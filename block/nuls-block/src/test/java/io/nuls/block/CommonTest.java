@@ -20,24 +20,14 @@
 
 package io.nuls.block;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import io.nuls.base.data.BlockHeader;
 import io.nuls.block.constant.ChainTypeEnum;
 import io.nuls.block.model.Chain;
 import io.nuls.block.model.Node;
-import io.nuls.rpc.client.WsClient;
-import io.nuls.rpc.info.Constants;
-import io.nuls.rpc.model.message.Message;
-import io.nuls.rpc.model.message.MessageType;
-import io.nuls.rpc.model.message.MessageUtil;
-import io.nuls.rpc.model.message.Request;
 import io.nuls.tools.cache.LimitHashMap;
 import io.nuls.tools.data.CollectionUtils;
-import io.nuls.tools.parse.JSONUtils;
 import org.junit.Assert;
 import org.junit.Test;
 
-import java.net.URISyntaxException;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -114,19 +104,6 @@ public class CommonTest {
     @Test
     public void thenAccept(){
         CompletableFuture.supplyAsync(() -> "hello").thenAccept(s -> System.out.println(s+" world"));
-    }
-
-    @Test
-    public void name() throws URISyntaxException, InterruptedException, JsonProcessingException {
-        WsClient client = new WsClient("ws://192.168.1.191:8887");
-        client.connectBlocking();
-        Map<String, Object> params = new HashMap<>(2);
-        params.put(Constants.VERSION_KEY_STR, "1.0");
-        params.put("chainId", "1");
-        Request request = MessageUtil.newRequest("", params, "0", "0", "0");
-        Message message = MessageUtil.basicMessage(MessageType.Request);
-        message.setMessageData(request);
-        client.send(JSONUtils.obj2json(message));
     }
 
     @Test

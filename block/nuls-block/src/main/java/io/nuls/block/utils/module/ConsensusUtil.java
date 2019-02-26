@@ -23,8 +23,8 @@ package io.nuls.block.utils.module;
 import io.nuls.base.data.Block;
 import io.nuls.base.data.BlockHeader;
 import io.nuls.block.manager.ContextManager;
-import io.nuls.rpc.client.CmdDispatcher;
 import io.nuls.rpc.model.ModuleE;
+import io.nuls.rpc.netty.processor.ResponseMessageProcessor;
 import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.log.logback.NulsLogger;
 
@@ -43,7 +43,7 @@ public class ConsensusUtil {
     /**
      * 共识验证
      *
-     * @param chainId
+     * @param chainId 链Id/chain id
      * @param block
      * @param download 0区块下载中，1接收到最新区块
      * @return
@@ -57,7 +57,7 @@ public class ConsensusUtil {
             params.put("download", download);
             params.put("block", HexUtil.encode(block.serialize()));
 
-            return CmdDispatcher.requestAndResponse(ModuleE.CS.abbr, "cs_validBlock", params).isSuccess();
+            return ResponseMessageProcessor.requestAndResponse(ModuleE.CS.abbr, "cs_validBlock", params).isSuccess();
         } catch (Exception e) {
             e.printStackTrace();
             commonLog.error(e);
@@ -68,7 +68,7 @@ public class ConsensusUtil {
     /**
      * 通知共识模块进入工作状态或者进入等待状态
      *
-     * @param chainId
+     * @param chainId 链Id/chain id
      * @param status  1-工作,0-等待
      * @return
      */
@@ -79,10 +79,10 @@ public class ConsensusUtil {
 //            params.put(Constants.VERSION_KEY_STR, "1.0");
             params.put("chainId", chainId);
             params.put("status", status);
-            boolean success = CmdDispatcher.requestAndResponse(ModuleE.CS.abbr, "cs_updateAgentStatus", params).isSuccess();
+            boolean success = ResponseMessageProcessor.requestAndResponse(ModuleE.CS.abbr, "cs_updateAgentStatus", params).isSuccess();
             while (!success) {
                 Thread.sleep(1000L);
-                success = CmdDispatcher.requestAndResponse(ModuleE.CS.abbr, "cs_updateAgentStatus", params).isSuccess();
+                success = ResponseMessageProcessor.requestAndResponse(ModuleE.CS.abbr, "cs_updateAgentStatus", params).isSuccess();
             }
             return success;
         } catch (Exception e) {
@@ -95,7 +95,7 @@ public class ConsensusUtil {
     /**
      * 收到分叉区块时通知共识模块
      *
-     * @param chainId
+     * @param chainId 链Id/chain id
      * @return
      */
     public static boolean evidence(int chainId, BlockHeader masterHeader, BlockHeader forkHeader) {
@@ -107,7 +107,7 @@ public class ConsensusUtil {
             params.put("blockHeader", HexUtil.encode(masterHeader.serialize()));
             params.put("evidenceHeader", HexUtil.encode(forkHeader.serialize()));
 
-            return CmdDispatcher.requestAndResponse(ModuleE.CS.abbr, "cs_addEvidenceRecord", params).isSuccess();
+            return ResponseMessageProcessor.requestAndResponse(ModuleE.CS.abbr, "cs_addEvidenceRecord", params).isSuccess();
         } catch (Exception e) {
             e.printStackTrace();
             commonLog.error(e);
@@ -118,7 +118,7 @@ public class ConsensusUtil {
     /**
      * 回滚区块时通知共识模块
      *
-     * @param chainId
+     * @param chainId 链Id/chain id
      * @return
      */
     public static boolean rollbackNotice(int chainId, long height) {
@@ -129,7 +129,7 @@ public class ConsensusUtil {
             params.put("chainId", chainId);
             params.put("height", height);
 
-            return CmdDispatcher.requestAndResponse(ModuleE.CS.abbr, "cs_chainRollBack", params).isSuccess();
+            return ResponseMessageProcessor.requestAndResponse(ModuleE.CS.abbr, "cs_chainRollBack", params).isSuccess();
         } catch (Exception e) {
             e.printStackTrace();
             commonLog.error(e);
@@ -140,7 +140,7 @@ public class ConsensusUtil {
     /**
      * 新增区块时通知共识模块
      *
-     * @param chainId
+     * @param chainId 链Id/chain id
      * @param localInit
      * @return
      */
@@ -156,7 +156,7 @@ public class ConsensusUtil {
             params.put("chainId", chainId);
             params.put("blockHeader", HexUtil.encode(blockHeader.serialize()));
 
-            return CmdDispatcher.requestAndResponse(ModuleE.CS.abbr, "cs_addBlock", params).isSuccess();
+            return ResponseMessageProcessor.requestAndResponse(ModuleE.CS.abbr, "cs_addBlock", params).isSuccess();
         } catch (Exception e) {
             e.printStackTrace();
             commonLog.error(e);

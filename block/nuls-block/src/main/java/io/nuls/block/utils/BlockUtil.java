@@ -21,17 +21,21 @@
 package io.nuls.block.utils;
 
 import io.nuls.base.data.*;
+import io.nuls.block.cache.CacheHandler;
 import io.nuls.block.constant.BlockErrorCode;
 import io.nuls.block.constant.ChainTypeEnum;
 import io.nuls.block.manager.ChainManager;
 import io.nuls.block.manager.ContextManager;
+import io.nuls.block.message.HashMessage;
 import io.nuls.block.model.Chain;
 import io.nuls.block.model.ChainContext;
 import io.nuls.block.model.ChainParameters;
+import io.nuls.block.model.Node;
 import io.nuls.block.model.po.BlockHeaderPo;
 import io.nuls.block.service.BlockService;
 import io.nuls.block.service.ChainStorageService;
 import io.nuls.block.utils.module.ConsensusUtil;
+import io.nuls.block.utils.module.NetworkUtil;
 import io.nuls.tools.basic.Result;
 import io.nuls.tools.constant.ErrorCode;
 import io.nuls.tools.core.annotation.Autowired;
@@ -42,8 +46,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.SortedSet;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import static io.nuls.block.constant.CommandConstant.GET_BLOCK_MESSAGE;
+import static io.nuls.block.constant.Constant.SINGLE_DOWNLOAD_TIMEOUNT;
 import static io.nuls.block.utils.LoggerUtil.commonLog;
 
 /**
@@ -137,7 +145,7 @@ public class BlockUtil {
      * 4.B与A没有任何关联关系
      * 以上四种关系适用于主链、分叉链、孤儿链
      *
-     * @param chainId
+     * @param chainId 链Id/chain id
      * @param block
      * @return
      */
@@ -167,7 +175,7 @@ public class BlockUtil {
     /**
      * 区块与主链比对
      *
-     * @param chainId
+     * @param chainId 链Id/chain id
      * @param block
      * @return
      */
@@ -218,7 +226,7 @@ public class BlockUtil {
     /**
      * 区块与分叉链比对
      *
-     * @param chainId
+     * @param chainId 链Id/chain id
      * @param block
      * @return
      */
@@ -265,7 +273,7 @@ public class BlockUtil {
     /**
      * 区块与孤儿链比对
      *
-     * @param chainId
+     * @param chainId 链Id/chain id
      * @param block
      * @return
      */
@@ -384,6 +392,38 @@ public class BlockUtil {
         po.setTxHashList(block.getTxHashList());
         po.setComplete(false);
         return po;
+    }
+
+    /**
+     * 根据区块hash从节点下载区块
+     *
+     * @param chainId 链Id/chain id
+     * @param hash
+     * @param nodeId
+     * @return
+     */
+    public static Block downloadBlockByHash(int chainId, NulsDigestData hash, String nodeId) {
+        if (hash == null || nodeId == null) {
+            return null;
+        }
+        HashMessage message = new HashMessage();
+        message.setRequestHash(hash);
+        Future<Block> future = CacheHandler.addSingleBlockRequest(chainId, hash);
+        commonLog.debug("get block-" + hash + " from " + nodeId + "begin");
+        boolean result = NetworkUtil.sendToNode(chainId, message, nodeId, GET_BLOCK_MESSAGE);
+        if (!result) {
+            CacheHandler.removeBlockByHashFuture(chainId, hash);
+            return null;
+        }
+        try {
+            return future.get(SINGLE_DOWNLOAD_TIMEOUNT, TimeUnit.SECONDS);
+        } catch (Exception e) {
+            e.printStackTrace();
+            commonLog.error("get block-" + hash + " from " + nodeId + "fail", e);
+            return null;
+        } finally {
+            CacheHandler.removeBlockByHashFuture(chainId, hash);
+        }
     }
 
 }

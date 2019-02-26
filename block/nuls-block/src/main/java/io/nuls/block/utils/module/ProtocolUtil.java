@@ -20,7 +20,6 @@
 
 package io.nuls.block.utils.module;
 
-import io.nuls.base.data.Block;
 import io.nuls.base.data.BlockHeader;
 import io.nuls.base.data.protocol.ListItem;
 import io.nuls.base.data.protocol.MessageConfig;
@@ -28,9 +27,9 @@ import io.nuls.base.data.protocol.Protocol;
 import io.nuls.block.manager.ContextManager;
 import io.nuls.block.model.ChainContext;
 import io.nuls.block.rpc.callback.ProtocolVersionInvoke;
-import io.nuls.rpc.client.CmdDispatcher;
 import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.model.message.Response;
+import io.nuls.rpc.netty.processor.ResponseMessageProcessor;
 import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.log.logback.NulsLogger;
 
@@ -74,7 +73,7 @@ public class ProtocolUtil {
     /**
      * 回滚区块时通知协议升级模块
      *
-     * @param chainId
+     * @param chainId 链Id/chain id
      * @return
      */
     public static boolean rollbackNotice(int chainId, BlockHeader blockHeader) {
@@ -85,7 +84,7 @@ public class ProtocolUtil {
 //            params.put(Constants.VERSION_KEY_STR, "1.0");
             params.put("chainId", chainId);
             params.put("blockHeader", HexUtil.encode(blockHeader.serialize()));
-            Response response = CmdDispatcher.requestAndResponse(ModuleE.PU.abbr, "rollbackBlock", params);
+            Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.PU.abbr, "rollbackBlock", params);
             if (response.isSuccess()) {
                 context.setVersion((short) 0);
             }
@@ -100,7 +99,7 @@ public class ProtocolUtil {
     /**
      * 新增区块时通知协议升级模块
      *
-     * @param chainId
+     * @param chainId 链Id/chain id
      * @return
      */
     public static boolean saveNotice(int chainId, BlockHeader blockHeader) {
@@ -111,7 +110,7 @@ public class ProtocolUtil {
 //            params.put(Constants.VERSION_KEY_STR, "1.0");
             params.put("chainId", chainId);
             params.put("blockHeader", HexUtil.encode(blockHeader.serialize()));
-            Response response = CmdDispatcher.requestAndResponse(ModuleE.PU.abbr, "saveBlock", params);
+            Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.PU.abbr, "saveBlock", params);
             if (response.isSuccess()) {
                 context.setVersion((short) 0);
             }
@@ -130,7 +129,7 @@ public class ProtocolUtil {
             Map<String, Object> params = new HashMap<>(2);
 //            params.put(Constants.VERSION_KEY_STR, "1.0");
             params.put("chainId", chainId);
-            CmdDispatcher.requestAndInvoke(ModuleE.PU.abbr, "getMainVersion", params, "0", "1", new ProtocolVersionInvoke(chainId));
+            ResponseMessageProcessor.requestAndInvoke(ModuleE.PU.abbr, "getMainVersion", params, "0", "1", new ProtocolVersionInvoke(chainId));
         } catch (Exception e) {
             e.printStackTrace();
             commonLog.error(e);

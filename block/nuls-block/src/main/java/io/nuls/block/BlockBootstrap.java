@@ -29,10 +29,11 @@ import io.nuls.block.thread.monitor.*;
 import io.nuls.block.utils.ConfigLoader;
 import io.nuls.block.utils.module.NetworkUtil;
 import io.nuls.db.service.RocksDBService;
-import io.nuls.rpc.client.CmdDispatcher;
+import io.nuls.rpc.info.HostInfo;
 import io.nuls.rpc.model.ModuleE;
-import io.nuls.rpc.server.WsServer;
-import io.nuls.rpc.server.runtime.ServerRuntime;
+import io.nuls.rpc.netty.bootstrap.NettyServer;
+import io.nuls.rpc.netty.channel.manager.ConnectManager;
+import io.nuls.rpc.netty.processor.ResponseMessageProcessor;
 import io.nuls.tools.core.ioc.SpringLiteContext;
 import io.nuls.tools.thread.ThreadUtils;
 import io.nuls.tools.thread.commom.NulsThreadFactory;
@@ -65,7 +66,7 @@ public class BlockBootstrap {
             //扫描包路径io.nuls.block,初始化bean
             SpringLiteContext.init(DEFAULT_SCAN_PACKAGE);
             //rpc服务初始化
-            WsServer.getInstance(ModuleE.BL)
+            NettyServer.getInstance(ModuleE.BL)
                     .moduleRoles(new String[]{"1.0"})
                     .moduleVersion("1.0")
                     .dependencies(ModuleE.KE.abbr, "1.0")
@@ -73,10 +74,11 @@ public class BlockBootstrap {
                     .dependencies(ModuleE.NW.abbr, "1.0")
                     .dependencies(ModuleE.PU.abbr, "1.0")
                     .dependencies(ModuleE.TX.abbr, "1.0")
-                    .scanPackage(RPC_DEFAULT_SCAN_PACKAGE)
-                    .connect("ws://localhost:8887");
+                    .scanPackage(RPC_DEFAULT_SCAN_PACKAGE);
             // Get information from kernel
-            CmdDispatcher.syncKernel();
+            String kernelUrl = "ws://"+ HostInfo.getLocalIP()+":8887/ws";
+            ConnectManager.getConnectByUrl(kernelUrl);
+            ResponseMessageProcessor.syncKernel(kernelUrl);
             //加载通用数据库
             RocksDBService.init(DATA_PATH);
             RocksDBService.createTable(CHAIN_LATEST_HEIGHT);
@@ -90,7 +92,7 @@ public class BlockBootstrap {
 
     private static void start() {
         try {
-            while (!ServerRuntime.isReady()) {
+            while (!ConnectManager.isReady()) {
                 commonLog.info("wait depend modules ready");
                 Thread.sleep(2000L);
             }
@@ -103,19 +105,19 @@ public class BlockBootstrap {
             ThreadUtils.createAndRunThread("block-synchronizer", BlockSynchronizer.getInstance());
             //开启分叉链处理线程
             ScheduledThreadPoolExecutor forkExecutor = ThreadUtils.createScheduledThreadPool(1, new NulsThreadFactory("fork-chains-monitor"));
-            forkExecutor.scheduleWithFixedDelay(ForkChainsMonitor.getInstance(), 0, 10, TimeUnit.SECONDS);
+            forkExecutor.scheduleWithFixedDelay(ForkChainsMonitor.getInstance(), 0, 15, TimeUnit.SECONDS);
             //开启孤儿链处理线程
             ScheduledThreadPoolExecutor orphanExecutor = ThreadUtils.createScheduledThreadPool(1, new NulsThreadFactory("orphan-chains-monitor"));
-            orphanExecutor.scheduleWithFixedDelay(OrphanChainsMonitor.getInstance(), 0, 10, TimeUnit.SECONDS);
+            orphanExecutor.scheduleWithFixedDelay(OrphanChainsMonitor.getInstance(), 0, 15, TimeUnit.SECONDS);
             //开启孤儿链维护线程
             ScheduledThreadPoolExecutor maintainExecutor = ThreadUtils.createScheduledThreadPool(1, new NulsThreadFactory("orphan-chains-maintainer"));
             maintainExecutor.scheduleWithFixedDelay(OrphanChainsMaintainer.getInstance(), 0, 5, TimeUnit.SECONDS);
             //开启数据库大小监控线程
             ScheduledThreadPoolExecutor dbSizeExecutor = ThreadUtils.createScheduledThreadPool(1, new NulsThreadFactory("db-size-monitor"));
-            dbSizeExecutor.scheduleWithFixedDelay(ChainsDbSizeMonitor.getInstance(), 0, 10, TimeUnit.SECONDS);
+            dbSizeExecutor.scheduleWithFixedDelay(ChainsDbSizeMonitor.getInstance(), 0, 5, TimeUnit.MINUTES);
             //开启区块监控线程
             ScheduledThreadPoolExecutor monitorExecutor = ThreadUtils.createScheduledThreadPool(1, new NulsThreadFactory("network-monitor"));
-            monitorExecutor.scheduleWithFixedDelay(NetworkResetMonitor.getInstance(), 0, 60, TimeUnit.SECONDS);
+            monitorExecutor.scheduleWithFixedDelay(NetworkResetMonitor.getInstance(), 0, 5, TimeUnit.MINUTES);
         } catch (Exception e) {
             e.printStackTrace();
             commonLog.error("error occur when start, " + e.getMessage());

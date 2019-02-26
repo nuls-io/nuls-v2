@@ -59,6 +59,7 @@ public class ContextManager {
         versions.sort(ProtocolVersion.COMPARATOR);
         protocolContext.setLocalVersionList(versions);
         protocolContext.setCurrentProtocolVersion(versions.get(0));
+        //todo 根据最新区块高度
         protocolContext.init();
         commonLog.info("new protocolContext add! chainId-" + chainId);
     }

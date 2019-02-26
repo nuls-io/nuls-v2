@@ -97,7 +97,7 @@ public class ConfigLoader {
     }
 
     private static Map<Short, Protocol> load(List<ProtocolConfigJson> protocolConfigs){
-        Map<Short, Protocol> protocolsMap = new HashMap<>();
+        Map<Short, Protocol> protocolsMap = new HashMap<>(protocolConfigs.size());
         for (ProtocolConfigJson config : protocolConfigs) {
             Protocol protocol = new Protocol();
             protocol.setVersion(config.getVersion());

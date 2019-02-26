@@ -67,7 +67,7 @@ public class BlockWorker implements Callable<BlockDownLoadResult> {
         try {
             Future<CompleteMessage> future = CacheHandler.addBatchBlockRequest(chainId, messageHash);
             //发送消息给目标节点
-            long begin = System.nanoTime();
+            long begin = System.currentTimeMillis();
             boolean result = NetworkUtil.sendToNode(chainId, message, node.getId(), GET_BLOCKS_BY_HEIGHT_MESSAGE);
             //发送失败清空数据
             if (!result) {
@@ -76,7 +76,7 @@ public class BlockWorker implements Callable<BlockDownLoadResult> {
             }
             CompleteMessage completeMessage = future.get(BATCH_DOWNLOAD_TIMEOUNT, TimeUnit.SECONDS);
             b = completeMessage.isSuccess();
-            long end = System.nanoTime();
+            long end = System.currentTimeMillis();
             duration = end - begin;
         } catch (Exception e) {
             e.printStackTrace();

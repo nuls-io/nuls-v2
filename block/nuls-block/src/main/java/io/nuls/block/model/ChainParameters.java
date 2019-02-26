@@ -36,6 +36,13 @@ import lombok.NoArgsConstructor;
 import java.io.IOException;
 import java.util.Map;
 
+/**
+ * 链的运行时参数
+ *
+ * @author captain
+ * @version 1.0
+ * @date 19-2-26 上午10:49
+ */
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
