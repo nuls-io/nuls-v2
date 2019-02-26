@@ -43,8 +43,8 @@ public class H2Test {
 
     public static void main(String[] args) throws Exception {
         before();
-        testInsert();
-//        testSelect();
+//        testInsert();
+        testSelect();
 //        long start = System.currentTimeMillis();
 //        initTestTable();
 //        System.out.println("花费时间：" + String.valueOf(System.currentTimeMillis() - start));

@@ -6,8 +6,10 @@ import io.nuls.h2.transactional.annotation.Transaction;
 import io.nuls.h2.utils.MybatisDbHelper;
 import io.nuls.h2.utils.SearchOperator;
 import io.nuls.h2.utils.Searchable;
+import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Service;
 import io.nuls.transaction.constant.TxConstant;
+import io.nuls.transaction.db.h2.dao.TransactionH2Service;
 import io.nuls.transaction.db.h2.dao.TransactionService;
 import io.nuls.transaction.db.h2.dao.impl.mapper.TransactionMapper;
 import io.nuls.transaction.model.po.TransactionPO;
@@ -21,12 +23,16 @@ import java.util.List;
 @Service
 public class TransactionServiceImpl implements TransactionService {
 
+    @Autowired
+    private TransactionH2Service h2Service;
+
     @Override
     @Transaction
     public int saveTx(TransactionPO tx) {
-        SqlSession sqlSession = MybatisDbHelper.get();
+        SqlSession sqlSession = MybatisDbHelper.getSession();
         String tableName = TxConstant.H2_TX_TABLE_NAME_PREFIX + tx.createTableIndex();
         int rs = sqlSession.getMapper(TransactionMapper.class).insert(tx, tableName);
+        h2Service.saveTx(tx);
         return rs;
     }
 
@@ -54,7 +60,7 @@ public class TransactionServiceImpl implements TransactionService {
         if (null != state) {
             searchable.addCondition("state", SearchOperator.eq, state);
         }
-        SqlSession sqlSession = MybatisDbHelper.get();
+        SqlSession sqlSession = MybatisDbHelper.getSession();
         TransactionMapper mapper = sqlSession.getMapper(TransactionMapper.class);
         String tableName = getTableName(address);
         long count = mapper.queryCount(searchable, tableName);
@@ -88,7 +94,7 @@ public class TransactionServiceImpl implements TransactionService {
 
     @Override
     public void createTxTablesIfNotExists(String tableName, String indexName, String uniqueName, int number) {
-        SqlSession sqlSession = MybatisDbHelper.get();
+        SqlSession sqlSession = MybatisDbHelper.getSession();
         TransactionMapper mapper = sqlSession.getMapper(TransactionMapper.class);
         List<TxTable> list = new ArrayList<>();
         for (int i = 0; i < number; i++) {

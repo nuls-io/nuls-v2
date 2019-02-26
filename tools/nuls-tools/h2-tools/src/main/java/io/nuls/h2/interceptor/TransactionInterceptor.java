@@ -49,31 +49,30 @@ public class TransactionInterceptor implements BeanMethodInterceptor {
 
     @Override
     public Object intercept(Annotation annotation, Object object, Method method, Object[] params, BeanMethodInterceptorChain interceptorChain) throws Throwable {
-        boolean b = FLAG_HOLDER.get();
+        boolean flag = FLAG_HOLDER.get();
+        Object result;
 
-        SqlSession sqlSession = null;
-        try {
-            sqlSession = MybatisDbHelper.get();
-            if (b == false) {
+        if (flag == false) {
+            SqlSession sqlSession = null;
+            try {
                 FLAG_HOLDER.set(true);
+                sqlSession = MybatisDbHelper.getSession();
+                result = interceptorChain.execute(annotation, object, method, params);
                 sqlSession.commit();
+            } catch (Exception e) {
+                if (sqlSession != null) {
+                    sqlSession.rollback();
+                }
+                throw e;
+            } finally {
+                if (sqlSession != null) {
+                    MybatisDbHelper.close(sqlSession);
+                }
+                FLAG_HOLDER.remove();
             }
-            return interceptorChain.execute(annotation, object, method, params);
-        } catch (Exception e) {
-            if (!b) {
-                sqlSession.rollback();
-            }
-            throw e;
-        } finally {
-            if (!b && sqlSession != null) {
-                MybatisDbHelper.close(sqlSession);
-            }
-            FLAG_HOLDER.remove();
+        } else {
+            result = interceptorChain.execute(annotation, object, method, params);
         }
+        return result;
     }
-
-    private boolean isFilterMethod(Method method) {
-        return false;
-    }
-
 }

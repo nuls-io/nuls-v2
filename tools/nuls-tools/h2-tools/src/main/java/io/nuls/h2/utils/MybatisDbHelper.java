@@ -14,10 +14,9 @@ public class MybatisDbHelper {
         MybatisDbHelper.sqlSessionFactory = sqlSessionFactory;
     }
 
-    public static SqlSession get() {
+    public static SqlSession getSession() {
         SqlSession sqlSession = sessionHolder.get();
         if (sqlSession == null) {
-
             sqlSession = sqlSessionFactory.openSession(false);
             sessionHolder.set(sqlSession);
         }
