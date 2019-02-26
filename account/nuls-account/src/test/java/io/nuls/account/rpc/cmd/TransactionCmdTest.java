@@ -7,12 +7,17 @@ import io.nuls.account.rpc.call.LegerCmdCall;
 import io.nuls.account.rpc.common.CommonRpcOperation;
 import io.nuls.account.util.TxUtil;
 import io.nuls.base.basic.AddressTool;
-import io.nuls.base.basic.NulsByteBuffer;
-import io.nuls.base.data.*;
-import io.nuls.rpc.client.CmdDispatcher;
+import io.nuls.base.data.BlockHeader;
+import io.nuls.base.data.CoinData;
+import io.nuls.base.data.CoinFrom;
+import io.nuls.base.data.CoinTo;
+import io.nuls.base.data.MultiSigAccount;
+import io.nuls.base.data.NulsDigestData;
+import io.nuls.base.data.Transaction;
 import io.nuls.rpc.info.NoUse;
 import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.model.message.Response;
+import io.nuls.rpc.netty.processor.ResponseMessageProcessor;
 import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.log.Log;
 import io.nuls.tools.parse.JSONUtils;
@@ -24,13 +29,13 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.math.BigInteger;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 /**
@@ -74,12 +79,12 @@ public class TransactionCmdTest {
         // Build params map
         Map<String, Object> params = new HashMap<>();
         params.put("chainId", chainId);
-        Response response = CmdDispatcher.requestAndResponse(ModuleE.LG.abbr, "bathValidateBegin", params);
+        Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.LG.abbr, "bathValidateBegin", params);
         Log.info("response {}", response);
         params.put("isBatchValidate", true);
         Transaction transaction = buildTransaction(address);
         params.put("txHex", HexUtil.encode(transaction.serialize()));
-        response = CmdDispatcher.requestAndResponse(ModuleE.LG.abbr, "validateCoinData", params);
+        response = ResponseMessageProcessor.requestAndResponse(ModuleE.LG.abbr, "validateCoinData", params);
         Log.info("response {}", response);
 
         List<String> txHexList = Arrays.asList(HexUtil.encode(transaction.serialize()));
@@ -87,7 +92,7 @@ public class TransactionCmdTest {
         params.put("isConfirmTx", true);
         params.put("blockHeight", 0);
         params.remove("txHex");
-        response = CmdDispatcher.requestAndResponse(ModuleE.LG.abbr, "commitTx", params);
+        response = ResponseMessageProcessor.requestAndResponse(ModuleE.LG.abbr, "commitTx", params);
         Log.info("response {}", response);
     }
 
@@ -132,7 +137,7 @@ public class TransactionCmdTest {
     public void transfer() throws Exception {
         //组装普通转账交易
         TransferDto transferDto = this.createTransferTx();
-        Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.AC.abbr, "ac_transfer", JSONUtils.json2map(JSONUtils.obj2json(transferDto)));
+        Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_transfer", JSONUtils.json2map(JSONUtils.obj2json(transferDto)));
         HashMap result = (HashMap) (((HashMap) cmdResp.getResponseData()).get("ac_transfer"));
         String txDigestHex = (String) result.get(RpcConstant.VALUE);
         System.out.println(txDigestHex);
@@ -184,7 +189,7 @@ public class TransactionCmdTest {
         params.put("alias", alias);
         params.put("amount", "10000");
         params.put("remark", "EdwardTest");
-        Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.AC.abbr, "ac_transferByAlias", params);
+        Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_transferByAlias", params);
         System.out.println("ac_transferByAlias response:" + JSONUtils.obj2json(cmdResp));
         HashMap result = (HashMap) (((HashMap) cmdResp.getResponseData()).get("ac_transferByAlias"));
         String txDigestHex = (String) result.get(RpcConstant.TX_HASH);
@@ -222,7 +227,7 @@ public class TransactionCmdTest {
         params.put("signAddress", signAddress);
         params.put("password", password);
         params.put("txHex", txHex);
-        Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.AC.abbr, "ac_signMultiSignTransaction", params);
+        Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_signMultiSignTransaction", params);
         Log.info("ac_signMultiSignTransaction response:{}", cmdResp);
         assertNotNull(cmdResp);
         HashMap result = (HashMap) (((HashMap) cmdResp.getResponseData()).get("ac_signMultiSignTransaction"));
@@ -239,7 +244,7 @@ public class TransactionCmdTest {
             //组装普通转账交易
             TransferDto transferDto = this.createTransferTx();
             //调用接口
-//            Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.AC.abbr, "ac_transfer", JSONUtils.json2map(JSONUtils.obj2json(transferDto)));
+//            Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_transfer", JSONUtils.json2map(JSONUtils.obj2json(transferDto)));
 //            HashMap result = (HashMap) (((HashMap) cmdResp.getResponseData()).get("ac_transfer"));
 //            Assert.assertTrue(null != result);
 //            Log.info("{}", result.get("value"));
@@ -248,7 +253,7 @@ public class TransactionCmdTest {
             //组装创建节点交易
 //            Map agentTxMap = this.createAgentTx(address1, address2);
 //            //调用接口
-//            Response cmdResp2 = CmdDispatcher.requestAndResponse(ModuleE.CS.abbr, "cs_createAgent", agentTxMap);
+//            Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.CS.abbr, "cs_createAgent", agentTxMap);
 //            HashMap result = (HashMap) (((HashMap) cmdResp2.getResponseData()).get("cs_createAgent"));
 //            Assert.assertTrue(null != result);
 //            String txHex = (String) result.get("txHex");
@@ -261,7 +266,7 @@ public class TransactionCmdTest {
             //组装委托节点交易
 //            String agentHash="00208fb929d0d351f3bb402e94a24d407ea91e9b25f706496ddc69b234c589cd4e26";
 //            Map dpTxMap = this.depositToAgent(agentHash);
-//            Response dpResp = CmdDispatcher.requestAndResponse(ModuleE.CS.abbr, "cs_depositToAgent", dpTxMap);
+//            Response dpResp = ResponseMessageProcessor.requestAndResponse(ModuleE.CS.abbr, "cs_depositToAgent", dpTxMap);
 //            HashMap dpResult = (HashMap) ((HashMap) dpResp.getResponseData()).get("cs_depositToAgent");
 //            String dpTxHex = (String) dpResult.get("txHex");
 //            System.out.println("createDeposit" + dpResp.getResponseData());
@@ -327,7 +332,7 @@ public class TransactionCmdTest {
         //组装创建节点交易
         Map agentTxMap = this.createAgentTx(address1, address2);
         //调用接口
-        Response cmdResp2 = CmdDispatcher.requestAndResponse(ModuleE.CS.abbr, "cs_createAgent", agentTxMap);
+        Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.CS.abbr, "cs_createAgent", agentTxMap);
         Map result = (HashMap) (((HashMap) cmdResp2.getResponseData()).get("cs_createAgent"));
         Assert.assertTrue(null != result);
         Log.info("{}", result.get("txHex"));
@@ -343,7 +348,7 @@ public class TransactionCmdTest {
         txMap.put("address", address1);
         txMap.put("password", "");
         //调用接口
-        Response cmdResp2 = CmdDispatcher.requestAndResponse(ModuleE.CS.abbr, "cs_stopAgent", txMap);
+        Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.CS.abbr, "cs_stopAgent", txMap);
         Map result = (HashMap) (((HashMap) cmdResp2.getResponseData()).get("cs_stopAgent"));
         Assert.assertTrue(null != result);
         Log.info("{}", result.get("txHex"));
@@ -366,7 +371,7 @@ public class TransactionCmdTest {
             blockHeader.setHeight(0);
             caTxCommit.put("blockHeader", HexUtil.encode(blockHeader.serialize()));
             caTxCommit.put("tx", caTxHex);
-            Response caCommitResp = CmdDispatcher.requestAndResponse(ModuleE.CS.abbr, "cs_createAgentCommit", caTxCommit);
+            Response caCommitResp = ResponseMessageProcessor.requestAndResponse(ModuleE.CS.abbr, "cs_createAgentCommit", caTxCommit);
             HashMap caCommitResult = (HashMap) ((HashMap) caCommitResp.getResponseData()).get("cs_createAgentCommit");
             agentHash = (String) caCommitResult.get("agentHash");
             System.out.println("createAgentCommit:" + caCommitResp.getResponseData());
@@ -402,7 +407,7 @@ public class TransactionCmdTest {
         dpParams.put("address", address4);
         dpParams.put("agentHash", agentHash);
         dpParams.put("deposit", 20000 * 100000000L);
-        Response dpResp = CmdDispatcher.requestAndResponse(ModuleE.CS.abbr, "cs_depositToAgent", dpParams);
+        Response dpResp = ResponseMessageProcessor.requestAndResponse(ModuleE.CS.abbr, "cs_depositToAgent", dpParams);
         HashMap dpResult = (HashMap) ((HashMap) dpResp.getResponseData()).get("cs_depositToAgent");
         String dpTxHex = (String) dpResult.get("txHex");
         System.out.println(dpTxHex);
@@ -421,7 +426,7 @@ public class TransactionCmdTest {
         params.put("chainId", chainId);
         params.put("address", address4);
         params.put("txHash", "0020b48a9922396edf0dd4c9dcad7eca7d3b96251acec4c9c22ffd55f3af7467b23b");
-        Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.CS.abbr, "cs_withdraw", params);
+        Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.CS.abbr, "cs_withdraw", params);
         System.out.println(cmdResp.getResponseData());
         BigInteger balance = LegerCmdCall.getBalance(chainId, assetChainId, assetId, address4);
         System.out.println(balance.longValue());
@@ -455,7 +460,7 @@ public class TransactionCmdTest {
         params.put("toAddress", toAddress);
         params.put("amount", "1000");
         params.put("remark", "EdwardTest");
-        Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.AC.abbr, "ac_createMultiSignTransfer", params);
+        Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_createMultiSignTransfer", params);
         System.out.println("ac_createMultiSignTransfer response:" + JSONUtils.obj2json(cmdResp));
         HashMap result = (HashMap) (((HashMap) cmdResp.getResponseData()).get("ac_createMultiSignTransfer"));
         String txHex = (String) result.get(RpcConstant.TX_DATA_HEX);

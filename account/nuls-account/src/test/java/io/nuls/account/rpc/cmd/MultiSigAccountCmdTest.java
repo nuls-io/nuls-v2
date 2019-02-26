@@ -1,19 +1,15 @@
 package io.nuls.account.rpc.cmd;
 
 import io.nuls.account.ServiceInitializer;
-import io.nuls.account.constant.AccountConstant;
 import io.nuls.account.model.bo.Account;
-import io.nuls.account.model.bo.tx.txdata.Alias;
-import io.nuls.account.rpc.common.CommonRpcOperation;
 import io.nuls.account.service.AccountService;
 import io.nuls.account.service.MultiSignAccountService;
 import io.nuls.base.data.Address;
 import io.nuls.base.data.MultiSigAccount;
-import io.nuls.base.data.Transaction;
-import io.nuls.rpc.client.CmdDispatcher;
 import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.model.message.Response;
+import io.nuls.rpc.netty.processor.ResponseMessageProcessor;
 import io.nuls.tools.core.ioc.SpringLiteContext;
 import io.nuls.tools.crypto.HexUtil;
 import org.junit.BeforeClass;
@@ -63,7 +59,7 @@ public class MultiSigAccountCmdTest {
         params.put("pubKeys", pubKeys);
         params.put("minSigns", 2);
         //create the multi sign accout
-        Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.AC.abbr, "ac_createMultiSigAccount", params);
+        Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_createMultiSigAccount", params);
         assertNotNull(cmdResp);
         HashMap result = (HashMap) ((HashMap) cmdResp.getResponseData()).get("ac_createMultiSigAccount");
         assertNotNull(result);
@@ -98,7 +94,7 @@ public class MultiSigAccountCmdTest {
         params.put(Constants.VERSION_KEY_STR, "1.0");
         params.put("chainId", chainId);
         params.put("address", address.getBase58());
-        Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.AC.abbr, "ac_removeMultiSigAccount", params);
+        Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_removeMultiSigAccount", params);
         assertNotNull(cmdResp);
         HashMap result = (HashMap) ((HashMap) cmdResp.getResponseData()).get("ac_removeMultiSigAccount");
         assertTrue((boolean)result.get("value"));
@@ -115,7 +111,7 @@ public class MultiSigAccountCmdTest {
         }
         params.put("pubKeys", pubKeys);
         params.put("minSigns", multiSigAccount.getM());
-        Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.AC.abbr, "ac_importMultiSigAccount", params);
+        Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_importMultiSigAccount", params);
         assertNotNull(cmdResp);
         HashMap result = (HashMap) ((HashMap) cmdResp.getResponseData()).get("ac_importMultiSigAccount");
         assertNotNull(result);
@@ -142,7 +138,7 @@ public class MultiSigAccountCmdTest {
         params.put("pubKeys", pubKeys);
         params.put("minSigns", multiSigAccount.getM());
         //create the multi sign accout
-        Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.AC.abbr, "ac_createMultiSigAccount", params);
+        Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_createMultiSigAccount", params);
         assertNotNull(cmdResp);
         HashMap result = (HashMap) ((HashMap) cmdResp.getResponseData()).get("ac_createMultiSigAccount");
         assertNotNull(result);
