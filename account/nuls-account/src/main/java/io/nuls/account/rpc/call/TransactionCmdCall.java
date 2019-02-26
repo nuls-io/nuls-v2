@@ -5,13 +5,12 @@ import io.nuls.account.constant.RpcConstant;
 import io.nuls.account.model.bo.tx.TxRegisterDetail;
 import io.nuls.account.util.annotation.ResisterTx;
 import io.nuls.account.util.annotation.TxMethodType;
-import io.nuls.rpc.client.CmdDispatcher;
 import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.model.message.Response;
+import io.nuls.rpc.netty.processor.ResponseMessageProcessor;
 import io.nuls.tools.core.ioc.ScanUtil;
 import io.nuls.tools.log.Log;
-import io.nuls.tools.parse.JSONUtils;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
@@ -68,7 +67,7 @@ public class TransactionCmdCall {
             params.put(RpcConstant.TX_MODULE_COMMIT_CMD, "ac_commitTx");
             params.put(RpcConstant.TX_MODULE_ROLLBACK_CMD, "ac_rollbackTx");
             params.put("list", txRegisterDetailList);
-            Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.TX.abbr, RpcConstant.TX_REGISTER_CMD, params);
+            Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.TX.abbr, RpcConstant.TX_REGISTER_CMD, params);
             if (!cmdResp.isSuccess()) {
                 Log.error("chain ：" + chainId + " Failure of transaction registration,errorMsg: " + cmdResp.getResponseComment());
                 return false;
@@ -104,7 +103,7 @@ public class TransactionCmdCall {
             params.put(Constants.VERSION_KEY_STR, RpcConstant.TX_NEW_VERSION);
             params.put(RpcConstant.TX_CHAIN_ID, chainId);
             params.put(RpcConstant.TX_DATA_HEX, txHex);
-            Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.TX.abbr, RpcConstant.TX_NEW_CMD, params);
+            Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.TX.abbr, RpcConstant.TX_NEW_CMD, params);
         } catch (Exception e) {
             e.printStackTrace();
         }
