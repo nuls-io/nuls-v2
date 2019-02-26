@@ -22,11 +22,11 @@
 
 package io.nuls.mykernel;
 
-import io.nuls.rpc.client.CmdDispatcher;
 import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.info.NoUse;
 import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.model.message.Response;
+import io.nuls.rpc.netty.processor.ResponseMessageProcessor;
 import io.nuls.tools.log.Log;
 
 import java.util.HashMap;
@@ -53,7 +53,7 @@ public class SummaryTest {
                     Map<String, Object> params = new HashMap<>(2);
                     params.put(Constants.VERSION_KEY_STR, "1.0");
                     params.put("count", i);
-                    Response response = CmdDispatcher.requestAndResponse(ModuleE.KE.abbr, "sum", params);
+                    Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.KE.abbr, "sum", params);
                     if (!response.isSuccess()) {
                         System.out.println(response);
                         throw new RuntimeException();

@@ -4,10 +4,11 @@ import io.nuls.db.service.RocksDBService;
 import io.nuls.poc.constant.ConsensusConstant;
 import io.nuls.poc.storage.LanguageService;
 import io.nuls.poc.utils.manager.ChainManager;
-import io.nuls.rpc.client.CmdDispatcher;
+import io.nuls.rpc.info.HostInfo;
 import io.nuls.rpc.model.ModuleE;
-import io.nuls.rpc.server.WsServer;
-import io.nuls.rpc.server.runtime.ServerRuntime;
+import io.nuls.rpc.netty.bootstrap.NettyServer;
+import io.nuls.rpc.netty.channel.manager.ConnectManager;
+import io.nuls.rpc.netty.processor.ResponseMessageProcessor;
 import io.nuls.tools.core.ioc.SpringLiteContext;
 import io.nuls.tools.log.Log;
 import io.nuls.tools.parse.ConfigLoader;
@@ -38,7 +39,7 @@ public class ConsensusBootStrap {
             SpringLiteContext.init(ConsensusConstant.CONTEXT_PATH);
             initLanguage();
             initServer();
-            while (!ServerRuntime.isReady()) {
+            while (!ConnectManager.isReady()) {
                 Log.debug("wait depend modules ready");
                 Thread.sleep(2000L);
             }
@@ -92,13 +93,14 @@ public class ConsensusBootStrap {
     private static void initServer() {
         try {
             try {
-                WsServer.getInstance(ModuleE.CS)
+                NettyServer.getInstance(ModuleE.CS)
                         .moduleRoles(new String[]{"1.0"})
                         .moduleVersion("1.0")
                         .dependencies(ModuleE.BL.abbr, "1.0")
-                        .scanPackage("io.nuls.poc.rpc")
-                        .connect("ws://127.0.0.1:8887");
-                CmdDispatcher.syncKernel();
+                        .scanPackage("io.nuls.poc.rpc");
+                String kernelUrl = "ws://"+ HostInfo.getLocalIP()+":8887/ws";
+                ConnectManager.getConnectByUrl(kernelUrl);
+                ResponseMessageProcessor.syncKernel(kernelUrl);
             } catch (Exception e) {
                 Log.error("Account initServer failed", e);
             }

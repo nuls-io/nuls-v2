@@ -16,7 +16,6 @@ import io.nuls.rpc.netty.thread.RequestByCountProcessor;
 import io.nuls.rpc.netty.thread.RequestByPeriodProcessor;
 import io.nuls.rpc.netty.thread.RequestSingleProcessor;
 import io.nuls.rpc.netty.thread.ResponseAutoProcessor;
-import io.nuls.rpc.server.runtime.ServerRuntime;
 import io.nuls.tools.core.ioc.ScanUtil;
 import io.nuls.tools.core.ioc.SpringLiteContext;
 import io.nuls.tools.data.StringUtils;
@@ -512,7 +511,7 @@ public class ConnectManager {
         if(!startService){
             Map dependencies = LOCAL.getDependencies();
             if(dependencies != null && dependencies.size() > 0){
-                for (String role : ServerRuntime.LOCAL.getDependencies().keySet()){
+                for (String role : LOCAL.getDependencies().keySet()){
                     if(!ROLE_MAP.containsKey(role)){
                         return;
                     }

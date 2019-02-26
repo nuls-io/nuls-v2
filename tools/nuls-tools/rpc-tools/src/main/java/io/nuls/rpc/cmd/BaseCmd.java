@@ -29,7 +29,7 @@ import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.model.ConfigItem;
 import io.nuls.rpc.model.message.MessageUtil;
 import io.nuls.rpc.model.message.Response;
-import io.nuls.rpc.server.runtime.ServerRuntime;
+import io.nuls.rpc.netty.channel.manager.ConnectManager;
 import io.nuls.tools.constant.ErrorCode;
 
 /**
@@ -50,7 +50,7 @@ public abstract class BaseCmd {
      */
     protected void setConfigItem(String key, Object value, boolean readOnly) {
         ConfigItem configItem = new ConfigItem(key, value, readOnly);
-        ServerRuntime.CONFIG_ITEM_MAP.put(key, configItem);
+        ConnectManager.CONFIG_ITEM_MAP.put(key, configItem);
     }
 
     /**

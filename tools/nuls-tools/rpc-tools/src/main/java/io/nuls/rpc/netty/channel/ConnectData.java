@@ -6,7 +6,6 @@ import io.nuls.rpc.model.message.Message;
 import io.nuls.rpc.model.message.Request;
 import io.nuls.rpc.model.message.Response;
 import io.nuls.rpc.netty.channel.manager.ConnectManager;
-import io.nuls.rpc.server.runtime.ServerRuntime;
 import io.nuls.tools.parse.JSONUtils;
 import io.nuls.tools.thread.ThreadUtils;
 import io.nuls.tools.thread.commom.NulsThreadFactory;
@@ -184,9 +183,9 @@ public class ConnectData {
         Request request = JSONUtils.map2pojo((Map) message.getMessageData(), Request.class);
         for (Object method : request.getRequestMethods().keySet()) {
             String cmd = (String)method;
-            String key = ServerRuntime.getSubscribeKey(message.getMessageId(),cmd);
+            String key = ConnectManager.getSubscribeKey(message.getMessageId(),cmd);
             if(!subscribeInitCount.containsKey(key)){
-                subscribeInitCount.put(key, ServerRuntime.getCmdChangeCount(cmd));
+                subscribeInitCount.put(key, ConnectManager.getCmdChangeCount(cmd));
             }
         }
     }
@@ -199,7 +198,7 @@ public class ConnectData {
         Request request = JSONUtils.map2pojo((Map) message.getMessageData(), Request.class);
         for (Object method : request.getRequestMethods().keySet()) {
             String cmd = (String)method;
-            String key = ServerRuntime.getSubscribeKey(message.getMessageId(),cmd);
+            String key = ConnectManager.getSubscribeKey(message.getMessageId(),cmd);
             if(subscribeInitCount.containsKey(key)){
                 subscribeInitCount.remove(key);
             }

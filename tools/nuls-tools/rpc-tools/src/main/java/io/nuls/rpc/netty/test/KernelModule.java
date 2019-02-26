@@ -47,10 +47,6 @@ public class KernelModule {
      * Analog Startup Module, Unit Test Specific
      */
     public static void mockModule() throws Exception {
-        /*NettyServer.getInstance("test", "TestModule", "test.com")
-                .moduleRoles("test_role", new String[]{"1.0"})
-                .moduleVersion("1.0");*/
-//                .dependencies(ModuleE.CM.abbr, "1.1")
         NettyServer.getInstance("test", "TestModule", "test.com")
                 .moduleRoles("test_role", new String[]{"1.0"})
                 .moduleVersion("1.0");
