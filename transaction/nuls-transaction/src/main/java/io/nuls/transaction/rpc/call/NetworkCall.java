@@ -21,10 +21,10 @@ package io.nuls.transaction.rpc.call;
 
 import io.nuls.base.data.NulsDigestData;
 import io.nuls.base.data.Transaction;
-import io.nuls.rpc.client.CmdDispatcher;
 import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.model.message.Response;
+import io.nuls.rpc.netty.processor.ResponseMessageProcessor;
 import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.data.StringUtils;
 import io.nuls.tools.exception.NulsException;
@@ -110,7 +110,7 @@ public class NetworkCall {
             params.put("excludeNodes", excludeNodes);
             params.put("messageBody", HexUtil.byteToHex(message.serialize()));
             params.put("command", message.getCommand());
-            return CmdDispatcher.requestAndResponse(ModuleE.NW.abbr, "nw_broadcast", params).isSuccess();
+            return ResponseMessageProcessor.requestAndResponse(ModuleE.NW.abbr, "nw_broadcast", params).isSuccess();
         } catch (Exception e) {
             Log.error("Calling remote interface failed. module:{} - interface:{}", ModuleE.NW.abbr, "nw_broadcast");
             throw new NulsException(e);
@@ -134,7 +134,7 @@ public class NetworkCall {
             params.put("messageBody", HexUtil.byteToHex(message.serialize()));
             params.put("command", message.getCommand());
 
-            return CmdDispatcher.requestAndResponse(ModuleE.NW.abbr, "nw_sendPeersMsg", params).isSuccess();
+            return ResponseMessageProcessor.requestAndResponse(ModuleE.NW.abbr, "nw_sendPeersMsg", params).isSuccess();
         } catch (Exception e) {
             Log.error("Calling remote interface failed. module:{} - interface:{}", ModuleE.NW.abbr, "nw_sendPeersMsg");
             throw new NulsException(e);
@@ -161,7 +161,7 @@ public class NetworkCall {
                 cmds.add(cmd);
             }
             map.put("protocolCmds", cmds);
-            Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.NW.abbr, "nw_protocolRegister", map);
+            Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.NW.abbr, "nw_protocolRegister", map);
             if(!cmdResp.isSuccess())
             {
                 Log.error("Calling remote interface failed. module:{} - interface:{} -reason:{}", ModuleE.NW.abbr, "nw_protocolRegister",cmdResp.getResponseComment());
