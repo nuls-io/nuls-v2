@@ -123,7 +123,7 @@ public interface Constant {
     /**
      * 下载单个区块的超时时间
      */
-    long SINGLE_DOWNLOAD_TIMEOUNT = 1000L;
+    long SINGLE_DOWNLOAD_TIMEOUNT = 10L;
 
     /**
      * 下载多个区块的超时时间

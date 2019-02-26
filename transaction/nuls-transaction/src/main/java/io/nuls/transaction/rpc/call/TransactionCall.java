@@ -44,9 +44,9 @@ public class TransactionCall {
                 }
                 throw new Exception(errorMsg);
             }
-            if (null == resData) {
+            /*if (null == resData) {
                 return null;
-            }
+            }*/
             return resData.get(cmd);
         } catch (Exception e) {
             Log.debug("cmd: {}", cmd);
