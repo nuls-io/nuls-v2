@@ -26,10 +26,9 @@ import io.nuls.base.data.Block;
 import io.nuls.block.manager.ContextManager;
 import io.nuls.block.model.ChainParameters;
 import io.nuls.block.model.Node;
+import io.nuls.tools.log.logback.NulsLogger;
 
 import java.util.concurrent.*;
-
-import static io.nuls.block.utils.LoggerUtil.commonLog;
 
 /**
  * 区块下载管理器
@@ -79,6 +78,7 @@ public class BlockDownloader implements Callable<Boolean> {
         PriorityBlockingQueue<Node> nodes = params.getNodes();
         long netLatestHeight = params.getNetLatestHeight();
         long startHeight = params.getLocalLatestHeight() + 1;
+        NulsLogger commonLog = ContextManager.getContext(chainId).getCommonLog();
         try {
             commonLog.info("BlockDownloader start work from " + startHeight + " to " + netLatestHeight);
             ChainParameters chainParameters = ContextManager.getContext(chainId).getParameters();

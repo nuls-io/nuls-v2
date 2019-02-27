@@ -27,13 +27,13 @@ import io.nuls.block.model.Chain;
 import io.nuls.block.model.ChainContext;
 import io.nuls.block.model.ChainParameters;
 import io.nuls.block.utils.module.ConsensusUtil;
+import io.nuls.tools.log.logback.NulsLogger;
 
 import java.util.SortedSet;
 import java.util.concurrent.locks.StampedLock;
 
 import static io.nuls.block.constant.Constant.CONSENSUS_WAITING;
 import static io.nuls.block.constant.Constant.CONSENSUS_WORKING;
-import static io.nuls.block.utils.LoggerUtil.commonLog;
 
 /**
  * 分叉链的形成原因分析:由于网络延迟,同时有两个矿工发布同一高度的区块,或者被恶意节点攻击
@@ -59,6 +59,7 @@ public class ForkChainsMonitor implements Runnable {
     public void run() {
         for (Integer chainId : ContextManager.chainIds) {
             ChainContext context = ContextManager.getContext(chainId);
+            NulsLogger commonLog = context.getCommonLog();
             try {
                 //判断该链的运行状态,只有正常运行时才会有分叉链的处理
                 RunningStatusEnum status = context.getStatus();

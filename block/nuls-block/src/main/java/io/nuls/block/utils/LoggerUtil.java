@@ -37,7 +37,7 @@ import io.nuls.tools.log.logback.NulsLogger;
  **/
 public class LoggerUtil {
 
-    public static NulsLogger commonLog = LoggerBuilder.getLogger("block","common", Level.DEBUG);
+    public static NulsLogger commonLog = LoggerBuilder.getLogger("block","common", Level.INFO);
 
     public static void init(int chainId, String levelString) {
         Level level = Level.valueOf(levelString);
