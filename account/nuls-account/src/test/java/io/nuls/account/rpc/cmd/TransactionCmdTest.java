@@ -63,6 +63,16 @@ public class TransactionCmdTest {
     @BeforeClass
     public static void start() throws Exception {
         NoUse.mockModule();
+        importKeyStore();
+    }
+
+    public static void importKeyStore() throws Exception {
+        CommonRpcOperation.importAccountByPriKeyWithOverwrite("5MR_2CckymYvKM7NKpt6fpZproQYMtnGdaT",
+                "00c940482596e30265f9f9f6216f7d7b507eebc9857c3689efa4378527bab3ba3d",null);
+        CommonRpcOperation.importAccountByPriKeyWithOverwrite("5MR_2CkYEhXKCmUWTEsWRTnaWgYE8kJdfd5",
+                "00ea8818c00c9fd20a54a93bbc749b903ee69617990af9bf0d6c6bc17d51820f",null);
+        CommonRpcOperation.importAccountByPriKeyWithOverwrite("5MR_2CcRgU3vDGp2uEG3rdzLdyMCbsiLFbJ",
+                "00d9a2384a3bc9fca252c8e2c8728efcb98e007b5290d7f01a008731669e433043",null);
     }
 
     /**
@@ -131,7 +141,7 @@ public class TransactionCmdTest {
     @Test
     public void transfer() throws Exception {
         //组装普通转账交易
-        TransferDto transferDto = this.createTransferTx();
+        TransferDto transferDto = CommonRpcOperation.createTransferTx("5MR_2CWWTDXc32s9Wd1guNQzPztFgkyVEsz","5MR_4bgJiPmxN4mZV2C89thSEdJ8qWnm9Xi",new BigInteger("10000000000"));
         Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.AC.abbr, "ac_transfer", JSONUtils.json2map(JSONUtils.obj2json(transferDto)));
         HashMap result = (HashMap) (((HashMap) cmdResp.getResponseData()).get("ac_transfer"));
         String txDigestHex = (String) result.get(RpcConstant.VALUE);
@@ -279,30 +289,7 @@ public class TransactionCmdTest {
      * @return
      */
     private TransferDto createTransferTx() {
-        TransferDto transferDto = new TransferDto();
-        transferDto.setChainId(chainId);
-        transferDto.setRemark("transfer test");
-        List<CoinDto> inputs = new ArrayList<>();
-        List<CoinDto> outputs = new ArrayList<>();
-        CoinDto inputCoin1 = new CoinDto();
-        inputCoin1.setAddress("5MR_2CWWTDXc32s9Wd1guNQzPztFgkyVEsz");
-        inputCoin1.setPassword(password);
-        inputCoin1.setAssetsChainId(chainId);
-        inputCoin1.setAssetsId(1);
-        inputCoin1.setAmount(new BigInteger("10000000000"));
-        inputs.add(inputCoin1);
-
-        CoinDto outputCoin1 = new CoinDto();
-        outputCoin1.setAddress("5MR_4bgJiPmxN4mZV2C89thSEdJ8qWnm9Xi");
-        outputCoin1.setPassword(password);
-        outputCoin1.setAssetsChainId(chainId);
-        outputCoin1.setAssetsId(1);
-        outputCoin1.setAmount(new BigInteger("10000000000"));
-        outputs.add(outputCoin1);
-
-        transferDto.setInputs(inputs);
-        transferDto.setOutputs(outputs);
-        return transferDto;
+        return CommonRpcOperation.createTransferTx("5MR_2CWWTDXc32s9Wd1guNQzPztFgkyVEsz","5MR_4bgJiPmxN4mZV2C89thSEdJ8qWnm9Xi",new BigInteger("10000000000"));
     }
 
     /**
@@ -440,6 +427,8 @@ public class TransactionCmdTest {
         List<String> accoutList = CommonRpcOperation.createAccount(1);
         assertTrue(accoutList != null & accoutList.size() == 1);
         String toAddress = "5MR_2Cc14Ph4ZfJTzsfxma8FGZ7FBzcTS87";//accoutList.get(0);
+        //向多签账户转账
+
         //铸币
         //addGenesisAsset(fromAddress);
         BigInteger balance = TxUtil.getBalance(chainId, chainId, assetId, AddressTool.getAddress(fromAddress));
