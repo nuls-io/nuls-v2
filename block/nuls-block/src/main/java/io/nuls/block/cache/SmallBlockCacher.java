@@ -55,7 +55,7 @@ public class SmallBlockCacher {
     /**
      * 将一个SmallBlock放入内存中,若不主动删除,则在缓存存满或者存在时间超过1000秒时,自动清理
      *
-     * @param chainId
+     * @param chainId 链Id/chain id
      * @param cachedSmallBlock
      */
     public static void cacheSmallBlock(int chainId, CachedSmallBlock cachedSmallBlock) {
@@ -67,7 +67,7 @@ public class SmallBlockCacher {
      * 根据hash获取缓存的{@link SmallBlock}
      * TODO  注释完整性
      *
-     * @param chainId
+     * @param chainId 链Id/chain id
      * @param blockHash
      * @return
      */
@@ -78,7 +78,7 @@ public class SmallBlockCacher {
     /**
      * 获取状态
      *
-     * @param chainId
+     * @param chainId 链Id/chain id
      * @param blockHash
      * @return
      */
@@ -95,7 +95,7 @@ public class SmallBlockCacher {
     /**
      * 设置状态
      *
-     * @param chainId
+     * @param chainId 链Id/chain id
      * @param blockHash
      * @param blockForwardEnum
      * @return
@@ -107,7 +107,7 @@ public class SmallBlockCacher {
     /**
      * 缓存初始化
      *
-     * @param chainId
+     * @param chainId 链Id/chain id
      */
     public static void init(int chainId) {
         ChainParameters parameters = ContextManager.getContext(chainId).getParameters();

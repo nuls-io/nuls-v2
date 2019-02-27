@@ -57,7 +57,7 @@
     "name": "resetTime",
     "remark": "持续多长时间区块高度没有更新时,就重新获取可用节点",
     "readOnly": "true",
-    "value": "180"
+    "value": "180000"
   },
   {
     "name": "cacheSize",
@@ -87,7 +87,7 @@
     "name": "minNodeAmount",
     "remark": "最小可用节点个数,低于此数不同步区块",
     "readOnly": "false",
-    "value": "1"
+    "value": "0"
   },
   {
     "name": "downloadNumber",

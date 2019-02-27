@@ -21,10 +21,10 @@
 package io.nuls.block.rpc;
 
 import io.nuls.block.message.HeightRangeMessage;
-import io.nuls.rpc.client.CmdDispatcher;
 import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.model.message.Response;
+import io.nuls.rpc.netty.processor.ResponseMessageProcessor;
 import io.nuls.tools.crypto.HexUtil;
 import org.junit.Test;
 
@@ -46,7 +46,7 @@ public class GetBlocksHandlerTest {
         message.setEndHeight(1010);
         params.put("messageBody", HexUtil.encode(message.serialize()));
         params.put("command", GET_BLOCKS_BY_HEIGHT_MESSAGE);
-        Response response = CmdDispatcher.requestAndResponse(ModuleE.BL.abbr, GET_BLOCKS_BY_HEIGHT_MESSAGE, params);
+        Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.BL.abbr, GET_BLOCKS_BY_HEIGHT_MESSAGE, params);
         System.out.println(response);
     }
 }

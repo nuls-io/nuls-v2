@@ -38,9 +38,9 @@ import io.nuls.chain.model.dto.AccountBalance;
 import io.nuls.chain.model.po.Asset;
 import io.nuls.chain.model.po.BlockChain;
 import io.nuls.chain.model.tx.txdata.TxChain;
-import io.nuls.rpc.client.CmdDispatcher;
 import io.nuls.rpc.cmd.BaseCmd;
 import io.nuls.rpc.model.message.Response;
+import io.nuls.rpc.netty.processor.ResponseMessageProcessor;
 import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.data.BigIntegerUtils;
 import io.nuls.tools.data.ByteUtils;
@@ -209,7 +209,7 @@ public class BaseChainCmd extends BaseCmd {
         signDigestParam.put("password", password);
         signDigestParam.put("dataHex", tx);
 
-        Response response = CmdDispatcher.requestAndResponse("ac", "ac_signDigest", signDigestParam);
+        Response response = ResponseMessageProcessor.requestAndResponse("ac", "ac_signDigest", signDigestParam);
         if (!response.isSuccess()) {
             throw new Exception("ac_signDigest error.");
         }

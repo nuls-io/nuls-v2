@@ -30,7 +30,7 @@ import io.nuls.block.model.ChainContext;
 import io.nuls.block.model.ChainParameters;
 import io.nuls.block.model.Node;
 import io.nuls.block.service.ChainStorageService;
-import io.nuls.block.utils.BlockDownloadUtils;
+import io.nuls.block.utils.BlockUtil;
 import io.nuls.block.utils.module.NetworkUtil;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.ioc.SpringLiteContext;
@@ -131,7 +131,7 @@ public class OrphanChainsMaintainer implements Runnable {
     /**
      * 维护孤儿链,向其他节点请求孤儿链起始区块的上一个区块,仅限于没有父链的孤儿链
      *
-     * @param chainId
+     * @param chainId 链Id/chain id
      * @param orphanChain
      * @param orphanChainMaxAge
      */
@@ -151,7 +151,7 @@ public class OrphanChainsMaintainer implements Runnable {
         //向其他节点请求孤儿链起始区块的上一个区块
         for (int i = 0, availableNodesSize = availableNodes.size(); i < availableNodesSize; i++) {
             Node availableNode = availableNodes.get(i);
-            block = BlockDownloadUtils.getBlockByHash(chainId, previousHash, availableNode);
+            block = BlockUtil.downloadBlockByHash(chainId, previousHash, availableNode.getId());
             if (block != null) {
                 orphanChain.addFirst(block);
                 chainStorageService.save(chainId, block);

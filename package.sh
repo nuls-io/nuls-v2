@@ -37,8 +37,7 @@ do
             m)     DOMOCK=1;;
 			o)	   MODULES_PATH="$OPTARG";;
 			h)     help ;;
-     #        ?)     
-					# exit 2;;
+            ?)     exit 2;;
            esac
 done
 #日志打印函数
@@ -143,9 +142,7 @@ checkModuleItem(){
 	for line in `cat "$(pwd)/module.ncf"`
 	do
 		pname=$(echo $line | awk -F '=' '{print $1}')
-		pvalue=$(echo $line | awk -F '=' '{print $2}')
 		if [ ${pname} == $1 ]; then
-			# echo ${pvalue};
 			return 1;
 		fi
 	done
@@ -159,7 +156,19 @@ getModuleItem(){
 	for line in `cat "$(pwd)/module.ncf"`
 	do
 		pname=$(echo $line | awk -F '=' '{print $1}')
-		pvalue=$(echo $line | awk -F '=' '{print $2}')
+		pvalue=$(awk -v a="$line" '
+						BEGIN{
+							len = split(a,ary,"=")
+							r=""
+							for ( i = 2; i <= len; i++ ){
+								if(r != ""){
+									r = (r"=")
+								}
+								r=(r""ary[i])
+					 		}
+							print r
+						}
+					')
 		if [ ${pname} == $1 ]; then
 			echo ${pvalue};
 			return 1;
@@ -196,7 +205,6 @@ copyModuleNcfToModules(){
 	version=$(getModuleItem "VERSION");
 	mainClass=$(getModuleItem "MAIN_CLASS");
 	mainClassName=$(awk -v s="${mainClass}" 'BEGIN{ len = split(s,ary,"."); print ary[len]}')
-	# echo ${mainClassName}
 	moduleBuildPath="${BUILD_PATH}/tmp/$1"
 	if [ ! -d "${moduleBuildPath}" ]; then
 		mkdir "${moduleBuildPath}"
@@ -218,7 +226,20 @@ copyModuleNcfToModules(){
 		if [ "${cfgDomain}" == "[JAVA]" -a ! -n "$TEMP" ]; 
 		then
 			pname=$(echo $line | awk -F '=' '{print $1}')
-			pvalue=$(echo $line | awk -F '=' '{print $2}')
+			#pvalue=$(echo $line | awk -F '=' '{print $2}')
+			pvalue=$(awk -v a="$line" '
+						BEGIN{
+							len = split(a,ary,"=")
+							r=""
+							for ( i = 2; i <= len; i++ ){
+								if(r != ""){
+									r = (r"=")
+								}
+								r=(r""ary[i])
+					 		}
+							print r
+						}
+					')
 			sedCommand+=" -e 's/%${pname}%/${pvalue}/g' "
 		else
 			if [ "${cfgDomain}" != "[JAVA]" ]; then
@@ -254,7 +275,7 @@ copyModuleNcfToModules(){
 
 	eval "${sedCommand}  ${BUILD_PATH}/start-temp.bat > ${moduleBuildPath}/start.bat"
 	cp "${moduleBuildPath}/start.bat" "${MODULES_PATH}/${moduleName}/${version}/start.bat"
-	cp "${moduleBuildPath}/start.bat" "/Volumes/share/start.bat"
+    #cp "${moduleBuildPath}/start.bat" "/Volumes/share/start.bat"
 	echo "拷贝 ${moduleBuildPath}/start.bat 到 ${MODULES_PATH}/${moduleName}/${version}/start.bat"
 
 	eval "${sedCommand}  ${BUILD_PATH}/stop-temp.sh > ${moduleBuildPath}/stop.sh"
@@ -264,28 +285,28 @@ copyModuleNcfToModules(){
 
 	eval "${sedCommand}  ${BUILD_PATH}/stop-temp.bat > ${moduleBuildPath}/stop.bat"
 	cp "${moduleBuildPath}/stop.bat" "${MODULES_PATH}/${moduleName}/${version}/stop.bat"
-	cp "${moduleBuildPath}/stop.bat" "/Volumes/share/stop.bat"
+	#cp "${moduleBuildPath}/stop.bat" "/Volumes/share/stop.bat"
 	echo "拷贝 ${moduleBuildPath}/stop.bat 到 ${MODULES_PATH}/${moduleName}/${version}/stop.bat"
 
 
-	cp "${moduleBuildPath}/module.temp.ncf" "${MODULES_PATH}/${moduleName}/${version}/module.ncf"
-	echo "拷贝 ${moduleBuildPath}/module.temp.ncf 到 ${MODULES_PATH}/${moduleName}/${version}/module.ncf"
+	cp "${moduleBuildPath}/module.temp.ncf" "${MODULES_PATH}/${moduleName}/${version}/Module.ncf"
+	echo "拷贝 ${moduleBuildPath}/module.temp.ncf 到 ${MODULES_PATH}/${moduleName}/${version}/odule.ncf"
 }
 
 #2.遍历文件夹，检查第一个pom 发现pom文件后通过mvn进行打包，完成后把文件jar文件和module.ncf文件复制到Modules文件夹下
 packageModule() {
 	if [ ! -d $(pwd)/$1 ]; then
 		return 0
-	fi	
+	fi
 	if [ $(pwd) == "${PROJECT_PATH}/Modules" ]; then
 		return 0;
 	fi
 	cd $(pwd)/$1
 	if [ -f "./module.ncf" ]; then
-		echo "find module.ncf in $(pwd)" 
+		echo "find module.ncf in $(pwd)"
 		if [ ! -f "./pom.xml" ]; then
-			echoRed "模块配置文件必须与pom.xml在同一个目录 : $(pwd)" 
-			exit 0;	
+			echoRed "模块配置文件必须与pom.xml在同一个目录 : $(pwd)"
+			exit 0;
 		fi
 		doMvn "package" $1
 		checkModuleItem "APP_NAME" "$1"
@@ -295,12 +316,12 @@ packageModule() {
 		copyModuleNcfToModules $1
 		log "$1 SUCCESS"
 		cd ..
-		return 0	
-	fi	
+		return 0
+	fi
     for f in `ls`
     do
         packageModule $f
-    done     		
+    done
     cd ..
 }
 
@@ -308,8 +329,8 @@ for fi in `ls`
 do
     if [ "$fi"x != "tools"x ]; then
     	packageModule $fi
-    fi	
-done	
+    fi
+done
 log "============ PACKAGE DONE ==============="
 
 if [ -n "${DOMOCK}" ]; then
@@ -318,9 +339,5 @@ if [ -n "${DOMOCK}" ]; then
 	chmod u+x "${MODULES_PATH}/start.sh"
 fi
 
-
-#1.读取module.ncf.temp文件到内存中
-#2.遍历替换module-start.ini参数
-#3.在生成module.ncf文件并复制到jar同目录下
 
 

@@ -26,7 +26,6 @@
 package io.nuls.ledger.test;
 
 import io.nuls.rpc.info.NoUse;
-import io.nuls.rpc.server.WsServer;
 import org.junit.Before;
 import org.junit.Test;
 

@@ -28,7 +28,6 @@
 package io.nuls.account;
 
 import io.nuls.rpc.info.NoUse;
-import io.nuls.rpc.server.WsServer;
 import org.junit.Test;
 
 /**

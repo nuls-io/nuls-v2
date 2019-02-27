@@ -32,10 +32,10 @@ import io.nuls.chain.model.dto.AccountBalance;
 import io.nuls.chain.model.po.BlockChain;
 import io.nuls.chain.service.RpcService;
 import io.nuls.chain.util.ResponseUtil;
-import io.nuls.rpc.client.CmdDispatcher;
 import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.model.message.Response;
+import io.nuls.rpc.netty.processor.ResponseMessageProcessor;
 import io.nuls.tools.core.annotation.Service;
 import io.nuls.tools.crypto.HexUtil;
 
@@ -58,7 +58,7 @@ public class RpcServiceImpl  implements RpcService {
     public String getCrossChainSeeds() {
             try {
                 Map<String,Object> map = new HashMap<>();
-                Response response =  CmdDispatcher.requestAndResponse(ModuleE.NW.abbr, RpcConstants.CMD_NW_CROSS_SEEDS,map );
+                Response response =  ResponseMessageProcessor.requestAndResponse(ModuleE.NW.abbr, RpcConstants.CMD_NW_CROSS_SEEDS,map );
                 if(response.isSuccess()){
                     Map rtMap = ResponseUtil.getResultMap(response,RpcConstants.CMD_NW_CROSS_SEEDS);
                     if(null != rtMap){
@@ -116,7 +116,7 @@ public class RpcServiceImpl  implements RpcService {
             destroyAssetMap.put(RpcConstants.TX_VERIFY_SIGNATURE_CMD,"true");
             txRegisterDetailList.add(destroyAssetMap);
             params.put("list", txRegisterDetailList);
-            Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.TX.abbr, RpcConstants.TX_REGISTER_CMD, params);
+            Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.TX.abbr, RpcConstants.TX_REGISTER_CMD, params);
             Log.debug("response={}",cmdResp);
             return cmdResp.isSuccess();
         } catch (Exception e) {
@@ -131,7 +131,7 @@ public class RpcServiceImpl  implements RpcService {
             Map<String, Object> params = new HashMap<>();
             params.put(RpcConstants.TX_CHAIN_ID,  CmConstants.CHAIN_ASSET_MAP.get(CmConstants.NULS_CHAIN_ID));
             params.put(RpcConstants.TX_DATA_HEX,HexUtil.encode(tx.serialize()));
-            Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.TX.abbr, RpcConstants.CMD_TX_NEW, params);
+            Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.TX.abbr, RpcConstants.CMD_TX_NEW, params);
             Log.debug("response={}",cmdResp);
             return cmdResp.isSuccess();
         } catch (Exception e) {
@@ -151,7 +151,7 @@ public class RpcServiceImpl  implements RpcService {
             map.put("minAvailableCount",blockChain.getMinAvailableNodeNum());
             map.put("seedIps","");
             map.put("isMoonNode","1");
-           Response response =  CmdDispatcher.requestAndResponse(ModuleE.NW.abbr, RpcConstants.CMD_NW_CREATE_NODEGROUP,map );
+           Response response =  ResponseMessageProcessor.requestAndResponse(ModuleE.NW.abbr, RpcConstants.CMD_NW_CREATE_NODEGROUP,map );
            return response.isSuccess();
         } catch (Exception e) {
             e.printStackTrace();
@@ -165,7 +165,7 @@ public class RpcServiceImpl  implements RpcService {
         try {
                 Map<String,Object> map = new HashMap<>();
                 map.put("chainId",blockChain.getChainId());
-                Response response =  CmdDispatcher.requestAndResponse(ModuleE.NW.abbr, RpcConstants.CMD_NW_DELETE_NODEGROUP,map );
+                Response response =  ResponseMessageProcessor.requestAndResponse(ModuleE.NW.abbr, RpcConstants.CMD_NW_DELETE_NODEGROUP,map );
                 return response.isSuccess();
         } catch (Exception e) {
             e.printStackTrace();
@@ -180,7 +180,7 @@ public class RpcServiceImpl  implements RpcService {
             map.put("chainId",CmConstants.CHAIN_ASSET_MAP.get(CmConstants.NULS_CHAIN_ID));
             map.put("assetChainId",CmConstants.CHAIN_ASSET_MAP.get(CmConstants.NULS_CHAIN_ID));
             map.put("assetId",CmConstants.CHAIN_ASSET_MAP.get(CmConstants.NULS_ASSET_ID));
-            Response response =  CmdDispatcher.requestAndResponse(CmConstants.MODULE_ROLE, RpcConstants.CMD_NW_CREATE_NODEGROUP,map );
+            Response response =  ResponseMessageProcessor.requestAndResponse(CmConstants.MODULE_ROLE, RpcConstants.CMD_NW_CREATE_NODEGROUP,map );
             Map resultMap =  ResponseUtil.getResultMap(response,RpcConstants.CMD_NW_CREATE_NODEGROUP);
             if(null != resultMap){
                String available = resultMap.get("available").toString();

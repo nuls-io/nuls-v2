@@ -63,10 +63,6 @@ public class TxGroupHandler extends BaseCmd {
     @CmdAnnotation(cmd = TXGROUP_MESSAGE, version = 1.0, scope = Constants.PUBLIC, description = "")
     public Response process(Map map) {
         int chainId = Integer.parseInt(map.get("chainId").toString());
-//        ChainContext context = ContextManager.getContext(chainId);
-//        if (!context.getStatus().equals(RUNNING)) {
-//            return success();
-//        }
         String nodeId = map.get("nodeId").toString();
         TxGroupMessage message = new TxGroupMessage();
         NulsLogger messageLog = ContextManager.getContext(chainId).getMessageLog();
@@ -78,7 +74,6 @@ public class TxGroupHandler extends BaseCmd {
             messageLog.error(e);
             return failed(BlockErrorCode.PARAMETER_ERROR);
         }
-
         List<Transaction> transactions = message.getTransactions();
         if (null == transactions || transactions.size() == 0) {
             messageLog.warn("recieved a null txGroup form " + nodeId);
@@ -91,7 +86,6 @@ public class TxGroupHandler extends BaseCmd {
         if (BlockForwardEnum.COMPLETE.equals(status)) {
             return success();
         }
-
         //2.已收到部分区块,还缺失交易信息,收到的应该就是缺失的交易信息
         if (BlockForwardEnum.INCOMPLETE.equals(status)) {
             SmallBlock smallBlock = SmallBlockCacher.getSmallBlock(chainId, blockHash).getSmallBlock();
@@ -119,7 +113,6 @@ public class TxGroupHandler extends BaseCmd {
             }
             return success();
         }
-
         //3.未收到区块
         if (BlockForwardEnum.EMPTY.equals(status)) {
             messageLog.error("It is theoretically impossible to enter this branch");

@@ -33,12 +33,14 @@ import io.nuls.network.model.dto.ProtocolRoleHandler;
 import io.nuls.network.model.message.base.BaseMessage;
 import io.nuls.network.model.message.base.MessageHeader;
 import io.nuls.network.utils.LoggerUtil;
-import io.nuls.rpc.client.CmdDispatcher;
 import io.nuls.rpc.model.message.Response;
+import io.nuls.rpc.netty.processor.ResponseMessageProcessor;
 import io.nuls.tools.crypto.HexUtil;
+
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+
 import static io.nuls.network.utils.LoggerUtil.Log;
 
 ;
@@ -93,7 +95,7 @@ public class OtherModuleMessageHandler extends BaseMessageHandler {
             for (ProtocolRoleHandler protocolRoleHandler : protocolRoleHandlers) {
                 try {
                     Log.debug("request：{}=={}", protocolRoleHandler.getRole(), protocolRoleHandler.getHandler());
-                    Response response = CmdDispatcher.requestAndResponse(protocolRoleHandler.getRole(), protocolRoleHandler.getHandler(), paramMap);
+                    Response response = ResponseMessageProcessor.requestAndResponse(protocolRoleHandler.getRole(), protocolRoleHandler.getHandler(), paramMap);
                     Log.debug("response：" + response);
                     LoggerUtil.modulesMsgLogs(protocolRoleHandler.getRole(),header.getCommandStr(),node,payLoadBody,response.toString());
                 } catch (Exception e) {

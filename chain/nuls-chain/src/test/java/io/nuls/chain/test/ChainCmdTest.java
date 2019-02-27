@@ -3,12 +3,12 @@ package io.nuls.chain.test;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import io.nuls.chain.info.CmConstants;
+import io.nuls.chain.model.dto.Seed;
 import io.nuls.chain.model.po.Asset;
 import io.nuls.chain.model.po.BlockChain;
-import io.nuls.chain.model.dto.Seed;
 import io.nuls.chain.util.LoggerUtil;
-import io.nuls.rpc.client.CmdDispatcher;
 import io.nuls.rpc.model.ModuleE;
+import io.nuls.rpc.netty.processor.ResponseMessageProcessor;
 import io.nuls.tools.parse.JSONUtils;
 import io.nuls.tools.thread.TimeService;
 import org.junit.Before;
@@ -42,7 +42,7 @@ public class ChainCmdTest {
 
     @Test
     public void chainReg() throws Exception {
-        System.out.println(CmdDispatcher.requestAndResponse(ModuleE.CM.abbr, "cm_chainReg", null));
+        System.out.println(ResponseMessageProcessor.requestAndResponse(ModuleE.CM.abbr, "cm_chainReg", null));
     }
 
     @Test

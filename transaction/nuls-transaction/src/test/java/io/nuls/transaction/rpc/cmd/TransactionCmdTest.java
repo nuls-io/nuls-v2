@@ -1,12 +1,10 @@
 package io.nuls.transaction.rpc.cmd;
 
-import io.nuls.rpc.client.CmdDispatcher;
 import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.info.NoUse;
 import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.model.message.Response;
-import io.nuls.rpc.server.WsServer;
-import io.nuls.tools.parse.JSONUtils;
+import io.nuls.rpc.netty.processor.ResponseMessageProcessor;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -15,7 +13,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 /**
@@ -52,7 +49,7 @@ public class TransactionCmdTest {
         txParams.put("verifySignature", true);
         txRegisterList.add(txParams);
         params.put("list",txRegisterList);
-        Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.TX.abbr, "tx_register", params);
+        Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.TX.abbr, "tx_register", params);
         HashMap result = (HashMap) ((HashMap) cmdResp.getResponseData()).get("tx_register");
         boolean value = (Boolean) result.get("value");
         assertTrue(value);
@@ -65,7 +62,7 @@ public class TransactionCmdTest {
         params.put("chainId", chainId);
         params.put("txHex", "0300bce49bca67010029215635667168583533426d7835376755754736426268717a46784d4d54393339333006e588abe5908d320001173930042301b50e18cbcd1891499450f125de50851bd09a39300100010000000000000000000000000000000000000000");
         params.put("secondaryDataHex", "");
-        Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.TX.abbr, "tx_commit", params);
+        Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.TX.abbr, "tx_commit", params);
         HashMap result = (HashMap) ((HashMap) cmdResp.getResponseData()).get("tx_register");
         boolean value = (Boolean) result.get("value");
         assertTrue(value);

@@ -10,15 +10,18 @@ import io.nuls.poc.constant.ConsensusConstant;
 import io.nuls.poc.constant.ConsensusErrorCode;
 import io.nuls.poc.model.bo.Chain;
 import io.nuls.poc.model.bo.tx.TxRegisterDetail;
-import io.nuls.rpc.client.CmdDispatcher;
 import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.model.message.Response;
+import io.nuls.rpc.netty.processor.ResponseMessageProcessor;
 import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.data.StringUtils;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.log.Log;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * 公共远程方法调用工具类
@@ -44,7 +47,7 @@ public class CallMethodUtils {
             callParams.put("chainId", chainId);
             callParams.put("address", address);
             callParams.put("password", password);
-            Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.AC.abbr, "ac_getPriKeyByAddress", callParams);
+            Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_getPriKeyByAddress", callParams);
             if (!cmdResp.isSuccess()) {
                 throw new NulsException(ConsensusErrorCode.ACCOUNT_NOT_EXIST);
             }
@@ -80,7 +83,7 @@ public class CallMethodUtils {
                 callParams.put("address", address);
                 callParams.put("password", password);
                 callParams.put("dataHex", HexUtil.encode(tx.getHash().getDigestBytes()));
-                Response signResp = CmdDispatcher.requestAndResponse(ModuleE.AC.abbr, "ac_signDigest", callParams);
+                Response signResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_signDigest", callParams);
                 if (!signResp.isSuccess()) {
                     throw new NulsException(ConsensusErrorCode.TX_SIGNTURE_ERROR);
                 }
@@ -114,7 +117,7 @@ public class CallMethodUtils {
             callParams.put("address", address);
             callParams.put("password", null);
             callParams.put("dataHex", HexUtil.encode(header.getHash().getDigestBytes()));
-            Response signResp = CmdDispatcher.requestAndResponse(ModuleE.AC.abbr, "ac_signBlockDigest", callParams);
+            Response signResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_signBlockDigest", callParams);
             if (!signResp.isSuccess()) {
                 throw new NulsException(ConsensusErrorCode.TX_SIGNTURE_ERROR);
             }
@@ -142,7 +145,7 @@ public class CallMethodUtils {
         params.put("chainId", chainId);
         params.put("block", block);
         try {
-            Response callResp = CmdDispatcher.requestAndResponse(ModuleE.BL.abbr, "receivePackingBlock", params);
+            Response callResp = ResponseMessageProcessor.requestAndResponse(ModuleE.BL.abbr, "receivePackingBlock", params);
             return callResp.isSuccess();
         } catch (Exception e) {
             throw new NulsException(e);
@@ -161,7 +164,7 @@ public class CallMethodUtils {
         callParams.put("chainId", chainId);
         callParams.put("isCross", isCross);
         try {
-            Response callResp = CmdDispatcher.requestAndResponse(ModuleE.NW.abbr, "nw_getChainConnectAmount", callParams);
+            Response callResp = ResponseMessageProcessor.requestAndResponse(ModuleE.NW.abbr, "nw_getChainConnectAmount", callParams);
             if (!callResp.isSuccess()) {
                 throw new NulsException(ConsensusErrorCode.INTERFACE_CALL_FAILED);
             }
@@ -187,7 +190,7 @@ public class CallMethodUtils {
         params.put("address", address);
         params.put("assetId", chain.getConfig().getAssetsId());
         try {
-            Response callResp = CmdDispatcher.requestAndResponse(ModuleE.LG.abbr, "getBalanceNonce", params);
+            Response callResp = ResponseMessageProcessor.requestAndResponse(ModuleE.LG.abbr, "getBalanceNonce", params);
             if (!callResp.isSuccess()) {
                 return null;
             }
@@ -212,7 +215,7 @@ public class CallMethodUtils {
         params.put("address", address);
         params.put("assetId", chain.getConfig().getAssetsId());
         try {
-            Response callResp = CmdDispatcher.requestAndResponse(ModuleE.LG.abbr, "getBalance", params);
+            Response callResp = ResponseMessageProcessor.requestAndResponse(ModuleE.LG.abbr, "getBalance", params);
             if (!callResp.isSuccess()) {
                 return null;
             }
@@ -228,7 +231,7 @@ public class CallMethodUtils {
      */
     public static long currentTime() {
         try {
-            Response response = CmdDispatcher.requestAndResponse(ModuleE.NW.abbr, "nw_currentTimeMillis", null);
+            Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.NW.abbr, "nw_currentTimeMillis", null);
             Map responseData = (Map) response.getResponseData();
             Map result = (Map) responseData.get("nw_currentTimeMillis");
             return (Long) result.get("currentTimeMillis");
@@ -254,7 +257,7 @@ public class CallMethodUtils {
             params.put("moduleValidator", "cs_batchValid");
             params.put("commit", "cs_commit");
             params.put("rollback", "cs_rollback");
-            Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.TX.abbr, "tx_register", params);
+            Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.TX.abbr, "tx_register", params);
             if (!cmdResp.isSuccess()) {
                 chain.getLoggerMap().get(ConsensusConstant.CONSENSUS_LOGGER_NAME).error("chain ：" + chain.getConfig().getChainId() + " Failure of transaction registration");
                 return false;
@@ -279,7 +282,7 @@ public class CallMethodUtils {
             params.put("chainId", chain.getConfig().getChainId());
             params.put("endTimestamp", currentTime() + ConsensusConstant.GET_TX_MAX_WAIT_TIME);
             params.put("maxTxDataSize", ConsensusConstant.PACK_TX_MAX_SIZE);
-            Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.TX.abbr, "tx_packableTxs", params);
+            Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.TX.abbr, "tx_packableTxs", params);
             if (!cmdResp.isSuccess()) {
                 chain.getLoggerMap().get(ConsensusConstant.CONSENSUS_LOGGER_NAME).error("Packaging transaction acquisition failure!");
                 return null;
@@ -312,7 +315,7 @@ public class CallMethodUtils {
             Map<String, Object> params = new HashMap(4);
             params.put("chainId", chain.getConfig().getChainId());
             params.put("txHash", txHash);
-            Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.TX.abbr, "tx_getConfirmedTx", params);
+            Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.TX.abbr, "tx_getConfirmedTx", params);
             if (!cmdResp.isSuccess()) {
                 chain.getLoggerMap().get(ConsensusConstant.CONSENSUS_LOGGER_NAME).error("Acquisition transaction failed！");
                 return null;
@@ -345,7 +348,7 @@ public class CallMethodUtils {
             Map<String, Object> params = new HashMap(4);
             params.put("chainId", chain.getConfig().getChainId());
             params.put("txHex", txHex);
-            Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.TX.abbr, "tx_newTx", params);
+            Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.TX.abbr, "tx_newTx", params);
             if (!cmdResp.isSuccess()) {
                 chain.getLoggerMap().get(ConsensusConstant.CONSENSUS_LOGGER_NAME).error("Transaction failed to send!");
             }

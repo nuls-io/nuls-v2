@@ -39,6 +39,7 @@ import org.junit.Before;
  */
 public class RepositoryTest {
 
+
     private Repository repository;
 
     @Before

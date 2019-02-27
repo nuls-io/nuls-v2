@@ -24,10 +24,10 @@ import io.nuls.block.manager.ContextManager;
 import io.nuls.block.message.CompleteMessage;
 import io.nuls.block.message.base.BaseMessage;
 import io.nuls.block.model.Node;
-import io.nuls.rpc.client.CmdDispatcher;
 import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.model.message.Response;
+import io.nuls.rpc.netty.processor.ResponseMessageProcessor;
 import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.log.logback.NulsLogger;
 
@@ -52,7 +52,7 @@ public class NetworkUtil {
     /**
      * 根据链ID获取可用节点
      *
-     * @param chainId
+     * @param chainId 链Id/chain id
      * @return
      */
     public static List<Node> getAvailableNodes(int chainId) {
@@ -66,7 +66,7 @@ public class NetworkUtil {
             params.put("startPage", 0);
             params.put("pageSize", 0);
 
-            Response response = CmdDispatcher.requestAndResponse(ModuleE.NW.abbr, "nw_getNodes", params);
+            Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.NW.abbr, "nw_getNodes", params);
             if (!response.isSuccess()) {
                 return List.of();
             }
@@ -92,7 +92,7 @@ public class NetworkUtil {
     /**
      * 根据链ID重置网络节点
      *
-     * @param chainId
+     * @param chainId 链Id/chain id
      */
     public static void resetNetwork(int chainId) {
         NulsLogger commonLog = ContextManager.getContext(chainId).getCommonLog();
@@ -101,7 +101,7 @@ public class NetworkUtil {
             params.put(Constants.VERSION_KEY_STR, "1.0");
             params.put("chainId", chainId);
 
-            CmdDispatcher.requestAndResponse(ModuleE.NW.abbr, "nw_reconnect", params);
+            ResponseMessageProcessor.requestAndResponse(ModuleE.NW.abbr, "nw_reconnect", params);
         } catch (Exception e) {
             e.printStackTrace();
             commonLog.error(e);
@@ -111,7 +111,7 @@ public class NetworkUtil {
     /**
      * 给网络上节点广播消息
      *
-     * @param chainId
+     * @param chainId 链Id/chain id
      * @param message
      * @param excludeNodes 排除的节点
      * @return
@@ -125,7 +125,7 @@ public class NetworkUtil {
             params.put("excludeNodes", excludeNodes);
             params.put("messageBody", HexUtil.encode(message.serialize()));
             params.put("command", command);
-            boolean success = CmdDispatcher.requestAndResponse(ModuleE.NW.abbr, "nw_broadcast", params).isSuccess();
+            boolean success = ResponseMessageProcessor.requestAndResponse(ModuleE.NW.abbr, "nw_broadcast", params).isSuccess();
 
             messageLog.debug("broadcast " + message.getClass().getName() +", chainId:" + chainId + ", success:" + success);
             return success;
@@ -139,7 +139,7 @@ public class NetworkUtil {
     /**
      * 给指定节点发送消息
      *
-     * @param chainId
+     * @param chainId 链Id/chain id
      * @param message
      * @param nodeId
      * @return
@@ -153,7 +153,7 @@ public class NetworkUtil {
             params.put("nodes", nodeId);
             params.put("messageBody", HexUtil.encode(message.serialize()));
             params.put("command", command);
-            boolean success = CmdDispatcher.requestAndResponse(ModuleE.NW.abbr, "nw_sendPeersMsg", params).isSuccess();
+            boolean success = ResponseMessageProcessor.requestAndResponse(ModuleE.NW.abbr, "nw_sendPeersMsg", params).isSuccess();
             messageLog.debug("send " + message.getClass().getName() + " to node-" + nodeId + ", chainId:" + chainId + ", success:" + success);
             return success;
         } catch (Exception e) {
@@ -166,7 +166,7 @@ public class NetworkUtil {
     /**
      * 给网络上节点广播消息
      *
-     * @param chainId
+     * @param chainId 链Id/chain id
      * @param message
      * @return
      */
@@ -177,7 +177,7 @@ public class NetworkUtil {
     /**
      * 针对某个异步消息返回执行结果
      *
-     * @param chainId
+     * @param chainId 链Id/chain id
      * @param hash
      * @param nodeId
      */
@@ -191,7 +191,7 @@ public class NetworkUtil {
     /**
      * 针对某个异步消息返回执行结果
      *
-     * @param chainId
+     * @param chainId 链Id/chain id
      * @param hash
      * @param nodeId
      */
@@ -207,7 +207,7 @@ public class NetworkUtil {
      * 1.收到smallblock时更新
      * 2.收到转发请求并且本地确定有这个hash的区块时更新
      *
-     * @param chainId
+     * @param chainId 链Id/chain id
      * @param hash
      * @param height
      * @param nodeId
@@ -222,7 +222,7 @@ public class NetworkUtil {
             params.put("blockHeight", height);
             params.put("blockHash", hash.toString());
 
-            CmdDispatcher.requestAndResponse(ModuleE.NW.abbr, "nw_updateNodeInfo", params);
+            ResponseMessageProcessor.requestAndResponse(ModuleE.NW.abbr, "nw_updateNodeInfo", params);
         } catch (Exception e) {
             e.printStackTrace();
             commonLog.error(e);
@@ -238,7 +238,7 @@ public class NetworkUtil {
         try {
 //            Map<String, Object> params = new HashMap<>(1);
 //            params.put(Constants.VERSION_KEY_STR, "1.0");
-            Response response = CmdDispatcher.requestAndResponse(ModuleE.NW.abbr, "nw_currentTimeMillis", null);
+            Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.NW.abbr, "nw_currentTimeMillis", null);
             Map responseData = (Map) response.getResponseData();
             Map result = (Map) responseData.get("nw_currentTimeMillis");
             return (Long) result.get("currentTimeMillis");
@@ -267,7 +267,7 @@ public class NetworkUtil {
                 cmds.add(cmd);
             }
             map.put("protocolCmds", cmds);
-            boolean success = CmdDispatcher.requestAndResponse(ModuleE.NW.abbr, "nw_protocolRegister", map).isSuccess();
+            boolean success = ResponseMessageProcessor.requestAndResponse(ModuleE.NW.abbr, "nw_protocolRegister", map).isSuccess();
             commonLog.debug("get nw_protocolRegister " + success);
             return success;
         } catch (Exception e) {

@@ -25,6 +25,7 @@ import io.nuls.block.cache.CacheHandler;
 import io.nuls.block.constant.BlockErrorCode;
 import io.nuls.block.manager.ContextManager;
 import io.nuls.block.message.BlockMessage;
+import io.nuls.block.utils.module.ProtocolUtil;
 import io.nuls.rpc.cmd.BaseCmd;
 import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.model.CmdAnnotation;
@@ -52,9 +53,12 @@ public class BlockHandler extends BaseCmd {
     @CmdAnnotation(cmd = BLOCK_MESSAGE, version = 1.0, scope = Constants.PUBLIC, description = "")
     public Response process(Map map) {
         int chainId = Integer.parseInt(map.get("chainId").toString());
+        NulsLogger messageLog = ContextManager.getContext(chainId).getMessageLog();
+        if (!ProtocolUtil.meaasgeValidate(chainId, BlockMessage.class, this.getClass())) {
+            messageLog.error("The message or message handler is not available in the current version!");
+        }
         String nodeId = map.get("nodeId").toString();
         BlockMessage message = new BlockMessage();
-        NulsLogger messageLog = ContextManager.getContext(chainId).getMessageLog();
         try {
             byte[] decode = HexUtil.decode(map.get("messageBody").toString());
             message.parse(new NulsByteBuffer(decode));

@@ -58,10 +58,10 @@ public class CacheHandler {
     /**
      * 初始化
      *
-     * @param chainId
+     * @param chainId 链Id/chain id
      */
     public static void init(int chainId) {
-        workerBlockCacher.put(chainId, new ConcurrentHashMap<>());
+        workerBlockCacher.put(chainId, new ConcurrentHashMap<>(2));
         singleBlockCacher.put(chainId, new DataCacher<>());
         completeCacher.put(chainId, new DataCacher<>());
     }
@@ -69,7 +69,7 @@ public class CacheHandler {
     /**
      * 下载单个区块任务开始时,添加缓存
      *
-     * @param chainId
+     * @param chainId 链Id/chain id
      * @param requestHash
      * @return
      */
@@ -80,7 +80,7 @@ public class CacheHandler {
     /**
      * 一个{@link BlockWorker}开始工作时,进行缓存初始化
      *
-     * @param chainId
+     * @param chainId 链Id/chain id
      * @param hash
      * @return
      */
@@ -92,7 +92,7 @@ public class CacheHandler {
     /**
      * 根据requestHash判断该区块是同步区块过程中收到的区块,还是孤儿链维护过程收到的区块,还是恶意区块,分别放入不同的缓存
      *
-     * @param chainId
+     * @param chainId 链Id/chain id
      * @param message
      */
     public static void receiveBlock(int chainId, BlockMessage message) {
@@ -109,7 +109,7 @@ public class CacheHandler {
     /**
      * 获取{@link BlockWorker}下载到的区块
      *
-     * @param chainId
+     * @param chainId 链Id/chain id
      * @param requestHash
      * @return
      */
@@ -120,7 +120,7 @@ public class CacheHandler {
     /**
      * 标记一个{@link BlockWorker}的下载任务结束
      *
-     * @param chainId
+     * @param chainId 链Id/chain id
      * @param message
      */
     public static void batchComplete(int chainId, CompleteMessage message) {
@@ -130,7 +130,7 @@ public class CacheHandler {
     /**
      * 移除缓存
      *
-     * @param chainId
+     * @param chainId 链Id/chain id
      * @param hash
      */
     public static void removeBlockByHashFuture(int chainId, NulsDigestData hash) {
@@ -140,7 +140,7 @@ public class CacheHandler {
     /**
      * 移除缓存
      *
-     * @param chainId
+     * @param chainId 链Id/chain id
      * @param hash
      */
     public static void removeRequest(int chainId, NulsDigestData hash) {

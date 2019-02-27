@@ -3,11 +3,11 @@ package io.nuls.test.rpc;
 import io.nuls.base.data.Address;
 import io.nuls.base.data.BlockHeader;
 import io.nuls.base.data.BlockRoundData;
-import io.nuls.rpc.client.CmdDispatcher;
 import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.info.NoUse;
 import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.model.message.Response;
+import io.nuls.rpc.netty.processor.ResponseMessageProcessor;
 import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.parse.SerializeUtils;
 import org.junit.BeforeClass;
@@ -40,7 +40,7 @@ public class ConsensusTest {
     public void getRoundInfo() throws Exception{
         Map<String,Object> params = new HashMap<>();
         params.put("chainId", chainId);
-        Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.CS.abbr, "cs_getRoundInfo", params);
+        Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.CS.abbr, "cs_getRoundInfo", params);
         System.out.println(cmdResp.getResponseData());
     }
 
@@ -51,7 +51,7 @@ public class ConsensusTest {
     public void updateAgentConsensusStatus()throws Exception{
         Map<String,Object> params = new HashMap<>();
         params.put("chainId", chainId);
-        Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.CS.abbr, "cs_updateAgentConsensusStatus", params);
+        Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.CS.abbr, "cs_updateAgentConsensusStatus", params);
         System.out.println(cmdResp.getResponseData());
     }
 
@@ -63,7 +63,7 @@ public class ConsensusTest {
         Map<String,Object> params = new HashMap<>();
         params.put("chainId", chainId);
         params.put("status", 1);
-        Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.CS.abbr, "cs_updateAgentStatus", params);
+        Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.CS.abbr, "cs_updateAgentStatus", params);
         System.out.println(cmdResp.getResponseData());
     }
 
@@ -74,7 +74,7 @@ public class ConsensusTest {
     public void getWholeInfo()throws Exception{
         Map<String,Object> params = new HashMap<>();
         params.put("chainId", chainId);
-        Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.CS.abbr, "cs_getWholeInfo", params);
+        Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.CS.abbr, "cs_getWholeInfo", params);
         System.out.println(cmdResp.getResponseData());
     }
 
@@ -87,7 +87,7 @@ public class ConsensusTest {
         Map<String,Object> params = new HashMap<>();
         params.put("chainId", chainId);
         params.put("address", agentAddress.getBase58());
-        Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.CS.abbr, "cs_getInfo", params);
+        Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.CS.abbr, "cs_getInfo", params);
         System.out.println(cmdResp.getResponseData());
     }
 
@@ -101,7 +101,7 @@ public class ConsensusTest {
         Address agentAddress = new Address(1,(byte)1, SerializeUtils.sha256hash160("a5WhgP1iu2Qwt5CiaPTV4Fe2Xqmfd".getBytes()));
         params.put("address",agentAddress.getBase58());
         params.put("type",1);
-        Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.CS.abbr, "cs_getPublishList", params);
+        Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.CS.abbr, "cs_getPublishList", params);
         System.out.println(cmdResp.getResponseData());
         //"fb8017b246114784749d46eebff4c34f446b500521f0cb19f66118O2ea8c942f7688180141c5a4feb65e24aedb5b529d";
     }
@@ -119,7 +119,7 @@ public class ConsensusTest {
             params.put("chainId", 12345);
             params.put("count", 4);
             params.put("password", null);
-            Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.AC.abbr, "ac_createAccount", params);
+            Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_createAccount", params);
             if (!cmdResp.isSuccess()) {
                 return;
             }
@@ -141,7 +141,7 @@ public class ConsensusTest {
             caParams.put("packingAddress",packingAddress);
             caParams.put("password","");
             caParams.put("rewardAddress",rewardAddress);
-            Response caResp = CmdDispatcher.requestAndResponse(ModuleE.CS.abbr, "cs_createAgent", caParams);
+            Response caResp = ResponseMessageProcessor.requestAndResponse(ModuleE.CS.abbr, "cs_createAgent", caParams);
             HashMap caResult = (HashMap)((HashMap) caResp.getResponseData()).get("cs_createAgent");
             String caTxHex = (String)caResult.get("txHex");
             System.out.println("createAgent:"+caResp.getResponseData());
@@ -153,7 +153,7 @@ public class ConsensusTest {
             blockHeader.setHeight(0);
             caTxCommit.put("blockHeader", HexUtil.encode(blockHeader.serialize()));
             caTxCommit.put("tx",caTxHex);
-            Response caCommitResp = CmdDispatcher.requestAndResponse(ModuleE.CS.abbr, "cs_createAgentCommit", caTxCommit);
+            Response caCommitResp = ResponseMessageProcessor.requestAndResponse(ModuleE.CS.abbr, "cs_createAgentCommit", caTxCommit);
             HashMap caCommitResult = (HashMap)((HashMap) caCommitResp.getResponseData()).get("cs_createAgentCommit");
             String agentHash = (String)caCommitResult.get("agentHash");
             System.out.println("createAgentCommit:"+caCommitResp.getResponseData());
@@ -166,7 +166,7 @@ public class ConsensusTest {
             dpParams.put("address",depositAddress);
             dpParams.put("agentHash",agentHash);
             dpParams.put("deposit","300000");
-            Response dpResp = CmdDispatcher.requestAndResponse(ModuleE.CS.abbr, "cs_depositToAgent", dpParams);
+            Response dpResp = ResponseMessageProcessor.requestAndResponse(ModuleE.CS.abbr, "cs_depositToAgent", dpParams);
             HashMap dpResult = (HashMap)((HashMap) dpResp.getResponseData()).get("cs_depositToAgent");
             String dpTxHex = (String)dpResult.get("txHex");
             System.out.println("createDeposit"+cmdResp.getResponseData());
@@ -178,7 +178,7 @@ public class ConsensusTest {
             blockHeader.setHeight(0);
             dpTxCommitParams.put("blockHeader", HexUtil.encode(blockHeader1.serialize()));
             dpTxCommitParams.put("tx",dpTxHex);
-            Response dpCommitResp = CmdDispatcher.requestAndResponse(ModuleE.CS.abbr, "cs_depositCommit", dpTxCommitParams);
+            Response dpCommitResp = ResponseMessageProcessor.requestAndResponse(ModuleE.CS.abbr, "cs_depositCommit", dpTxCommitParams);
             System.out.println("deposit transaction commit:"+dpCommitResp.getResponseData());
         } catch (Exception e) {
             e.printStackTrace();
@@ -187,7 +187,7 @@ public class ConsensusTest {
 
     public static void main(String[] args)throws Exception{
         BlockRoundData roundData = new BlockRoundData();
-        roundData.setConsensusMemberCount(3);
+        roundData.setConsensusMemberCount(1);
         roundData.setPackingIndexOfRound(1);
         roundData.setRoundIndex(1);
         roundData.setRoundStartTime(1L);

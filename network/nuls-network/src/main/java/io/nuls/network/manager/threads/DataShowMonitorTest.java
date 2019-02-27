@@ -24,7 +24,6 @@
  */
 package io.nuls.network.manager.threads;
 
-import io.nuls.network.manager.ConnectionManager;
 import io.nuls.network.manager.NodeGroupManager;
 import io.nuls.network.manager.handler.MessageHandlerFactory;
 import io.nuls.network.model.Node;
@@ -86,7 +85,7 @@ public class DataShowMonitorTest implements Runnable {
             Collection<Node> c5 = localNodesContainer.getFailNodes().values();
             Log.info("begin============================printlnPeer :SelfConnectNodes=============");
             for (Node n : c1) {
-                Log.info("*****connected:{},info:blockHash={},blockHeight={},version={}", n.getId(), n.getBlockHash(), n.getBlockHeight(), n.getVersion());
+                Log.info("*****connected:{},info:blockHash={},blockHeight={},version={},connStatus={}", n.getId(), n.getBlockHash(), n.getBlockHeight(), n.getVersion(),n.getConnectStatus());
             }
             for (Node n : c2) {
                 Log.info("*****canConnect:{},info:blockHash={},blockHeight={},version={}", n.getId(), n.getBlockHash(), n.getBlockHeight(), n.getVersion());

@@ -38,7 +38,7 @@ public interface BlockStorageService {
     /**
      * 存储一个{@link BlockHeaderPo}
      *
-     * @param chainId
+     * @param chainId 链Id/chain id
      * @param blockHeader
      * @return
      * @throws Exception
@@ -48,7 +48,7 @@ public interface BlockStorageService {
     /**
      * 根据链ID和区块高度查询一个{@link BlockHeaderPo}
      *
-     * @param chainId
+     * @param chainId 链Id/chain id
      * @param height
      * @return
      */
@@ -57,7 +57,7 @@ public interface BlockStorageService {
     /**
      * 根据链ID和区块hash查询一个{@link BlockHeaderPo}
      *
-     * @param chainId
+     * @param chainId 链Id/chain id
      * @param hash
      * @return
      */
@@ -66,7 +66,7 @@ public interface BlockStorageService {
     /**
      * 根据链ID和高度区间查询{@link BlockHeaderPo}列表
      *
-     * @param chainId
+     * @param chainId 链Id/chain id
      * @param startHeight
      * @param endHeight
      * @return
@@ -76,7 +76,7 @@ public interface BlockStorageService {
     /**
      * 根据链ID和高度区间移除{@link BlockHeaderPo}
      *
-     * @param chainId
+     * @param chainId 链Id/chain id
      * @param height
      * @return
      * @throws Exception
@@ -86,7 +86,7 @@ public interface BlockStorageService {
     /**
      * 根据链ID销毁数据库文件
      *
-     * @param chainId
+     * @param chainId 链Id/chain id
      * @return
      * @throws Exception
      */
@@ -95,7 +95,7 @@ public interface BlockStorageService {
     /**
      * 根据链ID查询该链的最新高度
      *
-     * @param chainId
+     * @param chainId 链Id/chain id
      * @return
      */
     long queryLatestHeight(int chainId);
@@ -103,7 +103,7 @@ public interface BlockStorageService {
     /**
      * 根据链ID设置该链的最新高度
      *
-     * @param chainId
+     * @param chainId 链Id/chain id
      * @param height
      * @return
      */

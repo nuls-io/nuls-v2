@@ -33,6 +33,7 @@ import io.netty.util.Attribute;
 import io.netty.util.AttributeKey;
 import io.nuls.network.manager.ConnectionManager;
 import io.nuls.network.manager.MessageManager;
+import io.nuls.network.manager.TimeManager;
 import io.nuls.network.manager.handler.base.BaseChannelHandler;
 import io.nuls.network.model.Node;
 import io.nuls.network.utils.IpUtil;
@@ -96,11 +97,14 @@ public class ServerChannelHandler extends BaseChannelHandler {
         SocketChannel channel = (SocketChannel) ctx.channel();
         ByteBuf buf = (ByteBuf) msg;
         String remoteIP = channel.remoteAddress().getHostString();
+        int port = channel.remoteAddress().getPort();
+        Log.info("{}-----------------server channelRead-----------------{}:{}", TimeManager.currentTimeMillis(), remoteIP, port);
         try {
             String nodeId = IpUtil.getNodeId(channel.remoteAddress());
             Attribute<Node> nodeAttribute = channel.attr(AttributeKey.valueOf("node-" + nodeId));
             Node node = nodeAttribute.get();
             if (node != null) {
+                Log.info("-----------------server channelRead  node={} -----------------", node.getId());
                 MessageManager.getInstance().receiveMessage(buf, node);
             } else {
                 Log.info("-----------------Server channelRead  node is null -----------------" + remoteIP + ":" + channel.remoteAddress().getPort());
