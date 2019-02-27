@@ -17,6 +17,7 @@ import io.nuls.account.service.AliasService;
 import io.nuls.account.service.MultiSignAccountService;
 import io.nuls.account.service.TransactionService;
 import io.nuls.account.storage.AliasStorageService;
+import io.nuls.account.util.Preconditions;
 import io.nuls.account.util.TxUtil;
 import io.nuls.account.util.annotation.ResisterTx;
 import io.nuls.account.util.annotation.TxMethodType;
@@ -407,18 +408,16 @@ public class TransactionCmd extends BaseCmd {
     public Response transferByAlias(Map params) {
         Log.debug("ac_transferByAlias start");
         Map<String, String> map = new HashMap<>(1);
-        Object chainIdObj = params == null ? null : params.get(RpcParameterNameConstant.CHAIN_ID);
-        Object addressObj = params == null ? null : params.get(RpcParameterNameConstant.ADDRESS);
-        Object passwordObj = params == null ? null : params.get(RpcParameterNameConstant.PASSWORD);
-        Object aliasObj = params == null ? null : params.get(RpcParameterNameConstant.ALIAS);
-        Object amountObj = params == null ? null : params.get(RpcParameterNameConstant.AMOUNT);
-        Object remarkObj = params == null ? null : params.get(RpcParameterNameConstant.REMARK);
         try {
+            Preconditions.checkNotNull(params,AccountErrorCode.NULL_PARAMETER);
+            Object chainIdObj = params.get(RpcParameterNameConstant.CHAIN_ID);
+            Object addressObj = params.get(RpcParameterNameConstant.ADDRESS);
+            Object passwordObj = params.get(RpcParameterNameConstant.PASSWORD);
+            Object aliasObj = params.get(RpcParameterNameConstant.ALIAS);
+            Object amountObj = params.get(RpcParameterNameConstant.AMOUNT);
+            Object remarkObj = params.get(RpcParameterNameConstant.REMARK);
             // check parameters
-            if (params == null || chainIdObj == null || addressObj == null || passwordObj == null || aliasObj == null ||
-                    amountObj == null || remarkObj == null) {
-                throw new NulsRuntimeException(AccountErrorCode.NULL_PARAMETER);
-            }
+            Preconditions.checkNotNull(new Object[]{chainIdObj,addressObj,passwordObj,aliasObj,amountObj},AccountErrorCode.NULL_PARAMETER);
             int chainId = (int) chainIdObj;
             String address = (String) addressObj;
             String password = (String) passwordObj;
@@ -434,26 +433,12 @@ public class TransactionCmd extends BaseCmd {
             }
             //根据别名查询出地址
             AliasPo aliasPo = aliasStorageService.getAlias(chainId, alias);
-            if (aliasPo == null) {
-                throw new NulsRuntimeException(AccountErrorCode.ALIAS_NOT_EXIST);
-            }
+            Preconditions.checkNotNull(aliasPo,AccountErrorCode.ALIAS_NOT_EXIST);
             Chain chain = chainManager.getChainMap().get(chainId);
-            if (chain == null) {
-                throw new NulsRuntimeException(AccountErrorCode.CHAIN_NOT_EXIST);
-            }
+            Preconditions.checkNotNull(chain,AccountErrorCode.CHAIN_NOT_EXIST);
             int assetId = chain.getConfig().getAssetsId();
-            CoinDto fromCoinDto = new CoinDto();
-            CoinDto toCoinDto = new CoinDto();
-            fromCoinDto.setAddress(address);
-            fromCoinDto.setAmount(amount);
-            fromCoinDto.setAssetsChainId(chainId);
-            fromCoinDto.setAssetsId(assetId);
-            fromCoinDto.setPassword(password);
-
-            toCoinDto.setAddress(AddressTool.getStringAddressByBytes(aliasPo.getAddress()));
-            toCoinDto.setAmount(amount);
-            toCoinDto.setAssetsChainId(chainId);
-            toCoinDto.setAssetsId(assetId);
+            CoinDto fromCoinDto = new CoinDto(address, chainId, assetId, amount, password);
+            CoinDto toCoinDto = new CoinDto(AddressTool.getStringAddressByBytes(aliasPo.getAddress()),chainId,assetId,amount,null);
             Transaction tx = transactionService.transferByAlias(chainId, fromCoinDto, toCoinDto, remark);
             map.put("txHash", tx.getHash().getDigestHex());
         } catch (NulsException e) {
@@ -480,27 +465,26 @@ public class TransactionCmd extends BaseCmd {
         Log.debug("ac_createMultiSignTransfer start");
         Map<String, String> map = new HashMap<>(1);
         MultiSigAccount multiSigAccount = null;
-
-        Object chainIdObj = params == null ? null : params.get(RpcParameterNameConstant.CHAIN_ID);
-        Object assetsIdObj = params == null ? null : params.get(RpcParameterNameConstant.ASSETS_Id);
-        Object addressObj = params == null ? null : params.get(RpcParameterNameConstant.ADDRESS);
-        Object passwordObj = params == null ? null : params.get(RpcParameterNameConstant.PASSWORD);
-        Object signAddressObj = params == null ? null : params.get(RpcParameterNameConstant.SIGN_ADDREESS);
-        Object typeObj = params == null ? null : params.get(RpcParameterNameConstant.TYPE);
-        Object aliasObj = params == null ? null : params.get(RpcParameterNameConstant.ALIAS);
-        Object toAddressObj = params == null ? null : params.get(RpcParameterNameConstant.TO_ADDRESS);
-        Object amountObj = params == null ? null : params.get(RpcParameterNameConstant.AMOUNT);
-        Object remarkObj = params == null ? null : params.get(RpcParameterNameConstant.REMARK);
         try {
+            Preconditions.checkNotNull(params,AccountErrorCode.NULL_PARAMETER);
+            Object chainIdObj = params.get(RpcParameterNameConstant.CHAIN_ID);
+            Object assetsIdObj = params.get(RpcParameterNameConstant.ASSETS_Id);
+            Object addressObj = params.get(RpcParameterNameConstant.ADDRESS);
+            Object passwordObj = params.get(RpcParameterNameConstant.PASSWORD);
+            Object signAddressObj = params.get(RpcParameterNameConstant.SIGN_ADDREESS);
+            Object typeObj = params.get(RpcParameterNameConstant.TYPE);
+            Object aliasObj = params.get(RpcParameterNameConstant.ALIAS);
+            Object toAddressObj = params.get(RpcParameterNameConstant.TO_ADDRESS);
+            Object amountObj = params.get(RpcParameterNameConstant.AMOUNT);
+            Object remarkObj = params.get(RpcParameterNameConstant.REMARK);
             // check parameters
-            if (params == null || chainIdObj == null || addressObj == null || signAddressObj == null ||
-                    amountObj == null) {
-                throw new NulsRuntimeException(AccountErrorCode.NULL_PARAMETER);
-            }
+            Preconditions.checkNotNull(new Object[]{chainIdObj,addressObj,signAddressObj,amountObj},AccountErrorCode.NULL_PARAMETER);
             int chainId = (int) chainIdObj;
             int assetsId;
-            if (assetsIdObj == null) {
-                assetsId = -1;
+            Chain chain = chainManager.getChainMap().get(chainId);
+            Preconditions.checkNotNull(chain,AccountErrorCode.CHAIN_NOT_EXIST);
+            if (assetsIdObj == null) { // if the assetsId is null,the default assetsId is the chain's main assets
+                assetsId = chain.getConfig().getAssetsId();
             } else {
                 assetsId = (int) assetsIdObj;
             }
@@ -511,25 +495,17 @@ public class TransactionCmd extends BaseCmd {
             String alias = (String) aliasObj;
             String toAddress = (String) toAddressObj;
             if (type == 1) {
-                if (toAddress == null) {
-                    throw new NulsRuntimeException(AccountErrorCode.PARAMETER_ERROR);
-                }
+                Preconditions.checkNotNull(toAddress,AccountErrorCode.PARAMETER_ERROR);
             } else if (type == 2) {
-                if (alias == null) {
-                    throw new NulsRuntimeException(AccountErrorCode.PARAMETER_ERROR);
-                }
+                Preconditions.checkNotNull(alias,AccountErrorCode.PARAMETER_ERROR);
                 AliasPo aliasPo = aliasStorageService.getAlias(chainId, alias);
-                if (aliasPo == null) {
-                    throw new NulsRuntimeException(AccountErrorCode.ACCOUNT_NOT_EXIST);
-                }
+                Preconditions.checkNotNull(aliasPo,AccountErrorCode.ACCOUNT_NOT_EXIST);
                 toAddress = AddressTool.getStringAddressByBytes(aliasPo.getAddress());
             } else {
                 throw new NulsRuntimeException(AccountErrorCode.PARAMETER_ERROR);
             }
             multiSigAccount = multiSignAccountService.getMultiSigAccountByAddress(chainId, address);
-            if (multiSigAccount == null) {
-                throw new NulsRuntimeException(AccountErrorCode.ACCOUNT_NOT_EXIST);
-            }
+            Preconditions.checkNotNull(multiSigAccount,AccountErrorCode.ACCOUNT_NOT_EXIST);
             BigInteger amount = new BigInteger((String) amountObj);
             String remark = (String) remarkObj;
             if (BigIntegerUtils.isLessThan(amount, BigInteger.ZERO)) {
@@ -541,18 +517,13 @@ public class TransactionCmd extends BaseCmd {
             }
             //查询出账户
             Account account = accountService.getAccount(chainId, signAddress);
-            if (account == null) {
-                throw new NulsRuntimeException(AccountErrorCode.ACCOUNT_NOT_EXIST);
-            }
+            Preconditions.checkNotNull(account,AccountErrorCode.ACCOUNT_NOT_EXIST);
 
             //验证签名账户是否属于多签账户的签名账户,如果不是多签账户下的地址则提示错误
             if (!AddressTool.validSignAddress(multiSigAccount.getPubKeyList(), account.getPubKey())) {
                 throw new NulsRuntimeException(AccountErrorCode.SIGN_ADDRESS_NOT_MATCH);
             }
-            Chain chain = chainManager.getChainMap().get(chainId);
-            if (chain == null) {
-                throw new NulsRuntimeException(AccountErrorCode.CHAIN_NOT_EXIST);
-            }
+
             MultiSignTransactionResultDto multiSignTransactionResultDto = transactionService.createMultiSignTransfer(chainId, assetsId, account, password, multiSigAccount, toAddress, amount, remark);
             if (multiSignTransactionResultDto.isBroadcasted()) {
                 map.put("txHash", multiSignTransactionResultDto.getTransaction().getHash().getDigestHex());
