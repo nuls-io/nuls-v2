@@ -92,7 +92,9 @@ public class TxCirculateCmd extends BaseChainCmd {
             Map<String, BigInteger> toAssetMap = toCoinDataAssets.getAssetsMap();
             ChainEventResult chainEventResult = validateService.assetCirculateValidator(fromChainId, toChainId, fromAssetMap, toAssetMap);
             if(chainEventResult.isSuccess()){
-                return success();
+                Map<String, Boolean> resultMap = new HashMap<>();
+                resultMap.put("value", true);
+                return success(resultMap);
             }else{
                 return failed(chainEventResult.getErrorCode());
             }

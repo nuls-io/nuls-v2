@@ -27,6 +27,7 @@ package io.nuls.chain.service.impl;
 import io.nuls.base.data.Transaction;
 import io.nuls.chain.info.ChainTxConstants;
 import io.nuls.chain.info.CmConstants;
+import io.nuls.chain.info.CmRuntimeInfo;
 import io.nuls.chain.info.RpcConstants;
 import io.nuls.chain.model.dto.AccountBalance;
 import io.nuls.chain.model.po.BlockChain;
@@ -77,7 +78,7 @@ public class RpcServiceImpl  implements RpcService {
             //向交易管理模块注册交易
             Map<String, Object> params = new HashMap<>();
             params.put(Constants.VERSION_KEY_STR, RpcConstants.TX_REGISTER_VERSION);
-            params.put(RpcConstants.TX_CHAIN_ID,  CmConstants.CHAIN_ASSET_MAP.get(CmConstants.NULS_CHAIN_ID));
+            params.put(RpcConstants.TX_CHAIN_ID,  CmRuntimeInfo.getMainIntChainId());
             params.put(RpcConstants.TX_MODULE_CODE, ModuleE.CM.abbr);
             params.put(RpcConstants.TX_MODULE_VALIDATE_CMD, RpcConstants.TX_MODULE_VALIDATE_CMD_VALUE);
             params.put(RpcConstants.TX_COMMIT_CMD,RpcConstants.TX_COMMIT_CMD_VALUE);
@@ -116,6 +117,7 @@ public class RpcServiceImpl  implements RpcService {
             destroyAssetMap.put(RpcConstants.TX_VERIFY_SIGNATURE_CMD,"true");
             txRegisterDetailList.add(destroyAssetMap);
             params.put("list", txRegisterDetailList);
+
             Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.TX.abbr, RpcConstants.TX_REGISTER_CMD, params);
             Log.debug("response={}",cmdResp);
             return cmdResp.isSuccess();
