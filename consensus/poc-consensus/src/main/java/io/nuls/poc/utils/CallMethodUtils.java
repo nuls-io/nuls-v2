@@ -358,6 +358,28 @@ public class CallMethodUtils {
     }
 
     /**
+     * 共识状态修改通知交易模块
+     * Consensus status modification notification transaction module
+     *
+     * @param chain    chain info
+     * @param packing  packing state
+     */
+    @SuppressWarnings("unchecked")
+    public static void sendState(Chain chain, boolean packing) {
+        try {
+            Map<String, Object> params = new HashMap(4);
+            params.put("chainId", chain.getConfig().getChainId());
+            params.put("packing", packing);
+            Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.TX.abbr, "tx_cs_state", params);
+            if (!cmdResp.isSuccess()) {
+                chain.getLoggerMap().get(ConsensusConstant.CONSENSUS_LOGGER_NAME).error("Packing state failed to send!");
+            }
+        } catch (Exception e) {
+            chain.getLoggerMap().get(ConsensusConstant.CONSENSUS_LOGGER_NAME).error(e);
+        }
+    }
+
+    /**
      * 根据交易HASH获取NONCE（交易HASH后8位）
      * Obtain NONCE according to HASH (the last 8 digits of HASH)
      */

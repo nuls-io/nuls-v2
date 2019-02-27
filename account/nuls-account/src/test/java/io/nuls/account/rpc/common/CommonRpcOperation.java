@@ -1,6 +1,8 @@
 package io.nuls.account.rpc.common;
 
 import io.nuls.account.constant.AccountConstant;
+import io.nuls.account.model.dto.CoinDto;
+import io.nuls.account.model.dto.TransferDto;
 import io.nuls.base.data.Address;
 import io.nuls.base.data.MultiSigAccount;
 import io.nuls.rpc.info.Constants;
@@ -10,6 +12,8 @@ import io.nuls.rpc.netty.processor.ResponseMessageProcessor;
 import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.parse.JSONUtils;
 
+import java.io.*;
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -167,5 +171,112 @@ public class CommonRpcOperation {
         }
         multiSigAccount.setPubKeyList(pubKeysBytesList);
         return multiSigAccount;
+    }
+/**
+ *
+ *
+ * */
+    public static String importAccountByKeystoreFile(String filePath) {
+        String address = null;
+        try {
+            File file = new File(filePath);
+            byte[] bytes = copyToByteArray(file);
+            String keyStoreStr = new String(bytes,"UTF-8");
+
+            //AccountKeyStoreDto accountKeyStoreDto = JSONUtils.json2pojo(new String(HexUtil.decode(keyStoreHexStr)), AccountKeyStoreDto.class);
+
+            Map<String, Object> params = new HashMap<>();
+            params.put(Constants.VERSION_KEY_STR, version);
+            params.put("chainId", chainId);
+            params.put("keyStore", HexUtil.encode(bytes));
+            params.put("password", null);
+            params.put("overwrite", true);
+            Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_importAccountByKeystore", params);
+            HashMap result = (HashMap) ((HashMap) cmdResp.getResponseData()).get("ac_importAccountByKeystore");
+            address = (String) result.get("address");
+            //assertEquals(accountList.get(0), address);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return address;
+    }
+
+    public static byte[] copyToByteArray(File in) throws IOException {
+        if (in == null) {
+            return new byte[0];
+        }
+        InputStream input = null;
+        try {
+            input = new FileInputStream(in);
+            ByteArrayOutputStream out = new ByteArrayOutputStream(4096);
+            int byteCount = 0;
+            byte[] buffer = new byte[4096];
+            int bytesRead = -1;
+            while ((bytesRead = input.read(buffer)) != -1) {
+                out.write(buffer, 0, bytesRead);
+                byteCount += bytesRead;
+            }
+            out.flush();
+            return out.toByteArray();
+        } finally {
+            try {
+                input.close();
+            } catch (Exception e) {
+            }
+        }
+    }
+
+    /**
+     *
+     *
+     * */
+    public static String importAccountByPriKeyWithOverwrite(String address,String priKey,String password) throws Exception {
+
+        Map<String, Object> params = new HashMap<>();
+        params.put(Constants.VERSION_KEY_STR, version);
+        params.put("chainId", chainId);
+        params.put("priKey", priKey);
+        params.put("password", password);
+        params.put("overwrite", true);
+        Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_importAccountByPriKey", params);
+        assertEquals(AccountConstant.SUCCESS_CODE, cmdResp.getResponseStatus());
+        HashMap result = (HashMap) ((HashMap) cmdResp.getResponseData()).get("ac_importAccountByPriKey");
+        String returnAddress = (String) result.get("address");
+        assertNotNull(returnAddress);
+        return returnAddress;
+
+    }
+
+    /**
+     * 创建普通转账交易
+     *
+     * @return
+     */
+    public static TransferDto createTransferTx(String fromAddress, String toAddress, BigInteger amount) {
+        TransferDto transferDto = new TransferDto();
+        transferDto.setChainId(chainId);
+        transferDto.setRemark("transfer test");
+        List<CoinDto> inputs = new ArrayList<>();
+        List<CoinDto> outputs = new ArrayList<>();
+        CoinDto inputCoin1 = new CoinDto();
+        inputCoin1.setAddress(fromAddress);
+        inputCoin1.setPassword(password);
+        inputCoin1.setAssetsChainId(chainId);
+        inputCoin1.setAssetsId(1);
+        inputCoin1.setAmount(amount);
+        inputs.add(inputCoin1);
+
+        CoinDto outputCoin1 = new CoinDto();
+        outputCoin1.setAddress(toAddress);
+        outputCoin1.setPassword(password);
+        outputCoin1.setAssetsChainId(chainId);
+        outputCoin1.setAssetsId(1);
+        outputCoin1.setAmount(amount);
+        outputs.add(outputCoin1);
+
+        transferDto.setInputs(inputs);
+        transferDto.setOutputs(outputs);
+        return transferDto;
     }
 }
