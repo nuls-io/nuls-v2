@@ -47,6 +47,7 @@ import java.util.List;
 public class BlockHeight extends BaseNulsData {
     private long blockHeight = 0;
     private boolean isCommit = false;
+    private long  latestRollHeight = 0;
     private List<Long> bakHeighList = new ArrayList<>();
 
     public void addBakHeight(long height){
@@ -56,6 +57,7 @@ public class BlockHeight extends BaseNulsData {
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
         stream.writeUint32(blockHeight);
         stream.writeBoolean(isCommit);
+        stream.writeUint32(latestRollHeight);
         stream.writeUint16(bakHeighList.size());
         for (Long height : bakHeighList) {
             stream.writeUint32(height);
@@ -66,6 +68,7 @@ public class BlockHeight extends BaseNulsData {
     public void parse(NulsByteBuffer byteBuffer) throws NulsException {
         this.blockHeight = byteBuffer.readUint32();
         this.isCommit = byteBuffer.readBoolean();
+        this.latestRollHeight = byteBuffer.readUint32();
         int totalSize = byteBuffer.readUint16();
         for (int i = 0; i < totalSize; i++) {
             bakHeighList.add(byteBuffer.readUint32());
@@ -77,6 +80,7 @@ public class BlockHeight extends BaseNulsData {
         int size = 0;
         size += SerializeUtils.sizeOfUint32();
         size += SerializeUtils.sizeOfBoolean();
+        size += SerializeUtils.sizeOfUint32();
         size += SerializeUtils.sizeOfUint16();
         size += (size * SerializeUtils.sizeOfUint32());
         return size;
