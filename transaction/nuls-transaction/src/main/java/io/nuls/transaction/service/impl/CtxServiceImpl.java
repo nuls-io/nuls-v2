@@ -62,6 +62,8 @@ public class CtxServiceImpl implements CtxService {
     @Autowired
     private TransactionH2Service transactionH2Service;
 
+    private boolean canPackage = false;
+
     @Override
     public void newCrossTx(Chain chain, String nodeId, Transaction tx) throws NulsException {
         if (tx == null) {

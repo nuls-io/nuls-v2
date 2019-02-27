@@ -14,7 +14,6 @@ import io.nuls.tools.data.ObjectUtils;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.log.Log;
 import io.nuls.tools.parse.JSONUtils;
-import io.nuls.transaction.cache.PackablePool;
 import io.nuls.transaction.constant.TxCmd;
 import io.nuls.transaction.constant.TxConfig;
 import io.nuls.transaction.constant.TxConstant;
@@ -46,8 +45,6 @@ import java.util.Map;
 @Component
 public class TransactionCmd extends BaseCmd {
 
-    @Autowired
-    private PackablePool packablePool;
     @Autowired
     private TxService txService;
     @Autowired

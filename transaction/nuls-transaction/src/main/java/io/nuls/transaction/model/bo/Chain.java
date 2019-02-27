@@ -14,6 +14,7 @@ import java.util.Map;
 import java.util.concurrent.BlockingDeque;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * 链信息类
@@ -40,6 +41,11 @@ public class Chain {
      * 是否正在共识出块中
      */
     private Boolean packaging;
+
+    /**
+     * 是否需要重新打包,开始打包区块交易时设为false. 打包同时,收到新区块时设为true,则需要重新打包
+     */
+    private AtomicBoolean rePackage;
 
     /**
      * 日志
@@ -90,6 +96,7 @@ public class Chain {
 //        this.runningStatus = RunningStatus.INITING;
 //        this.crossTxVerifyingMap = new HashMap<>();
         this.packaging = false;
+        this.rePackage.set(true);
         this.txRegisterMap = new HashMap<>();
         this.txQueue = new LinkedBlockingDeque<>();
         this.orphanContainer = new LimitHashMap(TxConstant.ORPHAN_CONTAINER_MAX_SIZE);
@@ -185,5 +192,13 @@ public class Chain {
 
     public void setPackaging(Boolean packaging) {
         this.packaging = packaging;
+    }
+
+    public AtomicBoolean getRePackage() {
+        return rePackage;
+    }
+
+    public void setRePackage(AtomicBoolean rePackage) {
+        this.rePackage = rePackage;
     }
 }
