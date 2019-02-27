@@ -15,6 +15,8 @@ import io.nuls.transaction.constant.TxConstant;
 import io.nuls.transaction.db.h2.dao.TransactionH2Service;
 import io.nuls.transaction.db.rocksdb.storage.LanguageStorageService;
 import io.nuls.transaction.manager.ChainManager;
+import io.nuls.transaction.model.bo.Chain;
+import io.nuls.transaction.rpc.call.BlockCall;
 import io.nuls.transaction.rpc.call.NetworkCall;
 import org.apache.ibatis.io.Resources;
 import org.apache.ibatis.session.SqlSessionFactory;
@@ -22,6 +24,7 @@ import org.apache.ibatis.session.SqlSessionFactoryBuilder;
 
 import java.lang.reflect.Field;
 import java.nio.charset.Charset;
+import java.util.Map;
 import java.util.Properties;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
@@ -45,18 +48,14 @@ public class TransactionBootStrap {
             //启动WebSocket服务,向外提供RPC接口
             initServer();
             initH2Table();
+            //启动链
+            SpringLiteContext.getBean(ChainManager.class).runChain();
             while (!ConnectManager.isReady()) {
                 Log.info("wait depend modules ready");
                 Thread.sleep(2000L);
             }
-            //启动链
-            SpringLiteContext.getBean(ChainManager.class).runChain();
-            //注册网络消息协议
-            while (!NetworkCall.registerProtocol())
-            {
-                Log.info("wait nw_protocolRegister ready");
-                Thread.sleep(5000L);
-            }
+            txStart();
+
             Log.debug("START-SUCCESS");
         }catch (Exception e){
             Log.error("Transaction startup error!");
@@ -64,6 +63,25 @@ public class TransactionBootStrap {
         }
     }
 
+    public static void txStart(){
+        try {
+            //注册网络消息协议 依赖block的ready状态
+            while (!NetworkCall.registerProtocol())
+            {
+                Log.info("wait nw_protocolRegister ready");
+                Thread.sleep(5000L);
+            }
+
+            ChainManager chainManager =  SpringLiteContext.getBean(ChainManager.class);
+            for (Map.Entry<Integer, Chain> entry : chainManager.getChainMap().entrySet()) {
+                Chain chain = entry.getValue();
+                //订阅Block模块接口
+                BlockCall.subscriptionNewBlockHeight(chain);
+            }
+        }catch (Exception e){
+            Log.error(e);
+        }
+    }
     /**
      * 初始化系统编码
      * */
@@ -101,7 +119,7 @@ public class TransactionBootStrap {
     public static void initLanguage(){
         try {
             LanguageStorageService languageService = SpringLiteContext.getBean(LanguageStorageService.class);
-            String languageDB = (String) languageService.getLanguage();
+            String languageDB = languageService.getLanguage();
             I18nUtils.loadLanguage("languages","");
             String language = null == languageDB ? I18nUtils.getLanguage() : languageDB;
             I18nUtils.setLanguage(language);
