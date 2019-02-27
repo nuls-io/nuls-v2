@@ -7,7 +7,7 @@ import io.nuls.tools.log.logback.NulsLogger;
 public class LogUtilTest {
     public static void main(String[] args){
         //logger.debug("test logger");
-        NulsLogger log = LoggerBuilder.getLogger("blockLog","test", Level.ALL,true);
+        NulsLogger log = LoggerBuilder.getLogger("blockLog","test", Level.ALL, Level.ALL);
 
         log.debug("test block log debug");
 

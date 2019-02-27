@@ -275,7 +275,7 @@ copyModuleNcfToModules(){
 
 	eval "${sedCommand}  ${BUILD_PATH}/start-temp.bat > ${moduleBuildPath}/start.bat"
 	cp "${moduleBuildPath}/start.bat" "${MODULES_PATH}/${moduleName}/${version}/start.bat"
-    #cp "${moduleBuildPath}/start.bat" "/Volumes/share/start.bat"
+    cp "${moduleBuildPath}/start.bat" "/Volumes/share/start.bat"
 	echo "拷贝 ${moduleBuildPath}/start.bat 到 ${MODULES_PATH}/${moduleName}/${version}/start.bat"
 
 	eval "${sedCommand}  ${BUILD_PATH}/stop-temp.sh > ${moduleBuildPath}/stop.sh"

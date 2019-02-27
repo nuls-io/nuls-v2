@@ -17,7 +17,7 @@ public class ConfigStorageServiceTest {
     protected int assetsId = 1;
 
     @BeforeClass
-    public static void beforeTest() {
+    public static void beforeTest() throws Exception{
         //初始化数据库配置文件
         TransactionBootStrap.initDB();
         //初始化上下文

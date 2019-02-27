@@ -3,6 +3,7 @@ if "%OS%" == "Windows_NT" setlocal
 set APP_NAME="%APP_NAME%"
 set MODULE_PATH=%~dp0
 ECHO %MODULE_PATH%
+cd /d %MODULE_PATH%
 SET START_DATE=%date% %time:~0,2%-%time:~3,2%
 SET LOG_PATH=%MODULE_PATH%\log
 if exist "%LOG_PATH%" goto logDirOk
@@ -65,10 +66,10 @@ SET JAVA_OOM_DUMP=-XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=${LOGS_DIR}/o
 SET JAVA_OPT=%JAVA_OPT% %JAVA_GC_LOG% %JAVA_OOM_DUMP%  -Dsys.name=%APP_NAME% 
 REM echo %JRE_HOME%\bin\java %JAVA_OPTS% %CLASSPATH% %MAIN_CLASS% %NulstarUrl% > log.log
 ECHO "%APP_NAME% IS STARTING"
-ECHO "%APP_NAME% START CMD: %JRE_HOME%\bin\java %JAVA_OPTS% %CLASSPATH% %MAIN_CLASS% %NulstarUrl%"
+ECHO "%APP_NAME% START CMD: %JRE_HOME%\bin\java %JAVA_OPT% %CLASSPATH% %MAIN_CLASS% %NulstarUrl% > %LOG_PATH%\log.log"
 ECHO "%APP_NAME% log file : %LOG_PATH%\log.log"
 
-%JRE_HOME%\bin\java %JAVA_OPTS% %CLASSPATH% %MAIN_CLASS% %NulstarUrl% > %LOG_PATH%\log.log
+%JRE_HOME%\bin\java %JAVA_OPT% %CLASSPATH% %MAIN_CLASS% %NulstarUrl% > %LOG_PATH%\log.log
 
 
 
