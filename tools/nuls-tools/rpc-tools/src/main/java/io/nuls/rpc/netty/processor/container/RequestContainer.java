@@ -22,29 +22,33 @@
  * SOFTWARE.
  *
  */
-package io.nuls.rpc.model.message;
+package io.nuls.rpc.netty.processor.container;
 
-import lombok.Data;
-import lombok.ToString;
+import java.util.Map;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * 握手确认
- * Handshake confirmation
- *
- * @author tangyi
- * @date 2018/11/15
- */
-@Data
-@ToString
-public class NegotiateConnectionResponse {
-    private String requestId;
-    /**
-     * An unsigned small integer value, 0 if negotiation was a failure and 1 if it was successful
-     */
-    private String negotiationStatus;
+ * 请求的数据存放容器
+ * Requested data storage container
+ * @author ln
+ * 2019/2/27
+ * */
+public final class RequestContainer {
 
-    /**
-     * A string value, useful to describe what exactly went wrong when the connection was rejected.
-     */
-    private String negotiationComment;
+    private static Map<String, ResponseContainer> REQUEST_MESSAGE_MAP = new ConcurrentHashMap<>();
+
+    public static ResponseContainer putRequest(String messageId) {
+        ResponseContainer responseContainer = new ResponseContainer(messageId, new CompletableFuture<>());
+        REQUEST_MESSAGE_MAP.put(messageId, responseContainer);
+        return responseContainer;
+    }
+
+    public static ResponseContainer getResponseContainer(String messageId) {
+        return REQUEST_MESSAGE_MAP.get(messageId);
+    }
+
+    public static boolean removeResponseContainer(String messageId) {
+        return REQUEST_MESSAGE_MAP.remove(messageId) != null;
+    }
 }

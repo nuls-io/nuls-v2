@@ -5,8 +5,13 @@ import io.netty.channel.socket.SocketChannel;
 import io.netty.handler.codec.http.FullHttpResponse;
 import io.netty.handler.codec.http.websocketx.*;
 import io.netty.util.CharsetUtil;
+import io.nuls.rpc.netty.channel.ConnectData;
 import io.nuls.rpc.netty.channel.manager.ConnectManager;
+import io.nuls.rpc.netty.handler.message.TextMessageHandler;
 import io.nuls.tools.log.Log;
+
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 /**
  * 客户端事件触发处理类
@@ -15,8 +20,12 @@ import io.nuls.tools.log.Log;
  * 2019/2/21
  * */
 public class ClientHandler extends SimpleChannelInboundHandler<Object> {
+
     private WebSocketClientHandshaker handShaker;
     private ChannelPromise handshakeFuture;
+
+    private ThreadLocal<ExecutorService> threadExecutorService = ThreadLocal.withInitial(() -> Executors.newFixedThreadPool(Thread.activeCount()));
+
     @Override
     public void handlerAdded(ChannelHandlerContext ctx) {
         this.handshakeFuture = ctx.newPromise();
@@ -63,16 +72,26 @@ public class ClientHandler extends SimpleChannelInboundHandler<Object> {
             throw new IllegalStateException("Unexpected FullHttpResponse (getStatus=" + response.status() + ", content=" + response.content().toString(CharsetUtil.UTF_8) + ')');
         } else {
             WebSocketFrame frame = (WebSocketFrame) msg;
-            if (frame instanceof TextWebSocketFrame) {
-                MessageHandler.handWebSocketFrame(ctx,frame);
-            } else if (frame instanceof CloseWebSocketFrame) {
+
+            if (frame instanceof CloseWebSocketFrame) {
                 ch.close();
+            } else if(msg instanceof TextWebSocketFrame){
+                TextWebSocketFrame txMsg = (TextWebSocketFrame) msg;
+                TextMessageHandler messageHandler = new TextMessageHandler((SocketChannel) ctx.channel(), txMsg.text());
+                threadExecutorService.get().execute(messageHandler);
+            } else {
+                Log.warn("Unsupported message format");
             }
         }
     }
 
     @Override
     public void channelUnregistered(ChannelHandlerContext ctx) throws Exception {
+
+        SocketChannel socketChannel = (SocketChannel) ctx.channel();
+        ConnectData connectData = ConnectManager.getConnectDataByChannel(socketChannel);
+        connectData.setConnected(false);
+
         Log.info("链接断开:"+ConnectManager.getRemoteUri((SocketChannel) ctx.channel()));
     }
 

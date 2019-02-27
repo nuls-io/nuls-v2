@@ -6,7 +6,7 @@ package io.nuls.rpc.netty.test;
 public class MockModuleTest {
     public static void main(String[] args){
         try {
-            KernelModule.mockModule();
+            KernelModule.mockKernel();
         }catch (Exception e){
             e.printStackTrace();
         }

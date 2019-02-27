@@ -9,6 +9,7 @@ import io.nuls.rpc.model.CmdParameter;
 import io.nuls.rpc.model.message.*;
 import io.nuls.rpc.netty.channel.ConnectData;
 import io.nuls.rpc.netty.channel.manager.ConnectManager;
+import io.nuls.tools.data.DateUtils;
 import io.nuls.tools.data.StringUtils;
 import io.nuls.tools.log.Log;
 import io.nuls.tools.parse.JSONUtils;
@@ -17,6 +18,7 @@ import org.java_websocket.exceptions.WebsocketNotConnectedException;
 
 import java.lang.reflect.Method;
 import java.math.BigDecimal;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -41,8 +43,9 @@ public class RequestMessageProcessor {
      * @param channel 用于发送消息 / Used to send message
      * @throws JsonProcessingException JSON解析错误 / JSON parsing error
      */
-    public static void negotiateConnectionResponse(Channel channel) throws JsonProcessingException {
+    public static void negotiateConnectionResponse(Channel channel, String messageId) throws JsonProcessingException {
         NegotiateConnectionResponse negotiateConnectionResponse = new NegotiateConnectionResponse();
+        negotiateConnectionResponse.setRequestId(messageId);
         negotiateConnectionResponse.setNegotiationStatus("1");
         negotiateConnectionResponse.setNegotiationComment("Connection true!");
 
@@ -281,8 +284,8 @@ public class RequestMessageProcessor {
             第一次执行，设置当前时间为执行时间，返回EXECUTE_AND_KEEP（执行，然后保留）
             First execution, set the current time as execution time, return EXECUTE_AND_KEEP (execution, then keep)
              */
-            channelData.getCmdInvokeTime().put(message, TimeService.currentTimeMillis());
-            return Constants.EXECUTE_AND_KEEP;
+            channelData.getCmdInvokeTime().put(message, 0L);
+//            return Constants.EXECUTE_AND_KEEP;
         }
 
         if (TimeService.currentTimeMillis() - channelData.getCmdInvokeTime().get(message) < subscriptionPeriod * Constants.MILLIS_PER_SECOND) {

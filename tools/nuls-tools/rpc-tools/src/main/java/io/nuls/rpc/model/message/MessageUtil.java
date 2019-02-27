@@ -51,8 +51,8 @@ public class MessageUtil {
         Message message = new Message();
         message.setMessageId(Constants.nextSequence());
         message.setMessageType(messageType.name());
-        message.setTimestamp(TimeService.currentTimeMillis() + "");
-        message.setTimezone(DateUtils.getTimeZone() + "");
+        message.setTimestamp(String.valueOf(TimeService.currentTimeMillis()));
+        message.setTimezone(DateUtils.TIME_ZONE_STRING);
         return message;
     }
 

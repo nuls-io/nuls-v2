@@ -22,29 +22,45 @@
  * SOFTWARE.
  *
  */
-package io.nuls.rpc.model.message;
+package io.nuls.rpc.netty.processor.container;
 
-import lombok.Data;
-import lombok.ToString;
+import io.nuls.rpc.model.message.Response;
+
+import java.util.concurrent.CompletableFuture;
 
 /**
- * 握手确认
- * Handshake confirmation
- *
- * @author tangyi
- * @date 2018/11/15
- */
-@Data
-@ToString
-public class NegotiateConnectionResponse {
-    private String requestId;
-    /**
-     * An unsigned small integer value, 0 if negotiation was a failure and 1 if it was successful
-     */
-    private String negotiationStatus;
+ * 结果数据存放容器
+ * Response data storage container
+ * @author ln
+ * 2019/2/27
+ * */
+public class ResponseContainer {
 
-    /**
-     * A string value, useful to describe what exactly went wrong when the connection was rejected.
-     */
-    private String negotiationComment;
+    private String messageId;
+    private CompletableFuture<Response> future;
+
+    public ResponseContainer(String messageId) {
+        this.messageId = messageId;
+    }
+
+    public ResponseContainer(String messageId, CompletableFuture<Response> future) {
+        this.messageId = messageId;
+        this.future = future;
+    }
+
+    public String getMessageId() {
+        return messageId;
+    }
+
+    public void setMessageId(String messageId) {
+        this.messageId = messageId;
+    }
+
+    public CompletableFuture<Response> getFuture() {
+        return future;
+    }
+
+    public void setFuture(CompletableFuture<Response> future) {
+        this.future = future;
+    }
 }
