@@ -5,16 +5,8 @@ import io.netty.channel.socket.SocketChannel;
 import io.netty.handler.codec.http.FullHttpResponse;
 import io.netty.handler.codec.http.websocketx.*;
 import io.netty.util.CharsetUtil;
-import io.nuls.rpc.model.message.Ack;
-import io.nuls.rpc.model.message.Message;
-import io.nuls.rpc.model.message.MessageType;
-import io.nuls.rpc.model.message.Response;
-import io.nuls.rpc.netty.channel.ConnectData;
 import io.nuls.rpc.netty.channel.manager.ConnectManager;
 import io.nuls.tools.log.Log;
-import io.nuls.tools.parse.JSONUtils;
-
-import java.util.Map;
 
 /**
  * 客户端事件触发处理类
@@ -72,55 +64,9 @@ public class ClientHandler extends SimpleChannelInboundHandler<Object> {
         } else {
             WebSocketFrame frame = (WebSocketFrame) msg;
             if (frame instanceof TextWebSocketFrame) {
-                handWebSocketFrame(ctx,frame);
+                MessageHandler.handWebSocketFrame(ctx,frame);
             } else if (frame instanceof CloseWebSocketFrame) {
                 ch.close();
-            }
-        }
-    }
-
-    /**
-     * 处理客户端与服务端之前的websocket业务
-     *
-     * @param ctx
-     * @param frame
-     */
-    private void handWebSocketFrame(ChannelHandlerContext ctx, WebSocketFrame frame)throws Exception{
-        SocketChannel socketChannel = (SocketChannel) ctx.channel();
-        ConnectData connectData = ConnectManager.getConnectDataByChannel(socketChannel);
-        if (frame instanceof TextWebSocketFrame) {
-            TextWebSocketFrame msg = (TextWebSocketFrame) frame;
-            Message message = JSONUtils.json2pojo(msg.text(), Message.class);
-            switch (MessageType.valueOf(message.getMessageType())) {
-                case NegotiateConnectionResponse:
-                    connectData.getNegotiateResponseQueue().offer(message);
-                    break;
-                case Ack:
-                    Ack ack = JSONUtils.map2pojo((Map) message.getMessageData(), Ack.class);
-                    connectData.getAckQueue().offer(ack);
-                    break;
-                case Response:
-                    Response response = JSONUtils.map2pojo((Map) message.getMessageData(), Response.class);
-                    /*
-                    如果收到已请求超时的返回直接丢弃
-                    Discard directly if you receive a return that has been requested for a timeout
-                     */
-                    if(connectData.getTimeOutMessageList().contains(response.getRequestId())){
-                        break;
-                    }
-
-                    /*
-                    Response：还要判断是否需要自动处理
-                    Response: Determines whether automatic processing is required
-                     */
-                    if (ConnectManager.INVOKE_MAP.containsKey(response.getRequestId())) {
-                        connectData.getResponseAutoQueue().offer(response);
-                    } else {
-                        connectData.getResponseManualQueue().offer(response);
-                    }
-                    break;
-                default:
-                    break;
             }
         }
     }
