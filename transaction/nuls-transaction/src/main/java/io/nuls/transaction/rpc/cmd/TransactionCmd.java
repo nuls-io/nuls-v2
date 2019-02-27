@@ -1,7 +1,9 @@
 package io.nuls.transaction.rpc.cmd;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
-import io.nuls.base.data.*;
+import io.nuls.base.data.NulsDigestData;
+import io.nuls.base.data.Page;
+import io.nuls.base.data.Transaction;
 import io.nuls.rpc.cmd.BaseCmd;
 import io.nuls.rpc.model.CmdAnnotation;
 import io.nuls.rpc.model.Parameter;
@@ -12,6 +14,7 @@ import io.nuls.tools.data.ObjectUtils;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.log.Log;
 import io.nuls.tools.parse.JSONUtils;
+import io.nuls.transaction.cache.PackablePool;
 import io.nuls.transaction.constant.TxCmd;
 import io.nuls.transaction.constant.TxConfig;
 import io.nuls.transaction.constant.TxConstant;
@@ -43,6 +46,8 @@ import java.util.Map;
 @Component
 public class TransactionCmd extends BaseCmd {
 
+    @Autowired
+    private PackablePool packablePool;
     @Autowired
     private TxService txService;
     @Autowired
@@ -85,7 +90,7 @@ public class TransactionCmd extends BaseCmd {
             ModuleTxRegisterDTO moduleTxRegisterDto = JSONUtils.json2pojo(JSONUtils.obj2json(params), ModuleTxRegisterDTO.class);
 
             chain = chainManager.getChain(moduleTxRegisterDto.getChainId());
-            if(null == chain){
+            if (null == chain) {
                 throw new NulsException(TxErrorCode.CHAIN_NOT_FOUND);
             }
             List<TxRegisterDTO> txRegisterList = moduleTxRegisterDto.getList();
@@ -140,10 +145,10 @@ public class TransactionCmd extends BaseCmd {
             ObjectUtils.canNotEmpty(params.get("chainId"), TxErrorCode.PARAMETER_ERROR.getMsg());
             ObjectUtils.canNotEmpty(params.get("txHex"), TxErrorCode.PARAMETER_ERROR.getMsg());
             chain = chainManager.getChain((int) params.get("chainId"));
-            if(null == chain){
+            if (null == chain) {
                 throw new NulsException(TxErrorCode.CHAIN_NOT_FOUND);
             }
-            String txHex = (String)params.get("txHex");
+            String txHex = (String) params.get("txHex");
             //将txHex转换为Transaction对象
             Transaction transaction = TxUtil.getTransaction(txHex);
             //将交易放入待验证本地交易队列中
@@ -176,7 +181,7 @@ public class TransactionCmd extends BaseCmd {
             ObjectUtils.canNotEmpty(params.get("endTimestamp"), TxErrorCode.PARAMETER_ERROR.getMsg());
             ObjectUtils.canNotEmpty(params.get("maxTxDataSize"), TxErrorCode.PARAMETER_ERROR.getMsg());
             chain = chainManager.getChain((int) params.get("chainId"));
-            if(null == chain){
+            if (null == chain) {
                 throw new NulsException(TxErrorCode.CHAIN_NOT_FOUND);
             }
             //结束打包的时间
@@ -218,7 +223,7 @@ public class TransactionCmd extends BaseCmd {
             ObjectUtils.canNotEmpty(params.get("blockHeaderHex"), TxErrorCode.PARAMETER_ERROR.getMsg());
 
             chain = chainManager.getChain((int) params.get("chainId"));
-            if(null == chain){
+            if (null == chain) {
                 throw new NulsException(TxErrorCode.CHAIN_NOT_FOUND);
             }
             List<String> txHashHexList = (List<String>) params.get("txHashList");
@@ -229,7 +234,7 @@ public class TransactionCmd extends BaseCmd {
             }
             //批量保存已确认交易
             //BlockHeader blockHeader = TxUtil.getInstance((String)params.get("blockHeaderHex"), BlockHeader.class);
-            result = confirmedTxService.saveTxList(chain, txHashList, (String)params.get("blockHeaderHex"));
+            result = confirmedTxService.saveTxList(chain, txHashList, (String) params.get("blockHeaderHex"));
         } catch (NulsException e) {
             errorLogProcess(chain, e);
             return failed(e.getErrorCode());
@@ -263,7 +268,7 @@ public class TransactionCmd extends BaseCmd {
             ObjectUtils.canNotEmpty(params.get("blockHeaderHex"), TxErrorCode.PARAMETER_ERROR.getMsg());
 
             chain = chainManager.getChain((int) params.get("chainId"));
-            if(null == chain){
+            if (null == chain) {
                 throw new NulsException(TxErrorCode.CHAIN_NOT_FOUND);
             }
             List<String> txHexList = (List<String>) params.get("txHexList");
@@ -272,7 +277,7 @@ public class TransactionCmd extends BaseCmd {
                 txList.add(TxUtil.getTransaction(txHex));
             }
 //            BlockHeader blockHeader = TxUtil.getInstance((String)params.get("blockHeaderHex"), BlockHeader.class);
-            result = confirmedTxService.saveGengsisTxList(chain, txList, (String)params.get("blockHeaderHex"));
+            result = confirmedTxService.saveGengsisTxList(chain, txList, (String) params.get("blockHeaderHex"));
         } catch (NulsException e) {
             errorLogProcess(chain, e);
             return failed(e.getErrorCode());
@@ -305,7 +310,7 @@ public class TransactionCmd extends BaseCmd {
             ObjectUtils.canNotEmpty(params.get("txHashList"), TxErrorCode.PARAMETER_ERROR.getMsg());
             ObjectUtils.canNotEmpty(params.get("blockHeaderHex"), TxErrorCode.PARAMETER_ERROR.getMsg());
             chain = chainManager.getChain((int) params.get("chainId"));
-            if(null == chain){
+            if (null == chain) {
                 throw new NulsException(TxErrorCode.CHAIN_NOT_FOUND);
             }
             List<String> txHashHexList = (List<String>) params.get("txHashList");
@@ -316,7 +321,7 @@ public class TransactionCmd extends BaseCmd {
             }
             //批量回滚已确认交易
 //            BlockHeader blockHeader = TxUtil.getInstance((String)params.get("blockHeaderHex"), BlockHeader.class);
-            result = confirmedTxService.rollbackTxList(chain, txHashList, (String)params.get("blockHeaderHex"));
+            result = confirmedTxService.rollbackTxList(chain, txHashList, (String) params.get("blockHeaderHex"));
 
         } catch (NulsException e) {
             errorLogProcess(chain, e);
@@ -332,6 +337,7 @@ public class TransactionCmd extends BaseCmd {
 
     /**
      * Get system transaction types
+     *
      * @param params
      * @return Response
      */
@@ -342,7 +348,7 @@ public class TransactionCmd extends BaseCmd {
         try {
             ObjectUtils.canNotEmpty(params.get("chainId"), TxErrorCode.PARAMETER_ERROR.getMsg());
             chain = chainManager.getChain((int) params.get("chainId"));
-            if(null == chain){
+            if (null == chain) {
                 throw new NulsException(TxErrorCode.CHAIN_NOT_FOUND);
             }
             List<Integer> list = transactionManager.getSysTypes(chain);
@@ -372,7 +378,7 @@ public class TransactionCmd extends BaseCmd {
             ObjectUtils.canNotEmpty(params.get("chainId"), TxErrorCode.PARAMETER_ERROR.getMsg());
             ObjectUtils.canNotEmpty(params.get("txHash"), TxErrorCode.PARAMETER_ERROR.getMsg());
             chain = chainManager.getChain((int) params.get("chainId"));
-            if(null == chain){
+            if (null == chain) {
                 throw new NulsException(TxErrorCode.CHAIN_NOT_FOUND);
             }
             String txHash = (String) params.get("txHash");
@@ -382,9 +388,9 @@ public class TransactionCmd extends BaseCmd {
             Log.debug("getConfirmedTransaction : " + txHash);
             Transaction tx = txService.getTransaction(chain, NulsDigestData.fromDigestHex(txHash));
             Map<String, String> resultMap = new HashMap<>(TxConstant.INIT_CAPACITY_8);
-            if(tx == null){
+            if (tx == null) {
                 resultMap.put("txHex", null);
-            }else{
+            } else {
                 resultMap.put("txHex", tx.hex());
             }
             return success(resultMap);
@@ -413,7 +419,7 @@ public class TransactionCmd extends BaseCmd {
             ObjectUtils.canNotEmpty(params.get("chainId"), TxErrorCode.PARAMETER_ERROR.getMsg());
             ObjectUtils.canNotEmpty(params.get("txHash"), TxErrorCode.PARAMETER_ERROR.getMsg());
             chain = chainManager.getChain((int) params.get("chainId"));
-            if(null == chain){
+            if (null == chain) {
                 throw new NulsException(TxErrorCode.CHAIN_NOT_FOUND);
             }
             String txHash = (String) params.get("txHash");
@@ -423,9 +429,9 @@ public class TransactionCmd extends BaseCmd {
             Log.debug("getConfirmedTransaction : " + txHash);
             Transaction tx = confirmedTxService.getConfirmedTransaction(chain, NulsDigestData.fromDigestHex(txHash));
             Map<String, String> resultMap = new HashMap<>(TxConstant.INIT_CAPACITY_8);
-            if(tx == null){
+            if (tx == null) {
                 resultMap.put("txHex", null);
-            }else{
+            } else {
                 resultMap.put("txHex", tx.hex());
             }
             return success(resultMap);
@@ -452,7 +458,7 @@ public class TransactionCmd extends BaseCmd {
         try {
             ObjectUtils.canNotEmpty(params.get("chainId"), TxErrorCode.PARAMETER_ERROR.getMsg());
             chain = chainManager.getChain((int) params.get("chainId"));
-            if(null == chain){
+            if (null == chain) {
                 throw new NulsException(TxErrorCode.CHAIN_NOT_FOUND);
             }
             Integer assetChainId = null == params.get("assetChainId") ? null : Integer.parseInt(params.get("assetChainId").toString());
@@ -484,7 +490,7 @@ public class TransactionCmd extends BaseCmd {
      */
     @CmdAnnotation(cmd = TxCmd.TX_BATCHVERIFY, version = 1.0, description = "")
     @Parameter(parameterName = "chainId", parameterType = "int")
-    public Response batchVerify(Map params){
+    public Response batchVerify(Map params) {
         VerifyTxResult verifyTxResult = null;
         Chain chain = null;
         try {
@@ -512,12 +518,13 @@ public class TransactionCmd extends BaseCmd {
     }
 
     /**
-     *  创建交易接口(该接口应该为外部客户端接口,本不应该写在此处)
+     * 创建交易接口(该接口应该为外部客户端接口,本不应该写在此处)
+     *
      * @param params
      * @return
      */
     @CmdAnnotation(cmd = TxCmd.TX_CREATE_CROSS_TX, version = 1.0, description = "")
-    public Response createCtx(Map params){
+    public Response createCtx(Map params) {
         Chain chain = null;
         try {
             // check parameters
@@ -543,32 +550,33 @@ public class TransactionCmd extends BaseCmd {
         }
     }
 
-    private void errorLogProcess(Chain chain, Exception e){
-        if(chain == null){
+    private void errorLogProcess(Chain chain, Exception e) {
+        if (chain == null) {
             Log.error(e);
-        }else{
+        } else {
             chain.getLogger().error(e);
         }
     }
 
     /**
      * 节点是否正在打包(由共识调用), 决定了新交易是否放入交易模块的待打包队列
+     *
      * @param params
      * @return
      */
     @CmdAnnotation(cmd = TxCmd.TX_CS_STATE, version = 1.0, description = "")
     @Parameter(parameterName = "chainId", parameterType = "int")
     @Parameter(parameterName = "packaging", parameterType = "Boolean")
-    public Response packaging(Map params){
+    public Response packaging(Map params) {
         Chain chain = null;
         try {
             ObjectUtils.canNotEmpty(params.get("chainId"), TxErrorCode.PARAMETER_ERROR.getMsg());
             chain = chainManager.getChain((int) params.get("chainId"));
-            if(null == chain){
+            if (null == chain) {
                 throw new NulsException(TxErrorCode.CHAIN_NOT_FOUND);
             }
-            Boolean packaging = null == params.get("packaging") ? null : (Boolean)params.get("packaging");
-            if(null == packaging){
+            Boolean packaging = null == params.get("packaging") ? null : (Boolean) params.get("packaging");
+            if (null == packaging) {
                 throw new NulsException(TxErrorCode.PARAMETER_ERROR);
             }
             chain.setPackaging(packaging);
@@ -582,4 +590,5 @@ public class TransactionCmd extends BaseCmd {
             return failed(TxErrorCode.SYS_UNKOWN_EXCEPTION);
         }
     }
+
 }
