@@ -90,7 +90,9 @@ public class ClientHandler extends SimpleChannelInboundHandler<Object> {
 
         SocketChannel socketChannel = (SocketChannel) ctx.channel();
         ConnectData connectData = ConnectManager.getConnectDataByChannel(socketChannel);
-        connectData.setConnected(false);
+        if (connectData != null) {
+            connectData.setConnected(false);
+        }
 
         Log.info("链接断开:"+ConnectManager.getRemoteUri((SocketChannel) ctx.channel()));
     }

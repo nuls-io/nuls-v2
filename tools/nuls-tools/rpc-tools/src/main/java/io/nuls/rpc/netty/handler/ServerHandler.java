@@ -47,7 +47,10 @@ public class ServerHandler extends SimpleChannelInboundHandler<Object> {
     public void channelUnregistered(ChannelHandlerContext ctx) throws Exception {
         SocketChannel socketChannel = (SocketChannel) ctx.channel();
         ConnectData connectData = ConnectManager.getConnectDataByChannel(socketChannel);
-        connectData.setConnected(false);
+
+        if(connectData != null) {
+            connectData.setConnected(false);
+        }
 
         Log.info("链接断开:"+ConnectManager.getRemoteUri(socketChannel));
     }
