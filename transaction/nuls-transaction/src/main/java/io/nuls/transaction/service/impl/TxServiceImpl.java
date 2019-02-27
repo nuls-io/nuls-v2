@@ -1172,7 +1172,7 @@ public class TxServiceImpl implements TxService {
             //通知账本回滚nonce
             List<String> txHexList = new ArrayList<>();
             txHexList.add(tx.hex());
-            LedgerCall.rollbackTxLedger(chain, txHexList, null,  false);
+            LedgerCall.rollBackUnconfirmTx(chain, txHexList);
         } catch (NulsException e) {
             e.printStackTrace();
         } catch (Exception e) {

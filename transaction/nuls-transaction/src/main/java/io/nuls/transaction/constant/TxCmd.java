@@ -54,6 +54,8 @@ public interface TxCmd {
      */
     String TX_CS_STATE = "tx_cs_state";
 
+    String TX_REPACKAGE = "tx_repackage";
+
 
     String TX_NEWTX = "tx_newTx";
     /**
