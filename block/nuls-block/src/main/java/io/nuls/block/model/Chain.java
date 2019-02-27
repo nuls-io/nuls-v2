@@ -187,6 +187,7 @@ public class Chain {
                 .add("endHeight=" + endHeight)
                 .add("hashList=" + hashList)
                 .add("type=" + type)
+                .add("age=" + age)
                 .toString();
     }
 }

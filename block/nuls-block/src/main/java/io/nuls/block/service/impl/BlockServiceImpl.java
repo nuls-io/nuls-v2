@@ -462,12 +462,6 @@ public class BlockServiceImpl implements BlockService {
             if (blockHeader == null) {
                 latestHeight = latestHeight - 1;
                 blockStorageService.setLatestHeight(chainId, latestHeight);
-            } else {
-                if (!blockHeader.isComplete()) {
-                    blockStorageService.remove(chainId, latestHeight);
-                    latestHeight = latestHeight - 1;
-                    blockStorageService.setLatestHeight(chainId, latestHeight);
-                }
             }
             //4.latestHeight已经维护成功,上面的步骤保证了latestHeight这个高度的区块数据在本地是完整的,但是区块数据的内容并不一定是正确的,所以要继续验证latestBlock
             block = getBlock(chainId, latestHeight);

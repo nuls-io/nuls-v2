@@ -25,14 +25,20 @@ import io.nuls.base.data.Block;
 import io.nuls.base.data.BlockHeader;
 import io.nuls.base.data.NulsDigestData;
 import io.nuls.block.constant.RunningStatusEnum;
+import io.nuls.block.manager.ChainManager;
 import io.nuls.block.manager.ContextManager;
 import io.nuls.block.model.ChainContext;
 import io.nuls.block.model.ChainParameters;
 import io.nuls.block.model.Node;
+import io.nuls.block.model.po.BlockHeaderPo;
 import io.nuls.block.service.BlockService;
+import io.nuls.block.service.BlockStorageService;
 import io.nuls.block.utils.BlockUtil;
+import io.nuls.block.utils.ChainGenerator;
 import io.nuls.block.utils.module.ConsensusUtil;
 import io.nuls.block.utils.module.NetworkUtil;
+import io.nuls.block.utils.module.TransactionUtil;
+import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.ioc.SpringLiteContext;
 import io.nuls.tools.log.logback.NulsLogger;
 import io.nuls.tools.thread.ThreadUtils;
@@ -71,8 +77,23 @@ public class BlockSynchronizer implements Runnable {
     @Override
     public void run() {
         for (Integer chainId : ContextManager.chainIds) {
-            NulsLogger commonLog = ContextManager.getContext(chainId).getCommonLog();
+            ChainContext context = ContextManager.getContext(chainId);
+            NulsLogger commonLog = context.getCommonLog();
             try {
+                BlockStorageService blockStorageService = SpringLiteContext.getBean(BlockStorageService.class);
+                long latestHeight = blockStorageService.queryLatestHeight(chainId);
+                BlockHeaderPo blockHeader = blockStorageService.query(chainId, latestHeight);
+                if (!blockHeader.isComplete()) {
+                    TransactionUtil.rollback(chainId, blockHeader);
+                    blockStorageService.remove(chainId, latestHeight);
+                    latestHeight = latestHeight - 1;
+                    blockStorageService.setLatestHeight(chainId, latestHeight);
+                }
+                //4.latestHeight已经维护成功,上面的步骤保证了latestHeight这个高度的区块数据在本地是完整的,但是区块数据的内容并不一定是正确的,所以要继续验证latestBlock
+                Block block = blockService.getBlock(chainId, latestHeight);
+                //5.本地区块维护成功
+                context.setLatestBlock(block);
+                ChainManager.setMasterChain(chainId, ChainGenerator.generateMasterChain(chainId, block));
                 while (!synchronize(chainId)) {
                     Thread.sleep(1000L);
                 }
@@ -102,7 +123,7 @@ public class BlockSynchronizer implements Runnable {
             //3.统计网络中可用节点的一致区块高度、区块hash
             BlockDownloaderParams params = statistics(availableNodes, context);
             int size = params.getNodes().size();
-            //网络上没有可用节点
+            //网络上没有可用一致节点
             if (size == 0) {
                 commonLog.warn("chain-" + chainId + ", no consistent nodes");
                 return false;
@@ -326,7 +347,7 @@ public class BlockSynchronizer implements Runnable {
     }
 
     private boolean checkRollback(int rollbackCount, int chainId, BlockDownloaderParams params) {
-        //每次最多回滚10个区块,等待下次同步,这样可以避免被恶意节点攻击,大量回滚正常区块.
+        //每次最多回滚1000个区块,等待下次同步,这样可以避免被恶意节点攻击,大量回滚正常区块.
         ChainParameters parameters = ContextManager.getContext(chainId).getParameters();
         if (params.getLocalLatestHeight() == 0 || rollbackCount >= parameters.getMaxRollback()) {
             return false;
