@@ -142,7 +142,10 @@ public class TransactionServiceImpl implements TransactionService {
         transaction.setTime(TimeService.currentTimeMillis());
         transaction.setRemark(StringUtils.bytes(remark));
         //build coin data
-        buildMultiSignTransactionCoinData(transaction, chainId,assetsId, multiSigAccount, toAddress, amount);
+        //buildMultiSignTransactionCoinData(transaction, chainId,assetsId, multiSigAccount, toAddress, amount);
+        CoinDto from = new CoinDto(multiSigAccount.getAddress().getBase58(),chainId,assetsId,amount,null);
+        CoinDto to = new CoinDto(toAddress,chainId,assetsId,amount,null);
+        assemblyCoinData(transaction, chainId, List.of(from), List.of(to));
         //sign
         TransactionSignature transactionSignature = buildMultiSignTransactionSignature(transaction, multiSigAccount, account, password);
         //缓存当前交易hash
