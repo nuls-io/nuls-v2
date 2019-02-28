@@ -84,10 +84,22 @@ public class DBUtils {
     private static String genAbsolutePath(String path) {
         String[] paths = path.split("/|\\\\");
         URL resource = ClassLoader.getSystemClassLoader().getResource("./");
-        int firstIndex = path.lastIndexOf(System.getProperty("path.separator")) + 1;
-        int lastIndex = path.lastIndexOf(File.separator) + 1;
-        String classPath = path.substring(firstIndex, lastIndex);
-        Log.info("classPath = {}", classPath);
+        String path1 = System.getProperty("java.class.path");
+        int firstIndex = path1.lastIndexOf(System.getProperty("path.separator")) + 1;
+        int lastIndex = path1.lastIndexOf(File.separator) + 1;
+        String classPath = path1.substring(firstIndex, lastIndex);
+        Log.info("1.classPath = {}", classPath);
+        if (resource == null) {
+            resource = DBUtils.class.getClassLoader().getResource("");
+            if (resource == null) {
+                resource = DBUtils.class.getResource("/");
+            }
+            classPath = resource.getPath();
+            Log.info("2.classPath = {}", classPath);
+        } else {
+            classPath = resource.getPath();
+            Log.info("3.classPath = {}", classPath);
+        }
         File file = new File(classPath);
         String resultPath = null;
         boolean isFileName = false;
