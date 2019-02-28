@@ -62,6 +62,8 @@ public class CtxServiceImpl implements CtxService {
     @Autowired
     private TransactionH2Service transactionH2Service;
 
+    private boolean canPackage = false;
+
     @Override
     public void newCrossTx(Chain chain, String nodeId, Transaction tx) throws NulsException {
         if (tx == null) {
@@ -208,7 +210,7 @@ public class CtxServiceImpl implements CtxService {
         } catch (Exception e) {
             throw new NulsException(e);
         }
-        LedgerCall.commitTxLedger(chain, txHexList, null, false);
+        LedgerCall.commitUnconfirmedTx(chain, txHexList);
         //广播交易hash
         BroadcastCrossTxHashMessage ctxHashMessage = new BroadcastCrossTxHashMessage();
         ctxHashMessage.setCommand(TxCmd.NW_NEW_CROSS_HASH);

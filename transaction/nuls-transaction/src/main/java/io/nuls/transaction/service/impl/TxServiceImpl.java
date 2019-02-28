@@ -794,7 +794,8 @@ public class TxServiceImpl implements TxService {
      */
     @Override
     public List<String> getPackableTxs(Chain chain, long endtimestamp, long maxTxDataSize) throws NulsException {
-
+        //重置重新打包标识为false
+        chain.getRePackage().set(false);
         //组装统一验证参数数据,key为各模块统一验证器cmd
         Map<TxRegister, List<String>> moduleVerifyMap = new HashMap<>(TxConstant.INIT_CAPACITY_16);
         List<Transaction> packingTxList = new ArrayList<>();
@@ -889,8 +890,14 @@ public class TxServiceImpl implements TxService {
                     txHexs.add(txHex);
                     moduleVerifyMap.put(txRegister, txHexs);
                 }
+                //如果有接收新区块,把取出的交易放回到打包队列
+                if(chain.getRePackage().get()){
+                    for (Transaction transaction : packingTxList) {
+                        packablePool.addInFirst(chain, transaction, false);
+                    }
+                    return getPackableTxs(chain, endtimestamp, maxTxDataSize);
+                }
                 long loopOnce = NetworkCall.getCurrentTimeMillis() - currentTimeMillis;
-
 //                chain.getLogger().debug("########## 分组花费时间:{} ",  NetworkCall.getCurrentTimeMillis() - debugeMap);
 //                chain.getLogger().debug("########## 成功取一个交易花费时间(一次循环):{} ", loopOnce);
                 loopDebug += (loopOnce - currentTimeMillis);
@@ -927,6 +934,13 @@ public class TxServiceImpl implements TxService {
                     iterator.remove();
                     throw new NulsException(e);
                 }
+            }
+            //如果有接收新区块,把取出的交易放回到打包队列
+            if(chain.getRePackage().get()){
+                for (Transaction transaction : packingTxList) {
+                    packablePool.addInFirst(chain, transaction, false);
+                }
+                return getPackableTxs(chain, endtimestamp, maxTxDataSize);
             }
             chain.getLogger().debug("---##########--- 批量验证花费时间:{} ",  NetworkCall.getCurrentTimeMillis() - debugeBatch);
         } catch (NulsException e) {
@@ -1172,7 +1186,7 @@ public class TxServiceImpl implements TxService {
             //通知账本回滚nonce
             List<String> txHexList = new ArrayList<>();
             txHexList.add(tx.hex());
-            LedgerCall.rollbackTxLedger(chain, txHexList, null,  false);
+            LedgerCall.rollBackUnconfirmTx(chain, txHexList);
         } catch (NulsException e) {
             e.printStackTrace();
         } catch (Exception e) {

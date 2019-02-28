@@ -59,8 +59,8 @@ public class BlockHeightStorageImpl implements BlockHeightStorage, InitializingB
     }
 
     @Override
-    public BlockHeight getBlockHeight(int chainId, boolean isCirculateTx) {
-        LoggerUtil.Log.info("chainId = {},isCirculateTx={} getBlockHeight", chainId, isCirculateTx);
+    public BlockHeight getBlockHeight(int chainId) {
+        LoggerUtil.Log.info("chainId = {} getBlockHeight", chainId);
         byte[] stream = RocksDBService.get(TBL, ByteUtils.intToBytes(chainId));
         if (stream == null) {
             return null;
@@ -76,8 +76,8 @@ public class BlockHeightStorageImpl implements BlockHeightStorage, InitializingB
     }
 
     @Override
-    public void saveOrUpdateBlockHeight(int chainId, BlockHeight blockHeight, boolean isCirculateTx) throws Exception {
-        LoggerUtil.Log.info("chainId = {},blockHeight={},isCirculateTx={} getBlockHeight", chainId, blockHeight, isCirculateTx);
+    public void saveOrUpdateBlockHeight(int chainId, BlockHeight blockHeight) throws Exception {
+        LoggerUtil.Log.info("chainId = {},blockHeight={} saveOrUpdateBlockHeight", chainId, blockHeight);
         RocksDBService.put(TBL, ByteUtils.intToBytes(chainId), blockHeight.serialize());
     }
 }

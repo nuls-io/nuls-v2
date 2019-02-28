@@ -33,28 +33,10 @@ public class ConnectData {
     private boolean connected = true;
 
     /**
-     * 从服务端得到的握手确认
-     * Handshake confirmation(NegotiateConnectionResponse) from the server
-     */
-    private final Queue<Message> negotiateResponseQueue = new ConcurrentLinkedQueue<>();
-
-    /**
-     * 从服务端得到的请求确认
-     * Request confirmation(Ack) from the server
-     */
-    private final Queue<Ack> ackQueue = new ConcurrentLinkedQueue<>();
-
-    /**
-     * 从服务端得到的需要手动处理的应答消息
-     * Response that need to be handled manually from the server
-     */
-    private final Queue<Response> responseManualQueue = new ConcurrentLinkedQueue<>();
-
-    /**
      * 从服务端得到的自动处理的应答消息
      * Response that need to be handled Automatically from the server
      */
-    private final Queue<Response> responseAutoQueue = new ConcurrentLinkedQueue<>();
+    private final LinkedBlockingQueue<Response> responseAutoQueue = new LinkedBlockingQueue<>();
 
     /**
      * 请求超时的请求
@@ -69,12 +51,6 @@ public class ConnectData {
      * Value: Time(long)
      */
     private final Map<Message, Long> cmdInvokeTime = new ConcurrentHashMap<>();
-
-    /**
-     * 单次响应队列，Message
-     * Single called queue.Message.
-     */
-    private final ConcurrentLinkedQueue<Object []> requestSingleQueue = new ConcurrentLinkedQueue<>();
 
     /**
      * 多次响应队列（根据时间间隔订阅/Period），Message
@@ -215,15 +191,19 @@ public class ConnectData {
 
     public void setConnected(boolean connected) {
         this.connected = connected;
+        if (!connected) {
+            requestEventResponseQueue.clear();
+            requestEventResponseQueue.offer(new Response());
+            responseAutoQueue.clear();
+            responseAutoQueue.offer(new Response());
+            requestPeriodLoopQueue.clear();
+        }
     }
 
     public Map<Message, Long> getCmdInvokeTime() {
         return cmdInvokeTime;
     }
 
-    public ConcurrentLinkedQueue<Object[]> getRequestSingleQueue() {
-        return requestSingleQueue;
-    }
     public LinkedBlockingQueue<Object []> getRequestPeriodLoopQueue() {
         return requestPeriodLoopQueue;
     }
@@ -252,20 +232,7 @@ public class ConnectData {
         return channel;
     }
 
-
-    public Queue<Message> getNegotiateResponseQueue() {
-        return negotiateResponseQueue;
-    }
-
-    public Queue<Ack> getAckQueue() {
-        return ackQueue;
-    }
-
-    public Queue<Response> getResponseManualQueue() {
-        return responseManualQueue;
-    }
-
-    public Queue<Response> getResponseAutoQueue() {
+    public LinkedBlockingQueue<Response> getResponseAutoQueue() {
         return responseAutoQueue;
     }
 
@@ -277,31 +244,4 @@ public class ConnectData {
         return threadPool;
     }
 
-    /**
-     * @return 第一条握手确认消息，The first handshake confirmed message
-     */
-    public Message firstMessageInNegotiateResponseQueue() {
-        return negotiateResponseQueue.poll();
-    }
-
-    /**
-     * @return 第一条确认消息，The first ack message
-     */
-    public Ack firstMessageInAckQueue() {
-        return ackQueue.poll();
-    }
-
-    /**
-     * @return 第一条需要手动处理的Response消息，The first Response message that needs to be handled manually
-     */
-    public Response firstMessageInResponseManualQueue() {
-        return responseManualQueue.poll();
-    }
-
-    /**
-     * @return 第一条需要自动处理的Response消息，The first Response message that needs to be handled automatically
-     */
-    public Response firstMessageInResponseAutoQueue() {
-        return responseAutoQueue.poll();
-    }
 }

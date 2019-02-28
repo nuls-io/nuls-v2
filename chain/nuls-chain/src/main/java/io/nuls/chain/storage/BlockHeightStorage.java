@@ -14,17 +14,15 @@ public interface BlockHeightStorage {
     /**
      *
      * @param chainId
-     * @param isCirculateTx
      * @return
      */
-    BlockHeight getBlockHeight(int chainId,boolean isCirculateTx);
+    BlockHeight getBlockHeight(int chainId);
 
 
     /**
      *
      * @param chainId
      * @param blockHeight
-     * @param isCirculateTx
      */
-    void saveOrUpdateBlockHeight(int chainId,  BlockHeight blockHeight,boolean isCirculateTx) throws Exception;
+    void saveOrUpdateBlockHeight(int chainId,  BlockHeight blockHeight) throws Exception;
 }

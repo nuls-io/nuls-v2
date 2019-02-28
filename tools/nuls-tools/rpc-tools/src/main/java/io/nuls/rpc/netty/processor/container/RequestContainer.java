@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2017-2019 nuls.io
+ * Copyright (c) 2017-2018 nuls.io
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,29 +22,33 @@
  * SOFTWARE.
  *
  */
-package io.nuls.block.utils;
+package io.nuls.rpc.netty.processor.container;
 
-import ch.qos.logback.classic.Level;
-import io.nuls.block.manager.ContextManager;
-import io.nuls.block.model.ChainContext;
-import io.nuls.tools.log.logback.LoggerBuilder;
-import io.nuls.tools.log.logback.NulsLogger;
+import java.util.Map;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * @author lan
- * @description
- * @date 2018/12/17
- **/
-public class LoggerUtil {
+ * 请求的数据存放容器
+ * Requested data storage container
+ * @author ln
+ * 2019/2/27
+ * */
+public final class RequestContainer {
 
-    public static NulsLogger commonLog = LoggerBuilder.getLogger("block","common", Level.INFO);
+    private static Map<String, ResponseContainer> REQUEST_MESSAGE_MAP = new ConcurrentHashMap<>();
 
-    public static void init(int chainId, String levelString) {
-        Level level = Level.valueOf(levelString);
-        NulsLogger commonLog = LoggerBuilder.getLogger("block/chain-"+chainId+"/","common", level);
-        NulsLogger messageLog = LoggerBuilder.getLogger("block/chain-"+chainId+"/","message", level);
-        ChainContext context = ContextManager.getContext(chainId);
-        context.setCommonLog(commonLog);
-        context.setMessageLog(messageLog);
+    public static ResponseContainer putRequest(String messageId) {
+        ResponseContainer responseContainer = new ResponseContainer(messageId, new CompletableFuture<>());
+        REQUEST_MESSAGE_MAP.put(messageId, responseContainer);
+        return responseContainer;
+    }
+
+    public static ResponseContainer getResponseContainer(String messageId) {
+        return REQUEST_MESSAGE_MAP.get(messageId);
+    }
+
+    public static boolean removeResponseContainer(String messageId) {
+        return REQUEST_MESSAGE_MAP.remove(messageId) != null;
     }
 }

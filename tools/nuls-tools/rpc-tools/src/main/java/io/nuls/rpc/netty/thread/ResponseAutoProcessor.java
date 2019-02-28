@@ -24,7 +24,6 @@
  */
 package io.nuls.rpc.netty.thread;
 
-import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.invoke.BaseInvoke;
 import io.nuls.rpc.model.message.Response;
 import io.nuls.rpc.netty.channel.ConnectData;
@@ -58,12 +57,10 @@ public class ResponseAutoProcessor implements Runnable {
                 获取队列中的第一个对象
                 Get the first item of the queue
                  */
-                Response response = connectData.firstMessageInResponseAutoQueue();
-                if (response == null) {
-                    Thread.sleep(Constants.INTERVAL_TIMEMILLIS);
+                Response response = connectData.getResponseAutoQueue().take();
+                if(response.getRequestId() == null) {
                     continue;
                 }
-
                 /*
                 获取Response对象，这里得到的对象一定是需要自动调用本地方法
                 Get Response object, The object you get here must automatically call the local method
@@ -76,8 +73,6 @@ public class ResponseAutoProcessor implements Runnable {
                  */
                 BaseInvoke baseInvoke = ConnectManager.INVOKE_MAP.get(messageId);
                 baseInvoke.callBack(response);
-
-                Thread.sleep(Constants.INTERVAL_TIMEMILLIS);
             } catch (Exception e) {
                 Log.error(e);
             }

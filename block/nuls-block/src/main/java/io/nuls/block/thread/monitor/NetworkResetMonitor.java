@@ -22,10 +22,10 @@ package io.nuls.block.thread.monitor;
 
 import io.nuls.block.constant.RunningStatusEnum;
 import io.nuls.block.manager.ContextManager;
+import io.nuls.block.model.ChainContext;
 import io.nuls.block.model.ChainParameters;
 import io.nuls.block.utils.module.NetworkUtil;
-
-import static io.nuls.block.utils.LoggerUtil.commonLog;
+import io.nuls.tools.log.logback.NulsLogger;
 
 /**
  * 区块高度监控器
@@ -50,16 +50,18 @@ public class NetworkResetMonitor implements Runnable {
     @Override
     public void run() {
         for (Integer chainId : ContextManager.chainIds) {
+            ChainContext context = ContextManager.getContext(chainId);
+            NulsLogger commonLog = context.getCommonLog();
             try {
                 //判断该链的运行状态,只有正常运行时才会有区块高度监控
-                RunningStatusEnum status = ContextManager.getContext(chainId).getStatus();
+                RunningStatusEnum status = context.getStatus();
                 if (!status.equals(RunningStatusEnum.RUNNING)) {
                     commonLog.info("skip process, status is " + status + ", chainId-" + chainId);
                     return;
                 }
-                ChainParameters parameters = ContextManager.getContext(chainId).getParameters();
+                ChainParameters parameters = context.getParameters();
                 int reset = parameters.getResetTime();
-                long time = ContextManager.getContext(chainId).getLatestBlock().getHeader().getTime();
+                long time = context.getLatestBlock().getHeader().getTime();
                 //如果(当前时间戳-最新区块时间戳)>重置网络阈值,通知网络模块重置可用节点
                 long currentTime = NetworkUtil.currentTime();
                 commonLog.debug("chainId-" + chainId + ",currentTime-" + currentTime + ",blockTime-" + time + ",diffrence-" + (currentTime - time));

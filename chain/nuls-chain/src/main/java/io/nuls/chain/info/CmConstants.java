@@ -16,12 +16,6 @@ public class CmConstants {
     private CmConstants() {
     }
 
-    /**
-     * 数据库文件存放路径
-     * The database file storage path
-     */
-    public static final String DATA_PATH = "../data";
-
     public static final BigInteger ZERO = new BigInteger("0");
 
     public static final String MODULE_ROLE = "CM";
@@ -58,7 +52,6 @@ public class CmConstants {
      * 初始配置参数
      */
     public static final Map<String, String> PARAM_MAP = new HashMap<>();
-    public static final String PARAM = "param";
     public static final String ASSET_SYMBOL_MAX = "asset_symbol_max";
     public static final String ASSET_NAME_MAX = "asset_name_max";
     public static final String ASSET_DEPOSIT_NULS = "asset_depositNuls";

@@ -27,17 +27,17 @@ public class Asset extends BaseNulsData {
      * 资产是在哪条链上注册的
      * Which chain is the asset registered on
      */
-    private int chainId;
+    private int chainId = 0;
 
-    private int assetId;
+    private int assetId = 0;
     private String symbol;
     private String assetName;
-    private int depositNuls;
-    private BigInteger initNumber;
-    private short decimalPlaces;
-    private boolean available;
-    private long createTime;
-    private long lastUpdateTime;
+    private int depositNuls = 0;
+    private BigInteger initNumber = BigInteger.ZERO;
+    private short decimalPlaces = 8;
+    private boolean available = true;
+    private long createTime = 0;
+    private long lastUpdateTime = 0;
     private byte[] address;
     private String txHash;
 
@@ -54,7 +54,7 @@ public class Asset extends BaseNulsData {
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
         stream.writeUint16(chainId);
-        stream.writeUint48(assetId);
+        stream.writeUint16(assetId);
         stream.writeString(symbol);
         stream.writeString(assetName);
         stream.writeUint32(depositNuls);

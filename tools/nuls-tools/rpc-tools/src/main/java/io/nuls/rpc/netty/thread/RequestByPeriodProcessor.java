@@ -55,7 +55,7 @@ public class RequestByPeriodProcessor implements Runnable {
     public void run() {
         while (connectData.isConnected()) {
             try {
-                if(!connectData.getRequestPeriodLoopQueue().isEmpty()){
+                if (!connectData.getRequestPeriodLoopQueue().isEmpty()) {
                     sendPeriodQueue();
                 }
                 Thread.sleep(Constants.INTERVAL_TIMEMILLIS);
@@ -71,7 +71,7 @@ public class RequestByPeriodProcessor implements Runnable {
      *
      * @throws Exception 抛出任何异常 / Throw any exception
      */
-    private void sendPeriodQueue(){
+    private void sendPeriodQueue() {
         /*
         获取队列中的第一个对象
         Get the first item of the queue

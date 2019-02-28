@@ -14,7 +14,6 @@ import io.nuls.rpc.netty.channel.ConnectData;
 import io.nuls.rpc.netty.processor.RequestMessageProcessor;
 import io.nuls.rpc.netty.thread.RequestByCountProcessor;
 import io.nuls.rpc.netty.thread.RequestByPeriodProcessor;
-import io.nuls.rpc.netty.thread.RequestSingleProcessor;
 import io.nuls.rpc.netty.thread.ResponseAutoProcessor;
 import io.nuls.tools.core.ioc.ScanUtil;
 import io.nuls.tools.core.ioc.SpringLiteContext;
@@ -477,7 +476,7 @@ public class ConnectManager {
                 if((changeCount - initCount)%eventCount == 0){
                     try {
                         connectData.getRequestEventResponseQueue().put(getRealResponse(cmd,message.getMessageId(),response));
-                    }catch (InterruptedException e){
+                    } catch (InterruptedException e){
                         Log.error(e);
                     }
                 }
@@ -620,9 +619,6 @@ public class ConnectManager {
         After the connection is created successfully, start the threads needed
         to process the transmission of information in the connection channel
         */
-        connectData.getThreadPool().execute(new RequestSingleProcessor(connectData));
-        connectData.getThreadPool().execute(new RequestSingleProcessor(connectData));
-        connectData.getThreadPool().execute(new RequestSingleProcessor(connectData));
         connectData.getThreadPool().execute(new RequestByPeriodProcessor(connectData));
         connectData.getThreadPool().execute(new RequestByCountProcessor(connectData));
         connectData.getThreadPool().execute(new ResponseAutoProcessor(connectData));
@@ -666,8 +662,9 @@ public class ConnectManager {
         }
     }
 
-    public static void sendMessage(Channel channel,String message){
-        TextWebSocketFrame frame = new TextWebSocketFrame(message);
-        channel.writeAndFlush(frame);
+    public static void sendMessage(Channel channel, String message){
+//        TextWebSocketFrame frame = new TextWebSocketFrame(message);
+//        channel.writeAndFlush(frame);
+        channel.eventLoop().execute(() -> channel.writeAndFlush(new TextWebSocketFrame(message)));
     }
 }

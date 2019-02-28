@@ -11,6 +11,19 @@ public class DateUtils {
     public final static long DATE_TIME = 1000 * 24 * 60 * 60;
     public final static long HOUR_TIME = 1000 * 60 * 60;
     public final static long MINUTE_TIME = 1000 * 60;
+    public final static long TIME_ZONE;
+    public final static String TIME_ZONE_STRING;
+
+    static {
+        Calendar cal = Calendar.getInstance();
+        int offset = cal.get(Calendar.ZONE_OFFSET);
+        cal.add(Calendar.MILLISECOND, -offset);
+        long timeStampUTC = cal.getTimeInMillis();
+        long timeStamp = System.currentTimeMillis();
+        long timeZone = (timeStamp - timeStampUTC) / HOUR_TIME;
+        TIME_ZONE = timeZone+1;
+        TIME_ZONE_STRING = String.valueOf(TIME_ZONE);
+    }
 
     public static String toGMTString(Date date) {
         SimpleDateFormat df = new SimpleDateFormat("E, dd MMM yyyy HH:mm:ss z", Locale.UK);
@@ -688,13 +701,13 @@ public class DateUtils {
      * 获取时区信息
      * */
     public static long getTimeZone(){
-        Calendar cal = Calendar.getInstance();
-        int offset = cal.get(Calendar.ZONE_OFFSET);
-        cal.add(Calendar.MILLISECOND, -offset);
-        Long timeStampUTC = cal.getTimeInMillis();
-        Long timeStamp = System.currentTimeMillis();
-        Long timeZone = (timeStamp - timeStampUTC) / (1000 * 3600);
-        return timeZone+1;
+        return TIME_ZONE;
+    }
 
+    /**
+     * 获取时区信息
+     * */
+    public static String getTimeZoneString(){
+        return TIME_ZONE_STRING;
     }
 }

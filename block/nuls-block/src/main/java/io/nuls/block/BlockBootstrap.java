@@ -35,6 +35,7 @@ import io.nuls.rpc.netty.bootstrap.NettyServer;
 import io.nuls.rpc.netty.channel.manager.ConnectManager;
 import io.nuls.rpc.netty.processor.ResponseMessageProcessor;
 import io.nuls.tools.core.ioc.SpringLiteContext;
+import io.nuls.tools.log.logback.NulsLogger;
 import io.nuls.tools.thread.ThreadUtils;
 import io.nuls.tools.thread.commom.NulsThreadFactory;
 
@@ -97,7 +98,6 @@ public class BlockBootstrap {
                 Thread.sleep(2000L);
             }
             NetworkUtil.register();
-            commonLog.info("service start");
             //加载配置
             ConfigLoader.load();
 
@@ -132,6 +132,7 @@ public class BlockBootstrap {
                     System.exit(0);
                 }
                 BlockHeader header = context.getLatestBlock().getHeader();
+                NulsLogger commonLog = context.getCommonLog();
                 commonLog.info("chainId:" + chainId + ", latestHeight:" + header.getHeight() + ", txCount:" + header.getTxCount() + ", hash:" + header.getHash());
                 try {
                     Thread.sleep(10000L);
