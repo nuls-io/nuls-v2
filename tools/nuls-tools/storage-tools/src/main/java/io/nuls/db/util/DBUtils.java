@@ -93,12 +93,12 @@ public class DBUtils {
             if (resource == null) {
                 resource = DBUtils.class.getResource("/");
             }
-            classPath = resource.getPath();
-            System.out.println("classPath: " + classPath);
-            Log.info("2.classPath = {}", classPath);
+            String classPath2 = resource.getPath();
+            System.out.println("classPath: " + classPath2);
+            Log.info("2.classPath = {}", classPath2);
         } else {
-            classPath = resource.getPath();
-            Log.info("3.classPath = {}", classPath);
+            String classPath3 = resource.getPath();
+            Log.info("3.classPath = {}", classPath3);
         }
         File file = new File(classPath);
         String resultPath = null;
