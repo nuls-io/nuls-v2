@@ -102,30 +102,52 @@
                     <version>2.4</version>
                 </plugin>
                 <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-resources-plugin</artifactId>
+                    <version>3.1.0</version>
+                    <configuration>
+                        <encoding>UTF-8</encoding>
+                    </configuration>
+                    <executions>
+                        <execution>
+                            <id>copy-resources</id>
+                            <!-- here the phase you need -->
+                            <phase>package</phase>
+                            <goals>
+                                <goal>copy-resources</goal>
+                            </goals>
+                            <configuration>
+                                <outputDirectory>${project.build.directory}/resources</outputDirectory>
+                                <resources>
+                                    <resource>
+                                        <directory>src/main/resources</directory>
+                                        <filtering>true</filtering>
+                                    </resource>
+                                </resources>
+                            </configuration>
+                        </execution>
+                    </executions>
+                </plugin>
+                <plugin>
                     <artifactId>maven-assembly-plugin</artifactId>
+                    <version>2.6</version>
                     <configuration>
                         <appendAssemblyId>false</appendAssemblyId>
-                        <descriptorRefs>
-                            <descriptorRef>jar-with-dependencies</descriptorRef>
-                        </descriptorRefs>
-                        <archive>
-                            <manifest>
-                                <!-- 此处指定main方法入口的class -->
-                                <mainClass>io.nuls.network.NetworkBootstrap</mainClass>
-                            </manifest>
-                        </archive>
-                        </configuration>
+                        <finalName>${project.artifactId}-${project.version}</finalName>
+                        <descriptors>
+                            <descriptor>src/main/assembly/default.xml</descriptor>
+                        </descriptors>
+                    </configuration>
                     <executions>
                         <execution>
                             <id>make-assembly</id>
-                            <phase>package</phase>
+                            <phase>deploy</phase>
                             <goals>
-                                <goal>assembly</goal>
+                                <goal>single</goal>
                             </goals>
                         </execution>
                     </executions>
                 </plugin>
-
             </plugins>
         </build>
 

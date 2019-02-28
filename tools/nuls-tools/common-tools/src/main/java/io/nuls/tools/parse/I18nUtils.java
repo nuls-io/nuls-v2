@@ -85,6 +85,10 @@ public class I18nUtils {
             URL furl = I18nUtils.class.getClassLoader().getResource(folder);
             if (null != furl) {
                 File folderFile = new File(furl.getPath());
+                System.out.println("folder="+folder+"====defaultLanguage="+defaultLanguage);
+                System.out.println("furl.getPath()="+furl.getPath());
+                Log.info("folder="+folder+"====defaultLanguage="+defaultLanguage);
+                Log.info("furl.getPath()="+furl.getPath());
                 for (File file : folderFile.listFiles()) {
                     InputStream is = new FileInputStream(file);
                     Properties prop = new Properties();
