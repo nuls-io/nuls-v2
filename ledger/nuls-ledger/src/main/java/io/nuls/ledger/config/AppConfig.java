@@ -35,6 +35,7 @@ import io.nuls.tools.parse.config.IniEntity;
 import org.ini4j.Config;
 import org.ini4j.Ini;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -67,7 +68,7 @@ public class AppConfig {
             moduleConfig.setDatabaseVersion(Integer.valueOf(databaseVersion));
 
             String language = ConfigManager.getValue("language");
-            I18nUtils.loadLanguage("languages", language);
+            I18nUtils.loadLanguage(File.separator+"languages", language);
             I18nUtils.setLanguage(language);
 
 
