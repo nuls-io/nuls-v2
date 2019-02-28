@@ -9,6 +9,7 @@ import io.nuls.rpc.model.message.Response;
 import io.nuls.rpc.netty.processor.ResponseMessageProcessor;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.crypto.HexUtil;
+import io.nuls.tools.log.Log;
 
 import java.util.*;
 
@@ -41,12 +42,13 @@ public class BlockManager {
             blockHeaderHexs = (List<String>) resultMap.get("getLatestBlockHeaders");
         }
         while(!cmdResp.isSuccess() && blockHeaderHexs.size() == 0){
-            Thread.sleep(1000);
             cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.BL.abbr, "getLatestBlockHeaders", params);
             if(cmdResp.isSuccess()){
                 resultMap = (Map<String, Object>) cmdResp.getResponseData();
                 blockHeaderHexs = (List<String>) resultMap.get("getLatestBlockHeaders");
+                break;
             }
+            Log.info("---------------------------区块加载失败！");
             Thread.sleep(1000);
         }
         List<BlockHeader> blockHeaders = new ArrayList<>();

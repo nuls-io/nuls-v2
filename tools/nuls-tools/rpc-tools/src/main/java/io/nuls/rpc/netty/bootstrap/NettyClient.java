@@ -13,6 +13,8 @@ import io.netty.handler.codec.http.HttpObjectAggregator;
 import io.netty.handler.codec.http.websocketx.WebSocketClientHandshaker;
 import io.netty.handler.codec.http.websocketx.WebSocketClientHandshakerFactory;
 import io.netty.handler.codec.http.websocketx.WebSocketVersion;
+import io.netty.handler.logging.LogLevel;
+import io.netty.handler.logging.LoggingHandler;
 import io.nuls.rpc.netty.handler.ClientHandler;
 import io.nuls.tools.log.Log;
 
@@ -44,7 +46,9 @@ public class NettyClient {
                         @Override
                         protected void initChannel(SocketChannel socketChannel) throws Exception {
                             ChannelPipeline p = socketChannel.pipeline();
-                            p.addLast(new ChannelHandler[]{new HttpClientCodec(),
+                            p.addLast(new ChannelHandler[]{
+                                    new LoggingHandler(LogLevel.TRACE),
+                                    new HttpClientCodec(),
                                     new HttpObjectAggregator(1024*1024*10)});
                             p.addLast("hookedHandler", new ClientHandler());
                         }
