@@ -25,6 +25,7 @@
 package io.nuls.db.util;
 
 import io.nuls.tools.data.StringUtils;
+import io.nuls.tools.log.Log;
 
 import java.io.File;
 import java.net.URL;
@@ -46,6 +47,8 @@ public class DBUtils {
             if (path.startsWith(rootPath)) {
                 dir = new File(path);
             } else {
+                Log.info("path="+path);
+                Log.info("genAbsolutePath(path)="+genAbsolutePath(path));
                 dir = new File(genAbsolutePath(path));
             }
         } else {

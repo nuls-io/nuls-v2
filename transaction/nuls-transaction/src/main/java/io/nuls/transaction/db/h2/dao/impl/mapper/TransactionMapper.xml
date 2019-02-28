@@ -54,13 +54,13 @@
     <select id="getTxs" parameterType="io.nuls.h2.utils.Searchable" resultMap="BaseResultMap">
         select id, address, hash, `type`, assetChainId, assetId, amount, state, `time`
          from ${tableName}
-        <include refid="io.nuls.h2.common.CommonMapper.Search_Where_multiple"/>
+        <include refid="io.nuls.transaction.db.h2.dao.impl.mapper.CommonMapper.Search_Where_multiple"/>
     </select>
 
     <select id="queryCount" resultType="java.lang.Long">
         select count(id)
         from ${tableName}
-        <include refid="io.nuls.h2.common.CommonMapper.Search_Where_multiple"/>
+        <include refid="io.nuls.transaction.db.h2.dao.impl.mapper.CommonMapper.Search_Where_multiple"/>
     </select>
     
     <delete id="delete" parameterType="String" >

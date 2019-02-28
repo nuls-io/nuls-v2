@@ -67,6 +67,16 @@ public class I18nUtils {
      */
     private static final String FOLDER = "languages";
 
+    public static boolean isSystemWin() {
+        String pathSeparator = System.getProperty("path.separator");
+        String unixPathSeparator = ":";
+        if (unixPathSeparator.equals(pathSeparator)) {
+            return false;
+        } else {
+            return true;
+        }
+
+    }
 
     /**
      * 加载语言包
@@ -79,16 +89,16 @@ public class I18nUtils {
             if (StringUtils.isBlank(folder)) {
                 folder = FOLDER;
             }
+            if (!isSystemWin()) {
+                folder = File.separator + folder;
+            }
             if (StringUtils.isNotBlank(defaultLanguage)) {
                 key = defaultLanguage;
             }
             URL furl = I18nUtils.class.getClassLoader().getResource(folder);
             if (null != furl) {
                 File folderFile = new File(furl.getPath());
-                System.out.println("folder="+folder+"====defaultLanguage="+defaultLanguage);
-                System.out.println("furl.getPath()="+furl.getPath());
-                Log.info("folder="+folder+"====defaultLanguage="+defaultLanguage);
-                Log.info("furl.getPath()="+furl.getPath());
+                Log.info("furl.getPath()=" + furl.getPath());
                 for (File file : folderFile.listFiles()) {
                     InputStream is = new FileInputStream(file);
                     Properties prop = new Properties();
