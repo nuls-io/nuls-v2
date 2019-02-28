@@ -26,6 +26,9 @@ package io.nuls.db.util;
 
 import io.nuls.tools.data.StringUtils;
 import io.nuls.tools.log.Log;
+import io.nuls.tools.parse.config.IniEntity;
+import org.ini4j.Config;
+import org.ini4j.Ini;
 
 import java.io.File;
 import java.net.URL;
@@ -65,10 +68,21 @@ public class DBUtils {
         }
         return dir;
     }
-
+    private static String getProjectDbPath() throws Exception {
+        Config cfg = new Config();
+        cfg.setMultiSection(true);
+        Ini ini = new Ini();
+        ini.setConfig(cfg);
+        ini.load(new File("module.ncf"));  //可以读取到nuls_2.0项目根目录下的module.ncf,在生产环境读到jar同目录下的module.ncf
+        IniEntity ie = new IniEntity(ini);
+        String filePath = ie.getCfgValue("Module","DataPath");
+        Log.info(filePath); //读取配置的data文件夹路径
+        return filePath;
+    }
     private static String genAbsolutePath(String path) {
         String[] paths = path.split("/|\\\\");
-        URL resource = ClassLoader.getSystemClassLoader().getResource(".");
+//        URL resource = ClassLoader.getSystemClassLoader().getResource(".");
+        URL resource =  Thread.currentThread().getContextClassLoader().getResource(".");
         String classPath = resource.getPath();
         File file = new File(classPath);
         String resultPath = null;
@@ -105,5 +119,12 @@ public class DBUtils {
         }
         String regex = "^[a-zA-Z0-9_\\-]+$";
         return areaName.matches(regex);
+    }
+    public static void main(String []args){
+        try {
+            System.out.println(genAbsolutePath("../../../../data/ledger"));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }
