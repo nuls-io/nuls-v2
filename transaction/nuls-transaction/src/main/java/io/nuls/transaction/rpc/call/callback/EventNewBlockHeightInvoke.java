@@ -29,12 +29,13 @@ import io.nuls.rpc.invoke.BaseInvoke;
 import io.nuls.rpc.model.message.Response;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.exception.NulsException;
-import io.nuls.tools.log.Log;
 import io.nuls.tools.parse.JSONUtils;
 import io.nuls.transaction.model.bo.Chain;
 import io.nuls.transaction.service.ConfirmedTxService;
 
 import java.util.HashMap;
+
+import static io.nuls.transaction.utils.LoggerUtil.Log;
 
 /**
  * @author: Charlie

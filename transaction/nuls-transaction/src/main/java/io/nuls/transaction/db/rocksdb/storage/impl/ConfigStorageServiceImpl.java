@@ -31,7 +31,6 @@ import io.nuls.tools.core.annotation.Service;
 import io.nuls.tools.data.ByteUtils;
 import io.nuls.tools.data.ObjectUtils;
 import io.nuls.tools.exception.NulsException;
-import io.nuls.tools.log.Log;
 import io.nuls.transaction.constant.TxConstant;
 import io.nuls.transaction.constant.TxDBConstant;
 import io.nuls.transaction.db.rocksdb.storage.ConfigStorageService;
@@ -41,6 +40,8 @@ import io.nuls.transaction.utils.DBUtil;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import static io.nuls.transaction.utils.LoggerUtil.Log;
 
 /**
  * 配置信息存储管理类
