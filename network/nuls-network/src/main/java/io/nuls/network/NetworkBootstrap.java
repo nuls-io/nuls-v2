@@ -37,7 +37,6 @@ import io.nuls.tools.parse.ConfigLoader;
 import io.nuls.tools.parse.I18nUtils;
 import io.nuls.tools.parse.config.ConfigManager;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -100,7 +99,7 @@ public class NetworkBootstrap {
             // set system language
             String language = ConfigManager.getValue(NetworkConstant.NETWORK_LANGUAGE);
             networkParam.setLanguage(language);
-            I18nUtils.loadLanguage(File.separator+"languages", language);
+            I18nUtils.loadLanguage("languages", language);
             I18nUtils.setLanguage(language);
             //set encode
             String encoding = ConfigManager.getValue(NetworkConstant.NETWORK_ENCODING);
