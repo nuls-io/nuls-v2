@@ -176,7 +176,10 @@ public class ChainBootstrap {
 
     private void regTxRpc() throws Exception {
         RpcService rpcService = SpringLiteContext.getBean(RpcServiceImpl.class);
-        rpcService.regTx();
+        boolean regResult = false;
+        while (!regResult) {
+            regResult = rpcService.regTx();
+        }
     }
 
     /**
