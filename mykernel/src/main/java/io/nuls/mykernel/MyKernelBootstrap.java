@@ -110,7 +110,7 @@ public class MyKernelBootstrap {
         if (modules.isFile()) {
             return;
         }
-        if (Arrays.stream(modules.listFiles()).anyMatch(f -> "module.ncf".equals(f.getName()))) {
+        if (Arrays.stream(modules.listFiles()).anyMatch(f -> "Module.ncf".equals(f.getName()))) {
             startModule(modules);
             return;
         }
@@ -133,7 +133,7 @@ public class MyKernelBootstrap {
         cfg.setMultiSection(true);
         Ini ini = new Ini();
         ini.setConfig(cfg);
-        ini.load(new File(modules.getAbsolutePath() + File.separator + "module.ncf"));
+        ini.load(new File(modules.getAbsolutePath() + File.separator + "Module.ncf"));
         IniEntity ie = new IniEntity(ini);
         String managed = ie.getCfgValue("Core", "Managed");
         if ("1".equals(managed)) {
