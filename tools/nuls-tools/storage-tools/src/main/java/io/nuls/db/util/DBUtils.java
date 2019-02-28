@@ -83,18 +83,13 @@ public class DBUtils {
 
     private static String genAbsolutePath(String path) {
         String[] paths = path.split("/|\\\\");
-        URL resource = ClassLoader.getSystemClassLoader().getResource("./");
-        String path1 = System.getProperty("java.class.path");
-        int firstIndex = path1.lastIndexOf(System.getProperty("path.separator")) + 1;
-        int lastIndex = path1.lastIndexOf(File.separator) + 1;
-        String classPath = path1.substring(firstIndex, lastIndex);
-        Log.info("1.classPath = {}", classPath);
+        URL resource = ClassLoader.getSystemClassLoader().getResource(".");
+        String classPath = "";
         if (resource == null) {
-            resource = DBUtils.class.getClassLoader().getResource("");
-            if (resource == null) {
-                resource = DBUtils.class.getResource("/");
-            }
-            classPath = resource.getPath();
+            String path1 = System.getProperty("java.class.path");
+            int firstIndex = path1.lastIndexOf(System.getProperty("path.separator")) + 1;
+            int lastIndex = path1.lastIndexOf(File.separator) + 1;
+            classPath = path1.substring(firstIndex, lastIndex);
             Log.info("2.classPath = {}", classPath);
         } else {
             classPath = resource.getPath();
@@ -135,13 +130,5 @@ public class DBUtils {
         }
         String regex = "^[a-zA-Z0-9_\\-]+$";
         return areaName.matches(regex);
-    }
-
-    public static void main(String[] args) {
-        try {
-            System.out.println(genAbsolutePath("../../../../data/ledger"));
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
     }
 }
