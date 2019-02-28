@@ -27,7 +27,7 @@ package io.nuls.transaction.db.rocksdb.storage.impl;
 import io.nuls.base.data.NulsDigestData;
 import io.nuls.db.service.RocksDBService;
 import io.nuls.tools.core.annotation.Service;
-import io.nuls.tools.log.Log;
+import static io.nuls.transaction.utils.LoggerUtil.Log;
 import io.nuls.transaction.constant.TxDBConstant;
 import io.nuls.transaction.db.rocksdb.storage.UnverifiedCtxStorageService;
 import io.nuls.transaction.model.bo.CrossTx;

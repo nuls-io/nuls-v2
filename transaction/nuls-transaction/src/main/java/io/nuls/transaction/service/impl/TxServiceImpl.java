@@ -40,7 +40,7 @@ import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.data.BigIntegerUtils;
 import io.nuls.tools.data.StringUtils;
 import io.nuls.tools.exception.NulsException;
-import io.nuls.tools.log.Log;
+import static io.nuls.transaction.utils.LoggerUtil.Log;
 import io.nuls.transaction.cache.PackablePool;
 import io.nuls.transaction.constant.TxConstant;
 import io.nuls.transaction.constant.TxErrorCode;

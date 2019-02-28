@@ -25,7 +25,7 @@
 package io.nuls.transaction.utils.queue.fqueue.entity;
 
 
-import io.nuls.tools.log.Log;
+import static io.nuls.transaction.utils.LoggerUtil.Log;
 
 import java.io.File;
 import java.io.IOException;

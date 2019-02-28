@@ -34,7 +34,7 @@ import io.nuls.rpc.model.message.Response;
 import io.nuls.rpc.netty.processor.ResponseMessageProcessor;
 import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.exception.NulsRuntimeException;
-import io.nuls.tools.log.Log;
+import static io.nuls.transaction.utils.LoggerUtil.Log;
 import io.nuls.tools.parse.JSONUtils;
 import io.nuls.tools.parse.SerializeUtils;
 import io.nuls.transaction.model.bo.Chain;
