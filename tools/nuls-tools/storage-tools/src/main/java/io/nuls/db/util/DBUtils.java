@@ -50,8 +50,8 @@ public class DBUtils {
             if (path.startsWith(rootPath)) {
                 dir = new File(path);
             } else {
-                Log.info("path="+path);
-                Log.info("genAbsolutePath(path)="+genAbsolutePath(path));
+                Log.info("path=" + path);
+                Log.info("genAbsolutePath(path)=" + genAbsolutePath(path));
                 dir = new File(genAbsolutePath(path));
             }
         } else {
@@ -68,6 +68,7 @@ public class DBUtils {
         }
         return dir;
     }
+
     private static String getProjectDbPath() throws Exception {
         Config cfg = new Config();
         cfg.setMultiSection(true);
@@ -75,15 +76,18 @@ public class DBUtils {
         ini.setConfig(cfg);
         ini.load(new File("module.ncf"));  //可以读取到nuls_2.0项目根目录下的module.ncf,在生产环境读到jar同目录下的module.ncf
         IniEntity ie = new IniEntity(ini);
-        String filePath = ie.getCfgValue("Module","DataPath");
+        String filePath = ie.getCfgValue("Module", "DataPath");
         Log.info(filePath); //读取配置的data文件夹路径
         return filePath;
     }
+
     private static String genAbsolutePath(String path) {
         String[] paths = path.split("/|\\\\");
         URL resource = ClassLoader.getSystemClassLoader().getResource("./");
-//        URL resource =  Thread.currentThread().getContextClassLoader().getResource(".");
-        String classPath = resource.getPath();
+        int firstIndex = path.lastIndexOf(System.getProperty("path.separator")) + 1;
+        int lastIndex = path.lastIndexOf(File.separator) + 1;
+        String classPath = path.substring(firstIndex, lastIndex);
+        Log.info("1.classPath = {}", classPath);
         if (resource == null) {
             resource = DBUtils.class.getClassLoader().getResource("");
             if (resource == null) {
@@ -91,6 +95,10 @@ public class DBUtils {
             }
             classPath = resource.getPath();
             System.out.println("classPath: " + classPath);
+            Log.info("2.classPath = {}", classPath);
+        } else {
+            classPath = resource.getPath();
+            Log.info("3.classPath = {}", classPath);
         }
         File file = new File(classPath);
         String resultPath = null;
@@ -128,7 +136,8 @@ public class DBUtils {
         String regex = "^[a-zA-Z0-9_\\-]+$";
         return areaName.matches(regex);
     }
-    public static void main(String []args){
+
+    public static void main(String[] args) {
         try {
             System.out.println(genAbsolutePath("../../../../data/ledger"));
         } catch (Exception e) {
