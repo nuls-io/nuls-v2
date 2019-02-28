@@ -44,12 +44,15 @@ public class Summary extends BaseCmd {
     @CmdAnnotation(cmd = "sum", version = 1.0, scope = Constants.PUBLIC, description = "")
     @Parameter(parameterName = "count", parameterType = "int")
     public Response process(Map map) {
+
         int count = Integer.parseInt(map.get("count").toString());
         int sum = 0;
         for (int i = 0; i < count; i++) {
             sum += i;
         }
-        return success(sum);
+
+        Response response = success(sum);
+        return response;
     }
 
 }

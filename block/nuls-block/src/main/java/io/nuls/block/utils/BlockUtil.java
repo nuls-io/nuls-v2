@@ -30,7 +30,6 @@ import io.nuls.block.message.HashMessage;
 import io.nuls.block.model.Chain;
 import io.nuls.block.model.ChainContext;
 import io.nuls.block.model.ChainParameters;
-import io.nuls.block.model.Node;
 import io.nuls.block.model.po.BlockHeaderPo;
 import io.nuls.block.service.BlockService;
 import io.nuls.block.service.ChainStorageService;
@@ -41,6 +40,7 @@ import io.nuls.tools.constant.ErrorCode;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.exception.NulsRuntimeException;
+import io.nuls.tools.log.logback.NulsLogger;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -52,7 +52,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import static io.nuls.block.constant.CommandConstant.GET_BLOCK_MESSAGE;
 import static io.nuls.block.constant.Constant.SINGLE_DOWNLOAD_TIMEOUNT;
-import static io.nuls.block.utils.LoggerUtil.commonLog;
 
 /**
  * 区块工具类
@@ -70,7 +69,7 @@ public class BlockUtil {
     private static ChainStorageService chainStorageService;
 
     public static boolean basicVerify(int chainId, Block block) {
-
+        NulsLogger commonLog = ContextManager.getContext(chainId).getCommonLog();
         if (block == null) {
             commonLog.debug("basicVerify fail, block is null! chainId-" + chainId);
             return false;
@@ -107,7 +106,7 @@ public class BlockUtil {
     }
 
     public static boolean headerVerify(int chainId, BlockHeader header) {
-
+        NulsLogger commonLog = ContextManager.getContext(chainId).getCommonLog();
         if (header.getHash() == null) {
             commonLog.debug("headerVerify fail, block hash can not be null! chainId-" + chainId + ", height-" + header.getHeight() + ", hash-" + header.getHash());
             return false;
@@ -150,24 +149,18 @@ public class BlockUtil {
      * @return
      */
     public static boolean forkVerify(int chainId, Block block) {
-        try {
-            //1.与主链判断
-            ErrorCode mainCode = mainChainProcess(chainId, block).getErrorCode();
-            if (mainCode.equals(BlockErrorCode.SUCCESS)) {
-                return true;
+        //1.与主链判断
+        ErrorCode mainCode = mainChainProcess(chainId, block).getErrorCode();
+        if (mainCode.equals(BlockErrorCode.SUCCESS)) {
+            return true;
+        }
+        if (mainCode.equals(BlockErrorCode.IRRELEVANT_BLOCK)) {
+            //2.与主链没有关联,进入分叉链判断流程
+            ErrorCode forkCode = forkChainProcess(chainId, block).getErrorCode();
+            if (forkCode.equals(BlockErrorCode.IRRELEVANT_BLOCK)) {
+                //3.与分叉链没有关联,进入孤儿链判断流程
+                orphanChainProcess(chainId, block);
             }
-
-            if (mainCode.equals(BlockErrorCode.IRRELEVANT_BLOCK)) {
-                //2.与主链没有关联,进入分叉链判断流程
-                ErrorCode forkCode = forkChainProcess(chainId, block).getErrorCode();
-                if (forkCode.equals(BlockErrorCode.IRRELEVANT_BLOCK)) {
-                    //3.与分叉链没有关联,进入孤儿链判断流程
-                    orphanChainProcess(chainId, block);
-                }
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-            commonLog.error(e);
         }
         return false;
     }
@@ -191,6 +184,7 @@ public class BlockUtil {
 
         //1.收到的区块与主链最新高度差大于1000(可配置),丢弃
         ChainParameters parameters = ContextManager.getContext(chainId).getParameters();
+        NulsLogger commonLog = ContextManager.getContext(chainId).getCommonLog();
         if (Math.abs(blockHeight - masterChainEndHeight) > parameters.getHeightRange()) {
             commonLog.debug("chainId:" + chainId + ", received out of range blocks, height:" + blockHeight + ", hash:" + blockHash);
             return Result.getFailed(BlockErrorCode.OUT_OF_RANGE);
@@ -235,6 +229,7 @@ public class BlockUtil {
         NulsDigestData blockHash = block.getHeader().getHash();
         NulsDigestData blockPreviousHash = block.getHeader().getPreHash();
         SortedSet<Chain> forkChains = ChainManager.getForkChains(chainId);
+        NulsLogger commonLog = ContextManager.getContext(chainId).getCommonLog();
         try {
             for (Chain forkChain : forkChains) {
                 long forkChainStartHeight = forkChain.getStartHeight();
@@ -282,6 +277,7 @@ public class BlockUtil {
         NulsDigestData blockHash = block.getHeader().getHash();
         NulsDigestData blockPreviousHash = block.getHeader().getPreHash();
         SortedSet<Chain> orphanChains = ChainManager.getOrphanChains(chainId);
+        NulsLogger commonLog = ContextManager.getContext(chainId).getCommonLog();
         try {
             for (Chain orphanChain : orphanChains) {
                 long orphanChainStartHeight = orphanChain.getStartHeight();
@@ -408,6 +404,7 @@ public class BlockUtil {
         }
         HashMessage message = new HashMessage();
         message.setRequestHash(hash);
+        NulsLogger commonLog = ContextManager.getContext(chainId).getCommonLog();
         Future<Block> future = CacheHandler.addSingleBlockRequest(chainId, hash);
         commonLog.debug("get block-" + hash + " from " + nodeId + "begin");
         boolean result = NetworkUtil.sendToNode(chainId, message, nodeId, GET_BLOCK_MESSAGE);

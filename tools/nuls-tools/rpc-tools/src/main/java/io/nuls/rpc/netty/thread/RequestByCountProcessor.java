@@ -1,6 +1,6 @@
 package io.nuls.rpc.netty.thread;
 
-import io.nuls.rpc.info.Constants;
+import io.nuls.rpc.model.message.Response;
 import io.nuls.rpc.netty.channel.ConnectData;
 import io.nuls.rpc.netty.processor.RequestMessageProcessor;
 import io.nuls.tools.log.Log;
@@ -27,10 +27,11 @@ public class RequestByCountProcessor implements Runnable{
     public void run() {
         while (connectData.isConnected()) {
             try {
-                if(!connectData.getRequestEventResponseQueue().isEmpty()){
-                    RequestMessageProcessor.responseWithEventCount(connectData.getChannel(),connectData.getRequestEventResponseQueue().poll());
+                Response response = connectData.getRequestEventResponseQueue().take();
+                if (response.getRequestId() == null) {
+                    continue;
                 }
-                Thread.sleep(Constants.INTERVAL_TIMEMILLIS);
+                RequestMessageProcessor.responseWithEventCount(connectData.getChannel(), response);
             } catch (Exception e) {
                 Log.error(e);
             }

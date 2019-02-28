@@ -23,7 +23,6 @@ package io.nuls.block.thread;
 import io.nuls.block.model.Node;
 
 import static io.nuls.block.constant.Constant.NODE_COMPARATOR;
-import static io.nuls.block.utils.LoggerUtil.commonLog;
 import org.junit.Test;
 
 import java.util.concurrent.PriorityBlockingQueue;
@@ -42,7 +41,7 @@ public class BlockDownloaderTest {
             if (startHeight + size > netLatestHeight) {
                 size = (int) (netLatestHeight - startHeight + 1);
             }
-            commonLog.info("get blocks "+startHeight+"->"+(startHeight + size - 1));
+            System.out.println("get blocks "+startHeight+"->"+(startHeight + size - 1));
             startHeight += size;
         }
     }

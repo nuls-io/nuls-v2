@@ -201,12 +201,4 @@ public class ChainBootstrap {
          * */
         ResponseMessageProcessor.syncKernel(kernelUrl);
     }
-
-    /**
-     * @throws Exception Any error will throw an exception
-     */
-    private void regTxHandler() throws Exception {
-
-    }
-
 }

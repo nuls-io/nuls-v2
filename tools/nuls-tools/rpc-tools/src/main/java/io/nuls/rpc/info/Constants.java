@@ -63,7 +63,7 @@ public class Constants {
      * 超时毫秒数(1分钟)
      * Timeout millisecond(1 minute)
      */
-    public static final long TIMEOUT_TIMEMILLIS = 60L * MILLIS_PER_SECOND;
+    public static final long TIMEOUT_TIMEMILLIS = 30L * MILLIS_PER_SECOND;
 
     /**
      * 取消订阅的常量，已经无用

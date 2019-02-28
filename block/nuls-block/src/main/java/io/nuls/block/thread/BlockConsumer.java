@@ -21,13 +21,13 @@
 package io.nuls.block.thread;
 
 import io.nuls.base.data.Block;
+import io.nuls.block.manager.ContextManager;
 import io.nuls.block.service.BlockService;
 import io.nuls.tools.core.ioc.SpringLiteContext;
+import io.nuls.tools.log.logback.NulsLogger;
 
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Callable;
-
-import static io.nuls.block.utils.LoggerUtil.commonLog;
 
 /**
  * 消费共享队列中的区块
@@ -60,12 +60,12 @@ public class BlockConsumer implements Callable<Boolean> {
 
     @Override
     public Boolean call() {
+        long netLatestHeight = params.getNetLatestHeight();
+        long startHeight = params.getLocalLatestHeight() + 1;
+        NulsLogger commonLog = ContextManager.getContext(chainId).getCommonLog();
+        Block block;
+        commonLog.info("BlockConsumer start work");
         try {
-            long netLatestHeight = params.getNetLatestHeight();
-            long startHeight = params.getLocalLatestHeight() + 1;
-
-            Block block;
-            commonLog.info("BlockConsumer start work");
             while (startHeight <= netLatestHeight && flag) {
                 block = queue.take();
                 boolean saveBlock = blockService.saveBlock(chainId, block, true);

@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2017-2019 nuls.io
+ * Copyright (c) 2017-2018 nuls.io
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,29 +22,45 @@
  * SOFTWARE.
  *
  */
-package io.nuls.block.utils;
+package io.nuls.rpc.netty.processor.container;
 
-import ch.qos.logback.classic.Level;
-import io.nuls.block.manager.ContextManager;
-import io.nuls.block.model.ChainContext;
-import io.nuls.tools.log.logback.LoggerBuilder;
-import io.nuls.tools.log.logback.NulsLogger;
+import io.nuls.rpc.model.message.Response;
+
+import java.util.concurrent.CompletableFuture;
 
 /**
- * @author lan
- * @description
- * @date 2018/12/17
- **/
-public class LoggerUtil {
+ * 结果数据存放容器
+ * Response data storage container
+ * @author ln
+ * 2019/2/27
+ * */
+public class ResponseContainer {
 
-    public static NulsLogger commonLog = LoggerBuilder.getLogger("block","common", Level.INFO);
+    private String messageId;
+    private CompletableFuture<Response> future;
 
-    public static void init(int chainId, String levelString) {
-        Level level = Level.valueOf(levelString);
-        NulsLogger commonLog = LoggerBuilder.getLogger("block/chain-"+chainId+"/","common", level);
-        NulsLogger messageLog = LoggerBuilder.getLogger("block/chain-"+chainId+"/","message", level);
-        ChainContext context = ContextManager.getContext(chainId);
-        context.setCommonLog(commonLog);
-        context.setMessageLog(messageLog);
+    public ResponseContainer(String messageId) {
+        this.messageId = messageId;
+    }
+
+    public ResponseContainer(String messageId, CompletableFuture<Response> future) {
+        this.messageId = messageId;
+        this.future = future;
+    }
+
+    public String getMessageId() {
+        return messageId;
+    }
+
+    public void setMessageId(String messageId) {
+        this.messageId = messageId;
+    }
+
+    public CompletableFuture<Response> getFuture() {
+        return future;
+    }
+
+    public void setFuture(CompletableFuture<Response> future) {
+        this.future = future;
     }
 }

@@ -37,6 +37,7 @@ import lombok.ToString;
 @Data
 @ToString
 public class NegotiateConnectionResponse {
+    private String requestId;
     /**
      * An unsigned small integer value, 0 if negotiation was a failure and 1 if it was successful
      */

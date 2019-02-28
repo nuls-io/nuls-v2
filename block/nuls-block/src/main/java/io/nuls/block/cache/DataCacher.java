@@ -27,8 +27,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
-import static io.nuls.block.utils.LoggerUtil.commonLog;
-
 /**
  * 异步请求响应结果缓存类
  *
@@ -50,7 +48,6 @@ public class DataCacher<T> {
     public boolean complete(NulsDigestData hash, T t) {
         CompletableFuture<T> future = cacher.get(hash);
         if (future == null) {
-            commonLog.debug("DataCacher Time out:" + hash.getDigestHex());
             return false;
         }
         future.complete(t);

@@ -1,38 +1,69 @@
-package io.nuls.rpc.netty.handler;
+/*
+ * MIT License
+ *
+ * Copyright (c) 2017-2018 nuls.io
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ *
+ */
+package io.nuls.rpc.netty.handler.message;
 
-import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.socket.SocketChannel;
-import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
-import io.netty.handler.codec.http.websocketx.WebSocketFrame;
 import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.model.message.*;
 import io.nuls.rpc.netty.channel.ConnectData;
 import io.nuls.rpc.netty.channel.manager.ConnectManager;
 import io.nuls.rpc.netty.processor.RequestMessageProcessor;
+import io.nuls.rpc.netty.processor.container.RequestContainer;
+import io.nuls.rpc.netty.processor.container.ResponseContainer;
 import io.nuls.tools.log.Log;
 import io.nuls.tools.parse.JSONUtils;
 
 import java.util.Map;
 
 /**
- * 服务器端事件触发处理类
- * Server-side event trigger processing class
- * @author tag
- * 2019/2/21
+ * 文本类型的消息处理器
+ * Text type message handler
+ * @author ln
+ * 2019/2/27
  * */
-public class MessageHandler {
-    /**
-     * 处理客户端与服务端之前的webSocket业务
-     *
-     * @param ctx
-     * @param frame
-     */
-    public static void handWebSocketFrame(ChannelHandlerContext ctx, WebSocketFrame frame)throws Exception{
-        SocketChannel socketChannel = (SocketChannel) ctx.channel();
-        ConnectData connectData = ConnectManager.getConnectDataByChannel(socketChannel);
-        if (frame instanceof TextWebSocketFrame) {
-            TextWebSocketFrame msg = (TextWebSocketFrame) frame;
-            Message message = JSONUtils.json2pojo(msg.text(), Message.class);
+public class TextMessageHandler implements Runnable {
+
+    private SocketChannel channel;
+    private String msg;
+
+    public TextMessageHandler(SocketChannel channel, String msg) {
+        this.channel = channel;
+        this.msg = msg;
+    }
+
+    @Override
+    public void run() {
+        handler();
+    }
+
+    private void handler() {
+        try {
+            ConnectData connectData = ConnectManager.getConnectDataByChannel(channel);
+
+
+            Message message = JSONUtils.json2pojo(msg, Message.class);
             /*
              * 获取该链接对应的ConnectData对象
              * Get the ConnectData object corresponding to the link
@@ -42,13 +73,13 @@ public class MessageHandler {
                     /*
                     握手，直接响应
                      */
-                    RequestMessageProcessor.negotiateConnectionResponse(socketChannel);
+                    RequestMessageProcessor.negotiateConnectionResponse(channel, message.getMessageId());
                     break;
                 case Unsubscribe:
                     /*
                     取消订阅，直接响应
                      */
-                    Log.debug("UnsubscribeFrom<" + socketChannel.remoteAddress().getHostString() + ":" + socketChannel.remoteAddress().getPort() + ">: " + msg);
+                    Log.debug("UnsubscribeFrom<" + channel.remoteAddress().getHostString() + ":" + channel.remoteAddress().getPort() + ">: " + msg);
                     RequestMessageProcessor.unsubscribe(connectData, message);
                     break;
                 case Request:
@@ -58,7 +89,7 @@ public class MessageHandler {
                     If no service is available, return directly
                      */
                     if (!ConnectManager.isReady()) {
-                        RequestMessageProcessor.serviceNotStarted(socketChannel, messageId);
+                        RequestMessageProcessor.serviceNotStarted(channel, messageId);
                         break;
                     }
 
@@ -70,11 +101,11 @@ public class MessageHandler {
 
                     if (!ConnectManager.isPureDigital(request.getSubscriptionEventCounter())
                             && !ConnectManager.isPureDigital(request.getSubscriptionPeriod())) {
-                        connectData.getRequestSingleQueue().offer(new Object[]{messageId, request});
+                        RequestMessageProcessor.callCommandsWithPeriod(connectData.getChannel(), request.getRequestMethods(), messageId);
                     } else {
                         if (ConnectManager.isPureDigital(request.getSubscriptionPeriod())) {
                             connectData.getRequestPeriodLoopQueue().offer(new Object[]{message, request});
-                            connectData.getIdToPeriodMessageMap().put(messageId,message);
+                            connectData.getIdToPeriodMessageMap().put(messageId, message);
                         }
                         if (ConnectManager.isPureDigital(request.getSubscriptionEventCounter())) {
                             connectData.subscribeByEvent(message);
@@ -86,24 +117,29 @@ public class MessageHandler {
                     Send Ack if needed
                      */
                     if (Constants.BOOLEAN_TRUE.equals(request.getRequestAck())) {
-                        RequestMessageProcessor.ack(socketChannel, messageId);
+                        RequestMessageProcessor.ack(channel, messageId);
                     }
                     break;
-
                 case NegotiateConnectionResponse:
-                    connectData.getNegotiateResponseQueue().offer(message);
-                    break;
                 case Ack:
-                    Ack ack = JSONUtils.map2pojo((Map) message.getMessageData(), Ack.class);
-                    connectData.getAckQueue().offer(ack);
+//                    NegotiateConnectionResponse nres = JSONUtils.map2pojo((Map) message.getMessageData(), NegotiateConnectionResponse.class);
+//                    ResponseContainer resContainer = RequestContainer.getResponseContainer(nres.getRequestId());
+
+                    ResponseContainer resContainer = RequestContainer.getResponseContainer(((Map<String, String>) message.getMessageData()).get("requestId"));
+
+                    if (resContainer != null && resContainer.getFuture() != null) {
+                        resContainer.getFuture().complete(new Response());
+                    }
                     break;
                 case Response:
+
                     Response response = JSONUtils.map2pojo((Map) message.getMessageData(), Response.class);
+
                     /*
                     如果收到已请求超时的返回直接丢弃
                     Discard directly if you receive a return that has been requested for a timeout
                      */
-                    if(connectData.getTimeOutMessageList().contains(response.getRequestId())){
+                    if (connectData.getTimeOutMessageList().contains(response.getRequestId())) {
                         break;
                     }
 
@@ -114,12 +150,17 @@ public class MessageHandler {
                     if (ConnectManager.INVOKE_MAP.containsKey(response.getRequestId())) {
                         connectData.getResponseAutoQueue().offer(response);
                     } else {
-                        connectData.getResponseManualQueue().offer(response);
+                        ResponseContainer responseContainer = RequestContainer.getResponseContainer(response.getRequestId());
+                        if(responseContainer != null && responseContainer.getFuture() != null) {
+                            responseContainer.getFuture().complete(response);
+                        }
                     }
                     break;
                 default:
                     break;
             }
+        } catch (Exception e) {
+            Log.error(e.getMessage());
         }
     }
 }

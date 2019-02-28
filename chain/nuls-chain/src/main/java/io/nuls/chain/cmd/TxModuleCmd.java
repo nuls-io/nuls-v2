@@ -180,8 +180,15 @@ public class TxModuleCmd extends BaseChainCmd {
             //高度先回滚
             CacheDatas moduleTxDatas = cacheDataService.getCacheDatas(commitHeight);
             if(null == moduleTxDatas){
-                Log.error("chain module height ={} bak datas is null",commitHeight);
-                return failed("chain module height = "+commitHeight+" bak datas is null");
+                //这里存在该高度 可能在TxCirculateCmd中已经回滚过了
+                BlockHeight blockHeight = cacheDataService.getBlockHeight(chainId);
+                if(blockHeight.getLatestRollHeight() == commitHeight){
+                    Log.debug("chain module height ={} bak datas is null,maybe had rolled",commitHeight);
+                    return success();
+                }else {
+                    Log.error("chain module height ={} bak datas is null",commitHeight);
+                    return failed("chain module height = " + commitHeight + " bak datas is null");
+                }
             }
 
             //通知远程调用回滚
