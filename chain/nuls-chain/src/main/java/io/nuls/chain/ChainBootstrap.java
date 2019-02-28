@@ -20,7 +20,6 @@ import io.nuls.tools.parse.I18nUtils;
 import io.nuls.tools.parse.JSONUtils;
 import io.nuls.tools.parse.config.ConfigManager;
 
-import java.io.File;
 import java.util.Map;
 
 import static io.nuls.chain.util.LoggerUtil.Log;
@@ -119,7 +118,7 @@ public class ChainBootstrap {
         NulsConfig.setEncoding(encoding);
         /* 设置系统语言 (Set system language) */
         String language = ConfigManager.getValue(CmConstants.CFG_SYSTEM_LANGUAGE);
-        I18nUtils.loadLanguage(File.separator+"languages", language);
+        I18nUtils.loadLanguage("languages", language);
         I18nUtils.setLanguage(language);
     }
 
