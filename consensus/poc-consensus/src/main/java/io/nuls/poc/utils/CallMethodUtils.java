@@ -369,7 +369,7 @@ public class CallMethodUtils {
         try {
             Map<String, Object> params = new HashMap(4);
             params.put("chainId", chain.getConfig().getChainId());
-            params.put("packing", packing);
+            params.put("packaging", packing);
             Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.TX.abbr, "tx_cs_state", params);
             if (!cmdResp.isSuccess()) {
                 chain.getLoggerMap().get(ConsensusConstant.CONSENSUS_LOGGER_NAME).error("Packing state failed to send!");

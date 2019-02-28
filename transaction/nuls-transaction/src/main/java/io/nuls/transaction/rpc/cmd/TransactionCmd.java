@@ -12,7 +12,7 @@ import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.data.ObjectUtils;
 import io.nuls.tools.exception.NulsException;
-import io.nuls.tools.log.Log;
+import static io.nuls.transaction.utils.LoggerUtil.Log;
 import io.nuls.tools.parse.JSONUtils;
 import io.nuls.transaction.constant.TxCmd;
 import io.nuls.transaction.constant.TxConfig;

@@ -22,54 +22,16 @@
  * SOFTWARE.
  */
 
-package io.nuls.transaction.db.rocksdb.storage;
+package io.nuls.transaction.utils;
 
-import io.nuls.base.data.NulsDigestData;
-import io.nuls.transaction.model.bo.CrossTx;
-
-import java.util.List;
+import ch.qos.logback.classic.Level;
+import io.nuls.tools.log.logback.LoggerBuilder;
+import io.nuls.tools.log.logback.NulsLogger;
 
 /**
- * 存储从其他链接收的跨链交易,还未进行跨链验证等处理的交易,
- * 先统一存储,再通过task来处理. task处理后将从此表中清除已处理的交易
  * @author: Charlie
- * @date: 2018-12-27
+ * @date: 2019/2/28
  */
-
-public interface UnverifiedCtxStorageService {
-
-    /**
-     * 新增或修改跨链交易数据
-     *
-     * @param chainId
-     * @param ctx
-     * @return
-     */
-    boolean putTx(int chainId, CrossTx ctx);
-
-    /**
-     * 是否已存在交易
-     * @param chainId
-     * @param hash
-     * @return
-     */
-    CrossTx getTx(int chainId, NulsDigestData hash);
-
-    /**
-     * 根据交易hash批量删除
-     * @param chainId
-     * @param ctxList
-     * @return 删除是否成功
-     */
-    boolean removeTxList(int chainId, List<CrossTx> ctxList);
-
-
-    /**
-     * 查询指定链下所有跨链交易
-     * Query all cross-chain transactions in the specified chain
-     *
-     * @param chainId
-     * @return
-     */
-    List<CrossTx> getTxList(int chainId);
+public class LoggerUtil {
+    public static NulsLogger Log = LoggerBuilder.getLogger("./tx", "tx",Level.ALL);
 }

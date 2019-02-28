@@ -8,7 +8,6 @@ import io.nuls.rpc.netty.bootstrap.NettyServer;
 import io.nuls.rpc.netty.channel.manager.ConnectManager;
 import io.nuls.rpc.netty.processor.ResponseMessageProcessor;
 import io.nuls.tools.core.ioc.SpringLiteContext;
-import io.nuls.tools.log.Log;
 import io.nuls.tools.parse.ConfigLoader;
 import io.nuls.tools.parse.I18nUtils;
 import io.nuls.transaction.constant.TxConstant;
@@ -27,6 +26,7 @@ import java.nio.charset.Charset;
 import java.util.Map;
 import java.util.Properties;
 
+import static io.nuls.transaction.utils.LoggerUtil.Log;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 /**
@@ -56,7 +56,7 @@ public class TransactionBootStrap {
             }
             txStart();
 
-            Log.debug("START-SUCCESS");
+            Log.info("START-SUCCESS");
         }catch (Exception e){
             Log.error("Transaction startup error!");
             Log.error(e);

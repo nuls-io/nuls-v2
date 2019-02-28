@@ -28,7 +28,7 @@ package io.nuls.transaction.db.rocksdb.storage.impl;
 
 import io.nuls.base.data.Transaction;
 import io.nuls.tools.core.annotation.Service;
-import io.nuls.tools.log.Log;
+import static io.nuls.transaction.utils.LoggerUtil.Log;
 import io.nuls.transaction.db.rocksdb.storage.UnverifiedTxStorageService;
 import io.nuls.transaction.model.bo.Chain;
 import io.nuls.transaction.utils.TxUtil;

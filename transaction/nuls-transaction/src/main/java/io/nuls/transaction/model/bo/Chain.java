@@ -96,7 +96,7 @@ public class Chain {
 //        this.runningStatus = RunningStatus.INITING;
 //        this.crossTxVerifyingMap = new HashMap<>();
         this.packaging = false;
-        this.rePackage.set(true);
+        this.rePackage = new AtomicBoolean(true);
         this.txRegisterMap = new HashMap<>();
         this.txQueue = new LinkedBlockingDeque<>();
         this.orphanContainer = new LimitHashMap(TxConstant.ORPHAN_CONTAINER_MAX_SIZE);

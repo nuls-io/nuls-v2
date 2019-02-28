@@ -2,7 +2,7 @@ package io.nuls.transaction.utils;
 
 import io.nuls.db.service.RocksDBService;
 import io.nuls.tools.exception.NulsRuntimeException;
-import io.nuls.tools.log.Log;
+import static io.nuls.transaction.utils.LoggerUtil.Log;
 import io.nuls.transaction.constant.TxErrorCode;
 
 /**
