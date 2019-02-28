@@ -391,10 +391,6 @@ public class TxServiceImpl implements TxService {
             }
             int assetChainId = coinDTO.getAssetsChainId();
             int assetId = coinDTO.getAssetsId();
-            //todo 查询资产是否存在
-           /* if (!ChainCall.verifyAssetExist(assetChainId, assetId)) {
-                throw new NulsException(TxErrorCode.ASSET_NOT_EXIST);
-            }*/
             //检查对应资产余额 是否足够
             BigInteger amount = coinDTO.getAmount();
             BigInteger balance = LedgerCall.getBalance(chain, address, assetChainId, assetId);
@@ -623,9 +619,6 @@ public class TxServiceImpl implements TxService {
      */
     @Override
     public boolean crossTransactionValidator(Chain chain, Transaction tx) throws NulsException {
-        /*if (!transactionManager.baseTxValidate(chainId, tx)) {
-            return false;
-        }*/
         if (null == tx.getCoinData() || tx.getCoinData().length == 0) {
             throw new NulsException(TxErrorCode.COINDATA_NOT_FOUND);
         }
@@ -642,7 +635,15 @@ public class TxServiceImpl implements TxService {
         if (fromChainId != crossTxData.getChainId()) {
             throw new NulsException(TxErrorCode.CROSS_TX_PAYER_CHAINID_MISMATCH);
         }
-        // todo 调链管理启用
+        //验证跨链交易coinData,链的账目等
+        try {
+            if(!ChainCall.verifyCtxAsset(chain, tx.hex())){
+                return false;
+            }
+        } catch (Exception e) {
+            chain.getLogger().error(e);
+            return false;
+        }
         return true;
     }
 
@@ -691,11 +692,6 @@ public class TxServiceImpl implements TxService {
             if (!rs) {
                 throw new NulsException(TxErrorCode.COINFROM_HAS_DUPLICATE_COIN);
             }
-            //只有NULS主网节点才会进入跨链交易验证器，直接验证资产即可
-            //todo
-            /*if (!ChainCall.verifyAssetExist(coinFrom.getAssetsChainId(), coinFrom.getAssetsId())) {
-                throw new NulsException(TxErrorCode.ASSET_NOT_EXIST);
-            }*/
         }
         if (!hasNulsFrom) {
             throw new NulsException(TxErrorCode.INSUFFICIENT_FEE);
@@ -717,10 +713,6 @@ public class TxServiceImpl implements TxService {
             if (!rs) {
                 throw new NulsException(TxErrorCode.COINFROM_HAS_DUPLICATE_COIN);
             }
-            //todo
-           /* if (!ChainCall.verifyAssetExist(coinTo.getAssetsChainId(), coinTo.getAssetsId())) {
-                throw new NulsException(TxErrorCode.ASSET_NOT_EXIST);
-            }*/
         }
         return true;
     }
@@ -728,7 +720,6 @@ public class TxServiceImpl implements TxService {
 
     @Override
     public boolean crossTransactionCommit(Chain chain, List<String> txHexList, String blockHeaderHex) throws NulsException {
-
         List<NulsDigestData> txHash = new ArrayList<>();
         List<String> successedCoinDataHexs = new ArrayList<>();
         boolean rs = true;
@@ -736,12 +727,11 @@ public class TxServiceImpl implements TxService {
             Transaction tx = TxUtil.getTransaction(txHex);
             txHash.add(tx.getHash());
             String coinDataHex = HexUtil.encode(tx.getCoinData());
-           /* todo 等链管理启用
-           if(!ChainCall.ctxChainLedgerCommit(coinDataHex)){
-                rs = false;
-                break;
-            }*/
-            successedCoinDataHexs.add(coinDataHex);
+           if(!ChainCall.ctxAssetCirculateCommit(chain, txHexList, blockHeaderHex)){
+               rs = false;
+               break;
+           }
+           successedCoinDataHexs.add(coinDataHex);
         }
         if(rs) {
             //保存生效高度
@@ -750,13 +740,12 @@ public class TxServiceImpl implements TxService {
             return confirmedTxStorageService.saveCrossTxEffectList(chain.getChainId(), effectHeight, txHash);
         }else{
             for(String coinDataHex : successedCoinDataHexs){
-                if(!ChainCall.ctxChainLedgerRollback(coinDataHex)){
+                if(!ChainCall.ctxAssetCirculateRollback(chain, txHexList, blockHeaderHex)){
                     throw new NulsException(TxErrorCode.FAILED);
                 }
             }
             return false;
         }
-
     }
 
     @Override
@@ -766,11 +755,10 @@ public class TxServiceImpl implements TxService {
         for(String txHex : txHexList){
             Transaction tx = TxUtil.getTransaction(txHex);
             String coinDataHex = HexUtil.encode(tx.getCoinData());
-            /* todo 等链管理启用
-            if(!ChainCall.ctxChainLedgerRollback(coinDataHex)){
+            if(!ChainCall.ctxAssetCirculateRollback(chain, txHexList, blockHeaderHex)){
                 rs = false;
                 break;
-            }*/
+            }
             successedCoinDataHexs.add(coinDataHex);
         }
         if(rs) {
@@ -779,7 +767,7 @@ public class TxServiceImpl implements TxService {
             return confirmedTxStorageService.removeCrossTxEffectList(chain.getChainId(), effectHeight);
         }else{
             for(String coinDataHex : successedCoinDataHexs){
-                if(!ChainCall.ctxChainLedgerCommit(coinDataHex)){
+                if(!ChainCall.ctxAssetCirculateCommit(chain, txHexList, blockHeaderHex)){
                     throw new NulsException(TxErrorCode.FAILED);
                 }
             }
