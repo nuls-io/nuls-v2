@@ -87,19 +87,7 @@ public class DBUtils {
         int firstIndex = path.lastIndexOf(System.getProperty("path.separator")) + 1;
         int lastIndex = path.lastIndexOf(File.separator) + 1;
         String classPath = path.substring(firstIndex, lastIndex);
-        Log.info("1.classPath = {}", classPath);
-        if (resource == null) {
-            resource = DBUtils.class.getClassLoader().getResource("");
-            if (resource == null) {
-                resource = DBUtils.class.getResource("/");
-            }
-            String classPath2 = resource.getPath();
-            System.out.println("classPath: " + classPath2);
-            Log.info("2.classPath = {}", classPath2);
-        } else {
-            String classPath3 = resource.getPath();
-            Log.info("3.classPath = {}", classPath3);
-        }
+        Log.info("classPath = {}", classPath);
         File file = new File(classPath);
         String resultPath = null;
         boolean isFileName = false;
