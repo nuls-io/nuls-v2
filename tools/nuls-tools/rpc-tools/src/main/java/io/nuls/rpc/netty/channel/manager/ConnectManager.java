@@ -632,7 +632,9 @@ public class ConnectManager {
      * */
     public static void disConnect(SocketChannel channel){
         String url = getRemoteUri(channel);
-        CHANNEL_MAP.remove(url);
+        ConnectData connectData = CHANNEL_MAP.remove(url);
+        connectData.setConnected(false);
+        connectData.getThreadPool().shutdown();
         for (String role : ROLE_MAP.keySet()) {
             if(url.equals(getRemoteUri(role))){
                 ROLE_MAP.remove(role);
