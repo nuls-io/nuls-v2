@@ -6,7 +6,6 @@ import io.nuls.rpc.model.message.Response;
 import io.nuls.rpc.netty.processor.ResponseMessageProcessor;
 import io.nuls.tools.data.StringUtils;
 import io.nuls.tools.exception.NulsException;
-import static io.nuls.transaction.utils.LoggerUtil.Log;
 import io.nuls.tools.parse.JSONUtils;
 import io.nuls.transaction.constant.TxConstant;
 import io.nuls.transaction.model.bo.Chain;
@@ -15,6 +14,8 @@ import io.nuls.transaction.model.bo.TxRegister;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import static io.nuls.transaction.utils.LoggerUtil.Log;
 
 /**
  * 调用其他模块跟交易相关的接口
@@ -49,7 +50,7 @@ public class TransactionCall {
             }*/
             return resData.get(cmd);
         } catch (Exception e) {
-            Log.debug("cmd: {}", cmd);
+            Log.info("cmd: {}", cmd);
             throw new NulsException(e);
         }
     }
@@ -75,7 +76,7 @@ public class TransactionCall {
         params.put("txHex", txHex);
         Map result = (Map) TransactionCall.request(txRegister.getModuleCode(), txRegister.getValidator(), params);
         try {
-            chain.getLogger().debug("moduleCode:{}, -cmd:{}, -txProcess -rs: {}", txRegister.getModuleCode(), txRegister.getValidator(), JSONUtils.obj2json(result));
+            chain.getLogger().info("moduleCode:{}, -cmd:{}, -txProcess -rs: {}", txRegister.getModuleCode(), txRegister.getValidator(), JSONUtils.obj2json(result));
         } catch (JsonProcessingException e) {
             e.printStackTrace();
         }
@@ -98,7 +99,7 @@ public class TransactionCall {
             params.put("txHexList", txHexList);
             params.put("blockHeaderHex", blockHeaderHex);
             Map result = (Map) TransactionCall.request(moduleCode, cmd, params);
-            chain.getLogger().debug("moduleCode:{}, -cmd:{}, -txProcess -rs: {}",moduleCode, cmd, JSONUtils.obj2json(result));
+            chain.getLogger().info("moduleCode:{}, -cmd:{}, -txProcess -rs: {}",moduleCode, cmd, JSONUtils.obj2json(result));
             return (Boolean) result.get("value");
         } catch (Exception e) {
             chain.getLogger().error(e);

@@ -69,20 +69,20 @@ public class UnconfirmedTxProcessTask implements Runnable {
 
     private void doTask(Chain chain) {
         List<TransactionsPO> txPOList = unconfirmedTxStorageService.getAllTxPOList(chain.getChainId());
-        chain.getLogger().debug("*** Debug *** [UnconfirmedTxProcessTask] unconfirmed list size: {}", txPOList.size());
+        chain.getLogger().info("*** Debug *** [UnconfirmedTxProcessTask] unconfirmed list size: {}", txPOList.size());
         if (txPOList == null || txPOList.size() == 0) {
             return;
         }
 
         List<Transaction> expireTxList = this.getExpireTxList(txPOList);
-        chain.getLogger().debug("*** Debug *** [UnconfirmedTxProcessTask] expire list size: {}", expireTxList.size());
+        chain.getLogger().info("*** Debug *** [UnconfirmedTxProcessTask] expire list size: {}", expireTxList.size());
         Transaction tx;
         for (int i = 0; i < expireTxList.size(); i++) {
             tx = expireTxList.get(i);
             //如果该未确认交易不在待打包池中，则认为是过期脏数据，需要清理
             if (!packablePool.exist(chain, tx, false)) {
                 processTx(chain, tx);
-                chain.getLogger().debug("*** Debug *** [UnconfirmedTxProcessTask] destroy tx - type:{}, - hash:{}", tx.getType(), tx.getHash().getDigestHex());
+                chain.getLogger().info("*** Debug *** [UnconfirmedTxProcessTask] destroy tx - type:{}, - hash:{}", tx.getType(), tx.getHash().getDigestHex());
             }
         }
     }

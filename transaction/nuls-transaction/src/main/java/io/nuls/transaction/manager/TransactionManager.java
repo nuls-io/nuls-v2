@@ -78,7 +78,7 @@ public class TransactionManager {
             chain.getTxRegisterMap().put(txRegister.getTxType(), txRegister);
 
             try {
-                Log.debug("\nTxRegisterMap = " + JSONUtils.obj2PrettyJson(chain.getTxRegisterMap()));
+                Log.info("\nTxRegisterMap = " + JSONUtils.obj2PrettyJson(chain.getTxRegisterMap()));
             } catch (JsonProcessingException e) {
                 e.printStackTrace();
             }
