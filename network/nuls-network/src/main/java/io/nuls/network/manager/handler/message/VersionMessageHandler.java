@@ -27,7 +27,10 @@ package io.nuls.network.manager.handler.message;
 
 import io.nuls.network.constant.NodeConnectStatusEnum;
 import io.nuls.network.constant.NodeStatusEnum;
-import io.nuls.network.manager.*;
+import io.nuls.network.manager.MessageFactory;
+import io.nuls.network.manager.MessageManager;
+import io.nuls.network.manager.NodeGroupManager;
+import io.nuls.network.manager.TimeManager;
 import io.nuls.network.manager.handler.base.BaseMessageHandler;
 import io.nuls.network.model.NetworkEventResult;
 import io.nuls.network.model.Node;
@@ -43,7 +46,6 @@ import io.nuls.network.rpc.external.BlockRpcService;
 import io.nuls.network.rpc.external.impl.BlockRpcServiceImpl;
 import io.nuls.network.utils.LoggerUtil;
 import io.nuls.tools.core.ioc.SpringLiteContext;
-import io.nuls.tools.log.Log;
 
 import java.util.Map;
 
@@ -142,7 +144,7 @@ public class VersionMessageHandler extends BaseMessageHandler {
 
         //监听被动连接的断开
         node.setDisconnectListener(() -> {
-            Log.info("------------in node disconnect:" + node.getId());
+            LoggerUtil.Log.info("------------in node disconnect:" + node.getId());
             if (node.isCrossConnect()) {
                 nodeGroup.getCrossNodeContainer().getConnectedNodes().remove(node.getId());
                 nodeGroup.getCrossNodeContainer().markCanuseNodeByIp(ip, NodeStatusEnum.CONNECTABLE);
