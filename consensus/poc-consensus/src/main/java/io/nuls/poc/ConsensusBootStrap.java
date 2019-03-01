@@ -79,7 +79,7 @@ public class ConsensusBootStrap {
     private static void initLanguage() throws Exception {
         LanguageService languageService = SpringLiteContext.getBean(LanguageService.class);
         String languageDB = languageService.getLanguage();
-        I18nUtils.loadLanguage("", "");
+        I18nUtils.loadLanguage(ConsensusBootStrap.class,"", "");
         String language = null == languageDB ? I18nUtils.getLanguage() : languageDB;
         I18nUtils.setLanguage(language);
         if (null == languageDB) {
