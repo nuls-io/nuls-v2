@@ -30,7 +30,6 @@ import io.nuls.base.data.*;
 import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.data.StringUtils;
 import io.nuls.tools.exception.NulsException;
-import static io.nuls.transaction.utils.LoggerUtil.Log;
 import io.nuls.transaction.constant.TxConstant;
 import io.nuls.transaction.constant.TxErrorCode;
 import io.nuls.transaction.model.bo.Chain;
@@ -38,6 +37,8 @@ import io.nuls.transaction.model.po.TransactionPO;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import static io.nuls.transaction.utils.LoggerUtil.Log;
 
 /**
  * @author: Charlie
@@ -127,7 +128,13 @@ public class TxUtil {
             return list;
         }
         CoinData coinData = tx.getCoinDataInstance();
-        if(coinData.getFrom() != null){
+        if(coinData.getFrom() != null
+                && tx.getType() != TxConstant.TX_TYPE_COINBASE
+                && tx.getType() != TxConstant.TX_TYPE_REGISTER_AGENT
+                && tx.getType() != TxConstant.TX_TYPE_JOIN_CONSENSUS
+                && tx.getType() != TxConstant.TX_TYPE_CANCEL_DEPOSIT
+                && tx.getType() != TxConstant.TX_TYPE_STOP_AGENT
+                && tx.getType() != TxConstant.TX_TYPE_RED_PUNISH){
             TransactionPO transactionPO = null;
             for(CoinFrom coinFrom : coinData.getFrom()){
                 transactionPO = new TransactionPO();
@@ -141,7 +148,8 @@ public class TxUtil {
                 byte locked = coinFrom.getLocked();
                 int state = 0;
                 if(locked == -1 || locked == 1){
-                    state = 3;
+                    //解锁金额交易
+                    break;
                 }
                 transactionPO.setState(state);
                 transactionPO.setTime(tx.getTime());
