@@ -3,7 +3,7 @@
     "name": "logLevel",
     "remark": "日志级别",
     "readOnly": "false",
-    "value": "DEBUG"
+    "value": "INFO"
   },
   {
     "name": "orphanChainMaxAge",
@@ -75,7 +75,7 @@
     "name": "maxRollback",
     "remark": "每次最多回滚多少区块",
     "readOnly": "true",
-    "value": "10"
+    "value": "1000"
   },
   {
     "name": "consistencyNodePercent",

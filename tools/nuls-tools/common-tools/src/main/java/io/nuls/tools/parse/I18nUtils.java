@@ -95,7 +95,7 @@ public class I18nUtils {
             if (StringUtils.isNotBlank(defaultLanguage)) {
                 key = defaultLanguage;
             }
-            URL furl = I18nUtils.class.getClassLoader().getResource(folder);
+            URL furl = I18nUtils.class.getResource(folder);
             if (null != furl) {
                 File folderFile = new File(furl.getPath());
                 Log.info("furl.getPath()=" + furl.getPath());

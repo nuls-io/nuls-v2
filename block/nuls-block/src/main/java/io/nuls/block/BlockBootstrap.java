@@ -135,7 +135,7 @@ public class BlockBootstrap {
                 NulsLogger commonLog = context.getCommonLog();
                 commonLog.info("chainId:" + chainId + ", latestHeight:" + header.getHeight() + ", txCount:" + header.getTxCount() + ", hash:" + header.getHash());
                 try {
-                    Thread.sleep(10000L);
+                    Thread.sleep(30000L);
                 } catch (InterruptedException e) {
                     commonLog.error(e);
                 }

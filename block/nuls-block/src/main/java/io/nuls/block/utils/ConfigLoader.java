@@ -109,11 +109,11 @@ public class ConfigLoader {
                 msgList.addAll(parent.getAllowMsg());
                 txList.addAll(parent.getAllowTx());
             }
-            msgList.addAll(config.getAddmsg());
-            List<String> discardMsg = config.getDiscardmsg().stream().map(ListItem::getName).collect(Collectors.toList());
+            msgList.addAll(config.getValidMessages());
+            List<String> discardMsg = config.getInvalidMessages().stream().map(ListItem::getName).collect(Collectors.toList());
             msgList.removeIf(e -> discardMsg.contains(e.getName()));
-            txList.addAll(config.getAddtx());
-            List<String> discardTx = config.getDiscardtx().stream().map(ListItem::getName).collect(Collectors.toList());
+            txList.addAll(config.getValidTransactions());
+            List<String> discardTx = config.getInvalidTransactions().stream().map(ListItem::getName).collect(Collectors.toList());
             txList.removeIf(e -> discardTx.contains(e.getName()));
             protocol.setAllowMsg(msgList);
             protocol.setAllowTx(txList);

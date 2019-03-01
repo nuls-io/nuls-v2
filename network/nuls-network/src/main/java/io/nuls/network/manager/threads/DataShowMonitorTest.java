@@ -50,7 +50,7 @@ public class DataShowMonitorTest implements Runnable {
         //test
         printlnPeer();
         printlnMem();
-        printlnProtocolMap();
+//        printlnProtocolMap();
     }
 
     private void printlnProtocolMap() {

@@ -2,107 +2,113 @@
   {
     "version": "1",
     "extend": "",
-    "addtx": [
+    "validTransactions": [
       {
         "type": "1",
-        "name": "aaaaa",
-        "validate": "aaaaa",
-        "commit": "aaaaa",
-        "rollback": "aaaaa"
+        "name": "io.nuls.test.TestTransaction",
+        "handler": "io.nuls.test.TestTransactionHandler",
+        "validate": "validate",
+        "commit": "commit",
+        "rollback": "rollback"
       }
     ],
-    "addmsg": [
+    "validMessages": [
       {
-        "name": "BlockMessage",
-        "refer": "io.nuls.block.message.BlockMessage",
+        "name": "io.nuls.block.message.BlockMessage",
         "handlers": [
           {
-            "name": "io.nuls.block.rpc.BlockHandler"
+            "name": "io.nuls.block.rpc.BlockHandler#process"
           }
         ]
       },
       {
-        "name": "CompleteMessage",
-        "refer": "io.nuls.block.message.CompleteMessage",
+        "name": "io.nuls.block.message.CompleteMessage",
         "handlers": [
           {
-            "name": "io.nuls.block.rpc.CompleteHandler"
+            "name": "io.nuls.block.rpc.CompleteHandler#process"
           }
         ]
       },
       {
-        "name": "HashListMessage",
-        "refer": "io.nuls.block.message.HashListMessage",
+        "name": "io.nuls.block.message.HashListMessage",
         "handlers": [
           {
-            "name": "io.nuls.block.rpc.GetTxGroupHandler"
+            "name": "io.nuls.block.rpc.GetTxGroupHandler#process"
           }
         ]
       },
       {
-        "name": "HashMessage",
-        "refer": "io.nuls.block.message.HashMessage",
+        "name": "io.nuls.block.message.HashMessage",
         "handlers": [
           {
-            "name": "io.nuls.block.rpc.ForwardSmallBlockHandler"
+            "name": "io.nuls.block.rpc.ForwardSmallBlockHandler#process"
           },
           {
-            "name": "io.nuls.block.rpc.GetBlockHandler"
+            "name": "io.nuls.block.rpc.GetBlockHandler#process"
           },
           {
-            "name": "io.nuls.block.rpc.GetSmallBlockHandler"
+            "name": "io.nuls.block.rpc.GetSmallBlockHandler#process"
           }
         ]
       },
       {
-        "name": "HeightRangeMessage",
-        "refer": "io.nuls.block.message.HeightRangeMessage",
+        "name": "io.nuls.block.message.HeightRangeMessage",
         "handlers": [
           {
-            "name": "io.nuls.block.rpc.GetBlocksHandler"
+            "name": "io.nuls.block.rpc.GetBlocksHandler#process"
           }
         ]
       },
       {
-        "name": "SmallBlockMessage",
-        "refer": "io.nuls.block.message.SmallBlockMessage",
+        "name": "io.nuls.block.message.SmallBlockMessage",
         "handlers": [
           {
-            "name": "io.nuls.block.rpc.SmallBlockHandler"
+            "name": "io.nuls.block.rpc.SmallBlockHandler#process"
           }
         ]
       },
       {
-        "name": "TxGroupMessage",
-        "refer": "io.nuls.block.message.TxGroupMessage",
+        "name": "io.nuls.block.message.TxGroupMessage",
         "handlers": [
           {
-            "name": "io.nuls.block.rpc.TxGroupHandler"
+            "name": "io.nuls.block.rpc.TxGroupHandler#process"
           }
         ]
       },
       {
-        "name": "TestMessage",
-        "refer": "io.nuls.block.test.TestMessage",
+        "name": "io.nuls.block.test.TestMessage",
         "handlers": [
           {
-            "name": "io.nuls.block.test.TestMessageHandler"
+            "name": "io.nuls.block.test.TestMessageHandler#process"
           }
         ]
       }
     ],
-    "discardtx": [],
-    "discardmsg": []
+    "invalidTransactions": [],
+    "invalidMessages": []
   },
   {
     "version": "2",
     "extend": "1",
-    "addtx": [],
-    "addmsg": [],
-    "discardtx": [],
-    "discardmsg": [
+    "validTransactions": [],
+    "validMessages": [
       {
-        "name": "TestMessage"
+        "name": "io.nuls.block.message.BlockMessage",
+        "handlers": [
+          {
+            "name": "io.nuls.block.rpc.BlockHandler#process2"
+          }
+        ]
+      }
+    ],
+    "invalidTransactions": [
+      {
+        "name": "io.nuls.test.TestTransaction"
+      }
+    ],
+    "invalidMessages": [
+      {
+        "name": "io.nuls.block.test.TestMessage"
       }
     ]
   }

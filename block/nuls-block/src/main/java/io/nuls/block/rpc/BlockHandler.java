@@ -34,6 +34,8 @@ import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.log.logback.NulsLogger;
+import io.nuls.tools.protocol.MessageHandler;
+import io.nuls.tools.protocol.ProtocolValidator;
 
 import java.util.Map;
 
@@ -48,14 +50,15 @@ import static io.nuls.block.constant.CommandConstant.BLOCK_MESSAGE;
  * @date 18-11-14 下午4:23
  */
 @Component
+@MessageHandler(message = BlockMessage.class)
 public class BlockHandler extends BaseCmd {
 
     @CmdAnnotation(cmd = BLOCK_MESSAGE, version = 1.0, scope = Constants.PUBLIC, description = "")
     public Response process(Map map) {
         int chainId = Integer.parseInt(map.get("chainId").toString());
         NulsLogger messageLog = ContextManager.getContext(chainId).getMessageLog();
-        if (!ProtocolUtil.meaasgeValidate(chainId, BlockMessage.class, this.getClass())) {
-            messageLog.error("The message or message handler is not available in the current version!");
+        if (!ProtocolValidator.meaasgeValidate(chainId, BlockMessage.class, this.getClass())) {
+            messageLog.error("The protocol or protocol handler is not available in the current version!");
         }
         String nodeId = map.get("nodeId").toString();
         BlockMessage message = new BlockMessage();
