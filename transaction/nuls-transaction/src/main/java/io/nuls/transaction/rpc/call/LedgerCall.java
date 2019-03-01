@@ -145,14 +145,14 @@ public class LedgerCall {
     /**
      * 提交未确认交易给账本
      * @param chain
-     * @param txHexList
+     * @param txHex
      */
-    public static boolean commitUnconfirmedTx(Chain chain, List<String> txHexList) throws NulsException {
+    public static boolean commitUnconfirmedTx(Chain chain, String txHex) throws NulsException {
         try {
             Map<String, Object> params = new HashMap<>(TxConstant.INIT_CAPACITY_8);
             params.put(Constants.VERSION_KEY_STR, "1.0");
             params.put("chainId", chain.getChainId());
-            params.put("txHexList", txHexList);
+            params.put("txHex", txHex);
             HashMap result = (HashMap)TransactionCall.request(ModuleE.LG.abbr, "commitUnconfirmedTx", params);
             return (int) result.get("value") == 1;
         } catch (Exception e) {
@@ -182,14 +182,14 @@ public class LedgerCall {
     /**
      * 调用账本回滚未确认的交易
      * @param chain
-     * @param txHexList
+     * @param txHex
      */
-    public static boolean rollBackUnconfirmTx(Chain chain, List<String> txHexList) throws NulsException {
+    public static boolean rollBackUnconfirmTx(Chain chain, String txHex) throws NulsException {
         try {
             Map<String, Object> params = new HashMap<>(TxConstant.INIT_CAPACITY_8);
             params.put(Constants.VERSION_KEY_STR, "1.0");
             params.put("chainId", chain.getChainId());
-            params.put("txHexList", txHexList);
+            params.put("txHex", txHex);
             HashMap result = (HashMap)TransactionCall.request(ModuleE.LG.abbr, "rollBackUnconfirmTx", params);
             return (int) result.get("value") == 1;
         } catch (Exception e) {

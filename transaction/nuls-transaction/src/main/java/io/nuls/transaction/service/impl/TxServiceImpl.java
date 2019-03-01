@@ -40,7 +40,6 @@ import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.data.BigIntegerUtils;
 import io.nuls.tools.data.StringUtils;
 import io.nuls.tools.exception.NulsException;
-import static io.nuls.transaction.utils.LoggerUtil.Log;
 import io.nuls.transaction.cache.PackablePool;
 import io.nuls.transaction.constant.TxConstant;
 import io.nuls.transaction.constant.TxErrorCode;
@@ -62,6 +61,8 @@ import io.nuls.transaction.utils.TxUtil;
 import java.io.IOException;
 import java.math.BigInteger;
 import java.util.*;
+
+import static io.nuls.transaction.utils.LoggerUtil.Log;
 
 /**
  * @author: Charlie
@@ -1172,9 +1173,7 @@ public class TxServiceImpl implements TxService {
         chain.getLogger().debug("---------------------- rollbackTxLedger -----------------------\n");
         try {
             //通知账本回滚nonce
-            List<String> txHexList = new ArrayList<>();
-            txHexList.add(tx.hex());
-            LedgerCall.rollBackUnconfirmTx(chain, txHexList);
+            LedgerCall.rollBackUnconfirmTx(chain, tx.hex());
         } catch (NulsException e) {
             e.printStackTrace();
         } catch (Exception e) {

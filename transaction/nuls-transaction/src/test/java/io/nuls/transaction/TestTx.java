@@ -34,7 +34,6 @@ import io.nuls.rpc.model.message.Response;
 import io.nuls.rpc.netty.processor.ResponseMessageProcessor;
 import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.exception.NulsRuntimeException;
-import static io.nuls.transaction.utils.LoggerUtil.Log;
 import io.nuls.tools.parse.JSONUtils;
 import io.nuls.tools.parse.SerializeUtils;
 import io.nuls.transaction.model.bo.Chain;
@@ -53,6 +52,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static io.nuls.transaction.utils.LoggerUtil.Log;
 import static org.junit.Assert.assertNotNull;
 
 /**
@@ -151,7 +151,7 @@ public class TestTx {
         System.out.println(balance.longValue());
 
         //组装创建节点交易
-        Map agentTxMap = this.createAgentTx(address21, "5MR_2CaU6brvzCnGo2avJvrAsmpMMVEPvQq");
+        Map agentTxMap = this.createAgentTx(address27, "5MR_2Ch8CCnLwoLWFZ45pFEZSmo1C1pkPFA");
         //调用接口
         Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.CS.abbr, "cs_createAgent", agentTxMap);
         Map result = (HashMap) (((HashMap) cmdResp2.getResponseData()).get("cs_createAgent"));
@@ -184,7 +184,7 @@ public class TestTx {
         String agentHash = "00203e805809a9aeadc5b68b82908d6ba0f4ff53e1c6869842002aa064545e824eeb";
         Map<String, Object> dpParams = new HashMap<>();
         dpParams.put("chainId", chainId);
-        dpParams.put("address", address21);
+        dpParams.put("address", address27);
         dpParams.put("agentHash", agentHash);
         dpParams.put("deposit", 200000 * 100000000L);
         Response dpResp = ResponseMessageProcessor.requestAndResponse(ModuleE.CS.abbr, "cs_depositToAgent", dpParams);
