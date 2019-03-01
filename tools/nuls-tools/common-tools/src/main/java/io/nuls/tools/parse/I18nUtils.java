@@ -89,9 +89,9 @@ public class I18nUtils {
             if (StringUtils.isBlank(folder)) {
                 folder = FOLDER;
             }
-            if (!isSystemWin()) {
-                folder = File.separator + folder;
-            }
+//            if (!isSystemWin()) {
+//                folder = File.separator + folder;
+//            }
             if (StringUtils.isNotBlank(defaultLanguage)) {
                 key = defaultLanguage;
             }
