@@ -26,6 +26,7 @@ import io.nuls.block.model.ChainContext;
 import io.nuls.block.rpc.callback.ProtocolVersionInvoke;
 import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.model.message.Response;
+import io.nuls.rpc.netty.processor.ResponseMessageProcessor;
 import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.log.logback.NulsLogger;
 
