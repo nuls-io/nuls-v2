@@ -34,7 +34,7 @@ import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Service;
 import io.nuls.tools.data.BigIntegerUtils;
 import io.nuls.tools.exception.NulsException;
-import io.nuls.tools.log.Log;
+import static io.nuls.transaction.utils.LoggerUtil.Log;
 import io.nuls.tools.parse.JSONUtils;
 import io.nuls.transaction.constant.TxConstant;
 import io.nuls.transaction.constant.TxErrorCode;
@@ -198,7 +198,8 @@ public class TransactionManager {
             validateCoinToBase(coinData.getTo(), tx.getType());
             validateFee(chain, tx.getType(), tx.size(), coinData, txRegister);
         } else if (tx.getType() != TxConstant.TX_TYPE_YELLOW_PUNISH && tx.getType() != TxConstant.TX_TYPE_RED_PUNISH) {
-            //不是红黄牌,必有coinData
+            //不是
+            // 红黄牌,必有coinData
             throw new NulsException(TxErrorCode.TX_DATA_VALIDATION_ERROR);
         }
     }

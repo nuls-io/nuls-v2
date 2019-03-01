@@ -39,7 +39,7 @@ if [ -z "${APP_NAME}" ]; then
     echoRed "APP_NAME 未配置"
     exit 0;
 fi
-VERSION="%Version%"; # %Version 注入
+VERSION="%VERSION%"; # %Version 注入
 JAR_FILE="${MODULE_PATH}/${APP_NAME}-${VERSION}.jar"
 MAIN_CLASS="%MAIN_CLASS%" # MAIN_CLASS 注入
 JOPT_XMS="%JOPT_XMS%"  # JOPT_XMS 注入

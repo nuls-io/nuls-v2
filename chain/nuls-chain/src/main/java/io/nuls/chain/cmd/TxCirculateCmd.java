@@ -49,6 +49,7 @@ import java.util.Map;
 
 /**
  * 进行资产跨连交易流通的处理
+ *
  * @author lan
  * @date 2019/02/21
  **/
@@ -67,8 +68,6 @@ public class TxCirculateCmd extends BaseChainCmd {
     private TxCirculateService txCirculateService;
 
 
-
-
     /**
      * 跨链流通校验
      */
@@ -80,7 +79,7 @@ public class TxCirculateCmd extends BaseChainCmd {
         try {
             String txHex = String.valueOf(params.get("txHex"));
             Transaction tx = TxUtil.buildTxData(txHex);
-            if(null == tx){
+            if (null == tx) {
                 return failed(CmErrorCode.ERROR_TX_HEX);
             }
             List<CoinDataAssets> list = txCirculateService.getChainAssetList(tx.getCoinData());
@@ -91,9 +90,11 @@ public class TxCirculateCmd extends BaseChainCmd {
             Map<String, BigInteger> fromAssetMap = fromCoinDataAssets.getAssetsMap();
             Map<String, BigInteger> toAssetMap = toCoinDataAssets.getAssetsMap();
             ChainEventResult chainEventResult = validateService.assetCirculateValidator(fromChainId, toChainId, fromAssetMap, toAssetMap);
-            if(chainEventResult.isSuccess()){
-                return success();
-            }else{
+            if (chainEventResult.isSuccess()) {
+                Map<String, Boolean> resultMap = new HashMap<>();
+                resultMap.put("value", true);
+                return success(resultMap);
+            } else {
                 return failed(chainEventResult.getErrorCode());
             }
         } catch (Exception e) {
@@ -125,21 +126,21 @@ public class TxCirculateCmd extends BaseChainCmd {
             }
             /*begin bak datas*/
             BlockHeight dbHeight = cacheDataService.getBlockHeight(chainId);
-            cacheDataService.bakBlockTxs(chainId,dbHeight.getBlockHeight(),commitHeight,txList,true);
+            cacheDataService.bakBlockTxs(chainId, dbHeight.getBlockHeight(), commitHeight, txList, true);
             /*end bak datas*/
             /*begin bak height*/
-            cacheDataService.beginBakBlockHeight(chainId,commitHeight);
+            cacheDataService.beginBakBlockHeight(chainId, commitHeight);
             /*end bak height*/
             try {
                 txCirculateService.circulateCommit(txList);
                 LoggerUtil.Log.debug("moduleTxsCommit end");
                 /*begin bak height*/
-                cacheDataService.endBakBlockHeight(chainId,commitHeight);
+                cacheDataService.endBakBlockHeight(chainId, commitHeight);
                 /*end bak height*/
             } catch (Exception e) {
                 LoggerUtil.Log.error(e);
                 //进行回滚
-                cacheDataService.rollBlockTxs(chainId,commitHeight);
+                cacheDataService.rollBlockTxs(chainId, commitHeight);
                 return failed(e.getMessage());
             }
 
@@ -174,12 +175,19 @@ public class TxCirculateCmd extends BaseChainCmd {
             }
             //高度先回滚
             CacheDatas circulateTxDatas = cacheDataService.getCacheDatas(commitHeight);
-            if(null == circulateTxDatas){
-                Log.error("chain module height ={} bak datas is null",commitHeight);
-                return failed("chain module height = "+commitHeight+" bak datas is null");
+            if (null == circulateTxDatas) {
+                BlockHeight blockHeight = cacheDataService.getBlockHeight(chainId);
+                //这里存在该高度 可能在TxCirculateCmd中已经回滚过了
+                if (blockHeight.getLatestRollHeight() == commitHeight) {
+                    LoggerUtil.Log.debug("chain module height ={} bak datas is null,maybe had rolled", commitHeight);
+                    return success();
+                } else {
+                    LoggerUtil.Log.error("chain module height ={} bak datas is null", commitHeight);
+                    return failed("chain module height = " + commitHeight + " bak datas is null");
+                }
             }
             //进行数据回滚
-            cacheDataService.rollBlockTxs(chainId,commitHeight);
+            cacheDataService.rollBlockTxs(chainId, commitHeight);
         } catch (Exception e) {
             Log.error(e);
             return failed(e.getMessage());

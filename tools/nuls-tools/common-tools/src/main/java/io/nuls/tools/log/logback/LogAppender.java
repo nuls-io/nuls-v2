@@ -1,7 +1,9 @@
 package io.nuls.tools.log.logback;
 
+import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.classic.encoder.PatternLayoutEncoder;
+import ch.qos.logback.classic.filter.ThresholdFilter;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.Appender;
 import ch.qos.logback.core.ConsoleAppender;
@@ -26,18 +28,25 @@ public class LogAppender {
      * @param fileName
      * @return
      */
-    public static RollingFileAppender getAppender(String fileName){
+    @SuppressWarnings("unchecked")
+    public static RollingFileAppender getAppender(String fileName, Level level){
         String rootPath = System.getProperty(PROJECT_PATH);
         LoggerContext context = (LoggerContext) LoggerFactory.getILoggerFactory();
         RollingFileAppender appender = new RollingFileAppender();
         /*设置上下文，每个logger都关联到logger上下文，默认上下文名称为default。
         但可以使用<contextName>设置成其他名字，用于区分不同应用程序的记录。一旦设置，不能修改。*/
         appender.setContext(context);
+
+        //这里设置级别过滤器
+        LogFilter levelController = new LogFilter();
+        ThresholdFilter levelFilter = levelController.getThresholdFilter(level);
+        levelFilter.start();
+        appender.addFilter(levelFilter);
+
         //设置文件名
         appender.setFile(OptionHelper.substVars(rootPath+"/logs/"+"/"+fileName + ".log",context));
         appender.setAppend(true);
         appender.setPrudent(false);
-
         //设置文件创建时间及大小的类
         SizeAndTimeBasedRollingPolicy policy = new SizeAndTimeBasedRollingPolicy();
         //文件名格式
@@ -71,10 +80,17 @@ public class LogAppender {
         return appender;
     }
 
-    public static Appender<ILoggingEvent> createConsoleAppender(){
+    @SuppressWarnings("unchecked")
+    public static Appender<ILoggingEvent> createConsoleAppender(Level level){
         ConsoleAppender appender = new ConsoleAppender();
         LoggerContext context = (LoggerContext) LoggerFactory.getILoggerFactory();
         appender.setContext(context);
+        //这里设置级别过滤器
+        LogFilter levelController = new LogFilter();
+        ThresholdFilter levelFilter = levelController.getThresholdFilter(level);
+        levelFilter.start();
+        appender.addFilter(levelFilter);
+
         PatternLayoutEncoder encoder = new PatternLayoutEncoder();
         //设置上下文，每个logger都关联到logger上下文，默认上下文名称为default。
         //但可以使用<contextName>设置成其他名字，用于区分不同应用程序的记录。一旦设置，不能修改。

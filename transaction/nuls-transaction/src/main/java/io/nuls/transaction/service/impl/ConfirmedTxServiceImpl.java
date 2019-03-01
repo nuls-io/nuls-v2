@@ -3,10 +3,8 @@ package io.nuls.transaction.service.impl;
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.constant.TxStatusEnum;
 import io.nuls.base.data.*;
-import io.nuls.rpc.model.ModuleE;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Service;
-import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.exception.NulsRuntimeException;
 import io.nuls.transaction.cache.PackablePool;
@@ -21,7 +19,6 @@ import io.nuls.transaction.manager.TransactionManager;
 import io.nuls.transaction.model.bo.Chain;
 import io.nuls.transaction.model.bo.TxRegister;
 import io.nuls.transaction.model.bo.VerifyTxResult;
-import io.nuls.transaction.rpc.call.ChainCall;
 import io.nuls.transaction.rpc.call.LedgerCall;
 import io.nuls.transaction.rpc.call.NetworkCall;
 import io.nuls.transaction.rpc.call.TransactionCall;
@@ -35,8 +32,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import static io.nuls.transaction.utils.TxUtil.getCoinData;
 
 /**
  * @author: Charlie
@@ -122,6 +117,8 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
         }
 
         chain.getLogger().debug("保存创世块交易成功, H2数据库生成{}条交易记录", debugCount);
+        //修改重新打包状态,如果共识正在打包则需要重新打包
+        chain.getRePackage().set(true);
         return true;
     }
 
@@ -144,7 +141,12 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
                 Transaction tx = unconfirmedTxStorageService.getTx(chain.getChainId(), hash);
                 txList.add(tx);
             }
-            return saveBlockTxList(chain, txList, blockHeaderHex, false);
+            boolean saveResult = saveBlockTxList(chain, txList, blockHeaderHex, false);
+            if(saveResult){
+                //修改重新打包状态,如果共识正在打包则需要重新打包
+                chain.getRePackage().set(true);
+            }
+            return saveResult;
         } catch (Exception e) {
             chain.getLogger().error(e);
             return false;
@@ -255,7 +257,7 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
     //提交账本
     public boolean commitLedger(Chain chain, List<String> txHexList, long blockHeight) {
         try {
-            return LedgerCall.commitTxLedger(chain, txHexList, blockHeight, true);
+            return LedgerCall.commitTxsLedger(chain, txHexList, blockHeight);
         } catch (NulsException e) {
             chain.getLogger().debug("failed! commitLedger");
             chain.getLogger().error(e);
@@ -314,7 +316,7 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
 
     public boolean rollbackLedger(Chain chain, List<String> txHexList, Long blockHeight) {
         try {
-            return LedgerCall.rollbackTxLedger(chain, txHexList, blockHeight,true);
+            return LedgerCall.rollbackTxsLedger(chain, txHexList, blockHeight);
         } catch (NulsException e) {
             chain.getLogger().error(e);
             return false;

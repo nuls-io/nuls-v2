@@ -7,7 +7,7 @@ import io.nuls.base.data.Transaction;
 import io.nuls.tools.core.ioc.SpringLiteContext;
 import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.exception.NulsException;
-import io.nuls.tools.log.Log;
+import static io.nuls.transaction.utils.LoggerUtil.Log;
 import io.nuls.transaction.cache.PackablePool;
 import io.nuls.transaction.constant.TxConstant;
 import io.nuls.transaction.db.h2.dao.TransactionH2Service;
@@ -103,10 +103,10 @@ public class VerifyTxProcessTask implements Runnable {
             }
             VerifyTxResult verifyTxResult = LedgerCall.verifyCoinData(chain, tx, false);
             if(verifyTxResult.success()){
-//                if(chain.getPackaging()) {
+                if(chain.getPackaging()) {
                     //当节点是出块节点时, 才将交易放入待打包队列
                     packablePool.add(chain, tx, false);
-//                }
+                }
                 //保存到rocksdb
                 unconfirmedTxStorageService.putTx(chainId, tx);
                 //保存到h2数据库
@@ -114,7 +114,7 @@ public class VerifyTxProcessTask implements Runnable {
                 //调账本记录未确认交易
                 List<String> txHexList = new ArrayList<>();
                 txHexList.add(tx.hex());
-                LedgerCall.commitTxLedger(chain, txHexList, null, false);
+                LedgerCall.commitUnconfirmedTx(chain, txHexList);
                 //广播交易hash
                 NetworkCall.broadcastTxHash(chain.getChainId(),tx.getHash());
                 count++;
@@ -151,7 +151,7 @@ public class VerifyTxProcessTask implements Runnable {
                 if (success) {
                     List<String> txHexList = new ArrayList<>();
                     txHexList.add(tx.hex());
-                    LedgerCall.rollbackTxLedger(chain, txHexList, null, false);
+                    LedgerCall.rollBackUnconfirmTx(chain, txHexList);
                     it.remove();
                     chain.getLogger().debug("*** Debug *** [VerifyTxProcessTask - OrphanTx] " +
                             "OrphanTx remove - type:{} - txhash:{}, -orphanTxList size:{}", tx.getType(), tx.getHash().getDigestHex(), orphanTxList.size());

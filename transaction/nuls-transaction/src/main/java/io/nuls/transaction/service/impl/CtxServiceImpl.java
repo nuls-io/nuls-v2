@@ -7,7 +7,6 @@ import io.nuls.base.signture.P2PHKSignature;
 import io.nuls.base.signture.SignatureUtil;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Service;
-import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.data.StringUtils;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.transaction.cache.PackablePool;
@@ -16,8 +15,8 @@ import io.nuls.transaction.constant.TxConstant;
 import io.nuls.transaction.constant.TxErrorCode;
 import io.nuls.transaction.db.h2.dao.TransactionH2Service;
 import io.nuls.transaction.db.rocksdb.storage.CtxStorageService;
-import io.nuls.transaction.db.rocksdb.storage.UnverifiedCtxStorageService;
 import io.nuls.transaction.db.rocksdb.storage.UnconfirmedTxStorageService;
+import io.nuls.transaction.db.rocksdb.storage.UnverifiedCtxStorageService;
 import io.nuls.transaction.message.BroadcastCrossNodeRsMessage;
 import io.nuls.transaction.message.BroadcastCrossTxHashMessage;
 import io.nuls.transaction.message.GetTxMessage;
@@ -27,7 +26,10 @@ import io.nuls.transaction.model.bo.Chain;
 import io.nuls.transaction.model.bo.CrossTx;
 import io.nuls.transaction.model.bo.CrossTxSignResult;
 import io.nuls.transaction.model.bo.CrossTxVerifyResult;
-import io.nuls.transaction.rpc.call.*;
+import io.nuls.transaction.rpc.call.AccountCall;
+import io.nuls.transaction.rpc.call.ConsensusCall;
+import io.nuls.transaction.rpc.call.LedgerCall;
+import io.nuls.transaction.rpc.call.NetworkCall;
 import io.nuls.transaction.service.CtxService;
 import io.nuls.transaction.utils.TxUtil;
 
@@ -62,6 +64,8 @@ public class CtxServiceImpl implements CtxService {
     @Autowired
     private TransactionH2Service transactionH2Service;
 
+    private boolean canPackage = false;
+
     @Override
     public void newCrossTx(Chain chain, String nodeId, Transaction tx) throws NulsException {
         if (tx == null) {
@@ -76,21 +80,6 @@ public class CtxServiceImpl implements CtxService {
         ctxExist = ctxStorageService.getTx(chainId, tx.getHash());
         if (null != ctxExist) {
             return;
-        }
-        if(chain.getChainId() == TxConstant.NULS_CHAINID){
-            String coinDataHex = HexUtil.encode(ctxExist.getTx().getCoinData());
-            //验证跨链交易coinData,链的账目等
-            if(!ChainCall.verifyCtxCoinData(coinDataHex)){
-                return;
-            }
-           /* //主网接收到一个友链跨链交易, 对转出者链进行账目金额扣除
-            if(!ChainCall.receiveInCtxTally(coinDataHex)){
-                return;
-            }
-            //对接收者链进行账目金额增加
-            if (!ChainCall.sendOutCtxTally(HexUtil.encode(tx.getCoinData()))) {
-                return;
-            }*/
         }
         CrossTx ctx = new CrossTx();
         ctx.setTx(tx);
@@ -208,7 +197,7 @@ public class CtxServiceImpl implements CtxService {
         } catch (Exception e) {
             throw new NulsException(e);
         }
-        LedgerCall.commitTxLedger(chain, txHexList, null, false);
+        LedgerCall.commitUnconfirmedTx(chain, txHexList);
         //广播交易hash
         BroadcastCrossTxHashMessage ctxHashMessage = new BroadcastCrossTxHashMessage();
         ctxHashMessage.setCommand(TxCmd.NW_NEW_CROSS_HASH);

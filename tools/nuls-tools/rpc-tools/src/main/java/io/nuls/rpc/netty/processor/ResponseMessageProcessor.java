@@ -8,12 +8,16 @@ import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.model.message.*;
 import io.nuls.rpc.netty.channel.ConnectData;
 import io.nuls.rpc.netty.channel.manager.ConnectManager;
+import io.nuls.rpc.netty.processor.container.RequestContainer;
+import io.nuls.rpc.netty.processor.container.ResponseContainer;
 import io.nuls.tools.data.StringUtils;
 import io.nuls.tools.log.Log;
 import io.nuls.tools.parse.JSONUtils;
 import io.nuls.tools.thread.TimeService;
 
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
 
 
 /**
@@ -42,13 +46,19 @@ public class ResponseMessageProcessor {
          */
         Message message = MessageUtil.basicMessage(MessageType.NegotiateConnection);
         message.setMessageData(MessageUtil.defaultNegotiateConnection());
+
+        ResponseContainer responseContainer = RequestContainer.putRequest(message.getMessageId());
+
         ConnectManager.sendMessage(channel,JSONUtils.obj2json(message));
 
-        /*
-        是否收到正确的握手确认
-        Whether received the correct handshake confirmation?
-         */
-        return receiveNegotiateConnectionResponse(ConnectManager.CHANNEL_MAP.get(url));
+        try {
+            return responseContainer.getFuture().get(Constants.TIMEOUT_TIMEMILLIS, TimeUnit.MILLISECONDS) != null;
+        } catch (Exception e) {
+            //Timeout Error
+            return false;
+        } finally {
+            RequestContainer.removeResponseContainer(message.getMessageId());
+        }
     }
 
     /**
@@ -81,17 +91,19 @@ public class ResponseMessageProcessor {
             throw new Exception("Kernel not available");
         }
 
+        ResponseContainer responseContainer = RequestContainer.putRequest(message.getMessageId());
+
         /*
         发送请求
         Send request
         */
-        ConnectManager.sendMessage(channel,JSONUtils.obj2json(message));
+        ConnectManager.sendMessage(channel, JSONUtils.obj2json(message));
 
         /*
         获取返回的数据，放入本地变量
         Get the returned data and place it in the local variable
          */
-        Response response = receiveResponse(ConnectManager.CHANNEL_MAP.get(kernelUrl),message.getMessageId(), Constants.TIMEOUT_TIMEMILLIS);
+        Response response = receiveResponse(responseContainer, Constants.TIMEOUT_TIMEMILLIS);
         BaseInvoke baseInvoke = new KernelInvoke();
         baseInvoke.callBack(response);
 
@@ -157,8 +169,8 @@ public class ResponseMessageProcessor {
      */
     public static Response requestAndResponse(String role, String cmd, Map params, long timeOut) throws Exception {
         Request request = MessageUtil.newRequest(cmd, params, Constants.BOOLEAN_FALSE, Constants.ZERO, Constants.ZERO);
-        String messageId = sendRequest(role, request);
-        return receiveResponse(ConnectManager.getConnectDataByRole(role),messageId, timeOut);
+        ResponseContainer responseContainer = sendRequest(role, request);
+        return receiveResponse(responseContainer, timeOut);
     }
 
     /**
@@ -176,9 +188,12 @@ public class ResponseMessageProcessor {
      */
     public static String requestAndInvoke(String role, String cmd, Map params, String subscriptionPeriod, String subscriptionEventCounter, BaseInvoke baseInvoke) throws Exception {
         Request request = MessageUtil.newRequest(cmd, params, Constants.BOOLEAN_FALSE, subscriptionPeriod, subscriptionEventCounter);
-        String messageId = sendRequest(role, request);
-        ConnectManager.INVOKE_MAP.put(messageId, baseInvoke);
-        return messageId;
+        ResponseContainer responseContainer = sendRequest(role, request);
+        ConnectManager.INVOKE_MAP.put(responseContainer.getMessageId(), baseInvoke);
+
+        RequestContainer.removeResponseContainer(responseContainer.getMessageId());
+
+        return responseContainer.getMessageId();
     }
 
     /**
@@ -196,9 +211,9 @@ public class ResponseMessageProcessor {
      */
     public static String requestAndInvokeWithAck(String role, String cmd, Map params, String subscriptionPeriod, String subscriptionEventCounter, BaseInvoke baseInvoke) throws Exception {
         Request request = MessageUtil.newRequest(cmd, params, Constants.BOOLEAN_TRUE, subscriptionPeriod, subscriptionEventCounter);
-        String messageId = sendRequest(role, request);
-        ConnectManager.INVOKE_MAP.put(messageId, baseInvoke);
-        return receiveAck(role,messageId) ? messageId : null;
+        ResponseContainer responseContainer = sendRequest(role, request);
+        ConnectManager.INVOKE_MAP.put(responseContainer.getMessageId(), baseInvoke);
+        return receiveResponse(responseContainer, Constants.TIMEOUT_TIMEMILLIS) != null ? responseContainer.getMessageId() : null;
     }
 
     /**
@@ -216,13 +231,12 @@ public class ResponseMessageProcessor {
                 && !ConnectManager.isPureDigital(request.getSubscriptionEventCounter())) {
             throw new Exception("Wrong value: [SubscriptionPeriod][SubscriptionEventCounter]");
         }
-
-        String messageId = sendRequest(role, request);
-        ConnectManager.INVOKE_MAP.put(messageId, baseInvoke);
+        ResponseContainer responseContainer = sendRequest(role, request);
+        ConnectManager.INVOKE_MAP.put(responseContainer.getMessageId(), baseInvoke);
         if (Constants.BOOLEAN_FALSE.equals(request.getRequestAck())) {
-            return messageId;
+            return responseContainer.getMessageId();
         } else {
-            return receiveAck(role,messageId) ? messageId : null;
+            return  receiveResponse(responseContainer, Constants.TIMEOUT_TIMEMILLIS) != null ? responseContainer.getMessageId() : null;
         }
     }
 
@@ -236,12 +250,14 @@ public class ResponseMessageProcessor {
      * @return messageId，用以取消订阅 / messageId, used to unsubscribe
      * @throws Exception JSON格式转换错误、连接失败 / JSON format conversion error, connection failure
      */
-    private static String sendRequest(String role, Request request) throws Exception {
+    private static ResponseContainer sendRequest(String role, Request request) throws Exception {
 
         Message message = MessageUtil.basicMessage(MessageType.Request);
         message.setMessageData(request);
 
         ConnectData connectData = ConnectManager.getConnectDataByRole(role);
+
+        ResponseContainer responseContainer = RequestContainer.putRequest(message.getMessageId());
 
         ConnectManager.sendMessage(connectData.getChannel(),JSONUtils.obj2json(message));
         if (ConnectManager.isPureDigital(request.getSubscriptionPeriod())
@@ -253,9 +269,8 @@ public class ResponseMessageProcessor {
             ConnectManager.MSG_ID_KEY_CHANNEL_MAP.put(message.getMessageId(), connectData);
         }
 
-        return message.getMessageId();
+        return responseContainer;
     }
-
 
     /**
      * 取消订阅
@@ -287,124 +302,23 @@ public class ResponseMessageProcessor {
     }
 
     /**
-     * 是否握手成功
-     * Whether shake hands successfully?
-     *
-     * @param connectData                   被调用模块角色链接/Called module roles
-     * @return boolean
-     * @throws InterruptedException    连接失败 / connection failure
-     */
-    public static boolean receiveNegotiateConnectionResponse(ConnectData connectData) throws Exception {
-        long timeMillis = System.currentTimeMillis();
-        while (System.currentTimeMillis() - timeMillis <= Constants.TIMEOUT_TIMEMILLIS) {
-            /*
-            获取队列中的第一个对象，如果非空，则说明握手成功
-            Get the first item of the queue, If not empty, the handshake is successful.
-             */
-            Message message = connectData.firstMessageInNegotiateResponseQueue();
-            if (message != null) {
-                return true;
-            }
-            Thread.sleep(Constants.INTERVAL_TIMEMILLIS);
-        }
-        /*
-        Timeout Error
-         */
-        return false;
-    }
-
-
-    /**
      * 根据messageId获取Response
      * Get response by messageId
      *
-     * @param connectData    链接通道/Called module roles
-     * @param messageId      订阅时的messageId / MessageId when do subscription
+     * @param responseContainer         结果容器/ Result container
+     * @param timeOut                   超时时间，单位毫秒 / Timeout, in milliseconds
      * @return Response
      * @throws Exception JSON格式转换错误、连接失败 / JSON format conversion error, connection failure
      */
-    private static Response receiveResponse(ConnectData connectData, String messageId, long timeOut) throws Exception {
-        long timeMillis = System.currentTimeMillis();
-        while (System.currentTimeMillis() - timeMillis <= timeOut) {
-            /*
-            获取队列中的第一个对象
-            Get the first item of the queue
-             */
-            Response response = connectData.firstMessageInResponseManualQueue();
-            if (response == null) {
-                Thread.sleep(Constants.INTERVAL_TIMEMILLIS);
-                continue;
-            }
+    private static Response receiveResponse(ResponseContainer responseContainer, long timeOut) throws Exception {
 
-            if (response.getRequestId().equals(messageId)) {
-                /*
-                messageId匹配，说明就是需要的结果，返回
-                If messageId is the same, then the response is needed
-                 */
-                return response;
-            }
-
-            /*
-            messageId不匹配，放回队列
-            Add back to the queue
-             */
-            connectData.getResponseManualQueue().offer(response);
-
-            Thread.sleep(Constants.INTERVAL_TIMEMILLIS);
+        try {
+            return responseContainer.getFuture().get(timeOut, TimeUnit.MILLISECONDS);
+        } catch (Exception e) {
+            //Timeout Error
+            return MessageUtil.newResponse(responseContainer.getMessageId(), Constants.BOOLEAN_FALSE, Constants.RESPONSE_TIMEOUT);
+        } finally {
+            RequestContainer.removeResponseContainer(responseContainer.getMessageId());
         }
-
-        connectData.getTimeOutMessageList().add(messageId);
-        /*
-        Timeout Error
-         */
-        return MessageUtil.newResponse(messageId, Constants.BOOLEAN_FALSE, Constants.RESPONSE_TIMEOUT);
-    }
-
-
-    /**
-     * 获取收到Request的确认
-     * Get confirmation of receipt(Ack) of Request
-     *
-     * @param role      被调用模块角色/Called module roles
-     * @param messageId 订阅时的messageId / MessageId when do subscription
-     * @return boolean
-     * @throws Exception JSON格式转换错误、连接失败 / JSON format conversion error, connection failure
-     */
-    private static boolean receiveAck(String role,String messageId) throws Exception {
-
-        long timeMillis = TimeService.currentTimeMillis();
-        ConnectData connectData = ConnectManager.getConnectDataByRole(role);
-        while (TimeService.currentTimeMillis() - timeMillis <= Constants.TIMEOUT_TIMEMILLIS) {
-            /*
-            获取队列中的第一个对象，如果是空，舍弃
-            Get the first item of the queue, If it is an empty object, discard
-             */
-            Ack ack = connectData.firstMessageInAckQueue();
-            if (ack == null) {
-                Thread.sleep(Constants.INTERVAL_TIMEMILLIS);
-                continue;
-            }
-
-            if (ack.getRequestId().equals(messageId)) {
-                /*
-                messageId匹配，说明就是需要的结果，返回
-                If messageId is the same, then the ack is needed
-                 */
-                return true;
-            }
-
-            /*
-            messageId不匹配，放回队列
-            Add back to the queue
-             */
-            connectData.getAckQueue().offer(ack);
-
-            Thread.sleep(Constants.INTERVAL_TIMEMILLIS);
-        }
-
-        /*
-        Timeout Error
-         */
-        return false;
     }
 }

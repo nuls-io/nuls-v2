@@ -25,9 +25,9 @@
         <setting name="logImpl" value="${mybatis.sql}" />
     </settings>
 
-    <typeAliases>
+  <!--  <typeAliases>
         <typeAlias type="io.nuls.h2.utils.Searchable"/>
-    </typeAliases>
+    </typeAliases>-->
 
 
     <plugins>
@@ -87,7 +87,7 @@
     </environments>
 
     <mappers>
-        <package name="io.nuls.h2.common"/>
+        <!--<package name="io.nuls.h2.common"/>-->
         <package name="${mybatis.mapper}"/>
     </mappers>
 </configuration>

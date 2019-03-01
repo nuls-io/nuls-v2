@@ -11,6 +11,7 @@ help()
     		-o <目录>  指定输出目录
     		-m 生成mykernel模块以及启动脚本
     		-h 查看帮助
+    		-j JAVA_HOME
     Author: zlj
 EOF
     exit 0
@@ -26,7 +27,7 @@ DOPULL=
 DOMOCK=
 #更新代码的 git 分支
 GIT_BRANCH=
-while getopts pmhb:o: name
+while getopts pmhb:o:j: name
 do
             case $name in
             p)	   DOPULL=1
@@ -37,6 +38,7 @@ do
             m)     DOMOCK=1;;
 			o)	   MODULES_PATH="$OPTARG";;
 			h)     help ;;
+			j)     JAVA_HOME="$OPTARG";;
             ?)     exit 2;;
            esac
 done
@@ -275,7 +277,7 @@ copyModuleNcfToModules(){
 
 	eval "${sedCommand}  ${BUILD_PATH}/start-temp.bat > ${moduleBuildPath}/start.bat"
 	cp "${moduleBuildPath}/start.bat" "${MODULES_PATH}/${moduleName}/${version}/start.bat"
-    #cp "${moduleBuildPath}/start.bat" "/Volumes/share/start.bat"
+#    cp "${moduleBuildPath}/start.bat" "/Volumes/share/start.bat"
 	echo "拷贝 ${moduleBuildPath}/start.bat 到 ${MODULES_PATH}/${moduleName}/${version}/start.bat"
 
 	eval "${sedCommand}  ${BUILD_PATH}/stop-temp.sh > ${moduleBuildPath}/stop.sh"

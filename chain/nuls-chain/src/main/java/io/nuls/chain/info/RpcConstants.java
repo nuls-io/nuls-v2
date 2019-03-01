@@ -49,7 +49,7 @@ public interface RpcConstants {
      * 模块统一交易验证器接口
      */
     String TX_MODULE_VALIDATE_CMD = "moduleValidator";
-    String TX_MODULE_VALIDATE_CMD_VALUE  = "chainModuleTxValidate";
+    String TX_MODULE_VALIDATE_CMD_VALUE  = "cm_chainModuleTxValidate";
 
     /**
      * 交易类型
@@ -60,13 +60,13 @@ public interface RpcConstants {
      */
     String TX_COMMIT_CMD = "commit";
 
-    String TX_COMMIT_CMD_VALUE = "moduleTxsCommit";
+    String TX_COMMIT_CMD_VALUE = "cm_moduleTxsCommit";
 
     /**
      * 交易回滚接口
      */
     String TX_ROLLBACK_CMD = "rollback";
-    String TX_ROLLBACK_CMD_VALUE = "moduleTxsRollBack";
+    String TX_ROLLBACK_CMD_VALUE = "cm_moduleTxsRollBack";
 
 
     /**

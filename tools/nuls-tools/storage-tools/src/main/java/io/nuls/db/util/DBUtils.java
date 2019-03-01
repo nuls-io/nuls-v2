@@ -25,13 +25,14 @@
 package io.nuls.db.util;
 
 import io.nuls.tools.data.StringUtils;
+import io.nuls.tools.log.Log;
 
 import java.io.File;
 import java.net.URL;
 
 /**
- * @desription: rocksdb utils
  * @author qinyf
+ * @desription: rocksdb utils
  * @date 2018/10/10
  */
 public class DBUtils {
@@ -46,6 +47,8 @@ public class DBUtils {
             if (path.startsWith(rootPath)) {
                 dir = new File(path);
             } else {
+                Log.info("path="+path);
+                Log.info("genAbsolutePath(path)="+genAbsolutePath(path));
                 dir = new File(genAbsolutePath(path));
             }
         } else {
@@ -67,6 +70,14 @@ public class DBUtils {
         String[] paths = path.split("/|\\\\");
         URL resource = ClassLoader.getSystemClassLoader().getResource(".");
         String classPath = resource.getPath();
+        if (resource == null) {
+            resource = DBUtils.class.getClassLoader().getResource("");
+            if (resource == null) {
+                resource = DBUtils.class.getResource("/");
+            }
+            classPath = resource.getPath();
+            System.out.println("classPath: " + classPath);
+        }
         File file = new File(classPath);
         String resultPath = null;
         boolean isFileName = false;

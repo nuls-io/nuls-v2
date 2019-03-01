@@ -1,4 +1,4 @@
-/**
+/*
  * MIT License
  *
  * Copyright (c) 2017-2018 nuls.io
@@ -20,15 +20,35 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
+ *
  */
-package io.nuls.h2.common;
+package io.nuls.rpc.netty.processor.container;
 
-import java.io.Serializable;
+import java.util.Map;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * mybatis查询组件使用，见sqlmap/commonMapper.xml
- * @author
- */
-public interface CommonMapper<M, ID extends Serializable> {
+ * 请求的数据存放容器
+ * Requested data storage container
+ * @author ln
+ * 2019/2/27
+ * */
+public final class RequestContainer {
 
+    private static Map<String, ResponseContainer> REQUEST_MESSAGE_MAP = new ConcurrentHashMap<>();
+
+    public static ResponseContainer putRequest(String messageId) {
+        ResponseContainer responseContainer = new ResponseContainer(messageId, new CompletableFuture<>());
+        REQUEST_MESSAGE_MAP.put(messageId, responseContainer);
+        return responseContainer;
+    }
+
+    public static ResponseContainer getResponseContainer(String messageId) {
+        return REQUEST_MESSAGE_MAP.get(messageId);
+    }
+
+    public static boolean removeResponseContainer(String messageId) {
+        return REQUEST_MESSAGE_MAP.remove(messageId) != null;
+    }
 }

@@ -1,6 +1,7 @@
 package io.nuls.rpc.netty.bootstrap;
 
 import io.netty.bootstrap.Bootstrap;
+import io.netty.buffer.PooledByteBufAllocator;
 import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
@@ -34,6 +35,7 @@ public class NettyClient {
             EventLoopGroup group=new NioEventLoopGroup();
             Bootstrap boot=new Bootstrap();
             boot.option(ChannelOption.SO_KEEPALIVE,true)
+                    .option(ChannelOption.ALLOCATOR, PooledByteBufAllocator.DEFAULT)
                     .option(ChannelOption.TCP_NODELAY,true)
                     .option(ChannelOption.SO_BACKLOG,1024*1024*10)
                     .group(group)
@@ -55,7 +57,7 @@ public class NettyClient {
             }
             HttpHeaders httpHeaders = new DefaultHttpHeaders();
             //进行握手
-            WebSocketClientHandshaker handShaker = WebSocketClientHandshakerFactory.newHandshaker(webSocketURI, WebSocketVersion.V13, (String)null, true,httpHeaders);
+            WebSocketClientHandshaker handShaker = WebSocketClientHandshakerFactory.newHandshaker(webSocketURI, WebSocketVersion.V13, (String)null, true,httpHeaders, 65536*5);
             final Channel channel=boot.connect(webSocketURI.getHost(),webSocketURI.getPort()).sync().channel();
             ClientHandler handler = (ClientHandler)channel.pipeline().get("hookedHandler");
             handler.setHandshaker(handShaker);

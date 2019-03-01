@@ -5,15 +5,13 @@ import io.netty.channel.socket.SocketChannel;
 import io.netty.handler.codec.http.FullHttpResponse;
 import io.netty.handler.codec.http.websocketx.*;
 import io.netty.util.CharsetUtil;
-import io.nuls.rpc.model.message.Ack;
-import io.nuls.rpc.model.message.Message;
-import io.nuls.rpc.model.message.MessageType;
-import io.nuls.rpc.model.message.Response;
 import io.nuls.rpc.netty.channel.ConnectData;
 import io.nuls.rpc.netty.channel.manager.ConnectManager;
-import io.nuls.tools.parse.JSONUtils;
+import io.nuls.rpc.netty.handler.message.TextMessageHandler;
+import io.nuls.tools.log.Log;
 
-import java.util.Map;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 /**
  * 客户端事件触发处理类
@@ -22,8 +20,12 @@ import java.util.Map;
  * 2019/2/21
  * */
 public class ClientHandler extends SimpleChannelInboundHandler<Object> {
+
     private WebSocketClientHandshaker handShaker;
     private ChannelPromise handshakeFuture;
+
+    private ThreadLocal<ExecutorService> threadExecutorService = ThreadLocal.withInitial(() -> Executors.newFixedThreadPool(Thread.activeCount()));
+
     @Override
     public void handlerAdded(ChannelHandlerContext ctx) {
         this.handshakeFuture = ctx.newPromise();
@@ -59,7 +61,7 @@ public class ClientHandler extends SimpleChannelInboundHandler<Object> {
                 this.handShaker.finishHandshake(ch, response);
                 //设置成功
                 this.handshakeFuture.setSuccess();
-                System.out.println("WebSocket Client connected! response headers[sec-webSocket-extensions]:{}" + response.headers());
+                Log.info("WebSocket Client connected! response headers[sec-webSocket-extensions]:{}" + response.headers());
             } catch (WebSocketHandshakeException var7) {
                 FullHttpResponse res = (FullHttpResponse) msg;
                 String errorMsg = String.format("WebSocket Client failed to connect,status:%s,reason:%s", res.status(), res.content().toString(CharsetUtil.UTF_8));
@@ -70,57 +72,33 @@ public class ClientHandler extends SimpleChannelInboundHandler<Object> {
             throw new IllegalStateException("Unexpected FullHttpResponse (getStatus=" + response.status() + ", content=" + response.content().toString(CharsetUtil.UTF_8) + ')');
         } else {
             WebSocketFrame frame = (WebSocketFrame) msg;
-            if (frame instanceof TextWebSocketFrame) {
-                handWebSocketFrame(ctx,frame);
-            } else if (frame instanceof CloseWebSocketFrame) {
+
+            if (frame instanceof CloseWebSocketFrame) {
                 ch.close();
+            } else if(msg instanceof TextWebSocketFrame){
+                TextWebSocketFrame txMsg = (TextWebSocketFrame) msg;
+                TextMessageHandler messageHandler = new TextMessageHandler((SocketChannel) ctx.channel(), txMsg.text());
+                threadExecutorService.get().execute(messageHandler);
+            } else {
+                Log.warn("Unsupported message format");
             }
         }
     }
 
-    /**
-     * 处理客户端与服务端之前的websocket业务
-     *
-     * @param ctx
-     * @param frame
-     */
-    private void handWebSocketFrame(ChannelHandlerContext ctx, WebSocketFrame frame)throws Exception{
+    @Override
+    public void channelUnregistered(ChannelHandlerContext ctx) throws Exception {
+
         SocketChannel socketChannel = (SocketChannel) ctx.channel();
         ConnectData connectData = ConnectManager.getConnectDataByChannel(socketChannel);
-        if (frame instanceof TextWebSocketFrame) {
-            TextWebSocketFrame msg = (TextWebSocketFrame) frame;
-            Message message = JSONUtils.json2pojo(msg.text(), Message.class);
-            switch (MessageType.valueOf(message.getMessageType())) {
-                case NegotiateConnectionResponse:
-                    connectData.getNegotiateResponseQueue().offer(message);
-                    break;
-                case Ack:
-                    Ack ack = JSONUtils.map2pojo((Map) message.getMessageData(), Ack.class);
-                    connectData.getAckQueue().offer(ack);
-                    break;
-                case Response:
-                    Response response = JSONUtils.map2pojo((Map) message.getMessageData(), Response.class);
-                    /*
-                    如果收到已请求超时的返回直接丢弃
-                    Discard directly if you receive a return that has been requested for a timeout
-                     */
-                    if(connectData.getTimeOutMessageList().contains(response.getRequestId())){
-                        break;
-                    }
-
-                    /*
-                    Response：还要判断是否需要自动处理
-                    Response: Determines whether automatic processing is required
-                     */
-                    if (ConnectManager.INVOKE_MAP.containsKey(response.getRequestId())) {
-                        connectData.getResponseAutoQueue().offer(response);
-                    } else {
-                        connectData.getResponseManualQueue().offer(response);
-                    }
-                    break;
-                default:
-                    break;
-            }
+        if (connectData != null) {
+            connectData.setConnected(false);
         }
+
+        Log.info("链接断开:"+ConnectManager.getRemoteUri((SocketChannel) ctx.channel()));
+    }
+
+    @Override
+    public void channelInactive(ChannelHandlerContext ctx) throws Exception {
+        ConnectManager.disConnect((SocketChannel) ctx.channel());
     }
 }

@@ -33,12 +33,12 @@ import io.nuls.block.utils.module.ConsensusUtil;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.exception.NulsRuntimeException;
+import io.nuls.tools.log.logback.NulsLogger;
 
 import java.util.*;
 
 import static io.nuls.block.constant.Constant.CONSENSUS_WAITING;
 import static io.nuls.block.constant.Constant.CONSENSUS_WORKING;
-import static io.nuls.block.utils.LoggerUtil.commonLog;
 
 /**
  * 链管理器,维护主链、分叉链集合、孤儿链集合
@@ -77,12 +77,13 @@ public class ChainManager {
      * 2.回滚主链到分叉高度.
      * 3.依次添加分叉链集合B中的区块到主链
      *
-     * @param chainId 链Id/chain id
+     * @param chainId     链Id/chain id
      * @param masterChain
      * @param forkChain
      * @return
      */
     public static boolean switchChain(int chainId, Chain masterChain, Chain forkChain) {
+        NulsLogger commonLog = ContextManager.getContext(chainId).getCommonLog();
         commonLog.info("*switch chain start");
         commonLog.info("*masterChain-" + masterChain);
         commonLog.info("*forkChain-" + forkChain);
@@ -179,6 +180,7 @@ public class ChainManager {
      * @return
      */
     private static boolean switchChain0(int chainId, Chain masterChain, Chain forkChain, Chain subChain) {
+        NulsLogger commonLog = ContextManager.getContext(chainId).getCommonLog();
         commonLog.info("*switchChain0 masterChain=" + masterChain);
         commonLog.info("*switchChain0 forkChain=" + forkChain);
         commonLog.info("*switchChain0 subChain=" + subChain);

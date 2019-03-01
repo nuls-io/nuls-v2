@@ -47,6 +47,7 @@ public class BlockManager {
                 resultMap = (Map<String, Object>) cmdResp.getResponseData();
                 blockHeaderHexs = (List<String>) resultMap.get("getLatestBlockHeaders");
             }
+            Thread.sleep(1000);
         }
         List<BlockHeader> blockHeaders = new ArrayList<>();
         for (String blockHeaderHex : blockHeaderHexs) {

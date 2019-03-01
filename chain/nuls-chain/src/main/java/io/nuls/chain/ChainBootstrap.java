@@ -75,16 +75,12 @@ public class ChainBootstrap {
 
             /* Read resources/module.ini to initialize the configuration */
             initCfg();
-
             /* Configuration to Map */
             initWithFile();
-
-            /* Database data to Map */
+            /*db info*/
             initWithDatabase();
-
             /* 自动注入 (Autowired) */
             SpringLiteContext.init("io.nuls.chain", new ModularServiceMethodInterceptor());
-
             /* 把Nuls2.0主网信息存入数据库中 (Store the Nuls2.0 main network information into the database) */
             initMainChain();
             /* 进行数据库数据初始化（避免异常关闭造成的事务不一致） */
@@ -157,21 +153,7 @@ public class ChainBootstrap {
      */
     private void initWithDatabase() throws Exception {
         /* 打开数据库连接 (Open database connection) */
-        RocksDBService.init(CmConstants.DATA_PATH);
-
-        /* 配置信息的表：param (Table of configuration: param) */
-        if (!RocksDBService.existTable(CmConstants.PARAM)) {
-            RocksDBService.createTable(CmConstants.PARAM);
-        }
-
-        /* 读取表中的数据更新Map (Read the data in the table, then update map) */
-        for (Map.Entry<String, String> entry : CmConstants.PARAM_MAP.entrySet()) {
-            String key = entry.getKey();
-            byte[] value = RocksDBService.get(CmConstants.PARAM, key.getBytes());
-            if (value != null) {
-                CmConstants.PARAM_MAP.put(key, new String(value));
-            }
-        }
+        RocksDBService.init(ConfigManager.getValue(CmConstants.DB_DATA_PATH));
     }
 
     private void configToMap(Map<String, String> toMap, String key) {
@@ -218,13 +200,6 @@ public class ChainBootstrap {
          * 和指定地址同步
          * */
         ResponseMessageProcessor.syncKernel(kernelUrl);
-    }
-
-    /**
-     * @throws Exception Any error will throw an exception
-     */
-    private void regTxHandler() throws Exception {
-
     }
 
 }

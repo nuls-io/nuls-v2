@@ -1,29 +1,32 @@
 package io.nuls.transaction;
 
 import io.nuls.db.service.RocksDBService;
+import io.nuls.h2.utils.MybatisDbHelper;
 import io.nuls.rpc.info.HostInfo;
 import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.netty.bootstrap.NettyServer;
 import io.nuls.rpc.netty.channel.manager.ConnectManager;
 import io.nuls.rpc.netty.processor.ResponseMessageProcessor;
 import io.nuls.tools.core.ioc.SpringLiteContext;
-import io.nuls.tools.log.Log;
 import io.nuls.tools.parse.ConfigLoader;
 import io.nuls.tools.parse.I18nUtils;
 import io.nuls.transaction.constant.TxConstant;
 import io.nuls.transaction.db.h2.dao.TransactionH2Service;
-import io.nuls.transaction.db.h2.dao.impl.BaseService;
 import io.nuls.transaction.db.rocksdb.storage.LanguageStorageService;
 import io.nuls.transaction.manager.ChainManager;
+import io.nuls.transaction.model.bo.Chain;
+import io.nuls.transaction.rpc.call.BlockCall;
 import io.nuls.transaction.rpc.call.NetworkCall;
 import org.apache.ibatis.io.Resources;
+import org.apache.ibatis.session.SqlSessionFactory;
 import org.apache.ibatis.session.SqlSessionFactoryBuilder;
 
-import java.io.InputStream;
 import java.lang.reflect.Field;
 import java.nio.charset.Charset;
+import java.util.Map;
 import java.util.Properties;
 
+import static io.nuls.transaction.utils.LoggerUtil.Log;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 /**
@@ -45,25 +48,40 @@ public class TransactionBootStrap {
             //启动WebSocket服务,向外提供RPC接口
             initServer();
             initH2Table();
+            //启动链
+            SpringLiteContext.getBean(ChainManager.class).runChain();
             while (!ConnectManager.isReady()) {
                 Log.info("wait depend modules ready");
                 Thread.sleep(2000L);
             }
-            //启动链
-            SpringLiteContext.getBean(ChainManager.class).runChain();
-            //注册网络消息协议
-            while (!NetworkCall.registerProtocol())
-            {
-                Log.info("wait nw_protocolRegister ready");
-                Thread.sleep(5000L);
-            }
-            Log.debug("START-SUCCESS");
+            txStart();
+
+            Log.info("START-SUCCESS");
         }catch (Exception e){
             Log.error("Transaction startup error!");
             Log.error(e);
         }
     }
 
+    public static void txStart(){
+        try {
+            //注册网络消息协议 依赖block的ready状态
+            while (!NetworkCall.registerProtocol())
+            {
+                Log.info("wait nw_protocolRegister ready");
+                Thread.sleep(5000L);
+            }
+
+            ChainManager chainManager =  SpringLiteContext.getBean(ChainManager.class);
+            for (Map.Entry<Integer, Chain> entry : chainManager.getChainMap().entrySet()) {
+                Chain chain = entry.getValue();
+                //订阅Block模块接口
+                BlockCall.subscriptionNewBlockHeight(chain);
+            }
+        }catch (Exception e){
+            Log.error(e);
+        }
+    }
     /**
      * 初始化系统编码
      * */
@@ -78,12 +96,9 @@ public class TransactionBootStrap {
             Log.error(e);
         }
     }
-
-    /**
-     * 初始化数据库
-     * */
-    public static void initDB(){
+    public static void initDB() {
         try {
+
             Properties properties = ConfigLoader.loadProperties(TxConstant.DB_CONFIG_NAME);
             String path = properties.getProperty(TxConstant.DB_DATA_PATH,
                     TransactionBootStrap.class.getClassLoader().getResource("").getPath() + "data");
@@ -91,9 +106,9 @@ public class TransactionBootStrap {
 
             //todo 单个节点跑多链的时候 h2是否需要通过chain来区分数据库(如何分？)，待确认！！
             String resource = "mybatis/mybatis-config.xml";
-            InputStream in = Resources.getResourceAsStream(resource);
-            BaseService.sqlSessionFactory = new SqlSessionFactoryBuilder().build(in);
-        }catch (Exception e){
+            SqlSessionFactory sqlSessionFactory = new SqlSessionFactoryBuilder().build(Resources.getResourceAsReader(resource), "druid");
+            MybatisDbHelper.setSqlSessionFactory(sqlSessionFactory);
+        } catch (Exception e) {
             Log.error(e);
         }
     }
@@ -104,7 +119,7 @@ public class TransactionBootStrap {
     public static void initLanguage(){
         try {
             LanguageStorageService languageService = SpringLiteContext.getBean(LanguageStorageService.class);
-            String languageDB = (String) languageService.getLanguage();
+            String languageDB = languageService.getLanguage();
             I18nUtils.loadLanguage("languages","");
             String language = null == languageDB ? I18nUtils.getLanguage() : languageDB;
             I18nUtils.setLanguage(language);
