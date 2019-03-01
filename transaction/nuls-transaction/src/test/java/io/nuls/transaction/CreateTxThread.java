@@ -106,7 +106,7 @@ public class CreateTxThread implements Runnable {
 //            Assert.assertTrue(null != response.getResponseData());
 //            Map map = (HashMap) ((HashMap) response.getResponseData()).get("tx_createCtx");
 //            Assert.assertTrue(null != map);
-//            Log.info("{}", map.get("value"));
+//            Log.debug("{}", map.get("value"));
 
 //            createTransfer();
             createTransfer();
@@ -120,7 +120,7 @@ public class CreateTxThread implements Runnable {
         Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_transfer", transferMap);
         HashMap result = (HashMap) (((HashMap) cmdResp.getResponseData()).get("ac_transfer"));
         Assert.assertTrue(null != result);
-        Log.info("{}", result.get("value"));
+        Log.debug("{}", result.get("value"));
     }
 
     private void createNewAddressTransfer() throws Exception {
@@ -132,7 +132,7 @@ public class CreateTxThread implements Runnable {
         Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_transfer", transferMap);
         HashMap result = (HashMap) (((HashMap) cmdResp.getResponseData()).get("ac_transfer"));
         Assert.assertTrue(null != result);
-        Log.info("{}", result.get("value"));
+        Log.debug("{}", result.get("value"));
     }
 
     public static String createAccount() {

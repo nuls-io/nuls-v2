@@ -100,7 +100,7 @@ public class ChainManager {
             //订阅Block模块接口
 //            BlockCall.subscriptionNewBlockHeight(chain);
 
-            Log.info("\nchain = " +JSONUtils.obj2PrettyJson(chain));
+            Log.debug("\nchain = " +JSONUtils.obj2PrettyJson(chain));
         }
     }
 

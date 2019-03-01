@@ -84,12 +84,12 @@ public class VerifyTxProcessTask implements Runnable {
 
     private boolean processTx(Chain chain, Transaction tx, boolean isOrphanTx){
         try {
-            chain.getLogger().info("*** Debug *** [VerifyTxProcessTask] type:[{}], txhash:{}, ", tx.getType(), tx.getHash());
+            chain.getLogger().debug("*** Debug *** [VerifyTxProcessTask] type:[{}], txhash:{}, ", tx.getType(), tx.getHash());
             CoinData coinData = TxUtil.getCoinData(tx);
             for(CoinFrom coinFrom : coinData.getFrom()){
-                chain.getLogger().info("*** Debug *** address:{}, nonce:{}, ", AddressTool.getChainIdByAddress(coinFrom.getAddress()), HexUtil.encode(coinFrom.getNonce()));
+                chain.getLogger().debug("*** Debug *** address:{}, nonce:{}, ", AddressTool.getChainIdByAddress(coinFrom.getAddress()), HexUtil.encode(coinFrom.getNonce()));
             }
-            chain.getLogger().info("");
+            chain.getLogger().debug("");
 
             int chainId = chain.getChainId();
             boolean rs = transactionManager.verify(chain, tx);
@@ -120,10 +120,10 @@ public class VerifyTxProcessTask implements Runnable {
                 count++;
                 return true;
             }
-            chain.getLogger().info("\n@@@@@@@@@@@@@@@@@");
-            chain.getLogger().info("*** Debug *** [VerifyTxProcessTask] " +
+            chain.getLogger().debug("\n@@@@@@@@@@@@@@@@@");
+            chain.getLogger().debug("*** Debug *** [VerifyTxProcessTask] " +
                     "coinData not success - code: {}, - reason:{}, type:{} - txhash:{}", verifyTxResult.getCode(),  verifyTxResult.getDesc(), tx.getType(), tx.getHash().getDigestHex());
-            chain.getLogger().info("@@@@@@@@@@@@@@@@@\n");
+            chain.getLogger().debug("@@@@@@@@@@@@@@@@@\n");
             if(verifyTxResult.getCode() == VerifyTxResult.ORPHAN && !isOrphanTx){
                 processOrphanTx(tx);
             }else if(isOrphanTx){
@@ -151,7 +151,7 @@ public class VerifyTxProcessTask implements Runnable {
                 if (success) {
                     LedgerCall.rollBackUnconfirmTx(chain, tx.hex());
                     it.remove();
-                    chain.getLogger().info("*** Debug *** [VerifyTxProcessTask - OrphanTx] " +
+                    chain.getLogger().debug("*** Debug *** [VerifyTxProcessTask - OrphanTx] " +
                             "OrphanTx remove - type:{} - txhash:{}, -orphanTxList size:{}", tx.getType(), tx.getHash().getDigestHex(), orphanTxList.size());
                 }
             }

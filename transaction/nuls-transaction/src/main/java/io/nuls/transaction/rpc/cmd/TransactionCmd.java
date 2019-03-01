@@ -300,8 +300,7 @@ public class TransactionCmd extends BaseCmd {
     @Parameter(parameterName = "txHashList", parameterType = "List")
     @Parameter(parameterName = "blockHeaderHex", parameterType = "String")
     public Response txRollback(Map params) {
-        Map<String, Boolean> map = new HashMap<>(TxConstant.INIT_CAPACITY_16);
-        boolean result = false;
+        boolean result;
         Chain chain = null;
         try {
             ObjectUtils.canNotEmpty(params.get("chainId"), TxErrorCode.PARAMETER_ERROR.getMsg());
@@ -318,9 +317,7 @@ public class TransactionCmd extends BaseCmd {
                 txHashList.add(NulsDigestData.fromDigestHex(hashHex));
             }
             //批量回滚已确认交易
-//            BlockHeader blockHeader = TxUtil.getInstance((String)params.get("blockHeaderHex"), BlockHeader.class);
             result = confirmedTxService.rollbackTxList(chain, txHashList, (String) params.get("blockHeaderHex"));
-
         } catch (NulsException e) {
             errorLogProcess(chain, e);
             return failed(e.getErrorCode());
@@ -383,7 +380,7 @@ public class TransactionCmd extends BaseCmd {
             if (!NulsDigestData.validHash(txHash)) {
                 throw new NulsException(TxErrorCode.HASH_ERROR);
             }
-            Log.info("getConfirmedTransaction : " + txHash);
+            Log.debug("getConfirmedTransaction : " + txHash);
             Transaction tx = txService.getTransaction(chain, NulsDigestData.fromDigestHex(txHash));
             Map<String, String> resultMap = new HashMap<>(TxConstant.INIT_CAPACITY_8);
             if (tx == null) {
@@ -424,7 +421,7 @@ public class TransactionCmd extends BaseCmd {
             if (!NulsDigestData.validHash(txHash)) {
                 throw new NulsException(TxErrorCode.HASH_ERROR);
             }
-            Log.info("getConfirmedTransaction : " + txHash);
+            Log.debug("getConfirmedTransaction : " + txHash);
             Transaction tx = confirmedTxService.getConfirmedTransaction(chain, NulsDigestData.fromDigestHex(txHash));
             Map<String, String> resultMap = new HashMap<>(TxConstant.INIT_CAPACITY_8);
             if (tx == null) {
