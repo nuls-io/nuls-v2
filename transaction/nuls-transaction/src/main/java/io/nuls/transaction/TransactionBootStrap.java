@@ -10,6 +10,7 @@ import io.nuls.rpc.netty.processor.ResponseMessageProcessor;
 import io.nuls.tools.core.ioc.SpringLiteContext;
 import io.nuls.tools.parse.ConfigLoader;
 import io.nuls.tools.parse.I18nUtils;
+import io.nuls.transaction.constant.TxConfig;
 import io.nuls.transaction.constant.TxConstant;
 import io.nuls.transaction.db.h2.dao.TransactionH2Service;
 import io.nuls.transaction.db.rocksdb.storage.LanguageStorageService;
@@ -100,9 +101,10 @@ public class TransactionBootStrap {
         try {
 
             Properties properties = ConfigLoader.loadProperties(TxConstant.DB_CONFIG_NAME);
-            String path = properties.getProperty(TxConstant.DB_DATA_PATH,
+
+            TxConfig.DB_ROOT_PATH = properties.getProperty(TxConstant.DB_DATA_PATH,
                     TransactionBootStrap.class.getClassLoader().getResource("").getPath() + "data");
-            RocksDBService.init(path);
+            RocksDBService.init(TxConfig.DB_ROOT_PATH);
 
             //todo 单个节点跑多链的时候 h2是否需要通过chain来区分数据库(如何分？)，待确认！！
             String resource = "mybatis/mybatis-config.xml";
