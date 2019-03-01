@@ -99,7 +99,7 @@ public class NetworkBootstrap {
             // set system language
             String language = ConfigManager.getValue(NetworkConstant.NETWORK_LANGUAGE);
             networkParam.setLanguage(language);
-            I18nUtils.loadLanguage("languages", language);
+            I18nUtils.loadLanguage(NetworkBootstrap.class,"languages", language);
             I18nUtils.setLanguage(language);
             //set encode
             String encoding = ConfigManager.getValue(NetworkConstant.NETWORK_ENCODING);
