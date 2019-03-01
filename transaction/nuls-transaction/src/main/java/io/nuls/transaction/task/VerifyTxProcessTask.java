@@ -105,7 +105,7 @@ public class VerifyTxProcessTask implements Runnable {
             }
             VerifyTxResult verifyTxResult = LedgerCall.verifyCoinData(chain, tx, false);
             if(verifyTxResult.success()){
-                if(chain.getPackaging()) {
+                if(chain.getPackaging().get()) {
                     //当节点是出块节点时, 才将交易放入待打包队列
                     packablePool.add(chain, tx, false);
                 }

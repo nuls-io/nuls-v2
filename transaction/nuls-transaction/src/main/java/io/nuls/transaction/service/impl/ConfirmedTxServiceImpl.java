@@ -302,7 +302,7 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
             }
             if (!rs) {
                 result = false;
-                chain.getLogger().info("failed! rollbackcommitTxs ");
+                chain.getLogger().debug("failed! rollbackcommitTxs ");
                 break;
             }
             successed.put(entry.getKey(), entry.getValue());
@@ -326,7 +326,7 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
 
     @Override
     public boolean rollbackTxList(Chain chain, List<NulsDigestData> txHashList, String blockHeaderHex) throws NulsException {
-        chain.getLogger().info("start rollbackTxList..............");
+        chain.getLogger().debug("start rollbackTxList..............");
         if (null == chain || txHashList == null || txHashList.size() == 0) {
             throw new NulsException(TxErrorCode.PARAMETER_ERROR);
         }
@@ -359,7 +359,7 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
         }
 
         BlockHeader blockHeader = TxUtil.getInstance(blockHeaderHex, BlockHeader.class);
-        chain.getLogger().info("rollbackTxList block height:{}", blockHeader.getHeight());
+        chain.getLogger().debug("rollbackTxList block height:{}", blockHeader.getHeight());
         if (!rollbackLedger(chain, txHexList, blockHeader.getHeight())) {
             return false;
         }

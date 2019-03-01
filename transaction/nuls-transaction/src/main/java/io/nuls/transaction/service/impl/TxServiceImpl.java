@@ -1071,6 +1071,7 @@ public class TxServiceImpl implements TxService {
 
     @Override
     public VerifyTxResult batchVerify(Chain chain, List<String> txHexList) throws NulsException {
+        chain.getLogger().info("");
         chain.getLogger().info("开始区块交易批量验证......");
         VerifyTxResult verifyTxResult = new VerifyTxResult(VerifyTxResult.OTHER_EXCEPTION);
         List<Transaction> txList = new ArrayList<>();

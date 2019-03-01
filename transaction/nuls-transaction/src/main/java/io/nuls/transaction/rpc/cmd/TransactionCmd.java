@@ -12,7 +12,6 @@ import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.data.ObjectUtils;
 import io.nuls.tools.exception.NulsException;
-import static io.nuls.transaction.utils.LoggerUtil.Log;
 import io.nuls.tools.parse.JSONUtils;
 import io.nuls.transaction.constant.TxCmd;
 import io.nuls.transaction.constant.TxConfig;
@@ -37,6 +36,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import static io.nuls.transaction.utils.LoggerUtil.Log;
 
 /**
  * @author: Charlie
@@ -576,7 +577,7 @@ public class TransactionCmd extends BaseCmd {
             if (null == packaging) {
                 throw new NulsException(TxErrorCode.PARAMETER_ERROR);
             }
-            chain.setPackaging(packaging);
+            chain.getPackaging().set(packaging);
             TxConfig.PACKAGING = packaging;
             return success();
         } catch (NulsException e) {
