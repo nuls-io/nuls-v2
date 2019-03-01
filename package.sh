@@ -115,6 +115,12 @@ if [ ! -d ${COMMON_LIBS_PATH} ]; then
 	mkdir ${COMMON_LIBS_PATH}
 fi
 
+#模块数据库文件存放位置
+COMMON_DATA_PATH=$MODULES_PATH/data
+if [ ! -d ${COMMON_DATA_PATH} ]; then
+    mkdir ${COMMON_DATA_PATH}
+fi
+
 #0.更新代码
 if [ -n "${DOPULL}" ];then
 	log "git pull origin $GIT_BRANCH"
