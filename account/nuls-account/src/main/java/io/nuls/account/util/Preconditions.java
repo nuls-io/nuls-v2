@@ -4,7 +4,6 @@ import io.nuls.tools.constant.ErrorCode;
 import io.nuls.tools.exception.NulsRuntimeException;
 
 import javax.annotation.Nullable;
-import java.util.List;
 
 /**
  * 检查对象是否满足条件类

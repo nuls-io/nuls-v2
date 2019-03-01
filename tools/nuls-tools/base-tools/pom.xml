@@ -21,12 +21,6 @@
 
     <dependencies>
         <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <version>4.11</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
             <groupId>io.nuls.nuls-tools</groupId>
             <artifactId>common-tools</artifactId>
             <version>${project.version}</version>
