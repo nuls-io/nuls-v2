@@ -90,7 +90,7 @@ public class TaskManager extends BaseManager {
 
     private void connectTasks() {
         executorService.scheduleAtFixedRate(new NodeMaintenanceTask(), 1000L, 5000L, TimeUnit.MILLISECONDS);
-        executorService.scheduleAtFixedRate(new SaveNodeInfoTask(), 1, 5, TimeUnit.MINUTES);
+        executorService.scheduleAtFixedRate(new SaveNodeInfoTask(), 1, 1, TimeUnit.MINUTES);
         executorService.scheduleAtFixedRate(new NodeDiscoverTask(), 3000L, 10000L, TimeUnit.MILLISECONDS);
         RunOnceAfterNetStableThreadStart();
 
