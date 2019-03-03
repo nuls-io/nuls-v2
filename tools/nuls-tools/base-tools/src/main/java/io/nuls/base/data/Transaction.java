@@ -259,11 +259,24 @@ public class Transaction extends BaseNulsData implements Cloneable {
         return HexUtil.encode(this.serialize());
     }
 
+    /**
+     * 获取交易的手续费
+     * @return
+     * @throws NulsException
+     */
     public BigInteger getFee() throws NulsException {
         BigInteger fee = BigInteger.ZERO;
         if (null != coinData && type > 1) {
             CoinData cData = getCoinDataInstance();
-            fee = cData.getFee();
+            BigInteger toAmount = BigInteger.ZERO;
+            for (CoinTo coinTo : cData.getTo()) {
+                toAmount = toAmount.add(coinTo.getAmount());
+            }
+            BigInteger fromAmount = BigInteger.ZERO;
+            for (CoinFrom coinFrom : cData.getFrom()) {
+                fromAmount = fromAmount.add(coinFrom.getAmount());
+            }
+            fee =  fromAmount.subtract(toAmount);
         }
         return fee;
     }
