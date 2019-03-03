@@ -62,4 +62,18 @@ public class NodeRpcTest {
             e.printStackTrace();
         }
     }
+
+    @Test
+    public void  addNodes(){
+        Map<String, Object> params = new HashMap<>();
+        params.put("chainId", 12345);
+        params.put("isCross", 0);
+        params.put("nodes", "192.168.1.100:1800");
+        try {
+            Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.NW.abbr, "nw_addNodes", params);
+            LoggerUtil.Log.info("response {}", response);
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+    }
 }

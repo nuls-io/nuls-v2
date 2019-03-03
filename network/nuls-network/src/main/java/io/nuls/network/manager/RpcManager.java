@@ -49,7 +49,7 @@ public class RpcManager extends BaseManager {
 
     @Override
     public void start() throws Exception {
-            String packageC = "io.nuls.network.rpc";
+            String packageC = "io.nuls.network.rpc.cmd";
             NettyServer.getInstance(ModuleE.NW)
                     .moduleRoles(ModuleE.NW.abbr, new String[]{"1.1", "1.2"})
                     .moduleVersion("1.1")
