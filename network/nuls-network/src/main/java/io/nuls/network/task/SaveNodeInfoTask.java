@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2017-2018 nuls.io
+ * Copyright (c) 2017-2019 nuls.io
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,30 +22,49 @@
  * SOFTWARE.
  *
  */
-package io.nuls.network.rpc.internal;
+package io.nuls.network.task;
 
-import io.nuls.network.manager.TimeManager;
-import io.nuls.rpc.cmd.BaseCmd;
-import io.nuls.rpc.model.CmdAnnotation;
-import io.nuls.rpc.model.message.Response;
-import io.nuls.tools.core.annotation.Component;
+import io.nuls.network.manager.NodeGroupManager;
+import io.nuls.network.manager.StorageManager;
+import io.nuls.network.model.NodeGroup;
+import io.nuls.network.storage.DbService;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.List;
+
+import static io.nuls.network.utils.LoggerUtil.Log;
 
 /**
- * @author lan
- * @description
- * @date 2018/12/05
- **/
-@Component
-public class TimeServiceRpc extends BaseCmd {
-    @CmdAnnotation(cmd = "nw_currentTimeMillis", version = 1.0,
-            description = "currentTimeMillis")
-    public Response currentTimeMillis(Map params) {
-        Map<String, Long> responseData = new HashMap<>();
-        responseData.put("currentTimeMillis", TimeManager.currentTimeMillis());
-        return success(responseData);
+ * 维护节点高度的定时任务
+ *
+ * @author: ln
+ * @date: 2018/12/8
+ */
+public class SaveNodeInfoTask implements Runnable {
+
+    private final NodeGroupManager nodeGroupManager = NodeGroupManager.getInstance();
+
+
+    public SaveNodeInfoTask() {
+
+    }
+
+    /**
+     * 每5分钟一次，将整个NodeContainer对象存储到文件中
+     */
+    @Override
+    public void run() {
+        try {
+            doCommit();
+        } catch (Exception e) {
+            Log.error(e);
+        }
+    }
+
+    private void doCommit() {
+        DbService networkStorageService = StorageManager.getInstance().getDbService();
+        List<NodeGroup> list = nodeGroupManager.getNodeGroups();
+        for (NodeGroup nodeGroup : list) {
+            networkStorageService.saveNodes(nodeGroup);
+        }
     }
 }
-

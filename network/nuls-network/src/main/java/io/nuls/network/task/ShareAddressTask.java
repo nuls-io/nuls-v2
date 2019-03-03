@@ -1,4 +1,4 @@
-package io.nuls.network.manager.threads;
+package io.nuls.network.task;
 
 import io.nuls.network.constant.NetworkParam;
 import io.nuls.network.manager.ConnectionManager;
@@ -6,7 +6,6 @@ import io.nuls.network.manager.MessageManager;
 import io.nuls.network.model.Node;
 import io.nuls.network.model.NodeGroup;
 import io.nuls.network.model.dto.IpAddress;
-
 
 import java.util.*;
 

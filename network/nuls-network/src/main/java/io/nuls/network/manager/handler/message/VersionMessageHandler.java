@@ -42,8 +42,8 @@ import io.nuls.network.model.message.base.BaseMessage;
 import io.nuls.network.model.message.body.VerackMessageBody;
 import io.nuls.network.model.message.body.VersionMessageBody;
 import io.nuls.network.netty.container.NodesContainer;
-import io.nuls.network.rpc.external.BlockRpcService;
-import io.nuls.network.rpc.external.impl.BlockRpcServiceImpl;
+import io.nuls.network.rpc.call.BlockRpcService;
+import io.nuls.network.rpc.call.impl.BlockRpcServiceImpl;
 import io.nuls.network.utils.LoggerUtil;
 import io.nuls.tools.core.ioc.SpringLiteContext;
 

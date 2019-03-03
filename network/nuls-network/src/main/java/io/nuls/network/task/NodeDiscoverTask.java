@@ -22,18 +22,16 @@
  * SOFTWARE.
  *
  */
-package io.nuls.network.manager.threads;
+package io.nuls.network.task;
 
 import io.nuls.network.constant.NodeConnectStatusEnum;
 import io.nuls.network.constant.NodeStatusEnum;
 import io.nuls.network.manager.*;
 import io.nuls.network.model.Node;
-
 import io.nuls.network.model.NodeGroup;
 import io.nuls.network.model.dto.IpAddress;
 import io.nuls.network.model.message.AddrMessage;
 import io.nuls.network.netty.container.NodesContainer;
-
 
 import java.util.ArrayList;
 import java.util.Collections;

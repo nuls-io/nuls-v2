@@ -24,10 +24,10 @@
  */
 package io.nuls.network.manager;
 
-import io.nuls.network.manager.threads.*;
 import io.nuls.network.model.Node;
 import io.nuls.network.model.NodeGroup;
 import io.nuls.network.netty.NettyClient;
+import io.nuls.network.task.*;
 import io.nuls.tools.thread.ThreadUtils;
 import io.nuls.tools.thread.commom.NulsThreadFactory;
 

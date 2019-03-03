@@ -22,7 +22,7 @@
  * SOFTWARE.
  *
  */
-package io.nuls.network.manager.threads;
+package io.nuls.network.task;
 
 import io.nuls.network.constant.NetworkParam;
 import io.nuls.network.constant.NodeConnectStatusEnum;
