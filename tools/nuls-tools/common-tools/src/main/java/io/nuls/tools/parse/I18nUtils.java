@@ -94,7 +94,7 @@ public class I18nUtils {
             if (StringUtils.isNotBlank(defaultLanguage)) {
                 key = defaultLanguage;
             }
-             URL furl = I18nUtils.class.getClassLoader().getResource(folder);
+            URL furl = I18nUtils.class.getClassLoader().getResource(folder);
             if (null != furl) {
                 File folderFile = new File(furl.getPath());
                 Log.info("furl.getPath()=" + furl.getPath());
@@ -191,26 +191,4 @@ public class I18nUtils {
         return key;
     }
 
-    public static void main(String[] args) throws Exception {
-        URL url = StringUtils.class.getProtectionDomain().getCodeSource().getLocation();
-        JarFile file = null;
-        try {
-            file = new JarFile("C:\\Users\\Administrator\\Desktop\\vpn\\network-1.0.0.jar");
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        Enumeration<JarEntry> entrys = file.entries();
-        while (entrys.hasMoreElements()) {
-            JarEntry jar = entrys.nextElement();
-            if (jar.getName().indexOf("languages/") == 0 && jar.getName().length() > "languages/".length()) {
-                System.out.println(jar.getName());
-                InputStream in = I18nUtils.class.getClassLoader().getResourceAsStream(jar.getName());
-                Properties prop = new Properties();
-                prop.load(in);
-                String key = file.getName().replace(".properties", "");
-                ALL_MAPPING.put(key, prop);
-            }
-
-        }
-    }
 }
