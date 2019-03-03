@@ -261,7 +261,7 @@ public class Transaction extends BaseNulsData implements Cloneable {
 
     public BigInteger getFee() throws NulsException {
         BigInteger fee = BigInteger.ZERO;
-        if (null != coinData) {
+        if (null != coinData && type > 1) {
             CoinData cData = getCoinDataInstance();
             fee = cData.getFee();
         }
@@ -271,18 +271,18 @@ public class Transaction extends BaseNulsData implements Cloneable {
     /**
      * 判断交易是否为多签交易
      * Judging whether a transaction is a multi-signature transaction
-     * */
-    public boolean isMultiSignTx()throws NulsException {
-        if(null == coinData){
+     */
+    public boolean isMultiSignTx() throws NulsException {
+        if (null == coinData) {
             return false;
         }
         CoinData cData = getCoinDataInstance();
         List<CoinFrom> from = cData.getFrom();
-        if(from == null || from.size() == 0){
+        if (from == null || from.size() == 0) {
             return false;
         }
         CoinFrom coinFrom = from.get(0);
-        if(AddressTool.isMultiSignAddress(coinFrom.getAddress())){
+        if (AddressTool.isMultiSignAddress(coinFrom.getAddress())) {
             return true;
         }
         return false;
