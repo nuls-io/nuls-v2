@@ -21,7 +21,7 @@
     "name": "network.self.server.port",
     "remark": "自有网络端口",
     "readOnly": "true",
-    "value": "9009"
+    "value": "8008"
   },
   {
     "name": "network.self.chainId",
@@ -51,7 +51,7 @@
     "name": "network.self.seed.ip",
     "remark": "种子节点",
     "readOnly": "true",
-    "value": "192.168.1.122:9009"
+    "value": "192.168.1.57:8008"
   },
   {
     "name": "network.cross.server.port",
