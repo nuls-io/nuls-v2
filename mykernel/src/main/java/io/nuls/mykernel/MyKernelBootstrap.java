@@ -51,7 +51,7 @@ public class MyKernelBootstrap {
     private static List<String> MODULE_STOP_LIST_SCRIPT = new ArrayList<>();
 
     public static void main(String[] args) throws Exception {
-        System.out.println(System.getProperty("os.name"));
+        System.setProperty("io.netty.tryReflectionSetAccessible", "true");
         //增加程序结束的钩子，监听到主线程停止时，调用./stop.sh停止所有的子模块
         Runtime.getRuntime().addShutdownHook(new Thread(()->{
             log.info("jvm shutdown");
@@ -87,11 +87,7 @@ public class MyKernelBootstrap {
                         TimeUnit.SECONDS.sleep(1);
                     }
                     //获取Modules目录
-                    String modulesPath = "." + File.separator;
-                    if(args.length > 1){
-                        modulesPath = args[1];
-                    }
-                    File modules = new File(modulesPath);
+                    File modules = new File(args[1]);
                     //遍历modules目录查找带有module.ncf文件的目录
                     try{
                         findModule(modules);
@@ -146,12 +142,12 @@ public class MyKernelBootstrap {
                 Process process = null;
                 try {
                     process = Runtime.getRuntime().exec(
-                            modules.getAbsolutePath() + File.separator + "start." + getScriptSuffix()
+                            modules.getAbsolutePath() + File.separator + "start.sh "
                                     + " --jre " + System.getProperty("java.home")
                                     + " --managerurl " + "127.0.0.1:8887"
                     );
                     synchronized (MODULE_STOP_LIST_SCRIPT){
-                        MODULE_STOP_LIST_SCRIPT.add(modules.getAbsolutePath() + File.separator + "stop." + getScriptSuffix());
+                        MODULE_STOP_LIST_SCRIPT.add(modules.getAbsolutePath() + File.separator + "stop.sh ");
                     }
                     printRuntimeConsole(process);
                 } catch (IOException e) {
@@ -159,10 +155,6 @@ public class MyKernelBootstrap {
                 }
             });
         }
-    }
-
-    private static String getScriptSuffix(){
-        return "Window".equals(System.getProperty("os.name")) ? "bat " : "sh ";
     }
 
     private static void printRuntimeConsole(Process process) throws IOException {

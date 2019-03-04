@@ -82,10 +82,6 @@ public class ProtocolBootstrap {
             RocksDBService.createTable(PROTOCOL_CONFIG);
             //加载配置
             ConfigLoader.load();
-            for (Integer chainId : ContextManager.chainIds) {
-                ContextManager.getContext(chainId).setStatus(RunningStatusEnum.READY);
-                KernelUtil.updateStatus(chainId, ModuleE.PU.abbr, RunningStatusEnum.READY);
-            }
         } catch (Exception e) {
             e.printStackTrace();
             commonLog.error("error occur when init, " + e.getMessage());
@@ -105,10 +101,6 @@ public class ProtocolBootstrap {
             //开启一些监控线程
             ScheduledThreadPoolExecutor executor = ThreadUtils.createScheduledThreadPool(1, new NulsThreadFactory("protocol-monitor"));
             executor.scheduleWithFixedDelay(ProtocolMonitor.getInstance(), 0, 5, TimeUnit.SECONDS);
-            for (Integer chainId : ContextManager.chainIds) {
-                ContextManager.getContext(chainId).setStatus(RunningStatusEnum.RUNNING);
-                KernelUtil.updateStatus(chainId, ModuleE.PU.abbr, RunningStatusEnum.RUNNING);
-            }
         } catch (Exception e) {
             e.printStackTrace();
             commonLog.error("error occur when start, " + e.getMessage());

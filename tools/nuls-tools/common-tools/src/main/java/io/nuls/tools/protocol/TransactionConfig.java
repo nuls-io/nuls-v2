@@ -1,11 +1,20 @@
-package io.nuls.base.data.protocol;
+package io.nuls.tools.protocol;
 
 public class TransactionConfig {
     private short type;
     private String name;
+    private String handler;
     private String validate;
     private String commit;
     private String rollback;
+
+    public String getHandler() {
+        return handler;
+    }
+
+    public void setHandler(String handler) {
+        this.handler = handler;
+    }
 
     public short getType() {
         return type;
