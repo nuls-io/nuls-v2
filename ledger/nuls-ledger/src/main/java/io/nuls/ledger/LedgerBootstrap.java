@@ -30,6 +30,8 @@ import io.nuls.ledger.config.AppConfig;
 import io.nuls.ledger.model.ModuleConfig;
 import io.nuls.ledger.service.BlockDataService;
 import io.nuls.ledger.service.impl.BlockDataServiceImpl;
+import io.nuls.ledger.storage.InitDB;
+import io.nuls.ledger.storage.impl.RepositoryImpl;
 import io.nuls.rpc.info.HostInfo;
 import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.netty.bootstrap.NettyServer;
@@ -49,10 +51,10 @@ public class LedgerBootstrap {
     public static void main(String[] args) {
         logger.info("ledger Bootstrap start...");
         try {
-            AppConfig.loadModuleConfig();
-            initRocksDb();
             //springLite容器初始化AppInitializing
             SpringLiteContext.init("io.nuls.ledger", new ModularServiceMethodInterceptor());
+            AppConfig.loadModuleConfig();
+            initRocksDb();
             initLedgerDatas();
             initRpcServer();
         } catch (Exception e) {
@@ -99,7 +101,8 @@ public class LedgerBootstrap {
     public static void initRocksDb() {
         try {
             RocksDBService.init(ModuleConfig.getInstance().getDatabaseDir());
-
+            InitDB initDB = SpringLiteContext.getBean(RepositoryImpl.class);
+            initDB.initTableName();
         } catch (Exception e) {
             logger.error(e);
         }

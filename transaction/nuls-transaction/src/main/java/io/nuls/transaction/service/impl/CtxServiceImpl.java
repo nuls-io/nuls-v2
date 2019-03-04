@@ -13,10 +13,10 @@ import io.nuls.transaction.cache.PackablePool;
 import io.nuls.transaction.constant.TxCmd;
 import io.nuls.transaction.constant.TxConstant;
 import io.nuls.transaction.constant.TxErrorCode;
-import io.nuls.transaction.db.h2.dao.TransactionH2Service;
-import io.nuls.transaction.db.rocksdb.storage.CtxStorageService;
-import io.nuls.transaction.db.rocksdb.storage.UnconfirmedTxStorageService;
-import io.nuls.transaction.db.rocksdb.storage.UnverifiedCtxStorageService;
+import io.nuls.transaction.storage.h2.TransactionH2Service;
+import io.nuls.transaction.storage.rocksdb.CtxStorageService;
+import io.nuls.transaction.storage.rocksdb.UnconfirmedTxStorageService;
+import io.nuls.transaction.storage.rocksdb.UnverifiedCtxStorageService;
 import io.nuls.transaction.message.BroadcastCrossNodeRsMessage;
 import io.nuls.transaction.message.BroadcastCrossTxHashMessage;
 import io.nuls.transaction.message.GetTxMessage;
@@ -182,7 +182,7 @@ public class CtxServiceImpl implements CtxService {
         }
         Transaction tx = ctx.getTx();
 
-        if(chain.getPackaging()) {
+        if(chain.getPackaging().get()) {
             //当节点是出块节点时, 才将交易放入待打包队列
             packablePool.add(chain, tx, false);
         }
@@ -191,13 +191,12 @@ public class CtxServiceImpl implements CtxService {
         //保存到h2数据库
         transactionH2Service.saveTxs(TxUtil.tx2PO(tx));
         //调账本记录未确认交易
-        List<String> txHexList = new ArrayList<>();
         try {
-            txHexList.add(tx.hex());
+            LedgerCall.commitUnconfirmedTx(chain, tx.hex());
         } catch (Exception e) {
             throw new NulsException(e);
         }
-        LedgerCall.commitUnconfirmedTx(chain, txHexList);
+
         //广播交易hash
         BroadcastCrossTxHashMessage ctxHashMessage = new BroadcastCrossTxHashMessage();
         ctxHashMessage.setCommand(TxCmd.NW_NEW_CROSS_HASH);

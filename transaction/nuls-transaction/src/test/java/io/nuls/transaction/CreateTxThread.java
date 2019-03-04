@@ -27,7 +27,6 @@ package io.nuls.transaction;
 import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.model.message.Response;
 import io.nuls.rpc.netty.processor.ResponseMessageProcessor;
-import static io.nuls.transaction.utils.LoggerUtil.Log;
 import io.nuls.transaction.model.bo.Chain;
 import io.nuls.transaction.model.bo.config.ConfigBean;
 import io.nuls.transaction.model.dto.CoinDTO;
@@ -38,6 +37,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import static io.nuls.transaction.utils.LoggerUtil.Log;
 
 /**
  * @author: Charlie
@@ -72,6 +73,8 @@ public class CreateTxThread implements Runnable {
     static String address28 = "5MR_2CfUsasd33vQV3HqGw6M3JwVsuVxJ7r";
     static String address29 = "5MR_2CVuGjQ3CYVkhFszxfSt6sodg1gDHYF";
 
+    static String password = "nuls123456";
+
     private Chain chain;
 
     public CreateTxThread(){
@@ -103,21 +106,21 @@ public class CreateTxThread implements Runnable {
 //            Assert.assertTrue(null != response.getResponseData());
 //            Map map = (HashMap) ((HashMap) response.getResponseData()).get("tx_createCtx");
 //            Assert.assertTrue(null != map);
-//            Log.info("{}", map.get("value"));
+//            Log.debug("{}", map.get("value"));
 
 //            createTransfer();
             createTransfer();
 
-            Thread.sleep(3500L);
+            Thread.sleep(2000L);
         }
     }
     private void createTransfer() throws Exception {
-        Map transferMap = this.createTransferTx(address24, "5MR_4bgJiPmxN4mZV2C89thSEdJ8qWnm9Xi", null);
+        Map transferMap = this.createTransferTx(address26, address25, password);
         //调用接口
         Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_transfer", transferMap);
         HashMap result = (HashMap) (((HashMap) cmdResp.getResponseData()).get("ac_transfer"));
         Assert.assertTrue(null != result);
-        Log.info("{}", result.get("value"));
+        Log.debug("{}", result.get("value"));
     }
 
     private void createNewAddressTransfer() throws Exception {
@@ -129,7 +132,7 @@ public class CreateTxThread implements Runnable {
         Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_transfer", transferMap);
         HashMap result = (HashMap) (((HashMap) cmdResp.getResponseData()).get("ac_transfer"));
         Assert.assertTrue(null != result);
-        Log.info("{}", result.get("value"));
+        Log.debug("{}", result.get("value"));
     }
 
     public static String createAccount() {

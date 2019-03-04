@@ -45,5 +45,4 @@ public interface AssetStorage {
      */
     List<Asset> getByChain(int chainId) throws Exception;
 
-
 }

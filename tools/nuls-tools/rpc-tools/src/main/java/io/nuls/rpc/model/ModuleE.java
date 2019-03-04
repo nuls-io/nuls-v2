@@ -44,7 +44,8 @@ public enum ModuleE {
     LG("lg", "Ledger", "nuls.io"),
     TX("tx", "Transaction", "nuls.io"),
     EB("eb", "EventBus", "nuls.io"),
-    PU("pu", "ProtocolUpdate", "nuls.io");
+    PU("pu", "ProtocolUpdate", "nuls.io"),
+    AP("ap", "Api", "nuls.io");
 
     public final String abbr;
     public final String name;

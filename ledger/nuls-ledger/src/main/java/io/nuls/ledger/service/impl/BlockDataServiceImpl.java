@@ -25,13 +25,13 @@
 package io.nuls.ledger.service.impl;
 
 import io.nuls.base.data.Transaction;
-import io.nuls.ledger.db.Repository;
 import io.nuls.ledger.model.ChainHeight;
 import io.nuls.ledger.model.po.AccountState;
 import io.nuls.ledger.model.po.BlockSnapshotAccounts;
 import io.nuls.ledger.model.po.BlockTxs;
 import io.nuls.ledger.service.AccountStateService;
 import io.nuls.ledger.service.BlockDataService;
+import io.nuls.ledger.storage.Repository;
 import io.nuls.ledger.utils.LedgerUtils;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Service;

@@ -27,7 +27,6 @@ package io.nuls.ledger.service.impl;
 
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.*;
-import io.nuls.ledger.db.Repository;
 import io.nuls.ledger.model.AccountBalance;
 import io.nuls.ledger.model.UnconfirmedTx;
 import io.nuls.ledger.model.ValidateResult;
@@ -38,6 +37,7 @@ import io.nuls.ledger.service.BlockDataService;
 import io.nuls.ledger.service.TransactionService;
 import io.nuls.ledger.service.processor.CommontTransactionProcessor;
 import io.nuls.ledger.service.processor.LockedTransactionProcessor;
+import io.nuls.ledger.storage.Repository;
 import io.nuls.ledger.utils.CoinDataUtils;
 import io.nuls.ledger.utils.LedgerUtils;
 import io.nuls.ledger.utils.LockerUtils;

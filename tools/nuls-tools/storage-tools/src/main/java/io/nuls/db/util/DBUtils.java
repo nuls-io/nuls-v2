@@ -81,15 +81,13 @@ public class DBUtils {
         return filePath;
     }
 
-    private static String genAbsolutePath(String path) {
+    public static String genAbsolutePath(String path) {
         String[] paths = path.split("/|\\\\");
         URL resource = ClassLoader.getSystemClassLoader().getResource(".");
         String classPath = "";
         if (resource == null) {
-            String path1 = System.getProperty("java.class.path");
-            int firstIndex = path1.lastIndexOf(System.getProperty("path.separator")) + 1;
-            int lastIndex = path1.lastIndexOf(File.separator) + 1;
-            classPath = path1.substring(firstIndex, lastIndex);
+            URL url = DBUtils.class.getProtectionDomain().getCodeSource().getLocation();
+            classPath = url.getPath();
             Log.info("2.classPath = {}", classPath);
         } else {
             classPath = resource.getPath();
@@ -130,5 +128,8 @@ public class DBUtils {
         }
         String regex = "^[a-zA-Z0-9_\\-]+$";
         return areaName.matches(regex);
+    }
+    public static void main(String []args){
+        System.out.println(  DBUtils.class.getProtectionDomain().getCodeSource().getLocation().getPath());
     }
 }

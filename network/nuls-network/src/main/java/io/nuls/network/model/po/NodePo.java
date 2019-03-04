@@ -56,16 +56,19 @@ public class NodePo extends  BasePo{
      */
     private boolean isCrossConnect=false;
 
+    private int status;
+
     public NodePo(){
         super();
     }
-    public NodePo(long magicNumber,String id,String ip,int port,int crossPort,boolean isCrossConnect){
+    public NodePo(long magicNumber,String id,String ip,int port,int crossPort,boolean isCrossConnect,int status){
         this.magicNumber = magicNumber;
         this.ip=ip;
         this.id=id;
         this.port=port;
         this.crossPort=crossPort;
         this.isCrossConnect=isCrossConnect;
+        this.status = status;
     }
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
@@ -75,6 +78,7 @@ public class NodePo extends  BasePo{
         stream.writeUint16(port);
         stream.writeUint16(crossPort);
         stream.writeBoolean(isCrossConnect);
+        stream.writeUint16(status);
     }
 
     @Override
@@ -85,6 +89,7 @@ public class NodePo extends  BasePo{
         this.port = byteBuffer.readUint16();
         this.crossPort = byteBuffer.readUint16();
         this.isCrossConnect = byteBuffer.readBoolean();
+        this.status = byteBuffer.readUint16();
     }
 
     @Override
@@ -96,6 +101,7 @@ public class NodePo extends  BasePo{
         size += SerializeUtils.sizeOfUint16();
         size += SerializeUtils.sizeOfUint16();
         size += SerializeUtils.sizeOfBoolean();
+        size += SerializeUtils.sizeOfUint16();
         return size;
     }
 
@@ -139,10 +145,20 @@ public class NodePo extends  BasePo{
         this.crossPort = crossPort;
     }
 
+    public int getStatus() {
+        return status;
+    }
+
+    public void setStatus(int status) {
+        this.status = status;
+    }
+
     @Override
     public Dto parseDto() {
         Node   node = new Node(magicNumber,ip, port, Node.OUT, isCrossConnect);
         node.setRemoteCrossPort(crossPort);
+        node.setStatus(status);
+        node.setSeedNode(false);
         return node;
     }
 

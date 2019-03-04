@@ -1,0 +1,26 @@
+[
+  {
+    "name": "logLevel",
+    "remark": "日志级别",
+    "readOnly": "false",
+    "value": "info"
+  },
+  {
+    "name": "chainId",
+    "remark": "链ID",
+    "readOnly": "true",
+    "value": "12345"
+  },
+  {
+    "name": "dbIp",
+    "remark": "数据库ip",
+    "readOnly": "true",
+    "value": "127.0.0.1"
+  },
+  {
+    "name": "dbPort",
+    "remark": "数据库断开",
+    "readOnly": "true",
+    "value": "27017"
+  }
+]

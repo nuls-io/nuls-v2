@@ -82,7 +82,7 @@ public abstract class BaseCmd {
      * @return Response
      */
     protected Response failed(ErrorCode errorCode) {
-        Response response = MessageUtil.newResponse("", Constants.BOOLEAN_FALSE, "");
+        Response response = MessageUtil.newResponse("", Constants.BOOLEAN_FALSE, errorCode.getMsg());
         response.setResponseData(errorCode);
         return response;
     }

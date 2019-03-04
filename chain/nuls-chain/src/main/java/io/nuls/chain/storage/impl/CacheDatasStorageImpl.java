@@ -2,19 +2,19 @@ package io.nuls.chain.storage.impl;
 
 import io.nuls.chain.model.po.CacheDatas;
 import io.nuls.chain.storage.CacheDatasStorage;
+import io.nuls.chain.storage.InitDB;
 import io.nuls.db.service.RocksDBService;
 import io.nuls.tools.basic.InitializingBean;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.data.ByteUtils;
-
-import static io.nuls.chain.util.LoggerUtil.Log;
+import io.nuls.tools.exception.NulsException;
 
 /**
  * @author lan
  * @date 2019/1/8
  */
 @Component
-public class CacheDatasStorageImpl implements CacheDatasStorage, InitializingBean {
+public class CacheDatasStorageImpl extends BaseStorage implements CacheDatasStorage, InitDB, InitializingBean {
 
     private final String TBL = "module_block_datas_bak";
 
@@ -24,27 +24,19 @@ public class CacheDatasStorageImpl implements CacheDatasStorage, InitializingBea
      */
     @Override
     public void afterPropertiesSet() {
-        try {
-            if (!RocksDBService.existTable(TBL)) {
-                RocksDBService.createTable(TBL);
-            }
-        } catch (Exception e) {
-            Log.error(e);
-        }
+
     }
 
 
     @Override
     public void save(long key, CacheDatas moduleTxDatas) throws Exception {
-         RocksDBService.put(TBL, ByteUtils.longToBytes(key), moduleTxDatas.serialize());
+        RocksDBService.put(TBL, ByteUtils.longToBytes(key), moduleTxDatas.serialize());
     }
-
-
 
 
     @Override
     public void delete(long key) throws Exception {
-         RocksDBService.delete(TBL, ByteUtils.longToBytes(key));
+        RocksDBService.delete(TBL, ByteUtils.longToBytes(key));
     }
 
 
@@ -57,5 +49,10 @@ public class CacheDatasStorageImpl implements CacheDatasStorage, InitializingBea
         CacheDatas moduleTxDatas = new CacheDatas();
         moduleTxDatas.parse(bytes, 0);
         return moduleTxDatas;
+    }
+
+    @Override
+    public void initTableName() throws NulsException {
+       super.initTableName(TBL);
     }
 }

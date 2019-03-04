@@ -53,7 +53,7 @@ import java.util.List;
 public class AliasStorageServiceImpl implements AliasStorageService, InitializingBean {
 
     /**
-     * Initialize the db when the application boot up
+     * Initialize the storage when the application boot up
      */
     @Override
     public void afterPropertiesSet() throws NulsException {
@@ -149,7 +149,7 @@ public class AliasStorageServiceImpl implements AliasStorageService, Initializin
     }
 
     /**
-     * save the alias to db
+     * save the alias to storage
      * @param chainId
      * @param alias
      * @return
@@ -190,9 +190,9 @@ public class AliasStorageServiceImpl implements AliasStorageService, Initializin
     }
 
     /**
-     * remove the alias from db
+     * remove the alias from storage
      * <p>
-     * if the alias isn't exist in db,it wil return true
+     * if the alias isn't exist in storage,it wil return true
      *
      * @param alias
      * @return
