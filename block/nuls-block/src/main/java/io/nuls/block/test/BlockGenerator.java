@@ -25,12 +25,10 @@ package io.nuls.block.test;
 import io.nuls.base.data.*;
 import io.nuls.base.signture.BlockSignature;
 import io.nuls.base.signture.SignatureUtil;
-import io.nuls.block.constant.BlockErrorCode;
 import io.nuls.block.model.GenesisBlock;
 import io.nuls.tools.crypto.ECKey;
 import io.nuls.tools.crypto.HexUtil;
 import lombok.Data;
-import org.apache.http.util.Asserts;
 
 import java.io.IOException;
 import java.math.BigInteger;
@@ -115,7 +113,6 @@ public final class BlockGenerator extends Thread {
         List<Transaction> txlist = new ArrayList<>();
         CoinData coinData = new CoinData();
         String address = ADDRESS;
-        Asserts.notEmpty(address, BlockErrorCode.DATA_ERROR.getMsg());
         String amount = "10000000" + seed + symbol;
         Address ads = Address.fromHashs(address);
         CoinTo coin = new CoinTo();
