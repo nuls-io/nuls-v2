@@ -40,7 +40,7 @@ public class ChainBootstrap extends RpcModule {
         if (args == null || args.length == 0) {
             args = new String[]{HostInfo.getLocalIP() + ":8887"};
         }
-        NulsRpcModuleBootstrap.run("io.nuls.ledger", args);
+        NulsRpcModuleBootstrap.run("io.nuls.chain", args);
     }
 
     private void start() {
