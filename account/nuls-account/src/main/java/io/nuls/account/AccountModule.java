@@ -26,7 +26,7 @@ public class AccountModule extends RpcModule {
 
     /**
      * 返回此模块的依赖模块
-     *
+     * 可写作 return new Module[]{new Module(ModuleE.LG.abbr, "1.0"),new Module(ModuleE.TX.abbr, "1.0")}
      * @return
      */
     @Override
@@ -88,11 +88,9 @@ public class AccountModule extends RpcModule {
     public static void initCfg() {
         try {
             NulsConfig.MODULES_CONFIG = ConfigLoader.loadIni(NulsConfig.MODULES_CONFIG_FILE);
-
             AccountParam accountParam = AccountParam.getInstance();
             //set data save path
             accountParam.setDataPath(NulsConfig.MODULES_CONFIG.getCfgValue(AccountConstant.CFG_DB_SECTION, AccountConstant.DB_DATA_PATH, null));
-
             try {
                 //set system encoding
                 NulsConfig.DEFAULT_ENCODING = NulsConfig.MODULES_CONFIG.getCfgValue(AccountConstant.CFG_SYSTEM_SECTION, AccountConstant.CFG_SYSTEM_DEFAULT_ENCODING);
