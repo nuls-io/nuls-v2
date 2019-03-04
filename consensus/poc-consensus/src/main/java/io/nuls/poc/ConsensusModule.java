@@ -62,7 +62,7 @@ public class ConsensusModule extends RpcModule {
 
     @Override
     public Module[] getDependencies() {
-        return new Module[]{new Module(ModuleE.BL.abbr, "1.0"),new Module(ModuleE.TX.abbr, "1.0")};
+        return new Module[]{new Module(ModuleE.BL.abbr, "1.0"),new Module(ModuleE.TX.abbr, "1.0"),new Module(ModuleE.BL.abbr, "1.0")};
     }
 
     @Override
@@ -73,7 +73,6 @@ public class ConsensusModule extends RpcModule {
     @Override
     public boolean doStart() {
         try {
-            SpringLiteContext.getBean(ChainManager.class).runChain();
             return true;
         }catch (Exception e){
             Log.error(e);
@@ -83,6 +82,7 @@ public class ConsensusModule extends RpcModule {
 
     @Override
     public RpcModuleState onDependenciesReady() {
+        SpringLiteContext.getBean(ChainManager.class).runChain();
         return RpcModuleState.Running;
     }
 
