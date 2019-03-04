@@ -4,6 +4,7 @@ import io.nuls.db.service.RocksDBService;
 import io.nuls.poc.constant.ConsensusConstant;
 import io.nuls.poc.storage.LanguageService;
 import io.nuls.poc.utils.manager.ChainManager;
+import io.nuls.rpc.info.HostInfo;
 import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.modulebootstrap.Module;
 import io.nuls.rpc.modulebootstrap.NulsRpcModuleBootstrap;
@@ -31,7 +32,7 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 public class ConsensusModule extends RpcModule {
 
     public static void main(String[] args){
-        NulsRpcModuleBootstrap.run(ConsensusConstant.CONTEXT_PATH,args);
+        NulsRpcModuleBootstrap.run(ConsensusConstant.CONTEXT_PATH,new String[]{HostInfo.getLocalIP()+":8887/ws"});
     }
     /**
      * 初始化模块，比如初始化RockDB等，在此处初始化后，可在其他bean的afterPropertiesSet中使用
