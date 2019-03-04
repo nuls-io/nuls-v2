@@ -43,7 +43,6 @@ public class ConsensusModule extends RpcModule {
         try {
             initSys();
             initDB();
-            SpringLiteContext.init(ConsensusConstant.CONTEXT_PATH);
             initLanguage();
         }catch (Exception e){
             Log.error(e);
