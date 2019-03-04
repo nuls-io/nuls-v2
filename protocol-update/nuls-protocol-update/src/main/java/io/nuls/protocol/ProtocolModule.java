@@ -1,10 +1,8 @@
-package io.nuls.block;
+package io.nuls.protocol;
 
-import io.nuls.block.thread.BlockSynchronizer;
-import io.nuls.block.thread.monitor.*;
-import io.nuls.block.utils.ConfigLoader;
-import io.nuls.block.utils.module.NetworkUtil;
 import io.nuls.db.service.RocksDBService;
+import io.nuls.protocol.thread.monitor.ProtocolMonitor;
+import io.nuls.protocol.utils.ConfigLoader;
 import io.nuls.rpc.info.HostInfo;
 import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.modulebootstrap.Module;
@@ -19,7 +17,8 @@ import io.nuls.tools.thread.commom.NulsThreadFactory;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
-import static io.nuls.block.constant.Constant.*;
+import static io.nuls.protocol.constant.Constant.DATA_PATH;
+import static io.nuls.protocol.constant.Constant.PROTOCOL_CONFIG;
 
 /**
  * 区块模块启动类
@@ -29,10 +28,10 @@ import static io.nuls.block.constant.Constant.*;
  * @date 19-3-4 下午4:09
  */
 @Component
-public class BlockModule extends RpcModule {
+public class ProtocolModule extends RpcModule {
 
     public static void main(String[] args) {
-        NulsRpcModuleBootstrap.run("io.nuls.block", new String[]{HostInfo.getLocalIP() + ":8887/ws"});
+        NulsRpcModuleBootstrap.run("io.nuls.protocol", new String[]{HostInfo.getLocalIP() + ":8887/ws"});
     }
 
     /**
@@ -42,7 +41,7 @@ public class BlockModule extends RpcModule {
      */
     @Override
     public Module[] getDependencies() {
-        return new Module[]{new Module(ModuleE.TX.abbr, "1.0")};
+        return new Module[]{new Module(ModuleE.BL.abbr, "1.0")};
     }
 
     /**
@@ -51,7 +50,7 @@ public class BlockModule extends RpcModule {
      */
     @Override
     public Module moduleInfo() {
-        return new Module(ModuleE.BL.abbr, "1.0");
+        return new Module(ModuleE.PU.abbr, "1.0");
     }
 
 
@@ -73,13 +72,11 @@ public class BlockModule extends RpcModule {
     @Override
     public boolean doStart() {
         try {
-            RocksDBService.createTable(CHAIN_LATEST_HEIGHT);
-            RocksDBService.createTable(CHAIN_PARAMETERS);
             RocksDBService.createTable(PROTOCOL_CONFIG);
         } catch (Exception e) {
             e.printStackTrace();
         }
-        Log.info("module ready");
+        Log.info("protocol module ready");
         return true;
     }
 
@@ -89,32 +86,16 @@ public class BlockModule extends RpcModule {
      */
     @Override
     public RpcModuleState onDependenciesReady() {
-        Log.info("block 依赖准备就绪");
-        NetworkUtil.register();
+        Log.info("protocol 依赖准备就绪");
         //加载配置
         try {
             ConfigLoader.load();
         } catch (Exception e) {
             e.printStackTrace();
         }
-
-        //开启区块同步线程
-        ThreadUtils.createAndRunThread("block-synchronizer", BlockSynchronizer.getInstance());
-        //开启分叉链处理线程
-        ScheduledThreadPoolExecutor forkExecutor = ThreadUtils.createScheduledThreadPool(1, new NulsThreadFactory("fork-chains-monitor"));
-        forkExecutor.scheduleWithFixedDelay(ForkChainsMonitor.getInstance(), 0, 15, TimeUnit.SECONDS);
-        //开启孤儿链处理线程
-        ScheduledThreadPoolExecutor orphanExecutor = ThreadUtils.createScheduledThreadPool(1, new NulsThreadFactory("orphan-chains-monitor"));
-        orphanExecutor.scheduleWithFixedDelay(OrphanChainsMonitor.getInstance(), 0, 15, TimeUnit.SECONDS);
-        //开启孤儿链维护线程
-        ScheduledThreadPoolExecutor maintainExecutor = ThreadUtils.createScheduledThreadPool(1, new NulsThreadFactory("orphan-chains-maintainer"));
-        maintainExecutor.scheduleWithFixedDelay(OrphanChainsMaintainer.getInstance(), 0, 5, TimeUnit.SECONDS);
-        //开启数据库大小监控线程
-        ScheduledThreadPoolExecutor dbSizeExecutor = ThreadUtils.createScheduledThreadPool(1, new NulsThreadFactory("storage-size-monitor"));
-        dbSizeExecutor.scheduleWithFixedDelay(ChainsDbSizeMonitor.getInstance(), 0, 5, TimeUnit.MINUTES);
-        //开启区块监控线程
-        ScheduledThreadPoolExecutor monitorExecutor = ThreadUtils.createScheduledThreadPool(1, new NulsThreadFactory("network-monitor"));
-        monitorExecutor.scheduleWithFixedDelay(NetworkResetMonitor.getInstance(), 0, 5, TimeUnit.MINUTES);
+        //开启一些监控线程
+        ScheduledThreadPoolExecutor executor = ThreadUtils.createScheduledThreadPool(1, new NulsThreadFactory("protocol-monitor"));
+        executor.scheduleWithFixedDelay(ProtocolMonitor.getInstance(), 0, 5, TimeUnit.SECONDS);
         return RpcModuleState.Running;
     }
 

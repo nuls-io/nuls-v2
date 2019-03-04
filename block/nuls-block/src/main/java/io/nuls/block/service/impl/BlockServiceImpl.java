@@ -212,7 +212,7 @@ public class BlockServiceImpl implements BlockService {
         try {
             //1.验证区块
             if (!verifyBlock(chainId, block, localInit, download)) {
-                commonLog.error("verifyBlock fail!chainId-" + chainId + ",height-" + height);
+                commonLog.debug("verifyBlock fail!chainId-" + chainId + ",height-" + height);
                 return false;
             }
             //2.设置最新高度,如果失败则恢复上一个高度
@@ -279,7 +279,7 @@ public class BlockServiceImpl implements BlockService {
                 }
                 hashList.addLast(hash);
             }
-            commonLog.debug("save block success, height-" + height + ", hash-" + hash);
+            commonLog.info("save block success, height-" + height + ", hash-" + hash);
             return true;
         } finally {
             if (needLock) {
@@ -423,7 +423,7 @@ public class BlockServiceImpl implements BlockService {
         //分叉验证
         boolean forkVerify = BlockUtil.forkVerify(chainId, block);
         if (!forkVerify) {
-            commonLog.error("forkVerify-"+forkVerify);
+            commonLog.debug("forkVerify-"+forkVerify);
             return false;
         }
         //共识验证
