@@ -12,12 +12,14 @@ import io.nuls.tools.parse.ConfigLoader;
 import io.nuls.tools.parse.I18nUtils;
 import io.nuls.transaction.constant.TxConfig;
 import io.nuls.transaction.constant.TxConstant;
-import io.nuls.transaction.db.h2.dao.TransactionH2Service;
-import io.nuls.transaction.db.rocksdb.storage.LanguageStorageService;
+import io.nuls.transaction.constant.TxDBConstant;
+import io.nuls.transaction.storage.h2.TransactionH2Service;
+import io.nuls.transaction.storage.rocksdb.LanguageStorageService;
 import io.nuls.transaction.manager.ChainManager;
 import io.nuls.transaction.model.bo.Chain;
 import io.nuls.transaction.rpc.call.BlockCall;
 import io.nuls.transaction.rpc.call.NetworkCall;
+import io.nuls.transaction.utils.DBUtil;
 import org.apache.ibatis.io.Resources;
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.apache.ibatis.session.SqlSessionFactoryBuilder;
@@ -38,12 +40,13 @@ public class TransactionBootStrap {
 
     public static void main(String[] args) {
         try {
+            //初始化上下文
+            SpringLiteContext.init(TxConstant.CONTEXT_PATH);
             //初始化系统参数
             initSys();
             //初始化数据库配置文件
             initDB();
-            //初始化上下文
-            SpringLiteContext.init(TxConstant.CONTEXT_PATH);
+
             //初始化国际资源文件语言
             initLanguage();
             //启动WebSocket服务,向外提供RPC接口
@@ -99,12 +102,16 @@ public class TransactionBootStrap {
     }
     public static void initDB() {
         try {
-
+            //数据文件存储地址
             Properties properties = ConfigLoader.loadProperties(TxConstant.DB_CONFIG_NAME);
-
             TxConfig.DB_ROOT_PATH = properties.getProperty(TxConstant.DB_DATA_PATH,
                     TransactionBootStrap.class.getClassLoader().getResource("").getPath() + "data");
             RocksDBService.init(TxConfig.DB_ROOT_PATH);
+
+            //模块配置表
+            DBUtil.createTable(TxDBConstant.DB_MODULE_CONGIF);
+            //语言表
+            DBUtil.createTable(TxDBConstant.DB_TX_LANGUAGE);
 
             //todo 单个节点跑多链的时候 h2是否需要通过chain来区分数据库(如何分？)，待确认！！
             String resource = "mybatis/mybatis-config.xml";

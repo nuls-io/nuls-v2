@@ -26,12 +26,13 @@ package io.nuls.chain.storage.impl;
 
 import io.nuls.chain.model.po.BlockHeight;
 import io.nuls.chain.storage.BlockHeightStorage;
+import io.nuls.chain.storage.InitDB;
 import io.nuls.chain.util.LoggerUtil;
 import io.nuls.db.service.RocksDBService;
 import io.nuls.tools.basic.InitializingBean;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.data.ByteUtils;
-import io.nuls.tools.log.Log;
+import io.nuls.tools.exception.NulsException;
 
 /**
  * @author lan
@@ -39,7 +40,7 @@ import io.nuls.tools.log.Log;
  * @date 2019/02/20
  **/
 @Component
-public class BlockHeightStorageImpl implements BlockHeightStorage, InitializingBean {
+public class BlockHeightStorageImpl  extends  BaseStorage implements BlockHeightStorage,InitDB,InitializingBean {
     private final String TBL = "txsBlockHeight";
 
 
@@ -49,13 +50,7 @@ public class BlockHeightStorageImpl implements BlockHeightStorage, InitializingB
      */
     @Override
     public void afterPropertiesSet() {
-        try {
-            if (!RocksDBService.existTable(TBL)) {
-                RocksDBService.createTable(TBL);
-            }
-        } catch (Exception e) {
-            Log.error(e);
-        }
+
     }
 
     @Override
@@ -79,5 +74,10 @@ public class BlockHeightStorageImpl implements BlockHeightStorage, InitializingB
     public void saveOrUpdateBlockHeight(int chainId, BlockHeight blockHeight) throws Exception {
         LoggerUtil.Log.info("chainId = {},blockHeight={} saveOrUpdateBlockHeight", chainId, blockHeight);
         RocksDBService.put(TBL, ByteUtils.intToBytes(chainId), blockHeight.serialize());
+    }
+
+    @Override
+    public void initTableName() throws NulsException {
+         super.initTableName(TBL);
     }
 }

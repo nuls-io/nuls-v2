@@ -9,6 +9,7 @@ import io.nuls.rpc.model.*;
 import io.nuls.rpc.model.message.Message;
 import io.nuls.rpc.model.message.Request;
 import io.nuls.rpc.model.message.Response;
+import io.nuls.rpc.modulebootstrap.Module;
 import io.nuls.rpc.netty.bootstrap.NettyClient;
 import io.nuls.rpc.netty.channel.ConnectData;
 import io.nuls.rpc.netty.processor.RequestMessageProcessor;
@@ -245,6 +246,26 @@ public class ConnectManager {
         LOCAL.getApiMethods().sort(Comparator.comparingDouble(CmdDetail::getVersion));
     }
 
+    public static void addCmdDetail(Class<?> claszs){
+        Method[] methods = claszs.getDeclaredMethods();
+        for (Method method : methods) {
+            CmdDetail cmdDetail = annotation2CmdDetail(method);
+            if (cmdDetail == null) {
+                continue;
+            }
+                /*
+                重复接口只注册一次
+                Repeated interfaces are registered only once
+                 */
+            if (!isRegister(cmdDetail)) {
+                LOCAL.getApiMethods().add(cmdDetail);
+                RequestMessageProcessor.handlerMap.put(cmdDetail.getInvokeClass(), SpringLiteContext.getBeanByClass(cmdDetail.getInvokeClass()));
+            };
+//            else {
+//                Log.warn(Constants.CMD_DUPLICATE + ":" + cmdDetail.getMethodName() + "-" + cmdDetail.getVersion());
+//            }
+        }
+    }
 
     /**
      * 保存所有拥有CmdAnnotation注解的方法
@@ -669,4 +690,9 @@ public class ConnectManager {
 //        channel.writeAndFlush(frame);
         channel.eventLoop().execute(() -> channel.writeAndFlush(new TextWebSocketFrame(message)));
     }
+
+    public static void sendMessage(String moduleAbbr, Message message) throws Exception {
+        sendMessage(getConnectByRole(moduleAbbr),JSONUtils.obj2json(message));
+    }
+
 }

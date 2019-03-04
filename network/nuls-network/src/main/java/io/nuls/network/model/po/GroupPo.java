@@ -35,7 +35,7 @@ import java.io.IOException;
 
 /**
  * @program: nuls2
- * @description: db bean
+ * @description: storage bean
  * @author: lan
  * @create: 2018/11/07
  **/

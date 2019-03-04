@@ -61,6 +61,10 @@ public class ResponseMessageProcessor {
         }
     }
 
+    public static void syncKernel(String kernelUrl) throws Exception {
+        syncKernel(kernelUrl,new KernelInvoke());
+    }
+
     /**
      * 同步本地模块与核心模块（Manager）
      * 1. 发送本地信息给Manager
@@ -72,7 +76,7 @@ public class ResponseMessageProcessor {
      *
      * @throws Exception 核心模块（Manager）不可用，Core Module (Manager) Not Available
      */
-    public static void syncKernel(String kernelUrl) throws Exception {
+    public static void syncKernel(String kernelUrl,BaseInvoke callbackInvoke) throws Exception {
         /*
         打造用于同步的Request
         Create Request for Synchronization
@@ -104,13 +108,13 @@ public class ResponseMessageProcessor {
         Get the returned data and place it in the local variable
          */
         Response response = receiveResponse(responseContainer, Constants.TIMEOUT_TIMEMILLIS);
-        BaseInvoke baseInvoke = new KernelInvoke();
-        baseInvoke.callBack(response);
+//        BaseInvoke baseInvoke = new KernelInvoke();
+        callbackInvoke.callBack(response);
 
         /*
         当有新模块注册到Kernel(Manager)时，需要同步连接信息
          */
-        requestAndInvoke(ModuleE.KE.abbr, "registerAPI", JSONUtils.json2map(JSONUtils.obj2json(ConnectManager.LOCAL)), "0", "1", baseInvoke);
+        requestAndInvoke(ModuleE.KE.abbr, "registerAPI", JSONUtils.json2map(JSONUtils.obj2json(ConnectManager.LOCAL)), "0", "1", callbackInvoke);
         Log.debug("Sync manager success. " + JSONUtils.obj2json(ConnectManager.ROLE_MAP));
 
         /*

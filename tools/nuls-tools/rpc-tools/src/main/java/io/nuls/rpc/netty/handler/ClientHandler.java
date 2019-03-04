@@ -87,13 +87,11 @@ public class ClientHandler extends SimpleChannelInboundHandler<Object> {
 
     @Override
     public void channelUnregistered(ChannelHandlerContext ctx) throws Exception {
-
         SocketChannel socketChannel = (SocketChannel) ctx.channel();
         ConnectData connectData = ConnectManager.getConnectDataByChannel(socketChannel);
         if (connectData != null) {
             connectData.setConnected(false);
         }
-
         Log.info("链接断开:"+ConnectManager.getRemoteUri((SocketChannel) ctx.channel()));
     }
 

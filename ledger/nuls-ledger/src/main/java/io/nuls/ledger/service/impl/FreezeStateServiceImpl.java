@@ -26,11 +26,11 @@
 package io.nuls.ledger.service.impl;
 
 import io.nuls.ledger.constant.LedgerConstant;
-import io.nuls.ledger.db.Repository;
 import io.nuls.ledger.model.po.AccountState;
 import io.nuls.ledger.model.po.FreezeHeightState;
 import io.nuls.ledger.model.po.FreezeLockTimeState;
 import io.nuls.ledger.service.FreezeStateService;
+import io.nuls.ledger.storage.Repository;
 import io.nuls.ledger.utils.TimeUtils;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Service;

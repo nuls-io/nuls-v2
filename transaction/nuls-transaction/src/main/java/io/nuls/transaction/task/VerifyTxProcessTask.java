@@ -9,9 +9,9 @@ import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.transaction.cache.PackablePool;
 import io.nuls.transaction.constant.TxConstant;
-import io.nuls.transaction.db.h2.dao.TransactionH2Service;
-import io.nuls.transaction.db.rocksdb.storage.UnconfirmedTxStorageService;
-import io.nuls.transaction.db.rocksdb.storage.UnverifiedTxStorageService;
+import io.nuls.transaction.storage.h2.TransactionH2Service;
+import io.nuls.transaction.storage.rocksdb.UnconfirmedTxStorageService;
+import io.nuls.transaction.storage.rocksdb.UnverifiedTxStorageService;
 import io.nuls.transaction.manager.TransactionManager;
 import io.nuls.transaction.model.bo.Chain;
 import io.nuls.transaction.model.bo.VerifyTxResult;
@@ -113,6 +113,7 @@ public class VerifyTxProcessTask implements Runnable {
                 unconfirmedTxStorageService.putTx(chainId, tx);
                 //保存到h2数据库
                 transactionH2Service.saveTxs(TxUtil.tx2PO(tx));
+                TxUtil.txInformationDebugPrint(chain, tx);
                 //调账本记录未确认交易
                 LedgerCall.commitUnconfirmedTx(chain, tx.hex());
                 //广播交易hash
