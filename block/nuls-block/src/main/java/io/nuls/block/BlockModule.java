@@ -32,7 +32,7 @@ import static io.nuls.block.constant.Constant.*;
 public class BlockModule extends RpcModule {
 
     public static void main(String[] args) {
-        NulsRpcModuleBootstrap.run("io.nuls.block", new String[]{HostInfo.getLocalIP() + ":8887/ws"});
+        NulsRpcModuleBootstrap.run("io.nuls", new String[]{HostInfo.getLocalIP() + ":8887/ws"});
     }
 
     /**
