@@ -32,7 +32,12 @@ import io.nuls.network.constant.NetworkParam;
 import io.nuls.network.manager.*;
 import io.nuls.network.storage.InitDB;
 import io.nuls.network.storage.impl.DbServiceImpl;
-import io.nuls.tools.core.inteceptor.ModularServiceMethodInterceptor;
+import io.nuls.rpc.info.HostInfo;
+import io.nuls.rpc.modulebootstrap.Module;
+import io.nuls.rpc.modulebootstrap.NulsRpcModuleBootstrap;
+import io.nuls.rpc.modulebootstrap.RpcModule;
+import io.nuls.rpc.modulebootstrap.RpcModuleState;
+import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.core.ioc.SpringLiteContext;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.parse.ConfigLoader;
@@ -52,44 +57,15 @@ import static io.nuls.network.utils.LoggerUtil.Log;
  * @author lan
  * @date 2018/11/01
  */
-public class NetworkBootstrap {
+@Component
+public class NetworkBootstrap extends RpcModule {
     private static NetworkBootstrap bootstrap = null;
 
-    private NetworkBootstrap() {
-    }
-
-    public static NetworkBootstrap getInstance() {
-        if (bootstrap == null) {
-            synchronized (NetworkBootstrap.class) {
-                if (bootstrap == null) {
-                    bootstrap = new NetworkBootstrap();
-                }
-            }
-        }
-        return bootstrap;
-    }
-
-
     public static void main(String[] args) {
-
-        NetworkBootstrap.getInstance().moduleStart();
-
-    }
-
-    public void moduleStart() {
-        try {
-            System.setProperty("io.netty.tryReflectionSetAccessible", "true");
-//            --add-exports java.base/jdk.internal.misc=ALL-UNNAMED
-//            --add-exports java.base/jdk.internal.ref=ALL-UNNAMED --add-exports java.base/sun.nio.ch=ALL-UNNAMED
-            SpringLiteContext.init("io.nuls.network", new ModularServiceMethodInterceptor());
-            jsonCfgInit();
-            dbInit();
-            managerInit();
-            managerStart();
-        } catch (Exception e) {
-            Log.error("Network NetworkBootstrap failed", e);
-            System.exit(-1);
+        if (args == null || args.length == 0) {
+            args = new String[]{HostInfo.getLocalIP() + ":8887"};
         }
+        NulsRpcModuleBootstrap.run("io.nuls.network", args);
     }
 
     /**
@@ -103,7 +79,7 @@ public class NetworkBootstrap {
             // set system language
             String language = ConfigManager.getValue(NetworkConstant.NETWORK_LANGUAGE);
             networkParam.setLanguage(language);
-            I18nUtils.loadLanguage(NetworkBootstrap.class,"languages", language);
+            I18nUtils.loadLanguage(NetworkBootstrap.class, "languages", language);
             I18nUtils.setLanguage(language);
             //set encode
             String encoding = ConfigManager.getValue(NetworkConstant.NETWORK_ENCODING);
@@ -139,11 +115,13 @@ public class NetworkBootstrap {
             e.printStackTrace();
         }
     }
-     private void dbInit()throws Exception{
-         RocksDBService.init(NetworkParam.getInstance().getDbPath());
-         InitDB dbService = SpringLiteContext.getBean(DbServiceImpl.class);
-         dbService.initTableName();
-     }
+
+    private void dbInit() throws Exception {
+        RocksDBService.init(NetworkParam.getInstance().getDbPath());
+        InitDB dbService = SpringLiteContext.getBean(DbServiceImpl.class);
+        dbService.initTableName();
+    }
+
     /**
      * 管理器初始化
      * Manager initialization
@@ -163,12 +141,68 @@ public class NetworkBootstrap {
      * Manager start
      */
     private void managerStart() throws Exception {
-        Log.debug("managerStart begin=========");
-        NodeGroupManager.getInstance().start();
-        RpcManager.getInstance().start();
-        ConnectionManager.getInstance().start();
-        TaskManager.getInstance().start();
+
+
         Log.debug("managerStart end============");
     }
 
+    /**
+     * 初始化模块信息，比如初始化RockDB等，在此处初始化后，可在其他bean的afterPropertiesSet中使用
+     */
+    @Override
+    public void init() {
+        try {
+            super.init();
+            System.setProperty("io.netty.tryReflectionSetAccessible", "true");
+//            --add-exports java.base/jdk.internal.misc=ALL-UNNAMED
+//            --add-exports java.base/jdk.internal.ref=ALL-UNNAMED --add-exports java.base/sun.nio.ch=ALL-UNNAMED
+            jsonCfgInit();
+            dbInit();
+            managerInit();
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.exit(-1);
+        }
+
+    }
+
+    @Override
+    public Module[] getDependencies() {
+        return new Module[0];
+    }
+
+    @Override
+    public Module moduleInfo() {
+        return null;
+    }
+
+    @Override
+    public boolean doStart() {
+        Log.debug("doStart begin=========");
+        try {
+            NodeGroupManager.getInstance().start();
+            RpcManager.getInstance().start();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+        return true;
+    }
+
+    @Override
+    public RpcModuleState onDependenciesReady() {
+        try {
+            ConnectionManager.getInstance().start();
+            TaskManager.getInstance().start();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return RpcModuleState.Ready;
+        }
+        return RpcModuleState.Running;
+    }
+
+    @Override
+    public RpcModuleState onDependenciesLoss(Module dependenciesModule) {
+        return RpcModuleState.Ready;
+    }
 }
