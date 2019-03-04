@@ -34,10 +34,14 @@ import io.nuls.ledger.storage.InitDB;
 import io.nuls.ledger.storage.impl.RepositoryImpl;
 import io.nuls.rpc.info.HostInfo;
 import io.nuls.rpc.model.ModuleE;
+import io.nuls.rpc.modulebootstrap.Module;
+import io.nuls.rpc.modulebootstrap.NulsRpcModuleBootstrap;
+import io.nuls.rpc.modulebootstrap.RpcModule;
+import io.nuls.rpc.modulebootstrap.RpcModuleState;
 import io.nuls.rpc.netty.bootstrap.NettyServer;
 import io.nuls.rpc.netty.channel.manager.ConnectManager;
 import io.nuls.rpc.netty.processor.ResponseMessageProcessor;
-import io.nuls.tools.core.inteceptor.ModularServiceMethodInterceptor;
+import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.core.ioc.SpringLiteContext;
 
 import static io.nuls.ledger.utils.LoggerUtil.logger;
@@ -46,21 +50,14 @@ import static io.nuls.ledger.utils.LoggerUtil.logger;
  * @author: Niels Wang
  * @date: 2018/10/15
  */
-public class LedgerBootstrap {
+@Component
+public class LedgerBootstrap extends RpcModule {
 
     public static void main(String[] args) {
-        logger.info("ledger Bootstrap start...");
-        try {
-            //springLite容器初始化AppInitializing
-            SpringLiteContext.init("io.nuls.ledger", new ModularServiceMethodInterceptor());
-            AppConfig.loadModuleConfig();
-            initRocksDb();
-            initLedgerDatas();
-            initRpcServer();
-        } catch (Exception e) {
-            logger.error("ledger Bootstrap failed", e);
-            System.exit(-1);
+        if (args == null || args.length == 0) {
+            args = new String[]{HostInfo.getLocalIP() + ":8887"};
         }
+        NulsRpcModuleBootstrap.run("io.nuls.ledger", args);
     }
 
 
@@ -106,5 +103,52 @@ public class LedgerBootstrap {
         } catch (Exception e) {
             logger.error(e);
         }
+    }
+
+    @Override
+    public Module[] getDependencies() {
+        return new Module[]{new Module(ModuleE.NW.abbr, "1.0")};
+    }
+
+    @Override
+    public Module moduleInfo() {
+        return new Module(ModuleE.LG.abbr, "1.0");
+    }
+    /**
+     * 初始化模块信息，比如初始化RockDB等，在此处初始化后，可在其他bean的afterPropertiesSet中使用
+     */
+    @Override
+    public void init() {
+        try {
+            super.init();
+            AppConfig.loadModuleConfig();
+            initRocksDb();
+            initLedgerDatas();
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.exit(-1);
+        }
+
+    }
+    @Override
+    public boolean doStart() {
+        //springLite容器初始化AppInitializing
+        try {
+            initRpcServer();
+        } catch (Exception e) {
+            logger.error("ledger Bootstrap failed", e);
+            System.exit(-1);
+        }
+        return true;
+    }
+
+    @Override
+    public RpcModuleState onDependenciesReady() {
+        return RpcModuleState.Running;
+    }
+
+    @Override
+    public RpcModuleState onDependenciesLoss(Module dependenciesModule) {
+        return RpcModuleState.Ready;
     }
 }
