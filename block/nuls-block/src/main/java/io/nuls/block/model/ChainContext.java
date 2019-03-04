@@ -23,7 +23,7 @@
 package io.nuls.block.model;
 
 import io.nuls.base.data.Block;
-import io.nuls.base.data.protocol.Protocol;
+import io.nuls.tools.protocol.Protocol;
 import io.nuls.block.cache.CacheHandler;
 import io.nuls.block.cache.SmallBlockCacher;
 import io.nuls.block.constant.RunningStatusEnum;

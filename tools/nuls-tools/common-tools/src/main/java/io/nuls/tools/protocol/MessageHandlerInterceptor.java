@@ -21,14 +21,11 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package io.nuls.h2.interceptor;
+package io.nuls.tools.protocol;
 
-import io.nuls.h2.transactional.annotation.Transaction;
-import io.nuls.h2.utils.MybatisDbHelper;
 import io.nuls.tools.core.annotation.Interceptor;
 import io.nuls.tools.core.inteceptor.base.BeanMethodInterceptor;
 import io.nuls.tools.core.inteceptor.base.BeanMethodInterceptorChain;
-import org.apache.ibatis.session.SqlSession;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
@@ -37,41 +34,21 @@ import java.lang.reflect.Method;
  * @author zhouwei
  * @date 2017/10/13
  */
-@Interceptor(Transaction.class)
-public class TransactionInterceptor implements BeanMethodInterceptor {
-
-    private static ThreadLocal<Boolean> FLAG_HOLDER = new ThreadLocal<Boolean>() {
-        @Override
-        protected Boolean initialValue() {
-            return false;
-        }
-    };
+@Interceptor(MessageHandler.class)
+public class MessageHandlerInterceptor implements BeanMethodInterceptor {
 
     @Override
     public Object intercept(Annotation annotation, Object object, Method method, Object[] params, BeanMethodInterceptorChain interceptorChain) throws Throwable {
-        boolean flag = FLAG_HOLDER.get();
-        Object result;
+        Object result = null;
+        try {
 
-        if (!flag) {
-            SqlSession sqlSession = null;
-            try {
-                FLAG_HOLDER.set(true);
-                sqlSession = MybatisDbHelper.getSession();
-                result = interceptorChain.execute(annotation, object, method, params);
-                sqlSession.commit();
-            } catch (Exception e) {
-                if (sqlSession != null) {
-                    sqlSession.rollback();
-                }
-                throw e;
-            } finally {
-                if (sqlSession != null) {
-                    MybatisDbHelper.close(sqlSession);
-                }
-                FLAG_HOLDER.remove();
-            }
-        } else {
+//            ProtocolValidator.meaasgeValidate()
             result = interceptorChain.execute(annotation, object, method, params);
+
+        } catch (Exception e) {
+
+        } finally {
+
         }
         return result;
     }

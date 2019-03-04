@@ -1,13 +1,40 @@
+/**
+ * MIT License
+ * <p>
+ * Copyright (c) 2017-2018 nuls.io
+ * <p>
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ * <p>
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * <p>
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+
 package io.nuls.transaction;
 
 import io.nuls.db.service.RocksDBService;
 import io.nuls.h2.utils.MybatisDbHelper;
 import io.nuls.rpc.info.HostInfo;
 import io.nuls.rpc.model.ModuleE;
-import io.nuls.rpc.netty.bootstrap.NettyServer;
-import io.nuls.rpc.netty.channel.manager.ConnectManager;
-import io.nuls.rpc.netty.processor.ResponseMessageProcessor;
+import io.nuls.rpc.modulebootstrap.Module;
+import io.nuls.rpc.modulebootstrap.NulsRpcModuleBootstrap;
+import io.nuls.rpc.modulebootstrap.RpcModule;
+import io.nuls.rpc.modulebootstrap.RpcModuleState;
+import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.core.ioc.SpringLiteContext;
+import io.nuls.tools.log.Log;
 import io.nuls.tools.parse.ConfigLoader;
 import io.nuls.tools.parse.I18nUtils;
 import io.nuls.transaction.constant.TxConfig;
@@ -16,10 +43,10 @@ import io.nuls.transaction.constant.TxDBConstant;
 import io.nuls.transaction.manager.ChainManager;
 import io.nuls.transaction.model.bo.Chain;
 import io.nuls.transaction.rpc.call.BlockCall;
-import io.nuls.transaction.rpc.call.NetworkCall;
 import io.nuls.transaction.storage.h2.TransactionH2Service;
 import io.nuls.transaction.storage.rocksdb.LanguageStorageService;
 import io.nuls.transaction.utils.DBUtil;
+import io.nuls.transaction.utils.LoggerUtil;
 import org.apache.ibatis.io.Resources;
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.apache.ibatis.session.SqlSessionFactoryBuilder;
@@ -29,61 +56,86 @@ import java.nio.charset.Charset;
 import java.util.Map;
 import java.util.Properties;
 
-import static io.nuls.transaction.utils.LoggerUtil.Log;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 /**
  * @author: Charlie
- * @date: 2018/11/12
+ * @date: 2019/3/4
  */
-public class TransactionBootStrap {
+@Component
+public class TransactionModule extends RpcModule {
 
     public static void main(String[] args) {
+        NulsRpcModuleBootstrap.run("io.nuls.transaction", new String[]{HostInfo.getLocalIP() + ":8887/ws"});
+    }
+
+    @Override
+    public void init() {
         try {
-            //初始化上下文
-            SpringLiteContext.init(TxConstant.CONTEXT_PATH);
             //初始化系统参数
             initSys();
             //初始化数据库配置文件
             initDB();
-
             //初始化国际资源文件语言
             initLanguage();
-            //启动WebSocket服务,向外提供RPC接口
-            initServer();
             initH2Table();
-            //启动链
-            SpringLiteContext.getBean(ChainManager.class).runChain();
-            while (!ConnectManager.isReady()) {
-                Log.info("wait depend modules ready");
-                Thread.sleep(2000L);
-            }
-            txStart();
-
-            Log.info("START-SUCCESS");
         } catch (Exception e) {
-            Log.error("Transaction startup error!");
+            Log.error("Transaction init error!");
             Log.error(e);
         }
     }
 
-    public static void txStart() {
+    @Override
+    public boolean doStart() {
         try {
-            //注册网络消息协议 依赖block的ready状态
-            while (!NetworkCall.registerProtocol()) {
-                Log.info("wait nw_protocolRegister ready");
-                Thread.sleep(5000L);
-            }
+            //启动链
+            SpringLiteContext.getBean(ChainManager.class).runChain();
+            Log.info("Transaction READY");
+            return true;
+        } catch (Exception e) {
+            Log.error("Transaction doStart error!");
+            Log.error(e);
+            return false;
+        }
+    }
 
+    @Override
+    public RpcModuleState onDependenciesReady() {
+        try {
             ChainManager chainManager = SpringLiteContext.getBean(ChainManager.class);
             for (Map.Entry<Integer, Chain> entry : chainManager.getChainMap().entrySet()) {
                 Chain chain = entry.getValue();
                 //订阅Block模块接口
                 BlockCall.subscriptionNewBlockHeight(chain);
             }
+            return RpcModuleState.Running;
         } catch (Exception e) {
             Log.error(e);
+            return RpcModuleState.Ready;
         }
+    }
+
+    @Override
+    public RpcModuleState onDependenciesLoss(Module dependenciesModule) {
+        return null;
+    }
+
+    @Override
+    public Module[] getDependencies() {
+        return new Module[]{
+                new Module(ModuleE.NW.abbr, "1.0"),
+                new Module(ModuleE.LG.abbr, "1.0"),
+                new Module(ModuleE.BL.abbr, "1.0")};
+    }
+
+    @Override
+    public Module moduleInfo() {
+        return new Module(ModuleE.TX.abbr, "1.0");
+    }
+
+    @Override
+    public String getRpcCmdPackage(){
+        return TxConstant.TX_CMD_PATH;
     }
 
     /**
@@ -97,7 +149,7 @@ public class TransactionBootStrap {
             charset.setAccessible(true);
             charset.set(null, UTF_8);
         } catch (Exception e) {
-            Log.error(e);
+            LoggerUtil.Log.error(e);
         }
     }
 
@@ -119,7 +171,7 @@ public class TransactionBootStrap {
             SqlSessionFactory sqlSessionFactory = new SqlSessionFactoryBuilder().build(Resources.getResourceAsReader(resource), "druid");
             MybatisDbHelper.setSqlSessionFactory(sqlSessionFactory);
         } catch (Exception e) {
-            Log.error(e);
+            LoggerUtil.Log.error(e);
         }
     }
 
@@ -137,29 +189,7 @@ public class TransactionBootStrap {
                 languageService.saveLanguage(language);
             }
         } catch (Exception e) {
-            Log.error(e);
-        }
-    }
-
-    /**
-     * 共识模块启动WebSocket服务，用于其他模块连接共识模块与共识模块交互
-     */
-    public static void initServer() {
-        try {
-            // todo 依赖模块 Start server instance
-            NettyServer.getInstance(ModuleE.TX)
-                    .moduleRoles(new String[]{"1.0"})
-                    .moduleVersion("1.0")
-                    .dependencies(ModuleE.NW.abbr, "1.0")
-                    .dependencies(ModuleE.LG.abbr, "1.0")
-                    .dependencies(ModuleE.BL.abbr, "1.0")
-                    .scanPackage("io.nuls.transaction.rpc.cmd");
-            String kernelUrl = "ws://" + HostInfo.getLocalIP() + ":8887/ws";
-            ConnectManager.getConnectByUrl(kernelUrl);
-            ResponseMessageProcessor.syncKernel(kernelUrl);
-        } catch (Exception e) {
-            Log.error("Transaction startup webSocket server error!");
-            e.printStackTrace();
+            LoggerUtil.Log.error(e);
         }
     }
 
