@@ -14,6 +14,7 @@ import io.nuls.rpc.modulebootstrap.Module;
 import io.nuls.rpc.modulebootstrap.NulsRpcModuleBootstrap;
 import io.nuls.rpc.modulebootstrap.RpcModule;
 import io.nuls.rpc.modulebootstrap.RpcModuleState;
+import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.core.ioc.SpringLiteContext;
 import io.nuls.tools.data.StringUtils;
 import io.nuls.tools.exception.NulsException;
@@ -27,6 +28,7 @@ import java.io.IOException;
  * @author: qinyifeng
  * @date: 2018/10/15
  */
+@Component
 public class AccountBootstrap extends RpcModule {
     public static void main(String[] args) {
         if (args == null || args.length == 0) {
