@@ -77,7 +77,7 @@ public class ChainBootstrap {
             initCfg();
             /* Configuration to Map */
             initWithFile();
-            /*db info*/
+            /*storage info*/
             initWithDatabase();
             /* 自动注入 (Autowired) */
             SpringLiteContext.init("io.nuls.chain", new ModularServiceMethodInterceptor());

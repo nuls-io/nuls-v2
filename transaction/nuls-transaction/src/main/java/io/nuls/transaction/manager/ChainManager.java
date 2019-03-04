@@ -35,7 +35,7 @@ import io.nuls.tools.log.logback.NulsLogger;
 import io.nuls.tools.parse.JSONUtils;
 import io.nuls.transaction.constant.TxConstant;
 import io.nuls.transaction.constant.TxDBConstant;
-import io.nuls.transaction.db.rocksdb.storage.ConfigStorageService;
+import io.nuls.transaction.storage.rocksdb.ConfigStorageService;
 import io.nuls.transaction.model.bo.Chain;
 import io.nuls.transaction.model.bo.TxRegister;
 import io.nuls.transaction.model.bo.config.ConfigBean;

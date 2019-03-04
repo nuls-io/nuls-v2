@@ -28,6 +28,7 @@ import io.nuls.base.basic.AddressTool;
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.data.*;
 import io.nuls.tools.crypto.HexUtil;
+import io.nuls.tools.data.DateUtils;
 import io.nuls.tools.data.StringUtils;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.transaction.constant.TxConstant;
@@ -223,5 +224,39 @@ public class TxUtil {
         System.arraycopy(in,  (copyEnd-8), out, 0, 8);
         String nonce8BytesStr = HexUtil.encode(out);
         return HexUtil.decode(nonce8BytesStr);
+    }
+
+    public static void txInformationPrint(Chain chain,Transaction tx) throws NulsException {
+        chain.getLogger().debug("");
+        chain.getLogger().debug("--------------------------------------------------");
+        chain.getLogger().debug("Transaction information");
+        chain.getLogger().debug("type: {}", tx.getType());
+        chain.getLogger().debug("txHash: {}", tx.getHash().getDigestHex());
+        chain.getLogger().debug("time: {}",  DateUtils.timeStamp2DateStr(tx.getTime()));
+        chain.getLogger().debug("size: {}KB",  String.valueOf(tx.getSize()/1024));
+
+        CoinData coinData = tx.getCoinDataInstance();
+        if(coinData != null){
+            chain.getLogger().debug("coinData:");
+            List<CoinFrom> coinFromList = coinData.getFrom();
+            if(coinFromList == null){
+                chain.getLogger().debug("\tcoinFrom: null");
+            }else if(coinFromList.size() == 0){
+                chain.getLogger().debug("\tcoinFrom: size 0");
+            }else{
+                for(CoinFrom coinFrom : coinFromList){
+                    chain.getLogger().debug("\tfrom:");
+                    chain.getLogger().debug("\taddress: {}", AddressTool.getStringAddressByBytes(coinFrom.getAddress()));
+                    chain.getLogger().debug("\tamount: {}", coinFrom.getAmount());
+                    chain.getLogger().debug("\taddress: {}", AddressTool.getStringAddressByBytes(coinFrom.getAddress()));
+                    chain.getLogger().debug("\taddress: {}", AddressTool.getStringAddressByBytes(coinFrom.getAddress()));
+                    chain.getLogger().debug("\taddress: {}", AddressTool.getStringAddressByBytes(coinFrom.getAddress()));
+                }
+            }
+
+        }else{
+            chain.getLogger().debug("coinData: null");
+        }
+
     }
 }

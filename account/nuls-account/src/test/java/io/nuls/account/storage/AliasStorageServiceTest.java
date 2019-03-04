@@ -68,14 +68,14 @@ public class AliasStorageServiceTest {
         //Forth:remove the alias
         result = aliasStorageService.removeAlias(chainId,alias.getAlias());
         assertTrue(result);
-        //Fifth:get the alias from db and check
+        //Fifth:get the alias from storage and check
         AliasPo aliasPoAfterRemove = aliasStorageService.getAlias(chainId,alias.getAlias());
         assertNull(aliasPoAfterRemove);
     }
 
     /**
      *
-     * test get the alias list from db
+     * test get the alias list from storage
      *
      *
      * @throws Exception
@@ -94,7 +94,7 @@ public class AliasStorageServiceTest {
 
     /**
      *
-     * test get the alias by address from db
+     * test get the alias by address from storage
      *
      *
      * @throws Exception

@@ -73,9 +73,9 @@ public interface AccountConstant {
     String KERNEL_MODULE_URL = "kernelUrl";
 
     /**
-     * --------[db configs] -------
+     * --------[storage configs] -------
      */
-    String CFG_DB_SECTION = "db";
+    String CFG_DB_SECTION = "storage";
     String DB_DATA_PATH = "rocksdb.datapath";
 
     /**

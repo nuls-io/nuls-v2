@@ -99,7 +99,7 @@ public class StorageManager extends BaseManager {
 
     /**
      * 加载所有模块的协议注册信息
-     * load ProtocolRegisterInfos form db
+     * load ProtocolRegisterInfos form storage
      *
      * @return List<RoleProtocolPo>
      */

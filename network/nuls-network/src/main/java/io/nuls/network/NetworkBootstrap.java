@@ -104,7 +104,7 @@ public class NetworkBootstrap {
             //set encode
             String encoding = ConfigManager.getValue(NetworkConstant.NETWORK_ENCODING);
             networkParam.setEncoding(encoding);
-            //set db path
+            //set storage path
             String dbPath = ConfigManager.getValue(NetworkConstant.NETWORK_DBPATH);
             networkParam.setDbPath(dbPath);
             //net parameters
