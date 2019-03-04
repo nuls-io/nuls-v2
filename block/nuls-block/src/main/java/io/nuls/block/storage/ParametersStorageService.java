@@ -20,7 +20,7 @@
  *
  */
 
-package io.nuls.block.service;
+package io.nuls.block.storage;
 
 import io.nuls.block.model.ChainParameters;
 

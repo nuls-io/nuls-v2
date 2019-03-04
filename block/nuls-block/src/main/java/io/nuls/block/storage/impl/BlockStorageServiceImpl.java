@@ -18,13 +18,13 @@
  * SOFTWARE.
  */
 
-package io.nuls.block.service.impl;
+package io.nuls.block.storage.impl;
 
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.data.BlockHeader;
 import io.nuls.base.data.NulsDigestData;
 import io.nuls.block.model.po.BlockHeaderPo;
-import io.nuls.block.service.BlockStorageService;
+import io.nuls.block.storage.BlockStorageService;
 import io.nuls.db.service.RocksDBService;
 import io.nuls.tools.core.annotation.Service;
 import io.nuls.tools.data.ByteUtils;

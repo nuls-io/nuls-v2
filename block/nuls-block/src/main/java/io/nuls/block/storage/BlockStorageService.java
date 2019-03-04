@@ -18,7 +18,7 @@
  * SOFTWARE.
  */
 
-package io.nuls.block.service;
+package io.nuls.block.storage;
 
 import io.nuls.base.data.BlockHeader;
 import io.nuls.base.data.NulsDigestData;

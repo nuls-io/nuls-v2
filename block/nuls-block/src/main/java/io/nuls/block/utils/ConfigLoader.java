@@ -27,7 +27,7 @@ import io.nuls.block.constant.ConfigConstant;
 import io.nuls.block.manager.ConfigManager;
 import io.nuls.block.manager.ContextManager;
 import io.nuls.block.model.ChainParameters;
-import io.nuls.block.service.ParametersStorageService;
+import io.nuls.block.storage.ParametersStorageService;
 import io.nuls.tools.core.ioc.SpringLiteContext;
 import io.nuls.tools.io.IoUtils;
 import io.nuls.tools.parse.JSONUtils;

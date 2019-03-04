@@ -29,7 +29,7 @@ import io.nuls.block.model.Chain;
 import io.nuls.block.model.ChainContext;
 import io.nuls.block.model.ChainParameters;
 import io.nuls.block.model.Node;
-import io.nuls.block.service.ChainStorageService;
+import io.nuls.block.storage.ChainStorageService;
 import io.nuls.block.utils.BlockUtil;
 import io.nuls.block.utils.module.NetworkUtil;
 import io.nuls.tools.core.annotation.Autowired;

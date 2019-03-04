@@ -20,12 +20,12 @@
  *
  */
 
-package io.nuls.block.service.impl;
+package io.nuls.block.storage.impl;
 
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.block.constant.Constant;
 import io.nuls.block.model.ChainParameters;
-import io.nuls.block.service.ParametersStorageService;
+import io.nuls.block.storage.ParametersStorageService;
 import io.nuls.db.service.RocksDBService;
 import io.nuls.tools.core.annotation.Service;
 import io.nuls.tools.data.ByteUtils;
