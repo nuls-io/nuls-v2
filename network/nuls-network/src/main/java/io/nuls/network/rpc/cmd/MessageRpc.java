@@ -22,7 +22,7 @@
  * SOFTWARE.
  *
  */
-package io.nuls.network.rpc.internal;
+package io.nuls.network.rpc.cmd;
 
 import io.nuls.base.data.NulsDigestData;
 import io.nuls.network.constant.NetworkConstant;

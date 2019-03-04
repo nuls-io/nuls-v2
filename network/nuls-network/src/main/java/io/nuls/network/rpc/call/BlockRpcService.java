@@ -22,7 +22,7 @@
  * SOFTWARE.
  *
  */
-package io.nuls.network.rpc.external;
+package io.nuls.network.rpc.call;
 
 import io.nuls.network.model.dto.BestBlockInfo;
 

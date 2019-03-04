@@ -23,22 +23,9 @@
  *
  */
 
-package io.nuls.network.manager.threads;
+package io.nuls.network.task;
 
-import io.nuls.network.manager.MessageFactory;
-import io.nuls.network.manager.MessageManager;
-import io.nuls.network.manager.NodeGroupManager;
 import io.nuls.network.manager.TimeManager;
-import io.nuls.network.model.Node;
-import io.nuls.network.model.NodeGroup;
-import io.nuls.network.model.dto.NetTimeUrl;
-import io.nuls.network.model.message.GetTimeMessage;
-import org.apache.commons.net.ntp.NTPUDPClient;
-import org.apache.commons.net.ntp.TimeInfo;
-
-import java.net.InetAddress;
-import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
 
 import static io.nuls.network.utils.LoggerUtil.Log;
 
@@ -64,7 +51,7 @@ public class TimeTask implements Runnable {
             if (Math.abs(newTime - lastTime) > TimeManager.TIME_OFFSET_BOUNDARY) {
                 Log.debug("local time changed ：{}", newTime - lastTime);
                 timeManager.syncWebTime();
-            } else if (timeManager.currentTimeMillis() - TimeManager.lastSyncTime > TimeManager.NET_REFRESH_TIME) {
+            } else if (TimeManager.currentTimeMillis() - TimeManager.lastSyncTime > TimeManager.NET_REFRESH_TIME) {
                 //每隔一段时间更新网络时间
                 timeManager.syncWebTime();
             }

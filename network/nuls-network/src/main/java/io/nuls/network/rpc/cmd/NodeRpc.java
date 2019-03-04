@@ -22,7 +22,7 @@
  * SOFTWARE.
  *
  */
-package io.nuls.network.rpc.internal;
+package io.nuls.network.rpc.cmd;
 
 import io.nuls.network.constant.NetworkErrorCode;
 import io.nuls.network.constant.NodeConnectStatusEnum;
@@ -69,24 +69,29 @@ public class NodeRpc extends BaseCmd {
     @Parameter(parameterName = "isCross", parameterType = "int", parameterValidRange = "[0,1]")
     @Parameter(parameterName = "nodes", parameterType = "String")
     public Response addNodes(Map params) {
-        int chainId = Integer.valueOf(String.valueOf(params.get("chainId")));
-        int isCross = Integer.valueOf(String.valueOf(params.get("isCross")));
-        String nodes = String.valueOf(params.get("nodes"));
-        Log.info("chainId:" + chainId + "==nodes:" + nodes);
-        if (chainId < 0 || StringUtils.isBlank(nodes)) {
-            return failed(NetworkErrorCode.PARAMETER_ERROR);
-        }
-        boolean blCross = false;
-        if (1 == isCross) {
-            blCross = true;
-        }
-        String[] peers = nodes.split(",");
-        NodeGroup nodeGroup = nodeGroupManager.getNodeGroupByChainId(chainId);
-        List<NodePo> nodePos = new ArrayList<>();
-        for (String peer : peers) {
-            String[] ipPort = peer.split(":");
-            IpAddress address = new IpAddress(ipPort[0], Integer.valueOf(ipPort[1]));
-            nodeGroup.addNeedCheckNode(address, blCross);
+        try {
+            int chainId = Integer.valueOf(String.valueOf(params.get("chainId")));
+            int isCross = Integer.valueOf(String.valueOf(params.get("isCross")));
+            String nodes = String.valueOf(params.get("nodes"));
+            Log.info("chainId:" + chainId + "==nodes:" + nodes);
+            if (chainId < 0 || StringUtils.isBlank(nodes)) {
+                return failed(NetworkErrorCode.PARAMETER_ERROR);
+            }
+            boolean blCross = false;
+            if (1 == isCross) {
+                blCross = true;
+            }
+            String[] peers = nodes.split(",");
+            NodeGroup nodeGroup = nodeGroupManager.getNodeGroupByChainId(chainId);
+            List<NodePo> nodePos = new ArrayList<>();
+            for (String peer : peers) {
+                String[] ipPort = peer.split(":");
+                IpAddress address = new IpAddress(ipPort[0], Integer.valueOf(ipPort[1]));
+                nodeGroup.addNeedCheckNode(address, blCross);
+            }
+        }catch (Exception e){
+            e.printStackTrace();
+            return failed(e.getMessage());
         }
         return success();
     }

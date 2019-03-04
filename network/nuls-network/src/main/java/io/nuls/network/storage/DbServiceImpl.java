@@ -28,7 +28,10 @@ import io.nuls.db.model.Entry;
 import io.nuls.db.service.RocksDBService;
 import io.nuls.network.constant.NetworkConstant;
 import io.nuls.network.model.NodeGroup;
-import io.nuls.network.model.po.*;
+import io.nuls.network.model.po.GroupNodesPo;
+import io.nuls.network.model.po.GroupPo;
+import io.nuls.network.model.po.RoleProtocolPo;
+import io.nuls.network.utils.LoggerUtil;
 import io.nuls.tools.basic.InitializingBean;
 import io.nuls.tools.core.annotation.Service;
 import io.nuls.tools.data.ByteUtils;
@@ -38,7 +41,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 import static io.nuls.network.utils.LoggerUtil.Log;
 
@@ -76,12 +78,12 @@ public class DbServiceImpl implements DbService, InitializingBean {
     public void saveNodes(NodeGroup nodeGroup) {
         int chainId = nodeGroup.getChainId();
         GroupNodesPo groupNodesPo = new GroupNodesPo();
-        Map<byte[], byte[]> nodeMap = new HashMap<>();
         try {
             groupNodesPo.setCrossNodeContainer(nodeGroup.getCrossNodeContainer().parseToNodesContainerPo());
-            groupNodesPo.setSelfNodeContainer(nodeGroup.getCrossNodeContainer().parseToNodesContainerPo());
+            groupNodesPo.setSelfNodeContainer(nodeGroup.getLocalNetNodeContainer().parseToNodesContainerPo());
             RocksDBService.put(NetworkConstant.DB_NAME_NETWORK_GROUP_NODES,
                     ByteUtils.intToBytes(chainId), groupNodesPo.serialize());
+            LoggerUtil.Log.info("save group={} nodes",nodeGroup.getChainId());
         } catch (Exception e) {
             e.printStackTrace();
         }

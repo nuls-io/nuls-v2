@@ -22,12 +22,11 @@
  * SOFTWARE.
  *
  */
-package io.nuls.network.manager.threads;
+package io.nuls.network.task;
 
 import io.nuls.network.manager.NodeGroupManager;
 import io.nuls.network.manager.StorageManager;
 import io.nuls.network.model.NodeGroup;
-import io.nuls.network.netty.container.NodesContainer;
 import io.nuls.network.storage.DbService;
 
 import java.util.List;

@@ -22,7 +22,7 @@
  * SOFTWARE.
  *
  */
-package io.nuls.network.manager.threads;
+package io.nuls.network.task;
 
 import io.nuls.network.manager.NodeGroupManager;
 import io.nuls.network.manager.handler.MessageHandlerFactory;
@@ -55,12 +55,16 @@ public class DataShowMonitorTest implements Runnable {
 
     private void printlnProtocolMap() {
         Collection<Map<String, ProtocolRoleHandler>> values = MessageHandlerFactory.getInstance().getProtocolRoleHandlerMap().values();
+        Log.debug("protocolRoleHandler ==================");
+        StringBuilder stringBuilder = new StringBuilder();
         for (Map<String, ProtocolRoleHandler> map : values) {
             Collection<ProtocolRoleHandler> list = map.values();
             for (ProtocolRoleHandler protocolRoleHandler : list) {
-                Log.debug("protocolRoleHandler =================={}==={}", protocolRoleHandler.getRole(), protocolRoleHandler.getHandler());
+                stringBuilder.append("{role:").append(protocolRoleHandler.getRole()).append(",cmd:").append(protocolRoleHandler.getHandler()).append("}");
+
             }
         }
+        Log.debug("protocolRoleHandler={}", stringBuilder.toString());
 
     }
 

@@ -22,7 +22,7 @@
  * SOFTWARE.
  *
  */
-package io.nuls.network.rpc.internal;
+package io.nuls.network.rpc.cmd;
 
 import io.nuls.network.manager.TimeManager;
 import io.nuls.rpc.cmd.BaseCmd;

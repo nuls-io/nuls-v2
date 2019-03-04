@@ -22,14 +22,14 @@
  * SOFTWARE.
  *
  */
-package io.nuls.network.rpc.external.impl;
+package io.nuls.network.rpc.call.impl;
 
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.data.BlockHeader;
 import io.nuls.network.constant.NetworkConstant;
 import io.nuls.network.manager.TimeManager;
 import io.nuls.network.model.dto.BestBlockInfo;
-import io.nuls.network.rpc.external.BlockRpcService;
+import io.nuls.network.rpc.call.BlockRpcService;
 import io.nuls.network.utils.LoggerUtil;
 import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.model.message.Response;
