@@ -41,14 +41,31 @@ public class NulsRuntimeException extends RuntimeException {
      * cause is not initialized, and may subsequently be initialized by
      * a call to {@link #initCause}.
      *
-     * @param message the detail validator. The detail validator is saved for
-     *                later retrieval by the {@link #getMessage()} method.
+     * @param errorCode the detail validator. The detail validator is saved for
+     *                  later retrieval by the {@link #getMessage()} method.
      */
-    public NulsRuntimeException(ErrorCode message) {
-        super(message.getMsg());
-        this.code = message.getCode();
-        this.message = message.getMsg();
-        this.errorCode = message;
+    public NulsRuntimeException(ErrorCode errorCode) {
+        super(errorCode.getMsg());
+        this.code = errorCode.getCode();
+        this.message = errorCode.getMsg();
+        this.errorCode = errorCode;
+    }
+
+    /**
+     * Constructs a new exception with the specified detail validator.  The
+     * cause is not initialized, and may subsequently be initialized by
+     * a call to {@link #initCause}.
+     *
+     * @param errorCode the detail validator. The detail validator is saved for
+     *                  later retrieval by the {@link #getMessage()} method.
+     * @param message   the detail message. The detail message is saved for
+     *                  later retrieval by the {@link #getMessage()} method.
+     */
+    public NulsRuntimeException(ErrorCode errorCode, String message) {
+        super(errorCode.getMsg());
+        this.code = errorCode.getCode();
+        this.message = errorCode.getMsg() + ";" + message;
+        this.errorCode = errorCode;
     }
 
     /**
@@ -57,20 +74,43 @@ public class NulsRuntimeException extends RuntimeException {
      * {@code cause} is <i>not</i> automatically incorporated in
      * this exception's detail validator.
      *
-     * @param message the detail validator (which is saved for later retrieval
-     *                by the {@link #getMessage()} method).
-     * @param cause   the cause (which is saved for later retrieval by the
-     *                {@link #getCause()} method).  (A <tt>null</tt> value is
-     *                permitted, and indicates that the cause is nonexistent or
-     *                unknown.)
+     * @param errorCode the detail validator (which is saved for later retrieval
+     *                  by the {@link #getMessage()} method).
+     * @param cause     the cause (which is saved for later retrieval by the
+     *                  {@link #getCause()} method).  (A <tt>null</tt> value is
+     *                  permitted, and indicates that the cause is nonexistent or
+     *                  unknown.)
      * @since 1.4
      */
-    public NulsRuntimeException(ErrorCode message, Throwable cause) {
-        super(message.getMsg(), cause);
-        this.code = message.getCode();
-        this.message = message.getMsg();
-        this.errorCode = message;
-        ;
+    public NulsRuntimeException(ErrorCode errorCode, Throwable cause) {
+        super(errorCode.getMsg(), cause);
+        this.code = errorCode.getCode();
+        this.message = errorCode.getMsg();
+        this.errorCode = errorCode;
+    }
+
+
+    /**
+     * Constructs a new exception with the specified detail validator and
+     * cause.  Note that the detail validator associated with
+     * {@code cause} is <i>not</i> automatically incorporated in
+     * this exception's detail validator.
+     *
+     * @param errorCode the detail validator (which is saved for later retrieval
+     *                  by the {@link #getMessage()} method).
+     * @param message   the detail message. The detail message is saved for
+     *                  later retrieval by the {@link #getMessage()} method.
+     * @param cause     the cause (which is saved for later retrieval by the
+     *                  {@link #getCause()} method).  (A <tt>null</tt> value is
+     *                  permitted, and indicates that the cause is nonexistent or
+     *                  unknown.)
+     * @since 1.4
+     */
+    public NulsRuntimeException(ErrorCode errorCode, String message, Throwable cause) {
+        super(errorCode.getMsg(), cause);
+        this.code = errorCode.getCode();
+        this.message = errorCode.getMsg() + ":" + message;
+        this.errorCode = errorCode;
     }
 
     /**

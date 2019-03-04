@@ -22,36 +22,49 @@
  * SOFTWARE.
  *
  */
-package io.nuls.rpc.model;
+package io.nuls.api.model.po.config;
 
 /**
- * Module information
+ * 配置信息类
+ * Configuration information class
  *
- * @author tangyi
+ * @author qinyifeng
+ * @date 2018/11/11
  */
-public enum ModuleE {
-    /**
-     * prefix + name
-     */
-    KE("ke", "Kernel", "nuls.io"),
-    CM("cm", "Chain", "nuls.io"),
-    AC("ac", "Account", "nuls.io"),
-    NW("nw", "Network", "nuls.io"),
-    CS("cs", "Consensus", "nuls.io"),
-    BL("bl", "Block", "nuls.io"),
-    LG("lg", "Ledger", "nuls.io"),
-    TX("tx", "Transaction", "nuls.io"),
-    EB("eb", "EventBus", "nuls.io"),
-    PU("pu", "ProtocolUpdate", "nuls.io"),
-    AP("ap", "Api", "nuls.io");
+public class ConfigItem {
+    private String key;
+    private Object value;
+    private boolean readOnly;
 
-    public final String abbr;
-    public final String name;
-    public final String domain;
+    public  ConfigItem(){
 
-    ModuleE(String abbr, String name, String domain) {
-        this.abbr = abbr;
-        this.name = name;
-        this.domain = domain;
+    }
+    public ConfigItem( Object value, boolean readOnly) {
+        this.value = value;
+        this.readOnly = readOnly;
+    }
+
+    public String getKey() {
+        return key;
+    }
+
+    public void setKey(String key) {
+        this.key = key;
+    }
+
+    public Object getValue() {
+        return value;
+    }
+
+    public void setValue(Object value) {
+        this.value = value;
+    }
+
+    public boolean isReadOnly() {
+        return readOnly;
+    }
+
+    public void setReadOnly(boolean readOnly) {
+        this.readOnly = readOnly;
     }
 }

@@ -22,36 +22,29 @@
  * SOFTWARE.
  *
  */
-package io.nuls.rpc.model;
+package io.nuls.api.model.po.config;
+
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+import java.io.Serializable;
 
 /**
- * Module information
+ * 模块配置类
+ * Module Configuration Class
  *
- * @author tangyi
+ * @author vivi
+ * @date 2019/02/28
  */
-public enum ModuleE {
-    /**
-     * prefix + name
-     */
-    KE("ke", "Kernel", "nuls.io"),
-    CM("cm", "Chain", "nuls.io"),
-    AC("ac", "Account", "nuls.io"),
-    NW("nw", "Network", "nuls.io"),
-    CS("cs", "Consensus", "nuls.io"),
-    BL("bl", "Block", "nuls.io"),
-    LG("lg", "Ledger", "nuls.io"),
-    TX("tx", "Transaction", "nuls.io"),
-    EB("eb", "EventBus", "nuls.io"),
-    PU("pu", "ProtocolUpdate", "nuls.io"),
-    AP("ap", "Api", "nuls.io");
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+public class ConfigBean implements Serializable {
 
-    public final String abbr;
-    public final String name;
-    public final String domain;
+    private int chainID;
 
-    ModuleE(String abbr, String name, String domain) {
-        this.abbr = abbr;
-        this.name = name;
-        this.domain = domain;
-    }
+    private String dbIp;
+
+    private int port;
 }
