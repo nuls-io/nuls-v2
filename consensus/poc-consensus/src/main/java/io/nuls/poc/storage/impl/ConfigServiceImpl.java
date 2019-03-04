@@ -5,11 +5,9 @@ import io.nuls.db.service.RocksDBService;
 import io.nuls.poc.constant.ConsensusConstant;
 import io.nuls.poc.model.bo.config.ConfigBean;
 import io.nuls.poc.storage.ConfigService;
-import io.nuls.tools.basic.InitializingBean;
 import io.nuls.tools.core.annotation.Service;
 import io.nuls.tools.data.ByteUtils;
 import io.nuls.tools.data.ObjectUtils;
-import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.log.Log;
 
 import java.util.HashMap;
@@ -24,7 +22,7 @@ import java.util.Map;
  * 2018/11/8
  * */
 @Service
-public class ConfigServiceImpl implements ConfigService, InitializingBean {
+public class ConfigServiceImpl implements ConfigService {
     @Override
     public boolean save(ConfigBean bean, int chainID) throws Exception{
         if(bean == null){
@@ -71,7 +69,7 @@ public class ConfigServiceImpl implements ConfigService, InitializingBean {
         }
     }
 
-    @Override
+    /*@Override
     public void afterPropertiesSet() throws NulsException {
         try {
             RocksDBService.createTable(ConsensusConstant.DB_NAME_CONSUME_CONGIF);
@@ -79,5 +77,5 @@ public class ConfigServiceImpl implements ConfigService, InitializingBean {
             Log.error(e);
             throw new NulsException(e);
         }
-    }
+    }*/
 }
