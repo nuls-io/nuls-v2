@@ -70,7 +70,7 @@ public class TransactionModule extends RpcModule {
         if(args.length == 0){
             args = new String[]{HostInfo.getLocalIP() + ":8887/ws"};
         }
-        NulsRpcModuleBootstrap.run("io.nuls.transaction", args);
+        NulsRpcModuleBootstrap.run("io.nuls", args);
     }
 
     @Override
