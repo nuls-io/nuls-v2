@@ -31,18 +31,7 @@ import io.nuls.db.service.RocksDBService;
 import io.nuls.tools.core.inteceptor.ModularServiceMethodInterceptor;
 import io.nuls.tools.core.ioc.SpringLiteContext;
 import org.junit.*;
-import org.junit.runner.RunWith;
-import org.powermock.api.mockito.PowerMockito;
-import org.powermock.core.classloader.annotations.PowerMockIgnore;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
 
-import static org.mockito.ArgumentMatchers.anyList;
-import static org.mockito.ArgumentMatchers.anyString;
-
-@RunWith(PowerMockRunner.class)
-@PrepareForTest(RocksDBService.class)
-@PowerMockIgnore({"com.sun.org.apache.xerces.*", "javax.xml.*", "org.xml.*", "org.w3c.*", "javax.management.*"})
 public class ChainManagerTest {
 
     private static final int CHAIN_ID = 1;
@@ -97,8 +86,6 @@ public class ChainManagerTest {
 
     @Test
     public void testMergeOrphanChains() throws Exception {
-        PowerMockito.mockStatic(RocksDBService.class);
-        PowerMockito.when(RocksDBService.deleteKeys(anyString(), anyList())).thenReturn(true);
         Assert.assertTrue(RocksDBService.deleteKeys("aaa", Lists.newArrayList()));
 
         ConfigLoader.load();
@@ -137,8 +124,6 @@ public class ChainManagerTest {
 
     @Test
     public void testOrphanChains() throws Exception {
-        PowerMockito.mockStatic(RocksDBService.class);
-        PowerMockito.when(RocksDBService.deleteKeys(anyString(), anyList())).thenReturn(true);
         Assert.assertTrue(RocksDBService.deleteKeys("aaa", Lists.newArrayList()));
 
         ConfigLoader.load();
@@ -184,8 +169,6 @@ public class ChainManagerTest {
 
     @Test
     public void testMockRocksDBService() throws Exception {
-        PowerMockito.mockStatic(RocksDBService.class);
-        PowerMockito.when(RocksDBService.deleteKeys(anyString(), anyList())).thenReturn(true);
         Assert.assertTrue(RocksDBService.deleteKeys("aaa", Lists.newArrayList()));
         Assert.assertTrue(RocksDBService.deleteKeys("ccc", Lists.newArrayList()));
     }

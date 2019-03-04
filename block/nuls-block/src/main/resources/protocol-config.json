@@ -2,107 +2,173 @@
   {
     "version": "1",
     "extend": "",
-    "addtx": [
+    "validTransactions": [
       {
         "type": "1",
-        "name": "aaaaa",
-        "validate": "aaaaa",
-        "commit": "aaaaa",
-        "rollback": "aaaaa"
+        "name": "io.nuls.test.TestTransaction1",
+        "handler": "io.nuls.test.TestTransactionHandler1",
+        "validate": "validate1",
+        "commit": "commit1",
+        "rollback": "rollback1"
+      },
+      {
+        "type": "2",
+        "name": "io.nuls.test.TestTransaction2",
+        "handler": "io.nuls.test.TestTransactionHandler2",
+        "validate": "validate1",
+        "commit": "commit1",
+        "rollback": "rollback1"
+      },
+      {
+        "type": "3",
+        "name": "io.nuls.test.TestTransaction3",
+        "handler": "io.nuls.test.TestTransactionHandler3",
+        "validate": "validate1",
+        "commit": "commit1",
+        "rollback": "rollback1"
       }
     ],
-    "addmsg": [
+    "validMessages": [
       {
-        "name": "BlockMessage",
-        "refer": "io.nuls.block.message.BlockMessage",
+        "name": "io.nuls.block.test.TestMessage1",
         "handlers": [
           {
-            "name": "io.nuls.block.rpc.BlockHandler"
+            "name": "io.nuls.block.test.TestMessageHandler1#processV1"
           }
         ]
       },
       {
-        "name": "CompleteMessage",
-        "refer": "io.nuls.block.message.CompleteMessage",
+        "name": "io.nuls.block.test.TestMessage2",
         "handlers": [
           {
-            "name": "io.nuls.block.rpc.CompleteHandler"
-          }
-        ]
-      },
-      {
-        "name": "HashListMessage",
-        "refer": "io.nuls.block.message.HashListMessage",
-        "handlers": [
-          {
-            "name": "io.nuls.block.rpc.GetTxGroupHandler"
-          }
-        ]
-      },
-      {
-        "name": "HashMessage",
-        "refer": "io.nuls.block.message.HashMessage",
-        "handlers": [
-          {
-            "name": "io.nuls.block.rpc.ForwardSmallBlockHandler"
+            "name": "io.nuls.block.test.TestMessageHandler2#processV1"
           },
           {
-            "name": "io.nuls.block.rpc.GetBlockHandler"
-          },
-          {
-            "name": "io.nuls.block.rpc.GetSmallBlockHandler"
+            "name": "io.nuls.block.test.TestMessageHandler2#processV2"
           }
         ]
       },
       {
-        "name": "HeightRangeMessage",
-        "refer": "io.nuls.block.message.HeightRangeMessage",
+        "name": "io.nuls.block.test.TestMessage3",
         "handlers": [
           {
-            "name": "io.nuls.block.rpc.GetBlocksHandler"
-          }
-        ]
-      },
-      {
-        "name": "SmallBlockMessage",
-        "refer": "io.nuls.block.message.SmallBlockMessage",
-        "handlers": [
-          {
-            "name": "io.nuls.block.rpc.SmallBlockHandler"
-          }
-        ]
-      },
-      {
-        "name": "TxGroupMessage",
-        "refer": "io.nuls.block.message.TxGroupMessage",
-        "handlers": [
-          {
-            "name": "io.nuls.block.rpc.TxGroupHandler"
-          }
-        ]
-      },
-      {
-        "name": "TestMessage",
-        "refer": "io.nuls.block.test.TestMessage",
-        "handlers": [
-          {
-            "name": "io.nuls.block.test.TestMessageHandler"
+            "name": "io.nuls.block.test.TestMessageHandler3#processV1"
           }
         ]
       }
     ],
-    "discardtx": [],
-    "discardmsg": []
+    "invalidTransactions": [],
+    "invalidMessages": []
   },
   {
     "version": "2",
     "extend": "1",
-    "addtx": [],
-    "addmsg": [],
-    "discardtx": [],
-    "discardmsg": [
+    "validTransactions": [
       {
-        "name": "TestMessage"
+        "type": "2",
+        "name": "io.nuls.test.TestTransaction2",
+        "handler": "io.nuls.test.TestTransactionHandler2",
+        "validate": "validate2",
+        "commit": "commit2",
+        "rollback": "rollback2"
+      },
+      {
+        "type": "4",
+        "name": "io.nuls.test.TestTransaction4",
+        "handler": "io.nuls.test.TestTransactionHandler4",
+        "validate": "validate1",
+        "commit": "commit1",
+        "rollback": "rollback1"
+      }
+    ],
+    "validMessages": [
+      {
+        "name": "io.nuls.block.test.TestMessage2",
+        "handlers": [
+          {
+            "name": "io.nuls.block.test.TestMessageHandler2#processV3"
+          },
+          {
+            "name": "io.nuls.block.test.TestMessageHandler2#processV4"
+          }
+        ]
+      },
+      {
+        "name": "io.nuls.block.test.TestMessage4",
+        "handlers": [
+          {
+            "name": "io.nuls.block.test.TestMessageHandler4#processV1"
+          },
+          {
+            "name": "io.nuls.block.test.TestMessageHandler4#processV2"
+          }
+        ]
+      }
+    ],
+    "invalidTransactions": [
+      {
+        "name": "io.nuls.test.TestTransaction3"
+      }
+    ],
+    "invalidMessages": [
+      {
+        "name": "io.nuls.block.test.TestMessage3"
+      }
+    ]
+  },
+  {
+    "version": "3",
+    "extend": "2",
+    "validTransactions": [
+      {
+        "type": "4",
+        "name": "io.nuls.test.TestTransaction4",
+        "handler": "io.nuls.test.TestTransactionHandler4",
+        "validate": "validate2",
+        "commit": "commit2",
+        "rollback": "rollback2"
+      },
+      {
+        "type": "5",
+        "name": "io.nuls.test.TestTransaction5",
+        "handler": "io.nuls.test.TestTransactionHandler5",
+        "validate": "validate1",
+        "commit": "commit1",
+        "rollback": "rollback1"
+      }
+    ],
+    "validMessages": [
+      {
+        "name": "io.nuls.block.test.TestMessage4",
+        "handlers": [
+          {
+            "name": "io.nuls.block.test.TestMessageHandler4#processV5"
+          },
+          {
+            "name": "io.nuls.block.test.TestMessageHandler4#processV6"
+          }
+        ]
+      },
+      {
+        "name": "io.nuls.block.test.TestMessage5",
+        "handlers": [
+          {
+            "name": "io.nuls.block.test.TestMessageHandler5#processV1"
+          },
+          {
+            "name": "io.nuls.block.test.TestMessageHandler5#processV2"
+          }
+        ]
+      }
+    ],
+    "invalidTransactions": [
+      {
+        "name": "io.nuls.test.TestTransaction1"
+      }
+    ],
+    "invalidMessages": [
+      {
+        "name": "io.nuls.block.test.TestMessage1"
       }
     ]
   }

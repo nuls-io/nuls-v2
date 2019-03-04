@@ -33,7 +33,7 @@
     "name": "network.self.magic",
     "remark": "自有网络魔法参数",
     "readOnly": "true",
-    "value": "20190301"
+    "value": "68866996"
   },
   {
     "name": "network.self.max.in",
@@ -50,8 +50,8 @@
   {
     "name": "network.self.seed.ip",
     "remark": "种子节点",
-    "readOnly": "true",
-    "value": "192.168.1.57:8008"
+    "readOnly": "false",
+    "value": "192.168.1.175:8008,192.168.1.191:8008"
   },
   {
     "name": "network.cross.server.port",

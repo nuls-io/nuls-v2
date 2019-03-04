@@ -60,6 +60,7 @@ public class BlockManager {
         Collections.sort(blockHeaders, new BlockHeaderComparator());
         chain.setBlockHeaderList(blockHeaders);
         chain.setNewestHeader(blockHeaders.get(blockHeaders.size() - 1));
+        Log.info("---------------------------区块加载成功！");
     }
 
     /**
