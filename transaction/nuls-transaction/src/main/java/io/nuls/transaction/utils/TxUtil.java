@@ -228,12 +228,13 @@ public class TxUtil {
 
     public static void txInformationDebugPrint(Chain chain, Transaction tx) {
         chain.getLogger().debug("");
-        chain.getLogger().debug("--------------------------------------------------");
+        chain.getLogger().debug("**************************************************");
         chain.getLogger().debug("Transaction information");
         chain.getLogger().debug("type: {}", tx.getType());
         chain.getLogger().debug("txHash: {}", tx.getHash().getDigestHex());
         chain.getLogger().debug("time: {}",  DateUtils.timeStamp2DateStr(tx.getTime()));
-        chain.getLogger().debug("size: {}KB",  String.valueOf(tx.getSize()/1024));
+        chain.getLogger().debug("size: {}B,  -{}KB, -{}MB",
+                String.valueOf(tx.getSize()/1024), String.valueOf(tx.getSize()/1024), String.valueOf(tx.getSize()/1024/1024));
 
         CoinData coinData = null;
         try {
@@ -249,8 +250,10 @@ public class TxUtil {
             }else if(coinFromList.size() == 0){
                 chain.getLogger().debug("\tcoinFrom: size 0");
             }else{
-                for(CoinFrom coinFrom : coinFromList){
-                    chain.getLogger().debug("\tFROM:");
+                chain.getLogger().debug("\tcoinFrom: ");
+                for(int i=0;i<coinFromList.size();i++){
+                    CoinFrom coinFrom = coinFromList.get(i);
+                    chain.getLogger().debug("\tFROM_{}:", i);
                     chain.getLogger().debug("\taddress: {}", AddressTool.getStringAddressByBytes(coinFrom.getAddress()));
                     chain.getLogger().debug("\tamount: {}", coinFrom.getAmount());
                     chain.getLogger().debug("\tassetChainId: [{}]", coinFrom.getAssetsChainId());
@@ -267,8 +270,10 @@ public class TxUtil {
             }else if(coinToList.size() == 0){
                 chain.getLogger().debug("\tcoinTo: size 0");
             }else{
-                for(CoinTo coinTo : coinToList){
-                    chain.getLogger().debug("\tTO:");
+                chain.getLogger().debug("\tcoinTo: ");
+                for(int i=0;i<coinToList.size();i++){
+                    CoinTo coinTo = coinToList.get(i);
+                    chain.getLogger().debug("\tTO_{}:", i);
                     chain.getLogger().debug("\taddress: {}", AddressTool.getStringAddressByBytes(coinTo.getAddress()));
                     chain.getLogger().debug("\tamount: {}", coinTo.getAmount());
                     chain.getLogger().debug("\tassetChainId: [{}]", coinTo.getAssetsChainId());
@@ -281,7 +286,7 @@ public class TxUtil {
         }else{
             chain.getLogger().debug("coinData: null");
         }
-        chain.getLogger().debug("--------------------------------------------------");
+        chain.getLogger().debug("**************************************************");
         chain.getLogger().debug("");
     }
 }

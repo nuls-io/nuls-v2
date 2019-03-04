@@ -62,7 +62,7 @@ public class PersistentQueue {
      */
     public PersistentQueue(String queueName, long maxSize) throws Exception {
 //        this.queueName = URLDecoder.decode(PersistentQueue.class.getClassLoader().getResource("").getPath() + "/data/queue/" + queueName, "UTF-8");
-        this.queueName = URLDecoder.decode(DBUtils.genAbsolutePath(TxConfig.DB_ROOT_PATH) + queueName, "UTF-8");
+        this.queueName = URLDecoder.decode(DBUtils.genAbsolutePath(TxConfig.DB_ROOT_PATH) + File.separator + queueName, "UTF-8");
         this.maxSize = maxSize;
         this.queue = new FQueue(this.queueName, maxSize);
     }
