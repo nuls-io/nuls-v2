@@ -2,10 +2,11 @@ package io.nuls.chain.storage.impl;
 
 import io.nuls.chain.model.po.ChainAsset;
 import io.nuls.chain.storage.ChainAssetStorage;
+import io.nuls.chain.storage.InitDB;
 import io.nuls.db.service.RocksDBService;
 import io.nuls.tools.basic.InitializingBean;
 import io.nuls.tools.core.annotation.Component;
-import static io.nuls.chain.util.LoggerUtil.Log;
+import io.nuls.tools.exception.NulsException;
 
 /**
  * @author tangyi
@@ -16,7 +17,7 @@ import static io.nuls.chain.util.LoggerUtil.Log;
  * value = ChainAsset
  */
 @Component
-public class ChainAssetStorageImpl implements ChainAssetStorage, InitializingBean {
+public class ChainAssetStorageImpl extends BaseStorage implements ChainAssetStorage,InitDB, InitializingBean {
 
     private final String TBL = "chain_asset";
 
@@ -26,13 +27,7 @@ public class ChainAssetStorageImpl implements ChainAssetStorage, InitializingBea
      */
     @Override
     public void afterPropertiesSet() {
-        try {
-            if (!RocksDBService.existTable(TBL)) {
-                RocksDBService.createTable(TBL);
-            }
-        } catch (Exception e) {
-            Log.error(e);
-        }
+
     }
 
     /**
@@ -74,4 +69,8 @@ public class ChainAssetStorageImpl implements ChainAssetStorage, InitializingBea
         RocksDBService.delete(TBL, key.getBytes());
     }
 
+    @Override
+    public void initTableName() throws NulsException {
+        super.initTableName(TBL);
+    }
 }

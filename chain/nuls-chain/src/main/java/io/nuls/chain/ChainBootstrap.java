@@ -7,6 +7,8 @@ import io.nuls.chain.service.CacheDataService;
 import io.nuls.chain.service.ChainService;
 import io.nuls.chain.service.RpcService;
 import io.nuls.chain.service.impl.RpcServiceImpl;
+import io.nuls.chain.storage.InitDB;
+import io.nuls.chain.storage.impl.*;
 import io.nuls.db.service.RocksDBService;
 import io.nuls.rpc.info.HostInfo;
 import io.nuls.rpc.model.ModuleE;
@@ -69,18 +71,16 @@ public class ChainBootstrap {
     private void start() {
         try {
             Log.info("Chain Bootstrap start...");
-
+            /* 自动注入 (Autowired) */
+            SpringLiteContext.init("io.nuls.chain", new ModularServiceMethodInterceptor());
             /* 如果属性不匹配，不要报错 (If the attributes do not match, don't report an error) */
             JSONUtils.getInstance().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-
             /* Read resources/module.ini to initialize the configuration */
             initCfg();
             /* Configuration to Map */
             initWithFile();
             /*db info*/
             initWithDatabase();
-            /* 自动注入 (Autowired) */
-            SpringLiteContext.init("io.nuls.chain", new ModularServiceMethodInterceptor());
             /* 把Nuls2.0主网信息存入数据库中 (Store the Nuls2.0 main network information into the database) */
             initMainChain();
             /* 进行数据库数据初始化（避免异常关闭造成的事务不一致） */
@@ -154,6 +154,16 @@ public class ChainBootstrap {
     private void initWithDatabase() throws Exception {
         /* 打开数据库连接 (Open database connection) */
         RocksDBService.init(ConfigManager.getValue(CmConstants.DB_DATA_PATH));
+        InitDB assetStorage = SpringLiteContext.getBean(AssetStorageImpl.class);
+        assetStorage.initTableName();
+        InitDB blockHeightStorage = SpringLiteContext.getBean(BlockHeightStorageImpl.class);
+        blockHeightStorage.initTableName();
+        InitDB cacheDatasStorage = SpringLiteContext.getBean(CacheDatasStorageImpl.class);
+        cacheDatasStorage.initTableName();
+        InitDB chainAssetStorage = SpringLiteContext.getBean(ChainAssetStorageImpl.class);
+        chainAssetStorage.initTableName();
+        InitDB chainStorage = SpringLiteContext.getBean(ChainStorageImpl.class);
+        chainStorage.initTableName();
     }
 
     private void configToMap(Map<String, String> toMap, String key) {
