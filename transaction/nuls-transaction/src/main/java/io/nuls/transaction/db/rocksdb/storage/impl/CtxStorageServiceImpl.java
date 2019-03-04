@@ -2,11 +2,9 @@ package io.nuls.transaction.db.rocksdb.storage.impl;
 
 import io.nuls.base.data.NulsDigestData;
 import io.nuls.db.service.RocksDBService;
-import io.nuls.tools.basic.InitializingBean;
 import io.nuls.tools.core.annotation.Service;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.exception.NulsRuntimeException;
-import static io.nuls.transaction.utils.LoggerUtil.Log;
 import io.nuls.transaction.constant.TxDBConstant;
 import io.nuls.transaction.constant.TxErrorCode;
 import io.nuls.transaction.db.rocksdb.storage.CtxStorageService;
@@ -18,16 +16,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static io.nuls.transaction.utils.LoggerUtil.Log;
+
 /**
  * @author: Charlie
  * @date: 2018/11/13
  */
 @Service
-public class CtxStorageServiceImpl implements CtxStorageService, InitializingBean {
-
-    @Override
-    public void afterPropertiesSet() throws NulsException {
-    }
+public class CtxStorageServiceImpl implements CtxStorageService {
 
     @Override
     public boolean putTx(int chainId, CrossTx ctx) {

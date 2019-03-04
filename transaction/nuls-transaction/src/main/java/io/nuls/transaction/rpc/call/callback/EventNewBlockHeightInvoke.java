@@ -55,9 +55,9 @@ public class EventNewBlockHeightInvoke extends BaseInvoke {
     @Override
     public void callBack(Response response) {
         try {
-            Log.info("EventNewBlockHeightInvoke 更新最新区块......");
+            Log.debug("EventNewBlockHeightInvoke 更新最新区块......");
             try {
-                Log.info(JSONUtils.obj2json(response));
+                Log.debug(JSONUtils.obj2json(response));
             } catch (JsonProcessingException e) {
                 e.printStackTrace();
             }

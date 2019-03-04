@@ -4,11 +4,9 @@ import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.data.NulsDigestData;
 import io.nuls.base.data.Transaction;
 import io.nuls.db.service.RocksDBService;
-import io.nuls.tools.basic.InitializingBean;
 import io.nuls.tools.core.annotation.Service;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.exception.NulsRuntimeException;
-import static io.nuls.transaction.utils.LoggerUtil.Log;
 import io.nuls.transaction.constant.TxDBConstant;
 import io.nuls.transaction.db.rocksdb.storage.UnconfirmedTxStorageService;
 import io.nuls.transaction.model.po.TransactionsPO;
@@ -16,6 +14,8 @@ import io.nuls.transaction.model.po.TransactionsPO;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+
+import static io.nuls.transaction.utils.LoggerUtil.Log;
 
 /**
  * 验证通过但未打包的交易
@@ -25,11 +25,7 @@ import java.util.List;
  * @date: 2018/11/13
  */
 @Service
-public class UnconfirmedTxStorageServiceImpl implements UnconfirmedTxStorageService, InitializingBean {
-
-    @Override
-    public void afterPropertiesSet() {
-    }
+public class UnconfirmedTxStorageServiceImpl implements UnconfirmedTxStorageService {
 
     @Override
     public boolean putTx(int chainId, Transaction tx) {

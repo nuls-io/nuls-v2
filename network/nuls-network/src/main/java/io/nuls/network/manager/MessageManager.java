@@ -157,9 +157,7 @@ public class MessageManager extends BaseManager {
                     Log.debug("==============================receive other module message, hash-" + NulsDigestData.calcDigestData(payLoadBody).getDigestHex() + "node-" + node.getId());
                     OtherModuleMessageHandler handler = MessageHandlerFactory.getInstance().getOtherModuleHandler();
                     result = handler.recieve(header, payLoadBody, node);
-                    Log.debug("s=={}==={}", byteBuffer.getPayload().length, byteBuffer.getCursor());
                     byteBuffer.setCursor(payLoad.length);
-                    Log.debug("e=={}==={}", byteBuffer.getPayload().length, byteBuffer.getCursor());
                 }
                 if (!result.isSuccess()) {
                     Log.error("receiveMessage deal fail:" + result.getErrorCode().getMsg());

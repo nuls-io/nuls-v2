@@ -128,21 +128,21 @@ public class TestTx {
 
     @Test
     public void importPriKeyTest() {
-        importPriKey("7e304e60c4e29c15382f76c0bb097bda28a1950b78871b6b7eb2bb4cc4ddeb49");//种子出块地址 5MR_2Cb86fpFbuY4Lici8MJStNxDFYH6kRB
+//        importPriKey("7e304e60c4e29c15382f76c0bb097bda28a1950b78871b6b7eb2bb4cc4ddeb49");//种子出块地址 5MR_2Cb86fpFbuY4Lici8MJStNxDFYH6kRB
 //        importPriKey("70e871a2e637b4182dfbedc53e164182d266821f4824ab1a3a73055e9f252f98");//种子出块地址
 
-        importPriKey("00c299b105e2f9b260d7811d5cb94c713cc324e55831cb15a18454f7382f0a5f6e");//20 5MR_2CWWTDXc32s9Wd1guNQzPztFgkyVEsz
-        importPriKey("00c4a6b90d3f4eb7b50bc85fd0e99ccb717e148b4fde7462e14c590445e589588c");//21 5MR_2CbdqKcZktcxntG14VuQDy8YHhc6ZqW
-        importPriKey("009ad5018ed1fc162c5320b9ae496984dd10227086ad86ea954a209597ff9b7d3a");//22 5MR_2Cj9tfgQpdeF7nDy5wyaGG6MZ35H3rA
+//        importPriKey("00c299b105e2f9b260d7811d5cb94c713cc324e55831cb15a18454f7382f0a5f6e");//20 5MR_2CWWTDXc32s9Wd1guNQzPztFgkyVEsz
+//        importPriKey("00c4a6b90d3f4eb7b50bc85fd0e99ccb717e148b4fde7462e14c590445e589588c");//21 5MR_2CbdqKcZktcxntG14VuQDy8YHhc6ZqW
+//        importPriKey("009ad5018ed1fc162c5320b9ae496984dd10227086ad86ea954a209597ff9b7d3a");//22 5MR_2Cj9tfgQpdeF7nDy5wyaGG6MZ35H3rA
 //        importPriKey("00c805d2d6d5e06f57fdfb1aff56ef3c2dd15eee88f36fa7d45d368c352ec5ec0d");//23 5MR_2CWKhFuoGVraaxL5FYY3RsQLjLDN7jw
 //        importPriKey("00c77707b21eece6c1ce0b8add04db79dc846f36830effe5c5ae2aced00097fafb");//24 5MR_2CgwCFRoJ8KX37xNqjjR7ttYuJsg8rk
-//        importPriKey("00def3b0f4bfad2a6abb5f6957829e752a1a30806edc35e98016425d578fdc4e77", password);//25 5MR_2CjZkQsN7EnEPcaLgNrMrp6wpPGN6xo
-//        importPriKey("1c2b9fd4417c1aad8ae9f24c982ff294eb50a6462b873b79a879e805a9990346", password);//26 5MR_2CeG11nRqx7nGNeh8hTXADibqfSYeNu
-//        importPriKey("00c98ecfd3777745270cacb9afba17ef0284769a83ff2adb4106b8a0baaec9452c");//27 5MR_2CVCFWH7o8AmrTBPLkdg2dYH1UCUJiM
-//        importPriKey("23848d45b4b34aca8ff24b00949a25a2c9175faf283675128e189eee8b085942");//28 5MR_2CfUsasd33vQV3HqGw6M3JwVsuVxJ7r
-//        importPriKey("009560d5ed6587822b7aee6f318f50b312c281e4f330b6990396881c6d3f870bc1");//29 5MR_2CVuGjQ3CYVkhFszxfSt6sodg1gDHYF
-//
-//        importPriKey("00fffd585ed08dddf0d034236aa1ea85abd2e4e69981617ee477adf6cdcf50f4d5");//打包地址 5MR_2Ch8CCnLwoLWFZ45pFEZSmo1C1pkPFA
+        importPriKey("00def3b0f4bfad2a6abb5f6957829e752a1a30806edc35e98016425d578fdc4e77", password);//25 5MR_2CjZkQsN7EnEPcaLgNrMrp6wpPGN6xo
+        importPriKey("1c2b9fd4417c1aad8ae9f24c982ff294eb50a6462b873b79a879e805a9990346", password);//26 5MR_2CeG11nRqx7nGNeh8hTXADibqfSYeNu
+        importPriKey("00c98ecfd3777745270cacb9afba17ef0284769a83ff2adb4106b8a0baaec9452c");//27 5MR_2CVCFWH7o8AmrTBPLkdg2dYH1UCUJiM
+        importPriKey("23848d45b4b34aca8ff24b00949a25a2c9175faf283675128e189eee8b085942");//28 5MR_2CfUsasd33vQV3HqGw6M3JwVsuVxJ7r
+        importPriKey("009560d5ed6587822b7aee6f318f50b312c281e4f330b6990396881c6d3f870bc1");//29 5MR_2CVuGjQ3CYVkhFszxfSt6sodg1gDHYF
+
+        importPriKey("00fffd585ed08dddf0d034236aa1ea85abd2e4e69981617ee477adf6cdcf50f4d5");//打包地址 5MR_2Ch8CCnLwoLWFZ45pFEZSmo1C1pkPFA
     }
 
     @Test
@@ -156,7 +156,7 @@ public class TestTx {
         Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.CS.abbr, "cs_createAgent", agentTxMap);
         Map result = (HashMap) (((HashMap) cmdResp2.getResponseData()).get("cs_createAgent"));
         Assert.assertTrue(null != result);
-        Log.info("{}", result.get("txHex"));
+        Log.debug("{}", result.get("txHex"));
         System.out.println("transfer: " + result.get("txHex"));  //Thread.sleep(3000L);
     }
 
@@ -170,7 +170,7 @@ public class TestTx {
         Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.CS.abbr, "cs_stopAgent", txMap);
         Map result = (HashMap) (((HashMap) cmdResp2.getResponseData()).get("cs_stopAgent"));
         Assert.assertTrue(null != result);
-        Log.info("{}", result.get("txHex"));
+        Log.debug("{}", result.get("txHex"));
         System.out.println("transfer: " + result.get("txHex"));  //Thread.sleep(3000L);
     }
 
@@ -181,7 +181,7 @@ public class TestTx {
     @Test
     public void depositToAgent() throws Exception {
         //组装委托节点交易
-        String agentHash = "00203e805809a9aeadc5b68b82908d6ba0f4ff53e1c6869842002aa064545e824eeb";
+        String agentHash = "00204fd0ab0c627a00f5d3fe7e44f3c313d520d38d0170ac4b113a3087c7942211c6";
         Map<String, Object> dpParams = new HashMap<>();
         dpParams.put("chainId", chainId);
         dpParams.put("address", address27);
@@ -203,7 +203,7 @@ public class TestTx {
         params.put("chainId", chainId);
         //Address depositAddress = new Address(1,(byte)1, SerializeUtils.sha256hash160("y5WhgP1iu2Qwt5CiaPTV4Fe2Xqmfd".getBytes()));
         params.put("address", address27);
-        params.put("txHash", "0020c2bed94bb1195cfa1c406fa1af9edeedb92a920fa2b77a56d4287ab2895c9333");
+        params.put("txHash", "00209668eab96e696138f6f34c945298d38a48f966b67c71ffe766862aa3930480da");
         Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.CS.abbr, "cs_withdraw", params);
         System.out.println(cmdResp.getResponseData());
     }
@@ -218,7 +218,7 @@ public class TestTx {
         Map<String, Object> params = new HashMap<>();
         params.put(Constants.VERSION_KEY_STR, "1.0");
         params.put("chainId", chainId);
-        params.put("address", address20);
+        params.put("address", address25);
         params.put("password", password);
         params.put("alias", alias);
         Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_setAlias", params);
@@ -228,7 +228,7 @@ public class TestTx {
         assertNotNull(result);
         String txHash = (String) result.get("txHash");
         assertNotNull(txHash);
-        Log.info("alias-txHash{}", txHash);
+        Log.debug("alias-txHash{}", txHash);
     }
 
     /**
@@ -250,7 +250,7 @@ public class TestTx {
         Assert.assertTrue(null != response.getResponseData());
         Map map = (HashMap) ((HashMap) response.getResponseData()).get("tx_createCtx");
         Assert.assertTrue(null != map);
-        Log.info("{}", map.get("value"));
+        Log.debug("{}", map.get("value"));
 
         Thread.sleep(3000L);
 
@@ -259,7 +259,7 @@ public class TestTx {
         Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_transfer", transferMap);
         HashMap result = (HashMap) (((HashMap) cmdResp.getResponseData()).get("ac_transfer"));
         Assert.assertTrue(null != result);
-        Log.info("{}", result.get("value"));
+        Log.debug("{}", result.get("value"));
         Thread.sleep(4000L);
         //packableTxs();*/
 
@@ -287,7 +287,7 @@ public class TestTx {
             Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_importAccountByPriKey", params);
             HashMap result = (HashMap) ((HashMap) cmdResp.getResponseData()).get("ac_importAccountByPriKey");
             String address = (String) result.get("address");
-            Log.info("{}", address);
+            Log.debug("{}", address);
         } catch (NulsRuntimeException e) {
             e.printStackTrace();
         } catch (Exception e) {
@@ -303,7 +303,7 @@ public class TestTx {
         params.put("address", address);
         params.put("password", password);
         Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_removeAccount", params);
-        Log.info("{}", JSONUtils.obj2json(cmdResp.getResponseData()));
+        Log.debug("{}", JSONUtils.obj2json(cmdResp.getResponseData()));
     }
 
 
@@ -337,9 +337,9 @@ public class TestTx {
         Map map = (HashMap) ((HashMap) response.getResponseData()).get("tx_packableTxs");
         Assert.assertTrue(null != map);
         List<String> list = (List) map.get("list");
-        Log.info("packableTxs:");
+        Log.debug("packableTxs:");
         for (String s : list) {
-            Log.info(s);
+            Log.debug(s);
         }
     }
 
@@ -419,13 +419,13 @@ public class TestTx {
         Map<String, Object> params = new HashMap<>();
         params.put("chainId", chainId);
         Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.LG.abbr, "bathValidateBegin", params);
-        Log.info("response {}", response);
+        Log.debug("response {}", response);
         params.put("isBatchValidate", true);
         Transaction transaction = buildTransaction(address);
 
         params.put("txHex", HexUtil.encode(transaction.serialize()));
         response = ResponseMessageProcessor.requestAndResponse(ModuleE.LG.abbr, "validateCoinData", params);
-        Log.info("response {}", response);
+        Log.debug("response {}", response);
 
         params.put("isConfirmTx", true);
         List<String> list = new ArrayList<>();
@@ -433,7 +433,7 @@ public class TestTx {
         params.put("txHexList", list);
         params.put("blockHeight", height++);
         response = ResponseMessageProcessor.requestAndResponse(ModuleE.LG.abbr, "commitTx", params);
-        Log.info("response {}", response);
+        Log.debug("response {}", response);
     }
 
 

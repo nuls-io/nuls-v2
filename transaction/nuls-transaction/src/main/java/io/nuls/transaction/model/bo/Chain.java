@@ -40,7 +40,7 @@ public class Chain {
     /**
      * 是否正在共识出块中
      */
-    private Boolean packaging;
+    private AtomicBoolean packaging;
 
     /**
      * 是否需要重新打包,开始打包区块交易时设为false. 打包同时,收到新区块时设为true,则需要重新打包
@@ -95,7 +95,7 @@ public class Chain {
     public Chain() throws Exception {
 //        this.runningStatus = RunningStatus.INITING;
 //        this.crossTxVerifyingMap = new HashMap<>();
-        this.packaging = false;
+        this.packaging =  new AtomicBoolean(false);
         this.rePackage = new AtomicBoolean(true);
         this.txRegisterMap = new HashMap<>();
         this.txQueue = new LinkedBlockingDeque<>();
@@ -186,11 +186,11 @@ public class Chain {
         this.bestBlockHeight = bestBlockHeight;
     }
 
-    public Boolean getPackaging() {
+    public AtomicBoolean getPackaging() {
         return packaging;
     }
 
-    public void setPackaging(Boolean packaging) {
+    public void setPackaging(AtomicBoolean packaging) {
         this.packaging = packaging;
     }
 

@@ -50,7 +50,7 @@ public class TransactionCall {
             }*/
             return resData.get(cmd);
         } catch (Exception e) {
-            Log.info("cmd: {}", cmd);
+            Log.debug("cmd: {}", cmd);
             throw new NulsException(e);
         }
     }
@@ -76,7 +76,7 @@ public class TransactionCall {
         params.put("txHex", txHex);
         Map result = (Map) TransactionCall.request(txRegister.getModuleCode(), txRegister.getValidator(), params);
         try {
-            chain.getLogger().info("moduleCode:{}, -cmd:{}, -txProcess -rs: {}", txRegister.getModuleCode(), txRegister.getValidator(), JSONUtils.obj2json(result));
+            chain.getLogger().debug("moduleCode:{}, -cmd:{}, -txProcess -rs: {}", txRegister.getModuleCode(), txRegister.getValidator(), JSONUtils.obj2json(result));
         } catch (JsonProcessingException e) {
             e.printStackTrace();
         }
@@ -99,7 +99,7 @@ public class TransactionCall {
             params.put("txHexList", txHexList);
             params.put("blockHeaderHex", blockHeaderHex);
             Map result = (Map) TransactionCall.request(moduleCode, cmd, params);
-            chain.getLogger().info("moduleCode:{}, -cmd:{}, -txProcess -rs: {}",moduleCode, cmd, JSONUtils.obj2json(result));
+            chain.getLogger().debug("moduleCode:{}, -cmd:{}, -txProcess -rs: {}",moduleCode, cmd, JSONUtils.obj2json(result));
             return (Boolean) result.get("value");
         } catch (Exception e) {
             chain.getLogger().error(e);

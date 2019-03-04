@@ -25,6 +25,8 @@
 package io.nuls.transaction.utils.queue.entity;
 
 
+import io.nuls.db.util.DBUtils;
+import io.nuls.transaction.constant.TxConfig;
 import io.nuls.transaction.utils.queue.fqueue.entity.FQueue;
 
 import java.io.File;
@@ -59,7 +61,8 @@ public class PersistentQueue {
      * @param maxSize   单个文件最大大小fileLimitLength
      */
     public PersistentQueue(String queueName, long maxSize) throws Exception {
-        this.queueName = URLDecoder.decode(PersistentQueue.class.getClassLoader().getResource("").getPath() + "/data/queue/" + queueName, "UTF-8");
+//        this.queueName = URLDecoder.decode(PersistentQueue.class.getClassLoader().getResource("").getPath() + "/data/queue/" + queueName, "UTF-8");
+        this.queueName = URLDecoder.decode(DBUtils.genAbsolutePath(TxConfig.DB_ROOT_PATH) + queueName, "UTF-8");
         this.maxSize = maxSize;
         this.queue = new FQueue(this.queueName, maxSize);
     }
@@ -139,14 +142,14 @@ public class PersistentQueue {
         if (null != file && file.exists()) {//判断文件是否存在
             if (file.isFile()) {//判断是否是文件
                 boolean b = file.delete();//删除文件
-//                Log.info("删除文件:" + file.getPath() + "，结果：" + b);
+//                Log.debug("删除文件:" + file.getPath() + "，结果：" + b);
             } else if (file.isDirectory()) {//否则如果它是一个目录
                 File[] files = file.listFiles();//声明目录下所有的文件 files[];
                 for (File f : files) {//遍历目录下所有的文件
                     this.deleteFile(f);//把每个文件用这个方法进行迭代
                 }
                 boolean b = file.delete();//删除文件夹
-//                Log.info("删除文件:" + file.getPath() + "，结果：" + b);
+//                Log.debug("删除文件:" + file.getPath() + "，结果：" + b);
             }
         }
     }
