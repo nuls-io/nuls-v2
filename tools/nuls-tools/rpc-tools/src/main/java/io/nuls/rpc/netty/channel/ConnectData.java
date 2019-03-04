@@ -10,10 +10,7 @@ import io.nuls.tools.parse.JSONUtils;
 import io.nuls.tools.thread.ThreadUtils;
 import io.nuls.tools.thread.commom.NulsThreadFactory;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Queue;
+import java.util.*;
 import java.util.concurrent.*;
 
 /**
@@ -94,6 +91,12 @@ public class ConnectData {
      * Value:订阅时接口已改变次数/Number of interface changes at subscription time
      * */
     private final Map<String, Integer> subscribeInitCount = new ConcurrentHashMap<>();
+
+
+    /**
+     * 存储连接断开的事件监听
+     */
+    private final List<EventListener> closeEventListenerList = new ArrayList<>();
 
     /**
      * 判断指定消息是否为订阅消息，且是按指定间隔时间返回数据
@@ -197,6 +200,7 @@ public class ConnectData {
             responseAutoQueue.clear();
             responseAutoQueue.offer(new Response());
             requestPeriodLoopQueue.clear();
+            emitCloseEvent(); //广播连接关闭事件
         }
     }
 
@@ -242,6 +246,21 @@ public class ConnectData {
 
     public ExecutorService getThreadPool() {
         return threadPool;
+    }
+
+    /**
+     * 监听连接关闭事件
+     * @param eventListener
+     */
+    public void addCloseEvent(EventListener eventListener){
+        this.closeEventListenerList.add(eventListener);
+    }
+
+    /**
+     * 触发连接关闭事件
+     */
+    public void emitCloseEvent(){
+        this.closeEventListenerList.forEach(f->f.apply());
     }
 
 }
