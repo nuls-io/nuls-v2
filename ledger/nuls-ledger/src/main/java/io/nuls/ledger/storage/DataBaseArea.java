@@ -23,7 +23,7 @@
  * THE SOFTWARE.
  * ⁣⁣
  */
-package io.nuls.ledger.db;
+package io.nuls.ledger.storage;
 
 /**
  * database table name constant

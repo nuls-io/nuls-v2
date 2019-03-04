@@ -27,10 +27,10 @@ package io.nuls.ledger.test.db;
 
 import io.nuls.db.service.RocksDBService;
 import io.nuls.ledger.config.AppConfig;
-import io.nuls.ledger.db.DataBaseArea;
-import io.nuls.ledger.db.Repository;
-import io.nuls.ledger.db.RepositoryImpl;
 import io.nuls.ledger.model.ModuleConfig;
+import io.nuls.ledger.storage.DataBaseArea;
+import io.nuls.ledger.storage.Repository;
+import io.nuls.ledger.storage.impl.RepositoryImpl;
 import io.nuls.ledger.utils.LoggerUtil;
 import org.junit.Before;
 

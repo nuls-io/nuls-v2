@@ -23,7 +23,7 @@
  * THE SOFTWARE.
  * ⁣⁣
  */
-package io.nuls.ledger.db;
+package io.nuls.ledger.storage.impl;
 
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.db.model.Entry;
@@ -33,6 +33,10 @@ import io.nuls.ledger.model.ChainHeight;
 import io.nuls.ledger.model.po.AccountState;
 import io.nuls.ledger.model.po.BlockSnapshotAccounts;
 import io.nuls.ledger.model.po.BlockTxs;
+import io.nuls.ledger.storage.DataBaseArea;
+import io.nuls.ledger.storage.InitDB;
+import io.nuls.ledger.storage.Repository;
+import io.nuls.tools.basic.InitializingBean;
 import io.nuls.tools.core.annotation.Service;
 import io.nuls.tools.data.ByteUtils;
 import io.nuls.tools.exception.NulsException;
@@ -46,20 +50,10 @@ import static io.nuls.ledger.utils.LoggerUtil.logger;
  * Created by wangkun23 on 2018/11/19.
  */
 @Service
-public class RepositoryImpl implements Repository {
+public class RepositoryImpl implements Repository, InitDB, InitializingBean {
 
     public RepositoryImpl() {
-        try {
-            if (!RocksDBService.existTable(getChainsHeightTableName())) {
-                RocksDBService.createTable(getChainsHeightTableName());
-            } else {
-                logger.info("table {} exist.", getChainsHeightTableName());
-            }
 
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
     }
 
     /**
@@ -172,7 +166,7 @@ public class RepositoryImpl implements Repository {
         if (null == list || 0 == list.size()) {
             return null;
         }
-        for (Entry<byte[], byte[]> entry:list){
+        for (Entry<byte[], byte[]> entry : list) {
             ChainHeight chainHeight = new ChainHeight();
             chainHeight.setChainId(ByteUtils.bytesToInt(entry.getKey()));
             chainHeight.setBlockHeight(ByteUtils.byteToLong(entry.getValue()));
@@ -190,11 +184,12 @@ public class RepositoryImpl implements Repository {
         return DataBaseArea.TB_LEDGER_ACCOUNT_BLOCK_SNAPSHOT + chainId;
     }
 
-    String getChainsHeightTableName() {
+    public String getChainsHeightTableName() {
         return DataBaseArea.TB_LEDGER_BLOCK_HEIGHT;
     }
+
     String getBlockTableName(int chainId) {
-        return DataBaseArea.TB_LEDGER_BLOCKS+chainId;
+        return DataBaseArea.TB_LEDGER_BLOCKS + chainId;
     }
 
     /**
@@ -216,14 +211,14 @@ public class RepositoryImpl implements Repository {
 
 
     @Override
-    public void saveBlock(int chainId,long height,BlockTxs blockTxs) {
+    public void saveBlock(int chainId, long height, BlockTxs blockTxs) {
         try {
             String table = getBlockTableName(chainId);
             if (!RocksDBService.existTable(table)) {
                 RocksDBService.createTable(table);
             }
             RocksDBService.put(table, ByteUtils.longToBytes(height), blockTxs.serialize());
-            RocksDBService.delete(table,ByteUtils.longToBytes(height-LedgerConstant.CACHE_ACCOUNT_BLOCK));
+            RocksDBService.delete(table, ByteUtils.longToBytes(height - LedgerConstant.CACHE_ACCOUNT_BLOCK));
         } catch (Exception e) {
             logger.error("saveBlock serialize error.", e);
         }
@@ -239,11 +234,30 @@ public class RepositoryImpl implements Repository {
                 return null;
             }
             BlockTxs blockTxs = new BlockTxs();
-                blockTxs.parse(new NulsByteBuffer(stream));
+            blockTxs.parse(new NulsByteBuffer(stream));
             return blockTxs;
         } catch (Exception e) {
             logger.error("getBlock serialize error.", e);
         }
         return null;
+    }
+
+    @Override
+    public void afterPropertiesSet() throws NulsException {
+
+    }
+
+    @Override
+    public void initTableName() throws NulsException {
+        try {
+            if (!RocksDBService.existTable(getChainsHeightTableName())) {
+                RocksDBService.createTable(getChainsHeightTableName());
+            } else {
+                logger.info("table {} exist.", getChainsHeightTableName());
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new NulsException(e);
+        }
     }
 }
