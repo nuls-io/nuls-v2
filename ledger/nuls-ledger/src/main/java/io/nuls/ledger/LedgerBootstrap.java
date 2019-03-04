@@ -32,6 +32,7 @@ import io.nuls.ledger.service.BlockDataService;
 import io.nuls.ledger.service.impl.BlockDataServiceImpl;
 import io.nuls.ledger.storage.InitDB;
 import io.nuls.ledger.storage.impl.RepositoryImpl;
+import io.nuls.ledger.utils.LoggerUtil;
 import io.nuls.rpc.info.HostInfo;
 import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.modulebootstrap.Module;
@@ -106,6 +107,7 @@ public class LedgerBootstrap extends RpcModule {
     @Override
     public boolean doStart() {
         //springLite容器初始化AppInitializing
+        LoggerUtil.logger.info("Ledger READY");
         return true;
     }
 

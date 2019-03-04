@@ -34,6 +34,7 @@ import io.nuls.rpc.modulebootstrap.RpcModule;
 import io.nuls.rpc.modulebootstrap.RpcModuleState;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.core.ioc.SpringLiteContext;
+import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.log.Log;
 import io.nuls.tools.parse.ConfigLoader;
 import io.nuls.tools.parse.I18nUtils;
@@ -66,7 +67,10 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 public class TransactionModule extends RpcModule {
 
     public static void main(String[] args) {
-        NulsRpcModuleBootstrap.run("io.nuls.transaction", new String[]{HostInfo.getLocalIP() + ":8887/ws"});
+        if(args.length == 0){
+            args = new String[]{HostInfo.getLocalIP() + ":8887/ws"};
+        }
+        NulsRpcModuleBootstrap.run("io.nuls.transaction", args);
     }
 
     @Override
@@ -101,18 +105,8 @@ public class TransactionModule extends RpcModule {
 
     @Override
     public RpcModuleState onDependenciesReady() {
-        try {
-            ChainManager chainManager = SpringLiteContext.getBean(ChainManager.class);
-            for (Map.Entry<Integer, Chain> entry : chainManager.getChainMap().entrySet()) {
-                Chain chain = entry.getValue();
-                //订阅Block模块接口
-                BlockCall.subscriptionNewBlockHeight(chain);
-            }
-            return RpcModuleState.Running;
-        } catch (Exception e) {
-            Log.error(e);
-            return RpcModuleState.Ready;
-        }
+        subscriptionBlockHeight();
+        return RpcModuleState.Running;
     }
 
     @Override
@@ -141,7 +135,7 @@ public class TransactionModule extends RpcModule {
     /**
      * 初始化系统编码
      */
-    public static void initSys() {
+    private static void initSys() {
         try {
             System.setProperty(TxConstant.SYS_ALLOW_NULL_ARRAY_ELEMENT, "true");
             System.setProperty(TxConstant.SYS_FILE_ENCODING, UTF_8.name());
@@ -153,7 +147,7 @@ public class TransactionModule extends RpcModule {
         }
     }
 
-    public static void initDB() {
+    private static void initDB() {
         try {
             //数据文件存储地址
             Properties properties = ConfigLoader.loadProperties(TxConstant.DB_CONFIG_NAME);
@@ -178,7 +172,7 @@ public class TransactionModule extends RpcModule {
     /**
      * 初始化国际化资源文件语言
      */
-    public static void initLanguage() {
+    private static void initLanguage() {
         try {
             LanguageStorageService languageService = SpringLiteContext.getBean(LanguageStorageService.class);
             String languageDB = languageService.getLanguage();
@@ -196,11 +190,30 @@ public class TransactionModule extends RpcModule {
     /**
      * 创建H2的表, 如果存在则不会创建
      */
-    public static void initH2Table() {
+    private static void initH2Table() {
         TransactionH2Service ts = SpringLiteContext.getBean(TransactionH2Service.class);
         ts.createTxTablesIfNotExists(TxConstant.H2_TX_TABLE_NAME_PREFIX,
                 TxConstant.H2_TX_TABLE_INDEX_NAME_PREFIX,
                 TxConstant.H2_TX_TABLE_UNIQUE_NAME_PREFIX,
                 TxConstant.H2_TX_TABLE_NUMBER);
+    }
+
+    /**
+     * 订阅最新区块高度
+     */
+    private static void subscriptionBlockHeight() {
+        try {
+            ChainManager chainManager = SpringLiteContext.getBean(ChainManager.class);
+            for (Map.Entry<Integer, Chain> entry : chainManager.getChainMap().entrySet()) {
+                Chain chain = entry.getValue();
+                //订阅Block模块接口
+                BlockCall.subscriptionNewBlockHeight(chain);
+            }
+//            int a = 0;
+//            int b = 0;
+//            System.out.println(a/b);
+        } catch (NulsException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

@@ -32,6 +32,7 @@ import io.nuls.network.constant.NetworkParam;
 import io.nuls.network.manager.*;
 import io.nuls.network.storage.InitDB;
 import io.nuls.network.storage.impl.DbServiceImpl;
+import io.nuls.network.utils.LoggerUtil;
 import io.nuls.rpc.info.HostInfo;
 import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.modulebootstrap.Module;
@@ -168,6 +169,7 @@ public class NetworkBootstrap extends RpcModule {
     @Override
     public boolean doStart() {
         Log.debug("doStart begin=========");
+        LoggerUtil.Log.info("NW doStart 1");
         try {
             NodeGroupManager.getInstance().start();
             RpcManager.getInstance().start();
@@ -176,6 +178,7 @@ public class NetworkBootstrap extends RpcModule {
             System.exit(-1);
         }
         Log.debug("doStart end=========");
+        LoggerUtil.Log.info("NW doStart 2");
         return true;
     }
 
@@ -188,6 +191,7 @@ public class NetworkBootstrap extends RpcModule {
             e.printStackTrace();
             System.exit(-1);
         }
+        LoggerUtil.Log.info("NW RUNNING");
         return RpcModuleState.Running;
     }
 
