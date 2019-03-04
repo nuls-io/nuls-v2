@@ -226,7 +226,7 @@ public class TxUtil {
         return HexUtil.decode(nonce8BytesStr);
     }
 
-    public static void txInformationPrint(Chain chain,Transaction tx) throws NulsException {
+    public static void txInformationDebugPrint(Chain chain, Transaction tx) {
         chain.getLogger().debug("");
         chain.getLogger().debug("--------------------------------------------------");
         chain.getLogger().debug("Transaction information");
@@ -235,7 +235,12 @@ public class TxUtil {
         chain.getLogger().debug("time: {}",  DateUtils.timeStamp2DateStr(tx.getTime()));
         chain.getLogger().debug("size: {}KB",  String.valueOf(tx.getSize()/1024));
 
-        CoinData coinData = tx.getCoinDataInstance();
+        CoinData coinData = null;
+        try {
+            coinData = tx.getCoinDataInstance();
+        } catch (NulsException e) {
+            e.printStackTrace();
+        }
         if(coinData != null){
             chain.getLogger().debug("coinData:");
             List<CoinFrom> coinFromList = coinData.getFrom();
@@ -245,18 +250,38 @@ public class TxUtil {
                 chain.getLogger().debug("\tcoinFrom: size 0");
             }else{
                 for(CoinFrom coinFrom : coinFromList){
-                    chain.getLogger().debug("\tfrom:");
+                    chain.getLogger().debug("\tFROM:");
                     chain.getLogger().debug("\taddress: {}", AddressTool.getStringAddressByBytes(coinFrom.getAddress()));
                     chain.getLogger().debug("\tamount: {}", coinFrom.getAmount());
-                    chain.getLogger().debug("\taddress: {}", AddressTool.getStringAddressByBytes(coinFrom.getAddress()));
-                    chain.getLogger().debug("\taddress: {}", AddressTool.getStringAddressByBytes(coinFrom.getAddress()));
-                    chain.getLogger().debug("\taddress: {}", AddressTool.getStringAddressByBytes(coinFrom.getAddress()));
+                    chain.getLogger().debug("\tassetChainId: [{}]", coinFrom.getAssetsChainId());
+                    chain.getLogger().debug("\tassetId: [{}]", coinFrom.getAssetsId());
+                    chain.getLogger().debug("\tnonce: {}", HexUtil.encode(coinFrom.getNonce()));
+                    chain.getLogger().debug("\tlocked(0普通交易，-1解锁金额交易（退出共识，退出委托)): [{}]",coinFrom.getLocked());
+                    chain.getLogger().debug("");
+                }
+            }
+
+            List<CoinTo> coinToList = coinData.getTo();
+            if(coinToList == null){
+                chain.getLogger().debug("\tcoinTo: null");
+            }else if(coinToList.size() == 0){
+                chain.getLogger().debug("\tcoinTo: size 0");
+            }else{
+                for(CoinTo coinTo : coinToList){
+                    chain.getLogger().debug("\tTO:");
+                    chain.getLogger().debug("\taddress: {}", AddressTool.getStringAddressByBytes(coinTo.getAddress()));
+                    chain.getLogger().debug("\tamount: {}", coinTo.getAmount());
+                    chain.getLogger().debug("\tassetChainId: [{}]", coinTo.getAssetsChainId());
+                    chain.getLogger().debug("\tassetId: [{}]", coinTo.getAssetsId());
+                    chain.getLogger().debug("\tlocked(解锁高度或解锁时间，-1为永久锁定): [{}]",coinTo.getLockTime());
+                    chain.getLogger().debug("");
                 }
             }
 
         }else{
             chain.getLogger().debug("coinData: null");
         }
-
+        chain.getLogger().debug("--------------------------------------------------");
+        chain.getLogger().debug("");
     }
 }

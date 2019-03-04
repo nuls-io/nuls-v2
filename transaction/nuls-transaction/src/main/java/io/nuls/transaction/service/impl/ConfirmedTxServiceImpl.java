@@ -209,6 +209,7 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
             tx.setStatus(TxStatusEnum.CONFIRMED);
             if (saveTx(chain, tx)) {
                 chain.getLogger().debug("success! saveTxs -type[{}], hash:{}", tx.getType(), tx.getHash().getDigestHex());
+                TxUtil.txInformationDebugPrint(chain, tx);
                 savedList.add(tx);
             } else {
                 if(atomicity) {

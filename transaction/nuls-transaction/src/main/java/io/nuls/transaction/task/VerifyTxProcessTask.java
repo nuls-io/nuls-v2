@@ -113,6 +113,7 @@ public class VerifyTxProcessTask implements Runnable {
                 unconfirmedTxStorageService.putTx(chainId, tx);
                 //保存到h2数据库
                 transactionH2Service.saveTxs(TxUtil.tx2PO(tx));
+                TxUtil.txInformationDebugPrint(chain, tx);
                 //调账本记录未确认交易
                 LedgerCall.commitUnconfirmedTx(chain, tx.hex());
                 //广播交易hash
