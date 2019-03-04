@@ -30,6 +30,8 @@ import io.nuls.network.cfg.NulsConfig;
 import io.nuls.network.constant.NetworkConstant;
 import io.nuls.network.constant.NetworkParam;
 import io.nuls.network.manager.*;
+import io.nuls.network.storage.InitDB;
+import io.nuls.network.storage.impl.DbServiceImpl;
 import io.nuls.tools.core.inteceptor.ModularServiceMethodInterceptor;
 import io.nuls.tools.core.ioc.SpringLiteContext;
 import io.nuls.tools.exception.NulsException;
@@ -79,7 +81,9 @@ public class NetworkBootstrap {
             System.setProperty("io.netty.tryReflectionSetAccessible", "true");
 //            --add-exports java.base/jdk.internal.misc=ALL-UNNAMED
 //            --add-exports java.base/jdk.internal.ref=ALL-UNNAMED --add-exports java.base/sun.nio.ch=ALL-UNNAMED
+            SpringLiteContext.init("io.nuls.network", new ModularServiceMethodInterceptor());
             jsonCfgInit();
+            dbInit();
             managerInit();
             managerStart();
         } catch (Exception e) {
@@ -135,14 +139,16 @@ public class NetworkBootstrap {
             e.printStackTrace();
         }
     }
-
+     private void dbInit()throws Exception{
+         RocksDBService.init(NetworkParam.getInstance().getDbPath());
+         InitDB dbService = SpringLiteContext.getBean(DbServiceImpl.class);
+         dbService.initTableName();
+     }
     /**
      * 管理器初始化
      * Manager initialization
      */
     private void managerInit() throws Exception {
-        RocksDBService.init(NetworkParam.getInstance().getDbPath());
-        SpringLiteContext.init("io.nuls.network", new ModularServiceMethodInterceptor());
         StorageManager.getInstance().init();
         NodeGroupManager.getInstance().init();
         MessageManager.getInstance().init();

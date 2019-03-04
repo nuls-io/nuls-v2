@@ -22,7 +22,7 @@
  * SOFTWARE.
  *
  */
-package io.nuls.network.storage;
+package io.nuls.network.storage.impl;
 
 import io.nuls.db.model.Entry;
 import io.nuls.db.service.RocksDBService;
@@ -31,6 +31,8 @@ import io.nuls.network.model.NodeGroup;
 import io.nuls.network.model.po.GroupNodesPo;
 import io.nuls.network.model.po.GroupPo;
 import io.nuls.network.model.po.RoleProtocolPo;
+import io.nuls.network.storage.DbService;
+import io.nuls.network.storage.InitDB;
 import io.nuls.network.utils.LoggerUtil;
 import io.nuls.tools.basic.InitializingBean;
 import io.nuls.tools.core.annotation.Service;
@@ -51,7 +53,7 @@ import static io.nuls.network.utils.LoggerUtil.Log;
  * @date 2018/11/01
  */
 @Service
-public class DbServiceImpl implements DbService, InitializingBean {
+public class DbServiceImpl implements DbService,InitDB,InitializingBean {
     private static String DEFAULT_ENCODING = "UTF-8";
 
     @Override
@@ -161,6 +163,11 @@ public class DbServiceImpl implements DbService, InitializingBean {
 
     @Override
     public void afterPropertiesSet() throws NulsException {
+
+    }
+
+    @Override
+    public void initTableName() throws NulsException {
         try {
             if (!RocksDBService.existTable(NetworkConstant.DB_NAME_NETWORK_NODEGROUPS)) {
                 RocksDBService.createTable(NetworkConstant.DB_NAME_NETWORK_NODEGROUPS);
