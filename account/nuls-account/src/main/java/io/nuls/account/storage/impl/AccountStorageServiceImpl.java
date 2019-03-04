@@ -50,17 +50,6 @@ public class AccountStorageServiceImpl implements AccountStorageService, Initial
 
     @Override
     public void afterPropertiesSet() {
-        //If tables do not exist, create tables.
-        if (!RocksDBService.existTable(AccountStorageConstant.DB_NAME_ACCOUNT)) {
-            try {
-                RocksDBService.createTable(AccountStorageConstant.DB_NAME_ACCOUNT);
-            } catch (Exception e) {
-                if (!DBErrorCode.DB_TABLE_EXIST.equals(e.getMessage())) {
-                    Log.error(e.getMessage());
-                    throw new NulsRuntimeException(AccountErrorCode.DB_TABLE_CREATE_ERROR);
-                }
-            }
-        }
     }
 
     @Override

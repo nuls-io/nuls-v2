@@ -54,14 +54,6 @@ public class ConfigServiceImpl implements ConfigService, InitializingBean {
 
     @Override
     public void afterPropertiesSet() throws NulsException {
-        if (!RocksDBService.existTable(AccountStorageConstant.DB_NAME_ACCOUNT_CONGIF)) {
-            try {
-                RocksDBService.createTable(AccountStorageConstant.DB_NAME_ACCOUNT_CONGIF);
-            } catch (Exception e) {
-                Log.error(e);
-                throw new NulsException(e);
-            }
-        }
     }
 
     @Override
