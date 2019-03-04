@@ -60,8 +60,6 @@ import static io.nuls.network.utils.LoggerUtil.Log;
  */
 @Component
 public class NetworkBootstrap extends RpcModule {
-    private static NetworkBootstrap bootstrap = null;
-
     public static void main(String[] args) {
         if (args == null || args.length == 0) {
             args = new String[]{HostInfo.getLocalIP() + ":8887"};
@@ -138,16 +136,6 @@ public class NetworkBootstrap extends RpcModule {
     }
 
     /**
-     * 启动管理模块
-     * Manager start
-     */
-    private void managerStart() throws Exception {
-
-
-        Log.debug("managerStart end============");
-    }
-
-    /**
      * 初始化模块信息，比如初始化RockDB等，在此处初始化后，可在其他bean的afterPropertiesSet中使用
      */
     @Override
@@ -185,8 +173,9 @@ public class NetworkBootstrap extends RpcModule {
             RpcManager.getInstance().start();
         } catch (Exception e) {
             e.printStackTrace();
-            return false;
+            System.exit(-1);
         }
+        Log.debug("doStart end=========");
         return true;
     }
 
@@ -197,7 +186,7 @@ public class NetworkBootstrap extends RpcModule {
             TaskManager.getInstance().start();
         } catch (Exception e) {
             e.printStackTrace();
-            return RpcModuleState.Ready;
+            System.exit(-1);
         }
         return RpcModuleState.Running;
     }
