@@ -53,6 +53,13 @@ public class CoinData extends BaseNulsData {
         to = new ArrayList<>();
     }
 
+    public CoinData(byte[] bytes) throws NulsException {
+        from = new ArrayList<>();
+        to = new ArrayList<>();
+        this.parse(new NulsByteBuffer(bytes));
+    }
+
+
     /**
      * serialize important field
      */

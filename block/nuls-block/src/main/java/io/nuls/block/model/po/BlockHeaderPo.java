@@ -51,7 +51,7 @@ public class BlockHeaderPo extends BaseNulsData {
     private NulsDigestData merkleHash;
     private long time;
     private long height;
-    private long txCount;
+    private int txCount;
     private BlockSignature blockSignature;
     private byte[] extend;
     private transient int size;
@@ -99,7 +99,7 @@ public class BlockHeaderPo extends BaseNulsData {
         this.merkleHash = byteBuffer.readHash();
         this.time = byteBuffer.readUint48();
         this.height = byteBuffer.readUint32();
-        this.txCount = byteBuffer.readUint32();
+        this.txCount = byteBuffer.readInt32();
         this.extend = byteBuffer.readByLengthByte();
         this.txHashList = new ArrayList<>();
         this.blockSignature = byteBuffer.readNulsData(new BlockSignature());
