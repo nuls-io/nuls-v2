@@ -7,13 +7,12 @@ import io.nuls.tools.protocol.ProtocolConfigJson;
 import io.nuls.tools.protocol.ProtocolLoader;
 import org.junit.Test;
 
-import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
 import static io.nuls.block.constant.Constant.PROTOCOL_CONFIG_COMPARATOR;
 import static io.nuls.block.constant.Constant.PROTOCOL_CONFIG_FILE;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 public class ConfigLoaderTest {
 
