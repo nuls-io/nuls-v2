@@ -38,7 +38,7 @@ import static io.nuls.chain.util.LoggerUtil.Log;
 public class ChainBootstrap extends RpcModule {
     public static void main(String[] args) {
         if (args == null || args.length == 0) {
-            args = new String[]{HostInfo.getLocalIP() + ":8887"};
+            args = new String[]{HostInfo.getLocalIP() + ":8887/ws"};
         }
         NulsRpcModuleBootstrap.run("io.nuls.chain", args);
     }
