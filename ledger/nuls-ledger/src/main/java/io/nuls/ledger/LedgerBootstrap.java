@@ -55,7 +55,7 @@ public class LedgerBootstrap extends RpcModule {
         if (args == null || args.length == 0) {
             args = new String[]{HostInfo.getLocalIP() + ":8887/ws"};
         }
-        NulsRpcModuleBootstrap.run("io.nuls.ledger", args);
+        NulsRpcModuleBootstrap.run("io.nuls", args);
     }
     /**
      * 进行数据的校验处理,比如异常关闭模块造成的数据不一致。
