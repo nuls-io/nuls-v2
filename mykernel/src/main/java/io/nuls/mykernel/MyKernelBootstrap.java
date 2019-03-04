@@ -51,6 +51,7 @@ public class MyKernelBootstrap {
     private static List<String> MODULE_STOP_LIST_SCRIPT = new ArrayList<>();
 
     public static void main(String[] args) throws Exception {
+        System.setProperty("io.netty.tryReflectionSetAccessible", "true");
         //增加程序结束的钩子，监听到主线程停止时，调用./stop.sh停止所有的子模块
         Runtime.getRuntime().addShutdownHook(new Thread(()->{
             log.info("jvm shutdown");
