@@ -2,6 +2,7 @@ package io.nuls.rpc.netty.bootstrap;
 
 import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.info.HostInfo;
+import io.nuls.rpc.model.CmdDetail;
 import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.netty.channel.manager.ConnectManager;
 import io.nuls.rpc.netty.thread.StartServerProcessor;
@@ -125,4 +126,16 @@ public class NettyServer {
         ConnectManager.scanPackage(scanPackage);
         return this;
     }
+
+    /**
+     * 添加RPC接口
+     * add RPC insterface
+     * @param cmdClass
+     * @return
+     */
+    public NettyServer  addCmdDetail(Class<?> cmdClass){
+        ConnectManager.addCmdDetail(cmdClass);
+        return this;
+    }
+
 }
