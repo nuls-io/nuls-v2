@@ -6,6 +6,7 @@ import io.nuls.poc.storage.LanguageService;
 import io.nuls.poc.utils.manager.ChainManager;
 import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.modulebootstrap.Module;
+import io.nuls.rpc.modulebootstrap.NulsRpcModuleBootstrap;
 import io.nuls.rpc.modulebootstrap.RpcModule;
 import io.nuls.rpc.modulebootstrap.RpcModuleState;
 import io.nuls.tools.core.annotation.Component;
@@ -28,6 +29,10 @@ import static java.nio.charset.StandardCharsets.UTF_8;
  */
 @Component
 public class ConsensusModule extends RpcModule {
+
+    public static void main(String[] args){
+        NulsRpcModuleBootstrap.run(ConsensusConstant.CONTEXT_PATH,args);
+    }
     /**
      * 初始化模块，比如初始化RockDB等，在此处初始化后，可在其他bean的afterPropertiesSet中使用
      * 在onStart前会调用此方法
