@@ -30,6 +30,7 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.util.Attribute;
 import io.netty.util.AttributeKey;
+import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.network.manager.MessageManager;
 import io.nuls.network.manager.TimeManager;
 import io.nuls.network.manager.handler.base.BaseChannelHandler;
@@ -90,12 +91,16 @@ public class ClientChannelHandler extends BaseChannelHandler {
         int port = socketChannel.remoteAddress().getPort();
         Log.info("{}-----------------client channelRead-----------------{}:{}", TimeManager.currentTimeMillis(), remoteIP, port);
         ByteBuf buf = (ByteBuf) msg;
+        NulsByteBuffer byteBuffer = null;
+        Node node = null;
         try {
             Attribute<Node> nodeAttribute = ctx.channel().attr(key);
-            Node node = nodeAttribute.get();
+            node = nodeAttribute.get();
             if (node != null) {
                 Log.info("-----------------client channelRead  node={} -----------------", node.getId());
-                MessageManager.getInstance().receiveMessage(buf, node);
+                byte[] bytes = new byte[buf.readableBytes()];
+                buf.readBytes(bytes);
+                byteBuffer = new NulsByteBuffer(bytes);
             } else {
                 Log.info("-----------------client channelRead  node is null -----------------" + remoteIP + ":" + port);
                 ctx.channel().close();
@@ -104,8 +109,10 @@ public class ClientChannelHandler extends BaseChannelHandler {
             e.printStackTrace();
 //            throw e;
         } finally {
+            buf.clear();
             buf.release();
         }
+        MessageManager.getInstance().receiveMessage(byteBuffer, node);
     }
 
     @Override

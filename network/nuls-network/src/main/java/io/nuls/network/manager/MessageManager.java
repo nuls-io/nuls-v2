@@ -24,7 +24,6 @@
  */
 package io.nuls.network.manager;
 
-import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelFuture;
 import io.nuls.base.basic.NulsByteBuffer;
@@ -124,12 +123,12 @@ public class MessageManager extends BaseManager {
         return checksum == pChecksum;
     }
 
-    public void receiveMessage(ByteBuf buffer, Node node) throws NulsException {
+    public void receiveMessage(NulsByteBuffer byteBuffer, Node node) throws NulsException {
         //统一接收消息处理
         try {
-            byte[] bytes = new byte[buffer.readableBytes()];
-            buffer.readBytes(bytes);
-            NulsByteBuffer byteBuffer = new NulsByteBuffer(bytes);
+            if (null == byteBuffer) {
+                return;
+            }
             MessageHeader header = new MessageHeader();
             int headerSize = header.size();
             byte[] payLoad = byteBuffer.getPayload();
@@ -166,8 +165,6 @@ public class MessageManager extends BaseManager {
         } catch (Exception e) {
             e.printStackTrace();
 //            throw new NulsException(NetworkErrorCode.DATA_ERROR, e);
-        } finally {
-            buffer.clear();
         }
     }
 
