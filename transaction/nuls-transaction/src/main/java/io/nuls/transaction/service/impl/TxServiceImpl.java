@@ -40,7 +40,6 @@ import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.data.BigIntegerUtils;
 import io.nuls.tools.data.StringUtils;
 import io.nuls.tools.exception.NulsException;
-import static io.nuls.transaction.utils.LoggerUtil.Log;
 import io.nuls.transaction.cache.PackablePool;
 import io.nuls.transaction.constant.TxConstant;
 import io.nuls.transaction.constant.TxErrorCode;
@@ -62,6 +61,8 @@ import io.nuls.transaction.utils.TxUtil;
 import java.io.IOException;
 import java.math.BigInteger;
 import java.util.*;
+
+import static io.nuls.transaction.utils.LoggerUtil.Log;
 
 /**
  * @author: Charlie
@@ -796,7 +797,7 @@ public class TxServiceImpl implements TxService {
                 throw new NulsException(TxErrorCode.CALLING_REMOTE_INTERFACE_FAILED);
             }
             chain.getLogger().debug("=================================================");
-            chain.getLogger().debug("获取打包交易开始,当前待打包队列交易数: {} ", packablePool.getPoolSize(chain));
+            chain.getLogger().info("获取打包交易开始,当前待打包队列交易数: {} ", packablePool.getPoolSize(chain));
             chain.getLogger().debug("交易最大容量: {} ", maxTxDataSize);
             chain.getLogger().debug("--------------while-----------");
             long loopDebug = NetworkCall.getCurrentTimeMillis();
@@ -829,7 +830,7 @@ public class TxServiceImpl implements TxService {
                 Transaction repeatTx = confirmedTxService.getConfirmedTransaction(chain, tx.getHash());
                 if (repeatTx != null) {
                     clearInvalidTx(chain, tx);
-                    chain.getLogger().debug("丢弃已确认过交易,txHash:{}, - type:{}, - time:{}",tx.getHash().getDigestHex(), tx.getType(), tx.getTime());
+                    chain.getLogger().info("丢弃已确认过交易,txHash:{}, - type:{}, - time:{}",tx.getHash().getDigestHex(), tx.getType(), tx.getTime());
                     continue;
                 }
                 String txHex = null;
@@ -838,7 +839,7 @@ public class TxServiceImpl implements TxService {
                 } catch (Exception e) {
                     clearInvalidTx(chain, tx);
                     chain.getLogger().warn(e.getMessage(), e);
-                    chain.getLogger().debug("丢弃获取hex出错交易,txHash:{}, - type:{}, - time:{}",tx.getHash().getDigestHex(), tx.getType(), tx.getTime());
+                    chain.getLogger().info("丢弃获取hex出错交易,txHash:{}, - type:{}, - time:{}",tx.getHash().getDigestHex(), tx.getType(), tx.getTime());
                     continue;
                 }
                 long debugeVerifyStart = NetworkCall.getCurrentTimeMillis();
@@ -847,7 +848,7 @@ public class TxServiceImpl implements TxService {
                 //交易业务验证tx
                 if (!transactionManager.verify(chain, tx)) {
                     clearInvalidTx(chain, tx);
-                    chain.getLogger().debug("丢弃验证器未验证通过交易,txHash:{}, - type:{}, - time:{}",tx.getHash().getDigestHex(), tx.getType(), tx.getTime());
+                    chain.getLogger().info("丢弃验证器未验证通过交易,txHash:{}, - type:{}, - time:{}",tx.getHash().getDigestHex(), tx.getType(), tx.getTime());
                     continue;
                 }
                 long debugeVerifyCoinDataStart = NetworkCall.getCurrentTimeMillis();
@@ -857,7 +858,7 @@ public class TxServiceImpl implements TxService {
                 if (!verifyTxResult.success()) {
                     //-----debug 打印第一个coinfrom 的nonce
                     String nonce = HexUtil.encode(TxUtil.getCoinData(tx).getFrom().get(0).getNonce());
-                    chain.getLogger().debug("丢弃批量验证coinData未通过交易 coinData not success - code: {}, - reason:{}, - type:{}, - first coinFrom nonce:{} - txhash:{}",
+                    chain.getLogger().info("丢弃批量验证coinData未通过交易 coinData not success - code: {}, - reason:{}, - type:{}, - first coinFrom nonce:{} - txhash:{}",
                             verifyTxResult.getCode(),  verifyTxResult.getDesc(), tx.getType(), nonce, tx.getHash().getDigestHex());
                     continue;
                 }
@@ -940,7 +941,7 @@ public class TxServiceImpl implements TxService {
             throw new NulsException(e);
         }
 
-        Log.info("提供给共识的可打包交易packableTxs - Rs:");
+        Log.debug("提供给共识的可打包交易packableTxs - Rs:");
         chain.getLogger().debug("***");
         for(int i = 0; i < packableTxs.size();i++){
             chain.getLogger().debug(i + ": " + packableTxs.get(i));
@@ -1070,6 +1071,7 @@ public class TxServiceImpl implements TxService {
 
     @Override
     public VerifyTxResult batchVerify(Chain chain, List<String> txHexList) throws NulsException {
+        chain.getLogger().debug("");
         chain.getLogger().debug("开始区块交易批量验证......");
         VerifyTxResult verifyTxResult = new VerifyTxResult(VerifyTxResult.OTHER_EXCEPTION);
         List<Transaction> txList = new ArrayList<>();
@@ -1172,9 +1174,7 @@ public class TxServiceImpl implements TxService {
         chain.getLogger().debug("---------------------- rollbackTxLedger -----------------------\n");
         try {
             //通知账本回滚nonce
-            List<String> txHexList = new ArrayList<>();
-            txHexList.add(tx.hex());
-            LedgerCall.rollBackUnconfirmTx(chain, txHexList);
+            LedgerCall.rollBackUnconfirmTx(chain, tx.hex());
         } catch (NulsException e) {
             e.printStackTrace();
         } catch (Exception e) {

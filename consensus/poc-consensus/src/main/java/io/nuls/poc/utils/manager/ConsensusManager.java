@@ -405,6 +405,6 @@ public class ConsensusManager {
         链内交易手续费
         Processing fees for intra-chain transactions
         */
-        return new ChargeResultData(coinData.getFee(),chainId);
+        return new ChargeResultData(tx.getFee(),chainId);
     }
 }

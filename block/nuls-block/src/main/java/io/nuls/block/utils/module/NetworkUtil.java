@@ -268,7 +268,11 @@ public class NetworkUtil {
             }
             map.put("protocolCmds", cmds);
             boolean success = ResponseMessageProcessor.requestAndResponse(ModuleE.NW.abbr, "nw_protocolRegister", map).isSuccess();
-            commonLog.debug("get nw_protocolRegister " + success);
+            while (!success) {
+                commonLog.debug("get nw_protocolRegister " + success);
+                Thread.sleep(1000L);
+                success = ResponseMessageProcessor.requestAndResponse(ModuleE.NW.abbr, "nw_protocolRegister", map).isSuccess();
+            }
             return success;
         } catch (Exception e) {
             e.printStackTrace();

@@ -81,7 +81,7 @@ public class DBUtils {
         return filePath;
     }
 
-    private static String genAbsolutePath(String path) {
+    public static String genAbsolutePath(String path) {
         String[] paths = path.split("/|\\\\");
         URL resource = ClassLoader.getSystemClassLoader().getResource(".");
         String classPath = "";

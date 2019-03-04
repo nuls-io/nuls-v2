@@ -25,6 +25,7 @@
  */
 package io.nuls.ledger.config;
 
+import io.nuls.ledger.LedgerBootstrap;
 import io.nuls.ledger.model.ModuleConfig;
 import io.nuls.tools.data.StringUtils;
 import io.nuls.tools.log.Log;
@@ -67,7 +68,7 @@ public class AppConfig {
             moduleConfig.setDatabaseVersion(Integer.valueOf(databaseVersion));
 
             String language = ConfigManager.getValue("language");
-            I18nUtils.loadLanguage("languages", language);
+            I18nUtils.loadLanguage(LedgerBootstrap.class,"languages", language);
             I18nUtils.setLanguage(language);
 
 

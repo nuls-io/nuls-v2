@@ -37,11 +37,10 @@ import io.nuls.tools.constant.ErrorCode;
 public interface NetworkErrorCode {
     ErrorCode SUCCESS = ErrorCode.init("10000");
 
-    ErrorCode FAIL = ErrorCode.init("50000");
+    ErrorCode FAIL = ErrorCode.init("10001");
 
-    ErrorCode DATA_ERROR = ErrorCode.init("20002");
-    ErrorCode PARAMETER_ERROR = ErrorCode.init("20003");
-    ErrorCode PEER_NOT_EXIST = ErrorCode.init("20004");
+    ErrorCode DATA_ERROR = ErrorCode.init("10014");
+    ErrorCode PARAMETER_ERROR = ErrorCode.init("10012");
 
 
     ErrorCode NET_MESSAGE_ERROR = ErrorCode.init("40002");
@@ -50,8 +49,8 @@ public interface NetworkErrorCode {
 
 
     ErrorCode NET_BROADCAST_FAIL = ErrorCode.init("40011");
-    ErrorCode NET_NODE_DEAD = ErrorCode.init("40013");
-    ErrorCode NET_NODE_MISS_CHANNEL = ErrorCode.init("40014");
+    ErrorCode NET_NODE_DEAD = ErrorCode.init("40012");
+    ErrorCode NET_NODE_MISS_CHANNEL = ErrorCode.init("40013");
 
 
 }

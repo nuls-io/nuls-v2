@@ -182,7 +182,7 @@ public class CtxServiceImpl implements CtxService {
         }
         Transaction tx = ctx.getTx();
 
-        if(chain.getPackaging()) {
+        if(chain.getPackaging().get()) {
             //当节点是出块节点时, 才将交易放入待打包队列
             packablePool.add(chain, tx, false);
         }
@@ -191,13 +191,12 @@ public class CtxServiceImpl implements CtxService {
         //保存到h2数据库
         transactionH2Service.saveTxs(TxUtil.tx2PO(tx));
         //调账本记录未确认交易
-        List<String> txHexList = new ArrayList<>();
         try {
-            txHexList.add(tx.hex());
+            LedgerCall.commitUnconfirmedTx(chain, tx.hex());
         } catch (Exception e) {
             throw new NulsException(e);
         }
-        LedgerCall.commitUnconfirmedTx(chain, txHexList);
+
         //广播交易hash
         BroadcastCrossTxHashMessage ctxHashMessage = new BroadcastCrossTxHashMessage();
         ctxHashMessage.setCommand(TxCmd.NW_NEW_CROSS_HASH);
