@@ -272,7 +272,9 @@ public class MessageManager extends BaseManager {
             MessageHeader header = message.getHeader();
             BaseNulsData body = message.getMsgBody();
             header.setPayloadLength(body.size());
+            Log.debug("node={},isWritable={}", node.getId(),node.getChannel().isWritable());
             ChannelFuture future = node.getChannel().writeAndFlush(Unpooled.wrappedBuffer(message.serialize()));
+            Log.debug("==================writeAndFlush end");
             if (!asyn) {
                 future.await();
                 Log.debug("{}==================ChannelFuture1", TimeManager.currentTimeMillis());
@@ -306,6 +308,7 @@ public class MessageManager extends BaseManager {
                 continue;
             }
             try {
+                Log.debug("node={},isWritable={}", node.getId(),node.getChannel().isWritable());
                 ChannelFuture future = node.getChannel().writeAndFlush(Unpooled.wrappedBuffer(message));
                 Log.debug("==================writeAndFlush end");
                 if (!asyn) {
