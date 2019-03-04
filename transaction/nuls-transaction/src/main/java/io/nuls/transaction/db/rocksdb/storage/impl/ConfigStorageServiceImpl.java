@@ -26,16 +26,13 @@ package io.nuls.transaction.db.rocksdb.storage.impl;
 
 import io.nuls.db.model.Entry;
 import io.nuls.db.service.RocksDBService;
-import io.nuls.tools.basic.InitializingBean;
 import io.nuls.tools.core.annotation.Service;
 import io.nuls.tools.data.ByteUtils;
 import io.nuls.tools.data.ObjectUtils;
-import io.nuls.tools.exception.NulsException;
 import io.nuls.transaction.constant.TxConstant;
 import io.nuls.transaction.constant.TxDBConstant;
 import io.nuls.transaction.db.rocksdb.storage.ConfigStorageService;
 import io.nuls.transaction.model.bo.config.ConfigBean;
-import io.nuls.transaction.utils.DBUtil;
 
 import java.util.HashMap;
 import java.util.List;
@@ -51,15 +48,7 @@ import static io.nuls.transaction.utils.LoggerUtil.Log;
  * @date 2018/12/11
  * */
 @Service
-public class ConfigStorageServiceImpl implements ConfigStorageService, InitializingBean {
-
-    @Override
-    public void afterPropertiesSet() throws NulsException {
-        /**
-         * 一个节点共用，不区分chain
-         */
-        DBUtil.createTable(TxDBConstant.DB_MODULE_CONGIF);
-    }
+public class ConfigStorageServiceImpl implements ConfigStorageService {
 
     @Override
     public boolean save(ConfigBean bean, int chainID) throws Exception{

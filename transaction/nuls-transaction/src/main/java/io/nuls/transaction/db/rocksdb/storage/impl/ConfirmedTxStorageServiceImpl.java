@@ -7,7 +7,6 @@ import io.nuls.base.data.BaseNulsData;
 import io.nuls.base.data.NulsDigestData;
 import io.nuls.base.data.Transaction;
 import io.nuls.db.service.RocksDBService;
-import io.nuls.tools.basic.InitializingBean;
 import io.nuls.tools.basic.VarInt;
 import io.nuls.tools.core.annotation.Service;
 import io.nuls.tools.exception.NulsException;
@@ -30,11 +29,7 @@ import static io.nuls.transaction.utils.LoggerUtil.Log;
  * @date: 2018/11/13
  */
 @Service
-public class ConfirmedTxStorageServiceImpl implements ConfirmedTxStorageService, InitializingBean {
-
-    @Override
-    public void afterPropertiesSet() throws NulsException {
-    }
+public class ConfirmedTxStorageServiceImpl implements ConfirmedTxStorageService {
 
     @Override
     public boolean saveTx(int chainId, Transaction tx) {
