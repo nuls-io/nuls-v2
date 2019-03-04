@@ -25,7 +25,7 @@ public class ModuleStatusCmd extends BaseCmd {
             description = "notify module is ready")
     public Response listenerDependenciesReady(Map<String, Object> map){
         Module module = JSONUtils.map2pojo(map, Module.class);
-        log.debug("ModuleReadyListener :{}",module);
+        log.info("ModuleReadyListener :{}",module);
         rpcModule.listenerDependenciesReady(module);
         return success("ModuleReadyListener success");
     }
