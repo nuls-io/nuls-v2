@@ -33,7 +33,10 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 public class ConsensusModule extends RpcModule {
 
     public static void main(String[] args){
-        NulsRpcModuleBootstrap.run(ConsensusConstant.CONTEXT_PATH,new String[]{HostInfo.getLocalIP()+":8887/ws"});
+        if (args == null || args.length == 0) {
+            args = new String[]{HostInfo.getLocalIP() + ":8887/ws"};
+        }
+        NulsRpcModuleBootstrap.run("io.nuls",args);
     }
     /**
      * 初始化模块，比如初始化RockDB等，在此处初始化后，可在其他bean的afterPropertiesSet中使用
