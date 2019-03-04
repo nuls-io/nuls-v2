@@ -1,8 +1,10 @@
 package io.nuls.rpc.modulebootstrap;
 
-import io.nuls.rpc.cmd.BaseCmd;
 import io.nuls.rpc.model.ModuleE;
-import io.nuls.rpc.model.message.*;
+import io.nuls.rpc.model.message.Message;
+import io.nuls.rpc.model.message.MessageType;
+import io.nuls.rpc.model.message.MessageUtil;
+import io.nuls.rpc.model.message.Request;
 import io.nuls.rpc.netty.bootstrap.NettyServer;
 import io.nuls.rpc.netty.channel.ConnectData;
 import io.nuls.rpc.netty.channel.manager.ConnectManager;
@@ -60,12 +62,12 @@ public abstract class RpcModule implements InitializingBean {
      * 监听依赖的模块进入ready状态的通知
      * @param module
      */
-    public void listenerDependenciesReady(Module module) {
+    void listenerDependenciesReady(Module module) {
         try {
             if (dependencies.containsKey(module)) {
                 dependencies.put(module, Boolean.TRUE);
             }
-            canRunning();
+            tryRunModule();
             ConnectData connectData = ConnectManager.getConnectDataByRole(module.getName());
             connectData.addCloseEvent(() -> {
                 log.info("{}模块触发连接断开事件", module);
@@ -76,15 +78,15 @@ public abstract class RpcModule implements InitializingBean {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        log.info("ModuleReadyListener :{}", module);
+        log.debug("ModuleReadyListener :{}", module);
     }
 
     /**
      * 监听依赖当前模块的其他模块的注册
      * @param module
      */
-    public void followModule(Module module) {
-        log.info("registerModuleDependencies :{}", module);
+    void followModule(Module module) {
+        log.debug("registerModuleDependencies :{}", module);
         synchronized (this) {
             followerList.add(module);
         }
@@ -142,13 +144,17 @@ public abstract class RpcModule implements InitializingBean {
             }
             state = RpcModuleState.Ready;
             this.notifyFollowerReady();
-            canRunning();
+            tryRunModule();
         } catch (Exception e) {
             Log.error(moduleInfo().toString() + " initServer failed", e);
         }
     }
 
-    private synchronized void canRunning() {
+    /**
+     * 尝试启动模块
+     * 如果所有依赖准备就绪就触发onDependenciesReady
+     */
+    private synchronized void tryRunModule() {
         Boolean dependencieReady = dependencies.isEmpty();
         if(!dependencieReady){
             dependencieReady = dependencies.entrySet().stream().allMatch(d -> d.getValue());
@@ -158,16 +164,36 @@ public abstract class RpcModule implements InitializingBean {
         }
     }
 
-    public String getRole(){
+    protected String getRole(){
         return ROLE;
     };
 
-    private boolean isRunning(){
+    /**
+     * 模块是否已运行
+     * @return
+     */
+    protected boolean isRunning(){
         return state.getIndex() >= RpcModuleState.Running.getIndex();
     }
 
-    private boolean isReady(){
+    /**
+     * 模块是否已准备好
+     * @return
+     */
+    protected boolean isReady(){
         return state.getIndex() >= RpcModuleState.Ready.getIndex();
+    }
+
+    /**
+     * 获取依赖模块的准备状态
+     * @param module
+     * @return true 已准备好
+     */
+    protected  boolean isDependencieReady(Module module){
+        if(!dependencies.containsKey(module)){
+            throw new IllegalArgumentException("can not found "+module.getName());
+        }
+        return dependencies.get(module);
     }
 
     /**
