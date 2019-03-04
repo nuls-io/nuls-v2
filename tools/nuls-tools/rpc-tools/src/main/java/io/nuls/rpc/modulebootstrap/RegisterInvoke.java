@@ -45,6 +45,7 @@ public class RegisterInvoke extends BaseInvoke {
                     Message message = MessageUtil.basicMessage(MessageType.Request);
                     message.setMessageData(request);
                     try {
+                        Log.info("follow module:{}:{}",entry.getKey(),entry.getValue());
                         Channel channel = ConnectManager.getConnectByUrl("ws://"+entry.getValue().get("IP") + ":" +entry.getValue().get("Port")+"/ws");
                         ConnectManager.sendMessage(channel, JSONUtils.obj2json(message));
                     } catch (Exception e) {

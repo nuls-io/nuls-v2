@@ -86,7 +86,7 @@ public abstract class RpcModule implements InitializingBean {
      * @param module
      */
     void followModule(Module module) {
-        log.debug("registerModuleDependencies :{}", module);
+        log.info("registerModuleDependencies :{}", module);
         synchronized (this) {
             followerList.add(module);
         }

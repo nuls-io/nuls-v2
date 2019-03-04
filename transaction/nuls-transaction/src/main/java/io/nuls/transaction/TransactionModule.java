@@ -94,7 +94,7 @@ public class TransactionModule extends RpcModule {
         try {
             //启动链
             SpringLiteContext.getBean(ChainManager.class).runChain();
-            Log.info("Transaction READY");
+            Log.info("Transaction Ready...");
             return true;
         } catch (Exception e) {
             Log.error("Transaction doStart error!");
@@ -106,6 +106,7 @@ public class TransactionModule extends RpcModule {
     @Override
     public RpcModuleState onDependenciesReady() {
         subscriptionBlockHeight();
+        Log.info("Transaction Running...");
         return RpcModuleState.Running;
     }
 
@@ -118,8 +119,9 @@ public class TransactionModule extends RpcModule {
     public Module[] getDependencies() {
         return new Module[]{
                 new Module(ModuleE.NW.abbr, "1.0"),
-                new Module(ModuleE.LG.abbr, "1.0"),
-                new Module(ModuleE.BL.abbr, "1.0")};
+                new Module(ModuleE.LG.abbr, "1.0")
+//                ,new Module(ModuleE.BL.abbr, "1.0")
+        };
     }
 
     @Override
