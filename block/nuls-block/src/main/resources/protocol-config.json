@@ -30,6 +30,14 @@
     ],
     "validMessages": [
       {
+        "name": "io.nuls.block.message.BlockMessage",
+        "handlers": [
+          {
+            "name": "io.nuls.block.rpc.BlockHandler#processV1"
+          }
+        ]
+      },
+      {
         "name": "io.nuls.block.test.TestMessage1",
         "handlers": [
           {

@@ -20,25 +20,21 @@
 
 package io.nuls.block.rpc;
 
-import io.netty.util.internal.StringUtil;
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.block.cache.CacheHandler;
 import io.nuls.block.constant.BlockErrorCode;
 import io.nuls.block.manager.ContextManager;
 import io.nuls.block.message.BlockMessage;
 import io.nuls.block.model.ChainContext;
-import io.nuls.block.utils.module.ProtocolUtil;
 import io.nuls.rpc.cmd.BaseCmd;
 import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.model.CmdAnnotation;
 import io.nuls.rpc.model.message.Response;
 import io.nuls.tools.core.annotation.Component;
-import io.nuls.tools.core.ioc.SpringLiteContext;
 import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.data.StringUtils;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.log.logback.NulsLogger;
-import io.nuls.tools.protocol.MessageHandler;
 import io.nuls.tools.protocol.Protocol;
 import io.nuls.tools.protocol.ProtocolValidator;
 
@@ -57,7 +53,6 @@ import static io.nuls.block.constant.CommandConstant.BLOCK_MESSAGE;
  * @date 18-11-14 下午4:23
  */
 @Component
-@MessageHandler(message = BlockMessage.class)
 public class BlockHandler extends BaseCmd {
 
     @CmdAnnotation(cmd = BLOCK_MESSAGE, version = 1.0, scope = Constants.PUBLIC, description = "")
@@ -69,7 +64,8 @@ public class BlockHandler extends BaseCmd {
         Protocol protocol = context.getProtocolsMap().get(version);
         String method = ProtocolValidator.meaasgeValidateV1(BlockMessage.class, this.getClass(), protocol);
         if (StringUtils.isBlank(method)) {
-            messageLog.error("The protocol or protocol handler is not available in the current version!");
+            messageLog.error("The message or message handler is not available in the current version!");
+            return failed("The message or message handler is not available in the current version!");
         }
         Response response = null;
         try {
@@ -82,28 +78,6 @@ public class BlockHandler extends BaseCmd {
     }
 
     public Response processV1(Map map) {
-        int chainId = Integer.parseInt(map.get("chainId").toString());
-        NulsLogger messageLog = ContextManager.getContext(chainId).getMessageLog();
-        String nodeId = map.get("nodeId").toString();
-        BlockMessage message = new BlockMessage();
-        try {
-            byte[] decode = HexUtil.decode(map.get("messageBody").toString());
-            message.parse(new NulsByteBuffer(decode));
-        } catch (NulsException e) {
-            e.printStackTrace();
-            messageLog.error(e);
-            return failed(BlockErrorCode.PARAMETER_ERROR);
-        }
-        if (message.getBlock() == null) {
-            messageLog.debug("recieve null BlockMessage from node-" + nodeId + ", chainId:" + chainId + ", hash:" + message.getRequestHash());
-        } else {
-            messageLog.debug("recieve BlockMessage from node-" + nodeId + ", chainId:" + chainId + ", hash:" + message.getRequestHash());
-        }
-        CacheHandler.receiveBlock(chainId, message);
-        return success();
-    }
-
-    public Response processV2(Map map) {
         int chainId = Integer.parseInt(map.get("chainId").toString());
         NulsLogger messageLog = ContextManager.getContext(chainId).getMessageLog();
         String nodeId = map.get("nodeId").toString();
