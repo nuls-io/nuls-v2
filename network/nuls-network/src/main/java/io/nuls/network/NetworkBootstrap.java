@@ -33,6 +33,7 @@ import io.nuls.network.manager.*;
 import io.nuls.network.storage.InitDB;
 import io.nuls.network.storage.impl.DbServiceImpl;
 import io.nuls.rpc.info.HostInfo;
+import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.modulebootstrap.Module;
 import io.nuls.rpc.modulebootstrap.NulsRpcModuleBootstrap;
 import io.nuls.rpc.modulebootstrap.RpcModule;
@@ -168,12 +169,12 @@ public class NetworkBootstrap extends RpcModule {
 
     @Override
     public Module[] getDependencies() {
-        return new Module[0];
+        return new Module[]{new Module(ModuleE.BL.abbr, "1.0")};
     }
 
     @Override
     public Module moduleInfo() {
-        return null;
+        return new Module(ModuleE.NW.abbr, "1.0");
     }
 
     @Override
