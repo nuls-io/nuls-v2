@@ -79,7 +79,7 @@ public class ChainBootstrap {
             initCfg();
             /* Configuration to Map */
             initWithFile();
-            /*db info*/
+            /*storage info*/
             initWithDatabase();
             /* 把Nuls2.0主网信息存入数据库中 (Store the Nuls2.0 main network information into the database) */
             initMainChain();

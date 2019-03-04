@@ -48,7 +48,7 @@ public class Entity {
     public static final String MAGIC = "FQueuefs";
     public static int MESSAGE_START_POSITION = 20;
     private static final String DB_FILE_PREFIX = "fq_";
-    private static final String DB_FILE_SUFFIX = ".db";
+    private static final String DB_FILE_SUFFIX = ".storage";
     private File file;
     private RandomAccessFile raFile;
     private FileChannel fc;

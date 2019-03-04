@@ -93,9 +93,9 @@
     </logger>
 
     <!--    日志异步到数据库
-        <appender name="DB" class="ch.qos.logback.classic.db.DBAppender">
+        <appender name="DB" class="ch.qos.logback.classic.storage.DBAppender">
         &lt;!&ndash;日志异步到数据库 &ndash;&gt;
-        <connectionSource class="ch.qos.logback.core.db.DriverManagerConnectionSource">
+        <connectionSource class="ch.qos.logback.core.storage.DriverManagerConnectionSource">
         &lt;!&ndash;连接池 &ndash;&gt;
         <dataSource class="com.mchange.v2.c3p0.ComboPooledDataSource">
         <driverClass>com.mysql.jdbc.Driver</driverClass>

@@ -25,7 +25,7 @@ public class CmConstants {
     /**
      * database data path
      */
-    public static final String DB = "db";
+    public static final String DB = "storage";
     public static final String DB_DATA_PATH = "rocksdb.datapath";
 
     public static final ErrorCode DB_TABLE_CREATE_ERROR = ErrorCode.init("20011");

@@ -90,7 +90,7 @@ public class MessageRpc extends BaseCmd {
             }
             /*
              * 进行持久化存库
-             * save info to db
+             * save info to storage
              */
             RoleProtocolPo roleProtocolPo = new RoleProtocolPo();
             roleProtocolPo.setRole(role);

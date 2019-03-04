@@ -25,7 +25,7 @@
 package io.nuls.transaction.manager;
 
 import io.nuls.tools.core.ioc.SpringLiteContext;
-import io.nuls.transaction.db.rocksdb.storage.ConfigStorageService;
+import io.nuls.transaction.storage.rocksdb.ConfigStorageService;
 import io.nuls.transaction.model.bo.config.ConfigBean;
 import io.nuls.transaction.model.bo.config.ConfigItem;
 
