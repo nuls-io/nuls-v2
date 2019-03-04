@@ -24,13 +24,7 @@
  */
 package io.nuls.network.manager.threads;
 
-import io.nuls.network.NetworkBootstrap;
-import io.nuls.tools.thread.ThreadUtils;
-import io.nuls.tools.thread.commom.NulsThreadFactory;
 import org.junit.Test;
-
-import java.util.concurrent.ScheduledThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
 
 /**
  * @author lan
