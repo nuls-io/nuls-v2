@@ -31,7 +31,7 @@ import static io.nuls.protocol.constant.Constant.PROTOCOL_CONFIG;
 public class ProtocolModule extends RpcModule {
 
     public static void main(String[] args) {
-        NulsRpcModuleBootstrap.run("io.nuls.protocol", new String[]{HostInfo.getLocalIP() + ":8887/ws"});
+        NulsRpcModuleBootstrap.run("io.nuls", new String[]{HostInfo.getLocalIP() + ":8887/ws"});
     }
 
     /**
