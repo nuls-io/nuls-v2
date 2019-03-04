@@ -120,7 +120,6 @@ public class ServerChannelHandler extends BaseChannelHandler {
             throw e;
         } finally {
             buf.clear();
-            buf.release();
         }
         MessageManager.getInstance().receiveMessage(byteBuffer, node);
     }
