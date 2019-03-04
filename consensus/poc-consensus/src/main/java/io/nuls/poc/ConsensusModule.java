@@ -33,6 +33,11 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 public class ConsensusModule extends RpcModule {
 
     public static void main(String[] args){
+        try {
+            initDB();
+        }catch (Exception e){
+            e.printStackTrace();
+        }
         NulsRpcModuleBootstrap.run(ConsensusConstant.CONTEXT_PATH,new String[]{HostInfo.getLocalIP()+":8887/ws"});
     }
     /**
@@ -44,7 +49,6 @@ public class ConsensusModule extends RpcModule {
     public void init() {
         try {
             initSys();
-            initDB();
             initLanguage();
         }catch (Exception e){
             Log.error(e);
