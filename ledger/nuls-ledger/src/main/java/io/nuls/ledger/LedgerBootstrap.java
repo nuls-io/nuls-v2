@@ -38,9 +38,6 @@ import io.nuls.rpc.modulebootstrap.Module;
 import io.nuls.rpc.modulebootstrap.NulsRpcModuleBootstrap;
 import io.nuls.rpc.modulebootstrap.RpcModule;
 import io.nuls.rpc.modulebootstrap.RpcModuleState;
-import io.nuls.rpc.netty.bootstrap.NettyServer;
-import io.nuls.rpc.netty.channel.manager.ConnectManager;
-import io.nuls.rpc.netty.processor.ResponseMessageProcessor;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.core.ioc.SpringLiteContext;
 
@@ -59,30 +56,6 @@ public class LedgerBootstrap extends RpcModule {
         }
         NulsRpcModuleBootstrap.run("io.nuls.ledger", args);
     }
-
-
-    /**
-     * 共识模块启动WebSocket服务，用于其他模块连接共识模块与账本模块RPC交互
-     */
-    private static void initRpcServer() throws Exception {
-            String packageC = "io.nuls.ledger.rpc.cmd";
-            NettyServer.getInstance(ModuleE.LG)
-                    .moduleRoles(new String[]{"1.0"})
-                    .moduleVersion("1.0")
-                    .dependencies(ModuleE.KE.abbr, "1.1")
-                    .scanPackage(packageC);
-            String kernelUrl = "ws://" + HostInfo.getLocalIP() + ":8887/ws";
-            /*
-             * 链接到指定地址
-             * */
-            ConnectManager.getConnectByUrl(kernelUrl);
-            /*
-             * 和指定地址同步
-             * */
-            ResponseMessageProcessor.syncKernel(kernelUrl);
-
-    }
-
     /**
      * 进行数据的校验处理,比如异常关闭模块造成的数据不一致。
      * 确认的高度是x,则进行x高度的数据恢复处理
@@ -133,12 +106,6 @@ public class LedgerBootstrap extends RpcModule {
     @Override
     public boolean doStart() {
         //springLite容器初始化AppInitializing
-        try {
-            initRpcServer();
-        } catch (Exception e) {
-            logger.error("ledger Bootstrap failed", e);
-            System.exit(-1);
-        }
         return true;
     }
 
