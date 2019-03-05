@@ -84,7 +84,7 @@ public class BlockModule extends RpcModule {
             RocksDBService.createTable(PROTOCOL_CONFIG);
             //加载配置
             ConfigLoader.load();
-            while (!isDependencieReady(new Module(ModuleE.TX.abbr, "1.0"))) {
+            while (!isDependencieReady(new Module(ModuleE.TX.abbr, "1.0")) && !isDependencieReady(new Module(ModuleE.PU.abbr, "1.0"))) {
                 Thread.sleep(1000);
             }
             List<Integer> chainIds = ContextManager.chainIds;
