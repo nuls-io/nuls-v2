@@ -1,5 +1,6 @@
 package io.nuls.api.task;
 
+import io.nuls.api.model.po.db.BlockHeaderInfo;
 import io.nuls.api.model.po.db.SyncInfo;
 import io.nuls.api.service.SyncService;
 import io.nuls.tools.core.ioc.SpringLiteContext;
@@ -35,7 +36,7 @@ public class SyncBlockTask implements Runnable {
     }
 
     private boolean syncBlock() {
-
+        BlockHeaderInfo localBestBlockHeader = syncService.getBestBlockHeader(chainId);
         return false;
     }
 }
