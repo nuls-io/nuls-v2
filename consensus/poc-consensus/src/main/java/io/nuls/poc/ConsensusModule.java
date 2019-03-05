@@ -10,7 +10,6 @@ import io.nuls.rpc.modulebootstrap.Module;
 import io.nuls.rpc.modulebootstrap.NulsRpcModuleBootstrap;
 import io.nuls.rpc.modulebootstrap.RpcModule;
 import io.nuls.rpc.modulebootstrap.RpcModuleState;
-import io.nuls.rpc.netty.channel.manager.ConnectManager;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.core.ioc.SpringLiteContext;
 import io.nuls.tools.log.Log;
@@ -36,7 +35,7 @@ public class ConsensusModule extends RpcModule {
         if (args == null || args.length == 0) {
             args = new String[]{HostInfo.getLocalIP() + ":8887/ws"};
         }
-        NulsRpcModuleBootstrap.run("io.nuls",args);
+        NulsRpcModuleBootstrap.run(ConsensusConstant.BOOT_PATH,args);
     }
     /**
      * 初始化模块，比如初始化RockDB等，在此处初始化后，可在其他bean的afterPropertiesSet中使用
@@ -66,7 +65,7 @@ public class ConsensusModule extends RpcModule {
 
     @Override
     public Module[] getDependencies() {
-        return new Module[]{new Module(ModuleE.BL.abbr, "1.0"),new Module(ModuleE.TX.abbr, "1.0"),new Module(ModuleE.BL.abbr, "1.0")};
+        return new Module[]{new Module(ModuleE.BL.abbr, "1.0"),new Module(ModuleE.TX.abbr, "1.0")};
     }
 
     @Override
@@ -77,7 +76,7 @@ public class ConsensusModule extends RpcModule {
     @Override
     public boolean doStart() {
         try {
-            while (!ConnectManager.isReady()){
+            while (isDependencieReady()){
                 Log.debug("wait depend modules ready");
                 Thread.sleep(2000L);
             }

@@ -67,8 +67,8 @@ public class SpringLiteContext {
      *
      * @param packName 扫描的根路径,The root package of the scan.
      */
-    public static void init(final String packName) {
-        init(packName, new DefaultMethodInterceptor());
+    public static void init(final String... packName) {
+        init(new DefaultMethodInterceptor(),packName);
     }
 
     /**
@@ -79,9 +79,20 @@ public class SpringLiteContext {
      * @param interceptor 方法拦截器,Method interceptor
      */
     public static void init(final String packName, MethodInterceptor interceptor) {
+        init(interceptor,packName);
+    }
+
+    public static void init(MethodInterceptor interceptor,String... packName){
+        if(packName.length == 0){
+            throw new IllegalArgumentException("spring lite init package can't be null");
+        }
         SpringLiteContext.interceptor = interceptor;
-        List<Class> list = ScanUtil.scan(packName);
-        list.stream()
+        Set<Class> classes = new HashSet<>();
+        Log.info("spring lite scan package : {}", Arrays.toString(packName));
+        Arrays.stream(packName).forEach(pack->{
+            classes.addAll(ScanUtil.scan(pack));
+        });
+        classes.stream()
                 //通过Order注解控制类加载顺序
                 .sorted((b1, b2) -> getOrderByClass(b1) > getOrderByClass(b2) ? 1 : -1)
                 .forEach((Class clazz) -> checkBeanClass(clazz));
