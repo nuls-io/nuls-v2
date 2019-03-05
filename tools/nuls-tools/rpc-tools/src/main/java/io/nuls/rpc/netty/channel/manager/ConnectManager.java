@@ -546,7 +546,7 @@ public class ConnectManager {
      * Can this module start the service? (Can the dependent modules be connected?)
      */
     public static boolean isReady() {
-        return startService||true;
+        return startService;
     }
 
     /**

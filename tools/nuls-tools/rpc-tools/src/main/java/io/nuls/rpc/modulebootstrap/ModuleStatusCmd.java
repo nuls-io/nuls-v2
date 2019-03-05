@@ -3,6 +3,7 @@ package io.nuls.rpc.modulebootstrap;
 import io.nuls.rpc.cmd.BaseCmd;
 import io.nuls.rpc.model.CmdAnnotation;
 import io.nuls.rpc.model.message.Response;
+import io.nuls.rpc.netty.channel.manager.ConnectManager;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.parse.JSONUtils;
@@ -36,6 +37,14 @@ public class ModuleStatusCmd extends BaseCmd {
         Module module = JSONUtils.map2pojo(param, Module.class);
         rpcModule.followModule(module);
         return success("ModuleDependenciesRegisterListener success");
+    }
+
+    @CmdAnnotation(cmd = "connectReady", version = 1.0, minEvent = 1,
+            description = "check module rpc is ready")
+    public Response connectReady(Map<String, Object> param) {
+//        Module module = JSONUtils.map2pojo(param, Module.class);
+//        rpcModule.followModule(module);
+        return success(Boolean.valueOf(ConnectManager.isReady()));
     }
 
 }
