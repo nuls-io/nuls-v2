@@ -41,7 +41,7 @@ public class ProtocolModule extends RpcModule {
      */
     @Override
     public Module[] getDependencies() {
-        return new Module[]{new Module(ModuleE.BL.abbr, "1.0")};
+        return new Module[]{};
     }
 
     /**

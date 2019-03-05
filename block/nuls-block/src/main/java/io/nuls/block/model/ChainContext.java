@@ -146,14 +146,10 @@ public class ChainContext {
         LoggerUtil.init(chainId, parameters.getLogLevel());
         systemTransactionType = TransactionUtil.getSystemTypes(chainId);
         this.setStatus(RunningStatusEnum.INITIALIZING);
-        //服务初始化
-        BlockService service = SpringLiteContext.getBean(BlockService.class);
-        service.init(chainId);
         //各类缓存初始化
         SmallBlockCacher.init(chainId);
         CacheHandler.init(chainId);
         ChainManager.init(chainId);
-        ProtocolUtil.subscribe(chainId);
     }
 
     public void start() {

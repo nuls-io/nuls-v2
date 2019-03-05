@@ -1,9 +1,12 @@
 package io.nuls.block;
 
+import io.nuls.block.manager.ContextManager;
+import io.nuls.block.service.BlockService;
 import io.nuls.block.thread.BlockSynchronizer;
 import io.nuls.block.thread.monitor.*;
 import io.nuls.block.utils.ConfigLoader;
 import io.nuls.block.utils.module.NetworkUtil;
+import io.nuls.block.utils.module.ProtocolUtil;
 import io.nuls.db.service.RocksDBService;
 import io.nuls.rpc.info.HostInfo;
 import io.nuls.rpc.model.ModuleE;
@@ -12,10 +15,12 @@ import io.nuls.rpc.modulebootstrap.NulsRpcModuleBootstrap;
 import io.nuls.rpc.modulebootstrap.RpcModule;
 import io.nuls.rpc.modulebootstrap.RpcModuleState;
 import io.nuls.tools.core.annotation.Component;
+import io.nuls.tools.core.ioc.SpringLiteContext;
 import io.nuls.tools.log.Log;
 import io.nuls.tools.thread.ThreadUtils;
 import io.nuls.tools.thread.commom.NulsThreadFactory;
 
+import java.util.List;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
@@ -76,8 +81,21 @@ public class BlockModule extends RpcModule {
             RocksDBService.createTable(CHAIN_LATEST_HEIGHT);
             RocksDBService.createTable(CHAIN_PARAMETERS);
             RocksDBService.createTable(PROTOCOL_CONFIG);
+            //加载配置
+            ConfigLoader.load();
+            while (!isDependencieReady(new Module(ModuleE.TX.abbr, "1.0"))) {
+                Thread.sleep(1000);
+            }
+            List<Integer> chainIds = ContextManager.chainIds;
+            BlockService service = SpringLiteContext.getBean(BlockService.class);
+            for (Integer chainId : chainIds) {
+                //服务初始化
+                service.init(chainId);
+            }
         } catch (Exception e) {
             e.printStackTrace();
+            Log.error("block module doStart error!");
+            return false;
         }
         Log.info("block module ready");
         return true;
@@ -91,13 +109,10 @@ public class BlockModule extends RpcModule {
     public RpcModuleState onDependenciesReady() {
         Log.info("block 依赖准备就绪");
         NetworkUtil.register();
-        //加载配置
-        try {
-            ConfigLoader.load();
-        } catch (Exception e) {
-            e.printStackTrace();
+        List<Integer> chainIds = ContextManager.chainIds;
+        for (Integer chainId : chainIds) {
+            ProtocolUtil.subscribe(chainId);
         }
-
         //开启区块同步线程
         ThreadUtils.createAndRunThread("block-synchronizer", BlockSynchronizer.getInstance());
         //开启分叉链处理线程
