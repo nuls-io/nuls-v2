@@ -11,6 +11,7 @@ import io.nuls.tools.parse.SerializeUtils;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import java.math.BigInteger;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -149,6 +150,14 @@ public class AgentTest {
         params.put("chainId",1);
         params.put("agentHash","0020fef3f394953c601f6abe82f223d5c5673d3b4d7461e575f663954a7c4e055317");
         Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.CS.abbr, "cs_getAgentStatus", params);
+        System.out.println(cmdResp.getResponseData());
+    }
+
+    @Test
+    public void testBigInteger()throws Exception{
+        Map<String,Object>params = new HashMap<>();
+        params.put("chainId",new BigInteger("123456778686868678686867"));
+        Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.CS.abbr, "cs_testBigInteger", params);
         System.out.println(cmdResp.getResponseData());
     }
 

@@ -42,7 +42,7 @@ public class BlockModule extends RpcModule {
      */
     @Override
     public Module[] getDependencies() {
-        return new Module[]{new Module(ModuleE.TX.abbr, "1.0")};
+        return new Module[]{new Module(ModuleE.TX.abbr, "1.0"),new Module(ModuleE.NW.abbr, "1.0"),new Module(ModuleE.PU.abbr, "1.0"),new Module(ModuleE.CS.abbr, "1.0")};
     }
 
     /**
@@ -79,7 +79,7 @@ public class BlockModule extends RpcModule {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        Log.info("module ready");
+        Log.info("block module ready");
         return true;
     }
 
