@@ -234,7 +234,7 @@ public class TxUtil {
         chain.getLogger().debug("txHash: {}", tx.getHash().getDigestHex());
         chain.getLogger().debug("time: {}",  DateUtils.timeStamp2DateStr(tx.getTime()));
         chain.getLogger().debug("size: {}B,  -{}KB, -{}MB",
-                String.valueOf(tx.getSize()/1024), String.valueOf(tx.getSize()/1024), String.valueOf(tx.getSize()/1024/1024));
+                String.valueOf(tx.getSize()), String.valueOf(tx.getSize()/1024), String.valueOf(tx.getSize()/1024/1024));
 
         CoinData coinData = null;
         try {
