@@ -43,7 +43,8 @@ public class NulsRpcModuleBootstrap {
         while(true){
             try {
                 String cmd = is_reader.readLine();
-                System.out.println(cmd);
+//                System.out.println(cmd);
+                if(cmd == null)break;
                 switch (cmd){
                     case "f":
                         System.out.println("模块的追随者：");

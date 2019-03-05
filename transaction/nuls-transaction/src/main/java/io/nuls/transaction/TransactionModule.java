@@ -113,7 +113,7 @@ public class TransactionModule extends RpcModule {
 
     @Override
     public RpcModuleState onDependenciesLoss(Module dependenciesModule) {
-        return null;
+        return RpcModuleState.Ready;
     }
 
     @Override
