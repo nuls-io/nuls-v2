@@ -33,8 +33,11 @@ import io.nuls.network.model.dto.ProtocolRoleHandler;
 import io.nuls.network.model.message.base.BaseMessage;
 import io.nuls.network.model.message.base.MessageHeader;
 import io.nuls.network.utils.LoggerUtil;
-import io.nuls.rpc.model.message.Response;
+import io.nuls.rpc.info.Constants;
+import io.nuls.rpc.model.message.MessageUtil;
+import io.nuls.rpc.model.message.Request;
 import io.nuls.rpc.netty.processor.ResponseMessageProcessor;
+import io.nuls.rpc.netty.processor.container.ResponseContainer;
 import io.nuls.tools.crypto.HexUtil;
 
 import java.util.Collection;
@@ -95,9 +98,10 @@ public class OtherModuleMessageHandler extends BaseMessageHandler {
             for (ProtocolRoleHandler protocolRoleHandler : protocolRoleHandlers) {
                 try {
                     Log.debug("request：{}=={}", protocolRoleHandler.getRole(), protocolRoleHandler.getHandler());
-                    Response response = ResponseMessageProcessor.requestAndResponse(protocolRoleHandler.getRole(), protocolRoleHandler.getHandler(), paramMap, 1);
-                    Log.debug("response：" + response);
-                    LoggerUtil.modulesMsgLogs(protocolRoleHandler.getRole(), header.getCommandStr(), node, payLoadBody, response.toString());
+                    Request request = MessageUtil.newRequest( protocolRoleHandler.getHandler(), paramMap, Constants.BOOLEAN_FALSE, Constants.ZERO, Constants.ZERO);
+                    ResponseContainer responseContainer =ResponseMessageProcessor.sendRequest(protocolRoleHandler.getRole(), request);
+                    Log.debug("responseContainer：" + responseContainer.getMessageId());
+                    LoggerUtil.modulesMsgLogs(protocolRoleHandler.getRole(), header.getCommandStr(), node, payLoadBody, responseContainer.getMessageId());
                 } catch (Exception e) {
                     e.printStackTrace();
                 }

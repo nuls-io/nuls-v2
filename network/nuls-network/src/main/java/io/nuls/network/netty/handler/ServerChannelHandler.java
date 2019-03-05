@@ -94,7 +94,7 @@ public class ServerChannelHandler extends BaseChannelHandler {
     }
 
     @Override
-    public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
+    public void channelRead0(ChannelHandlerContext ctx, Object msg) throws Exception {
         SocketChannel channel = (SocketChannel) ctx.channel();
         ByteBuf buf = (ByteBuf) msg;
         String remoteIP = channel.remoteAddress().getHostString();
