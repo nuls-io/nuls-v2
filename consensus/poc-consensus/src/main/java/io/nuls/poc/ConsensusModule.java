@@ -36,7 +36,7 @@ public class ConsensusModule extends RpcModule {
         if (args == null || args.length == 0) {
             args = new String[]{HostInfo.getLocalIP() + ":8887/ws"};
         }
-        NulsRpcModuleBootstrap.run("io.nuls",args);
+        NulsRpcModuleBootstrap.run(ConsensusConstant.BOOT_PATH,args);
     }
     /**
      * 初始化模块，比如初始化RockDB等，在此处初始化后，可在其他bean的afterPropertiesSet中使用
@@ -66,7 +66,7 @@ public class ConsensusModule extends RpcModule {
 
     @Override
     public Module[] getDependencies() {
-        return new Module[]{new Module(ModuleE.BL.abbr, "1.0"),new Module(ModuleE.TX.abbr, "1.0"),new Module(ModuleE.BL.abbr, "1.0")};
+        return new Module[]{new Module(ModuleE.BL.abbr, "1.0"),new Module(ModuleE.TX.abbr, "1.0")};
     }
 
     @Override
