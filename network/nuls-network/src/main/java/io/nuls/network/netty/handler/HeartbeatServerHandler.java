@@ -26,12 +26,10 @@
 package io.nuls.network.netty.handler;
 
 import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.handler.timeout.IdleState;
 import io.netty.handler.timeout.IdleStateEvent;
-import io.nuls.network.manager.ConnectionManager;
-import io.nuls.network.manager.handler.base.BaseChannelHandler;
-import io.nuls.network.model.Node;
 import io.nuls.network.utils.IpUtil;
 
 import static io.nuls.network.utils.LoggerUtil.Log;
@@ -41,7 +39,7 @@ import static io.nuls.network.utils.LoggerUtil.Log;
  * @desription:
  * @author: PierreLuo
  */
-public class HeartbeatServerHandler extends BaseChannelHandler {
+public class HeartbeatServerHandler extends ChannelInboundHandlerAdapter {
 
     @Override
     public void userEventTriggered(ChannelHandlerContext ctx, Object evt) throws Exception {
@@ -69,5 +67,4 @@ public class HeartbeatServerHandler extends BaseChannelHandler {
             super.userEventTriggered(ctx, evt);
         }
     }
-
 }

@@ -65,7 +65,9 @@ public class ConsensusModule extends RpcModule {
 
     @Override
     public Module[] getDependencies() {
-        return new Module[]{new Module(ModuleE.BL.abbr, "1.0"),new Module(ModuleE.TX.abbr, "1.0")};
+        return new Module[]{
+                new Module(ModuleE.BL.abbr, "1.0"),
+                new Module(ModuleE.TX.abbr, "1.0")};
     }
 
     @Override
@@ -76,7 +78,7 @@ public class ConsensusModule extends RpcModule {
     @Override
     public boolean doStart() {
         try {
-            while (isDependencieReady()){
+            while (!isDependencieReady()){
                 Log.debug("wait depend modules ready");
                 Thread.sleep(2000L);
             }
@@ -90,6 +92,7 @@ public class ConsensusModule extends RpcModule {
 
     @Override
     public RpcModuleState onDependenciesReady() {
+        Log.debug("cs onDependenciesReady");
         return RpcModuleState.Running;
     }
 

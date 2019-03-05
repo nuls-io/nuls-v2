@@ -13,10 +13,8 @@ import io.nuls.rpc.netty.processor.container.ResponseContainer;
 import io.nuls.tools.data.StringUtils;
 import io.nuls.tools.log.Log;
 import io.nuls.tools.parse.JSONUtils;
-import io.nuls.tools.thread.TimeService;
 
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
 
@@ -254,7 +252,7 @@ public class ResponseMessageProcessor {
      * @return messageId，用以取消订阅 / messageId, used to unsubscribe
      * @throws Exception JSON格式转换错误、连接失败 / JSON format conversion error, connection failure
      */
-    private static ResponseContainer sendRequest(String role, Request request) throws Exception {
+    public static ResponseContainer sendRequest(String role, Request request) throws Exception {
 
         Message message = MessageUtil.basicMessage(MessageType.Request);
         message.setMessageData(request);

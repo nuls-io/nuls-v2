@@ -184,6 +184,7 @@ public class NetworkBootstrap extends RpcModule {
 
     @Override
     public RpcModuleState onDependenciesReady() {
+        LoggerUtil.Log.info("network onDependenciesReady");
         try {
             ConnectionManager.getInstance().start();
             TaskManager.getInstance().start();

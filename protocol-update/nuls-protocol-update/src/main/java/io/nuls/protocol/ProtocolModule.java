@@ -41,7 +41,7 @@ public class ProtocolModule extends RpcModule {
      */
     @Override
     public Module[] getDependencies() {
-        return new Module[]{new Module(ModuleE.BL.abbr, "1.0")};
+        return new Module[]{};
     }
 
     /**
@@ -86,7 +86,7 @@ public class ProtocolModule extends RpcModule {
      */
     @Override
     public RpcModuleState onDependenciesReady() {
-        Log.info("protocol 依赖准备就绪");
+        Log.info("protocol onDependenciesReady");
         //加载配置
         try {
             ConfigLoader.load();

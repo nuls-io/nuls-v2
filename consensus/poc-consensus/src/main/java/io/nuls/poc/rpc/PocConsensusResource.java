@@ -13,6 +13,7 @@ import io.nuls.tools.basic.Result;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
 
+import java.math.BigInteger;
 import java.util.Map;
 
 /**
@@ -24,6 +25,19 @@ import java.util.Map;
 public class PocConsensusResource extends BaseCmd{
     @Autowired
     private ConsensusService service;
+
+    @CmdAnnotation(cmd = "cs_testBigInteger", version = 1.0, description = "create agent 1.0")
+    @Parameter(parameterName = "chainId", parameterType = "BigInteger")
+    public Response testBigInteger(Map<String,Object> params){
+        try {
+            BigInteger bigInteger = new BigInteger(params.get("chainId").toString());
+            System.out.println("---------------------------------------"+bigInteger.toString());
+            return success();
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+        return failed("error");
+    }
 
     /**
      * 创建节点

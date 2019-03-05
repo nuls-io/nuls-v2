@@ -81,17 +81,6 @@ public class ChainManager {
             Initialize linked database tables
             */
             initTable(chainId);
-            //注册账户相关交易
-            try {
-                while (true) {
-                    if (TransactionCmdCall.registerTx(chainId)) {
-                        break;
-                    }
-                    Thread.sleep(3000L);
-                }
-            } catch (Exception e) {
-                Log.error("Transaction registerTx error!");
-            }
             chainMap.put(chainId, chain);
         }
     }
