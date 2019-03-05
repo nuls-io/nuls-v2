@@ -285,7 +285,7 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
         return rs;
     }
 
-    public boolean rollbackTxs(Chain chain, Map<TxRegister, List<String>> moduleVerifyMap, String blockHeaderHex, boolean atomicity) {
+    private boolean rollbackTxs(Chain chain, Map<TxRegister, List<String>> moduleVerifyMap, String blockHeaderHex, boolean atomicity) {
         Map<TxRegister, List<String>> successed = new HashMap<>(TxConstant.INIT_CAPACITY_16);
         boolean result = true;
         for (Map.Entry<TxRegister, List<String>> entry : moduleVerifyMap.entrySet()) {

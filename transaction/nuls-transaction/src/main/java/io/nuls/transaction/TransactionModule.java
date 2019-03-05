@@ -83,6 +83,7 @@ public class TransactionModule extends RpcModule {
             //初始化国际资源文件语言
             initLanguage();
             initH2Table();
+            SpringLiteContext.getBean(ChainManager.class).runChain();
         } catch (Exception e) {
             Log.error("Transaction init error!");
             Log.error(e);
@@ -93,7 +94,7 @@ public class TransactionModule extends RpcModule {
     public boolean doStart() {
         try {
             //启动链
-            SpringLiteContext.getBean(ChainManager.class).runChain();
+//            SpringLiteContext.getBean(ChainManager.class).runChain();
             Log.info("Transaction Ready...");
             return true;
         } catch (Exception e) {
