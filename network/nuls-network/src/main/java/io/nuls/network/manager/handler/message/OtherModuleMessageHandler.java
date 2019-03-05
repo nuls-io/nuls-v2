@@ -32,9 +32,14 @@ import io.nuls.network.model.Node;
 import io.nuls.network.model.dto.ProtocolRoleHandler;
 import io.nuls.network.model.message.base.BaseMessage;
 import io.nuls.network.model.message.base.MessageHeader;
+import io.nuls.network.rpc.ResponseHandler;
 import io.nuls.network.utils.LoggerUtil;
-import io.nuls.rpc.model.message.Response;
+import io.nuls.rpc.info.Constants;
+import io.nuls.rpc.invoke.BaseInvoke;
+import io.nuls.rpc.model.message.MessageUtil;
+import io.nuls.rpc.model.message.Request;
 import io.nuls.rpc.netty.processor.ResponseMessageProcessor;
+import io.nuls.tools.core.ioc.SpringLiteContext;
 import io.nuls.tools.crypto.HexUtil;
 
 import java.util.Collection;
@@ -89,15 +94,16 @@ public class OtherModuleMessageHandler extends BaseMessageHandler {
         paramMap.put("messageBody", HexUtil.byteToHex(payLoadBody));
         Collection<ProtocolRoleHandler> protocolRoleHandlers = MessageHandlerFactory.getInstance().getProtocolRoleHandlerMap(header.getCommandStr());
         if (null == protocolRoleHandlers) {
-            Log.error("unknown mssages. cmd={},may be handle had not be registered to network.", header.getCommandStr());
+            Log.error("unknown mssages. cmd={},handler may be unRegistered to network.", header.getCommandStr());
         } else {
             Log.debug("==============================other module message protocolRoleHandlers-size:{}", protocolRoleHandlers.size());
             for (ProtocolRoleHandler protocolRoleHandler : protocolRoleHandlers) {
                 try {
                     Log.debug("request：{}=={}", protocolRoleHandler.getRole(), protocolRoleHandler.getHandler());
-                    Response response = ResponseMessageProcessor.requestAndResponse(protocolRoleHandler.getRole(), protocolRoleHandler.getHandler(), paramMap);
-                    Log.debug("response：" + response);
-                    LoggerUtil.modulesMsgLogs(protocolRoleHandler.getRole(),header.getCommandStr(),node,payLoadBody,response.toString());
+                    Request request = MessageUtil.newRequest(protocolRoleHandler.getHandler(), paramMap, Constants.BOOLEAN_FALSE, Constants.ZERO, Constants.ZERO);
+                    String  messageId = ResponseMessageProcessor.requestAndInvoke(protocolRoleHandler.getRole(),request,(BaseInvoke)SpringLiteContext.getBean(ResponseHandler.class));
+                    Log.debug("response：" + messageId);
+                    LoggerUtil.modulesMsgLogs(protocolRoleHandler.getRole(),header.getCommandStr(),node,payLoadBody,messageId);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
