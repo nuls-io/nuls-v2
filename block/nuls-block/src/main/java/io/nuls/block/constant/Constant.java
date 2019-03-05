@@ -129,4 +129,9 @@ public interface Constant {
      * 下载多个区块的超时时间
      */
     long BATCH_DOWNLOAD_TIMEOUNT = 30L;
+
+    /**
+     * 批量下载区块时,如果收到CompleteMessage时,区块还没有保存完,最多循环等待几个回合
+     */
+    long MAX_LOOP = 10;
 }

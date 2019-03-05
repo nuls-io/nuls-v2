@@ -66,6 +66,10 @@ public interface ConfigConstant {
      */
     String HEIGHT_RANGE = "heightRange";
     /**
+     * 批量下载区块时,如果收到CompleteMessage时,区块还没有保存完,每一个区块预留多长等待时间
+     */
+    String WAIT_INTERVAL = "waitInterval";
+    /**
      * 每次回滚区块最大值
      */
     String MAX_ROLLBACK = "maxRollback";
