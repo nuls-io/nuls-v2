@@ -92,6 +92,7 @@ public class ConsensusModule extends RpcModule {
 
     @Override
     public RpcModuleState onDependenciesReady() {
+        Log.debug("cs onDependenciesReady");
         return RpcModuleState.Running;
     }
 

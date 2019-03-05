@@ -96,7 +96,7 @@ public class AccountBootstrap extends RpcModule {
      */
     @Override
     public RpcModuleState onDependenciesReady() {
-        Log.info("account 依赖准备就绪");
+        Log.info("account onDependenciesReady");
         //启动链
         SpringLiteContext.getBean(ChainManager.class).runChain();
         Log.debug("START-SUCCESS");

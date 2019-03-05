@@ -106,6 +106,7 @@ public class TransactionModule extends RpcModule {
 
     @Override
     public RpcModuleState onDependenciesReady() {
+        Log.info("Transaction onDependenciesReady");
         subscriptionBlockHeight();
         Log.info("Transaction Running...");
         return RpcModuleState.Running;

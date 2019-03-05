@@ -82,6 +82,7 @@ public class ChainContext {
      * 该链的系统交易类型
      */
     @Getter
+    @Setter
     private List<Integer> systemTransactionType;
 
     /**
@@ -144,7 +145,6 @@ public class ChainContext {
     public void init() {
         lock = new StampedLock();
         LoggerUtil.init(chainId, parameters.getLogLevel());
-        systemTransactionType = TransactionUtil.getSystemTypes(chainId);
         this.setStatus(RunningStatusEnum.INITIALIZING);
         //各类缓存初始化
         SmallBlockCacher.init(chainId);

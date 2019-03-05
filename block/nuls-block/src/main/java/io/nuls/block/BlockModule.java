@@ -7,6 +7,7 @@ import io.nuls.block.thread.monitor.*;
 import io.nuls.block.utils.ConfigLoader;
 import io.nuls.block.utils.module.NetworkUtil;
 import io.nuls.block.utils.module.ProtocolUtil;
+import io.nuls.block.utils.module.TransactionUtil;
 import io.nuls.db.service.RocksDBService;
 import io.nuls.rpc.info.HostInfo;
 import io.nuls.rpc.model.ModuleE;
@@ -90,6 +91,7 @@ public class BlockModule extends RpcModule {
             BlockService service = SpringLiteContext.getBean(BlockService.class);
             for (Integer chainId : chainIds) {
                 //服务初始化
+                ContextManager.getContext(chainId).setSystemTransactionType(TransactionUtil.getSystemTypes(chainId));
                 service.init(chainId);
             }
         } catch (Exception e) {
@@ -107,7 +109,7 @@ public class BlockModule extends RpcModule {
      */
     @Override
     public RpcModuleState onDependenciesReady() {
-        Log.info("block 依赖准备就绪");
+        Log.info("block onDependenciesReady");
         NetworkUtil.register();
         List<Integer> chainIds = ContextManager.chainIds;
         for (Integer chainId : chainIds) {
