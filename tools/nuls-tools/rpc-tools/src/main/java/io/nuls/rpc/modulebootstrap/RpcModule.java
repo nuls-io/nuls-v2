@@ -209,6 +209,13 @@ public abstract class RpcModule implements InitializingBean {
     }
 
     /**
+     * 依赖模块都以进入Ready状态
+     * */
+    protected boolean isDependencieReady(){
+        return dependencies.entrySet().stream().allMatch(d -> d.getValue());
+    }
+
+    /**
      * 返回此模块的依赖模块
      *
      * @return

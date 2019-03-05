@@ -10,7 +10,6 @@ import io.nuls.rpc.modulebootstrap.Module;
 import io.nuls.rpc.modulebootstrap.NulsRpcModuleBootstrap;
 import io.nuls.rpc.modulebootstrap.RpcModule;
 import io.nuls.rpc.modulebootstrap.RpcModuleState;
-import io.nuls.rpc.netty.channel.manager.ConnectManager;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.core.ioc.SpringLiteContext;
 import io.nuls.tools.log.Log;
@@ -77,7 +76,7 @@ public class ConsensusModule extends RpcModule {
     @Override
     public boolean doStart() {
         try {
-            while (!ConnectManager.isReady()){
+            while (isDependencieReady()){
                 Log.debug("wait depend modules ready");
                 Thread.sleep(2000L);
             }
