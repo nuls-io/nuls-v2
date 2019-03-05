@@ -41,7 +41,7 @@ public abstract class RpcModule implements InitializingBean {
     /**
      * 模块运行状态
      */
-    private RpcModuleState state;
+    private RpcModuleState state = RpcModuleState.Start;
 
     /**
      * 依赖当前模块的其他模块列表
@@ -55,7 +55,12 @@ public abstract class RpcModule implements InitializingBean {
 
     @Override
     public final void afterPropertiesSet() throws NulsException {
-        init();
+        try{
+            init();
+        }catch (Exception e){
+            log.error("rpc module init fail",e);
+            throw new NulsException(e);
+        }
     }
 
     /**
@@ -70,7 +75,7 @@ public abstract class RpcModule implements InitializingBean {
             tryRunModule();
             ConnectData connectData = ConnectManager.getConnectDataByRole(module.getName());
             connectData.addCloseEvent(() -> {
-                log.info("{}模块触发连接断开事件", module);
+                log.warn("{}模块触发连接断开事件", module);
                 if (isRunning()) {
                     state = this.onDependenciesLoss(module);
                     Objects.requireNonNull(state,"onDependenciesLoss return null state");
@@ -160,9 +165,14 @@ public abstract class RpcModule implements InitializingBean {
         if(!dependencieReady){
             dependencieReady = dependencies.entrySet().stream().allMatch(d -> d.getValue());
         }
-        if (dependencieReady && !isRunning()) {
-            state = onDependenciesReady();
-            Objects.requireNonNull(state,"onDependenciesReady return null state");
+        if (dependencieReady) {
+            if(!isRunning()){
+                state = onDependenciesReady();
+                Objects.requireNonNull(state,"onDependenciesReady return null state");
+            }
+        }else{
+            log.info("dependencie state");
+            dependencies.entrySet().forEach(entry->log.info("{}:{}",entry.getKey().getName(),entry.getValue()));
         }
     }
 
@@ -191,7 +201,7 @@ public abstract class RpcModule implements InitializingBean {
      * @param module
      * @return true 已准备好
      */
-    protected  boolean isDependencieReady(Module module){
+    public  boolean isDependencieReady(Module module){
         if(!dependencies.containsKey(module)){
             throw new IllegalArgumentException("can not found "+module.getName());
         }

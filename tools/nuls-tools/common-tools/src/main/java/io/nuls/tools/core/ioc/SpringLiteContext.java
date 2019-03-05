@@ -88,6 +88,7 @@ public class SpringLiteContext {
         }
         SpringLiteContext.interceptor = interceptor;
         Set<Class> classes = new HashSet<>();
+        Log.info("spring lite scan package : {}", Arrays.toString(packName));
         Arrays.stream(packName).forEach(pack->{
             classes.addAll(ScanUtil.scan(pack));
         });
