@@ -172,7 +172,7 @@ public class NetworkBootstrap extends RpcModule {
         LoggerUtil.Log.info("NW doStart 1");
         try {
             NodeGroupManager.getInstance().start();
-            RpcManager.getInstance().start();
+//            RpcManager.getInstance().start();
         } catch (Exception e) {
             e.printStackTrace();
             System.exit(-1);

@@ -119,8 +119,8 @@ public class TransactionModule extends RpcModule {
     public Module[] getDependencies() {
         return new Module[]{
                 new Module(ModuleE.NW.abbr, "1.0"),
-                new Module(ModuleE.LG.abbr, "1.0")
-//                ,new Module(ModuleE.BL.abbr, "1.0")
+                new Module(ModuleE.LG.abbr, "1.0"),
+                new Module(ModuleE.BL.abbr, "1.0")
         };
     }
 

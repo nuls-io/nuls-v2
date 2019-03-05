@@ -39,9 +39,6 @@ public class NulsRpcModuleBootstrap {
         ThreadUtils.createAndRunThread(module.moduleInfo().getName()+"-thread",()->{
             module.run(scanPackage,"ws://" + args[0]);
         });
-        if (System.getProperties().getProperty("os.name").toUpperCase().indexOf("WINDOWS") != -1) {
-            System.setProperty("jline.WindowsTerminal.directConsole", "false");
-        }
         BufferedReader is_reader = new BufferedReader(new InputStreamReader(System.in));
         while(true){
             try {
