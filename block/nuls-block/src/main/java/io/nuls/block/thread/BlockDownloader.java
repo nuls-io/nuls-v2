@@ -24,6 +24,7 @@ package io.nuls.block.thread;
 
 import io.nuls.base.data.Block;
 import io.nuls.block.manager.ContextManager;
+import io.nuls.block.model.ChainContext;
 import io.nuls.block.model.ChainParameters;
 import io.nuls.block.model.Node;
 import io.nuls.tools.log.logback.NulsLogger;
@@ -56,21 +57,16 @@ public class BlockDownloader implements Callable<Boolean> {
      */
     private int chainId;
     /**
-     * 是否继续本次下载，中途发生异常置为false
-     */
-    private boolean flag;
-    /**
      * 下载到的区块最终放入此队列，由消费线程取出进行保存
      */
     private BlockingQueue<Block> queue;
 
-    public BlockDownloader(int chainId, BlockingQueue<Future<BlockDownLoadResult>> futures, ThreadPoolExecutor executor, BlockDownloaderParams params, BlockingQueue<Block> queue, boolean flag) {
+    public BlockDownloader(int chainId, BlockingQueue<Future<BlockDownLoadResult>> futures, ThreadPoolExecutor executor, BlockDownloaderParams params, BlockingQueue<Block> queue) {
         this.params = params;
         this.executor = executor;
         this.futures = futures;
         this.chainId = chainId;
         this.queue = queue;
-        this.flag = flag;
     }
 
     @Override
@@ -78,13 +74,14 @@ public class BlockDownloader implements Callable<Boolean> {
         PriorityBlockingQueue<Node> nodes = params.getNodes();
         long netLatestHeight = params.getNetLatestHeight();
         long startHeight = params.getLocalLatestHeight() + 1;
-        NulsLogger commonLog = ContextManager.getContext(chainId).getCommonLog();
+        ChainContext context = ContextManager.getContext(chainId);
+        NulsLogger commonLog = context.getCommonLog();
         try {
             commonLog.info("BlockDownloader start work from " + startHeight + " to " + netLatestHeight);
-            ChainParameters chainParameters = ContextManager.getContext(chainId).getParameters();
+            ChainParameters chainParameters = context.getParameters();
             int blockCache = chainParameters.getBlockCache();
             int maxDowncount = chainParameters.getDownloadNumber();
-            while (startHeight <= netLatestHeight && flag) {
+            while (startHeight <= netLatestHeight && context.isDoSyn()) {
                 while (queue.size() > blockCache) {
                     commonLog.info("BlockDownloader wait！ cached queue size:" + queue.size());
                     Thread.sleep(1000L);
@@ -105,15 +102,15 @@ public class BlockDownloader implements Callable<Boolean> {
                 futures.offer(future);
                 startHeight += size;
             }
-            commonLog.info("BlockDownloader stop work, flag-" + flag);
+            commonLog.info("BlockDownloader stop work, flag-" + context.isDoSyn());
         } catch (Exception e) {
             e.printStackTrace();
             commonLog.error(e);
-            flag = false;
+            context.setDoSyn(false);
             return false;
         }
         executor.shutdown();
-        return flag;
+        return context.isDoSyn();
     }
 
 }

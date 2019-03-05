@@ -468,7 +468,7 @@ public class BlockServiceImpl implements BlockService {
             //5.本地区块维护成功
             ContextManager.getContext(chainId).setLatestBlock(block);
             ContextManager.getContext(chainId).setGenesisBlock(genesisBlock);
-            ChainManager.setMasterChain(chainId, ChainGenerator.generateMasterChain(chainId, block));
+            ChainManager.setMasterChain(chainId, ChainGenerator.generateMasterChain(chainId, block, this));
         } catch (Exception e) {
             e.printStackTrace();
             commonLog.error(e);

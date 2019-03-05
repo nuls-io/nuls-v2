@@ -25,6 +25,7 @@ package io.nuls.block.thread;
 import io.nuls.base.data.Block;
 import io.nuls.block.cache.CacheHandler;
 import io.nuls.block.manager.ContextManager;
+import io.nuls.block.model.ChainContext;
 import io.nuls.block.model.Node;
 import io.nuls.tools.log.logback.NulsLogger;
 
@@ -52,29 +53,25 @@ public class BlockCollector implements Runnable {
     private BlockingQueue<Future<BlockDownLoadResult>> futures;
     private int chainId;
     private NulsLogger commonLog;
-    /**
-     * 是否继续本次下载，中途发生异常置为false
-     */
-    private boolean flag;
 
-    BlockCollector(int chainId, BlockingQueue<Future<BlockDownLoadResult>> futures, ThreadPoolExecutor executor, BlockDownloaderParams params, BlockingQueue<Block> queue, boolean flag) {
+    BlockCollector(int chainId, BlockingQueue<Future<BlockDownLoadResult>> futures, ThreadPoolExecutor executor, BlockDownloaderParams params, BlockingQueue<Block> queue) {
         this.params = params;
         this.executor = executor;
         this.futures = futures;
         this.chainId = chainId;
         this.queue = queue;
-        this.flag = flag;
         this.commonLog = ContextManager.getContext(chainId).getCommonLog();
     }
 
     @Override
     public void run() {
         BlockDownLoadResult result;
+        ChainContext context = ContextManager.getContext(chainId);
         try {
             long netLatestHeight = params.getNetLatestHeight();
             long startHeight = params.getLocalLatestHeight() + 1;
             commonLog.info("BlockCollector start work");
-            while (startHeight <= netLatestHeight && flag) {
+            while (startHeight <= netLatestHeight && context.isDoSyn()) {
                 result = futures.take().get();
                 int size = result.getSize();
                 Node node = result.getNode();
@@ -96,7 +93,7 @@ public class BlockCollector implements Runnable {
                 }
                 startHeight += size;
             }
-            commonLog.info("BlockCollector stop work, flag-" + flag);
+            commonLog.info("BlockCollector stop work, flag-" + context.isDoSyn());
         } catch (Exception e) {
             e.printStackTrace();
             commonLog.error("BlockCollector stop work abnormally-" + e);

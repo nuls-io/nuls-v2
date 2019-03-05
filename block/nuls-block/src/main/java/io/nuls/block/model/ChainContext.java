@@ -58,6 +58,13 @@ public class ChainContext {
     private RunningStatusEnum status;
 
     /**
+     * 是否继续本次下载，中途发生异常置为false
+     */
+    @Getter
+    @Setter
+    private boolean doSyn;
+
+    /**
      * 链ID
      */
     @Getter
@@ -143,6 +150,7 @@ public class ChainContext {
     }
 
     public void init() {
+        doSyn = true;
         lock = new StampedLock();
         LoggerUtil.init(chainId, parameters.getLogLevel());
         this.setStatus(RunningStatusEnum.INITIALIZING);
