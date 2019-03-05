@@ -32,14 +32,9 @@ import io.nuls.network.model.Node;
 import io.nuls.network.model.dto.ProtocolRoleHandler;
 import io.nuls.network.model.message.base.BaseMessage;
 import io.nuls.network.model.message.base.MessageHeader;
-import io.nuls.network.rpc.ResponseHandler;
 import io.nuls.network.utils.LoggerUtil;
-import io.nuls.rpc.info.Constants;
-import io.nuls.rpc.invoke.BaseInvoke;
-import io.nuls.rpc.model.message.MessageUtil;
-import io.nuls.rpc.model.message.Request;
+import io.nuls.rpc.model.message.Response;
 import io.nuls.rpc.netty.processor.ResponseMessageProcessor;
-import io.nuls.tools.core.ioc.SpringLiteContext;
 import io.nuls.tools.crypto.HexUtil;
 
 import java.util.Collection;
@@ -100,10 +95,9 @@ public class OtherModuleMessageHandler extends BaseMessageHandler {
             for (ProtocolRoleHandler protocolRoleHandler : protocolRoleHandlers) {
                 try {
                     Log.debug("request：{}=={}", protocolRoleHandler.getRole(), protocolRoleHandler.getHandler());
-                    Request request = MessageUtil.newRequest(protocolRoleHandler.getHandler(), paramMap, Constants.BOOLEAN_FALSE, Constants.ZERO, Constants.ZERO);
-                    String  messageId = ResponseMessageProcessor.requestAndInvoke(protocolRoleHandler.getRole(),request,(BaseInvoke)SpringLiteContext.getBean(ResponseHandler.class));
-                    Log.debug("response：" + messageId);
-                    LoggerUtil.modulesMsgLogs(protocolRoleHandler.getRole(),header.getCommandStr(),node,payLoadBody,messageId);
+                    Response response = ResponseMessageProcessor.requestAndResponse(protocolRoleHandler.getRole(), protocolRoleHandler.getHandler(), paramMap, 1);
+                    Log.debug("response：" + response);
+                    LoggerUtil.modulesMsgLogs(protocolRoleHandler.getRole(), header.getCommandStr(), node, payLoadBody, response.toString());
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
