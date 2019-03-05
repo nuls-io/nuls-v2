@@ -24,18 +24,13 @@
  */
 package io.nuls.network.manager.handler.base;
 
-import io.netty.channel.Channel;
-import io.netty.channel.ChannelInboundHandlerAdapter;
-import io.netty.channel.socket.SocketChannel;
-import io.nuls.network.constant.NetworkConstant;
-
-import static io.nuls.network.constant.NetworkParam.getInstance;
+import io.netty.channel.SimpleChannelInboundHandler;
 
 /**
  * channel handler
  * @author  lan
  * @date 2018/11/01
  */
-public abstract class BaseChannelHandler  extends ChannelInboundHandlerAdapter {
+public abstract class BaseChannelHandler  extends SimpleChannelInboundHandler {
 
 }
