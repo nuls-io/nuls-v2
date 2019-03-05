@@ -5,6 +5,8 @@ import io.nuls.account.constant.AccountConstant;
 import io.nuls.account.constant.AccountErrorCode;
 import io.nuls.account.constant.AccountParam;
 import io.nuls.account.constant.AccountStorageConstant;
+import io.nuls.account.model.bo.Chain;
+import io.nuls.account.rpc.call.TransactionCmdCall;
 import io.nuls.account.util.manager.ChainManager;
 import io.nuls.db.constant.DBErrorCode;
 import io.nuls.db.service.RocksDBService;
@@ -23,6 +25,7 @@ import io.nuls.tools.parse.ConfigLoader;
 import io.nuls.tools.parse.I18nUtils;
 
 import java.io.IOException;
+import java.util.Map;
 
 /**
  * @author: qinyifeng
@@ -69,7 +72,6 @@ public class AccountBootstrap extends RpcModule {
         initCfg();
         //读取配置文件，数据存储根目录，初始化打开该目录下所有表连接并放入缓存
         RocksDBService.init(AccountParam.getInstance().getDataPath());
-
     }
 
     /**
@@ -83,6 +85,8 @@ public class AccountBootstrap extends RpcModule {
         try {
             //初始化数据库
             initDB();
+            //启动链
+            SpringLiteContext.getBean(ChainManager.class).runChain();
         } catch (Exception e) {
             return false;
         }
@@ -97,8 +101,8 @@ public class AccountBootstrap extends RpcModule {
     @Override
     public RpcModuleState onDependenciesReady() {
         Log.info("account onDependenciesReady");
-        //启动链
-        SpringLiteContext.getBean(ChainManager.class).runChain();
+        //注册账户模块相关交易
+        registerTx();
         Log.debug("START-SUCCESS");
         return RpcModuleState.Running;
     }
@@ -171,6 +175,28 @@ public class AccountBootstrap extends RpcModule {
             } else {
                 Log.info(e.getMessage());
             }
+        }
+    }
+
+    /**
+     * 注册交易
+     */
+    private static void registerTx() {
+        try {
+            ChainManager chainManager = SpringLiteContext.getBean(ChainManager.class);
+            for (Map.Entry<Integer, Chain> entry : chainManager.getChainMap().entrySet()) {
+                Chain chain = entry.getValue();
+                //注册账户相关交易
+                while (true) {
+                    if (TransactionCmdCall.registerTx(chain.getConfig().getChainId())) {
+                        break;
+                    }
+                    Thread.sleep(3000L);
+                }
+            }
+        } catch (Exception e) {
+            Log.error("Transaction registerTx error!");
+            throw new RuntimeException(e);
         }
     }
 }
