@@ -78,7 +78,7 @@ public class ConsensusModule extends RpcModule {
     @Override
     public boolean doStart() {
         try {
-            while (isDependencieReady()){
+            while (!isDependencieReady()){
                 Log.debug("wait depend modules ready");
                 Thread.sleep(2000L);
             }
