@@ -24,7 +24,7 @@ package io.nuls.block.service.impl;
 
 import io.nuls.base.data.Block;
 import io.nuls.base.data.NulsDigestData;
-import io.nuls.block.service.ChainStorageService;
+import io.nuls.block.storage.ChainStorageService;
 import io.nuls.block.test.BlockGenerator;
 import io.nuls.db.service.RocksDBService;
 import io.nuls.tools.core.ioc.SpringLiteContext;

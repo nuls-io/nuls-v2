@@ -25,10 +25,7 @@
 package io.nuls.tools.core.ioc;
 
 import io.nuls.tools.basic.InitializingBean;
-import io.nuls.tools.core.annotation.Autowired;
-import io.nuls.tools.core.annotation.Component;
-import io.nuls.tools.core.annotation.Interceptor;
-import io.nuls.tools.core.annotation.Service;
+import io.nuls.tools.core.annotation.*;
 import io.nuls.tools.core.inteceptor.DefaultMethodInterceptor;
 import io.nuls.tools.core.inteceptor.base.BeanMethodInterceptor;
 import io.nuls.tools.core.inteceptor.base.BeanMethodInterceptorManager;
@@ -70,8 +67,8 @@ public class SpringLiteContext {
      *
      * @param packName 扫描的根路径,The root package of the scan.
      */
-    public static void init(final String packName) {
-        init(packName, new DefaultMethodInterceptor());
+    public static void init(final String... packName) {
+        init(new DefaultMethodInterceptor(),packName);
     }
 
     /**
@@ -82,10 +79,25 @@ public class SpringLiteContext {
      * @param interceptor 方法拦截器,Method interceptor
      */
     public static void init(final String packName, MethodInterceptor interceptor) {
+        init(interceptor,packName);
+    }
+
+    public static void init(MethodInterceptor interceptor,String... packName){
+        if(packName.length == 0){
+            throw new IllegalArgumentException("spring lite init package can't be null");
+        }
         SpringLiteContext.interceptor = interceptor;
-        List<Class> list = ScanUtil.scan(packName);
-        list.forEach((Class clazz) -> checkBeanClass(clazz));
+        Set<Class> classes = new HashSet<>();
+        Log.info("spring lite scan package : {}", Arrays.toString(packName));
+        Arrays.stream(packName).forEach(pack->{
+            classes.addAll(ScanUtil.scan(pack));
+        });
+        classes.stream()
+                //通过Order注解控制类加载顺序
+                .sorted((b1, b2) -> getOrderByClass(b1) > getOrderByClass(b2) ? 1 : -1)
+                .forEach((Class clazz) -> checkBeanClass(clazz));
         autowireFields();
+        callAfterPropertiesSet();
         success = true;
     }
 
@@ -102,6 +114,23 @@ public class SpringLiteContext {
                 if (result) {
                     BEAN_OK_MAP.put(key, bean);
                     BEAN_TEMP_MAP.remove(key);
+                    //call afterPropertiesSet 代码迁移到 callAfterPropertiesSet方法执行
+                }
+            } catch (Exception e) {
+                Log.debug(key + " autowire fields failed!");
+            }
+        }
+    }
+
+    /**
+     * 对实现了InitializingBean接口的对象，调用afterPropertiesSet方法
+     */
+    private static void callAfterPropertiesSet() {
+        BEAN_OK_MAP.entrySet().stream()
+                .sorted((e1, e2) ->
+                    getOrderByClass(e1.getValue().getClass()) > getOrderByClass(e2.getValue().getClass()) ? 1 : -1)
+                .forEach(entry -> {
+                    Object bean = entry.getValue();
                     if (bean instanceof InitializingBean) {
                         try {
                             ((InitializingBean) bean).afterPropertiesSet();
@@ -109,11 +138,7 @@ public class SpringLiteContext {
                             Log.error(e.getMessage());
                         }
                     }
-                }
-            } catch (Exception e) {
-                Log.debug(key + " autowire fields failed!");
-            }
-        }
+                });
     }
 
     /**
@@ -381,6 +406,39 @@ public class SpringLiteContext {
                 addClassNameMap(intfClass, beanName);
             }
         }
+    }
+
+    /**
+     * 返回bean的加载顺序权重值
+     * 默认权重值为1
+     *
+     * @param clazz
+     * @return
+     */
+    private static int getOrderByClass(Class clazz) {
+        List<Annotation> anns = getAnnotationForBean(clazz);
+        if (anns == null || anns.isEmpty()) {
+            return Order.DEFALUT_ORDER;
+        }
+        Optional<Annotation> ann = anns.stream().filter(a -> a.annotationType().equals(Order.class)).findFirst();
+        if (ann.isEmpty()) {
+            return Order.DEFALUT_ORDER;
+        }
+        return ((Order) ann.get()).value();
+    }
+
+    private static List<Annotation> getAnnotationForBean(Class clazz) {
+        Annotation[] anns = clazz.getDeclaredAnnotations();
+        List<Annotation> res = Arrays.asList(anns);
+        if (!(clazz.getSuperclass() instanceof Object) && clazz.getSuperclass() != null) {
+            List<Annotation> supperAnno = getAnnotationForBean(clazz.getSuperclass());
+            supperAnno.forEach(sa -> {
+                if (!res.stream().anyMatch(a -> a.annotationType().equals(sa.annotationType()))) {
+                    res.add(sa);
+                }
+            });
+        }
+        return res;
     }
 
     /**

@@ -49,6 +49,11 @@ public interface ConsensusConstant {
     String PARAM_PARTAKE_PACKING = "partake_packing";
 
     /**
+     * boot path
+     * */
+    String BOOT_PATH = "io.nuls";
+
+    /**
      * context path
      * */
     String CONTEXT_PATH = "io.nuls.poc";
@@ -227,5 +232,5 @@ public interface ConsensusConstant {
      * 获取打包交易最长等待时间(毫秒)
      * Get the longest waiting time for packaged transactions
      * */
-    long GET_TX_MAX_WAIT_TIME = 7000;
+    long GET_TX_MAX_WAIT_TIME = 500;
  }

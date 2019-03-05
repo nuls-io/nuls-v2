@@ -27,7 +27,7 @@ import io.nuls.block.constant.ChainTypeEnum;
 import io.nuls.block.exception.ChainRuntimeException;
 import io.nuls.block.model.Chain;
 import io.nuls.block.service.BlockService;
-import io.nuls.block.service.ChainStorageService;
+import io.nuls.block.storage.ChainStorageService;
 import io.nuls.block.utils.BlockUtil;
 import io.nuls.block.utils.module.ConsensusUtil;
 import io.nuls.tools.core.annotation.Autowired;

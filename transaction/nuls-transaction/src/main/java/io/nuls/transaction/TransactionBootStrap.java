@@ -13,12 +13,12 @@ import io.nuls.tools.parse.I18nUtils;
 import io.nuls.transaction.constant.TxConfig;
 import io.nuls.transaction.constant.TxConstant;
 import io.nuls.transaction.constant.TxDBConstant;
-import io.nuls.transaction.db.h2.dao.TransactionH2Service;
-import io.nuls.transaction.db.rocksdb.storage.LanguageStorageService;
 import io.nuls.transaction.manager.ChainManager;
 import io.nuls.transaction.model.bo.Chain;
 import io.nuls.transaction.rpc.call.BlockCall;
 import io.nuls.transaction.rpc.call.NetworkCall;
+import io.nuls.transaction.storage.h2.TransactionH2Service;
+import io.nuls.transaction.storage.rocksdb.LanguageStorageService;
 import io.nuls.transaction.utils.DBUtil;
 import org.apache.ibatis.io.Resources;
 import org.apache.ibatis.session.SqlSessionFactory;
@@ -61,45 +61,46 @@ public class TransactionBootStrap {
             txStart();
 
             Log.info("START-SUCCESS");
-        }catch (Exception e){
+        } catch (Exception e) {
             Log.error("Transaction startup error!");
             Log.error(e);
         }
     }
 
-    public static void txStart(){
+    public static void txStart() {
         try {
             //注册网络消息协议 依赖block的ready状态
-            while (!NetworkCall.registerProtocol())
-            {
+            while (!NetworkCall.registerProtocol()) {
                 Log.info("wait nw_protocolRegister ready");
                 Thread.sleep(5000L);
             }
 
-            ChainManager chainManager =  SpringLiteContext.getBean(ChainManager.class);
+            ChainManager chainManager = SpringLiteContext.getBean(ChainManager.class);
             for (Map.Entry<Integer, Chain> entry : chainManager.getChainMap().entrySet()) {
                 Chain chain = entry.getValue();
                 //订阅Block模块接口
                 BlockCall.subscriptionNewBlockHeight(chain);
             }
-        }catch (Exception e){
+        } catch (Exception e) {
             Log.error(e);
         }
     }
+
     /**
      * 初始化系统编码
-     * */
-    public static void initSys(){
+     */
+    public static void initSys() {
         try {
             System.setProperty(TxConstant.SYS_ALLOW_NULL_ARRAY_ELEMENT, "true");
             System.setProperty(TxConstant.SYS_FILE_ENCODING, UTF_8.name());
             Field charset = Charset.class.getDeclaredField("defaultCharset");
             charset.setAccessible(true);
             charset.set(null, UTF_8);
-        }catch (Exception e){
+        } catch (Exception e) {
             Log.error(e);
         }
     }
+
     public static void initDB() {
         try {
             //数据文件存储地址
@@ -124,26 +125,26 @@ public class TransactionBootStrap {
 
     /**
      * 初始化国际化资源文件语言
-     * */
-    public static void initLanguage(){
+     */
+    public static void initLanguage() {
         try {
             LanguageStorageService languageService = SpringLiteContext.getBean(LanguageStorageService.class);
             String languageDB = languageService.getLanguage();
-            I18nUtils.loadLanguage(TransactionBootStrap.class,"languages","");
+            I18nUtils.loadLanguage(TransactionBootStrap.class, "languages", "");
             String language = null == languageDB ? I18nUtils.getLanguage() : languageDB;
             I18nUtils.setLanguage(language);
             if (null == languageDB) {
                 languageService.saveLanguage(language);
             }
-        }catch (Exception e){
+        } catch (Exception e) {
             Log.error(e);
         }
     }
 
     /**
      * 共识模块启动WebSocket服务，用于其他模块连接共识模块与共识模块交互
-     * */
-    public static void initServer(){
+     */
+    public static void initServer() {
         try {
             // todo 依赖模块 Start server instance
             NettyServer.getInstance(ModuleE.TX)
@@ -156,7 +157,7 @@ public class TransactionBootStrap {
             String kernelUrl = "ws://" + HostInfo.getLocalIP() + ":8887/ws";
             ConnectManager.getConnectByUrl(kernelUrl);
             ResponseMessageProcessor.syncKernel(kernelUrl);
-        }catch (Exception e){
+        } catch (Exception e) {
             Log.error("Transaction startup webSocket server error!");
             e.printStackTrace();
         }
@@ -165,7 +166,7 @@ public class TransactionBootStrap {
     /**
      * 创建H2的表, 如果存在则不会创建
      */
-    public static void initH2Table(){
+    public static void initH2Table() {
         TransactionH2Service ts = SpringLiteContext.getBean(TransactionH2Service.class);
         ts.createTxTablesIfNotExists(TxConstant.H2_TX_TABLE_NAME_PREFIX,
                 TxConstant.H2_TX_TABLE_INDEX_NAME_PREFIX,

@@ -128,7 +128,7 @@ public class TestTx {
 
     @Test
     public void importPriKeyTest() {
-//        importPriKey("7e304e60c4e29c15382f76c0bb097bda28a1950b78871b6b7eb2bb4cc4ddeb49");//种子出块地址 5MR_2Cb86fpFbuY4Lici8MJStNxDFYH6kRB
+        importPriKey("7e304e60c4e29c15382f76c0bb097bda28a1950b78871b6b7eb2bb4cc4ddeb49");//种子出块地址 5MR_2Cb86fpFbuY4Lici8MJStNxDFYH6kRB
 //        importPriKey("70e871a2e637b4182dfbedc53e164182d266821f4824ab1a3a73055e9f252f98");//种子出块地址
 
 //        importPriKey("00c299b105e2f9b260d7811d5cb94c713cc324e55831cb15a18454f7382f0a5f6e");//20 5MR_2CWWTDXc32s9Wd1guNQzPztFgkyVEsz
@@ -160,6 +160,40 @@ public class TestTx {
         System.out.println("transfer: " + result.get("txHex"));  //Thread.sleep(3000L);
     }
 
+
+    /**
+     * 委托节点
+     */
+    @Test
+    public void depositToAgent() throws Exception {
+        //组装委托节点交易
+        String agentHash = "0020bd925c3b7f34577887c2091d087630c2cf9ca165b709a08b303a8cdf7a5b3585";
+        Map<String, Object> dpParams = new HashMap<>();
+        dpParams.put("chainId", chainId);
+        dpParams.put("address", address27);
+        dpParams.put("agentHash", agentHash);
+        dpParams.put("deposit", 200000 * 100000000L);
+        Response dpResp = ResponseMessageProcessor.requestAndResponse(ModuleE.CS.abbr, "cs_depositToAgent", dpParams);
+        HashMap dpResult = (HashMap) ((HashMap) dpResp.getResponseData()).get("cs_depositToAgent");
+        String dpTxHex = (String) dpResult.get("txHex");
+    }
+
+    /**
+     * 取消委托
+     *
+     * @throws Exception
+     */
+    @Test
+    public void withdraw() throws Exception {
+        Map<String, Object> params = new HashMap<>();
+        params.put("chainId", chainId);
+        //Address depositAddress = new Address(1,(byte)1, SerializeUtils.sha256hash160("y5WhgP1iu2Qwt5CiaPTV4Fe2Xqmfd".getBytes()));
+        params.put("address", address27);
+        params.put("txHash", "0020467c4aea7653d17295b313c4002ddb41d882c22039d181fc474e7de6d5d0c06b");
+        Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.CS.abbr, "cs_withdraw", params);
+        System.out.println(cmdResp.getResponseData());
+    }
+
     @Test
     public void stopAgentTx() throws Exception {
         Map<String, Object> txMap = new HashMap();
@@ -172,40 +206,6 @@ public class TestTx {
         Assert.assertTrue(null != result);
         Log.debug("{}", result.get("txHex"));
         System.out.println("transfer: " + result.get("txHex"));  //Thread.sleep(3000L);
-    }
-
-
-    /**
-     * 委托节点
-     */
-    @Test
-    public void depositToAgent() throws Exception {
-        //组装委托节点交易
-        String agentHash = "00204fd0ab0c627a00f5d3fe7e44f3c313d520d38d0170ac4b113a3087c7942211c6";
-        Map<String, Object> dpParams = new HashMap<>();
-        dpParams.put("chainId", chainId);
-        dpParams.put("address", address27);
-        dpParams.put("agentHash", agentHash);
-        dpParams.put("deposit", 200000 * 100000000L);
-        Response dpResp = ResponseMessageProcessor.requestAndResponse(ModuleE.CS.abbr, "cs_depositToAgent", dpParams);
-        HashMap dpResult = (HashMap) ((HashMap) dpResp.getResponseData()).get("cs_depositToAgent");
-        String dpTxHex = (String) dpResult.get("txHex");
-    }
-
-    /**
-     * 退出共识
-     *
-     * @throws Exception
-     */
-    @Test
-    public void withdraw() throws Exception {
-        Map<String, Object> params = new HashMap<>();
-        params.put("chainId", chainId);
-        //Address depositAddress = new Address(1,(byte)1, SerializeUtils.sha256hash160("y5WhgP1iu2Qwt5CiaPTV4Fe2Xqmfd".getBytes()));
-        params.put("address", address27);
-        params.put("txHash", "00209668eab96e696138f6f34c945298d38a48f966b67c71ffe766862aa3930480da");
-        Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.CS.abbr, "cs_withdraw", params);
-        System.out.println(cmdResp.getResponseData());
     }
 
     /**

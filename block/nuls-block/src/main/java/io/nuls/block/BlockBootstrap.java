@@ -113,7 +113,7 @@ public class BlockBootstrap {
             ScheduledThreadPoolExecutor maintainExecutor = ThreadUtils.createScheduledThreadPool(1, new NulsThreadFactory("orphan-chains-maintainer"));
             maintainExecutor.scheduleWithFixedDelay(OrphanChainsMaintainer.getInstance(), 0, 5, TimeUnit.SECONDS);
             //开启数据库大小监控线程
-            ScheduledThreadPoolExecutor dbSizeExecutor = ThreadUtils.createScheduledThreadPool(1, new NulsThreadFactory("db-size-monitor"));
+            ScheduledThreadPoolExecutor dbSizeExecutor = ThreadUtils.createScheduledThreadPool(1, new NulsThreadFactory("storage-size-monitor"));
             dbSizeExecutor.scheduleWithFixedDelay(ChainsDbSizeMonitor.getInstance(), 0, 5, TimeUnit.MINUTES);
             //开启区块监控线程
             ScheduledThreadPoolExecutor monitorExecutor = ThreadUtils.createScheduledThreadPool(1, new NulsThreadFactory("network-monitor"));
@@ -135,7 +135,7 @@ public class BlockBootstrap {
                 NulsLogger commonLog = context.getCommonLog();
                 commonLog.info("chainId:" + chainId + ", latestHeight:" + header.getHeight() + ", txCount:" + header.getTxCount() + ", hash:" + header.getHash());
                 try {
-                    Thread.sleep(10000L);
+                    Thread.sleep(30000L);
                 } catch (InterruptedException e) {
                     commonLog.error(e);
                 }

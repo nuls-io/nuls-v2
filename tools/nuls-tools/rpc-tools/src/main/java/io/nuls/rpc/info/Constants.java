@@ -60,6 +60,12 @@ public class Constants {
     public static final long INTERVAL_TIMEMILLIS = 1L;
 
     /**
+     * 定时任务处理器循环间隔时间
+     * Timed task processor cycle interval
+     * */
+    public static final long PROCESSOR_INTERVAL_TIMEMILLIS = 6L * MILLIS_PER_SECOND;
+
+    /**
      * 超时毫秒数(1分钟)
      * Timeout millisecond(1 minute)
      */

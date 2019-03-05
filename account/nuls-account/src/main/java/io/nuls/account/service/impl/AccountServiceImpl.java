@@ -572,7 +572,7 @@ public class AccountServiceImpl implements AccountService, InitializingBean {
             //if the local account already exists
             account.setAlias(acc.getAlias());
         }
-        //save account to db
+        //save account to storage
         accountStorageService.saveAccount(new AccountPo(account));
         //put the account in local cache
         accountCacheService.localAccountMaps.put(account.getAddress().getBase58(), account);
@@ -652,7 +652,7 @@ public class AccountServiceImpl implements AccountService, InitializingBean {
         if (FormatValidUtils.validPassword(password)) {
             account.encrypt(password);
         }
-        //save account to db
+        //save account to storage
         accountStorageService.saveAccount(new AccountPo(account));
         //put the account in local cache
         accountCacheService.localAccountMaps.put(account.getAddress().getBase58(), account);

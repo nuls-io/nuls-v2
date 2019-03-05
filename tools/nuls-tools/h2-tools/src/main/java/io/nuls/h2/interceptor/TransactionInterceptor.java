@@ -52,7 +52,7 @@ public class TransactionInterceptor implements BeanMethodInterceptor {
         boolean flag = FLAG_HOLDER.get();
         Object result;
 
-        if (flag == false) {
+        if (!flag) {
             SqlSession sqlSession = null;
             try {
                 FLAG_HOLDER.set(true);

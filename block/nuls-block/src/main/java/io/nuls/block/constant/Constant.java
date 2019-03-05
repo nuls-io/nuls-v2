@@ -22,7 +22,7 @@ package io.nuls.block.constant;
 
 import io.nuls.base.data.Block;
 import io.nuls.base.data.BlockHeader;
-import io.nuls.base.data.protocol.ProtocolConfigJson;
+import io.nuls.tools.protocol.ProtocolConfigJson;
 import io.nuls.block.model.Node;
 
 import java.util.Comparator;

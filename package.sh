@@ -147,21 +147,19 @@ checkModuleItem(){
 		echoRed "getModuleItem 必须传入配置项名称"
 		exit 1
 	fi
-	for line in `cat "$(pwd)/module.ncf"`
+    while read line
 	do
 		pname=$(echo $line | awk -F '=' '{print $1}')
-		if [ ${pname} == $1 ]; then
+		if [ "${pname}" == "$1" ]; then
 			return 1;
 		fi
-	done
-	#if [ "$2" == "1" ]; then
-		echoRed "$2 module.ncf 必须配置 $1"
-		exit 0
-	#fi
+	done < "$(pwd)/module.ncf"
+	echoRed "$2 module.ncf 必须配置 $1"
+	exit 0
 }
 
 getModuleItem(){
-	for line in `cat "$(pwd)/module.ncf"`
+    while read line
 	do
 		pname=$(echo $line | awk -F '=' '{print $1}')
 		pvalue=$(awk -v a="$line" '
@@ -181,7 +179,7 @@ getModuleItem(){
 			echo ${pvalue};
 			return 1;
 		fi
-	done
+	done < "$(pwd)/module.ncf"
 	return 0
 }
 
@@ -224,7 +222,7 @@ copyModuleNcfToModules(){
 	touch $moduleNcf
 	cfgDomain=""
 	sedCommand="sed "
-	for line in `cat ./module.ncf`
+	while read line
 	do
 		TEMP=$(echo $line|grep -Eo '\[.+\]')
 		if [ -n "$TEMP" ]; then
@@ -248,18 +246,20 @@ copyModuleNcfToModules(){
 							print r
 						}
 					')
-			sedCommand+=" -e 's/%${pname}%/${pvalue}/g' "
+            if [ "${pname}" != "" ]; then
+			    sedCommand+=" -e 's/%${pname}%/${pvalue}/g' "
+			fi
 		else
 			if [ "${cfgDomain}" != "[JAVA]" ]; then
 				echo $line >> $moduleNcf
 			fi
 		fi
-	done
+	done < ./module.ncf
 	# merge common module.ncf and private module.ncf to module.tmep.ncf
 	sh "${PROJECT_PATH}/build/merge-ncf.sh" "${PROJECT_PATH}/module.ncf" $moduleNcf
 	rm $moduleNcf 
 	sedCommand+=" -e 's/%MAIN_CLASS_NAME%/${mainClassName}/g' "
-
+    echo $sedCommand
 	if [ -z $(echo "${sedCommand}" | grep -o "%JOPT_XMS%") ]; then
 		sedCommand="${sedCommand}  -e 's/%JOPT_XMS%/256/g' "
 	fi

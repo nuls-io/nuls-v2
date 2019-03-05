@@ -24,6 +24,7 @@
  */
 package io.nuls.tools.parse;
 
+import com.google.common.io.Resources;
 import io.nuls.tools.constant.ToolsConstant;
 import io.nuls.tools.data.StringUtils;
 import io.nuls.tools.exception.NulsException;
@@ -94,7 +95,7 @@ public class I18nUtils {
             if (StringUtils.isNotBlank(defaultLanguage)) {
                 key = defaultLanguage;
             }
-            URL furl = I18nUtils.class.getClassLoader().getResource(folder);
+            URL furl = Resources.getResource(folder);
             if (null != furl) {
                 File folderFile = new File(furl.getPath());
                 Log.info("furl.getPath()=" + furl.getPath());

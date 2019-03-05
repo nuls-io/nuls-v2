@@ -41,12 +41,20 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
+ * 调用区块模块的RPC接口
+ *
  * @author lan
  * @description
  * @date 2018/12/07
  **/
 @Service
 public class BlockRpcServiceImpl implements BlockRpcService {
+    /**
+     * 获取最近区块高度与hash
+     *
+     * @param chainId chainId
+     * @return
+     */
     @Override
     public BestBlockInfo getBestBlockHeader(int chainId) {
         BestBlockInfo bestBlockInfo = new BestBlockInfo();
@@ -64,7 +72,7 @@ public class BlockRpcServiceImpl implements BlockRpcService {
                 bestBlockInfo.setBlockHeight(header.getHeight());
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            LoggerUtil.Log.error("getBestBlockHeader error,chainId={}.exception={}", chainId, e.getMessage());
         } finally {
             LoggerUtil.Log.info("getBestBlockHeader end time={}", TimeManager.currentTimeMillis());
             LoggerUtil.Log.debug("getBestBlockHeader height ={},hash={}", bestBlockInfo.getBlockHeight(), bestBlockInfo.getHash());

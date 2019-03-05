@@ -1,0 +1,115 @@
+[
+  {
+    "version": "1",
+    "extend": "",
+    "validTransactions": [
+      {
+        "type": "1",
+        "name": "io.nuls.test.TestTransaction",
+        "handler": "io.nuls.test.TestTransactionHandler",
+        "validate": "validate",
+        "commit": "commit",
+        "rollback": "rollback"
+      }
+    ],
+    "validMessages": [
+      {
+        "name": "io.nuls.block.message.BlockMessage",
+        "handlers": [
+          {
+            "name": "io.nuls.block.rpc.BlockHandler#processV1"
+          }
+        ]
+      },
+      {
+        "name": "io.nuls.block.message.CompleteMessage",
+        "handlers": [
+          {
+            "name": "io.nuls.block.rpc.CompleteHandler#processV1"
+          }
+        ]
+      },
+      {
+        "name": "io.nuls.block.message.HashListMessage",
+        "handlers": [
+          {
+            "name": "io.nuls.block.rpc.GetTxGroupHandler#processV1"
+          }
+        ]
+      },
+      {
+        "name": "io.nuls.block.message.HashMessage",
+        "handlers": [
+          {
+            "name": "io.nuls.block.rpc.ForwardSmallBlockHandler#processV1"
+          },
+          {
+            "name": "io.nuls.block.rpc.GetBlockHandler#processV1"
+          },
+          {
+            "name": "io.nuls.block.rpc.GetSmallBlockHandler#processV1"
+          }
+        ]
+      },
+      {
+        "name": "io.nuls.block.message.HeightRangeMessage",
+        "handlers": [
+          {
+            "name": "io.nuls.block.rpc.GetBlocksHandler#processV1"
+          }
+        ]
+      },
+      {
+        "name": "io.nuls.block.message.SmallBlockMessage",
+        "handlers": [
+          {
+            "name": "io.nuls.block.rpc.SmallBlockHandler#processV1"
+          }
+        ]
+      },
+      {
+        "name": "io.nuls.block.message.TxGroupMessage",
+        "handlers": [
+          {
+            "name": "io.nuls.block.rpc.TxGroupHandler#processV1"
+          }
+        ]
+      },
+      {
+        "name": "io.nuls.block.test.TestMessage",
+        "handlers": [
+          {
+            "name": "io.nuls.block.test.TestMessageHandler#processV1"
+          }
+        ]
+      }
+    ],
+    "invalidTransactions": [],
+    "invalidMessages": []
+  },
+  {
+    "version": "2",
+    "extend": "1",
+    "validTransactions": [],
+    "validMessages": [
+      {
+        "name": "io.nuls.block.message.BlockMessage",
+        "handlers": [
+          {
+            "name": "io.nuls.block.rpc.BlockHandler#processV2"
+          }
+        ]
+      }
+    ],
+    "invalidTransactions": [
+      {
+        "name": "io.nuls.test.TestTransaction"
+      }
+    ],
+    "invalidMessages": [
+      {
+        "name": "io.nuls.block.test.TestMessage"
+      }
+    ]
+  }
+]

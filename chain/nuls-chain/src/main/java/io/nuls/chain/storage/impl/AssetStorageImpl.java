@@ -2,24 +2,23 @@ package io.nuls.chain.storage.impl;
 
 import io.nuls.chain.model.po.Asset;
 import io.nuls.chain.storage.AssetStorage;
+import io.nuls.chain.storage.InitDB;
 import io.nuls.db.service.RocksDBService;
 import io.nuls.tools.basic.InitializingBean;
 import io.nuls.tools.core.annotation.Component;
+import io.nuls.tools.exception.NulsException;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import static io.nuls.chain.util.LoggerUtil.Log;
-
 /**
  * @author tangyi
  * @date 2018/11/9
- * @description
- *  String assetKey = CmRuntimeInfo.getAssetKey(asset.getChainId(), asset.getAssetId());
- *  value =  Asset
+ * @description String assetKey = CmRuntimeInfo.getAssetKey(asset.getChainId(), asset.getAssetId());
+ * value =  Asset
  */
 @Component
-public class AssetStorageImpl implements AssetStorage, InitializingBean {
+public class AssetStorageImpl extends  BaseStorage implements AssetStorage, InitDB, InitializingBean {
 
     private final String TBL = "asset";
 
@@ -29,13 +28,7 @@ public class AssetStorageImpl implements AssetStorage, InitializingBean {
      */
     @Override
     public void afterPropertiesSet() {
-        try {
-            if (!RocksDBService.existTable(TBL)) {
-                RocksDBService.createTable(TBL);
-            }
-        } catch (Exception e) {
-            Log.error(e);
-        }
+
     }
 
     /**
@@ -99,5 +92,10 @@ public class AssetStorageImpl implements AssetStorage, InitializingBean {
             }
         }
         return assetList;
+    }
+
+    @Override
+    public void initTableName() throws NulsException {
+         super.initTableName(TBL);
     }
 }

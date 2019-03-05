@@ -61,6 +61,6 @@ public class ConfigTest {
         IniEntity iniEntity = new IniEntity(ini);
 
         logger.info("iniEntity {}", iniEntity);
-        logger.info("rocksdb.datapath {}", iniEntity.getCfgValue("db", "rocksdb.datapath"));
+        logger.info("rocksdb.datapath {}", iniEntity.getCfgValue("storage", "rocksdb.datapath"));
     }
 }

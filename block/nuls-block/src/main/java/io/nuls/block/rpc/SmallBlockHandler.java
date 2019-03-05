@@ -133,8 +133,6 @@ public class SmallBlockHandler extends BaseCmd {
             //还有一种场景时收到smallBlock时,有一些普通交易还没有缓存在未确认交易池中,此时要再从源节点请求
             Map<NulsDigestData, Transaction> txMap = new HashMap<>((int) header.getTxCount());
             List<Transaction> subTxList = smallBlock.getSubTxList();
-            messageLog.info("smallBlock getTxHashList " + smallBlock.getTxHashList());
-            messageLog.info("smallBlock size " + smallBlock.getSubTxList().size());
             for (Transaction tx : subTxList) {
                 txMap.put(tx.getHash(), tx);
             }

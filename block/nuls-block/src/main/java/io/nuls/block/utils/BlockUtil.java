@@ -32,7 +32,7 @@ import io.nuls.block.model.ChainContext;
 import io.nuls.block.model.ChainParameters;
 import io.nuls.block.model.po.BlockHeaderPo;
 import io.nuls.block.service.BlockService;
-import io.nuls.block.service.ChainStorageService;
+import io.nuls.block.storage.ChainStorageService;
 import io.nuls.block.utils.module.ConsensusUtil;
 import io.nuls.block.utils.module.NetworkUtil;
 import io.nuls.tools.basic.Result;

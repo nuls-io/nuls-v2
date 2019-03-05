@@ -11,7 +11,6 @@ import io.nuls.account.service.AccountKeyStoreService;
 import io.nuls.account.service.AccountService;
 import io.nuls.account.service.TransactionService;
 import io.nuls.account.util.AccountTool;
-import io.nuls.tools.log.Log;
 import io.nuls.base.data.Page;
 import io.nuls.base.signture.BlockSignature;
 import io.nuls.base.signture.P2PHKSignature;
@@ -27,8 +26,8 @@ import io.nuls.tools.data.FormatValidUtils;
 import io.nuls.tools.data.StringUtils;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.exception.NulsRuntimeException;
+import io.nuls.tools.log.Log;
 import io.nuls.tools.parse.JSONUtils;
-import org.bouncycastle.util.encoders.Hex;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -975,9 +974,9 @@ public class AccountCmd extends BaseCmd {
             //根据地址查询账户
             //TODO 如果需要验证账户是否存在，则需要chainId
             //account = accountService.getAccount(chainId, address);
-            byte[] pubKey = Hex.decode(pubKeyHexObj.toString());
-            byte[] sig = Hex.decode(sigHexObj.toString());
-            byte[] data = Hex.decode(dataHexObj.toString());
+            byte[] pubKey = HexUtil.decode(pubKeyHexObj.toString());
+            byte[] sig = HexUtil.decode(sigHexObj.toString());
+            byte[] data = HexUtil.decode(dataHexObj.toString());
             boolean result = true;
             if (!ECKey.verify(data, sig, pubKey)) {
                 result = false;

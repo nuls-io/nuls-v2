@@ -26,7 +26,6 @@
 package io.nuls.ledger.service.impl;
 
 import io.nuls.ledger.constant.LedgerConstant;
-import io.nuls.ledger.db.Repository;
 import io.nuls.ledger.model.UnconfirmedTx;
 import io.nuls.ledger.model.po.AccountState;
 import io.nuls.ledger.model.po.BlockSnapshotAccounts;
@@ -34,6 +33,7 @@ import io.nuls.ledger.model.po.UnconfirmedAmount;
 import io.nuls.ledger.model.po.UnconfirmedNonce;
 import io.nuls.ledger.service.AccountStateService;
 import io.nuls.ledger.service.FreezeStateService;
+import io.nuls.ledger.storage.Repository;
 import io.nuls.ledger.utils.CoinDataUtils;
 import io.nuls.ledger.utils.LedgerUtils;
 import io.nuls.ledger.utils.LockerUtils;
@@ -43,6 +43,7 @@ import io.nuls.tools.core.annotation.Service;
 
 import java.math.BigInteger;
 import java.util.List;
+
 /**
  * Created by wangkun23 on 2018/11/29.
  * update by lanjinsheng 2018/12/29.
@@ -57,24 +58,26 @@ public class AccountStateServiceImpl implements AccountStateService {
 
     @Override
     public AccountState createAccount(String address, int addressChainId, int assetChainId, int assetId) {
-        AccountState accountState = new AccountState(address,addressChainId,assetChainId, assetId, LedgerConstant.INIT_NONCE);
+        AccountState accountState = new AccountState(address, addressChainId, assetChainId, assetId, LedgerConstant.INIT_NONCE);
         byte[] key = LedgerUtils.getKey(address, assetChainId, assetId);
         repository.createAccountState(key, accountState);
         return accountState;
     }
+
     @Override
     public void updateAccountStateByTx(String assetKey, BlockSnapshotAccounts blockSnapshotAccounts, AccountState accountState) throws Exception {
         //同步下未确认交易账户数据
         synchronized (LockerUtils.getAccountLocker(assetKey)) {
-            AccountState dbAccountState = repository.getAccountState(accountState.getAddressChainId(),assetKey.getBytes(LedgerConstant.DEFAULT_ENCODING));
-            List<UnconfirmedNonce> unconfirmedNonces = CoinDataUtils.getUnconfirmedNonces(accountState.getNonce(),dbAccountState.getUnconfirmedNonces());
-            accountState.setUnconfirmedNonces( unconfirmedNonces);
-            List<UnconfirmedAmount> unconfirmedAmounts = CoinDataUtils.getUnconfirmedAmounts(accountState.getTxHash(),dbAccountState.getUnconfirmedAmounts());
+            AccountState dbAccountState = repository.getAccountState(accountState.getAddressChainId(), assetKey.getBytes(LedgerConstant.DEFAULT_ENCODING));
+            List<UnconfirmedNonce> unconfirmedNonces = CoinDataUtils.getUnconfirmedNonces(accountState.getNonce(), dbAccountState.getUnconfirmedNonces());
+            accountState.setUnconfirmedNonces(unconfirmedNonces);
+            List<UnconfirmedAmount> unconfirmedAmounts = CoinDataUtils.getUnconfirmedAmounts(accountState.getTxHash(), dbAccountState.getUnconfirmedAmounts());
             accountState.setUnconfirmedAmounts(unconfirmedAmounts);
             repository.updateAccountState(assetKey.getBytes(LedgerConstant.DEFAULT_ENCODING), accountState);
             blockSnapshotAccounts.addAccountState(dbAccountState);
         }
     }
+
     @Override
     public void rollAccountState(String assetKey, AccountState accountState) throws Exception {
         //同步下未确认交易账户数据
@@ -82,95 +85,96 @@ public class AccountStateServiceImpl implements AccountStateService {
             repository.updateAccountState(assetKey.getBytes(LedgerConstant.DEFAULT_ENCODING), accountState);
         }
     }
+
     @Override
-    public void rollUnconfirmTx(int addressChainId,String assetKey,String nonce,String txHash) {
+    public void rollUnconfirmTx(int addressChainId, String assetKey, String nonce, String txHash) {
         //账户处理锁
         synchronized (LockerUtils.getAccountLocker(assetKey)) {
-               try {
-                   AccountState accountState = repository.getAccountState(addressChainId,assetKey.getBytes(LedgerConstant.DEFAULT_ENCODING));
-                   List<UnconfirmedNonce> list =  accountState.getUnconfirmedNonces();
-                   int i = 0;
-                   boolean hadRollNonce = rollUnconfirmedNonce(accountState,nonce);
-                   boolean hadRollAmount = rollUnconfirmedAmount(accountState,txHash);
-                   if(hadRollNonce || hadRollAmount) {
-                       repository.updateAccountState(assetKey.getBytes(LedgerConstant.DEFAULT_ENCODING), accountState);
-                   }
+            try {
+                AccountState accountState = repository.getAccountState(addressChainId, assetKey.getBytes(LedgerConstant.DEFAULT_ENCODING));
+                List<UnconfirmedNonce> list = accountState.getUnconfirmedNonces();
+                int i = 0;
+                boolean hadRollNonce = rollUnconfirmedNonce(accountState, nonce);
+                boolean hadRollAmount = rollUnconfirmedAmount(accountState, txHash);
+                if (hadRollNonce || hadRollAmount) {
+                    repository.updateAccountState(assetKey.getBytes(LedgerConstant.DEFAULT_ENCODING), accountState);
+                }
             } catch (Exception e) {
                 e.printStackTrace();
             }
         }
     }
 
-    private boolean rollUnconfirmedNonce(AccountState accountState,String nonce){
-        List<UnconfirmedNonce> list =  accountState.getUnconfirmedNonces();
+    private boolean rollUnconfirmedNonce(AccountState accountState, String nonce) {
+        List<UnconfirmedNonce> list = accountState.getUnconfirmedNonces();
         int i = 0;
         boolean hadRoll = false;
-        for(UnconfirmedNonce unconfirmedNonce : list){
+        for (UnconfirmedNonce unconfirmedNonce : list) {
             i++;
-            if(unconfirmedNonce.getNonce().equalsIgnoreCase(nonce)) {
-                hadRoll=true;
+            if (unconfirmedNonce.getNonce().equalsIgnoreCase(nonce)) {
+                hadRoll = true;
                 break;
             }
         }
         int size = list.size();
         //从第list的index=i-1起进行清空
-        if(hadRoll) {
-            for (int j = size; j >=i; j--) {
-                LoggerUtil.logger.debug("roll j={},nonce = {}",j,list.get(j-1).getNonce());
-                list.remove(j-1);
+        if (hadRoll) {
+            for (int j = size; j >= i; j--) {
+                LoggerUtil.logger.debug("roll j={},nonce = {}", j, list.get(j - 1).getNonce());
+                list.remove(j - 1);
             }
 
         }
         return hadRoll;
     }
 
-    private boolean rollUnconfirmedAmount(AccountState accountState,String txHash){
-        List<UnconfirmedAmount> list =  accountState.getUnconfirmedAmounts();
+    private boolean rollUnconfirmedAmount(AccountState accountState, String txHash) {
+        List<UnconfirmedAmount> list = accountState.getUnconfirmedAmounts();
         int i = 0;
         boolean hadRoll = false;
-        for(UnconfirmedAmount unconfirmedAmount : list){
+        for (UnconfirmedAmount unconfirmedAmount : list) {
             i++;
-            if(unconfirmedAmount.getTxHash().equalsIgnoreCase(txHash)) {
-                hadRoll=true;
+            if (unconfirmedAmount.getTxHash().equalsIgnoreCase(txHash)) {
+                hadRoll = true;
                 break;
             }
         }
         int size = list.size();
         //从第list的index=i-1起进行清空
-        if(hadRoll) {
-            for (int j = size; j >=i; j--) {
-                LoggerUtil.logger.debug("roll j={},nonce = {}",j,list.get(j-1).getTxHash());
-                list.remove(j-1);
+        if (hadRoll) {
+            for (int j = size; j >= i; j--) {
+                LoggerUtil.logger.debug("roll j={},nonce = {}", j, list.get(j - 1).getTxHash());
+                list.remove(j - 1);
             }
 
         }
         return hadRoll;
     }
+
     /**
-     *
      * @param address
      * @param assetChainId
      * @param assetId
      * @return
      */
     @Override
-    public  AccountState getAccountState(String address,int addressChainId, int assetChainId, int assetId) {
+    public AccountState getAccountState(String address, int addressChainId, int assetChainId, int assetId) {
         //账户处理锁
         synchronized (LockerUtils.getAccountLocker(address, assetChainId, assetId)) {
             byte[] key = LedgerUtils.getKey(address, assetChainId, assetId);
-            AccountState accountState = repository.getAccountState(addressChainId,key);
+            AccountState accountState = repository.getAccountState(addressChainId, key);
             if (null == accountState) {
-                accountState = new AccountState(address,addressChainId,assetChainId, assetId, LedgerConstant.INIT_NONCE);
+                accountState = new AccountState(address, addressChainId, assetChainId, assetId, LedgerConstant.INIT_NONCE);
                 repository.createAccountState(key, accountState);
             } else {
                 //清理未确认交易
-                if(accountState.getUnconfirmedNonces().size()>0){
-                    if(LedgerUtils.isExpiredNonce(accountState.getUnconfirmedNonces().get(0))){
+                if (accountState.getUnconfirmedNonces().size() > 0) {
+                    if (LedgerUtils.isExpiredNonce(accountState.getUnconfirmedNonces().get(0))) {
                         accountState.getUnconfirmedNonces().clear();
                     }
                 }
-                if(accountState.getUnconfirmedAmounts().size()>0){
-                    if(LedgerUtils.isExpiredAmount(accountState.getUnconfirmedAmounts().get(0))){
+                if (accountState.getUnconfirmedAmounts().size() > 0) {
+                    if (LedgerUtils.isExpiredAmount(accountState.getUnconfirmedAmounts().get(0))) {
                         accountState.getUnconfirmedAmounts().clear();
                     }
                 }
@@ -189,24 +193,23 @@ public class AccountStateServiceImpl implements AccountStateService {
     }
 
     /**
-     *
      * @param addressChainId
      * @param newNonce
      * @param unconfirmedTx
      */
     @Override
-    public void  setUnconfirmTx(int addressChainId, String newNonce, UnconfirmedTx unconfirmedTx){
+    public void setUnconfirmTx(int addressChainId, String newNonce, UnconfirmedTx unconfirmedTx) {
         //账户同步锁
-        synchronized (LockerUtils.getAccountLocker(unconfirmedTx.getAddress(),unconfirmedTx.getAssetChainId(),unconfirmedTx.getAssetId())) {
-            AccountState accountState = getAccountState(unconfirmedTx.getAddress(),addressChainId,unconfirmedTx.getAssetChainId(), unconfirmedTx.getAssetId());
-            if(unconfirmedTx.getSpendAmount().compareTo(BigInteger.ZERO)!=0) {
+        synchronized (LockerUtils.getAccountLocker(unconfirmedTx.getAddress(), unconfirmedTx.getAssetChainId(), unconfirmedTx.getAssetId())) {
+            AccountState accountState = getAccountState(unconfirmedTx.getAddress(), addressChainId, unconfirmedTx.getAssetChainId(), unconfirmedTx.getAssetId());
+            if (unconfirmedTx.getSpendAmount().compareTo(BigInteger.ZERO) != 0) {
                 UnconfirmedNonce unconfirmedNonce = new UnconfirmedNonce(newNonce);
                 accountState.addUnconfirmedNonce(unconfirmedNonce);
             }
-            UnconfirmedAmount unconfirmedAmount = new UnconfirmedAmount(unconfirmedTx.getEarnAmount(),unconfirmedTx.getSpendAmount());
+            UnconfirmedAmount unconfirmedAmount = new UnconfirmedAmount(unconfirmedTx.getEarnAmount(), unconfirmedTx.getSpendAmount());
             unconfirmedAmount.setTxHash(unconfirmedTx.getTxHash());
             accountState.addUnconfirmedAmount(unconfirmedAmount);
-            byte[] key = LedgerUtils.getKey(unconfirmedTx.getAddress(),unconfirmedTx.getAssetChainId(),unconfirmedTx.getAssetId());
+            byte[] key = LedgerUtils.getKey(unconfirmedTx.getAddress(), unconfirmedTx.getAssetChainId(), unconfirmedTx.getAssetId());
             //这个改变无需进行账户的snapshot
             try {
                 repository.updateAccountState(key, accountState);
@@ -215,9 +218,5 @@ public class AccountStateServiceImpl implements AccountStateService {
             }
         }
 
-    }
-    public static void main(String []args){
-        UnconfirmedTx unconfirmedTx = new UnconfirmedTx();
-        System.out.println(unconfirmedTx.getSpendAmount().compareTo(BigInteger.ZERO)!=0);
     }
 }
