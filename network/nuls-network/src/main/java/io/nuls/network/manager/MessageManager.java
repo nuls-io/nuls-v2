@@ -149,7 +149,6 @@ public class MessageManager extends BaseManager {
                     message = byteBuffer.readNulsData(message);
                     BaseMeesageHandlerInf handler = MessageHandlerFactory.getInstance().getHandler(header.getCommandStr());
                     result = handler.recieve(message, node);
-                    message = byteBuffer.readNulsData(message);
                 } else {
                     //外部消息，转外部接口
                     LoggerUtil.modulesMsgLogs(header.getCommandStr(), node, payLoadBody, "received");
