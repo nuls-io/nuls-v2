@@ -60,7 +60,9 @@ public class NulsRpcModuleBootstrap {
                         break;
                     case "s":
                         System.out.println("当前状态："+module.getState());
+                        break;
                         default:
+                            System.out.println("错误的输入,请输入f,d,s");
                             break;
                 }
             } catch (IOException e) {
