@@ -58,7 +58,7 @@ public class RequestByPeriodProcessor implements Runnable {
                 if (!connectData.getRequestPeriodLoopQueue().isEmpty()) {
                     sendPeriodQueue();
                 }
-                Thread.sleep(Constants.INTERVAL_TIMEMILLIS);
+                Thread.sleep(Constants.PROCESSOR_INTERVAL_TIMEMILLIS);
             } catch (Exception e) {
                 Log.error(e);
             }
