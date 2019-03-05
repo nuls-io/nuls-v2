@@ -22,7 +22,7 @@ public class NulsRpcModuleBootstrap {
     }
 
     public static void run(String scanPackage,String[] args){
-        SpringLiteContext.init(scanPackage);
+        SpringLiteContext.init(scanPackage,"io.nuls.rpc.modulebootstrap");
         RpcModule module;
         try {
             module = SpringLiteContext.getBean(RpcModule.class);

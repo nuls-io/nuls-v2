@@ -73,6 +73,7 @@ public abstract class RpcModule implements InitializingBean {
                 log.info("{}模块触发连接断开事件", module);
                 if (isRunning()) {
                     state = this.onDependenciesLoss(module);
+                    Objects.requireNonNull(state,"onDependenciesLoss return null state");
                 }
             });
         } catch (Exception e) {
@@ -161,6 +162,7 @@ public abstract class RpcModule implements InitializingBean {
         }
         if (dependencieReady && !isRunning()) {
             state = onDependenciesReady();
+            Objects.requireNonNull(state,"onDependenciesReady return null state");
         }
     }
 
