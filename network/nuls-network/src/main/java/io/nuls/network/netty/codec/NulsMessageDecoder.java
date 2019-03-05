@@ -26,7 +26,6 @@ package io.nuls.network.netty.codec;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.ByteToMessageDecoder;
-import io.nuls.network.manager.ConnectionManager;
 import io.nuls.network.manager.NodeGroupManager;
 
 import java.nio.ByteOrder;
@@ -41,9 +40,7 @@ import static io.nuls.network.utils.LoggerUtil.Log;
  * @date: 2018/8/7
  */
 public class NulsMessageDecoder extends ByteToMessageDecoder {
-    ConnectionManager connectionManager = ConnectionManager.getInstance();
     private NulsLengthFieldBasedFrameDecoder newDecoder = new NulsLengthFieldBasedFrameDecoder(ByteOrder.LITTLE_ENDIAN, MAX_FRAME_LENGTH, 4, 4, 16, 0, true);
-
     @Override
     protected void decode(ChannelHandlerContext ctx, ByteBuf in, List<Object> out) throws Exception {
         long readMagicNumber = in.getUnsignedIntLE(0);
@@ -53,9 +50,8 @@ public class NulsMessageDecoder extends ByteToMessageDecoder {
                 out.add(decoded);
             }
         } else {
-            Log.error("illegal message REC");
+            Log.error("readMagicNumber={} illegal message REC",readMagicNumber);
             in.clear();
-            //如果一个连接有多条链，此时通道需要保留，不该关闭连接
             ctx.close();
 
         }
