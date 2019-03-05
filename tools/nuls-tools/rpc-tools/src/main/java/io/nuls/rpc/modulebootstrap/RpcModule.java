@@ -75,19 +75,20 @@ public abstract class RpcModule implements InitializingBean {
             tryRunModule();
             ConnectData connectData = ConnectManager.getConnectDataByRole(module.getName());
             connectData.addCloseEvent(() -> {
-                log.warn("{}模块触发连接断开事件", module);
+                log.warn("RMB:{}模块触发连接断开事件", module);
                 if (isRunning()) {
                     state = this.onDependenciesLoss(module);
                     if(state == null){
                         log.error("onDependenciesReady return null state",new NullPointerException("onDependenciesReady return null state"));
                         System.exit(0);
                     }
+                    log.info("RMB:module state : {}",state);
                 }
             });
         } catch (Exception e) {
             e.printStackTrace();
         }
-        log.debug("ModuleReadyListener :{}", module);
+        log.info("RMB:ModuleReadyListener :{}", module);
     }
 
     /**
@@ -95,7 +96,7 @@ public abstract class RpcModule implements InitializingBean {
      * @param module
      */
     void followModule(Module module) {
-        log.info("registerModuleDependencies :{}", module);
+        log.info("RMB:registerModuleDependencies :{}", module);
         synchronized (this) {
             followerList.add(module);
         }
@@ -136,7 +137,7 @@ public abstract class RpcModule implements InitializingBean {
         Arrays.stream(this.getDependencies()).forEach(d -> dependencies.put(d, Boolean.FALSE));
         try {
             // Start server instance
-            NettyServer server = NettyServer.getInstance(ModuleE.valueOfAbbr(moduleInfo().getName()))
+            NettyServer server = NettyServer.getInstance(moduleInfo().getName(),moduleInfo().getName(),moduleInfo().getVersion())
                     .moduleRoles(new String[]{getRole()})
                     .moduleVersion(moduleInfo().getVersion())
                     .scanPackage(StringUtils.isBlank(getRpcCmdPackage()) ? modulePackage : getRpcCmdPackage())
@@ -151,6 +152,7 @@ public abstract class RpcModule implements InitializingBean {
             while (!doStart()) {
                 TimeUnit.SECONDS.sleep(10L);
             }
+            log.info("RMB:module is READY");
             state = RpcModuleState.Ready;
             this.notifyFollowerReady();
             tryRunModule();
@@ -164,20 +166,25 @@ public abstract class RpcModule implements InitializingBean {
      * 如果所有依赖准备就绪就触发onDependenciesReady
      */
     private synchronized void tryRunModule() {
+        if(!isReady()){
+            return ;
+        }
         Boolean dependencieReady = dependencies.isEmpty();
         if(!dependencieReady){
             dependencieReady = dependencies.entrySet().stream().allMatch(d -> d.getValue());
         }
         if (dependencieReady) {
             if(!isRunning()){
+                log.info("RMB:module try running");
                 state = onDependenciesReady();
                 if(state == null){
                     log.error("onDependenciesReady return null state",new NullPointerException("onDependenciesReady return null state"));
                     System.exit(0);
                 }
+                log.info("RMB:module state : {}",state);
             }
         }else{
-            log.info("dependencie state");
+            log.info("RMB:dependencie state");
             dependencies.entrySet().forEach(entry->log.info("{}:{}",entry.getKey().getName(),entry.getValue()));
         }
     }

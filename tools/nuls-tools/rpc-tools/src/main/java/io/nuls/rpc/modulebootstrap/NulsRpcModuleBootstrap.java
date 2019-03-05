@@ -9,6 +9,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.Arrays;
+import java.util.concurrent.CountDownLatch;
 
 /**
  * @Author: zhoulijun
@@ -66,6 +67,11 @@ public class NulsRpcModuleBootstrap {
             } catch (IOException e) {
                 e.printStackTrace();
             }
+        }
+        try {
+            new CountDownLatch(1).await();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
         }
     }
 
