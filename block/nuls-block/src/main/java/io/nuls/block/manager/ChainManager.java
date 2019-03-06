@@ -139,7 +139,8 @@ public class ChainManager {
         }
         if (!addForkChain(chainId, masterForkChain) || !chainStorageService.save(chainId, blockList)) {
             commonLog.info("*error occur when rollback master chain");
-            saveBlockToMasterChain(chainId, blockList);
+//            saveBlockToMasterChain(chainId, blockList);
+            append(masterChain, masterForkChain);
             return false;
         }
         //至此,主链回滚完成
@@ -152,7 +153,8 @@ public class ChainManager {
             boolean b = switchChain0(chainId, masterChain, chain, subChain);
             if (!b) {
                 removeForkChain(chainId, topForkChain);
-                saveBlockToMasterChain(chainId, blockList);
+//                saveBlockToMasterChain(chainId, blockList);
+                append(masterChain, masterForkChain);
                 return false;
             }
         }
@@ -216,12 +218,14 @@ public class ChainManager {
             newForkChain.setEndHeight(forkChain.getEndHeight());
             newForkChain.setPreviousHash(subChain.getPreviousHash());
             newForkChain.setHashList(hashList);
+            commonLog.info("*switchChain0 newForkChain-" + newForkChain);
 
             //4.低于subChain的链重新链接到主链masterChain
             SortedSet<Chain> lowerSubChains = forkChain.getSons().headSet(subChain);
             if (lowerSubChains.size() > 0) {
                 lowerSubChains.forEach(e -> e.setParent(masterChain));
                 masterChain.getSons().addAll(lowerSubChains);
+                lowerSubChains.forEach(e -> commonLog.info("*switchChain0 lowerSubChains-" + e));
             }
 
             //5.高于subChain的链重新链接到新生成的分叉链newForkChain
@@ -230,6 +234,7 @@ public class ChainManager {
                 higherSubChains.remove(subChain);
                 higherSubChains.forEach(e -> e.setParent(newForkChain));
                 newForkChain.setSons(higherSubChains);
+                higherSubChains.forEach(e -> commonLog.info("*switchChain0 higherSubChains-" + e));
             }
             addForkChain(chainId, newForkChain);
         }

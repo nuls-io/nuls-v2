@@ -24,6 +24,7 @@
     "value": "8008"
   },
   {
+
     "name": "network.self.chainId",
     "remark": "自有主网链id",
     "readOnly": "true",

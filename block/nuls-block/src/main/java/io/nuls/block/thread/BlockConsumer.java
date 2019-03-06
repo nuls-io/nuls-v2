@@ -22,6 +22,7 @@ package io.nuls.block.thread;
 
 import io.nuls.base.data.Block;
 import io.nuls.block.manager.ContextManager;
+import io.nuls.block.model.ChainContext;
 import io.nuls.block.service.BlockService;
 import io.nuls.tools.core.ioc.SpringLiteContext;
 import io.nuls.tools.log.logback.NulsLogger;
@@ -45,16 +46,11 @@ public class BlockConsumer implements Callable<Boolean> {
     private int chainId;
     private BlockingQueue<Block> queue;
     private BlockService blockService;
-    /**
-     * 是否继续本次下载，中途发生异常置为false
-     */
-    private boolean flag;
 
-    public BlockConsumer(int chainId, BlockingQueue<Block> queue, BlockDownloaderParams params, boolean flag) {
+    public BlockConsumer(int chainId, BlockingQueue<Block> queue, BlockDownloaderParams params) {
         this.params = params;
         this.chainId = chainId;
         this.queue = queue;
-        this.flag = flag;
         this.blockService = SpringLiteContext.getBean(BlockService.class);
     }
 
@@ -62,16 +58,17 @@ public class BlockConsumer implements Callable<Boolean> {
     public Boolean call() {
         long netLatestHeight = params.getNetLatestHeight();
         long startHeight = params.getLocalLatestHeight() + 1;
-        NulsLogger commonLog = ContextManager.getContext(chainId).getCommonLog();
+        ChainContext context = ContextManager.getContext(chainId);
+        NulsLogger commonLog = context.getCommonLog();
         Block block;
         commonLog.info("BlockConsumer start work");
         try {
-            while (startHeight <= netLatestHeight && flag) {
+            while (startHeight <= netLatestHeight && context.isDoSyn()) {
                 block = queue.take();
                 boolean saveBlock = blockService.saveBlock(chainId, block, true);
                 if (!saveBlock) {
                     commonLog.error("error occur when save syn blocks");
-                    flag = false;
+                    context.setDoSyn(false);
                     return false;
                 }
                 startHeight++;
@@ -81,7 +78,7 @@ public class BlockConsumer implements Callable<Boolean> {
         } catch (Exception e) {
             e.printStackTrace();
             commonLog.error("BlockConsumer stop work abnormally");
-            flag = false;
+            context.setDoSyn(false);
             return false;
         }
     }
