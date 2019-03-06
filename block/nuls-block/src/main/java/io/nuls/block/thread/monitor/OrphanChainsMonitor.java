@@ -102,16 +102,16 @@ public class OrphanChainsMonitor implements Runnable {
                         SortedSet<Chain> forkChains = ChainManager.getForkChains(chainId);
                         //标记、变更链属性阶段
                         for (Chain orphanChain : orphanChains) {
-                            commonLog.info("OrphanChainsMonitor-mark-begin");
+                            commonLog.debug("OrphanChainsMonitor-mark-begin");
                             mark(orphanChain, masterChain, forkChains, orphanChains);
-                            commonLog.info("OrphanChainsMonitor-mark-end");
+                            commonLog.debug("OrphanChainsMonitor-mark-end");
                         }
                         //复制、清除阶段
                         SortedSet<Chain> maintainedOrphanChains = new TreeSet<>(Chain.COMPARATOR);
                         for (Chain orphanChain : orphanChains) {
-                            commonLog.info("OrphanChainsMonitor-copy-begin");
+                            commonLog.debug("OrphanChainsMonitor-copy-begin");
                             copy(chainId, maintainedOrphanChains, orphanChain);
-                            commonLog.info("OrphanChainsMonitor-copy-end");
+                            commonLog.debug("OrphanChainsMonitor-copy-end");
                         }
                         ChainManager.setOrphanChains(chainId, maintainedOrphanChains);
                         forkChains.forEach(e -> e.setType(ChainTypeEnum.FORK));

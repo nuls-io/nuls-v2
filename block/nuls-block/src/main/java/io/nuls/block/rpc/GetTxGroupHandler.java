@@ -71,11 +71,11 @@ public class GetTxGroupHandler extends BaseCmd {
         }
 
         List<NulsDigestData> hashList = message.getTxHashList();
-        messageLog.info("recieve HashListMessage from node-" + nodeId + ", chainId:" + chainId + ", txcount:" + hashList.size() + ", hashList:" + hashList);
+        messageLog.debug("recieve HashListMessage from node-" + nodeId + ", chainId:" + chainId + ", txcount:" + hashList.size() + ", hashList:" + hashList);
         TxGroupMessage request = new TxGroupMessage();
         List<Transaction> transactions = TransactionUtil.getTransactions(chainId, hashList);
-        messageLog.info("transactions size:" + transactions.size());
-        transactions.forEach(e -> messageLog.info("transaction hash:" + e.getHash()));
+        messageLog.debug("transactions size:" + transactions.size());
+        transactions.forEach(e -> messageLog.debug("transaction hash:" + e.getHash()));
         request.setBlockHash(message.getBlockHash());
         request.setTransactions(transactions);
         NetworkUtil.sendToNode(chainId, request, nodeId, TXGROUP_MESSAGE);
