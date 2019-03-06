@@ -136,22 +136,22 @@ public class TestTx {
 //        importPriKey("009ad5018ed1fc162c5320b9ae496984dd10227086ad86ea954a209597ff9b7d3a");//22 5MR_2Cj9tfgQpdeF7nDy5wyaGG6MZ35H3rA
 //        importPriKey("00c805d2d6d5e06f57fdfb1aff56ef3c2dd15eee88f36fa7d45d368c352ec5ec0d");//23 5MR_2CWKhFuoGVraaxL5FYY3RsQLjLDN7jw
 //        importPriKey("00c77707b21eece6c1ce0b8add04db79dc846f36830effe5c5ae2aced00097fafb");//24 5MR_2CgwCFRoJ8KX37xNqjjR7ttYuJsg8rk
-        importPriKey("00def3b0f4bfad2a6abb5f6957829e752a1a30806edc35e98016425d578fdc4e77", password);//25 5MR_2CjZkQsN7EnEPcaLgNrMrp6wpPGN6xo
-        importPriKey("1c2b9fd4417c1aad8ae9f24c982ff294eb50a6462b873b79a879e805a9990346", password);//26 5MR_2CeG11nRqx7nGNeh8hTXADibqfSYeNu
-        importPriKey("00c98ecfd3777745270cacb9afba17ef0284769a83ff2adb4106b8a0baaec9452c");//27 5MR_2CVCFWH7o8AmrTBPLkdg2dYH1UCUJiM
-        importPriKey("23848d45b4b34aca8ff24b00949a25a2c9175faf283675128e189eee8b085942");//28 5MR_2CfUsasd33vQV3HqGw6M3JwVsuVxJ7r
-        importPriKey("009560d5ed6587822b7aee6f318f50b312c281e4f330b6990396881c6d3f870bc1");//29 5MR_2CVuGjQ3CYVkhFszxfSt6sodg1gDHYF
-
-        importPriKey("00fffd585ed08dddf0d034236aa1ea85abd2e4e69981617ee477adf6cdcf50f4d5");//打包地址 5MR_2Ch8CCnLwoLWFZ45pFEZSmo1C1pkPFA
+//        importPriKey("00def3b0f4bfad2a6abb5f6957829e752a1a30806edc35e98016425d578fdc4e77", password);//25 5MR_2CjZkQsN7EnEPcaLgNrMrp6wpPGN6xo
+//        importPriKey("1c2b9fd4417c1aad8ae9f24c982ff294eb50a6462b873b79a879e805a9990346", password);//26 5MR_2CeG11nRqx7nGNeh8hTXADibqfSYeNu
+//        importPriKey("00c98ecfd3777745270cacb9afba17ef0284769a83ff2adb4106b8a0baaec9452c");//27 5MR_2CVCFWH7o8AmrTBPLkdg2dYH1UCUJiM
+//        importPriKey("23848d45b4b34aca8ff24b00949a25a2c9175faf283675128e189eee8b085942");//28 5MR_2CfUsasd33vQV3HqGw6M3JwVsuVxJ7r
+//        importPriKey("009560d5ed6587822b7aee6f318f50b312c281e4f330b6990396881c6d3f870bc1");//29 5MR_2CVuGjQ3CYVkhFszxfSt6sodg1gDHYF
+//
+//        importPriKey("00fffd585ed08dddf0d034236aa1ea85abd2e4e69981617ee477adf6cdcf50f4d5");//打包地址 5MR_2Ch8CCnLwoLWFZ45pFEZSmo1C1pkPFA
     }
 
     @Test
     public void createAgentTx() throws Exception {
-        BigInteger balance = LedgerCall.getBalance(chain, AddressTool.getAddress(address23), assetChainId, assetId);
+        BigInteger balance = LedgerCall.getBalance(chain, AddressTool.getAddress(address21), assetChainId, assetId);
         System.out.println(balance.longValue());
 
         //组装创建节点交易
-        Map agentTxMap = this.createAgentTx(address27, "5MR_2Ch8CCnLwoLWFZ45pFEZSmo1C1pkPFA");
+        Map agentTxMap = this.createAgentTx(address22, "5MR_2CbdqKcZktcxntG14VuQDy8YHhc6ZqW");
         //调用接口
         Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.CS.abbr, "cs_createAgent", agentTxMap);
         Map result = (HashMap) (((HashMap) cmdResp2.getResponseData()).get("cs_createAgent"));
@@ -167,10 +167,10 @@ public class TestTx {
     @Test
     public void depositToAgent() throws Exception {
         //组装委托节点交易
-        String agentHash = "0020bd925c3b7f34577887c2091d087630c2cf9ca165b709a08b303a8cdf7a5b3585";
+        String agentHash = "0020fe9361bf2b2648def8cf4a10b2d6dccd6ed9f10fbb4a7f07a009f5f9a45dfe42";
         Map<String, Object> dpParams = new HashMap<>();
         dpParams.put("chainId", chainId);
-        dpParams.put("address", address27);
+        dpParams.put("address", address22);
         dpParams.put("agentHash", agentHash);
         dpParams.put("deposit", 200000 * 100000000L);
         Response dpResp = ResponseMessageProcessor.requestAndResponse(ModuleE.CS.abbr, "cs_depositToAgent", dpParams);
@@ -267,8 +267,8 @@ public class TestTx {
 
     @Test
     public void removeAccountTest() throws Exception {
-        removeAccount("5MR_2Cb86fpFbuY4Lici8MJStNxDFYH6kRB");
-        removeAccount(address26);
+        //removeAccount("5MR_2Cb86fpFbuY4Lici8MJStNxDFYH6kRB");
+        removeAccount(address21);
     }
 
     public void importPriKey(String priKey){
