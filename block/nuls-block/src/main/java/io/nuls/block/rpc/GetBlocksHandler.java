@@ -73,7 +73,7 @@ public class GetBlocksHandler extends BaseCmd {
             messageLog.error("PARAMETER_ERROR");
             return failed(BlockErrorCode.PARAMETER_ERROR);
         }
-        messageLog.info("recieve HeightRangeMessage from node-" + nodeId + ", chainId:" + chainId + ", start:" + startHeight + ", end:" + endHeight);
+        messageLog.debug("recieve HeightRangeMessage from node-" + nodeId + ", chainId:" + chainId + ", start:" + startHeight + ", end:" + endHeight);
         NulsDigestData requestHash;
         try {
             requestHash = NulsDigestData.calcDigestData(message.serialize());
