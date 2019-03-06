@@ -537,7 +537,7 @@ public class AccountServiceImpl implements AccountService, InitializingBean {
         if (!ECKey.isValidPrivteHex(prikey)) {
             throw new NulsRuntimeException(AccountErrorCode.PRIVATE_KEY_WRONG);
         }
-        if (!FormatValidUtils.validPassword(password)) {
+        if (StringUtils.isNotBlank(password) && !FormatValidUtils.validPassword(password)) {
             throw new NulsRuntimeException(AccountErrorCode.PASSWORD_IS_WRONG);
         }
         //not allowed to cover
@@ -557,7 +557,7 @@ public class AccountServiceImpl implements AccountService, InitializingBean {
             throw new NulsRuntimeException(AccountErrorCode.PRIVATE_KEY_WRONG);
         }
         //encrypting account private key
-        if (FormatValidUtils.validPassword(password)) {
+        if (StringUtils.isNotBlank(password) && FormatValidUtils.validPassword(password)) {
             account.encrypt(password);
         }
         //Query account already exists
