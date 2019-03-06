@@ -130,34 +130,6 @@ public class NodesContainer implements Serializable {
         return availableNodes;
     }
 
-    public NodesContainer(NodesContainerPo containerPo) {
-        Node node = null;
-        if (containerPo.getDisConnectNodes() != null) {
-            for (NodePo nodePo : containerPo.getDisConnectNodes()) {
-                node = (Node) nodePo.parseDto();
-                disconnectNodes.put(node.getId(), node);
-            }
-        }
-        if (containerPo.getUncheckNodes() != null) {
-            for (NodePo nodePo : containerPo.getUncheckNodes()) {
-                node = (Node) nodePo.parseDto();
-                uncheckNodes.put(node.getId(), node);
-            }
-        }
-        if (containerPo.getFailNodes() != null) {
-            for (NodePo nodePo : containerPo.getFailNodes()) {
-                node = (Node) nodePo.parseDto();
-                failNodes.put(node.getId(), node);
-            }
-        }
-        if (containerPo.getCanConnectNodes() != null) {
-            for (NodePo nodePo : containerPo.getCanConnectNodes()) {
-                node = (Node) nodePo.parseDto();
-                canConnectNodes.put(node.getId(), node);
-            }
-        }
-    }
-
     public boolean markCanuseNodeByIp(String ip, int type) {
         if (type == NodeStatusEnum.AVAILABLE) {
             inNodes.put(ip, 1);
