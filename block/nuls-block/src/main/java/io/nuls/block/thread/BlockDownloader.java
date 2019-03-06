@@ -24,6 +24,7 @@ package io.nuls.block.thread;
 
 import io.nuls.base.data.Block;
 import io.nuls.block.manager.ContextManager;
+import io.nuls.block.message.HeightRangeMessage;
 import io.nuls.block.model.ChainContext;
 import io.nuls.block.model.ChainParameters;
 import io.nuls.block.model.Node;
@@ -97,7 +98,10 @@ public class BlockDownloader implements Callable<Boolean> {
                 if (startHeight + size > netLatestHeight) {
                     size = (int) (netLatestHeight - startHeight + 1);
                 }
-                BlockWorker worker = new BlockWorker(startHeight, size, chainId, node);
+                long endHeight = startHeight + size - 1;
+                //组装批量获取区块消息
+                HeightRangeMessage message = new HeightRangeMessage(startHeight, endHeight);
+                BlockWorker worker = new BlockWorker(startHeight, size, chainId, node, message);
                 Future<BlockDownLoadResult> future = executor.submit(worker);
                 futures.offer(future);
                 startHeight += size;

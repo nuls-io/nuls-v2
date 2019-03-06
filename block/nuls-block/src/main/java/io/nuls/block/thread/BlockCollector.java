@@ -25,6 +25,7 @@ package io.nuls.block.thread;
 import io.nuls.base.data.Block;
 import io.nuls.block.cache.CacheHandler;
 import io.nuls.block.manager.ContextManager;
+import io.nuls.block.message.HeightRangeMessage;
 import io.nuls.block.model.ChainContext;
 import io.nuls.block.model.Node;
 import io.nuls.tools.log.logback.NulsLogger;
@@ -126,12 +127,15 @@ public class BlockCollector implements Runnable {
 
     private BlockDownLoadResult downloadBlockFromNode(long startHeight, int size, Node node) {
         commonLog.info("retry download blocks, node:" + node + ", start:" + startHeight);
-        BlockWorker worker = new BlockWorker(startHeight, size, chainId, node);
+        long endHeight = startHeight + size - 1;
+        //组装批量获取区块消息
+        HeightRangeMessage message = new HeightRangeMessage(startHeight, endHeight);
+        BlockWorker worker = new BlockWorker(startHeight, size, chainId, node, message);
         Future<BlockDownLoadResult> submit = executor.submit(worker);
         try {
             return submit.get();
         } catch (Exception e) {
-            return new BlockDownLoadResult();
+            return new BlockDownLoadResult(message.getHash(), startHeight, size, node, false, 0);
         }
     }
 

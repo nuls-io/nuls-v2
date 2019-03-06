@@ -58,13 +58,11 @@ public class BlockWorker implements Callable<BlockDownLoadResult> {
     private int size;
     private int chainId;
     private Node node;
+    private HeightRangeMessage message;
 
     @Override
     public BlockDownLoadResult call() {
         boolean b = false;
-        long endHeight = startHeight + size - 1;
-        //组装批量获取区块消息
-        HeightRangeMessage message = new HeightRangeMessage(startHeight, endHeight);
         //计算本次请求hash,用来跟踪本次异步请求
         NulsDigestData messageHash = message.getHash();
         ChainContext context = ContextManager.getContext(chainId);
@@ -86,8 +84,7 @@ public class BlockWorker implements Callable<BlockDownLoadResult> {
             int interval = context.getParameters().getWaitInterval();
             int count = 0;
             while (real < size && count < MAX_LOOP) {
-                commonLog.info("#############message.getStartHeight()-" + message.getStartHeight() + ",message.getEndHeight()-" + message.getEndHeight());
-                commonLog.info("#############real-" + real + ",expect-" + size + ",count-" + count + ",node-" +node.getId());
+                commonLog.info("#start-" + message.getStartHeight() + ",end-" + message.getEndHeight() + "#real-" + real + ",expect-" + size + ",count-" + count + ",node-" +node.getId());
                 Thread.sleep(interval * (size - real));
                 blockList = CacheHandler.getBlockList(chainId, messageHash);
                 real = blockList.size();
