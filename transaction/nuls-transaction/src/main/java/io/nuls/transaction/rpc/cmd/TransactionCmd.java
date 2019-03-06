@@ -513,7 +513,7 @@ public class TransactionCmd extends BaseCmd {
     }
 
     /**
-     * 创建交易接口(该接口应该为外部客户端接口,本不应该写在此处)
+     * 创建跨链交易接口
      *
      * @param params
      * @return
