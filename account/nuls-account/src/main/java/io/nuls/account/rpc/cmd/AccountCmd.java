@@ -864,7 +864,8 @@ public class AccountCmd extends BaseCmd {
             Object addressObj = params == null ? null : params.get(RpcParameterNameConstant.ADDRESS);
             Object passwordObj = params == null ? null : params.get(RpcParameterNameConstant.PASSWORD);
             Object dataHexObj = params == null ? null : params.get(RpcParameterNameConstant.DATA_HEX);
-            if (params == null || chainIdObj == null || addressObj == null || passwordObj == null || dataHexObj == null) {
+            //|| passwordObj == null
+            if (params == null || chainIdObj == null || addressObj == null || dataHexObj == null) {
                 throw new NulsRuntimeException(AccountErrorCode.NULL_PARAMETER);
             }
 
