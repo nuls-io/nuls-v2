@@ -70,7 +70,7 @@ public class CommonRpcOperation {
         return accountList;
     }
 
-    public static Map<String,Object> getAccountByAddress(int chainId, String address) {
+    public static Map<String, Object> getAccountByAddress(int chainId, String address) {
         HashMap accountMap = null;
         try {
             Map<String, Object> params = new HashMap<>();
@@ -125,19 +125,16 @@ public class CommonRpcOperation {
 
     /**
      * 创建多签账户
-     *
-     *
-     *
-     * **/
+     **/
     public static MultiSigAccount createMultiSigAccount() throws Exception {
         MultiSigAccount multiSigAccount = new MultiSigAccount();
         //List<String> accountList = createAccount(3);
-        List<String> accountList = List.of("5MR_2CkYEhXKCmUWTEsWRTnaWgYE8kJdfd5","5MR_2CcRgU3vDGp2uEG3rdzLdyMCbsiLFbJ","5MR_2CckymYvKM7NKpt6fpZproQYMtnGdaT");
+        List<String> accountList = List.of("5MR_2CkYEhXKCmUWTEsWRTnaWgYE8kJdfd5", "5MR_2CcRgU3vDGp2uEG3rdzLdyMCbsiLFbJ", "5MR_2CckymYvKM7NKpt6fpZproQYMtnGdaT");
         Map<String, Object> params = new HashMap<>();
         List<String> pubKeys = new ArrayList<>();
         List<byte[]> pubKeysBytesList = new ArrayList<>();
-        for (String address:accountList ) {
-            Map<String,Object> accountMap = getAccountByAddress(chainId,address);
+        for (String address : accountList) {
+            Map<String, Object> accountMap = getAccountByAddress(chainId, address);
             //pubKeys.add(HexUtil.encode(account.getPubKey()));
             assertNotNull(accountMap);
             Object pubKeyHexObj = accountMap.get("pubkeyHex");
@@ -162,26 +159,27 @@ public class CommonRpcOperation {
         assertNotNull(address);
         multiSigAccount.setAddress(new Address(address));
         int resultMinSigns = (int) result.get("minSigns");
-        assertEquals(resultMinSigns,2);
-        List<Map<String,String>> resultPubKeys = (List<Map<String,String>>) result.get("pubKeys");
+        assertEquals(resultMinSigns, 2);
+        List<Map<String, String>> resultPubKeys = (List<Map<String, String>>) result.get("pubKeys");
         assertNotNull(resultPubKeys);
-        assertEquals(resultPubKeys.size(),3);
-        for (Map<String,String> map : resultPubKeys) {
+        assertEquals(resultPubKeys.size(), 3);
+        for (Map<String, String> map : resultPubKeys) {
             pubKeysBytesList.add(HexUtil.decode(map.get("pubKey")));
         }
         multiSigAccount.setPubKeyList(pubKeysBytesList);
         return multiSigAccount;
     }
-/**
- *
- *
- * */
-    public static String importAccountByKeystoreFile(String filePath) {
+
+    /**
+     *
+     *
+     * */
+    public static String importAccountByKeystoreFile(String filePath, String password) {
         String address = null;
         try {
             File file = new File(filePath);
             byte[] bytes = copyToByteArray(file);
-            String keyStoreStr = new String(bytes,"UTF-8");
+            String keyStoreStr = new String(bytes, "UTF-8");
 
             //AccountKeyStoreDto accountKeyStoreDto = JSONUtils.json2pojo(new String(HexUtil.decode(keyStoreHexStr)), AccountKeyStoreDto.class);
 
@@ -189,7 +187,7 @@ public class CommonRpcOperation {
             params.put(Constants.VERSION_KEY_STR, version);
             params.put("chainId", chainId);
             params.put("keyStore", HexUtil.encode(bytes));
-            params.put("password", null);
+            params.put("password", password);
             params.put("overwrite", true);
             Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_importAccountByKeystore", params);
             HashMap result = (HashMap) ((HashMap) cmdResp.getResponseData()).get("ac_importAccountByKeystore");
@@ -231,7 +229,7 @@ public class CommonRpcOperation {
      *
      *
      * */
-    public static String importAccountByPriKeyWithOverwrite(String address,String priKey,String password) throws Exception {
+    public static String importAccountByPriKeyWithOverwrite(String address, String priKey, String password) throws Exception {
 
         Map<String, Object> params = new HashMap<>();
         params.put(Constants.VERSION_KEY_STR, version);
