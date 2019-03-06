@@ -1,25 +1,28 @@
 package io.nuls.api.model.po.db;
 
+import io.nuls.api.constant.Constant;
 import lombok.Data;
 import org.bson.Document;
 
 import java.math.BigInteger;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Data
 public class TransactionInfo {
 
     private String hash;
 
-    private Integer type;
+    private int type;
 
-    private Long height;
+    private long height;
 
-    private Integer size;
+    private int size;
 
     private BigInteger fee;
 
-    private Long createTime;
+    private long createTime;
 
     private String remark;
 
@@ -36,39 +39,39 @@ public class TransactionInfo {
     private BigInteger value;
 
 
-//    public void calcValue() {
-//        long value = 0;
-//        if (type == TransactionConstant.TX_TYPE_COINBASE ||
-//                type == TransactionConstant.TX_TYPE_STOP_AGENT ||
-//                type == TransactionConstant.TX_TYPE_CANCEL_DEPOSIT) {
-//            if (tos != null) {
-//                for (Output output : tos) {
-//                    value += output.getValue();
-//                }
-//            }
-//        } else if (type == TransactionConstant.TX_TYPE_TRANSFER ||
-//                type == TransactionConstant.TX_TYPE_ALIAS ||
-//                type == TransactionConstant.TX_TYPE_CONTRACT_TRANSFER) {
-//            Set<String> addressSet = new HashSet<>();
-//            for (Input input : froms) {
-//                addressSet.add(input.getAddress());
-//            }
-//            for (Output output : tos) {
-//                if (!addressSet.contains(output.getAddress())) {
-//                    value += output.getValue();
-//                }
-//            }
-//        } else if (type == TransactionConstant.TX_TYPE_REGISTER_AGENT || type == TransactionConstant.TX_TYPE_JOIN_CONSENSUS) {
-//            for (Output output : tos) {
-//                if (output.getLockTime() == -1) {
-//                    value += output.getValue();
-//                }
-//            }
-//        } else {
-//            value = this.fee;
-//        }
-//        this.value = value;
-//    }
+    public void calcValue() {
+        BigInteger value = BigInteger.ZERO;
+        if (type == Constant.TX_TYPE_COINBASE ||
+                type == Constant.TX_TYPE_STOP_AGENT ||
+                type == Constant.TX_TYPE_CANCEL_DEPOSIT) {
+            if (coinTos != null) {
+                for (CoinToInfo output : coinTos) {
+                    value.add(output.getAmount());
+                }
+            }
+        } else if (type == Constant.TX_TYPE_TRANSFER ||
+                type == Constant.TX_TYPE_ALIAS ||
+                type == Constant.TX_TYPE_CONTRACT_TRANSFER) {
+            Set<String> addressSet = new HashSet<>();
+            for (CoinFromInfo input : coinFroms) {
+                addressSet.add(input.getAddress());
+            }
+            for (CoinToInfo output : coinTos) {
+                if (!addressSet.contains(output.getAddress())) {
+                    value.add(output.getAmount());
+                }
+            }
+        } else if (type == Constant.TX_TYPE_REGISTER_AGENT || type == Constant.TX_TYPE_JOIN_CONSENSUS) {
+            for (CoinToInfo output : coinTos) {
+                if (output.getLockTime() == -1) {
+                    value.add(output.getAmount());
+                }
+            }
+        } else {
+            value = this.fee;
+        }
+        this.value = value;
+    }
 
     public Document toDocument() {
         Document document = new Document();

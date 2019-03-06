@@ -17,7 +17,7 @@ public class DepositInfo extends TxDataInfo {
 
     private String address;
 
-    private Long createTime;
+    private long createTime;
 
     private String deleteKey;
 
@@ -30,4 +30,10 @@ public class DepositInfo extends TxDataInfo {
     private boolean isNew;
     // 0 加入共识，1 退出共识
     private int type;
+
+    public void copyInfoWithDeposit(DepositInfo depositInfo) {
+        this.amount = depositInfo.amount;
+        this.address = depositInfo.address;
+        this.agentHash = depositInfo.getAgentHash();
+    }
 }

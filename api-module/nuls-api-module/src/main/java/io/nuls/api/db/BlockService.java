@@ -15,10 +15,15 @@ public class BlockService {
     private MongoDBService mongoDBService;
 
     public BlockHeaderInfo getBlockHeader(int chainId, long height) {
-        Document document = mongoDBService.findOne(MongoTableConstant.BLOCK_HEADER_TABLE, Filters.eq("_id", height));
+        Document document = mongoDBService.findOne(MongoTableConstant.BLOCK_HEADER_TABLE + chainId, Filters.eq("_id", height));
         if (document == null) {
             return null;
         }
         return DocumentTransferTool.toInfo(document, "height", BlockHeaderInfo.class);
+    }
+
+    public void saveBLockHeaderInfo(int chainId, BlockHeaderInfo blockHeaderInfo) {
+        Document document = DocumentTransferTool.toDocument(blockHeaderInfo, "height");
+        mongoDBService.insertOne(MongoTableConstant.BLOCK_HEADER_TABLE + chainId, document);
     }
 }

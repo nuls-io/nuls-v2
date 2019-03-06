@@ -2,17 +2,14 @@ package io.nuls.api.analysis;
 
 import io.nuls.api.constant.CommandConstant;
 import io.nuls.api.constant.Constant;
-import io.nuls.api.model.po.db.BlockHeaderInfo;
 import io.nuls.api.model.po.db.BlockInfo;
 import io.nuls.api.rpc.RpcCall;
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.data.Block;
-import io.nuls.base.data.BlockExtendsData;
 import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.model.ModuleE;
-import io.nuls.tools.core.annotation.Component;
+import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.exception.NulsException;
-import org.bouncycastle.util.encoders.Hex;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -26,7 +23,7 @@ public class WalletRpcHandler {
         params.put("height", height);
         try {
             String blockHex = (String) RpcCall.request(ModuleE.BL.abbr, CommandConstant.GET_BLOCK_BY_HEIGHT, params);
-            byte[] bytes = Hex.decode(blockHex);
+            byte[] bytes = HexUtil.decode(blockHex);
             Block block = new Block();
             block.parse(new NulsByteBuffer(bytes));
             return AnalysisHandler.toBlockInfo(block, chainID);

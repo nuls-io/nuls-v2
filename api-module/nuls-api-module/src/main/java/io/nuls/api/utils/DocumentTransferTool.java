@@ -5,6 +5,7 @@ import io.nuls.tools.exception.NulsRuntimeException;
 import org.bson.Document;
 
 import java.lang.reflect.Field;
+import java.math.BigInteger;
 
 public class DocumentTransferTool {
 
@@ -21,7 +22,16 @@ public class DocumentTransferTool {
                 if (field.getName().equals("isNew")) {
                     continue;
                 }
-                document.append(field.getName(), field.get(obj));
+                if (field.getType().getName().equals("java.math.BigInteger")) {
+                    BigInteger value = (BigInteger) field.get(obj);
+                    if (value == null) {
+                        value = BigInteger.ZERO;
+                    }
+                    document.append(field.getName(), value.toString());
+                } else {
+                    document.append(field.getName(), field.get(obj));
+                }
+
             } catch (IllegalAccessException e) {
                 throw new NulsRuntimeException(ApiErrorCode.DATA_PARSE_ERROR, "class to Document fail");
             }
@@ -42,7 +52,13 @@ public class DocumentTransferTool {
                 if (field.getName().equals("isNew")) {
                     continue;
                 }
-                if (field.getName().equals(_id)) {
+                if (field.getType().getName().equals("java.math.BigInteger")) {
+                    BigInteger value = (BigInteger) field.get(obj);
+                    if (value == null) {
+                        value = BigInteger.ZERO;
+                    }
+                    document.append(field.getName(), value.toString());
+                } else if (field.getName().equals(_id)) {
                     document.append("_id", field.get(obj));
                 } else {
                     document.append(field.getName(), field.get(obj));
@@ -66,7 +82,12 @@ public class DocumentTransferTool {
                 if (field.getName().equals("isNew")) {
                     continue;
                 }
-                field.set(instance, document.get(field.getName()));
+                if (field.getType().getName().equals("java.math.BigInteger")) {
+                    field.set(instance, new BigInteger(document.get(field.getName()).toString()));
+                } else {
+                    field.set(instance, document.get(field.getName()));
+                }
+
             }
             return instance;
         } catch (Exception e) {
@@ -87,7 +108,9 @@ public class DocumentTransferTool {
                 if (field.getName().equals("isNew")) {
                     continue;
                 }
-                if (_id.equals(field.getName())) {
+                if (field.getType().getName().equals("java.math.BigInteger")) {
+                    field.set(instance, new BigInteger(document.get(field.getName()).toString()));
+                } else if (_id.equals(field.getName())) {
                     field.set(instance, document.get("_id"));
                 } else {
                     field.set(instance, document.get(field.getName()));

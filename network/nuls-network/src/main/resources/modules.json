@@ -21,7 +21,7 @@
     "name": "network.self.server.port",
     "remark": "自有网络端口",
     "readOnly": "true",
-    "value": "8008"
+    "value": "8018"
   },
   {
     "name": "network.self.chainId",
@@ -33,7 +33,7 @@
     "name": "network.self.magic",
     "remark": "自有网络魔法参数",
     "readOnly": "true",
-    "value": "68866996"
+    "value": "68861996"
   },
   {
     "name": "network.self.max.in",

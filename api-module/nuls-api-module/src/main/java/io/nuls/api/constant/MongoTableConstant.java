@@ -2,13 +2,15 @@ package io.nuls.api.constant;
 
 public interface MongoTableConstant {
 
-    String CHAIN_ID_TABLE = "chain_id_table_";
+    String CHAIN_INFO_TABLE = "chain_info_table_";
 
     String SYNC_INFO_TABLE = "sync_info_table_";
     //区块信息表
     String BLOCK_HEADER_TABLE = "block_header_table_";
     //账户信息表
     String ACCOUNT_TABLE = "account_table_";
+    //资产信息表
+    String ACCOUNT_LEDGER_TABLE = "account_ledger_table_";
     //共识节点信息表
     String AGENT_TABLE = "agent_table_";
     //别名信息表
