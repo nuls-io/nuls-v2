@@ -51,27 +51,6 @@ public class RegisterInvoke extends BaseInvoke {
                 return ;
             }
             log.info("RMB:module rpc is ready");
-            while(!dependenices.stream().allMatch(dm->{
-                try {
-                    Response res = ResponseMessageProcessor.requestAndResponse(dm.getName(), "connectReady", null);
-                    Map rd = (Map) res.getResponseData();
-                    if(rd == null)return false;
-                    Boolean isReady = (Boolean) rd.get("connectReady");
-                    if (!res.isSuccess()) {
-                        return false;
-                    }
-                    return isReady;
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    return false;
-                }
-            })){
-                try {
-                    TimeUnit.SECONDS.sleep(5);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            };
             dependMap.entrySet().forEach(obj->{
                 Map.Entry<String, Map> entry = (Map.Entry<String, Map>) obj;
                 if(dependenices.stream().anyMatch(d->d.getName().equals(entry.getKey()))){

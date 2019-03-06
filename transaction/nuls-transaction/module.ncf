@@ -1,6 +1,6 @@
 [JAVA]
 APP_NAME=transaction
-MAIN_CLASS=io.nuls.transaction.TransactionBootStrap
+MAIN_CLASS=io.nuls.transaction.TransactionModule
 VERSION=1.0.0
 JOPT_XMS=256
 JOPT_XMX=256

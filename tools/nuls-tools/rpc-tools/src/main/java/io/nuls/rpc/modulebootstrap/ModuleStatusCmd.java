@@ -26,7 +26,6 @@ public class ModuleStatusCmd extends BaseCmd {
             description = "notify module is ready")
     public Response listenerDependenciesReady(Map<String, Object> map){
         Module module = JSONUtils.map2pojo(map, Module.class);
-        log.info("ModuleReadyListener :{}",module);
         rpcModule.listenerDependenciesReady(module);
         return success("ModuleReadyListener success");
     }
@@ -42,8 +41,6 @@ public class ModuleStatusCmd extends BaseCmd {
     @CmdAnnotation(cmd = "connectReady", version = 1.0, minEvent = 1,
             description = "check module rpc is ready")
     public Response connectReady(Map<String, Object> param) {
-//        Module module = JSONUtils.map2pojo(param, Module.class);
-//        rpcModule.followModule(module);
         return success(Boolean.valueOf(ConnectManager.isReady()));
     }
 

@@ -345,6 +345,8 @@ if [ -n "${DOMOCK}" ]; then
 	log "BUILD start-mykernel script"
 	cp "${BUILD_PATH}/start-mykernel.sh" "${MODULES_PATH}/start.sh"
 	chmod u+x "${MODULES_PATH}/start.sh"
+	cp "${BUILD_PATH}/check-status.sh" "${MODULES_PATH}/"
+	chmod u+x "${MODULES_PATH}/check-status.sh"
 fi
 
 
