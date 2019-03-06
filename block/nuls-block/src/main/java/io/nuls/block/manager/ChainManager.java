@@ -152,6 +152,9 @@ public class ChainManager {
             Chain subChain = switchChainPath.empty() ? null : switchChainPath.peek();
             boolean b = switchChain0(chainId, masterChain, chain, subChain);
             if (!b) {
+                commonLog.info("*switchChain0 fail masterChain-" + masterChain);
+                commonLog.info("*switchChain0 fail chain-" + chain);
+                commonLog.info("*switchChain0 fail subChain-" + subChain);
                 removeForkChain(chainId, topForkChain);
 //                saveBlockToMasterChain(chainId, blockList);
                 append(masterChain, masterForkChain);
@@ -187,7 +190,7 @@ public class ChainManager {
         commonLog.info("*switchChain0 forkChain=" + forkChain);
         commonLog.info("*switchChain0 subChain=" + subChain);
         //1.计算要从forkChain上添加到主链上多少个区块
-        int target = 0;
+        int target;
         if (subChain != null) {
             target = (int) (subChain.getStartHeight() - forkChain.getStartHeight());
         } else {

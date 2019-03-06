@@ -116,10 +116,6 @@ public class BlockBootstrap extends RpcModule {
         List<Integer> chainIds = ContextManager.chainIds;
         for (Integer chainId : chainIds) {
             ProtocolUtil.subscribe(chainId);
-            ChainContext context = ContextManager.getContext(chainId);
-            short version = context.getVersion();
-            Protocol protocol = context.getProtocolsMap().get(version);
-            Log.info("$$$$$$$$$" + protocol);
         }
         //开启区块同步线程
         ThreadUtils.createAndRunThread("block-synchronizer", BlockSynchronizer.getInstance());
