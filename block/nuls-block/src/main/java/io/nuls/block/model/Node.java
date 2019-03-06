@@ -69,6 +69,6 @@ public class Node {
             //下载失败，信用值减半，下限为0
             credit /= 2;
         }
-        System.out.println("################################node-" + id + ", duration-" + duration + ", credit-" + credit);
+//        System.out.println("################################node-" + id + ", duration-" + duration + ", credit-" + credit);
     }
 }

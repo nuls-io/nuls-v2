@@ -160,6 +160,7 @@ public class TextMessageHandler implements Runnable {
                     break;
             }
         } catch (Exception e) {
+            e.printStackTrace();
             Log.error(e.getMessage());
         }
     }

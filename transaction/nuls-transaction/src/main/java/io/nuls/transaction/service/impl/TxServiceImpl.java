@@ -1150,7 +1150,7 @@ public class TxServiceImpl implements TxService {
                     unconfirmedTxStorageService.putTx(chain.getChainId(), tx);
                     //保存到h2数据库
                     transactionH2Service.saveTxs(TxUtil.tx2PO(tx));
-                    TxUtil.txInformationDebugPrint(chain, tx);
+//                    TxUtil.txInformationDebugPrint(chain, tx);
                 }
             }
             verifyTxResult.setCode(VerifyTxResult.SUCCESS);

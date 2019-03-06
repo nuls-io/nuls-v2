@@ -1,7 +1,7 @@
 [
   {
     "key":"packingInterval",
-    "value":1000,
+    "value":10000,
     "readOnly":true
   },
   {

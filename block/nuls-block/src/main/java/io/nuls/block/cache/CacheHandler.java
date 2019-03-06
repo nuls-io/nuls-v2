@@ -22,9 +22,11 @@ package io.nuls.block.cache;
 
 import io.nuls.base.data.Block;
 import io.nuls.base.data.NulsDigestData;
+import io.nuls.block.manager.ContextManager;
 import io.nuls.block.message.BlockMessage;
 import io.nuls.block.message.CompleteMessage;
 import io.nuls.block.thread.BlockWorker;
+import io.nuls.tools.log.logback.NulsLogger;
 
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
@@ -99,7 +101,13 @@ public class CacheHandler {
         NulsDigestData requestHash = message.getRequestHash();
         List<Block> blockList = workerBlockCacher.get(chainId).get(requestHash);
         Block block = message.getBlock();
-        if (blockList != null && block != null && !blockList.contains(block)) {
+//        NulsLogger commonLog = ContextManager.getContext(chainId).getCommonLog();
+//        commonLog.info("###height###" + block.getHeader().getHeight() + "###hash###" + block.getHeader().getHash());
+//        commonLog.info("###blockList != null###" + (blockList != null));
+//        if (blockList != null) {
+//            commonLog.info("###!blockList.contains(block)###" + !blockList.contains(block));
+//        }
+        if (blockList != null && !blockList.contains(block)) {
             blockList.add(block);
             return;
         }
