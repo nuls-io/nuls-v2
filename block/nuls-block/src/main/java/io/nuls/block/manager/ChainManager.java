@@ -139,7 +139,6 @@ public class ChainManager {
         }
         if (!addForkChain(chainId, masterForkChain) || !chainStorageService.save(chainId, blockList)) {
             commonLog.info("*error occur when rollback master chain");
-//            saveBlockToMasterChain(chainId, blockList);
             append(masterChain, masterForkChain);
             return false;
         }
@@ -147,8 +146,10 @@ public class ChainManager {
         commonLog.info("*masterChain rollback complete");
 
         //3.依次添加最长分叉链路径上所有分叉链区块
+        List<Chain> delete = new ArrayList<>();
         while (!switchChainPath.empty()) {
             Chain chain = switchChainPath.pop();
+            delete.add(chain);
             Chain subChain = switchChainPath.empty() ? null : switchChainPath.peek();
             boolean b = switchChain0(chainId, masterChain, chain, subChain);
             if (!b) {
@@ -156,11 +157,12 @@ public class ChainManager {
                 commonLog.info("*switchChain0 fail chain-" + chain);
                 commonLog.info("*switchChain0 fail subChain-" + subChain);
                 removeForkChain(chainId, topForkChain);
-//                saveBlockToMasterChain(chainId, blockList);
                 append(masterChain, masterForkChain);
                 return false;
             }
         }
+        //6.收尾工作
+        delete.forEach(e -> deleteForkChain(chainId, e));
         commonLog.info("*switch chain complete");
         return true;
     }
@@ -243,7 +245,7 @@ public class ChainManager {
         }
 
         //6.收尾工作
-        deleteForkChain(chainId, forkChain);
+//        deleteForkChain(chainId, forkChain);
         return true;
     }
 
