@@ -143,6 +143,7 @@ public class AccountStateCmd extends BaseCmd {
         }else{
             rtMap.put("available",accountState.getAvailableAmount());
         }
+        rtMap.put("freeze",accountState.getFreezeTotal());
         return success(rtMap);
     }
 
