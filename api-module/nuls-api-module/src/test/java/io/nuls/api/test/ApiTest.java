@@ -1,10 +1,10 @@
 package io.nuls.api.test;
 
 import io.nuls.api.analysis.WalletRpcHandler;
+import io.nuls.api.db.BlockService;
 import io.nuls.api.model.po.db.BlockHeaderInfo;
 import io.nuls.api.model.po.db.BlockInfo;
 import io.nuls.api.model.po.db.TransactionInfo;
-import io.nuls.api.utils.DocumentTransferTool;
 import io.nuls.base.data.Block;
 import io.nuls.rpc.info.HostInfo;
 import io.nuls.rpc.model.ModuleE;
@@ -12,11 +12,10 @@ import io.nuls.rpc.netty.bootstrap.NettyServer;
 import io.nuls.rpc.netty.channel.manager.ConnectManager;
 import io.nuls.rpc.netty.processor.ResponseMessageProcessor;
 import io.nuls.tools.core.ioc.SpringLiteContext;
-import org.bson.Document;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.util.List;
+import java.math.BigInteger;
 
 import static io.nuls.api.constant.Constant.DEFAULT_SCAN_PACKAGE;
 import static io.nuls.api.constant.Constant.RPC_DEFAULT_SCAN_PACKAGE;
@@ -25,7 +24,7 @@ import static io.nuls.api.utils.LoggerUtil.commonLog;
 public class ApiTest {
 
 
-    @Before
+    //    @Before
     public void before() {
         SpringLiteContext.init(DEFAULT_SCAN_PACKAGE);
         try {
@@ -58,13 +57,14 @@ public class ApiTest {
 
         for (int i = 0; i < 10000; i++) {
             BlockInfo block = WalletRpcHandler.getBlockInfo(12345, i);
-            for(TransactionInfo tx : block.getTxList()) {
-                if(tx.getType() == 1) {
+            for (TransactionInfo tx : block.getTxList()) {
+                if (tx.getType() == 1) {
 
                 }
             }
         }
-
     }
+
+
 
 }

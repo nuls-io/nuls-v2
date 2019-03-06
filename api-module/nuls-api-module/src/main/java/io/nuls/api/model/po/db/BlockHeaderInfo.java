@@ -36,13 +36,13 @@ public class BlockHeaderInfo {
 
     private String hash;
 
-    private Long height;
+    private long height;
 
     private String preHash;
 
     private String merkleHash;
 
-    private Long createTime;
+    private long createTime;
 
     private String agentHash;
 
@@ -52,17 +52,17 @@ public class BlockHeaderInfo {
 
     private String agentAlias;
 
-    private Integer txCount;
+    private int txCount;
 
-    private Long roundIndex;
+    private long roundIndex;
 
     private BigInteger totalFee;
 
     private BigInteger reward;
 
-    private Integer size;
+    private int size;
 
-    private Integer packingIndexOfRound;
+    private int packingIndexOfRound;
 
     private String scriptSign;
 
@@ -70,9 +70,14 @@ public class BlockHeaderInfo {
 
     private boolean isSeedPacked;
 
-    private Long roundStartTime;
+    private long roundStartTime;
 
     private int agentVersion;
 
+    public void setByAgentInfo(AgentInfo agentInfo) {
+        this.agentHash = agentInfo.getTxHash();
+        this.agentId = agentInfo.getAgentId();
+        this.agentAlias = agentInfo.getAgentAlias();
+    }
 
 }

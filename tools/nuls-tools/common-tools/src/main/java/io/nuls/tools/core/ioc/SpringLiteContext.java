@@ -486,6 +486,13 @@ public class SpringLiteContext {
         autowireFields();
     }
 
+    public static void putBean(String beanName, Object bean) {
+        BEAN_TEMP_MAP.put(beanName, bean);
+        BEAN_TYPE_MAP.put(beanName, bean.getClass());
+        addClassNameMap(bean.getClass(), beanName);
+    }
+
+
     /**
      * 从上下文中删除一个类型的所有实例，请谨慎调用
      * Delete all instances of a type from the context, please call carefully.
