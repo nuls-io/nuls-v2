@@ -21,6 +21,7 @@
 package io.nuls.block.rpc;
 
 import io.nuls.base.basic.NulsByteBuffer;
+import io.nuls.base.data.Block;
 import io.nuls.block.cache.CacheHandler;
 import io.nuls.block.constant.BlockErrorCode;
 import io.nuls.block.manager.ContextManager;
@@ -90,10 +91,11 @@ public class BlockHandler extends BaseCmd {
             messageLog.error(e);
             return failed(BlockErrorCode.PARAMETER_ERROR);
         }
-        if (message.getBlock() == null) {
-            messageLog.debug("recieve null BlockMessage from node-" + nodeId + ", chainId:" + chainId + ", hash:" + message.getRequestHash());
+        Block block = message.getBlock();
+        if (block == null) {
+            messageLog.debug("recieve null BlockMessage from node-" + nodeId + ", chainId:" + chainId + ", msghash:" + message.getRequestHash());
         } else {
-            messageLog.debug("recieve BlockMessage from node-" + nodeId + ", chainId:" + chainId + ", hash:" + message.getRequestHash());
+            messageLog.debug("recieve BlockMessage from node-" + nodeId + ", chainId:" + chainId + ", hash:" + block.getHeader().getHash() + ", height-" + block.getHeader().getHeight());
         }
         CacheHandler.receiveBlock(chainId, message);
         return success();

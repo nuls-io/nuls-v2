@@ -1,8 +1,8 @@
 package io.nuls.transaction.storage.rocksdb;
 
 import io.nuls.tools.core.ioc.SpringLiteContext;
-import io.nuls.transaction.constant.TxConstant;
 import io.nuls.transaction.TransactionBootStrap;
+import io.nuls.transaction.constant.TxConstant;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;

@@ -87,6 +87,9 @@ public class ParametersStorageServiceImpl implements ParametersStorageService {
         try {
             var pos = new ArrayList<ChainParameters>();
             List<byte[]> valueList = RocksDBService.valueList(Constant.CHAIN_PARAMETERS);
+            if (valueList == null) {
+                return null;
+            }
             for (byte[] bytes : valueList) {
                 var po = new ChainParameters();
                 po.parse(new NulsByteBuffer(bytes));

@@ -113,6 +113,7 @@ public class LedgerBootstrap extends RpcModule {
 
     @Override
     public RpcModuleState onDependenciesReady() {
+        LoggerUtil.logger.info("Ledger onDependenciesReady");
         return RpcModuleState.Running;
     }
 

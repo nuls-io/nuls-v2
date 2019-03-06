@@ -513,7 +513,7 @@ public class TransactionCmd extends BaseCmd {
     }
 
     /**
-     * 创建交易接口(该接口应该为外部客户端接口,本不应该写在此处)
+     * 创建跨链交易接口
      *
      * @param params
      * @return
@@ -576,6 +576,7 @@ public class TransactionCmd extends BaseCmd {
             }
             chain.getPackaging().set(packaging);
             TxConfig.PACKAGING = packaging;
+            chain.getLogger().debug("节点是否是打包节点,状态变更为: {}", chain.getPackaging().get());
             return success();
         } catch (NulsException e) {
             errorLogProcess(chain, e);

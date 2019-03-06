@@ -713,6 +713,7 @@ public class PunishManager {
                 for (PunishLogPo punishLogPo : savedList) {
                     punishStorageService.delete(getPoKey(punishLogPo.getAddress(), PunishType.YELLOW.getCode(), punishLogPo.getHeight(), punishLogPo.getIndex()),chainId);
                 }
+                savedList.clear();
                 throw new NulsException(ConsensusErrorCode.SAVE_FAILED);
             } else {
                 savedList.add(po);

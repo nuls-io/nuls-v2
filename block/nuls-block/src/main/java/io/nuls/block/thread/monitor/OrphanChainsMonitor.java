@@ -102,16 +102,16 @@ public class OrphanChainsMonitor implements Runnable {
                         SortedSet<Chain> forkChains = ChainManager.getForkChains(chainId);
                         //标记、变更链属性阶段
                         for (Chain orphanChain : orphanChains) {
-                            commonLog.info("OrphanChainsMonitor-mark-begin");
+                            commonLog.debug("OrphanChainsMonitor-mark-begin");
                             mark(orphanChain, masterChain, forkChains, orphanChains);
-                            commonLog.info("OrphanChainsMonitor-mark-end");
+                            commonLog.debug("OrphanChainsMonitor-mark-end");
                         }
                         //复制、清除阶段
                         SortedSet<Chain> maintainedOrphanChains = new TreeSet<>(Chain.COMPARATOR);
                         for (Chain orphanChain : orphanChains) {
-                            commonLog.info("OrphanChainsMonitor-copy-begin");
+                            commonLog.debug("OrphanChainsMonitor-copy-begin");
                             copy(chainId, maintainedOrphanChains, orphanChain);
-                            commonLog.info("OrphanChainsMonitor-copy-end");
+                            commonLog.debug("OrphanChainsMonitor-copy-end");
                         }
                         ChainManager.setOrphanChains(chainId, maintainedOrphanChains);
                         forkChains.forEach(e -> e.setType(ChainTypeEnum.FORK));
@@ -133,8 +133,6 @@ public class OrphanChainsMonitor implements Runnable {
     }
 
     private void copy(Integer chainId, SortedSet<Chain> maintainedOrphanChains, Chain orphanChain) {
-        System.out.println("OrphanChainsMonitor orphanChain-" + orphanChain);
-        System.out.println("OrphanChainsMonitor after mark orphanChain type-" + orphanChain.getType());
         //如果标记为重复,orphanChain不会复制到新的孤儿链集合,也不会进入分叉链集合,所有orphanChain的直接子链标记为ChainTypeEnum.DUPLICATE
         if (orphanChain.getType().equals(ChainTypeEnum.DUPLICATE)) {
             orphanChain.getSons().forEach(e -> e.setType(ChainTypeEnum.DUPLICATE));

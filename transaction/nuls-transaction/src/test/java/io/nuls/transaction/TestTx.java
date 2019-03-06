@@ -25,7 +25,9 @@
 package io.nuls.transaction;
 
 import io.nuls.base.basic.AddressTool;
-import io.nuls.base.data.*;
+import io.nuls.base.data.Address;
+import io.nuls.base.data.Page;
+import io.nuls.base.data.Transaction;
 import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.info.HostInfo;
 import io.nuls.rpc.info.NoUse;
@@ -41,11 +43,12 @@ import io.nuls.transaction.model.bo.config.ConfigBean;
 import io.nuls.transaction.model.dto.CoinDTO;
 import io.nuls.transaction.model.dto.CrossTxTransferDTO;
 import io.nuls.transaction.rpc.call.LedgerCall;
+import io.nuls.transaction.utils.TxUtil;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.io.IOException;
+import java.io.*;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -61,21 +64,6 @@ import static org.junit.Assert.assertNotNull;
  */
 public class TestTx {
 
-    static int chainId = 12345;
-    static int assetChainId = 12345;
-//    static String address20 = "QXpkrbKqShZfopyck5jBQSFgbP9cD3930";
-//    static String address22 = "KS3wfAPFAmY8EwMFz21EXhJMXf8DV3930";
-//    static String address3 = "Vxb3xxatcFFTZZe3wynX6CfAsvzAx3930";
-//    static String address4 = "R9CxmNqtBDEm9iWX2Cod46QGCNE2M3930";
-//    static String address5 = "LFkghywKjdE2G3SZUcTsMkzcJ7tda3930";
-//    static String address6 = "QMwz71wTKgp9sZ8g44A9WNgXk11u23930";
-//    static String address23 = "WEXAmsUJSNAvCx2zUaXziy3ZYX1em3930";
-//    static String address8 = "TewWmmtBxuxN14FRazZXdtD9XuH313930";
-//    static String address9 = "WodfCXTbJ22mPa35Y61yNTRh1x3zB3930";
-//    static String address200 = "SPWAxuodkw222367N88eavYDWRraG3930";
-//    static String address201 = "Rnt57eZnH8Dd7K3LudJXmmEutYJZD3930";
-//    static String address202 = "XroY3cLWTfgKMRRRLCP5rhvo1gHY63930";
-
 
     static String address20 = "5MR_2CWWTDXc32s9Wd1guNQzPztFgkyVEsz";
     static String address21 = "5MR_2CbdqKcZktcxntG14VuQDy8YHhc6ZqW";
@@ -88,27 +76,27 @@ public class TestTx {
     static String address28 = "5MR_2CfUsasd33vQV3HqGw6M3JwVsuVxJ7r";
     static String address29 = "5MR_2CVuGjQ3CYVkhFszxfSt6sodg1gDHYF";
 
-    static int assetId = 1;
-    //入账金额
-    static BigInteger amount = BigInteger.valueOf(1000000L * 100000000L);
-    static String password = "nuls123456";
-
     private Chain chain;
-    private Transaction tx;
-    private CoinData coinData;
+    static int chainId = 12345;
+    static int assetChainId = 12345;
+    static int assetId = 1;
+    static String version = "1.0";
+
+    static String password = "nuls123456";
 
     @Before
     public void before() throws Exception {
         NoUse.mockModule();
-        // Get information from kernel
         ResponseMessageProcessor.syncKernel("ws://" + HostInfo.getLocalIP() + ":8887/ws");
         chain = new Chain();
-        chain.setConfig(new ConfigBean(12345, 1));
-//        初始化token
-//        addGenesisAsset();
+        chain.setConfig(new ConfigBean(chainId, assetId));
     }
 
-
+    @Test
+    public void newCtx() throws Exception {
+        createTransfer();
+//        createCtxTransfer();
+    }
 
     @Test
     public void multiThreadCreateTx() {
@@ -128,36 +116,34 @@ public class TestTx {
 
     @Test
     public void importPriKeyTest() {
-        importPriKey("7e304e60c4e29c15382f76c0bb097bda28a1950b78871b6b7eb2bb4cc4ddeb49");//种子出块地址 5MR_2Cb86fpFbuY4Lici8MJStNxDFYH6kRB
-//        importPriKey("70e871a2e637b4182dfbedc53e164182d266821f4824ab1a3a73055e9f252f98");//种子出块地址
+//        importPriKey("7e304e60c4e29c15382f76c0bb097bda28a1950b78871b6b7eb2bb4cc4ddeb49", null);//种子出块地址 5MR_2Cb86fpFbuY4Lici8MJStNxDFYH6kRB
+//        importPriKey("70e871a2e637b4182dfbedc53e164182d266821f4824ab1a3a73055e9f252f98", password);//种子出块地址
 
-//        importPriKey("00c299b105e2f9b260d7811d5cb94c713cc324e55831cb15a18454f7382f0a5f6e");//20 5MR_2CWWTDXc32s9Wd1guNQzPztFgkyVEsz
-//        importPriKey("00c4a6b90d3f4eb7b50bc85fd0e99ccb717e148b4fde7462e14c590445e589588c");//21 5MR_2CbdqKcZktcxntG14VuQDy8YHhc6ZqW
-//        importPriKey("009ad5018ed1fc162c5320b9ae496984dd10227086ad86ea954a209597ff9b7d3a");//22 5MR_2Cj9tfgQpdeF7nDy5wyaGG6MZ35H3rA
-//        importPriKey("00c805d2d6d5e06f57fdfb1aff56ef3c2dd15eee88f36fa7d45d368c352ec5ec0d");//23 5MR_2CWKhFuoGVraaxL5FYY3RsQLjLDN7jw
-//        importPriKey("00c77707b21eece6c1ce0b8add04db79dc846f36830effe5c5ae2aced00097fafb");//24 5MR_2CgwCFRoJ8KX37xNqjjR7ttYuJsg8rk
+//        importPriKey("00c299b105e2f9b260d7811d5cb94c713cc324e55831cb15a18454f7382f0a5f6e", password);//20 5MR_2CWWTDXc32s9Wd1guNQzPztFgkyVEsz
+//        importPriKey("00c4a6b90d3f4eb7b50bc85fd0e99ccb717e148b4fde7462e14c590445e589588c", password);//21 5MR_2CbdqKcZktcxntG14VuQDy8YHhc6ZqW
+//        importPriKey("009ad5018ed1fc162c5320b9ae496984dd10227086ad86ea954a209597ff9b7d3a", password);//22 5MR_2Cj9tfgQpdeF7nDy5wyaGG6MZ35H3rA
+//        importPriKey("00c805d2d6d5e06f57fdfb1aff56ef3c2dd15eee88f36fa7d45d368c352ec5ec0d", password);//23 5MR_2CWKhFuoGVraaxL5FYY3RsQLjLDN7jw
+//        importPriKey("00c77707b21eece6c1ce0b8add04db79dc846f36830effe5c5ae2aced00097fafb", password);//24 5MR_2CgwCFRoJ8KX37xNqjjR7ttYuJsg8rk
         importPriKey("00def3b0f4bfad2a6abb5f6957829e752a1a30806edc35e98016425d578fdc4e77", password);//25 5MR_2CjZkQsN7EnEPcaLgNrMrp6wpPGN6xo
         importPriKey("1c2b9fd4417c1aad8ae9f24c982ff294eb50a6462b873b79a879e805a9990346", password);//26 5MR_2CeG11nRqx7nGNeh8hTXADibqfSYeNu
-        importPriKey("00c98ecfd3777745270cacb9afba17ef0284769a83ff2adb4106b8a0baaec9452c");//27 5MR_2CVCFWH7o8AmrTBPLkdg2dYH1UCUJiM
-        importPriKey("23848d45b4b34aca8ff24b00949a25a2c9175faf283675128e189eee8b085942");//28 5MR_2CfUsasd33vQV3HqGw6M3JwVsuVxJ7r
-        importPriKey("009560d5ed6587822b7aee6f318f50b312c281e4f330b6990396881c6d3f870bc1");//29 5MR_2CVuGjQ3CYVkhFszxfSt6sodg1gDHYF
+        importPriKey("00c98ecfd3777745270cacb9afba17ef0284769a83ff2adb4106b8a0baaec9452c", password);//27 5MR_2CVCFWH7o8AmrTBPLkdg2dYH1UCUJiM
+        importPriKey("23848d45b4b34aca8ff24b00949a25a2c9175faf283675128e189eee8b085942", password);//28 5MR_2CfUsasd33vQV3HqGw6M3JwVsuVxJ7r
+        importPriKey("009560d5ed6587822b7aee6f318f50b312c281e4f330b6990396881c6d3f870bc1", password);//29 5MR_2CVuGjQ3CYVkhFszxfSt6sodg1gDHYF
 
-        importPriKey("00fffd585ed08dddf0d034236aa1ea85abd2e4e69981617ee477adf6cdcf50f4d5");//打包地址 5MR_2Ch8CCnLwoLWFZ45pFEZSmo1C1pkPFA
+        importPriKey("00fffd585ed08dddf0d034236aa1ea85abd2e4e69981617ee477adf6cdcf50f4d5", password);//打包地址 5MR_2Ch8CCnLwoLWFZ45pFEZSmo1C1pkPFA
     }
 
     @Test
     public void createAgentTx() throws Exception {
-        BigInteger balance = LedgerCall.getBalance(chain, AddressTool.getAddress(address23), assetChainId, assetId);
-        System.out.println(balance.longValue());
-
         //组装创建节点交易
         Map agentTxMap = this.createAgentTx(address27, "5MR_2Ch8CCnLwoLWFZ45pFEZSmo1C1pkPFA");
         //调用接口
         Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.CS.abbr, "cs_createAgent", agentTxMap);
         Map result = (HashMap) (((HashMap) cmdResp2.getResponseData()).get("cs_createAgent"));
         Assert.assertTrue(null != result);
-        Log.debug("{}", result.get("txHex"));
-        System.out.println("transfer: " + result.get("txHex"));  //Thread.sleep(3000L);
+        String txHex =  (String)result.get("txHex");
+        Transaction tx = TxUtil.getTransaction(txHex);
+        Log.debug("createAgent-txHash:{}", tx.getHash().getDigestHex());
     }
 
 
@@ -167,15 +153,18 @@ public class TestTx {
     @Test
     public void depositToAgent() throws Exception {
         //组装委托节点交易
-        String agentHash = "0020bd925c3b7f34577887c2091d087630c2cf9ca165b709a08b303a8cdf7a5b3585";
+        String agentHash = "00203ce7a72a4370bce3d1fdefcb2e35364370bde670f5fde30474820abd55dbeaa7";
         Map<String, Object> dpParams = new HashMap<>();
         dpParams.put("chainId", chainId);
         dpParams.put("address", address27);
+        dpParams.put("password", password);
         dpParams.put("agentHash", agentHash);
         dpParams.put("deposit", 200000 * 100000000L);
         Response dpResp = ResponseMessageProcessor.requestAndResponse(ModuleE.CS.abbr, "cs_depositToAgent", dpParams);
         HashMap dpResult = (HashMap) ((HashMap) dpResp.getResponseData()).get("cs_depositToAgent");
-        String dpTxHex = (String) dpResult.get("txHex");
+        String txHex = (String) dpResult.get("txHex");
+        Transaction tx = TxUtil.getTransaction(txHex);
+        Log.debug("deposit-txHash:{}", tx.getHash().getDigestHex());
     }
 
     /**
@@ -187,11 +176,14 @@ public class TestTx {
     public void withdraw() throws Exception {
         Map<String, Object> params = new HashMap<>();
         params.put("chainId", chainId);
-        //Address depositAddress = new Address(1,(byte)1, SerializeUtils.sha256hash160("y5WhgP1iu2Qwt5CiaPTV4Fe2Xqmfd".getBytes()));
         params.put("address", address27);
+        params.put("password", password);
         params.put("txHash", "0020467c4aea7653d17295b313c4002ddb41d882c22039d181fc474e7de6d5d0c06b");
         Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.CS.abbr, "cs_withdraw", params);
-        System.out.println(cmdResp.getResponseData());
+        HashMap dpResult = (HashMap) ((HashMap) cmdResp.getResponseData()).get("cs_withdraw");
+        String txHex = (String) dpResult.get("txHex");
+        Transaction tx = TxUtil.getTransaction(txHex);
+        Log.debug("withdraw-txHash:{}", tx.getHash().getDigestHex());
     }
 
     @Test
@@ -199,13 +191,13 @@ public class TestTx {
         Map<String, Object> txMap = new HashMap();
         txMap.put("chainId", chainId);
         txMap.put("address", address27);
-        txMap.put("password", "");
+        txMap.put("password", password);
         //调用接口
         Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.CS.abbr, "cs_stopAgent", txMap);
         Map result = (HashMap) (((HashMap) cmdResp2.getResponseData()).get("cs_stopAgent"));
-        Assert.assertTrue(null != result);
-        Log.debug("{}", result.get("txHex"));
-        System.out.println("transfer: " + result.get("txHex"));  //Thread.sleep(3000L);
+        String txHex = (String) result.get("txHex");
+        Transaction tx = TxUtil.getTransaction(txHex);
+        Log.debug("stopAgent-txHash:{}", tx.getHash().getDigestHex());
     }
 
     /**
@@ -232,15 +224,52 @@ public class TestTx {
     }
 
     /**
-     * 转账
-     * @throws Exception
+     * 查交易
      */
     @Test
-    public void newCtx() throws Exception {
-        BigInteger balance1 = LedgerCall.getBalance(chain, AddressTool.getAddress(address20), assetChainId, assetId);
-        BigInteger balance2 = LedgerCall.getBalance(chain, AddressTool.getAddress(address21), assetChainId, assetId);
-        System.out.println("address20: " + balance1.longValue());
-        System.out.println("address21: " + balance2.longValue());
+    public void getTxRecord() throws Exception{
+        Map<String, Object> params = new HashMap<>();
+        params.put("chainId", chainId);
+        params.put("address", address27);
+        params.put("assetChainId", null);
+        params.put("assetId", null);
+        params.put("type", null);
+        params.put("pageSize", null);
+        params.put("pageNumber", null);
+        Response dpResp = ResponseMessageProcessor.requestAndResponse(ModuleE.TX.abbr, "tx_getTxs", params);
+        Page record = (Page) dpResp.getResponseData();
+        Log.debug("Page<TransactionPO>:{}", JSONUtils.obj2PrettyJson(record));
+    }
+
+    /**
+     * 导入keystore
+     */
+    @Test
+    public void importAccountByKeystoreFile(){
+        String address = importAccountByKeystoreFile("C:/Users/Administrator/Desktop/2.0测试配置和内容/种子节点地址/5MR_2Ch2F7jfohNqwwdmMmF3ESQYK2R9bt8.keystore");
+        Log.info("address:{}", address);
+    }
+
+    /**
+     *  删除账户
+     */
+    @Test
+    public void removeAccountTest() throws Exception {
+        removeAccount("5MR_2Cb86fpFbuY4Lici8MJStNxDFYH6kRB", password);
+        removeAccount(address26, password);
+    }
+
+    private void createTransfer() throws Exception {
+        Map transferMap = this.createTransferTx();
+        //调用接口
+        Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_transfer", transferMap);
+        HashMap result = (HashMap) (((HashMap) cmdResp.getResponseData()).get("ac_transfer"));
+        Assert.assertTrue(null != result);
+        Log.debug("{}", result.get("value"));
+    }
+
+
+    private void createCtxTransfer() throws Exception {
         CrossTxTransferDTO ctxTransfer = new CrossTxTransferDTO(chain.getChainId(),
                 createFromCoinDTOList(), createToCoinDTOList(), "this is cross-chain transaction");
         //调接口
@@ -251,29 +280,58 @@ public class TestTx {
         Map map = (HashMap) ((HashMap) response.getResponseData()).get("tx_createCtx");
         Assert.assertTrue(null != map);
         Log.debug("{}", map.get("value"));
-
-        Thread.sleep(3000L);
-
-      /*  Map transferMap = this.createTransferTx();
-        //调用接口
-        Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_transfer", transferMap);
-        HashMap result = (HashMap) (((HashMap) cmdResp.getResponseData()).get("ac_transfer"));
-        Assert.assertTrue(null != result);
-        Log.debug("{}", result.get("value"));
-        Thread.sleep(4000L);
-        //packableTxs();*/
-
     }
 
-    @Test
-    public void removeAccountTest() throws Exception {
-        removeAccount("5MR_2Cb86fpFbuY4Lici8MJStNxDFYH6kRB");
-        removeAccount(address26);
+    public static String importAccountByKeystoreFile(String filePath) {
+        String address = null;
+        try {
+            File file = new File(filePath);
+            byte[] bytes = copyToByteArray(file);
+            String keyStoreStr = new String(bytes,"UTF-8");
+
+            //AccountKeyStoreDto accountKeyStoreDto = JSONUtils.json2pojo(new String(HexUtil.decode(keyStoreHexStr)), AccountKeyStoreDto.class);
+
+            Map<String, Object> params = new HashMap<>();
+            params.put(Constants.VERSION_KEY_STR, version);
+            params.put("chainId", chainId);
+            params.put("keyStore", HexUtil.encode(bytes));
+            params.put("password", password);
+            params.put("overwrite", true);
+            Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_importAccountByKeystore", params);
+            HashMap result = (HashMap) ((HashMap) cmdResp.getResponseData()).get("ac_importAccountByKeystore");
+            address = (String) result.get("address");
+            //assertEquals(accountList.get(0), address);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return address;
     }
 
-    public void importPriKey(String priKey){
-        importPriKey(priKey, null);
+    public static byte[] copyToByteArray(File in) throws IOException {
+        if (in == null) {
+            return new byte[0];
+        }
+        InputStream input = null;
+        try {
+            input = new FileInputStream(in);
+            ByteArrayOutputStream out = new ByteArrayOutputStream(4096);
+            int byteCount = 0;
+            byte[] buffer = new byte[4096];
+            int bytesRead = -1;
+            while ((bytesRead = input.read(buffer)) != -1) {
+                out.write(buffer, 0, bytesRead);
+                byteCount += bytesRead;
+            }
+            out.flush();
+            return out.toByteArray();
+        } finally {
+            try {
+                input.close();
+            } catch (Exception e) {
+            }
+        }
     }
+
     public void importPriKey(String priKey, String pwd){
         try {
             //账户已存在则覆盖 If the account exists, it covers.
@@ -295,8 +353,7 @@ public class TestTx {
         }
     }
 
-
-    public void removeAccount(String address) throws Exception {
+    public void removeAccount(String address, String password) throws Exception {
         Map<String, Object> params = new HashMap<>();
         params.put(Constants.VERSION_KEY_STR, "1.0");
         params.put("chainId", chainId);
@@ -305,7 +362,6 @@ public class TestTx {
         Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_removeAccount", params);
         Log.debug("{}", JSONUtils.obj2json(cmdResp.getResponseData()));
     }
-
 
     @Test
     public void getBalance() throws Exception {
@@ -381,61 +437,6 @@ public class TestTx {
         return listTO;
     }
 
-    /**
-     * 铸币交易
-     *
-     * @return
-     * @throws IOException
-     */
-    private static Transaction buildTransaction(String address) throws IOException {
-        //封装交易执行
-        Transaction tx = new Transaction();
-        CoinData coinData = new CoinData();
-        CoinTo coinTo = new CoinTo();
-        coinTo.setAddress(AddressTool.getAddress(address));
-        coinTo.setAmount(amount);
-        coinTo.setAssetsChainId(assetChainId);
-        coinTo.setAssetsId(assetId);
-        coinTo.setLockTime(0);
-        List<CoinFrom> coinFroms = new ArrayList<>();
-        List<CoinTo> coinTos = new ArrayList<>();
-        coinTos.add(coinTo);
-        coinData.setFrom(coinFroms);
-        coinData.setTo(coinTos);
-        tx.setBlockHeight(1L);
-        tx.setCoinData(coinData.serialize());
-        tx.setHash(NulsDigestData.calcDigestData(tx.serializeForHash()));
-        return tx;
-    }
-
-    static int height = 0;
-    /**
-     * 铸币
-     *
-     * @throws Exception
-     */
-    public static void addGenesisAsset(String address) throws Exception {
-        // Build params map
-        Map<String, Object> params = new HashMap<>();
-        params.put("chainId", chainId);
-        Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.LG.abbr, "bathValidateBegin", params);
-        Log.debug("response {}", response);
-        params.put("isBatchValidate", true);
-        Transaction transaction = buildTransaction(address);
-
-        params.put("txHex", HexUtil.encode(transaction.serialize()));
-        response = ResponseMessageProcessor.requestAndResponse(ModuleE.LG.abbr, "validateCoinData", params);
-        Log.debug("response {}", response);
-
-        params.put("isConfirmTx", true);
-        List<String> list = new ArrayList<>();
-        list.add(HexUtil.encode(transaction.serialize()));
-        params.put("txHexList", list);
-        params.put("blockHeight", height++);
-        response = ResponseMessageProcessor.requestAndResponse(ModuleE.LG.abbr, "commitTx", params);
-        Log.debug("response {}", response);
-    }
-
 
     /**
      * 创建普通转账交易
@@ -449,7 +450,7 @@ public class TestTx {
         List<CoinDTO> inputs = new ArrayList<>();
         List<CoinDTO> outputs = new ArrayList<>();
         CoinDTO inputCoin1 = new CoinDTO();
-        inputCoin1.setAddress(address23);
+        inputCoin1.setAddress(address26);
         inputCoin1.setPassword(password);
         inputCoin1.setAssetsChainId(chainId);
         inputCoin1.setAssetsId(assetId);
@@ -457,7 +458,7 @@ public class TestTx {
         inputs.add(inputCoin1);
 
         CoinDTO outputCoin1 = new CoinDTO();
-        outputCoin1.setAddress(address24);
+        outputCoin1.setAddress(address27);
         outputCoin1.setPassword(password);
         outputCoin1.setAssetsChainId(chainId);
         outputCoin1.setAssetsId(assetId);
@@ -482,10 +483,8 @@ public class TestTx {
         params.put("deposit", 20000 * 100000000L);
         params.put("commissionRate", 10);
         params.put("packingAddress", packingAddr);
-        params.put("password", "");
+        params.put("password", password);
         params.put("rewardAddress", agentAddr);
         return params;
-//        Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.CS.abbr, "cs_createAgent", params);
-//        System.out.println(cmdResp.getResponseData());
     }
 }

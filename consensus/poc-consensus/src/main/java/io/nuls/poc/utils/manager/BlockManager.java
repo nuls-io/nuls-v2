@@ -7,6 +7,7 @@ import io.nuls.poc.utils.compare.BlockHeaderComparator;
 import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.model.message.Response;
 import io.nuls.rpc.netty.processor.ResponseMessageProcessor;
+import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.log.Log;
@@ -22,7 +23,8 @@ import java.util.*;
  */
 @Component
 public class BlockManager {
-
+    @Autowired
+    private RoundManager roundManager;
     /**
      * 初始化链区块头数据，缓存指定数量的区块头
      * Initialize chain block header data to cache a specified number of block headers
@@ -98,6 +100,7 @@ public class BlockManager {
         }
         chain.setBlockHeaderList(headerList);
         chain.setNewestHeader(headerList.get(headerList.size() - 1));
+        roundManager.rollBackRound(chain,height);
         chain.getLoggerMap().get(ConsensusConstant.BASIC_LOGGER_NAME).info("区块回滚成功，回滚到的高度为：" + height + ",本地最新区块高度为：" + chain.getNewestHeader().getHeight());
     }
 }
