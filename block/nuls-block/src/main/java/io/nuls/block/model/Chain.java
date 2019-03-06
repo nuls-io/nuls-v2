@@ -185,7 +185,7 @@ public class Chain {
         return new StringJoiner(", ", Chain.class.getSimpleName() + "[", "]")
                 .add("startHeight=" + startHeight)
                 .add("endHeight=" + endHeight)
-                .add("hashList=" + hashList)
+//                .add("hashList=" + hashList)
                 .add("type=" + type)
                 .add("age=" + age)
                 .toString();
