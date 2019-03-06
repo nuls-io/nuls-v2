@@ -31,6 +31,7 @@ import io.nuls.tools.log.logback.NulsLogger;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.Future;
 
 /**
@@ -87,7 +88,7 @@ public class CacheHandler {
      * @return
      */
     public static Future<CompleteMessage> addBatchBlockRequest(int chainId, NulsDigestData hash) {
-        workerBlockCacher.get(chainId).put(hash, new ArrayList<>());
+        workerBlockCacher.get(chainId).put(hash, new CopyOnWriteArrayList<>());
         return completeCacher.get(chainId).addFuture(hash);
     }
 
@@ -101,16 +102,13 @@ public class CacheHandler {
         NulsDigestData requestHash = message.getRequestHash();
         List<Block> blockList = workerBlockCacher.get(chainId).get(requestHash);
         Block block = message.getBlock();
-//        NulsLogger commonLog = ContextManager.getContext(chainId).getCommonLog();
-//        commonLog.info("###height###" + block.getHeader().getHeight() + "###hash###" + block.getHeader().getHash());
-//        commonLog.info("###blockList != null###" + (blockList != null));
-//        if (blockList != null) {
-//            commonLog.info("###!blockList.contains(block)###" + !blockList.contains(block));
-//        }
+        NulsLogger commonLog = ContextManager.getContext(chainId).getCommonLog();
         if (blockList != null && !blockList.contains(block)) {
+//            commonLog.info("###height###" + block.getHeader().getHeight() + "###hash###" + block.getHeader().getHash() + "###true");
             blockList.add(block);
             return;
         }
+//        commonLog.info("###height###" + block.getHeader().getHeight() + "###hash###" + block.getHeader().getHash() + "###false");
         singleBlockCacher.get(chainId).complete(requestHash, block);
     }
 

@@ -39,7 +39,6 @@ import io.nuls.tools.parse.SerializeUtils;
 import io.nuls.transaction.model.bo.Chain;
 import io.nuls.transaction.model.bo.config.ConfigBean;
 import io.nuls.transaction.model.dto.CoinDTO;
-import io.nuls.transaction.model.dto.CrossTxTransferDTO;
 import io.nuls.transaction.rpc.call.LedgerCall;
 import org.junit.Assert;
 import org.junit.Before;
@@ -167,7 +166,7 @@ public class TestTx {
     @Test
     public void depositToAgent() throws Exception {
         //组装委托节点交易
-        String agentHash = "0020bd925c3b7f34577887c2091d087630c2cf9ca165b709a08b303a8cdf7a5b3585";
+        String agentHash = "00203ce7a72a4370bce3d1fdefcb2e35364370bde670f5fde30474820abd55dbeaa7";
         Map<String, Object> dpParams = new HashMap<>();
         dpParams.put("chainId", chainId);
         dpParams.put("address", address27);
@@ -237,7 +236,7 @@ public class TestTx {
      */
     @Test
     public void newCtx() throws Exception {
-        BigInteger balance1 = LedgerCall.getBalance(chain, AddressTool.getAddress(address20), assetChainId, assetId);
+/*        BigInteger balance1 = LedgerCall.getBalance(chain, AddressTool.getAddress(address20), assetChainId, assetId);
         BigInteger balance2 = LedgerCall.getBalance(chain, AddressTool.getAddress(address21), assetChainId, assetId);
         System.out.println("address20: " + balance1.longValue());
         System.out.println("address21: " + balance2.longValue());
@@ -252,23 +251,23 @@ public class TestTx {
         Assert.assertTrue(null != map);
         Log.debug("{}", map.get("value"));
 
-        Thread.sleep(3000L);
+        Thread.sleep(3000L);*/
 
-      /*  Map transferMap = this.createTransferTx();
+        Map transferMap = this.createTransferTx();
         //调用接口
         Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_transfer", transferMap);
         HashMap result = (HashMap) (((HashMap) cmdResp.getResponseData()).get("ac_transfer"));
         Assert.assertTrue(null != result);
         Log.debug("{}", result.get("value"));
         Thread.sleep(4000L);
-        //packableTxs();*/
+        //packableTxs();
 
     }
 
     @Test
     public void removeAccountTest() throws Exception {
-        removeAccount("5MR_2Cb86fpFbuY4Lici8MJStNxDFYH6kRB");
-        removeAccount(address26);
+        //removeAccount("5MR_2Cb86fpFbuY4Lici8MJStNxDFYH6kRB");
+        removeAccount(address21);
     }
 
     public void importPriKey(String priKey){
@@ -449,7 +448,7 @@ public class TestTx {
         List<CoinDTO> inputs = new ArrayList<>();
         List<CoinDTO> outputs = new ArrayList<>();
         CoinDTO inputCoin1 = new CoinDTO();
-        inputCoin1.setAddress(address23);
+        inputCoin1.setAddress(address26);
         inputCoin1.setPassword(password);
         inputCoin1.setAssetsChainId(chainId);
         inputCoin1.setAssetsId(assetId);
@@ -457,7 +456,7 @@ public class TestTx {
         inputs.add(inputCoin1);
 
         CoinDTO outputCoin1 = new CoinDTO();
-        outputCoin1.setAddress(address24);
+        outputCoin1.setAddress(address27);
         outputCoin1.setPassword(password);
         outputCoin1.setAssetsChainId(chainId);
         outputCoin1.setAssetsId(assetId);
@@ -477,7 +476,8 @@ public class TestTx {
         Address rewardAddress = new Address(chainId, (byte) assetId, SerializeUtils.sha256hash160(agentAddr.getBytes()));
         Address packingAddress = new Address(chainId, (byte) assetId, SerializeUtils.sha256hash160(packingAddr.getBytes()));
         Map<String, Object> params = new HashMap<>();
-        params.put("agentAddress", agentAddr);
+        params.put("" +
+                "", agentAddr);
         params.put("chainId", chainId);
         params.put("deposit", 20000 * 100000000L);
         params.put("commissionRate", 10);

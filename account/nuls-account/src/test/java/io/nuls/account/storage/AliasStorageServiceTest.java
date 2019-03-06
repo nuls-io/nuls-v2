@@ -39,7 +39,7 @@ public class AliasStorageServiceTest {
         //springLite容器初始化
         SpringLiteContext.init("io.nuls.account", new ModularServiceMethodInterceptor());
         //启动时间同步线程
-        TimeService.getInstance().start();
+        //TimeService.getInstance().start();
         aliasStorageService = SpringLiteContext.getBean(AliasStorageService.class);
         accountService = SpringLiteContext.getBean(AccountService.class);
     }

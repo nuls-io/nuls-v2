@@ -33,6 +33,7 @@ import io.nuls.account.model.bo.tx.AliasTransaction;
 import io.nuls.account.model.bo.tx.txdata.Alias;
 import io.nuls.account.model.po.AccountPo;
 import io.nuls.account.model.po.AliasPo;
+import io.nuls.account.rpc.call.NetworkCall;
 import io.nuls.account.rpc.call.TransactionCmdCall;
 import io.nuls.account.service.AccountCacheService;
 import io.nuls.account.service.AccountService;
@@ -132,7 +133,7 @@ public class AliasServiceImpl implements AliasService, InitializingBean {
 
         account.setChainId(chainId);
         //创建别名交易
-        tx = createAliasTrasactionWithoutSign(account,aliasName);
+        tx = createAliasTrasactionWithoutSign(account, aliasName);
         //签名别名交易
         signTransaction(tx, account, password);
         //广播别名交易
@@ -160,7 +161,7 @@ public class AliasServiceImpl implements AliasService, InitializingBean {
             }
 
             //create a set alias transaction
-            tx = createAliasTrasactionWithoutSign(account,aliasName);
+            tx = createAliasTrasactionWithoutSign(account, aliasName);
 
             fee = TransactionFeeCalculator.getNormalTxFee(tx.size());
             //todo whether need to other operation if the fee is too big
@@ -302,11 +303,11 @@ public class AliasServiceImpl implements AliasService, InitializingBean {
         return result;
     }
 
-    private Transaction createAliasTrasactionWithoutSign(Account account,String aliasName) throws NulsException, IOException {
+    private Transaction createAliasTrasactionWithoutSign(Account account, String aliasName) throws NulsException, IOException {
         Transaction tx = null;
         //Second:build the transaction
         tx = new AliasTransaction();
-        tx.setTime(TimeService.currentTimeMillis());
+        tx.setTime(NetworkCall.getCurrentTimeMillis());
         Alias alias = new Alias();
         alias.setAlias(aliasName);
         alias.setAddress(account.getAddress().getAddressBytes());
