@@ -53,6 +53,25 @@ public class RoundManager {
     }
 
     /**
+     * 回滚本地轮次到指定轮次
+     *
+     * @param roundIndex 回滚到指定轮次
+     * @param chain      链信息
+     * */
+    public void rollBackRound(Chain chain,int roundIndex){
+        List<MeetingRound> roundList = chain.getRoundList();
+        if(roundList.size() > 0){
+            Iterator<MeetingRound> iterator = roundList.iterator();
+            while (iterator.hasNext()){
+                MeetingRound round = iterator.next();
+                if(round.getIndex() > roundIndex){
+                    iterator.remove();
+                }
+            }
+        }
+    }
+
+    /**
      * 清理指定链的轮次信息
      * Clean up the wheel number information of the specified chain
      *
