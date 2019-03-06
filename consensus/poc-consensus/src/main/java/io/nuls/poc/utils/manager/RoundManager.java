@@ -60,7 +60,7 @@ public class RoundManager {
      * */
     public void rollBackRound(Chain chain,int roundIndex){
         List<MeetingRound> roundList = chain.getRoundList();
-        if(roundList.size() > 0){
+        if(roundList.size() >= 0){
             Iterator<MeetingRound> iterator = roundList.iterator();
             while (iterator.hasNext()){
                 MeetingRound round = iterator.next();
