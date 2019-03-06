@@ -83,7 +83,7 @@ public class BlockWorker implements Callable<BlockDownLoadResult> {
             CompleteMessage completeMessage = future.get(BATCH_DOWNLOAD_TIMEOUNT, TimeUnit.SECONDS);
             List<Block> blockList = CacheHandler.getBlockList(chainId, messageHash);
             int size = blockList.size();
-            long expect = message.getEndHeight() - message.getStartHeight();
+            long expect = message.getEndHeight() - message.getStartHeight() + 1;
             int interval = context.getParameters().getWaitInterval();
             int count = 0;
             while (size < expect && count < MAX_LOOP) {

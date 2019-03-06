@@ -150,6 +150,7 @@ public class ChainContext {
     }
 
     public void init() {
+        version = 1;
         doSyn = true;
         lock = new StampedLock();
         LoggerUtil.init(chainId, parameters.getLogLevel());
