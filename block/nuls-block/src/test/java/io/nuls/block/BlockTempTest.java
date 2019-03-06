@@ -23,7 +23,7 @@ package io.nuls.block;
 import io.nuls.rpc.info.NoUse;
 import org.junit.Test;
 
-public class BlockBootstrapTempTest {
+public class BlockTempTest {
 
 
     @Test

@@ -53,7 +53,7 @@ import static io.nuls.block.utils.LoggerUtil.commonLog;
  * @version 1.0
  * @date 18-11-8 上午10:20
  */
-public class BlockBootstrapTemp {
+public class BlockTemp {
 
     public static void main(String[] args) {
         Thread.currentThread().setName("block-main");

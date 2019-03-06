@@ -146,7 +146,7 @@ public class BlockSynchronizer implements Runnable {
             context.setStatus(RunningStatusEnum.SYNCHRONIZING);
             PriorityBlockingQueue<Node> nodes = params.getNodes();
             int nodeCount = nodes.size();
-            ThreadPoolExecutor executor = ThreadUtils.createThreadPool(nodeCount, 0, new NulsThreadFactory("worker-" + chainId));
+            ThreadPoolExecutor executor = ThreadUtils.createThreadPool(nodeCount * 4, 0, new NulsThreadFactory("worker-" + chainId));
             BlockingQueue<Block> queue = new LinkedBlockingQueue<>();
             BlockingQueue<Future<BlockDownLoadResult>> futures = new LinkedBlockingQueue<>();
             long netLatestHeight = params.getNetLatestHeight();
@@ -169,8 +169,8 @@ public class BlockSynchronizer implements Runnable {
             Boolean storageResult = consumerFuture.get();
             boolean success = downResult != null && downResult && storageResult != null && storageResult;
             long end = System.currentTimeMillis();
-            commonLog.info("block syn complete, total download:" + total + ", total time:" + (end - start) + ", average time:" + (end - start) / total);
             if (success) {
+                commonLog.info("block syn complete, total download:" + total + ", total time:" + (end - start) + ", average time:" + (end - start) / total);
                 if (checkIsNewest(chainId, params, context)) {
                     //要测试分叉链切换或者孤儿链，放开下面语句，概率会加大
 //                if (true) {

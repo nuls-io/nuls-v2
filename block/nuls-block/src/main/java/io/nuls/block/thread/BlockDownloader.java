@@ -84,7 +84,7 @@ public class BlockDownloader implements Callable<Boolean> {
             while (startHeight <= netLatestHeight && context.isDoSyn()) {
                 while (queue.size() > blockCache) {
                     commonLog.info("BlockDownloader wait！ cached queue size:" + queue.size());
-                    Thread.sleep(1000L);
+                    Thread.sleep(5000L);
                 }
                 int credit;
                 Node node;
