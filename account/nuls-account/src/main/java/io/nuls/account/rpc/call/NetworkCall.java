@@ -44,7 +44,7 @@ public class NetworkCall {
      * @return
      * @throws NulsException
      */
-    public static long getCurrentTimeMillis() throws Exception {
+    public static long getCurrentTimeMillis() throws NulsException {
         try {
             Map<String, Object> params = new HashMap<>();
             params.put(Constants.VERSION_KEY_STR, "1.0");
