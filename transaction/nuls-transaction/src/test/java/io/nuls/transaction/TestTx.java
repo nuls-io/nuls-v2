@@ -301,7 +301,6 @@ public class TestTx {
             HashMap result = (HashMap) ((HashMap) cmdResp.getResponseData()).get("ac_importAccountByKeystore");
             address = (String) result.get("address");
             //assertEquals(accountList.get(0), address);
-
         } catch (Exception e) {
             e.printStackTrace();
         }

@@ -28,6 +28,7 @@ package io.nuls.account.util;
 import io.nuls.account.constant.AccountConstant;
 import io.nuls.account.constant.AccountErrorCode;
 import io.nuls.account.model.bo.Account;
+import io.nuls.account.rpc.call.NetworkCall;
 import io.nuls.tools.log.Log;
 import io.nuls.base.constant.BaseConstant;
 import io.nuls.base.data.Address;
@@ -92,7 +93,7 @@ public class AccountTool {
         account.setPubKey(key.getPubKey());
         account.setPriKey(key.getPrivKeyBytes());
         account.setEncryptedPriKey(new byte[0]);
-        account.setCreateTime(TimeService.currentTimeMillis());
+        account.setCreateTime(NetworkCall.getCurrentTimeMillis());
         account.setEcKey(key);
         return account;
     }
