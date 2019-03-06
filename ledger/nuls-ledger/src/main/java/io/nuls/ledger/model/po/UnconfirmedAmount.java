@@ -52,16 +52,38 @@ public class UnconfirmedAmount extends BaseNulsData {
     @Setter
     @Getter
     private String txHash;
+    /**
+     * locked == 0 时的 fromCoin花费金额
+     */
     @Setter
     @Getter
     private BigInteger spendAmount = BigInteger.ZERO;
+    /**
+     * lockedTime == 0 时的 toCoin收入金额
+     */
     @Setter
     @Getter
-    private BigInteger  earnAmount = BigInteger.ZERO;
+    private BigInteger earnAmount = BigInteger.ZERO;
+    /**
+     * locked != 0 时的 fromCoin 解锁花费金额
+     */
+    @Setter
+    @Getter
+    private BigInteger fromUnLockedAmount = BigInteger.ZERO;
 
-    public UnconfirmedAmount(BigInteger earn, BigInteger spend){
-        spendAmount=spendAmount.add(spend);
+    /**
+     * lockedTime != 0 时的 toCoin 锁定收入金额
+     */
+    @Setter
+    @Getter
+    private BigInteger toLockedAmount = BigInteger.ZERO;
+
+
+    public UnconfirmedAmount(BigInteger earn, BigInteger spend,BigInteger unLockedAmount,BigInteger lockedAmount) {
+        spendAmount = spendAmount.add(spend);
         earnAmount = earnAmount.add(earn);
+        fromUnLockedAmount = fromUnLockedAmount.add(unLockedAmount);
+        toLockedAmount = toLockedAmount.add(lockedAmount);
         this.time = TimeUtils.getCurrentTime();
     }
 
@@ -71,6 +93,8 @@ public class UnconfirmedAmount extends BaseNulsData {
         stream.writeString(txHash);
         stream.writeBigInteger(spendAmount);
         stream.writeBigInteger(earnAmount);
+        stream.writeBigInteger(fromUnLockedAmount);
+        stream.writeBigInteger(toLockedAmount);
     }
 
     @Override
@@ -79,6 +103,11 @@ public class UnconfirmedAmount extends BaseNulsData {
         this.txHash = byteBuffer.readString();
         this.spendAmount = byteBuffer.readBigInteger();
         this.earnAmount = byteBuffer.readBigInteger();
+        if (!byteBuffer.isFinished()) {
+            //兼容下老数据，过阵子可以删除该判断20190306
+            this.fromUnLockedAmount = byteBuffer.readBigInteger();
+            this.toLockedAmount = byteBuffer.readBigInteger();
+        }
     }
 
     @Override
@@ -86,6 +115,8 @@ public class UnconfirmedAmount extends BaseNulsData {
         int size = 0;
         size += SerializeUtils.sizeOfUint48();
         size += SerializeUtils.sizeOfString(txHash);
+        size += SerializeUtils.sizeOfBigInteger();
+        size += SerializeUtils.sizeOfBigInteger();
         size += SerializeUtils.sizeOfBigInteger();
         size += SerializeUtils.sizeOfBigInteger();
         return size;

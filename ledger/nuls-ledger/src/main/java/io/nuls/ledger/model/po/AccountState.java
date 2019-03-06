@@ -147,6 +147,8 @@ public class AccountState extends BaseNulsData {
         BigInteger calUnconfirmedAmount = BigInteger.ZERO;
         for (UnconfirmedAmount unconfirmedAmount : unconfirmedAmounts) {
             calUnconfirmedAmount = calUnconfirmedAmount.add(unconfirmedAmount.getEarnAmount()).subtract(unconfirmedAmount.getSpendAmount());
+            calUnconfirmedAmount = calUnconfirmedAmount.add(unconfirmedAmount.getFromUnLockedAmount());
+            calUnconfirmedAmount = calUnconfirmedAmount.subtract(unconfirmedAmount.getToLockedAmount());
         }
         return calUnconfirmedAmount;
     }

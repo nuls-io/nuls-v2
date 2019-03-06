@@ -109,18 +109,21 @@ public class TransactionServiceImpl implements TransactionService {
                 //非解锁交易处理
                 CoinDataUtils.calTxFromAmount(accountsMap, from, txHash, accountKey);
             } else {
-                //解锁交易处理[未确认解锁交易From，暂时不处理]
-                logger.info("unConfirmTxProcess account = {} unlocked tx.txHash = {}", accountKey, txHash);
+                //解锁交易处理[未确认解锁交易From
+                CoinDataUtils.calTxFromUnlockedAmount(accountsMap, from, txHash, accountKey);
+                logger.debug("unConfirmTxProcess account = {} unlocked tx.txHash = {}", accountKey, txHash);
             }
         }
         for (CoinTo to : tos) {
             String address = AddressTool.getStringAddressByBytes(to.getAddress());
             int assetChainId = to.getAssetsChainId();
             int assetId = to.getAssetsId();
+            String accountKey = LedgerUtils.getKeyStr(address, assetChainId, assetId);
             if (to.getLockTime() == 0) {
                 //普通交易
-                String accountKey = LedgerUtils.getKeyStr(address, assetChainId, assetId);
                 CoinDataUtils.calTxToAmount(accountsMap, to, txHash, accountKey);
+            }else{
+                CoinDataUtils.calTxToLockedAmount(accountsMap, to, txHash, accountKey);
             }
         }
         Set keys = accountsMap.keySet();

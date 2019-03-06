@@ -206,7 +206,8 @@ public class AccountStateServiceImpl implements AccountStateService {
                 UnconfirmedNonce unconfirmedNonce = new UnconfirmedNonce(newNonce);
                 accountState.addUnconfirmedNonce(unconfirmedNonce);
             }
-            UnconfirmedAmount unconfirmedAmount = new UnconfirmedAmount(unconfirmedTx.getEarnAmount(), unconfirmedTx.getSpendAmount());
+            UnconfirmedAmount unconfirmedAmount = new UnconfirmedAmount(unconfirmedTx.getEarnAmount(), unconfirmedTx.getSpendAmount(),
+                    unconfirmedTx.getFromUnLockedAmount(),unconfirmedTx.getToLockedAmount());
             unconfirmedAmount.setTxHash(unconfirmedTx.getTxHash());
             accountState.addUnconfirmedAmount(unconfirmedAmount);
             byte[] key = LedgerUtils.getKey(unconfirmedTx.getAddress(), unconfirmedTx.getAssetChainId(), unconfirmedTx.getAssetId());

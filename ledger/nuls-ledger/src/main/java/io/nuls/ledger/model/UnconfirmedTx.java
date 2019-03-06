@@ -49,7 +49,12 @@ public class UnconfirmedTx {
     @Setter
     @Getter
     private BigInteger  earnAmount = BigInteger.ZERO;
-
+    @Setter
+    @Getter
+    private BigInteger fromUnLockedAmount = BigInteger.ZERO;
+    @Setter
+    @Getter
+    private BigInteger toLockedAmount = BigInteger.ZERO;
     @Setter
     @Getter
     private String  address = "";
