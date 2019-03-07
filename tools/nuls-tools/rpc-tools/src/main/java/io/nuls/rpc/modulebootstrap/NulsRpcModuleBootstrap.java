@@ -39,9 +39,10 @@ public class NulsRpcModuleBootstrap {
             Log.error("加载RpcModule的实现类失败");
             return ;
         }
-        String debug = args[1];
-        if(debug == null){
-            debug = "1";
+
+        String debug = "1";
+        if(args.length > 1){
+            debug = args[1];
         }
         if("1".equals(debug)){
             ThreadUtils.createAndRunThread(module.moduleInfo().getName()+"-thread",()->{
