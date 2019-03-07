@@ -203,8 +203,8 @@ public class TransactionCmd extends BaseCmd {
     @CmdAnnotation(cmd = "ac_rollbackTx", version = 1.0, description = "batch rollback the transaction")
     public Response rollbackTx(Map params) {
         Log.debug("ac_rollbackTx start,params size:{}", params == null ? 0 : params.size());
-
-        boolean result = false;
+        //默认回滚成功
+        boolean result = true;
         int chainId;
         List<String> txHexList;
         Object chainIdObj = params == null ? null : params.get(RpcParameterNameConstant.CHAIN_ID);
