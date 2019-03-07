@@ -31,12 +31,11 @@ import io.nuls.account.constant.AccountErrorCode;
 import io.nuls.account.model.bo.Account;
 import io.nuls.account.model.bo.AccountKeyStore;
 import io.nuls.account.model.dto.AccountKeyStoreDto;
-import io.nuls.account.service.AccountCacheService;
 import io.nuls.account.service.AccountKeyStoreService;
 import io.nuls.account.service.AccountService;
 import io.nuls.account.service.AliasService;
 import io.nuls.account.storage.AccountStorageService;
-import io.nuls.tools.log.Log;
+import io.nuls.account.util.LoggerUtil;
 import io.nuls.base.basic.AddressTool;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Service;
@@ -168,7 +167,7 @@ public class AccountKeyStoreServiceImpl implements AccountKeyStoreService {
                 try {
                     fileOutputStream.close();
                 } catch (IOException e) {
-                    Log.error(e);
+                    LoggerUtil.logger.error(e);
                 }
             }
         }

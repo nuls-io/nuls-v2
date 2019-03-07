@@ -88,6 +88,7 @@ public class TransactionServiceImpl implements TransactionService {
         Map<String, Transaction> accountAddressMap = new HashMap<>();
         try {
             for (Transaction transaction : txList) {
+                Log.debug("start=======type: "+transaction.getType()+"===hash: "+transaction.getHash());
                 if (transaction.getType() == AccountConstant.TX_TYPE_ACCOUNT_ALIAS) {
                     Alias alias = new Alias();
                     alias.parse(new NulsByteBuffer(transaction.getTxData()));
@@ -113,6 +114,7 @@ public class TransactionServiceImpl implements TransactionService {
                         accountAddressMap.put(address, transaction);
                     }
                 }
+                Log.debug("end=======");
             }
         } catch (Exception e) {
             Log.error("", e);

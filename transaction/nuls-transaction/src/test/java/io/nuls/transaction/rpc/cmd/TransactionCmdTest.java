@@ -1,5 +1,6 @@
 package io.nuls.transaction.rpc.cmd;
 
+import io.nuls.base.data.Transaction;
 import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.info.NoUse;
 import io.nuls.rpc.model.ModuleE;
@@ -13,6 +14,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 /**
@@ -38,7 +40,7 @@ public class TransactionCmdTest {
         params.put("chainId", chainId);
         params.put("moduleCode", "ac");
         params.put("moduleValidator", "ac_accountTxValidate");
-        List<Map> txRegisterList=new ArrayList<>();
+        List<Map> txRegisterList = new ArrayList<>();
         Map<String, Object> txParams = new HashMap<>();
         txParams.put("txType", "3");
         txParams.put("validateCmd", "ac_aliasTxValidate");
@@ -48,7 +50,7 @@ public class TransactionCmdTest {
         txParams.put("unlockTx", false);
         txParams.put("verifySignature", true);
         txRegisterList.add(txParams);
-        params.put("list",txRegisterList);
+        params.put("list", txRegisterList);
         Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.TX.abbr, "tx_register", params);
         HashMap result = (HashMap) ((HashMap) cmdResp.getResponseData()).get("tx_register");
         boolean value = (Boolean) result.get("value");
@@ -66,6 +68,19 @@ public class TransactionCmdTest {
         HashMap result = (HashMap) ((HashMap) cmdResp.getResponseData()).get("tx_register");
         boolean value = (Boolean) result.get("value");
         assertTrue(value);
+    }
+
+    @Test
+    public void getTxTest() throws Exception {
+        Map<String, Object> params = new HashMap<>();
+        params.put(Constants.VERSION_KEY_STR, version);
+        params.put("chainId", chainId);
+        params.put("txHash", "00208cdfa154206b175072f9acc1ccc81ccc58f3104403f0df6dc4806be67bc30b02");
+        Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.TX.abbr, "tx_getTx", params);
+        HashMap result = (HashMap) ((HashMap) cmdResp.getResponseData()).get("tx_getTx");
+        String txHex = (String) result.get("txHex");
+        Transaction tx = Transaction.getInstance(txHex);
+        assertNotNull(tx);
     }
 
 }
