@@ -35,6 +35,7 @@ import io.nuls.block.service.BlockService;
 import io.nuls.block.storage.ChainStorageService;
 import io.nuls.block.utils.module.ConsensusUtil;
 import io.nuls.block.utils.module.NetworkUtil;
+import io.nuls.block.utils.module.TransactionUtil;
 import io.nuls.tools.basic.Result;
 import io.nuls.tools.constant.ErrorCode;
 import io.nuls.tools.core.annotation.Autowired;
@@ -327,12 +328,15 @@ public class BlockUtil {
     }
 
     public static SmallBlock getSmallBlock(int chainId, Block block) {
-        ChainContext chainContext = ContextManager.getContext(chainId);
-        List<Integer> systemTransactionType = chainContext.getSystemTransactionType();
+        ChainContext context = ContextManager.getContext(chainId);
+        List<Integer> transactionType = context.getSystemTransactionType();
+        if (transactionType.size() == 0) {
+            transactionType.addAll(TransactionUtil.getSystemTypes(chainId));
+        }
         SmallBlock smallBlock = new SmallBlock();
         smallBlock.setHeader(block.getHeader());
         smallBlock.setTxHashList(block.getTxHashList());
-        block.getTxs().stream().filter(e -> systemTransactionType.contains(e.getType())).forEach(e -> smallBlock.addBaseTx(e));
+        block.getTxs().stream().filter(e -> transactionType.contains(e.getType())).forEach(e -> smallBlock.addBaseTx(e));
         return smallBlock;
     }
 

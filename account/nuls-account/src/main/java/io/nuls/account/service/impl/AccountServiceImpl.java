@@ -37,6 +37,7 @@ import io.nuls.account.service.AccountService;
 import io.nuls.account.service.AliasService;
 import io.nuls.account.storage.AccountStorageService;
 import io.nuls.account.util.AccountTool;
+import io.nuls.account.util.LoggerUtil;
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.Address;
 import io.nuls.base.data.NulsSignData;
@@ -54,11 +55,15 @@ import io.nuls.tools.data.StringUtils;
 import io.nuls.tools.exception.CryptoException;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.exception.NulsRuntimeException;
-import io.nuls.tools.log.Log;
 import io.nuls.tools.parse.JSONUtils;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -129,7 +134,7 @@ public class AccountServiceImpl implements AccountService, InitializingBean {
             }
             return accounts;
         } catch (Exception e) {
-            Log.error(e);
+            LoggerUtil.logger.error(e);
             throw new NulsRuntimeException(AccountErrorCode.FAILED);
         } finally {
             locker.unlock();
@@ -221,11 +226,11 @@ public class AccountServiceImpl implements AccountService, InitializingBean {
     public boolean setPassword(int chainId, String address, String password) {
         //check if the account is legal
         if (!AddressTool.validAddress(chainId, address)) {
-            Log.debug("the address is illegal,chainId:{},address:{}", chainId, address);
+            LoggerUtil.logger.debug("the address is illegal,chainId:{},address:{}", chainId, address);
             throw new NulsRuntimeException(AccountErrorCode.ADDRESS_ERROR);
         }
         if (StringUtils.isBlank(password)) {
-            Log.debug("the password should't be null,chainId:{},address:{}", chainId, address);
+            LoggerUtil.logger.debug("the password should't be null,chainId:{},address:{}", chainId, address);
             throw new NulsRuntimeException(AccountErrorCode.NULL_PARAMETER);
         }
         if (!FormatValidUtils.validPassword(password)) {
@@ -234,25 +239,25 @@ public class AccountServiceImpl implements AccountService, InitializingBean {
         //check if the account is exist
         Account account = getAccountByAddress(chainId, address);
         if (account == null) {
-            Log.debug("the account isn't exist,chainId:{},address:{}", chainId, address);
+            LoggerUtil.logger.debug("the account isn't exist,chainId:{},address:{}", chainId, address);
             throw new NulsRuntimeException(AccountErrorCode.ACCOUNT_NOT_EXIST);
         }
         //check if the account has encrypt
         if (account.isEncrypted()) {
-            Log.debug("the account has encrypted,chainId:{},address:{}", chainId, address);
+            LoggerUtil.logger.debug("the account has encrypted,chainId:{},address:{}", chainId, address);
             throw new NulsRuntimeException(AccountErrorCode.ACCOUNT_IS_ALREADY_ENCRYPTED);
         }
         //encrypt the account
         try {
             account.encrypt(password);
         } catch (Exception e) {
-            Log.error("encrypt the account occur exception,chainId:{},address:{}", chainId, address, e);
+            LoggerUtil.logger.error("encrypt the account occur exception,chainId:{},address:{}", chainId, address, e);
         }
         //save the account
         AccountPo po = new AccountPo(account);
         boolean result = accountStorageService.saveAccount(po);
         if (!result) {
-            Log.debug("save the account failed,chainId:{},address:{}", chainId, address);
+            LoggerUtil.logger.debug("save the account failed,chainId:{},address:{}", chainId, address);
         }
         //backup account to keystore
         keyStoreService.backupAccountToKeyStore(null, chainId, account.getAddress().getBase58(), password);
@@ -303,10 +308,10 @@ public class AccountServiceImpl implements AccountService, InitializingBean {
             EventCmdCall.sendEvent(AccountConstant.EVENT_TOPIC_UPDATE_PASSWORD, JSONUtils.obj2json(eventData));
             return result;
         } catch (NulsException e) {
-            Log.error(e);
+            LoggerUtil.logger.error(e);
             throw new NulsRuntimeException(e.getErrorCode());
         } catch (Exception e) {
-            Log.error(e);
+            LoggerUtil.logger.error(e);
             throw new NulsRuntimeException(AccountErrorCode.FAILED);
         }
     }
@@ -389,17 +394,17 @@ public class AccountServiceImpl implements AccountService, InitializingBean {
     public boolean isEncrypted(int chainId, String address) {
         //check if the account is legal
         if (!AddressTool.validAddress(chainId, address)) {
-            Log.debug("the address is illegal,chainId:{},address:{}", chainId, address);
+            LoggerUtil.logger.debug("the address is illegal,chainId:{},address:{}", chainId, address);
             throw new NulsRuntimeException(AccountErrorCode.ADDRESS_ERROR);
         }
         //check if the account is exist
         Account account = getAccountByAddress(chainId, address);
         if (account == null) {
-            Log.debug("the account isn't exist,chainId:{},address:{}", chainId, address);
+            LoggerUtil.logger.debug("the account isn't exist,chainId:{},address:{}", chainId, address);
             throw new NulsRuntimeException(AccountErrorCode.ACCOUNT_NOT_EXIST);
         }
         boolean result = account.isEncrypted();
-        Log.debug("the account is Encrypted:{},chainId:{},address:{}", result, chainId, address);
+        LoggerUtil.logger.debug("the account is Encrypted:{},chainId:{},address:{}", result, chainId, address);
         return result;
     }
 
@@ -431,7 +436,7 @@ public class AccountServiceImpl implements AccountService, InitializingBean {
             //Sending account remove events
             EventCmdCall.sendEvent(AccountConstant.EVENT_TOPIC_REMOVE_ACCOUNT, JSONUtils.obj2json(eventData));
         } catch (Exception e) {
-            Log.error(e);
+            LoggerUtil.logger.error(e);
             throw new NulsRuntimeException(AccountErrorCode.FAILED);
         }
         return result;
@@ -663,7 +668,7 @@ public class AccountServiceImpl implements AccountService, InitializingBean {
             byte[] signBytes = SignatureUtil.signDigest(digest, ecKey).serialize();
             return new P2PHKSignature(signBytes, ecKey.getPubKey());
         } catch (IOException e) {
-            Log.error(e.getMessage());
+            LoggerUtil.logger.error(e.getMessage());
             throw new NulsRuntimeException(AccountErrorCode.IO_ERROR);
         }
     }

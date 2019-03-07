@@ -16,6 +16,10 @@ public class PunishService {
     @Autowired
     private MongoDBService mongoDBService;
 
+    public void initSelect(int chainId) {
+
+    }
+
     public void savePunishList(int chainId, List<PunishLogInfo> punishLogList) {
         if (punishLogList.isEmpty()) {
             return;

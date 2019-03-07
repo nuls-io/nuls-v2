@@ -22,6 +22,7 @@
 
 package io.nuls.api.utils;
 
+import io.nuls.api.ApiContext;
 import io.nuls.api.constant.Constant;
 import io.nuls.api.manager.ChainManager;
 import io.nuls.api.model.po.config.ConfigBean;
@@ -45,39 +46,50 @@ import static io.nuls.api.constant.Constant.MODULES_CONFIG_FILE;
  */
 public class ConfigLoader {
 
-    private static ConfigStorageService configService = SpringLiteContext.getBean(ConfigStorageService.class);
+//    private static ConfigStorageService configService = SpringLiteContext.getBean(ConfigStorageService.class);
 
     /**
      * 加载配置文件
      *
      * @throws Exception
      */
+//    public static void load() throws Exception {
+//        Map<Integer, ConfigBean> configMap = configService.getList();
+//        if (configMap != null && configMap.isEmpty()) {
+//            for (ConfigBean bean : configMap.values()) {
+//                ChainManager.addConfigBean(bean.getChainId(), bean);
+//            }
+//        } else {
+//            loadDefault();
+//        }
+//    }
     public static void load() throws Exception {
-        Map<Integer, ConfigBean> configMap = configService.getList();
-        if (configMap != null && configMap.isEmpty()) {
-            for (ConfigBean bean : configMap.values()) {
-                ChainManager.addConfigBean(bean.getChainID(), bean);
-            }
-        } else {
-            loadDefault();
-        }
-    }
-
-    private static void loadDefault() throws Exception {
         String configJson = IoUtils.read(MODULES_CONFIG_FILE);
         List<ConfigItem> configItems = JSONUtils.json2list(configJson, ConfigItem.class);
 
-        ConfigBean bean = new ConfigBean();
         for (ConfigItem item : configItems) {
             if (item.getName().equals(Constant.CHAIN_ID)) {
-                bean.setChainID(Integer.parseInt(item.getValue()));
+                ApiContext.defaultChainId = Integer.parseInt(item.getValue());
+            } else if (item.getName().equals(Constant.ASSET_ID)) {
+                ApiContext.defaultAssetId = Integer.parseInt(item.getValue());
             } else if (item.getName().equals(Constant.DB_IP)) {
-                bean.setDbIp(item.getValue());
+                ApiContext.dbIp = item.getValue();
             } else if (item.getName().equals(Constant.DB_PORT)) {
-                bean.setPort(Integer.parseInt(item.getValue()));
+                ApiContext.port = Integer.parseInt(item.getValue());
             }
         }
 
-        ChainManager.addConfigBean(bean.getChainID(), bean);
+//        ConfigBean bean = new ConfigBean();
+//        for (ConfigItem item : configItems) {
+//            if (item.getName().equals(Constant.CHAIN_ID)) {
+//                bean.setChainId(Integer.parseInt(item.getValue()));
+//            } else if (item.getName().equals(Constant.DB_IP)) {
+//                bean.setDbIp(item.getValue());
+//            } else if (item.getName().equals(Constant.DB_PORT)) {
+//                bean.setPort(Integer.parseInt(item.getValue()));
+//            }
+//        }
+//
+//        ChainManager.addConfigBean(bean.getChainId(), bean);
     }
 }

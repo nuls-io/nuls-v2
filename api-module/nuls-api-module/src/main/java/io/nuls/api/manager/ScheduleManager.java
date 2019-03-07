@@ -16,7 +16,7 @@ public class ScheduleManager {
         int corePoolSize = ChainManager.getConfigBeanMap().size();
         ScheduledExecutorService executorService = Executors.newScheduledThreadPool(corePoolSize);
         for (ConfigBean bean : ChainManager.getConfigBeanMap().values()) {
-            executorService.scheduleAtFixedRate(new SyncBlockTask(bean.getChainID()), 1, 10, TimeUnit.SECONDS);
+            executorService.scheduleAtFixedRate(new SyncBlockTask(bean.getChainId()), 1, 10, TimeUnit.SECONDS);
         }
     }
 }

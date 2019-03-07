@@ -586,14 +586,15 @@ public class ConnectManager {
     }
 
     public static ConnectData getConnectDataByRole(String role)throws Exception{
-        if(ROLE_CHANNEL_MAP.isEmpty() || ROLE_CHANNEL_MAP.get(role) == null){
+        Channel channel = ROLE_CHANNEL_MAP.get(role);
+        if(ROLE_CHANNEL_MAP.isEmpty() || channel == null){
             String url = getRemoteUri(role);
             if(StringUtils.isBlank(url)){
                 throw new Exception("Connection module not started");
             }
-            getConnectByUrl(role);
+            channel = getConnectByUrl(role);
         }
-        return CHANNEL_DATA_MAP.get(ROLE_CHANNEL_MAP.get(role));
+        return CHANNEL_DATA_MAP.get(channel);
     }
 
 
@@ -606,6 +607,8 @@ public class ConnectManager {
             throw new Exception("Connection module not started");
         }
         SocketChannel channel = createConnect(url);
+        Log.info("当前已建立在连接："+ConnectManager.ROLE_CHANNEL_MAP);
+        Log.info("当前正在主动建立的连接："+role);
         ROLE_CHANNEL_MAP.put(role,channel);
         createConnectData(channel);
         return channel;
@@ -633,6 +636,8 @@ public class ConnectManager {
             return ROLE_CHANNEL_MAP.get(role);
         }
         SocketChannel channel = createConnect(url);
+        Log.info("当前已建立在连接："+ConnectManager.ROLE_CHANNEL_MAP);
+        Log.info("当前正在主动建立的连接："+role);
         ROLE_CHANNEL_MAP.put(role,channel);
         createConnectData(channel);
         return channel;

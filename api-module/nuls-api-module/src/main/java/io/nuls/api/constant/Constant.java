@@ -42,6 +42,8 @@ public interface Constant {
      */
     String CHAIN_ID = "chainId";
 
+    String ASSET_ID = "assetId";
+
     String DB_IP = "dbIp";
 
     String DB_PORT = "dbPort";

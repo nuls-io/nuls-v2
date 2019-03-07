@@ -25,6 +25,7 @@
 package io.nuls.transaction;
 
 import io.nuls.db.service.RocksDBService;
+import io.nuls.db.util.DBUtils;
 import io.nuls.h2.utils.MybatisDbHelper;
 import io.nuls.rpc.info.HostInfo;
 import io.nuls.rpc.model.ModuleE;
@@ -68,7 +69,7 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 public class TransactionBootStrap extends RpcModule {
 
     public static void main(String[] args) {
-        if(args.length == 0){
+        if (args.length == 0) {
             args = new String[]{HostInfo.getLocalIP() + ":8887/ws"};
         }
         NulsRpcModuleBootstrap.run("io.nuls", args);
@@ -93,16 +94,8 @@ public class TransactionBootStrap extends RpcModule {
 
     @Override
     public boolean doStart() {
-        try {
-            //启动链
-//            SpringLiteContext.getBean(ChainManager.class).runChain();
-            Log.info("Transaction Ready...");
-            return true;
-        } catch (Exception e) {
-            Log.error("Transaction doStart error!");
-            Log.error(e);
-            return false;
-        }
+        Log.info("Transaction Ready...");
+        return true;
     }
 
     @Override
@@ -140,7 +133,7 @@ public class TransactionBootStrap extends RpcModule {
     }
 
     @Override
-    public String getRpcCmdPackage(){
+    public String getRpcCmdPackage() {
         return TxConstant.TX_CMD_PATH;
     }
 
@@ -174,7 +167,11 @@ public class TransactionBootStrap extends RpcModule {
 
             //todo 单个节点跑多链的时候 h2是否需要通过chain来区分数据库(如何分？)，待确认！！
             String resource = "mybatis/mybatis-config.xml";
-            SqlSessionFactory sqlSessionFactory = new SqlSessionFactoryBuilder().build(Resources.getResourceAsReader(resource), "druid");
+            Properties prop =  ConfigLoader.loadProperties("db_config.properties");
+            String currentPath = DBUtils.genAbsolutePath((String)prop.get(TxConstant.DB_DATA_PATH));
+            LoggerUtil.Log.debug("#########################:" + currentPath);
+            prop.setProperty("url", "jdbc:h2:file:" + currentPath + "/h2/nuls;LOG=2;DB_CLOSE_DELAY=-1;TRACE_LEVEL_SYSTEM_OUT=1;DATABASE_TO_UPPER=FALSE;MV_STORE=false;COMPRESS=true;MAX_COMPACT_TIME=5000");
+            SqlSessionFactory sqlSessionFactory = new SqlSessionFactoryBuilder().build(Resources.getResourceAsReader(resource), "druid",prop);
             MybatisDbHelper.setSqlSessionFactory(sqlSessionFactory);
         } catch (Exception e) {
             LoggerUtil.Log.error(e);
@@ -221,9 +218,6 @@ public class TransactionBootStrap extends RpcModule {
                 //订阅Block模块接口
                 BlockCall.subscriptionNewBlockHeight(chain);
             }
-//            int a = 0;
-//            int b = 0;
-//            System.out.println(a/b);
         } catch (NulsException e) {
             throw new RuntimeException(e);
         }
