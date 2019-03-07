@@ -9,7 +9,6 @@ import io.nuls.rpc.model.message.*;
 import io.nuls.rpc.netty.channel.manager.ConnectManager;
 import io.nuls.rpc.netty.processor.container.RequestContainer;
 import io.nuls.rpc.netty.processor.container.ResponseContainer;
-import io.nuls.tools.data.StringUtils;
 import io.nuls.tools.log.Log;
 import io.nuls.tools.parse.JSONUtils;
 
@@ -118,7 +117,7 @@ public class ResponseMessageProcessor {
         判断所有依赖的模块是否已经启动（发送握手信息）
         Determine whether all dependent modules have been started (send handshake information)
          */
-        if (ConnectManager.LOCAL.getDependencies() == null) {
+        /*if (ConnectManager.LOCAL.getDependencies() == null) {
             ConnectManager.startService = true;
             Log.debug("Start service!");
             return;
@@ -140,7 +139,7 @@ public class ResponseMessageProcessor {
         }
 
         ConnectManager.startService = true;
-        Log.debug("Start service!");
+        Log.debug("Start service!");*/
     }
 
     /**
