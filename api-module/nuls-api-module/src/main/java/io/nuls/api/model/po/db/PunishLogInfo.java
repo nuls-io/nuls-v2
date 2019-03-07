@@ -7,15 +7,15 @@ public class PunishLogInfo extends TxDataInfo {
 
     private String txHash;
 
-    private Integer type;
+    private int type;
 
     private String address;
 
-    private Long time;
+    private long time;
 
-    private Long blockHeight;
+    private long blockHeight;
 
-    private Long roundIndex;
+    private long roundIndex;
 
     private int index;
 

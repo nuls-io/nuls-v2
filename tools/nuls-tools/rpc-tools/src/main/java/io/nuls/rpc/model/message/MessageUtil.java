@@ -25,6 +25,7 @@
 package io.nuls.rpc.model.message;
 
 import io.nuls.rpc.info.Constants;
+import io.nuls.rpc.netty.channel.manager.ConnectManager;
 import io.nuls.tools.data.DateUtils;
 import io.nuls.tools.thread.TimeService;
 
@@ -65,6 +66,7 @@ public class MessageUtil {
      */
     public static NegotiateConnection defaultNegotiateConnection() {
         NegotiateConnection negotiateConnection = new NegotiateConnection();
+        negotiateConnection.setAbbreviation(ConnectManager.LOCAL.getModuleAbbreviation());
         negotiateConnection.setProtocolVersion("1.0");
         negotiateConnection.setCompressionAlgorithm("zlib");
         negotiateConnection.setCompressionRate("0");

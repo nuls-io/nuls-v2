@@ -26,8 +26,19 @@ import java.util.*;
  * @author Niels
  */
 public class ApiContext {
+
+    public static int defaultChainId;
+
+    public static int defaultAssetId;
+
+    public static String dbIp;
+
+    public static int port;
+
     public static boolean doSync = true;
+
     public static long bestHeight;
+
     public static Properties config;
 
     //种子节点地址

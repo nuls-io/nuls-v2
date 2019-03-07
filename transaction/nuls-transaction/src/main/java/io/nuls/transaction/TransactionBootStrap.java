@@ -1,13 +1,41 @@
+/**
+ * MIT License
+ * <p>
+ * Copyright (c) 2017-2018 nuls.io
+ * <p>
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ * <p>
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * <p>
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+
 package io.nuls.transaction;
 
 import io.nuls.db.service.RocksDBService;
 import io.nuls.h2.utils.MybatisDbHelper;
 import io.nuls.rpc.info.HostInfo;
 import io.nuls.rpc.model.ModuleE;
-import io.nuls.rpc.netty.bootstrap.NettyServer;
-import io.nuls.rpc.netty.channel.manager.ConnectManager;
-import io.nuls.rpc.netty.processor.ResponseMessageProcessor;
+import io.nuls.rpc.modulebootstrap.Module;
+import io.nuls.rpc.modulebootstrap.NulsRpcModuleBootstrap;
+import io.nuls.rpc.modulebootstrap.RpcModule;
+import io.nuls.rpc.modulebootstrap.RpcModuleState;
+import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.core.ioc.SpringLiteContext;
+import io.nuls.tools.exception.NulsException;
+import io.nuls.tools.log.Log;
 import io.nuls.tools.parse.ConfigLoader;
 import io.nuls.tools.parse.I18nUtils;
 import io.nuls.transaction.constant.TxConfig;
@@ -20,76 +48,112 @@ import io.nuls.transaction.rpc.call.NetworkCall;
 import io.nuls.transaction.storage.h2.TransactionH2Service;
 import io.nuls.transaction.storage.rocksdb.LanguageStorageService;
 import io.nuls.transaction.utils.DBUtil;
+import io.nuls.transaction.utils.LoggerUtil;
 import org.apache.ibatis.io.Resources;
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.apache.ibatis.session.SqlSessionFactoryBuilder;
 
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.lang.reflect.Field;
+import java.net.URL;
 import java.nio.charset.Charset;
 import java.util.Map;
 import java.util.Properties;
 
-import static io.nuls.transaction.utils.LoggerUtil.Log;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 /**
  * @author: Charlie
- * @date: 2018/11/12
+ * @date: 2019/3/4
  */
-public class TransactionBootStrap {
+@Component
+public class TransactionBootStrap extends RpcModule {
 
     public static void main(String[] args) {
+        if (args.length == 0) {
+            args = new String[]{HostInfo.getLocalIP() + ":8887/ws"};
+        }
+        NulsRpcModuleBootstrap.run("io.nuls", args);
+    }
+
+    @Override
+    public void init() {
         try {
-            //初始化上下文
-            SpringLiteContext.init(TxConstant.CONTEXT_PATH);
-            //初始化系统参数
+            updateDataPath();
+//            //初始化系统参数
             initSys();
             //初始化数据库配置文件
             initDB();
-
             //初始化国际资源文件语言
             initLanguage();
-            //启动WebSocket服务,向外提供RPC接口
-            initServer();
             initH2Table();
-            //启动链
             SpringLiteContext.getBean(ChainManager.class).runChain();
-            while (!ConnectManager.isReady()) {
-                Log.info("wait depend modules ready");
-                Thread.sleep(2000L);
-            }
-            txStart();
-
-            Log.info("START-SUCCESS");
         } catch (Exception e) {
-            Log.error("Transaction startup error!");
+            Log.error("Transaction init error!");
             Log.error(e);
         }
     }
 
-    public static void txStart() {
+    @Override
+    public boolean doStart() {
         try {
-            //注册网络消息协议 依赖block的ready状态
-            while (!NetworkCall.registerProtocol()) {
-                Log.info("wait nw_protocolRegister ready");
-                Thread.sleep(5000L);
-            }
-
-            ChainManager chainManager = SpringLiteContext.getBean(ChainManager.class);
-            for (Map.Entry<Integer, Chain> entry : chainManager.getChainMap().entrySet()) {
-                Chain chain = entry.getValue();
-                //订阅Block模块接口
-                BlockCall.subscriptionNewBlockHeight(chain);
-            }
+            //启动链
+//            SpringLiteContext.getBean(ChainManager.class).runChain();
+            Log.info("Transaction Ready...");
+            return true;
         } catch (Exception e) {
+            Log.error("Transaction doStart error!");
             Log.error(e);
+            return false;
         }
+    }
+
+    @Override
+    public RpcModuleState onDependenciesReady() {
+        Log.info("Transaction onDependenciesReady");
+        try {
+            NetworkCall.registerProtocol();
+            subscriptionBlockHeight();
+            Log.info("Transaction Running...");
+            return RpcModuleState.Running;
+        } catch (Exception e) {
+            LoggerUtil.Log.error(e);
+            return RpcModuleState.Ready;
+        }
+
+    }
+
+    @Override
+    public RpcModuleState onDependenciesLoss(Module dependenciesModule) {
+        return RpcModuleState.Ready;
+    }
+
+    @Override
+    public Module[] getDependencies() {
+        return new Module[]{
+                new Module(ModuleE.NW.abbr, "1.0"),
+                new Module(ModuleE.LG.abbr, "1.0"),
+                new Module(ModuleE.BL.abbr, "1.0")
+        };
+    }
+
+    @Override
+    public Module moduleInfo() {
+        return new Module(ModuleE.TX.abbr, "1.0");
+    }
+
+    @Override
+    public String getRpcCmdPackage() {
+        return TxConstant.TX_CMD_PATH;
     }
 
     /**
      * 初始化系统编码
      */
-    public static void initSys() {
+    private static void initSys() {
         try {
             System.setProperty(TxConstant.SYS_ALLOW_NULL_ARRAY_ELEMENT, "true");
             System.setProperty(TxConstant.SYS_FILE_ENCODING, UTF_8.name());
@@ -97,7 +161,7 @@ public class TransactionBootStrap {
             charset.setAccessible(true);
             charset.set(null, UTF_8);
         } catch (Exception e) {
-            Log.error(e);
+            LoggerUtil.Log.error(e);
         }
     }
 
@@ -119,7 +183,7 @@ public class TransactionBootStrap {
             SqlSessionFactory sqlSessionFactory = new SqlSessionFactoryBuilder().build(Resources.getResourceAsReader(resource), "druid");
             MybatisDbHelper.setSqlSessionFactory(sqlSessionFactory);
         } catch (Exception e) {
-            Log.error(e);
+            LoggerUtil.Log.error(e);
         }
     }
 
@@ -137,40 +201,70 @@ public class TransactionBootStrap {
                 languageService.saveLanguage(language);
             }
         } catch (Exception e) {
-            Log.error(e);
-        }
-    }
-
-    /**
-     * 共识模块启动WebSocket服务，用于其他模块连接共识模块与共识模块交互
-     */
-    public static void initServer() {
-        try {
-            // todo 依赖模块 Start server instance
-            NettyServer.getInstance(ModuleE.TX)
-                    .moduleRoles(new String[]{"1.0"})
-                    .moduleVersion("1.0")
-                    .dependencies(ModuleE.NW.abbr, "1.0")
-                    .dependencies(ModuleE.LG.abbr, "1.0")
-                    .dependencies(ModuleE.BL.abbr, "1.0")
-                    .scanPackage("io.nuls.transaction.rpc.cmd");
-            String kernelUrl = "ws://" + HostInfo.getLocalIP() + ":8887/ws";
-            ConnectManager.getConnectByUrl(kernelUrl);
-            ResponseMessageProcessor.syncKernel(kernelUrl);
-        } catch (Exception e) {
-            Log.error("Transaction startup webSocket server error!");
-            e.printStackTrace();
+            LoggerUtil.Log.error(e);
         }
     }
 
     /**
      * 创建H2的表, 如果存在则不会创建
      */
-    public static void initH2Table() {
+    private static void initH2Table() {
         TransactionH2Service ts = SpringLiteContext.getBean(TransactionH2Service.class);
         ts.createTxTablesIfNotExists(TxConstant.H2_TX_TABLE_NAME_PREFIX,
                 TxConstant.H2_TX_TABLE_INDEX_NAME_PREFIX,
                 TxConstant.H2_TX_TABLE_UNIQUE_NAME_PREFIX,
                 TxConstant.H2_TX_TABLE_NUMBER);
+    }
+
+    /**
+     * 订阅最新区块高度
+     */
+    private static void subscriptionBlockHeight() {
+        try {
+            ChainManager chainManager = SpringLiteContext.getBean(ChainManager.class);
+            for (Map.Entry<Integer, Chain> entry : chainManager.getChainMap().entrySet()) {
+                Chain chain = entry.getValue();
+                //订阅Block模块接口
+                BlockCall.subscriptionNewBlockHeight(chain);
+            }
+//            int a = 0;
+//            int b = 0;
+//            System.out.println(a/b);
+        } catch (NulsException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private static void updateDataPath() {
+        String filePath = "db_config.properties";
+
+        Properties pps = new Properties();
+        InputStream in = null;
+        OutputStream out = null;
+        try {
+            URL url = TransactionBootStrap.class.getClassLoader().getResource(filePath);
+            in = TransactionBootStrap.class.getClassLoader().getResourceAsStream(filePath);
+            pps.load(in);
+            out = new FileOutputStream(url.getPath());
+            pps.setProperty("url", "jdbc:h2:file:./data/tx/h2/nuls;LOG=2;DB_CLOSE_DELAY=-1;TRACE_LEVEL_SYSTEM_OUT=1;DATABASE_TO_UPPER=FALSE;MV_STORE=false;COMPRESS=true;MAX_COMPACT_TIME=5000");
+            pps.store(out, "");
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            if (out != null) {
+                try {
+                    out.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+            if (in != null) {
+                try {
+                    in.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
     }
 }

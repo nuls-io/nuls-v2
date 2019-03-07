@@ -6,7 +6,6 @@ import io.nuls.rpc.invoke.BaseInvoke;
 import io.nuls.rpc.invoke.KernelInvoke;
 import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.model.message.*;
-import io.nuls.rpc.netty.channel.ConnectData;
 import io.nuls.rpc.netty.channel.manager.ConnectManager;
 import io.nuls.rpc.netty.processor.container.RequestContainer;
 import io.nuls.rpc.netty.processor.container.ResponseContainer;
@@ -32,7 +31,7 @@ public class ResponseMessageProcessor {
      * @return boolean
      * @throws Exception 握手失败, handshake failed
      */
-    public static boolean handshakeKernel(String url) throws Exception {
+    public static boolean handshake(String url) throws Exception {
         Channel channel = ConnectManager.getConnectByUrl(url);
         if (channel == null) {
             throw new Exception("Kernel not available");
@@ -257,18 +256,18 @@ public class ResponseMessageProcessor {
         Message message = MessageUtil.basicMessage(MessageType.Request);
         message.setMessageData(request);
 
-        ConnectData connectData = ConnectManager.getConnectDataByRole(role);
+        Channel channel = ConnectManager.getConnectByRole(role);
 
         ResponseContainer responseContainer = RequestContainer.putRequest(message.getMessageId());
 
-        ConnectManager.sendMessage(connectData.getChannel(),JSONUtils.obj2json(message));
+        ConnectManager.sendMessage(channel,JSONUtils.obj2json(message));
         if (ConnectManager.isPureDigital(request.getSubscriptionPeriod())
                 || ConnectManager.isPureDigital(request.getSubscriptionEventCounter())) {
             /*
             如果是需要重复发送的消息（订阅消息），记录messageId与客户端的对应关系，用于取消订阅
             If it is a message (subscription message) that needs to be sent repeatedly, record the relationship between the messageId and the WsClient
              */
-            ConnectManager.MSG_ID_KEY_CHANNEL_MAP.put(message.getMessageId(), connectData);
+            ConnectManager.MSG_ID_KEY_CHANNEL_MAP.put(message.getMessageId(), channel);
         }
 
         return responseContainer;
@@ -295,9 +294,9 @@ public class ResponseMessageProcessor {
         根据messageId获取WsClient，发送取消订阅命令，然后移除本地信息
         Get the WsClient according to messageId, send the unsubscribe command, and then remove the local information
          */
-        ConnectData connectData = ConnectManager.MSG_ID_KEY_CHANNEL_MAP.get(messageId);
-        if (connectData != null) {
-            ConnectManager.sendMessage(connectData.getChannel(),JSONUtils.obj2json(message));
+        Channel channel = ConnectManager.MSG_ID_KEY_CHANNEL_MAP.get(messageId);
+        if (channel != null) {
+            ConnectManager.sendMessage(channel,JSONUtils.obj2json(message));
             Log.debug("取消订阅：" + JSONUtils.obj2json(message));
             ConnectManager.INVOKE_MAP.remove(messageId);
         }

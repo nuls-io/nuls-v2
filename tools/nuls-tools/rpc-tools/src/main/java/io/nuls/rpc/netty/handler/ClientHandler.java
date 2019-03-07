@@ -88,7 +88,7 @@ public class ClientHandler extends SimpleChannelInboundHandler<Object> {
     @Override
     public void channelUnregistered(ChannelHandlerContext ctx) throws Exception {
         SocketChannel socketChannel = (SocketChannel) ctx.channel();
-        ConnectData connectData = ConnectManager.getConnectDataByChannel(socketChannel);
+        ConnectData connectData = ConnectManager.CHANNEL_DATA_MAP.get(socketChannel);
         if (connectData != null) {
             connectData.setConnected(false);
         }

@@ -1,5 +1,6 @@
 package io.nuls.api.manager;
 
+import io.nuls.api.cache.ApiCache;
 import io.nuls.api.db.MongoDBService;
 import io.nuls.api.model.po.config.ConfigBean;
 import io.nuls.tools.core.annotation.Component;
@@ -26,6 +27,8 @@ public class ChainManager {
      * 存放每条链对应的mangoDBSevice
      */
     private static Map<Integer, MongoDBService> dbServiceMap = new ConcurrentHashMap<>();
+
+
 
     /**
      * 首先明确单条链的启动过程
@@ -54,4 +57,6 @@ public class ChainManager {
     public static Map<Integer, ConfigBean> getConfigBeanMap() {
         return configBeanMap;
     }
+
+
 }

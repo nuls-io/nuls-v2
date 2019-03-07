@@ -67,7 +67,8 @@ public class AccountCmd extends BaseCmd {
             Object chainIdObj = params == null ? null : params.get(RpcParameterNameConstant.CHAIN_ID);
             Object countObj = params == null ? null : params.get(RpcParameterNameConstant.COUNT);
             Object passwordObj = params == null ? null : params.get(RpcParameterNameConstant.PASSWORD);
-            if (params == null || chainIdObj == null) {
+            //|| passwordObj == null
+            if (params == null || chainIdObj == null ) {
                 throw new NulsRuntimeException(AccountErrorCode.NULL_PARAMETER);
             }
 
@@ -108,7 +109,7 @@ public class AccountCmd extends BaseCmd {
             Object chainIdObj = params == null ? null : params.get(RpcParameterNameConstant.CHAIN_ID);
             Object countObj = params == null ? null : params.get(RpcParameterNameConstant.COUNT);
             Object passwordObj = params == null ? null : params.get(RpcParameterNameConstant.PASSWORD);
-            if (params == null || chainIdObj == null) {
+            if (params == null || chainIdObj == null || passwordObj == null) {
                 throw new NulsRuntimeException(AccountErrorCode.NULL_PARAMETER);
             }
             // parse params
@@ -226,7 +227,7 @@ public class AccountCmd extends BaseCmd {
      * @param params []
      * @return
      */
-    @CmdAnnotation(cmd = "ac_getUnencryptedAddressList", version = 1.0, scope = "private", minEvent = 0, minPeriod = 0, description = "query all account collections and put them in cache")
+    @CmdAnnotation(cmd = "ac_getUnencryptedAddressList", version = 1.0, scope = "private", minEvent = 0, minPeriod = 0, description = "Get a list of local unencrypted accounts")
     public Response getUnencryptedAddressList(Map params) {
         Log.debug("getUnencryptedAddressList start");
         Map<String, List<String>> map = new HashMap<>();
@@ -256,6 +257,46 @@ public class AccountCmd extends BaseCmd {
         }
         map.put(RpcConstant.LIST, unencryptedAddressList);
         Log.debug("getUnencryptedAddressList end");
+        return success(map);
+    }
+
+    /**
+     * 获取本地加密账户列表
+     * Get a list of local encrypted accounts
+     *
+     * @param params []
+     * @return
+     */
+    @CmdAnnotation(cmd = "ac_getEncryptedAddressList", version = 1.0, scope = "private", minEvent = 0, minPeriod = 0, description = "Get a list of locally encrypted accounts")
+    public Response getEncryptedAddressList(Map params) {
+        Log.debug("getEncryptedAddressList start");
+        Map<String, List<String>> map = new HashMap<>();
+        List<String> encryptedAddressList = new ArrayList<>();
+        try {
+            //query all accounts
+            Object chainIdObj = params == null ? null : params.get(RpcParameterNameConstant.CHAIN_ID);
+            List<Account> accountList;
+            if (chainIdObj != null) {
+                int chainId = (int) chainIdObj;
+                //query all accounts in a chain
+                accountList = accountService.getAccountListByChain(chainId);
+            } else {
+                //query all accounts
+                accountList = accountService.getAccountList();
+            }
+            if (null == accountList) {
+                return success(null);
+            }
+            for (Account account : accountList) {
+                if (account.isEncrypted()) {
+                    encryptedAddressList.add(account.getAddress().getBase58());
+                }
+            }
+        } catch (NulsRuntimeException e) {
+            return failed(e.getErrorCode());
+        }
+        map.put(RpcConstant.LIST, encryptedAddressList);
+        Log.debug("getEncryptedAddressList end");
         return success(map);
     }
 
@@ -335,7 +376,7 @@ public class AccountCmd extends BaseCmd {
             Object chainIdObj = params == null ? null : params.get(RpcParameterNameConstant.CHAIN_ID);
             Object addressObj = params == null ? null : params.get(RpcParameterNameConstant.ADDRESS);
             Object passwordObj = params == null ? null : params.get(RpcParameterNameConstant.PASSWORD);
-            if (params == null || chainIdObj == null || addressObj == null) {
+            if (params == null || chainIdObj == null || addressObj == null || passwordObj == null) {
                 throw new NulsRuntimeException(AccountErrorCode.NULL_PARAMETER);
             }
             // parse params
@@ -374,7 +415,8 @@ public class AccountCmd extends BaseCmd {
             Object chainIdObj = params == null ? null : params.get(RpcParameterNameConstant.CHAIN_ID);
             Object addressObj = params == null ? null : params.get(RpcParameterNameConstant.ADDRESS);
             Object passwordObj = params == null ? null : params.get(RpcParameterNameConstant.PASSWORD);
-            if (params == null || chainIdObj == null || addressObj == null) {
+            //|| passwordObj == null
+            if (params == null || chainIdObj == null || addressObj == null ) {
                 throw new NulsRuntimeException(AccountErrorCode.NULL_PARAMETER);
             }
             // parse params
@@ -416,7 +458,7 @@ public class AccountCmd extends BaseCmd {
             // check parameters
             Object chainIdObj = params == null ? null : params.get(RpcParameterNameConstant.CHAIN_ID);
             Object passwordObj = params == null ? null : params.get(RpcParameterNameConstant.PASSWORD);
-            if (params == null || chainIdObj == null) {
+            if (params == null || chainIdObj == null || passwordObj == null) {
                 throw new NulsRuntimeException(AccountErrorCode.NULL_PARAMETER);
             }
             // parse params
@@ -493,6 +535,7 @@ public class AccountCmd extends BaseCmd {
             Object priKeyObj = params == null ? null : params.get(RpcParameterNameConstant.PRIKEY);
             Object passwordObj = params == null ? null : params.get(RpcParameterNameConstant.PASSWORD);
             Object overwriteObj = params == null ? null : params.get(RpcParameterNameConstant.OVERWRITE);
+            //passwordObj == null ||
             if (params == null || chainIdObj == null || priKeyObj == null || overwriteObj == null) {
                 throw new NulsRuntimeException(AccountErrorCode.NULL_PARAMETER);
             }
@@ -535,7 +578,7 @@ public class AccountCmd extends BaseCmd {
             Object keyStoreObj = params == null ? null : params.get(RpcParameterNameConstant.KEYSTORE);
             Object passwordObj = params == null ? null : params.get(RpcParameterNameConstant.PASSWORD);
             Object overwriteObj = params == null ? null : params.get(RpcParameterNameConstant.OVERWRITE);
-            if (params == null || chainIdObj == null || keyStoreObj == null || overwriteObj == null) {
+            if (params == null || chainIdObj == null || keyStoreObj == null || passwordObj == null || overwriteObj == null) {
                 throw new NulsRuntimeException(AccountErrorCode.NULL_PARAMETER);
             }
             // parse params
@@ -584,7 +627,7 @@ public class AccountCmd extends BaseCmd {
             Object addressObj = params == null ? null : params.get(RpcParameterNameConstant.ADDRESS);
             Object passwordObj = params == null ? null : params.get(RpcParameterNameConstant.PASSWORD);
             Object filePathObj = params == null ? null : params.get(RpcParameterNameConstant.FILE_PATH);
-            if (params == null || chainIdObj == null || addressObj == null) {
+            if (params == null || chainIdObj == null || addressObj == null || passwordObj == null) {
                 throw new NulsRuntimeException(AccountErrorCode.NULL_PARAMETER);
             }
             // parse params
@@ -862,6 +905,7 @@ public class AccountCmd extends BaseCmd {
             Object addressObj = params == null ? null : params.get(RpcParameterNameConstant.ADDRESS);
             Object passwordObj = params == null ? null : params.get(RpcParameterNameConstant.PASSWORD);
             Object dataHexObj = params == null ? null : params.get(RpcParameterNameConstant.DATA_HEX);
+            //|| passwordObj == null
             if (params == null || chainIdObj == null || addressObj == null || dataHexObj == null) {
                 throw new NulsRuntimeException(AccountErrorCode.NULL_PARAMETER);
             }
@@ -913,6 +957,7 @@ public class AccountCmd extends BaseCmd {
             Object addressObj = params == null ? null : params.get(RpcParameterNameConstant.ADDRESS);
             Object passwordObj = params == null ? null : params.get(RpcParameterNameConstant.PASSWORD);
             Object dataHexObj = params == null ? null : params.get(RpcParameterNameConstant.DATA_HEX);
+            //|| passwordObj == null
             if (params == null || chainIdObj == null || addressObj == null || dataHexObj == null) {
                 throw new NulsRuntimeException(AccountErrorCode.NULL_PARAMETER);
             }

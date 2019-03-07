@@ -92,7 +92,7 @@ public class BlockValidator {
       }
       MeetingRound currentRound = roundManager.getCurrentRound(chain);
       boolean hasChangeRound = false;
-      if(extendsData.getRoundIndex() < currentRound.getIndex()){
+      if(currentRound == null || extendsData.getRoundIndex() < currentRound.getIndex()){
          MeetingRound round = roundManager.getRoundByIndex(chain, extendsData.getRoundIndex());
          if (round != null) {
             currentRound = round;
@@ -335,8 +335,12 @@ public class BlockValidator {
          chain.getLoggerMap().get(ConsensusConstant.BASIC_LOGGER_NAME).debug("CoinBase transaction order wrong! height: " + block.getHeader().getHeight() + " , hash : " + block.getHeader().getHash());
          return false;
       }
+
       Transaction coinBaseTransaction = consensusManager.createCoinBaseTx(chain ,member, block.getTxs(), currentRound, 0);
       if (null == coinBaseTransaction || !tx.getHash().equals(coinBaseTransaction.getHash())) {
+         Log.info(AddressTool.getStringAddressByBytes(member.getAgent().getAgentAddress()));
+         BlockExtendsData extendsData = new BlockExtendsData(block.getHeader().getExtend());
+         Log.info(extendsData.getRoundIndex()+"");
          chain.getLoggerMap().get(ConsensusConstant.BASIC_LOGGER_NAME).error("the coin base tx is wrong! height: " + block.getHeader().getHeight() + " , hash : " + block.getHeader().getHash());
          return false;
       }

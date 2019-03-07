@@ -42,6 +42,8 @@ public interface Constant {
      */
     String CHAIN_ID = "chainId";
 
+    String ASSET_ID = "assetId";
+
     String DB_IP = "dbIp";
 
     String DB_PORT = "dbPort";
@@ -103,6 +105,8 @@ public interface Constant {
     int JOIN_CONSENSUS = 0;
     //取消委托共识
     int CANCEL_CONSENSUS = 1;
+    //删除共识节点
+    int STOP_AGENT = 2;
     //创建合约成功
     int CONTRACT_STATUS_NORMAL = 0;
     //创建合约失败

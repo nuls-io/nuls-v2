@@ -294,7 +294,7 @@ public class ConsensusProcess {
         bd.setTxList(packingTxList);
         Block newBlock = consensusManager.createBlock(chain,bd, self.getAgent().getPackingAddress());
         consensusLogger.info("make block height:" + newBlock.getHeader().getHeight() + ",txCount: " + newBlock.getTxs().size() + " , block size: " + newBlock.size() + " , time:" + DateUtils.convertDate(new Date(newBlock.getHeader().getTime())) + ",packEndTime:" +
-                DateUtils.convertDate(new Date(self.getPackEndTime())));
+                DateUtils.convertDate(new Date(self.getPackEndTime()))+",hash:"+newBlock.getHeader().getHash().getDigestHex()+",preHash:"+newBlock.getHeader().getPreHash().getDigestHex());
         return newBlock;
     }
 }

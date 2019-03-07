@@ -106,14 +106,6 @@ public class TaskManager extends BaseManager {
         executorService.scheduleAtFixedRate(new GroupStatusMonitor(), 5, 10, TimeUnit.SECONDS);
     }
 
-    synchronized void clientConnectThreadStart() {
-        if (clientThreadStart) {
-            return;
-        }
-//        executorService.scheduleAtFixedRate(new NodesConnectTask(), 5, 10, TimeUnit.SECONDS);
-        clientThreadStart = true;
-    }
-
     /**
      * 启动时间同步线程
      * Start the time synchronization thread.

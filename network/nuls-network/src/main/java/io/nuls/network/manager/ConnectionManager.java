@@ -207,7 +207,6 @@ public class ConnectionManager extends BaseManager {
      */
     private void nettyBoot() {
         serverStart();
-        clientStart();
         Log.info("==========================NettyBoot");
     }
 
@@ -237,12 +236,6 @@ public class ConnectionManager extends BaseManager {
         }, false);
 
     }
-
-    private void clientStart() {
-        taskManager.clientConnectThreadStart();
-    }
-
-
     public boolean connection(Node node) {
         try {
             NettyClient client = new NettyClient(node);

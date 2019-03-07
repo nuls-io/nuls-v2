@@ -37,7 +37,6 @@ import io.nuls.account.service.AccountService;
 import io.nuls.account.service.AliasService;
 import io.nuls.account.storage.AccountStorageService;
 import io.nuls.account.util.AccountTool;
-import io.nuls.tools.log.Log;
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.Address;
 import io.nuls.base.data.NulsSignData;
@@ -59,12 +58,7 @@ import io.nuls.tools.log.Log;
 import io.nuls.tools.parse.JSONUtils;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -96,10 +90,11 @@ public class AccountServiceImpl implements AccountService, InitializingBean {
     @Override
     public List<Account> createAccount(int chainId, int count, String password) {
         //check params
-        if (chainId <= 0 || count <= 0 || count > AccountTool.CREATE_MAX_SIZE) {
+        //|| StringUtils.isBlank(password)
+        if (chainId <= 0 || count <= 0 || count > AccountTool.CREATE_MAX_SIZE ) {
             throw new NulsRuntimeException(AccountErrorCode.PARAMETER_ERROR);
         }
-        if (StringUtils.isNotBlank(password) && !FormatValidUtils.validPassword(password)) {
+        if (!StringUtils.isBlank(password) && !FormatValidUtils.validPassword(password)) {
             throw new NulsRuntimeException(AccountErrorCode.PASSWORD_FORMAT_WRONG);
         }
         locker.lock();
@@ -420,10 +415,8 @@ public class AccountServiceImpl implements AccountService, InitializingBean {
             throw new NulsRuntimeException(AccountErrorCode.ACCOUNT_NOT_EXIST);
         }
         //The account is encrypted, verify password
-        if (account.isEncrypted()) {
-            if (!account.validatePassword(password)) {
-                throw new NulsRuntimeException(AccountErrorCode.PASSWORD_IS_WRONG);
-            }
+        if (!account.validatePassword(password)) {
+            throw new NulsRuntimeException(AccountErrorCode.PASSWORD_IS_WRONG);
         }
         boolean result;
         try {
@@ -503,7 +496,7 @@ public class AccountServiceImpl implements AccountService, InitializingBean {
             localAccountList.addAll(chainAccountList);
         }
         //Check if the password is correct.
-        if (StringUtils.isNotBlank(password) && !FormatValidUtils.validPassword(password)) {
+        if (!FormatValidUtils.validPassword(password)) {
             throw new NulsRuntimeException(AccountErrorCode.PASSWORD_IS_WRONG);
         }
         List<String> list = new ArrayList<>();
@@ -559,7 +552,7 @@ public class AccountServiceImpl implements AccountService, InitializingBean {
             throw new NulsRuntimeException(AccountErrorCode.PRIVATE_KEY_WRONG);
         }
         //encrypting account private key
-        if (FormatValidUtils.validPassword(password)) {
+        if (StringUtils.isNotBlank(password) && FormatValidUtils.validPassword(password)) {
             account.encrypt(password);
         }
         //Query account already exists
@@ -590,7 +583,7 @@ public class AccountServiceImpl implements AccountService, InitializingBean {
         if (!AddressTool.validAddress(chainId, keyStore.getAddress())) {
             throw new NulsRuntimeException(AccountErrorCode.ADDRESS_ERROR);
         }
-        if (StringUtils.isNotBlank(password) && !FormatValidUtils.validPassword(password)) {
+        if (!FormatValidUtils.validPassword(password)) {
             throw new NulsRuntimeException(AccountErrorCode.PASSWORD_IS_WRONG);
         }
         //not allowed to cover
@@ -617,11 +610,6 @@ public class AccountServiceImpl implements AccountService, InitializingBean {
                 throw new NulsRuntimeException(AccountErrorCode.PRIVATE_KEY_WRONG);
             }
         } else if (null == keyStore.getPrikey() && null != keyStore.getEncryptedPrivateKey()) {
-            //加密私钥不为空,验证密码是否正确
-            //encrypting private key is not empty,verify that the password is correct
-            if (!FormatValidUtils.validPassword(password)) {
-                throw new NulsRuntimeException(AccountErrorCode.PASSWORD_IS_WRONG);
-            }
             try {
                 //create account by private key
                 priKey = AESEncrypt.decrypt(HexUtil.decode(keyStore.getEncryptedPrivateKey()), password);
@@ -649,9 +637,7 @@ public class AccountServiceImpl implements AccountService, InitializingBean {
         }
 
         //encrypting account private key
-        if (FormatValidUtils.validPassword(password)) {
-            account.encrypt(password);
-        }
+        account.encrypt(password);
         //save account to storage
         accountStorageService.saveAccount(new AccountPo(account));
         //put the account in local cache

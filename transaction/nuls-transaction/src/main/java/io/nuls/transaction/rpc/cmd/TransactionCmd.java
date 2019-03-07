@@ -380,12 +380,13 @@ public class TransactionCmd extends BaseCmd {
             if (!NulsDigestData.validHash(txHash)) {
                 throw new NulsException(TxErrorCode.HASH_ERROR);
             }
-            Log.debug("getConfirmedTransaction : " + txHash);
             Transaction tx = txService.getTransaction(chain, NulsDigestData.fromDigestHex(txHash));
             Map<String, String> resultMap = new HashMap<>(TxConstant.INIT_CAPACITY_8);
             if (tx == null) {
+                Log.debug("getTx - from all, fail! tx is null, txHash:{}", txHash);
                 resultMap.put("txHex", null);
             } else {
+                Log.debug("getTx - from all, success txHash : " + tx.getHash().getDigestHex());
                 resultMap.put("txHex", tx.hex());
             }
             return success(resultMap);
@@ -421,12 +422,13 @@ public class TransactionCmd extends BaseCmd {
             if (!NulsDigestData.validHash(txHash)) {
                 throw new NulsException(TxErrorCode.HASH_ERROR);
             }
-            Log.debug("getConfirmedTransaction : " + txHash);
             Transaction tx = confirmedTxService.getConfirmedTransaction(chain, NulsDigestData.fromDigestHex(txHash));
             Map<String, String> resultMap = new HashMap<>(TxConstant.INIT_CAPACITY_8);
             if (tx == null) {
+                Log.debug("getConfirmedTransaction fail, tx is null. txHash:{}", txHash);
                 resultMap.put("txHex", null);
             } else {
+                Log.debug("getConfirmedTransaction success. txHash:{}", txHash);
                 resultMap.put("txHex", tx.hex());
             }
             return success(resultMap);
@@ -513,7 +515,7 @@ public class TransactionCmd extends BaseCmd {
     }
 
     /**
-     * 创建交易接口(该接口应该为外部客户端接口,本不应该写在此处)
+     * 创建跨链交易接口
      *
      * @param params
      * @return

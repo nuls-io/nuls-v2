@@ -21,11 +21,15 @@
 package io.nuls.api;
 
 import com.mongodb.MongoClient;
+import com.mongodb.client.ListIndexesIterable;
+import com.mongodb.client.MongoCursor;
 import com.mongodb.client.MongoDatabase;
+import com.mongodb.client.model.Indexes;
+import io.nuls.api.constant.MongoTableConstant;
 import io.nuls.api.constant.RunningStatusEnum;
 import io.nuls.api.db.MongoDBService;
-import io.nuls.api.manager.ChainManager;
-import io.nuls.api.model.po.config.ConfigBean;
+import io.nuls.api.manager.ScheduleManager;
+import io.nuls.api.service.SyncService;
 import io.nuls.api.utils.ConfigLoader;
 import io.nuls.rpc.info.HostInfo;
 import io.nuls.rpc.model.ModuleE;
@@ -33,6 +37,7 @@ import io.nuls.rpc.netty.bootstrap.NettyServer;
 import io.nuls.rpc.netty.channel.manager.ConnectManager;
 import io.nuls.rpc.netty.processor.ResponseMessageProcessor;
 import io.nuls.tools.core.ioc.SpringLiteContext;
+import org.bson.Document;
 
 import static io.nuls.api.constant.Constant.DEFAULT_SCAN_PACKAGE;
 import static io.nuls.api.constant.Constant.RPC_DEFAULT_SCAN_PACKAGE;
@@ -51,7 +56,7 @@ public class ApiModuleBootstrap {
     public static void main(String[] args) {
         Thread.currentThread().setName("api-module-main");
         init();
-        start();
+//        start();
 //        loop();
     }
 
@@ -59,13 +64,13 @@ public class ApiModuleBootstrap {
      * 初始化，完成后系统状态变更为{@link RunningStatusEnum#READY}
      */
     private static void init() {
-        //扫描包路径io.nuls.api,初始化bean
-        SpringLiteContext.init(DEFAULT_SCAN_PACKAGE);
         try {
             //加载配置
             ConfigLoader.load();
+            //扫描包路径io.nuls.api,初始化bean
+            springInit();
+            //初始化数据库相关
             initDB();
-
 //            initServer();
         } catch (Exception e) {
             e.printStackTrace();
@@ -73,19 +78,89 @@ public class ApiModuleBootstrap {
         }
     }
 
+
+    private static void springInit() {
+        String dbName = "nuls-api";
+        MongoClient mongoClient = new MongoClient(ApiContext.dbIp, ApiContext.port);
+        MongoDatabase mongoDatabase = mongoClient.getDatabase(dbName);
+        MongoDBService mongoDBService = new MongoDBService(mongoClient, mongoDatabase);
+        SpringLiteContext.putBean("dbService", mongoDBService);
+
+        SpringLiteContext.init(DEFAULT_SCAN_PACKAGE);
+    }
+
     /**
+     * Initialize the database connection
      * 初始化数据库连接
      */
     private static void initDB() {
-        String dbName = "nuls-api";
+        MongoDBService mongoDBService = SpringLiteContext.getBean(MongoDBService.class);
+        SyncService syncService = SpringLiteContext.getBean(SyncService.class);
+        syncService.initCache();
+//        for (ConfigBean bean : ChainManager.getConfigBeanMap().values()) {
+//            initTablesAndIndex(bean.getChainId(), mongoDBService);
+//
+//        }
+    }
 
-        for (ConfigBean bean : ChainManager.getConfigBeanMap().values()) {
-            MongoClient mongoClient = new MongoClient(bean.getDbIp(), bean.getPort());
-            MongoDatabase mongoDatabase = mongoClient.getDatabase(dbName);
-            MongoDBService dbService = new MongoDBService(mongoClient, mongoDatabase);
-            ChainManager.addDBService(bean.getChainID(), dbService);
+    /**
+     * Initialize database tables and indexes
+     * 初始化数据库表和索引
+     *
+     * @param chainId        链ID
+     * @param mongoDBService 数据库服务器
+     */
+    private static void initTablesAndIndex(int chainId, MongoDBService mongoDBService) {
+        //判断是否需要创建索引
+        //交易关系表
+        ListIndexesIterable<Document> indexes = mongoDBService.getIndexes(MongoTableConstant.TX_RELATION_TABLE + chainId);
+        MongoCursor<Document> iterator = indexes.iterator();
+        if (!iterator.hasNext() || (iterator.next() != null && !iterator.hasNext())) {
+            if (!iterator.hasNext()) {
+                mongoDBService.createCollection(MongoTableConstant.TX_RELATION_TABLE + chainId);
+            }
+            //创建索引
+            mongoDBService.createIndex(MongoTableConstant.TX_RELATION_TABLE + chainId, Indexes.ascending("address"));
+            mongoDBService.createIndex(MongoTableConstant.TX_RELATION_TABLE + chainId, Indexes.ascending("address", "type"));
+            mongoDBService.createIndex(MongoTableConstant.TX_RELATION_TABLE + chainId, Indexes.ascending("txHash"));
+            mongoDBService.createIndex(MongoTableConstant.TX_RELATION_TABLE + chainId, Indexes.descending("height", "createTime"));
         }
-
+        //账户信息表
+        indexes = mongoDBService.getIndexes(MongoTableConstant.ACCOUNT_TABLE + chainId);
+        iterator = indexes.iterator();
+        if (!iterator.hasNext() || (iterator.next() != null && !iterator.hasNext())) {
+            if (!iterator.hasNext()) {
+                mongoDBService.createCollection(MongoTableConstant.ACCOUNT_TABLE + chainId);
+            }
+            mongoDBService.createIndex(MongoTableConstant.ACCOUNT_TABLE + chainId, Indexes.descending("totalBalance"));
+        }
+        //交易表
+        indexes = mongoDBService.getIndexes(MongoTableConstant.TX_TABLE + chainId);
+        iterator = indexes.iterator();
+        if (!iterator.hasNext() || (iterator.next() != null && !iterator.hasNext())) {
+            if (!iterator.hasNext()) {
+                mongoDBService.createCollection(MongoTableConstant.TX_TABLE + chainId);
+            }
+            mongoDBService.createIndex(MongoTableConstant.TX_TABLE + chainId, Indexes.descending("height", "createTime"));
+        }
+//        //UTXO 表
+//        indexes = mongoDBService.getIndexes(MongoTableConstant.UTXO_INFO);
+//        iterator = indexes.iterator();
+//        if (!iterator.hasNext() || (iterator.next() != null && !iterator.hasNext())) {
+//            if (!iterator.hasNext()) {
+//                mongoDBService.createCollection(MongoTableConstant.UTXO_INFO);
+//            }
+//            mongoDBService.createIndex(MongoTableConstant.UTXO_INFO, Indexes.ascending("address"));
+//        }
+        //block 表
+        indexes = mongoDBService.getIndexes(MongoTableConstant.BLOCK_HEADER_TABLE + chainId);
+        iterator = indexes.iterator();
+        if (!iterator.hasNext() || (iterator.next() != null && !iterator.hasNext())) {
+            if (!iterator.hasNext()) {
+                mongoDBService.createCollection(MongoTableConstant.BLOCK_HEADER_TABLE + chainId);
+            }
+            mongoDBService.createIndex(MongoTableConstant.BLOCK_HEADER_TABLE + chainId, Indexes.ascending("hash"));
+        }
     }
 
 
@@ -96,13 +171,13 @@ public class ApiModuleBootstrap {
                     .moduleRoles(new String[]{"1.0"})
                     .moduleVersion("1.0")
                     .dependencies(ModuleE.KE.abbr, "1.0")
-                    .dependencies(ModuleE.CM.abbr, "1.0")
-                    .dependencies(ModuleE.AC.abbr, "1.0")
-                    .dependencies(ModuleE.NW.abbr, "1.0")
-                    .dependencies(ModuleE.CS.abbr, "1.0")
+//                    .dependencies(ModuleE.CM.abbr, "1.0")
+//                    .dependencies(ModuleE.AC.abbr, "1.0")
+//                    .dependencies(ModuleE.NW.abbr, "1.0")
+//                    .dependencies(ModuleE.CS.abbr, "1.0")
                     .dependencies(ModuleE.BL.abbr, "1.0")
-                    .dependencies(ModuleE.LG.abbr, "1.0")
-                    .dependencies(ModuleE.TX.abbr, "1.0")
+//                    .dependencies(ModuleE.LG.abbr, "1.0")
+//                    .dependencies(ModuleE.TX.abbr, "1.0")
 //                    .dependencies(ModuleE.PU.abbr, "1.0")
                     .scanPackage(RPC_DEFAULT_SCAN_PACKAGE);
             // Get information from kernel
@@ -119,6 +194,8 @@ public class ApiModuleBootstrap {
      * 启动，完成后系统状态变更为{@link RunningStatusEnum#RUNNING}
      */
     private static void start() {
+        ScheduleManager scheduleManager = SpringLiteContext.getBean(ScheduleManager.class);
+        scheduleManager.start();
     }
 
     /**
