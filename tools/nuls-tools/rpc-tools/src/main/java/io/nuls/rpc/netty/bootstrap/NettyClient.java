@@ -37,7 +37,7 @@ public class NettyClient {
      * 连接服务器，返回连接通道
      * Connect to the server and return to the connection channel
      * */
-    public static SocketChannel createConnect(String uri){
+    public static Channel createConnect(String uri){
         try {
             EventLoopGroup group=new NioEventLoopGroup();
             Bootstrap boot=new Bootstrap();
@@ -78,7 +78,7 @@ public class NettyClient {
             Message message = MessageUtil.basicMessage(MessageType.NegotiateConnection);
             message.setMessageData(MessageUtil.defaultNegotiateConnection());
             channel.writeAndFlush(new TextWebSocketFrame(JSONUtils.obj2json(message)));
-            return (SocketChannel) channel;
+            return channel;
         }catch (Exception e){
             e.printStackTrace();
             return null;
