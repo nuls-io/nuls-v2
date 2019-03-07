@@ -227,7 +227,7 @@ public class AccountCmd extends BaseCmd {
      * @param params []
      * @return
      */
-    @CmdAnnotation(cmd = "ac_getUnencryptedAddressList", version = 1.0, scope = "private", minEvent = 0, minPeriod = 0, description = "query all account collections and put them in cache")
+    @CmdAnnotation(cmd = "ac_getUnencryptedAddressList", version = 1.0, scope = "private", minEvent = 0, minPeriod = 0, description = "Get a list of local unencrypted accounts")
     public Response getUnencryptedAddressList(Map params) {
         Log.debug("getUnencryptedAddressList start");
         Map<String, List<String>> map = new HashMap<>();
@@ -257,6 +257,46 @@ public class AccountCmd extends BaseCmd {
         }
         map.put(RpcConstant.LIST, unencryptedAddressList);
         Log.debug("getUnencryptedAddressList end");
+        return success(map);
+    }
+
+    /**
+     * 获取本地加密账户列表
+     * Get a list of local encrypted accounts
+     *
+     * @param params []
+     * @return
+     */
+    @CmdAnnotation(cmd = "ac_getEncryptedAddressList", version = 1.0, scope = "private", minEvent = 0, minPeriod = 0, description = "Get a list of locally encrypted accounts")
+    public Response getEncryptedAddressList(Map params) {
+        Log.debug("getEncryptedAddressList start");
+        Map<String, List<String>> map = new HashMap<>();
+        List<String> encryptedAddressList = new ArrayList<>();
+        try {
+            //query all accounts
+            Object chainIdObj = params == null ? null : params.get(RpcParameterNameConstant.CHAIN_ID);
+            List<Account> accountList;
+            if (chainIdObj != null) {
+                int chainId = (int) chainIdObj;
+                //query all accounts in a chain
+                accountList = accountService.getAccountListByChain(chainId);
+            } else {
+                //query all accounts
+                accountList = accountService.getAccountList();
+            }
+            if (null == accountList) {
+                return success(null);
+            }
+            for (Account account : accountList) {
+                if (account.isEncrypted()) {
+                    encryptedAddressList.add(account.getAddress().getBase58());
+                }
+            }
+        } catch (NulsRuntimeException e) {
+            return failed(e.getErrorCode());
+        }
+        map.put(RpcConstant.LIST, encryptedAddressList);
+        Log.debug("getEncryptedAddressList end");
         return success(map);
     }
 
