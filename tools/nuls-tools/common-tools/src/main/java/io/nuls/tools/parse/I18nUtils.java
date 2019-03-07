@@ -131,10 +131,8 @@ public class I18nUtils {
                             e.printStackTrace();
                         }
                     } else {
-
+                        Log.error("unSupport loadLanguage!");
                     }
-
-
                 }
             }
         } catch (IOException e) {
