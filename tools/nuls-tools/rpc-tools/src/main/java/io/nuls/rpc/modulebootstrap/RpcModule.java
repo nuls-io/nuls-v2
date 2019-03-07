@@ -1,6 +1,5 @@
 package io.nuls.rpc.modulebootstrap;
 
-import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.model.message.Message;
 import io.nuls.rpc.model.message.MessageType;
 import io.nuls.rpc.model.message.MessageUtil;
@@ -20,9 +19,9 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.Executor;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
@@ -127,6 +126,11 @@ public abstract class RpcModule implements InitializingBean {
             Message message = MessageUtil.basicMessage(MessageType.Request);
             message.setMessageData(request);
             try {
+                int getConnectCount = 0;
+                while(getConnectCount<5 && !ConnectManager.ROLE_CHANNEL_MAP.containsKey(module.name)){
+                    TimeUnit.SECONDS.sleep(1);
+                    getConnectCount++;
+                }
                 ConnectManager.sendMessage(module.getName(), message);
                 followerList.put(module,Boolean.TRUE);
             } catch (Exception e) {

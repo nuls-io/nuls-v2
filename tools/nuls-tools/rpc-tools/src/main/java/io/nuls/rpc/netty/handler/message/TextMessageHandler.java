@@ -60,10 +60,11 @@ public class TextMessageHandler implements Runnable {
 
     private void handler() {
         try {
-            ConnectData connectData = ConnectManager.getConnectDataByChannel(channel);
+            ConnectData connectData = ConnectManager.CHANNEL_DATA_MAP.get(channel);
 
 
             Message message = JSONUtils.json2pojo(msg, Message.class);
+
             /*
              * 获取该链接对应的ConnectData对象
              * Get the ConnectData object corresponding to the link
@@ -73,7 +74,7 @@ public class TextMessageHandler implements Runnable {
                     /*
                     握手，直接响应
                      */
-                    RequestMessageProcessor.negotiateConnectionResponse(channel, message.getMessageId());
+                    RequestMessageProcessor.negotiateConnectionResponse(channel, message);
                     break;
                 case Unsubscribe:
                     /*
@@ -88,12 +89,11 @@ public class TextMessageHandler implements Runnable {
                     如果不能提供服务，则直接返回
                     If no service is available, return directly
                      */
-//==================modify by zhoulijun==============
-//                    if (!ConnectManager.isReady()) {
-//                        RequestMessageProcessor.serviceNotStarted(channel, messageId);
-//                        break;
-//                    }
-//===================================================
+                    if (!ConnectManager.isReady()) {
+                        RequestMessageProcessor.serviceNotStarted(channel, messageId);
+                        break;
+                    }
+
                     /*
                     Request，根据是否需要定时推送放入不同队列，等待处理
                     Request, put in different queues according to the response mode. Wait for processing
@@ -102,7 +102,7 @@ public class TextMessageHandler implements Runnable {
 
                     if (!ConnectManager.isPureDigital(request.getSubscriptionEventCounter())
                             && !ConnectManager.isPureDigital(request.getSubscriptionPeriod())) {
-                        RequestMessageProcessor.callCommandsWithPeriod(connectData.getChannel(), request.getRequestMethods(), messageId);
+                        RequestMessageProcessor.callCommandsWithPeriod(channel, request.getRequestMethods(), messageId);
                     } else {
                         if (ConnectManager.isPureDigital(request.getSubscriptionPeriod())) {
                             connectData.getRequestPeriodLoopQueue().offer(new Object[]{message, request});
@@ -161,8 +161,7 @@ public class TextMessageHandler implements Runnable {
                     break;
             }
         } catch (Exception e) {
-            e.printStackTrace();
-            Log.error(e.getMessage());
+            Log.error(e);
         }
     }
 }
