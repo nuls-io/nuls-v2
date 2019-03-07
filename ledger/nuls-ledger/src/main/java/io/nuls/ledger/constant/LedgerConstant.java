@@ -69,5 +69,5 @@ public interface LedgerConstant {
     /**
      * 未确认交易nonce的过期间隔时间，单位ms
      */
-    public static final int UNCONFIRM_NONCE_EXPIRED_TIME =300000;
+    public static final int UNCONFIRM_NONCE_EXPIRED_TIME =20*60*1000;
 }

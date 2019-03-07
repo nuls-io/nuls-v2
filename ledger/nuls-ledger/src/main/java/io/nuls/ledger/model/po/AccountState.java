@@ -147,12 +147,23 @@ public class AccountState extends BaseNulsData {
         BigInteger calUnconfirmedAmount = BigInteger.ZERO;
         for (UnconfirmedAmount unconfirmedAmount : unconfirmedAmounts) {
             calUnconfirmedAmount = calUnconfirmedAmount.add(unconfirmedAmount.getEarnAmount()).subtract(unconfirmedAmount.getSpendAmount());
-            calUnconfirmedAmount = calUnconfirmedAmount.add(unconfirmedAmount.getFromUnLockedAmount());
-            calUnconfirmedAmount = calUnconfirmedAmount.subtract(unconfirmedAmount.getToLockedAmount());
+
         }
         return calUnconfirmedAmount;
     }
 
+    /**
+     * 计算未确认交易的冻结部分
+     * @return
+     */
+    public BigInteger getUnconfirmedFreezeAmount() {
+        BigInteger calUnconfirmedFreeAmount = BigInteger.ZERO;
+        for (UnconfirmedAmount unconfirmedAmount : unconfirmedAmounts) {
+            //add 冻结 subtract 解锁的
+            calUnconfirmedFreeAmount = calUnconfirmedFreeAmount.add(unconfirmedAmount.getToLockedAmount()).subtract(unconfirmedAmount.getFromUnLockedAmount());
+        }
+        return calUnconfirmedFreeAmount;
+    }
     public void addUnconfirmedNonce(UnconfirmedNonce unconfirmedNonce) {
         unconfirmedNonces.add(unconfirmedNonce);
     }
@@ -160,7 +171,6 @@ public class AccountState extends BaseNulsData {
     public void addUnconfirmedAmount(UnconfirmedAmount unconfirmedAmount) {
         unconfirmedAmounts.add(unconfirmedAmount);
     }
-
 
 
     public boolean updateConfirmedAmount(String hash) {

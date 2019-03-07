@@ -81,7 +81,7 @@ public class LedgerBootstrap extends RpcModule {
 
     @Override
     public Module[] getDependencies() {
-        return new Module[]{new Module(ModuleE.NW.abbr, "1.0")};
+        return new Module[]{};
     }
 
     @Override

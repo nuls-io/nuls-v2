@@ -93,6 +93,14 @@ public class LedgerUtils {
         String nonce8BytesStr = HexUtil.encode(out);
         return nonce8BytesStr;
     }
+    public static String getNonceStrByTxHash(String txHash){
+        byte[] out = new byte[8];
+        byte [] in = HexUtil.decode(txHash);
+        int copyEnd = in.length;
+        System.arraycopy(in,  (copyEnd-8), out, 0, 8);
+        String nonce8BytesStr = HexUtil.encode(out);
+        return nonce8BytesStr;
+    }
 
     public static boolean isExpiredNonce(UnconfirmedNonce unconfirmedNonce){
         if(TimeUtils.getCurrentTime() - unconfirmedNonce.getTime() > LedgerConstant.UNCONFIRM_NONCE_EXPIRED_TIME){

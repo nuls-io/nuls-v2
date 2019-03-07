@@ -140,10 +140,12 @@ public class AccountStateCmd extends BaseCmd {
         }
         if(accountState.getUnconfirmedAmounts().size()> 0){
             rtMap.put("available",accountState.getAvailableAmount().add(accountState.getUnconfirmedAmount()));
+            rtMap.put("freeze",accountState.getFreezeTotal().add(accountState.getUnconfirmedFreezeAmount()));
         }else{
             rtMap.put("available",accountState.getAvailableAmount());
+            rtMap.put("freeze",accountState.getFreezeTotal());
         }
-        rtMap.put("freeze",accountState.getFreezeTotal());
+
         return success(rtMap);
     }
 
