@@ -1,0 +1,12 @@
+[
+  {
+    "key": "chainId",
+    "value": 12345,
+    "readOnly": true
+  },
+  {
+    "key": "assetsId",
+    "value": 1,
+    "readOnly": true
+  }
+]
