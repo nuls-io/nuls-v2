@@ -7,6 +7,7 @@ import io.nuls.account.constant.AccountParam;
 import io.nuls.account.constant.AccountStorageConstant;
 import io.nuls.account.model.bo.Chain;
 import io.nuls.account.rpc.call.TransactionCmdCall;
+import io.nuls.account.util.LoggerUtil;
 import io.nuls.account.util.manager.ChainManager;
 import io.nuls.db.constant.DBErrorCode;
 import io.nuls.db.service.RocksDBService;
@@ -20,7 +21,6 @@ import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.core.ioc.SpringLiteContext;
 import io.nuls.tools.data.StringUtils;
 import io.nuls.tools.exception.NulsException;
-import io.nuls.tools.log.Log;
 import io.nuls.tools.parse.ConfigLoader;
 import io.nuls.tools.parse.I18nUtils;
 
@@ -81,7 +81,7 @@ public class AccountBootstrap extends RpcModule {
      */
     @Override
     public boolean doStart() {
-        Log.info("module ready");
+        LoggerUtil.logger.info("module ready");
         try {
             //初始化数据库
             initDB();
@@ -100,10 +100,10 @@ public class AccountBootstrap extends RpcModule {
      */
     @Override
     public RpcModuleState onDependenciesReady() {
-        Log.info("account onDependenciesReady");
+        LoggerUtil.logger.info("account onDependenciesReady");
         //注册账户模块相关交易
         registerTx();
-        Log.debug("START-SUCCESS");
+        LoggerUtil.logger.debug("START-SUCCESS");
         return RpcModuleState.Running;
     }
 
@@ -140,10 +140,10 @@ public class AccountBootstrap extends RpcModule {
                 }
                 NulsConfig.KERNEL_MODULE_URL = NulsConfig.MODULES_CONFIG.getCfgValue(AccountConstant.CFG_SYSTEM_SECTION, AccountConstant.KERNEL_MODULE_URL);
             } catch (Exception e) {
-                Log.error(e);
+                LoggerUtil.logger.error(e);
             }
         } catch (IOException e) {
-            Log.error("Account Bootstrap initCfg failed", e);
+            LoggerUtil.logger.error("Account Bootstrap initCfg failed", e);
             throw new RuntimeException("Account Bootstrap initCfg failed");
         }
     }
@@ -170,10 +170,10 @@ public class AccountBootstrap extends RpcModule {
             }
         } catch (Exception e) {
             if (!DBErrorCode.DB_TABLE_EXIST.equals(e.getMessage())) {
-                Log.error(e.getMessage());
+                LoggerUtil.logger.error(e.getMessage());
                 throw new NulsException(AccountErrorCode.DB_TABLE_CREATE_ERROR);
             } else {
-                Log.info(e.getMessage());
+                LoggerUtil.logger.info(e.getMessage());
             }
         }
     }
@@ -195,7 +195,7 @@ public class AccountBootstrap extends RpcModule {
                 }
             }
         } catch (Exception e) {
-            Log.error("Transaction registerTx error!");
+            LoggerUtil.logger.error("Transaction registerTx error!");
             throw new RuntimeException(e);
         }
     }

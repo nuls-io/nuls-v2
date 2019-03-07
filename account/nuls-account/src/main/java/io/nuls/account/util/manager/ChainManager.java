@@ -30,15 +30,14 @@ import io.nuls.account.constant.AccountStorageConstant;
 import io.nuls.account.model.bo.Chain;
 import io.nuls.account.model.bo.config.ConfigBean;
 import io.nuls.account.model.bo.config.ConfigItem;
-import io.nuls.account.rpc.call.TransactionCmdCall;
 import io.nuls.account.storage.ConfigService;
+import io.nuls.account.util.LoggerUtil;
 import io.nuls.db.constant.DBErrorCode;
 import io.nuls.db.service.RocksDBService;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.exception.NulsRuntimeException;
 import io.nuls.tools.io.IoUtils;
-import io.nuls.tools.log.Log;
 import io.nuls.tools.parse.JSONUtils;
 
 import java.util.List;
@@ -127,7 +126,7 @@ public class ChainManager {
             }
             return configMap;
         } catch (Exception e) {
-            Log.error(e);
+            LoggerUtil.logger.error(e);
             return null;
         }
     }
@@ -152,10 +151,10 @@ public class ChainManager {
             }
         } catch (Exception e) {
             if (!DBErrorCode.DB_TABLE_EXIST.equals(e.getMessage())) {
-                Log.error(e.getMessage());
+                LoggerUtil.logger.error(e.getMessage());
                 throw new NulsRuntimeException(AccountErrorCode.DB_TABLE_CREATE_ERROR);
             } else {
-                Log.info(e.getMessage());
+                LoggerUtil.logger.info(e.getMessage());
             }
         }
     }
