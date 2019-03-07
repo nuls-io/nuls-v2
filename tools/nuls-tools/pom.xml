@@ -18,6 +18,7 @@
         <module>common-tools</module>
         <module>base-tools</module>
         <module>h2-tools</module>
+        <module>api-provider</module>
     </modules>
 
     <build>
