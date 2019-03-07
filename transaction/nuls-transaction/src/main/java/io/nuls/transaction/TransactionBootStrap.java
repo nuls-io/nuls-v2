@@ -25,6 +25,7 @@
 package io.nuls.transaction;
 
 import io.nuls.db.service.RocksDBService;
+import io.nuls.db.util.DBUtils;
 import io.nuls.h2.utils.MybatisDbHelper;
 import io.nuls.rpc.info.HostInfo;
 import io.nuls.rpc.model.ModuleE;
@@ -246,7 +247,8 @@ public class TransactionBootStrap extends RpcModule {
             in = TransactionBootStrap.class.getClassLoader().getResourceAsStream(filePath);
             pps.load(in);
             out = new FileOutputStream(url.getPath());
-            pps.setProperty("url", "jdbc:h2:file:./data/tx/h2/nuls;LOG=2;DB_CLOSE_DELAY=-1;TRACE_LEVEL_SYSTEM_OUT=1;DATABASE_TO_UPPER=FALSE;MV_STORE=false;COMPRESS=true;MAX_COMPACT_TIME=5000");
+            String currentPath = DBUtils.genAbsolutePath("../../../../data/tx");
+            pps.setProperty("url", "jdbc:h2:file:" + currentPath + "/h2/nuls;LOG=2;DB_CLOSE_DELAY=-1;TRACE_LEVEL_SYSTEM_OUT=1;DATABASE_TO_UPPER=FALSE;MV_STORE=false;COMPRESS=true;MAX_COMPACT_TIME=5000");
             pps.store(out, "");
         } catch (Exception e) {
             e.printStackTrace();
