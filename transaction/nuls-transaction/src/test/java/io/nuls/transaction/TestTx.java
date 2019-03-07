@@ -25,7 +25,6 @@
 package io.nuls.transaction;
 
 import io.nuls.base.basic.AddressTool;
-import io.nuls.base.data.Address;
 import io.nuls.base.data.Page;
 import io.nuls.base.data.Transaction;
 import io.nuls.rpc.info.Constants;
@@ -37,7 +36,6 @@ import io.nuls.rpc.netty.processor.ResponseMessageProcessor;
 import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.exception.NulsRuntimeException;
 import io.nuls.tools.parse.JSONUtils;
-import io.nuls.tools.parse.SerializeUtils;
 import io.nuls.transaction.model.bo.Chain;
 import io.nuls.transaction.model.bo.config.ConfigBean;
 import io.nuls.transaction.model.dto.CoinDTO;
@@ -153,7 +151,7 @@ public class TestTx {
     @Test
     public void depositToAgent() throws Exception {
         //组装委托节点交易
-        String agentHash = "00203ce7a72a4370bce3d1fdefcb2e35364370bde670f5fde30474820abd55dbeaa7";
+        String agentHash = "0020832c1bcc658c56f45da3ddb5ea045579371a94ff1f17f0bc9a765d49fa416385";
         Map<String, Object> dpParams = new HashMap<>();
         dpParams.put("chainId", chainId);
         dpParams.put("address", address27);
@@ -474,9 +472,9 @@ public class TestTx {
      * 创建节点
      */
     public Map createAgentTx(String agentAddr, String packingAddr) throws Exception {
-        Address agentAddress = new Address(chainId, (byte) assetId, SerializeUtils.sha256hash160(agentAddr.getBytes()));
+        /*Address agentAddress = new Address(chainId, (byte) assetId, SerializeUtils.sha256hash160(agentAddr.getBytes()));
         Address rewardAddress = new Address(chainId, (byte) assetId, SerializeUtils.sha256hash160(agentAddr.getBytes()));
-        Address packingAddress = new Address(chainId, (byte) assetId, SerializeUtils.sha256hash160(packingAddr.getBytes()));
+        Address packingAddress = new Address(chainId, (byte) assetId, SerializeUtils.sha256hash160(packingAddr.getBytes()));*/
         Map<String, Object> params = new HashMap<>();
         params.put("agentAddress", agentAddr);
         params.put("chainId", chainId);
