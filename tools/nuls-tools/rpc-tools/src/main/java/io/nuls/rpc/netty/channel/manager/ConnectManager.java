@@ -748,8 +748,8 @@ public class ConnectManager {
         if (!ROLE_CHANNEL_MAP.containsKey(role)
                 || (isSender && role.compareTo(LOCAL.getModuleAbbreviation()) > 0)
                 || (!isSender && role.compareTo(LOCAL.getModuleAbbreviation()) < 0)) {
-            ROLE_CHANNEL_MAP.put(role, channel);
             createConnectData(channel);
+            ROLE_CHANNEL_MAP.put(role, channel);
             return channel;
         }
         return ROLE_CHANNEL_MAP.get(role);
