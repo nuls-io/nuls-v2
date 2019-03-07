@@ -25,6 +25,7 @@
 package io.nuls.transaction;
 
 import io.nuls.base.basic.AddressTool;
+import io.nuls.base.data.Address;
 import io.nuls.base.data.Page;
 import io.nuls.base.data.Transaction;
 import io.nuls.rpc.info.Constants;
@@ -36,6 +37,7 @@ import io.nuls.rpc.netty.processor.ResponseMessageProcessor;
 import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.exception.NulsRuntimeException;
 import io.nuls.tools.parse.JSONUtils;
+import io.nuls.tools.parse.SerializeUtils;
 import io.nuls.transaction.model.bo.Chain;
 import io.nuls.transaction.model.bo.config.ConfigBean;
 import io.nuls.transaction.model.dto.CoinDTO;
@@ -62,6 +64,82 @@ import static org.junit.Assert.assertNotNull;
  */
 public class TestTx {
 
+    @Test
+    public void allInOne() {
+        importPriKey("00c805d2d6d5e06f57fdfb1aff56ef3c2dd15eee88f36fa7d45d368c352ec5ec0d", null);//23 5MR_2CWKhFuoGVraaxL5FYY3RsQLjLDN7jw
+        List<String> accountList = null;
+        try {
+            Map<String, Object> params = new HashMap<>();
+            params.put(Constants.VERSION_KEY_STR, version);
+            params.put("chainId", chainId);
+            params.put("count", 1);
+            params.put("password", password);
+            Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_createAccount", params);
+            accountList = (List<String>) ((HashMap) ((HashMap) cmdResp.getResponseData()).get("ac_createAccount")).get("list");
+            for (String address : accountList) {
+                Log.debug("address-{{}}", address);
+                Map transferMap = new HashMap();
+                transferMap.put("chainId", chainId);
+                transferMap.put("remark", "transfer test");
+                List<CoinDTO> inputs = new ArrayList<>();
+                List<CoinDTO> outputs = new ArrayList<>();
+                CoinDTO inputCoin1 = new CoinDTO();
+                inputCoin1.setAddress(address23);
+                inputCoin1.setPassword(password);
+                inputCoin1.setAssetsChainId(chainId);
+                inputCoin1.setAssetsId(assetId);
+                inputCoin1.setAmount(new BigInteger("20000100000000"));
+                inputs.add(inputCoin1);
+
+                CoinDTO outputCoin1 = new CoinDTO();
+                outputCoin1.setAddress(address);
+                outputCoin1.setPassword(password);
+                outputCoin1.setAssetsChainId(chainId);
+                outputCoin1.setAssetsId(assetId);
+                outputCoin1.setAmount(new BigInteger("20000100000000"));
+                outputs.add(outputCoin1);
+
+                transferMap.put("inputs", inputs);
+                transferMap.put("outputs", outputs);
+
+                Response ccc = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_transfer", transferMap);
+                HashMap result = (HashMap) (((HashMap) ccc.getResponseData()).get("ac_transfer"));
+                Assert.assertTrue(null != result);
+                Log.debug("{}", result.get("value"));
+
+                Thread.sleep(15000);
+
+                //组装创建节点交易
+                Map agentTxMap = this.createAgentTx(address, address);
+                //调用接口
+                Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.CS.abbr, "cs_createAgent", agentTxMap);
+                Map sss = (HashMap) (((HashMap) cmdResp2.getResponseData()).get("cs_createAgent"));
+                Assert.assertTrue(null != sss);
+                String txHex =  (String)result.get("txHex");
+                Transaction tx = TxUtil.getTransaction(txHex);
+                String agentHash = tx.getHash().getDigestHex();
+                Log.debug("createAgent-txHash:{}", agentHash);
+
+
+                //组装委托节点交易
+                Map<String, Object> dpParams = new HashMap<>();
+                dpParams.put("chainId", chainId);
+                dpParams.put("address", address);
+                dpParams.put("password", password);
+                dpParams.put("agentHash", agentHash);
+                dpParams.put("deposit", 200000 * 100000000L);
+                Response dpResp = ResponseMessageProcessor.requestAndResponse(ModuleE.CS.abbr, "cs_depositToAgent", dpParams);
+                HashMap dpResult = (HashMap) ((HashMap) dpResp.getResponseData()).get("cs_depositToAgent");
+                String aaaaa = (String) dpResult.get("txHex");
+                Transaction eeeee = TxUtil.getTransaction(aaaaa);
+                Log.debug("deposit-txHash:{}", eeeee.getHash().getDigestHex());
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
 
     static String address20 = "5MR_2CWWTDXc32s9Wd1guNQzPztFgkyVEsz";
     static String address21 = "5MR_2CbdqKcZktcxntG14VuQDy8YHhc6ZqW";
@@ -80,7 +158,7 @@ public class TestTx {
     static int assetId = 1;
     static String version = "1.0";
 
-    static String password = "nuls123456";
+    static String password = null;//"nuls123456";
 
     @Before
     public void before() throws Exception {
@@ -120,21 +198,21 @@ public class TestTx {
 //        importPriKey("00c299b105e2f9b260d7811d5cb94c713cc324e55831cb15a18454f7382f0a5f6e", password);//20 5MR_2CWWTDXc32s9Wd1guNQzPztFgkyVEsz
 //        importPriKey("00c4a6b90d3f4eb7b50bc85fd0e99ccb717e148b4fde7462e14c590445e589588c", password);//21 5MR_2CbdqKcZktcxntG14VuQDy8YHhc6ZqW
 //        importPriKey("009ad5018ed1fc162c5320b9ae496984dd10227086ad86ea954a209597ff9b7d3a", password);//22 5MR_2Cj9tfgQpdeF7nDy5wyaGG6MZ35H3rA
-//        importPriKey("00c805d2d6d5e06f57fdfb1aff56ef3c2dd15eee88f36fa7d45d368c352ec5ec0d", password);//23 5MR_2CWKhFuoGVraaxL5FYY3RsQLjLDN7jw
-//        importPriKey("00c77707b21eece6c1ce0b8add04db79dc846f36830effe5c5ae2aced00097fafb", password);//24 5MR_2CgwCFRoJ8KX37xNqjjR7ttYuJsg8rk
-        importPriKey("00def3b0f4bfad2a6abb5f6957829e752a1a30806edc35e98016425d578fdc4e77", password);//25 5MR_2CjZkQsN7EnEPcaLgNrMrp6wpPGN6xo
-        importPriKey("1c2b9fd4417c1aad8ae9f24c982ff294eb50a6462b873b79a879e805a9990346", password);//26 5MR_2CeG11nRqx7nGNeh8hTXADibqfSYeNu
-        importPriKey("00c98ecfd3777745270cacb9afba17ef0284769a83ff2adb4106b8a0baaec9452c", password);//27 5MR_2CVCFWH7o8AmrTBPLkdg2dYH1UCUJiM
-        importPriKey("23848d45b4b34aca8ff24b00949a25a2c9175faf283675128e189eee8b085942", password);//28 5MR_2CfUsasd33vQV3HqGw6M3JwVsuVxJ7r
-        importPriKey("009560d5ed6587822b7aee6f318f50b312c281e4f330b6990396881c6d3f870bc1", password);//29 5MR_2CVuGjQ3CYVkhFszxfSt6sodg1gDHYF
-
-        importPriKey("00fffd585ed08dddf0d034236aa1ea85abd2e4e69981617ee477adf6cdcf50f4d5", password);//打包地址 5MR_2Ch8CCnLwoLWFZ45pFEZSmo1C1pkPFA
+        importPriKey("00c805d2d6d5e06f57fdfb1aff56ef3c2dd15eee88f36fa7d45d368c352ec5ec0d", null);//23 5MR_2CWKhFuoGVraaxL5FYY3RsQLjLDN7jw
+        importPriKey("00c77707b21eece6c1ce0b8add04db79dc846f36830effe5c5ae2aced00097fafb", null);//24 5MR_2CgwCFRoJ8KX37xNqjjR7ttYuJsg8rk
+//        importPriKey("00def3b0f4bfad2a6abb5f6957829e752a1a30806edc35e98016425d578fdc4e77", password);//25 5MR_2CjZkQsN7EnEPcaLgNrMrp6wpPGN6xo
+//        importPriKey("1c2b9fd4417c1aad8ae9f24c982ff294eb50a6462b873b79a879e805a9990346", password);//26 5MR_2CeG11nRqx7nGNeh8hTXADibqfSYeNu
+//        importPriKey("00c98ecfd3777745270cacb9afba17ef0284769a83ff2adb4106b8a0baaec9452c", password);//27 5MR_2CVCFWH7o8AmrTBPLkdg2dYH1UCUJiM
+//        importPriKey("23848d45b4b34aca8ff24b00949a25a2c9175faf283675128e189eee8b085942", password);//28 5MR_2CfUsasd33vQV3HqGw6M3JwVsuVxJ7r
+//        importPriKey("009560d5ed6587822b7aee6f318f50b312c281e4f330b6990396881c6d3f870bc1", password);//29 5MR_2CVuGjQ3CYVkhFszxfSt6sodg1gDHYF
+//
+//        importPriKey("00fffd585ed08dddf0d034236aa1ea85abd2e4e69981617ee477adf6cdcf50f4d5", password);//打包地址 5MR_2Ch8CCnLwoLWFZ45pFEZSmo1C1pkPFA
     }
 
     @Test
     public void createAgentTx() throws Exception {
         //组装创建节点交易
-        Map agentTxMap = this.createAgentTx(address27, "5MR_2Ch8CCnLwoLWFZ45pFEZSmo1C1pkPFA");
+        Map agentTxMap = this.createAgentTx(address23, address24);
         //调用接口
         Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.CS.abbr, "cs_createAgent", agentTxMap);
         Map result = (HashMap) (((HashMap) cmdResp2.getResponseData()).get("cs_createAgent"));
@@ -151,10 +229,10 @@ public class TestTx {
     @Test
     public void depositToAgent() throws Exception {
         //组装委托节点交易
-        String agentHash = "0020832c1bcc658c56f45da3ddb5ea045579371a94ff1f17f0bc9a765d49fa416385";
+        String agentHash = "00201b42bc483d07e50a0f4904700c4f6d74610609b2aa371f4a4033c5479ba4208a";
         Map<String, Object> dpParams = new HashMap<>();
         dpParams.put("chainId", chainId);
-        dpParams.put("address", address27);
+        dpParams.put("address", address23);
         dpParams.put("password", password);
         dpParams.put("agentHash", agentHash);
         dpParams.put("deposit", 200000 * 100000000L);
@@ -188,8 +266,8 @@ public class TestTx {
     public void stopAgentTx() throws Exception {
         Map<String, Object> txMap = new HashMap();
         txMap.put("chainId", chainId);
-        txMap.put("address", address27);
-        txMap.put("password", password);
+        txMap.put("address", address23);
+        txMap.put("password", "nuls123456");
         //调用接口
         Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.CS.abbr, "cs_stopAgent", txMap);
         Map result = (HashMap) (((HashMap) cmdResp2.getResponseData()).get("cs_stopAgent"));
@@ -472,9 +550,9 @@ public class TestTx {
      * 创建节点
      */
     public Map createAgentTx(String agentAddr, String packingAddr) throws Exception {
-        /*Address agentAddress = new Address(chainId, (byte) assetId, SerializeUtils.sha256hash160(agentAddr.getBytes()));
+        Address agentAddress = new Address(chainId, (byte) assetId, SerializeUtils.sha256hash160(agentAddr.getBytes()));
         Address rewardAddress = new Address(chainId, (byte) assetId, SerializeUtils.sha256hash160(agentAddr.getBytes()));
-        Address packingAddress = new Address(chainId, (byte) assetId, SerializeUtils.sha256hash160(packingAddr.getBytes()));*/
+        Address packingAddress = new Address(chainId, (byte) assetId, SerializeUtils.sha256hash160(packingAddr.getBytes()));
         Map<String, Object> params = new HashMap<>();
         params.put("agentAddress", agentAddr);
         params.put("chainId", chainId);
