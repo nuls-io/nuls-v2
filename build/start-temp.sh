@@ -31,6 +31,9 @@ while [ ! -z $1 ] ; do
             #log "NulstarUrl is : $2"; 
             NulstarUrl=$2;    
             shift 2 ;;
+        "-r")
+            RESTART="1"
+            shift 1 ;;
         * ) shift
     esac
 done  
@@ -58,8 +61,17 @@ checkLogDir(){
 checkIsRunning(){
     if [ ! -z "`ps -ef|grep -w "name=${APP_NAME} "|grep -v grep|awk '{print $2}'`" ]; then
         pid=`ps -ef|grep -w "name=${APP_NAME} "|grep -v grep|awk '{print $2}'`
-        echoRed "$APP_NAME Already running pid=$pid";
-        exit 0;
+
+        if [ -n "${RESTART}" ];
+        then
+            log "$APP_NAME Already running pid=$pid";
+            log "do restart ${APP_NAM}"
+            log "stop ${APP_NAME}@${pid} failure,dump and kill it."
+            kill $pid > /dev/null 2>&1
+        else
+            echoRed "$APP_NAME Already running pid=$pid";
+            exit 0;
+        fi
     fi
 }
 
