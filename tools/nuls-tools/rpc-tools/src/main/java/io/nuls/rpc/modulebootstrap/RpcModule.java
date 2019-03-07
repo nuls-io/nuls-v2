@@ -57,7 +57,7 @@ public abstract class RpcModule implements InitializingBean {
     private Map<Module,Boolean> followerList = new ConcurrentHashMap<>();
 
     /**
-     * 当前模块依赖的其他模块列表
+     * 当前模块依赖的其他模块的运行状态（是否接收到模块推送的ready通知）
      */
     private Map<Module, Boolean> dependencies = new ConcurrentHashMap<>();
 
@@ -84,7 +84,8 @@ public abstract class RpcModule implements InitializingBean {
             tryRunModule();
             ConnectData connectData = ConnectManager.getConnectDataByRole(module.getName());
             connectData.addCloseEvent(() -> {
-                log.warn("RMB:{}模块触发连接断开事件", module);
+                log.warn("RMB:dependencie:{}模块触发连接断开事件", module);
+                dependencies.put(module,Boolean.FALSE);
                 if (isRunning()) {
                     state = this.onDependenciesLoss(module);
                     if(state == null){
@@ -107,6 +108,17 @@ public abstract class RpcModule implements InitializingBean {
         log.info("RMB:registerModuleDependencies :{}", module);
         synchronized (this) {
             followerList.put(module,Boolean.FALSE);
+            try{
+                //监听与follower的连接，如果断开后需要修改通知状态
+                ConnectData connectData = ConnectManager.getConnectDataByRole(module.getName());
+                connectData.addCloseEvent(() -> {
+                    log.warn("RMB:follower:{}模块触发连接断开事件", module);
+                    //修改通知状态为未通知
+                    followerList.put(module,Boolean.FALSE);
+                });
+            }catch (Exception e){
+                log.error("RMB:获取follower:{}模块连接发生异常.",module,e);
+            }
         }
         if (this.isReady()) {
             notifyFollowerReady(module,0);
@@ -128,6 +140,7 @@ public abstract class RpcModule implements InitializingBean {
             message.setMessageData(request);
             try {
                 ConnectManager.sendMessage(module.getName(), message);
+                log.info("notify follower {} is Ready success",module);
                 followerList.put(module,Boolean.TRUE);
             } catch (Exception e) {
                 if(tryCount > 5){
@@ -138,7 +151,7 @@ public abstract class RpcModule implements InitializingBean {
                     TimeUnit.SECONDS.sleep(1);
                     notifyFollowerReady(module, tryCount+1);
                 } catch (InterruptedException e1) {
-                    e1.printStackTrace();
+                    log.warn("sleep线程发生异常");
                 }
             }
         });
