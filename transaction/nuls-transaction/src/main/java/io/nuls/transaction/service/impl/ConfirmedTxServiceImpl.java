@@ -225,7 +225,7 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
 
     //调提交易
     public boolean commitTxs(Chain chain, Map<TxRegister, List<String>> moduleVerifyMap, String blockHeaderHex, boolean atomicity) {
-        //调用交易模块统一验证器 批量
+        //调用交易模块统一commit接口 批量
         Map<TxRegister, List<String>> successed = new HashMap<>(TxConstant.INIT_CAPACITY_16);
         boolean result = true;
         for (Map.Entry<TxRegister, List<String>> entry : moduleVerifyMap.entrySet()) {

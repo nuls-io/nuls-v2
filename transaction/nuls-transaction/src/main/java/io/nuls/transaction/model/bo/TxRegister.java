@@ -155,6 +155,11 @@ public class TxRegister {
         this.moduleCode = moduleCode;
     }
 
+    /**
+     * 只能用于区分模块
+     * @param obj
+     * @return
+     */
     @Override
     public boolean equals(Object obj) {
         if (obj == null) {
@@ -163,7 +168,7 @@ public class TxRegister {
         if (!(obj instanceof TxRegister)) {
             return false;
         }
-        return this.getTxType()==(((TxRegister) obj).getTxType());
+        return this.getModuleValidator().equals(((TxRegister) obj).getModuleValidator());
     }
 
     @Override
