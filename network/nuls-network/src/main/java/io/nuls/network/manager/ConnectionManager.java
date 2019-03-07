@@ -39,6 +39,7 @@ import io.nuls.network.netty.NettyClient;
 import io.nuls.network.netty.NettyServer;
 import io.nuls.network.netty.container.NodesContainer;
 import io.nuls.network.utils.IpUtil;
+import io.nuls.rpc.netty.channel.manager.ConnectManager;
 import io.nuls.tools.thread.ThreadUtils;
 import io.nuls.tools.thread.TimeService;
 
@@ -206,7 +207,6 @@ public class ConnectionManager extends BaseManager {
      */
     private void nettyBoot() {
         serverStart();
-        clientStart();
         Log.info("==========================NettyBoot");
     }
 
@@ -236,12 +236,6 @@ public class ConnectionManager extends BaseManager {
         }, false);
 
     }
-
-    private void clientStart() {
-        taskManager.clientConnectThreadStart();
-    }
-
-
     public boolean connection(Node node) {
         try {
             NettyClient client = new NettyClient(node);
@@ -269,6 +263,10 @@ public class ConnectionManager extends BaseManager {
 
     @Override
     public void start() throws Exception {
+        while(!ConnectManager.isReady()){
+            Log.debug("wait depend modules ready");
+            Thread.sleep(2000L);
+        }
         nettyBoot();
         status = ManagerStatusEnum.RUNNING;
     }

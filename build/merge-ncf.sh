@@ -53,7 +53,7 @@ done
 for title in ${titleList[@]}
 do
 	#echo $title
-	declare -a itemName=()
+	declare -a itemName
 	titleTemp=""
 	for line in `cat $moduleTmepFile`
 	do

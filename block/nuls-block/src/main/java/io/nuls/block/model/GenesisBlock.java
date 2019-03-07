@@ -31,7 +31,6 @@ import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.exception.NulsRuntimeException;
 import io.nuls.tools.io.IoUtils;
 import io.nuls.tools.parse.JSONUtils;
-import org.apache.http.util.Asserts;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -97,7 +96,6 @@ public final class GenesisBlock extends Block {
             commonLog.error(e);
         }
         String time = (String) jsonMap.get(CONFIG_FILED_TIME);
-        Asserts.notEmpty(time, BlockErrorCode.DATA_ERROR.getCode());
         blockTime = Long.parseLong(time);
         this.initGengsisTxs(jsonMap);
         this.fillHeader(jsonMap);
@@ -114,8 +112,6 @@ public final class GenesisBlock extends Block {
 
         for (Map<String, Object> map : list) {
             String address = (String) map.get(CONFIG_FILED_ADDRESS);
-            Asserts.notEmpty(address, BlockErrorCode.DATA_ERROR.getMsg());
-
             String amount = map.get(CONFIG_FILED_AMOUNT).toString();
             Long lockTime = Long.valueOf("" + map.get(CONFIG_FILED_LOCK_TIME));
 

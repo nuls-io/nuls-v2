@@ -50,13 +50,27 @@ public class NodeRpcTest {
     @Test
     public void  getNodes(){
         Map<String, Object> params = new HashMap<>();
-        params.put("chainId", 1);
+        params.put("chainId", 12345);
         params.put("state", 0);
         params.put("isCross", 0);
         params.put("startPage", 0);
         params.put("pageSize", 0);
         try {
             Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.NW.abbr, "nw_getNodes", params);
+            LoggerUtil.Log.info("response {}", response);
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+    }
+
+    @Test
+    public void  addNodes(){
+        Map<String, Object> params = new HashMap<>();
+        params.put("chainId", 12345);
+        params.put("isCross", 0);
+        params.put("nodes", "192.168.1.100:1800");
+        try {
+            Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.NW.abbr, "nw_addNodes", params);
             LoggerUtil.Log.info("response {}", response);
         }catch (Exception e){
             e.printStackTrace();

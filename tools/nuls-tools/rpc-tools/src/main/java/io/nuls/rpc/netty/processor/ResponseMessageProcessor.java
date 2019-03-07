@@ -6,17 +6,14 @@ import io.nuls.rpc.invoke.BaseInvoke;
 import io.nuls.rpc.invoke.KernelInvoke;
 import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.model.message.*;
-import io.nuls.rpc.netty.channel.ConnectData;
 import io.nuls.rpc.netty.channel.manager.ConnectManager;
 import io.nuls.rpc.netty.processor.container.RequestContainer;
 import io.nuls.rpc.netty.processor.container.ResponseContainer;
 import io.nuls.tools.data.StringUtils;
 import io.nuls.tools.log.Log;
 import io.nuls.tools.parse.JSONUtils;
-import io.nuls.tools.thread.TimeService;
 
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
 
@@ -34,7 +31,7 @@ public class ResponseMessageProcessor {
      * @return boolean
      * @throws Exception 握手失败, handshake failed
      */
-    public static boolean handshakeKernel(String url) throws Exception {
+    public static boolean handshake(String url) throws Exception {
         Channel channel = ConnectManager.getConnectByUrl(url);
         if (channel == null) {
             throw new Exception("Kernel not available");
@@ -61,6 +58,10 @@ public class ResponseMessageProcessor {
         }
     }
 
+    public static void syncKernel(String kernelUrl) throws Exception {
+        syncKernel(kernelUrl,new KernelInvoke());
+    }
+
     /**
      * 同步本地模块与核心模块（Manager）
      * 1. 发送本地信息给Manager
@@ -72,7 +73,7 @@ public class ResponseMessageProcessor {
      *
      * @throws Exception 核心模块（Manager）不可用，Core Module (Manager) Not Available
      */
-    public static void syncKernel(String kernelUrl) throws Exception {
+    public static void syncKernel(String kernelUrl,BaseInvoke callbackInvoke) throws Exception {
         /*
         打造用于同步的Request
         Create Request for Synchronization
@@ -104,13 +105,13 @@ public class ResponseMessageProcessor {
         Get the returned data and place it in the local variable
          */
         Response response = receiveResponse(responseContainer, Constants.TIMEOUT_TIMEMILLIS);
-        BaseInvoke baseInvoke = new KernelInvoke();
-        baseInvoke.callBack(response);
+//        BaseInvoke baseInvoke = new KernelInvoke();
+        callbackInvoke.callBack(response);
 
         /*
         当有新模块注册到Kernel(Manager)时，需要同步连接信息
          */
-        requestAndInvoke(ModuleE.KE.abbr, "registerAPI", JSONUtils.json2map(JSONUtils.obj2json(ConnectManager.LOCAL)), "0", "1", baseInvoke);
+        requestAndInvoke(ModuleE.KE.abbr, "registerAPI", JSONUtils.json2map(JSONUtils.obj2json(ConnectManager.LOCAL)), "0", "1", callbackInvoke);
         Log.debug("Sync manager success. " + JSONUtils.obj2json(ConnectManager.ROLE_MAP));
 
         /*
@@ -250,23 +251,23 @@ public class ResponseMessageProcessor {
      * @return messageId，用以取消订阅 / messageId, used to unsubscribe
      * @throws Exception JSON格式转换错误、连接失败 / JSON format conversion error, connection failure
      */
-    private static ResponseContainer sendRequest(String role, Request request) throws Exception {
+    public static ResponseContainer sendRequest(String role, Request request) throws Exception {
 
         Message message = MessageUtil.basicMessage(MessageType.Request);
         message.setMessageData(request);
 
-        ConnectData connectData = ConnectManager.getConnectDataByRole(role);
+        Channel channel = ConnectManager.getConnectByRole(role);
 
         ResponseContainer responseContainer = RequestContainer.putRequest(message.getMessageId());
 
-        ConnectManager.sendMessage(connectData.getChannel(),JSONUtils.obj2json(message));
+        ConnectManager.sendMessage(channel,JSONUtils.obj2json(message));
         if (ConnectManager.isPureDigital(request.getSubscriptionPeriod())
                 || ConnectManager.isPureDigital(request.getSubscriptionEventCounter())) {
             /*
             如果是需要重复发送的消息（订阅消息），记录messageId与客户端的对应关系，用于取消订阅
             If it is a message (subscription message) that needs to be sent repeatedly, record the relationship between the messageId and the WsClient
              */
-            ConnectManager.MSG_ID_KEY_CHANNEL_MAP.put(message.getMessageId(), connectData);
+            ConnectManager.MSG_ID_KEY_CHANNEL_MAP.put(message.getMessageId(), channel);
         }
 
         return responseContainer;
@@ -293,9 +294,9 @@ public class ResponseMessageProcessor {
         根据messageId获取WsClient，发送取消订阅命令，然后移除本地信息
         Get the WsClient according to messageId, send the unsubscribe command, and then remove the local information
          */
-        ConnectData connectData = ConnectManager.MSG_ID_KEY_CHANNEL_MAP.get(messageId);
-        if (connectData != null) {
-            ConnectManager.sendMessage(connectData.getChannel(),JSONUtils.obj2json(message));
+        Channel channel = ConnectManager.MSG_ID_KEY_CHANNEL_MAP.get(messageId);
+        if (channel != null) {
+            ConnectManager.sendMessage(channel,JSONUtils.obj2json(message));
             Log.debug("取消订阅：" + JSONUtils.obj2json(message));
             ConnectManager.INVOKE_MAP.remove(messageId);
         }

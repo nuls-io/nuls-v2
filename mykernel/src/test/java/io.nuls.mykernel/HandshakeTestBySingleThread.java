@@ -46,7 +46,7 @@ public class HandshakeTestBySingleThread {
             ResponseMessageProcessor.syncKernel(url);
 
             long time = System.currentTimeMillis();
-            ResponseMessageProcessor.handshakeKernel(url);
+            ResponseMessageProcessor.handshake(url);
             System.out.println("单次握手耗时：" + (System.currentTimeMillis() - time));
 
             long now = System.nanoTime();
@@ -54,7 +54,7 @@ public class HandshakeTestBySingleThread {
             int count  = 100000;
 
             for(int i = 0 ; i < count ; i++) {
-                ResponseMessageProcessor.handshakeKernel(url);
+                ResponseMessageProcessor.handshake(url);
             }
 
             long timeDiff = System.nanoTime() - now;

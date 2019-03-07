@@ -30,7 +30,7 @@ import io.nuls.network.model.po.GroupPo;
 import io.nuls.network.model.po.NodePo;
 import io.nuls.network.model.po.RoleProtocolPo;
 import io.nuls.network.storage.DbService;
-import io.nuls.network.storage.DbServiceImpl;
+import io.nuls.network.storage.impl.DbServiceImpl;
 import io.nuls.tools.core.ioc.SpringLiteContext;
 import io.nuls.tools.exception.NulsException;
 
@@ -99,7 +99,7 @@ public class StorageManager extends BaseManager {
 
     /**
      * 加载所有模块的协议注册信息
-     * load ProtocolRegisterInfos form db
+     * load ProtocolRegisterInfos form storage
      *
      * @return List<RoleProtocolPo>
      */

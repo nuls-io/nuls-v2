@@ -35,8 +35,8 @@ import io.nuls.block.model.ChainContext;
 import io.nuls.block.model.GenesisBlock;
 import io.nuls.block.model.po.BlockHeaderPo;
 import io.nuls.block.service.BlockService;
-import io.nuls.block.service.BlockStorageService;
-import io.nuls.block.service.ChainStorageService;
+import io.nuls.block.storage.BlockStorageService;
+import io.nuls.block.storage.ChainStorageService;
 import io.nuls.block.utils.BlockUtil;
 import io.nuls.block.utils.ChainGenerator;
 import io.nuls.block.utils.module.ConsensusUtil;
@@ -212,7 +212,7 @@ public class BlockServiceImpl implements BlockService {
         try {
             //1.验证区块
             if (!verifyBlock(chainId, block, localInit, download)) {
-                commonLog.error("verifyBlock fail!chainId-" + chainId + ",height-" + height);
+                commonLog.debug("verifyBlock fail!chainId-" + chainId + ",height-" + height);
                 return false;
             }
             //2.设置最新高度,如果失败则恢复上一个高度
@@ -279,7 +279,7 @@ public class BlockServiceImpl implements BlockService {
                 }
                 hashList.addLast(hash);
             }
-            commonLog.debug("save block success, height-" + height + ", hash-" + hash);
+            commonLog.info("save block success, height-" + height + ", hash-" + hash);
             return true;
         } finally {
             if (needLock) {
@@ -423,7 +423,7 @@ public class BlockServiceImpl implements BlockService {
         //分叉验证
         boolean forkVerify = BlockUtil.forkVerify(chainId, block);
         if (!forkVerify) {
-            commonLog.error("forkVerify-"+forkVerify);
+            commonLog.debug("forkVerify-"+forkVerify);
             return false;
         }
         //共识验证
@@ -468,7 +468,7 @@ public class BlockServiceImpl implements BlockService {
             //5.本地区块维护成功
             ContextManager.getContext(chainId).setLatestBlock(block);
             ContextManager.getContext(chainId).setGenesisBlock(genesisBlock);
-            ChainManager.setMasterChain(chainId, ChainGenerator.generateMasterChain(chainId, block));
+            ChainManager.setMasterChain(chainId, ChainGenerator.generateMasterChain(chainId, block, this));
         } catch (Exception e) {
             e.printStackTrace();
             commonLog.error(e);

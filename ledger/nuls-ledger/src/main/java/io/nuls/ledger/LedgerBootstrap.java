@@ -30,12 +30,16 @@ import io.nuls.ledger.config.AppConfig;
 import io.nuls.ledger.model.ModuleConfig;
 import io.nuls.ledger.service.BlockDataService;
 import io.nuls.ledger.service.impl.BlockDataServiceImpl;
+import io.nuls.ledger.storage.InitDB;
+import io.nuls.ledger.storage.impl.RepositoryImpl;
+import io.nuls.ledger.utils.LoggerUtil;
 import io.nuls.rpc.info.HostInfo;
 import io.nuls.rpc.model.ModuleE;
-import io.nuls.rpc.netty.bootstrap.NettyServer;
-import io.nuls.rpc.netty.channel.manager.ConnectManager;
-import io.nuls.rpc.netty.processor.ResponseMessageProcessor;
-import io.nuls.tools.core.inteceptor.ModularServiceMethodInterceptor;
+import io.nuls.rpc.modulebootstrap.Module;
+import io.nuls.rpc.modulebootstrap.NulsRpcModuleBootstrap;
+import io.nuls.rpc.modulebootstrap.RpcModule;
+import io.nuls.rpc.modulebootstrap.RpcModuleState;
+import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.core.ioc.SpringLiteContext;
 
 import static io.nuls.ledger.utils.LoggerUtil.logger;
@@ -44,46 +48,15 @@ import static io.nuls.ledger.utils.LoggerUtil.logger;
  * @author: Niels Wang
  * @date: 2018/10/15
  */
-public class LedgerBootstrap {
+@Component
+public class LedgerBootstrap extends RpcModule {
 
     public static void main(String[] args) {
-        logger.info("ledger Bootstrap start...");
-        try {
-            AppConfig.loadModuleConfig();
-            initRocksDb();
-            //springLite容器初始化AppInitializing
-            SpringLiteContext.init("io.nuls.ledger", new ModularServiceMethodInterceptor());
-            initLedgerDatas();
-            initRpcServer();
-        } catch (Exception e) {
-            logger.error("ledger Bootstrap failed", e);
-            System.exit(-1);
+        if (args == null || args.length == 0) {
+            args = new String[]{HostInfo.getLocalIP() + ":8887/ws"};
         }
+        NulsRpcModuleBootstrap.run("io.nuls", args);
     }
-
-
-    /**
-     * 共识模块启动WebSocket服务，用于其他模块连接共识模块与账本模块RPC交互
-     */
-    private static void initRpcServer() throws Exception {
-            String packageC = "io.nuls.ledger.rpc.cmd";
-            NettyServer.getInstance(ModuleE.LG)
-                    .moduleRoles(new String[]{"1.0"})
-                    .moduleVersion("1.0")
-                    .dependencies(ModuleE.KE.abbr, "1.1")
-                    .scanPackage(packageC);
-            String kernelUrl = "ws://" + HostInfo.getLocalIP() + ":8887/ws";
-            /*
-             * 链接到指定地址
-             * */
-            ConnectManager.getConnectByUrl(kernelUrl);
-            /*
-             * 和指定地址同步
-             * */
-            ResponseMessageProcessor.syncKernel(kernelUrl);
-
-    }
-
     /**
      * 进行数据的校验处理,比如异常关闭模块造成的数据不一致。
      * 确认的高度是x,则进行x高度的数据恢复处理
@@ -99,9 +72,53 @@ public class LedgerBootstrap {
     public static void initRocksDb() {
         try {
             RocksDBService.init(ModuleConfig.getInstance().getDatabaseDir());
-
+            InitDB initDB = SpringLiteContext.getBean(RepositoryImpl.class);
+            initDB.initTableName();
         } catch (Exception e) {
             logger.error(e);
         }
+    }
+
+    @Override
+    public Module[] getDependencies() {
+        return new Module[]{new Module(ModuleE.NW.abbr, "1.0")};
+    }
+
+    @Override
+    public Module moduleInfo() {
+        return new Module(ModuleE.LG.abbr, "1.0");
+    }
+    /**
+     * 初始化模块信息，比如初始化RockDB等，在此处初始化后，可在其他bean的afterPropertiesSet中使用
+     */
+    @Override
+    public void init() {
+        try {
+            super.init();
+            AppConfig.loadModuleConfig();
+            initRocksDb();
+            initLedgerDatas();
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.exit(-1);
+        }
+
+    }
+    @Override
+    public boolean doStart() {
+        //springLite容器初始化AppInitializing
+        LoggerUtil.logger.info("Ledger READY");
+        return true;
+    }
+
+    @Override
+    public RpcModuleState onDependenciesReady() {
+        LoggerUtil.logger.info("Ledger onDependenciesReady");
+        return RpcModuleState.Running;
+    }
+
+    @Override
+    public RpcModuleState onDependenciesLoss(Module dependenciesModule) {
+        return RpcModuleState.Ready;
     }
 }

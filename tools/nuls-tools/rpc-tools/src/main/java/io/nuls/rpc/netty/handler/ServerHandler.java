@@ -24,12 +24,12 @@ public class ServerHandler extends SimpleChannelInboundHandler<Object> {
 
     @Override
     public void channelActive(ChannelHandlerContext ctx) throws Exception {
-        SocketChannel socketChannel = (SocketChannel) ctx.channel();
+        //SocketChannel socketChannel = (SocketChannel) ctx.channel();
         /*
         * 缓存链接通道
         * cache link channel
         * */
-        ConnectManager.createConnectData(socketChannel,ConnectManager.getRemoteUri(socketChannel));
+        //ConnectManager.createConnectData(socketChannel,ConnectManager.getRemoteUri(socketChannel));
     }
 
     @Override
@@ -46,7 +46,7 @@ public class ServerHandler extends SimpleChannelInboundHandler<Object> {
     @Override
     public void channelUnregistered(ChannelHandlerContext ctx) throws Exception {
         SocketChannel socketChannel = (SocketChannel) ctx.channel();
-        ConnectData connectData = ConnectManager.getConnectDataByChannel(socketChannel);
+        ConnectData connectData = ConnectManager.CHANNEL_DATA_MAP.get(socketChannel);
 
         if(connectData != null) {
             connectData.setConnected(false);

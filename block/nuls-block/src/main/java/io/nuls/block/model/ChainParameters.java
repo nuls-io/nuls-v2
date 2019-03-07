@@ -77,6 +77,10 @@ public class ChainParameters extends BaseNulsData {
      */
     private int heightRange;
     /**
+     * 批量下载区块时,如果收到CompleteMessage时,区块还没有保存完,每一个区块预留多长等待时间
+     */
+    private int waitInterval;
+    /**
      * 每次回滚区块最大值
      */
     private int maxRollback;
@@ -127,6 +131,7 @@ public class ChainParameters extends BaseNulsData {
         stream.writeUint16(chainSwtichThreshold);
         stream.writeUint16(cacheSize);
         stream.writeUint16(heightRange);
+        stream.writeUint16(waitInterval);
         stream.writeUint16(maxRollback);
         stream.writeUint16(consistencyNodePercent);
         stream.writeUint16(minNodeAmount);
@@ -148,6 +153,7 @@ public class ChainParameters extends BaseNulsData {
         this.chainSwtichThreshold = byteBuffer.readUint16();
         this.cacheSize = byteBuffer.readUint16();
         this.heightRange = byteBuffer.readUint16();
+        this.waitInterval = byteBuffer.readUint16();
         this.maxRollback = byteBuffer.readUint16();
         this.consistencyNodePercent = byteBuffer.readUint16();
         this.minNodeAmount = byteBuffer.readUint16();
@@ -163,7 +169,7 @@ public class ChainParameters extends BaseNulsData {
     @Override
     public int size() {
         int size = 0;
-        size += (16 * SerializeUtils.sizeOfUint16());
+        size += (17 * SerializeUtils.sizeOfUint16());
         size += SerializeUtils.sizeOfString(chainName);
         size += SerializeUtils.sizeOfString(logLevel);
         return size;
@@ -177,6 +183,7 @@ public class ChainParameters extends BaseNulsData {
         this.chainSwtichThreshold = Integer.parseInt(map.get(ConfigConstant.CHAIN_SWTICH_THRESHOLD).getValue());
         this.cacheSize = Integer.parseInt(map.get(ConfigConstant.CACHE_SIZE).getValue());
         this.heightRange = Integer.parseInt(map.get(ConfigConstant.HEIGHT_RANGE).getValue());
+        this.waitInterval = Integer.parseInt(map.get(ConfigConstant.WAIT_INTERVAL).getValue());
         this.maxRollback = Integer.parseInt(map.get(ConfigConstant.MAX_ROLLBACK).getValue());
         this.consistencyNodePercent = Integer.parseInt(map.get(ConfigConstant.CONSISTENCY_NODE_PERCENT).getValue());
         this.minNodeAmount = Integer.parseInt(map.get(ConfigConstant.MIN_NODE_AMOUNT).getValue());

@@ -256,7 +256,9 @@ public class NodeGroup implements Dto {
         if (nodePoList != null) {
             for (NodePo nodePo : nodePoList) {
                 Node node = (Node) nodePo.parseDto();
-                nodeMap.put(node.getId(), node);
+                if (null == nodeMap.get(node.getId())) {
+                    nodeMap.put(node.getId(), node);
+                }
             }
         }
     }

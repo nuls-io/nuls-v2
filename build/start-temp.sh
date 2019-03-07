@@ -58,7 +58,7 @@ checkLogDir(){
 checkIsRunning(){
     if [ ! -z "`ps -ef|grep -w "name=${APP_NAME} "|grep -v grep|awk '{print $2}'`" ]; then
         pid=`ps -ef|grep -w "name=${APP_NAME} "|grep -v grep|awk '{print $2}'`
-        log "$APP_NAME Already running pid=$pid";
+        echoRed "$APP_NAME Already running pid=$pid";
         exit 0;
     fi
 }

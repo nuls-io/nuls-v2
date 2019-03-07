@@ -2,6 +2,7 @@ package io.nuls.rpc.netty.processor;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import io.netty.channel.Channel;
+import io.netty.channel.socket.SocketChannel;
 import io.nuls.rpc.cmd.BaseCmd;
 import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.model.CmdDetail;
@@ -9,16 +10,13 @@ import io.nuls.rpc.model.CmdParameter;
 import io.nuls.rpc.model.message.*;
 import io.nuls.rpc.netty.channel.ConnectData;
 import io.nuls.rpc.netty.channel.manager.ConnectManager;
-import io.nuls.tools.data.DateUtils;
 import io.nuls.tools.data.StringUtils;
 import io.nuls.tools.log.Log;
 import io.nuls.tools.parse.JSONUtils;
 import io.nuls.tools.thread.TimeService;
-import org.java_websocket.exceptions.WebsocketNotConnectedException;
 
 import java.lang.reflect.Method;
 import java.math.BigDecimal;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -43,15 +41,20 @@ public class RequestMessageProcessor {
      * @param channel 用于发送消息 / Used to send message
      * @throws JsonProcessingException JSON解析错误 / JSON parsing error
      */
-    public static void negotiateConnectionResponse(Channel channel, String messageId) throws JsonProcessingException {
+    public static void negotiateConnectionResponse(Channel channel, Message message) throws JsonProcessingException {
         NegotiateConnectionResponse negotiateConnectionResponse = new NegotiateConnectionResponse();
-        negotiateConnectionResponse.setRequestId(messageId);
+        negotiateConnectionResponse.setRequestId(message.getMessageId());
         negotiateConnectionResponse.setNegotiationStatus("1");
         negotiateConnectionResponse.setNegotiationComment("Connection true!");
 
         Message rspMsg = MessageUtil.basicMessage(MessageType.NegotiateConnectionResponse);
         rspMsg.setMessageData(negotiateConnectionResponse);
         ConnectManager.sendMessage(channel,JSONUtils.obj2json(rspMsg));
+
+        //握手成功之后保存channel与角色的对应信息
+        NegotiateConnection negotiateConnection = JSONUtils.map2pojo((Map) message.getMessageData(), NegotiateConnection.class);
+        ConnectManager.ROLE_CHANNEL_MAP.put(negotiateConnection.getAbbreviation(),channel);
+        ConnectManager.createConnectData((SocketChannel) channel);
     }
 
 
@@ -136,9 +139,6 @@ public class RequestMessageProcessor {
                 default:
                     return false;
             }
-        } catch (WebsocketNotConnectedException e) {
-            Log.error("Socket disconnected, remove");
-            return false;
         } catch (Exception e) {
             Log.error(e);
             return false;
@@ -253,8 +253,6 @@ public class RequestMessageProcessor {
         try {
             Log.debug("responseWithEventCount: " + JSONUtils.obj2json(rspMessage));
             ConnectManager.sendMessage(channel,JSONUtils.obj2json(rspMessage));
-        } catch (WebsocketNotConnectedException e) {
-            Log.error("Socket disconnected, remove");
         } catch (JsonProcessingException e) {
             Log.error(e);
         }

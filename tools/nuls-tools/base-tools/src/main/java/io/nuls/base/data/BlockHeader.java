@@ -45,7 +45,7 @@ public class BlockHeader extends BaseNulsData {
     private NulsDigestData merkleHash;
     private long time;
     private long height;
-    private long txCount;
+    private int txCount;
     private BlockSignature blockSignature;
     private byte[] extend;
     /**
@@ -96,7 +96,7 @@ public class BlockHeader extends BaseNulsData {
         this.merkleHash = byteBuffer.readHash();
         this.time = byteBuffer.readUint48();
         this.height = byteBuffer.readUint32();
-        this.txCount = byteBuffer.readUint32();
+        this.txCount = byteBuffer.readInt32();
         this.extend = byteBuffer.readByLengthByte();
         try {
             this.hash = NulsDigestData.calcDigestData(this.serialize());
@@ -160,11 +160,11 @@ public class BlockHeader extends BaseNulsData {
         this.height = height;
     }
 
-    public long getTxCount() {
+    public int getTxCount() {
         return txCount;
     }
 
-    public void setTxCount(long txCount) {
+    public void setTxCount(int txCount) {
         this.txCount = txCount;
     }
 

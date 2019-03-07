@@ -72,10 +72,16 @@
     "value": "1000"
   },
   {
+    "name": "waitInterval",
+    "remark": "批量下载区块时,如果收到CompleteMessage时,区块还没有保存完,每一个区块预留多长等待时间",
+    "readOnly": "true",
+    "value": "50"
+  },
+  {
     "name": "maxRollback",
     "remark": "每次最多回滚多少区块",
     "readOnly": "true",
-    "value": "10"
+    "value": "1000"
   },
   {
     "name": "consistencyNodePercent",

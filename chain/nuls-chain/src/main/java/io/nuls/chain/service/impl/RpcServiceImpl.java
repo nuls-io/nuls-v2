@@ -122,6 +122,7 @@ public class RpcServiceImpl  implements RpcService {
             Log.debug("response={}",cmdResp);
             return cmdResp.isSuccess();
         } catch (Exception e) {
+            Log.error("tx_register fail,wait for reg again");
             e.printStackTrace();
             return false;
         }

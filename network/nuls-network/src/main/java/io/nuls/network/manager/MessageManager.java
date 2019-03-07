@@ -24,7 +24,6 @@
  */
 package io.nuls.network.manager;
 
-import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelFuture;
 import io.nuls.base.basic.NulsByteBuffer;
@@ -124,12 +123,12 @@ public class MessageManager extends BaseManager {
         return checksum == pChecksum;
     }
 
-    public void receiveMessage(ByteBuf buffer, Node node) throws NulsException {
+    public void receiveMessage(NulsByteBuffer byteBuffer, Node node) throws NulsException {
         //统一接收消息处理
         try {
-            byte[] bytes = new byte[buffer.readableBytes()];
-            buffer.readBytes(bytes);
-            NulsByteBuffer byteBuffer = new NulsByteBuffer(bytes);
+            if (null == byteBuffer) {
+                return;
+            }
             MessageHeader header = new MessageHeader();
             int headerSize = header.size();
             byte[] payLoad = byteBuffer.getPayload();
@@ -150,16 +149,13 @@ public class MessageManager extends BaseManager {
                     message = byteBuffer.readNulsData(message);
                     BaseMeesageHandlerInf handler = MessageHandlerFactory.getInstance().getHandler(header.getCommandStr());
                     result = handler.recieve(message, node);
-                    message = byteBuffer.readNulsData(message);
                 } else {
                     //外部消息，转外部接口
                     LoggerUtil.modulesMsgLogs(header.getCommandStr(), node, payLoadBody, "received");
                     Log.debug("==============================receive other module message, hash-" + NulsDigestData.calcDigestData(payLoadBody).getDigestHex() + "node-" + node.getId());
                     OtherModuleMessageHandler handler = MessageHandlerFactory.getInstance().getOtherModuleHandler();
                     result = handler.recieve(header, payLoadBody, node);
-                    Log.debug("s=={}==={}", byteBuffer.getPayload().length, byteBuffer.getCursor());
                     byteBuffer.setCursor(payLoad.length);
-                    Log.debug("e=={}==={}", byteBuffer.getPayload().length, byteBuffer.getCursor());
                 }
                 if (!result.isSuccess()) {
                     Log.error("receiveMessage deal fail:" + result.getErrorCode().getMsg());
@@ -168,8 +164,6 @@ public class MessageManager extends BaseManager {
         } catch (Exception e) {
             e.printStackTrace();
 //            throw new NulsException(NetworkErrorCode.DATA_ERROR, e);
-        } finally {
-            buffer.clear();
         }
     }
 
@@ -277,7 +271,9 @@ public class MessageManager extends BaseManager {
             MessageHeader header = message.getHeader();
             BaseNulsData body = message.getMsgBody();
             header.setPayloadLength(body.size());
+            Log.debug("node={},isWritable={}", node.getId(),node.getChannel().isWritable());
             ChannelFuture future = node.getChannel().writeAndFlush(Unpooled.wrappedBuffer(message.serialize()));
+            Log.debug("==================writeAndFlush end");
             if (!asyn) {
                 future.await();
                 Log.debug("{}==================ChannelFuture1", TimeManager.currentTimeMillis());
@@ -311,6 +307,7 @@ public class MessageManager extends BaseManager {
                 continue;
             }
             try {
+                Log.debug("node={},isWritable={}", node.getId(),node.getChannel().isWritable());
                 ChannelFuture future = node.getChannel().writeAndFlush(Unpooled.wrappedBuffer(message));
                 Log.debug("==================writeAndFlush end");
                 if (!asyn) {

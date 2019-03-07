@@ -43,7 +43,7 @@ public class Bootstrap {
      * @param args
      */
     public static void main(String[] args){
-        Log.info("Event Bus module bootstrap starts...");
+        Log.info("Event Bus module modulebootstrap starts...");
         try {
             initConfig();
             SpringLiteContext.init(EbConstants.EB_BASE_PACKAGE,new ModularServiceMethodInterceptor());

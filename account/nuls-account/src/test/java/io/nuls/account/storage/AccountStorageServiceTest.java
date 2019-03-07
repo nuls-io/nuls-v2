@@ -42,7 +42,7 @@ public class AccountStorageServiceTest {
         //springLite容器初始化
         SpringLiteContext.init("io.nuls.account", new ModularServiceMethodInterceptor());
         //启动时间同步线程
-        TimeService.getInstance().start();
+        //TimeService.getInstance().start();
         accountStorageService = SpringLiteContext.getBean(AccountStorageService.class);
     }
 

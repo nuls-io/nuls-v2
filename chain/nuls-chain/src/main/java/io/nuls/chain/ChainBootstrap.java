@@ -7,13 +7,16 @@ import io.nuls.chain.service.CacheDataService;
 import io.nuls.chain.service.ChainService;
 import io.nuls.chain.service.RpcService;
 import io.nuls.chain.service.impl.RpcServiceImpl;
+import io.nuls.chain.storage.InitDB;
+import io.nuls.chain.storage.impl.*;
 import io.nuls.db.service.RocksDBService;
 import io.nuls.rpc.info.HostInfo;
 import io.nuls.rpc.model.ModuleE;
-import io.nuls.rpc.netty.bootstrap.NettyServer;
-import io.nuls.rpc.netty.channel.manager.ConnectManager;
-import io.nuls.rpc.netty.processor.ResponseMessageProcessor;
-import io.nuls.tools.core.inteceptor.ModularServiceMethodInterceptor;
+import io.nuls.rpc.modulebootstrap.Module;
+import io.nuls.rpc.modulebootstrap.NulsRpcModuleBootstrap;
+import io.nuls.rpc.modulebootstrap.RpcModule;
+import io.nuls.rpc.modulebootstrap.RpcModuleState;
+import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.core.ioc.SpringLiteContext;
 import io.nuls.tools.parse.ConfigLoader;
 import io.nuls.tools.parse.I18nUtils;
@@ -31,76 +34,37 @@ import static io.nuls.chain.util.LoggerUtil.Log;
  * @author tangyi
  * @date 2018/11/7
  */
-public class ChainBootstrap {
-
-    private static ChainBootstrap chainBootstrap = null;
-
-    private ChainBootstrap() {
-    }
-
-    /**
-     * 单例模式，只能启动一个链管理模块
-     * Singleton mode, only one chain management module can be started
-     *
-     * @return ChainBootstrap
-     */
-    private static ChainBootstrap getInstance() {
-        if (chainBootstrap == null) {
-            synchronized (ChainBootstrap.class) {
-                if (chainBootstrap == null) {
-                    chainBootstrap = new ChainBootstrap();
-                }
-            }
-        }
-
-        return chainBootstrap;
-    }
-
-    /**
-     * 链管理模块启动入口
-     * Chain management module startup entry
-     *
-     * @param args null
-     */
+@Component
+public class ChainBootstrap extends RpcModule {
     public static void main(String[] args) {
-        ChainBootstrap.getInstance().start();
+        if (args == null || args.length == 0) {
+            args = new String[]{HostInfo.getLocalIP() + ":8887/ws"};
+        }
+        NulsRpcModuleBootstrap.run("io.nuls", args);
     }
 
     private void start() {
         try {
             Log.info("Chain Bootstrap start...");
-
+            /* 自动注入 (Autowired) */
             /* 如果属性不匹配，不要报错 (If the attributes do not match, don't report an error) */
             JSONUtils.getInstance().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-
             /* Read resources/module.ini to initialize the configuration */
             initCfg();
             /* Configuration to Map */
             initWithFile();
-            /*db info*/
+            /*storage info*/
             initWithDatabase();
-            /* 自动注入 (Autowired) */
-            SpringLiteContext.init("io.nuls.chain", new ModularServiceMethodInterceptor());
             /* 把Nuls2.0主网信息存入数据库中 (Store the Nuls2.0 main network information into the database) */
             initMainChain();
             /* 进行数据库数据初始化（避免异常关闭造成的事务不一致） */
             initChainDatas();
-            /* 提供对外接口 (Provide external interface) */
-            startRpcServer();
-            waitDependencies();
             /*注册交易处理器*/
             regTxRpc();
         } catch (Exception e) {
             e.printStackTrace();
             System.exit(1);
             Log.error(e);
-        }
-    }
-
-    void waitDependencies() throws InterruptedException {
-        while (!ConnectManager.isReady()) {
-            Log.info("wait depend modules ready");
-            Thread.sleep(2000L);
         }
     }
 
@@ -118,7 +82,7 @@ public class ChainBootstrap {
         NulsConfig.setEncoding(encoding);
         /* 设置系统语言 (Set system language) */
         String language = ConfigManager.getValue(CmConstants.CFG_SYSTEM_LANGUAGE);
-        I18nUtils.loadLanguage("languages", language);
+        I18nUtils.loadLanguage(ChainBootstrap.class, "languages", language);
         I18nUtils.setLanguage(language);
     }
 
@@ -154,6 +118,16 @@ public class ChainBootstrap {
     private void initWithDatabase() throws Exception {
         /* 打开数据库连接 (Open database connection) */
         RocksDBService.init(ConfigManager.getValue(CmConstants.DB_DATA_PATH));
+        InitDB assetStorage = SpringLiteContext.getBean(AssetStorageImpl.class);
+        assetStorage.initTableName();
+        InitDB blockHeightStorage = SpringLiteContext.getBean(BlockHeightStorageImpl.class);
+        blockHeightStorage.initTableName();
+        InitDB cacheDatasStorage = SpringLiteContext.getBean(CacheDatasStorageImpl.class);
+        cacheDatasStorage.initTableName();
+        InitDB chainAssetStorage = SpringLiteContext.getBean(ChainAssetStorageImpl.class);
+        chainAssetStorage.initTableName();
+        InitDB chainStorage = SpringLiteContext.getBean(ChainStorageImpl.class);
+        chainStorage.initTableName();
     }
 
     private void configToMap(Map<String, String> toMap, String key) {
@@ -176,30 +150,73 @@ public class ChainBootstrap {
 
     private void regTxRpc() throws Exception {
         RpcService rpcService = SpringLiteContext.getBean(RpcServiceImpl.class);
-        rpcService.regTx();
+        boolean regResult = false;
+        while (!regResult) {
+            regResult = rpcService.regTx();
+        }
+    }
+    @Override
+    public Module[] getDependencies() {
+        return new Module[]{new Module(ModuleE.NW.abbr, "1.0"),
+                new Module(ModuleE.TX.abbr, "1.0")};
     }
 
+    @Override
+    public Module moduleInfo() {
+        return new Module(ModuleE.CM.abbr, "1.0");
+    }
     /**
-     * @throws Exception Any error will throw an exception
+     * 初始化模块信息，比如初始化RockDB等，在此处初始化后，可在其他bean的afterPropertiesSet中使用
      */
-    private void startRpcServer() throws Exception {
-        String packageC = "io.nuls.chain.cmd";
-        NettyServer.getInstance(ModuleE.CM)
-                .moduleRoles(ModuleE.CM.abbr, new String[]{"1.1", "1.2"})
-                .moduleVersion("1.1")
-                .dependencies(ModuleE.KE.abbr, "1.1")
-                .dependencies(ModuleE.NW.abbr, "1.1")
-                .dependencies(ModuleE.TX.abbr, "1.1")
-                .scanPackage(packageC);
-        String kernelUrl = "ws://" + HostInfo.getLocalIP() + ":8887/ws";
-        /*
-         * 链接到指定地址
-         * */
-        ConnectManager.getConnectByUrl(kernelUrl);
-        /*
-         * 和指定地址同步
-         * */
-        ResponseMessageProcessor.syncKernel(kernelUrl);
+    @Override
+    public void init() {
+        super.init();
+        try {
+            /* 自动注入 (Autowired) */
+            /* 如果属性不匹配，不要报错 (If the attributes do not match, don't report an error) */
+            JSONUtils.getInstance().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+            /* Read resources/module.ini to initialize the configuration */
+            initCfg();
+            /* Configuration to Map */
+            initWithFile();
+            /*storage info*/
+            initWithDatabase();
+            /* 把Nuls2.0主网信息存入数据库中 (Store the Nuls2.0 main network information into the database) */
+            initMainChain();
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.exit(1);
+            Log.error(e);
+        }
+    }
+    @Override
+    public boolean doStart() {
+        try {
+            /* 进行数据库数据初始化（避免异常关闭造成的事务不一致） */
+            initChainDatas();
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.exit(1);
+            Log.error(e);
+        }
+        return true;
     }
 
+    @Override
+    public RpcModuleState onDependenciesReady() {
+        try {
+            /*注册交易处理器*/
+            regTxRpc();
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.exit(1);
+            Log.error(e);
+        }
+        return RpcModuleState.Running;
+    }
+
+    @Override
+    public RpcModuleState onDependenciesLoss(Module dependenciesModule) {
+        return RpcModuleState.Ready;
+    }
 }

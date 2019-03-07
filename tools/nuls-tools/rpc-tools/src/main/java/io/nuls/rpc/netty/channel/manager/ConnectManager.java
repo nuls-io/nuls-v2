@@ -72,20 +72,26 @@ public class ConnectManager {
     public static final Map<String, BaseInvoke> INVOKE_MAP = new ConcurrentHashMap<>();
 
     /**
-     * 链接地址与链接通道的集合
-     * Key: 连接地址(如: ws://127.0.0.1:8887), Value：WsClient对象
-     * <p>
-     * Key: url(ex: ws://127.0.0.1:8887), Value: ConnectData object
+     * 链接与链接数据的集合
+     *
+     * Key: Channel, Value: ConnectData
      */
-    public static final Map<String, ConnectData> CHANNEL_MAP = new ConcurrentHashMap<>();
+    public static final Map<Channel, ConnectData> CHANNEL_DATA_MAP = new ConcurrentHashMap<>();
+
+    /**
+     * 角色与链接通道集合
+     * KEY:ROLE
+     * VALUE:Channel
+     * */
+    public static final Map<String, Channel> ROLE_CHANNEL_MAP = new ConcurrentHashMap<>();
 
     /**
      * messageId对应链接通道对象，用于取消订阅的Request
      * Key：messageId, Value：链接通道
      * <p>
-     * key: messageId, value: ConnectData
+     * key: messageId, value: channel
      */
-    public static final ConcurrentMap<String, ConnectData> MSG_ID_KEY_CHANNEL_MAP = new ConcurrentHashMap<>();
+    public static final ConcurrentMap<String, Channel> MSG_ID_KEY_CHANNEL_MAP = new ConcurrentHashMap<>();
 
     /**
      * 接口被那些Message订阅
@@ -245,6 +251,26 @@ public class ConnectManager {
         LOCAL.getApiMethods().sort(Comparator.comparingDouble(CmdDetail::getVersion));
     }
 
+    public static void addCmdDetail(Class<?> claszs){
+        Method[] methods = claszs.getDeclaredMethods();
+        for (Method method : methods) {
+            CmdDetail cmdDetail = annotation2CmdDetail(method);
+            if (cmdDetail == null) {
+                continue;
+            }
+                /*
+                重复接口只注册一次
+                Repeated interfaces are registered only once
+                 */
+            if (!isRegister(cmdDetail)) {
+                LOCAL.getApiMethods().add(cmdDetail);
+                RequestMessageProcessor.handlerMap.put(cmdDetail.getInvokeClass(), SpringLiteContext.getBeanByClass(cmdDetail.getInvokeClass()));
+            };
+//            else {
+//                Log.warn(Constants.CMD_DUPLICATE + ":" + cmdDetail.getMethodName() + "-" + cmdDetail.getVersion());
+//            }
+        }
+    }
 
     /**
      * 保存所有拥有CmdAnnotation注解的方法
@@ -560,30 +586,29 @@ public class ConnectManager {
     }
 
     public static ConnectData getConnectDataByRole(String role)throws Exception{
-        String url = getRemoteUri(role);
-        if(StringUtils.isBlank(url)){
-            throw new Exception("Connection module not started");
+        if(ROLE_CHANNEL_MAP.isEmpty() || ROLE_CHANNEL_MAP.get(role) == null){
+            String url = getRemoteUri(role);
+            if(StringUtils.isBlank(url)){
+                throw new Exception("Connection module not started");
+            }
+            getConnectByUrl(role);
         }
-        if(CHANNEL_MAP.isEmpty() || CHANNEL_MAP.get(url) == null){
-            getConnectByUrl(url);
-        }
-        return CHANNEL_MAP.get(url);
+        return CHANNEL_DATA_MAP.get(ROLE_CHANNEL_MAP.get(role));
     }
 
-    public static ConnectData getConnectDataByChannel(SocketChannel channel)throws Exception{
-        String url = getRemoteUri(channel);
-        if(StringUtils.isBlank(url)){
-            throw new Exception("Connection module not started");
-        }
-        return CHANNEL_MAP.get(url);
-    }
 
     public static Channel getConnectByRole(String role)throws Exception{
+        if(ROLE_CHANNEL_MAP.containsKey(role)){
+            return ROLE_CHANNEL_MAP.get(role);
+        }
         String url = getRemoteUri(role);
         if(StringUtils.isBlank(url)){
             throw new Exception("Connection module not started");
         }
-        return getConnectByUrl(url);
+        SocketChannel channel = createConnect(url);
+        ROLE_CHANNEL_MAP.put(role,channel);
+        createConnectData(channel);
+        return channel;
     }
 
     public static Channel getConnectByUrl(String url)throws Exception{
@@ -591,12 +616,31 @@ public class ConnectManager {
         如果连接已存在，直接返回
         If the connection already exists, return directly
          */
-        if(CHANNEL_MAP.containsKey(url) ){
-            return CHANNEL_MAP.get(url).getChannel();
+        String role = "";
+        for (String key:ROLE_MAP.keySet()) {
+            if(url.equals(getRemoteUri(key))){
+                role = key;
+                break;
+            }
         }
+        if(role.isEmpty() && ROLE_CHANNEL_MAP.isEmpty() && !ROLE_MAP.isEmpty()){
+            throw new Exception("Connection module not started");
+        }
+        if(role.isEmpty()){
+            role = ModuleE.KE.abbr;
+        }
+        if(ROLE_CHANNEL_MAP.containsKey(role)){
+            return ROLE_CHANNEL_MAP.get(role);
+        }
+        SocketChannel channel = createConnect(url);
+        ROLE_CHANNEL_MAP.put(role,channel);
+        createConnectData(channel);
+        return channel;
+    }
 
-        /*
-        如果是第一次连接，则先放入集合
+    public static SocketChannel createConnect(String url)throws  Exception{
+         /*
+        如 果是第一次连接，则先放入集合
         If it's the first connection, put it in the collection first
          */
 
@@ -608,11 +652,10 @@ public class ConnectManager {
             }
             Thread.sleep(Constants.INTERVAL_TIMEMILLIS);
         }
-        createConnectData(channel,url);
         return channel;
     }
 
-    public static void createConnectData(SocketChannel channel,String url){
+    public static void createConnectData(SocketChannel channel){
         ConnectData connectData = new ConnectData(channel);
         /*
         连接创建成功之后，启动处理连接通道中传输信息所需线程
@@ -623,7 +666,7 @@ public class ConnectManager {
         connectData.getThreadPool().execute(new RequestByCountProcessor(connectData));
         connectData.getThreadPool().execute(new ResponseAutoProcessor(connectData));
         connectData.getThreadPool().execute(new ResponseAutoProcessor(connectData));
-        CHANNEL_MAP.put(url,connectData);
+        CHANNEL_DATA_MAP.put(channel,connectData);
     }
 
     /**
@@ -631,22 +674,40 @@ public class ConnectManager {
      * Stop or disconnect a connection
      * */
     public static void disConnect(SocketChannel channel){
-        String url = getRemoteUri(channel);
-        ConnectData connectData = CHANNEL_MAP.remove(url);
-        connectData.setConnected(false);
-        connectData.getThreadPool().shutdown();
-        for (String role : ROLE_MAP.keySet()) {
-            if(url.equals(getRemoteUri(role))){
-                ROLE_MAP.remove(role);
+        String role = "";
+        Iterator<Map.Entry<String, Channel>> entries = ROLE_CHANNEL_MAP.entrySet().iterator();
+        while (entries.hasNext()) {
+            Map.Entry<String, Channel> entry = entries.next();
+            if(channel.equals(entry.getValue())){
+                role = entry.getKey();
+                entries.remove();
                 break;
             }
         }
-        for (Map.Entry<String,ConnectData> entry:MSG_ID_KEY_CHANNEL_MAP.entrySet()) {
-            if(channel.equals(entry.getValue().getChannel())){
+        ConnectData connectData = CHANNEL_DATA_MAP.remove(channel);
+        connectData.setConnected(false);
+        connectData.getThreadPool().shutdown();
+
+        ROLE_MAP.remove(role);
+        Log.info(role+"模块断开连接，当前在线模块列表"+ROLE_MAP);
+
+        for (Map.Entry<String,Channel> entry:MSG_ID_KEY_CHANNEL_MAP.entrySet()) {
+            if(channel.equals(entry.getValue())){
                 MSG_ID_KEY_CHANNEL_MAP.remove(entry.getKey());
                 INVOKE_MAP.remove(entry.getKey());
             }
         }
+
+        Iterator<Map.Entry<String, Channel>> msgEntries = MSG_ID_KEY_CHANNEL_MAP.entrySet().iterator();
+        while (msgEntries.hasNext()){
+            Map.Entry<String, Channel> entry = entries.next();
+            if(channel.equals(entry.getValue())){
+                INVOKE_MAP.remove(entry.getKey());
+                msgEntries.remove();
+            }
+        }
+
+        channel.close();
     }
 
     /**
@@ -669,4 +730,9 @@ public class ConnectManager {
 //        channel.writeAndFlush(frame);
         channel.eventLoop().execute(() -> channel.writeAndFlush(new TextWebSocketFrame(message)));
     }
+
+    public static void sendMessage(String moduleAbbr, Message message) throws Exception {
+        sendMessage(getConnectByRole(moduleAbbr),JSONUtils.obj2json(message));
+    }
+
 }

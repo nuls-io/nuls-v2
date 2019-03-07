@@ -33,5 +33,5 @@ import io.nuls.tools.log.logback.NulsLogger;
  * @date: 2019/2/28
  */
 public class LoggerUtil {
-    public static NulsLogger Log = LoggerBuilder.getLogger("./tx", "tx",Level.ALL);
+    public static NulsLogger Log = LoggerBuilder.getLogger("./tx", "tx", Level.ALL);
 }

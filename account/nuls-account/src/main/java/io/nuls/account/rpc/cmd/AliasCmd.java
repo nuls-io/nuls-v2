@@ -268,12 +268,12 @@ public class AliasCmd extends BaseCmd {
     }
 
     /**
-     * rollback the alias info which saved in the db
+     * rollback the alias info which saved in the storage
      *
      * @param params
      * @return
      */
-    @CmdAnnotation(cmd = "ac_aliasTxRollback", version = 1.0, scope = "private", minEvent = 0, minPeriod = 0, description = "rollback the alias info which saved in the db")
+    @CmdAnnotation(cmd = "ac_aliasTxRollback", version = 1.0, scope = "private", minEvent = 0, minPeriod = 0, description = "rollback the alias info which saved in the storage")
     //@ResisterTx(txType = AccountConstant.TX_TYPE_ACCOUNT_ALIAS, methodType = TxMethodType.ROLLBACK, methodName = "ac_aliasTxRollback")
     public Response rollbackAlias(Map params) throws NulsException {
         Log.debug("ac_aliasTxRollback start,params size:{}", params == null ? 0 : params.size());

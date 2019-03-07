@@ -10,11 +10,18 @@ import io.netty.handler.codec.http.DefaultHttpHeaders;
 import io.netty.handler.codec.http.HttpClientCodec;
 import io.netty.handler.codec.http.HttpHeaders;
 import io.netty.handler.codec.http.HttpObjectAggregator;
+import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.WebSocketClientHandshaker;
 import io.netty.handler.codec.http.websocketx.WebSocketClientHandshakerFactory;
 import io.netty.handler.codec.http.websocketx.WebSocketVersion;
+import io.netty.handler.logging.LogLevel;
+import io.netty.handler.logging.LoggingHandler;
+import io.nuls.rpc.model.message.Message;
+import io.nuls.rpc.model.message.MessageType;
+import io.nuls.rpc.model.message.MessageUtil;
 import io.nuls.rpc.netty.handler.ClientHandler;
 import io.nuls.tools.log.Log;
+import io.nuls.tools.parse.JSONUtils;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -44,7 +51,9 @@ public class NettyClient {
                         @Override
                         protected void initChannel(SocketChannel socketChannel) throws Exception {
                             ChannelPipeline p = socketChannel.pipeline();
-                            p.addLast(new ChannelHandler[]{new HttpClientCodec(),
+                            p.addLast(new ChannelHandler[]{
+                                    new LoggingHandler(LogLevel.TRACE),
+                                    new HttpClientCodec(),
                                     new HttpObjectAggregator(1024*1024*10)});
                             p.addLast("hookedHandler", new ClientHandler());
                         }
@@ -65,6 +74,10 @@ public class NettyClient {
             //阻塞等待是否握手成功
             handler.handshakeFuture().sync();
             Log.info("与服务器："+webSocketURI.toString()+"握手成功");
+            //netty握手成功之后，发送业务握手信息
+            Message message = MessageUtil.basicMessage(MessageType.NegotiateConnection);
+            message.setMessageData(MessageUtil.defaultNegotiateConnection());
+            channel.writeAndFlush(new TextWebSocketFrame(JSONUtils.obj2json(message)));
             return (SocketChannel) channel;
         }catch (Exception e){
             e.printStackTrace();

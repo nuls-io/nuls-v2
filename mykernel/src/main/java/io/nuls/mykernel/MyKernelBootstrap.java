@@ -20,6 +20,7 @@
 
 package io.nuls.mykernel;
 
+import io.nuls.rpc.info.HostInfo;
 import io.nuls.rpc.info.NoUse;
 import io.nuls.rpc.netty.channel.manager.ConnectManager;
 import io.nuls.tools.parse.config.IniEntity;
@@ -36,6 +37,7 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -51,6 +53,7 @@ public class MyKernelBootstrap {
     private static List<String> MODULE_STOP_LIST_SCRIPT = new ArrayList<>();
 
     public static void main(String[] args) throws Exception {
+        System.setProperty("io.netty.tryReflectionSetAccessible", "true");
         //增加程序结束的钩子，监听到主线程停止时，调用./stop.sh停止所有的子模块
         Runtime.getRuntime().addShutdownHook(new Thread(()->{
             log.info("jvm shutdown");
@@ -82,9 +85,9 @@ public class MyKernelBootstrap {
             ThreadUtils.createAndRunThread("startModule",()->{
                 try {
                     //等待mykernel启动完毕
-                    while (!ConnectManager.isReady()) {
-                        TimeUnit.SECONDS.sleep(1);
-                    }
+//                    while (!ConnectManager.isReady()) {
+                        TimeUnit.SECONDS.sleep(5);
+//                    }
                     //获取Modules目录
                     File modules = new File(args[1]);
                     //遍历modules目录查找带有module.ncf文件的目录
@@ -140,10 +143,15 @@ public class MyKernelBootstrap {
             ThreadUtils.createAndRunThread("module-start", () -> {
                 Process process = null;
                 try {
+//                    try {
+//                        TimeUnit.SECONDS.sleep(new Random().nextInt(100) % 10);
+//                    } catch (InterruptedException e) {
+//                        e.printStackTrace();
+//                    }
                     process = Runtime.getRuntime().exec(
                             modules.getAbsolutePath() + File.separator + "start.sh "
                                     + " --jre " + System.getProperty("java.home")
-                                    + " --managerurl " + "127.0.0.1:8887"
+                                    + " --managerurl " + ""+ HostInfo.getLocalIP()+":8887/ws"
                     );
                     synchronized (MODULE_STOP_LIST_SCRIPT){
                         MODULE_STOP_LIST_SCRIPT.add(modules.getAbsolutePath() + File.separator + "stop.sh ");

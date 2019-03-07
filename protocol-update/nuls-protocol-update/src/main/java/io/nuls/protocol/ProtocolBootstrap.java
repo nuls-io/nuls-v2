@@ -1,139 +1,116 @@
-/*
- * MIT License
- * Copyright (c) 2017-2019 nuls.io
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to deal
- * in the Software without restriction, including without limitation the rights
- * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
- * The above copyright notice and this permission notice shall be included in all
- * copies or substantial portions of the Software.
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
- * SOFTWARE.
- */
-
 package io.nuls.protocol;
 
 import io.nuls.db.service.RocksDBService;
-import io.nuls.protocol.constant.RunningStatusEnum;
-import io.nuls.protocol.manager.ContextManager;
-import io.nuls.protocol.model.ProtocolContext;
-import io.nuls.protocol.model.ProtocolVersion;
 import io.nuls.protocol.thread.monitor.ProtocolMonitor;
 import io.nuls.protocol.utils.ConfigLoader;
-import io.nuls.protocol.utils.module.KernelUtil;
 import io.nuls.rpc.info.HostInfo;
 import io.nuls.rpc.model.ModuleE;
-import io.nuls.rpc.netty.bootstrap.NettyServer;
-import io.nuls.rpc.netty.channel.manager.ConnectManager;
-import io.nuls.rpc.netty.processor.ResponseMessageProcessor;
-import io.nuls.tools.core.ioc.SpringLiteContext;
+import io.nuls.rpc.modulebootstrap.Module;
+import io.nuls.rpc.modulebootstrap.NulsRpcModuleBootstrap;
+import io.nuls.rpc.modulebootstrap.RpcModule;
+import io.nuls.rpc.modulebootstrap.RpcModuleState;
+import io.nuls.tools.core.annotation.Component;
+import io.nuls.tools.log.Log;
 import io.nuls.tools.thread.ThreadUtils;
 import io.nuls.tools.thread.commom.NulsThreadFactory;
 
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
-import static io.nuls.protocol.constant.Constant.*;
-import static io.nuls.protocol.utils.LoggerUtil.commonLog;
+import static io.nuls.protocol.constant.Constant.DATA_PATH;
+import static io.nuls.protocol.constant.Constant.PROTOCOL_CONFIG;
 
 /**
- * 协议升级模块启动类
- * protocol update module startup class
+ * 区块模块启动类
  *
  * @author captain
  * @version 1.0
- * @date 19-1-25 上午10:48
+ * @date 19-3-4 下午4:09
  */
-public class ProtocolBootstrap {
+@Component
+public class ProtocolBootstrap extends RpcModule {
 
     public static void main(String[] args) {
-        Thread.currentThread().setName("protocol-main");
-        init();
-        start();
-        loop();
+        NulsRpcModuleBootstrap.run("io.nuls", new String[]{HostInfo.getLocalIP() + ":8887/ws"});
     }
 
     /**
-     * 初始化，完成后系统状态变更为{@link RunningStatusEnum#READY}
+     * 返回此模块的依赖模块
+     *
+     * @return
      */
-    private static void init() {
-        //扫描包路径io.nuls.protocol,初始化bean
-        SpringLiteContext.init(DEFAULT_SCAN_PACKAGE);
+    @Override
+    public Module[] getDependencies() {
+        return new Module[]{};
+    }
+
+    /**
+     * 返回当前模块的描述信息
+     * @return
+     */
+    @Override
+    public Module moduleInfo() {
+        return new Module(ModuleE.PU.abbr, "1.0");
+    }
+
+
+    /**
+     * 初始化模块信息，比如初始化RockDB等，在此处初始化后，可在其他bean的afterPropertiesSet中使用
+     */
+    @Override
+    public void init() {
+        super.init();
+        initCfg();
+        //读取配置文件，数据存储根目录，初始化打开该目录下所有表连接并放入缓存
+        RocksDBService.init(DATA_PATH);
+    }
+
+    /**
+     * 已完成spring init注入，开始启动模块
+     * @return 如果启动完成返回true，模块将进入ready状态，若启动失败返回false，10秒后会再次调用此方法
+     */
+    @Override
+    public boolean doStart() {
         try {
-            //rpc服务初始化
-            NettyServer.getInstance(ModuleE.PU)
-                    .moduleRoles(new String[]{"1.0"})
-                    .moduleVersion("1.0")
-                    .dependencies(ModuleE.KE.abbr, "1.0")
-                    .scanPackage(RPC_DEFAULT_SCAN_PACKAGE);
-            // Get information from kernel
-            String kernelUrl = "ws://"+ HostInfo.getLocalIP()+":8887/ws";
-            ConnectManager.getConnectByUrl(kernelUrl);
-            ResponseMessageProcessor.syncKernel(kernelUrl);
-            //加载通用数据库
-            RocksDBService.init(DATA_PATH);
             RocksDBService.createTable(PROTOCOL_CONFIG);
-            //加载配置
-            ConfigLoader.load();
-            for (Integer chainId : ContextManager.chainIds) {
-                ContextManager.getContext(chainId).setStatus(RunningStatusEnum.READY);
-                KernelUtil.updateStatus(chainId, ModuleE.PU.abbr, RunningStatusEnum.READY);
-            }
         } catch (Exception e) {
             e.printStackTrace();
-            commonLog.error("error occur when init, " + e.getMessage());
         }
+        Log.info("protocol module ready");
+        return true;
     }
 
     /**
-     * 启动，完成后系统状态变更为{@link RunningStatusEnum#RUNNING}
+     * 所有外部依赖进入ready状态后会调用此方法，正常启动后返回Running状态
+     * @return
      */
-    private static void start() {
+    @Override
+    public RpcModuleState onDependenciesReady() {
+        Log.info("protocol onDependenciesReady");
+        //加载配置
         try {
-            while (!ConnectManager.isReady()) {
-                commonLog.info("wait depend modules ready");
-                Thread.sleep(2000L);
-            }
-            commonLog.info("service starting");
-            //开启一些监控线程
-            ScheduledThreadPoolExecutor executor = ThreadUtils.createScheduledThreadPool(1, new NulsThreadFactory("protocol-monitor"));
-            executor.scheduleWithFixedDelay(ProtocolMonitor.getInstance(), 0, 5, TimeUnit.SECONDS);
-            for (Integer chainId : ContextManager.chainIds) {
-                ContextManager.getContext(chainId).setStatus(RunningStatusEnum.RUNNING);
-                KernelUtil.updateStatus(chainId, ModuleE.PU.abbr, RunningStatusEnum.RUNNING);
-            }
+            ConfigLoader.load();
         } catch (Exception e) {
             e.printStackTrace();
-            commonLog.error("error occur when start, " + e.getMessage());
         }
+        //开启一些监控线程
+        ScheduledThreadPoolExecutor executor = ThreadUtils.createScheduledThreadPool(1, new NulsThreadFactory("protocol-monitor"));
+        executor.scheduleWithFixedDelay(ProtocolMonitor.getInstance(), 0, 5, TimeUnit.SECONDS);
+        return RpcModuleState.Running;
     }
 
     /**
-     * 循环记录一些日志信息
+     * 某个外部依赖连接丢失后，会调用此方法，可控制模块状态，如果返回Ready,则表明模块退化到Ready状态，当依赖重新准备完毕后，将重新触发onDependenciesReady方法，若返回的状态是Running，将不会重新触发onDependenciesReady
+     * @param module
+     * @return
      */
-    private static void loop() {
-        while (true) {
-            for (Integer chainId : ContextManager.chainIds) {
-                ProtocolContext context = ContextManager.getContext(chainId);
-                if (RunningStatusEnum.FAIL.equals(context.getStatus())) {
-                    System.exit(0);
-                }
-                ProtocolVersion protocolVersion = context.getCurrentProtocolVersion();
-                commonLog.info("chainId:" + chainId + ", protocolVersion:" + protocolVersion.getVersion());
-                try {
-                    Thread.sleep(10000L);
-                } catch (InterruptedException e) {
-                    commonLog.error(e);
-                }
-            }
-        }
+    @Override
+    public RpcModuleState onDependenciesLoss(Module module) {
+        return RpcModuleState.Ready;
+    }
+
+    public static void initCfg() {
+
     }
 
 }

@@ -49,6 +49,11 @@ public interface ConsensusConstant {
     String PARAM_PARTAKE_PACKING = "partake_packing";
 
     /**
+     * boot path
+     * */
+    String BOOT_PATH = "io.nuls";
+
+    /**
      * context path
      * */
     String CONTEXT_PATH = "io.nuls.poc";

@@ -26,7 +26,10 @@ import io.nuls.base.data.Block;
 import io.nuls.base.data.BlockHeader;
 import io.nuls.base.data.NulsDigestData;
 import io.nuls.block.constant.ChainTypeEnum;
+import io.nuls.block.manager.ContextManager;
 import io.nuls.block.model.Chain;
+import io.nuls.block.model.ChainParameters;
+import io.nuls.block.service.BlockService;
 
 import java.util.LinkedList;
 
@@ -130,9 +133,10 @@ public class ChainGenerator {
      *
      * @param chainId 链Id/chain id
      * @param block
+     * @param blockService
      * @return
      */
-    public static Chain generateMasterChain(int chainId, Block block) {
+    public static Chain generateMasterChain(int chainId, Block block, BlockService blockService) {
         BlockHeader header = block.getHeader();
         long height = header.getHeight();
         Chain chain = new Chain();
@@ -144,8 +148,14 @@ public class ChainGenerator {
         chain.setPreviousHash(header.getPreHash());
         chain.setStartHashCode(header.getHash().hashCode());
         LinkedList<NulsDigestData> hashs = new LinkedList();
-        NulsDigestData hash = header.getHash();
-        hashs.add(hash);
+        ChainParameters parameters = ContextManager.getContext(chainId).getParameters();
+        int heightRange = parameters.getHeightRange();
+        long start = height - heightRange + 1;
+        start = start >= 0 ? start : 0;
+        //加载主链上的区块hash
+        for (long i = start; i <= height; i++) {
+            hashs.add(blockService.getBlockHash(chainId, i));
+        }
         chain.setHashList(hashs);
         return chain;
     }

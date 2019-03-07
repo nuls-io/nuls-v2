@@ -7,8 +7,10 @@ import io.nuls.poc.utils.compare.BlockHeaderComparator;
 import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.model.message.Response;
 import io.nuls.rpc.netty.processor.ResponseMessageProcessor;
+import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.crypto.HexUtil;
+import io.nuls.tools.log.Log;
 
 import java.util.*;
 
@@ -21,7 +23,8 @@ import java.util.*;
  */
 @Component
 public class BlockManager {
-
+    @Autowired
+    private RoundManager roundManager;
     /**
      * 初始化链区块头数据，缓存指定数量的区块头
      * Initialize chain block header data to cache a specified number of block headers
@@ -41,12 +44,13 @@ public class BlockManager {
             blockHeaderHexs = (List<String>) resultMap.get("getLatestBlockHeaders");
         }
         while(!cmdResp.isSuccess() && blockHeaderHexs.size() == 0){
-            Thread.sleep(1000);
             cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.BL.abbr, "getLatestBlockHeaders", params);
             if(cmdResp.isSuccess()){
                 resultMap = (Map<String, Object>) cmdResp.getResponseData();
                 blockHeaderHexs = (List<String>) resultMap.get("getLatestBlockHeaders");
+                break;
             }
+            Log.info("---------------------------区块加载失败！");
             Thread.sleep(1000);
         }
         List<BlockHeader> blockHeaders = new ArrayList<>();
@@ -58,6 +62,7 @@ public class BlockManager {
         Collections.sort(blockHeaders, new BlockHeaderComparator());
         chain.setBlockHeaderList(blockHeaders);
         chain.setNewestHeader(blockHeaders.get(blockHeaders.size() - 1));
+        Log.info("---------------------------区块加载成功！");
     }
 
     /**
@@ -95,6 +100,7 @@ public class BlockManager {
         }
         chain.setBlockHeaderList(headerList);
         chain.setNewestHeader(headerList.get(headerList.size() - 1));
+        roundManager.rollBackRound(chain,height);
         chain.getLoggerMap().get(ConsensusConstant.BASIC_LOGGER_NAME).info("区块回滚成功，回滚到的高度为：" + height + ",本地最新区块高度为：" + chain.getNewestHeader().getHeight());
     }
 }

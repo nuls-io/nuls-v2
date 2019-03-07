@@ -29,6 +29,7 @@ import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.parse.SerializeUtils;
 
 import java.io.IOException;
+import java.math.BigInteger;
 import java.util.*;
 
 /**
@@ -425,7 +426,7 @@ public class PunishManager {
             */
             if (index > 0) {
                 member = round.getMember(index);
-                if (member.getAgent() == null || member.getAgent().getDelHeight() > 0) {
+                if (member.getAgent() == null || member.getAgent().getDelHeight() > 0 || member.getAgent().getDeposit().equals(BigInteger.ZERO)) {
                     continue;
                 }
                 addressList.add(member.getAgent().getAgentAddress());
@@ -437,7 +438,7 @@ public class PunishManager {
             else {
                 preRound = round.getPreRound();
                 member = preRound.getMember(index + preRound.getMemberCount());
-                if (member.getAgent() == null || member.getAgent().getDelHeight() > 0) {
+                if (member.getAgent() == null || member.getAgent().getDelHeight() > 0 || member.getAgent().getDeposit().equals(BigInteger.ZERO)) {
                     continue;
                 }
                 addressList.add(member.getAgent().getAgentAddress());
@@ -712,6 +713,7 @@ public class PunishManager {
                 for (PunishLogPo punishLogPo : savedList) {
                     punishStorageService.delete(getPoKey(punishLogPo.getAddress(), PunishType.YELLOW.getCode(), punishLogPo.getHeight(), punishLogPo.getIndex()),chainId);
                 }
+                savedList.clear();
                 throw new NulsException(ConsensusErrorCode.SAVE_FAILED);
             } else {
                 savedList.add(po);

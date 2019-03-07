@@ -12,4 +12,19 @@ if [ ! -n "$JAVA_EXIST" ]; then
     exit 0;
 fi
 MODULE_PATH=$(cd `dirname $0`;pwd)
-${JAVA} -server -classpath ./libs/*:./mykernel/1.0.0/mykernel-1.0.0.jar io.nuls.mykernel.MyKernelBootstrap startModule $MODULE_PATH
+RUNBLOCK=
+while getopts b name
+do
+            case $name in
+            b)	   RUNBLOCK="1";;
+            ?)     exit 2;;
+           esac
+done
+if [ -z "${RUNBLOCK}" ];
+then
+    ${JAVA} -server -classpath ./libs/*:./mykernel/1.0.0/mykernel-1.0.0.jar io.nuls.mykernel.MyKernelBootstrap startModule $MODULE_PATH
+else
+    nohup ${JAVA} -server -classpath ./libs/*:./mykernel/1.0.0/mykernel-1.0.0.jar io.nuls.mykernel.MyKernelBootstrap startModule $MODULE_PATH  > mykernel.log 2>&1 &
+fi
+
+

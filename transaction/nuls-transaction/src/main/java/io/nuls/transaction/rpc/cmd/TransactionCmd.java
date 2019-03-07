@@ -12,13 +12,12 @@ import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.data.ObjectUtils;
 import io.nuls.tools.exception.NulsException;
-import static io.nuls.transaction.utils.LoggerUtil.Log;
 import io.nuls.tools.parse.JSONUtils;
 import io.nuls.transaction.constant.TxCmd;
 import io.nuls.transaction.constant.TxConfig;
 import io.nuls.transaction.constant.TxConstant;
 import io.nuls.transaction.constant.TxErrorCode;
-import io.nuls.transaction.db.h2.dao.TransactionH2Service;
+import io.nuls.transaction.storage.h2.TransactionH2Service;
 import io.nuls.transaction.manager.ChainManager;
 import io.nuls.transaction.manager.TransactionManager;
 import io.nuls.transaction.model.bo.Chain;
@@ -37,6 +36,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import static io.nuls.transaction.utils.LoggerUtil.Log;
 
 /**
  * @author: Charlie
@@ -299,8 +300,7 @@ public class TransactionCmd extends BaseCmd {
     @Parameter(parameterName = "txHashList", parameterType = "List")
     @Parameter(parameterName = "blockHeaderHex", parameterType = "String")
     public Response txRollback(Map params) {
-        Map<String, Boolean> map = new HashMap<>(TxConstant.INIT_CAPACITY_16);
-        boolean result = false;
+        boolean result;
         Chain chain = null;
         try {
             ObjectUtils.canNotEmpty(params.get("chainId"), TxErrorCode.PARAMETER_ERROR.getMsg());
@@ -317,9 +317,7 @@ public class TransactionCmd extends BaseCmd {
                 txHashList.add(NulsDigestData.fromDigestHex(hashHex));
             }
             //批量回滚已确认交易
-//            BlockHeader blockHeader = TxUtil.getInstance((String)params.get("blockHeaderHex"), BlockHeader.class);
             result = confirmedTxService.rollbackTxList(chain, txHashList, (String) params.get("blockHeaderHex"));
-
         } catch (NulsException e) {
             errorLogProcess(chain, e);
             return failed(e.getErrorCode());
@@ -382,12 +380,13 @@ public class TransactionCmd extends BaseCmd {
             if (!NulsDigestData.validHash(txHash)) {
                 throw new NulsException(TxErrorCode.HASH_ERROR);
             }
-            Log.debug("getConfirmedTransaction : " + txHash);
             Transaction tx = txService.getTransaction(chain, NulsDigestData.fromDigestHex(txHash));
             Map<String, String> resultMap = new HashMap<>(TxConstant.INIT_CAPACITY_8);
             if (tx == null) {
+                Log.debug("getTx - from all, fail! tx is null, txHash:{}", txHash);
                 resultMap.put("txHex", null);
             } else {
+                Log.debug("getTx - from all, success txHash : " + tx.getHash().getDigestHex());
                 resultMap.put("txHex", tx.hex());
             }
             return success(resultMap);
@@ -423,12 +422,13 @@ public class TransactionCmd extends BaseCmd {
             if (!NulsDigestData.validHash(txHash)) {
                 throw new NulsException(TxErrorCode.HASH_ERROR);
             }
-            Log.debug("getConfirmedTransaction : " + txHash);
             Transaction tx = confirmedTxService.getConfirmedTransaction(chain, NulsDigestData.fromDigestHex(txHash));
             Map<String, String> resultMap = new HashMap<>(TxConstant.INIT_CAPACITY_8);
             if (tx == null) {
+                Log.debug("getConfirmedTransaction fail, tx is null. txHash:{}", txHash);
                 resultMap.put("txHex", null);
             } else {
+                Log.debug("getConfirmedTransaction success. txHash:{}", txHash);
                 resultMap.put("txHex", tx.hex());
             }
             return success(resultMap);
@@ -515,7 +515,7 @@ public class TransactionCmd extends BaseCmd {
     }
 
     /**
-     * 创建交易接口(该接口应该为外部客户端接口,本不应该写在此处)
+     * 创建跨链交易接口
      *
      * @param params
      * @return
@@ -576,8 +576,9 @@ public class TransactionCmd extends BaseCmd {
             if (null == packaging) {
                 throw new NulsException(TxErrorCode.PARAMETER_ERROR);
             }
-            chain.setPackaging(packaging);
+            chain.getPackaging().set(packaging);
             TxConfig.PACKAGING = packaging;
+            chain.getLogger().debug("节点是否是打包节点,状态变更为: {}", chain.getPackaging().get());
             return success();
         } catch (NulsException e) {
             errorLogProcess(chain, e);

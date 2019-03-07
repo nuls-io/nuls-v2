@@ -27,7 +27,7 @@ import io.nuls.block.constant.ChainTypeEnum;
 import io.nuls.block.exception.ChainRuntimeException;
 import io.nuls.block.model.Chain;
 import io.nuls.block.service.BlockService;
-import io.nuls.block.service.ChainStorageService;
+import io.nuls.block.storage.ChainStorageService;
 import io.nuls.block.utils.BlockUtil;
 import io.nuls.block.utils.module.ConsensusUtil;
 import io.nuls.tools.core.annotation.Autowired;
@@ -139,23 +139,30 @@ public class ChainManager {
         }
         if (!addForkChain(chainId, masterForkChain) || !chainStorageService.save(chainId, blockList)) {
             commonLog.info("*error occur when rollback master chain");
-            saveBlockToMasterChain(chainId, blockList);
+            append(masterChain, masterForkChain);
             return false;
         }
         //至此,主链回滚完成
         commonLog.info("*masterChain rollback complete");
 
         //3.依次添加最长分叉链路径上所有分叉链区块
+        List<Chain> delete = new ArrayList<>();
         while (!switchChainPath.empty()) {
             Chain chain = switchChainPath.pop();
+            delete.add(chain);
             Chain subChain = switchChainPath.empty() ? null : switchChainPath.peek();
             boolean b = switchChain0(chainId, masterChain, chain, subChain);
             if (!b) {
+                commonLog.info("*switchChain0 fail masterChain-" + masterChain);
+                commonLog.info("*switchChain0 fail chain-" + chain);
+                commonLog.info("*switchChain0 fail subChain-" + subChain);
                 removeForkChain(chainId, topForkChain);
-                saveBlockToMasterChain(chainId, blockList);
+                append(masterChain, masterForkChain);
                 return false;
             }
         }
+        //6.收尾工作
+        delete.forEach(e -> deleteForkChain(chainId, e));
         commonLog.info("*switch chain complete");
         return true;
     }
@@ -185,7 +192,7 @@ public class ChainManager {
         commonLog.info("*switchChain0 forkChain=" + forkChain);
         commonLog.info("*switchChain0 subChain=" + subChain);
         //1.计算要从forkChain上添加到主链上多少个区块
-        int target = 0;
+        int target;
         if (subChain != null) {
             target = (int) (subChain.getStartHeight() - forkChain.getStartHeight());
         } else {
@@ -216,12 +223,14 @@ public class ChainManager {
             newForkChain.setEndHeight(forkChain.getEndHeight());
             newForkChain.setPreviousHash(subChain.getPreviousHash());
             newForkChain.setHashList(hashList);
+            commonLog.info("*switchChain0 newForkChain-" + newForkChain);
 
             //4.低于subChain的链重新链接到主链masterChain
             SortedSet<Chain> lowerSubChains = forkChain.getSons().headSet(subChain);
             if (lowerSubChains.size() > 0) {
                 lowerSubChains.forEach(e -> e.setParent(masterChain));
                 masterChain.getSons().addAll(lowerSubChains);
+                lowerSubChains.forEach(e -> commonLog.info("*switchChain0 lowerSubChains-" + e));
             }
 
             //5.高于subChain的链重新链接到新生成的分叉链newForkChain
@@ -230,12 +239,13 @@ public class ChainManager {
                 higherSubChains.remove(subChain);
                 higherSubChains.forEach(e -> e.setParent(newForkChain));
                 newForkChain.setSons(higherSubChains);
+                higherSubChains.forEach(e -> commonLog.info("*switchChain0 higherSubChains-" + e));
             }
             addForkChain(chainId, newForkChain);
         }
 
         //6.收尾工作
-        deleteForkChain(chainId, forkChain);
+//        deleteForkChain(chainId, forkChain);
         return true;
     }
 

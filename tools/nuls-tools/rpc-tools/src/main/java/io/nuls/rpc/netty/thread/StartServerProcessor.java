@@ -7,6 +7,8 @@ import io.netty.channel.ChannelOption;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
+import io.netty.handler.logging.LogLevel;
+import io.netty.handler.logging.LoggingHandler;
 import io.nuls.rpc.info.HostInfo;
 import io.nuls.rpc.netty.initializer.ServerInitializer;
 
@@ -40,6 +42,7 @@ public class StartServerProcessor implements Runnable{
                     .channel(NioServerSocketChannel.class)
                     .option(ChannelOption.ALLOCATOR, PooledByteBufAllocator.DEFAULT)
                     .option(ChannelOption.SO_KEEPALIVE,true)
+                    .handler(new LoggingHandler(LogLevel.TRACE))
                     .childHandler(new ServerInitializer());
             ChannelFuture channelFuture = serverBootstrap.bind(new InetSocketAddress(HostInfo.getLocalIP(),port)).sync();
             channelFuture.channel().closeFuture().sync();

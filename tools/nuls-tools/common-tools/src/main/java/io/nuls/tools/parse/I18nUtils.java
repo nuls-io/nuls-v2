@@ -24,6 +24,7 @@
  */
 package io.nuls.tools.parse;
 
+import com.google.common.io.Resources;
 import io.nuls.tools.constant.ToolsConstant;
 import io.nuls.tools.data.StringUtils;
 import io.nuls.tools.exception.NulsException;
@@ -31,9 +32,12 @@ import io.nuls.tools.log.Log;
 
 import java.io.*;
 import java.net.URL;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
+import java.util.jar.JarEntry;
+import java.util.jar.JarFile;
 
 /**
  * 国际化工具，可以根据系统设置的语言把信息编码转换为可读的不同语言的字符串
@@ -79,38 +83,65 @@ public class I18nUtils {
     }
 
     /**
-     * 加载语言包
-     *
-     * @param folder          文件所在包名
-     * @param defaultLanguage 语言
+     * @param c
+     * @param folder
+     * @param defaultLanguage
      */
-    public static void loadLanguage(String folder, String defaultLanguage) {
+    public static void loadLanguage(Class c, String folder, String defaultLanguage) {
         try {
             if (StringUtils.isBlank(folder)) {
                 folder = FOLDER;
             }
-            if (!isSystemWin()) {
-                folder = File.separator + folder;
-            }
             if (StringUtils.isNotBlank(defaultLanguage)) {
                 key = defaultLanguage;
             }
-            URL furl = I18nUtils.class.getClassLoader().getResource(folder);
+            URL furl = Resources.getResource(folder);
             if (null != furl) {
                 File folderFile = new File(furl.getPath());
                 Log.info("furl.getPath()=" + furl.getPath());
-                for (File file : folderFile.listFiles()) {
-                    InputStream is = new FileInputStream(file);
-                    Properties prop = new Properties();
-                    prop.load(new InputStreamReader(is, ToolsConstant.DEFAULT_ENCODING));
-                    String key = file.getName().replace(".properties", "");
-                    ALL_MAPPING.put(key, prop);
+                if (null != folderFile && null != folderFile.listFiles()) {
+                    for (File file : folderFile.listFiles()) {
+                        InputStream is = new FileInputStream(file);
+                        Properties prop = new Properties();
+                        prop.load(new InputStreamReader(is, ToolsConstant.DEFAULT_ENCODING));
+                        String key = file.getName().replace(".properties", "");
+                        ALL_MAPPING.put(key, prop);
+                    }
+                } else {
+                    URL url = c.getProtectionDomain().getCodeSource().getLocation();
+                    if (url.getPath().endsWith(".jar")) {
+                        try {
+                            JarFile jarFile = new JarFile(url.getFile());
+                            Enumeration<JarEntry> entrys = jarFile.entries();
+                            while (entrys.hasMoreElements()) {
+                                JarEntry jar = entrys.nextElement();
+                                if (jar.getName().indexOf("languages/") == 0 && jar.getName().length() > "languages/".length()) {
+                                    Log.info(jar.getName());
+                                    InputStream in = I18nUtils.class.getClassLoader().getResourceAsStream(jar.getName());
+                                    Properties prop = new Properties();
+                                    prop.load(in);
+                                    String key = jar.getName().replace(".properties", "");
+                                    key = key.replace("languages/", "");
+                                    Log.info("key={}", key);
+                                    ALL_MAPPING.put(key, prop);
+                                }
+
+                            }
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    } else {
+
+                    }
+
+
                 }
             }
         } catch (IOException e) {
             Log.error(e.getMessage());
         }
     }
+
 
     /**
      * 设置系统语言，切换语言包
@@ -160,4 +191,5 @@ public class I18nUtils {
     public static String getLanguage() {
         return key;
     }
+
 }

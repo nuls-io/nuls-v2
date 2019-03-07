@@ -22,22 +22,27 @@
 
 package io.nuls.block.thread;
 
+import io.nuls.base.data.Block;
 import io.nuls.base.data.NulsDigestData;
 import io.nuls.block.cache.CacheHandler;
 import io.nuls.block.manager.ContextManager;
 import io.nuls.block.message.CompleteMessage;
 import io.nuls.block.message.HeightRangeMessage;
+import io.nuls.block.model.ChainContext;
 import io.nuls.block.model.Node;
 import io.nuls.block.utils.module.NetworkUtil;
 import io.nuls.tools.log.logback.NulsLogger;
 import lombok.AllArgsConstructor;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
 import static io.nuls.block.constant.CommandConstant.GET_BLOCKS_BY_HEIGHT_MESSAGE;
 import static io.nuls.block.constant.Constant.BATCH_DOWNLOAD_TIMEOUNT;
+import static io.nuls.block.constant.Constant.MAX_LOOP;
 
 /**
  * 区块下载器
@@ -53,16 +58,15 @@ public class BlockWorker implements Callable<BlockDownLoadResult> {
     private int size;
     private int chainId;
     private Node node;
+    private HeightRangeMessage message;
 
     @Override
     public BlockDownLoadResult call() {
         boolean b = false;
-        long endHeight = startHeight + size - 1;
-        //组装批量获取区块消息
-        HeightRangeMessage message = new HeightRangeMessage(startHeight, endHeight);
         //计算本次请求hash,用来跟踪本次异步请求
         NulsDigestData messageHash = message.getHash();
-        NulsLogger commonLog = ContextManager.getContext(chainId).getCommonLog();
+        ChainContext context = ContextManager.getContext(chainId);
+        NulsLogger commonLog = context.getCommonLog();
         long duration = 0;
         try {
             Future<CompleteMessage> future = CacheHandler.addBatchBlockRequest(chainId, messageHash);
@@ -75,6 +79,29 @@ public class BlockWorker implements Callable<BlockDownLoadResult> {
                 return new BlockDownLoadResult(messageHash, startHeight, size, node, false, 0);
             }
             CompleteMessage completeMessage = future.get(BATCH_DOWNLOAD_TIMEOUNT, TimeUnit.SECONDS);
+            List<Block> blockList = CacheHandler.getBlockList(chainId, messageHash);
+            int real = blockList.size();
+            int interval = context.getParameters().getWaitInterval();
+            int count = 0;
+            while (real < size && count < MAX_LOOP) {
+                commonLog.info("#start-" + message.getStartHeight() + ",end-" + message.getEndHeight() + "#real-" + real + ",expect-" + size + ",count-" + count + ",node-" +node.getId());
+                Thread.sleep(interval * (size - real));
+                blockList = CacheHandler.getBlockList(chainId, messageHash);
+                real = blockList.size();
+                count++;
+            }
+            if (real != size) {
+                return new BlockDownLoadResult(messageHash, startHeight, size, node, b, 0);
+            }
+            List<Long> heightList = new ArrayList<>();
+            for (Block block : blockList) {
+                heightList.add(block.getHeader().getHeight());
+            }
+            for (long i = message.getStartHeight(); i <= message.getEndHeight(); i++) {
+                if (!heightList.contains(i)) {
+                    return new BlockDownLoadResult(messageHash, startHeight, size, node, b, 0);
+                }
+            }
             b = completeMessage.isSuccess();
             long end = System.currentTimeMillis();
             duration = end - begin;

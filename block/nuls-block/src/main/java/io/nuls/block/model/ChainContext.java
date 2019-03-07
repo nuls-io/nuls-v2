@@ -23,7 +23,7 @@
 package io.nuls.block.model;
 
 import io.nuls.base.data.Block;
-import io.nuls.base.data.protocol.Protocol;
+import io.nuls.tools.protocol.Protocol;
 import io.nuls.block.cache.CacheHandler;
 import io.nuls.block.cache.SmallBlockCacher;
 import io.nuls.block.constant.RunningStatusEnum;
@@ -58,6 +58,13 @@ public class ChainContext {
     private RunningStatusEnum status;
 
     /**
+     * 是否继续本次下载，中途发生异常置为false
+     */
+    @Getter
+    @Setter
+    private boolean doSyn;
+
+    /**
      * 链ID
      */
     @Getter
@@ -82,6 +89,7 @@ public class ChainContext {
      * 该链的系统交易类型
      */
     @Getter
+    @Setter
     private List<Integer> systemTransactionType;
 
     /**
@@ -142,18 +150,15 @@ public class ChainContext {
     }
 
     public void init() {
+        version = 1;
+        doSyn = true;
         lock = new StampedLock();
         LoggerUtil.init(chainId, parameters.getLogLevel());
-        systemTransactionType = TransactionUtil.getSystemTypes(chainId);
         this.setStatus(RunningStatusEnum.INITIALIZING);
-        //服务初始化
-        BlockService service = SpringLiteContext.getBean(BlockService.class);
-        service.init(chainId);
         //各类缓存初始化
         SmallBlockCacher.init(chainId);
         CacheHandler.init(chainId);
         ChainManager.init(chainId);
-        ProtocolUtil.subscribe(chainId);
     }
 
     public void start() {

@@ -22,7 +22,6 @@ package io.nuls.block.storage;
 
 import io.nuls.base.data.Block;
 import io.nuls.block.model.po.BlockHeaderPo;
-import io.nuls.block.service.BlockStorageService;
 import io.nuls.block.test.BlockGenerator;
 import io.nuls.block.utils.BlockUtil;
 import io.nuls.db.service.RocksDBService;

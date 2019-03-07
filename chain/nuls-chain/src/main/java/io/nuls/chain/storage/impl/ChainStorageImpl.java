@@ -2,11 +2,12 @@ package io.nuls.chain.storage.impl;
 
 import io.nuls.chain.model.po.BlockChain;
 import io.nuls.chain.storage.ChainStorage;
+import io.nuls.chain.storage.InitDB;
 import io.nuls.db.service.RocksDBService;
 import io.nuls.tools.basic.InitializingBean;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.data.ByteUtils;
-import static io.nuls.chain.util.LoggerUtil.Log;
+import io.nuls.tools.exception.NulsException;
 
 /**
  * 关于链的所有操作：增删改查 key =chainId, value = BlockChain
@@ -16,7 +17,7 @@ import static io.nuls.chain.util.LoggerUtil.Log;
  * @date 2018/11/8
  */
 @Component
-public class ChainStorageImpl implements ChainStorage, InitializingBean {
+public class ChainStorageImpl extends BaseStorage implements ChainStorage,InitDB, InitializingBean {
 
     private final String TBL = "block_chain";
 
@@ -26,13 +27,7 @@ public class ChainStorageImpl implements ChainStorage, InitializingBean {
      */
     @Override
     public void afterPropertiesSet() {
-        try {
-            if (!RocksDBService.existTable(TBL)) {
-                RocksDBService.createTable(TBL);
-            }
-        } catch (Exception e) {
-            Log.error(e);
-        }
+
     }
 
     /**
@@ -91,5 +86,10 @@ public class ChainStorageImpl implements ChainStorage, InitializingBean {
         BlockChain blockChain = new BlockChain();
         blockChain.parse(bytes, 0);
         return blockChain;
+    }
+
+    @Override
+    public void initTableName() throws NulsException {
+         super.initTableName(TBL);
     }
 }

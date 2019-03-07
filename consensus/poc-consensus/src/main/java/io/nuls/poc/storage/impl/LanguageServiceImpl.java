@@ -27,11 +27,8 @@ package io.nuls.poc.storage.impl;
 import io.nuls.db.service.RocksDBService;
 import io.nuls.poc.constant.ConsensusConstant;
 import io.nuls.poc.storage.LanguageService;
-import io.nuls.tools.basic.InitializingBean;
 import io.nuls.tools.core.annotation.Service;
 import io.nuls.tools.data.ByteUtils;
-import io.nuls.tools.exception.NulsException;
-import io.nuls.tools.log.Log;
 
 /**
  * 语言存储管理实现类
@@ -41,7 +38,7 @@ import io.nuls.tools.log.Log;
  * 2018/11/8
  */
 @Service
-public class LanguageServiceImpl implements LanguageService, InitializingBean {
+public class LanguageServiceImpl implements LanguageService{
     @Override
     public boolean saveLanguage(String language) throws  Exception{
         return RocksDBService.put(ConsensusConstant.DB_NAME_CONSUME_LANGUAGE,ConsensusConstant.DB_NAME_CONSUME_LANGUAGE.getBytes(),language.getBytes());
@@ -56,7 +53,7 @@ public class LanguageServiceImpl implements LanguageService, InitializingBean {
         return ByteUtils.asString(languageByte);
     }
 
-    @Override
+   /* @Override
     public void afterPropertiesSet() throws NulsException {
         try {
             RocksDBService.createTable(ConsensusConstant.DB_NAME_CONSUME_LANGUAGE);
@@ -64,5 +61,5 @@ public class LanguageServiceImpl implements LanguageService, InitializingBean {
             Log.error(e);
             throw new NulsException(e);
         }
-    }
+    }*/
 }

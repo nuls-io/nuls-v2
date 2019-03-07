@@ -25,6 +25,7 @@
 package io.nuls.account.util.manager;
 
 import io.nuls.account.config.NulsConfig;
+import io.nuls.account.constant.AccountErrorCode;
 import io.nuls.account.constant.AccountStorageConstant;
 import io.nuls.account.model.bo.Chain;
 import io.nuls.account.model.bo.config.ConfigBean;
@@ -35,6 +36,7 @@ import io.nuls.db.constant.DBErrorCode;
 import io.nuls.db.service.RocksDBService;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
+import io.nuls.tools.exception.NulsRuntimeException;
 import io.nuls.tools.io.IoUtils;
 import io.nuls.tools.log.Log;
 import io.nuls.tools.parse.JSONUtils;
@@ -79,17 +81,6 @@ public class ChainManager {
             Initialize linked database tables
             */
             initTable(chainId);
-            //注册账户相关交易
-            try {
-                while (true) {
-                    if (TransactionCmdCall.registerTx(chainId)) {
-                        break;
-                    }
-                    Thread.sleep(3000L);
-                }
-            } catch (Exception e) {
-                Log.error("Transaction registerTx error!");
-            }
             chainMap.put(chainId, chain);
         }
     }
@@ -161,9 +152,10 @@ public class ChainManager {
             }
         } catch (Exception e) {
             if (!DBErrorCode.DB_TABLE_EXIST.equals(e.getMessage())) {
-                Log.info(e.getMessage());
+                Log.error(e.getMessage());
+                throw new NulsRuntimeException(AccountErrorCode.DB_TABLE_CREATE_ERROR);
             } else {
-                Log.error(e);
+                Log.info(e.getMessage());
             }
         }
     }

@@ -32,13 +32,11 @@ import io.nuls.base.basic.NulsOutputStreamBuffer;
 import io.nuls.base.constant.BaseConstant;
 import io.nuls.base.script.Script;
 import io.nuls.base.signture.SignatureUtil;
-import io.nuls.tools.data.BigIntegerUtils;
 import io.nuls.tools.data.ByteArrayWrapper;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.parse.SerializeUtils;
 
 import java.io.IOException;
-import java.math.BigInteger;
 import java.util.*;
 
 /**
@@ -54,6 +52,13 @@ public class CoinData extends BaseNulsData {
         from = new ArrayList<>();
         to = new ArrayList<>();
     }
+
+    public CoinData(byte[] bytes) throws NulsException {
+        from = new ArrayList<>();
+        to = new ArrayList<>();
+        this.parse(new NulsByteBuffer(bytes));
+    }
+
 
     /**
      * serialize important field
@@ -130,26 +135,6 @@ public class CoinData extends BaseNulsData {
 
     public void setTo(List<CoinTo> to) {
         this.to = to;
-    }
-
-    /**
-     * 获取该交易的手续费
-     * The handling charge for the transaction.
-     *
-     * @return tx fee
-     */
-    @JsonIgnore
-    public BigInteger getFee() {
-        BigInteger toAmount = BigInteger.ZERO;
-
-        for (CoinTo coinTo : to) {
-            toAmount = toAmount.add(coinTo.getAmount());
-        }
-        BigInteger fromAmount = BigInteger.ZERO;
-        for (CoinFrom coinFrom : from) {
-            fromAmount = fromAmount.add(coinFrom.getAmount());
-        }
-        return fromAmount.subtract(toAmount);
     }
 
     public void addTo(CoinTo coinTo) {

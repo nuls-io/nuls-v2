@@ -24,13 +24,7 @@
  */
 package io.nuls.network.manager.threads;
 
-import io.nuls.network.NetworkBootstrap;
-import io.nuls.tools.thread.ThreadUtils;
-import io.nuls.tools.thread.commom.NulsThreadFactory;
 import org.junit.Test;
-
-import java.util.concurrent.ScheduledThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
 
 /**
  * @author lan
@@ -38,12 +32,8 @@ import java.util.concurrent.TimeUnit;
  * @date 2018/12/12
  **/
 public class ThreadTest {
-    private void start(){
-        NetworkBootstrap.getInstance().moduleStart();
-    }
     @Test
     public void clientConnectTest(){
-        start();
 //        ScheduledThreadPoolExecutor executor = ThreadUtils.createScheduledThreadPool(1, new NulsThreadFactory("NodesConnectThread"));
 //        executor.scheduleAtFixedRate(new NodesConnectTaskTest(), 5, 1, TimeUnit.SECONDS);
 //        try {
