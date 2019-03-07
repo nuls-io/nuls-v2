@@ -7,6 +7,7 @@ import com.mongodb.client.model.WriteModel;
 import io.nuls.api.constant.MongoTableConstant;
 import io.nuls.api.model.po.db.DepositInfo;
 import io.nuls.api.utils.DocumentTransferTool;
+import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
 import org.bson.Document;
 import org.bson.conversions.Bson;
@@ -17,7 +18,12 @@ import java.util.List;
 @Component
 public class DepositService {
 
+    @Autowired
     private MongoDBService mongoDBService;
+
+    public void initSelect(int chainId) {
+
+    }
 
     public DepositInfo getDepositInfoByKey(int chainId, String key) {
         Document document = mongoDBService.findOne(MongoTableConstant.DEPOSIT_TABLE + chainId, Filters.eq("_id", key));
