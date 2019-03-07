@@ -24,16 +24,24 @@ public class AgentService {
     private MongoDBService mongoDBService;
     @Autowired
     private AliasService aliasService;
-    @Autowired
-    private AccountService accountService;
+
+    public void initCache() {
+        for (ApiCache apiCache : CacheManager.getApiCaches().values()) {
+            List<Document> documentList = mongoDBService.query(MongoTableConstant.AGENT_TABLE + apiCache.getChainInfo().getChainId());
+            for (Document document : documentList) {
+                AgentInfo agentInfo = DocumentTransferTool.toInfo(document, "txHash", AgentInfo.class);
+                apiCache.addAgentInfo(agentInfo);
+            }
+        }
+    }
 
     public AgentInfo getAgentByAgentHash(int chainID, String agentHash) {
         AgentInfo agentInfo = CacheManager.getCache(chainID).getAgentInfo(agentHash);
-//        if (agentInfo == null) {
-//            Document document = mongoDBService.findOne(MongoTableConstant.AGENT_TABLE + chainID, Filters.eq("_id", agentHash));
-//            agentInfo = DocumentTransferTool.toInfo(document, "txHash", AgentInfo.class);
-//            CacheManager.getCache(chainID).addAgentInfo(agentInfo);
-//        }
+        if (agentInfo == null) {
+            Document document = mongoDBService.findOne(MongoTableConstant.AGENT_TABLE + chainID, Filters.eq("_id", agentHash));
+            agentInfo = DocumentTransferTool.toInfo(document, "txHash", AgentInfo.class);
+            CacheManager.getCache(chainID).addAgentInfo(agentInfo);
+        }
         return agentInfo;
     }
 

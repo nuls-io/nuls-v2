@@ -42,7 +42,9 @@ import java.io.Serializable;
 @NoArgsConstructor
 public class ConfigBean implements Serializable {
 
-    private int chainID;
+    private int chainId;
+
+    private int assetId;
 
     private String dbIp;
 

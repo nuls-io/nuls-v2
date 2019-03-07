@@ -2,8 +2,6 @@ package io.nuls.api.model.po.db;
 
 import lombok.Data;
 
-import java.math.BigInteger;
-
 @Data
 public class AssetInfo {
 

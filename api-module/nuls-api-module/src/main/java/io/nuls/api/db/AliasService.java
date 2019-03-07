@@ -20,6 +20,16 @@ public class AliasService {
     @Autowired
     private MongoDBService mongoDBService;
 
+    public void initCache() {
+        for (ApiCache apiCache : CacheManager.getApiCaches().values()) {
+            List<Document> documentList = mongoDBService.query(MongoTableConstant.ALIAS_TABLE + apiCache.getChainInfo().getChainId());
+            for (Document document : documentList) {
+                AliasInfo aliasInfo = DocumentTransferTool.toInfo(document, "alias", AliasInfo.class);
+                apiCache.addAlias(aliasInfo);
+            }
+        }
+    }
+
     public AliasInfo getAliasByAddress(int chainId, String address) {
         ApiCache apiCache = CacheManager.getCache(chainId);
         AliasInfo aliasInfo = apiCache.getAlias(address);
@@ -62,4 +72,5 @@ public class AliasService {
         }
         mongoDBService.insertMany(MongoTableConstant.ALIAS_TABLE + chainId, documentList);
     }
+
 }

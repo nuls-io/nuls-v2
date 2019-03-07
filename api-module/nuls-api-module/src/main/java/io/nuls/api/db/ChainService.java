@@ -30,6 +30,11 @@ public class ChainService {
         }
     }
 
+    public void addChainInfo(ChainInfo chainInfo) {
+        Document document = DocumentTransferTool.toDocument(chainInfo, "chainId");
+        mongoDBService.insertOne(MongoTableConstant.CHAIN_INFO_TABLE, document);
+    }
+
     public ChainInfo getChainInfo(int chainId) {
         return CacheManager.getChainInfo(chainId);
     }

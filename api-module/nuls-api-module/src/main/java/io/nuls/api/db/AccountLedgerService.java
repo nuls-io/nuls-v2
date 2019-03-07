@@ -31,7 +31,7 @@ public class AccountLedgerService {
             List<Document> documentList = mongoDBService.query(MongoTableConstant.ACCOUNT_LEDGER_TABLE + apiCache.getChainInfo().getChainId());
             for (Document document : documentList) {
                 AccountLedgerInfo ledgerInfo = DocumentTransferTool.toInfo(document, "key", AccountLedgerInfo.class);
-                apiCache.getLedgerMap().put(ledgerInfo.getKey(), ledgerInfo);
+                apiCache.addAccountLedgerInfo(ledgerInfo);
             }
         }
     }

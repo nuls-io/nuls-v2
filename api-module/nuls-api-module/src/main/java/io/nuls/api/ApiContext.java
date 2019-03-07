@@ -27,6 +27,14 @@ import java.util.*;
  */
 public class ApiContext {
 
+    public static int defaultChainId;
+
+    public static int defaultAssetId;
+
+    public static String dbIp;
+
+    public static int port;
+
     public static boolean doSync = true;
 
     public static long bestHeight;

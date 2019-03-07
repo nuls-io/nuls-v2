@@ -53,7 +53,12 @@ import org.apache.ibatis.io.Resources;
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.apache.ibatis.session.SqlSessionFactoryBuilder;
 
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.lang.reflect.Field;
+import java.net.URL;
 import java.nio.charset.Charset;
 import java.util.Map;
 import java.util.Properties;
@@ -68,7 +73,7 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 public class TransactionBootStrap extends RpcModule {
 
     public static void main(String[] args) {
-        if(args.length == 0){
+        if (args.length == 0) {
             args = new String[]{HostInfo.getLocalIP() + ":8887/ws"};
         }
         NulsRpcModuleBootstrap.run("io.nuls", args);
@@ -77,7 +82,8 @@ public class TransactionBootStrap extends RpcModule {
     @Override
     public void init() {
         try {
-            //初始化系统参数
+            updateDataPath();
+//            //初始化系统参数
             initSys();
             //初始化数据库配置文件
             initDB();
@@ -140,7 +146,7 @@ public class TransactionBootStrap extends RpcModule {
     }
 
     @Override
-    public String getRpcCmdPackage(){
+    public String getRpcCmdPackage() {
         return TxConstant.TX_CMD_PATH;
     }
 
@@ -226,6 +232,39 @@ public class TransactionBootStrap extends RpcModule {
 //            System.out.println(a/b);
         } catch (NulsException e) {
             throw new RuntimeException(e);
+        }
+    }
+
+    private static void updateDataPath() {
+        String filePath = "db_config.properties";
+
+        Properties pps = new Properties();
+        InputStream in = null;
+        OutputStream out = null;
+        try {
+            URL url = TransactionBootStrap.class.getClassLoader().getResource(filePath);
+            in = TransactionBootStrap.class.getClassLoader().getResourceAsStream(filePath);
+            pps.load(in);
+            out = new FileOutputStream(url.getPath());
+            pps.setProperty("url", "jdbc:h2:file:./data/tx/h2/nuls;LOG=2;DB_CLOSE_DELAY=-1;TRACE_LEVEL_SYSTEM_OUT=1;DATABASE_TO_UPPER=FALSE;MV_STORE=false;COMPRESS=true;MAX_COMPACT_TIME=5000");
+            pps.store(out, "");
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            if (out != null) {
+                try {
+                    out.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+            if (in != null) {
+                try {
+                    in.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
         }
     }
 }

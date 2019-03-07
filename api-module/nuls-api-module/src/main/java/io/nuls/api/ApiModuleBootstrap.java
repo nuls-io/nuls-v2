@@ -28,9 +28,8 @@ import com.mongodb.client.model.Indexes;
 import io.nuls.api.constant.MongoTableConstant;
 import io.nuls.api.constant.RunningStatusEnum;
 import io.nuls.api.db.MongoDBService;
-import io.nuls.api.manager.ChainManager;
 import io.nuls.api.manager.ScheduleManager;
-import io.nuls.api.model.po.config.ConfigBean;
+import io.nuls.api.service.SyncService;
 import io.nuls.api.utils.ConfigLoader;
 import io.nuls.rpc.info.HostInfo;
 import io.nuls.rpc.model.ModuleE;
@@ -57,7 +56,7 @@ public class ApiModuleBootstrap {
     public static void main(String[] args) {
         Thread.currentThread().setName("api-module-main");
         init();
-        start();
+//        start();
 //        loop();
     }
 
@@ -65,17 +64,29 @@ public class ApiModuleBootstrap {
      * 初始化，完成后系统状态变更为{@link RunningStatusEnum#READY}
      */
     private static void init() {
-        //扫描包路径io.nuls.api,初始化bean
-        SpringLiteContext.init(DEFAULT_SCAN_PACKAGE);
         try {
             //加载配置
             ConfigLoader.load();
+            //扫描包路径io.nuls.api,初始化bean
+            springInit();
+            //初始化数据库相关
             initDB();
-            initServer();
+//            initServer();
         } catch (Exception e) {
             e.printStackTrace();
             commonLog.error("error occur when init, " + e.getMessage());
         }
+    }
+
+
+    private static void springInit() {
+        String dbName = "nuls-api";
+        MongoClient mongoClient = new MongoClient(ApiContext.dbIp, ApiContext.port);
+        MongoDatabase mongoDatabase = mongoClient.getDatabase(dbName);
+        MongoDBService mongoDBService = new MongoDBService(mongoClient, mongoDatabase);
+        SpringLiteContext.putBean("dbService", mongoDBService);
+
+        SpringLiteContext.init(DEFAULT_SCAN_PACKAGE);
     }
 
     /**
@@ -83,16 +94,13 @@ public class ApiModuleBootstrap {
      * 初始化数据库连接
      */
     private static void initDB() {
-        String dbName = "nuls-api";
-
-        MongoClient mongoClient = new MongoClient("127.0.0.1", 27017);
-        MongoDatabase mongoDatabase = mongoClient.getDatabase(dbName);
-        MongoDBService mongoDBService = new MongoDBService(mongoClient, mongoDatabase);
-        SpringLiteContext.putBean("dbService", mongoDBService);
-
-        for (ConfigBean bean : ChainManager.getConfigBeanMap().values()) {
-            initTablesAndIndex(bean.getChainID(), mongoDBService);
-        }
+        MongoDBService mongoDBService = SpringLiteContext.getBean(MongoDBService.class);
+        SyncService syncService = SpringLiteContext.getBean(SyncService.class);
+        syncService.initCache();
+//        for (ConfigBean bean : ChainManager.getConfigBeanMap().values()) {
+//            initTablesAndIndex(bean.getChainId(), mongoDBService);
+//
+//        }
     }
 
     /**
@@ -113,8 +121,9 @@ public class ApiModuleBootstrap {
             }
             //创建索引
             mongoDBService.createIndex(MongoTableConstant.TX_RELATION_TABLE + chainId, Indexes.ascending("address"));
-            mongoDBService.createIndex(MongoTableConstant.TX_RELATION_TABLE + chainId, Indexes.ascending("type"));
+            mongoDBService.createIndex(MongoTableConstant.TX_RELATION_TABLE + chainId, Indexes.ascending("address", "type"));
             mongoDBService.createIndex(MongoTableConstant.TX_RELATION_TABLE + chainId, Indexes.ascending("txHash"));
+            mongoDBService.createIndex(MongoTableConstant.TX_RELATION_TABLE + chainId, Indexes.descending("height", "createTime"));
         }
         //账户信息表
         indexes = mongoDBService.getIndexes(MongoTableConstant.ACCOUNT_TABLE + chainId);

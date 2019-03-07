@@ -50,6 +50,15 @@ public class SyncService {
     //记录每个区块的红黄牌信息
     private List<PunishLogInfo> punishLogList = new ArrayList<>();
 
+    public void initCache() {
+        chainService.initCache();
+        accountService.initCache();
+        ledgerService.initCache();
+        aliasService.initCache();
+        agentService.initCache();
+    }
+
+
     public SyncInfo getSyncInfo(int chainId) {
         return chainService.getSyncInfo(chainId);
     }
@@ -63,11 +72,10 @@ public class SyncService {
     }
 
     public boolean syncNewBlock(int chainId, BlockInfo blockInfo) throws Exception {
-        BlockHeaderInfo headerInfo = blockInfo.getHeader();
+        clear();
         findAddProcessAgentOfBlock(chainId, blockInfo);
         //处理交易
         processTxs(chainId, blockInfo.getTxList());
-
         //保存数据
         save(chainId, blockInfo);
         return false;
@@ -498,7 +506,7 @@ public class SyncService {
         //修改账户信息表
         accountService.saveAccounts(chainId, accountInfoMap);
         //完成解析
-        chainService.syncComplete(chainId,height, 100);
+        chainService.syncComplete(chainId, height, 100);
     }
 
 
@@ -552,5 +560,15 @@ public class SyncService {
             agentInfoList.add(agentInfo);
         }
         return agentInfo;
+    }
+
+    private void clear() {
+        accountInfoMap.clear();
+        accountLedgerInfoMap.clear();
+        agentInfoList.clear();
+        txRelationInfoSet.clear();
+        aliasInfoList.clear();
+        depositInfoList.clear();
+        punishLogList.clear();
     }
 }

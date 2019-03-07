@@ -23,10 +23,19 @@ public class AccountService {
     @Autowired
     private MongoDBService mongoDBService;
 
+    public void initCache() {
+        for (ApiCache apiCache : CacheManager.getApiCaches().values()) {
+            List<Document> documentList = mongoDBService.query(MongoTableConstant.ACCOUNT_TABLE + apiCache.getChainInfo().getChainId());
+            for (Document document : documentList) {
+                AccountInfo accountInfo = DocumentTransferTool.toInfo(document, "address", AccountInfo.class);
+                apiCache.addAccountInfo(accountInfo);
+            }
+        }
+    }
+
     public AccountInfo getAccountInfo(int chainId, String address) {
         return CacheManager.getCache(chainId).getAccountInfo(address);
     }
-
 
     public void saveAccounts(int chainId, Map<String, AccountInfo> accountInfoMap) {
         if (accountInfoMap.isEmpty()) {
@@ -38,8 +47,8 @@ public class AccountService {
             if (accountInfo.isNew()) {
                 modelList.add(new InsertOneModel(document));
                 accountInfo.setNew(false);
-                ApiCache cache = CacheManager.getCache(chainId);
-                cache.addAccountInfo(accountInfo);
+                ApiCache apiCache = CacheManager.getCache(chainId);
+                apiCache.addAccountInfo(accountInfo);
             } else {
                 modelList.add(new ReplaceOneModel<>(Filters.eq("_id", accountInfo.getAddress()), document));
             }

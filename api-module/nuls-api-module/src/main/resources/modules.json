@@ -12,6 +12,12 @@
     "value": "12345"
   },
   {
+    "name": "assetId",
+    "remark": "资产ID",
+    "readOnly": "true",
+    "value": "1"
+  },
+  {
     "name": "dbIp",
     "remark": "数据库ip",
     "readOnly": "true",
