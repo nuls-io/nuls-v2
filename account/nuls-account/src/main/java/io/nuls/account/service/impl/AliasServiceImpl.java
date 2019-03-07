@@ -209,10 +209,12 @@ public class AliasServiceImpl implements AliasService, InitializingBean {
             throw new NulsRuntimeException(AccountErrorCode.ALIAS_FORMAT_WRONG);
         }
         if (!isAliasUsable(chainId, alias.getAlias())) {
+            LoggerUtil.logger.error("alias is disable,alias: " + alias.getAlias() + ",address: " + alias.getAddress());
             throw new NulsRuntimeException(AccountErrorCode.ALIAS_EXIST);
         }
         AliasPo aliasPo = aliasStorageService.getAliasByAddress(chainId, address);
         if (aliasPo != null) {
+            LoggerUtil.logger.error("alias is already exist,alias: " + alias.getAlias() + ",address: " + alias.getAddress());
             throw new NulsRuntimeException(AccountErrorCode.ACCOUNT_ALREADY_SET_ALIAS);
         }
         // check the CoinData

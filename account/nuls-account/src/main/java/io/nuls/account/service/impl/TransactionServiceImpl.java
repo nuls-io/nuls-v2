@@ -38,6 +38,7 @@ import io.nuls.account.rpc.call.TransactionCmdCall;
 import io.nuls.account.service.AccountService;
 import io.nuls.account.service.MultiSignAccountService;
 import io.nuls.account.service.TransactionService;
+import io.nuls.account.util.LoggerUtil;
 import io.nuls.account.util.TxUtil;
 import io.nuls.base.signture.MultiSignTxSignature;
 import io.nuls.tools.log.Log;
@@ -88,7 +89,7 @@ public class TransactionServiceImpl implements TransactionService {
         Map<String, Transaction> accountAddressMap = new HashMap<>();
         try {
             for (Transaction transaction : txList) {
-                Log.debug("start=======type: "+transaction.getType()+"===hash: "+transaction.getHash());
+                LoggerUtil.logger.debug("start=======type: " + transaction.getType() + "===hash: " + transaction.getHash());
                 if (transaction.getType() == AccountConstant.TX_TYPE_ACCOUNT_ALIAS) {
                     Alias alias = new Alias();
                     alias.parse(new NulsByteBuffer(transaction.getTxData()));
@@ -99,6 +100,7 @@ public class TransactionServiceImpl implements TransactionService {
                     if (tmp != null) {
                         result.add(transaction);
                         result.add(tmp);
+                        LoggerUtil.logger.error("the alias is already exist,alias: " + alias.getAlias() + ",address: " + alias.getAddress());
                         continue;
                     } else {
                         aliasNamesMap.put(alias.getAlias(), transaction);
@@ -138,7 +140,7 @@ public class TransactionServiceImpl implements TransactionService {
     }
 
     @Override
-    public MultiSignTransactionResultDto createMultiSignTransfer(int chainId,int assetsId, Account account, String password, MultiSigAccount multiSigAccount, String toAddress, BigInteger amount, String remark)
+    public MultiSignTransactionResultDto createMultiSignTransfer(int chainId, int assetsId, Account account, String password, MultiSigAccount multiSigAccount, String toAddress, BigInteger amount, String remark)
             throws NulsException, IOException {
         //create transaction
         Transaction transaction = new Transaction(AccountConstant.TX_TYPE_TRANSFER);
@@ -146,8 +148,8 @@ public class TransactionServiceImpl implements TransactionService {
         transaction.setRemark(StringUtils.bytes(remark));
         //build coin data
         //buildMultiSignTransactionCoinData(transaction, chainId,assetsId, multiSigAccount, toAddress, amount);
-        CoinDto from = new CoinDto(multiSigAccount.getAddress().getBase58(),chainId,assetsId,amount,null);
-        CoinDto to = new CoinDto(toAddress,chainId,assetsId,amount,null);
+        CoinDto from = new CoinDto(multiSigAccount.getAddress().getBase58(), chainId, assetsId, amount, null);
+        CoinDto to = new CoinDto(toAddress, chainId, assetsId, amount, null);
         assemblyCoinData(transaction, chainId, List.of(from), List.of(to));
         //sign
         TransactionSignature transactionSignature = buildMultiSignTransactionSignature(transaction, multiSigAccount, account, password);
@@ -203,7 +205,7 @@ public class TransactionServiceImpl implements TransactionService {
         Alias alias = new Alias(multiSigAccount.getAddress().getAddressBytes(), aliasName);
         transaction.setTxData(alias.serialize());
         //build coin data
-        buildMultiSignTransactionCoinData(transaction, chainId,-1, multiSigAccount, toAddress, BigInteger.ONE);
+        buildMultiSignTransactionCoinData(transaction, chainId, -1, multiSigAccount, toAddress, BigInteger.ONE);
         //sign
         TransactionSignature transactionSignature = buildMultiSignTransactionSignature(transaction, multiSigAccount, account, password);
         //缓存当前交易hash
