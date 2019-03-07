@@ -90,7 +90,8 @@ public class AccountServiceImpl implements AccountService, InitializingBean {
     @Override
     public List<Account> createAccount(int chainId, int count, String password) {
         //check params
-        if (chainId <= 0 || count <= 0 || count > AccountTool.CREATE_MAX_SIZE || StringUtils.isBlank(password)) {
+        //|| StringUtils.isBlank(password)
+        if (chainId <= 0 || count <= 0 || count > AccountTool.CREATE_MAX_SIZE ) {
             throw new NulsRuntimeException(AccountErrorCode.PARAMETER_ERROR);
         }
         if (!StringUtils.isBlank(password) && !FormatValidUtils.validPassword(password)) {
