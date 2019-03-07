@@ -67,7 +67,8 @@ public class AccountCmd extends BaseCmd {
             Object chainIdObj = params == null ? null : params.get(RpcParameterNameConstant.CHAIN_ID);
             Object countObj = params == null ? null : params.get(RpcParameterNameConstant.COUNT);
             Object passwordObj = params == null ? null : params.get(RpcParameterNameConstant.PASSWORD);
-            if (params == null || chainIdObj == null || passwordObj == null) {
+            //|| passwordObj == null
+            if (params == null || chainIdObj == null ) {
                 throw new NulsRuntimeException(AccountErrorCode.NULL_PARAMETER);
             }
 

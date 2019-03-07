@@ -99,7 +99,7 @@ public class AccountServiceImpl implements AccountService, InitializingBean {
         if (chainId <= 0 || count <= 0 || count > AccountTool.CREATE_MAX_SIZE || StringUtils.isBlank(password)) {
             throw new NulsRuntimeException(AccountErrorCode.PARAMETER_ERROR);
         }
-        if (!FormatValidUtils.validPassword(password)) {
+        if (StringUtils.isBlank(password) || !FormatValidUtils.validPassword(password)) {
             throw new NulsRuntimeException(AccountErrorCode.PASSWORD_FORMAT_WRONG);
         }
         locker.lock();
