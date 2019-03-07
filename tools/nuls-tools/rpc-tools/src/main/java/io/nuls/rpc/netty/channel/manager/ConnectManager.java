@@ -586,14 +586,15 @@ public class ConnectManager {
     }
 
     public static ConnectData getConnectDataByRole(String role)throws Exception{
-        if(ROLE_CHANNEL_MAP.isEmpty() || ROLE_CHANNEL_MAP.get(role) == null){
+        Channel channel = ROLE_CHANNEL_MAP.get(role);
+        if(ROLE_CHANNEL_MAP.isEmpty() || channel == null){
             String url = getRemoteUri(role);
             if(StringUtils.isBlank(url)){
                 throw new Exception("Connection module not started");
             }
-            getConnectByUrl(role);
+            channel = getConnectByUrl(role);
         }
-        return CHANNEL_DATA_MAP.get(ROLE_CHANNEL_MAP.get(role));
+        return CHANNEL_DATA_MAP.get(channel);
     }
 
 
