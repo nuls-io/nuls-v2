@@ -3,6 +3,7 @@ package io.nuls.api.provider.account;
 import io.nuls.api.provider.BaseService;
 import io.nuls.api.provider.Provider;
 import io.nuls.api.provider.Result;
+import io.nuls.api.provider.account.facade.BackupAccountReq;
 import io.nuls.api.provider.account.facade.CreateAccountReq;
 import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.model.ModuleE;
@@ -23,15 +24,13 @@ import java.util.Map;
 @Provider(Provider.ProviderType.RPC)
 public class AccountServiceForRpc extends BaseService implements AccountService {
 
-
-    @Override
-    public String hello() {
-        return "hello world";
-    }
-
     @Override
     public Result<String> createAccount(CreateAccountReq req) {
         try {
+            if(req.getChainId() == null){
+                req.setChainId(getChainId());
+            }
+            req.setChainId(getChainId());
             Map<String, Object> params = MapUtils.beanToLinkedMap(req);
             params.put(Constants.VERSION_KEY_STR, "1.0");
             Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_createAccount", params);
@@ -46,5 +45,11 @@ public class AccountServiceForRpc extends BaseService implements AccountService 
             Log.error("Calling remote interface failed. module:{} - interface:{}", ModuleE.AC.abbr, "ac_createAccount");
             return fail(BaseService.ERROR_CODE,"call remote failed");
         }
+    }
+
+    @Override
+    public Result<Boolean> backupAccount(BackupAccountReq req) {
+
+        return null;
     }
 }

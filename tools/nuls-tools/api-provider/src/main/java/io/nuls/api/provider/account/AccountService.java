@@ -1,10 +1,8 @@
 package io.nuls.api.provider.account;
 
 import io.nuls.api.provider.Result;
+import io.nuls.api.provider.account.facade.BackupAccountReq;
 import io.nuls.api.provider.account.facade.CreateAccountReq;
-import io.nuls.api.provider.account.facade.CreateAccountRes;
-
-import java.util.List;
 
 /**
  * @Author: zhoulijun
@@ -13,8 +11,8 @@ import java.util.List;
  */
 public interface AccountService {
 
-    String hello();
-
     Result<String> createAccount(CreateAccountReq req);
+
+    Result<Boolean> backupAccount(BackupAccountReq req);
 
 }

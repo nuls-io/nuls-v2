@@ -64,4 +64,18 @@ public @interface Parameter {
      * @return String
      */
     String parameterValidRegExp() default "";
+
+
+    /**
+     * 参数描述
+     * @return
+     */
+    String parameterDes() default "";
+
+
+    /**
+     * 是否可为空
+     * @return
+     */
+    boolean canNull() default true;
 }

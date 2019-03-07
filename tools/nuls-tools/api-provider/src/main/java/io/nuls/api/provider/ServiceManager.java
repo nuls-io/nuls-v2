@@ -3,6 +3,7 @@ package io.nuls.api.provider;
 import io.nuls.tools.core.ioc.ScanUtil;
 import io.nuls.tools.parse.ConfigLoader;
 import lombok.extern.slf4j.Slf4j;
+import net.sf.cglib.proxy.Enhancer;
 
 import java.io.IOException;
 import java.util.*;
@@ -43,11 +44,16 @@ public class ServiceManager {
     private static void init() {
         //1.初始化提供器类型
         Provider.ProviderType providerType;
+        Integer defaultChainId;
         try {
             Properties prop = ConfigLoader.loadProperties("module.properties");
             providerType = Provider.ProviderType.valueOf(prop.getProperty("provider-type"));
+            if(prop.getProperty("chain-id") == null){
+                throw new RuntimeException("api provider init fail, must be set chain-id in module.properties");
+            }
+            defaultChainId = Integer.parseInt(prop.getProperty("chain-id"));
         } catch (IOException e) {
-            throw new RuntimeException("api provicer init fail, load module.properties fail");
+            throw new RuntimeException("api provider init fail, load module.properties fail");
         }
         //2.加载服务提供类实例
         List<Class> imps = ScanUtil.scan("io.nuls.api.provider");
@@ -59,7 +65,16 @@ public class ServiceManager {
                 if(providerType == clsProviderType){
                     Arrays.stream(cls.getInterfaces()).forEach(intf->{
                         try {
-                            serviceImpls.put(intf,cls.getConstructor().newInstance());
+                            if(cls.getSuperclass() == null && !cls.getSuperclass().equals(BaseService.class)){
+                                throw new RuntimeException("api provider init fail, Service must be extends BaseService");
+                            }
+                            ServiceProxy serviceProxy = new ServiceProxy(defaultChainId);
+                            Enhancer enhancer = new Enhancer();
+                            enhancer.setSuperclass(cls);
+                            enhancer.setCallback(serviceProxy);
+                            BaseService service = (BaseService)enhancer.create();
+                            serviceImpls.put(intf,service);
+                            service.setChainId(defaultChainId);
                         } catch (Exception e) {
                             e.printStackTrace();
                         }

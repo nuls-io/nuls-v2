@@ -17,6 +17,7 @@ import io.nuls.base.signture.P2PHKSignature;
 import io.nuls.rpc.cmd.BaseCmd;
 import io.nuls.rpc.model.CmdAnnotation;
 import io.nuls.rpc.model.Parameter;
+import io.nuls.rpc.model.Parameters;
 import io.nuls.rpc.model.message.Response;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
@@ -618,6 +619,12 @@ public class AccountCmd extends BaseCmd {
      * @return
      */
     @CmdAnnotation(cmd = "ac_exportAccountKeyStore", version = 1.0, scope = "private", minEvent = 0, minPeriod = 0, description = "export account KeyStore")
+    @Parameters({
+            @Parameter(parameterName = "chainId",parameterType = "int",canNull = false),
+            @Parameter(parameterName = "address",parameterType = "string",canNull = false),
+            @Parameter(parameterName = "password",parameterType = "string",canNull = false),
+            @Parameter(parameterName = "filePath",parameterType = "string",canNull = false)
+    })
     public Response exportAccountKeyStore(Map params) {
         Log.debug("ac_exportAccountKeyStore start");
         Map<String, String> map = new HashMap<>(1);

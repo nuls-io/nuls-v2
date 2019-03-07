@@ -152,6 +152,7 @@ public class MyKernelBootstrap {
                             modules.getAbsolutePath() + File.separator + "start.sh "
                                     + " --jre " + System.getProperty("java.home")
                                     + " --managerurl " + ""+ HostInfo.getLocalIP()+":8887/ws"
+                                    + " -r "
                     );
                     synchronized (MODULE_STOP_LIST_SCRIPT){
                         MODULE_STOP_LIST_SCRIPT.add(modules.getAbsolutePath() + File.separator + "stop.sh ");

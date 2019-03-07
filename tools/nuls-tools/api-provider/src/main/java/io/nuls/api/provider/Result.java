@@ -35,6 +35,10 @@ public class Result<T> {
         this.message = message;
     }
 
+    public static Result fail(int status,String message){
+        return new Result(status,message);
+    }
+
     public boolean isSuccess(){
         return status == 0;
     }

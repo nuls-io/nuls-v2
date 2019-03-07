@@ -25,6 +25,8 @@
 
 package io.nuls.cmd.client;
 
+import io.nuls.api.provider.Result;
+import io.nuls.tools.constant.ErrorCode;
 import io.nuls.tools.data.StringUtils;
 import io.nuls.tools.parse.JSONUtils;
 import jline.console.ConsoleReader;
@@ -154,40 +156,65 @@ public class CommandHelper {
     }
 
     //
-//    /**
-//     * 得到用户输入的密码,允许不输入
-//     * @param prompt
-//     * @return
-//     */
-//    public static String getPwdOptional(String prompt) {
-//        if (StringUtils.isBlank(prompt)) {
-//            prompt = "Please enter the password (password is between 8 and 20 inclusive of numbers and letters), " +
-//                    "If you do not want to set a password, return directly.\nEnter your password:";
-//        }
-//        System.out.print(prompt);
-//        ConsoleReader reader = null;
-//        try {
-//            reader = new ConsoleReader();
-//            String npwd = null;
-//            do {
-//                npwd = reader.readLine('*');
-//                if (!"".equals(npwd) && !StringUtils.validPassword(npwd)) {
-//                    System.out.print("Password invalid, password is between 8 and 20 inclusive of numbers and letters.\nEnter your password:");
-//                }
-//            } while (!"".equals(npwd) && !StringUtils.validPassword(npwd));
-//            return npwd;
-//        } catch (IOException e) {
-//            return null;
-//        } finally {
-//            try {
-//                if (!reader.delete()) {
-//                    reader.close();
-//                }
-//            } catch (IOException e) {
-//                e.printStackTrace();
-//            }
-//        }
-//    }
+    /**
+     * 得到用户输入的密码,允许不输入
+     * @param prompt
+     * @return
+     */
+    public static String getPwdOptional(String prompt) {
+        if (StringUtils.isBlank(prompt)) {
+            prompt = "Please enter the password (password is between 8 and 20 inclusive of numbers and letters), " +
+                    "If you do not want to set a password, return directly.\nEnter your password:";
+        }
+        System.out.print(prompt);
+        ConsoleReader reader = null;
+        try {
+            reader = new ConsoleReader();
+            String npwd = null;
+            do {
+                npwd = reader.readLine('*');
+                if (!"".equals(npwd) && !validPassword(npwd)) {
+                    System.out.print("Password invalid, password is between 8 and 20 inclusive of numbers and letters.\nEnter your password:");
+                }
+            } while (!"".equals(npwd) && !validPassword(npwd));
+            return npwd;
+        } catch (IOException e) {
+            return null;
+        } finally {
+            try {
+                if (!reader.delete()) {
+                    reader.close();
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+
+    /**
+     *  Check the difficulty of the password
+     *  length between 8 and 20, the combination of characters and numbers
+     *
+     * @return boolean
+     */
+    public static boolean validPassword(String password) {
+        if (StringUtils.isBlank(password)) {
+            return false;
+        }
+        if (password.length() < 8 || password.length() > 20) {
+            return false;
+        }
+        if (password.matches("(.*)[a-zA-z](.*)")
+                && password.matches("(.*)\\d+(.*)")
+                && !password.matches("(.*)\\s+(.*)")
+                && !password.matches("(.*)[\u4e00-\u9fa5\u3000]+(.*)")) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
 
     /**
      * 得到用户输入的密码,允许不输入
@@ -195,35 +222,12 @@ public class CommandHelper {
      *
      * @return
      */
-//    public static String getPwdOptional() {
-//        return getPwdOptional(null);
-//    }
+    public static String getPwdOptional() {
+        return getPwdOptional(null);
+    }
 
 
-//    public static Long getLongAmount(String arg) {
-//        Na na = null;
-//        try {
-//            na = Na.parseNuls(arg);
-//            return na.getValue();
-//        } catch (Exception e) {
-//            return null;
-//        }
-//    }
 
-//    public static String naToNuls(Object object) {
-//        if (null == object) {
-//            return null;
-//        }
-//        Long na = null;
-//        if (object instanceof Long) {
-//            na = (Long) object;
-//        } else if (object instanceof Integer) {
-//            na = ((Integer) object).longValue();
-//        } else {
-//            return null;
-//        }
-//        return (Na.valueOf(na)).toText();
-//    }
 
     public static String txTypeExplain(Integer type) {
         if (null == type) {
@@ -283,34 +287,35 @@ public class CommandHelper {
         }
     }
 
-//
-//    //    /**
-////     * 根据账户获取密码
-////     * 1.如果账户有密码, 则让用户输入密码
-////     * 2.如果账户没有设置密码, 直接返回
-////     *
-////     * @param address
-////     * @param restFul
-////     * @return RpcClientResult
-////     */
-//    public static RpcClientResult getPassword(String address, RestFulUtils restFul) {
-//        return getPassword(address, restFul, null);
+
+    //    /**
+//     * 根据账户获取密码
+//     * 1.如果账户有密码, 则让用户输入密码
+//     * 2.如果账户没有设置密码, 直接返回
+//     *
+//     * @param address
+//     * @param restFul
+//     * @return RpcClientResult
+//     */
+//    public static Result<String> getPassword(String address) {
+//        return getPassword(address, null);
 //    }
-//
-//    //    /**
-////     * 根据账户获取密码
-////     * 1.如果账户有密码, 则让用户输入密码
-////     * 2.如果账户没有设置密码, 直接返回
-////     *
-////     * @param address
-////     * @param restFul
-////     * @param prompt 自定义提示
-////     * @return RpcClientResult
-////     */
-//    public static RpcClientResult getPassword(String address, RestFulUtils restFul, String prompt) {
+
+    //    /**
+//     * 根据账户获取密码
+//     * 1.如果账户有密码, 则让用户输入密码
+//     * 2.如果账户没有设置密码, 直接返回
+//     *
+//     * @param address
+//     * @param restFul
+//     * @param prompt 自定义提示
+//     * @return RpcClientResult
+//     */
+//    public static Result getPassword(String address,  String prompt) {
 //        if (StringUtils.isBlank(address)) {
-//            return RpcClientResult.getFailed("address is wrong");
+//            return Result.fail(30002,ErrorCode.init("30002").getMsg());
 //        }
+//
 //        RpcClientResult result = restFul.get("/account/encrypted/" + address, null);
 //        if (result.isSuccess()) {
 //            RpcClientResult rpcClientResult = new RpcClientResult();
@@ -324,7 +329,7 @@ public class CommandHelper {
 //        return result;
 //
 //    }
-//
+
 //
 //    private static String getArgsJson() {
 //        String prompt = "Please enter the arguments according to the arguments structure(eg. \"a\",2,[\"c\",4],\"\",\"e\" or \"'a',2,['c',4],'','e'\")," +

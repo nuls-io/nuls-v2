@@ -6,8 +6,10 @@ import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.modulebootstrap.Module;
 import io.nuls.rpc.modulebootstrap.RpcModule;
 import io.nuls.rpc.modulebootstrap.RpcModuleState;
+import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
 import lombok.extern.slf4j.Slf4j;
+import org.junit.Before;
 
 /**
  * @Author: zhoulijun
@@ -18,7 +20,8 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class CmdClientModule extends RpcModule {
 
-    AccountService accountService = ServiceManager.get(AccountService.class);
+
+    @Autowired CommandHandler commandHandler;
 
     @Override
     public Module[] getDependencies() {
@@ -35,14 +38,13 @@ public class CmdClientModule extends RpcModule {
     @Override
     public boolean doStart() {
         log.info("cmd client start");
-        log.info(accountService.hello());
         return true;
     }
 
     @Override
     public RpcModuleState onDependenciesReady() {
         log.info("cmd client running");
-        CommandHandler.main();
+        commandHandler.start();
         return RpcModuleState.Running;
     }
 
