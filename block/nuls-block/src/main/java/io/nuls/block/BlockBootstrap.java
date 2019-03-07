@@ -98,7 +98,6 @@ public class BlockBootstrap extends RpcModule {
             BlockService service = SpringLiteContext.getBean(BlockService.class);
             for (Integer chainId : chainIds) {
                 //服务初始化
-                ContextManager.getContext(chainId).setSystemTransactionType(TransactionUtil.getSystemTypes(chainId));
                 service.init(chainId);
             }
         } catch (Exception e) {

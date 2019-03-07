@@ -23,6 +23,10 @@ public class TransactionService {
     @Autowired
     private MongoDBService mongoDBService;
 
+    public void initSelect(int chainId) {
+
+    }
+
     public void saveTxList(int chainId, List<TransactionInfo> txList) {
         if (txList.isEmpty()) {
             return;

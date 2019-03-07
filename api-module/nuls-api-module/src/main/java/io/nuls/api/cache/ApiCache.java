@@ -1,6 +1,5 @@
 package io.nuls.api.cache;
 
-import io.nuls.api.model.data.Alias;
 import io.nuls.api.model.po.db.*;
 import io.nuls.base.data.BlockHeader;
 import lombok.Data;
@@ -54,14 +53,6 @@ public class ApiCache {
 
     public AliasInfo getAlias(String key) {
         return aliasMap.get(key);
-    }
-
-    public void setBestHeader(BlockHeader bestHeader) {
-        this.bestHeader = bestHeader;
-    }
-
-    public BlockHeader getBestHeader() {
-        return this.bestHeader;
     }
 
 }

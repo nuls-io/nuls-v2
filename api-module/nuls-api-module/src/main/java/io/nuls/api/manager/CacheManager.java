@@ -22,9 +22,10 @@ public class CacheManager {
         return apiCacheMap.get(chainID);
     }
 
-    public static void initCache(int chainId) {
+    public static void initCache(ChainInfo chainInfo) {
         ApiCache apiCache = new ApiCache();
-        apiCacheMap.put(chainId, apiCache);
+        apiCache.setChainInfo(chainInfo);
+        apiCacheMap.put(chainInfo.getChainId(), apiCache);
     }
 
     public static void addChainInfo(ChainInfo chainInfo) {

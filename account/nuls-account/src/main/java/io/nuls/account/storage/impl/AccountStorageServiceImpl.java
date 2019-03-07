@@ -29,9 +29,8 @@ import io.nuls.account.constant.AccountErrorCode;
 import io.nuls.account.constant.AccountStorageConstant;
 import io.nuls.account.model.po.AccountPo;
 import io.nuls.account.storage.AccountStorageService;
-import io.nuls.tools.log.Log;
+import io.nuls.account.util.LoggerUtil;
 import io.nuls.base.data.Address;
-import io.nuls.db.constant.DBErrorCode;
 import io.nuls.db.service.RocksDBService;
 import io.nuls.tools.basic.InitializingBean;
 import io.nuls.tools.core.annotation.Service;
@@ -65,7 +64,7 @@ public class AccountStorageServiceImpl implements AccountStorageService, Initial
             }
             return RocksDBService.batchPut(AccountStorageConstant.DB_NAME_ACCOUNT, accountPoMap);
         } catch (Exception e) {
-            Log.error(e.getMessage());
+            LoggerUtil.logger.error(e.getMessage());
             throw new NulsRuntimeException(AccountErrorCode.DB_SAVE_BATCH_ERROR);
         }
     }
@@ -75,7 +74,7 @@ public class AccountStorageServiceImpl implements AccountStorageService, Initial
         try {
             return RocksDBService.put(AccountStorageConstant.DB_NAME_ACCOUNT, account.getAddressObj().getAddressBytes(), account.serialize());
         } catch (Exception e) {
-            Log.error(e.getMessage());
+            LoggerUtil.logger.error(e.getMessage());
             throw new NulsRuntimeException(AccountErrorCode.DB_SAVE_BATCH_ERROR);
         }
     }
@@ -88,7 +87,7 @@ public class AccountStorageServiceImpl implements AccountStorageService, Initial
         try {
             return RocksDBService.delete(AccountStorageConstant.DB_NAME_ACCOUNT, address.getAddressBytes());
         } catch (Exception e) {
-            Log.error(e.getMessage());
+            LoggerUtil.logger.error(e.getMessage());
             throw new NulsRuntimeException(AccountErrorCode.DB_SAVE_ERROR);
         }
     }
@@ -107,7 +106,7 @@ public class AccountStorageServiceImpl implements AccountStorageService, Initial
                 }
             }
         } catch (Exception e) {
-            Log.error(e.getMessage());
+            LoggerUtil.logger.error(e.getMessage());
             throw new NulsRuntimeException(AccountErrorCode.DB_QUERY_ERROR);
         }
         return accountPoList;
@@ -124,7 +123,7 @@ public class AccountStorageServiceImpl implements AccountStorageService, Initial
             //将byte数组反序列化为AccountPo返回
             accountPo.parse(accountBytes, 0);
         } catch (Exception e) {
-            Log.error(e.getMessage());
+            LoggerUtil.logger.error(e.getMessage());
             throw new NulsRuntimeException(AccountErrorCode.DB_QUERY_ERROR);
         }
         return accountPo;
@@ -147,7 +146,7 @@ public class AccountStorageServiceImpl implements AccountStorageService, Initial
             //更新账户数据
             return RocksDBService.put(AccountStorageConstant.DB_NAME_ACCOUNT, po.getAddressObj().getAddressBytes(), po.serialize());
         } catch (Exception e) {
-            Log.error(e.getMessage());
+            LoggerUtil.logger.error(e.getMessage());
             throw new NulsRuntimeException(AccountErrorCode.DB_UPDATE_ERROR);
         }
     }
