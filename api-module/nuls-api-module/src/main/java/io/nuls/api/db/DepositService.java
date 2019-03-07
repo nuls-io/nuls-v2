@@ -65,4 +65,16 @@ public class DepositService {
         }
         mongoDBService.bulkWrite(MongoTableConstant.DEPOSIT_TABLE + chainId, modelList);
     }
+
+    public List<DepositInfo> getDepositList(int chainId, long startHeight) {
+        Bson bson = Filters.and(Filters.lte("blockHeight", startHeight), Filters.eq("type", 0), Filters.or(Filters.eq("deleteHeight", 0), Filters.gt("deleteHeight", startHeight)));
+
+        List<Document> list = this.mongoDBService.query(MongoTableConstant.DEPOSIT_TABLE + chainId, bson);
+        List<DepositInfo> resultList = new ArrayList<>();
+        for (Document document : list) {
+            resultList.add(DocumentTransferTool.toInfo(document, "key", DepositInfo.class));
+        }
+
+        return resultList;
+    }
 }

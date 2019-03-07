@@ -14,7 +14,7 @@ import org.junit.Test;
 import java.math.BigInteger;
 import java.util.List;
 
-import static io.nuls.api.constant.Constant.DEFAULT_SCAN_PACKAGE;
+import static io.nuls.api.constant.ApiConstant.DEFAULT_SCAN_PACKAGE;
 
 public class MongoDBTest {
 

@@ -22,7 +22,7 @@
 
 package io.nuls.api.service.impl;
 
-import io.nuls.api.constant.Constant;
+import io.nuls.api.constant.ApiConstant;
 import io.nuls.api.model.po.config.ConfigBean;
 import io.nuls.api.service.ConfigStorageService;
 import io.nuls.db.model.Entry;
@@ -43,12 +43,12 @@ public class ConfigStorageServiceImpl implements ConfigStorageService {
         if (configBean == null) {
             return false;
         }
-        return RocksDBService.put(Constant.DB_MODULE_CONFIG, ByteUtils.intToBytes(chainID), ObjectUtils.objectToBytes(configBean));
+        return RocksDBService.put(ApiConstant.DB_MODULE_CONFIG, ByteUtils.intToBytes(chainID), ObjectUtils.objectToBytes(configBean));
     }
 
     @Override
     public ConfigBean get(int chainID) {
-        byte[] value = RocksDBService.get(Constant.DB_MODULE_CONFIG, ByteUtils.intToBytes(chainID));
+        byte[] value = RocksDBService.get(ApiConstant.DB_MODULE_CONFIG, ByteUtils.intToBytes(chainID));
         if (value == null) {
             return null;
         }
@@ -57,12 +57,12 @@ public class ConfigStorageServiceImpl implements ConfigStorageService {
 
     @Override
     public boolean delete(int chainID) throws Exception {
-        return RocksDBService.delete(Constant.DB_MODULE_CONFIG, ByteUtils.intToBytes(chainID));
+        return RocksDBService.delete(ApiConstant.DB_MODULE_CONFIG, ByteUtils.intToBytes(chainID));
     }
 
     @Override
     public Map<Integer, ConfigBean> getList() {
-        List<Entry<byte[], byte[]>> list = RocksDBService.entryList(Constant.DB_MODULE_CONFIG);
+        List<Entry<byte[], byte[]>> list = RocksDBService.entryList(ApiConstant.DB_MODULE_CONFIG);
         Map<Integer, ConfigBean> configBeanMap = new HashMap<>();
         for (Entry<byte[], byte[]> entry : list) {
             int key = ByteUtils.bytesToInt(entry.getKey());

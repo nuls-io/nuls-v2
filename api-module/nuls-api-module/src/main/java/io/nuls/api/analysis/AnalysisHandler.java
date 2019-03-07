@@ -1,7 +1,7 @@
 package io.nuls.api.analysis;
 
 import io.nuls.api.ApiContext;
-import io.nuls.api.constant.Constant;
+import io.nuls.api.constant.ApiConstant;
 import io.nuls.api.model.data.*;
 import io.nuls.api.model.po.db.*;
 import io.nuls.base.basic.AddressTool;
@@ -68,11 +68,11 @@ public class AnalysisHandler {
         List<TransactionInfo> txs = new ArrayList<>();
         for (int i = 0; i < txList.size(); i++) {
             TransactionInfo txInfo = toTransaction(txList.get(i));
-            if (txInfo.getType() == Constant.TX_TYPE_RED_PUNISH) {
+            if (txInfo.getType() == ApiConstant.TX_TYPE_RED_PUNISH) {
                 PunishLogInfo punishLog = (PunishLogInfo) txInfo.getTxData();
                 punishLog.setRoundIndex(blockHeader.getRoundIndex());
                 punishLog.setIndex(blockHeader.getPackingIndexOfRound());
-            } else if (txInfo.getType() == Constant.TX_TYPE_YELLOW_PUNISH) {
+            } else if (txInfo.getType() == ApiConstant.TX_TYPE_YELLOW_PUNISH) {
                 for (TxDataInfo txData : txInfo.getTxDataList()) {
                     PunishLogInfo punishLog = (PunishLogInfo) txData;
                     punishLog.setRoundIndex(blockHeader.getRoundIndex());
@@ -112,23 +112,23 @@ public class AnalysisHandler {
         }
 
 
-        if (info.getType() == Constant.TX_TYPE_YELLOW_PUNISH) {
+        if (info.getType() == ApiConstant.TX_TYPE_YELLOW_PUNISH) {
             info.setTxDataList(toYellowPunish(tx));
         } else {
             info.setTxData(toTxData(tx));
         }
 
         BigInteger value = BigInteger.ZERO;
-        if (info.getType() == Constant.TX_TYPE_COINBASE) {
+        if (info.getType() == ApiConstant.TX_TYPE_COINBASE) {
             if (info.getCoinTos() != null) {
                 for (CoinToInfo coinTo : info.getCoinTos()) {
                     value = value.add(coinTo.getAmount());
                 }
             }
-        } else if (info.getType() == Constant.TX_TYPE_TRANSFER ||
-                info.getType() == Constant.TX_TYPE_CALL_CONTRACT ||
-                info.getType() == Constant.TX_TYPE_CONTRACT_TRANSFER ||
-                info.getType() == Constant.TX_TYPE_DATA) {
+        } else if (info.getType() == ApiConstant.TX_TYPE_TRANSFER ||
+                info.getType() == ApiConstant.TX_TYPE_CALL_CONTRACT ||
+                info.getType() == ApiConstant.TX_TYPE_CONTRACT_TRANSFER ||
+                info.getType() == ApiConstant.TX_TYPE_DATA) {
             Set<String> addressSet = new HashSet<>();
             for (CoinFromInfo coinFrom : info.getCoinFroms()) {
                 addressSet.add(coinFrom.getAddress());
@@ -140,8 +140,8 @@ public class AnalysisHandler {
                     }
                 }
             }
-        } else if (info.getType() == Constant.TX_TYPE_ALIAS) {
-            value = Constant.ALIAS_AMOUNT;
+        } else if (info.getType() == ApiConstant.TX_TYPE_ALIAS) {
+            value = ApiConstant.ALIAS_AMOUNT;
         }
         info.setValue(value);
         return info;
@@ -185,19 +185,19 @@ public class AnalysisHandler {
 
 
     public static TxDataInfo toTxData(Transaction tx) throws NulsException {
-        if (tx.getType() == Constant.TX_TYPE_ALIAS) {
+        if (tx.getType() == ApiConstant.TX_TYPE_ALIAS) {
             return toAlias(tx);
-        } else if (tx.getType() == Constant.TX_TYPE_REGISTER_AGENT) {
+        } else if (tx.getType() == ApiConstant.TX_TYPE_REGISTER_AGENT) {
             return toAgent(tx);
-        } else if (tx.getType() == Constant.TX_TYPE_JOIN_CONSENSUS) {
+        } else if (tx.getType() == ApiConstant.TX_TYPE_JOIN_CONSENSUS) {
             return toDeposit(tx);
-        } else if (tx.getType() == Constant.TX_TYPE_CANCEL_DEPOSIT) {
+        } else if (tx.getType() == ApiConstant.TX_TYPE_CANCEL_DEPOSIT) {
             return toCancelDeposit(tx);
-        } else if (tx.getType() == Constant.TX_TYPE_STOP_AGENT) {
+        } else if (tx.getType() == ApiConstant.TX_TYPE_STOP_AGENT) {
             return toStopAgent(tx);
-        } else if (tx.getType() == Constant.TX_TYPE_RED_PUNISH) {
+        } else if (tx.getType() == ApiConstant.TX_TYPE_RED_PUNISH) {
             return toRedPublishLog(tx);
-        } else if (tx.getType() == Constant.TX_TYPE_CREATE_CONTRACT) {
+        } else if (tx.getType() == ApiConstant.TX_TYPE_CREATE_CONTRACT) {
         }
 
         return null;
@@ -252,7 +252,7 @@ public class AnalysisHandler {
         deposit.setTxHash(cancelDeposit.getJoinTxHash().getDigestHex());
         deposit.setFee(tx.getFee());
         deposit.setCreateTime(tx.getTime());
-        deposit.setType(Constant.CANCEL_CONSENSUS);
+        deposit.setType(ApiConstant.CANCEL_CONSENSUS);
         return deposit;
     }
 
@@ -275,7 +275,7 @@ public class AnalysisHandler {
             log.setAddress(AddressTool.getStringAddressByBytes(address));
             log.setBlockHeight(tx.getBlockHeight());
             log.setTime(tx.getTime());
-            log.setType(Constant.PUBLISH_YELLOW);
+            log.setType(ApiConstant.PUBLISH_YELLOW);
             log.setReason("No packaged blocks");
             logList.add(log);
         }
@@ -288,13 +288,13 @@ public class AnalysisHandler {
 
         PunishLogInfo punishLog = new PunishLogInfo();
         punishLog.setTxHash(tx.getHash().getDigestHex());
-        punishLog.setType(Constant.PUTLISH_RED);
+        punishLog.setType(ApiConstant.PUTLISH_RED);
         punishLog.setAddress(AddressTool.getStringAddressByBytes(data.getAddress()));
-        if (data.getReasonCode() == Constant.TRY_FORK) {
+        if (data.getReasonCode() == ApiConstant.TRY_FORK) {
             punishLog.setReason("Trying to bifurcate many times");
-        } else if (data.getReasonCode() == Constant.DOUBLE_SPEND) {
+        } else if (data.getReasonCode() == ApiConstant.DOUBLE_SPEND) {
             punishLog.setReason("double-send tx in the block");
-        } else if (data.getReasonCode() == Constant.TOO_MUCH_YELLOW_PUNISH) {
+        } else if (data.getReasonCode() == ApiConstant.TOO_MUCH_YELLOW_PUNISH) {
             punishLog.setReason("too much yellow publish");
         }
         punishLog.setBlockHeight(tx.getBlockHeight());

@@ -40,6 +40,7 @@ public class DBTableService {
         ledgerService.initCache();
         aliasService.initCache();
         agentService.initCache();
+
     }
 
     public void addDefaultChain() {
@@ -70,6 +71,8 @@ public class DBTableService {
         mongoDBService.createCollection(MongoTableConstant.TX_RELATION_TABLE + chainId);
         mongoDBService.createCollection(MongoTableConstant.TX_TABLE + chainId);
         mongoDBService.createCollection(MongoTableConstant.PUNISH_TABLE + chainId);
+        mongoDBService.createCollection(MongoTableConstant.ROUND_TABLE + chainId);
+        mongoDBService.createCollection(MongoTableConstant.ROUND_ITEM_TABLE + chainId);
     }
 
     private void initTablesIndex(int chainId) {

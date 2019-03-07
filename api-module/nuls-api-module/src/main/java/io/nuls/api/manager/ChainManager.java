@@ -1,6 +1,5 @@
 package io.nuls.api.manager;
 
-import io.nuls.api.cache.ApiCache;
 import io.nuls.api.db.MongoDBService;
 import io.nuls.api.model.po.config.ConfigBean;
 import io.nuls.tools.core.annotation.Component;
@@ -15,7 +14,6 @@ import java.util.concurrent.ConcurrentHashMap;
  * @version 1.0
  * @date 19-2-26 下午1:43
  */
-@Component
 public class ChainManager {
 
     /**

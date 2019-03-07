@@ -1,7 +1,7 @@
 package io.nuls.api.analysis;
 
+import io.nuls.api.constant.ApiConstant;
 import io.nuls.api.constant.CommandConstant;
-import io.nuls.api.constant.Constant;
 import io.nuls.api.model.po.db.BlockInfo;
 import io.nuls.api.rpc.RpcCall;
 import io.nuls.base.basic.NulsByteBuffer;
@@ -17,7 +17,7 @@ import java.util.Map;
 public class WalletRpcHandler {
 
     public static BlockInfo getBlockInfo(int chainID, long height) {
-        Map<String, Object> params = new HashMap<>(Constant.INIT_CAPACITY_8);
+        Map<String, Object> params = new HashMap<>(ApiConstant.INIT_CAPACITY_8);
         params.put(Constants.VERSION_KEY_STR, "1.0");
         params.put("chainId", chainID);
         params.put("height", height);
