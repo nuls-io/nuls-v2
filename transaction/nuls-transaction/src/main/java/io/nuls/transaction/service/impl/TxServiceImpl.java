@@ -969,6 +969,10 @@ public class TxServiceImpl implements TxService {
         Iterator<Map.Entry<TxRegister, List<String>>> it = moduleVerifyMap.entrySet().iterator();
         while (it.hasNext()) {
             Map.Entry<TxRegister, List<String>> entry = it.next();
+            if (entry.getValue().size() == 0){
+                //当递归中途模块交易被过滤完后会造成list为空,这时不需要再调用模块同意验证器
+                continue;
+            }
             List<String> txhashList = null;
             if (entry.getKey().getModuleCode().equals(ModuleE.TX.abbr)) {
                 //模块统一验证,交易模块,不用调RPC接口

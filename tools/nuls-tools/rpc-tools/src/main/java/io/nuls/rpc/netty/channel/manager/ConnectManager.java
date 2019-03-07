@@ -635,9 +635,9 @@ public class ConnectManager {
         if(ROLE_CHANNEL_MAP.containsKey(role)){
             return ROLE_CHANNEL_MAP.get(role);
         }
-        SocketChannel channel = createConnect(url);
         Log.info("当前已建立在连接："+ConnectManager.ROLE_CHANNEL_MAP);
         Log.info("当前正在主动建立的连接："+role);
+        SocketChannel channel = createConnect(url);
         ROLE_CHANNEL_MAP.put(role,channel);
         createConnectData(channel);
         return channel;
