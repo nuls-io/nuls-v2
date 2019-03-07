@@ -607,6 +607,8 @@ public class ConnectManager {
             throw new Exception("Connection module not started");
         }
         SocketChannel channel = createConnect(url);
+        Log.info("当前已建立在连接："+ConnectManager.ROLE_CHANNEL_MAP);
+        Log.info("当前正在主动建立的连接："+role);
         ROLE_CHANNEL_MAP.put(role,channel);
         createConnectData(channel);
         return channel;
@@ -634,6 +636,8 @@ public class ConnectManager {
             return ROLE_CHANNEL_MAP.get(role);
         }
         SocketChannel channel = createConnect(url);
+        Log.info("当前已建立在连接："+ConnectManager.ROLE_CHANNEL_MAP);
+        Log.info("当前正在主动建立的连接："+role);
         ROLE_CHANNEL_MAP.put(role,channel);
         createConnectData(channel);
         return channel;
