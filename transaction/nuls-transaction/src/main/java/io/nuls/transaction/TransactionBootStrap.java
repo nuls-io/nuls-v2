@@ -54,12 +54,10 @@ import org.apache.ibatis.io.Resources;
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.apache.ibatis.session.SqlSessionFactoryBuilder;
 
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.reflect.Field;
-import java.net.URL;
 import java.nio.charset.Charset;
 import java.util.Map;
 import java.util.Properties;
@@ -83,7 +81,7 @@ public class TransactionBootStrap extends RpcModule {
     @Override
     public void init() {
         try {
-            updateDataPath();
+//            updateDataPath();
 //            //初始化系统参数
             initSys();
             //初始化数据库配置文件
@@ -181,7 +179,11 @@ public class TransactionBootStrap extends RpcModule {
 
             //todo 单个节点跑多链的时候 h2是否需要通过chain来区分数据库(如何分？)，待确认！！
             String resource = "mybatis/mybatis-config.xml";
-            SqlSessionFactory sqlSessionFactory = new SqlSessionFactoryBuilder().build(Resources.getResourceAsReader(resource), "druid");
+            Properties prop =  ConfigLoader.loadProperties("db_config.properties");
+            String currentPath = DBUtils.genAbsolutePath("../../../../data/tx");
+            LoggerUtil.Log.debug("#########################:" + currentPath);
+            prop.setProperty("url", "jdbc:h2:file:" + currentPath + "/h2/nuls;LOG=2;DB_CLOSE_DELAY=-1;TRACE_LEVEL_SYSTEM_OUT=1;DATABASE_TO_UPPER=FALSE;MV_STORE=false;COMPRESS=true;MAX_COMPACT_TIME=5000");
+            SqlSessionFactory sqlSessionFactory = new SqlSessionFactoryBuilder().build(Resources.getResourceAsReader(resource), "druid",prop);
             MybatisDbHelper.setSqlSessionFactory(sqlSessionFactory);
         } catch (Exception e) {
             LoggerUtil.Log.error(e);
@@ -243,10 +245,11 @@ public class TransactionBootStrap extends RpcModule {
         InputStream in = null;
         OutputStream out = null;
         try {
-            URL url = TransactionBootStrap.class.getClassLoader().getResource(filePath);
-            in = TransactionBootStrap.class.getClassLoader().getResourceAsStream(filePath);
-            pps.load(in);
-            out = new FileOutputStream(url.getPath());
+//            URL url = TransactionBootStrap.class.getClassLoader().getResource(filePath);
+//            in = TransactionBootStrap.class.getClassLoader().getResourceAsStream(filePath);
+//            pps.load(in);
+//            out = new FileOutputStream(url.getPath());  pps = ConfigLoader.loadProperties(filePath);
+            pps = ConfigLoader.loadProperties(filePath);
             String currentPath = DBUtils.genAbsolutePath("../../../../data/tx");
             LoggerUtil.Log.debug("#########################:" + currentPath);
             pps.setProperty("url", "jdbc:h2:file:" + currentPath + "/h2/nuls;LOG=2;DB_CLOSE_DELAY=-1;TRACE_LEVEL_SYSTEM_OUT=1;DATABASE_TO_UPPER=FALSE;MV_STORE=false;COMPRESS=true;MAX_COMPACT_TIME=5000");
