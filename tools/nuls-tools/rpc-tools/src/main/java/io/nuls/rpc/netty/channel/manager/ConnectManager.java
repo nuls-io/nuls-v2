@@ -28,6 +28,8 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * 链接管理类
@@ -36,6 +38,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
  * 2019/2/21
  * */
 public class ConnectManager {
+    private static final Lock cache_lock = new ReentrantLock();
     /**
      * 本模块是否可以启动服务（所依赖模块是否可以连接）
      * Can this module start the service? (Can the dependent modules be connected?)
@@ -606,11 +609,8 @@ public class ConnectManager {
         if(StringUtils.isBlank(url)){
             throw new Exception("Connection module not started");
         }
-        SocketChannel channel = createConnect(url);
-        Log.info("当前已建立在连接："+ConnectManager.ROLE_CHANNEL_MAP);
-        Log.info("当前正在主动建立的连接："+role);
-        ROLE_CHANNEL_MAP.put(role,channel);
-        createConnectData(channel);
+        Channel channel = createConnect(url);
+        channel = cacheConnect(role,channel,true);
         return channel;
     }
 
@@ -635,21 +635,18 @@ public class ConnectManager {
         if(ROLE_CHANNEL_MAP.containsKey(role)){
             return ROLE_CHANNEL_MAP.get(role);
         }
-        Log.info("当前已建立在连接："+ConnectManager.ROLE_CHANNEL_MAP);
-        Log.info("当前正在主动建立的连接："+role);
-        SocketChannel channel = createConnect(url);
-        ROLE_CHANNEL_MAP.put(role,channel);
-        createConnectData(channel);
+        Channel channel = createConnect(url);
+        channel = cacheConnect(role,channel,true);
         return channel;
     }
 
-    public static SocketChannel createConnect(String url)throws  Exception{
+    public static Channel createConnect(String url)throws  Exception{
          /*
         如 果是第一次连接，则先放入集合
         If it's the first connection, put it in the collection first
          */
 
-        SocketChannel channel = NettyClient.createConnect(url);
+        Channel channel = NettyClient.createConnect(url);
         long start = TimeService.currentTimeMillis();
         while (!channel.isOpen()) {
             if (TimeService.currentTimeMillis() - start > Constants.MILLIS_PER_SECOND * 5) {
@@ -660,8 +657,8 @@ public class ConnectManager {
         return channel;
     }
 
-    public static void createConnectData(SocketChannel channel){
-        ConnectData connectData = new ConnectData(channel);
+    public static void createConnectData(Channel channel){
+        ConnectData connectData = new ConnectData((SocketChannel) channel);
         /*
         连接创建成功之后，启动处理连接通道中传输信息所需线程
         After the connection is created successfully, start the threads needed
@@ -740,4 +737,23 @@ public class ConnectManager {
         sendMessage(getConnectByRole(moduleAbbr),JSONUtils.obj2json(message));
     }
 
+    /**
+     * 缓存链接信息
+     * Cache link information
+     * */
+    public static Channel cacheConnect(String role,Channel channel,boolean isSender){
+        cache_lock.lock();
+        try {
+            if(!ROLE_CHANNEL_MAP.containsKey(role)
+                    || (isSender && role.compareTo(LOCAL.getModuleAbbreviation())>0)
+                    || (!isSender && role.compareTo(LOCAL.getModuleAbbreviation())<0)){
+                ROLE_CHANNEL_MAP.put(role,channel);
+                createConnectData(channel);
+                return channel;
+            }
+            return ROLE_CHANNEL_MAP.get(role);
+        }finally {
+            cache_lock.unlock();
+        }
+    }
 }
