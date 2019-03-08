@@ -18,11 +18,9 @@ import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.data.StringUtils;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.log.Log;
+import io.nuls.tools.parse.ConfigLoader;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * 公共远程方法调用工具类
@@ -113,10 +111,12 @@ public class CallMethodUtils {
      */
     public static void blockSignature(int chainId, String address, BlockHeader header) throws NulsException {
         try {
+            Properties properties = ConfigLoader.loadProperties(ConsensusConstant.PASSWORD_CONFIG_NAME);
+            String password = properties.getProperty(ConsensusConstant.PASSWORD, ConsensusConstant.PASSWORD);
             Map<String, Object> callParams = new HashMap<>(4);
             callParams.put("chainId", chainId);
             callParams.put("address", address);
-            callParams.put("password", null);
+            callParams.put("password", password);
             callParams.put("dataHex", HexUtil.encode(header.getHash().getDigestBytes()));
             Response signResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_signBlockDigest", callParams);
             if (!signResp.isSuccess()) {
