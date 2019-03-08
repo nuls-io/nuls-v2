@@ -45,7 +45,6 @@ public class AgentService {
         return agentInfo;
     }
 
-
     public AgentInfo getAgentByPackingAddress(int chainID, String packingAddress) {
         Collection<AgentInfo> agentInfos = CacheManager.getCache(chainID).getAgentMap().values();
         AgentInfo info = null;
@@ -92,6 +91,36 @@ public class AgentService {
             }
         }
         mongoDBService.bulkWrite(MongoTableConstant.AGENT_TABLE + chainID, modelList);
+    }
+
+    public List<AgentInfo> getAgentList(int chainId, long startHeight) {
+        ApiCache apiCache = CacheManager.getCache(chainId);
+        Collection<AgentInfo> agentInfos = apiCache.getAgentMap().values();
+        List<AgentInfo> resultList = new ArrayList<>();
+        for (AgentInfo agent : agentInfos) {
+            if (agent.getDeleteHash() != null && agent.getDeleteHeight() <= startHeight) {
+                continue;
+            }
+            if (agent.getBlockHeight() > startHeight) {
+                continue;
+            }
+            resultList.add(agent);
+        }
+
+//        Bson bson = Filters.and(Filters.lte("blockHeight", startHeight), Filters.or(Filters.eq("deleteHeight", 0), Filters.gt("deleteHeight", startHeight)));
+//
+//        List<Document> list = this.mongoDBService.query(MongoTableName.AGENT_INFO, bson);
+
+//        for (Document document : list) {
+//            AgentInfo agentInfo = DocumentTransferTool.toInfo(document, "txHash", AgentInfo.class);
+//            AliasInfo alias = aliasService.getAliasByAddress(agentInfo.getAgentAddress());
+//            if (alias != null) {
+//                agentInfo.setAgentAlias(alias.getAlias());
+//            }
+//            resultList.add(agentInfo);
+//        }
+
+        return resultList;
     }
 
 }

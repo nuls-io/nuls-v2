@@ -2,11 +2,8 @@ package io.nuls.api.db;
 
 
 import com.mongodb.client.model.Filters;
-import io.nuls.api.cache.ApiCache;
 import io.nuls.api.constant.MongoTableConstant;
 import io.nuls.api.manager.CacheManager;
-import io.nuls.api.manager.ChainManager;
-import io.nuls.api.model.po.db.AssetInfo;
 import io.nuls.api.model.po.db.ChainInfo;
 import io.nuls.api.model.po.db.SyncInfo;
 import io.nuls.api.utils.DocumentTransferTool;

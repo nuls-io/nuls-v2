@@ -28,6 +28,7 @@ package io.nuls.ledger.rpc.cmd;
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.data.Transaction;
 import io.nuls.ledger.service.TransactionService;
+import io.nuls.ledger.utils.LoggerUtil;
 import io.nuls.rpc.cmd.BaseCmd;
 import io.nuls.rpc.model.CmdAnnotation;
 import io.nuls.rpc.model.Parameter;
@@ -89,55 +90,6 @@ public class TransactionCmd extends BaseCmd {
         return tx;
     }
 
-    /**
-     * 确认与未确认交易提交
-     *
-     * @param params
-     * @return
-     */
-    @CmdAnnotation(cmd = "commitTx",
-            version = 1.0, scope = "private", minEvent = 0, minPeriod = 0,
-            description = "")
-    @Parameter(parameterName = "chainId", parameterType = "int")
-    @Parameter(parameterName = "txHexList", parameterType = "List")
-    @Parameter(parameterName = "blockHeight", parameterType = "long")
-    @Parameter(parameterName = "isConfirmTx", parameterType = "boolean")
-    public Response commitTx(Map params) {
-        Map<String, Object> rtData = new HashMap<>();
-        Integer chainId = (Integer) params.get("chainId");
-        List<String> txHexList = (List) params.get("txHexList");
-        boolean isConfirmTx = Boolean.valueOf(params.get("isConfirmTx").toString());
-        if (null == txHexList || 0 == txHexList.size()) {
-            return failed("txHexList is blank");
-        }
-        int value = 0;
-        List<Transaction> txList = new ArrayList<>();
-        Response parseResponse = parseTxs(txHexList, txList);
-        if (!parseResponse.isSuccess()) {
-            return parseResponse;
-        }
-        if (isConfirmTx) {
-            long blockHeight = Long.valueOf(params.get("blockHeight").toString());
-            if (transactionService.confirmBlockProcess(chainId, txList, blockHeight)) {
-                value = 1;
-            } else {
-                value = 0;
-            }
-        } else {
-            //未确认交易按单笔来提交
-            if (txList.size() != 1) {
-                value = 0;
-            } else {
-                if (transactionService.unConfirmTxProcess(chainId, txList.get(0))) {
-                    value = 1;
-                } else {
-                    value = 0;
-                }
-            }
-        }
-        rtData.put("value", value);
-        return success(rtData);
-    }
 
     /**
      * 未确认交易提交
@@ -154,8 +106,10 @@ public class TransactionCmd extends BaseCmd {
         Map<String, Object> rtData = new HashMap<>();
         Integer chainId = (Integer) params.get("chainId");
         String txHex = params.get("txHex").toString();
+        LoggerUtil.logger.debug("commitUnconfirmedTx chainId={},txHex={}", chainId, txHex);
         Transaction tx = parseTxs(txHex);
         if (null == tx) {
+            LoggerUtil.logger.error("txHex is invalid chainId={},txHex={}", chainId, txHex);
             return failed("txHex is invalid");
         }
         int value = 0;
@@ -165,7 +119,9 @@ public class TransactionCmd extends BaseCmd {
             value = 0;
         }
         rtData.put("value", value);
-        return success(rtData);
+        Response response = success(rtData);
+        LoggerUtil.logger.debug(" chainId={},txHex={},response={}", chainId, txHex, response);
+        return response;
     }
 
     /**
@@ -184,13 +140,17 @@ public class TransactionCmd extends BaseCmd {
         Map<String, Object> rtData = new HashMap<>();
         Integer chainId = (Integer) params.get("chainId");
         List<String> txHexList = (List) params.get("txHexList");
+        LoggerUtil.logger.debug("commitBlockTxs chainId={}", chainId, txHexList.size());
         if (null == txHexList || 0 == txHexList.size()) {
+            LoggerUtil.logger.error("txHexList is blank");
             return failed("txHexList is blank");
         }
+        LoggerUtil.logger.debug("commitBlockTxs txHexList={}", chainId, txHexList.size());
         int value = 0;
         List<Transaction> txList = new ArrayList<>();
         Response parseResponse = parseTxs(txHexList, txList);
         if (!parseResponse.isSuccess()) {
+            LoggerUtil.logger.debug("commitBlockTxs response={}", parseResponse);
             return parseResponse;
         }
         long blockHeight = Long.valueOf(params.get("blockHeight").toString());
@@ -200,61 +160,9 @@ public class TransactionCmd extends BaseCmd {
             value = 0;
         }
         rtData.put("value", value);
-        return success(rtData);
-    }
-
-    /**
-     * 逐笔回滚交易
-     *
-     * @param params
-     * @return
-     */
-    @CmdAnnotation(cmd = "rollBackConfirmTx",
-            version = 1.0, scope = "private", minEvent = 0, minPeriod = 0,
-            description = "")
-    @Parameter(parameterName = "chainId", parameterType = "int")
-    @Parameter(parameterName = "txHexList", parameterType = "List")
-    @Parameter(parameterName = "blockHeight", parameterType = "long")
-    @Parameter(parameterName = "isConfirmTx", parameterType = "boolean")
-    public Response rollBackConfirmTx(Map params) {
-        Map<String, Object> rtData = new HashMap<>();
-        int value = 0;
-        try {
-            Integer chainId = (Integer) params.get("chainId");
-            List<String> txHexList = (List) params.get("txHexList");
-            boolean isConfirmTx = Boolean.valueOf(params.get("isConfirmTx").toString());
-            if (null == txHexList || 0 == txHexList.size()) {
-                return failed("txHexList is blank");
-            }
-            List<Transaction> txList = new ArrayList<>();
-            Response parseResponse = parseTxs(txHexList, txList);
-            if (!parseResponse.isSuccess()) {
-                return parseResponse;
-            }
-            if (isConfirmTx) {
-                long blockHeight = Long.valueOf(params.get("blockHeight").toString());
-                if (transactionService.rollBackConfirmTxs(chainId, blockHeight)) {
-                    value = 1;
-                } else {
-                    value = 0;
-                }
-            } else {
-                //未确认交易按单笔来提交
-                if (txList.size() != 1) {
-                    value = 0;
-                } else {
-                    if (transactionService.rollBackUnconfirmTx(chainId, txList.get(0))) {
-                        value = 1;
-                    } else {
-                        value = 0;
-                    }
-                }
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        rtData.put("value", value);
-        return success(rtData);
+        Response response = success(rtData);
+        LoggerUtil.logger.debug("response={}", response);
+        return response;
     }
 
     /**
@@ -274,8 +182,10 @@ public class TransactionCmd extends BaseCmd {
         try {
             Integer chainId = (Integer) params.get("chainId");
             String txHex = params.get("txHex").toString();
+            LoggerUtil.logger.debug("rollBackUnconfirmTx chainId={},txHex={}", chainId, txHex);
             Transaction tx = parseTxs(txHex);
             if (null == tx) {
+                LoggerUtil.logger.debug("txHex is invalid chainId={}", chainId);
                 return failed("txHex is invalid");
             }
             if (transactionService.rollBackUnconfirmTx(chainId, tx)) {
@@ -287,7 +197,10 @@ public class TransactionCmd extends BaseCmd {
             e.printStackTrace();
         }
         rtData.put("value", value);
-        return success(rtData);
+        Response response = success(rtData);
+        LoggerUtil.logger.debug("response={}", response);
+        return response;
+
     }
 
 
@@ -308,15 +221,19 @@ public class TransactionCmd extends BaseCmd {
         try {
             Integer chainId = (Integer) params.get("chainId");
             long blockHeight = Long.valueOf(params.get("blockHeight").toString());
+            LoggerUtil.logger.debug("rollBackBlockTxs chainId={},blockHeight={}", chainId, blockHeight);
             if (transactionService.rollBackConfirmTxs(chainId, blockHeight)) {
                 value = 1;
             } else {
                 value = 0;
             }
         } catch (Exception e) {
+            LoggerUtil.logger.error(e);
             e.printStackTrace();
         }
         rtData.put("value", value);
-        return success(rtData);
+        Response response = success(rtData);
+        LoggerUtil.logger.debug("rollBackBlockTxs response={}", response);
+        return response;
     }
 }

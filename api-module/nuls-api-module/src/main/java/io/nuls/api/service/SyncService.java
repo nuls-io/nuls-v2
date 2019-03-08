@@ -1,8 +1,9 @@
 package io.nuls.api.service;
 
 
+import io.nuls.api.cache.ApiCache;
+import io.nuls.api.constant.ApiConstant;
 import io.nuls.api.constant.ApiErrorCode;
-import io.nuls.api.constant.Constant;
 import io.nuls.api.db.*;
 import io.nuls.api.manager.CacheManager;
 import io.nuls.api.model.po.db.*;
@@ -51,19 +52,12 @@ public class SyncService {
     private List<PunishLogInfo> punishLogList = new ArrayList<>();
 
 
-
-
-
     public SyncInfo getSyncInfo(int chainId) {
         return chainService.getSyncInfo(chainId);
     }
 
     public BlockHeaderInfo getBestBlockHeader(int chainId) {
-        SyncInfo syncInfo = chainService.getSyncInfo(chainId);
-        if (syncInfo == null) {
-            return null;
-        }
-        return blockService.getBlockHeader(chainId, syncInfo.getBestHeight());
+        return blockService.getBestBlockHeader(chainId);
     }
 
     public boolean syncNewBlock(int chainId, BlockInfo blockInfo) throws Exception {
@@ -73,7 +67,10 @@ public class SyncService {
         processTxs(chainId, blockInfo.getTxList());
         //保存数据
         save(chainId, blockInfo);
-        return false;
+
+        ApiCache apiCache = CacheManager.getCache(chainId);
+        apiCache.setBestHeader(blockInfo.getHeader());
+        return true;
     }
 
 
@@ -144,31 +141,31 @@ public class SyncService {
     private void processTxs(int chainId, List<TransactionInfo> txs) throws Exception {
         for (int i = 0; i < txs.size(); i++) {
             TransactionInfo tx = txs.get(i);
-            if (tx.getType() == Constant.TX_TYPE_COINBASE) {
+            if (tx.getType() == ApiConstant.TX_TYPE_COINBASE) {
                 processCoinBaseTx(chainId, tx);
-            } else if (tx.getType() == Constant.TX_TYPE_TRANSFER) {
+            } else if (tx.getType() == ApiConstant.TX_TYPE_TRANSFER) {
                 processTransferTx(chainId, tx);
-            } else if (tx.getType() == Constant.TX_TYPE_ALIAS) {
+            } else if (tx.getType() == ApiConstant.TX_TYPE_ALIAS) {
                 processAliasTx(chainId, tx);
-            } else if (tx.getType() == Constant.TX_TYPE_REGISTER_AGENT) {
+            } else if (tx.getType() == ApiConstant.TX_TYPE_REGISTER_AGENT) {
                 processCreateAgentTx(chainId, tx);
-            } else if (tx.getType() == Constant.TX_TYPE_JOIN_CONSENSUS) {
+            } else if (tx.getType() == ApiConstant.TX_TYPE_JOIN_CONSENSUS) {
                 processDepositTx(chainId, tx);
-            } else if (tx.getType() == Constant.TX_TYPE_CANCEL_DEPOSIT) {
+            } else if (tx.getType() == ApiConstant.TX_TYPE_CANCEL_DEPOSIT) {
                 processCancelDepositTx(chainId, tx);
-            } else if (tx.getType() == Constant.TX_TYPE_STOP_AGENT) {
+            } else if (tx.getType() == ApiConstant.TX_TYPE_STOP_AGENT) {
                 processStopAgentTx(chainId, tx);
-            } else if (tx.getType() == Constant.TX_TYPE_YELLOW_PUNISH) {
+            } else if (tx.getType() == ApiConstant.TX_TYPE_YELLOW_PUNISH) {
                 processYellowPunishTx(chainId, tx);
-            } else if (tx.getType() == Constant.TX_TYPE_RED_PUNISH) {
+            } else if (tx.getType() == ApiConstant.TX_TYPE_RED_PUNISH) {
                 processRedPunishTx(chainId, tx);
-            } else if (tx.getType() == Constant.TX_TYPE_CREATE_CONTRACT) {
+            } else if (tx.getType() == ApiConstant.TX_TYPE_CREATE_CONTRACT) {
                 //                processCreateContract(tx);
-            } else if (tx.getType() == Constant.TX_TYPE_CALL_CONTRACT) {
+            } else if (tx.getType() == ApiConstant.TX_TYPE_CALL_CONTRACT) {
                 //                processCallContract(tx);
-            } else if (tx.getType() == Constant.TX_TYPE_DELETE_CONTRACT) {
+            } else if (tx.getType() == ApiConstant.TX_TYPE_DELETE_CONTRACT) {
                 //                processDeleteContract(tx);
-            } else if (tx.getType() == Constant.TX_TYPE_CONTRACT_TRANSFER) {
+            } else if (tx.getType() == ApiConstant.TX_TYPE_CONTRACT_TRANSFER) {
                 //                processContractTransfer(tx);
             }
         }
@@ -315,7 +312,7 @@ public class SyncService {
         agentInfo = queryAgentInfo(chainId, agentInfo.getTxHash(), 1);
         agentInfo.setDeleteHash(tx.getHash());
         agentInfo.setDeleteHeight(tx.getHeight());
-        agentInfo.setStatus(Constant.STOP_AGENT);
+        agentInfo.setStatus(ApiConstant.STOP_AGENT);
         agentInfo.setNew(false);
 
         for (int i = 0; i < tx.getCoinTos().size(); i++) {
@@ -336,7 +333,7 @@ public class SyncService {
         for (DepositInfo depositInfo : depositInfos) {
             DepositInfo cancelDeposit = new DepositInfo();
             cancelDeposit.setNew(true);
-            cancelDeposit.setType(Constant.CANCEL_CONSENSUS);
+            cancelDeposit.setType(ApiConstant.CANCEL_CONSENSUS);
             cancelDeposit.copyInfoWithDeposit(depositInfo);
             cancelDeposit.setKey(tx.getHash() + depositInfo.getKey());
             cancelDeposit.setTxHash(tx.getHash());
@@ -388,7 +385,7 @@ public class SyncService {
         AgentInfo agentInfo = queryAgentInfo(chainId, redPunish.getAddress(), 2);
         agentInfo.setDeleteHash(tx.getHash());
         agentInfo.setDeleteHeight(tx.getHeight());
-        agentInfo.setStatus(Constant.STOP_AGENT);
+        agentInfo.setStatus(ApiConstant.STOP_AGENT);
         agentInfo.setNew(false);
 
         //根据节点找到委托列表
@@ -397,7 +394,7 @@ public class SyncService {
             for (DepositInfo depositInfo : depositInfos) {
                 DepositInfo cancelDeposit = new DepositInfo();
                 cancelDeposit.setNew(true);
-                cancelDeposit.setType(Constant.CANCEL_CONSENSUS);
+                cancelDeposit.setType(ApiConstant.CANCEL_CONSENSUS);
                 cancelDeposit.copyInfoWithDeposit(depositInfo);
                 cancelDeposit.setKey(tx.getHash() + depositInfo.getKey());
                 cancelDeposit.setTxHash(tx.getHash());

@@ -27,6 +27,7 @@ package io.nuls.ledger.rpc.cmd;
 
 import io.nuls.base.data.Transaction;
 import io.nuls.ledger.model.ValidateResult;
+import io.nuls.ledger.utils.LoggerUtil;
 import io.nuls.ledger.validator.CoinDataValidator;
 import io.nuls.rpc.cmd.BaseCmd;
 import io.nuls.rpc.model.CmdAnnotation;
@@ -47,9 +48,11 @@ import java.util.Map;
 public class ValidatorCmd extends BaseCmd {
     @Autowired
     CoinDataValidator coinDataValidator;
+
     /**
      * validate coin data
-     *进行nonce-hash校验，进行可用余额校验
+     * 进行nonce-hash校验，进行可用余额校验
+     *
      * @param params
      * @return
      */
@@ -62,23 +65,27 @@ public class ValidatorCmd extends BaseCmd {
         Integer chainId = (Integer) params.get("chainId");
         String txHex = (String) params.get("txHex");
         boolean isBatchValidate = Boolean.valueOf(params.get("isBatchValidate").toString());
+        LoggerUtil.logger.debug("chainId={},txHex={},isBatchValidate={}", chainId, txHex, isBatchValidate);
         Transaction tx = new Transaction();
+        Response response = null;
         try {
-            tx.parse(HexUtil.hexToByte(txHex),0);
-            if(isBatchValidate){
+            tx.parse(HexUtil.hexToByte(txHex), 0);
+            if (isBatchValidate) {
                 ValidateResult validateResult = coinDataValidator.bathValidatePerTx(chainId, tx);
-                return success(validateResult);
-            }else {
+                response = success(validateResult);
+            } else {
                 ValidateResult validateResult = coinDataValidator.validateCoinData(chainId, tx);
-                return success(validateResult);
+                response = success(validateResult);
             }
 
         } catch (NulsException e) {
             e.printStackTrace();
-            return failed(e.getErrorCode());
+            response = failed(e.getErrorCode());
         }
-
+        LoggerUtil.logger.debug("response={}",response);
+        return response;
     }
+
     /**
      * bathValidateBegin
      *
@@ -91,9 +98,11 @@ public class ValidatorCmd extends BaseCmd {
     @Parameter(parameterName = "chainId", parameterType = "int")
     public Response bathValidateBegin(Map params) {
         Integer chainId = (Integer) params.get("chainId");
+        LoggerUtil.logger.debug("chainId={} bathValidateBegin", chainId);
         coinDataValidator.beginBatchPerTxValidate(chainId);
-        Map<String,Object> rtData = new HashMap<>();
-        rtData.put("value",1);
+        Map<String, Object> rtData = new HashMap<>();
+        rtData.put("value", 1);
+        LoggerUtil.logger.debug("return={}", success(rtData));
         return success(rtData);
     }
 }

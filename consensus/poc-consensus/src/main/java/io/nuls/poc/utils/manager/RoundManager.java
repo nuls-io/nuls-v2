@@ -13,9 +13,6 @@ import io.nuls.poc.model.bo.tx.txdata.Deposit;
 import io.nuls.poc.model.po.PunishLogPo;
 import io.nuls.poc.utils.CallMethodUtils;
 import io.nuls.poc.utils.enumeration.PunishType;
-import io.nuls.rpc.model.ModuleE;
-import io.nuls.rpc.model.message.Response;
-import io.nuls.rpc.netty.processor.ResponseMessageProcessor;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.data.DateUtils;
 import io.nuls.tools.data.DoubleUtils;
@@ -360,8 +357,8 @@ public class RoundManager {
         round.setIndex(index);
         round.setStartTime(startTime);
         setMemberList(chain,round, startBlockHeader);
-        List<byte[]> packingAddressList = new ArrayList<>();
-        try {
+        List<byte[]> packingAddressList =CallMethodUtils.getEncryptedAddressList(chain);
+        /*try {
             Map<String,Object> params = new HashMap<>(2);
             params.put(ConsensusConstant.PARAM_CHAIN_ID,chain.getConfig().getChainId());
             Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr,"ac_getUnencryptedAddressList", params);
@@ -374,8 +371,8 @@ public class RoundManager {
         }catch (Exception e){
             chain.getLoggerMap().get(ConsensusConstant.CONSENSUS_LOGGER_NAME).error(e);
             return null;
-        }
-        round.calcLocalPacker(packingAddressList);
+        }*/
+        round.calcLocalPacker(packingAddressList,chain);
         chain.getLoggerMap().get(ConsensusConstant.CONSENSUS_LOGGER_NAME).debug("当前轮次为："+round.getIndex()+";当前轮次开始打包时间："+ DateUtils.convertDate(new Date(startTime)));
         chain.getLoggerMap().get(ConsensusConstant.CONSENSUS_LOGGER_NAME).debug("\ncalculation||index:{},startTime:{},startHeight:{},hash:{}\n" + round.toString() + "\n\n", index, startTime, startBlockHeader.getHeight(), startBlockHeader.getHash());
         return round;

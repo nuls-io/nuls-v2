@@ -1,5 +1,6 @@
 package io.nuls.poc.utils.manager;
 
+import io.nuls.base.data.BlockExtendsData;
 import io.nuls.base.data.BlockHeader;
 import io.nuls.poc.constant.ConsensusConstant;
 import io.nuls.poc.model.bo.Chain;
@@ -73,6 +74,25 @@ public class BlockManager {
      * @param blockHeader block header
      */
     public void addNewBlock(Chain chain, BlockHeader blockHeader) {
+        /*
+        如果新增区块有轮次变化，则删除最小轮次区块
+         */
+        BlockHeader newestHeader = chain.getNewestHeader();
+        BlockExtendsData newestExtendsData = new BlockExtendsData(newestHeader.getExtend());
+        BlockExtendsData receiveExtendsData = new BlockExtendsData(blockHeader.getExtend());
+        if(receiveExtendsData.getRoundIndex() > newestExtendsData.getRoundIndex()){
+            BlockExtendsData lastExtendsData = new BlockExtendsData(chain.getBlockHeaderList().get(0).getExtend());
+            long lastRoundIndex = lastExtendsData.getRoundIndex();
+            Iterator<BlockHeader> iterator = chain.getBlockHeaderList().iterator();
+            while (iterator.hasNext()){
+                lastExtendsData = new BlockExtendsData(iterator.next().getExtend());
+                if(lastExtendsData.getRoundIndex() == lastRoundIndex){
+                    iterator.remove();
+                }else if(lastExtendsData.getRoundIndex() > lastRoundIndex){
+                    break;
+                }
+            }
+        }
         chain.getBlockHeaderList().add(blockHeader);
         if (chain.getBlockHeaderList().size() > ConsensusConstant.INIT_BLOCK_HEADER_COUNT) {
             chain.getBlockHeaderList().remove(0);

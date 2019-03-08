@@ -37,8 +37,8 @@ import io.nuls.tools.core.ioc.SpringLiteContext;
 
 import java.util.List;
 
-import static io.nuls.api.constant.Constant.DEFAULT_SCAN_PACKAGE;
-import static io.nuls.api.constant.Constant.RPC_DEFAULT_SCAN_PACKAGE;
+import static io.nuls.api.constant.ApiConstant.DEFAULT_SCAN_PACKAGE;
+import static io.nuls.api.constant.ApiConstant.RPC_DEFAULT_SCAN_PACKAGE;
 import static io.nuls.api.utils.LoggerUtil.commonLog;
 
 /**
@@ -53,27 +53,28 @@ public class ApiModuleBootstrap {
 
     public static void main(String[] args) {
         Thread.currentThread().setName("api-module-main");
-        init();
-//        start();
+        try {
+            init();
+            start();
+        } catch (Exception e) {
+            e.printStackTrace();
+            commonLog.error("error occur when init, " + e.getMessage());
+        }
 //        loop();
     }
 
     /**
      * 初始化，完成后系统状态变更为{@link RunningStatusEnum#READY}
      */
-    private static void init() {
-        try {
-            //加载配置
-            ConfigLoader.load();
-            //扫描包路径io.nuls.api,初始化bean
-            springInit();
-            //初始化数据库相关
-            initDB();
-            initServer();
-        } catch (Exception e) {
-            e.printStackTrace();
-            commonLog.error("error occur when init, " + e.getMessage());
-        }
+    private static void init() throws Exception {
+        //加载配置
+        ConfigLoader.load();
+        //扫描包路径io.nuls.api,初始化bean
+        springInit();
+        //初始化数据库相关
+        initDB();
+        //初始化远程连接
+        initServer();
     }
 
 
@@ -100,7 +101,6 @@ public class ApiModuleBootstrap {
             tableService.initCache();
         }
     }
-
 
     private static void initServer() {
         try {

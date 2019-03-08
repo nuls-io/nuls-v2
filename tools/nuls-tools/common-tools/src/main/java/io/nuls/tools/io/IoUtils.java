@@ -12,6 +12,7 @@ import java.net.URL;
  */
 public class IoUtils {
     private static final int SIZE = 1024 * 8;
+
     /**
      * 读取远程文件字节流
      *
@@ -55,9 +56,18 @@ public class IoUtils {
      */
     public static String read(String path) throws Exception {
         ObjectUtils.canNotEmpty(path, "null parameter");
-        InputStream stream = IoUtils.class.getClassLoader().getResourceAsStream(path);
-        String string = readRealPath(stream);
-        return string;
+        InputStream stream = null;
+        try {
+            stream = IoUtils.class.getClassLoader().getResourceAsStream(path);
+            String string = readRealPath(stream);
+            return string;
+        } catch (Exception e) {
+            throw e;
+        } finally {
+            if (stream != null) {
+                stream.close();
+            }
+        }
     }
 
     /**
@@ -67,24 +77,32 @@ public class IoUtils {
      * @return 文件内容
      */
     private static String readRealPath(InputStream stream) throws Exception {
-        BufferedReader br = new BufferedReader(new InputStreamReader(stream));
-        StringBuilder str = new StringBuilder();
-        String line;
+        InputStreamReader inReader = null;
+        BufferedReader br = null;
         try {
+            inReader = new InputStreamReader(stream);
+            br = new BufferedReader(inReader);
+            StringBuilder str = new StringBuilder();
+            String line;
             while ((line = br.readLine()) != null) {
                 str.append(line.trim());
             }
+            return str.toString();
         } catch (IOException e) {
             Log.error(e.getMessage());
-            throw new Exception(e);
+            throw e;
         } finally {
             try {
-                br.close();
-            } catch (IOException e) {
+                if (br != null) {
+                    br.close();
+                }
+                if (inReader != null) {
+                    inReader.close();
+                }
+            } catch (Exception e) {
                 Log.error(e.getMessage());
             }
         }
-        return str.toString();
     }
 
     /**
