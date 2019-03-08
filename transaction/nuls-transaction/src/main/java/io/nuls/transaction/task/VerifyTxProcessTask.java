@@ -1,23 +1,19 @@
 package io.nuls.transaction.task;
 
-import io.nuls.base.basic.AddressTool;
-import io.nuls.base.data.CoinData;
-import io.nuls.base.data.CoinFrom;
 import io.nuls.base.data.Transaction;
 import io.nuls.tools.core.ioc.SpringLiteContext;
-import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.transaction.cache.PackablePool;
 import io.nuls.transaction.constant.TxConstant;
-import io.nuls.transaction.storage.h2.TransactionH2Service;
-import io.nuls.transaction.storage.rocksdb.UnconfirmedTxStorageService;
-import io.nuls.transaction.storage.rocksdb.UnverifiedTxStorageService;
 import io.nuls.transaction.manager.TransactionManager;
 import io.nuls.transaction.model.bo.Chain;
 import io.nuls.transaction.model.bo.VerifyTxResult;
 import io.nuls.transaction.rpc.call.LedgerCall;
 import io.nuls.transaction.rpc.call.NetworkCall;
 import io.nuls.transaction.service.TxService;
+import io.nuls.transaction.storage.h2.TransactionH2Service;
+import io.nuls.transaction.storage.rocksdb.UnconfirmedTxStorageService;
+import io.nuls.transaction.storage.rocksdb.UnverifiedTxStorageService;
 import io.nuls.transaction.utils.TransactionTimeComparator;
 import io.nuls.transaction.utils.TxUtil;
 
@@ -50,8 +46,6 @@ public class VerifyTxProcessTask implements Runnable {
         this.chain = chain;
     }
 
-    int count = 0;
-    int size = 0;
 
     @Override
     public void run() {
@@ -66,7 +60,6 @@ public class VerifyTxProcessTask implements Runnable {
         } catch (Exception e) {
             chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).error(e);
         }
-//        System.out.println("count: " + count + " , size : " + size + " , orphan size : " + orphanTxList.size());
     }
 
     private void doTask(Chain chain){
@@ -76,21 +69,14 @@ public class VerifyTxProcessTask implements Runnable {
 
         Transaction tx = null;
         while ((tx = unverifiedTxStorageService.pollTx(chain)) != null && orphanTxList.size() < TxConstant.ORPHAN_CONTAINER_MAX_SIZE) {
-            size++;
             processTx(chain, tx, false);
-//            System.out.println("count: " + count + " , size : " + size + " , orphan size : " + orphanTxList.size());
         }
     }
 
     private boolean processTx(Chain chain, Transaction tx, boolean isOrphanTx){
         try {
-            chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("Process tx [VerifyTxProcessTask] type:[{}], txhash:{}, ", tx.getType(), tx.getHash());
-            CoinData coinData = TxUtil.getCoinData(tx);
-            for(CoinFrom coinFrom : coinData.getFrom()){
-                chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug(" address:{}, nonce:{}, ", AddressTool.getChainIdByAddress(coinFrom.getAddress()), HexUtil.encode(coinFrom.getNonce()));
-            }
-            chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("");
-
+            chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("Process tx start......");
+            TxUtil.txInformationDebugPrint(chain, tx, chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS));
             int chainId = chain.getChainId();
             boolean rs = transactionManager.verify(chain, tx);
             //todo 跨链交易单独处理, 是否需要进行跨链验证？
@@ -105,7 +91,7 @@ public class VerifyTxProcessTask implements Runnable {
             }
             VerifyTxResult verifyTxResult = LedgerCall.verifyCoinData(chain, tx, false);
             if(verifyTxResult.success()){
-                chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("Task,节点是否是打包节点: {}, 判断交易是否进入待打包队列", chain.getPackaging().get());
+                chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("Task-Packaging 判断交易是否进入待打包队列,节点是否是打包节点: {}", chain.getPackaging().get());
                 if(chain.getPackaging().get()) {
                     //当节点是出块节点时, 才将交易放入待打包队列
                     packablePool.add(chain, tx, false);
@@ -114,19 +100,21 @@ public class VerifyTxProcessTask implements Runnable {
                 unconfirmedTxStorageService.putTx(chainId, tx);
                 //保存到h2数据库
                 transactionH2Service.saveTxs(TxUtil.tx2PO(tx));
-                TxUtil.txInformationDebugPrint(chain, tx, chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS));
                 //调账本记录未确认交易
                 LedgerCall.commitUnconfirmedTx(chain, tx.hex());
                 //广播交易hash
                 NetworkCall.broadcastTxHash(chain.getChainId(),tx.getHash());
-                count++;
+                chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("Process tx success..");
+                chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("");
                 return true;
             }
             chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("");
             chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("-- verifyCoinData fail ----------");
-            chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("*** Debug *** [VerifyTxProcessTask] " +
-                    "coinData not success - code: {}, - reason:{}, type:{} - txhash:{}", verifyTxResult.getCode(),  verifyTxResult.getDesc(), tx.getType(), tx.getHash().getDigestHex());
+            chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug(
+                    "coinData not success - code: {}, - reason:{}, type:{} - txhash:{}",
+                    verifyTxResult.getCode(),  verifyTxResult.getDesc(), tx.getType(), tx.getHash().getDigestHex());
             chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("---------------------------------");
+            chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("Process tx fail..");
             chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("");
             if(verifyTxResult.getCode() == VerifyTxResult.ORPHAN && !isOrphanTx){
                 processOrphanTx(tx);
