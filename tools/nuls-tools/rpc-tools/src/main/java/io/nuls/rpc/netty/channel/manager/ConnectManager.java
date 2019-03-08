@@ -679,6 +679,7 @@ public class ConnectManager {
      * Stop or disconnect a connection
      */
     public static void disConnect(SocketChannel channel) {
+        boolean isCached = false;
         String role = "";
         Iterator<Map.Entry<String, Channel>> entries = ROLE_CHANNEL_MAP.entrySet().iterator();
         while (entries.hasNext()) {
@@ -686,8 +687,12 @@ public class ConnectManager {
             if (channel.equals(entry.getValue())) {
                 role = entry.getKey();
                 entries.remove();
+                isCached = true;
                 break;
             }
+        }
+        if(!isCached){
+            return;
         }
         ConnectData connectData = CHANNEL_DATA_MAP.remove(channel);
         connectData.setConnected(false);
