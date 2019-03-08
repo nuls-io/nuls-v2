@@ -679,7 +679,9 @@ public class ConnectManager {
      * Stop or disconnect a connection
      */
     public static void disConnect(SocketChannel channel) {
-        boolean isCached = false;
+        if(!ROLE_CHANNEL_MAP.values().contains(channel)){
+            return;
+        }
         String role = "";
         Iterator<Map.Entry<String, Channel>> entries = ROLE_CHANNEL_MAP.entrySet().iterator();
         while (entries.hasNext()) {
@@ -687,19 +689,12 @@ public class ConnectManager {
             if (channel.equals(entry.getValue())) {
                 role = entry.getKey();
                 entries.remove();
-                isCached = true;
                 break;
             }
-        }
-        if(!isCached){
-            return;
         }
         ConnectData connectData = CHANNEL_DATA_MAP.remove(channel);
         connectData.setConnected(false);
         connectData.getThreadPool().shutdown();
-
-        ROLE_MAP.remove(role);
-        Log.info(role + "模块断开连接，当前在线模块列表" + ROLE_MAP);
 
         for (Map.Entry<String, Channel> entry : MSG_ID_KEY_CHANNEL_MAP.entrySet()) {
             if (channel.equals(entry.getValue())) {
