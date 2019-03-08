@@ -82,6 +82,7 @@ public class RepositoryImpl implements Repository, InitDB, InitializingBean {
     @Override
     public void updateAccountState(byte[] key, AccountState nowAccountState) throws Exception {
         //update account
+        LoggerUtil.logger.debug("updateAccountState hash={},nonce={},UnconfirmedNoncesNum={}",nowAccountState.getTxHash(),nowAccountState.getNonce(),nowAccountState.getUnconfirmedNonces().size());
         LoggerUtil.logger.debug("updateAccountState address={},addressChainId={},assetChainId={},assetId={},getAvailableAmount={}," +
                         "getFreezeTotal={},getUnconfirmedAmount={},getUnconfirmedFreezeAmount={}",
                 nowAccountState.getAddress(),nowAccountState.getAddressChainId(),nowAccountState.getAssetChainId(),nowAccountState.getAssetId(),
