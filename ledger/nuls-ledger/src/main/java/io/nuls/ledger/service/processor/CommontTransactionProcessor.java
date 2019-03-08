@@ -25,12 +25,16 @@
  */
 package io.nuls.ledger.service.processor;
 
+import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.CoinFrom;
 import io.nuls.base.data.CoinTo;
 import io.nuls.ledger.model.po.AccountState;
 import io.nuls.ledger.service.AccountStateService;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
+import io.nuls.tools.crypto.HexUtil;
+
+import static io.nuls.ledger.utils.LoggerUtil.logger;
 
 /**
  * 普通交易处理
@@ -44,14 +48,16 @@ public class CommontTransactionProcessor implements TxProcessor {
 
 
     @Override
-    public boolean processFromCoinData(CoinFrom coin,String nonce,String hash,  AccountState accountState) {
+    public boolean processFromCoinData(CoinFrom coin, String nonce, String hash, AccountState accountState) {
+        logger.debug("processFromCoinData address={},amount={},oldNonce={},updateNonce={},hash={} ", AddressTool.getStringAddressByBytes(coin.getAddress()), coin.getAmount(), HexUtil.encode(coin.getNonce()), nonce, hash);
         accountState.addTotalFromAmount(coin.getAmount());
         accountState.setNonce(nonce);
         return true;
     }
 
     @Override
-    public boolean processToCoinData(CoinTo coin,String nonce,String hash,  AccountState accountState) {
+    public boolean processToCoinData(CoinTo coin, String nonce, String hash, AccountState accountState) {
+        logger.debug("processToCoinData address={},amount={},lockedTime={},hash={} ", AddressTool.getStringAddressByBytes(coin.getAddress()), coin.getAmount(), coin.getLockTime(), hash);
         accountState.addTotalToAmount(coin.getAmount());
         return true;
     }

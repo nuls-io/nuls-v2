@@ -140,12 +140,12 @@ public class TransactionCmd extends BaseCmd {
         Map<String, Object> rtData = new HashMap<>();
         Integer chainId = (Integer) params.get("chainId");
         List<String> txHexList = (List) params.get("txHexList");
-        LoggerUtil.logger.debug("commitBlockTxs chainId={}", chainId, txHexList.size());
+        LoggerUtil.logger.debug("commitBlockTxs chainId={}", chainId);
         if (null == txHexList || 0 == txHexList.size()) {
             LoggerUtil.logger.error("txHexList is blank");
             return failed("txHexList is blank");
         }
-        LoggerUtil.logger.debug("commitBlockTxs txHexList={}", chainId, txHexList.size());
+        LoggerUtil.logger.debug("commitBlockTxs txHexList={}",txHexList.size());
         int value = 0;
         List<Transaction> txList = new ArrayList<>();
         Response parseResponse = parseTxs(txHexList, txList);

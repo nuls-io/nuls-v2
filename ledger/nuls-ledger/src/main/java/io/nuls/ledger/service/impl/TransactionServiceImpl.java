@@ -41,6 +41,7 @@ import io.nuls.ledger.storage.Repository;
 import io.nuls.ledger.utils.CoinDataUtils;
 import io.nuls.ledger.utils.LedgerUtils;
 import io.nuls.ledger.utils.LockerUtils;
+import io.nuls.ledger.utils.LoggerUtil;
 import io.nuls.ledger.validator.CoinDataValidator;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Service;
@@ -168,6 +169,7 @@ public class TransactionServiceImpl implements TransactionService {
                     CoinData coinData = CoinDataUtils.parseCoinData(transaction.getCoinData());
                     if (null == coinData) {
                         //例如黄牌交易，直接返回
+                        LoggerUtil.logger.debug("coinData is null continue.");
                         continue;
                     }
                     //更新账户状态
