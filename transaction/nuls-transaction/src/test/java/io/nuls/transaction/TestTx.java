@@ -27,7 +27,6 @@ package io.nuls.transaction;
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.Address;
 import io.nuls.base.data.Page;
-import io.nuls.base.data.Transaction;
 import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.info.HostInfo;
 import io.nuls.rpc.info.NoUse;
@@ -43,7 +42,6 @@ import io.nuls.transaction.model.bo.config.ConfigBean;
 import io.nuls.transaction.model.dto.CoinDTO;
 import io.nuls.transaction.model.dto.CrossTxTransferDTO;
 import io.nuls.transaction.rpc.call.LedgerCall;
-import io.nuls.transaction.utils.TxUtil;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -114,7 +112,7 @@ public class TestTx {
             //调用接口
             Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.CS.abbr, "cs_createAgent", agentTxMap);
             Map sss = (HashMap) (((HashMap) cmdResp2.getResponseData()).get("cs_createAgent"));
-            String agentHash =  (String)sss.get("txHex");
+            String agentHash =  (String)sss.get("txHash");
             Log.debug("createAgent-txHash:{}", agentHash);
 
             Thread.sleep(15000);
@@ -128,7 +126,7 @@ public class TestTx {
             dpParams.put("deposit", 200000 * 100000000L);
             Response dpResp = ResponseMessageProcessor.requestAndResponse(ModuleE.CS.abbr, "cs_depositToAgent", dpParams);
             HashMap dpResult = (HashMap) ((HashMap) dpResp.getResponseData()).get("cs_depositToAgent");
-            String hash = (String) dpResult.get("txHex");
+            String hash = (String) dpResult.get("txHash");
             Log.debug("deposit-txHash:{}", hash);
 
         } catch (Exception e) {
@@ -154,7 +152,7 @@ public class TestTx {
     static int assetId = 1;
     static String version = "1.0";
 
-    static String password = null;//"nuls123456";
+    static String password = "nuls123456";//"nuls123456";
 
     @Before
     public void before() throws Exception {
@@ -213,7 +211,7 @@ public class TestTx {
         Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.CS.abbr, "cs_createAgent", agentTxMap);
         Map result = (HashMap) (((HashMap) cmdResp2.getResponseData()).get("cs_createAgent"));
         Assert.assertTrue(null != result);
-        String hash =  (String)result.get("txHex");
+        String hash =  (String)result.get("txHash");
         Log.debug("createAgent-txHash:{}", hash);
     }
 
@@ -233,9 +231,8 @@ public class TestTx {
         dpParams.put("deposit", 200000 * 100000000L);
         Response dpResp = ResponseMessageProcessor.requestAndResponse(ModuleE.CS.abbr, "cs_depositToAgent", dpParams);
         HashMap dpResult = (HashMap) ((HashMap) dpResp.getResponseData()).get("cs_depositToAgent");
-        String txHex = (String) dpResult.get("txHex");
-        Transaction tx = TxUtil.getTransaction(txHex);
-        Log.debug("deposit-txHash:{}", tx.getHash().getDigestHex());
+        String txHash = (String) dpResult.get("txHash");
+        Log.debug("deposit-txHash:{}", txHash);
     }
 
     /**
@@ -252,7 +249,7 @@ public class TestTx {
         params.put("txHash", "0020b8a42eb4c70196189e607e9434fe09b595d5753711f21819113f40d64a1c82c1");
         Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.CS.abbr, "cs_withdraw", params);
         HashMap dpResult = (HashMap) ((HashMap) cmdResp.getResponseData()).get("cs_withdraw");
-        String hash = (String) dpResult.get("txHex");
+        String hash = (String) dpResult.get("txHash");
         Log.debug("withdraw-txHash:{}", hash);
     }
 
@@ -265,9 +262,8 @@ public class TestTx {
         //调用接口
         Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.CS.abbr, "cs_stopAgent", txMap);
         Map result = (HashMap) (((HashMap) cmdResp2.getResponseData()).get("cs_stopAgent"));
-        String txHex = (String) result.get("txHex");
-        Transaction tx = TxUtil.getTransaction(txHex);
-        Log.debug("stopAgent-txHash:{}", tx.getHash().getDigestHex());
+        String txHash = (String) result.get("txHash");
+        Log.debug("stopAgent-txHash:{}", txHash);
     }
 
     /**
