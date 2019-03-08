@@ -4,7 +4,6 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
-import io.nuls.rpc.netty.channel.ConnectData;
 import io.nuls.rpc.netty.channel.manager.ConnectManager;
 import io.nuls.rpc.netty.handler.message.TextMessageHandler;
 import io.nuls.tools.log.Log;
@@ -45,14 +44,8 @@ public class ServerHandler extends SimpleChannelInboundHandler<Object> {
 
     @Override
     public void channelUnregistered(ChannelHandlerContext ctx) throws Exception {
-        SocketChannel socketChannel = (SocketChannel) ctx.channel();
-        ConnectData connectData = ConnectManager.CHANNEL_DATA_MAP.get(socketChannel);
-
-        if(connectData != null) {
-            connectData.setConnected(false);
-        }
-
-        Log.info("链接断开:"+ConnectManager.getRemoteUri(socketChannel));
+        /*SocketChannel socketChannel = (SocketChannel) ctx.channel();
+        Log.info("链接断开:"+ConnectManager.getRemoteUri(socketChannel));*/
     }
 
     @Override
@@ -60,4 +53,9 @@ public class ServerHandler extends SimpleChannelInboundHandler<Object> {
         ConnectManager.disConnect((SocketChannel) ctx.channel());
     }
 
+    @Override
+    public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
+        super.exceptionCaught(ctx, cause);
+        cause.printStackTrace();
+    }
 }
