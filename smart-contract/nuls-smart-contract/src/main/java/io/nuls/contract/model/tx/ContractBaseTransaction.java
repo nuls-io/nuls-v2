@@ -24,6 +24,7 @@
 package io.nuls.contract.model.tx;
 
 import io.nuls.base.basic.TransactionLogicData;
+import io.nuls.base.data.BlockHeader;
 import io.nuls.base.data.CoinData;
 import io.nuls.base.data.Transaction;
 import io.nuls.contract.model.bo.ContractResult;

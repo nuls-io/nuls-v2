@@ -48,24 +48,6 @@ public interface ContractService {
     boolean isContractAddress(int chainId, byte[] addressBytes);
 
     /**
-     * 保存 txInfo : key -> contractAddress + txHash, status is confirmed
-     * 保存 UTXO : key -> txHash + index
-     *
-     * @param txs
-     * @return
-     */
-    Result<Integer> saveConfirmedTransactionList(int chainId, List<Transaction> txs);
-
-    /**
-     * 回滚合约交易
-     *
-     * @param txs
-     * @return
-     */
-    Result<Integer> rollbackTransactionList(int chainId, List<Transaction> txs);
-
-
-    /**
      * 保存合约执行结果
      *
      * @param hash
