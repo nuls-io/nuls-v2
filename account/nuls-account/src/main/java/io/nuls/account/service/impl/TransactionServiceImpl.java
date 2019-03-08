@@ -40,13 +40,17 @@ import io.nuls.account.service.MultiSignAccountService;
 import io.nuls.account.service.TransactionService;
 import io.nuls.account.util.LoggerUtil;
 import io.nuls.account.util.TxUtil;
-import io.nuls.base.signture.MultiSignTxSignature;
-import io.nuls.tools.log.Log;
 import io.nuls.account.util.manager.ChainManager;
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.basic.TransactionFeeCalculator;
-import io.nuls.base.data.*;
+import io.nuls.base.data.CoinData;
+import io.nuls.base.data.CoinFrom;
+import io.nuls.base.data.CoinTo;
+import io.nuls.base.data.MultiSigAccount;
+import io.nuls.base.data.NulsDigestData;
+import io.nuls.base.data.Transaction;
+import io.nuls.base.signture.MultiSignTxSignature;
 import io.nuls.base.signture.P2PHKSignature;
 import io.nuls.base.signture.SignatureUtil;
 import io.nuls.base.signture.TransactionSignature;
@@ -58,12 +62,17 @@ import io.nuls.tools.data.BigIntegerUtils;
 import io.nuls.tools.data.StringUtils;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.exception.NulsRuntimeException;
-import io.nuls.tools.log.Log;
-import io.nuls.tools.thread.TimeService;
 
 import java.io.IOException;
 import java.math.BigInteger;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.ListIterator;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * @author: qinyifeng
@@ -116,10 +125,10 @@ public class TransactionServiceImpl implements TransactionService {
                         accountAddressMap.put(address, transaction);
                     }
                 }
-                Log.debug("end=======");
+                LoggerUtil.logger.debug("end=======");
             }
         } catch (Exception e) {
-            Log.error("", e);
+            LoggerUtil.logger.error("", e);
             throw new NulsRuntimeException(AccountErrorCode.SYS_UNKOWN_EXCEPTION, e);
         }
         return new ArrayList<>(result);
@@ -322,13 +331,13 @@ public class TransactionServiceImpl implements TransactionService {
             //发起新交易
             TransactionCmdCall.newTx(chainId, tx.hex());
         } catch (NulsException e) {
-            Log.error("assemblyTransaction exception.", e);
+            LoggerUtil.logger.error("assemblyTransaction exception.", e);
             throw new NulsRuntimeException(e.getErrorCode());
         } catch (IOException e) {
-            Log.error("assemblyTransaction io exception.", e);
+            LoggerUtil.logger.error("assemblyTransaction io exception.", e);
             throw new NulsRuntimeException(AccountErrorCode.SERIALIZE_ERROR);
         } catch (Exception e) {
-            Log.error("assemblyTransaction error.", e);
+            LoggerUtil.logger.error("assemblyTransaction error.", e);
             throw new NulsRuntimeException(AccountErrorCode.FAILED);
         }
         return tx;
@@ -351,6 +360,7 @@ public class TransactionServiceImpl implements TransactionService {
             List<CoinTo> coinToList = assemblyCoinTo(chainId, toList);
             //来源地址或转出地址为空
             if (coinFromList.size() == 0 || coinToList.size() == 0) {
+                LoggerUtil.logger.warn("assemblyCoinData coinData params error");
                 throw new NulsRuntimeException(AccountErrorCode.COINDATA_IS_INCOMPLETE);
             }
             //交易总大小=交易数据大小+签名数据大小
@@ -359,13 +369,13 @@ public class TransactionServiceImpl implements TransactionService {
             CoinData coinData = getCoinData(chainId, coinFromList, coinToList, txSize);
             tx.setCoinData(coinData.serialize());
         } catch (NulsException e) {
-            Log.error("assemblyCoinData exception.", e);
+            LoggerUtil.logger.error("assemblyCoinData exception.", e);
             throw new NulsRuntimeException(e.getErrorCode());
         } catch (IOException e) {
-            Log.error("assemblyCoinData io exception.", e);
+            LoggerUtil.logger.error("assemblyCoinData io exception.", e);
             throw new NulsRuntimeException(AccountErrorCode.SERIALIZE_ERROR);
         } catch (Exception e) {
-            Log.error("assemblyCoinData error.", e);
+            LoggerUtil.logger.error("assemblyCoinData error.", e);
             throw new NulsRuntimeException(AccountErrorCode.FAILED);
         }
         return tx;
@@ -386,18 +396,25 @@ public class TransactionServiceImpl implements TransactionService {
             byte[] addressByte = AddressTool.getAddress(address);
             //转账交易转出地址必须是本链地址
             if (!AddressTool.validAddress(chainId, address)) {
+                LoggerUtil.logger.warn("assemblyCoinFrom address error");
                 throw new NulsException(AccountErrorCode.IS_NOT_CURRENT_CHAIN_ADDRESS);
             }
             //检查该链是否有该资产
             int assetChainId = coinDto.getAssetsChainId();
             int assetId = coinDto.getAssetsId();
             if (!this.assetExist(assetChainId, assetId)) {
+                LoggerUtil.logger.warn("assemblyCoinFrom asset not exist");
                 throw new NulsException(AccountErrorCode.ASSET_NOT_EXIST);
             }
             //检查对应资产余额是否足够
             BigInteger amount = coinDto.getAmount();
+            if (BigIntegerUtils.isLessThan(amount, BigInteger.ZERO)) {
+                LoggerUtil.logger.warn("assemblyCoinFrom amount too small");
+                throw new NulsException(AccountErrorCode.AMOUNT_TOO_SMALL);
+            }
             BigInteger balance = TxUtil.getBalance(chainId, assetChainId, assetId, addressByte);
             if (BigIntegerUtils.isLessThan(balance, amount)) {
+                LoggerUtil.logger.warn("assemblyCoinFrom insufficient amount");
                 throw new NulsException(AccountErrorCode.INSUFFICIENT_BALANCE);
             }
             //查询账本获取nonce值
@@ -424,13 +441,21 @@ public class TransactionServiceImpl implements TransactionService {
             byte[] addressByte = AddressTool.getAddress(address);
             //转账交易转出地址必须是本链地址
             if (!AddressTool.validAddress(chainId, address)) {
+                LoggerUtil.logger.warn("assemblyCoinFrom address error");
                 throw new NulsException(AccountErrorCode.IS_NOT_CURRENT_CHAIN_ADDRESS);
             }
             //检查该链是否有该资产
             int assetsChainId = coinDto.getAssetsChainId();
             int assetId = coinDto.getAssetsId();
             if (!this.assetExist(assetsChainId, assetId)) {
+                LoggerUtil.logger.warn("assemblyCoinTo asset not exist");
                 throw new NulsException(AccountErrorCode.ASSET_NOT_EXIST);
+            }
+            //检查金额是否小于0
+            BigInteger amount = coinDto.getAmount();
+            if (BigIntegerUtils.isLessThan(amount, BigInteger.ZERO)) {
+                LoggerUtil.logger.warn("assemblyCoinTo amount too small");
+                throw new NulsException(AccountErrorCode.AMOUNT_TOO_SMALL);
             }
             CoinTo coinTo = new CoinTo();
             coinTo.setAddress(addressByte);
