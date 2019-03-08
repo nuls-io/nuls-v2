@@ -51,7 +51,7 @@ public class BlockBootstrap extends RpcModule {
         return new Module[]{
                 new Module(ModuleE.TX.abbr, "1.0"),
                 new Module(ModuleE.NW.abbr, "1.0"),
-                new Module(ModuleE.PU.abbr, "1.0"),
+//                new Module(ModuleE.PU.abbr, "1.0"),
                 new Module(ModuleE.CS.abbr, "1.0"),
                 new Module(ModuleE.LG.abbr, "1.0"),
                 new Module(ModuleE.AC.abbr, "1.0")
