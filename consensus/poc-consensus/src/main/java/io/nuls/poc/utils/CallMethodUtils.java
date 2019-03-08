@@ -1,5 +1,6 @@
 package io.nuls.poc.utils;
 
+import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.BlockHeader;
 import io.nuls.base.data.Transaction;
 import io.nuls.base.signture.BlockSignature;
@@ -395,5 +396,28 @@ public class CallMethodUtils {
         byte[] targetArr = new byte[8];
         System.arraycopy(txHash, txHash.length - 8, targetArr, 0, 8);
         return targetArr;
+    }
+
+    /**
+     * 查询本地加密账户
+     * Search for Locally Encrypted Accounts
+     * */
+    @SuppressWarnings("unchecked")
+    public static List<byte[]> getEncryptedAddressList(Chain chain) {
+        List<byte[]> packingAddressList = new ArrayList<>();
+        try {
+            Map<String,Object> params = new HashMap<>(2);
+            params.put(ConsensusConstant.PARAM_CHAIN_ID,chain.getConfig().getChainId());
+            Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr,"ac_getEncryptedAddressList", params);
+            List<String> accountAddressList =  (List<String>) ((HashMap)((HashMap) cmdResp.getResponseData()).get("ac_getEncryptedAddressList")).get("list");
+            if(accountAddressList != null && accountAddressList.size()>0){
+                for (String address:accountAddressList) {
+                    packingAddressList.add(AddressTool.getAddress(address));
+                }
+            }
+        } catch (Exception e) {
+            chain.getLoggerMap().get(ConsensusConstant.CONSENSUS_LOGGER_NAME).error(e);
+        }
+        return packingAddressList;
     }
 }

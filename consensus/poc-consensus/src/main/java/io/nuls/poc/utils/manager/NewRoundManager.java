@@ -234,7 +234,7 @@ public class NewRoundManager {
             chain.getLoggerMap().get(ConsensusConstant.CONSENSUS_LOGGER_NAME).error(e);
             return null;
         }
-        round.calcLocalPacker(packingAddressList);
+        round.calcLocalPacker(packingAddressList,chain);
         chain.getLoggerMap().get(ConsensusConstant.CONSENSUS_LOGGER_NAME).debug("\ncalculation||index:{},startTime:{},startHeight:{},hash:{}\n" + round.toString() + "\n\n", index, startTime, startBlockHeader.getHeight(), startBlockHeader.getHash());
         return round;
     }

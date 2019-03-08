@@ -90,6 +90,12 @@ public interface ConsensusConstant {
     String DB_DATA_DEFAULT_PATH ="rocksdb.datapath";
 
     /**
+     * password config
+     * */
+    String PASSWORD_CONFIG_NAME ="password.properties";
+    String PASSWORD = "password";
+
+    /**
      * RPC_VERSION
      */
     double RPC_VERSION = 1.0;
@@ -131,7 +137,7 @@ public interface ConsensusConstant {
      * 系统启动时缓存指定数量的区块
      * Buffer a specified number of blocks at system startup
      * */
-    int INIT_BLOCK_HEADER_COUNT = 200;
+    int INIT_BLOCK_HEADER_COUNT = 110;
 
     /**
      * 系统运行的最小连接节点数量

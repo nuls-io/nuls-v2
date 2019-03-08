@@ -844,10 +844,8 @@ public class ConsensusServiceImpl implements ConsensusService {
         if (status == 1) {
             chain.setCanPacking(true);
             chain.getLoggerMap().get(ConsensusConstant.BASIC_LOGGER_NAME).debug("updateAgentStatus-修改节点打包状态成功......");
-            CallMethodUtils.sendState(chain,true);
         } else {
             chain.setCanPacking(false);
-            CallMethodUtils.sendState(chain,false);
         }
         return Result.getSuccess(ConsensusErrorCode.SUCCESS);
 
@@ -1365,7 +1363,7 @@ public class ConsensusServiceImpl implements ConsensusService {
         if (round == null) {
             return;
         }
-        MeetingMember member = round.getMember(agent.getPackingAddress());
+        MeetingMember member = round.getMember(agent.getPackingAddress(),chain);
         if (null == member) {
             agent.setStatus(0);
             return;

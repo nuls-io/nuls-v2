@@ -25,19 +25,21 @@
  */
 package io.nuls.poc.model.bo.round;
 
+import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.Address;
+import io.nuls.poc.constant.ConsensusConstant;
 import io.nuls.poc.constant.ConsensusErrorCode;
 import io.nuls.poc.model.bo.Chain;
 import io.nuls.poc.utils.CallMethodUtils;
 import io.nuls.tools.data.DoubleUtils;
+import io.nuls.tools.data.StringUtils;
 import io.nuls.tools.exception.NulsRuntimeException;
+import io.nuls.tools.log.Log;
+import io.nuls.tools.parse.ConfigLoader;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 /**
  * 轮次信息类
@@ -158,13 +160,28 @@ public class MeetingRound {
         return this.memberList.get(order - 1);
     }
 
-    public MeetingMember getMember(byte[] address) {
+    public MeetingMember getMember(byte[] address,Chain chain) {
         for (MeetingMember member : memberList) {
-            if (Arrays.equals(address, member.getAgent().getPackingAddress())) {
+            if (Arrays.equals(address, member.getAgent().getPackingAddress()) && validAccount(chain, AddressTool.getStringAddressByBytes(member.getAgent().getPackingAddress()))) {
                 return member;
             }
         }
         return null;
+    }
+
+    private boolean validAccount(Chain chain,String address) {
+        try {
+            Properties properties = ConfigLoader.loadProperties(ConsensusConstant.PASSWORD_CONFIG_NAME);
+            String password = properties.getProperty(ConsensusConstant.PASSWORD, ConsensusConstant.PASSWORD);
+            HashMap callResult = CallMethodUtils.accountValid(chain.getConfig().getChainId(), address, password);
+            String priKey = (String) callResult.get("priKey");
+            if (StringUtils.isNotBlank(priKey)){
+                return true;
+            }
+        }catch (Exception e){
+            Log.error(e);
+        }
+        return false;
     }
 
     /**
@@ -201,12 +218,18 @@ public class MeetingRound {
         return myMember;
     }
 
-    public void calcLocalPacker(List<byte[]> localAddressList) {
+    public void calcLocalPacker(List<byte[]> localAddressList,Chain chain) {
         for (byte[] address:localAddressList) {
-            MeetingMember member = getMember(address);
+            MeetingMember member = getMember(address,chain);
             if (null != member) {
                 myMember = member;
+                if(!chain.isPacker()){
+                    CallMethodUtils.sendState(chain,true);
+                }
                 return;
+            }
+            if(chain.isPacker()){
+                CallMethodUtils.sendState(chain,false);
             }
         }
     }
