@@ -87,7 +87,7 @@ public class CreateTxThread implements Runnable {
         for(int i = 0; i<999999; i++) {
 //            createCtxTransfer();
             createTransfer();
-            Thread.sleep(2000L);
+            Thread.sleep(1000L);
         }
     }
 
