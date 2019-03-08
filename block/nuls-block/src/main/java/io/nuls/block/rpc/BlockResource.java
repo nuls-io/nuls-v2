@@ -187,7 +187,12 @@ public class BlockResource extends BaseCmd {
             BlockExtendsData data = new BlockExtendsData(extend);
             long roundIndex = data.getRoundIndex();
             List<String> hexList = new ArrayList<>();
+            hexList.add(HexUtil.encode(latestBlock.getHeader().serialize()));
             while (count < round) {
+                latestHeight--;
+                if ((latestHeight < 0)) {
+                    break;
+                }
                 BlockHeaderPo blockHeader = service.getBlockHeader(chainId, latestHeight);
                 BlockExtendsData newData = new BlockExtendsData(blockHeader.getExtend());
                 long newRoundIndex = newData.getRoundIndex();
@@ -196,7 +201,6 @@ public class BlockResource extends BaseCmd {
                     roundIndex = newRoundIndex;
                 }
                 hexList.add(HexUtil.encode(BlockUtil.fromBlockHeaderPo(blockHeader).serialize()));
-                latestHeight--;
             }
             return success(hexList);
         } catch (Exception e) {
