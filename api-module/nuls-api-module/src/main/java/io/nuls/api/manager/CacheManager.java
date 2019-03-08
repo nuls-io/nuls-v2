@@ -1,7 +1,6 @@
 package io.nuls.api.manager;
 
 import io.nuls.api.cache.ApiCache;
-import io.nuls.api.model.po.db.AccountInfo;
 import io.nuls.api.model.po.db.ChainInfo;
 
 import java.util.Map;

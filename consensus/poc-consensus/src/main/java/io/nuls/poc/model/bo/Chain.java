@@ -29,6 +29,12 @@ import java.util.concurrent.locks.ReentrantLock;
  **/
 public class Chain {
     /**
+     * 是否为共识节点
+     * Is it a consensus node
+     * */
+    private boolean packer;
+
+    /**
      * 链基础配置信息
      * Chain Foundation Configuration Information
      */
@@ -124,6 +130,7 @@ public class Chain {
         this.redPunishTransactionList = new ArrayList<>();
         this.roundList = new ArrayList<>();
         this.loggerMap = new HashMap<>();
+        this.packer = false;
     }
 
     /**
@@ -330,5 +337,13 @@ public class Chain {
 
     public Lock getRound_lock() {
         return round_lock;
+    }
+
+    public boolean isPacker() {
+        return packer;
+    }
+
+    public void setPacker(boolean packer) {
+        this.packer = packer;
     }
 }

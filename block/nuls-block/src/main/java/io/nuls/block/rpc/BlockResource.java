@@ -22,6 +22,7 @@ package io.nuls.block.rpc;
 
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.data.Block;
+import io.nuls.base.data.BlockExtendsData;
 import io.nuls.base.data.BlockHeader;
 import io.nuls.base.data.NulsDigestData;
 import io.nuls.block.constant.BlockErrorCode;
@@ -138,7 +139,7 @@ public class BlockResource extends BaseCmd {
     }
 
     /**
-     * 获取区块头
+     * 获取最新若干个区块头
      *
      * @param map
      * @return
@@ -157,6 +158,49 @@ public class BlockResource extends BaseCmd {
             List<String> hexList = new ArrayList<>();
             for (BlockHeader blockHeader : blockHeaders) {
                 hexList.add(HexUtil.encode(blockHeader.serialize()));
+            }
+            return success(hexList);
+        } catch (Exception e) {
+            e.printStackTrace();
+            commonLog.error(e);
+            return failed(e.getMessage());
+        }
+    }
+
+    /**
+     * 获取最新若干轮区块头
+     *
+     * @param map
+     * @return
+     */
+    @CmdAnnotation(cmd = GET_LATEST_ROUND_BLOCK_HEADERS, version = 1.0, scope = Constants.PUBLIC, description = "")
+    @Parameter(parameterName = "chainId", parameterType = "int")
+    @Parameter(parameterName = "round", parameterType = "int")
+    public Response getLatestRoundBlockHeaders(Map map) {
+        try {
+            int chainId = Integer.parseInt(map.get("chainId").toString());
+            int round = Integer.parseInt(map.get("round").toString());
+            int count = 0;
+            Block latestBlock = ContextManager.getContext(chainId).getLatestBlock();
+            long latestHeight = latestBlock.getHeader().getHeight();
+            byte[] extend = latestBlock.getHeader().getExtend();
+            BlockExtendsData data = new BlockExtendsData(extend);
+            long roundIndex = data.getRoundIndex();
+            List<String> hexList = new ArrayList<>();
+            hexList.add(HexUtil.encode(latestBlock.getHeader().serialize()));
+            while (count < round) {
+                latestHeight--;
+                if ((latestHeight < 0)) {
+                    break;
+                }
+                BlockHeaderPo blockHeader = service.getBlockHeader(chainId, latestHeight);
+                BlockExtendsData newData = new BlockExtendsData(blockHeader.getExtend());
+                long newRoundIndex = newData.getRoundIndex();
+                if (newRoundIndex != roundIndex) {
+                    count++;
+                    roundIndex = newRoundIndex;
+                }
+                hexList.add(HexUtil.encode(BlockUtil.fromBlockHeaderPo(blockHeader).serialize()));
             }
             return success(hexList);
         } catch (Exception e) {

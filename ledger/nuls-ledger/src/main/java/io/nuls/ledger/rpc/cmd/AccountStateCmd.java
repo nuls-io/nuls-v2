@@ -10,10 +10,10 @@
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- * 
+ *
  * The above copyright notice and this permission notice shall be included in
  * all copies or substantial portions of the Software.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -29,6 +29,7 @@ import io.nuls.ledger.constant.LedgerConstant;
 import io.nuls.ledger.model.po.AccountState;
 import io.nuls.ledger.model.po.UnconfirmedNonce;
 import io.nuls.ledger.service.AccountStateService;
+import io.nuls.ledger.utils.LoggerUtil;
 import io.nuls.rpc.cmd.BaseCmd;
 import io.nuls.rpc.model.CmdAnnotation;
 import io.nuls.rpc.model.Parameter;
@@ -40,8 +41,6 @@ import io.nuls.tools.data.StringUtils;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import static io.nuls.ledger.utils.LoggerUtil.logger;
 
 /**
  * 用于获取账户余额及账户nonce值
@@ -73,14 +72,15 @@ public class AccountStateCmd extends BaseCmd {
         Integer assetChainId = (Integer) params.get("assetChainId");
         String address = (String) params.get("address");
         Integer assetId = (Integer) params.get("assetId");
-        logger.info("chainId {}", chainId);
-        logger.info("address {}", address);
-        AccountState accountState = accountStateService.getAccountState(address, chainId, assetChainId,assetId);
-        Map<String,Object> rtMap = new HashMap<>();
-        rtMap.put("freeze",accountState.getFreezeTotal());
-        rtMap.put("total",accountState.getTotalAmount());
-        rtMap.put("available",accountState.getAvailableAmount());
-        return success(rtMap);
+        LoggerUtil.logger.debug("chainId={},assetChainId={},address={},assetId={}", chainId, assetChainId, address, assetId);
+        AccountState accountState = accountStateService.getAccountState(address, chainId, assetChainId, assetId);
+        Map<String, Object> rtMap = new HashMap<>();
+        rtMap.put("freeze", accountState.getFreezeTotal());
+        rtMap.put("total", accountState.getTotalAmount());
+        rtMap.put("available", accountState.getAvailableAmount());
+        Response response = success(rtMap);
+        LoggerUtil.logger.debug("response={}",response);
+        return  response;
     }
 
     /**
@@ -102,15 +102,15 @@ public class AccountStateCmd extends BaseCmd {
         Integer assetChainId = (Integer) params.get("assetChainId");
         String address = (String) params.get("address");
         Integer assetId = (Integer) params.get("assetId");
-        AccountState accountState = accountStateService.getAccountState(address, chainId,assetChainId, assetId);
-        Map<String,Object> rtMap = new HashMap<>();
+        AccountState accountState = accountStateService.getAccountState(address, chainId, assetChainId, assetId);
+        Map<String, Object> rtMap = new HashMap<>();
         String unconfirmedNonce = accountState.getLatestUnconfirmedNonce();
-        if(StringUtils.isNotBlank(unconfirmedNonce)){
-            rtMap.put("nonce",unconfirmedNonce);
-            rtMap.put("nonceType",LedgerConstant.UNCONFIRMED_NONCE);
-        }else{
-            rtMap.put("nonce",accountState.getNonce());
-            rtMap.put("nonceType",LedgerConstant.CONFIRMED_NONCE);
+        if (StringUtils.isNotBlank(unconfirmedNonce)) {
+            rtMap.put("nonce", unconfirmedNonce);
+            rtMap.put("nonceType", LedgerConstant.UNCONFIRMED_NONCE);
+        } else {
+            rtMap.put("nonce", accountState.getNonce());
+            rtMap.put("nonceType", LedgerConstant.CONFIRMED_NONCE);
         }
 
         return success(rtMap);
@@ -128,23 +128,30 @@ public class AccountStateCmd extends BaseCmd {
         Integer assetChainId = (Integer) params.get("assetChainId");
         String address = (String) params.get("address");
         Integer assetId = (Integer) params.get("assetId");
-        AccountState accountState = accountStateService.getAccountState(address, chainId,assetChainId, assetId);
-        Map<String,Object> rtMap = new HashMap<>();
+        LoggerUtil.logger.debug("chainId={},assetChainId={},address={},assetId={}", chainId, assetChainId, address, assetId);
+        AccountState accountState = accountStateService.getAccountState(address, chainId, assetChainId, assetId);
+        Map<String, Object> rtMap = new HashMap<>();
         List<UnconfirmedNonce> unconfirmedNonces = accountState.getUnconfirmedNonces();
-        if(unconfirmedNonces.size()> 0) {
+        if (unconfirmedNonces.size() > 0) {
             rtMap.put("nonce", accountState.getLatestUnconfirmedNonce());
-            rtMap.put("nonceType",LedgerConstant.UNCONFIRMED_NONCE);
-        }else{
-            rtMap.put("nonce",accountState.getNonce());
-            rtMap.put("nonceType",LedgerConstant.CONFIRMED_NONCE);
+            rtMap.put("nonceType", LedgerConstant.UNCONFIRMED_NONCE);
+        } else {
+            rtMap.put("nonce", accountState.getNonce());
+            rtMap.put("nonceType", LedgerConstant.CONFIRMED_NONCE);
         }
-        if(accountState.getUnconfirmedAmounts().size()> 0){
-            rtMap.put("available",accountState.getAvailableAmount().add(accountState.getUnconfirmedAmount()));
-        }else{
-            rtMap.put("available",accountState.getAvailableAmount());
+        if (accountState.getUnconfirmedAmounts().size() > 0) {
+            rtMap.put("available", accountState.getAvailableAmount().add(accountState.getUnconfirmedAmount()));
+            rtMap.put("freeze", accountState.getFreezeTotal().add(accountState.getUnconfirmedFreezeAmount()));
+            LoggerUtil.logger.debug("UnconfirmedAmounts=true");
+
+        } else {
+            rtMap.put("available", accountState.getAvailableAmount());
+            rtMap.put("freeze", accountState.getFreezeTotal());
         }
-        rtMap.put("freeze",accountState.getFreezeTotal());
-        return success(rtMap);
+
+        Response response =  success(rtMap);
+        LoggerUtil.logger.debug("response={}", response);
+        return response;
     }
 
 }

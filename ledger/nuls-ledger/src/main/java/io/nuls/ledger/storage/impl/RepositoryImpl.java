@@ -36,6 +36,7 @@ import io.nuls.ledger.model.po.BlockTxs;
 import io.nuls.ledger.storage.DataBaseArea;
 import io.nuls.ledger.storage.InitDB;
 import io.nuls.ledger.storage.Repository;
+import io.nuls.ledger.utils.LoggerUtil;
 import io.nuls.tools.basic.InitializingBean;
 import io.nuls.tools.core.annotation.Service;
 import io.nuls.tools.data.ByteUtils;
@@ -81,6 +82,10 @@ public class RepositoryImpl implements Repository, InitDB, InitializingBean {
     @Override
     public void updateAccountState(byte[] key, AccountState nowAccountState) throws Exception {
         //update account
+        LoggerUtil.logger.debug("updateAccountState address={},addressChainId={},assetChainId={},assetId={},getAvailableAmount={}," +
+                        "getFreezeTotal={},getUnconfirmedAmount={},getUnconfirmedFreezeAmount={}",
+                nowAccountState.getAddress(),nowAccountState.getAddressChainId(),nowAccountState.getAssetChainId(),nowAccountState.getAssetId(),
+                nowAccountState.getAvailableAmount(),nowAccountState.getFreezeTotal(),nowAccountState.getUnconfirmedAmount(),nowAccountState.getUnconfirmedFreezeAmount());
         RocksDBService.put(getLedgerAccountTableName(nowAccountState.getAddressChainId()), key, nowAccountState.serialize());
 
     }

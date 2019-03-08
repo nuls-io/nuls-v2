@@ -2,7 +2,6 @@ package io.nuls.rpc.netty.processor;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import io.netty.channel.Channel;
-import io.netty.channel.socket.SocketChannel;
 import io.nuls.rpc.cmd.BaseCmd;
 import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.model.CmdDetail;
@@ -53,10 +52,9 @@ public class RequestMessageProcessor {
 
         //握手成功之后保存channel与角色的对应信息
         NegotiateConnection negotiateConnection = JSONUtils.map2pojo((Map) message.getMessageData(), NegotiateConnection.class);
-        Log.info("当前已建立在连接："+ConnectManager.ROLE_CHANNEL_MAP);
-        Log.info("当前正在建立在连接："+negotiateConnection.getAbbreviation());
-        ConnectManager.ROLE_CHANNEL_MAP.put(negotiateConnection.getAbbreviation(),channel);
-        ConnectManager.createConnectData((SocketChannel) channel);
+        /*ConnectManager.ROLE_CHANNEL_MAP.put(negotiateConnection.getAbbreviation(),channel);
+        ConnectManager.createConnectData((SocketChannel) channel);*/
+        ConnectManager.cacheConnect(negotiateConnection.getAbbreviation(),channel,false);
     }
 
 

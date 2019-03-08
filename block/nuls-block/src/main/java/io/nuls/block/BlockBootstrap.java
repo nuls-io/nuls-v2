@@ -51,7 +51,7 @@ public class BlockBootstrap extends RpcModule {
         return new Module[]{
                 new Module(ModuleE.TX.abbr, "1.0"),
                 new Module(ModuleE.NW.abbr, "1.0"),
-                new Module(ModuleE.PU.abbr, "1.0"),
+//                new Module(ModuleE.PU.abbr, "1.0"),
                 new Module(ModuleE.CS.abbr, "1.0"),
                 new Module(ModuleE.LG.abbr, "1.0"),
                 new Module(ModuleE.AC.abbr, "1.0")
@@ -91,7 +91,7 @@ public class BlockBootstrap extends RpcModule {
             RocksDBService.createTable(PROTOCOL_CONFIG);
             //加载配置
             ConfigLoader.load();
-            while (!isDependencieReady(new Module(ModuleE.TX.abbr, "1.0")) || !isDependencieReady(new Module(ModuleE.PU.abbr, "1.0"))) {
+            while (!isDependencieReady(new Module(ModuleE.TX.abbr, "1.0"))) {
                 Thread.sleep(1000);
             }
             List<Integer> chainIds = ContextManager.chainIds;

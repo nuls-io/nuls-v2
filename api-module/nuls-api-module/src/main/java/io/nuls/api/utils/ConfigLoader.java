@@ -23,19 +23,14 @@
 package io.nuls.api.utils;
 
 import io.nuls.api.ApiContext;
-import io.nuls.api.constant.Constant;
-import io.nuls.api.manager.ChainManager;
-import io.nuls.api.model.po.config.ConfigBean;
-import io.nuls.api.service.ConfigStorageService;
-import io.nuls.tools.core.ioc.SpringLiteContext;
+import io.nuls.api.constant.ApiConstant;
 import io.nuls.tools.io.IoUtils;
 import io.nuls.tools.parse.JSONUtils;
 import io.nuls.tools.parse.config.ConfigItem;
 
 import java.util.List;
-import java.util.Map;
 
-import static io.nuls.api.constant.Constant.MODULES_CONFIG_FILE;
+import static io.nuls.api.constant.ApiConstant.MODULES_CONFIG_FILE;
 
 /**
  * 配置加载器
@@ -68,24 +63,24 @@ public class ConfigLoader {
         List<ConfigItem> configItems = JSONUtils.json2list(configJson, ConfigItem.class);
 
         for (ConfigItem item : configItems) {
-            if (item.getName().equals(Constant.CHAIN_ID)) {
+            if (item.getName().equals(ApiConstant.CHAIN_ID)) {
                 ApiContext.defaultChainId = Integer.parseInt(item.getValue());
-            } else if (item.getName().equals(Constant.ASSET_ID)) {
+            } else if (item.getName().equals(ApiConstant.ASSET_ID)) {
                 ApiContext.defaultAssetId = Integer.parseInt(item.getValue());
-            } else if (item.getName().equals(Constant.DB_IP)) {
+            } else if (item.getName().equals(ApiConstant.DB_IP)) {
                 ApiContext.dbIp = item.getValue();
-            } else if (item.getName().equals(Constant.DB_PORT)) {
+            } else if (item.getName().equals(ApiConstant.DB_PORT)) {
                 ApiContext.port = Integer.parseInt(item.getValue());
             }
         }
 
 //        ConfigBean bean = new ConfigBean();
 //        for (ConfigItem item : configItems) {
-//            if (item.getName().equals(Constant.CHAIN_ID)) {
+//            if (item.getName().equals(ApiConstant.CHAIN_ID)) {
 //                bean.setChainId(Integer.parseInt(item.getValue()));
-//            } else if (item.getName().equals(Constant.DB_IP)) {
+//            } else if (item.getName().equals(ApiConstant.DB_IP)) {
 //                bean.setDbIp(item.getValue());
-//            } else if (item.getName().equals(Constant.DB_PORT)) {
+//            } else if (item.getName().equals(ApiConstant.DB_PORT)) {
 //                bean.setPort(Integer.parseInt(item.getValue()));
 //            }
 //        }

@@ -89,10 +89,10 @@ public class TextMessageHandler implements Runnable {
                     如果不能提供服务，则直接返回
                     If no service is available, return directly
                      */
-//                    if (!ConnectManager.isReady()) {
-//                        RequestMessageProcessor.serviceNotStarted(channel, messageId);
-//                        break;
-//                    }
+                    /*if (!ConnectManager.isReady()) {
+                        RequestMessageProcessor.serviceNotStarted(channel, messageId);
+                        break;
+                    }*/
 
                     /*
                     Request，根据是否需要定时推送放入不同队列，等待处理

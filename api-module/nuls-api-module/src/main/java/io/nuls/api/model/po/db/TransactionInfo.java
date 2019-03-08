@@ -1,6 +1,6 @@
 package io.nuls.api.model.po.db;
 
-import io.nuls.api.constant.Constant;
+import io.nuls.api.constant.ApiConstant;
 import lombok.Data;
 import org.bson.Document;
 
@@ -41,17 +41,17 @@ public class TransactionInfo {
 
     public void calcValue() {
         BigInteger value = BigInteger.ZERO;
-        if (type == Constant.TX_TYPE_COINBASE ||
-                type == Constant.TX_TYPE_STOP_AGENT ||
-                type == Constant.TX_TYPE_CANCEL_DEPOSIT) {
+        if (type == ApiConstant.TX_TYPE_COINBASE ||
+                type == ApiConstant.TX_TYPE_STOP_AGENT ||
+                type == ApiConstant.TX_TYPE_CANCEL_DEPOSIT) {
             if (coinTos != null) {
                 for (CoinToInfo output : coinTos) {
                     value.add(output.getAmount());
                 }
             }
-        } else if (type == Constant.TX_TYPE_TRANSFER ||
-                type == Constant.TX_TYPE_ALIAS ||
-                type == Constant.TX_TYPE_CONTRACT_TRANSFER) {
+        } else if (type == ApiConstant.TX_TYPE_TRANSFER ||
+                type == ApiConstant.TX_TYPE_ALIAS ||
+                type == ApiConstant.TX_TYPE_CONTRACT_TRANSFER) {
             Set<String> addressSet = new HashSet<>();
             for (CoinFromInfo input : coinFroms) {
                 addressSet.add(input.getAddress());
@@ -61,7 +61,7 @@ public class TransactionInfo {
                     value.add(output.getAmount());
                 }
             }
-        } else if (type == Constant.TX_TYPE_REGISTER_AGENT || type == Constant.TX_TYPE_JOIN_CONSENSUS) {
+        } else if (type == ApiConstant.TX_TYPE_REGISTER_AGENT || type == ApiConstant.TX_TYPE_JOIN_CONSENSUS) {
             for (CoinToInfo output : coinTos) {
                 if (output.getLockTime() == -1) {
                     value.add(output.getAmount());

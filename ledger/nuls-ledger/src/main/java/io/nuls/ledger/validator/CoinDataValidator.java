@@ -32,10 +32,7 @@ import io.nuls.base.data.Transaction;
 import io.nuls.ledger.model.AccountBalance;
 import io.nuls.ledger.model.TempAccountState;
 import io.nuls.ledger.model.ValidateResult;
-import io.nuls.ledger.model.po.AccountState;
-import io.nuls.ledger.model.po.FreezeHeightState;
-import io.nuls.ledger.model.po.FreezeLockTimeState;
-import io.nuls.ledger.model.po.UnconfirmedNonce;
+import io.nuls.ledger.model.po.*;
 import io.nuls.ledger.service.AccountStateService;
 import io.nuls.ledger.storage.Repository;
 import io.nuls.ledger.utils.CoinDataUtils;
@@ -334,7 +331,30 @@ public class CoinDataValidator {
     }
 
     /**
+     * 进行未确认锁定的交易查找
+     *
+     * @param accountState
+     * @param fromAmount
+     * @param fromNonce
+     * @return
+     */
+    private boolean isExsitUnconfirmedFreezeTx(AccountState accountState, BigInteger fromAmount, String fromNonce) {
+        boolean isValidate = false;
+        List<UnconfirmedAmount> list = accountState.getUnconfirmedAmounts();
+        for (UnconfirmedAmount unconfirmedAmount : list) {
+            if (LedgerUtils.getNonceStrByTxHash(unconfirmedAmount.getTxHash()).equalsIgnoreCase(fromNonce) && unconfirmedAmount.getToLockedAmount().compareTo(fromAmount) == 0) {
+                //找到交易
+                isValidate = true;
+                break;
+            }
+        }
+        return isValidate;
+    }
+
+
+    /**
      * 进行coinData值的校验,在本地交易产生时候进行的校验
+     * 即只有未确认交易的校验使用到
      * 未进行全文的nonce检索,所以不排除历史区块中的双花被当成孤儿交易返回。
      *
      * @param addressChainId
@@ -365,9 +385,12 @@ public class CoinDataValidator {
                 return validateCommonCoinData(accountState, address, coinFrom.getAmount(), nonce);
             } else {
                 if (!isValidateFreezeTx(coinFrom.getLocked(), accountState, coinFrom.getAmount(), nonce)) {
-                    //未找到冻结的交易
-                    ValidateResult validateResult = new ValidateResult(VALIDATE_FAIL_CODE, String.format(VALIDATE_FAIL_DESC, address, nonce, " freeze tx is not exist"));
-                    return validateResult;
+                    //确认交易未找到冻结的交易
+                    if (!isExsitUnconfirmedFreezeTx(accountState,coinFrom.getAmount(),nonce)) {
+                        //未确认交易中也未找到冻结的交易
+                        ValidateResult validateResult = new ValidateResult(VALIDATE_FAIL_CODE, String.format(VALIDATE_FAIL_DESC, address, nonce, " freeze tx is not exist"));
+                        return validateResult;
+                    }
                 }
             }
         }

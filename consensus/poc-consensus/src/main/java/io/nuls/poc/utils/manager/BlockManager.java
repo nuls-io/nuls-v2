@@ -1,5 +1,6 @@
 package io.nuls.poc.utils.manager;
 
+import io.nuls.base.data.BlockExtendsData;
 import io.nuls.base.data.BlockHeader;
 import io.nuls.poc.constant.ConsensusConstant;
 import io.nuls.poc.model.bo.Chain;
@@ -35,19 +36,19 @@ public class BlockManager {
     public void loadBlockHeader(Chain chain) throws Exception {
         Map params = new HashMap(ConsensusConstant.INIT_CAPACITY);
         params.put("chainId", chain.getConfig().getChainId());
-        params.put("size", ConsensusConstant.INIT_BLOCK_HEADER_COUNT);
-        Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.BL.abbr, "getLatestBlockHeaders", params);
+        params.put("round", ConsensusConstant.INIT_BLOCK_HEADER_COUNT);
+        Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.BL.abbr, "getLatestRoundBlockHeaders", params);
         Map<String, Object> resultMap;
         List<String> blockHeaderHexs = new ArrayList<>();
         if(cmdResp.isSuccess()){
             resultMap = (Map<String, Object>) cmdResp.getResponseData();
-            blockHeaderHexs = (List<String>) resultMap.get("getLatestBlockHeaders");
+            blockHeaderHexs = (List<String>) resultMap.get("getLatestRoundBlockHeaders");
         }
         while(!cmdResp.isSuccess() && blockHeaderHexs.size() == 0){
-            cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.BL.abbr, "getLatestBlockHeaders", params);
+            cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.BL.abbr, "getLatestRoundBlockHeaders", params);
             if(cmdResp.isSuccess()){
                 resultMap = (Map<String, Object>) cmdResp.getResponseData();
-                blockHeaderHexs = (List<String>) resultMap.get("getLatestBlockHeaders");
+                blockHeaderHexs = (List<String>) resultMap.get("getLatestRoundBlockHeaders");
                 break;
             }
             Log.info("---------------------------区块加载失败！");
@@ -73,6 +74,25 @@ public class BlockManager {
      * @param blockHeader block header
      */
     public void addNewBlock(Chain chain, BlockHeader blockHeader) {
+        /*
+        如果新增区块有轮次变化，则删除最小轮次区块
+         */
+        BlockHeader newestHeader = chain.getNewestHeader();
+        BlockExtendsData newestExtendsData = new BlockExtendsData(newestHeader.getExtend());
+        BlockExtendsData receiveExtendsData = new BlockExtendsData(blockHeader.getExtend());
+        if(receiveExtendsData.getRoundIndex() > newestExtendsData.getRoundIndex()){
+            BlockExtendsData lastExtendsData = new BlockExtendsData(chain.getBlockHeaderList().get(0).getExtend());
+            long lastRoundIndex = lastExtendsData.getRoundIndex();
+            Iterator<BlockHeader> iterator = chain.getBlockHeaderList().iterator();
+            while (iterator.hasNext()){
+                lastExtendsData = new BlockExtendsData(iterator.next().getExtend());
+                if(lastExtendsData.getRoundIndex() == lastRoundIndex){
+                    iterator.remove();
+                }else if(lastExtendsData.getRoundIndex() > lastRoundIndex){
+                    break;
+                }
+            }
+        }
         chain.getBlockHeaderList().add(blockHeader);
         if (chain.getBlockHeaderList().size() > ConsensusConstant.INIT_BLOCK_HEADER_COUNT) {
             chain.getBlockHeaderList().remove(0);

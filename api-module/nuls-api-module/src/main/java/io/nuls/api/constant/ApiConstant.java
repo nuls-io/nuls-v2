@@ -29,7 +29,7 @@ import java.math.BigInteger;
  * @version 1.0
  * @date 19-1-22 下午3:34
  */
-public interface Constant {
+public interface ApiConstant {
 
 
     /**
@@ -138,4 +138,5 @@ public interface Constant {
     int TX_TYPE_CONTRACT_TRANSFER = 103;
 
     BigInteger ALIAS_AMOUNT = BigInteger.valueOf(100000000L);
+    BigInteger MIN_DEPOSIT = BigInteger.valueOf(20000000000000L);
 }

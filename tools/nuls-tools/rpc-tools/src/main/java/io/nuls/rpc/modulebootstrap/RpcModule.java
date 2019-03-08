@@ -138,11 +138,6 @@ public abstract class RpcModule implements InitializingBean {
             Message message = MessageUtil.basicMessage(MessageType.Request);
             message.setMessageData(request);
             try {
-                int getConnectCount = 0;
-                while(getConnectCount<5 && !ConnectManager.ROLE_CHANNEL_MAP.containsKey(module.name)){
-                    TimeUnit.SECONDS.sleep(1);
-                    getConnectCount++;
-                }
                 ConnectManager.sendMessage(module.getName(), message);
                 log.info("notify follower {} is Ready success",module);
                 followerList.put(module,Boolean.TRUE);

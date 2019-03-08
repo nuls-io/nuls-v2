@@ -21,18 +21,6 @@
 package io.nuls.block.utils.module;
 
 import io.nuls.base.data.BlockHeader;
-import io.nuls.block.manager.ContextManager;
-import io.nuls.block.model.ChainContext;
-import io.nuls.block.rpc.callback.ProtocolVersionInvoke;
-import io.nuls.rpc.model.ModuleE;
-import io.nuls.rpc.model.message.Response;
-import io.nuls.rpc.netty.processor.ResponseMessageProcessor;
-import io.nuls.tools.crypto.HexUtil;
-import io.nuls.tools.log.logback.NulsLogger;
-
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 /**
  * 调用协议升级模块接口的工具类
@@ -50,23 +38,24 @@ public class ProtocolUtil {
      * @return
      */
     public static boolean rollbackNotice(int chainId, BlockHeader blockHeader) {
-        ChainContext context = ContextManager.getContext(chainId);
-        NulsLogger commonLog = context.getCommonLog();
-        try {
-            Map<String, Object> params = new HashMap<>(3);
-//            params.put(Constants.VERSION_KEY_STR, "1.0");
-            params.put("chainId", chainId);
-            params.put("blockHeader", HexUtil.encode(blockHeader.serialize()));
-            Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.PU.abbr, "rollbackBlock", params);
-            if (response.isSuccess()) {
-                context.setVersion((short) 1);
-            }
-            return response.isSuccess();
-        } catch (Exception e) {
-            e.printStackTrace();
-            commonLog.error(e);
-            return false;
-        }
+        return true;
+//        ChainContext context = ContextManager.getContext(chainId);
+//        NulsLogger commonLog = context.getCommonLog();
+//        try {
+//            Map<String, Object> params = new HashMap<>(3);
+////            params.put(Constants.VERSION_KEY_STR, "1.0");
+//            params.put("chainId", chainId);
+//            params.put("blockHeader", HexUtil.encode(blockHeader.serialize()));
+//            Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.PU.abbr, "rollbackBlock", params);
+//            if (response.isSuccess()) {
+//                context.setVersion((short) 1);
+//            }
+//            return response.isSuccess();
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//            commonLog.error(e);
+//            return false;
+//        }
     }
 
     /**
@@ -76,37 +65,38 @@ public class ProtocolUtil {
      * @return
      */
     public static boolean saveNotice(int chainId, BlockHeader blockHeader) {
-        ChainContext context = ContextManager.getContext(chainId);
-        NulsLogger commonLog = context.getCommonLog();
-        try {
-            Map<String, Object> params = new HashMap<>(3);
-//            params.put(Constants.VERSION_KEY_STR, "1.0");
-            params.put("chainId", chainId);
-            params.put("blockHeader", HexUtil.encode(blockHeader.serialize()));
-            Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.PU.abbr, "saveBlock", params);
-            if (response.isSuccess()) {
-                context.setVersion((short) 1);
-            }
-            return response.isSuccess();
-        } catch (Exception e) {
-            e.printStackTrace();
-            commonLog.error(e);
-            return false;
-        }
+        return true;
+//        ChainContext context = ContextManager.getContext(chainId);
+//        NulsLogger commonLog = context.getCommonLog();
+//        try {
+//            Map<String, Object> params = new HashMap<>(3);
+////            params.put(Constants.VERSION_KEY_STR, "1.0");
+//            params.put("chainId", chainId);
+//            params.put("blockHeader", HexUtil.encode(blockHeader.serialize()));
+//            Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.PU.abbr, "saveBlock", params);
+//            if (response.isSuccess()) {
+//                context.setVersion((short) 1);
+//            }
+//            return response.isSuccess();
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//            commonLog.error(e);
+//            return false;
+//        }
     }
 
     public static void subscribe(int chainId){
-        ChainContext context = ContextManager.getContext(chainId);
-        NulsLogger commonLog = context.getCommonLog();
-        try {
-            Map<String, Object> params = new HashMap<>(2);
-//            params.put(Constants.VERSION_KEY_STR, "1.0");
-            params.put("chainId", chainId);
-            ResponseMessageProcessor.requestAndInvoke(ModuleE.PU.abbr, "getMainVersion", params, "0", "1", new ProtocolVersionInvoke(chainId));
-        } catch (Exception e) {
-            e.printStackTrace();
-            commonLog.error(e);
-        }
+//        ChainContext context = ContextManager.getContext(chainId);
+//        NulsLogger commonLog = context.getCommonLog();
+//        try {
+//            Map<String, Object> params = new HashMap<>(2);
+////            params.put(Constants.VERSION_KEY_STR, "1.0");
+//            params.put("chainId", chainId);
+//            ResponseMessageProcessor.requestAndInvoke(ModuleE.PU.abbr, "getMainVersion", params, "0", "1", new ProtocolVersionInvoke(chainId));
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//            commonLog.error(e);
+//        }
     }
 
 }

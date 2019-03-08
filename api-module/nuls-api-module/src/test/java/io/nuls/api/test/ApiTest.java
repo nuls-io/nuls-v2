@@ -1,11 +1,13 @@
 package io.nuls.api.test;
 
 import io.nuls.api.analysis.WalletRpcHandler;
-import io.nuls.api.db.BlockService;
-import io.nuls.api.model.po.db.BlockHeaderInfo;
+import io.nuls.api.cache.ApiCache;
+import io.nuls.api.constant.ApiConstant;
+import io.nuls.api.db.RoundManager;
+import io.nuls.api.manager.CacheManager;
 import io.nuls.api.model.po.db.BlockInfo;
+import io.nuls.api.model.po.db.CurrentRound;
 import io.nuls.api.model.po.db.TransactionInfo;
-import io.nuls.base.data.Block;
 import io.nuls.rpc.info.HostInfo;
 import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.netty.bootstrap.NettyServer;
@@ -15,10 +17,8 @@ import io.nuls.tools.core.ioc.SpringLiteContext;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.math.BigInteger;
-
-import static io.nuls.api.constant.Constant.DEFAULT_SCAN_PACKAGE;
-import static io.nuls.api.constant.Constant.RPC_DEFAULT_SCAN_PACKAGE;
+import static io.nuls.api.constant.ApiConstant.DEFAULT_SCAN_PACKAGE;
+import static io.nuls.api.constant.ApiConstant.RPC_DEFAULT_SCAN_PACKAGE;
 import static io.nuls.api.utils.LoggerUtil.commonLog;
 
 public class ApiTest {
@@ -65,6 +65,37 @@ public class ApiTest {
         }
     }
 
+    @Before
+    public void initApiCache() {
+        ApiCache apiCache = new ApiCache();
+        CurrentRound currentRound = new CurrentRound();
+        currentRound.setStartHeight(111);
+        currentRound.setEndHeight(222);
+        apiCache.setCurrentRound(currentRound);
+
+        CacheManager.addApiCache(12345, apiCache);
+    }
 
 
+    @Test
+    public void updateCurrentRound() {
+        ApiCache apiCache = CacheManager.getCache(12345);
+        CurrentRound currentRound = apiCache.getCurrentRound();
+        System.out.println(currentRound.getStartHeight() + "----" + currentRound.getEndHeight());
+        CurrentRound beforeRound = new CurrentRound();
+        beforeRound.setStartHeight(3333);
+        beforeRound.setEndHeight(4444);
+
+        apiCache.setCurrentRound(beforeRound);
+        System.out.println(apiCache.getCurrentRound().getStartHeight() + "----" + apiCache.getCurrentRound().getEndHeight());
+
+        testUpdateCurrentRound(currentRound);
+
+        System.out.println(currentRound.getStartHeight() + "----" + currentRound.getEndHeight());
+    }
+
+    private void testUpdateCurrentRound(CurrentRound currentRound ) {
+        currentRound.setStartHeight(7777);
+        currentRound.setEndHeight(8888);
+    }
 }

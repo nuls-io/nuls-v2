@@ -1,7 +1,6 @@
 package io.nuls.api.cache;
 
 import io.nuls.api.model.po.db.*;
-import io.nuls.base.data.BlockHeader;
 import lombok.Data;
 
 import java.util.Map;
@@ -12,7 +11,9 @@ public class ApiCache {
 
     private ChainInfo chainInfo;
 
-    private BlockHeader bestHeader;
+    private BlockHeaderInfo bestHeader;
+
+    private CurrentRound currentRound;
 
     private Map<String, AccountInfo> accountMap = new ConcurrentHashMap<>();
 
@@ -21,6 +22,10 @@ public class ApiCache {
     private Map<String, AgentInfo> agentMap = new ConcurrentHashMap<>();
 
     private Map<String, AliasInfo> aliasMap = new ConcurrentHashMap<>();
+
+    public ApiCache() {
+        currentRound = new CurrentRound();
+    }
 
     public void addAccountInfo(AccountInfo accountInfo) {
         accountMap.put(accountInfo.getAddress(), accountInfo);
