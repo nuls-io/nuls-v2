@@ -67,8 +67,7 @@ public class AccountCmd extends BaseCmd {
             Object chainIdObj = params == null ? null : params.get(RpcParameterNameConstant.CHAIN_ID);
             Object countObj = params == null ? null : params.get(RpcParameterNameConstant.COUNT);
             Object passwordObj = params == null ? null : params.get(RpcParameterNameConstant.PASSWORD);
-            //|| passwordObj == null
-            if (params == null || chainIdObj == null ) {
+            if (params == null || chainIdObj == null || passwordObj == null) {
                 throw new NulsRuntimeException(AccountErrorCode.NULL_PARAMETER);
             }
 
@@ -124,7 +123,7 @@ public class AccountCmd extends BaseCmd {
             if (count <= 0 || count > AccountTool.CREATE_MAX_SIZE) {
                 throw new NulsRuntimeException(AccountErrorCode.PARAMETER_ERROR);
             }
-            if (StringUtils.isNotBlank(password) && !FormatValidUtils.validPassword(password)) {
+            if (!FormatValidUtils.validPassword(password)) {
                 throw new NulsRuntimeException(AccountErrorCode.PASSWORD_FORMAT_WRONG);
             }
 
@@ -415,8 +414,7 @@ public class AccountCmd extends BaseCmd {
             Object chainIdObj = params == null ? null : params.get(RpcParameterNameConstant.CHAIN_ID);
             Object addressObj = params == null ? null : params.get(RpcParameterNameConstant.ADDRESS);
             Object passwordObj = params == null ? null : params.get(RpcParameterNameConstant.PASSWORD);
-            //|| passwordObj == null
-            if (params == null || chainIdObj == null || addressObj == null ) {
+            if (params == null || chainIdObj == null || addressObj == null || passwordObj == null) {
                 throw new NulsRuntimeException(AccountErrorCode.NULL_PARAMETER);
             }
             // parse params
@@ -535,8 +533,7 @@ public class AccountCmd extends BaseCmd {
             Object priKeyObj = params == null ? null : params.get(RpcParameterNameConstant.PRIKEY);
             Object passwordObj = params == null ? null : params.get(RpcParameterNameConstant.PASSWORD);
             Object overwriteObj = params == null ? null : params.get(RpcParameterNameConstant.OVERWRITE);
-            //passwordObj == null ||
-            if (params == null || chainIdObj == null || priKeyObj == null || overwriteObj == null) {
+            if (params == null || chainIdObj == null || priKeyObj == null || passwordObj == null || overwriteObj == null) {
                 throw new NulsRuntimeException(AccountErrorCode.NULL_PARAMETER);
             }
             // parse params
@@ -905,8 +902,7 @@ public class AccountCmd extends BaseCmd {
             Object addressObj = params == null ? null : params.get(RpcParameterNameConstant.ADDRESS);
             Object passwordObj = params == null ? null : params.get(RpcParameterNameConstant.PASSWORD);
             Object dataHexObj = params == null ? null : params.get(RpcParameterNameConstant.DATA_HEX);
-            //|| passwordObj == null
-            if (params == null || chainIdObj == null || addressObj == null || dataHexObj == null) {
+            if (params == null || chainIdObj == null || addressObj == null || passwordObj == null || dataHexObj == null) {
                 throw new NulsRuntimeException(AccountErrorCode.NULL_PARAMETER);
             }
 
@@ -957,8 +953,7 @@ public class AccountCmd extends BaseCmd {
             Object addressObj = params == null ? null : params.get(RpcParameterNameConstant.ADDRESS);
             Object passwordObj = params == null ? null : params.get(RpcParameterNameConstant.PASSWORD);
             Object dataHexObj = params == null ? null : params.get(RpcParameterNameConstant.DATA_HEX);
-            //|| passwordObj == null
-            if (params == null || chainIdObj == null || addressObj == null || dataHexObj == null) {
+            if (params == null || chainIdObj == null || addressObj == null || passwordObj == null || dataHexObj == null) {
                 throw new NulsRuntimeException(AccountErrorCode.NULL_PARAMETER);
             }
 

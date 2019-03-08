@@ -95,11 +95,11 @@ public class AccountServiceImpl implements AccountService, InitializingBean {
     @Override
     public List<Account> createAccount(int chainId, int count, String password) {
         //check params
-        //|| StringUtils.isBlank(password)
-        if (chainId <= 0 || count <= 0 || count > AccountTool.CREATE_MAX_SIZE ) {
+        //
+        if (chainId <= 0 || count <= 0 || count > AccountTool.CREATE_MAX_SIZE || StringUtils.isBlank(password)) {
             throw new NulsRuntimeException(AccountErrorCode.PARAMETER_ERROR);
         }
-        if (!StringUtils.isBlank(password) && !FormatValidUtils.validPassword(password)) {
+        if (!FormatValidUtils.validPassword(password)) {
             throw new NulsRuntimeException(AccountErrorCode.PASSWORD_FORMAT_WRONG);
         }
         locker.lock();
@@ -325,7 +325,7 @@ public class AccountServiceImpl implements AccountService, InitializingBean {
         if (StringUtils.isBlank(priKey) || !ECKey.isValidPrivteHex(priKey)) {
             throw new NulsRuntimeException(AccountErrorCode.PRIVATE_KEY_WRONG);
         }
-        if (StringUtils.isBlank(password) || !FormatValidUtils.validPassword(password)) {
+        if (!FormatValidUtils.validPassword(password)) {
             throw new NulsRuntimeException(AccountErrorCode.PASSWORD_FORMAT_WRONG);
         }
         try {
@@ -352,10 +352,10 @@ public class AccountServiceImpl implements AccountService, InitializingBean {
         if (StringUtils.isBlank(priKey)) {
             throw new NulsRuntimeException(AccountErrorCode.PARAMETER_ERROR);
         }
-        if (StringUtils.isBlank(oldPassword) || !FormatValidUtils.validPassword(oldPassword)) {
+        if (!FormatValidUtils.validPassword(oldPassword)) {
             throw new NulsRuntimeException(AccountErrorCode.PASSWORD_FORMAT_WRONG);
         }
-        if (StringUtils.isBlank(newPassword) || !FormatValidUtils.validPassword(newPassword)) {
+        if (!FormatValidUtils.validPassword(newPassword)) {
             throw new NulsRuntimeException(AccountErrorCode.PASSWORD_FORMAT_WRONG);
         }
 
@@ -537,7 +537,7 @@ public class AccountServiceImpl implements AccountService, InitializingBean {
         if (!ECKey.isValidPrivteHex(prikey)) {
             throw new NulsRuntimeException(AccountErrorCode.PRIVATE_KEY_WRONG);
         }
-        if (StringUtils.isNotBlank(password) && !FormatValidUtils.validPassword(password)) {
+        if (!FormatValidUtils.validPassword(password)) {
             throw new NulsRuntimeException(AccountErrorCode.PASSWORD_IS_WRONG);
         }
         //not allowed to cover
@@ -557,9 +557,7 @@ public class AccountServiceImpl implements AccountService, InitializingBean {
             throw new NulsRuntimeException(AccountErrorCode.PRIVATE_KEY_WRONG);
         }
         //encrypting account private key
-        if (StringUtils.isNotBlank(password) && FormatValidUtils.validPassword(password)) {
-            account.encrypt(password);
-        }
+        account.encrypt(password);
         //Query account already exists
         Account acc = getAccountByAddress(chainId, account.getAddress().getBase58());
         if (null == acc) {
