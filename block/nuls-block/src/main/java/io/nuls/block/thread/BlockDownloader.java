@@ -113,7 +113,6 @@ public class BlockDownloader implements Callable<Boolean> {
             context.setDoSyn(false);
             return false;
         }
-        executor.shutdown();
         return context.isDoSyn();
     }
 
