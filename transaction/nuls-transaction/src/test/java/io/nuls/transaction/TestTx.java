@@ -66,73 +66,70 @@ public class TestTx {
 
     @Test
     public void allInOne() {
+        importPriKey("00c805d2d6d5e06f57fdfb1aff56ef3c2dd15eee88f36fa7d45d368c352ec5ec0d", null);//23 5MR_2CWKhFuoGVraaxL5FYY3RsQLjLDN7jw
         List<String> accountList = null;
         try {
             Map<String, Object> params = new HashMap<>();
             params.put(Constants.VERSION_KEY_STR, version);
             params.put("chainId", chainId);
-            params.put("count", 1);
+            params.put("count", 2);
             params.put("password", password);
             Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_createAccount", params);
             accountList = (List<String>) ((HashMap) ((HashMap) cmdResp.getResponseData()).get("ac_createAccount")).get("list");
-            for (String address : accountList) {
-                Log.debug("address-{{}}", address);
-                Map transferMap = new HashMap();
-                transferMap.put("chainId", chainId);
-                transferMap.put("remark", "transfer test");
-                List<CoinDTO> inputs = new ArrayList<>();
-                List<CoinDTO> outputs = new ArrayList<>();
-                CoinDTO inputCoin1 = new CoinDTO();
-                inputCoin1.setAddress(address23);
-                inputCoin1.setPassword(password);
-                inputCoin1.setAssetsChainId(chainId);
-                inputCoin1.setAssetsId(assetId);
-                inputCoin1.setAmount(new BigInteger("20000100000000"));
-                inputs.add(inputCoin1);
+            String agentAddress = accountList.get(0);
+            String packingAddress = accountList.get(1);
+            Log.debug("agentAddress-{{}}", agentAddress);
+            Log.debug("packingAddress-{{}}", packingAddress);
+            Map transferMap = new HashMap();
+            transferMap.put("chainId", chainId);
+            transferMap.put("remark", "transfer test");
+            List<CoinDTO> inputs = new ArrayList<>();
+            List<CoinDTO> outputs = new ArrayList<>();
+            CoinDTO inputCoin1 = new CoinDTO();
+            inputCoin1.setAddress(address23);
+            inputCoin1.setPassword(password);
+            inputCoin1.setAssetsChainId(chainId);
+            inputCoin1.setAssetsId(assetId);
+            inputCoin1.setAmount(new BigInteger("25000100000000"));
+            inputs.add(inputCoin1);
 
-                CoinDTO outputCoin1 = new CoinDTO();
-                outputCoin1.setAddress(address);
-                outputCoin1.setPassword(password);
-                outputCoin1.setAssetsChainId(chainId);
-                outputCoin1.setAssetsId(assetId);
-                outputCoin1.setAmount(new BigInteger("20000100000000"));
-                outputs.add(outputCoin1);
+            CoinDTO outputCoin1 = new CoinDTO();
+            outputCoin1.setAddress(agentAddress);
+            outputCoin1.setPassword(password);
+            outputCoin1.setAssetsChainId(chainId);
+            outputCoin1.setAssetsId(assetId);
+            outputCoin1.setAmount(new BigInteger("25000100000000"));
+            outputs.add(outputCoin1);
+            transferMap.put("inputs", inputs);
+            transferMap.put("outputs", outputs);
 
-                transferMap.put("inputs", inputs);
-                transferMap.put("outputs", outputs);
+            Response ccc = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_transfer", transferMap);
+            HashMap result = (HashMap) (((HashMap) ccc.getResponseData()).get("ac_transfer"));
+            Log.debug("ac_transfer hash:{}", result.get("value"));
 
-                Response ccc = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_transfer", transferMap);
-                HashMap result = (HashMap) (((HashMap) ccc.getResponseData()).get("ac_transfer"));
-                Assert.assertTrue(null != result);
-                Log.debug("{}", result.get("value"));
+            Thread.sleep(15000);
 
-                Thread.sleep(15000);
+            //组装创建节点交易
+            Map agentTxMap = this.createAgentTx(agentAddress, packingAddress);
+            //调用接口
+            Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.CS.abbr, "cs_createAgent", agentTxMap);
+            Map sss = (HashMap) (((HashMap) cmdResp2.getResponseData()).get("cs_createAgent"));
+            String agentHash =  (String)sss.get("txHex");
+            Log.debug("createAgent-txHash:{}", agentHash);
 
-                //组装创建节点交易
-                Map agentTxMap = this.createAgentTx(address, address);
-                //调用接口
-                Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.CS.abbr, "cs_createAgent", agentTxMap);
-                Map sss = (HashMap) (((HashMap) cmdResp2.getResponseData()).get("cs_createAgent"));
-                Assert.assertTrue(null != sss);
-                String txHex =  (String)result.get("txHex");
-                Transaction tx = TxUtil.getTransaction(txHex);
-                String agentHash = tx.getHash().getDigestHex();
-                Log.debug("createAgent-txHash:{}", agentHash);
+            Thread.sleep(15000);
 
-
-                //组装委托节点交易
-                Map<String, Object> dpParams = new HashMap<>();
-                dpParams.put("chainId", chainId);
-                dpParams.put("address", address);
-                dpParams.put("password", password);
-                dpParams.put("agentHash", agentHash);
-                dpParams.put("deposit", 200000 * 100000000L);
-                Response dpResp = ResponseMessageProcessor.requestAndResponse(ModuleE.CS.abbr, "cs_depositToAgent", dpParams);
-                HashMap dpResult = (HashMap) ((HashMap) dpResp.getResponseData()).get("cs_depositToAgent");
-                String aaaaa = (String) dpResult.get("txHex");
-                Transaction eeeee = TxUtil.getTransaction(aaaaa);
-                Log.debug("deposit-txHash:{}", eeeee.getHash().getDigestHex());
-            }
+            //组装委托节点交易
+            Map<String, Object> dpParams = new HashMap<>();
+            dpParams.put("chainId", chainId);
+            dpParams.put("address", agentAddress);
+            dpParams.put("password", password);
+            dpParams.put("agentHash", agentHash);
+            dpParams.put("deposit", 200000 * 100000000L);
+            Response dpResp = ResponseMessageProcessor.requestAndResponse(ModuleE.CS.abbr, "cs_depositToAgent", dpParams);
+            HashMap dpResult = (HashMap) ((HashMap) dpResp.getResponseData()).get("cs_depositToAgent");
+            String hash = (String) dpResult.get("txHex");
+            Log.debug("deposit-txHash:{}", hash);
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -216,9 +213,8 @@ public class TestTx {
         Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.CS.abbr, "cs_createAgent", agentTxMap);
         Map result = (HashMap) (((HashMap) cmdResp2.getResponseData()).get("cs_createAgent"));
         Assert.assertTrue(null != result);
-        String txHex =  (String)result.get("txHex");
-        Transaction tx = TxUtil.getTransaction(txHex);
-        Log.debug("createAgent-txHash:{}", tx.getHash().getDigestHex());
+        String hash =  (String)result.get("txHex");
+        Log.debug("createAgent-txHash:{}", hash);
     }
 
 
@@ -251,14 +247,13 @@ public class TestTx {
     public void withdraw() throws Exception {
         Map<String, Object> params = new HashMap<>();
         params.put("chainId", chainId);
-        params.put("address", address27);
+        params.put("address", "5MR_2Cb5vRQRzG52A9qWg9G7seXvUWtbjMi");
         params.put("password", password);
-        params.put("txHash", "0020467c4aea7653d17295b313c4002ddb41d882c22039d181fc474e7de6d5d0c06b");
+        params.put("txHash", "0020b8a42eb4c70196189e607e9434fe09b595d5753711f21819113f40d64a1c82c1");
         Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.CS.abbr, "cs_withdraw", params);
         HashMap dpResult = (HashMap) ((HashMap) cmdResp.getResponseData()).get("cs_withdraw");
-        String txHex = (String) dpResult.get("txHex");
-        Transaction tx = TxUtil.getTransaction(txHex);
-        Log.debug("withdraw-txHash:{}", tx.getHash().getDigestHex());
+        String hash = (String) dpResult.get("txHex");
+        Log.debug("withdraw-txHash:{}", hash);
     }
 
     @Test

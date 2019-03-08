@@ -1,5 +1,8 @@
 package io.nuls.api.provider;
 
+import io.nuls.rpc.model.ModuleE;
+import io.nuls.tools.constant.ErrorCode;
+import io.nuls.tools.log.Log;
 import lombok.extern.slf4j.Slf4j;
 import net.sf.cglib.proxy.MethodInterceptor;
 import net.sf.cglib.proxy.MethodProxy;
@@ -10,7 +13,7 @@ import java.util.Arrays;
 /**
  * @Author: zhoulijun
  * @Time: 2019-03-07 18:33
- * @Description: 功能描述
+ * @Description: 在请求参数中注入默认chainId
  */
 @Slf4j
 public class ServiceProxy implements MethodInterceptor {
@@ -31,8 +34,12 @@ public class ServiceProxy implements MethodInterceptor {
                 }
             }
         });
-        Object res = methodProxy.invokeSuper(o, objects);
-        return res;
+        try{
+            return methodProxy.invokeSuper(o, objects);
+        }catch(Exception e){
+            log.error("Calling provider interface failed. service:{} - method:{}",o.getClass(),method.getName(),e);
+            return BaseService.fail(BaseService.ERROR_CODE, ErrorCode.init("10001").getMsg());
+        }
     }
 
 }

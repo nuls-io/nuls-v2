@@ -39,7 +39,6 @@ import io.nuls.base.data.Transaction;
 import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.data.StringUtils;
 import io.nuls.tools.exception.NulsException;
-import io.nuls.tools.log.Log;
 
 import java.math.BigInteger;
 import java.util.HashMap;
@@ -181,7 +180,7 @@ public class TxUtil {
         try {
             return tx.getCoinDataInstance();
         } catch (NulsException e) {
-            Log.error(e);
+            LoggerUtil.logger.error(e);
             throw new NulsException(AccountErrorCode.DESERIALIZE_ERROR);
         }
     }
@@ -193,7 +192,7 @@ public class TxUtil {
         try {
             return Transaction.getInstance(txBytes);
         } catch (NulsException e) {
-            Log.error(e);
+            LoggerUtil.logger.error(e);
             throw new NulsException(AccountErrorCode.DESERIALIZE_ERROR);
         }
     }
@@ -214,10 +213,10 @@ public class TxUtil {
             baseNulsData.parse(new NulsByteBuffer(bytes));
             return (T) baseNulsData;
         } catch (NulsException e) {
-            Log.error(e);
+            LoggerUtil.logger.error(e);
             throw new NulsException(AccountErrorCode.DESERIALIZE_ERROR);
         } catch (Exception e) {
-            Log.error(e);
+            LoggerUtil.logger.error(e);
             throw new NulsException(AccountErrorCode.DESERIALIZE_ERROR);
         }
     }

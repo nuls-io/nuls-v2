@@ -38,6 +38,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.locks.StampedLock;
@@ -150,6 +151,7 @@ public class ChainContext {
     }
 
     public void init() {
+        systemTransactionType = new ArrayList<>();
         version = 1;
         doSyn = true;
         lock = new StampedLock();

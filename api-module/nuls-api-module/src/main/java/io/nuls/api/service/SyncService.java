@@ -50,13 +50,8 @@ public class SyncService {
     //记录每个区块的红黄牌信息
     private List<PunishLogInfo> punishLogList = new ArrayList<>();
 
-    public void initCache() {
-        chainService.initCache();
-        accountService.initCache();
-        ledgerService.initCache();
-        aliasService.initCache();
-        agentService.initCache();
-    }
+
+
 
 
     public SyncInfo getSyncInfo(int chainId) {

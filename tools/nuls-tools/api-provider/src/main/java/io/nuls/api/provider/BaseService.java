@@ -1,5 +1,6 @@
 package io.nuls.api.provider;
 
+import io.nuls.tools.constant.ErrorCode;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -14,8 +15,9 @@ import java.util.List;
 @Setter
 public abstract class BaseService {
 
-    public static final int ERROR_CODE = -1;
+    public static final String ERROR_CODE = "10001";
 
+    public static final String RPC_ERROR_CODE = "10002";
     /**
      * 默认chainId
      * 从配置文件中注入
@@ -30,8 +32,12 @@ public abstract class BaseService {
         return new Result<>(list);
     }
 
-    protected Result fail(int status,String message){
-        return new Result(status,message);
+    public static Result fail(String errorCode,String message){
+        return new Result(errorCode,message);
+    }
+
+    public static Result fail(String errorCode){
+        return fail(errorCode, ErrorCode.init(errorCode).getMsg());
     }
 
 }

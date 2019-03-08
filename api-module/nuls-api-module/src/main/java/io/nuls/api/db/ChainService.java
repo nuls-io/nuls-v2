@@ -2,9 +2,11 @@ package io.nuls.api.db;
 
 
 import com.mongodb.client.model.Filters;
+import io.nuls.api.cache.ApiCache;
 import io.nuls.api.constant.MongoTableConstant;
 import io.nuls.api.manager.CacheManager;
 import io.nuls.api.manager.ChainManager;
+import io.nuls.api.model.po.db.AssetInfo;
 import io.nuls.api.model.po.db.ChainInfo;
 import io.nuls.api.model.po.db.SyncInfo;
 import io.nuls.api.utils.DocumentTransferTool;
@@ -13,6 +15,7 @@ import io.nuls.tools.core.annotation.Component;
 import org.bson.Document;
 import org.bson.conversions.Bson;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Component
@@ -24,15 +27,27 @@ public class ChainService {
     public void initCache() {
         List<Document> documentList = mongoDBService.query(MongoTableConstant.CHAIN_INFO_TABLE);
         for (Document document : documentList) {
-            ChainInfo chainInfo = DocumentTransferTool.toInfo(document, "chainId", ChainInfo.class);
-            CacheManager.initCache(chainInfo.getChainId());
-            CacheManager.addChainInfo(chainInfo);
+            ChainInfo chainInfo = ChainInfo.toInfo(document);
+            CacheManager.initCache(chainInfo);
         }
     }
 
+    public List<ChainInfo> getChainInfoList() {
+        List<Document> documentList = mongoDBService.query(MongoTableConstant.CHAIN_INFO_TABLE);
+        if (documentList.isEmpty()) {
+            return null;
+        }
+        List<ChainInfo> chainList = new ArrayList<>();
+        for (Document document : documentList) {
+            chainList.add(ChainInfo.toInfo(document));
+        }
+        return chainList;
+    }
+
     public void addChainInfo(ChainInfo chainInfo) {
-        Document document = DocumentTransferTool.toDocument(chainInfo, "chainId");
+        Document document = chainInfo.toDocument();
         mongoDBService.insertOne(MongoTableConstant.CHAIN_INFO_TABLE, document);
+        CacheManager.initCache(chainInfo);
     }
 
     public ChainInfo getChainInfo(int chainId) {

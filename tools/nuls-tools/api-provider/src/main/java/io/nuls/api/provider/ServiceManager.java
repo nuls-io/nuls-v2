@@ -76,7 +76,8 @@ public class ServiceManager {
                             serviceImpls.put(intf,service);
                             service.setChainId(defaultChainId);
                         } catch (Exception e) {
-                            e.printStackTrace();
+                            log.error("api provider init fail, service : {}",cls,e);
+                            System.exit(0);
                         }
                     });
                 }

@@ -113,7 +113,7 @@ public class CreateProcessor implements CommandProcessor {
 
     @Override
     public CommandResult execute(String[] args) {
-        String password = CommandHelper.getPwdOptional();
+        String password = CommandHelper.getPwd();
         if(StringUtils.isNotBlank(password)){
             CommandHelper.confirmPwd(password);
         }

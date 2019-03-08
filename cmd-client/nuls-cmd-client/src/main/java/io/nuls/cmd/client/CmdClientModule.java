@@ -8,6 +8,8 @@ import io.nuls.rpc.modulebootstrap.RpcModule;
 import io.nuls.rpc.modulebootstrap.RpcModuleState;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
+import io.nuls.tools.exception.NulsException;
+import io.nuls.tools.parse.I18nUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Before;
 
@@ -53,4 +55,18 @@ public class CmdClientModule extends RpcModule {
         return RpcModuleState.Ready;
     }
 
+    @Override
+    public void init() {
+        super.init();
+//        String language = NulsConfig.MODULES_CONFIG.getCfgValue(AccountConstant.CFG_SYSTEM_SECTION, AccountConstant.CFG_SYSTEM_LANGUAGE);
+        try {
+            String language = "zh-CHS";
+            I18nUtils.loadLanguage(this.getClass(), "languages", language);
+            I18nUtils.setLanguage(language);
+        } catch (NulsException e) {
+            log.error("module init I18nUtils fail");
+            System.exit(0);
+        }
+
+    }
 }

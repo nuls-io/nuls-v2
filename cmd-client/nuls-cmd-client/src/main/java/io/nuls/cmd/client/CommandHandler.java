@@ -27,14 +27,14 @@ package io.nuls.cmd.client;
 
 
 import io.nuls.cmd.client.processor.CommandProcessor;
-import io.nuls.cmd.client.processor.account.CreateProcessor;
+import io.nuls.cmd.client.processor.account.*;
+import io.nuls.cmd.client.processor.system.ExitProcessor;
+import io.nuls.cmd.client.processor.system.HelpProcessor;
 import io.nuls.tools.basic.InitializingBean;
+import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.core.ioc.SpringLiteContext;
 import io.nuls.tools.data.StringUtils;
 import io.nuls.tools.exception.NulsException;
-import io.nuls.tools.exception.NulsRuntimeException;
-import io.nuls.tools.log.Log;
-import io.nuls.tools.parse.ConfigLoader;
 import io.nuls.tools.parse.I18nUtils;
 import jline.console.ConsoleReader;
 import jline.console.completer.ArgumentCompleter;
@@ -52,7 +52,9 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import static io.nuls.tools.core.ioc.SpringLiteContext.getBean;
 
+@Component
 public class CommandHandler implements InitializingBean {
 
     public static final Map<String, CommandProcessor> PROCESSOR_MAP = new TreeMap<>();
@@ -82,11 +84,29 @@ public class CommandHandler implements InitializingBean {
 //        register(new GetBlockProcessor());
 //        register(new GetBestBlockHeaderProcessor());
 //
-//        /**
-//         * account
-//         */
-//        register(new BackupAccountProcessor());
-        register(SpringLiteContext.getBean(CreateProcessor.class));
+        /**
+         * account
+         */
+        //create account
+        register(getBean(CreateProcessor.class));
+        //backup account to key store
+        register(getBean(BackupAccountProcessor.class));
+        //import account for key store
+        register(getBean(ImportByKeyStoreProcessor.class));
+        //import account for private key
+        register(getBean(ImportByPrivateKeyProcessor.class));
+        //update account password
+        register(getBean(UpdatePasswordProcessor.class));
+        //get account info
+        register(getBean(GetAccountProcessor.class));
+        //get all account list
+        register(getBean(GetAccountsProcessor.class));
+        //remove account by address
+        register(getBean(RemoveAccountProcessor.class));
+        //get private key by address
+        register(getBean(GetPrivateKeyProcessor.class));
+        //set account alias
+        register(getBean(SetAliasProcessor.class));
 //        register(new GetAccountProcessor());
 //        register(new GetAccountsProcessor());
 ////        register(new GetAssetProcessor());//
@@ -147,11 +167,11 @@ public class CommandHandler implements InitializingBean {
 //        register(new GetNetInfoProcessor());
 //        register(new GetNetNodesProcessor());
 //
-//        /**
-//         * system
-//         */
-//        register(new ExitProcessor());
-//        register(new HelpProcessor());
+        /**
+         * system
+         */
+        register(SpringLiteContext.getBean(ExitProcessor.class));
+        register(SpringLiteContext.getBean(HelpProcessor.class));
 //        register(new VersionProcessor());
 //        register(new UpgradeProcessor());
 //        /**

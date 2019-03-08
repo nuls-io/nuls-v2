@@ -53,6 +53,8 @@ public class RequestMessageProcessor {
 
         //握手成功之后保存channel与角色的对应信息
         NegotiateConnection negotiateConnection = JSONUtils.map2pojo((Map) message.getMessageData(), NegotiateConnection.class);
+        Log.info("当前已建立在连接："+ConnectManager.ROLE_CHANNEL_MAP);
+        Log.info("当前正在建立在连接："+negotiateConnection.getAbbreviation());
         ConnectManager.ROLE_CHANNEL_MAP.put(negotiateConnection.getAbbreviation(),channel);
         ConnectManager.createConnectData((SocketChannel) channel);
     }
