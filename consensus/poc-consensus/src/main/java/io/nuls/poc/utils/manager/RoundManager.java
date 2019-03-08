@@ -166,7 +166,7 @@ public class RoundManager {
      * @param chain            chain info
      * */
     public void initRound(Chain chain) throws NulsException{
-        resetRound(chain,false)
+        resetRound(chain,false);
         /*MeetingRound currentRound = resetRound(chain,false);
         *//*
         如果当前没有设置它的上一轮次，则找到它的上一轮的轮次并设置
