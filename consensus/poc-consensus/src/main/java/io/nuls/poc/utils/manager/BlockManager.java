@@ -36,7 +36,7 @@ public class BlockManager {
     public void loadBlockHeader(Chain chain) throws Exception {
         Map params = new HashMap(ConsensusConstant.INIT_CAPACITY);
         params.put("chainId", chain.getConfig().getChainId());
-        params.put("size", ConsensusConstant.INIT_BLOCK_HEADER_COUNT);
+        params.put("round", ConsensusConstant.INIT_BLOCK_HEADER_COUNT);
         Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.BL.abbr, "getLatestRoundBlockHeaders", params);
         Map<String, Object> resultMap;
         List<String> blockHeaderHexs = new ArrayList<>();
