@@ -1,7 +1,6 @@
 package io.nuls.rpc.netty.channel;
 
 import io.netty.channel.socket.SocketChannel;
-import io.nuls.rpc.model.message.Ack;
 import io.nuls.rpc.model.message.Message;
 import io.nuls.rpc.model.message.Request;
 import io.nuls.rpc.model.message.Response;
@@ -10,8 +9,13 @@ import io.nuls.tools.parse.JSONUtils;
 import io.nuls.tools.thread.ThreadUtils;
 import io.nuls.tools.thread.commom.NulsThreadFactory;
 
-import java.util.*;
-import java.util.concurrent.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.LinkedBlockingQueue;
 
 /**
  * 链接基础类

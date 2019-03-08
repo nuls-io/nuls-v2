@@ -18,7 +18,9 @@ import io.nuls.tools.data.DateUtils;
 import io.nuls.tools.data.DoubleUtils;
 import io.nuls.tools.data.StringUtils;
 import io.nuls.tools.exception.NulsException;
+import io.nuls.tools.log.Log;
 
+import java.io.IOException;
 import java.math.BigInteger;
 import java.util.*;
 
@@ -166,12 +168,12 @@ public class RoundManager {
      * @param chain            chain info
      * */
     public void initRound(Chain chain) throws NulsException{
-        resetRound(chain,false);
-        /*MeetingRound currentRound = resetRound(chain,false);
-        *//*
+        //resetRound(chain,false);
+        MeetingRound currentRound = resetRound(chain,false);
+        /*
         如果当前没有设置它的上一轮次，则找到它的上一轮的轮次并设置
         If the previous round is not currently set, find the previous round and set it.
-        *//*
+        */
         if (currentRound.getPreRound() == null) {
             BlockHeader newestHeader = chain.getNewestHeader();
             BlockExtendsData extendsData = new BlockExtendsData(newestHeader.getExtend());
@@ -185,7 +187,7 @@ public class RoundManager {
             }
             MeetingRound preRound = getRound(chain,extendsData,false);
             currentRound.setPreRound(preRound);
-        }*/
+        }
     }
 
     /**
@@ -414,28 +416,35 @@ public class RoundManager {
         }
         List<Agent> agentList = getAliveAgentList(chain,startBlockHeader.getHeight());
         for (Agent agent : agentList) {
+            Agent realAgent = new Agent();
+            try {
+                realAgent.parse(agent.serialize(),0);
+            }catch (IOException io){
+                Log.error(io);
+                return;
+            }
             MeetingMember member = new MeetingMember();
             member.setRoundStartTime(round.getStartTime());
             /*
             获取节点委托信息，用于计算节点总的委托金额
             Get the node delegation information for calculating the total amount of the node delegation
             */
-            List<Deposit> cdList = getDepositListByAgentId(chain,agent.getTxHash(), startBlockHeader.getHeight());
+            List<Deposit> cdList = getDepositListByAgentId(chain,realAgent.getTxHash(), startBlockHeader.getHeight());
             BigInteger totalDeposit = BigInteger.ZERO;
             for (Deposit dtx : cdList) {
                 totalDeposit = totalDeposit.add(dtx.getDeposit());
             }
-            agent.setTotalDeposit(totalDeposit);
+            realAgent.setTotalDeposit(totalDeposit);
             member.setDepositList(cdList);
             member.setRoundIndex(round.getIndex());
-            member.setAgent(agent);
+            member.setAgent(realAgent);
             /*
             节点总的委托金额是否达到出块节点的最小值
             Does the total delegation amount of the node reach the minimum value of the block node?
             */
-            boolean isItIn = agent.getTotalDeposit().compareTo(ConsensusConstant.SUM_OF_DEPOSIT_OF_AGENT_LOWER_LIMIT) >= 0 ? true : false;
+            boolean isItIn = realAgent.getTotalDeposit().compareTo(ConsensusConstant.SUM_OF_DEPOSIT_OF_AGENT_LOWER_LIMIT) >= 0 ? true : false;
             if (isItIn) {
-                agent.setCreditVal(calcCreditVal(chain,member, startBlockHeader));
+                realAgent.setCreditVal(calcCreditVal(chain,member, startBlockHeader));
                 memberList.add(member);
             }
         }

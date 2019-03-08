@@ -279,6 +279,7 @@ public class AccountCmd extends BaseCmd {
         LoggerUtil.logger.debug("getEncryptedAddressList start");
         Map<String, List<String>> map = new HashMap<>();
         List<String> encryptedAddressList = new ArrayList<>();
+        map.put(RpcConstant.LIST, encryptedAddressList);
         try {
             //query all accounts
             Object chainIdObj = params == null ? null : params.get(RpcParameterNameConstant.CHAIN_ID);
@@ -292,7 +293,7 @@ public class AccountCmd extends BaseCmd {
                 accountList = accountService.getAccountList();
             }
             if (null == accountList) {
-                return success(null);
+                return success(map);
             }
             for (Account account : accountList) {
                 if (account.isEncrypted()) {
@@ -302,7 +303,7 @@ public class AccountCmd extends BaseCmd {
         } catch (NulsRuntimeException e) {
             return failed(e.getErrorCode());
         }
-        map.put(RpcConstant.LIST, encryptedAddressList);
+
         LoggerUtil.logger.debug("getEncryptedAddressList end");
         return success(map);
     }
