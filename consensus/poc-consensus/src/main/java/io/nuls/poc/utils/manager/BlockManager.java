@@ -36,19 +36,19 @@ public class BlockManager {
     public void loadBlockHeader(Chain chain) throws Exception {
         Map params = new HashMap(ConsensusConstant.INIT_CAPACITY);
         params.put("chainId", chain.getConfig().getChainId());
-        params.put("size", ConsensusConstant.INIT_BLOCK_HEADER_COUNT);
-        Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.BL.abbr, "getLatestBlockHeaders", params);
+        params.put("round", ConsensusConstant.INIT_BLOCK_HEADER_COUNT);
+        Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.BL.abbr, "getLatestRoundBlockHeaders", params);
         Map<String, Object> resultMap;
         List<String> blockHeaderHexs = new ArrayList<>();
         if(cmdResp.isSuccess()){
             resultMap = (Map<String, Object>) cmdResp.getResponseData();
-            blockHeaderHexs = (List<String>) resultMap.get("getLatestBlockHeaders");
+            blockHeaderHexs = (List<String>) resultMap.get("getLatestRoundBlockHeaders");
         }
         while(!cmdResp.isSuccess() && blockHeaderHexs.size() == 0){
-            cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.BL.abbr, "getLatestBlockHeaders", params);
+            cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.BL.abbr, "getLatestRoundBlockHeaders", params);
             if(cmdResp.isSuccess()){
                 resultMap = (Map<String, Object>) cmdResp.getResponseData();
-                blockHeaderHexs = (List<String>) resultMap.get("getLatestBlockHeaders");
+                blockHeaderHexs = (List<String>) resultMap.get("getLatestRoundBlockHeaders");
                 break;
             }
             Log.info("---------------------------区块加载失败！");

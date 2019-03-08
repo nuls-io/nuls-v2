@@ -101,6 +101,10 @@ public interface CommandConstant {
      */
     String GET_LATEST_BLOCK_HEADERS = "getLatestBlockHeaders";
     /**
+     * 获取最新若干区块头
+     */
+    String GET_LATEST_ROUND_BLOCK_HEADERS = "getLatestRoundBlockHeaders";
+    /**
      * 接收本地节点新打包的区块
      */
     String RECEIVE_PACKING_BLOCK = "receivePackingBlock";
