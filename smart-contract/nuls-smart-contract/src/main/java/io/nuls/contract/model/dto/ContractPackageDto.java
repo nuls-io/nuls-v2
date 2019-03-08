@@ -23,7 +23,7 @@
  */
 package io.nuls.contract.model.dto;
 
-import io.nuls.contract.model.tx.ContractTransferTransaction;
+import io.nuls.base.data.Transaction;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
@@ -39,5 +39,5 @@ import java.util.List;
 @AllArgsConstructor
 public class ContractPackageDto {
     private byte[] stateRoot;
-    private List<ContractTransferTransaction> transferTransactionList;
+    private List<Transaction> transferTransactionList;
 }

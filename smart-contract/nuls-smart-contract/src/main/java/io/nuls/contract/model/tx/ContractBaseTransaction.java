@@ -47,6 +47,8 @@ public abstract class ContractBaseTransaction<T extends TransactionLogicData> ex
 
     private T txDataObj;
 
+    protected ContractBaseTransaction() {}
+
     protected ContractBaseTransaction(int txType) {
         super(txType);
 

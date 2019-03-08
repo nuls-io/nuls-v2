@@ -23,15 +23,16 @@
  */
 package io.nuls.contract.service.impl;
 
-import io.nuls.base.data.NulsDigestData;
-import io.nuls.base.data.Transaction;
+import io.nuls.base.data.*;
 import io.nuls.contract.constant.ContractConstant;
 import io.nuls.contract.constant.ContractErrorCode;
 import io.nuls.contract.helper.ContractHelper;
 import io.nuls.contract.model.bo.*;
 import io.nuls.contract.model.dto.ContractPackageDto;
 import io.nuls.contract.model.po.TransactionInfoPo;
+import io.nuls.contract.model.tx.ContractReturnGasTransaction;
 import io.nuls.contract.model.tx.ContractTransferTransaction;
+import io.nuls.contract.model.txdata.ContractData;
 import io.nuls.contract.service.*;
 import io.nuls.contract.storage.ContractAddressStorageService;
 import io.nuls.contract.storage.ContractExecuteResultStorageService;
@@ -42,15 +43,18 @@ import io.nuls.contract.vm.program.ProgramExecutor;
 import io.nuls.tools.basic.Result;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Service;
+import io.nuls.tools.data.ByteArrayWrapper;
+import io.nuls.tools.data.LongUtils;
 import io.nuls.tools.log.Log;
 import org.spongycastle.util.encoders.Hex;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.io.IOException;
+import java.math.BigInteger;
+import java.util.*;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
+import static io.nuls.contract.constant.ContractConstant.TX_TYPE_DELETE_CONTRACT;
 import static io.nuls.contract.util.ContractUtil.getFailed;
 import static io.nuls.contract.util.ContractUtil.getSuccess;
 
@@ -92,13 +96,16 @@ public class ContractServiceImpl implements ContractService {
             AnalyzerResult analyzerResult = resultAnalyzer.analysis(callerResult.getCallableResultList());
             List<ContractResult> resultList = resultHanlder.handleAnalyzerResult(chainId, batchExecutor, analyzerResult, preStateRoot);
             // 返回生成的合约内部转账交易
-            List<ContractTransferTransaction> transferTransactionList = new ArrayList<>();
+            List<Transaction> resultTxList = new ArrayList<>();
             for(ContractResult contractResult : resultList) {
-                transferTransactionList.addAll(contractResult.getContractTransferList());
+                resultTxList.addAll(contractResult.getContractTransferList());
             }
+            // 生成退还剩余Gas的交易
+            ContractReturnGasTransaction contractReturnGasTx = this.makeReturnGasTx(chainId, resultList, resultTxList.get(resultTxList.size() - 1).getTime() + 1);
+            resultTxList.add(contractReturnGasTx);
             Result<byte[]> batchExecuteResult = contractCaller.commitBatchExecute(batchExecutor);
             byte[] stateRoot = batchExecuteResult.getData();
-            ContractPackageDto dto = new ContractPackageDto(stateRoot, transferTransactionList);
+            ContractPackageDto dto = new ContractPackageDto(stateRoot, resultTxList);
             return getSuccess().setData(dto);
         } catch (Exception e) {
             Log.error(e);
@@ -108,6 +115,56 @@ public class ContractServiceImpl implements ContractService {
             contractHelper.removeTempBalanceManagerAndCurrentBlockHeader(chainId);
         }
 
+    }
+
+    private ContractReturnGasTransaction makeReturnGasTx(int chainId, List<ContractResult> resultList, long time) throws IOException {
+        int assetsId = contractHelper.getChain(chainId).getConfig().getAssetsId();
+        ContractWrapperTransaction wrapperTx;
+        ContractData contractData;
+        Map<ByteArrayWrapper, BigInteger> returnMap = new HashMap<>();
+        for(ContractResult contractResult : resultList) {
+            wrapperTx = contractResult.getTx();
+            // 终止合约不消耗Gas，跳过
+            if(wrapperTx.getType() == TX_TYPE_DELETE_CONTRACT) {
+                continue;
+            }
+            contractData = wrapperTx.getContractData();
+            long realGasUsed = contractResult.getGasUsed();
+            long txGasUsed = contractData.getGasLimit();
+            long returnGas;
+
+            BigInteger returnValue;
+            if (txGasUsed > realGasUsed) {
+                returnGas = txGasUsed - realGasUsed;
+                returnValue = BigInteger.valueOf(LongUtils.mul(returnGas, contractData.getPrice()));
+
+                ByteArrayWrapper sender = new ByteArrayWrapper(contractData.getSender());
+                BigInteger senderValue = returnMap.get(sender);
+                if (senderValue == null) {
+                    senderValue = returnValue;
+                } else {
+                    senderValue = senderValue.add(returnValue);
+                }
+                returnMap.put(sender, senderValue);
+            }
+        }
+        if(!returnMap.isEmpty()) {
+            CoinData coinData = new CoinData();
+            List<CoinTo> toList = coinData.getTo();
+            Set<Map.Entry<ByteArrayWrapper, BigInteger>> entries = returnMap.entrySet();
+            CoinTo returnCoin;
+            for (Map.Entry<ByteArrayWrapper, BigInteger> entry : entries) {
+                returnCoin = new CoinTo(entry.getKey().getBytes(), chainId, assetsId, entry.getValue(), 0L);
+                toList.add(returnCoin);
+            }
+            ContractReturnGasTransaction tx = new ContractReturnGasTransaction();
+            tx.setTime(time);
+            tx.setCoinData(coinData.serialize());
+            tx.setHash(NulsDigestData.calcDigestData(tx.serializeForHash()));
+            return tx;
+        }
+
+        return null;
     }
 
     @Autowired

@@ -36,6 +36,11 @@ public interface ContractConstant {
     int TX_TYPE_CREATE_CONTRACT = 100;
     int TX_TYPE_CALL_CONTRACT = 101;
     int TX_TYPE_DELETE_CONTRACT = 102;
+    /**
+     * contract transfer
+     */
+    int TX_TYPE_CONTRACT_TRANSFER = 103;
+    int TX_TYPE_CONTRACT_RETURN_GAS = 104;
 
     int TX_TYPE_COINBASE = 1;
     /**
@@ -47,10 +52,7 @@ public interface ContractConstant {
 
     int STOP = 2;
 
-    /**
-     * contract transfer
-     */
-    int TX_TYPE_CONTRACT_TRANSFER = 103;
+
     long CONTRACT_TRANSFER_GAS_COST = 1000;
 
     String BALANCE_TRIGGER_METHOD_NAME = "_payable";
