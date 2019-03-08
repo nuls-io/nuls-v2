@@ -97,13 +97,13 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
             //todo 批量验证coinData，接口和单个的区别？
             VerifyTxResult verifyTxResult = LedgerCall.verifyCoinData(chain, tx, true);
             if (!verifyTxResult.success()) {
-                chain.getLogger().debug("*** Debug *** [保存创世块交易失败] " +
+                chain.getLoggerMap().get(TxConstant.LOG_TX).debug("*** Debug *** [保存创世块交易失败] " +
                         "coinData not success - code: {}, - reason:{}, type:{} - txhash:{}", verifyTxResult.getCode(),  verifyTxResult.getDesc(), tx.getType(), tx.getHash().getDigestHex());
                 return false;
             }
         }
         if (!saveBlockTxList(chain, txList, blockHeaderHex, true)) {
-            chain.getLogger().debug("保存创世块交易失败");
+            chain.getLoggerMap().get(TxConstant.LOG_TX).debug("保存创世块交易失败");
             return false;
         }
         int debugCount = 0;
@@ -113,10 +113,10 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
         }
         CoinData coinData = TxUtil.getCoinData(txList.get(0));
         for (Coin coin : coinData.getTo()){
-            chain.getLogger().debug("address:{}, to:{}", AddressTool.getStringAddressByBytes(coin.getAddress()), coin.getAmount());
+            chain.getLoggerMap().get(TxConstant.LOG_TX).debug("address:{}, to:{}", AddressTool.getStringAddressByBytes(coin.getAddress()), coin.getAmount());
         }
 
-        chain.getLogger().debug("保存创世块交易成功, H2数据库生成{}条交易记录", debugCount);
+        chain.getLoggerMap().get(TxConstant.LOG_TX).debug("保存创世块交易成功, H2数据库生成{}条交易记录", debugCount);
         //修改重新打包状态,如果共识正在打包则需要重新打包
         chain.getRePackage().set(true);
         return true;
@@ -130,7 +130,7 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
      */
     @Override
     public boolean saveTxList(Chain chain, List<NulsDigestData> txHashList, String blockHeaderHex) throws NulsException {
-        chain.getLogger().debug("start save block txs.......");
+        chain.getLoggerMap().get(TxConstant.LOG_TX).debug("start save block txs.......");
         if (null == chain || txHashList == null || txHashList.size() == 0) {
             throw new NulsException(TxErrorCode.PARAMETER_ERROR);
         }
@@ -148,7 +148,7 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
             }
             return saveResult;
         } catch (Exception e) {
-            chain.getLogger().error(e);
+            chain.getLoggerMap().get(TxConstant.LOG_TX).error(e);
             return false;
         }
     }
@@ -162,7 +162,7 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
         BlockHeader blockHeader = null;
         try {
             blockHeader = TxUtil.getInstance(blockHeaderHex, BlockHeader.class);
-            chain.getLogger().debug("saveBlockTxList block height:{}", blockHeader.getHeight());
+            chain.getLoggerMap().get(TxConstant.LOG_TX).debug("saveBlockTxList block height:{}", blockHeader.getHeight());
             for (Transaction tx : txList) {
                 tx.setBlockHeight(blockHeader.getHeight());
                 String txHex = tx.hex();
@@ -178,7 +178,7 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
                 }
             }
         } catch (Exception e) {
-            chain.getLogger().error(e);
+            chain.getLoggerMap().get(TxConstant.LOG_TX).error(e);
             return false;
         }
         if (!saveTxs(chain, txList, true)) {
@@ -208,15 +208,15 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
         for (Transaction tx : txList) {
             tx.setStatus(TxStatusEnum.CONFIRMED);
             if (saveTx(chain, tx)) {
-                chain.getLogger().debug("success! saveTxs -type[{}], hash:{}", tx.getType(), tx.getHash().getDigestHex());
-                TxUtil.txInformationDebugPrint(chain, tx);
+                chain.getLoggerMap().get(TxConstant.LOG_TX).debug("success! saveTxs -type[{}], hash:{}", tx.getType(), tx.getHash().getDigestHex());
+                TxUtil.txInformationDebugPrint(chain, tx, chain.getLoggerMap().get(TxConstant.LOG_TX));
                 savedList.add(tx);
             } else {
                 if(atomicity) {
                     removeTxs(chain, savedList, false);
                 }
                 rs = false;
-                chain.getLogger().debug("failed! saveTxs  -type[{}], hash:{}", tx.getType(), tx.getHash().getDigestHex());
+                chain.getLoggerMap().get(TxConstant.LOG_TX).debug("failed! saveTxs  -type[{}], hash:{}", tx.getType(), tx.getHash().getDigestHex());
                 break;
             }
         }
@@ -234,7 +234,7 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
                 try {
                     rs = txService.crossTransactionCommit(chain, entry.getValue(), blockHeaderHex);
                 } catch (NulsException e) {
-                    chain.getLogger().error(e);
+                    chain.getLoggerMap().get(TxConstant.LOG_TX).error(e);
                     rs = false;
                 }
             }else {
@@ -243,7 +243,7 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
             }
             if (!rs) {
                 result = false;
-                chain.getLogger().debug("failed! commitTxs");
+                chain.getLoggerMap().get(TxConstant.LOG_TX).debug("failed! commitTxs");
                 break;
             }
             successed.put(entry.getKey(), entry.getValue());
@@ -260,8 +260,8 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
         try {
             return LedgerCall.commitTxsLedger(chain, txHexList, blockHeight);
         } catch (NulsException e) {
-            chain.getLogger().debug("failed! commitLedger");
-            chain.getLogger().error(e);
+            chain.getLoggerMap().get(TxConstant.LOG_TX).debug("failed! commitLedger");
+            chain.getLoggerMap().get(TxConstant.LOG_TX).error(e);
             return false;
         }
     }
@@ -272,13 +272,13 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
         for (Transaction tx : txList) {
             if (confirmedTxStorageService.removeTx(chain.getChainId(), tx.getHash())) {
                 successedList.add(tx);
-                chain.getLogger().debug("success! removeTxs  -type[{}], hash:{}", tx.getType(), tx.getHash().getDigestHex());
+                chain.getLoggerMap().get(TxConstant.LOG_TX).debug("success! removeTxs  -type[{}], hash:{}", tx.getType(), tx.getHash().getDigestHex());
             } else {
                 if(atomicity){
                     saveTxs(chain, successedList, false);
                 }
                 rs = false;
-                chain.getLogger().debug("failed! removeTxs  -type[{}], hash:{}", tx.getType(), tx.getHash().getDigestHex());
+                chain.getLoggerMap().get(TxConstant.LOG_TX).debug("failed! removeTxs  -type[{}], hash:{}", tx.getType(), tx.getHash().getDigestHex());
                 break;
             }
         }
@@ -294,7 +294,7 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
                 try {
                     rs = txService.crossTransactionRollback(chain, entry.getValue(), blockHeaderHex);
                 } catch (NulsException e) {
-                    chain.getLogger().error(e);
+                    chain.getLoggerMap().get(TxConstant.LOG_TX).error(e);
                     rs = false;
                 }
             }else {
@@ -303,7 +303,7 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
             }
             if (!rs) {
                 result = false;
-                chain.getLogger().debug("failed! rollbackcommitTxs ");
+                chain.getLoggerMap().get(TxConstant.LOG_TX).debug("failed! rollbackcommitTxs ");
                 break;
             }
             successed.put(entry.getKey(), entry.getValue());
@@ -319,7 +319,7 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
         try {
             return LedgerCall.rollbackTxsLedger(chain, txHexList, blockHeight);
         } catch (NulsException e) {
-            chain.getLogger().error(e);
+            chain.getLoggerMap().get(TxConstant.LOG_TX).error(e);
             return false;
         }
     }
@@ -327,7 +327,7 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
 
     @Override
     public boolean rollbackTxList(Chain chain, List<NulsDigestData> txHashList, String blockHeaderHex) throws NulsException {
-        chain.getLogger().debug("start rollbackTxList..............");
+        chain.getLoggerMap().get(TxConstant.LOG_TX).debug("start rollbackTxList..............");
         if (null == chain || txHashList == null || txHashList.size() == 0) {
             throw new NulsException(TxErrorCode.PARAMETER_ERROR);
         }
@@ -355,12 +355,12 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
                 }
             }
         } catch (Exception e) {
-            chain.getLogger().error(e);
+            chain.getLoggerMap().get(TxConstant.LOG_TX).error(e);
             return false;
         }
 
         BlockHeader blockHeader = TxUtil.getInstance(blockHeaderHex, BlockHeader.class);
-        chain.getLogger().debug("rollbackTxList block height:{}", blockHeader.getHeight());
+        chain.getLoggerMap().get(TxConstant.LOG_TX).debug("rollbackTxList block height:{}", blockHeader.getHeight());
         if (!rollbackLedger(chain, txHexList, blockHeader.getHeight())) {
             return false;
         }
@@ -408,11 +408,11 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
         for (NulsDigestData hash : hashList) {
             Transaction tx = confirmedTxStorageService.getTx(chainId, hash);
             if (null == tx) {
-                chain.getLogger().error(TxErrorCode.TX_NOT_EXIST.getMsg() + ": " + hash.toString());
+                chain.getLoggerMap().get(TxConstant.LOG_TX).error(TxErrorCode.TX_NOT_EXIST.getMsg() + ": " + hash.toString());
                 continue;
             }
             if (tx.getType() != TxConstant.TX_TYPE_CROSS_CHAIN_TRANSFER) {
-                chain.getLogger().error(TxErrorCode.TX_TYPE_ERROR.getMsg() + ": " + hash.toString());
+                chain.getLoggerMap().get(TxConstant.LOG_TX).error(TxErrorCode.TX_TYPE_ERROR.getMsg() + ": " + hash.toString());
                 continue;
             }
             //跨链转账交易接收者链id

@@ -113,7 +113,7 @@ public class CtxServiceImpl implements CtxService {
 //    public boolean updateCrossTxState(Chain chain, NulsDigestData hash, int state) {
 //        CrossTx crossTx = ctxStorageService.getTx(chain.getChainId(), hash);
 //        if (null != crossTx) {
-//            chain.getLogger().error(hash.getDigestHex() + TxErrorCode.TX_NOT_EXIST.getMsg());
+//            chain.getLoggerMap().get(TxConstant.LOG_TX).error(hash.getDigestHex() + TxErrorCode.TX_NOT_EXIST.getMsg());
 //            return false;
 //        }
 //        crossTx.setState(state);

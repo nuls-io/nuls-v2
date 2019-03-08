@@ -58,13 +58,13 @@ public class VerifyTxProcessTask implements Runnable {
         try {
             doTask(chain);
         } catch (Exception e) {
-            chain.getLogger().error(e);
+            chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).error(e);
         }
         try {
             //处理孤儿交易
             doOrphanTxTask(chain);
         } catch (Exception e) {
-            chain.getLogger().error(e);
+            chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).error(e);
         }
 //        System.out.println("count: " + count + " , size : " + size + " , orphan size : " + orphanTxList.size());
     }
@@ -84,12 +84,12 @@ public class VerifyTxProcessTask implements Runnable {
 
     private boolean processTx(Chain chain, Transaction tx, boolean isOrphanTx){
         try {
-            chain.getLogger().debug("*** Debug *** [VerifyTxProcessTask] type:[{}], txhash:{}, ", tx.getType(), tx.getHash());
+            chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("Process tx [VerifyTxProcessTask] type:[{}], txhash:{}, ", tx.getType(), tx.getHash());
             CoinData coinData = TxUtil.getCoinData(tx);
             for(CoinFrom coinFrom : coinData.getFrom()){
-                chain.getLogger().debug("*** Debug *** address:{}, nonce:{}, ", AddressTool.getChainIdByAddress(coinFrom.getAddress()), HexUtil.encode(coinFrom.getNonce()));
+                chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug(" address:{}, nonce:{}, ", AddressTool.getChainIdByAddress(coinFrom.getAddress()), HexUtil.encode(coinFrom.getNonce()));
             }
-            chain.getLogger().debug("");
+            chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("");
 
             int chainId = chain.getChainId();
             boolean rs = transactionManager.verify(chain, tx);
@@ -105,7 +105,7 @@ public class VerifyTxProcessTask implements Runnable {
             }
             VerifyTxResult verifyTxResult = LedgerCall.verifyCoinData(chain, tx, false);
             if(verifyTxResult.success()){
-                chain.getLogger().debug("Task,节点是否是打包节点: {}, 判断交易是否进入待打包队列", chain.getPackaging().get());
+                chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("Task,节点是否是打包节点: {}, 判断交易是否进入待打包队列", chain.getPackaging().get());
                 if(chain.getPackaging().get()) {
                     //当节点是出块节点时, 才将交易放入待打包队列
                     packablePool.add(chain, tx, false);
@@ -114,7 +114,7 @@ public class VerifyTxProcessTask implements Runnable {
                 unconfirmedTxStorageService.putTx(chainId, tx);
                 //保存到h2数据库
                 transactionH2Service.saveTxs(TxUtil.tx2PO(tx));
-                TxUtil.txInformationDebugPrint(chain, tx);
+                TxUtil.txInformationDebugPrint(chain, tx, chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS));
                 //调账本记录未确认交易
                 LedgerCall.commitUnconfirmedTx(chain, tx.hex());
                 //广播交易hash
@@ -122,10 +122,12 @@ public class VerifyTxProcessTask implements Runnable {
                 count++;
                 return true;
             }
-            chain.getLogger().debug("\n@@@@@@@@@@@@@@@@@");
-            chain.getLogger().debug("*** Debug *** [VerifyTxProcessTask] " +
+            chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("");
+            chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("-- verifyCoinData fail ----------");
+            chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("*** Debug *** [VerifyTxProcessTask] " +
                     "coinData not success - code: {}, - reason:{}, type:{} - txhash:{}", verifyTxResult.getCode(),  verifyTxResult.getDesc(), tx.getType(), tx.getHash().getDigestHex());
-            chain.getLogger().debug("@@@@@@@@@@@@@@@@@\n");
+            chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("---------------------------------");
+            chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("");
             if(verifyTxResult.getCode() == VerifyTxResult.ORPHAN && !isOrphanTx){
                 processOrphanTx(tx);
             }else if(isOrphanTx){
@@ -153,7 +155,7 @@ public class VerifyTxProcessTask implements Runnable {
                 if (success) {
                     LedgerCall.rollBackUnconfirmTx(chain, tx.hex());
                     it.remove();
-                    chain.getLogger().debug("*** Debug *** [VerifyTxProcessTask - OrphanTx] " +
+                    chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("*** Debug *** [VerifyTxProcessTask - OrphanTx] " +
                             "OrphanTx remove - type:{} - txhash:{}, -orphanTxList size:{}", tx.getType(), tx.getHash().getDigestHex(), orphanTxList.size());
                 }
             }
