@@ -166,11 +166,12 @@ public class RoundManager {
      * @param chain            chain info
      * */
     public void initRound(Chain chain) throws NulsException{
-        MeetingRound currentRound = resetRound(chain,false);
-        /*
+        resetRound(chain,false)
+        /*MeetingRound currentRound = resetRound(chain,false);
+        *//*
         如果当前没有设置它的上一轮次，则找到它的上一轮的轮次并设置
         If the previous round is not currently set, find the previous round and set it.
-        */
+        *//*
         if (currentRound.getPreRound() == null) {
             BlockHeader newestHeader = chain.getNewestHeader();
             BlockExtendsData extendsData = new BlockExtendsData(newestHeader.getExtend());
@@ -184,7 +185,7 @@ public class RoundManager {
             }
             MeetingRound preRound = getRound(chain,extendsData,false);
             currentRound.setPreRound(preRound);
-        }
+        }*/
     }
 
     /**
