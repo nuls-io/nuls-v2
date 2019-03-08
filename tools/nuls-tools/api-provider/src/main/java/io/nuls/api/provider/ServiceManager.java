@@ -61,7 +61,7 @@ public class ServiceManager {
             Provider annotation = (Provider) cls.getAnnotation(Provider.class);
             if(annotation != null){
                 Provider.ProviderType clsProviderType = annotation.value();
-                log.info("{} provider type : {}",cls, providerType);
+//                log.info("{} provider type : {}",cls, providerType);
                 if(providerType == clsProviderType){
                     Arrays.stream(cls.getInterfaces()).forEach(intf->{
                         try {

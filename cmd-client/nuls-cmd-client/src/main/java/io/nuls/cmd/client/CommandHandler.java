@@ -30,6 +30,7 @@ import io.nuls.cmd.client.processor.CommandProcessor;
 import io.nuls.cmd.client.processor.account.*;
 import io.nuls.cmd.client.processor.system.ExitProcessor;
 import io.nuls.cmd.client.processor.system.HelpProcessor;
+import io.nuls.cmd.client.processor.transaction.TransferProcessor;
 import io.nuls.tools.basic.InitializingBean;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.core.ioc.SpringLiteContext;
@@ -107,6 +108,8 @@ public class CommandHandler implements InitializingBean {
         register(getBean(GetPrivateKeyProcessor.class));
         //set account alias
         register(getBean(SetAliasProcessor.class));
+        //transfer
+        register(getBean(TransferProcessor.class));
 //        register(new GetAccountProcessor());
 //        register(new GetAccountsProcessor());
 ////        register(new GetAssetProcessor());//
