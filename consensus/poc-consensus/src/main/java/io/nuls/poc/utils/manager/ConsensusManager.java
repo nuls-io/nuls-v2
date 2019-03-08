@@ -16,15 +16,13 @@ import io.nuls.tools.data.BigIntegerUtils;
 import io.nuls.tools.data.DoubleUtils;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.exception.NulsRuntimeException;
+import io.nuls.tools.parse.ConfigLoader;
 
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.RoundingMode;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 
 /**
  * @author tag
@@ -292,9 +290,11 @@ public class ConsensusManager {
      * @param packingAddress  packing address/打包地址
      * @return Block
      */
-    public Block createBlock(Chain chain,BlockData blockData, byte[] packingAddress){
+    public Block createBlock(Chain chain,BlockData blockData, byte[] packingAddress)throws Exception{
         try {
-            CallMethodUtils.accountValid(chain.getConfig().getChainId(),AddressTool.getStringAddressByBytes(packingAddress),null);
+            Properties properties = ConfigLoader.loadProperties(ConsensusConstant.PASSWORD_CONFIG_NAME);
+            String password = properties.getProperty(ConsensusConstant.PASSWORD, ConsensusConstant.PASSWORD);
+            CallMethodUtils.accountValid(chain.getConfig().getChainId(),AddressTool.getStringAddressByBytes(packingAddress),password);
         }catch (NulsException e){
             chain.getLoggerMap().get(ConsensusConstant.CONSENSUS_LOGGER_NAME).error(e);
             return null;
