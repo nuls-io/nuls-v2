@@ -26,7 +26,7 @@ public class ServerInitializer extends ChannelInitializer<SocketChannel> {
         //netty是基于分段请求的，HttpObjectAggregator的作用是将请求分段再聚合,参数是聚合字节的最大长度
         pipeline.addLast(new HttpObjectAggregator(1024*1024*1024));
         //参数指的是contex_path
-        pipeline.addLast(new WebSocketServerProtocolHandler("/ws",null,true,65535));
+        pipeline.addLast(new WebSocketServerProtocolHandler("/ws",null,true,65535*5));
 
         //webSocket定义了传递数据的6中frame类型
         pipeline.addLast(new ServerHandler());

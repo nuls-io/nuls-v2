@@ -34,40 +34,19 @@ import io.nuls.cmd.client.CommandBuilder;
 import io.nuls.cmd.client.CommandHelper;
 import io.nuls.cmd.client.CommandResult;
 import io.nuls.cmd.client.processor.CommandProcessor;
+import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.data.StringUtils;
 import jline.console.ConsoleReader;
 
 import java.io.IOException;
 
 /**
- * @author: Charlie
+ * @author zhoulijun
  */
+@Component
 public class CreateProcessor implements CommandProcessor {
 
     AccountService accountService = ServiceManager.get(AccountService.class);
-
-    /**
-     *  Check the difficulty of the password
-     *  length between 8 and 20, the combination of characters and numbers
-     *
-     * @return boolean
-     */
-    public static boolean validPassword(String password) {
-        if (StringUtils.isBlank(password)) {
-            return false;
-        }
-        if (password.length() < 8 || password.length() > 20) {
-            return false;
-        }
-        if (password.matches("(.*)[a-zA-z](.*)")
-                && password.matches("(.*)\\d+(.*)")
-                && !password.matches("(.*)\\s+(.*)")
-                && !password.matches("(.*)[\u4e00-\u9fa5\u3000]+(.*)")) {
-            return true;
-        } else {
-            return false;
-        }
-    }
 
     public static String getNewPwd() {
         System.out.print("Please enter the new password(8-20 characters, the combination of letters and numbers).\nEnter your new password:");
@@ -77,10 +56,10 @@ public class CreateProcessor implements CommandProcessor {
             String pwd = null;
             do {
                 pwd = reader.readLine('*');
-                if (!validPassword(pwd)) {
+                if (!CommandHelper.validPassword(pwd)) {
                     System.out.print("The password is invalid, (8-20 characters, the combination of letters and numbers) .\nReenter the new password: ");
                 }
-            } while (!validPassword(pwd));
+            } while (!CommandHelper.validPassword(pwd));
             return pwd;
         } catch (IOException e) {
             return null;
@@ -134,7 +113,7 @@ public class CreateProcessor implements CommandProcessor {
 
     @Override
     public CommandResult execute(String[] args) {
-        String password = getNewPwd();
+        String password = CommandHelper.getPwd();
         if(StringUtils.isNotBlank(password)){
             CommandHelper.confirmPwd(password);
         }
@@ -142,7 +121,7 @@ public class CreateProcessor implements CommandProcessor {
         if(args.length == 2){
             count = Integer.parseInt(args[1]);
         }
-        Result<String> result = accountService.createAccount(new CreateAccountReq(1,count,password));
+        Result<String> result = accountService.createAccount(new CreateAccountReq(count,password));
         if(!result.isSuccess()){
             return CommandResult.getFailed(result);
         }

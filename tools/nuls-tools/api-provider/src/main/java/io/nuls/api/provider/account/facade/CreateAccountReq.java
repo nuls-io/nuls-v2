@@ -1,5 +1,6 @@
 package io.nuls.api.provider.account.facade;
 
+import io.nuls.api.provider.BaseReq;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
@@ -10,17 +11,15 @@ import lombok.Data;
  */
 @Data
 @AllArgsConstructor
-public class CreateAccountReq {
-
-    private int chainId;
+public class CreateAccountReq extends BaseReq {
 
     private int count;
 
     private String password;
 
-    public CreateAccountReq(int chainId){
-        this.chainId = chainId;
+    public CreateAccountReq(){
         this.count = 1;
     }
+
 
 }

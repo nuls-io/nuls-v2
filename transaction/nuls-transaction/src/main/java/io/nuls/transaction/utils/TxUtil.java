@@ -31,6 +31,7 @@ import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.data.DateUtils;
 import io.nuls.tools.data.StringUtils;
 import io.nuls.tools.exception.NulsException;
+import io.nuls.tools.log.logback.NulsLogger;
 import io.nuls.transaction.constant.TxConstant;
 import io.nuls.transaction.constant.TxErrorCode;
 import io.nuls.transaction.model.bo.Chain;
@@ -227,14 +228,14 @@ public class TxUtil {
         return HexUtil.decode(nonce8BytesStr);
     }
 
-    public static void txInformationDebugPrint(Chain chain, Transaction tx) {
-        chain.getLogger().debug("");
-        chain.getLogger().debug("**************************************************");
-        chain.getLogger().debug("Transaction information");
-        chain.getLogger().debug("type: {}", tx.getType());
-        chain.getLogger().debug("txHash: {}", tx.getHash().getDigestHex());
-        chain.getLogger().debug("time: {}", DateUtils.timeStamp2DateStr(tx.getTime()));
-        chain.getLogger().debug("size: {}B,  -{}KB, -{}MB",
+    public static void txInformationDebugPrint(Chain chain, Transaction tx, NulsLogger nulsLogger) {
+        nulsLogger.debug("");
+        nulsLogger.debug("**************************************************");
+        nulsLogger.debug("Transaction information");
+        nulsLogger.debug("type: {}", tx.getType());
+        nulsLogger.debug("txHash: {}", tx.getHash().getDigestHex());
+        nulsLogger.debug("time: {}", DateUtils.timeStamp2DateStr(tx.getTime()));
+        nulsLogger.debug("size: {}B,  -{}KB, -{}MB",
                 String.valueOf(tx.getSize()), String.valueOf(tx.getSize() / 1024), String.valueOf(tx.getSize() / 1024 / 1024));
 
         CoinData coinData = null;
@@ -246,50 +247,50 @@ public class TxUtil {
             e.printStackTrace();
         }
         if (coinData != null) {
-            chain.getLogger().debug("coinData:");
+            nulsLogger.debug("coinData:");
             List<CoinFrom> coinFromList = coinData.getFrom();
             if (coinFromList == null) {
-                chain.getLogger().debug("\tcoinFrom: null");
+                nulsLogger.debug("\tcoinFrom: null");
             } else if (coinFromList.size() == 0) {
-                chain.getLogger().debug("\tcoinFrom: size 0");
+                nulsLogger.debug("\tcoinFrom: size 0");
             } else {
-                chain.getLogger().debug("\tcoinFrom: ");
+                nulsLogger.debug("\tcoinFrom: ");
                 for (int i = 0; i < coinFromList.size(); i++) {
                     CoinFrom coinFrom = coinFromList.get(i);
-                    chain.getLogger().debug("\tFROM_{}:", i);
-                    chain.getLogger().debug("\taddress: {}", AddressTool.getStringAddressByBytes(coinFrom.getAddress()));
-                    chain.getLogger().debug("\tamount: {}", coinFrom.getAmount());
-                    chain.getLogger().debug("\tassetChainId: [{}]", coinFrom.getAssetsChainId());
-                    chain.getLogger().debug("\tassetId: [{}]", coinFrom.getAssetsId());
-                    chain.getLogger().debug("\tnonce: {}", HexUtil.encode(coinFrom.getNonce()));
-                    chain.getLogger().debug("\tlocked(0普通交易，-1解锁金额交易（退出共识，退出委托)): [{}]", coinFrom.getLocked());
-                    chain.getLogger().debug("");
+                    nulsLogger.debug("\tFROM_{}:", i);
+                    nulsLogger.debug("\taddress: {}", AddressTool.getStringAddressByBytes(coinFrom.getAddress()));
+                    nulsLogger.debug("\tamount: {}", coinFrom.getAmount());
+                    nulsLogger.debug("\tassetChainId: [{}]", coinFrom.getAssetsChainId());
+                    nulsLogger.debug("\tassetId: [{}]", coinFrom.getAssetsId());
+                    nulsLogger.debug("\tnonce: {}", HexUtil.encode(coinFrom.getNonce()));
+                    nulsLogger.debug("\tlocked(0普通交易，-1解锁金额交易（退出共识，退出委托)): [{}]", coinFrom.getLocked());
+                    nulsLogger.debug("");
                 }
             }
 
             List<CoinTo> coinToList = coinData.getTo();
             if (coinToList == null) {
-                chain.getLogger().debug("\tcoinTo: null");
+                nulsLogger.debug("\tcoinTo: null");
             } else if (coinToList.size() == 0) {
-                chain.getLogger().debug("\tcoinTo: size 0");
+                nulsLogger.debug("\tcoinTo: size 0");
             } else {
-                chain.getLogger().debug("\tcoinTo: ");
+                nulsLogger.debug("\tcoinTo: ");
                 for (int i = 0; i < coinToList.size(); i++) {
                     CoinTo coinTo = coinToList.get(i);
-                    chain.getLogger().debug("\tTO_{}:", i);
-                    chain.getLogger().debug("\taddress: {}", AddressTool.getStringAddressByBytes(coinTo.getAddress()));
-                    chain.getLogger().debug("\tamount: {}", coinTo.getAmount());
-                    chain.getLogger().debug("\tassetChainId: [{}]", coinTo.getAssetsChainId());
-                    chain.getLogger().debug("\tassetId: [{}]", coinTo.getAssetsId());
-                    chain.getLogger().debug("\tlocked(解锁高度或解锁时间，-1为永久锁定): [{}]", coinTo.getLockTime());
-                    chain.getLogger().debug("");
+                    nulsLogger.debug("\tTO_{}:", i);
+                    nulsLogger.debug("\taddress: {}", AddressTool.getStringAddressByBytes(coinTo.getAddress()));
+                    nulsLogger.debug("\tamount: {}", coinTo.getAmount());
+                    nulsLogger.debug("\tassetChainId: [{}]", coinTo.getAssetsChainId());
+                    nulsLogger.debug("\tassetId: [{}]", coinTo.getAssetsId());
+                    nulsLogger.debug("\tlocked(解锁高度或解锁时间，-1为永久锁定): [{}]", coinTo.getLockTime());
+                    nulsLogger.debug("");
                 }
             }
 
         } else {
-            chain.getLogger().debug("coinData: null");
+            nulsLogger.debug("coinData: null");
         }
-        chain.getLogger().debug("**************************************************");
-        chain.getLogger().debug("");
+        nulsLogger.debug("**************************************************");
+        nulsLogger.debug("");
     }
 }

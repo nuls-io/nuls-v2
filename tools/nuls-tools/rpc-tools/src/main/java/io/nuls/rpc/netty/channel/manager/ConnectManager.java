@@ -679,39 +679,29 @@ public class ConnectManager {
      * Stop or disconnect a connection
      */
     public static void disConnect(SocketChannel channel) {
-        String role = "";
+        if(!ROLE_CHANNEL_MAP.values().contains(channel)){
+            return;
+        }
         Iterator<Map.Entry<String, Channel>> entries = ROLE_CHANNEL_MAP.entrySet().iterator();
         while (entries.hasNext()) {
             Map.Entry<String, Channel> entry = entries.next();
             if (channel.equals(entry.getValue())) {
-                role = entry.getKey();
                 entries.remove();
                 break;
-            }
-        }
-        ConnectData connectData = CHANNEL_DATA_MAP.remove(channel);
-        connectData.setConnected(false);
-        connectData.getThreadPool().shutdown();
-
-        ROLE_MAP.remove(role);
-        Log.info(role + "模块断开连接，当前在线模块列表" + ROLE_MAP);
-
-        for (Map.Entry<String, Channel> entry : MSG_ID_KEY_CHANNEL_MAP.entrySet()) {
-            if (channel.equals(entry.getValue())) {
-                MSG_ID_KEY_CHANNEL_MAP.remove(entry.getKey());
-                INVOKE_MAP.remove(entry.getKey());
             }
         }
 
         Iterator<Map.Entry<String, Channel>> msgEntries = MSG_ID_KEY_CHANNEL_MAP.entrySet().iterator();
         while (msgEntries.hasNext()) {
-            Map.Entry<String, Channel> entry = entries.next();
+            Map.Entry<String, Channel> entry = msgEntries.next();
             if (channel.equals(entry.getValue())) {
                 INVOKE_MAP.remove(entry.getKey());
                 msgEntries.remove();
             }
         }
-
+        ConnectData connectData = CHANNEL_DATA_MAP.remove(channel);
+        connectData.setConnected(false);
+        connectData.getThreadPool().shutdown();
         channel.close();
     }
 

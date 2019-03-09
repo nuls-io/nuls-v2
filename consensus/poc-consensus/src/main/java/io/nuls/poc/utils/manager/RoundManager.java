@@ -13,15 +13,14 @@ import io.nuls.poc.model.bo.tx.txdata.Deposit;
 import io.nuls.poc.model.po.PunishLogPo;
 import io.nuls.poc.utils.CallMethodUtils;
 import io.nuls.poc.utils.enumeration.PunishType;
-import io.nuls.rpc.model.ModuleE;
-import io.nuls.rpc.model.message.Response;
-import io.nuls.rpc.netty.processor.ResponseMessageProcessor;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.data.DateUtils;
 import io.nuls.tools.data.DoubleUtils;
 import io.nuls.tools.data.StringUtils;
 import io.nuls.tools.exception.NulsException;
+import io.nuls.tools.log.Log;
 
+import java.io.IOException;
 import java.math.BigInteger;
 import java.util.*;
 
@@ -169,6 +168,7 @@ public class RoundManager {
      * @param chain            chain info
      * */
     public void initRound(Chain chain) throws NulsException{
+        //resetRound(chain,false);
         MeetingRound currentRound = resetRound(chain,false);
         /*
         如果当前没有设置它的上一轮次，则找到它的上一轮的轮次并设置
@@ -360,8 +360,8 @@ public class RoundManager {
         round.setIndex(index);
         round.setStartTime(startTime);
         setMemberList(chain,round, startBlockHeader);
-        List<byte[]> packingAddressList = new ArrayList<>();
-        try {
+        List<byte[]> packingAddressList =CallMethodUtils.getEncryptedAddressList(chain);
+        /*try {
             Map<String,Object> params = new HashMap<>(2);
             params.put(ConsensusConstant.PARAM_CHAIN_ID,chain.getConfig().getChainId());
             Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr,"ac_getUnencryptedAddressList", params);
@@ -374,8 +374,8 @@ public class RoundManager {
         }catch (Exception e){
             chain.getLoggerMap().get(ConsensusConstant.CONSENSUS_LOGGER_NAME).error(e);
             return null;
-        }
-        round.calcLocalPacker(packingAddressList);
+        }*/
+        round.calcLocalPacker(packingAddressList,chain);
         chain.getLoggerMap().get(ConsensusConstant.CONSENSUS_LOGGER_NAME).debug("当前轮次为："+round.getIndex()+";当前轮次开始打包时间："+ DateUtils.convertDate(new Date(startTime)));
         chain.getLoggerMap().get(ConsensusConstant.CONSENSUS_LOGGER_NAME).debug("\ncalculation||index:{},startTime:{},startHeight:{},hash:{}\n" + round.toString() + "\n\n", index, startTime, startBlockHeader.getHeight(), startBlockHeader.getHash());
         return round;
@@ -416,28 +416,36 @@ public class RoundManager {
         }
         List<Agent> agentList = getAliveAgentList(chain,startBlockHeader.getHeight());
         for (Agent agent : agentList) {
+            Agent realAgent = new Agent();
+            try {
+                realAgent.parse(agent.serialize(),0);
+                realAgent.setTxHash(agent.getTxHash());
+            }catch (IOException io){
+                Log.error(io);
+                return;
+            }
             MeetingMember member = new MeetingMember();
             member.setRoundStartTime(round.getStartTime());
             /*
             获取节点委托信息，用于计算节点总的委托金额
             Get the node delegation information for calculating the total amount of the node delegation
             */
-            List<Deposit> cdList = getDepositListByAgentId(chain,agent.getTxHash(), startBlockHeader.getHeight());
+            List<Deposit> cdList = getDepositListByAgentId(chain,realAgent.getTxHash(), startBlockHeader.getHeight());
             BigInteger totalDeposit = BigInteger.ZERO;
             for (Deposit dtx : cdList) {
                 totalDeposit = totalDeposit.add(dtx.getDeposit());
             }
-            agent.setTotalDeposit(totalDeposit);
+            realAgent.setTotalDeposit(totalDeposit);
             member.setDepositList(cdList);
             member.setRoundIndex(round.getIndex());
-            member.setAgent(agent);
+            member.setAgent(realAgent);
             /*
             节点总的委托金额是否达到出块节点的最小值
             Does the total delegation amount of the node reach the minimum value of the block node?
             */
-            boolean isItIn = agent.getTotalDeposit().compareTo(ConsensusConstant.SUM_OF_DEPOSIT_OF_AGENT_LOWER_LIMIT) >= 0 ? true : false;
+            boolean isItIn = realAgent.getTotalDeposit().compareTo(ConsensusConstant.SUM_OF_DEPOSIT_OF_AGENT_LOWER_LIMIT) >= 0 ? true : false;
             if (isItIn) {
-                agent.setCreditVal(calcCreditVal(chain,member, startBlockHeader));
+                realAgent.setCreditVal(calcCreditVal(chain,member, startBlockHeader));
                 memberList.add(member);
             }
         }

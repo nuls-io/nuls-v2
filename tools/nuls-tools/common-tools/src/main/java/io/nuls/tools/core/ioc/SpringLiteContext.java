@@ -135,7 +135,8 @@ public class SpringLiteContext {
                         try {
                             ((InitializingBean) bean).afterPropertiesSet();
                         } catch (Exception e) {
-                            Log.error(e.getMessage());
+                            Log.error("spring lite callAfterPropertiesSet fail : {} ",bean.getClass(),e.getMessage(),e);
+                            System.exit(0);
                         }
                     }
                 });
@@ -461,10 +462,10 @@ public class SpringLiteContext {
     public static <T> T getBean(Class<T> beanClass) {
         Set<String> nameSet = CLASS_NAME_SET_MAP.get(beanClass);
         if (null == nameSet || nameSet.isEmpty()) {
-            throw new NulsRuntimeException(new Error());
+            throw new NulsRuntimeException(new Error("can not found " + beanClass + " in beans"));
         }
         if (nameSet.size() > 1) {
-            throw new NulsRuntimeException(new Error());
+            throw new NulsRuntimeException(new Error("find multiple implementations {} " + beanClass));
         }
         T value = null;
         String beanName = null;

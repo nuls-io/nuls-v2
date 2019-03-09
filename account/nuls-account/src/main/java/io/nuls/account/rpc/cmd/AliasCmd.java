@@ -14,6 +14,8 @@ import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.data.Transaction;
 import io.nuls.rpc.cmd.BaseCmd;
 import io.nuls.rpc.model.CmdAnnotation;
+import io.nuls.rpc.model.Parameter;
+import io.nuls.rpc.model.Parameters;
 import io.nuls.rpc.model.message.Response;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
@@ -47,6 +49,12 @@ public class AliasCmd extends BaseCmd {
      * @return txhash
      */
     @CmdAnnotation(cmd = "ac_setAlias", version = 1.0, scope = "private", minEvent = 0, minPeriod = 0, description = "set the alias of account")
+    @Parameters({
+            @Parameter(parameterName = "chainId",parameterType = "int",canNull = false),
+            @Parameter(parameterName = "address",parameterType = "string",canNull = false),
+            @Parameter(parameterName = "password",parameterType = "string",canNull = false),
+            @Parameter(parameterName = "alias",parameterType = "string",canNull = false)
+    })
     public Response setAlias(Map params) {
         LoggerUtil.logger.debug("ac_setAlias start,params size:{}", params == null ? 0 : params.size());
         int chainId;

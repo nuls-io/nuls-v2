@@ -135,7 +135,7 @@ public class ConsensusServiceImpl implements ConsensusService {
             CallMethodUtils.transactionSignature(dto.getChainId(), dto.getAgentAddress(), dto.getPassword(), priKey, tx);
             CallMethodUtils.sendTx(chain,HexUtil.encode(tx.serialize()));
             Map<String, Object> result = new HashMap<>(2);
-            result.put("txHex", tx.getHash().getDigestHex());
+            result.put("txHash", tx.getHash().getDigestHex());
             return Result.getSuccess(ConsensusErrorCode.SUCCESS).setData(result);
         } catch (IOException e) {
             chain.getLoggerMap().get(ConsensusConstant.BASIC_LOGGER_NAME).error(e);
@@ -199,7 +199,7 @@ public class ConsensusServiceImpl implements ConsensusService {
             CallMethodUtils.transactionSignature(dto.getChainId(), dto.getAddress(), dto.getPassword(), priKey, tx);
             CallMethodUtils.sendTx(chain,HexUtil.encode(tx.serialize()));
             Map<String, Object> result = new HashMap<>(ConsensusConstant.INIT_CAPACITY);
-            result.put("txHex", tx.getHash().getDigestHex());
+            result.put("txHash", tx.getHash().getDigestHex());
             return Result.getSuccess(ConsensusErrorCode.SUCCESS).setData(result);
         } catch (NulsException e) {
             chain.getLoggerMap().get(ConsensusConstant.BASIC_LOGGER_NAME).error(e);
@@ -250,7 +250,7 @@ public class ConsensusServiceImpl implements ConsensusService {
             CallMethodUtils.transactionSignature(dto.getChainId(), dto.getAddress(), dto.getPassword(), priKey, tx);
             CallMethodUtils.sendTx(chain,HexUtil.encode(tx.serialize()));
             Map<String, Object> result = new HashMap<>(ConsensusConstant.INIT_CAPACITY);
-            result.put("txHex", tx.getHash().getDigestHex());
+            result.put("txHash", tx.getHash().getDigestHex());
             return Result.getSuccess(ConsensusErrorCode.SUCCESS).setData(result);
         } catch (NulsException e) {
             chain.getLoggerMap().get(ConsensusConstant.BASIC_LOGGER_NAME).error(e);
@@ -316,7 +316,7 @@ public class ConsensusServiceImpl implements ConsensusService {
             CallMethodUtils.transactionSignature(dto.getChainId(), dto.getAddress(), dto.getPassword(), priKey, cancelDepositTransaction);
             CallMethodUtils.sendTx(chain,HexUtil.encode(cancelDepositTransaction.serialize()));
             Map<String, Object> result = new HashMap<>(ConsensusConstant.INIT_CAPACITY);
-            result.put("txHex", cancelDepositTransaction.getHash().getDigestHex());
+            result.put("txHash", cancelDepositTransaction.getHash().getDigestHex());
             return Result.getSuccess(ConsensusErrorCode.SUCCESS).setData(result);
         } catch (NulsException e) {
             chain.getLoggerMap().get(ConsensusConstant.BASIC_LOGGER_NAME).error(e);
@@ -844,10 +844,8 @@ public class ConsensusServiceImpl implements ConsensusService {
         if (status == 1) {
             chain.setCanPacking(true);
             chain.getLoggerMap().get(ConsensusConstant.BASIC_LOGGER_NAME).debug("updateAgentStatus-修改节点打包状态成功......");
-            CallMethodUtils.sendState(chain,true);
         } else {
             chain.setCanPacking(false);
-            CallMethodUtils.sendState(chain,false);
         }
         return Result.getSuccess(ConsensusErrorCode.SUCCESS);
 
@@ -1365,7 +1363,7 @@ public class ConsensusServiceImpl implements ConsensusService {
         if (round == null) {
             return;
         }
-        MeetingMember member = round.getMember(agent.getPackingAddress());
+        MeetingMember member = round.getMember(agent.getPackingAddress(),chain);
         if (null == member) {
             agent.setStatus(0);
             return;

@@ -28,6 +28,7 @@ import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.BlockHeader;
 import io.nuls.contract.constant.ContractErrorCode;
 import io.nuls.contract.helper.ContractHelper;
+import io.nuls.contract.manager.ContractTokenBalanceManager;
 import io.nuls.contract.model.bo.ContractResult;
 import io.nuls.contract.model.po.ContractAddressInfoPo;
 import io.nuls.contract.model.po.ContractTokenTransferInfoPo;
@@ -73,8 +74,6 @@ public class CallContractTxProcessor {
         try {
             ContractResult contractResult = tx.getContractResult();
 
-            long blockHeight = tx.getBlockHeight();
-
             // 保存代币交易
             CallContractData callContractData = tx.getTxDataObj();
             byte[] contractAddress = callContractData.getContractAddress();
@@ -91,11 +90,12 @@ public class CallContractTxProcessor {
 
             BlockHeader blockHeader = contractHelper.getCurrentBlockHeader(chainId);
             byte[] newestStateRoot = blockHeader.getStateRoot();
+            long blockHeight = blockHeader.getHeight();
+            tx.setBlockHeight(blockHeight);
 
 
-            //TODO pierre  获取合约当前状态
-            //ProgramStatus status = contractHelper.getContractStatus(newestStateRoot, contractAddress);
-            ProgramStatus status = null;
+            // 获取合约当前状态
+            ProgramStatus status = contractHelper.getContractStatus(chainId, newestStateRoot, contractAddress);
             boolean isTerminatedContract = ContractUtil.isTerminatedContract(status.ordinal());
 
             // 处理合约执行失败 - 没有transferEvent的情况, 直接从数据库中获取, 若是本地创建的交易，获取到修改为失败交易
@@ -112,18 +112,16 @@ public class CallContractTxProcessor {
                         // 刷新token余额
                         if (isTerminatedContract) {
                             // 终止的合约，回滚token余额
-                            this.rollbackContractToken(po);
+                            this.rollbackContractToken(chainId, po);
                             contractResult.setError(true);
                             contractResult.setErrorMessage("this contract has been terminated");
                         } else {
 
                             if (po.getFrom() != null) {
-                                //TODO pierre 刷新token余额
-                                //contractHelper.refreshTokenBalance(newestStateRoot, contractAddressInfoPo, AddressTool.getStringAddressByBytes(po.getFrom()), po.getContractAddress());
+                                contractHelper.refreshTokenBalance(chainId, newestStateRoot, blockHeight, contractAddressInfoPo, AddressTool.getStringAddressByBytes(po.getFrom()), po.getContractAddress());
                             }
                             if (po.getTo() != null) {
-                                //TODO pierre 刷新token余额
-                                //contractHelper.refreshTokenBalance(newestStateRoot, contractAddressInfoPo, AddressTool.getStringAddressByBytes(po.getTo()), po.getContractAddress());
+                                contractHelper.refreshTokenBalance(chainId, newestStateRoot, blockHeight, contractAddressInfoPo, AddressTool.getStringAddressByBytes(po.getTo()), po.getContractAddress());
                             }
                         }
                     }
@@ -131,8 +129,8 @@ public class CallContractTxProcessor {
             }
 
             if (!isTerminatedContract) {
-                //TODO pierre  处理合约事件
-                //vmHelper.dealEvents(newestStateRoot, tx, contractResult, contractAddressInfoPo);
+                // 处理合约事件
+                contractHelper.dealNrc20Events(chainId, newestStateRoot, tx, contractResult, contractAddressInfoPo);
             }
 
             // 保存合约执行结果
@@ -208,7 +206,7 @@ public class CallContractTxProcessor {
                             }
 
                             // 回滚token余额
-                            this.rollbackContractToken(tokenTransferInfoPo);
+                            this.rollbackContractToken(chainId, tokenTransferInfoPo);
                             contractTokenTransferStorageService.deleteTokenTransferInfo(chainId, Arrays.concatenate(tokenTransferInfoPo.getFrom(), txHashBytes, new VarInt(i).encode()));
                             contractTokenTransferStorageService.deleteTokenTransferInfo(chainId, Arrays.concatenate(tokenTransferInfoPo.getTo(), txHashBytes, new VarInt(i).encode()));
                         }
@@ -225,7 +223,7 @@ public class CallContractTxProcessor {
         return getSuccess();
     }
 
-    private void rollbackContractToken(ContractTokenTransferInfoPo po) {
+    private void rollbackContractToken(int chainId, ContractTokenTransferInfoPo po) {
         try {
             String contractAddressStr = po.getContractAddress();
             byte[] from = po.getFrom();
@@ -239,11 +237,12 @@ public class CallContractTxProcessor {
             if (to != null) {
                 toStr = AddressTool.getStringAddressByBytes(to);
             }
-            //TODO pierre 建立token余额管理器, ContractTokenBalanceManager
-            //contractBalanceManager.addContractToken(fromStr, contractAddressStr, token);
-            //contractBalanceManager.subtractContractToken(toStr, contractAddressStr, token);
+            ContractTokenBalanceManager contractTokenBalanceManager = contractHelper.getChain(chainId).getContractTokenBalanceManager();
+            contractTokenBalanceManager.addContractToken(fromStr, contractAddressStr, token);
+            contractTokenBalanceManager.subtractContractToken(toStr, contractAddressStr, token);
         } catch (Exception e) {
             // skip it
+            Log.error(e);
         }
     }
 

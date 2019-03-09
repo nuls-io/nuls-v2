@@ -93,12 +93,12 @@ public class AccountKeyStoreServiceImpl implements AccountKeyStoreService {
             throw new NulsRuntimeException(AccountErrorCode.ACCOUNT_NOT_EXIST);
         }
         AccountKeyStore accountKeyStore = new AccountKeyStore();
-        //如果账户加密,就验证密码
-        //if the account is encrypted, verify the password
-        if (account.isEncrypted() && !account.validatePassword(password)) {
+        //验证密码
+        //verify the password
+        if (!account.validatePassword(password)) {
             throw new NulsRuntimeException(AccountErrorCode.PASSWORD_IS_WRONG);
         }
-        //如果账户加密,都不导出明文私钥
+        //如果账户加密,不导出明文私钥
         //if the account is encrypted , the plaintext private key is not exported
         if (account.isEncrypted()) {
             accountKeyStore.setEncryptedPrivateKey(HexUtil.encode(account.getEncryptedPriKey()));

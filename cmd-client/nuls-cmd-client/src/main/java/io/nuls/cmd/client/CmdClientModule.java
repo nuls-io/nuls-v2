@@ -6,8 +6,12 @@ import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.modulebootstrap.Module;
 import io.nuls.rpc.modulebootstrap.RpcModule;
 import io.nuls.rpc.modulebootstrap.RpcModuleState;
+import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
+import io.nuls.tools.exception.NulsException;
+import io.nuls.tools.parse.I18nUtils;
 import lombok.extern.slf4j.Slf4j;
+import org.junit.Before;
 
 /**
  * @Author: zhoulijun
@@ -18,7 +22,8 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class CmdClientModule extends RpcModule {
 
-    AccountService accountService = ServiceManager.get(AccountService.class);
+
+    @Autowired CommandHandler commandHandler;
 
     @Override
     public Module[] getDependencies() {
@@ -35,14 +40,13 @@ public class CmdClientModule extends RpcModule {
     @Override
     public boolean doStart() {
         log.info("cmd client start");
-        log.info(accountService.hello());
         return true;
     }
 
     @Override
     public RpcModuleState onDependenciesReady() {
         log.info("cmd client running");
-        CommandHandler.main();
+        commandHandler.start();
         return RpcModuleState.Running;
     }
 
@@ -51,4 +55,18 @@ public class CmdClientModule extends RpcModule {
         return RpcModuleState.Ready;
     }
 
+    @Override
+    public void init() {
+        super.init();
+//        String language = NulsConfig.MODULES_CONFIG.getCfgValue(AccountConstant.CFG_SYSTEM_SECTION, AccountConstant.CFG_SYSTEM_LANGUAGE);
+        try {
+            String language = "zh-CHS";
+            I18nUtils.loadLanguage(this.getClass(), "languages", language);
+            I18nUtils.setLanguage(language);
+        } catch (NulsException e) {
+            log.error("module init I18nUtils fail");
+            System.exit(0);
+        }
+
+    }
 }

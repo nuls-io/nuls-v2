@@ -97,10 +97,6 @@ public class ChainManager {
             initTx(chain);
             schedulerManager.createTransactionScheduler(chain);
             chainMap.put(chainId, chain);
-            //订阅Block模块接口
-//            BlockCall.subscriptionNewBlockHeight(chain);
-
-            Log.debug("\nchain = " +JSONUtils.obj2PrettyJson(chain));
         }
     }
 
@@ -155,7 +151,7 @@ public class ChainManager {
      * @param chain
      */
     private void initTable(Chain chain) {
-        NulsLogger logger = chain.getLogger();
+        NulsLogger logger = chain.getLoggerMap().get(TxConstant.LOG_TX);
         int chainId = chain.getConfig().getChainId();
         try {
             /*
@@ -180,11 +176,12 @@ public class ChainManager {
             已验证未打包交易
             Verified transaction
             */
-            String area = TxDBConstant.DB_TRANSACTION_CACHE + chainId;
+            RocksDBService.createTable(TxDBConstant.DB_TRANSACTION_CACHE + chainId);
+           /* String area = TxDBConstant.DB_TRANSACTION_CACHE + chainId;
             if(RocksDBService.existTable(area)){
                 RocksDBService.destroyTable(area);
             }
-            RocksDBService.createTable(area);
+            RocksDBService.createTable(area);*/
         } catch (Exception e) {
             if (!DBErrorCode.DB_TABLE_EXIST.equals(e.getMessage())) {
                 logger.error(e.getMessage());
@@ -211,8 +208,12 @@ public class ChainManager {
          * 共识模块日志文件对象创建,如果一条链有多类日志文件，可在此添加
          * Creation of Log File Object in Consensus Module，If there are multiple log files in a chain, you can add them here
          * */
-        NulsLogger txLogger = LoggerBuilder.getLogger(String.valueOf(chain.getConfig().getChainId()), TxConstant.TX_LOGGER_NAME, Level.DEBUG, Level.DEBUG);
-        chain.setLogger(txLogger);
+        NulsLogger txLogger = LoggerBuilder.getLogger(String.valueOf(chain.getConfig().getChainId()), TxConstant.LOG_TX, Level.DEBUG, Level.DEBUG);
+        chain.getLoggerMap().put(TxConstant.LOG_TX, txLogger);
+        NulsLogger txProcessLogger = LoggerBuilder.getLogger(String.valueOf(chain.getConfig().getChainId()), TxConstant.LOG_NEW_TX_PROCESS, Level.DEBUG, Level.DEBUG);
+        chain.getLoggerMap().put(TxConstant.LOG_NEW_TX_PROCESS, txProcessLogger);
+        NulsLogger txMessageLogger = LoggerBuilder.getLogger(String.valueOf(chain.getConfig().getChainId()), TxConstant.LOG_TX_MESSAGE, Level.DEBUG, Level.DEBUG);
+        chain.getLoggerMap().put(TxConstant.LOG_TX_MESSAGE, txMessageLogger);
     }
 
     private void initTx(Chain chain){

@@ -27,7 +27,10 @@
 package io.nuls.cmd.client;
 
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import io.nuls.api.provider.Result;
+import io.nuls.cmd.client.processor.ErrorCodeContanst;
+import io.nuls.tools.constant.ErrorCode;
 import io.nuls.tools.data.StringUtils;
 import io.nuls.tools.parse.JSONUtils;
 import lombok.extern.slf4j.Slf4j;
@@ -71,6 +74,10 @@ public class CommandResult {
         }
     }
 
+    public static CommandResult failed(String errCode){
+        return getFailed(ErrorCode.init(ErrorCodeContanst.SYSTEM_ERR).getMsg());
+    }
+
     public static CommandResult getFailed(String message) {
         CommandResult result = new CommandResult();
         result.setMessage(message);
@@ -80,8 +87,7 @@ public class CommandResult {
 
     public static CommandResult getFailed(Result rpcResult) {
         CommandResult result = new CommandResult();
-        Map<String, Object> map = (Map) rpcResult.getData();
-        result.setMessage((String) map.get("msg"));
+        result.setMessage(rpcResult.getMessage());
         result.setSuccess(false);
         return result;
     }
@@ -110,6 +116,15 @@ public class CommandResult {
 
     public static CommandResult getSuccess(String message) {
         return new CommandResult().setSuccess(true).setMessage(message);
+    }
+
+    public static CommandResult getSuccess(Result rpcResult) {
+        try {
+            return new CommandResult().setSuccess(true).setMessage(JSONUtils.obj2PrettyJson(rpcResult.getData()));
+        } catch (JsonProcessingException e) {
+            log.error("",e);
+            return null;
+        }
     }
 
 

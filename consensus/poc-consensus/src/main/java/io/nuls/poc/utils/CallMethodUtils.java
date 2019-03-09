@@ -1,5 +1,6 @@
 package io.nuls.poc.utils;
 
+import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.BlockHeader;
 import io.nuls.base.data.Transaction;
 import io.nuls.base.signture.BlockSignature;
@@ -17,11 +18,9 @@ import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.data.StringUtils;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.log.Log;
+import io.nuls.tools.parse.ConfigLoader;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * 公共远程方法调用工具类
@@ -112,10 +111,12 @@ public class CallMethodUtils {
      */
     public static void blockSignature(int chainId, String address, BlockHeader header) throws NulsException {
         try {
+            Properties properties = ConfigLoader.loadProperties(ConsensusConstant.PASSWORD_CONFIG_NAME);
+            String password = properties.getProperty(ConsensusConstant.PASSWORD, ConsensusConstant.PASSWORD);
             Map<String, Object> callParams = new HashMap<>(4);
             callParams.put("chainId", chainId);
             callParams.put("address", address);
-            callParams.put("password", null);
+            callParams.put("password", password);
             callParams.put("dataHex", HexUtil.encode(header.getHash().getDigestBytes()));
             Response signResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_signBlockDigest", callParams);
             if (!signResp.isSuccess()) {
@@ -395,5 +396,28 @@ public class CallMethodUtils {
         byte[] targetArr = new byte[8];
         System.arraycopy(txHash, txHash.length - 8, targetArr, 0, 8);
         return targetArr;
+    }
+
+    /**
+     * 查询本地加密账户
+     * Search for Locally Encrypted Accounts
+     * */
+    @SuppressWarnings("unchecked")
+    public static List<byte[]> getEncryptedAddressList(Chain chain) {
+        List<byte[]> packingAddressList = new ArrayList<>();
+        try {
+            Map<String,Object> params = new HashMap<>(2);
+            params.put(ConsensusConstant.PARAM_CHAIN_ID,chain.getConfig().getChainId());
+            Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr,"ac_getEncryptedAddressList", params);
+            List<String> accountAddressList =  (List<String>) ((HashMap)((HashMap) cmdResp.getResponseData()).get("ac_getEncryptedAddressList")).get("list");
+            if(accountAddressList != null && accountAddressList.size()>0){
+                for (String address:accountAddressList) {
+                    packingAddressList.add(AddressTool.getAddress(address));
+                }
+            }
+        } catch (Exception e) {
+            chain.getLoggerMap().get(ConsensusConstant.CONSENSUS_LOGGER_NAME).error(e);
+        }
+        return packingAddressList;
     }
 }

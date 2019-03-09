@@ -34,7 +34,6 @@ import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Service;
 import io.nuls.tools.data.BigIntegerUtils;
 import io.nuls.tools.exception.NulsException;
-import static io.nuls.transaction.utils.LoggerUtil.Log;
 import io.nuls.tools.parse.JSONUtils;
 import io.nuls.transaction.constant.TxConstant;
 import io.nuls.transaction.constant.TxErrorCode;
@@ -46,7 +45,12 @@ import io.nuls.transaction.service.TxService;
 import io.nuls.transaction.utils.TxUtil;
 
 import java.math.BigInteger;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import static io.nuls.transaction.utils.LoggerUtil.Log;
 
 /**
  * 交易管理类，存储管理交易注册的基本信息
@@ -148,10 +152,10 @@ public class TransactionManager {
             }
             return TransactionCall.txValidatorProcess(chain, txRegister, tx.hex());
         } catch (NulsException e) {
-            chain.getLogger().error("tx type: " + tx.getType(), e);
+            chain.getLoggerMap().get(TxConstant.LOG_TX).error("tx type: " + tx.getType(), e);
             return false;
         } catch (Exception e) {
-            chain.getLogger().error(TxErrorCode.IO_ERROR.getMsg());
+            chain.getLoggerMap().get(TxConstant.LOG_TX).error(TxErrorCode.IO_ERROR.getMsg());
             return false;
         }
 

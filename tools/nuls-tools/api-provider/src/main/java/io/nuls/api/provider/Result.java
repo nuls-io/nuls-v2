@@ -12,7 +12,9 @@ import java.util.List;
 @Data
 public class Result<T> {
 
-    int status;
+    static final String SUCCESS = "10000";
+
+    String status;
 
     String message;
 
@@ -21,22 +23,30 @@ public class Result<T> {
     List<T> list;
 
     public Result(T data){
-        this.status = 0;
+        this.status = SUCCESS;
         this.data = data;
     }
 
     public Result(List<T> list){
         this.list = list;
-        this.status = 0;
+        this.status = SUCCESS;
     }
 
-    public Result(int status,String message){
+    public Result(String status,String message){
         this.status = status;
         this.message = message;
     }
 
+    public static Result fail(String status,String message){
+        return new Result(status,message);
+    }
+
     public boolean isSuccess(){
-        return status == 0;
+        return status == SUCCESS;
+    }
+
+    public boolean isFailed(){
+        return !isSuccess();
     }
 
 }

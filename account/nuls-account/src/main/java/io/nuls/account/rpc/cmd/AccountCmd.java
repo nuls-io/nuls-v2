@@ -18,6 +18,7 @@ import io.nuls.base.signture.P2PHKSignature;
 import io.nuls.rpc.cmd.BaseCmd;
 import io.nuls.rpc.model.CmdAnnotation;
 import io.nuls.rpc.model.Parameter;
+import io.nuls.rpc.model.Parameters;
 import io.nuls.rpc.model.message.Response;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
@@ -67,8 +68,7 @@ public class AccountCmd extends BaseCmd {
             Object chainIdObj = params == null ? null : params.get(RpcParameterNameConstant.CHAIN_ID);
             Object countObj = params == null ? null : params.get(RpcParameterNameConstant.COUNT);
             Object passwordObj = params == null ? null : params.get(RpcParameterNameConstant.PASSWORD);
-            //|| passwordObj == null
-            if (params == null || chainIdObj == null ) {
+            if (params == null || chainIdObj == null || passwordObj == null) {
                 throw new NulsRuntimeException(AccountErrorCode.NULL_PARAMETER);
             }
 
@@ -124,7 +124,7 @@ public class AccountCmd extends BaseCmd {
             if (count <= 0 || count > AccountTool.CREATE_MAX_SIZE) {
                 throw new NulsRuntimeException(AccountErrorCode.PARAMETER_ERROR);
             }
-            if (StringUtils.isNotBlank(password) && !FormatValidUtils.validPassword(password)) {
+            if (!FormatValidUtils.validPassword(password)) {
                 throw new NulsRuntimeException(AccountErrorCode.PASSWORD_FORMAT_WRONG);
             }
 
@@ -157,6 +157,10 @@ public class AccountCmd extends BaseCmd {
      * @return
      */
     @CmdAnnotation(cmd = "ac_getAccountByAddress", version = 1.0, scope = "private", minEvent = 0, minPeriod = 0, description = "get account according to address")
+    @Parameters({
+            @Parameter(parameterName = "chainId",parameterType = "short",canNull = false),
+            @Parameter(parameterName = "address",parameterType = "string",canNull = false)
+    })
     public Response getAccountByAddress(Map params) {
         LoggerUtil.logger.debug("ac_getAccountByAddress start");
         Account account;
@@ -192,6 +196,9 @@ public class AccountCmd extends BaseCmd {
      * @return
      */
     @CmdAnnotation(cmd = "ac_getAccountList", version = 1.0, scope = "private", minEvent = 0, minPeriod = 0, description = "query all account collections and put them in cache")
+    @Parameters({
+            @Parameter(parameterName = "chainId",parameterType = "short",canNull = false)
+    })
     public Response getAccountList(Map params) {
         LoggerUtil.logger.debug("ac_getAccountList start");
         Map<String, List<SimpleAccountDto>> map = new HashMap<>();
@@ -272,6 +279,7 @@ public class AccountCmd extends BaseCmd {
         LoggerUtil.logger.debug("getEncryptedAddressList start");
         Map<String, List<String>> map = new HashMap<>();
         List<String> encryptedAddressList = new ArrayList<>();
+        map.put(RpcConstant.LIST, encryptedAddressList);
         try {
             //query all accounts
             Object chainIdObj = params == null ? null : params.get(RpcParameterNameConstant.CHAIN_ID);
@@ -285,7 +293,7 @@ public class AccountCmd extends BaseCmd {
                 accountList = accountService.getAccountList();
             }
             if (null == accountList) {
-                return success(null);
+                return success(map);
             }
             for (Account account : accountList) {
                 if (account.isEncrypted()) {
@@ -295,7 +303,7 @@ public class AccountCmd extends BaseCmd {
         } catch (NulsRuntimeException e) {
             return failed(e.getErrorCode());
         }
-        map.put(RpcConstant.LIST, encryptedAddressList);
+
         LoggerUtil.logger.debug("getEncryptedAddressList end");
         return success(map);
     }
@@ -368,6 +376,11 @@ public class AccountCmd extends BaseCmd {
      * @return
      */
     @CmdAnnotation(cmd = "ac_removeAccount", version = 1.0, scope = "private", minEvent = 0, minPeriod = 0, description = "remove specified account")
+    @Parameters({
+            @Parameter(parameterName = "chainId",parameterType = "int",canNull = false),
+            @Parameter(parameterName = "address",parameterType = "string",canNull = false),
+            @Parameter(parameterName = "password",parameterType = "string",canNull = false)
+    })
     public Response removeAccount(Map params) {
         LoggerUtil.logger.debug("ac_removeAccount start");
         boolean result;
@@ -407,6 +420,11 @@ public class AccountCmd extends BaseCmd {
      * @return
      */
     @CmdAnnotation(cmd = "ac_getPriKeyByAddress", version = 1.0, scope = "private", minEvent = 0, minPeriod = 0, description = "inquire the account's private key according to the address")
+    @Parameters({
+            @Parameter(parameterName = "chainId",parameterType = "int",canNull = false),
+            @Parameter(parameterName = "address",parameterType = "string",canNull = false),
+            @Parameter(parameterName = "password",parameterType = "string",canNull = false)
+    })
     public Response getPriKeyByAddress(Map params) {
         LoggerUtil.logger.debug("ac_getPriKeyByAddress start");
         String unencryptedPrivateKey;
@@ -415,8 +433,7 @@ public class AccountCmd extends BaseCmd {
             Object chainIdObj = params == null ? null : params.get(RpcParameterNameConstant.CHAIN_ID);
             Object addressObj = params == null ? null : params.get(RpcParameterNameConstant.ADDRESS);
             Object passwordObj = params == null ? null : params.get(RpcParameterNameConstant.PASSWORD);
-            //|| passwordObj == null
-            if (params == null || chainIdObj == null || addressObj == null ) {
+            if (params == null || chainIdObj == null || addressObj == null || passwordObj == null) {
                 throw new NulsRuntimeException(AccountErrorCode.NULL_PARAMETER);
             }
             // parse params
@@ -526,6 +543,12 @@ public class AccountCmd extends BaseCmd {
      * @return
      */
     @CmdAnnotation(cmd = "ac_importAccountByPriKey", version = 1.0, scope = "private", minEvent = 0, minPeriod = 0, description = "import accounts by private key")
+    @Parameters({
+            @Parameter(parameterName = "chainId", parameterType = "short", parameterValidRange = "", parameterValidRegExp = "",canNull = false),
+            @Parameter(parameterName = "password", parameterType = "string", parameterValidRange = "", parameterValidRegExp = "",canNull = false),
+            @Parameter(parameterName = "priKey", parameterType = "string", parameterValidRange = "私钥", parameterValidRegExp = "",canNull =false),
+            @Parameter(parameterName = "overwrite", parameterType = "boolean", parameterDes = "是否覆盖", parameterValidRegExp = "",canNull =false)
+    })
     public Response importAccountByPriKey(Map params) {
         LoggerUtil.logger.debug("ac_importAccountByPriKey start");
         Map<String, String> map = new HashMap<>(1);
@@ -535,8 +558,7 @@ public class AccountCmd extends BaseCmd {
             Object priKeyObj = params == null ? null : params.get(RpcParameterNameConstant.PRIKEY);
             Object passwordObj = params == null ? null : params.get(RpcParameterNameConstant.PASSWORD);
             Object overwriteObj = params == null ? null : params.get(RpcParameterNameConstant.OVERWRITE);
-            //passwordObj == null ||
-            if (params == null || chainIdObj == null || priKeyObj == null || overwriteObj == null) {
+            if (params == null || chainIdObj == null || priKeyObj == null || passwordObj == null || overwriteObj == null) {
                 throw new NulsRuntimeException(AccountErrorCode.NULL_PARAMETER);
             }
             // parse params
@@ -569,6 +591,12 @@ public class AccountCmd extends BaseCmd {
      * @return
      */
     @CmdAnnotation(cmd = "ac_importAccountByKeystore", version = 1.0, scope = "private", minEvent = 0, minPeriod = 0, description = "import accounts by AccountKeyStore")
+    @Parameters({
+            @Parameter(parameterName = "chainId",parameterType = "short",canNull = false),
+            @Parameter(parameterName = "password",parameterType = "string",canNull = false),
+            @Parameter(parameterName = "keyStore",parameterType = "string",canNull = false),
+            @Parameter(parameterName = "overwrite",parameterType = "string",canNull = false)
+    })
     public Response importAccountByKeystore(Map params) {
         LoggerUtil.logger.debug("ac_importAccountByKeystore start");
         Map<String, String> map = new HashMap<>(1);
@@ -600,7 +628,7 @@ public class AccountCmd extends BaseCmd {
 
             //导入账户
             Account account = accountService.importAccountByKeyStore(accountKeyStoreDto.toAccountKeyStore(), chainId, password, overwrite);
-            map.put("address", account.getAddress().toString());
+            map.put(RpcParameterNameConstant.ADDRESS, account.getAddress().toString());
         } catch (NulsRuntimeException e) {
             return failed(e.getErrorCode());
         } catch (NulsException e) {
@@ -618,6 +646,12 @@ public class AccountCmd extends BaseCmd {
      * @return
      */
     @CmdAnnotation(cmd = "ac_exportAccountKeyStore", version = 1.0, scope = "private", minEvent = 0, minPeriod = 0, description = "export account KeyStore")
+    @Parameters({
+            @Parameter(parameterName = "chainId",parameterType = "int",canNull = false),
+            @Parameter(parameterName = "address",parameterType = "string",canNull = false),
+            @Parameter(parameterName = "password",parameterType = "string",canNull = false),
+            @Parameter(parameterName = "filePath",parameterType = "string",canNull = false)
+    })
     public Response exportAccountKeyStore(Map params) {
         LoggerUtil.logger.debug("ac_exportAccountKeyStore start");
         Map<String, String> map = new HashMap<>(1);
@@ -736,6 +770,12 @@ public class AccountCmd extends BaseCmd {
      * @return
      */
     @CmdAnnotation(cmd = "ac_updatePassword", version = 1.0, scope = "private", minEvent = 0, minPeriod = 0, description = "modify the account password by the original password")
+    @Parameters({
+            @Parameter(parameterName = "chainId",parameterType = "short" ,canNull = false),
+            @Parameter(parameterName = "address",parameterType = "string" ,canNull = false),
+            @Parameter(parameterName = "password",parameterType = "string",canNull = false),
+            @Parameter(parameterName = "newPassword",parameterType = "string",canNull = false)
+    })
     public Response updatePassword(Map params) {
         LoggerUtil.logger.debug("ac_updatePassword start");
         Map<String, Boolean> map = new HashMap<>(1);
@@ -905,8 +945,7 @@ public class AccountCmd extends BaseCmd {
             Object addressObj = params == null ? null : params.get(RpcParameterNameConstant.ADDRESS);
             Object passwordObj = params == null ? null : params.get(RpcParameterNameConstant.PASSWORD);
             Object dataHexObj = params == null ? null : params.get(RpcParameterNameConstant.DATA_HEX);
-            //|| passwordObj == null
-            if (params == null || chainIdObj == null || addressObj == null || dataHexObj == null) {
+            if (params == null || chainIdObj == null || addressObj == null || passwordObj == null || dataHexObj == null) {
                 throw new NulsRuntimeException(AccountErrorCode.NULL_PARAMETER);
             }
 
@@ -957,8 +996,7 @@ public class AccountCmd extends BaseCmd {
             Object addressObj = params == null ? null : params.get(RpcParameterNameConstant.ADDRESS);
             Object passwordObj = params == null ? null : params.get(RpcParameterNameConstant.PASSWORD);
             Object dataHexObj = params == null ? null : params.get(RpcParameterNameConstant.DATA_HEX);
-            //|| passwordObj == null
-            if (params == null || chainIdObj == null || addressObj == null || dataHexObj == null) {
+            if (params == null || chainIdObj == null || addressObj == null || passwordObj == null || dataHexObj == null) {
                 throw new NulsRuntimeException(AccountErrorCode.NULL_PARAMETER);
             }
 

@@ -21,7 +21,6 @@ import io.nuls.tools.data.DateUtils;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.log.logback.NulsLogger;
 
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
@@ -147,7 +146,7 @@ public class ConsensusProcess {
         }
     }
 
-    private void packing(Chain chain,MeetingMember self, MeetingRound round) throws IOException, NulsException{
+    private void packing(Chain chain,MeetingMember self, MeetingRound round) throws Exception{
         /*
         等待出块
         Wait for blocks
@@ -259,7 +258,7 @@ public class ConsensusProcess {
         }
     }
 
-    private Block doPacking(Chain chain, MeetingMember self, MeetingRound round) throws NulsException, IOException{
+    private Block doPacking(Chain chain, MeetingMember self, MeetingRound round) throws Exception{
         BlockHeader bestBlock = chain.getNewestHeader();
         BlockData bd = new BlockData();
         bd.setHeight(bestBlock.getHeight() + 1);

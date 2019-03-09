@@ -28,12 +28,14 @@ package io.nuls.transaction.storage.rocksdb.impl;
 
 import io.nuls.base.data.Transaction;
 import io.nuls.tools.core.annotation.Service;
-import static io.nuls.transaction.utils.LoggerUtil.Log;
-import io.nuls.transaction.storage.rocksdb.UnverifiedTxStorageService;
+import io.nuls.transaction.constant.TxConstant;
 import io.nuls.transaction.model.bo.Chain;
+import io.nuls.transaction.storage.rocksdb.UnverifiedTxStorageService;
 import io.nuls.transaction.utils.TxUtil;
 
 import java.io.IOException;
+
+import static io.nuls.transaction.utils.LoggerUtil.Log;
 
 /**
  * 未验证交易存储
@@ -48,7 +50,7 @@ public class UnverifiedTxStorageServiceImpl implements UnverifiedTxStorageServic
     public boolean putTx(Chain chain, Transaction tx) {
         try {
             chain.getUnverifiedQueue().offer(tx.serialize());
-            chain.getLogger().debug("UnverifiedTxQueue putTx - size: {}", chain.getUnverifiedQueue().size());
+            chain.getLoggerMap().get(TxConstant.LOG_TX).debug("UnverifiedTxQueue putTx - size: {}", chain.getUnverifiedQueue().size());
             return true;
         } catch (IOException e) {
             Log.error(e);
@@ -62,7 +64,7 @@ public class UnverifiedTxStorageServiceImpl implements UnverifiedTxStorageServic
         if (null == bytes) {
             return null;
         }
-        chain.getLogger().debug("UnverifiedTxQueue pollTx - size: {}", chain.getUnverifiedQueue().size());
+        chain.getLoggerMap().get(TxConstant.LOG_TX).debug("UnverifiedTxQueue pollTx - size: {}", chain.getUnverifiedQueue().size());
         try {
             return TxUtil.getTransaction(bytes);
         } catch (Exception e) {
