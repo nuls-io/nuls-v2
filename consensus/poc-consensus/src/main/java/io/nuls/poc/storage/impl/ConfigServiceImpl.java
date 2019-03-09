@@ -6,8 +6,8 @@ import io.nuls.poc.constant.ConsensusConstant;
 import io.nuls.poc.model.bo.config.ConfigBean;
 import io.nuls.poc.storage.ConfigService;
 import io.nuls.tools.core.annotation.Service;
-import io.nuls.tools.data.ByteUtils;
-import io.nuls.tools.data.ObjectUtils;
+import io.nuls.tools.model.ByteUtils;
+import io.nuls.tools.model.ObjectUtils;
 import io.nuls.tools.log.Log;
 
 import java.util.HashMap;

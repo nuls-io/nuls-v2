@@ -128,8 +128,8 @@ public interface Repository extends org.ethereum.facade.Repository {
      * Put a value in storage of an account at a given key
      *
      * @param addr  of the account
-     * @param key   of the data to store
-     * @param value is the data to store
+     * @param key   of the entity to store
+     * @param value is the entity to store
      */
     void addStorageRow(byte[] addr, DataWord key, DataWord value);
 
@@ -139,7 +139,7 @@ public interface Repository extends org.ethereum.facade.Repository {
      *
      * @param addr of the account
      * @param key  associated with this value
-     * @return data in the form of a <code>DataWord</code>
+     * @return entity in the form of a <code>DataWord</code>
      */
     @Override
     DataWord getStorageValue(byte[] addr, DataWord key);

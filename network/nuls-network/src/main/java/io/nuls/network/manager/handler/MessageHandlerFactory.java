@@ -83,7 +83,7 @@ public class MessageHandlerFactory {
     }
 
     /**
-     * add handler Map data
+     * add handler Map entity
      *
      * @param protocolCmd protocolCmd
      * @param handler     handler
@@ -120,7 +120,7 @@ public class MessageHandlerFactory {
     }
 
     /**
-     * get handler data
+     * get handler entity
      *
      * @param protocolCmd protocolCmd
      * @return Collection

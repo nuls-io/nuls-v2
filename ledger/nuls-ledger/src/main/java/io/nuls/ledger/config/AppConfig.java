@@ -27,7 +27,7 @@ package io.nuls.ledger.config;
 
 import io.nuls.ledger.LedgerBootstrap;
 import io.nuls.ledger.model.ModuleConfig;
-import io.nuls.tools.data.StringUtils;
+import io.nuls.tools.model.StringUtils;
 import io.nuls.tools.log.Log;
 import io.nuls.tools.parse.ConfigLoader;
 import io.nuls.tools.parse.I18nUtils;

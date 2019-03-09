@@ -2,7 +2,7 @@ package io.nuls.api.analysis;
 
 import io.nuls.api.ApiContext;
 import io.nuls.api.constant.ApiConstant;
-import io.nuls.api.model.data.*;
+import io.nuls.api.model.entity.*;
 import io.nuls.api.model.po.db.*;
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.basic.NulsByteBuffer;

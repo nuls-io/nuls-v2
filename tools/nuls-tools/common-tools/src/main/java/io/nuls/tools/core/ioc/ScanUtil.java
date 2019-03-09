@@ -24,7 +24,7 @@
  */
 package io.nuls.tools.core.ioc;
 
-import io.nuls.tools.data.StringUtils;
+import io.nuls.tools.model.StringUtils;
 
 import java.io.File;
 import java.io.FileFilter;

@@ -27,8 +27,8 @@ public class SyncBlockTask implements Runnable {
     @Override
     public void run() {
         //每次同步数据前都查看一下最新的同步信息，如果最新块的数据并没有在一次事务中完全处理，需要对区块数据进行回滚
-        //Check the latest synchronization information before each data synchronization.
-        //If the latest block data is not completely processed in one transaction, you need to roll back the block data.
+        //Check the latest synchronization information before each entity synchronization.
+        //If the latest block entity is not completely processed in one transaction, you need to roll back the block entity.
         SyncInfo syncInfo = syncService.getSyncInfo(chainId);
         if (syncInfo != null && !syncInfo.isFinish()) {
             //rollback();

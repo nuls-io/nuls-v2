@@ -10,7 +10,7 @@ import io.nuls.rpc.model.message.Response;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.crypto.HexUtil;
-import io.nuls.tools.data.ObjectUtils;
+import io.nuls.tools.model.ObjectUtils;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.transaction.cache.TxDuplicateRemoval;
 import io.nuls.transaction.constant.TxCmd;
@@ -109,12 +109,12 @@ public class MessageCmd extends BaseCmd {
 
     /**
      * 获取完整链内交易数据,包含还未开始跨链处理的跨链交易
-     * get complete transaction data
+     * get complete transaction entity
      *
      * @param params
      * @return
      */
-    @CmdAnnotation(cmd = TxCmd.NW_ASK_TX, version = 1.0, description = "get complete transaction data")
+    @CmdAnnotation(cmd = TxCmd.NW_ASK_TX, version = 1.0, description = "get complete transaction entity")
     @Parameter(parameterName = KEY_CHAIN_ID, parameterType = "int")
     @Parameter(parameterName = KEY_NODE_ID, parameterType = "String")
     public Response askTx(Map params) {

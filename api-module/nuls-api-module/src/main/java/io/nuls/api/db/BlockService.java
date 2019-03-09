@@ -3,7 +3,6 @@ package io.nuls.api.db;
 import com.mongodb.client.model.Filters;
 import com.mongodb.client.model.Sorts;
 import io.nuls.api.cache.ApiCache;
-import io.nuls.api.constant.MongoTableConstant;
 import io.nuls.api.manager.CacheManager;
 import io.nuls.api.model.po.db.BlockHeaderInfo;
 import io.nuls.api.model.po.db.PageInfo;
@@ -11,7 +10,7 @@ import io.nuls.api.model.po.db.SyncInfo;
 import io.nuls.api.utils.DocumentTransferTool;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
-import io.nuls.tools.data.StringUtils;
+import io.nuls.tools.model.StringUtils;
 import org.bson.Document;
 import org.bson.conversions.Bson;
 

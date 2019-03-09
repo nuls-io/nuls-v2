@@ -44,7 +44,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static io.nuls.contract.constant.ContractConstant.*;
-import static io.nuls.tools.data.StringUtils.isBlank;
+import static io.nuls.tools.model.StringUtils.isBlank;
 
 /**
  * @author: PierreLuo

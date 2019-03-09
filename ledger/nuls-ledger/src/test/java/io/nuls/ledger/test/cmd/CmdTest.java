@@ -35,7 +35,7 @@ import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.model.message.Response;
 import io.nuls.rpc.netty.processor.ResponseMessageProcessor;
 import io.nuls.tools.crypto.HexUtil;
-import io.nuls.tools.data.BigIntegerUtils;
+import io.nuls.tools.model.BigIntegerUtils;
 import org.junit.Before;
 import org.junit.Test;
 

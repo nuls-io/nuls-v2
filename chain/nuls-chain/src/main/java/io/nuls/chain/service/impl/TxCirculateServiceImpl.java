@@ -41,7 +41,7 @@ import io.nuls.chain.service.ChainService;
 import io.nuls.chain.service.TxCirculateService;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Service;
-import io.nuls.tools.data.BigIntegerUtils;
+import io.nuls.tools.model.BigIntegerUtils;
 import io.nuls.tools.exception.NulsException;
 
 import java.math.BigDecimal;

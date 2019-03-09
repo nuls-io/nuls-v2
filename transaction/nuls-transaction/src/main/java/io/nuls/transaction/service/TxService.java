@@ -124,7 +124,7 @@ public interface TxService {
      * @param chain                链信息
      * @param tx                   交易数据 tx
      * @param ecKey                签名者的 eckey数据
-     * @param multiSignTxSignature 新的签名数据  sign data
+     * @param multiSignTxSignature 新的签名数据  sign entity
      * @return Map<String   ,       String>
      * @throws NulsException NulsException
      */

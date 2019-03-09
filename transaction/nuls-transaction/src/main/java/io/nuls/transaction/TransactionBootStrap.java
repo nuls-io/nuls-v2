@@ -157,7 +157,7 @@ public class TransactionBootStrap extends RpcModule {
             //数据文件存储地址
             Properties properties = ConfigLoader.loadProperties(TxConstant.DB_CONFIG_NAME);
             TxConfig.DB_ROOT_PATH = properties.getProperty(TxConstant.DB_DATA_PATH,
-                    TransactionBootStrap.class.getClassLoader().getResource("").getPath() + "data");
+                    TransactionBootStrap.class.getClassLoader().getResource("").getPath() + "entity");
             RocksDBService.init(TxConfig.DB_ROOT_PATH);
 
             //模块配置表

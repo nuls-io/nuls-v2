@@ -23,8 +23,8 @@ import io.nuls.tools.basic.VarInt;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.crypto.HexUtil;
-import io.nuls.tools.data.ByteUtils;
-import io.nuls.tools.data.DoubleUtils;
+import io.nuls.tools.model.ByteUtils;
+import io.nuls.tools.model.DoubleUtils;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.parse.SerializeUtils;
 
@@ -34,7 +34,7 @@ import java.util.*;
 
 /**
  * 惩罚信息管理，用于惩罚数据证据的记录，红黄牌惩罚生成等
- * Punishment information management, records of punishment data evidence, red and yellow card punishment generation, etc.
+ * Punishment information management, records of punishment entity evidence, red and yellow card punishment generation, etc.
  *
  * @author tag
  * 2018/12/5
@@ -55,7 +55,7 @@ public class PunishManager {
     private AgentManager agentManager;
     /**
      * 加载所有的红牌信息和最近X黃牌数据到缓存
-     * Load all red card information and latest X rotation card data to the cache
+     * Load all red card information and latest X rotation card entity to the cache
      *
      * @param chain 链信息/chain info
      * */
@@ -87,7 +87,7 @@ public class PunishManager {
 
     /**
      * 清理黄牌数据
-     * Clean up yellow card data
+     * Clean up yellow card entity
      *
      * @param chain 链信息/chain info
      * */

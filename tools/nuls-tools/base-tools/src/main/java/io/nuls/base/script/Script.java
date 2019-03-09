@@ -26,8 +26,8 @@ import io.nuls.tools.crypto.ECKey;
 import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.crypto.Sha256Hash;
 import io.nuls.tools.crypto.UnsafeByteArrayOutputStream;
-import io.nuls.tools.data.ByteUtils;
-import io.nuls.tools.data.CollectionUtils;
+import io.nuls.tools.model.ByteUtils;
+import io.nuls.tools.model.CollectionUtils;
 import io.nuls.tools.parse.SerializeUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -56,7 +56,7 @@ import static io.nuls.base.script.ScriptOpCodes.*;
  * "accepts" or rejects the other transactions connected to it.</p>
  *
  * <p>In SPV mode, scripts are not run, because that would require all transactions to be available and lightweight
- * clients don't have that data. In full mode, this class is used to run the interpreted language. It also has
+ * clients don't have that entity. In full mode, this class is used to run the interpreted language. It also has
  * static methods for building scripts.</p>
  */
 public class Script {
@@ -99,7 +99,7 @@ public class Script {
      */
     public static final int MAX_P2SH_SIGOPS = 15;
 
-    // The program is a set of chunks where each element is either [opcode] or [data, data, data ...]
+    // The program is a set of chunks where each element is either [opcode] or [entity, entity, entity ...]
     protected List<ScriptChunk> chunks;
     // Unfortunately, scripts are not ever re-serialized or canonicalized when used in signature hashing. Thus we
     // must preserve the exact bytes that we read off the wire, along with the parsed form.
@@ -176,7 +176,7 @@ public class Script {
     }
 
     /**
-     * Returns an immutable list of the scripts parsed form. Each chunk is either an opcode or data element.
+     * Returns an immutable list of the scripts parsed form. Each chunk is either an opcode or entity element.
      */
     public List<ScriptChunk> getChunks() {
         return Collections.unmodifiableList(chunks);
@@ -190,11 +190,11 @@ public class Script {
     };
 
     /**
-     * <p>To run a script, first we parse it which breaks it up into chunks representing pushes of data or logical
+     * <p>To run a script, first we parse it which breaks it up into chunks representing pushes of entity or logical
      * opcodes. Then we can run the parsed chunks.</p>
      *
      * <p>The reason for this split, instead of just interpreting directly, is to make it easier
-     * to reach into a programs structure and pull out bits of data without having to run it.
+     * to reach into a programs structure and pull out bits of entity without having to run it.
      * This is necessary to render the to/from addresses of transactions in a user interface.
      * Bitcoin Core does something similar.</p>
      * <p>
@@ -210,7 +210,7 @@ public class Script {
 
             long dataToRead = -1;
             if (opcode >= 0 && opcode < OP_PUSHDATA1) {
-                // Read some bytes of data, where how many is the opcode value itself.
+                // Read some bytes of entity, where how many is the opcode value itself.
                 dataToRead = opcode;
             } else if (opcode == OP_PUSHDATA1) {
                 if (bis.available() < 1) {
@@ -218,13 +218,13 @@ public class Script {
                 }
                 dataToRead = bis.read();
             } else if (opcode == OP_PUSHDATA2) {
-                // Read a short, then read that many bytes of data.
+                // Read a short, then read that many bytes of entity.
                 if (bis.available() < 2) {
                     throw new ScriptException("Unexpected end of script");
                 }
                 dataToRead = bis.read() | (bis.read() << 8);
             } else if (opcode == OP_PUSHDATA4) {
-                // Read a uint32, then read that many bytes of data.
+                // Read a uint32, then read that many bytes of entity.
                 // Though this is allowed, because its value cannot be > 520, it should never actually be used
                 if (bis.available() < 4) {
                     throw new ScriptException("Unexpected end of script");
@@ -237,7 +237,7 @@ public class Script {
                 chunk = new ScriptChunk(opcode, null, startLocationInProgram);
             } else {
                 if (dataToRead > bis.available()) {
-                    throw new ScriptException("Push of data element that is larger than remaining data");
+                    throw new ScriptException("Push of entity element that is larger than remaining entity");
                 }
                 byte[] data = new byte[(int) dataToRead];
                 checkState(dataToRead == 0 || bis.read(data, 0, (int) dataToRead) == dataToRead);
@@ -597,7 +597,7 @@ public class Script {
         int numKeys = Script.decodeFromOpN(chunks.get(chunks.size() - 2).opcode);
        /* TransactionSignature signature = TransactionSignature.decodeFromBitcoin(signatureBytes, true);
         for (int i = 0 ; i < numKeys ; i++) {
-            if (ECKey.fromPublicOnly(chunks.get(i + 1).data).verify(hash, signature)) {
+            if (ECKey.fromPublicOnly(chunks.get(i + 1).entity).verify(hash, signature)) {
                 return i;
             }
         }*/
@@ -772,7 +772,7 @@ public class Script {
             return false;
         }
         try {
-            // Second to last chunk must be an OP_N opcode and there should be that many data chunks (keys).
+            // Second to last chunk must be an OP_N opcode and there should be that many entity chunks (keys).
             ScriptChunk m = chunks.get(chunks.size() - 2);
             if (!m.isOpCode()) {
                 return false;
@@ -975,7 +975,7 @@ public class Script {
                 stack.add(new byte[]{});
             } else if (!chunk.isOpCode()) {
                 if (chunk.data.length > MAX_SCRIPT_ELEMENT_SIZE) {
-                    throw new ScriptException("Attempted to push a data string larger than 520 bytes");
+                    throw new ScriptException("Attempted to push a entity string larger than 520 bytes");
                 }
 
                 if (!shouldExecute) {
@@ -1203,7 +1203,7 @@ public class Script {
                         }
                         long val = castToBigInteger(stack.pollLast()).longValue();
                         if (val < 0 || val >= stack.size()) {
-                            throw new ScriptException("OP_PICK/OP_ROLL attempted to get data deeper than stack size");
+                            throw new ScriptException("OP_PICK/OP_ROLL attempted to get entity deeper than stack size");
                         }
                         Iterator<byte[]> itPICK = stack.descendingIterator();
                         for (long i = 0; i < val; i++) {
@@ -1266,9 +1266,9 @@ public class Script {
                             throw new ScriptException("Attempted OP_EQUALVERIFY on a stack with size < 2");
                         }
                     /*if (!Arrays.equals(stack.pollLast(), stack.pollLast()))
-                        throw new ScriptException("OP_EQUALVERIFY: non-equal data");*/
+                        throw new ScriptException("OP_EQUALVERIFY: non-equal entity");*/
                         if (!AddressTool.checkPublicKeyHash(stack.pollLast(), stack.pollLast())) {
-                            throw new ScriptException("OP_EQUALVERIFY: non-equal data");
+                            throw new ScriptException("OP_EQUALVERIFY: non-equal entity");
                         }
                         break;
                     case OP_1ADD:
@@ -1583,7 +1583,7 @@ public class Script {
         //
         // Testing if this vin is not final is sufficient to
         // prevent this condition. Alternatively we could test all
-        // inputs, but testing just this input minimizes the data
+        // inputs, but testing just this input minimizes the entity
         // required to prove correct CHECKLOCKTIMEVERIFY execution.
         /*if (!txContainingThis.getInput(index).hasSequence())
             throw new ScriptException("Transaction contains a final transaction input for a CHECKLOCKTIMEVERIFY script.");*/

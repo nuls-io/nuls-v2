@@ -26,7 +26,7 @@ import java.util.concurrent.ConcurrentMap;
  * Bootstrap class for Event Bus module.
  * <p> It does following operations
  *  <ul>
- *      <li>Loads module configuration data from modules.ini file</li>
+ *      <li>Loads module configuration entity from modules.ini file</li>
  *      <li>Initializes annotated driven dependency management</li>
  *      <li>Starts {@code TimeService} thread</li>
  *      <li>initializes Rocks DB and loads topics from the db</li>

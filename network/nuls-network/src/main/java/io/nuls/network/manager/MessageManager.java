@@ -46,7 +46,7 @@ import io.nuls.network.model.message.base.BaseMessage;
 import io.nuls.network.model.message.base.MessageHeader;
 import io.nuls.network.utils.LoggerUtil;
 import io.nuls.tools.crypto.Sha256Hash;
-import io.nuls.tools.data.ByteUtils;
+import io.nuls.tools.model.ByteUtils;
 import io.nuls.tools.exception.NulsException;
 
 import java.lang.reflect.InvocationTargetException;
@@ -113,7 +113,7 @@ public class MessageManager extends BaseManager {
      * 验证消息
      * validate message checkSum
      *
-     * @param data data
+     * @param data entity
      * @return boolean
      */
     private boolean validate(byte[] data, long pChecksum) {

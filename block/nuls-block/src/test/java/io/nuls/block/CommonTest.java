@@ -24,7 +24,7 @@ import io.nuls.block.constant.ChainTypeEnum;
 import io.nuls.block.model.Chain;
 import io.nuls.block.model.Node;
 import io.nuls.tools.cache.LimitHashMap;
-import io.nuls.tools.data.CollectionUtils;
+import io.nuls.tools.model.CollectionUtils;
 import org.junit.Assert;
 import org.junit.Test;
 

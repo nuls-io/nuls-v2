@@ -56,7 +56,7 @@ public class EbConstants {
 
     public static final String CMD_PARAM_TOPIC = "topic";
 
-    public static final String CMD_PARAM_DATA = "data";
+    public static final String CMD_PARAM_DATA = "entity";
 
     public static final String CMD_PARAM_DOMAIN = "domain";
 
