@@ -40,7 +40,7 @@ import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.data.StringUtils;
 
-import java.util.ArrayList;
+import java.math.BigInteger;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -81,26 +81,17 @@ public class AccountStateCmd extends BaseCmd {
         rtMap.put("freeze", accountState.getFreezeTotal());
         rtMap.put("total", accountState.getTotalAmount());
         rtMap.put("available", accountState.getAvailableAmount());
-        List<Map<String,Object>> permanentLocked = new ArrayList<Map<String,Object>>();
-        List<Map<String,Object>> timeHeightLocked = new ArrayList<Map<String,Object>>();
+        BigInteger permanentLocked = BigInteger.ZERO;
+        BigInteger timeHeightLocked = BigInteger.ZERO;;
         for(FreezeLockTimeState freezeLockTimeState:accountState.getFreezeLockTimeStates()){
             if(LedgerConstant.PERMANENT_LOCK == freezeLockTimeState.getLockTime()){
-                Map<String,Object> data = new HashMap<>();
-                data.put("amount",freezeLockTimeState.getAmount());
-                data.put("createTime",freezeLockTimeState.getCreateTime());
-                permanentLocked.add(data);
+                permanentLocked= permanentLocked.add(freezeLockTimeState.getAmount());
             }else{
-                Map<String,Object> data = new HashMap<>();
-                data.put("amount",freezeLockTimeState.getAmount());
-                data.put("timeHeight",freezeLockTimeState.getLockTime());
-                timeHeightLocked.add(data);
+                timeHeightLocked= timeHeightLocked.add(freezeLockTimeState.getAmount());
             }
         }
         for(FreezeHeightState freezeHeightState:accountState.getFreezeHeightStates()){
-            Map<String,Object> data = new HashMap<>();
-            data.put("amount",freezeHeightState.getAmount());
-            data.put("timeHeight",freezeHeightState.getHeight());
-            timeHeightLocked.add(data);
+            timeHeightLocked= timeHeightLocked.add(freezeHeightState.getAmount());
         }
         rtMap.put("permanentLocked",permanentLocked);
         rtMap.put("timeHeightLocked", timeHeightLocked);
