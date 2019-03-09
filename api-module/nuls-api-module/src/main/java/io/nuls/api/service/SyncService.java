@@ -35,6 +35,8 @@ public class SyncService {
     private DepositService depositService;
     @Autowired
     private PunishService punishService;
+    @Autowired
+    private RoundManager roundManager;
 
     //记录每个区块打包交易涉及到的账户的余额变动
     private Map<String, AccountInfo> accountInfoMap = new HashMap<>();
@@ -65,6 +67,8 @@ public class SyncService {
         findAddProcessAgentOfBlock(chainId, blockInfo);
         //处理交易
         processTxs(chainId, blockInfo.getTxList());
+        //处理交易
+        roundManager.process(chainId, blockInfo);
         //保存数据
         save(chainId, blockInfo);
 

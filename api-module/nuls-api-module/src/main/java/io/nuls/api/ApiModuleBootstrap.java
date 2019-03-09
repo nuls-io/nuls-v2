@@ -133,8 +133,8 @@ public class ApiModuleBootstrap {
      * 启动，完成后系统状态变更为{@link RunningStatusEnum#RUNNING}
      */
     private static void start() {
-//        ScheduleManager scheduleManager = SpringLiteContext.getBean(ScheduleManager.class);
-//        scheduleManager.start();
+        ScheduleManager scheduleManager = SpringLiteContext.getBean(ScheduleManager.class);
+        scheduleManager.start();
 
         String ip = "0.0.0.0";
         int port = 8080;

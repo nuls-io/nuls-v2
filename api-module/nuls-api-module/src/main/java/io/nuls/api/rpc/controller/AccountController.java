@@ -20,10 +20,14 @@
 
 package io.nuls.api.rpc.controller;
 
+import io.nuls.api.analysis.WalletRpcHandler;
+import io.nuls.api.cache.ApiCache;
 import io.nuls.api.db.AccountService;
 import io.nuls.api.db.BlockService;
 import io.nuls.api.exception.JsonRpcException;
+import io.nuls.api.manager.CacheManager;
 import io.nuls.api.model.po.db.AccountInfo;
+import io.nuls.api.model.po.db.AssetInfo;
 import io.nuls.api.model.po.db.PageInfo;
 import io.nuls.api.model.po.db.TxRelationInfo;
 import io.nuls.api.model.rpc.RpcErrorCode;
@@ -95,24 +99,30 @@ public class AccountController {
         result.setResult(relationInfos);
         return result;
     }
-//
-//    @RpcMethod("getAccount")
-//    public RpcResult getAccount(List<Object> params) {
-//        VerifyUtils.verifyParams(params, 1);
-//        String address = (String) params.get(0);
-//        if (!AddressTool.validAddress(address)) {
-//            throw new JsonRpcException(new RpcResultError(RpcErrorCode.PARAMS_ERROR, "[address] is inValid"));
-//        }
-//
-//        AccountInfo accountInfo = accountService.getAccountInfo(address);
-//        RpcResult result = new RpcResult();
-//        if (accountInfo == null) {
-//            return result.setError(new RpcResultError(RpcErrorCode.DATA_NOT_EXISTS));
-//        }
-//
-//        List<Output> outputs = utxoService.getAccountUtxos(address);
-//        CalcUtil.calcBalance(accountInfo, outputs, blockHeaderService.getBestBlockHeight());
-//
-//        return result.setResult(accountInfo);
-//    }
+
+    @RpcMethod("getAccount")
+    public RpcResult getAccount(List<Object> params) {
+        VerifyUtils.verifyParams(params, 2);
+        String address = (String) params.get(0);
+        int chainId = (int) params.get(1);
+        if (!AddressTool.validAddress(chainId, address)) {
+            throw new JsonRpcException(new RpcResultError(RpcErrorCode.PARAMS_ERROR, "[address] is inValid"));
+        }
+        RpcResult result = new RpcResult();
+        ApiCache apiCache = CacheManager.getCache(chainId);
+        if (apiCache == null) {
+            return result.setError(new RpcResultError(RpcErrorCode.DATA_NOT_EXISTS));
+        }
+
+        AccountInfo accountInfo = accountService.getAccountInfo(chainId, address);
+        if (accountInfo == null) {
+            return result.setError(new RpcResultError(RpcErrorCode.DATA_NOT_EXISTS));
+        }
+        AssetInfo defaultAsset = apiCache.getChainInfo().getDefaultAsset();
+        AccountInfo account = WalletRpcHandler.getAccountBalance(chainId, address, defaultAsset.getChainId(), defaultAsset.getAssetId());
+        accountInfo.setBalance(account.getBalance());
+        accountInfo.setConsensusLock(account.getConsensusLock());
+        accountInfo.setTimeLock(account.getTimeLock());
+        return result.setResult(accountInfo);
+    }
 }
