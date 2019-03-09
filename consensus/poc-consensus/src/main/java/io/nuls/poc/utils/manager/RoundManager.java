@@ -419,6 +419,7 @@ public class RoundManager {
             Agent realAgent = new Agent();
             try {
                 realAgent.parse(agent.serialize(),0);
+                realAgent.setTxHash(agent.getTxHash());
             }catch (IOException io){
                 Log.error(io);
                 return;
