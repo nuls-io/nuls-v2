@@ -217,6 +217,7 @@ public class AnalysisHandler {
         agent.parse(new NulsByteBuffer(tx.getTxData()));
 
         AgentInfo agentInfo = new AgentInfo();
+        agentInfo.init();
         agentInfo.setAgentAddress(AddressTool.getStringAddressByBytes(agent.getAgentAddress()));
         agentInfo.setPackingAddress(AddressTool.getStringAddressByBytes(agent.getPackingAddress()));
         agentInfo.setRewardAddress(AddressTool.getStringAddressByBytes(agent.getPackingAddress()));

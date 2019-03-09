@@ -70,6 +70,7 @@ public class SyncService {
 
         ApiCache apiCache = CacheManager.getCache(chainId);
         apiCache.setBestHeader(blockInfo.getHeader());
+        System.out.println(blockInfo.getHeader().getHeight() + "--------------");
         return true;
     }
 
