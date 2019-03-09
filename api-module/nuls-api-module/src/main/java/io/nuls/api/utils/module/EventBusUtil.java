@@ -18,45 +18,42 @@
  * SOFTWARE.
  */
 
-package io.nuls.api.utils;
+package io.nuls.api.utils.module;
 
 /**
- * @author Niels
+ * 调用事件总线模块接口的工具类
+ * Utility class that invokes the event-bus module interface
+ *
+ * @author captain
+ * @version 1.0
+ * @date 19-1-25 上午11:46
  */
-public class AgentSorter implements Comparable<AgentSorter> {
+public class EventBusUtil {
 
-    private String agentId;
-
-    private String seedAddress;
-
-    private String sorter;
-
-    public String getAgentId() {
-        return agentId;
+    /**
+     * 订阅事件
+     *
+     * @param moduleId
+     * @param topic
+     * @return
+     * @throws Exception
+     */
+    public static boolean subscribe(String moduleId, String topic) {
+//        String response = CmdDispatcher.request("subscribe", null);
+        return true;
     }
 
-    public void setAgentId(String agentId) {
-        this.agentId = agentId;
+    /**
+     * 发布事件
+     *
+     * @param moduleId
+     * @param topic
+     * @return
+     * @throws Exception
+     */
+    public static boolean send(String moduleId, String topic, String eventJson) {
+//        String response = CmdDispatcher.request("send", null);
+        return true;
     }
 
-    public String getSorter() {
-        return sorter;
-    }
-
-    public void setSorter(String sorter) {
-        this.sorter = sorter;
-    }
-
-    public String getSeedAddress() {
-        return seedAddress;
-    }
-
-    public void setSeedAddress(String seedAddress) {
-        this.seedAddress = seedAddress;
-    }
-
-    @Override
-    public int compareTo(AgentSorter o2) {
-        return this.getSorter().compareTo(o2.getSorter());
-    }
 }
