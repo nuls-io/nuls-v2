@@ -223,7 +223,7 @@ public class AccountStateServiceImpl implements AccountStateService {
             byte[] key = LedgerUtils.getKey(unconfirmedTx.getAddress(), unconfirmedTx.getAssetChainId(), unconfirmedTx.getAssetId());
             //这个改变无需进行账户的snapshot
             try {
-                LoggerUtil.logger.debug("非确认交易nonce提交：txHash={},key={},addNonce={}", unconfirmedTx.getTxHash(), key, newNonce);
+                LoggerUtil.logger.debug("非确认交易nonce提交：txHash={},key={},addNonce={}", unconfirmedTx.getTxHash(), unconfirmedTx.getAddress()+"-"+unconfirmedTx.getAssetChainId()+"-"+unconfirmedTx.getAssetId(), newNonce);
                 repository.updateAccountState(key, accountState);
                 StringBuilder s1 = new StringBuilder();
                 for (UnconfirmedNonce unconfirmedNonce : accountState.getUnconfirmedNonces()) {
