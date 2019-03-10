@@ -53,7 +53,7 @@ public interface AccountStateService {
     AccountState getAccountState(String address,int addressChainId, int assetChainId, int assetId);
 
     /**
-     * 存储新的账户信息时，进行快照存储
+     * 存储新的账户信息
      * @param assetKey
      * @param blockSnapshotAccounts
      * @param accountState

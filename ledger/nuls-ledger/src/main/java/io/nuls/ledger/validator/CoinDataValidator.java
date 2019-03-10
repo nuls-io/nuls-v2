@@ -269,7 +269,7 @@ public class CoinDataValidator {
         if (null == list) {
             //从头开始处理
             if (!accountState.getNonce().equalsIgnoreCase(nonce)) {
-                logger.info("isValidateCommonTxBatch {}=={}=={}==nonce is error!dbNonce:{}!=fromNonce:{}", address, coinFrom.getAssetsChainId(), coinFrom.getAssetsId(), accountState.getNonce(), nonce);
+                logger.error("批量校验失败(BatchValidate failed)： isValidateCommonTxBatch {}=={}=={}==nonce is error!dbNonce:{}!=fromNonce:{}", address, coinFrom.getAssetsChainId(), coinFrom.getAssetsId(), accountState.getNonce(), nonce);
                 return false;
             }
             list = new ArrayList<>();

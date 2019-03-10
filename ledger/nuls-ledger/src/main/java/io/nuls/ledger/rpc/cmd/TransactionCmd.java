@@ -104,23 +104,29 @@ public class TransactionCmd extends BaseCmd {
     @Parameter(parameterName = "txHex", parameterType = "String")
     public Response commitUnconfirmedTx(Map params) {
         Map<String, Object> rtData = new HashMap<>();
-        Integer chainId = (Integer) params.get("chainId");
-        String txHex = params.get("txHex").toString();
-        LoggerUtil.logger.debug("commitUnconfirmedTx chainId={},txHex={}", chainId, txHex);
-        Transaction tx = parseTxs(txHex);
-        if (null == tx) {
-            LoggerUtil.logger.error("txHex is invalid chainId={},txHex={}", chainId, txHex);
-            return failed("txHex is invalid");
+        try {
+            Integer chainId = (Integer) params.get("chainId");
+            String txHex = params.get("txHex").toString();
+            Transaction tx = parseTxs(txHex);
+            if (null == tx) {
+                LoggerUtil.logger.error("txHex is invalid chainId={},txHex={}", chainId, txHex);
+                return failed("txHex is invalid");
+            }
+            LoggerUtil.logger.debug("commitUnconfirmedTx chainId={},txHash={}", chainId, tx.getHash().toString());
+            int value = 0;
+            if (transactionService.unConfirmTxProcess(chainId, tx)) {
+                value = 1;
+            } else {
+                value = 0;
+            }
+            rtData.put("value", value);
+            LoggerUtil.logger.debug(" chainId={},txHash={},value={}", chainId, tx.getHash().toString(), value);
+        } catch (Exception e) {
+            e.printStackTrace();
+            LoggerUtil.logger.error("commitUnconfirmedTx exception ={}",e.getMessage());
+            return failed(e.getMessage());
         }
-        int value = 0;
-        if (transactionService.unConfirmTxProcess(chainId, tx)) {
-            value = 1;
-        } else {
-            value = 0;
-        }
-        rtData.put("value", value);
         Response response = success(rtData);
-        LoggerUtil.logger.debug(" chainId={},txHex={},response={}", chainId, txHex, response);
         return response;
     }
 
@@ -141,12 +147,12 @@ public class TransactionCmd extends BaseCmd {
         Integer chainId = (Integer) params.get("chainId");
         List<String> txHexList = (List) params.get("txHexList");
         long blockHeight = Long.valueOf(params.get("blockHeight").toString());
-        LoggerUtil.logger.debug("commitBlockTxs chainId={},blockHeight={}", chainId,blockHeight);
+        LoggerUtil.logger.debug("commitBlockTxs chainId={},blockHeight={}", chainId, blockHeight);
         if (null == txHexList || 0 == txHexList.size()) {
             LoggerUtil.logger.error("txHexList is blank");
             return failed("txHexList is blank");
         }
-        LoggerUtil.logger.debug("commitBlockTxs txHexList={}",txHexList.size());
+        LoggerUtil.logger.debug("commitBlockTxs txHexList={}", txHexList.size());
         int value = 0;
         List<Transaction> txList = new ArrayList<>();
         Response parseResponse = parseTxs(txHexList, txList);

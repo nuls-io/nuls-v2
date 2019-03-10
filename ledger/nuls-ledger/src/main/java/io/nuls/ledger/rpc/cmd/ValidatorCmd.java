@@ -65,24 +65,25 @@ public class ValidatorCmd extends BaseCmd {
         Integer chainId = (Integer) params.get("chainId");
         String txHex = (String) params.get("txHex");
         boolean isBatchValidate = Boolean.valueOf(params.get("isBatchValidate").toString());
-        LoggerUtil.logger.debug("chainId={},txHex={},isBatchValidate={}", chainId, txHex, isBatchValidate);
         Transaction tx = new Transaction();
         Response response = null;
+        ValidateResult validateResult = null;
         try {
             tx.parse(HexUtil.hexToByte(txHex), 0);
             if (isBatchValidate) {
-                ValidateResult validateResult = coinDataValidator.bathValidatePerTx(chainId, tx);
-                response = success(validateResult);
+                LoggerUtil.logger.debug("确认交易校验：chainId={},txHash={},isBatchValidate={}", chainId, tx.getHash().toString(), isBatchValidate);
+                validateResult = coinDataValidator.bathValidatePerTx(chainId, tx);
             } else {
-                ValidateResult validateResult = coinDataValidator.validateCoinData(chainId, tx);
-                response = success(validateResult);
+                LoggerUtil.logger.debug("未确认交易校验：chainId={},txHash={},isBatchValidate={}", chainId, tx.getHash().toString(), isBatchValidate);
+                validateResult = coinDataValidator.validateCoinData(chainId, tx);
             }
-
+            response = success(validateResult);
+            LoggerUtil.logger.debug("validateCoinData returnCode={},returnMsg={}", validateResult.getValidateCode(),validateResult.getValidateDesc());
         } catch (NulsException e) {
             e.printStackTrace();
             response = failed(e.getErrorCode());
+            LoggerUtil.logger.error("validateCoinData exception:{}", e.getMessage());
         }
-        LoggerUtil.logger.debug("response={}",response);
         return response;
     }
 
