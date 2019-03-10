@@ -51,7 +51,7 @@ public interface Constant {
     /**
      * db文件存放目录
      */
-    String DATA_PATH = "../../../../entity/block";
+    String DATA_PATH = "../../../../data/block";
     /**
      * 存储每条链的配置信息
      */
