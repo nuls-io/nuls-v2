@@ -22,20 +22,17 @@
  * SOFTWARE.
  *
  */
-package io.nuls.ledger.utils;
-
-import io.nuls.ledger.rpc.call.TimeRpcService;
-import io.nuls.ledger.rpc.call.impl.TimeRpcServiceImpl;
-import io.nuls.tools.core.ioc.SpringLiteContext;
+package io.nuls.ledger.rpc.call;
 
 /**
  * @author lan
- * @description
- * @date 2019/01/07
+ * @description 调用外部区块模块接口
+ * @date 2018/12/07
  **/
-public class TimeUtils {
-    public static long getCurrentTime() {
-        TimeRpcService timeRpcService = SpringLiteContext.getBean(TimeRpcServiceImpl.class);
-        return timeRpcService.getTime();
-    }
+public interface TimeRpcService {
+    /**
+     *
+     * @return
+     */
+    long getTime();
 }

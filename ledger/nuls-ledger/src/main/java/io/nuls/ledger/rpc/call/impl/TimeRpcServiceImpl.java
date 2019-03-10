@@ -22,20 +22,44 @@
  * SOFTWARE.
  *
  */
-package io.nuls.ledger.utils;
+package io.nuls.ledger.rpc.call.impl;
 
+import io.nuls.ledger.constant.CmdConstant;
 import io.nuls.ledger.rpc.call.TimeRpcService;
-import io.nuls.ledger.rpc.call.impl.TimeRpcServiceImpl;
-import io.nuls.tools.core.ioc.SpringLiteContext;
+import io.nuls.rpc.model.ModuleE;
+import io.nuls.rpc.model.message.Response;
+import io.nuls.rpc.netty.processor.ResponseMessageProcessor;
+import io.nuls.tools.core.annotation.Service;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
+ * 调用网络模块的RPC接口
+ *
  * @author lan
  * @description
- * @date 2019/01/07
+ * @date 2018/12/07
  **/
-public class TimeUtils {
-    public static long getCurrentTime() {
-        TimeRpcService timeRpcService = SpringLiteContext.getBean(TimeRpcServiceImpl.class);
-        return timeRpcService.getTime();
+@Service
+public class TimeRpcServiceImpl implements TimeRpcService {
+    @Override
+    public long getTime() {
+        long time = 0;
+        Map<String, Object> map = new HashMap<>();
+        try {
+            Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.NW.abbr, CmdConstant.CMD_NW_GET_TIME_CALL, map, 100);
+            if (null != response && response.isSuccess()) {
+                Map responseData = (Map) response.getResponseData();
+                time = Long.valueOf(((Map) responseData.get(CmdConstant.CMD_NW_GET_TIME_CALL)).get("currentTimeMillis").toString());
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            if (time == 0) {
+                time = System.currentTimeMillis();
+            }
+        }
+        return time;
     }
 }

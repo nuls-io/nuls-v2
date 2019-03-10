@@ -22,20 +22,13 @@
  * SOFTWARE.
  *
  */
-package io.nuls.ledger.utils;
-
-import io.nuls.ledger.rpc.call.TimeRpcService;
-import io.nuls.ledger.rpc.call.impl.TimeRpcServiceImpl;
-import io.nuls.tools.core.ioc.SpringLiteContext;
+package io.nuls.ledger.constant;
 
 /**
  * @author lan
  * @description
- * @date 2019/01/07
+ * @date 2019/03/10
  **/
-public class TimeUtils {
-    public static long getCurrentTime() {
-        TimeRpcService timeRpcService = SpringLiteContext.getBean(TimeRpcServiceImpl.class);
-        return timeRpcService.getTime();
-    }
+public class CmdConstant {
+    public static String  CMD_NW_GET_TIME_CALL = "nw_currentTimeMillis";
 }
