@@ -134,7 +134,7 @@ public class RoundManager {
             if (null == totalDeposit) {
                 totalDeposit = BigInteger.ZERO;
             }
-            if (totalDeposit.compareTo(ApiConstant.MIN_DEPOSIT) > 0) {
+            if (totalDeposit.compareTo(ApiConstant.MIN_DEPOSIT) >= 0) {
                 AgentSorter sorter = new AgentSorter();
                 sorter.setAgentId(agent.getTxHash());
                 byte[] hash = ArraysTool.concatenate(AddressTool.getAddress(agent.getPackingAddress()), SerializeUtils.uint64ToByteArray(blockInfo.getHeader().getRoundStartTime()));
