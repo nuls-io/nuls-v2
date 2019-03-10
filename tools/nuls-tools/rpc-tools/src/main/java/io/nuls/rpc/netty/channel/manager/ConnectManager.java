@@ -379,11 +379,8 @@ public class ConnectManager {
      * @return long
      */
     public static int getCmdChangeCount(String cmd) {
-        try {
-            return CMD_CHANGE_COUNT.get(cmd);
-        } catch (Exception e) {
-            return 1;
-        }
+        Integer integer = CMD_CHANGE_COUNT.get(cmd);
+        return integer == null ? 1 : integer;
     }
 
     /**
