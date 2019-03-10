@@ -80,6 +80,7 @@ public class FreezeStateServiceImpl implements FreezeStateService {
         return addFromAmount;
     }
     private BigInteger unFreezeLockHeightState(List<FreezeHeightState> heightList,AccountState accountState){
+        //TODO:此处高度可以做个时间缓存
         long nowHeight = repository.getBlockHeight(accountState.getAddressChainId());
         //可移除的高度锁列表
         List<FreezeHeightState>  heightRemove =  new ArrayList<>();
@@ -96,7 +97,7 @@ public class FreezeStateServiceImpl implements FreezeStateService {
         BigInteger addFromAmount = BigInteger.ZERO;
         for(FreezeHeightState freezeHeightState : heightRemove){
             heightList.remove(freezeHeightState);
-            addFromAmount.add(freezeHeightState.getAmount());
+            addFromAmount = addFromAmount.add(freezeHeightState.getAmount());
         }
         return addFromAmount;
     }
