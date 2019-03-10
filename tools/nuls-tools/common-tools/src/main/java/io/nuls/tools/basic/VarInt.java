@@ -56,19 +56,19 @@ public class VarInt {
         int first = 0xFF & buf[offset];
         if (first < 253) {
             value = first;
-            // 1 data byte (8 bits)
+            // 1 entity byte (8 bits)
             originallyEncodedSize = 1;
         } else if (first == 253) {
             value = (0xFF & buf[offset + 1]) | ((0xFF & buf[offset + 2]) << 8);
-            // 1 marker + 2 data bytes (16 bits)
+            // 1 marker + 2 entity bytes (16 bits)
             originallyEncodedSize = 3;
         } else if (first == 254) {
             value = SerializeUtils.readUint32LE(buf, offset + 1);
-            // 1 marker + 4 data bytes (32 bits)
+            // 1 marker + 4 entity bytes (32 bits)
             originallyEncodedSize = 5;
         } else {
             value = SerializeUtils.readInt64LE(buf, offset + 1);
-            // 1 marker + 8 data bytes (64 bits)
+            // 1 marker + 8 entity bytes (64 bits)
             originallyEncodedSize = 9;
         }
     }
@@ -96,22 +96,22 @@ public class VarInt {
     public static int sizeOf(long value) {
         // if negative, it's actually a very large unsigned long value
         if (value < 0) {
-            // 1 marker + 8 data bytes
+            // 1 marker + 8 entity bytes
             return 9;
         }
         if (value < 253) {
-            // 1 data byte
+            // 1 entity byte
             return 1;
         }
         if (value <= 0xFFFFL) {
-            // 1 marker + 2 data bytes
+            // 1 marker + 2 entity bytes
             return 3;
         }
         if (value <= 0xFFFFFFFFL) {
-            // 1 marker + 4 data bytes
+            // 1 marker + 4 entity bytes
             return 5;
         }
-        // 1 marker + 8 data bytes
+        // 1 marker + 8 entity bytes
         return 9;
     }
 

@@ -50,7 +50,7 @@ public class ValidatorCmd extends BaseCmd {
     CoinDataValidator coinDataValidator;
 
     /**
-     * validate coin data
+     * validate coin entity
      * 进行nonce-hash校验，进行可用余额校验
      *
      * @param params

@@ -30,7 +30,7 @@ import io.nuls.base.basic.AddressTool;
 import io.nuls.poc.model.bo.tx.txdata.Agent;
 import io.nuls.poc.utils.manager.AgentManager;
 import io.nuls.tools.core.ioc.SpringLiteContext;
-import io.nuls.tools.data.BigIntegerUtils;
+import io.nuls.tools.model.BigIntegerUtils;
 
 
 /**

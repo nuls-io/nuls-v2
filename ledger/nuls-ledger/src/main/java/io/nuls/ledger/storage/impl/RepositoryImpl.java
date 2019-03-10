@@ -39,7 +39,7 @@ import io.nuls.ledger.storage.Repository;
 import io.nuls.ledger.utils.LoggerUtil;
 import io.nuls.tools.basic.InitializingBean;
 import io.nuls.tools.core.annotation.Service;
-import io.nuls.tools.data.ByteUtils;
+import io.nuls.tools.model.ByteUtils;
 import io.nuls.tools.exception.NulsException;
 
 import java.util.ArrayList;

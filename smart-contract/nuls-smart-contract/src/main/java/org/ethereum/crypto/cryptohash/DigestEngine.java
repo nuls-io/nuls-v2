@@ -24,7 +24,7 @@ import java.security.MessageDigest;
 /**
  * <p>This class is a template which can be used to implement hash
  * functions. It takes care of some of the API, and also provides an
- * internal data buffer whose length is equal to the hash function
+ * internal entity buffer whose length is equal to the hash function
  * internal block length.</p>
  *
  * <p>Classes which use this template MUST provide a working {@link
@@ -75,9 +75,9 @@ public abstract class DigestEngine extends MessageDigest implements Digest {
     protected abstract void engineReset();
 
     /**
-     * Process one block of data.
+     * Process one block of entity.
      *
-     * @param data the data block
+     * @param data the entity block
      */
     protected abstract void processBlock(byte[] data);
 
@@ -85,7 +85,7 @@ public abstract class DigestEngine extends MessageDigest implements Digest {
      * Perform the final padding and store the result in the
      * provided buffer. This method shall call {@link #flush}
      * and then {@link #update} with the appropriate padding
-     * data in order to get the full input data.
+     * entity in order to get the full input entity.
      *
      * @param buf the output buffer
      * @param off the output offset
@@ -96,7 +96,7 @@ public abstract class DigestEngine extends MessageDigest implements Digest {
      * This function is called at object creation time; the
      * implementation should use it to perform initialization tasks.
      * After this method is called, the implementation should be ready
-     * to process data or meaningfully honour calls such as
+     * to process entity or meaningfully honour calls such as
      * {@link #engineGetDigestLength}
      */
     protected abstract void doInit();
@@ -234,7 +234,7 @@ public abstract class DigestEngine extends MessageDigest implements Digest {
     }
 
     /**
-     * Flush internal buffers, so that less than a block of data
+     * Flush internal buffers, so that less than a block of entity
      * may at most be upheld.
      *
      * @return the number of bytes still unprocessed after the flush
@@ -249,7 +249,7 @@ public abstract class DigestEngine extends MessageDigest implements Digest {
      * immediately after a call to {@link #flush()}: if
      * {@link #flush()} return the value {@code n}, then the
      * first {@code n} bytes of the array returned by this method
-     * are the {@code n} bytes of input data which are still
+     * are the {@code n} bytes of input entity which are still
      * unprocessed. The values of the remaining bytes are
      * undefined and may be altered at will.
      *

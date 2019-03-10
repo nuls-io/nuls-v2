@@ -32,7 +32,7 @@ import java.util.List;
 
 /**
  * 账户数据存储服务接口
- * Account data storage service interface
+ * Account entity storage service interface
  *
  * @author: qinyifeng
  */

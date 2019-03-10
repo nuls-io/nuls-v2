@@ -104,7 +104,7 @@ public class ChainManager {
 
             /*
             加载链缓存数据
-            Load chain caching data
+            Load chain caching entity
             */
             initCache(chain);
 
@@ -220,7 +220,7 @@ public class ChainManager {
      * 初始化链缓存数据
      * 在poc的共识机制下，由于存在轮次信息，节点信息，以及节点被惩罚的红黄牌信息，
      * 因此需要在初始化的时候，缓存相关的数据，用于计算最新的轮次信息，以及各个节点的信用值等
-     * Initialize chain caching data
+     * Initialize chain caching entity
      *
      * @param chain chain info
      */

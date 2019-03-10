@@ -85,7 +85,7 @@ public class ScriptBuilder {
     }
 
     /**
-     * Adds a copy of the given byte array as a data element (i.e. PUSHDATA) at the end of the program.
+     * Adds a copy of the given byte array as a entity element (i.e. PUSHDATA) at the end of the program.
      * 添加数据命令（只包含数据）到命令列表最后
      */
     public ScriptBuilder data(byte[] data) {
@@ -97,7 +97,7 @@ public class ScriptBuilder {
     }
 
     /**
-     * Adds a copy of the given byte array as a data element (i.e. PUSHDATA) at the given index in the program.
+     * Adds a copy of the given byte array as a entity element (i.e. PUSHDATA) at the given index in the program.
      * 添加数据命令（只包含数据）到命令列表指定位置
      */
     public ScriptBuilder data(int index, byte[] data) {
@@ -181,7 +181,7 @@ public class ScriptBuilder {
     }
 
     /**
-     * Adds the given number as a push data chunk.
+     * Adds the given number as a push entity chunk.
      * This is intended to use for negative numbers or values > 16, and although
      * it will accept numbers in the range 0-16 inclusive, the encoding would be
      * considered non-standard.
@@ -205,7 +205,7 @@ public class ScriptBuilder {
     }
 
     /**
-     * Adds the given number as a push data chunk to the given index in the program.
+     * Adds the given number as a push entity chunk to the given index in the program.
      * This is intended to use for negative numbers or values > 16, and although
      * it will accept numbers in the range 0-16 inclusive, the encoding would be
      * considered non-standard.
@@ -592,7 +592,7 @@ public class ScriptBuilder {
     }
 
     /**
-     * Creates a script of the form OP_RETURN [data]. This feature allows you to attach a small piece of data (like
+     * Creates a script of the form OP_RETURN [entity]. This feature allows you to attach a small piece of entity (like
      * a hash of something stored elsewhere) to a zero valued output which can never be spent and thus does not pollute
      * the ledger.
      */

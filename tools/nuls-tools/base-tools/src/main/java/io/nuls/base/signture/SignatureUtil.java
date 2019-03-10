@@ -389,12 +389,12 @@ public class SignatureUtil {
      */
 /*    public static String getScriptAddress(List<ScriptChunk> chunks) {
         if (chunks.get(0).opcode == ScriptOpCodes.OP_0) {
-            byte[] redeemByte = chunks.get(chunks.size() - 1).data;
+            byte[] redeemByte = chunks.get(chunks.size() - 1).entity;
             Script redeemScript = new Script(redeemByte);
             Address address = new Address(BaseConstant.DEFAULT_CHAIN_ID, BaseConstant.P2SH_ADDRESS_TYPE, SerializeUtils.sha256hash160(redeemScript.getProgram()));
             return address.toString();
         } else {
-            return AddressTool.getStringAddressByBytes(AddressTool.getAddress(chunks.get(1).data,BaseConstant.DEFAULT_CHAIN_ID));
+            return AddressTool.getStringAddressByBytes(AddressTool.getAddress(chunks.get(1).entity,BaseConstant.DEFAULT_CHAIN_ID));
         }
     }*/
 

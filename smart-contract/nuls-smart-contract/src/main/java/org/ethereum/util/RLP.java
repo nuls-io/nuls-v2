@@ -33,9 +33,9 @@ import static org.spongycastle.util.BigIntegers.asUnsignedByteArray;
 /**
  * Recursive Length Prefix (RLP) encoding.
  * <p>
- * The purpose of RLP is to encode arbitrarily nested arrays of binary data, and
+ * The purpose of RLP is to encode arbitrarily nested arrays of binary entity, and
  * RLP is the main encoding method used to serialize objects in Ethereum. The
- * only purpose of RLP is to encode structure; encoding specific atomic data
+ * only purpose of RLP is to encode structure; encoding specific atomic entity
  * types (eg. strings, integers, floats) is left up to higher-order protocols; in
  * Ethereum the standard is that integers are represented in big endian binary
  * form. If one wishes to use RLP to encode a dictionary, the two suggested
@@ -48,10 +48,10 @@ import static org.spongycastle.util.BigIntegers.asUnsignedByteArray;
  * - A string (ie. byte array) is an item - A list of items is an item
  * <p>
  * For example, an empty string is an item, as is the string containing the word
- * "cat", a list containing any number of strings, as well as more complex data
+ * "cat", a list containing any number of strings, as well as more complex entity
  * structures like ["cat",["puppy","cow"],"horse",[[]],"pig",[""],"sheep"]. Note
  * that in the context of the rest of this article, "string" will be used as a
- * synonym for "a certain number of bytes of binary data"; no special encodings
+ * synonym for "a certain number of bytes of binary entity"; no special encodings
  * are used and no knowledge about the content of the strings is implied.
  * <p>
  * See: https://github.com/ethereum/wiki/wiki/%5BEnglish%5D-RLP
@@ -441,7 +441,7 @@ public class RLP {
     /**
      * Parse wire byte[] message into RLP elements
      *
-     * @param msgData    - raw RLP data
+     * @param msgData    - raw RLP entity
      * @param depthLimit - limits depth of decoding
      * @return rlpList
      * - outcome of recursive RLP structure
@@ -458,7 +458,7 @@ public class RLP {
     /**
      * Parse wire byte[] message into RLP elements
      *
-     * @param msgData - raw RLP data
+     * @param msgData - raw RLP entity
      * @return rlpList
      * - outcome of recursive RLP structure
      */
@@ -476,7 +476,7 @@ public class RLP {
      * you could use this method to unpack them,
      * getting RLPList with RLPItem's holding byte[] inside
      *
-     * @param msgData rlp data
+     * @param msgData rlp entity
      * @return list of RLPItems
      */
     public static RLPList unwrapList(byte[] msgData) {
@@ -510,7 +510,7 @@ public class RLP {
 
 
                 // It's a list with a payload more than 55 bytes
-                // data[0] - 0xF7 = how many next bytes allocated
+                // entity[0] - 0xF7 = how many next bytes allocated
                 // for the length of the list
                 if ((msgData[pos] & 0xFF) > OFFSET_LONG_LIST) {
 
@@ -567,7 +567,7 @@ public class RLP {
                     continue;
                 }
                 // It's an item with a payload more than 55 bytes
-                // data[0] - 0xB7 = how much next bytes allocated for
+                // entity[0] - 0xB7 = how much next bytes allocated for
                 // the length of the string
                 if ((msgData[pos] & 0xFF) > OFFSET_LONG_ITEM
                         && (msgData[pos] & 0xFF) < OFFSET_SHORT_LIST) {
@@ -582,7 +582,7 @@ public class RLP {
                     // check that length is in payload bounds
                     verifyLength(length, msgData.length - pos - lengthOfLength);
 
-                    // now we can parse an item for data[1]..data[length]
+                    // now we can parse an item for entity[1]..entity[length]
                     byte[] item = new byte[length];
                     System.arraycopy(msgData, pos + lengthOfLength + 1, item,
                             0, length);
@@ -594,7 +594,7 @@ public class RLP {
                     continue;
                 }
                 // It's an item less than 55 bytes long,
-                // data[0] - 0x80 == length of the item
+                // entity[0] - 0x80 == length of the item
                 if ((msgData[pos] & 0xFF) > OFFSET_SHORT_ITEM
                         && (msgData[pos] & 0xFF) <= OFFSET_LONG_ITEM) {
 
@@ -648,7 +648,7 @@ public class RLP {
     private static void verifyLength(int suppliedLength, int availableLength) {
         if (suppliedLength > availableLength) {
             throw new RuntimeException(String.format("Length parsed from RLP (%s bytes) is greater " +
-                    "than possible size of data (%s bytes)", suppliedLength, availableLength));
+                    "than possible size of entity (%s bytes)", suppliedLength, availableLength));
         }
     }
 
@@ -794,7 +794,7 @@ public class RLP {
 
         List<Object> slice = new ArrayList<>();
         for (int i = 0; i < len; ) {
-            // Get the next item in the data list and append it
+            // Get the next item in the entity list and append it
             DecodeResult result = decode(data, pos);
             slice.add(result.getDecoded());
             // Increment pos by the amount bytes in the previous read
@@ -1098,7 +1098,7 @@ public class RLP {
     /**
      * A handy shortcut for {@link #encodeElement(byte[])} + {@link #encodeList(byte[]...)}
      * <p>
-     * Encodes each data element and wraps them all into a list.
+     * Encodes each entity element and wraps them all into a list.
      */
     public static byte[] wrapList(byte[]... data) {
         byte[][] elements = new byte[data.length][];

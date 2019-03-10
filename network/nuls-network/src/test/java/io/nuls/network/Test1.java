@@ -25,7 +25,7 @@
 package io.nuls.network;
 
 import io.nuls.network.model.Node;
-import io.nuls.tools.data.ByteUtils;
+import io.nuls.tools.model.ByteUtils;
 import io.nuls.tools.thread.ThreadUtils;
 import io.nuls.tools.thread.TimeService;
 import org.junit.Test;

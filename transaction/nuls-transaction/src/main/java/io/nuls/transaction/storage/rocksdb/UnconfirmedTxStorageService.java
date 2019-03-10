@@ -46,7 +46,7 @@ public interface UnconfirmedTxStorageService {
      * 根据交易hash批量查询已验证交易数据
      *
      * @param chainId
-     * @param hashList NulsDigestData serialize data
+     * @param hashList NulsDigestData serialize entity
      * @return 交易数据列表
      */
     List<Transaction> getTxList(int chainId, List<byte[]> hashList);
@@ -54,7 +54,7 @@ public interface UnconfirmedTxStorageService {
     /**
      * 根据交易hash批量删除已验证交易数据
      * @param chainId
-     * @param hashList NulsDigestData serialize data
+     * @param hashList NulsDigestData serialize entity
      * @return 删除是否成功
      */
     boolean removeTxList(int chainId, List<byte[]> hashList);

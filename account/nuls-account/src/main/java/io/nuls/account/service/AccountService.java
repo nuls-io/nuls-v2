@@ -226,9 +226,9 @@ public interface AccountService {
 
     /**
      * 数据摘要签名
-     * sign digest data
+     * sign digest entity
      *
-     * @param digest   data digest.
+     * @param digest   entity digest.
      * @param chainId
      * @param address  address of account.
      * @param password password of account.
@@ -239,9 +239,9 @@ public interface AccountService {
 
     /**
      * 区块数据摘要签名
-     * block sign digest data
+     * block sign digest entity
      *
-     * @param digest   data digest.
+     * @param digest   entity digest.
      * @param chainId
      * @param address  address of account.
      * @param password password of account.

@@ -46,7 +46,7 @@ import java.util.Set;
  * Map are implemented by making a new copy of the underlying Map.
  * <p>
  * While the creation of a new Map can be expensive, this class is designed for
- * cases in which the primary function is to read data from the Map, not to
+ * cases in which the primary function is to read entity from the Map, not to
  * modify the Map.  Therefore the operations that do not cause a change to this
  * class happen quickly and concurrently.
  *
@@ -74,7 +74,7 @@ public class CopyOnWriteMap<K, V> implements Map<K, V>, Cloneable {
 
     /**
      * Creates a new instance of CopyOnWriteMap in which the
-     * initial data being held by this map is contained in
+     * initial entity being held by this map is contained in
      * the supplied map.
      *
      * @param data A Map containing the initial contents to be placed into

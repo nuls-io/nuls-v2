@@ -31,7 +31,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import io.nuls.api.provider.Result;
 import io.nuls.cmd.client.processor.ErrorCodeContanst;
 import io.nuls.tools.constant.ErrorCode;
-import io.nuls.tools.data.StringUtils;
+import io.nuls.tools.model.StringUtils;
 import io.nuls.tools.parse.JSONUtils;
 import lombok.extern.slf4j.Slf4j;
 

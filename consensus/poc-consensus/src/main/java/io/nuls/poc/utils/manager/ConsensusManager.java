@@ -12,8 +12,8 @@ import io.nuls.poc.model.bo.tx.txdata.Deposit;
 import io.nuls.poc.utils.CallMethodUtils;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
-import io.nuls.tools.data.BigIntegerUtils;
-import io.nuls.tools.data.DoubleUtils;
+import io.nuls.tools.model.BigIntegerUtils;
+import io.nuls.tools.model.DoubleUtils;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.exception.NulsRuntimeException;
 import io.nuls.tools.parse.ConfigLoader;
@@ -38,7 +38,7 @@ public class ConsensusManager {
      * @param chain     chain info
      * @param bestBlock local highest block/本地最新区块
      * @param txList    all tx of block/需打包的交易列表
-     * @param self      agent meeting data/节点打包信息
+     * @param self      agent meeting entity/节点打包信息
      * @param round     latest local round/本地最新轮次信息
      */
     public void addConsensusTx(Chain chain, BlockHeader bestBlock, List<Transaction> txList, MeetingMember self, MeetingRound round) throws NulsException, IOException {
@@ -286,7 +286,7 @@ public class ConsensusManager {
      * create block
      *
      * @param chain        chain info
-     * @param blockData       block data/区块数据
+     * @param blockData       block entity/区块数据
      * @param packingAddress  packing address/打包地址
      * @return Block
      */

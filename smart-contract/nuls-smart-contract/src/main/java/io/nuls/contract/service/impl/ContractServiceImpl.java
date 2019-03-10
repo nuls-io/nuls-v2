@@ -43,8 +43,8 @@ import io.nuls.contract.vm.program.ProgramExecutor;
 import io.nuls.tools.basic.Result;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Service;
-import io.nuls.tools.data.ByteArrayWrapper;
-import io.nuls.tools.data.LongUtils;
+import io.nuls.tools.model.ByteArrayWrapper;
+import io.nuls.tools.model.LongUtils;
 import io.nuls.tools.log.Log;
 import org.spongycastle.util.encoders.Hex;
 

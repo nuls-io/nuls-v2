@@ -67,7 +67,7 @@ public interface Repository {
      *
      * @param addr of the account
      * @param key  associated with this value
-     * @return data in the form of a <code>DataWord</code>
+     * @return entity in the form of a <code>DataWord</code>
      */
     DataWord getStorageValue(byte[] addr, DataWord key);
 

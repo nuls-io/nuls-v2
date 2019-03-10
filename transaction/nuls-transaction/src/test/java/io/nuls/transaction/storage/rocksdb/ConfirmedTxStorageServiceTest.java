@@ -3,7 +3,7 @@ package io.nuls.transaction.storage.rocksdb;
 import io.nuls.base.data.NulsDigestData;
 import io.nuls.base.data.Transaction;
 import io.nuls.tools.core.ioc.SpringLiteContext;
-import io.nuls.tools.data.StringUtils;
+import io.nuls.tools.model.StringUtils;
 import io.nuls.transaction.TestConstant;
 import io.nuls.transaction.TransactionBootStrap;
 import io.nuls.transaction.constant.TxConstant;

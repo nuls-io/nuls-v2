@@ -11,7 +11,7 @@ import io.nuls.contract.model.bo.Output;
 import io.nuls.contract.model.txdata.ContractTransferData;
 import io.nuls.contract.util.MapUtil;
 import io.nuls.contract.vm.program.ProgramTransfer;
-import io.nuls.tools.data.ByteArrayWrapper;
+import io.nuls.tools.model.ByteArrayWrapper;
 import io.nuls.tools.exception.NulsException;
 import org.junit.Assert;
 import org.junit.Test;

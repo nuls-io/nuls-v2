@@ -85,7 +85,7 @@ public class RocksDBTest {
     @Ignore
     @Test
     public void initTest() throws Exception {
-        String dataPath = "../../data";
+        String dataPath = "../../entity";
         long start = System.currentTimeMillis();
         RocksDBService.init(dataPath);
         long end = System.currentTimeMillis();
@@ -304,7 +304,7 @@ public class RocksDBTest {
             }
             long end = System.currentTimeMillis();
             System.out.println(list.size() + "次批量添加测试耗时：" + (end - start) + "ms");
-            //System.out.println("last insert data======" + new String(get(table,list.get(list.size() - 1))));
+            //System.out.println("last insert entity======" + new String(get(table,list.get(list.size() - 1))));
         }
         //批量修改测试
         {
@@ -369,14 +369,14 @@ public class RocksDBTest {
                 batch.put("key222".getBytes(), "value22222".getBytes());
                 batch.delete("key444".getBytes());
                 batch.executeBatch();
-                System.out.println("query data======" + new String(get(table, "key222".getBytes())));
-                System.out.println("query deleted data======" + get(table, "key444".getBytes()));
+                System.out.println("query entity======" + new String(get(table, "key222".getBytes())));
+                System.out.println("query deleted entity======" + get(table, "key444".getBytes()));
 
                 RocksDBService.createTable("account");
                 BatchOperation batch2 = RocksDBService.createWriteBatch("account");
                 batch2.put("key111".getBytes(), "value111".getBytes());
                 batch2.executeBatch();
-                System.out.println("query data======" + new String(get("account", "key111".getBytes())));
+                System.out.println("query entity======" + new String(get("account", "key111".getBytes())));
             } catch (Exception e) {
                 e.printStackTrace();
             }

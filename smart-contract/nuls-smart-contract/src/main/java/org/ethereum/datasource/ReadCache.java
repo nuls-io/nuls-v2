@@ -30,7 +30,7 @@ import java.util.Map;
  * Caches entries get/updated and use LRU algo to purge them if the number
  * of entries exceeds threshold.
  * <p>
- * This implementation could extended to estimate cached data size for
+ * This implementation could extended to estimate cached entity size for
  * more accurate size restriction, but if entries are more or less
  * of the same size the entries count would be good enough
  * <p>

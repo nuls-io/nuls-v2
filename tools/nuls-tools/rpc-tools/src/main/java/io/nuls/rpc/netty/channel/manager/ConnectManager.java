@@ -17,7 +17,7 @@ import io.nuls.rpc.netty.thread.RequestByPeriodProcessor;
 import io.nuls.rpc.netty.thread.ResponseAutoProcessor;
 import io.nuls.tools.core.ioc.ScanUtil;
 import io.nuls.tools.core.ioc.SpringLiteContext;
-import io.nuls.tools.data.StringUtils;
+import io.nuls.tools.model.StringUtils;
 import io.nuls.tools.log.Log;
 import io.nuls.tools.parse.JSONUtils;
 import io.nuls.tools.thread.TimeService;
@@ -379,11 +379,8 @@ public class ConnectManager {
      * @return long
      */
     public static int getCmdChangeCount(String cmd) {
-        try {
-            return CMD_CHANGE_COUNT.get(cmd);
-        } catch (Exception e) {
-            return 1;
-        }
+        Integer integer = CMD_CHANGE_COUNT.get(cmd);
+        return integer == null ? 1 : integer;
     }
 
     /**
