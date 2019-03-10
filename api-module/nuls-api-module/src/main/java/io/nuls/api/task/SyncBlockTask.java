@@ -84,6 +84,10 @@ public class SyncBlockTask implements Runnable {
             nextHeight = localBestBlockHeader.getHeight() + 1;
         }
         BlockInfo newBlock = WalletRpcHandler.getBlockInfo(chainId, nextHeight);
+        if (null == newBlock) {
+            Thread.sleep(5000L);
+            return false;
+        }
         if (checkBlockContinuity(localBestBlockHeader, newBlock.getHeader())) {
             return syncService.syncNewBlock(chainId, newBlock);
         } else {
