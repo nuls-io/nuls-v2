@@ -76,7 +76,7 @@ public class TransactionCall {
         params.put("txHex", txHex);
         Map result = (Map) TransactionCall.request(txRegister.getModuleCode(), txRegister.getValidator(), params);
         try {
-            chain.getLogger().debug("moduleCode:{}, -cmd:{}, -txProcess -rs: {}", txRegister.getModuleCode(), txRegister.getValidator(), JSONUtils.obj2json(result));
+            chain.getLoggerMap().get(TxConstant.LOG_TX).debug("moduleCode:{}, -cmd:{}, -txProcess -rs: {}", txRegister.getModuleCode(), txRegister.getValidator(), JSONUtils.obj2json(result));
         } catch (JsonProcessingException e) {
             e.printStackTrace();
         }
@@ -99,10 +99,10 @@ public class TransactionCall {
             params.put("txHexList", txHexList);
             params.put("blockHeaderHex", blockHeaderHex);
             Map result = (Map) TransactionCall.request(moduleCode, cmd, params);
-            chain.getLogger().debug("moduleCode:{}, -cmd:{}, -txProcess -rs: {}",moduleCode, cmd, JSONUtils.obj2json(result));
+            chain.getLoggerMap().get(TxConstant.LOG_TX).debug("moduleCode:{}, -cmd:{}, -txProcess -rs: {}",moduleCode, cmd, JSONUtils.obj2json(result));
             return (Boolean) result.get("value");
         } catch (Exception e) {
-            chain.getLogger().error(e);
+            chain.getLoggerMap().get(TxConstant.LOG_TX).error(e);
             return false;
         }
     }

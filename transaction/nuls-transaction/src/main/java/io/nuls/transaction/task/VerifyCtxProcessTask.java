@@ -28,8 +28,7 @@ import io.nuls.base.data.Transaction;
 import io.nuls.tools.core.ioc.SpringLiteContext;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.transaction.constant.TxCmd;
-import io.nuls.transaction.storage.rocksdb.CtxStorageService;
-import io.nuls.transaction.storage.rocksdb.UnverifiedCtxStorageService;
+import io.nuls.transaction.constant.TxConstant;
 import io.nuls.transaction.manager.TransactionManager;
 import io.nuls.transaction.message.VerifyCrossWithFCMessage;
 import io.nuls.transaction.model.bo.Chain;
@@ -37,6 +36,8 @@ import io.nuls.transaction.model.bo.CrossTx;
 import io.nuls.transaction.model.bo.CrossTxData;
 import io.nuls.transaction.model.bo.Node;
 import io.nuls.transaction.rpc.call.NetworkCall;
+import io.nuls.transaction.storage.rocksdb.CtxStorageService;
+import io.nuls.transaction.storage.rocksdb.UnverifiedCtxStorageService;
 import io.nuls.transaction.utils.TxUtil;
 
 import java.util.ArrayList;
@@ -64,7 +65,7 @@ public class VerifyCtxProcessTask implements Runnable {
         try {
             doTask(chain);
         } catch (Exception e) {
-            chain.getLogger().error(e);
+            chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).error(e);
         }
     }
 
@@ -115,7 +116,7 @@ public class VerifyCtxProcessTask implements Runnable {
                 unverifiedCtxStorageService.removeTxList(chainId, processedList);
             }
         } catch (NulsException e) {
-            chain.getLogger().error(e);
+            chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).error(e);
         }
     }
 }

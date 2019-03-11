@@ -34,8 +34,7 @@ import io.nuls.api.provider.account.facade.AccountInfo;
 import io.nuls.cmd.client.CommandBuilder;
 import io.nuls.cmd.client.CommandResult;
 import io.nuls.cmd.client.processor.CommandProcessor;
-import io.nuls.cmd.client.processor.ErrorCodeContanst;
-import io.nuls.tools.constant.ErrorCode;
+import io.nuls.cmd.client.processor.ErrorCodeConstants;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.parse.JSONUtils;
 
@@ -79,7 +78,7 @@ public class GetAccountsProcessor implements CommandProcessor {
         try {
             return CommandResult.getSuccess(JSONUtils.obj2PrettyJson(result.getList()));
         } catch (JsonProcessingException e) {
-            return CommandResult.failed(ErrorCodeContanst.SYSTEM_ERR);
+            return CommandResult.failed(ErrorCodeConstants.SYSTEM_ERR);
         }
     }
 }

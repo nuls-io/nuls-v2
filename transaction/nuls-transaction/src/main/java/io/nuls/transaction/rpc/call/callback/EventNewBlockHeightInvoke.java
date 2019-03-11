@@ -30,6 +30,7 @@ import io.nuls.rpc.model.message.Response;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.parse.JSONUtils;
+import io.nuls.transaction.constant.TxConstant;
 import io.nuls.transaction.model.bo.Chain;
 import io.nuls.transaction.service.ConfirmedTxService;
 
@@ -68,7 +69,7 @@ public class EventNewBlockHeightInvoke extends BaseInvoke {
                 confirmedTxService.processEffectCrossTx(chain, blockHeight);
             }
         } catch (NulsException e) {
-            chain.getLogger().error(e);
+            chain.getLoggerMap().get(TxConstant.LOG_TX).error(e);
         }
     }
 }

@@ -50,8 +50,9 @@ public class Chain {
     /**
      * 日志
      */
-    @JsonIgnore
-    private NulsLogger logger;
+  /*  @JsonIgnore
+    private NulsLogger logger;*/
+    private Map<String, NulsLogger> loggerMap;
 
     /**
      * 管理接收的其他链创建的跨链交易(如果有), 暂存验证中的跨链交易.
@@ -92,15 +93,14 @@ public class Chain {
     @JsonIgnore
     private ScheduledThreadPoolExecutor scheduledThreadPoolExecutor;
 
-    public Chain() throws Exception {
-//        this.runningStatus = RunningStatus.INITING;
-//        this.crossTxVerifyingMap = new HashMap<>();
+    public Chain() throws Exception {;
         this.packaging =  new AtomicBoolean(false);
         this.rePackage = new AtomicBoolean(true);
         this.txRegisterMap = new HashMap<>();
         this.txQueue = new LinkedBlockingDeque<>();
         this.orphanContainer = new LimitHashMap(TxConstant.ORPHAN_CONTAINER_MAX_SIZE);
         this.unverifiedQueue = new PersistentQueue(TxConstant.TX_UNVERIFIED_QUEUE, TxConstant.TX_UNVERIFIED_QUEUE_MAXSIZE);
+        this.loggerMap = new HashMap<>();
     }
 
     public int getChainId(){
@@ -114,13 +114,6 @@ public class Chain {
         this.config = config;
     }
 
-//    public RunningStatus getRunningStatus() {
-//        return runningStatus;
-//    }
-//
-//    public void setRunningStatus(RunningStatus runningStatus) {
-//        this.runningStatus = runningStatus;
-//    }
 
     public ScheduledThreadPoolExecutor getScheduledThreadPoolExecutor() {
         return scheduledThreadPoolExecutor;
@@ -130,21 +123,13 @@ public class Chain {
         this.scheduledThreadPoolExecutor = scheduledThreadPoolExecutor;
     }
 
-    public NulsLogger getLogger() {
-        return logger;
+    public Map<String, NulsLogger> getLoggerMap() {
+        return loggerMap;
     }
 
-    public void setLogger(NulsLogger logger) {
-        this.logger = logger;
+    public void setLoggerMap(Map<String, NulsLogger> loggerMap) {
+        this.loggerMap = loggerMap;
     }
-
-//    public Map<NulsDigestData, CrossTx> getCrossTxVerifyingMap() {
-//        return crossTxVerifyingMap;
-//    }
-//
-//    public void setCrossTxVerifyingMap(Map<NulsDigestData, CrossTx> crossTxVerifyingMap) {
-//        this.crossTxVerifyingMap = crossTxVerifyingMap;
-//    }
 
     public Map<Integer, TxRegister> getTxRegisterMap() {
         return txRegisterMap;

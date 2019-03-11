@@ -12,12 +12,10 @@ import java.math.BigInteger;
 @Data
 public class AccountBalanceInfo {
 
-
-    private String freeze;
+    private BigInteger freeze;
 
     private BigInteger total;
 
-    private String available;
-
+    private BigInteger available;
 
 }

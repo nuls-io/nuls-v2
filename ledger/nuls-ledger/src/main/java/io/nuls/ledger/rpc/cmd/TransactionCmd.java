@@ -140,7 +140,8 @@ public class TransactionCmd extends BaseCmd {
         Map<String, Object> rtData = new HashMap<>();
         Integer chainId = (Integer) params.get("chainId");
         List<String> txHexList = (List) params.get("txHexList");
-        LoggerUtil.logger.debug("commitBlockTxs chainId={}", chainId);
+        long blockHeight = Long.valueOf(params.get("blockHeight").toString());
+        LoggerUtil.logger.debug("commitBlockTxs chainId={},blockHeight={}", chainId,blockHeight);
         if (null == txHexList || 0 == txHexList.size()) {
             LoggerUtil.logger.error("txHexList is blank");
             return failed("txHexList is blank");
@@ -153,7 +154,7 @@ public class TransactionCmd extends BaseCmd {
             LoggerUtil.logger.debug("commitBlockTxs response={}", parseResponse);
             return parseResponse;
         }
-        long blockHeight = Long.valueOf(params.get("blockHeight").toString());
+
         if (transactionService.confirmBlockProcess(chainId, txList, blockHeight)) {
             value = 1;
         } else {

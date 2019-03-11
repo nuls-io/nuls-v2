@@ -37,6 +37,7 @@ import io.nuls.ledger.service.AccountStateService;
 import io.nuls.ledger.storage.Repository;
 import io.nuls.ledger.utils.CoinDataUtils;
 import io.nuls.ledger.utils.LedgerUtils;
+import io.nuls.ledger.utils.LoggerUtil;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.crypto.HexUtil;
@@ -268,7 +269,7 @@ public class CoinDataValidator {
         if (null == list) {
             //从头开始处理
             if (!accountState.getNonce().equalsIgnoreCase(nonce)) {
-                logger.info("{}=={}=={}==nonce is error!{}!={}", address, coinFrom.getAssetsChainId(), coinFrom.getAssetsId(), accountState.getNonce(), nonce);
+                logger.info("isValidateCommonTxBatch {}=={}=={}==nonce is error!dbNonce:{}!=fromNonce:{}", address, coinFrom.getAssetsChainId(), coinFrom.getAssetsId(), accountState.getNonce(), nonce);
                 return false;
             }
             list = new ArrayList<>();
@@ -279,13 +280,13 @@ public class CoinDataValidator {
             //从已有的缓存数据中获取对象进行操作,nonce必须连贯
             TempAccountState tempAccountState = list.get(list.size() - 1);
             if (!tempAccountState.getNextNonce().equalsIgnoreCase(nonce)) {
-                logger.info("{}=={}=={}==nonce is error!{}!={}", address, coinFrom.getAssetsChainId(), coinFrom.getAssetsId(), tempAccountState.getNextNonce(), nonce);
+                logger.info("isValidateCommonTxBatch {}=={}=={}==nonce is error!tempNonce:{}!=fromNonce:{}", address, coinFrom.getAssetsChainId(), coinFrom.getAssetsId(), tempAccountState.getNextNonce(), nonce);
                 return false;
             }
             for (TempAccountState tempAccountState1 : list) {
                 //交易池中账户存在一样的nonce
                 if (tempAccountState1.getNonce().equalsIgnoreCase(nonce)) {
-                    logger.info("{}=={}=={}==nonce is double expenses! nonce ={}", address, coinFrom.getAssetsChainId(), coinFrom.getAssetsId(), nonce);
+                    logger.info("isValidateCommonTxBatch {}=={}=={}==nonce is double expenses! nonce ={}", address, coinFrom.getAssetsChainId(), coinFrom.getAssetsId(), nonce);
                     return false;
                 }
             }
@@ -310,6 +311,8 @@ public class CoinDataValidator {
             //时间解锁
             List<FreezeLockTimeState> list = accountState.getFreezeLockTimeStates();
             for (FreezeLockTimeState freezeLockTimeState : list) {
+                LoggerUtil.logger.debug("UnlockedValidate-time: address={},assetChainId={},assetId={},nonceFrom={},nonceDb={},amountFrom={},amountDb={}",
+                        accountState.getAddress(), accountState.getAssetChainId(), accountState.getAssetId(), fromNonce, freezeLockTimeState.getNonce(), fromAmount, freezeLockTimeState.getAmount());
                 if (freezeLockTimeState.getNonce().equalsIgnoreCase(fromNonce) && freezeLockTimeState.getAmount().compareTo(fromAmount) == 0) {
                     //找到交易
                     isValidate = true;
@@ -320,6 +323,8 @@ public class CoinDataValidator {
             //高度解锁
             List<FreezeHeightState> list = accountState.getFreezeHeightStates();
             for (FreezeHeightState freezeHeightState : list) {
+                LoggerUtil.logger.debug("UnlockedValidate-height: address={},assetChainId={},assetId={},nonceFrom={},nonceDb={},amountFrom={},amountDb={}",
+                        accountState.getAddress(), accountState.getAssetChainId(), accountState.getAssetId(), fromNonce, freezeHeightState.getNonce(), fromAmount, freezeHeightState.getAmount());
                 if (freezeHeightState.getNonce().equalsIgnoreCase(fromNonce) && freezeHeightState.getAmount().compareTo(fromAmount) == 0) {
                     //找到交易
                     isValidate = true;
@@ -327,6 +332,8 @@ public class CoinDataValidator {
                 }
             }
         }
+        LoggerUtil.logger.debug("isValidateFreezeTx: address={},assetChainId={},assetId={},isValidate={}",
+                accountState.getAddress(), accountState.getAssetChainId(), accountState.getAssetId(),isValidate);
         return isValidate;
     }
 
@@ -348,6 +355,8 @@ public class CoinDataValidator {
                 break;
             }
         }
+        LoggerUtil.logger.debug("isExsitUnconfirmedFreezeTx: address={},assetChainId={},assetId={},isValidate={}",
+                accountState.getAddress(), accountState.getAssetChainId(), accountState.getAssetId(),isValidate);
         return isValidate;
     }
 
@@ -386,7 +395,7 @@ public class CoinDataValidator {
             } else {
                 if (!isValidateFreezeTx(coinFrom.getLocked(), accountState, coinFrom.getAmount(), nonce)) {
                     //确认交易未找到冻结的交易
-                    if (!isExsitUnconfirmedFreezeTx(accountState,coinFrom.getAmount(),nonce)) {
+                    if (!isExsitUnconfirmedFreezeTx(accountState, coinFrom.getAmount(), nonce)) {
                         //未确认交易中也未找到冻结的交易
                         ValidateResult validateResult = new ValidateResult(VALIDATE_FAIL_CODE, String.format(VALIDATE_FAIL_DESC, address, nonce, " freeze tx is not exist"));
                         return validateResult;

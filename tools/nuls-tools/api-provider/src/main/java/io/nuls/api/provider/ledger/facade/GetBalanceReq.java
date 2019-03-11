@@ -1,5 +1,6 @@
 package io.nuls.api.provider.ledger.facade;
 
+import io.nuls.api.provider.BaseReq;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
@@ -14,6 +15,12 @@ import java.math.BigInteger;
  */
 @Data
 @AllArgsConstructor
-public class GetBalanceReq {
+public class GetBalanceReq extends BaseReq {
+
+    Integer assetId;
+
+    Integer assetChainId;
+
+    String address;
 
 }

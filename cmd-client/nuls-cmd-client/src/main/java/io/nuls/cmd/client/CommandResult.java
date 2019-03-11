@@ -29,7 +29,7 @@ package io.nuls.cmd.client;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import io.nuls.api.provider.Result;
-import io.nuls.cmd.client.processor.ErrorCodeContanst;
+import io.nuls.cmd.client.processor.ErrorCodeConstants;
 import io.nuls.tools.constant.ErrorCode;
 import io.nuls.tools.data.StringUtils;
 import io.nuls.tools.parse.JSONUtils;
@@ -75,7 +75,7 @@ public class CommandResult {
     }
 
     public static CommandResult failed(String errCode){
-        return getFailed(ErrorCode.init(ErrorCodeContanst.SYSTEM_ERR).getMsg());
+        return getFailed(ErrorCode.init(ErrorCodeConstants.SYSTEM_ERR).getMsg());
     }
 
     public static CommandResult getFailed(String message) {

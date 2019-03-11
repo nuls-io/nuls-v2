@@ -551,7 +551,7 @@ public class TransactionCmd extends BaseCmd {
         if (chain == null) {
             Log.error(e);
         } else {
-            chain.getLogger().error(e);
+            chain.getLoggerMap().get(TxConstant.LOG_TX).error(e);
         }
     }
 
@@ -578,7 +578,7 @@ public class TransactionCmd extends BaseCmd {
             }
             chain.getPackaging().set(packaging);
             TxConfig.PACKAGING = packaging;
-            chain.getLogger().debug("节点是否是打包节点,状态变更为: {}", chain.getPackaging().get());
+            chain.getLoggerMap().get(TxConstant.LOG_TX).debug("Task-Packaging 节点是否是打包节点,状态变更为: {}", chain.getPackaging().get());
             return success();
         } catch (NulsException e) {
             errorLogProcess(chain, e);
