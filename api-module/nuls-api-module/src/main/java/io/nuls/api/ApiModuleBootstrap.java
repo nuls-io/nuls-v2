@@ -27,6 +27,7 @@ import io.nuls.api.db.DBTableService;
 import io.nuls.api.db.MongoDBService;
 import io.nuls.api.manager.ScheduleManager;
 import io.nuls.api.model.po.db.ChainInfo;
+import io.nuls.api.rpc.jsonRpc.JsonRpcServer;
 import io.nuls.api.utils.ConfigLoader;
 import io.nuls.rpc.info.HostInfo;
 import io.nuls.rpc.model.ModuleE;
@@ -134,6 +135,13 @@ public class ApiModuleBootstrap {
     private static void start() {
         ScheduleManager scheduleManager = SpringLiteContext.getBean(ScheduleManager.class);
         scheduleManager.start();
+
+        String ip = "0.0.0.0";
+        int port = 8080;
+
+        JsonRpcServer server = new JsonRpcServer();
+
+        server.startServer(ip, port);
     }
 
     /**

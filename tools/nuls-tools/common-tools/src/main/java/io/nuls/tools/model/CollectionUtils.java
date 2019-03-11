@@ -1,4 +1,4 @@
-package io.nuls.tools.data;
+package io.nuls.tools.model;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;

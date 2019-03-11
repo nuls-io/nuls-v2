@@ -1,4 +1,4 @@
-package io.nuls.tools.data;
+package io.nuls.tools.model;
 
 import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.parse.SerializeUtils;

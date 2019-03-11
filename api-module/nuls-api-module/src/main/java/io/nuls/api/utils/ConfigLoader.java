@@ -74,6 +74,8 @@ public class ConfigLoader {
             }
         }
 
+        ApiContext.SEED_NODE_ADDRESS.add("5MR_2CkbW7Bn1GpKkh4ZVfudxzTUNPdKp5Z");
+
 //        ConfigBean bean = new ConfigBean();
 //        for (ConfigItem item : configItems) {
 //            if (item.getName().equals(ApiConstant.CHAIN_ID)) {

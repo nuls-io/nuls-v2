@@ -27,7 +27,7 @@ package io.nuls.cmd.client;
 
 import io.nuls.api.provider.Result;
 import io.nuls.tools.constant.ErrorCode;
-import io.nuls.tools.data.StringUtils;
+import io.nuls.tools.model.StringUtils;
 import io.nuls.tools.parse.JSONUtils;
 import jline.console.ConsoleReader;
 

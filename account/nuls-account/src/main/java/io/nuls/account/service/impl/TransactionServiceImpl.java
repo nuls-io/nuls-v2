@@ -58,8 +58,8 @@ import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Service;
 import io.nuls.tools.crypto.ECKey;
 import io.nuls.tools.crypto.HexUtil;
-import io.nuls.tools.data.BigIntegerUtils;
-import io.nuls.tools.data.StringUtils;
+import io.nuls.tools.model.BigIntegerUtils;
+import io.nuls.tools.model.StringUtils;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.exception.NulsRuntimeException;
 
@@ -155,7 +155,7 @@ public class TransactionServiceImpl implements TransactionService {
         Transaction transaction = new Transaction(AccountConstant.TX_TYPE_TRANSFER);
         transaction.setTime(NetworkCall.getCurrentTimeMillis());
         transaction.setRemark(StringUtils.bytes(remark));
-        //build coin data
+        //build coin entity
         //buildMultiSignTransactionCoinData(transaction, chainId,assetsId, multiSigAccount, toAddress, amount);
         CoinDto from = new CoinDto(multiSigAccount.getAddress().getBase58(), chainId, assetsId, amount, null);
         CoinDto to = new CoinDto(toAddress, chainId, assetsId, amount, null);
@@ -213,7 +213,7 @@ public class TransactionServiceImpl implements TransactionService {
         transaction.setRemark(StringUtils.bytes(remark));
         Alias alias = new Alias(multiSigAccount.getAddress().getAddressBytes(), aliasName);
         transaction.setTxData(alias.serialize());
-        //build coin data
+        //build coin entity
         buildMultiSignTransactionCoinData(transaction, chainId, -1, multiSigAccount, toAddress, BigInteger.ONE);
         //sign
         TransactionSignature transactionSignature = buildMultiSignTransactionSignature(transaction, multiSigAccount, account, password);
@@ -345,7 +345,7 @@ public class TransactionServiceImpl implements TransactionService {
 
     /**
      * 组装CoinData数据
-     * assembly coinFrom data
+     * assembly coinFrom entity
      *
      * @param tx
      * @param chainId
@@ -383,7 +383,7 @@ public class TransactionServiceImpl implements TransactionService {
 
     /**
      * 组装coinFrom数据
-     * assembly coinFrom data
+     * assembly coinFrom entity
      *
      * @param listFrom Initiator set coinFrom
      * @return List<CoinFrom>
@@ -427,7 +427,7 @@ public class TransactionServiceImpl implements TransactionService {
 
     /**
      * 组装coinTo数据
-     * assembly coinTo data
+     * assembly coinTo entity
      * 条件：to中所有地址必须是同一条链的地址
      *
      * @param listTo Initiator set coinTo

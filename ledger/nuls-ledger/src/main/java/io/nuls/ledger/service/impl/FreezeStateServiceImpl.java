@@ -61,7 +61,7 @@ public class FreezeStateServiceImpl implements FreezeStateService {
         List<FreezeLockTimeState>  timeRemove =  new ArrayList<>();
         timeList.sort((x, y) -> Long.compare(x.getLockTime(),y.getLockTime()));
         for(FreezeLockTimeState freezeLockTimeState : timeList){
-            if(freezeLockTimeState.getLockTime() >= nowTime){
+            if(freezeLockTimeState.getLockTime() <= nowTime){
                 //永久锁定的,继续处理
                 if(freezeLockTimeState.getLockTime() == LedgerConstant.PERMANENT_LOCK){
                     continue;
@@ -75,11 +75,12 @@ public class FreezeStateServiceImpl implements FreezeStateService {
         BigInteger addFromAmount = BigInteger.ZERO;
         for(FreezeLockTimeState freezeLockTimeState : timeRemove){
             timeList.remove(freezeLockTimeState);
-            addFromAmount.add(freezeLockTimeState.getAmount());
+            addFromAmount=addFromAmount.add(freezeLockTimeState.getAmount());
         }
         return addFromAmount;
     }
     private BigInteger unFreezeLockHeightState(List<FreezeHeightState> heightList,AccountState accountState){
+        //TODO:此处高度可以做个时间缓存
         long nowHeight = repository.getBlockHeight(accountState.getAddressChainId());
         //可移除的高度锁列表
         List<FreezeHeightState>  heightRemove =  new ArrayList<>();
@@ -96,7 +97,7 @@ public class FreezeStateServiceImpl implements FreezeStateService {
         BigInteger addFromAmount = BigInteger.ZERO;
         for(FreezeHeightState freezeHeightState : heightRemove){
             heightList.remove(freezeHeightState);
-            addFromAmount.add(freezeHeightState.getAmount());
+            addFromAmount = addFromAmount.add(freezeHeightState.getAmount());
         }
         return addFromAmount;
     }

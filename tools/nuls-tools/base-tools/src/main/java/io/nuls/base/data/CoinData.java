@@ -32,7 +32,7 @@ import io.nuls.base.basic.NulsOutputStreamBuffer;
 import io.nuls.base.constant.BaseConstant;
 import io.nuls.base.script.Script;
 import io.nuls.base.signture.SignatureUtil;
-import io.nuls.tools.data.ByteArrayWrapper;
+import io.nuls.tools.model.ByteArrayWrapper;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.parse.SerializeUtils;
 

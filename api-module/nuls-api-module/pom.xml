@@ -104,7 +104,16 @@
             <artifactId>mongo-java-driver</artifactId>
             <version>3.9.1</version>
         </dependency>
-
+        <dependency>
+            <groupId>org.glassfish.jersey.containers</groupId>
+            <artifactId>jersey-container-servlet-core</artifactId>
+            <version>2.25.1</version>
+        </dependency>
+        <dependency>
+            <groupId>org.glassfish.grizzly</groupId>
+            <artifactId>grizzly-http-server</artifactId>
+            <version>2.4.3.1</version>
+        </dependency>
     </dependencies>
 
     <build>

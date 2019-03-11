@@ -54,13 +54,13 @@ public class CreateContractTxValidator {
         byte[] sender = txData.getSender();
         byte[] contractAddress = txData.getContractAddress();
         if(!ContractUtil.isLegalContractAddress(contractAddress)) {
-            Log.error("contract data error: Illegal contract address.");
+            Log.error("contract entity error: Illegal contract address.");
             return Result.getFailed(ILLEGAL_CONTRACT_ADDRESS);
         }
         Set<String> addressSet = SignatureUtil.getAddressFromTX(tx, chainId);
 
         if (!addressSet.contains(AddressTool.getStringAddressByBytes(sender))) {
-            Log.error("contract data error: The contract creater is not the transaction creator.");
+            Log.error("contract entity error: The contract creater is not the transaction creator.");
             return Result.getFailed(TX_DATA_VALIDATION_ERROR);
         }
 

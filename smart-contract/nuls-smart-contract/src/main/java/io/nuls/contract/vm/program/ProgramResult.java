@@ -64,6 +64,16 @@ public class ProgramResult {
         return this;
     }
 
+    public static ProgramResult getFailed(String errorMessage) {
+        ProgramResult result = new ProgramResult();
+        return result.error(errorMessage);
+    }
+
+    public static ProgramResult getFailed() {
+        ProgramResult result = new ProgramResult();
+        return result.error(null);
+    }
+
     public void view() {
         this.transfers = new ArrayList<>();
         this.events = new ArrayList<>();

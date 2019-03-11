@@ -104,7 +104,7 @@ public class ConnectData {
 
     /**
      * 判断指定消息是否为订阅消息，且是按指定间隔时间返回数据
-     * Determines whether the specified message is a subscription message and returns data at a specified interval
+     * Determines whether the specified message is a subscription message and returns entity at a specified interval
      *
      * @param messageId
      * */
@@ -114,7 +114,7 @@ public class ConnectData {
 
     /**
      * 判断指定消息是否为订阅消息，且是事件触发次数返回数据
-     * Determines whether the specified message is a subscription message and returns data on the number of event triggers
+     * Determines whether the specified message is a subscription message and returns entity on the number of event triggers
      *
      * @param messageId
      * */

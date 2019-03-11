@@ -157,7 +157,7 @@ public class ScriptUtil {
             byte[] pubkeyByte = "public_key".getBytes();
             Script inputScript = createP2PKHInputScript(signbyte, pubkeyByte);
             System.out.println("P2PKH_INPUT:" + inputScript.getChunks());
-            //System.out.println(new String(inputScript.getChunks().get(0).data));
+            //System.out.println(new String(inputScript.getChunks().get(0).entity));
             //P2PKHOutput
             byte[] addrByte = "Nsdybg1xmP7z4PTUKKN26stocrJ1qrUJ".getBytes();
             Script outputScript = createP2PKHOutputScript(addrByte);
@@ -178,7 +178,7 @@ public class ScriptUtil {
             Script p2shInput = createP2SHInputScript(signBytes, redeemScript);
             System.out.println("P2SH_INPUT:" + p2shInput.getChunks());
             ScriptChunk scriptChunk = p2shInput.getChunks().get(p2shInput.getChunks().size() - 1); //scriptChunk.data存放的就是赎回脚本的序列化信息
-            Script redeemScriptParse = new Script(scriptChunk.data);
+            Script redeemScriptParse = new Script(scriptChunk.entity);
             System.out.println(redeemScriptParse.getChunks());
             //P2SHOutput
             Script p2shOutput = createP2SHOutputScript(redeemScript);

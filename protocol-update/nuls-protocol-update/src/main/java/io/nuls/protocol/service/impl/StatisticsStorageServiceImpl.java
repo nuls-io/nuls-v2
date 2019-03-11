@@ -25,11 +25,10 @@ package io.nuls.protocol.service.impl;
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.db.service.RocksDBService;
 import io.nuls.protocol.constant.Constant;
-import io.nuls.protocol.model.ProtocolConfig;
 import io.nuls.protocol.model.po.Statistics;
 import io.nuls.protocol.service.StatisticsStorageService;
 import io.nuls.tools.core.annotation.Service;
-import io.nuls.tools.data.ByteUtils;
+import io.nuls.tools.model.ByteUtils;
 
 import java.util.ArrayList;
 import java.util.List;

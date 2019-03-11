@@ -45,7 +45,7 @@ public interface ConflictDetectProcessor {
      *
      * @param txList 需要检查的交易列表/A list of transactions to be checked.
      * @return 操作结果：成功则返回successResult，失败时，data中返回丢弃列表，msg中返回冲突原因
-     * Operation result: success returns successResult. When failure, data returns the discard list, and MSG returns the cause of conflict.
+     * Operation result: success returns successResult. When failure, entity returns the discard list, and MSG returns the cause of conflict.
      */
     Result conflictDetect(List<Transaction> txList);
 }

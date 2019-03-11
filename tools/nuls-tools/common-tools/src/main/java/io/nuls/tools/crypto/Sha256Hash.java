@@ -26,7 +26,7 @@
 
 package io.nuls.tools.crypto;
 
-import io.nuls.tools.data.ByteUtils;
+import io.nuls.tools.model.ByteUtils;
 
 import java.io.File;
 import java.io.FileInputStream;

@@ -10,8 +10,8 @@ import io.nuls.base.basic.AddressTool;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.crypto.Sha256Hash;
-import io.nuls.tools.data.ArraysTool;
-import io.nuls.tools.data.DoubleUtils;
+import io.nuls.tools.model.ArraysTool;
+import io.nuls.tools.model.DoubleUtils;
 import io.nuls.tools.log.Log;
 import io.nuls.tools.parse.SerializeUtils;
 
@@ -134,7 +134,7 @@ public class RoundManager {
             if (null == totalDeposit) {
                 totalDeposit = BigInteger.ZERO;
             }
-            if (totalDeposit.compareTo(ApiConstant.MIN_DEPOSIT) > 0) {
+            if (totalDeposit.compareTo(ApiConstant.MIN_DEPOSIT) >= 0) {
                 AgentSorter sorter = new AgentSorter();
                 sorter.setAgentId(agent.getTxHash());
                 byte[] hash = ArraysTool.concatenate(AddressTool.getAddress(agent.getPackingAddress()), SerializeUtils.uint64ToByteArray(blockInfo.getHeader().getRoundStartTime()));

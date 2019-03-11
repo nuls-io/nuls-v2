@@ -50,7 +50,7 @@ public interface RpcConstant {
     /**
      * 事件发送数据
      */
-    String EVENT_SEND_DATA = "data";
+    String EVENT_SEND_DATA = "entity";
     /**
      * --------[call Transaction module RPC constants] -------
      */

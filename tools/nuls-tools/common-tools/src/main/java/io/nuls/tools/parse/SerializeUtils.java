@@ -28,7 +28,7 @@ import io.nuls.tools.basic.NulsData;
 import io.nuls.tools.basic.VarInt;
 import io.nuls.tools.constant.ToolsConstant;
 import io.nuls.tools.crypto.Sha256Hash;
-import io.nuls.tools.data.ByteUtils;
+import io.nuls.tools.model.ByteUtils;
 import io.nuls.tools.exception.NulsRuntimeException;
 import io.nuls.tools.log.Log;
 import org.spongycastle.crypto.digests.RIPEMD160Digest;

@@ -128,20 +128,20 @@ public final class DataWord implements Comparable<DataWord> {
     }
 
     /**
-     * Returns instance data
+     * Returns instance entity
      * Actually copy of internal byte array is provided
      * in order to protect DataWord immutability
      *
-     * @return instance data
+     * @return instance entity
      */
     public byte[] getData() {
         return Arrays.copyOf(data, data.length);
     }
 
     /**
-     * Returns copy of instance data
+     * Returns copy of instance entity
      *
-     * @return copy of instance data
+     * @return copy of instance entity
      */
     private byte[] copyData() {
         return Arrays.copyOf(data, data.length);

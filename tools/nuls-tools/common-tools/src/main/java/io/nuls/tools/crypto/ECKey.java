@@ -26,7 +26,7 @@ package io.nuls.tools.crypto;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.google.common.primitives.UnsignedBytes;
-import io.nuls.tools.data.ObjectUtils;
+import io.nuls.tools.model.ObjectUtils;
 import io.nuls.tools.log.Log;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

@@ -29,7 +29,7 @@ import io.nuls.tools.core.annotation.*;
 import io.nuls.tools.core.inteceptor.DefaultMethodInterceptor;
 import io.nuls.tools.core.inteceptor.base.BeanMethodInterceptor;
 import io.nuls.tools.core.inteceptor.base.BeanMethodInterceptorManager;
-import io.nuls.tools.data.StringUtils;
+import io.nuls.tools.model.StringUtils;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.exception.NulsRuntimeException;
 import io.nuls.tools.log.Log;
@@ -68,7 +68,7 @@ public class SpringLiteContext {
      * @param packName 扫描的根路径,The root package of the scan.
      */
     public static void init(final String... packName) {
-        init(new DefaultMethodInterceptor(),packName);
+        init(new DefaultMethodInterceptor(), packName);
     }
 
     /**
@@ -79,17 +79,17 @@ public class SpringLiteContext {
      * @param interceptor 方法拦截器,Method interceptor
      */
     public static void init(final String packName, MethodInterceptor interceptor) {
-        init(interceptor,packName);
+        init(interceptor, packName);
     }
 
-    public static void init(MethodInterceptor interceptor,String... packName){
-        if(packName.length == 0){
+    public static void init(MethodInterceptor interceptor, String... packName) {
+        if (packName.length == 0) {
             throw new IllegalArgumentException("spring lite init package can't be null");
         }
         SpringLiteContext.interceptor = interceptor;
         Set<Class> classes = new HashSet<>();
         Log.info("spring lite scan package : {}", Arrays.toString(packName));
-        Arrays.stream(packName).forEach(pack->{
+        Arrays.stream(packName).forEach(pack -> {
             classes.addAll(ScanUtil.scan(pack));
         });
         classes.stream()
@@ -128,7 +128,7 @@ public class SpringLiteContext {
     private static void callAfterPropertiesSet() {
         BEAN_OK_MAP.entrySet().stream()
                 .sorted((e1, e2) ->
-                    getOrderByClass(e1.getValue().getClass()) > getOrderByClass(e2.getValue().getClass()) ? 1 : -1)
+                        getOrderByClass(e1.getValue().getClass()) > getOrderByClass(e2.getValue().getClass()) ? 1 : -1)
                 .forEach(entry -> {
                     Object bean = entry.getValue();
                     if (bean instanceof InitializingBean) {
@@ -267,18 +267,27 @@ public class SpringLiteContext {
         if (anns == null || anns.length == 0) {
             return;
         }
-        Annotation ann = getFromArray(anns, Service.class);
         String beanName = null;
         boolean aopProxy = false;
+        Annotation ann = getFromArray(anns, Service.class);
+
+        if (null != ann) {
+            beanName = ((Service) ann).value();
+            aopProxy = true;
+        }
         if (null == ann) {
             ann = getFromArray(anns, Component.class);
             if (null != ann) {
                 beanName = ((Component) ann).value();
             }
-        } else {
-            beanName = ((Service) ann).value();
-            aopProxy = true;
         }
+        if (null == ann) {
+            ann = getFromArray(anns, Controller.class);
+            if (null != ann) {
+                beanName = ((Controller) ann).value();
+            }
+        }
+
         if (ann != null) {
             if (beanName == null || beanName.trim().length() == 0) {
                 beanName = getBeanName(clazz);
@@ -326,7 +335,7 @@ public class SpringLiteContext {
      * @param clazz 目标注解类型，Target annotation type
      * @return Annotation
      */
-    private static Annotation getFromArray(Annotation[] anns, Class clazz) {
+    public static Annotation getFromArray(Annotation[] anns, Class clazz) {
         for (Annotation ann : anns) {
             if (ann.annotationType().equals(clazz)) {
                 return ann;

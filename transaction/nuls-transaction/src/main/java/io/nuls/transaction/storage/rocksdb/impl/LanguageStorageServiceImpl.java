@@ -2,7 +2,7 @@ package io.nuls.transaction.storage.rocksdb.impl;
 
 import io.nuls.db.service.RocksDBService;
 import io.nuls.tools.core.annotation.Service;
-import io.nuls.tools.data.ByteUtils;
+import io.nuls.tools.model.ByteUtils;
 import io.nuls.transaction.constant.TxDBConstant;
 import io.nuls.transaction.storage.rocksdb.LanguageStorageService;
 

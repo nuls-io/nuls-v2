@@ -11,7 +11,7 @@ import io.nuls.poc.model.bo.tx.txdata.Deposit;
 import io.nuls.poc.utils.CallMethodUtils;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.crypto.HexUtil;
-import io.nuls.tools.data.BigIntegerUtils;
+import io.nuls.tools.model.BigIntegerUtils;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.exception.NulsRuntimeException;
 

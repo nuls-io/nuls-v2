@@ -24,8 +24,6 @@
 package io.nuls.contract.processor;
 
 
-import io.nuls.base.basic.AddressTool;
-import io.nuls.base.basic.TransactionProcessor;
 import io.nuls.base.data.BlockHeader;
 import io.nuls.base.data.NulsDigestData;
 import io.nuls.contract.helper.ContractHelper;
@@ -37,22 +35,14 @@ import io.nuls.contract.service.ContractService;
 import io.nuls.contract.storage.ContractAddressStorageService;
 import io.nuls.contract.storage.ContractExecuteResultStorageService;
 import io.nuls.contract.util.VMContext;
-import io.nuls.contract.vm.program.ProgramExecutor;
-import io.nuls.contract.vm.program.ProgramResult;
-import io.nuls.tools.basic.InitializingBean;
 import io.nuls.tools.basic.Result;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
-import io.nuls.tools.data.StringUtils;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.exception.NulsRuntimeException;
-import io.nuls.tools.log.Log;
 
 import java.io.IOException;
-import java.math.BigInteger;
-import java.util.List;
 
-import static io.nuls.contract.constant.ContractConstant.*;
 import static io.nuls.contract.util.ContractUtil.getSuccess;
 
 /**
@@ -91,8 +81,11 @@ public class CreateContractTxProcessor {
             return getSuccess();
         }
 
+        BlockHeader blockHeader = contractHelper.getCurrentBlockHeader(chainId);
         NulsDigestData hash = tx.getHash();
-        long blockHeight = tx.getBlockHeight();
+        long blockHeight = blockHeader.getHeight();
+        tx.setBlockHeight(blockHeight);
+
         ContractAddressInfoPo info = new ContractAddressInfoPo();
         info.setContractAddress(contractAddress);
         info.setSender(sender);
@@ -115,11 +108,9 @@ public class CreateContractTxProcessor {
             info.setNrc20TokenSymbol(contractResult.getTokenSymbol());
             info.setDecimals(contractResult.getTokenDecimals());
             info.setTotalSupply(contractResult.getTokenTotalSupply());
-
-            //TODO pierre  刷新创建者的token余额
-            //contractHelper.refreshTokenBalance(newestStateRoot, info, senderStr, contractAddressStr);
-            //TODO pierre  处理合约事件
-            //contractHelper.dealEvents(newestStateRoot, tx, contractResult, info);
+            byte[] newestStateRoot = blockHeader.getStateRoot();
+            //处理NRC20合约事件
+            contractHelper.dealNrc20Events(chainId, newestStateRoot, tx, contractResult, info);
         }
 
         Result result = contractAddressStorageService.saveContractAddress(chainId, contractAddress, info);

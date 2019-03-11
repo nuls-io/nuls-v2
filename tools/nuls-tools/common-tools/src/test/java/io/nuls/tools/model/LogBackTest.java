@@ -1,4 +1,4 @@
-package io.nuls.tools.data;
+package io.nuls.tools.model;
 
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.LoggerContext;

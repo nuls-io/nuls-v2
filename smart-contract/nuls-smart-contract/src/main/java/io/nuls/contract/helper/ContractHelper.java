@@ -26,30 +26,31 @@ package io.nuls.contract.helper;
 
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.BlockHeader;
+import io.nuls.base.data.Transaction;
 import io.nuls.contract.constant.ContractConstant;
 import io.nuls.contract.constant.ContractErrorCode;
 import io.nuls.contract.manager.ChainManager;
 import io.nuls.contract.manager.TempBalanceManager;
-import io.nuls.contract.model.bo.Chain;
-import io.nuls.contract.model.bo.ContractBalance;
-import io.nuls.contract.model.bo.ContractResult;
-import io.nuls.contract.model.bo.ContractWrapperTransaction;
+import io.nuls.contract.model.bo.*;
 import io.nuls.contract.model.po.ContractAddressInfoPo;
+import io.nuls.contract.model.po.ContractTokenTransferInfoPo;
 import io.nuls.contract.model.txdata.ContractData;
+import io.nuls.contract.rpc.call.BlockCall;
 import io.nuls.contract.rpc.call.LedgerCall;
 import io.nuls.contract.storage.ContractAddressStorageService;
+import io.nuls.contract.storage.ContractTokenTransferStorageService;
+import io.nuls.contract.storage.impl.ContractTokenTransferStorageServiceImpl;
 import io.nuls.contract.util.ContractUtil;
 import io.nuls.contract.util.VMContext;
-import io.nuls.contract.vm.program.ProgramCall;
-import io.nuls.contract.vm.program.ProgramExecutor;
-import io.nuls.contract.vm.program.ProgramMethod;
-import io.nuls.contract.vm.program.ProgramResult;
+import io.nuls.contract.vm.program.*;
 import io.nuls.tools.basic.Result;
+import io.nuls.tools.basic.VarInt;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
-import io.nuls.tools.data.StringUtils;
+import io.nuls.tools.model.StringUtils;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.log.Log;
+import org.spongycastle.util.Arrays;
 
 import java.math.BigInteger;
 import java.util.HashMap;
@@ -58,9 +59,10 @@ import java.util.Map;
 import java.util.Set;
 
 import static io.nuls.contract.constant.ContractConstant.*;
+import static io.nuls.contract.constant.ContractErrorCode.ADDRESS_ERROR;
 import static io.nuls.contract.util.ContractUtil.getFailed;
 import static io.nuls.contract.util.ContractUtil.getSuccess;
-import static io.nuls.tools.data.FormatValidUtils.validTokenNameOrSymbol;
+import static io.nuls.tools.model.FormatValidUtils.validTokenNameOrSymbol;
 
 @Component
 public class ContractHelper {
@@ -71,6 +73,8 @@ public class ContractHelper {
     private ChainManager chainManager;
     @Autowired
     private ContractAddressStorageService contractAddressStorageService;
+    @Autowired
+    private ContractTokenTransferStorageService contractTokenTransferStorageService;
 
     private static final BigInteger MAXIMUM_DECIMALS = BigInteger.valueOf(18L);
     private static final BigInteger MAXIMUM_TOTAL_SUPPLY = BigInteger.valueOf(2L).pow(256).subtract(BigInteger.ONE);
@@ -131,6 +135,47 @@ public class ContractHelper {
             }
         }
         return false;
+    }
+
+    public ProgramResult invokeViewMethod(int chainId, byte[] contractAddressBytes, String methodName, String methodDesc, Object... args) {
+        return this.invokeViewMethod(chainId, contractAddressBytes, methodName, methodDesc, ContractUtil.twoDimensionalArray(args));
+    }
+
+    public ProgramResult invokeViewMethod(int chainId, byte[] contractAddressBytes, String methodName, String methodDesc, String[][] args) {
+        // 当前区块高度
+        BlockHeader blockHeader;
+        try {
+            blockHeader = BlockCall.getLatestBlockHeader(chainId);
+        } catch (NulsException e) {
+            Log.error(e);
+            return ProgramResult.getFailed(e.getMessage());
+        }
+        if(blockHeader == null) {
+            return ProgramResult.getFailed("block header is null.");
+        }
+        long blockHeight = blockHeader.getHeight();
+        // 当前区块状态根
+        byte[] currentStateRoot = ContractUtil.getStateRoot(blockHeader);
+        return this.invokeViewMethod(chainId, null, false, currentStateRoot, blockHeight, contractAddressBytes, methodName, methodDesc, args);
+    }
+
+    public ProgramResult invokeCustomGasViewMethod(int chainId, byte[] contractAddressBytes, String methodName, String methodDesc, String[][] args) {
+        // 当前区块高度
+        BlockHeader blockHeader;
+        try {
+            blockHeader = BlockCall.getLatestBlockHeader(chainId);
+        } catch (NulsException e) {
+            Log.error(e);
+            return ProgramResult.getFailed(e.getMessage());
+        }
+        if(blockHeader == null) {
+            return ProgramResult.getFailed("block header is null.");
+        }
+        long blockHeight = blockHeader.getHeight();
+        // 当前区块状态根
+        byte[] currentStateRoot = ContractUtil.getStateRoot(blockHeader);
+
+        return this.invokeViewMethod(chainId, null, true, currentStateRoot, blockHeight, contractAddressBytes, methodName, methodDesc, args);
     }
 
     private ProgramResult invokeViewMethod(int chainId, ProgramExecutor executor, byte[] stateRoot, long blockHeight, byte[] contractAddressBytes, String methodName, String methodDesc, Object... args) {
@@ -339,5 +384,152 @@ public class ContractHelper {
 
     public Result<ContractAddressInfoPo> getContractAddressInfo(int chainId, byte[] contractAddressBytes) {
         return contractAddressStorageService.getContractAddressInfo(chainId, contractAddressBytes);
+    }
+
+    public Result<ContractTokenInfo> getContractToken(int chainId, String address, String contractAddress) {
+        try {
+            if (StringUtils.isBlank(contractAddress) || StringUtils.isBlank(address)) {
+                return Result.getFailed(ContractErrorCode.NULL_PARAMETER);
+            }
+
+            if (!AddressTool.validAddress(chainId, contractAddress) || !AddressTool.validAddress(chainId, address)) {
+                return Result.getFailed(ADDRESS_ERROR);
+            }
+
+            // 当前区块高度
+            BlockHeader blockHeader;
+            try {
+                blockHeader = BlockCall.getLatestBlockHeader(chainId);
+            } catch (NulsException e) {
+                Log.error(e);
+                return getFailed();
+            }
+            if(blockHeader == null) {
+                Log.error("block header is null.");
+                return getFailed();
+            }
+            long blockHeight = blockHeader.getHeight();
+            // 当前区块状态根
+            byte[] currentStateRoot = ContractUtil.getStateRoot(blockHeader);
+
+            byte[] contractAddressBytes = AddressTool.getAddress(contractAddress);
+            Result<ContractAddressInfoPo> contractAddressInfoResult = this.getContractAddressInfo(chainId, contractAddressBytes);
+            ContractAddressInfoPo po = contractAddressInfoResult.getData();
+            if(po == null) {
+                return Result.getFailed(ContractErrorCode.CONTRACT_ADDRESS_NOT_EXIST);
+            }
+            if(!po.isNrc20()) {
+                return Result.getFailed(ContractErrorCode.CONTRACT_NOT_NRC20);
+            }
+
+            ProgramResult programResult = this.invokeViewMethod(chainId, null, false, currentStateRoot, blockHeight, contractAddressBytes, "balanceOf", null, ContractUtil.twoDimensionalArray(new Object[]{address}));
+            Result<ContractTokenInfo> result;
+            if(!programResult.isSuccess()) {
+                result = getFailed();
+                result.setMsg(ContractUtil.simplifyErrorMsg(programResult.getErrorMessage()));
+            } else {
+                result = getSuccess();
+                ContractTokenInfo tokenInfo = new ContractTokenInfo(contractAddress, po.getNrc20TokenName(), po.getDecimals(), new BigInteger(programResult.getResult()), po.getNrc20TokenSymbol(), po.getBlockHeight());
+                ProgramExecutor track = getProgramExecutor(chainId).begin(currentStateRoot);
+                tokenInfo.setStatus(track.status(AddressTool.getAddress(tokenInfo.getContractAddress())).ordinal());
+                result.setData(tokenInfo);
+            }
+            return result;
+        } catch (Exception e) {
+            Log.error("get contract token via VM error.", e);
+            return getFailed();
+        }
+
+    }
+
+    public void dealNrc20Events(int chainId, byte[] newestStateRoot, Transaction tx, ContractResult contractResult, ContractAddressInfoPo po) {
+        if(po == null) {
+            return;
+        }
+        try {
+            List<String> events = contractResult.getEvents();
+            int size = events.size();
+            // 目前只处理Transfer事件, 为了刷新账户的token余额
+            String event;
+            ContractAddressInfoPo contractAddressInfo;
+            if(events != null && size > 0) {
+                for(int i = 0; i < size; i++) {
+                    event = events.get(i);
+                    // 按照NRC20标准，TransferEvent事件中第一个参数是转出地址-from，第二个参数是转入地址-to, 第三个参数是金额
+                    ContractTokenTransferInfoPo tokenTransferInfoPo = ContractUtil.convertJsonToTokenTransferInfoPo(chainId, event);
+                    if(tokenTransferInfoPo == null) {
+                        continue;
+                    }
+                    String contractAddress = tokenTransferInfoPo.getContractAddress();
+                    if (StringUtils.isBlank(contractAddress)) {
+                        continue;
+                    }
+                    if (!AddressTool.validAddress(chainId, contractAddress)) {
+                        continue;
+                    }
+                    byte[] contractAddressBytes = AddressTool.getAddress(contractAddress);
+                    if(Arrays.areEqual(po.getContractAddress(), contractAddressBytes)) {
+                        contractAddressInfo = po;
+                    } else {
+                        Result<ContractAddressInfoPo> contractAddressInfoResult = this.getContractAddressInfo(chainId, contractAddressBytes);
+                        contractAddressInfo = contractAddressInfoResult.getData();
+                    }
+
+                    if(contractAddressInfo == null) {
+                        continue;
+                    }
+                    // 事件不是NRC20合约的事件
+                    if(!contractAddressInfo.isNrc20()) {
+                        continue;
+                    }
+                    byte[] txHashBytes;
+                    byte[] from = tokenTransferInfoPo.getFrom();
+                    byte[] to = tokenTransferInfoPo.getTo();
+                    tokenTransferInfoPo.setName(contractAddressInfo.getNrc20TokenName());
+                    tokenTransferInfoPo.setSymbol(contractAddressInfo.getNrc20TokenSymbol());
+                    tokenTransferInfoPo.setDecimals(contractAddressInfo.getDecimals());
+                    tokenTransferInfoPo.setTime(tx.getTime());
+                    tokenTransferInfoPo.setBlockHeight(tx.getBlockHeight());
+                    txHashBytes = tx.getHash().serialize();
+                    tokenTransferInfoPo.setTxHash(txHashBytes);
+                    tokenTransferInfoPo.setStatus((byte) (contractResult.isSuccess() ? 1 : 2));
+
+                    if(from != null) {
+                        this.refreshTokenBalance(chainId, newestStateRoot, tx.getBlockHeight(), contractAddressInfo, AddressTool.getStringAddressByBytes(from), contractAddress);
+                        this.saveTokenTransferInfo(chainId, from, txHashBytes, new VarInt(i).encode(), tokenTransferInfoPo);
+                    }
+                    if(to != null) {
+                        this.refreshTokenBalance(chainId, newestStateRoot, tx.getBlockHeight(), contractAddressInfo, AddressTool.getStringAddressByBytes(to), contractAddress);
+                        this.saveTokenTransferInfo(chainId, to, txHashBytes, new VarInt(i).encode(), tokenTransferInfoPo);
+                    }
+                }
+            }
+        } catch (Exception e) {
+            Log.warn("contract event parse error.", e);
+        }
+    }
+
+    private void saveTokenTransferInfo(int chainId, byte[] address, byte[] txHashBytes, byte[] index, ContractTokenTransferInfoPo tokenTransferInfoPo) {
+        contractTokenTransferStorageService.saveTokenTransferInfo(chainId, Arrays.concatenate(address, txHashBytes, index), tokenTransferInfoPo);
+    }
+
+    public void refreshTokenBalance(int chainId, byte[] stateRoot, long blockHeight, ContractAddressInfoPo po, String address, String contractAddress) {
+        this.refreshTokenBalance(chainId, null, stateRoot, blockHeight, po, address, contractAddress);
+    }
+
+    private void refreshTokenBalance(int chainId, ProgramExecutor executor, byte[] stateRoot, long blockHeight, ContractAddressInfoPo po, String address, String contractAddress) {
+        byte[] contractAddressBytes = po.getContractAddress();
+        ProgramResult programResult = this.invokeViewMethod(chainId, executor, stateRoot, blockHeight, contractAddressBytes, NRC20_METHOD_BALANCE_OF, null, address);
+        if(!programResult.isSuccess()) {
+            return;
+        } else {
+            getChain(chainId).getContractTokenBalanceManager().refreshContractToken(address, contractAddress, po, new BigInteger(programResult.getResult()));
+        }
+
+    }
+
+    public ProgramStatus getContractStatus(int chainId, byte[] stateRoot, byte[] contractAddress) {
+        ProgramExecutor track = getProgramExecutor(chainId).begin(stateRoot);
+        return track.status(contractAddress);
     }
 }
