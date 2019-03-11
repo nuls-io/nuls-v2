@@ -51,7 +51,6 @@ public class TextMessageHandler implements Runnable {
 
     private SocketChannel channel;
     private String msg;
-    private static final int TRY_COUNT = 5;
 
     public TextMessageHandler(SocketChannel channel, String msg) {
         this.channel = channel;
@@ -101,7 +100,7 @@ public class TextMessageHandler implements Runnable {
                         RequestMessageProcessor.callCommandsWithPeriod(channel, request.getRequestMethods(), messageId);
                     } else {
                         int tryCount = 0;
-                        while(connectData == null && tryCount < TRY_COUNT){
+                        while(connectData == null && tryCount < Constants.TRY_COUNT){
                             TimeUnit.SECONDS.sleep(2L);
                             connectData = ConnectManager.CHANNEL_DATA_MAP.get(channel);
                             tryCount++;
@@ -115,7 +114,11 @@ public class TextMessageHandler implements Runnable {
                             connectData.getIdToPeriodMessageMap().put(messageId, message);
                         }
                         if (ConnectManager.isPureDigital(request.getSubscriptionEventCounter())) {
+                            ConnectManager.modifySubRequestCount(true);
+                            Log.info("--------------------增加订阅数量后："+ConnectManager.subRequestCount);
                             connectData.subscribeByEvent(message);
+                            ConnectManager.modifySubRequestCount(false);
+                            Log.info("--------------------增加订阅数量后："+ConnectManager.subRequestCount);
                         }
                     }
 

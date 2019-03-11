@@ -1,8 +1,6 @@
 package io.nuls.rpc.netty.channel.manager;
 
 import io.netty.channel.Channel;
-import io.netty.channel.ChannelFuture;
-import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
 import io.nuls.rpc.info.Constants;
@@ -30,6 +28,7 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -41,7 +40,7 @@ import java.util.concurrent.locks.ReentrantLock;
  * 2019/2/21
  */
 public class ConnectManager {
-    private static final Lock cache_lock = new ReentrantLock();
+    private static Lock SUB_LOCK = new ReentrantLock();
     /**
      * 本模块是否可以启动服务（所依赖模块是否可以连接）
      * Can this module start the service? (Can the dependent modules be connected?)
@@ -132,14 +131,10 @@ public class ConnectManager {
     private static final Map<String, Integer> CMD_CHANGE_COUNT = new ConcurrentHashMap<>();
 
     /**
-     * 核心模块（Manager）的连接地址
-     * URL of Core Module (Manager)
-     */
-    /*public static String kernelUrl = "";
-
-    public static void setKernelUrl(String url) {
-        kernelUrl = url;
-    }*/
+     * 当前正在处理的订阅请求数量
+     * Number of subscription requests currently being processed
+     * */
+    public static int subRequestCount = 0;
 
     /**
      * 根据cmd命令和版本号获取本地方法
@@ -492,26 +487,37 @@ public class ConnectManager {
      * @param response Response
      */
     public static void eventTrigger(String cmd, Response response) {
-        /*
-        找到订阅该接口的Message和WsData,然后判断订阅该接口的Message事件是否触发
-         */
-        CopyOnWriteArrayList<Message> messageList = CMD_SUBSCRIBE_MESSAGE_MAP.get(cmd);
-        int changeCount = addCmdChangeCount(cmd);
-        for (Message message : messageList) {
-            ConnectData connectData = MESSAGE_TO_CHANNEL_MAP.get(message);
-            String key = getSubscribeKey(message.getMessageId(), cmd);
-            if (connectData.getSubscribeInitCount().containsKey(key)) {
-                int initCount = connectData.getSubscribeInitCount().get(key);
-                Request request = JSONUtils.map2pojo((Map) message.getMessageData(), Request.class);
-                long eventCount = Long.parseLong(request.getSubscriptionEventCounter());
-                if ((changeCount - initCount) % eventCount == 0) {
-                    try {
-                        connectData.getRequestEventResponseQueue().put(getRealResponse(cmd, message.getMessageId(), response));
-                    } catch (InterruptedException e) {
-                        Log.error(e);
+        try {
+             /*
+            找到订阅该接口的Message和WsData,然后判断订阅该接口的Message事件是否触发
+            */
+            int tryCount = 0;
+            while (subRequestCount > 0 && tryCount < Constants.TRY_COUNT){
+                TimeUnit.SECONDS.sleep(2L);
+                tryCount++;
+            }
+            Log.info("--------------------------订阅事件触发！");
+            CopyOnWriteArrayList<Message> messageList = CMD_SUBSCRIBE_MESSAGE_MAP.get(cmd);
+            int changeCount = addCmdChangeCount(cmd);
+            for (Message message : messageList) {
+                ConnectData connectData = MESSAGE_TO_CHANNEL_MAP.get(message);
+                String key = getSubscribeKey(message.getMessageId(), cmd);
+                if (connectData.getSubscribeInitCount().containsKey(key)) {
+                    int initCount = connectData.getSubscribeInitCount().get(key);
+                    Request request = JSONUtils.map2pojo((Map) message.getMessageData(), Request.class);
+                    long eventCount = Long.parseLong(request.getSubscriptionEventCounter());
+                    if ((changeCount - initCount) % eventCount == 0) {
+                        try {
+                            connectData.getRequestEventResponseQueue().put(getRealResponse(cmd, message.getMessageId(), response));
+                            Log.info("----------------------广播模块："+connectData.getChannel());
+                        } catch (InterruptedException e) {
+                            Log.error(e);
+                        }
                     }
                 }
             }
+        }catch (Exception e){
+            Log.error(e);
         }
     }
 
@@ -708,17 +714,23 @@ public class ConnectManager {
     }
 
     public static void sendMessage(Channel channel, String message) {
-//        TextWebSocketFrame frame = new TextWebSocketFrame(message);
-//        channel.writeAndFlush(frame);
-        channel.eventLoop().execute(() -> {
-            channel.writeAndFlush(new TextWebSocketFrame(message)).addListener((ChannelFutureListener) future -> {
-                if (!future.isSuccess()) {
-                    Log.info("######registerModuleDependencies message#########" + message);
-                    Log.info("######registerModuleDependencies isCancelled#########" + future.isCancelled());
-                    Log.info("######registerModuleDependencies cause#########" + future.cause());
-                }
+        try {
+            channel.eventLoop().execute(() -> {
+                channel.writeAndFlush(new TextWebSocketFrame(message));
+                /*ChannelFuture channelFuture = channel.writeAndFlush(new TextWebSocketFrame(message));
+                if (message.contains("registerModuleDependencies")) {
+                    channelFuture.addListener((ChannelFutureListener) future -> {
+                        if (!future.isSuccess()) {
+                            Log.info("######registerModuleDependencies message#########" + message);
+                            Log.info("######registerModuleDependencies isCancelled#########" + future.isCancelled());
+                            Log.info("######registerModuleDependencies cause#########" + future.cause());
+                        }
+                    });
+                }*/
             });
-        });
+        }catch (Exception e){
+            Log.error(e);
+        }
     }
 
     public static void sendMessage(String moduleAbbr, Message message) throws Exception {
@@ -738,5 +750,26 @@ public class ConnectManager {
             return channel;
         }
         return ROLE_CHANNEL_MAP.get(role);
+    }
+
+    /**
+     * 订阅请求数量增减
+     * Increase or decrease in subscription requests
+     * @param add true表示加一，false减一
+     * */
+    public static void modifySubRequestCount(boolean add){
+        try {
+            SUB_LOCK.lock();
+            if(add){
+                subRequestCount++;
+            }else{
+                subRequestCount--;
+            }
+        }catch (Exception e){
+            Log.error(e);
+        }finally {
+            SUB_LOCK.unlock();
+        }
+
     }
 }
