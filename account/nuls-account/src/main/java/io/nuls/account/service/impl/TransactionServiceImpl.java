@@ -711,7 +711,9 @@ public class TransactionServiceImpl implements TransactionService {
     private void cacheTxHash(Transaction tx) throws NulsException {
         CoinData coinData = TxUtil.getCoinData(tx);
         for (CoinFrom coinFrom : coinData.getFrom()) {
-            TxUtil.PRE_HASH_MAP.put(AddressTool.getStringAddressByBytes(coinFrom.getAddress()), tx.getHash());
+            String address = AddressTool.getStringAddressByBytes(coinFrom.getAddress());
+            String key = address + "_" + coinFrom.getAssetsChainId() + "_" + coinFrom.getAssetsId();
+            TxUtil.PRE_HASH_MAP.put(key, tx.getHash());
         }
     }
 

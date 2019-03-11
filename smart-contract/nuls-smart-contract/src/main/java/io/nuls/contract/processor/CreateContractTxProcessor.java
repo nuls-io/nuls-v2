@@ -34,7 +34,7 @@ import io.nuls.contract.model.txdata.CreateContractData;
 import io.nuls.contract.service.ContractService;
 import io.nuls.contract.storage.ContractAddressStorageService;
 import io.nuls.contract.storage.ContractExecuteResultStorageService;
-import io.nuls.contract.util.VMContext;
+import io.nuls.contract.storage.ContractTokenAddressStorageService;
 import io.nuls.tools.basic.Result;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
@@ -55,16 +55,12 @@ public class CreateContractTxProcessor {
 
     @Autowired
     private ContractAddressStorageService contractAddressStorageService;
-
+    @Autowired
+    private ContractTokenAddressStorageService contractTokenAddressStorageService;
     @Autowired
     private ContractService contractService;
-
-    @Autowired
-    private VMContext vmContext;
-
     @Autowired
     private ContractExecuteResultStorageService contractExecuteResultStorageService;
-
     @Autowired
     private ContractHelper contractHelper;
 
@@ -111,6 +107,8 @@ public class CreateContractTxProcessor {
             byte[] newestStateRoot = blockHeader.getStateRoot();
             //处理NRC20合约事件
             contractHelper.dealNrc20Events(chainId, newestStateRoot, tx, contractResult, info);
+            // 保存NRC20-token地址
+            contractTokenAddressStorageService.saveTokenAddress(chainId, contractAddress);
         }
 
         Result result = contractAddressStorageService.saveContractAddress(chainId, contractAddress, info);
@@ -120,7 +118,16 @@ public class CreateContractTxProcessor {
     public Result onRollback(int chainId, CreateContractTransaction tx, Object secondaryData) throws Exception {
         CreateContractData txData = tx.getTxDataObj();
         byte[] contractAddress = txData.getContractAddress();
+
+        // 回滚代币转账交易
+        ContractResult contractResult = tx.getContractResult();
+        if (contractResult == null) {
+            contractResult = contractService.getContractExecuteResult(chainId, tx.getHash());
+        }
+        contractHelper.rollbackNrc20Events(chainId, tx, contractResult);
         contractAddressStorageService.deleteContractAddress(chainId, contractAddress);
+        contractTokenAddressStorageService.deleteTokenAddress(chainId, contractAddress);
+
         contractService.deleteContractExecuteResult(chainId, tx.getHash());
         return getSuccess();
     }

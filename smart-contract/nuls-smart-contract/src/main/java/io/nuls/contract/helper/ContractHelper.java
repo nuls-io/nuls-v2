@@ -30,6 +30,7 @@ import io.nuls.base.data.Transaction;
 import io.nuls.contract.constant.ContractConstant;
 import io.nuls.contract.constant.ContractErrorCode;
 import io.nuls.contract.manager.ChainManager;
+import io.nuls.contract.manager.ContractTokenBalanceManager;
 import io.nuls.contract.manager.TempBalanceManager;
 import io.nuls.contract.model.bo.*;
 import io.nuls.contract.model.po.ContractAddressInfoPo;
@@ -41,6 +42,7 @@ import io.nuls.contract.storage.ContractAddressStorageService;
 import io.nuls.contract.storage.ContractTokenTransferStorageService;
 import io.nuls.contract.storage.impl.ContractTokenTransferStorageServiceImpl;
 import io.nuls.contract.util.ContractUtil;
+import io.nuls.contract.util.MapUtil;
 import io.nuls.contract.util.VMContext;
 import io.nuls.contract.vm.program.*;
 import io.nuls.tools.basic.Result;
@@ -52,11 +54,13 @@ import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.log.Log;
 import org.spongycastle.util.Arrays;
 
+import java.io.IOException;
 import java.math.BigInteger;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 import static io.nuls.contract.constant.ContractConstant.*;
 import static io.nuls.contract.constant.ContractErrorCode.ADDRESS_ERROR;
@@ -75,6 +79,8 @@ public class ContractHelper {
     private ContractAddressStorageService contractAddressStorageService;
     @Autowired
     private ContractTokenTransferStorageService contractTokenTransferStorageService;
+
+    private ConcurrentHashMap<String, Long> accountLastedPriceMap = MapUtil.createConcurrentHashMap(4);
 
     private static final BigInteger MAXIMUM_DECIMALS = BigInteger.valueOf(18L);
     private static final BigInteger MAXIMUM_TOTAL_SUPPLY = BigInteger.valueOf(2L).pow(256).subtract(BigInteger.ONE);
@@ -442,6 +448,25 @@ public class ContractHelper {
 
     }
 
+    public void updateLastedPriceForAccount(int chainId, byte[] sender, long price) {
+        if(price <= 0) {
+            return;
+        }
+        String address = AddressTool.getStringAddressByBytes(sender) + chainId;
+        accountLastedPriceMap.put(address, price);
+    }
+
+    public long getLastedPriceForAccount(int chainId, byte[] sender) {
+        String address = AddressTool.getStringAddressByBytes(sender) + chainId;
+        Long price = accountLastedPriceMap.get(address);
+        if(price == null) {
+            price = ContractConstant.CONTRACT_MINIMUM_PRICE;
+        }
+        price = price < ContractConstant.CONTRACT_MINIMUM_PRICE ? ContractConstant.CONTRACT_MINIMUM_PRICE : price;
+        accountLastedPriceMap.put(address, price);
+        return price;
+    }
+
     public void dealNrc20Events(int chainId, byte[] newestStateRoot, Transaction tx, ContractResult contractResult, ContractAddressInfoPo po) {
         if(po == null) {
             return;
@@ -506,6 +531,82 @@ public class ContractHelper {
             }
         } catch (Exception e) {
             Log.warn("contract event parse error.", e);
+        }
+    }
+
+    public void rollbackNrc20Events(int chainId, Transaction tx, ContractResult contractResult) {
+        try {
+            byte[] txHashBytes = null;
+            try {
+                txHashBytes = tx.getHash().serialize();
+            } catch (IOException e) {
+                Log.error(e);
+            }
+
+            List<String> events = contractResult.getEvents();
+            int size = events.size();
+            // 目前只处理Transfer事件, 为了刷新账户的token余额
+            String event;
+            ContractAddressInfoPo contractAddressInfo;
+            if(events != null && size > 0) {
+                for(int i = size - 1; i >= 0; i--) {
+                    event = events.get(i);
+                    // 按照NRC20标准，TransferEvent事件中第一个参数是转出地址-from，第二个参数是转入地址-to, 第三个参数是金额
+                    ContractTokenTransferInfoPo tokenTransferInfoPo = ContractUtil.convertJsonToTokenTransferInfoPo(chainId, event);
+                    if(tokenTransferInfoPo == null) {
+                        continue;
+                    }
+                    String contractAddress = tokenTransferInfoPo.getContractAddress();
+                    if (StringUtils.isBlank(contractAddress)) {
+                        continue;
+                    }
+                    if (!AddressTool.validAddress(chainId, contractAddress)) {
+                        continue;
+                    }
+                    byte[] contractAddressBytes = AddressTool.getAddress(contractAddress);
+                    Result<ContractAddressInfoPo> contractAddressInfoResult = this.getContractAddressInfo(chainId, contractAddressBytes);
+                    contractAddressInfo = contractAddressInfoResult.getData();
+
+                    if(contractAddressInfo == null) {
+                        continue;
+                    }
+                    // 事件不是NRC20合约的事件
+                    if(!contractAddressInfo.isNrc20()) {
+                        continue;
+                    }
+
+                    // 回滚token余额
+                    this.rollbackContractToken(chainId, tokenTransferInfoPo);
+                    contractTokenTransferStorageService.deleteTokenTransferInfo(chainId, Arrays.concatenate(tokenTransferInfoPo.getFrom(), txHashBytes, new VarInt(i).encode()));
+                    contractTokenTransferStorageService.deleteTokenTransferInfo(chainId, Arrays.concatenate(tokenTransferInfoPo.getTo(), txHashBytes, new VarInt(i).encode()));
+
+                }
+            }
+        } catch (Exception e) {
+            Log.warn("contract event parse error.", e);
+        }
+    }
+
+    public void rollbackContractToken(int chainId, ContractTokenTransferInfoPo po) {
+        try {
+            String contractAddressStr = po.getContractAddress();
+            byte[] from = po.getFrom();
+            byte[] to = po.getTo();
+            BigInteger token = po.getValue();
+            String fromStr = null;
+            String toStr = null;
+            if (from != null) {
+                fromStr = AddressTool.getStringAddressByBytes(from);
+            }
+            if (to != null) {
+                toStr = AddressTool.getStringAddressByBytes(to);
+            }
+            ContractTokenBalanceManager contractTokenBalanceManager = getChain(chainId).getContractTokenBalanceManager();
+            contractTokenBalanceManager.addContractToken(fromStr, contractAddressStr, token);
+            contractTokenBalanceManager.subtractContractToken(toStr, contractAddressStr, token);
+        } catch (Exception e) {
+            // skip it
+            Log.error(e);
         }
     }
 
