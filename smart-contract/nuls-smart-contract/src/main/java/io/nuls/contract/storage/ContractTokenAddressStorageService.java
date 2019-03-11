@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2017-2018 nuls.io
+ * Copyright (c) 2017-2019 nuls.io
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,35 +22,52 @@
  * SOFTWARE.
  *
  */
+package io.nuls.contract.storage;
 
-package io.nuls.contract.constant;
+
+import io.nuls.contract.model.po.ContractAddressInfoPo;
+import io.nuls.contract.model.po.ContractTokenTransferInfoPo;
+import io.nuls.tools.basic.Result;
+
+import java.util.List;
 
 /**
- * 交易数据存储常量
- * Transaction entity storage constants
  *
- * @author: qinyifeng
+ * @author: PierreLuo
+ * @date: 2019-03-11
  */
-public interface ContractDBConstant {
+public interface ContractTokenAddressStorageService {
 
     /**
-     * 系统语言表名 一个节点共用，不区分chain
-     * system language table name
+     * 保存合约地址以及创建合约的交易hash
+     *
+     * @param account
+     * @param hash
+     * @return
      */
-    String DB_NAME_LANGUAGE = "language";
+    Result saveTokenAddress(int chainId, byte[] contractAddressBytes);
+
+
     /**
-     * 配置信息表名
-     * chain configuration table name
+     * 删除合约地址
+     *
+     * @param contractAddressBytes
+     * @return
      */
-    String DB_NAME_CONGIF = "config";
+    Result deleteTokenAddress(int chainId, byte[] contractAddressBytes) throws Exception;
 
-    String DB_NAME_CONTRACT_LEDGER_TX_INDEX = "contract_ledger_tx_index";
-    String DB_NAME_CONTRACT_ADDRESS = "contract_address";
-    String DB_NAME_CONTRACT_TRANSFER_TX = "contract_transfer_tx";
-    String DB_NAME_CONTRACT_EXECUTE_RESULT = "contract_execute_result";
-    String DB_NAME_CONTRACT_COLLECTION = "contract_collection";
+    /**
+     * 根据地址检查是否存在这个合约地址
+     *
+     * @param contractAddressBytes
+     * @return
+     */
+    boolean isExistTokenAddress(int chainId, byte[] contractAddressBytes);
 
-    String DB_NAME_CONTRACT_NRC20_TOKEN_TRANSFER = "contract_nrc20_token_transfer";
-    String DB_NAME_CONTRACT_NRC20_TOKEN_ADDRESS = "contract_nrc20_token_address";
-
+    /**
+     * 获取全网所有Nrc20合约
+     *
+     * @return
+     */
+    Result<List<byte[]>> getAllNrc20AddressList(int chainId);
 }

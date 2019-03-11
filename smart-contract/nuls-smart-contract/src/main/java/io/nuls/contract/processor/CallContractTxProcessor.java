@@ -112,7 +112,7 @@ public class CallContractTxProcessor {
                         // 刷新token余额
                         if (isTerminatedContract) {
                             // 终止的合约，回滚token余额
-                            this.rollbackContractToken(chainId, po);
+                            contractHelper.rollbackContractToken(chainId, po);
                             contractResult.setError(true);
                             contractResult.setErrorMessage("this contract has been terminated");
                         } else {
@@ -146,74 +146,11 @@ public class CallContractTxProcessor {
     public Result onRollback(int chainId, CallContractTransaction tx, Object secondaryData) {
         try {
             // 回滚代币转账交易
-            byte[] txHashBytes = null;
-            try {
-                txHashBytes = tx.getHash().serialize();
-            } catch (IOException e) {
-                Log.error(e);
-            }
-
             ContractResult contractResult = tx.getContractResult();
             if (contractResult == null) {
                 contractResult = contractService.getContractExecuteResult(chainId, tx.getHash());
             }
-            CallContractData txData = tx.getTxDataObj();
-            byte[] senderContractAddressBytes = txData.getContractAddress();
-            Result<ContractAddressInfoPo> senderContractAddressInfoResult = contractHelper.getContractAddressInfo(chainId, senderContractAddressBytes);
-            ContractAddressInfoPo po = senderContractAddressInfoResult.getData();
-            if (po != null) {
-                if (contractResult != null) {
-                    // 处理合约执行失败 - 没有transferEvent的情况, 直接从数据库中删除
-                    if (!contractResult.isSuccess()) {
-                        if (ContractUtil.isTransferMethod(txData.getMethodName())) {
-                            contractTokenTransferStorageService.deleteTokenTransferInfo(chainId, Arrays.concatenate(txData.getSender(), txHashBytes, new VarInt(0).encode()));
-                        }
-                    }
-                    List<String> events = contractResult.getEvents();
-                    int size = events.size();
-                    // 目前只处理Transfer事件
-                    String event;
-                    ContractAddressInfoPo contractAddressInfo;
-                    if (events != null && size > 0) {
-                        for (int i = 0; i < size; i++) {
-                            event = events.get(i);
-                            // 按照NRC20标准，TransferEvent事件中第一个参数是转出地址-from，第二个参数是转入地址-to, 第三个参数是金额
-                            ContractTokenTransferInfoPo tokenTransferInfoPo = ContractUtil.convertJsonToTokenTransferInfoPo(chainId, event);
-                            if (tokenTransferInfoPo == null) {
-                                continue;
-                            }
-                            String contractAddress = tokenTransferInfoPo.getContractAddress();
-                            if (StringUtils.isBlank(contractAddress)) {
-                                continue;
-                            }
-                            if (!AddressTool.validAddress(chainId, contractAddress)) {
-                                continue;
-                            }
-                            byte[] contractAddressBytes = AddressTool.getAddress(contractAddress);
-                            if (Arrays.areEqual(senderContractAddressBytes, contractAddressBytes)) {
-                                contractAddressInfo = po;
-                            } else {
-                                Result<ContractAddressInfoPo> contractAddressInfoResult = contractHelper.getContractAddressInfo(chainId, contractAddressBytes);
-                                contractAddressInfo = contractAddressInfoResult.getData();
-                            }
-
-                            if (contractAddressInfo == null) {
-                                continue;
-                            }
-                            // 事件不是NRC20合约的事件
-                            if (!contractAddressInfo.isNrc20()) {
-                                continue;
-                            }
-
-                            // 回滚token余额
-                            this.rollbackContractToken(chainId, tokenTransferInfoPo);
-                            contractTokenTransferStorageService.deleteTokenTransferInfo(chainId, Arrays.concatenate(tokenTransferInfoPo.getFrom(), txHashBytes, new VarInt(i).encode()));
-                            contractTokenTransferStorageService.deleteTokenTransferInfo(chainId, Arrays.concatenate(tokenTransferInfoPo.getTo(), txHashBytes, new VarInt(i).encode()));
-                        }
-                    }
-                }
-            }
-
+            contractHelper.rollbackNrc20Events(chainId, tx, contractResult);
             // 删除合约执行结果
             contractService.deleteContractExecuteResult(chainId, tx.getHash());
         } catch (Exception e) {
@@ -223,27 +160,5 @@ public class CallContractTxProcessor {
         return getSuccess();
     }
 
-    private void rollbackContractToken(int chainId, ContractTokenTransferInfoPo po) {
-        try {
-            String contractAddressStr = po.getContractAddress();
-            byte[] from = po.getFrom();
-            byte[] to = po.getTo();
-            BigInteger token = po.getValue();
-            String fromStr = null;
-            String toStr = null;
-            if (from != null) {
-                fromStr = AddressTool.getStringAddressByBytes(from);
-            }
-            if (to != null) {
-                toStr = AddressTool.getStringAddressByBytes(to);
-            }
-            ContractTokenBalanceManager contractTokenBalanceManager = contractHelper.getChain(chainId).getContractTokenBalanceManager();
-            contractTokenBalanceManager.addContractToken(fromStr, contractAddressStr, token);
-            contractTokenBalanceManager.subtractContractToken(toStr, contractAddressStr, token);
-        } catch (Exception e) {
-            // skip it
-            Log.error(e);
-        }
-    }
 
 }

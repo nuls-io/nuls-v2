@@ -80,10 +80,4 @@ public interface ContractAddressStorageService {
      */
     Result<List<ContractAddressInfoPo>> getAllContractInfoList(int chainId);
 
-    /**
-     * 获取全网所有Nrc20合约
-     *
-     * @return
-     */
-    Result<List<ContractAddressInfoPo>> getAllNrc20ContractInfoList(int chainId);
 }
