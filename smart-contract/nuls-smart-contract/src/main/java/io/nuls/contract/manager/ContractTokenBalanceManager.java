@@ -28,7 +28,7 @@ import io.nuls.contract.constant.ContractErrorCode;
 import io.nuls.contract.helper.ContractHelper;
 import io.nuls.contract.model.bo.ContractTokenInfo;
 import io.nuls.contract.model.po.ContractAddressInfoPo;
-import io.nuls.contract.storage.ContractAddressStorageService;
+import io.nuls.contract.storage.ContractTokenAddressStorageService;
 import io.nuls.tools.basic.Result;
 import io.nuls.tools.core.ioc.SpringLiteContext;
 
@@ -48,7 +48,7 @@ public class ContractTokenBalanceManager {
 
     private ContractHelper contractHelper;
 
-    private ContractAddressStorageService contractAddressStorageService;
+    private ContractTokenAddressStorageService contractTokenAddressStorageService;
 
     private int chainId;
 
@@ -58,7 +58,7 @@ public class ContractTokenBalanceManager {
         ContractTokenBalanceManager manager = new ContractTokenBalanceManager();
         manager.chainId = chainId;
         manager.contractHelper = SpringLiteContext.getBean(ContractHelper.class);
-        manager.contractAddressStorageService = SpringLiteContext.getBean(ContractAddressStorageService.class);
+        manager.contractTokenAddressStorageService = SpringLiteContext.getBean(ContractTokenAddressStorageService.class);
         return manager;
     }
 
@@ -78,13 +78,13 @@ public class ContractTokenBalanceManager {
         if(!AddressTool.validAddress(chainId, account)) {
             return;
         }
-        Result<List<ContractAddressInfoPo>> allContractInfoListResult = contractAddressStorageService.getAllNrc20ContractInfoList(chainId);
-        if(allContractInfoListResult.isFailed()) {
+        Result<List<byte[]>> allNrc20ListResult = contractTokenAddressStorageService.getAllNrc20AddressList(chainId);
+        if(allNrc20ListResult.isFailed()) {
             return;
         }
-        List<ContractAddressInfoPo> contractAddressInfoPoList = allContractInfoListResult.getData();
-        for(ContractAddressInfoPo po : contractAddressInfoPoList) {
-            initialContractToken(account, AddressTool.getStringAddressByBytes(po.getContractAddress()));
+        List<byte[]> contractAddressInfoPoList = allNrc20ListResult.getData();
+        for(byte[] address : contractAddressInfoPoList) {
+            initialContractToken(account, AddressTool.getStringAddressByBytes(address));
         }
     }
 

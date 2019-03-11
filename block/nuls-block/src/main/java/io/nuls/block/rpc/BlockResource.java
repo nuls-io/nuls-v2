@@ -168,7 +168,7 @@ public class BlockResource extends BaseCmd {
     }
 
     /**
-     * 获取最新若干轮区块头
+     * 获取最新若干轮区块头，提供给POC共识模块使用
      *
      * @param map
      * @return
@@ -187,7 +187,10 @@ public class BlockResource extends BaseCmd {
             BlockExtendsData data = new BlockExtendsData(extend);
             long roundIndex = data.getRoundIndex();
             List<String> hexList = new ArrayList<>();
-            hexList.add(HexUtil.encode(latestBlock.getHeader().serialize()));
+            BlockHeaderPo latestBlockHeader = service.getBlockHeader(chainId, latestHeight);
+            if (latestBlockHeader.isComplete()) {
+                hexList.add(HexUtil.encode(latestBlock.getHeader().serialize()));
+            }
             while (count < round) {
                 latestHeight--;
                 if ((latestHeight < 0)) {

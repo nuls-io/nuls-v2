@@ -130,7 +130,7 @@ public class MeetingRound {
         Collections.sort(memberList);
         this.memberCount = memberList.size();
         totalWeight = 0d;
-        MeetingMember member = null;
+        MeetingMember member;
         for (int i = 0; i < memberCount; i++) {
             member = memberList.get(i);
             member.setRoundStartTime(this.getStartTime());

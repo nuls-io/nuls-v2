@@ -418,7 +418,8 @@ public class TxServiceImpl implements TxService {
      * @throws NulsException
      */
     public byte[] getNonce(Chain chain, String address, int assetChainId, int assetId) throws NulsException {
-        NulsDigestData hash = PRE_HASH_MAP.get(address);
+        String key = address + "_" + assetChainId + "_" + assetId;
+        NulsDigestData hash = PRE_HASH_MAP.get(key);
         if (null == hash) {
             return LedgerCall.getNonce(chain, address, assetChainId, assetId);
         } else {
@@ -435,7 +436,9 @@ public class TxServiceImpl implements TxService {
     private void cacheTxHash(Transaction tx) throws NulsException {
         CoinData coinData = TxUtil.getCoinData(tx);
         for (CoinFrom coinFrom : coinData.getFrom()) {
-            PRE_HASH_MAP.put(AddressTool.getStringAddressByBytes(coinFrom.getAddress()), tx.getHash());
+            String address = AddressTool.getStringAddressByBytes(coinFrom.getAddress());
+            String key = address + "_" + coinFrom.getAssetsChainId() + "_" + coinFrom.getAssetsId();
+            PRE_HASH_MAP.put(key, tx.getHash());
         }
     }
 

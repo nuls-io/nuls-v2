@@ -137,7 +137,8 @@ public class TxUtil {
      */
     public static byte[] getNonce(int chainId, int assetChainId, int assetId, byte[] addressByte){
         String address = AddressTool.getStringAddressByBytes(addressByte);
-        NulsDigestData hash = PRE_HASH_MAP.get(address);
+        String key = address + "_" + assetChainId + "_" + assetId;
+        NulsDigestData hash = PRE_HASH_MAP.get(key);
         if(null == hash){
             return  LegerCmdCall.getNonce(chainId, assetChainId, assetId, address);
         }else{
