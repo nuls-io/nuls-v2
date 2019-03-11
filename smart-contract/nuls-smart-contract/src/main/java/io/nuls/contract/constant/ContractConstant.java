@@ -31,15 +31,18 @@ public interface ContractConstant {
     short MODULE_ID_CONTRACT = 10;
 
     /**
-     * CONTRACT
+     * CONTRACT create, call, delete tx
      */
     int TX_TYPE_CREATE_CONTRACT = 100;
     int TX_TYPE_CALL_CONTRACT = 101;
     int TX_TYPE_DELETE_CONTRACT = 102;
     /**
-     * contract transfer
+     * contract transfer tx
      */
     int TX_TYPE_CONTRACT_TRANSFER = 103;
+    /**
+     * contract return gas tx
+     */
     int TX_TYPE_CONTRACT_RETURN_GAS = 104;
 
     int TX_TYPE_COINBASE = 1;
