@@ -117,6 +117,8 @@ public interface ContractConstant {
      */
     String SYS_FILE_ENCODING = "file.encoding";
 
+    String DEFAULT_ENCODING = "UTF-8";
+
     /**
      * context path
      */

@@ -1,7 +1,7 @@
 /**
  * MIT License
  * <p>
- * Copyright (c) 2017-2019 nuls.io
+ * Copyright (c) 2017-2018 nuls.io
  * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -21,38 +21,34 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package io.nuls.contract.processor;
 
+package io.nuls.contract.rpc.call;
 
-import io.nuls.contract.model.bo.ContractResult;
-import io.nuls.contract.model.bo.ContractWrapperTransaction;
-import io.nuls.contract.service.ContractService;
-import io.nuls.tools.basic.Result;
-import io.nuls.tools.core.annotation.Autowired;
-import io.nuls.tools.core.annotation.Component;
+import io.nuls.contract.rpc.CallHelper;
+import io.nuls.rpc.info.Constants;
+import io.nuls.rpc.model.ModuleE;
+import io.nuls.tools.exception.NulsException;
 
-import static io.nuls.contract.util.ContractUtil.getSuccess;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
- * @desription:
+ * 
  * @author: PierreLuo
- * @date: 2018/6/8
+ * @date: 2019-02-27
  */
-@Component
-public class DeleteContractTxProcessor {
+public class AccountCall {
 
-    @Autowired
-    private ContractService contractService;
-
-    public Result onCommit(int chainId, ContractWrapperTransaction tx) {
-        ContractResult contractResult = tx.getContractResult();
-        contractService.saveContractExecuteResult(chainId, tx.getHash(), contractResult);
-        return getSuccess();
-    }
-
-    public Result onRollback(int chainId, ContractWrapperTransaction tx) {
-        contractService.deleteContractExecuteResult(chainId, tx.getHash());
-        return getSuccess();
+    public static String createContractAddress(int chainId) throws NulsException {
+        try {
+            Map<String, Object> params = new HashMap<>(4);
+            params.put("chainId", chainId);
+            //TODO pierre account模块获取合约地址的命令
+            Map resultMap = (Map) CallHelper.request(ModuleE.AC.abbr, "contractAddress", params);
+            return (String) resultMap.get("height");
+        } catch (Exception e) {
+            throw new NulsException(e);
+        }
     }
 
 }

@@ -1,7 +1,7 @@
 /**
  * MIT License
  * <p>
- * Copyright (c) 2017-2019 nuls.io
+ * Copyright (c) 2017-2018 nuls.io
  * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -21,38 +21,42 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package io.nuls.contract.processor;
+package io.nuls.contract.manager;
 
-
-import io.nuls.contract.model.bo.ContractResult;
-import io.nuls.contract.model.bo.ContractWrapperTransaction;
-import io.nuls.contract.service.ContractService;
+import io.nuls.contract.model.tx.CallContractTransaction;
+import io.nuls.contract.model.tx.CreateContractTransaction;
+import io.nuls.contract.model.tx.DeleteContractTransaction;
+import io.nuls.contract.validator.CallContractTxValidator;
+import io.nuls.contract.validator.CreateContractTxValidator;
+import io.nuls.contract.validator.DeleteContractTxValidator;
 import io.nuls.tools.basic.Result;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
-
-import static io.nuls.contract.util.ContractUtil.getSuccess;
+import io.nuls.tools.exception.NulsException;
 
 /**
- * @desription:
  * @author: PierreLuo
- * @date: 2018/6/8
+ * @date: 2019-03-11
  */
 @Component
-public class DeleteContractTxProcessor {
+public class ContractTxValidatorManager {
 
     @Autowired
-    private ContractService contractService;
+    private CreateContractTxValidator createContractTxValidator;
+    @Autowired
+    private CallContractTxValidator callContractTxValidator;
+    @Autowired
+    private DeleteContractTxValidator deleteContractTxValidator;
 
-    public Result onCommit(int chainId, ContractWrapperTransaction tx) {
-        ContractResult contractResult = tx.getContractResult();
-        contractService.saveContractExecuteResult(chainId, tx.getHash(), contractResult);
-        return getSuccess();
+    public Result createValidator(int chainId, CreateContractTransaction tx) throws NulsException {
+        return createContractTxValidator.validate(chainId, tx);
     }
 
-    public Result onRollback(int chainId, ContractWrapperTransaction tx) {
-        contractService.deleteContractExecuteResult(chainId, tx.getHash());
-        return getSuccess();
+    public Result callValidator(int chainId, CallContractTransaction tx) throws NulsException {
+        return callContractTxValidator.validate(chainId, tx);
     }
-
+    
+    public Result deleteValidator(int chainId, DeleteContractTransaction tx) throws NulsException {
+        return deleteContractTxValidator.validate(chainId, tx);
+    }
 }

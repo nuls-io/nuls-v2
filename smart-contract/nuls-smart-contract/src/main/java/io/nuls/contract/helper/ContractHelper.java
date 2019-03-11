@@ -98,8 +98,32 @@ public class ContractHelper {
         return chainManager.getChainMap().get(chainId);
     }
 
+    public ProgramMethod getMethodInfoByCode(int chainId, String methodName, String methodDesc, byte[] code) {
+        if(StringUtils.isBlank(methodName) || code == null) {
+            return null;
+        }
+        List<ProgramMethod> methods = this.getAllMethods(chainId, code);
+        return this.getMethodInfo(methodName, methodDesc, methods);
+    }
+
     private List<ProgramMethod> getAllMethods(int chainId, byte[] contractCode) {
         return getProgramExecutor(chainId).jarMethod(contractCode);
+    }
+
+    private ProgramMethod getMethodInfo(String methodName, String methodDesc, List<ProgramMethod> methods) {
+        if(methods != null && methods.size() > 0) {
+            boolean emptyDesc = StringUtils.isBlank(methodDesc);
+            for(ProgramMethod method : methods) {
+                if(methodName.equals(method.getName())) {
+                    if(emptyDesc) {
+                        return method;
+                    } else if(methodDesc.equals(method.getDesc())) {
+                        return method;
+                    }
+                }
+            }
+        }
+        return null;
     }
 
     private boolean checkNrc20Contract(List<ProgramMethod> methods) {
@@ -302,22 +326,6 @@ public class ContractHelper {
             }
         }
         return getSuccess();
-    }
-
-    private ProgramMethod getMethodInfo(String methodName, String methodDesc, List<ProgramMethod> methods) {
-        if(methods != null && methods.size() > 0) {
-            boolean emptyDesc = StringUtils.isBlank(methodDesc);
-            for(ProgramMethod method : methods) {
-                if(methodName.equals(method.getName())) {
-                    if(emptyDesc) {
-                        return method;
-                    } else if(methodDesc.equals(method.getDesc())) {
-                        return method;
-                    }
-                }
-            }
-        }
-        return null;
     }
 
     public ContractBalance getBalance(int chainId, byte[] address) {
