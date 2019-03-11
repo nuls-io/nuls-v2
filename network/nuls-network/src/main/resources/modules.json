@@ -34,7 +34,7 @@
     "name": "network.self.magic",
     "remark": "自有网络魔法参数",
     "readOnly": "true",
-    "value": "20190311"
+    "value": "999876"
   },
   {
     "name": "network.self.max.in",
