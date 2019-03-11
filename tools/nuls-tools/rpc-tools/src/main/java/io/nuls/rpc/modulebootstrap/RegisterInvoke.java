@@ -33,9 +33,8 @@ public class RegisterInvoke extends BaseInvoke {
         Map responseData = (Map) response.getResponseData();
         Map methodMap = (Map) responseData.get("registerAPI");
         Map dependMap = (Map) methodMap.get("Dependencies");
-        String status = response.getResponseStatus();
         StringBuilder logInfo = new StringBuilder("\n有模块信息改变，重新同步：\n");
-        if("1".equals(status)){
+        if(response.isSuccess()){
             for (Object object : dependMap.entrySet()) {
                 Map.Entry<String, Map> entry = (Map.Entry<String, Map>) object;
                 logInfo.append("注入：[key=").append(entry.getKey()).append(",value=").append(entry.getValue()).append("]\n");
