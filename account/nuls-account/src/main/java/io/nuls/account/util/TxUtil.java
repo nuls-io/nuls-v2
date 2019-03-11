@@ -35,6 +35,7 @@ import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.data.BaseNulsData;
 import io.nuls.base.data.Coin;
 import io.nuls.base.data.CoinData;
+import io.nuls.base.data.CoinFrom;
 import io.nuls.base.data.NonceHashData;
 import io.nuls.base.data.NulsDigestData;
 import io.nuls.base.data.Transaction;
@@ -146,6 +147,21 @@ public class TxUtil {
             return LegerCmdCall.getNonce(chainId, assetChainId, assetId, address);
         } else {
             return TxUtil.getNonceByPreHash(nonceHashData.getHash());
+        }
+    }
+
+    /**
+     * 缓存发出的交易hash
+     *
+     * @param tx
+     * @throws NulsException
+     */
+    public static void cacheTxHash(Transaction tx) throws NulsException {
+        CoinData coinData = TxUtil.getCoinData(tx);
+        for (CoinFrom coinFrom : coinData.getFrom()) {
+            String address = AddressTool.getStringAddressByBytes(coinFrom.getAddress());
+            String key = address + "_" + coinFrom.getAssetsChainId() + "_" + coinFrom.getAssetsId();
+            TxUtil.PRE_HASH_MAP.put(key, new NonceHashData(tx.getHash(), NetworkCall.getCurrentTimeMillis()));
         }
     }
 
