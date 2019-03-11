@@ -97,10 +97,6 @@ public class ChainManager {
             initTx(chain);
             schedulerManager.createTransactionScheduler(chain);
             chainMap.put(chainId, chain);
-            //订阅Block模块接口
-//            BlockCall.subscriptionNewBlockHeight(chain);
-
-            Log.debug("\nchain = " +JSONUtils.obj2PrettyJson(chain));
         }
     }
 
@@ -195,7 +191,7 @@ public class ChainManager {
 
     /**
      * 初始化链缓存数据
-     * Initialize chain caching data
+     * Initialize chain caching entity
      *
      * @param chain chain info
      */

@@ -153,7 +153,7 @@ public class CommonConfig {
             dbSources.add(dbSource);
             return dbSource;
         } finally {
-            logger.debug(dataSource + " key-value data source created: " + name);
+            logger.debug(dataSource + " key-value entity source created: " + name);
         }
     }
 

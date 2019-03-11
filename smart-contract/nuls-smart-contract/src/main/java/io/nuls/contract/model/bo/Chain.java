@@ -1,6 +1,7 @@
 package io.nuls.contract.model.bo;
 
 import io.nuls.base.data.BlockHeader;
+import io.nuls.contract.manager.ContractTokenBalanceManager;
 import io.nuls.contract.manager.TempBalanceManager;
 import io.nuls.contract.model.bo.config.ConfigBean;
 import io.nuls.contract.vm.program.ProgramExecutor;
@@ -8,6 +9,9 @@ import lombok.Getter;
 import lombok.Setter;
 import org.ethereum.config.CommonConfig;
 import org.ethereum.config.DefaultConfig;
+
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * 链信息类
@@ -46,6 +50,11 @@ public class Chain {
      * 当前正在打包的区块头
      */
     private BlockHeader currentBlockHeader;
+
+    /**
+     * 智能合约token余额管理
+     */
+    private ContractTokenBalanceManager contractTokenBalanceManager;
 
     public int getChainId() {
         return config.getChainId();

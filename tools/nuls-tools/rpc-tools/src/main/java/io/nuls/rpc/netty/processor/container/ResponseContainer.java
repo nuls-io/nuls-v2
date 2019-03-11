@@ -30,7 +30,7 @@ import java.util.concurrent.CompletableFuture;
 
 /**
  * 结果数据存放容器
- * Response data storage container
+ * Response entity storage container
  * @author ln
  * 2019/2/27
  * */

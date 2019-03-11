@@ -28,7 +28,7 @@ import static com.google.common.base.Preconditions.checkState;
 import static io.nuls.base.script.ScriptOpCodes.*;
 
 /**
- * A script element that is either a data push (signature, pubkey, etc) or a non-push (logic, numeric, etc) operation.
+ * A script element that is either a entity push (signature, pubkey, etc) or a non-push (logic, numeric, etc) operation.
  */
 public class ScriptChunk {
     /**
@@ -85,7 +85,7 @@ public class ScriptChunk {
     }
 
     /**
-     * Called on a pushdata chunk, returns true if it uses the smallest possible way (according to BIP62) to push the data.
+     * Called on a pushdata chunk, returns true if it uses the smallest possible way (according to BIP62) to push the entity.
      */
     public boolean isShortestPossiblePushData() {
         checkState(isPushData());

@@ -32,7 +32,7 @@ import io.nuls.base.signture.SignatureUtil;
 import io.nuls.tools.basic.Result;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Service;
-import io.nuls.tools.data.BigIntegerUtils;
+import io.nuls.tools.model.BigIntegerUtils;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.parse.JSONUtils;
 import io.nuls.transaction.constant.TxConstant;

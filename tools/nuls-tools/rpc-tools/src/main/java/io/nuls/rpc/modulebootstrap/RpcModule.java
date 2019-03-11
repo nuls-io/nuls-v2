@@ -10,7 +10,7 @@ import io.nuls.rpc.netty.channel.manager.ConnectManager;
 import io.nuls.rpc.netty.processor.ResponseMessageProcessor;
 import io.nuls.tools.basic.InitializingBean;
 import io.nuls.tools.core.annotation.Order;
-import io.nuls.tools.data.StringUtils;
+import io.nuls.tools.model.StringUtils;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.log.Log;
 import io.nuls.tools.thread.ThreadUtils;
@@ -83,15 +83,17 @@ public abstract class RpcModule implements InitializingBean {
             tryRunModule();
             ConnectData connectData = ConnectManager.getConnectDataByRole(module.getName());
             connectData.addCloseEvent(() -> {
-                log.warn("RMB:dependencie:{}模块触发连接断开事件", module);
-                dependencies.put(module,Boolean.FALSE);
-                if (isRunning()) {
-                    state = this.onDependenciesLoss(module);
-                    if(state == null){
-                        log.error("onDependenciesReady return null state",new NullPointerException("onDependenciesReady return null state"));
-                        System.exit(0);
+                if(!ConnectManager.ROLE_CHANNEL_MAP.containsKey(module.getName())){
+                    log.warn("RMB:dependencie:{}模块触发连接断开事件", module);
+                    dependencies.put(module,Boolean.FALSE);
+                    if (isRunning()) {
+                        state = this.onDependenciesLoss(module);
+                        if(state == null){
+                            log.error("onDependenciesReady return null state",new NullPointerException("onDependenciesReady return null state"));
+                            System.exit(0);
+                        }
+                        log.info("RMB:module state : {}",state);
                     }
-                    log.info("RMB:module state : {}",state);
                 }
             });
         } catch (Exception e) {
@@ -111,9 +113,11 @@ public abstract class RpcModule implements InitializingBean {
                 //监听与follower的连接，如果断开后需要修改通知状态
                 ConnectData connectData = ConnectManager.getConnectDataByRole(module.getName());
                 connectData.addCloseEvent(() -> {
-                    log.warn("RMB:follower:{}模块触发连接断开事件", module);
-                    //修改通知状态为未通知
-                    followerList.put(module,Boolean.FALSE);
+                    if(!ConnectManager.ROLE_CHANNEL_MAP.containsKey(module.getName())) {
+                        log.warn("RMB:follower:{}模块触发连接断开事件", module);
+                        //修改通知状态为未通知
+                        followerList.put(module, Boolean.FALSE);
+                    }
                 });
             }catch (Exception e){
                 log.error("RMB:获取follower:{}模块连接发生异常.",module,e);

@@ -58,8 +58,14 @@ public class AgentInfo extends TxDataInfo {
     private int version;
 
     public AgentInfo() {
+
+    }
+
+    public void init() {
         totalReward = BigInteger.ZERO;
-        totalPackingCount = 0;
+        commissionReward = BigInteger.ZERO;
+        agentReward = BigInteger.ZERO;
+        totalDeposit = BigInteger.ZERO;
     }
 
 }

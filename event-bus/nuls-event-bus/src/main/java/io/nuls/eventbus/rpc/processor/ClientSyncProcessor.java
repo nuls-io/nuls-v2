@@ -70,7 +70,7 @@ public class ClientSyncProcessor implements Runnable {
             if(response.isSuccess()){
                 ConcurrentMap<String,String> connectionInfoMap = new ConcurrentHashMap<>(2);
                 Object data = response.getResponseData();
-                //TODO parse data to get connection information
+                //TODO parse entity to get connection information
                 ClientRuntime.ROLE_MAP.put(subscriber,connectionInfoMap);
                 ClientRuntime.WS_CLIENT_MAP.remove(ClientRuntime.getRemoteUri(subscriber));
                 ClientRuntime.getWsClient(ClientRuntime.getRemoteUri(subscriber));

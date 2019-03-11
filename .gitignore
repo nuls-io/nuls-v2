@@ -116,5 +116,6 @@ buildNumber.properties
 # log
 logs/
 data/
+!tools/nuls-tools/base-tools/src/main/java/io/nuls/base/data
 keystore/
 Modules/

@@ -22,7 +22,7 @@ package io.nuls.db.manager;
 import io.nuls.db.constant.DBErrorCode;
 import io.nuls.db.model.Entry;
 import io.nuls.db.util.DBUtils;
-import io.nuls.tools.data.StringUtils;
+import io.nuls.tools.model.StringUtils;
 import io.nuls.tools.log.Log;
 import org.rocksdb.BlockBasedTableConfig;
 import org.rocksdb.BloomFilter;
@@ -48,7 +48,7 @@ import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * rocksdb数据库连接管理、数据存储、查询、删除操作.
- * Rocksdb database connection management, data storage, query, delete operation
+ * Rocksdb database connection management, entity storage, query, delete operation
  *
  * @author qinyf
  * @date 2018/10/10
@@ -307,7 +307,7 @@ public class RocksDBManager {
 
     /**
      * 新增或者修改数据.
-     * Add or modify data to specified table
+     * Add or modify entity to specified table
      *
      * @param table 表名
      * @param key   数据键
@@ -333,7 +333,7 @@ public class RocksDBManager {
 
     /**
      * 删除数据.
-     * delete data from specified table
+     * delete entity from specified table
      *
      * @param table 数据库表名称
      * @param key   删除标识
@@ -358,7 +358,7 @@ public class RocksDBManager {
 
     /**
      * 批量保存数据.
-     * batch save data
+     * batch save entity
      *
      * @param table 数据库表名称
      * @param kvs   保存数据的键值对
@@ -387,7 +387,7 @@ public class RocksDBManager {
 
     /**
      * 批量删除数据.
-     * batch delete data
+     * batch delete entity
      *
      * @param table 数据库表名称
      * @param keys  批量删除标识
@@ -415,7 +415,7 @@ public class RocksDBManager {
 
     /**
      * 根据key查询数据.
-     * query data in a specified table by key
+     * query entity in a specified table by key
      *
      * @param table 数据库表名称
      * @param key   查询关键字

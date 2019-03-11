@@ -31,8 +31,8 @@ import io.nuls.poc.constant.ConsensusConstant;
 import io.nuls.poc.constant.ConsensusErrorCode;
 import io.nuls.poc.model.bo.Chain;
 import io.nuls.poc.utils.CallMethodUtils;
-import io.nuls.tools.data.DoubleUtils;
-import io.nuls.tools.data.StringUtils;
+import io.nuls.tools.model.DoubleUtils;
+import io.nuls.tools.model.StringUtils;
 import io.nuls.tools.exception.NulsRuntimeException;
 import io.nuls.tools.log.Log;
 import io.nuls.tools.parse.ConfigLoader;
@@ -130,7 +130,7 @@ public class MeetingRound {
         Collections.sort(memberList);
         this.memberCount = memberList.size();
         totalWeight = 0d;
-        MeetingMember member = null;
+        MeetingMember member;
         for (int i = 0; i < memberCount; i++) {
             member = memberList.get(i);
             member.setRoundStartTime(this.getStartTime());
@@ -241,7 +241,7 @@ public class MeetingRound {
             str.append(Address.fromHashs(member.getAgent().getPackingAddress()).getBase58());
             str.append(" ,order:" + member.getPackingIndexOfRound());
             str.append(",packTime:" + new Date(member.getPackEndTime()));
-            str.append(",creditVal:" + member.getAgent().getCreditVal());
+            str.append(",creditVal:" + member.getAgent().getRealCreditVal());
             str.append("\n");
         }
         if (null == this.getPreRound()) {

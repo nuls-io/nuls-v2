@@ -19,7 +19,7 @@ import io.nuls.rpc.modulebootstrap.RpcModule;
 import io.nuls.rpc.modulebootstrap.RpcModuleState;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.core.ioc.SpringLiteContext;
-import io.nuls.tools.data.StringUtils;
+import io.nuls.tools.model.StringUtils;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.parse.ConfigLoader;
 import io.nuls.tools.parse.I18nUtils;
@@ -87,6 +87,11 @@ public class AccountBootstrap extends RpcModule {
             initDB();
             //启动链
             SpringLiteContext.getBean(ChainManager.class).runChain();
+            while (!isDependencieReady(new Module(ModuleE.TX.abbr, "1.0"))) {
+                Thread.sleep(1000);
+            }
+            //注册账户模块相关交易
+            registerTx();
         } catch (Exception e) {
             return false;
         }
@@ -101,8 +106,6 @@ public class AccountBootstrap extends RpcModule {
     @Override
     public RpcModuleState onDependenciesReady() {
         LoggerUtil.logger.info("account onDependenciesReady");
-        //注册账户模块相关交易
-        registerTx();
         LoggerUtil.logger.debug("START-SUCCESS");
         return RpcModuleState.Running;
     }
@@ -123,7 +126,7 @@ public class AccountBootstrap extends RpcModule {
             NulsConfig.MODULES_CONFIG = ConfigLoader.loadIni(NulsConfig.MODULES_CONFIG_FILE);
 
             AccountParam accountParam = AccountParam.getInstance();
-            //set data save path
+            //set entity save path
             accountParam.setDataPath(NulsConfig.MODULES_CONFIG.getCfgValue(AccountConstant.CFG_DB_SECTION, AccountConstant.DB_DATA_PATH, null));
 
             try {

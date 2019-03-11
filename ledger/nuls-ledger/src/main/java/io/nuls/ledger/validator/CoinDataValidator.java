@@ -199,6 +199,7 @@ public class CoinDataValidator {
      * @return
      */
     private ValidateResult validateCommonCoinData(AccountState accountState, String address, BigInteger fromAmount, String fromNonce) {
+        LoggerUtil.logger.debug("未确认普通交易校验：fromNonce={},数据库值:dbNonce={},unconfirmedNonces={}",fromNonce,accountState.getNonce(),accountState.getUnconfirmedNoncesStrs());
         BigInteger totalAmount = accountState.getAvailableAmount().add(accountState.getUnconfirmedAmount());
         if (totalAmount.compareTo(fromAmount) == -1) {
             logger.info("balance is not enough");
@@ -269,7 +270,7 @@ public class CoinDataValidator {
         if (null == list) {
             //从头开始处理
             if (!accountState.getNonce().equalsIgnoreCase(nonce)) {
-                logger.info("isValidateCommonTxBatch {}=={}=={}==nonce is error!dbNonce:{}!=fromNonce:{}", address, coinFrom.getAssetsChainId(), coinFrom.getAssetsId(), accountState.getNonce(), nonce);
+                logger.error("批量校验失败(BatchValidate failed)： isValidateCommonTxBatch {}=={}=={}==nonce is error!dbNonce:{}!=fromNonce:{}", address, coinFrom.getAssetsChainId(), coinFrom.getAssetsId(), accountState.getNonce(), nonce);
                 return false;
             }
             list = new ArrayList<>();

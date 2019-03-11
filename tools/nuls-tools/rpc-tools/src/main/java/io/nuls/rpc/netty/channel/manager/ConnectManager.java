@@ -17,7 +17,7 @@ import io.nuls.rpc.netty.thread.RequestByPeriodProcessor;
 import io.nuls.rpc.netty.thread.ResponseAutoProcessor;
 import io.nuls.tools.core.ioc.ScanUtil;
 import io.nuls.tools.core.ioc.SpringLiteContext;
-import io.nuls.tools.data.StringUtils;
+import io.nuls.tools.model.StringUtils;
 import io.nuls.tools.log.Log;
 import io.nuls.tools.parse.JSONUtils;
 import io.nuls.tools.thread.TimeService;
@@ -379,11 +379,8 @@ public class ConnectManager {
      * @return long
      */
     public static int getCmdChangeCount(String cmd) {
-        try {
-            return CMD_CHANGE_COUNT.get(cmd);
-        } catch (Exception e) {
-            return 1;
-        }
+        Integer integer = CMD_CHANGE_COUNT.get(cmd);
+        return integer == null ? 1 : integer;
     }
 
     /**
@@ -682,36 +679,26 @@ public class ConnectManager {
         if(!ROLE_CHANNEL_MAP.values().contains(channel)){
             return;
         }
-        String role = "";
         Iterator<Map.Entry<String, Channel>> entries = ROLE_CHANNEL_MAP.entrySet().iterator();
         while (entries.hasNext()) {
             Map.Entry<String, Channel> entry = entries.next();
             if (channel.equals(entry.getValue())) {
-                role = entry.getKey();
                 entries.remove();
                 break;
-            }
-        }
-        ConnectData connectData = CHANNEL_DATA_MAP.remove(channel);
-        connectData.setConnected(false);
-        connectData.getThreadPool().shutdown();
-
-        for (Map.Entry<String, Channel> entry : MSG_ID_KEY_CHANNEL_MAP.entrySet()) {
-            if (channel.equals(entry.getValue())) {
-                MSG_ID_KEY_CHANNEL_MAP.remove(entry.getKey());
-                INVOKE_MAP.remove(entry.getKey());
             }
         }
 
         Iterator<Map.Entry<String, Channel>> msgEntries = MSG_ID_KEY_CHANNEL_MAP.entrySet().iterator();
         while (msgEntries.hasNext()) {
-            Map.Entry<String, Channel> entry = entries.next();
+            Map.Entry<String, Channel> entry = msgEntries.next();
             if (channel.equals(entry.getValue())) {
                 INVOKE_MAP.remove(entry.getKey());
                 msgEntries.remove();
             }
         }
-
+        ConnectData connectData = CHANNEL_DATA_MAP.remove(channel);
+        connectData.setConnected(false);
+        connectData.getThreadPool().shutdown();
         channel.close();
     }
 

@@ -28,7 +28,7 @@ public class BlockManager {
     private RoundManager roundManager;
     /**
      * 初始化链区块头数据，缓存指定数量的区块头
-     * Initialize chain block header data to cache a specified number of block headers
+     * Initialize chain block header entity to cache a specified number of block headers
      *
      * @param chain chain info
      */
@@ -68,7 +68,7 @@ public class BlockManager {
 
     /**
      * 收到最新区块头，更新链区块缓存数据
-     * Receive the latest block header, update the chain block cache data
+     * Receive the latest block header, update the chain block cache entity
      *
      * @param chain       chain info
      * @param blockHeader block header
@@ -80,9 +80,10 @@ public class BlockManager {
         BlockHeader newestHeader = chain.getNewestHeader();
         BlockExtendsData newestExtendsData = new BlockExtendsData(newestHeader.getExtend());
         BlockExtendsData receiveExtendsData = new BlockExtendsData(blockHeader.getExtend());
-        if(receiveExtendsData.getRoundIndex() > newestExtendsData.getRoundIndex()){
-            BlockExtendsData lastExtendsData = new BlockExtendsData(chain.getBlockHeaderList().get(0).getExtend());
-            long lastRoundIndex = lastExtendsData.getRoundIndex();
+        long receiveRoundIndex = receiveExtendsData.getRoundIndex();
+        BlockExtendsData lastExtendsData = new BlockExtendsData(chain.getBlockHeaderList().get(0).getExtend());
+        long lastRoundIndex = lastExtendsData.getRoundIndex();
+        if(receiveRoundIndex > newestExtendsData.getRoundIndex() && (receiveRoundIndex - ConsensusConstant.INIT_BLOCK_HEADER_COUNT > lastRoundIndex)){
             Iterator<BlockHeader> iterator = chain.getBlockHeaderList().iterator();
             while (iterator.hasNext()){
                 lastExtendsData = new BlockExtendsData(iterator.next().getExtend());
@@ -94,9 +95,6 @@ public class BlockManager {
             }
         }
         chain.getBlockHeaderList().add(blockHeader);
-        if (chain.getBlockHeaderList().size() > ConsensusConstant.INIT_BLOCK_HEADER_COUNT) {
-            chain.getBlockHeaderList().remove(0);
-        }
         chain.setNewestHeader(blockHeader);
         chain.getLoggerMap().get(ConsensusConstant.BASIC_LOGGER_NAME).info("新区块保存成功，新区块高度为：" + blockHeader.getHeight() + ",本地最新区块高度为：" + chain.getNewestHeader().getHeight());
     }

@@ -30,7 +30,7 @@ package org.ethereum.crypto.cryptohash;
  * <p>A {@code Digest} object maintains a running state for a hash
  * function computation. Data is inserted with {@code update()} calls;
  * the result is obtained from a {@code digest()} method (where some
- * final data can be inserted as well). When a digest output has been
+ * final entity can be inserted as well). When a digest output has been
  * produced, the objet is automatically resetted, and can be used
  * immediately for another digest operation. The state of a computation
  * can be cloned with the {@link #copy} method; this can be used to get
@@ -75,7 +75,7 @@ package org.ethereum.crypto.cryptohash;
 public interface Digest {
 
     /**
-     * Insert one more input data byte.
+     * Insert one more input entity byte.
      *
      * @param in the input byte
      */
@@ -84,16 +84,16 @@ public interface Digest {
     /**
      * Insert some more bytes.
      *
-     * @param inbuf the data bytes
+     * @param inbuf the entity bytes
      */
     void update(byte[] inbuf);
 
     /**
      * Insert some more bytes.
      *
-     * @param inbuf the data buffer
-     * @param off   the data offset in {@code inbuf}
-     * @param len   the data length (in bytes)
+     * @param inbuf the entity buffer
+     * @param off   the entity offset in {@code inbuf}
+     * @param len   the entity length (in bytes)
      */
     void update(byte[] inbuf, int off, int len);
 
@@ -110,7 +110,7 @@ public interface Digest {
      * and return the hash value in a newly-allocated array. The object
      * is resetted.
      *
-     * @param inbuf the input data
+     * @param inbuf the input entity
      * @return the hash output
      */
     byte[] digest(byte[] inbuf);

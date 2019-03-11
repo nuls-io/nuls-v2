@@ -18,7 +18,7 @@
 package org.ethereum.datasource;
 
 /**
- * Base interface for all data source classes
+ * Base interface for all entity source classes
  * <p>
  * Created by Anton Nashatyrev on 05.10.2016.
  */

@@ -65,7 +65,7 @@ public interface DbSource<V> extends BatchSource<byte[], V> {
     Set<byte[]> keys() throws RuntimeException;
 
     /**
-     * Closes database, destroys its data and finally runs init()
+     * Closes database, destroys its entity and finally runs init()
      */
     void reset();
 

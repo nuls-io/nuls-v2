@@ -23,8 +23,9 @@
  */
 package io.nuls.contract.model.tx;
 
-import io.nuls.contract.constant.ContractConstant;
 import io.nuls.contract.model.txdata.ContractTransferData;
+
+import static io.nuls.contract.constant.ContractConstant.TX_TYPE_CONTRACT_TRANSFER;
 
 /**
  * @author: PierreLuo
@@ -33,7 +34,7 @@ import io.nuls.contract.model.txdata.ContractTransferData;
 public class ContractTransferTransaction extends ContractBaseTransaction<ContractTransferData> {
 
     public ContractTransferTransaction() {
-        super(ContractConstant.TX_TYPE_CONTRACT_TRANSFER);
+        this.setType(TX_TYPE_CONTRACT_TRANSFER);
     }
 
     @Override

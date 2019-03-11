@@ -27,6 +27,8 @@ package io.nuls.ledger.rpc.cmd;
 
 import io.nuls.ledger.constant.LedgerConstant;
 import io.nuls.ledger.model.po.AccountState;
+import io.nuls.ledger.model.po.FreezeHeightState;
+import io.nuls.ledger.model.po.FreezeLockTimeState;
 import io.nuls.ledger.model.po.UnconfirmedNonce;
 import io.nuls.ledger.service.AccountStateService;
 import io.nuls.ledger.utils.LoggerUtil;
@@ -36,8 +38,9 @@ import io.nuls.rpc.model.Parameter;
 import io.nuls.rpc.model.message.Response;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
-import io.nuls.tools.data.StringUtils;
+import io.nuls.tools.model.StringUtils;
 
+import java.math.BigInteger;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -78,6 +81,20 @@ public class AccountStateCmd extends BaseCmd {
         rtMap.put("freeze", accountState.getFreezeTotal());
         rtMap.put("total", accountState.getTotalAmount());
         rtMap.put("available", accountState.getAvailableAmount());
+        BigInteger permanentLocked = BigInteger.ZERO;
+        BigInteger timeHeightLocked = BigInteger.ZERO;;
+        for(FreezeLockTimeState freezeLockTimeState:accountState.getFreezeLockTimeStates()){
+            if(LedgerConstant.PERMANENT_LOCK == freezeLockTimeState.getLockTime()){
+                permanentLocked= permanentLocked.add(freezeLockTimeState.getAmount());
+            }else{
+                timeHeightLocked= timeHeightLocked.add(freezeLockTimeState.getAmount());
+            }
+        }
+        for(FreezeHeightState freezeHeightState:accountState.getFreezeHeightStates()){
+            timeHeightLocked= timeHeightLocked.add(freezeHeightState.getAmount());
+        }
+        rtMap.put("permanentLocked",permanentLocked);
+        rtMap.put("timeHeightLocked", timeHeightLocked);
         Response response = success(rtMap);
         LoggerUtil.logger.debug("response={}",response);
         return  response;

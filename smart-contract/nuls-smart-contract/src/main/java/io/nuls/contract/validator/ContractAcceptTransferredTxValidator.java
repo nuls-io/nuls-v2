@@ -36,7 +36,7 @@ public class ContractAcceptTransferredTxValidator{
         for (CoinTo coinTo : toList) {
             if(ContractUtil.isLegalContractAddress(coinTo.getAddress())) {
                 if(type != TX_TYPE_COINBASE && type != TX_TYPE_CALL_CONTRACT) {
-                    Log.error("contract data error: The contract does not accept transfers of this type[{}] of transaction.", type);
+                    Log.error("contract entity error: The contract does not accept transfers of this type[{}] of transaction.", type);
                     return Result.getFailed(TX_DATA_VALIDATION_ERROR);
                 }
             }

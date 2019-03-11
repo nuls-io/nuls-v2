@@ -24,14 +24,13 @@
 package io.nuls.account.model.bo;
 
 import io.nuls.account.constant.AccountErrorCode;
-import io.nuls.account.util.AccountTool;
 import io.nuls.base.data.Address;
 import io.nuls.tools.crypto.AESEncrypt;
 import io.nuls.tools.crypto.ECKey;
 import io.nuls.tools.crypto.EncryptedData;
 import io.nuls.tools.crypto.Sha256Hash;
-import io.nuls.tools.data.FormatValidUtils;
-import io.nuls.tools.data.ObjectUtils;
+import io.nuls.tools.model.FormatValidUtils;
+import io.nuls.tools.model.ObjectUtils;
 import io.nuls.tools.exception.CryptoException;
 import io.nuls.tools.exception.NulsException;
 import org.spongycastle.crypto.params.KeyParameter;

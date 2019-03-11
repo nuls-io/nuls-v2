@@ -27,7 +27,7 @@ package io.nuls.contract.constant;
 
 /**
  * 交易数据存储常量
- * Transaction data storage constants
+ * Transaction entity storage constants
  *
  * @author: qinyifeng
  */
@@ -51,5 +51,6 @@ public interface ContractDBConstant {
     String DB_NAME_CONTRACT_COLLECTION = "contract_collection";
 
     String DB_NAME_CONTRACT_NRC20_TOKEN_TRANSFER = "contract_nrc20_token_transfer";
+    String DB_NAME_CONTRACT_NRC20_TOKEN_ADDRESS = "contract_nrc20_token_address";
 
 }

@@ -354,13 +354,13 @@ public class QuotientFilter implements Iterable<Long> {
         return overflowed;
     }
 
-//    public void insert(byte[] data)
+//    public void insert(byte[] entity)
 //    {
-//        insert(data, 0, data.length);
+//        insert(entity, 0, entity.length);
 //    }
 //
-//    public void insert(byte[] data, int offset, int length) {
-//        insert(hashFactory.hash64().hash(data, offset, length, 0));
+//    public void insert(byte[] entity, int offset, int length) {
+//        insert(hashFactory.hash64().hash(entity, offset, length, 0));
 //    }
 
     protected long hash(byte[] bytes) {

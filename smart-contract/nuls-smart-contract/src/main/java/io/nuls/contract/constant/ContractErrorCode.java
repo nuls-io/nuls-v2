@@ -39,6 +39,7 @@ public interface ContractErrorCode {
     ErrorCode PARAMETER_ERROR = ErrorCode.init("10012");
     ErrorCode NULL_PARAMETER = ErrorCode.init("10013");
     ErrorCode DATA_NOT_FOUND = ErrorCode.init("10015");
+    ErrorCode INSUFFICIENT_BALANCE = ErrorCode.init("10027");
 
     ErrorCode DB_UNKOWN_EXCEPTION = ErrorCode.init("20001");
     ErrorCode DB_AREA_EXIST = ErrorCode.init("20009");
@@ -53,6 +54,8 @@ public interface ContractErrorCode {
     ErrorCode INVALID_AMOUNT = ErrorCode.init("31005");
     ErrorCode TX_DATA_VALIDATION_ERROR = ErrorCode.init("31008");
     ErrorCode TOO_SMALL_AMOUNT = ErrorCode.init("31012");
+
+    ErrorCode ADDRESS_ERROR = ErrorCode.init("50004");
 
     ErrorCode CONTRACT_EXECUTE_ERROR = ErrorCode.init("100001");
     ErrorCode CONTRACT_ADDRESS_NOT_EXIST = ErrorCode.init("100002");

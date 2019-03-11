@@ -135,19 +135,4 @@ public class ContractAddressStorageServiceImpl implements ContractAddressStorage
         return result;
     }
 
-    @Override
-    public Result<List<ContractAddressInfoPo>> getAllNrc20ContractInfoList(int chainId) {
-        Result<List<ContractAddressInfoPo>> allContractInfoListResult = getAllContractInfoList(chainId);
-        if(allContractInfoListResult.isFailed()) {
-            return allContractInfoListResult;
-        }
-        List<ContractAddressInfoPo> resultList = new ArrayList<>();
-        List<ContractAddressInfoPo> contractAddressInfoPoList = allContractInfoListResult.getData();
-        for(ContractAddressInfoPo po : contractAddressInfoPoList) {
-            if(po.isNrc20()) {
-                resultList.add(po);
-            }
-        }
-        return ContractUtil.getSuccess().setData(resultList);
-    }
 }

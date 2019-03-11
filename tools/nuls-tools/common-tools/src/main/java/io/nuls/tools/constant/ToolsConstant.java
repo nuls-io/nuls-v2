@@ -12,7 +12,7 @@ public class ToolsConstant {
 
     /**
      * 48位整型数据长度
-     * 48 bit integer data length.
+     * 48 bit integer entity length.
      */
     public static int INT48_VALUE_LENGTH = 6;
 

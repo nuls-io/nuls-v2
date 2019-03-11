@@ -24,7 +24,7 @@
  */
 package io.nuls.db.util;
 
-import io.nuls.tools.data.StringUtils;
+import io.nuls.tools.model.StringUtils;
 import io.nuls.tools.log.Log;
 import io.nuls.tools.parse.config.IniEntity;
 import org.ini4j.Config;

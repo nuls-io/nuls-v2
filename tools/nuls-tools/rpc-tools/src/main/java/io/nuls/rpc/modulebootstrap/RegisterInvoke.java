@@ -2,18 +2,14 @@ package io.nuls.rpc.modulebootstrap;
 
 import io.netty.channel.Channel;
 import io.nuls.rpc.invoke.BaseInvoke;
-import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.model.message.*;
 import io.nuls.rpc.netty.channel.manager.ConnectManager;
-import io.nuls.rpc.netty.processor.ResponseMessageProcessor;
 import io.nuls.tools.log.Log;
 import io.nuls.tools.parse.JSONUtils;
 import lombok.extern.slf4j.Slf4j;
 
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.TimeUnit;
 
 /**
  * @Author: zhoulijun
@@ -37,9 +33,8 @@ public class RegisterInvoke extends BaseInvoke {
         Map responseData = (Map) response.getResponseData();
         Map methodMap = (Map) responseData.get("registerAPI");
         Map dependMap = (Map) methodMap.get("Dependencies");
-        String status = response.getResponseStatus();
         StringBuilder logInfo = new StringBuilder("\n有模块信息改变，重新同步：\n");
-        if("1".equals(status)){
+        if(response.isSuccess()){
             for (Object object : dependMap.entrySet()) {
                 Map.Entry<String, Map> entry = (Map.Entry<String, Map>) object;
                 logInfo.append("注入：[key=").append(entry.getKey()).append(",value=").append(entry.getValue()).append("]\n");
