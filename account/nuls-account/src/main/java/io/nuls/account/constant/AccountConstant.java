@@ -214,4 +214,6 @@ public interface AccountConstant {
     int TX_HASH_DIGEST_BYTE_MAX_LEN = 70;
     int TX_MAX_BYTES = 300;
     int TX_MAX_SIZE = TX_MAX_BYTES * 1024;
+    /** 本地计算nonce值的hash缓存有效时间 30秒*/
+    int HASH_TTL = 30000;
 }
