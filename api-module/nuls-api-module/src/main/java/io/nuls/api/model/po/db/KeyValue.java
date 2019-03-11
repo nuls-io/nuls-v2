@@ -18,26 +18,29 @@
  * SOFTWARE.
  */
 
-package io.nuls.api.constant;
+package io.nuls.api.model.po.db;
 
 /**
- * 存储对外提供的接口命令
- *
- * @author captain
- * @version 1.0
- * @date 18-11-9 下午2:15
+ * @author Niels
  */
-public interface CommandConstant {
+public class KeyValue {
+    private String key;
 
-    //根据区块高度获取区块
-    String GET_BLOCK_BY_HEIGHT = "getBlockByHeight";
-    //根据区块hash获取区块
-    String GET_BLOCK_BY_HASH = "downloadBlockByHash";
-    //获取账户余额
-    String GET_BALANCE = "getBalance";
+    private Object value;
 
-    //查询交易详情
-    String GET_TX = "tx_getTx";
-    //查询节点详情
-    String GET_AGENT = "cs_getAgentInfo";
+    public String getKey() {
+        return key;
+    }
+
+    public void setKey(String key) {
+        this.key = key;
+    }
+
+    public Object getValue() {
+        return value;
+    }
+
+    public void setValue(Object value) {
+        this.value = value;
+    }
 }

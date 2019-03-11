@@ -20,18 +20,30 @@
 
 package io.nuls.api.rpc.controller;
 
+import io.nuls.api.ApiContext;
+import io.nuls.api.analysis.WalletRpcHandler;
 import io.nuls.api.cache.ApiCache;
 import io.nuls.api.db.*;
 import io.nuls.api.manager.CacheManager;
-import io.nuls.api.model.po.db.CurrentRound;
+import io.nuls.api.model.po.db.AgentInfo;
+import io.nuls.api.model.po.db.AliasInfo;
+import io.nuls.api.model.po.db.PageInfo;
 import io.nuls.api.model.po.db.PocRoundItem;
+import io.nuls.api.model.rpc.RpcErrorCode;
 import io.nuls.api.model.rpc.RpcResult;
+import io.nuls.api.model.rpc.RpcResultError;
+import io.nuls.api.utils.AgentComparator;
 import io.nuls.api.utils.VerifyUtils;
+import io.nuls.tools.basic.Result;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Controller;
 import io.nuls.tools.core.annotation.RpcMethod;
+import io.nuls.tools.model.DoubleUtils;
 
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author Niels
@@ -49,8 +61,8 @@ public class PocConsensusController {
     private DepositService depositService;
     @Autowired
     private RoundService roundService;
-//    @Autowired
-//    private StatisticalService statisticalService;
+    @Autowired
+    private StatisticalService statisticalService;
 
     @Autowired
     private BlockService headerService;
@@ -70,112 +82,126 @@ public class PocConsensusController {
         rpcResult.setResult(itemList);
         return rpcResult;
     }
-//
-//    @RpcMethod("getConsensusNodeCount")
-//    public RpcResult getConsensusNodeCount(List<Object> params) {
-//        Map<String, Long> resultMap = new HashMap<>();
-//        resultMap.put("seedsCount", (long) ApiContext.SEED_NODE_ADDRESS.size());
-//        resultMap.put("consensusCount", (long) (roundManager.getCurrentRound().getMemberCount() - ApiContext.SEED_NODE_ADDRESS.size()));
-//        long count = agentService.agentsCount(ApiContext.bestHeight);
-//        resultMap.put("agentCount", count);
-//        resultMap.put("totalCount", count + ApiContext.SEED_NODE_ADDRESS.size());
-//        RpcResult result = new RpcResult();
-//        result.setResult(resultMap);
-//        return result;
-//    }
-//
-//    @RpcMethod("getConsensusStatistical")
-//    public RpcResult getConsensusStatistical(List<Object> params) {
-//        VerifyUtils.verifyParams(params, 1);
-//        int type = (int) params.get(0);
-//        List list = this.statisticalService.getStatisticalList(type, "consensusLocked");
-//        return new RpcResult().setResult(list);
-//    }
-//
-//    @RpcMethod("getConsensusNodes")
-//    public RpcResult getConsensusNodes(List<Object> params) {
-//        VerifyUtils.verifyParams(params, 3);
-//        int pageIndex = (int) params.get(0);
-//        int pageSize = (int) params.get(1);
-//        int type = (int) params.get(2);
-//        if (pageIndex <= 0) {
-//            pageIndex = 1;
-//        }
-//        if (pageSize <= 0 || pageSize > 200) {
-//            pageSize = 10;
-//        }
-////        Map<String, Integer> map = new HashMap<>();
-////        List<PocRoundItem> itemList = roundManager.getCurrentRound().getItemList();
-////        for (PocRoundItem item : itemList) {
-////            map.put(item.getPackingAddress(), 1);
-////        }
-//
-//        PageInfo<AgentInfo> list = agentService.getAgentList(type, pageIndex, pageSize);
-//        for (AgentInfo agentInfo : list.getList()) {
-//            RpcClientResult<AgentInfo> clientResult = walletRPCHandler.getAgent(agentInfo.getTxHash());
-//            if (clientResult.isSuccess()) {
-//                agentInfo.setCreditValue(clientResult.getData().getCreditValue());
-//                agentInfo.setDepositCount(clientResult.getData().getDepositCount());
-//                agentInfo.setStatus(clientResult.getData().getStatus());
-//                if (agentInfo.getAgentAlias() == null) {
-//                    AliasInfo info = aliasService.getAliasByAddress(agentInfo.getAgentAddress());
-//                    if (null != info) {
-//                        agentInfo.setAgentAlias(info.getAlias());
-//                    }
-//                }
-//            }
-//        }
-//
-//        Collections.sort(list.getList(), AgentComparator.getInstance());
-//
-//        return new RpcResult().setResult(list);
-//    }
-//
-//    @RpcMethod("getConsensusNode")
-//    public RpcResult getConsensusNode(List<Object> params) {
-//        VerifyUtils.verifyParams(params, 1);
-//        String agentHash = (String) params.get(0);
-//
-//        AgentInfo agentInfo = agentService.getAgentByAgentHash(agentHash);
-//
-//        long count = punishService.getYellowCount(agentInfo.getAgentAddress());
-//        if (agentInfo.getTotalPackingCount() != 0) {
-//            agentInfo.setLostRate(DoubleUtils.div(count, count + agentInfo.getTotalPackingCount()));
-//        }
-//
+
+    @RpcMethod("getConsensusNodeCount")
+    public RpcResult getConsensusNodeCount(List<Object> params) {
+        VerifyUtils.verifyParams(params, 1);
+        int chainId = (int) params.get(0);
+
+        Map<String, Long> resultMap = new HashMap<>();
+        resultMap.put("seedsCount", (long) ApiContext.SEED_NODE_ADDRESS.size());
+        ApiCache apiCache = CacheManager.getCache(chainId);
+
+        resultMap.put("consensusCount", (long) (apiCache.getCurrentRound().getMemberCount() - ApiContext.SEED_NODE_ADDRESS.size()));
+        long count = agentService.agentsCount(chainId, ApiContext.bestHeight);
+        resultMap.put("agentCount", count);
+        resultMap.put("totalCount", count + ApiContext.SEED_NODE_ADDRESS.size());
+        RpcResult result = new RpcResult();
+        result.setResult(resultMap);
+        return result;
+    }
+
+    @RpcMethod("getConsensusStatistical")
+    public RpcResult getConsensusStatistical(List<Object> params) {
+        VerifyUtils.verifyParams(params, 2);
+        int chainId = (int) params.get(0);
+        int type = (int) params.get(1);
+        List list = this.statisticalService.getStatisticalList(chainId, type, "consensusLocked");
+        return new RpcResult().setResult(list);
+    }
+
+    @RpcMethod("getConsensusNodes")
+    public RpcResult getConsensusNodes(List<Object> params) {
+        VerifyUtils.verifyParams(params, 3);
+        int pageIndex = (int) params.get(0);
+        int pageSize = (int) params.get(1);
+        int type = (int) params.get(2);
+        int chainId = (int) params.get(3);
+        if (pageIndex <= 0) {
+            pageIndex = 1;
+        }
+        if (pageSize <= 0 || pageSize > 200) {
+            pageSize = 10;
+        }
+//        Map<String, Integer> map = new HashMap<>();
 //        List<PocRoundItem> itemList = roundManager.getCurrentRound().getItemList();
-//
-//        PocRoundItem roundItem = null;
-//        if (null != itemList) {
-//            for (PocRoundItem item : itemList) {
-//                if (item.getPackingAddress().equals(agentInfo.getPackingAddress())) {
-//                    roundItem = item;
-//                    break;
-//                }
-//            }
+//        for (PocRoundItem item : itemList) {
+//            map.put(item.getPackingAddress(), 1);
 //        }
-//        if (null == roundItem) {
-//            agentInfo.setStatus(0);
-//        } else {
-//            agentInfo.setRoundPackingTime(roundManager.getCurrentRound().getStartTime() + roundItem.getOrder() * 10000);
-//            agentInfo.setStatus(1);
-//        }
-//
-//        RpcClientResult<AgentInfo> result = walletRPCHandler.getAgent(agentHash);
-//        if (result.isSuccess()) {
-//            AgentInfo agent = result.getData();
-//            agentInfo.setCreditValue(agent.getCreditValue());
-//            agentInfo.setDepositCount(agent.getDepositCount());
-//            if (agentInfo.getAgentAlias() == null) {
-//                AliasInfo info = aliasService.getAliasByAddress(agentInfo.getAgentAddress());
-//                if (null != info) {
-//                    agentInfo.setAgentAlias(info.getAlias());
-//                }
-//            }
-//        }
-//
-//        return new RpcResult().setResult(agentInfo);
-//    }
+
+        PageInfo<AgentInfo> list = agentService.getAgentList(chainId, type, pageIndex, pageSize);
+        for (AgentInfo agentInfo : list.getList()) {
+            Result<AgentInfo> clientResult = WalletRpcHandler.getAgentInfo(chainId, agentInfo.getTxHash());
+            if (clientResult.isSuccess()) {
+                agentInfo.setCreditValue(clientResult.getData().getCreditValue());
+                agentInfo.setDepositCount(clientResult.getData().getDepositCount());
+                agentInfo.setStatus(clientResult.getData().getStatus());
+                if (agentInfo.getAgentAlias() == null) {
+                    AliasInfo info = aliasService.getAliasByAddress(chainId, agentInfo.getAgentAddress());
+                    if (null != info) {
+                        agentInfo.setAgentAlias(info.getAlias());
+                    }
+                }
+            }
+        }
+
+        Collections.sort(list.getList(), AgentComparator.getInstance());
+
+        return new RpcResult().setResult(list);
+    }
+
+    @RpcMethod("getConsensusNode")
+    public RpcResult getConsensusNode(List<Object> params) {
+        VerifyUtils.verifyParams(params, 1);
+        int chainId = (int) params.get(0);
+        String agentHash = (String) params.get(1);
+        ApiCache apiCache = CacheManager.getCache(chainId);
+
+        RpcResult rpcResult = new RpcResult();
+        if (apiCache == null) {
+            return RpcResult.failed(RpcErrorCode.DATA_NOT_EXISTS);
+        }
+
+        AgentInfo agentInfo = agentService.getAgentByHash(chainId, agentHash);
+        if (agentInfo == null) {
+            return RpcResult.failed(RpcErrorCode.DATA_NOT_EXISTS);
+        }
+        long count = punishService.getYellowCount(chainId, agentInfo.getAgentAddress());
+        if (agentInfo.getTotalPackingCount() != 0) {
+            agentInfo.setLostRate(DoubleUtils.div(count, count + agentInfo.getTotalPackingCount()));
+        }
+
+        List<PocRoundItem> itemList = apiCache.getCurrentRound().getItemList();
+        PocRoundItem roundItem = null;
+        if (null != itemList) {
+            for (PocRoundItem item : itemList) {
+                if (item.getPackingAddress().equals(agentInfo.getPackingAddress())) {
+                    roundItem = item;
+                    break;
+                }
+            }
+        }
+        if (null == roundItem) {
+            agentInfo.setStatus(0);
+        } else {
+            agentInfo.setRoundPackingTime(apiCache.getCurrentRound().getStartTime() + roundItem.getOrder() * 10000);
+            agentInfo.setStatus(1);
+        }
+
+        Result<AgentInfo> result = WalletRpcHandler.getAgentInfo(chainId, agentHash);
+        if (result.isSuccess()) {
+            AgentInfo agent = result.getData();
+            agentInfo.setCreditValue(agent.getCreditValue());
+            agentInfo.setDepositCount(agent.getDepositCount());
+            if (agentInfo.getAgentAlias() == null) {
+                AliasInfo info = aliasService.getAliasByAddress(chainId, agentInfo.getAgentAddress());
+                if (null != info) {
+                    agentInfo.setAgentAlias(info.getAlias());
+                }
+            }
+        }
+        return RpcResult.success(agentInfo);
+    }
 //
 //    @RpcMethod("getConsensusNodeStatistical")
 //    public RpcResult getConsensusNodeStatistical(List<Object> params) {

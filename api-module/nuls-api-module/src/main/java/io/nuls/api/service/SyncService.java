@@ -547,7 +547,7 @@ public class SyncService {
             }
         }
         if (type == 1) {
-            agentInfo = agentService.getAgentByAgentHash(chainId, key);
+            agentInfo = agentService.getAgentByHash(chainId, key);
         } else if (type == 2) {
             agentInfo = agentService.getAgentByAgentAddress(chainId, key);
         } else {

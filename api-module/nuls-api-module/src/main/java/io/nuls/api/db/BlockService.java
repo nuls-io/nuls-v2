@@ -81,4 +81,8 @@ public class BlockService {
         PageInfo<BlockHeaderInfo> pageInfo = new PageInfo<>(pageIndex, pageSize, totalCount, list);
         return pageInfo;
     }
+
+    public long getMaxHeight(int chainId, long endTime) {
+        return this.mongoDBService.getMax(BLOCK_HEADER_TABLE + chainId, "_id", Filters.lte("createTime", endTime));
+    }
 }

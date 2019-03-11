@@ -41,7 +41,14 @@ public interface MongoTableConstant {
     String TOKEN_TRANSFER_TABLE = "token_transfer_table_";
     //智能合约结果记录
     String CONTRACT_RESULT_TABLE = "contract_result_table_";
-
+    //统计表
     String STATISTICAL_TABLE = "statistical_table_";
 
+
+    //---------------------------------字段(field)------------------------------
+    //new_info表，最新统计的时间点
+    String LAST_STATISTICAL_TIME = "last_statistical_time";
+
+    String TX_COUNT = "txCount";
+    String ANNUALIZE_REWARD = "annualizedReward";
 }

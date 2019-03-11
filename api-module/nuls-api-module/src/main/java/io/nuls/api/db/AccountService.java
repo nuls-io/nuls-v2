@@ -94,4 +94,25 @@ public class AccountService {
         PageInfo<TxRelationInfo> pageInfo = new PageInfo<>(pageIndex, pageSize, totalCount, txRelationInfoList);
         return pageInfo;
     }
+
+    public PageInfo<AccountInfo> getCoinRanking(int pageIndex, int pageSize, int sortType, int chainId) {
+        Bson sort;
+        if (sortType == 0) {
+            sort = Sorts.descending("totalBalance");
+        } else {
+            sort = Sorts.ascending("totalBalance");
+        }
+        List<AccountInfo> accountInfoList = new ArrayList<>();
+        Bson filter = Filters.gt("totalBalance", 0);
+        List<Document> docsList = this.mongoDBService.pageQuery(ACCOUNT_TABLE + chainId, filter, sort, pageIndex, pageSize);
+        long totalCount = mongoDBService.getCount(ACCOUNT_TABLE + chainId, filter);
+        for (Document document : docsList) {
+            AccountInfo accountInfo = DocumentTransferTool.toInfo(document, "address", AccountInfo.class);
+//            List<Output> outputs = utxoService.getAccountUtxos(accountInfo.getAddress());
+//            CalcUtil.calcBalance(accountInfo, outputs, blockHeaderService.getBestBlockHeight());
+            accountInfoList.add(accountInfo);
+        }
+        PageInfo<AccountInfo> pageInfo = new PageInfo<>(pageIndex, pageSize, totalCount, accountInfoList);
+        return pageInfo;
+    }
 }

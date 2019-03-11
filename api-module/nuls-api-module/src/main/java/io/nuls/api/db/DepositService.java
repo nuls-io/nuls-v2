@@ -15,18 +15,16 @@ import org.bson.conversions.Bson;
 import java.util.ArrayList;
 import java.util.List;
 
+import static io.nuls.api.constant.MongoTableConstant.DEPOSIT_TABLE;
+
 @Component
 public class DepositService {
 
     @Autowired
     private MongoDBService mongoDBService;
 
-    public void initSelect(int chainId) {
-
-    }
-
     public DepositInfo getDepositInfoByKey(int chainId, String key) {
-        Document document = mongoDBService.findOne(MongoTableConstant.DEPOSIT_TABLE + chainId, Filters.eq("_id", key));
+        Document document = mongoDBService.findOne(DEPOSIT_TABLE + chainId, Filters.eq("_id", key));
         if (document == null) {
             return null;
         }
@@ -34,11 +32,19 @@ public class DepositService {
         return depositInfo;
     }
 
+    public DepositInfo getDepositInfoByHash(int chainId, String hash) {
+        Document document = mongoDBService.findOne(DEPOSIT_TABLE + chainId, Filters.eq("txHash", hash));
+        if (document == null) {
+            return null;
+        }
+        DepositInfo depositInfo = DocumentTransferTool.toInfo(document, "key", DepositInfo.class);
+        return depositInfo;
+    }
 
     public List<DepositInfo> getDepositListByAgentHash(int chainId, String hash) {
         List<DepositInfo> depositInfos = new ArrayList<>();
         Bson bson = Filters.and(Filters.eq("agentHash", hash), Filters.eq("deleteKey", null));
-        List<Document> documentList = mongoDBService.query(MongoTableConstant.DEPOSIT_TABLE + chainId, bson);
+        List<Document> documentList = mongoDBService.query(DEPOSIT_TABLE + chainId, bson);
         if (documentList == null && documentList.isEmpty()) {
             return depositInfos;
         }
@@ -63,13 +69,13 @@ public class DepositService {
                 modelList.add(new ReplaceOneModel<>(Filters.eq("_id", depositInfo.getKey()), document));
             }
         }
-        mongoDBService.bulkWrite(MongoTableConstant.DEPOSIT_TABLE + chainId, modelList);
+        mongoDBService.bulkWrite(DEPOSIT_TABLE + chainId, modelList);
     }
 
     public List<DepositInfo> getDepositList(int chainId, long startHeight) {
         Bson bson = Filters.and(Filters.lte("blockHeight", startHeight), Filters.eq("type", 0), Filters.or(Filters.eq("deleteHeight", 0), Filters.gt("deleteHeight", startHeight)));
 
-        List<Document> list = this.mongoDBService.query(MongoTableConstant.DEPOSIT_TABLE + chainId, bson);
+        List<Document> list = this.mongoDBService.query(DEPOSIT_TABLE + chainId, bson);
         List<DepositInfo> resultList = new ArrayList<>();
         for (Document document : list) {
             resultList.add(DocumentTransferTool.toInfo(document, "key", DepositInfo.class));

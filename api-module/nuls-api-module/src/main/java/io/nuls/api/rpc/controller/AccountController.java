@@ -26,10 +26,7 @@ import io.nuls.api.db.AccountService;
 import io.nuls.api.db.BlockService;
 import io.nuls.api.exception.JsonRpcException;
 import io.nuls.api.manager.CacheManager;
-import io.nuls.api.model.po.db.AccountInfo;
-import io.nuls.api.model.po.db.AssetInfo;
-import io.nuls.api.model.po.db.PageInfo;
-import io.nuls.api.model.po.db.TxRelationInfo;
+import io.nuls.api.model.po.db.*;
 import io.nuls.api.model.rpc.RpcErrorCode;
 import io.nuls.api.model.rpc.RpcResult;
 import io.nuls.api.model.rpc.RpcResultError;
@@ -124,5 +121,43 @@ public class AccountController {
         accountInfo.setConsensusLock(account.getConsensusLock());
         accountInfo.setTimeLock(account.getTimeLock());
         return result.setResult(accountInfo);
+    }
+
+
+    @RpcMethod("getCoinRanking")
+    public RpcResult getCoinRanking(List<Object> params) {
+        VerifyUtils.verifyParams(params, 4);
+        int pageIndex = (int) params.get(0);
+        int pageSize = (int) params.get(1);
+        int sortType = (int) params.get(2);
+        int chainId = (int) params.get(3);
+
+        PageInfo<AccountInfo> pageInfo = accountService.getCoinRanking(pageIndex, pageSize, sortType, chainId);
+        return new RpcResult().setResult(pageInfo);
+    }
+
+
+    @RpcMethod("getAccountTokens")
+    public RpcResult getAccountTokens(List<Object> params) {
+        VerifyUtils.verifyParams(params, 4);
+        int pageIndex = (int) params.get(0);
+        int pageSize = (int) params.get(1);
+        String address = (String) params.get(2);
+        int chainId = (int) params.get(3);
+        if (!AddressTool.validAddress(chainId, address)) {
+            throw new JsonRpcException(new RpcResultError(RpcErrorCode.PARAMS_ERROR, "[address] is inValid"));
+        }
+        if (pageIndex <= 0) {
+            pageIndex = 1;
+        }
+        if (pageSize <= 0 || pageSize > 100) {
+            pageSize = 10;
+        }
+        // todo
+        //PageInfo<AccountTokenInfo> pageInfo = tokenService.getAccountTokens(address, pageIndex, pageSize);
+        PageInfo<AccountTokenInfo> pageInfo = new PageInfo<>();
+        RpcResult result = new RpcResult();
+        result.setResult(pageInfo);
+        return result;
     }
 }
