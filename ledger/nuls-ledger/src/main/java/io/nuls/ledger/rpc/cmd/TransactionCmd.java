@@ -112,7 +112,7 @@ public class TransactionCmd extends BaseCmd {
                 LoggerUtil.logger.error("txHex is invalid chainId={},txHex={}", chainId, txHex);
                 return failed("txHex is invalid");
             }
-            LoggerUtil.logger.debug("commitUnconfirmedTx chainId={},txHash={}", chainId, tx.getHash().toString());
+            LoggerUtil.logger.debug("commitUnconfirmedTx chainId={},txHash={},txHex={}", chainId, tx.getHash().toString(),txHex);
             int value = 0;
             if (transactionService.unConfirmTxProcess(chainId, tx)) {
                 value = 1;
@@ -195,6 +195,7 @@ public class TransactionCmd extends BaseCmd {
                 LoggerUtil.logger.debug("txHex is invalid chainId={}", chainId);
                 return failed("txHex is invalid");
             }
+            LoggerUtil.logger.debug("rollBackUnconfirmTx chainId={},txHash={}", chainId, tx.getHash().toString());
             if (transactionService.rollBackUnconfirmTx(chainId, tx)) {
                 value = 1;
             } else {
