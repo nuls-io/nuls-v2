@@ -149,7 +149,7 @@ public class TransactionCmdTest {
     public void transfer() throws Exception {
         //组装普通转账交易
         //TransferDto transferDto = CommonRpcOperation.createTransferTx("5MR_2CWWTDXc32s9Wd1guNQzPztFgkyVEsz","5MR_2CckymYvKM7NKpt6fpZproQYMtnGdaT",new BigInteger("10000000000"));
-        TransferDto transferDto = CommonRpcOperation.createTransferTx("5MR_2CckymYvKM7NKpt6fpZproQYMtnGdaT","5MR_2CkYEhXKCmUWTEsWRTnaWgYE8kJdfd5",new BigInteger("10000000000"));
+        TransferDto transferDto = CommonRpcOperation.createTransferTx("5MR_2CckymYvKM7NKpt6fpZproQYMtnGdaT","5MR_2CkYEhXKCmUWTEsWRTnaWgYE8kJdfd5",new BigInteger("199800000"));
         Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_transfer", JSONUtils.json2map(JSONUtils.obj2json(transferDto)));
         HashMap result = (HashMap) (((HashMap) cmdResp.getResponseData()).get("ac_transfer"));
         String txDigestHex = (String) result.get(RpcConstant.VALUE);
