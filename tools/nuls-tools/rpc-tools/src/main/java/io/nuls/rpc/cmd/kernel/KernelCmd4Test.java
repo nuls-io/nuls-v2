@@ -48,7 +48,7 @@ public class KernelCmd4Test extends BaseCmd {
 
     @CmdAnnotation(cmd = "registerAPI", version = 1.0, minEvent = 1,
             description = "Register API")
-    public Response registerAPI(Map<String, Object> map) {
+    public synchronized Response registerAPI(Map<String, Object> map) {
         try {
             RegisterApi registerApi = JSONUtils.map2pojo(map, RegisterApi.class);
             Log.debug("注册的方法：" + JSONUtils.obj2json(registerApi));
