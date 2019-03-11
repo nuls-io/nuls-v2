@@ -60,12 +60,12 @@ public class CallContractTxValidator{
         Set<String> addressSet = SignatureUtil.getAddressFromTX(tx, chainId);
 
         if(!ContractLedgerUtil.isExistContractAddress(chainId, contractAddress)) {
-            Log.error("contract data error: The contract does not exist.");
+            Log.error("contract entity error: The contract does not exist.");
             return Result.getFailed(CONTRACT_ADDRESS_NOT_EXIST);
         }
 
         if (!addressSet.contains(AddressTool.getStringAddressByBytes(sender))) {
-            Log.error("contract data error: The contract caller is not the transaction creator.");
+            Log.error("contract entity error: The contract caller is not the transaction creator.");
             return Result.getFailed(TX_DATA_VALIDATION_ERROR);
         }
 
@@ -82,24 +82,24 @@ public class CallContractTxValidator{
             }
 
             if (coin.getLockTime() != 0) {
-                Log.error("contract data error: The amount of the transfer cannot be locked(UTXO status error).");
+                Log.error("contract entity error: The amount of the transfer cannot be locked(UTXO status error).");
                 return Result.getFailed(UTXO_STATUS_CHANGE);
             }
 
             if (!Arrays.equals(owner, contractAddress)) {
-                Log.error("contract data error: The receiver is not the contract address.");
+                Log.error("contract entity error: The receiver is not the contract address.");
                 return Result.getFailed(TX_DATA_VALIDATION_ERROR);
             } else {
                 contractReceivedValue = contractReceivedValue.add(coin.getAmount());
             }
 
             if (coin.getAmount().compareTo(MININUM_TRANSFER_AMOUNT) < 0) {
-                Log.error("contract data error: The amount of the transfer is too small.");
+                Log.error("contract entity error: The amount of the transfer is too small.");
                 return Result.getFailed(TOO_SMALL_AMOUNT);
             }
         }
         if (contractReceivedValue.compareTo(transferValue) < 0) {
-            Log.error("contract data error: Insufficient amount to transfer to the contract address.");
+            Log.error("contract entity error: Insufficient amount to transfer to the contract address.");
             return Result.getFailed(INVALID_AMOUNT);
         }
         return getSuccess();

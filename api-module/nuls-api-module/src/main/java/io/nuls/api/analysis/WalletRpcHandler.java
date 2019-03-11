@@ -25,6 +25,9 @@ public class WalletRpcHandler {
         params.put("height", height);
         try {
             String blockHex = (String) RpcCall.request(ModuleE.BL.abbr, CommandConstant.GET_BLOCK_BY_HEIGHT, params);
+            if (null == blockHex) {
+                return null;
+            }
             byte[] bytes = HexUtil.decode(blockHex);
             Block block = new Block();
             block.parse(new NulsByteBuffer(bytes));

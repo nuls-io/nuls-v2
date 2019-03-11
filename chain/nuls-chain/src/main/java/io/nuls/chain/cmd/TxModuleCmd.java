@@ -44,7 +44,7 @@ import io.nuls.rpc.model.Parameter;
 import io.nuls.rpc.model.message.Response;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
-import io.nuls.tools.data.ObjectUtils;
+import io.nuls.tools.model.ObjectUtils;
 
 import java.util.ArrayList;
 import java.util.HashMap;

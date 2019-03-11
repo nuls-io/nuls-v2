@@ -17,8 +17,8 @@ import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.model.message.Response;
 import io.nuls.rpc.netty.processor.ResponseMessageProcessor;
 import io.nuls.tools.core.annotation.Component;
-import io.nuls.tools.data.DoubleUtils;
-import io.nuls.tools.data.StringUtils;
+import io.nuls.tools.model.DoubleUtils;
+import io.nuls.tools.model.StringUtils;
 import io.nuls.tools.exception.NulsException;
 
 import java.math.BigInteger;
@@ -110,7 +110,7 @@ public class NewRoundManager {
      * Get the next round of round objects
      *
      * @param chain       chain info
-     * @param roundData   轮次数据/block extends data
+     * @param roundData   轮次数据/block extends entity
      * @param isRealTime  是否根据最新时间计算轮次/Whether to calculate rounds based on current time
      * @return MeetingRound
      * */
@@ -174,7 +174,7 @@ public class NewRoundManager {
 
     /**
      * 根据最新区块数据计算下一轮轮次信息
-     * Calculate next round information based on the latest block data
+     * Calculate next round information based on the latest block entity
      *
      * @param chain          chain info
      * @return MeetingRound
@@ -189,10 +189,10 @@ public class NewRoundManager {
 
     /**
      * 根据指定区块数据计算下一轮轮次信息
-     * Calculate next round information based on the latest block data
+     * Calculate next round information based on the latest block entity
      *
      * @param chain      chain info
-     * @param roundData  区块里的轮次信息/block extends data
+     * @param roundData  区块里的轮次信息/block extends entity
      * @return  MeetingRound
      * */
     private MeetingRound getRoundByExpectedRound(Chain chain,BlockExtendsData roundData) throws NulsException{

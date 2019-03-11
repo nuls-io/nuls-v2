@@ -26,7 +26,7 @@ package io.nuls.tools.basic;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.nuls.tools.constant.ErrorCode;
-import io.nuls.tools.data.StringUtils;
+import io.nuls.tools.model.StringUtils;
 import io.nuls.tools.parse.JSONUtils;
 
 import java.io.Serializable;
@@ -111,7 +111,7 @@ public class Result<T> implements Serializable {
         }
         if (data != null) {
             try {
-                buffer.append("\"data\":" + JSONUtils.obj2json(data));
+                buffer.append("\"entity\":" + JSONUtils.obj2json(data));
             } catch (Exception e) {
                 e.printStackTrace();
             }

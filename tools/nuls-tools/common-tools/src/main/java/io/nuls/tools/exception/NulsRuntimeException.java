@@ -25,7 +25,7 @@
 package io.nuls.tools.exception;
 
 import io.nuls.tools.constant.ErrorCode;
-import io.nuls.tools.data.StringUtils;
+import io.nuls.tools.model.StringUtils;
 
 /**
  * @author Niels

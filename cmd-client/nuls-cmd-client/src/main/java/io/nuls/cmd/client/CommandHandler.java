@@ -33,7 +33,7 @@ import io.nuls.cmd.client.processor.system.HelpProcessor;
 import io.nuls.tools.basic.InitializingBean;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.core.ioc.SpringLiteContext;
-import io.nuls.tools.data.StringUtils;
+import io.nuls.tools.model.StringUtils;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.parse.I18nUtils;
 import jline.console.ConsoleReader;

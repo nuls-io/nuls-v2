@@ -62,8 +62,8 @@ public class HashUtil {
     }
 
     /**
-     * @param input - data for hashing
-     * @return - sha256 hash of the data
+     * @param input - entity for hashing
+     * @return - sha256 hash of the entity
      */
     public static byte[] sha256(byte[] input) {
         try {
@@ -102,9 +102,9 @@ public class HashUtil {
     }
 
     /**
-     * hashing chunk of the data
+     * hashing chunk of the entity
      *
-     * @param input  - data for hash
+     * @param input  - entity for hash
      * @param start  - start of hashing chunk
      * @param length - length of hashing chunk
      * @return - keccak hash of the chunk
@@ -152,8 +152,8 @@ public class HashUtil {
      * Calculates RIGTMOST160(SHA3(input)). This is used in address
      * calculations. *
      *
-     * @param input - data
-     * @return - 20 right bytes of the hash keccak of the data
+     * @param input - entity
+     * @return - 20 right bytes of the hash keccak of the entity
      */
     public static byte[] sha3omit12(byte[] input) {
         byte[] hash = sha3(input);

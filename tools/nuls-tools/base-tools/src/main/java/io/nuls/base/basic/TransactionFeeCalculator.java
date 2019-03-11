@@ -75,10 +75,10 @@ public class TransactionFeeCalculator {
      */
     public static final BigInteger getFee(int size, BigInteger price) {
         if(price.compareTo(NORMAL_PRICE_PRE_1024_BYTES)<0){
-            throw new NulsRuntimeException(new Exception("data is error"));
+            throw new NulsRuntimeException(new Exception("entity is error"));
         }
         if(price.compareTo(CROSSTX_PRICE_PRE_1024_BYTES)>0) {
-            throw new NulsRuntimeException(new Exception("data is error"));
+            throw new NulsRuntimeException(new Exception("entity is error"));
         }
         BigInteger fee = price.multiply(new BigInteger(String.valueOf(size/KB)));
         if (size % KB > 0) {

@@ -1,6 +1,6 @@
 package io.nuls.tools.io;
 
-import io.nuls.tools.data.ObjectUtils;
+import io.nuls.tools.model.ObjectUtils;
 import io.nuls.tools.log.Log;
 
 import java.io.*;

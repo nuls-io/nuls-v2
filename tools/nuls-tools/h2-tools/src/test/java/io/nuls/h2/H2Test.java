@@ -44,7 +44,7 @@ public class H2Test {
 
     @Test
     public void db(){
-        String JDBC_URL = "jdbc:h2:file:./data/nuls;INIT=RUNSCRIPT FROM 'classpath:sql/schema-h2-bak.sql';LOG=2;DB_CLOSE_DELAY=-1;TRACE_LEVEL_SYSTEM_OUT=1;DATABASE_TO_UPPER=FALSE";
+        String JDBC_URL = "jdbc:h2:file:./entity/nuls;INIT=RUNSCRIPT FROM 'classpath:sql/schema-h2-bak.sql';LOG=2;DB_CLOSE_DELAY=-1;TRACE_LEVEL_SYSTEM_OUT=1;DATABASE_TO_UPPER=FALSE";
         //连接数据库时使用的用户名
         String USER = "sa";
         //连接数据库时使用的密码

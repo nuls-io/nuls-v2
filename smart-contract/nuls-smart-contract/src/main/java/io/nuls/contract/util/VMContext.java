@@ -33,7 +33,7 @@ import io.nuls.contract.rpc.call.BlockCall;
 import io.nuls.contract.vm.program.ProgramMethod;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
-import io.nuls.tools.data.StringUtils;
+import io.nuls.tools.model.StringUtils;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.log.Log;
 

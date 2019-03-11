@@ -308,7 +308,7 @@ public class SyncService {
         agentInfo.setTotalDeposit(agentInfo.getTotalDeposit().subtract(depositInfo.getAmount()));
         agentInfo.setNew(false);
         if (agentInfo.getTotalDeposit().compareTo(BigInteger.ZERO) < 0) {
-            throw new NulsRuntimeException(ApiErrorCode.DATA_ERROR, "data error: agent[" + agentInfo.getTxHash() + "] totalDeposit < 0");
+            throw new NulsRuntimeException(ApiErrorCode.DATA_ERROR, "entity error: agent[" + agentInfo.getTxHash() + "] totalDeposit < 0");
         }
     }
 
@@ -353,7 +353,7 @@ public class SyncService {
             depositInfoList.add(cancelDeposit);
             agentInfo.setTotalDeposit(agentInfo.getTotalDeposit().subtract(depositInfo.getAmount()));
             if (agentInfo.getTotalDeposit().compareTo(BigInteger.ZERO) < 0) {
-                throw new NulsRuntimeException(ApiErrorCode.DATA_ERROR, "data error: agent[" + agentInfo.getTxHash() + "] totalDeposit < 0");
+                throw new NulsRuntimeException(ApiErrorCode.DATA_ERROR, "entity error: agent[" + agentInfo.getTxHash() + "] totalDeposit < 0");
             }
         }
     }
@@ -415,7 +415,7 @@ public class SyncService {
 
                 agentInfo.setTotalDeposit(agentInfo.getTotalDeposit().subtract(depositInfo.getAmount()));
                 if (agentInfo.getTotalDeposit().compareTo(BigInteger.ZERO) < 0) {
-                    throw new NulsRuntimeException(ApiErrorCode.DATA_ERROR, "data error: agent[" + agentInfo.getTxHash() + "] totalDeposit < 0");
+                    throw new NulsRuntimeException(ApiErrorCode.DATA_ERROR, "entity error: agent[" + agentInfo.getTxHash() + "] totalDeposit < 0");
                 }
             }
         }
@@ -470,7 +470,7 @@ public class SyncService {
 
     /**
      * 解析区块和所有交易后，将数据存储到数据库中
-     * Store data in the database after parsing the block and all transactions
+     * Store entity in the database after parsing the block and all transactions
      */
     public void save(int chainId, BlockInfo blockInfo) throws Exception {
         long height = blockInfo.getHeader().getHeight();

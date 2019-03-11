@@ -1,4 +1,4 @@
-package io.nuls.tools.data;
+package io.nuls.tools.model;
 
 import java.io.*;
 import java.util.List;

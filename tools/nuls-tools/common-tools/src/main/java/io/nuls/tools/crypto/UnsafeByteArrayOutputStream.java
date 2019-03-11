@@ -25,7 +25,7 @@
 
 package io.nuls.tools.crypto;
 
-import io.nuls.tools.data.ByteUtils;
+import io.nuls.tools.model.ByteUtils;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -69,8 +69,8 @@ public class UnsafeByteArrayOutputStream extends ByteArrayOutputStream {
      * Writes <code>len</code> bytes from the specified byte array
      * starting at offset <code>off</code> to this byte array output stream.
      *
-     * @param b   the data.
-     * @param off the start offset in the data.
+     * @param b   the entity.
+     * @param off the start offset in the entity.
      * @param len the number of bytes to write.
      */
     @Override
@@ -94,7 +94,7 @@ public class UnsafeByteArrayOutputStream extends ByteArrayOutputStream {
      * the specified output stream argument, as if by calling the output
      * stream's write method using <code>out.write(buf, 0, count)</code>.
      *
-     * @param out the output stream to which to write the data.
+     * @param out the output stream to which to write the entity.
      * @throws IOException if an I/O error occurs.
      */
     @Override

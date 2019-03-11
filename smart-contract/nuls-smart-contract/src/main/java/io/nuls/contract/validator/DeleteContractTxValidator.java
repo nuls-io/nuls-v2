@@ -65,7 +65,7 @@ public class DeleteContractTxValidator{
         Set<String> addressSet = SignatureUtil.getAddressFromTX(tx, chainId);
 
         if (!addressSet.contains(AddressTool.getStringAddressByBytes(sender))) {
-            Log.error("contract data error: The contract deleter is not the transaction creator.");
+            Log.error("contract entity error: The contract deleter is not the transaction creator.");
             return Result.getFailed(TX_DATA_VALIDATION_ERROR);
         }
 
@@ -75,23 +75,23 @@ public class DeleteContractTxValidator{
         }
         ContractAddressInfoPo contractAddressInfoPo = contractAddressInfoPoResult.getData();
         if(contractAddressInfoPo == null) {
-            Log.error("contract data error: The contract does not exist.");
+            Log.error("contract entity error: The contract does not exist.");
             return Result.getFailed(ContractErrorCode.CONTRACT_ADDRESS_NOT_EXIST);
         }
         if(!Arrays.equals(sender, contractAddressInfoPo.getSender())) {
-            Log.error("contract data error: The contract deleter is not the contract creator.");
+            Log.error("contract entity error: The contract deleter is not the contract creator.");
             return Result.getFailed(TX_DATA_VALIDATION_ERROR);
         }
 
         ContractBalance balance = contractHelper.getRealBalance(chainId, AddressTool.getStringAddressByBytes(contractAddressBytes));
         if(balance == null) {
-            Log.error("contract data error: That balance of the contract is abnormal.");
+            Log.error("contract entity error: That balance of the contract is abnormal.");
             return Result.getFailed(TX_DATA_VALIDATION_ERROR);
         }
 
         BigInteger totalBalance = balance.getTotal();
         if(totalBalance.compareTo(BigInteger.ZERO) != 0) {
-            Log.error("contract data error: The balance of the contract is not 0.");
+            Log.error("contract entity error: The balance of the contract is not 0.");
             return Result.getFailed(CONTRACT_DELETE_BALANCE);
         }
 

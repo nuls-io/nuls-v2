@@ -27,7 +27,7 @@ package io.nuls.transaction.constant;
 
 /**
  * 交易数据存储常量
- * Transaction data storage constants
+ * Transaction entity storage constants
  * @author: qinyifeng
  */
 public interface TxDBConstant {

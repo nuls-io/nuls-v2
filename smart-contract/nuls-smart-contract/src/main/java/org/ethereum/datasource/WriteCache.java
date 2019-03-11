@@ -36,9 +36,9 @@ import java.util.Map;
  * <p>
  * Counting counts the resulting number of inserts (+1) and deletes (-1) and when flushed
  * does the resulting number of inserts (if sum > 0) or deletes (if sum < 0)
- * Counting Source acts like {@link HashedKeySource} and makes sense only for data
+ * Counting Source acts like {@link HashedKeySource} and makes sense only for entity
  * where a single key always corresponds to a single value
- * Counting cache normally used as backing store for Trie data structure
+ * Counting cache normally used as backing store for Trie entity structure
  * <p>
  * Created by Anton Nashatyrev on 11.11.2016.
  */
@@ -56,9 +56,9 @@ public class WriteCache<Key, Value> extends AbstractCachedSource<Key, Value> {
         /**
          * Counting counts the resulting number of inserts (+1) and deletes (-1) and when flushed
          * does the resulting number of inserts (if sum > 0) or deletes (if sum < 0)
-         * Counting Source acts like {@link HashedKeySource} and makes sense only for data
+         * Counting Source acts like {@link HashedKeySource} and makes sense only for entity
          * where a single key always corresponds to a single value
-         * Counting cache normally used as backing store for Trie data structure
+         * Counting cache normally used as backing store for Trie entity structure
          */
         COUNTING
     }

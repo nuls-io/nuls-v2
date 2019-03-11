@@ -27,7 +27,7 @@ package io.nuls.contract.constant;
 
 /**
  * 交易数据存储常量
- * Transaction data storage constants
+ * Transaction entity storage constants
  *
  * @author: qinyifeng
  */

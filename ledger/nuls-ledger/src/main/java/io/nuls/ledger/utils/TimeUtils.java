@@ -24,14 +24,18 @@
  */
 package io.nuls.ledger.utils;
 
+import io.nuls.ledger.rpc.call.TimeRpcService;
+import io.nuls.ledger.rpc.call.impl.TimeRpcServiceImpl;
+import io.nuls.tools.core.ioc.SpringLiteContext;
+
 /**
  * @author lan
  * @description
  * @date 2019/01/07
  **/
 public class TimeUtils {
-    public static long getCurrentTime(){
-        //TODO：改为网络时间
-        return System.currentTimeMillis();
+    public static long getCurrentTime() {
+        TimeRpcService timeRpcService = SpringLiteContext.getBean(TimeRpcServiceImpl.class);
+        return timeRpcService.getTime();
     }
 }

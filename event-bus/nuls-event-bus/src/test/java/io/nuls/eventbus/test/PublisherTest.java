@@ -32,7 +32,7 @@ public class PublisherTest {
     @Test
     public void sendEvent(){
         Map<String,Object> params = new HashMap<>();
-        params.put("data","This is test event data");
+        params.put("entity","This is test event entity");
         params.put("topic","ac_create");
         try {
            Response response = CmdDispatcher.requestAndResponse(ModuleE.EB.abbr,"eb_send",params);

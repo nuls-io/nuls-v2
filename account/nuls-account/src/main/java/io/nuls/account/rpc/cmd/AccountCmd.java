@@ -24,8 +24,8 @@ import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.crypto.ECKey;
 import io.nuls.tools.crypto.HexUtil;
-import io.nuls.tools.data.FormatValidUtils;
-import io.nuls.tools.data.StringUtils;
+import io.nuls.tools.model.FormatValidUtils;
+import io.nuls.tools.model.StringUtils;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.exception.NulsRuntimeException;
 import io.nuls.tools.parse.JSONUtils;
@@ -930,12 +930,12 @@ public class AccountCmd extends BaseCmd {
 
     /**
      * 数据摘要签名
-     * data digest signature
+     * entity digest signature
      *
      * @param params [chainId,address,password,digestHex]
      * @return
      */
-    @CmdAnnotation(cmd = "ac_signDigest", version = 1.0, scope = "private", minEvent = 0, minPeriod = 0, description = "data digest signature")
+    @CmdAnnotation(cmd = "ac_signDigest", version = 1.0, scope = "private", minEvent = 0, minPeriod = 0, description = "entity digest signature")
     public Response signDigest(Map params) {
         LoggerUtil.logger.debug("ac_signDigest start");
         Map<String, String> map = new HashMap<>(1);
@@ -960,7 +960,7 @@ public class AccountCmd extends BaseCmd {
             String dataHex = (String) dataHexObj;
             //数据解码为字节数组
             byte[] data = HexUtil.decode(dataHex);
-            //sign digest data
+            //sign digest entity
             P2PHKSignature signature = accountService.signDigest(data, chainId, address, password);
             if (null == signature || signature.getSignData() == null) {
                 throw new NulsRuntimeException(AccountErrorCode.SIGNATURE_ERROR);
@@ -981,12 +981,12 @@ public class AccountCmd extends BaseCmd {
 
     /**
      * 区块数据摘要签名
-     * block data digest signature
+     * block entity digest signature
      *
      * @param params [chainId,address,password,digestHex]
      * @return
      */
-    @CmdAnnotation(cmd = "ac_signBlockDigest", version = 1.0, scope = "private", minEvent = 0, minPeriod = 0, description = "block data digest signature")
+    @CmdAnnotation(cmd = "ac_signBlockDigest", version = 1.0, scope = "private", minEvent = 0, minPeriod = 0, description = "block entity digest signature")
     public Response signBlockDigest(Map params) {
         LoggerUtil.logger.debug("ac_signDigest start");
         Map<String, String> map = new HashMap<>(1);
@@ -1011,7 +1011,7 @@ public class AccountCmd extends BaseCmd {
             String dataHex = (String) dataHexObj;
             //数据解码为字节数组
             byte[] data = HexUtil.decode(dataHex);
-            //sign digest data
+            //sign digest entity
             BlockSignature signature = accountService.signBlockDigest(data, chainId, address, password);
             if (null == signature || signature.getSignData() == null) {
                 throw new NulsRuntimeException(AccountErrorCode.SIGNATURE_ERROR);

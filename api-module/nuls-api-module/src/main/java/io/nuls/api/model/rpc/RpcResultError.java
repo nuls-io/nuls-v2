@@ -86,7 +86,7 @@ public class RpcResultError {
                 .append(code);
         sb.append(",\"message\":")
                 .append('\"').append(message).append('\"');
-        sb.append(",\"data\":")
+        sb.append(",\"entity\":")
                 .append('\"').append(data).append('\"');
         sb.append('}');
         return sb.toString();

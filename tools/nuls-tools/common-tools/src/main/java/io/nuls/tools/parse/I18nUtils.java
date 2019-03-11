@@ -26,7 +26,7 @@ package io.nuls.tools.parse;
 
 import com.google.common.io.Resources;
 import io.nuls.tools.constant.ToolsConstant;
-import io.nuls.tools.data.StringUtils;
+import io.nuls.tools.model.StringUtils;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.log.Log;
 
@@ -49,7 +49,7 @@ import java.util.jar.JarFile;
 public class I18nUtils {
     /**
      * 语言包池、内含所有配置的语言包数据
-     * The language pool contains all the configured language package data.
+     * The language pool contains all the configured language package entity.
      */
     private static final Map<String, Properties> ALL_MAPPING = new HashMap<>();
 

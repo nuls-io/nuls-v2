@@ -8,5 +8,5 @@ package io.nuls.transaction.constant;
 public class TxConfig {
 
     public static Boolean PACKAGING = null;
-    public static String DB_ROOT_PATH = "../../../../data/tx";
+    public static String DB_ROOT_PATH = "../../../../entity/tx";
 }

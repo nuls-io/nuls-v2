@@ -23,7 +23,7 @@ public class CmConstants {
     public static final String ADDRESS_TYPE_OTHER = "other";
 
     /**
-     * database data path
+     * database entity path
      */
     public static final String DB = "storage";
     public static final String DB_DATA_PATH = "rocksdb.datapath";

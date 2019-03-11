@@ -40,7 +40,7 @@ import io.nuls.contract.vm.program.ProgramTransfer;
 import io.nuls.tools.basic.Result;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
-import io.nuls.tools.data.ByteArrayWrapper;
+import io.nuls.tools.model.ByteArrayWrapper;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.log.Log;
 import org.spongycastle.util.encoders.Hex;

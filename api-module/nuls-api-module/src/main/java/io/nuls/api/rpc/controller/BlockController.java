@@ -35,7 +35,7 @@ import io.nuls.api.utils.VerifyUtils;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Controller;
 import io.nuls.tools.core.annotation.RpcMethod;
-import io.nuls.tools.data.StringUtils;
+import io.nuls.tools.model.StringUtils;
 
 
 import java.util.List;

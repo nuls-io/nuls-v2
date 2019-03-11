@@ -46,7 +46,7 @@ public class ProgramContext {
 
     //private long difficulty;
 
-    //private ObjectRef data;
+    //private ObjectRef entity;
 
     private boolean estimateGas;
 
