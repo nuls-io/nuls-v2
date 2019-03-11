@@ -40,6 +40,7 @@ import io.nuls.transaction.model.bo.config.ConfigBean;
 import io.nuls.transaction.model.dto.CoinDTO;
 import io.nuls.transaction.model.dto.CrossTxTransferDTO;
 import io.nuls.transaction.rpc.call.LedgerCall;
+import io.nuls.transaction.utils.TxUtil;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -89,11 +90,27 @@ public class TxValid {
     @Test
     public void transfer() throws Exception {
         for (int i = 0; i < 99999999; i++) {
-            createTransfer();
-            Thread.sleep(100L);
+            String hash = createTransfer();
+            Thread.sleep(5000L);
+            getTx(hash);
         }
 //        createCtxTransfer();
     }
+
+    private void getTx(String hash) throws Exception{
+        Map<String, Object> params = new HashMap<>();
+        params.put(Constants.VERSION_KEY_STR, "1.0");
+        params.put("chainId", chainId);
+        params.put("txHash", hash);
+        //调用接口
+        Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.TX.abbr, "tx_getTx", params);
+        HashMap result = (HashMap) (((HashMap) cmdResp.getResponseData()).get("tx_getTx"));
+        Assert.assertTrue(null != result);
+        String hex = (String) result.get("txHex");
+        Log.debug("getTx -hash:{}", TxUtil.getTransaction(hex).getHash().getDigestHex());
+    }
+
+
 
     @Test
     public void importPriKeyTest() {
@@ -236,13 +253,15 @@ public class TxValid {
         removeAccount(address26, password);
     }
 
-    private void createTransfer() throws Exception {
+    private String createTransfer() throws Exception {
         Map transferMap = this.createTransferTx();
         //调用接口
         Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_transfer", transferMap);
         HashMap result = (HashMap) (((HashMap) cmdResp.getResponseData()).get("ac_transfer"));
         Assert.assertTrue(null != result);
-        Log.debug("{}", result.get("value"));
+        String hash = (String) result.get("value");
+        Log.debug("{}", hash);
+        return hash;
     }
 
 
