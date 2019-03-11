@@ -347,6 +347,8 @@ if [ -n "${DOMOCK}" ]; then
 	chmod u+x "${MODULES_PATH}/start.sh"
 	cp "${BUILD_PATH}/check-status.sh" "${MODULES_PATH}/"
 	chmod u+x "${MODULES_PATH}/check-status.sh"
+	cp "${BUILD_PATH}/cmd.sh" "${MODULES_PATH}/"
+	chmod u+x "${MODULES_PATH}/cmd.sh"
 fi
 
 

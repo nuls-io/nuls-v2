@@ -26,19 +26,29 @@
 package io.nuls.cmd.client.processor.account;
 
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import io.nuls.api.provider.Result;
 import io.nuls.api.provider.ServiceManager;
 import io.nuls.api.provider.account.AccountService;
 import io.nuls.api.provider.account.facade.AccountInfo;
 import io.nuls.api.provider.account.facade.GetAccountByAddressReq;
+import io.nuls.api.provider.ledger.LedgerProvider;
+import io.nuls.api.provider.ledger.facade.AccountBalanceInfo;
+import io.nuls.api.provider.ledger.facade.GetBalanceReq;
 import io.nuls.cmd.client.CommandBuilder;
 import io.nuls.cmd.client.CommandHelper;
 import io.nuls.cmd.client.CommandResult;
+import io.nuls.cmd.client.Config;
 import io.nuls.cmd.client.processor.CommandProcessor;
+import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
-import io.nuls.tools.model.StringUtils;
+import io.nuls.tools.data.StringUtils;
+import io.nuls.tools.log.Log;
+import io.nuls.tools.parse.JSONUtils;
+import io.nuls.tools.parse.MapUtils;
 
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -48,6 +58,11 @@ import java.util.Map;
 public class GetAccountProcessor implements CommandProcessor {
 
     AccountService accountService = ServiceManager.get(AccountService.class);
+
+    LedgerProvider ledgerProvider = ServiceManager.get(LedgerProvider.class);
+
+    @Autowired
+    Config config;
 
     @Override
     public String getCommand() {
@@ -84,10 +99,22 @@ public class GetAccountProcessor implements CommandProcessor {
     @Override
     public CommandResult execute(String[] args) {
         String address = args[1];
-        Result<AccountInfo> result = accountService.getAccountByAddress(new GetAccountByAddressReq(address));
-        if (result.isFailed()) {
-            return CommandResult.getFailed(result);
+        Result<AccountInfo> info = accountService.getAccountByAddress(new GetAccountByAddressReq(address));
+        if (info.isFailed()) {
+            return CommandResult.getFailed(info);
         }
-        return CommandResult.getSuccess(result);
+        Result<AccountBalanceInfo> balance = ledgerProvider.getBalance(new GetBalanceReq(config.getAssetsId(),config.getChainId(),address));
+        if (balance.isFailed()) {
+            return CommandResult.getFailed(balance);
+        }
+        Map<String,Object> res = new HashMap<>(7);
+        res.putAll(MapUtils.beanToMap(info.getData()));
+        res.put("baglance",balance.getData());
+        try {
+            return CommandResult.getSuccess(JSONUtils.obj2PrettyJson(res));
+        } catch (JsonProcessingException e) {
+            Log.error("",e);
+            return null;
+        }
     }
 }

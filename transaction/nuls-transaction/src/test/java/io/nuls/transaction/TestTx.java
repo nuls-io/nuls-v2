@@ -247,7 +247,9 @@ public class TestTx {
                 {
                     Log.debug("9.##########查询刚才创建的地址余额并返还给创世块地址##########");
                     BigInteger agentBalance = LedgerCall.getBalance(chain, AddressTool.getAddress(agentAddress), chainId, assetId);
+                    Log.debug(agentAddress + "-----balance:{}", agentBalance);
                     BigInteger packingBalance = LedgerCall.getBalance(chain, AddressTool.getAddress(packingAddress), chainId, assetId);
+                    Log.debug(packingAddress + "-----balance:{}", packingBalance);
                     Map transferMap = new HashMap();
                     transferMap.put("chainId", chainId);
                     transferMap.put("remark", "transfer test");
@@ -298,7 +300,7 @@ public class TestTx {
     @Test
     public void batchTransfer() throws Exception {
         importPriKey("00c805d2d6d5e06f57fdfb1aff56ef3c2dd15eee88f36fa7d45d368c352ec5ec0d", password);//23 5MR_2CWKhFuoGVraaxL5FYY3RsQLjLDN7jw
-        int count = 100;
+        int count = 5;
         List<String> accountList;
         {
             //新建100个地址
@@ -345,6 +347,7 @@ public class TestTx {
                 Thread.sleep(5000);
             }
         }
+        Thread.sleep(15000);
         {
             //100个地址之间互相转账
             while (true) {
@@ -380,7 +383,7 @@ public class TestTx {
                     HashMap result = (HashMap) (((HashMap) response.getResponseData()).get("ac_transfer"));
                     Log.debug("transfer from {} to {}, hash:{}", from, to, result.get("value"));
                 }
-                Thread.sleep(5000);
+                Thread.sleep(15000);
             }
         }
     }

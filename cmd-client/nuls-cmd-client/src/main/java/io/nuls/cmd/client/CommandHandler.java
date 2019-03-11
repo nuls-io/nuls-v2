@@ -28,8 +28,17 @@ package io.nuls.cmd.client;
 
 import io.nuls.cmd.client.processor.CommandProcessor;
 import io.nuls.cmd.client.processor.account.*;
+import io.nuls.cmd.client.processor.block.GetBestBlockHeaderProcessor;
+import io.nuls.cmd.client.processor.block.GetBlockHeaderProcessor;
+import io.nuls.cmd.client.processor.consensus.CreateAgentProcessor;
+import io.nuls.cmd.client.processor.consensus.DepositProcessor;
+import io.nuls.cmd.client.processor.consensus.StopAgentProcessor;
+import io.nuls.cmd.client.processor.consensus.WithdrawProcessor;
+import io.nuls.cmd.client.processor.ledger.GetBalanceProcessor;
 import io.nuls.cmd.client.processor.system.ExitProcessor;
 import io.nuls.cmd.client.processor.system.HelpProcessor;
+import io.nuls.cmd.client.processor.transaction.GetTxProcessor;
+import io.nuls.cmd.client.processor.transaction.TransferProcessor;
 import io.nuls.tools.basic.InitializingBean;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.core.ioc.SpringLiteContext;
@@ -73,18 +82,6 @@ public class CommandHandler implements InitializingBean {
     @Override
     public void afterPropertiesSet() throws NulsException {
         /**
-//         * ledger
-//         */
-//        register(new GetTxProcessor());
-//
-//        /**
-//         * block
-//         */
-//        register(new GetBlockHeaderProcessor());
-//        register(new GetBlockProcessor());
-//        register(new GetBestBlockHeaderProcessor());
-//
-        /**
          * account
          */
         //create account
@@ -107,133 +104,39 @@ public class CommandHandler implements InitializingBean {
         register(getBean(GetPrivateKeyProcessor.class));
         //set account alias
         register(getBean(SetAliasProcessor.class));
-//        register(new GetAccountProcessor());
-//        register(new GetAccountsProcessor());
-////        register(new GetAssetProcessor());//
-//        register(new GetBalanceProcessor());
-////        register(new GetWalletBalanceProcessor());//
-//        register(new GetPrivateKeyProcessor());
-//        register(new ImportByKeyStoreProcessor());
-//        register(new ImportByPrivateKeyProcessor());
-//        register(new ImportForcedByPrivateKeyProcessor());
-//        register(new RemoveAccountProcessor());
-//        register(new ResetPasswordProcessor());
-//        register(new SetAliasProcessor());
-//        register(new SetPasswordProcessor());
-//
-//        /**
-//         * Multi-signature account
-//         */
-//        register(new CreateMultiSigAccountProcessor());
-//        register(new ImportMultiSigAccountProcessor());
-//        register(new GetMultiSigAccountListProcessor());
-//        register(new GetMultiSigAccountProcessor());
-//        register(new RemoveMultiSigAccountProcessor());
-//        register(new GetMultiSigAccountCountProcessor());
-//        register(new CreateMultiSigAccountProcessor());
-//
-//        register(new CreateMultiTransferProcess());
-//        register(new SignMultiTransactionProcess());
-//        register(new CreateMultiAliasProcess());
-//        register(new CreateMultiAgentProcessor());
-//        register(new CreateMultiDepositProcessor());
-//        register(new CreateMultiWithdrawProcessor());
-//        register(new CreateMultiStopAgentProcessor());
-//
-//        /**
-//         * accountLedger
-//         */
-//        register(new TransferProcessor());
-//        register(new GetAccountTxListProcessor());
-////        register(new GetUTXOProcessor());//
-//
-//        /**
-//         * consensus
-//         */
-//        register(new CreateAgentProcessor());
-//        register(new GetConsensusProcessor());
-//        register(new DepositProcessor());
-//        register(new WithdrawProcessor());
-//        register(new StopAgentProcessor());
-//        register(new GetAgentProcessor());
-//        register(new GetAgentsProcessor());
-//        register(new GetDepositedAgentsProcessor());
-//        register(new GetDepositedsProcessor());
-//        register(new GetDepositedInfoProcessor());
-//
-//        /**
-//         * network
-//         */
-//        register(new GetNetInfoProcessor());
-//        register(new GetNetNodesProcessor());
-//
+        //transfer
+        register(getBean(TransferProcessor.class));
+
+        //get last height block header
+        register(getBean(GetBestBlockHeaderProcessor.class));
+        //get block header by hash or height
+        register(getBean(GetBlockHeaderProcessor.class));
+
+        //get tx by hash
+        register(getBean(GetTxProcessor.class));
+
+        //get account balance
+        register(getBean(GetBalanceProcessor.class));
+
+        /**
+         * consensus
+         */
+        //create consensus node
+        register(getBean(CreateAgentProcessor.class));
+
+        //stop consensus node
+        register(getBean(StopAgentProcessor.class));
+
+        //deposit
+        register(getBean(DepositProcessor.class));
+        //withdraw
+        register(getBean(WithdrawProcessor.class));
         /**
          * system
          */
         register(SpringLiteContext.getBean(ExitProcessor.class));
         register(SpringLiteContext.getBean(HelpProcessor.class));
-//        register(new VersionProcessor());
-//        register(new UpgradeProcessor());
-//        /**
-//         * utxoAccounts
-//         */
-//        register(new GetUtxoAccountsProcessor());
-//
-//        /**
-//         * contract
-//         */
-//        register(new GetContractTxProcessor());
-//        register(new GetContractResultProcessor());
-//        register(new GetContractInfoProcessor());
-//        register(new GetContractBalanceProcessor());
-//        register(new GetContractTxListProcessor());
-//        register(new GetContractAddressValidProcessor());
-//        register(new GetWalletContractsProcessor());
-//        register(new GetTokenBalanceProcessor());
-//        register(new CreateContractProcessor());
-//        register(new CallContractProcessor());
-//        register(new ViewContractProcessor());
-//        register(new TransferToContractProcessor());
-//        register(new TokenTransferProcessor());
-//        register(new DeleteContractProcessor());
-//        register(new GetContractConstructorProcessor());
-//        JSONUtils.getInstance().configure(JsonParser.Feature.ALLOW_SINGLE_QUOTES, true);
-//        sdkInit();
     }
-
-//    private void sdkInit() {
-//        String port = null;
-//        try {
-//            NulsConfig.NULS_CONFIG = ConfigLoader.loadIni(NulsConstant.USER_CONFIG_FILE);
-//
-//            String mode = NulsConfig.NULS_CONFIG.getCfgValue(NulsConstant.CFG_SYSTEM_SECTION, "mode", "main");
-//            if ("main".equals(mode)) {
-//                NulsConfig.MODULES_CONFIG = ConfigLoader.loadIni(NulsConstant.MODULES_CONFIG_FILE);
-//            } else {
-//                NulsConfig.MODULES_CONFIG = ConfigLoader.loadIni(mode + "/" + NulsConstant.MODULES_CONFIG_FILE);
-//            }
-//            port = NulsConfig.MODULES_CONFIG.getCfgValue(RpcConstant.CFG_RPC_SECTION, RpcConstant.CFG_RPC_SERVER_PORT);
-//            String chainId = NulsConfig.NULS_CONFIG.getCfgValue(NulsConstant.CFG_SYSTEM_SECTION, NulsConstant.CFG_SYSTEM_DEFAULT_CHAIN_ID, "8964");
-//            NulsContext.getInstance().setDefaultChainId(Short.parseShort(chainId));
-//        } catch (Exception e) {
-//            Log.error("CommandHandler start failed", e);
-//            throw new NulsRuntimeException(KernelErrorCode.FAILED);
-//        }
-//        if (StringUtils.isBlank(port)) {
-//            RestFulUtils.getInstance().setServerUri("http://" + RpcConstant.DEFAULT_IP + ":" + RpcConstant.DEFAULT_PORT + RpcConstant.PREFIX);
-//        } else {
-//            String ip = null;
-//            try {
-//                ip = NulsConfig.MODULES_CONFIG.getCfgValue(RpcConstant.CFG_RPC_SECTION, "server.ip").trim();
-//                if ("0.0.0.0".equals(ip)) {
-//                    ip = RpcConstant.DEFAULT_IP;
-//                }
-//            } catch (Exception e) {
-//                ip = RpcConstant.DEFAULT_IP;
-//            }
-//            RestFulUtils.getInstance().setServerUri("http://" + ip + ":" + port + RpcConstant.PREFIX);
-//        }
-//    }
 
     public void start() {
         /**

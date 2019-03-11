@@ -19,7 +19,9 @@ import java.util.Properties;
 @Getter
 public class Config implements InitializingBean {
 
-    private int chainId;
+    private Integer chainId;
+
+    private Integer assetsId;
 
     @Override
     public void afterPropertiesSet() throws NulsException {
@@ -30,6 +32,7 @@ public class Config implements InitializingBean {
                 throw new RuntimeException("api provider init fail, must be set chain-id in module.properties");
             }
             defaultChainId = Integer.parseInt(prop.getProperty("chain-id"));
+            assetsId = Integer.parseInt(prop.getProperty("assets-id"));
             this.chainId = defaultChainId;
         } catch (IOException e) {
             throw new RuntimeException("api provider init fail, load module.properties fail");

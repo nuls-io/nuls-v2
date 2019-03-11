@@ -5,6 +5,7 @@ import io.nuls.api.provider.BaseRpcService;
 import io.nuls.api.provider.Provider;
 import io.nuls.api.provider.Result;
 import io.nuls.api.provider.account.facade.*;
+import io.nuls.base.data.BlockHeader;
 import io.nuls.rpc.model.ModuleE;
 import io.nuls.tools.parse.MapUtils;
 import lombok.extern.slf4j.Slf4j;
@@ -24,7 +25,7 @@ public class AccountServiceForRpc extends BaseRpcService implements AccountServi
 
     @Override
     public Result<String> createAccount(CreateAccountReq req) {
-        return call("ac_createAccount",req,res->{
+        return _call("ac_createAccount",req,res->{
             List<String> list = (List<String>) res.get("list");
             return success(list);
         });
@@ -47,7 +48,7 @@ public class AccountServiceForRpc extends BaseRpcService implements AccountServi
 
     @Override
     public Result<Boolean> updatePassword(UpdatePasswordReq req) {
-        return call("ac_updatePassword",req,res->{
+        return _call("ac_updatePassword",req,res->{
             Boolean data = (Boolean) res.get("value");
             return success(data);
         });
@@ -55,7 +56,7 @@ public class AccountServiceForRpc extends BaseRpcService implements AccountServi
 
     @Override
     public Result<AccountInfo> getAccountByAddress(GetAccountByAddressReq req) {
-        return call("ac_getAccountByAddress",req,res->{
+        return _call("ac_getAccountByAddress",req,res->{
             AccountInfo accountInfo = MapUtils.mapToBean(res,new AccountInfo());
             return success(accountInfo);
         });
@@ -63,7 +64,7 @@ public class AccountServiceForRpc extends BaseRpcService implements AccountServi
 
     @Override
     public Result<AccountInfo> getAccountList() {
-        return call("ac_getAccountList",new BaseReq(),res->{
+        return _call("ac_getAccountList",new BaseReq(),res->{
             try {
                 List<AccountInfo> list = MapUtils.mapsToObjects((List<Map<String, Object>>) res.get("list"),AccountInfo.class);
                 return success(list);
@@ -79,7 +80,7 @@ public class AccountServiceForRpc extends BaseRpcService implements AccountServi
 
     @Override
     public Result<Boolean> removeAccount(RemoveAccountReq req) {
-        return call("ac_removeAccount",req,res->{
+        return _call("ac_removeAccount",req,res->{
             Boolean data = (Boolean) res.get("value");
             return success(data);
         });
@@ -95,16 +96,15 @@ public class AccountServiceForRpc extends BaseRpcService implements AccountServi
         return callReturnString("ac_setAlias",req,"txHash");
     }
 
-
-    private <T> Result<T> call(String method, Object req, Function<Map,Result> res){
+    @Override
+    protected  <T,R> Result<T> call(String method, Object req, Function<R,Result> res){
         return callRpc(ModuleE.AC.abbr,method,req,res);
     }
 
-    private Result<String> callReturnString(String method,Object req, String fieldName){
-        return call(method,req,res->{
-            String data = (String) res.get(fieldName);
-            return success(data);
-        });
+
+    private <T> Result<T> _call(String method, Object req, Function<Map, Result> callback){
+        return call(method,req,callback);
     }
+
 
 }

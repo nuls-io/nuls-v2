@@ -71,9 +71,6 @@ public class SmallBlockHandler extends BaseCmd {
     public Response process(Map map) {
         int chainId = Integer.parseInt(map.get("chainId").toString());
         ChainContext context = ContextManager.getContext(chainId);
-//        if (!context.getStatus().equals(RUNNING)) {
-//            return success();
-//        }
         String nodeId = map.get("nodeId").toString();
         SmallBlockMessage message = new SmallBlockMessage();
         NulsLogger messageLog = ContextManager.getContext(chainId).getMessageLog();
@@ -110,11 +107,13 @@ public class SmallBlockHandler extends BaseCmd {
         NetworkUtil.setHashAndHeight(chainId, blockHash, header.getHeight(), nodeId);
         //1.已收到完整区块,丢弃
         if (BlockForwardEnum.COMPLETE.equals(status)) {
+            messageLog.debug("BlockForwardEnum.COMPLETE recieve smallBlockMessage from node-" + nodeId + ", chainId:" + chainId + ", height:" + header.getHeight() + ", hash:" + header.getHash());
             return success();
         }
 
         //2.已收到部分区块,还缺失交易信息,发送HashListMessage到源节点
         if (BlockForwardEnum.INCOMPLETE.equals(status)) {
+            messageLog.debug("BlockForwardEnum.INCOMPLETE recieve smallBlockMessage from node-" + nodeId + ", chainId:" + chainId + ", height:" + header.getHeight() + ", hash:" + header.getHash());
             CachedSmallBlock block = SmallBlockCacher.getSmallBlock(chainId, blockHash);
             HashListMessage request = new HashListMessage();
             request.setBlockHash(blockHash);
@@ -125,13 +124,14 @@ public class SmallBlockHandler extends BaseCmd {
 
         //3.未收到区块
         if (BlockForwardEnum.EMPTY.equals(status)) {
+            messageLog.debug("BlockForwardEnum.EMPTY recieve smallBlockMessage from node-" + nodeId + ", chainId:" + chainId + ", height:" + header.getHeight() + ", hash:" + header.getHash());
             if (!BlockUtil.headerVerify(chainId, header)) {
                 messageLog.info("recieve error SmallBlockMessage from " + nodeId);
                 return success();
             }
             //共识节点打包的交易包括两种交易,一种是在网络上已经广播的普通交易,一种是共识节点生成的特殊交易(如共识奖励、红黄牌),后面一种交易其他节点的未确认交易池中不可能有,所以都放在SubTxList中
             //还有一种场景时收到smallBlock时,有一些普通交易还没有缓存在未确认交易池中,此时要再从源节点请求
-            Map<NulsDigestData, Transaction> txMap = new HashMap<>((int) header.getTxCount());
+            Map<NulsDigestData, Transaction> txMap = new HashMap<>(header.getTxCount());
             List<Transaction> subTxList = smallBlock.getSubTxList();
             for (Transaction tx : subTxList) {
                 txMap.put(tx.getHash(), tx);

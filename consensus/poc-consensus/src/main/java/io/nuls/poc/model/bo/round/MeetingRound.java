@@ -241,7 +241,7 @@ public class MeetingRound {
             str.append(Address.fromHashs(member.getAgent().getPackingAddress()).getBase58());
             str.append(" ,order:" + member.getPackingIndexOfRound());
             str.append(",packTime:" + new Date(member.getPackEndTime()));
-            str.append(",creditVal:" + member.getAgent().getCreditVal());
+            str.append(",creditVal:" + member.getAgent().getRealCreditVal());
             str.append("\n");
         }
         if (null == this.getPreRound()) {

@@ -103,7 +103,7 @@ public class TxServiceImpl implements TxService {
         return transactionManager.register(chain, txRegister);
     }
 
-    private static final Map<String, NulsDigestData> PRE_HASH_MAP = new HashMap<>(TxConstant.INIT_CAPACITY_16);
+    private static final Map<String, NonceHashData> PRE_HASH_MAP = new HashMap<>(TxConstant.INIT_CAPACITY_16);
 
     @Override
     public void newTx(Chain chain, Transaction tx) throws NulsException {
@@ -418,11 +418,12 @@ public class TxServiceImpl implements TxService {
      * @throws NulsException
      */
     public byte[] getNonce(Chain chain, String address, int assetChainId, int assetId) throws NulsException {
-        NulsDigestData hash = PRE_HASH_MAP.get(address);
-        if (null == hash) {
+        String key = address + "_" + assetChainId + "_" + assetId;
+        NonceHashData nonceHashData = PRE_HASH_MAP.get(key);
+        if (null == nonceHashData || (NetworkCall.getCurrentTimeMillis() - nonceHashData.getCacheTimestamp() > TxConstant.HASH_TTL)) {
             return LedgerCall.getNonce(chain, address, assetChainId, assetId);
         } else {
-            return TxUtil.getNonceByPreHash(hash);
+            return TxUtil.getNonceByPreHash(nonceHashData.getHash());
         }
     }
 
@@ -435,7 +436,9 @@ public class TxServiceImpl implements TxService {
     private void cacheTxHash(Transaction tx) throws NulsException {
         CoinData coinData = TxUtil.getCoinData(tx);
         for (CoinFrom coinFrom : coinData.getFrom()) {
-            PRE_HASH_MAP.put(AddressTool.getStringAddressByBytes(coinFrom.getAddress()), tx.getHash());
+            String address = AddressTool.getStringAddressByBytes(coinFrom.getAddress());
+            String key = address + "_" + coinFrom.getAssetsChainId() + "_" + coinFrom.getAssetsId();
+            PRE_HASH_MAP.put(key, new NonceHashData(tx.getHash(), NetworkCall.getCurrentTimeMillis()));
         }
     }
 
@@ -969,7 +972,7 @@ public class TxServiceImpl implements TxService {
         Iterator<Map.Entry<TxRegister, List<String>>> it = moduleVerifyMap.entrySet().iterator();
         while (it.hasNext()) {
             Map.Entry<TxRegister, List<String>> entry = it.next();
-            if (entry.getValue().size() == 0){
+            if (entry.getValue().size() == 0) {
                 //当递归中途模块交易被过滤完后会造成list为空,这时不需要再调用模块同意验证器
                 continue;
             }

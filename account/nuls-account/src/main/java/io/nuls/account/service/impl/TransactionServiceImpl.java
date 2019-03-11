@@ -48,6 +48,7 @@ import io.nuls.base.data.CoinData;
 import io.nuls.base.data.CoinFrom;
 import io.nuls.base.data.CoinTo;
 import io.nuls.base.data.MultiSigAccount;
+import io.nuls.base.data.NonceHashData;
 import io.nuls.base.data.NulsDigestData;
 import io.nuls.base.data.Transaction;
 import io.nuls.base.signture.MultiSignTxSignature;
@@ -58,10 +59,10 @@ import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Service;
 import io.nuls.tools.crypto.ECKey;
 import io.nuls.tools.crypto.HexUtil;
-import io.nuls.tools.model.BigIntegerUtils;
-import io.nuls.tools.model.StringUtils;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.exception.NulsRuntimeException;
+import io.nuls.tools.model.BigIntegerUtils;
+import io.nuls.tools.model.StringUtils;
 
 import java.io.IOException;
 import java.math.BigInteger;
@@ -163,7 +164,7 @@ public class TransactionServiceImpl implements TransactionService {
         //sign
         TransactionSignature transactionSignature = buildMultiSignTransactionSignature(transaction, multiSigAccount, account, password);
         //缓存当前交易hash
-        this.cacheTxHash(transaction);
+        TxUtil.cacheTxHash(transaction);
         //process transaction
         boolean isBroadcasted = txMutilProcessing(multiSigAccount, transaction, transactionSignature);
         MultiSignTransactionResultDto multiSignTransactionResultDto = new MultiSignTransactionResultDto();
@@ -218,7 +219,7 @@ public class TransactionServiceImpl implements TransactionService {
         //sign
         TransactionSignature transactionSignature = buildMultiSignTransactionSignature(transaction, multiSigAccount, account, password);
         //缓存当前交易hash
-        this.cacheTxHash(transaction);
+        TxUtil.cacheTxHash(transaction);
         //process transaction
         boolean isBroadcasted = txMutilProcessing(multiSigAccount, transaction, transactionSignature);
         MultiSignTransactionResultDto multiSignTransactionResultDto = new MultiSignTransactionResultDto();
@@ -227,7 +228,7 @@ public class TransactionServiceImpl implements TransactionService {
         return multiSignTransactionResultDto;
     }
 
-    private Transaction buildMultiSignTransactionCoinData(Transaction transaction, int chainId, int assetsId, MultiSigAccount multiSigAccount, String toAddress, BigInteger amount) throws IOException {
+    private Transaction buildMultiSignTransactionCoinData(Transaction transaction, int chainId, int assetsId, MultiSigAccount multiSigAccount, String toAddress, BigInteger amount) throws NulsException, IOException {
         Chain chain = chainManager.getChainMap().get(chainId);
         if (assetsId == -1) {
             assetsId = chain.getConfig().getAssetsId();
@@ -327,7 +328,7 @@ public class TransactionServiceImpl implements TransactionService {
             //交易签名
             SignatureUtil.createTransactionSignture(tx, signEcKeys);
             //缓存当前交易hash
-            this.cacheTxHash(tx);
+            TxUtil.cacheTxHash(tx);
             //发起新交易
             TransactionCmdCall.newTx(chainId, tx.hex());
         } catch (NulsException e) {
@@ -700,19 +701,6 @@ public class TransactionServiceImpl implements TransactionService {
             return true;
         }
         return false;
-    }
-
-    /**
-     * 缓存发出的交易hash
-     *
-     * @param tx
-     * @throws NulsException
-     */
-    private void cacheTxHash(Transaction tx) throws NulsException {
-        CoinData coinData = TxUtil.getCoinData(tx);
-        for (CoinFrom coinFrom : coinData.getFrom()) {
-            TxUtil.PRE_HASH_MAP.put(AddressTool.getStringAddressByBytes(coinFrom.getAddress()), tx.getHash());
-        }
     }
 
 }

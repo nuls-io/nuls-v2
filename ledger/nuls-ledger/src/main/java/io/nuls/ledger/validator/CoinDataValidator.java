@@ -199,6 +199,7 @@ public class CoinDataValidator {
      * @return
      */
     private ValidateResult validateCommonCoinData(AccountState accountState, String address, BigInteger fromAmount, String fromNonce) {
+        LoggerUtil.logger.debug("未确认普通交易校验：fromNonce={},数据库值:dbNonce={},unconfirmedNonces={}",fromNonce,accountState.getNonce(),accountState.getUnconfirmedNoncesStrs());
         BigInteger totalAmount = accountState.getAvailableAmount().add(accountState.getUnconfirmedAmount());
         if (totalAmount.compareTo(fromAmount) == -1) {
             logger.info("balance is not enough");

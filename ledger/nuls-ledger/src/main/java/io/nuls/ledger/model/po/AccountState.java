@@ -154,6 +154,7 @@ public class AccountState extends BaseNulsData {
 
     /**
      * 计算未确认交易的冻结部分
+     *
      * @return
      */
     public BigInteger getUnconfirmedFreezeAmount() {
@@ -164,8 +165,17 @@ public class AccountState extends BaseNulsData {
         }
         return calUnconfirmedFreeAmount;
     }
+
     public void addUnconfirmedNonce(UnconfirmedNonce unconfirmedNonce) {
         unconfirmedNonces.add(unconfirmedNonce);
+    }
+
+    public String getUnconfirmedNoncesStrs() {
+        StringBuilder s = new StringBuilder();
+        for (UnconfirmedNonce unconfirmedNonce : unconfirmedNonces) {
+            s.append(unconfirmedNonce.getNonce() + ",");
+        }
+        return s.toString();
     }
 
     public void addUnconfirmedAmount(UnconfirmedAmount unconfirmedAmount) {

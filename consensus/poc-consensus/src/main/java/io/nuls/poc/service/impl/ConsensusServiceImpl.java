@@ -1369,6 +1369,6 @@ public class ConsensusServiceImpl implements ConsensusService {
             return;
         }
         agent.setStatus(1);
-        agent.setCreditVal(member.getAgent().getCreditVal());
+        agent.setCreditVal(member.getAgent().getRealCreditVal());
     }
 }
