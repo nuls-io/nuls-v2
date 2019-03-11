@@ -45,7 +45,7 @@ public class TransferServiceForRpc extends BaseRpcService implements TransferSer
 
     @Override
     public Result<Transaction> getConfirmedTxByHash(GetConfirmedTxByHashReq req) {
-        return getTx("tx_getConfirmedTx",req);
+        return getTx("tx_getTx",req);
     }
 
     @Override
