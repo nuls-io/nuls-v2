@@ -1,6 +1,8 @@
 package io.nuls.rpc.netty.channel.manager;
 
 import io.netty.channel.Channel;
+import io.netty.channel.ChannelFuture;
+import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
 import io.nuls.rpc.info.Constants;
@@ -17,8 +19,8 @@ import io.nuls.rpc.netty.thread.RequestByPeriodProcessor;
 import io.nuls.rpc.netty.thread.ResponseAutoProcessor;
 import io.nuls.tools.core.ioc.ScanUtil;
 import io.nuls.tools.core.ioc.SpringLiteContext;
-import io.nuls.tools.model.StringUtils;
 import io.nuls.tools.log.Log;
+import io.nuls.tools.model.StringUtils;
 import io.nuls.tools.parse.JSONUtils;
 import io.nuls.tools.thread.TimeService;
 
@@ -576,18 +578,6 @@ public class ConnectManager {
         return "ws://" + channel.remoteAddress().getHostString() + ":" + channel.remoteAddress().getPort() + "/ws";
     }
 
-    /**
-     * 获取队列中的第一个元素，然后从队列中移除
-     * Get the first item and remove
-     *
-     * @return 队列的第一个元素. The first item in queue.
-     */
-    public static synchronized Message firstMessageInQueue(Queue<Message> messageQueue) {
-        Message message = messageQueue.peek();
-        messageQueue.poll();
-        return message;
-    }
-
     public static ConnectData getConnectDataByRole(String role) throws Exception {
         Channel channel = ROLE_CHANNEL_MAP.get(role);
         if (ROLE_CHANNEL_MAP.isEmpty() || channel == null) {
@@ -720,7 +710,18 @@ public class ConnectManager {
     public static void sendMessage(Channel channel, String message) {
 //        TextWebSocketFrame frame = new TextWebSocketFrame(message);
 //        channel.writeAndFlush(frame);
-        channel.eventLoop().execute(() -> channel.writeAndFlush(new TextWebSocketFrame(message)));
+        channel.eventLoop().execute(() -> {
+            ChannelFuture channelFuture = channel.writeAndFlush(new TextWebSocketFrame(message));
+            if (message.contains("registerModuleDependencies")) {
+                channelFuture.addListener((ChannelFutureListener) future -> {
+                    Log.info("######registerModuleDependencies message#########" + message);
+                    Log.info("######registerModuleDependencies isCancelled#########" + future.isCancelled());
+                    Log.info("######registerModuleDependencies isSuccess#########" + future.isSuccess());
+                    Log.info("######registerModuleDependencies isDone#########" + future.isDone());
+                    Log.info("######registerModuleDependencies cause#########" + future.cause());
+                });
+            }
+        });
     }
 
     public static void sendMessage(String moduleAbbr, Message message) throws Exception {
