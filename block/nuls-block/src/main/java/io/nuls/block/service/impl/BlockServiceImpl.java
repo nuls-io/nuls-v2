@@ -139,7 +139,7 @@ public class BlockServiceImpl implements BlockService {
                 return null;
             }
             block.setHeader(BlockUtil.fromBlockHeaderPo(blockHeaderPo));
-            List<Transaction> transactions = TransactionUtil.getTransactions(chainId, blockHeaderPo.getTxHashList());
+            List<Transaction> transactions = TransactionUtil.getTransactions(chainId, blockHeaderPo.getTxHashList(), true);
             block.setTxs(transactions);
             return block;
         } catch (Exception e) {
@@ -159,7 +159,7 @@ public class BlockServiceImpl implements BlockService {
                 return null;
             }
             block.setHeader(BlockUtil.fromBlockHeaderPo(blockHeaderPo));
-            block.setTxs(TransactionUtil.getTransactions(chainId, blockHeaderPo.getTxHashList()));
+            block.setTxs(TransactionUtil.getTransactions(chainId, blockHeaderPo.getTxHashList(), true));
             return block;
         } catch (Exception e) {
             e.printStackTrace();

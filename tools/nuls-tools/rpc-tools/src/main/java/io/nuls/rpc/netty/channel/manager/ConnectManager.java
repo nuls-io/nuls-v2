@@ -711,16 +711,13 @@ public class ConnectManager {
 //        TextWebSocketFrame frame = new TextWebSocketFrame(message);
 //        channel.writeAndFlush(frame);
         channel.eventLoop().execute(() -> {
-            ChannelFuture channelFuture = channel.writeAndFlush(new TextWebSocketFrame(message));
-            if (message.contains("registerModuleDependencies")) {
-                channelFuture.addListener((ChannelFutureListener) future -> {
-                    if (!future.isSuccess()) {
-                        Log.info("######registerModuleDependencies message#########" + message);
-                        Log.info("######registerModuleDependencies isCancelled#########" + future.isCancelled());
-                        Log.info("######registerModuleDependencies cause#########" + future.cause());
-                    }
-                });
-            }
+            channel.writeAndFlush(new TextWebSocketFrame(message)).addListener((ChannelFutureListener) future -> {
+                if (!future.isSuccess()) {
+                    Log.info("######registerModuleDependencies message#########" + message);
+                    Log.info("######registerModuleDependencies isCancelled#########" + future.isCancelled());
+                    Log.info("######registerModuleDependencies cause#########" + future.cause());
+                }
+            });
         });
     }
 
