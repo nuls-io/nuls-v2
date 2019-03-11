@@ -39,12 +39,10 @@ import io.nuls.cmd.client.Config;
 import io.nuls.cmd.client.processor.CommandProcessor;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
-import io.nuls.tools.data.StringUtils;
+import io.nuls.tools.model.StringUtils;
 import lombok.extern.slf4j.Slf4j;
 
 import java.math.BigInteger;
-import java.util.HashMap;
-import java.util.Map;
 import static io.nuls.cmd.client.CommandHelper.*;
 
 /**

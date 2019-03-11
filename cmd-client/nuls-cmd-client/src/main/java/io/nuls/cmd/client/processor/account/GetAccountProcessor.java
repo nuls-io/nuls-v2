@@ -42,8 +42,8 @@ import io.nuls.cmd.client.Config;
 import io.nuls.cmd.client.processor.CommandProcessor;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
-import io.nuls.tools.data.StringUtils;
 import io.nuls.tools.log.Log;
+import io.nuls.tools.model.StringUtils;
 import io.nuls.tools.parse.JSONUtils;
 import io.nuls.tools.parse.MapUtils;
 

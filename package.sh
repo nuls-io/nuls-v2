@@ -298,7 +298,7 @@ copyModuleNcfToModules(){
 
 
 	cp "${moduleBuildPath}/module.temp.ncf" "${MODULES_PATH}/${moduleName}/${version}/Module.ncf"
-	echo "拷贝 ${moduleBuildPath}/module.temp.ncf 到 ${MODULES_PATH}/${moduleName}/${version}/odule.ncf"
+	echo "拷贝 ${moduleBuildPath}/module.temp.ncf 到 ${MODULES_PATH}/${moduleName}/${version}/Module.ncf"
 }
 
 #2.遍历文件夹，检查第一个pom 发现pom文件后通过mvn进行打包，完成后把文件jar文件和module.ncf文件复制到Modules文件夹下

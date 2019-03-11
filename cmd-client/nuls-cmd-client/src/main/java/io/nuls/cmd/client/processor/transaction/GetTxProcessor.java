@@ -36,7 +36,7 @@ import io.nuls.cmd.client.CommandResult;
 import io.nuls.cmd.client.processor.CommandProcessor;
 import io.nuls.cmd.client.processor.ErrorCodeConstants;
 import io.nuls.tools.core.annotation.Component;
-import io.nuls.tools.data.StringUtils;
+import io.nuls.tools.model.StringUtils;
 import lombok.extern.slf4j.Slf4j;
 
 /**

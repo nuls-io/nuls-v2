@@ -17,8 +17,8 @@ while [ -h "$SOURCE"  ]; do # resolve $SOURCE until the file is no longer a syml
     SOURCE="$(readlink "$SOURCE")"
     [[ $SOURCE != /*  ]] && SOURCE="$DIR/$SOURCE" # if $SOURCE was a relative symlink, we need to resolve it relative to the path where the symlink file was located
 done
-SERVER_HOME="$( cd -P "$( dirname "$SOURCE"  )" && cd .. && pwd  )"
-
+SERVER_HOME="$( cd -P "$( dirname "$SOURCE"  )" && pwd  )"
+echo $SERVER_HOME
 export logdir=${SERVER_HOME}/logs
 if [ ! -d ${logdir} ]; then
   mkdir ${logdir}
@@ -26,20 +26,20 @@ fi
 
 LIBS=$SERVER_HOME/libs
 PUB_LIB=""
-MAIN_CLASS=io.nuls.cmd.client.CommandHandler
+MAIN_CLASS=io.nuls.cmd.client.CmdClientBootstrap
 
 for jar in `find $LIBS -name "*.jar"`
 
 do
  PUB_LIB="$PUB_LIB:""$jar"
 done
-
+PUB_LIB="${PUB_LIB}:"
 # Get standard environment variables
 JAVA_OPTS="-Xms128m -Xmx128m"
 
 CONF_PATH=$SERVER_HOME/conf
 CLASSPATH=$CLASSPATH:$CONF_PATH:$PUB_LIB:.
-
+echo $CLASSPATH
 if  [ -x ${SERVER_HOME}/jre/bin/java ]; then
   ${SERVER_HOME}/jre/bin/java $JAVA_OPTS -classpath $CLASSPATH $MAIN_CLASS
   exit 0
