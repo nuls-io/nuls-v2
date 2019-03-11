@@ -87,6 +87,10 @@ public class ChainManager {
              *初始化智能合约执行器
              */
             initContractExecutor(chain);
+            /*
+             *初始化智能合约nrc20-token管理器
+             */
+            initTokenBalanceManager(chain);
             registerTx(chain);
             chainMap.put(chainId, chain);
             //订阅Block模块接口
@@ -94,6 +98,11 @@ public class ChainManager {
 
             Log.debug("\nchain = " + JSONUtils.obj2PrettyJson(chain));
         }
+    }
+
+    private void initTokenBalanceManager(Chain chain) {
+        ContractTokenBalanceManager tokenBalanceManager = ContractTokenBalanceManager.newInstance(chain.getChainId());
+        chain.setContractTokenBalanceManager(tokenBalanceManager);
     }
 
     private void initContractExecutor(Chain chain) {
@@ -167,6 +176,8 @@ public class ChainManager {
             RocksDBService.createTable(ContractDBConstant.DB_NAME_CONTRACT_EXECUTE_RESULT + chainId);
             // 收藏地址表
             RocksDBService.createTable(ContractDBConstant.DB_NAME_CONTRACT_COLLECTION + chainId);
+            // nrc20-token地址表
+            RocksDBService.createTable(ContractDBConstant.DB_NAME_CONTRACT_NRC20_TOKEN_ADDRESS + chainId);
             // nrc20-token转账表
             RocksDBService.createTable(ContractDBConstant.DB_NAME_CONTRACT_NRC20_TOKEN_TRANSFER + chainId);
 

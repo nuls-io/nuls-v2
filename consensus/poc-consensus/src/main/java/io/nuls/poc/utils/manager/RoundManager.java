@@ -435,6 +435,7 @@ public class RoundManager {
             for (Deposit dtx : cdList) {
                 totalDeposit = totalDeposit.add(dtx.getDeposit());
             }
+            agent.setTotalDeposit(totalDeposit);
             realAgent.setTotalDeposit(totalDeposit);
             member.setDepositList(cdList);
             member.setRoundIndex(round.getIndex());
