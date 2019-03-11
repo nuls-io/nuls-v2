@@ -164,7 +164,7 @@ public class TransactionServiceImpl implements TransactionService {
         //sign
         TransactionSignature transactionSignature = buildMultiSignTransactionSignature(transaction, multiSigAccount, account, password);
         //缓存当前交易hash
-        this.cacheTxHash(transaction);
+        TxUtil.cacheTxHash(transaction);
         //process transaction
         boolean isBroadcasted = txMutilProcessing(multiSigAccount, transaction, transactionSignature);
         MultiSignTransactionResultDto multiSignTransactionResultDto = new MultiSignTransactionResultDto();
@@ -219,7 +219,7 @@ public class TransactionServiceImpl implements TransactionService {
         //sign
         TransactionSignature transactionSignature = buildMultiSignTransactionSignature(transaction, multiSigAccount, account, password);
         //缓存当前交易hash
-        this.cacheTxHash(transaction);
+        TxUtil.cacheTxHash(transaction);
         //process transaction
         boolean isBroadcasted = txMutilProcessing(multiSigAccount, transaction, transactionSignature);
         MultiSignTransactionResultDto multiSignTransactionResultDto = new MultiSignTransactionResultDto();
@@ -328,7 +328,7 @@ public class TransactionServiceImpl implements TransactionService {
             //交易签名
             SignatureUtil.createTransactionSignture(tx, signEcKeys);
             //缓存当前交易hash
-            this.cacheTxHash(tx);
+            TxUtil.cacheTxHash(tx);
             //发起新交易
             TransactionCmdCall.newTx(chainId, tx.hex());
         } catch (NulsException e) {
@@ -701,21 +701,6 @@ public class TransactionServiceImpl implements TransactionService {
             return true;
         }
         return false;
-    }
-
-    /**
-     * 缓存发出的交易hash
-     *
-     * @param tx
-     * @throws NulsException
-     */
-    private void cacheTxHash(Transaction tx) throws NulsException {
-        CoinData coinData = TxUtil.getCoinData(tx);
-        for (CoinFrom coinFrom : coinData.getFrom()) {
-            String address = AddressTool.getStringAddressByBytes(coinFrom.getAddress());
-            String key = address + "_" + coinFrom.getAssetsChainId() + "_" + coinFrom.getAssetsId();
-            TxUtil.PRE_HASH_MAP.put(key, new NonceHashData(tx.getHash(), NetworkCall.getCurrentTimeMillis()));
-        }
     }
 
 }
