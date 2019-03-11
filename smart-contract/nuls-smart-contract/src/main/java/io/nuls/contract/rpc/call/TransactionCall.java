@@ -23,10 +23,45 @@
  */
 package io.nuls.contract.rpc.call;
 
+import io.nuls.contract.rpc.CallHelper;
+import io.nuls.rpc.model.ModuleE;
+import io.nuls.tools.exception.NulsException;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 /**
  * @author: PierreLuo
  * @date: 2019-02-27
  */
 public class TransactionCall {
 
+    public static boolean registerTx(int chainId, String moduleCode, String moduleValidator, String commit, String rollback, List list) throws NulsException {
+        Map<String, Object> params = new HashMap(4);
+        params.put("chainId", chainId);
+        params.put("moduleCode", moduleCode);
+        params.put("moduleValidator", moduleValidator);
+        params.put("commit", commit);
+        params.put("rollback", rollback);
+        params.put("list", list);
+        try {
+            Map<String, Boolean> registerResult = (Map<String, Boolean>) CallHelper.request(ModuleE.TX.abbr, "tx_register", params);
+            return registerResult.get("value");
+        } catch (Exception e) {
+            throw new NulsException(e);
+        }
+    }
+
+    public static boolean newTx(int chainId, String txHex) throws NulsException {
+        Map<String, Object> params = new HashMap(4);
+        params.put("chainId", chainId);
+        params.put("txHex", txHex);
+        try {
+            Map<String, Boolean> registerResult = (Map<String, Boolean>) CallHelper.request(ModuleE.TX.abbr, "tx_newTx", params);
+            return registerResult.get("value");
+        } catch (Exception e) {
+            throw new NulsException(e);
+        }
+    }
 }

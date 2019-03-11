@@ -31,9 +31,11 @@ import io.nuls.contract.constant.ContractErrorCode;
 import io.nuls.contract.model.bo.ContractResult;
 import io.nuls.contract.model.bo.ContractWrapperTransaction;
 import io.nuls.contract.model.po.ContractTokenTransferInfoPo;
+import io.nuls.contract.rpc.call.BlockCall;
 import io.nuls.db.service.RocksDBService;
 import io.nuls.tools.basic.Result;
 import io.nuls.tools.basic.VarInt;
+import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.exception.NulsRuntimeException;
 import io.nuls.tools.log.Log;
 import io.nuls.tools.parse.JSONUtils;
@@ -188,11 +190,9 @@ public class ContractUtil {
         return false;
     }
 
-    public static boolean isLockContract(long blockHeight) {
+    public static boolean isLockContract(int chainId, long blockHeight) throws NulsException {
         if (blockHeight > 0) {
-            //TODO pierre bestHeight
-            long bestBlockHeight = 0;
-            //long bestBlockHeight = NulsContext.getInstance().getBestHeight();
+            long bestBlockHeight = BlockCall.getLatestHeight(chainId);
             long confirmCount = bestBlockHeight - blockHeight;
             if (confirmCount < 7) {
                 return true;

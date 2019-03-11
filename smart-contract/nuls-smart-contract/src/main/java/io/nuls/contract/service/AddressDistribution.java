@@ -24,7 +24,7 @@
 package io.nuls.contract.service;
 
 
-import io.nuls.base.data.Transaction;
+import io.nuls.contract.model.bo.ContractTempTransaction;
 import io.nuls.contract.model.bo.ContractWrapperTransaction;
 import io.nuls.tools.exception.NulsException;
 
@@ -37,5 +37,5 @@ import java.util.Map;
  */
 public interface AddressDistribution {
 
-    Map<String, List<ContractWrapperTransaction>> distribution(List<Transaction> txList) throws NulsException;
+    Map<String, List<ContractWrapperTransaction>> distribution(List<ContractTempTransaction> txList) throws NulsException;
 }

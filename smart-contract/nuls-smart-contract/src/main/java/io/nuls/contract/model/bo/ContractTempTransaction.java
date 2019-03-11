@@ -21,56 +21,18 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package io.nuls.contract.service;
+package io.nuls.contract.model.bo;
 
-
-import io.nuls.base.data.NulsDigestData;
 import io.nuls.base.data.Transaction;
-import io.nuls.contract.model.bo.ContractResult;
-import io.nuls.contract.model.bo.ContractTempTransaction;
-import io.nuls.tools.basic.Result;
-
-import java.util.List;
+import lombok.Getter;
+import lombok.Setter;
 
 /**
  * @author: PierreLuo
- * @date: 2018/11/19
+ * @date: 2019-02-27
  */
-public interface ContractService {
-
-    Result invokeContract(int chainId, List<ContractTempTransaction> txList, long number, long blockTime, String packingAddress, String preStateRoot);
-
-    /**
-     * 是否为合约地址
-     *
-     * @param addressBytes
-     * @return
-     */
-    boolean isContractAddress(int chainId, byte[] addressBytes);
-
-    /**
-     * 保存合约执行结果
-     *
-     * @param hash
-     * @param contractResult
-     * @return
-     */
-    Result saveContractExecuteResult(int chainId, NulsDigestData hash, ContractResult contractResult);
-
-    /**
-     * 删除合约执行结果
-     *
-     * @param hash
-     * @return
-     */
-    Result deleteContractExecuteResult(int chainId, NulsDigestData hash);
-
-    /**
-     * 获取合约执行结果
-     *
-     * @param hash
-     * @return
-     */
-    ContractResult getContractExecuteResult(int chainId, NulsDigestData hash);
-
+@Getter
+@Setter
+public class ContractTempTransaction extends Transaction{
+    private String txHex;
 }

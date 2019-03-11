@@ -29,21 +29,29 @@ import io.nuls.contract.constant.ContractDBConstant;
 import io.nuls.contract.model.bo.Chain;
 import io.nuls.contract.model.bo.config.ConfigBean;
 import io.nuls.contract.model.bo.config.ConfigItem;
+import io.nuls.contract.model.dto.ContractTxRegisterDto;
+import io.nuls.contract.rpc.call.TransactionCall;
 import io.nuls.contract.storage.ConfigStorageService;
 import io.nuls.contract.util.VMContext;
 import io.nuls.contract.vm.program.ProgramExecutor;
 import io.nuls.contract.vm.program.impl.ProgramExecutorImpl;
 import io.nuls.db.constant.DBErrorCode;
 import io.nuls.db.service.RocksDBService;
+import io.nuls.rpc.model.ModuleE;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
+import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.io.IoUtils;
 import io.nuls.tools.log.Log;
 import io.nuls.tools.parse.JSONUtils;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+
+import static io.nuls.contract.constant.ContractCmdConstant.*;
+import static io.nuls.contract.constant.ContractConstant.*;
 
 /**
  * 链管理类,负责各条链的初始化,运行,启动,参数维护等
@@ -110,8 +118,12 @@ public class ChainManager {
         chain.setProgramExecutor(programExecutor);
     }
 
-    private void registerTx(Chain chain) {
-        //TODO pierre
+    private void registerTx(Chain chain) throws NulsException {
+        List<ContractTxRegisterDto> list = new ArrayList();
+        list.add(new ContractTxRegisterDto(TX_TYPE_CREATE_CONTRACT, CREATE_VALIDATOR, false, false, true));
+        list.add(new ContractTxRegisterDto(TX_TYPE_CALL_CONTRACT, CALL_VALIDATOR, false, false, true));
+        list.add(new ContractTxRegisterDto(TX_TYPE_DELETE_CONTRACT, DELETE_VALIDATOR, false, false, true));
+        TransactionCall.registerTx(chain.getChainId(), ModuleE.SC.abbr, INTEGRATE_VALIDATOR, COMMIT, ROLLBACK, list);
     }
 
 
