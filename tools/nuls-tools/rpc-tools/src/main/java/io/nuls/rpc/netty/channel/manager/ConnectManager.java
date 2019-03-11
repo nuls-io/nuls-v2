@@ -134,7 +134,7 @@ public class ConnectManager {
      * 当前正在处理的订阅请求数量
      * Number of subscription requests currently being processed
      * */
-    private static int subRequestCount = 0;
+    public static int subRequestCount = 0;
 
     /**
      * 根据cmd命令和版本号获取本地方法
@@ -496,6 +496,7 @@ public class ConnectManager {
                 TimeUnit.SECONDS.sleep(2L);
                 tryCount++;
             }
+            Log.info("--------------------------订阅事件触发！");
             CopyOnWriteArrayList<Message> messageList = CMD_SUBSCRIBE_MESSAGE_MAP.get(cmd);
             int changeCount = addCmdChangeCount(cmd);
             for (Message message : messageList) {
@@ -508,6 +509,7 @@ public class ConnectManager {
                     if ((changeCount - initCount) % eventCount == 0) {
                         try {
                             connectData.getRequestEventResponseQueue().put(getRealResponse(cmd, message.getMessageId(), response));
+                            Log.info("----------------------广播模块："+connectData.getChannel());
                         } catch (InterruptedException e) {
                             Log.error(e);
                         }
