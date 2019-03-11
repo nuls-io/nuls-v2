@@ -27,6 +27,11 @@ public class LoggerBuilder {
         Logger logger = context.getLogger("io.netty");
         logger.setAdditive(false);
         logger.setLevel(Level.INFO);
+
+        Logger logger1 = context.getLogger("org.mongodb.driver.protocol.command");
+        logger1.setAdditive(false);
+        logger1.setLevel(Level.INFO);
+
     }
 
     public static NulsLogger getLogger(String folderName, String fileName) {

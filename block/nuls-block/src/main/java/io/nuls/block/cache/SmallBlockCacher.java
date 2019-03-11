@@ -26,7 +26,7 @@ import io.nuls.block.constant.BlockForwardEnum;
 import io.nuls.block.manager.ContextManager;
 import io.nuls.block.model.CachedSmallBlock;
 import io.nuls.block.model.ChainParameters;
-import io.nuls.tools.data.CollectionUtils;
+import io.nuls.tools.model.CollectionUtils;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;

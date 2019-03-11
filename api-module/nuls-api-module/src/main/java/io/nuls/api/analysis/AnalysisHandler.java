@@ -2,7 +2,7 @@ package io.nuls.api.analysis;
 
 import io.nuls.api.ApiContext;
 import io.nuls.api.constant.ApiConstant;
-import io.nuls.api.model.data.*;
+import io.nuls.api.model.entity.*;
 import io.nuls.api.model.po.db.*;
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.basic.NulsByteBuffer;
@@ -217,6 +217,7 @@ public class AnalysisHandler {
         agent.parse(new NulsByteBuffer(tx.getTxData()));
 
         AgentInfo agentInfo = new AgentInfo();
+        agentInfo.init();
         agentInfo.setAgentAddress(AddressTool.getStringAddressByBytes(agent.getAgentAddress()));
         agentInfo.setPackingAddress(AddressTool.getStringAddressByBytes(agent.getPackingAddress()));
         agentInfo.setRewardAddress(AddressTool.getStringAddressByBytes(agent.getPackingAddress()));

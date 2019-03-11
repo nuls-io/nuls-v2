@@ -9,7 +9,7 @@ import static io.nuls.eventbus.util.EbLog.Log;
 
 import java.util.Map;
 
-/** Separate thread for each subscriber to perform send & retry process in case event data is not sent successfully.
+/** Separate thread for each subscriber to perform send & retry process in case event entity is not sent successfully.
  *  subscriber has to send acknowledgement for the retry process.
  * @author naveen
  */

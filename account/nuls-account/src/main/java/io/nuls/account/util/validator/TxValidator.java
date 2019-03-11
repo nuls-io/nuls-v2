@@ -41,15 +41,12 @@ import io.nuls.base.data.MultiSigAccount;
 import io.nuls.base.data.Transaction;
 import io.nuls.base.signture.MultiSignTxSignature;
 import io.nuls.base.signture.SignatureUtil;
-import io.nuls.base.signture.TransactionSignature;
 import io.nuls.tools.basic.Result;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.crypto.HexUtil;
-import io.nuls.tools.data.BigIntegerUtils;
-import io.nuls.tools.data.ByteUtils;
+import io.nuls.tools.model.BigIntegerUtils;
 import io.nuls.tools.exception.NulsException;
-import io.nuls.tools.exception.NulsRuntimeException;
 
 import java.io.IOException;
 import java.math.BigInteger;

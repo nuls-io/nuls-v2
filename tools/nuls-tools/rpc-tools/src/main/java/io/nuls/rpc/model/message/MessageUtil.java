@@ -26,7 +26,7 @@ package io.nuls.rpc.model.message;
 
 import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.netty.channel.manager.ConnectManager;
-import io.nuls.tools.data.DateUtils;
+import io.nuls.tools.model.DateUtils;
 import io.nuls.tools.thread.TimeService;
 
 import java.util.HashMap;

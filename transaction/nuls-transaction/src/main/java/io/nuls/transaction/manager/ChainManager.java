@@ -191,7 +191,7 @@ public class ChainManager {
 
     /**
      * 初始化链缓存数据
-     * Initialize chain caching data
+     * Initialize chain caching entity
      *
      * @param chain chain info
      */

@@ -101,7 +101,7 @@ public class ResponseMessageProcessor {
 
         /*
         获取返回的数据，放入本地变量
-        Get the returned data and place it in the local variable
+        Get the returned entity and place it in the local variable
          */
         Response response = receiveResponse(responseContainer, Constants.TIMEOUT_TIMEMILLIS);
 //        BaseInvoke baseInvoke = new KernelInvoke();

@@ -91,7 +91,7 @@ public class BloomFilter implements Serializable {
     }
 
     /**
-     * Construct a new Bloom filter based on existing Bloom filter data.
+     * Construct a new Bloom filter based on existing Bloom filter entity.
      *
      * @param bitSetSize                     defines how many bits should be used for the filter.
      * @param expectedNumberOfFilterElements defines the maximum number of elements the filter is expected to contain.

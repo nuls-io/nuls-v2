@@ -30,7 +30,7 @@ public class RoundService {
     }
 
     public List<PocRoundItem> getRoundItemList(int chainId, long roundIndex) {
-        List<Document> list = this.mongoDBService.query(MongoTableConstant.ROUND_TABLE + chainId, eq("roundIndex", roundIndex), Sorts.ascending("order"));
+        List<Document> list = this.mongoDBService.query(MongoTableConstant.ROUND_ITEM_TABLE + chainId, eq("roundIndex", roundIndex), Sorts.ascending("order"));
         List<PocRoundItem> itemList = new ArrayList<>();
         for (Document document : list) {
             itemList.add(DocumentTransferTool.toInfo(document, "id", PocRoundItem.class));

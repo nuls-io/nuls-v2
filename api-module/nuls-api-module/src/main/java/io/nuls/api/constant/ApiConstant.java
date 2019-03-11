@@ -52,7 +52,7 @@ public interface ApiConstant {
     /**
      * db文件存放目录
      */
-    String DATA_PATH = "../../../../data/api";
+    String DATA_PATH = "../../../../entity/api";
 
     String DB_MODULE_CONFIG = "api-config";
 

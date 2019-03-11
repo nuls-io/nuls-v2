@@ -121,7 +121,7 @@ public class CompactEncoder {
     /**
      * Unpack a binary string to its nibbles equivalent
      *
-     * @param str of binary data
+     * @param str of binary entity
      * @return array of nibbles in byte-format
      */
     public static byte[] unpackToNibbles(byte[] str) {

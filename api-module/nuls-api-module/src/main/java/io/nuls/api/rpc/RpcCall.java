@@ -25,17 +25,21 @@ public class RpcCall {
         try {
             params.put(Constants.VERSION_KEY_STR, "1.0");
             Response cmdResp = ResponseMessageProcessor.requestAndResponse(moduleCode, cmd, params);
-            Map resData = (Map)cmdResp.getResponseData();
+            Map resData = (Map) cmdResp.getResponseData();
             if (!cmdResp.isSuccess()) {
                 String errorMsg = null;
-                if(null == resData){
+                if (null == resData) {
                     errorMsg = String.format("Remote call fail. ResponseComment: %s ", cmdResp.getResponseComment());
-                }else {
+                } else {
                     Map map = (Map) resData.get(cmd);
-                    errorMsg = String.format("Remote call fail. msg: %s - code: %s - module: %s - interface: %s \n- params: %s ",
-                            map.get("msg"), map.get("code"), moduleCode, cmd, JSONUtils.obj2PrettyJson(params));
+                    if (null != map) {
+                        errorMsg = String.format("Remote call fail. msg: %s - code: %s - module: %s - interface: %s \n- params: %s ",
+                                map.get("msg"), map.get("code"), moduleCode, cmd, JSONUtils.obj2PrettyJson(params));
+                    }
                 }
-                throw new Exception(errorMsg);
+                if (null != errorMsg) {
+                    throw new Exception(errorMsg);
+                }
             }
             /*if (null == resData) {
                 return null;

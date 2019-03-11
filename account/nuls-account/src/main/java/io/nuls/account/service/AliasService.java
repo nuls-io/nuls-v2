@@ -132,7 +132,7 @@ public interface AliasService {
      * 2.取出对应的account将别名清除,重新存入数据库
      * 3.重新缓存account
      * rollbackAlias
-     * 1.Delete the alias data from the database.
+     * 1.Delete the alias entity from the database.
      * 2. Remove the corresponding account to clear the alias and restore it in the database.
      * 3. Recache the account.
      */

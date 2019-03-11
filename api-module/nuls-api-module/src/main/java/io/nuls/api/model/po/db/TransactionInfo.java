@@ -75,7 +75,7 @@ public class TransactionInfo {
 
     public Document toDocument() {
         Document document = new Document();
-        document.append("_id", hash).append("height", height).append("createTime", createTime).append("type", type).append("value", value).append("fee", fee);
+        document.append("_id", hash).append("height", height).append("createTime", createTime).append("type", type).append("value", value.toString()).append("fee", fee.toString());
         return document;
     }
 

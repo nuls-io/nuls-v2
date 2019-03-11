@@ -42,7 +42,7 @@ public interface TransactionProcessor<T extends Transaction> extends ConflictDet
 //     * This method is called when the transaction rolls back.
 //     *
 //     * @param tx            要回滚的交易，The transaction to roll back.
-//     * @param secondaryData 辅助数据，视业务需要传递，Secondary data, depending on the business needs to be passed.
+//     * @param secondaryData 辅助数据，视业务需要传递，Secondary entity, depending on the business needs to be passed.
 //     */
     Result onRollback(T tx, Object secondaryData);
 
@@ -51,7 +51,7 @@ public interface TransactionProcessor<T extends Transaction> extends ConflictDet
 //     * This method is called when the transaction save.
 //     *
 //     * @param tx            要保存的交易，The transaction to save;
-//     * @param secondaryData 辅助数据，视业务需要传递，Secondary data, depending on the business needs to be passed.
+//     * @param secondaryData 辅助数据，视业务需要传递，Secondary entity, depending on the business needs to be passed.
 //     */
     Result onCommit(T tx, Object secondaryData);
 

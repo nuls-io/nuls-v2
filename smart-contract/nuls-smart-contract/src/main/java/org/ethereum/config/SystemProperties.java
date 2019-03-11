@@ -695,7 +695,7 @@ public class SystemProperties {
     @ValidateMe
     public boolean recordInternalTransactionsData() {
         if (recordInternalTransactionsData == null) {
-            recordInternalTransactionsData = config.getBoolean("record.internal.transactions.data");
+            recordInternalTransactionsData = config.getBoolean("record.internal.transactions.entity");
         }
         return recordInternalTransactionsData;
     }
