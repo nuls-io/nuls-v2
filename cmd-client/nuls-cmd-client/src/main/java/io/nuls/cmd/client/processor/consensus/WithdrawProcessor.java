@@ -23,62 +23,81 @@
  *
  */
 
-package io.nuls.cmd.client.processor.account;
+package io.nuls.cmd.client.processor.consensus;
 
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import io.nuls.api.provider.Result;
 import io.nuls.api.provider.ServiceManager;
-import io.nuls.api.provider.account.AccountService;
-import io.nuls.api.provider.account.facade.AccountInfo;
+import io.nuls.api.provider.consensus.ConsensusProvider;
+import io.nuls.api.provider.consensus.facade.WithdrawReq;
+import io.nuls.base.basic.AddressTool;
+import io.nuls.base.data.NulsDigestData;
 import io.nuls.cmd.client.CommandBuilder;
+import io.nuls.cmd.client.CommandHelper;
 import io.nuls.cmd.client.CommandResult;
+import io.nuls.cmd.client.Config;
 import io.nuls.cmd.client.processor.CommandProcessor;
-import io.nuls.cmd.client.processor.ErrorCodeConstants;
+import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
-import io.nuls.tools.parse.JSONUtils;
+import lombok.extern.slf4j.Slf4j;
+
+import static io.nuls.cmd.client.CommandHelper.getPwd;
 
 /**
  * @author: zhoulijun
- *
  */
 @Component
-public class GetAccountsProcessor implements CommandProcessor {
+@Slf4j
+public class WithdrawProcessor implements CommandProcessor {
 
-    AccountService accountService = ServiceManager.get(AccountService.class);
+    @Autowired
+    Config config;
+
+    ConsensusProvider consensusProvider = ServiceManager.get(ConsensusProvider.class);
 
     @Override
     public String getCommand() {
-        return "getaccounts";
+        return "withdraw";
     }
 
     @Override
     public String getHelp() {
-        CommandBuilder builder = new CommandBuilder();
-        builder.newLine(getCommandDescription());
-        return builder.toString();
+        CommandBuilder bulider = new CommandBuilder();
+        bulider.newLine(getCommandDescription())
+                .newLine("\t<address>   address -required")
+                .newLine("\t<txHash>    your deposit transaction hash  -required");
+        return bulider.toString();
     }
 
     @Override
     public String getCommandDescription() {
-        return "getaccounts --get all account info list int the wallet";
+        return "withdraw <address> <txHash> -- withdraw the agent";
     }
 
     @Override
     public boolean argsValidate(String[] args) {
+        int length = args.length;
+        if(length != 3){
+            return false;
+        }
+        if (!CommandHelper.checkArgsIsNull(args)) {
+            return false;
+        }
+        if(!AddressTool.validAddress(config.getChainId(),args[1]) || !NulsDigestData.validHash(args[2])){
+            return false;
+        }
         return true;
     }
 
     @Override
     public CommandResult execute(String[] args) {
-        Result<AccountInfo> result = accountService.getAccountList();
-        if(result.isFailed()){
+        String address = args[1];
+        String txHash = args[2];
+        String password = getPwd("Enter your account password");
+        Result<String> result = consensusProvider.withdraw(new WithdrawReq(address,txHash,password));
+        if (result.isFailed()) {
             return CommandResult.getFailed(result);
         }
-        try {
-            return CommandResult.getSuccess(JSONUtils.obj2PrettyJson(result.getList()));
-        } catch (JsonProcessingException e) {
-            return CommandResult.failed(ErrorCodeConstants.SYSTEM_ERR);
-        }
+        return CommandResult.getSuccess(result);
     }
 }

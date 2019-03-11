@@ -23,62 +23,81 @@
  *
  */
 
-package io.nuls.cmd.client.processor.account;
+package io.nuls.cmd.client.processor.block;
 
-
-import com.fasterxml.jackson.core.JsonProcessingException;
 import io.nuls.api.provider.Result;
 import io.nuls.api.provider.ServiceManager;
-import io.nuls.api.provider.account.AccountService;
-import io.nuls.api.provider.account.facade.AccountInfo;
+import io.nuls.api.provider.block.BlockService;
+import io.nuls.api.provider.block.facade.GetBlockHeaderByHashReq;
+import io.nuls.api.provider.block.facade.GetBlockHeaderByHeightReq;
+import io.nuls.base.data.BlockHeader;
 import io.nuls.cmd.client.CommandBuilder;
+import io.nuls.cmd.client.CommandHelper;
 import io.nuls.cmd.client.CommandResult;
 import io.nuls.cmd.client.processor.CommandProcessor;
-import io.nuls.cmd.client.processor.ErrorCodeConstants;
 import io.nuls.tools.core.annotation.Component;
-import io.nuls.tools.parse.JSONUtils;
+import lombok.extern.slf4j.Slf4j;
+
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 
 /**
  * @author: zhoulijun
- *
  */
 @Component
-public class GetAccountsProcessor implements CommandProcessor {
+@Slf4j
+public class GetBlockHeaderProcessor implements CommandProcessor {
 
-    AccountService accountService = ServiceManager.get(AccountService.class);
+    Pattern IS_NUMBERIC = Pattern.compile("[0-9]+]");
+
+
+    BlockService blockService = ServiceManager.get(BlockService.class);
 
     @Override
     public String getCommand() {
-        return "getaccounts";
+        return "getblockheader";
     }
 
     @Override
     public String getHelp() {
         CommandBuilder builder = new CommandBuilder();
-        builder.newLine(getCommandDescription());
+        builder.newLine(getCommandDescription())
+                .newLine("\t<hash> | <height> get block header by hash or block height - Required");
         return builder.toString();
     }
 
     @Override
     public String getCommandDescription() {
-        return "getaccounts --get all account info list int the wallet";
+        return "getblockheader <hash> | <height>--get the block header with hash or height";
     }
 
     @Override
     public boolean argsValidate(String[] args) {
+        int length = args.length;
+        if (length != 2) {
+            return false;
+        }
+        if (!CommandHelper.checkArgsIsNull(args)) {
+            return false;
+        }
         return true;
     }
 
     @Override
     public CommandResult execute(String[] args) {
-        Result<AccountInfo> result = accountService.getAccountList();
+        String hash = args[1];
+        Matcher matcher = IS_NUMBERIC.matcher(args[1]);
+        Result<BlockHeader> result;
+        if(matcher.matches()){
+            Long height = Long.parseLong(args[1]);
+            result = blockService.getBlockHeaderByHeight(new GetBlockHeaderByHeightReq(height));
+        }else{
+            result = blockService.getBlockHeaderByHash(new GetBlockHeaderByHashReq(hash));
+        }
         if(result.isFailed()){
             return CommandResult.getFailed(result);
         }
-        try {
-            return CommandResult.getSuccess(JSONUtils.obj2PrettyJson(result.getList()));
-        } catch (JsonProcessingException e) {
-            return CommandResult.failed(ErrorCodeConstants.SYSTEM_ERR);
-        }
+        return CommandResult.getSuccess(result);
     }
 }

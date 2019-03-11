@@ -23,18 +23,15 @@
  *
  */
 
-package io.nuls.cmd.client.processor.account;
+package io.nuls.cmd.client.processor.consensus;
 
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import io.nuls.api.provider.Result;
 import io.nuls.api.provider.ServiceManager;
-import io.nuls.api.provider.account.AccountService;
-import io.nuls.api.provider.account.facade.AccountInfo;
-import io.nuls.api.provider.account.facade.GetAccountByAddressReq;
-import io.nuls.api.provider.ledger.LedgerProvider;
-import io.nuls.api.provider.ledger.facade.AccountBalanceInfo;
-import io.nuls.api.provider.ledger.facade.GetBalanceReq;
+import io.nuls.api.provider.consensus.ConsensusProvider;
+import io.nuls.api.provider.consensus.facade.DepositToAgentReq;
+import io.nuls.base.basic.AddressTool;
+import io.nuls.base.data.NulsDigestData;
 import io.nuls.cmd.client.CommandBuilder;
 import io.nuls.cmd.client.CommandHelper;
 import io.nuls.cmd.client.CommandResult;
@@ -43,54 +40,55 @@ import io.nuls.cmd.client.processor.CommandProcessor;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.data.StringUtils;
-import io.nuls.tools.log.Log;
-import io.nuls.tools.parse.JSONUtils;
-import io.nuls.tools.parse.MapUtils;
+import lombok.extern.slf4j.Slf4j;
 
-import java.util.Date;
+import java.math.BigInteger;
 import java.util.HashMap;
 import java.util.Map;
+import static io.nuls.cmd.client.CommandHelper.*;
 
 /**
  * @author: zhoulijun
  */
 @Component
-public class GetAccountProcessor implements CommandProcessor {
+@Slf4j
+public class DepositProcessor implements CommandProcessor {
 
-    AccountService accountService = ServiceManager.get(AccountService.class);
-
-    LedgerProvider ledgerProvider = ServiceManager.get(LedgerProvider.class);
+    ConsensusProvider consensusProvider = ServiceManager.get(ConsensusProvider.class);
 
     @Autowired
     Config config;
-
     @Override
     public String getCommand() {
-        return "getaccount";
+        return "deposit";
     }
 
     @Override
     public String getHelp() {
-        CommandBuilder builder = new CommandBuilder();
-        builder.newLine(getCommandDescription())
-                .newLine("\t<address> the account address - Required");
-        return builder.toString();
+        CommandBuilder bulider = new CommandBuilder();
+        bulider.newLine(getCommandDescription())
+                .newLine("\t<address>   Your own account address -required")
+                .newLine("\t<agentHash>   The agent hash you want to deposit  -required")
+                .newLine("\t<deposit>   the amount you want to deposit, you can have up to 8 valid digits after the decimal point -required");
+        return bulider.toString();
     }
 
     @Override
     public String getCommandDescription() {
-        return "getaccount <address> --get account information";
+        return "deposit <address> <agentHash> <deposit> --apply for deposit";
     }
 
     @Override
     public boolean argsValidate(String[] args) {
-        if (args.length != 2) {
+        int length = args.length;
+        if(length != 4){
             return false;
         }
         if (!CommandHelper.checkArgsIsNull(args)) {
             return false;
         }
-        if (StringUtils.isBlank(args[1])) {
+        if(!AddressTool.validAddress(config.getChainId(),args[1]) || !NulsDigestData.validHash(args[2])
+                || StringUtils.isBlank(args[3]) || !StringUtils.isNuls(args[3])){
             return false;
         }
         return true;
@@ -99,22 +97,13 @@ public class GetAccountProcessor implements CommandProcessor {
     @Override
     public CommandResult execute(String[] args) {
         String address = args[1];
-        Result<AccountInfo> info = accountService.getAccountByAddress(new GetAccountByAddressReq(address));
-        if (info.isFailed()) {
-            return CommandResult.getFailed(info);
+        String password = getPwd("Enter your account password");
+        BigInteger deposit = new BigInteger(args[3]);
+        String agentHash = args[2];
+        Result<String> result = consensusProvider.depositToAgent(new DepositToAgentReq(address,agentHash,deposit,password));
+        if (result.isFailed()) {
+            return CommandResult.getFailed(result);
         }
-        Result<AccountBalanceInfo> balance = ledgerProvider.getBalance(new GetBalanceReq(config.getAssetsId(),config.getChainId(),address));
-        if (balance.isFailed()) {
-            return CommandResult.getFailed(balance);
-        }
-        Map<String,Object> res = new HashMap<>(7);
-        res.putAll(MapUtils.beanToMap(info.getData()));
-        res.put("baglance",balance.getData());
-        try {
-            return CommandResult.getSuccess(JSONUtils.obj2PrettyJson(res));
-        } catch (JsonProcessingException e) {
-            Log.error("",e);
-            return null;
-        }
+        return CommandResult.getSuccess(result);
     }
 }

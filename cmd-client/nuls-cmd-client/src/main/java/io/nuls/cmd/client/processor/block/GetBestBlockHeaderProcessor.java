@@ -23,33 +23,32 @@
  *
  */
 
-package io.nuls.cmd.client.processor.account;
+package io.nuls.cmd.client.processor.block;
 
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import io.nuls.api.provider.Result;
 import io.nuls.api.provider.ServiceManager;
-import io.nuls.api.provider.account.AccountService;
-import io.nuls.api.provider.account.facade.AccountInfo;
+import io.nuls.api.provider.block.BlockService;
+import io.nuls.api.provider.block.facade.GetBlockHeaderByLastHeightReq;
+import io.nuls.base.data.BlockHeader;
 import io.nuls.cmd.client.CommandBuilder;
 import io.nuls.cmd.client.CommandResult;
 import io.nuls.cmd.client.processor.CommandProcessor;
-import io.nuls.cmd.client.processor.ErrorCodeConstants;
 import io.nuls.tools.core.annotation.Component;
-import io.nuls.tools.parse.JSONUtils;
+import lombok.extern.slf4j.Slf4j;
 
 /**
- * @author: zhoulijun
- *
+ * @author: Charlie
  */
 @Component
-public class GetAccountsProcessor implements CommandProcessor {
+@Slf4j
+public class GetBestBlockHeaderProcessor implements CommandProcessor {
 
-    AccountService accountService = ServiceManager.get(AccountService.class);
+    BlockService blockService = ServiceManager.get(BlockService.class);
 
     @Override
     public String getCommand() {
-        return "getaccounts";
+        return "getbestblockheader";
     }
 
     @Override
@@ -61,24 +60,24 @@ public class GetAccountsProcessor implements CommandProcessor {
 
     @Override
     public String getCommandDescription() {
-        return "getaccounts --get all account info list int the wallet";
+        return "getbestblockheader --get the best block header";
     }
 
     @Override
     public boolean argsValidate(String[] args) {
+        int length = args.length;
+        if(length > 1) {
+            return false;
+        }
         return true;
     }
 
     @Override
     public CommandResult execute(String[] args) {
-        Result<AccountInfo> result = accountService.getAccountList();
-        if(result.isFailed()){
+        Result<BlockHeader> result = blockService.getBlockHeaderByLastHeight(new GetBlockHeaderByLastHeightReq());
+        if (result.isFailed()) {
             return CommandResult.getFailed(result);
         }
-        try {
-            return CommandResult.getSuccess(JSONUtils.obj2PrettyJson(result.getList()));
-        } catch (JsonProcessingException e) {
-            return CommandResult.failed(ErrorCodeConstants.SYSTEM_ERR);
-        }
+        return CommandResult.getSuccess(result);
     }
 }

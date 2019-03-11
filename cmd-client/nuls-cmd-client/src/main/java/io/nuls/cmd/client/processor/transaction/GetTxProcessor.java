@@ -23,62 +23,69 @@
  *
  */
 
-package io.nuls.cmd.client.processor.account;
+package io.nuls.cmd.client.processor.transaction;
 
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import io.nuls.api.provider.Result;
 import io.nuls.api.provider.ServiceManager;
-import io.nuls.api.provider.account.AccountService;
-import io.nuls.api.provider.account.facade.AccountInfo;
+import io.nuls.api.provider.transaction.TransferService;
+import io.nuls.api.provider.transaction.facade.GetConfirmedTxByHashReq;
+import io.nuls.base.data.Transaction;
 import io.nuls.cmd.client.CommandBuilder;
 import io.nuls.cmd.client.CommandResult;
 import io.nuls.cmd.client.processor.CommandProcessor;
 import io.nuls.cmd.client.processor.ErrorCodeConstants;
 import io.nuls.tools.core.annotation.Component;
-import io.nuls.tools.parse.JSONUtils;
+import io.nuls.tools.data.StringUtils;
+import lombok.extern.slf4j.Slf4j;
 
 /**
- * @author: zhoulijun
- *
+ * @author zhoulijun
  */
 @Component
-public class GetAccountsProcessor implements CommandProcessor {
+@Slf4j
+public class GetTxProcessor implements CommandProcessor {
 
-    AccountService accountService = ServiceManager.get(AccountService.class);
+    TransferService transferService = ServiceManager.get(TransferService.class);
 
     @Override
     public String getCommand() {
-        return "getaccounts";
+        return "gettx";
     }
 
     @Override
     public String getHelp() {
-        CommandBuilder builder = new CommandBuilder();
-        builder.newLine(getCommandDescription());
-        return builder.toString();
+        CommandBuilder bulider = new CommandBuilder();
+        bulider.newLine(getCommandDescription())
+                .newLine("\t<hash>  transaction hash -required");
+        return bulider.toString();
     }
 
     @Override
     public String getCommandDescription() {
-        return "getaccounts --get all account info list int the wallet";
+        return "gettx <hash> --get the transaction information by txhash";
     }
 
     @Override
     public boolean argsValidate(String[] args) {
+        int length = args.length;
+        if (length != 2) {
+            return false;
+        }
         return true;
     }
 
     @Override
     public CommandResult execute(String[] args) {
-        Result<AccountInfo> result = accountService.getAccountList();
-        if(result.isFailed()){
+        String hash = args[1];
+        if (StringUtils.isBlank(hash)) {
+            return CommandResult.getFailed(ErrorCodeConstants.PARAM_ERR.getMsg());
+        }
+        Result<Transaction> result = transferService.getConfirmedTxByHash(new GetConfirmedTxByHashReq(hash));
+        if (result.isFailed()) {
             return CommandResult.getFailed(result);
         }
-        try {
-            return CommandResult.getSuccess(JSONUtils.obj2PrettyJson(result.getList()));
-        } catch (JsonProcessingException e) {
-            return CommandResult.failed(ErrorCodeConstants.SYSTEM_ERR);
-        }
+        return CommandResult.getSuccess(result);
     }
+
 }

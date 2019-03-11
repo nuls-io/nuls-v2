@@ -1,6 +1,7 @@
 package io.nuls.api.provider;
 
 import io.nuls.rpc.info.Constants;
+import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.model.message.Response;
 import io.nuls.rpc.netty.processor.ResponseMessageProcessor;
 import io.nuls.tools.constant.ErrorCode;
@@ -19,6 +20,7 @@ import java.util.function.Function;
 @Slf4j
 public abstract class BaseRpcService extends BaseService {
 
+
     /**
      * 调用其他模块rpc接口
      * @param module 模块名称
@@ -28,7 +30,7 @@ public abstract class BaseRpcService extends BaseService {
      * @param <T> 返回值泛型类型
      * @return
      */
-    protected  <T> Result<T> callRpc(String module,String method, Object req, Function<Map,Result> callback) {
+    protected <T,R> Result<T> callRpc(String module,String method,Object req,Function<R,Result> callback) {
         Map<String, Object> params = MapUtils.beanToLinkedMap(req);
         params.put(Constants.VERSION_KEY_STR, "1.0");
         log.debug("call {} rpc , method : {},param : {}",module,method,params);
@@ -44,7 +46,17 @@ public abstract class BaseRpcService extends BaseService {
             log.error("Calling remote interface failed. module:{} - interface:{} - ResponseComment:{}", module, method, cmdResp.getResponseComment());
             return fail(ERROR_CODE, cmdResp.getResponseComment());
         }
-        return callback.apply((Map) ((HashMap) cmdResp.getResponseData()).get(method));
+        return callback.apply((R) ((HashMap) cmdResp.getResponseData()).get(method));
+    }
+
+    protected abstract  <T,R> Result<T> call(String method, Object req, Function<R,Result> res);
+
+    protected Result<String> callReturnString(String method,Object req, String fieldName){
+        Function<Map,Result> fun = res->{
+            String data = (String) res.get(fieldName);
+            return success(data);
+        };
+        return call(method,req,fun);
     }
 
 }

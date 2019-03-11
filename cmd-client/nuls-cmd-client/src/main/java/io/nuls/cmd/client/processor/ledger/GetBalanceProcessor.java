@@ -23,62 +23,74 @@
  *
  */
 
-package io.nuls.cmd.client.processor.account;
+package io.nuls.cmd.client.processor.ledger;
 
-
-import com.fasterxml.jackson.core.JsonProcessingException;
 import io.nuls.api.provider.Result;
 import io.nuls.api.provider.ServiceManager;
-import io.nuls.api.provider.account.AccountService;
-import io.nuls.api.provider.account.facade.AccountInfo;
+import io.nuls.api.provider.ledger.LedgerProvider;
+import io.nuls.api.provider.ledger.facade.AccountBalanceInfo;
+import io.nuls.api.provider.ledger.facade.GetBalanceReq;
+import io.nuls.base.basic.AddressTool;
 import io.nuls.cmd.client.CommandBuilder;
+import io.nuls.cmd.client.CommandHelper;
 import io.nuls.cmd.client.CommandResult;
+import io.nuls.cmd.client.Config;
 import io.nuls.cmd.client.processor.CommandProcessor;
-import io.nuls.cmd.client.processor.ErrorCodeConstants;
+import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
-import io.nuls.tools.parse.JSONUtils;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * @author: zhoulijun
- *
  */
 @Component
-public class GetAccountsProcessor implements CommandProcessor {
+@Slf4j
+public class GetBalanceProcessor implements CommandProcessor {
 
-    AccountService accountService = ServiceManager.get(AccountService.class);
+    LedgerProvider ledgerProvider = ServiceManager.get(LedgerProvider.class);
+
+    @Autowired
+    Config config;
 
     @Override
     public String getCommand() {
-        return "getaccounts";
+        return "getbalance";
     }
 
     @Override
     public String getHelp() {
         CommandBuilder builder = new CommandBuilder();
-        builder.newLine(getCommandDescription());
+        builder.newLine(getCommandDescription())
+                .newLine("\t<address> the account address - require");
         return builder.toString();
     }
-
     @Override
     public String getCommandDescription() {
-        return "getaccounts --get all account info list int the wallet";
+        return "getbalance <address> --get the balance of a address";
     }
 
     @Override
     public boolean argsValidate(String[] args) {
+        int length = args.length;
+        if(length != 2) {
+            return false;
+        }
+        if (!CommandHelper.checkArgsIsNull(args)) {
+            return false;
+        }
+        if(!AddressTool.validAddress(config.getChainId(),args[1])){
+            return false;
+        }
         return true;
     }
 
     @Override
     public CommandResult execute(String[] args) {
-        Result<AccountInfo> result = accountService.getAccountList();
+        String address = args[1];
+        Result<AccountBalanceInfo> result = ledgerProvider.getBalance(new GetBalanceReq(config.getAssetsId(),config.getChainId(),address));
         if(result.isFailed()){
             return CommandResult.getFailed(result);
         }
-        try {
-            return CommandResult.getSuccess(JSONUtils.obj2PrettyJson(result.getList()));
-        } catch (JsonProcessingException e) {
-            return CommandResult.failed(ErrorCodeConstants.SYSTEM_ERR);
-        }
+        return CommandResult.getSuccess(result);
     }
 }
