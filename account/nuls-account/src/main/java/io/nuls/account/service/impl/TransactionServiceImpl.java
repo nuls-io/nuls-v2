@@ -136,13 +136,13 @@ public class TransactionServiceImpl implements TransactionService {
     }
 
     @Override
-    public String transfer(int chainId, List<CoinDto> fromList, List<CoinDto> toList, String remark) {
+    public String transfer(int chainId, List<CoinDto> fromList, List<CoinDto> toList, String remark) throws NulsException{
         Transaction tx = this.assemblyTransaction(chainId, fromList, toList, remark);
         return tx.getHash().getDigestHex();
     }
 
     @Override
-    public Transaction transferByAlias(int chainId, CoinDto from, CoinDto to, String remark) {
+    public Transaction transferByAlias(int chainId, CoinDto from, CoinDto to, String remark) throws NulsException{
         List<CoinDto> fromList = Arrays.asList(from);
         List<CoinDto> toList = Arrays.asList(to);
         Transaction tx = this.assemblyTransaction(chainId, fromList, toList, remark);
@@ -306,7 +306,7 @@ public class TransactionServiceImpl implements TransactionService {
         return transactionSignature;
     }
 
-    private Transaction assemblyTransaction(int chainId, List<CoinDto> fromList, List<CoinDto> toList, String remark) {
+    private Transaction assemblyTransaction(int chainId, List<CoinDto> fromList, List<CoinDto> toList, String remark) throws NulsException{
         Transaction tx = new Transaction(AccountConstant.TX_TYPE_TRANSFER);
         tx.setRemark(StringUtils.bytes(remark));
         try {
@@ -333,13 +333,13 @@ public class TransactionServiceImpl implements TransactionService {
             TransactionCmdCall.newTx(chainId, tx.hex());
         } catch (NulsException e) {
             LoggerUtil.logger.error("assemblyTransaction exception.", e);
-            throw new NulsRuntimeException(e.getErrorCode());
+            throw new NulsException(e.getErrorCode());
         } catch (IOException e) {
             LoggerUtil.logger.error("assemblyTransaction io exception.", e);
-            throw new NulsRuntimeException(AccountErrorCode.SERIALIZE_ERROR);
+            throw new NulsException(AccountErrorCode.SERIALIZE_ERROR);
         } catch (Exception e) {
             LoggerUtil.logger.error("assemblyTransaction error.", e);
-            throw new NulsRuntimeException(AccountErrorCode.FAILED);
+            throw new NulsException(AccountErrorCode.FAILED);
         }
         return tx;
     }
@@ -354,7 +354,7 @@ public class TransactionServiceImpl implements TransactionService {
      * @param toList
      * @return
      */
-    private Transaction assemblyCoinData(Transaction tx, int chainId, List<CoinDto> fromList, List<CoinDto> toList) {
+    private Transaction assemblyCoinData(Transaction tx, int chainId, List<CoinDto> fromList, List<CoinDto> toList) throws NulsException{
         try {
             //组装coinFrom、coinTo数据
             List<CoinFrom> coinFromList = assemblyCoinFrom(chainId, fromList);
@@ -371,13 +371,13 @@ public class TransactionServiceImpl implements TransactionService {
             tx.setCoinData(coinData.serialize());
         } catch (NulsException e) {
             LoggerUtil.logger.error("assemblyCoinData exception.", e);
-            throw new NulsRuntimeException(e.getErrorCode());
+            throw new NulsException(e.getErrorCode());
         } catch (IOException e) {
             LoggerUtil.logger.error("assemblyCoinData io exception.", e);
-            throw new NulsRuntimeException(AccountErrorCode.SERIALIZE_ERROR);
+            throw new NulsException(AccountErrorCode.SERIALIZE_ERROR);
         } catch (Exception e) {
             LoggerUtil.logger.error("assemblyCoinData error.", e);
-            throw new NulsRuntimeException(AccountErrorCode.FAILED);
+            throw new NulsException(AccountErrorCode.FAILED);
         }
         return tx;
     }
@@ -556,6 +556,8 @@ public class TransactionServiceImpl implements TransactionService {
             //必须为当前链主资产
             if (TxUtil.isChainAssetExist(chain, coinFrom)) {
                 BigInteger mainAsset = TxUtil.getBalance(chainId, chainId, assetsId, coinFrom.getAddress());
+                //可用余额=当前余额减去本次转出
+                mainAsset = mainAsset.subtract(coinFrom.getAmount());
                 //当前还差的手续费
                 BigInteger current = targetFee.subtract(actualFee);
                 //如果余额大于等于目标手续费，则直接收取全额手续费
@@ -608,6 +610,8 @@ public class TransactionServiceImpl implements TransactionService {
                 //当前还差的手续费
                 BigInteger current = targetFee.subtract(actualFee);
                 //此账户可以支付的手续费
+                //可用余额=当前余额减去本次转出
+                mainAsset = mainAsset.subtract(coinFrom.getAmount());
                 BigInteger fee = BigIntegerUtils.isEqualOrGreaterThan(mainAsset, current) ? current : mainAsset;
 
                 feeCoinFrom.setLocked(AccountConstant.NORMAL_TX_LOCKED);
