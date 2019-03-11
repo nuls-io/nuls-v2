@@ -714,11 +714,11 @@ public class ConnectManager {
             ChannelFuture channelFuture = channel.writeAndFlush(new TextWebSocketFrame(message));
             if (message.contains("registerModuleDependencies")) {
                 channelFuture.addListener((ChannelFutureListener) future -> {
-                    Log.info("######registerModuleDependencies message#########" + message);
-                    Log.info("######registerModuleDependencies isCancelled#########" + future.isCancelled());
-                    Log.info("######registerModuleDependencies isSuccess#########" + future.isSuccess());
-                    Log.info("######registerModuleDependencies isDone#########" + future.isDone());
-                    Log.info("######registerModuleDependencies cause#########" + future.cause());
+                    if (!future.isSuccess()) {
+                        Log.info("######registerModuleDependencies message#########" + message);
+                        Log.info("######registerModuleDependencies isCancelled#########" + future.isCancelled());
+                        Log.info("######registerModuleDependencies cause#########" + future.cause());
+                    }
                 });
             }
         });
