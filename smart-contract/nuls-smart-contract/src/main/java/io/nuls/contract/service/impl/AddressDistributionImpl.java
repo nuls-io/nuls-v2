@@ -25,6 +25,7 @@ package io.nuls.contract.service.impl;
 
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.Transaction;
+import io.nuls.contract.model.bo.ContractTempTransaction;
 import io.nuls.contract.model.bo.ContractWrapperTransaction;
 import io.nuls.contract.model.txdata.CallContractData;
 import io.nuls.contract.model.txdata.ContractData;
@@ -49,13 +50,13 @@ import static io.nuls.contract.constant.ContractConstant.*;
 public class AddressDistributionImpl implements AddressDistribution {
 
     @Override
-    public Map<String, List<ContractWrapperTransaction>> distribution(List<Transaction> txList) throws NulsException {
+    public Map<String, List<ContractWrapperTransaction>> distribution(List<ContractTempTransaction> txList) throws NulsException {
         Map<String, List<ContractWrapperTransaction>> map = new LinkedHashMap<>();
         ContractWrapperTransaction ctx;
         byte[] contractAddressBytes;
         String contractAddress;
         int i = 0;
-        for (Transaction tx : txList) {
+        for (ContractTempTransaction tx : txList) {
             ctx = this.parseContractTransaction(tx);
             if(ctx == null) {
                 continue;
@@ -73,7 +74,7 @@ public class AddressDistributionImpl implements AddressDistribution {
         return map;
     }
 
-    private ContractWrapperTransaction parseContractTransaction(Transaction tx) throws NulsException {
+    private ContractWrapperTransaction parseContractTransaction(ContractTempTransaction tx) throws NulsException {
         ContractWrapperTransaction contractTransaction = null;
         ContractData contractData = null;
         boolean isContractTx = true;
@@ -98,7 +99,7 @@ public class AddressDistributionImpl implements AddressDistribution {
                 break;
         }
         if(isContractTx) {
-            contractTransaction = new ContractWrapperTransaction(tx, contractData);
+            contractTransaction = new ContractWrapperTransaction(tx, tx.getTxHex(), contractData);
         }
         return contractTransaction;
     }

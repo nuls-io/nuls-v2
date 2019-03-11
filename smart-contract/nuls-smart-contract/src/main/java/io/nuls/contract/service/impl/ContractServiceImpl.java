@@ -29,10 +29,7 @@ import io.nuls.base.data.NulsDigestData;
 import io.nuls.base.data.Transaction;
 import io.nuls.contract.constant.ContractErrorCode;
 import io.nuls.contract.helper.ContractHelper;
-import io.nuls.contract.model.bo.AnalyzerResult;
-import io.nuls.contract.model.bo.CallerResult;
-import io.nuls.contract.model.bo.ContractResult;
-import io.nuls.contract.model.bo.ContractWrapperTransaction;
+import io.nuls.contract.model.bo.*;
 import io.nuls.contract.model.dto.ContractPackageDto;
 import io.nuls.contract.model.tx.ContractReturnGasTransaction;
 import io.nuls.contract.model.txdata.ContractData;
@@ -43,9 +40,9 @@ import io.nuls.contract.vm.program.ProgramExecutor;
 import io.nuls.tools.basic.Result;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Service;
+import io.nuls.tools.log.Log;
 import io.nuls.tools.model.ByteArrayWrapper;
 import io.nuls.tools.model.LongUtils;
-import io.nuls.tools.log.Log;
 import org.spongycastle.util.encoders.Hex;
 
 import java.io.IOException;
@@ -85,28 +82,34 @@ public class ContractServiceImpl implements ContractService {
     private ContractExecuteResultStorageService contractExecuteResultStorageService;
 
     @Override
-    public Result invokeContract(int chainId, List<Transaction> txList, long number, long blockTime, byte[] packingAddress, String preStateRoot) {
+    public Result invokeContract(int chainId, List<ContractTempTransaction> txList, long number, long blockTime, String packingAddress, String preStateRoot) {
         try {
             // 准备临时余额和当前区块头
-            contractHelper.createTempBalanceManagerAndCurrentBlockHeader(chainId, number, blockTime, packingAddress);
+            contractHelper.createTempBalanceManagerAndCurrentBlockHeader(chainId, number, blockTime, Hex.decode(packingAddress));
             // 准备批量执行器
             ProgramExecutor batchExecutor = contractExecutor.createBatchExecute(chainId, Hex.decode(preStateRoot));
 
+            // 交易按合约地址分组
             Map<String, List<ContractWrapperTransaction>> listMap = addressDistribution.distribution(txList);
+            // 多线程执行合约
             CallerResult callerResult = contractCaller.caller(chainId, batchExecutor, listMap, preStateRoot);
+            // 合约执行结果归类
             AnalyzerResult analyzerResult = resultAnalyzer.analysis(callerResult.getCallableResultList());
-            List<ContractResult> resultList = resultHanlder.handleAnalyzerResult(chainId, batchExecutor, analyzerResult, preStateRoot);
-            // 返回生成的合约内部转账交易
+            // 重新执行冲突合约，处理失败合约的金额退还
+            List<ContractResult> contractResultList = resultHanlder.handleAnalyzerResult(chainId, batchExecutor, analyzerResult, preStateRoot);
+            // 归集合约内部转账交易
             List<Transaction> resultTxList = new ArrayList<>();
-            for(ContractResult contractResult : resultList) {
+            for(ContractResult contractResult : contractResultList) {
                 resultTxList.addAll(contractResult.getContractTransferList());
             }
             // 生成退还剩余Gas的交易
-            ContractReturnGasTransaction contractReturnGasTx = this.makeReturnGasTx(chainId, resultList, resultTxList.get(resultTxList.size() - 1).getTime() + 1);
+            ContractReturnGasTransaction contractReturnGasTx = this.makeReturnGasTx(chainId, contractResultList, resultTxList.get(resultTxList.size() - 1).getTime() + 1);
             resultTxList.add(contractReturnGasTx);
             Result<byte[]> batchExecuteResult = contractCaller.commitBatchExecute(batchExecutor);
             byte[] stateRoot = batchExecuteResult.getData();
             ContractPackageDto dto = new ContractPackageDto(stateRoot, resultTxList);
+            dto.makeContractResultMap(contractResultList);
+            contractHelper.getChain(chainId).setContractPackageDto(dto);
             return getSuccess().setData(dto);
         } catch (Exception e) {
             Log.error(e);

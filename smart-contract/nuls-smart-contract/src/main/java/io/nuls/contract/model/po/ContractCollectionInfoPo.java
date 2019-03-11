@@ -27,7 +27,6 @@ package io.nuls.contract.model.po;
 import java.util.Map;
 
 /**
- * @desription:
  * @author: PierreLuo
  * @date: 2018/8/15
  */

@@ -49,7 +49,7 @@ import java.util.regex.Pattern;
 @Slf4j
 public class GetBlockHeaderProcessor implements CommandProcessor {
 
-    Pattern IS_NUMBERIC = Pattern.compile("[0-9]+]");
+    Pattern IS_NUMBERIC = Pattern.compile("[0-9]+");
 
 
     BlockService blockService = ServiceManager.get(BlockService.class);
