@@ -82,10 +82,7 @@ public class TransactionBootStrap extends RpcModule {
             initSys();
             //初始化数据库配置文件
             initDB();
-            //初始化国际资源文件语言
-            initLanguage();
-            initH2Table();
-            SpringLiteContext.getBean(ChainManager.class).runChain();
+
         } catch (Exception e) {
             Log.error("Transaction init error!");
             Log.error(e);
@@ -94,8 +91,18 @@ public class TransactionBootStrap extends RpcModule {
 
     @Override
     public boolean doStart() {
-        Log.info("Transaction Ready...");
-        return true;
+        //初始化国际资源文件语言
+        try {
+            initLanguage();
+            initH2Table();
+            SpringLiteContext.getBean(ChainManager.class).runChain();
+            Log.info("Transaction Ready...");
+            return true;
+        } catch (Exception e) {
+            Log.error("Transaction init error!");
+            Log.error(e);
+            return false;
+        }
     }
 
     @Override
