@@ -420,7 +420,7 @@ public class TxServiceImpl implements TxService {
     public byte[] getNonce(Chain chain, String address, int assetChainId, int assetId) throws NulsException {
         String key = address + "_" + assetChainId + "_" + assetId;
         NonceHashData nonceHashData = PRE_HASH_MAP.get(key);
-        if (null != nonceHashData && (NetworkCall.getCurrentTimeMillis() - nonceHashData.getCacheTimestamp() < TxConstant.HASH_TTL)) {
+        if (null == nonceHashData || (NetworkCall.getCurrentTimeMillis() - nonceHashData.getCacheTimestamp() > TxConstant.HASH_TTL)) {
             return LedgerCall.getNonce(chain, address, assetChainId, assetId);
         } else {
             return TxUtil.getNonceByPreHash(nonceHashData.getHash());
