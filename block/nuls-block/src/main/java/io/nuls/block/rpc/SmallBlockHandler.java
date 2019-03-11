@@ -140,7 +140,7 @@ public class SmallBlockHandler extends BaseCmd {
             for (NulsDigestData hash : smallBlock.getTxHashList()) {
                 Transaction tx = txMap.get(hash);
                 if (null == tx) {
-                    tx = TransactionUtil.getConfirmedTransaction(chainId, hash);
+                    tx = TransactionUtil.getTransaction(chainId, hash);
                     if (tx != null) {
                         subTxList.add(tx);
                         txMap.put(hash, tx);
