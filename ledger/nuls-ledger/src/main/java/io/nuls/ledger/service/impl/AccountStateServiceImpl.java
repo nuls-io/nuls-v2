@@ -208,7 +208,7 @@ public class AccountStateServiceImpl implements AccountStateService {
                 LoggerUtil.logger.debug("非确认交易nonce提交：txHash={},key={},addNonce={}", unconfirmedTx.getTxHash(), unconfirmedTx.getAddress() + "-" + unconfirmedTx.getAssetChainId() + "-" + unconfirmedTx.getAssetId(), newNonce);
                 UnconfirmedNonce unconfirmedNonce = new UnconfirmedNonce(newNonce);
                 accountState.addUnconfirmedNonce(unconfirmedNonce);
-                LoggerUtil.logger.debug("非确认交易nonce提交后：txHash={},dbNonce={},nonces={}", unconfirmedTx.getTxHash(), accountState.getUnconfirmedNoncesStrs(), accountState.getUnconfirmedNonces());
+                LoggerUtil.logger.debug("非确认交易nonce提交后：txHash={},dbNonce={},nonces={}", unconfirmedTx.getTxHash(), accountState.getNonce(), accountState.getUnconfirmedNoncesStrs());
             }
             UnconfirmedAmount unconfirmedAmount = new UnconfirmedAmount(unconfirmedTx.getEarnAmount(), unconfirmedTx.getSpendAmount(),
                     unconfirmedTx.getFromUnLockedAmount(), unconfirmedTx.getToLockedAmount());
