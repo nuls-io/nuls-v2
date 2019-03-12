@@ -431,7 +431,7 @@ public class TransactionCmd extends BaseCmd {
             String address = (String) addressObj;
             String password = (String) passwordObj;
             String alias = (String) aliasObj;
-            BigInteger amount = new BigInteger((String) amountObj);
+            BigInteger amount = new BigInteger(String.valueOf(amountObj));
             String remark = (String) remarkObj;
             if (BigIntegerUtils.isLessThan(amount, BigInteger.ZERO)) {
                 throw new NulsRuntimeException(AccountErrorCode.NULL_PARAMETER);
