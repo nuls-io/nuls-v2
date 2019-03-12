@@ -7,19 +7,14 @@ import io.nuls.api.model.po.db.*;
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.data.*;
-import io.nuls.tools.constant.ToolsConstant;
 import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.exception.NulsException;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 public class AnalysisHandler {
 
@@ -52,7 +47,7 @@ public class AnalysisHandler {
         info.setPackingAddress(AddressTool.getStringAddressByBytes(blockHeader.getPackingAddress(chainId)));
         info.setTxCount(blockHeader.getTxCount());
         info.setRoundIndex(extendsData.getRoundIndex());
-        info.setSize(blockHeader.getSize());
+        info.setSize(blockHeader.size());
         info.setPackingIndexOfRound(extendsData.getPackingIndexOfRound());
         info.setScriptSign(HexUtil.encode(blockHeader.getBlockSignature().serialize()));
         info.setAgentVersion(extendsData.getBlockVersion());
@@ -114,32 +109,6 @@ public class AnalysisHandler {
         } else {
             info.setTxData(toTxData(tx));
         }
-
-//        BigInteger value = BigInteger.ZERO;
-//        if (info.getType() == ApiConstant.TX_TYPE_COINBASE) {
-//            if (info.getCoinTos() != null) {
-//                for (CoinToInfo coinTo : info.getCoinTos()) {
-//                    value = value.add(coinTo.getAmount());
-//                }
-//            }
-//        } else if (info.getType() == ApiConstant.TX_TYPE_TRANSFER ||
-//                info.getType() == ApiConstant.TX_TYPE_CALL_CONTRACT ||
-//                info.getType() == ApiConstant.TX_TYPE_CONTRACT_TRANSFER ||
-//                info.getType() == ApiConstant.TX_TYPE_DATA) {
-//            Set<String> addressSet = new HashSet<>();
-//            for (CoinFromInfo coinFrom : info.getCoinFroms()) {
-//                addressSet.add(coinFrom.getAddress());
-//            }
-//            if (null != info.getCoinTos()) {
-//                for (CoinToInfo coinTo : info.getCoinTos()) {
-//                    if (!addressSet.contains(coinTo.getAddress())) {
-//                        value = value.add(coinTo.getAmount());
-//                    }
-//                }
-//            }
-//        } else if (info.getType() == ApiConstant.TX_TYPE_ALIAS) {
-//            value = ApiConstant.ALIAS_AMOUNT;
-//        }
         info.calcValue();
         return info;
     }

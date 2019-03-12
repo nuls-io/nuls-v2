@@ -23,7 +23,6 @@ package io.nuls.api.rpc.controller;
 import io.nuls.api.ApiContext;
 import io.nuls.api.analysis.WalletRpcHandler;
 import io.nuls.api.cache.ApiCache;
-import io.nuls.api.constant.ApiConstant;
 import io.nuls.api.db.*;
 import io.nuls.api.exception.JsonRpcException;
 import io.nuls.api.manager.CacheManager;
@@ -103,11 +102,12 @@ public class PocConsensusController {
 
     @RpcMethod("getConsensusNodes")
     public RpcResult getConsensusNodes(List<Object> params) {
-        VerifyUtils.verifyParams(params, 3);
-        int pageIndex = (int) params.get(0);
-        int pageSize = (int) params.get(1);
-        int type = (int) params.get(2);
-        int chainId = (int) params.get(3);
+        VerifyUtils.verifyParams(params, 4);
+        int chainId = (int) params.get(0);
+        int pageIndex = (int) params.get(1);
+        int pageSize = (int) params.get(2);
+        int type = (int) params.get(3);
+
         if (pageIndex <= 0) {
             pageIndex = 1;
         }
@@ -137,18 +137,16 @@ public class PocConsensusController {
         }
 
         Collections.sort(list.getList(), AgentComparator.getInstance());
-
         return new RpcResult().setResult(list);
     }
 
     @RpcMethod("getConsensusNode")
     public RpcResult getConsensusNode(List<Object> params) {
-        VerifyUtils.verifyParams(params, 1);
+        VerifyUtils.verifyParams(params, 2);
         int chainId = (int) params.get(0);
         String agentHash = (String) params.get(1);
         ApiCache apiCache = CacheManager.getCache(chainId);
 
-        RpcResult rpcResult = new RpcResult();
         if (apiCache == null) {
             return RpcResult.failed(RpcErrorCode.DATA_NOT_EXISTS);
         }
@@ -161,23 +159,23 @@ public class PocConsensusController {
         if (agentInfo.getTotalPackingCount() != 0) {
             agentInfo.setLostRate(DoubleUtils.div(count, count + agentInfo.getTotalPackingCount()));
         }
-
-        List<PocRoundItem> itemList = apiCache.getCurrentRound().getItemList();
-        PocRoundItem roundItem = null;
-        if (null != itemList) {
-            for (PocRoundItem item : itemList) {
-                if (item.getPackingAddress().equals(agentInfo.getPackingAddress())) {
-                    roundItem = item;
-                    break;
-                }
-            }
-        }
-        if (null == roundItem) {
-            agentInfo.setStatus(0);
-        } else {
-            agentInfo.setRoundPackingTime(apiCache.getCurrentRound().getStartTime() + roundItem.getOrder() * 10000);
-            agentInfo.setStatus(1);
-        }
+//
+//        List<PocRoundItem> itemList = apiCache.getCurrentRound().getItemList();
+//        PocRoundItem roundItem = null;
+//        if (null != itemList) {
+//            for (PocRoundItem item : itemList) {
+//                if (item.getPackingAddress().equals(agentInfo.getPackingAddress())) {
+//                    roundItem = item;
+//                    break;
+//                }
+//            }
+//        }
+//        if (null == roundItem) {
+//            agentInfo.setStatus(0);
+//        } else {
+//            agentInfo.setRoundPackingTime(apiCache.getCurrentRound().getStartTime() + roundItem.getOrder() * 10000);
+//            agentInfo.setStatus(1);
+//        }
 
         Result<AgentInfo> result = WalletRpcHandler.getAgentInfo(chainId, agentHash);
         if (result.isSuccess()) {
@@ -227,11 +225,11 @@ public class PocConsensusController {
     @RpcMethod("getPunishList")
     public RpcResult getPunishList(List<Object> params) {
         VerifyUtils.verifyParams(params, 5);
-        int pageIndex = (int) params.get(0);
-        int pageSize = (int) params.get(1);
-        int type = (int) params.get(2);
-        String agentAddress = (String) params.get(3);
-        int chainId = (int) params.get(4);
+        int chainId = (int) params.get(0);
+        int pageIndex = (int) params.get(1);
+        int pageSize = (int) params.get(2);
+        int type = (int) params.get(3);
+        String agentAddress = (String) params.get(4);
         if (!AddressTool.validAddress(chainId, agentAddress)) {
             throw new JsonRpcException(new RpcResultError(RpcErrorCode.PARAMS_ERROR, "[address] is inValid"));
         }
@@ -248,10 +246,11 @@ public class PocConsensusController {
     @RpcMethod("getConsensusDeposit")
     public RpcResult getConsensusDeposit(List<Object> params) {
         VerifyUtils.verifyParams(params, 4);
-        int pageIndex = (int) params.get(0);
-        int pageSize = (int) params.get(1);
-        String agentHash = (String) params.get(2);
-        int chainId = (int) params.get(3);
+        int chainId = (int) params.get(0);
+        int pageIndex = (int) params.get(1);
+        int pageSize = (int) params.get(2);
+        String agentHash = (String) params.get(3);
+
         if (StringUtils.isBlank(agentHash)) {
             throw new JsonRpcException(new RpcResultError(RpcErrorCode.PARAMS_ERROR, "[agentHash] is inValid"));
         }
@@ -268,11 +267,12 @@ public class PocConsensusController {
     @RpcMethod("getAllConsensusDeposit")
     public RpcResult getAllConsensusDeposit(List<Object> params) {
         VerifyUtils.verifyParams(params, 5);
-        int pageIndex = (int) params.get(0);
-        int pageSize = (int) params.get(1);
-        String agentHash = (String) params.get(2);
-        int type = (int) params.get(3);
-        int chainId = (int) params.get(4);
+        int chainId = (int) params.get(0);
+        int pageIndex = (int) params.get(1);
+        int pageSize = (int) params.get(2);
+        String agentHash = (String) params.get(3);
+        int type = (int) params.get(4);
+
         if (StringUtils.isBlank(agentHash)) {
             throw new JsonRpcException(new RpcResultError(RpcErrorCode.PARAMS_ERROR, "[agentHash] is inValid"));
         }
@@ -297,13 +297,12 @@ public class PocConsensusController {
         return new RpcResult().setResult(apiCache.getCurrentRound());
     }
 
-
     @RpcMethod("getRoundList")
     public RpcResult getRoundList(List<Object> params) {
         VerifyUtils.verifyParams(params, 3);
-        int pageIndex = (int) params.get(0);
-        int pageSize = (int) params.get(1);
-        int chainId = (int) params.get(2);
+        int chainId = (int) params.get(0);
+        int pageIndex = (int) params.get(1);
+        int pageSize = (int) params.get(2);
         if (pageIndex <= 0) {
             pageIndex = 1;
         }

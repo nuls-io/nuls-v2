@@ -10,6 +10,7 @@ import io.nuls.api.model.rpc.RpcErrorCode;
 import io.nuls.api.model.rpc.RpcResult;
 import io.nuls.api.model.rpc.RpcResultError;
 import io.nuls.api.utils.VerifyUtils;
+import io.nuls.tools.basic.Result;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Controller;
 import io.nuls.tools.core.annotation.RpcMethod;
@@ -42,7 +43,11 @@ public class TransactionController {
             throw new JsonRpcException(new RpcResultError(RpcErrorCode.PARAMS_ERROR, "[hash] is required"));
         }
         try {
-            TransactionInfo tx = WalletRpcHandler.getTx(chainId, hash);
+            Result<TransactionInfo> result = WalletRpcHandler.getTx(chainId, hash);
+            if (result.isFailed()) {
+                throw new JsonRpcException(result.getErrorCode());
+            }
+            TransactionInfo tx = result.getData();
             if (tx == null) {
                 throw new JsonRpcException(new RpcResultError(RpcErrorCode.DATA_NOT_EXISTS));
             }

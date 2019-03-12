@@ -18,37 +18,30 @@
  * SOFTWARE.
  */
 
-package io.nuls.api.exception;
-
-
-import io.nuls.api.model.rpc.RpcResultError;
-import io.nuls.tools.constant.ErrorCode;
+package io.nuls.api.constant;
 
 /**
  * @author Niels
  */
-public class JsonRpcException extends RuntimeException {
-    private RpcResultError error;
+public class AddressType {
 
-    public JsonRpcException() {
-    }
 
-    public JsonRpcException(ErrorCode errorCode) {
-        RpcResultError error = new RpcResultError();
-        error.setCode(errorCode.getCode());
-        error.setMessage(errorCode.getMsg());
-        this.error = error;
-    }
+    /**
+     * 多重签名地址
+     * contract address type
+     */
+    public static byte P2SH_ADDRESS_TYPE = 3;
 
-    public JsonRpcException(RpcResultError error) {
-        this.error = error;
-    }
+    /**
+     * 默认的地址类型，一条链可以包含几种地址类型，地址类型包含在地址中
+     * The default address type, a chain can contain several address types, and the address type is contained in the address.
+     */
+    public static byte DEFAULT_ADDRESS_TYPE = 1;
 
-    public RpcResultError getError() {
-        return error;
-    }
 
-    public void setError(RpcResultError error) {
-        this.error = error;
-    }
+    /**
+     * 智能合约地址类型
+     * contract address type
+     */
+    public static byte CONTRACT_ADDRESS_TYPE = 2;
 }

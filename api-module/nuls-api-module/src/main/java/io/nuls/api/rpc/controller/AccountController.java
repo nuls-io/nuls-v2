@@ -133,28 +133,28 @@ public class AccountController {
         return new RpcResult().setResult(pageInfo);
     }
 
-    @RpcMethod("getAccountTokens")
-    public RpcResult getAccountTokens(List<Object> params) {
-        VerifyUtils.verifyParams(params, 4);
-        int chainId = (int) params.get(0);
-        int pageIndex = (int) params.get(1);
-        int pageSize = (int) params.get(2);
-        String address = (String) params.get(3);
-
-        if (!AddressTool.validAddress(chainId, address)) {
-            throw new JsonRpcException(new RpcResultError(RpcErrorCode.PARAMS_ERROR, "[address] is inValid"));
-        }
-        if (pageIndex <= 0) {
-            pageIndex = 1;
-        }
-        if (pageSize <= 0 || pageSize > 100) {
-            pageSize = 10;
-        }
-        // todo
-        //PageInfo<AccountTokenInfo> pageInfo = tokenService.getAccountTokens(address, pageIndex, pageSize);
-        PageInfo<AccountTokenInfo> pageInfo = new PageInfo<>();
-        RpcResult result = new RpcResult();
-        result.setResult(pageInfo);
-        return result;
-    }
+//    @RpcMethod("getAccountTokens")
+//    public RpcResult getAccountTokens(List<Object> params) {
+//        VerifyUtils.verifyParams(params, 4);
+//        int chainId = (int) params.get(0);
+//        int pageIndex = (int) params.get(1);
+//        int pageSize = (int) params.get(2);
+//        String address = (String) params.get(3);
+//
+//        if (!AddressTool.validAddress(chainId, address)) {
+//            throw new JsonRpcException(new RpcResultError(RpcErrorCode.PARAMS_ERROR, "[address] is inValid"));
+//        }
+//        if (pageIndex <= 0) {
+//            pageIndex = 1;
+//        }
+//        if (pageSize <= 0 || pageSize > 100) {
+//            pageSize = 10;
+//        }
+//        // todo
+//        //PageInfo<AccountTokenInfo> pageInfo = tokenService.getAccountTokens(address, pageIndex, pageSize);
+//        PageInfo<AccountTokenInfo> pageInfo = new PageInfo<>();
+//        RpcResult result = new RpcResult();
+//        result.setResult(pageInfo);
+//        return result;
+//    }
 }

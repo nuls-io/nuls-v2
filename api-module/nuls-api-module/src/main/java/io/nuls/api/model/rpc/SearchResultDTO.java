@@ -18,37 +18,30 @@
  * SOFTWARE.
  */
 
-package io.nuls.api.exception;
-
-
-import io.nuls.api.model.rpc.RpcResultError;
-import io.nuls.tools.constant.ErrorCode;
+package io.nuls.api.model.rpc;
 
 /**
  * @author Niels
  */
-public class JsonRpcException extends RuntimeException {
-    private RpcResultError error;
+public class SearchResultDTO {
 
-    public JsonRpcException() {
+    private String type;
+
+    private Object data;
+
+    public String getType() {
+        return type;
     }
 
-    public JsonRpcException(ErrorCode errorCode) {
-        RpcResultError error = new RpcResultError();
-        error.setCode(errorCode.getCode());
-        error.setMessage(errorCode.getMsg());
-        this.error = error;
+    public void setType(String type) {
+        this.type = type;
     }
 
-    public JsonRpcException(RpcResultError error) {
-        this.error = error;
+    public Object getData() {
+        return data;
     }
 
-    public RpcResultError getError() {
-        return error;
-    }
-
-    public void setError(RpcResultError error) {
-        this.error = error;
+    public void setData(Object data) {
+        this.data = data;
     }
 }

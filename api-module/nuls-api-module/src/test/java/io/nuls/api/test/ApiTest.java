@@ -22,6 +22,7 @@ import org.junit.Test;
 
 import java.beans.Transient;
 import java.math.BigInteger;
+import java.util.Map;
 
 import static io.nuls.api.constant.ApiConstant.DEFAULT_SCAN_PACKAGE;
 import static io.nuls.api.constant.ApiConstant.RPC_DEFAULT_SCAN_PACKAGE;
@@ -113,6 +114,5 @@ public class ApiTest {
 
         System.out.println(DoubleUtils.mul(100, DoubleUtils.div(ApiContext.inflationCoins, b, 4), 2));
     }
-
 
 }

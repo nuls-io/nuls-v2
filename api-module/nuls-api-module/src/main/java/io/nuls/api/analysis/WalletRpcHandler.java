@@ -87,32 +87,42 @@ public class WalletRpcHandler {
         return null;
     }
 
-    public static TransactionInfo getTx(int chainId, String hash) throws Exception {
+    public static Result<TransactionInfo> getTx(int chainId, String hash) {
         Map<String, Object> params = new HashMap<>();
         params.put(Constants.VERSION_KEY_STR, ApiContext.VERSION);
         params.put("chainId", chainId);
         params.put("txHash", hash);
-        Map map = (Map) RpcCall.request(ModuleE.TX.abbr, CommandConstant.GET_TX, params);
-        String txHex = (String) map.get("txHex");
-        if (null == txHex) {
-            return null;
+        try {
+            Map map = (Map) RpcCall.request(ModuleE.TX.abbr, CommandConstant.GET_TX, params);
+            String txHex = (String) map.get("txHex");
+            if (null == txHex) {
+                return null;
+            }
+            Transaction tx = Transaction.getInstance(txHex);
+            TransactionInfo txInfo = AnalysisHandler.toTransaction(tx);
+
+            return Result.getSuccess(null).setData(txInfo);
+        } catch (NulsException e) {
+            return Result.getFailed(e.getErrorCode());
+        } catch (Exception e) {
+            return Result.getFailed(ApiErrorCode.DATA_PARSE_ERROR);
         }
-        Transaction tx = Transaction.getInstance(txHex);
-        TransactionInfo txInfo = AnalysisHandler.toTransaction(tx);
-        return txInfo;
     }
 
     public static Result<AgentInfo> getAgentInfo(int chainId, String hash) {
         Map<String, Object> params = new HashMap<>();
-        params.put(Constants.VERSION_KEY_STR, ApiContext.VERSION);
         params.put("chainId", chainId);
         params.put("agentHash", hash);
         try {
             Map map = (Map) RpcCall.request(ModuleE.CS.abbr, CommandConstant.GET_AGENT, params);
+            AgentInfo agentInfo = new AgentInfo();
+            agentInfo.setCreditValue(Double.parseDouble(map.get("creditVal").toString()));
+            agentInfo.setDepositCount((Integer) map.get("memberCount"));
+            agentInfo.setDepositCount((Integer) map.get("status"));
 
+            return Result.getSuccess(null).setData(agentInfo);
         } catch (NulsException e) {
-            e.printStackTrace();
+            return Result.getFailed(e.getErrorCode());
         }
-        return null;
     }
 }
