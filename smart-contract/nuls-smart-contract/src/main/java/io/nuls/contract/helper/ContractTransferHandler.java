@@ -75,9 +75,9 @@ public class ContractTransferHandler {
 
         byte[] contractAddress = contractData.getContractAddress();
         // 增加转入
-        long value = contractData.getValue();
-        if(value > 0) {
-            tempBalanceManager.addTempBalance(contractAddress, BigInteger.valueOf(value));
+        BigInteger value = contractData.getValue();
+        if(value.compareTo(BigInteger.ZERO) > 0) {
+            tempBalanceManager.addTempBalance(contractAddress, value);
         }
         // 增加转入, 扣除转出
         List<ProgramTransfer> transfers = contractResult.getTransfers();
@@ -127,9 +127,9 @@ public class ContractTransferHandler {
                 }
             }
             // 扣除转入
-            long value = contractData.getValue();
-            if(value > 0) {
-                tempBalanceManager.minusTempBalance(contractAddress, BigInteger.valueOf(value));
+            BigInteger value = contractData.getValue();
+            if(value.compareTo(BigInteger.ZERO) > 0) {
+                tempBalanceManager.minusTempBalance(contractAddress, value);
             }
         }
     }

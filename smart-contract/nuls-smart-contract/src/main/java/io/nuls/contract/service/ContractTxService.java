@@ -24,9 +24,12 @@
 package io.nuls.contract.service;
 
 
+import io.nuls.contract.model.bo.ContractResult;
 import io.nuls.tools.basic.Result;
 
 import java.math.BigInteger;
+import java.util.LinkedList;
+import java.util.Map;
 
 /**
  *
@@ -38,23 +41,30 @@ public interface ContractTxService {
     Result contractCreateTx(int chainId, String sender, Long gasLimit, Long price,
                             byte[] contractCode, String[][] args, String password, String remark);
 
-    Result validateContractCreateTx(Long gasLimit, Long price,
-                                    byte[] contractCode, String[][] args);
+    Result validateContractCreateTx(int chainId, byte[] sender, Long gasLimit, Long price, byte[] contractCode, String[][] args);
 
 
-    Result contractPreCreateTx(String sender, Long gasLimit, Long price,
+    Result contractPreCreateTx(int chainId, String sender, Long gasLimit, Long price,
                                byte[] contractCode, String[][] args, String password, String remark);
 
-    Result contractCallTx(String sender, BigInteger value, Long gasLimit, Long price, String contractAddress,
+    LinkedList<Map<String, String>> getLocalUnconfirmedCreateContractTransaction(String sender);
+
+    void removeLocalUnconfirmedCreateContractTransaction(String sender, String contractAddress, ContractResult contractResult);
+
+    void removeLocalUnconfirmedCreateContractTransaction(String sender, String contractAddress);
+
+    void removeLocalFailedUnconfirmedCreateContractTransaction(String sender, String contractAddress);
+
+    Result contractCallTx(int chainId, String sender, BigInteger value, Long gasLimit, Long price, String contractAddress,
                           String methodName, String methodDesc, String[][] args, String password, String remark);
 
-    Result validateContractCallTx(String sender, Long value, Long gasLimit, Long price, String contractAddress,
+    Result validateContractCallTx(int chainId, byte[] senderBytes, BigInteger value, Long gasLimit, Long price, byte[] contractAddressBytes,
                                   String methodName, String methodDesc, String[][] args);
 
-    Result transferFee(String sender, BigInteger value, Long gasLimit, Long price, String contractAddress,
+    Result transferFee(int chainId, String sender, BigInteger value, Long gasLimit, Long price, String contractAddress,
                        String methodName, String methodDesc, String[][] args, String remark);
 
-    Result contractDeleteTx(String sender, String contractAddress, String password, String remark);
+    Result contractDeleteTx(int chainId, String sender, String contractAddress, String password, String remark);
 
-    Result validateContractDeleteTx(String sender, String contractAddress);
+    Result validateContractDeleteTx(int chainId, String sender, String contractAddress);
 }

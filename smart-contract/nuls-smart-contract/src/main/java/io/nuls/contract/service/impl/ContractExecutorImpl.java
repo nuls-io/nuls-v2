@@ -51,7 +51,7 @@ import java.util.stream.Collectors;
 public class ContractExecutorImpl implements ContractExecutor {
 
     @Autowired
-    private ContractHelper vmHelper;
+    private ContractHelper contractHelper;
 
     @Override
     public ContractResult create(ProgramExecutor executor, ContractData create, long number, String preStateRoot) {
@@ -109,7 +109,7 @@ public class ContractExecutorImpl implements ContractExecutor {
         ProgramCall programCall = new ProgramCall();
         programCall.setContractAddress(contractAddress);
         programCall.setSender(sender);
-        programCall.setValue(BigInteger.valueOf(call.getValue()));
+        programCall.setValue(call.getValue());
         programCall.setPrice(price);
         programCall.setGasLimit(call.getGasLimit());
         programCall.setNumber(number);
@@ -199,7 +199,7 @@ public class ContractExecutorImpl implements ContractExecutor {
         if (stateRoot == null) {
             return null;
         }
-        ProgramExecutor executor = vmHelper.getProgramExecutor(chainId).begin(stateRoot);
+        ProgramExecutor executor = contractHelper.getProgramExecutor(chainId).begin(stateRoot);
         return executor;
     }
 

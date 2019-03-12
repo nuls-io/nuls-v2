@@ -27,6 +27,7 @@ import io.nuls.base.basic.AddressTool;
 import io.nuls.contract.constant.ContractConstant;
 import io.nuls.contract.constant.ContractErrorCode;
 import io.nuls.contract.helper.ContractHelper;
+import io.nuls.contract.service.ContractTxService;
 import io.nuls.contract.util.ContractUtil;
 import io.nuls.contract.util.MapUtil;
 import io.nuls.contract.vm.program.ProgramMethod;
@@ -34,7 +35,6 @@ import io.nuls.rpc.cmd.BaseCmd;
 import io.nuls.rpc.model.CmdAnnotation;
 import io.nuls.rpc.model.Parameter;
 import io.nuls.rpc.model.message.Response;
-import io.nuls.tools.basic.Result;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.log.Log;
@@ -55,6 +55,8 @@ public class ContractResource extends BaseCmd {
 
     @Autowired
     private ContractHelper contractHelper;
+    @Autowired
+    private ContractTxService contractTxService;
 
     @CmdAnnotation(cmd = CREATE, version = 1.0, description = "invoke contract")
     @Parameter(parameterName = "chainId", parameterType = "int")

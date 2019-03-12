@@ -29,8 +29,10 @@ import io.nuls.base.basic.TransactionLogicData;
 import io.nuls.base.data.Address;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.parse.SerializeUtils;
+import lombok.AllArgsConstructor;
 
 import java.io.IOException;
+import java.math.BigInteger;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -41,7 +43,7 @@ public class CreateContractData extends TransactionLogicData implements Contract
 
     private byte[] sender;
     private byte[] contractAddress;
-    private long value;
+    private BigInteger value;
     private int codeLen;
     private byte[] code;
     private long gasLimit;
@@ -54,7 +56,7 @@ public class CreateContractData extends TransactionLogicData implements Contract
         int size = 0;
         size += Address.ADDRESS_LENGTH;
         size += Address.ADDRESS_LENGTH;
-        size += SerializeUtils.sizeOfInt64();
+        size += SerializeUtils.sizeOfBigInteger();
         size += SerializeUtils.sizeOfInt32();
         size += SerializeUtils.sizeOfBytes(code);
         size += SerializeUtils.sizeOfInt64();
@@ -79,7 +81,7 @@ public class CreateContractData extends TransactionLogicData implements Contract
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
         stream.write(sender);
         stream.write(contractAddress);
-        stream.writeInt64(value);
+        stream.writeBigInteger(value);
         stream.writeUint32(codeLen);
         stream.writeBytesWithLength(code);
         stream.writeInt64(gasLimit);
@@ -103,7 +105,7 @@ public class CreateContractData extends TransactionLogicData implements Contract
     public void parse(NulsByteBuffer byteBuffer) throws NulsException {
         this.sender = byteBuffer.readBytes(Address.ADDRESS_LENGTH);
         this.contractAddress = byteBuffer.readBytes(Address.ADDRESS_LENGTH);
-        this.value = byteBuffer.readInt64();
+        this.value = byteBuffer.readBigInteger();
         this.codeLen = byteBuffer.readInt32();
         this.code = byteBuffer.readByLengthByte();
         this.gasLimit = byteBuffer.readInt64();
@@ -126,7 +128,7 @@ public class CreateContractData extends TransactionLogicData implements Contract
     }
 
     @Override
-    public long getValue() {
+    public BigInteger getValue() {
         return value;
     }
 
@@ -140,7 +142,7 @@ public class CreateContractData extends TransactionLogicData implements Contract
         return null;
     }
 
-    public void setValue(long value) {
+    public void setValue(BigInteger value) {
         this.value = value;
     }
 
