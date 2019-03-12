@@ -27,6 +27,7 @@ package io.nuls.transaction.service.impl;
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.basic.TransactionFeeCalculator;
+import io.nuls.base.constant.TxStatusEnum;
 import io.nuls.base.data.*;
 import io.nuls.base.signture.MultiSignTxSignature;
 import io.nuls.base.signture.P2PHKSignature;
@@ -118,6 +119,9 @@ public class TxServiceImpl implements TxService {
         Transaction tx = unconfirmedTxStorageService.getTx(chain.getChainId(), hash);
         if (null == tx) {
             tx = confirmedTxService.getConfirmedTransaction(chain, hash);
+            if (null != tx) {
+                tx.setStatus(TxStatusEnum.CONFIRMED);
+            }
         }
         return tx;
     }

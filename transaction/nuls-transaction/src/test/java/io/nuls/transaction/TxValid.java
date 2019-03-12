@@ -91,6 +91,8 @@ public class TxValid {
     public void transfer() throws Exception {
         for (int i = 0; i < 9999999; i++) {
             String hash = createTransfer();
+            System.out.println("count:" + (i+1));
+            System.out.println("");
             Thread.sleep(500L);
             //getTx(hash);
         }

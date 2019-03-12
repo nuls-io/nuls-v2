@@ -708,16 +708,6 @@ public class ConnectManager {
         try {
             channel.eventLoop().execute(() -> {
                 channel.writeAndFlush(new TextWebSocketFrame(message));
-                /*ChannelFuture channelFuture = channel.writeAndFlush(new TextWebSocketFrame(message));
-                if (message.contains("registerModuleDependencies")) {
-                    channelFuture.addListener((ChannelFutureListener) future -> {
-                        if (!future.isSuccess()) {
-                            Log.info("######registerModuleDependencies message#########" + message);
-                            Log.info("######registerModuleDependencies isCancelled#########" + future.isCancelled());
-                            Log.info("######registerModuleDependencies cause#########" + future.cause());
-                        }
-                    });
-                }*/
             });
         }catch (Exception e){
             Log.error(e);
