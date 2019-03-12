@@ -8,6 +8,7 @@ import io.nuls.transaction.constant.TxConstant;
 import io.nuls.transaction.manager.TransactionManager;
 import io.nuls.transaction.model.bo.Chain;
 import io.nuls.transaction.model.bo.VerifyTxResult;
+import io.nuls.transaction.model.po.TransactionConfirmedPO;
 import io.nuls.transaction.rpc.call.LedgerCall;
 import io.nuls.transaction.rpc.call.NetworkCall;
 import io.nuls.transaction.service.TxService;
@@ -85,7 +86,7 @@ public class VerifyTxProcessTask implements Runnable {
                 return false;
             }
             //获取一笔交易
-            Transaction existTx = txService.getTransaction(chain, tx.getHash());
+            TransactionConfirmedPO existTx = txService.getTransaction(chain, tx.getHash());
             if(null != existTx){
                 return isOrphanTx;
             }

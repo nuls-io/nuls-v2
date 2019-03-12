@@ -102,8 +102,30 @@ public class LedgerCall {
         }
     }
 
+
     /**
-     * 查询账户特定资产的余额
+     * 查询账户特定资产的余额(包含未确认的余额)
+     * Check the balance of an account-specific asset
+     */
+    public static BigInteger getBalanceNonce(Chain chain, byte[] address, int assetChainId, int assetId) throws NulsException {
+        try {
+            String addressString = AddressTool.getStringAddressByBytes(address);
+            Map<String, Object> params = new HashMap<>(TxConstant.INIT_CAPACITY_8);
+            params.put(Constants.VERSION_KEY_STR, "1.0");
+            params.put("chainId", chain.getChainId());
+            params.put("assetChainId", assetChainId);
+            params.put("assetId", assetId);
+            params.put("address", addressString);
+            Map result = (Map)TransactionCall.request(ModuleE.LG.abbr, "getBalanceNonce", params);
+            Object available = result.get("available");
+            return BigIntegerUtils.stringToBigInteger(String.valueOf(available));
+        } catch (Exception e) {
+            throw new NulsException(e);
+        }
+    }
+
+    /**
+     * 查询账户特定资产的余额(只获取已确认的余额)
      * Check the balance of an account-specific asset
      */
     public static BigInteger getBalance(Chain chain, byte[] address, int assetChainId, int assetId) throws NulsException {
