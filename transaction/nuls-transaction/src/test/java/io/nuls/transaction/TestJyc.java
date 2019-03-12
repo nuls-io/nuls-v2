@@ -25,27 +25,21 @@
 package io.nuls.transaction;
 
 import io.nuls.base.basic.AddressTool;
-import io.nuls.base.data.Page;
 import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.info.HostInfo;
 import io.nuls.rpc.info.NoUse;
 import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.model.message.Response;
 import io.nuls.rpc.netty.processor.ResponseMessageProcessor;
-import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.parse.JSONUtils;
 import io.nuls.transaction.model.bo.Chain;
 import io.nuls.transaction.model.bo.config.ConfigBean;
 import io.nuls.transaction.model.dto.CoinDTO;
-import io.nuls.transaction.model.dto.CrossTxTransferDTO;
 import io.nuls.transaction.rpc.call.LedgerCall;
-import org.junit.Assert;
-import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import java.io.*;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -53,7 +47,8 @@ import java.util.List;
 import java.util.Map;
 
 import static io.nuls.transaction.utils.LoggerUtil.Log;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 /**
  * @author: Charlie
@@ -213,7 +208,7 @@ public class TestJyc {
                     Log.debug("deposit-txHash:{}", depositHash);
                 }
 
-                Thread.sleep(60000);
+                Thread.sleep(600000);
                 {
                     Log.debug("6.##########取消委托##########");
                     //取消委托
@@ -246,7 +241,7 @@ public class TestJyc {
                     Log.debug("deposit-txHash:{}", depositHash);
                 }
 
-                Thread.sleep(60000);
+                Thread.sleep(600000);
                 {
                     Log.debug("8.##########删除节点账户，制造黄牌##########");
                     Map<String, Object> params = new HashMap<>();
@@ -258,10 +253,10 @@ public class TestJyc {
                     HashMap result = (HashMap) ((HashMap) cmdResp.getResponseData()).get("ac_getPriKeyByAddress");
                     String priKey = (String) result.get("priKey");
                     removeAccount(packingAddress, password);
-                    Thread.sleep(60000);
+                    Thread.sleep(600000);
                     Log.debug("9.##########导入节点账户，重新加入共识##########");
                     importPriKey(priKey, password);
-                    Thread.sleep(60000);
+                    Thread.sleep(600000);
                 }
 
                 {
