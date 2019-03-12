@@ -100,7 +100,18 @@ public class TxValid {
 
     @Test
     public void getTx() throws Exception {
-        getTx("002036d91fa50deb3a0d69d9c6097a75711e94e4edcdd942962190379cd9261a8813");
+            String hash = createTransfer();
+            Thread.sleep(1000L);
+            getTxClient(hash);
+            Thread.sleep(1000L);
+            getTxClient(hash);
+            Thread.sleep(1000L);
+            getTxClient(hash);
+            Thread.sleep(1000L);
+            getTxClient(hash);
+            Thread.sleep(1000L);
+            getTxClient(hash);
+            getTxCfmClient("002022f34902fa07b53434f8f98959970b2dcb8bb34ce262896820a8b9e1d16e30b4");
     }
 
     private void getTx(String hash) throws Exception{
@@ -252,22 +263,6 @@ public class TxValid {
         Response dpResp = ResponseMessageProcessor.requestAndResponse(ModuleE.TX.abbr, "tx_getTxClient", params);
         Map record = (Map) dpResp.getResponseData();
         Log.debug("{}", JSONUtils.obj2PrettyJson(record));
-    }
-
-    @Test
-    public void te() throws Exception{
-        String hash = createTransfer();
-        Thread.sleep(1000L);
-        getTxClient(hash);
-        Thread.sleep(1000L);
-        getTxClient(hash);
-        Thread.sleep(1000L);
-        getTxClient(hash);
-        Thread.sleep(1000L);
-        getTxClient(hash);
-        Thread.sleep(1000L);
-        getTxClient(hash);
-        getTxCfmClient("002022f34902fa07b53434f8f98959970b2dcb8bb34ce262896820a8b9e1d16e30b4");
     }
 
     /**
