@@ -132,8 +132,8 @@ public class ConnectData {
      * 订阅事件（接口改变次数）
      * Subscription events (number of interface changes)
      * */
-    public void subscribeByEvent(Message message){
-        ConnectManager.subscribeByEvent(this,message);
+    public void subscribeByEvent(Message message,Request request){
+        ConnectManager.subscribeByEvent(this,message,request);
         idToEventMessageMap.put(message.getMessageId(),message);
         addSubscribeInitCount(message);
         requestEventCountLoopList.add(message);

@@ -97,7 +97,7 @@ public class TextMessageHandler implements Runnable {
 
                     if (!ConnectManager.isPureDigital(request.getSubscriptionEventCounter())
                             && !ConnectManager.isPureDigital(request.getSubscriptionPeriod())) {
-                        RequestMessageProcessor.callCommandsWithPeriod(channel, request.getRequestMethods(), messageId);
+                        RequestMessageProcessor.callCommandsWithPeriod(channel, request.getRequestMethods(), messageId, false);
                     } else {
                         int tryCount = 0;
                         while(connectData == null && tryCount < Constants.TRY_COUNT){
@@ -114,11 +114,9 @@ public class TextMessageHandler implements Runnable {
                             connectData.getIdToPeriodMessageMap().put(messageId, message);
                         }
                         if (ConnectManager.isPureDigital(request.getSubscriptionEventCounter())) {
-                            ConnectManager.modifySubRequestCount(true);
-                            Log.info(channel.toString()+"--------------------模块增加订阅数量后："+ConnectManager.subRequestCount);
-                            connectData.subscribeByEvent(message);
-                            ConnectManager.modifySubRequestCount(false);
-                            Log.info(channel.toString()+"--------------------模块删除订阅数量后："+ConnectManager.subRequestCount);
+                            connectData.subscribeByEvent(message,request);
+                            RequestMessageProcessor.callCommandsWithPeriod(channel, request.getRequestMethods(), messageId, true);
+
                         }
                     }
 
