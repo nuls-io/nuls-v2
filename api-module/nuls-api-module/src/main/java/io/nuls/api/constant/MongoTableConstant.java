@@ -51,4 +51,5 @@ public interface MongoTableConstant {
 
     String TX_COUNT = "txCount";
     String ANNUALIZE_REWARD = "annualizedReward";
+    String CONSENSUS_LOCKED = "consensusLocked";
 }

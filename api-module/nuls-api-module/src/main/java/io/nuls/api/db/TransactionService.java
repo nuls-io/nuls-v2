@@ -41,7 +41,6 @@ public class TransactionService {
         }
         List<Document> documentList = new ArrayList<>();
         for (TransactionInfo transactionInfo : txList) {
-            transactionInfo.calcValue();
             documentList.add(transactionInfo.toDocument());
         }
         mongoDBService.insertMany(TX_TABLE + chainId, documentList);

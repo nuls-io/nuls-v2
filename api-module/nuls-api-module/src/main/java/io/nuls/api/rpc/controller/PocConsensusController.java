@@ -23,27 +23,27 @@ package io.nuls.api.rpc.controller;
 import io.nuls.api.ApiContext;
 import io.nuls.api.analysis.WalletRpcHandler;
 import io.nuls.api.cache.ApiCache;
+import io.nuls.api.constant.ApiConstant;
 import io.nuls.api.db.*;
+import io.nuls.api.exception.JsonRpcException;
 import io.nuls.api.manager.CacheManager;
-import io.nuls.api.model.po.db.AgentInfo;
-import io.nuls.api.model.po.db.AliasInfo;
-import io.nuls.api.model.po.db.PageInfo;
-import io.nuls.api.model.po.db.PocRoundItem;
+import io.nuls.api.model.po.db.*;
 import io.nuls.api.model.rpc.RpcErrorCode;
 import io.nuls.api.model.rpc.RpcResult;
 import io.nuls.api.model.rpc.RpcResultError;
 import io.nuls.api.utils.AgentComparator;
 import io.nuls.api.utils.VerifyUtils;
+import io.nuls.base.basic.AddressTool;
 import io.nuls.tools.basic.Result;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Controller;
 import io.nuls.tools.core.annotation.RpcMethod;
 import io.nuls.tools.model.DoubleUtils;
+import io.nuls.tools.model.StringUtils;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+
+import static io.nuls.api.constant.MongoTableConstant.CONSENSUS_LOCKED;
 
 /**
  * @author Niels
@@ -99,15 +99,6 @@ public class PocConsensusController {
         RpcResult result = new RpcResult();
         result.setResult(resultMap);
         return result;
-    }
-
-    @RpcMethod("getConsensusStatistical")
-    public RpcResult getConsensusStatistical(List<Object> params) {
-        VerifyUtils.verifyParams(params, 2);
-        int chainId = (int) params.get(0);
-        int type = (int) params.get(1);
-        List list = this.statisticalService.getStatisticalList(chainId, type, "consensusLocked");
-        return new RpcResult().setResult(list);
     }
 
     @RpcMethod("getConsensusNodes")
@@ -202,153 +193,178 @@ public class PocConsensusController {
         }
         return RpcResult.success(agentInfo);
     }
-//
-//    @RpcMethod("getConsensusNodeStatistical")
-//    public RpcResult getConsensusNodeStatistical(List<Object> params) {
-//        VerifyUtils.verifyParams(params, 1);
-//        int type = (int) params.get(0);
-//        List list = this.statisticalService.getStatisticalList(type, "nodeCount");
-//        return new RpcResult().setResult(list);
-//    }
-//
-//    @RpcMethod("getAnnulizedRewardStatistical")
-//    public RpcResult getAnnulizedRewardStatistical(List<Object> params) {
-//        VerifyUtils.verifyParams(params, 1);
-//        int type = (int) params.get(0);
-//        List list = this.statisticalService.getStatisticalList(type, "annualizedReward");
-//        return new RpcResult().setResult(list);
-//    }
-//
-//    @RpcMethod("getPunishList")
-//    public RpcResult getPunishList(List<Object> params) {
-//        VerifyUtils.verifyParams(params, 4);
-//        int pageIndex = (int) params.get(0);
-//        int pageSize = (int) params.get(1);
-//        int type = (int) params.get(2);
-//        String agentAddress = (String) params.get(3);
-//        if (!AddressTool.validAddress(agentAddress)) {
-//            throw new JsonRpcException(new RpcResultError(RpcErrorCode.PARAMS_ERROR, "[address] is inValid"));
-//        }
-//        if (pageIndex <= 0) {
-//            pageIndex = 1;
-//        }
-//        if (pageSize <= 0 || pageSize > 100) {
-//            pageSize = 10;
-//        }
-//        PageInfo<PunishLog> list = punishService.getPunishLogList(type, agentAddress, pageIndex, pageSize);
-//        return new RpcResult().setResult(list);
-//    }
-//
-//    @RpcMethod("getConsensusDeposit")
-//    public RpcResult getConsensusDeposit(List<Object> params) {
-//        VerifyUtils.verifyParams(params, 3);
-//        int pageIndex = (int) params.get(0);
-//        int pageSize = (int) params.get(1);
-//        String agentHash = (String) params.get(2);
-//        if (StringUtils.isBlank(agentHash)) {
-//            throw new JsonRpcException(new RpcResultError(RpcErrorCode.PARAMS_ERROR, "[agentHash] is inValid"));
-//        }
-//        if (pageIndex <= 0) {
-//            pageIndex = 1;
-//        }
-//        if (pageSize <= 0 || pageSize > 100) {
-//            pageSize = 10;
-//        }
-//        PageInfo<DepositInfo> list = this.depositService.getDepositListByAgentHash(agentHash, pageIndex, pageSize);
-//        return new RpcResult().setResult(list);
-//    }
-//
-//    @RpcMethod("getBestRoundInfo")
-//    public RpcResult getBestRoundInfo(List<Object> params) {
-//        VerifyUtils.verifyParams(params, 0);
-//        return new RpcResult().setResult(roundManager.getCurrentRound());
-//    }
-//
-//    @RpcMethod("getAllConsensusDeposit")
-//    public RpcResult getAllConsensusDeposit(List<Object> params) {
-//        VerifyUtils.verifyParams(params, 4);
-//        int pageIndex = (int) params.get(0);
-//        int pageSize = (int) params.get(1);
-//        String agentHash = (String) params.get(2);
-//        int type = (int) params.get(3);
-//        if (StringUtils.isBlank(agentHash)) {
-//            throw new JsonRpcException(new RpcResultError(RpcErrorCode.PARAMS_ERROR, "[agentHash] is inValid"));
-//        }
-//        if (pageIndex <= 0) {
-//            pageIndex = 1;
-//        }
-//        if (pageSize <= 0 || pageSize > 100) {
-//            pageSize = 10;
-//        }
-//        PageInfo<DepositInfo> list = this.depositService.getCancelDepositListByAgentHash(agentHash, type, pageIndex, pageSize);
-//        return new RpcResult().setResult(list);
-//    }
-//
-//    @RpcMethod("getRoundList")
-//    public RpcResult getRoundList(List<Object> params) {
-//        VerifyUtils.verifyParams(params, 2);
-//        int pageIndex = (int) params.get(0);
-//        int pageSize = (int) params.get(1);
-//        if (pageIndex <= 0) {
-//            pageIndex = 1;
-//        }
-//        if (pageSize <= 0 || pageSize > 100) {
-//            pageSize = 10;
-//        }
-//        long count = roundService.getTotalCount();
-//        List<PocRound> roundList = roundService.getRoundList(pageIndex, pageSize);
-//        PageInfo<PocRound> pageInfo = new PageInfo<>();
-//        pageInfo.setPageNumber(pageIndex);
-//        pageInfo.setPageSize(pageSize);
-//        pageInfo.setTotalCount(count);
-//        pageInfo.setList(roundList);
-//        return new RpcResult().setResult(pageInfo);
-//    }
-//
-//    @RpcMethod("getRoundInfo")
-//    public RpcResult getRoundInfo(List<Object> params) {
-//        VerifyUtils.verifyParams(params, 1);
-//        long roundIndex = Long.parseLong(params.get(0) + "");
-//        if (roundIndex == 1) {
-//            return getFirstRound();
-//        }
-//
-//        CurrentRound round = new CurrentRound();
-//        PocRound pocRound = roundService.getRound(roundIndex);
-//        if (pocRound == null) {
-//            throw new JsonRpcException(new RpcResultError(RpcErrorCode.DATA_NOT_EXISTS));
-//        }
-//        List<PocRoundItem> itemList = roundService.getRoundItemList(roundIndex);
-//        round.setItemList(itemList);
-//        round.initByPocRound(pocRound);
-//        return new RpcResult().setResult(round);
-//    }
-//
-//    private RpcResult getFirstRound() {
-//        BlockHeaderInfo headerInfo = headerService.getBlockHeaderInfoByHeight(0);
-//        if (null == headerInfo) {
-//            return new RpcResult();
-//        }
-//        CurrentRound round = new CurrentRound();
-//        round.setStartTime(headerInfo.getRoundStartTime());
-//        round.setStartHeight(0);
-//        round.setProducedBlockCount(1);
-//        round.setMemberCount(1);
-//        round.setIndex(1);
-//        round.setEndTime(headerInfo.getCreateTime());
-//        round.setEndHeight(0);
-//        List<PocRoundItem> itemList = new ArrayList<>();
-//        PocRoundItem item = new PocRoundItem();
-//        itemList.add(item);
-//        item.setTime(headerInfo.getCreateTime());
-//        item.setTxCount(1);
-//        item.setBlockHash(headerInfo.getHash());
-//        item.setBlockHeight(0);
-//        item.setPackingAddress(headerInfo.getPackingAddress());
-//        item.setRoundIndex(1);
-//        item.setOrder(1);
-//        round.setItemList(itemList);
-//        return new RpcResult().setResult(round);
-//    }
+
+
+    @RpcMethod("getConsensusStatistical")
+    public RpcResult getConsensusStatistical(List<Object> params) {
+        VerifyUtils.verifyParams(params, 2);
+        int chainId = (int) params.get(0);
+        int type = (int) params.get(1);
+        List list = this.statisticalService.getStatisticalList(chainId, type, CONSENSUS_LOCKED);
+        return new RpcResult().setResult(list);
+    }
+
+
+    @RpcMethod("getConsensusNodeStatistical")
+    public RpcResult getConsensusNodeStatistical(List<Object> params) {
+        VerifyUtils.verifyParams(params, 2);
+        int chainId = (int) params.get(0);
+        int type = (int) params.get(1);
+        List list = this.statisticalService.getStatisticalList(chainId, type, "nodeCount");
+        return new RpcResult().setResult(list);
+    }
+
+    @RpcMethod("getAnnulizedRewardStatistical")
+    public RpcResult getAnnulizedRewardStatistical(List<Object> params) {
+        VerifyUtils.verifyParams(params, 2);
+        int chainId = (int) params.get(0);
+        int type = (int) params.get(1);
+        List list = this.statisticalService.getStatisticalList(chainId, type, "annualizedReward");
+        return new RpcResult().setResult(list);
+    }
+
+
+    @RpcMethod("getPunishList")
+    public RpcResult getPunishList(List<Object> params) {
+        VerifyUtils.verifyParams(params, 5);
+        int pageIndex = (int) params.get(0);
+        int pageSize = (int) params.get(1);
+        int type = (int) params.get(2);
+        String agentAddress = (String) params.get(3);
+        int chainId = (int) params.get(4);
+        if (!AddressTool.validAddress(chainId, agentAddress)) {
+            throw new JsonRpcException(new RpcResultError(RpcErrorCode.PARAMS_ERROR, "[address] is inValid"));
+        }
+        if (pageIndex <= 0) {
+            pageIndex = 1;
+        }
+        if (pageSize <= 0 || pageSize > 100) {
+            pageSize = 10;
+        }
+        PageInfo<PunishLogInfo> list = punishService.getPunishLogList(chainId, type, agentAddress, pageIndex, pageSize);
+        return new RpcResult().setResult(list);
+    }
+
+    @RpcMethod("getConsensusDeposit")
+    public RpcResult getConsensusDeposit(List<Object> params) {
+        VerifyUtils.verifyParams(params, 4);
+        int pageIndex = (int) params.get(0);
+        int pageSize = (int) params.get(1);
+        String agentHash = (String) params.get(2);
+        int chainId = (int) params.get(3);
+        if (StringUtils.isBlank(agentHash)) {
+            throw new JsonRpcException(new RpcResultError(RpcErrorCode.PARAMS_ERROR, "[agentHash] is inValid"));
+        }
+        if (pageIndex <= 0) {
+            pageIndex = 1;
+        }
+        if (pageSize <= 0 || pageSize > 100) {
+            pageSize = 10;
+        }
+        PageInfo<DepositInfo> list = this.depositService.getDepositListByAgentHash(chainId, agentHash, pageIndex, pageSize);
+        return new RpcResult().setResult(list);
+    }
+
+    @RpcMethod("getAllConsensusDeposit")
+    public RpcResult getAllConsensusDeposit(List<Object> params) {
+        VerifyUtils.verifyParams(params, 5);
+        int pageIndex = (int) params.get(0);
+        int pageSize = (int) params.get(1);
+        String agentHash = (String) params.get(2);
+        int type = (int) params.get(3);
+        int chainId = (int) params.get(4);
+        if (StringUtils.isBlank(agentHash)) {
+            throw new JsonRpcException(new RpcResultError(RpcErrorCode.PARAMS_ERROR, "[agentHash] is inValid"));
+        }
+        if (pageIndex <= 0) {
+            pageIndex = 1;
+        }
+        if (pageSize <= 0 || pageSize > 100) {
+            pageSize = 10;
+        }
+        PageInfo<DepositInfo> list = this.depositService.getCancelDepositListByAgentHash(chainId, agentHash, type, pageIndex, pageSize);
+        return new RpcResult().setResult(list);
+    }
+
+    @RpcMethod("getBestRoundInfo")
+    public RpcResult getBestRoundInfo(List<Object> params) {
+        VerifyUtils.verifyParams(params, 1);
+        int chainId = (int) params.get(0);
+        ApiCache apiCache = CacheManager.getCache(chainId);
+        if (apiCache == null) {
+            throw new JsonRpcException(new RpcResultError(RpcErrorCode.DATA_NOT_EXISTS));
+        }
+        return new RpcResult().setResult(apiCache.getCurrentRound());
+    }
+
+
+    @RpcMethod("getRoundList")
+    public RpcResult getRoundList(List<Object> params) {
+        VerifyUtils.verifyParams(params, 3);
+        int pageIndex = (int) params.get(0);
+        int pageSize = (int) params.get(1);
+        int chainId = (int) params.get(2);
+        if (pageIndex <= 0) {
+            pageIndex = 1;
+        }
+        if (pageSize <= 0 || pageSize > 100) {
+            pageSize = 10;
+        }
+        long count = roundService.getTotalCount(chainId);
+        List<PocRound> roundList = roundService.getRoundList(chainId, pageIndex, pageSize);
+        PageInfo<PocRound> pageInfo = new PageInfo<>();
+        pageInfo.setPageNumber(pageIndex);
+        pageInfo.setPageSize(pageSize);
+        pageInfo.setTotalCount(count);
+        pageInfo.setList(roundList);
+        return new RpcResult().setResult(pageInfo);
+    }
+
+    @RpcMethod("getRoundInfo")
+    public RpcResult getRoundInfo(List<Object> params) {
+        VerifyUtils.verifyParams(params, 2);
+        int chainId = (int) params.get(0);
+        long roundIndex = Long.parseLong(params.get(1) + "");
+        if (roundIndex == 1) {
+            return getFirstRound(chainId);
+        }
+
+        CurrentRound round = new CurrentRound();
+        PocRound pocRound = roundService.getRound(chainId, roundIndex);
+        if (pocRound == null) {
+            throw new JsonRpcException(new RpcResultError(RpcErrorCode.DATA_NOT_EXISTS));
+        }
+        List<PocRoundItem> itemList = roundService.getRoundItemList(chainId, roundIndex);
+        round.setItemList(itemList);
+        round.initByPocRound(pocRound);
+        return new RpcResult().setResult(round);
+    }
+
+    private RpcResult getFirstRound(int chainId) {
+        BlockHeaderInfo headerInfo = headerService.getBlockHeader(chainId, 0);
+        if (null == headerInfo) {
+            return new RpcResult();
+        }
+        CurrentRound round = new CurrentRound();
+        round.setStartTime(headerInfo.getRoundStartTime());
+        round.setStartHeight(0);
+        round.setProducedBlockCount(1);
+        round.setMemberCount(1);
+        round.setIndex(1);
+        round.setEndTime(headerInfo.getCreateTime());
+        round.setEndHeight(0);
+        List<PocRoundItem> itemList = new ArrayList<>();
+        PocRoundItem item = new PocRoundItem();
+        itemList.add(item);
+        item.setTime(headerInfo.getCreateTime());
+        item.setTxCount(1);
+        item.setBlockHash(headerInfo.getHash());
+        item.setBlockHeight(0);
+        item.setPackingAddress(headerInfo.getPackingAddress());
+        item.setRoundIndex(1);
+        item.setOrder(1);
+        round.setItemList(itemList);
+        return new RpcResult().setResult(round);
+    }
 
 }

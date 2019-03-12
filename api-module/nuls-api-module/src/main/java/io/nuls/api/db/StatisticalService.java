@@ -30,7 +30,9 @@ import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.model.DoubleUtils;
 import org.bson.Document;
 
+import java.math.BigInteger;
 import java.util.*;
+import java.util.zip.ZipEntry;
 
 import static com.mongodb.client.model.Filters.*;
 import static io.nuls.api.constant.MongoTableConstant.*;
@@ -87,8 +89,10 @@ public class StatisticalService {
             for (Document document : documentList) {
                 KeyValue keyValue = new KeyValue();
                 keyValue.setKey(document.get("month") + "/" + document.get("date"));
-                if ("annualizedReward".equals(field)) {
+                if (ANNUALIZE_REWARD.equals(field)) {
                     keyValue.setValue(document.getDouble(field));
+                } else if (CONSENSUS_LOCKED.equals(field)) {
+                    keyValue.setValue(new BigInteger(document.getString(field)));
                 } else {
                     keyValue.setValue(document.getLong(field));
                 }
@@ -99,6 +103,8 @@ public class StatisticalService {
                 summaryLong(list, documentList, field);
             } else if (ANNUALIZE_REWARD.equals(field)) {
                 avgDouble(list, documentList, field);
+            } else if (CONSENSUS_LOCKED.equals(field)) {
+                avgBigIngter(list, documentList, field);
             } else {
                 avgLong(list, documentList, field);
             }
@@ -126,6 +132,34 @@ public class StatisticalService {
             keyValue.setValue(map.get(key));
             list.add(keyValue);
         }
+    }
+
+    private void avgBigIngter(List<KeyValue> list, List<Document> documentList, String field) {
+        List<String> keyList = new ArrayList<>();
+        Map<String, List<BigInteger>> map = new HashMap<>();
+        for (Document document : documentList) {
+            String key = document.get("year") + "/" + document.get("month");
+            List<BigInteger> value = map.get(key);
+            if (null == value) {
+                value = new ArrayList<>();
+                keyList.add(key);
+                map.put(key, value);
+            }
+            value.add(new BigInteger(document.get(field).toString()));
+        }
+        for (String key : keyList) {
+            KeyValue keyValue = new KeyValue();
+            keyValue.setKey(key);
+            BigInteger value = BigInteger.ZERO;
+            List<BigInteger> valueList = map.get(key);
+            for (BigInteger val : valueList) {
+                value = value.add(val);
+            }
+
+            keyValue.setValue(value.divide(new BigInteger(valueList.size() + "")));
+            list.add(keyValue);
+        }
+
     }
 
     private void avgLong(List<KeyValue> list, List<Document> documentList, String field) {

@@ -1,5 +1,6 @@
 package io.nuls.api.model.po.db;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class PageInfo<T> {
@@ -21,6 +22,12 @@ public class PageInfo<T> {
         this.pageSize = pageSize;
         this.totalCount = totalCount;
         this.list = list;
+    }
+
+    public PageInfo(int pageNumber, int pageSize) {
+        this.pageNumber = pageNumber;
+        this.pageSize = pageSize;
+        this.list = new ArrayList<>();
     }
 
     public int getPageNumber() {

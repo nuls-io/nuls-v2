@@ -29,6 +29,6 @@ import io.nuls.api.model.rpc.RpcResultError;
 public class NotFoundException extends JsonRpcException {
 
     public NotFoundException() {
-        super(new RpcResultError(404, "Data not found!", null));
+        super(new RpcResultError("404", "Data not found!", null));
     }
 }

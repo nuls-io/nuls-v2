@@ -11,6 +11,7 @@ import io.nuls.api.model.rpc.RpcResult;
 import io.nuls.api.model.rpc.RpcResultError;
 import io.nuls.api.utils.VerifyUtils;
 import io.nuls.tools.core.annotation.Autowired;
+import io.nuls.tools.core.annotation.Controller;
 import io.nuls.tools.core.annotation.RpcMethod;
 import io.nuls.tools.model.StringUtils;
 
@@ -18,6 +19,7 @@ import java.util.List;
 
 import static io.nuls.api.constant.MongoTableConstant.TX_COUNT;
 
+@Controller
 public class TransactionController {
 
     @Autowired

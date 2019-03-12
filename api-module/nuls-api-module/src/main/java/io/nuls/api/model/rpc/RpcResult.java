@@ -21,6 +21,7 @@
 package io.nuls.api.model.rpc;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import io.nuls.tools.basic.Result;
 
 /**
  * @author Niels
@@ -80,6 +81,12 @@ public class RpcResult<T> {
         RpcResult rpcResult = new RpcResult();
         RpcResultError error = new RpcResultError(errorCode);
         rpcResult.setError(error);
+        return rpcResult;
+    }
+
+    public static RpcResult failed(Result result) {
+        RpcResult rpcResult = new RpcResult();
+        RpcResultError error = new RpcResultError(result.getErrorCode().getCode(), result.getMsg(), null);
         return rpcResult;
     }
 

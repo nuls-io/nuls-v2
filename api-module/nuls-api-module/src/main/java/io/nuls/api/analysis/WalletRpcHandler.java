@@ -2,6 +2,7 @@ package io.nuls.api.analysis;
 
 import io.nuls.api.ApiContext;
 import io.nuls.api.constant.ApiConstant;
+import io.nuls.api.constant.ApiErrorCode;
 import io.nuls.api.constant.CommandConstant;
 import io.nuls.api.model.po.db.AccountInfo;
 import io.nuls.api.model.po.db.AgentInfo;
@@ -23,7 +24,7 @@ import java.util.Map;
 
 public class WalletRpcHandler {
 
-    public static BlockInfo getBlockInfo(int chainID, long height) {
+    public static Result<BlockInfo> getBlockInfo(int chainID, long height) {
         Map<String, Object> params = new HashMap<>(ApiConstant.INIT_CAPACITY_8);
         params.put(Constants.VERSION_KEY_STR, ApiContext.VERSION);
         params.put("chainId", chainID);
@@ -31,21 +32,21 @@ public class WalletRpcHandler {
         try {
             String blockHex = (String) RpcCall.request(ModuleE.BL.abbr, CommandConstant.GET_BLOCK_BY_HEIGHT, params);
             if (null == blockHex) {
-                return null;
+                return Result.getFailed(ApiErrorCode.DATA_NOT_FOUND);
             }
             byte[] bytes = HexUtil.decode(blockHex);
             Block block = new Block();
             block.parse(new NulsByteBuffer(bytes));
-            return AnalysisHandler.toBlockInfo(block, chainID);
-        } catch (NulsException e) {
-            e.printStackTrace();
+            BlockInfo blockInfo = AnalysisHandler.toBlockInfo(block, chainID);
+
+            return Result.getSuccess(null).setData(blockInfo);
         } catch (Exception e) {
             e.printStackTrace();
         }
-        return null;
+        return Result.getFailed(ApiErrorCode.DATA_PARSE_ERROR);
     }
 
-    public static BlockInfo getBlockInfo(int chainID, String hash) {
+    public static Result<BlockInfo> getBlockInfo(int chainID, String hash) {
         Map<String, Object> params = new HashMap<>(ApiConstant.INIT_CAPACITY_8);
         params.put(Constants.VERSION_KEY_STR, ApiContext.VERSION);
         params.put("chainId", chainID);
@@ -55,11 +56,11 @@ public class WalletRpcHandler {
             byte[] bytes = HexUtil.decode(blockHex);
             Block block = new Block();
             block.parse(new NulsByteBuffer(bytes));
-            return AnalysisHandler.toBlockInfo(block, chainID);
-        } catch (NulsException e) {
-            e.printStackTrace();
+            BlockInfo blockInfo = AnalysisHandler.toBlockInfo(block, chainID);
+            return Result.getSuccess(null).setData(blockInfo);
         } catch (Exception e) {
             e.printStackTrace();
+            // return Result.getFailed()
         }
         return null;
     }

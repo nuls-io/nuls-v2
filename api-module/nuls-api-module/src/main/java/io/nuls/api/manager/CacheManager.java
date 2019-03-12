@@ -39,4 +39,9 @@ public class CacheManager {
         return apiCacheMap;
     }
 
+    public static boolean isChainExsit(int chainId) {
+        ApiCache cache = apiCacheMap.get(chainId);
+        return cache != null;
+    }
+
 }

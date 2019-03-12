@@ -1,11 +1,9 @@
 package io.nuls.api.db;
 
-import com.mongodb.client.model.Filters;
-import com.mongodb.client.model.InsertOneModel;
-import com.mongodb.client.model.ReplaceOneModel;
-import com.mongodb.client.model.WriteModel;
+import com.mongodb.client.model.*;
 import io.nuls.api.constant.MongoTableConstant;
 import io.nuls.api.model.po.db.DepositInfo;
+import io.nuls.api.model.po.db.PageInfo;
 import io.nuls.api.utils.DocumentTransferTool;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
@@ -55,6 +53,21 @@ public class DepositService {
         return depositInfos;
     }
 
+    public PageInfo<DepositInfo> getDepositListByAgentHash(int chainID, String hash, int pageIndex, int pageSize) {
+        Bson bson = Filters.and(Filters.eq("agentHash", hash), Filters.eq("deleteKey", null));
+        List<Document> documentList = mongoDBService.pageQuery(DEPOSIT_TABLE + chainID, bson, Sorts.descending("createTime"), pageIndex, pageSize);
+        long totalCount = mongoDBService.getCount(DEPOSIT_TABLE + chainID, bson);
+
+        List<DepositInfo> depositInfos = new ArrayList<>();
+        for (Document document : documentList) {
+            DepositInfo depositInfo = DocumentTransferTool.toInfo(document, "key", DepositInfo.class);
+            depositInfos.add(depositInfo);
+        }
+        PageInfo<DepositInfo> pageInfo = new PageInfo<>(pageIndex, pageSize, totalCount, depositInfos);
+        return pageInfo;
+    }
+
+
     public void saveDepositList(int chainId, List<DepositInfo> depositInfoList) {
         if (depositInfoList.isEmpty()) {
             return;
@@ -82,5 +95,24 @@ public class DepositService {
         }
 
         return resultList;
+    }
+
+    public PageInfo<DepositInfo> getCancelDepositListByAgentHash(int chainId, String hash, int type, int pageIndex, int pageSize) {
+        Bson bson;
+        if (type != 2) {
+            bson = Filters.and(Filters.eq("agentHash", hash), Filters.eq("type", type));
+        } else {
+            bson = Filters.eq("agentHash", hash);
+        }
+        List<Document> documentList = mongoDBService.pageQuery(DEPOSIT_TABLE + chainId, bson, Sorts.descending("createTime"), pageIndex, pageSize);
+        long totalCount = mongoDBService.getCount(DEPOSIT_TABLE + chainId, bson);
+
+        List<DepositInfo> depositInfos = new ArrayList<>();
+        for (Document document : documentList) {
+            DepositInfo depositInfo = DocumentTransferTool.toInfo(document, "key", DepositInfo.class);
+            depositInfos.add(depositInfo);
+        }
+        PageInfo<DepositInfo> pageInfo = new PageInfo<>(pageIndex, pageSize, totalCount, depositInfos);
+        return pageInfo;
     }
 }

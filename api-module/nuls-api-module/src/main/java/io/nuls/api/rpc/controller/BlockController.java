@@ -32,11 +32,11 @@ import io.nuls.api.model.rpc.RpcResult;
 import io.nuls.api.model.rpc.RpcResultError;
 import io.nuls.api.service.RollbackService;
 import io.nuls.api.utils.VerifyUtils;
+import io.nuls.tools.basic.Result;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Controller;
 import io.nuls.tools.core.annotation.RpcMethod;
 import io.nuls.tools.model.StringUtils;
-
 
 import java.util.List;
 
@@ -50,10 +50,6 @@ public class BlockController {
 
     @Autowired
     private MongoDBService dbService;
-
-//    @Autowired
-//    private WalletRPCHandler rpcHandler;
-
     @Autowired
     private BlockService blockService;
     @Autowired
@@ -64,7 +60,10 @@ public class BlockController {
         VerifyUtils.verifyParams(params, 1);
         int chainId = (int) params.get(0);
         BlockHeaderInfo localBestBlockHeader = blockService.getBestBlockHeader(chainId);
-        return new RpcResult().setResult(localBestBlockHeader);
+        if (localBestBlockHeader == null) {
+            return RpcResult.failed(DATA_NOT_EXISTS);
+        }
+        return RpcResult.success(localBestBlockHeader);
     }
 
     @RpcMethod("getHeaderByHeight")
@@ -76,10 +75,10 @@ public class BlockController {
             height = 0;
         }
         BlockHeaderInfo header = blockService.getBlockHeader(chainId, height);
-        RpcResult rpcResult = new RpcResult();
-        rpcResult.setResult(header);
-
-        return rpcResult;
+        if (header == null) {
+            return RpcResult.failed(DATA_NOT_EXISTS);
+        }
+        return RpcResult.success(header);
     }
 
     @RpcMethod("getHeaderByHash")
@@ -92,10 +91,10 @@ public class BlockController {
             throw new JsonRpcException(new RpcResultError(RpcErrorCode.PARAMS_ERROR, "[hash] is required"));
         }
         BlockHeaderInfo header = blockService.getBlockHeaderByHash(chainId, hash);
-
-        RpcResult rpcResult = new RpcResult();
-        rpcResult.setResult(header);
-        return rpcResult;
+        if (header == null) {
+            return RpcResult.failed(DATA_NOT_EXISTS);
+        }
+        return RpcResult.success(header);
     }
 
     @RpcMethod("getBlockByHash")
@@ -107,14 +106,12 @@ public class BlockController {
         if (StringUtils.isBlank(hash)) {
             throw new JsonRpcException(new RpcResultError(RpcErrorCode.PARAMS_ERROR, "[hash] is required"));
         }
-
-        BlockInfo blockInfo = WalletRpcHandler.getBlockInfo(chainId, hash);
-        if (blockInfo == null) {
-            throw new JsonRpcException(new RpcResultError(DATA_NOT_EXISTS.getCode(), DATA_NOT_EXISTS.getMessage(), null));
+        Result<BlockInfo> result = WalletRpcHandler.getBlockInfo(chainId, hash);
+        if (result.isFailed()) {
+            return RpcResult.failed(result);
         }
-
         RpcResult rpcResult = new RpcResult();
-        rpcResult.setResult(blockInfo);
+        rpcResult.setResult(result.getData());
         return rpcResult;
     }
 
@@ -130,8 +127,11 @@ public class BlockController {
         if (blockHeaderInfo == null) {
             throw new JsonRpcException(new RpcResultError(DATA_NOT_EXISTS.getCode(), DATA_NOT_EXISTS.getMessage(), null));
         }
-
-        BlockInfo blockInfo = WalletRpcHandler.getBlockInfo(chainId, height);
+        Result<BlockInfo> result = WalletRpcHandler.getBlockInfo(chainId, height);
+        if (result.isFailed()) {
+            return RpcResult.failed(result);
+        }
+        BlockInfo blockInfo = result.getData();
         blockInfo.setHeader(blockHeaderInfo);
         RpcResult rpcResult = new RpcResult();
         rpcResult.setResult(blockInfo);

@@ -10,6 +10,7 @@ import io.nuls.api.model.po.db.TxRelationInfo;
 import io.nuls.api.utils.DocumentTransferTool;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
+import io.nuls.tools.model.BigIntegerUtils;
 import org.bson.Document;
 import org.bson.conversions.Bson;
 
@@ -47,6 +48,7 @@ public class AccountService {
         List<WriteModel<Document>> modelList = new ArrayList<>();
         for (AccountInfo accountInfo : accountInfoMap.values()) {
             Document document = DocumentTransferTool.toDocument(accountInfo, "address");
+            document.put("totalBalance", BigIntegerUtils.bigIntegerToString(accountInfo.getTotalBalance(), 32));
             if (accountInfo.isNew()) {
                 modelList.add(new InsertOneModel(document));
                 accountInfo.setNew(false);
@@ -103,7 +105,7 @@ public class AccountService {
             sort = Sorts.ascending("totalBalance");
         }
         List<AccountInfo> accountInfoList = new ArrayList<>();
-        Bson filter = Filters.gt("totalBalance", 0);
+        Bson filter = Filters.ne("totalBalance", 0);
         List<Document> docsList = this.mongoDBService.pageQuery(ACCOUNT_TABLE + chainId, filter, sort, pageIndex, pageSize);
         long totalCount = mongoDBService.getCount(ACCOUNT_TABLE + chainId, filter);
         for (Document document : docsList) {

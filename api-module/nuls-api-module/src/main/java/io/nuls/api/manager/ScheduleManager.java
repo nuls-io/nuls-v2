@@ -24,7 +24,7 @@ public class ScheduleManager {
         for (ApiCache apiCache : CacheManager.getApiCaches().values()) {
             executorService.scheduleAtFixedRate(new SyncBlockTask(apiCache.getChainInfo().getChainId()), 1, 10, TimeUnit.SECONDS);
 
-            executorService.scheduleAtFixedRate(new StatisticalTask(apiCache.getChainInfo().getChainId()), 1, 60, TimeUnit.MINUTES);
+            executorService.scheduleAtFixedRate(new StatisticalTask(apiCache.getChainInfo().getChainId()), 20, 300, TimeUnit.SECONDS);
         }
     }
 }

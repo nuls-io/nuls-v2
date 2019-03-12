@@ -118,32 +118,32 @@ public class AnalysisHandler {
             info.setTxData(toTxData(tx));
         }
 
-        BigInteger value = BigInteger.ZERO;
-        if (info.getType() == ApiConstant.TX_TYPE_COINBASE) {
-            if (info.getCoinTos() != null) {
-                for (CoinToInfo coinTo : info.getCoinTos()) {
-                    value = value.add(coinTo.getAmount());
-                }
-            }
-        } else if (info.getType() == ApiConstant.TX_TYPE_TRANSFER ||
-                info.getType() == ApiConstant.TX_TYPE_CALL_CONTRACT ||
-                info.getType() == ApiConstant.TX_TYPE_CONTRACT_TRANSFER ||
-                info.getType() == ApiConstant.TX_TYPE_DATA) {
-            Set<String> addressSet = new HashSet<>();
-            for (CoinFromInfo coinFrom : info.getCoinFroms()) {
-                addressSet.add(coinFrom.getAddress());
-            }
-            if (null != info.getCoinTos()) {
-                for (CoinToInfo coinTo : info.getCoinTos()) {
-                    if (!addressSet.contains(coinTo.getAddress())) {
-                        value = value.add(coinTo.getAmount());
-                    }
-                }
-            }
-        } else if (info.getType() == ApiConstant.TX_TYPE_ALIAS) {
-            value = ApiConstant.ALIAS_AMOUNT;
-        }
-        info.setValue(value);
+//        BigInteger value = BigInteger.ZERO;
+//        if (info.getType() == ApiConstant.TX_TYPE_COINBASE) {
+//            if (info.getCoinTos() != null) {
+//                for (CoinToInfo coinTo : info.getCoinTos()) {
+//                    value = value.add(coinTo.getAmount());
+//                }
+//            }
+//        } else if (info.getType() == ApiConstant.TX_TYPE_TRANSFER ||
+//                info.getType() == ApiConstant.TX_TYPE_CALL_CONTRACT ||
+//                info.getType() == ApiConstant.TX_TYPE_CONTRACT_TRANSFER ||
+//                info.getType() == ApiConstant.TX_TYPE_DATA) {
+//            Set<String> addressSet = new HashSet<>();
+//            for (CoinFromInfo coinFrom : info.getCoinFroms()) {
+//                addressSet.add(coinFrom.getAddress());
+//            }
+//            if (null != info.getCoinTos()) {
+//                for (CoinToInfo coinTo : info.getCoinTos()) {
+//                    if (!addressSet.contains(coinTo.getAddress())) {
+//                        value = value.add(coinTo.getAmount());
+//                    }
+//                }
+//            }
+//        } else if (info.getType() == ApiConstant.TX_TYPE_ALIAS) {
+//            value = ApiConstant.ALIAS_AMOUNT;
+//        }
+        info.calcValue();
         return info;
     }
 
