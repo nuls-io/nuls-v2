@@ -89,12 +89,17 @@ public class TxValid {
 
     @Test
     public void transfer() throws Exception {
-        for (int i = 0; i < 99999999; i++) {
+        for (int i = 0; i < 9999999; i++) {
             String hash = createTransfer();
-            Thread.sleep(5000L);
-            getTx(hash);
+            Thread.sleep(500L);
+            //getTx(hash);
         }
 //        createCtxTransfer();
+    }
+
+    @Test
+    public void getTx() throws Exception {
+        getTx("0020b0c6ea2c6fd089062a65841abcd420e100ba203f3b0425f642979bf8f7e65c1e");
     }
 
     private void getTx(String hash) throws Exception{
@@ -106,6 +111,7 @@ public class TxValid {
         Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.TX.abbr, "tx_getTx", params);
         HashMap result = (HashMap) (((HashMap) cmdResp.getResponseData()).get("tx_getTx"));
         Assert.assertTrue(null != result);
+        Log.debug("{}", JSONUtils.obj2PrettyJson(result));
         String hex = (String) result.get("txHex");
         Log.debug("getTx -hash:{}", TxUtil.getTransaction(hex).getHash().getDigestHex());
     }
@@ -444,7 +450,7 @@ public class TxValid {
         List<CoinDTO> inputs = new ArrayList<>();
         List<CoinDTO> outputs = new ArrayList<>();
         CoinDTO inputCoin1 = new CoinDTO();
-        inputCoin1.setAddress(address26);
+        inputCoin1.setAddress(address29);
         inputCoin1.setPassword(password);
         inputCoin1.setAssetsChainId(chainId);
         inputCoin1.setAssetsId(assetId);
