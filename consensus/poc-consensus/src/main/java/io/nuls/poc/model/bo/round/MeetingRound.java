@@ -161,9 +161,7 @@ public class MeetingRound {
     }
 
     public MeetingMember getMember(byte[] address,Chain chain) {
-        Log.info("-----------------本地账户地址："+AddressTool.getStringAddressByBytes(address));
         for (MeetingMember member : memberList) {
-            Log.info("---------轮次成员："+ AddressTool.getStringAddressByBytes(member.getAgent().getPackingAddress()));
             if (Arrays.equals(address, member.getAgent().getPackingAddress()) && validAccount(chain, AddressTool.getStringAddressByBytes(member.getAgent().getPackingAddress()))) {
                 return member;
             }
@@ -177,7 +175,6 @@ public class MeetingRound {
             String password = properties.getProperty(ConsensusConstant.PASSWORD, ConsensusConstant.PASSWORD);
             HashMap callResult = CallMethodUtils.accountValid(chain.getConfig().getChainId(), address, password);
             String priKey = (String) callResult.get("priKey");
-            Log.info(address+"账户的私钥为"+priKey);
             if (StringUtils.isNotBlank(priKey)){
                 return true;
             }
