@@ -88,7 +88,7 @@ public class AccountServiceImpl implements AccountService, InitializingBean {
 
     @Override
     public void afterPropertiesSet() {
-        //Initialize local account entity to cache
+        //Initialize local account data to cache
         getAccountList();
     }
 
@@ -116,7 +116,7 @@ public class AccountServiceImpl implements AccountService, InitializingBean {
                 AccountPo po = new AccountPo(account);
                 accountPos.add(po);
             }
-            //Saving account entity in batches
+            //Saving account data in batches
             boolean result = accountStorageService.saveAccountList(accountPos);
             if (result) {
                 //If saved successfully, put the account in local cache.
@@ -124,7 +124,7 @@ public class AccountServiceImpl implements AccountService, InitializingBean {
                     accountCacheService.localAccountMaps.put(account.getAddress().getBase58(), account);
                     //backup account to keystore
                     keyStoreService.backupAccountToKeyStore(null, chainId, account.getAddress().getBase58(), password);
-                    //build event entity
+                    //build event data
                     HashMap<String, Object> eventData = new HashMap<>();
                     eventData.put("address", account.getAddress().getBase58());
                     eventData.put("isEncrypted", account.isEncrypted());
@@ -155,7 +155,7 @@ public class AccountServiceImpl implements AccountService, InitializingBean {
     @Override
     public List<Account> getAccountList() {
         List<Account> list = new ArrayList<>();
-        //If local account entity is loaded into the cache
+        //If local account data is loaded into the cache
         if (accountCacheService.localAccountMaps.size() > 0) {
             Collection<Account> values = accountCacheService.localAccountMaps.values();
             Iterator<Account> iterator = values.iterator();
@@ -301,7 +301,7 @@ public class AccountServiceImpl implements AccountService, InitializingBean {
             accountCacheService.localAccountMaps.put(account.getAddress().getBase58(), account);
             //backup account to keystore
             keyStoreService.backupAccountToKeyStore(null, chainId, account.getAddress().getBase58(), newPassword);
-            //build event entity
+            //build event data
             HashMap<String, Object> eventData = new HashMap<>();
             eventData.put("address", account.getAddress().getBase58());
             //Sending update account password events
@@ -430,7 +430,7 @@ public class AccountServiceImpl implements AccountService, InitializingBean {
             //Delete the account from the cache
             accountCacheService.localAccountMaps.remove(account.getAddress().getBase58());
 
-            //build event entity
+            //build event data
             HashMap<String, Object> eventData = new HashMap<>();
             eventData.put("address", account.getAddress().getBase58());
             //Sending account remove events

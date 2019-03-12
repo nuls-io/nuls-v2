@@ -25,24 +25,19 @@ package io.nuls.transaction.model.po;
 
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.basic.NulsOutputStreamBuffer;
-import io.nuls.base.constant.TxStatusEnum;
-import io.nuls.base.data.Address;
 import io.nuls.base.data.BaseNulsData;
 import io.nuls.base.data.NulsDigestData;
 import io.nuls.base.data.Transaction;
 import io.nuls.tools.constant.ToolsConstant;
-import io.nuls.tools.crypto.ECKey;
-import io.nuls.tools.crypto.EncryptedData;
 import io.nuls.tools.crypto.UnsafeByteArrayOutputStream;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.parse.SerializeUtils;
-import io.nuls.transaction.constant.TxConstant;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.math.BigInteger;
 
 /**
+ * 未确认交易的保存, 封装是为了记录交易进入[未确认保存]时的时间,以便作为未确认交易清理机制清理的依据
  * @author: qinyifeng
  * @date: 2019/01/24
  */

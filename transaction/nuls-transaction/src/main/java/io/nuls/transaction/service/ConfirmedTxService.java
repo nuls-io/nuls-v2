@@ -1,10 +1,10 @@
 package io.nuls.transaction.service;
 
-import io.nuls.base.data.BlockHeader;
 import io.nuls.base.data.NulsDigestData;
 import io.nuls.base.data.Transaction;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.transaction.model.bo.Chain;
+import io.nuls.transaction.model.po.TransactionConfirmedPO;
 
 import java.util.List;
 
@@ -21,9 +21,9 @@ public interface ConfirmedTxService {
      * 获取一笔已打包进区块并且确认的交易
      * @param chain
      * @param hash
-     * @return Transaction
+     * @return TransactionConfirmedPO
      */
-    Transaction getConfirmedTransaction(Chain chain, NulsDigestData hash);
+    TransactionConfirmedPO getConfirmedTransaction(Chain chain, NulsDigestData hash);
 
     /**
      * 保存已确认交易

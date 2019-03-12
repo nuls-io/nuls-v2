@@ -1,7 +1,5 @@
 package io.nuls.transaction.service;
 
-import io.nuls.base.data.BlockHeader;
-import io.nuls.base.data.BlockHeaderDigest;
 import io.nuls.base.data.NulsDigestData;
 import io.nuls.base.data.Transaction;
 import io.nuls.base.signture.MultiSignTxSignature;
@@ -12,6 +10,7 @@ import io.nuls.transaction.model.bo.TxRegister;
 import io.nuls.transaction.model.bo.VerifyTxResult;
 import io.nuls.transaction.model.dto.AccountSignDTO;
 import io.nuls.transaction.model.dto.CoinDTO;
+import io.nuls.transaction.model.po.TransactionConfirmedPO;
 
 import java.util.List;
 import java.util.Map;
@@ -52,7 +51,7 @@ public interface TxService {
      * @param hash  tx hash
      * @return Transaction 如果没有找到则返回null
      */
-    Transaction getTransaction(Chain chain, NulsDigestData hash);
+    TransactionConfirmedPO getTransaction(Chain chain, NulsDigestData hash);
 
     /**
      * 创建不包含多签地址跨链交易，支持多普通地址

@@ -20,6 +20,7 @@ import io.nuls.transaction.manager.ChainManager;
 import io.nuls.transaction.message.*;
 import io.nuls.transaction.model.bo.Chain;
 import io.nuls.transaction.model.bo.CrossTx;
+import io.nuls.transaction.model.po.TransactionConfirmedPO;
 import io.nuls.transaction.rpc.call.NetworkCall;
 import io.nuls.transaction.service.ConfirmedTxService;
 import io.nuls.transaction.service.CtxService;
@@ -140,11 +141,11 @@ public class MessageCmd extends BaseCmd {
             NulsDigestData txHash = message.getRequestHash();
             chain.getLoggerMap().get(TxConstant.LOG_TX_MESSAGE).debug(
                     "recieve [askTx] message from node-{}, chainId:{}, hash:{}", nodeId, chainId, txHash.getDigestHex());
-            Transaction tx = txService.getTransaction(chain, txHash);
+            TransactionConfirmedPO tx = txService.getTransaction(chain, txHash);
             if (tx == null) {
                 throw new NulsException(TxErrorCode.TX_NOT_EXIST);
             }
-            result = NetworkCall.sendTxToNode(chainId, nodeId, tx);
+            result = NetworkCall.sendTxToNode(chainId, nodeId, tx.getTx());
         } catch (NulsException e) {
             errorLogProcess(chain, e);
             return failed(e.getErrorCode());
@@ -293,7 +294,7 @@ public class MessageCmd extends BaseCmd {
             NulsDigestData txHash = message.getRequestHash();
             chain.getLoggerMap().get(TxConstant.LOG_TX_MESSAGE).debug(
                     "recieve [askCrossTxM2Fc] message from node-{}, chainId:{}, hash:{}", nodeId, chainId, txHash.getDigestHex());
-            Transaction tx = confirmedTxService.getConfirmedTransaction(chain, txHash);
+            TransactionConfirmedPO tx = confirmedTxService.getConfirmedTransaction(chain, txHash);
             if (tx == null) {
                 throw new NulsException(TxErrorCode.TX_NOT_EXIST);
             }
@@ -304,7 +305,7 @@ public class MessageCmd extends BaseCmd {
             //发送跨链交易到指定节点
             CrossTxMessage crossTxMessage = new CrossTxMessage();
             crossTxMessage.setCommand(NW_NEW_MN_TX);
-            crossTxMessage.setTx(tx);
+            crossTxMessage.setTx(tx.getTx());
             result = NetworkCall.sendToNode(chainId, crossTxMessage, nodeId);
         } catch (NulsException e) {
             errorLogProcess(chain, e);
@@ -358,10 +359,11 @@ public class MessageCmd extends BaseCmd {
             Transaction tx = ctx.getTx();
             if (tx == null) {
                 //查询已确认跨链交易
-                tx = confirmedTxService.getConfirmedTransaction(chain, txHash);
-                if (tx == null) {
+                TransactionConfirmedPO txConfirmed = confirmedTxService.getConfirmedTransaction(chain, txHash);
+                if (txConfirmed == null) {
                     throw new NulsException(TxErrorCode.TX_NOT_EXIST);
                 }
+                tx = txConfirmed.getTx();
             }
             //发送跨链交易到指定节点
             CrossTxMessage crossTxMessage = new CrossTxMessage();
@@ -414,7 +416,7 @@ public class MessageCmd extends BaseCmd {
             chain.getLoggerMap().get(TxConstant.LOG_TX_MESSAGE).debug(
                     "recieve [askCrossTxFc2M] message from node-{}, chainId:{}, hash:{}", nodeId, chainId, txHash.getDigestHex());
 
-            Transaction tx = confirmedTxService.getConfirmedTransaction(chain, txHash);
+            TransactionConfirmedPO tx = confirmedTxService.getConfirmedTransaction(chain, txHash);
             if (tx == null) {
                 throw new NulsException(TxErrorCode.TX_NOT_EXIST);
             }
@@ -425,7 +427,7 @@ public class MessageCmd extends BaseCmd {
             //发送跨链交易到指定节点
             CrossTxMessage crossTxMessage = new CrossTxMessage();
             crossTxMessage.setCommand(NW_NEW_MN_TX);
-            crossTxMessage.setTx(tx);
+            crossTxMessage.setTx(tx.getTx());
             result = NetworkCall.sendToNode(chainId, crossTxMessage, nodeId);
         } catch (NulsException e) {
             errorLogProcess(chain, e);
@@ -525,7 +527,7 @@ public class MessageCmd extends BaseCmd {
             chain.getLoggerMap().get(TxConstant.LOG_TX_MESSAGE).debug(
                     "recieve [verifyFc] message from node-{}, chainId:{}, originalTxHash:{}", nodeId, chainId, originalTxHash.getDigestHex());
             //查询已确认跨链交易
-            Transaction tx = confirmedTxService.getConfirmedTransaction(chainManager.getChain(chainId), originalTxHash);
+            TransactionConfirmedPO tx = confirmedTxService.getConfirmedTransaction(chainManager.getChain(chainId), originalTxHash);
             if (tx == null) {
                 throw new NulsException(TxErrorCode.TX_NOT_EXIST);
             }
@@ -630,7 +632,7 @@ public class MessageCmd extends BaseCmd {
             chain.getLoggerMap().get(TxConstant.LOG_TX_MESSAGE).debug(
                     "recieve [verifyMn] message from node-{}, chainId:{}, txHash:{}", nodeId, chainId, originalTxHash.getDigestHex());
             //查询已确认跨链交易
-            Transaction tx = confirmedTxService.getConfirmedTransaction(chainManager.getChain(chainId), originalTxHash);
+            TransactionConfirmedPO tx = confirmedTxService.getConfirmedTransaction(chainManager.getChain(chainId), originalTxHash);
             if (tx == null) {
                 throw new NulsException(TxErrorCode.TX_NOT_EXIST);
             }

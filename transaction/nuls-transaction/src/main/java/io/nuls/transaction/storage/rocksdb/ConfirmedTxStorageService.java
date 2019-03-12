@@ -1,7 +1,7 @@
 package io.nuls.transaction.storage.rocksdb;
 
 import io.nuls.base.data.NulsDigestData;
-import io.nuls.base.data.Transaction;
+import io.nuls.transaction.model.po.TransactionConfirmedPO;
 
 import java.util.List;
 
@@ -19,7 +19,7 @@ public interface ConfirmedTxStorageService {
      * @param tx
      * @return
      */
-    boolean saveTx(int chainId, Transaction tx);
+    boolean saveTx(int chainId, TransactionConfirmedPO tx);
 
     /**
      * 批量保存交易
@@ -27,7 +27,7 @@ public interface ConfirmedTxStorageService {
      * @param txList
      * @return
      */
-    boolean saveTxList(int chainId, List<Transaction> txList);
+    boolean saveTxList(int chainId, List<TransactionConfirmedPO> txList);
 
     /**
      * 获取交易数据
@@ -35,7 +35,7 @@ public interface ConfirmedTxStorageService {
      * @param hash 交易hash
      * @return
      */
-    Transaction getTx(int chainId, NulsDigestData hash);
+    TransactionConfirmedPO getTx(int chainId, NulsDigestData hash);
 
     /**
      * 删除交易数据
@@ -60,7 +60,7 @@ public interface ConfirmedTxStorageService {
      * @param hashList
      * @return 交易数据列表
      */
-    List<Transaction> getTxList(int chainId, List<byte[]> hashList);
+    List<TransactionConfirmedPO> getTxList(int chainId, List<byte[]> hashList);
 
     /**
      * 保存跨链交易的生效高度和交易hash

@@ -64,7 +64,7 @@ public class BackupAccountProcessor implements CommandProcessor {
     public CommandResult execute(String[] args) {
         String address = args[1];
         String path = args.length == 3 ? args[2] : "";
-        String password = CommandHelper.getPwd(null);
+        String password = CommandHelper.getPwd("Enter account password");
         BackupAccountReq req = new BackupAccountReq(password, address, path);
         Result<String> res = accountService.backupAccount(req);
         if (!res.isSuccess()) {
