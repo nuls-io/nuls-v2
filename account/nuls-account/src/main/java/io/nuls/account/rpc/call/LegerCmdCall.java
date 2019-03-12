@@ -36,13 +36,13 @@ public class LegerCmdCall {
             params.put("address", address);
             Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.LG.abbr, "getBalanceNonce", params);
             if (!cmdResp.isSuccess()) {
-                Log.error("Calling remote interface failed. module:{} - interface:{} - ResponseComment:{}", ModuleE.LG.abbr, "getBalance", cmdResp.getResponseComment());
+                Log.error("Calling remote interface failed. module:{} - interface:{} - ResponseComment:{}", ModuleE.LG.abbr, "getBalanceNonce", cmdResp.getResponseComment());
                 throw new NulsException(AccountErrorCode.FAILED);
             }
             HashMap result = (HashMap) ((HashMap) cmdResp.getResponseData()).get("getBalanceNonce");
             return result;
         } catch (Exception e) {
-            Log.error("Calling remote interface failed. module:{} - interface:{}", ModuleE.LG.abbr, "getBalance");
+            Log.error("Calling remote interface failed. module:{} - interface:{}", ModuleE.LG.abbr, "getBalanceNonce");
             e.printStackTrace();
         }
         return null;

@@ -193,9 +193,11 @@ public class TxUtil {
     public static BigInteger getBalance(int chainId, int assetChainId, int assetId, byte[] addressByte) {
         String address = AddressTool.getStringAddressByBytes(addressByte);
         HashMap balanceNonce = LegerCmdCall.getBalanceNonce(chainId, assetChainId, assetId, address);
-        Object available = balanceNonce.get("available");
-        return BigIntegerUtils.stringToBigInteger(String.valueOf(available));
-
+        if (balanceNonce != null) {
+            Object available = balanceNonce.get("available");
+            return BigIntegerUtils.stringToBigInteger(String.valueOf(available));
+        }
+        return new BigInteger("0");
     }
 
     /**
