@@ -38,6 +38,7 @@ import io.nuls.cmd.client.processor.ledger.GetBalanceProcessor;
 import io.nuls.cmd.client.processor.system.ExitProcessor;
 import io.nuls.cmd.client.processor.system.HelpProcessor;
 import io.nuls.cmd.client.processor.transaction.GetTxProcessor;
+import io.nuls.cmd.client.processor.transaction.TransferByAliasProcessor;
 import io.nuls.cmd.client.processor.transaction.TransferProcessor;
 import io.nuls.tools.basic.InitializingBean;
 import io.nuls.tools.core.annotation.Component;
@@ -106,6 +107,8 @@ public class CommandHandler implements InitializingBean {
         register(getBean(SetAliasProcessor.class));
         //transfer
         register(getBean(TransferProcessor.class));
+        //transfer by alias
+        register(getBean(TransferByAliasProcessor.class));
 
         //get last height block header
         register(getBean(GetBestBlockHeaderProcessor.class));

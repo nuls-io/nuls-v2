@@ -112,16 +112,22 @@ public class BlockSynchronizer implements Runnable {
     }
 
     private List<Node> waitUntilNetworkStable(int chainId){
+        NulsLogger commonLog = ContextManager.getContext(chainId).getCommonLog();
         List<Node> availableNodesFirst = NetworkUtil.getAvailableNodes(chainId);
         List<Node> availableNodesSecond;
         int sizeFirst = availableNodesFirst.size();
         try {
-            Thread.sleep(10000);
             int sizeSecond;
-            do{
+            while (true) {
+                Thread.sleep(20000);
                 availableNodesSecond = NetworkUtil.getAvailableNodes(chainId);
                 sizeSecond = availableNodesSecond.size();
-            } while(sizeSecond != sizeFirst);
+                if (sizeSecond == sizeFirst) {
+                    break;
+                }
+                commonLog.debug("sizeFirst=" + sizeFirst + ", sizeSecond=" + sizeSecond+ ", wait Until Network Stable..........");
+                sizeFirst = sizeSecond;
+            }
         } catch (InterruptedException e) {
             return List.of();
         }

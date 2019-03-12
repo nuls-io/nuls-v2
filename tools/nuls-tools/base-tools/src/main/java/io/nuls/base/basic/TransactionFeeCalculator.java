@@ -26,6 +26,7 @@
 package io.nuls.base.basic;
 
 
+import io.nuls.base.signture.P2PHKSignature;
 import io.nuls.tools.exception.NulsRuntimeException;
 
 import java.math.BigInteger;
@@ -48,6 +49,20 @@ public class TransactionFeeCalculator {
      * @param size 交易大小/size of the transaction
      */
     public static final BigInteger getNormalTxFee(int size) {
+        BigInteger fee = NORMAL_PRICE_PRE_1024_BYTES.multiply(new BigInteger(String.valueOf(size/KB)));
+        if (size % KB > 0) {
+            fee = fee.add(NORMAL_PRICE_PRE_1024_BYTES);
+        }
+        return fee;
+    }
+
+    /**
+     * 根据未签名的交易大小计算需要交纳的手续费
+     * @param size 未签名的交易大小/ size of the unsigned transaction
+     * @return 交易手续费
+     */
+    public static final BigInteger getNormalUnsignedTxFee(int size) {
+        size += P2PHKSignature.SERIALIZE_LENGTH;
         BigInteger fee = NORMAL_PRICE_PRE_1024_BYTES.multiply(new BigInteger(String.valueOf(size/KB)));
         if (size % KB > 0) {
             fee = fee.add(NORMAL_PRICE_PRE_1024_BYTES);
