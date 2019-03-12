@@ -194,11 +194,15 @@ public class TransactionUtil {
      * @return
      * @throws IOException
      */
-    public static List<Transaction> getTransactions(int chainId, List<NulsDigestData> hashList) {
+    public static List<Transaction> getTransactions(int chainId, List<NulsDigestData> hashList, boolean confirmed) {
         List<Transaction> transactions = new ArrayList<>();
         NulsLogger commonLog = ContextManager.getContext(chainId).getCommonLog();
         try {
-            hashList.forEach(e -> transactions.add(getTransaction(chainId, e)));
+            if (confirmed) {
+                hashList.forEach(e -> transactions.add(getConfirmedTransaction(chainId, e)));
+            } else {
+                hashList.forEach(e -> transactions.add(getTransaction(chainId, e)));
+            }
             return transactions;
         } catch (Exception e) {
             e.printStackTrace();

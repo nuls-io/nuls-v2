@@ -94,6 +94,9 @@ public class WalletRpcHandler {
         params.put("txHash", hash);
         Map map = (Map) RpcCall.request(ModuleE.TX.abbr, CommandConstant.GET_TX, params);
         String txHex = (String) map.get("txHex");
+        if (null == txHex) {
+            return null;
+        }
         Transaction tx = Transaction.getInstance(txHex);
         TransactionInfo txInfo = AnalysisHandler.toTransaction(tx);
         return txInfo;

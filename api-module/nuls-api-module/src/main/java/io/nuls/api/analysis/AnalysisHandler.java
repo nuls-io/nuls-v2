@@ -14,6 +14,8 @@ import io.nuls.tools.exception.NulsException;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -97,11 +99,7 @@ public class AnalysisHandler {
             info.setTxDataHex(HexUtil.encode(tx.getTxData()));
         }
         if (tx.getRemark() != null) {
-            try {
-                info.setRemark(new String(tx.getRemark(), ToolsConstant.DEFAULT_ENCODING));
-            } catch (UnsupportedEncodingException e) {
-                info.setRemark(HexUtil.encode(tx.getRemark()));
-            }
+            info.setRemark(new String(tx.getRemark(), StandardCharsets.UTF_8));
         }
 
         CoinData coinData = new CoinData();
@@ -110,7 +108,6 @@ public class AnalysisHandler {
             info.setCoinFroms(toFroms(coinData));
             info.setCoinTos(toCoinToList(coinData));
         }
-
 
         if (info.getType() == ApiConstant.TX_TYPE_YELLOW_PUNISH) {
             info.setTxDataList(toYellowPunish(tx));

@@ -26,7 +26,10 @@ package io.nuls.rpc.netty.handler.message;
 
 import io.netty.channel.socket.SocketChannel;
 import io.nuls.rpc.info.Constants;
-import io.nuls.rpc.model.message.*;
+import io.nuls.rpc.model.message.Message;
+import io.nuls.rpc.model.message.MessageType;
+import io.nuls.rpc.model.message.Request;
+import io.nuls.rpc.model.message.Response;
 import io.nuls.rpc.netty.channel.ConnectData;
 import io.nuls.rpc.netty.channel.manager.ConnectManager;
 import io.nuls.rpc.netty.processor.RequestMessageProcessor;
@@ -36,6 +39,7 @@ import io.nuls.tools.log.Log;
 import io.nuls.tools.parse.JSONUtils;
 
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 /**
  * 文本类型的消息处理器
@@ -86,15 +90,6 @@ public class TextMessageHandler implements Runnable {
                 case Request:
                     String messageId = message.getMessageId();
                     /*
-                    如果不能提供服务，则直接返回
-                    If no service is available, return directly
-                     */
-                    /*if (!ConnectManager.isReady()) {
-                        RequestMessageProcessor.serviceNotStarted(channel, messageId);
-                        break;
-                    }*/
-
-                    /*
                     Request，根据是否需要定时推送放入不同队列，等待处理
                     Request, put in different queues according to the response mode. Wait for processing
                      */
@@ -104,12 +99,26 @@ public class TextMessageHandler implements Runnable {
                             && !ConnectManager.isPureDigital(request.getSubscriptionPeriod())) {
                         RequestMessageProcessor.callCommandsWithPeriod(channel, request.getRequestMethods(), messageId);
                     } else {
+                        int tryCount = 0;
+                        while(connectData == null && tryCount < Constants.TRY_COUNT){
+                            TimeUnit.SECONDS.sleep(2L);
+                            connectData = ConnectManager.CHANNEL_DATA_MAP.get(channel);
+                            tryCount++;
+                        }
+                        if(connectData == null){
+                            RequestMessageProcessor.serviceNotStarted(channel, messageId);
+                            break;
+                        }
                         if (ConnectManager.isPureDigital(request.getSubscriptionPeriod())) {
                             connectData.getRequestPeriodLoopQueue().offer(new Object[]{message, request});
                             connectData.getIdToPeriodMessageMap().put(messageId, message);
                         }
                         if (ConnectManager.isPureDigital(request.getSubscriptionEventCounter())) {
+                            ConnectManager.modifySubRequestCount(true);
+                            Log.info("--------------------增加订阅数量后："+ConnectManager.subRequestCount);
                             connectData.subscribeByEvent(message);
+                            ConnectManager.modifySubRequestCount(false);
+                            Log.info("--------------------增加订阅数量后："+ConnectManager.subRequestCount);
                         }
                     }
 

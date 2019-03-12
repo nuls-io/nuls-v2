@@ -28,9 +28,9 @@ import io.nuls.base.data.BlockHeader;
 import io.nuls.base.data.NulsDigestData;
 import io.nuls.contract.helper.ContractHelper;
 import io.nuls.contract.model.bo.ContractResult;
+import io.nuls.contract.model.bo.ContractWrapperTransaction;
 import io.nuls.contract.model.po.ContractAddressInfoPo;
-import io.nuls.contract.model.tx.CreateContractTransaction;
-import io.nuls.contract.model.txdata.CreateContractData;
+import io.nuls.contract.model.txdata.ContractData;
 import io.nuls.contract.service.ContractService;
 import io.nuls.contract.storage.ContractAddressStorageService;
 import io.nuls.contract.storage.ContractExecuteResultStorageService;
@@ -64,11 +64,11 @@ public class CreateContractTxProcessor {
     @Autowired
     private ContractHelper contractHelper;
 
-    public Result onCommit(int chainId, CreateContractTransaction tx, Object secondaryData) throws NulsException {
+    public Result onCommit(int chainId, ContractWrapperTransaction tx) throws NulsException {
         ContractResult contractResult = tx.getContractResult();
         contractService.saveContractExecuteResult(chainId, tx.getHash(), contractResult);
 
-        CreateContractData txData = tx.getTxDataObj();
+        ContractData txData = tx.getContractData();
         byte[] contractAddress = txData.getContractAddress();
         byte[] sender = txData.getSender();
 
@@ -115,8 +115,8 @@ public class CreateContractTxProcessor {
         return result;
     }
 
-    public Result onRollback(int chainId, CreateContractTransaction tx, Object secondaryData) throws Exception {
-        CreateContractData txData = tx.getTxDataObj();
+    public Result onRollback(int chainId, ContractWrapperTransaction tx) throws Exception {
+        ContractData txData = tx.getContractData();
         byte[] contractAddress = txData.getContractAddress();
 
         // 回滚代币转账交易

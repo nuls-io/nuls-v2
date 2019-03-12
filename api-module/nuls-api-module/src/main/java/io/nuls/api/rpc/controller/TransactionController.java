@@ -43,6 +43,9 @@ public class TransactionController {
         }
         try {
             TransactionInfo tx = WalletRpcHandler.getTx(chainId, hash);
+            if (tx == null) {
+                throw new JsonRpcException(new RpcResultError(RpcErrorCode.DATA_NOT_EXISTS));
+            }
             RpcResult rpcResult = new RpcResult();
             if (tx.getType() == ApiConstant.TX_TYPE_JOIN_CONSENSUS) {
                 DepositInfo depositInfo = (DepositInfo) tx.getTxData();
@@ -82,22 +85,23 @@ public class TransactionController {
             }
             rpcResult.setResult(tx);
             return rpcResult;
+        } catch (JsonRpcException e) {
+            throw e;
         } catch (Exception e) {
             e.printStackTrace();
+            throw new JsonRpcException(new RpcResultError(RpcErrorCode.TX_PARSE_ERROR));
         }
-
-        return null;
     }
-
 
     @RpcMethod("getTxList")
     public RpcResult getTxList(List<Object> params) {
         VerifyUtils.verifyParams(params, 5);
-        int pageIndex = (int) params.get(0);
-        int pageSize = (int) params.get(1);
-        int type = (int) params.get(2);
-        boolean isHidden = (boolean) params.get(3);
-        int chainId = (int) params.get(4);
+        int chainId = (int) params.get(0);
+        int pageIndex = (int) params.get(1);
+        int pageSize = (int) params.get(2);
+        int type = (int) params.get(3);
+        boolean isHidden = (boolean) params.get(4);
+
         if (pageIndex <= 0) {
             pageIndex = 1;
         }
@@ -113,12 +117,12 @@ public class TransactionController {
     @RpcMethod("getBlockTxList")
     public RpcResult getBlockTxList(List<Object> params) {
         VerifyUtils.verifyParams(params, 4);
+        int chainId = (int) params.get(0);
+        int pageIndex = (int) params.get(1);
+        int pageSize = (int) params.get(2);
+        long height = Long.valueOf(params.get(3).toString());
+        int type = Integer.parseInt("" + params.get(4));
 
-        int pageIndex = (int) params.get(0);
-        int pageSize = (int) params.get(1);
-        long height = Long.valueOf(params.get(2).toString());
-        int type = Integer.parseInt("" + params.get(3));
-        int chainId = (int) params.get(4);
 
         if (pageIndex <= 0) {
             pageIndex = 1;

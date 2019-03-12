@@ -214,7 +214,7 @@ public class DoubleUtils {
     public static double div(BigInteger b1, BigInteger b2, int scale) {
         BigDecimal d1 = new BigDecimal(b1);
         BigDecimal d2 = new BigDecimal(b2);
-        return round(div(d1.divide(d2).doubleValue(), scale));
+        return round(div(d1, d2).doubleValue(), scale);
     }
 
     /**

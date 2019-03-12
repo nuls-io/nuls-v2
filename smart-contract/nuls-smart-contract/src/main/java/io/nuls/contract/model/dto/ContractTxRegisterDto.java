@@ -1,7 +1,7 @@
 /**
  * MIT License
  * <p>
- * Copyright (c) 2017-2019 nuls.io
+ * Copyright (c) 2017-2018 nuls.io
  * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -21,38 +21,24 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package io.nuls.contract.processor;
+package io.nuls.contract.model.dto;
 
-
-import io.nuls.contract.model.bo.ContractResult;
-import io.nuls.contract.model.bo.ContractWrapperTransaction;
-import io.nuls.contract.service.ContractService;
-import io.nuls.tools.basic.Result;
-import io.nuls.tools.core.annotation.Autowired;
-import io.nuls.tools.core.annotation.Component;
-
-import static io.nuls.contract.util.ContractUtil.getSuccess;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.Setter;
 
 /**
- * @desription:
  * @author: PierreLuo
- * @date: 2018/6/8
+ * @date: 2019-03-11
  */
-@Component
-public class DeleteContractTxProcessor {
+@Getter
+@Setter
+@AllArgsConstructor
+public class ContractTxRegisterDto {
 
-    @Autowired
-    private ContractService contractService;
-
-    public Result onCommit(int chainId, ContractWrapperTransaction tx) {
-        ContractResult contractResult = tx.getContractResult();
-        contractService.saveContractExecuteResult(chainId, tx.getHash(), contractResult);
-        return getSuccess();
-    }
-
-    public Result onRollback(int chainId, ContractWrapperTransaction tx) {
-        contractService.deleteContractExecuteResult(chainId, tx.getHash());
-        return getSuccess();
-    }
-
+    private int txType;
+    private String validator;
+    private boolean systemTx;
+    public boolean unlockTx;
+    public boolean verifySignature;
 }

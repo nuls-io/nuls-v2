@@ -51,7 +51,7 @@ public class TransactionCmdTest {
 
     protected int chainId = 12345;
     protected int assetChainId = 12345;
-    protected String password = "nuls123456";
+    protected static String password = "nuls123456";
     protected String newPassword = "c12345678";
     protected String version = "1.0";
     protected String success = "1";
@@ -72,12 +72,14 @@ public class TransactionCmdTest {
     }
 
     public static void importKeyStore() throws Exception {
+        CommonRpcOperation.importAccountByPriKeyWithOverwrite("5MR_2CWWTDXc32s9Wd1guNQzPztFgkyVEsz",
+                "00c299b105e2f9b260d7811d5cb94c713cc324e55831cb15a18454f7382f0a5f6e",password);
         CommonRpcOperation.importAccountByPriKeyWithOverwrite("5MR_2CckymYvKM7NKpt6fpZproQYMtnGdaT",
-                "00c940482596e30265f9f9f6216f7d7b507eebc9857c3689efa4378527bab3ba3d",null);
+                "00c940482596e30265f9f9f6216f7d7b507eebc9857c3689efa4378527bab3ba3d",password);
         CommonRpcOperation.importAccountByPriKeyWithOverwrite("5MR_2CkYEhXKCmUWTEsWRTnaWgYE8kJdfd5",
-                "00ea8818c00c9fd20a54a93bbc749b903ee69617990af9bf0d6c6bc17d51820f",null);
+                "00ea8818c00c9fd20a54a93bbc749b903ee69617990af9bf0d6c6bc17d51820f",password);
         CommonRpcOperation.importAccountByPriKeyWithOverwrite("5MR_2CcRgU3vDGp2uEG3rdzLdyMCbsiLFbJ",
-                "00d9a2384a3bc9fca252c8e2c8728efcb98e007b5290d7f01a008731669e433043",null);
+                "00d9a2384a3bc9fca252c8e2c8728efcb98e007b5290d7f01a008731669e433043",password);
     }
 
     /**
@@ -146,7 +148,8 @@ public class TransactionCmdTest {
     @Test
     public void transfer() throws Exception {
         //组装普通转账交易
-        TransferDto transferDto = CommonRpcOperation.createTransferTx("5MR_2CWWTDXc32s9Wd1guNQzPztFgkyVEsz","5MR_4bgJiPmxN4mZV2C89thSEdJ8qWnm9Xi",new BigInteger("10000000000"));
+        //TransferDto transferDto = CommonRpcOperation.createTransferTx("5MR_2CWWTDXc32s9Wd1guNQzPztFgkyVEsz","5MR_2CckymYvKM7NKpt6fpZproQYMtnGdaT",new BigInteger("10000000000"));
+        TransferDto transferDto = CommonRpcOperation.createTransferTx("5MR_2CckymYvKM7NKpt6fpZproQYMtnGdaT","5MR_2CkYEhXKCmUWTEsWRTnaWgYE8kJdfd5",new BigInteger("199800000"));
         Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_transfer", JSONUtils.json2map(JSONUtils.obj2json(transferDto)));
         HashMap result = (HashMap) (((HashMap) cmdResp.getResponseData()).get("ac_transfer"));
         String txDigestHex = (String) result.get(RpcConstant.VALUE);
@@ -464,7 +467,7 @@ public class TransactionCmdTest {
      */
     @Test
     public void getBalance() {
-        BigInteger balance = LegerCmdCall.getBalance(chainId, assetChainId, assetId, "5MR_2Cc14Ph4ZfJTzsfxma8FGZ7FBzcTS87");
+        BigInteger balance = LegerCmdCall.getBalance(chainId, assetChainId, assetId, "5MR_2CckymYvKM7NKpt6fpZproQYMtnGdaT");
         System.out.println(balance.longValue());
     }
 

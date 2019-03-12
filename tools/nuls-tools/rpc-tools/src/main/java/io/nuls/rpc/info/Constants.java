@@ -212,6 +212,8 @@ public class Constants {
         return SEQUENCE.incrementAndGet() + "";
     }
 
+    public static final int TRY_COUNT = 5;
+
     /**
      * 参数类型
      * Parameter type

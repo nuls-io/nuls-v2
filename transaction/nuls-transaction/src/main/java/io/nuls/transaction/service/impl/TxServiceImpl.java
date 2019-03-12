@@ -542,6 +542,8 @@ public class TxServiceImpl implements TxService {
         for (CoinFrom coinFrom : listFrom) {
             if (TxUtil.isNulsAsset(coinFrom)) {
                 BigInteger mainAsset = LedgerCall.getBalance(chain, coinFrom.getAddress(), TxConstant.NULS_CHAINID, TxConstant.NULS_CHAIN_ASSETID);
+                //可用余额=当前余额减去本次转出
+                mainAsset = mainAsset.subtract(coinFrom.getAmount());
                 //当前还差的手续费
                 BigInteger current = targetFee.subtract(actualFee);
                 //如果余额大于等于目标手续费，则直接收取全额手续费
@@ -788,6 +790,8 @@ public class TxServiceImpl implements TxService {
      */
     @Override
     public List<String> getPackableTxs(Chain chain, long endtimestamp, long maxTxDataSize) throws NulsException {
+        chain.getLoggerMap().get(TxConstant.LOG_TX).debug("%%%%%%%%% TX开始打包 %%%%%%%%%%%%");
+        chain.getLoggerMap().get(TxConstant.LOG_TX).debug("%%%%%%%%% getPackableTxs 打包第一次批量校验通知 %%%%%%%%%%%%");
         //重置重新打包标识为false
         chain.getRePackage().set(false);
         //组装统一验证参数数据,key为各模块统一验证器cmd
@@ -797,6 +801,7 @@ public class TxServiceImpl implements TxService {
         List<String> packableTxs = null;
         try {
             //向账本模块发送要批量验证coinData的标识
+            chain.getLoggerMap().get(TxConstant.LOG_TX).debug("%%%%%%%%% getPackableTxs 打包第一次批量校验通知 %%%%%%%%%%%%");
             if (!LedgerCall.coinDataBatchNotify(chain)) {
                 chain.getLoggerMap().get(TxConstant.LOG_TX).error("Call ledger bathValidateBegin interface failed");
                 throw new NulsException(TxErrorCode.CALLING_REMOTE_INTERFACE_FAILED);
@@ -955,7 +960,8 @@ public class TxServiceImpl implements TxService {
         chain.getLoggerMap().get(TxConstant.LOG_TX).debug("");
         chain.getLoggerMap().get(TxConstant.LOG_TX).debug("获取打包交易结束,当前待打包队列交易数: {} ", packablePool.getPoolSize(chain));
         chain.getLoggerMap().get(TxConstant.LOG_TX).debug("=================================================");
-
+        chain.getLoggerMap().get(TxConstant.LOG_TX).debug("%%%%%%%%% 打包完成 %%%%%%%%%%%%");
+        chain.getLoggerMap().get(TxConstant.LOG_TX).debug("");
         return packableTxs;
     }
 
@@ -1015,6 +1021,7 @@ public class TxServiceImpl implements TxService {
         //已经按模块分组的集合
         Iterator<Map.Entry<TxRegister, List<String>>> it = moduleVerifyMap.entrySet().iterator();
         //向账本模块发送要批量验证coinData的标识
+        chain.getLoggerMap().get(TxConstant.LOG_TX).debug("%%%%%%%%% verifyAgain 打包再次批量校验通知 %%%%%%%%%%%%");
         if (!LedgerCall.coinDataBatchNotify(chain)) {
             chain.getLoggerMap().get(TxConstant.LOG_TX).error("Call ledger bathValidateBegin interface failed");
             throw new NulsException(TxErrorCode.CALLING_REMOTE_INTERFACE_FAILED);
@@ -1124,12 +1131,14 @@ public class TxServiceImpl implements TxService {
                 moduleVerifyMap.put(txRegister, txHexs);
             }
         }
+        chain.getLoggerMap().get(TxConstant.LOG_TX).debug("%%%%%%%%% 批量验证,批量校验通知 %%%%%%%%%%%%");
         LedgerCall.coinDataBatchNotify(chain);
         //todo 批量验证coinData，接口和单个的区别？
         for (Transaction tx : txList) {
             verifyTxResult = LedgerCall.verifyCoinData(chain, tx, true);
             if (!verifyTxResult.success()) {
-                chain.getLoggerMap().get(TxConstant.LOG_TX).debug("batchVerify failed, batch verifyCoinData failed. hash:{}, -type:{}", tx.getHash().getDigestHex(), tx.getType());
+                chain.getLoggerMap().get(TxConstant.LOG_TX).debug("batchVerify failed, batch verifyCoinData failed. hash:{}, -type:{}, -code:{}", tx.getHash().getDigestHex(), tx.getType(), verifyTxResult.getCode());
+
                 return verifyTxResult;
             }
         }

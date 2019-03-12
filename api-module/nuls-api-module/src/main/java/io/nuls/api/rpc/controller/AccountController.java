@@ -46,17 +46,16 @@ public class AccountController {
 
     @Autowired
     private AccountService accountService;
-    //    @Autowired
-//    private UTXOService utxoService;
     @Autowired
     private BlockService blockHeaderService;
 
     @RpcMethod("getAccountList")
     public RpcResult getAccountList(List<Object> params) {
         VerifyUtils.verifyParams(params, 3);
-        int pageIndex = (int) params.get(0);
-        int pageSize = (int) params.get(1);
-        int chainId = (int) params.get(2);
+        int chainId = (int) params.get(0);
+        int pageIndex = (int) params.get(1);
+        int pageSize = (int) params.get(2);
+
         if (pageIndex <= 0) {
             pageIndex = 1;
         }
@@ -70,17 +69,15 @@ public class AccountController {
         return result;
     }
 
-
     @RpcMethod("getAccountTxs")
     public RpcResult getAccountTxs(List<Object> params) {
         VerifyUtils.verifyParams(params, 6);
-
-        int pageIndex = (int) params.get(0);
-        int pageSize = (int) params.get(1);
-        String address = (String) params.get(2);
-        int type = (int) params.get(3);
-        boolean isMark = (boolean) params.get(4);
-        int chainId = (int) params.get(5);
+        int chainId = (int) params.get(0);
+        int pageIndex = (int) params.get(1);
+        int pageSize = (int) params.get(2);
+        String address = (String) params.get(3);
+        int type = (int) params.get(4);
+        boolean isMark = (boolean) params.get(5);
 
         if (!AddressTool.validAddress(chainId, address)) {
             throw new JsonRpcException(new RpcResultError(RpcErrorCode.PARAMS_ERROR, "[address] is inValid"));
@@ -100,8 +97,9 @@ public class AccountController {
     @RpcMethod("getAccount")
     public RpcResult getAccount(List<Object> params) {
         VerifyUtils.verifyParams(params, 2);
-        String address = (String) params.get(0);
-        int chainId = (int) params.get(1);
+        int chainId = (int) params.get(0);
+        String address = (String) params.get(1);
+
         if (!AddressTool.validAddress(chainId, address)) {
             throw new JsonRpcException(new RpcResultError(RpcErrorCode.PARAMS_ERROR, "[address] is inValid"));
         }
@@ -123,27 +121,26 @@ public class AccountController {
         return result.setResult(accountInfo);
     }
 
-
     @RpcMethod("getCoinRanking")
     public RpcResult getCoinRanking(List<Object> params) {
         VerifyUtils.verifyParams(params, 4);
-        int pageIndex = (int) params.get(0);
-        int pageSize = (int) params.get(1);
-        int sortType = (int) params.get(2);
-        int chainId = (int) params.get(3);
+        int chainId = (int) params.get(0);
+        int pageIndex = (int) params.get(1);
+        int pageSize = (int) params.get(2);
+        int sortType = (int) params.get(3);
 
         PageInfo<AccountInfo> pageInfo = accountService.getCoinRanking(pageIndex, pageSize, sortType, chainId);
         return new RpcResult().setResult(pageInfo);
     }
 
-
     @RpcMethod("getAccountTokens")
     public RpcResult getAccountTokens(List<Object> params) {
         VerifyUtils.verifyParams(params, 4);
-        int pageIndex = (int) params.get(0);
-        int pageSize = (int) params.get(1);
-        String address = (String) params.get(2);
-        int chainId = (int) params.get(3);
+        int chainId = (int) params.get(0);
+        int pageIndex = (int) params.get(1);
+        int pageSize = (int) params.get(2);
+        String address = (String) params.get(3);
+
         if (!AddressTool.validAddress(chainId, address)) {
             throw new JsonRpcException(new RpcResultError(RpcErrorCode.PARAMS_ERROR, "[address] is inValid"));
         }

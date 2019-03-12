@@ -69,8 +69,8 @@ public class BlockController {
     @RpcMethod("getHeaderByHeight")
     public RpcResult getHeaderByHeight(List<Object> params) {
         VerifyUtils.verifyParams(params, 2);
-        long height = Long.parseLong("" + params.get(0));
-        int chainId = (int) params.get(1);
+        int chainId = (int) params.get(0);
+        long height = Long.parseLong("" + params.get(1));
         if (height < 0) {
             height = 0;
         }
@@ -84,8 +84,8 @@ public class BlockController {
     @RpcMethod("getHeaderByHash")
     public RpcResult getHeaderByHash(List<Object> params) {
         VerifyUtils.verifyParams(params, 2);
-        String hash = (String) params.get(0);
-        int chainId = (int) params.get(1);
+        int chainId = (int) params.get(0);
+        String hash = (String) params.get(1);
 
         if (StringUtils.isBlank(hash)) {
             throw new JsonRpcException(new RpcResultError(RpcErrorCode.PARAMS_ERROR, "[hash] is required"));
@@ -100,8 +100,8 @@ public class BlockController {
     @RpcMethod("getBlockByHash")
     public RpcResult getBlockByHash(List<Object> params) {
         VerifyUtils.verifyParams(params, 2);
-        String hash = (String) params.get(0);
-        int chainId = (int) params.get(1);
+        int chainId = (int) params.get(0);
+        String hash = (String) params.get(1);
 
         if (StringUtils.isBlank(hash)) {
             throw new JsonRpcException(new RpcResultError(RpcErrorCode.PARAMS_ERROR, "[hash] is required"));
@@ -118,8 +118,8 @@ public class BlockController {
     @RpcMethod("getBlockByHeight")
     public RpcResult getBlockByHeight(List<Object> params) {
         VerifyUtils.verifyParams(params, 2);
-        long height = Long.parseLong("" + params.get(0));
-        int chainId = (int) params.get(1);
+        int chainId = (int) params.get(0);
+        long height = Long.parseLong("" + params.get(1));
         if (height < 0) {
             height = 0;
         }
@@ -141,9 +141,9 @@ public class BlockController {
     @RpcMethod("getBlockHeaderList")
     public RpcResult getBlockHeaderList(List<Object> params) {
         VerifyUtils.verifyParams(params, 3);
-        int pageIndex = (int) params.get(0);
-        int pageSize = (int) params.get(1);
-        int chainId = (int) params.get(2);
+        int chainId = (int) params.get(0);
+        int pageIndex = (int) params.get(1);
+        int pageSize = (int) params.get(2);
         if (pageIndex <= 0) {
             pageIndex = 1;
         }
@@ -152,7 +152,6 @@ public class BlockController {
         }
         // Whether to filter empty blocks
         boolean filterEmptyBlocks = (boolean) params.get(3);
-        ;
         String packingAddress = null;
         if (params.size() > 4) {
             packingAddress = (String) params.get(4);

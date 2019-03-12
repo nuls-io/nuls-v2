@@ -24,6 +24,7 @@
 package io.nuls.contract.model.po;
 
 import io.nuls.contract.util.ContractUtil;
+import io.nuls.tools.exception.NulsException;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -49,8 +50,8 @@ public class ContractAddressInfoPo {
     private long decimals;
     private BigInteger totalSupply;
 
-    public boolean isLock() {
-        return ContractUtil.isLockContract(this.blockHeight);
+    public boolean isLock(int chainId) throws NulsException {
+        return ContractUtil.isLockContract(chainId, this.blockHeight);
     }
 
     public int compareTo(long thatTime) {

@@ -27,6 +27,7 @@ package io.nuls.ledger.service.impl;
 
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.*;
+import io.nuls.ledger.constant.LedgerConstant;
 import io.nuls.ledger.model.AccountBalance;
 import io.nuls.ledger.model.UnconfirmedTx;
 import io.nuls.ledger.model.ValidateResult;
@@ -355,6 +356,7 @@ public class TransactionServiceImpl implements TransactionService {
         }
         List<CoinFrom> froms = coinData.getFrom();
         String txHash = transaction.getHash().toString();
+        String rollNonce = LedgerUtils.getNonceStrByTxHash(txHash);
         for (CoinFrom from : froms) {
             if (LedgerUtils.isNotLocalChainAccount(addressChainId, from.getAddress())) {
                 //非本地网络账户地址,不进行处理
@@ -364,7 +366,7 @@ public class TransactionServiceImpl implements TransactionService {
             int assetChainId = from.getAssetsChainId();
             int assetId = from.getAssetsId();
             String assetKey = LedgerUtils.getKeyStr(address, assetChainId, assetId);
-            accountStateService.rollUnconfirmTx(addressChainId, assetKey, HexUtil.encode(from.getNonce()), txHash);
+            accountStateService.rollUnconfirmTx(addressChainId, assetKey, rollNonce, txHash);
         }
         return true;
     }

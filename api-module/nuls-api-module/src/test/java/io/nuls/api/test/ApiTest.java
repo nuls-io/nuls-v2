@@ -1,5 +1,6 @@
 package io.nuls.api.test;
 
+import io.nuls.api.ApiContext;
 import io.nuls.api.analysis.WalletRpcHandler;
 import io.nuls.api.cache.ApiCache;
 import io.nuls.api.constant.ApiConstant;
@@ -15,6 +16,7 @@ import io.nuls.rpc.netty.channel.manager.ConnectManager;
 import io.nuls.rpc.netty.processor.ResponseMessageProcessor;
 import io.nuls.tools.core.ioc.SpringLiteContext;
 import io.nuls.tools.model.BigIntegerUtils;
+import io.nuls.tools.model.DoubleUtils;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -105,8 +107,12 @@ public class ApiTest {
 
     @Test
     public void testAddO() {
-        BigInteger b = new BigInteger(100002222 + "");
-        String str = BigIntegerUtils.bigIntegerToString(b, 32);
-        System.out.println(str);
+        BigInteger b = new BigInteger(1000000002222L + "");
+//        String str = BigIntegerUtils.bigIntegerToString(b, 32);
+//        System.out.println(str);
+
+        System.out.println(DoubleUtils.mul(100, DoubleUtils.div(ApiContext.inflationCoins, b, 4), 2));
     }
+
+
 }

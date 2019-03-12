@@ -24,30 +24,18 @@
 package io.nuls.contract.model.dto;
 
 import io.nuls.contract.vm.program.ProgramMethod;
+import lombok.Getter;
+import lombok.Setter;
 
 /**
- * @desription:
  * @author: PierreLuo
  * @date: 2018/8/15
  */
+@Getter
+@Setter
 public class ContractInfoDto {
 
     private ProgramMethod constructor;
     private boolean isNrc20;
 
-    public ProgramMethod getConstructor() {
-        return constructor;
-    }
-
-    public void setConstructor(ProgramMethod constructor) {
-        this.constructor = constructor;
-    }
-
-    public boolean isNrc20() {
-        return isNrc20;
-    }
-
-    public void setNrc20(boolean nrc20) {
-        isNrc20 = nrc20;
-    }
 }

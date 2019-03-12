@@ -28,12 +28,11 @@ import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.BlockHeader;
 import io.nuls.contract.constant.ContractErrorCode;
 import io.nuls.contract.helper.ContractHelper;
-import io.nuls.contract.manager.ContractTokenBalanceManager;
 import io.nuls.contract.model.bo.ContractResult;
+import io.nuls.contract.model.bo.ContractWrapperTransaction;
 import io.nuls.contract.model.po.ContractAddressInfoPo;
 import io.nuls.contract.model.po.ContractTokenTransferInfoPo;
-import io.nuls.contract.model.tx.CallContractTransaction;
-import io.nuls.contract.model.txdata.CallContractData;
+import io.nuls.contract.model.txdata.ContractData;
 import io.nuls.contract.service.ContractService;
 import io.nuls.contract.storage.ContractTokenTransferStorageService;
 import io.nuls.contract.util.ContractUtil;
@@ -42,13 +41,8 @@ import io.nuls.tools.basic.Result;
 import io.nuls.tools.basic.VarInt;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
-import io.nuls.tools.model.StringUtils;
 import io.nuls.tools.log.Log;
 import org.spongycastle.util.Arrays;
-
-import java.io.IOException;
-import java.math.BigInteger;
-import java.util.List;
 
 import static io.nuls.contract.util.ContractUtil.getFailed;
 import static io.nuls.contract.util.ContractUtil.getSuccess;
@@ -70,12 +64,12 @@ public class CallContractTxProcessor {
     @Autowired
     private ContractService contractService;
 
-    public Result onCommit(int chainId, CallContractTransaction tx, Object secondaryData) {
+    public Result onCommit(int chainId, ContractWrapperTransaction tx) {
         try {
             ContractResult contractResult = tx.getContractResult();
 
             // 保存代币交易
-            CallContractData callContractData = tx.getTxDataObj();
+            ContractData callContractData = tx.getContractData();
             byte[] contractAddress = callContractData.getContractAddress();
 
             Result<ContractAddressInfoPo> contractAddressInfoPoResult = contractHelper.getContractAddressInfo(chainId, contractAddress);
@@ -143,7 +137,7 @@ public class CallContractTxProcessor {
         return getSuccess();
     }
 
-    public Result onRollback(int chainId, CallContractTransaction tx, Object secondaryData) {
+    public Result onRollback(int chainId, ContractWrapperTransaction tx) {
         try {
             // 回滚代币转账交易
             ContractResult contractResult = tx.getContractResult();
