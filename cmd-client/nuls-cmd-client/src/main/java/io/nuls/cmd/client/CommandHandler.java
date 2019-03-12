@@ -35,6 +35,7 @@ import io.nuls.cmd.client.processor.consensus.DepositProcessor;
 import io.nuls.cmd.client.processor.consensus.StopAgentProcessor;
 import io.nuls.cmd.client.processor.consensus.WithdrawProcessor;
 import io.nuls.cmd.client.processor.ledger.GetBalanceProcessor;
+import io.nuls.cmd.client.processor.network.GetNetworkProcessor;
 import io.nuls.cmd.client.processor.system.ExitProcessor;
 import io.nuls.cmd.client.processor.system.HelpProcessor;
 import io.nuls.cmd.client.processor.transaction.GetTxProcessor;
@@ -139,6 +140,8 @@ public class CommandHandler implements InitializingBean {
          */
         register(SpringLiteContext.getBean(ExitProcessor.class));
         register(SpringLiteContext.getBean(HelpProcessor.class));
+
+        register(getBean(GetNetworkProcessor.class));
     }
 
     public void start() {
@@ -210,7 +213,7 @@ public class CommandHandler implements InitializingBean {
         if (length == 0) {
             return CommandConstant.COMMAND_ERROR;
         }
-        String command = args[0];
+        String command = args[0].trim();
         CommandProcessor processor = PROCESSOR_MAP.get(command);
         if (processor == null) {
             return command + " not a nuls command!";
