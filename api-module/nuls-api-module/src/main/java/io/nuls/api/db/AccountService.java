@@ -10,6 +10,7 @@ import io.nuls.api.model.po.db.TxRelationInfo;
 import io.nuls.api.utils.DocumentTransferTool;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
+import io.nuls.tools.model.BigIntegerUtils;
 import org.bson.Document;
 import org.bson.conversions.Bson;
 
@@ -47,6 +48,7 @@ public class AccountService {
         List<WriteModel<Document>> modelList = new ArrayList<>();
         for (AccountInfo accountInfo : accountInfoMap.values()) {
             Document document = DocumentTransferTool.toDocument(accountInfo, "address");
+            document.put("totalBalance", BigIntegerUtils.bigIntegerToString(accountInfo.getTotalBalance(), 32));
             if (accountInfo.isNew()) {
                 modelList.add(new InsertOneModel(document));
                 accountInfo.setNew(false);
@@ -92,6 +94,27 @@ public class AccountService {
             txRelationInfoList.add(DocumentTransferTool.toInfo(document, TxRelationInfo.class));
         }
         PageInfo<TxRelationInfo> pageInfo = new PageInfo<>(pageIndex, pageSize, totalCount, txRelationInfoList);
+        return pageInfo;
+    }
+
+    public PageInfo<AccountInfo> getCoinRanking(int pageIndex, int pageSize, int sortType, int chainId) {
+        Bson sort;
+        if (sortType == 0) {
+            sort = Sorts.descending("totalBalance");
+        } else {
+            sort = Sorts.ascending("totalBalance");
+        }
+        List<AccountInfo> accountInfoList = new ArrayList<>();
+        Bson filter = Filters.ne("totalBalance", 0);
+        List<Document> docsList = this.mongoDBService.pageQuery(ACCOUNT_TABLE + chainId, filter, sort, pageIndex, pageSize);
+        long totalCount = mongoDBService.getCount(ACCOUNT_TABLE + chainId, filter);
+        for (Document document : docsList) {
+            AccountInfo accountInfo = DocumentTransferTool.toInfo(document, "address", AccountInfo.class);
+//            List<Output> outputs = utxoService.getAccountUtxos(accountInfo.getAddress());
+//            CalcUtil.calcBalance(accountInfo, outputs, blockHeaderService.getBestBlockHeight());
+            accountInfoList.add(accountInfo);
+        }
+        PageInfo<AccountInfo> pageInfo = new PageInfo<>(pageIndex, pageSize, totalCount, accountInfoList);
         return pageInfo;
     }
 }

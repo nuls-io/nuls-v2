@@ -18,17 +18,29 @@
  * SOFTWARE.
  */
 
-package io.nuls.api.exception;
-
-
-import io.nuls.api.model.rpc.RpcResultError;
+package io.nuls.api.model.po.db;
 
 /**
  * @author Niels
  */
-public class NotFoundException extends JsonRpcException {
+public class KeyValue {
+    private String key;
 
-    public NotFoundException() {
-        super(new RpcResultError("404", "Data not found!", null));
+    private Object value;
+
+    public String getKey() {
+        return key;
+    }
+
+    public void setKey(String key) {
+        this.key = key;
+    }
+
+    public Object getValue() {
+        return value;
+    }
+
+    public void setValue(Object value) {
+        this.value = value;
     }
 }

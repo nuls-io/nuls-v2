@@ -74,7 +74,7 @@ public class SyncService {
 
         ApiCache apiCache = CacheManager.getCache(chainId);
         apiCache.setBestHeader(blockInfo.getHeader());
-        System.out.println(blockInfo.getHeader().getHeight() + "--------------");
+//        System.out.println(blockInfo.getHeader().getHeight() + "--------------");
         return true;
     }
 
@@ -547,7 +547,7 @@ public class SyncService {
             }
         }
         if (type == 1) {
-            agentInfo = agentService.getAgentByAgentHash(chainId, key);
+            agentInfo = agentService.getAgentByHash(chainId, key);
         } else if (type == 2) {
             agentInfo = agentService.getAgentByAgentAddress(chainId, key);
         } else {

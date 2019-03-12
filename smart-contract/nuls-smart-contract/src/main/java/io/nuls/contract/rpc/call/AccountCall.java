@@ -24,13 +24,26 @@
 
 package io.nuls.contract.rpc.call;
 
+import io.nuls.base.data.Transaction;
+import io.nuls.base.signture.P2PHKSignature;
+import io.nuls.base.signture.TransactionSignature;
 import io.nuls.contract.rpc.CallHelper;
-import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.model.ModuleE;
+import io.nuls.rpc.model.message.Response;
+import io.nuls.rpc.netty.processor.ResponseMessageProcessor;
+import io.nuls.tools.basic.Result;
 import io.nuls.tools.exception.NulsException;
+import io.nuls.tools.log.Log;
+import io.nuls.tools.model.StringUtils;
+import org.spongycastle.util.encoders.Hex;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+
+import static io.nuls.contract.constant.ContractErrorCode.*;
+import static io.nuls.contract.util.ContractUtil.getSuccess;
 
 /**
  * 
@@ -43,9 +56,55 @@ public class AccountCall {
         try {
             Map<String, Object> params = new HashMap<>(4);
             params.put("chainId", chainId);
-            //TODO pierre account模块获取合约地址的命令
-            Map resultMap = (Map) CallHelper.request(ModuleE.AC.abbr, "contractAddress", params);
-            return (String) resultMap.get("height");
+            Map resultMap = (Map) CallHelper.request(ModuleE.AC.abbr, "ac_createContractAccount", params);
+            return (String) resultMap.get("address");
+        } catch (Exception e) {
+            throw new NulsException(e);
+        }
+    }
+
+    public static Result validationPassword(int chainId, String address, String passwd) {
+        try {
+            if(StringUtils.isBlank(address) || StringUtils.isBlank(passwd)) {
+                return Result.getFailed(NULL_PARAMETER);
+            }
+            Map<String, Object> params = new HashMap<>(4);
+            params.put("chainId", chainId);
+            params.put("address", address);
+            params.put("password", passwd);
+            Map resultMap = (Map) CallHelper.request(ModuleE.AC.abbr, "ac_validationPassword", params);
+            boolean validate = (boolean) resultMap.get("value");
+            if(validate) {
+                return getSuccess();
+            }
+            return Result.getFailed(PASSWORD_IS_WRONG);
+        } catch (Exception e) {
+            Log.error(e);
+            return Result.getFailed(ACCOUNT_NOT_EXIST);
+        }
+    }
+
+    public static void transactionSignature(int chainId, String address, String password, Transaction tx) throws NulsException {
+        try {
+            P2PHKSignature p2PHKSignature = new P2PHKSignature();
+            Map<String, Object> callParams = new HashMap<>(4);
+            callParams.put("chainId", chainId);
+            callParams.put("address", address);
+            callParams.put("password", password);
+            callParams.put("dataHex", Hex.toHexString(tx.getHash().getDigestBytes()));
+            Response signResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_signDigest", callParams);
+            if (!signResp.isSuccess()) {
+                throw new NulsException(SIGNATURE_ERROR);
+            }
+            HashMap signResult = (HashMap) ((HashMap) signResp.getResponseData()).get("ac_signDigest");
+            p2PHKSignature.parse(Hex.decode((String) signResult.get("signatureHex")), 0);
+            TransactionSignature signature = new TransactionSignature();
+            List<P2PHKSignature> p2PHKSignatures = new ArrayList<>();
+            p2PHKSignatures.add(p2PHKSignature);
+            signature.setP2PHKSignatures(p2PHKSignatures);
+            tx.setTransactionSignature(signature.serialize());
+        } catch (NulsException e) {
+            throw e;
         } catch (Exception e) {
             throw new NulsException(e);
         }

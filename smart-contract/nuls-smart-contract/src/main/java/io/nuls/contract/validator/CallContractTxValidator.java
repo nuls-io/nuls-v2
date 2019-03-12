@@ -54,7 +54,7 @@ public class CallContractTxValidator{
 
     public Result validate(int chainId, CallContractTransaction tx) throws NulsException {
         CallContractData txData = tx.getTxDataObj();
-        BigInteger transferValue = BigInteger.valueOf(txData.getValue());
+        BigInteger transferValue = txData.getValue();
         byte[] contractAddress = txData.getContractAddress();
         byte[] sender = txData.getSender();
         Set<String> addressSet = SignatureUtil.getAddressFromTX(tx, chainId);

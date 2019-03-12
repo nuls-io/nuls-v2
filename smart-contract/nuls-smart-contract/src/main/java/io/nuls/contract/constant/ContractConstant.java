@@ -146,4 +146,6 @@ public interface ContractConstant {
      * Minimum transfer amount
      */
     BigInteger MININUM_TRANSFER_AMOUNT = BigInteger.TEN.pow(6);
+
+    byte UNLOCKED_TX = (byte) 0;
 }

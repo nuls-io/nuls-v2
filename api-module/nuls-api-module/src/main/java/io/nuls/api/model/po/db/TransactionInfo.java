@@ -46,31 +46,34 @@ public class TransactionInfo {
                 type == ApiConstant.TX_TYPE_CANCEL_DEPOSIT) {
             if (coinTos != null) {
                 for (CoinToInfo output : coinTos) {
-                    value.add(output.getAmount());
+                    value = value.add(output.getAmount());
                 }
             }
         } else if (type == ApiConstant.TX_TYPE_TRANSFER ||
-                type == ApiConstant.TX_TYPE_ALIAS ||
-                type == ApiConstant.TX_TYPE_CONTRACT_TRANSFER) {
+                type == ApiConstant.TX_TYPE_CALL_CONTRACT ||
+                type == ApiConstant.TX_TYPE_CONTRACT_TRANSFER ||
+                type == ApiConstant.TX_TYPE_DATA) {
             Set<String> addressSet = new HashSet<>();
             for (CoinFromInfo input : coinFroms) {
                 addressSet.add(input.getAddress());
             }
             for (CoinToInfo output : coinTos) {
                 if (!addressSet.contains(output.getAddress())) {
-                    value.add(output.getAmount());
+                    value = value.add(output.getAmount());
                 }
             }
         } else if (type == ApiConstant.TX_TYPE_REGISTER_AGENT || type == ApiConstant.TX_TYPE_JOIN_CONSENSUS) {
             for (CoinToInfo output : coinTos) {
                 if (output.getLockTime() == -1) {
-                    value.add(output.getAmount());
+                    value = value.add(output.getAmount());
                 }
             }
+        } else if (type == ApiConstant.TX_TYPE_ALIAS) {
+            value = ApiConstant.ALIAS_AMOUNT;
         } else {
             value = this.fee;
         }
-        this.value = value;
+        this.value = value.abs();
     }
 
     public Document toDocument() {

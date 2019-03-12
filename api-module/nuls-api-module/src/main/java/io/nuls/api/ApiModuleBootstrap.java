@@ -113,7 +113,7 @@ public class ApiModuleBootstrap {
 //                    .dependencies(ModuleE.CM.abbr, "1.0")
 //                    .dependencies(ModuleE.AC.abbr, "1.0")
 //                    .dependencies(ModuleE.NW.abbr, "1.0")
-//                    .dependencies(ModuleE.CS.abbr, "1.0")
+                    .dependencies(ModuleE.CS.abbr, "1.0")
                     .dependencies(ModuleE.BL.abbr, "1.0")
 //                    .dependencies(ModuleE.LG.abbr, "1.0")
 //                    .dependencies(ModuleE.TX.abbr, "1.0")

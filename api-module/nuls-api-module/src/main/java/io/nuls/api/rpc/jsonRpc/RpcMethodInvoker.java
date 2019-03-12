@@ -59,7 +59,7 @@ public class RpcMethodInvoker {
                 result = new RpcResult();
                 RpcResultError error = new RpcResultError();
                 error.setMessage(e.getMessage());
-                error.setCode(-32603);
+                error.setCode("-32603");
                 result.setError(error);
             }
         }

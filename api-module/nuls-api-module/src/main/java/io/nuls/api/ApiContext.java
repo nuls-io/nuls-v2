@@ -20,6 +20,7 @@
 
 package io.nuls.api;
 
+import java.math.BigInteger;
 import java.util.*;
 
 /**
@@ -40,6 +41,10 @@ public class ApiContext {
     public static long bestHeight;
 
     public static Properties config;
+
+    public static BigInteger inflationCoins = new BigInteger("500000000000000");
+
+    public static String VERSION = "1.0";
 
     //种子节点地址
     public static Set<String> SEED_NODE_ADDRESS = new HashSet<>();

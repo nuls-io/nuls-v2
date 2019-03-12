@@ -23,6 +23,8 @@
  */
 package io.nuls.contract.model.txdata;
 
+import java.math.BigInteger;
+
 /**
  * @desription:
  * @author: PierreLuo
@@ -40,7 +42,7 @@ public interface ContractData {
 
     long getPrice();
 
-    long getValue();
+    BigInteger getValue();
 
     String getMethodName();
 

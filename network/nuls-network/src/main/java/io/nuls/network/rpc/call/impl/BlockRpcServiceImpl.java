@@ -70,6 +70,7 @@ public class BlockRpcServiceImpl implements BlockRpcService {
                 header.parse(new NulsByteBuffer(HexUtil.decode(hex)));
                 bestBlockInfo.setHash(header.getHash().getDigestHex());
                 bestBlockInfo.setBlockHeight(header.getHeight());
+
             }
         } catch (Exception e) {
             LoggerUtil.Log.error("getBestBlockHeader error,chainId={}.exception={}", chainId, e.getMessage());
