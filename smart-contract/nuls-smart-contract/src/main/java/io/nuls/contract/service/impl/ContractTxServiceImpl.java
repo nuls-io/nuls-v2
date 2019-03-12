@@ -54,6 +54,7 @@ import org.spongycastle.util.encoders.Hex;
 
 import java.io.IOException;
 import java.math.BigInteger;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.Map;
@@ -269,7 +270,9 @@ public class ContractTxServiceImpl implements ContractTxService {
                 return getFailed();
             }
 
-            return getSuccess().setData(tx.getHash().getDigestHex());
+            Map<String, Object> resultMap = new HashMap<>(2);
+            resultMap.put("txHash", tx.getHash().getDigestHex());
+            return getSuccess().setData(resultMap);
         } catch (IOException e) {
             Log.error(e);
             Result result = Result.getFailed(ContractErrorCode.CONTRACT_EXECUTE_ERROR);
@@ -346,14 +349,14 @@ public class ContractTxServiceImpl implements ContractTxService {
             return getSuccess();
         } catch (Exception e) {
             Log.error(e);
-            Result result = Result.getFailed(ContractErrorCode.CONTRACT_TX_CREATE_ERROR);
+            Result result = Result.getFailed(ContractErrorCode.CONTRACT_OTHER_ERROR);
             result.setMsg(e.getMessage());
             return result;
         }
     }
 
     @Override
-    public Result transferFee(int chainId, String sender, BigInteger value, Long gasLimit, Long price, String contractAddress,
+    public Result txFee(int chainId, String sender, BigInteger value, Long gasLimit, Long price, String contractAddress,
                               String methodName, String methodDesc, String[][] args, String remark) {
         try {
             byte[] contractAddressBytes = AddressTool.getAddress(contractAddress);
@@ -392,20 +395,17 @@ public class ContractTxServiceImpl implements ContractTxService {
             if (!broadcast) {
                 return getFailed();
             }
-            return getSuccess().setData(tx.getHash().getDigestHex());
+            Map<String, Object> resultMap = new HashMap<>(2);
+            resultMap.put("txHash", tx.getHash().getDigestHex());
+            return getSuccess().setData(resultMap);
         } catch (IOException e) {
             Log.error(e);
-            Result result = Result.getFailed(ContractErrorCode.CONTRACT_TX_CREATE_ERROR);
+            Result result = Result.getFailed(ContractErrorCode.CONTRACT_OTHER_ERROR);
             result.setMsg(e.getMessage());
             return result;
         } catch (NulsException e) {
             Log.error(e);
             return Result.getFailed(e.getErrorCode());
-        } catch (Exception e) {
-            Log.error(e);
-            Result result = Result.getFailed(ContractErrorCode.CONTRACT_TX_CREATE_ERROR);
-            result.setMsg(e.getMessage());
-            return result;
         }
     }
 

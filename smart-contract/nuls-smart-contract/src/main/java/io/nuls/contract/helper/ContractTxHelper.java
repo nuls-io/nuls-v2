@@ -240,10 +240,8 @@ public class ContractTxHelper {
         CreateContractData createContractData = new CreateContractData();
         createContractData.setSender(senderBytes);
         createContractData.setContractAddress(contractAddressBytes);
-        createContractData.setValue(value);
         createContractData.setGasLimit(gasLimit);
         createContractData.setPrice(price);
-        createContractData.setCodeLen(contractCode.length);
         createContractData.setCode(contractCode);
         if (args != null) {
             createContractData.setArgsCount((byte) args.length);
