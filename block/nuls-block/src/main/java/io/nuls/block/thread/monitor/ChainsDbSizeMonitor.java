@@ -192,7 +192,7 @@ public class ChainsDbSizeMonitor implements Runnable {
                 SortedSet<Chain> deleteSet = new TreeSet<>(Chain.COMPARATOR);
                 //1.标记
                 for (Chain forkChain : forkChains) {
-                    if (latestHeight - forkChain.getStartHeight() > heightRange) {
+                    if (latestHeight - forkChain.getStartHeight() > heightRange || masterChain.getHashList().contains(forkChain.getEndHash())) {
                         //清理orphanChain,并递归清理orphanChain的所有子链
                         deleteSet.add(forkChain);
                         deleteSet.addAll(forkChain.getSons());

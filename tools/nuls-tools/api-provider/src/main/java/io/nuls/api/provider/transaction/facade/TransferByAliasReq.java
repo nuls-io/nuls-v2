@@ -18,15 +18,14 @@ import java.math.BigInteger;
 public class TransferByAliasReq extends BaseReq {
 
     /**
+     * 发出资产账户别名
+     */
+    private String alias;
+
+    /**
      * 接收地址
      */
     private String address;
-
-    /**
-     * 账户密码
-     *
-     */
-    private String password;
 
     /**
      * 转账金额
@@ -34,9 +33,10 @@ public class TransferByAliasReq extends BaseReq {
     private BigInteger amount;
 
     /**
-     * 发出资产账户别名
+     * 账户密码
+     *
      */
-    private String alias;
+    private String password;
 
     /**
      * 备注

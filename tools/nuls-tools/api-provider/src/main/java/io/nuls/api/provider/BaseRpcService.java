@@ -32,7 +32,7 @@ public abstract class BaseRpcService extends BaseService {
      */
     protected <T,R> Result<T> callRpc(String module,String method,Object req,Function<R,Result> callback) {
         Map<String, Object> params = MapUtils.beanToLinkedMap(req);
-        params.put(Constants.VERSION_KEY_STR, "1.0");
+//        params.put(Constants.VERSION_KEY_STR, "1.0");
         log.debug("call {} rpc , method : {},param : {}",module,method,params);
         Response cmdResp = null;
         try {
