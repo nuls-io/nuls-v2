@@ -256,12 +256,12 @@ public class CoinDataValidator {
         //余额判断
         if (accountState.getAvailableAmount().compareTo(coinFrom.getAmount()) == -1) {
             //余额不足
-            logger.info("{}=={}=={}==balance is not enough", coinFrom.getAddress(), coinFrom.getAssetsChainId(), coinFrom.getAssetsId());
+            logger.info("{}=={}=={}==balance is not enough", AddressTool.getStringAddressByBytes(coinFrom.getAddress()), coinFrom.getAssetsChainId(), coinFrom.getAssetsId());
             return false;
         }
         if (nonce.equalsIgnoreCase(txNonce)) {
             //nonce 重复了
-            logger.info("{}=={}=={}== nonce is repeat", coinFrom.getAddress(), coinFrom.getAssetsChainId(), coinFrom.getAssetsId());
+            logger.info("{}=={}=={}== nonce is repeat",  AddressTool.getStringAddressByBytes(coinFrom.getAddress()), coinFrom.getAssetsChainId(), coinFrom.getAssetsId());
             return false;
         }
         //不是解锁操作
