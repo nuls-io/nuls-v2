@@ -156,7 +156,7 @@ public class TransactionServiceImpl implements TransactionService {
         Transaction transaction = new Transaction(AccountConstant.TX_TYPE_TRANSFER);
         transaction.setTime(NetworkCall.getCurrentTimeMillis());
         transaction.setRemark(StringUtils.bytes(remark));
-        //build coin entity
+        //build coin data
         //buildMultiSignTransactionCoinData(transaction, chainId,assetsId, multiSigAccount, toAddress, amount);
         CoinDto from = new CoinDto(multiSigAccount.getAddress().getBase58(), chainId, assetsId, amount, null);
         CoinDto to = new CoinDto(toAddress, chainId, assetsId, amount, null);
@@ -214,7 +214,7 @@ public class TransactionServiceImpl implements TransactionService {
         transaction.setRemark(StringUtils.bytes(remark));
         Alias alias = new Alias(multiSigAccount.getAddress().getAddressBytes(), aliasName);
         transaction.setTxData(alias.serialize());
-        //build coin entity
+        //build coin data
         buildMultiSignTransactionCoinData(transaction, chainId, -1, multiSigAccount, toAddress, BigInteger.ONE);
         //sign
         TransactionSignature transactionSignature = buildMultiSignTransactionSignature(transaction, multiSigAccount, account, password);
@@ -346,7 +346,7 @@ public class TransactionServiceImpl implements TransactionService {
 
     /**
      * 组装CoinData数据
-     * assembly coinFrom entity
+     * assembly coinFrom data
      *
      * @param tx
      * @param chainId
@@ -384,7 +384,7 @@ public class TransactionServiceImpl implements TransactionService {
 
     /**
      * 组装coinFrom数据
-     * assembly coinFrom entity
+     * assembly coinFrom data
      *
      * @param listFrom Initiator set coinFrom
      * @return List<CoinFrom>
@@ -428,7 +428,7 @@ public class TransactionServiceImpl implements TransactionService {
 
     /**
      * 组装coinTo数据
-     * assembly coinTo entity
+     * assembly coinTo data
      * 条件：to中所有地址必须是同一条链的地址
      *
      * @param listTo Initiator set coinTo
