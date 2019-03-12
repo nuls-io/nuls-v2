@@ -124,7 +124,7 @@ public class TransactionServiceImpl implements TransactionService {
             if (to.getLockTime() == 0) {
                 //普通交易
                 CoinDataUtils.calTxToAmount(accountsMap, to, txHash, accountKey);
-            }else{
+            } else {
                 CoinDataUtils.calTxToLockedAmount(accountsMap, to, txHash, accountKey);
             }
         }
@@ -149,6 +149,7 @@ public class TransactionServiceImpl implements TransactionService {
      */
     @Override
     public boolean confirmBlockProcess(int addressChainId, List<Transaction> txList, long blockHeight) {
+
         try {
             /*--begin 缓存区块交易数据,作为接口交互联调使用*/
             blockDataService.saveLatestBlockDatas(addressChainId, blockHeight, txList);
@@ -165,6 +166,7 @@ public class TransactionServiceImpl implements TransactionService {
             //整体区块备份
             BlockSnapshotAccounts blockSnapshotAccounts = new BlockSnapshotAccounts();
             for (Transaction transaction : txList) {
+                LoggerUtil.txCommitLog.debug("start confirmBlockProcess addressChainId={},blockHeight={},hash={}", addressChainId, blockHeight, transaction.getHash().toString());
                 //从缓存校验交易
                 if (coinDataValidator.hadValidateTx(addressChainId, transaction)) {
                     CoinData coinData = CoinDataUtils.parseCoinData(transaction.getCoinData());
@@ -327,6 +329,7 @@ public class TransactionServiceImpl implements TransactionService {
             BlockSnapshotAccounts blockSnapshotAccounts = repository.getBlockSnapshot(addressChainId, blockHeight);
             List<AccountState> preAccountStates = blockSnapshotAccounts.getAccounts();
             for (AccountState accountState : preAccountStates) {
+                LoggerUtil.txRollBackLog.debug("start rollBackConfirmTxs acountKey={},blockHeight={},preHash={}",LedgerUtils.getKeyStr(accountState.getAddress(),accountState.getAssetChainId(),accountState.getAssetId()),blockHeight,accountState.getTxHash());
                 String key = LedgerUtils.getKeyStr(accountState.getAddress(), accountState.getAssetChainId(), accountState.getAssetId());
                 accountStateService.rollAccountState(key, accountState);
                 logger.info("rollBack account={},assetChainId={},assetId={}, height={},lastHash= {} ", key, accountState.getAssetChainId(), accountState.getAssetId(),

@@ -28,7 +28,6 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -448,9 +447,8 @@ public class ConnectManager {
      * @param connectData 链接信息
      * @param message     订阅消息
      */
-    public static void subscribeByEvent(ConnectData connectData, Message message) {
+    public static void subscribeByEvent(ConnectData connectData, Message message, Request request) {
         MESSAGE_TO_CHANNEL_MAP.put(message, connectData);
-        Request request = JSONUtils.map2pojo((Map) message.getMessageData(), Request.class);
         for (String method : request.getRequestMethods().keySet()) {
             if (CMD_SUBSCRIBE_MESSAGE_MAP.containsKey(method)) {
                 CMD_SUBSCRIBE_MESSAGE_MAP.get(method).add(message);
@@ -491,12 +489,6 @@ public class ConnectManager {
              /*
             找到订阅该接口的Message和WsData,然后判断订阅该接口的Message事件是否触发
             */
-            int tryCount = 0;
-            while (subRequestCount > 0 && tryCount < Constants.TRY_COUNT){
-                TimeUnit.SECONDS.sleep(2L);
-                tryCount++;
-            }
-            Log.info("--------------------------订阅事件触发！");
             CopyOnWriteArrayList<Message> messageList = CMD_SUBSCRIBE_MESSAGE_MAP.get(cmd);
             int changeCount = addCmdChangeCount(cmd);
             for (Message message : messageList) {
@@ -509,7 +501,6 @@ public class ConnectManager {
                     if ((changeCount - initCount) % eventCount == 0) {
                         try {
                             connectData.getRequestEventResponseQueue().put(getRealResponse(cmd, message.getMessageId(), response));
-                            Log.info("----------------------广播模块："+connectData.getChannel());
                         } catch (InterruptedException e) {
                             Log.error(e);
                         }
@@ -717,16 +708,6 @@ public class ConnectManager {
         try {
             channel.eventLoop().execute(() -> {
                 channel.writeAndFlush(new TextWebSocketFrame(message));
-                /*ChannelFuture channelFuture = channel.writeAndFlush(new TextWebSocketFrame(message));
-                if (message.contains("registerModuleDependencies")) {
-                    channelFuture.addListener((ChannelFutureListener) future -> {
-                        if (!future.isSuccess()) {
-                            Log.info("######registerModuleDependencies message#########" + message);
-                            Log.info("######registerModuleDependencies isCancelled#########" + future.isCancelled());
-                            Log.info("######registerModuleDependencies cause#########" + future.cause());
-                        }
-                    });
-                }*/
             });
         }catch (Exception e){
             Log.error(e);
@@ -750,26 +731,5 @@ public class ConnectManager {
             return channel;
         }
         return ROLE_CHANNEL_MAP.get(role);
-    }
-
-    /**
-     * 订阅请求数量增减
-     * Increase or decrease in subscription requests
-     * @param add true表示加一，false减一
-     * */
-    public static void modifySubRequestCount(boolean add){
-        try {
-            SUB_LOCK.lock();
-            if(add){
-                subRequestCount++;
-            }else{
-                subRequestCount--;
-            }
-        }catch (Exception e){
-            Log.error(e);
-        }finally {
-            SUB_LOCK.unlock();
-        }
-
     }
 }

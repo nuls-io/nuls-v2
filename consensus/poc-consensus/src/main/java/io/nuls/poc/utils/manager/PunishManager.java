@@ -53,6 +53,8 @@ public class PunishManager {
     private DepositManager depositManager;
     @Autowired
     private AgentManager agentManager;
+    @Autowired
+    private RoundManager roundManager;
     /**
      * 加载所有的红牌信息和最近X黃牌数据到缓存
      * Load all red card information and latest X rotation card entity to the cache
@@ -323,7 +325,7 @@ public class PunishManager {
      * @param round      Local latest rounds information/本地最新轮次信息
      */
     public void punishTx(Chain chain, BlockHeader bestBlock, List<Transaction> txList, MeetingMember self, MeetingRound round) throws NulsException, IOException {
-        Transaction yellowPunishTransaction = createYellowPunishTx(bestBlock, self, round);
+        Transaction yellowPunishTransaction = createYellowPunishTx(chain,bestBlock, self, round);
         if (null == yellowPunishTransaction) {
             return;
         }
@@ -378,7 +380,7 @@ public class PunishManager {
      * @param round     Local latest rounds information/本地最新轮次信息
      * @return  Transaction
      */
-    public Transaction createYellowPunishTx(BlockHeader preBlock, MeetingMember self, MeetingRound round) throws IOException {
+    public Transaction createYellowPunishTx(Chain chain,BlockHeader preBlock, MeetingMember self, MeetingRound round) throws IOException,NulsException {
         BlockExtendsData preBlockRoundData = new BlockExtendsData(preBlock.getExtend());
         /*
         如果本节点当前打包轮次比本地最新区块的轮次大一轮以上则返回不生成黄牌交易
@@ -437,6 +439,9 @@ public class PunishManager {
             */
             else {
                 preRound = round.getPreRound();
+                if(preRound == null){
+                    preRound = roundManager.getRoundByRoundIndex(chain,round.getIndex(),round.getStartTime());
+                }
                 member = preRound.getMember(index + preRound.getMemberCount());
                 if (member.getAgent() == null || member.getAgent().getDelHeight() > 0 || member.getAgent().getDeposit().equals(BigInteger.ZERO)) {
                     continue;

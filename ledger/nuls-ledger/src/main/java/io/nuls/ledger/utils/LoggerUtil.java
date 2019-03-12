@@ -35,4 +35,6 @@ import io.nuls.tools.log.logback.NulsLogger;
  **/
 public class LoggerUtil {
    public static NulsLogger logger = LoggerBuilder.getLogger("./ld", "ld",Level.ALL);
+   public static NulsLogger txCommitLog = LoggerBuilder.getLogger("./ld", "tx",Level.ALL);
+   public static NulsLogger txRollBackLog = LoggerBuilder.getLogger("./ld", "txRb",Level.ALL);
 }

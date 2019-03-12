@@ -1,6 +1,7 @@
 package io.nuls.transaction.rpc.cmd;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
+import io.nuls.base.constant.TxStatusEnum;
 import io.nuls.base.data.NulsDigestData;
 import io.nuls.base.data.Page;
 import io.nuls.base.data.Transaction;
@@ -10,14 +11,13 @@ import io.nuls.rpc.model.Parameter;
 import io.nuls.rpc.model.message.Response;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
-import io.nuls.tools.model.ObjectUtils;
 import io.nuls.tools.exception.NulsException;
+import io.nuls.tools.model.ObjectUtils;
 import io.nuls.tools.parse.JSONUtils;
 import io.nuls.transaction.constant.TxCmd;
 import io.nuls.transaction.constant.TxConfig;
 import io.nuls.transaction.constant.TxConstant;
 import io.nuls.transaction.constant.TxErrorCode;
-import io.nuls.transaction.storage.h2.TransactionH2Service;
 import io.nuls.transaction.manager.ChainManager;
 import io.nuls.transaction.manager.TransactionManager;
 import io.nuls.transaction.model.bo.Chain;
@@ -29,6 +29,7 @@ import io.nuls.transaction.model.dto.TxRegisterDTO;
 import io.nuls.transaction.model.po.TransactionPO;
 import io.nuls.transaction.service.ConfirmedTxService;
 import io.nuls.transaction.service.TxService;
+import io.nuls.transaction.storage.h2.TransactionH2Service;
 import io.nuls.transaction.utils.TxUtil;
 
 import java.io.IOException;
@@ -429,6 +430,7 @@ public class TransactionCmd extends BaseCmd {
                 resultMap.put("txHex", null);
             } else {
                 Log.debug("getConfirmedTransaction success. txHash:{}", txHash);
+                tx.setStatus(TxStatusEnum.CONFIRMED);
                 resultMap.put("txHex", tx.hex());
             }
             return success(resultMap);

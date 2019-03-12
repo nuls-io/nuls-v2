@@ -94,12 +94,17 @@ public class ConsensusServiceImpl implements ConsensusService {
             return Result.getFailed(ConsensusErrorCode.PARAM_ERROR);
         }
         CreateAgentDTO dto = JSONUtils.map2pojo(params, CreateAgentDTO.class);
-        ObjectUtils.canNotEmpty(dto);
-        ObjectUtils.canNotEmpty(dto.getChainId(), "chainId can not be null");
-        ObjectUtils.canNotEmpty(dto.getAgentAddress(), "agent address can not be null");
-        ObjectUtils.canNotEmpty(dto.getCommissionRate(), "commission rate can not be null");
-        ObjectUtils.canNotEmpty(dto.getDeposit(), "deposit can not be null");
-        ObjectUtils.canNotEmpty(dto.getPackingAddress(), "packing address can not be null");
+        try {
+            ObjectUtils.canNotEmpty(dto);
+            ObjectUtils.canNotEmpty(dto.getChainId(), "chainId can not be null");
+            ObjectUtils.canNotEmpty(dto.getAgentAddress(), "agent address can not be null");
+            ObjectUtils.canNotEmpty(dto.getCommissionRate(), "commission rate can not be null");
+            ObjectUtils.canNotEmpty(dto.getDeposit(), "deposit can not be null");
+            ObjectUtils.canNotEmpty(dto.getPackingAddress(), "packing address can not be null");
+        }catch (RuntimeException e){
+            return Result.getFailed(ConsensusErrorCode.PARAM_ERROR);
+        }
+
         Chain chain = chainManager.getChainMap().get(dto.getChainId());
         if (chain == null) {
             Log.error(ConsensusErrorCode.CHAIN_NOT_EXIST.getMsg());
@@ -159,9 +164,13 @@ public class ConsensusServiceImpl implements ConsensusService {
             return Result.getFailed(ConsensusErrorCode.PARAM_ERROR);
         }
         StopAgentDTO dto = JSONUtils.map2pojo(params, StopAgentDTO.class);
-        ObjectUtils.canNotEmpty(dto);
-        ObjectUtils.canNotEmpty(dto.getChainId(), "chainId can not be null");
-        ObjectUtils.canNotEmpty(dto.getAddress(), "address can not be null");
+        try {
+            ObjectUtils.canNotEmpty(dto);
+            ObjectUtils.canNotEmpty(dto.getChainId(), "chainId can not be null");
+            ObjectUtils.canNotEmpty(dto.getAddress(), "address can not be null");
+        }catch (RuntimeException e){
+            return Result.getFailed(ConsensusErrorCode.PARAM_ERROR);
+        }
         if (!AddressTool.validAddress((short) dto.getChainId(), dto.getAddress())) {
             throw new NulsRuntimeException(ConsensusErrorCode.ADDRESS_ERROR);
         }
@@ -220,10 +229,14 @@ public class ConsensusServiceImpl implements ConsensusService {
             return Result.getFailed(ConsensusErrorCode.PARAM_ERROR);
         }
         CreateDepositDTO dto = JSONUtils.map2pojo(params, CreateDepositDTO.class);
-        ObjectUtils.canNotEmpty(dto);
-        ObjectUtils.canNotEmpty(dto.getAddress());
-        ObjectUtils.canNotEmpty(dto.getAgentHash());
-        ObjectUtils.canNotEmpty(dto.getDeposit());
+        try {
+            ObjectUtils.canNotEmpty(dto);
+            ObjectUtils.canNotEmpty(dto.getAddress());
+            ObjectUtils.canNotEmpty(dto.getAgentHash());
+            ObjectUtils.canNotEmpty(dto.getDeposit());
+        }catch (RuntimeException e){
+            return Result.getFailed(ConsensusErrorCode.PARAM_ERROR);
+        }
         if (!NulsDigestData.validHash(dto.getAgentHash())) {
             return Result.getFailed(ConsensusErrorCode.AGENT_NOT_EXIST);
         }

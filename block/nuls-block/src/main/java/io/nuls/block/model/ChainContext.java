@@ -23,24 +23,22 @@
 package io.nuls.block.model;
 
 import io.nuls.base.data.Block;
-import io.nuls.tools.protocol.Protocol;
 import io.nuls.block.cache.CacheHandler;
 import io.nuls.block.cache.SmallBlockCacher;
 import io.nuls.block.constant.RunningStatusEnum;
 import io.nuls.block.manager.ChainManager;
-import io.nuls.block.service.BlockService;
 import io.nuls.block.utils.LoggerUtil;
-import io.nuls.block.utils.module.ProtocolUtil;
-import io.nuls.block.utils.module.TransactionUtil;
-import io.nuls.tools.core.ioc.SpringLiteContext;
 import io.nuls.tools.log.logback.NulsLogger;
+import io.nuls.tools.protocol.Protocol;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.StampedLock;
 
 /**
@@ -142,6 +140,12 @@ public class ChainContext {
     @Setter
     private NulsLogger messageLog;
 
+    /**
+     * 分叉链、孤儿链中重复hash计数器
+     */
+    @Getter
+    private Map<String, AtomicInteger> duplicateBlockMap;
+
     public synchronized void setStatus(RunningStatusEnum status) {
         this.status = status;
     }
@@ -151,6 +155,7 @@ public class ChainContext {
     }
 
     public void init() {
+        duplicateBlockMap = new HashMap<>();
         systemTransactionType = new ArrayList<>();
         version = 1;
         doSyn = true;

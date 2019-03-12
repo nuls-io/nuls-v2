@@ -111,11 +111,27 @@ public class BlockSynchronizer implements Runnable {
         }
     }
 
+    private List<Node> waitUntilNetworkStable(int chainId){
+        List<Node> availableNodesFirst = NetworkUtil.getAvailableNodes(chainId);
+        List<Node> availableNodesSecond;
+        int sizeFirst = availableNodesFirst.size();
+        try {
+            Thread.sleep(10000);
+            int sizeSecond;
+            do{
+                availableNodesSecond = NetworkUtil.getAvailableNodes(chainId);
+                sizeSecond = availableNodesSecond.size();
+            } while(sizeSecond != sizeFirst);
+        } catch (InterruptedException e) {
+            return List.of();
+        }
+        return availableNodesSecond;
+    }
+
     private boolean synchronize(int chainId) throws Exception {
         NulsLogger commonLog = ContextManager.getContext(chainId).getCommonLog();
         //1.调用网络模块接口获取当前chainId网络的可用节点
-        List<Node> availableNodes = NetworkUtil.getAvailableNodes(chainId);
-
+        List<Node> availableNodes = waitUntilNetworkStable(chainId);
         //2.判断可用节点数是否满足最小配置
         ChainContext context = ContextManager.getContext(chainId);
         ChainParameters parameters = context.getParameters();
@@ -162,15 +178,12 @@ public class BlockSynchronizer implements Runnable {
             //5.开启区块下载器BlockDownloader
             BlockDownloader downloader = new BlockDownloader(chainId, futures, executor, params, queue);
             Future<Boolean> downloadFutrue = ThreadUtils.asynExecuteCallable(downloader);
-
             //6.开启区块收集线程BlockCollector,收集BlockDownloader下载的区块
             BlockCollector collector = new BlockCollector(chainId, futures, executor, params, queue);
             ThreadUtils.createAndRunThread("block-collector-" + chainId, collector);
-
             //7.开启区块消费线程BlockConsumer,与上面的BlockDownloader共用一个队列blockQueue
             BlockConsumer consumer = new BlockConsumer(chainId, queue, params);
             Future<Boolean> consumerFuture = ThreadUtils.asynExecuteCallable(consumer);
-
             Boolean downResult = downloadFutrue.get();
             Boolean storageResult = consumerFuture.get();
             boolean success = downResult != null && downResult && storageResult != null && storageResult;
@@ -178,9 +191,9 @@ public class BlockSynchronizer implements Runnable {
             executor.shutdownNow();
             if (success) {
                 commonLog.info("block syn complete, total download:" + total + ", total time:" + (end - start) + ", average time:" + (end - start) / total);
-                if (checkIsNewest(chainId, params, context)) {
+//                if (checkIsNewest(chainId, params, context)) {
                     //要测试分叉链切换或者孤儿链，放开下面语句，概率会加大
-//                if (true) {
+                if (true) {
                     commonLog.info("block syn complete successfully, current height-" + params.getNetLatestHeight());
                     context.setStatus(RunningStatusEnum.RUNNING);
                     ConsensusUtil.notice(chainId, CONSENSUS_WORKING);
@@ -208,17 +221,14 @@ public class BlockSynchronizer implements Runnable {
      * @throws Exception
      */
     private boolean checkIsNewest(int chainId, BlockDownloaderParams params, ChainContext context) throws Exception {
-
         long downloadBestHeight = params.getNetLatestHeight();
         long time = NetworkUtil.currentTime();
         long timeout = 60 * 1000L;
         long localBestHeight = 0L;
-
         while (true) {
             if (NetworkUtil.currentTime() - time > timeout) {
                 break;
             }
-
             long bestHeight = blockService.getLatestBlock(chainId).getHeader().getHeight();
             if (bestHeight >= downloadBestHeight) {
                 break;
@@ -228,12 +238,8 @@ public class BlockSynchronizer implements Runnable {
             }
             Thread.sleep(100L);
         }
-
         BlockDownloaderParams newestParams = statistics(NetworkUtil.getAvailableNodes(chainId), context);
-        if (newestParams.getNetLatestHeight() > blockService.getLatestBlock(chainId).getHeader().getHeight()) {
-            return false;
-        }
-        return true;
+        return newestParams.getNetLatestHeight() <= blockService.getLatestBlock(chainId).getHeader().getHeight();
     }
 
     /**
@@ -275,7 +281,6 @@ public class BlockSynchronizer implements Runnable {
                 nodeMap.put(tempKey, Lists.newArrayList(node));
             }
         }
-
         //最终统计出出现频率最大的key,就获取到当前可信的最新高度与最新hash,以及可信的节点列表
         for (Map.Entry<String, Integer> entry : countMap.entrySet()) {
             Integer value = entry.getValue();
@@ -284,7 +289,6 @@ public class BlockSynchronizer implements Runnable {
                 key = entry.getKey();
             }
         }
-
         ChainParameters parameters = context.getParameters();
         int config = availableNodes.size() * parameters.getConsistencyNodePercent() / 100;
         if (count < config) {

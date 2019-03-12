@@ -104,7 +104,7 @@ public class VerifyTxProcessTask implements Runnable {
                 LedgerCall.commitUnconfirmedTx(chain, tx.hex());
                 //广播交易hash
                 NetworkCall.broadcastTxHash(chain.getChainId(),tx.getHash());
-                chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("Process tx success..");
+                chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("Process tx success..................");
                 chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("");
                 return true;
             }
@@ -114,7 +114,7 @@ public class VerifyTxProcessTask implements Runnable {
                     "coinData not success - code: {}, - reason:{}, type:{} - txhash:{}",
                     verifyTxResult.getCode(),  verifyTxResult.getDesc(), tx.getType(), tx.getHash().getDigestHex());
             chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("---------------------------------");
-            chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("Process tx fail..");
+            chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("Process tx fail..................");
             chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("");
             if(verifyTxResult.getCode() == VerifyTxResult.ORPHAN && !isOrphanTx){
                 processOrphanTx(tx);
@@ -141,7 +141,6 @@ public class VerifyTxProcessTask implements Runnable {
                 Transaction tx = it.next();
                 boolean success = processTx(chain, tx, true);
                 if (success) {
-                    LedgerCall.rollBackUnconfirmTx(chain, tx.hex());
                     it.remove();
                     chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("*** Debug *** [VerifyTxProcessTask - OrphanTx] " +
                             "OrphanTx remove - type:{} - txhash:{}, -orphanTxList size:{}", tx.getType(), tx.getHash().getDigestHex(), orphanTxList.size());

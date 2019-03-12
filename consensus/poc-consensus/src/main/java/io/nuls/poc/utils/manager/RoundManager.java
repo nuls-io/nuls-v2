@@ -345,6 +345,14 @@ public class RoundManager {
         return calculationRound(chain,startBlockHeader, roundIndex, roundStartTime);
     }
 
+    public MeetingRound getRoundByRoundIndex(Chain chain,long roundIndex,long roundStartTime )throws NulsException{
+        BlockHeader startBlockHeader = chain.getNewestHeader();
+        if (startBlockHeader.getHeight() != 0L) {
+            startBlockHeader = getFirstBlockOfPreRound(chain,roundIndex);
+        }
+        return calculationRound(chain,startBlockHeader, roundIndex, roundStartTime);
+    }
+
     /**
      * 计算轮次信息
      * Calculate wheel information
