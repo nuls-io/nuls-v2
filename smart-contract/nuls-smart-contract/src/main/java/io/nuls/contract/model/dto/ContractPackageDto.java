@@ -24,20 +24,34 @@
 package io.nuls.contract.model.dto;
 
 import io.nuls.base.data.Transaction;
-import lombok.AllArgsConstructor;
+import io.nuls.contract.model.bo.ContractResult;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 /**
  * @author: PierreLuo
  * @date: 2019-03-06
  */
 @Getter
-@Setter
-@AllArgsConstructor
 public class ContractPackageDto {
+    @Setter
     private byte[] stateRoot;
-    private List<Transaction> transferTransactionList;
+    @Setter
+    private List<Transaction> resultTxList;
+    private Map<String, ContractResult> contractResultMap;
+
+    public ContractPackageDto(byte[] stateRoot, List<Transaction> resultTxList) {
+        this.stateRoot = stateRoot;
+        this.resultTxList = resultTxList;
+    }
+
+    public void makeContractResultMap(List<ContractResult> contractResultList) {
+        this.contractResultMap = contractResultList.stream().collect(Collectors.toMap(c -> c.getTx().getTxHex(), Function.identity(), (key1, key2) -> key2, LinkedHashMap::new));
+    }
 }

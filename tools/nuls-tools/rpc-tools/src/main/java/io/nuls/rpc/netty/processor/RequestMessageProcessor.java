@@ -125,11 +125,11 @@ public class RequestMessageProcessor {
              */
             switch (nextProcess) {
                 case Constants.EXECUTE_AND_KEEP:
-                    callCommandsWithPeriod(channelData.getChannel(), request.getRequestMethods(), message.getMessageId());
+                    callCommandsWithPeriod(channelData.getChannel(), request.getRequestMethods(), message.getMessageId(),false);
                     channelData.getCmdInvokeTime().put(message, TimeService.currentTimeMillis());
                     return true;
                 case Constants.EXECUTE_AND_REMOVE:
-                    callCommandsWithPeriod(channelData.getChannel(), request.getRequestMethods(), message.getMessageId());
+                    callCommandsWithPeriod(channelData.getChannel(), request.getRequestMethods(), message.getMessageId(),false);
                     channelData.getCmdInvokeTime().put(message, TimeService.currentTimeMillis());
                     return false;
                 case Constants.SKIP_AND_KEEP:
@@ -153,10 +153,11 @@ public class RequestMessageProcessor {
      * @param channel        用于发送消息 / Used to send message
      * @param requestMethods 请求的方法集合 / The collections of request method
      * @param messageId      原始消息ID / The origin message ID
+     * @param isSubscribe    is subscribe message
      * @throws Exception 连接失败 / Connected failed
      */
     @SuppressWarnings("unchecked")
-    public static void callCommandsWithPeriod(Channel channel, Map requestMethods, String messageId) throws Exception {
+    public static void callCommandsWithPeriod(Channel channel, Map requestMethods, String messageId ,boolean isSubscribe) throws Exception {
         for (Object object : requestMethods.entrySet()) {
             Map.Entry<String, Map> entry = (Map.Entry<String, Map>) object;
             String method = entry.getKey();
@@ -210,7 +211,7 @@ public class RequestMessageProcessor {
             执行成功之后判断该接口是否被订阅过，如果被订阅则改变该接口触发次数
             After successful execution, determine if the interface has been subscribed, and if subscribed, change the number of triggers for the interface
              */
-            if(ConnectManager.SUBSCRIBE_COUNT.containsKey(method)){
+            if(ConnectManager.SUBSCRIBE_COUNT.containsKey(method) && !isSubscribe){
                 ConnectManager.eventTrigger(method,(Response) rspMessage.getMessageData());
             }
         }

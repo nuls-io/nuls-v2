@@ -24,14 +24,18 @@
 package io.nuls.contract.model.bo;
 
 import io.nuls.contract.util.ContractUtil;
+import io.nuls.tools.exception.NulsException;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.math.BigInteger;
 
 /**
- * @desription:
  * @author: PierreLuo
  * @date: 2018/8/19
  */
+@Getter
+@Setter
 public class ContractTokenInfo {
 
     private String contractAddress;
@@ -54,33 +58,9 @@ public class ContractTokenInfo {
         this.blockHeight = blockHeight;
     }
 
-    public String getSymbol() {
-        return symbol;
-    }
-
-    public void setSymbol(String symbol) {
-        this.symbol = symbol;
-    }
-
-    public String getContractAddress() {
-        return contractAddress;
-    }
-
-    public void setContractAddress(String contractAddress) {
-        this.contractAddress = contractAddress;
-    }
-
-    public String getName() {
-        return name;
-    }
-
     public ContractTokenInfo setName(String name) {
         this.name = name;
         return this;
-    }
-
-    public BigInteger getAmount() {
-        return amount;
     }
 
     public ContractTokenInfo setAmount(BigInteger amount) {
@@ -88,35 +68,12 @@ public class ContractTokenInfo {
         return this;
     }
 
-    public long getDecimals() {
-        return decimals;
-    }
-
-    public void setDecimals(long decimals) {
-        this.decimals = decimals;
-    }
-
-    public long getBlockHeight() {
-        return blockHeight;
-    }
-
-    public void setBlockHeight(long blockHeight) {
-        this.blockHeight = blockHeight;
-    }
-
-    public boolean isLock() {
-        return ContractUtil.isLockContract(this.blockHeight);
+    public boolean isLock(int chainId) throws NulsException {
+        return ContractUtil.isLockContract(chainId, this.blockHeight);
     }
 
     public boolean isStop() {
         return ContractUtil.isTerminatedContract(this.status);
     }
 
-    public int getStatus() {
-        return status;
-    }
-
-    public void setStatus(int status) {
-        this.status = status;
-    }
 }

@@ -77,7 +77,7 @@ public class TxValid {
     static int assetId = 1;
     static String version = "1.0";
 
-    static String password = "nuls123456";//"nuls123456";
+    static String password = "zhoujun172";//"nuls123456";
 
     @Before
     public void before() throws Exception {

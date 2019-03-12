@@ -46,16 +46,19 @@ public class ContractWrapperTransaction extends Transaction{
 
     private Transaction tx;
 
+    private String txHex;
+
     private ContractResult contractResult;
 
     private ContractData contractData;
 
     private int order;
 
-    private transient BlockHeader blockHeader;
+    private BlockHeader blockHeader;
 
-    public ContractWrapperTransaction(Transaction tx, ContractData contractData) {
+    public ContractWrapperTransaction(Transaction tx, String txHex, ContractData contractData) {
         this.tx = tx;
+        this.txHex = txHex;
         this.contractData = contractData;
     }
 
