@@ -126,7 +126,7 @@ public class AccountBootstrap extends RpcModule {
             NulsConfig.MODULES_CONFIG = ConfigLoader.loadIni(NulsConfig.MODULES_CONFIG_FILE);
 
             AccountParam accountParam = AccountParam.getInstance();
-            //set entity save path
+            //set data save path
             accountParam.setDataPath(NulsConfig.MODULES_CONFIG.getCfgValue(AccountConstant.CFG_DB_SECTION, AccountConstant.DB_DATA_PATH, null));
 
             try {
