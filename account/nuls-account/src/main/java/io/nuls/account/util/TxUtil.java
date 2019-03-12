@@ -40,8 +40,9 @@ import io.nuls.base.data.NonceHashData;
 import io.nuls.base.data.NulsDigestData;
 import io.nuls.base.data.Transaction;
 import io.nuls.tools.crypto.HexUtil;
-import io.nuls.tools.model.StringUtils;
 import io.nuls.tools.exception.NulsException;
+import io.nuls.tools.model.BigIntegerUtils;
+import io.nuls.tools.model.StringUtils;
 
 import java.math.BigInteger;
 import java.util.HashMap;
@@ -181,7 +182,7 @@ public class TxUtil {
     }
 
     /**
-     * 查询账户余额
+     * 查询账户余额（未确认）
      *
      * @param chainId
      * @param assetChainId
@@ -190,6 +191,23 @@ public class TxUtil {
      * @return
      */
     public static BigInteger getBalance(int chainId, int assetChainId, int assetId, byte[] addressByte) {
+        String address = AddressTool.getStringAddressByBytes(addressByte);
+        HashMap balanceNonce = LegerCmdCall.getBalanceNonce(chainId, assetChainId, assetId, address);
+        Object available = balanceNonce.get("available");
+        return BigIntegerUtils.stringToBigInteger(String.valueOf(available));
+
+    }
+
+    /**
+     * 查询账户余额（已确认）
+     *
+     * @param chainId
+     * @param assetChainId
+     * @param assetId
+     * @param addressByte
+     * @return
+     */
+    public static BigInteger getConfirmedBalance(int chainId, int assetChainId, int assetId, byte[] addressByte) {
         String address = AddressTool.getStringAddressByBytes(addressByte);
         return LegerCmdCall.getBalance(chainId, assetChainId, assetId, address);
     }
