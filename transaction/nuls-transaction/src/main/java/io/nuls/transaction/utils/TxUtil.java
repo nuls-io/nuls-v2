@@ -237,7 +237,7 @@ public class TxUtil {
         nulsLogger.debug("time: {}", DateUtils.timeStamp2DateStr(tx.getTime()));
         nulsLogger.debug("size: {}B,  -{}KB, -{}MB",
                 String.valueOf(tx.getSize()), String.valueOf(tx.getSize() / 1024), String.valueOf(tx.getSize() / 1024 / 1024));
-
+        nulsLogger.debug("remark: {}", HexUtil.encode(tx.getRemark()));
         CoinData coinData = null;
         try {
             if(tx.getCoinData()!=null) {

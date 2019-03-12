@@ -9,6 +9,7 @@ import io.nuls.transaction.TransactionBootStrap;
 import io.nuls.transaction.constant.TxConstant;
 import io.nuls.transaction.manager.ChainManager;
 import io.nuls.transaction.model.bo.CrossTx;
+import io.nuls.transaction.model.po.TransactionConfirmedPO;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -36,17 +37,17 @@ public class ConfirmedTxStorageServiceTest {
     @Test
     public void saveTx() throws Exception {
         Transaction tx = TestConstant.getTransaction2();
-        boolean result = confirmedTxStorageService.saveTx(chainId, tx);
+        boolean result = confirmedTxStorageService.saveTx(chainId, new TransactionConfirmedPO(tx, 1, (byte)1));
         Assert.assertTrue(result);
     }
 
     @Test
     public void saveTxList() throws Exception {
-        List<Transaction> list = new ArrayList<>();
+        List<TransactionConfirmedPO> list = new ArrayList<>();
         for (int i = 0; i < 5; i++) {
             Transaction tx = TestConstant.getTransaction2();
             tx.setRemark(StringUtils.bytes("tx remark" + i));
-            list.add(tx);
+            list.add(new TransactionConfirmedPO(tx, 1, (byte)1));
         }
         boolean result = confirmedTxStorageService.saveTxList(chainId, list);
         Assert.assertTrue(result);
@@ -60,24 +61,24 @@ public class ConfirmedTxStorageServiceTest {
     @Test
     public void getTxList() throws Exception {
         //test saveTxList
-        List<Transaction> list = new ArrayList<>();
+        List<TransactionConfirmedPO> list = new ArrayList<>();
         List<byte[]> hashList = new ArrayList<>();
         for (int i = 0; i < 5; i++) {
             Transaction tx = TestConstant.getTransaction2();
             tx.setRemark(StringUtils.bytes("tx remark" + i));
-            list.add(tx);
+            list.add(new TransactionConfirmedPO(tx, 1, (byte)1));
             hashList.add(tx.getHash().serialize());
         }
         confirmedTxStorageService.saveTxList(chainId, list);
 
         //test getTxList
-        List<Transaction> txList = confirmedTxStorageService.getTxList(chainId, hashList);
+        List<TransactionConfirmedPO> txList = confirmedTxStorageService.getTxList(chainId, hashList);
         Assert.assertEquals(hashList.size(), txList.size());
 
-        NulsDigestData hash = list.get(0).getHash();
+        NulsDigestData hash = list.get(0).getTx().getHash();
         //test getTx
-        Transaction tx = confirmedTxStorageService.getTx(chainId, hash);
-        Assert.assertEquals(hash, tx.getHash());
+        TransactionConfirmedPO tx = confirmedTxStorageService.getTx(chainId, hash);
+        Assert.assertEquals(hash, tx.getTx().getHash());
         //test removeTxList
         List<byte[]> removeList = List.of(hashList.get(0));
         confirmedTxStorageService.removeTxList(chainId, removeList);

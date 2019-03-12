@@ -25,7 +25,6 @@
 package io.nuls.transaction;
 
 import io.nuls.base.basic.AddressTool;
-import io.nuls.base.data.Page;
 import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.info.HostInfo;
 import io.nuls.rpc.info.NoUse;
@@ -52,7 +51,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertNotNull;
 
 /**
  * @author: Charlie
@@ -93,7 +92,7 @@ public class TxValid {
             String hash = createTransfer();
             System.out.println("count:" + (i+1));
             System.out.println("");
-            Thread.sleep(500L);
+            Thread.sleep(50L);
             //getTx(hash);
         }
 //        createCtxTransfer();
@@ -101,7 +100,7 @@ public class TxValid {
 
     @Test
     public void getTx() throws Exception {
-        getTx("0020b0c6ea2c6fd089062a65841abcd420e100ba203f3b0425f642979bf8f7e65c1e");
+        getTx("002036d91fa50deb3a0d69d9c6097a75711e94e4edcdd942962190379cd9261a8813");
     }
 
     private void getTx(String hash) throws Exception{
@@ -237,9 +236,9 @@ public class TxValid {
         params.put("assetId", null);
         params.put("type", null);
         params.put("pageSize", null);
-        params.put("pageNumber", null);
+        params.put("pageNumber", 501);
         Response dpResp = ResponseMessageProcessor.requestAndResponse(ModuleE.TX.abbr, "tx_getTxs", params);
-        Page record = (Page) dpResp.getResponseData();
+        Map record = (Map) dpResp.getResponseData();
         Log.debug("Page<TransactionPO>:{}", JSONUtils.obj2PrettyJson(record));
     }
 

@@ -59,7 +59,7 @@ public class Transaction extends BaseNulsData implements Cloneable {
 
     private transient NulsDigestData hash;
 
-    private long blockHeight = -1L;
+    private transient long blockHeight = -1L;
 
     private transient TxStatusEnum status = TxStatusEnum.UNCONFIRM;
 

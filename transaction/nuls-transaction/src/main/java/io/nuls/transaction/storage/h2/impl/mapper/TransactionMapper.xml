@@ -9,8 +9,8 @@
         <result column="address" jdbcType="VARCHAR" property="address" />
         <result column="hash" jdbcType="VARCHAR" property="hash" />
         <result column="type" jdbcType="INTEGER" property="type" />
-        <result column="assetChainId" jdbcType="INTEGER" property="amount" />
-        <result column="assetId" jdbcType="INTEGER" property="amount" />
+        <result column="assetChainId" jdbcType="INTEGER" property="assetChainId" />
+        <result column="assetId" jdbcType="INTEGER" property="assetId" />
         <result column="amount" jdbcType="BIGINT" property="amount" />
         <result column="state" jdbcType="INTEGER" property="state" />
         <result column="time" jdbcType="BIGINT" property="time" />

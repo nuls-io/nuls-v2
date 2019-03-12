@@ -2,10 +2,8 @@ package io.nuls.transaction.storage.rocksdb.impl;
 
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.basic.NulsOutputStreamBuffer;
-import io.nuls.base.basic.TransactionManager;
 import io.nuls.base.data.BaseNulsData;
 import io.nuls.base.data.NulsDigestData;
-import io.nuls.base.data.Transaction;
 import io.nuls.db.service.RocksDBService;
 import io.nuls.tools.basic.VarInt;
 import io.nuls.tools.core.annotation.Service;
@@ -14,6 +12,7 @@ import io.nuls.tools.exception.NulsRuntimeException;
 import io.nuls.tools.parse.SerializeUtils;
 import io.nuls.transaction.constant.TxDBConstant;
 import io.nuls.transaction.constant.TxErrorCode;
+import io.nuls.transaction.model.po.TransactionConfirmedPO;
 import io.nuls.transaction.storage.rocksdb.ConfirmedTxStorageService;
 
 import java.io.IOException;
@@ -32,13 +31,13 @@ import static io.nuls.transaction.utils.LoggerUtil.Log;
 public class ConfirmedTxStorageServiceImpl implements ConfirmedTxStorageService {
 
     @Override
-    public boolean saveTx(int chainId, Transaction tx) {
+    public boolean saveTx(int chainId, TransactionConfirmedPO tx) {
         if (tx == null) {
             return false;
         }
         byte[] txHashBytes = null;
         try {
-            txHashBytes = tx.getHash().serialize();
+            txHashBytes = tx.getTx().getHash().serialize();
         } catch (IOException e) {
             Log.error(e);
             return false;
@@ -53,15 +52,15 @@ public class ConfirmedTxStorageServiceImpl implements ConfirmedTxStorageService 
     }
 
     @Override
-    public boolean saveTxList(int chainId, List<Transaction> txList) {
+    public boolean saveTxList(int chainId, List<TransactionConfirmedPO> txList) {
         if (null == txList || txList.size() == 0) {
             throw new NulsRuntimeException(TxErrorCode.PARAMETER_ERROR);
         }
         Map<byte[], byte[]> txPoMap = new HashMap<>();
         try {
-            for (Transaction tx : txList) {
+            for (TransactionConfirmedPO tx : txList) {
                 //序列化对象为byte数组存储
-                txPoMap.put(tx.getHash().serialize(), tx.serialize());
+                txPoMap.put(tx.getTx().getHash().serialize(), tx.serialize());
             }
             return RocksDBService.batchPut(TxDBConstant.DB_TRANSACTION_CONFIRMED + chainId, txPoMap);
         } catch (Exception e) {
@@ -71,7 +70,7 @@ public class ConfirmedTxStorageServiceImpl implements ConfirmedTxStorageService 
     }
 
     @Override
-    public Transaction getTx(int chainId, NulsDigestData hash) {
+    public TransactionConfirmedPO getTx(int chainId, NulsDigestData hash) {
         if (hash == null) {
             return null;
         }
@@ -83,10 +82,11 @@ public class ConfirmedTxStorageServiceImpl implements ConfirmedTxStorageService 
             throw new NulsRuntimeException(e);
         }
         byte[] txBytes = RocksDBService.get(TxDBConstant.DB_TRANSACTION_CONFIRMED + chainId, hashBytes);
-        Transaction tx = null;
+        TransactionConfirmedPO tx = null;
         if (null != txBytes) {
             try {
-                tx = TransactionManager.getInstance(new NulsByteBuffer(txBytes, 0));
+                tx = new TransactionConfirmedPO();
+                tx.parse(new NulsByteBuffer(txBytes, 0));
             } catch (Exception e) {
                 Log.error(e);
                 return null;
@@ -126,17 +126,17 @@ public class ConfirmedTxStorageServiceImpl implements ConfirmedTxStorageService 
     }
 
     @Override
-    public List<Transaction> getTxList(int chainId, List<byte[]> hashList) {
+    public List<TransactionConfirmedPO> getTxList(int chainId, List<byte[]> hashList) {
         //check params
         if (hashList == null || hashList.size() == 0) {
             return null;
         }
-        List<Transaction> txList = new ArrayList<>();
+        List<TransactionConfirmedPO> txList = new ArrayList<>();
         //根据交易hash批量查询交易数据
         List<byte[]> list = RocksDBService.multiGetValueList(TxDBConstant.DB_TRANSACTION_CONFIRMED + chainId, hashList);
         if (list != null) {
             for (byte[] value : list) {
-                Transaction tx = new Transaction();
+                TransactionConfirmedPO tx = new TransactionConfirmedPO();
                 try {
                     tx.parse(value, 0);
                 } catch (NulsException e) {
