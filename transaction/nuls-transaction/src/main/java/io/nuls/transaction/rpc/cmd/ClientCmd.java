@@ -31,6 +31,7 @@ import io.nuls.rpc.model.CmdAnnotation;
 import io.nuls.rpc.model.Parameter;
 import io.nuls.rpc.model.message.Response;
 import io.nuls.tools.core.annotation.Autowired;
+import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.log.Log;
 import io.nuls.tools.model.ObjectUtils;
@@ -53,6 +54,7 @@ import java.util.Map;
  * @author: Charlie
  * @date: 2019/3/12
  */
+@Component
 public class ClientCmd extends BaseCmd {
 
     @Autowired
