@@ -184,7 +184,7 @@ public class BlockValidator {
       Check the correctness of yellow card trading in block trading
       */
       try {
-         Transaction newYellowPunishTX = punishManager.createYellowPunishTx(chain.getNewestHeader(), member, currentRound);
+         Transaction newYellowPunishTX = punishManager.createYellowPunishTx(chain,chain.getNewestHeader(), member, currentRound);
          if(yellowPunishTx == null && newYellowPunishTX == null){
 
          }else if(yellowPunishTx == null || newYellowPunishTX == null){
