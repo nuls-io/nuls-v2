@@ -112,7 +112,7 @@ public interface TransactionService {
      * @param chainId  chainId
      * @param account  the account which will sign the transaction
      * @param password the account's password
-     * @param txHex    the hex entity of transaction
+     * @param txHex    the hex data of transaction
      * @return MultiSignTransactionResultDto it contains two element:is broadcast and the transactio
      * @auther EdwardChan
      */
