@@ -283,7 +283,7 @@ public class BlockServiceImpl implements BlockService {
             commonLog.info("save block success, height-" + height + ", hash-" + hash);
             Response response = MessageUtil.newResponse("", Constants.BOOLEAN_TRUE, "Congratulations! Processing completed！");
             Map<String, Long> responseData = new HashMap<>(1);
-            responseData.put("value", ContextManager.getContext(chainId).getLatestHeight());
+            responseData.put("value", height);
             response.setResponseData(responseData);
             ConnectManager.eventTrigger(LATEST_HEIGHT, response);
             return true;
