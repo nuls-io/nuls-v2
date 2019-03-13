@@ -14,6 +14,7 @@ import io.nuls.tools.core.annotation.Component;
 import org.bson.Document;
 import org.bson.conversions.Bson;
 
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -180,5 +181,17 @@ public class AgentService {
         return count;
 //        Bson bson = Filters.and(Filters.lte("blockHeight", startHeight), Filters.or(Filters.eq("deleteHeight", 0), Filters.gt("deleteHeight", startHeight)));
 //        return this.mongoDBService.getCount(MongoTableName.AGENT_INFO, bson);
+    }
+
+    public BigInteger getConsensusCoinTotal(int chainId) {
+        BigInteger total = BigInteger.ZERO;
+
+        ApiCache apiCache = CacheManager.getCache(chainId);
+        for (AgentInfo agentInfo : apiCache.getAgentMap().values()) {
+            if (agentInfo.getDeleteHash() == null) {
+                total = total.add(agentInfo.getDeposit()).add(agentInfo.getTotalDeposit());
+            }
+        }
+        return total;
     }
 }

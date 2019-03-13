@@ -27,7 +27,7 @@ package io.nuls.transaction.rpc.call.callback;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import io.nuls.rpc.invoke.BaseInvoke;
 import io.nuls.rpc.model.message.Response;
-import io.nuls.tools.core.annotation.Autowired;
+import io.nuls.tools.core.ioc.SpringLiteContext;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.parse.JSONUtils;
 import io.nuls.transaction.constant.TxConstant;
@@ -44,13 +44,13 @@ import static io.nuls.transaction.utils.LoggerUtil.Log;
  */
 public class EventNewBlockHeightInvoke extends BaseInvoke {
 
-    @Autowired
     private ConfirmedTxService confirmedTxService;
 
     private Chain chain;
 
     public EventNewBlockHeightInvoke(Chain chain){
         this.chain = chain;
+        this.confirmedTxService = SpringLiteContext.getBean(ConfirmedTxService.class);
     }
 
     @Override
@@ -63,8 +63,8 @@ public class EventNewBlockHeightInvoke extends BaseInvoke {
                 e.printStackTrace();
             }
             if (response.isSuccess()) {
-                HashMap result = ((HashMap) response.getResponseData());
-                long blockHeight = (long) result.get("height");
+                HashMap result = (HashMap)((HashMap) response.getResponseData()).get("latestHeight");
+                long blockHeight = Long.valueOf(result.get("value").toString());
                 chain.getLoggerMap().get(TxConstant.LOG_TX).debug("latestHeight : {}", blockHeight);
                 chain.setBestBlockHeight(blockHeight);
                 confirmedTxService.processEffectCrossTx(chain, blockHeight);

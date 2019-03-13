@@ -23,13 +23,11 @@ package io.nuls.api.rpc.controller;
 import io.nuls.api.analysis.WalletRpcHandler;
 import io.nuls.api.db.BlockService;
 import io.nuls.api.db.MongoDBService;
-import io.nuls.api.exception.JsonRpcException;
+import io.nuls.api.manager.CacheManager;
 import io.nuls.api.model.po.db.BlockHeaderInfo;
 import io.nuls.api.model.po.db.BlockInfo;
 import io.nuls.api.model.po.db.PageInfo;
-import io.nuls.api.model.rpc.RpcErrorCode;
 import io.nuls.api.model.rpc.RpcResult;
-import io.nuls.api.model.rpc.RpcResultError;
 import io.nuls.api.service.RollbackService;
 import io.nuls.api.utils.VerifyUtils;
 import io.nuls.tools.basic.Result;
@@ -39,8 +37,6 @@ import io.nuls.tools.core.annotation.RpcMethod;
 import io.nuls.tools.model.StringUtils;
 
 import java.util.List;
-
-import static io.nuls.api.model.rpc.RpcErrorCode.DATA_NOT_EXISTS;
 
 /**
  * @author Niels
@@ -59,9 +55,13 @@ public class BlockController {
     public RpcResult getBestInfo(List<Object> params) {
         VerifyUtils.verifyParams(params, 1);
         int chainId = (int) params.get(0);
+        if (!CacheManager.isChainExist(chainId)) {
+            return RpcResult.dataNotFound();
+        }
+
         BlockHeaderInfo localBestBlockHeader = blockService.getBestBlockHeader(chainId);
         if (localBestBlockHeader == null) {
-            return RpcResult.failed(DATA_NOT_EXISTS);
+            return RpcResult.dataNotFound();
         }
         return RpcResult.success(localBestBlockHeader);
     }
@@ -74,9 +74,12 @@ public class BlockController {
         if (height < 0) {
             height = 0;
         }
+        if (!CacheManager.isChainExist(chainId)) {
+            return RpcResult.dataNotFound();
+        }
         BlockHeaderInfo header = blockService.getBlockHeader(chainId, height);
         if (header == null) {
-            return RpcResult.failed(DATA_NOT_EXISTS);
+            return RpcResult.dataNotFound();
         }
         return RpcResult.success(header);
     }
@@ -86,13 +89,16 @@ public class BlockController {
         VerifyUtils.verifyParams(params, 2);
         int chainId = (int) params.get(0);
         String hash = (String) params.get(1);
-
-        if (StringUtils.isBlank(hash)) {
-            throw new JsonRpcException(new RpcResultError(RpcErrorCode.PARAMS_ERROR, "[hash] is required"));
+        if (!CacheManager.isChainExist(chainId)) {
+            return RpcResult.dataNotFound();
         }
+        if (StringUtils.isBlank(hash)) {
+            return RpcResult.paramError("[hash] is required");
+        }
+
         BlockHeaderInfo header = blockService.getBlockHeaderByHash(chainId, hash);
         if (header == null) {
-            return RpcResult.failed(DATA_NOT_EXISTS);
+            return RpcResult.dataNotFound();
         }
         return RpcResult.success(header);
     }
@@ -102,13 +108,19 @@ public class BlockController {
         VerifyUtils.verifyParams(params, 2);
         int chainId = (int) params.get(0);
         String hash = (String) params.get(1);
-
-        if (StringUtils.isBlank(hash)) {
-            throw new JsonRpcException(new RpcResultError(RpcErrorCode.PARAMS_ERROR, "[hash] is required"));
+        if (!CacheManager.isChainExist(chainId)) {
+            return RpcResult.dataNotFound();
         }
+        if (StringUtils.isBlank(hash)) {
+            return RpcResult.paramError("[hash] is required");
+        }
+
         Result<BlockInfo> result = WalletRpcHandler.getBlockInfo(chainId, hash);
         if (result.isFailed()) {
             return RpcResult.failed(result);
+        }
+        if (result.getData() == null) {
+            return RpcResult.dataNotFound();
         }
         RpcResult rpcResult = new RpcResult();
         rpcResult.setResult(result.getData());
@@ -125,11 +137,14 @@ public class BlockController {
         }
         BlockHeaderInfo blockHeaderInfo = blockService.getBlockHeader(chainId, height);
         if (blockHeaderInfo == null) {
-            throw new JsonRpcException(new RpcResultError(DATA_NOT_EXISTS.getCode(), DATA_NOT_EXISTS.getMessage(), null));
+            return RpcResult.dataNotFound();
         }
         Result<BlockInfo> result = WalletRpcHandler.getBlockInfo(chainId, height);
         if (result.isFailed()) {
             return RpcResult.failed(result);
+        }
+        if (result.getData() == null) {
+            return RpcResult.dataNotFound();
         }
         BlockInfo blockInfo = result.getData();
         blockInfo.setHeader(blockHeaderInfo);
@@ -156,7 +171,13 @@ public class BlockController {
         if (params.size() > 4) {
             packingAddress = (String) params.get(4);
         }
-        PageInfo<BlockHeaderInfo> pageInfo = blockService.pageQuery(chainId, pageIndex, pageSize, packingAddress, filterEmptyBlocks);
+
+        PageInfo<BlockHeaderInfo> pageInfo;
+        if (!CacheManager.isChainExist(chainId)) {
+            pageInfo = new PageInfo<>(pageIndex, pageSize);
+        } else {
+            pageInfo = blockService.pageQuery(chainId, pageIndex, pageSize, packingAddress, filterEmptyBlocks);
+        }
         RpcResult result = new RpcResult();
         result.setResult(pageInfo);
         return result;

@@ -32,7 +32,7 @@ public class WalletRpcHandler {
         try {
             String blockHex = (String) RpcCall.request(ModuleE.BL.abbr, CommandConstant.GET_BLOCK_BY_HEIGHT, params);
             if (null == blockHex) {
-                return Result.getFailed(ApiErrorCode.DATA_NOT_FOUND);
+                return Result.getSuccess(null);
             }
             byte[] bytes = HexUtil.decode(blockHex);
             Block block = new Block();
@@ -53,6 +53,9 @@ public class WalletRpcHandler {
         params.put("hash", hash);
         try {
             String blockHex = (String) RpcCall.request(ModuleE.BL.abbr, CommandConstant.GET_BLOCK_BY_HASH, params);
+            if (null == blockHex) {
+                return Result.getSuccess(null);
+            }
             byte[] bytes = HexUtil.decode(blockHex);
             Block block = new Block();
             block.parse(new NulsByteBuffer(bytes));
@@ -62,7 +65,7 @@ public class WalletRpcHandler {
             e.printStackTrace();
             // return Result.getFailed()
         }
-        return null;
+        return Result.getFailed(ApiErrorCode.DATA_PARSE_ERROR);
     }
 
     public static AccountInfo getAccountBalance(int chainId, String address, int assetChainId, int assetId) {
@@ -93,14 +96,14 @@ public class WalletRpcHandler {
         params.put("chainId", chainId);
         params.put("txHash", hash);
         try {
-            Map map = (Map) RpcCall.request(ModuleE.TX.abbr, CommandConstant.GET_TX, params);
+            Map map = (Map) RpcCall.request(ModuleE.TX.abbr, CommandConstant.CLIENT_GETTX, params);
             String txHex = (String) map.get("txHex");
             if (null == txHex) {
                 return null;
             }
             Transaction tx = Transaction.getInstance(txHex);
             TransactionInfo txInfo = AnalysisHandler.toTransaction(tx);
-
+            txInfo.setHeight(Long.parseLong(map.get("height").toString()));
             return Result.getSuccess(null).setData(txInfo);
         } catch (NulsException e) {
             return Result.getFailed(e.getErrorCode());

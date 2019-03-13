@@ -38,6 +38,8 @@ public interface CommandConstant {
 
     //查询交易详情
     String GET_TX = "tx_getTx";
+    String CLIENT_GETTX = "tx_getTxClient";
+
     //查询节点详情
     String GET_AGENT = "cs_getAgentInfo";
 }

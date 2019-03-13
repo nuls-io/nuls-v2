@@ -1,5 +1,14 @@
 #!/bin/bash
 #cd ./mykernel/1.0.0
+RUNBLOCK=
+while getopts bj: name
+do
+            case $name in
+            b)	   RUNBLOCK="1";;
+            j)     JAVA_HOME="$OPTARG";;
+            ?)     exit 2;;
+           esac
+done
 JAVA="$JAVA_HOME/bin/java"
 if [[ ! -r "$JAVA" ]]; then
     JAVA='java'
@@ -11,15 +20,9 @@ if [ ! -n "$JAVA_EXIST" ]; then
     ${JAVA} -version
     exit 0;
 fi
+#echo "jdk version : `$JAVA -version `"
 MODULE_PATH=$(cd `dirname $0`;pwd)
-RUNBLOCK=
-while getopts b name
-do
-            case $name in
-            b)	   RUNBLOCK="1";;
-            ?)     exit 2;;
-           esac
-done
+
 if [ -z "${RUNBLOCK}" ];
 then
     ${JAVA} -server -classpath ./libs/*:./mykernel/1.0.0/mykernel-1.0.0.jar io.nuls.mykernel.MyKernelBootstrap startModule $MODULE_PATH

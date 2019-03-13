@@ -1,5 +1,8 @@
 package io.nuls.api.db;
 
+import com.mongodb.client.AggregateIterable;
+import com.mongodb.client.MongoCollection;
+import com.mongodb.client.MongoCursor;
 import com.mongodb.client.model.*;
 import io.nuls.api.cache.ApiCache;
 import io.nuls.api.constant.MongoTableConstant;
@@ -14,7 +17,9 @@ import io.nuls.tools.model.BigIntegerUtils;
 import org.bson.Document;
 import org.bson.conversions.Bson;
 
+import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -116,5 +121,23 @@ public class AccountService {
         }
         PageInfo<AccountInfo> pageInfo = new PageInfo<>(pageIndex, pageSize, totalCount, accountInfoList);
         return pageInfo;
+    }
+
+    public BigInteger getAllAccountBalance(int chainId) {
+        List<Document> documentList = mongoDBService.query(ACCOUNT_TABLE + chainId);
+
+        BigInteger totalBalance = BigInteger.ZERO;
+        for (Document document : documentList) {
+            totalBalance = totalBalance.add(new BigInteger(document.getString("totalBalance")));
+        }
+        return totalBalance;
+    }
+
+    public BigInteger getAccountTotalBalance(int chainId, String address) {
+        AccountInfo accountInfo = getAccountInfo(chainId, address);
+        if (accountInfo == null) {
+            return BigInteger.ZERO;
+        }
+        return accountInfo.getTotalBalance();
     }
 }

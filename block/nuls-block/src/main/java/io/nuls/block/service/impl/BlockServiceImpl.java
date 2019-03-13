@@ -44,18 +44,19 @@ import io.nuls.block.utils.module.NetworkUtil;
 import io.nuls.block.utils.module.ProtocolUtil;
 import io.nuls.block.utils.module.TransactionUtil;
 import io.nuls.db.service.RocksDBService;
+import io.nuls.rpc.info.Constants;
+import io.nuls.rpc.model.message.MessageUtil;
+import io.nuls.rpc.model.message.Response;
+import io.nuls.rpc.netty.channel.manager.ConnectManager;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Service;
 import io.nuls.tools.log.logback.NulsLogger;
 import io.nuls.tools.parse.SerializeUtils;
 
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.locks.StampedLock;
 
-import static io.nuls.block.constant.CommandConstant.FORWARD_SMALL_BLOCK_MESSAGE;
-import static io.nuls.block.constant.CommandConstant.SMALL_BLOCK_MESSAGE;
+import static io.nuls.block.constant.CommandConstant.*;
 import static io.nuls.block.constant.Constant.*;
 
 /**
@@ -279,7 +280,14 @@ public class BlockServiceImpl implements BlockService {
                 }
                 hashList.addLast(hash);
             }
-            commonLog.info("save block success, height-" + height + ", hash-" + hash);
+            commonLog.info("save block success, height-" + height + ", txCount-" + blockHeaderPo.getTxCount() + ", hash-" + hash);
+            Response response = MessageUtil.newResponse("", Constants.BOOLEAN_TRUE, "Congratulations! Processing completed！");
+            Map<String, Long> responseData = new HashMap<>(1);
+            responseData.put("value", height);
+            Map<String, Object> sss = new HashMap<>(1);
+            sss.put(LATEST_HEIGHT, responseData);
+            response.setResponseData(sss);
+            ConnectManager.eventTrigger(LATEST_HEIGHT, response);
             return true;
         } finally {
             if (needLock) {
@@ -433,7 +441,7 @@ public class BlockServiceImpl implements BlockService {
             return false;
         }
         //交易验证
-        boolean transactionVerify = TransactionUtil.verify(chainId, block.getTxs());
+        boolean transactionVerify = TransactionUtil.verify(chainId, block.getTxs(), block.getHeader().getHeight());
         if (!transactionVerify) {
             commonLog.error("transactionVerify-"+transactionVerify);
             return false;
