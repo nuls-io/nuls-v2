@@ -20,7 +20,7 @@ if [ ! -n "$JAVA_EXIST" ]; then
     ${JAVA} -version
     exit 0;
 fi
-$JAVA -version
+#echo "jdk version : `$JAVA -version `"
 MODULE_PATH=$(cd `dirname $0`;pwd)
 
 if [ -z "${RUNBLOCK}" ];
