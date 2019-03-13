@@ -57,7 +57,7 @@ public class ContractUtil {
     /**
      * 此长度来源于BlockExtendsData中定长变量的字节总数
      */
-    private static final int BLOCK_EXTENDS_DATA_FIX_LENGTH = 28;
+    private static final int BLOCK_EXTENDS_DATA_FIX_LENGTH = 21;
 
     private static final String STRING = "String";
 
@@ -202,7 +202,6 @@ public class ContractUtil {
     }
 
     public static byte[] getStateRoot(BlockHeader blockHeader) {
-        //TODO pierre stateRoot parse
         if (blockHeader == null || blockHeader.getExtend() == null) {
             return null;
         }

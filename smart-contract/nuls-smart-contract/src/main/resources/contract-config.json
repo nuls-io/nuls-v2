@@ -8,5 +8,10 @@
     "key": "assetsId",
     "value": 1,
     "readOnly": true
+  },
+  {
+    "key": "max.view.gas",
+    "value": 100000000,
+    "readOnly": true
   }
 ]
