@@ -131,7 +131,6 @@ public class ValidatorCmd extends BaseLedgerCmd {
             return failed("txHexList is blank");
         }
         LoggerUtil.logger.debug("commitBlockTxs txHexList={}", txHexList.size());
-        int value = 0;
         List<Transaction> txList = new ArrayList<>();
         Response parseResponse = parseTxs(txHexList, txList);
         if (!parseResponse.isSuccess()) {
