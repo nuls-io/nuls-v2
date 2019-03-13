@@ -44,9 +44,7 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Component
 @Slf4j
-public class GetTxProcessor implements CommandProcessor {
-
-    TransferService transferService = ServiceManager.get(TransferService.class);
+public class GetTxProcessor extends TransactionBaseProcessor implements CommandProcessor {
 
     @Override
     public String getCommand() {

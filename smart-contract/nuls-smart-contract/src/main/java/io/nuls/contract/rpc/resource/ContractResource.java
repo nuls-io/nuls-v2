@@ -445,11 +445,10 @@ public class ContractResource extends BaseCmd {
                 return failed(CONTRACT_ADDRESS_NOT_EXIST);
             }
 
-            Result result = contractTxService.txFee(chainId, sender, value, gasLimit, price, contractAddress,
+            Result result = contractTxService.callTxFee(chainId, sender, value, gasLimit, price, contractAddress,
                     ContractConstant.BALANCE_TRIGGER_METHOD_NAME,
                     ContractConstant.BALANCE_TRIGGER_METHOD_DESC,
                     null, remark);
-            //TODO pierre 
             if(result.isFailed()) {
                 return failed(result.getErrorCode());
             }

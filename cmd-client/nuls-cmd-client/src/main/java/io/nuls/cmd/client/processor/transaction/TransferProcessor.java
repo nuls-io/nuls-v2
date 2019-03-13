@@ -49,10 +49,7 @@ import java.util.Map;
  * @author: zhoulijun
  */
 @Component
-public class TransferProcessor implements CommandProcessor {
-
-
-    TransferService transferService = ServiceManager.get(TransferService.class);
+public class TransferProcessor extends TransactionBaseProcessor implements CommandProcessor {
 
     @Autowired
     Config config;

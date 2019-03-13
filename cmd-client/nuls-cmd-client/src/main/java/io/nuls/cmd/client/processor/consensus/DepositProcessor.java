@@ -50,7 +50,7 @@ import static io.nuls.cmd.client.CommandHelper.*;
  */
 @Component
 @Slf4j
-public class DepositProcessor implements CommandProcessor {
+public class DepositProcessor extends ConsensusBaseProcessor implements CommandProcessor {
 
     ConsensusProvider consensusProvider = ServiceManager.get(ConsensusProvider.class);
 

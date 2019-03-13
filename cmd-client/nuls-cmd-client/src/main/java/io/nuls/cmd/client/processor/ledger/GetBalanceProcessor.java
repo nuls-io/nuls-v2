@@ -36,6 +36,7 @@ import io.nuls.cmd.client.CommandHelper;
 import io.nuls.cmd.client.CommandResult;
 import io.nuls.cmd.client.Config;
 import io.nuls.cmd.client.processor.CommandProcessor;
+import io.nuls.cmd.client.processor.CommandGroup;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
 import lombok.extern.slf4j.Slf4j;
@@ -55,6 +56,11 @@ public class GetBalanceProcessor implements CommandProcessor {
     @Override
     public String getCommand() {
         return "getbalance";
+    }
+
+    @Override
+    public CommandGroup getGroup() {
+        return CommandGroup.Ledger;
     }
 
     @Override

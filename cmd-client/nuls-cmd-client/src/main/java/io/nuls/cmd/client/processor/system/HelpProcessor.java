@@ -30,7 +30,11 @@ import io.nuls.cmd.client.CommandConstant;
 import io.nuls.cmd.client.CommandHandler;
 import io.nuls.cmd.client.CommandResult;
 import io.nuls.cmd.client.processor.CommandProcessor;
+import io.nuls.cmd.client.processor.CommandGroup;
 import io.nuls.tools.core.annotation.Component;
+
+import java.util.Arrays;
+import java.util.Optional;
 
 /**
  * @author: Charlie
@@ -44,16 +48,23 @@ public class HelpProcessor implements CommandProcessor {
     }
 
     @Override
+    public CommandGroup getGroup() {
+        return CommandGroup.System;
+    }
+
+    @Override
     public String getHelp() {
         CommandBuilder bulider = new CommandBuilder();
-        bulider.newLine(getCommandDescription())
-                .newLine("\t[-a] show all commands and options of command - optional");
+        bulider.newLine("help [-a | grep | command]")
+                .newLine("\t[-a] show all commands and options of command - optional")
+                .newLine("\t[group] show commands and options of this group ")
+                .newLine("\t[command] shwo this command info ");
         return bulider.toString();
     }
 
     @Override
     public String getCommandDescription() {
-        return "help [-a] --print all commands";
+        return "help [-a  -- print all commands info | group -- print command info for this group | command -- print this command info ] ";
     }
 
     @Override
@@ -62,7 +73,10 @@ public class HelpProcessor implements CommandProcessor {
         if(length > 2) {
             return false;
         }
-        if(length == 2 && !CommandConstant.NEED_ALL.equals(args[1])) {
+        if(length == 2 && !(
+                CommandConstant.NEED_ALL.equals(args[1]) || Arrays.stream(CommandGroup.values()).anyMatch(g->g.getTitle().equals(args[1]))
+                ||  CommandHandler.PROCESSOR_MAP.values().stream().anyMatch(p->p.getCommand().equals(args[1]))
+        )) {
             return false;
         }
         return true;
@@ -70,18 +84,64 @@ public class HelpProcessor implements CommandProcessor {
 
     @Override
     public CommandResult execute(String[] args) {
-        int length = args.length;
+
         StringBuilder str = new StringBuilder();
-        str.append("all commands:");
-        for (CommandProcessor processor : CommandHandler.PROCESSOR_MAP.values()) {
-            str.append("\n");
-            if(length == 2 && CommandConstant.NEED_ALL.equals(args[1])) {
-                str.append(processor.getHelp());
-            } else {
-                str.append(processor.getCommandDescription());
+        if(args.length == 1){
+            Arrays.stream(CommandGroup.values()).forEach(group->{
+                printGroup(group,str,false);
+            });
+        }else{
+            String cmd = args[1];
+            if(CommandConstant.NEED_ALL.equals(cmd)){
+                Arrays.stream(CommandGroup.values()).forEach(group->{
+                    printGroup(group,str,true);
+                });
+            }else{
+                Optional<CommandGroup> group = Arrays.stream(CommandGroup.values()).filter(g->g.getTitle().equals(cmd)).findFirst();
+                if(group.isPresent()){
+                    printGroup(group.get(),str,true);
+                }else{
+                    Optional<CommandProcessor> processor = CommandHandler.PROCESSOR_MAP.values().stream().filter(p->p.getCommand().equals(cmd)).findFirst();
+                    if(processor.isPresent()){
+                        n(str);
+                        n(str);
+                        str.append(processor.get().getHelp());
+                    }else{
+                        CommandResult.failed("error cmd");
+                    }
+                }
             }
 
         }
+
         return CommandResult.getSuccess(str.toString());
     }
+
+    private StringBuilder printGroup(CommandGroup group, StringBuilder str, boolean printHelp){
+        n(str);
+        n(str);
+        str.append("-------------------------------------------------- ");
+        n(str);
+        str.append("group : ").append(group.getTitle());
+        n(str);
+        str.append("-------------------------------------------------- ");
+        n(str);
+        CommandHandler.PROCESSOR_MAP.values().stream()
+                .filter(p->group.equals(p.getGroup()))
+                .forEach(p->{
+                    n(str);
+                    if(printHelp){
+                        str.append(p.getHelp());
+                    }else{
+                        str.append(p.getCommandDescription());
+                    }
+                });
+        n(str);
+        return str;
+    }
+
+    private StringBuilder n(StringBuilder buf){
+        return buf.append("\n");
+    }
+
 }

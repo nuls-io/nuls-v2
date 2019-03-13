@@ -26,21 +26,16 @@
 package io.nuls.cmd.client.processor.network;
 
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import io.nuls.api.provider.Result;
 import io.nuls.api.provider.ServiceManager;
-import io.nuls.api.provider.account.AccountService;
-import io.nuls.api.provider.account.facade.AccountInfo;
 import io.nuls.api.provider.network.NetworkProvider;
-import io.nuls.api.provider.network.facade.NetworkInfo;
 import io.nuls.cmd.client.CommandBuilder;
 import io.nuls.cmd.client.CommandHelper;
 import io.nuls.cmd.client.CommandResult;
 import io.nuls.cmd.client.processor.CommandProcessor;
-import io.nuls.cmd.client.processor.ErrorCodeConstants;
+import io.nuls.cmd.client.processor.CommandGroup;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.model.StringUtils;
-import io.nuls.tools.parse.JSONUtils;
 
 /**
  * @author: zhoulijun
@@ -53,6 +48,11 @@ public class GetNetworkProcessor implements CommandProcessor {
     @Override
     public String getCommand() {
         return "network";
+    }
+
+    @Override
+    public CommandGroup getGroup() {
+        return CommandGroup.System;
     }
 
     @Override

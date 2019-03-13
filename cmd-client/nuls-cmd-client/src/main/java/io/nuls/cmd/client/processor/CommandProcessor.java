@@ -35,6 +35,8 @@ public interface CommandProcessor {
 
     String getCommand();
 
+    CommandGroup getGroup();
+
     String getHelp();
 
     String getCommandDescription();

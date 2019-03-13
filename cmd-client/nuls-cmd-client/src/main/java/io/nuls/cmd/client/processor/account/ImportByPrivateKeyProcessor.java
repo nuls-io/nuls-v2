@@ -41,9 +41,7 @@ import io.nuls.tools.model.StringUtils;
  * @author: Charlie
  */
 @Component
-public class ImportByPrivateKeyProcessor implements CommandProcessor {
-
-    AccountService accountService = ServiceManager.get(AccountService.class);
+public class ImportByPrivateKeyProcessor extends AccountBaseProcessor implements CommandProcessor {
 
     @Override
     public String getCommand() {

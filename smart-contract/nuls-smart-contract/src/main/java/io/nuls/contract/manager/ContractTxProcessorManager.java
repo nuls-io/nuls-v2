@@ -46,7 +46,7 @@ public class ContractTxProcessorManager {
     @Autowired
     private DeleteContractTxProcessor deleteContractTxProcessor;
 
-    public Result createCommit(int chainId, ContractWrapperTransaction tx) throws NulsException {
+    public Result createCommit(int chainId, ContractWrapperTransaction tx) {
         return createContractTxProcessor.onCommit(chainId, tx);
     }
 

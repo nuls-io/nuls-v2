@@ -28,6 +28,7 @@ package io.nuls.cmd.client.processor.system;
 import io.nuls.cmd.client.CommandBuilder;
 import io.nuls.cmd.client.CommandResult;
 import io.nuls.cmd.client.processor.CommandProcessor;
+import io.nuls.cmd.client.processor.CommandGroup;
 import io.nuls.tools.core.annotation.Component;
 
 /**
@@ -39,6 +40,11 @@ public class ExitProcessor implements CommandProcessor {
     @Override
     public String getCommand() {
         return "exit";
+    }
+
+    @Override
+    public CommandGroup getGroup() {
+        return CommandGroup.System;
     }
 
     @Override

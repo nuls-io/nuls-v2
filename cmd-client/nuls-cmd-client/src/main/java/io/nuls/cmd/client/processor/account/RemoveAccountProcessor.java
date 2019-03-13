@@ -43,9 +43,7 @@ import io.nuls.tools.core.annotation.Component;
  * @author: zhoulijun
  */
 @Component
-public class RemoveAccountProcessor implements CommandProcessor {
-
-    AccountService accountService = ServiceManager.get(AccountService.class);
+public class RemoveAccountProcessor extends AccountBaseProcessor implements CommandProcessor {
 
     @Autowired
     Config config;

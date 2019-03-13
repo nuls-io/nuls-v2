@@ -27,8 +27,6 @@ package io.nuls.cmd.client.processor.account;
 
 
 import io.nuls.api.provider.Result;
-import io.nuls.api.provider.ServiceManager;
-import io.nuls.api.provider.account.AccountService;
 import io.nuls.api.provider.account.facade.CreateAccountReq;
 import io.nuls.cmd.client.CommandBuilder;
 import io.nuls.cmd.client.CommandHelper;
@@ -44,9 +42,7 @@ import java.io.IOException;
  * @author zhoulijun
  */
 @Component
-public class CreateProcessor implements CommandProcessor {
-
-    AccountService accountService = ServiceManager.get(AccountService.class);
+public class CreateProcessor extends AccountBaseProcessor implements CommandProcessor {
 
     public static String getNewPwd() {
         System.out.print("Please enter the new password(8-20 characters, the combination of letters and numbers).\nEnter your new password:");

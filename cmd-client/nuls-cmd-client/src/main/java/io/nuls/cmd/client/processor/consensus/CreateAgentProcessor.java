@@ -49,12 +49,7 @@ import static io.nuls.cmd.client.CommandHelper.getPwd;
  */
 @Component
 @Slf4j
-public class CreateAgentProcessor implements CommandProcessor {
-
-    @Autowired Config config;
-
-    ConsensusProvider consensusProvider = ServiceManager.get(ConsensusProvider.class);
-
+public class CreateAgentProcessor extends ConsensusBaseProcessor implements CommandProcessor {
 
     @Override
     public String getCommand() {

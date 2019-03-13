@@ -55,9 +55,7 @@ import java.util.Map;
  * @author: zhoulijun
  */
 @Component
-public class GetAccountProcessor implements CommandProcessor {
-
-    AccountService accountService = ServiceManager.get(AccountService.class);
+public class GetAccountProcessor extends AccountBaseProcessor implements CommandProcessor {
 
     LedgerProvider ledgerProvider = ServiceManager.get(LedgerProvider.class);
 

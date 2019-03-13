@@ -42,9 +42,7 @@ import io.nuls.tools.core.annotation.Component;
  * update account password
  */
 @Component
-public class UpdatePasswordProcessor implements CommandProcessor {
-
-    AccountService accountService = ServiceManager.get(AccountService.class);
+public class UpdatePasswordProcessor extends AccountBaseProcessor implements CommandProcessor {
 
 
     @Override

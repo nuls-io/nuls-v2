@@ -34,6 +34,7 @@ import io.nuls.base.data.BlockHeader;
 import io.nuls.cmd.client.CommandBuilder;
 import io.nuls.cmd.client.CommandResult;
 import io.nuls.cmd.client.processor.CommandProcessor;
+import io.nuls.cmd.client.processor.CommandGroup;
 import io.nuls.tools.core.annotation.Component;
 import lombok.extern.slf4j.Slf4j;
 
@@ -49,6 +50,11 @@ public class GetBestBlockHeaderProcessor implements CommandProcessor {
     @Override
     public String getCommand() {
         return "getbestblockheader";
+    }
+
+    @Override
+    public CommandGroup getGroup() {
+        return CommandGroup.Block;
     }
 
     @Override

@@ -5,6 +5,7 @@ import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.model.message.Response;
 import io.nuls.rpc.netty.processor.ResponseMessageProcessor;
 import io.nuls.tools.constant.ErrorCode;
+import io.nuls.tools.parse.JSONUtils;
 import io.nuls.tools.parse.MapUtils;
 import lombok.extern.slf4j.Slf4j;
 
@@ -20,6 +21,7 @@ import java.util.function.Function;
 @Slf4j
 public abstract class BaseRpcService extends BaseService {
 
+    public static final ErrorCode RPC_ERROR_CODE = ErrorCode.init("10002");
 
     /**
      * 调用其他模块rpc接口
@@ -40,11 +42,16 @@ public abstract class BaseRpcService extends BaseService {
             log.debug("result : {}",cmdResp);
         } catch (Exception e) {
             log.error("Calling remote interface failed. module:{} - interface:{} - message:{}", module, method, e.getMessage());
-            return fail(BaseService.ERROR_CODE, ErrorCode.init(BaseService.ERROR_CODE).getMsg());
+            return fail(BaseService.ERROR_CODE,e.getMessage());
         }
         if (!cmdResp.isSuccess()) {
             log.error("Calling remote interface failed. module:{} - interface:{} - ResponseComment:{}", module, method, cmdResp.getResponseComment());
-            return fail(ERROR_CODE, cmdResp.getResponseComment());
+            if(cmdResp.getResponseData() != null){
+                Map<String,String> error = (Map)((Map) cmdResp.getResponseData()).get(method);
+                return fail(RPC_ERROR_CODE,error.get("msg"));
+            }else{
+                return fail(RPC_ERROR_CODE,cmdResp.getResponseComment());
+            }
         }
         return callback.apply((R) ((HashMap) cmdResp.getResponseData()).get(method));
     }

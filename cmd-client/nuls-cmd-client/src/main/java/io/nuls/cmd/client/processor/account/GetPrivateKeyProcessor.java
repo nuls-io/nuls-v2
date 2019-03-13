@@ -46,9 +46,7 @@ import static io.nuls.cmd.client.CommandHelper.*;
  * @author: zhoulijun
  */
 @Component
-public class GetPrivateKeyProcessor implements CommandProcessor {
-
-    AccountService accountService = ServiceManager.get(AccountService.class);
+public class GetPrivateKeyProcessor extends AccountBaseProcessor implements CommandProcessor {
 
     @Autowired
     Config config;

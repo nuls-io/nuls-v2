@@ -51,6 +51,5 @@ public interface ContractCmdConstant {
     String DELETE = "sc_delete";
     String VALIDATE_DELETE = "sc_validate_delete";
 
-    //TODO pierre
     String TRANSFER_FEE = "sc_transfer_fee";
 }
