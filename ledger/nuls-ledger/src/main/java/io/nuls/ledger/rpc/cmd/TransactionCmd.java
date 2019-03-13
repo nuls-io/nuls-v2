@@ -25,7 +25,6 @@
  */
 package io.nuls.ledger.rpc.cmd;
 
-import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.data.Transaction;
 import io.nuls.ledger.service.TransactionService;
 import io.nuls.ledger.utils.LoggerUtil;
@@ -34,16 +33,11 @@ import io.nuls.rpc.model.Parameter;
 import io.nuls.rpc.model.message.Response;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
-import io.nuls.tools.crypto.HexUtil;
-import io.nuls.tools.exception.NulsException;
-import io.nuls.tools.model.StringUtils;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import static io.nuls.ledger.utils.LoggerUtil.logger;
 
 /**
  * 未确认交易提交，提交失败直接返回错误信息
@@ -76,7 +70,7 @@ public class TransactionCmd extends BaseLedgerCmd {
                 LoggerUtil.logger.error("txHex is invalid chainId={},txHex={}", chainId, txHex);
                 return failed("txHex is invalid");
             }
-            LoggerUtil.logger.debug("commitUnconfirmedTx chainId={},txHash={},txHex={}", chainId, tx.getHash().toString(),txHex);
+            LoggerUtil.logger.debug("commitUnconfirmedTx chainId={},txHash={}", chainId, tx.getHash().toString());
             int value = 0;
             if (transactionService.unConfirmTxProcess(chainId, tx)) {
                 value = 1;
@@ -153,13 +147,13 @@ public class TransactionCmd extends BaseLedgerCmd {
         try {
             Integer chainId = (Integer) params.get("chainId");
             String txHex = params.get("txHex").toString();
-            LoggerUtil.logger.debug("rollBackUnconfirmTx chainId={},txHex={}", chainId, txHex);
+            LoggerUtil.logger.debug("rollBackUnconfirmTx chainId={}", chainId);
             Transaction tx = parseTxs(txHex);
             if (null == tx) {
-                LoggerUtil.logger.debug("txHex is invalid chainId={}", chainId);
+                LoggerUtil.logger.debug("txHex is invalid chainId={},txHex={}", chainId,txHex);
                 return failed("txHex is invalid");
             }
-            LoggerUtil.logger.debug("rollBackUnconfirmTx chainId={},txHash={}", chainId, tx.getHash().toString());
+            LoggerUtil.txUnconfirmedRollBackLog.debug("rollBackUnconfirmTx chainId={},txHash={}", chainId, tx.getHash().toString());
             if (transactionService.rollBackUnconfirmTx(chainId, tx)) {
                 value = 1;
             } else {
