@@ -29,7 +29,6 @@ import io.nuls.base.data.Transaction;
 import io.nuls.ledger.model.ValidateResult;
 import io.nuls.ledger.utils.LoggerUtil;
 import io.nuls.ledger.validator.CoinDataValidator;
-import io.nuls.rpc.cmd.BaseCmd;
 import io.nuls.rpc.model.CmdAnnotation;
 import io.nuls.rpc.model.Parameter;
 import io.nuls.rpc.model.message.Response;
@@ -38,14 +37,16 @@ import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.exception.NulsException;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
  * Created by wangkun23 on 2018/11/22.
  */
 @Component
-public class ValidatorCmd extends BaseCmd {
+public class ValidatorCmd extends BaseLedgerCmd {
     @Autowired
     CoinDataValidator coinDataValidator;
 
@@ -78,7 +79,7 @@ public class ValidatorCmd extends BaseCmd {
                 validateResult = coinDataValidator.validateCoinData(chainId, tx);
             }
             response = success(validateResult);
-            LoggerUtil.logger.debug("validateCoinData returnCode={},returnMsg={}", validateResult.getValidateCode(),validateResult.getValidateDesc());
+            LoggerUtil.logger.debug("validateCoinData returnCode={},returnMsg={}", validateResult.getValidateCode(), validateResult.getValidateDesc());
         } catch (NulsException e) {
             e.printStackTrace();
             response = failed(e.getErrorCode());
@@ -104,6 +105,45 @@ public class ValidatorCmd extends BaseCmd {
         Map<String, Object> rtData = new HashMap<>();
         rtData.put("value", 1);
         LoggerUtil.logger.debug("return={}", success(rtData));
+        return success(rtData);
+    }
+
+    /**
+     * 接收到peer区块时调用验证
+     *
+     * @param params
+     * @return
+     */
+
+    @CmdAnnotation(cmd = "blockValidate",
+            version = 1.0, scope = "private", minEvent = 0, minPeriod = 0,
+            description = "")
+    @Parameter(parameterName = "chainId", parameterType = "int")
+    @Parameter(parameterName = "txHexList", parameterType = "List")
+    @Parameter(parameterName = "blockHeight", parameterType = "long")
+    public Response blockValidate(Map params) {
+        Integer chainId = (Integer) params.get("chainId");
+        long blockHeight = Long.valueOf(params.get("blockHeight").toString());
+        List<String> txHexList = (List) params.get("txHexList");
+        LoggerUtil.logger.debug("chainId={} blockHeight={} blockValidate", chainId, blockHeight);
+        if (null == txHexList || 0 == txHexList.size()) {
+            LoggerUtil.logger.error("txHexList is blank");
+            return failed("txHexList is blank");
+        }
+        LoggerUtil.logger.debug("commitBlockTxs txHexList={}", txHexList.size());
+        List<Transaction> txList = new ArrayList<>();
+        Response parseResponse = parseTxs(txHexList, txList);
+        if (!parseResponse.isSuccess()) {
+            LoggerUtil.logger.debug("commitBlockTxs response={}", parseResponse);
+            return parseResponse;
+        }
+        Map<String, Object> rtData = new HashMap<>();
+        if (coinDataValidator.blockValidate(chainId, blockHeight, txList)) {
+            rtData.put("value", 1);
+        } else {
+            rtData.put("value", 0);
+        }
+        LoggerUtil.logger.debug("chainId={} blockHeight={},return={}", chainId, blockHeight, success(rtData));
         return success(rtData);
     }
 }

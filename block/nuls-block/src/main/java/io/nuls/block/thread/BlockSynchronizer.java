@@ -49,8 +49,7 @@ import java.util.Map;
 import java.util.concurrent.*;
 import java.util.concurrent.locks.StampedLock;
 
-import static io.nuls.block.constant.Constant.CONSENSUS_WORKING;
-import static io.nuls.block.constant.Constant.NODE_COMPARATOR;
+import static io.nuls.block.constant.Constant.*;
 
 /**
  * 区块同步主线程,管理多条链的区块同步
@@ -102,7 +101,7 @@ public class BlockSynchronizer implements Runnable {
                     ChainManager.setMasterChain(chainId, ChainGenerator.generateMasterChain(chainId, block, blockService));
                 }
                 while (!synchronize(chainId)) {
-                    Thread.sleep(1000L);
+                    Thread.sleep(SYN_SLEEP_INTERVAL);
                 }
             } catch (Exception e) {
                 e.printStackTrace();
@@ -119,7 +118,7 @@ public class BlockSynchronizer implements Runnable {
         try {
             int sizeSecond;
             while (true) {
-                Thread.sleep(20000);
+                Thread.sleep(WAIT_NETWORK_INTERVAL);
                 availableNodesSecond = NetworkUtil.getAvailableNodes(chainId);
                 sizeSecond = availableNodesSecond.size();
                 if (sizeSecond == sizeFirst) {
@@ -152,7 +151,7 @@ public class BlockSynchronizer implements Runnable {
             //3.统计网络中可用节点的一致区块高度、区块hash
             BlockDownloaderParams params = statistics(availableNodes, context);
             int size = params.getNodes().size();
-            //网络上没有可用一致节点
+            //网络上没有可用的一致节点,就是节点高度都不一致，或者一致的节点比例不够
             if (size == 0) {
                 commonLog.warn("chain-" + chainId + ", no consistent nodes");
                 return false;

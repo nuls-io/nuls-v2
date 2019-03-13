@@ -433,7 +433,7 @@ public class BlockServiceImpl implements BlockService {
             return false;
         }
         //交易验证
-        boolean transactionVerify = TransactionUtil.verify(chainId, block.getTxs());
+        boolean transactionVerify = TransactionUtil.verify(chainId, block.getTxs(), block.getHeader().getHeight());
         if (!transactionVerify) {
             commonLog.error("transactionVerify-"+transactionVerify);
             return false;

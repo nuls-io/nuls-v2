@@ -36,9 +36,7 @@ import lombok.AllArgsConstructor;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.Callable;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 
 import static io.nuls.block.constant.CommandConstant.GET_BLOCKS_BY_HEIGHT_MESSAGE;
 import static io.nuls.block.constant.Constant.BATCH_DOWNLOAD_TIMEOUNT;
@@ -105,7 +103,7 @@ public class BlockWorker implements Callable<BlockDownLoadResult> {
             b = completeMessage.isSuccess();
             long end = System.currentTimeMillis();
             duration = end - begin;
-        } catch (Exception e) {
+        } catch (TimeoutException | InterruptedException | ExecutionException e) {
             e.printStackTrace();
             commonLog.error(e);
         }

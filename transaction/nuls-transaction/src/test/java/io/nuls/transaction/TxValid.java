@@ -76,7 +76,7 @@ public class TxValid {
     static int assetId = 1;
     static String version = "1.0";
 
-    static String password = "zhoujun172";//"nuls123456";
+    static String password = "nuls123456";//"nuls123456";
 
     @Before
     public void before() throws Exception {
@@ -168,7 +168,7 @@ public class TxValid {
     @Test
     public void depositToAgent() throws Exception {
         //组装委托节点交易
-        String agentHash = "00200dc01886dc021f7b85a10717ce8a8fdb901c6b41aba0c1f143517ad9ee948d5a";
+        String agentHash = "00205989de73d03c4a0560d4caa436d387738bbd2baccf4ce3440d6cbfae1149e63d";
         Map<String, Object> dpParams = new HashMap<>();
         dpParams.put("chainId", chainId);
         dpParams.put("address", address27);

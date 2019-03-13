@@ -457,14 +457,15 @@ public class TransactionCmd extends BaseCmd {
         try {
             Object chainIdObj = params == null ? null : params.get("chainId");
             Object txHexListObj = params == null ? null : params.get("txList");
+            Object height = params == null ? null : params.get("height");
             // check parameters
-            if (params == null || chainIdObj == null || txHexListObj == null) {
+            if (params == null || chainIdObj == null || txHexListObj == null || height == null) {
                 throw new NulsException(TxErrorCode.NULL_PARAMETER);
             }
             int chainId = (Integer) chainIdObj;
             chain = chainManager.getChain(chainId);
             List<String> txHexList = (List<String>) txHexListObj;
-            verifyTxResult = txService.batchVerify(chainManager.getChain(chainId), txHexList);
+            verifyTxResult = txService.batchVerify(chainManager.getChain(chainId), txHexList, (long)height);
         } catch (NulsException e) {
             errorLogProcess(chain, e);
             return failed(e.getErrorCode());
