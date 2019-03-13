@@ -29,15 +29,14 @@ import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.data.Transaction;
 import io.nuls.ledger.service.TransactionService;
 import io.nuls.ledger.utils.LoggerUtil;
-import io.nuls.rpc.cmd.BaseCmd;
 import io.nuls.rpc.model.CmdAnnotation;
 import io.nuls.rpc.model.Parameter;
 import io.nuls.rpc.model.message.Response;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.crypto.HexUtil;
-import io.nuls.tools.model.StringUtils;
 import io.nuls.tools.exception.NulsException;
+import io.nuls.tools.model.StringUtils;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -51,45 +50,10 @@ import static io.nuls.ledger.utils.LoggerUtil.logger;
  * Created by wangkun23 on 2018/11/20.
  */
 @Component
-public class TransactionCmd extends BaseCmd {
+public class TransactionCmd extends BaseLedgerCmd {
 
     @Autowired
     private TransactionService transactionService;
-
-
-    Response parseTxs(List<String> txHexList, List<Transaction> txList) {
-        for (String txHex : txHexList) {
-            if (StringUtils.isBlank(txHex)) {
-                return failed("txHex is blank");
-            }
-            byte[] txStream = HexUtil.decode(txHex);
-            Transaction tx = new Transaction();
-            try {
-                tx.parse(new NulsByteBuffer(txStream));
-                txList.add(tx);
-            } catch (NulsException e) {
-                logger.error("transaction parse error", e);
-                return failed("transaction parse error");
-            }
-        }
-        return success();
-    }
-
-    Transaction parseTxs(String txHex) {
-        if (StringUtils.isBlank(txHex)) {
-            return null;
-        }
-        byte[] txStream = HexUtil.decode(txHex);
-        Transaction tx = new Transaction();
-        try {
-            tx.parse(new NulsByteBuffer(txStream));
-        } catch (NulsException e) {
-            logger.error("transaction parse error", e);
-            return null;
-        }
-        return tx;
-    }
-
 
     /**
      * 未确认交易提交
