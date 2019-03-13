@@ -242,7 +242,7 @@ public class TxValid {
     public void getTxRecord() throws Exception{
         Map<String, Object> params = new HashMap<>();
         params.put("chainId", chainId);
-        params.put("address", address27);
+        params.put("address", "5MR_2CeZVsqvjUfVE2dMc2ucmHaYkwaFwtj");
         params.put("assetChainId", null);
         params.put("assetId", null);
         params.put("type", null);

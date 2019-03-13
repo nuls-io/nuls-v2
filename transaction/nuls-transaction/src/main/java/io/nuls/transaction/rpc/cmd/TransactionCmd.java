@@ -447,6 +447,41 @@ public class TransactionCmd extends BaseCmd {
     }
 
     /**
+     * 根据hash获取交易, 先查未确认, 查不到再查已确认
+     * Get the transaction that have been packaged into the block from the database
+     *
+     * @param params
+     * @return Response
+     */
+    @CmdAnnotation(cmd = TxCmd.TX_GET_BLOCK_TXS, version = 1.0, description = "Get transaction ")
+    @Parameter(parameterName = "chainId", parameterType = "int")
+    @Parameter(parameterName = "txHashList", parameterType = "list")
+    public Response getBlockTxs(Map params) {
+        Chain chain = null;
+        try {
+            ObjectUtils.canNotEmpty(params.get("chainId"), TxErrorCode.PARAMETER_ERROR.getMsg());
+            ObjectUtils.canNotEmpty(params.get("txHashList"), TxErrorCode.PARAMETER_ERROR.getMsg());
+            chain = chainManager.getChain((int) params.get("chainId"));
+            if (null == chain) {
+                throw new NulsException(TxErrorCode.CHAIN_NOT_FOUND);
+            }
+            List<String> txHashList = (List<String>) params.get("txHashList");
+            List<String> txHexList = confirmedTxService.getTxList(chain,txHashList);
+            Map<String, List<String>> resultMap = new HashMap<>(TxConstant.INIT_CAPACITY_8);
+            Log.debug("getBlockTxs size:{} ", txHexList.size());
+            resultMap.put("txHexList", txHexList);
+            return success(resultMap);
+        } catch (NulsException e) {
+            errorLogProcess(chain, e);
+            return failed(e.getErrorCode());
+        } catch (Exception e) {
+            errorLogProcess(chain, e);
+            return failed(TxErrorCode.SYS_UNKOWN_EXCEPTION);
+        }
+    }
+
+
+    /**
      * The transaction is verified locally before the block is saved,
      * including calling the validator, verifying the coinData, etc.
      * If it is a cross-chain transaction and not initiated by the current chain,

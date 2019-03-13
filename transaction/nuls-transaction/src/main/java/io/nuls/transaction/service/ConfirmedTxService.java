@@ -26,17 +26,6 @@ public interface ConfirmedTxService {
     TransactionConfirmedPO getConfirmedTransaction(Chain chain, NulsDigestData hash);
 
     /**
-     * 保存已确认交易
-     * Save confirmed transactions
-     *
-     * @param chain
-     * @param transaction
-     * @return Result
-     */
-    /*boolean saveTx(Chain chain, Transaction transaction);*/
-
-
-    /**
      * 保存创世块的交易
      * @param chain
      * @param txhexList
@@ -73,4 +62,14 @@ public interface ConfirmedTxService {
      * @throws NulsException
      */
     void processEffectCrossTx(Chain chain, long blockHeight) throws NulsException;
+
+
+    /**
+     * 获取区块的完整交易
+     * 如果没有查询到,或者查询到的不是区块完整的交易数据 则返回空list
+     * @param chain
+     * @param hashList
+     * @return List<String> txHex list
+     */
+    List<String> getTxList(Chain chain, List<String> hashList);
 }
