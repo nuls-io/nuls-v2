@@ -47,7 +47,7 @@ public class NulsConfig {
      * 模块配置文件名称
      * Module configuration file name.
      */
-    public final static String MODULES_CONFIG_FILE = "modules.ini";
+    public final static String MODULES_CONFIG_FILE = "modules.json";
 
     /**
      * 系统使用的编码方式
@@ -61,10 +61,16 @@ public class NulsConfig {
     public static String ACCOUNTKEYSTORE_FOLDER_NAME = "keystore/backup";
 
     /**
-     * 内核模块地址
-     * Kernel module address
+     * 内核模块地址端口
+     * Kernel module address port
      */
-    public static String KERNEL_MODULE_URL;
+    public static String KERNEL_MODULE_PORT = "8008";
+
+    /**
+     * 数据库存储地址
+     * database path
+     */
+    public static String DATA_PATH = "../../../../data/account";
 
     /**
      * config file path

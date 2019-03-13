@@ -19,12 +19,17 @@ import io.nuls.rpc.modulebootstrap.RpcModule;
 import io.nuls.rpc.modulebootstrap.RpcModuleState;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.core.ioc.SpringLiteContext;
+import io.nuls.tools.io.IoUtils;
 import io.nuls.tools.model.StringUtils;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.parse.ConfigLoader;
 import io.nuls.tools.parse.I18nUtils;
+import io.nuls.tools.parse.JSONUtils;
+import io.nuls.tools.parse.config.ConfigItem;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -68,10 +73,16 @@ public class AccountBootstrap extends RpcModule {
      */
     @Override
     public void init() {
-        super.init();
-        initCfg();
-        //读取配置文件，数据存储根目录，初始化打开该目录下所有表连接并放入缓存
-        RocksDBService.init(AccountParam.getInstance().getDataPath());
+        try {
+            super.init();
+            //初始化配置项
+            initCfg();
+            //初始化数据库
+            initDB();
+        } catch (Exception e) {
+            LoggerUtil.logger.error("AccountBootsrap init error!");
+            throw new RuntimeException(e);
+        }
     }
 
     /**
@@ -83,8 +94,6 @@ public class AccountBootstrap extends RpcModule {
     public boolean doStart() {
         LoggerUtil.logger.info("module ready");
         try {
-            //初始化数据库
-            initDB();
             //启动链
             SpringLiteContext.getBean(ChainManager.class).runChain();
             while (!isDependencieReady(new Module(ModuleE.TX.abbr, "1.0"))) {
@@ -123,29 +132,25 @@ public class AccountBootstrap extends RpcModule {
 
     public static void initCfg() {
         try {
-            NulsConfig.MODULES_CONFIG = ConfigLoader.loadIni(NulsConfig.MODULES_CONFIG_FILE);
-
-            AccountParam accountParam = AccountParam.getInstance();
+            String configJson = IoUtils.read(NulsConfig.MODULES_CONFIG_FILE);
+            List<ConfigItem> configItems = JSONUtils.json2list(configJson, ConfigItem.class);
+            Map<String, ConfigItem> configMap = new HashMap<>();
+            configItems.forEach(e -> configMap.put(e.getName(), e));
             //set data save path
-            accountParam.setDataPath(NulsConfig.MODULES_CONFIG.getCfgValue(AccountConstant.CFG_DB_SECTION, AccountConstant.DB_DATA_PATH, null));
-
-            try {
-                //set system encoding
-                NulsConfig.DEFAULT_ENCODING = NulsConfig.MODULES_CONFIG.getCfgValue(AccountConstant.CFG_SYSTEM_SECTION, AccountConstant.CFG_SYSTEM_DEFAULT_ENCODING);
-                //set system language
-                String language = NulsConfig.MODULES_CONFIG.getCfgValue(AccountConstant.CFG_SYSTEM_SECTION, AccountConstant.CFG_SYSTEM_LANGUAGE);
-                I18nUtils.loadLanguage(AccountBootstrap.class, "languages", language);
-                I18nUtils.setLanguage(language);
-                //ACCOUNTKEYSTORE_FOLDER_NAME
-                String keystoreFolder = NulsConfig.MODULES_CONFIG.getCfgValue(AccountConstant.CFG_SYSTEM_SECTION, AccountConstant.CFG_SYSTEM_TKEYSTORE_FOLDER);
-                if (StringUtils.isNotBlank(keystoreFolder)) {
-                    NulsConfig.ACCOUNTKEYSTORE_FOLDER_NAME = keystoreFolder;
-                }
-                NulsConfig.KERNEL_MODULE_URL = NulsConfig.MODULES_CONFIG.getCfgValue(AccountConstant.CFG_SYSTEM_SECTION, AccountConstant.KERNEL_MODULE_URL);
-            } catch (Exception e) {
-                LoggerUtil.logger.error(e);
+            NulsConfig.DATA_PATH = configMap.get(AccountConstant.DB_DATA_PATH).getValue();
+            //set system encoding
+            NulsConfig.DEFAULT_ENCODING = configMap.get(AccountConstant.CFG_SYSTEM_DEFAULT_ENCODING).getValue();
+            //set system language
+            String language = configMap.get(AccountConstant.CFG_SYSTEM_LANGUAGE).getValue();
+            I18nUtils.loadLanguage(AccountBootstrap.class, "languages", language);
+            I18nUtils.setLanguage(language);
+            //set keystore dir
+            String keystoreFolder = configMap.get(AccountConstant.CFG_SYSTEM_TKEYSTORE_FOLDER).getValue();
+            if (StringUtils.isNotBlank(keystoreFolder)) {
+                NulsConfig.ACCOUNTKEYSTORE_FOLDER_NAME = keystoreFolder;
             }
-        } catch (IOException e) {
+            NulsConfig.KERNEL_MODULE_PORT = configMap.get(AccountConstant.KERNEL_MODULE_PORT).getValue();
+        } catch (Exception e) {
             LoggerUtil.logger.error("Account Bootstrap initCfg failed", e);
             throw new RuntimeException("Account Bootstrap initCfg failed");
         }
@@ -157,7 +162,7 @@ public class AccountBootstrap extends RpcModule {
      */
     private static void initDB() throws Exception {
         //读取配置文件，数据存储根目录，初始化打开该目录下所有表连接并放入缓存
-        RocksDBService.init(AccountParam.getInstance().getDataPath());
+        RocksDBService.init(NulsConfig.DATA_PATH);
 
         //初始化表
         try {

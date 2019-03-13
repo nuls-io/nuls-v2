@@ -1,0 +1,32 @@
+[
+  {
+    "name": "language",
+    "remark": "language",
+    "readOnly": "true",
+    "value": "en"
+  },
+  {
+    "name": "encoding",
+    "remark": "encoding",
+    "readOnly": "true",
+    "value": "UTF-8"
+  },
+  {
+    "name": "keyDir",
+    "remark": "keystore dir",
+    "readOnly": "true",
+    "value": "keystore/backup"
+  },
+  {
+    "name": "kernelPort",
+    "remark": "kernel port",
+    "readOnly": "true",
+    "value": "8887"
+  },
+  {
+    "name": "dataDir",
+    "remark": "数据库路径",
+    "readOnly": "true",
+    "value": "../../../../data/account"
+  }
+]
