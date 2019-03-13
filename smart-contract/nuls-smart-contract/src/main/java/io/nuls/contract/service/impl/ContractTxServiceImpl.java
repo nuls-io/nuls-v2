@@ -356,7 +356,7 @@ public class ContractTxServiceImpl implements ContractTxService {
     }
 
     @Override
-    public Result txFee(int chainId, String sender, BigInteger value, Long gasLimit, Long price, String contractAddress,
+    public Result callTxFee(int chainId, String sender, BigInteger value, Long gasLimit, Long price, String contractAddress,
                               String methodName, String methodDesc, String[][] args, String remark) {
         try {
             byte[] contractAddressBytes = AddressTool.getAddress(contractAddress);
@@ -367,7 +367,9 @@ public class ContractTxServiceImpl implements ContractTxService {
             }
             CallContractTransaction tx = result.getData();
             BigInteger fee = tx.getFee();
-            return getSuccess().setData(new Object[]{fee, tx});
+            Map<String, BigInteger> map = new HashMap<>(2);
+            map.put("fee", fee);
+            return getSuccess().setData(map);
         } catch (NulsException e) {
             Log.error(e);
             return Result.getFailed(e.getErrorCode());

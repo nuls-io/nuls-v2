@@ -25,7 +25,6 @@ package io.nuls.contract.service;
 
 
 import io.nuls.base.data.NulsDigestData;
-import io.nuls.base.data.Transaction;
 import io.nuls.contract.model.bo.ContractResult;
 import io.nuls.contract.model.bo.ContractTempTransaction;
 import io.nuls.tools.basic.Result;
@@ -40,6 +39,9 @@ public interface ContractService {
 
     Result invokeContract(int chainId, List<ContractTempTransaction> txList, long number, long blockTime, String packingAddress, String preStateRoot);
 
+    Result commitProcessor(int chainId, List<String> txHexList, String blockHeaderHex);
+
+    Result rollbackProcessor(int chainId, List<String> txHexList, String blockHeaderHex);
     /**
      * 是否为合约地址
      *

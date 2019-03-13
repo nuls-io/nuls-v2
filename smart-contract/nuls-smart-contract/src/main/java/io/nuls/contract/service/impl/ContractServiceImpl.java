@@ -29,10 +29,15 @@ import io.nuls.base.data.NulsDigestData;
 import io.nuls.base.data.Transaction;
 import io.nuls.contract.constant.ContractErrorCode;
 import io.nuls.contract.helper.ContractHelper;
+import io.nuls.contract.manager.ContractTxProcessorManager;
+import io.nuls.contract.manager.ContractTxValidatorManager;
 import io.nuls.contract.model.bo.*;
 import io.nuls.contract.model.dto.ContractPackageDto;
 import io.nuls.contract.model.tx.ContractReturnGasTransaction;
+import io.nuls.contract.model.txdata.CallContractData;
 import io.nuls.contract.model.txdata.ContractData;
+import io.nuls.contract.model.txdata.CreateContractData;
+import io.nuls.contract.model.txdata.DeleteContractData;
 import io.nuls.contract.service.*;
 import io.nuls.contract.storage.ContractExecuteResultStorageService;
 import io.nuls.contract.util.ContractLedgerUtil;
@@ -40,6 +45,7 @@ import io.nuls.contract.vm.program.ProgramExecutor;
 import io.nuls.tools.basic.Result;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Service;
+import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.log.Log;
 import io.nuls.tools.model.ByteArrayWrapper;
 import io.nuls.tools.model.LongUtils;
@@ -49,7 +55,7 @@ import java.io.IOException;
 import java.math.BigInteger;
 import java.util.*;
 
-import static io.nuls.contract.constant.ContractConstant.TX_TYPE_DELETE_CONTRACT;
+import static io.nuls.contract.constant.ContractConstant.*;
 import static io.nuls.contract.util.ContractUtil.getFailed;
 import static io.nuls.contract.util.ContractUtil.getSuccess;
 
@@ -81,6 +87,11 @@ public class ContractServiceImpl implements ContractService {
     @Autowired
     private ContractExecuteResultStorageService contractExecuteResultStorageService;
 
+    @Autowired
+    private ContractTxProcessorManager contractTxProcessorManager;
+    @Autowired
+    private ContractTxValidatorManager contractTxValidatorManager;
+
     @Override
     public Result invokeContract(int chainId, List<ContractTempTransaction> txList, long number, long blockTime, String packingAddress, String preStateRoot) {
         try {
@@ -111,15 +122,46 @@ public class ContractServiceImpl implements ContractService {
             dto.makeContractResultMap(contractResultList);
             contractHelper.getChain(chainId).setContractPackageDto(dto);
             return getSuccess().setData(dto);
-        } catch (Exception e) {
+        } catch (NulsException e) {
+            Log.error(e);
+            return Result.getFailed(e.getErrorCode());
+        } catch (IOException e) {
             Log.error(e);
             return getFailed().setMsg(e.getMessage());
         }
     }
 
-    //TODO pierre commitProcessor
-    public Result commitProcessor(int chainId) {
+    public Result commitProcessor(int chainId, List<String> txHexList, String blockHeaderHex) {
         try {
+            ContractPackageDto contractPackageDto = contractHelper.getChain(chainId).getContractPackageDto();
+            if(contractPackageDto != null) {
+                Map<String, ContractResult> contractResultMap = contractPackageDto.getContractResultMap();
+                ContractResult contractResult;
+                ContractWrapperTransaction wrapperTx;
+                for(String txHex : txHexList) {
+                    contractResult = contractResultMap.get(txHex);
+                    if(contractResult == null) {
+                        Log.warn("empty contract result with txHex: {}", txHex);
+                        continue;
+                    }
+                    wrapperTx = contractResult.getTx();
+                    wrapperTx.setContractResult(contractResult);
+                    switch (wrapperTx.getType()) {
+                        case TX_TYPE_CREATE_CONTRACT:
+                            contractTxProcessorManager.createCommit(chainId, wrapperTx);
+                            break;
+                        case TX_TYPE_CALL_CONTRACT:
+                            contractTxProcessorManager.callCommit(chainId, wrapperTx);
+                            break;
+                        case TX_TYPE_DELETE_CONTRACT:
+                            contractTxProcessorManager.callCommit(chainId, wrapperTx);
+                            break;
+                        default:
+                            break;
+                    }
+                }
+            }
+
             return getSuccess();
         } catch (Exception e) {
             return getFailed();
@@ -128,8 +170,43 @@ public class ContractServiceImpl implements ContractService {
             contractHelper.removeTempBalanceManagerAndCurrentBlockHeader(chainId);
         }
     }
-    //TODO pierre rollbackProcessor
 
+    public Result rollbackProcessor(int chainId, List<String> txHexList, String blockHeaderHex) {
+        try {
+            Transaction tx;
+            for(String txHex : txHexList) {
+                tx = new Transaction();
+                tx.parse(Hex.decode(txHex), 0);
+                switch (tx.getType()) {
+                    case TX_TYPE_CREATE_CONTRACT:
+                        CreateContractData create = new CreateContractData();
+                        create.parse(tx.getTxData(), 0);
+                        contractTxProcessorManager.createRollback(chainId, new ContractWrapperTransaction(tx, null, create));
+                        break;
+                    case TX_TYPE_CALL_CONTRACT:
+                        CallContractData call = new CallContractData();
+                        call.parse(tx.getTxData(), 0);
+                        contractTxProcessorManager.callRollback(chainId, new ContractWrapperTransaction(tx, null, call));
+                        break;
+                    case TX_TYPE_DELETE_CONTRACT:
+                        DeleteContractData delete = new DeleteContractData();
+                        delete.parse(tx.getTxData(), 0);
+                        contractTxProcessorManager.deleteRollback(chainId, new ContractWrapperTransaction(tx, null, delete));
+                        break;
+                    default:
+                        break;
+                }
+            }
+
+            return getSuccess();
+        } catch (NulsException e) {
+            Log.error(e);
+            return Result.getFailed(e.getErrorCode());
+        } catch (Exception e) {
+            Log.error(e);
+            return getFailed().setMsg(e.getMessage());
+        }
+    }
 
 
     private ContractReturnGasTransaction makeReturnGasTx(int chainId, List<ContractResult> resultList, long time) throws IOException {

@@ -64,9 +64,8 @@ public abstract class ContractBaseTransaction<T extends TransactionLogicData> ex
 
     public T getTxDataObj() throws NulsException {
         if(txDataObj == null) {
-            T txData = newInstance();
-            txData.parse(this.getTxData(), 0);
-            txDataObj = txData;
+            txDataObj = newInstance();
+            txDataObj.parse(this.getTxData(), 0);
         }
         return txDataObj;
     }
