@@ -80,7 +80,7 @@ public class TransactionUtil {
      * @param transactions
      * @return
      */
-    public static boolean verify(int chainId, List<Transaction> transactions) {
+    public static boolean verify(int chainId, List<Transaction> transactions, long height) {
         NulsLogger commonLog = ContextManager.getContext(chainId).getCommonLog();
         try {
             Map<String, Object> params = new HashMap<>(2);
@@ -91,6 +91,7 @@ public class TransactionUtil {
                 txHashList.add(transaction.hex());
             }
             params.put("txList", txHashList);
+            params.put("height", height);
             Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.TX.abbr, "tx_batchVerify", params);
             if (response.isSuccess()) {
                 Map responseData = (Map) response.getResponseData();
