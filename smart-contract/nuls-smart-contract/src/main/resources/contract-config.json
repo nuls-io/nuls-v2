@@ -10,7 +10,7 @@
     "readOnly": true
   },
   {
-    "key": "max.view.gas",
+    "key": "maxViewGas",
     "value": 100000000,
     "readOnly": true
   }

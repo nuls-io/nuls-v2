@@ -51,10 +51,21 @@ public class ConfigLoader {
      * @return properties配置文件类
      */
     public static Properties loadProperties(String fileName) throws IOException {
-        InputStream is = ConfigLoader.class.getClassLoader().getResourceAsStream(fileName);
-        Properties prop = new Properties();
-        prop.load(is);
-        is.close();
+        InputStream is = null;
+        Properties prop;
+        try {
+            is = ConfigLoader.class.getClassLoader().getResourceAsStream(fileName);
+            prop = new Properties();
+            prop.load(is);
+        } catch (IOException e) {
+            throw e;
+        } finally {
+            try {
+                if(is != null) {
+                    is.close();
+                }
+            } catch (IOException e) {}
+        }
         return prop;
     }
 

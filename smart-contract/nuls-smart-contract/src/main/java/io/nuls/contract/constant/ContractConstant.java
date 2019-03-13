@@ -134,6 +134,7 @@ public interface ContractConstant {
      */
     String CONFIG_FILE_PATH = "consensus-config.json";
 
+    String NRC20_STANDARD_FILE = "nrc20.json";
     /**
      * DB config
      */

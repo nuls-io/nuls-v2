@@ -222,7 +222,7 @@ public class ContractHelper {
 
         long gasLimit;
         if(isCustomGasLimit) {
-            gasLimit = vmContext.getCustomMaxViewGasLimit();
+            gasLimit = vmContext.getCustomMaxViewGasLimit(chainId);
         } else {
             gasLimit = ContractConstant.CONTRACT_CONSTANT_GASLIMIT;
         }
