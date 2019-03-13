@@ -31,6 +31,19 @@ public class BigIntegerUtils {
         return String.valueOf(bigInteger);
     }
 
+    public static String bigIntegerToString(BigInteger bigInteger, int size) {
+        String value = bigInteger.toString();
+        int length = size - value.length();
+        if (length > 0) {
+            StringBuffer buffer = new StringBuffer("");
+            for (int i = 0; i < length; i++) {
+                buffer.append(0);
+            }
+            value = buffer.append(value).toString();
+        }
+        return value;
+    }
+
     /**
      * 两个数字字符串相加
      *

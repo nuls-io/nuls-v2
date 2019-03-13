@@ -223,14 +223,16 @@ public class MeetingRound {
             MeetingMember member = getMember(address,chain);
             if (null != member) {
                 myMember = member;
-                if(!chain.isPacker()){
-                    CallMethodUtils.sendState(chain,true);
-                }
-                return;
+                break;
             }
-            if(chain.isPacker()){
-                CallMethodUtils.sendState(chain,false);
-            }
+        }
+        if(myMember != null && !chain.isPacker()){
+            CallMethodUtils.sendState(chain,true);
+            chain.setPacker(true);
+        }
+        if(myMember == null && chain.isPacker()){
+            CallMethodUtils.sendState(chain,false);
+            chain.setPacker(false);
         }
     }
 

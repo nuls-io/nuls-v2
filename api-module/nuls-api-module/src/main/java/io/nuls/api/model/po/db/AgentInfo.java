@@ -57,6 +57,8 @@ public class AgentInfo extends TxDataInfo {
 
     private int version;
 
+    private int type;
+
     public AgentInfo() {
 
     }

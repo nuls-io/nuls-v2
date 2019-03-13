@@ -35,6 +35,8 @@ public interface ContractErrorCode {
 
     ErrorCode SUCCESS = ErrorCode.init("10000");
     ErrorCode FAILED = ErrorCode.init("10001");
+    ErrorCode SIGNATURE_ERROR = ErrorCode.init("10009");
+    ErrorCode DATA_ERROR = ErrorCode.init("10014");
 
     ErrorCode PARAMETER_ERROR = ErrorCode.init("10012");
     ErrorCode NULL_PARAMETER = ErrorCode.init("10013");
@@ -55,7 +57,10 @@ public interface ContractErrorCode {
     ErrorCode TX_DATA_VALIDATION_ERROR = ErrorCode.init("31008");
     ErrorCode TOO_SMALL_AMOUNT = ErrorCode.init("31012");
 
+    ErrorCode PASSWORD_IS_WRONG = ErrorCode.init("50000");
+    ErrorCode ACCOUNT_NOT_EXIST = ErrorCode.init("50001");
     ErrorCode ADDRESS_ERROR = ErrorCode.init("50004");
+    ErrorCode ACCOUNT_VALIDATION_ERROR = ErrorCode.init("50025");
 
     ErrorCode CONTRACT_EXECUTE_ERROR = ErrorCode.init("100001");
     ErrorCode CONTRACT_ADDRESS_NOT_EXIST = ErrorCode.init("100002");

@@ -322,7 +322,7 @@ public class AliasServiceImpl implements AliasService, InitializingBean {
         CoinFrom coinFrom = new CoinFrom(account.getAddress().getAddressBytes(), account.getChainId(), assetsId, AccountConstant.ALIAS_FEE, nonce, AccountConstant.NORMAL_TX_LOCKED);
         coinFrom.setAddress(account.getAddress().getAddressBytes());
         CoinTo coinTo = new CoinTo(AccountConstant.BLACK_HOLE_ADDRESS, account.getChainId(), assetsId, AccountConstant.ALIAS_FEE);
-        int txSize = tx.size() + coinFrom.size() + coinTo.size() + 72;
+        int txSize = tx.size() + coinFrom.size() + coinTo.size() + P2PHKSignature.SERIALIZE_LENGTH;
         //计算手续费
         BigInteger fee = TransactionFeeCalculator.getNormalTxFee(txSize);
         //总费用为

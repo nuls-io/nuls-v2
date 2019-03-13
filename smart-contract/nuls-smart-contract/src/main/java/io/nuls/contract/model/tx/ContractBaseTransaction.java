@@ -24,7 +24,6 @@
 package io.nuls.contract.model.tx;
 
 import io.nuls.base.basic.TransactionLogicData;
-import io.nuls.base.data.BlockHeader;
 import io.nuls.base.data.CoinData;
 import io.nuls.base.data.Transaction;
 import io.nuls.contract.model.bo.ContractResult;
@@ -65,9 +64,8 @@ public abstract class ContractBaseTransaction<T extends TransactionLogicData> ex
 
     public T getTxDataObj() throws NulsException {
         if(txDataObj == null) {
-            T txData = newInstance();
-            txData.parse(this.getTxData(), 0);
-            txDataObj = txData;
+            txDataObj = newInstance();
+            txDataObj.parse(this.getTxData(), 0);
         }
         return txDataObj;
     }
@@ -82,6 +80,4 @@ public abstract class ContractBaseTransaction<T extends TransactionLogicData> ex
             this.setTxData(txDataObj.serialize());
         }
     }
-
-
 }

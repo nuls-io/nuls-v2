@@ -25,7 +25,7 @@ package io.nuls.api.model.rpc;
  */
 public class RpcResultError {
 
-    private int code;
+    private String code;
 
     private String message;
 
@@ -35,7 +35,7 @@ public class RpcResultError {
 
     }
 
-    public RpcResultError(int code, String message, Object data) {
+    public RpcResultError(String code, String message, Object data) {
         this.code = code;
         this.message = message;
         this.data = data;
@@ -52,11 +52,11 @@ public class RpcResultError {
         this.data = data;
     }
 
-    public int getCode() {
+    public String getCode() {
         return code;
     }
 
-    public RpcResultError setCode(int code) {
+    public RpcResultError setCode(String code) {
         this.code = code;
         return this;
     }

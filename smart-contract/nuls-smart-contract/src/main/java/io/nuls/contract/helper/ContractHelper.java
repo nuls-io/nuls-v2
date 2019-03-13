@@ -126,6 +126,16 @@ public class ContractHelper {
         return null;
     }
 
+    public ProgramMethod getMethodInfoByContractAddress(int chainId, byte[] currentStateRoot, String methodName, String methodDesc, byte[] contractAddressBytes) {
+        if(StringUtils.isBlank(methodName)) {
+            return null;
+        }
+        ProgramExecutor track = getProgramExecutor(chainId).begin(currentStateRoot);
+        List<ProgramMethod> methods = track.method(contractAddressBytes);
+
+        return this.getMethodInfo(methodName, methodDesc, methods);
+    }
+
     private boolean checkNrc20Contract(List<ProgramMethod> methods) {
         if(methods == null || methods.size() == 0) {
             return false;
@@ -189,15 +199,7 @@ public class ContractHelper {
         return this.invokeViewMethod(chainId, null, false, currentStateRoot, blockHeight, contractAddressBytes, methodName, methodDesc, args);
     }
 
-    public ProgramResult invokeCustomGasViewMethod(int chainId, byte[] contractAddressBytes, String methodName, String methodDesc, String[][] args) {
-        // 当前区块高度
-        BlockHeader blockHeader;
-        try {
-            blockHeader = BlockCall.getLatestBlockHeader(chainId);
-        } catch (NulsException e) {
-            Log.error(e);
-            return ProgramResult.getFailed(e.getMessage());
-        }
+    public ProgramResult invokeCustomGasViewMethod(int chainId, BlockHeader blockHeader, byte[] contractAddressBytes, String methodName, String methodDesc, String[][] args) {
         if(blockHeader == null) {
             return ProgramResult.getFailed("block header is null.");
         }

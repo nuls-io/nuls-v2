@@ -5,8 +5,10 @@ import io.nuls.api.analysis.WalletRpcHandler;
 import io.nuls.api.model.po.db.BlockHeaderInfo;
 import io.nuls.api.model.po.db.BlockInfo;
 import io.nuls.api.model.po.db.SyncInfo;
+import io.nuls.api.model.rpc.RpcResult;
 import io.nuls.api.service.RollbackService;
 import io.nuls.api.service.SyncService;
+import io.nuls.tools.basic.Result;
 import io.nuls.tools.core.ioc.SpringLiteContext;
 import io.nuls.tools.log.Log;
 
@@ -35,6 +37,7 @@ public class SyncBlockTask implements Runnable {
         }
 
         boolean running = true;
+        long time1 = System.currentTimeMillis();
         while (running) {
             try {
                 running = syncBlock();
@@ -43,6 +46,9 @@ public class SyncBlockTask implements Runnable {
                 running = false;
             }
         }
+        long time2 = System.currentTimeMillis();
+
+        System.out.println((time2 - time1) + "-------------------");
     }
 
     /**
@@ -83,7 +89,11 @@ public class SyncBlockTask implements Runnable {
         if (localBestBlockHeader != null) {
             nextHeight = localBestBlockHeader.getHeight() + 1;
         }
-        BlockInfo newBlock = WalletRpcHandler.getBlockInfo(chainId, nextHeight);
+        Result<BlockInfo> result = WalletRpcHandler.getBlockInfo(chainId, nextHeight);
+        if (result.isFailed()) {
+            return false;
+        }
+        BlockInfo newBlock = result.getData();
         if (null == newBlock) {
             Thread.sleep(5000L);
             return false;

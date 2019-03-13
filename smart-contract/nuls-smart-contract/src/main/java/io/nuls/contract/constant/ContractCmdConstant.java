@@ -44,6 +44,12 @@ public interface ContractCmdConstant {
      *  user cmd
      */
     String CREATE = "sc_create";
+    String PRE_CREATE = "sc_pre_create";
+    String VALIDATE_CREATE = "sc_validate_create";
     String CALL = "sc_call";
+    String VALIDATE_CALL = "sc_validate_call";
     String DELETE = "sc_delete";
+    String VALIDATE_DELETE = "sc_validate_delete";
+
+    String TRANSFER_FEE = "sc_transfer_fee";
 }

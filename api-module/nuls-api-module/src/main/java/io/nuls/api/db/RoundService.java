@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static com.mongodb.client.model.Filters.eq;
+import static io.nuls.api.constant.MongoTableConstant.ROUND_TABLE;
 
 @Component
 public class RoundService {
@@ -22,7 +23,7 @@ public class RoundService {
     private MongoDBService mongoDBService;
 
     public PocRound getRound(int chainId, long roundIndex) {
-        Document document = this.mongoDBService.findOne(MongoTableConstant.ROUND_TABLE + chainId, eq("_id", roundIndex));
+        Document document = this.mongoDBService.findOne(ROUND_TABLE + chainId, eq("_id", roundIndex));
         if (null == document) {
             return null;
         }
@@ -40,12 +41,12 @@ public class RoundService {
 
     public void saveRound(int chainId, PocRound round) {
         Document document = DocumentTransferTool.toDocument(round, "index");
-        this.mongoDBService.insertOne(MongoTableConstant.ROUND_TABLE + chainId, document);
+        this.mongoDBService.insertOne(ROUND_TABLE + chainId, document);
     }
 
     public long updateRound(int chainId, PocRound round) {
         Document document = DocumentTransferTool.toDocument(round, "index");
-        return this.mongoDBService.updateOne(MongoTableConstant.ROUND_TABLE + chainId, eq("_id", round.getIndex()), document);
+        return this.mongoDBService.updateOne(ROUND_TABLE + chainId, eq("_id", round.getIndex()), document);
     }
 
     public long updateRoundItem(int chainId, PocRoundItem item) {
@@ -64,6 +65,19 @@ public class RoundService {
         } catch (Exception e) {
             Log.warn("", e);
         }
+    }
+
+    public long getTotalCount(int chainId) {
+        return this.mongoDBService.getCount(ROUND_TABLE + chainId);
+    }
+
+    public List<PocRound> getRoundList(int chainId, int pageIndex, int pageSize) {
+        List<Document> list = this.mongoDBService.pageQuery(ROUND_TABLE + chainId, Sorts.descending("_id"), pageIndex, pageSize);
+        List<PocRound> roundList = new ArrayList<>();
+        for (Document document : list) {
+            roundList.add(DocumentTransferTool.toInfo(document, "index", PocRound.class));
+        }
+        return roundList;
     }
 
 }

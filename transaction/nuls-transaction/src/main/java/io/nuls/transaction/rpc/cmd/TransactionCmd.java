@@ -1,9 +1,7 @@
 package io.nuls.transaction.rpc.cmd;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
-import io.nuls.base.constant.TxStatusEnum;
 import io.nuls.base.data.NulsDigestData;
-import io.nuls.base.data.Page;
 import io.nuls.base.data.Transaction;
 import io.nuls.rpc.cmd.BaseCmd;
 import io.nuls.rpc.model.CmdAnnotation;
@@ -26,7 +24,7 @@ import io.nuls.transaction.model.bo.VerifyTxResult;
 import io.nuls.transaction.model.dto.CrossTxTransferDTO;
 import io.nuls.transaction.model.dto.ModuleTxRegisterDTO;
 import io.nuls.transaction.model.dto.TxRegisterDTO;
-import io.nuls.transaction.model.po.TransactionPO;
+import io.nuls.transaction.model.po.TransactionConfirmedPO;
 import io.nuls.transaction.service.ConfirmedTxService;
 import io.nuls.transaction.service.TxService;
 import io.nuls.transaction.storage.h2.TransactionH2Service;
@@ -381,14 +379,14 @@ public class TransactionCmd extends BaseCmd {
             if (!NulsDigestData.validHash(txHash)) {
                 throw new NulsException(TxErrorCode.HASH_ERROR);
             }
-            Transaction tx = txService.getTransaction(chain, NulsDigestData.fromDigestHex(txHash));
+            TransactionConfirmedPO tx = txService.getTransaction(chain, NulsDigestData.fromDigestHex(txHash));
             Map<String, String> resultMap = new HashMap<>(TxConstant.INIT_CAPACITY_8);
             if (tx == null) {
                 Log.debug("getTx - from all, fail! tx is null, txHash:{}", txHash);
                 resultMap.put("txHex", null);
             } else {
-                Log.debug("getTx - from all, success txHash : " + tx.getHash().getDigestHex());
-                resultMap.put("txHex", tx.hex());
+                Log.debug("getTx - from all, success txHash : " + tx.getTx().getHash().getDigestHex());
+                resultMap.put("txHex", tx.getTx().hex());
             }
             return success(resultMap);
         } catch (NulsException e) {
@@ -423,52 +421,16 @@ public class TransactionCmd extends BaseCmd {
             if (!NulsDigestData.validHash(txHash)) {
                 throw new NulsException(TxErrorCode.HASH_ERROR);
             }
-            Transaction tx = confirmedTxService.getConfirmedTransaction(chain, NulsDigestData.fromDigestHex(txHash));
+            TransactionConfirmedPO tx = confirmedTxService.getConfirmedTransaction(chain, NulsDigestData.fromDigestHex(txHash));
             Map<String, String> resultMap = new HashMap<>(TxConstant.INIT_CAPACITY_8);
             if (tx == null) {
                 Log.debug("getConfirmedTransaction fail, tx is null. txHash:{}", txHash);
                 resultMap.put("txHex", null);
             } else {
                 Log.debug("getConfirmedTransaction success. txHash:{}", txHash);
-                tx.setStatus(TxStatusEnum.CONFIRMED);
-                resultMap.put("txHex", tx.hex());
+                resultMap.put("txHex", tx.getTx().hex());
             }
             return success(resultMap);
-        } catch (NulsException e) {
-            errorLogProcess(chain, e);
-            return failed(e.getErrorCode());
-        } catch (Exception e) {
-            errorLogProcess(chain, e);
-            return failed(TxErrorCode.SYS_UNKOWN_EXCEPTION);
-        }
-    }
-
-    /**
-     * 分页查询交易记录
-     * Query the transaction list based on conditions such as account, chain, asset, and paging information.
-     *
-     * @param params
-     * @return Response
-     */
-    @CmdAnnotation(cmd = TxCmd.TX_GETTXS, version = 1.0, description = "Get transaction record")
-    @Parameter(parameterName = "chainId", parameterType = "int")
-    public Response getTxs(Map params) {
-        Chain chain = null;
-        try {
-            ObjectUtils.canNotEmpty(params.get("chainId"), TxErrorCode.PARAMETER_ERROR.getMsg());
-            chain = chainManager.getChain((int) params.get("chainId"));
-            if (null == chain) {
-                throw new NulsException(TxErrorCode.CHAIN_NOT_FOUND);
-            }
-            Integer assetChainId = null == params.get("assetChainId") ? null : Integer.parseInt(params.get("assetChainId").toString());
-            Integer assetId = null == params.get("assetId") ? null : Integer.parseInt(params.get("assetId").toString());
-            Integer type = null == params.get("type") ? null : Integer.parseInt(params.get("type").toString());
-            Integer pageSize = null == params.get("pageSize") ? TxConstant.PAGESIZE : Integer.parseInt(params.get("pageSize").toString());
-            Integer pageNumber = null == params.get("pageNumber") ? 1 : Integer.parseInt(params.get("pageNumber").toString());
-            String address = (String) params.get("address");
-
-            Page<TransactionPO> list = transactionH2Service.getTxs(address, assetChainId, assetId, type, pageNumber, pageSize);
-            return success(list);
         } catch (NulsException e) {
             errorLogProcess(chain, e);
             return failed(e.getErrorCode());
@@ -549,14 +511,6 @@ public class TransactionCmd extends BaseCmd {
         }
     }
 
-    private void errorLogProcess(Chain chain, Exception e) {
-        if (chain == null) {
-            Log.error(e);
-        } else {
-            chain.getLoggerMap().get(TxConstant.LOG_TX).error(e);
-        }
-    }
-
     /**
      * 节点是否正在打包(由共识调用), 决定了新交易是否放入交易模块的待打包队列
      *
@@ -590,5 +544,15 @@ public class TransactionCmd extends BaseCmd {
             return failed(TxErrorCode.SYS_UNKOWN_EXCEPTION);
         }
     }
+
+
+    private void errorLogProcess(Chain chain, Exception e) {
+        if (chain == null) {
+            Log.error(e);
+        } else {
+            chain.getLoggerMap().get(TxConstant.LOG_TX).error(e);
+        }
+    }
+
 
 }

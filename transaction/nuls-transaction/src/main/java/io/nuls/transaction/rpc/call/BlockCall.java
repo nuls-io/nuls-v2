@@ -46,7 +46,7 @@ public class BlockCall {
             Map<String, Object> params = new HashMap<>(TxConstant.INIT_CAPACITY_8);
             params.put(Constants.VERSION_KEY_STR, "1.0");
             params.put("chainId", chain.getChainId());
-            String messageId = ResponseMessageProcessor.requestAndInvoke(ModuleE.BL.abbr, "bestHeight",
+            String messageId = ResponseMessageProcessor.requestAndInvoke(ModuleE.BL.abbr, "latestHeight",
                     params, "0", "1", new EventNewBlockHeightInvoke(chain));
             if(null != messageId){
                 return true;

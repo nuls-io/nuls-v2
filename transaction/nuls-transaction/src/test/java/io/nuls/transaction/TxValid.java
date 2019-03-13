@@ -25,7 +25,6 @@
 package io.nuls.transaction;
 
 import io.nuls.base.basic.AddressTool;
-import io.nuls.base.data.Page;
 import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.info.HostInfo;
 import io.nuls.rpc.info.NoUse;
@@ -52,7 +51,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertNotNull;
 
 /**
  * @author: Charlie
@@ -93,7 +92,7 @@ public class TxValid {
             String hash = createTransfer();
             System.out.println("count:" + (i+1));
             System.out.println("");
-            Thread.sleep(500L);
+            Thread.sleep(50L);
             //getTx(hash);
         }
 //        createCtxTransfer();
@@ -101,7 +100,18 @@ public class TxValid {
 
     @Test
     public void getTx() throws Exception {
-        getTx("0020b0c6ea2c6fd089062a65841abcd420e100ba203f3b0425f642979bf8f7e65c1e");
+            String hash = createTransfer();
+            Thread.sleep(1000L);
+            getTxClient(hash);
+            Thread.sleep(1000L);
+            getTxClient(hash);
+            Thread.sleep(1000L);
+            getTxClient(hash);
+            Thread.sleep(1000L);
+            getTxClient(hash);
+            Thread.sleep(1000L);
+            getTxClient(hash);
+            getTxCfmClient("002022f34902fa07b53434f8f98959970b2dcb8bb34ce262896820a8b9e1d16e30b4");
     }
 
     private void getTx(String hash) throws Exception{
@@ -239,8 +249,32 @@ public class TxValid {
         params.put("pageSize", null);
         params.put("pageNumber", null);
         Response dpResp = ResponseMessageProcessor.requestAndResponse(ModuleE.TX.abbr, "tx_getTxs", params);
-        Page record = (Page) dpResp.getResponseData();
+        Map record = (Map) dpResp.getResponseData();
         Log.debug("Page<TransactionPO>:{}", JSONUtils.obj2PrettyJson(record));
+    }
+
+    /**
+     * 查交易
+     */
+    private void getTxClient(String hash) throws Exception{
+        Map<String, Object> params = new HashMap<>();
+        params.put("chainId", chainId);
+        params.put("txHash", hash);
+        Response dpResp = ResponseMessageProcessor.requestAndResponse(ModuleE.TX.abbr, "tx_getTxClient", params);
+        Map record = (Map) dpResp.getResponseData();
+        Log.debug("{}", JSONUtils.obj2PrettyJson(record));
+    }
+
+    /**
+     * 查交易
+     */
+    private void getTxCfmClient(String hash) throws Exception{
+        Map<String, Object> params = new HashMap<>();
+        params.put("chainId", chainId);
+        params.put("txHash", hash);
+        Response dpResp = ResponseMessageProcessor.requestAndResponse(ModuleE.TX.abbr, "tx_getConfirmedTxClient", params);
+        Map record = (Map) dpResp.getResponseData();
+        Log.debug("", JSONUtils.obj2PrettyJson(record));
     }
 
     /**

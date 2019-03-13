@@ -27,19 +27,11 @@ import io.nuls.base.data.Transaction;
 import io.nuls.contract.helper.ContractHelper;
 import io.nuls.contract.manager.ContractTxProcessorManager;
 import io.nuls.contract.manager.ContractTxValidatorManager;
-import io.nuls.contract.model.bo.ContractResult;
 import io.nuls.contract.model.bo.ContractTempTransaction;
-import io.nuls.contract.model.bo.ContractWrapperTransaction;
 import io.nuls.contract.model.dto.ContractPackageDto;
 import io.nuls.contract.model.tx.CallContractTransaction;
 import io.nuls.contract.model.tx.CreateContractTransaction;
 import io.nuls.contract.model.tx.DeleteContractTransaction;
-import io.nuls.contract.model.txdata.CallContractData;
-import io.nuls.contract.model.txdata.CreateContractData;
-import io.nuls.contract.model.txdata.DeleteContractData;
-import io.nuls.contract.processor.CallContractTxProcessor;
-import io.nuls.contract.processor.CreateContractTxProcessor;
-import io.nuls.contract.processor.DeleteContractTxProcessor;
 import io.nuls.contract.service.ContractService;
 import io.nuls.contract.util.MapUtil;
 import io.nuls.rpc.cmd.BaseCmd;
@@ -225,33 +217,9 @@ public class ContractCmd extends BaseCmd {
             List<String> txHexList = (List<String>) params.get("txHexList");
             String blockHeaderHex = (String) params.get("blockHeaderHex");
 
-            ContractPackageDto contractPackageDto = contractHelper.getChain(chainId).getContractPackageDto();
-            if(contractPackageDto != null) {
-                Map<String, ContractResult> contractResultMap = contractPackageDto.getContractResultMap();
-                ContractResult contractResult;
-                ContractWrapperTransaction wrapperTx;
-                for(String txHex : txHexList) {
-                    contractResult = contractResultMap.get(txHex);
-                    if(contractResult == null) {
-                        Log.warn("empty contract result with txHex: {}", txHex);
-                        continue;
-                    }
-                    wrapperTx = contractResult.getTx();
-                    wrapperTx.setContractResult(contractResult);
-                    switch (wrapperTx.getType()) {
-                        case TX_TYPE_CREATE_CONTRACT:
-                            contractTxProcessorManager.createCommit(chainId, wrapperTx);
-                            break;
-                        case TX_TYPE_CALL_CONTRACT:
-                            contractTxProcessorManager.callCommit(chainId, wrapperTx);
-                            break;
-                        case TX_TYPE_DELETE_CONTRACT:
-                            contractTxProcessorManager.callCommit(chainId, wrapperTx);
-                            break;
-                        default:
-                            break;
-                    }
-                }
+            Result result = contractService.commitProcessor(chainId, txHexList, blockHeaderHex);
+            if(result.isFailed()) {
+                return failed(result.getErrorCode(), result.getMsg());
             }
 
             return success();
@@ -270,31 +238,11 @@ public class ContractCmd extends BaseCmd {
             Integer chainId = (Integer) params.get("chainId");
             List<String> txHexList = (List<String>) params.get("txHexList");
             String blockHeaderHex = (String) params.get("blockHeaderHex");
-            Transaction tx;
-            for(String txHex : txHexList) {
-                tx = new Transaction();
-                tx.parse(Hex.decode(txHex), 0);
-                switch (tx.getType()) {
-                    case TX_TYPE_CREATE_CONTRACT:
-                        CreateContractData create = new CreateContractData();
-                        create.parse(tx.getTxData(), 0);
-                        contractTxProcessorManager.createRollback(chainId, new ContractWrapperTransaction(tx, null, create));
-                        break;
-                    case TX_TYPE_CALL_CONTRACT:
-                        CallContractData call = new CallContractData();
-                        call.parse(tx.getTxData(), 0);
-                        contractTxProcessorManager.callRollback(chainId, new ContractWrapperTransaction(tx, null, call));
-                        break;
-                    case TX_TYPE_DELETE_CONTRACT:
-                        DeleteContractData delete = new DeleteContractData();
-                        delete.parse(tx.getTxData(), 0);
-                        contractTxProcessorManager.deleteRollback(chainId, new ContractWrapperTransaction(tx, null, delete));
-                        break;
-                    default:
-                        break;
-                }
-            }
 
+            Result result = contractService.rollbackProcessor(chainId, txHexList, blockHeaderHex);
+            if(result.isFailed()) {
+                return failed(result.getErrorCode(), result.getMsg());
+            }
             return success();
         } catch (Exception e) {
             Log.error(e);

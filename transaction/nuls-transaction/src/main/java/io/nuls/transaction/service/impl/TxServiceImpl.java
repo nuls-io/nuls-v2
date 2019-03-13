@@ -38,25 +38,26 @@ import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Service;
 import io.nuls.tools.crypto.ECKey;
 import io.nuls.tools.crypto.HexUtil;
+import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.model.BigIntegerUtils;
 import io.nuls.tools.model.StringUtils;
-import io.nuls.tools.exception.NulsException;
 import io.nuls.transaction.cache.PackablePool;
 import io.nuls.transaction.constant.TxConstant;
 import io.nuls.transaction.constant.TxErrorCode;
+import io.nuls.transaction.manager.TransactionManager;
+import io.nuls.transaction.model.bo.*;
+import io.nuls.transaction.model.dto.AccountSignDTO;
+import io.nuls.transaction.model.dto.CoinDTO;
+import io.nuls.transaction.model.po.TransactionConfirmedPO;
+import io.nuls.transaction.rpc.call.*;
+import io.nuls.transaction.service.ConfirmedTxService;
+import io.nuls.transaction.service.CtxService;
+import io.nuls.transaction.service.TxService;
 import io.nuls.transaction.storage.h2.TransactionH2Service;
 import io.nuls.transaction.storage.rocksdb.ConfirmedTxStorageService;
 import io.nuls.transaction.storage.rocksdb.CtxStorageService;
 import io.nuls.transaction.storage.rocksdb.UnconfirmedTxStorageService;
 import io.nuls.transaction.storage.rocksdb.UnverifiedTxStorageService;
-import io.nuls.transaction.manager.TransactionManager;
-import io.nuls.transaction.model.bo.*;
-import io.nuls.transaction.model.dto.AccountSignDTO;
-import io.nuls.transaction.model.dto.CoinDTO;
-import io.nuls.transaction.rpc.call.*;
-import io.nuls.transaction.service.ConfirmedTxService;
-import io.nuls.transaction.service.CtxService;
-import io.nuls.transaction.service.TxService;
 import io.nuls.transaction.utils.TxUtil;
 
 import java.io.IOException;
@@ -108,22 +109,21 @@ public class TxServiceImpl implements TxService {
 
     @Override
     public void newTx(Chain chain, Transaction tx) throws NulsException {
-        Transaction txExist = getTransaction(chain, tx.getHash());
+        TransactionConfirmedPO txExist = getTransaction(chain, tx.getHash());
         if (null == txExist) {
             unverifiedTxStorageService.putTx(chain, tx);
         }
     }
 
     @Override
-    public Transaction getTransaction(Chain chain, NulsDigestData hash) {
+    public TransactionConfirmedPO getTransaction(Chain chain, NulsDigestData hash) {
         Transaction tx = unconfirmedTxStorageService.getTx(chain.getChainId(), hash);
-        if (null == tx) {
-            tx = confirmedTxService.getConfirmedTransaction(chain, hash);
-            if (null != tx) {
-                tx.setStatus(TxStatusEnum.CONFIRMED);
-            }
+        if (null != tx) {
+            return new TransactionConfirmedPO(tx, -1L, TxStatusEnum.UNCONFIRM.getStatus());
+        }else{
+            return confirmedTxService.getConfirmedTransaction(chain, hash);
         }
-        return tx;
+
     }
 
     @Override
@@ -398,7 +398,7 @@ public class TxServiceImpl implements TxService {
             int assetId = coinDTO.getAssetsId();
             //检查对应资产余额 是否足够
             BigInteger amount = coinDTO.getAmount();
-            BigInteger balance = LedgerCall.getBalance(chain, address, assetChainId, assetId);
+            BigInteger balance = LedgerCall.getBalanceNonce(chain, address, assetChainId, assetId);
             if (BigIntegerUtils.isLessThan(balance, amount)) {
                 throw new NulsException(TxErrorCode.INSUFFICIENT_BALANCE);
             }
@@ -545,7 +545,7 @@ public class TxServiceImpl implements TxService {
     private BigInteger getFeeDirect(Chain chain, List<CoinFrom> listFrom, BigInteger targetFee, BigInteger actualFee) throws NulsException {
         for (CoinFrom coinFrom : listFrom) {
             if (TxUtil.isNulsAsset(coinFrom)) {
-                BigInteger mainAsset = LedgerCall.getBalance(chain, coinFrom.getAddress(), TxConstant.NULS_CHAINID, TxConstant.NULS_CHAIN_ASSETID);
+                BigInteger mainAsset = LedgerCall.getBalanceNonce(chain, coinFrom.getAddress(), TxConstant.NULS_CHAINID, TxConstant.NULS_CHAIN_ASSETID);
                 //可用余额=当前余额减去本次转出
                 mainAsset = mainAsset.subtract(coinFrom.getAmount());
                 //当前还差的手续费
@@ -581,7 +581,7 @@ public class TxServiceImpl implements TxService {
         while (iterator.hasNext()) {
             CoinFrom coinFrom = iterator.next();
             if (!TxUtil.isNulsAsset(coinFrom)) {
-                BigInteger mainAsset = LedgerCall.getBalance(chain, coinFrom.getAddress(), TxConstant.NULS_CHAINID, TxConstant.NULS_CHAIN_ASSETID);
+                BigInteger mainAsset = LedgerCall.getBalanceNonce(chain, coinFrom.getAddress(), TxConstant.NULS_CHAINID, TxConstant.NULS_CHAIN_ASSETID);
                 if (BigIntegerUtils.isEqualOrLessThan(mainAsset, BigInteger.ZERO)) {
                     continue;
                 }
@@ -841,8 +841,8 @@ public class TxServiceImpl implements TxService {
                     break;
                 }
                 //从已确认的交易中进行重复交易判断
-                Transaction repeatTx = confirmedTxService.getConfirmedTransaction(chain, tx.getHash());
-                if (repeatTx != null) {
+                TransactionConfirmedPO txConfirmed = confirmedTxService.getConfirmedTransaction(chain, tx.getHash());
+                if (txConfirmed != null) {
                     clearInvalidTx(chain, tx);
                     chain.getLoggerMap().get(TxConstant.LOG_TX).info("丢弃已确认过交易,txHash:{}, - type:{}, - time:{}", tx.getHash().getDigestHex(), tx.getType(), tx.getTime());
                     continue;
@@ -1100,8 +1100,8 @@ public class TxServiceImpl implements TxService {
         for (String txHex : txHexList) {
             //将txHex转换为Transaction对象
             Transaction tx = TxUtil.getTransaction(txHex);
-            Transaction transaction = confirmedTxService.getConfirmedTransaction(chain, tx.getHash());
-            if (null != transaction) {
+            TransactionConfirmedPO txConfirmed = confirmedTxService.getConfirmedTransaction(chain, tx.getHash());
+            if (null != txConfirmed) {
                 //交易已存在于已确认块中
                 chain.getLoggerMap().get(TxConstant.LOG_TX).debug("batchVerify failed, tx is existed. hash:{}, -type:{}", tx.getHash().getDigestHex(), tx.getType());
                 return verifyTxResult;
