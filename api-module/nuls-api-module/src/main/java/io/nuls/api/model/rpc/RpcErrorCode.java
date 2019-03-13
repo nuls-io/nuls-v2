@@ -37,7 +37,7 @@ public enum RpcErrorCode {
     CONTRACT_VALIDATION_FAILED("102", "Contract verification failed."),
 
     //数据未找到
-    DATA_NOT_EXISTS("404", "Data is not exists!"),
+    DATA_NOT_EXISTS("404", "Data not found!"),
 
     //交易解析错误
     TX_PARSE_ERROR("999", "Transaction parse error!"),

@@ -2,6 +2,7 @@ package io.nuls.api.rpc.controller;
 
 import io.nuls.api.ApiContext;
 import io.nuls.api.analysis.WalletRpcHandler;
+import io.nuls.api.cache.ApiCache;
 import io.nuls.api.constant.AddressType;
 import io.nuls.api.db.AccountService;
 import io.nuls.api.db.BlockService;
@@ -26,8 +27,6 @@ import io.nuls.tools.log.Log;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import static io.nuls.api.model.rpc.RpcErrorCode.DATA_NOT_EXISTS;
 
 @Controller
 public class ChainController {
@@ -55,17 +54,23 @@ public class ChainController {
 
     @RpcMethod("getCoinInfo")
     public RpcResult getCoinInfo(List<Object> params) {
-
-        ApiContext.NULS_MAP.put("total", 0L);
-        ApiContext.NULS_MAP.put("consensusTotal", 0L);
-        ApiContext.NULS_MAP.put("circulation", 0L);
-        return RpcResult.success(ApiContext.NULS_MAP);
+        VerifyUtils.verifyParams(params, 1);
+        int chainId = (int) params.get(0);
+        if (!CacheManager.isChainExist(chainId)) {
+            return RpcResult.dataNotFound();
+        }
+        ApiCache apiCache = CacheManager.getCache(chainId);
+        return RpcResult.success(apiCache.getContextInfo());
     }
 
     @RpcMethod("search")
     public RpcResult search(List<Object> params) {
         VerifyUtils.verifyParams(params, 1);
         int chainId = (int) params.get(0);
+        if (!CacheManager.isChainExist(chainId)) {
+            return RpcResult.dataNotFound();
+        }
+
         String text = (String) params.get(1);
         text = text.trim();
         int length = text.length();
@@ -86,7 +91,7 @@ public class ChainController {
             result = getResultByHash(chainId, text);
         }
         if (null == result) {
-            throw new NotFoundException();
+            return RpcResult.dataNotFound();
         }
         return new RpcResult().setResult(result);
     }
@@ -124,7 +129,6 @@ public class ChainController {
     }
 
     private SearchResultDTO getAccountByAddress(int chainId, String address) {
-
         if (!AddressTool.validAddress(chainId, address)) {
             throw new JsonRpcException(new RpcResultError(RpcErrorCode.PARAMS_ERROR, "[address] is inValid"));
         }
@@ -148,7 +152,7 @@ public class ChainController {
         }
         BlockHeaderInfo blockHeaderInfo = blockService.getBlockHeader(chainId, height);
         if (blockHeaderInfo == null) {
-            throw new JsonRpcException(new RpcResultError(DATA_NOT_EXISTS.getCode(), DATA_NOT_EXISTS.getMessage(), null));
+            return null;
         }
         return getBlockInfo(chainId, blockHeaderInfo);
     }

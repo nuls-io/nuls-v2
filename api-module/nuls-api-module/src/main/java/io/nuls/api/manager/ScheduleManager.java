@@ -1,6 +1,7 @@
 package io.nuls.api.manager;
 
 import io.nuls.api.cache.ApiCache;
+import io.nuls.api.task.StatisticalNulsTask;
 import io.nuls.api.task.StatisticalTask;
 import io.nuls.api.task.SyncBlockTask;
 import io.nuls.tools.core.annotation.Component;
@@ -23,8 +24,8 @@ public class ScheduleManager {
         ScheduledExecutorService executorService = Executors.newScheduledThreadPool(corePoolSize);
         for (ApiCache apiCache : CacheManager.getApiCaches().values()) {
             executorService.scheduleAtFixedRate(new SyncBlockTask(apiCache.getChainInfo().getChainId()), 1, 10, TimeUnit.SECONDS);
-
-            executorService.scheduleAtFixedRate(new StatisticalTask(apiCache.getChainInfo().getChainId()), 20, 300, TimeUnit.SECONDS);
+            executorService.scheduleAtFixedRate(new StatisticalNulsTask(apiCache.getChainInfo().getChainId()), 1, 20, TimeUnit.MINUTES);
+            executorService.scheduleAtFixedRate(new StatisticalTask(apiCache.getChainInfo().getChainId()), 1, 60, TimeUnit.MINUTES);
         }
     }
 }

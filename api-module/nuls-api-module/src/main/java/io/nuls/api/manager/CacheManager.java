@@ -2,6 +2,7 @@ package io.nuls.api.manager;
 
 import io.nuls.api.cache.ApiCache;
 import io.nuls.api.model.po.db.ChainInfo;
+import io.nuls.api.model.po.db.ContextInfo;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -24,6 +25,8 @@ public class CacheManager {
     public static void initCache(ChainInfo chainInfo) {
         ApiCache apiCache = new ApiCache();
         apiCache.setChainInfo(chainInfo);
+        ContextInfo contextInfo = new ContextInfo();
+        apiCache.setContextInfo(contextInfo);
         apiCacheMap.put(chainInfo.getChainId(), apiCache);
     }
 
@@ -39,7 +42,7 @@ public class CacheManager {
         return apiCacheMap;
     }
 
-    public static boolean isChainExsit(int chainId) {
+    public static boolean isChainExist(int chainId) {
         ApiCache cache = apiCacheMap.get(chainId);
         return cache != null;
     }

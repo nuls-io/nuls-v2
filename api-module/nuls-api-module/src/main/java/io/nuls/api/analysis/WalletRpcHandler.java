@@ -32,7 +32,7 @@ public class WalletRpcHandler {
         try {
             String blockHex = (String) RpcCall.request(ModuleE.BL.abbr, CommandConstant.GET_BLOCK_BY_HEIGHT, params);
             if (null == blockHex) {
-                return Result.getFailed(ApiErrorCode.DATA_NOT_FOUND);
+                return Result.getSuccess(null);
             }
             byte[] bytes = HexUtil.decode(blockHex);
             Block block = new Block();
@@ -53,6 +53,9 @@ public class WalletRpcHandler {
         params.put("hash", hash);
         try {
             String blockHex = (String) RpcCall.request(ModuleE.BL.abbr, CommandConstant.GET_BLOCK_BY_HASH, params);
+            if (null == blockHex) {
+                return Result.getSuccess(null);
+            }
             byte[] bytes = HexUtil.decode(blockHex);
             Block block = new Block();
             block.parse(new NulsByteBuffer(bytes));
@@ -62,7 +65,7 @@ public class WalletRpcHandler {
             e.printStackTrace();
             // return Result.getFailed()
         }
-        return null;
+        return Result.getFailed(ApiErrorCode.DATA_PARSE_ERROR);
     }
 
     public static AccountInfo getAccountBalance(int chainId, String address, int assetChainId, int assetId) {

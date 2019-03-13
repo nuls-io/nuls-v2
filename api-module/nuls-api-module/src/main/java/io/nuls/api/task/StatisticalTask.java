@@ -21,10 +21,12 @@
 package io.nuls.api.task;
 
 import io.nuls.api.ApiContext;
+import io.nuls.api.cache.ApiCache;
 import io.nuls.api.db.AgentService;
 import io.nuls.api.db.BlockService;
 import io.nuls.api.db.DepositService;
 import io.nuls.api.db.StatisticalService;
+import io.nuls.api.manager.CacheManager;
 import io.nuls.api.model.po.db.AgentInfo;
 import io.nuls.api.model.po.db.BlockHeaderInfo;
 import io.nuls.api.model.po.db.DepositInfo;
@@ -115,8 +117,9 @@ public class StatisticalTask implements Runnable {
             consensusLocked = consensusLocked.add(deposit.getAmount());
         }
         double annualizedReward = 0L;
+        ApiCache apiCache = CacheManager.getCache(chainId);
         if (consensusLocked.compareTo(BigInteger.ZERO) != 0) {
-            annualizedReward = DoubleUtils.mul(100, DoubleUtils.div(ApiContext.inflationCoins, consensusLocked, 4), 2);
+            annualizedReward = DoubleUtils.mul(100, DoubleUtils.div(apiCache.getChainInfo().getInflationCoins(), consensusLocked, 4), 2);
         }
 
         Calendar calendar = Calendar.getInstance();
