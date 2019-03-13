@@ -111,7 +111,8 @@ public class ResultHandlerImpl implements ResultHanlder {
                 tx.setCoinDataObj(coinData);
                 tx.setTxDataObj(txData);
                 // 合约内部转账交易的时间的偏移量，用于排序
-                tx.setTime(blockTime + orginTx.getOrder());
+                //tx.setTime(blockTime + orginTx.getOrder());
+                tx.setTime(blockTime);
 
                 tx.serializeData();
                 NulsDigestData hash = NulsDigestData.calcDigestData(tx.serializeForHash());

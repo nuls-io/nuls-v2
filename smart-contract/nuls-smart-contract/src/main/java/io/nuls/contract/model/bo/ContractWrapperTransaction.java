@@ -52,7 +52,10 @@ public class ContractWrapperTransaction extends Transaction{
 
     private ContractData contractData;
 
-    private int order;
+    /**
+     *  合约内部转账交易的时间的偏移量，用于排序，区块逻辑没有用到时间排序，暂时放弃
+     */
+    //private int order;
 
     private BlockHeader blockHeader;
 

@@ -46,7 +46,7 @@ public class ContractBootStrap {
             SpringLiteContext.init(ContractConstant.CONTEXT_PATH);
             initLanguage();
             initServer();
-            initERC20Standard();
+            initNRC20Standard();
             while (!ConnectManager.isReady()) {
                 Log.debug("wait depend modules ready");
                 Thread.sleep(2000L);
@@ -58,7 +58,7 @@ public class ContractBootStrap {
         }
     }
 
-    private static void initERC20Standard() {
+    private static void initNRC20Standard() {
         String json = null;
         try {
             json = IoUtils.read(NRC20_STANDARD_FILE);

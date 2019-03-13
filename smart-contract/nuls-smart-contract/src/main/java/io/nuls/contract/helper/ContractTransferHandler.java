@@ -269,7 +269,8 @@ public class ContractTransferHandler {
                 coinTo = new CoinTo(to, chainId, assetsId, value, 0L);
                 coinData.getTo().add(coinTo);
                 mergeCoinToMap.put(asString(to), coinTo);
-                timeOffset = tx.getOrder() + (i++);
+                //timeOffset = tx.getOrder() + (i++);
+                timeOffset = 0L;
                 contractTransferTx = this.createContractTransferTx(coinData, txData, blockTime, timeOffset);
                 contractTransferList.add(contractTransferTx);
             } else {
