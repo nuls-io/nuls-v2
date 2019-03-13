@@ -63,8 +63,8 @@ public class EventNewBlockHeightInvoke extends BaseInvoke {
                 e.printStackTrace();
             }
             if (response.isSuccess()) {
-                HashMap result = ((HashMap) response.getResponseData());
-                long blockHeight = (long) result.get("height");
+                HashMap result = (HashMap)((HashMap) response.getResponseData()).get("latestHeight");
+                long blockHeight = (long) result.get("value");
                 chain.getLoggerMap().get(TxConstant.LOG_TX).debug("latestHeight : {}", blockHeight);
                 chain.setBestBlockHeight(blockHeight);
                 confirmedTxService.processEffectCrossTx(chain, blockHeight);

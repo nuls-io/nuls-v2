@@ -19,6 +19,8 @@ public interface ConsensusConstant {
     int TX_TYPE_STOP_AGENT = 9;
     int TX_TYPE_COINBASE = 1;
     int TX_TYPE_CROSS_CHAIN = 10;
+    int TX_TYPE_CONTRACT_TRANSFER = 103;
+    int TX_TYPE_CONTRACT_RETURN_GAS = 104;
 
     /**
      * Consensus module related table name/共识模块相关表名
