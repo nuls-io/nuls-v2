@@ -94,10 +94,8 @@ public class ResultHandlerImpl implements ResultHanlder {
                     continue;
                 }
 
-                ContractTransferData txData = new ContractTransferData();
-                txData.setOrginTxHash(orginTx.getHash());
                 byte[] contractAddress = contractResult.getContractAddress();
-                txData.setContractAddress(contractAddress);
+                ContractTransferData txData = new ContractTransferData(orginTx.getHash(), contractAddress);
 
                 CoinData coinData = new CoinData();
                 ContractBalance balance = tempBalanceManager.getBalance(contractAddress).getData();

@@ -163,7 +163,6 @@ public class ContractTxHelper {
             programCreate.setSender(sender);
             programCreate.setValue(value);
             programCreate.setPrice(price.longValue());
-            programCreate.setGasLimit(gasLimit.longValue());
             programCreate.setNumber(blockHeight);
             programCreate.setContractCode(contractCode);
             if (args != null) {
@@ -184,17 +183,19 @@ public class ContractTxHelper {
                 return result;
             } else {
                 // 其他合法性都通过后，再验证Gas
-                track = programExecutor.begin(prevStateRoot);
-                programCreate.setGasLimit(realGasLimit);
-                programResult = track.create(programCreate);
-                if(!programResult.isSuccess()) {
-                    Log.error(programResult.getStackTrace());
-                    Result result = Result.getFailed(DATA_ERROR);
-                    result.setMsg(ContractUtil.simplifyErrorMsg(programResult.getErrorMessage()));
-                    return result;
+                if(realGasLimit != MAX_GASLIMIT) {
+                    programCreate.setGasLimit(realGasLimit);
+                    track = programExecutor.begin(prevStateRoot);
+                    programResult = track.create(programCreate);
+                    if(!programResult.isSuccess()) {
+                        Log.error(programResult.getStackTrace());
+                        Result result = Result.getFailed(DATA_ERROR);
+                        result.setMsg(ContractUtil.simplifyErrorMsg(programResult.getErrorMessage()));
+                        return result;
+                    }
                 }
             }
-            return getSuccess();
+            return getSuccess().setData(programResult);
         }  catch (NulsException e) {
             Log.error(e);
             return Result.getFailed(e.getErrorCode());
@@ -354,26 +355,12 @@ public class ContractTxHelper {
             programCall.setArgs(args);
 
             // 如果方法是不上链的合约调用，同步执行合约代码，不改变状态根，并返回值
-            ProgramMethod method;
-            if ((method = contractHelper.getMethodInfoByContractAddress(chainId, prevStateRoot, methodName, methodDesc, contractAddressBytes)).isView()) {
-                ProgramResult programResult = contractHelper.invokeCustomGasViewMethod(chainId, blockHeader, contractAddressBytes, methodName, methodDesc,
-                        ContractUtil.twoDimensionalArray(args, method.argsType2Array()));
-                Result result;
-                if (!programResult.isSuccess()) {
-                    Log.error(programResult.getStackTrace());
-                    result = Result.getFailed(DATA_ERROR);
-                    result.setMsg(ContractUtil.simplifyErrorMsg(programResult.getErrorMessage()));
-                    result = checkVmResultAndReturn(programResult.getErrorMessage(), result);
-                } else {
-                    result = getSuccess();
-                    result.setData(programResult.getResult());
-                }
-                return result;
+            if ((contractHelper.getMethodInfoByContractAddress(chainId, prevStateRoot, methodName, methodDesc, contractAddressBytes)).isView()) {
+                return Result.getFailed(CONTRACT_NOT_EXECUTE_VIEW);
             }
             // 创建链上交易，包含智能合约
             programCall.setValue(value);
             programCall.setPrice(price.longValue());
-            programCall.setGasLimit(gasLimit.longValue());
 
             // 获取VM执行器
             ProgramExecutor programExecutor = contractHelper.getProgramExecutor(chainId);
@@ -393,18 +380,20 @@ public class ContractTxHelper {
                 return result;
             } else {
                 // 其他合法性都通过后，再验证Gas
-                track = programExecutor.begin(prevStateRoot);
-                programCall.setGasLimit(realGasLimit);
-                programResult = track.call(programCall);
-                if(!programResult.isSuccess()) {
-                    Log.error(programResult.getStackTrace());
-                    Result result = Result.getFailed(DATA_ERROR);
-                    result.setMsg(ContractUtil.simplifyErrorMsg(programResult.getErrorMessage()));
-                    return result;
+                if(realGasLimit != MAX_GASLIMIT) {
+                    programCall.setGasLimit(realGasLimit);
+                    track = programExecutor.begin(prevStateRoot);
+                    programResult = track.call(programCall);
+                    if(!programResult.isSuccess()) {
+                        Log.error(programResult.getStackTrace());
+                        Result result = Result.getFailed(DATA_ERROR);
+                        result.setMsg(ContractUtil.simplifyErrorMsg(programResult.getErrorMessage()));
+                        return result;
+                    }
                 }
             }
 
-            return getSuccess();
+            return getSuccess().setData(programResult);
 
         }  catch (NulsException e) {
             Log.error(e);

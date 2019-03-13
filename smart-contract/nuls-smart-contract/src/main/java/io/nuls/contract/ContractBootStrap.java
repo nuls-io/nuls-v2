@@ -109,8 +109,7 @@ public class ContractBootStrap {
     private static void initLanguage() throws Exception {
         LanguageStorageService languageService = SpringLiteContext.getBean(LanguageStorageService.class);
         String languageDB = languageService.getLanguage();
-        //TODO pierre
-        //I18nUtils.loadLanguage("", "");
+        I18nUtils.loadLanguage(ContractBootStrap.class, "languages", "");
         String language = null == languageDB ? I18nUtils.getLanguage() : languageDB;
         I18nUtils.setLanguage(language);
         if (null == languageDB) {

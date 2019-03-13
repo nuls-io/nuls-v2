@@ -226,9 +226,7 @@ public class ContractTransferHandler {
 
         List<ContractTransferTransaction> contractTransferList = new ArrayList<>();
         contractResult.setContractTransferList(contractTransferList);
-        ContractTransferData txData = new ContractTransferData();
-        txData.setContractAddress(contractAddress);
-        txData.setOrginTxHash(tx.getHash());
+        ContractTransferData txData = new ContractTransferData(tx.getHash(), contractAddress);
 
         int assetsId = contractHelper.getChain(chainId).getConfig().getAssetsId();
         Map<String, CoinTo> mergeCoinToMap = MapUtil.createHashMap(transfers.size());
