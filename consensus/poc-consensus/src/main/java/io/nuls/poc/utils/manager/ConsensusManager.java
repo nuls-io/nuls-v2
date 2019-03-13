@@ -108,8 +108,12 @@ public class ConsensusManager {
         计算区块中交易产生的链内和跨链手续费
         Calculating intra-chain and cross-chain handling fees for transactions in blocks
         */
+        BigInteger returnGas = BigInteger.ZERO;
         for (Transaction tx : txList) {
-            if(tx.getType() != ConsensusConstant.TX_TYPE_COINBASE){
+            int txType = tx.getType();
+            if(txType != ConsensusConstant.TX_TYPE_COINBASE
+                    && txType != ConsensusConstant.TX_TYPE_CONTRACT_TRANSFER
+                    && txType != ConsensusConstant.TX_TYPE_CONTRACT_RETURN_GAS){
                 CoinData coinData = new CoinData();
                 coinData.parse(tx.getCoinData(), 0);
                 ChargeResultData resultData = getFee(tx,chain);
@@ -119,7 +123,16 @@ public class ConsensusManager {
                     crossFee = crossFee.add(resultData.getFee());
                 }
             }
+            if(txType == ConsensusConstant.TX_TYPE_CONTRACT_RETURN_GAS){
+                CoinData coinData = new CoinData();
+                coinData.parse(tx.getCoinData(),0);
+                for (CoinTo to:coinData.getTo()) {
+                    returnGas = returnGas.add(to.getAmount());
+                }
+            }
         }
+
+        totalFee = totalFee.subtract(returnGas);
 
         /*
         链内奖励列表
