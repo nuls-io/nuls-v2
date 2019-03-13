@@ -40,12 +40,12 @@ public class TransferServiceForRpc extends BaseRpcService implements TransferSer
 
     @Override
     public Result<Transaction> getTxByHash(GetTxByHashReq req) {
-        return getTx("tx_getTx",req) ;
+        return getTx("tx_getTxClient",req) ;
     }
 
     @Override
     public Result<Transaction> getConfirmedTxByHash(GetConfirmedTxByHashReq req) {
-        return getTx("tx_getConfirmedTx",req);
+        return getTx("tx_getConfirmedTxClient",req);
     }
 
     @Override
@@ -64,7 +64,7 @@ public class TransferServiceForRpc extends BaseRpcService implements TransferSer
     private Result<Transaction> tranderTransaction(String hexString){
         try {
             if(hexString == null){
-                return fail("10001","not found tx");
+                return fail(ERROR_CODE,"not found tx");
             }
             Transaction transaction = new Transaction();
             transaction.parse(new NulsByteBuffer(HexUtil.decode(hexString)));
