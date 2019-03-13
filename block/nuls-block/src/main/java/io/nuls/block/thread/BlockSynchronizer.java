@@ -196,9 +196,9 @@ public class BlockSynchronizer implements Runnable {
             executor.shutdownNow();
             if (success) {
                 commonLog.info("block syn complete, total download:" + total + ", total time:" + (end - start) + ", average time:" + (end - start) / total);
-//                if (checkIsNewest(chainId, params, context)) {
+                if (checkIsNewest(chainId, context)) {
                     //要测试分叉链切换或者孤儿链，放开下面语句，概率会加大
-                if (true) {
+//                if (true) {
                     commonLog.info("block syn complete successfully, current height-" + params.getNetLatestHeight());
                     context.setStatus(RunningStatusEnum.RUNNING);
                     ConsensusUtil.notice(chainId, CONSENSUS_WORKING);
@@ -220,31 +220,13 @@ public class BlockSynchronizer implements Runnable {
      * 检查本地区块是否同步到最新高度,如果不是最新高度,变更同步状态为BlockSynStatusEnum.WAITING,等待下次同步
      *
      * @param chainId 链Id/chain id
-     * @param params
      * @param context
      * @return
      * @throws Exception
      */
-    private boolean checkIsNewest(int chainId, BlockDownloaderParams params, ChainContext context) throws Exception {
-        long downloadBestHeight = params.getNetLatestHeight();
-        long time = NetworkUtil.currentTime();
-        long timeout = 60 * 1000L;
-        long localBestHeight = 0L;
-        while (true) {
-            if (NetworkUtil.currentTime() - time > timeout) {
-                break;
-            }
-            long bestHeight = blockService.getLatestBlock(chainId).getHeader().getHeight();
-            if (bestHeight >= downloadBestHeight) {
-                break;
-            } else if (bestHeight != localBestHeight) {
-                localBestHeight = bestHeight;
-                time = NetworkUtil.currentTime();
-            }
-            Thread.sleep(100L);
-        }
+    private boolean checkIsNewest(int chainId, ChainContext context) {
         BlockDownloaderParams newestParams = statistics(NetworkUtil.getAvailableNodes(chainId), context);
-        return newestParams.getNetLatestHeight() <= blockService.getLatestBlock(chainId).getHeader().getHeight();
+        return newestParams.getNetLatestHeight() <= context.getLatestBlock().getHeader().getHeight();
     }
 
     /**
