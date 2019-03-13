@@ -27,7 +27,6 @@ package io.nuls.ledger.service.impl;
 
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.*;
-import io.nuls.ledger.constant.LedgerConstant;
 import io.nuls.ledger.model.AccountBalance;
 import io.nuls.ledger.model.UnconfirmedTx;
 import io.nuls.ledger.model.ValidateResult;
@@ -149,7 +148,6 @@ public class TransactionServiceImpl implements TransactionService {
      */
     @Override
     public boolean confirmBlockProcess(int addressChainId, List<Transaction> txList, long blockHeight) {
-
         try {
             /*--begin 缓存区块交易数据,作为接口交互联调使用*/
             blockDataService.saveLatestBlockDatas(addressChainId, blockHeight, txList);
@@ -168,7 +166,6 @@ public class TransactionServiceImpl implements TransactionService {
             for (Transaction transaction : txList) {
                 LoggerUtil.txCommitLog.debug("start confirmBlockProcess addressChainId={},blockHeight={},hash={}", addressChainId, blockHeight, transaction.getHash().toString());
                 //从缓存校验交易
-                if (coinDataValidator.hadValidateTx(addressChainId, transaction)) {
                     CoinData coinData = CoinDataUtils.parseCoinData(transaction.getCoinData());
                     if (null == coinData) {
                         //例如黄牌交易，直接返回
@@ -219,10 +216,6 @@ public class TransactionServiceImpl implements TransactionService {
                             lockedTransactionProcessor.processToCoinData(to, nonce8BytesStr, transaction.getHash().toString(), accountBalance.getNowAccountState());
                         }
                     }
-                } else {
-                    return false;
-                }
-
             }
             //整体交易的处理
             try {

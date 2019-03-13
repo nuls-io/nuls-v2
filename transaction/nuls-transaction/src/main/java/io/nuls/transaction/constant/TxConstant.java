@@ -142,7 +142,7 @@ public interface TxConstant {
     /**
      * config file path
      */
-    String CONFIG_FILE_PATH = "transaction-config.json";
+    String CONFIG_FILE_PATH = "modules.json";
 
     /**
      * 打包交易，预留模块统一验证的时间 毫秒

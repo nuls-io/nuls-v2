@@ -172,7 +172,7 @@ public interface TxService {
      * @return
      * @throws NulsException
      */
-    VerifyTxResult batchVerify(Chain chain, List<String> list) throws NulsException;
+    VerifyTxResult batchVerify(Chain chain, List<String> list, long blockHeight) throws NulsException;
 
 
     /**

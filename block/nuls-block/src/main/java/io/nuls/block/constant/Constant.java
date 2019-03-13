@@ -78,18 +78,9 @@ public interface Constant {
     String CACHED_BLOCK = "CachedBlock";
 
     /**
-     * 每次清理几分之一
+     * 分叉链、孤儿链清理时每次清理几分之一
      */
     int CLEAN_PARAM = 2;
-
-    /**
-     * 默认扫描包路径
-     */
-    String DEFAULT_SCAN_PACKAGE = "io.nuls.block";
-    /**
-     * RPC默认扫描包路径
-     */
-    String RPC_DEFAULT_SCAN_PACKAGE = "io.nuls.block.rpc";
 
     /**
      * 共识工作状态
@@ -134,4 +125,14 @@ public interface Constant {
      * 批量下载区块时,如果收到CompleteMessage时,区块还没有保存完,最多循环等待几个回合
      */
     long MAX_LOOP = 10;
+
+    /**
+     * 两次区块同步之间的时间间隔
+     */
+    int SYN_SLEEP_INTERVAL = 10000;
+
+    /**
+     * 等待网络稳定的时间间隔
+     */
+    int WAIT_NETWORK_INTERVAL = 10000;
 }

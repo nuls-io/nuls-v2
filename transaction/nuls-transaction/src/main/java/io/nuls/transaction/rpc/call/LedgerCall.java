@@ -59,22 +59,27 @@ public class LedgerCall {
     }
 
     /**
-     * 查资产是否存在
-     * @param chainId
-     * @param assetId
+     * 验证区块中的交易CoinData
+     * @param chain
+     * @param txHexList
+     * @param blockHeight
      * @return
+     * @throws NulsException
      */
-  /*  public static boolean verifyAssetExist(int chainId, int assetId) throws NulsException {
+    public static boolean verifyBlockTxsCoinData(Chain chain, List<String> txHexList, Long blockHeight) throws NulsException {
         try {
             Map<String, Object> params = new HashMap<>(TxConstant.INIT_CAPACITY_8);
-            params.put("chainId", chainId);
-            params.put("assetId", assetId);
-            HashMap result = (HashMap) TransactionCall.request(ModuleE.LG.abbr, "cm_asset", params);
-            return null != result;
-        } catch (NulsException e) {
+            params.put(Constants.VERSION_KEY_STR, "1.0");
+            params.put("chainId", chain.getChainId());
+            params.put("txHexList", txHexList);
+            params.put("blockHeight", blockHeight);
+            chain.getLoggerMap().get(TxConstant.LOG_TX).debug("%%%%%%%%% 验证区块交易, %%%%%%%%%%%%");
+            HashMap result = (HashMap)TransactionCall.request(ModuleE.LG.abbr, "blockValidate", params);
+            return (int) result.get("value") == 1;
+        } catch (Exception e) {
             throw new NulsException(e);
         }
-    }*/
+    }
 
     /**
      * 查询nonce值

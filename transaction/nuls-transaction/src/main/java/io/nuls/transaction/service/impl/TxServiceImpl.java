@@ -1090,7 +1090,7 @@ public class TxServiceImpl implements TxService {
     }
 
     @Override
-    public VerifyTxResult batchVerify(Chain chain, List<String> txHexList) throws NulsException {
+    public VerifyTxResult batchVerify(Chain chain, List<String> txHexList, long blockHeight) throws NulsException {
         chain.getLoggerMap().get(TxConstant.LOG_TX).debug("");
         chain.getLoggerMap().get(TxConstant.LOG_TX).debug("开始区块交易批量验证......");
         VerifyTxResult verifyTxResult = new VerifyTxResult(VerifyTxResult.OTHER_EXCEPTION);
@@ -1135,16 +1135,9 @@ public class TxServiceImpl implements TxService {
                 moduleVerifyMap.put(txRegister, txHexs);
             }
         }
-        chain.getLoggerMap().get(TxConstant.LOG_TX).debug("%%%%%%%%% 批量验证,批量校验通知 %%%%%%%%%%%%");
-        LedgerCall.coinDataBatchNotify(chain);
-        //todo 批量验证coinData，接口和单个的区别？
-        for (Transaction tx : txList) {
-            verifyTxResult = LedgerCall.verifyCoinData(chain, tx, true);
-            if (!verifyTxResult.success()) {
-                chain.getLoggerMap().get(TxConstant.LOG_TX).debug("batchVerify failed, batch verifyCoinData failed. hash:{}, -type:{}, -code:{}", tx.getHash().getDigestHex(), tx.getType(), verifyTxResult.getCode());
-
-                return verifyTxResult;
-            }
+        if(!LedgerCall.verifyBlockTxsCoinData(chain, txHexList, blockHeight)){
+            chain.getLoggerMap().get(TxConstant.LOG_TX).debug("batch verifyCoinData failed.");
+            return verifyTxResult;
         }
 
         //统一验证
