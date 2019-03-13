@@ -1,8 +1,7 @@
 package io.nuls.account.storage;
 
-import io.nuls.account.config.NulsConfig;
-import io.nuls.account.constant.AccountParam;
 import io.nuls.account.AccountBootstrap;
+import io.nuls.account.config.NulsConfig;
 import io.nuls.account.model.bo.Account;
 import io.nuls.account.model.po.AccountPo;
 import io.nuls.account.util.AccountTool;

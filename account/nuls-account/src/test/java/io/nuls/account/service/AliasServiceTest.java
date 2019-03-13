@@ -1,8 +1,7 @@
 package io.nuls.account.service;
 
-import io.nuls.account.config.NulsConfig;
-import io.nuls.account.constant.AccountParam;
 import io.nuls.account.AccountBootstrap;
+import io.nuls.account.config.NulsConfig;
 import io.nuls.account.model.bo.Account;
 import io.nuls.account.model.bo.tx.txdata.Alias;
 import io.nuls.account.storage.AliasStorageServiceTest;
@@ -14,7 +13,9 @@ import io.nuls.tools.thread.TimeService;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 /**
  * @author: qinyifeng

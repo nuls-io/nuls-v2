@@ -48,7 +48,6 @@ import io.nuls.base.data.CoinData;
 import io.nuls.base.data.CoinFrom;
 import io.nuls.base.data.CoinTo;
 import io.nuls.base.data.MultiSigAccount;
-import io.nuls.base.data.NonceHashData;
 import io.nuls.base.data.NulsDigestData;
 import io.nuls.base.data.Transaction;
 import io.nuls.base.signture.MultiSignTxSignature;
