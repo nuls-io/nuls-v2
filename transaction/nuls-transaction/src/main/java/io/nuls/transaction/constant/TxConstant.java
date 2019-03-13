@@ -130,8 +130,8 @@ public interface TxConstant {
      * 交易基础信息
      */
     int TX_HASH_DIGEST_BYTE_MAX_LEN = 70;
-    int TX_MAX_BYTES = 300;
-    int TX_MAX_SIZE = TX_MAX_BYTES * 1024;
+    /** 单个交易最大2MB */
+    int TX_MAX_SIZE = 1024 * 1024 * 2;
 
     /**
      * 创建多签交易时，返回map的key
