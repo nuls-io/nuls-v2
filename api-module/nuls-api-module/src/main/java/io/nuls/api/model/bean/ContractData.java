@@ -1,14 +1,18 @@
-/*
+/**
  * MIT License
+ * <p>
  * Copyright (c) 2017-2019 nuls.io
+ * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
+ * <p>
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
+ * <p>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -17,29 +21,32 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+package io.nuls.api.model.bean;
 
-package io.nuls.api.constant;
+import java.math.BigInteger;
 
 /**
- * 存储对外提供的接口命令
- *
- * @author captain
- * @version 1.0
- * @date 18-11-9 下午2:15
+ * @desription:
+ * @author: PierreLuo
+ * @date: 2018/7/19
  */
-public interface CommandConstant {
+public interface ContractData {
 
-    //根据区块高度获取区块
-    String GET_BLOCK_BY_HEIGHT = "getBlockByHeight";
-    //根据区块hash获取区块
-    String GET_BLOCK_BY_HASH = "downloadBlockByHash";
-    //获取账户余额
-    String GET_BALANCE = "getBalance";
+    byte[] getContractAddress();
 
-    //查询交易详情
-    String GET_TX = "tx_getTx";
-    String CLIENT_GETTX = "tx_getTxClient";
+    byte[] getSender();
 
-    //查询节点详情
-    String GET_AGENT = "cs_getAgentInfo";
+    byte[] getCode();
+
+    long getGasLimit();
+
+    long getPrice();
+
+    BigInteger getValue();
+
+    String getMethodName();
+
+    String getMethodDesc();
+
+    String[][] getArgs();
 }

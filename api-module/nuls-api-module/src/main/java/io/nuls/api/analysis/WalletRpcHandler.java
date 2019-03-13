@@ -96,14 +96,14 @@ public class WalletRpcHandler {
         params.put("chainId", chainId);
         params.put("txHash", hash);
         try {
-            Map map = (Map) RpcCall.request(ModuleE.TX.abbr, CommandConstant.GET_TX, params);
+            Map map = (Map) RpcCall.request(ModuleE.TX.abbr, CommandConstant.CLIENT_GETTX, params);
             String txHex = (String) map.get("txHex");
             if (null == txHex) {
                 return null;
             }
             Transaction tx = Transaction.getInstance(txHex);
             TransactionInfo txInfo = AnalysisHandler.toTransaction(tx);
-
+            txInfo.setHeight(Long.parseLong(map.get("height").toString()));
             return Result.getSuccess(null).setData(txInfo);
         } catch (NulsException e) {
             return Result.getFailed(e.getErrorCode());
