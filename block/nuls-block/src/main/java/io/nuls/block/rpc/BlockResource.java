@@ -71,7 +71,7 @@ public class BlockResource extends BaseCmd {
     public Response latestHeight(Map map) {
         int chainId = Integer.parseInt(map.get("chainId").toString());
         Map<String, Long> responseData = new HashMap<>(1);
-        responseData.put("height", ContextManager.getContext(chainId).getLatestHeight());
+        responseData.put("value", ContextManager.getContext(chainId).getLatestHeight());
         return success(responseData);
     }
 
