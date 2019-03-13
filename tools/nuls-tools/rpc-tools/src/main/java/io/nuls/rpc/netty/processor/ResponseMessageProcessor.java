@@ -104,6 +104,20 @@ public class ResponseMessageProcessor {
         Get the returned entity and place it in the local variable
          */
         Response response = receiveResponse(responseContainer, Constants.TIMEOUT_TIMEMILLIS);
+        /*
+        注册消息发送失败，重新发送
+        */
+        int tryCount = 0;
+        while (!response.isSuccess() && tryCount < Constants.TRY_COUNT){
+            Log.info("向核心注册消息发送失败第"+(tryCount+1)+"次");
+            responseContainer = RequestContainer.putRequest(message.getMessageId());
+            ConnectManager.sendMessage(channel, JSONUtils.obj2json(message));
+            response = receiveResponse(responseContainer, Constants.TIMEOUT_TIMEMILLIS);
+            tryCount++;
+        }
+        if(!response.isSuccess()){
+            throw new Exception("向核心注册失败！");
+        }
 //        BaseInvoke baseInvoke = new KernelInvoke();
         callbackInvoke.callBack(response);
 
