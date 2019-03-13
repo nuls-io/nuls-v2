@@ -1,8 +1,6 @@
 package io.nuls.cmd.client.processor.account;
 
 import io.nuls.api.provider.Result;
-import io.nuls.api.provider.ServiceManager;
-import io.nuls.api.provider.account.AccountService;
 import io.nuls.api.provider.account.facade.BackupAccountReq;
 import io.nuls.base.basic.AddressTool;
 import io.nuls.cmd.client.CommandBuilder;
@@ -19,9 +17,8 @@ import io.nuls.tools.core.annotation.Component;
  * @Description: 导出账户到keystore文件中
  */
 @Component
-public class BackupAccountProcessor implements CommandProcessor {
+public class BackupAccountProcessor extends AccountBaseProcessor implements CommandProcessor {
 
-    AccountService accountService = ServiceManager.get(AccountService.class);
 
     @Autowired
     Config config;

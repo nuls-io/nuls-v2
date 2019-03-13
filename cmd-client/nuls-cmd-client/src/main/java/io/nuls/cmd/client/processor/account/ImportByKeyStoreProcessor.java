@@ -46,9 +46,7 @@ import java.net.URLDecoder;
  */
 @Slf4j
 @Component
-public class ImportByKeyStoreProcessor implements CommandProcessor {
-
-    AccountService accountService = ServiceManager.get(AccountService.class);
+public class ImportByKeyStoreProcessor extends AccountBaseProcessor implements CommandProcessor {
 
     @Override
     public String getCommand() {

@@ -11,19 +11,19 @@ while [ -h "$PRG" ]; do
   fi
 done
 
-SOURCE="$0"
-while [ -h "$SOURCE"  ]; do # resolve $SOURCE until the file is no longer a symlink
-    DIR="$( cd -P "$( dirname "$SOURCE"  )" && pwd  )"
-    SOURCE="$(readlink "$SOURCE")"
-    [[ $SOURCE != /*  ]] && SOURCE="$DIR/$SOURCE" # if $SOURCE was a relative symlink, we need to resolve it relative to the path where the symlink file was located
-done
-SERVER_HOME="$( cd -P "$( dirname "$SOURCE"  )" && pwd  )"
-echo $SERVER_HOME
-export logdir=${SERVER_HOME}/logs
-if [ ! -d ${logdir} ]; then
-  mkdir ${logdir}
-fi
-
+#SOURCE="$0"
+#while [ -h "$SOURCE"  ]; do # resolve $SOURCE until the file is no longer a symlink
+#    DIR="$( cd -P "$( dirname "$SOURCE"  )" && pwd  )"
+#    SOURCE="$(readlink "$SOURCE")"
+#    [[ $SOURCE != /*  ]] && SOURCE="$DIR/$SOURCE" # if $SOURCE was a relative symlink, we need to resolve it relative to the path where the symlink file was located
+#done
+#SERVER_HOME="$( cd -P "$( dirname "$SOURCE"  )" && pwd  )"
+#echo $SERVER_HOME
+#export logdir=${SERVER_HOME}/logs
+#if [ ! -d ${logdir} ]; then
+#  mkdir ${logdir}
+#fi
+SERVER_HOME="../../"
 LIBS=$SERVER_HOME/libs
 PUB_LIB=""
 MAIN_CLASS=io.nuls.cmd.client.CmdClientBootstrap
@@ -33,7 +33,7 @@ for jar in `find $LIBS -name "*.jar"`
 do
  PUB_LIB="$PUB_LIB:""$jar"
 done
-PUB_LIB="${PUB_LIB}:"
+PUB_LIB="${PUB_LIB}:./cmdclient-1.0.0.jar"
 # Get standard environment variables
 JAVA_OPTS="-Xms128m -Xmx128m"
 

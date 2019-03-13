@@ -48,7 +48,7 @@ import static io.nuls.cmd.client.CommandHelper.getPwd;
  */
 @Component
 @Slf4j
-public class WithdrawProcessor implements CommandProcessor {
+public class WithdrawProcessor extends ConsensusBaseProcessor implements CommandProcessor {
 
     @Autowired
     Config config;

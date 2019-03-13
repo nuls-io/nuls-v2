@@ -48,10 +48,8 @@ import static io.nuls.cmd.client.CommandHelper.getPwd;
  * @author: zhoulijun
  */
 @Component
-public class TransferByAliasProcessor implements CommandProcessor {
+public class TransferByAliasProcessor  extends TransactionBaseProcessor implements CommandProcessor {
 
-
-    TransferService transferService = ServiceManager.get(TransferService.class);
 
     @Autowired
     Config config;

@@ -44,8 +44,8 @@ import io.nuls.cmd.client.processor.transaction.TransferProcessor;
 import io.nuls.tools.basic.InitializingBean;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.core.ioc.SpringLiteContext;
-import io.nuls.tools.model.StringUtils;
 import io.nuls.tools.exception.NulsException;
+import io.nuls.tools.model.StringUtils;
 import io.nuls.tools.parse.I18nUtils;
 import jline.console.ConsoleReader;
 import jline.console.completer.ArgumentCompleter;
@@ -63,6 +63,7 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
 import static io.nuls.tools.core.ioc.SpringLiteContext.getBean;
 
 @Component
@@ -145,6 +146,12 @@ public class CommandHandler implements InitializingBean {
     }
 
     public void start() {
+//        try {
+//            ServerSocket serverSocket = new ServerSocket(1122,1);
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
+//       System.out.println("服务器启动1111!");
         /**
          * 如果操作系统是windows, 可能会使控制台读取部分处于死循环，可以设置为false，绕过本地Windows API，直接使用Java IO流输出
          * If the operating system is windows, it may cause the console to read part of the loop, can be set to false,
@@ -160,7 +167,9 @@ public class CommandHandler implements InitializingBean {
         }
 
         try {
-
+//            OutputStream os = socket.getOutputStream();//字节输出流
+//            PrintWriter pw = new PrintWriter(os);//将输出流包装为打印流
+//            CONSOLE_READER = new ConsoleReader(socket.getInputStream(),socket.getOutputStream());
             CONSOLE_READER = new ConsoleReader();
             List<Completer> completers = new ArrayList<Completer>();
             completers.add(new StringsCompleter(PROCESSOR_MAP.keySet()));
@@ -173,6 +182,9 @@ public class CommandHandler implements InitializingBean {
                 }
                 String[] cmdArgs = parseArgs(line);
                 System.out.print(this.processCommand(cmdArgs) + "\n");
+//                System.out.println("1111111\n");
+//                pw.println(this.processCommand(cmdArgs) + "\n");
+//                pw.flush();
             } while (line != null);
         } catch (IOException e) {
             e.printStackTrace();

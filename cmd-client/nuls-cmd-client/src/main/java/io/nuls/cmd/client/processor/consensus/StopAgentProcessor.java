@@ -47,7 +47,7 @@ import static io.nuls.cmd.client.CommandHelper.getPwd;
  */
 @Component
 @Slf4j
-public class StopAgentProcessor implements CommandProcessor {
+public class StopAgentProcessor extends ConsensusBaseProcessor implements CommandProcessor {
 
     @Autowired
     Config config;
