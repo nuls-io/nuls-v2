@@ -4,7 +4,7 @@ import io.nuls.tools.crypto.ECKey;
 import io.nuls.tools.exception.NulsException;
 import org.junit.Test;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertTrue;
 
 /**
  * @author Niels
