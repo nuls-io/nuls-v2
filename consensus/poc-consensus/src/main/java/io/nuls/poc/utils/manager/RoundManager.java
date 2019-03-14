@@ -368,22 +368,9 @@ public class RoundManager {
         round.setIndex(index);
         round.setStartTime(startTime);
         setMemberList(chain,round, startBlockHeader);
-        List<byte[]> packingAddressList =CallMethodUtils.getEncryptedAddressList(chain);
-        /*try {
-            Map<String,Object> params = new HashMap<>(2);
-            params.put(ConsensusConstant.PARAM_CHAIN_ID,chain.getConfig().getChainId());
-            Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr,"ac_getUnencryptedAddressList", params);
-            List<String> accountAddressList =  (List<String>) ((HashMap)((HashMap) cmdResp.getResponseData()).get("ac_getUnencryptedAddressList")).get("list");
-            if(accountAddressList != null && accountAddressList.size()>0){
-                for (String address:accountAddressList) {
-                    packingAddressList.add(AddressTool.getAddress(address));
-                }
-            }
-        }catch (Exception e){
-            chain.getLoggerMap().get(ConsensusConstant.CONSENSUS_LOGGER_NAME).error(e);
-            return null;
-        }*/
-        round.calcLocalPacker(packingAddressList,chain);
+        /*List<byte[]> packingAddressList =CallMethodUtils.getEncryptedAddressList(chain);
+        round.calcLocalPacker(packingAddressList,chain);*/
+        round.calcLocalPacker(chain);
         chain.getLoggerMap().get(ConsensusConstant.CONSENSUS_LOGGER_NAME).debug("当前轮次为："+round.getIndex()+";当前轮次开始打包时间："+ DateUtils.convertDate(new Date(startTime)));
         chain.getLoggerMap().get(ConsensusConstant.CONSENSUS_LOGGER_NAME).debug("\ncalculation||index:{},startTime:{},startHeight:{},hash:{}\n" + round.toString() + "\n\n", index, startTime, startBlockHeader.getHeight(), startBlockHeader.getHash());
         return round;
