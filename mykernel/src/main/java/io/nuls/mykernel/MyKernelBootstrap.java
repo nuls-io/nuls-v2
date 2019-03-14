@@ -151,7 +151,7 @@ public class MyKernelBootstrap {
                     process = Runtime.getRuntime().exec(
                             modules.getAbsolutePath() + File.separator + "start.sh "
                                     + " --jre " + System.getProperty("java.home")
-                                    + " --managerurl " + ""+ HostInfo.getLocalIP()+":8887/ws"
+                                    + " --managerurl " + "ws://"+ HostInfo.getLocalIP()+":8887/ws"
                                     + " -r "
                     );
                     synchronized (MODULE_STOP_LIST_SCRIPT){
