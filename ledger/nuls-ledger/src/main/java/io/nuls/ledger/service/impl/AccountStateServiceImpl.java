@@ -76,7 +76,7 @@ public class AccountStateServiceImpl implements AccountStateService {
             LoggerUtil.logger.debug("更新确认的交易信息：orgNonce={},newNonce={}", dbAccountState.getNonce(), accountState.getNonce());
             LoggerUtil.logger.debug("更新确认的交易信息:unConfirmedNonce org={},new={}", dbAccountState.getUnconfirmedNoncesStrs(), accountState.getUnconfirmedNoncesStrs());
             repository.updateAccountState(assetKey.getBytes(LedgerConstant.DEFAULT_ENCODING), accountState);
-            LoggerUtil.logger.debug("hash={},assetKey={},dbAmount={},toAmount={}",accountState.getTxHash(),assetKey,dbAccountState.getAvailableAmount(),accountState.getAvailableAmount());
+            LoggerUtil.txCommitLog.debug("hash={},assetKey={},dbAmount={},toAmount={}",accountState.getTxHash(),assetKey,dbAccountState.getAvailableAmount(),accountState.getAvailableAmount());
             blockSnapshotAccounts.addAccountState(dbAccountState);
         }
     }
