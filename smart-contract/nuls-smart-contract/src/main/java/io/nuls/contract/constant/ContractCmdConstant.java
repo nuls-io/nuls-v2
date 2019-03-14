@@ -61,6 +61,6 @@ public interface ContractCmdConstant {
     String CONTRACT_INFO = "sc_contract_info";
     String CONTRACT_RESULT = "sc_contract_result";
     String CONTRACT_TX = "sc_contract_tx";
-    //TODO pierre 用户调用rpc
     String TOKEN_ASSETS_LIST = "sc_token_assets_list";
+    String UPLOAD = "sc_upload";
 }

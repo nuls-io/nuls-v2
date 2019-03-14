@@ -27,10 +27,12 @@ import io.nuls.base.basic.AddressTool;
 import io.nuls.base.constant.TxStatusEnum;
 import io.nuls.base.data.BlockHeader;
 import io.nuls.base.data.NulsDigestData;
+import io.nuls.base.data.Page;
 import io.nuls.base.data.Transaction;
 import io.nuls.contract.constant.ContractConstant;
 import io.nuls.contract.constant.ContractErrorCode;
 import io.nuls.contract.helper.ContractHelper;
+import io.nuls.contract.manager.ContractTokenBalanceManager;
 import io.nuls.contract.model.bo.ContractResult;
 import io.nuls.contract.model.bo.ContractTokenInfo;
 import io.nuls.contract.model.dto.*;
@@ -746,7 +748,9 @@ public class ContractResource extends BaseCmd {
             String contractAddress = (String) params.get("contractAddress");
             String address = (String) params.get("address");
 
-            Result<ContractTokenInfo> result = contractHelper.getContractToken(chainId, address, contractAddress);
+            // 当前区块
+            BlockHeader blockHeader = BlockCall.getLatestBlockHeader(chainId);
+            Result<ContractTokenInfo> result = contractHelper.getContractToken(chainId, blockHeader, address, contractAddress);
             if(result.isFailed()) {
                 return failed(result.getErrorCode());
             }
@@ -1101,6 +1105,98 @@ public class ContractResource extends BaseCmd {
             value = value.add(new BigInteger(outputDto.getAmount()));
         }
         txDto.setValue(bigInteger2String(value));
+    }
+
+    @CmdAnnotation(cmd = TOKEN_ASSETS_LIST, version = 1.0, description = "token assets list")
+    @Parameter(parameterName = "chainId", parameterType = "int")
+    @Parameter(parameterName = "address", parameterType = "String")
+    @Parameter(parameterName = "pageNumber", parameterType = "int")
+    @Parameter(parameterName = "pageSize", parameterType = "int")
+    public Response tokenAssetsList(Map<String,Object> params){
+        try {
+            Integer chainId = (Integer) params.get("chainId");
+            String address = (String) params.get("address");
+            Integer pageNumber = (Integer) params.get("pageNumber");
+            Integer pageSize = (Integer) params.get("pageSize");
+
+            if (!AddressTool.validAddress(chainId, address)) {
+                return failed(ADDRESS_ERROR);
+            }
+
+            ContractTokenBalanceManager tokenBalanceManager = contractHelper.getChain(chainId).getContractTokenBalanceManager();
+            Result<List<ContractTokenInfo>> tokenListResult = tokenBalanceManager.getAllTokensByAccount(address);
+            if(tokenListResult.isFailed()) {
+                return failed(tokenListResult.getErrorCode());
+            }
+
+            List<ContractTokenInfo> tokenInfoList = tokenListResult.getData();
+
+            List<ContractTokenInfoDto> tokenInfoDtoList = new ArrayList<>();
+            Page<ContractTokenInfoDto> page = new Page<>(pageNumber, pageSize, tokenInfoList.size());
+            int start = pageNumber * pageSize - pageSize;
+            if (start >= page.getTotal()) {
+                return success(page);
+            }
+
+            int end = start + pageSize;
+            if (end > page.getTotal()) {
+                end = (int) page.getTotal();
+            }
+
+            if(tokenInfoList.size() > 0) {
+                for (int i = start; i < end; i++) {
+                    ContractTokenInfo info = tokenInfoList.get(i);
+                    tokenInfoDtoList.add(new ContractTokenInfoDto(info));
+                }
+            }
+            if(tokenInfoDtoList != null && tokenInfoDtoList.size() > 0) {
+                BlockHeader blockHeader = BlockCall.getLatestBlockHeader(chainId);
+                byte[] prevStateRoot = ContractUtil.getStateRoot(blockHeader);
+                ProgramExecutor track = contractHelper.getProgramExecutor(chainId).begin(prevStateRoot);
+                for(ContractTokenInfoDto tokenInfo : tokenInfoDtoList) {
+                    tokenInfo.setStatus(track.status(AddressTool.getAddress(tokenInfo.getContractAddress())).ordinal());
+                }
+            }
+            page.setList(tokenInfoDtoList);
+
+            return success(page);
+        } catch (NulsException e) {
+            Log.error(e);
+            return failed(e.getErrorCode());
+        }
+    }
+
+    @CmdAnnotation(cmd = UPLOAD, version = 1.0, description = "upload")
+    @Parameter(parameterName = "chainId", parameterType = "int")
+    @Parameter(parameterName = "jarFileData", parameterType = "String")
+    public Response upload(Map<String,Object> params){
+        try {
+            Integer chainId = (Integer) params.get("chainId");
+            String jarFileData = (String) params.get("jarFileData");
+            if(StringUtils.isBlank(jarFileData)) {
+                return failed(NULL_PARAMETER);
+            }
+            String[] arr = jarFileData.split(",");
+            if (arr.length != 2) {
+                return failed(PARAMETER_ERROR);
+            }
+
+            String body = arr[1];
+            byte[] contractCode = Base64.getDecoder().decode(body);
+            ContractInfoDto contractInfoDto = contractHelper.getConstructor(chainId, contractCode);
+            if(contractInfoDto == null || contractInfoDto.getConstructor() == null) {
+                return failed(ILLEGAL_CONTRACT);
+            }
+            Map<String, Object> resultMap = MapUtil.createLinkedHashMap(3);
+            resultMap.put("constructor", contractInfoDto.getConstructor());
+            resultMap.put("isNrc20", contractInfoDto.isNrc20());
+            resultMap.put("code", Hex.encode(contractCode));
+
+            return success();
+        } catch (Exception e) {
+            Log.error(e);
+            return failed(e.getMessage());
+        }
     }
 
 }

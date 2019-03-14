@@ -24,13 +24,16 @@
 package io.nuls.contract.manager;
 
 import io.nuls.base.basic.AddressTool;
+import io.nuls.base.data.BlockHeader;
 import io.nuls.contract.constant.ContractErrorCode;
 import io.nuls.contract.helper.ContractHelper;
 import io.nuls.contract.model.bo.ContractTokenInfo;
 import io.nuls.contract.model.po.ContractAddressInfoPo;
+import io.nuls.contract.rpc.call.BlockCall;
 import io.nuls.contract.storage.ContractTokenAddressStorageService;
 import io.nuls.tools.basic.Result;
 import io.nuls.tools.core.ioc.SpringLiteContext;
+import io.nuls.tools.exception.NulsException;
 
 import java.math.BigInteger;
 import java.util.*;
@@ -54,11 +57,14 @@ public class ContractTokenBalanceManager {
 
     private Lock tokenLock = new ReentrantLock();
 
+    private Set<String> initializedAddressSet;
+
     public static ContractTokenBalanceManager newInstance(int chainId) {
         ContractTokenBalanceManager manager = new ContractTokenBalanceManager();
         manager.chainId = chainId;
         manager.contractHelper = SpringLiteContext.getBean(ContractHelper.class);
         manager.contractTokenAddressStorageService = SpringLiteContext.getBean(ContractTokenAddressStorageService.class);
+        manager.initializedAddressSet = ConcurrentHashMap.newKeySet();
         return manager;
     }
 
@@ -74,7 +80,10 @@ public class ContractTokenBalanceManager {
 
 
 
-    public void initAllTokensByAccount(String account) {
+    public void initAllTokensByAccount(String account) throws NulsException {
+        if(!initializedAddressSet.add(account)) {
+            return;
+        }
         if(!AddressTool.validAddress(chainId, account)) {
             return;
         }
@@ -82,16 +91,17 @@ public class ContractTokenBalanceManager {
         if(allNrc20ListResult.isFailed()) {
             return;
         }
+        BlockHeader blockHeader = BlockCall.getLatestBlockHeader(chainId);
         List<byte[]> contractAddressInfoPoList = allNrc20ListResult.getData();
         for(byte[] address : contractAddressInfoPoList) {
-            initialContractToken(account, AddressTool.getStringAddressByBytes(address));
+            initialContractToken(account, blockHeader, AddressTool.getStringAddressByBytes(address));
         }
     }
 
-    public void initialContractToken(String account, String contract) {
+    public void initialContractToken(String account, BlockHeader blockHeader, String contract) {
         tokenLock.lock();
         try {
-            Result<ContractTokenInfo> result = contractHelper.getContractToken(chainId, account, contract);
+            Result<ContractTokenInfo> result = contractHelper.getContractToken(chainId, blockHeader, account, contract);
             if(result.isFailed()) {
                 return;
             }
@@ -126,7 +136,8 @@ public class ContractTokenBalanceManager {
         }
     }
 
-    public Result<List<ContractTokenInfo>> getAllTokensByAccount(String account) {
+    public Result<List<ContractTokenInfo>> getAllTokensByAccount(String account) throws NulsException {
+        this.initAllTokensByAccount(account);
         Map<String, ContractTokenInfo> tokensMap = contractTokenOfLocalAccount.get(account);
         if(tokensMap == null || tokensMap.size() == 0) {
             return getSuccess().setData(new ArrayList<>());
