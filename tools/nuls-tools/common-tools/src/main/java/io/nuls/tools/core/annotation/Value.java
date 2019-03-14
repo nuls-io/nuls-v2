@@ -15,4 +15,11 @@ public @interface Value {
 
     String value();
 
+    /**
+     * 配置文件非空校验
+     */
+    @Target({ElementType.FIELD})
+    @Retention(RetentionPolicy.RUNTIME)
+    @Documented
+    @interface  NotNull {}
 }
