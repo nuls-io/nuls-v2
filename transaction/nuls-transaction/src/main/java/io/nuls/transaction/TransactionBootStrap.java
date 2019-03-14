@@ -69,8 +69,8 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 public class TransactionBootStrap extends RpcModule {
 
     public static void main(String[] args) {
-        if (args.length == 0) {
-            args = new String[]{HostInfo.getLocalIP() + ":8887/ws"};
+        if (args == null || args.length == 0) {
+            args = new String[]{"ws://" + HostInfo.getLocalIP() + ":8887/ws"};
         }
         NulsRpcModuleBootstrap.run("io.nuls", args);
     }

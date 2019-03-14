@@ -36,7 +36,7 @@ import java.util.concurrent.TimeUnit;
 @Getter
 @Setter
 @Slf4j
-@Order(0)
+@Order(Integer.MIN_VALUE)
 public abstract class RpcModule implements InitializingBean {
 
     private static final String ROLE = "1.0";

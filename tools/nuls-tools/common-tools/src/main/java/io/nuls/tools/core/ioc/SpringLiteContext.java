@@ -120,17 +120,23 @@ public class SpringLiteContext {
             if (configuration != null) {
                 Set<Field> fields = getFieldSet(cls);
                 fields.stream().forEach(field -> {
-                    ConfigSetting.set(bean, field, configLoader.getValue(field.getName()));
+                    Value annValue = field.getAnnotation(Value.class);
+                    String key = field.getName();
+                    if(annValue != null){
+                        key = annValue.value();
+                    }
+                    ConfigSetting.set(bean, field, configLoader.getValue(key));
+                });
+            }else{
+                Set<Field> fields = getFieldSet(cls);
+                fields.stream().forEach(field -> {
+                    Value annValue = field.getAnnotation(Value.class);
+                    if (annValue != null) {
+                        String key = annValue.value();
+                        ConfigSetting.set(bean, field, configLoader.getValue(key));
+                    }
                 });
             }
-            Set<Field> fields = getFieldSet(cls);
-            fields.stream().forEach(field -> {
-                Value annValue = field.getAnnotation(Value.class);
-                if (annValue != null) {
-                    String key = annValue.value();
-                    ConfigSetting.set(bean, field, configLoader.getValue(key));
-                }
-            });
         });
     }
 
