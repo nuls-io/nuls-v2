@@ -55,6 +55,14 @@ public class ContractTokenBalanceManager {
 
     private int chainId;
 
+    /**
+     * key: String - local account address
+     *      value:
+     *          key: String - contract address
+     *          value: ContractTokenInfo - token name && amount
+     */
+    private Map<String, Map<String, ContractTokenInfo>> contractTokenOfLocalAccount = new ConcurrentHashMap<>();
+
     private Lock tokenLock = new ReentrantLock();
 
     private Set<String> initializedAddressSet;
@@ -69,16 +77,6 @@ public class ContractTokenBalanceManager {
     }
 
     private ContractTokenBalanceManager() {}
-
-    /**
-     * key: String - local account address
-     *      value:
-     *          key: String - contract address
-     *          value: ContractTokenInfo - token name && amount
-     */
-    private Map<String, Map<String, ContractTokenInfo>> contractTokenOfLocalAccount = new ConcurrentHashMap<>();
-
-
 
     public void initAllTokensByAccount(String account) throws NulsException {
         if(!initializedAddressSet.add(account)) {
