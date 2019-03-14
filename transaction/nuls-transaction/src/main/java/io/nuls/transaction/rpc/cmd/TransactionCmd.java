@@ -447,13 +447,12 @@ public class TransactionCmd extends BaseCmd {
     }
 
     /**
-     * 根据hash获取交易, 先查未确认, 查不到再查已确认
-     * Get the transaction that have been packaged into the block from the database
-     *
+     * 根据交易hash list 获取区块的完整交易
+     * 如果没有查询到,或者查询到的不是区块完整的交易数据 则返回空list
      * @param params
      * @return Response
      */
-    @CmdAnnotation(cmd = TxCmd.TX_GET_BLOCK_TXS, version = 1.0, description = "Get transaction ")
+    @CmdAnnotation(cmd = TxCmd.TX_GET_BLOCK_TXS, version = 1.0, description = "Get block transactions ")
     @Parameter(parameterName = "chainId", parameterType = "int")
     @Parameter(parameterName = "txHashList", parameterType = "list")
     public Response getBlockTxs(Map params) {
