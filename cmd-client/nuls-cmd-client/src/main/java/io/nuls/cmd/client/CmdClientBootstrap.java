@@ -15,9 +15,9 @@ public class CmdClientBootstrap {
 
     public static void main(String[] args) {
         if (args == null || args.length == 0) {
-            args = new String[]{HostInfo.getLocalIP() + ":8887/ws","0"};
+            args = new String[]{"ws://" + HostInfo.getLocalIP() + ":8887/ws","0"};
         }else{
-            args = new String[]{args[0] + ":8887/ws","0"};
+            args = new String[]{args[0],"0"};
         }
         ConfigurationLoader configurationLoader = new ConfigurationLoader();
         configurationLoader.load();
