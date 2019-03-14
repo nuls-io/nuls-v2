@@ -1344,6 +1344,32 @@ public class ConsensusServiceImpl implements ConsensusService {
         return Result.getSuccess(ConsensusErrorCode.SUCCESS).setData(resultMap);
     }
 
+    /**
+     * 获取种子节点列表
+     *
+     * @param params
+     * @return Result
+     */
+    @Override
+    @SuppressWarnings("unchecked")
+    public Result getSeedNodeList(Map<String, Object> params) {
+        if (params == null || params.get(ConsensusConstant.PARAM_CHAIN_ID) == null) {
+            return Result.getFailed(ConsensusErrorCode.PARAM_ERROR);
+        }
+        int chainId = (Integer) params.get(ConsensusConstant.PARAM_CHAIN_ID);
+        if (chainId <= ConsensusConstant.MIN_VALUE) {
+            return Result.getFailed(ConsensusErrorCode.PARAM_ERROR);
+        }
+        Chain chain = chainManager.getChainMap().get(chainId);
+        if (chain == null) {
+            return Result.getFailed(ConsensusErrorCode.CHAIN_NOT_EXIST);
+        }
+        Map<String, Object> resultMap = new HashMap<>(2);
+        resultMap.put("seedNodeList", chain.getConfig().getSeedNodes().split(","));
+        return Result.getSuccess(ConsensusErrorCode.SUCCESS).setData(resultMap);
+    }
+
+
     private void fillAgentList(Chain chain, List<Agent> agentList, List<Deposit> depositList) {
         MeetingRound round = roundManager.getCurrentRound(chain);
         for (Agent agent : agentList) {
