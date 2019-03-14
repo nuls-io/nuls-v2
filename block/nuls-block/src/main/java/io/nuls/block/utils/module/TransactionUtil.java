@@ -188,6 +188,46 @@ public class TransactionUtil {
     }
 
     /**
+     * 批量获取已确认交易
+     *
+     * @param chainId 链Id/chain id
+     * @param hashList
+     * @return
+     * @throws IOException
+     */
+    public static List<Transaction> getConfirmedTransactions(int chainId, List<NulsDigestData> hashList) {
+        List<Transaction> transactions = new ArrayList<>();
+        NulsLogger commonLog = ContextManager.getContext(chainId).getCommonLog();
+        try {
+            Map<String, Object> params = new HashMap<>(2);
+//            params.put(Constants.VERSION_KEY_STR, "1.0");
+            params.put("chainId", chainId);
+            params.put("txHashList", hashList);
+            Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.TX.abbr, "tx_getBlockTxs", params);
+            if (response.isSuccess()) {
+                Map responseData = (Map) response.getResponseData();
+                Map map = (Map) responseData.get("tx_getBlockTxs");
+                List<String> txHexList = (List<String>) map.get("txHexList");
+                if (txHexList == null || txHexList.size() == 0) {
+                    return null;
+                }
+                for (String txHex : txHexList) {
+                    Transaction transaction = new Transaction();
+                    transaction.parse(new NulsByteBuffer(HexUtil.decode(txHex)));
+                    transactions.add(transaction);
+                }
+            } else {
+                return null;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            commonLog.error(e);
+            return null;
+        }
+        return transactions;
+    }
+
+    /**
      * 批量获取交易
      *
      * @param chainId 链Id/chain id
@@ -195,15 +235,11 @@ public class TransactionUtil {
      * @return
      * @throws IOException
      */
-    public static List<Transaction> getTransactions(int chainId, List<NulsDigestData> hashList, boolean confirmed) {
+    public static List<Transaction> getTransactions(int chainId, List<NulsDigestData> hashList) {
         List<Transaction> transactions = new ArrayList<>();
         NulsLogger commonLog = ContextManager.getContext(chainId).getCommonLog();
         try {
-            if (confirmed) {
-                hashList.forEach(e -> transactions.add(getConfirmedTransaction(chainId, e)));
-            } else {
-                hashList.forEach(e -> transactions.add(getTransaction(chainId, e)));
-            }
+            hashList.forEach(e -> transactions.add(getTransaction(chainId, e)));
             return transactions;
         } catch (Exception e) {
             e.printStackTrace();
@@ -254,7 +290,7 @@ public class TransactionUtil {
      * @param hash
      * @return
      */
-    public static Transaction getConfirmedTransaction(int chainId, NulsDigestData hash) {
+    private static Transaction getConfirmedTransaction(int chainId, NulsDigestData hash) {
         NulsLogger commonLog = ContextManager.getContext(chainId).getCommonLog();
         try {
             Map<String, Object> params = new HashMap<>(2);
