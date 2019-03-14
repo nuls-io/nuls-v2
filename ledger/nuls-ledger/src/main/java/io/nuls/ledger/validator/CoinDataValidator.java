@@ -150,7 +150,7 @@ public class CoinDataValidator {
         Map<String, String> batchValidateTxMap = new ConcurrentHashMap();
         Map<String, List<TempAccountState>> accountValidateTxMap = new ConcurrentHashMap<>();
         for(Transaction tx : txs){
-            LoggerUtil.logger.debug("peer blocksValidate chainId={},height={},txHash={}",tx.getHash().toString());
+            LoggerUtil.logger.debug("peer blocksValidate chainId={},height={},txHash={}",chainId,height,tx.getHash().toString());
             ValidateResult validateResult =confirmedTxsValidate(chainId,tx,batchValidateTxMap,accountValidateTxMap);
             if(VALIDATE_SUCCESS_CODE != validateResult.getValidateCode()){
                 LoggerUtil.logger.error("code={},msg={}",validateResult.getValidateCode(),validateResult.getValidateCode());
