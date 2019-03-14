@@ -2,7 +2,6 @@ package io.nuls.account;
 
 import io.nuls.account.config.AccountConfig;
 import io.nuls.account.config.NulsConfig;
-import io.nuls.account.constant.AccountConstant;
 import io.nuls.account.constant.AccountErrorCode;
 import io.nuls.account.constant.AccountStorageConstant;
 import io.nuls.account.model.bo.Chain;
@@ -18,19 +17,12 @@ import io.nuls.rpc.modulebootstrap.NulsRpcModuleBootstrap;
 import io.nuls.rpc.modulebootstrap.RpcModule;
 import io.nuls.rpc.modulebootstrap.RpcModuleState;
 import io.nuls.tools.core.annotation.Autowired;
-import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.core.annotation.Configuration;
-import io.nuls.tools.core.annotation.Value;
 import io.nuls.tools.core.ioc.SpringLiteContext;
 import io.nuls.tools.exception.NulsException;
-import io.nuls.tools.io.IoUtils;
 import io.nuls.tools.model.StringUtils;
 import io.nuls.tools.parse.I18nUtils;
-import io.nuls.tools.parse.JSONUtils;
-import io.nuls.tools.parse.config.ConfigItem;
 
-import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 /**
