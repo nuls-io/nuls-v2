@@ -64,19 +64,19 @@ public interface AccountConstant {
      * 系统配置中语言设置的字段名
      * The field name of the language set in the system configuration.
      */
-    String CFG_SYSTEM_TKEYSTORE_FOLDER = "keydir";
+    String CFG_SYSTEM_TKEYSTORE_FOLDER = "keyDir";
 
     /**
-     * 内核模块地址
-     * Kernel module address
+     * 内核模块地址端口
+     * Kernel module address port
      */
-    String KERNEL_MODULE_URL = "kernelUrl";
+    String KERNEL_MODULE_PORT = "kernelPort";
 
     /**
      * --------[storage configs] -------
      */
     String CFG_DB_SECTION = "storage";
-    String DB_DATA_PATH = "rocksdb.datapath";
+    String DB_DATA_PATH = "dataDir";
 
     /**
      * --------[chain constant] -------

@@ -11,6 +11,8 @@ public class ApiCache {
 
     private ChainInfo chainInfo;
 
+    private ContextInfo contextInfo;
+
     private BlockHeaderInfo bestHeader;
 
     private CurrentRound currentRound;

@@ -40,7 +40,6 @@ import io.nuls.contract.model.txdata.CreateContractData;
 import io.nuls.contract.model.txdata.DeleteContractData;
 import io.nuls.contract.service.*;
 import io.nuls.contract.storage.ContractExecuteResultStorageService;
-import io.nuls.contract.util.ContractLedgerUtil;
 import io.nuls.contract.vm.program.ProgramExecutor;
 import io.nuls.tools.basic.Result;
 import io.nuls.tools.core.annotation.Autowired;
@@ -258,12 +257,6 @@ public class ContractServiceImpl implements ContractService {
 
         return null;
     }
-
-    @Override
-    public boolean isContractAddress(int chainId, byte[] addressBytes) {
-        return ContractLedgerUtil.isExistContractAddress(chainId, addressBytes);
-    }
-
 
     @Override
     public Result saveContractExecuteResult(int chainId, NulsDigestData hash, ContractResult result) {

@@ -3,6 +3,8 @@ package io.nuls.contract;
 import io.nuls.contract.constant.ContractConstant;
 import io.nuls.contract.manager.ChainManager;
 import io.nuls.contract.storage.LanguageStorageService;
+import io.nuls.contract.util.VMContext;
+import io.nuls.contract.vm.program.ProgramMethod;
 import io.nuls.db.service.RocksDBService;
 import io.nuls.rpc.info.HostInfo;
 import io.nuls.rpc.model.ModuleE;
@@ -10,14 +12,19 @@ import io.nuls.rpc.netty.bootstrap.NettyServer;
 import io.nuls.rpc.netty.channel.manager.ConnectManager;
 import io.nuls.rpc.netty.processor.ResponseMessageProcessor;
 import io.nuls.tools.core.ioc.SpringLiteContext;
+import io.nuls.tools.io.IoUtils;
 import io.nuls.tools.log.Log;
 import io.nuls.tools.parse.ConfigLoader;
 import io.nuls.tools.parse.I18nUtils;
+import io.nuls.tools.parse.JSONUtils;
 
+import java.io.IOException;
 import java.lang.reflect.Field;
 import java.nio.charset.Charset;
+import java.util.Map;
 import java.util.Properties;
 
+import static io.nuls.contract.constant.ContractConstant.NRC20_STANDARD_FILE;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 /**
@@ -39,6 +46,7 @@ public class ContractBootStrap {
             SpringLiteContext.init(ContractConstant.CONTEXT_PATH);
             initLanguage();
             initServer();
+            initNRC20Standard();
             while (!ConnectManager.isReady()) {
                 Log.debug("wait depend modules ready");
                 Thread.sleep(2000L);
@@ -48,6 +56,27 @@ public class ContractBootStrap {
             Log.error("consensus startup error！");
             Log.error(e);
         }
+    }
+
+    private static void initNRC20Standard() {
+        String json = null;
+        try {
+            json = IoUtils.read(NRC20_STANDARD_FILE);
+        } catch (Exception e) {
+            // skip it
+            Log.error("init NRC20Standard error.", e);
+        }
+        if(json == null) {
+            return;
+        }
+
+        Map<String, ProgramMethod> jsonMap = null;
+        try {
+            jsonMap = JSONUtils.json2map(json, ProgramMethod.class);
+        } catch (Exception e) {
+            Log.error("init NRC20Standard map error.", e);
+        }
+        VMContext.setNrc20Methods(jsonMap);
     }
 
     /**
@@ -66,7 +95,7 @@ public class ContractBootStrap {
      * 初始化数据库
      * Initialization database
      */
-    private static void initDB() throws Exception {
+    private static void initDB() throws IOException {
         Properties properties = ConfigLoader.loadProperties(ContractConstant.DB_CONFIG_NAME);
         String path = properties.getProperty(ContractConstant.DB_DATA_PATH, ContractConstant.DB_DATA_DEFAULT_PATH);
         RocksDBService.init(path);
@@ -80,8 +109,7 @@ public class ContractBootStrap {
     private static void initLanguage() throws Exception {
         LanguageStorageService languageService = SpringLiteContext.getBean(LanguageStorageService.class);
         String languageDB = languageService.getLanguage();
-        //TODO pierre
-        //I18nUtils.loadLanguage("", "");
+        I18nUtils.loadLanguage(ContractBootStrap.class, "languages", "");
         String language = null == languageDB ? I18nUtils.getLanguage() : languageDB;
         I18nUtils.setLanguage(language);
         if (null == languageDB) {
@@ -95,7 +123,7 @@ public class ContractBootStrap {
     private static void initServer() {
         try {
             try {
-                NettyServer.getInstance(ModuleE.CS)
+                NettyServer.getInstance(ModuleE.SC)
                         .moduleRoles(new String[]{"1.0"})
                         .moduleVersion("1.0")
                         .scanPackage("io.nuls");
@@ -109,7 +137,7 @@ public class ContractBootStrap {
                  * */
                 ResponseMessageProcessor.syncKernel(kernelUrl);
             } catch (Exception e) {
-                Log.error("Account initServer failed", e);
+                Log.error("Smart Contract initServer failed", e);
             }
         } catch (Exception e) {
             Log.error("Consensus startup webSocket server error!");

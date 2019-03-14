@@ -132,6 +132,7 @@ public class TxValid {
 
     @Test
     public void importPriKeyTest() {
+//        importPriKey("008da295e53ad4aab4a5b4c20c95bf0732a7ab10d61e4acc788f5a50eef2f51f58", password);//种子出块地址 5MR_2CVzGriCSBRf9KCFqPW4mq26uEK5Vig
 //        importPriKey("7e304e60c4e29c15382f76c0bb097bda28a1950b78871b6b7eb2bb4cc4ddeb49", password);//种子出块地址 5MR_2Cb86fpFbuY4Lici8MJStNxDFYH6kRB
 //        importPriKey("70e871a2e637b4182dfbedc53e164182d266821f4824ab1a3a73055e9f252f98", password);//种子出块地址
 
@@ -242,7 +243,7 @@ public class TxValid {
     public void getTxRecord() throws Exception{
         Map<String, Object> params = new HashMap<>();
         params.put("chainId", chainId);
-        params.put("address", address27);
+        params.put("address", "5MR_2CeZVsqvjUfVE2dMc2ucmHaYkwaFwtj");
         params.put("assetChainId", null);
         params.put("assetId", null);
         params.put("type", null);

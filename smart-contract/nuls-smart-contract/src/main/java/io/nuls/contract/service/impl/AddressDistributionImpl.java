@@ -61,7 +61,7 @@ public class AddressDistributionImpl implements AddressDistribution {
             if(ctx == null) {
                 continue;
             }
-            ctx.setOrder(i++);
+            //ctx.setOrder(i++);
             contractAddressBytes = ctx.getContractData().getContractAddress();
             contractAddress = AddressTool.getStringAddressByBytes(contractAddressBytes);
             List<ContractWrapperTransaction> transactions = map.get(contractAddress);

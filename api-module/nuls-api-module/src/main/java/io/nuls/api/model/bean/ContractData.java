@@ -21,28 +21,32 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package io.nuls.contract.processor;
+package io.nuls.api.model.bean;
 
-
-import io.nuls.contract.model.tx.ContractTransferTransaction;
-import io.nuls.tools.basic.Result;
-import io.nuls.tools.core.annotation.Component;
-
-import static io.nuls.contract.util.ContractUtil.getSuccess;
+import java.math.BigInteger;
 
 /**
  * @desription:
  * @author: PierreLuo
- * @date: 2018/6/7
+ * @date: 2018/7/19
  */
-@Component
-public class ContractTransferTxProcessor{
-    public Result onCommit(ContractTransferTransaction tx, Object secondaryData) {
-        return getSuccess();
-    }
+public interface ContractData {
 
-    public Result onRollback(ContractTransferTransaction tx, Object secondaryData) {
-        return getSuccess();
-    }
+    byte[] getContractAddress();
 
+    byte[] getSender();
+
+    byte[] getCode();
+
+    long getGasLimit();
+
+    long getPrice();
+
+    BigInteger getValue();
+
+    String getMethodName();
+
+    String getMethodDesc();
+
+    String[][] getArgs();
 }

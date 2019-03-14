@@ -280,11 +280,13 @@ public class BlockServiceImpl implements BlockService {
                 }
                 hashList.addLast(hash);
             }
-            commonLog.info("save block success, height-" + height + ", hash-" + hash);
+            commonLog.info("save block success, height-" + height + ", txCount-" + blockHeaderPo.getTxCount() + ", hash-" + hash);
             Response response = MessageUtil.newResponse("", Constants.BOOLEAN_TRUE, "Congratulations! Processing completed！");
             Map<String, Long> responseData = new HashMap<>(1);
             responseData.put("value", height);
-            response.setResponseData(responseData);
+            Map<String, Object> sss = new HashMap<>(1);
+            sss.put(LATEST_HEIGHT, responseData);
+            response.setResponseData(sss);
             ConnectManager.eventTrigger(LATEST_HEIGHT, response);
             return true;
         } finally {

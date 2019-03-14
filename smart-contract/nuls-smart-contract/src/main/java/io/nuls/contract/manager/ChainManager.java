@@ -30,6 +30,7 @@ import io.nuls.contract.model.bo.Chain;
 import io.nuls.contract.model.bo.config.ConfigBean;
 import io.nuls.contract.model.bo.config.ConfigItem;
 import io.nuls.contract.model.dto.ContractTxRegisterDto;
+import io.nuls.contract.rpc.call.BlockCall;
 import io.nuls.contract.rpc.call.TransactionCall;
 import io.nuls.contract.storage.ConfigStorageService;
 import io.nuls.contract.util.VMContext;
@@ -88,21 +89,24 @@ public class ChainManager {
             int chainId = entry.getKey();
             chain.setConfig(entry.getValue());
             /*
-            初始化链数据库表/Initialize linked database tables
-            */
+             * 初始化链数据库表/Initialize linked database tables
+             */
             initTable(chain);
             /*
-             *初始化智能合约执行器
+             * 初始化智能合约执行器
              */
             initContractExecutor(chain);
             /*
-             *初始化智能合约nrc20-token管理器
+             * 初始化智能合约nrc20-token管理器
              */
             initTokenBalanceManager(chain);
+            /*
+             * 注册交易到交易管理模块
+             */
             registerTx(chain);
             chainMap.put(chainId, chain);
             //订阅Block模块接口
-//            BlockCall.subscriptionNewBlockHeight(chain);
+            //BlockCall.subscriptionNewBlockHeight(chain);
 
             Log.debug("\nchain = " + JSONUtils.obj2PrettyJson(chain));
         }

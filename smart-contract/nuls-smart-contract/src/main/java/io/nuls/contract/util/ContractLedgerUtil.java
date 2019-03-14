@@ -52,30 +52,4 @@ public class ContractLedgerUtil {
         return contractAddressStorageService.isExistContractAddress(chainId, addressBytes);
     }
 
-    /**
-     * 获取tx中是智能合约地址的地址列表
-     *
-     * @param tx
-     * @return
-     */
-    public static List<byte[]> getRelatedAddresses(Transaction tx) {
-        List<byte[]> result = new ArrayList<>();
-        if (tx == null) {
-            return result;
-        }
-        //TODO pierre
-        List<byte[]> txAddressList = null;
-        //List<byte[]> txAddressList = tx.getAllRelativeAddress();
-        if (txAddressList == null || txAddressList.size() == 0) {
-            return result;
-        }
-        for (byte[] txAddress : txAddressList) {
-            if(isLegalContractAddress(txAddress)) {
-                result.add(txAddress);
-            }
-        }
-
-        return result;
-    }
-
 }

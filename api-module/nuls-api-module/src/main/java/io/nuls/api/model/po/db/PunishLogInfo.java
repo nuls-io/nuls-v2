@@ -20,6 +20,4 @@ public class PunishLogInfo extends TxDataInfo {
     private int index;
 
     private String reason;
-
-
 }

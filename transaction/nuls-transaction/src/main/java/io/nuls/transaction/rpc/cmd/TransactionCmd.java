@@ -12,6 +12,7 @@ import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.model.ObjectUtils;
 import io.nuls.tools.parse.JSONUtils;
+import io.nuls.transaction.cache.PackablePool;
 import io.nuls.transaction.constant.TxCmd;
 import io.nuls.transaction.constant.TxConfig;
 import io.nuls.transaction.constant.TxConstant;
@@ -27,7 +28,7 @@ import io.nuls.transaction.model.dto.TxRegisterDTO;
 import io.nuls.transaction.model.po.TransactionConfirmedPO;
 import io.nuls.transaction.service.ConfirmedTxService;
 import io.nuls.transaction.service.TxService;
-import io.nuls.transaction.storage.h2.TransactionH2Service;
+import io.nuls.transaction.storage.rocksdb.UnconfirmedTxStorageService;
 import io.nuls.transaction.utils.TxUtil;
 
 import java.io.IOException;
@@ -53,8 +54,13 @@ public class TransactionCmd extends BaseCmd {
     private ChainManager chainManager;
     @Autowired
     private TransactionManager transactionManager;
+//    @Autowired
+//    private TransactionH2Service transactionH2Service;
+
     @Autowired
-    private TransactionH2Service transactionH2Service;
+    private PackablePool packablePool;
+    @Autowired
+    private UnconfirmedTxStorageService unconfirmedTxStorageService;
 
 
     /**
@@ -441,6 +447,40 @@ public class TransactionCmd extends BaseCmd {
     }
 
     /**
+     * 根据交易hash list 获取区块的完整交易
+     * 如果没有查询到,或者查询到的不是区块完整的交易数据 则返回空list
+     * @param params
+     * @return Response
+     */
+    @CmdAnnotation(cmd = TxCmd.TX_GET_BLOCK_TXS, version = 1.0, description = "Get block transactions ")
+    @Parameter(parameterName = "chainId", parameterType = "int")
+    @Parameter(parameterName = "txHashList", parameterType = "list")
+    public Response getBlockTxs(Map params) {
+        Chain chain = null;
+        try {
+            ObjectUtils.canNotEmpty(params.get("chainId"), TxErrorCode.PARAMETER_ERROR.getMsg());
+            ObjectUtils.canNotEmpty(params.get("txHashList"), TxErrorCode.PARAMETER_ERROR.getMsg());
+            chain = chainManager.getChain((int) params.get("chainId"));
+            if (null == chain) {
+                throw new NulsException(TxErrorCode.CHAIN_NOT_FOUND);
+            }
+            List<String> txHashList = (List<String>) params.get("txHashList");
+            List<String> txHexList = confirmedTxService.getTxList(chain,txHashList);
+            Map<String, List<String>> resultMap = new HashMap<>(TxConstant.INIT_CAPACITY_8);
+            Log.debug("getBlockTxs size:{} ", txHexList.size());
+            resultMap.put("txHexList", txHexList);
+            return success(resultMap);
+        } catch (NulsException e) {
+            errorLogProcess(chain, e);
+            return failed(e.getErrorCode());
+        } catch (Exception e) {
+            errorLogProcess(chain, e);
+            return failed(TxErrorCode.SYS_UNKOWN_EXCEPTION);
+        }
+    }
+
+
+    /**
      * The transaction is verified locally before the block is saved,
      * including calling the validator, verifying the coinData, etc.
      * If it is a cross-chain transaction and not initiated by the current chain,
@@ -538,6 +578,63 @@ public class TransactionCmd extends BaseCmd {
             TxConfig.PACKAGING = packaging;
             chain.getLoggerMap().get(TxConstant.LOG_TX).debug("Task-Packaging 节点是否是打包节点,状态变更为: {}", chain.getPackaging().get());
             return success();
+        } catch (NulsException e) {
+            errorLogProcess(chain, e);
+            return failed(e.getErrorCode());
+        } catch (Exception e) {
+            errorLogProcess(chain, e);
+            return failed(TxErrorCode.SYS_UNKOWN_EXCEPTION);
+        }
+    }
+
+
+    /**
+     * 待打包队列交易个数
+     *
+     * @param params
+     * @return
+     */
+    @CmdAnnotation(cmd = "packageQueueSize", version = 1.0, description = "")
+    @Parameter(parameterName = "chainId", parameterType = "int")
+    public Response packageQueueSize(Map params) {
+        Chain chain = null;
+        try {
+            ObjectUtils.canNotEmpty(params.get("chainId"), TxErrorCode.PARAMETER_ERROR.getMsg());
+            chain = chainManager.getChain((int) params.get("chainId"));
+            if (null == chain) {
+                throw new NulsException(TxErrorCode.CHAIN_NOT_FOUND);
+            }
+            Map<String, Object> resultMap = new HashMap<>(TxConstant.INIT_CAPACITY_8);
+            resultMap.put("value", packablePool.getPoolSize(chain));
+            return success(resultMap);
+        } catch (NulsException e) {
+            errorLogProcess(chain, e);
+            return failed(e.getErrorCode());
+        } catch (Exception e) {
+            errorLogProcess(chain, e);
+            return failed(TxErrorCode.SYS_UNKOWN_EXCEPTION);
+        }
+    }
+
+    /**
+     * 未确认交易个数
+     *
+     * @param params
+     * @return
+     */
+    @CmdAnnotation(cmd = "unconfirmTxSize", version = 1.0, description = "")
+    @Parameter(parameterName = "chainId", parameterType = "int")
+    public Response unconfirmTxSize(Map params) {
+        Chain chain = null;
+        try {
+            ObjectUtils.canNotEmpty(params.get("chainId"), TxErrorCode.PARAMETER_ERROR.getMsg());
+            chain = chainManager.getChain((int) params.get("chainId"));
+            if (null == chain) {
+                throw new NulsException(TxErrorCode.CHAIN_NOT_FOUND);
+            }
+            Map<String, Object> resultMap = new HashMap<>(TxConstant.INIT_CAPACITY_8);
+            resultMap.put("value", unconfirmedTxStorageService.getAllTxPOList(chain.getChainId()));
+            return success(resultMap);
         } catch (NulsException e) {
             errorLogProcess(chain, e);
             return failed(e.getErrorCode());

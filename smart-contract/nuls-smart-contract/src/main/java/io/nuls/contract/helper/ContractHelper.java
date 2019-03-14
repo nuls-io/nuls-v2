@@ -33,6 +33,7 @@ import io.nuls.contract.manager.ChainManager;
 import io.nuls.contract.manager.ContractTokenBalanceManager;
 import io.nuls.contract.manager.TempBalanceManager;
 import io.nuls.contract.model.bo.*;
+import io.nuls.contract.model.dto.ContractInfoDto;
 import io.nuls.contract.model.po.ContractAddressInfoPo;
 import io.nuls.contract.model.po.ContractTokenTransferInfoPo;
 import io.nuls.contract.model.txdata.ContractData;
@@ -104,6 +105,27 @@ public class ContractHelper {
         }
         List<ProgramMethod> methods = this.getAllMethods(chainId, code);
         return this.getMethodInfo(methodName, methodDesc, methods);
+    }
+
+    public ContractInfoDto getConstructor(int chainId, byte[] contractCode) {
+        try {
+            ContractInfoDto dto = new ContractInfoDto();
+            List<ProgramMethod> programMethods = this.getAllMethods(chainId, contractCode);
+            if(programMethods == null || programMethods.size() == 0) {
+                return null;
+            }
+            for(ProgramMethod method : programMethods) {
+                if(ContractConstant.CONTRACT_CONSTRUCTOR.equals(method.getName())) {
+                    dto.setConstructor(method);
+                    break;
+                }
+            }
+            dto.setNrc20(this.checkNrc20Contract(programMethods));
+            return dto;
+        } catch (Exception e) {
+            Log.error(e);
+            return null;
+        }
     }
 
     private List<ProgramMethod> getAllMethods(int chainId, byte[] contractCode) {
@@ -222,7 +244,7 @@ public class ContractHelper {
 
         long gasLimit;
         if(isCustomGasLimit) {
-            gasLimit = vmContext.getCustomMaxViewGasLimit();
+            gasLimit = vmContext.getCustomMaxViewGasLimit(chainId);
         } else {
             gasLimit = ContractConstant.CONTRACT_CONSTANT_GASLIMIT;
         }

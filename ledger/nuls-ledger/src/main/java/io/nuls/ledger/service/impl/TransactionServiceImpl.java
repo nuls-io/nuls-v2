@@ -244,6 +244,7 @@ public class TransactionServiceImpl implements TransactionService {
                 e.printStackTrace();
                 //需要回滚数据
                 logger.error("confirmBlockProcess  error! go rollBackBlock!");
+                LoggerUtil.txRollBackLog.error("confirmBlockProcess  error! go rollBackBlock!addrChainId={},height={}",addressChainId,blockHeight);
                 rollBackBlock(addressChainId, blockSnapshotAccounts.getAccounts(), blockHeight);
                 return false;
             }

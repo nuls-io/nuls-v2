@@ -17,7 +17,9 @@ import static io.nuls.contract.constant.ContractErrorCode.TX_DATA_VALIDATION_ERR
 import static io.nuls.contract.util.ContractUtil.getSuccess;
 
 /**
- * @author tag
+ * 
+ * @author: PierreLuo
+ * @date: 2019-03-13
  */
 @Component
 public class ContractAcceptTransferredTxValidator{

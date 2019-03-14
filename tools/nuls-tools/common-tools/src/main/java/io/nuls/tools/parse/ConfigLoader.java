@@ -55,10 +55,20 @@ public class ConfigLoader {
         return loadProperties(is);
     }
 
-    public static Properties loadProperties(InputStream inputStream) throws IOException {
-        Properties prop = new Properties();
-        prop.load(inputStream);
-        inputStream.close();
+    public static Properties loadProperties(InputStream is) throws IOException {
+        Properties prop;
+        try {
+            prop = new Properties();
+            prop.load(is);
+        } catch (IOException e) {
+            throw e;
+        } finally {
+            try {
+                if(is != null) {
+                    is.close();
+                }
+            } catch (IOException e) {}
+        }
         return prop;
     }
 

@@ -1,7 +1,7 @@
 package io.nuls.account.storage;
 
-import io.nuls.account.constant.AccountParam;
 import io.nuls.account.AccountBootstrap;
+import io.nuls.account.config.NulsConfig;
 import io.nuls.account.model.bo.Account;
 import io.nuls.account.model.po.AccountPo;
 import io.nuls.account.util.AccountTool;
@@ -37,7 +37,7 @@ public class AccountStorageServiceTest {
         //初始化配置
         AccountBootstrap.initCfg();
         //读取配置文件，数据存储根目录，初始化打开该目录下所有表连接并放入缓存
-        RocksDBService.init(AccountParam.getInstance().getDataPath());
+        RocksDBService.init(NulsConfig.DATA_PATH);
         //springLite容器初始化
         SpringLiteContext.init("io.nuls.account", new ModularServiceMethodInterceptor());
         //启动时间同步线程

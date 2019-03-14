@@ -4,6 +4,7 @@ import io.nuls.api.utils.DocumentTransferTool;
 import lombok.Data;
 import org.bson.Document;
 
+import java.math.BigInteger;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -16,6 +17,8 @@ public class ChainInfo {
     private AssetInfo defaultAsset;
 
     private Set<AssetInfo> assets;
+
+    private BigInteger inflationCoins = new BigInteger("500000000000000");
 
     public ChainInfo() {
         assets = new HashSet<>();

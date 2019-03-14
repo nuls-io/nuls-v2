@@ -82,5 +82,6 @@ public interface ContractErrorCode {
     ErrorCode CONTRACT_DELETE_CREATER = ErrorCode.init("100018");
     ErrorCode CONTRACT_DELETED = ErrorCode.init("100019");
     ErrorCode CONTRACT_GAS_LIMIT = ErrorCode.init("100020");
+    ErrorCode CONTRACT_NOT_EXECUTE_VIEW = ErrorCode.init("100021");
     ErrorCode CONTRACT_OTHER_ERROR = ErrorCode.init("100099");
 }

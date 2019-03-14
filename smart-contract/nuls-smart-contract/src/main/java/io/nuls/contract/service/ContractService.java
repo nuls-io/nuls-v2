@@ -42,13 +42,6 @@ public interface ContractService {
     Result commitProcessor(int chainId, List<String> txHexList, String blockHeaderHex);
 
     Result rollbackProcessor(int chainId, List<String> txHexList, String blockHeaderHex);
-    /**
-     * 是否为合约地址
-     *
-     * @param addressBytes
-     * @return
-     */
-    boolean isContractAddress(int chainId, byte[] addressBytes);
 
     /**
      * 保存合约执行结果

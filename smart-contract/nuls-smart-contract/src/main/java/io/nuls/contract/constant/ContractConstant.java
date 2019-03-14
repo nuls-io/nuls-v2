@@ -45,6 +45,9 @@ public interface ContractConstant {
      */
     int TX_TYPE_CONTRACT_RETURN_GAS = 104;
 
+    /**
+     * coin base tx
+     */
     int TX_TYPE_COINBASE = 1;
     /**
      * CONTRACT STATUS
@@ -134,6 +137,7 @@ public interface ContractConstant {
      */
     String CONFIG_FILE_PATH = "consensus-config.json";
 
+    String NRC20_STANDARD_FILE = "nrc20.json";
     /**
      * DB config
      */

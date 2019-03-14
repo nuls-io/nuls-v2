@@ -187,8 +187,7 @@ public class VMContext {
         }
     }
 
-    public long getCustomMaxViewGasLimit() {
-        //TODO pierre auto-generated method stub
-        return 0;
+    public long getCustomMaxViewGasLimit(int chainId) {
+        return contractHelper.getChain(chainId).getConfig().getMaxViewGas();
     }
 }

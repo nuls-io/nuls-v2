@@ -490,6 +490,9 @@ public class ConnectManager {
             找到订阅该接口的Message和WsData,然后判断订阅该接口的Message事件是否触发
             */
             CopyOnWriteArrayList<Message> messageList = CMD_SUBSCRIBE_MESSAGE_MAP.get(cmd);
+            if (messageList == null) {
+                return;
+            }
             int changeCount = addCmdChangeCount(cmd);
             for (Message message : messageList) {
                 ConnectData connectData = MESSAGE_TO_CHANNEL_MAP.get(message);

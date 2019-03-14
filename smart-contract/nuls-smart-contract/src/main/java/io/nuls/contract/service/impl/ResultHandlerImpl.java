@@ -94,10 +94,8 @@ public class ResultHandlerImpl implements ResultHanlder {
                     continue;
                 }
 
-                ContractTransferData txData = new ContractTransferData();
-                txData.setOrginTxHash(orginTx.getHash());
                 byte[] contractAddress = contractResult.getContractAddress();
-                txData.setContractAddress(contractAddress);
+                ContractTransferData txData = new ContractTransferData(orginTx.getHash(), contractAddress);
 
                 CoinData coinData = new CoinData();
                 ContractBalance balance = tempBalanceManager.getBalance(contractAddress).getData();
@@ -111,7 +109,8 @@ public class ResultHandlerImpl implements ResultHanlder {
                 tx.setCoinDataObj(coinData);
                 tx.setTxDataObj(txData);
                 // 合约内部转账交易的时间的偏移量，用于排序
-                tx.setTime(blockTime + orginTx.getOrder());
+                //tx.setTime(blockTime + orginTx.getOrder());
+                tx.setTime(blockTime);
 
                 tx.serializeData();
                 NulsDigestData hash = NulsDigestData.calcDigestData(tx.serializeForHash());

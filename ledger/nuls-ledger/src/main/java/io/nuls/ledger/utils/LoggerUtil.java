@@ -37,4 +37,6 @@ public class LoggerUtil {
    public static NulsLogger logger = LoggerBuilder.getLogger("./ld", "ld",Level.ALL);
    public static NulsLogger txCommitLog = LoggerBuilder.getLogger("./ld", "tx",Level.ALL);
    public static NulsLogger txRollBackLog = LoggerBuilder.getLogger("./ld", "txRb",Level.ALL);
+   public static NulsLogger txUnconfirmedRollBackLog = LoggerBuilder.getLogger("./ld", "txUncfRb",Level.ALL);
+   public static NulsLogger txMsg = LoggerBuilder.getLogger("./ld", "txMsg",Level.ALL);
 }

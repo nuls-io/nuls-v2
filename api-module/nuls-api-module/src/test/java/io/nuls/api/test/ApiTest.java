@@ -112,7 +112,7 @@ public class ApiTest {
 //        String str = BigIntegerUtils.bigIntegerToString(b, 32);
 //        System.out.println(str);
 
-        System.out.println(DoubleUtils.mul(100, DoubleUtils.div(ApiContext.inflationCoins, b, 4), 2));
+//        System.out.println(DoubleUtils.mul(100, DoubleUtils.div(ApiContext.inflationCoins, b, 4), 2));
     }
 
 }
