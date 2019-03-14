@@ -202,7 +202,9 @@ public class TransactionUtil {
             Map<String, Object> params = new HashMap<>(2);
 //            params.put(Constants.VERSION_KEY_STR, "1.0");
             params.put("chainId", chainId);
-            params.put("txHashList", hashList);
+            List<String> t = new ArrayList<>();
+            hashList.forEach(e -> t.add(e.getDigestHex()));
+            params.put("txHashList", t);
             Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.TX.abbr, "tx_getBlockTxs", params);
             if (response.isSuccess()) {
                 Map responseData = (Map) response.getResponseData();
