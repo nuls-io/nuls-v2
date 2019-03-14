@@ -89,7 +89,7 @@ public class ConfirmedTxStorageServiceImpl implements ConfirmedTxStorageService 
         TransactionConfirmedPO tx = null;
         if (null != txBytes) {
             try {
-                TxUtil.getInstance(txBytes, TransactionConfirmedPO.class);
+                tx = TxUtil.getInstance(txBytes, TransactionConfirmedPO.class);
             } catch (Exception e) {
                 Log.error(e);
                 return null;
@@ -107,7 +107,7 @@ public class ConfirmedTxStorageServiceImpl implements ConfirmedTxStorageService 
         TransactionConfirmedPO tx = null;
         if (null != txBytes) {
             try {
-                TxUtil.getInstance(txBytes, TransactionConfirmedPO.class);
+                tx = TxUtil.getInstance(txBytes, TransactionConfirmedPO.class);
             } catch (Exception e) {
                 Log.error(e);
                 return null;
