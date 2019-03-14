@@ -27,9 +27,12 @@ public class IniModuleConfigParser implements ModuleConfigParser {
         Ini ini = new Ini();
         ini.setConfig(cfg);
         ini.load(inputStream);
+        Map<String,String> res = new HashMap<>();
         ini.values().forEach(s->{
-            s.values().forEach(System.out::println);
+            s.entrySet().forEach(item->{
+                res.put(item.getKey(),item.getValue());
+            });
         });
-        return new HashMap<>();
+        return res;
     }
 }

@@ -107,28 +107,27 @@ public class SpringLiteContext {
         success = true;
     }
 
-    private static void setConfiguration(){
+    private static void setConfiguration() {
         ConfigurationLoader configLoader = getBean(ConfigurationLoader.class);
         configLoader.load();
-        BEAN_TEMP_MAP.entrySet().forEach(entry->{
+        BEAN_TEMP_MAP.entrySet().forEach(entry -> {
             Object bean = entry.getValue();
             Class<?> cls = BEAN_TYPE_MAP.get(entry.getKey());
             Configuration configuration = cls.getAnnotation(Configuration.class);
-            if(configuration != null){
+            if (configuration != null) {
                 Set<Field> fields = getFieldSet(cls);
-                fields.stream().forEach(field->{
-                    ConfigSetting.set(bean,field,configLoader.getValue(field.getName()));
-                });
-            }else{
-                Set<Field> fields = getFieldSet(cls);
-                fields.stream().forEach(field->{
-                    Value annValue = field.getAnnotation(Value.class);
-                    if(annValue != null){
-                        String key = annValue.value();
-                        ConfigSetting.set(bean,field,configLoader.getValue(key));
-                    }
+                fields.stream().forEach(field -> {
+                    ConfigSetting.set(bean, field, configLoader.getValue(field.getName()));
                 });
             }
+            Set<Field> fields = getFieldSet(cls);
+            fields.stream().forEach(field -> {
+                Value annValue = field.getAnnotation(Value.class);
+                if (annValue != null) {
+                    String key = annValue.value();
+                    ConfigSetting.set(bean, field, configLoader.getValue(key));
+                }
+            });
         });
     }
 
@@ -166,7 +165,7 @@ public class SpringLiteContext {
                         try {
                             ((InitializingBean) bean).afterPropertiesSet();
                         } catch (Exception e) {
-                            Log.error("spring lite callAfterPropertiesSet fail : {} ",bean.getClass(),e.getMessage(),e);
+                            Log.error("spring lite callAfterPropertiesSet fail : {} ", bean.getClass(), e.getMessage(), e);
                             System.exit(0);
                         }
                     }

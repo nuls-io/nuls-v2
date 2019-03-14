@@ -26,8 +26,6 @@
 package io.nuls.account.config;
 
 
-import io.nuls.tools.parse.config.IniEntity;
-
 /**
  * 用来管理配置项
  * <p>
@@ -37,17 +35,17 @@ import io.nuls.tools.parse.config.IniEntity;
  */
 public class NulsConfig {
 
-    /**
-     * 模块配置文件中加载的所有配置项
-     * All the configuration items that are loaded in the module configuration file.
-     */
-    public static IniEntity MODULES_CONFIG;
-
-    /**
-     * 模块配置文件名称
-     * Module configuration file name.
-     */
-    public final static String MODULES_CONFIG_FILE = "modules.json";
+//    /**
+//     * 模块配置文件中加载的所有配置项
+//     * All the configuration items that are loaded in the module configuration file.
+//     */
+//    public static IniEntity MODULES_CONFIG;
+//
+//    /**
+//     * 模块配置文件名称
+//     * Module configuration file name.
+//     */
+//    public final static String MODULES_CONFIG_FILE = "modules.json";
 
     /**
      * 系统使用的编码方式
@@ -60,17 +58,17 @@ public class NulsConfig {
      */
     public static String ACCOUNTKEYSTORE_FOLDER_NAME = "keystore/backup";
 
-    /**
-     * 内核模块地址端口
-     * Kernel module address port
-     */
-    public static String KERNEL_MODULE_PORT = "8008";
+//    /**
+//     * 内核模块地址端口
+//     * Kernel module address port
+//     */
+//    public static String KERNEL_MODULE_PORT = "8008";
 
     /**
      * 数据库存储地址
      * database path
      */
-    public static String DATA_PATH = "../../../../data/account";
+    public static String DATA_PATH;
 
     /**
      * config file path
@@ -80,22 +78,22 @@ public class NulsConfig {
     /**
      * 主网链ID（卫星链ID）
      */
-    public final static int MAIN_CHAIN_ID = 12345;
+    public static int MAIN_CHAIN_ID;
 
     /**
      * 主网链资产ID（卫星链资产ID，NULS资产）
      */
-    public final static int MAIN_ASSETS_ID = 1;
-
-    /**
-     * 当前链ID
-     */
-    public static int CURRENT_CHAIN_ID = 12345;
-
-    /**
-     * 当前链主资产ID
-     */
-    public static int CURRENT_MAIN_ASSETS_ID = 1;
+    public static int MAIN_ASSETS_ID;
+//
+//    /**
+//     * 当前链ID
+//     */
+//    public static int CURRENT_CHAIN_ID = 12345;
+//
+//    /**
+//     * 当前链主资产ID
+//     */
+//    public static int CURRENT_MAIN_ASSETS_ID = 1;
 
 
 }

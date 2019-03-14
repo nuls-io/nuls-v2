@@ -1,21 +1,13 @@
 {
-  "data" : [
-    {
-      "name": "chainId",
-      "value": 12345,
-      "readOnly": true
-    },
-    {
-      "name": "assetsId",
-      "value": 1,
-      "readOnly": true
-    }
-  ],
-  "name" : "zhoulijun",
-  "age" : 37,
-  "item" : {
-    "name": "assetsId",
-    "value": 1,
-    "readOnly": true
-  }
+  "chainConfig": {
+    "chainId": 12345,
+    "assetsId": 1
+  },
+  "mainChainId": 12345,
+  "mainAssetId": 1,
+  "language": "en",
+  "encoding": "UTF-8",
+  "keystoreFolder": "/keystore/backup",
+  "kernelUrl": "ws://127.0.0.1:8887/ws",
+  "rocksDbDataPath": "../../../../data/account"
 }

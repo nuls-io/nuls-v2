@@ -29,11 +29,12 @@ public class AccountKeyStoreServiceTest {
     @BeforeClass
     public static void beforeTest() {
         //初始化配置
-        AccountBootstrap.initCfg();
+        SpringLiteContext.init("io.nuls.account", new ModularServiceMethodInterceptor());
+        AccountBootstrap accountBootstrap = SpringLiteContext.getBean(AccountBootstrap.class);
+        //初始化配置
+        accountBootstrap.initCfg();
         //读取配置文件，数据存储根目录，初始化打开该目录下所有表连接并放入缓存
         RocksDBService.init(NulsConfig.DATA_PATH);
-        //springLite容器初始化
-        SpringLiteContext.init("io.nuls.account", new ModularServiceMethodInterceptor());
         //启动时间同步线程
         TimeService.getInstance().start();
         accountService = SpringLiteContext.getBean(AccountService.class);

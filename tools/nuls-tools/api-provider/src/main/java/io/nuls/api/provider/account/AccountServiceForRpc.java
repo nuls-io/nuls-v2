@@ -7,6 +7,7 @@ import io.nuls.api.provider.Result;
 import io.nuls.api.provider.account.facade.*;
 import io.nuls.base.data.BlockHeader;
 import io.nuls.rpc.model.ModuleE;
+import io.nuls.tools.constant.ErrorCode;
 import io.nuls.tools.parse.MapUtils;
 import lombok.extern.slf4j.Slf4j;
 
@@ -57,6 +58,9 @@ public class AccountServiceForRpc extends BaseRpcService implements AccountServi
     @Override
     public Result<AccountInfo> getAccountByAddress(GetAccountByAddressReq req) {
         return _call("ac_getAccountByAddress",req,res->{
+            if(res == null){
+                return fail(RPC_ERROR_CODE,"account not found");
+            }
             AccountInfo accountInfo = MapUtils.mapToBean(res,new AccountInfo());
             return success(accountInfo);
         });

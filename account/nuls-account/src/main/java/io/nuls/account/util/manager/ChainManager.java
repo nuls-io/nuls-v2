@@ -24,6 +24,7 @@
  */
 package io.nuls.account.util.manager;
 
+import io.nuls.account.config.AccountConfig;
 import io.nuls.account.config.NulsConfig;
 import io.nuls.account.constant.AccountErrorCode;
 import io.nuls.account.constant.AccountStorageConstant;
@@ -53,8 +54,12 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 @Component
 public class ChainManager {
+
     @Autowired
     private ConfigService configService;
+
+    @Autowired
+    AccountConfig accountConfig;
 
     private Map<Integer, Chain> chainMap = new ConcurrentHashMap<>();
 
@@ -112,17 +117,18 @@ public class ChainManager {
             and the main chain configuration information needs to be read from the configuration file at this time.
             */
             if (configMap == null || configMap.size() == 0) {
-                String configJson = IoUtils.read(NulsConfig.CONFIG_FILE_PATH);
-                List<ConfigItem> configItemList = JSONUtils.json2list(configJson, ConfigItem.class);
-                ConfigBean configBean = ConfigManager.initManager(configItemList);
+//                String configJson = IoUtils.read(NulsConfig.CONFIG_FILE_PATH);
+//                List<ConfigItem> configItemList = JSONUtils.json2list(configJson, ConfigItem.class);
+//                ConfigBean configBean = ConfigManager.initManager(configItemList);
+                ConfigBean configBean = accountConfig.getChainConfig();
                 if (configBean == null) {
                     return null;
                 }
                 configMap.put(configBean.getChainId(), configBean);
-                //设置当前链ID
-                NulsConfig.CURRENT_CHAIN_ID = configBean.getChainId();
-                //设置当前链主资产ID
-                NulsConfig.CURRENT_MAIN_ASSETS_ID = configBean.getAssetsId();
+//                //设置当前链ID
+//                NulsConfig.CURRENT_CHAIN_ID = configBean.getChainId();
+//                //设置当前链主资产ID
+//                NulsConfig.CURRENT_MAIN_ASSETS_ID = configBean.getAssetsId();
             }
             return configMap;
         } catch (Exception e) {
