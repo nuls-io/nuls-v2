@@ -76,7 +76,7 @@ public class IoUtils {
      * @param stream 文件的绝对路径
      * @return 文件内容
      */
-    private static String readRealPath(InputStream stream) throws Exception {
+    public static String readRealPath(InputStream stream) throws Exception {
         InputStreamReader inReader = null;
         BufferedReader br = null;
         try {

@@ -1,0 +1,21 @@
+{
+  "data" : [
+    {
+      "name": "chainId",
+      "value": 12345,
+      "readOnly": true
+    },
+    {
+      "name": "assetsId",
+      "value": 1,
+      "readOnly": true
+    }
+  ],
+  "name" : "zhoulijun",
+  "age" : 37,
+  "item" : {
+    "name": "assetsId",
+    "value": 1,
+    "readOnly": true
+  }
+}

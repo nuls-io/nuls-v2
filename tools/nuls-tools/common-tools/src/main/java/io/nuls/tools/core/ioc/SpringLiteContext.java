@@ -24,8 +24,11 @@
  */
 package io.nuls.tools.core.ioc;
 
+import ch.qos.logback.core.joran.spi.ConfigurationWatchList;
 import io.nuls.tools.basic.InitializingBean;
 import io.nuls.tools.core.annotation.*;
+import io.nuls.tools.core.config.ConfigSetting;
+import io.nuls.tools.core.config.ConfigurationLoader;
 import io.nuls.tools.core.inteceptor.DefaultMethodInterceptor;
 import io.nuls.tools.core.inteceptor.base.BeanMethodInterceptor;
 import io.nuls.tools.core.inteceptor.base.BeanMethodInterceptorManager;
@@ -33,6 +36,7 @@ import io.nuls.tools.model.StringUtils;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.exception.NulsRuntimeException;
 import io.nuls.tools.log.Log;
+import io.nuls.tools.parse.ConfigLoader;
 import net.sf.cglib.proxy.Enhancer;
 import net.sf.cglib.proxy.MethodInterceptor;
 
@@ -89,6 +93,7 @@ public class SpringLiteContext {
         SpringLiteContext.interceptor = interceptor;
         Set<Class> classes = new HashSet<>();
         Log.info("spring lite scan package : {}", Arrays.toString(packName));
+        classes.addAll(ScanUtil.scan("io.nuls.tools.core.config"));
         Arrays.stream(packName).forEach(pack -> {
             classes.addAll(ScanUtil.scan(pack));
         });
@@ -96,9 +101,35 @@ public class SpringLiteContext {
                 //通过Order注解控制类加载顺序
                 .sorted((b1, b2) -> getOrderByClass(b1) > getOrderByClass(b2) ? 1 : -1)
                 .forEach((Class clazz) -> checkBeanClass(clazz));
+        setConfiguration();
         autowireFields();
         callAfterPropertiesSet();
         success = true;
+    }
+
+    private static void setConfiguration(){
+        ConfigurationLoader configLoader = getBean(ConfigurationLoader.class);
+        configLoader.load();
+        BEAN_TEMP_MAP.entrySet().forEach(entry->{
+            Object bean = entry.getValue();
+            Class<?> cls = BEAN_TYPE_MAP.get(entry.getKey());
+            Configuration configuration = cls.getAnnotation(Configuration.class);
+            if(configuration != null){
+                Set<Field> fields = getFieldSet(cls);
+                fields.stream().forEach(field->{
+                    ConfigSetting.set(bean,field,configLoader.getValue(field.getName()));
+                });
+            }else{
+                Set<Field> fields = getFieldSet(cls);
+                fields.stream().forEach(field->{
+                    Value annValue = field.getAnnotation(Value.class);
+                    if(annValue != null){
+                        String key = annValue.value();
+                        ConfigSetting.set(bean,field,configLoader.getValue(key));
+                    }
+                });
+            }
+        });
     }
 
     /**
@@ -286,6 +317,13 @@ public class SpringLiteContext {
             if (null != ann) {
                 beanName = ((Controller) ann).value();
             }
+        }
+
+        if (null == ann) {
+            ann = getFromArray(anns, Configuration.class);
+//            if (null != ann) {
+//                beanName = ((Configuration) ann).value();
+//            }
         }
 
         if (ann != null) {
