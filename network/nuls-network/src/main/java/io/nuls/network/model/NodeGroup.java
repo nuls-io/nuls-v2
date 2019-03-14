@@ -25,7 +25,7 @@
  */
 package io.nuls.network.model;
 
-import io.nuls.network.constant.NetworkParam;
+import io.nuls.network.cfg.NetworkConfig;
 import io.nuls.network.constant.NodeConnectStatusEnum;
 import io.nuls.network.constant.NodeStatusEnum;
 import io.nuls.network.manager.NodeGroupManager;
@@ -33,6 +33,7 @@ import io.nuls.network.model.dto.Dto;
 import io.nuls.network.model.dto.IpAddress;
 import io.nuls.network.model.po.*;
 import io.nuls.network.netty.container.NodesContainer;
+import io.nuls.tools.core.ioc.SpringLiteContext;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -47,6 +48,7 @@ import java.util.concurrent.locks.ReentrantLock;
  * @date 2018/11/01
  */
 public class NodeGroup implements Dto {
+    NetworkConfig networkConfig = SpringLiteContext.getBean(NetworkConfig.class);
     private long magicNumber;
     private int chainId;
     private int maxOut;
@@ -96,7 +98,7 @@ public class NodeGroup implements Dto {
         this.maxIn = maxIn;
         this.maxOut = maxOut;
         this.minAvailableCount = minAvailableCount;
-        if (NetworkParam.getInstance().isMoonNode()) {
+        if (networkConfig.isMoonNode()) {
             isCrossActive = true;
         }
     }
@@ -188,7 +190,7 @@ public class NodeGroup implements Dto {
      * @return
      */
     public boolean isMoonCrossGroup() {
-        if (NetworkParam.getInstance().isMoonNode() && NetworkParam.getInstance().getChainId() != chainId) {
+        if (networkConfig.isMoonNode() && networkConfig.getChainId() != chainId) {
             return true;
         }
         return false;
@@ -236,7 +238,7 @@ public class NodeGroup implements Dto {
      * @return
      */
     public boolean isMoonGroup() {
-        if (NetworkParam.getInstance().isMoonNode() && NetworkParam.getInstance().getChainId() == chainId) {
+        if (networkConfig.isMoonNode() && networkConfig.getChainId() == chainId) {
             return true;
         }
         return false;
@@ -384,7 +386,7 @@ public class NodeGroup implements Dto {
                 return false;
             }
             activeConnectNum = crossNodeContainer.getConnectedNodes().size();
-            if (NetworkParam.getInstance().isMoonNode()) {
+            if (networkConfig.isMoonNode()) {
                 if (activeConnectNum < minAvailableCount) {
                     return false;
                 }

@@ -1,10 +1,11 @@
 package io.nuls.network.task;
 
-import io.nuls.network.constant.NetworkParam;
+import io.nuls.network.cfg.NetworkConfig;
 import io.nuls.network.manager.NodeGroupManager;
 import io.nuls.network.manager.TaskManager;
 import io.nuls.network.model.NodeGroup;
 import io.nuls.network.netty.container.NodesContainer;
+import io.nuls.tools.core.ioc.SpringLiteContext;
 
 import java.util.List;
 
@@ -14,7 +15,7 @@ import static io.nuls.network.utils.LoggerUtil.Log;
  * @author ljs
  */
 public class RunAfterNetStableTask implements Runnable {
-    private final NetworkParam networkParam = NetworkParam.getInstance();
+    private final NetworkConfig networkConfig = SpringLiteContext.getBean(NetworkConfig.class);
 
     @Override
     public void run() {

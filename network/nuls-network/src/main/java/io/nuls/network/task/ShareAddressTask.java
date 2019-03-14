@@ -1,11 +1,12 @@
 package io.nuls.network.task;
 
-import io.nuls.network.constant.NetworkParam;
+import io.nuls.network.cfg.NetworkConfig;
 import io.nuls.network.manager.ConnectionManager;
 import io.nuls.network.manager.MessageManager;
 import io.nuls.network.model.Node;
 import io.nuls.network.model.NodeGroup;
 import io.nuls.network.model.dto.IpAddress;
+import io.nuls.tools.core.ioc.SpringLiteContext;
 
 import java.util.*;
 
@@ -13,7 +14,7 @@ import static io.nuls.network.utils.LoggerUtil.Log;
 
 public class ShareAddressTask implements Runnable {
 
-    private final NetworkParam networkParam = NetworkParam.getInstance();
+    private final NetworkConfig networkConfig = SpringLiteContext.getBean(NetworkConfig.class);
     private NodeGroup nodeGroup = null;
     private boolean isCross = false;
 
@@ -43,14 +44,14 @@ public class ShareAddressTask implements Runnable {
         if (externalIp == null) {
             return;
         }
-        networkParam.getLocalIps().add(externalIp);
+        networkConfig.getLocalIps().add(externalIp);
         /*自有网络的连接分享*/
         if (!nodeGroup.isMoonCrossGroup()) {
             Log.info("share self ip  is {}", externalIp);
-            Node myNode = new Node(nodeGroup.getMagicNumber(), externalIp, networkParam.getPort(), Node.OUT, false);
+            Node myNode = new Node(nodeGroup.getMagicNumber(), externalIp, networkConfig.getPort(), Node.OUT, false);
             myNode.setConnectedListener(() -> {
                 myNode.getChannel().close();
-                doShare(externalIp, nodeGroup.getLocalNetNodeContainer().getConnectedNodes().values(), networkParam.getPort());
+                doShare(externalIp, nodeGroup.getLocalNetNodeContainer().getConnectedNodes().values(), networkConfig.getPort());
             });
             myNode.setDisconnectListener(() -> myNode.setChannel(null));
             connectionManager.connection(myNode);
@@ -67,13 +68,13 @@ public class ShareAddressTask implements Runnable {
             return;
         }
         Log.info("my external ip  is {}", externalIp);
-        networkParam.getLocalIps().add(externalIp);
+        networkConfig.getLocalIps().add(externalIp);
         if (nodeGroup.isCrossActive()) {
             //开启了跨链业务
-            Node crossNode = new Node(nodeGroup.getMagicNumber(), externalIp, networkParam.getCrossPort(), Node.OUT, true);
+            Node crossNode = new Node(nodeGroup.getMagicNumber(), externalIp, networkConfig.getCrossPort(), Node.OUT, true);
             crossNode.setConnectedListener(() -> {
                 crossNode.getChannel().close();
-                doShare(externalIp, nodeGroup.getCrossNodeContainer().getConnectedNodes().values(), networkParam.getCrossPort());
+                doShare(externalIp, nodeGroup.getCrossNodeContainer().getConnectedNodes().values(), networkConfig.getCrossPort());
             });
             connectionManager.connection(crossNode);
         }

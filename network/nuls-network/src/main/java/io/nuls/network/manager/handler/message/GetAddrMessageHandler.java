@@ -25,7 +25,7 @@
 
 package io.nuls.network.manager.handler.message;
 
-import io.nuls.network.constant.NetworkParam;
+import io.nuls.network.cfg.NetworkConfig;
 import io.nuls.network.manager.MessageFactory;
 import io.nuls.network.manager.MessageManager;
 import io.nuls.network.manager.NodeGroupManager;
@@ -36,7 +36,7 @@ import io.nuls.network.model.NodeGroup;
 import io.nuls.network.model.dto.IpAddress;
 import io.nuls.network.model.message.AddrMessage;
 import io.nuls.network.model.message.base.BaseMessage;
-import io.nuls.network.netty.container.NodesContainer;
+import io.nuls.tools.core.ioc.SpringLiteContext;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -93,9 +93,10 @@ public class GetAddrMessageHandler extends BaseMessageHandler {
     }
 
     private List<IpAddress> getAvailableNodes(Node node) {
+        NetworkConfig networkConfig = SpringLiteContext.getBean(NetworkConfig.class);
         NodeGroup nodeGroup = null;
         List<IpAddress> addressList = new ArrayList<>();
-        if (NetworkParam.getInstance().isMoonNode()) {
+        if (networkConfig.isMoonNode()) {
             //是主网节点，回复
             //从跨链连接过来的请求
             nodeGroup = NodeGroupManager.getInstance().getMoonMainNet();
