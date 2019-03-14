@@ -1366,6 +1366,7 @@ public class ConsensusServiceImpl implements ConsensusService {
         }
         Map<String, Object> resultMap = new HashMap<>(2);
         resultMap.put("seedNodeList", chain.getConfig().getSeedNodes().split(","));
+        resultMap.put("inflationAmount",chain.getConfig().getInflationAmount());
         return Result.getSuccess(ConsensusErrorCode.SUCCESS).setData(resultMap);
     }
 

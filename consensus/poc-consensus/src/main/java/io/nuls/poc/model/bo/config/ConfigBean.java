@@ -100,6 +100,15 @@ public class ConfigBean implements Serializable {
      */
     private int chainId;
 
+    /**
+     * 通胀
+     */
+    /**
+     * 节点委托金额最大值
+     * Maximum Node Delegation Amount
+     */
+    private BigInteger inflationAmount;
+
     public long getPackingInterval() {
         return packingInterval;
     }
@@ -234,5 +243,13 @@ public class ConfigBean implements Serializable {
 
     public void setChainId(int chainId) {
         this.chainId = chainId;
+    }
+
+    public BigInteger getInflationAmount() {
+        return inflationAmount;
+    }
+
+    public void setInflationAmount(BigInteger inflationAmount) {
+        this.inflationAmount = inflationAmount;
     }
 }

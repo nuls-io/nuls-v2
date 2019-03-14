@@ -5,6 +5,11 @@
     "readOnly":true
   },
   {
+    "key":"inflationAmount",
+    "value":"500000000000000",
+    "readOnly":true
+  },
+  {
     "key":"blockSize",
     "value":10,
     "readOnly":true
