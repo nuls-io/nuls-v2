@@ -23,9 +23,12 @@
  */
 package io.nuls.contract.rpc.call;
 
+import io.nuls.base.data.Transaction;
 import io.nuls.contract.rpc.CallHelper;
 import io.nuls.rpc.model.ModuleE;
 import io.nuls.tools.exception.NulsException;
+import io.nuls.tools.model.StringUtils;
+import org.spongycastle.util.encoders.Hex;
 
 import java.util.HashMap;
 import java.util.List;
@@ -64,4 +67,24 @@ public class TransactionCall {
             throw new NulsException(e);
         }
     }
+
+    public static Transaction getConfirmedTx(int chainId, String txHash) throws NulsException {
+        Map<String, Object> params = new HashMap(4);
+        params.put("chainId", chainId);
+        params.put("txHash", txHash);
+        try {
+            Map result = (Map) CallHelper.request(ModuleE.TX.abbr, "tx_getConfirmedTx", params);
+            String txHex = (String) result.get("txHex");
+            if(StringUtils.isBlank(txHex)) {
+                return null;
+            }
+            Transaction tx = new Transaction();
+            tx.parse(Hex.decode(txHex), 0);
+            return tx;
+        } catch (Exception e) {
+            throw new NulsException(e);
+        }
+    }
+
+
 }

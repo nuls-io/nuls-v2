@@ -23,6 +23,7 @@
  */
 package io.nuls.contract.util;
 
+import ch.qos.logback.core.joran.util.beans.BeanUtil;
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.BlockHeader;
 import io.nuls.base.data.Transaction;
@@ -31,6 +32,13 @@ import io.nuls.contract.constant.ContractErrorCode;
 import io.nuls.contract.model.bo.ContractResult;
 import io.nuls.contract.model.bo.ContractWrapperTransaction;
 import io.nuls.contract.model.po.ContractTokenTransferInfoPo;
+import io.nuls.contract.model.tx.CallContractTransaction;
+import io.nuls.contract.model.tx.ContractBaseTransaction;
+import io.nuls.contract.model.tx.CreateContractTransaction;
+import io.nuls.contract.model.tx.DeleteContractTransaction;
+import io.nuls.contract.model.txdata.CallContractData;
+import io.nuls.contract.model.txdata.CreateContractData;
+import io.nuls.contract.model.txdata.DeleteContractData;
 import io.nuls.contract.rpc.call.BlockCall;
 import io.nuls.db.service.RocksDBService;
 import io.nuls.tools.basic.Result;
@@ -194,6 +202,16 @@ public class ContractUtil {
         if (blockHeight > 0) {
             long bestBlockHeight = BlockCall.getLatestHeight(chainId);
             long confirmCount = bestBlockHeight - blockHeight;
+            if (confirmCount < 7) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public static boolean isLockContract(long lastestHeight, long blockHeight) throws NulsException {
+        if (blockHeight > 0) {
+            long confirmCount = lastestHeight - blockHeight;
             if (confirmCount < 7) {
                 return true;
             }
@@ -414,5 +432,26 @@ public class ContractUtil {
             throw new RuntimeException("Negative number detected.");
         }
         return result;
+    }
+
+    public static ContractBaseTransaction convertContractTx(Transaction tx) {
+        ContractBaseTransaction resultTx = null;
+        switch (tx.getType()) {
+            case TX_TYPE_CREATE_CONTRACT:
+                resultTx = new CreateContractTransaction();
+                resultTx.copyTx(tx);
+                break;
+            case TX_TYPE_CALL_CONTRACT:
+                resultTx = new CallContractTransaction();
+                resultTx.copyTx(tx);
+                break;
+            case TX_TYPE_DELETE_CONTRACT:
+                resultTx = new DeleteContractTransaction();
+                resultTx.copyTx(tx);
+                break;
+            default:
+                break;
+        }
+        return resultTx;
     }
 }

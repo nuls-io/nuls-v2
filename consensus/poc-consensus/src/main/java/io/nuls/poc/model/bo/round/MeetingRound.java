@@ -238,7 +238,10 @@ public class MeetingRound {
 
     public void calcLocalPacker(Chain chain) throws Exception{
         Properties properties = ConfigLoader.loadProperties(ConsensusConstant.PASSWORD_CONFIG_NAME);
-        String address = properties.getProperty(ConsensusConstant.PASSWORD, ConsensusConstant.PASSWORD);
+        String address = properties.getProperty(ConsensusConstant.ADDRESS, ConsensusConstant.ADDRESS);
+        if(address.isEmpty()){
+            return;
+        }
         MeetingMember member = getMember(AddressTool.getAddress(address),chain);
         if (null != member) {
             myMember = member;
