@@ -24,15 +24,12 @@
 package io.nuls.contract.model.dto;
 
 import io.nuls.base.basic.AddressTool;
-import io.nuls.base.data.Transaction;
 import io.nuls.contract.model.bo.ContractMergedTransfer;
 import io.nuls.contract.model.bo.ContractResult;
-import io.nuls.contract.model.po.ContractAddressInfoPo;
 import io.nuls.contract.model.po.ContractTokenTransferInfoPo;
 import io.nuls.contract.model.tx.ContractBaseTransaction;
 import io.nuls.contract.model.txdata.ContractData;
 import io.nuls.contract.util.ContractUtil;
-import io.nuls.contract.vm.program.ProgramTransfer;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.model.LongUtils;
 import lombok.Getter;
@@ -43,6 +40,8 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+
+import static io.nuls.contract.util.ContractUtil.bigInteger2String;
 
 /**
  * @author: PierreLuo
@@ -65,21 +64,21 @@ public class ContractResultDto {
 
     private long price;
 
-    private BigInteger totalFee;
+    private String totalFee;
 
-    private BigInteger txSizeFee;
+    private String txSizeFee;
 
-    private BigInteger actualContractFee;
+    private String actualContractFee;
 
-    private BigInteger refundFee;
+    private String refundFee;
 
     private String stateRoot;
 
-    private long value;
+    private String value;
 
     private String stackTrace;
 
-    private BigInteger balance;
+    private String balance;
 
     private List<ContractMergedTransferDto> transfers;
 
@@ -93,22 +92,24 @@ public class ContractResultDto {
 
     public ContractResultDto(int chainId, ContractResult result, ContractBaseTransaction tx) throws NulsException {
         ContractData contractData = (ContractData) tx.getTxDataObj();
-        this.totalFee = tx.getFee();
         this.gasLimit = contractData.getGasLimit();
         this.gasUsed = result.getGasUsed();
         this.price = result.getPrice();
-        this.actualContractFee = BigInteger.valueOf(LongUtils.mul(this.gasUsed, this.price));
+        BigInteger totalFee = tx.getFee();
+        this.totalFee = bigInteger2String(totalFee);
+        BigInteger actualContractFee = BigInteger.valueOf(LongUtils.mul(this.gasUsed, this.price));
+        this.actualContractFee = bigInteger2String(actualContractFee);
         BigInteger contractFee = BigInteger.valueOf(LongUtils.mul(gasLimit, price));
-        this.refundFee = contractFee.subtract(this.actualContractFee);
-        this.txSizeFee = this.totalFee.subtract(contractFee);
+        this.refundFee = bigInteger2String(contractFee.subtract(actualContractFee));
+        this.txSizeFee = bigInteger2String(totalFee.subtract(contractFee));
+        this.value = String.valueOf(result.getValue());
+        this.balance = bigInteger2String(result.getBalance());
         this.contractAddress = AddressTool.getStringAddressByBytes(result.getContractAddress());
         this.result = result.getResult();
         this.stateRoot = (result.getStateRoot() != null ? Hex.toHexString(result.getStateRoot()) : null);
-        this.value = result.getValue();
         this.success = result.isSuccess();
         this.errorMessage = result.getErrorMessage();
         this.stackTrace = result.getStackTrace();
-        this.balance = result.getBalance();
         this.setMergedTransfers(result.getMergedTransferList());
         this.events = result.getEvents();
         this.remark = result.getRemark();

@@ -60,7 +60,7 @@ public interface ContractCmdConstant {
     String IMPUTED_CALL_GAS = "sc_imputed_call_gas";
     String CONTRACT_INFO = "sc_contract_info";
     String CONTRACT_RESULT = "sc_contract_result";
-    //TODO pierre 用户调用rpc
     String CONTRACT_TX = "sc_contract_tx";
+    //TODO pierre 用户调用rpc
     String TOKEN_ASSETS_LIST = "sc_token_assets_list";
 }
