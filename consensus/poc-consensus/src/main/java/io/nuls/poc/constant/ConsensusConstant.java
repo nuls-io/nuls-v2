@@ -96,6 +96,7 @@ public interface ConsensusConstant {
      * */
     String PASSWORD_CONFIG_NAME ="password.properties";
     String PASSWORD = "password";
+    String ADDRESS = "address";
 
     /**
      * RPC_VERSION

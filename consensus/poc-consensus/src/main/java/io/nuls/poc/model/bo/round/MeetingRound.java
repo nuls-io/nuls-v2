@@ -218,13 +218,30 @@ public class MeetingRound {
         return myMember;
     }
 
-    public void calcLocalPacker(List<byte[]> localAddressList,Chain chain) {
+    /*public void calcLocalPacker(List<byte[]> localAddressList,Chain chain) {
         for (byte[] address:localAddressList) {
             MeetingMember member = getMember(address,chain);
             if (null != member) {
                 myMember = member;
                 break;
             }
+        }
+        if(myMember != null && !chain.isPacker()){
+            CallMethodUtils.sendState(chain,true);
+            chain.setPacker(true);
+        }
+        if(myMember == null && chain.isPacker()){
+            CallMethodUtils.sendState(chain,false);
+            chain.setPacker(false);
+        }
+    }*/
+
+    public void calcLocalPacker(Chain chain) throws Exception{
+        Properties properties = ConfigLoader.loadProperties(ConsensusConstant.PASSWORD_CONFIG_NAME);
+        String address = properties.getProperty(ConsensusConstant.PASSWORD, ConsensusConstant.PASSWORD);
+        MeetingMember member = getMember(AddressTool.getAddress(address),chain);
+        if (null != member) {
+            myMember = member;
         }
         if(myMember != null && !chain.isPacker()){
             CallMethodUtils.sendState(chain,true);
