@@ -53,13 +53,14 @@ public interface ContractCmdConstant {
     String TRANSFER = "sc_transfer";
     String TRANSFER_FEE = "sc_transfer_fee";
     String TOKEN_TRANSFER = "sc_token_transfer";
+    String TOKEN_BALANCE = "sc_token_balance";
     String INVOKE_VIEW = "sc_invoke_view";
     String CONSTRUCTOR = "sc_constructor";
     String IMPUTED_CREATE_GAS = "sc_imputed_create_gas";
     String IMPUTED_CALL_GAS = "sc_imputed_call_gas";
+    String CONTRACT_INFO = "sc_contract_info";
+    String CONTRACT_RESULT = "sc_contract_result";
     //TODO pierre 用户调用rpc
     String CONTRACT_TX = "sc_contract_tx";
-    String CONTRACT_RESULT = "sc_contract_result";
-    String TOKEN_BALANCE = "sc_token_balance";
     String TOKEN_ASSETS_LIST = "sc_token_assets_list";
 }

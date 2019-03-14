@@ -1,18 +1,18 @@
 /**
  * MIT License
- * <p>
+ *
  * Copyright (c) 2017-2019 nuls.io
- * <p>
+ *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- * <p>
+ *
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- * <p>
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -21,41 +21,28 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package io.nuls.contract.model.bo;
+package io.nuls.contract.model.dto;
 
+
+import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.NulsDigestData;
+import io.nuls.contract.model.txdata.ContractTransferData;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.List;
-
 /**
- * @author: PierreLuo
+ * @Author: PierreLuo
  */
 @Getter
 @Setter
-public class ContractMergedTransfer {
+public class ContractTransferDataDto{
+    private String orginTxHash;
+    private String contractAddress;
 
-    private byte[] from;
-    private BigInteger value;
-    private List<Output> outputs;
-
-
-    /**
-     * 智能合约交易hash
-     */
-    private NulsDigestData orginHash;
-
-    /**
-     * 合约转账(从合约转出)交易hash
-     */
-    private NulsDigestData hash;
-
-    public ContractMergedTransfer() {
-        outputs = new ArrayList<>();
+    public ContractTransferDataDto(ContractTransferData transferData) {
+        NulsDigestData thatOrginTxHash = transferData.getOrginTxHash();
+        this.orginTxHash = thatOrginTxHash == null ? null : thatOrginTxHash.getDigestHex();
+        this.contractAddress = AddressTool.getStringAddressByBytes(transferData.getContractAddress());
     }
-
 
 }

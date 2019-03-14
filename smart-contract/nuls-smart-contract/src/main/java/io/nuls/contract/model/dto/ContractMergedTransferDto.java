@@ -21,41 +21,51 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package io.nuls.contract.model.bo;
+package io.nuls.contract.model.dto;
 
+
+import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.NulsDigestData;
+import io.nuls.contract.model.bo.ContractMergedTransfer;
+import io.nuls.contract.model.bo.Output;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
+
+import static io.nuls.contract.util.ContractUtil.bigInteger2String;
 
 /**
  * @author: PierreLuo
  */
 @Getter
 @Setter
-public class ContractMergedTransfer {
+public class ContractMergedTransferDto {
 
-    private byte[] from;
-    private BigInteger value;
-    private List<Output> outputs;
+    private String txHash;
+    private String from;
+    private String value;
+    private List<ContractOutputDto> outputs;
+    private String orginTxHash;
 
-
-    /**
-     * 智能合约交易hash
-     */
-    private NulsDigestData orginHash;
-
-    /**
-     * 合约转账(从合约转出)交易hash
-     */
-    private NulsDigestData hash;
-
-    public ContractMergedTransfer() {
-        outputs = new ArrayList<>();
+    public ContractMergedTransferDto(ContractMergedTransfer transfer) {
+        this.from = AddressTool.getStringAddressByBytes(transfer.getFrom());
+        this.value = bigInteger2String(transfer.getValue());
+        NulsDigestData thatHash = transfer.getHash();
+        this.txHash = thatHash == null ? null : thatHash.getDigestHex();
+        NulsDigestData thatOrginTxHash = transfer.getOrginHash();
+        this.orginTxHash = thatOrginTxHash == null ? null : thatOrginTxHash.getDigestHex();
+        this.makeOutputs(transfer.getOutputs());
     }
 
+    private void makeOutputs(List<Output> outputs) {
+        if(outputs != null && !outputs.isEmpty()) {
+            this.outputs = new ArrayList<>(outputs.size());
+            for(Output output : outputs) {
+                this.outputs.add(new ContractOutputDto(output));
+            }
+        }
+    }
 
 }

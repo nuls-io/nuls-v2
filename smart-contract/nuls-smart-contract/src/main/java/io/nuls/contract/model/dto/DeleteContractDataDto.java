@@ -21,41 +21,26 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package io.nuls.contract.model.bo;
+package io.nuls.contract.model.dto;
 
-import io.nuls.base.data.NulsDigestData;
+
+import io.nuls.base.basic.AddressTool;
+import io.nuls.contract.model.txdata.ContractData;
 import lombok.Getter;
 import lombok.Setter;
-
-import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * @author: PierreLuo
  */
 @Getter
 @Setter
-public class ContractMergedTransfer {
+public class DeleteContractDataDto {
+    private String sender;
+    private String contractAddress;
 
-    private byte[] from;
-    private BigInteger value;
-    private List<Output> outputs;
-
-
-    /**
-     * 智能合约交易hash
-     */
-    private NulsDigestData orginHash;
-
-    /**
-     * 合约转账(从合约转出)交易hash
-     */
-    private NulsDigestData hash;
-
-    public ContractMergedTransfer() {
-        outputs = new ArrayList<>();
+    public DeleteContractDataDto(ContractData delete) {
+        this.sender = AddressTool.getStringAddressByBytes(delete.getSender());
+        this.contractAddress = AddressTool.getStringAddressByBytes(delete.getContractAddress());
     }
-
 
 }

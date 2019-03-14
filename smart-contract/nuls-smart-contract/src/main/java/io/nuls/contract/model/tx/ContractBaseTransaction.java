@@ -80,4 +80,13 @@ public abstract class ContractBaseTransaction<T extends TransactionLogicData> ex
             this.setTxData(txDataObj.serialize());
         }
     }
+
+    public void copyTx(Transaction tx) {
+        this.setType(tx.getType());
+        this.setCoinData(tx.getCoinData());
+        this.setTxData(tx.getTxData());
+        this.setTime(tx.getTime());
+        this.setTransactionSignature(tx.getTransactionSignature());
+        this.setRemark(tx.getRemark());
+    }
 }

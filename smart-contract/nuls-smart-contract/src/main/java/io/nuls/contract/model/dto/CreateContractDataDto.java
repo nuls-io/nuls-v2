@@ -21,41 +21,39 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package io.nuls.contract.model.bo;
+package io.nuls.contract.model.dto;
 
-import io.nuls.base.data.NulsDigestData;
+
+import io.nuls.base.basic.AddressTool;
+import io.nuls.contract.model.txdata.ContractData;
 import lombok.Getter;
 import lombok.Setter;
+import org.spongycastle.util.encoders.Hex;
 
-import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.List;
+import static io.nuls.contract.util.ContractUtil.bigInteger2String;
 
 /**
  * @author: PierreLuo
  */
 @Getter
 @Setter
-public class ContractMergedTransfer {
+public class CreateContractDataDto {
+    private String sender;
+    private String contractAddress;
+    private String value;
+    private String hexCode;
+    private long gasLimit;
+    private long price;
+    private String[][] args;
 
-    private byte[] from;
-    private BigInteger value;
-    private List<Output> outputs;
-
-
-    /**
-     * 智能合约交易hash
-     */
-    private NulsDigestData orginHash;
-
-    /**
-     * 合约转账(从合约转出)交易hash
-     */
-    private NulsDigestData hash;
-
-    public ContractMergedTransfer() {
-        outputs = new ArrayList<>();
+    public CreateContractDataDto(ContractData create) {
+        this.sender = AddressTool.getStringAddressByBytes(create.getSender());
+        this.contractAddress = AddressTool.getStringAddressByBytes(create.getContractAddress());
+        this.value = bigInteger2String(create.getValue());
+        this.hexCode = Hex.toHexString(create.getCode());
+        this.gasLimit = create.getGasLimit();
+        this.price = create.getPrice();
+        this.args = create.getArgs();
     }
-
 
 }

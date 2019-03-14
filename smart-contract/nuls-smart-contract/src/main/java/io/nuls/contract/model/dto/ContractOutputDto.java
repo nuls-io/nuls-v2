@@ -1,7 +1,7 @@
 /**
  * MIT License
  * <p>
- * Copyright (c) 2017-2019 nuls.io
+ * Copyright (c) 2017-2018 nuls.io
  * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -21,41 +21,27 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package io.nuls.contract.model.bo;
+package io.nuls.contract.model.dto;
 
-import io.nuls.base.data.NulsDigestData;
+import io.nuls.base.basic.AddressTool;
+import io.nuls.contract.model.bo.Output;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.List;
+import static io.nuls.contract.util.ContractUtil.bigInteger2String;
 
 /**
  * @author: PierreLuo
+ * @date: 2019-03-06
  */
 @Getter
 @Setter
-public class ContractMergedTransfer {
+public class ContractOutputDto {
+    private String to;
+    private String value;
 
-    private byte[] from;
-    private BigInteger value;
-    private List<Output> outputs;
-
-
-    /**
-     * 智能合约交易hash
-     */
-    private NulsDigestData orginHash;
-
-    /**
-     * 合约转账(从合约转出)交易hash
-     */
-    private NulsDigestData hash;
-
-    public ContractMergedTransfer() {
-        outputs = new ArrayList<>();
+    public ContractOutputDto(Output output) {
+        this.to = AddressTool.getStringAddressByBytes(output.getTo());
+        this.value = bigInteger2String(output.getValue());
     }
-
-
 }

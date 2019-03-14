@@ -24,37 +24,56 @@
 package io.nuls.contract.rpc.resource;
 
 import io.nuls.base.basic.AddressTool;
+import io.nuls.base.constant.TxStatusEnum;
 import io.nuls.base.data.BlockHeader;
+import io.nuls.base.data.NulsDigestData;
+import io.nuls.base.data.Transaction;
 import io.nuls.contract.constant.ContractConstant;
 import io.nuls.contract.constant.ContractErrorCode;
 import io.nuls.contract.helper.ContractHelper;
-import io.nuls.contract.model.dto.ContractInfoDto;
+import io.nuls.contract.model.bo.ContractResult;
+import io.nuls.contract.model.bo.ContractTokenInfo;
+import io.nuls.contract.model.dto.*;
 import io.nuls.contract.model.po.ContractAddressInfoPo;
+import io.nuls.contract.model.po.ContractTokenTransferInfoPo;
+import io.nuls.contract.model.tx.ContractBaseTransaction;
+import io.nuls.contract.model.txdata.ContractData;
 import io.nuls.contract.rpc.call.BlockCall;
+import io.nuls.contract.rpc.call.TransactionCall;
+import io.nuls.contract.service.ContractService;
 import io.nuls.contract.service.ContractTxService;
+import io.nuls.contract.storage.ContractTokenTransferStorageService;
 import io.nuls.contract.util.ContractLedgerUtil;
 import io.nuls.contract.util.ContractUtil;
 import io.nuls.contract.util.MapUtil;
+import io.nuls.contract.vm.program.ProgramExecutor;
 import io.nuls.contract.vm.program.ProgramMethod;
 import io.nuls.contract.vm.program.ProgramResult;
+import io.nuls.contract.vm.program.ProgramStatus;
 import io.nuls.rpc.cmd.BaseCmd;
 import io.nuls.rpc.model.CmdAnnotation;
 import io.nuls.rpc.model.Parameter;
 import io.nuls.rpc.model.message.Response;
 import io.nuls.tools.basic.Result;
+import io.nuls.tools.basic.VarInt;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
+import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.log.Log;
+import io.nuls.tools.model.ArraysTool;
 import io.nuls.tools.model.StringUtils;
 import org.spongycastle.util.encoders.Hex;
 
+import java.io.IOException;
 import java.math.BigInteger;
-import java.util.Map;
+import java.util.*;
 
 import static io.nuls.contract.constant.ContractCmdConstant.*;
 import static io.nuls.contract.constant.ContractConstant.MAX_GASLIMIT;
 import static io.nuls.contract.constant.ContractErrorCode.*;
+import static io.nuls.contract.util.ContractUtil.bigInteger2String;
 import static io.nuls.contract.util.ContractUtil.checkVmResultAndReturn;
+import static org.apache.commons.lang3.StringUtils.EMPTY;
 
 /**
  * @author: PierreLuo
@@ -66,7 +85,11 @@ public class ContractResource extends BaseCmd {
     @Autowired
     private ContractHelper contractHelper;
     @Autowired
+    private ContractService contractService;
+    @Autowired
     private ContractTxService contractTxService;
+    @Autowired
+    private ContractTokenTransferStorageService contractTokenTransferStorageService;
 
     @CmdAnnotation(cmd = CREATE, version = 1.0, description = "invoke contract")
     @Parameter(parameterName = "chainId", parameterType = "int")
@@ -713,6 +736,34 @@ public class ContractResource extends BaseCmd {
         }
     }
 
+    @CmdAnnotation(cmd = TOKEN_BALANCE, version = 1.0, description = "NRC20-token balance")
+    @Parameter(parameterName = "chainId", parameterType = "int")
+    @Parameter(parameterName = "contractAddress", parameterType = "String")
+    @Parameter(parameterName = "address", parameterType = "String")
+    public Response tokenBalance(Map<String,Object> params){
+        try {
+            Integer chainId = (Integer) params.get("chainId");
+            String contractAddress = (String) params.get("contractAddress");
+            String address = (String) params.get("address");
+
+            Result<ContractTokenInfo> result = contractHelper.getContractToken(chainId, address, contractAddress);
+            if(result.isFailed()) {
+                return failed(result.getErrorCode());
+            }
+            ContractTokenInfo data = result.getData();
+            ContractTokenInfoDto dto = null;
+            if(data != null) {
+                dto = new ContractTokenInfoDto(data);
+                dto.setStatus(data.getStatus());
+            }
+
+            return success(dto);
+        } catch (Exception e) {
+            Log.error(e);
+            return failed(e.getMessage());
+        }
+    }
+
     @CmdAnnotation(cmd = INVOKE_VIEW, version = 1.0, description = "invoke view contract")
     @Parameter(parameterName = "chainId", parameterType = "int")
     @Parameter(parameterName = "contractAddress", parameterType = "String")
@@ -803,6 +854,253 @@ public class ContractResource extends BaseCmd {
         }
     }
 
+    @CmdAnnotation(cmd = CONTRACT_INFO, version = 1.0, description = "contract info")
+    @Parameter(parameterName = "chainId", parameterType = "int")
+    @Parameter(parameterName = "contractAddress", parameterType = "String")
+    public Response contractInfo(Map<String,Object> params){
+        try {
+            Integer chainId = (Integer) params.get("chainId");
+            String contractAddress = (String) params.get("contractAddress");
 
+            if (!AddressTool.validAddress(chainId, contractAddress)) {
+                return failed(ADDRESS_ERROR);
+            }
+
+            byte[] contractAddressBytes = AddressTool.getAddress(contractAddress);
+            if(!ContractLedgerUtil.isExistContractAddress(chainId, contractAddressBytes)) {
+                return failed(CONTRACT_ADDRESS_NOT_EXIST);
+            }
+
+            Result<ContractAddressInfoPo> contractAddressInfoResult = contractHelper.getContractAddressInfo(chainId, contractAddressBytes);
+            if(contractAddressInfoResult.isFailed()) {
+                return failed(contractAddressInfoResult.getErrorCode());
+            }
+
+            ContractAddressInfoPo contractAddressInfoPo = contractAddressInfoResult.getData();
+            if(contractAddressInfoPo == null) {
+                return failed(ContractErrorCode.CONTRACT_ADDRESS_NOT_EXIST);
+            }
+
+            BlockHeader blockHeader = BlockCall.getLatestBlockHeader(chainId);
+
+            if(contractAddressInfoPo.isLock(blockHeader.getHeight())) {
+                return failed(ContractErrorCode.CONTRACT_LOCK);
+            }
+
+            // 当前区块状态根
+            byte[] prevStateRoot = ContractUtil.getStateRoot(blockHeader);
+
+            ProgramExecutor track = contractHelper.getProgramExecutor(chainId).begin(prevStateRoot);
+            ProgramStatus status = track.status(contractAddressBytes);
+            List<ProgramMethod> methods = track.method(contractAddressBytes);
+
+            Map<String, Object> resultMap = MapUtil.createLinkedHashMap(8);
+            try {
+                byte[] createTxHash = contractAddressInfoPo.getCreateTxHash();
+                NulsDigestData create = new NulsDigestData();
+                create.parse(createTxHash, 0);
+                resultMap.put("createTxHash", create.getDigestHex());
+            } catch (Exception e) {
+                Log.error("createTxHash parse error.", e);
+            }
+
+            resultMap.put("address", contractAddress);
+            resultMap.put("creater", AddressTool.getStringAddressByBytes(contractAddressInfoPo.getSender()));
+            resultMap.put("createTime", contractAddressInfoPo.getCreateTime());
+            resultMap.put("blockHeight", contractAddressInfoPo.getBlockHeight());
+            resultMap.put("isNrc20", contractAddressInfoPo.isNrc20());
+            if(contractAddressInfoPo.isNrc20()) {
+                resultMap.put("nrc20TokenName", contractAddressInfoPo.getNrc20TokenName());
+                resultMap.put("nrc20TokenSymbol", contractAddressInfoPo.getNrc20TokenSymbol());
+                resultMap.put("decimals", contractAddressInfoPo.getDecimals());
+                resultMap.put("totalSupply", ContractUtil.bigInteger2String(contractAddressInfoPo.getTotalSupply()));
+            }
+            resultMap.put("status", status.name());
+            resultMap.put("method", methods);
+            return success(resultMap);
+        } catch (Exception e) {
+            Log.error(e);
+            return failed(e.getMessage());
+        }
+    }
+
+
+    @CmdAnnotation(cmd = CONTRACT_RESULT, version = 1.0, description = "contract result")
+    @Parameter(parameterName = "chainId", parameterType = "int")
+    @Parameter(parameterName = "hash", parameterType = "String")
+    public Response contractResult(Map<String,Object> params){
+        try {
+            Integer chainId = (Integer) params.get("chainId");
+            String hash = (String) params.get("hash");
+
+            if (StringUtils.isBlank(hash)) {
+                return failed(NULL_PARAMETER);
+            }
+            if (!NulsDigestData.validHash(hash)) {
+                return failed(PARAMETER_ERROR);
+            }
+
+            ContractResultDto contractResultDto = null;
+            boolean flag = true;
+            String msg = EMPTY;
+            do {
+                NulsDigestData txHash = NulsDigestData.fromDigestHex(hash);
+                Transaction tx = TransactionCall.getConfirmedTx(chainId, hash);
+                if (tx == null) {
+                    flag = false;
+                    msg = TX_NOT_EXIST.getMsg();
+                    break;
+                } else {
+                    if (!ContractUtil.isContractTransaction(tx)) {
+                        flag = false;
+                        msg = ContractErrorCode.NON_CONTRACTUAL_TRANSACTION.getMsg();
+                        break;
+                    }
+                }
+                ContractBaseTransaction tx1 = ContractUtil.convertContractTx(tx);
+                contractResultDto = this.makeContractResultDto(chainId, tx1, txHash);
+                if (contractResultDto == null){
+                    flag = false;
+                    msg = DATA_NOT_FOUND.getMsg();
+                    break;
+                }
+            } while (false);
+            Map<String, Object> resultMap = MapUtil.createLinkedHashMap(2);
+            resultMap.put("flag", flag);
+            if(!flag && StringUtils.isNotBlank(msg)) {
+                resultMap.put("msg", msg);
+            }
+            if(flag && contractResultDto != null) {
+                List<ContractTokenTransferDto> tokenTransfers = contractResultDto.getTokenTransfers();
+                List<ContractTokenTransferDto> realTokenTransfers = this.filterRealTokenTransfers(chainId, tokenTransfers);
+                contractResultDto.setTokenTransfers(realTokenTransfers);
+                resultMap.put("data", contractResultDto);
+            }
+            return success(resultMap);
+        } catch (Exception e) {
+            Log.error(e);
+            return failed(e.getMessage());
+        }
+    }
+
+    private ContractResultDto makeContractResultDto(int chainId, ContractBaseTransaction tx1, NulsDigestData txHash) throws NulsException, IOException {
+        ContractResultDto contractResultDto = null;
+        if(tx1.getType() == ContractConstant.TX_TYPE_CONTRACT_TRANSFER) {
+            return null;
+        }
+        ContractResult contractExecuteResult = contractService.getContractExecuteResult(chainId, txHash);
+        if(contractExecuteResult != null) {
+            Result<ContractAddressInfoPo> contractAddressInfoResult =
+                    contractHelper.getContractAddressInfo(chainId, contractExecuteResult.getContractAddress());
+            ContractAddressInfoPo po = contractAddressInfoResult.getData();
+            if(po != null && po.isNrc20()) {
+                contractExecuteResult.setNrc20(true);
+                if(contractExecuteResult.isSuccess()) {
+                    contractResultDto = new ContractResultDto(chainId, contractExecuteResult, tx1);
+                } else {
+                    ContractData contractData = (ContractData) tx1.getTxDataObj();
+                    byte[] sender = contractData.getSender();
+                    byte[] infoKey = ArraysTool.concatenate(sender, txHash.serialize(), new VarInt(0).encode());
+                    Result<ContractTokenTransferInfoPo> tokenTransferResult = contractTokenTransferStorageService.getTokenTransferInfo(chainId, infoKey);
+                    ContractTokenTransferInfoPo transferInfoPo = tokenTransferResult.getData();
+                    contractResultDto = new ContractResultDto(chainId, contractExecuteResult, tx1, transferInfoPo);
+                }
+            } else {
+                contractResultDto = new ContractResultDto(chainId, contractExecuteResult, tx1);
+            }
+        }
+        return contractResultDto;
+    }
+
+    private List<ContractTokenTransferDto> filterRealTokenTransfers(int chainId, List<ContractTokenTransferDto> tokenTransfers) {
+        if(tokenTransfers == null || tokenTransfers.isEmpty()) {
+            return tokenTransfers;
+        }
+        List<ContractTokenTransferDto> resultDto = new ArrayList<>();
+        Map<String, ContractAddressInfoPo> cache = MapUtil.createHashMap(tokenTransfers.size());
+        for(ContractTokenTransferDto tokenTransfer : tokenTransfers) {
+            try {
+                if(StringUtils.isBlank(tokenTransfer.getName())) {
+                    String contractAddress = tokenTransfer.getContractAddress();
+                    ContractAddressInfoPo po = cache.get(contractAddress);
+                    if(po == null) {
+                        po = contractHelper.getContractAddressInfo(
+                                chainId, AddressTool.getAddress(contractAddress)).getData();
+                        cache.put(contractAddress, po);
+                    }
+                    if(po == null || !po.isNrc20()) {
+                        continue;
+                    }
+                    tokenTransfer.setNrc20Info(po);
+                    resultDto.add(tokenTransfer);
+                }
+            } catch (Exception e) {
+                Log.error(e);
+            }
+        }
+        return resultDto;
+    }
+
+    @CmdAnnotation(cmd = CONTRACT_TX, version = 1.0, description = "contract tx")
+    @Parameter(parameterName = "chainId", parameterType = "int")
+    @Parameter(parameterName = "hash", parameterType = "String")
+    public Response contractTx(Map<String,Object> params){
+        try {
+            Integer chainId = (Integer) params.get("chainId");
+            String hash = (String) params.get("hash");
+
+            if (StringUtils.isBlank(hash)) {
+                return failed(NULL_PARAMETER);
+            }
+            if (!NulsDigestData.validHash(hash)) {
+                return failed(PARAMETER_ERROR);
+            }
+
+            NulsDigestData txHash = NulsDigestData.fromDigestHex(hash);
+            Transaction tx = TransactionCall.getConfirmedTx(chainId, hash);
+            if (tx == null) {
+                return failed(TX_NOT_EXIST);
+            } else {
+                if (!ContractUtil.isContractTransaction(tx)) {
+                    return failed(NON_CONTRACTUAL_TRANSACTION);
+                }
+            }
+            ContractBaseTransaction tx1 = ContractUtil.convertContractTx(tx);
+            tx1.setStatus(TxStatusEnum.CONFIRMED);
+            ContractTransactionDto txDto = new ContractTransactionDto(chainId, tx1);
+            // 计算交易实际发生的金额
+            calTransactionValue(txDto);
+            // 获取合约执行结果
+            ContractResultDto contractResultDto = this.makeContractResultDto(chainId, tx1, txHash);
+            if (contractResultDto != null){
+                txDto.setContractResult(contractResultDto);
+            }
+
+            return success(txDto);
+        } catch (Exception e) {
+            Log.error(e);
+            return failed(e.getMessage());
+        }
+    }
+
+    private void calTransactionValue(ContractTransactionDto txDto) {
+        if(txDto == null) {
+            return;
+        }
+        List<InputDto> inputDtoList = txDto.getInputs();
+        Set<String> inputAdressSet = new HashSet<>(inputDtoList.size());
+        for(InputDto inputDto : inputDtoList) {
+            inputAdressSet.add(inputDto.getAddress());
+        }
+        BigInteger value = BigInteger.ZERO;
+        List<OutputDto> outputDtoList = txDto.getOutputs();
+        for(OutputDto outputDto : outputDtoList) {
+            if(inputAdressSet.contains(outputDto.getAddress())) {
+                continue;
+            }
+            value = value.add(new BigInteger(outputDto.getAmount()));
+        }
+        txDto.setValue(bigInteger2String(value));
+    }
 
 }
