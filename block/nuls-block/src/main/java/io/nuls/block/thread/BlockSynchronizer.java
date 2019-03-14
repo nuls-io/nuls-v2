@@ -24,7 +24,9 @@ import com.google.common.collect.Lists;
 import io.nuls.base.data.Block;
 import io.nuls.base.data.BlockHeader;
 import io.nuls.base.data.NulsDigestData;
+import io.nuls.block.constant.LocalBlockStateEnum;
 import io.nuls.block.constant.RunningStatusEnum;
+import io.nuls.block.exception.ChainRuntimeException;
 import io.nuls.block.manager.ChainManager;
 import io.nuls.block.manager.ContextManager;
 import io.nuls.block.model.ChainContext;
@@ -50,6 +52,7 @@ import java.util.concurrent.*;
 import java.util.concurrent.locks.StampedLock;
 
 import static io.nuls.block.constant.Constant.*;
+import static io.nuls.block.constant.LocalBlockStateEnum.*;
 
 /**
  * 区块同步主线程,管理多条链的区块同步
@@ -103,6 +106,7 @@ public class BlockSynchronizer implements Runnable {
                     context.setLatestBlock(block);
                     ChainManager.setMasterChain(chainId, ChainGenerator.generateMasterChain(chainId, block, blockService));
                 }
+                waitUntilNetworkStable(chainId);
                 while (!synchronize(chainId)) {
                     Thread.sleep(SYN_SLEEP_INTERVAL);
                 }
@@ -113,33 +117,34 @@ public class BlockSynchronizer implements Runnable {
         }
     }
 
-    private List<Node> waitUntilNetworkStable(int chainId){
+    /**
+     * 等待网络稳定
+     *
+     * @param chainId
+     * @return
+     */
+    private void waitUntilNetworkStable(int chainId) throws InterruptedException {
         NulsLogger commonLog = ContextManager.getContext(chainId).getCommonLog();
         List<Node> availableNodesFirst = NetworkUtil.getAvailableNodes(chainId);
         List<Node> availableNodesSecond;
         int sizeFirst = availableNodesFirst.size();
-        try {
-            int sizeSecond;
-            while (true) {
-                Thread.sleep(WAIT_NETWORK_INTERVAL);
-                availableNodesSecond = NetworkUtil.getAvailableNodes(chainId);
-                sizeSecond = availableNodesSecond.size();
-                if (sizeSecond == sizeFirst) {
-                    break;
-                }
-                commonLog.debug("sizeFirst=" + sizeFirst + ", sizeSecond=" + sizeSecond+ ", wait Until Network Stable..........");
-                sizeFirst = sizeSecond;
+        int sizeSecond;
+        while (true) {
+            Thread.sleep(WAIT_NETWORK_INTERVAL);
+            availableNodesSecond = NetworkUtil.getAvailableNodes(chainId);
+            sizeSecond = availableNodesSecond.size();
+            if (sizeSecond == sizeFirst) {
+                break;
             }
-        } catch (InterruptedException e) {
-            return List.of();
+            commonLog.debug("sizeFirst=" + sizeFirst + ", sizeSecond=" + sizeSecond+ ", wait Until Network Stable..........");
+            sizeFirst = sizeSecond;
         }
-        return availableNodesSecond;
     }
 
     private boolean synchronize(int chainId) throws Exception {
         NulsLogger commonLog = ContextManager.getContext(chainId).getCommonLog();
         //1.调用网络模块接口获取当前chainId网络的可用节点
-        List<Node> availableNodes = waitUntilNetworkStable(chainId);
+        List<Node> availableNodes = NetworkUtil.getAvailableNodes(chainId);
         //2.判断可用节点数是否满足最小配置
         ChainContext context = ContextManager.getContext(chainId);
         ChainParameters parameters = context.getParameters();
@@ -167,11 +172,22 @@ public class BlockSynchronizer implements Runnable {
                 return true;
             }
             //检查本地区块状态
-            if (!checkLocalBlock(chainId, params)) {
+            LocalBlockStateEnum stateEnum = checkLocalBlock(chainId, params);
+            if (stateEnum.equals(CONSISTENT)) {
                 commonLog.warn("chain-" + chainId + ", local blocks is newest");
                 context.setStatus(RunningStatusEnum.RUNNING);
                 ConsensusUtil.notice(chainId, CONSENSUS_WORKING);
                 return true;
+            }
+            if (stateEnum.equals(UNCERTAINTY)) {
+                commonLog.warn("chain-" + chainId + ", The number of rolled back blocks exceeded the configured value");
+                NetworkUtil.resetNetwork(chainId);
+                waitUntilNetworkStable(chainId);
+                return false;
+            }
+            if (stateEnum.equals(CONFLICT)) {
+                commonLog.warn("chain-" + chainId + ", The local GenesisBlock differ from network");
+                throw new ChainRuntimeException("The local GenesisBlock differ from network");
             }
             context.setStatus(RunningStatusEnum.SYNCHRONIZING);
             PriorityBlockingQueue<Node> nodes = params.getNodes();
@@ -322,18 +338,22 @@ public class BlockSynchronizer implements Runnable {
      * @param params
      * @return
      */
-    private boolean checkLocalBlock(int chainId, BlockDownloaderParams params) {
+    private LocalBlockStateEnum checkLocalBlock(int chainId, BlockDownloaderParams params) {
         long localHeight = params.getLocalLatestHeight();
         long netHeight = params.getNetLatestHeight();
         //如果本地高度是0，网络高度大于0，直接进行同步？
-        if (localHeight == 0 && netHeight > 0) {
-            return true;
-        }
+//        if (localHeight == 0 && netHeight > 0) {
+//            return CONSISTENT;
+//        }
         //得到共同高度
         long commonHeight = Math.min(localHeight, netHeight);
         if (checkHashEquality(chainId, params)) {
             //commonHeight区块的hash一致,正常,比远程节点落后,下载区块
-            return commonHeight < netHeight;
+            if (commonHeight < netHeight) {
+                return INCONSISTENT;
+            } else {
+                return CONSISTENT;
+            }
         } else {
             //需要回滚的场景,要满足可用节点数(10个)>配置,一致可用节点数(6个)占比超80%两个条件
             ChainParameters parameters = ContextManager.getContext(chainId).getParameters();
@@ -343,21 +363,24 @@ public class BlockSynchronizer implements Runnable {
                 return checkRollback(0, chainId, params);
             }
         }
-        return false;
+        return INCONSISTENT;
     }
 
-    private boolean checkRollback(int rollbackCount, int chainId, BlockDownloaderParams params) {
+    private LocalBlockStateEnum checkRollback(int rollbackCount, int chainId, BlockDownloaderParams params) {
         //每次最多回滚1000个区块,等待下次同步,这样可以避免被恶意节点攻击,大量回滚正常区块.
         ChainParameters parameters = ContextManager.getContext(chainId).getParameters();
-        if (params.getLocalLatestHeight() == 0 || rollbackCount >= parameters.getMaxRollback()) {
-            return false;
+        if (params.getLocalLatestHeight() == 0) {
+            return CONFLICT;
+        }
+        if (rollbackCount >= parameters.getMaxRollback()) {
+            return UNCERTAINTY;
         }
         blockService.rollbackBlock(chainId, params.getLocalLatestHeight(), true);
         BlockHeader latestBlockHeader = blockService.getLatestBlockHeader(chainId);
         params.setLocalLatestHeight(latestBlockHeader.getHeight());
         params.setLocalLatestHash(latestBlockHeader.getHash());
         if (checkHashEquality(chainId, params)) {
-            return true;
+            return CONSISTENT;
         }
         return checkRollback(rollbackCount + 1, chainId, params);
     }
