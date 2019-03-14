@@ -225,4 +225,11 @@ public interface ConsensusService {
      * @return Result
      * */
     Result getAgentAddressList(Map<String,Object> params);
+
+    /**
+     * 获取种子节点列表
+     * @param params
+     * @return Result
+     * */
+    Result getSeedNodeList(Map<String,Object> params);
 }

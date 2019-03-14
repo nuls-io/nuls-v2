@@ -41,7 +41,7 @@ public class ConsensusManager {
      * @param self      agent meeting entity/节点打包信息
      * @param round     latest local round/本地最新轮次信息
      */
-    public void addConsensusTx(Chain chain, BlockHeader bestBlock, List<Transaction> txList, MeetingMember self, MeetingRound round) throws NulsException, IOException {
+    public void addConsensusTx(Chain chain, BlockHeader bestBlock, List<Transaction> txList, MeetingMember self, MeetingRound round) throws Exception {
         /*
         * NULS2.0共识奖励不需要锁定
         * */

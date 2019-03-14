@@ -42,12 +42,12 @@ public class ConfigurationLoader {
     public ConfigurationLoader(){
         ModuleConfigParser json = new JsonModuleConfigParser();
         parserMap.put(json.fileSuffix(),json);
-        ModuleConfigParser properties = new PropertiesModuleConfigParser();
-        parserMap.put(properties.fileSuffix(),properties);
         ModuleConfigParser ini = new IniModuleConfigParser();
         parserMap.put(ini.fileSuffix(),ini);
         ModuleConfigParser ncf = new NcfModuleConfigParser();
         parserMap.put(ncf.fileSuffix(),ncf);
+        ModuleConfigParser properties = new PropertiesModuleConfigParser();
+        parserMap.put(properties.fileSuffix(),properties);
     }
 
 

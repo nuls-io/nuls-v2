@@ -56,7 +56,13 @@ public class BlockValidator {
       if (!blockHeader.getMerkleHash().equals(NulsDigestData.calcMerkleDigestData(block.getTxHashList()))) {
          throw new NulsException(ConsensusErrorCode.MERKEL_HASH_ERROR);
       }
-      MeetingRound currentRound = roundValidate(isDownload,chain,blockHeader);
+      MeetingRound currentRound = null;
+      try {
+         currentRound = roundValidate(isDownload,chain,blockHeader);
+      }catch (Exception e){
+         throw new NulsException(e);
+      }
+
       BlockExtendsData extendsData = new BlockExtendsData(blockHeader.getExtend());
       MeetingMember member = currentRound.getMember(extendsData.getPackingIndexOfRound());
       boolean validResult = punishValidate(block,currentRound,member,chain);
@@ -77,7 +83,7 @@ public class BlockValidator {
     * @param chain             chain info
     * @param blockHeader       block header info
     * */
-   private MeetingRound roundValidate(boolean isDownload, Chain chain, BlockHeader blockHeader)throws NulsException {
+   private MeetingRound roundValidate(boolean isDownload, Chain chain, BlockHeader blockHeader)throws Exception {
       BlockExtendsData extendsData = new BlockExtendsData(blockHeader.getExtend());
       BlockHeader bestBlockHeader = chain.getNewestHeader();
       BlockExtendsData bestExtendsData = new BlockExtendsData(bestBlockHeader.getExtend());

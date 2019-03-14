@@ -114,7 +114,7 @@ public class RoundManager {
      *
      * @param chain     chain info
      * */
-    public void checkIsNeedReset(Chain chain) throws NulsException{
+    public void checkIsNeedReset(Chain chain) throws Exception{
         /*
         1.如果本地不存在轮次信息,则初始化本地轮次信息
         2.如果存在且，本地最新区块轮次小于本地计算的最新轮次，则重置本地轮次信息
@@ -167,7 +167,7 @@ public class RoundManager {
      *
      * @param chain            chain info
      * */
-    public void initRound(Chain chain) throws NulsException{
+    public void initRound(Chain chain) throws Exception{
         //resetRound(chain,false);
         MeetingRound currentRound = resetRound(chain,false);
         /*
@@ -198,7 +198,7 @@ public class RoundManager {
      * @param isRealTime 是否根据最新时间计算轮次/Whether to calculate rounds based on current time
      * @return MeetingRound
      * */
-    public MeetingRound resetRound(Chain chain,boolean isRealTime) throws NulsException{
+    public MeetingRound resetRound(Chain chain,boolean isRealTime) throws Exception{
         chain.getRound_lock().lock();
         try {
             MeetingRound round = getCurrentRound(chain);
@@ -254,7 +254,7 @@ public class RoundManager {
      * @param isRealTime  是否根据最新时间计算轮次/Whether to calculate rounds based on current time
      * @return MeetingRound
      * */
-    public MeetingRound getRound(Chain chain, BlockExtendsData roundData, boolean isRealTime) throws NulsException{
+    public MeetingRound getRound(Chain chain, BlockExtendsData roundData, boolean isRealTime) throws Exception{
         chain.getRound_lock().lock();
         try {
             if (isRealTime && roundData == null) {
@@ -276,7 +276,7 @@ public class RoundManager {
      * @param chain           chain info
      * @return MeetingRound
      * */
-    private MeetingRound getRoundByRealTime(Chain chain) throws NulsException{
+    private MeetingRound getRoundByRealTime(Chain chain) throws Exception{
         BlockHeader bestBlockHeader = chain.getNewestHeader();
         BlockHeader startBlockHeader = bestBlockHeader;
         BlockExtendsData bestRoundData = new BlockExtendsData(bestBlockHeader.getExtend());
@@ -319,7 +319,7 @@ public class RoundManager {
      * @param chain          chain info
      * @return MeetingRound
      * */
-    private MeetingRound getRoundByNewestBlock(Chain chain) throws NulsException{
+    private MeetingRound getRoundByNewestBlock(Chain chain) throws Exception{
         BlockHeader bestBlockHeader = chain.getNewestHeader();
         BlockExtendsData extendsData = new BlockExtendsData(bestBlockHeader.getExtend());
         extendsData.setRoundStartTime(extendsData.getRoundEndTime(chain.getConfig().getPackingInterval()));
@@ -335,7 +335,7 @@ public class RoundManager {
      * @param roundData  区块里的轮次信息/block extends entity
      * @return  MeetingRound
      * */
-    private MeetingRound getRoundByExpectedRound(Chain chain,BlockExtendsData roundData) throws NulsException{
+    private MeetingRound getRoundByExpectedRound(Chain chain,BlockExtendsData roundData) throws Exception{
         BlockHeader startBlockHeader = chain.getNewestHeader();
         long roundIndex = roundData.getRoundIndex();
         long roundStartTime = roundData.getRoundStartTime();
@@ -345,7 +345,7 @@ public class RoundManager {
         return calculationRound(chain,startBlockHeader, roundIndex, roundStartTime);
     }
 
-    public MeetingRound getRoundByRoundIndex(Chain chain,long roundIndex,long roundStartTime )throws NulsException{
+    public MeetingRound getRoundByRoundIndex(Chain chain,long roundIndex,long roundStartTime )throws Exception{
         BlockHeader startBlockHeader = chain.getNewestHeader();
         if (startBlockHeader.getHeight() != 0L) {
             startBlockHeader = getFirstBlockOfPreRound(chain,roundIndex);
@@ -363,7 +363,7 @@ public class RoundManager {
      * @param startTime          轮次开始打包时间/start time
      * */
     @SuppressWarnings("unchecked")
-    private MeetingRound calculationRound(Chain chain,BlockHeader startBlockHeader, long index, long startTime) throws NulsException{
+    private MeetingRound calculationRound(Chain chain,BlockHeader startBlockHeader, long index, long startTime) throws Exception{
         MeetingRound round = new MeetingRound();
         round.setIndex(index);
         round.setStartTime(startTime);
