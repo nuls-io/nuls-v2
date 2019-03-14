@@ -15,7 +15,9 @@ import java.util.function.Function;
 /**
  * @Author: zhoulijun
  * @Time: 2019-03-13 19:39
- * @Description: 功能描述
+ * @Description:
+ * 配置项注入到成员变量中
+ * config setting to field
  */
 public class ConfigSetting {
 

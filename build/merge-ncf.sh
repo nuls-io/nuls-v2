@@ -49,15 +49,15 @@ do
 		titleList[${#titleList[@]}]="$TEMP"
 	fi
 done
-#echo ${titleList[@]}
+#echo ${titleList[@]}  # Section list
 for title in ${titleList[@]}
 do
 	#echo $title
-	declare -a itemName
+	declare -a itemName=()  #存放item的数组
 	titleTemp=""
-	for line in `cat $moduleTmepFile`
+	for line in `cat $moduleTmepFile`    #遍历默认module.ncf
 	do
-	TEMP=$(echo $line|grep -Eo '\[.+\]')
+	TEMP=$(echo $line|grep -Eo '\[.+\]')  #存放当前Section
 	if [ -n "$TEMP" ]; then
 		titleTemp=$TEMP
 	fi
