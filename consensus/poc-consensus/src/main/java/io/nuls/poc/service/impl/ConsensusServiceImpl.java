@@ -779,6 +779,8 @@ public class ConsensusServiceImpl implements ConsensusService {
         } catch (NulsException e) {
             chain.getLoggerMap().get(ConsensusConstant.BASIC_LOGGER_NAME).error(e);
             return Result.getFailed(e.getErrorCode());
+        }catch (Exception e){
+            return Result.getFailed(ConsensusErrorCode.DATA_ERROR);
         }
     }
 
