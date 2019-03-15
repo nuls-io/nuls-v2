@@ -14,7 +14,6 @@ import io.nuls.tools.model.ObjectUtils;
 import io.nuls.tools.parse.JSONUtils;
 import io.nuls.transaction.cache.PackablePool;
 import io.nuls.transaction.constant.TxCmd;
-import io.nuls.transaction.constant.TxConfig;
 import io.nuls.transaction.constant.TxConstant;
 import io.nuls.transaction.constant.TxErrorCode;
 import io.nuls.transaction.manager.ChainManager;
@@ -54,14 +53,10 @@ public class TransactionCmd extends BaseCmd {
     private ChainManager chainManager;
     @Autowired
     private TransactionManager transactionManager;
-//    @Autowired
-//    private TransactionH2Service transactionH2Service;
-
     @Autowired
     private PackablePool packablePool;
     @Autowired
     private UnconfirmedTxStorageService unconfirmedTxStorageService;
-
 
     /**
      * Register module transactions, validators, processors(commit, rollback), etc.
@@ -78,7 +73,7 @@ public class TransactionCmd extends BaseCmd {
     @Parameter(parameterName = "rollback", parameterType = "String")
     @Parameter(parameterName = "list", parameterType = "List")
     public Response register(Map params) {
-        Map<String, Boolean> map = new HashMap<>(TxConstant.INIT_CAPACITY_16);
+        Map<String, Boolean> map = new HashMap<>(TxConstant.INIT_CAPACITY_2);
         boolean result = false;
         Chain chain = null;
         try {
@@ -142,7 +137,7 @@ public class TransactionCmd extends BaseCmd {
     @Parameter(parameterName = "chainId", parameterType = "int")
     @Parameter(parameterName = "txHex", parameterType = "String")
     public Response newTx(Map params) {
-        Map<String, Boolean> map = new HashMap<>(TxConstant.INIT_CAPACITY_16);
+        Map<String, Boolean> map = new HashMap<>(TxConstant.INIT_CAPACITY_2);
         Chain chain = null;
         try {
             ObjectUtils.canNotEmpty(params.get("chainId"), TxErrorCode.PARAMETER_ERROR.getMsg());
@@ -193,7 +188,7 @@ public class TransactionCmd extends BaseCmd {
             int maxTxDataSize = (int) params.get("maxTxDataSize");
 
             List<String> txHexlist = txService.getPackableTxs(chain, endTimestamp, maxTxDataSize);
-            Map<String, List<String>> map = new HashMap<>(TxConstant.INIT_CAPACITY_16);
+            Map<String, List<String>> map = new HashMap<>(TxConstant.INIT_CAPACITY_2);
             map.put("list", txHexlist);
             return success(map);
         } catch (NulsException e) {
@@ -245,7 +240,7 @@ public class TransactionCmd extends BaseCmd {
             errorLogProcess(chain, e);
             return failed(TxErrorCode.SYS_UNKOWN_EXCEPTION);
         }
-        Map<String, Boolean> resultMap = new HashMap<>(TxConstant.INIT_CAPACITY_8);
+        Map<String, Boolean> resultMap = new HashMap<>(TxConstant.INIT_CAPACITY_2);
         resultMap.put("value", result);
         return success(resultMap);
     }
@@ -288,7 +283,7 @@ public class TransactionCmd extends BaseCmd {
             errorLogProcess(chain, e);
             return failed(TxErrorCode.SYS_UNKOWN_EXCEPTION);
         }
-        Map<String, Boolean> resultMap = new HashMap<>(TxConstant.INIT_CAPACITY_8);
+        Map<String, Boolean> resultMap = new HashMap<>(TxConstant.INIT_CAPACITY_2);
         resultMap.put("value", result);
         return success(resultMap);
     }
@@ -330,7 +325,7 @@ public class TransactionCmd extends BaseCmd {
             errorLogProcess(chain, e);
             return failed(TxErrorCode.SYS_UNKOWN_EXCEPTION);
         }
-        Map<String, Boolean> resultMap = new HashMap<>(TxConstant.INIT_CAPACITY_16);
+        Map<String, Boolean> resultMap = new HashMap<>(TxConstant.INIT_CAPACITY_2);
         resultMap.put("value", result);
         return success(resultMap);
     }
@@ -386,7 +381,7 @@ public class TransactionCmd extends BaseCmd {
                 throw new NulsException(TxErrorCode.HASH_ERROR);
             }
             TransactionConfirmedPO tx = txService.getTransaction(chain, NulsDigestData.fromDigestHex(txHash));
-            Map<String, String> resultMap = new HashMap<>(TxConstant.INIT_CAPACITY_8);
+            Map<String, String> resultMap = new HashMap<>(TxConstant.INIT_CAPACITY_2);
             if (tx == null) {
                 Log.debug("getTx - from all, fail! tx is null, txHash:{}", txHash);
                 resultMap.put("txHex", null);
@@ -428,7 +423,7 @@ public class TransactionCmd extends BaseCmd {
                 throw new NulsException(TxErrorCode.HASH_ERROR);
             }
             TransactionConfirmedPO tx = confirmedTxService.getConfirmedTransaction(chain, NulsDigestData.fromDigestHex(txHash));
-            Map<String, String> resultMap = new HashMap<>(TxConstant.INIT_CAPACITY_8);
+            Map<String, String> resultMap = new HashMap<>(TxConstant.INIT_CAPACITY_2);
             if (tx == null) {
                 Log.debug("getConfirmedTransaction fail, tx is null. txHash:{}", txHash);
                 resultMap.put("txHex", null);
@@ -466,7 +461,7 @@ public class TransactionCmd extends BaseCmd {
             }
             List<String> txHashList = (List<String>) params.get("txHashList");
             List<String> txHexList = confirmedTxService.getTxList(chain,txHashList);
-            Map<String, List<String>> resultMap = new HashMap<>(TxConstant.INIT_CAPACITY_8);
+            Map<String, List<String>> resultMap = new HashMap<>(TxConstant.INIT_CAPACITY_2);
             Log.debug("getBlockTxs size:{} ", txHexList.size());
             resultMap.put("txHexList", txHexList);
             return success(resultMap);
@@ -514,7 +509,7 @@ public class TransactionCmd extends BaseCmd {
             errorLogProcess(chain, e);
             return failed(TxErrorCode.SYS_UNKOWN_EXCEPTION);
         }
-        Map<String, Object> resultMap = new HashMap<>(TxConstant.INIT_CAPACITY_8);
+        Map<String, Object> resultMap = new HashMap<>(TxConstant.INIT_CAPACITY_2);
         boolean result = verifyTxResult.success();
         resultMap.put("value", result);
         return success(resultMap);
@@ -541,7 +536,7 @@ public class TransactionCmd extends BaseCmd {
             chain = chainManager.getChain(chainId);
             String hash = txService.createCrossTransaction(chainManager.getChain(chainId),
                     crossTxTransferDTO.getListFrom(), crossTxTransferDTO.getListTo(), crossTxTransferDTO.getRemark());
-            Map<String, Object> resultMap = new HashMap<>(TxConstant.INIT_CAPACITY_8);
+            Map<String, Object> resultMap = new HashMap<>(TxConstant.INIT_CAPACITY_2);
             resultMap.put("value", hash);
             return success(resultMap);
         } catch (NulsException e) {
@@ -575,7 +570,6 @@ public class TransactionCmd extends BaseCmd {
                 throw new NulsException(TxErrorCode.PARAMETER_ERROR);
             }
             chain.getPackaging().set(packaging);
-            TxConfig.PACKAGING = packaging;
             chain.getLoggerMap().get(TxConstant.LOG_TX).debug("Task-Packaging 节点是否是打包节点,状态变更为: {}", chain.getPackaging().get());
             return success();
         } catch (NulsException e) {
@@ -604,7 +598,7 @@ public class TransactionCmd extends BaseCmd {
             if (null == chain) {
                 throw new NulsException(TxErrorCode.CHAIN_NOT_FOUND);
             }
-            Map<String, Object> resultMap = new HashMap<>(TxConstant.INIT_CAPACITY_8);
+            Map<String, Object> resultMap = new HashMap<>(TxConstant.INIT_CAPACITY_2);
             resultMap.put("value", packablePool.getPoolSize(chain));
             return success(resultMap);
         } catch (NulsException e) {
@@ -632,7 +626,7 @@ public class TransactionCmd extends BaseCmd {
             if (null == chain) {
                 throw new NulsException(TxErrorCode.CHAIN_NOT_FOUND);
             }
-            Map<String, Object> resultMap = new HashMap<>(TxConstant.INIT_CAPACITY_8);
+            Map<String, Object> resultMap = new HashMap<>(TxConstant.INIT_CAPACITY_2);
             resultMap.put("value", unconfirmedTxStorageService.getAllTxPOList(chain.getChainId()));
             return success(resultMap);
         } catch (NulsException e) {

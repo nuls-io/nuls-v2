@@ -32,9 +32,10 @@ import io.nuls.base.signture.SignatureUtil;
 import io.nuls.tools.basic.Result;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Service;
-import io.nuls.tools.model.BigIntegerUtils;
 import io.nuls.tools.exception.NulsException;
+import io.nuls.tools.model.BigIntegerUtils;
 import io.nuls.tools.parse.JSONUtils;
+import io.nuls.transaction.constant.TxConfig;
 import io.nuls.transaction.constant.TxConstant;
 import io.nuls.transaction.constant.TxErrorCode;
 import io.nuls.transaction.model.bo.Chain;
@@ -66,6 +67,9 @@ public class TransactionManager {
 
     @Autowired
     private ChainManager chainManager;
+
+    @Autowired
+    private TxConfig txConfig;
 
     public TransactionManager() {
     }
@@ -189,7 +193,7 @@ public class TransactionManager {
         if (tx.getTime() == 0L) {
             throw new NulsException(TxErrorCode.TX_DATA_VALIDATION_ERROR);
         }
-        if (tx.size() > TxConstant.TX_MAX_SIZE) {
+        if (tx.size() > chain.getConfig().getTxMaxSize()) {
             throw new NulsException(TxErrorCode.TX_SIZE_TOO_LARGE);
         }
         //验证签名
@@ -280,11 +284,11 @@ public class TransactionManager {
             }
             //当交易不是转账以及跨链转账时，from的资产必须是该链主资产。(转账以及跨链交易，在验证器中验证资产)
             if (type != TxConstant.TX_TYPE_TRANSFER && type != TxConstant.TX_TYPE_CROSS_CHAIN_TRANSFER) {
-                if (chain.getConfig().getAssetsId() != assetsId) {
+                if (chain.getConfig().getAssetId() != assetsId) {
                     throw new NulsException(TxErrorCode.ASSETID_ERROR);
                 }
             }
-            if (chainId == TxConstant.NULS_CHAINID) {
+            if (chainId == txConfig.getMainChainId()) {
                 //如果chainId是主网则通过连管理验证资产是否存在
                 //todo
                /* if (!ChainCall.verifyAssetExist(assetsChainId, assetsId)) {

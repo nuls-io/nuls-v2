@@ -33,7 +33,8 @@ import io.nuls.rpc.modulebootstrap.Module;
 import io.nuls.rpc.modulebootstrap.NulsRpcModuleBootstrap;
 import io.nuls.rpc.modulebootstrap.RpcModule;
 import io.nuls.rpc.modulebootstrap.RpcModuleState;
-import io.nuls.tools.core.annotation.Component;
+import io.nuls.tools.core.annotation.Autowired;
+import io.nuls.tools.core.annotation.Configuration;
 import io.nuls.tools.core.ioc.SpringLiteContext;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.log.Log;
@@ -65,8 +66,11 @@ import static java.nio.charset.StandardCharsets.UTF_8;
  * @author: Charlie
  * @date: 2019/3/4
  */
-@Component
+@Configuration
 public class TransactionBootStrap extends RpcModule {
+
+    @Autowired
+    TxConfig txConfig;
 
     public static void main(String[] args) {
         if (args.length == 0) {
@@ -128,15 +132,15 @@ public class TransactionBootStrap extends RpcModule {
     @Override
     public Module[] getDependencies() {
         return new Module[]{
-                new Module(ModuleE.NW.abbr, "1.0"),
-                new Module(ModuleE.LG.abbr, "1.0"),
-                new Module(ModuleE.BL.abbr, "1.0")
+                new Module(ModuleE.NW.abbr, TxConstant.RPC_VERSION),
+                new Module(ModuleE.LG.abbr, TxConstant.RPC_VERSION),
+                new Module(ModuleE.BL.abbr, TxConstant.RPC_VERSION)
         };
     }
 
     @Override
     public Module moduleInfo() {
-        return new Module(ModuleE.TX.abbr, "1.0");
+        return new Module(ModuleE.TX.abbr, TxConstant.RPC_VERSION);
     }
 
     @Override
@@ -147,7 +151,7 @@ public class TransactionBootStrap extends RpcModule {
     /**
      * 初始化系统编码
      */
-    private static void initSys() {
+    private void initSys() {
         try {
             System.setProperty(TxConstant.SYS_ALLOW_NULL_ARRAY_ELEMENT, "true");
             System.setProperty(TxConstant.SYS_FILE_ENCODING, UTF_8.name());
@@ -159,13 +163,13 @@ public class TransactionBootStrap extends RpcModule {
         }
     }
 
-    public static void initDB() {
+    public void initDB() {
         try {
             //数据文件存储地址
-            Properties properties = ConfigLoader.loadProperties(TxConstant.DB_CONFIG_NAME);
-            TxConfig.DB_ROOT_PATH = properties.getProperty(TxConstant.DB_DATA_PATH,
-                    TransactionBootStrap.class.getClassLoader().getResource("").getPath() + "entity");
-            RocksDBService.init(TxConfig.DB_ROOT_PATH);
+//            Properties properties = ConfigLoader.loadProperties(TxConstant.DB_CONFIG_NAME);
+//            TxConfig.DB_ROOT_PATH = properties.getProperty(txConfig.getDbRootPath(),
+//                    TransactionBootStrap.class.getClassLoader().getResource("").getPath() + "data");
+            RocksDBService.init(txConfig.getDbRootPath());
 
             //模块配置表
             DBUtil.createTable(TxDBConstant.DB_MODULE_CONGIF);
@@ -174,8 +178,8 @@ public class TransactionBootStrap extends RpcModule {
 
             //todo 单个节点跑多链的时候 h2是否需要通过chain来区分数据库(如何分？)，待确认！！
             String resource = "mybatis/mybatis-config.xml";
-            Properties prop =  ConfigLoader.loadProperties("db_config.properties");
-            String currentPath = DBUtils.genAbsolutePath((String)prop.get(TxConstant.DB_DATA_PATH));
+            Properties prop =  ConfigLoader.loadProperties(TxConstant.DB_CONFIG_NAME);
+            String currentPath = DBUtils.genAbsolutePath((String)prop.get(txConfig.getDbRootPath()));
             LoggerUtil.Log.debug("#########################:" + currentPath);
             prop.setProperty("url", "jdbc:h2:file:" + currentPath + "/h2/nuls;LOG=2;DB_CLOSE_DELAY=-1;TRACE_LEVEL_SYSTEM_OUT=1;DATABASE_TO_UPPER=FALSE;MV_STORE=false;COMPRESS=true;MAX_COMPACT_TIME=5000");
             SqlSessionFactory sqlSessionFactory = new SqlSessionFactoryBuilder().build(Resources.getResourceAsReader(resource), "druid",prop);
@@ -188,7 +192,7 @@ public class TransactionBootStrap extends RpcModule {
     /**
      * 初始化国际化资源文件语言
      */
-    public static void initLanguage() {
+    public void initLanguage() {
         try {
             LanguageStorageService languageService = SpringLiteContext.getBean(LanguageStorageService.class);
             String languageDB = languageService.getLanguage();
@@ -206,18 +210,18 @@ public class TransactionBootStrap extends RpcModule {
     /**
      * 创建H2的表, 如果存在则不会创建
      */
-    private static void initH2Table() {
+    private void initH2Table() {
         TransactionH2Service ts = SpringLiteContext.getBean(TransactionH2Service.class);
         ts.createTxTablesIfNotExists(TxConstant.H2_TX_TABLE_NAME_PREFIX,
                 TxConstant.H2_TX_TABLE_INDEX_NAME_PREFIX,
                 TxConstant.H2_TX_TABLE_UNIQUE_NAME_PREFIX,
-                TxConstant.H2_TX_TABLE_NUMBER);
+                txConfig.getH2TxTableNumber());
     }
 
     /**
      * 订阅最新区块高度
      */
-    private static void subscriptionBlockHeight() {
+    private void subscriptionBlockHeight() {
         try {
             ChainManager chainManager = SpringLiteContext.getBean(ChainManager.class);
             for (Map.Entry<Integer, Chain> entry : chainManager.getChainMap().entrySet()) {

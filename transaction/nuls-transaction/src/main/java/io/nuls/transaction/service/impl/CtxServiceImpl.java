@@ -7,16 +7,12 @@ import io.nuls.base.signture.P2PHKSignature;
 import io.nuls.base.signture.SignatureUtil;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Service;
-import io.nuls.tools.model.StringUtils;
 import io.nuls.tools.exception.NulsException;
+import io.nuls.tools.model.StringUtils;
 import io.nuls.transaction.cache.PackablePool;
 import io.nuls.transaction.constant.TxCmd;
-import io.nuls.transaction.constant.TxConstant;
+import io.nuls.transaction.constant.TxConfig;
 import io.nuls.transaction.constant.TxErrorCode;
-import io.nuls.transaction.storage.h2.TransactionH2Service;
-import io.nuls.transaction.storage.rocksdb.CtxStorageService;
-import io.nuls.transaction.storage.rocksdb.UnconfirmedTxStorageService;
-import io.nuls.transaction.storage.rocksdb.UnverifiedCtxStorageService;
 import io.nuls.transaction.message.BroadcastCrossNodeRsMessage;
 import io.nuls.transaction.message.BroadcastCrossTxHashMessage;
 import io.nuls.transaction.message.GetTxMessage;
@@ -31,6 +27,10 @@ import io.nuls.transaction.rpc.call.ConsensusCall;
 import io.nuls.transaction.rpc.call.LedgerCall;
 import io.nuls.transaction.rpc.call.NetworkCall;
 import io.nuls.transaction.service.CtxService;
+import io.nuls.transaction.storage.h2.TransactionH2Service;
+import io.nuls.transaction.storage.rocksdb.CtxStorageService;
+import io.nuls.transaction.storage.rocksdb.UnconfirmedTxStorageService;
+import io.nuls.transaction.storage.rocksdb.UnverifiedCtxStorageService;
 import io.nuls.transaction.utils.TxUtil;
 
 import java.math.BigDecimal;
@@ -64,7 +64,8 @@ public class CtxServiceImpl implements CtxService {
     @Autowired
     private TransactionH2Service transactionH2Service;
 
-    private boolean canPackage = false;
+    @Autowired
+    private TxConfig txConfig;
 
     @Override
     public void newCrossTx(Chain chain, String nodeId, Transaction tx) throws NulsException {
@@ -169,12 +170,12 @@ public class CtxServiceImpl implements CtxService {
             2.如果是友链 如果交易的签名者是友链最近x块的出块者
         */
         List<String> agentAddrs = null;
-        if (chain.getChainId() == TxConstant.NULS_CHAINID) {
+        if (chain.getChainId() == txConfig.getMainChainId()) {
             //主网
             agentAddrs = ConsensusCall.getAgentAddressList(chain);
         } else {
             //如果是友链,需满足签名者达到了最近N块的出块者的M%时则通过
-            agentAddrs = ConsensusCall.getRecentPackagerAddress(chain, TxConstant.RECENT_PACKAGER_THRESHOLD);
+            agentAddrs = ConsensusCall.getRecentPackagerAddress(chain, txConfig.getRecentPackagerThreshold());
         }
         boolean isPass = isNodePass(agentAddrs, signRsList);
         if (!isPass) {
@@ -224,7 +225,7 @@ public class CtxServiceImpl implements CtxService {
         }
         BigDecimal rs = new BigDecimal(Integer.toString(signRsCount));
         BigDecimal agents = new BigDecimal(Integer.toString(agentAddrs.size()));
-        BigDecimal passRate = new BigDecimal(TxConstant.CHAIN_NODES_RESULT_PASS_RATE);
+        BigDecimal passRate = new BigDecimal(txConfig.getChainNodesResultPassRate());
         if (rs.compareTo(agents.multiply(passRate)) >= 0) {
             return true;
         }
@@ -255,7 +256,7 @@ public class CtxServiceImpl implements CtxService {
      */
     private boolean verifyNodeResult(Chain chain, BroadcastCrossNodeRsMessage message, CrossTx ctx) throws NulsException {
         String agentAddress = message.getPackingAddress();
-        if (chain.getChainId() == TxConstant.NULS_CHAINID && !ConsensusCall.isConsensusNode(chain, agentAddress)) {
+        if (chain.getChainId() == txConfig.getMainChainId() && !ConsensusCall.isConsensusNode(chain, agentAddress)) {
             return false;
         }
         P2PHKSignature signature = message.getSignature();
@@ -308,7 +309,7 @@ public class CtxServiceImpl implements CtxService {
             //共识节点
             BigDecimal rs = new BigDecimal(Integer.toString(ctx.getCtxVerifyResultList().size()));
             BigDecimal agents = new BigDecimal(Integer.toString(ctx.getVerifyNodeList().size()));
-            BigDecimal passRate = new BigDecimal(TxConstant.CROSS_VERIFY_RESULT_PASS_RATE);
+            BigDecimal passRate = new BigDecimal(txConfig.getCrossVerifyResultPassRat());
             //超过全部链接节点51%的节点验证通过,则节点判定交易的验证通过
             if (rs.compareTo(agents.multiply(passRate)) >= 0) {
                 //使用该地址到账户模块对跨链交易atx_trans_hash签名

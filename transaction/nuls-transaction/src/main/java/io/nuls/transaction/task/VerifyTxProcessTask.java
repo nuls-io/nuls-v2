@@ -64,12 +64,12 @@ public class VerifyTxProcessTask implements Runnable {
     }
 
     private void doTask(Chain chain){
-        if (packablePool.getPoolSize(chain) >= TxConstant.TX_UNVERIFIED_QUEUE_MAXSIZE) {
+        if (packablePool.getPoolSize(chain) >= chain.getConfig().getTxUnverifiedQueueSize()) {
             return;
         }
 
         Transaction tx = null;
-        while ((tx = unverifiedTxStorageService.pollTx(chain)) != null && orphanTxList.size() < TxConstant.ORPHAN_CONTAINER_MAX_SIZE) {
+        while ((tx = unverifiedTxStorageService.pollTx(chain)) != null && orphanTxList.size() < chain.getConfig().getOrphanContainerSize()) {
             processTx(chain, tx, false);
         }
     }
@@ -92,7 +92,8 @@ public class VerifyTxProcessTask implements Runnable {
             }
             VerifyTxResult verifyTxResult = LedgerCall.verifyCoinData(chain, tx, false);
             if(verifyTxResult.success()){
-                chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("Task-Packaging 判断交易是否进入待打包队列,节点是否是打包节点: {}", chain.getPackaging().get());
+                chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS)
+                        .debug("Task-Packaging 判断交易是否进入待打包队列,节点是否是打包节点: {}", chain.getPackaging().get());
                 if(chain.getPackaging().get()) {
                     //当节点是出块节点时, 才将交易放入待打包队列
                     packablePool.add(chain, tx, false);
@@ -120,10 +121,8 @@ public class VerifyTxProcessTask implements Runnable {
             if(verifyTxResult.getCode() == VerifyTxResult.ORPHAN && !isOrphanTx){
                 processOrphanTx(tx);
             }else if(isOrphanTx){
-                //todo 孤儿交易还是10分钟删, 如何处理nonce值??
                 long currentTimeMillis = NetworkCall.getCurrentTimeMillis();
-//                return tx.getTime() < (currentTimeMillis - 3600000L);
-                return tx.getTime() < (currentTimeMillis - 60000L);//TODO 调试暂时改为60秒
+                return tx.getTime() < (currentTimeMillis - chain.getConfig().getOrphanTtl());
             }
         } catch (Exception e) {
             Log.error(e);
@@ -132,10 +131,9 @@ public class VerifyTxProcessTask implements Runnable {
         return false;
     }
 
-
     private void doOrphanTxTask(Chain chain) throws NulsException{
-        //时间排序TransactionTimeComparator
         try {
+            //时间排序TransactionTimeComparator
             orphanTxList.sort(txComparator);
             Iterator<Transaction> it = orphanTxList.iterator();
             while (it.hasNext()) {

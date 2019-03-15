@@ -6,8 +6,10 @@ import io.nuls.base.data.Transaction;
 import io.nuls.h2.utils.MybatisDbHelper;
 import io.nuls.h2.utils.SearchOperator;
 import io.nuls.h2.utils.Searchable;
+import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Service;
 import io.nuls.tools.exception.NulsException;
+import io.nuls.transaction.constant.TxConfig;
 import io.nuls.transaction.constant.TxConstant;
 import io.nuls.transaction.storage.h2.TransactionH2Service;
 import io.nuls.transaction.storage.h2.impl.mapper.TransactionMapper;
@@ -28,6 +30,9 @@ import java.util.Map;
  */
 @Service
 public class TransactionH2ServiceImpl implements TransactionH2Service {
+
+    @Autowired
+    private TxConfig txConfig;
 
     @Override
     public Page<TransactionPO> getTxs(String address, Integer assetChainId, Integer assetId, Integer type, int pageNumber, int pageSize) {
@@ -90,7 +95,7 @@ public class TransactionH2ServiceImpl implements TransactionH2Service {
      * @return
      */
     private String getTableName(String address) {
-        int tabNumber = (address.hashCode() & Integer.MAX_VALUE) % TxConstant.H2_TX_TABLE_NUMBER;
+        int tabNumber = (address.hashCode() & Integer.MAX_VALUE) % txConfig.getH2TxTableNumber();
         return TxConstant.H2_TX_TABLE_NAME_PREFIX + tabNumber;
     }
 

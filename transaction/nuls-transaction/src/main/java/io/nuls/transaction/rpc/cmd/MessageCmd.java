@@ -14,6 +14,7 @@ import io.nuls.tools.model.ObjectUtils;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.transaction.cache.TxDuplicateRemoval;
 import io.nuls.transaction.constant.TxCmd;
+import io.nuls.transaction.constant.TxConfig;
 import io.nuls.transaction.constant.TxConstant;
 import io.nuls.transaction.constant.TxErrorCode;
 import io.nuls.transaction.manager.ChainManager;
@@ -54,6 +55,8 @@ public class MessageCmd extends BaseCmd {
     private CtxStorageService ctxStorageService;
     @Autowired
     private ChainManager chainManager;
+    @Autowired
+    private TxConfig txConfig;
 
     /**
      * 接收链内广播的新交易hash
@@ -299,7 +302,7 @@ public class MessageCmd extends BaseCmd {
                 throw new NulsException(TxErrorCode.TX_NOT_EXIST);
             }
             //交易是否被确认超过指定高度
-            if (chain.getBestBlockHeight() < (tx.getBlockHeight() + TxConstant.CTX_EFFECT_THRESHOLD)) {
+            if (chain.getBestBlockHeight() < (tx.getBlockHeight() + txConfig.getCtxEffectThreshold())) {
                 throw new NulsException(TxErrorCode.TX_NOT_EFFECTIVE_HEIGHT);
             }
             //发送跨链交易到指定节点
@@ -421,7 +424,7 @@ public class MessageCmd extends BaseCmd {
                 throw new NulsException(TxErrorCode.TX_NOT_EXIST);
             }
             //交易是否被确认超过指定高度
-            if (chain.getBestBlockHeight() < (tx.getBlockHeight() + TxConstant.CTX_EFFECT_THRESHOLD)) {
+            if (chain.getBestBlockHeight() < (tx.getBlockHeight() + txConfig.getMainAssetId())) {
                 throw new NulsException(TxErrorCode.TX_NOT_EFFECTIVE_HEIGHT);
             }
             //发送跨链交易到指定节点
@@ -532,7 +535,7 @@ public class MessageCmd extends BaseCmd {
                 throw new NulsException(TxErrorCode.TX_NOT_EXIST);
             }
             //验证该交易所在的区块是否被确认超过指定高度
-            if (chain.getBestBlockHeight() < (tx.getBlockHeight() + TxConstant.CTX_EFFECT_THRESHOLD)) {
+            if (chain.getBestBlockHeight() < (tx.getBlockHeight() + txConfig.getMainAssetId())) {
                 throw new NulsException(TxErrorCode.TX_NOT_EFFECTIVE_HEIGHT);
             }
 
@@ -637,7 +640,7 @@ public class MessageCmd extends BaseCmd {
                 throw new NulsException(TxErrorCode.TX_NOT_EXIST);
             }
             //验证该交易所在的区块是否被确认超过指定高度
-            if (chain.getBestBlockHeight() < (tx.getBlockHeight() + TxConstant.CTX_EFFECT_THRESHOLD)) {
+            if (chain.getBestBlockHeight() < (tx.getBlockHeight() + txConfig.getMainAssetId())) {
                 throw new NulsException(TxErrorCode.TX_NOT_EFFECTIVE_HEIGHT);
             }
 

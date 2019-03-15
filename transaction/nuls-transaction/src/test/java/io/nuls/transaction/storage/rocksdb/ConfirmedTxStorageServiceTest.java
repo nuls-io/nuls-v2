@@ -6,7 +6,6 @@ import io.nuls.tools.core.ioc.SpringLiteContext;
 import io.nuls.tools.model.StringUtils;
 import io.nuls.transaction.TestConstant;
 import io.nuls.transaction.TransactionBootStrap;
-import io.nuls.transaction.constant.TxConstant;
 import io.nuls.transaction.manager.ChainManager;
 import io.nuls.transaction.model.bo.CrossTx;
 import io.nuls.transaction.model.po.TransactionConfirmedPO;
@@ -26,9 +25,9 @@ public class ConfirmedTxStorageServiceTest {
     @BeforeClass
     public static void beforeTest() throws Exception {
         //初始化数据库配置文件
-        TransactionBootStrap.initDB();
+        new TransactionBootStrap().initDB();
         //初始化上下文
-        SpringLiteContext.init(TxConstant.CONTEXT_PATH);
+        SpringLiteContext.init(TestConstant.CONTEXT_PATH);
         confirmedTxStorageService = SpringLiteContext.getBean(ConfirmedTxStorageService.class);
         //启动链
         SpringLiteContext.getBean(ChainManager.class).runChain();

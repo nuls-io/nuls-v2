@@ -8,6 +8,7 @@ import io.nuls.tools.core.annotation.Service;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.exception.NulsRuntimeException;
 import io.nuls.transaction.cache.PackablePool;
+import io.nuls.transaction.constant.TxConfig;
 import io.nuls.transaction.constant.TxConstant;
 import io.nuls.transaction.constant.TxErrorCode;
 import io.nuls.transaction.manager.ChainManager;
@@ -66,6 +67,9 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
 
     @Autowired
     private TxService txService;
+
+    @Autowired
+    private TxConfig txConfig;
 
     @Override
     public TransactionConfirmedPO getConfirmedTransaction(Chain chain, NulsDigestData hash) {
@@ -228,7 +232,7 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
         boolean result = true;
         for (Map.Entry<TxRegister, List<String>> entry : moduleVerifyMap.entrySet()) {
             boolean rs;
-            if (entry.getKey().getModuleCode().equals(TxConstant.MODULE_CODE)) {
+            if (entry.getKey().getModuleCode().equals(txConfig.getModuleCode())) {
                 try {
                     rs = txService.crossTransactionCommit(chain, entry.getValue(), blockHeaderHex);
                 } catch (NulsException e) {
@@ -296,7 +300,7 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
         boolean result = true;
         for (Map.Entry<TxRegister, List<String>> entry : moduleVerifyMap.entrySet()) {
             boolean rs;
-            if (entry.getKey().getModuleCode().equals(TxConstant.MODULE_CODE)) {
+            if (entry.getKey().getModuleCode().equals(txConfig.getModuleCode())) {
                 try {
                     rs = txService.crossTransactionRollback(chain, entry.getValue(), blockHeaderHex);
                 } catch (NulsException e) {
@@ -433,7 +437,7 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
                 如果当前链是交易发起链
                     1.广播给主网
              */
-            if (chainId == TxConstant.NULS_CHAINID) {
+            if (chainId == txConfig.getMainChainId()) {
                 if (toChainId == chainId) {
                     //todo 已到达目标链发送回执
                 } else {
@@ -442,7 +446,7 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
                 }
             } else {
                 //广播给 主网 链的节点
-                NetworkCall.broadcastTxHash(TxConstant.NULS_CHAINID, tx.getHash());
+                NetworkCall.broadcastTxHash(txConfig.getMainChainId(), tx.getHash());
             }
         }
     }

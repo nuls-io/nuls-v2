@@ -42,6 +42,7 @@ import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.model.BigIntegerUtils;
 import io.nuls.tools.model.StringUtils;
 import io.nuls.transaction.cache.PackablePool;
+import io.nuls.transaction.constant.TxConfig;
 import io.nuls.transaction.constant.TxConstant;
 import io.nuls.transaction.constant.TxErrorCode;
 import io.nuls.transaction.manager.TransactionManager;
@@ -99,6 +100,9 @@ public class TxServiceImpl implements TxService {
 
     @Autowired
     private ConfirmedTxStorageService confirmedTxStorageService;
+
+    @Autowired
+    private TxConfig txConfig;
 
     @Override
     public boolean register(Chain chain, TxRegister txRegister) {
@@ -424,7 +428,7 @@ public class TxServiceImpl implements TxService {
     public byte[] getNonce(Chain chain, String address, int assetChainId, int assetId) throws NulsException {
         String key = address + "_" + assetChainId + "_" + assetId;
         NonceHashData nonceHashData = PRE_HASH_MAP.get(key);
-        if (null == nonceHashData || (NetworkCall.getCurrentTimeMillis() - nonceHashData.getCacheTimestamp() > TxConstant.HASH_TTL)) {
+        if (null == nonceHashData || (NetworkCall.getCurrentTimeMillis() - nonceHashData.getCacheTimestamp() > txConfig.getHashTtl())) {
             return LedgerCall.getNonce(chain, address, assetChainId, assetId);
         } else {
             return TxUtil.getNonceByPreHash(nonceHashData.getHash());
@@ -545,7 +549,7 @@ public class TxServiceImpl implements TxService {
     private BigInteger getFeeDirect(Chain chain, List<CoinFrom> listFrom, BigInteger targetFee, BigInteger actualFee) throws NulsException {
         for (CoinFrom coinFrom : listFrom) {
             if (TxUtil.isNulsAsset(coinFrom)) {
-                BigInteger mainAsset = LedgerCall.getBalanceNonce(chain, coinFrom.getAddress(), TxConstant.NULS_CHAINID, TxConstant.NULS_CHAIN_ASSETID);
+                BigInteger mainAsset = LedgerCall.getBalanceNonce(chain, coinFrom.getAddress(), txConfig.getMainChainId(), txConfig.getMainAssetId());
                 //可用余额=当前余额减去本次转出
                 mainAsset = mainAsset.subtract(coinFrom.getAmount());
                 //当前还差的手续费
@@ -581,14 +585,14 @@ public class TxServiceImpl implements TxService {
         while (iterator.hasNext()) {
             CoinFrom coinFrom = iterator.next();
             if (!TxUtil.isNulsAsset(coinFrom)) {
-                BigInteger mainAsset = LedgerCall.getBalanceNonce(chain, coinFrom.getAddress(), TxConstant.NULS_CHAINID, TxConstant.NULS_CHAIN_ASSETID);
+                BigInteger mainAsset = LedgerCall.getBalanceNonce(chain, coinFrom.getAddress(), txConfig.getMainChainId(), txConfig.getMainAssetId());
                 if (BigIntegerUtils.isEqualOrLessThan(mainAsset, BigInteger.ZERO)) {
                     continue;
                 }
                 CoinFrom feeCoinFrom = new CoinFrom();
                 byte[] address = coinFrom.getAddress();
                 feeCoinFrom.setAddress(address);
-                feeCoinFrom.setNonce(getNonce(chain, AddressTool.getStringAddressByBytes(address), TxConstant.NULS_CHAINID, TxConstant.NULS_CHAIN_ASSETID));
+                feeCoinFrom.setNonce(getNonce(chain, AddressTool.getStringAddressByBytes(address), txConfig.getMainChainId(), txConfig.getMainAssetId()));
                 txSize += feeCoinFrom.size();
                 //新增coinfrom，重新计算本交易预计收取的手续费
                 targetFee = TransactionFeeCalculator.getCrossTxFee(txSize);
@@ -598,8 +602,8 @@ public class TxServiceImpl implements TxService {
                 BigInteger fee = BigIntegerUtils.isEqualOrGreaterThan(mainAsset, current) ? current : mainAsset;
 
                 feeCoinFrom.setLocked(TxConstant.CORSS_TX_LOCKED);
-                feeCoinFrom.setAssetsChainId(TxConstant.NULS_CHAINID);
-                feeCoinFrom.setAssetsId(TxConstant.NULS_CHAIN_ASSETID);
+                feeCoinFrom.setAssetsChainId(txConfig.getMainChainId());
+                feeCoinFrom.setAssetsId(txConfig.getMainAssetId());
                 feeCoinFrom.setAmount(fee);
 
                 iterator.add(feeCoinFrom);
@@ -748,7 +752,7 @@ public class TxServiceImpl implements TxService {
         if (rs) {
             //保存生效高度
             BlockHeader blockHeader = TxUtil.getInstance(blockHeaderHex, BlockHeader.class);
-            long effectHeight = blockHeader.getHeight() + TxConstant.CTX_EFFECT_THRESHOLD;
+            long effectHeight = blockHeader.getHeight() + txConfig.getMainAssetId();
             return confirmedTxStorageService.saveCrossTxEffectList(chain.getChainId(), effectHeight, txHash);
         } else {
             for (String coinDataHex : successedCoinDataHexs) {
@@ -775,7 +779,7 @@ public class TxServiceImpl implements TxService {
         }
         if (rs) {
             BlockHeader blockHeader = TxUtil.getInstance(blockHeaderHex, BlockHeader.class);
-            long effectHeight = blockHeader.getHeight() + TxConstant.CTX_EFFECT_THRESHOLD;
+            long effectHeight = blockHeader.getHeight() + txConfig.getMainAssetId();
             return confirmedTxStorageService.removeCrossTxEffectList(chain.getChainId(), effectHeight);
         } else {
             for (String coinDataHex : successedCoinDataHexs) {
@@ -820,8 +824,9 @@ public class TxServiceImpl implements TxService {
 //                chain.getLoggerMap().get(TxConstant.LOG_TX).debug("");
 //                chain.getLoggerMap().get(TxConstant.LOG_TX).debug("########## (循环开始)当前网络时间: {} ", currentTimeMillis);
 //                chain.getLoggerMap().get(TxConstant.LOG_TX).debug("########## 预留的[获取打包交易]结束时间: {}, 还剩{}秒 ", endtimestamp, (endtimestamp - currentTimeMillis)/1000.0);
-                if (endtimestamp - currentTimeMillis <= TxConstant.VERIFY_OFFSET) {
-                    chain.getLoggerMap().get(TxConstant.LOG_TX).debug("########## 打包时间到: {}, -endtimestamp:{} , -offset:{}", currentTimeMillis, endtimestamp, TxConstant.VERIFY_OFFSET);
+                if (endtimestamp - currentTimeMillis <= chain.getConfig().getModuleVerifyOffset()) {
+                    chain.getLoggerMap().get(TxConstant.LOG_TX).debug("########## 打包时间到: {}, -endtimestamp:{} , -offset:{}",
+                            currentTimeMillis, endtimestamp, chain.getConfig().getModuleVerifyOffset());
                     break;
                 }
 //                chain.getLoggerMap().get(TxConstant.LOG_TX).debug("########## 开始获取交易");

@@ -33,7 +33,7 @@ public class LedgerCall {
     public static VerifyTxResult verifyCoinData(Chain chain, String txHex, boolean batch) throws NulsException {
         try {
             Map<String, Object> params = new HashMap<>(TxConstant.INIT_CAPACITY_8);
-            params.put(Constants.VERSION_KEY_STR, "1.0");
+            params.put(Constants.VERSION_KEY_STR, TxConstant.RPC_VERSION);
             params.put("chainId", chain.getChainId());
             params.put("txHex", txHex);
             params.put("isBatchValidate", batch);
@@ -69,7 +69,7 @@ public class LedgerCall {
     public static boolean verifyBlockTxsCoinData(Chain chain, List<String> txHexList, Long blockHeight) throws NulsException {
         try {
             Map<String, Object> params = new HashMap<>(TxConstant.INIT_CAPACITY_8);
-            params.put(Constants.VERSION_KEY_STR, "1.0");
+            params.put(Constants.VERSION_KEY_STR, TxConstant.RPC_VERSION);
             params.put("chainId", chain.getChainId());
             params.put("txHexList", txHexList);
             params.put("blockHeight", blockHeight);
@@ -94,7 +94,7 @@ public class LedgerCall {
     public static byte[] getNonce(Chain chain, String address, int assetChainId, int assetId) throws NulsException {
         try {
             Map<String, Object> params = new HashMap<>(TxConstant.INIT_CAPACITY_8);
-            params.put(Constants.VERSION_KEY_STR, "1.0");
+            params.put(Constants.VERSION_KEY_STR, TxConstant.RPC_VERSION);
             params.put("chainId", chain.getChainId());
             params.put("address", address);
             params.put("assetChainId", assetChainId);
@@ -116,7 +116,7 @@ public class LedgerCall {
         try {
             String addressString = AddressTool.getStringAddressByBytes(address);
             Map<String, Object> params = new HashMap<>(TxConstant.INIT_CAPACITY_8);
-            params.put(Constants.VERSION_KEY_STR, "1.0");
+            params.put(Constants.VERSION_KEY_STR, TxConstant.RPC_VERSION);
             params.put("chainId", chain.getChainId());
             params.put("assetChainId", assetChainId);
             params.put("assetId", assetId);
@@ -137,7 +137,7 @@ public class LedgerCall {
         try {
             String addressString = AddressTool.getStringAddressByBytes(address);
             Map<String, Object> params = new HashMap<>(TxConstant.INIT_CAPACITY_8);
-            params.put(Constants.VERSION_KEY_STR, "1.0");
+            params.put(Constants.VERSION_KEY_STR, TxConstant.RPC_VERSION);
             params.put("chainId", chain.getChainId());
             params.put("assetChainId", assetChainId);
             params.put("assetId", assetId);
@@ -159,7 +159,7 @@ public class LedgerCall {
     public static boolean coinDataBatchNotify(Chain chain) throws NulsException {
         try {
             Map<String, Object> params = new HashMap<>(TxConstant.INIT_CAPACITY_8);
-            params.put(Constants.VERSION_KEY_STR, "1.0");
+            params.put(Constants.VERSION_KEY_STR, TxConstant.RPC_VERSION);
             params.put("chainId", chain.getChainId());
             HashMap result = (HashMap)TransactionCall.request(ModuleE.LG.abbr, "bathValidateBegin", params);
             return (int) result.get("value") == 1;
@@ -177,7 +177,7 @@ public class LedgerCall {
     public static boolean commitUnconfirmedTx(Chain chain, String txHex) throws NulsException {
         try {
             Map<String, Object> params = new HashMap<>(TxConstant.INIT_CAPACITY_8);
-            params.put(Constants.VERSION_KEY_STR, "1.0");
+            params.put(Constants.VERSION_KEY_STR, TxConstant.RPC_VERSION);
             params.put("chainId", chain.getChainId());
             params.put("txHex", txHex);
             HashMap result = (HashMap)TransactionCall.request(ModuleE.LG.abbr, "commitUnconfirmedTx", params);
@@ -195,7 +195,7 @@ public class LedgerCall {
     public static boolean commitTxsLedger(Chain chain, List<String> txHexList, Long blockHeight) throws NulsException {
         try {
             Map<String, Object> params = new HashMap<>(TxConstant.INIT_CAPACITY_8);
-            params.put(Constants.VERSION_KEY_STR, "1.0");
+            params.put(Constants.VERSION_KEY_STR, TxConstant.RPC_VERSION);
             params.put("chainId", chain.getChainId());
             params.put("txHexList", txHexList);
             params.put("blockHeight", blockHeight);
@@ -214,7 +214,7 @@ public class LedgerCall {
     public static boolean rollBackUnconfirmTx(Chain chain, String txHex) throws NulsException {
         try {
             Map<String, Object> params = new HashMap<>(TxConstant.INIT_CAPACITY_8);
-            params.put(Constants.VERSION_KEY_STR, "1.0");
+            params.put(Constants.VERSION_KEY_STR, TxConstant.RPC_VERSION);
             params.put("chainId", chain.getChainId());
             params.put("txHex", txHex);
             HashMap result = (HashMap)TransactionCall.request(ModuleE.LG.abbr, "rollBackUnconfirmTx", params);
@@ -232,7 +232,7 @@ public class LedgerCall {
     public static boolean rollbackTxsLedger(Chain chain, List<String> txHexList, Long blockHeight) throws NulsException {
         try {
             Map<String, Object> params = new HashMap<>(TxConstant.INIT_CAPACITY_8);
-            params.put(Constants.VERSION_KEY_STR, "1.0");
+            params.put(Constants.VERSION_KEY_STR, TxConstant.RPC_VERSION);
             params.put("chainId", chain.getChainId());
             params.put("txHexList", txHexList);
             params.put("blockHeight", blockHeight);

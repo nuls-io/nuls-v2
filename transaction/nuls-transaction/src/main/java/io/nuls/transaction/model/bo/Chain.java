@@ -5,7 +5,6 @@ import io.nuls.base.data.NulsDigestData;
 import io.nuls.base.data.Transaction;
 import io.nuls.tools.cache.LimitHashMap;
 import io.nuls.tools.log.logback.NulsLogger;
-import io.nuls.transaction.constant.TxConstant;
 import io.nuls.transaction.model.bo.config.ConfigBean;
 import io.nuls.transaction.utils.queue.entity.PersistentQueue;
 
@@ -32,12 +31,6 @@ public class Chain {
     private ConfigBean config;
 
     /**
-     * 运行状态
-     * Chain running state
-     */
-//    private RunningStatus runningStatus;
-
-    /**
      * 是否正在共识出块中
      */
     private AtomicBoolean packaging;
@@ -50,8 +43,6 @@ public class Chain {
     /**
      * 日志
      */
-  /*  @JsonIgnore
-    private NulsLogger logger;*/
     private Map<String, NulsLogger> loggerMap;
 
     /**
@@ -93,13 +84,13 @@ public class Chain {
     @JsonIgnore
     private ScheduledThreadPoolExecutor scheduledThreadPoolExecutor;
 
-    public Chain() throws Exception {;
+    public Chain() throws Exception {
         this.packaging =  new AtomicBoolean(false);
         this.rePackage = new AtomicBoolean(true);
         this.txRegisterMap = new HashMap<>();
         this.txQueue = new LinkedBlockingDeque<>();
-        this.orphanContainer = new LimitHashMap(TxConstant.ORPHAN_CONTAINER_MAX_SIZE);
-        this.unverifiedQueue = new PersistentQueue(TxConstant.TX_UNVERIFIED_QUEUE, TxConstant.TX_UNVERIFIED_QUEUE_MAXSIZE);
+//        this.orphanContainer = new LimitHashMap(TxConstant.ORPHAN_CONTAINER_MAX_SIZE);
+//        this.unverifiedQueue = new PersistentQueue(TxConstant.TX_UNVERIFIED_QUEUE, TxConstant.TX_UNVERIFIED_QUEUE_MAXSIZE);
         this.loggerMap = new HashMap<>();
     }
 

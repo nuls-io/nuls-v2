@@ -31,7 +31,7 @@ public class TransactionCall {
      */
     public static Object request(String moduleCode, String cmd, Map params) throws NulsException {
         try {
-            params.put(Constants.VERSION_KEY_STR, "1.0");
+            params.put(Constants.VERSION_KEY_STR, TxConstant.RPC_VERSION);
             Response cmdResp = ResponseMessageProcessor.requestAndResponse(moduleCode, cmd, params);
             Map resData = (Map)cmdResp.getResponseData();
             if (!cmdResp.isSuccess()) {
@@ -45,9 +45,6 @@ public class TransactionCall {
                 }
                 throw new Exception(errorMsg);
             }
-            /*if (null == resData) {
-                return null;
-            }*/
             return resData.get(cmd);
         } catch (Exception e) {
             Log.debug("cmd: {}", cmd);

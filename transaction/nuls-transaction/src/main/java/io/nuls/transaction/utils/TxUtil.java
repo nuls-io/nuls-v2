@@ -27,11 +27,13 @@ package io.nuls.transaction.utils;
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.data.*;
+import io.nuls.tools.core.ioc.SpringLiteContext;
 import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.model.DateUtils;
 import io.nuls.tools.model.StringUtils;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.log.logback.NulsLogger;
+import io.nuls.transaction.constant.TxConfig;
 import io.nuls.transaction.constant.TxConstant;
 import io.nuls.transaction.constant.TxErrorCode;
 import io.nuls.transaction.model.bo.Chain;
@@ -47,6 +49,8 @@ import static io.nuls.transaction.utils.LoggerUtil.Log;
  * @date: 2018-12-05
  */
 public class TxUtil {
+
+    private static TxConfig txConfig = SpringLiteContext.getBean(TxConfig.class);
 
     public static CoinData getCoinData(Transaction tx) throws NulsException {
         if (null == tx) {
@@ -109,8 +113,9 @@ public class TxUtil {
     }
 
     public static boolean isNulsAsset(int chainId, int assetId) {
-        if (chainId == TxConstant.NULS_CHAINID
-                && assetId == TxConstant.NULS_CHAIN_ASSETID) {
+
+        if (chainId == txConfig.getMainChainId()
+                && assetId == txConfig.getMainAssetId()) {
             return true;
         }
         return false;
@@ -118,7 +123,7 @@ public class TxUtil {
 
     public static boolean isChainAssetExist(Chain chain, Coin coin) {
         if (chain.getConfig().getChainId() == coin.getAssetsChainId() &&
-                chain.getConfig().getAssetsId() == coin.getAssetsId()) {
+                chain.getConfig().getAssetId() == coin.getAssetsId()) {
             return true;
         }
         return false;
