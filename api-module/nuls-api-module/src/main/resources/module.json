@@ -1,0 +1,11 @@
+{
+  "defaultChainId": 12345,
+  "defaultAssetId": 1,
+  "language": "en",
+  "encoding": "UTF-8",
+  "mongoIp": "127.0.0.1",
+  "mongoPort": 27017,
+  "kernelUrl": "ws://127.0.0.1:8887/ws",
+  "listenerIp": "0.0.0.0",
+  "rpcPort": 8080
+}

@@ -59,23 +59,23 @@ public class ConfigLoader {
 //        }
 //    }
     public static void load() throws Exception {
-        String configJson = IoUtils.read(MODULES_CONFIG_FILE);
-        List<ConfigItem> configItems = JSONUtils.json2list(configJson, ConfigItem.class);
+//        String configJson = IoUtils.read(MODULES_CONFIG_FILE);
+//        List<ConfigItem> configItems = JSONUtils.json2list(configJson, ConfigItem.class);
+//
+//        for (ConfigItem item : configItems) {
+//            if (item.getName().equals(ApiConstant.CHAIN_ID)) {
+//                ApiContext.defaultChainId = Integer.parseInt(item.getValue());
+//            } else if (item.getName().equals(ApiConstant.ASSET_ID)) {
+//                ApiContext.defaultAssetId = Integer.parseInt(item.getValue());
+//            } else if (item.getName().equals(ApiConstant.DB_IP)) {
+//                ApiContext.dbIp = item.getValue();
+//            } else if (item.getName().equals(ApiConstant.DB_PORT)) {
+//                ApiContext.port = Integer.parseInt(item.getValue());
+//            }
+//        }
 
-        for (ConfigItem item : configItems) {
-            if (item.getName().equals(ApiConstant.CHAIN_ID)) {
-                ApiContext.defaultChainId = Integer.parseInt(item.getValue());
-            } else if (item.getName().equals(ApiConstant.ASSET_ID)) {
-                ApiContext.defaultAssetId = Integer.parseInt(item.getValue());
-            } else if (item.getName().equals(ApiConstant.DB_IP)) {
-                ApiContext.dbIp = item.getValue();
-            } else if (item.getName().equals(ApiConstant.DB_PORT)) {
-                ApiContext.port = Integer.parseInt(item.getValue());
-            }
-        }
-
-        ApiContext.SEED_NODE_ADDRESS.add("5MR_2CVzGriCSBRf9KCFqPW4mq26uEK5Vig");
-        ApiContext.SEED_NODE_ADDRESS.add("5MR_2CfTWAk7qwYyuzU76q9zrR54txuthNn");
+//        ApiContext.SEED_NODE_ADDRESS.add("5MR_2CVzGriCSBRf9KCFqPW4mq26uEK5Vig");
+//        ApiContext.SEED_NODE_ADDRESS.add("5MR_2CfTWAk7qwYyuzU76q9zrR54txuthNn");
 
 //        ConfigBean bean = new ConfigBean();
 //        for (ConfigItem item : configItems) {
