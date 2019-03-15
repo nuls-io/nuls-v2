@@ -30,6 +30,8 @@ package io.nuls.ledger.constant;
  */
 public class LedgerConstant {
 
+    public static final String MODULE_DB_PATH = "/ld";
+
     public static int UNCONFIRMED_NONCE = 0;
     public static int CONFIRMED_NONCE = 1;
 
@@ -54,6 +56,6 @@ public class LedgerConstant {
      * 缓存的账户初始化nonce
      */
     public static final String INIT_NONCE = "ffffffff";
-    public static String DEFAULT_ENCODING ="en";
-    public static  int  UNCONFIRM_NONCE_EXPIRED_TIME = 100000;
+    public static String DEFAULT_ENCODING = "en";
+    public static int UNCONFIRM_NONCE_EXPIRED_TIME = 100000;
 }
