@@ -366,7 +366,7 @@ public class NativeUtils {
 
         List<byte[]> seeds = frame.vm.getRandomSeedList(endHeight, count);
         int i = seeds.size() - 1;
-        if(i > 0) {
+        if (i > 0) {
             frame.vm.addGasUsed(GasCost.RANDOM_COUNT_SEED * i);
         }
 
@@ -397,7 +397,7 @@ public class NativeUtils {
 
         List<byte[]> seeds = frame.vm.getRandomSeedList(startHeight, endHeight);
         int i = seeds.size() - 1;
-        if(i > 0) {
+        if (i > 0) {
             frame.vm.addGasUsed(GasCost.RANDOM_HEIGHT_SEED * i);
         }
 

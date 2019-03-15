@@ -46,7 +46,6 @@ import static io.nuls.contract.constant.ContractErrorCode.*;
 import static io.nuls.contract.util.ContractUtil.getSuccess;
 
 /**
- * 
  * @author: PierreLuo
  * @date: 2019-02-27
  */
@@ -65,7 +64,7 @@ public class AccountCall {
 
     public static Result validationPassword(int chainId, String address, String passwd) {
         try {
-            if(StringUtils.isBlank(address) || StringUtils.isBlank(passwd)) {
+            if (StringUtils.isBlank(address) || StringUtils.isBlank(passwd)) {
                 return Result.getFailed(NULL_PARAMETER);
             }
             Map<String, Object> params = new HashMap<>(4);
@@ -74,7 +73,7 @@ public class AccountCall {
             params.put("password", passwd);
             Map resultMap = (Map) CallHelper.request(ModuleE.AC.abbr, "ac_validationPassword", params);
             boolean validate = (boolean) resultMap.get("value");
-            if(validate) {
+            if (validate) {
                 return getSuccess();
             }
             return Result.getFailed(PASSWORD_IS_WRONG);

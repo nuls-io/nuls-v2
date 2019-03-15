@@ -32,7 +32,7 @@ import io.nuls.tools.core.inteceptor.ModularServiceMethodInterceptor;
 import io.nuls.tools.core.ioc.SpringLiteContext;
 import org.junit.*;
 
-public class ChainManagerTest {
+public class BlockChainManagerTest {
 
     private static final int CHAIN_ID = 1;
 
@@ -43,14 +43,14 @@ public class ChainManagerTest {
 
     @Before
     public void setUp() throws Exception {
-        ChainManager.init(CHAIN_ID);
+        BlockChainManager.init(CHAIN_ID);
     }
 
     @After
     public void tearDown() throws Exception {
-        ChainManager.setMasterChain(CHAIN_ID, null);
-        ChainManager.setOrphanChains(CHAIN_ID, null);
-        ChainManager.setForkChains(CHAIN_ID, null);
+        BlockChainManager.setMasterChain(CHAIN_ID, null);
+        BlockChainManager.setOrphanChains(CHAIN_ID, null);
+        BlockChainManager.setForkChains(CHAIN_ID, null);
     }
 
     @Test
@@ -58,18 +58,18 @@ public class ChainManagerTest {
         ConfigLoader.load();
         ContextManager.getContext(CHAIN_ID).setStatus(RunningStatusEnum.RUNNING);
         Chain masterChain = ChainGenerator.newMasterChain(999L, "M", CHAIN_ID);
-        ChainManager.setMasterChain(CHAIN_ID, masterChain);
+        BlockChainManager.setMasterChain(CHAIN_ID, masterChain);
 
         Chain chainA = ChainGenerator.newChain(100, 200, "A", null, "M", CHAIN_ID, ChainTypeEnum.ORPHAN);
         Chain chainB = ChainGenerator.newChain(155, 170, "B", null, "C", CHAIN_ID, ChainTypeEnum.ORPHAN);
         Chain chainC = ChainGenerator.newChain(150, 180, "C", null, "A", CHAIN_ID, ChainTypeEnum.ORPHAN);
         Chain chainD = ChainGenerator.newChain(160, 190, "D", null, "C", CHAIN_ID, ChainTypeEnum.ORPHAN);
         Chain chainE = ChainGenerator.newChain(170, 180, "E", null, "D", CHAIN_ID, ChainTypeEnum.ORPHAN);
-        ChainManager.addOrphanChain(CHAIN_ID, chainA);
-        ChainManager.addOrphanChain(CHAIN_ID, chainB);
-        ChainManager.addOrphanChain(CHAIN_ID, chainC);
-        ChainManager.addOrphanChain(CHAIN_ID, chainD);
-        ChainManager.addOrphanChain(CHAIN_ID, chainE);
+        BlockChainManager.addOrphanChain(CHAIN_ID, chainA);
+        BlockChainManager.addOrphanChain(CHAIN_ID, chainB);
+        BlockChainManager.addOrphanChain(CHAIN_ID, chainC);
+        BlockChainManager.addOrphanChain(CHAIN_ID, chainD);
+        BlockChainManager.addOrphanChain(CHAIN_ID, chainE);
 
         Assert.assertNotEquals(chainA, chainB);
 
@@ -81,7 +81,7 @@ public class ChainManagerTest {
         Assert.assertEquals(chainC, chainB.getParent());
         Assert.assertEquals(chainD, chainE.getParent());
         Assert.assertEquals(chainC, chainD.getParent());
-        Assert.assertEquals(0, ChainManager.getOrphanChains(CHAIN_ID).size());
+        Assert.assertEquals(0, BlockChainManager.getOrphanChains(CHAIN_ID).size());
     }
 
     @Test
@@ -91,7 +91,7 @@ public class ChainManagerTest {
         ConfigLoader.load();
         ContextManager.getContext(CHAIN_ID).setStatus(RunningStatusEnum.RUNNING);
         Chain masterChain = ChainGenerator.newMasterChain(999L, "M", CHAIN_ID);
-        ChainManager.setMasterChain(CHAIN_ID, masterChain);
+        BlockChainManager.setMasterChain(CHAIN_ID, masterChain);
 
         Chain chainA = ChainGenerator.newChain(100, 199, "A", null, "M", CHAIN_ID, ChainTypeEnum.ORPHAN);
         Chain chainB = ChainGenerator.newChain(400, 499, "B", null, "C", CHAIN_ID, ChainTypeEnum.ORPHAN);
@@ -99,27 +99,27 @@ public class ChainManagerTest {
         Chain chainD = ChainGenerator.newChain(450, 549, "D", null, "E", CHAIN_ID, ChainTypeEnum.ORPHAN);
         Chain chainE = ChainGenerator.newChain(300, 449, "E", null, "C", CHAIN_ID, ChainTypeEnum.ORPHAN);
         Chain chainF = ChainGenerator.newChain(500, 599, "F", chainD, "D", CHAIN_ID, ChainTypeEnum.ORPHAN);
-        ChainManager.addOrphanChain(CHAIN_ID, chainA);
-        ChainManager.addOrphanChain(CHAIN_ID, chainB);
-        ChainManager.addOrphanChain(CHAIN_ID, chainC);
-        ChainManager.addOrphanChain(CHAIN_ID, chainD);
-        ChainManager.addOrphanChain(CHAIN_ID, chainE);
-        ChainManager.addOrphanChain(CHAIN_ID, chainF);
+        BlockChainManager.addOrphanChain(CHAIN_ID, chainA);
+        BlockChainManager.addOrphanChain(CHAIN_ID, chainB);
+        BlockChainManager.addOrphanChain(CHAIN_ID, chainC);
+        BlockChainManager.addOrphanChain(CHAIN_ID, chainD);
+        BlockChainManager.addOrphanChain(CHAIN_ID, chainE);
+        BlockChainManager.addOrphanChain(CHAIN_ID, chainF);
 
         Assert.assertNotEquals(chainA, chainB);
 
         OrphanChainsMonitor.getInstance().run();
 
-        Assert.assertFalse(ChainManager.getOrphanChains(CHAIN_ID).contains(chainB));
-        Assert.assertFalse(ChainManager.getOrphanChains(CHAIN_ID).contains(chainC));
-        Assert.assertFalse(ChainManager.getOrphanChains(CHAIN_ID).contains(chainD));
+        Assert.assertFalse(BlockChainManager.getOrphanChains(CHAIN_ID).contains(chainB));
+        Assert.assertFalse(BlockChainManager.getOrphanChains(CHAIN_ID).contains(chainC));
+        Assert.assertFalse(BlockChainManager.getOrphanChains(CHAIN_ID).contains(chainD));
         Assert.assertEquals(1, chainA.getSons().size());
         Assert.assertEquals(chainE, chainA.getSons().first());
         Assert.assertEquals(chainA, chainE.getParent());
         Assert.assertEquals(499, chainA.getEndHeight());
         Assert.assertEquals(549, chainE.getEndHeight());
         Assert.assertEquals(chainE, chainF.getParent());
-        Assert.assertEquals(0, ChainManager.getOrphanChains(CHAIN_ID).size());
+        Assert.assertEquals(0, BlockChainManager.getOrphanChains(CHAIN_ID).size());
     }
 
     @Test
@@ -130,7 +130,7 @@ public class ChainManagerTest {
         ContextManager.getContext(CHAIN_ID).setStatus(RunningStatusEnum.RUNNING);
         Chain masterChain = ChainGenerator.newMasterChain(999L, "A", CHAIN_ID);
 //        masterChain.setEndHash(NulsDigestData.calcDigestData(("A" + (999)).getBytes()));
-        ChainManager.setMasterChain(CHAIN_ID, masterChain);
+        BlockChainManager.setMasterChain(CHAIN_ID, masterChain);
 
         Chain chainB = ChainGenerator.newChain(200, 299, "B", masterChain, "A", CHAIN_ID, ChainTypeEnum.FORK);
         Chain chainC = ChainGenerator.newChain(250, 399, "C", chainB, "B", CHAIN_ID, ChainTypeEnum.FORK);
@@ -142,21 +142,21 @@ public class ChainManagerTest {
         Chain chainI = ChainGenerator.newChain(150, 199, "I", null, "H", CHAIN_ID, ChainTypeEnum.ORPHAN);
         Chain chainJ = ChainGenerator.newChain(200, 299, "J", null, "H", CHAIN_ID, ChainTypeEnum.ORPHAN);
         Chain chainK = ChainGenerator.newChain(250, 299, "K", chainJ, "J", CHAIN_ID, ChainTypeEnum.ORPHAN);
-        ChainManager.addForkChain(CHAIN_ID, chainB);
-        ChainManager.addForkChain(CHAIN_ID, chainC);
-        ChainManager.addOrphanChain(CHAIN_ID, chainD);
-        ChainManager.addOrphanChain(CHAIN_ID, chainE);
-        ChainManager.addOrphanChain(CHAIN_ID, chainF);
-        ChainManager.addOrphanChain(CHAIN_ID, chainG);
-        ChainManager.addOrphanChain(CHAIN_ID, chainH);
-        ChainManager.addOrphanChain(CHAIN_ID, chainI);
-        ChainManager.addOrphanChain(CHAIN_ID, chainJ);
-        ChainManager.addOrphanChain(CHAIN_ID, chainK);
+        BlockChainManager.addForkChain(CHAIN_ID, chainB);
+        BlockChainManager.addForkChain(CHAIN_ID, chainC);
+        BlockChainManager.addOrphanChain(CHAIN_ID, chainD);
+        BlockChainManager.addOrphanChain(CHAIN_ID, chainE);
+        BlockChainManager.addOrphanChain(CHAIN_ID, chainF);
+        BlockChainManager.addOrphanChain(CHAIN_ID, chainG);
+        BlockChainManager.addOrphanChain(CHAIN_ID, chainH);
+        BlockChainManager.addOrphanChain(CHAIN_ID, chainI);
+        BlockChainManager.addOrphanChain(CHAIN_ID, chainJ);
+        BlockChainManager.addOrphanChain(CHAIN_ID, chainK);
 
         OrphanChainsMonitor.getInstance().run();
 
-        Assert.assertEquals(7, ChainManager.getForkChains(CHAIN_ID).size());
-        Assert.assertEquals(0, ChainManager.getOrphanChains(CHAIN_ID).size());
+        Assert.assertEquals(7, BlockChainManager.getForkChains(CHAIN_ID).size());
+        Assert.assertEquals(0, BlockChainManager.getOrphanChains(CHAIN_ID).size());
         Assert.assertEquals(1099, masterChain.getEndHeight());
         Assert.assertEquals(499, chainC.getEndHeight());
         Assert.assertEquals(299, chainH.getEndHeight());

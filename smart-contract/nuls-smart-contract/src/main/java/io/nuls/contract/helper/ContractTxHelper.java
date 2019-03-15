@@ -77,8 +77,8 @@ public class ContractTxHelper {
     private ContractHelper contractHelper;
 
     public Result<CreateContractTransaction> makeCreateTx(int chainId, String sender, Long gasLimit, Long price,
-                                   byte[] contractCode, String[][] args,
-                                   String password, String remark) {
+                                                          byte[] contractCode, String[][] args,
+                                                          String password, String remark) {
         try {
             BigInteger value = BigInteger.ZERO;
 
@@ -94,7 +94,7 @@ public class ContractTxHelper {
             byte[] senderBytes = AddressTool.getAddress(sender);
 
             Result validateCreate = this.validateCreate(chainId, senderBytes, contractAddressBytes, gasLimit, price, contractCode, args);
-            if(validateCreate.isFailed()) {
+            if (validateCreate.isFailed()) {
                 return validateCreate;
             }
 
@@ -116,7 +116,7 @@ public class ContractTxHelper {
              */
             CoinData coinData = new CoinData();
             Result makeCoinDataResult = this.makeCoinData(chainId, sender, senderBytes, contractAddressBytes, gasLimit, price, value, tx.size(), createContractData, coinData);
-            if(makeCoinDataResult.isFailed()) {
+            if (makeCoinDataResult.isFailed()) {
                 return makeCoinDataResult;
             }
 
@@ -125,7 +125,7 @@ public class ContractTxHelper {
             tx.serializeData();
 
             return getSuccess().setData(tx);
-        }  catch (NulsException e) {
+        } catch (NulsException e) {
             Log.error(e);
             return Result.getFailed(e.getErrorCode());
         } catch (IOException e) {
@@ -137,15 +137,15 @@ public class ContractTxHelper {
     }
 
     public Result validateCreate(int chainId, byte[] sender, byte[] contractAddress, Long gasLimit, Long price,
-                                  byte[] contractCode, String[][] args) {
+                                 byte[] contractCode, String[][] args) {
         try {
             BigInteger value = BigInteger.ZERO;
 
-            if(!ContractUtil.checkPrice(price.longValue())) {
+            if (!ContractUtil.checkPrice(price.longValue())) {
                 return Result.getFailed(ContractErrorCode.CONTRACT_MINIMUM_PRICE);
             }
 
-            if(contractAddress == null) {
+            if (contractAddress == null) {
                 contractAddress = Hex.decode(AccountCall.createContractAddress(chainId));
             }
 
@@ -175,7 +175,7 @@ public class ContractTxHelper {
             ProgramResult programResult = track.create(programCreate);
 
             // 执行结果失败时，交易直接返回错误，不上链，不消耗Gas，
-            if(!programResult.isSuccess()) {
+            if (!programResult.isSuccess()) {
                 Log.error(programResult.getStackTrace());
                 Result result = Result.getFailed(DATA_ERROR);
                 result.setMsg(ContractUtil.simplifyErrorMsg(programResult.getErrorMessage()));
@@ -183,11 +183,11 @@ public class ContractTxHelper {
                 return result;
             } else {
                 // 其他合法性都通过后，再验证Gas
-                if(realGasLimit != MAX_GASLIMIT) {
+                if (realGasLimit != MAX_GASLIMIT) {
                     programCreate.setGasLimit(realGasLimit);
                     track = programExecutor.begin(prevStateRoot);
                     programResult = track.create(programCreate);
-                    if(!programResult.isSuccess()) {
+                    if (!programResult.isSuccess()) {
                         Log.error(programResult.getStackTrace());
                         Result result = Result.getFailed(DATA_ERROR);
                         result.setMsg(ContractUtil.simplifyErrorMsg(programResult.getErrorMessage()));
@@ -196,14 +196,14 @@ public class ContractTxHelper {
                 }
             }
             return getSuccess().setData(programResult);
-        }  catch (NulsException e) {
+        } catch (NulsException e) {
             Log.error(e);
             return Result.getFailed(e.getErrorCode());
         }
     }
 
     private int calcSize(NulsData nulsData) {
-        if(nulsData == null) {
+        if (nulsData == null) {
             return 0;
         }
         int size = nulsData.size();
@@ -223,14 +223,14 @@ public class ContractTxHelper {
         CoinFrom coinFrom = new CoinFrom(senderBytes, chainId, assetsId, totalValue, Hex.decode(senderBalance.getNonce()), UNLOCKED_TX);
         coinData.addFrom(coinFrom);
 
-        if(value.compareTo(BigInteger.ZERO) > 0) {
+        if (value.compareTo(BigInteger.ZERO) > 0) {
             CoinTo coinTo = new CoinTo(contractAddress, chainId, assetsId, value);
             coinData.addTo(coinTo);
         }
 
         BigInteger fee = TransactionFeeCalculator.getNormalUnsignedTxFee(txSize + calcSize(txData) + calcSize(coinData));
         totalValue = totalValue.add(fee);
-        if(senderBalance.getBalance().compareTo(totalValue) < 0) {
+        if (senderBalance.getBalance().compareTo(totalValue) < 0) {
             return Result.getFailed(INSUFFICIENT_BALANCE);
         }
         coinFrom.setAmount(totalValue);
@@ -268,7 +268,7 @@ public class ContractTxHelper {
         byte[] senderBytes = AddressTool.getAddress(sender);
 
         Result validateCall = this.validateCall(chainId, senderBytes, contractAddressBytes, value, gasLimit, price, methodName, methodDesc, args);
-        if(validateCall.isFailed()) {
+        if (validateCall.isFailed()) {
             return validateCall;
         }
 
@@ -277,7 +277,7 @@ public class ContractTxHelper {
     }
 
     public Result<CallContractTransaction> newCallTx(int chainId, String sender, byte[] senderBytes, BigInteger value, Long gasLimit, Long price, byte[] contractAddressBytes,
-                                                      String methodName, String methodDesc, String[][] args, String remark) {
+                                                     String methodName, String methodDesc, String[][] args, String remark) {
         try {
 
             CallContractTransaction tx = new CallContractTransaction();
@@ -298,7 +298,7 @@ public class ContractTxHelper {
              */
             CoinData coinData = new CoinData();
             Result makeCoinDataResult = this.makeCoinData(chainId, sender, senderBytes, contractAddressBytes, gasLimit, price, value, tx.size(), callContractData, coinData);
-            if(makeCoinDataResult.isFailed()) {
+            if (makeCoinDataResult.isFailed()) {
                 return makeCoinDataResult;
             }
 
@@ -335,7 +335,7 @@ public class ContractTxHelper {
 
     public Result validateCall(int chainId, byte[] senderBytes, byte[] contractAddressBytes, BigInteger value, Long gasLimit, Long price, String methodName, String methodDesc, String[][] args) {
         try {
-            if(!ContractUtil.checkPrice(price.longValue())) {
+            if (!ContractUtil.checkPrice(price.longValue())) {
                 return Result.getFailed(ContractErrorCode.CONTRACT_MINIMUM_PRICE);
             }
 
@@ -372,7 +372,7 @@ public class ContractTxHelper {
             ProgramResult programResult = track.call(programCall);
 
             // 执行结果失败时，交易直接返回错误，不上链，不消耗Gas
-            if(!programResult.isSuccess()) {
+            if (!programResult.isSuccess()) {
                 Log.error(programResult.getStackTrace());
                 Result result = Result.getFailed(DATA_ERROR);
                 result.setMsg(ContractUtil.simplifyErrorMsg(programResult.getErrorMessage()));
@@ -380,11 +380,11 @@ public class ContractTxHelper {
                 return result;
             } else {
                 // 其他合法性都通过后，再验证Gas
-                if(realGasLimit != MAX_GASLIMIT) {
+                if (realGasLimit != MAX_GASLIMIT) {
                     programCall.setGasLimit(realGasLimit);
                     track = programExecutor.begin(prevStateRoot);
                     programResult = track.call(programCall);
-                    if(!programResult.isSuccess()) {
+                    if (!programResult.isSuccess()) {
                         Log.error(programResult.getStackTrace());
                         Result result = Result.getFailed(DATA_ERROR);
                         result.setMsg(ContractUtil.simplifyErrorMsg(programResult.getErrorMessage()));
@@ -395,7 +395,7 @@ public class ContractTxHelper {
 
             return getSuccess().setData(programResult);
 
-        }  catch (NulsException e) {
+        } catch (NulsException e) {
             Log.error(e);
             return Result.getFailed(e.getErrorCode());
         }
@@ -412,7 +412,7 @@ public class ContractTxHelper {
         byte[] contractAddressBytes = AddressTool.getAddress(contractAddress);
 
         Result validateDelete = this.validateDelete(chainId, senderBytes, contractAddress, contractAddressBytes);
-        if(validateDelete.isFailed()) {
+        if (validateDelete.isFailed()) {
             return validateDelete;
         }
 
@@ -421,6 +421,7 @@ public class ContractTxHelper {
 
 
     }
+
     public Result<DeleteContractTransaction> newDeleteTx(int chainId, String sender, byte[] senderBytes, byte[] contractAddressBytes, String remark) {
         try {
             DeleteContractTransaction tx = new DeleteContractTransaction();
@@ -440,7 +441,7 @@ public class ContractTxHelper {
              */
             CoinData coinData = new CoinData();
             Result makeCoinDataResult = this.makeCoinData(chainId, sender, senderBytes, contractAddressBytes, 0L, 0L, BigInteger.ZERO, tx.size(), deleteContractData, coinData);
-            if(makeCoinDataResult.isFailed()) {
+            if (makeCoinDataResult.isFailed()) {
                 return makeCoinDataResult;
             }
 
@@ -467,11 +468,11 @@ public class ContractTxHelper {
     public Result validateDelete(int chainId, byte[] senderBytes, String contractAddress, byte[] contractAddressBytes) {
         try {
             Result<ContractAddressInfoPo> contractAddressInfoPoResult = contractHelper.getContractAddressInfo(chainId, contractAddressBytes);
-            if(contractAddressInfoPoResult.isFailed()) {
+            if (contractAddressInfoPoResult.isFailed()) {
                 return contractAddressInfoPoResult;
             }
             ContractAddressInfoPo contractAddressInfoPo = contractAddressInfoPoResult.getData();
-            if(contractAddressInfoPo == null) {
+            if (contractAddressInfoPo == null) {
                 return Result.getFailed(ContractErrorCode.CONTRACT_ADDRESS_NOT_EXIST);
             }
 
@@ -482,22 +483,22 @@ public class ContractTxHelper {
             // 获取合约当前状态
             ProgramStatus status = contractHelper.getContractStatus(chainId, stateRoot, contractAddressBytes);
             boolean isTerminatedContract = ContractUtil.isTerminatedContract(status.ordinal());
-            if(isTerminatedContract) {
+            if (isTerminatedContract) {
                 return Result.getFailed(ContractErrorCode.CONTRACT_DELETED);
             }
 
 
-            if(!ArraysTool.arrayEquals(senderBytes, contractAddressInfoPo.getSender())) {
+            if (!ArraysTool.arrayEquals(senderBytes, contractAddressInfoPo.getSender())) {
                 return Result.getFailed(ContractErrorCode.CONTRACT_DELETE_CREATER);
             }
 
             ContractBalance balance = contractHelper.getRealBalance(chainId, contractAddress);
-            if(balance == null) {
+            if (balance == null) {
                 return Result.getFailed(CONTRACT_OTHER_ERROR);
             }
 
             BigInteger totalBalance = balance.getTotal();
-            if(totalBalance.compareTo(BigInteger.ZERO) != 0) {
+            if (totalBalance.compareTo(BigInteger.ZERO) != 0) {
                 return Result.getFailed(ContractErrorCode.CONTRACT_DELETE_BALANCE);
             }
 

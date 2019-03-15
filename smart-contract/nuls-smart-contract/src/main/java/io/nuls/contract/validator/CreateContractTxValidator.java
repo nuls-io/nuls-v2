@@ -42,7 +42,6 @@ import static io.nuls.contract.constant.ContractErrorCode.TX_DATA_VALIDATION_ERR
 import static io.nuls.contract.util.ContractUtil.getSuccess;
 
 /**
- * 
  * @author: PierreLuo
  * @date: 2019-03-07
  */
@@ -53,7 +52,7 @@ public class CreateContractTxValidator {
         CreateContractData txData = tx.getTxDataObj();
         byte[] sender = txData.getSender();
         byte[] contractAddress = txData.getContractAddress();
-        if(!ContractUtil.isLegalContractAddress(contractAddress)) {
+        if (!ContractUtil.isLegalContractAddress(contractAddress)) {
             Log.error("contract entity error: Illegal contract address.");
             return Result.getFailed(ILLEGAL_CONTRACT_ADDRESS);
         }

@@ -32,7 +32,6 @@ import java.util.LinkedList;
 import java.util.Map;
 
 /**
- *
  * @author: PierreLuo
  * @date: 2019-03-11
  */
@@ -62,7 +61,7 @@ public interface ContractTxService {
                                   String methodName, String methodDesc, String[][] args);
 
     Result callTxFee(int chainId, String sender, BigInteger value, Long gasLimit, Long price, String contractAddress,
-                       String methodName, String methodDesc, String[][] args, String remark);
+                     String methodName, String methodDesc, String[][] args, String remark);
 
     Result contractDeleteTx(int chainId, String sender, String contractAddress, String password, String remark);
 

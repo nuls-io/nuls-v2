@@ -33,9 +33,9 @@ import io.nuls.contract.rpc.call.BlockCall;
 import io.nuls.contract.vm.program.ProgramMethod;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
-import io.nuls.tools.model.StringUtils;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.log.Log;
+import io.nuls.tools.model.StringUtils;
 import org.spongycastle.util.encoders.Hex;
 
 import java.io.IOException;
@@ -119,7 +119,7 @@ public class VMContext {
     public BlockHeaderDto getNewestBlockHeader(int chainId) {
         try {
             BlockHeader header = BlockCall.getLatestBlockHeader(chainId);
-            if(header != null) {
+            if (header != null) {
                 return new BlockHeaderDto(chainId, header);
             }
         } catch (NulsException e) {
@@ -150,7 +150,7 @@ public class VMContext {
      */
     public BigInteger getBalance(int chainId, byte[] address) {
         ContractBalance balance = contractHelper.getBalance(chainId, address);
-        if(balance != null) {
+        if (balance != null) {
             return balance.getBalance();
         }
         return BigInteger.ZERO;
@@ -164,7 +164,7 @@ public class VMContext {
      */
     public BigInteger getTotalBalance(int chainId, byte[] address) {
         ContractBalance balance = contractHelper.getBalance(chainId, address);
-        if(balance != null) {
+        if (balance != null) {
             return balance.getTotal();
         }
         return BigInteger.ZERO;
@@ -180,7 +180,7 @@ public class VMContext {
 
     public long getBestHeight(int chainId) {
         BlockHeader currentBlockHeader = contractHelper.getCurrentBlockHeader(chainId);
-        if(currentBlockHeader != null) {
+        if (currentBlockHeader != null) {
             return currentBlockHeader.getHeight() - 1;
         } else {
             try {

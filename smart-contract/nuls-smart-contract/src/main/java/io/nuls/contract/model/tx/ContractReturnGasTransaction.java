@@ -30,7 +30,6 @@ import io.nuls.base.data.Transaction;
 import static io.nuls.contract.constant.ContractConstant.TX_TYPE_CONTRACT_RETURN_GAS;
 
 /**
- * 
  * @author: PierreLuo
  * @date: 2019-03-08
  */

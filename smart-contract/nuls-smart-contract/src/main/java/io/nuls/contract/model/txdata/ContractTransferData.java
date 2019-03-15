@@ -45,7 +45,8 @@ public class ContractTransferData extends TransactionLogicData implements Contra
     private NulsDigestData orginTxHash;
     private byte[] contractAddress;
 
-    public ContractTransferData() {}
+    public ContractTransferData() {
+    }
 
     public ContractTransferData(NulsDigestData orginTxHash, byte[] contractAddress) {
         this.orginTxHash = orginTxHash;

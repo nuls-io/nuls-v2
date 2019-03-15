@@ -27,7 +27,7 @@ import io.nuls.base.data.NulsDigestData;
 import io.nuls.block.constant.LocalBlockStateEnum;
 import io.nuls.block.constant.RunningStatusEnum;
 import io.nuls.block.exception.ChainRuntimeException;
-import io.nuls.block.manager.ChainManager;
+import io.nuls.block.manager.BlockChainManager;
 import io.nuls.block.manager.ContextManager;
 import io.nuls.block.model.ChainContext;
 import io.nuls.block.model.ChainParameters;
@@ -104,7 +104,7 @@ public class BlockSynchronizer implements Runnable {
                     Block block = blockService.getBlock(chainId, latestHeight);
                     //本地区块维护成功
                     context.setLatestBlock(block);
-                    ChainManager.setMasterChain(chainId, ChainGenerator.generateMasterChain(chainId, block, blockService));
+                    BlockChainManager.setMasterChain(chainId, ChainGenerator.generateMasterChain(chainId, block, blockService));
                 }
                 waitUntilNetworkStable(chainId);
                 while (!synchronize(chainId)) {
@@ -215,9 +215,9 @@ public class BlockSynchronizer implements Runnable {
             executor.shutdownNow();
             if (success) {
                 commonLog.info("block syn complete, total download:" + total + ", total time:" + (end - start) + ", average time:" + (end - start) / total);
-                if (checkIsNewest(chainId, context)) {
+//                if (checkIsNewest(chainId, context)) {
                     //要测试分叉链切换或者孤儿链，放开下面语句，概率会加大
-//                if (true) {
+                if (true) {
                     commonLog.info("block syn complete successfully, current height-" + params.getNetLatestHeight());
                     context.setStatus(RunningStatusEnum.RUNNING);
                     ConsensusUtil.notice(chainId, CONSENSUS_WORKING);
@@ -341,10 +341,6 @@ public class BlockSynchronizer implements Runnable {
     private LocalBlockStateEnum checkLocalBlock(int chainId, BlockDownloaderParams params) {
         long localHeight = params.getLocalLatestHeight();
         long netHeight = params.getNetLatestHeight();
-        //如果本地高度是0，网络高度大于0，直接进行同步？
-//        if (localHeight == 0 && netHeight > 0) {
-//            return CONSISTENT;
-//        }
         //得到共同高度
         long commonHeight = Math.min(localHeight, netHeight);
         if (checkHashEquality(chainId, params)) {

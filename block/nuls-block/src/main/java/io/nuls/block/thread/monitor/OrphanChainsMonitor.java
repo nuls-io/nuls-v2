@@ -22,7 +22,7 @@ package io.nuls.block.thread.monitor;
 
 import io.nuls.block.constant.ChainTypeEnum;
 import io.nuls.block.constant.RunningStatusEnum;
-import io.nuls.block.manager.ChainManager;
+import io.nuls.block.manager.BlockChainManager;
 import io.nuls.block.manager.ContextManager;
 import io.nuls.block.model.Chain;
 import io.nuls.block.model.ChainContext;
@@ -81,7 +81,7 @@ public class OrphanChainsMonitor implements Runnable {
                             continue;
                         }
                         // possibly racy reads
-                        SortedSet<Chain> orphanChains = ChainManager.getOrphanChains(chainId);
+                        SortedSet<Chain> orphanChains = BlockChainManager.getOrphanChains(chainId);
                         if (!lock.validate(stamp)) {
                             continue;
                         }
@@ -98,8 +98,8 @@ public class OrphanChainsMonitor implements Runnable {
                             commonLog.info("#" + orphanChain);
                         }
                         context.setStatus(MAINTAIN_ORPHAN_CHAINS);
-                        Chain masterChain = ChainManager.getMasterChain(chainId);
-                        SortedSet<Chain> forkChains = ChainManager.getForkChains(chainId);
+                        Chain masterChain = BlockChainManager.getMasterChain(chainId);
+                        SortedSet<Chain> forkChains = BlockChainManager.getForkChains(chainId);
                         //标记、变更链属性阶段
                         for (Chain orphanChain : orphanChains) {
                             commonLog.debug("OrphanChainsMonitor-mark-begin");
@@ -113,7 +113,7 @@ public class OrphanChainsMonitor implements Runnable {
                             copy(chainId, maintainedOrphanChains, orphanChain);
                             commonLog.debug("OrphanChainsMonitor-copy-end");
                         }
-                        ChainManager.setOrphanChains(chainId, maintainedOrphanChains);
+                        BlockChainManager.setOrphanChains(chainId, maintainedOrphanChains);
                         forkChains.forEach(e -> e.setType(ChainTypeEnum.FORK));
                         maintainedOrphanChains.forEach(e -> e.setType(ChainTypeEnum.ORPHAN));
                         break;
@@ -146,7 +146,7 @@ public class OrphanChainsMonitor implements Runnable {
         }
         //如果标记为从主链分叉,orphanChain不会复制到新的孤儿链集合,但是会进入分叉链集合,所有orphanChain的直接子链标记为ChainTypeEnum.FORK_FORK
         if (orphanChain.getType().equals(ChainTypeEnum.MASTER_FORK)) {
-            ChainManager.addForkChain(chainId, orphanChain);
+            BlockChainManager.addForkChain(chainId, orphanChain);
             orphanChain.getSons().forEach(e -> e.setType(ChainTypeEnum.FORK_FORK));
             return;
         }
@@ -158,7 +158,7 @@ public class OrphanChainsMonitor implements Runnable {
         }
         //如果标记为从分叉链分叉,orphanChain不会复制到新的孤儿链集合,但是会进入分叉链集合,所有orphanChain的直接子链标记为ChainTypeEnum.FORK_FORK
         if (orphanChain.getType().equals(ChainTypeEnum.FORK_FORK)) {
-            ChainManager.addForkChain(chainId, orphanChain);
+            BlockChainManager.addForkChain(chainId, orphanChain);
             orphanChain.getSons().forEach(e -> e.setType(ChainTypeEnum.FORK_FORK));
             return;
         }
@@ -275,7 +275,7 @@ public class OrphanChainsMonitor implements Runnable {
      */
     private boolean tryAppend(Chain mainChain, Chain subChain) {
         if (mainChain.getEndHeight() + 1 == subChain.getStartHeight() && mainChain.getEndHash().equals(subChain.getPreviousHash())) {
-            return ChainManager.append(mainChain, subChain);
+            return BlockChainManager.append(mainChain, subChain);
         }
         return false;
     }
@@ -290,7 +290,7 @@ public class OrphanChainsMonitor implements Runnable {
      */
     private boolean tryFork(Chain mainChain, Chain subChain) {
         if (mainChain.getHashList().contains(subChain.getPreviousHash())) {
-            return ChainManager.fork(mainChain, subChain);
+            return BlockChainManager.fork(mainChain, subChain);
         }
         return false;
     }

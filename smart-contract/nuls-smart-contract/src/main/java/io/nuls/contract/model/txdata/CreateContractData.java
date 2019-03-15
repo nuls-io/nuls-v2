@@ -29,7 +29,6 @@ import io.nuls.base.basic.TransactionLogicData;
 import io.nuls.base.data.Address;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.parse.SerializeUtils;
-import lombok.AllArgsConstructor;
 
 import java.io.IOException;
 import java.math.BigInteger;
