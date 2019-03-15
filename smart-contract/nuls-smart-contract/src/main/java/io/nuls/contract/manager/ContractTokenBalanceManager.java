@@ -41,6 +41,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
+import static io.nuls.contract.constant.ContractErrorCode.ADDRESS_ERROR;
+import static io.nuls.contract.constant.ContractErrorCode.DATA_ERROR;
 import static io.nuls.contract.util.ContractUtil.getSuccess;
 
 /**
@@ -78,22 +80,24 @@ public class ContractTokenBalanceManager {
 
     private ContractTokenBalanceManager() {}
 
-    public void initAllTokensByAccount(String account) throws NulsException {
+    public Result initAllTokensByAccount(String account) throws NulsException {
         if(!initializedAddressSet.add(account)) {
-            return;
+            return getSuccess();
         }
         if(!AddressTool.validAddress(chainId, account)) {
-            return;
+            return Result.getFailed(ADDRESS_ERROR);
         }
         Result<List<byte[]>> allNrc20ListResult = contractTokenAddressStorageService.getAllNrc20AddressList(chainId);
         if(allNrc20ListResult.isFailed()) {
-            return;
+            return allNrc20ListResult;
         }
         BlockHeader blockHeader = BlockCall.getLatestBlockHeader(chainId);
         List<byte[]> contractAddressInfoPoList = allNrc20ListResult.getData();
         for(byte[] address : contractAddressInfoPoList) {
             initialContractToken(account, blockHeader, AddressTool.getStringAddressByBytes(address));
         }
+
+        return getSuccess();
     }
 
     public void initialContractToken(String account, BlockHeader blockHeader, String contract) {
@@ -135,7 +139,10 @@ public class ContractTokenBalanceManager {
     }
 
     public Result<List<ContractTokenInfo>> getAllTokensByAccount(String account) throws NulsException {
-        this.initAllTokensByAccount(account);
+        Result result = this.initAllTokensByAccount(account);
+        if(result.isFailed()) {
+            return result;
+        }
         Map<String, ContractTokenInfo> tokensMap = contractTokenOfLocalAccount.get(account);
         if(tokensMap == null || tokensMap.size() == 0) {
             return getSuccess().setData(new ArrayList<>());

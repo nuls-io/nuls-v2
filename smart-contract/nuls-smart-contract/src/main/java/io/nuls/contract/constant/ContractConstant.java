@@ -25,6 +25,8 @@ package io.nuls.contract.constant;
 
 
 import java.math.BigInteger;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 
 public interface ContractConstant {
 
@@ -73,10 +75,6 @@ public interface ContractConstant {
     String CREATE = "create";
     String DELETE = "delete";
 
-    String GET = "get";
-
-    String SEND_BACK_REMARK = "Contract execution failed, return funds.";
-
     String NOT_ENOUGH_GAS = "not enough gas";
 
     long CONTRACT_CONSTANT_GASLIMIT = 10000000;
@@ -122,22 +120,15 @@ public interface ContractConstant {
      */
     String SYS_FILE_ENCODING = "file.encoding";
 
-    String DEFAULT_ENCODING = "UTF-8";
-
     /**
      * context path
      */
-    String CONTEXT_PATH = "io.nuls.poc";
+    String CONTEXT_PATH = "io.nuls.contract";
 
     /**
      * rpc file path
      */
-    String RPC_PATH = "io.nuls.poc.rpc";
-
-    /**
-     * config file path
-     */
-    String CONFIG_FILE_PATH = "consensus-config.json";
+    String RPC_PATH = "io.nuls.contract.rpc";
 
     String NRC20_STANDARD_FILE = "nrc20.json";
     /**

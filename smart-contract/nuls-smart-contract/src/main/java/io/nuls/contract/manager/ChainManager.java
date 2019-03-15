@@ -24,13 +24,11 @@
  */
 package io.nuls.contract.manager;
 
-import io.nuls.contract.constant.ContractConstant;
 import io.nuls.contract.constant.ContractDBConstant;
 import io.nuls.contract.model.bo.Chain;
 import io.nuls.contract.model.bo.config.ConfigBean;
-import io.nuls.contract.model.bo.config.ConfigItem;
+import io.nuls.contract.config.ContractConfig;
 import io.nuls.contract.model.dto.ContractTxRegisterDto;
-import io.nuls.contract.rpc.call.BlockCall;
 import io.nuls.contract.rpc.call.TransactionCall;
 import io.nuls.contract.storage.ConfigStorageService;
 import io.nuls.contract.util.VMContext;
@@ -42,7 +40,6 @@ import io.nuls.rpc.model.ModuleE;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.exception.NulsException;
-import io.nuls.tools.io.IoUtils;
 import io.nuls.tools.log.Log;
 import io.nuls.tools.parse.JSONUtils;
 
@@ -69,6 +66,9 @@ public class ChainManager {
 
     @Autowired
     private ConfigStorageService configStorageService;
+
+    @Autowired
+    private ContractConfig contractConfig;
 
     private Map<Integer, Chain> chainMap = new ConcurrentHashMap<>();
 
@@ -158,9 +158,10 @@ public class ChainManager {
             and the main chain configuration information needs to be read from the configuration file at this time.
             */
             if (configMap == null || configMap.size() == 0) {
-                String configJson = IoUtils.read(ContractConstant.CONFIG_FILE_PATH);
-                List<ConfigItem> configItemList = JSONUtils.json2list(configJson, ConfigItem.class);
-                ConfigBean configBean = ConfigManager.initManager(configItemList);
+                //String configJson = IoUtils.read(ContractConstant.CONFIG_FILE_PATH);
+                //List<ConfigItem> configItemList = JSONUtils.json2list(configJson, ConfigItem.class);
+                //ConfigBean configBean = ConfigManager.initManager(configItemList);
+                ConfigBean configBean = contractConfig.getChainConfig();
                 if (configBean == null) {
                     return null;
                 }

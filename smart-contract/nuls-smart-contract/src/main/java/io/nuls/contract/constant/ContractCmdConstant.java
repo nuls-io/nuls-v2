@@ -39,6 +39,7 @@ public interface ContractCmdConstant {
     String CREATE_VALIDATOR = "sc_create_validator";
     String CALL_VALIDATOR = "sc_call_validator";
     String DELETE_VALIDATOR = "sc_delete_validator";
+    String INITIAL_ACCOUNT_TOKEN = "sc_initial_account_token";
 
     /**
      *  user cmd

@@ -23,8 +23,10 @@
  */
 package io.nuls.contract.rpc.cmd;
 
+import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.Transaction;
 import io.nuls.contract.helper.ContractHelper;
+import io.nuls.contract.manager.ContractTokenBalanceManager;
 import io.nuls.contract.manager.ContractTxProcessorManager;
 import io.nuls.contract.manager.ContractTxValidatorManager;
 import io.nuls.contract.model.bo.ContractTempTransaction;
@@ -51,6 +53,8 @@ import java.util.Map;
 
 import static io.nuls.contract.constant.ContractCmdConstant.*;
 import static io.nuls.contract.constant.ContractConstant.*;
+import static io.nuls.contract.constant.ContractErrorCode.ADDRESS_ERROR;
+import static io.nuls.contract.constant.ContractErrorCode.DATA_ERROR;
 
 /**
  * @author: PierreLuo
@@ -228,7 +232,6 @@ public class ContractCmd extends BaseCmd {
             return failed(e.getMessage());
         }
     }
-
     @CmdAnnotation(cmd = ROLLBACK, version = 1.0, description = "commit contract")
     @Parameter(parameterName = "chainId", parameterType = "int")
     @Parameter(parameterName = "txHexList", parameterType = "List<String>")
@@ -243,6 +246,34 @@ public class ContractCmd extends BaseCmd {
             if(result.isFailed()) {
                 return failed(result.getErrorCode(), result.getMsg());
             }
+            return success();
+        } catch (Exception e) {
+            Log.error(e);
+            return failed(e.getMessage());
+        }
+    }
+
+    @CmdAnnotation(cmd = INITIAL_ACCOUNT_TOKEN, version = 1.0, description = "initial account token")
+    @Parameter(parameterName = "chainId", parameterType = "int")
+    @Parameter(parameterName = "address", parameterType = "String")
+    public Response initialAccountToken(Map<String,Object> params){
+        try {
+            Integer chainId = (Integer) params.get("chainId");
+            String address = (String) params.get("address");
+            if(!AddressTool.validAddress(chainId, address)) {
+                return failed(ADDRESS_ERROR);
+            }
+
+            ContractTokenBalanceManager contractTokenBalanceManager = contractHelper.getChain(chainId).getContractTokenBalanceManager();
+            if(contractTokenBalanceManager == null) {
+                return failed(DATA_ERROR);
+            }
+
+            Result result = contractTokenBalanceManager.initAllTokensByAccount(address);
+            if(result.isFailed()) {
+                return failed(result.getErrorCode());
+            }
+
             return success();
         } catch (Exception e) {
             Log.error(e);
