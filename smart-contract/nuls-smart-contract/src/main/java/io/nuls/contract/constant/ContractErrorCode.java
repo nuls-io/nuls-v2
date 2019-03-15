@@ -56,6 +56,7 @@ public interface ContractErrorCode {
     ErrorCode INVALID_AMOUNT = ErrorCode.init("31005");
     ErrorCode TX_DATA_VALIDATION_ERROR = ErrorCode.init("31008");
     ErrorCode TOO_SMALL_AMOUNT = ErrorCode.init("31012");
+    ErrorCode TX_NOT_EXIST = ErrorCode.init("31015");
 
     ErrorCode PASSWORD_IS_WRONG = ErrorCode.init("50000");
     ErrorCode ACCOUNT_NOT_EXIST = ErrorCode.init("50001");

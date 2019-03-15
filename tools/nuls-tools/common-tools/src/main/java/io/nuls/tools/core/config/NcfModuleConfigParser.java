@@ -7,6 +7,7 @@ package io.nuls.tools.core.config;
  */
 public class NcfModuleConfigParser extends IniModuleConfigParser {
 
+
     @Override
     public String fileSuffix() {
         return "ncf";

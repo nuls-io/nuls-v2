@@ -24,7 +24,6 @@
  */
 package io.nuls.tools.core.ioc;
 
-import ch.qos.logback.core.joran.spi.ConfigurationWatchList;
 import io.nuls.tools.basic.InitializingBean;
 import io.nuls.tools.core.annotation.*;
 import io.nuls.tools.core.config.ConfigSetting;
@@ -36,7 +35,6 @@ import io.nuls.tools.model.StringUtils;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.exception.NulsRuntimeException;
 import io.nuls.tools.log.Log;
-import io.nuls.tools.parse.ConfigLoader;
 import net.sf.cglib.proxy.Enhancer;
 import net.sf.cglib.proxy.MethodInterceptor;
 
@@ -101,14 +99,19 @@ public class SpringLiteContext {
                 //通过Order注解控制类加载顺序
                 .sorted((b1, b2) -> getOrderByClass(b1) > getOrderByClass(b2) ? 1 : -1)
                 .forEach((Class clazz) -> checkBeanClass(clazz));
-        setConfiguration();
+        configurationInjectToBean();
         autowireFields();
         callAfterPropertiesSet();
         success = true;
     }
 
-    private static void setConfiguration() {
+    /**
+     * 将配置项注入到bean中
+     * inject config to bean
+     */
+    private static void configurationInjectToBean() {
         ConfigurationLoader configLoader = getBean(ConfigurationLoader.class);
+        //加载配置项
         configLoader.load();
         BEAN_TEMP_MAP.entrySet().forEach(entry -> {
             Object bean = entry.getValue();
@@ -117,17 +120,23 @@ public class SpringLiteContext {
             if (configuration != null) {
                 Set<Field> fields = getFieldSet(cls);
                 fields.stream().forEach(field -> {
-                    ConfigSetting.set(bean, field, configLoader.getValue(field.getName()));
+                    Value annValue = field.getAnnotation(Value.class);
+                    String key = field.getName();
+                    if(annValue != null){
+                        key = annValue.value();
+                    }
+                    ConfigSetting.set(bean, field, configLoader.getValue(key));
+                });
+            }else{
+                Set<Field> fields = getFieldSet(cls);
+                fields.stream().forEach(field -> {
+                    Value annValue = field.getAnnotation(Value.class);
+                    if (annValue != null) {
+                        String key = annValue.value();
+                        ConfigSetting.set(bean, field, configLoader.getValue(key));
+                    }
                 });
             }
-            Set<Field> fields = getFieldSet(cls);
-            fields.stream().forEach(field -> {
-                Value annValue = field.getAnnotation(Value.class);
-                if (annValue != null) {
-                    String key = annValue.value();
-                    ConfigSetting.set(bean, field, configLoader.getValue(key));
-                }
-            });
         });
     }
 

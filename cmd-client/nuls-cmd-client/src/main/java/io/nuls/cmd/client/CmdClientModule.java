@@ -1,5 +1,6 @@
 package io.nuls.cmd.client;
 
+import io.nuls.api.provider.Provider;
 import io.nuls.api.provider.ServiceManager;
 import io.nuls.api.provider.account.AccountService;
 import io.nuls.rpc.model.ModuleE;
@@ -8,6 +9,7 @@ import io.nuls.rpc.modulebootstrap.RpcModule;
 import io.nuls.rpc.modulebootstrap.RpcModuleState;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
+import io.nuls.tools.core.annotation.Value;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.model.StringUtils;
 import io.nuls.tools.parse.I18nUtils;
@@ -32,6 +34,12 @@ public class CmdClientModule extends RpcModule {
 //    ServerSocket serverSocket;
 //
 //    int port = 1122;
+
+    @Value("chain-id")
+    int defaultChainId;
+
+    @Value("provider-type")
+    Provider.ProviderType providerType;
 
     @Autowired CommandHandler commandHandler;
 
@@ -104,6 +112,7 @@ public class CmdClientModule extends RpcModule {
             String language = "zh-CHS";
             I18nUtils.loadLanguage(this.getClass(), "languages", language);
             I18nUtils.setLanguage(language);
+            ServiceManager.init(defaultChainId,providerType);
 //            serverSocket = new ServerSocket(port,1);
 //            System.out.println("服务器启动!");
         } catch (Exception e) {

@@ -10,7 +10,6 @@ JRE=11.0.2
 [Networks]
 AllowedNetworks=127.0.0.1/32
 CommPort=7779
-ManagerUrl=127.0.0.1:7771
 IP=127.0.0.1
 
 [Output]

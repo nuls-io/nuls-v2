@@ -36,10 +36,15 @@ import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.model.StringUtils;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.log.Log;
+import org.spongycastle.util.encoders.Hex;
 
 import java.io.IOException;
 import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
+
+import static io.nuls.contract.constant.ContractConstant.INITIAL_STATE_ROOT;
 
 /**
  * @Author: PierreLuo
@@ -185,6 +190,30 @@ public class VMContext {
                 return -1L;
             }
         }
+    }
+
+    public String getRandomSeed(long endHeight, int count, String algorithm) {
+        //TODO pierre
+        return INITIAL_STATE_ROOT;
+    }
+
+    public String getRandomSeed(long startHeight, long endHeight, String algorithm) {
+        //TODO pierre
+        return INITIAL_STATE_ROOT;
+    }
+
+    public List<byte[]> getRandomSeedList(long endHeight, int seedCount) {
+        //TODO pierre
+        List<byte[]> list = new ArrayList<>();
+        list.add(Hex.decode(INITIAL_STATE_ROOT));
+        return list;
+    }
+
+    public List<byte[]> getRandomSeedList(long startHeight, long endHeight) {
+        //TODO pierre
+        List<byte[]> list = new ArrayList<>();
+        list.add(Hex.decode(INITIAL_STATE_ROOT));
+        return list;
     }
 
     public long getCustomMaxViewGasLimit(int chainId) {

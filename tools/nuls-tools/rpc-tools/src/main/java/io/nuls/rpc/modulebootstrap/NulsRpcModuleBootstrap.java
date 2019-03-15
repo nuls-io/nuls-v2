@@ -79,7 +79,7 @@ public class NulsRpcModuleBootstrap {
         log.info("MODULE INFO : {}:{}",module.moduleInfo().name,module.moduleInfo().version);
         log.info("MODULE DEPENDENCIES:");
         Arrays.stream(module.getDependencies()).forEach(d->log.info("====>{}:{}",d.name,d.version));
-        module.run(scanPackage,"ws://" + args[0]);
+        module.run(scanPackage,args[0]);
     }
 
 }

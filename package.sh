@@ -255,9 +255,9 @@ copyModuleNcfToModules(){
 			fi
 		fi
 	done < ./module.ncf
-	# merge common module.ncf and private module.ncf to module.tmep.ncf
-	sh "${PROJECT_PATH}/build/merge-ncf.sh" "${PROJECT_PATH}/module-base.ncf" $moduleNcf
-	rm $moduleNcf 
+#	 merge common module.ncf and private module.ncf to module.tmep.ncf
+	sh "${PROJECT_PATH}/build/merge-ncf.sh" "${PROJECT_PATH}/module.ncf" $moduleNcf
+	rm $moduleNcf
 	sedCommand+=" -e 's/%MAIN_CLASS_NAME%/${mainClassName}/g' "
     echo $sedCommand
 	if [ -z $(echo "${sedCommand}" | grep -o "%JOPT_XMS%") ]; then

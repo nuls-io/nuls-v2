@@ -28,7 +28,11 @@ package io.nuls.network.manager;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.util.Attribute;
 import io.netty.util.AttributeKey;
-import io.nuls.network.constant.*;
+import io.nuls.network.cfg.NetworkConfig;
+import io.nuls.network.constant.ManagerStatusEnum;
+import io.nuls.network.constant.NetworkConstant;
+import io.nuls.network.constant.NodeConnectStatusEnum;
+import io.nuls.network.constant.NodeStatusEnum;
 import io.nuls.network.manager.handler.MessageHandlerFactory;
 import io.nuls.network.manager.handler.base.BaseMeesageHandlerInf;
 import io.nuls.network.model.Node;
@@ -40,6 +44,7 @@ import io.nuls.network.netty.NettyServer;
 import io.nuls.network.netty.container.NodesContainer;
 import io.nuls.network.utils.IpUtil;
 import io.nuls.rpc.netty.channel.manager.ConnectManager;
+import io.nuls.tools.core.ioc.SpringLiteContext;
 import io.nuls.tools.thread.ThreadUtils;
 import io.nuls.tools.thread.TimeService;
 
@@ -59,6 +64,7 @@ import static io.nuls.network.utils.LoggerUtil.Log;
  */
 public class ConnectionManager extends BaseManager {
     private TaskManager taskManager = TaskManager.getInstance();
+    NetworkConfig networkConfig = SpringLiteContext.getBean(NetworkConfig.class);
     private static ConnectionManager instance = new ConnectionManager();
     /**
      * 作为Server 被动连接的peer
@@ -106,9 +112,8 @@ public class ConnectionManager extends BaseManager {
      * loadSeedsNode
      */
     private void loadSeedsNode() {
-        NetworkParam networkParam = NetworkParam.getInstance();
-        List<String> list = networkParam.getSeedIpList();
-        NodeGroup nodeGroup = NodeGroupManager.getInstance().getNodeGroupByMagic(networkParam.getPacketMagic());
+        List<String> list = networkConfig.getSeedIpList();
+        NodeGroup nodeGroup = NodeGroupManager.getInstance().getNodeGroupByMagic(networkConfig.getPacketMagic());
         for (String seed : list) {
             String[] peer = seed.split(NetworkConstant.COLON);
             if (IpUtil.getIps().contains(peer[0])) {
@@ -158,9 +163,10 @@ public class ConnectionManager extends BaseManager {
     }
 
     public boolean nodeConnectIn(String ip, int port, SocketChannel channel) {
+
         boolean isCross = false;
         //client 连接 server的端口是跨链端口?
-        if (channel.localAddress().getPort() == NetworkParam.getInstance().getCrossPort()) {
+        if (channel.localAddress().getPort() == networkConfig.getCrossPort()) {
             isCross = true;
         }
         Log.debug("peer = {}:{} connectIn",ip,port);
@@ -214,8 +220,8 @@ public class ConnectionManager extends BaseManager {
      * server start
      */
     private void serverStart() {
-        NettyServer server = new NettyServer(NetworkParam.getInstance().getPort());
-        NettyServer serverCross = new NettyServer(NetworkParam.getInstance().getCrossPort());
+        NettyServer server = new NettyServer(networkConfig.getPort());
+        NettyServer serverCross = new NettyServer(networkConfig.getCrossPort());
         server.init();
         serverCross.init();
         ThreadUtils.createAndRunThread("node server start", () -> {

@@ -10,6 +10,12 @@ import java.util.Map;
  */
 public interface ModuleConfigParser {
 
+    String MODULE_NAME = "module.";
+
+    default String getFileName(){
+        return MODULE_NAME + fileSuffix();
+    }
+
     /**
      * 解析文件类型的后缀
      * @return

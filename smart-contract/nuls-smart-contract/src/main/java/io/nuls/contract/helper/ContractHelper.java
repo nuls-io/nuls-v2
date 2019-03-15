@@ -424,7 +424,7 @@ public class ContractHelper {
         return contractAddressStorageService.getContractAddressInfo(chainId, contractAddressBytes);
     }
 
-    public Result<ContractTokenInfo> getContractToken(int chainId, String address, String contractAddress) {
+    public Result<ContractTokenInfo> getContractToken(int chainId, BlockHeader blockHeader, String address, String contractAddress) {
         try {
             if (StringUtils.isBlank(contractAddress) || StringUtils.isBlank(address)) {
                 return Result.getFailed(ContractErrorCode.NULL_PARAMETER);
@@ -434,18 +434,6 @@ public class ContractHelper {
                 return Result.getFailed(ADDRESS_ERROR);
             }
 
-            // 当前区块高度
-            BlockHeader blockHeader;
-            try {
-                blockHeader = BlockCall.getLatestBlockHeader(chainId);
-            } catch (NulsException e) {
-                Log.error(e);
-                return getFailed();
-            }
-            if(blockHeader == null) {
-                Log.error("block header is null.");
-                return getFailed();
-            }
             long blockHeight = blockHeader.getHeight();
             // 当前区块状态根
             byte[] currentStateRoot = ContractUtil.getStateRoot(blockHeader);

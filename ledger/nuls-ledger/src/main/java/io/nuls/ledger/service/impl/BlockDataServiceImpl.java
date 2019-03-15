@@ -32,7 +32,7 @@ import io.nuls.ledger.model.po.BlockTxs;
 import io.nuls.ledger.service.AccountStateService;
 import io.nuls.ledger.service.BlockDataService;
 import io.nuls.ledger.storage.Repository;
-import io.nuls.ledger.utils.LedgerUtils;
+import io.nuls.ledger.utils.LedgerUtil;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Service;
 
@@ -62,7 +62,7 @@ public class BlockDataServiceImpl implements BlockDataService {
                     List<AccountState> preAccountStates = blockSnapshotAccounts.getAccounts();
                     //回滚高度
                     for (AccountState accountState :preAccountStates) {
-                        String key = LedgerUtils.getKeyStr(accountState.getAddress(), accountState.getAssetChainId(), accountState.getAssetId());
+                        String key = LedgerUtil.getKeyStr(accountState.getAddress(), accountState.getAssetChainId(), accountState.getAssetId());
                         accountStateService.rollAccountState(key,accountState);
                         logger.info("rollBack account={},assetChainId={},assetId={}, height={},lastHash= {} ", key, accountState.getAssetChainId(),accountState.getAssetId(),
                                 accountState.getHeight(), accountState.getTxHash());

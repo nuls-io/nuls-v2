@@ -38,7 +38,10 @@ import static io.nuls.block.constant.Constant.*;
 public class BlockBootstrap extends RpcModule {
 
     public static void main(String[] args) {
-        NulsRpcModuleBootstrap.run("io.nuls", new String[]{HostInfo.getLocalIP() + ":8887/ws"});
+        if (args == null || args.length == 0) {
+            args = new String[]{"ws://" + HostInfo.getLocalIP() + ":8887/ws"};
+        }
+        NulsRpcModuleBootstrap.run("io.nuls", args);
     }
 
     /**
