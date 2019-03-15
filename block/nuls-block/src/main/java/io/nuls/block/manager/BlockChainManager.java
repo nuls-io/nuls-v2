@@ -152,8 +152,12 @@ public class BlockChainManager {
             delete.add(chain);
             Chain subChain = switchChainPath.empty() ? null : switchChainPath.peek();
             boolean b = switchChain0(chainId, masterChain, chain, subChain);
-            b=false;
             if (!b) {
+                //切换链失败,恢复主链
+                //首先把切换失败过程中加到主链上的区块回滚掉
+                while (masterChain.getEndHeight() >= forkHeight) {
+                    blockService.rollbackBlock(chainId, masterChain.getEndHeight(), false);
+                }
                 commonLog.info("*switchChain0 fail masterChain-" + masterChain);
                 commonLog.info("*switchChain0 fail chain-" + chain);
                 commonLog.info("*switchChain0 fail subChain-" + subChain);
