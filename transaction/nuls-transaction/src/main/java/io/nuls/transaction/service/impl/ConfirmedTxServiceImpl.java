@@ -272,9 +272,7 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
         List<Transaction> successedList = new ArrayList<>();
         boolean rs = true;
         if(!confirmedTxStorageService.removeTxList(chain.getChainId(), txList) && atomicity ){
-            for (Transaction tx : txList) {
-                saveTxs(chain, successedList, blockheight, false);
-            }
+            saveTxs(chain, txList, blockheight, false);
             rs = false;
             chain.getLoggerMap().get(TxConstant.LOG_TX).debug("failed! removeTxs");
         }
