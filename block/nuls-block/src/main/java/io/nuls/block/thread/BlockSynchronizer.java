@@ -136,7 +136,7 @@ public class BlockSynchronizer implements Runnable {
             if (sizeSecond == sizeFirst) {
                 break;
             }
-            commonLog.debug("sizeFirst=" + sizeFirst + ", sizeSecond=" + sizeSecond+ ", wait Until Network Stable..........");
+            commonLog.info("sizeFirst=" + sizeFirst + ", sizeSecond=" + sizeSecond+ ", wait Until Network Stable..........");
             sizeFirst = sizeSecond;
         }
     }
