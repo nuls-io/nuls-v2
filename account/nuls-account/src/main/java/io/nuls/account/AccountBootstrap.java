@@ -2,6 +2,7 @@ package io.nuls.account;
 
 import io.nuls.account.config.AccountConfig;
 import io.nuls.account.config.NulsConfig;
+import io.nuls.account.constant.AccountConstant;
 import io.nuls.account.constant.AccountErrorCode;
 import io.nuls.account.constant.AccountStorageConstant;
 import io.nuls.account.model.bo.Chain;
@@ -165,7 +166,7 @@ public class AccountBootstrap extends RpcModule {
      */
     private static void initDB() throws Exception {
         //读取配置文件，数据存储根目录，初始化打开该目录下所有表连接并放入缓存
-        RocksDBService.init(NulsConfig.DATA_PATH);
+        RocksDBService.init(NulsConfig.DATA_PATH+AccountConstant.MODULE_DB_PATH);
         //初始化表
         try {
             //If tables do not exist, create tables.
