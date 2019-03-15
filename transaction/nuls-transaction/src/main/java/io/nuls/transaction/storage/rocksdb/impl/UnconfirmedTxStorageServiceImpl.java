@@ -71,7 +71,7 @@ public class UnconfirmedTxStorageServiceImpl implements UnconfirmedTxStorageServ
                 TransactionsPO txPO = new TransactionsPO();
                 txPO.parse(new NulsByteBuffer(txBytes, 0));
                 tx = txPO.toTransaction();
-                //tx = TransactionManager.getInstance(new NulsByteBuffer(txBytes, 0));
+                //tx = TxManager.getInstance(new NulsByteBuffer(txBytes, 0));
             } catch (Exception e) {
                 Log.error(e);
                 return null;

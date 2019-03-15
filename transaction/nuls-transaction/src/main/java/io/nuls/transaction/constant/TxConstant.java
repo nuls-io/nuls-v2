@@ -35,6 +35,13 @@ public interface TxConstant {
     int TX_TYPE_ADD_ASSET_TO_CHAIN = 13;
     /** 删除链上资产*/
     int TX_TYPE_REMOVE_ASSET_FROM_CHAIN = 14;
+    /** 创建智能合约交易*/
+    int TX_TYPE_CREATE_CONTRACT = 100;
+    /** 调用智能合约交易*/
+    int TX_TYPE_CALL_CONTRACT = 101;
+    /** 删除智能合约交易*/
+    int TX_TYPE_DELETE_CONTRACT = 102;
+
 
     String LOG_TX = "tx/tx";
     String LOG_NEW_TX_PROCESS = "tx/newTxProcess";

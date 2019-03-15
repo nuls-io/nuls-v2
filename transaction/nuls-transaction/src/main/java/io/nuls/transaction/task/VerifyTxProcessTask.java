@@ -5,7 +5,6 @@ import io.nuls.tools.core.ioc.SpringLiteContext;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.transaction.cache.PackablePool;
 import io.nuls.transaction.constant.TxConstant;
-import io.nuls.transaction.manager.TransactionManager;
 import io.nuls.transaction.model.bo.Chain;
 import io.nuls.transaction.model.bo.VerifyTxResult;
 import io.nuls.transaction.model.po.TransactionConfirmedPO;
@@ -31,7 +30,6 @@ import static io.nuls.transaction.utils.LoggerUtil.Log;
 public class VerifyTxProcessTask implements Runnable {
 
     private PackablePool packablePool = SpringLiteContext.getBean(PackablePool.class);
-    private TransactionManager transactionManager = SpringLiteContext.getBean(TransactionManager.class);
 
     private UnverifiedTxStorageService unverifiedTxStorageService = SpringLiteContext.getBean(UnverifiedTxStorageService.class);
     private TxService txService = SpringLiteContext.getBean(TxService.class);
@@ -79,7 +77,7 @@ public class VerifyTxProcessTask implements Runnable {
             chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("Process tx start......");
             TxUtil.txInformationDebugPrint(chain, tx, chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS));
             int chainId = chain.getChainId();
-            boolean rs = transactionManager.verify(chain, tx);
+            boolean rs = txService.verify(chain, tx);
             //todo 跨链交易单独处理, 是否需要进行跨链验证？
             //只会有本地创建的跨链交易才会进入这里, 其他链广播到跨链交易, 由其他逻辑处理
             if (!rs) {
@@ -101,7 +99,7 @@ public class VerifyTxProcessTask implements Runnable {
                 //保存到rocksdb
                 unconfirmedTxStorageService.putTx(chainId, tx);
                 //保存到h2数据库
-                transactionH2Service.saveTxs(TxUtil.tx2PO(tx));
+                transactionH2Service.saveTxs(TxUtil.tx2PO(chain,tx));
                 //调账本记录未确认交易
                 LedgerCall.commitUnconfirmedTx(chain, tx.hex());
                 //广播交易hash

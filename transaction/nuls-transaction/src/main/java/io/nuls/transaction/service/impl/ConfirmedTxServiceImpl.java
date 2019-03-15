@@ -12,7 +12,7 @@ import io.nuls.transaction.constant.TxConfig;
 import io.nuls.transaction.constant.TxConstant;
 import io.nuls.transaction.constant.TxErrorCode;
 import io.nuls.transaction.manager.ChainManager;
-import io.nuls.transaction.manager.TransactionManager;
+import io.nuls.transaction.manager.TxManager;
 import io.nuls.transaction.model.bo.Chain;
 import io.nuls.transaction.model.bo.TxRegister;
 import io.nuls.transaction.model.bo.VerifyTxResult;
@@ -48,7 +48,7 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
     private UnconfirmedTxStorageService unconfirmedTxStorageService;
 
     @Autowired
-    private TransactionManager transactionManager;
+    private TxManager txManager;
 
     @Autowired
     private ChainManager chainManager;
@@ -110,7 +110,7 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
         int debugCount = 0;
         for (Transaction tx : txList) {
             //保存到h2数据库
-            debugCount += transactionH2Service.saveTxs(TxUtil.tx2PO(tx));
+            debugCount += transactionH2Service.saveTxs(TxUtil.tx2PO(chain,tx));
         }
         CoinData coinData = TxUtil.getCoinData(txList.get(0));
         for (Coin coin : coinData.getTo()) {
@@ -169,7 +169,7 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
                 String txHex = tx.hex();
                 txHexList.add(txHex);
                 txHashs.add(tx.getHash().serialize());
-                TxRegister txRegister = transactionManager.getTxRegister(chain, tx.getType());
+                TxRegister txRegister = txManager.getTxRegister(chain, tx.getType());
                 if (moduleVerifyMap.containsKey(txRegister)) {
                     moduleVerifyMap.get(txRegister).add(txHex);
                 } else {
@@ -272,9 +272,7 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
         List<Transaction> successedList = new ArrayList<>();
         boolean rs = true;
         if(!confirmedTxStorageService.removeTxList(chain.getChainId(), txList) && atomicity ){
-            for (Transaction tx : txList) {
-                saveTxs(chain, successedList, blockheight, false);
-            }
+            saveTxs(chain, txList, blockheight, false);
             rs = false;
             chain.getLoggerMap().get(TxConstant.LOG_TX).debug("failed! removeTxs");
         }
@@ -356,7 +354,7 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
                 txList.add(tx);
                 String txHex = tx.hex();
                 txHexList.add(txHex);
-                TxRegister txRegister = transactionManager.getTxRegister(chain, tx.getType());
+                TxRegister txRegister = txManager.getTxRegister(chain, tx.getType());
                 if (moduleVerifyMap.containsKey(txRegister)) {
                     moduleVerifyMap.get(txRegister).add(txHex);
                 } else {
@@ -403,7 +401,7 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
      */
     private boolean savePackable(Chain chain, Transaction tx) {
         //不是系统交易则重新放回待打包队列的最前端
-        if (!transactionManager.isSystemTx(chain, tx)) {
+        if (!txManager.isSystemTx(chain, tx)) {
             return packablePool.addInFirst(chain, tx, false);
 
         }

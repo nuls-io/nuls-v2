@@ -166,11 +166,7 @@ public class TransactionBootStrap extends RpcModule {
     public void initDB() {
         try {
             //数据文件存储地址
-//            Properties properties = ConfigLoader.loadProperties(TxConstant.DB_CONFIG_NAME);
-//            TxConfig.DB_ROOT_PATH = properties.getProperty(txConfig.getDbRootPath(),
-//                    TransactionBootStrap.class.getClassLoader().getResource("").getPath() + "data");
             RocksDBService.init(txConfig.getDbRootPath());
-
             //模块配置表
             DBUtil.createTable(TxDBConstant.DB_MODULE_CONGIF);
             //语言表
@@ -196,7 +192,7 @@ public class TransactionBootStrap extends RpcModule {
         try {
             LanguageStorageService languageService = SpringLiteContext.getBean(LanguageStorageService.class);
             String languageDB = languageService.getLanguage();
-            I18nUtils.loadLanguage(TransactionBootStrap.class, "languages", "");
+            I18nUtils.loadLanguage(TransactionBootStrap.class, "languages", txConfig.getLanguage());
             String language = null == languageDB ? I18nUtils.getLanguage() : languageDB;
             I18nUtils.setLanguage(language);
             if (null == languageDB) {

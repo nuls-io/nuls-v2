@@ -63,7 +63,7 @@ public class ChainManager {
     private SchedulerManager schedulerManager;
 
     @Autowired
-    private TransactionManager transactionManager;
+    private TxManager txManager;
 
     @Autowired
     private TxConfig txConfig;
@@ -224,7 +224,7 @@ public class ChainManager {
         txRegister.setSystemTx(false);
         txRegister.setUnlockTx(false);
         txRegister.setVerifySignature(true);
-        transactionManager.register(chain, txRegister);
+        txManager.register(chain, txRegister);
     }
 
     public Map<Integer, Chain> getChainMap() {

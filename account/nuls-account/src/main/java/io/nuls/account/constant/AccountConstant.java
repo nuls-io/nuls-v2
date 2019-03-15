@@ -146,7 +146,7 @@ public interface AccountConstant {
     /**
      * DEFAULT PAGE_SIZE
      */
-    int PAGE_SIZE = 10;
+    int PAGE_SIZE = 20;
 
     /**
      * 黑洞地址，该地址的资产无法找回
