@@ -20,8 +20,8 @@
 
 package io.nuls.api;
 
-import java.math.BigInteger;
-import java.util.*;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * @author Niels
@@ -32,9 +32,13 @@ public class ApiContext {
 
     public static int defaultAssetId;
 
-    public static String dbIp;
+    public static String mongoIp;
 
-    public static int port;
+    public static int mongoPort;
+
+    public static String listenerIp;
+
+    public static int rpcPort;
 
     public static boolean doSync = true;
 
@@ -42,8 +46,6 @@ public class ApiContext {
 
     public static String VERSION = "1.0";
 
-    //种子节点地址
-    public static Set<String> SEED_NODE_ADDRESS = new HashSet<>();
     //开发者节点地址
     public static Set<String> DEVELOPER_NODE_ADDRESS = new HashSet<>();
     //大使节点地址

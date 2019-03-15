@@ -91,16 +91,16 @@ public class PocConsensusController {
         VerifyUtils.verifyParams(params, 1);
         int chainId = (int) params.get(0);
 
-        Map<String, Long> resultMap = new HashMap<>();
-        resultMap.put("seedsCount", (long) ApiContext.SEED_NODE_ADDRESS.size());
         ApiCache apiCache = CacheManager.getCache(chainId);
         if (apiCache == null) {
             return RpcResult.dataNotFound();
         }
-        resultMap.put("consensusCount", (long) (apiCache.getCurrentRound().getMemberCount() - ApiContext.SEED_NODE_ADDRESS.size()));
+        Map<String, Long> resultMap = new HashMap<>();
+        resultMap.put("seedsCount", (long) apiCache.getChainInfo().getSeeds().size());
+        resultMap.put("consensusCount", (long) (apiCache.getCurrentRound().getMemberCount() - apiCache.getChainInfo().getSeeds().size()));
         long count = agentService.agentsCount(chainId, ApiContext.bestHeight);
         resultMap.put("agentCount", count);
-        resultMap.put("totalCount", count + ApiContext.SEED_NODE_ADDRESS.size());
+        resultMap.put("totalCount", count + apiCache.getChainInfo().getSeeds().size());
         RpcResult result = new RpcResult();
         result.setResult(resultMap);
         return result;

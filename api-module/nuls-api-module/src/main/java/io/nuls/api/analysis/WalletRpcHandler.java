@@ -128,4 +128,15 @@ public class WalletRpcHandler {
             return Result.getFailed(e.getErrorCode());
         }
     }
+
+    public static Result getConsensusConfig(int chainId) {
+        Map<String, Object> params = new HashMap<>();
+        params.put("chainId", chainId);
+        try {
+            Map map = (Map) RpcCall.request(ModuleE.CS.abbr, CommandConstant.GET_CONSENSUS_CONFIG, params);
+            return Result.getSuccess(null).setData(map);
+        } catch (NulsException e) {
+            return Result.getFailed(e.getErrorCode());
+        }
+    }
 }

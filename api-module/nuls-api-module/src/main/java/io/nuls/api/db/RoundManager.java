@@ -145,7 +145,8 @@ public class RoundManager {
             }
         }
 
-        for (String address : ApiContext.SEED_NODE_ADDRESS) {
+
+        for (String address : apiCache.getChainInfo().getSeeds()) {
             AgentSorter sorter = new AgentSorter();
             sorter.setSeedAddress(address);
             byte[] hash = ArraysTool.concatenate(AddressTool.getAddress(address), SerializeUtils.uint64ToByteArray(blockInfo.getHeader().getRoundStartTime()));

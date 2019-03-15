@@ -18,10 +18,13 @@ public class ChainInfo {
 
     private Set<AssetInfo> assets;
 
-    private BigInteger inflationCoins = new BigInteger("500000000000000");
+    private Set<String> seeds;
+
+    private BigInteger inflationCoins;
 
     public ChainInfo() {
         assets = new HashSet<>();
+        seeds = new HashSet<>();
     }
 
     public Document toDocument() {
@@ -31,6 +34,8 @@ public class ChainInfo {
         Document defaultAssetDoc = DocumentTransferTool.toDocument(defaultAsset);
         document.put("defaultAsset", defaultAssetDoc);
         document.put("assets", assets);
+        document.put("seeds", seeds);
+        document.put("inflationCoins", inflationCoins.toString());
         return document;
     }
 
@@ -43,6 +48,12 @@ public class ChainInfo {
 
         List<AssetInfo> list = (List<AssetInfo>) document.get("assets");
         chainInfo.getAssets().addAll(list);
+
+        List<String> seeds = (List<String>) document.get("seeds");
+        chainInfo.getSeeds().addAll(seeds);
+
+        String inflationCoins = document.getString("inflationCoins");
+        chainInfo.setInflationCoins(new BigInteger(inflationCoins));
         return chainInfo;
     }
 }

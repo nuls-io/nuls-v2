@@ -42,4 +42,6 @@ public interface CommandConstant {
 
     //查询节点详情
     String GET_AGENT = "cs_getAgentInfo";
+
+    String GET_CONSENSUS_CONFIG = "cs_getSeedNodeList";
 }
