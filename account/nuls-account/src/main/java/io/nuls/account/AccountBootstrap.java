@@ -164,9 +164,9 @@ public class AccountBootstrap extends RpcModule {
      * 初始化数据库
      * Initialization database
      */
-    private static void initDB() throws Exception {
+    private  void initDB() throws Exception {
         //读取配置文件，数据存储根目录，初始化打开该目录下所有表连接并放入缓存
-        RocksDBService.init(NulsConfig.DATA_PATH+AccountConstant.MODULE_DB_PATH);
+        RocksDBService.init(accountConfig.getDataPath()+AccountConstant.MODULE_DB_PATH);
         //初始化表
         try {
             //If tables do not exist, create tables.
