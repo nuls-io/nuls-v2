@@ -33,47 +33,6 @@ public class NettyClient {
      * */
     public static Channel createConnect(String uri){
         try {
-            /*EventLoopGroup group=new NioEventLoopGroup();
-            Bootstrap boot=new Bootstrap();
-            boot.option(ChannelOption.SO_KEEPALIVE,true)
-                    .option(ChannelOption.ALLOCATOR, PooledByteBufAllocator.DEFAULT)
-                    .option(ChannelOption.TCP_NODELAY,true)
-                    .option(ChannelOption.SO_BACKLOG,1024*1024*10)
-                    .group(group)
-                    .channel(NioSocketChannel.class)
-                    .handler(new ChannelInitializer<SocketChannel>() {
-                        @Override
-                        protected void initChannel(SocketChannel socketChannel) throws Exception {
-                            ChannelPipeline p = socketChannel.pipeline();
-                            p.addLast(new ChannelHandler[]{
-                                    new LoggingHandler(LogLevel.TRACE),
-                                    new HttpClientCodec(),
-                                    new HttpObjectAggregator(1024*1024*10)});
-                            p.addLast("hookedHandler", new ClientHandler());
-                        }
-                    });
-            URI webSocketURI = null;
-            try {
-                webSocketURI = new URI(uri);
-            } catch (URISyntaxException e) {
-                e.printStackTrace();
-            }
-            HttpHeaders httpHeaders = new DefaultHttpHeaders();
-            //进行握手
-            WebSocketClientHandshaker handShaker = WebSocketClientHandshakerFactory.newHandshaker(webSocketURI, WebSocketVersion.V13, (String)null, true,httpHeaders, 65536*5);
-            final Channel channel=boot.connect(webSocketURI.getHost(),webSocketURI.getPort()).sync().channel();
-            ClientHandler handler = (ClientHandler)channel.pipeline().get("hookedHandler");
-            handler.setHandshaker(handShaker);
-            handShaker.handshake(channel);
-            //阻塞等待是否握手成功
-            handler.handshakeFuture().sync();
-            Log.info("与服务器："+webSocketURI.toString()+"握手成功");
-            //netty握手成功之后，发送业务握手信息
-            Message message = MessageUtil.basicMessage(MessageType.NegotiateConnection);
-            message.setMessageData(MessageUtil.defaultNegotiateConnection());
-            channel.writeAndFlush(new TextWebSocketFrame(JSONUtils.obj2json(message)));
-            return channel;*/
-
             URI webSocketURI = null;
             try {
                 webSocketURI = new URI(uri);
