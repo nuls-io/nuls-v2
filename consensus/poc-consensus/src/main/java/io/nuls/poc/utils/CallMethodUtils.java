@@ -1,6 +1,7 @@
 package io.nuls.poc.utils;
 
 import io.nuls.base.basic.AddressTool;
+import io.nuls.base.data.BlockExtendsData;
 import io.nuls.base.data.BlockHeader;
 import io.nuls.base.data.Transaction;
 import io.nuls.base.signture.BlockSignature;
@@ -15,9 +16,9 @@ import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.model.message.Response;
 import io.nuls.rpc.netty.processor.ResponseMessageProcessor;
 import io.nuls.tools.crypto.HexUtil;
-import io.nuls.tools.model.StringUtils;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.log.Log;
+import io.nuls.tools.model.StringUtils;
 import io.nuls.tools.parse.ConfigLoader;
 
 import java.util.*;
@@ -277,12 +278,18 @@ public class CallMethodUtils {
      * @param chain chain info
      */
     @SuppressWarnings("unchecked")
-    public static List<Transaction> getPackingTxList(Chain chain) {
+    public static List<Transaction> getPackingTxList(Chain chain,long height,long blockTime,String packingAddress,BlockExtendsData extendsData) {
         try {
             Map<String, Object> params = new HashMap(4);
             params.put("chainId", chain.getConfig().getChainId());
             params.put("endTimestamp", currentTime() + ConsensusConstant.GET_TX_MAX_WAIT_TIME);
             params.put("maxTxDataSize", ConsensusConstant.PACK_TX_MAX_SIZE);
+            params.put("height",height);
+            params.put("blockTime",blockTime);
+            params.put("packingAddress",packingAddress);
+            BlockExtendsData preExtendsData = new BlockExtendsData(chain.getNewestHeader().getExtend());
+            byte[] preStateRoot = preExtendsData.getStateRoot();
+            params.put("preStateRoot",HexUtil.encode(preStateRoot));
             Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.TX.abbr, "tx_packableTxs", params);
             if (!cmdResp.isSuccess()) {
                 chain.getLoggerMap().get(ConsensusConstant.CONSENSUS_LOGGER_NAME).error("Packaging transaction acquisition failure!");
@@ -296,6 +303,7 @@ public class CallMethodUtils {
                 tx.parse(HexUtil.decode(txHex), 0);
                 txList.add(tx);
             }
+            extendsData.setStateRoot(HexUtil.decode((String)signResult.get("stateRoot")));
             return txList;
         } catch (Exception e) {
             chain.getLoggerMap().get(ConsensusConstant.CONSENSUS_LOGGER_NAME).error(e);
