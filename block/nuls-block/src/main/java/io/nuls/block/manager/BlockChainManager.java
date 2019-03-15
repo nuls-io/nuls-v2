@@ -48,7 +48,7 @@ import static io.nuls.block.constant.Constant.CONSENSUS_WORKING;
  * @date 18-11-16 下午2:29
  */
 @Component
-public class ChainManager {
+public class BlockChainManager {
 
     @Autowired
     private static BlockService blockService;
@@ -152,6 +152,7 @@ public class ChainManager {
             delete.add(chain);
             Chain subChain = switchChainPath.empty() ? null : switchChainPath.peek();
             boolean b = switchChain0(chainId, masterChain, chain, subChain);
+            b=false;
             if (!b) {
                 commonLog.info("*switchChain0 fail masterChain-" + masterChain);
                 commonLog.info("*switchChain0 fail chain-" + chain);
@@ -243,9 +244,6 @@ public class ChainManager {
             }
             addForkChain(chainId, newForkChain);
         }
-
-        //6.收尾工作
-//        deleteForkChain(chainId, forkChain);
         return true;
     }
 

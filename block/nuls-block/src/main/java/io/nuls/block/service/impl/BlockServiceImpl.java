@@ -25,8 +25,9 @@ import io.nuls.base.data.Block;
 import io.nuls.base.data.BlockHeader;
 import io.nuls.base.data.NulsDigestData;
 import io.nuls.base.data.Transaction;
+import io.nuls.block.exception.ChainRuntimeException;
 import io.nuls.block.exception.DbRuntimeException;
-import io.nuls.block.manager.ChainManager;
+import io.nuls.block.manager.BlockChainManager;
 import io.nuls.block.manager.ContextManager;
 import io.nuls.block.message.HashMessage;
 import io.nuls.block.message.SmallBlockMessage;
@@ -271,7 +272,7 @@ public class BlockServiceImpl implements BlockService {
             //6.如果不是第一次启动,则更新主链属性
             if (!localInit) {
                 context.setLatestBlock(block);
-                Chain masterChain = ChainManager.getMasterChain(chainId);
+                Chain masterChain = BlockChainManager.getMasterChain(chainId);
                 masterChain.setEndHeight(masterChain.getEndHeight() + 1);
                 int heightRange = context.getParameters().getHeightRange();
                 LinkedList<NulsDigestData> hashList = masterChain.getHashList();
@@ -377,7 +378,7 @@ public class BlockServiceImpl implements BlockService {
                 return false;
             }
             context.setLatestBlock(getBlock(chainId, height - 1));
-            Chain masterChain = ChainManager.getMasterChain(chainId);
+            Chain masterChain = BlockChainManager.getMasterChain(chainId);
             masterChain.setEndHeight(height - 1);
             LinkedList<NulsDigestData> hashList = masterChain.getHashList();
             hashList.removeLast();
@@ -458,7 +459,10 @@ public class BlockServiceImpl implements BlockService {
             //1.判断有没有创世块,如果没有就初始化创世块并保存
             if (null == genesisBlock) {
                 genesisBlock = GenesisBlock.getInstance();
-                saveBlock(chainId, genesisBlock, true, 0, false);
+                boolean b = saveBlock(chainId, genesisBlock, true, 0, false);
+                if (!b) {
+                    throw new ChainRuntimeException("error occur when saving GenesisBlock!");
+                }
             }
 
             //2.获取缓存的最新区块高度（缓存的最新高度与实际的最新高度最多相差1,理论上不会有相差多个高度的情况,所以异常场景也只考虑了高度相差1）
@@ -476,7 +480,7 @@ public class BlockServiceImpl implements BlockService {
             //5.本地区块维护成功
             ContextManager.getContext(chainId).setLatestBlock(block);
             ContextManager.getContext(chainId).setGenesisBlock(genesisBlock);
-            ChainManager.setMasterChain(chainId, ChainGenerator.generateMasterChain(chainId, block, this));
+            BlockChainManager.setMasterChain(chainId, ChainGenerator.generateMasterChain(chainId, block, this));
         } catch (Exception e) {
             e.printStackTrace();
             commonLog.error(e);
