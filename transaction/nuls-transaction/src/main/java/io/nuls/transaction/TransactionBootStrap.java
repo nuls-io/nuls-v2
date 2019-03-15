@@ -179,7 +179,7 @@ public class TransactionBootStrap extends RpcModule {
             //todo 单个节点跑多链的时候 h2是否需要通过chain来区分数据库(如何分？)，待确认！！
             String resource = "mybatis/mybatis-config.xml";
             Properties prop =  ConfigLoader.loadProperties(TxConstant.DB_CONFIG_NAME);
-            String currentPath = DBUtils.genAbsolutePath((String)prop.get(txConfig.getDbRootPath()));
+            String currentPath = DBUtils.genAbsolutePath(txConfig.getDbRootPath());
             LoggerUtil.Log.debug("#########################:" + currentPath);
             prop.setProperty("url", "jdbc:h2:file:" + currentPath + "/h2/nuls;LOG=2;DB_CLOSE_DELAY=-1;TRACE_LEVEL_SYSTEM_OUT=1;DATABASE_TO_UPPER=FALSE;MV_STORE=false;COMPRESS=true;MAX_COMPACT_TIME=5000");
             SqlSessionFactory sqlSessionFactory = new SqlSessionFactoryBuilder().build(Resources.getResourceAsReader(resource), "druid",prop);

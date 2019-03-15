@@ -92,7 +92,7 @@ public class TxValid {
             String hash = createTransfer();
             System.out.println("count:" + (i+1));
             System.out.println("");
-            Thread.sleep(50L);
+            Thread.sleep(500L);
             //getTx(hash);
         }
 //        createCtxTransfer();
@@ -243,7 +243,7 @@ public class TxValid {
     public void getTxRecord() throws Exception{
         Map<String, Object> params = new HashMap<>();
         params.put("chainId", chainId);
-        params.put("address", "5MR_2CeZVsqvjUfVE2dMc2ucmHaYkwaFwtj");
+        params.put("address", "5MR_2CVuGjQ3CYVkhFszxfSt6sodg1gDHYF");
         params.put("assetChainId", null);
         params.put("assetId", null);
         params.put("type", null);
