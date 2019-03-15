@@ -94,7 +94,7 @@ public class NetworkBootstrap extends RpcModule {
     }
 
     private void dbInit() throws Exception {
-        RocksDBService.init(networkConfig.getDataPath());
+        RocksDBService.init(networkConfig.getDataPath()+NetworkConstant.MODULE_DB_PATH);
         InitDB dbService = SpringLiteContext.getBean(DbServiceImpl.class);
         dbService.initTableName();
     }
