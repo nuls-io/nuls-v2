@@ -79,6 +79,7 @@ public class NetworkBootstrap extends RpcModule {
             List<String> ipList = new ArrayList<>();
             Collections.addAll(ipList, seedIp.split(NetworkConstant.COMMA));
             networkConfig.setSeedIpList(ipList);
+            networkConfig.setMaxInSameIp((networkConfig.getMaxInCount() / networkConfig.getMaxOutCount()));
             networkConfig.setCorssMaxInSameIp((networkConfig.getCrossMaxInCount() / networkConfig.getCrossMaxOutCount()));
             String seedMoonIp = networkConfig.getMoonSeedIps();
             List<String> ipMoonList = new ArrayList<>();
