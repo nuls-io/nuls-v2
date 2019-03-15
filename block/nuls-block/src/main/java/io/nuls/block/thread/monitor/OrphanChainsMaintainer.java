@@ -23,7 +23,7 @@ package io.nuls.block.thread.monitor;
 import io.nuls.base.data.Block;
 import io.nuls.base.data.NulsDigestData;
 import io.nuls.block.constant.RunningStatusEnum;
-import io.nuls.block.manager.ChainManager;
+import io.nuls.block.manager.BlockChainManager;
 import io.nuls.block.manager.ContextManager;
 import io.nuls.block.model.Chain;
 import io.nuls.block.model.ChainContext;
@@ -94,7 +94,7 @@ public class OrphanChainsMaintainer implements Runnable {
                             continue;
                         }
                         // possibly racy reads
-                        SortedSet<Chain> orphanChains = ChainManager.getOrphanChains(chainId);
+                        SortedSet<Chain> orphanChains = BlockChainManager.getOrphanChains(chainId);
                         if (!lock.validate(stamp)) {
                             continue;
                         }

@@ -25,14 +25,11 @@
 package io.nuls.contract.storage;
 
 
-import io.nuls.contract.model.po.ContractAddressInfoPo;
-import io.nuls.contract.model.po.ContractTokenTransferInfoPo;
 import io.nuls.tools.basic.Result;
 
 import java.util.List;
 
 /**
- *
  * @author: PierreLuo
  * @date: 2019-03-11
  */

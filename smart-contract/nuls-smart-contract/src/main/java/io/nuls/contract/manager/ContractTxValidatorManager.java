@@ -55,7 +55,7 @@ public class ContractTxValidatorManager {
     public Result callValidator(int chainId, CallContractTransaction tx) throws NulsException {
         return callContractTxValidator.validate(chainId, tx);
     }
-    
+
     public Result deleteValidator(int chainId, DeleteContractTransaction tx) throws NulsException {
         return deleteContractTxValidator.validate(chainId, tx);
     }

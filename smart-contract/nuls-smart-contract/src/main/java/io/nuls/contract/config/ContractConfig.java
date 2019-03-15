@@ -36,7 +36,7 @@ import lombok.Data;
 @Data
 public class ContractConfig {
     /**
-     *  编码方式
+     * 编码方式
      */
     private String encoding;
 

@@ -109,7 +109,7 @@ public class ContractServiceImpl implements ContractService {
             List<ContractResult> contractResultList = resultHanlder.handleAnalyzerResult(chainId, batchExecutor, analyzerResult, preStateRoot);
             // 归集合约内部转账交易
             List<Transaction> resultTxList = new ArrayList<>();
-            for(ContractResult contractResult : contractResultList) {
+            for (ContractResult contractResult : contractResultList) {
                 resultTxList.addAll(contractResult.getContractTransferList());
             }
             // 生成退还剩余Gas的交易
@@ -133,13 +133,13 @@ public class ContractServiceImpl implements ContractService {
     public Result commitProcessor(int chainId, List<String> txHexList, String blockHeaderHex) {
         try {
             ContractPackageDto contractPackageDto = contractHelper.getChain(chainId).getContractPackageDto();
-            if(contractPackageDto != null) {
+            if (contractPackageDto != null) {
                 Map<String, ContractResult> contractResultMap = contractPackageDto.getContractResultMap();
                 ContractResult contractResult;
                 ContractWrapperTransaction wrapperTx;
-                for(String txHex : txHexList) {
+                for (String txHex : txHexList) {
                     contractResult = contractResultMap.get(txHex);
-                    if(contractResult == null) {
+                    if (contractResult == null) {
                         Log.warn("empty contract result with txHex: {}", txHex);
                         continue;
                     }
@@ -173,7 +173,7 @@ public class ContractServiceImpl implements ContractService {
     public Result rollbackProcessor(int chainId, List<String> txHexList, String blockHeaderHex) {
         try {
             Transaction tx;
-            for(String txHex : txHexList) {
+            for (String txHex : txHexList) {
                 tx = new Transaction();
                 tx.parse(Hex.decode(txHex), 0);
                 switch (tx.getType()) {
@@ -213,10 +213,10 @@ public class ContractServiceImpl implements ContractService {
         ContractWrapperTransaction wrapperTx;
         ContractData contractData;
         Map<ByteArrayWrapper, BigInteger> returnMap = new HashMap<>();
-        for(ContractResult contractResult : resultList) {
+        for (ContractResult contractResult : resultList) {
             wrapperTx = contractResult.getTx();
             // 终止合约不消耗Gas，跳过
-            if(wrapperTx.getType() == TX_TYPE_DELETE_CONTRACT) {
+            if (wrapperTx.getType() == TX_TYPE_DELETE_CONTRACT) {
                 continue;
             }
             contractData = wrapperTx.getContractData();
@@ -239,7 +239,7 @@ public class ContractServiceImpl implements ContractService {
                 returnMap.put(sender, senderValue);
             }
         }
-        if(!returnMap.isEmpty()) {
+        if (!returnMap.isEmpty()) {
             CoinData coinData = new CoinData();
             List<CoinTo> toList = coinData.getTo();
             Set<Map.Entry<ByteArrayWrapper, BigInteger>> entries = returnMap.entrySet();
@@ -282,7 +282,6 @@ public class ContractServiceImpl implements ContractService {
         }
         return contractExecuteResultStorageService.getContractExecuteResult(chainId, hash);
     }
-
 
 
 }

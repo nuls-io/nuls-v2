@@ -4,7 +4,6 @@ import io.nuls.contract.config.ContractConfig;
 import io.nuls.contract.config.NulsConfig;
 import io.nuls.contract.constant.ContractConstant;
 import io.nuls.contract.manager.ChainManager;
-import io.nuls.contract.storage.LanguageStorageService;
 import io.nuls.contract.util.VMContext;
 import io.nuls.contract.vm.program.ProgramMethod;
 import io.nuls.db.service.RocksDBService;
@@ -14,16 +13,12 @@ import io.nuls.rpc.modulebootstrap.Module;
 import io.nuls.rpc.modulebootstrap.NulsRpcModuleBootstrap;
 import io.nuls.rpc.modulebootstrap.RpcModule;
 import io.nuls.rpc.modulebootstrap.RpcModuleState;
-import io.nuls.rpc.netty.bootstrap.NettyServer;
-import io.nuls.rpc.netty.channel.manager.ConnectManager;
-import io.nuls.rpc.netty.processor.ResponseMessageProcessor;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Configuration;
 import io.nuls.tools.core.ioc.SpringLiteContext;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.io.IoUtils;
 import io.nuls.tools.log.Log;
-import io.nuls.tools.parse.ConfigLoader;
 import io.nuls.tools.parse.I18nUtils;
 import io.nuls.tools.parse.JSONUtils;
 
@@ -31,7 +26,6 @@ import java.io.IOException;
 import java.lang.reflect.Field;
 import java.nio.charset.Charset;
 import java.util.Map;
-import java.util.Properties;
 
 import static io.nuls.contract.constant.ContractConstant.NRC20_STANDARD_FILE;
 import static java.nio.charset.StandardCharsets.UTF_8;
@@ -110,7 +104,7 @@ public class ContractBootStrap extends RpcModule {
             // skip it
             Log.error("init NRC20Standard error.", e);
         }
-        if(json == null) {
+        if (json == null) {
             return;
         }
 

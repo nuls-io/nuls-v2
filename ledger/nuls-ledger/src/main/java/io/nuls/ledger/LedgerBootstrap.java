@@ -74,7 +74,7 @@ public class LedgerBootstrap extends RpcModule {
      */
     public  void initRocksDb() {
         try {
-            RocksDBService.init(ledgerConfig.getDataPath());
+            RocksDBService.init(ledgerConfig.getDataPath()+LedgerConstant.MODULE_DB_PATH);
             InitDB initDB = SpringLiteContext.getBean(RepositoryImpl.class);
             initDB.initTableName();
         } catch (Exception e) {

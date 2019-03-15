@@ -48,7 +48,7 @@ import static io.nuls.block.constant.Constant.CONSENSUS_WORKING;
  * @date 18-11-16 下午2:29
  */
 @Component
-public class ChainManager {
+public class BlockChainManager {
 
     @Autowired
     private static BlockService blockService;
@@ -153,6 +153,11 @@ public class ChainManager {
             Chain subChain = switchChainPath.empty() ? null : switchChainPath.peek();
             boolean b = switchChain0(chainId, masterChain, chain, subChain);
             if (!b) {
+                //切换链失败,恢复主链
+                //首先把切换失败过程中加到主链上的区块回滚掉
+                while (masterChain.getEndHeight() >= forkHeight) {
+                    blockService.rollbackBlock(chainId, masterChain.getEndHeight(), false);
+                }
                 commonLog.info("*switchChain0 fail masterChain-" + masterChain);
                 commonLog.info("*switchChain0 fail chain-" + chain);
                 commonLog.info("*switchChain0 fail subChain-" + subChain);
@@ -243,9 +248,6 @@ public class ChainManager {
             }
             addForkChain(chainId, newForkChain);
         }
-
-        //6.收尾工作
-//        deleteForkChain(chainId, forkChain);
         return true;
     }
 

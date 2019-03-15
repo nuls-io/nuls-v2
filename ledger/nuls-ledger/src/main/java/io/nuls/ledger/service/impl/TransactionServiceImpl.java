@@ -252,6 +252,7 @@ public class TransactionServiceImpl implements TransactionService {
             repository.saveOrUpdateBlockHeight(addressChainId, blockHeight);
             return true;
         } catch (Exception e) {
+            e.printStackTrace();
             logger.error("confirmBlockProcess error", e);
             return false;
         } finally {

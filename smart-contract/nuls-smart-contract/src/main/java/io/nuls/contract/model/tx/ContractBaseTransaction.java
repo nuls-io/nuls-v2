@@ -47,14 +47,16 @@ public abstract class ContractBaseTransaction<T extends TransactionLogicData> ex
 
     private T txDataObj;
 
-    protected ContractBaseTransaction() {}
+    protected ContractBaseTransaction() {
+    }
 
     protected ContractBaseTransaction(int txType) {
         super(txType);
 
     }
+
     public CoinData getCoinDataObj() throws NulsException {
-        if(coinDataObj == null) {
+        if (coinDataObj == null) {
             CoinData coinData = new CoinData();
             coinData.parse(this.getCoinData(), 0);
             coinDataObj = coinData;
@@ -63,20 +65,20 @@ public abstract class ContractBaseTransaction<T extends TransactionLogicData> ex
     }
 
     public T getTxDataObj() throws NulsException {
-        if(txDataObj == null) {
+        if (txDataObj == null) {
             txDataObj = newInstance();
             txDataObj.parse(this.getTxData(), 0);
         }
         return txDataObj;
     }
 
-    protected abstract T newInstance() ;
+    protected abstract T newInstance();
 
     public void serializeData() throws IOException {
-        if(this.getCoinData() == null && coinDataObj != null) {
+        if (this.getCoinData() == null && coinDataObj != null) {
             this.setCoinData(coinDataObj.serialize());
         }
-        if(this.getTxData() == null && txDataObj != null) {
+        if (this.getTxData() == null && txDataObj != null) {
             this.setTxData(txDataObj.serialize());
         }
     }

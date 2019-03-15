@@ -11,9 +11,6 @@ import lombok.Setter;
 import org.ethereum.config.CommonConfig;
 import org.ethereum.config.DefaultConfig;
 
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-
 /**
  * 链信息类
  * Chain information class

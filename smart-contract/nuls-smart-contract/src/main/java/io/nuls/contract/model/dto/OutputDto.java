@@ -34,7 +34,6 @@ import lombok.Setter;
 import static io.nuls.contract.util.ContractUtil.bigInteger2String;
 
 /**
- *
  * @author: PierreLuo
  * @date: 2019-03-14
  */

@@ -25,8 +25,6 @@ package io.nuls.contract.constant;
 
 
 import java.math.BigInteger;
-import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
 
 public interface ContractConstant {
 

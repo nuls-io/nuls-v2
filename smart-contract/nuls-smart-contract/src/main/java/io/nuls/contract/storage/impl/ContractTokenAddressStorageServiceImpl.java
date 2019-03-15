@@ -37,7 +37,6 @@ import io.nuls.tools.core.annotation.Component;
 import java.util.List;
 
 /**
- *
  * @author: PierreLuo
  * @date: 2019-03-11
  */
@@ -79,7 +78,7 @@ public class ContractTokenAddressStorageServiceImpl implements ContractTokenAddr
             return false;
         }
         byte[] contract = RocksDBService.get(ContractDBConstant.DB_NAME_CONTRACT_NRC20_TOKEN_ADDRESS + chainId, contractAddressBytes);
-        if(contract == null) {
+        if (contract == null) {
             return false;
         }
         return true;
@@ -88,7 +87,7 @@ public class ContractTokenAddressStorageServiceImpl implements ContractTokenAddr
     @Override
     public Result<List<byte[]>> getAllNrc20AddressList(int chainId) {
         List<byte[]> list = RocksDBService.keyList(ContractDBConstant.DB_NAME_CONTRACT_NRC20_TOKEN_ADDRESS + chainId);
-        if(list == null || list.size() ==0) {
+        if (list == null || list.size() == 0) {
             return Result.getFailed(ContractErrorCode.DATA_NOT_FOUND);
         }
         Result<List<byte[]>> result = ContractUtil.getSuccess();

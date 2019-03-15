@@ -24,4 +24,4 @@ StartScript=start
 StopScript=stop
 
 [Module]
-DataPath=../../data
+DataPath=../../../../data

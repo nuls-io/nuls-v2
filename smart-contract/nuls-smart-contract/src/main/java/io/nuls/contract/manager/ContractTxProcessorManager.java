@@ -30,7 +30,6 @@ import io.nuls.contract.processor.DeleteContractTxProcessor;
 import io.nuls.tools.basic.Result;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
-import io.nuls.tools.exception.NulsException;
 
 /**
  * @author: PierreLuo

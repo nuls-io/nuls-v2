@@ -75,7 +75,7 @@ public class TransactionCall {
         try {
             Map result = (Map) CallHelper.request(ModuleE.TX.abbr, "tx_getConfirmedTx", params);
             String txHex = (String) result.get("txHex");
-            if(StringUtils.isBlank(txHex)) {
+            if (StringUtils.isBlank(txHex)) {
                 return null;
             }
             Transaction tx = new Transaction();

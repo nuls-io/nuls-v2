@@ -24,15 +24,9 @@
 package io.nuls.contract.util;
 
 
-import io.nuls.base.data.Transaction;
 import io.nuls.contract.storage.ContractAddressStorageService;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
-
-import java.util.ArrayList;
-import java.util.List;
-
-import static io.nuls.contract.util.ContractUtil.isLegalContractAddress;
 
 /**
  * @desription:
@@ -46,7 +40,7 @@ public class ContractLedgerUtil {
     private static ContractAddressStorageService contractAddressStorageService;
 
     public static boolean isExistContractAddress(int chainId, byte[] addressBytes) {
-        if(addressBytes == null) {
+        if (addressBytes == null) {
             return false;
         }
         return contractAddressStorageService.isExistContractAddress(chainId, addressBytes);

@@ -23,7 +23,6 @@
  */
 package io.nuls.contract.model.bo;
 
-import io.nuls.contract.vm.program.ProgramExecutor;
 import lombok.Getter;
 import lombok.Setter;
 

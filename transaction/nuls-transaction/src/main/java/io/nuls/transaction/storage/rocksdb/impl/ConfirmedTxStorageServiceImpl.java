@@ -143,7 +143,7 @@ public class ConfirmedTxStorageServiceImpl implements ConfirmedTxStorageService 
         try {
             List<byte[]> hashList = new ArrayList<>();
             for(Transaction tx : txList){
-                hashList.add(tx.serialize());
+                hashList.add(tx.getHash().serialize());
             }
             return removeTxListByHashBytes(chainId, hashList);
         } catch (IOException e) {

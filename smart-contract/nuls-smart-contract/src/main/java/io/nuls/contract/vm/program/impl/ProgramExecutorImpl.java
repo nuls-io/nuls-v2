@@ -112,16 +112,16 @@ public class ProgramExecutorImpl implements ProgramExecutor {
     @Override
     public int getCurrentChainId() {
         Chain c = getCurrentChain();
-        if(c != null) {
+        if (c != null) {
             return c.getChainId();
         }
         return 0;
     }
 
     private Chain getCurrentChain() {
-        if(this.chain != null) {
+        if (this.chain != null) {
             return chain;
-        } else if(this.parent.chain != null) {
+        } else if (this.parent.chain != null) {
             return this.parent.chain;
         }
         return null;
