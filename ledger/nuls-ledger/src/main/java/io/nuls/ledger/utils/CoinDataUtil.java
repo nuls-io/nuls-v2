@@ -20,7 +20,7 @@ import static io.nuls.ledger.utils.LoggerUtil.logger;
 /**
  * Created by ljs on 2018/12/30.
  */
-public class CoinDataUtils {
+public class CoinDataUtil {
     /**
      * parseCoinData
      *

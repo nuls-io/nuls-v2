@@ -14,7 +14,7 @@ import java.io.UnsupportedEncodingException;
 /**
  * Created by lanjinsheng on 2019/01/02
  */
-public class LedgerUtils {
+public class LedgerUtil {
     /**
      * rockdb key
      *

@@ -148,7 +148,7 @@ public class CmdRollBackTest {
         try {
             Map<String,Object> params = new HashMap<>();
             params.put("chainId", chainId);
-            params.put("blockHeight",1);
+            params.put("blockHeight",44);
             Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.LG.abbr, "getBlock", params);
             logger.info("response {}", response);
         } catch (IOException e) {

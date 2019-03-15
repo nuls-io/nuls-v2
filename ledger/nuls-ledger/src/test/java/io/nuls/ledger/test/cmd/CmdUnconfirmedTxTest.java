@@ -27,7 +27,7 @@ package io.nuls.ledger.test.cmd;
 
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.*;
-import io.nuls.ledger.utils.LedgerUtils;
+import io.nuls.ledger.utils.LedgerUtil;
 import io.nuls.ledger.utils.LoggerUtil;
 import io.nuls.rpc.info.NoUse;
 import io.nuls.rpc.model.ModuleE;
@@ -126,7 +126,7 @@ public class CmdUnconfirmedTxTest {
     Transaction buildUnLockedTimeTransaction(String fromAddr, String toAddr, BigInteger tranAmount) throws Exception {
         //封装交易执行
         String hash = "00202f4c51b04d06b338e9917e99ecb4dfe3b02147e7f206a4c3b3aaf7a1dd86aea1";
-        String unLockNonce = LedgerUtils.getNonceStrByTxHash(hash);
+        String unLockNonce = LedgerUtil.getNonceStrByTxHash(hash);
         Transaction tx = new Transaction();
         CoinData coinData = new CoinData();
         CoinFrom coinFrom = new CoinFrom();

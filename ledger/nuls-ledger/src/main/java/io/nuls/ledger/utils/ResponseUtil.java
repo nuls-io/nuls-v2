@@ -22,32 +22,25 @@
  * SOFTWARE.
  *
  */
-package io.nuls.ledger.test.task;
+package io.nuls.ledger.utils;
 
-import io.nuls.ledger.utils.LockerUtil;
+import io.nuls.rpc.model.message.Response;
+
+import java.util.Map;
 
 /**
  * @author lan
  * @description
- * @date 2019/02/14
+ * @date 2019/01/16
  **/
-public class BlockTestThread extends Thread {
-    public static int i = 0;
-    public BlockTestThread(String name){
-        Thread.currentThread().setName(name);
-    }
-    @Override
-    public void run() {
-        try {
-            LockerUtil.BLOCK_SYNC_LOCKER.lock();
-            for(int j = 0 ;j<1000;j++) {
-                System.out.print(Thread.currentThread().getName() + ":");
-                System.out.println(i++);
+public class ResponseUtil {
+    public Map<String,Object> getResultMap(Response response,String cmd){
+        if(response.isSuccess()){
+            Object o=((Map)response.getResponseData()).get(cmd);
+            if(null != o){
+                return (Map)o;
             }
-        }catch(Exception e){
-            e.printStackTrace();
-        }finally {
-            LockerUtil.BLOCK_SYNC_LOCKER.unlock();
         }
+        return null;
     }
 }

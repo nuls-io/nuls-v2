@@ -24,23 +24,38 @@
  */
 package io.nuls.ledger.utils;
 
-import io.nuls.rpc.model.message.Response;
-
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * @author lan
  * @description
- * @date 2019/01/16
+ * @date 2019/01/07
  **/
-public class ResponseUtils {
-    public Map<String,Object> getResultMap(Response response,String cmd){
-        if(response.isSuccess()){
-            Object o=((Map)response.getResponseData()).get(cmd);
-            if(null != o){
-                return (Map)o;
+public class LockerUtil {
+    public static Map<String,Object> accountLockers = new ConcurrentHashMap<>();
+    private static Object assetLockerAddLocker = new Object();
+    public final static Lock BLOCK_SYNC_LOCKER = new ReentrantLock();
+
+    public static   Object getAccountLocker(String address, int chainId, int assetId)
+    {
+        String accountKey = LedgerUtil.getKeyStr(address, chainId, assetId);
+        synchronized(assetLockerAddLocker) {
+            if (null == accountLockers.get(accountKey)) {
+                accountLockers.put(accountKey, new Object());
             }
         }
-        return null;
+        return accountLockers.get(accountKey);
+    }
+    public static   Object getAccountLocker(String accountKey)
+    {
+        synchronized(assetLockerAddLocker) {
+            if (null == accountLockers.get(accountKey)) {
+                accountLockers.put(accountKey, new Object());
+            }
+        }
+        return accountLockers.get(accountKey);
     }
 }
