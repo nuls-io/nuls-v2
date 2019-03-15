@@ -29,6 +29,6 @@ package io.nuls.ledger.constant;
  * @description
  * @date 2019/03/10
  **/
-public class CmdConstant {
-    public static String  CMD_NW_GET_TIME_CALL = "nw_currentTimeMillis";
+public interface CmdConstant {
+    public static final String  CMD_NW_GET_TIME_CALL = "nw_currentTimeMillis";
 }
