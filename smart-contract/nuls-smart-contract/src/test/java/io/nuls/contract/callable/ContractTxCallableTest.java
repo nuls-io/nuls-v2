@@ -6,13 +6,13 @@ import io.nuls.base.data.CoinTo;
 import io.nuls.base.data.NulsDigestData;
 import io.nuls.contract.model.bo.ContractBalance;
 import io.nuls.contract.model.bo.ContractMergedTransfer;
-import io.nuls.contract.model.tx.ContractTransferTransaction;
 import io.nuls.contract.model.bo.Output;
+import io.nuls.contract.model.tx.ContractTransferTransaction;
 import io.nuls.contract.model.txdata.ContractTransferData;
 import io.nuls.contract.util.MapUtil;
 import io.nuls.contract.vm.program.ProgramTransfer;
-import io.nuls.tools.model.ByteArrayWrapper;
 import io.nuls.tools.exception.NulsException;
+import io.nuls.tools.model.ByteArrayWrapper;
 import org.junit.Assert;
 import org.junit.Test;
 import org.spongycastle.util.encoders.Hex;
@@ -31,11 +31,11 @@ public class ContractTxCallableTest {
     @Test
     public void mergeContractTransferTest() throws IOException, NulsException {
         List<ProgramTransfer> transfers = new ArrayList<>();
-        transfers.add(new ProgramTransfer(new byte[]{1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,8,8,1,2,3}, new byte[]{1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,8,8,2,3,4}, BigInteger.ONE));
-        transfers.add(new ProgramTransfer(new byte[]{1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,8,8,1,2,3}, new byte[]{1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,8,8,2,3,4}, BigInteger.TWO));
-        transfers.add(new ProgramTransfer(new byte[]{1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,8,8,3,4,5}, new byte[]{1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,8,8,4,5,6}, BigInteger.TEN));
-        transfers.add(new ProgramTransfer(new byte[]{1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,8,8,1,2,3}, new byte[]{1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,8,8,4,5,6}, BigInteger.TWO));
-        transfers.add(new ProgramTransfer(new byte[]{1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,8,8,1,2,3}, new byte[]{1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,8,8,5,3,4}, BigInteger.ONE));
+        transfers.add(new ProgramTransfer(new byte[]{1, 2, 3, 1, 2, 3, 1, 2, 3, 1, 2, 3, 1, 2, 3, 1, 2, 3, 8, 8, 1, 2, 3}, new byte[]{1, 2, 3, 1, 2, 3, 1, 2, 3, 1, 2, 3, 1, 2, 3, 1, 2, 3, 8, 8, 2, 3, 4}, BigInteger.ONE));
+        transfers.add(new ProgramTransfer(new byte[]{1, 2, 3, 1, 2, 3, 1, 2, 3, 1, 2, 3, 1, 2, 3, 1, 2, 3, 8, 8, 1, 2, 3}, new byte[]{1, 2, 3, 1, 2, 3, 1, 2, 3, 1, 2, 3, 1, 2, 3, 1, 2, 3, 8, 8, 2, 3, 4}, BigInteger.TWO));
+        transfers.add(new ProgramTransfer(new byte[]{1, 2, 3, 1, 2, 3, 1, 2, 3, 1, 2, 3, 1, 2, 3, 1, 2, 3, 8, 8, 3, 4, 5}, new byte[]{1, 2, 3, 1, 2, 3, 1, 2, 3, 1, 2, 3, 1, 2, 3, 1, 2, 3, 8, 8, 4, 5, 6}, BigInteger.TEN));
+        transfers.add(new ProgramTransfer(new byte[]{1, 2, 3, 1, 2, 3, 1, 2, 3, 1, 2, 3, 1, 2, 3, 1, 2, 3, 8, 8, 1, 2, 3}, new byte[]{1, 2, 3, 1, 2, 3, 1, 2, 3, 1, 2, 3, 1, 2, 3, 1, 2, 3, 8, 8, 4, 5, 6}, BigInteger.TWO));
+        transfers.add(new ProgramTransfer(new byte[]{1, 2, 3, 1, 2, 3, 1, 2, 3, 1, 2, 3, 1, 2, 3, 1, 2, 3, 8, 8, 1, 2, 3}, new byte[]{1, 2, 3, 1, 2, 3, 1, 2, 3, 1, 2, 3, 1, 2, 3, 1, 2, 3, 8, 8, 5, 3, 4}, BigInteger.ONE));
         CoinData coinData = null;
         CoinFrom coinFrom = null;
         CoinTo coinTo = null;
@@ -46,7 +46,7 @@ public class ContractTxCallableTest {
         int chainId = 1;
         int assetsId = 1;
         ContractTransferData txData = new ContractTransferData();
-        txData.setContractAddress(new byte[]{1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,8,8,1,2,3});
+        txData.setContractAddress(new byte[]{1, 2, 3, 1, 2, 3, 1, 2, 3, 1, 2, 3, 1, 2, 3, 1, 2, 3, 8, 8, 1, 2, 3});
         NulsDigestData orginHash = NulsDigestData.calcDigestData(new byte[]{1, 2, 3, 1, 2, 3, 1, 2, 3, 1, 2, 3, 1, 2, 3, 1, 2, 3, 8, 8});
         txData.setOrginTxHash(orginHash);
 
@@ -54,20 +54,20 @@ public class ContractTxCallableTest {
         Map<String, CoinTo> mergeCoinToMap = MapUtil.createHashMap(transfers.size());
         Map<String, ContractBalance> tempBalanceManager = MapUtil.createHashMap(8);
         ContractBalance balance = ContractBalance.newInstance();
-        balance.setNonce(Hex.toHexString(new byte[]{1,2,3,1,2,3,1,2}));
-        tempBalanceManager.put(asString(new byte[]{1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,8,8,1,2,3}), balance);
+        balance.setNonce(Hex.toHexString(new byte[]{1, 2, 3, 1, 2, 3, 1, 2}));
+        tempBalanceManager.put(asString(new byte[]{1, 2, 3, 1, 2, 3, 1, 2, 3, 1, 2, 3, 1, 2, 3, 1, 2, 3, 8, 8, 1, 2, 3}), balance);
         balance = ContractBalance.newInstance();
-        balance.setNonce(Hex.toHexString(new byte[]{8,2,3,8,2,3,8,2}));
-        tempBalanceManager.put(asString(new byte[]{1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,8,8,3,4,5}), balance);
+        balance.setNonce(Hex.toHexString(new byte[]{8, 2, 3, 8, 2, 3, 8, 2}));
+        tempBalanceManager.put(asString(new byte[]{1, 2, 3, 1, 2, 3, 1, 2, 3, 1, 2, 3, 1, 2, 3, 1, 2, 3, 8, 8, 3, 4, 5}), balance);
 
         for (ProgramTransfer transfer : transfers) {
             byte[] from = transfer.getFrom();
             byte[] to = transfer.getTo();
             BigInteger value = transfer.getValue();
             ByteArrayWrapper wrapperFrom = new ByteArrayWrapper(from);
-            if(compareFrom == null || !compareFrom.equals(wrapperFrom)) {
+            if (compareFrom == null || !compareFrom.equals(wrapperFrom)) {
                 // 产生新交易
-                if(compareFrom == null) {
+                if (compareFrom == null) {
                     // 第一次遍历，获取新交易的coinFrom的nonce
                     contractBalance = tempBalanceManager.get(asString(from));
                     nonceBytes = Hex.decode(contractBalance.getNonce());
@@ -112,7 +112,7 @@ public class ContractTxCallableTest {
 
     private List<ContractMergedTransfer> contractTransfer2mergedTransfer(NulsDigestData hash, List<ContractTransferTransaction> transferList) throws NulsException {
         List<ContractMergedTransfer> resultList = new ArrayList<>();
-        for(ContractTransferTransaction transfer : transferList) {
+        for (ContractTransferTransaction transfer : transferList) {
             resultList.add(this.transformMergedTransfer(hash, transfer));
         }
         return resultList;
@@ -127,7 +127,7 @@ public class ContractTxCallableTest {
         List<CoinTo> toList = coinData.getTo();
         List<Output> outputs = result.getOutputs();
         Output output;
-        for(CoinTo to : toList) {
+        for (CoinTo to : toList) {
             output = new Output();
             output.setTo(to.getAddress());
             output.setValue(to.getAmount());
@@ -159,7 +159,7 @@ public class ContractTxCallableTest {
     private void mergeCoinTo(Map<String, CoinTo> mergeCoinToMap, CoinData coinData, byte[] to, int assetsId, BigInteger value) {
         CoinTo coinTo;
         String key = asString(to);
-        if((coinTo = mergeCoinToMap.get(key)) != null) {
+        if ((coinTo = mergeCoinToMap.get(key)) != null) {
             coinTo.setAmount(coinTo.getAmount().add(value));
         } else {
             coinTo = new CoinTo(to, 1, assetsId, value, 0L);

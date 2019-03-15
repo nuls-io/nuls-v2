@@ -23,7 +23,6 @@
  */
 package io.nuls.contract.util;
 
-import ch.qos.logback.core.joran.util.beans.BeanUtil;
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.BlockHeader;
 import io.nuls.base.data.Transaction;
@@ -36,9 +35,6 @@ import io.nuls.contract.model.tx.CallContractTransaction;
 import io.nuls.contract.model.tx.ContractBaseTransaction;
 import io.nuls.contract.model.tx.CreateContractTransaction;
 import io.nuls.contract.model.tx.DeleteContractTransaction;
-import io.nuls.contract.model.txdata.CallContractData;
-import io.nuls.contract.model.txdata.CreateContractData;
-import io.nuls.contract.model.txdata.DeleteContractData;
 import io.nuls.contract.rpc.call.BlockCall;
 import io.nuls.db.service.RocksDBService;
 import io.nuls.tools.basic.Result;
@@ -428,7 +424,7 @@ public class ContractUtil {
 
     public static BigInteger minus(BigInteger a, BigInteger b) {
         BigInteger result = a.subtract(b);
-        if(result.compareTo(BigInteger.ZERO) < 0) {
+        if (result.compareTo(BigInteger.ZERO) < 0) {
             throw new RuntimeException("Negative number detected.");
         }
         return result;

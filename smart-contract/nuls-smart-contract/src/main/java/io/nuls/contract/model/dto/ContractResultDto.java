@@ -88,7 +88,8 @@ public class ContractResultDto {
 
     private String remark;
 
-    public ContractResultDto() {}
+    public ContractResultDto() {
+    }
 
     public ContractResultDto(int chainId, ContractResult result, ContractBaseTransaction tx) throws NulsException {
         ContractData contractData = (ContractData) tx.getTxDataObj();
@@ -113,14 +114,14 @@ public class ContractResultDto {
         this.setMergedTransfers(result.getMergedTransferList());
         this.events = result.getEvents();
         this.remark = result.getRemark();
-        if(result.isSuccess()) {
+        if (result.isSuccess()) {
             this.makeTokenTransfers(chainId, result.getEvents());
         }
     }
 
     public ContractResultDto(int chainId, ContractResult contractExecuteResult, ContractBaseTransaction tx, ContractTokenTransferInfoPo transferInfoPo) throws NulsException {
         this(chainId, contractExecuteResult, tx);
-        if(transferInfoPo != null) {
+        if (transferInfoPo != null) {
             this.tokenTransfers = new ArrayList<>();
             this.tokenTransfers.add(new ContractTokenTransferDto(transferInfoPo));
         }
@@ -136,11 +137,11 @@ public class ContractResultDto {
 
     private void makeTokenTransfers(int chainId, List<String> tokenTransferEvents) {
         List<ContractTokenTransferDto> result = new ArrayList<>();
-        if(tokenTransferEvents != null && tokenTransferEvents.size() > 0) {
+        if (tokenTransferEvents != null && tokenTransferEvents.size() > 0) {
             ContractTokenTransferInfoPo po;
-            for(String event : tokenTransferEvents) {
+            for (String event : tokenTransferEvents) {
                 po = ContractUtil.convertJsonToTokenTransferInfoPo(chainId, event);
-                if(po != null) {
+                if (po != null) {
                     result.add(new ContractTokenTransferDto(po));
                 }
             }
@@ -155,10 +156,10 @@ public class ContractResultDto {
     public void setMergedTransfers(List<ContractMergedTransfer> transfers) {
         List<ContractMergedTransferDto> list = new LinkedList<>();
         this.transfers = list;
-        if(transfers == null || transfers.size() == 0) {
+        if (transfers == null || transfers.size() == 0) {
             return;
         }
-        for(ContractMergedTransfer transfer : transfers) {
+        for (ContractMergedTransfer transfer : transfers) {
             list.add(new ContractMergedTransferDto(transfer));
         }
     }

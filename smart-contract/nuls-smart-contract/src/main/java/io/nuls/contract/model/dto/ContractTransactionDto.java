@@ -1,18 +1,18 @@
 /**
  * MIT License
- *
+ * <p>
  * Copyright (c) 2017-2019 nuls.io
- *
+ * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- *
+ * <p>
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- *
+ * <p>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -20,14 +20,12 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
- *
  */
 
 package io.nuls.contract.model.dto;
 
 
 import io.nuls.base.constant.TxStatusEnum;
-import io.nuls.base.data.Coin;
 import io.nuls.base.data.CoinData;
 import io.nuls.base.data.CoinFrom;
 import io.nuls.base.data.CoinTo;
@@ -59,49 +57,49 @@ import static org.apache.commons.lang3.StringUtils.EMPTY;
 @Setter
 public class ContractTransactionDto {
 
-    
+
     private String hash;
 
-    
+
     private Integer type;
 
-    
+
     private Long time;
 
-    
+
     private Long blockHeight;
 
-    
+
     private String fee;
 
-    
+
     private String value;
 
-    
+
     private String remark;
 
-    
+
     private String scriptSig;
 
-    
+
     private Integer status;
 
-    
+
     private Long confirmCount;
 
-    
+
     private int size;
 
-    
+
     private List<InputDto> inputs;
 
-    
+
     private List<OutputDto> outputs;
 
-    
+
     protected Map<String, Object> txData;
 
-    
+
     protected ContractResultDto contractResult;
 
     public ContractTransactionDto(int chainId, ContractBaseTransaction tx) throws NulsException {
@@ -135,13 +133,13 @@ public class ContractTransactionDto {
         CoinData coinData = tx.getCoinDataObj();
         inputs = new ArrayList<>();
         outputs = new ArrayList<>();
-        if(coinData != null) {
+        if (coinData != null) {
             List<CoinFrom> froms = coinData.getFrom();
-            for(CoinFrom from : froms) {
+            for (CoinFrom from : froms) {
                 inputs.add(new InputDto(from));
             }
             List<CoinTo> tos = coinData.getTo();
-            for(CoinTo to : tos) {
+            for (CoinTo to : tos) {
                 outputs.add(new OutputDto(to));
             }
         }
@@ -150,15 +148,15 @@ public class ContractTransactionDto {
     private Map<String, Object> makeTxData(ContractBaseTransaction tx) throws NulsException {
         Map<String, Object> result = new HashMap<>();
         ContractData txData = (ContractData) tx.getTxDataObj();
-        if(type == ContractConstant.TX_TYPE_CREATE_CONTRACT) {
+        if (type == ContractConstant.TX_TYPE_CREATE_CONTRACT) {
             result.put("data", new CreateContractDataDto(txData));
-        } else if(type == ContractConstant.TX_TYPE_CALL_CONTRACT) {
+        } else if (type == ContractConstant.TX_TYPE_CALL_CONTRACT) {
             result.put("data", new CallContractDataDto(txData));
-        } else if(type == ContractConstant.TX_TYPE_DELETE_CONTRACT) {
+        } else if (type == ContractConstant.TX_TYPE_DELETE_CONTRACT) {
             result.put("data", new DeleteContractDataDto(txData));
-        } else if(type == ContractConstant.TX_TYPE_CONTRACT_TRANSFER) {
+        } else if (type == ContractConstant.TX_TYPE_CONTRACT_TRANSFER) {
             result.put("data", new ContractTransferDataDto((ContractTransferData) txData));
-        } else if(type == TX_TYPE_COINBASE) {
+        } else if (type == TX_TYPE_COINBASE) {
             Map<String, String> map = MapUtil.createLinkedHashMap(1);
             map.put("sender", EMPTY);
             result.put("data", map);

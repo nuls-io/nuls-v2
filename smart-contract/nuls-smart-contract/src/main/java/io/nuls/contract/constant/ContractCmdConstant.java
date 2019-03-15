@@ -30,7 +30,7 @@ package io.nuls.contract.constant;
  */
 public interface ContractCmdConstant {
     /**
-     *  module cmd
+     * module cmd
      */
     String COMMIT = "sc_commit";
     String ROLLBACK = "sc_rollback";
@@ -42,7 +42,7 @@ public interface ContractCmdConstant {
     String INITIAL_ACCOUNT_TOKEN = "sc_initial_account_token";
 
     /**
-     *  user cmd
+     * user cmd
      */
     String CREATE = "sc_create";
     String PRE_CREATE = "sc_pre_create";

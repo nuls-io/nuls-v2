@@ -57,5 +57,6 @@ public class ConfigBean implements Serializable {
      */
     private long maxViewGas;
 
-    public ConfigBean() {}
+    public ConfigBean() {
+    }
 }

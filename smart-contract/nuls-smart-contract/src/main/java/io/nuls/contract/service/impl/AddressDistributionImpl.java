@@ -24,7 +24,6 @@
 package io.nuls.contract.service.impl;
 
 import io.nuls.base.basic.AddressTool;
-import io.nuls.base.data.Transaction;
 import io.nuls.contract.model.bo.ContractTempTransaction;
 import io.nuls.contract.model.bo.ContractWrapperTransaction;
 import io.nuls.contract.model.txdata.CallContractData;
@@ -58,7 +57,7 @@ public class AddressDistributionImpl implements AddressDistribution {
         int i = 0;
         for (ContractTempTransaction tx : txList) {
             ctx = this.parseContractTransaction(tx);
-            if(ctx == null) {
+            if (ctx == null) {
                 continue;
             }
             //ctx.setOrder(i++);
@@ -98,7 +97,7 @@ public class AddressDistributionImpl implements AddressDistribution {
                 isContractTx = false;
                 break;
         }
-        if(isContractTx) {
+        if (isContractTx) {
             contractTransaction = new ContractWrapperTransaction(tx, tx.getTxHex(), contractData);
         }
         return contractTransaction;

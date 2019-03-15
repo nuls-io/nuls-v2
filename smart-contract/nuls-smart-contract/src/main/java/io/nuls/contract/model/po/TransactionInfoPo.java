@@ -56,7 +56,8 @@ public class TransactionInfoPo extends BaseNulsData {
 
     private byte status;
 
-    public TransactionInfoPo() {}
+    public TransactionInfoPo() {
+    }
 
     /**
      * serialize important field
@@ -144,9 +145,9 @@ public class TransactionInfoPo extends BaseNulsData {
     }
 
     public int compareTo(long thatTime) {
-        if(this.time > thatTime) {
+        if (this.time > thatTime) {
             return -1;
-        } else if(this.time < thatTime) {
+        } else if (this.time < thatTime) {
             return 1;
         }
         return 0;

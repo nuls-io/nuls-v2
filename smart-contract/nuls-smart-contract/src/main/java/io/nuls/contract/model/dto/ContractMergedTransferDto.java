@@ -60,9 +60,9 @@ public class ContractMergedTransferDto {
     }
 
     private void makeOutputs(List<Output> outputs) {
-        if(outputs != null && !outputs.isEmpty()) {
+        if (outputs != null && !outputs.isEmpty()) {
             this.outputs = new ArrayList<>(outputs.size());
-            for(Output output : outputs) {
+            for (Output output : outputs) {
                 this.outputs.add(new ContractOutputDto(output));
             }
         }

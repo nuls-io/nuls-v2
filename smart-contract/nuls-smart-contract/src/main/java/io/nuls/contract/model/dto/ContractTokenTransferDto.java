@@ -35,27 +35,27 @@ import io.nuls.contract.util.ContractUtil;
 
 public class ContractTokenTransferDto {
 
-    
+
     private String contractAddress;
-    
+
     private String from;
-    
+
     private String to;
-    
+
     private String value;
-    
+
     private String name;
-    
+
     private String symbol;
-    
+
     private long decimals;
 
     public ContractTokenTransferDto(ContractTokenTransferInfoPo po) {
         this.contractAddress = po.getContractAddress();
-        if(po.getFrom() != null) {
+        if (po.getFrom() != null) {
             this.from = AddressTool.getStringAddressByBytes(po.getFrom());
         }
-        if(po.getTo() != null) {
+        if (po.getTo() != null) {
             this.to = AddressTool.getStringAddressByBytes(po.getTo());
         }
         this.value = ContractUtil.bigInteger2String(po.getValue());

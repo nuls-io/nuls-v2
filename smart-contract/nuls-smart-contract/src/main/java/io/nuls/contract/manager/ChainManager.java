@@ -24,10 +24,10 @@
  */
 package io.nuls.contract.manager;
 
+import io.nuls.contract.config.ContractConfig;
 import io.nuls.contract.constant.ContractDBConstant;
 import io.nuls.contract.model.bo.Chain;
 import io.nuls.contract.model.bo.config.ConfigBean;
-import io.nuls.contract.config.ContractConfig;
 import io.nuls.contract.model.dto.ContractTxRegisterDto;
 import io.nuls.contract.rpc.call.TransactionCall;
 import io.nuls.contract.storage.ConfigStorageService;

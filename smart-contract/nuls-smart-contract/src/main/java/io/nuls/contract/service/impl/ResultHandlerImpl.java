@@ -26,7 +26,10 @@ package io.nuls.contract.service.impl;
 import io.nuls.base.data.*;
 import io.nuls.contract.helper.ContractHelper;
 import io.nuls.contract.manager.TempBalanceManager;
-import io.nuls.contract.model.bo.*;
+import io.nuls.contract.model.bo.AnalyzerResult;
+import io.nuls.contract.model.bo.ContractBalance;
+import io.nuls.contract.model.bo.ContractResult;
+import io.nuls.contract.model.bo.ContractWrapperTransaction;
 import io.nuls.contract.model.tx.ContractTransferTransaction;
 import io.nuls.contract.model.txdata.ContractTransferData;
 import io.nuls.contract.service.ContractCaller;
@@ -86,11 +89,11 @@ public class ResultHandlerImpl implements ResultHanlder {
         int assetsId = contractHelper.getChain(chainId).getConfig().getAssetsId();
 
         Set<ContractResult> failedSet = analyzerResult.getFailedSet();
-        for(ContractResult contractResult : failedSet) {
+        for (ContractResult contractResult : failedSet) {
             long value = contractResult.getValue();
-            if(value > 0) {
+            if (value > 0) {
                 ContractWrapperTransaction orginTx = contractResult.getTx();
-                if(orginTx.getType() != TX_TYPE_CALL_CONTRACT) {
+                if (orginTx.getType() != TX_TYPE_CALL_CONTRACT) {
                     continue;
                 }
 

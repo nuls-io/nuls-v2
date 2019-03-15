@@ -33,6 +33,6 @@ import lombok.Setter;
  */
 @Getter
 @Setter
-public class ContractTempTransaction extends Transaction{
+public class ContractTempTransaction extends Transaction {
     private String txHex;
 }

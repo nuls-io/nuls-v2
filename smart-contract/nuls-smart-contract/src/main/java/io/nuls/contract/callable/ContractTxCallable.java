@@ -114,7 +114,7 @@ public class ContractTxCallable implements Callable<CallableResult> {
                 resultList.add(ContractResult.getFailed(contractData, "contract has been terminated."));
                 continue;
             }
-            if(!ContractUtil.checkPrice(contractData.getPrice())) {
+            if (!ContractUtil.checkPrice(contractData.getPrice())) {
                 resultList.add(ContractResult.getFailed(contractData, "The minimum value of price is 25."));
                 continue;
             }
@@ -143,7 +143,7 @@ public class ContractTxCallable implements Callable<CallableResult> {
         makeContractResult(tx, contractResult);
         if (contractResult.isSuccess()) {
             Result checkResult = contractHelper.validateNrc20Contract(chainId, (ProgramExecutor) contractResult.getTxTrack(), tx, contractResult);
-            if(checkResult.isSuccess()) {
+            if (checkResult.isSuccess()) {
                 commitSet.add(contract);
                 commitContract(contractResult);
             }
@@ -179,7 +179,7 @@ public class ContractTxCallable implements Callable<CallableResult> {
             contractTransferHandler.handleContractTransfer(chainId, blockTime, tx, contractResult, tempBalanceManager);
         }
         // 处理合约内部转账时可能失败，合约视为执行失败
-        if(contractResult.isSuccess()) {
+        if (contractResult.isSuccess()) {
             callableResult.getResultList().add(contractResult);
             commitContract(contractResult);
         } else {
@@ -189,7 +189,7 @@ public class ContractTxCallable implements Callable<CallableResult> {
     }
 
     private void commitContract(ContractResult contractResult) {
-        if(!contractResult.isSuccess()) {
+        if (!contractResult.isSuccess()) {
             return;
         }
         Object txTrackObj = contractResult.getTxTrack();

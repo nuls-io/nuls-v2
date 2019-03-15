@@ -42,7 +42,6 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 import static io.nuls.contract.constant.ContractErrorCode.ADDRESS_ERROR;
-import static io.nuls.contract.constant.ContractErrorCode.DATA_ERROR;
 import static io.nuls.contract.util.ContractUtil.getSuccess;
 
 /**
@@ -59,9 +58,9 @@ public class ContractTokenBalanceManager {
 
     /**
      * key: String - local account address
-     *      value:
-     *          key: String - contract address
-     *          value: ContractTokenInfo - token name && amount
+     * value:
+     * key: String - contract address
+     * value: ContractTokenInfo - token name && amount
      */
     private Map<String, Map<String, ContractTokenInfo>> contractTokenOfLocalAccount = new ConcurrentHashMap<>();
 
@@ -78,22 +77,23 @@ public class ContractTokenBalanceManager {
         return manager;
     }
 
-    private ContractTokenBalanceManager() {}
+    private ContractTokenBalanceManager() {
+    }
 
     public Result initAllTokensByAccount(String account) throws NulsException {
-        if(!initializedAddressSet.add(account)) {
+        if (!initializedAddressSet.add(account)) {
             return getSuccess();
         }
-        if(!AddressTool.validAddress(chainId, account)) {
+        if (!AddressTool.validAddress(chainId, account)) {
             return Result.getFailed(ADDRESS_ERROR);
         }
         Result<List<byte[]>> allNrc20ListResult = contractTokenAddressStorageService.getAllNrc20AddressList(chainId);
-        if(allNrc20ListResult.isFailed()) {
+        if (allNrc20ListResult.isFailed()) {
             return allNrc20ListResult;
         }
         BlockHeader blockHeader = BlockCall.getLatestBlockHeader(chainId);
         List<byte[]> contractAddressInfoPoList = allNrc20ListResult.getData();
-        for(byte[] address : contractAddressInfoPoList) {
+        for (byte[] address : contractAddressInfoPoList) {
             initialContractToken(account, blockHeader, AddressTool.getStringAddressByBytes(address));
         }
 
@@ -104,16 +104,16 @@ public class ContractTokenBalanceManager {
         tokenLock.lock();
         try {
             Result<ContractTokenInfo> result = contractHelper.getContractToken(chainId, blockHeader, account, contract);
-            if(result.isFailed()) {
+            if (result.isFailed()) {
                 return;
             }
             ContractTokenInfo tokenInfo = result.getData();
             BigInteger amount = tokenInfo.getAmount();
-            if(amount == null || amount.equals(BigInteger.ZERO)) {
+            if (amount == null || amount.equals(BigInteger.ZERO)) {
                 return;
             }
             Map<String, ContractTokenInfo> tokens = contractTokenOfLocalAccount.get(account);
-            if(tokens == null) {
+            if (tokens == null) {
                 tokens = new HashMap<>();
             }
             tokens.put(contract, tokenInfo);
@@ -128,7 +128,7 @@ public class ContractTokenBalanceManager {
         try {
             ContractTokenInfo tokenInfo = new ContractTokenInfo(contract, po.getNrc20TokenName(), po.getDecimals(), value, po.getNrc20TokenSymbol(), po.getBlockHeight());
             Map<String, ContractTokenInfo> tokens = contractTokenOfLocalAccount.get(account);
-            if(tokens == null) {
+            if (tokens == null) {
                 tokens = new HashMap<>();
             }
             tokens.put(contract, tokenInfo);
@@ -140,18 +140,18 @@ public class ContractTokenBalanceManager {
 
     public Result<List<ContractTokenInfo>> getAllTokensByAccount(String account) throws NulsException {
         Result result = this.initAllTokensByAccount(account);
-        if(result.isFailed()) {
+        if (result.isFailed()) {
             return result;
         }
         Map<String, ContractTokenInfo> tokensMap = contractTokenOfLocalAccount.get(account);
-        if(tokensMap == null || tokensMap.size() == 0) {
+        if (tokensMap == null || tokensMap.size() == 0) {
             return getSuccess().setData(new ArrayList<>());
         }
         List<ContractTokenInfo> resultList = new ArrayList<>();
         Set<Map.Entry<String, ContractTokenInfo>> entries = tokensMap.entrySet();
         String contractAddress;
         ContractTokenInfo info;
-        for(Map.Entry<String, ContractTokenInfo> entry : entries) {
+        for (Map.Entry<String, ContractTokenInfo> entry : entries) {
             contractAddress = entry.getKey();
             info = entry.getValue();
             info.setContractAddress(contractAddress);
@@ -165,18 +165,18 @@ public class ContractTokenBalanceManager {
         tokenLock.lock();
         try {
             Map<String, ContractTokenInfo> tokens = contractTokenOfLocalAccount.get(account);
-            if(tokens == null) {
+            if (tokens == null) {
                 return getSuccess();
             } else {
                 ContractTokenInfo info = tokens.get(contract);
-                if(info == null) {
+                if (info == null) {
                     return getSuccess();
                 }
                 BigInteger currentToken = info.getAmount();
-                if(currentToken == null) {
+                if (currentToken == null) {
                     return getSuccess();
                 } else {
-                    if(currentToken.compareTo(token) < 0) {
+                    if (currentToken.compareTo(token) < 0) {
                         return Result.getFailed(ContractErrorCode.INSUFFICIENT_BALANCE);
                     }
                     currentToken = currentToken.subtract(token);
@@ -194,22 +194,22 @@ public class ContractTokenBalanceManager {
         try {
             Map<String, ContractTokenInfo> tokens = contractTokenOfLocalAccount.get(account);
             do {
-                if(tokens == null) {
+                if (tokens == null) {
                     break;
                 } else {
                     ContractTokenInfo info = tokens.get(contract);
-                    if(info == null) {
+                    if (info == null) {
                         return getSuccess();
                     }
                     BigInteger currentToken = info.getAmount();
-                    if(currentToken == null) {
+                    if (currentToken == null) {
                         break;
                     } else {
                         currentToken = currentToken.add(token);
                         tokens.put(contract, info.setAmount(currentToken));
                     }
                 }
-            } while(false);
+            } while (false);
         } finally {
             tokenLock.unlock();
         }
