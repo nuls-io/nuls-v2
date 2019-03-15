@@ -57,6 +57,36 @@ public class ResponseMessageProcessor {
         }
     }
 
+
+    /**
+     * 与已连接的模块握手
+     * Shake hands with the core module (Manager)
+     *
+     * @return boolean
+     * @throws Exception 握手失败, handshake failed
+     */
+    public static boolean handshake(Channel channel) throws Exception {
+        /*
+        发送握手消息
+        Send handshake message
+         */
+        Message message = MessageUtil.basicMessage(MessageType.NegotiateConnection);
+        message.setMessageData(MessageUtil.defaultNegotiateConnection());
+
+        ResponseContainer responseContainer = RequestContainer.putRequest(message.getMessageId());
+
+        ConnectManager.sendMessage(channel,JSONUtils.obj2json(message));
+
+        try {
+            return responseContainer.getFuture().get(Constants.TIMEOUT_TIMEMILLIS, TimeUnit.MILLISECONDS) != null;
+        } catch (Exception e) {
+            //Timeout Error
+            return false;
+        } finally {
+            RequestContainer.removeResponseContainer(message.getMessageId());
+        }
+    }
+
     public static void syncKernel(String kernelUrl) throws Exception {
         syncKernel(kernelUrl,new KernelInvoke());
     }

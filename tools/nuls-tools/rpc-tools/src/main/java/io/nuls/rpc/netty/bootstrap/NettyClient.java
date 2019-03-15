@@ -1,27 +1,21 @@
 package io.nuls.rpc.netty.bootstrap;
 
 import io.netty.bootstrap.Bootstrap;
-import io.netty.buffer.PooledByteBufAllocator;
-import io.netty.channel.*;
+import io.netty.channel.Channel;
+import io.netty.channel.ChannelInitializer;
+import io.netty.channel.ChannelPipeline;
+import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.handler.codec.http.DefaultHttpHeaders;
 import io.netty.handler.codec.http.HttpClientCodec;
-import io.netty.handler.codec.http.HttpHeaders;
 import io.netty.handler.codec.http.HttpObjectAggregator;
-import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
-import io.netty.handler.codec.http.websocketx.WebSocketClientHandshaker;
 import io.netty.handler.codec.http.websocketx.WebSocketClientHandshakerFactory;
 import io.netty.handler.codec.http.websocketx.WebSocketVersion;
-import io.netty.handler.logging.LogLevel;
-import io.netty.handler.logging.LoggingHandler;
-import io.nuls.rpc.model.message.Message;
-import io.nuls.rpc.model.message.MessageType;
-import io.nuls.rpc.model.message.MessageUtil;
+import io.netty.handler.codec.http.websocketx.extensions.compression.WebSocketClientCompressionHandler;
 import io.nuls.rpc.netty.handler.ClientHandler;
-import io.nuls.tools.log.Log;
-import io.nuls.tools.parse.JSONUtils;
+import io.nuls.rpc.netty.processor.ResponseMessageProcessor;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -39,7 +33,7 @@ public class NettyClient {
      * */
     public static Channel createConnect(String uri){
         try {
-            EventLoopGroup group=new NioEventLoopGroup();
+            /*EventLoopGroup group=new NioEventLoopGroup();
             Bootstrap boot=new Bootstrap();
             boot.option(ChannelOption.SO_KEEPALIVE,true)
                     .option(ChannelOption.ALLOCATOR, PooledByteBufAllocator.DEFAULT)
@@ -78,7 +72,37 @@ public class NettyClient {
             Message message = MessageUtil.basicMessage(MessageType.NegotiateConnection);
             message.setMessageData(MessageUtil.defaultNegotiateConnection());
             channel.writeAndFlush(new TextWebSocketFrame(JSONUtils.obj2json(message)));
-            return channel;
+            return channel;*/
+
+            URI webSocketURI = null;
+            try {
+                webSocketURI = new URI(uri);
+            } catch (URISyntaxException e) {
+                e.printStackTrace();
+            }
+            final ClientHandler handler =
+                    new ClientHandler(
+                            WebSocketClientHandshakerFactory.newHandshaker(
+                                    webSocketURI, WebSocketVersion.V13, null, true, new DefaultHttpHeaders()));
+            EventLoopGroup group=new NioEventLoopGroup();
+            Bootstrap b = new Bootstrap();
+            b.group(group)
+                    .channel(NioSocketChannel.class)
+                    .handler(new ChannelInitializer<SocketChannel>() {
+                        @Override
+                        protected void initChannel(SocketChannel ch) {
+                            ChannelPipeline p = ch.pipeline();
+                            p.addLast(
+                                    new HttpClientCodec(),
+                                    new HttpObjectAggregator(1024*1024*10),
+                                    WebSocketClientCompressionHandler.INSTANCE,
+                                    handler);
+                        }
+                    });
+            Channel ch = b.connect(webSocketURI.getHost(),webSocketURI.getPort()).sync().channel();
+            handler.handshakeFuture().sync();
+            ResponseMessageProcessor.handshake(ch);
+            return ch;
         }catch (Exception e){
             e.printStackTrace();
             return null;
