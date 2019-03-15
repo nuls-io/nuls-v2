@@ -273,17 +273,10 @@ public class ConsensusProcess {
         extendsData.setBlockVersion((short) 1);
         extendsData.setEffectiveRatio((byte) 80);
         extendsData.setContinuousIntervalCount((short) 100);
+
+        List<Transaction> packingTxList = CallMethodUtils.getPackingTxList(chain,bd.getHeight(),bd.getTime(),AddressTool.getStringAddressByBytes(self.getAgent().getPackingAddress()),extendsData);
+
         bd.setExtendsData(extendsData);
-
-        StringBuilder str = new StringBuilder();
-        str.append(AddressTool.getStringAddressByBytes(self.getAgent().getPackingAddress()));
-        str.append(" ,order:").append(self.getPackingIndexOfRound());
-        str.append(",packTime:").append(new Date(self.getPackEndTime()));
-        str.append("\n");
-        consensusLogger.debug("pack round:" + str);
-
-        List<Transaction> packingTxList = CallMethodUtils.getPackingTxList(chain);
-
         /*
         组装系统交易（CoinBase/红牌/黄牌）+ 创建区块
         Assembly System Transactions (CoinBase/Red/Yellow)+ Create blocks
