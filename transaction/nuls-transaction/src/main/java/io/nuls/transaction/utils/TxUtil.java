@@ -131,9 +131,9 @@ public class TxUtil {
         return false;
     }
 
-  /*  public static List<TransactionPO> tx2PO(Transaction tx) throws NulsException {
+    public static List<TransactionPO> tx2PO(Transaction tx) throws NulsException {
         return tx2PO(null, tx);
-    }*/
+    }
 
     public static List<TransactionPO> tx2PO(Chain chain, Transaction tx) throws NulsException {
         List<TransactionPO> list = new ArrayList<>();
@@ -193,8 +193,6 @@ public class TxUtil {
         if(TxManager.isSmartContract(chain, tx.getType())){
             TransactionPO transactionPO = new TransactionPO();
             transactionPO.setAddress(extractContractAddress(tx.getTxData()));
-//            transactionPO.setAssetChainId(null == chain ? -1 : chain.getConfig().getChainId());
-//            transactionPO.setAssetId(null == chain ? -1 : chain.getConfig().getAssetId());
             transactionPO.setAssetChainId(chain.getConfig().getChainId());
             transactionPO.setAssetId(chain.getConfig().getAssetId());
             transactionPO.setAmount(BigInteger.ZERO);

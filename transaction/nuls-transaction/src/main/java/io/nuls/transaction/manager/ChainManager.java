@@ -29,7 +29,7 @@ import io.nuls.db.constant.DBErrorCode;
 import io.nuls.db.service.RocksDBService;
 import io.nuls.tools.cache.LimitHashMap;
 import io.nuls.tools.core.annotation.Autowired;
-import io.nuls.tools.core.annotation.Component;
+import io.nuls.tools.core.annotation.Service;
 import io.nuls.tools.log.logback.LoggerBuilder;
 import io.nuls.tools.log.logback.NulsLogger;
 import io.nuls.transaction.constant.TxConfig;
@@ -53,7 +53,7 @@ import static io.nuls.transaction.utils.LoggerUtil.Log;
  * @author qinyifeng
  * @date 2018/12/11
  */
-@Component
+@Service
 public class ChainManager {
 
     @Autowired
@@ -61,9 +61,6 @@ public class ChainManager {
 
     @Autowired
     private SchedulerManager schedulerManager;
-
-    @Autowired
-    private TxManager txManager;
 
     @Autowired
     private TxConfig txConfig;
@@ -224,7 +221,7 @@ public class ChainManager {
         txRegister.setSystemTx(false);
         txRegister.setUnlockTx(false);
         txRegister.setVerifySignature(true);
-        txManager.register(chain, txRegister);
+        TxManager.register(chain, txRegister);
     }
 
     public Map<Integer, Chain> getChainMap() {

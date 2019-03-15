@@ -725,10 +725,13 @@ public class TxServiceImpl implements TxService {
                     }
                 }
             }
-            Map<String, Object> map = ContractCall.invokeContract(chain, scTxHexList);
-            List<String> scNewList = (List<String>) map.get("txHexList");
-            packableTxs.addAll(scNewList);
-            String stateRoot = (String) map.get("txHexList");
+            String stateRoot = null;
+            if(scTxHexList.size() > 0) {
+                Map<String, Object> map = ContractCall.invokeContract(chain, scTxHexList);
+                List<String> scNewList = (List<String>) map.get("txHexList");
+                packableTxs.addAll(scNewList);
+                stateRoot = (String) map.get("txHexList");
+            }
             TxPackage txPackage = new TxPackage(packableTxs, stateRoot);
 
             chain.getLoggerMap().get(TxConstant.LOG_TX).debug("提供给共识的可打包交易packableTxs - Rs:");

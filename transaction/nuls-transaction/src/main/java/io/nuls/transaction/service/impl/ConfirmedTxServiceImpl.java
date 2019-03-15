@@ -48,9 +48,6 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
     private UnconfirmedTxStorageService unconfirmedTxStorageService;
 
     @Autowired
-    private TxManager txManager;
-
-    @Autowired
     private ChainManager chainManager;
 
     @Autowired
@@ -110,7 +107,7 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
         int debugCount = 0;
         for (Transaction tx : txList) {
             //保存到h2数据库
-            debugCount += transactionH2Service.saveTxs(TxUtil.tx2PO(chain,tx));
+            debugCount += transactionH2Service.saveTxs(TxUtil.tx2PO(chain, tx));
         }
         CoinData coinData = TxUtil.getCoinData(txList.get(0));
         for (Coin coin : coinData.getTo()) {
@@ -169,7 +166,7 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
                 String txHex = tx.hex();
                 txHexList.add(txHex);
                 txHashs.add(tx.getHash().serialize());
-                TxRegister txRegister = txManager.getTxRegister(chain, tx.getType());
+                TxRegister txRegister = TxManager.getTxRegister(chain, tx.getType());
                 if (moduleVerifyMap.containsKey(txRegister)) {
                     moduleVerifyMap.get(txRegister).add(txHex);
                 } else {
@@ -354,7 +351,7 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
                 txList.add(tx);
                 String txHex = tx.hex();
                 txHexList.add(txHex);
-                TxRegister txRegister = txManager.getTxRegister(chain, tx.getType());
+                TxRegister txRegister = TxManager.getTxRegister(chain, tx.getType());
                 if (moduleVerifyMap.containsKey(txRegister)) {
                     moduleVerifyMap.get(txRegister).add(txHex);
                 } else {
@@ -401,7 +398,7 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
      */
     private boolean savePackable(Chain chain, Transaction tx) {
         //不是系统交易则重新放回待打包队列的最前端
-        if (!txManager.isSystemTx(chain, tx)) {
+        if (!TxManager.isSystemTx(chain, tx)) {
             return packablePool.addInFirst(chain, tx, false);
 
         }

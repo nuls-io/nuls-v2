@@ -46,7 +46,11 @@ import static io.nuls.transaction.utils.LoggerUtil.Log;
 public class TxManager {
 
     public static String getModuleCode(Chain chain, int type){
-        return chain.getTxRegisterMap().get(type).getModuleCode();
+       TxRegister txRegister = chain.getTxRegisterMap().get(type);
+       if(null != txRegister){
+           return txRegister.getModuleCode();
+       }
+        return null;
     }
 
     /**

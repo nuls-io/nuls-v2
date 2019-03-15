@@ -33,6 +33,7 @@ import io.nuls.base.signture.P2PHKSignature;
 import io.nuls.base.signture.SignatureUtil;
 import io.nuls.base.signture.TransactionSignature;
 import io.nuls.tools.core.annotation.Autowired;
+import io.nuls.tools.core.annotation.Service;
 import io.nuls.tools.crypto.ECKey;
 import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.exception.NulsException;
@@ -61,6 +62,7 @@ import java.util.*;
  * @author: Charlie
  * @date: 2019/3/15
  */
+@Service
 public class TxGenerateServiceImpl implements TxGenerateService {
 
     @Autowired

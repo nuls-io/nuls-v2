@@ -8,7 +8,7 @@ import io.nuls.rpc.model.CmdAnnotation;
 import io.nuls.rpc.model.Parameter;
 import io.nuls.rpc.model.message.Response;
 import io.nuls.tools.core.annotation.Autowired;
-import io.nuls.tools.core.annotation.Component;
+import io.nuls.tools.core.annotation.Service;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.model.ObjectUtils;
 import io.nuls.tools.parse.JSONUtils;
@@ -44,7 +44,7 @@ import static io.nuls.transaction.utils.LoggerUtil.Log;
  * @author: Charlie
  * @date: 2018/11/12
  */
-@Component
+@Service
 public class TransactionCmd extends BaseCmd {
 
     @Autowired
@@ -55,8 +55,6 @@ public class TransactionCmd extends BaseCmd {
     private ConfirmedTxService confirmedTxService;
     @Autowired
     private ChainManager chainManager;
-    @Autowired
-    private TxManager txManager;
     @Autowired
     private PackablePool packablePool;
     @Autowired
@@ -364,7 +362,7 @@ public class TransactionCmd extends BaseCmd {
             if (null == chain) {
                 throw new NulsException(TxErrorCode.CHAIN_NOT_FOUND);
             }
-            List<Integer> list = txManager.getSysTypes(chain);
+            List<Integer> list = TxManager.getSysTypes(chain);
             return success(list);
         } catch (NulsException e) {
             errorLogProcess(chain, e);
