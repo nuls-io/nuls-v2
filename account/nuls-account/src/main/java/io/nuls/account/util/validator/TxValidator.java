@@ -220,7 +220,7 @@ public class TxValidator {
             int assetsChainId = coinFrom.getAssetsChainId();
             int assetsId = coinFrom.getAssetsId();
             //黑洞地址不能发起转账
-            if(!Arrays.equals(AccountConstant.BLACK_HOLE_ADDRESS, coinFrom.getAddress())){
+            if(Arrays.equals(AccountConstant.BLACK_HOLE_ADDRESS, coinFrom.getAddress())){
                 throw new NulsException(AccountErrorCode.ADDRESS_TRANSFER_BAN);
             }
             // 发送方from中地址和资产对应的链id必须发起链id
