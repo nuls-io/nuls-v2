@@ -24,6 +24,7 @@
 package io.nuls.contract.util;
 
 import io.nuls.base.basic.AddressTool;
+import io.nuls.base.data.Address;
 import io.nuls.base.data.BlockHeader;
 import io.nuls.base.data.Transaction;
 import io.nuls.contract.constant.ContractConstant;
@@ -107,6 +108,31 @@ public class ContractUtil {
             }
             return two;
         }
+    }
+
+    public static byte[] extractContractAddressFromTxData(Transaction tx) {
+        if (tx == null) {
+            return null;
+        }
+        int txType = tx.getType();
+        if (txType == ContractConstant.TX_TYPE_CREATE_CONTRACT
+                || txType == ContractConstant.TX_TYPE_CALL_CONTRACT
+                || txType == ContractConstant.TX_TYPE_DELETE_CONTRACT) {
+            return extractContractAddressFromTxData(tx.getTxData());
+        }
+        return null;
+    }
+    private static byte[] extractContractAddressFromTxData(byte[] txData) {
+        if(txData == null) {
+            return null;
+        }
+        int length = txData.length;
+        if(length < Address.ADDRESS_LENGTH * 2) {
+            return null;
+        }
+        byte[] contractAddress = new byte[Address.ADDRESS_LENGTH];
+        System.arraycopy(txData, Address.ADDRESS_LENGTH, contractAddress, 0, Address.ADDRESS_LENGTH);
+        return contractAddress;
     }
 
     public static String[][] twoDimensionalArray(Object[] args) {
