@@ -21,47 +21,42 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package io.nuls.contract.executorbus;
+package io.nuls.contract.model.bo;
 
+import lombok.Data;
 
-import io.nuls.contract.callable.ContractTxCallable;
-import io.nuls.contract.model.bo.CallableResult;
-
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
 /**
  * @author: PierreLuo
- * @date: 2018/11/19
+ * @date: 2019-03-16
  */
-public class ContractExecutorBus {
+@Data
+public class ContractContainer {
+    private String contractAddress;
+    private boolean hasCreate = false;
+    private boolean isDelete = false;
+    private CallableResult callableResult;
+    private ExecutorService executorService;
+    private Set<String> commitSet;
+    private List<Future<ContractResult>> futureList;
 
-    private static final ExecutorService EXECUTOR = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
-
-    private List<ContractTxCallable> contractTxCallableList;
-
-    public static ContractExecutorBus newInstance() {
-        return new ContractExecutorBus();
+    public ContractContainer(String contractAddress, ExecutorService executorService, Set<String> commitSet, List<Future<ContractResult>> futureList) {
+        this.contractAddress = contractAddress;
+        this.executorService = executorService;
+        this.commitSet = commitSet;
+        this.futureList = futureList;
+        this.callableResult = new CallableResult();
+        this.callableResult.setContract(contractAddress);
     }
 
-    public ContractExecutorBus() {
-        this.contractTxCallableList = new ArrayList<>();
-    }
-
-    public void add(ContractTxCallable callable) {
-        contractTxCallableList.add(callable);
-    }
-
-    public List<Future<CallableResult>> execute() {
-        try {
-            List<Future<CallableResult>> futures = EXECUTOR.invokeAll(contractTxCallableList);
-            return futures;
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-            return null;
+    public void loadFutureList() throws ExecutionException, InterruptedException {
+        for(Future<ContractResult> future : futureList) {
+            future.get();
         }
     }
 }

@@ -24,14 +24,13 @@
 
 package io.nuls.contract.service;
 
-import io.nuls.contract.model.bo.CallerResult;
 import io.nuls.contract.model.bo.ContractResult;
 import io.nuls.contract.model.bo.ContractWrapperTransaction;
+import io.nuls.contract.model.bo.ContractContainer;
 import io.nuls.contract.vm.program.ProgramExecutor;
 import io.nuls.tools.basic.Result;
 
 import java.util.List;
-import java.util.Map;
 
 /**
  * @author: PierreLuo
@@ -39,7 +38,7 @@ import java.util.Map;
  */
 public interface ContractCaller {
 
-    CallerResult caller(int chainId, ProgramExecutor batchExecutor, Map<String, List<ContractWrapperTransaction>> txMap, String preStateRoot);
+    Result caller(int chainId, ContractContainer executorServiceContainer, ProgramExecutor batchExecutor, ContractWrapperTransaction tx, String preStateRoot);
 
     List<ContractResult> callerReCallTx(ProgramExecutor batchExecutor, List<ContractWrapperTransaction> reCallTxList, int chainId, String preStateRoot);
 

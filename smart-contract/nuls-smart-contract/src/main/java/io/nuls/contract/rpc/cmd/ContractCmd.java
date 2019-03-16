@@ -72,31 +72,62 @@ public class ContractCmd extends BaseCmd {
     @Autowired
     private ContractTxValidatorManager contractTxValidatorManager;
 
-    @CmdAnnotation(cmd = INVOKE_CONTRACT, version = 1.0, description = "invoke contract")
+    @CmdAnnotation(cmd = BATCH_BEGIN, version = 1.0, description = "batch begin")
     @Parameter(parameterName = "chainId", parameterType = "int")
     @Parameter(parameterName = "blockHeight", parameterType = "long")
     @Parameter(parameterName = "blockTime", parameterType = "long")
     @Parameter(parameterName = "packingAddress", parameterType = "String")
     @Parameter(parameterName = "preStateRoot", parameterType = "String")
-    @Parameter(parameterName = "txHexList", parameterType = "List<String>")
-    public Response invokeContract(Map<String, Object> params) {
+    public Response batchBegin(Map<String, Object> params) {
         try {
             Integer chainId = (Integer) params.get("chainId");
             Long blockHeight = Long.parseLong(params.get("blockHeight").toString());
             Long blockTime = Long.parseLong(params.get("blockTime").toString());
             String packingAddress = (String) params.get("packingAddress");
             String preStateRoot = (String) params.get("preStateRoot");
-            List<String> txHexList = (List<String>) params.get("txHexList");
 
-            List<ContractTempTransaction> txList = new ArrayList<>();
-            ContractTempTransaction tx;
-            for (String txHex : txHexList) {
-                tx = new ContractTempTransaction();
-                tx.setTxHex(txHex);
-                tx.parse(Hex.decode(txHex), 0);
-                txList.add(tx);
+            Result result = contractService.begin(chainId, blockHeight, blockTime, packingAddress, preStateRoot);
+            if (result.isFailed()) {
+                return failed(result.getErrorCode());
             }
-            Result result = contractService.invokeContract(chainId, txList, blockHeight, blockTime, packingAddress, preStateRoot);
+
+            return success();
+        } catch (Exception e) {
+            Log.error(e);
+            return failed(e.getMessage());
+        }
+    }
+
+    @CmdAnnotation(cmd = INVOKE_CONTRACT, version = 1.0, description = "invoke contract one by one")
+    @Parameter(parameterName = "chainId", parameterType = "int")
+    @Parameter(parameterName = "txHex", parameterType = "String")
+    public Response invokeContractOneByOne(Map<String, Object> params) {
+        try {
+            Integer chainId = (Integer) params.get("chainId");
+            String txHex = (String) params.get("txHex");
+            ContractTempTransaction tx = new ContractTempTransaction();
+            tx.setTxHex(txHex);
+            tx.parse(Hex.decode(txHex), 0);
+            Result result = contractService.invokeContractOneByOne(chainId, tx);
+            if(result.isSuccess()) {
+                return failed(result.getErrorCode());
+            }
+            return success();
+        } catch (Exception e) {
+            Log.error(e);
+            return failed(e.getMessage());
+        }
+    }
+
+    @CmdAnnotation(cmd = BATCH_END, version = 1.0, description = "batch end")
+    @Parameter(parameterName = "chainId", parameterType = "int")
+    @Parameter(parameterName = "blockHeight", parameterType = "long")
+    public Response invokeContract(Map<String, Object> params) {
+        try {
+            Integer chainId = (Integer) params.get("chainId");
+            Long blockHeight = Long.parseLong(params.get("blockHeight").toString());
+
+            Result result = contractService.end(chainId, blockHeight);
             if (result.isFailed()) {
                 return failed(result.getErrorCode());
             }
