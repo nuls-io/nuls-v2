@@ -153,8 +153,9 @@ public class ContractServiceImpl implements ContractService {
     @Override
     public Result end(int chainId, long blockHeight) {
 
+        BatchInfo batchInfo = null;
         try {
-            BatchInfo batchInfo = contractHelper.getChain(chainId).getBatchInfo();
+            batchInfo = contractHelper.getChain(chainId).getBatchInfo();
             if(!batchInfo.hasBegan()) {
                 return getFailed();
             }
@@ -190,6 +191,10 @@ public class ContractServiceImpl implements ContractService {
         } catch (IOException e) {
             Log.error(e);
             return getFailed().setMsg(e.getMessage());
+        } finally {
+            if(batchInfo != null) {
+                batchInfo.shutdownExecutorServic();
+            }
         }
 
     }

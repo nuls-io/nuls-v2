@@ -33,6 +33,7 @@ import io.nuls.tools.thread.TimeService;
 import lombok.Data;
 
 import java.util.*;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 /**
@@ -110,9 +111,23 @@ public class BatchInfo {
         this.tempBalanceManager = null;
         this.currentBlockHeader = null;
         this.contractPackageDto = null;
+        this.batchExecutor = null;
         this.height = -1L;
         this.beginTime = -1L;
         this.status = 0;
+        this.preStateRoot = null;
+        this.checker = null;
+        this.contractContainerMap = null;
+    }
+
+    public void shutdownExecutorServic() {
+        if(contractContainerMap != null) {
+            Collection<ContractContainer> containers = contractContainerMap.values();
+            for(ContractContainer container : containers) {
+                ExecutorService executorService = container.getExecutorService();
+                executorService.shutdown();
+            }
+        }
     }
 
 
