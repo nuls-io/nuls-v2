@@ -278,18 +278,18 @@ public class CallMethodUtils {
      * @param chain chain info
      */
     @SuppressWarnings("unchecked")
-    public static List<Transaction> getPackingTxList(Chain chain,long height,long blockTime,String packingAddress,BlockExtendsData extendsData) {
+    public static List<Transaction> getPackingTxList(Chain chain, long height, long blockTime, String packingAddress, BlockExtendsData extendsData) {
         try {
             Map<String, Object> params = new HashMap(4);
             params.put("chainId", chain.getConfig().getChainId());
             params.put("endTimestamp", currentTime() + ConsensusConstant.GET_TX_MAX_WAIT_TIME);
             params.put("maxTxDataSize", ConsensusConstant.PACK_TX_MAX_SIZE);
-            params.put("height",height);
-            params.put("blockTime",blockTime);
-            params.put("packingAddress",packingAddress);
+            params.put("height", height);
+            params.put("blockTime", blockTime);
+            params.put("packingAddress", packingAddress);
             BlockExtendsData preExtendsData = new BlockExtendsData(chain.getNewestHeader().getExtend());
             byte[] preStateRoot = preExtendsData.getStateRoot();
-            params.put("preStateRoot",HexUtil.encode(preStateRoot));
+            params.put("preStateRoot", HexUtil.encode(preStateRoot));
             Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.TX.abbr, "tx_packableTxs", params);
             if (!cmdResp.isSuccess()) {
                 chain.getLoggerMap().get(ConsensusConstant.CONSENSUS_LOGGER_NAME).error("Packaging transaction acquisition failure!");
@@ -303,7 +303,11 @@ public class CallMethodUtils {
                 tx.parse(HexUtil.decode(txHex), 0);
                 txList.add(tx);
             }
-            extendsData.setStateRoot(HexUtil.decode((String)signResult.get("stateRoot")));
+            String stateRoot = (String) signResult.get("stateRoot");
+            if (null == stateRoot) {
+                extendsData.setStateRoot(preStateRoot);
+            }
+            extendsData.setStateRoot(HexUtil.decode(stateRoot));
             return txList;
         } catch (Exception e) {
             chain.getLoggerMap().get(ConsensusConstant.CONSENSUS_LOGGER_NAME).error(e);
@@ -331,10 +335,10 @@ public class CallMethodUtils {
             }
             Map responseData = (Map) cmdResp.getResponseData();
             Transaction tx = new Transaction();
-            Map realData = (Map)responseData.get("tx_getConfirmedTx");
-            String txHex  = (String)realData.get("txHex");
-            if(!StringUtils.isBlank(txHex)){
-                tx.parse(HexUtil.decode(txHex),0);
+            Map realData = (Map) responseData.get("tx_getConfirmedTx");
+            String txHex = (String) realData.get("txHex");
+            if (!StringUtils.isBlank(txHex)) {
+                tx.parse(HexUtil.decode(txHex), 0);
             }
             return tx;
         } catch (Exception e) {
@@ -370,8 +374,8 @@ public class CallMethodUtils {
      * 共识状态修改通知交易模块
      * Consensus status modification notification transaction module
      *
-     * @param chain    chain info
-     * @param packing  packing state
+     * @param chain   chain info
+     * @param packing packing state
      */
     @SuppressWarnings("unchecked")
     public static void sendState(Chain chain, boolean packing) {
@@ -409,17 +413,17 @@ public class CallMethodUtils {
     /**
      * 查询本地加密账户
      * Search for Locally Encrypted Accounts
-     * */
+     */
     @SuppressWarnings("unchecked")
     public static List<byte[]> getEncryptedAddressList(Chain chain) {
         List<byte[]> packingAddressList = new ArrayList<>();
         try {
-            Map<String,Object> params = new HashMap<>(2);
-            params.put(ConsensusConstant.PARAM_CHAIN_ID,chain.getConfig().getChainId());
-            Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr,"ac_getEncryptedAddressList", params);
-            List<String> accountAddressList =  (List<String>) ((HashMap)((HashMap) cmdResp.getResponseData()).get("ac_getEncryptedAddressList")).get("list");
-            if(accountAddressList != null && accountAddressList.size()>0){
-                for (String address:accountAddressList) {
+            Map<String, Object> params = new HashMap<>(2);
+            params.put(ConsensusConstant.PARAM_CHAIN_ID, chain.getConfig().getChainId());
+            Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_getEncryptedAddressList", params);
+            List<String> accountAddressList = (List<String>) ((HashMap) ((HashMap) cmdResp.getResponseData()).get("ac_getEncryptedAddressList")).get("list");
+            if (accountAddressList != null && accountAddressList.size() > 0) {
+                for (String address : accountAddressList) {
                     packingAddressList.add(AddressTool.getAddress(address));
                 }
             }
