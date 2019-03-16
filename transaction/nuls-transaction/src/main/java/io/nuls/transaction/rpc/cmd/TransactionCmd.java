@@ -197,12 +197,12 @@ public class TransactionCmd extends BaseCmd {
             //交易数据最大容量值
             int maxTxDataSize = (int) params.get("maxTxDataSize");
 
-            long height = (long) params.get("height");
+            long blockHeight = Long.valueOf(params.get("height").toString());
             long blockTime = (long) params.get("blockTime");
             String packingAddress = (String) params.get("packingAddress");
             String preStateRoot = (String) params.get("preStateRoot");
 
-            TxPackage txPackage = txService.getPackableTxs(chain, endTimestamp, maxTxDataSize, height, blockTime, packingAddress, preStateRoot);
+            TxPackage txPackage = txService.getPackableTxs(chain, endTimestamp, maxTxDataSize, blockHeight, blockTime, packingAddress, preStateRoot);
             Map<String, Object> map = new HashMap<>(TxConstant.INIT_CAPACITY_4);
             map.put("list", txPackage.getList());
             map.put("stateRoot", txPackage.getStateRoot());
