@@ -5,6 +5,7 @@ import io.nuls.base.data.Transaction;
 import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.model.ModuleE;
 import io.nuls.tools.crypto.HexUtil;
+import io.nuls.tools.log.Log;
 import io.nuls.tools.model.BigIntegerUtils;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.transaction.constant.TxConstant;
@@ -30,7 +31,7 @@ public class LedgerCall {
      * @param txHex
      * @return
      */
-    public static VerifyTxResult verifyCoinData(Chain chain, String txHex, boolean batch) throws NulsException {
+    public static VerifyTxResult verifyCoinData(Chain chain, String txHex, boolean batch) {
         try {
             Map<String, Object> params = new HashMap<>(TxConstant.INIT_CAPACITY_8);
             params.put(Constants.VERSION_KEY_STR, TxConstant.RPC_VERSION);
@@ -40,7 +41,8 @@ public class LedgerCall {
             HashMap result = (HashMap) TransactionCall.request(ModuleE.LG.abbr,"validateCoinData", params);
             return new VerifyTxResult((int)result.get("validateCode"), (String)result.get("validateDesc"));
         } catch (Exception e) {
-            throw new NulsException(e);
+            chain.getLoggerMap().get(TxConstant.LOG_TX).error(e);
+            return new VerifyTxResult(VerifyTxResult.OTHER_EXCEPTION, "Call validateCoinData failed!");
         }
     }
 
@@ -156,15 +158,18 @@ public class LedgerCall {
      * @return
      * @throws NulsException
      */
-    public static boolean coinDataBatchNotify(Chain chain) throws NulsException {
+    public static boolean coinDataBatchNotify(Chain chain) {
+        Long timeStartTest = System.currentTimeMillis();
         try {
             Map<String, Object> params = new HashMap<>(TxConstant.INIT_CAPACITY_8);
             params.put(Constants.VERSION_KEY_STR, TxConstant.RPC_VERSION);
             params.put("chainId", chain.getChainId());
             HashMap result = (HashMap)TransactionCall.request(ModuleE.LG.abbr, "bathValidateBegin", params);
+            Log.debug("##### 通知账本花费的时间:{}", System.currentTimeMillis() - timeStartTest);
             return (int) result.get("value") == 1;
         } catch (Exception e) {
-            throw new NulsException(e);
+            chain.getLoggerMap().get(TxConstant.LOG_TX).error(e);
+            return false;
         }
 
     }

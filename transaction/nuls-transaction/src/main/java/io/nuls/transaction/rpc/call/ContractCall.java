@@ -48,10 +48,14 @@ public class ContractCall {
      * @return
      * @throws NulsException
      */
-    public static Map<String, Object> invokeContract(Chain chain, List<String> txHexList) throws NulsException {
+    public static Map<String, Object> invokeContract(Chain chain, List<String> txHexList, long blockHeight, long blockTime, String packingAddress, String preStateRoot) throws NulsException {
 
         Map<String, Object> params = new HashMap(TxConstant.INIT_CAPACITY_8);
         params.put("chainId", chain.getChainId());
+        params.put("blockHeight", blockHeight);
+        params.put("blockTime", blockTime);
+        params.put("packingAddress", packingAddress);
+        params.put("preStateRoot", preStateRoot);
         params.put("txHexList", txHexList);
         Map result = (Map) TransactionCall.request(ModuleE.SC.abbr, "sc_invoke_contract", params);
         try {
