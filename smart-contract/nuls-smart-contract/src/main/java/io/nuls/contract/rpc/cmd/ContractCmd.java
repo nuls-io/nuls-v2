@@ -109,7 +109,7 @@ public class ContractCmd extends BaseCmd {
             tx.setTxHex(txHex);
             tx.parse(Hex.decode(txHex), 0);
             Result result = contractService.invokeContractOneByOne(chainId, tx);
-            if(result.isSuccess()) {
+            if (result.isSuccess()) {
                 return failed(result.getErrorCode());
             }
             return success();

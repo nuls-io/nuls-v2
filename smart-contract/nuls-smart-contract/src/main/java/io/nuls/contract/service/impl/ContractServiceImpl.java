@@ -97,10 +97,10 @@ public class ContractServiceImpl implements ContractService {
         Chain chain = contractHelper.getChain(chainId);
         BatchInfo batchInfo = chain.getBatchInfo();
         boolean canInit = true;
-        if(batchInfo.hasBegan() && !batchInfo.isTimeOut()) {
+        if (batchInfo.hasBegan() && !batchInfo.isTimeOut()) {
             canInit = false;
         }
-        if(canInit) {
+        if (canInit) {
             batchInfo.init(blockHeight);
             // 准备临时余额和当前区块头
             contractHelper.createTempBalanceManagerAndCurrentBlockHeader(chainId, blockHeight, blockTime, Hex.decode(packingAddress));
@@ -108,6 +108,7 @@ public class ContractServiceImpl implements ContractService {
             ProgramExecutor batchExecutor = contractExecutor.createBatchExecute(chainId, Hex.decode(preStateRoot));
             batchInfo.setBatchExecutor(batchExecutor);
             batchInfo.setPreStateRoot(preStateRoot);
+            // 准备冲突检测器
             ContractConflictChecker checker = ContractConflictChecker.newInstance();
             checker.setContractSetList(new ArrayList<>());
             batchInfo.setChecker(checker);
@@ -122,7 +123,7 @@ public class ContractServiceImpl implements ContractService {
         try {
             Chain chain = contractHelper.getChain(chainId);
             BatchInfo batchInfo = chain.getBatchInfo();
-            if(!batchInfo.hasBegan()) {
+            if (!batchInfo.hasBegan()) {
                 return getFailed();
             }
 
@@ -131,11 +132,11 @@ public class ContractServiceImpl implements ContractService {
 
             byte[] contractAddressBytes = ContractUtil.extractContractAddressFromTxData(tx);
             String contractAddress = AddressTool.getStringAddressByBytes(contractAddressBytes);
-            ContractContainer container = batchInfo.getContractContainer(contractAddress);
+            ContractContainer container = batchInfo.newAndGetContractContainer(contractAddress);
             // 等上次的执行完
             container.loadFutureList();
-            ContractWrapperTransaction wrapperTx = ContractUtil.parseContractTransaction(tx);
             // 多线程执行合约
+            ContractWrapperTransaction wrapperTx = ContractUtil.parseContractTransaction(tx);
             Result result = contractCaller.caller(chainId, container, batchExecutor, wrapperTx, preStateRoot);
             return result;
         } catch (InterruptedException e) {
@@ -153,17 +154,17 @@ public class ContractServiceImpl implements ContractService {
     @Override
     public Result end(int chainId, long blockHeight) {
 
-        BatchInfo batchInfo = null;
+        BatchInfo batchInfo;
         try {
             batchInfo = contractHelper.getChain(chainId).getBatchInfo();
-            if(!batchInfo.hasBegan()) {
+            if (!batchInfo.hasBegan()) {
                 return getFailed();
             }
             LinkedHashMap<String, ContractContainer> contractContainerMap = batchInfo.getContractContainerMap();
             Collection<ContractContainer> containerList = contractContainerMap.values();
             CallerResult callerResult = new CallerResult();
             List<CallableResult> resultList = callerResult.getCallableResultList();
-            for(ContractContainer container : containerList) {
+            for (ContractContainer container : containerList) {
                 resultList.add(container.getCallableResult());
             }
 
@@ -191,12 +192,7 @@ public class ContractServiceImpl implements ContractService {
         } catch (IOException e) {
             Log.error(e);
             return getFailed().setMsg(e.getMessage());
-        } finally {
-            if(batchInfo != null) {
-                batchInfo.shutdownExecutorServic();
-            }
         }
-
     }
 
     public Result commitProcessor(int chainId, List<String> txHexList, String blockHeaderHex) {
@@ -234,7 +230,7 @@ public class ContractServiceImpl implements ContractService {
         } catch (Exception e) {
             return getFailed();
         } finally {
-            // 移除临时余额
+            // 移除临时余额, 临时区块头等当前批次执行数据
             Chain chain = contractHelper.getChain(chainId);
             BatchInfo batchInfo = chain.getBatchInfo();
             batchInfo.clear();

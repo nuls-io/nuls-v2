@@ -30,7 +30,10 @@ import io.nuls.contract.helper.ContractConflictChecker;
 import io.nuls.contract.helper.ContractHelper;
 import io.nuls.contract.helper.ContractTransferHandler;
 import io.nuls.contract.manager.TempBalanceManager;
-import io.nuls.contract.model.bo.*;
+import io.nuls.contract.model.bo.BatchInfo;
+import io.nuls.contract.model.bo.ContractContainer;
+import io.nuls.contract.model.bo.ContractResult;
+import io.nuls.contract.model.bo.ContractWrapperTransaction;
 import io.nuls.contract.model.txdata.ContractData;
 import io.nuls.contract.service.ContractCaller;
 import io.nuls.contract.service.ContractExecutor;
@@ -41,8 +44,10 @@ import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Service;
 import io.nuls.tools.log.Log;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
 import static io.nuls.contract.constant.ContractConstant.TX_TYPE_CALL_CONTRACT;
@@ -55,6 +60,8 @@ import static io.nuls.contract.util.ContractUtil.*;
  */
 @Service
 public class ContractCallerImpl implements ContractCaller {
+
+    private static final ExecutorService EXECUTOR_SERVICE = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors() * 2);
 
     @Autowired
     private ContractExecutor contractExecutor;
@@ -80,8 +87,7 @@ public class ContractCallerImpl implements ContractCaller {
             long number = currentBlockHeader.getHeight();
             ContractTxCallable txCallable = new ContractTxCallable(chainId, blockTime, batchExecutor, contract, tx, number, preStateRoot, checker, container);
 
-            ExecutorService executorService = container.getExecutorService();
-            Future<ContractResult> submit = executorService.submit(txCallable);
+            Future<ContractResult> submit = EXECUTOR_SERVICE.submit(txCallable);
             container.getFutureList().add(submit);
 
             return getSuccess();

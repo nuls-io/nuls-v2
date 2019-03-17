@@ -127,12 +127,13 @@ public class ContractUtil {
         }
         return null;
     }
+
     private static byte[] extractContractAddressFromTxData(byte[] txData) {
-        if(txData == null) {
+        if (txData == null) {
             return null;
         }
         int length = txData.length;
-        if(length < Address.ADDRESS_LENGTH * 2) {
+        if (length < Address.ADDRESS_LENGTH * 2) {
             return null;
         }
         byte[] contractAddress = new byte[Address.ADDRESS_LENGTH];

@@ -32,9 +32,10 @@ import io.nuls.tools.model.StringUtils;
 import io.nuls.tools.thread.TimeService;
 import lombok.Data;
 
-import java.util.*;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.Set;
 
 /**
  * @author: PierreLuo
@@ -43,6 +44,9 @@ import java.util.concurrent.Executors;
 @Data
 public class BatchInfo {
 
+    /**
+     * 当前批量执行超时时间 - 10秒
+     */
     private static final long TIME_OUT = 10L * 1000L;
     /**
      * 智能合约临时余额
@@ -71,7 +75,7 @@ public class BatchInfo {
      */
     private long beginTime;
     /**
-     * 0-未开始， 1-已开始
+     * 0 - 未开始， 1 - 已开始
      */
     private int status;
 
@@ -80,10 +84,15 @@ public class BatchInfo {
      */
     private String preStateRoot;
 
+    /**
+     * 并行执行的合约容器
+     */
     private LinkedHashMap<String, ContractContainer> contractContainerMap;
 
+    /**
+     * 合约执行冲突检测器
+     */
     private ContractConflictChecker checker;
-
 
 
     public BatchInfo() {
@@ -120,26 +129,15 @@ public class BatchInfo {
         this.contractContainerMap = null;
     }
 
-    public void shutdownExecutorServic() {
-        if(contractContainerMap != null) {
-            Collection<ContractContainer> containers = contractContainerMap.values();
-            for(ContractContainer container : containers) {
-                ExecutorService executorService = container.getExecutorService();
-                executorService.shutdown();
-            }
-        }
-    }
-
-
-    public ContractContainer getContractContainer(String contractAddress) {
-        if(StringUtils.isBlank(contractAddress)) {
+    public ContractContainer newAndGetContractContainer(String contractAddress) {
+        if (StringUtils.isBlank(contractAddress)) {
             return null;
         }
         ContractContainer container = contractContainerMap.get(contractAddress);
-        if(container == null) {
+        if (container == null) {
             Set<String> commitSet = new HashSet<>();
             checker.add(commitSet);
-            container = new ContractContainer(contractAddress, Executors.newSingleThreadExecutor(), commitSet, new ArrayList<>());
+            container = new ContractContainer(contractAddress, commitSet, new ArrayList<>());
             contractContainerMap.put(contractAddress, container);
         }
         return container;

@@ -28,7 +28,6 @@ import lombok.Data;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 
 /**
@@ -41,13 +40,11 @@ public class ContractContainer {
     private boolean hasCreate = false;
     private boolean isDelete = false;
     private CallableResult callableResult;
-    private ExecutorService executorService;
     private Set<String> commitSet;
     private List<Future<ContractResult>> futureList;
 
-    public ContractContainer(String contractAddress, ExecutorService executorService, Set<String> commitSet, List<Future<ContractResult>> futureList) {
+    public ContractContainer(String contractAddress, Set<String> commitSet, List<Future<ContractResult>> futureList) {
         this.contractAddress = contractAddress;
-        this.executorService = executorService;
         this.commitSet = commitSet;
         this.futureList = futureList;
         this.callableResult = new CallableResult();
@@ -55,7 +52,7 @@ public class ContractContainer {
     }
 
     public void loadFutureList() throws ExecutionException, InterruptedException {
-        for(Future<ContractResult> future : futureList) {
+        for (Future<ContractResult> future : futureList) {
             future.get();
         }
     }

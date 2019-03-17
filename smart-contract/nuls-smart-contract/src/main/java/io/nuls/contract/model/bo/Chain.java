@@ -52,6 +52,7 @@ public class Chain {
     public TempBalanceManager getTempBalanceManager() {
         return batchInfo.getTempBalanceManager();
     }
+
     public void setTempBalanceManager(TempBalanceManager tempBalanceManager) {
         batchInfo.setTempBalanceManager(tempBalanceManager);
     }
@@ -59,6 +60,7 @@ public class Chain {
     public BlockHeader getCurrentBlockHeader() {
         return batchInfo.getCurrentBlockHeader();
     }
+
     public void setCurrentBlockHeader(BlockHeader currentBlockHeader) {
         batchInfo.setCurrentBlockHeader(currentBlockHeader);
     }
@@ -66,6 +68,7 @@ public class Chain {
     public ContractPackageDto getContractPackageDto() {
         return batchInfo.getContractPackageDto();
     }
+
     public void setContractPackageDto(ContractPackageDto contractPackageDto) {
         batchInfo.setContractPackageDto(contractPackageDto);
     }

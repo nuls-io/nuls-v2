@@ -38,6 +38,7 @@ import java.util.List;
 public interface ContractService {
 
     Result begin(int chainId, long blockHeight, long blockTime, String packingAddress, String preStateRoot);
+
     Result end(int chainId, long blockHeight);
 
     Result invokeContractOneByOne(int chainId, ContractTempTransaction tx);
