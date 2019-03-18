@@ -66,9 +66,7 @@ public class CmdClientModule extends RpcModule {
     @Override
     public RpcModuleState onDependenciesReady() {
         log.info("cmd client running");
-        log.info("chainId:{}",config.getChainId());
-        config.setChainId(12345);
-        commandHandler.start();
+        ThreadUtils.createAndRunThread("cmd",()->commandHandler.start());
 //        ThreadUtils.createAndRunThread("socket",()->{
 //            while(true){
 //                Socket socket = null;
@@ -116,7 +114,6 @@ public class CmdClientModule extends RpcModule {
             String language = "zh-CHS";
             I18nUtils.loadLanguage(this.getClass(), "languages", language);
             I18nUtils.setLanguage(language);
-            ServiceManager.init(defaultChainId,providerType);
 //            serverSocket = new ServerSocket(port,1);
 //            System.out.println("服务器启动!");
         } catch (Exception e) {

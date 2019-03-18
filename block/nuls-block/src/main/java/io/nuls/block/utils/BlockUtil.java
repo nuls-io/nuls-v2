@@ -49,10 +49,8 @@ import java.util.Map;
 import java.util.SortedSet;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import static io.nuls.block.constant.CommandConstant.GET_BLOCK_MESSAGE;
-import static io.nuls.block.constant.Constant.SINGLE_DOWNLOAD_TIMEOUNT;
 
 /**
  * 区块工具类
@@ -406,7 +404,9 @@ public class BlockUtil {
         }
         HashMessage message = new HashMessage();
         message.setRequestHash(hash);
-        NulsLogger commonLog = ContextManager.getContext(chainId).getCommonLog();
+        ChainContext context = ContextManager.getContext(chainId);
+        int singleDownloadTimeount = context.getParameters().getSingleDownloadTimeount();
+        NulsLogger commonLog = context.getCommonLog();
         Future<Block> future = CacheHandler.addSingleBlockRequest(chainId, hash);
         commonLog.debug("get block-" + hash + " from " + nodeId + "begin");
         boolean result = NetworkUtil.sendToNode(chainId, message, nodeId, GET_BLOCK_MESSAGE);
@@ -415,7 +415,7 @@ public class BlockUtil {
             return null;
         }
         try {
-            Block block = future.get(SINGLE_DOWNLOAD_TIMEOUNT, TimeUnit.SECONDS);
+            Block block = future.get(singleDownloadTimeount, TimeUnit.MILLISECONDS);
             commonLog.debug("get block-" + hash + " from " + nodeId + "success");
             return block;
         } catch (Exception e) {

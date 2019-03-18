@@ -18,7 +18,7 @@ import java.util.Properties;
 /**
  * @Author: zhoulijun
  * @Time: 2019-03-07 16:56
- * @Description: 功能描述
+ * @Description:
  */
 @Configuration(persistDomain = "cmd_client")
 @Getter

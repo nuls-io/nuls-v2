@@ -32,7 +32,6 @@ import io.nuls.transaction.constant.TxConstant;
 import io.nuls.transaction.model.bo.Chain;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -41,28 +40,75 @@ import java.util.Map;
  */
 public class ContractCall {
 
+
     /**
-     * 调用智能合约
+     * 打包智能合约通知
      * @param chain
-     * @param txHexList
+     * @param blockHeight
+     * @param blockTime
+     * @param packingAddress
+     * @param preStateRoot
      * @return
      * @throws NulsException
      */
-    public static Map<String, Object> invokeContract(Chain chain, List<String> txHexList, long blockHeight, long blockTime, String packingAddress, String preStateRoot) throws NulsException {
-
+    public static boolean contractBatchBegin(Chain chain, long blockHeight, long blockTime, String packingAddress, String preStateRoot) {
         Map<String, Object> params = new HashMap(TxConstant.INIT_CAPACITY_8);
         params.put("chainId", chain.getChainId());
         params.put("blockHeight", blockHeight);
         params.put("blockTime", blockTime);
         params.put("packingAddress", packingAddress);
         params.put("preStateRoot", preStateRoot);
-        params.put("txHexList", txHexList);
-        Map result = (Map) TransactionCall.request(ModuleE.SC.abbr, "sc_invoke_contract", params);
         try {
+            TransactionCall.request(ModuleE.SC.abbr, "sc_batch_begin", params);
+            return true;
+        } catch (NulsException e) {
+            chain.getLoggerMap().get(TxConstant.LOG_TX).error(e);
+            return false;
+        }
+
+    }
+    /**
+     * 调用智能合约, 合约执行成功与否,不影响交易的打包
+     * @param chain
+     * @param txHex
+     * @return
+     * @throws NulsException
+     */
+    public static boolean invokeContract(Chain chain, String txHex) {
+
+        Map<String, Object> params = new HashMap(TxConstant.INIT_CAPACITY_8);
+        params.put("chainId", chain.getChainId());
+        params.put("txHex", txHex);
+        try {
+            TransactionCall.request(ModuleE.SC.abbr, "sc_invoke_contract", params);
+            return true;
+        } catch (NulsException e) {
+            chain.getLoggerMap().get(TxConstant.LOG_TX).error(e);
+            return false;
+        }
+    }
+
+    /**
+     * 调用智能合约
+     * @param chain
+     * @param blockHeight
+     * @return
+     * @throws NulsException
+     */
+    public static Map<String, Object> contractBatchEnd(Chain chain, long blockHeight) throws NulsException {
+
+        Map<String, Object> params = new HashMap(TxConstant.INIT_CAPACITY_8);
+        params.put("chainId", chain.getChainId());
+        params.put("blockHeight", blockHeight);
+        Map result = null;
+        try {
+           result = (Map) TransactionCall.request(ModuleE.SC.abbr, "sc_batch_end", params);
             chain.getLoggerMap().get(TxConstant.LOG_TX).debug("moduleCode:{}, -cmd:{}, -contractProcess -rs: {}",
                     ModuleE.SC.abbr, "sc_invoke_contract", JSONUtils.obj2json(result));
-        } catch (JsonProcessingException e) {
-            e.printStackTrace();
+        }catch (JsonProcessingException e) {
+            chain.getLoggerMap().get(TxConstant.LOG_TX).error(e);
+        }catch (NulsException e) {
+            chain.getLoggerMap().get(TxConstant.LOG_TX).error(e);
         }
         return result;
     }

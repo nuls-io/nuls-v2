@@ -88,4 +88,10 @@ public class BlockService {
     public long getMaxHeight(int chainId, long endTime) {
         return this.mongoDBService.getMax(BLOCK_HEADER_TABLE + chainId, "_id", Filters.lte("createTime", endTime));
     }
+
+    public void deleteBlockHeader(int chainId, long height) {
+        mongoDBService.delete(BLOCK_HEADER_TABLE + chainId, Filters.eq("_id", height));
+        ApiCache apiCache = CacheManager.getCache(chainId);
+        apiCache.setBestHeader(null);
+    }
 }

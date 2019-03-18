@@ -1,5 +1,7 @@
 package io.nuls.api.db;
 
+import com.mongodb.client.model.DeleteManyModel;
+import com.mongodb.client.model.DeleteOneModel;
 import com.mongodb.client.model.Filters;
 import com.mongodb.client.model.Sorts;
 import io.nuls.api.cache.ApiCache;
@@ -119,5 +121,30 @@ public class TransactionService {
         txInfo.setCoinTos(coinDataInfo.getToList());
         txInfo.setCoinFroms(coinDataInfo.getFromList());
         return txInfo;
+    }
+
+    public void rollbackTxRelationList(int chainId, List<String> txHashList) {
+        if (txHashList.isEmpty()) {
+            return;
+        }
+        List<DeleteManyModel<Document>> list = new ArrayList<>();
+        for (String hash : txHashList) {
+            DeleteManyModel model = new DeleteManyModel(Filters.eq("txHash", hash));
+            list.add(model);
+        }
+        mongoDBService.bulkWrite(TX_RELATION_TABLE + chainId, list);
+    }
+
+    public void rollbackTx(int chainId, List<String> txHashList) {
+        if (txHashList.isEmpty()) {
+            return;
+        }
+        List<DeleteOneModel<Document>> list = new ArrayList<>();
+        for (String hash : txHashList) {
+            DeleteOneModel<Document> model = new DeleteOneModel(Filters.eq("txHash", hash));
+            list.add(model);
+        }
+        mongoDBService.bulkWrite(COINDATA_TABLE + chainId, list);
+        mongoDBService.bulkWrite(TX_TABLE + chainId, list);
     }
 }

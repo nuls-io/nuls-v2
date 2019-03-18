@@ -81,4 +81,11 @@ public class PunishService {
         return pageInfo;
     }
 
+
+    public void rollbackPunishLog(int chainID,List<String> txHashs, long height) {
+        if (txHashs.isEmpty()) {
+            return;
+        }
+        mongoDBService.delete(PUNISH_TABLE + chainID, Filters.eq("blockHeight", height));
+    }
 }

@@ -13,7 +13,9 @@ public class SyncInfo {
 
     private long bestHeight;
 
-    private boolean isFinish;
-
     private int step;
+
+    public boolean isFinish() {
+        return this.step == 100;
+    }
 }
