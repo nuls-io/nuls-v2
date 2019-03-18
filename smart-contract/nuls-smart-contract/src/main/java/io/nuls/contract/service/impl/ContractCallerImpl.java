@@ -82,7 +82,7 @@ public class ContractCallerImpl implements ContractCaller {
             String contract = AddressTool.getStringAddressByBytes(contractAddressBytes);
             BatchInfo batchInfo = contractHelper.getChain(chainId).getBatchInfo();
             ContractConflictChecker checker = batchInfo.getChecker();
-            BlockHeader currentBlockHeader = contractHelper.getCurrentBlockHeader(chainId);
+            BlockHeader currentBlockHeader = batchInfo.getCurrentBlockHeader();
             long blockTime = currentBlockHeader.getTime();
             long number = currentBlockHeader.getHeight();
             ContractTxCallable txCallable = new ContractTxCallable(chainId, blockTime, batchExecutor, contract, tx, number, preStateRoot, checker, container);
