@@ -2,10 +2,13 @@ package io.nuls.api.utils;
 
 import io.nuls.api.constant.ApiErrorCode;
 import io.nuls.tools.exception.NulsRuntimeException;
+import io.nuls.tools.log.Log;
 import org.bson.Document;
 
 import java.lang.reflect.Field;
 import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.List;
 
 public class DocumentTransferTool {
 
@@ -91,7 +94,7 @@ public class DocumentTransferTool {
             }
             return instance;
         } catch (Exception e) {
-//            Log.error(e);
+            Log.error(e);
             throw new NulsRuntimeException(ApiErrorCode.DATA_PARSE_ERROR, "Document to Model fail");
         }
     }
@@ -118,8 +121,53 @@ public class DocumentTransferTool {
             }
             return instance;
         } catch (Exception e) {
-//            Log.error(e);
+            Log.error(e);
             throw new NulsRuntimeException(ApiErrorCode.DATA_PARSE_ERROR, "Document to Model fail");
         }
+    }
+
+
+    public static List<Document> toDocumentList(List list) {
+        List<Document> documentList = new ArrayList<>();
+        if (list == null || list.isEmpty()) {
+            return documentList;
+        }
+        for (int i = 0; i < list.size(); i++) {
+            documentList.add(toDocument(list.get(i)));
+        }
+        return documentList;
+    }
+
+    public static List<Document> toDocumentList(List list, String _id) {
+        List<Document> documentList = new ArrayList<>();
+        if (list == null || list.isEmpty()) {
+            return documentList;
+        }
+        for (int i = 0; i < list.size(); i++) {
+            documentList.add(toDocument(list.get(i), _id));
+        }
+        return documentList;
+    }
+
+    public static <T> List<T> toInfoList(List<Document> documents, Class<T> clazz) {
+        List<T> list = new ArrayList<>();
+        if (documents == null || documents.isEmpty()) {
+            return list;
+        }
+        for (int i = 0; i < documents.size(); i++) {
+            list.add(toInfo(documents.get(i), clazz));
+        }
+        return list;
+    }
+
+    public static <T> List<T> toInfoList(List<Document> documents, String _id, Class<T> clazz) {
+        List<T> list = new ArrayList<>();
+        if (documents == null || documents.isEmpty()) {
+            return list;
+        }
+        for (int i = 0; i < documents.size(); i++) {
+            list.add(toInfo(documents.get(i), _id, clazz));
+        }
+        return list;
     }
 }

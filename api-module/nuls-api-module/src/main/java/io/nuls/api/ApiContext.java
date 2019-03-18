@@ -42,8 +42,6 @@ public class ApiContext {
 
     public static boolean doSync = true;
 
-    public static long bestHeight;
-
     public static String VERSION = "1.0";
 
     //开发者节点地址

@@ -53,7 +53,7 @@ public class ApiModuleBootstrap extends RpcModule {
 
     public static void main(String[] args) {
         if (args == null || args.length == 0) {
-            args = new String[]{HostInfo.getLocalIP() + ":8887/ws"};
+            args = new String[]{"ws://" + HostInfo.getLocalIP() + ":8887/ws"};
         }
         Thread.currentThread().setName("api-module-main");
         NulsRpcModuleBootstrap.run("io.nuls", args);
@@ -133,6 +133,6 @@ public class ApiModuleBootstrap extends RpcModule {
 
     @Override
     public RpcModuleState onDependenciesLoss(Module dependenciesModule) {
-        return RpcModuleState.Running;
+        return RpcModuleState.Ready;
     }
 }

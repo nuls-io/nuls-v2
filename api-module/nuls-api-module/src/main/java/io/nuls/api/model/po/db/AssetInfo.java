@@ -1,18 +1,26 @@
 package io.nuls.api.model.po.db;
 
-import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
 @NoArgsConstructor
-@AllArgsConstructor
 public class AssetInfo {
+
+    private String key;
 
     private int chainId;
 
-    private int AssetId;
+    private int assetId;
 
     private String symbol;
+
+
+    public AssetInfo(int chainId, int assetId, String symbol) {
+        this.key = chainId + "-" + assetId;
+        this.chainId = chainId;
+        this.assetId = assetId;
+        this.symbol = symbol;
+    }
 
 }
