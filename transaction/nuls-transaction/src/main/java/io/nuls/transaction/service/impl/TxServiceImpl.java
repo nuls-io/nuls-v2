@@ -591,6 +591,7 @@ public class TxServiceImpl implements TxService {
             Transaction tx = packablePool.get(chain);
             if (tx == null) {
                 try {
+                    Log.debug("************* [获取交易等待]");
                     Thread.sleep(100L);
                 } catch (InterruptedException e) {
                     Log.error("packaging error ", e);
@@ -631,6 +632,11 @@ public class TxServiceImpl implements TxService {
 //            Log.debug("########## 单个验证器花费时间:{} ", debugeVerifyCoinDataStart - debugeVerifyStart);
             VerifyTxResult verifyTxResult = LedgerCall.verifyCoinData(chain, txHex, true);
             if (!verifyTxResult.success()) {
+                if(verifyTxResult.getCode() == VerifyTxResult.ORPHAN){
+                    packablePool.addInFirst(chain, tx, true);
+                }else{
+                    clearInvalidTx(chain, tx);
+                }
                 Log.info("丢弃批量验证coinData未通过交易 coinData not success - code: {}, - reason:{}, - type:{}, - txhash:{}",
                         verifyTxResult.getCode(), verifyTxResult.getDesc(), tx.getType(), tx.getHash().getDigestHex());
                 continue;
@@ -762,6 +768,11 @@ public class TxServiceImpl implements TxService {
                 //批量验证coinData, 单个发送
                 VerifyTxResult verifyTxResult = LedgerCall.verifyCoinData(chain, txHex, true);
                 if (!verifyTxResult.success()) {
+                    if(verifyTxResult.getCode() == VerifyTxResult.ORPHAN){
+                        packablePool.addInFirst(chain, tx, true);
+                    }else{
+                        clearInvalidTx(chain, tx);
+                    }
                     //-----debug 打印第一个coinfrom 的nonce
                     String nonce = HexUtil.encode(TxUtil.getCoinData(tx).getFrom().get(0).getNonce());
                     chain.getLoggerMap().get(TxConstant.LOG_TX).info("丢弃批量验证coinData未通过交易 coinData not success - code: {}, - reason:{}, - type:{}, - first coinFrom nonce:{} - txhash:{}",
@@ -961,11 +972,15 @@ public class TxServiceImpl implements TxService {
                 //验证coinData
                 VerifyTxResult verifyTxResult = LedgerCall.verifyCoinData(chain, txHex, true);
                 if (!verifyTxResult.success()) {
+                    if(verifyTxResult.getCode() == VerifyTxResult.ORPHAN){
+                        packablePool.addInFirst(chain, tx, true);
+                    }else{
+                        filterList.add(tx);
+                    }
+                    iterator.remove();
                     chain.getLoggerMap().get(TxConstant.LOG_TX).debug("*** Debug *** [verifyAgain] " +
                                     "coinData not success - code: {}, - reason:{}, type:{} - txhash:{}",
                             verifyTxResult.getCode(), verifyTxResult.getDesc(), tx.getType(), tx.getHash().getDigestHex());
-                    filterList.add(tx);
-                    iterator.remove();
                     continue;
                 }
             }
