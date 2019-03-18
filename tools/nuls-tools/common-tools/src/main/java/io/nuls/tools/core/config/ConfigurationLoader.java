@@ -1,6 +1,7 @@
 package io.nuls.tools.core.config;
 
 import io.nuls.tools.core.annotation.Component;
+import io.nuls.tools.core.config.persist.PersistManager;
 import io.nuls.tools.log.Log;
 import io.nuls.tools.model.StringUtils;
 
@@ -35,6 +36,8 @@ public class ConfigurationLoader {
      */
     Map<String, String> configData = new HashMap<>();
 
+    Map<String,Map<String,String>> persistConfigData = new HashMap<>();
+
     Map<String, ModuleConfigParser> parserMap = new HashMap<>();
 
     public ConfigurationLoader() {
@@ -53,8 +56,12 @@ public class ConfigurationLoader {
         loadResourceModule();
         loadJarPathModule();
         loadJvmOptionActiveModule();
+        loadForPersist();
     }
 
+    private void loadForPersist() {
+        persistConfigData = PersistManager.loadPersist();
+    }
 
     private void loadJvmOptionActiveModule() {
         String fileName = System.getProperty(JVM_OPTION_ACTIVE_MODULE);
@@ -122,6 +129,18 @@ public class ConfigurationLoader {
     }
 
     public String getValue(String key) {
+        return configData.get(key);
+    }
+
+    public String getValue(String key,String persistDomain) {
+        Map<String,String> persistConfig = persistConfigData.get(persistDomain);
+        if(persistConfig == null){
+            return configData.get(key);
+        }
+        String persistConfigValue = persistConfig.get(key);
+        if(persistConfigValue != null){
+            return persistConfigValue;
+        }
         return configData.get(key);
     }
 

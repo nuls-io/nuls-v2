@@ -155,13 +155,13 @@ public class ChainContext {
     }
 
     public void init() {
+        this.setStatus(RunningStatusEnum.INITIALIZING);
         duplicateBlockMap = new HashMap<>();
         systemTransactionType = new ArrayList<>();
         version = 1;
         doSyn = true;
         lock = new StampedLock();
         LoggerUtil.init(chainId, parameters.getLogLevel());
-        this.setStatus(RunningStatusEnum.INITIALIZING);
         //各类缓存初始化
         SmallBlockCacher.init(chainId);
         CacheHandler.init(chainId);

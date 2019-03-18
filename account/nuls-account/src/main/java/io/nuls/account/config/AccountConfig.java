@@ -2,6 +2,7 @@ package io.nuls.account.config;
 
 import io.nuls.account.model.bo.config.ConfigBean;
 import io.nuls.tools.core.annotation.Configuration;
+import io.nuls.tools.core.annotation.Persist;
 import io.nuls.tools.core.annotation.Value;
 import lombok.Data;
 
@@ -11,8 +12,9 @@ import lombok.Data;
  * @Description:
  * 配置文件
  */
-@Configuration
+@Configuration(persistDomain = "account")
 @Data
+@Persist
 public class AccountConfig {
 
     /**

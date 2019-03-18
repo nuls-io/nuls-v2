@@ -9,7 +9,7 @@ import lombok.Data;
  * @author: Charlie
  * @date: 2019/03/14
  */
-@Configuration
+@Configuration(persistDomain = "transaction")
 @Data
 public class TxConfig {
     /** 当前链默认配置*/

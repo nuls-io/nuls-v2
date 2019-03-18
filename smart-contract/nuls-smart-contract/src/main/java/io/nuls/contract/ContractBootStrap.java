@@ -37,7 +37,7 @@ import static java.nio.charset.StandardCharsets.UTF_8;
  * @author: PierreLuo
  * @date: 2019-03-14
  */
-@Configuration
+@Configuration(persistDomain = "smart_contract")
 public class ContractBootStrap extends RpcModule {
 
     @Autowired

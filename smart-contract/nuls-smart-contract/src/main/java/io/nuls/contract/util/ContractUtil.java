@@ -30,12 +30,17 @@ import io.nuls.base.data.Transaction;
 import io.nuls.contract.constant.ContractConstant;
 import io.nuls.contract.constant.ContractErrorCode;
 import io.nuls.contract.model.bo.ContractResult;
+import io.nuls.contract.model.bo.ContractTempTransaction;
 import io.nuls.contract.model.bo.ContractWrapperTransaction;
 import io.nuls.contract.model.po.ContractTokenTransferInfoPo;
 import io.nuls.contract.model.tx.CallContractTransaction;
 import io.nuls.contract.model.tx.ContractBaseTransaction;
 import io.nuls.contract.model.tx.CreateContractTransaction;
 import io.nuls.contract.model.tx.DeleteContractTransaction;
+import io.nuls.contract.model.txdata.CallContractData;
+import io.nuls.contract.model.txdata.ContractData;
+import io.nuls.contract.model.txdata.CreateContractData;
+import io.nuls.contract.model.txdata.DeleteContractData;
 import io.nuls.contract.rpc.call.BlockCall;
 import io.nuls.db.service.RocksDBService;
 import io.nuls.tools.basic.Result;
@@ -122,17 +127,48 @@ public class ContractUtil {
         }
         return null;
     }
+
     private static byte[] extractContractAddressFromTxData(byte[] txData) {
-        if(txData == null) {
+        if (txData == null) {
             return null;
         }
         int length = txData.length;
-        if(length < Address.ADDRESS_LENGTH * 2) {
+        if (length < Address.ADDRESS_LENGTH * 2) {
             return null;
         }
         byte[] contractAddress = new byte[Address.ADDRESS_LENGTH];
         System.arraycopy(txData, Address.ADDRESS_LENGTH, contractAddress, 0, Address.ADDRESS_LENGTH);
         return contractAddress;
+    }
+
+    public static ContractWrapperTransaction parseContractTransaction(ContractTempTransaction tx) throws NulsException {
+        ContractWrapperTransaction contractTransaction = null;
+        ContractData contractData = null;
+        boolean isContractTx = true;
+        switch (tx.getType()) {
+            case TX_TYPE_CREATE_CONTRACT:
+                CreateContractData create = new CreateContractData();
+                create.parse(tx.getTxData(), 0);
+                contractData = create;
+                break;
+            case TX_TYPE_CALL_CONTRACT:
+                CallContractData call = new CallContractData();
+                call.parse(tx.getTxData(), 0);
+                contractData = call;
+                break;
+            case TX_TYPE_DELETE_CONTRACT:
+                DeleteContractData delete = new DeleteContractData();
+                delete.parse(tx.getTxData(), 0);
+                contractData = delete;
+                break;
+            default:
+                isContractTx = false;
+                break;
+        }
+        if (isContractTx) {
+            contractTransaction = new ContractWrapperTransaction(tx, tx.getTxHex(), contractData);
+        }
+        return contractTransaction;
     }
 
     public static String[][] twoDimensionalArray(Object[] args) {

@@ -40,6 +40,7 @@ import io.nuls.rpc.modulebootstrap.NulsRpcModuleBootstrap;
 import io.nuls.rpc.modulebootstrap.RpcModule;
 import io.nuls.rpc.modulebootstrap.RpcModuleState;
 import io.nuls.tools.core.annotation.Autowired;
+import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.core.annotation.Configuration;
 import io.nuls.tools.core.ioc.SpringLiteContext;
 import io.nuls.tools.parse.I18nUtils;
@@ -56,7 +57,7 @@ import static io.nuls.network.utils.LoggerUtil.Log;
  * @author lan
  * @date 2018/11/01
  */
-@Configuration
+@Component
 public class NetworkBootstrap extends RpcModule {
     @Autowired
     NetworkConfig networkConfig;

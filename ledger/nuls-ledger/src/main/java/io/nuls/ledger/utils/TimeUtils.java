@@ -34,8 +34,16 @@ import io.nuls.tools.core.ioc.SpringLiteContext;
  * @date 2019/01/07
  **/
 public class TimeUtils {
+    static long latestGetTime = System.currentTimeMillis();
+    static long offset = 0;
+
     public static long getCurrentTime() {
-        TimeRpcService timeRpcService = SpringLiteContext.getBean(TimeRpcServiceImpl.class);
-        return timeRpcService.getTime();
+        long now = System.currentTimeMillis();
+        if (now - latestGetTime > 30000) {
+            TimeRpcService timeRpcService = SpringLiteContext.getBean(TimeRpcServiceImpl.class);
+            offset = timeRpcService.getTime() - System.currentTimeMillis();
+        }
+        latestGetTime = now;
+        return (System.currentTimeMillis() + offset);
     }
 }
