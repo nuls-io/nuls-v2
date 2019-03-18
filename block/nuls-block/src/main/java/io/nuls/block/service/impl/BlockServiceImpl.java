@@ -50,7 +50,7 @@ import io.nuls.rpc.model.message.MessageUtil;
 import io.nuls.rpc.model.message.Response;
 import io.nuls.rpc.netty.channel.manager.ConnectManager;
 import io.nuls.tools.core.annotation.Autowired;
-import io.nuls.tools.core.annotation.Service;
+import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.log.logback.NulsLogger;
 import io.nuls.tools.parse.SerializeUtils;
 
@@ -67,7 +67,7 @@ import static io.nuls.block.constant.Constant.*;
  * @version 1.0
  * @date 18-11-20 上午11:09
  */
-@Service
+@Component
 public class BlockServiceImpl implements BlockService {
 
     @Autowired
