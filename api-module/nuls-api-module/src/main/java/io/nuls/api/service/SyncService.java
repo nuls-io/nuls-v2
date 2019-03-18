@@ -53,6 +53,7 @@ public class SyncService {
     //记录每个区块的红黄牌信息
     private List<PunishLogInfo> punishLogList = new ArrayList<>();
 
+    private List<CoinDataInfo> coinDataList = new ArrayList<>();
 
     public SyncInfo getSyncInfo(int chainId) {
         return chainService.getSyncInfo(chainId);
@@ -143,9 +144,12 @@ public class SyncService {
      * @param txs
      * @throws Exception
      */
-    private void processTxs(int chainId, List<TransactionInfo> txs) throws Exception {
+    private void processTxs(int chainId, List<TransactionInfo> txs) {
         for (int i = 0; i < txs.size(); i++) {
             TransactionInfo tx = txs.get(i);
+            CoinDataInfo coinDataInfo = new CoinDataInfo(tx.getHash(), tx.getCoinFroms(), tx.getCoinTos());
+            coinDataList.add(coinDataInfo);
+
             if (tx.getType() == ApiConstant.TX_TYPE_COINBASE) {
                 processCoinBaseTx(chainId, tx);
             } else if (tx.getType() == ApiConstant.TX_TYPE_TRANSFER) {
@@ -467,7 +471,6 @@ public class SyncService {
         return ledgerInfo;
     }
 
-
     /**
      * 解析区块和所有交易后，将数据存储到数据库中
      * Store entity in the database after parsing the block and all transactions
@@ -480,6 +483,8 @@ public class SyncService {
         blockService.saveBLockHeaderInfo(chainId, blockInfo.getHeader());
         //存储交易记录
         txService.saveTxList(chainId, blockInfo.getTxList());
+
+        txService.saveCoinDataList(chainId, coinDataList);
         //存储交易和地址关系记录
         txService.saveTxRelationList(chainId, txRelationInfoSet);
         //存储别名记录
@@ -488,6 +493,7 @@ public class SyncService {
         punishService.savePunishList(chainId, punishLogList);
         //存储委托/取消委托记录
         depositService.saveDepositList(chainId, depositInfoList);
+
         chainService.updateStep(chainId, height, 10);
         /*
             涉及到统计类的表放在最后来存储，便于回滚
@@ -505,7 +511,6 @@ public class SyncService {
         //完成解析
         chainService.syncComplete(chainId, height, 100);
     }
-
 
     private AccountInfo queryAccountInfo(int chainId, String address) {
         AccountInfo accountInfo = accountInfoMap.get(address);
@@ -531,7 +536,6 @@ public class SyncService {
         }
         return ledgerInfo;
     }
-
 
     private AgentInfo queryAgentInfo(int chainId, String key, int type) {
         AgentInfo agentInfo;
@@ -567,5 +571,6 @@ public class SyncService {
         aliasInfoList.clear();
         depositInfoList.clear();
         punishLogList.clear();
+        coinDataList.clear();
     }
 }

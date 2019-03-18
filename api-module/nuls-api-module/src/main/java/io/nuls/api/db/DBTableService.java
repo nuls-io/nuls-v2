@@ -56,7 +56,6 @@ public class DBTableService {
         String inflationAmount = (String) map.get("inflationAmount");
 
 
-
         initTables(chainId);
         initTablesIndex(chainId);
 
@@ -64,7 +63,8 @@ public class DBTableService {
         chainInfo.setChainId(chainId);
         AssetInfo assetInfo = new AssetInfo(chainId, defaultAssetId, symbol);
         chainInfo.setDefaultAsset(assetInfo);
-        for(String address :seedNodeList) {
+        chainInfo.getAssets().add(assetInfo);
+        for (String address : seedNodeList) {
             chainInfo.getSeeds().add(address);
         }
         chainInfo.setInflationCoins(new BigInteger(inflationAmount));

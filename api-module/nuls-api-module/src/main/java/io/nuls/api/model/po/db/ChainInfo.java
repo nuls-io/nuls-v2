@@ -5,6 +5,7 @@ import lombok.Data;
 import org.bson.Document;
 
 import java.math.BigInteger;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -16,24 +17,25 @@ public class ChainInfo {
 
     private AssetInfo defaultAsset;
 
-    private Set<AssetInfo> assets;
+    private List<AssetInfo> assets;
 
-    private Set<String> seeds;
+    private List<String> seeds;
 
     private BigInteger inflationCoins;
 
     public ChainInfo() {
-        assets = new HashSet<>();
-        seeds = new HashSet<>();
+        assets = new ArrayList<>();
+        seeds = new ArrayList<>();
     }
 
     public Document toDocument() {
         Document document = new Document();
-        document.put("chainId", chainId);
+        document.put("_id", chainId);
 
         Document defaultAssetDoc = DocumentTransferTool.toDocument(defaultAsset);
         document.put("defaultAsset", defaultAssetDoc);
-        document.put("assets", assets);
+
+        document.put("assets", DocumentTransferTool.toDocumentList(assets));
         document.put("seeds", seeds);
         document.put("inflationCoins", inflationCoins.toString());
         return document;
@@ -41,12 +43,12 @@ public class ChainInfo {
 
     public static ChainInfo toInfo(Document document) {
         ChainInfo chainInfo = new ChainInfo();
-        chainInfo.setChainId(document.getInteger("chainId"));
+        chainInfo.setChainId(document.getInteger("_id"));
 
         AssetInfo defaultAsset = DocumentTransferTool.toInfo((Document) document.get("defaultAsset"), AssetInfo.class);
         chainInfo.setDefaultAsset(defaultAsset);
 
-        List<AssetInfo> list = (List<AssetInfo>) document.get("assets");
+        List<AssetInfo> list = DocumentTransferTool.toInfoList((List<Document>) document.get("assets"), AssetInfo.class);
         chainInfo.getAssets().addAll(list);
 
         List<String> seeds = (List<String>) document.get("seeds");

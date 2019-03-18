@@ -4,6 +4,7 @@ import io.nuls.api.provider.Provider;
 import io.nuls.tools.basic.InitializingBean;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.core.annotation.Configuration;
+import io.nuls.tools.core.annotation.Persist;
 import io.nuls.tools.core.annotation.Value;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.parse.ConfigLoader;
@@ -19,11 +20,12 @@ import java.util.Properties;
  * @Time: 2019-03-07 16:56
  * @Description: 功能描述
  */
-@Configuration
+@Configuration(persistDomain = "cmd_client")
 @Getter
 @Setter
 public class Config {
 
+    @Persist
     @Value.NotNull
     private Integer chainId;
 

@@ -13,7 +13,7 @@ import java.util.List;
  * @Description:
  * 配置文件
  */
-@Configuration
+@Configuration(persistDomain = "network")
 @Data
 public class NetworkConfig {
 

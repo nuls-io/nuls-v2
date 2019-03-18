@@ -9,7 +9,7 @@ import lombok.Data;
  * @Time: 2019-03-14 14:11
  * @Description: 配置文件
  */
-@Configuration
+@Configuration(persistDomain = "ledger")
 @Data
 public class LedgerConfig {
     private String language;

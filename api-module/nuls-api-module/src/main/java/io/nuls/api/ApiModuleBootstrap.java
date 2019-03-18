@@ -32,6 +32,7 @@ import io.nuls.rpc.modulebootstrap.NulsRpcModuleBootstrap;
 import io.nuls.rpc.modulebootstrap.RpcModule;
 import io.nuls.rpc.modulebootstrap.RpcModuleState;
 import io.nuls.tools.core.annotation.Autowired;
+import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.core.annotation.Configuration;
 import io.nuls.tools.core.ioc.SpringLiteContext;
 
@@ -45,7 +46,7 @@ import java.util.List;
  * @version 1.0
  * @date 19-1-25 上午10:48
  */
-@Configuration
+@Component
 public class ApiModuleBootstrap extends RpcModule {
 
     @Autowired
@@ -53,7 +54,7 @@ public class ApiModuleBootstrap extends RpcModule {
 
     public static void main(String[] args) {
         if (args == null || args.length == 0) {
-            args = new String[]{HostInfo.getLocalIP() + ":8887/ws"};
+            args = new String[]{"ws://" + HostInfo.getLocalIP() + ":8887/ws"};
         }
         Thread.currentThread().setName("api-module-main");
         NulsRpcModuleBootstrap.run("io.nuls", args);
@@ -133,6 +134,6 @@ public class ApiModuleBootstrap extends RpcModule {
 
     @Override
     public RpcModuleState onDependenciesLoss(Module dependenciesModule) {
-        return RpcModuleState.Running;
+        return RpcModuleState.Ready;
     }
 }

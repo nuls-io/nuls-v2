@@ -21,12 +21,10 @@ public interface MongoTableConstant {
     String TX_RELATION_TABLE = "tx_relation_table_";
     //交易表
     String TX_TABLE = "tx_table_";
-    //红黄牌记录表
-    String PUNISH_TABLE = "punish_table_";
-    //UTXO记录
-    String UTXO_TABLE = "utxo_table_";
     //coinData记录
     String COINDATA_TABLE = "coin_data_table_";
+    //红黄牌记录表
+    String PUNISH_TABLE = "punish_table_";
 
     String ROUND_TABLE = "round_table_";
 
