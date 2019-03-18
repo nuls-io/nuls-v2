@@ -125,7 +125,13 @@ public class SpringLiteContext {
                     if(annValue != null){
                         key = annValue.value();
                     }
-                    ConfigSetting.set(bean, field, configLoader.getValue(key));
+                    Persist persist = field.getAnnotation(Persist.class);
+                    boolean readPersist = persist != null;
+                    if(readPersist){
+                        ConfigSetting.set(bean, field, configLoader.getValue(key,configuration.persistDomain()));
+                    }else{
+                        ConfigSetting.set(bean, field, configLoader.getValue(key));
+                    }
                 });
             }else{
                 Set<Field> fields = getFieldSet(cls);
@@ -329,6 +335,9 @@ public class SpringLiteContext {
 
         if (null == ann) {
             ann = getFromArray(anns, Configuration.class);
+            if(null != ann) {
+                aopProxy = true;
+            }
 //            if (null != ann) {
 //                beanName = ((Configuration) ann).value();
 //            }

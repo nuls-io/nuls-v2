@@ -28,7 +28,9 @@ import io.nuls.tools.core.inteceptor.base.BeanMethodInterceptorManager;
 import net.sf.cglib.proxy.MethodInterceptor;
 import net.sf.cglib.proxy.MethodProxy;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
+import java.util.Arrays;
 
 /**
  * 系统默认的方法拦截器，用于aop底层实现
@@ -50,9 +52,14 @@ public class DefaultMethodInterceptor implements MethodInterceptor {
      */
     @Override
     public Object intercept(Object obj, Method method, Object[] params, MethodProxy methodProxy) throws Throwable {
-        if (null == method.getDeclaredAnnotations() || method.getDeclaredAnnotations().length == 0) {
+        Annotation[] clsAnns = obj.getClass().getSuperclass().getDeclaredAnnotations();
+        Annotation[] methodAnns = method.getDeclaredAnnotations();
+        if ((null == method.getDeclaredAnnotations() || method.getDeclaredAnnotations().length == 0) &&
+                (obj.getClass().getSuperclass().getDeclaredAnnotations() == null || obj.getClass().getSuperclass().getDeclaredAnnotations().length == 0 )) {
             return methodProxy.invokeSuper(obj, params);
         }
-        return BeanMethodInterceptorManager.doInterceptor(method.getDeclaredAnnotations(), obj, method, params, methodProxy);
+        Annotation[] anns = Arrays.copyOf(methodAnns,methodAnns.length + clsAnns.length);
+        System.arraycopy(clsAnns,0,anns,methodAnns.length,clsAnns.length);
+        return BeanMethodInterceptorManager.doInterceptor(anns, obj, method, params, methodProxy);
     }
 }

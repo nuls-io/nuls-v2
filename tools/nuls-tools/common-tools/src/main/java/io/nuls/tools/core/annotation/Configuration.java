@@ -14,4 +14,12 @@ import java.lang.annotation.*;
 @Documented
 public @interface Configuration {
 
+    /**
+     * save name
+     * 存储名称
+     * @return
+     */
+    String persistDomain();
+
+
 }
