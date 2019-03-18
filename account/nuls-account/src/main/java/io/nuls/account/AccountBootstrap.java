@@ -18,7 +18,7 @@ import io.nuls.rpc.modulebootstrap.NulsRpcModuleBootstrap;
 import io.nuls.rpc.modulebootstrap.RpcModule;
 import io.nuls.rpc.modulebootstrap.RpcModuleState;
 import io.nuls.tools.core.annotation.Autowired;
-import io.nuls.tools.core.annotation.Configuration;
+import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.core.ioc.SpringLiteContext;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.model.StringUtils;
@@ -30,7 +30,7 @@ import java.util.Map;
  * @author: qinyifeng
  * @date: 2018/10/15
  */
-@Configuration
+@Component
 public class AccountBootstrap extends RpcModule {
 
     @Autowired
