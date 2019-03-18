@@ -551,7 +551,7 @@ public class TxServiceImpl implements TxService {
     }
 
     public TxPackage getPackableTxsTest(Chain chain, long endtimestamp, long maxTxDataSize, long blockHeight, long blockTime, String packingAddress, String preStateRoot) {
-        Log.debug("%%%%%%%%%%%%%%%%%% TX开始打包 %%%%%%%%%%%%%%%%%%%%%");
+        Log.debug("%%%%%%%%%%%%%%%%%% TX开始打包 %%%%%%%%%%%%%%%%%%%%% 高度:{}", blockHeight);
         Log.debug("交易最大容量: {} ,打包结束时间", maxTxDataSize);
         //重置重新打包标识为false
         chain.getRePackage().set(false);
@@ -566,7 +566,7 @@ public class TxServiceImpl implements TxService {
             chain.getLoggerMap().get(TxConstant.LOG_TX).error("Call ledger bathValidateBegin interface failed");
             throw new NulsRuntimeException(TxErrorCode.CALLING_REMOTE_INTERFACE_FAILED);
         }
-        Log.info("获取打包交易开始,当前待打包队列交易数: {} ", packablePool.getPoolSize(chain));
+        Log.info("获取打包交易开始,当前待打包队列交易数: {} , height:{}", packablePool.getPoolSize(chain), blockHeight);
         Log.debug("--------------while-----------");
         long loopDebug = System.currentTimeMillis();
         while (true) {
@@ -690,7 +690,7 @@ public class TxServiceImpl implements TxService {
      */
     @Override
     public TxPackage getPackableTxs(Chain chain, long endtimestamp, long maxTxDataSize, long blockHeight, long blockTime, String packingAddress, String preStateRoot) throws NulsException {
-        chain.getLoggerMap().get(TxConstant.LOG_TX).debug("%%%%%%%%% TX开始打包 %%%%%%%%%%%%");
+        chain.getLoggerMap().get(TxConstant.LOG_TX).debug("%%%%%%%%% TX开始打包 %%%%%%%%%%%% height:{}", blockHeight);
         //重置重新打包标识为false
         chain.getRePackage().set(false);
         //组装统一验证参数数据,key为各模块统一验证器cmd
@@ -713,7 +713,7 @@ public class TxServiceImpl implements TxService {
                 throw new NulsException(TxErrorCode.CALLING_REMOTE_INTERFACE_FAILED);
             }
 //            chain.getLoggerMap().get(TxConstant.LOG_TX).debug("=================================================");
-            chain.getLoggerMap().get(TxConstant.LOG_TX).info("获取打包交易开始,当前待打包队列交易数: {} ", packablePool.getPoolSize(chain));
+            chain.getLoggerMap().get(TxConstant.LOG_TX).info("获取打包交易开始,当前待打包队列交易数: {} , height:{}", packablePool.getPoolSize(chain), blockHeight);
 //            chain.getLoggerMap().get(TxConstant.LOG_TX).debug("交易最大容量: {} ", maxTxDataSize);
             chain.getLoggerMap().get(TxConstant.LOG_TX).debug("--------------while-----------");
             long loopDebug = NetworkCall.getCurrentTimeMillis();
@@ -738,7 +738,7 @@ public class TxServiceImpl implements TxService {
                     }
                     continue;
                 }
-                chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("@@@@@ 打包取出交易 hash:{}",tx.getHash().getDigestHex());
+                chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("@@@@@ 打包取出交易 hash:{}", tx.getHash().getDigestHex());
                 long txSize = tx.size();
                 if ((totalSize + txSize) > maxTxDataSize) {
                     packablePool.addInFirst(chain, tx, false);
@@ -798,7 +798,7 @@ public class TxServiceImpl implements TxService {
                     chain.getLoggerMap().get(TxConstant.LOG_TX).debug("**************************** 测试未确认垃圾交易回收,对转账交易不打包");
                     continue;
                 }*/
-                chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("@@@@@ 打包交易单个验证成功 hash:{}",tx.getHash().getDigestHex());
+                chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("@@@@@ 打包交易单个验证成功 hash:{}", tx.getHash().getDigestHex());
                 packingTxList.add(tx);
                 totalSize += txSize;
                 //根据模块的统一验证器名，对所有交易进行分组，准备进行各模块的统一验证
@@ -872,11 +872,11 @@ public class TxServiceImpl implements TxService {
                 Map<String, Object> map = ContractCall.contractBatchEnd(chain, blockHeight);
                 if (null != map) {
                     List<String> scNewList = (List<String>) map.get("txHexList");
-                    if(null != scNewList) {
+                    if (null != scNewList) {
                         packableTxs.addAll(scNewList);
                     }
                     String sr = (String) map.get("stateRoot");
-                    if(null != sr) {
+                    if (null != sr) {
                         stateRoot = sr;
                     }
                 }
@@ -889,7 +889,7 @@ public class TxServiceImpl implements TxService {
             chain.getLoggerMap().get(TxConstant.LOG_TX).debug("");
             chain.getLoggerMap().get(TxConstant.LOG_TX).debug("获取打包交易结束,当前待打包队列交易数: {} ", packablePool.getPoolSize(chain));
             chain.getLoggerMap().get(TxConstant.LOG_TX).debug("=================================================");
-            chain.getLoggerMap().get(TxConstant.LOG_TX).debug("%%%%%%%%% 打包完成 %%%%%%%%%%%%");
+            chain.getLoggerMap().get(TxConstant.LOG_TX).debug("%%%%%%%%% 打包完成 %%%%%%%%%%%% height:{}", blockHeight);
             chain.getLoggerMap().get(TxConstant.LOG_TX).debug("");
 
             return txPackage;
@@ -1115,11 +1115,15 @@ public class TxServiceImpl implements TxService {
 
     @Override
     public void clearInvalidTx(Chain chain, List<Transaction> txList) {
-        chain.getLoggerMap().get(TxConstant.LOG_TX).info("集中清理统一验证过程中未通过交易..");
+        if (txList.size() > 0) {// TODO: 2019/3/18 测试代码
+            chain.getLoggerMap().get(TxConstant.LOG_TX).info("集中清理统一验证过程中未通过交易..");
+        }
         for (Transaction tx : txList) {
             clearInvalidTx(chain, tx);
         }
-        chain.getLoggerMap().get(TxConstant.LOG_TX).info("集中清理完成..");
+        if (txList.size() > 0) {// TODO: 2019/3/18 测试代码
+            chain.getLoggerMap().get(TxConstant.LOG_TX).info("集中清理完成..");
+        }
     }
 
     @Override
