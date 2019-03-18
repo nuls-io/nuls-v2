@@ -1,0 +1,29 @@
+{
+  "dataPath": "../../../../data/block",
+  "defaultChainParameter": {
+    "chainName": "nuls2.0",
+    "chainId": 12345,
+    "blockMaxSize": 2097152,
+    "resetTime": 180000,
+    "chainSwtichThreshold": 1,
+    "cacheSize": 100,
+    "heightRange": 1000,
+    "waitInterval": 50,
+    "maxRollback": 100,
+    "consistencyNodePercent": 60,
+    "minNodeAmount": 1,
+    "downloadNumber": 20,
+    "extendMaxSize": 1024,
+    "validBlockInterval": 60000,
+    "blockCache": 10000,
+    "smallBlockCache": 100,
+    "orphanChainMaxAge": 10,
+    "logLevel": "DEBUG",
+    "singleDownloadTimeount": 5000,
+    "batchDownloadTimeount": 15000,
+    "maxLoop": 10,
+    "synSleepInterval": 1000,
+    "waitNetworkInterval": 15000,
+    "cleanParam": 2
+  }
+}

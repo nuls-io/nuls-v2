@@ -34,8 +34,7 @@ import org.junit.Test;
 import java.util.ArrayList;
 import java.util.List;
 
-import static io.nuls.block.constant.Constant.DATA_PATH;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 public class ChainStorageServiceImplTest {
 
@@ -45,7 +44,7 @@ public class ChainStorageServiceImplTest {
     @BeforeClass
     public static void beforeClass() throws Exception {
         SpringLiteContext.init("io.nuls.block");
-        RocksDBService.init(DATA_PATH);
+        RocksDBService.init("../../../../data/block");
         service = SpringLiteContext.getBean(ChainStorageService.class);
         block = BlockGenerator.generate(null);
     }

@@ -32,7 +32,6 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.concurrent.locks.StampedLock;
 
-import static io.nuls.block.constant.Constant.CLEAN_PARAM;
 import static io.nuls.block.constant.RunningStatusEnum.RUNNING;
 
 /**
@@ -91,6 +90,7 @@ public class ChainsDbSizeMonitor implements Runnable {
         StampedLock lock = context.getLock();
         long stamp = lock.tryOptimisticRead();
         NulsLogger commonLog = context.getCommonLog();
+        int cleanParam = context.getParameters().getCleanParam();
         try {
             for (; ; stamp = lock.writeLock()) {
                 if (stamp == 0L) {
@@ -119,7 +119,7 @@ public class ChainsDbSizeMonitor implements Runnable {
                     SortedSet<Chain> orphanChains = BlockChainManager.getOrphanChains(chainId);
                     int orphanSize = orphanChains.size();
                     if (orphanSize > 0) {
-                        int i = orphanSize / CLEAN_PARAM;
+                        int i = orphanSize / cleanParam;
                         //最少清理一个链
                         i = i == 0 ? 1 : i;
                         for (int j = 0; j < i; j++) {
@@ -138,7 +138,7 @@ public class ChainsDbSizeMonitor implements Runnable {
                     SortedSet<Chain> forkChains = BlockChainManager.getForkChains(chainId);
                     int forkSize = forkChains.size();
                     if (forkSize > 0) {
-                        int i = forkSize / CLEAN_PARAM;
+                        int i = forkSize / cleanParam;
                         //最少清理一个链
                         i = i == 0 ? 1 : i;
                         for (int j = 0; j < i; j++) {

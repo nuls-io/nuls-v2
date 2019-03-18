@@ -1,5 +1,6 @@
 package io.nuls.block;
 
+import io.nuls.block.constant.BlockConfig;
 import io.nuls.block.manager.ContextManager;
 import io.nuls.block.service.BlockService;
 import io.nuls.block.thread.BlockSynchronizer;
@@ -15,6 +16,7 @@ import io.nuls.rpc.modulebootstrap.Module;
 import io.nuls.rpc.modulebootstrap.NulsRpcModuleBootstrap;
 import io.nuls.rpc.modulebootstrap.RpcModule;
 import io.nuls.rpc.modulebootstrap.RpcModuleState;
+import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.core.ioc.SpringLiteContext;
 import io.nuls.tools.log.Log;
@@ -36,6 +38,9 @@ import static io.nuls.block.constant.Constant.*;
  */
 @Component
 public class BlockBootstrap extends RpcModule {
+
+    @Autowired
+    public static BlockConfig blockConfig;
 
     public static void main(String[] args) {
         if (args == null || args.length == 0) {
@@ -79,7 +84,7 @@ public class BlockBootstrap extends RpcModule {
         super.init();
         initCfg();
         //读取配置文件，数据存储根目录，初始化打开该目录下所有表连接并放入缓存
-        RocksDBService.init(DATA_PATH);
+        RocksDBService.init(blockConfig.getDataPath());
     }
 
     /**
