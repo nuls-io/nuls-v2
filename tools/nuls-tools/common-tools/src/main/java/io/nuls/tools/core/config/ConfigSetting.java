@@ -2,6 +2,7 @@ package io.nuls.tools.core.config;
 
 import io.nuls.tools.core.annotation.Configuration;
 import io.nuls.tools.core.annotation.Value;
+import io.nuls.tools.core.config.persist.PersistManager;
 import io.nuls.tools.model.StringUtils;
 import io.nuls.tools.parse.JSONUtils;
 

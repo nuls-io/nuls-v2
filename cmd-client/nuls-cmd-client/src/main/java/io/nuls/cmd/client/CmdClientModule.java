@@ -31,6 +31,8 @@ import java.net.Socket;
 @Slf4j
 public class CmdClientModule extends RpcModule {
 
+    @Autowired Config config;
+
 //    ServerSocket serverSocket;
 //
 //    int port = 1122;
@@ -64,6 +66,8 @@ public class CmdClientModule extends RpcModule {
     @Override
     public RpcModuleState onDependenciesReady() {
         log.info("cmd client running");
+        log.info("chainId:{}",config.getChainId());
+        config.setChainId(12345);
         commandHandler.start();
 //        ThreadUtils.createAndRunThread("socket",()->{
 //            while(true){
