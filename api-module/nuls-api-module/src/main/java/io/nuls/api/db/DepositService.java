@@ -67,6 +67,35 @@ public class DepositService {
         return pageInfo;
     }
 
+    public List<DepositInfo> getDepositListByHash(int chainID, String hash) {
+        Bson bson = Filters.and(Filters.eq("txHash", hash));
+        List<Document> documentList = mongoDBService.query(DEPOSIT_TABLE + chainID, bson);
+
+        List<DepositInfo> depositInfos = new ArrayList<>();
+        for (Document document : documentList) {
+            DepositInfo depositInfo = DocumentTransferTool.toInfo(document, "key", DepositInfo.class);
+            depositInfos.add(depositInfo);
+        }
+        return depositInfos;
+    }
+
+    public void rollbackDepoist(int chainId, List<DepositInfo> depositInfoList) {
+        if (depositInfoList.isEmpty()) {
+            return;
+        }
+        List<WriteModel<Document>> modelList = new ArrayList<>();
+        for (DepositInfo depositInfo : depositInfoList) {
+
+            if (depositInfo.isNew()) {
+                modelList.add(new DeleteOneModel<>(Filters.eq("_id", depositInfo.getKey())));
+            } else {
+                Document document = DocumentTransferTool.toDocument(depositInfo);
+                modelList.add(new ReplaceOneModel<>(Filters.eq("_id", depositInfo.getKey()), document));
+            }
+        }
+        mongoDBService.bulkWrite(DEPOSIT_TABLE + chainId, modelList);
+    }
+
 
     public void saveDepositList(int chainId, List<DepositInfo> depositInfoList) {
         if (depositInfoList.isEmpty()) {

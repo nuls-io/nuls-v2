@@ -9,6 +9,7 @@ import io.nuls.api.model.po.db.SyncInfo;
 import io.nuls.api.utils.DocumentTransferTool;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
+import org.apache.tools.ant.taskdefs.Sync;
 import org.bson.Document;
 import org.bson.conversions.Bson;
 
@@ -62,8 +63,8 @@ public class ChainService {
         return DocumentTransferTool.toInfo(document, "chainId", SyncInfo.class);
     }
 
-    public void saveNewSyncInfo(int chainId, long newHeight) {
-        SyncInfo syncInfo = new SyncInfo(chainId, newHeight, false, 0);
+    public SyncInfo saveNewSyncInfo(int chainId, long newHeight) {
+        SyncInfo syncInfo = new SyncInfo(chainId, newHeight, 0);
         Document document = DocumentTransferTool.toDocument(syncInfo, "chainId");
         if (newHeight == 0) {
             mongoDBService.insertOne(SYNC_INFO_TABLE, document);
@@ -71,19 +72,12 @@ public class ChainService {
             Bson query = Filters.eq("_id", chainId);
             mongoDBService.updateOne(SYNC_INFO_TABLE, query, document);
         }
+        return syncInfo;
     }
 
-    public void updateStep(int chainId, long height, int step) {
-        SyncInfo syncInfo = new SyncInfo(chainId, height, false, step);
+    public void updateStep(SyncInfo syncInfo) {
         Document document = DocumentTransferTool.toDocument(syncInfo, "chainId");
-        Bson query = Filters.eq("_id", chainId);
-        mongoDBService.updateOne(SYNC_INFO_TABLE, query, document);
-    }
-
-    public void syncComplete(int chainId, long height, int step) {
-        SyncInfo syncInfo = new SyncInfo(chainId, height, true, step);
-        Document document = DocumentTransferTool.toDocument(syncInfo, "chainId");
-        Bson query = Filters.eq("_id", chainId);
+        Bson query = Filters.eq("_id", syncInfo.getChainId());
         mongoDBService.updateOne(SYNC_INFO_TABLE, query, document);
     }
 
