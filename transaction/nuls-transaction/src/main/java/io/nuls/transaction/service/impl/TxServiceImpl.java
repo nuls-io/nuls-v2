@@ -868,7 +868,7 @@ public class TxServiceImpl implements TxService {
 
             String stateRoot = preStateRoot;
             /**智能合约 当通知标识为true, 则表明有智能合约被调用执行*/
-            if (!contractNotify) {
+            if (contractNotify) {
                 Map<String, Object> map = ContractCall.contractBatchEnd(chain, blockHeight);
                 if (null != map) {
                     List<String> scNewList = (List<String>) map.get("txHexList");
