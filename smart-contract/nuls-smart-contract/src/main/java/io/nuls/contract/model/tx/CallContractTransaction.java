@@ -27,7 +27,6 @@ import io.nuls.contract.constant.ContractConstant;
 import io.nuls.contract.model.txdata.CallContractData;
 
 /**
- *
  * @author: PierreLuo
  * @date: 2019-03-07
  */

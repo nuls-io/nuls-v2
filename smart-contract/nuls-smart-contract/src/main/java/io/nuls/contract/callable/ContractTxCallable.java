@@ -28,6 +28,7 @@ import io.nuls.contract.helper.ContractHelper;
 import io.nuls.contract.helper.ContractTransferHandler;
 import io.nuls.contract.manager.TempBalanceManager;
 import io.nuls.contract.model.bo.CallableResult;
+import io.nuls.contract.model.bo.ContractContainer;
 import io.nuls.contract.model.bo.ContractResult;
 import io.nuls.contract.model.bo.ContractWrapperTransaction;
 import io.nuls.contract.model.txdata.ContractData;
@@ -57,7 +58,7 @@ import static io.nuls.contract.util.ContractUtil.*;
  */
 @Getter
 @Setter
-public class ContractTxCallable implements Callable<CallableResult> {
+public class ContractTxCallable implements Callable<ContractResult> {
 
     private ContractExecutor contractVM;
     private ContractHelper contractHelper;
@@ -66,16 +67,16 @@ public class ContractTxCallable implements Callable<CallableResult> {
     private TempBalanceManager tempBalanceManager;
     private ProgramExecutor executor;
     private String contract;
-    private List<ContractWrapperTransaction> txList;
+    private ContractWrapperTransaction tx;
     private long number;
     private String preStateRoot;
     private ContractConflictChecker checker;
-    private Set<String> commitSet;
+    private ContractContainer container;
     private int chainId;
     private long blockTime;
 
 
-    public ContractTxCallable(int chainId, long blockTime, ProgramExecutor executor, String contract, List<ContractWrapperTransaction> txList, long number, String preStateRoot, ContractConflictChecker checker, Set<String> commitSet) {
+    public ContractTxCallable(int chainId, long blockTime, ProgramExecutor executor, String contract, ContractWrapperTransaction tx, long number, String preStateRoot, ContractConflictChecker checker, ContractContainer container) {
         this.chainId = chainId;
         this.blockTime = blockTime;
         this.contractVM = SpringLiteContext.getBean(ContractExecutor.class);
@@ -85,58 +86,49 @@ public class ContractTxCallable implements Callable<CallableResult> {
         this.tempBalanceManager = contractHelper.getTempBalanceManager(chainId);
         this.executor = executor;
         this.contract = contract;
-        this.txList = txList;
+        this.tx = tx;
         this.number = number;
         this.preStateRoot = preStateRoot;
         this.checker = checker;
-        this.commitSet = commitSet;
+        this.container = container;
     }
 
     @Override
-    public CallableResult call() throws Exception {
-        CallableResult callableResult = CallableResult.newInstance();
-        List<ContractResult> resultList = callableResult.getResultList();
-        callableResult.setContract(contract);
-
+    public ContractResult call() throws Exception {
+        CallableResult callableResult = container.getCallableResult();
         ContractData contractData;
+        ContractResult contractResult = null;
+        contractData = tx.getContractData();
         // 创建合约无论成功与否，后续的其他的跳过执行，视作失败 -> 合约锁定中或者合约不存在
-        // 删除合约成功后，后续的其他的跳过执行，视作失败 -> 合约已删除
-        boolean hasCreate = false;
-        boolean isDelete = false;
-        ContractResult contractResult;
-        for (ContractWrapperTransaction tx : txList) {
-            contractData = tx.getContractData();
-            if (hasCreate) {
-                resultList.add(ContractResult.getFailed(contractData, "contract lock or not exist."));
-                continue;
-            }
-            if (isDelete) {
-                resultList.add(ContractResult.getFailed(contractData, "contract has been terminated."));
-                continue;
-            }
-            if (!ContractUtil.checkPrice(contractData.getPrice())) {
-                resultList.add(ContractResult.getFailed(contractData, "The minimum value of price is 25."));
-                continue;
-            }
-            switch (tx.getType()) {
-                case TX_TYPE_CREATE_CONTRACT:
-                    hasCreate = true;
-                    contractResult = contractVM.create(executor, contractData, number, preStateRoot);
-                    checkCreateResult(tx, callableResult, contractResult);
-                    break;
-                case TX_TYPE_CALL_CONTRACT:
-                    contractResult = contractVM.call(executor, contractData, number, preStateRoot);
-                    checkCallResult(tx, callableResult, contractResult);
-                    break;
-                case TX_TYPE_DELETE_CONTRACT:
-                    contractResult = contractVM.delete(executor, contractData, number, preStateRoot);
-                    isDelete = checkDeleteResult(tx, callableResult, contractResult);
-                    break;
-                default:
-                    break;
-            }
+        if (container.isHasCreate()) {
+            return ContractResult.getFailed(contractData, "contract lock or not exist.");
         }
-        return callableResult;
+        // 删除合约成功后，后续的其他的跳过执行，视作失败 -> 合约已删除
+        if (container.isDelete()) {
+            return ContractResult.getFailed(contractData, "contract has been terminated.");
+        }
+        if (!ContractUtil.checkPrice(contractData.getPrice())) {
+            return ContractResult.getFailed(contractData, "The minimum value of price is 25.");
+        }
+        switch (tx.getType()) {
+            case TX_TYPE_CREATE_CONTRACT:
+                container.setHasCreate(true);
+                contractResult = contractVM.create(executor, contractData, number, preStateRoot);
+                checkCreateResult(tx, callableResult, contractResult);
+                break;
+            case TX_TYPE_CALL_CONTRACT:
+                contractResult = contractVM.call(executor, contractData, number, preStateRoot);
+                checkCallResult(tx, callableResult, contractResult);
+                break;
+            case TX_TYPE_DELETE_CONTRACT:
+                contractResult = contractVM.delete(executor, contractData, number, preStateRoot);
+                boolean isDelete = checkDeleteResult(tx, callableResult, contractResult);
+                container.setDelete(isDelete);
+                break;
+            default:
+                break;
+        }
+        return contractResult;
     }
 
     private void checkCreateResult(ContractWrapperTransaction tx, CallableResult callableResult, ContractResult contractResult) {
@@ -144,7 +136,7 @@ public class ContractTxCallable implements Callable<CallableResult> {
         if (contractResult.isSuccess()) {
             Result checkResult = contractHelper.validateNrc20Contract(chainId, (ProgramExecutor) contractResult.getTxTrack(), tx, contractResult);
             if (checkResult.isSuccess()) {
-                commitSet.add(contract);
+                container.getCommitSet().add(contract);
                 commitContract(contractResult);
             }
         }
@@ -156,7 +148,7 @@ public class ContractTxCallable implements Callable<CallableResult> {
     private void checkCallResult(ContractWrapperTransaction tx, CallableResult callableResult, ContractResult contractResult) throws IOException {
         makeContractResult(tx, contractResult);
         List<ContractResult> reCallList = callableResult.getReCallList();
-        boolean isConflict = checker.checkConflict(tx, contractResult, commitSet);
+        boolean isConflict = checker.checkConflict(tx, contractResult, container.getCommitSet());
         if (isConflict) {
             // 冲突后，添加到重新执行的集合中
             reCallList.add(contractResult);
@@ -178,12 +170,12 @@ public class ContractTxCallable implements Callable<CallableResult> {
             // 处理临时余额和合约内部转账
             contractTransferHandler.handleContractTransfer(chainId, blockTime, tx, contractResult, tempBalanceManager);
         }
-        // 处理合约内部转账时可能失败，合约视为执行失败
+        // 处理合约内部转账成功后，提交合约
         if (contractResult.isSuccess()) {
             callableResult.getResultList().add(contractResult);
             commitContract(contractResult);
         } else {
-            // 执行失败，添加到执行失败的集合中
+            // 处理合约内部转账时可能失败，合约视为执行失败，执行失败，添加到执行失败的集合中
             putAll(callableResult.getFailedMap(), contractResult);
         }
     }

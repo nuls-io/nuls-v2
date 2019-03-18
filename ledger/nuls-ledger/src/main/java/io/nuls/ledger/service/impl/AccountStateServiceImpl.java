@@ -34,10 +34,7 @@ import io.nuls.ledger.model.po.UnconfirmedNonce;
 import io.nuls.ledger.service.AccountStateService;
 import io.nuls.ledger.service.FreezeStateService;
 import io.nuls.ledger.storage.Repository;
-import io.nuls.ledger.utils.CoinDataUtil;
-import io.nuls.ledger.utils.LedgerUtil;
-import io.nuls.ledger.utils.LockerUtil;
-import io.nuls.ledger.utils.LoggerUtil;
+import io.nuls.ledger.utils.*;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Service;
 
@@ -76,7 +73,7 @@ public class AccountStateServiceImpl implements AccountStateService {
             LoggerUtil.logger.debug("更新确认的交易信息：orgNonce={},newNonce={}", dbAccountState.getNonce(), accountState.getNonce());
             LoggerUtil.logger.debug("更新确认的交易信息:unConfirmedNonce org={},new={}", dbAccountState.getUnconfirmedNoncesStrs(), accountState.getUnconfirmedNoncesStrs());
             repository.updateAccountState(assetKey.getBytes(LedgerConstant.DEFAULT_ENCODING), accountState);
-            LoggerUtil.txMsg.debug("hash={},assetKey={},dbAmount={},toAmount={},oldHash={}",accountState.getTxHash(),assetKey,dbAccountState.getAvailableAmount(),accountState.getAvailableAmount(),dbAccountState.getTxHash());
+            LoggerUtil.txMsg.debug("hash={},assetKey={},dbAmount={},toAmount={},oldHash={}", accountState.getTxHash(), assetKey, dbAccountState.getAvailableAmount(), accountState.getAvailableAmount(), dbAccountState.getTxHash());
             blockSnapshotAccounts.addAccountState(dbAccountState);
         }
     }
@@ -170,19 +167,21 @@ public class AccountStateServiceImpl implements AccountStateService {
                 accountState = new AccountState(address, addressChainId, assetChainId, assetId, LedgerConstant.INIT_NONCE);
                 repository.createAccountState(key, accountState);
             } else {
-                //清理未确认交易
-                if (accountState.getUnconfirmedNonces().size() > 0) {
-                    if (LedgerUtil.isExpiredNonce(accountState.getUnconfirmedNonces().get(0))) {
-                        accountState.getUnconfirmedNonces().clear();
+                if (timeAllow(accountState.getLatestUnFreezeTime())) {
+                    //清理未确认交易
+                    if (accountState.getUnconfirmedNonces().size() > 0) {
+                        if (LedgerUtil.isExpiredNonce(accountState.getUnconfirmedNonces().get(0))) {
+                            accountState.getUnconfirmedNonces().clear();
+                        }
                     }
-                }
-                if (accountState.getUnconfirmedAmounts().size() > 0) {
-                    if (LedgerUtil.isExpiredAmount(accountState.getUnconfirmedAmounts().get(0))) {
-                        accountState.getUnconfirmedAmounts().clear();
+                    if (accountState.getUnconfirmedAmounts().size() > 0) {
+                        if (LedgerUtil.isExpiredAmount(accountState.getUnconfirmedAmounts().get(0))) {
+                            accountState.getUnconfirmedAmounts().clear();
+                        }
                     }
-                }
-                //解冻时间锁
-                if (freezeStateService.recalculateFreeze(accountState)) {
+                    //解冻时间锁
+                    freezeStateService.recalculateFreeze(accountState);
+                    accountState.setLatestUnFreezeTime(TimeUtils.getCurrentTime());
                     try {
                         repository.updateAccountState(key, accountState);
                     } catch (Exception e) {
@@ -193,6 +192,16 @@ public class AccountStateServiceImpl implements AccountStateService {
             return accountState;
         }
 
+    }
+
+    private boolean timeAllow(long latestUnfreezeTime) {
+        //是否改为网络时间？
+        long nowTime = TimeUtils.getCurrentTime();
+        if (nowTime - latestUnfreezeTime > LedgerConstant.TIME_RECALCULATE_FREEZE) {
+            //解锁时间超时了,进行重新计算
+            return true;
+        }
+        return false;
     }
 
     /**
