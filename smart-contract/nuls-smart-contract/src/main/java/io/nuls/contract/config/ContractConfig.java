@@ -32,7 +32,7 @@ import lombok.Data;
  * @author: PierreLuo
  * @date: 2019-03-15
  */
-@Configuration
+@Configuration(persistDomain = "smart_contract")
 @Data
 public class ContractConfig {
     /**

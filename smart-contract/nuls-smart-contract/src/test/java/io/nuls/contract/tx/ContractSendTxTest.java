@@ -44,7 +44,6 @@ import java.util.List;
 import java.util.Map;
 
 /**
- *
  * @author: PierreLuo
  * @date: 2019-03-15
  */
@@ -96,7 +95,7 @@ public class ContractSendTxTest {
         Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.CS.abbr, "cs_createAgent", agentTxMap);
         Map result = (HashMap) (((HashMap) cmdResp2.getResponseData()).get("cs_createAgent"));
         Assert.assertTrue(null != result);
-        String hash =  (String)result.get("txHash");
+        String hash = (String) result.get("txHash");
         Log.debug("createAgent-txHash:{}", hash);
     }
 
@@ -154,7 +153,7 @@ public class ContractSendTxTest {
      * 查交易
      */
     @Test
-    public void getTxRecord() throws Exception{
+    public void getTxRecord() throws Exception {
         Map<String, Object> params = new HashMap<>();
         params.put("chainId", chainId);
         params.put("address", "5MR_2CVuGjQ3CYVkhFszxfSt6sodg1gDHYF");
@@ -171,7 +170,7 @@ public class ContractSendTxTest {
     /**
      * 查交易
      */
-    private void getTxClient(String hash) throws Exception{
+    private void getTxClient(String hash) throws Exception {
         Map<String, Object> params = new HashMap<>();
         params.put("chainId", chainId);
         params.put("txHash", hash);
@@ -183,7 +182,7 @@ public class ContractSendTxTest {
     /**
      * 查交易
      */
-    private void getTxCfmClient(String hash) throws Exception{
+    private void getTxCfmClient(String hash) throws Exception {
         Map<String, Object> params = new HashMap<>();
         params.put("chainId", chainId);
         params.put("txHash", hash);
@@ -193,7 +192,7 @@ public class ContractSendTxTest {
     }
 
     /**
-     *  删除账户
+     * 删除账户
      */
     @Test
     public void removeAccountTest() throws Exception {
@@ -201,7 +200,7 @@ public class ContractSendTxTest {
         removeAccount(address26, password);
     }
 
-    public void importPriKey(String priKey, String pwd){
+    public void importPriKey(String priKey, String pwd) {
         try {
             //账户已存在则覆盖 If the account exists, it covers.
             Map<String, Object> params = new HashMap<>();

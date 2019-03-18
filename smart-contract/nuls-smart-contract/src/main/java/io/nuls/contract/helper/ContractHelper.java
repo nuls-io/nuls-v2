@@ -413,12 +413,6 @@ public class ContractHelper {
         return getChain(chainId).getCurrentBlockHeader();
     }
 
-    public void removeTempBalanceManagerAndCurrentBlockHeader(int chainId) {
-        Chain chain = getChain(chainId);
-        chain.setTempBalanceManager(null);
-        chain.setCurrentBlockHeader(null);
-    }
-
     public Result<ContractAddressInfoPo> getContractAddressInfo(int chainId, byte[] contractAddressBytes) {
         return contractAddressStorageService.getContractAddressInfo(chainId, contractAddressBytes);
     }
