@@ -1,8 +1,6 @@
 package io.nuls.tools.core.config;
 
-import io.nuls.tools.core.annotation.Configuration;
 import io.nuls.tools.core.annotation.Value;
-import io.nuls.tools.core.config.persist.PersistManager;
 import io.nuls.tools.model.StringUtils;
 import io.nuls.tools.parse.JSONUtils;
 
@@ -110,19 +108,5 @@ public class ConfigSetting {
     private static boolean isPrimitive(Field field){
         return isPrimitive(field.getType());
     }
-
-//    public static boolean isPrimitive(Field field) {
-//        return field.getType().isPrimitive() ||
-//                field.getType().equals(String.class) ||
-//                field.getType().equals(Integer.class) ||
-//                field.getType().equals(Long.class) ||
-//                field.getType().equals(Short.class) ||
-//                field.getType().equals(Float.class) ||
-//                field.getType().equals(Double.class) ||
-//                field.getType().equals(Character.class) ||
-//                field.getType().equals(Byte.class) ||
-//                field.getType().equals(Boolean.class);
-//    }
-//
 
 }
