@@ -3,7 +3,7 @@ package io.nuls.api.model.po.config;
 import io.nuls.tools.core.annotation.Configuration;
 import lombok.Data;
 
-@Configuration
+@Configuration(persistDomain = "apiModule")
 @Data
 public class ApiConfig {
 

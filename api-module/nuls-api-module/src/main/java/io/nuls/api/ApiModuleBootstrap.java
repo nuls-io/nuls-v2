@@ -32,6 +32,7 @@ import io.nuls.rpc.modulebootstrap.NulsRpcModuleBootstrap;
 import io.nuls.rpc.modulebootstrap.RpcModule;
 import io.nuls.rpc.modulebootstrap.RpcModuleState;
 import io.nuls.tools.core.annotation.Autowired;
+import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.core.annotation.Configuration;
 import io.nuls.tools.core.ioc.SpringLiteContext;
 
@@ -45,7 +46,7 @@ import java.util.List;
  * @version 1.0
  * @date 19-1-25 上午10:48
  */
-@Configuration
+@Component
 public class ApiModuleBootstrap extends RpcModule {
 
     @Autowired
