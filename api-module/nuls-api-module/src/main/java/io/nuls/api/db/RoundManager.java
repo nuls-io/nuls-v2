@@ -1,6 +1,5 @@
 package io.nuls.api.db;
 
-import io.nuls.api.ApiContext;
 import io.nuls.api.cache.ApiCache;
 import io.nuls.api.constant.ApiConstant;
 import io.nuls.api.manager.CacheManager;
@@ -10,9 +9,9 @@ import io.nuls.base.basic.AddressTool;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.crypto.Sha256Hash;
+import io.nuls.tools.log.Log;
 import io.nuls.tools.model.ArraysTool;
 import io.nuls.tools.model.DoubleUtils;
-import io.nuls.tools.log.Log;
 import io.nuls.tools.parse.SerializeUtils;
 
 import java.math.BigInteger;
@@ -145,7 +144,6 @@ public class RoundManager {
             }
         }
 
-
         for (String address : apiCache.getChainInfo().getSeeds()) {
             AgentSorter sorter = new AgentSorter();
             sorter.setSeedAddress(address);
@@ -154,7 +152,6 @@ public class RoundManager {
             sorterList.add(sorter);
         }
         Collections.sort(sorterList);
-
 
         BlockHeaderInfo header = blockInfo.getHeader();
         //生成新的round
@@ -166,7 +163,6 @@ public class RoundManager {
         round.setMemberCount(sorterList.size());
         round.setEndTime(round.getStartTime() + 10000 * sorterList.size());
         round.setProducedBlockCount(1);
-
 
         List<PocRoundItem> itemList = new ArrayList<>();
         int index = 1;
@@ -232,6 +228,82 @@ public class RoundManager {
         roundService.saveRoundItemList(chainId, round.getItemList());
         roundService.saveRound(chainId, round.toPocRound());
 
+    }
 
+
+    public void rollback(int chainId, BlockInfo blockInfo) {
+        ApiCache apiCache = CacheManager.getCache(chainId);
+        CurrentRound currentRound = apiCache.getCurrentRound();
+        if (null == currentRound.getItemList()) {
+            PocRound round = null;
+            long roundIndex = blockInfo.getHeader().getRoundIndex();
+            while (round == null && blockInfo.getHeader().getHeight() > 0) {
+                round = roundService.getRound(chainId, roundIndex--);
+            }
+            if (round != null) {
+                CurrentRound preRound = new CurrentRound();
+                preRound.initByPocRound(round);
+                List<PocRoundItem> list = roundService.getRoundItemList(chainId, round.getIndex());
+                preRound.setItemList(list);
+                preRound.setStartBlockHeader(blockService.getBlockHeader(chainId, round.getStartHeight()));
+                preRound.setPackerOrder(round.getMemberCount());
+                currentRound = preRound;
+                apiCache.setCurrentRound(currentRound);
+            }
+        }
+        if (blockInfo.getHeader().getHeight() == currentRound.getStartHeight()) {
+            rollbackPreRound(chainId);
+        } else {
+            rollbackCurrentRound(chainId, blockInfo);
+        }
+    }
+
+    private void rollbackPreRound(int chainId) {
+        ApiCache apiCache = CacheManager.getCache(chainId);
+        CurrentRound currentRound = apiCache.getCurrentRound();
+
+        roundService.removeRound(chainId, currentRound.getIndex());
+        PocRound round = null;
+        long roundIndex = currentRound.getIndex() - 1;
+        while (round == null) {
+            round = roundService.getRound(chainId, roundIndex--);
+        }
+        CurrentRound preRound = new CurrentRound();
+        preRound.initByPocRound(round);
+        List<PocRoundItem> list = roundService.getRoundItemList(chainId, round.getIndex());
+        preRound.setItemList(list);
+        preRound.setStartBlockHeader(blockService.getBlockHeader(chainId, round.getStartHeight()));
+        preRound.setPackerOrder(round.getMemberCount());
+        apiCache.setCurrentRound(preRound);
+    }
+
+    private void rollbackCurrentRound(int chainId, BlockInfo blockInfo) {
+        ApiCache apiCache = CacheManager.getCache(chainId);
+        CurrentRound currentRound = apiCache.getCurrentRound();
+
+        int indexOfRound = blockInfo.getHeader().getPackingIndexOfRound() - 1;
+        if (currentRound.getItemList() == null) {
+            PocRound round = roundService.getRound(chainId, blockInfo.getHeader().getRoundIndex());
+            CurrentRound preRound = new CurrentRound();
+            preRound.initByPocRound(round);
+            List<PocRoundItem> list = roundService.getRoundItemList(chainId, round.getIndex());
+            preRound.setItemList(list);
+            preRound.setStartBlockHeader(blockService.getBlockHeader(chainId, round.getStartHeight()));
+            preRound.setPackerOrder(round.getMemberCount());
+            apiCache.setCurrentRound(preRound);
+        }
+        PocRoundItem item = currentRound.getItemList().get(indexOfRound);
+        item.setBlockHeight(0);
+        item.setReward(BigInteger.ZERO);
+        item.setTxCount(0);
+
+        roundService.updateRoundItem(chainId, item);
+        currentRound.setProducedBlockCount(currentRound.getProducedBlockCount() - 1);
+        currentRound.setEndHeight(blockInfo.getHeader().getHeight() - 1);
+        currentRound.setLostRate(DoubleUtils.div(currentRound.getMemberCount() - currentRound.getProducedBlockCount(), currentRound.getMemberCount()));
+        this.fillPunishCount(blockInfo.getTxList(), currentRound, false);
+
+        this.roundService.updateRound(chainId, currentRound.toPocRound());
+        apiCache.setCurrentRound(currentRound);
     }
 }

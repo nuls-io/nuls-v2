@@ -79,6 +79,7 @@ public class BlockSynchronizer implements Runnable {
     public void run() {
         for (Integer chainId : ContextManager.chainIds) {
             ChainContext context = ContextManager.getContext(chainId);
+            int synSleepInterval = context.getParameters().getSynSleepInterval();
             NulsLogger commonLog = context.getCommonLog();
             try {
                 BlockStorageService blockStorageService = SpringLiteContext.getBean(BlockStorageService.class);
@@ -108,7 +109,7 @@ public class BlockSynchronizer implements Runnable {
                 }
                 waitUntilNetworkStable(chainId);
                 while (!synchronize(chainId)) {
-                    Thread.sleep(SYN_SLEEP_INTERVAL);
+                    Thread.sleep(synSleepInterval);
                 }
             } catch (Exception e) {
                 e.printStackTrace();
@@ -124,19 +125,21 @@ public class BlockSynchronizer implements Runnable {
      * @return
      */
     private void waitUntilNetworkStable(int chainId) throws InterruptedException {
-        NulsLogger commonLog = ContextManager.getContext(chainId).getCommonLog();
+        ChainContext context = ContextManager.getContext(chainId);
+        int waitNetworkInterval = context.getParameters().getWaitNetworkInterval();
+        NulsLogger commonLog = context.getCommonLog();
         List<Node> availableNodesFirst = NetworkUtil.getAvailableNodes(chainId);
         List<Node> availableNodesSecond;
         int sizeFirst = availableNodesFirst.size();
         int sizeSecond;
         while (true) {
-            Thread.sleep(WAIT_NETWORK_INTERVAL);
+            Thread.sleep(waitNetworkInterval);
             availableNodesSecond = NetworkUtil.getAvailableNodes(chainId);
             sizeSecond = availableNodesSecond.size();
             if (sizeSecond == sizeFirst) {
                 break;
             }
-            commonLog.info("sizeFirst=" + sizeFirst + ", sizeSecond=" + sizeSecond+ ", wait Until Network Stable..........");
+            commonLog.info("sizeFirst=" + sizeFirst + ", sizeSecond=" + sizeSecond + ", wait Until Network Stable..........");
             sizeFirst = sizeSecond;
         }
     }
