@@ -35,7 +35,9 @@ public interface ContractCmdConstant {
     String COMMIT = "sc_commit";
     String ROLLBACK = "sc_rollback";
     String INTEGRATE_VALIDATOR = "sc_integrate_validator";
+    String BATCH_BEGIN = "sc_batch_begin";
     String INVOKE_CONTRACT = "sc_invoke_contract";
+    String BATCH_END = "sc_batch_end";
     String CREATE_VALIDATOR = "sc_create_validator";
     String CALL_VALIDATOR = "sc_call_validator";
     String DELETE_VALIDATOR = "sc_delete_validator";
