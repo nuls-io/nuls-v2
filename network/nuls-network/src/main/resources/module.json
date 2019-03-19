@@ -7,7 +7,7 @@
   "maxInCount": 100,
   "maxOutCount": 10,
   "moonNode":true,
-  "selfSeedIps": "192.168.1.168:9995",
+  "selfSeedIps": "192.168.1.61:9995",
   "crossPort": 8004,
   "crossMaxInCount": 100,
   "crossMaxOutCount": 10,
