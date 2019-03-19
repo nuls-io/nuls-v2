@@ -5,6 +5,8 @@ import io.nuls.tools.core.annotation.Value;
 import io.nuls.transaction.model.bo.config.ConfigBean;
 import lombok.Data;
 
+import java.io.File;
+
 /**
  * Transaction module setting
  * @author: Charlie
@@ -46,4 +48,9 @@ public class TxConfig {
     private long unconfirmedTxExpireMs;
     /** h2数据库交易记录表分表数量*/
     private int h2TxTableNumber;
+
+
+    public String getTxDataRoot() {
+        return dataPath + File.separator + txDataRoot;
+    }
 }

@@ -14,7 +14,7 @@
   "mainAssetId": 1,
   "language": "en",
   "encoding": "UTF-8",
-  "txDataPath": "/tx",
+  "txDataPath": "tx",
   "hashTtl":30000,
   "ctxEffectThreshold":30,
   "crossVerifyResultPassRate":"0.51",

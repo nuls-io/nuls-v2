@@ -166,7 +166,7 @@ public class TransactionBootstrap extends RpcModule {
     public void initDB() {
         try {
             //数据文件存储地址
-            RocksDBService.init(txConfig.getDataPath() + txConfig.getTxDataRoot());
+            RocksDBService.init(txConfig.getTxDataRoot());
             //模块配置表
             DBUtil.createTable(TxDBConstant.DB_MODULE_CONGIF);
             //语言表
@@ -175,7 +175,7 @@ public class TransactionBootstrap extends RpcModule {
             //todo 单个节点跑多链的时候 h2是否需要通过chain来区分数据库(如何分？)，待确认！！
             String resource = "mybatis/mybatis-config.xml";
             Properties prop =  ConfigLoader.loadProperties(TxConstant.DB_CONFIG_NAME);
-            String currentPath = DBUtils.genAbsolutePath(txConfig.getDataPath() + txConfig.getTxDataRoot());
+            String currentPath = DBUtils.genAbsolutePath(txConfig.getTxDataRoot());
             LoggerUtil.Log.debug("#########################:" + currentPath);
             prop.setProperty("url", "jdbc:h2:file:" + currentPath + "/h2/nuls;LOG=2;DB_CLOSE_DELAY=-1;TRACE_LEVEL_SYSTEM_OUT=1;DATABASE_TO_UPPER=FALSE;MV_STORE=false;COMPRESS=true;MAX_COMPACT_TIME=5000");
             SqlSessionFactory sqlSessionFactory = new SqlSessionFactoryBuilder().build(Resources.getResourceAsReader(resource), "druid",prop);
