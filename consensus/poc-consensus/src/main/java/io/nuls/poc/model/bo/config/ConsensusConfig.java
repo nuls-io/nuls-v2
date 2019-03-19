@@ -1,6 +1,8 @@
 package io.nuls.poc.model.bo.config;
 
 import io.nuls.tools.core.annotation.Configuration;
+import io.nuls.tools.core.annotation.Value;
+
 /**
  * 共识模块配置类
  * @author tag
@@ -11,6 +13,7 @@ public class ConsensusConfig {
      * 初始链配置文件
      * Initial Chain Profile
      * */
+    @Value("consensusConfig")
     private ConfigBean configBean;
 
 

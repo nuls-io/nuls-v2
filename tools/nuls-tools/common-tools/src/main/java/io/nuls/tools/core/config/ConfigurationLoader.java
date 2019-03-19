@@ -28,7 +28,6 @@ import java.util.Map;
 @Component
 public class ConfigurationLoader {
 
-
     private static final String JVM_OPTION_ACTIVE_MODULE = "active.module";
 
     /**
