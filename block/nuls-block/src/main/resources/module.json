@@ -1,5 +1,5 @@
 {
-  "dataPath": "../../../../data/block",
+  "dataFolder": "block",
   "defaultChainParameter": {
     "chainName": "nuls2.0",
     "chainId": 12345,

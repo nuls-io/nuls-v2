@@ -6,7 +6,7 @@ import io.nuls.db.service.RocksDBService;
 import io.nuls.poc.constant.ConsensusConstant;
 import io.nuls.poc.model.bo.Chain;
 import io.nuls.poc.model.bo.config.ConfigBean;
-import io.nuls.poc.model.bo.config.ConsensusConfig;
+import io.nuls.poc.config.ConsensusConfig;
 import io.nuls.poc.model.bo.tx.TxRegisterDetail;
 import io.nuls.poc.storage.ConfigService;
 import io.nuls.poc.utils.CallMethodUtils;

@@ -40,6 +40,7 @@ import io.nuls.cmd.client.CommandHelper;
 import io.nuls.cmd.client.CommandResult;
 import io.nuls.cmd.client.Config;
 import io.nuls.cmd.client.processor.CommandProcessor;
+import io.nuls.cmd.client.utils.Na;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.log.Log;
@@ -106,8 +107,12 @@ public class GetAccountProcessor extends AccountBaseProcessor implements Command
             return CommandResult.getFailed(balance);
         }
         Map<String,Object> res = new HashMap<>(7);
+        Map<String,Object> balanceMap = new HashMap<>(3);
+        balanceMap.put("available", Na.valueOf(balance.getData().getAvailable()).toNuls());
+        balanceMap.put("freeze",Na.valueOf(balance.getData().getFreeze()).toNuls());
+        balanceMap.put("total",Na.valueOf(balance.getData().getTotal()).toNuls());
         res.putAll(MapUtils.beanToMap(info.getData()));
-        res.put("baglance",balance.getData());
+        res.put("baglance",balanceMap);
         try {
             return CommandResult.getSuccess(JSONUtils.obj2PrettyJson(res));
         } catch (JsonProcessingException e) {

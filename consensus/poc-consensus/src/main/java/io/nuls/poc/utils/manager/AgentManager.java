@@ -219,7 +219,7 @@ public class AgentManager{
         return true;
     }
 
-    public boolean stopAgentRollBack(Transaction transaction,Chain chain) throws NulsException{
+    public boolean stopAgentRollBack(Transaction transaction,Chain chain, BlockHeader blockHeader) throws NulsException{
         int chainId = chain.getConfig().getChainId();
         StopAgent stopAgent = new StopAgent();
         stopAgent.parse(transaction.getTxData(), 0);
@@ -228,7 +228,7 @@ public class AgentManager{
         //找到该节点的委托信息,并设置委托状态为退出
         List<DepositPo> depositPoList = depositStorageService.getList(chainId);
         for (DepositPo depositPo : depositPoList) {
-            if (depositPo.getDelHeight() != transaction.getBlockHeight()) {
+            if (depositPo.getDelHeight() != blockHeader.getHeight()) {
                 continue;
             }
             if (!depositPo.getAgentHash().equals(agentPo.getHash())) {

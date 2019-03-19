@@ -19,9 +19,11 @@ import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.log.Log;
 import io.nuls.tools.model.StringUtils;
-import io.nuls.tools.parse.ConfigLoader;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * 公共远程方法调用工具类
@@ -106,18 +108,18 @@ public class CallMethodUtils {
      * 区块签名
      * block signature
      *
-     * @param chainId
+     * @param chain
      * @param address
      * @param header
      */
-    public static void blockSignature(int chainId, String address, BlockHeader header) throws NulsException {
+    public static void blockSignature(Chain chain, String address, BlockHeader header) throws NulsException {
         try {
-            Properties properties = ConfigLoader.loadProperties(ConsensusConstant.PASSWORD_CONFIG_NAME);
-            String password = properties.getProperty(ConsensusConstant.PASSWORD, ConsensusConstant.PASSWORD);
+            /*Properties properties = ConfigLoader.loadProperties(ConsensusConstant.PASSWORD_CONFIG_NAME);
+            String password = properties.getProperty(ConsensusConstant.PASSWORD, ConsensusConstant.PASSWORD);*/
             Map<String, Object> callParams = new HashMap<>(4);
-            callParams.put("chainId", chainId);
+            callParams.put("chainId", chain.getConfig().getChainId());
             callParams.put("address", address);
-            callParams.put("password", password);
+            callParams.put("password", chain.getConfig().getPassword());
             callParams.put("dataHex", HexUtil.encode(header.getHash().getDigestBytes()));
             Response signResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_signBlockDigest", callParams);
             if (!signResp.isSuccess()) {
@@ -306,8 +308,9 @@ public class CallMethodUtils {
             String stateRoot = (String) signResult.get("stateRoot");
             if (null == stateRoot) {
                 extendsData.setStateRoot(preStateRoot);
+            }else{
+                extendsData.setStateRoot(HexUtil.decode(stateRoot));
             }
-            extendsData.setStateRoot(HexUtil.decode(stateRoot));
             return txList;
         } catch (Exception e) {
             chain.getLoggerMap().get(ConsensusConstant.CONSENSUS_LOGGER_NAME).error(e);

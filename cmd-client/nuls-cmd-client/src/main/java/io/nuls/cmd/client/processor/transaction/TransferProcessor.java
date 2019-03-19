@@ -35,6 +35,7 @@ import io.nuls.cmd.client.CommandHelper;
 import io.nuls.cmd.client.CommandResult;
 import io.nuls.cmd.client.Config;
 import io.nuls.cmd.client.processor.CommandProcessor;
+import io.nuls.cmd.client.utils.Na;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.model.StringUtils;
@@ -112,7 +113,7 @@ public class TransferProcessor extends TransactionBaseProcessor implements Comma
     private TransferReq buildTransferReq(String[] args) {
         String formAddress = args[1];
         String toAddress = args[2];
-        BigInteger amount = new BigInteger(args[3]);
+        BigInteger amount = Na.parseNuls(args[3]).toBigInteger();
         TransferReq.TransferReqBuilder builder =
                 new TransferReq.TransferReqBuilder(config.getChainId(),config.getAssetsId())
                         .addForm(formAddress,getPwd("Enter your account password"), amount)

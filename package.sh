@@ -256,7 +256,7 @@ copyModuleNcfToModules(){
 		fi
 	done < ./module.ncf
 #	 merge common module.ncf and private module.ncf to module.tmep.ncf
-	sh "${PROJECT_PATH}/build/merge-ncf.sh" "${PROJECT_PATH}/module.ncf" $moduleNcf
+	sh "${PROJECT_PATH}/build/merge-ncf.sh" "${BUILD_PATH}/module-prod.ncf" $moduleNcf
 	rm $moduleNcf
 	sedCommand+=" -e 's/%MAIN_CLASS_NAME%/${mainClassName}/g' "
     echo $sedCommand

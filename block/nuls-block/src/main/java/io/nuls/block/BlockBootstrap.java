@@ -84,7 +84,7 @@ public class BlockBootstrap extends RpcModule {
         super.init();
         initCfg();
         //读取配置文件，数据存储根目录，初始化打开该目录下所有表连接并放入缓存
-        RocksDBService.init(blockConfig.getDataPath());
+        RocksDBService.init(blockConfig.getDataFolder());
     }
 
     /**

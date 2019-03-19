@@ -162,13 +162,6 @@ public class ConsensusProcess {
         * After packaging, check whether the packaged block and the latest block in the main chain are continuous. If the block is not continuous,
         * the local node needs to repackage the block when it receives the packaged block from the previous consensus node in the packaging process.
         */
-        BlockHeader header =chain.getNewestHeader();
-        boolean rePacking = !block.getHeader().getPreHash().equals(header.getHash());
-        if(rePacking){
-            start = System.currentTimeMillis();
-            block=doPacking(chain, self, round);
-            consensusLogger.info("doPacking use:" + (System.currentTimeMillis() - start) + "ms");
-        }
         if (null == block) {
             consensusLogger.error("make a null block");
             return;
@@ -189,7 +182,7 @@ public class ConsensusProcess {
      * Otherwise, if the block from the previous node has not been received after waiting for a certain time, it will be packed directly.
      * */
     private void waitReceiveNewestBlock(Chain chain,MeetingMember self, MeetingRound round){
-        long timeout = chain.getConfig().getPackingInterval()/2;
+        long timeout = chain.getConfig().getPackingInterval()/5;
         long endTime = self.getPackStartTime() + timeout;
         boolean hasReceiveNewestBlock;
         try {
@@ -290,6 +283,15 @@ public class ConsensusProcess {
         consensusManager.addConsensusTx(chain,bestBlock,packingTxList,self,round);
         bd.setTxList(packingTxList);
         Block newBlock = consensusManager.createBlock(chain,bd, self.getAgent().getPackingAddress());
+        /*
+        * 验证打包中途是否收到新区块
+        * Verify that new blocks are received halfway through packaging
+        * */
+        bestBlock = chain.getNewestHeader();
+        if(!newBlock.getHeader().getPreHash().equals(bestBlock.getHash())){
+            newBlock.getHeader().setPreHash(bestBlock.getHash());
+            newBlock.getHeader().setHeight(bestBlock.getHeight());
+        }
         consensusLogger.info("make block height:" + newBlock.getHeader().getHeight() + ",txCount: " + newBlock.getTxs().size() + " , block size: " + newBlock.size() + " , time:" + DateUtils.convertDate(new Date(newBlock.getHeader().getTime())) + ",packEndTime:" +
                 DateUtils.convertDate(new Date(self.getPackEndTime()))+",hash:"+newBlock.getHeader().getHash().getDigestHex()+",preHash:"+newBlock.getHeader().getPreHash().getDigestHex());
         return newBlock;

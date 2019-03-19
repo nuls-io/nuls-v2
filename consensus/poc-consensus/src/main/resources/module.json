@@ -1,5 +1,6 @@
 {
-  "configBean":{
+  "dataFolder": "consensus",
+  "consensusConfig":{
     "packingInterval":10000,
     "inflationAmount":500000000000000,
     "blockSize":10,
