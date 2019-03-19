@@ -3,7 +3,9 @@ package io.nuls.contract;
 import io.nuls.contract.config.ContractConfig;
 import io.nuls.contract.config.NulsConfig;
 import io.nuls.contract.constant.ContractConstant;
+import io.nuls.contract.constant.ContractDBConstant;
 import io.nuls.contract.manager.ChainManager;
+import io.nuls.contract.util.ContractUtil;
 import io.nuls.contract.util.VMContext;
 import io.nuls.contract.vm.program.ProgramMethod;
 import io.nuls.db.service.RocksDBService;
@@ -45,7 +47,7 @@ public class ContractBootStrap extends RpcModule {
 
     public static void main(String[] args) {
         if (args == null || args.length == 0) {
-            args = new String[]{HostInfo.getLocalIP() + ":8887/ws"};
+            args = new String[]{"ws://" + HostInfo.getLocalIP() + ":8887/ws"};
         }
         NulsRpcModuleBootstrap.run("io.nuls", args);
     }
@@ -60,9 +62,9 @@ public class ContractBootStrap extends RpcModule {
             super.init();
             initSys();
             initNulsConfig();
+            initDB();
             initLanguage();
             initNRC20Standard();
-            initDB();
         } catch (Exception e) {
             Log.error("AccountBootsrap init error!");
             throw new RuntimeException(e);
@@ -123,7 +125,8 @@ public class ContractBootStrap extends RpcModule {
      */
     private static void initDB() throws IOException {
         RocksDBService.init(NulsConfig.DATA_PATH);
-
+        ContractUtil.createTable(ContractDBConstant.DB_NAME_CONGIF);
+        ContractUtil.createTable(ContractDBConstant.DB_NAME_LANGUAGE);
     }
 
     /**

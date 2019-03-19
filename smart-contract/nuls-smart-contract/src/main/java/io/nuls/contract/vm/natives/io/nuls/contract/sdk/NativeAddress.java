@@ -226,6 +226,7 @@ public class NativeAddress {
         programCall.setMethodDesc(methodDesc);
         programCall.setArgs(args);
         programCall.setEstimateGas(programInvoke.isEstimateGas());
+        programCall.setViewMethod(programInvoke.isViewMethod());
         programCall.setInternalCall(true);
 
         if (programCall.getValue().compareTo(BigInteger.ZERO) > 0) {
