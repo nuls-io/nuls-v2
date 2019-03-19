@@ -1,6 +1,7 @@
 package io.nuls.transaction.constant;
 
 import io.nuls.tools.core.annotation.Configuration;
+import io.nuls.tools.core.annotation.Value;
 import io.nuls.transaction.model.bo.config.ConfigBean;
 import lombok.Data;
 
@@ -14,8 +15,13 @@ import lombok.Data;
 public class TxConfig {
     /** 当前链默认配置*/
     private ConfigBean chainConfig;
-    /** 模块数据根目录*/
-    private String dbRootPath;
+    /**
+     * ROCK DB 数据库文件存储路径
+     */
+    @Value("DataPath")
+    private String dataPath;
+    /** 交易模块数据根目录*/
+    private String txDataRoot;
     /** 模块code*/
     private String moduleCode;
     /** 主链链ID*/

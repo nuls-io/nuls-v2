@@ -174,7 +174,7 @@ public class TransactionCmd extends BaseCmd {
     @Parameter(parameterName = "chainId", parameterType = "int")
     @Parameter(parameterName = "endTimestamp", parameterType = "long")
     @Parameter(parameterName = "maxTxDataSize", parameterType = "int")
-    @Parameter(parameterName = "height", parameterType = "long")
+//    @Parameter(parameterName = "height", parameterType = "long")
     @Parameter(parameterName = "blockTime", parameterType = "long")
     @Parameter(parameterName = "packingAddress", parameterType = "String")
     @Parameter(parameterName = "preStateRoot", parameterType = "String")
@@ -184,7 +184,7 @@ public class TransactionCmd extends BaseCmd {
             ObjectUtils.canNotEmpty(params.get("chainId"), TxErrorCode.PARAMETER_ERROR.getMsg());
             ObjectUtils.canNotEmpty(params.get("endTimestamp"), TxErrorCode.PARAMETER_ERROR.getMsg());
             ObjectUtils.canNotEmpty(params.get("maxTxDataSize"), TxErrorCode.PARAMETER_ERROR.getMsg());
-            ObjectUtils.canNotEmpty(params.get("height"), TxErrorCode.PARAMETER_ERROR.getMsg());
+//            ObjectUtils.canNotEmpty(params.get("height"), TxErrorCode.PARAMETER_ERROR.getMsg());
             ObjectUtils.canNotEmpty(params.get("blockTime"), TxErrorCode.PARAMETER_ERROR.getMsg());
             ObjectUtils.canNotEmpty(params.get("packingAddress"), TxErrorCode.PARAMETER_ERROR.getMsg());
             ObjectUtils.canNotEmpty(params.get("preStateRoot"), TxErrorCode.PARAMETER_ERROR.getMsg());
@@ -197,7 +197,8 @@ public class TransactionCmd extends BaseCmd {
             //交易数据最大容量值
             int maxTxDataSize = (int) params.get("maxTxDataSize");
 
-            long blockHeight = Long.valueOf(params.get("height").toString());
+//            long blockHeight = Long.valueOf(params.get("height").toString());
+            long blockHeight = chain.getBestBlockHeight();
             long blockTime = (long) params.get("blockTime");
             String packingAddress = (String) params.get("packingAddress");
             String preStateRoot = (String) params.get("preStateRoot");

@@ -115,8 +115,6 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
         }
 
         chain.getLoggerMap().get(TxConstant.LOG_TX).debug("保存创世块交易成功, H2数据库生成{}条交易记录", debugCount);
-        //修改重新打包状态,如果共识正在打包则需要重新打包
-        chain.getRePackage().set(true);
         return true;
     }
 
@@ -139,13 +137,7 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
                 Transaction tx = unconfirmedTxStorageService.getTx(chain.getChainId(), hash);
                 txList.add(tx);
             }
-            boolean saveResult = saveBlockTxList(chain, txList, blockHeaderHex, false);
-            if (saveResult) {
-                //修改重新打包状态,如果共识正在打包则需要重新打包
-                chain.getLoggerMap().get(TxConstant.LOG_TX).debug("收到新块,修改重新打包状态,如果共识正在打包则需要重新打包 rePackage:{}", "true");
-                chain.getRePackage().set(true);
-            }
-            return saveResult;
+            return saveBlockTxList(chain, txList, blockHeaderHex, false);
         } catch (Exception e) {
             chain.getLoggerMap().get(TxConstant.LOG_TX).error(e);
             return false;

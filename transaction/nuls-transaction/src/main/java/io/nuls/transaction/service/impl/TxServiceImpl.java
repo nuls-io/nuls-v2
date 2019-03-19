@@ -56,6 +56,8 @@ import io.nuls.transaction.utils.TxUtil;
 
 import java.math.BigInteger;
 import java.util.*;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 import static io.nuls.transaction.utils.LoggerUtil.Log;
 
@@ -92,6 +94,8 @@ public class TxServiceImpl implements TxService {
 
     @Autowired
     private TxConfig txConfig;
+
+    private Lock packageLock = new ReentrantLock();
 
     @Override
     public boolean register(Chain chain, TxRegister txRegister) {
@@ -557,10 +561,11 @@ public class TxServiceImpl implements TxService {
      * 3.冲突检测，模块统一验证，如果有没验证通过的交易，则将该交易之后的所有交易再从1.开始执行一次
      */
     @Override
-    public TxPackage getPackableTxs(Chain chain, long endtimestamp, long maxTxDataSize, long blockHeight, long blockTime, String packingAddress, String preStateRoot) throws NulsException {
+    public TxPackage getPackableTxs(Chain chain, long endtimestamp, long maxTxDataSize,long blockHeight, long blockTime, String packingAddress, String preStateRoot) throws NulsException {
+        packageLock.lock();
         chain.getLoggerMap().get(TxConstant.LOG_TX).debug("%%%%%%%%% TX开始打包 %%%%%%%%%%%% height:{}", blockHeight);
         //重置重新打包标识为false
-        chain.getRePackage().set(false);
+//        chain.getRePackage().set(false);
         //组装统一验证参数数据,key为各模块统一验证器cmd
         Map<TxRegister, List<String>> moduleVerifyMap = new HashMap<>(TxConstant.INIT_CAPACITY_16);
         List<Transaction> packingTxList = new ArrayList<>();
@@ -679,14 +684,14 @@ public class TxServiceImpl implements TxService {
                     moduleVerifyMap.put(txRegister, txHexs);
                 }
                 //检测打包状态,如果有接收新区块,把取出的交易放回到打包队列
-                if (chain.getRePackage().get()) {
+                if (blockHeight < chain.getBestBlockHeight()) {
                     chain.getLoggerMap().get(TxConstant.LOG_TX).debug("有接收新区块-1,把取出的交易放回到打包队列...");
                     for(int i = packingTxList.size()-1; i >= 0;i--) {
                         Transaction transaction = packingTxList.get(i);
                         chain.getLoggerMap().get(TxConstant.LOG_TX).debug("有接收新区块-1,把取出的交易放回到打包队列, hash:{}", transaction.getHash().getDigestHex());
                         packablePool.addInFirst(chain, transaction, false);
                     }
-                    return getPackableTxs(chain, endtimestamp, maxTxDataSize, blockHeight, blockTime, packingAddress, preStateRoot);
+                    return getPackableTxs(chain, endtimestamp, maxTxDataSize, chain.getBestBlockHeight(), blockTime, packingAddress, preStateRoot);
                 }
                 long loopOnce = NetworkCall.getCurrentTimeMillis() - currentTimeMillis;
 //                chain.getLoggerMap().get(TxConstant.LOG_TX).debug("########## 分组花费时间:{} ",  NetworkCall.getCurrentTimeMillis() - debugeMap);
@@ -727,14 +732,14 @@ public class TxServiceImpl implements TxService {
                 }
             }
             //如果有接收新区块,把取出的交易放回到打包队列
-            if (chain.getRePackage().get()) {
+            if (blockHeight < chain.getBestBlockHeight()) {
                 chain.getLoggerMap().get(TxConstant.LOG_TX).debug("有接收新区块-2,把取出的交易放回到打包队列...");
                 for(int i = packingTxList.size()-1; i >= 0;i--) {
                     Transaction transaction = packingTxList.get(i);
                     chain.getLoggerMap().get(TxConstant.LOG_TX).debug("有接收新区块-2,把取出的交易放回到打包队列, hash:{}", transaction.getHash().getDigestHex());
                     packablePool.addInFirst(chain, transaction, false);
                 }
-                return getPackableTxs(chain, endtimestamp, maxTxDataSize, blockHeight, blockTime, packingAddress, preStateRoot);
+                return getPackableTxs(chain, endtimestamp, maxTxDataSize, chain.getBestBlockHeight(), blockTime, packingAddress, preStateRoot);
             }
             chain.getLoggerMap().get(TxConstant.LOG_TX).debug("---##########--- 批量验证花费时间:{} ", NetworkCall.getCurrentTimeMillis() - debugeBatch);
 
@@ -775,6 +780,8 @@ public class TxServiceImpl implements TxService {
                 packablePool.addInFirst(chain, tx, false);
             }
             throw new NulsException(e);
+        } finally {
+            packageLock.unlock();
         }
 
     }
