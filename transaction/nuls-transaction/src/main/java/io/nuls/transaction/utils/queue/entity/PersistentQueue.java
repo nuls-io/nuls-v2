@@ -64,7 +64,7 @@ public class PersistentQueue {
      */
     public PersistentQueue(String queueName, long maxSize) throws Exception {
         txConfig = SpringLiteContext.getBean(TxConfig.class);
-        this.queueName = URLDecoder.decode(DBUtils.genAbsolutePath(txConfig.getDbRootPath()) + File.separator + queueName, "UTF-8");
+        this.queueName = URLDecoder.decode(DBUtils.genAbsolutePath(txConfig.getDataPath() + txConfig.getTxDataRoot()) + File.separator + queueName, "UTF-8");
         this.maxSize = maxSize;
         this.queue = new FQueue(this.queueName, maxSize);
     }
