@@ -7,9 +7,9 @@ if [ ! -d $LOGS_DIR ]; then
 fi
 START_DATE=`date +%Y%m%d%H%M%S`
 STDOUT_FILE=$LOGS_DIR/stdout.log
-echoRed() { echo $'\e[0;31m'$1$'\e[0m'; }
-echoGreen() { echo $'\e[0;32m'$1$'\e[0m'; }
-echoYellow() { echo $'\e[0;33m'$1$'\e[0m'; }
+echoRed() { echo -e $'\e[0;31m'$1$'\e[0m'; }
+echoGreen() { echo -e $'\e[0;32m'$1$'\e[0m'; }
+echoYellow() { echo -e $'\e[0;33m'$1$'\e[0m'; }
 log(){
     now=`date "+%Y-%m-%d %H:%M:%S"`
     echo "${now}    $@" >> ${STDOUT_FILE}
@@ -104,9 +104,7 @@ JAVA_OPTS="$JAVA_OPTS $JAVA_GC_LOG $JAVA_OOM_DUMP  -Dsys.name=$APP_NAME -Dactive
 # echo "${JAVA} ${JAVA_OPTS} ${CLASSPATH} ${MAIN_CLASS} ${NulstarUrl}"
 nohup ${JAVA} ${JAVA_OPTS} ${CLASSPATH} ${MAIN_CLASS} ${NulstarUrl} > ${STDOUT_FILE} 2>&1 &
 
-log "${APP_NAME} IS STARTING"
-log "${APP_NAME} START CMD: ${JAVA} ${JAVA_OPTS} ${CLASSPATH} ${MAIN_CLASS} ${NulstarUrl}"
-log "${APP_NAME} 日志文件: ${STDOUT_FILE}"
+log "${APP_NAME} IS STARTING \n ${APP_NAME} START CMD: ${JAVA} ${JAVA_OPTS} ${CLASSPATH} ${MAIN_CLASS} ${NulstarUrl}  \n ${APP_NAME} 日志文件: ${STDOUT_FILE}"
 # echo "${APP_NAME} start cmd:" $'\e[0;31m'${JAVA} ${JAVA_OPTS} ${CLASSPATH} ${MAIN_CLASS} ${NulstarUrl}$'\e[0m'
 # echo "${APP_NAME} 日志文件: " $'\e[0;31m'${STDOUT_FILE}$'\e[0m'
 

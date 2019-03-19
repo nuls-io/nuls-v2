@@ -1,15 +1,30 @@
 #!/bin/bash
 #cd ./mykernel/1.0.0
+function get_fullpath()
+{
+   _PWD=`pwd`
+   if [ -d $1 ]; then
+      cd $1
+   elif [ -f $1 ]; then
+      cd `dirname $1`
+   else
+      cd
+   fi
+   echo $(cd ..; cd -)
+   cd ${_PWD} >/dev/null
+}
+
 RUNBLOCK=
 while getopts bj:c: name
 do
             case $name in
-            b)	   RUNBLOCK="1";;
+            b)     RUNBLOCK="1";;
             j)     JAVA_HOME="$OPTARG";;
-            c)     CONFIG="$OPTARG";;
+            c)     CONFIG="`get_fullpath $OPTARG`/${OPTARG##*/}";;
             ?)     exit 2;;
            esac
 done
+echo $CONFIG
 JAVA="$JAVA_HOME/bin/java"
 if [[ ! -r "$JAVA" ]]; then
     JAVA='java'
