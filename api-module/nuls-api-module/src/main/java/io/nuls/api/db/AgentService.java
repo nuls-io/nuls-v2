@@ -97,6 +97,26 @@ public class AgentService {
         mongoDBService.bulkWrite(AGENT_TABLE + chainID, modelList);
     }
 
+    public void rollbackAgentList(int chainId, List<AgentInfo> agentInfoList) {
+        initCache();
+        if (agentInfoList.isEmpty()) {
+            return;
+        }
+        ApiCache apiCache = CacheManager.getCache(chainId);
+        List<WriteModel<Document>> modelList = new ArrayList<>();
+        for (AgentInfo agentInfo : agentInfoList) {
+            if (agentInfo.isNew()) {
+                modelList.add(new DeleteOneModel(Filters.eq("_id", agentInfo.getTxHash())));
+                apiCache.getAgentMap().remove(agentInfo.getTxHash());
+            } else {
+                Document document = DocumentTransferTool.toDocument(agentInfo, "txHash");
+                modelList.add(new ReplaceOneModel<>(Filters.eq("_id", agentInfo.getTxHash()), document));
+                apiCache.getAgentMap().put(agentInfo.getTxHash(), agentInfo);
+            }
+        }
+        mongoDBService.bulkWrite(AGENT_TABLE + chainId, modelList);
+    }
+
     public List<AgentInfo> getAgentList(int chainId, long startHeight) {
         ApiCache apiCache = CacheManager.getCache(chainId);
         Collection<AgentInfo> agentInfos = apiCache.getAgentMap().values();

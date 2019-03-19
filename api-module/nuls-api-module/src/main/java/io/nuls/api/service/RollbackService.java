@@ -53,12 +53,12 @@ public class RollbackService {
     private List<String> punishTxHashList = new ArrayList<>();
 
     public boolean rollbackBlock(int chainId, long blockHeight) {
+        System.out.println("--------rollbackBlock:" + blockHeight);
         clear();
 
         BlockInfo blockInfo = queryBlock(chainId, blockHeight);
         if (blockInfo == null) {
-            chainService.rollbackComplete(chainId);
-            return true;
+            return false;
         }
 
         findAddProcessAgentOfBlock(chainId, blockInfo);
@@ -68,7 +68,8 @@ public class RollbackService {
         roundManager.rollback(chainId, blockInfo);
 
         save(chainId, blockInfo);
-        return false;
+
+        return true;
     }
 
     private void findAddProcessAgentOfBlock(int chainId, BlockInfo blockInfo) {
@@ -367,7 +368,7 @@ public class RollbackService {
         }
 
         if (syncInfo.getStep() == 20) {
-            agentService.saveAgentList(chainId, agentInfoList);
+            agentService.rollbackAgentList(chainId, agentInfoList);
             syncInfo.setStep(10);
             chainService.updateStep(syncInfo);
         }
@@ -379,6 +380,7 @@ public class RollbackService {
         transactionService.rollbackTx(chainId, blockInfo.getHeader().getTxHashList());
         blockService.deleteBlockHeader(chainId, blockInfo.getHeader().getHeight());
 
+
         syncInfo.setStep(100);
         syncInfo.setBestHeight(blockInfo.getHeader().getHeight() - 1);
         chainService.updateStep(syncInfo);
@@ -388,12 +390,18 @@ public class RollbackService {
         ChainInfo chainInfo = CacheManager.getChainInfo(chainId);
         if (output.getChainId() == chainInfo.getChainId() && output.getAssetsId() == chainInfo.getDefaultAsset().getAssetId()) {
             AccountInfo accountInfo = queryAccountInfo(chainId, output.getAddress());
-            accountInfo.setTotalIn(accountInfo.getTotalIn().add(output.getAmount()));
-            accountInfo.setTotalBalance(accountInfo.getTotalBalance().add(output.getAmount()));
+            accountInfo.setTotalIn(accountInfo.getTotalIn().subtract(output.getAmount()));
+            accountInfo.setTotalBalance(accountInfo.getTotalBalance().subtract(output.getAmount()));
+            if (accountInfo.getTotalBalance().compareTo(BigInteger.ZERO) < 0) {
+                throw new NulsRuntimeException(ApiErrorCode.DATA_ERROR, "account[" + accountInfo.getAddress() + "] totalBalance < 0");
+            }
         }
 
         AccountLedgerInfo ledgerInfo = queryLedgerInfo(chainId, output.getAddress(), output.getChainId(), output.getAssetsId());
-        ledgerInfo.setTotalBalance(ledgerInfo.getTotalBalance().add(output.getAmount()));
+        ledgerInfo.setTotalBalance(ledgerInfo.getTotalBalance().subtract(output.getAmount()));
+        if (ledgerInfo.getTotalBalance().compareTo(BigInteger.ZERO) < 0) {
+            throw new NulsRuntimeException(ApiErrorCode.DATA_ERROR, "account[" + ledgerInfo.getAddress() + "] totalBalance < 0");
+        }
         return ledgerInfo;
     }
 
@@ -401,17 +409,12 @@ public class RollbackService {
         ChainInfo chainInfo = CacheManager.getChainInfo(chainId);
         if (input.getChainId() == chainInfo.getChainId() && input.getAssetsId() == chainInfo.getDefaultAsset().getAssetId()) {
             AccountInfo accountInfo = queryAccountInfo(chainId, input.getAddress());
-            accountInfo.setTotalIn(accountInfo.getTotalIn().subtract(input.getAmount()));
-            accountInfo.setTotalBalance(accountInfo.getTotalBalance().subtract(input.getAmount()));
-            if (accountInfo.getTotalBalance().compareTo(BigInteger.ZERO) < 0) {
-                throw new NulsRuntimeException(ApiErrorCode.DATA_ERROR, "account[" + accountInfo.getAddress() + "] totalBalance < 0");
-            }
+            accountInfo.setTotalIn(accountInfo.getTotalIn().add(input.getAmount()));
+            accountInfo.setTotalBalance(accountInfo.getTotalBalance().add(input.getAmount()));
+
         }
         AccountLedgerInfo ledgerInfo = queryLedgerInfo(chainId, input.getAddress(), input.getChainId(), input.getAssetsId());
-        ledgerInfo.setTotalBalance(ledgerInfo.getTotalBalance().subtract(input.getAmount()));
-        if (ledgerInfo.getTotalBalance().compareTo(BigInteger.ZERO) < 0) {
-            throw new NulsRuntimeException(ApiErrorCode.DATA_ERROR, "accountLedger[" + ledgerInfo.getAddress() + "_" + ledgerInfo.getChainId() + "_" + ledgerInfo.getAssetId() + "] totalBalance < 0");
-        }
+        ledgerInfo.setTotalBalance(ledgerInfo.getTotalBalance().add(input.getAmount()));
         return ledgerInfo;
     }
 

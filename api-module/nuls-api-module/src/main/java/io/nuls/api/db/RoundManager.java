@@ -265,6 +265,9 @@ public class RoundManager {
         roundService.removeRound(chainId, currentRound.getIndex());
         PocRound round = null;
         long roundIndex = currentRound.getIndex() - 1;
+        if(currentRound.getStartHeight() == 1) {
+            roundIndex = 1;
+        }
         while (round == null) {
             round = roundService.getRound(chainId, roundIndex--);
         }
