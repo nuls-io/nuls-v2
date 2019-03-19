@@ -49,15 +49,8 @@ import java.util.Map;
  * @date 2018/12/11
  */
 @Service
-public class ConfigStorageServiceImpl implements ConfigStorageService, InitializingBean {
+public class ConfigStorageServiceImpl implements ConfigStorageService {
 
-    @Override
-    public void afterPropertiesSet() throws NulsException {
-        /**
-         * 一个节点共用，不区分chain
-         */
-        ContractUtil.createTable(ContractDBConstant.DB_NAME_CONGIF);
-    }
 
     @Override
     public boolean save(ConfigBean bean, int chainID) throws Exception {

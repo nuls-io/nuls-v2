@@ -14,15 +14,7 @@ import io.nuls.tools.model.ByteUtils;
  * @date: 2019-02-26
  */
 @Service
-public class LanguageStorageServiceImpl implements LanguageStorageService, InitializingBean {
-
-    @Override
-    public void afterPropertiesSet() throws NulsException {
-        /**
-         * 一个节点共用，不区分chain
-         */
-        ContractUtil.createTable(ContractDBConstant.DB_NAME_LANGUAGE);
-    }
+public class LanguageStorageServiceImpl implements LanguageStorageService {
 
     @Override
     public boolean saveLanguage(String language) throws Exception {

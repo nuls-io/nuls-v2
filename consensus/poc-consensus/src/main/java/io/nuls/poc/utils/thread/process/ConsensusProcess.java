@@ -21,6 +21,7 @@ import io.nuls.tools.model.DateUtils;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.log.logback.NulsLogger;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
@@ -275,6 +276,10 @@ public class ConsensusProcess {
         extendsData.setContinuousIntervalCount((short) 100);
 
         List<Transaction> packingTxList = CallMethodUtils.getPackingTxList(chain,bd.getHeight(),bd.getTime(),AddressTool.getStringAddressByBytes(self.getAgent().getPackingAddress()),extendsData);
+
+        if(packingTxList == null){
+            packingTxList = new ArrayList<>();
+        }
 
         bd.setExtendsData(extendsData);
         /*
