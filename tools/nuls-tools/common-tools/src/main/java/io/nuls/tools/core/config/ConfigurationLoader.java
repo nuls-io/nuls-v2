@@ -68,6 +68,10 @@ public class ConfigurationLoader {
         loadJarPathModule();
         loadJvmOptionActiveModule();
         loadForPersist();
+        if(configData.isEmpty()){
+            Log.info("config item list is empty");
+            return ;
+        }
         Log.info("config item list:");
         int maxKeyLength = configData.keySet().stream().max((d1,d2)->d1.length() > d2.length() ? 1 : -1).get().length();
         configData.entrySet().forEach(entry->{
