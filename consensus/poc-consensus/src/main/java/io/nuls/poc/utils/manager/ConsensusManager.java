@@ -338,7 +338,7 @@ public class ConsensusManager {
         header.setMerkleHash(NulsDigestData.calcMerkleDigestData(txHashList));
         header.setHash(NulsDigestData.calcDigestData(block.getHeader()));
         try {
-            CallMethodUtils.blockSignature(chain.getConfig().getChainId(),AddressTool.getStringAddressByBytes(packingAddress),header);
+            CallMethodUtils.blockSignature(chain,AddressTool.getStringAddressByBytes(packingAddress),header);
         }catch (NulsException e){
             chain.getLoggerMap().get(ConsensusConstant.CONSENSUS_LOGGER_NAME).error(e);
             return null;
