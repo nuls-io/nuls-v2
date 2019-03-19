@@ -35,7 +35,6 @@ import io.nuls.rpc.modulebootstrap.RpcModule;
 import io.nuls.rpc.modulebootstrap.RpcModuleState;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
-import io.nuls.tools.core.annotation.Configuration;
 import io.nuls.tools.core.ioc.SpringLiteContext;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.log.Log;
@@ -68,7 +67,7 @@ import static java.nio.charset.StandardCharsets.UTF_8;
  * @date: 2019/3/4
  */
 @Component
-public class TransactionBootStrap extends RpcModule {
+public class TransactionBootstrap extends RpcModule {
 
     @Autowired
     TxConfig txConfig;
@@ -193,7 +192,7 @@ public class TransactionBootStrap extends RpcModule {
         try {
             LanguageStorageService languageService = SpringLiteContext.getBean(LanguageStorageService.class);
             String languageDB = languageService.getLanguage();
-            I18nUtils.loadLanguage(TransactionBootStrap.class, "languages", txConfig.getLanguage());
+            I18nUtils.loadLanguage(TransactionBootstrap.class, "languages", txConfig.getLanguage());
             String language = null == languageDB ? I18nUtils.getLanguage() : languageDB;
             I18nUtils.setLanguage(language);
             if (null == languageDB) {

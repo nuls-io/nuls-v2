@@ -3,7 +3,7 @@ package io.nuls.transaction.storage.rocksdb;
 import io.nuls.base.data.NulsDigestData;
 import io.nuls.tools.core.ioc.SpringLiteContext;
 import io.nuls.transaction.TestConstant;
-import io.nuls.transaction.TransactionBootStrap;
+import io.nuls.transaction.TransactionBootstrap;
 import io.nuls.transaction.manager.ChainManager;
 import io.nuls.transaction.model.bo.CrossTx;
 import org.junit.Assert;
@@ -21,7 +21,7 @@ public class UnverifiedCtxStorageServiceTest {
     @BeforeClass
     public static void beforeTest() throws Exception {
         //初始化数据库配置文件
-        new TransactionBootStrap().initDB();
+        new TransactionBootstrap().initDB();
         //初始化上下文
         SpringLiteContext.init(TestConstant.CONTEXT_PATH);
         unverifiedCtxStorageService = SpringLiteContext.getBean(UnverifiedCtxStorageService.class);

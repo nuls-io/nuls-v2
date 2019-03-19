@@ -88,7 +88,7 @@ public class TxValid {
 
     @Test
     public void transfer() throws Exception {
-        for (int i = 0; i < 2000; i++) {
+        for (int i = 0; i < 10000; i++) {
             String hash = createTransfer();
             System.out.println("count:" + (i+1));
             System.out.println("");

@@ -4,7 +4,7 @@ import io.nuls.base.data.NulsDigestData;
 import io.nuls.base.data.Transaction;
 import io.nuls.tools.core.ioc.SpringLiteContext;
 import io.nuls.transaction.TestConstant;
-import io.nuls.transaction.TransactionBootStrap;
+import io.nuls.transaction.TransactionBootstrap;
 import io.nuls.transaction.manager.ChainManager;
 import org.junit.Assert;
 import org.junit.BeforeClass;
@@ -20,7 +20,7 @@ public class UnconfirmedTxStorageServiceTest {
     @BeforeClass
     public static void beforeTest() throws Exception {
         //初始化数据库配置文件
-        new TransactionBootStrap().initDB();
+        new TransactionBootstrap().initDB();
         //初始化上下文
         SpringLiteContext.init(TestConstant.CONTEXT_PATH);
         unconfirmedTxStorageService = SpringLiteContext.getBean(UnconfirmedTxStorageService.class);

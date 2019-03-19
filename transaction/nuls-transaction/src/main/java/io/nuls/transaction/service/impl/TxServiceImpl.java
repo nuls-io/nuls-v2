@@ -423,6 +423,7 @@ public class TxServiceImpl implements TxService {
 
     @Override
     public List<String> transactionModuleValidator(Chain chain, List<String> txHexList) throws NulsException {
+        //验证不同的交易是否含有相同的CrossTxData(原始交易hash),如果有则不通过
         Map<String, CrossTxData> map = new HashMap<>(TxConstant.INIT_CAPACITY_8);
         List<String> list = new ArrayList<>();
         //todo 有测试代码
@@ -679,7 +680,7 @@ public class TxServiceImpl implements TxService {
                 }
                 //检测打包状态,如果有接收新区块,把取出的交易放回到打包队列
                 if (chain.getRePackage().get()) {
-//                    for (Transaction transaction : packingTxList) {
+                    chain.getLoggerMap().get(TxConstant.LOG_TX).debug("有接收新区块-1,把取出的交易放回到打包队列...");
                     for(int i = packingTxList.size()-1; i >= 0;i--) {
                         Transaction transaction = packingTxList.get(i);
                         chain.getLoggerMap().get(TxConstant.LOG_TX).debug("有接收新区块-1,把取出的交易放回到打包队列, hash:{}", transaction.getHash().getDigestHex());
@@ -694,15 +695,15 @@ public class TxServiceImpl implements TxService {
                 chain.getLoggerMap().get(TxConstant.LOG_TX).debug("");
             }
             chain.getLoggerMap().get(TxConstant.LOG_TX).debug("--------------while end----花费时间:{}毫秒-------", loopDebug);
-            chain.getLoggerMap().get(TxConstant.LOG_TX).debug("取出的交易 - Start:");
-
+            chain.getLoggerMap().get(TxConstant.LOG_TX).debug("取出的交易 - size:{}", packingTxList.size());
+/*
             try {
                 for (int i = 0; i < packingTxList.size(); i++) {
                     chain.getLoggerMap().get(TxConstant.LOG_TX).debug(i + ": " + ((Transaction) packingTxList.get(i)).getHash().getDigestHex());
                 }
             } catch (Exception e) {
                 e.printStackTrace();
-            }
+            }*/
             chain.getLoggerMap().get(TxConstant.LOG_TX).debug("***");
             chain.getLoggerMap().get(TxConstant.LOG_TX).debug("");
             long debugeBatch = NetworkCall.getCurrentTimeMillis();
@@ -727,6 +728,7 @@ public class TxServiceImpl implements TxService {
             }
             //如果有接收新区块,把取出的交易放回到打包队列
             if (chain.getRePackage().get()) {
+                chain.getLoggerMap().get(TxConstant.LOG_TX).debug("有接收新区块-2,把取出的交易放回到打包队列...");
                 for(int i = packingTxList.size()-1; i >= 0;i--) {
                     Transaction transaction = packingTxList.get(i);
                     chain.getLoggerMap().get(TxConstant.LOG_TX).debug("有接收新区块-2,把取出的交易放回到打包队列, hash:{}", transaction.getHash().getDigestHex());
@@ -752,7 +754,9 @@ public class TxServiceImpl implements TxService {
                 }
             }
             TxPackage txPackage = new TxPackage(packableTxs, stateRoot);
+            chain.getLoggerMap().get(TxConstant.LOG_TX).debug("提供给共识的可打包交易packableTxs - size:{}",packableTxs.size());
             chain.getLoggerMap().get(TxConstant.LOG_TX).debug("提供给共识的可打包交易packableTxs - Rs:");
+
             for (int i = 0; i < packableTxs.size(); i++) {
                 chain.getLoggerMap().get(TxConstant.LOG_TX).debug(i + ": " + TxUtil.getTransaction(packableTxs.get(i)).getHash().getDigestHex());
             }
@@ -764,12 +768,12 @@ public class TxServiceImpl implements TxService {
 
             return txPackage;
         } catch (NulsException e) {
+            chain.getLoggerMap().get(TxConstant.LOG_TX).error(e);
             //可打包交易,全加回去
             for(int i = packingTxList.size()-1; i >= 0;i--) {
                 Transaction tx = packingTxList.get(i);
                 packablePool.addInFirst(chain, tx, false);
             }
-            chain.getLoggerMap().get(TxConstant.LOG_TX).error(e);
             throw new NulsException(e);
         }
 
