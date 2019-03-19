@@ -142,7 +142,7 @@ public class ContractTxHelper {
             BigInteger value = BigInteger.ZERO;
 
             if (!ContractUtil.checkPrice(price.longValue())) {
-                return Result.getFailed(ContractErrorCode.CONTRACT_MINIMUM_PRICE);
+                return Result.getFailed(CONTRACT_MINIMUM_PRICE_ERROR);
             }
 
             if (contractAddress == null) {
@@ -336,7 +336,7 @@ public class ContractTxHelper {
     public Result validateCall(int chainId, byte[] senderBytes, byte[] contractAddressBytes, BigInteger value, Long gasLimit, Long price, String methodName, String methodDesc, String[][] args) {
         try {
             if (!ContractUtil.checkPrice(price.longValue())) {
-                return Result.getFailed(ContractErrorCode.CONTRACT_MINIMUM_PRICE);
+                return Result.getFailed(CONTRACT_MINIMUM_PRICE_ERROR);
             }
 
             BlockHeader blockHeader = BlockCall.getLatestBlockHeader(chainId);

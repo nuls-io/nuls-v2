@@ -155,6 +155,11 @@ public class Frame {
         throwException(objectRef);
     }
 
+    public void throwArithmeticException(String message) {
+        ObjectRef objectRef = this.heap.runNewObject(VariableType.ARITHMETIC_EXCEPTION_TYPE, message);
+        throwException(objectRef);
+    }
+
     private void throwError(ObjectRef objectRef) {
         this.vm.getResult().error(objectRef);
     }

@@ -177,10 +177,15 @@ public class NativeAddress {
             value = BigInteger.ZERO;
         }
 
-        String callResult = call(address, methodName, methodDesc, args, value, frame);
+        ProgramResult programResult = call(address, methodName, methodDesc, args, value, frame);
+
+        if(!programResult.isSuccess()) {
+            return new Result();
+        }
+
         Object resultValue = null;
-        if (returnResult) {
-            resultValue = frame.heap.newString(callResult);
+        if (returnResult && programResult.isSuccess()) {
+            resultValue = frame.heap.newString(programResult.getResult());
         }
 
         Result result = NativeMethod.result(methodCode, resultValue, frame);
@@ -209,7 +214,7 @@ public class NativeAddress {
         return array;
     }
 
-    private static String call(String address, String methodName, String methodDesc, String[][] args, BigInteger value, Frame frame) {
+    private static ProgramResult call(String address, String methodName, String methodDesc, String[][] args, BigInteger value, Frame frame) {
         if (value.compareTo(BigInteger.ZERO) < 0) {
             throw new ErrorException(String.format("amount less than zero, value=%s", value), frame.vm.getGasUsed(), null);
         }
@@ -253,12 +258,16 @@ public class NativeAddress {
             frame.vm.getTransfers().addAll(programResult.getTransfers());
             frame.vm.getInternalCalls().addAll(programResult.getInternalCalls());
             frame.vm.getEvents().addAll(programResult.getEvents());
-            return programResult.getResult();
-        } else if (programResult.isError()) {
-            throw new ErrorException(programResult.getErrorMessage(), programResult.getGasUsed(), programResult.getStackTrace());
+            return programResult;
         } else {
-            throw new RuntimeException("error contract status");
+            frame.throwRuntimeException(programResult.getErrorMessage());
+            return programResult;
         }
+        //else if (programResult.isError()) {
+        //    throw new ErrorException(programResult.getErrorMessage(), programResult.getGasUsed(), programResult.getStackTrace());
+        //} else {
+        //    throw new RuntimeException("error contract status");
+        //}
 
     }
 

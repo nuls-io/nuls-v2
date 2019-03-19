@@ -86,7 +86,7 @@ public class ContractCmd extends BaseCmd {
             String packingAddress = (String) params.get("packingAddress");
             String preStateRoot = (String) params.get("preStateRoot");
 
-            Result result = contractService.begin(chainId, blockHeight, blockTime, packingAddress, preStateRoot);
+            Result result = contractService.begin(chainId, blockHeight + 1, blockTime, packingAddress, preStateRoot);
             if (result.isFailed()) {
                 return failed(result.getErrorCode());
             }

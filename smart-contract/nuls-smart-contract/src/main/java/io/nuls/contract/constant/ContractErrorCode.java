@@ -78,7 +78,7 @@ public interface ContractErrorCode {
     ErrorCode CONTRACT_LOCK = ErrorCode.init("100013");
     ErrorCode CONTRACT_NRC20_MAXIMUM_DECIMALS = ErrorCode.init("100014");
     ErrorCode CONTRACT_NRC20_MAXIMUM_TOTAL_SUPPLY = ErrorCode.init("100015");
-    ErrorCode CONTRACT_MINIMUM_PRICE = ErrorCode.init("100016");
+    ErrorCode CONTRACT_MINIMUM_PRICE_ERROR = ErrorCode.init("100016");
     ErrorCode CONTRACT_DELETE_BALANCE = ErrorCode.init("100017");
     ErrorCode CONTRACT_DELETE_CREATER = ErrorCode.init("100018");
     ErrorCode CONTRACT_DELETED = ErrorCode.init("100019");

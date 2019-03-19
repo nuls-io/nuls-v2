@@ -71,6 +71,7 @@ import java.math.BigInteger;
 import java.util.*;
 
 import static io.nuls.contract.constant.ContractCmdConstant.*;
+import static io.nuls.contract.constant.ContractConstant.CONTRACT_MINIMUM_PRICE;
 import static io.nuls.contract.constant.ContractConstant.MAX_GASLIMIT;
 import static io.nuls.contract.constant.ContractErrorCode.*;
 import static io.nuls.contract.util.ContractUtil.bigInteger2String;
@@ -202,7 +203,6 @@ public class ContractResource extends BaseCmd {
     @CmdAnnotation(cmd = IMPUTED_CREATE_GAS, version = 1.0, description = "imputed create gas")
     @Parameter(parameterName = "chainId", parameterType = "int")
     @Parameter(parameterName = "sender", parameterType = "String")
-    @Parameter(parameterName = "price", parameterType = "long")
     @Parameter(parameterName = "contractCode", parameterType = "String")
     @Parameter(parameterName = "args", parameterType = "Object[]")
     public Response imputedCreateGas(Map<String, Object> params) {
@@ -214,12 +214,8 @@ public class ContractResource extends BaseCmd {
             do {
                 Integer chainId = (Integer) params.get("chainId");
                 String sender = (String) params.get("sender");
-                Long price = Long.parseLong(params.get("price").toString());
                 String contractCode = (String) params.get("contractCode");
                 Object[] args = (Object[]) params.get("args");
-                if (price < 0) {
-                    break;
-                }
                 if (!AddressTool.validAddress(chainId, sender)) {
                     break;
                 }
@@ -233,7 +229,7 @@ public class ContractResource extends BaseCmd {
                 if (method != null) {
                     convertArgs = ContractUtil.twoDimensionalArray(args, method.argsType2Array());
                 }
-                result = contractTxService.validateContractCreateTx(chainId, senderBytes, MAX_GASLIMIT, price, contractCodeBytes, convertArgs);
+                result = contractTxService.validateContractCreateTx(chainId, senderBytes, MAX_GASLIMIT, CONTRACT_MINIMUM_PRICE, contractCodeBytes, convertArgs);
                 if (result.isFailed()) {
                     break;
                 }
@@ -442,9 +438,8 @@ public class ContractResource extends BaseCmd {
     @CmdAnnotation(cmd = IMPUTED_CALL_GAS, version = 1.0, description = "imputed call gas")
     @Parameter(parameterName = "chainId", parameterType = "int")
     @Parameter(parameterName = "sender", parameterType = "String")
-    @Parameter(parameterName = "contractAddress", parameterType = "String")
     @Parameter(parameterName = "value", parameterType = "BigInteger")
-    @Parameter(parameterName = "price", parameterType = "long")
+    @Parameter(parameterName = "contractAddress", parameterType = "String")
     @Parameter(parameterName = "methodName", parameterType = "String")
     @Parameter(parameterName = "methodDesc", parameterType = "String")
     @Parameter(parameterName = "args", parameterType = "Object[]")
@@ -457,13 +452,12 @@ public class ContractResource extends BaseCmd {
             do {
                 Integer chainId = (Integer) params.get("chainId");
                 String sender = (String) params.get("sender");
-                String contractAddress = (String) params.get("contractAddress");
                 BigInteger value = new BigInteger(params.get("value").toString());
-                Long price = Long.parseLong(params.get("price").toString());
+                String contractAddress = (String) params.get("contractAddress");
                 String methodName = (String) params.get("methodName");
                 String methodDesc = (String) params.get("methodDesc");
                 Object[] args = (Object[]) params.get("args");
-                if (value.compareTo(BigInteger.ZERO) < 0 || price < 0) {
+                if (value.compareTo(BigInteger.ZERO) < 0) {
                     break;
                 }
                 if (!AddressTool.validAddress(chainId, sender)) {
@@ -488,7 +482,7 @@ public class ContractResource extends BaseCmd {
                 if (method != null) {
                     convertArgs = ContractUtil.twoDimensionalArray(args, method.argsType2Array());
                 }
-                result = contractTxService.validateContractCallTx(chainId, senderBytes, value, MAX_GASLIMIT, price, contractAddressBytes, methodName, methodDesc, convertArgs);
+                result = contractTxService.validateContractCallTx(chainId, senderBytes, value, MAX_GASLIMIT, CONTRACT_MINIMUM_PRICE, contractAddressBytes, methodName, methodDesc, convertArgs);
                 if (result.isFailed()) {
                     break;
                 }
