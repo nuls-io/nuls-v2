@@ -368,9 +368,9 @@ public class RoundManager {
         round.setIndex(index);
         round.setStartTime(startTime);
         setMemberList(chain,round, startBlockHeader);
-        /*List<byte[]> packingAddressList =CallMethodUtils.getEncryptedAddressList(chain);
-        round.calcLocalPacker(packingAddressList,chain);*/
-        round.calcLocalPacker(chain);
+        List<byte[]> packingAddressList =CallMethodUtils.getEncryptedAddressList(chain);
+        round.calcLocalPacker(packingAddressList,chain);
+        //round.calcLocalPacker(chain);
         chain.getLoggerMap().get(ConsensusConstant.CONSENSUS_LOGGER_NAME).debug("当前轮次为："+round.getIndex()+";当前轮次开始打包时间："+ DateUtils.convertDate(new Date(startTime)));
         chain.getLoggerMap().get(ConsensusConstant.CONSENSUS_LOGGER_NAME).debug("\ncalculation||index:{},startTime:{},startHeight:{},hash:{}\n" + round.toString() + "\n\n", index, startTime, startBlockHeader.getHeight(), startBlockHeader.getHash());
         return round;
