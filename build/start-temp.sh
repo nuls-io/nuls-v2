@@ -34,6 +34,9 @@ while [ ! -z $1 ] ; do
         "-r")
             RESTART="1"
             shift 1 ;;
+        "--config")
+            config=$2;
+            shift 2 ;;
         * ) shift
     esac
 done  
@@ -97,7 +100,7 @@ checkIsRunning
 CLASSPATH=" -classpath ../../libs/*:${JAR_FILE} "
 JAVA_OPTS=" -server -XX:+UseG1GC -XX:MaxGCPauseMillis=50 -Xms${JOPT_XMS}m -Xmx${JOPT_XMX}m -XX:MetaspaceSize=${JOPT_METASPACESIZE}m -XX:MaxMetaspaceSize=${JOPT_MAXMETASPACESIZE}m -XX:+ParallelRefProcEnabled -XX:+TieredCompilation -XX:+ExplicitGCInvokesConcurrent $JAVA_OPTS"
 JAVA_OOM_DUMP="-XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=${LOGS_DIR}/oom-${START_DATE}.hprof"
-JAVA_OPTS="$JAVA_OPTS $JAVA_GC_LOG $JAVA_OOM_DUMP  -Dsys.name=$APP_NAME "
+JAVA_OPTS="$JAVA_OPTS $JAVA_GC_LOG $JAVA_OOM_DUMP  -Dsys.name=$APP_NAME -Dactive.module=${config} "
 # echo "${JAVA} ${JAVA_OPTS} ${CLASSPATH} ${MAIN_CLASS} ${NulstarUrl}"
 nohup ${JAVA} ${JAVA_OPTS} ${CLASSPATH} ${MAIN_CLASS} ${NulstarUrl} > ${STDOUT_FILE} 2>&1 &
 

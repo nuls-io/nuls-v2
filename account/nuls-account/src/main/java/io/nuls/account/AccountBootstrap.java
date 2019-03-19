@@ -21,6 +21,7 @@ import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.core.ioc.SpringLiteContext;
 import io.nuls.tools.exception.NulsException;
+import io.nuls.tools.log.Log;
 import io.nuls.tools.model.StringUtils;
 import io.nuls.tools.parse.I18nUtils;
 
@@ -138,6 +139,7 @@ public class AccountBootstrap extends RpcModule {
 //            NulsConfig.DATA_PATH = configMap.get(AccountConstant.DB_DATA_PATH).getValue();
             //改为通过配置文件注入
             NulsConfig.DATA_PATH = accountConfig.getDataPath();
+            LoggerUtil.logger.info("dataPath:{}",NulsConfig.DATA_PATH);
             //set system encoding
 //            NulsConfig.DEFAULT_ENCODING = configMap.get(AccountConstant.CFG_SYSTEM_DEFAULT_ENCODING).getValue();
             //改为通过配置文件注入

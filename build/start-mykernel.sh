@@ -1,11 +1,12 @@
 #!/bin/bash
 #cd ./mykernel/1.0.0
 RUNBLOCK=
-while getopts bj: name
+while getopts bj:c: name
 do
             case $name in
             b)	   RUNBLOCK="1";;
             j)     JAVA_HOME="$OPTARG";;
+            c)     CONFIG="$OPTARG";;
             ?)     exit 2;;
            esac
 done
@@ -25,9 +26,9 @@ MODULE_PATH=$(cd `dirname $0`;pwd)
 
 if [ -z "${RUNBLOCK}" ];
 then
-    ${JAVA} -server -classpath ./libs/*:./mykernel/1.0.0/mykernel-1.0.0.jar io.nuls.mykernel.MyKernelBootstrap startModule $MODULE_PATH
+    ${JAVA} -server -classpath ./libs/*:./mykernel/1.0.0/mykernel-1.0.0.jar io.nuls.mykernel.MyKernelBootstrap startModule $MODULE_PATH $CONFIG
 else
-    nohup ${JAVA} -server -classpath ./libs/*:./mykernel/1.0.0/mykernel-1.0.0.jar io.nuls.mykernel.MyKernelBootstrap startModule $MODULE_PATH  > mykernel.log 2>&1 &
+    nohup ${JAVA} -server -classpath ./libs/*:./mykernel/1.0.0/mykernel-1.0.0.jar io.nuls.mykernel.MyKernelBootstrap startModule $MODULE_PATH $CONFIG > mykernel.log 2>&1 &
 fi
 
 
