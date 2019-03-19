@@ -36,6 +36,7 @@ import io.nuls.cmd.client.CommandHelper;
 import io.nuls.cmd.client.CommandResult;
 import io.nuls.cmd.client.Config;
 import io.nuls.cmd.client.processor.CommandProcessor;
+import io.nuls.cmd.client.utils.Na;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.model.StringUtils;
@@ -127,7 +128,7 @@ public class TransferByAliasProcessor  extends TransactionBaseProcessor implemen
     public CommandResult execute(String[] args) {
         String alias = args[1];
         String toAddress = args[2];
-        BigInteger amount = new BigInteger(args[3]);
+        BigInteger amount = Na.parseNuls(args[3]).toBigInteger();
         String remark = null;
         if(args.length > 4){
             remark = args[4];
