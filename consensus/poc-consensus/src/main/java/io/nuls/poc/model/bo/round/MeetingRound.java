@@ -171,9 +171,9 @@ public class MeetingRound {
 
     private boolean validAccount(Chain chain,String address) {
         try {
-            Properties properties = ConfigLoader.loadProperties(ConsensusConstant.PASSWORD_CONFIG_NAME);
-            String password = properties.getProperty(ConsensusConstant.PASSWORD, ConsensusConstant.PASSWORD);
-            HashMap callResult = CallMethodUtils.accountValid(chain.getConfig().getChainId(), address, password);
+            /*Properties properties = ConfigLoader.loadProperties(ConsensusConstant.PASSWORD_CONFIG_NAME);
+            String password = properties.getProperty(ConsensusConstant.PASSWORD, ConsensusConstant.PASSWORD);*/
+            HashMap callResult = CallMethodUtils.accountValid(chain.getConfig().getChainId(), address, chain.getConfig().getPassword());
             String priKey = (String) callResult.get("priKey");
             if (StringUtils.isNotBlank(priKey)){
                 return true;
