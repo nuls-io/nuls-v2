@@ -255,6 +255,9 @@ public class BlockResource extends BaseCmd {
             int chainId = Integer.parseInt(map.get("chainId").toString());
             Long height = Long.parseLong(map.get("height").toString());
             Block block = service.getBlock(chainId, height);
+            if(block == null) {
+                return success(null);
+            }
             return success(HexUtil.encode(block.serialize()));
         } catch (Exception e) {
             e.printStackTrace();

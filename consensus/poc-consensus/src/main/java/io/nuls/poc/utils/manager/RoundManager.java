@@ -14,11 +14,11 @@ import io.nuls.poc.model.po.PunishLogPo;
 import io.nuls.poc.utils.CallMethodUtils;
 import io.nuls.poc.utils.enumeration.PunishType;
 import io.nuls.tools.core.annotation.Component;
+import io.nuls.tools.exception.NulsException;
+import io.nuls.tools.log.Log;
 import io.nuls.tools.model.DateUtils;
 import io.nuls.tools.model.DoubleUtils;
 import io.nuls.tools.model.StringUtils;
-import io.nuls.tools.exception.NulsException;
-import io.nuls.tools.log.Log;
 
 import java.io.IOException;
 import java.math.BigInteger;
@@ -368,9 +368,11 @@ public class RoundManager {
         round.setIndex(index);
         round.setStartTime(startTime);
         setMemberList(chain,round, startBlockHeader);
-        /*List<byte[]> packingAddressList =CallMethodUtils.getEncryptedAddressList(chain);
-        round.calcLocalPacker(packingAddressList,chain);*/
-        round.calcLocalPacker(chain);
+        List<byte[]> packingAddressList =CallMethodUtils.getEncryptedAddressList(chain);
+        if(!packingAddressList.isEmpty()){
+            round.calcLocalPacker(packingAddressList,chain);
+        }
+        //round.calcLocalPacker(chain);
         chain.getLoggerMap().get(ConsensusConstant.CONSENSUS_LOGGER_NAME).debug("当前轮次为："+round.getIndex()+";当前轮次开始打包时间："+ DateUtils.convertDate(new Date(startTime)));
         chain.getLoggerMap().get(ConsensusConstant.CONSENSUS_LOGGER_NAME).debug("\ncalculation||index:{},startTime:{},startHeight:{},hash:{}\n" + round.toString() + "\n\n", index, startTime, startBlockHeader.getHeight(), startBlockHeader.getHash());
         return round;

@@ -141,7 +141,7 @@ public class TransactionService {
         }
         List<DeleteOneModel<Document>> list = new ArrayList<>();
         for (String hash : txHashList) {
-            DeleteOneModel<Document> model = new DeleteOneModel(Filters.eq("txHash", hash));
+            DeleteOneModel<Document> model = new DeleteOneModel(Filters.eq("_id", hash));
             list.add(model);
         }
         mongoDBService.bulkWrite(COINDATA_TABLE + chainId, list);

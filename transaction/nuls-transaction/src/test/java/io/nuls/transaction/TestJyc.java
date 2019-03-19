@@ -25,12 +25,15 @@
 package io.nuls.transaction;
 
 import io.nuls.base.basic.AddressTool;
+import io.nuls.base.basic.NulsByteBuffer;
+import io.nuls.base.data.Transaction;
 import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.info.HostInfo;
 import io.nuls.rpc.info.NoUse;
 import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.model.message.Response;
 import io.nuls.rpc.netty.processor.ResponseMessageProcessor;
+import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.parse.JSONUtils;
 import io.nuls.transaction.model.bo.Chain;
@@ -55,7 +58,7 @@ import static org.junit.Assert.assertTrue;
  * @date: 2019-01-15
  */
 public class TestJyc {
-    static String address23 = "5MR_2Cb86fpFbuY4Lici8MJStNxDFYH6kRB";
+    static String address23 = "5MR_2CbdqKcZktcxntG14VuQDy8YHhc6ZqW";
 
     private static Chain chain;
     static int chainId = 12345;
@@ -83,7 +86,14 @@ public class TestJyc {
      */
     @Test
     public void importSeed() {
-        importPriKey("7e304e60c4e29c15382f76c0bb097bda28a1950b78871b6b7eb2bb4cc4ddeb49", password);//种子出块地址 5MR_2Cb86fpFbuY4Lici8MJStNxDFYH6kRB
+        importPriKey("00c4a6b90d3f4eb7b50bc85fd0e99ccb717e148b4fde7462e14c590445e589588c", password);//21 5MR_2CbdqKcZktcxntG14VuQDy8YHhc6ZqW
+    }
+
+    @Test
+    public void getAccountList() throws Exception {
+        Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_getAccountList", null);
+        Object o = ((HashMap) ((HashMap) cmdResp.getResponseData()).get("ac_getAccountList")).get("list");
+        Log.debug("list:{}", o);
     }
 
     /**
@@ -358,8 +368,20 @@ public class TestJyc {
      */
     @Test
     public void pressureTest() throws Exception {
-        int total = 10_000_000;
-        int count = 5_000;
+        {
+            Map<String, Object> params = new HashMap<>();
+            params.put(Constants.VERSION_KEY_STR, version);
+            params.put("chainId", chainId);
+            params.put("address", address23);
+            Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_getAccountByAddress", params);
+
+            String address = JSONUtils.obj2json(((HashMap) cmdResp.getResponseData()).get("ac_getAccountByAddress"));
+            Log.debug("address-{}" + address);
+            BigInteger balance = LedgerCall.getBalance(chain, AddressTool.getAddress(address23), chainId, assetId);
+            Log.debug(address23 + "-----balance:{}", balance);
+        }
+        int total = 1000;
+        int count = 100;
         List<String> accountList;
         Log.debug("##################################################");
         {
@@ -373,6 +395,18 @@ public class TestJyc {
             assertTrue(response.isSuccess());
             accountList = (List<String>) ((HashMap) ((HashMap) response.getResponseData()).get("ac_createAccount")).get("list");
             assertEquals(count, accountList.size());
+        }
+        {
+            for (String account : accountList) {
+                Map<String, Object> params = new HashMap<>();
+                params.put(Constants.VERSION_KEY_STR, version);
+                params.put("chainId", chainId);
+                params.put("address", account);
+                Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_getAccountByAddress", params);
+
+                String address = JSONUtils.obj2json(((HashMap) cmdResp.getResponseData()).get("ac_getAccountByAddress"));
+                Log.debug("address-{}" + address);
+            }
         }
         {
             Log.debug("2.##########transfer from seed address to " + count + " accounts##########");
@@ -409,6 +443,7 @@ public class TestJyc {
             }
         }
         Thread.sleep(10000);
+        List<String> hashList = new ArrayList<>();
         {
             Log.debug("3.##########" + count + " accounts Transfer to each other##########");
             //100个地址之间互相转账
@@ -443,10 +478,28 @@ public class TestJyc {
                     Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_transfer", transferMap);
                     assertTrue(response.isSuccess());
                     HashMap result = (HashMap) (((HashMap) response.getResponseData()).get("ac_transfer"));
-                    Log.debug("transfer from {} to {}, hash:{}", from, to, result.get("value"));
+                    String hash = result.get("value").toString();
+                    hashList.add(hash);
+                    Log.debug("transfer from {} to {}, hash:{}", from, to, hash);
                 }
                 Log.debug("##########" + j + " round end##########");
                 Thread.sleep(10000);
+            }
+        }
+        Thread.sleep(100000);
+        {
+            for (String hash : hashList) {
+                Map<String, Object> params = new HashMap<>();
+                params.put("chainId", chainId);
+                params.put("txHash", hash);
+                Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.TX.abbr, "tx_getConfirmedTx", params);
+                assertTrue(response.isSuccess());
+                Map map = (Map) response.getResponseData();
+                Map tx = (Map) map.get("tx_getConfirmedTx");
+                String txHex = tx.get("txHex").toString();
+                Transaction transaction = new Transaction();
+                transaction.parse(new NulsByteBuffer(HexUtil.decode(txHex)));
+                assertEquals(hash, transaction.getHash());
             }
         }
     }

@@ -27,7 +27,7 @@ import io.nuls.block.exception.DbRuntimeException;
 import io.nuls.block.manager.ContextManager;
 import io.nuls.block.storage.ChainStorageService;
 import io.nuls.db.service.RocksDBService;
-import io.nuls.tools.core.annotation.Service;
+import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.exception.NulsException;
 
 import java.io.IOException;
@@ -48,7 +48,7 @@ import static io.nuls.block.utils.LoggerUtil.commonLog;
  * @version 1.0
  * @date 18-11-20 上午11:09
  */
-@Service
+@Component
 public class ChainStorageServiceImpl implements ChainStorageService {
 
     @Override
