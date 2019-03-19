@@ -201,6 +201,8 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
             TransactionConfirmedPO transactionConfirmedPO = new TransactionConfirmedPO(tx, blockHeight, TxStatusEnum.CONFIRMED.getStatus());
             if (saveTx(chain, transactionConfirmedPO)) {
                 chain.getLoggerMap().get(TxConstant.LOG_TX).debug("success! saveTxs -type[{}], hash:{}", tx.getType(), tx.getHash().getDigestHex());
+                chain.getLoggerMap().get(TxConstant.LOG_TX).debug("get hash:{}, txObj:{}",
+                        tx.getType(), tx.getHash().getDigestHex(), confirmedTxStorageService.getTx(chain.getChainId(), tx.getHash().getDigestHex()).getTx());
                 TxUtil.txInformationDebugPrint(chain, tx, chain.getLoggerMap().get(TxConstant.LOG_TX));
                 savedList.add(tx);
             } else {
