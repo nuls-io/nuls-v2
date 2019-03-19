@@ -12,17 +12,19 @@ import io.nuls.poc.model.bo.tx.txdata.Deposit;
 import io.nuls.poc.utils.CallMethodUtils;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
-import io.nuls.tools.model.BigIntegerUtils;
-import io.nuls.tools.model.DoubleUtils;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.exception.NulsRuntimeException;
-import io.nuls.tools.parse.ConfigLoader;
+import io.nuls.tools.model.BigIntegerUtils;
+import io.nuls.tools.model.DoubleUtils;
 
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.RoundingMode;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.List;
 
 /**
  * @author tag
@@ -305,8 +307,9 @@ public class ConsensusManager {
      */
     public Block createBlock(Chain chain,BlockData blockData, byte[] packingAddress)throws Exception{
         try {
-            Properties properties = ConfigLoader.loadProperties(ConsensusConstant.PASSWORD_CONFIG_NAME);
-            String password = properties.getProperty(ConsensusConstant.PASSWORD, ConsensusConstant.PASSWORD);
+            /*Properties properties = ConfigLoader.loadProperties(ConsensusConstant.PASSWORD_CONFIG_NAME);
+            String password = properties.getProperty(ConsensusConstant.PASSWORD, ConsensusConstant.PASSWORD);*/
+            String password = chain.getConfig().getPassword();
             CallMethodUtils.accountValid(chain.getConfig().getChainId(),AddressTool.getStringAddressByBytes(packingAddress),password);
         }catch (NulsException e){
             chain.getLoggerMap().get(ConsensusConstant.CONSENSUS_LOGGER_NAME).error(e);
