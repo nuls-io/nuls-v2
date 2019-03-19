@@ -27,7 +27,7 @@ public class SchedulerManager {
      * */
     public void createChainScheduler(Chain chain){
         int chainId = chain.getConfig().getChainId();
-        ScheduledThreadPoolExecutor scheduledThreadPoolExecutor = ThreadUtils.createScheduledThreadPool(1,new NulsThreadFactory("consensus"+chainId));
+        ScheduledThreadPoolExecutor scheduledThreadPoolExecutor = ThreadUtils.createScheduledThreadPool(2,new NulsThreadFactory("consensus"+chainId));
         /*
         创建链相关的任务
         Chain-related tasks
