@@ -5,10 +5,10 @@ import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.basic.TransactionFeeCalculator;
 import io.nuls.base.data.*;
 import io.nuls.base.signture.P2PHKSignature;
+import io.nuls.poc.config.ConsensusConfig;
 import io.nuls.poc.constant.ConsensusConstant;
 import io.nuls.poc.constant.ConsensusErrorCode;
 import io.nuls.poc.model.bo.Chain;
-import io.nuls.poc.config.ConsensusConfig;
 import io.nuls.poc.model.bo.round.MeetingMember;
 import io.nuls.poc.model.bo.round.MeetingRound;
 import io.nuls.poc.model.bo.tx.txdata.Agent;
@@ -1141,9 +1141,9 @@ public class ConsensusServiceImpl implements ConsensusService {
     private boolean transactionRollback(Transaction tx,Chain chain,BlockHeader header)throws NulsException{
         switch (tx.getType()){
             case(ConsensusConstant.TX_TYPE_REGISTER_AGENT) : return agentManager.createAgentRollBack(tx,chain);
-            case(ConsensusConstant.TX_TYPE_STOP_AGENT): return agentManager.stopAgentRollBack(tx,chain);
+            case(ConsensusConstant.TX_TYPE_STOP_AGENT): return agentManager.stopAgentRollBack(tx,chain,header);
             case(ConsensusConstant.TX_TYPE_JOIN_CONSENSUS): return depositManager.depositRollBack(tx,chain);
-            case(ConsensusConstant.TX_TYPE_CANCEL_DEPOSIT): return depositManager.cancelDepositRollBack(tx,chain);
+            case(ConsensusConstant.TX_TYPE_CANCEL_DEPOSIT): return depositManager.cancelDepositRollBack(tx,chain,header);
             case(ConsensusConstant.TX_TYPE_YELLOW_PUNISH): return punishManager.yellowPunishRollback(tx,chain,header);
             case(ConsensusConstant.TX_TYPE_RED_PUNISH): return punishManager.redPunishRollback(tx,chain,header);
             case(ConsensusConstant.TX_TYPE_COINBASE) : return true;

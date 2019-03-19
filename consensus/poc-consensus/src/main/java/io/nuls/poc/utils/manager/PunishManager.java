@@ -538,13 +538,14 @@ public class PunishManager {
     }
 
     public boolean redPunishCommit(Transaction tx,Chain chain,BlockHeader blockHeader)throws NulsException{
+        long blockHeight = blockHeader.getHeight();
         int chainId = chain.getConfig().getChainId();
         RedPunishData punishData = new RedPunishData();
         punishData.parse(tx.getTxData(),0);
         BlockExtendsData roundData = new BlockExtendsData(blockHeader.getExtend());
         PunishLogPo punishLogPo = new PunishLogPo();
         punishLogPo.setAddress(punishData.getAddress());
-        punishLogPo.setHeight(blockHeader.getHeight());
+        punishLogPo.setHeight(blockHeight);
         punishLogPo.setRoundIndex(roundData.getRoundIndex());
         punishLogPo.setTime(tx.getTime());
         punishLogPo.setType(PunishType.RED.getCode());
@@ -583,49 +584,58 @@ public class PunishManager {
             if (!po.getAgentHash().equals(agent.getHash())) {
                 continue;
             }
-            po.setDelHeight(tx.getBlockHeight());
+            po.setDelHeight(blockHeight);
             boolean b = depositStorageService.save(po,chainId);
             if (!b) {
                 for (DepositPo po2 : updatedList) {
                     po2.setDelHeight(-1);
                     this.depositStorageService.save(po2,chainId);
-                    depositManager.updateDeposit(chain,depositManager.poToDeposit(po2));
                 }
                 return false;
             }
-            depositManager.updateDeposit(chain,depositManager.poToDeposit(po));
             updatedList.add(po);
         }
-
+        /*
+        * 保存红牌惩罚信息
+        * */
         boolean success = punishStorageService.save(punishLogPo,chainId);
         if (!success) {
             for (DepositPo po2 : updatedList) {
                 po2.setDelHeight(-1);
                 this.depositStorageService.save(po2,chainId);
-                depositManager.updateDeposit(chain,depositManager.poToDeposit(po2));
             }
             return false;
         }
-        chain.getRedPunishList().add(punishLogPo);
-
+        /*
+        * 修改惩罚节点信息
+        * */
         AgentPo agentPo = agent;
-        agentPo.setDelHeight(tx.getBlockHeight());
+        agentPo.setDelHeight(blockHeight);
         success = agentStorageService.save(agentPo,chainId);
         if (!success) {
             for (DepositPo po2 : updatedList) {
                 po2.setDelHeight(-1);
                 this.depositStorageService.save(po2,chainId);
-                depositManager.updateDeposit(chain,depositManager.poToDeposit(po2));
             }
             this.punishStorageService.delete(punishLogPo.getKey(),chainId);
-            chain.getRedPunishList().remove(punishLogPo);
             return false;
         }
+
+        /*
+        * 更新缓存
+        * */
+        if(!updatedList.isEmpty()){
+            for (DepositPo depositPo:updatedList) {
+                depositManager.updateDeposit(chain,depositManager.poToDeposit(depositPo));
+            }
+        }
+        chain.getRedPunishList().add(punishLogPo);
         agentManager.updateAgent(chain,agentManager.poToAgent(agentPo));
         return true;
     }
 
     public boolean redPunishRollback(Transaction tx,Chain chain,BlockHeader blockHeader)throws NulsException{
+        long blockHeight = blockHeader.getHeight();
         int chainId = chain.getConfig().getChainId();
         RedPunishData punishData = new RedPunishData();
         punishData.parse(tx.getTxData(),0);
@@ -658,14 +668,12 @@ public class PunishManager {
             po.setDelHeight(-1);
             boolean success = this.depositStorageService.save(po,chainId);
             if (!success) {
-                for (DepositPo po2 : depositPoList) {
-                    po2.setDelHeight(tx.getBlockHeight());
+                for (DepositPo po2 : updatedList) {
+                    po2.setDelHeight(blockHeight);
                     this.depositStorageService.save(po2,chainId);
-                    depositManager.updateDeposit(chain,depositManager.poToDeposit(po2));
                 }
                 return false;
             }
-            depositManager.updateDeposit(chain,depositManager.poToDeposit(po));
             updatedList.add(po);
         }
 
@@ -674,27 +682,33 @@ public class PunishManager {
         boolean success = agentStorageService.save(agentPo,chainId);
         if (!success) {
             for (DepositPo po2 : depositPoList) {
-                po2.setDelHeight(tx.getBlockHeight());
+                po2.setDelHeight(blockHeight);
                 this.depositStorageService.save(po2,chainId);
-                depositManager.updateDeposit(chain,depositManager.poToDeposit(po2));
             }
             return false;
         }
-        agentManager.updateAgent(chain,agentManager.poToAgent(agentPo));
 
-        byte[] key = ByteUtils.concatenate(punishData.getAddress(), new byte[]{PunishType.RED.getCode()}, SerializeUtils.uint64ToByteArray(tx.getBlockHeight()), new byte[]{0});
+        byte[] key = ByteUtils.concatenate(punishData.getAddress(), new byte[]{PunishType.RED.getCode()}, SerializeUtils.uint64ToByteArray(blockHeight), new byte[]{0});
         success = punishStorageService.delete(key,chainId);
         if (!success) {
             for (DepositPo po2 : depositPoList) {
-                po2.setDelHeight(tx.getBlockHeight());
+                po2.setDelHeight(blockHeight);
                 this.depositStorageService.save(po2,chainId);
-                depositManager.updateDeposit(chain,depositManager.poToDeposit(po2));
             }
-            agentPo.setDelHeight(tx.getBlockHeight());
+            agentPo.setDelHeight(blockHeight);
             agentStorageService.save(agentPo,chainId);
-            agentManager.updateAgent(chain,agentManager.poToAgent(agentPo));
             return false;
         }
+
+        /*
+        * 修改缓存
+        * */
+        if(!updatedList.isEmpty()){
+            for (DepositPo po2 : updatedList) {
+                depositManager.updateDeposit(chain,depositManager.poToDeposit(po2));
+            }
+        }
+        agentManager.updateAgent(chain,agentManager.poToAgent(agentPo));
         return true;
     }
 
@@ -729,6 +743,7 @@ public class PunishManager {
     }
 
     public boolean yellowPunishRollback(Transaction tx,Chain chain,BlockHeader blockHeader)throws NulsException{
+        long blockHeight = blockHeader.getHeight();
         YellowPunishData punishData = new YellowPunishData();
         punishData.parse(tx.getTxData(),0);
         List<PunishLogPo> deletedList = new ArrayList<>();
@@ -736,7 +751,7 @@ public class PunishManager {
         int deleteIndex = 1;
         int chainId = chain.getConfig().getChainId();
         for (byte[] address : punishData.getAddressList()) {
-            boolean result = punishStorageService.delete(getPoKey(address, PunishType.YELLOW.getCode(), tx.getBlockHeight(), deleteIndex++),chainId);
+            boolean result = punishStorageService.delete(getPoKey(address, PunishType.YELLOW.getCode(), blockHeight, deleteIndex++),chainId);
             if (!result) {
                 for (PunishLogPo po : deletedList) {
                     punishStorageService.save(po,chainId);
@@ -746,7 +761,7 @@ public class PunishManager {
             } else {
                 PunishLogPo po = new PunishLogPo();
                 po.setAddress(address);
-                po.setHeight(tx.getBlockHeight());
+                po.setHeight(blockHeight);
                 po.setRoundIndex(roundData.getRoundIndex());
                 po.setTime(tx.getTime());
                 po.setIndex(deleteIndex);
