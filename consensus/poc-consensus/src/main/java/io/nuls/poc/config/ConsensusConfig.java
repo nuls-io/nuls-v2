@@ -1,7 +1,10 @@
-package io.nuls.poc.model.bo.config;
+package io.nuls.poc.config;
 
+import io.nuls.poc.model.bo.config.ConfigBean;
 import io.nuls.tools.core.annotation.Configuration;
 import io.nuls.tools.core.annotation.Value;
+
+import java.io.File;
 
 /**
  * 共识模块配置类
@@ -16,6 +19,10 @@ public class ConsensusConfig {
     @Value("consensusConfig")
     private ConfigBean configBean;
 
+    private String DataPath;
+
+    private String dataFolder;
+
 
     public ConfigBean getConfigBean() {
         return configBean;
@@ -24,5 +31,11 @@ public class ConsensusConfig {
     public void setConfigBean(ConfigBean configBean) {
         this.configBean = configBean;
     }
+
+
+    public String getDataFolder() {
+        return DataPath + File.separator + dataFolder;
+    }
+
 
 }

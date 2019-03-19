@@ -24,9 +24,10 @@ public interface ModuleConfigParser {
 
     /**
      * 解析配置项到map中
+     * @param fileName
      * @param inputStream
      * @return
      */
-    Map<String,String> parse(InputStream inputStream) throws Exception;
+    Map<String, ConfigurationLoader.ConfigItem> parse(String fileName,InputStream inputStream) throws Exception;
 
 }

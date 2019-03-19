@@ -19,11 +19,11 @@ public class PropertiesModuleConfigParser implements ModuleConfigParser {
     }
 
     @Override
-    public Map<String, String> parse(InputStream inputStream) throws Exception {
+    public Map<String, ConfigurationLoader.ConfigItem> parse(String configFile,InputStream inputStream) throws Exception {
         Properties prop = ConfigLoader.loadProperties(inputStream);
-        Map<String,String> res = new HashMap<>();
+        Map<String, ConfigurationLoader.ConfigItem> res = new HashMap<>(prop.size());
         prop.entrySet().stream().forEach(entry->{
-            res.put(String.valueOf(entry.getKey()),String.valueOf(entry.getValue()));
+            res.put(String.valueOf(entry.getKey()),new ConfigurationLoader.ConfigItem(configFile,String.valueOf(entry.getValue())));
         });
         return res;
     }

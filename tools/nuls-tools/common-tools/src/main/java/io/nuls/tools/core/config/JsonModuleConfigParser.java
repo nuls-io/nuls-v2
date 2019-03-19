@@ -20,17 +20,17 @@ public class JsonModuleConfigParser implements ModuleConfigParser {
     }
 
     @Override
-    public Map<String, String> parse(InputStream inputStream) {
-        Map<String,String> res = new HashMap<>();
+    public Map<String, ConfigurationLoader.ConfigItem> parse(String configFile,InputStream inputStream) {
         try {
             String configJson = IoUtils.readRealPath(inputStream);
             Map<String,Object> data = JSONUtils.json2map(configJson);
+            Map<String,ConfigurationLoader.ConfigItem> res = new HashMap<>(data.size());
             data.entrySet().forEach(entry->{
                 try {
                     if(ConfigSetting.isPrimitive(entry.getValue().getClass())){
-                        res.put(entry.getKey(),String.valueOf(entry.getValue()));
+                        res.put(entry.getKey(),new ConfigurationLoader.ConfigItem(configFile,String.valueOf(entry.getValue())));
                     }else{
-                        res.put(entry.getKey(),JSONUtils.obj2json(entry.getValue()));
+                        res.put(entry.getKey(),new ConfigurationLoader.ConfigItem(configFile,JSONUtils.obj2json(entry.getValue())));
                     }
                 } catch (JsonProcessingException e) {
                     throw new RuntimeException("json配置文件解析错误："+entry.getKey());

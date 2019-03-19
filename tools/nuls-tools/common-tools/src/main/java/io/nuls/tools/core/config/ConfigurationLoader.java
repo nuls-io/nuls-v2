@@ -28,12 +28,24 @@ import java.util.Map;
 @Component
 public class ConfigurationLoader {
 
+    public static class ConfigItem {
+
+        String value;
+
+        String configFile;
+
+        public ConfigItem(String configFile,String value){
+            this.configFile = configFile;
+            this.value = value;
+        }
+    }
+
     private static final String JVM_OPTION_ACTIVE_MODULE = "active.module";
 
     /**
      * 存储解析好的配置项
      */
-    Map<String, String> configData = new HashMap<>();
+    Map<String, ConfigItem> configData = new HashMap<>();
 
     Map<String,Map<String,String>> persistConfigData = new HashMap<>();
 
@@ -56,9 +68,14 @@ public class ConfigurationLoader {
         loadJarPathModule();
         loadJvmOptionActiveModule();
         loadForPersist();
-        Log.info("config data:");
+        Log.info("config item list:");
+        int maxKeyLength = configData.keySet().stream().max((d1,d2)->d1.length() > d2.length() ? 1 : -1).get().length();
         configData.entrySet().forEach(entry->{
-            Log.info("{}:{}",entry.getKey(),entry.getValue());
+            StringBuilder space = new StringBuilder();
+            for(var i = 0;i<maxKeyLength - entry.getKey().length();i++){
+                space.append(" ");
+            }
+            Log.info("{} : {} ==> {}",entry.getKey() + space,entry.getValue().value,entry.getValue().configFile);
         });
     }
 
@@ -89,7 +106,7 @@ public class ConfigurationLoader {
         if (file.exists() && file.isFile()) {
             try {
                 Log.info("found config file : {}", fileName);
-                configData.putAll(parser.parse(new FileInputStream(file)));
+                configData.putAll(parser.parse(file.getAbsolutePath(),new FileInputStream(file)));
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
@@ -107,7 +124,7 @@ public class ConfigurationLoader {
             if (file.exists() && file.isFile()) {
                 Log.info("found config file : {}", newFileName.toString());
                 try {
-                    configData.putAll(parser.parse(new FileInputStream(file)));
+                    configData.putAll(parser.parse(file.getAbsolutePath(),new FileInputStream(file)));
                 } catch (Exception e) {
                     throw new RuntimeException(e);
                 }
@@ -123,7 +140,7 @@ public class ConfigurationLoader {
             }
             Log.info("found config file : {}", parserEntry.getValue().getFileName());
             try {
-                configData.putAll(parserEntry.getValue().parse(url.openStream()));
+                configData.putAll(parserEntry.getValue().parse(url.getPath(),url.openStream()));
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -132,19 +149,20 @@ public class ConfigurationLoader {
     }
 
     public String getValue(String key) {
-        return configData.get(key);
+        ConfigItem item = configData.get(key);
+        return item == null ? null : item.value;
     }
 
     public String getValue(String key,String persistDomain) {
         Map<String,String> persistConfig = persistConfigData.get(persistDomain);
         if(persistConfig == null){
-            return configData.get(key);
+            return getValue(key);
         }
         String persistConfigValue = persistConfig.get(key);
         if(persistConfigValue != null){
             return persistConfigValue;
         }
-        return configData.get(key);
+        return getValue(key);
     }
 
 }

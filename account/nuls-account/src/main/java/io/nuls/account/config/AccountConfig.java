@@ -34,8 +34,6 @@ public class AccountConfig {
 
     private String kernelUrl;
 
-    private String rocksDbDataPath;
-
     private int mainChainId;
 
     private int mainAssetId;
