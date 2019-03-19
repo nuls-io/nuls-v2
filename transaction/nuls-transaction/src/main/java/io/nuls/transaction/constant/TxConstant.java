@@ -43,7 +43,7 @@ public interface TxConstant {
     int TX_TYPE_DELETE_CONTRACT = 102;
 
 
-    String LOG_TX = "tx/tx";
+    String LOG_TX = "tx/txChain";
     String LOG_NEW_TX_PROCESS = "tx/newTxProcess";
     String LOG_TX_MESSAGE = "tx/message";
 
