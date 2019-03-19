@@ -525,8 +525,9 @@ public class RoundManager {
         long blockCount = getBlockCountByAddress(chain,member.getAgent().getPackingAddress(), roundStart, roundData.getRoundIndex() - 1);
         long sumRoundVal = getPunishCountByAddress(chain,member.getAgent().getAgentAddress(), roundStart, roundData.getRoundIndex() - 1, PunishType.YELLOW.getCode());
         double ability = DoubleUtils.div(blockCount, ConsensusConstant.RANGE_OF_CAPACITY_COEFFICIENT);
-        double penalty = DoubleUtils.div(DoubleUtils.mul(ConsensusConstant.CREDIT_MAGIC_NUM, sumRoundVal),
-                DoubleUtils.mul(ConsensusConstant.RANGE_OF_CAPACITY_COEFFICIENT, ConsensusConstant.RANGE_OF_CAPACITY_COEFFICIENT));
+        /*double penalty = DoubleUtils.div(DoubleUtils.mul(ConsensusConstant.CREDIT_MAGIC_NUM, sumRoundVal),
+                DoubleUtils.mul(ConsensusConstant.RANGE_OF_CAPACITY_COEFFICIENT, ConsensusConstant.RANGE_OF_CAPACITY_COEFFICIENT));*/
+        double penalty = DoubleUtils.div(sumRoundVal,ConsensusConstant.RANGE_OF_CAPACITY_COEFFICIENT);
 
         return DoubleUtils.round(DoubleUtils.sub(ability, penalty), 4);
     }
@@ -549,7 +550,7 @@ public class RoundManager {
             punishList = chain.getRedPunishList();
         }
         for (int i = punishList.size() - 1; i >= 0; i--) {
-            if(count>=100){
+            if(count>=ConsensusConstant.CREDIT_MAGIC_NUM){
                 break;
             }
             PunishLogPo punish = punishList.get(i);
@@ -570,8 +571,8 @@ public class RoundManager {
         a round of punishment is likely to be punished in an address in a - 1 round not out of the blocks,
         lead to round up to 100 May be 101 punishment record, treatment here
         */
-        if (count > 100) {
-            return 100;
+        if (count > ConsensusConstant.CREDIT_MAGIC_NUM) {
+            return ConsensusConstant.CREDIT_MAGIC_NUM;
         }
         return count;
     }

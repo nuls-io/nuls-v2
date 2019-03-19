@@ -308,8 +308,9 @@ public class CallMethodUtils {
             String stateRoot = (String) signResult.get("stateRoot");
             if (null == stateRoot) {
                 extendsData.setStateRoot(preStateRoot);
+            }else{
+                extendsData.setStateRoot(HexUtil.decode(stateRoot));
             }
-            extendsData.setStateRoot(HexUtil.decode(stateRoot));
             return txList;
         } catch (Exception e) {
             chain.getLoggerMap().get(ConsensusConstant.CONSENSUS_LOGGER_NAME).error(e);
