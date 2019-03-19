@@ -142,6 +142,7 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
             boolean saveResult = saveBlockTxList(chain, txList, blockHeaderHex, false);
             if (saveResult) {
                 //修改重新打包状态,如果共识正在打包则需要重新打包
+                chain.getLoggerMap().get(TxConstant.LOG_TX).debug("收到新块,修改重新打包状态,如果共识正在打包则需要重新打包 rePackage:{}", "true");
                 chain.getRePackage().set(true);
             }
             return saveResult;

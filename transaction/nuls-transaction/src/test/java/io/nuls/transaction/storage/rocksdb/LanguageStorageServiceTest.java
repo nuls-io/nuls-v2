@@ -2,7 +2,7 @@ package io.nuls.transaction.storage.rocksdb;
 
 import io.nuls.tools.core.ioc.SpringLiteContext;
 import io.nuls.transaction.TestConstant;
-import io.nuls.transaction.TransactionBootStrap;
+import io.nuls.transaction.TransactionBootstrap;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -14,7 +14,7 @@ public class LanguageStorageServiceTest {
     @BeforeClass
     public static void beforeTest() throws Exception {
         //初始化数据库配置文件
-        new TransactionBootStrap().initDB();
+        new TransactionBootstrap().initDB();
         //初始化上下文
         SpringLiteContext.init(TestConstant.CONTEXT_PATH);
         languageStorageService = SpringLiteContext.getBean(LanguageStorageService.class);
