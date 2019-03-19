@@ -218,7 +218,7 @@ public class MeetingRound {
         return myMember;
     }
 
-    /*public void calcLocalPacker(List<byte[]> localAddressList,Chain chain) {
+    public void calcLocalPacker(List<byte[]> localAddressList,Chain chain) {
         for (byte[] address:localAddressList) {
             MeetingMember member = getMember(address,chain);
             if (null != member) {
@@ -234,7 +234,7 @@ public class MeetingRound {
             CallMethodUtils.sendState(chain,false);
             chain.setPacker(false);
         }
-    }*/
+    }
 
     public void calcLocalPacker(Chain chain) throws Exception{
         Properties properties = ConfigLoader.loadProperties(ConsensusConstant.PASSWORD_CONFIG_NAME);
