@@ -57,6 +57,10 @@ public class ConfigurationLoader {
         loadJarPathModule();
         loadJvmOptionActiveModule();
         loadForPersist();
+        Log.info("config data:");
+        configData.entrySet().forEach(entry->{
+            Log.info("{}:{}",entry.getKey(),entry.getValue());
+        });
     }
 
     private void loadForPersist() {
