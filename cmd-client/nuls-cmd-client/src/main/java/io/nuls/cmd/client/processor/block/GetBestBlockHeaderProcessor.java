@@ -29,6 +29,7 @@ package io.nuls.cmd.client.processor.block;
 import io.nuls.api.provider.Result;
 import io.nuls.api.provider.ServiceManager;
 import io.nuls.api.provider.block.BlockService;
+import io.nuls.api.provider.block.facade.BlockHeaderData;
 import io.nuls.api.provider.block.facade.GetBlockHeaderByLastHeightReq;
 import io.nuls.base.data.BlockHeader;
 import io.nuls.cmd.client.CommandBuilder;
@@ -80,7 +81,7 @@ public class GetBestBlockHeaderProcessor implements CommandProcessor {
 
     @Override
     public CommandResult execute(String[] args) {
-        Result<BlockHeader> result = blockService.getBlockHeaderByLastHeight(new GetBlockHeaderByLastHeightReq());
+        Result<BlockHeaderData> result = blockService.getBlockHeaderByLastHeight(new GetBlockHeaderByLastHeightReq());
         if (result.isFailed()) {
             return CommandResult.getFailed(result);
         }
