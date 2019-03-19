@@ -3,16 +3,20 @@ package io.nuls.api.provider.block;
 import io.nuls.api.provider.BaseRpcService;
 import io.nuls.api.provider.Provider;
 import io.nuls.api.provider.Result;
+import io.nuls.api.provider.block.facade.BlockHeaderData;
 import io.nuls.api.provider.block.facade.GetBlockHeaderByHashReq;
 import io.nuls.api.provider.block.facade.GetBlockHeaderByHeightReq;
 import io.nuls.api.provider.block.facade.GetBlockHeaderByLastHeightReq;
 import io.nuls.base.basic.NulsByteBuffer;
+import io.nuls.base.data.BlockExtendsData;
 import io.nuls.base.data.BlockHeader;
 import io.nuls.rpc.model.ModuleE;
 import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.exception.NulsException;
+import io.nuls.tools.model.DateUtils;
 import lombok.extern.slf4j.Slf4j;
 
+import java.util.Date;
 import java.util.function.Function;
 
 /**
@@ -25,17 +29,17 @@ import java.util.function.Function;
 public class BlockServiceForRpc extends BaseRpcService implements BlockService {
 
     @Override
-    public Result<BlockHeader> getBlockHeaderByHash(GetBlockHeaderByHashReq req) {
+    public Result<BlockHeaderData> getBlockHeaderByHash(GetBlockHeaderByHashReq req) {
         return _call("getBlockHeaderByHash",req,this::tranderBlockHeader);
     }
 
     @Override
-    public Result<BlockHeader> getBlockHeaderByHeight(GetBlockHeaderByHeightReq req) {
+    public Result<BlockHeaderData> getBlockHeaderByHeight(GetBlockHeaderByHeightReq req) {
         return _call("getBlockHeaderByHeight",req,this::tranderBlockHeader);
     }
 
     @Override
-    public Result<BlockHeader> getBlockHeaderByLastHeight(GetBlockHeaderByLastHeightReq req) {
+    public Result<BlockHeaderData> getBlockHeaderByLastHeight(GetBlockHeaderByLastHeightReq req) {
         return _call("latestBlockHeader",req,this::tranderBlockHeader);
     }
 
@@ -44,15 +48,31 @@ public class BlockServiceForRpc extends BaseRpcService implements BlockService {
         return callRpc(ModuleE.BL.abbr,method,req,res);
     }
 
-    private Result<BlockHeader> _call(String method, Object req, Function<String, Result> callback){
+    private Result<BlockHeaderData> _call(String method, Object req, Function<String, Result> callback){
         return call(method,req,callback);
     }
 
-    private Result<BlockHeader> tranderBlockHeader(String hexString){
+    private Result<BlockHeaderData> tranderBlockHeader(String hexString){
         try {
             BlockHeader header = new BlockHeader();
             header.parse(new NulsByteBuffer(HexUtil.decode(hexString)));
-            return success(header);
+            BlockHeaderData res = new BlockHeaderData();
+            BlockExtendsData blockExtendsData = new BlockExtendsData();
+            blockExtendsData.parse(new NulsByteBuffer(header.getExtend()));
+            res.setHash(header.getHash().toString());
+            res.setHeight(header.getHeight());
+            res.setSize(header.getSize());
+            res.setTime(DateUtils.timeStamp2DateStr(header.getTime()));
+            res.setTxCount(header.getTxCount());
+            res.setMerkleHash(header.getMerkleHash().toString());
+            res.setBlockSignature(header.getBlockSignature().getSignData().toString());
+            res.setPreHash(header.getPreHash().toString());
+            res.setConsensusMemberCount(blockExtendsData.getContinuousIntervalCount());
+            res.setMainVersion(blockExtendsData.getMainVersion());
+            res.setPackingIndexOfRound(blockExtendsData.getPackingIndexOfRound());
+            res.setRoundIndex(blockExtendsData.getRoundIndex());
+            res.setRoundStartTime(DateUtils.timeStamp2DateStr(blockExtendsData.getRoundStartTime()));
+            return success(res);
         } catch (NulsException e) {
             log.error("反序列化block header发生异常",e);
             return fail(ERROR_CODE);
