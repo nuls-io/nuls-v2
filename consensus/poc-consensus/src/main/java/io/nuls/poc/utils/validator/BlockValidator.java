@@ -56,7 +56,7 @@ public class BlockValidator {
       if (!blockHeader.getMerkleHash().equals(NulsDigestData.calcMerkleDigestData(block.getTxHashList()))) {
          throw new NulsException(ConsensusErrorCode.MERKEL_HASH_ERROR);
       }
-      MeetingRound currentRound = null;
+      MeetingRound currentRound ;
       try {
          currentRound = roundValidate(isDownload,chain,blockHeader);
       }catch (Exception e){
