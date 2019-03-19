@@ -76,20 +76,13 @@ public class ChainService {
     }
 
     public void updateStep(SyncInfo syncInfo) {
-        Document document = DocumentTransferTool.toDocument(syncInfo, "chainId");
-        Bson query = Filters.eq("_id", syncInfo.getChainId());
-        mongoDBService.updateOne(SYNC_INFO_TABLE, query, document);
-    }
-
-    public void rollbackComplete(int chainId) {
-        Bson query = Filters.eq("_id", chainId);
-        Document document = mongoDBService.findOne(SYNC_INFO_TABLE + chainId, Filters.eq("_id", chainId));
-        document.put("height", document.getLong("height") - 1);
-        document.put("finish", true);
-        if (document.getLong("height") < 0) {
-            mongoDBService.delete(SYNC_INFO_TABLE + chainId, query);
+        if (syncInfo.getBestHeight() >= 0) {
+            Document document = DocumentTransferTool.toDocument(syncInfo, "chainId");
+            Bson query = Filters.eq("_id", syncInfo.getChainId());
+            mongoDBService.updateOne(SYNC_INFO_TABLE, query, document);
         } else {
-            mongoDBService.updateOne(SYNC_INFO_TABLE + chainId, query, document);
+            Bson query = Filters.eq("_id", syncInfo.getChainId());
+            mongoDBService.delete(SYNC_INFO_TABLE, query);
         }
     }
 }

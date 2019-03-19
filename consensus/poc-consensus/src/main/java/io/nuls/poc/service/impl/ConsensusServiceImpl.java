@@ -8,6 +8,7 @@ import io.nuls.base.signture.P2PHKSignature;
 import io.nuls.poc.constant.ConsensusConstant;
 import io.nuls.poc.constant.ConsensusErrorCode;
 import io.nuls.poc.model.bo.Chain;
+import io.nuls.poc.model.bo.config.ConsensusConfig;
 import io.nuls.poc.model.bo.round.MeetingMember;
 import io.nuls.poc.model.bo.round.MeetingRound;
 import io.nuls.poc.model.bo.tx.txdata.Agent;
@@ -35,13 +36,13 @@ import io.nuls.tools.basic.Result;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Service;
 import io.nuls.tools.crypto.HexUtil;
+import io.nuls.tools.exception.NulsException;
+import io.nuls.tools.exception.NulsRuntimeException;
+import io.nuls.tools.log.Log;
 import io.nuls.tools.model.BigIntegerUtils;
 import io.nuls.tools.model.ByteUtils;
 import io.nuls.tools.model.ObjectUtils;
 import io.nuls.tools.model.StringUtils;
-import io.nuls.tools.exception.NulsException;
-import io.nuls.tools.exception.NulsRuntimeException;
-import io.nuls.tools.log.Log;
 import io.nuls.tools.parse.JSONUtils;
 
 import java.io.IOException;
@@ -83,6 +84,8 @@ public class ConsensusServiceImpl implements ConsensusService {
     private BlockManager blockManager;
     @Autowired
     private PunishManager punishManager;
+    @Autowired
+    private ConsensusConfig config;
 
     /**
      * 创建节点
