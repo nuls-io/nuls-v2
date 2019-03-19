@@ -28,7 +28,6 @@ import java.util.Map;
 @Component
 public class ConfigurationLoader {
 
-
     private static final String JVM_OPTION_ACTIVE_MODULE = "active.module";
 
     /**
@@ -57,6 +56,10 @@ public class ConfigurationLoader {
         loadJarPathModule();
         loadJvmOptionActiveModule();
         loadForPersist();
+        Log.info("config data:");
+        configData.entrySet().forEach(entry->{
+            Log.info("{}:{}",entry.getKey(),entry.getValue());
+        });
     }
 
     private void loadForPersist() {

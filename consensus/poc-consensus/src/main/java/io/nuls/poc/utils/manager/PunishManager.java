@@ -343,7 +343,7 @@ public class PunishManager {
             if (null == member) {
                 member = round.getPreRound().getMemberByAgentAddress(address);
             }
-            if (DoubleUtils.compare(member.getAgent().getRealCreditVal(), ConsensusConstant.RED_PUNISH_CREDIT_VAL) == -1) {
+            if (DoubleUtils.compare(member.getAgent().getRealCreditVal(), ConsensusConstant.RED_PUNISH_CREDIT_VAL) <= 0) {
                 if (!punishedSet.add(member.getPackingIndexOfRound())) {
                     continue;
                 }
