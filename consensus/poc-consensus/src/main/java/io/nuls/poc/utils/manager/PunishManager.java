@@ -15,7 +15,6 @@ import io.nuls.poc.model.po.PunishLogPo;
 import io.nuls.poc.storage.AgentStorageService;
 import io.nuls.poc.storage.DepositStorageService;
 import io.nuls.poc.storage.PunishStorageService;
-import io.nuls.poc.utils.compare.EvidenceComparator;
 import io.nuls.poc.utils.compare.PunishLogComparator;
 import io.nuls.poc.utils.enumeration.PunishReasonEnum;
 import io.nuls.poc.utils.enumeration.PunishType;
@@ -23,9 +22,9 @@ import io.nuls.tools.basic.VarInt;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.crypto.HexUtil;
+import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.model.ByteUtils;
 import io.nuls.tools.model.DoubleUtils;
-import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.parse.SerializeUtils;
 
 import java.io.IOException;
@@ -208,7 +207,7 @@ public class PunishManager {
      * @return boolean
      * */
     private boolean isRedPunish(Chain chain, BlockHeader firstHeader, BlockHeader secondHeader)throws NulsException{
-        //验证出块地址PackingAddress，记录分叉的连续次数，如达到连续3轮则红牌惩罚
+        //验证出块地址PackingAddress，记录分叉的连续次数，如达到连续3轮则红牌惩罚/最近100轮中有3次分叉
         String packingAddress = AddressTool.getStringAddressByBytes(firstHeader.getPackingAddress(chain.getConfig().getChainId()));
         BlockExtendsData extendsData = new BlockExtendsData(firstHeader.getExtend());
         long currentRoundIndex = extendsData.getRoundIndex();
@@ -246,19 +245,21 @@ public class PunishManager {
         */
         else{
             List<Evidence> list = currentChainEvidences.get(packingAddress);
-            Collections.sort(list,new EvidenceComparator());
-            long preRoundIndex = list.get(list.size()-1).getRoundIndex();
-            if(currentRoundIndex - preRoundIndex != 1){
-                currentChainEvidences.remove(packingAddress);
-                return false;
-            }else{
-                list.add(evidence);
-                currentChainEvidences.put(packingAddress,list);
-                if(list.size()>= ConsensusConstant.REDPUNISH_BIFURCATION){
-                    return true;
+
+            Iterator<Evidence> iterator = list.iterator();
+            while (iterator.hasNext()){
+                Evidence e = iterator.next();
+                if(e.getRoundIndex() <= currentRoundIndex - ConsensusConstant.CREDIT_MAGIC_NUM){
+                    iterator.remove();
                 }
-                return false;
             }
+            list.add(evidence);
+            currentChainEvidences.put(packingAddress,list);
+            chain.setEvidenceMap(currentChainEvidences);
+            if(list.size() >= ConsensusConstant.REDPUNISH_BIFURCATION){
+                return true;
+            }
+            return false;
         }
     }
 
