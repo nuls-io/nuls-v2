@@ -24,6 +24,7 @@ import io.nuls.tools.log.Log;
 import io.nuls.tools.parse.I18nUtils;
 import io.nuls.tools.parse.JSONUtils;
 
+import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.nio.charset.Charset;
@@ -73,7 +74,7 @@ public class ContractBootStrap extends RpcModule {
 
     private void initNulsConfig() {
         NulsConfig.DEFAULT_ENCODING = Charset.forName(contractConfig.getEncoding());
-        NulsConfig.DATA_PATH = contractConfig.getDataPath();
+        NulsConfig.DATA_PATH = contractConfig.getDataPath() + File.separator + "contract";
         NulsConfig.MAIN_ASSETS_ID = contractConfig.getMainAssetId();
         NulsConfig.MAIN_CHAIN_ID = contractConfig.getMainChainId();
     }
@@ -177,6 +178,7 @@ public class ContractBootStrap extends RpcModule {
      */
     @Override
     public RpcModuleState onDependenciesReady() {
+        Log.info("running");
         return RpcModuleState.Running;
     }
 

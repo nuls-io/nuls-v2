@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2017-2018 nuls.io
+ * Copyright (c) 2017-2019 nuls.io
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,35 +22,34 @@
  * SOFTWARE.
  *
  */
+package io.nuls.test.controller;
 
-package io.nuls.contract.constant;
+import com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider;
+import io.nuls.tools.core.ioc.SpringLiteContext;
+import lombok.extern.slf4j.Slf4j;
+import org.glassfish.jersey.media.multipart.MultiPartFeature;
+import org.glassfish.jersey.server.ResourceConfig;
+
+import javax.ws.rs.Path;
+import java.util.Collection;
 
 /**
- * 交易数据存储常量
- * Transaction entity storage constants
- *
- * @author: qinyifeng
+ * @author Niels
  */
-public interface ContractDBConstant {
+@Slf4j
+public class NulsResourceConfig extends ResourceConfig {
 
-    /**
-     * 系统语言表名 一个节点共用，不区分chain
-     * system language table name
-     */
-    String DB_NAME_LANGUAGE = "contract_language";
-    /**
-     * 配置信息表名
-     * chain configuration table name
-     */
-    String DB_NAME_CONGIF = "contract_config";
+    public NulsResourceConfig() {
+        register(MultiPartFeature.class);
+        register(JacksonJsonProvider.class);
 
-    String DB_NAME_CONTRACT_LEDGER_TX_INDEX = "contract_ledger_tx_index";
-    String DB_NAME_CONTRACT_ADDRESS = "contract_address";
-    String DB_NAME_CONTRACT_TRANSFER_TX = "contract_transfer_tx";
-    String DB_NAME_CONTRACT_EXECUTE_RESULT = "contract_execute_result";
-    String DB_NAME_CONTRACT_COLLECTION = "contract_collection";
-
-    String DB_NAME_CONTRACT_NRC20_TOKEN_TRANSFER = "contract_nrc20_token_transfer";
-    String DB_NAME_CONTRACT_NRC20_TOKEN_ADDRESS = "contract_nrc20_token_address";
+        Collection<Object> list = SpringLiteContext.getAllBeanList();
+        for (Object object : list) {
+            if (object.getClass().getAnnotation(Path.class) != null) {
+                log.debug("register restFul resource:{}", object.getClass());
+                register(object);
+            }
+        }
+    }
 
 }

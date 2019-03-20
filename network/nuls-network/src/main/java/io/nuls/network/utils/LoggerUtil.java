@@ -47,6 +47,7 @@ public class LoggerUtil {
     public static NulsLogger blockMsLog = LoggerBuilder.getLogger("./nwLogs", "block.log", Level.ALL);
     public static NulsLogger txMsLog = LoggerBuilder.getLogger("./nwLogs", "tx.log", Level.ALL);
     public static NulsLogger csMsLog = LoggerBuilder.getLogger("./nwLogs", "cs.log", Level.ALL);
+    public static NulsLogger rpcLog = LoggerBuilder.getLogger("./nwLogs", "rpc.log", Level.ALL);
     public static Map<String, NulsLogger> logMap = new HashMap<>();
 
     static {

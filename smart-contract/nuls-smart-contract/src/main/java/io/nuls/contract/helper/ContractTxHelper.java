@@ -146,7 +146,7 @@ public class ContractTxHelper {
             }
 
             if (contractAddress == null) {
-                contractAddress = Hex.decode(AccountCall.createContractAddress(chainId));
+                contractAddress = AddressTool.getAddress(AccountCall.createContractAddress(chainId));
             }
 
             BlockHeader blockHeader = BlockCall.getLatestBlockHeader(chainId);
@@ -170,7 +170,7 @@ public class ContractTxHelper {
             }
             ProgramExecutor track = programExecutor.begin(prevStateRoot);
             // 验证合约时跳过Gas验证
-            long realGasLimit = programCreate.getGasLimit();
+            long realGasLimit = gasLimit;
             programCreate.setGasLimit(MAX_GASLIMIT);
             ProgramResult programResult = track.create(programCreate);
 
@@ -367,7 +367,7 @@ public class ContractTxHelper {
             // 执行VM验证合法性
             ProgramExecutor track = programExecutor.begin(prevStateRoot);
             // 验证合约时跳过Gas验证
-            long realGasLimit = programCall.getGasLimit();
+            long realGasLimit = gasLimit;
             programCall.setGasLimit(MAX_GASLIMIT);
             ProgramResult programResult = track.call(programCall);
 

@@ -292,7 +292,7 @@ public class TxServiceImpl implements TxService {
      * @return Result
      */
     private void validateCoinToBase(Chain chain, List<CoinTo> listTo, int type) throws NulsException {
-        if (type != TxConstant.TX_TYPE_COINBASE) {
+        if (type != TxConstant.TX_TYPE_COINBASE && !TxManager.isSmartContract(chain, type)) {
             if (null == listTo || listTo.size() == 0) {
                 throw new NulsException(TxErrorCode.COINTO_NOT_FOUND);
             }
@@ -561,7 +561,7 @@ public class TxServiceImpl implements TxService {
      * 3.冲突检测，模块统一验证，如果有没验证通过的交易，则将该交易之后的所有交易再从1.开始执行一次
      */
     @Override
-    public TxPackage getPackableTxs(Chain chain, long endtimestamp, long maxTxDataSize,long blockHeight, long blockTime, String packingAddress, String preStateRoot) throws NulsException {
+    public TxPackage getPackableTxs(Chain chain, long endtimestamp, long maxTxDataSize, long blockHeight, long blockTime, String packingAddress, String preStateRoot) throws NulsException {
         packageLock.lock();
         chain.getLoggerMap().get(TxConstant.LOG_TX).debug("%%%%%%%%% TX开始打包 %%%%%%%%%%%% height:{}", blockHeight);
         //重置重新打包标识为false
@@ -622,7 +622,7 @@ public class TxServiceImpl implements TxService {
                 TransactionConfirmedPO txConfirmed = confirmedTxService.getConfirmedTransaction(chain, tx.getHash());
                 if (txConfirmed != null) {
                     chain.getLoggerMap().get(TxConstant.LOG_TX).info("丢弃已确认过交易,txHash:{}, - type:{}, - time:{}", tx.getHash().getDigestHex(), tx.getType(), tx.getTime());
-                    clearInvalidTx(chain, tx);
+                    clearInvalidTx(chain, tx, false);
                     continue;
                 }
                 String txHex = null;
@@ -686,7 +686,7 @@ public class TxServiceImpl implements TxService {
                 //如果本地最新区块+1 大于当前在打包区块的高度, 说明本地最新区块已更新,需要重新打包,把取出的交易放回到打包队列
                 if (blockHeight < chain.getBestBlockHeight() + 1) {
                     chain.getLoggerMap().get(TxConstant.LOG_TX).debug("有接收新区块-1,把取出的交易放回到打包队列...");
-                    for(int i = packingTxList.size()-1; i >= 0;i--) {
+                    for (int i = packingTxList.size() - 1; i >= 0; i--) {
                         Transaction transaction = packingTxList.get(i);
                         chain.getLoggerMap().get(TxConstant.LOG_TX).debug("有接收新区块-1,把取出的交易放回到打包队列, hash:{}", transaction.getHash().getDigestHex());
                         packablePool.addInFirst(chain, transaction, false);
@@ -734,7 +734,7 @@ public class TxServiceImpl implements TxService {
             //如果有接收新区块,把取出的交易放回到打包队列
             if (blockHeight < chain.getBestBlockHeight() + 1) {
                 chain.getLoggerMap().get(TxConstant.LOG_TX).debug("有接收新区块-2,把取出的交易放回到打包队列...");
-                for(int i = packingTxList.size()-1; i >= 0;i--) {
+                for (int i = packingTxList.size() - 1; i >= 0; i--) {
                     Transaction transaction = packingTxList.get(i);
                     chain.getLoggerMap().get(TxConstant.LOG_TX).debug("有接收新区块-2,把取出的交易放回到打包队列, hash:{}", transaction.getHash().getDigestHex());
                     packablePool.addInFirst(chain, transaction, false);
@@ -759,7 +759,7 @@ public class TxServiceImpl implements TxService {
                 }
             }
             TxPackage txPackage = new TxPackage(packableTxs, stateRoot, blockHeight);
-            chain.getLoggerMap().get(TxConstant.LOG_TX).debug("提供给共识的可打包交易packableTxs - size:{}",packableTxs.size());
+            chain.getLoggerMap().get(TxConstant.LOG_TX).debug("提供给共识的可打包交易packableTxs - size:{}", packableTxs.size());
             chain.getLoggerMap().get(TxConstant.LOG_TX).debug("提供给共识的可打包交易packableTxs - Rs:");
 
             for (int i = 0; i < packableTxs.size(); i++) {
@@ -775,7 +775,7 @@ public class TxServiceImpl implements TxService {
         } catch (NulsException e) {
             chain.getLoggerMap().get(TxConstant.LOG_TX).error(e);
             //可打包交易,全加回去
-            for(int i = packingTxList.size()-1; i >= 0;i--) {
+            for (int i = packingTxList.size() - 1; i >= 0; i--) {
                 Transaction tx = packingTxList.get(i);
                 packablePool.addInFirst(chain, tx, false);
             }
@@ -1003,8 +1003,7 @@ public class TxServiceImpl implements TxService {
         }
     }
 
-    @Override
-    public void clearInvalidTx(Chain chain, Transaction tx) {
+    private void clearInvalidTx(Chain chain, Transaction tx, boolean rollbackLedger) {
         chain.getLoggerMap().get(TxConstant.LOG_TX).debug("---------------------- rollbackClear txHash: " + tx.getHash().getDigestHex());
         unconfirmedTxStorageService.removeTx(chain.getChainId(), tx.getHash());
         //移除H2交易记录
@@ -1012,13 +1011,20 @@ public class TxServiceImpl implements TxService {
         try {
             transactionH2Service.deleteTx(chain, tx);
             chain.getLoggerMap().get(TxConstant.LOG_TX).debug("---------------------- rollbackTxLedger -----------------------\n");
-            //通知账本回滚nonce
-            LedgerCall.rollBackUnconfirmTx(chain, tx.hex());
+            if (rollbackLedger) {
+                //通知账本回滚nonce
+                LedgerCall.rollBackUnconfirmTx(chain, tx.hex());
+            }
         } catch (NulsException e) {
             e.printStackTrace();
         } catch (Exception e) {
             e.printStackTrace();
         }
 
+    }
+
+    @Override
+    public void clearInvalidTx(Chain chain, Transaction tx) {
+        clearInvalidTx(chain, tx, true);
     }
 }
