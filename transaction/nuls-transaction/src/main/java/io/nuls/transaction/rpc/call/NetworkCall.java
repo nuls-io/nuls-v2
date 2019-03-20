@@ -26,9 +26,8 @@ import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.model.message.Response;
 import io.nuls.rpc.netty.processor.ResponseMessageProcessor;
 import io.nuls.tools.crypto.HexUtil;
-import io.nuls.tools.model.StringUtils;
 import io.nuls.tools.exception.NulsException;
-import static io.nuls.transaction.utils.LoggerUtil.Log;
+import io.nuls.tools.model.StringUtils;
 import io.nuls.transaction.constant.TxConstant;
 import io.nuls.transaction.message.BroadcastTxMessage;
 import io.nuls.transaction.message.TransactionMessage;
@@ -41,6 +40,7 @@ import java.util.List;
 import java.util.Map;
 
 import static io.nuls.transaction.constant.TxCmd.*;
+import static io.nuls.transaction.utils.LoggerUtil.Log;
 
 /**
  * 调用网络模块接口的工具
@@ -59,7 +59,7 @@ public class NetworkCall {
      */
     public static List<Node> getAvailableNodes(int chainId, int isCross, String excludeNodes) throws NulsException{
         Map<String, Object> params = new HashMap<>(TxConstant.INIT_CAPACITY_8);
-        params.put(Constants.VERSION_KEY_STR, "1.0");
+        params.put(Constants.VERSION_KEY_STR, TxConstant.RPC_VERSION);
         params.put("chainId", chainId);
         params.put("state", 1);
         params.put("isCross", isCross);
@@ -105,7 +105,7 @@ public class NetworkCall {
     public static boolean broadcast(int chainId, BaseMessage message, String excludeNodes) throws NulsException {
         try {
             Map<String, Object> params = new HashMap<>(TxConstant.INIT_CAPACITY_8);
-            params.put(Constants.VERSION_KEY_STR, "1.0");
+            params.put(Constants.VERSION_KEY_STR, TxConstant.RPC_VERSION);
             params.put("chainId", chainId);
             params.put("excludeNodes", excludeNodes);
             params.put("messageBody", HexUtil.byteToHex(message.serialize()));
@@ -128,7 +128,7 @@ public class NetworkCall {
     public static boolean sendToNode(int chainId, BaseMessage message, String nodeId) throws NulsException {
         try {
             Map<String, Object> params = new HashMap<>(TxConstant.INIT_CAPACITY_8);
-            params.put(Constants.VERSION_KEY_STR, "1.0");
+            params.put(Constants.VERSION_KEY_STR, TxConstant.RPC_VERSION);
             params.put("chainId", chainId);
             params.put("nodes", nodeId);
             params.put("messageBody", HexUtil.byteToHex(message.serialize()));
@@ -211,7 +211,7 @@ public class NetworkCall {
      */
     public static long getCurrentTimeMillis() throws NulsException  {
         Map<String, Object> params = new HashMap<>(TxConstant.INIT_CAPACITY_8);
-        params.put(Constants.VERSION_KEY_STR, "1.0");
+        params.put(Constants.VERSION_KEY_STR, TxConstant.RPC_VERSION);
         HashMap hashMap = (HashMap)TransactionCall.request(ModuleE.NW.abbr, "nw_currentTimeMillis", params);
         return (long) hashMap.get("currentTimeMillis");
     }

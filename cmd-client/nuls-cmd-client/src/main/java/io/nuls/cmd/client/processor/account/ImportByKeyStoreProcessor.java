@@ -46,9 +46,7 @@ import java.net.URLDecoder;
  */
 @Slf4j
 @Component
-public class ImportByKeyStoreProcessor implements CommandProcessor {
-
-    AccountService accountService = ServiceManager.get(AccountService.class);
+public class ImportByKeyStoreProcessor extends AccountBaseProcessor implements CommandProcessor {
 
     @Override
     public String getCommand() {
@@ -85,7 +83,7 @@ public class ImportByKeyStoreProcessor implements CommandProcessor {
         String path = args[1];
         String password = CommandHelper.getPwdOptional();
         String keystore = getAccountKeystoreDto(path);
-        ImportAccountByKeyStoreReq req = new ImportAccountByKeyStoreReq(password, HexUtil.encode(keystore.getBytes()),true);
+        ImportAccountByKeyStoreReq req = new ImportAccountByKeyStoreReq(password, HexUtil.encode(keystore.getBytes()),false);
         io.nuls.api.provider.Result<String> result = accountService.importAccountByKeyStore(req);
         if(result.isFailed()){
             return CommandResult.getFailed(result);

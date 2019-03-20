@@ -35,4 +35,13 @@ public interface CommandConstant {
     String GET_BLOCK_BY_HASH = "downloadBlockByHash";
     //获取账户余额
     String GET_BALANCE = "getBalance";
+
+    //查询交易详情
+    String GET_TX = "tx_getTx";
+    String CLIENT_GETTX = "tx_getTxClient";
+
+    //查询节点详情
+    String GET_AGENT = "cs_getAgentInfo";
+
+    String GET_CONSENSUS_CONFIG = "cs_getSeedNodeList";
 }

@@ -16,4 +16,10 @@ public final class ErrorCodeConstants {
      */
     public static final ErrorCode PARAM_ERR = ErrorCode.init("10012");
 
+    /**
+     * 数据格式异常
+     */
+    public static final ErrorCode DATA_ERROR = ErrorCode.init("10014");
+
+
 }

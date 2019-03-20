@@ -21,18 +21,20 @@
 package io.nuls.api.model.rpc;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import io.nuls.api.exception.NotFoundException;
+import io.nuls.tools.basic.Result;
 
 /**
  * @author Niels
  */
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class RpcResult {
+public class RpcResult<T> {
 
     private String jsonrpc = "2.0";
 
     private long id;
 
-    private Object result;
+    private T result;
 
     private RpcResultError error;
 
@@ -52,11 +54,11 @@ public class RpcResult {
         this.id = id;
     }
 
-    public Object getResult() {
+    public T getResult() {
         return result;
     }
 
-    public RpcResult setResult(Object result) {
+    public RpcResult setResult(T result) {
         this.result = result;
         return this;
     }
@@ -68,6 +70,47 @@ public class RpcResult {
     public RpcResult setError(RpcResultError error) {
         this.error = error;
         return this;
+    }
+
+    public static <T> RpcResult success(T t) {
+        RpcResult rpcResult = new RpcResult();
+        rpcResult.setResult(t);
+        return rpcResult;
+    }
+
+    public static RpcResult failed(RpcErrorCode errorCode) {
+        RpcResult rpcResult = new RpcResult();
+        RpcResultError error = new RpcResultError(errorCode);
+        rpcResult.setError(error);
+        return rpcResult;
+    }
+
+    public static RpcResult failed(Result result) {
+        RpcResult rpcResult = new RpcResult();
+        RpcResultError error = new RpcResultError(result.getErrorCode().getCode(), result.getMsg(), null);
+        rpcResult.setError(error);
+        return rpcResult;
+    }
+
+    public static RpcResult dataNotFound() {
+        RpcResult rpcResult = new RpcResult();
+        RpcResultError error = new RpcResultError(RpcErrorCode.DATA_NOT_EXISTS.getCode(), RpcErrorCode.DATA_NOT_EXISTS.getMessage(), null);
+        rpcResult.setError(error);
+        return rpcResult;
+    }
+
+    public static RpcResult paramError() {
+        RpcResult rpcResult = new RpcResult();
+        RpcResultError error = new RpcResultError(RpcErrorCode.PARAMS_ERROR.getCode(), RpcErrorCode.PARAMS_ERROR.getMessage(), null);
+        rpcResult.setError(error);
+        return rpcResult;
+    }
+
+    public static RpcResult paramError(String data) {
+        RpcResult rpcResult = new RpcResult();
+        RpcResultError error = new RpcResultError(RpcErrorCode.PARAMS_ERROR.getCode(), RpcErrorCode.PARAMS_ERROR.getMessage(), data);
+        rpcResult.setError(error);
+        return rpcResult;
     }
 
     @Override

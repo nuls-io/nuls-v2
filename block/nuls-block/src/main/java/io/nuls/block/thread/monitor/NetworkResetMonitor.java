@@ -24,7 +24,7 @@ import io.nuls.block.constant.RunningStatusEnum;
 import io.nuls.block.manager.ContextManager;
 import io.nuls.block.model.ChainContext;
 import io.nuls.block.model.ChainParameters;
-import io.nuls.block.utils.module.NetworkUtil;
+import io.nuls.block.rpc.call.NetworkUtil;
 import io.nuls.tools.log.logback.NulsLogger;
 
 /**

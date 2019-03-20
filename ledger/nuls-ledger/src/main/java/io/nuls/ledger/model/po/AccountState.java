@@ -69,7 +69,7 @@ public class AccountState extends BaseNulsData {
     @Getter
     private long height = 0;
     /**
-     * 最近一次的解冻处理时间,存储毫秒
+     * 最近一次的账本数据处理时间,存储毫秒
      */
     @Setter
     @Getter

@@ -28,14 +28,10 @@ package io.nuls.contract.storage.impl;
 import io.nuls.base.data.Address;
 import io.nuls.contract.model.po.ContractTokenTransferInfoPo;
 import io.nuls.contract.storage.ContractTokenTransferStorageService;
-import io.nuls.db.constant.DBErrorCode;
 import io.nuls.db.model.Entry;
 import io.nuls.db.service.RocksDBService;
-import io.nuls.tools.basic.InitializingBean;
 import io.nuls.tools.basic.Result;
-import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
-import io.nuls.tools.exception.NulsRuntimeException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -52,12 +48,12 @@ import static io.nuls.contract.util.ContractUtil.getSuccess;
  * @date: 2018/6/5
  */
 @Component
-public class ContractTokenTransferStorageServiceImpl implements ContractTokenTransferStorageService{
+public class ContractTokenTransferStorageServiceImpl implements ContractTokenTransferStorageService {
 
     @Override
     public Result saveTokenTransferInfo(int chainId, byte[] infoKey, ContractTokenTransferInfoPo infoPo) {
         boolean result = putModel(DB_NAME_CONTRACT_NRC20_TOKEN_TRANSFER + chainId, infoKey, infoPo);
-        if(result) {
+        if (result) {
             return getSuccess();
         } else {
             return getFailed();
@@ -84,8 +80,8 @@ public class ContractTokenTransferStorageServiceImpl implements ContractTokenTra
 
     private boolean isAddressEquals(byte[] key, byte[] address) {
         int length = Address.ADDRESS_LENGTH;
-        for(int i = 0; i < length; i++) {
-            if(key[i] != address[i]) {
+        for (int i = 0; i < length; i++) {
+            if (key[i] != address[i]) {
                 return false;
             }
         }
@@ -112,13 +108,13 @@ public class ContractTokenTransferStorageServiceImpl implements ContractTokenTra
 
     private boolean isAddressAndHashEquals(byte[] key, byte[] address, byte[] txHash) {
         int length = Address.ADDRESS_LENGTH + txHash.length;
-        for(int i = 0, k = 0; i < length; i++) {
-            if(i < Address.ADDRESS_LENGTH) {
-                if(key[i] != address[i]) {
+        for (int i = 0, k = 0; i < length; i++) {
+            if (i < Address.ADDRESS_LENGTH) {
+                if (key[i] != address[i]) {
                     return false;
                 }
             } else {
-                if(key[i] != txHash[k++]) {
+                if (key[i] != txHash[k++]) {
                     return false;
                 }
             }
@@ -129,7 +125,7 @@ public class ContractTokenTransferStorageServiceImpl implements ContractTokenTra
     @Override
     public Result deleteTokenTransferInfo(int chainId, byte[] infoKey) throws Exception {
         boolean result = RocksDBService.delete(DB_NAME_CONTRACT_NRC20_TOKEN_TRANSFER + chainId, infoKey);
-        if(result) {
+        if (result) {
             return getSuccess();
         } else {
             return getFailed();

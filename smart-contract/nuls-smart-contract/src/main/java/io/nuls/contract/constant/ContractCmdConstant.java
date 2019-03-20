@@ -30,20 +30,40 @@ package io.nuls.contract.constant;
  */
 public interface ContractCmdConstant {
     /**
-     *  module cmd
+     * module cmd
      */
     String COMMIT = "sc_commit";
     String ROLLBACK = "sc_rollback";
     String INTEGRATE_VALIDATOR = "sc_integrate_validator";
+    String BATCH_BEGIN = "sc_batch_begin";
     String INVOKE_CONTRACT = "sc_invoke_contract";
+    String BATCH_END = "sc_batch_end";
     String CREATE_VALIDATOR = "sc_create_validator";
     String CALL_VALIDATOR = "sc_call_validator";
     String DELETE_VALIDATOR = "sc_delete_validator";
+    String INITIAL_ACCOUNT_TOKEN = "sc_initial_account_token";
 
     /**
-     *  user cmd
+     * user cmd
      */
     String CREATE = "sc_create";
+    String PRE_CREATE = "sc_pre_create";
+    String VALIDATE_CREATE = "sc_validate_create";
     String CALL = "sc_call";
+    String VALIDATE_CALL = "sc_validate_call";
     String DELETE = "sc_delete";
+    String VALIDATE_DELETE = "sc_validate_delete";
+    String TRANSFER = "sc_transfer";
+    String TRANSFER_FEE = "sc_transfer_fee";
+    String TOKEN_TRANSFER = "sc_token_transfer";
+    String TOKEN_BALANCE = "sc_token_balance";
+    String INVOKE_VIEW = "sc_invoke_view";
+    String CONSTRUCTOR = "sc_constructor";
+    String IMPUTED_CREATE_GAS = "sc_imputed_create_gas";
+    String IMPUTED_CALL_GAS = "sc_imputed_call_gas";
+    String CONTRACT_INFO = "sc_contract_info";
+    String CONTRACT_RESULT = "sc_contract_result";
+    String CONTRACT_TX = "sc_contract_tx";
+    String TOKEN_ASSETS_LIST = "sc_token_assets_list";
+    String UPLOAD = "sc_upload";
 }

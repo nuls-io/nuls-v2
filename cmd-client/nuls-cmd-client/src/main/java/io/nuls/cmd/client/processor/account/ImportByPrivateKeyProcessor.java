@@ -41,9 +41,7 @@ import io.nuls.tools.model.StringUtils;
  * @author: Charlie
  */
 @Component
-public class ImportByPrivateKeyProcessor implements CommandProcessor {
-
-    AccountService accountService = ServiceManager.get(AccountService.class);
+public class ImportByPrivateKeyProcessor extends AccountBaseProcessor implements CommandProcessor {
 
     @Override
     public String getCommand() {
@@ -82,7 +80,7 @@ public class ImportByPrivateKeyProcessor implements CommandProcessor {
         if(StringUtils.isNotBlank(password)){
             CommandHelper.confirmPwd(password);
         }
-        ImportAccountByPrivateKeyReq req = new ImportAccountByPrivateKeyReq(password,prikey,false);
+        ImportAccountByPrivateKeyReq req = new ImportAccountByPrivateKeyReq(password,prikey,true);
         Result<String> result = accountService.importAccountByPrivateKey(req);
         if (result.isFailed()) {
             return CommandResult.getFailed(result);

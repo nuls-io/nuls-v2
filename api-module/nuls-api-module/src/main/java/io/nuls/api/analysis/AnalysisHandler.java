@@ -1,23 +1,22 @@
 package io.nuls.api.analysis;
 
 import io.nuls.api.ApiContext;
+import io.nuls.api.cache.ApiCache;
 import io.nuls.api.constant.ApiConstant;
+import io.nuls.api.manager.CacheManager;
 import io.nuls.api.model.entity.*;
 import io.nuls.api.model.po.db.*;
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.data.*;
-import io.nuls.tools.constant.ToolsConstant;
 import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.exception.NulsException;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 public class AnalysisHandler {
 
@@ -50,19 +49,19 @@ public class AnalysisHandler {
         info.setPackingAddress(AddressTool.getStringAddressByBytes(blockHeader.getPackingAddress(chainId)));
         info.setTxCount(blockHeader.getTxCount());
         info.setRoundIndex(extendsData.getRoundIndex());
-        info.setSize(blockHeader.getSize());
+        info.setSize(blockHeader.size());
         info.setPackingIndexOfRound(extendsData.getPackingIndexOfRound());
         info.setScriptSign(HexUtil.encode(blockHeader.getBlockSignature().serialize()));
         info.setAgentVersion(extendsData.getBlockVersion());
         info.setRoundStartTime(extendsData.getRoundStartTime());
         info.setAgentVersion(extendsData.getBlockVersion());
         //是否是种子节点打包的区块
-        if (ApiContext.SEED_NODE_ADDRESS.contains(info.getPackingAddress()) || info.getHeight() == 0) {
+        ApiCache apiCache = CacheManager.getCache(chainId);
+        if (apiCache.getChainInfo().getSeeds().contains(info.getPackingAddress()) || info.getHeight() == 0) {
             info.setSeedPacked(true);
         }
         return info;
     }
-
 
     public static List<TransactionInfo> toTxs(List<Transaction> txList, BlockHeaderInfo blockHeader) throws Exception {
         List<TransactionInfo> txs = new ArrayList<>();
@@ -97,11 +96,7 @@ public class AnalysisHandler {
             info.setTxDataHex(HexUtil.encode(tx.getTxData()));
         }
         if (tx.getRemark() != null) {
-            try {
-                info.setRemark(new String(tx.getRemark(), ToolsConstant.DEFAULT_ENCODING));
-            } catch (UnsupportedEncodingException e) {
-                info.setRemark(HexUtil.encode(tx.getRemark()));
-            }
+            info.setRemark(new String(tx.getRemark(), StandardCharsets.UTF_8));
         }
 
         CoinData coinData = new CoinData();
@@ -111,39 +106,12 @@ public class AnalysisHandler {
             info.setCoinTos(toCoinToList(coinData));
         }
 
-
         if (info.getType() == ApiConstant.TX_TYPE_YELLOW_PUNISH) {
             info.setTxDataList(toYellowPunish(tx));
         } else {
             info.setTxData(toTxData(tx));
         }
-
-        BigInteger value = BigInteger.ZERO;
-        if (info.getType() == ApiConstant.TX_TYPE_COINBASE) {
-            if (info.getCoinTos() != null) {
-                for (CoinToInfo coinTo : info.getCoinTos()) {
-                    value = value.add(coinTo.getAmount());
-                }
-            }
-        } else if (info.getType() == ApiConstant.TX_TYPE_TRANSFER ||
-                info.getType() == ApiConstant.TX_TYPE_CALL_CONTRACT ||
-                info.getType() == ApiConstant.TX_TYPE_CONTRACT_TRANSFER ||
-                info.getType() == ApiConstant.TX_TYPE_DATA) {
-            Set<String> addressSet = new HashSet<>();
-            for (CoinFromInfo coinFrom : info.getCoinFroms()) {
-                addressSet.add(coinFrom.getAddress());
-            }
-            if (null != info.getCoinTos()) {
-                for (CoinToInfo coinTo : info.getCoinTos()) {
-                    if (!addressSet.contains(coinTo.getAddress())) {
-                        value = value.add(coinTo.getAmount());
-                    }
-                }
-            }
-        } else if (info.getType() == ApiConstant.TX_TYPE_ALIAS) {
-            value = ApiConstant.ALIAS_AMOUNT;
-        }
-        info.setValue(value);
+        info.calcValue();
         return info;
     }
 
@@ -198,8 +166,8 @@ public class AnalysisHandler {
         } else if (tx.getType() == ApiConstant.TX_TYPE_RED_PUNISH) {
             return toRedPublishLog(tx);
         } else if (tx.getType() == ApiConstant.TX_TYPE_CREATE_CONTRACT) {
-        }
 
+        }
         return null;
     }
 

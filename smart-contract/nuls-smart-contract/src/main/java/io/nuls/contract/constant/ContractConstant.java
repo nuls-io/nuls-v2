@@ -28,6 +28,8 @@ import java.math.BigInteger;
 
 public interface ContractConstant {
 
+    String INITIAL_STATE_ROOT = "56e81f171bcc55a6ff8345e692c0f86e5b48e01b996cadc001622fb5e363b421";
+
     short MODULE_ID_CONTRACT = 10;
 
     /**
@@ -45,6 +47,9 @@ public interface ContractConstant {
      */
     int TX_TYPE_CONTRACT_RETURN_GAS = 104;
 
+    /**
+     * coin base tx
+     */
     int TX_TYPE_COINBASE = 1;
     /**
      * CONTRACT STATUS
@@ -67,10 +72,6 @@ public interface ContractConstant {
     String CALL = "call";
     String CREATE = "create";
     String DELETE = "delete";
-
-    String GET = "get";
-
-    String SEND_BACK_REMARK = "Contract execution failed, return funds.";
 
     String NOT_ENOUGH_GAS = "not enough gas";
 
@@ -117,23 +118,17 @@ public interface ContractConstant {
      */
     String SYS_FILE_ENCODING = "file.encoding";
 
-    String DEFAULT_ENCODING = "UTF-8";
-
     /**
      * context path
      */
-    String CONTEXT_PATH = "io.nuls.poc";
+    String CONTEXT_PATH = "io.nuls.contract";
 
     /**
      * rpc file path
      */
-    String RPC_PATH = "io.nuls.poc.rpc";
+    String RPC_PATH = "io.nuls.contract.rpc";
 
-    /**
-     * config file path
-     */
-    String CONFIG_FILE_PATH = "consensus-config.json";
-
+    String NRC20_STANDARD_FILE = "nrc20.json";
     /**
      * DB config
      */
@@ -146,4 +141,6 @@ public interface ContractConstant {
      * Minimum transfer amount
      */
     BigInteger MININUM_TRANSFER_AMOUNT = BigInteger.TEN.pow(6);
+
+    byte UNLOCKED_TX = (byte) 0;
 }

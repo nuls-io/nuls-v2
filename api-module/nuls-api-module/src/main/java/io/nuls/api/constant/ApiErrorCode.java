@@ -48,7 +48,7 @@ public interface ApiErrorCode {
      * 未定义错误
      */
     ErrorCode UNDEFINED_ERROR = ErrorCode.init("20003");
-
+    ErrorCode DATA_NOT_FOUND = ErrorCode.init("10015");
 
     /**
      * 收到的区块超出范围

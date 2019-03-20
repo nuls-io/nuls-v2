@@ -6,7 +6,7 @@ import io.nuls.db.service.RocksDBService;
 import io.nuls.poc.constant.ConsensusConstant;
 import io.nuls.poc.model.bo.Chain;
 import io.nuls.poc.model.bo.config.ConfigBean;
-import io.nuls.poc.model.bo.config.ConfigItem;
+import io.nuls.poc.config.ConsensusConfig;
 import io.nuls.poc.model.bo.tx.TxRegisterDetail;
 import io.nuls.poc.storage.ConfigService;
 import io.nuls.poc.utils.CallMethodUtils;
@@ -16,11 +16,9 @@ import io.nuls.poc.utils.enumeration.TxProperty;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.core.ioc.ScanUtil;
-import io.nuls.tools.io.IoUtils;
 import io.nuls.tools.log.Log;
 import io.nuls.tools.log.logback.LoggerBuilder;
 import io.nuls.tools.log.logback.NulsLogger;
-import io.nuls.tools.parse.JSONUtils;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
@@ -53,6 +51,8 @@ public class ChainManager {
     private SchedulerManager schedulerManager;
     @Autowired
     private BlockManager blockManager;
+    @Autowired
+    private ConsensusConfig config;
 
     private Map<Integer, Chain> chainMap = new ConcurrentHashMap<>();
 
@@ -154,12 +154,13 @@ public class ChainManager {
             and the main chain configuration information needs to be read from the configuration file at this time.
             */
             if (configMap == null || configMap.size() == 0) {
-                String configJson = IoUtils.read(ConsensusConstant.CONFIG_FILE_PATH);
+                /*String configJson = IoUtils.read(ConsensusConstant.CONFIG_FILE_PATH);
                 List<ConfigItem> configItemList = JSONUtils.json2list(configJson, ConfigItem.class);
                 ConfigBean configBean = ConfigManager.initManager(configItemList);
                 if (configBean == null) {
                     return null;
-                }
+                }*/
+                ConfigBean configBean = config.getConfigBean();
                 configMap.put(configBean.getChainId(), configBean);
             }
             return configMap;

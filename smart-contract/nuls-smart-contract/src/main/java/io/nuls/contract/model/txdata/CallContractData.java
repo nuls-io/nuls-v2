@@ -31,6 +31,7 @@ import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.parse.SerializeUtils;
 
 import java.io.IOException;
+import java.math.BigInteger;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -41,7 +42,7 @@ public class CallContractData extends TransactionLogicData implements ContractDa
 
     private byte[] sender;
     private byte[] contractAddress;
-    private long value;
+    private BigInteger value;
     private long gasLimit;
     private long price;
     private String methodName;
@@ -49,12 +50,13 @@ public class CallContractData extends TransactionLogicData implements ContractDa
     private byte argsCount;
     private String[][] args;
 
+
     @Override
     public int size() {
         int size = 0;
         size += Address.ADDRESS_LENGTH;
         size += Address.ADDRESS_LENGTH;
-        size += SerializeUtils.sizeOfInt64();
+        size += SerializeUtils.sizeOfBigInteger();
         size += SerializeUtils.sizeOfInt64();
         size += SerializeUtils.sizeOfInt64();
 
@@ -80,7 +82,7 @@ public class CallContractData extends TransactionLogicData implements ContractDa
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
         stream.write(sender);
         stream.write(contractAddress);
-        stream.writeInt64(value);
+        stream.writeBigInteger(value);
         stream.writeInt64(gasLimit);
         stream.writeInt64(price);
 
@@ -105,7 +107,7 @@ public class CallContractData extends TransactionLogicData implements ContractDa
     public void parse(NulsByteBuffer byteBuffer) throws NulsException {
         this.sender = byteBuffer.readBytes(Address.ADDRESS_LENGTH);
         this.contractAddress = byteBuffer.readBytes(Address.ADDRESS_LENGTH);
-        this.value = byteBuffer.readInt64();
+        this.value = byteBuffer.readBigInteger();
         this.gasLimit = byteBuffer.readInt64();
         this.price = byteBuffer.readInt64();
 
@@ -152,11 +154,11 @@ public class CallContractData extends TransactionLogicData implements ContractDa
     }
 
     @Override
-    public long getValue() {
+    public BigInteger getValue() {
         return value;
     }
 
-    public void setValue(long value) {
+    public void setValue(BigInteger value) {
         this.value = value;
     }
 

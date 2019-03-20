@@ -50,7 +50,7 @@ public class ConsensusCall {
     public static boolean isConsensusNode(Chain chain, String agentAddress) throws NulsException {
         try {
             Map<String, Object> params = new HashMap<>(TxConstant.INIT_CAPACITY_8);
-            params.put(Constants.VERSION_KEY_STR, "1.0");
+            params.put(Constants.VERSION_KEY_STR, TxConstant.RPC_VERSION);
             params.put("chainId", chain.getChainId());
             params.put("agentAddress", agentAddress);
             HashMap result = (HashMap) TransactionCall.request(ModuleE.CS.abbr, "cs_isConsensusNode", params);
@@ -69,7 +69,7 @@ public class ConsensusCall {
     public static String getNodePackingAddress(Chain chain) throws NulsException {
         try {
             Map<String, Object> params = new HashMap<>(TxConstant.INIT_CAPACITY_8);
-            params.put(Constants.VERSION_KEY_STR, "1.0");
+            params.put(Constants.VERSION_KEY_STR, TxConstant.RPC_VERSION);
             //TODO cmd名称 返回值key
             params.put("chainId", chain.getChainId());
             HashMap result = (HashMap) TransactionCall.request(ModuleE.CS.abbr, "cs_getNodePackingAddress", params);
@@ -100,7 +100,7 @@ public class ConsensusCall {
 
         try {
             Map<String, Object> params = new HashMap<>(TxConstant.INIT_CAPACITY_16);
-            params.put(Constants.VERSION_KEY_STR, "1.0");
+            params.put(Constants.VERSION_KEY_STR, TxConstant.RPC_VERSION);
             //TODO cmd名称 返回值key
             params.put("chainId", chain.getChainId());
             params.put("height", height);

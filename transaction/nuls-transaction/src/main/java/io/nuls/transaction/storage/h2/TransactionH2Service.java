@@ -2,6 +2,7 @@ package io.nuls.transaction.storage.h2;
 
 import io.nuls.base.data.Page;
 import io.nuls.base.data.Transaction;
+import io.nuls.transaction.model.bo.Chain;
 import io.nuls.transaction.model.po.TransactionPO;
 
 import java.util.List;
@@ -35,7 +36,7 @@ public interface TransactionH2Service {
 
     int deleteTx(String address, String txhash);
 
-    int deleteTx(Transaction tx);
+    int deleteTx(Chain chain, Transaction tx) throws Exception;
 
     /**
      * 初始化创建存储账户交易的表

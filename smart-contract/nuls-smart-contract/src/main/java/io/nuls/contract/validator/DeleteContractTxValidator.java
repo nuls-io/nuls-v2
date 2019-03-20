@@ -52,7 +52,7 @@ import static io.nuls.contract.util.ContractUtil.getSuccess;
  * @date: 2018/10/2
  */
 @Component
-public class DeleteContractTxValidator{
+public class DeleteContractTxValidator {
 
     @Autowired
     private ContractHelper contractHelper;
@@ -70,27 +70,27 @@ public class DeleteContractTxValidator{
         }
 
         Result<ContractAddressInfoPo> contractAddressInfoPoResult = contractHelper.getContractAddressInfo(chainId, contractAddressBytes);
-        if(contractAddressInfoPoResult.isFailed()) {
+        if (contractAddressInfoPoResult.isFailed()) {
             return Result.getFailed(contractAddressInfoPoResult.getErrorCode());
         }
         ContractAddressInfoPo contractAddressInfoPo = contractAddressInfoPoResult.getData();
-        if(contractAddressInfoPo == null) {
+        if (contractAddressInfoPo == null) {
             Log.error("contract entity error: The contract does not exist.");
             return Result.getFailed(ContractErrorCode.CONTRACT_ADDRESS_NOT_EXIST);
         }
-        if(!Arrays.equals(sender, contractAddressInfoPo.getSender())) {
+        if (!Arrays.equals(sender, contractAddressInfoPo.getSender())) {
             Log.error("contract entity error: The contract deleter is not the contract creator.");
             return Result.getFailed(TX_DATA_VALIDATION_ERROR);
         }
 
         ContractBalance balance = contractHelper.getRealBalance(chainId, AddressTool.getStringAddressByBytes(contractAddressBytes));
-        if(balance == null) {
+        if (balance == null) {
             Log.error("contract entity error: That balance of the contract is abnormal.");
             return Result.getFailed(TX_DATA_VALIDATION_ERROR);
         }
 
         BigInteger totalBalance = balance.getTotal();
-        if(totalBalance.compareTo(BigInteger.ZERO) != 0) {
+        if (totalBalance.compareTo(BigInteger.ZERO) != 0) {
             Log.error("contract entity error: The balance of the contract is not 0.");
             return Result.getFailed(CONTRACT_DELETE_BALANCE);
         }

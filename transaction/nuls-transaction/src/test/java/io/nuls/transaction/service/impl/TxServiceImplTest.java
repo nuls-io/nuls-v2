@@ -38,7 +38,7 @@ public class TxServiceImplTest {
     @Before
     public void setUp() throws Exception {
         //初始化上下文
-        //SpringLiteContext.init(TxConstant.CONTEXT_PATH);
+        //SpringLiteContext.init(TestConstant.CONTEXT_PATH);
         /*try {
             LanguageStorageServiceImpl languageService = new LanguageStorageServiceImpl();
             String languageDB = (String) languageService.getLanguage();

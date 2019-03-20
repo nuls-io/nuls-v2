@@ -29,13 +29,13 @@ import io.nuls.tools.core.ioc.SpringLiteContext;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.transaction.constant.TxCmd;
 import io.nuls.transaction.constant.TxConstant;
-import io.nuls.transaction.manager.TransactionManager;
 import io.nuls.transaction.message.VerifyCrossWithFCMessage;
 import io.nuls.transaction.model.bo.Chain;
 import io.nuls.transaction.model.bo.CrossTx;
 import io.nuls.transaction.model.bo.CrossTxData;
 import io.nuls.transaction.model.bo.Node;
 import io.nuls.transaction.rpc.call.NetworkCall;
+import io.nuls.transaction.service.TxService;
 import io.nuls.transaction.storage.rocksdb.CtxStorageService;
 import io.nuls.transaction.storage.rocksdb.UnverifiedCtxStorageService;
 import io.nuls.transaction.utils.TxUtil;
@@ -49,11 +49,9 @@ import java.util.List;
  */
 public class VerifyCtxProcessTask implements Runnable {
 
-
-//    private CtxService ctxService = SpringLiteContext.getBean(CtxService.class);
     private CtxStorageService ctxStorageService = SpringLiteContext.getBean(CtxStorageService.class);
     private UnverifiedCtxStorageService unverifiedCtxStorageService = SpringLiteContext.getBean(UnverifiedCtxStorageService.class);
-    private TransactionManager transactionManager = SpringLiteContext.getBean(TransactionManager.class);
+    private TxService TxService = SpringLiteContext.getBean(TxService.class);
     private Chain chain;
 
     public VerifyCtxProcessTask(Chain chain) {
@@ -84,7 +82,7 @@ public class VerifyCtxProcessTask implements Runnable {
             for (CrossTx ctx : unprocessedList) {
                 Transaction tx = ctx.getTx();
                 //交易验证
-                if(!transactionManager.verify(chain, tx)){
+                if(!TxService.verify(chain, tx)){
                     break;
                 }
                 CrossTxData crossTxData = TxUtil.getInstance(tx.getTxData(), CrossTxData.class);

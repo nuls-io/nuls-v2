@@ -35,6 +35,8 @@ public interface ContractErrorCode {
 
     ErrorCode SUCCESS = ErrorCode.init("10000");
     ErrorCode FAILED = ErrorCode.init("10001");
+    ErrorCode SIGNATURE_ERROR = ErrorCode.init("10009");
+    ErrorCode DATA_ERROR = ErrorCode.init("10014");
 
     ErrorCode PARAMETER_ERROR = ErrorCode.init("10012");
     ErrorCode NULL_PARAMETER = ErrorCode.init("10013");
@@ -54,8 +56,12 @@ public interface ContractErrorCode {
     ErrorCode INVALID_AMOUNT = ErrorCode.init("31005");
     ErrorCode TX_DATA_VALIDATION_ERROR = ErrorCode.init("31008");
     ErrorCode TOO_SMALL_AMOUNT = ErrorCode.init("31012");
+    ErrorCode TX_NOT_EXIST = ErrorCode.init("31015");
 
+    ErrorCode PASSWORD_IS_WRONG = ErrorCode.init("50000");
+    ErrorCode ACCOUNT_NOT_EXIST = ErrorCode.init("50001");
     ErrorCode ADDRESS_ERROR = ErrorCode.init("50004");
+    ErrorCode ACCOUNT_VALIDATION_ERROR = ErrorCode.init("50025");
 
     ErrorCode CONTRACT_EXECUTE_ERROR = ErrorCode.init("100001");
     ErrorCode CONTRACT_ADDRESS_NOT_EXIST = ErrorCode.init("100002");
@@ -72,10 +78,11 @@ public interface ContractErrorCode {
     ErrorCode CONTRACT_LOCK = ErrorCode.init("100013");
     ErrorCode CONTRACT_NRC20_MAXIMUM_DECIMALS = ErrorCode.init("100014");
     ErrorCode CONTRACT_NRC20_MAXIMUM_TOTAL_SUPPLY = ErrorCode.init("100015");
-    ErrorCode CONTRACT_MINIMUM_PRICE = ErrorCode.init("100016");
+    ErrorCode CONTRACT_MINIMUM_PRICE_ERROR = ErrorCode.init("100016");
     ErrorCode CONTRACT_DELETE_BALANCE = ErrorCode.init("100017");
     ErrorCode CONTRACT_DELETE_CREATER = ErrorCode.init("100018");
     ErrorCode CONTRACT_DELETED = ErrorCode.init("100019");
     ErrorCode CONTRACT_GAS_LIMIT = ErrorCode.init("100020");
+    ErrorCode CONTRACT_NOT_EXECUTE_VIEW = ErrorCode.init("100021");
     ErrorCode CONTRACT_OTHER_ERROR = ErrorCode.init("100099");
 }

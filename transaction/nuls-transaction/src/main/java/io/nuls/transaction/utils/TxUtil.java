@@ -27,16 +27,20 @@ package io.nuls.transaction.utils;
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.data.*;
+import io.nuls.tools.core.ioc.SpringLiteContext;
 import io.nuls.tools.crypto.HexUtil;
-import io.nuls.tools.model.DateUtils;
-import io.nuls.tools.model.StringUtils;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.log.logback.NulsLogger;
+import io.nuls.tools.model.DateUtils;
+import io.nuls.tools.model.StringUtils;
+import io.nuls.transaction.constant.TxConfig;
 import io.nuls.transaction.constant.TxConstant;
 import io.nuls.transaction.constant.TxErrorCode;
+import io.nuls.transaction.manager.TxManager;
 import io.nuls.transaction.model.bo.Chain;
 import io.nuls.transaction.model.po.TransactionPO;
 
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -47,6 +51,8 @@ import static io.nuls.transaction.utils.LoggerUtil.Log;
  * @date: 2018-12-05
  */
 public class TxUtil {
+
+    private static TxConfig txConfig = SpringLiteContext.getBean(TxConfig.class);
 
     public static CoinData getCoinData(Transaction tx) throws NulsException {
         if (null == tx) {
@@ -109,8 +115,9 @@ public class TxUtil {
     }
 
     public static boolean isNulsAsset(int chainId, int assetId) {
-        if (chainId == TxConstant.NULS_CHAINID
-                && assetId == TxConstant.NULS_CHAIN_ASSETID) {
+
+        if (chainId == txConfig.getMainChainId()
+                && assetId == txConfig.getMainAssetId()) {
             return true;
         }
         return false;
@@ -118,13 +125,17 @@ public class TxUtil {
 
     public static boolean isChainAssetExist(Chain chain, Coin coin) {
         if (chain.getConfig().getChainId() == coin.getAssetsChainId() &&
-                chain.getConfig().getAssetsId() == coin.getAssetsId()) {
+                chain.getConfig().getAssetId() == coin.getAssetsId()) {
             return true;
         }
         return false;
     }
 
     public static List<TransactionPO> tx2PO(Transaction tx) throws NulsException {
+        return tx2PO(null, tx);
+    }
+
+    public static List<TransactionPO> tx2PO(Chain chain, Transaction tx) throws NulsException {
         List<TransactionPO> list = new ArrayList<>();
         if (null == tx.getCoinData()) {
             return list;
@@ -179,9 +190,38 @@ public class TxUtil {
                 list.add(transactionPO);
             }
         }
+        if(TxManager.isSmartContract(chain, tx.getType())){
+            TransactionPO transactionPO = new TransactionPO();
+            transactionPO.setAddress(extractContractAddress(tx.getTxData()));
+            transactionPO.setAssetChainId(chain.getConfig().getChainId());
+            transactionPO.setAssetId(chain.getConfig().getAssetId());
+            transactionPO.setAmount(BigInteger.ZERO);
+            transactionPO.setHash(tx.getHash().getDigestHex());
+            transactionPO.setType(tx.getType());
+            transactionPO.setState(4);
+            transactionPO.setTime(tx.getTime());
+            list.add(transactionPO);
+        }
         return list;
     }
 
+    /**
+     * 从智能合约TxData中获取地址
+     * @param txData
+     * @return
+     */
+    public static String extractContractAddress(byte[] txData) {
+        if(txData == null) {
+            return null;
+        }
+        int length = txData.length;
+        if(length < Address.ADDRESS_LENGTH * 2) {
+            return null;
+        }
+        byte[] contractAddress = new byte[Address.ADDRESS_LENGTH];
+        System.arraycopy(txData, Address.ADDRESS_LENGTH, contractAddress, 0, Address.ADDRESS_LENGTH);
+        return AddressTool.getStringAddressByBytes(contractAddress);
+    }
 
     /**
      * 获取跨链交易tx中froms里面地址的链id
@@ -213,6 +253,13 @@ public class TxUtil {
 
     }
 
+    public static boolean isLegalContractAddress(byte[] addressBytes, Chain chain) {
+        if(addressBytes == null) {
+            return false;
+        }
+        return AddressTool.validContractAddress(addressBytes, chain.getChainId());
+    }
+
     /**
      * 根据上一个交易hash获取下一个合法的nonce
      *
@@ -237,7 +284,8 @@ public class TxUtil {
         nulsLogger.debug("time: {}", DateUtils.timeStamp2DateStr(tx.getTime()));
         nulsLogger.debug("size: {}B,  -{}KB, -{}MB",
                 String.valueOf(tx.getSize()), String.valueOf(tx.getSize() / 1024), String.valueOf(tx.getSize() / 1024 / 1024));
-
+        byte[] remark = tx.getRemark();
+        nulsLogger.debug("remark: {}", remark == null ? "" : HexUtil.encode(tx.getRemark()));
         CoinData coinData = null;
         try {
             if(tx.getCoinData()!=null) {

@@ -27,7 +27,7 @@ package io.nuls.ledger.model.po;
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.basic.NulsOutputStreamBuffer;
 import io.nuls.base.data.BaseNulsData;
-import io.nuls.ledger.utils.TimeUtils;
+import io.nuls.ledger.utils.TimeUtil;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.parse.SerializeUtils;
 import lombok.Getter;
@@ -84,7 +84,7 @@ public class UnconfirmedAmount extends BaseNulsData {
         earnAmount = earnAmount.add(earn);
         fromUnLockedAmount = fromUnLockedAmount.add(unLockedAmount);
         toLockedAmount = toLockedAmount.add(lockedAmount);
-        this.time = TimeUtils.getCurrentTime();
+        this.time = TimeUtil.getCurrentTime();
     }
 
     @Override

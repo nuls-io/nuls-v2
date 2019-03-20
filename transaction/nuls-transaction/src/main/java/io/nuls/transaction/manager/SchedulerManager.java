@@ -24,9 +24,11 @@
 
 package io.nuls.transaction.manager;
 
+import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Service;
 import io.nuls.tools.thread.ThreadUtils;
 import io.nuls.tools.thread.commom.NulsThreadFactory;
+import io.nuls.transaction.constant.TxConfig;
 import io.nuls.transaction.constant.TxConstant;
 import io.nuls.transaction.model.bo.Chain;
 import io.nuls.transaction.task.UnconfirmedTxProcessTask;
@@ -43,22 +45,28 @@ import java.util.concurrent.TimeUnit;
 @Service
 public class SchedulerManager {
 
+    @Autowired
+    private TxConfig txConfig;
+
     public boolean createTransactionScheduler(Chain chain) {
         ScheduledThreadPoolExecutor localTxExecutor = ThreadUtils.createScheduledThreadPool(1,
-                new NulsThreadFactory(TxConstant.MODULE_CODE));
-        localTxExecutor.scheduleAtFixedRate(new VerifyTxProcessTask(chain), 5, 1, TimeUnit.SECONDS);
+                new NulsThreadFactory(txConfig.getModuleCode()));
+        localTxExecutor.scheduleAtFixedRate(new VerifyTxProcessTask(chain),
+                TxConstant.TX_TASK_INITIALDELAY, TxConstant.TX_TASK_PERIOD, TimeUnit.SECONDS);
         chain.setScheduledThreadPoolExecutor(localTxExecutor);
 
         ScheduledThreadPoolExecutor crossTxExecutor = ThreadUtils.createScheduledThreadPool(1,
-                new NulsThreadFactory(TxConstant.MODULE_CODE));
+                new NulsThreadFactory(txConfig.getModuleCode()));
         //固定延迟时间
-        crossTxExecutor.scheduleWithFixedDelay(new VerifyCtxProcessTask(chain), 5, 10, TimeUnit.SECONDS);
+        crossTxExecutor.scheduleWithFixedDelay(new VerifyCtxProcessTask(chain),
+                TxConstant.CTX_TASK_INITIALDELAY, TxConstant.CTX_TASK_PERIOD, TimeUnit.SECONDS);
         chain.setScheduledThreadPoolExecutor(crossTxExecutor);
 
         ScheduledThreadPoolExecutor unconfirmedTxExecutor = ThreadUtils.createScheduledThreadPool(1,
-                new NulsThreadFactory(TxConstant.MODULE_CODE));
+                new NulsThreadFactory(txConfig.getModuleCode()));
         //固定延迟时间
-        crossTxExecutor.scheduleWithFixedDelay(new UnconfirmedTxProcessTask(chain), 5, 5, TimeUnit.MINUTES);
+        crossTxExecutor.scheduleWithFixedDelay(new UnconfirmedTxProcessTask(chain),
+                TxConstant.CLEAN_TASK_INITIALDELAY, TxConstant.CLEAN_TASK_PERIOD, TimeUnit.MINUTES);
         chain.setScheduledThreadPoolExecutor(unconfirmedTxExecutor);
 
         return true;

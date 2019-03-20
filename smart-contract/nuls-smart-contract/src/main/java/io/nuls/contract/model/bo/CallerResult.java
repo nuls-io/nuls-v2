@@ -23,10 +23,10 @@
  */
 package io.nuls.contract.model.bo;
 
-import io.nuls.contract.vm.program.ProgramExecutor;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -39,4 +39,7 @@ public class CallerResult {
 
     private List<CallableResult> callableResultList;
 
+    public CallerResult() {
+        this.callableResultList = new ArrayList<>();
+    }
 }

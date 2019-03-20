@@ -33,6 +33,7 @@ import io.nuls.contract.manager.ChainManager;
 import io.nuls.contract.manager.ContractTokenBalanceManager;
 import io.nuls.contract.manager.TempBalanceManager;
 import io.nuls.contract.model.bo.*;
+import io.nuls.contract.model.dto.ContractInfoDto;
 import io.nuls.contract.model.po.ContractAddressInfoPo;
 import io.nuls.contract.model.po.ContractTokenTransferInfoPo;
 import io.nuls.contract.model.txdata.ContractData;
@@ -40,7 +41,6 @@ import io.nuls.contract.rpc.call.BlockCall;
 import io.nuls.contract.rpc.call.LedgerCall;
 import io.nuls.contract.storage.ContractAddressStorageService;
 import io.nuls.contract.storage.ContractTokenTransferStorageService;
-import io.nuls.contract.storage.impl.ContractTokenTransferStorageServiceImpl;
 import io.nuls.contract.util.ContractUtil;
 import io.nuls.contract.util.MapUtil;
 import io.nuls.contract.util.VMContext;
@@ -49,9 +49,9 @@ import io.nuls.tools.basic.Result;
 import io.nuls.tools.basic.VarInt;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
-import io.nuls.tools.model.StringUtils;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.log.Log;
+import io.nuls.tools.model.StringUtils;
 import org.spongycastle.util.Arrays;
 
 import java.io.IOException;
@@ -88,7 +88,7 @@ public class ContractHelper {
 
     public ProgramExecutor getProgramExecutor(int chainId) {
         Chain chain = getChain(chainId);
-        if(chain == null) {
+        if (chain == null) {
             return null;
         }
         return chain.getProgramExecutor();
@@ -99,11 +99,32 @@ public class ContractHelper {
     }
 
     public ProgramMethod getMethodInfoByCode(int chainId, String methodName, String methodDesc, byte[] code) {
-        if(StringUtils.isBlank(methodName) || code == null) {
+        if (StringUtils.isBlank(methodName) || code == null) {
             return null;
         }
         List<ProgramMethod> methods = this.getAllMethods(chainId, code);
         return this.getMethodInfo(methodName, methodDesc, methods);
+    }
+
+    public ContractInfoDto getConstructor(int chainId, byte[] contractCode) {
+        try {
+            ContractInfoDto dto = new ContractInfoDto();
+            List<ProgramMethod> programMethods = this.getAllMethods(chainId, contractCode);
+            if (programMethods == null || programMethods.size() == 0) {
+                return null;
+            }
+            for (ProgramMethod method : programMethods) {
+                if (ContractConstant.CONTRACT_CONSTRUCTOR.equals(method.getName())) {
+                    dto.setConstructor(method);
+                    break;
+                }
+            }
+            dto.setNrc20(this.checkNrc20Contract(programMethods));
+            return dto;
+        } catch (Exception e) {
+            Log.error(e);
+            return null;
+        }
     }
 
     private List<ProgramMethod> getAllMethods(int chainId, byte[] contractCode) {
@@ -111,13 +132,13 @@ public class ContractHelper {
     }
 
     private ProgramMethod getMethodInfo(String methodName, String methodDesc, List<ProgramMethod> methods) {
-        if(methods != null && methods.size() > 0) {
+        if (methods != null && methods.size() > 0) {
             boolean emptyDesc = StringUtils.isBlank(methodDesc);
-            for(ProgramMethod method : methods) {
-                if(methodName.equals(method.getName())) {
-                    if(emptyDesc) {
+            for (ProgramMethod method : methods) {
+                if (methodName.equals(method.getName())) {
+                    if (emptyDesc) {
                         return method;
-                    } else if(methodDesc.equals(method.getDesc())) {
+                    } else if (methodDesc.equals(method.getDesc())) {
                         return method;
                     }
                 }
@@ -126,12 +147,22 @@ public class ContractHelper {
         return null;
     }
 
+    public ProgramMethod getMethodInfoByContractAddress(int chainId, byte[] currentStateRoot, String methodName, String methodDesc, byte[] contractAddressBytes) {
+        if (StringUtils.isBlank(methodName)) {
+            return null;
+        }
+        ProgramExecutor track = getProgramExecutor(chainId).begin(currentStateRoot);
+        List<ProgramMethod> methods = track.method(contractAddressBytes);
+
+        return this.getMethodInfo(methodName, methodDesc, methods);
+    }
+
     private boolean checkNrc20Contract(List<ProgramMethod> methods) {
-        if(methods == null || methods.size() == 0) {
+        if (methods == null || methods.size() == 0) {
             return false;
         }
         Map<String, ProgramMethod> contractMethodsMap = new HashMap<>(methods.size());
-        for(ProgramMethod method : methods) {
+        for (ProgramMethod method : methods) {
             contractMethodsMap.put(method.getName(), method);
         }
 
@@ -139,15 +170,15 @@ public class ContractHelper {
         String methodName;
         ProgramMethod standardMethod;
         ProgramMethod mappingMethod;
-        for(Map.Entry<String, ProgramMethod> entry : entries) {
+        for (Map.Entry<String, ProgramMethod> entry : entries) {
             methodName = entry.getKey();
             standardMethod = entry.getValue();
             mappingMethod = contractMethodsMap.get(methodName);
 
-            if(mappingMethod == null) {
+            if (mappingMethod == null) {
                 return false;
             }
-            if(!standardMethod.equalsNrc20Method(mappingMethod)) {
+            if (!standardMethod.equalsNrc20Method(mappingMethod)) {
                 return false;
             }
         }
@@ -156,11 +187,11 @@ public class ContractHelper {
     }
 
     private boolean checkAcceptDirectTransfer(List<ProgramMethod> methods) {
-        if(methods == null || methods.size() == 0) {
+        if (methods == null || methods.size() == 0) {
             return false;
         }
-        for(ProgramMethod method : methods) {
-            if(ContractConstant.BALANCE_TRIGGER_METHOD_NAME.equals(method.getName())) {
+        for (ProgramMethod method : methods) {
+            if (ContractConstant.BALANCE_TRIGGER_METHOD_NAME.equals(method.getName())) {
                 return method.isPayable();
             }
         }
@@ -180,7 +211,7 @@ public class ContractHelper {
             Log.error(e);
             return ProgramResult.getFailed(e.getMessage());
         }
-        if(blockHeader == null) {
+        if (blockHeader == null) {
             return ProgramResult.getFailed("block header is null.");
         }
         long blockHeight = blockHeader.getHeight();
@@ -189,16 +220,8 @@ public class ContractHelper {
         return this.invokeViewMethod(chainId, null, false, currentStateRoot, blockHeight, contractAddressBytes, methodName, methodDesc, args);
     }
 
-    public ProgramResult invokeCustomGasViewMethod(int chainId, byte[] contractAddressBytes, String methodName, String methodDesc, String[][] args) {
-        // 当前区块高度
-        BlockHeader blockHeader;
-        try {
-            blockHeader = BlockCall.getLatestBlockHeader(chainId);
-        } catch (NulsException e) {
-            Log.error(e);
-            return ProgramResult.getFailed(e.getMessage());
-        }
-        if(blockHeader == null) {
+    public ProgramResult invokeCustomGasViewMethod(int chainId, BlockHeader blockHeader, byte[] contractAddressBytes, String methodName, String methodDesc, String[][] args) {
+        if (blockHeader == null) {
             return ProgramResult.getFailed("block header is null.");
         }
         long blockHeight = blockHeader.getHeight();
@@ -219,8 +242,8 @@ public class ContractHelper {
     public ProgramResult invokeViewMethod(int chainId, ProgramExecutor executor, boolean isCustomGasLimit, byte[] stateRoot, long blockHeight, byte[] contractAddressBytes, String methodName, String methodDesc, String[][] args) {
 
         long gasLimit;
-        if(isCustomGasLimit) {
-            gasLimit = vmContext.getCustomMaxViewGasLimit();
+        if (isCustomGasLimit) {
+            gasLimit = vmContext.getCustomMaxViewGasLimit(chainId);
         } else {
             gasLimit = ContractConstant.CONTRACT_CONSTANT_GASLIMIT;
         }
@@ -236,7 +259,7 @@ public class ContractHelper {
         programCall.setViewMethod(isCustomGasLimit);
 
         ProgramExecutor track;
-        if(executor == null) {
+        if (executor == null) {
             track = getProgramExecutor(chainId).begin(stateRoot);
         } else {
             track = executor.startTracking();
@@ -247,7 +270,7 @@ public class ContractHelper {
     }
 
     public Result validateNrc20Contract(int chainId, ProgramExecutor track, ContractWrapperTransaction tx, ContractResult contractResult) {
-        if(contractResult == null) {
+        if (contractResult == null) {
             return Result.getFailed(ContractErrorCode.NULL_PARAMETER);
         }
         ContractData createContractData = tx.getContractData();
@@ -259,13 +282,13 @@ public class ContractHelper {
         boolean isAcceptDirectTransfer = this.checkAcceptDirectTransfer(methods);
         contractResult.setNrc20(isNrc20);
         contractResult.setAcceptDirectTransfer(isAcceptDirectTransfer);
-        if(isNrc20) {
+        if (isNrc20) {
             // NRC20 tokenName 验证代币名称格式
             ProgramResult programResult = this.invokeViewMethod(chainId, track, stateRoot, bestBlockHeight, contractAddress, NRC20_METHOD_NAME, null, null);
-            if(programResult.isSuccess()) {
+            if (programResult.isSuccess()) {
                 String tokenName = programResult.getResult();
-                if(StringUtils.isNotBlank(tokenName)) {
-                    if(!validTokenNameOrSymbol(tokenName)) {
+                if (StringUtils.isNotBlank(tokenName)) {
+                    if (!validTokenNameOrSymbol(tokenName)) {
                         contractResult.setError(true);
                         contractResult.setErrorMessage("The format of the name is incorrect.");
                         return getFailed();
@@ -275,10 +298,10 @@ public class ContractHelper {
             }
             // NRC20 tokenSymbol 验证代币符号的格式
             programResult = this.invokeViewMethod(chainId, track, stateRoot, bestBlockHeight, contractAddress, NRC20_METHOD_SYMBOL, null, null);
-            if(programResult.isSuccess()) {
+            if (programResult.isSuccess()) {
                 String symbol = programResult.getResult();
-                if(StringUtils.isNotBlank(symbol)) {
-                    if(!validTokenNameOrSymbol(symbol)) {
+                if (StringUtils.isNotBlank(symbol)) {
+                    if (!validTokenNameOrSymbol(symbol)) {
                         contractResult.setError(true);
                         contractResult.setErrorMessage("The format of the symbol is incorrect.");
                         return getFailed();
@@ -289,12 +312,12 @@ public class ContractHelper {
 
             programResult = this.invokeViewMethod(chainId, track, stateRoot, bestBlockHeight, contractAddress, NRC20_METHOD_DECIMALS, null, null);
             BigInteger decimalsBig = BigInteger.ZERO;
-            if(programResult.isSuccess()) {
+            if (programResult.isSuccess()) {
                 String decimals = programResult.getResult();
-                if(StringUtils.isNotBlank(decimals)) {
+                if (StringUtils.isNotBlank(decimals)) {
                     try {
                         decimalsBig = new BigInteger(decimals);
-                        if(decimalsBig.compareTo(BigInteger.ZERO) < 0 || decimalsBig.compareTo(MAXIMUM_DECIMALS) > 0) {
+                        if (decimalsBig.compareTo(BigInteger.ZERO) < 0 || decimalsBig.compareTo(MAXIMUM_DECIMALS) > 0) {
                             contractResult.setError(true);
                             contractResult.setErrorMessage("The value of decimals ranges from 0 to 18.");
                             return getFailed();
@@ -307,12 +330,12 @@ public class ContractHelper {
                 }
             }
             programResult = this.invokeViewMethod(chainId, track, stateRoot, bestBlockHeight, contractAddress, NRC20_METHOD_TOTAL_SUPPLY, null, null);
-            if(programResult.isSuccess()) {
+            if (programResult.isSuccess()) {
                 String totalSupply = programResult.getResult();
-                if(StringUtils.isNotBlank(totalSupply)) {
+                if (StringUtils.isNotBlank(totalSupply)) {
                     try {
                         BigInteger totalSupplyBig = new BigInteger(totalSupply);
-                        if(totalSupplyBig.compareTo(BigInteger.ZERO) <= 0 || totalSupplyBig.compareTo(MAXIMUM_TOTAL_SUPPLY.multiply(BigInteger.TEN.pow(decimalsBig.intValue()))) > 0) {
+                        if (totalSupplyBig.compareTo(BigInteger.ZERO) <= 0 || totalSupplyBig.compareTo(MAXIMUM_TOTAL_SUPPLY.multiply(BigInteger.TEN.pow(decimalsBig.intValue()))) > 0) {
                             contractResult.setErrorMessage("The value of totalSupply ranges from 1 to 2^256 - 1.");
                             contractResult.setError(true);
                             return getFailed();
@@ -330,14 +353,14 @@ public class ContractHelper {
 
     public ContractBalance getBalance(int chainId, byte[] address) {
         TempBalanceManager tempBalanceManager = getTempBalanceManager(chainId);
-        if(tempBalanceManager != null) {
+        if (tempBalanceManager != null) {
             Result<ContractBalance> balance = tempBalanceManager.getBalance(address);
-            if(balance.isSuccess()) {
+            if (balance.isSuccess()) {
                 return balance.getData();
             }
         } else {
             ContractBalance realBalance = getBalanceAndNonce(chainId, AddressTool.getStringAddressByBytes(address));
-            if(realBalance != null) {
+            if (realBalance != null) {
                 return realBalance;
             }
         }
@@ -390,17 +413,11 @@ public class ContractHelper {
         return getChain(chainId).getCurrentBlockHeader();
     }
 
-    public void removeTempBalanceManagerAndCurrentBlockHeader(int chainId) {
-        Chain chain = getChain(chainId);
-        chain.setTempBalanceManager(null);
-        chain.setCurrentBlockHeader(null);
-    }
-
     public Result<ContractAddressInfoPo> getContractAddressInfo(int chainId, byte[] contractAddressBytes) {
         return contractAddressStorageService.getContractAddressInfo(chainId, contractAddressBytes);
     }
 
-    public Result<ContractTokenInfo> getContractToken(int chainId, String address, String contractAddress) {
+    public Result<ContractTokenInfo> getContractToken(int chainId, BlockHeader blockHeader, String address, String contractAddress) {
         try {
             if (StringUtils.isBlank(contractAddress) || StringUtils.isBlank(address)) {
                 return Result.getFailed(ContractErrorCode.NULL_PARAMETER);
@@ -410,18 +427,6 @@ public class ContractHelper {
                 return Result.getFailed(ADDRESS_ERROR);
             }
 
-            // 当前区块高度
-            BlockHeader blockHeader;
-            try {
-                blockHeader = BlockCall.getLatestBlockHeader(chainId);
-            } catch (NulsException e) {
-                Log.error(e);
-                return getFailed();
-            }
-            if(blockHeader == null) {
-                Log.error("block header is null.");
-                return getFailed();
-            }
             long blockHeight = blockHeader.getHeight();
             // 当前区块状态根
             byte[] currentStateRoot = ContractUtil.getStateRoot(blockHeader);
@@ -429,16 +434,16 @@ public class ContractHelper {
             byte[] contractAddressBytes = AddressTool.getAddress(contractAddress);
             Result<ContractAddressInfoPo> contractAddressInfoResult = this.getContractAddressInfo(chainId, contractAddressBytes);
             ContractAddressInfoPo po = contractAddressInfoResult.getData();
-            if(po == null) {
+            if (po == null) {
                 return Result.getFailed(ContractErrorCode.CONTRACT_ADDRESS_NOT_EXIST);
             }
-            if(!po.isNrc20()) {
+            if (!po.isNrc20()) {
                 return Result.getFailed(ContractErrorCode.CONTRACT_NOT_NRC20);
             }
 
             ProgramResult programResult = this.invokeViewMethod(chainId, null, false, currentStateRoot, blockHeight, contractAddressBytes, "balanceOf", null, ContractUtil.twoDimensionalArray(new Object[]{address}));
             Result<ContractTokenInfo> result;
-            if(!programResult.isSuccess()) {
+            if (!programResult.isSuccess()) {
                 result = getFailed();
                 result.setMsg(ContractUtil.simplifyErrorMsg(programResult.getErrorMessage()));
             } else {
@@ -457,7 +462,7 @@ public class ContractHelper {
     }
 
     public void updateLastedPriceForAccount(int chainId, byte[] sender, long price) {
-        if(price <= 0) {
+        if (price <= 0) {
             return;
         }
         String address = AddressTool.getStringAddressByBytes(sender) + chainId;
@@ -467,7 +472,7 @@ public class ContractHelper {
     public long getLastedPriceForAccount(int chainId, byte[] sender) {
         String address = AddressTool.getStringAddressByBytes(sender) + chainId;
         Long price = accountLastedPriceMap.get(address);
-        if(price == null) {
+        if (price == null) {
             price = ContractConstant.CONTRACT_MINIMUM_PRICE;
         }
         price = price < ContractConstant.CONTRACT_MINIMUM_PRICE ? ContractConstant.CONTRACT_MINIMUM_PRICE : price;
@@ -476,7 +481,7 @@ public class ContractHelper {
     }
 
     public void dealNrc20Events(int chainId, byte[] newestStateRoot, Transaction tx, ContractResult contractResult, ContractAddressInfoPo po) {
-        if(po == null) {
+        if (po == null) {
             return;
         }
         try {
@@ -485,12 +490,12 @@ public class ContractHelper {
             // 目前只处理Transfer事件, 为了刷新账户的token余额
             String event;
             ContractAddressInfoPo contractAddressInfo;
-            if(events != null && size > 0) {
-                for(int i = 0; i < size; i++) {
+            if (events != null && size > 0) {
+                for (int i = 0; i < size; i++) {
                     event = events.get(i);
                     // 按照NRC20标准，TransferEvent事件中第一个参数是转出地址-from，第二个参数是转入地址-to, 第三个参数是金额
                     ContractTokenTransferInfoPo tokenTransferInfoPo = ContractUtil.convertJsonToTokenTransferInfoPo(chainId, event);
-                    if(tokenTransferInfoPo == null) {
+                    if (tokenTransferInfoPo == null) {
                         continue;
                     }
                     String contractAddress = tokenTransferInfoPo.getContractAddress();
@@ -501,18 +506,18 @@ public class ContractHelper {
                         continue;
                     }
                     byte[] contractAddressBytes = AddressTool.getAddress(contractAddress);
-                    if(Arrays.areEqual(po.getContractAddress(), contractAddressBytes)) {
+                    if (Arrays.areEqual(po.getContractAddress(), contractAddressBytes)) {
                         contractAddressInfo = po;
                     } else {
                         Result<ContractAddressInfoPo> contractAddressInfoResult = this.getContractAddressInfo(chainId, contractAddressBytes);
                         contractAddressInfo = contractAddressInfoResult.getData();
                     }
 
-                    if(contractAddressInfo == null) {
+                    if (contractAddressInfo == null) {
                         continue;
                     }
                     // 事件不是NRC20合约的事件
-                    if(!contractAddressInfo.isNrc20()) {
+                    if (!contractAddressInfo.isNrc20()) {
                         continue;
                     }
                     byte[] txHashBytes;
@@ -527,11 +532,11 @@ public class ContractHelper {
                     tokenTransferInfoPo.setTxHash(txHashBytes);
                     tokenTransferInfoPo.setStatus((byte) (contractResult.isSuccess() ? 1 : 2));
 
-                    if(from != null) {
+                    if (from != null) {
                         this.refreshTokenBalance(chainId, newestStateRoot, tx.getBlockHeight(), contractAddressInfo, AddressTool.getStringAddressByBytes(from), contractAddress);
                         this.saveTokenTransferInfo(chainId, from, txHashBytes, new VarInt(i).encode(), tokenTransferInfoPo);
                     }
-                    if(to != null) {
+                    if (to != null) {
                         this.refreshTokenBalance(chainId, newestStateRoot, tx.getBlockHeight(), contractAddressInfo, AddressTool.getStringAddressByBytes(to), contractAddress);
                         this.saveTokenTransferInfo(chainId, to, txHashBytes, new VarInt(i).encode(), tokenTransferInfoPo);
                     }
@@ -556,12 +561,12 @@ public class ContractHelper {
             // 目前只处理Transfer事件, 为了刷新账户的token余额
             String event;
             ContractAddressInfoPo contractAddressInfo;
-            if(events != null && size > 0) {
-                for(int i = size - 1; i >= 0; i--) {
+            if (events != null && size > 0) {
+                for (int i = size - 1; i >= 0; i--) {
                     event = events.get(i);
                     // 按照NRC20标准，TransferEvent事件中第一个参数是转出地址-from，第二个参数是转入地址-to, 第三个参数是金额
                     ContractTokenTransferInfoPo tokenTransferInfoPo = ContractUtil.convertJsonToTokenTransferInfoPo(chainId, event);
-                    if(tokenTransferInfoPo == null) {
+                    if (tokenTransferInfoPo == null) {
                         continue;
                     }
                     String contractAddress = tokenTransferInfoPo.getContractAddress();
@@ -575,11 +580,11 @@ public class ContractHelper {
                     Result<ContractAddressInfoPo> contractAddressInfoResult = this.getContractAddressInfo(chainId, contractAddressBytes);
                     contractAddressInfo = contractAddressInfoResult.getData();
 
-                    if(contractAddressInfo == null) {
+                    if (contractAddressInfo == null) {
                         continue;
                     }
                     // 事件不是NRC20合约的事件
-                    if(!contractAddressInfo.isNrc20()) {
+                    if (!contractAddressInfo.isNrc20()) {
                         continue;
                     }
 
@@ -629,7 +634,7 @@ public class ContractHelper {
     private void refreshTokenBalance(int chainId, ProgramExecutor executor, byte[] stateRoot, long blockHeight, ContractAddressInfoPo po, String address, String contractAddress) {
         byte[] contractAddressBytes = po.getContractAddress();
         ProgramResult programResult = this.invokeViewMethod(chainId, executor, stateRoot, blockHeight, contractAddressBytes, NRC20_METHOD_BALANCE_OF, null, address);
-        if(!programResult.isSuccess()) {
+        if (!programResult.isSuccess()) {
             return;
         } else {
             getChain(chainId).getContractTokenBalanceManager().refreshContractToken(address, contractAddress, po, new BigInteger(programResult.getResult()));

@@ -479,12 +479,25 @@ public class PocConsensusResource extends BaseCmd{
     }
 
     /**
-     * 获取所有节点出块地址/指定N个区块出块指定
+     * 获取所有节点出块地址/指定N个区块出块地址
      * */
     @CmdAnnotation(cmd = "cs_getAgentAddressList", version = 1.0, description = "Get all node out-of-block addresses/specify N block out-of-block designations")
     @Parameter(parameterName = "chainId", parameterType = "int")
     public Response getAgentAddressList(Map<String,Object> params){
         Result result = service.getAgentAddressList(params);
+        if(result.isFailed()){
+            return failed(result.getErrorCode());
+        }
+        return success(result.getData());
+    }
+
+    /**
+     * 获取种子节点
+     * */
+    @CmdAnnotation(cmd = "cs_getSeedNodeList", version = 1.0, description = "get seed nodes list")
+    @Parameter(parameterName = "chainId", parameterType = "int")
+    public Response getSeedNodeList(Map<String,Object> params){
+        Result result = service.getSeedNodeList(params);
         if(result.isFailed()){
             return failed(result.getErrorCode());
         }

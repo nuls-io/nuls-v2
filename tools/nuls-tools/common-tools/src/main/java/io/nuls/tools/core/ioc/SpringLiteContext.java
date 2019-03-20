@@ -26,6 +26,8 @@ package io.nuls.tools.core.ioc;
 
 import io.nuls.tools.basic.InitializingBean;
 import io.nuls.tools.core.annotation.*;
+import io.nuls.tools.core.config.ConfigSetting;
+import io.nuls.tools.core.config.ConfigurationLoader;
 import io.nuls.tools.core.inteceptor.DefaultMethodInterceptor;
 import io.nuls.tools.core.inteceptor.base.BeanMethodInterceptor;
 import io.nuls.tools.core.inteceptor.base.BeanMethodInterceptorManager;
@@ -89,6 +91,7 @@ public class SpringLiteContext {
         SpringLiteContext.interceptor = interceptor;
         Set<Class> classes = new HashSet<>();
         Log.info("spring lite scan package : {}", Arrays.toString(packName));
+        classes.addAll(ScanUtil.scan("io.nuls.tools.core.config"));
         Arrays.stream(packName).forEach(pack -> {
             classes.addAll(ScanUtil.scan(pack));
         });
@@ -96,9 +99,51 @@ public class SpringLiteContext {
                 //通过Order注解控制类加载顺序
                 .sorted((b1, b2) -> getOrderByClass(b1) > getOrderByClass(b2) ? 1 : -1)
                 .forEach((Class clazz) -> checkBeanClass(clazz));
+        configurationInjectToBean();
         autowireFields();
         callAfterPropertiesSet();
         success = true;
+    }
+
+    /**
+     * 将配置项注入到bean中
+     * inject config to bean
+     */
+    private static void configurationInjectToBean() {
+        ConfigurationLoader configLoader = getBean(ConfigurationLoader.class);
+        //加载配置项
+        configLoader.load();
+        BEAN_TEMP_MAP.entrySet().forEach(entry -> {
+            Object bean = entry.getValue();
+            Class<?> cls = BEAN_TYPE_MAP.get(entry.getKey());
+            Configuration configuration = cls.getAnnotation(Configuration.class);
+            if (configuration != null) {
+                Set<Field> fields = getFieldSet(cls);
+                fields.stream().forEach(field -> {
+                    Value annValue = field.getAnnotation(Value.class);
+                    String key = field.getName();
+                    if(annValue != null){
+                        key = annValue.value();
+                    }
+                    Persist persist = field.getAnnotation(Persist.class);
+                    boolean readPersist = persist != null;
+                    if(readPersist){
+                        ConfigSetting.set(bean, field, configLoader.getValue(key,configuration.persistDomain()));
+                    }else{
+                        ConfigSetting.set(bean, field, configLoader.getValue(key));
+                    }
+                });
+            }else{
+                Set<Field> fields = getFieldSet(cls);
+                fields.stream().forEach(field -> {
+                    Value annValue = field.getAnnotation(Value.class);
+                    if (annValue != null) {
+                        String key = annValue.value();
+                        ConfigSetting.set(bean, field, configLoader.getValue(key));
+                    }
+                });
+            }
+        });
     }
 
     /**
@@ -135,7 +180,7 @@ public class SpringLiteContext {
                         try {
                             ((InitializingBean) bean).afterPropertiesSet();
                         } catch (Exception e) {
-                            Log.error("spring lite callAfterPropertiesSet fail : {} ",bean.getClass(),e.getMessage(),e);
+                            Log.error("spring lite callAfterPropertiesSet fail : {} ", bean.getClass(), e.getMessage(), e);
                             System.exit(0);
                         }
                     }
@@ -286,6 +331,16 @@ public class SpringLiteContext {
             if (null != ann) {
                 beanName = ((Controller) ann).value();
             }
+        }
+
+        if (null == ann) {
+            ann = getFromArray(anns, Configuration.class);
+            if(null != ann) {
+                aopProxy = true;
+            }
+//            if (null != ann) {
+//                beanName = ((Configuration) ann).value();
+//            }
         }
 
         if (ann != null) {

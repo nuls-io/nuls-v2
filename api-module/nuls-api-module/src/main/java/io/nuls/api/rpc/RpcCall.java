@@ -23,7 +23,7 @@ public class RpcCall {
      */
     public static Object request(String moduleCode, String cmd, Map params) throws NulsException {
         try {
-            params.put(Constants.VERSION_KEY_STR, "1.0");
+//            params.put(Constants.VERSION_KEY_STR, "1.0");
             Response cmdResp = ResponseMessageProcessor.requestAndResponse(moduleCode, cmd, params);
             Map resData = (Map) cmdResp.getResponseData();
             if (!cmdResp.isSuccess()) {

@@ -25,7 +25,6 @@ package io.nuls.contract.service;
 
 
 import io.nuls.base.data.NulsDigestData;
-import io.nuls.base.data.Transaction;
 import io.nuls.contract.model.bo.ContractResult;
 import io.nuls.contract.model.bo.ContractTempTransaction;
 import io.nuls.tools.basic.Result;
@@ -38,15 +37,15 @@ import java.util.List;
  */
 public interface ContractService {
 
-    Result invokeContract(int chainId, List<ContractTempTransaction> txList, long number, long blockTime, String packingAddress, String preStateRoot);
+    Result begin(int chainId, long blockHeight, long blockTime, String packingAddress, String preStateRoot);
 
-    /**
-     * 是否为合约地址
-     *
-     * @param addressBytes
-     * @return
-     */
-    boolean isContractAddress(int chainId, byte[] addressBytes);
+    Result end(int chainId, long blockHeight);
+
+    Result invokeContractOneByOne(int chainId, ContractTempTransaction tx);
+
+    Result commitProcessor(int chainId, List<String> txHexList, String blockHeaderHex);
+
+    Result rollbackProcessor(int chainId, List<String> txHexList, String blockHeaderHex);
 
     /**
      * 保存合约执行结果

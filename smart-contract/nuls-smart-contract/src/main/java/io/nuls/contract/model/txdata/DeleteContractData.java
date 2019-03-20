@@ -31,6 +31,7 @@ import io.nuls.base.data.Address;
 import io.nuls.tools.exception.NulsException;
 
 import java.io.IOException;
+import java.math.BigInteger;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -83,8 +84,8 @@ public class DeleteContractData extends TransactionLogicData implements Contract
     }
 
     @Override
-    public long getValue() {
-        return 0L;
+    public BigInteger getValue() {
+        return BigInteger.ZERO;
     }
 
     @Override

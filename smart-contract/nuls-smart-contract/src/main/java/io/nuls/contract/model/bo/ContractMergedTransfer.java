@@ -39,10 +39,9 @@ import java.util.List;
 public class ContractMergedTransfer {
 
     private byte[] from;
-
+    private BigInteger value;
     private List<Output> outputs;
 
-    private BigInteger value;
 
     /**
      * 智能合约交易hash

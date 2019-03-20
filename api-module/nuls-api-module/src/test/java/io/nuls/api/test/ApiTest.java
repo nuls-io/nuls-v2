@@ -1,5 +1,6 @@
 package io.nuls.api.test;
 
+import io.nuls.api.ApiContext;
 import io.nuls.api.analysis.WalletRpcHandler;
 import io.nuls.api.cache.ApiCache;
 import io.nuls.api.constant.ApiConstant;
@@ -14,8 +15,14 @@ import io.nuls.rpc.netty.bootstrap.NettyServer;
 import io.nuls.rpc.netty.channel.manager.ConnectManager;
 import io.nuls.rpc.netty.processor.ResponseMessageProcessor;
 import io.nuls.tools.core.ioc.SpringLiteContext;
+import io.nuls.tools.model.BigIntegerUtils;
+import io.nuls.tools.model.DoubleUtils;
 import org.junit.Before;
 import org.junit.Test;
+
+import java.beans.Transient;
+import java.math.BigInteger;
+import java.util.Map;
 
 import static io.nuls.api.constant.ApiConstant.DEFAULT_SCAN_PACKAGE;
 import static io.nuls.api.constant.ApiConstant.RPC_DEFAULT_SCAN_PACKAGE;
@@ -54,15 +61,15 @@ public class ApiTest {
 
     @Test
     public void testCmdCall() {
-
-        for (int i = 0; i < 10000; i++) {
-            BlockInfo block = WalletRpcHandler.getBlockInfo(12345, i);
-            for (TransactionInfo tx : block.getTxList()) {
-                if (tx.getType() == 1) {
-
-                }
-            }
-        }
+//
+//        for (int i = 0; i < 10000; i++) {
+//            BlockInfo block = WalletRpcHandler.getBlockInfo(12345, i);
+//            for (TransactionInfo tx : block.getTxList()) {
+//                if (tx.getType() == 1) {
+//
+//                }
+//            }
+//        }
     }
 
     @Before
@@ -94,8 +101,20 @@ public class ApiTest {
         System.out.println(currentRound.getStartHeight() + "----" + currentRound.getEndHeight());
     }
 
-    private void testUpdateCurrentRound(CurrentRound currentRound ) {
+    private void testUpdateCurrentRound(CurrentRound currentRound) {
         currentRound.setStartHeight(7777);
         currentRound.setEndHeight(8888);
     }
+
+    @Test
+    public void testAddO() {
+        int i = 100;
+        test(i--);
+        System.out.println(i);
+    }
+
+    private void test(int i) {
+        System.out.println(i);
+    }
+
 }

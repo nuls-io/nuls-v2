@@ -37,6 +37,7 @@ import io.nuls.cmd.client.CommandHelper;
 import io.nuls.cmd.client.CommandResult;
 import io.nuls.cmd.client.Config;
 import io.nuls.cmd.client.processor.CommandProcessor;
+import io.nuls.cmd.client.utils.Na;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.model.StringUtils;
@@ -50,7 +51,7 @@ import static io.nuls.cmd.client.CommandHelper.*;
  */
 @Component
 @Slf4j
-public class DepositProcessor implements CommandProcessor {
+public class DepositProcessor extends ConsensusBaseProcessor implements CommandProcessor {
 
     ConsensusProvider consensusProvider = ServiceManager.get(ConsensusProvider.class);
 
@@ -96,7 +97,7 @@ public class DepositProcessor implements CommandProcessor {
     public CommandResult execute(String[] args) {
         String address = args[1];
         String password = getPwd("Enter your account password");
-        BigInteger deposit = new BigInteger(args[3]);
+        BigInteger deposit = Na.parseNuls(args[3]).toBigInteger();
         String agentHash = args[2];
         Result<String> result = consensusProvider.depositToAgent(new DepositToAgentReq(address,agentHash,deposit,password));
         if (result.isFailed()) {

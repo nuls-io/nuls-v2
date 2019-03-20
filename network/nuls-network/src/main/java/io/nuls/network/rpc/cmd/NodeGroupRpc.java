@@ -24,9 +24,9 @@
  */
 package io.nuls.network.rpc.cmd;
 
+import io.nuls.network.cfg.NetworkConfig;
 import io.nuls.network.constant.NetworkConstant;
 import io.nuls.network.constant.NetworkErrorCode;
-import io.nuls.network.constant.NetworkParam;
 import io.nuls.network.manager.NodeGroupManager;
 import io.nuls.network.manager.StorageManager;
 import io.nuls.network.model.Node;
@@ -38,6 +38,7 @@ import io.nuls.rpc.cmd.BaseCmd;
 import io.nuls.rpc.model.CmdAnnotation;
 import io.nuls.rpc.model.Parameter;
 import io.nuls.rpc.model.message.Response;
+import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.model.StringUtils;
 
@@ -52,8 +53,8 @@ import static io.nuls.network.utils.LoggerUtil.Log;
  **/
 @Component
 public class NodeGroupRpc extends BaseCmd {
-    private NodeGroupManager nodeGroupManager = NodeGroupManager.getInstance();
-
+    @Autowired
+    NetworkConfig networkConfig;
     /**
      * nw_createNodeGroup
      * 主网创建跨链网络或者链工厂创建链
@@ -75,22 +76,23 @@ public class NodeGroupRpc extends BaseCmd {
         if (StringUtils.isNotBlank(String.valueOf(params.get("maxOut")))) {
             maxOut = Integer.valueOf(String.valueOf(params.get("maxOut")));
         } else {
-            maxOut = NetworkParam.getInstance().getMaxOutCount();
+            maxOut = networkConfig.getMaxOutCount();
         }
 
         int maxIn;
         if (StringUtils.isNotBlank(String.valueOf(params.get("maxIn")))) {
             maxIn = Integer.valueOf(String.valueOf(params.get("maxIn")));
         } else {
-            maxIn = NetworkParam.getInstance().getMaxInCount();
+            maxIn = networkConfig.getMaxInCount();
         }
         int minAvailableCount = Integer.valueOf(String.valueOf(params.get("minAvailableCount")));
         int isMoonNode = Integer.valueOf(String.valueOf(params.get("isMoonNode")));
         boolean isMoonNet = (isMoonNode == 1);
-        if (!NetworkParam.getInstance().isMoonNode() && isMoonNet) {
+        if (!networkConfig.isMoonNode() && isMoonNet) {
             Log.error("Local is not Moon net，but param isMoonNode is 1");
             return failed(NetworkErrorCode.PARAMETER_ERROR);
         }
+        NodeGroupManager nodeGroupManager = NodeGroupManager.getInstance();
         NodeGroup nodeGroup = nodeGroupManager.getNodeGroupByMagic(magicNumber);
         if (null != nodeGroup) {
             Log.info("getNodeGroupByMagic: nodeGroup  exist");
@@ -122,15 +124,16 @@ public class NodeGroupRpc extends BaseCmd {
         if (StringUtils.isNotBlank(String.valueOf(params.get("maxOut")))) {
             maxOut = Integer.valueOf(String.valueOf(params.get("maxOut")));
         } else {
-            maxOut = NetworkParam.getInstance().getMaxOutCount();
+            maxOut = networkConfig.getMaxOutCount();
         }
 
         int maxIn;
         if (StringUtils.isNotBlank(String.valueOf(params.get("maxIn")))) {
             maxIn = Integer.valueOf(String.valueOf(params.get("maxIn")));
         } else {
-            maxIn = NetworkParam.getInstance().getMaxInCount();
+            maxIn = networkConfig.getMaxInCount();
         }
+        NodeGroupManager nodeGroupManager = NodeGroupManager.getInstance();
         String seedIps = String.valueOf(params.get("seedIps"));
         //友链的跨链协议调用
         NodeGroup nodeGroup = nodeGroupManager.getNodeGroupByChainId(chainId);
@@ -153,7 +156,7 @@ public class NodeGroupRpc extends BaseCmd {
             String[] crossAddr = croosSeed.split(NetworkConstant.COLON);
             nodeGroup.addNeedCheckNode(new IpAddress(crossAddr[0], Integer.valueOf(crossAddr[1])), true);
         }
-        NetworkParam.getInstance().setMoonSeedIpList(ipList);
+        networkConfig.setMoonSeedIpList(ipList);
         nodeGroup.setCrossActive(true);
         return success();
     }
@@ -256,7 +259,7 @@ public class NodeGroupRpc extends BaseCmd {
     public Response getCrossSeeds(List params) {
         int chainId = Integer.valueOf(String.valueOf(params.get(0)));
         Log.info("chainId:" + chainId);
-        List<String> seeds = NetworkParam.getInstance().getMoonSeedIpList();
+        List<String> seeds = networkConfig.getMoonSeedIpList();
         if (null == seeds) {
             return success();
         }
@@ -298,6 +301,7 @@ public class NodeGroupRpc extends BaseCmd {
     public Response getGroups(Map params) {
         int startPage = Integer.valueOf(String.valueOf(params.get("startPage")));
         int pageSize = Integer.valueOf(String.valueOf(params.get("pageSize")));
+        NodeGroupManager nodeGroupManager = NodeGroupManager.getInstance();
         List<NodeGroup> nodeGroups = nodeGroupManager.getNodeGroups();
         int total = nodeGroups.size();
         List<NodeGroupVo> pageList = new ArrayList<>();

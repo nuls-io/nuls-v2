@@ -30,7 +30,6 @@ import io.nuls.contract.processor.DeleteContractTxProcessor;
 import io.nuls.tools.basic.Result;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
-import io.nuls.tools.exception.NulsException;
 
 /**
  * @author: PierreLuo
@@ -46,7 +45,7 @@ public class ContractTxProcessorManager {
     @Autowired
     private DeleteContractTxProcessor deleteContractTxProcessor;
 
-    public Result createCommit(int chainId, ContractWrapperTransaction tx) throws NulsException {
+    public Result createCommit(int chainId, ContractWrapperTransaction tx) {
         return createContractTxProcessor.onCommit(chainId, tx);
     }
 

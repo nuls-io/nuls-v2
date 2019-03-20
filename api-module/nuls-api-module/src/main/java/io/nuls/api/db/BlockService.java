@@ -61,6 +61,9 @@ public class BlockService {
     }
 
     public PageInfo<BlockHeaderInfo> pageQuery(int chainId, int pageIndex, int pageSize, String packingAddress, boolean filterEmptyBlocks) {
+        if (!CacheManager.isChainExist(chainId)) {
+            return new PageInfo<>(pageIndex, pageSize);
+        }
         Bson filter = null;
         if (StringUtils.isNotBlank(packingAddress)) {
             filter = Filters.eq("packingAddress", packingAddress);
@@ -80,5 +83,15 @@ public class BlockService {
         }
         PageInfo<BlockHeaderInfo> pageInfo = new PageInfo<>(pageIndex, pageSize, totalCount, list);
         return pageInfo;
+    }
+
+    public long getMaxHeight(int chainId, long endTime) {
+        return this.mongoDBService.getMax(BLOCK_HEADER_TABLE + chainId, "_id", Filters.lte("createTime", endTime));
+    }
+
+    public void deleteBlockHeader(int chainId, long height) {
+        mongoDBService.delete(BLOCK_HEADER_TABLE + chainId, Filters.eq("_id", height));
+        ApiCache apiCache = CacheManager.getCache(chainId);
+        apiCache.setBestHeader(null);
     }
 }

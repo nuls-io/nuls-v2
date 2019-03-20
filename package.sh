@@ -255,9 +255,9 @@ copyModuleNcfToModules(){
 			fi
 		fi
 	done < ./module.ncf
-	# merge common module.ncf and private module.ncf to module.tmep.ncf
-	sh "${PROJECT_PATH}/build/merge-ncf.sh" "${PROJECT_PATH}/module.ncf" $moduleNcf
-	rm $moduleNcf 
+#	 merge common module.ncf and private module.ncf to module.tmep.ncf
+	sh "${PROJECT_PATH}/build/merge-ncf.sh" "${BUILD_PATH}/module-prod.ncf" $moduleNcf
+	rm $moduleNcf
 	sedCommand+=" -e 's/%MAIN_CLASS_NAME%/${mainClassName}/g' "
     echo $sedCommand
 	if [ -z $(echo "${sedCommand}" | grep -o "%JOPT_XMS%") ]; then
@@ -275,28 +275,42 @@ copyModuleNcfToModules(){
 	if [ -z $(echo "${sedCommand}" | grep -o "%JOPT_MAXMETASPACESIZE%") ]; then
 		sedCommand="${sedCommand}  -e 's/%JOPT_MAXMETASPACESIZE%/256/g' "
 	fi
-	# echo $sedCommand
-	eval "${sedCommand}  ${BUILD_PATH}/start-temp.sh > ${moduleBuildPath}/start.sh"
-	cp "${moduleBuildPath}/start.sh" "${MODULES_PATH}/${moduleName}/${version}/start.sh"
-	chmod +x "${MODULES_PATH}/${moduleName}/${version}/start.sh"
-	echo "拷贝 ${moduleBuildPath}/start.sh 到 ${MODULES_PATH}/${moduleName}/${version}/start.sh"
+    if [ -d "$(pwd)/script" ];
+    then
+        for file in `ls $(pwd)/script`
+        do
+            eval "${sedCommand}  $(pwd)/script/${file} > ${moduleBuildPath}/${file}"
+            cp "${moduleBuildPath}/${file}" "${MODULES_PATH}/${moduleName}/${version}/${file}"
+            chmod u+x "${MODULES_PATH}/${moduleName}/${version}/${file}"
+            echo "拷贝 ${moduleBuildPath}/${file} 到 ${MODULES_PATH}/${moduleName}/${version}/${file}"
+        done
+    else
+    	startSh="${BUILD_PATH}/start-temp.sh"
+        startBat="${BUILD_PATH}/start-temp.bat"
+        stopSh="${BUILD_PATH}/stop-temp.sh"
+        stopBat="${BUILD_PATH}/stop-temp.bat"
+        # echo $sedCommand
+        eval "${sedCommand}  ${startSh} > ${moduleBuildPath}/start.sh"
+        cp "${moduleBuildPath}/start.sh" "${MODULES_PATH}/${moduleName}/${version}/start.sh"
+        chmod +x "${MODULES_PATH}/${moduleName}/${version}/start.sh"
+        echo "拷贝 ${moduleBuildPath}/start.sh 到 ${MODULES_PATH}/${moduleName}/${version}/start.sh"
 
-	eval "${sedCommand}  ${BUILD_PATH}/start-temp.bat > ${moduleBuildPath}/start.bat"
-	cp "${moduleBuildPath}/start.bat" "${MODULES_PATH}/${moduleName}/${version}/start.bat"
-#    cp "${moduleBuildPath}/start.bat" "/Volumes/share/start.bat"
-	echo "拷贝 ${moduleBuildPath}/start.bat 到 ${MODULES_PATH}/${moduleName}/${version}/start.bat"
+        eval "${sedCommand}  ${startBat} > ${moduleBuildPath}/start.bat"
+        cp "${moduleBuildPath}/start.bat" "${MODULES_PATH}/${moduleName}/${version}/start.bat"
+    #    cp "${moduleBuildPath}/start.bat" "/Volumes/share/start.bat"
+        echo "拷贝 ${moduleBuildPath}/start.bat 到 ${MODULES_PATH}/${moduleName}/${version}/start.bat"
 
-	eval "${sedCommand}  ${BUILD_PATH}/stop-temp.sh > ${moduleBuildPath}/stop.sh"
-	cp "${moduleBuildPath}/stop.sh" "${MODULES_PATH}/${moduleName}/${version}/stop.sh"
-	chmod +x "${MODULES_PATH}/${moduleName}/${version}/stop.sh"
-	echo "拷贝 ${moduleBuildPath}/stop.sh 到 ${MODULES_PATH}/${moduleName}/${version}/stop.sh"
+        eval "${sedCommand}  ${stopSh} > ${moduleBuildPath}/stop.sh"
+        cp "${moduleBuildPath}/stop.sh" "${MODULES_PATH}/${moduleName}/${version}/stop.sh"
+        chmod +x "${MODULES_PATH}/${moduleName}/${version}/stop.sh"
+        echo "拷贝 ${moduleBuildPath}/stop.sh 到 ${MODULES_PATH}/${moduleName}/${version}/stop.sh"
 
-	eval "${sedCommand}  ${BUILD_PATH}/stop-temp.bat > ${moduleBuildPath}/stop.bat"
-	cp "${moduleBuildPath}/stop.bat" "${MODULES_PATH}/${moduleName}/${version}/stop.bat"
-	#cp "${moduleBuildPath}/stop.bat" "/Volumes/share/stop.bat"
-	echo "拷贝 ${moduleBuildPath}/stop.bat 到 ${MODULES_PATH}/${moduleName}/${version}/stop.bat"
+        eval "${sedCommand}  ${stopBat} > ${moduleBuildPath}/stop.bat"
+        cp "${moduleBuildPath}/stop.bat" "${MODULES_PATH}/${moduleName}/${version}/stop.bat"
+        #cp "${moduleBuildPath}/stop.bat" "/Volumes/share/stop.bat"
+        echo "拷贝 ${moduleBuildPath}/stop.bat 到 ${MODULES_PATH}/${moduleName}/${version}/stop.bat"
 
-
+    fi
 	cp "${moduleBuildPath}/module.temp.ncf" "${MODULES_PATH}/${moduleName}/${version}/Module.ncf"
 	echo "拷贝 ${moduleBuildPath}/module.temp.ncf 到 ${MODULES_PATH}/${moduleName}/${version}/Module.ncf"
 }
@@ -347,8 +361,8 @@ if [ -n "${DOMOCK}" ]; then
 	chmod u+x "${MODULES_PATH}/start.sh"
 	cp "${BUILD_PATH}/check-status.sh" "${MODULES_PATH}/"
 	chmod u+x "${MODULES_PATH}/check-status.sh"
-	cp "${BUILD_PATH}/cmd.sh" "${MODULES_PATH}/"
-	chmod u+x "${MODULES_PATH}/cmd.sh"
+#	cp "${BUILD_PATH}/cmd.sh" "${MODULES_PATH}/"
+#	chmod u+x "${MODULES_PATH}/cmd.sh"
 fi
 
 

@@ -1,10 +1,10 @@
 package io.nuls.transaction.service;
 
-import io.nuls.base.data.BlockHeader;
 import io.nuls.base.data.NulsDigestData;
 import io.nuls.base.data.Transaction;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.transaction.model.bo.Chain;
+import io.nuls.transaction.model.po.TransactionConfirmedPO;
 
 import java.util.List;
 
@@ -21,20 +21,9 @@ public interface ConfirmedTxService {
      * 获取一笔已打包进区块并且确认的交易
      * @param chain
      * @param hash
-     * @return Transaction
+     * @return TransactionConfirmedPO
      */
-    Transaction getConfirmedTransaction(Chain chain, NulsDigestData hash);
-
-    /**
-     * 保存已确认交易
-     * Save confirmed transactions
-     *
-     * @param chain
-     * @param transaction
-     * @return Result
-     */
-    /*boolean saveTx(Chain chain, Transaction transaction);*/
-
+    TransactionConfirmedPO getConfirmedTransaction(Chain chain, NulsDigestData hash);
 
     /**
      * 保存创世块的交易
@@ -73,4 +62,14 @@ public interface ConfirmedTxService {
      * @throws NulsException
      */
     void processEffectCrossTx(Chain chain, long blockHeight) throws NulsException;
+
+
+    /**
+     * 获取区块的完整交易
+     * 如果没有查询到,或者查询到的不是区块完整的交易数据 则返回空list
+     * @param chain
+     * @param hashList
+     * @return List<String> txHex list
+     */
+    List<String> getTxList(Chain chain, List<String> hashList);
 }

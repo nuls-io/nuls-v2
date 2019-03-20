@@ -23,24 +23,20 @@ package io.nuls.api.rpc.controller;
 import io.nuls.api.analysis.WalletRpcHandler;
 import io.nuls.api.db.BlockService;
 import io.nuls.api.db.MongoDBService;
-import io.nuls.api.exception.JsonRpcException;
+import io.nuls.api.manager.CacheManager;
 import io.nuls.api.model.po.db.BlockHeaderInfo;
 import io.nuls.api.model.po.db.BlockInfo;
 import io.nuls.api.model.po.db.PageInfo;
-import io.nuls.api.model.rpc.RpcErrorCode;
 import io.nuls.api.model.rpc.RpcResult;
-import io.nuls.api.model.rpc.RpcResultError;
 import io.nuls.api.service.RollbackService;
 import io.nuls.api.utils.VerifyUtils;
+import io.nuls.tools.basic.Result;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Controller;
 import io.nuls.tools.core.annotation.RpcMethod;
 import io.nuls.tools.model.StringUtils;
 
-
 import java.util.List;
-
-import static io.nuls.api.model.rpc.RpcErrorCode.DATA_NOT_EXISTS;
 
 /**
  * @author Niels
@@ -50,10 +46,6 @@ public class BlockController {
 
     @Autowired
     private MongoDBService dbService;
-
-//    @Autowired
-//    private WalletRPCHandler rpcHandler;
-
     @Autowired
     private BlockService blockService;
     @Autowired
@@ -63,75 +55,98 @@ public class BlockController {
     public RpcResult getBestInfo(List<Object> params) {
         VerifyUtils.verifyParams(params, 1);
         int chainId = (int) params.get(0);
+        if (!CacheManager.isChainExist(chainId)) {
+            return RpcResult.dataNotFound();
+        }
+
         BlockHeaderInfo localBestBlockHeader = blockService.getBestBlockHeader(chainId);
-        return new RpcResult().setResult(localBestBlockHeader);
+        if (localBestBlockHeader == null) {
+            return RpcResult.dataNotFound();
+        }
+        return RpcResult.success(localBestBlockHeader);
     }
 
     @RpcMethod("getHeaderByHeight")
     public RpcResult getHeaderByHeight(List<Object> params) {
         VerifyUtils.verifyParams(params, 2);
-        long height = Long.parseLong("" + params.get(0));
-        int chainId = (int) params.get(1);
+        int chainId = (int) params.get(0);
+        long height = Long.parseLong("" + params.get(1));
         if (height < 0) {
             height = 0;
         }
+        if (!CacheManager.isChainExist(chainId)) {
+            return RpcResult.dataNotFound();
+        }
         BlockHeaderInfo header = blockService.getBlockHeader(chainId, height);
-        RpcResult rpcResult = new RpcResult();
-        rpcResult.setResult(header);
-
-        return rpcResult;
+        if (header == null) {
+            return RpcResult.dataNotFound();
+        }
+        return RpcResult.success(header);
     }
 
     @RpcMethod("getHeaderByHash")
     public RpcResult getHeaderByHash(List<Object> params) {
         VerifyUtils.verifyParams(params, 2);
-        String hash = (String) params.get(0);
-        int chainId = (int) params.get(1);
-
-        if (StringUtils.isBlank(hash)) {
-            throw new JsonRpcException(new RpcResultError(RpcErrorCode.PARAMS_ERROR, "[hash] is required"));
+        int chainId = (int) params.get(0);
+        String hash = (String) params.get(1);
+        if (!CacheManager.isChainExist(chainId)) {
+            return RpcResult.dataNotFound();
         }
-        BlockHeaderInfo header = blockService.getBlockHeaderByHash(chainId, hash);
+        if (StringUtils.isBlank(hash)) {
+            return RpcResult.paramError("[hash] is required");
+        }
 
-        RpcResult rpcResult = new RpcResult();
-        rpcResult.setResult(header);
-        return rpcResult;
+        BlockHeaderInfo header = blockService.getBlockHeaderByHash(chainId, hash);
+        if (header == null) {
+            return RpcResult.dataNotFound();
+        }
+        return RpcResult.success(header);
     }
 
     @RpcMethod("getBlockByHash")
     public RpcResult getBlockByHash(List<Object> params) {
         VerifyUtils.verifyParams(params, 2);
-        String hash = (String) params.get(0);
-        int chainId = (int) params.get(1);
-
+        int chainId = (int) params.get(0);
+        String hash = (String) params.get(1);
+        if (!CacheManager.isChainExist(chainId)) {
+            return RpcResult.dataNotFound();
+        }
         if (StringUtils.isBlank(hash)) {
-            throw new JsonRpcException(new RpcResultError(RpcErrorCode.PARAMS_ERROR, "[hash] is required"));
+            return RpcResult.paramError("[hash] is required");
         }
 
-        BlockInfo blockInfo = WalletRpcHandler.getBlockInfo(chainId, hash);
-        if (blockInfo == null) {
-            throw new JsonRpcException(new RpcResultError(DATA_NOT_EXISTS.getCode(), DATA_NOT_EXISTS.getMessage(), null));
+        Result<BlockInfo> result = WalletRpcHandler.getBlockInfo(chainId, hash);
+        if (result.isFailed()) {
+            return RpcResult.failed(result);
         }
-
+        if (result.getData() == null) {
+            return RpcResult.dataNotFound();
+        }
         RpcResult rpcResult = new RpcResult();
-        rpcResult.setResult(blockInfo);
+        rpcResult.setResult(result.getData());
         return rpcResult;
     }
 
     @RpcMethod("getBlockByHeight")
     public RpcResult getBlockByHeight(List<Object> params) {
         VerifyUtils.verifyParams(params, 2);
-        long height = Long.parseLong("" + params.get(0));
-        int chainId = (int) params.get(1);
+        int chainId = (int) params.get(0);
+        long height = Long.parseLong("" + params.get(1));
         if (height < 0) {
             height = 0;
         }
         BlockHeaderInfo blockHeaderInfo = blockService.getBlockHeader(chainId, height);
         if (blockHeaderInfo == null) {
-            throw new JsonRpcException(new RpcResultError(DATA_NOT_EXISTS.getCode(), DATA_NOT_EXISTS.getMessage(), null));
+            return RpcResult.dataNotFound();
         }
-
-        BlockInfo blockInfo = WalletRpcHandler.getBlockInfo(chainId, height);
+        Result<BlockInfo> result = WalletRpcHandler.getBlockInfo(chainId, height);
+        if (result.isFailed()) {
+            return RpcResult.failed(result);
+        }
+        if (result.getData() == null) {
+            return RpcResult.dataNotFound();
+        }
+        BlockInfo blockInfo = result.getData();
         blockInfo.setHeader(blockHeaderInfo);
         RpcResult rpcResult = new RpcResult();
         rpcResult.setResult(blockInfo);
@@ -141,9 +156,9 @@ public class BlockController {
     @RpcMethod("getBlockHeaderList")
     public RpcResult getBlockHeaderList(List<Object> params) {
         VerifyUtils.verifyParams(params, 3);
-        int pageIndex = (int) params.get(0);
-        int pageSize = (int) params.get(1);
-        int chainId = (int) params.get(2);
+        int chainId = (int) params.get(0);
+        int pageIndex = (int) params.get(1);
+        int pageSize = (int) params.get(2);
         if (pageIndex <= 0) {
             pageIndex = 1;
         }
@@ -152,12 +167,17 @@ public class BlockController {
         }
         // Whether to filter empty blocks
         boolean filterEmptyBlocks = (boolean) params.get(3);
-        ;
         String packingAddress = null;
         if (params.size() > 4) {
             packingAddress = (String) params.get(4);
         }
-        PageInfo<BlockHeaderInfo> pageInfo = blockService.pageQuery(chainId, pageIndex, pageSize, packingAddress, filterEmptyBlocks);
+
+        PageInfo<BlockHeaderInfo> pageInfo;
+        if (!CacheManager.isChainExist(chainId)) {
+            pageInfo = new PageInfo<>(pageIndex, pageSize);
+        } else {
+            pageInfo = blockService.pageQuery(chainId, pageIndex, pageSize, packingAddress, filterEmptyBlocks);
+        }
         RpcResult result = new RpcResult();
         result.setResult(pageInfo);
         return result;

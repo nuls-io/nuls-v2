@@ -22,6 +22,7 @@ package io.nuls.api.exception;
 
 
 import io.nuls.api.model.rpc.RpcResultError;
+import io.nuls.tools.constant.ErrorCode;
 
 /**
  * @author Niels
@@ -30,6 +31,13 @@ public class JsonRpcException extends RuntimeException {
     private RpcResultError error;
 
     public JsonRpcException() {
+    }
+
+    public JsonRpcException(ErrorCode errorCode) {
+        RpcResultError error = new RpcResultError();
+        error.setCode(errorCode.getCode());
+        error.setMessage(errorCode.getMsg());
+        this.error = error;
     }
 
     public JsonRpcException(RpcResultError error) {

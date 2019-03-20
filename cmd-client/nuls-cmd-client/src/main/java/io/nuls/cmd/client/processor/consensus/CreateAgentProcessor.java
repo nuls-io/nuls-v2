@@ -35,6 +35,7 @@ import io.nuls.cmd.client.CommandHelper;
 import io.nuls.cmd.client.CommandResult;
 import io.nuls.cmd.client.Config;
 import io.nuls.cmd.client.processor.CommandProcessor;
+import io.nuls.cmd.client.utils.Na;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.model.StringUtils;
@@ -49,12 +50,7 @@ import static io.nuls.cmd.client.CommandHelper.getPwd;
  */
 @Component
 @Slf4j
-public class CreateAgentProcessor implements CommandProcessor {
-
-    @Autowired Config config;
-
-    ConsensusProvider consensusProvider = ServiceManager.get(ConsensusProvider.class);
-
+public class CreateAgentProcessor extends ConsensusBaseProcessor implements CommandProcessor {
 
     @Override
     public String getCommand() {
@@ -109,7 +105,7 @@ public class CreateAgentProcessor implements CommandProcessor {
         String password = getPwd("Enter agent address password");
         String packingAddress = args[2];
         Integer commissionRate = Integer.parseInt(args[3]);
-        BigInteger deposit = new BigInteger(args[4]);
+        BigInteger deposit = Na.parseNuls(args[4]).toBigInteger();
         String rewardAddress = null;
         if(args.length == 6){
             rewardAddress = args[5];

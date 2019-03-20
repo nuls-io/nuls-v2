@@ -42,13 +42,14 @@ public interface TxCmd {
     String TX_GET_CONFIRMED_TX = "tx_getConfirmedTx";
     String TX_GETTX = "tx_getTx";
     String TX_GETTXS = "tx_getTxs";
-//    String TX_DELETE = "tx_delete";
+    String TX_GET_BLOCK_TXS = "tx_getBlockTxs";
     String TX_BATCHVERIFY = "tx_batchVerify";
-    String TX_GETTXSINFO = "tx_getTxsInfo";
-    String TX_GETTXPROCESSORS = "tx_getTxProcessors";
-    String TX_RUNCHAIN = "tx_runChain";
-    String TX_STOPCHAIN = "tx_stopChain";
     String TX_CREATE_CROSS_TX = "tx_createCtx";
+
+
+    String CLIENT_GETTX = "tx_getTxClient";
+    String CLIENT_GETTX_CONFIRMED = "tx_getConfirmedTxClient";
+
     /**
      * 修改节点共识状态
      */

@@ -21,6 +21,7 @@ import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.log.Log;
+import io.nuls.tools.model.DoubleUtils;
 
 import java.io.IOException;
 import java.util.*;
@@ -56,7 +57,13 @@ public class BlockValidator {
       if (!blockHeader.getMerkleHash().equals(NulsDigestData.calcMerkleDigestData(block.getTxHashList()))) {
          throw new NulsException(ConsensusErrorCode.MERKEL_HASH_ERROR);
       }
-      MeetingRound currentRound = roundValidate(isDownload,chain,blockHeader);
+      MeetingRound currentRound ;
+      try {
+         currentRound = roundValidate(isDownload,chain,blockHeader);
+      }catch (Exception e){
+         throw new NulsException(e);
+      }
+
       BlockExtendsData extendsData = new BlockExtendsData(blockHeader.getExtend());
       MeetingMember member = currentRound.getMember(extendsData.getPackingIndexOfRound());
       boolean validResult = punishValidate(block,currentRound,member,chain);
@@ -77,7 +84,7 @@ public class BlockValidator {
     * @param chain             chain info
     * @param blockHeader       block header info
     * */
-   private MeetingRound roundValidate(boolean isDownload, Chain chain, BlockHeader blockHeader)throws NulsException {
+   private MeetingRound roundValidate(boolean isDownload, Chain chain, BlockHeader blockHeader)throws Exception {
       BlockExtendsData extendsData = new BlockExtendsData(blockHeader.getExtend());
       BlockHeader bestBlockHeader = chain.getNewestHeader();
       BlockExtendsData bestExtendsData = new BlockExtendsData(bestBlockHeader.getExtend());
@@ -213,7 +220,7 @@ public class BlockValidator {
                if (null == item) {
                   item = currentRound.getPreRound().getMemberByAgentAddress(address);
                }
-               if (item.getAgent().getCreditVal() <= ConsensusConstant.RED_PUNISH_CREDIT_VAL) {
+               if (DoubleUtils.compare(item.getAgent().getRealCreditVal(), ConsensusConstant.RED_PUNISH_CREDIT_VAL) <= 0) {
                   punishAddress.add(AddressTool.getStringAddressByBytes(item.getAgent().getAgentAddress()));
                }
             }

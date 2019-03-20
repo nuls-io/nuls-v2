@@ -89,6 +89,7 @@ public class TextMessageHandler implements Runnable {
                     break;
                 case Request:
                     String messageId = message.getMessageId();
+//                    Log.debug("##messageId={}",messageId);
                     /*
                     Request，根据是否需要定时推送放入不同队列，等待处理
                     Request, put in different queues according to the response mode. Wait for processing

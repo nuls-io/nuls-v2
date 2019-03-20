@@ -37,6 +37,7 @@ import io.nuls.account.service.AliasService;
 import io.nuls.account.storage.AccountStorageService;
 import io.nuls.account.util.LoggerUtil;
 import io.nuls.base.basic.AddressTool;
+import io.nuls.db.util.DBUtils;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Service;
 import io.nuls.tools.crypto.HexUtil;
@@ -130,7 +131,7 @@ public class AccountKeyStoreServiceImpl implements AccountKeyStoreService {
                 e.printStackTrace();
             }
         }
-        File backupFile = new File(path);
+        File backupFile = DBUtils.loadDataPath(path);
         //if not directory,create directory
         if (!backupFile.isDirectory()) {
             if (!backupFile.mkdirs()) {

@@ -11,9 +11,6 @@ import lombok.Setter;
 import org.ethereum.config.CommonConfig;
 import org.ethereum.config.DefaultConfig;
 
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-
 /**
  * 链信息类
  * Chain information class
@@ -43,24 +40,39 @@ public class Chain {
     private DefaultConfig defaultConfig;
 
     /**
-     * 智能合约临时余额
-     */
-    private TempBalanceManager tempBalanceManager;
-
-    /**
-     * 当前正在打包的区块头
-     */
-    private BlockHeader currentBlockHeader;
-
-    /**
      * 智能合约token余额管理
      */
     private ContractTokenBalanceManager contractTokenBalanceManager;
 
     /**
-     * 智能合约交易打包结果
+     * 批量执行信息
      */
-    private ContractPackageDto contractPackageDto;
+    private BatchInfo batchInfo = new BatchInfo();
+
+    public TempBalanceManager getTempBalanceManager() {
+        return batchInfo.getTempBalanceManager();
+    }
+
+    public void setTempBalanceManager(TempBalanceManager tempBalanceManager) {
+        batchInfo.setTempBalanceManager(tempBalanceManager);
+    }
+
+    public BlockHeader getCurrentBlockHeader() {
+        return batchInfo.getCurrentBlockHeader();
+    }
+
+    public void setCurrentBlockHeader(BlockHeader currentBlockHeader) {
+        batchInfo.setCurrentBlockHeader(currentBlockHeader);
+    }
+
+    public ContractPackageDto getContractPackageDto() {
+        return batchInfo.getContractPackageDto();
+    }
+
+    public void setContractPackageDto(ContractPackageDto contractPackageDto) {
+        batchInfo.setContractPackageDto(contractPackageDto);
+    }
+
 
     public int getChainId() {
         return config.getChainId();

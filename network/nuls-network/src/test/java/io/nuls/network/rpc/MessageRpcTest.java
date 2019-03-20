@@ -25,7 +25,6 @@
 package io.nuls.network.rpc;
 
 import io.nuls.network.constant.NetworkConstant;
-import io.nuls.network.constant.NetworkParam;
 import io.nuls.network.manager.NodeGroupManager;
 import io.nuls.network.model.NodeGroup;
 import io.nuls.network.model.dto.IpAddress;
@@ -72,9 +71,9 @@ public class MessageRpcTest {
             IpAddress addrYou = new IpAddress(inetAddrYou, 8282);
             versionMessageBody.setAddrYou(addrYou);
             versionMessageBody.setPortYouCross(8686);
-            IpAddress addrMe= new IpAddress(NetworkParam.getInstance().getExternalIp(),8008);
+            IpAddress addrMe= new IpAddress("",8008);
             versionMessageBody.setAddrMe(addrMe);
-            versionMessageBody.setPortMeCross(NetworkParam.getInstance().getCrossPort());
+            versionMessageBody.setPortMeCross(9005);
             VersionMessage versionMessage = new VersionMessage(0, NetworkConstant.CMD_MESSAGE_VERSION, versionMessageBody);
             versionMessage.getHeader().setPayloadLength(versionMessageBody.size());
 //            versionMessage.getHeader().setChecksum(  versionMessage.getHeader().);

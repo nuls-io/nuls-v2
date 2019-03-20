@@ -14,11 +14,11 @@ import io.nuls.poc.model.po.PunishLogPo;
 import io.nuls.poc.utils.CallMethodUtils;
 import io.nuls.poc.utils.enumeration.PunishType;
 import io.nuls.tools.core.annotation.Component;
+import io.nuls.tools.exception.NulsException;
+import io.nuls.tools.log.Log;
 import io.nuls.tools.model.DateUtils;
 import io.nuls.tools.model.DoubleUtils;
 import io.nuls.tools.model.StringUtils;
-import io.nuls.tools.exception.NulsException;
-import io.nuls.tools.log.Log;
 
 import java.io.IOException;
 import java.math.BigInteger;
@@ -114,7 +114,7 @@ public class RoundManager {
      *
      * @param chain     chain info
      * */
-    public void checkIsNeedReset(Chain chain) throws NulsException{
+    public void checkIsNeedReset(Chain chain) throws Exception{
         /*
         1.如果本地不存在轮次信息,则初始化本地轮次信息
         2.如果存在且，本地最新区块轮次小于本地计算的最新轮次，则重置本地轮次信息
@@ -167,7 +167,7 @@ public class RoundManager {
      *
      * @param chain            chain info
      * */
-    public void initRound(Chain chain) throws NulsException{
+    public void initRound(Chain chain) throws Exception{
         //resetRound(chain,false);
         MeetingRound currentRound = resetRound(chain,false);
         /*
@@ -198,7 +198,7 @@ public class RoundManager {
      * @param isRealTime 是否根据最新时间计算轮次/Whether to calculate rounds based on current time
      * @return MeetingRound
      * */
-    public MeetingRound resetRound(Chain chain,boolean isRealTime) throws NulsException{
+    public MeetingRound resetRound(Chain chain,boolean isRealTime) throws Exception{
         chain.getRound_lock().lock();
         try {
             MeetingRound round = getCurrentRound(chain);
@@ -254,7 +254,7 @@ public class RoundManager {
      * @param isRealTime  是否根据最新时间计算轮次/Whether to calculate rounds based on current time
      * @return MeetingRound
      * */
-    public MeetingRound getRound(Chain chain, BlockExtendsData roundData, boolean isRealTime) throws NulsException{
+    public MeetingRound getRound(Chain chain, BlockExtendsData roundData, boolean isRealTime) throws Exception{
         chain.getRound_lock().lock();
         try {
             if (isRealTime && roundData == null) {
@@ -276,7 +276,7 @@ public class RoundManager {
      * @param chain           chain info
      * @return MeetingRound
      * */
-    private MeetingRound getRoundByRealTime(Chain chain) throws NulsException{
+    private MeetingRound getRoundByRealTime(Chain chain) throws Exception{
         BlockHeader bestBlockHeader = chain.getNewestHeader();
         BlockHeader startBlockHeader = bestBlockHeader;
         BlockExtendsData bestRoundData = new BlockExtendsData(bestBlockHeader.getExtend());
@@ -319,7 +319,7 @@ public class RoundManager {
      * @param chain          chain info
      * @return MeetingRound
      * */
-    private MeetingRound getRoundByNewestBlock(Chain chain) throws NulsException{
+    private MeetingRound getRoundByNewestBlock(Chain chain) throws Exception{
         BlockHeader bestBlockHeader = chain.getNewestHeader();
         BlockExtendsData extendsData = new BlockExtendsData(bestBlockHeader.getExtend());
         extendsData.setRoundStartTime(extendsData.getRoundEndTime(chain.getConfig().getPackingInterval()));
@@ -335,7 +335,7 @@ public class RoundManager {
      * @param roundData  区块里的轮次信息/block extends entity
      * @return  MeetingRound
      * */
-    private MeetingRound getRoundByExpectedRound(Chain chain,BlockExtendsData roundData) throws NulsException{
+    private MeetingRound getRoundByExpectedRound(Chain chain,BlockExtendsData roundData) throws Exception{
         BlockHeader startBlockHeader = chain.getNewestHeader();
         long roundIndex = roundData.getRoundIndex();
         long roundStartTime = roundData.getRoundStartTime();
@@ -345,7 +345,7 @@ public class RoundManager {
         return calculationRound(chain,startBlockHeader, roundIndex, roundStartTime);
     }
 
-    public MeetingRound getRoundByRoundIndex(Chain chain,long roundIndex,long roundStartTime )throws NulsException{
+    public MeetingRound getRoundByRoundIndex(Chain chain,long roundIndex,long roundStartTime )throws Exception{
         BlockHeader startBlockHeader = chain.getNewestHeader();
         if (startBlockHeader.getHeight() != 0L) {
             startBlockHeader = getFirstBlockOfPreRound(chain,roundIndex);
@@ -363,27 +363,16 @@ public class RoundManager {
      * @param startTime          轮次开始打包时间/start time
      * */
     @SuppressWarnings("unchecked")
-    private MeetingRound calculationRound(Chain chain,BlockHeader startBlockHeader, long index, long startTime) throws NulsException{
+    private MeetingRound calculationRound(Chain chain,BlockHeader startBlockHeader, long index, long startTime) throws Exception{
         MeetingRound round = new MeetingRound();
         round.setIndex(index);
         round.setStartTime(startTime);
         setMemberList(chain,round, startBlockHeader);
         List<byte[]> packingAddressList =CallMethodUtils.getEncryptedAddressList(chain);
-        /*try {
-            Map<String,Object> params = new HashMap<>(2);
-            params.put(ConsensusConstant.PARAM_CHAIN_ID,chain.getConfig().getChainId());
-            Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr,"ac_getUnencryptedAddressList", params);
-            List<String> accountAddressList =  (List<String>) ((HashMap)((HashMap) cmdResp.getResponseData()).get("ac_getUnencryptedAddressList")).get("list");
-            if(accountAddressList != null && accountAddressList.size()>0){
-                for (String address:accountAddressList) {
-                    packingAddressList.add(AddressTool.getAddress(address));
-                }
-            }
-        }catch (Exception e){
-            chain.getLoggerMap().get(ConsensusConstant.CONSENSUS_LOGGER_NAME).error(e);
-            return null;
-        }*/
-        round.calcLocalPacker(packingAddressList,chain);
+        if(!packingAddressList.isEmpty()){
+            round.calcLocalPacker(packingAddressList,chain);
+        }
+        //round.calcLocalPacker(chain);
         chain.getLoggerMap().get(ConsensusConstant.CONSENSUS_LOGGER_NAME).debug("当前轮次为："+round.getIndex()+";当前轮次开始打包时间："+ DateUtils.convertDate(new Date(startTime)));
         chain.getLoggerMap().get(ConsensusConstant.CONSENSUS_LOGGER_NAME).debug("\ncalculation||index:{},startTime:{},startHeight:{},hash:{}\n" + round.toString() + "\n\n", index, startTime, startBlockHeader.getHeight(), startBlockHeader.getHash());
         return round;
@@ -536,8 +525,9 @@ public class RoundManager {
         long blockCount = getBlockCountByAddress(chain,member.getAgent().getPackingAddress(), roundStart, roundData.getRoundIndex() - 1);
         long sumRoundVal = getPunishCountByAddress(chain,member.getAgent().getAgentAddress(), roundStart, roundData.getRoundIndex() - 1, PunishType.YELLOW.getCode());
         double ability = DoubleUtils.div(blockCount, ConsensusConstant.RANGE_OF_CAPACITY_COEFFICIENT);
-        double penalty = DoubleUtils.div(DoubleUtils.mul(ConsensusConstant.CREDIT_MAGIC_NUM, sumRoundVal),
-                DoubleUtils.mul(ConsensusConstant.RANGE_OF_CAPACITY_COEFFICIENT, ConsensusConstant.RANGE_OF_CAPACITY_COEFFICIENT));
+        /*double penalty = DoubleUtils.div(DoubleUtils.mul(ConsensusConstant.CREDIT_MAGIC_NUM, sumRoundVal),
+                DoubleUtils.mul(ConsensusConstant.RANGE_OF_CAPACITY_COEFFICIENT, ConsensusConstant.RANGE_OF_CAPACITY_COEFFICIENT));*/
+        double penalty = DoubleUtils.div(sumRoundVal,ConsensusConstant.RANGE_OF_CAPACITY_COEFFICIENT);
 
         return DoubleUtils.round(DoubleUtils.sub(ability, penalty), 4);
     }
@@ -560,7 +550,7 @@ public class RoundManager {
             punishList = chain.getRedPunishList();
         }
         for (int i = punishList.size() - 1; i >= 0; i--) {
-            if(count>=100){
+            if(count>=ConsensusConstant.CREDIT_MAGIC_NUM){
                 break;
             }
             PunishLogPo punish = punishList.get(i);
@@ -581,8 +571,8 @@ public class RoundManager {
         a round of punishment is likely to be punished in an address in a - 1 round not out of the blocks,
         lead to round up to 100 May be 101 punishment record, treatment here
         */
-        if (count > 100) {
-            return 100;
+        if (count > ConsensusConstant.CREDIT_MAGIC_NUM) {
+            return ConsensusConstant.CREDIT_MAGIC_NUM;
         }
         return count;
     }

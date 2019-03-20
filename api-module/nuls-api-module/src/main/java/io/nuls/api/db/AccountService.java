@@ -1,5 +1,8 @@
 package io.nuls.api.db;
 
+import com.mongodb.client.AggregateIterable;
+import com.mongodb.client.MongoCollection;
+import com.mongodb.client.MongoCursor;
 import com.mongodb.client.model.*;
 import io.nuls.api.cache.ApiCache;
 import io.nuls.api.constant.MongoTableConstant;
@@ -10,10 +13,13 @@ import io.nuls.api.model.po.db.TxRelationInfo;
 import io.nuls.api.utils.DocumentTransferTool;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
+import io.nuls.tools.model.BigIntegerUtils;
 import org.bson.Document;
 import org.bson.conversions.Bson;
 
+import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -47,6 +53,7 @@ public class AccountService {
         List<WriteModel<Document>> modelList = new ArrayList<>();
         for (AccountInfo accountInfo : accountInfoMap.values()) {
             Document document = DocumentTransferTool.toDocument(accountInfo, "address");
+            document.put("totalBalance", BigIntegerUtils.bigIntegerToString(accountInfo.getTotalBalance(), 32));
             if (accountInfo.isNew()) {
                 modelList.add(new InsertOneModel(document));
                 accountInfo.setNew(false);
@@ -93,5 +100,44 @@ public class AccountService {
         }
         PageInfo<TxRelationInfo> pageInfo = new PageInfo<>(pageIndex, pageSize, totalCount, txRelationInfoList);
         return pageInfo;
+    }
+
+    public PageInfo<AccountInfo> getCoinRanking(int pageIndex, int pageSize, int sortType, int chainId) {
+        Bson sort;
+        if (sortType == 0) {
+            sort = Sorts.descending("totalBalance");
+        } else {
+            sort = Sorts.ascending("totalBalance");
+        }
+        List<AccountInfo> accountInfoList = new ArrayList<>();
+        Bson filter = Filters.ne("totalBalance", 0);
+        List<Document> docsList = this.mongoDBService.pageQuery(ACCOUNT_TABLE + chainId, filter, sort, pageIndex, pageSize);
+        long totalCount = mongoDBService.getCount(ACCOUNT_TABLE + chainId, filter);
+        for (Document document : docsList) {
+            AccountInfo accountInfo = DocumentTransferTool.toInfo(document, "address", AccountInfo.class);
+//            List<Output> outputs = utxoService.getAccountUtxos(accountInfo.getAddress());
+//            CalcUtil.calcBalance(accountInfo, outputs, blockHeaderService.getBestBlockHeight());
+            accountInfoList.add(accountInfo);
+        }
+        PageInfo<AccountInfo> pageInfo = new PageInfo<>(pageIndex, pageSize, totalCount, accountInfoList);
+        return pageInfo;
+    }
+
+    public BigInteger getAllAccountBalance(int chainId) {
+        List<Document> documentList = mongoDBService.query(ACCOUNT_TABLE + chainId);
+
+        BigInteger totalBalance = BigInteger.ZERO;
+        for (Document document : documentList) {
+            totalBalance = totalBalance.add(new BigInteger(document.getString("totalBalance")));
+        }
+        return totalBalance;
+    }
+
+    public BigInteger getAccountTotalBalance(int chainId, String address) {
+        AccountInfo accountInfo = getAccountInfo(chainId, address);
+        if (accountInfo == null) {
+            return BigInteger.ZERO;
+        }
+        return accountInfo.getTotalBalance();
     }
 }

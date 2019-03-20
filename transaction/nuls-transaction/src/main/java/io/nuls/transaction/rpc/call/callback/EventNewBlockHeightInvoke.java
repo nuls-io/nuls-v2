@@ -24,19 +24,15 @@
 
 package io.nuls.transaction.rpc.call.callback;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import io.nuls.rpc.invoke.BaseInvoke;
 import io.nuls.rpc.model.message.Response;
-import io.nuls.tools.core.annotation.Autowired;
+import io.nuls.tools.core.ioc.SpringLiteContext;
 import io.nuls.tools.exception.NulsException;
-import io.nuls.tools.parse.JSONUtils;
 import io.nuls.transaction.constant.TxConstant;
 import io.nuls.transaction.model.bo.Chain;
 import io.nuls.transaction.service.ConfirmedTxService;
 
 import java.util.HashMap;
-
-import static io.nuls.transaction.utils.LoggerUtil.Log;
 
 /**
  * @author: Charlie
@@ -44,27 +40,23 @@ import static io.nuls.transaction.utils.LoggerUtil.Log;
  */
 public class EventNewBlockHeightInvoke extends BaseInvoke {
 
-    @Autowired
     private ConfirmedTxService confirmedTxService;
 
     private Chain chain;
 
     public EventNewBlockHeightInvoke(Chain chain){
         this.chain = chain;
+        this.confirmedTxService = SpringLiteContext.getBean(ConfirmedTxService.class);
     }
 
     @Override
     public void callBack(Response response) {
         try {
-            Log.debug("EventNewBlockHeightInvoke 更新最新区块......");
-            try {
-                Log.debug(JSONUtils.obj2json(response));
-            } catch (JsonProcessingException e) {
-                e.printStackTrace();
-            }
+           chain.getLoggerMap().get(TxConstant.LOG_TX).debug("EventNewBlockHeightInvoke 更新最新区块......");
             if (response.isSuccess()) {
-                HashMap result = ((HashMap) response.getResponseData());
-                long blockHeight = (long) result.get("height");
+                HashMap result = (HashMap)((HashMap) response.getResponseData()).get("latestHeight");
+                long blockHeight = Long.valueOf(result.get("value").toString());
+                chain.getLoggerMap().get(TxConstant.LOG_TX).debug("latestHeight : {}", blockHeight);
                 chain.setBestBlockHeight(blockHeight);
                 confirmedTxService.processEffectCrossTx(chain, blockHeight);
             }

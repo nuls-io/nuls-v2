@@ -49,44 +49,56 @@ public class AccountController {
 
     @Autowired
     private AccountService accountService;
-    //    @Autowired
-//    private UTXOService utxoService;
     @Autowired
     private BlockService blockHeaderService;
 
     @RpcMethod("getAccountList")
     public RpcResult getAccountList(List<Object> params) {
         VerifyUtils.verifyParams(params, 3);
-        int pageIndex = (int) params.get(0);
-        int pageSize = (int) params.get(1);
-        int chainId = (int) params.get(2);
+        int chainId, pageIndex, pageSize;
+        try {
+            chainId = (int) params.get(0);
+            pageIndex = (int) params.get(1);
+            pageSize = (int) params.get(2);
+        } catch (Exception e) {
+            return RpcResult.paramError();
+        }
         if (pageIndex <= 0) {
             pageIndex = 1;
         }
         if (pageSize <= 0 || pageSize > 100) {
             pageSize = 10;
         }
-
-        PageInfo<AccountInfo> pageInfo = accountService.pageQuery(chainId, pageIndex, pageSize);
         RpcResult result = new RpcResult();
+        PageInfo<AccountInfo> pageInfo;
+        if (CacheManager.isChainExist(chainId)) {
+            pageInfo = accountService.pageQuery(chainId, pageIndex, pageSize);
+        } else {
+            pageInfo = new PageInfo<>(pageIndex, pageSize);
+        }
         result.setResult(pageInfo);
         return result;
     }
 
-
     @RpcMethod("getAccountTxs")
     public RpcResult getAccountTxs(List<Object> params) {
         VerifyUtils.verifyParams(params, 6);
-
-        int pageIndex = (int) params.get(0);
-        int pageSize = (int) params.get(1);
-        String address = (String) params.get(2);
-        int type = (int) params.get(3);
-        boolean isMark = (boolean) params.get(4);
-        int chainId = (int) params.get(5);
+        int chainId, pageIndex, pageSize, type;
+        String address;
+        boolean isMark;
+        try {
+            chainId = (int) params.get(0);
+            pageIndex = (int) params.get(1);
+            pageSize = (int) params.get(2);
+            address = (String) params.get(3);
+            type = (int) params.get(4);
+            isMark = (boolean) params.get(5);
+        } catch (Exception e) {
+            return RpcResult.paramError();
+        }
 
         if (!AddressTool.validAddress(chainId, address)) {
-            throw new JsonRpcException(new RpcResultError(RpcErrorCode.PARAMS_ERROR, "[address] is inValid"));
+            return RpcResult.paramError("[address] is inValid");
         }
         if (pageIndex <= 0) {
             pageIndex = 1;
@@ -94,19 +106,31 @@ public class AccountController {
         if (pageSize <= 0 || pageSize > 100) {
             pageSize = 10;
         }
-        PageInfo<TxRelationInfo> relationInfos = accountService.getAccountTxs(chainId, address, pageIndex, pageSize, type, isMark);
         RpcResult result = new RpcResult();
-        result.setResult(relationInfos);
+        PageInfo<TxRelationInfo> pageInfo;
+        if (CacheManager.isChainExist(chainId)) {
+            pageInfo = accountService.getAccountTxs(chainId, address, pageIndex, pageSize, type, isMark);
+        } else {
+            pageInfo = new PageInfo<>(pageIndex, pageSize);
+        }
+        result.setResult(pageInfo);
         return result;
     }
 
     @RpcMethod("getAccount")
     public RpcResult getAccount(List<Object> params) {
         VerifyUtils.verifyParams(params, 2);
-        String address = (String) params.get(0);
-        int chainId = (int) params.get(1);
+        int chainId;
+        String address;
+        try {
+            chainId = (int) params.get(0);
+            address = (String) params.get(1);
+        } catch (Exception e) {
+            return RpcResult.paramError();
+        }
+
         if (!AddressTool.validAddress(chainId, address)) {
-            throw new JsonRpcException(new RpcResultError(RpcErrorCode.PARAMS_ERROR, "[address] is inValid"));
+            return RpcResult.paramError("[address] is inValid");
         }
         RpcResult result = new RpcResult();
         ApiCache apiCache = CacheManager.getCache(chainId);
@@ -125,4 +149,51 @@ public class AccountController {
         accountInfo.setTimeLock(account.getTimeLock());
         return result.setResult(accountInfo);
     }
+
+    @RpcMethod("getCoinRanking")
+    public RpcResult getCoinRanking(List<Object> params) {
+        VerifyUtils.verifyParams(params, 4);
+        int chainId,pageIndex,pageSize,sortType;
+        try {
+            chainId = (int) params.get(0);
+            pageIndex = (int) params.get(1);
+            pageSize = (int) params.get(2);
+            sortType = (int) params.get(3);
+        }catch (Exception e) {
+            return RpcResult.paramError();
+        }
+
+        PageInfo<AccountInfo> pageInfo;
+        if (CacheManager.isChainExist(chainId)) {
+            pageInfo = accountService.getCoinRanking(pageIndex, pageSize, sortType, chainId);
+        } else {
+            pageInfo = new PageInfo<>(pageIndex, pageSize);
+        }
+        return new RpcResult().setResult(pageInfo);
+    }
+
+//    @RpcMethod("getAccountTokens")
+//    public RpcResult getAccountTokens(List<Object> params) {
+//        VerifyUtils.verifyParams(params, 4);
+//        int chainId = (int) params.get(0);
+//        int pageIndex = (int) params.get(1);
+//        int pageSize = (int) params.get(2);
+//        String address = (String) params.get(3);
+//
+//        if (!AddressTool.validAddress(chainId, address)) {
+//            throw new JsonRpcException(new RpcResultError(RpcErrorCode.PARAMS_ERROR, "[address] is inValid"));
+//        }
+//        if (pageIndex <= 0) {
+//            pageIndex = 1;
+//        }
+//        if (pageSize <= 0 || pageSize > 100) {
+//            pageSize = 10;
+//        }
+//        // todo
+//        //PageInfo<AccountTokenInfo> pageInfo = tokenService.getAccountTokens(address, pageIndex, pageSize);
+//        PageInfo<AccountTokenInfo> pageInfo = new PageInfo<>();
+//        RpcResult result = new RpcResult();
+//        result.setResult(pageInfo);
+//        return result;
+//    }
 }

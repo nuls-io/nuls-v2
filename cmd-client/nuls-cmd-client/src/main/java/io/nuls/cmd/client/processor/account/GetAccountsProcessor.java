@@ -43,9 +43,7 @@ import io.nuls.tools.parse.JSONUtils;
  *
  */
 @Component
-public class GetAccountsProcessor implements CommandProcessor {
-
-    AccountService accountService = ServiceManager.get(AccountService.class);
+public class GetAccountsProcessor extends AccountBaseProcessor implements CommandProcessor {
 
     @Override
     public String getCommand() {

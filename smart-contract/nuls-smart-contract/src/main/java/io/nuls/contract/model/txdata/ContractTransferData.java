@@ -33,6 +33,7 @@ import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.parse.SerializeUtils;
 
 import java.io.IOException;
+import java.math.BigInteger;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -47,7 +48,7 @@ public class ContractTransferData extends TransactionLogicData implements Contra
     public ContractTransferData() {
     }
 
-    public ContractTransferData(NulsDigestData orginTxHash, byte[] contractAddress, byte success) {
+    public ContractTransferData(NulsDigestData orginTxHash, byte[] contractAddress) {
         this.orginTxHash = orginTxHash;
         this.contractAddress = contractAddress;
     }
@@ -117,8 +118,8 @@ public class ContractTransferData extends TransactionLogicData implements Contra
     }
 
     @Override
-    public long getValue() {
-        return 0L;
+    public BigInteger getValue() {
+        return BigInteger.ZERO;
     }
 
     @Override

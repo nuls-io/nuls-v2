@@ -38,7 +38,6 @@ import io.nuls.contract.storage.ContractTokenAddressStorageService;
 import io.nuls.tools.basic.Result;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
-import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.exception.NulsRuntimeException;
 
 import java.io.IOException;
@@ -64,7 +63,7 @@ public class CreateContractTxProcessor {
     @Autowired
     private ContractHelper contractHelper;
 
-    public Result onCommit(int chainId, ContractWrapperTransaction tx) throws NulsException {
+    public Result onCommit(int chainId, ContractWrapperTransaction tx) {
         ContractResult contractResult = tx.getContractResult();
         contractService.saveContractExecuteResult(chainId, tx.getHash(), contractResult);
 
@@ -73,7 +72,7 @@ public class CreateContractTxProcessor {
         byte[] sender = txData.getSender();
 
         // 执行失败的合约直接返回
-        if(!contractResult.isSuccess()) {
+        if (!contractResult.isSuccess()) {
             return getSuccess();
         }
 
@@ -98,7 +97,7 @@ public class CreateContractTxProcessor {
         info.setAcceptDirectTransfer(acceptDirectTransfer);
         info.setNrc20(isNrc20Contract);
         // 获取 token tracker
-        if(isNrc20Contract) {
+        if (isNrc20Contract) {
             // NRC20 token 标准方法获取名称数据
             info.setNrc20TokenName(contractResult.getTokenName());
             info.setNrc20TokenSymbol(contractResult.getTokenSymbol());

@@ -26,17 +26,11 @@ package io.nuls.transaction;
 
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.basic.NulsByteBuffer;
-import io.nuls.base.data.BaseNulsData;
-import io.nuls.base.data.CoinData;
-import io.nuls.base.data.CoinFrom;
-import io.nuls.base.data.CoinTo;
-import io.nuls.base.data.NulsDigestData;
-import io.nuls.base.data.Transaction;
+import io.nuls.base.data.*;
 import io.nuls.base.signture.P2PHKSignature;
 import io.nuls.tools.crypto.HexUtil;
-import io.nuls.tools.model.StringUtils;
 import io.nuls.tools.exception.NulsException;
-import io.nuls.transaction.constant.TxConstant;
+import io.nuls.tools.model.StringUtils;
 import io.nuls.transaction.model.bo.CrossTx;
 import io.nuls.transaction.model.bo.CrossTxSignResult;
 import io.nuls.transaction.model.bo.CrossTxVerifyResult;
@@ -54,6 +48,9 @@ import java.util.List;
  * @date: 2019-01-09
  */
 public class TestConstant {
+
+    /** context path */
+    public static String CONTEXT_PATH = "io.nuls";
     public static String address1 = "LU6eNP3pJ5UMn5yn8LeDE3Pxeapsq3930";//pwd:nuls123456"
     public static String address2 = "JcgbDRvBqQ67Uq4Tb52U22ieJdr3G3930";//pwd:nuls123456"
     public static String address3 = "Vxb3xxatcFFTZZe3wynX6CfAsvzAx3930";
@@ -245,7 +242,7 @@ public class TestConstant {
 
     public static CrossTxVerifyResult getCrossTxVerifyResult1() {
         CrossTxVerifyResult obj = new CrossTxVerifyResult();
-        obj.setChainId(TxConstant.NULS_CHAINID);
+        obj.setChainId(12345);
         obj.setHeight(34);
         obj.setNodeId("1");
         return obj;
@@ -253,7 +250,7 @@ public class TestConstant {
 
     public static CrossTxVerifyResult getCrossTxVerifyResult2() {
         CrossTxVerifyResult obj = new CrossTxVerifyResult();
-        obj.setChainId(TxConstant.NULS_CHAINID);
+        obj.setChainId(12345);
         obj.setHeight(34);
         obj.setNodeId("23");
         return obj;

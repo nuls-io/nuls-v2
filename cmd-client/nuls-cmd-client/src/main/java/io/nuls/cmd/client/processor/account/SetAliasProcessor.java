@@ -46,9 +46,7 @@ import static io.nuls.cmd.client.CommandHelper.getPwd;
  * @author: zhoulijun
  */
 @Component
-public class SetAliasProcessor implements CommandProcessor {
-
-    AccountService accountService = ServiceManager.get(AccountService.class);
+public class SetAliasProcessor extends AccountBaseProcessor implements CommandProcessor {
 
     @Autowired
     Config config;

@@ -24,7 +24,7 @@ import io.nuls.base.data.*;
 import io.nuls.block.cache.CacheHandler;
 import io.nuls.block.constant.BlockErrorCode;
 import io.nuls.block.constant.ChainTypeEnum;
-import io.nuls.block.manager.ChainManager;
+import io.nuls.block.manager.BlockChainManager;
 import io.nuls.block.manager.ContextManager;
 import io.nuls.block.message.HashMessage;
 import io.nuls.block.model.Chain;
@@ -33,9 +33,9 @@ import io.nuls.block.model.ChainParameters;
 import io.nuls.block.model.po.BlockHeaderPo;
 import io.nuls.block.service.BlockService;
 import io.nuls.block.storage.ChainStorageService;
-import io.nuls.block.utils.module.ConsensusUtil;
-import io.nuls.block.utils.module.NetworkUtil;
-import io.nuls.block.utils.module.TransactionUtil;
+import io.nuls.block.rpc.call.ConsensusUtil;
+import io.nuls.block.rpc.call.NetworkUtil;
+import io.nuls.block.rpc.call.TransactionUtil;
 import io.nuls.tools.basic.Result;
 import io.nuls.tools.constant.ErrorCode;
 import io.nuls.tools.core.annotation.Autowired;
@@ -49,10 +49,8 @@ import java.util.Map;
 import java.util.SortedSet;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import static io.nuls.block.constant.CommandConstant.GET_BLOCK_MESSAGE;
-import static io.nuls.block.constant.Constant.SINGLE_DOWNLOAD_TIMEOUNT;
 
 /**
  * 区块工具类
@@ -179,7 +177,7 @@ public class BlockUtil {
         NulsDigestData blockHash = header.getHash();
         NulsDigestData blockPreviousHash = header.getPreHash();
 
-        Chain masterChain = ChainManager.getMasterChain(chainId);
+        Chain masterChain = BlockChainManager.getMasterChain(chainId);
         long masterChainEndHeight = masterChain.getEndHeight();
         NulsDigestData masterChainEndHash = masterChain.getEndHash();
 
@@ -208,7 +206,7 @@ public class BlockUtil {
             if (blockPreviousHash.equals(blockHeader.getPreHash())) {
                 chainStorageService.save(chainId, block);
                 Chain forkChain = ChainGenerator.generate(chainId, block, masterChain, ChainTypeEnum.FORK);
-                ChainManager.addForkChain(chainId, forkChain);
+                BlockChainManager.addForkChain(chainId, forkChain);
                 ConsensusUtil.evidence(chainId, ContextManager.getContext(chainId).getLatestBlock().getHeader(), header);
                 commonLog.info("chainId:" + chainId + ", received fork blocks of masterChain, height:" + blockHeight + ", hash:" + blockHash);
                 return Result.getFailed(BlockErrorCode.FORK_BLOCK);
@@ -229,7 +227,7 @@ public class BlockUtil {
         long blockHeight = block.getHeader().getHeight();
         NulsDigestData blockHash = block.getHeader().getHash();
         NulsDigestData blockPreviousHash = block.getHeader().getPreHash();
-        SortedSet<Chain> forkChains = ChainManager.getForkChains(chainId);
+        SortedSet<Chain> forkChains = BlockChainManager.getForkChains(chainId);
         NulsLogger commonLog = ContextManager.getContext(chainId).getCommonLog();
         try {
             for (Chain forkChain : forkChains) {
@@ -241,7 +239,7 @@ public class BlockUtil {
                 if (blockHeight == forkChainEndHeight + 1 && blockPreviousHash.equals(forkChainEndHash)) {
                     chainStorageService.save(chainId, block);
                     forkChain.addLast(block);
-                    commonLog.info("chainId:" + chainId + ", received continuous blocks of forkChain, height:" + blockHeight + ", hash:" + blockHash);
+                    commonLog.debug("chainId:" + chainId + ", received continuous blocks of forkChain, height:" + blockHeight + ", hash:" + blockHash);
                     return Result.getFailed(BlockErrorCode.FORK_BLOCK);
                 }
                 //2.重复,丢弃
@@ -253,7 +251,7 @@ public class BlockUtil {
                 if (forkChainStartHeight <= blockHeight && blockHeight <= forkChainEndHeight && forkChain.getHashList().contains(blockPreviousHash)) {
                     chainStorageService.save(chainId, block);
                     Chain newForkChain = ChainGenerator.generate(chainId, block, forkChain, ChainTypeEnum.FORK);
-                    ChainManager.addForkChain(chainId, newForkChain);
+                    BlockChainManager.addForkChain(chainId, newForkChain);
                     commonLog.debug("chainId:" + chainId + ", received fork blocks of forkChain, height:" + blockHeight + ", hash:" + blockHash);
                     return Result.getFailed(BlockErrorCode.FORK_BLOCK);
                 }
@@ -277,7 +275,7 @@ public class BlockUtil {
         long blockHeight = block.getHeader().getHeight();
         NulsDigestData blockHash = block.getHeader().getHash();
         NulsDigestData blockPreviousHash = block.getHeader().getPreHash();
-        SortedSet<Chain> orphanChains = ChainManager.getOrphanChains(chainId);
+        SortedSet<Chain> orphanChains = BlockChainManager.getOrphanChains(chainId);
         NulsLogger commonLog = ContextManager.getContext(chainId).getCommonLog();
         try {
             for (Chain orphanChain : orphanChains) {
@@ -289,13 +287,13 @@ public class BlockUtil {
                 if (blockHeight == orphanChainEndHeight + 1 && blockPreviousHash.equals(orphanChainEndHash)) {
                     chainStorageService.save(chainId, block);
                     orphanChain.addLast(block);
-                    commonLog.info("chainId:" + chainId + ", received continuous blocks of orphanChain, height:" + blockHeight + ", hash:" + blockHash);
+                    commonLog.debug("chainId:" + chainId + ", received continuous tail blocks of orphanChain, height:" + blockHeight + ", hash:" + blockHash);
                     return Result.getFailed(BlockErrorCode.ORPHAN_BLOCK);
                 }
                 if (blockHeight == orphanChainStartHeight - 1 && blockHash.equals(orphanChainPreviousHash)) {
                     chainStorageService.save(chainId, block);
                     orphanChain.addFirst(block);
-                    commonLog.info("chainId:" + chainId + ", received continuous blocks of orphanChain, height:" + blockHeight + ", hash:" + blockHash);
+                    commonLog.info("chainId:" + chainId + ", received continuous head blocks of orphanChain, height:" + blockHeight + ", hash:" + blockHash);
                     return Result.getFailed(BlockErrorCode.ORPHAN_BLOCK);
                 }
                 //2.重复,丢弃
@@ -307,8 +305,7 @@ public class BlockUtil {
                 if (orphanChainStartHeight <= blockHeight && blockHeight <= orphanChainEndHeight && orphanChain.getHashList().contains(blockPreviousHash)) {
                     chainStorageService.save(chainId, block);
                     Chain forkOrphanChain = ChainGenerator.generate(chainId, block, orphanChain, ChainTypeEnum.ORPHAN);
-                    forkOrphanChain.setAge(new AtomicInteger(0));
-                    ChainManager.addOrphanChain(chainId, forkOrphanChain);
+                    BlockChainManager.addOrphanChain(chainId, forkOrphanChain);
                     commonLog.info("chainId:" + chainId + ", received fork blocks of orphanChain, height:" + blockHeight + ", hash:" + blockHash);
                     return Result.getFailed(BlockErrorCode.ORPHAN_BLOCK);
                 }
@@ -316,8 +313,7 @@ public class BlockUtil {
             //4.与主链、分叉链、孤儿链都无关,形成一个新的孤儿链
             chainStorageService.save(chainId, block);
             Chain newOrphanChain = ChainGenerator.generate(chainId, block, null, ChainTypeEnum.ORPHAN);
-            newOrphanChain.setAge(new AtomicInteger(0));
-            ChainManager.addOrphanChain(chainId, newOrphanChain);
+            BlockChainManager.addOrphanChain(chainId, newOrphanChain);
             commonLog.info("chainId:" + chainId + ", received orphan block, height:" + blockHeight + ", hash:" + blockHash);
             return Result.getFailed(BlockErrorCode.ORPHAN_BLOCK);
         } catch (Exception e) {
@@ -408,7 +404,9 @@ public class BlockUtil {
         }
         HashMessage message = new HashMessage();
         message.setRequestHash(hash);
-        NulsLogger commonLog = ContextManager.getContext(chainId).getCommonLog();
+        ChainContext context = ContextManager.getContext(chainId);
+        int singleDownloadTimeount = context.getParameters().getSingleDownloadTimeount();
+        NulsLogger commonLog = context.getCommonLog();
         Future<Block> future = CacheHandler.addSingleBlockRequest(chainId, hash);
         commonLog.debug("get block-" + hash + " from " + nodeId + "begin");
         boolean result = NetworkUtil.sendToNode(chainId, message, nodeId, GET_BLOCK_MESSAGE);
@@ -417,7 +415,9 @@ public class BlockUtil {
             return null;
         }
         try {
-            return future.get(SINGLE_DOWNLOAD_TIMEOUNT, TimeUnit.SECONDS);
+            Block block = future.get(singleDownloadTimeount, TimeUnit.MILLISECONDS);
+            commonLog.debug("get block-" + hash + " from " + nodeId + "success");
+            return block;
         } catch (Exception e) {
             e.printStackTrace();
             commonLog.error("get block-" + hash + " from " + nodeId + "fail", e);

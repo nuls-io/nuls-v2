@@ -57,6 +57,36 @@ public class ResponseMessageProcessor {
         }
     }
 
+
+    /**
+     * 与已连接的模块握手
+     * Shake hands with the core module (Manager)
+     *
+     * @return boolean
+     * @throws Exception 握手失败, handshake failed
+     */
+    public static boolean handshake(Channel channel) throws Exception {
+        /*
+        发送握手消息
+        Send handshake message
+         */
+        Message message = MessageUtil.basicMessage(MessageType.NegotiateConnection);
+        message.setMessageData(MessageUtil.defaultNegotiateConnection());
+
+        ResponseContainer responseContainer = RequestContainer.putRequest(message.getMessageId());
+
+        ConnectManager.sendMessage(channel,JSONUtils.obj2json(message));
+
+        try {
+            return responseContainer.getFuture().get(Constants.TIMEOUT_TIMEMILLIS, TimeUnit.MILLISECONDS) != null;
+        } catch (Exception e) {
+            //Timeout Error
+            return false;
+        } finally {
+            RequestContainer.removeResponseContainer(message.getMessageId());
+        }
+    }
+
     public static void syncKernel(String kernelUrl) throws Exception {
         syncKernel(kernelUrl,new KernelInvoke());
     }
@@ -104,6 +134,20 @@ public class ResponseMessageProcessor {
         Get the returned entity and place it in the local variable
          */
         Response response = receiveResponse(responseContainer, Constants.TIMEOUT_TIMEMILLIS);
+        /*
+        注册消息发送失败，重新发送
+        */
+        int tryCount = 0;
+        while (!response.isSuccess() && tryCount < Constants.TRY_COUNT){
+            Log.info("向核心注册消息发送失败第"+(tryCount+1)+"次");
+            responseContainer = RequestContainer.putRequest(message.getMessageId());
+            ConnectManager.sendMessage(channel, JSONUtils.obj2json(message));
+            response = receiveResponse(responseContainer, Constants.TIMEOUT_TIMEMILLIS);
+            tryCount++;
+        }
+        if(!response.isSuccess()){
+            throw new Exception("向核心注册失败！");
+        }
 //        BaseInvoke baseInvoke = new KernelInvoke();
         callbackInvoke.callBack(response);
 

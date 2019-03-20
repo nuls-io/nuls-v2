@@ -29,11 +29,13 @@ package io.nuls.cmd.client.processor.block;
 import io.nuls.api.provider.Result;
 import io.nuls.api.provider.ServiceManager;
 import io.nuls.api.provider.block.BlockService;
+import io.nuls.api.provider.block.facade.BlockHeaderData;
 import io.nuls.api.provider.block.facade.GetBlockHeaderByLastHeightReq;
 import io.nuls.base.data.BlockHeader;
 import io.nuls.cmd.client.CommandBuilder;
 import io.nuls.cmd.client.CommandResult;
 import io.nuls.cmd.client.processor.CommandProcessor;
+import io.nuls.cmd.client.processor.CommandGroup;
 import io.nuls.tools.core.annotation.Component;
 import lombok.extern.slf4j.Slf4j;
 
@@ -49,6 +51,11 @@ public class GetBestBlockHeaderProcessor implements CommandProcessor {
     @Override
     public String getCommand() {
         return "getbestblockheader";
+    }
+
+    @Override
+    public CommandGroup getGroup() {
+        return CommandGroup.Block;
     }
 
     @Override
@@ -74,7 +81,7 @@ public class GetBestBlockHeaderProcessor implements CommandProcessor {
 
     @Override
     public CommandResult execute(String[] args) {
-        Result<BlockHeader> result = blockService.getBlockHeaderByLastHeight(new GetBlockHeaderByLastHeightReq());
+        Result<BlockHeaderData> result = blockService.getBlockHeaderByLastHeight(new GetBlockHeaderByLastHeightReq());
         if (result.isFailed()) {
             return CommandResult.getFailed(result);
         }

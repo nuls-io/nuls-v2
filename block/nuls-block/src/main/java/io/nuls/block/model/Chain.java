@@ -137,7 +137,7 @@ public class Chain {
      */
     @Getter
     @Setter
-    private AtomicInteger age;
+    private AtomicInteger age = new AtomicInteger(0);
 
     /**
      * 获取链的结束hash
@@ -189,5 +189,12 @@ public class Chain {
                 .add("type=" + type)
                 .add("age=" + age)
                 .toString();
+    }
+
+    @Override
+    protected Object clone() throws CloneNotSupportedException {
+        Chain clone = new Chain();
+
+        return super.clone();
     }
 }

@@ -28,6 +28,7 @@ import io.nuls.base.data.Transaction;
 import io.nuls.tools.core.ioc.SpringLiteContext;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.transaction.cache.PackablePool;
+import io.nuls.transaction.constant.TxConfig;
 import io.nuls.transaction.constant.TxConstant;
 import io.nuls.transaction.model.bo.Chain;
 import io.nuls.transaction.model.po.TransactionsPO;
@@ -50,7 +51,7 @@ public class UnconfirmedTxProcessTask implements Runnable {
     private PackablePool packablePool = SpringLiteContext.getBean(PackablePool.class);
     private TxService txService = SpringLiteContext.getBean(TxService.class);
     private UnconfirmedTxStorageService unconfirmedTxStorageService = SpringLiteContext.getBean(UnconfirmedTxStorageService.class);
-
+    private TxConfig txConfig = SpringLiteContext.getBean(TxConfig.class);
     private Chain chain;
 
     public UnconfirmedTxProcessTask(Chain chain) {
@@ -106,11 +107,12 @@ public class UnconfirmedTxProcessTask implements Runnable {
         try {
             long currentTime = NetworkCall.getCurrentTimeMillis();
             //过滤指定时间内过期的交易
-            List<TransactionsPO> expireTxPOList = txPOList.stream().filter(txPo -> currentTime - TxConstant.UNCONFIRMED_TX_EXPIRE_MS > txPo.getCreateTime()).collect(Collectors.toList());
+            List<TransactionsPO> expireTxPOList = txPOList.stream().filter(txPo -> currentTime - txConfig.getUnconfirmedTxExpireMs() > txPo.getCreateTime()).collect(Collectors.toList());
             expireTxPOList.forEach(txPo -> expireTxList.add(txPo.toTransaction()));
         } catch (NulsException e) {
             chain.getLoggerMap().get(TxConstant.LOG_TX).error(e);
         }
         return expireTxList;
     }
+
 }

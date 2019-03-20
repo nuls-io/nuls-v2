@@ -66,7 +66,7 @@ public class ContractAddressStorageServiceImpl implements ContractAddressStorage
             return Result.getFailed(ContractErrorCode.NULL_PARAMETER);
         }
         ContractAddressInfoPo infoPo = ContractDBUtil.getModel(ContractDBConstant.DB_NAME_CONTRACT_ADDRESS + chainId, contractAddressBytes, ContractAddressInfoPo.class);
-        if(infoPo != null) {
+        if (infoPo != null) {
             infoPo.setContractAddress(contractAddressBytes);
         }
         return ContractUtil.getSuccess().setData(infoPo);
@@ -91,7 +91,7 @@ public class ContractAddressStorageServiceImpl implements ContractAddressStorage
             return false;
         }
         byte[] contract = RocksDBService.get(ContractDBConstant.DB_NAME_CONTRACT_ADDRESS + chainId, contractAddressBytes);
-        if(contract == null) {
+        if (contract == null) {
             return false;
         }
         return true;
@@ -100,14 +100,14 @@ public class ContractAddressStorageServiceImpl implements ContractAddressStorage
     @Override
     public Result<List<ContractAddressInfoPo>> getContractInfoList(int chainId, byte[] creater) {
         List<Entry<byte[], byte[]>> list = RocksDBService.entryList(ContractDBConstant.DB_NAME_CONTRACT_ADDRESS + chainId);
-        if(list == null || list.size() ==0) {
+        if (list == null || list.size() == 0) {
             return Result.getFailed(ContractErrorCode.DATA_NOT_FOUND);
         }
         List<ContractAddressInfoPo> resultList = new ArrayList<>();
         ContractAddressInfoPo po;
-        for(Entry<byte[], byte[]> entry : list) {
+        for (Entry<byte[], byte[]> entry : list) {
             po = ContractDBUtil.getModel(entry.getValue(), ContractAddressInfoPo.class);
-            if(Arrays.equals(creater, po.getSender())) {
+            if (Arrays.equals(creater, po.getSender())) {
                 po.setContractAddress(entry.getKey());
                 resultList.add(po);
             }
@@ -120,12 +120,12 @@ public class ContractAddressStorageServiceImpl implements ContractAddressStorage
     @Override
     public Result<List<ContractAddressInfoPo>> getAllContractInfoList(int chainId) {
         List<Entry<byte[], byte[]>> list = RocksDBService.entryList(ContractDBConstant.DB_NAME_CONTRACT_ADDRESS + chainId);
-        if(list == null || list.size() ==0) {
+        if (list == null || list.size() == 0) {
             return Result.getFailed(ContractErrorCode.DATA_NOT_FOUND);
         }
         List<ContractAddressInfoPo> resultList = new ArrayList<>();
         ContractAddressInfoPo po;
-        for(Entry<byte[], byte[]> entry : list) {
+        for (Entry<byte[], byte[]> entry : list) {
             po = ContractDBUtil.getModel(entry.getValue(), ContractAddressInfoPo.class);
             po.setContractAddress(entry.getKey());
             resultList.add(po);
