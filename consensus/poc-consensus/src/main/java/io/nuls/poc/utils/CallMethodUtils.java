@@ -33,6 +33,9 @@ import java.util.Map;
  * 2018/12/26
  */
 public class CallMethodUtils {
+    public static final long MIN_PACK_SURPLUS_TIME = 2000;
+    public static final long TIME_OUT = 1000;
+    public static final long PROCESS_TIME = 1200;
 
     /**
      * 账户验证
@@ -284,7 +287,12 @@ public class CallMethodUtils {
         try {
             Map<String, Object> params = new HashMap(4);
             params.put("chainId", chain.getConfig().getChainId());
-            params.put("endTimestamp", currentTime() + ConsensusConstant.GET_TX_MAX_WAIT_TIME);
+            long currentTime = currentTime();
+            long surplusTime = blockTime - currentTime;
+            if(surplusTime <= MIN_PACK_SURPLUS_TIME){
+                return null;
+            }
+            params.put("endTimestamp", blockTime - PROCESS_TIME);
             params.put("maxTxDataSize", ConsensusConstant.PACK_TX_MAX_SIZE);
             //params.put("height", height);
             params.put("blockTime", blockTime);
@@ -292,7 +300,7 @@ public class CallMethodUtils {
             BlockExtendsData preExtendsData = new BlockExtendsData(chain.getNewestHeader().getExtend());
             byte[] preStateRoot = preExtendsData.getStateRoot();
             params.put("preStateRoot", HexUtil.encode(preStateRoot));
-            Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.TX.abbr, "tx_packableTxs", params,ConsensusConstant.GET_TX_MAX_WAIT_TIME);
+            Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.TX.abbr, "tx_packableTxs", params,surplusTime-TIME_OUT);
             if (!cmdResp.isSuccess()) {
                 chain.getLoggerMap().get(ConsensusConstant.CONSENSUS_LOGGER_NAME).error("Packaging transaction acquisition failure!");
                 return null;
