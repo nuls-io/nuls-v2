@@ -1,11 +1,10 @@
 package io.nuls.transaction.rpc.call;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.model.message.Response;
 import io.nuls.rpc.netty.processor.ResponseMessageProcessor;
-import io.nuls.tools.model.StringUtils;
 import io.nuls.tools.exception.NulsException;
+import io.nuls.tools.model.StringUtils;
 import io.nuls.tools.parse.JSONUtils;
 import io.nuls.transaction.constant.TxConstant;
 import io.nuls.transaction.model.bo.Chain;
@@ -72,11 +71,11 @@ public class TransactionCall {
         params.put("chainId", chain.getChainId());
         params.put("txHex", txHex);
         Map result = (Map) TransactionCall.request(txRegister.getModuleCode(), txRegister.getValidator(), params);
-        try {
+/*        try {
             chain.getLoggerMap().get(TxConstant.LOG_TX).debug("moduleCode:{}, -cmd:{}, -txProcess -rs: {}", txRegister.getModuleCode(), txRegister.getValidator(), JSONUtils.obj2json(result));
         } catch (JsonProcessingException e) {
             e.printStackTrace();
-        }
+        }*/
         return (Boolean) result.get("value");
     }
 
@@ -96,7 +95,7 @@ public class TransactionCall {
             params.put("txHexList", txHexList);
             params.put("blockHeaderHex", blockHeaderHex);
             Map result = (Map) TransactionCall.request(moduleCode, cmd, params);
-            chain.getLoggerMap().get(TxConstant.LOG_TX).debug("moduleCode:{}, -cmd:{}, -txProcess -rs: {}",moduleCode, cmd, JSONUtils.obj2json(result));
+//            chain.getLoggerMap().get(TxConstant.LOG_TX).debug("moduleCode:{}, -cmd:{}, -txProcess -rs: {}",moduleCode, cmd, JSONUtils.obj2json(result));
             return (Boolean) result.get("value");
         } catch (Exception e) {
             chain.getLoggerMap().get(TxConstant.LOG_TX).error(e);
