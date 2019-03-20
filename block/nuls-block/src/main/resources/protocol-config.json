@@ -33,7 +33,7 @@
         "name": "io.nuls.block.message.BlockMessage",
         "handlers": [
           {
-            "name": "io.nuls.block.rpc.BlockHandler#processV1"
+            "name": "io.nuls.block.message.handler.BlockHandler#processV1"
           }
         ]
       },
