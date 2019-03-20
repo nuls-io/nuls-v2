@@ -82,7 +82,7 @@ public class ImportByKeyStoreProcessor extends AccountBaseProcessor implements C
     public CommandResult execute(String[] args) {
         String path = args[1];
         String password = CommandHelper.getPwdOptional();
-        String keystore = getAccountKeystoreDto(path);
+        String keystore = accountService.getAccountKeystoreDto(path);
         ImportAccountByKeyStoreReq req = new ImportAccountByKeyStoreReq(password, HexUtil.encode(keystore.getBytes()),false);
         io.nuls.api.provider.Result<String> result = accountService.importAccountByKeyStore(req);
         if(result.isFailed()){
@@ -92,42 +92,42 @@ public class ImportByKeyStoreProcessor extends AccountBaseProcessor implements C
     }
 
 
-    /**
-     * 根据文件地址获取AccountKeystoreDto对象
-     * Gets the AccountKeystoreDto object based on the file address
-     * @param path
-     * @return
-     */
-    private String getAccountKeystoreDto(String path) {
-        File file = null;
-        try {
-            file = new File(URLDecoder.decode(path, "UTF-8"));
-        } catch (UnsupportedEncodingException e) {
-            log.error("未找到文件", e);
-        }
-        if (null != file && file.isFile()) {
-            StringBuilder ks = new StringBuilder();
-            BufferedReader bufferedReader = null;
-            String str;
-            try {
-                bufferedReader = new BufferedReader(new FileReader(file));
-                while ((str = bufferedReader.readLine()) != null) {
-                    if (!str.isEmpty()) {
-                        ks.append(str);
-                    }
-                }
-                return ks.toString();
-            } catch (Exception e) {
-            } finally {
-                if (bufferedReader != null) {
-                    try {
-                        bufferedReader.close();
-                    } catch (IOException e) {
-                        log.error("system error", e);
-                    }
-                }
-            }
-        }
-        return null;
-    }
+//    /**
+//     * 根据文件地址获取AccountKeystoreDto对象
+//     * Gets the AccountKeystoreDto object based on the file address
+//     * @param path
+//     * @return
+//     */
+//    public  String getAccountKeystoreDto(String path) {
+//        File file = null;
+//        try {
+//            file = new File(URLDecoder.decode(path, "UTF-8"));
+//        } catch (UnsupportedEncodingException e) {
+//            log.error("未找到文件", e);
+//        }
+//        if (null != file && file.isFile()) {
+//            StringBuilder ks = new StringBuilder();
+//            BufferedReader bufferedReader = null;
+//            String str;
+//            try {
+//                bufferedReader = new BufferedReader(new FileReader(file));
+//                while ((str = bufferedReader.readLine()) != null) {
+//                    if (!str.isEmpty()) {
+//                        ks.append(str);
+//                    }
+//                }
+//                return ks.toString();
+//            } catch (Exception e) {
+//            } finally {
+//                if (bufferedReader != null) {
+//                    try {
+//                        bufferedReader.close();
+//                    } catch (IOException e) {
+//                        log.error("system error", e);
+//                    }
+//                }
+//            }
+//        }
+//        return null;
+//    }
 }
