@@ -42,7 +42,7 @@ public class ConfigSetting {
     }
 
     public static void set(Object obj, Field field, String value) {
-        if (StringUtils.isBlank(value)) {
+        if (null == value) {
             Value.NotNull notNull = field.getAnnotation(Value.NotNull.class);
             if(notNull != null){
                 throw new RuntimeException("config item " + obj.getClass() + "#" + field.getName() + " can't be null ");

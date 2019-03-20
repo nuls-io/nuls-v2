@@ -647,7 +647,7 @@ public class PunishManager {
         List<AgentPo> agentList = agentStorageService.getList(chainId);
         AgentPo agent = null;
         for (AgentPo agentPo : agentList) {
-            if (agentPo.getDelHeight() > 0) {
+            if (agentPo.getDelHeight() <= 0) {
                 continue;
             }
             if (Arrays.equals(agentPo.getAgentAddress(), punishData.getAddress())) {

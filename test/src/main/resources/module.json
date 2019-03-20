@@ -2,5 +2,6 @@
   "providerType": "RPC",
   "chainId": 12345,
   "assetsId": 1,
-  "testNodeType": "slave"
+  "testNodeType": "master",
+  "testNodeExclude": "192.168.1.145"
 }

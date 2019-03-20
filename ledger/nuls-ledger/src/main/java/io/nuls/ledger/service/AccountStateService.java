@@ -79,7 +79,7 @@ public interface AccountStateService {
      * @param nonce
      * @param txHash
      */
-    void rollUnconfirmTx(int addressChainId,String assetKey,String nonce,String txHash);
+    boolean rollUnconfirmTx(int addressChainId,String assetKey,String nonce,String txHash);
 
     /**
      *
