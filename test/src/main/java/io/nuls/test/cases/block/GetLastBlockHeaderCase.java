@@ -1,7 +1,10 @@
 package io.nuls.test.cases.block;
 
+import io.nuls.api.provider.Result;
 import io.nuls.api.provider.ServiceManager;
 import io.nuls.api.provider.block.BlockService;
+import io.nuls.api.provider.block.facade.BlockHeaderData;
+import io.nuls.api.provider.block.facade.GetBlockHeaderByLastHeightReq;
 import io.nuls.base.data.BlockHeader;
 import io.nuls.test.cases.TestCaseIntf;
 import io.nuls.test.cases.TestFailException;
@@ -13,7 +16,7 @@ import io.nuls.tools.core.annotation.Component;
  * @Description: 功能描述
  */
 @Component
-public class GetLastBlockHeaderCase implements TestCaseIntf<BlockHeader,Void> {
+public class GetLastBlockHeaderCase implements TestCaseIntf<BlockHeaderData,Void> {
 
     BlockService blockService = ServiceManager.get(BlockService.class);
 
@@ -23,9 +26,10 @@ public class GetLastBlockHeaderCase implements TestCaseIntf<BlockHeader,Void> {
     }
 
     @Override
-    public BlockHeader doTest(Void param, int depth) throws TestFailException {
-
-        return null;
+    public BlockHeaderData doTest(Void param, int depth) throws TestFailException {
+        Result<BlockHeaderData> result = blockService.getBlockHeaderByLastHeight(new GetBlockHeaderByLastHeightReq());
+        checkResultStatus(result);
+        return result.getData();
     }
 
 }

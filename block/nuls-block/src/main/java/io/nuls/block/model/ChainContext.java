@@ -38,6 +38,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.StampedLock;
 
@@ -146,6 +147,12 @@ public class ChainContext {
     @Getter
     private Map<String, AtomicInteger> duplicateBlockMap;
 
+    /**
+     * 记录某个打包地址是否已经进行过分叉通知，每个地址只通知一次
+     */
+    @Getter
+    private List<byte []> packingAddressList;
+
     public synchronized void setStatus(RunningStatusEnum status) {
         this.status = status;
     }
@@ -156,6 +163,7 @@ public class ChainContext {
 
     public void init() {
         this.setStatus(RunningStatusEnum.INITIALIZING);
+        packingAddressList = new CopyOnWriteArrayList<>();
         duplicateBlockMap = new HashMap<>();
         systemTransactionType = new ArrayList<>();
         version = 1;

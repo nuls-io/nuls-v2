@@ -435,7 +435,7 @@ public class PocConsensusResource extends BaseCmd{
         return success(result.getData());
     }
 
-    /**
+    /**cs_addEvidenceRecord
      * 区块分叉记录
      * */
     @CmdAnnotation(cmd = "cs_addEvidenceRecord", version = 1.0, description = "add evidence record 1.0")

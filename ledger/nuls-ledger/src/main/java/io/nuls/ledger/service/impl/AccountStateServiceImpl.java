@@ -73,7 +73,7 @@ public class AccountStateServiceImpl implements AccountStateService {
             LoggerUtil.logger.debug("更新确认的交易信息：orgNonce={},newNonce={}", dbAccountState.getNonce(), accountState.getNonce());
             LoggerUtil.logger.debug("更新确认的交易信息:unConfirmedNonce org={},new={}", dbAccountState.getUnconfirmedNoncesStrs(), accountState.getUnconfirmedNoncesStrs());
             repository.updateAccountState(assetKey.getBytes(LedgerConstant.DEFAULT_ENCODING), accountState);
-            LoggerUtil.txMsg.debug("hash={},assetKey={},dbAmount={},toAmount={},oldHash={}", accountState.getTxHash(), assetKey, dbAccountState.getAvailableAmount(), accountState.getAvailableAmount(), dbAccountState.getTxHash());
+            LoggerUtil.txAmount.debug("hash={},assetKey={},dbAmount={},changeTo={},oldHash={}", accountState.getTxHash(), assetKey, dbAccountState.getAvailableAmount(), accountState.getAvailableAmount(), dbAccountState.getTxHash());
             blockSnapshotAccounts.addAccountState(dbAccountState);
         }
     }
@@ -87,7 +87,7 @@ public class AccountStateServiceImpl implements AccountStateService {
     }
 
     @Override
-    public void rollUnconfirmTx(int addressChainId, String assetKey, String nonce, String txHash) {
+    public boolean rollUnconfirmTx(int addressChainId, String assetKey, String nonce, String txHash) {
         //账户处理锁
         synchronized (LockerUtil.getAccountLocker(assetKey)) {
             try {
@@ -98,10 +98,12 @@ public class AccountStateServiceImpl implements AccountStateService {
                 boolean hadRollAmount = rollUnconfirmedAmount(accountState, txHash);
                 if (hadRollNonce || hadRollAmount) {
                     repository.updateAccountState(assetKey.getBytes(LedgerConstant.DEFAULT_ENCODING), accountState);
+                    return true;
                 }
             } catch (Exception e) {
                 e.printStackTrace();
             }
+            return false;
         }
     }
 
