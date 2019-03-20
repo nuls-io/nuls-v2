@@ -270,8 +270,10 @@ public class ConsensusProcess {
 
         List<Transaction> packingTxList = CallMethodUtils.getPackingTxList(chain,bd.getHeight(),bd.getTime(),AddressTool.getStringAddressByBytes(self.getAgent().getPackingAddress()),extendsData);
 
+        boolean stateRootIsNull = false;
         if(packingTxList == null){
             packingTxList = new ArrayList<>();
+            stateRootIsNull = true;
         }
 
         bd.setExtendsData(extendsData);
@@ -291,6 +293,10 @@ public class ConsensusProcess {
         if(!newBlock.getHeader().getPreHash().equals(bestBlock.getHash())){
             newBlock.getHeader().setPreHash(bestBlock.getHash());
             newBlock.getHeader().setHeight(bestBlock.getHeight());
+        }
+        if(stateRootIsNull){
+            BlockExtendsData preExtendsData = new BlockExtendsData(bestBlock.getExtend());
+            extendsData.setStateRoot(preExtendsData.getStateRoot());
         }
         consensusLogger.info("make block height:" + newBlock.getHeader().getHeight() + ",txCount: " + newBlock.getTxs().size() + " , block size: " + newBlock.size() + " , time:" + DateUtils.convertDate(new Date(newBlock.getHeader().getTime())) + ",packEndTime:" +
                 DateUtils.convertDate(new Date(self.getPackEndTime()))+",hash:"+newBlock.getHeader().getHash().getDigestHex()+",preHash:"+newBlock.getHeader().getPreHash().getDigestHex());

@@ -306,7 +306,7 @@ public class CallMethodUtils {
                 txList.add(tx);
             }
             String stateRoot = (String) signResult.get("stateRoot");
-            if (null == stateRoot) {
+            if (StringUtils.isBlank(stateRoot)) {
                 extendsData.setStateRoot(preStateRoot);
             }else{
                 extendsData.setStateRoot(HexUtil.decode(stateRoot));
