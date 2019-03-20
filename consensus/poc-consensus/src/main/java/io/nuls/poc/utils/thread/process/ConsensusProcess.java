@@ -146,11 +146,11 @@ public class ConsensusProcess {
     }
 
     private void packing(Chain chain,MeetingMember self, MeetingRound round) throws Exception{
+        waitReceiveNewestBlock(chain,self, round);
         /*
         等待出块
         Wait for blocks
         */
-        waitReceiveNewestBlock(chain,self, round);
         long start = System.currentTimeMillis();
         Block block = doPacking(chain, self, round);
         consensusLogger.info("doPacking use:" + (System.currentTimeMillis() - start) + "ms");
@@ -183,6 +183,9 @@ public class ConsensusProcess {
         long timeout = chain.getConfig().getPackingInterval()/5;
         long endTime = self.getPackStartTime() + timeout;
         boolean hasReceiveNewestBlock;
+        if(CallMethodUtils.currentTime() >= endTime){
+            return;
+        }
         try {
             while (true) {
                 /*

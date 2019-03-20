@@ -23,12 +23,15 @@ package io.nuls.block.rpc.call;
 import io.nuls.base.data.Block;
 import io.nuls.base.data.BlockHeader;
 import io.nuls.block.manager.ContextManager;
+import io.nuls.block.model.ChainContext;
 import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.netty.processor.ResponseMessageProcessor;
 import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.log.logback.NulsLogger;
 
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -99,7 +102,18 @@ public class ConsensusUtil {
      * @return
      */
     public static boolean evidence(int chainId, BlockHeader masterHeader, BlockHeader forkHeader) {
-        NulsLogger commonLog = ContextManager.getContext(chainId).getCommonLog();
+        ChainContext context = ContextManager.getContext(chainId);
+        NulsLogger commonLog = context.getCommonLog();
+        byte[] masterHeaderPackingAddress = masterHeader.getPackingAddress(chainId);
+        byte[] forkHeaderPackingAddress = forkHeader.getPackingAddress(chainId);
+        if (!Arrays.equals(masterHeaderPackingAddress, forkHeaderPackingAddress)) {
+            return true;
+        }
+        List<byte[]> packingAddressList = context.getPackingAddressList();
+        if (packingAddressList.contains(masterHeaderPackingAddress)) {
+            return true;
+        }
+        packingAddressList.add(masterHeaderPackingAddress);
         try {
             Map<String, Object> params = new HashMap<>(5);
 //            params.put(Constants.VERSION_KEY_STR, "1.0");
