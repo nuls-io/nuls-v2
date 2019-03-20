@@ -656,14 +656,7 @@ public class TxServiceImpl implements TxService {
                     continue;
                 }
 
-                /** 智能合约*/
-                if (TxManager.isSmartContract(chain, tx.getType())) {
-                    /** 出现智能合约,且通知标识为false,则先调用通知 */
-                    if (!contractNotify) {
-                        ContractCall.contractBatchBegin(chain, blockHeight, blockTime, packingAddress, preStateRoot);
-                    }
-                    ContractCall.invokeContract(chain, txHex);
-                }
+
 
                 long debugeMap = NetworkCall.getCurrentTimeMillis();
 //                chain.getLoggerMap().get(TxConstant.LOG_TX).debug("########## 单个VerifyCoinData花费时间:{} ", debugeMap - debugeVerifyCoinDataStart);
@@ -674,6 +667,17 @@ public class TxServiceImpl implements TxService {
                 chain.getLoggerMap().get(TxConstant.LOG_TX).debug("@@@@@ 打包交易单个验证成功 hash:{}", tx.getHash().getDigestHex());
                 packingTxList.add(tx);
                 totalSize += txSize;
+
+                /** 智能合约*/
+                if (TxManager.isSmartContract(chain, tx.getType())) {
+                    /** 出现智能合约,且通知标识为false,则先调用通知 */
+                    if (!contractNotify) {
+                        ContractCall.contractBatchBegin(chain, blockHeight, blockTime, packingAddress, preStateRoot);
+                        contractNotify = true;
+                    }
+                    ContractCall.invokeContract(chain, txHex);
+                }
+
                 //根据模块的统一验证器名，对所有交易进行分组，准备进行各模块的统一验证
                 TxRegister txRegister = TxManager.getTxRegister(chain, tx.getType());
                 if (moduleVerifyMap.containsKey(txRegister)) {
@@ -770,7 +774,15 @@ public class TxServiceImpl implements TxService {
             chain.getLoggerMap().get(TxConstant.LOG_TX).debug("=================================================");
             chain.getLoggerMap().get(TxConstant.LOG_TX).debug("%%%%%%%%% 打包完成 %%%%%%%%%%%% height:{}", blockHeight);
             chain.getLoggerMap().get(TxConstant.LOG_TX).debug("");
-
+            long current = NetworkCall.getCurrentTimeMillis();
+            chain.getLoggerMap().get(TxConstant.LOG_TX).debug("Time endtimestamp-current:{}", endtimestamp - current);
+            chain.getLoggerMap().get(TxConstant.LOG_TX).debug("");
+            if (endtimestamp - current < chain.getConfig().getPackageRpcReserveTime()) {
+                //超时,留给RPC传输时间不足
+                chain.getLoggerMap().get(TxConstant.LOG_TX).error("getPackableTxs time out, endtimestamp:{}, current:{}, endtimestamp-current:{}, reserveTime:{}",
+                        endtimestamp, current, endtimestamp - current, chain.getConfig().getPackageRpcReserveTime());
+                throw new NulsException(TxErrorCode.PACKAGE_TIME_OUT);
+            }
             return txPackage;
         } catch (NulsException e) {
             chain.getLoggerMap().get(TxConstant.LOG_TX).error(e);

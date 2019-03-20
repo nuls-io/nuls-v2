@@ -42,6 +42,9 @@ public interface TxConstant {
     /** 删除智能合约交易*/
     int TX_TYPE_DELETE_CONTRACT = 102;
 
+    /** 获取网络时间间隔*/
+    long GETTIME_INTERVAL = 30000;
+
 
     String LOG_TX = "tx/txChain";
     String LOG_NEW_TX_PROCESS = "tx/newTxProcess";

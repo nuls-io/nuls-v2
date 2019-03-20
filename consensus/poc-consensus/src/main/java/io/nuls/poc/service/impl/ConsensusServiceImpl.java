@@ -1228,6 +1228,7 @@ public class ConsensusServiceImpl implements ConsensusService {
             header.parse(HexUtil.decode((String) params.get(ConsensusConstant.PARAM_BLOCK_HEADER)), 0);
             BlockHeader evidenceHeader = new BlockHeader();
             evidenceHeader.parse(HexUtil.decode((String) params.get(ConsensusConstant.PARAM_EVIDENCE_HEADER)), 0);
+            chain.getLoggerMap().get(ConsensusConstant.BASIC_LOGGER_NAME).info("Received new bifurcation evidence:"+header.getHeight());
             punishManager.addEvidenceRecord(chain, header, evidenceHeader);
             Map<String, Object> validResult = new HashMap<>(2);
             validResult.put("value", true);
