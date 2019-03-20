@@ -8,7 +8,10 @@ import io.nuls.poc.model.bo.Chain;
 import io.nuls.poc.model.bo.consensus.Evidence;
 import io.nuls.poc.model.bo.round.MeetingMember;
 import io.nuls.poc.model.bo.round.MeetingRound;
-import io.nuls.poc.model.bo.tx.txdata.*;
+import io.nuls.poc.model.bo.tx.txdata.Agent;
+import io.nuls.poc.model.bo.tx.txdata.CancelDeposit;
+import io.nuls.poc.model.bo.tx.txdata.Deposit;
+import io.nuls.poc.model.bo.tx.txdata.StopAgent;
 import io.nuls.poc.model.po.AgentPo;
 import io.nuls.poc.model.po.DepositPo;
 import io.nuls.poc.model.po.PunishLogPo;
@@ -647,7 +650,7 @@ public class PunishManager {
         List<AgentPo> agentList = agentStorageService.getList(chainId);
         AgentPo agent = null;
         for (AgentPo agentPo : agentList) {
-            if (agentPo.getDelHeight() > 0) {
+            if (agentPo.getDelHeight() <= 0) {
                 continue;
             }
             if (Arrays.equals(agentPo.getAgentAddress(), punishData.getAddress())) {

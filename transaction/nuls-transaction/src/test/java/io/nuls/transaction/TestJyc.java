@@ -78,7 +78,14 @@ public class TestJyc {
         NoUse.mockModule();
         ResponseMessageProcessor.syncKernel("ws://" + HostInfo.getLocalIP() + ":8887/ws");
         chain = new Chain();
-        chain.setConfig(new ConfigBean(chainId, assetId, 1024*1024,500,20000L,20000,60000L));
+        chain.setConfig(new ConfigBean(chainId, assetId, 1024*1024,1000,20,20000L,20000,60000L));
+    }
+
+    @Test
+    public void name() throws Exception {
+        String hash = "0020a1632aba562395506888f137e3ebe461b35ada0c8cd38f3652a854d3a902ba0b";
+        boolean b = queryTx(hash);
+        Log.debug("hash-{} exist-{}", hash, b);
     }
 
     /**
@@ -243,7 +250,7 @@ public class TestJyc {
                     Log.debug("deposit-txHash:{}", depositHash);
                 }
 
-                Thread.sleep(600000);
+                Thread.sleep(60000);
                 {
                     Log.debug("6.##########取消委托##########");
                     //取消委托
@@ -276,7 +283,7 @@ public class TestJyc {
                     Log.debug("deposit-txHash:{}", depositHash);
                 }
 
-                Thread.sleep(600000);
+                Thread.sleep(60000);
                 {
                     Log.debug("8.##########删除节点账户，制造黄牌##########");
                     Map<String, Object> params = new HashMap<>();
@@ -288,10 +295,10 @@ public class TestJyc {
                     HashMap result = (HashMap) ((HashMap) cmdResp.getResponseData()).get("ac_getPriKeyByAddress");
                     String priKey = (String) result.get("priKey");
                     removeAccount(packingAddress, password);
-                    Thread.sleep(600000);
+                    Thread.sleep(60000000);
                     Log.debug("9.##########导入节点账户，重新加入共识##########");
                     importPriKey(priKey, password);
-                    Thread.sleep(600000);
+                    Thread.sleep(60000);
                 }
 
                 {
@@ -381,21 +388,23 @@ public class TestJyc {
             BigInteger balance = LedgerCall.getBalance(chain, AddressTool.getAddress(address23), chainId, assetId);
             Log.debug(address23 + "-----balance:{}", balance);
         }
-        int total = 1000;
-        int count = 100;
-        List<String> accountList;
+        int total = 100_000;
+        int count = 1_000;
+        List<String> accountList = new ArrayList<>();
         Log.debug("##################################################");
         {
             Log.debug("1.##########create " + count + " accounts##########");
-            Map<String, Object> params = new HashMap<>();
-            params.put(Constants.VERSION_KEY_STR, version);
-            params.put("chainId", chainId);
-            params.put("count", count);
-            params.put("password", password);
-            Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_createAccount", params);
-            assertTrue(response.isSuccess());
-            accountList = (List<String>) ((HashMap) ((HashMap) response.getResponseData()).get("ac_createAccount")).get("list");
-            assertEquals(count, accountList.size());
+            for (int i = 0; i < count/100; i++) {
+                Map<String, Object> params = new HashMap<>();
+                params.put(Constants.VERSION_KEY_STR, version);
+                params.put("chainId", chainId);
+                params.put("count", 100);
+                params.put("password", password);
+                Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_createAccount", params);
+                assertTrue(response.isSuccess());
+                accountList.addAll((List<String>) ((HashMap) ((HashMap) response.getResponseData()).get("ac_createAccount")).get("list"));
+                assertEquals(100 * (i + 1), accountList.size());
+            }
         }
         {
             for (String account : accountList) {
@@ -409,6 +418,7 @@ public class TestJyc {
                 Log.debug("address-{}" + address);
             }
         }
+        List<String> hashList = new ArrayList<>();
         {
             Log.debug("2.##########transfer from seed address to " + count + " accounts##########");
             for (int i = 0, accountListSize = accountList.size(); i < accountListSize; i++) {
@@ -439,12 +449,20 @@ public class TestJyc {
                 Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_transfer", transferMap);
                 assertTrue(response.isSuccess());
                 HashMap result = (HashMap) (((HashMap) response.getResponseData()).get("ac_transfer"));
-                Log.debug(i + "---transfer from {} to {}, hash:{}", address23, account, result.get("value"));
-                Thread.sleep(1000);
+                String hash = result.get("value").toString();
+                hashList.add(hash);
+                Log.debug(i + "---transfer from {} to {}, hash:{}", address23, account, hash);
+                Thread.sleep(100);
             }
         }
-        Thread.sleep(10000);
-        List<String> hashList = new ArrayList<>();
+        Thread.sleep(60000);
+
+        {
+            boolean b = queryTxs(hashList);
+            Log.debug("all tx exist-{}" + b);
+            assertTrue(b);
+        }
+        hashList.clear();
         {
             Log.debug("3.##########" + count + " accounts Transfer to each other##########");
             //100个地址之间互相转账
@@ -489,19 +507,9 @@ public class TestJyc {
         }
         Thread.sleep(100000);
         {
-            for (String hash : hashList) {
-                Map<String, Object> params = new HashMap<>();
-                params.put("chainId", chainId);
-                params.put("txHash", hash);
-                Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.TX.abbr, "tx_getConfirmedTx", params);
-                assertTrue(response.isSuccess());
-                Map map = (Map) response.getResponseData();
-                Map tx = (Map) map.get("tx_getConfirmedTx");
-                String txHex = tx.get("txHex").toString();
-                Transaction transaction = new Transaction();
-                transaction.parse(new NulsByteBuffer(HexUtil.decode(txHex)));
-                assertEquals(hash, transaction.getHash());
-            }
+            boolean b = queryTxs(hashList);
+            Log.debug("all tx exist-{}" + b);
+            assertTrue(b);
         }
     }
 
@@ -686,5 +694,46 @@ public class TestJyc {
         Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_removeAccount", params);
         assertTrue(response.isSuccess());
         Log.debug("{}", JSONUtils.obj2json(response.getResponseData()));
+    }
+
+    private boolean queryTxs(List<String> hashList) throws Exception {
+        boolean result = true;
+        for (String hash : hashList) {
+            Map<String, Object> params = new HashMap<>();
+            params.put("chainId", chainId);
+            params.put("txHash", hash);
+            Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.TX.abbr, "tx_getConfirmedTx", params);
+            assertTrue(response.isSuccess());
+            Map map = (Map) response.getResponseData();
+            Map tx = (Map) map.get("tx_getConfirmedTx");
+            String txHex = tx.get("txHex").toString();
+            Transaction transaction = new Transaction();
+            transaction.parse(new NulsByteBuffer(HexUtil.decode(txHex)));
+            if (!hash.equals(transaction.getHash())) {
+                Log.debug("hash-{} not exist", hash);
+                result = false;
+                continue;
+            }
+        }
+        return result;
+    }
+
+    private boolean queryTx(String hash) throws Exception {
+        boolean result = true;
+        Map<String, Object> params = new HashMap<>();
+        params.put("chainId", chainId);
+        params.put("txHash", hash);
+        Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.TX.abbr, "tx_getConfirmedTx", params);
+        assertTrue(response.isSuccess());
+        Map map = (Map) response.getResponseData();
+        Map tx = (Map) map.get("tx_getConfirmedTx");
+        String txHex = tx.get("txHex").toString();
+        Transaction transaction = new Transaction();
+        transaction.parse(new NulsByteBuffer(HexUtil.decode(txHex)));
+        if (!hash.equals(transaction.getHash())) {
+            Log.debug("hash-{} not exist", hash);
+            result = false;
+        }
+        return result;
     }
 }

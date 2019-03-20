@@ -4,7 +4,8 @@
     "chainId":12345,
     "assetId":1,
     "txMaxSize":1048576,
-    "moduleVerifyOffset":1000,
+    "moduleVerifyOffset":1500,
+    "packageRpcReserveTime":20,
     "txUnverifiedQueueSize":10000000,
     "orphanContainerSize":200000,
     "orphanTtl":3600000

@@ -324,7 +324,7 @@ public class TransactionServiceImpl implements TransactionService {
             BlockSnapshotAccounts blockSnapshotAccounts = repository.getBlockSnapshot(addressChainId, blockHeight);
             List<AccountState> preAccountStates = blockSnapshotAccounts.getAccounts();
             for (AccountState accountState : preAccountStates) {
-                LoggerUtil.txRollBackLog.debug("start rollBackConfirmTxs acountKey={},blockHeight={},preHash={}", LedgerUtil.getKeyStr(accountState.getAddress(), accountState.getAssetChainId(), accountState.getAssetId()), blockHeight, accountState.getTxHash());
+                LoggerUtil.txRollBackLog.debug("#####start rollBackConfirmTxs acountKey={},blockHeight={},preHash={}", LedgerUtil.getKeyStr(accountState.getAddress(), accountState.getAssetChainId(), accountState.getAssetId()), blockHeight, accountState.getTxHash());
                 String key = LedgerUtil.getKeyStr(accountState.getAddress(), accountState.getAssetChainId(), accountState.getAssetId());
                 accountStateService.rollAccountState(key, accountState);
                 logger.info("rollBack account={},assetChainId={},assetId={}, height={},lastHash= {} ", key, accountState.getAssetChainId(), accountState.getAssetId(),
@@ -355,6 +355,7 @@ public class TransactionServiceImpl implements TransactionService {
         List<CoinFrom> froms = coinData.getFrom();
         String txHash = transaction.getHash().toString();
         String rollNonce = LedgerUtil.getNonceStrByTxHash(txHash);
+        boolean hadRoll = false;
         for (CoinFrom from : froms) {
             if (LedgerUtil.isNotLocalChainAccount(addressChainId, from.getAddress())) {
                 //非本地网络账户地址,不进行处理
@@ -364,7 +365,10 @@ public class TransactionServiceImpl implements TransactionService {
             int assetChainId = from.getAssetsChainId();
             int assetId = from.getAssetsId();
             String assetKey = LedgerUtil.getKeyStr(address, assetChainId, assetId);
-            accountStateService.rollUnconfirmTx(addressChainId, assetKey, rollNonce, txHash);
+            hadRoll = (hadRoll || accountStateService.rollUnconfirmTx(addressChainId, assetKey, rollNonce, txHash));
+        }
+        if (hadRoll) {
+            LoggerUtil.txUnconfirmedRollBackLog2.debug("hash={}", txHash);
         }
         return true;
     }

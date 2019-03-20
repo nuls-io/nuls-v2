@@ -110,8 +110,8 @@ public class FreezeStateServiceImpl implements FreezeStateService {
         }
         BigInteger addTimeAmount = unFreezeLockTimeState(timeList, accountState);
         BigInteger addHeightAmount = unFreezeLockHeightState(heightList, accountState);
-        accountState.addTotalFromAmount(addTimeAmount);
-        accountState.addTotalFromAmount(addHeightAmount);
+        accountState.addTotalToAmount(addTimeAmount);
+        accountState.addTotalToAmount(addHeightAmount);
         return true;
     }
 }

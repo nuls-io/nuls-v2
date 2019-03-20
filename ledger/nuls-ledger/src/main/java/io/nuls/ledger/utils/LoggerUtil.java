@@ -38,5 +38,6 @@ public class LoggerUtil {
    public static NulsLogger txCommitLog = LoggerBuilder.getLogger("./ld", "tx",Level.ALL);
    public static NulsLogger txRollBackLog = LoggerBuilder.getLogger("./ld", "txRb",Level.ALL);
    public static NulsLogger txUnconfirmedRollBackLog = LoggerBuilder.getLogger("./ld", "txUncfRb",Level.ALL);
-   public static NulsLogger txMsg = LoggerBuilder.getLogger("./ld", "txMsg",Level.ALL);
+   public static NulsLogger txAmount = LoggerBuilder.getLogger("./ld", "accountAmount",Level.ALL);
+   public static NulsLogger txUnconfirmedRollBackLog2 = LoggerBuilder.getLogger("./ld", "txUncfRb2",Level.ALL);
 }
