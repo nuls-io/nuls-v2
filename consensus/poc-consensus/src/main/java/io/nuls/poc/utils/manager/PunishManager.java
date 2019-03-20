@@ -285,7 +285,7 @@ public class PunishManager {
             */
             byte[][] headers = new byte[ConsensusConstant.REDPUNISH_BIFURCATION * 2][];
             Map<String, List<Evidence>> currentChainEvidences = chain.getEvidenceMap();
-            List<Evidence> list = currentChainEvidences.get(AddressTool.getStringAddressByBytes(agent.getPackingAddress()));
+            List<Evidence> list = currentChainEvidences.remove(AddressTool.getStringAddressByBytes(agent.getPackingAddress()));
             for (int i = 0; i < list.size() && i < ConsensusConstant.REDPUNISH_BIFURCATION; i++) {
                 Evidence evidence = list.get(i);
                 int s = i * 2;
@@ -331,6 +331,9 @@ public class PunishManager {
     public void punishTx(Chain chain, BlockHeader bestBlock, List<Transaction> txList, MeetingMember self, MeetingRound round) throws Exception{
         Transaction yellowPunishTransaction = createYellowPunishTx(chain,bestBlock, self, round);
         if (null == yellowPunishTransaction) {
+            if(chain.getRedPunishTransactionList().size() > 0){
+                conflictValid(chain,txList);
+            }
             return;
         }
         txList.add(yellowPunishTransaction);

@@ -62,9 +62,11 @@ public class TestModule extends RpcModule {
                         return ;
                     }
                     try {
+                        Utils.msg("==============================");
                         Utils.msg("开始测试"+tester.title());
+                        Utils.msg("==============================");
                         tester.check(null,0);
-                        Utils.msg(tester.title() + " 结束 ");
+//                        Utils.msg(tester.title() + " 结束 ");
                     } catch (TestFailException e) {
                         Utils.fail( tester.title() + " FAIL :" + e.getMessage());
                     }

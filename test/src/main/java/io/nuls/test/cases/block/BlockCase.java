@@ -17,12 +17,14 @@ public class BlockCase extends TestCaseChain {
     @Override
     public Class<? extends TestCaseIntf>[] testChain() {
         return new Class[]{
-                LastBlockSyncCase.class
+                SyncGetLastBlockHeaderCase.class,
+                SyncGetBlockHeaderByHeightCase.class,
+                SyncGetBlockHeaderByHashCase.class
         };
     }
 
     @Override
     public String title() {
-        return "区块数据一致性测试";
+        return "区块数据一致性";
     }
 }
