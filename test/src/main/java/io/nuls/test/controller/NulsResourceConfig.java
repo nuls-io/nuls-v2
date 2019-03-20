@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2017-2018 nuls.io
+ * Copyright (c) 2017-2019 nuls.io
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,32 +22,34 @@
  * SOFTWARE.
  *
  */
-package io.nuls.network.rpc.cmd;
+package io.nuls.test.controller;
 
-import io.nuls.network.manager.TimeManager;
-import io.nuls.network.utils.LoggerUtil;
-import io.nuls.rpc.cmd.BaseCmd;
-import io.nuls.rpc.model.CmdAnnotation;
-import io.nuls.rpc.model.message.Response;
-import io.nuls.tools.core.annotation.Component;
+import com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider;
+import io.nuls.tools.core.ioc.SpringLiteContext;
+import lombok.extern.slf4j.Slf4j;
+import org.glassfish.jersey.media.multipart.MultiPartFeature;
+import org.glassfish.jersey.server.ResourceConfig;
 
-import java.util.HashMap;
-import java.util.Map;
+import javax.ws.rs.Path;
+import java.util.Collection;
 
 /**
- * @author lan
- * @description
- * @date 2018/12/05
- **/
-@Component
-public class TimeServiceRpc extends BaseCmd {
-    @CmdAnnotation(cmd = "nw_currentTimeMillis", version = 1.0,
-            description = "currentTimeMillis")
-    public Response currentTimeMillis(Map params) {
-        LoggerUtil.rpcLog.debug("get time");
-        Map<String, Long> responseData = new HashMap<>();
-        responseData.put("currentTimeMillis", TimeManager.currentTimeMillis());
-        return success(responseData);
-    }
-}
+ * @author Niels
+ */
+@Slf4j
+public class NulsResourceConfig extends ResourceConfig {
 
+    public NulsResourceConfig() {
+        register(MultiPartFeature.class);
+        register(JacksonJsonProvider.class);
+
+        Collection<Object> list = SpringLiteContext.getAllBeanList();
+        for (Object object : list) {
+            if (object.getClass().getAnnotation(Path.class) != null) {
+                log.debug("register restFul resource:{}", object.getClass());
+                register(object);
+            }
+        }
+    }
+
+}
