@@ -92,7 +92,7 @@ public class ContractSendTxTest extends Base {
         importPriKey("00c98ecfd3777745270cacb9afba17ef0284769a83ff2adb4106b8a0baaec9452c", password);//27 5MR_2CVCFWH7o8AmrTBPLkdg2dYH1UCUJiM
         importPriKey("23848d45b4b34aca8ff24b00949a25a2c9175faf283675128e189eee8b085942", password);//28 5MR_2CfUsasd33vQV3HqGw6M3JwVsuVxJ7r
         importPriKey("009560d5ed6587822b7aee6f318f50b312c281e4f330b6990396881c6d3f870bc1", password);//29 5MR_2CVuGjQ3CYVkhFszxfSt6sodg1gDHYF
-        importPriKey("00fffd585ed08dddf0d034236aa1ea85abd2e4e69981617ee477adf6cdcf50f4d5", password);//打包地址 5MR_2Ch8CCnLwoLWFZ45pFEZSmo1C1pkPFA
+        //importPriKey("00fffd585ed08dddf0d034236aa1ea85abd2e4e69981617ee477adf6cdcf50f4d5", password);//打包地址 5MR_2Ch8CCnLwoLWFZ45pFEZSmo1C1pkPFA
     }
 
     /**
@@ -145,9 +145,8 @@ public class ContractSendTxTest extends Base {
         String decimals = "2";
         Map params = this.makePreCreateParams(sender, contractCode, remark, name, symbol, amount, decimals);
         Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, PRE_CREATE, params);
-        Map result = (HashMap) (((HashMap) cmdResp2.getResponseData()).get(PRE_CREATE));
-        Assert.assertTrue(null != result);
-        Log.info("pre_create-result:{}", result);
+        Assert.assertTrue(cmdResp2.isSuccess());
+        Log.info("pre_create-Response:{}", cmdResp2);
     }
     private Map makePreCreateParams(String sender, byte[] contractCode, String remark, Object... args) {
         Map<String, Object> params = new HashMap<>();
@@ -204,9 +203,8 @@ public class ContractSendTxTest extends Base {
         String decimals = "2";
         Map params = this.makeValidateCreateParams(sender, contractCode, name, symbol, amount, decimals);
         Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, VALIDATE_CREATE, params);
-        Map result = (HashMap) (((HashMap) cmdResp2.getResponseData()).get(VALIDATE_CREATE));
-        Assert.assertTrue(null != result);
-        Log.info("validate_create-result:{}", result);
+        Assert.assertTrue(cmdResp2.isSuccess());
+        Log.info("validate_create-Response:{}", cmdResp2);
     }
     private Map makeValidateCreateParams(String sender, byte[] contractCode, Object... args) {
         Map<String, Object> params = new HashMap<>();
@@ -224,9 +222,11 @@ public class ContractSendTxTest extends Base {
      */
     @Test
     public void callContract() throws Exception {
+        // txHash:002006a52ed92144d330abd498e5a301a08e2e09fc55b14756602efa0a7f1e907ea0
+        // contractAddress:5MR_3QAFMGYT29kt385feXHJp8Y8NkHM9cJ
         String sender = "5MR_2CjZkQsN7EnEPcaLgNrMrp6wpPGN6xo";
         BigInteger value = BigInteger.ZERO;
-        String contractAddress = "xxx";//TODO pierre 待定
+        String contractAddress = "5MR_3QAFMGYT29kt385feXHJp8Y8NkHM9cJ";//TODO pierre 待定
         String methodName = "transfer";
         String methodDesc = "";
         String remark = "call contract test - 空气币转账";
@@ -433,7 +433,7 @@ public class ContractSendTxTest extends Base {
         params.put("pageNumber", null);
         Response dpResp = ResponseMessageProcessor.requestAndResponse(ModuleE.TX.abbr, "tx_getTxs", params);
         Map record = (Map) dpResp.getResponseData();
-        Log.debug("Page<TransactionPO>:{}", JSONUtils.obj2PrettyJson(record));
+        Log.info("Page<TransactionPO>:{}", JSONUtils.obj2PrettyJson(record));
     }
 
     /**
@@ -450,7 +450,7 @@ public class ContractSendTxTest extends Base {
         params.put("txHash", hash);
         Response dpResp = ResponseMessageProcessor.requestAndResponse(ModuleE.TX.abbr, "tx_getTxClient", params);
         Map record = (Map) dpResp.getResponseData();
-        Log.debug("{}", JSONUtils.obj2PrettyJson(record));
+        Log.info("{}", JSONUtils.obj2PrettyJson(record));
     }
 
     /**
@@ -467,7 +467,7 @@ public class ContractSendTxTest extends Base {
         params.put("txHash", hash);
         Response dpResp = ResponseMessageProcessor.requestAndResponse(ModuleE.TX.abbr, "tx_getConfirmedTxClient", params);
         Map record = (Map) dpResp.getResponseData();
-        Log.debug("", JSONUtils.obj2PrettyJson(record));
+        Log.info("", JSONUtils.obj2PrettyJson(record));
     }
 
     private void importPriKey(String priKey, String pwd) {
@@ -483,7 +483,7 @@ public class ContractSendTxTest extends Base {
             Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_importAccountByPriKey", params);
             HashMap result = (HashMap) ((HashMap) cmdResp.getResponseData()).get("ac_importAccountByPriKey");
             String address = (String) result.get("address");
-            Log.debug("importPriKey success! address-{}", address);
+            Log.info("importPriKey success! address-{}", address);
         } catch (Exception e) {
             e.printStackTrace();
         }

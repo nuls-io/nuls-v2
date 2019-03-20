@@ -43,11 +43,16 @@ import io.nuls.contract.model.txdata.CreateContractData;
 import io.nuls.contract.model.txdata.DeleteContractData;
 import io.nuls.contract.rpc.call.BlockCall;
 import io.nuls.db.service.RocksDBService;
+import io.nuls.rpc.info.Constants;
+import io.nuls.rpc.model.message.MessageUtil;
+import io.nuls.rpc.model.message.Response;
 import io.nuls.tools.basic.Result;
 import io.nuls.tools.basic.VarInt;
+import io.nuls.tools.constant.ErrorCode;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.exception.NulsRuntimeException;
 import io.nuls.tools.log.Log;
+import io.nuls.tools.model.StringUtils;
 import io.nuls.tools.parse.JSONUtils;
 
 import java.lang.reflect.Array;
@@ -511,5 +516,16 @@ public class ContractUtil {
                 break;
         }
         return resultTx;
+    }
+
+    public static Response wrapperFailed(Result result) {
+        ErrorCode errorCode = result.getErrorCode();
+        String msg = result.getMsg();
+        if(StringUtils.isBlank(msg)) {
+            msg = errorCode.getMsg();
+        }
+        Response response = MessageUtil.newResponse("", Constants.BOOLEAN_FALSE, msg);
+        response.setResponseData(errorCode);
+        return response;
     }
 }
