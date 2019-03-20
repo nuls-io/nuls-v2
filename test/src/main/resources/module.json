@@ -1,5 +1,6 @@
 {
   "providerType": "RPC",
   "chainId": 12345,
-  "assetsId": 1
+  "assetsId": 1,
+  "testNodeType": "slave"
 }

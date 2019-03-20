@@ -14,6 +14,7 @@ import io.nuls.test.controller.RpcServerManager;
 import io.nuls.test.utils.RestFulUtils;
 import io.nuls.test.utils.Utils;
 import io.nuls.tools.core.annotation.Component;
+import io.nuls.tools.core.annotation.Value;
 import io.nuls.tools.core.config.ConfigurationLoader;
 import io.nuls.tools.core.ioc.SpringLiteContext;
 import lombok.extern.slf4j.Slf4j;
@@ -29,6 +30,9 @@ import java.util.List;
 @Component
 @Slf4j
 public class TestModule extends RpcModule {
+
+    @Value("testNodeType")
+    String nodeType;
 
     @Override
     public Module[] getDependencies() {
@@ -49,23 +53,25 @@ public class TestModule extends RpcModule {
     public RpcModuleState onDependenciesReady() {
         log.info("do running");
         RpcServerManager.getInstance().startServer("0.0.0.0",9999);
-        try {
-            List<TestCaseIntf> testList = SpringLiteContext.getBeanList(TestCaseIntf.class);
-            testList.forEach(tester->{
-                TestCase testCase = tester.getClass().getAnnotation(TestCase.class);
-                if(testCase == null){
-                    return ;
-                }
-                try {
-                    Utils.msg("开始测试"+tester.title());
-                    tester.check(null,0);
-                    Utils.msg(tester.title() + " 结束 ");
-                } catch (TestFailException e) {
-                    Utils.fail( tester.title() + " FAIL ");
-                }
-            });
-        } catch (Exception e) {
-            e.printStackTrace();
+        if(nodeType.equals("master")){
+            try {
+                List<TestCaseIntf> testList = SpringLiteContext.getBeanList(TestCaseIntf.class);
+                testList.forEach(tester->{
+                    TestCase testCase = tester.getClass().getAnnotation(TestCase.class);
+                    if(testCase == null){
+                        return ;
+                    }
+                    try {
+                        Utils.msg("开始测试"+tester.title());
+                        tester.check(null,0);
+                        Utils.msg(tester.title() + " 结束 ");
+                    } catch (TestFailException e) {
+                        Utils.fail( tester.title() + " FAIL ");
+                    }
+                });
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
         return RpcModuleState.Running;
     }
@@ -73,24 +79,6 @@ public class TestModule extends RpcModule {
     @Override
     public RpcModuleState onDependenciesLoss(Module dependenciesModule) {
         return RpcModuleState.Ready;
-    }
-
-    public static class TestBootstrap {
-
-        public static void main(String[] args) {
-            if (args == null || args.length == 0) {
-                args = new String[]{"ws://" + HostInfo.getLocalIP() + ":8887/ws","1"};
-            }else{
-                args = new String[]{args[0],"1"};
-            }
-            ConfigurationLoader configurationLoader = new ConfigurationLoader();
-            configurationLoader.load();
-            Provider.ProviderType providerType = Provider.ProviderType.valueOf(configurationLoader.getValue("providerType"));
-            int defaultChainId = Integer.parseInt(configurationLoader.getValue("chainId"));
-            ServiceManager.init(defaultChainId,providerType);
-            NulsRpcModuleBootstrap.run("io.nuls.test",args);
-        }
-
     }
 
     @Override
