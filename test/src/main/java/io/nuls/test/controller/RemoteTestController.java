@@ -37,11 +37,15 @@ public class RemoteTestController {
     public <T> RemoteResult doTest(RemoteCaseReq req) {
         Class<? extends TestCaseIntf> caseClass = req.getCaseClass();
         Type type = caseClass.getGenericSuperclass();
+        if(!(type instanceof ParameterizedType)){
+            type = caseClass.getGenericInterfaces()[0];
+        }
         Type[] params = ((ParameterizedType) type).getActualTypeArguments();
         Class<T> reponseClass = (Class) params[1];
         TestCaseIntf tc = SpringLiteContext.getBean(caseClass);
         try {
-            return new RemoteResult(true, tc.check(JSONUtils.json2pojo(req.getParam(), reponseClass), 0));
+            Object param = req.getParam() == null ? null : JSONUtils.json2pojo(req.getParam(), reponseClass);
+            return new RemoteResult(true, tc.check(param, 0));
         } catch (TestFailException e) {
             return new RemoteResult(false,null);
         } catch (IOException e) {

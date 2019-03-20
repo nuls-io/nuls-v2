@@ -66,7 +66,7 @@ public class TestModule extends RpcModule {
                         tester.check(null,0);
                         Utils.msg(tester.title() + " 结束 ");
                     } catch (TestFailException e) {
-                        Utils.fail( tester.title() + " FAIL ");
+                        Utils.fail( tester.title() + " FAIL :" + e.getMessage());
                     }
                 });
             } catch (Exception e) {
