@@ -31,7 +31,7 @@ import io.nuls.ledger.model.po.FreezeHeightState;
 import io.nuls.ledger.model.po.FreezeLockTimeState;
 import io.nuls.ledger.service.FreezeStateService;
 import io.nuls.ledger.storage.Repository;
-import io.nuls.ledger.utils.TimeUtils;
+import io.nuls.ledger.utils.TimeUtil;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Service;
 
@@ -48,7 +48,7 @@ public class FreezeStateServiceImpl implements FreezeStateService {
     Repository repository;
 
     private BigInteger unFreezeLockTimeState(List<FreezeLockTimeState> timeList, AccountState accountState) {
-        long nowTime = TimeUtils.getCurrentTime();
+        long nowTime = TimeUtil.getCurrentTime();
         //可移除的时间锁列表
         List<FreezeLockTimeState> timeRemove = new ArrayList<>();
         timeList.sort((x, y) -> Long.compare(x.getLockTime(), y.getLockTime()));

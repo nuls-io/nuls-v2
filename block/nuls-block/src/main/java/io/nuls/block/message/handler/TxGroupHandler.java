@@ -18,46 +18,53 @@
  * SOFTWARE.
  */
 
-package io.nuls.block.rpc;
+package io.nuls.block.message.handler;
 
 import io.nuls.base.basic.NulsByteBuffer;
-import io.nuls.base.data.NulsDigestData;
+import io.nuls.base.data.*;
 import io.nuls.block.cache.SmallBlockCacher;
 import io.nuls.block.constant.BlockErrorCode;
 import io.nuls.block.constant.BlockForwardEnum;
 import io.nuls.block.manager.ContextManager;
-import io.nuls.block.message.HashListMessage;
-import io.nuls.block.message.HashMessage;
+import io.nuls.block.message.TxGroupMessage;
 import io.nuls.block.model.CachedSmallBlock;
-import io.nuls.block.utils.module.NetworkUtil;
+import io.nuls.block.service.BlockService;
+import io.nuls.block.utils.BlockUtil;
 import io.nuls.rpc.cmd.BaseCmd;
 import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.model.CmdAnnotation;
 import io.nuls.rpc.model.message.Response;
+import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.log.logback.NulsLogger;
 
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
-import static io.nuls.block.constant.CommandConstant.*;
+import static io.nuls.block.constant.CommandConstant.TXGROUP_MESSAGE;
+
 
 /**
- * 处理收到的{@link HashMessage},用于区块的广播与转发
+ * 处理收到的{@link TxGroupMessage},用于区块的广播与转发
  *
  * @author captain
  * @version 1.0
  * @date 18-11-14 下午4:23
  */
 @Component
-public class ForwardSmallBlockHandler extends BaseCmd {
+public class TxGroupHandler extends BaseCmd {
 
-    @CmdAnnotation(cmd = FORWARD_SMALL_BLOCK_MESSAGE, version = 1.0, scope = Constants.PUBLIC, description = "")
+    @Autowired
+    private BlockService blockService;
+
+    @CmdAnnotation(cmd = TXGROUP_MESSAGE, version = 1.0, scope = Constants.PUBLIC, description = "")
     public Response process(Map map) {
         int chainId = Integer.parseInt(map.get("chainId").toString());
         String nodeId = map.get("nodeId").toString();
-        HashMessage message = new HashMessage();
+        TxGroupMessage message = new TxGroupMessage();
         NulsLogger messageLog = ContextManager.getContext(chainId).getMessageLog();
         byte[] decode = HexUtil.decode(map.get("messageBody").toString());
         try {
@@ -67,32 +74,50 @@ public class ForwardSmallBlockHandler extends BaseCmd {
             messageLog.error(e);
             return failed(BlockErrorCode.PARAMETER_ERROR);
         }
-        NulsDigestData blockHash = message.getRequestHash();
+        List<Transaction> transactions = message.getTransactions();
+        if (null == transactions || transactions.size() == 0) {
+            messageLog.warn("recieved a null txGroup form " + nodeId);
+            return failed(BlockErrorCode.PARAMETER_ERROR);
+        }
+        messageLog.debug("recieve TxGroupMessage from network node-" + nodeId + ", chainId:" + chainId + ", txcount:" + transactions.size());
+        NulsDigestData blockHash = message.getBlockHash();
         BlockForwardEnum status = SmallBlockCacher.getStatus(chainId, blockHash);
-        messageLog.debug("recieve HashMessage from node-" + nodeId + ", chainId:" + chainId + ", hash:" + blockHash);
         //1.已收到完整区块,丢弃
         if (BlockForwardEnum.COMPLETE.equals(status)) {
-            CachedSmallBlock block = SmallBlockCacher.getSmallBlock(chainId, blockHash);
-            NetworkUtil.setHashAndHeight(chainId, blockHash, block.getSmallBlock().getHeader().getHeight(), nodeId);
             return success();
         }
-        //2.已收到部分区块,还缺失交易信息,发送HashListMessage到源节点
+        //2.已收到部分区块,还缺失交易信息,收到的应该就是缺失的交易信息
         if (BlockForwardEnum.INCOMPLETE.equals(status)) {
-            CachedSmallBlock block = SmallBlockCacher.getSmallBlock(chainId, blockHash);
-            HashListMessage request = new HashListMessage();
-            request.setBlockHash(blockHash);
-            request.setTxHashList(block.getMissingTransactions());
-            NetworkUtil.sendToNode(chainId, request, nodeId, GET_TXGROUP_MESSAGE);
-            NetworkUtil.setHashAndHeight(chainId, blockHash, block.getSmallBlock().getHeader().getHeight(), nodeId);
+            SmallBlock smallBlock = SmallBlockCacher.getSmallBlock(chainId, blockHash).getSmallBlock();
+            if (null == smallBlock) {
+                return failed(BlockErrorCode.PARAMETER_ERROR);
+            }
+
+            BlockHeader header = smallBlock.getHeader();
+            NulsDigestData headerHash = header.getHash();
+            Map<NulsDigestData, Transaction> txMap = new HashMap<>((int) header.getTxCount());
+            for (Transaction tx : smallBlock.getSubTxList()) {
+                txMap.put(tx.getHash(), tx);
+            }
+            for (Transaction tx : transactions) {
+                txMap.put(tx.getHash(), tx);
+            }
+
+            Block block = BlockUtil.assemblyBlock(header, txMap, smallBlock.getTxHashList());
+            if (blockService.saveBlock(chainId, block, 1, true)) {
+                SmallBlock newSmallBlock = BlockUtil.getSmallBlock(chainId, block);
+                CachedSmallBlock cachedSmallBlock = new CachedSmallBlock(null, newSmallBlock);
+                SmallBlockCacher.cacheSmallBlock(chainId, cachedSmallBlock);
+                SmallBlockCacher.setStatus(chainId, blockHash, BlockForwardEnum.COMPLETE);
+                blockService.forwardBlock(chainId, headerHash, nodeId);
+            }
             return success();
         }
         //3.未收到区块
         if (BlockForwardEnum.EMPTY.equals(status)) {
-            HashMessage request = new HashMessage();
-            request.setRequestHash(blockHash);
-            NetworkUtil.sendToNode(chainId, request, nodeId, GET_SMALL_BLOCK_MESSAGE);
-            return success();
+            messageLog.error("It is theoretically impossible to enter this branch");
         }
         return success();
     }
+
 }

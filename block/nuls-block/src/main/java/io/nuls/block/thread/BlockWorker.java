@@ -30,7 +30,7 @@ import io.nuls.block.message.CompleteMessage;
 import io.nuls.block.message.HeightRangeMessage;
 import io.nuls.block.model.ChainContext;
 import io.nuls.block.model.Node;
-import io.nuls.block.utils.module.NetworkUtil;
+import io.nuls.block.rpc.call.NetworkUtil;
 import io.nuls.tools.log.logback.NulsLogger;
 import lombok.AllArgsConstructor;
 

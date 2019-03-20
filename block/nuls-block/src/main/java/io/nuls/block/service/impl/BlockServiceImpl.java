@@ -40,10 +40,10 @@ import io.nuls.block.storage.BlockStorageService;
 import io.nuls.block.storage.ChainStorageService;
 import io.nuls.block.utils.BlockUtil;
 import io.nuls.block.utils.ChainGenerator;
-import io.nuls.block.utils.module.ConsensusUtil;
-import io.nuls.block.utils.module.NetworkUtil;
-import io.nuls.block.utils.module.ProtocolUtil;
-import io.nuls.block.utils.module.TransactionUtil;
+import io.nuls.block.rpc.call.ConsensusUtil;
+import io.nuls.block.rpc.call.NetworkUtil;
+import io.nuls.block.rpc.call.ProtocolUtil;
+import io.nuls.block.rpc.call.TransactionUtil;
 import io.nuls.db.service.RocksDBService;
 import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.model.message.MessageUtil;
@@ -282,10 +282,10 @@ public class BlockServiceImpl implements BlockService {
                 hashList.addLast(hash);
             }
             commonLog.info("save block success, height-" + height + ", txCount-" + blockHeaderPo.getTxCount() + ", hash-" + hash);
-            Response response = MessageUtil.newResponse("", Constants.BOOLEAN_TRUE, "Congratulations! Processing completed！");
-            Map<String, Long> responseData = new HashMap<>(1);
+            Response response = MessageUtil.newResponse("", Constants.BOOLEAN_TRUE, "success");
+            Map<String, Long> responseData = new HashMap<>(2);
             responseData.put("value", height);
-            Map<String, Object> sss = new HashMap<>(1);
+            Map<String, Object> sss = new HashMap<>(2);
             sss.put(LATEST_HEIGHT, responseData);
             response.setResponseData(sss);
             ConnectManager.eventTrigger(LATEST_HEIGHT, response);

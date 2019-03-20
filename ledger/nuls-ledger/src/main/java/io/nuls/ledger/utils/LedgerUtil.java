@@ -106,13 +106,13 @@ public class LedgerUtil {
     }
 
     public static boolean isExpiredNonce(UnconfirmedNonce unconfirmedNonce){
-        if(TimeUtils.getCurrentTime() - unconfirmedNonce.getTime() > LedgerConstant.UNCONFIRM_NONCE_EXPIRED_TIME){
+        if(TimeUtil.getCurrentTime() - unconfirmedNonce.getTime() > LedgerConstant.UNCONFIRM_NONCE_EXPIRED_TIME){
             return true;
         }
         return false;
     }
     public static boolean isExpiredAmount(UnconfirmedAmount unconfirmedAmount){
-        if(TimeUtils.getCurrentTime() - unconfirmedAmount.getTime() > LedgerConstant.UNCONFIRM_NONCE_EXPIRED_TIME){
+        if(TimeUtil.getCurrentTime() - unconfirmedAmount.getTime() > LedgerConstant.UNCONFIRM_NONCE_EXPIRED_TIME){
             return true;
         }
         return false;

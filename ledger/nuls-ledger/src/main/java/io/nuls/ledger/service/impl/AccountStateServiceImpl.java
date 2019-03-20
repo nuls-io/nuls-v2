@@ -181,7 +181,7 @@ public class AccountStateServiceImpl implements AccountStateService {
                     }
                     //解冻时间锁
                     freezeStateService.recalculateFreeze(accountState);
-                    accountState.setLatestUnFreezeTime(TimeUtils.getCurrentTime());
+                    accountState.setLatestUnFreezeTime(TimeUtil.getCurrentTime());
                     try {
                         repository.updateAccountState(key, accountState);
                     } catch (Exception e) {
@@ -196,7 +196,7 @@ public class AccountStateServiceImpl implements AccountStateService {
 
     private boolean timeAllow(long latestUnfreezeTime) {
         //是否改为网络时间？
-        long nowTime = TimeUtils.getCurrentTime();
+        long nowTime = TimeUtil.getCurrentTime();
         if (nowTime - latestUnfreezeTime > LedgerConstant.TIME_RECALCULATE_FREEZE) {
             //解锁时间超时了,进行重新计算
             return true;

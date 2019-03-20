@@ -25,8 +25,10 @@
 package io.nuls.contract.tx;
 
 
+import io.nuls.contract.basetest.ContractTest;
 import io.nuls.contract.model.bo.Chain;
 import io.nuls.contract.model.bo.config.ConfigBean;
+import io.nuls.contract.tx.base.Base;
 import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.info.HostInfo;
 import io.nuls.rpc.info.NoUse;
@@ -35,25 +37,33 @@ import io.nuls.rpc.model.message.Response;
 import io.nuls.rpc.netty.processor.ResponseMessageProcessor;
 import io.nuls.tools.log.Log;
 import io.nuls.tools.parse.JSONUtils;
+import org.apache.commons.io.IOUtils;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.spongycastle.util.encoders.Hex;
 
+import java.io.FileInputStream;
+import java.io.InputStream;
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
+
+import static io.nuls.contract.constant.ContractCmdConstant.*;
 
 /**
  * @author: PierreLuo
  * @date: 2019-03-15
  */
-public class ContractSendTxTest {
+public class ContractSendTxTest extends Base {
 
     static String address20 = "5MR_2CWWTDXc32s9Wd1guNQzPztFgkyVEsz";
     static String address21 = "5MR_2CbdqKcZktcxntG14VuQDy8YHhc6ZqW";
     static String address22 = "5MR_2Cj9tfgQpdeF7nDy5wyaGG6MZ35H3rA";
     static String address23 = "5MR_2CWKhFuoGVraaxL5FYY3RsQLjLDN7jw";
     static String address24 = "5MR_2CgwCFRoJ8KX37xNqjjR7ttYuJsg8rk";
+
     static String address25 = "5MR_2CjZkQsN7EnEPcaLgNrMrp6wpPGN6xo";
     static String address26 = "5MR_2CeG11nRqx7nGNeh8hTXADibqfSYeNu";
     static String address27 = "5MR_2CVCFWH7o8AmrTBPLkdg2dYH1UCUJiM";
@@ -62,7 +72,6 @@ public class ContractSendTxTest {
 
     private Chain chain;
     static int chainId = 12345;
-    static int assetChainId = 12345;
     static int assetId = 1;
     static String version = "1.0";
 
@@ -83,70 +92,330 @@ public class ContractSendTxTest {
         importPriKey("00c98ecfd3777745270cacb9afba17ef0284769a83ff2adb4106b8a0baaec9452c", password);//27 5MR_2CVCFWH7o8AmrTBPLkdg2dYH1UCUJiM
         importPriKey("23848d45b4b34aca8ff24b00949a25a2c9175faf283675128e189eee8b085942", password);//28 5MR_2CfUsasd33vQV3HqGw6M3JwVsuVxJ7r
         importPriKey("009560d5ed6587822b7aee6f318f50b312c281e4f330b6990396881c6d3f870bc1", password);//29 5MR_2CVuGjQ3CYVkhFszxfSt6sodg1gDHYF
-
-        importPriKey("00fffd585ed08dddf0d034236aa1ea85abd2e4e69981617ee477adf6cdcf50f4d5", password);//打包地址 5MR_2Ch8CCnLwoLWFZ45pFEZSmo1C1pkPFA
+        //importPriKey("00fffd585ed08dddf0d034236aa1ea85abd2e4e69981617ee477adf6cdcf50f4d5", password);//打包地址 5MR_2Ch8CCnLwoLWFZ45pFEZSmo1C1pkPFA
     }
 
+    /**
+     * 创建合约
+     */
     @Test
-    public void createAgentTx() throws Exception {
-        //组装创建节点交易
-        Map agentTxMap = this.createAgentTx(address27, address26);
-        //调用接口
-        Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.CS.abbr, "cs_createAgent", agentTxMap);
-        Map result = (HashMap) (((HashMap) cmdResp2.getResponseData()).get("cs_createAgent"));
+    public void createContract() throws Exception {
+        InputStream in = new FileInputStream(ContractTest.class.getResource("/nrc20").getFile());
+        byte[] contractCode = IOUtils.toByteArray(in);
+        String sender = "5MR_2CjZkQsN7EnEPcaLgNrMrp6wpPGN6xo";
+        String remark = "create contract test - 空气币";
+        String name = "KQB";
+        String symbol = "KongQiBi";
+        String amount = BigDecimal.TEN.pow(10).toPlainString();
+        String decimals = "2";
+        Map params = this.makeCreateParams(sender, contractCode, remark, name, symbol, amount, decimals);
+        Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, CREATE, params);
+        Map result = (HashMap) (((HashMap) cmdResp2.getResponseData()).get(CREATE));
         Assert.assertTrue(null != result);
         String hash = (String) result.get("txHash");
-        Log.debug("createAgent-txHash:{}", hash);
+        String contractAddress = (String) result.get("contractAddress");
+        Log.info("createContract-txHash:{}, contractAddress:{}", hash, contractAddress);
     }
-
-    /**
-     * 委托节点
-     */
-    @Test
-    public void depositToAgent() throws Exception {
-        //组装委托节点交易
-        String agentHash = "00205989de73d03c4a0560d4caa436d387738bbd2baccf4ce3440d6cbfae1149e63d";
-        Map<String, Object> dpParams = new HashMap<>();
-        dpParams.put("chainId", chainId);
-        dpParams.put("address", address27);
-        dpParams.put("password", password);
-        dpParams.put("agentHash", agentHash);
-        dpParams.put("deposit", 200000 * 100000000L);
-        Response dpResp = ResponseMessageProcessor.requestAndResponse(ModuleE.CS.abbr, "cs_depositToAgent", dpParams);
-        HashMap dpResult = (HashMap) ((HashMap) dpResp.getResponseData()).get("cs_depositToAgent");
-        String txHash = (String) dpResult.get("txHash");
-        Log.debug("deposit-txHash:{}", txHash);
-    }
-
-    /**
-     * 取消委托
-     *
-     * @throws Exception
-     */
-    @Test
-    public void withdraw() throws Exception {
+    private Map makeCreateParams(String sender, byte[] contractCode, String remark, Object... args) {
         Map<String, Object> params = new HashMap<>();
         params.put("chainId", chainId);
-        params.put("address", address27);
+        params.put("sender", sender);
         params.put("password", password);
-        params.put("txHash", "0020b8a42eb4c70196189e607e9434fe09b595d5753711f21819113f40d64a1c82c1");
-        Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.CS.abbr, "cs_withdraw", params);
-        HashMap dpResult = (HashMap) ((HashMap) cmdResp.getResponseData()).get("cs_withdraw");
-        String hash = (String) dpResult.get("txHash");
-        Log.debug("withdraw-txHash:{}", hash);
+        params.put("gasLimit", 200000L);
+        params.put("price", 25);
+        params.put("contractCode", Hex.toHexString(contractCode));
+        params.put("args", args);
+        params.put("remark", remark);
+        return params;
     }
 
+
+    /**
+     * 预创建合约
+     */
     @Test
-    public void stopAgentTx() throws Exception {
-        Map<String, Object> txMap = new HashMap();
-        txMap.put("chainId", chainId);
-        txMap.put("address", address27);
-        txMap.put("password", password);
-        //调用接口
-        Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.CS.abbr, "cs_stopAgent", txMap);
-        Map result = (HashMap) (((HashMap) cmdResp2.getResponseData()).get("cs_stopAgent"));
-        String txHash = (String) result.get("txHash");
-        Log.debug("stopAgent-txHash:{}", txHash);
+    public void preCreateContract() throws Exception {
+        InputStream in = new FileInputStream(ContractTest.class.getResource("/nrc20").getFile());
+        byte[] contractCode = IOUtils.toByteArray(in);
+        String sender = "5MR_2CjZkQsN7EnEPcaLgNrMrp6wpPGN6xo";
+        String remark = "create contract test - 空气币";
+        String name = "KQB";
+        String symbol = "KongQiBi";
+        String amount = BigDecimal.TEN.pow(10).toPlainString();
+        String decimals = "2";
+        Map params = this.makePreCreateParams(sender, contractCode, remark, name, symbol, amount, decimals);
+        Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, PRE_CREATE, params);
+        Assert.assertTrue(cmdResp2.isSuccess());
+        Log.info("pre_create-Response:{}", cmdResp2);
+    }
+    private Map makePreCreateParams(String sender, byte[] contractCode, String remark, Object... args) {
+        Map<String, Object> params = new HashMap<>();
+        params.put("chainId", chainId);
+        params.put("sender", sender);
+        params.put("password", password);
+        params.put("gasLimit", 200000L);
+        params.put("price", 25);
+        params.put("contractCode", Hex.toHexString(contractCode));
+        params.put("args", args);
+        params.put("remark", remark);
+        return params;
+    }
+
+
+    /**
+     * 估算创建合约的gas
+     */
+    @Test
+    public void imputedCreateGas() throws Exception {
+        InputStream in = new FileInputStream(ContractTest.class.getResource("/nrc20").getFile());
+        byte[] contractCode = IOUtils.toByteArray(in);
+        String sender = "5MR_2CjZkQsN7EnEPcaLgNrMrp6wpPGN6xo";
+        String name = "KQB";
+        String symbol = "KongQiBi";
+        String amount = BigDecimal.TEN.pow(10).toPlainString();
+        String decimals = "2";
+        Map params = this.makeImputedCreateGasParams(sender, contractCode, name, symbol, amount, decimals);
+        Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, IMPUTED_CREATE_GAS, params);
+        Map result = (HashMap) (((HashMap) cmdResp2.getResponseData()).get(IMPUTED_CREATE_GAS));
+        Assert.assertTrue(null != result);
+        Log.info("imputed_create_gas-result:{}", result);
+    }
+    private Map makeImputedCreateGasParams(String sender, byte[] contractCode, Object... args) {
+        Map<String, Object> params = new HashMap<>();
+        params.put("chainId", chainId);
+        params.put("sender", sender);
+        params.put("contractCode", Hex.toHexString(contractCode));
+        params.put("args", args);
+        return params;
+    }
+
+    /**
+     * 验证创建合约
+     */
+    @Test
+    public void validateCreate() throws Exception {
+        InputStream in = new FileInputStream(ContractTest.class.getResource("/nrc20").getFile());
+        byte[] contractCode = IOUtils.toByteArray(in);
+        String sender = "5MR_2CjZkQsN7EnEPcaLgNrMrp6wpPGN6xo";
+        String name = "KQB";
+        String symbol = "KongQiBi";
+        String amount = BigDecimal.TEN.pow(10).toPlainString();
+        String decimals = "2";
+        Map params = this.makeValidateCreateParams(sender, contractCode, name, symbol, amount, decimals);
+        Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, VALIDATE_CREATE, params);
+        Assert.assertTrue(cmdResp2.isSuccess());
+        Log.info("validate_create-Response:{}", cmdResp2);
+    }
+    private Map makeValidateCreateParams(String sender, byte[] contractCode, Object... args) {
+        Map<String, Object> params = new HashMap<>();
+        params.put("chainId", chainId);
+        params.put("sender", sender);
+        params.put("gasLimit", 200000L);
+        params.put("price", 25);
+        params.put("contractCode", Hex.toHexString(contractCode));
+        params.put("args", args);
+        return params;
+    }
+
+    /**
+     * 调用合约
+     */
+    @Test
+    public void callContract() throws Exception {
+        // txHash:002006a52ed92144d330abd498e5a301a08e2e09fc55b14756602efa0a7f1e907ea0
+        // contractAddress:5MR_3QAFMGYT29kt385feXHJp8Y8NkHM9cJ
+        String sender = "5MR_2CjZkQsN7EnEPcaLgNrMrp6wpPGN6xo";
+        BigInteger value = BigInteger.ZERO;
+        String contractAddress = "5MR_3QAFMGYT29kt385feXHJp8Y8NkHM9cJ";//TODO pierre 待定
+        String methodName = "transfer";
+        String methodDesc = "";
+        String remark = "call contract test - 空气币转账";
+        String toAddress = "5MR_2CeG11nRqx7nGNeh8hTXADibqfSYeNu";
+        String token = BigInteger.TEN.pow(8).toString();
+        Map params = this.makeCallParams(sender, value, contractAddress, methodName, methodDesc, remark, toAddress, token);
+        Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, CALL, params);
+        Map result = (HashMap) (((HashMap) cmdResp2.getResponseData()).get(CALL));
+        Assert.assertTrue(null != result);
+        Log.info("call-result:{}", result);
+    }
+    private Map makeCallParams(String sender, BigInteger value, String contractAddress, String methodName, String methodDesc, String remark, Object... args) {
+        Map<String, Object> params = new HashMap<>();
+        params.put("chainId", chainId);
+        params.put("sender", sender);
+        params.put("value", value);
+        params.put("gasLimit", 200000L);
+        params.put("price", 25);
+        params.put("contractAddress", contractAddress);
+        params.put("methodName", methodName);
+        params.put("methodDesc", methodDesc);
+        params.put("args", args);
+        params.put("password", password);
+        params.put("remark", remark);
+        return params;
+    }
+
+    /**
+     * 验证调用合约
+     */
+    @Test
+    public void validateCall() throws Exception {
+        String sender = "5MR_2CjZkQsN7EnEPcaLgNrMrp6wpPGN6xo";
+        BigInteger value = BigInteger.ZERO;
+        String contractAddress = "xxx";//TODO pierre 待定
+        String methodName = "transfer";
+        String methodDesc = "";
+        String toAddress = "5MR_2CeG11nRqx7nGNeh8hTXADibqfSYeNu";
+        String token = BigInteger.TEN.pow(8).toString();
+        Map params = this.makeValidateCallParams(sender, value, contractAddress, methodName, methodDesc, toAddress, token);
+        Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, CALL, params);
+        Map result = (HashMap) (((HashMap) cmdResp2.getResponseData()).get(CALL));
+        Assert.assertTrue(null != result);
+        Log.info("validateCall-result:{}", result);
+    }
+    private Map makeValidateCallParams(String sender, BigInteger value, String contractAddress, String methodName, String methodDesc, Object... args) {
+        Map<String, Object> params = new HashMap<>();
+        params.put("chainId", chainId);
+        params.put("sender", sender);
+        params.put("value", value);
+        params.put("gasLimit", 200000L);
+        params.put("price", 25);
+        params.put("contractAddress", contractAddress);
+        params.put("methodName", methodName);
+        params.put("methodDesc", methodDesc);
+        params.put("args", args);
+        return params;
+    }
+
+    /**
+     * 估算调用合约的gas
+     */
+    @Test
+    public void imputedCallGas() throws Exception {
+        String sender = "5MR_2CjZkQsN7EnEPcaLgNrMrp6wpPGN6xo";
+        BigInteger value = BigInteger.ZERO;
+        String contractAddress = "xxx";//TODO pierre 待定
+        String methodName = "transfer";
+        String methodDesc = "";
+        String toAddress = "5MR_2CeG11nRqx7nGNeh8hTXADibqfSYeNu";
+        String token = BigInteger.TEN.pow(8).toString();
+        Map params = this.makeImputedCallGasParams(sender, value, contractAddress, methodName, methodDesc, toAddress, token);
+        Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, IMPUTED_CALL_GAS, params);
+        Map result = (HashMap) (((HashMap) cmdResp2.getResponseData()).get(IMPUTED_CALL_GAS));
+        Assert.assertTrue(null != result);
+        Log.info("imputed_call_gas-result:{}", result);
+    }
+    private Map makeImputedCallGasParams(String sender, BigInteger value, String contractAddress, String methodName, String methodDesc, Object... args) {
+        Map<String, Object> params = new HashMap<>();
+        params.put("chainId", chainId);
+        params.put("sender", sender);
+        params.put("value", value);
+        params.put("contractAddress", contractAddress);
+        params.put("methodName", methodName);
+        params.put("methodDesc", methodDesc);
+        params.put("args", args);
+        return params;
+    }
+
+    /**
+     * 调用合约视图方法
+     */
+    @Test
+    public void invokeView() throws Exception {
+        String contractAddress = "xxx";//TODO pierre 待定
+        String methodName = "balanceOf";
+        String methodDesc = "";
+        String toAddress = "5MR_2CeG11nRqx7nGNeh8hTXADibqfSYeNu";
+        Map params = this.makeInvokeViewParams(contractAddress, methodName, methodDesc, toAddress);
+        Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, INVOKE_VIEW, params);
+        Map result = (HashMap) (((HashMap) cmdResp2.getResponseData()).get(INVOKE_VIEW));
+        Assert.assertTrue(null != result);
+        Log.info("invoke_view-result:{}", result);
+    }
+    private Map makeInvokeViewParams(String contractAddress, String methodName, String methodDesc, Object... args) {
+        Map<String, Object> params = new HashMap<>();
+        params.put("chainId", chainId);
+        params.put("contractAddress", contractAddress);
+        params.put("methodName", methodName);
+        params.put("methodDesc", methodDesc);
+        params.put("args", args);
+        return params;
+    }
+
+    /**
+     * 获取合约构造函数
+     */
+    @Test
+    public void constructor() throws Exception {
+        InputStream in = new FileInputStream(ContractTest.class.getResource("/nrc20").getFile());
+        byte[] contractCode = IOUtils.toByteArray(in);
+        Map params = this.makeConstructorParams(contractCode);
+        Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, CONSTRUCTOR, params);
+        Map result = (HashMap) (((HashMap) cmdResp2.getResponseData()).get(CONSTRUCTOR));
+        Assert.assertTrue(null != result);
+        Log.info("constructor-result:{}", result);
+    }
+    private Map makeConstructorParams(byte[] contractCode) {
+        Map<String, Object> params = new HashMap<>();
+        params.put("chainId", chainId);
+        params.put("contractCode", Hex.toHexString(contractCode));
+        return params;
+    }
+
+    /**
+     * 获取合约基本信息
+     */
+    @Test
+    public void contractInfo() throws Exception {
+        String contractAddress = "xxx";//TODO pierre 待定
+        Map params = this.makeContractInfoParams(contractAddress);
+        Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, CONTRACT_INFO, params);
+        Map result = (HashMap) (((HashMap) cmdResp2.getResponseData()).get(CONTRACT_INFO));
+        Assert.assertTrue(null != result);
+        Log.info("contract_info-result:{}", result);
+    }
+    private Map makeContractInfoParams(String contractAddress) {
+        Map<String, Object> params = new HashMap<>();
+        params.put("chainId", chainId);
+        params.put("contractAddress", contractAddress);
+        return params;
+    }
+
+    /**
+     * 获取合约执行结果
+     */
+    @Test
+    public void contractResult() throws Exception {
+        String hash = "xxx";//TODO pierre 待定
+        Map params = this.makeContractResultParams(hash);
+        Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, CONTRACT_RESULT, params);
+        Map result = (HashMap) (((HashMap) cmdResp2.getResponseData()).get(CONTRACT_RESULT));
+        Assert.assertTrue(null != result);
+        Log.info("contractResult-result:{}", result);
+    }
+    private Map makeContractResultParams(String hash) {
+        Map<String, Object> params = new HashMap<>();
+        params.put("chainId", chainId);
+        params.put("hash", hash);
+        return params;
+    }
+
+    /**
+     * 获取合约交易详情
+     */
+    @Test
+    public void contractTx() throws Exception {
+        String hash = "xxx";//TODO pierre 待定
+        Map params = this.makeContractTxParams(hash);
+        Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, CONTRACT_TX, params);
+        Map result = (HashMap) (((HashMap) cmdResp2.getResponseData()).get(CONTRACT_TX));
+        Assert.assertTrue(null != result);
+        Log.info("contractTx-result:{}", result);
+    }
+    private Map makeContractTxParams(String hash) {
+        Map<String, Object> params = new HashMap<>();
+        params.put("chainId", chainId);
+        params.put("hash", hash);
+        return params;
     }
 
     /**
@@ -156,7 +425,7 @@ public class ContractSendTxTest {
     public void getTxRecord() throws Exception {
         Map<String, Object> params = new HashMap<>();
         params.put("chainId", chainId);
-        params.put("address", "5MR_2CVuGjQ3CYVkhFszxfSt6sodg1gDHYF");
+        params.put("address", "5MR_2CjZkQsN7EnEPcaLgNrMrp6wpPGN6xo");
         params.put("assetChainId", null);
         params.put("assetId", null);
         params.put("type", null);
@@ -164,43 +433,44 @@ public class ContractSendTxTest {
         params.put("pageNumber", null);
         Response dpResp = ResponseMessageProcessor.requestAndResponse(ModuleE.TX.abbr, "tx_getTxs", params);
         Map record = (Map) dpResp.getResponseData();
-        Log.debug("Page<TransactionPO>:{}", JSONUtils.obj2PrettyJson(record));
+        Log.info("Page<TransactionPO>:{}", JSONUtils.obj2PrettyJson(record));
     }
 
     /**
-     * 查交易
+     * 查交易模块的交易
      */
+    @Test
+    public void getTx() throws Exception {
+        String hash = "xxx";//TODO pierre 待定
+        this.getTxClient(hash);
+    }
     private void getTxClient(String hash) throws Exception {
         Map<String, Object> params = new HashMap<>();
         params.put("chainId", chainId);
         params.put("txHash", hash);
         Response dpResp = ResponseMessageProcessor.requestAndResponse(ModuleE.TX.abbr, "tx_getTxClient", params);
         Map record = (Map) dpResp.getResponseData();
-        Log.debug("{}", JSONUtils.obj2PrettyJson(record));
+        Log.info("{}", JSONUtils.obj2PrettyJson(record));
     }
 
     /**
-     * 查交易
+     * 查交易模块的确认交易
      */
+    @Test
+    public void getConfirmTx() throws Exception {
+        String hash = "xxx";//TODO pierre 待定
+        this.getTxCfmClient(hash);
+    }
     private void getTxCfmClient(String hash) throws Exception {
         Map<String, Object> params = new HashMap<>();
         params.put("chainId", chainId);
         params.put("txHash", hash);
         Response dpResp = ResponseMessageProcessor.requestAndResponse(ModuleE.TX.abbr, "tx_getConfirmedTxClient", params);
         Map record = (Map) dpResp.getResponseData();
-        Log.debug("", JSONUtils.obj2PrettyJson(record));
+        Log.info("", JSONUtils.obj2PrettyJson(record));
     }
 
-    /**
-     * 删除账户
-     */
-    @Test
-    public void removeAccountTest() throws Exception {
-        removeAccount("5MR_2Cb86fpFbuY4Lici8MJStNxDFYH6kRB", password);
-        removeAccount(address26, password);
-    }
-
-    public void importPriKey(String priKey, String pwd) {
+    private void importPriKey(String priKey, String pwd) {
         try {
             //账户已存在则覆盖 If the account exists, it covers.
             Map<String, Object> params = new HashMap<>();
@@ -213,53 +483,10 @@ public class ContractSendTxTest {
             Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_importAccountByPriKey", params);
             HashMap result = (HashMap) ((HashMap) cmdResp.getResponseData()).get("ac_importAccountByPriKey");
             String address = (String) result.get("address");
-            Log.debug("importPriKey success! address-{}", address);
+            Log.info("importPriKey success! address-{}", address);
         } catch (Exception e) {
             e.printStackTrace();
         }
-    }
-
-    public void removeAccount(String address, String password) throws Exception {
-        Map<String, Object> params = new HashMap<>();
-        params.put(Constants.VERSION_KEY_STR, "1.0");
-        params.put("chainId", chainId);
-        params.put("address", address);
-        params.put("password", password);
-        Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_removeAccount", params);
-        Log.debug("{}", JSONUtils.obj2json(cmdResp.getResponseData()));
-    }
-
-    public void packableTxs() throws Exception {
-        Map<String, Object> params = new HashMap<>();
-        params.put("chainId", chainId);
-        long endTime = System.currentTimeMillis() + 10000L;
-        System.out.println("endTime: " + endTime);
-        params.put("endTimestamp", endTime);
-        params.put("maxTxDataSize", 2 * 1024 * 1024L);
-        Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.TX.abbr, "tx_packableTxs", params);
-        Assert.assertTrue(null != response.getResponseData());
-        Map map = (HashMap) ((HashMap) response.getResponseData()).get("tx_packableTxs");
-        Assert.assertTrue(null != map);
-        List<String> list = (List) map.get("list");
-        Log.debug("packableTxs:");
-        for (String s : list) {
-            Log.debug(s);
-        }
-    }
-
-    /**
-     * 创建节点
-     */
-    public Map createAgentTx(String agentAddr, String packingAddr) {
-        Map<String, Object> params = new HashMap<>();
-        params.put("agentAddress", agentAddr);
-        params.put("chainId", chainId);
-        params.put("deposit", 20000 * 100000000L);
-        params.put("commissionRate", 10);
-        params.put("packingAddress", packingAddr);
-        params.put("password", password);
-        params.put("rewardAddress", agentAddr);
-        return params;
     }
 
 }

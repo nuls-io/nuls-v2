@@ -280,13 +280,13 @@ public class CallMethodUtils {
      * @param chain chain info
      */
     @SuppressWarnings("unchecked")
-    public static List<Transaction> getPackingTxList(Chain chain, long height, long blockTime, String packingAddress, BlockExtendsData extendsData) {
+    public static Map<String,Object> getPackingTxList(Chain chain, long blockTime, String packingAddress) {
         try {
             Map<String, Object> params = new HashMap(4);
             params.put("chainId", chain.getConfig().getChainId());
             params.put("endTimestamp", currentTime() + ConsensusConstant.GET_TX_MAX_WAIT_TIME);
             params.put("maxTxDataSize", ConsensusConstant.PACK_TX_MAX_SIZE);
-            params.put("height", height);
+            //params.put("height", height);
             params.put("blockTime", blockTime);
             params.put("packingAddress", packingAddress);
             BlockExtendsData preExtendsData = new BlockExtendsData(chain.getNewestHeader().getExtend());
@@ -297,8 +297,8 @@ public class CallMethodUtils {
                 chain.getLoggerMap().get(ConsensusConstant.CONSENSUS_LOGGER_NAME).error("Packaging transaction acquisition failure!");
                 return null;
             }
-            HashMap signResult = (HashMap) ((HashMap) cmdResp.getResponseData()).get("tx_packableTxs");
-            List<String> txHexList = (List) signResult.get("list");
+            return (HashMap) ((HashMap) cmdResp.getResponseData()).get("tx_packableTxs");
+            /*List<String> txHexList = (List) signResult.get("list");
             List<Transaction> txList = new ArrayList<>();
             for (String txHex : txHexList) {
                 Transaction tx = new Transaction();
@@ -306,12 +306,12 @@ public class CallMethodUtils {
                 txList.add(tx);
             }
             String stateRoot = (String) signResult.get("stateRoot");
-            if (null == stateRoot) {
+            if (StringUtils.isBlank(stateRoot)) {
                 extendsData.setStateRoot(preStateRoot);
             }else{
                 extendsData.setStateRoot(HexUtil.decode(stateRoot));
             }
-            return txList;
+            return txList;*/
         } catch (Exception e) {
             chain.getLoggerMap().get(ConsensusConstant.CONSENSUS_LOGGER_NAME).error(e);
             return null;
