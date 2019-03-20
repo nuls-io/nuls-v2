@@ -292,7 +292,7 @@ public class TxServiceImpl implements TxService {
      * @return Result
      */
     private void validateCoinToBase(Chain chain, List<CoinTo> listTo, int type) throws NulsException {
-        if (type != TxConstant.TX_TYPE_COINBASE) {
+        if (type != TxConstant.TX_TYPE_COINBASE && !TxManager.isSmartContract(chain, type)) {
             if (null == listTo || listTo.size() == 0) {
                 throw new NulsException(TxErrorCode.COINTO_NOT_FOUND);
             }
