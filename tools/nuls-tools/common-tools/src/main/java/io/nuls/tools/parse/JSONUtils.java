@@ -97,6 +97,17 @@ public final class JSONUtils {
     }
 
     /**
+     * json string convert to map/JSON字符串转MAP
+     *
+     * @param jsonStr JSON字符串
+     * @return 转换得到的MAP
+     */
+    public static <T> Map<String, T> jsonToMap(String jsonStr)
+            throws IOException {
+        return OBJECT_MAPPER.readValue(jsonStr, Map.class);
+    }
+
+    /**
      * json string convert to map with javaBean/JSON转MAP
      *
      * @param jsonStr JSON字符串

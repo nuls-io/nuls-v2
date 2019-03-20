@@ -23,15 +23,15 @@
  */
 package io.nuls.contract.service.impl;
 
+import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.BlockHeader;
 import io.nuls.contract.callable.ContractTxCallable;
-import io.nuls.contract.executorbus.ContractExecutorBus;
 import io.nuls.contract.helper.ContractConflictChecker;
 import io.nuls.contract.helper.ContractHelper;
 import io.nuls.contract.helper.ContractTransferHandler;
 import io.nuls.contract.manager.TempBalanceManager;
-import io.nuls.contract.model.bo.CallableResult;
-import io.nuls.contract.model.bo.CallerResult;
+import io.nuls.contract.model.bo.BatchInfo;
+import io.nuls.contract.model.bo.ContractContainer;
 import io.nuls.contract.model.bo.ContractResult;
 import io.nuls.contract.model.bo.ContractWrapperTransaction;
 import io.nuls.contract.model.txdata.ContractData;
@@ -42,12 +42,16 @@ import io.nuls.contract.vm.program.ProgramExecutor;
 import io.nuls.tools.basic.Result;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Service;
+import io.nuls.tools.log.Log;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
 import static io.nuls.contract.constant.ContractConstant.TX_TYPE_CALL_CONTRACT;
-import static io.nuls.contract.util.ContractUtil.makeContractResult;
+import static io.nuls.contract.util.ContractUtil.*;
 
 
 /**
@@ -56,6 +60,8 @@ import static io.nuls.contract.util.ContractUtil.makeContractResult;
  */
 @Service
 public class ContractCallerImpl implements ContractCaller {
+
+    private static final ExecutorService EXECUTOR_SERVICE = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors() * 2);
 
     @Autowired
     private ContractExecutor contractExecutor;
@@ -67,47 +73,28 @@ public class ContractCallerImpl implements ContractCaller {
     private ContractTransferHandler contractTransferHandler;
 
     @Override
-    public CallerResult caller(int chainId, ProgramExecutor batchExecutor, Map<String, List<ContractWrapperTransaction>> txMap, String preStateRoot) {
+    public Result caller(int chainId, ContractContainer container, ProgramExecutor batchExecutor, ContractWrapperTransaction tx, String preStateRoot) {
 
-        List<CallableResult> resultList = new ArrayList<>();
-        CallerResult callerResult = new CallerResult();
         try {
-            BlockHeader currentBlockHeader = contractHelper.getCurrentBlockHeader(chainId);
+
+            ContractData contractData = tx.getContractData();
+            byte[] contractAddressBytes = contractData.getContractAddress();
+            String contract = AddressTool.getStringAddressByBytes(contractAddressBytes);
+            BatchInfo batchInfo = contractHelper.getChain(chainId).getBatchInfo();
+            ContractConflictChecker checker = batchInfo.getChecker();
+            BlockHeader currentBlockHeader = batchInfo.getCurrentBlockHeader();
             long blockTime = currentBlockHeader.getTime();
             long number = currentBlockHeader.getHeight();
+            ContractTxCallable txCallable = new ContractTxCallable(chainId, blockTime, batchExecutor, contract, tx, number, preStateRoot, checker, container);
 
-            callerResult.setCallableResultList(resultList);
+            Future<ContractResult> submit = EXECUTOR_SERVICE.submit(txCallable);
+            container.getFutureList().add(submit);
 
-            ContractExecutorBus contractExecutorBus = ContractExecutorBus.newInstance();
-
-            ContractConflictChecker checker = ContractConflictChecker.newInstance();
-            Set<String>[] sets = new Set[txMap.size()];
-            checker.setContractSetArray(sets);
-            Set<Map.Entry<String, List<ContractWrapperTransaction>>> entries = txMap.entrySet();
-            Set<String> commitSet;
-
-            int i = 0;
-            for (Map.Entry<String, List<ContractWrapperTransaction>> addressTxs : entries) {
-                commitSet = new HashSet<>();
-                sets[i++] = commitSet;
-                String contract = addressTxs.getKey();
-                List<ContractWrapperTransaction> txList = addressTxs.getValue();
-                contractExecutorBus.add(new ContractTxCallable(chainId, blockTime, batchExecutor, contract, txList, number, preStateRoot, checker, commitSet));
-            }
-
-            List<Future<CallableResult>> executeList = contractExecutorBus.execute();
-            if (executeList == null) {
-                return callerResult;
-            }
-            for (Future<CallableResult> future : executeList) {
-                CallableResult callableResult = future.get();
-                resultList.add(callableResult);
-            }
-
+            return getSuccess();
         } catch (Exception e) {
-            e.printStackTrace();
+            Log.error(e);
+            return getFailed();
         }
-        return callerResult;
     }
 
     @Override

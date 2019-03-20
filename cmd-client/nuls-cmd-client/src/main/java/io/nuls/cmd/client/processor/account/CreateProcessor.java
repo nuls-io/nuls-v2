@@ -109,7 +109,7 @@ public class CreateProcessor extends AccountBaseProcessor implements CommandProc
 
     @Override
     public CommandResult execute(String[] args) {
-        String password = CommandHelper.getPwd();
+        String password = CommandHelper.getPwd("Please enter the new password(8-20 characters, the combination of letters and numbers).\nEnter your new password:");
         if(StringUtils.isNotBlank(password)){
             CommandHelper.confirmPwd(password);
         }

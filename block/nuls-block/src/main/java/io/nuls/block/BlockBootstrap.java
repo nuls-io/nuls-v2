@@ -1,13 +1,13 @@
 package io.nuls.block;
 
+import io.nuls.block.constant.BlockConfig;
 import io.nuls.block.manager.ContextManager;
 import io.nuls.block.service.BlockService;
 import io.nuls.block.thread.BlockSynchronizer;
 import io.nuls.block.thread.monitor.*;
 import io.nuls.block.utils.ConfigLoader;
-import io.nuls.block.utils.module.NetworkUtil;
-import io.nuls.block.utils.module.ProtocolUtil;
-import io.nuls.block.utils.module.TransactionUtil;
+import io.nuls.block.rpc.call.NetworkUtil;
+import io.nuls.block.rpc.call.ProtocolUtil;
 import io.nuls.db.service.RocksDBService;
 import io.nuls.rpc.info.HostInfo;
 import io.nuls.rpc.model.ModuleE;
@@ -15,6 +15,7 @@ import io.nuls.rpc.modulebootstrap.Module;
 import io.nuls.rpc.modulebootstrap.NulsRpcModuleBootstrap;
 import io.nuls.rpc.modulebootstrap.RpcModule;
 import io.nuls.rpc.modulebootstrap.RpcModuleState;
+import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.core.ioc.SpringLiteContext;
 import io.nuls.tools.log.Log;
@@ -37,8 +38,14 @@ import static io.nuls.block.constant.Constant.*;
 @Component
 public class BlockBootstrap extends RpcModule {
 
+    @Autowired
+    public static BlockConfig blockConfig;
+
     public static void main(String[] args) {
-        NulsRpcModuleBootstrap.run("io.nuls", new String[]{HostInfo.getLocalIP() + ":8887/ws"});
+        if (args == null || args.length == 0) {
+            args = new String[]{"ws://" + HostInfo.getLocalIP() + ":8887/ws"};
+        }
+        NulsRpcModuleBootstrap.run("io.nuls", args);
     }
 
     /**
@@ -76,7 +83,7 @@ public class BlockBootstrap extends RpcModule {
         super.init();
         initCfg();
         //读取配置文件，数据存储根目录，初始化打开该目录下所有表连接并放入缓存
-        RocksDBService.init(DATA_PATH);
+        RocksDBService.init(blockConfig.getDataFolder());
     }
 
     /**
@@ -125,19 +132,19 @@ public class BlockBootstrap extends RpcModule {
         ThreadUtils.createAndRunThread("block-synchronizer", BlockSynchronizer.getInstance());
         //开启分叉链处理线程
         ScheduledThreadPoolExecutor forkExecutor = ThreadUtils.createScheduledThreadPool(1, new NulsThreadFactory("fork-chains-monitor"));
-        forkExecutor.scheduleWithFixedDelay(ForkChainsMonitor.getInstance(), 0, 10, TimeUnit.SECONDS);
+        forkExecutor.scheduleWithFixedDelay(ForkChainsMonitor.getInstance(), 0, 15, TimeUnit.SECONDS);
         //开启孤儿链处理线程
         ScheduledThreadPoolExecutor orphanExecutor = ThreadUtils.createScheduledThreadPool(1, new NulsThreadFactory("orphan-chains-monitor"));
-        orphanExecutor.scheduleWithFixedDelay(OrphanChainsMonitor.getInstance(), 0, 30, TimeUnit.SECONDS);
+        orphanExecutor.scheduleWithFixedDelay(OrphanChainsMonitor.getInstance(), 0, 15, TimeUnit.SECONDS);
         //开启孤儿链维护线程
         ScheduledThreadPoolExecutor maintainExecutor = ThreadUtils.createScheduledThreadPool(1, new NulsThreadFactory("orphan-chains-maintainer"));
-        maintainExecutor.scheduleWithFixedDelay(OrphanChainsMaintainer.getInstance(), 0, 2, TimeUnit.SECONDS);
+        maintainExecutor.scheduleWithFixedDelay(OrphanChainsMaintainer.getInstance(), 0, 5, TimeUnit.SECONDS);
         //开启数据库大小监控线程
         ScheduledThreadPoolExecutor dbSizeExecutor = ThreadUtils.createScheduledThreadPool(1, new NulsThreadFactory("storage-size-monitor"));
-        dbSizeExecutor.scheduleWithFixedDelay(ChainsDbSizeMonitor.getInstance(), 0, 5, TimeUnit.MINUTES);
+        dbSizeExecutor.scheduleWithFixedDelay(ChainsDbSizeMonitor.getInstance(), 0, 3, TimeUnit.MINUTES);
         //开启区块监控线程
         ScheduledThreadPoolExecutor monitorExecutor = ThreadUtils.createScheduledThreadPool(1, new NulsThreadFactory("network-monitor"));
-        monitorExecutor.scheduleWithFixedDelay(NetworkResetMonitor.getInstance(), 0, 5, TimeUnit.MINUTES);
+        monitorExecutor.scheduleWithFixedDelay(NetworkResetMonitor.getInstance(), 0, 3, TimeUnit.MINUTES);
         return RpcModuleState.Running;
     }
 

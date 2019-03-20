@@ -14,6 +14,7 @@ import io.nuls.tools.core.annotation.Component;
 import org.bson.Document;
 import org.bson.conversions.Bson;
 
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -94,6 +95,26 @@ public class AgentService {
             }
         }
         mongoDBService.bulkWrite(AGENT_TABLE + chainID, modelList);
+    }
+
+    public void rollbackAgentList(int chainId, List<AgentInfo> agentInfoList) {
+        initCache();
+        if (agentInfoList.isEmpty()) {
+            return;
+        }
+        ApiCache apiCache = CacheManager.getCache(chainId);
+        List<WriteModel<Document>> modelList = new ArrayList<>();
+        for (AgentInfo agentInfo : agentInfoList) {
+            if (agentInfo.isNew()) {
+                modelList.add(new DeleteOneModel(Filters.eq("_id", agentInfo.getTxHash())));
+                apiCache.getAgentMap().remove(agentInfo.getTxHash());
+            } else {
+                Document document = DocumentTransferTool.toDocument(agentInfo, "txHash");
+                modelList.add(new ReplaceOneModel<>(Filters.eq("_id", agentInfo.getTxHash()), document));
+                apiCache.getAgentMap().put(agentInfo.getTxHash(), agentInfo);
+            }
+        }
+        mongoDBService.bulkWrite(AGENT_TABLE + chainId, modelList);
     }
 
     public List<AgentInfo> getAgentList(int chainId, long startHeight) {
@@ -180,5 +201,17 @@ public class AgentService {
         return count;
 //        Bson bson = Filters.and(Filters.lte("blockHeight", startHeight), Filters.or(Filters.eq("deleteHeight", 0), Filters.gt("deleteHeight", startHeight)));
 //        return this.mongoDBService.getCount(MongoTableName.AGENT_INFO, bson);
+    }
+
+    public BigInteger getConsensusCoinTotal(int chainId) {
+        BigInteger total = BigInteger.ZERO;
+
+        ApiCache apiCache = CacheManager.getCache(chainId);
+        for (AgentInfo agentInfo : apiCache.getAgentMap().values()) {
+            if (agentInfo.getDeleteHash() == null) {
+                total = total.add(agentInfo.getDeposit()).add(agentInfo.getTotalDeposit());
+            }
+        }
+        return total;
     }
 }

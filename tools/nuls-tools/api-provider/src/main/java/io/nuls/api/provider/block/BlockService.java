@@ -1,6 +1,7 @@
 package io.nuls.api.provider.block;
 
 import io.nuls.api.provider.Result;
+import io.nuls.api.provider.block.facade.BlockHeaderData;
 import io.nuls.api.provider.block.facade.GetBlockHeaderByHashReq;
 import io.nuls.api.provider.block.facade.GetBlockHeaderByHeightReq;
 import io.nuls.api.provider.block.facade.GetBlockHeaderByLastHeightReq;
@@ -13,11 +14,11 @@ import io.nuls.base.data.BlockHeader;
  */
 public interface BlockService {
 
-    Result<BlockHeader> getBlockHeaderByHash(GetBlockHeaderByHashReq req);
+    Result<BlockHeaderData> getBlockHeaderByHash(GetBlockHeaderByHashReq req);
 
-    Result<BlockHeader> getBlockHeaderByHeight(GetBlockHeaderByHeightReq req);
+    Result<BlockHeaderData> getBlockHeaderByHeight(GetBlockHeaderByHeightReq req);
 
-    Result<BlockHeader> getBlockHeaderByLastHeight(GetBlockHeaderByLastHeightReq req);
+    Result<BlockHeaderData> getBlockHeaderByLastHeight(GetBlockHeaderByLastHeightReq req);
 
 
 }

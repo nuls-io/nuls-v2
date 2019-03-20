@@ -108,11 +108,13 @@ public class ApiTest {
 
     @Test
     public void testAddO() {
-        BigInteger b = new BigInteger(1000000002222L + "");
-//        String str = BigIntegerUtils.bigIntegerToString(b, 32);
-//        System.out.println(str);
+        int i = 100;
+        test(i--);
+        System.out.println(i);
+    }
 
-        System.out.println(DoubleUtils.mul(100, DoubleUtils.div(ApiContext.inflationCoins, b, 4), 2));
+    private void test(int i) {
+        System.out.println(i);
     }
 
 }

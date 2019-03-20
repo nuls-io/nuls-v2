@@ -51,7 +51,7 @@ public class ContractExecuteResultStorageServiceImpl implements ContractExecuteR
     public Result saveContractExecuteResult(int chainId, NulsDigestData hash, ContractResult executeResult) {
         try {
             boolean result = putModel(DB_NAME_CONTRACT_EXECUTE_RESULT + chainId, hash.getDigestBytes(), executeResult);
-            if(result) {
+            if (result) {
                 return getSuccess();
             } else {
                 return getFailed();
@@ -66,7 +66,7 @@ public class ContractExecuteResultStorageServiceImpl implements ContractExecuteR
     public Result deleteContractExecuteResult(int chainId, NulsDigestData hash) {
         try {
             boolean result = RocksDBService.delete(DB_NAME_CONTRACT_EXECUTE_RESULT + chainId, hash.getDigestBytes());
-            if(result) {
+            if (result) {
                 return getSuccess();
             } else {
                 return getFailed();
@@ -89,7 +89,7 @@ public class ContractExecuteResultStorageServiceImpl implements ContractExecuteR
             Log.error("check contract execute result error", e);
             return false;
         }
-        if(contractExecuteResult == null) {
+        if (contractExecuteResult == null) {
             return false;
         }
         return true;
@@ -97,7 +97,7 @@ public class ContractExecuteResultStorageServiceImpl implements ContractExecuteR
 
     @Override
     public ContractResult getContractExecuteResult(int chainId, NulsDigestData hash) {
-        if(hash == null) {
+        if (hash == null) {
             return null;
         }
         try {

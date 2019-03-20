@@ -66,16 +66,7 @@ public class SyncBlockTask implements Runnable {
      * @return boolean 是否还继续同步
      */
     private boolean syncBlock() {
-        long localBestHeight;
         BlockHeaderInfo localBestBlockHeader = syncService.getBestBlockHeader(chainId);
-        if (localBestBlockHeader == null) {
-            localBestHeight = -1;
-        } else {
-            localBestHeight = localBestBlockHeader.getHeight();
-        }
-
-        ApiContext.bestHeight = localBestHeight;
-
         try {
             return process(localBestBlockHeader);
         } catch (Exception e) {
@@ -98,10 +89,10 @@ public class SyncBlockTask implements Runnable {
             Thread.sleep(5000L);
             return false;
         }
-        if (checkBlockContinuity(localBestBlockHeader, newBlock.getHeader())) {
+        if (!checkBlockContinuity(localBestBlockHeader, newBlock.getHeader())) {
             return syncService.syncNewBlock(chainId, newBlock);
         } else {
-            return rollbackService.rollbackBlock();
+            return rollbackService.rollbackBlock(chainId, localBestBlockHeader.getHeight());
         }
     }
 

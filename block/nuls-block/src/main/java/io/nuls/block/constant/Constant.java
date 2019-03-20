@@ -37,21 +37,11 @@ import java.util.Comparator;
 public interface Constant {
 
     /**
-     * 模块配置文件名称
-     * Module configuration file name.
-     */
-    String MODULES_CONFIG_FILE = "modules.json";
-
-    /**
      * 协议配置文件名称
      * Protocol configuration file name.
      */
     String PROTOCOL_CONFIG_FILE = "protocol-config.json";
 
-    /**
-     * db文件存放目录
-     */
-    String DATA_PATH = "../../../../data/block";
     /**
      * 存储每条链的配置信息
      */
@@ -78,11 +68,6 @@ public interface Constant {
     String CACHED_BLOCK = "CachedBlock";
 
     /**
-     * 分叉链、孤儿链清理时每次清理几分之一
-     */
-    int CLEAN_PARAM = 2;
-
-    /**
      * 共识工作状态
      */
     int CONSENSUS_WORKING = 1;
@@ -102,7 +87,7 @@ public interface Constant {
     Comparator<BlockHeader> BLOCK_HEADER_COMPARATOR = Comparator.comparingLong(BlockHeader::getHeight);
 
     /**
-     * 区块头排序器
+     * 协议配置信息排序器
      */
     Comparator<ProtocolConfigJson> PROTOCOL_CONFIG_COMPARATOR = Comparator.comparingInt(ProtocolConfigJson::getVersion);
 
@@ -110,29 +95,4 @@ public interface Constant {
      * 节点比较器,默认按信用值排序
      */
     Comparator<Node> NODE_COMPARATOR = Comparator.comparingInt(Node::getCredit).reversed();
-
-    /**
-     * 下载单个区块的超时时间
-     */
-    long SINGLE_DOWNLOAD_TIMEOUNT = 10L;
-
-    /**
-     * 下载多个区块的超时时间
-     */
-    long BATCH_DOWNLOAD_TIMEOUNT = 30L;
-
-    /**
-     * 批量下载区块时,如果收到CompleteMessage时,区块还没有保存完,最多循环等待几个回合
-     */
-    long MAX_LOOP = 10;
-
-    /**
-     * 两次区块同步之间的时间间隔
-     */
-    int SYN_SLEEP_INTERVAL = 10000;
-
-    /**
-     * 等待网络稳定的时间间隔
-     */
-    int WAIT_NETWORK_INTERVAL = 10000;
 }

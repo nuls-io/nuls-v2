@@ -17,9 +17,4 @@ public class CreateAccountReq extends BaseReq {
 
     private String password;
 
-    public CreateAccountReq(){
-        this.count = 1;
-    }
-
-
 }

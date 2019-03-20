@@ -1,0 +1,23 @@
+{
+  "dataFolder": "consensus",
+  "consensusConfig":{
+    "packingInterval":10000,
+    "inflationAmount":500000000000000,
+    "blockSize":10,
+    "packingAmount":20000000000000,
+    "coinbaseUnlockHeight":1000,
+    "redPublishLockTime":3600000,
+    "stopAgentLockTime":3600000,
+    "commissionRateMax":80,
+    "depositMin":2000000000000,
+    "depositMax":50000000000000,
+    "commissionMin":20000000000000,
+    "commissionMax":50000000000000,
+    "entrusterDepositMin":200000000000,
+    "depositNumberMax":100,
+    "assetsId":1,
+    "chainId":12345,
+    "seedNodes":"5MR_2CbDGZXZRc7SnBEKuCubTUkYi9JXcCu",
+    "password":"nuls123456"
+  }
+}

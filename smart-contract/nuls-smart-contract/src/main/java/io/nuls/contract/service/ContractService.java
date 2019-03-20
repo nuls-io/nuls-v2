@@ -37,18 +37,15 @@ import java.util.List;
  */
 public interface ContractService {
 
-    Result invokeContract(int chainId, List<ContractTempTransaction> txList, long number, long blockTime, String packingAddress, String preStateRoot);
+    Result begin(int chainId, long blockHeight, long blockTime, String packingAddress, String preStateRoot);
+
+    Result end(int chainId, long blockHeight);
+
+    Result invokeContractOneByOne(int chainId, ContractTempTransaction tx);
 
     Result commitProcessor(int chainId, List<String> txHexList, String blockHeaderHex);
 
     Result rollbackProcessor(int chainId, List<String> txHexList, String blockHeaderHex);
-    /**
-     * 是否为合约地址
-     *
-     * @param addressBytes
-     * @return
-     */
-    boolean isContractAddress(int chainId, byte[] addressBytes);
 
     /**
      * 保存合约执行结果

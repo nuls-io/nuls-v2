@@ -1,6 +1,7 @@
 package io.nuls.transaction.storage.rocksdb;
 
 import io.nuls.base.data.NulsDigestData;
+import io.nuls.base.data.Transaction;
 import io.nuls.transaction.model.po.TransactionConfirmedPO;
 
 import java.util.List;
@@ -38,6 +39,14 @@ public interface ConfirmedTxStorageService {
     TransactionConfirmedPO getTx(int chainId, NulsDigestData hash);
 
     /**
+     * 获取交易数据
+     * @param chainId 链ID
+     * @param hash 交易hash
+     * @return
+     */
+    TransactionConfirmedPO getTx(int chainId, String hash);
+
+    /**
      * 删除交易数据
      * @param chainId 链ID
      * @param hash 交易hash
@@ -46,21 +55,22 @@ public interface ConfirmedTxStorageService {
     boolean removeTx(int chainId,NulsDigestData hash);
 
     /**
+     * 删除交易数据
+     * @param chainId 链ID
+     * @param hash 交易hash
+     * @return
+     */
+    boolean removeTx(int chainId, String hash);
+
+    /**
      * 根据交易hash批量删除已确认交易数据
      * @param chainId
      * @param hashList
      * @return 删除是否成功
      */
-    boolean removeTxList(int chainId, List<byte[]> hashList);
+    boolean removeTxListByHashBytes(int chainId, List<byte[]> hashList);
 
-    /**
-     * 根据交易hash批量查询已确认交易数据
-     *
-     * @param chainId
-     * @param hashList
-     * @return 交易数据列表
-     */
-    List<TransactionConfirmedPO> getTxList(int chainId, List<byte[]> hashList);
+    boolean removeTxList(int chainId, List<Transaction> txList);
 
     /**
      * 保存跨链交易的生效高度和交易hash
@@ -86,4 +96,5 @@ public interface ConfirmedTxStorageService {
      * @return boolean
      */
     boolean removeCrossTxEffectList(int chainId, long height);
+
 }

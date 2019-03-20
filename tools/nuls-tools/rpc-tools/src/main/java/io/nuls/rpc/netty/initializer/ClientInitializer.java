@@ -5,7 +5,6 @@ import io.netty.channel.ChannelPipeline;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.handler.codec.http.HttpObjectAggregator;
 import io.netty.handler.codec.http.HttpServerCodec;
-import io.nuls.rpc.netty.handler.ClientHandler;
 
 /**
  * 客户端配置类
@@ -22,6 +21,6 @@ public class ClientInitializer extends ChannelInitializer<SocketChannel> {
         //netty是基于分段请求的，HttpObjectAggregator的作用是将请求分段再聚合,参数是聚合字节的最大长度
         pipeline.addLast(new HttpObjectAggregator(1024*1024*1024));
         //webSocket定义了传递数据的6中frame类型
-        pipeline.addLast("hookedHandler",new ClientHandler());
+        //pipeline.addLast("hookedHandler",new ClientHandler());
     }
 }

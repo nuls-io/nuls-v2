@@ -77,8 +77,8 @@ public class ContractTxHelper {
     private ContractHelper contractHelper;
 
     public Result<CreateContractTransaction> makeCreateTx(int chainId, String sender, Long gasLimit, Long price,
-                                   byte[] contractCode, String[][] args,
-                                   String password, String remark) {
+                                                          byte[] contractCode, String[][] args,
+                                                          String password, String remark) {
         try {
             BigInteger value = BigInteger.ZERO;
 
@@ -94,7 +94,7 @@ public class ContractTxHelper {
             byte[] senderBytes = AddressTool.getAddress(sender);
 
             Result validateCreate = this.validateCreate(chainId, senderBytes, contractAddressBytes, gasLimit, price, contractCode, args);
-            if(validateCreate.isFailed()) {
+            if (validateCreate.isFailed()) {
                 return validateCreate;
             }
 
@@ -116,7 +116,7 @@ public class ContractTxHelper {
              */
             CoinData coinData = new CoinData();
             Result makeCoinDataResult = this.makeCoinData(chainId, sender, senderBytes, contractAddressBytes, gasLimit, price, value, tx.size(), createContractData, coinData);
-            if(makeCoinDataResult.isFailed()) {
+            if (makeCoinDataResult.isFailed()) {
                 return makeCoinDataResult;
             }
 
@@ -125,7 +125,7 @@ public class ContractTxHelper {
             tx.serializeData();
 
             return getSuccess().setData(tx);
-        }  catch (NulsException e) {
+        } catch (NulsException e) {
             Log.error(e);
             return Result.getFailed(e.getErrorCode());
         } catch (IOException e) {
@@ -137,16 +137,16 @@ public class ContractTxHelper {
     }
 
     public Result validateCreate(int chainId, byte[] sender, byte[] contractAddress, Long gasLimit, Long price,
-                                  byte[] contractCode, String[][] args) {
+                                 byte[] contractCode, String[][] args) {
         try {
             BigInteger value = BigInteger.ZERO;
 
-            if(!ContractUtil.checkPrice(price.longValue())) {
-                return Result.getFailed(ContractErrorCode.CONTRACT_MINIMUM_PRICE);
+            if (!ContractUtil.checkPrice(price.longValue())) {
+                return Result.getFailed(CONTRACT_MINIMUM_PRICE_ERROR);
             }
 
-            if(contractAddress == null) {
-                contractAddress = Hex.decode(AccountCall.createContractAddress(chainId));
+            if (contractAddress == null) {
+                contractAddress = AddressTool.getAddress(AccountCall.createContractAddress(chainId));
             }
 
             BlockHeader blockHeader = BlockCall.getLatestBlockHeader(chainId);
@@ -163,7 +163,6 @@ public class ContractTxHelper {
             programCreate.setSender(sender);
             programCreate.setValue(value);
             programCreate.setPrice(price.longValue());
-            programCreate.setGasLimit(gasLimit.longValue());
             programCreate.setNumber(blockHeight);
             programCreate.setContractCode(contractCode);
             if (args != null) {
@@ -171,12 +170,12 @@ public class ContractTxHelper {
             }
             ProgramExecutor track = programExecutor.begin(prevStateRoot);
             // 验证合约时跳过Gas验证
-            long realGasLimit = programCreate.getGasLimit();
+            long realGasLimit = gasLimit;
             programCreate.setGasLimit(MAX_GASLIMIT);
             ProgramResult programResult = track.create(programCreate);
 
             // 执行结果失败时，交易直接返回错误，不上链，不消耗Gas，
-            if(!programResult.isSuccess()) {
+            if (!programResult.isSuccess()) {
                 Log.error(programResult.getStackTrace());
                 Result result = Result.getFailed(DATA_ERROR);
                 result.setMsg(ContractUtil.simplifyErrorMsg(programResult.getErrorMessage()));
@@ -184,25 +183,27 @@ public class ContractTxHelper {
                 return result;
             } else {
                 // 其他合法性都通过后，再验证Gas
-                track = programExecutor.begin(prevStateRoot);
-                programCreate.setGasLimit(realGasLimit);
-                programResult = track.create(programCreate);
-                if(!programResult.isSuccess()) {
-                    Log.error(programResult.getStackTrace());
-                    Result result = Result.getFailed(DATA_ERROR);
-                    result.setMsg(ContractUtil.simplifyErrorMsg(programResult.getErrorMessage()));
-                    return result;
+                if (realGasLimit != MAX_GASLIMIT) {
+                    programCreate.setGasLimit(realGasLimit);
+                    track = programExecutor.begin(prevStateRoot);
+                    programResult = track.create(programCreate);
+                    if (!programResult.isSuccess()) {
+                        Log.error(programResult.getStackTrace());
+                        Result result = Result.getFailed(DATA_ERROR);
+                        result.setMsg(ContractUtil.simplifyErrorMsg(programResult.getErrorMessage()));
+                        return result;
+                    }
                 }
             }
-            return getSuccess();
-        }  catch (NulsException e) {
+            return getSuccess().setData(programResult);
+        } catch (NulsException e) {
             Log.error(e);
             return Result.getFailed(e.getErrorCode());
         }
     }
 
     private int calcSize(NulsData nulsData) {
-        if(nulsData == null) {
+        if (nulsData == null) {
             return 0;
         }
         int size = nulsData.size();
@@ -222,14 +223,14 @@ public class ContractTxHelper {
         CoinFrom coinFrom = new CoinFrom(senderBytes, chainId, assetsId, totalValue, Hex.decode(senderBalance.getNonce()), UNLOCKED_TX);
         coinData.addFrom(coinFrom);
 
-        if(value.compareTo(BigInteger.ZERO) > 0) {
+        if (value.compareTo(BigInteger.ZERO) > 0) {
             CoinTo coinTo = new CoinTo(contractAddress, chainId, assetsId, value);
             coinData.addTo(coinTo);
         }
 
         BigInteger fee = TransactionFeeCalculator.getNormalUnsignedTxFee(txSize + calcSize(txData) + calcSize(coinData));
         totalValue = totalValue.add(fee);
-        if(senderBalance.getBalance().compareTo(totalValue) < 0) {
+        if (senderBalance.getBalance().compareTo(totalValue) < 0) {
             return Result.getFailed(INSUFFICIENT_BALANCE);
         }
         coinFrom.setAmount(totalValue);
@@ -267,7 +268,7 @@ public class ContractTxHelper {
         byte[] senderBytes = AddressTool.getAddress(sender);
 
         Result validateCall = this.validateCall(chainId, senderBytes, contractAddressBytes, value, gasLimit, price, methodName, methodDesc, args);
-        if(validateCall.isFailed()) {
+        if (validateCall.isFailed()) {
             return validateCall;
         }
 
@@ -276,7 +277,7 @@ public class ContractTxHelper {
     }
 
     public Result<CallContractTransaction> newCallTx(int chainId, String sender, byte[] senderBytes, BigInteger value, Long gasLimit, Long price, byte[] contractAddressBytes,
-                                                      String methodName, String methodDesc, String[][] args, String remark) {
+                                                     String methodName, String methodDesc, String[][] args, String remark) {
         try {
 
             CallContractTransaction tx = new CallContractTransaction();
@@ -297,7 +298,7 @@ public class ContractTxHelper {
              */
             CoinData coinData = new CoinData();
             Result makeCoinDataResult = this.makeCoinData(chainId, sender, senderBytes, contractAddressBytes, gasLimit, price, value, tx.size(), callContractData, coinData);
-            if(makeCoinDataResult.isFailed()) {
+            if (makeCoinDataResult.isFailed()) {
                 return makeCoinDataResult;
             }
 
@@ -334,8 +335,8 @@ public class ContractTxHelper {
 
     public Result validateCall(int chainId, byte[] senderBytes, byte[] contractAddressBytes, BigInteger value, Long gasLimit, Long price, String methodName, String methodDesc, String[][] args) {
         try {
-            if(!ContractUtil.checkPrice(price.longValue())) {
-                return Result.getFailed(ContractErrorCode.CONTRACT_MINIMUM_PRICE);
+            if (!ContractUtil.checkPrice(price.longValue())) {
+                return Result.getFailed(CONTRACT_MINIMUM_PRICE_ERROR);
             }
 
             BlockHeader blockHeader = BlockCall.getLatestBlockHeader(chainId);
@@ -354,38 +355,24 @@ public class ContractTxHelper {
             programCall.setArgs(args);
 
             // 如果方法是不上链的合约调用，同步执行合约代码，不改变状态根，并返回值
-            ProgramMethod method;
-            if ((method = contractHelper.getMethodInfoByContractAddress(chainId, prevStateRoot, methodName, methodDesc, contractAddressBytes)).isView()) {
-                ProgramResult programResult = contractHelper.invokeCustomGasViewMethod(chainId, blockHeader, contractAddressBytes, methodName, methodDesc,
-                        ContractUtil.twoDimensionalArray(args, method.argsType2Array()));
-                Result result;
-                if (!programResult.isSuccess()) {
-                    Log.error(programResult.getStackTrace());
-                    result = Result.getFailed(DATA_ERROR);
-                    result.setMsg(ContractUtil.simplifyErrorMsg(programResult.getErrorMessage()));
-                    result = checkVmResultAndReturn(programResult.getErrorMessage(), result);
-                } else {
-                    result = getSuccess();
-                    result.setData(programResult.getResult());
-                }
-                return result;
+            if ((contractHelper.getMethodInfoByContractAddress(chainId, prevStateRoot, methodName, methodDesc, contractAddressBytes)).isView()) {
+                return Result.getFailed(CONTRACT_NOT_EXECUTE_VIEW);
             }
             // 创建链上交易，包含智能合约
             programCall.setValue(value);
             programCall.setPrice(price.longValue());
-            programCall.setGasLimit(gasLimit.longValue());
 
             // 获取VM执行器
             ProgramExecutor programExecutor = contractHelper.getProgramExecutor(chainId);
             // 执行VM验证合法性
             ProgramExecutor track = programExecutor.begin(prevStateRoot);
             // 验证合约时跳过Gas验证
-            long realGasLimit = programCall.getGasLimit();
+            long realGasLimit = gasLimit;
             programCall.setGasLimit(MAX_GASLIMIT);
             ProgramResult programResult = track.call(programCall);
 
             // 执行结果失败时，交易直接返回错误，不上链，不消耗Gas
-            if(!programResult.isSuccess()) {
+            if (!programResult.isSuccess()) {
                 Log.error(programResult.getStackTrace());
                 Result result = Result.getFailed(DATA_ERROR);
                 result.setMsg(ContractUtil.simplifyErrorMsg(programResult.getErrorMessage()));
@@ -393,20 +380,22 @@ public class ContractTxHelper {
                 return result;
             } else {
                 // 其他合法性都通过后，再验证Gas
-                track = programExecutor.begin(prevStateRoot);
-                programCall.setGasLimit(realGasLimit);
-                programResult = track.call(programCall);
-                if(!programResult.isSuccess()) {
-                    Log.error(programResult.getStackTrace());
-                    Result result = Result.getFailed(DATA_ERROR);
-                    result.setMsg(ContractUtil.simplifyErrorMsg(programResult.getErrorMessage()));
-                    return result;
+                if (realGasLimit != MAX_GASLIMIT) {
+                    programCall.setGasLimit(realGasLimit);
+                    track = programExecutor.begin(prevStateRoot);
+                    programResult = track.call(programCall);
+                    if (!programResult.isSuccess()) {
+                        Log.error(programResult.getStackTrace());
+                        Result result = Result.getFailed(DATA_ERROR);
+                        result.setMsg(ContractUtil.simplifyErrorMsg(programResult.getErrorMessage()));
+                        return result;
+                    }
                 }
             }
 
-            return getSuccess();
+            return getSuccess().setData(programResult);
 
-        }  catch (NulsException e) {
+        } catch (NulsException e) {
             Log.error(e);
             return Result.getFailed(e.getErrorCode());
         }
@@ -423,7 +412,7 @@ public class ContractTxHelper {
         byte[] contractAddressBytes = AddressTool.getAddress(contractAddress);
 
         Result validateDelete = this.validateDelete(chainId, senderBytes, contractAddress, contractAddressBytes);
-        if(validateDelete.isFailed()) {
+        if (validateDelete.isFailed()) {
             return validateDelete;
         }
 
@@ -432,6 +421,7 @@ public class ContractTxHelper {
 
 
     }
+
     public Result<DeleteContractTransaction> newDeleteTx(int chainId, String sender, byte[] senderBytes, byte[] contractAddressBytes, String remark) {
         try {
             DeleteContractTransaction tx = new DeleteContractTransaction();
@@ -451,7 +441,7 @@ public class ContractTxHelper {
              */
             CoinData coinData = new CoinData();
             Result makeCoinDataResult = this.makeCoinData(chainId, sender, senderBytes, contractAddressBytes, 0L, 0L, BigInteger.ZERO, tx.size(), deleteContractData, coinData);
-            if(makeCoinDataResult.isFailed()) {
+            if (makeCoinDataResult.isFailed()) {
                 return makeCoinDataResult;
             }
 
@@ -478,11 +468,11 @@ public class ContractTxHelper {
     public Result validateDelete(int chainId, byte[] senderBytes, String contractAddress, byte[] contractAddressBytes) {
         try {
             Result<ContractAddressInfoPo> contractAddressInfoPoResult = contractHelper.getContractAddressInfo(chainId, contractAddressBytes);
-            if(contractAddressInfoPoResult.isFailed()) {
+            if (contractAddressInfoPoResult.isFailed()) {
                 return contractAddressInfoPoResult;
             }
             ContractAddressInfoPo contractAddressInfoPo = contractAddressInfoPoResult.getData();
-            if(contractAddressInfoPo == null) {
+            if (contractAddressInfoPo == null) {
                 return Result.getFailed(ContractErrorCode.CONTRACT_ADDRESS_NOT_EXIST);
             }
 
@@ -493,22 +483,22 @@ public class ContractTxHelper {
             // 获取合约当前状态
             ProgramStatus status = contractHelper.getContractStatus(chainId, stateRoot, contractAddressBytes);
             boolean isTerminatedContract = ContractUtil.isTerminatedContract(status.ordinal());
-            if(isTerminatedContract) {
+            if (isTerminatedContract) {
                 return Result.getFailed(ContractErrorCode.CONTRACT_DELETED);
             }
 
 
-            if(!ArraysTool.arrayEquals(senderBytes, contractAddressInfoPo.getSender())) {
+            if (!ArraysTool.arrayEquals(senderBytes, contractAddressInfoPo.getSender())) {
                 return Result.getFailed(ContractErrorCode.CONTRACT_DELETE_CREATER);
             }
 
             ContractBalance balance = contractHelper.getRealBalance(chainId, contractAddress);
-            if(balance == null) {
+            if (balance == null) {
                 return Result.getFailed(CONTRACT_OTHER_ERROR);
             }
 
             BigInteger totalBalance = balance.getTotal();
-            if(totalBalance.compareTo(BigInteger.ZERO) != 0) {
+            if (totalBalance.compareTo(BigInteger.ZERO) != 0) {
                 return Result.getFailed(ContractErrorCode.CONTRACT_DELETE_BALANCE);
             }
 

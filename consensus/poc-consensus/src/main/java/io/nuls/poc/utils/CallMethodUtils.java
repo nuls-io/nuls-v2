@@ -1,6 +1,7 @@
 package io.nuls.poc.utils;
 
 import io.nuls.base.basic.AddressTool;
+import io.nuls.base.data.BlockExtendsData;
 import io.nuls.base.data.BlockHeader;
 import io.nuls.base.data.Transaction;
 import io.nuls.base.signture.BlockSignature;
@@ -15,12 +16,14 @@ import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.model.message.Response;
 import io.nuls.rpc.netty.processor.ResponseMessageProcessor;
 import io.nuls.tools.crypto.HexUtil;
-import io.nuls.tools.model.StringUtils;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.log.Log;
-import io.nuls.tools.parse.ConfigLoader;
+import io.nuls.tools.model.StringUtils;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * 公共远程方法调用工具类
@@ -105,18 +108,18 @@ public class CallMethodUtils {
      * 区块签名
      * block signature
      *
-     * @param chainId
+     * @param chain
      * @param address
      * @param header
      */
-    public static void blockSignature(int chainId, String address, BlockHeader header) throws NulsException {
+    public static void blockSignature(Chain chain, String address, BlockHeader header) throws NulsException {
         try {
-            Properties properties = ConfigLoader.loadProperties(ConsensusConstant.PASSWORD_CONFIG_NAME);
-            String password = properties.getProperty(ConsensusConstant.PASSWORD, ConsensusConstant.PASSWORD);
+            /*Properties properties = ConfigLoader.loadProperties(ConsensusConstant.PASSWORD_CONFIG_NAME);
+            String password = properties.getProperty(ConsensusConstant.PASSWORD, ConsensusConstant.PASSWORD);*/
             Map<String, Object> callParams = new HashMap<>(4);
-            callParams.put("chainId", chainId);
+            callParams.put("chainId", chain.getConfig().getChainId());
             callParams.put("address", address);
-            callParams.put("password", password);
+            callParams.put("password", chain.getConfig().getPassword());
             callParams.put("dataHex", HexUtil.encode(header.getHash().getDigestBytes()));
             Response signResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_signBlockDigest", callParams);
             if (!signResp.isSuccess()) {
@@ -277,26 +280,38 @@ public class CallMethodUtils {
      * @param chain chain info
      */
     @SuppressWarnings("unchecked")
-    public static List<Transaction> getPackingTxList(Chain chain) {
+    public static Map<String,Object> getPackingTxList(Chain chain, long blockTime, String packingAddress) {
         try {
             Map<String, Object> params = new HashMap(4);
             params.put("chainId", chain.getConfig().getChainId());
             params.put("endTimestamp", currentTime() + ConsensusConstant.GET_TX_MAX_WAIT_TIME);
             params.put("maxTxDataSize", ConsensusConstant.PACK_TX_MAX_SIZE);
-            Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.TX.abbr, "tx_packableTxs", params);
+            //params.put("height", height);
+            params.put("blockTime", blockTime);
+            params.put("packingAddress", packingAddress);
+            BlockExtendsData preExtendsData = new BlockExtendsData(chain.getNewestHeader().getExtend());
+            byte[] preStateRoot = preExtendsData.getStateRoot();
+            params.put("preStateRoot", HexUtil.encode(preStateRoot));
+            Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.TX.abbr, "tx_packableTxs", params,ConsensusConstant.GET_TX_MAX_WAIT_TIME);
             if (!cmdResp.isSuccess()) {
                 chain.getLoggerMap().get(ConsensusConstant.CONSENSUS_LOGGER_NAME).error("Packaging transaction acquisition failure!");
                 return null;
             }
-            HashMap signResult = (HashMap) ((HashMap) cmdResp.getResponseData()).get("tx_packableTxs");
-            List<String> txHexList = (List) signResult.get("list");
+            return (HashMap) ((HashMap) cmdResp.getResponseData()).get("tx_packableTxs");
+            /*List<String> txHexList = (List) signResult.get("list");
             List<Transaction> txList = new ArrayList<>();
             for (String txHex : txHexList) {
                 Transaction tx = new Transaction();
                 tx.parse(HexUtil.decode(txHex), 0);
                 txList.add(tx);
             }
-            return txList;
+            String stateRoot = (String) signResult.get("stateRoot");
+            if (StringUtils.isBlank(stateRoot)) {
+                extendsData.setStateRoot(preStateRoot);
+            }else{
+                extendsData.setStateRoot(HexUtil.decode(stateRoot));
+            }
+            return txList;*/
         } catch (Exception e) {
             chain.getLoggerMap().get(ConsensusConstant.CONSENSUS_LOGGER_NAME).error(e);
             return null;
@@ -323,10 +338,10 @@ public class CallMethodUtils {
             }
             Map responseData = (Map) cmdResp.getResponseData();
             Transaction tx = new Transaction();
-            Map realData = (Map)responseData.get("tx_getConfirmedTx");
-            String txHex  = (String)realData.get("txHex");
-            if(!StringUtils.isBlank(txHex)){
-                tx.parse(HexUtil.decode(txHex),0);
+            Map realData = (Map) responseData.get("tx_getConfirmedTx");
+            String txHex = (String) realData.get("txHex");
+            if (!StringUtils.isBlank(txHex)) {
+                tx.parse(HexUtil.decode(txHex), 0);
             }
             return tx;
         } catch (Exception e) {
@@ -362,8 +377,8 @@ public class CallMethodUtils {
      * 共识状态修改通知交易模块
      * Consensus status modification notification transaction module
      *
-     * @param chain    chain info
-     * @param packing  packing state
+     * @param chain   chain info
+     * @param packing packing state
      */
     @SuppressWarnings("unchecked")
     public static void sendState(Chain chain, boolean packing) {
@@ -401,17 +416,17 @@ public class CallMethodUtils {
     /**
      * 查询本地加密账户
      * Search for Locally Encrypted Accounts
-     * */
+     */
     @SuppressWarnings("unchecked")
     public static List<byte[]> getEncryptedAddressList(Chain chain) {
         List<byte[]> packingAddressList = new ArrayList<>();
         try {
-            Map<String,Object> params = new HashMap<>(2);
-            params.put(ConsensusConstant.PARAM_CHAIN_ID,chain.getConfig().getChainId());
-            Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr,"ac_getEncryptedAddressList", params);
-            List<String> accountAddressList =  (List<String>) ((HashMap)((HashMap) cmdResp.getResponseData()).get("ac_getEncryptedAddressList")).get("list");
-            if(accountAddressList != null && accountAddressList.size()>0){
-                for (String address:accountAddressList) {
+            Map<String, Object> params = new HashMap<>(2);
+            params.put(ConsensusConstant.PARAM_CHAIN_ID, chain.getConfig().getChainId());
+            Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_getEncryptedAddressList", params);
+            List<String> accountAddressList = (List<String>) ((HashMap) ((HashMap) cmdResp.getResponseData()).get("ac_getEncryptedAddressList")).get("list");
+            if (accountAddressList != null && accountAddressList.size() > 0) {
+                for (String address : accountAddressList) {
                     packingAddressList.add(AddressTool.getAddress(address));
                 }
             }

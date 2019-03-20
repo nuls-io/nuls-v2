@@ -9,9 +9,9 @@ import io.nuls.tools.core.ioc.SpringLiteContext;
 import io.nuls.tools.crypto.ECKey;
 import io.nuls.tools.parse.JSONUtils;
 import io.nuls.tools.parse.SerializeUtils;
+import io.nuls.transaction.constant.TxConfig;
 import io.nuls.transaction.constant.TxConstant;
 import io.nuls.transaction.storage.h2.impl.TransactionH2ServiceImpl;
-import io.nuls.transaction.storage.h2.impl.TransactionServiceImpl;
 import io.nuls.transaction.model.po.TransactionPO;
 import org.apache.ibatis.io.Resources;
 import org.apache.ibatis.session.SqlSessionFactory;
@@ -40,7 +40,7 @@ public class H2Test {
     public static void main(String[] args) throws Exception {
         before();
 //        testInsert();
-        testSelect();
+//        testSelect();
 //        long start = System.currentTimeMillis();
 //        initTestTable();
 //        System.out.println("花费时间：" + String.valueOf(System.currentTimeMillis() - start));
@@ -80,22 +80,22 @@ public class H2Test {
         System.out.println("查询数据花费时间：" + String.valueOf(System.currentTimeMillis() - s));*/
     }
 
-    private static void testSelect() {
-        TransactionService service = new TransactionServiceImpl();
-        service.createTxTablesIfNotExists(TxConstant.H2_TX_TABLE_NAME_PREFIX,
-                TxConstant.H2_TX_TABLE_INDEX_NAME_PREFIX,
-                TxConstant.H2_TX_TABLE_UNIQUE_NAME_PREFIX,
-                TxConstant.H2_TX_TABLE_NUMBER);
-        Page<TransactionPO> page = service.getTxs("5MR_2CeG11nRqx7nGNeh8hTXADibqfSYeNu", null, null, null, null, null, null, 1, 10);
-        System.out.println(page.getTotal());
-
-    }
-
-    private static void testInsert() {
-        TransactionService service = SpringLiteContext.getBean(TransactionService.class);
-        TransactionPO tx = createTxPo("5MR_2CeG11nRqx7nGNeh8hTXADibqfSYeNu");
-        service.saveTx(tx);
-    }
+//    private static void testSelect() {
+//        TransactionService service = new TransactionServiceImpl();
+//        service.createTxTablesIfNotExists(TxConstant.H2_TX_TABLE_NAME_PREFIX,
+//                TxConstant.H2_TX_TABLE_INDEX_NAME_PREFIX,
+//                TxConstant.H2_TX_TABLE_UNIQUE_NAME_PREFIX,
+//                TxConstant.H2_TX_TABLE_NUMBER);
+//        Page<TransactionPO> page = service.getTxs("5MR_2CeG11nRqx7nGNeh8hTXADibqfSYeNu", null, null, null, null, null, null, 1, 10);
+//        System.out.println(page.getTotal());
+//
+//    }
+//
+//    private static void testInsert() {
+//        TransactionService service = SpringLiteContext.getBean(TransactionService.class);
+//        TransactionPO tx = createTxPo("5MR_2CeG11nRqx7nGNeh8hTXADibqfSYeNu");
+//        service.saveTx(tx);
+//    }
 
 
     private static void delete() {
@@ -238,7 +238,7 @@ public class H2Test {
         System.out.println("{");
         while (count < 40) {
             String addr = getAddr();
-            if ((addr.hashCode() & Integer.MAX_VALUE) % TxConstant.H2_TX_TABLE_NUMBER == 0) {
+            if ((addr.hashCode() & Integer.MAX_VALUE) % 128 == 0) {
                 System.out.println("\"" + addr + "\"" + (count == 39 ? "" : ","));
                 count++;
             }
@@ -410,11 +410,12 @@ public class H2Test {
     }
 
     public static void initTestTable() {
+        TxConfig txConfig = SpringLiteContext.getBean(TxConfig.class);
         TransactionH2Service ts = new TransactionH2ServiceImpl();
         //ts.createTable("transaction", "transaction_index",128);
         ts.createTxTablesIfNotExists(TxConstant.H2_TX_TABLE_NAME_PREFIX,
                 TxConstant.H2_TX_TABLE_INDEX_NAME_PREFIX,
                 TxConstant.H2_TX_TABLE_UNIQUE_NAME_PREFIX,
-                TxConstant.H2_TX_TABLE_NUMBER);
+                128);
     }
 }

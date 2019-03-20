@@ -28,6 +28,7 @@ package io.nuls.cmd.client.processor.block;
 import io.nuls.api.provider.Result;
 import io.nuls.api.provider.ServiceManager;
 import io.nuls.api.provider.block.BlockService;
+import io.nuls.api.provider.block.facade.BlockHeaderData;
 import io.nuls.api.provider.block.facade.GetBlockHeaderByHashReq;
 import io.nuls.api.provider.block.facade.GetBlockHeaderByHeightReq;
 import io.nuls.base.data.BlockHeader;
@@ -94,7 +95,7 @@ public class GetBlockHeaderProcessor implements CommandProcessor {
     public CommandResult execute(String[] args) {
         String hash = args[1];
         Matcher matcher = IS_NUMBERIC.matcher(args[1]);
-        Result<BlockHeader> result;
+        Result<BlockHeaderData> result;
         if(matcher.matches()){
             Long height = Long.parseLong(args[1]);
             result = blockService.getBlockHeaderByHeight(new GetBlockHeaderByHeightReq(height));

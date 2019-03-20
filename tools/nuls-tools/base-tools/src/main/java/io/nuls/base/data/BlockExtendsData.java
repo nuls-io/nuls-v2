@@ -160,6 +160,7 @@ public class BlockExtendsData extends BaseNulsData {
         size += SerializeUtils.sizeOfUint48();  // roundStartTime
         size += SerializeUtils.sizeOfUint16();  // packingIndexOfRound
         size += 7;
+        size += SerializeUtils.sizeOfBytes(stateRoot);
         return size;
     }
 
@@ -173,6 +174,7 @@ public class BlockExtendsData extends BaseNulsData {
         stream.writeShort(blockVersion);
         stream.writeByte(effectiveRatio);
         stream.writeShort(continuousIntervalCount);
+        stream.writeBytesWithLength(stateRoot);
     }
 
     @Override
@@ -185,6 +187,7 @@ public class BlockExtendsData extends BaseNulsData {
         this.blockVersion = byteBuffer.readShort();
         this.effectiveRatio = byteBuffer.readByte();
         this.continuousIntervalCount = byteBuffer.readShort();
+        this.stateRoot = byteBuffer.readByLengthByte();
     }
 
     public byte[] getStateRoot() {

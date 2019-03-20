@@ -79,9 +79,9 @@ public class ContractCollectionInfoPo {
     }
 
     public int compareTo(long thatTime) {
-        if(this.createTime > thatTime) {
+        if (this.createTime > thatTime) {
             return -1;
-        } else if(this.createTime < thatTime) {
+        } else if (this.createTime < thatTime) {
             return 1;
         }
         return 0;

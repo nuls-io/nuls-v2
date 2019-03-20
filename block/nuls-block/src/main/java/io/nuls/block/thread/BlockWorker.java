@@ -30,7 +30,7 @@ import io.nuls.block.message.CompleteMessage;
 import io.nuls.block.message.HeightRangeMessage;
 import io.nuls.block.model.ChainContext;
 import io.nuls.block.model.Node;
-import io.nuls.block.utils.module.NetworkUtil;
+import io.nuls.block.rpc.call.NetworkUtil;
 import io.nuls.tools.log.logback.NulsLogger;
 import lombok.AllArgsConstructor;
 
@@ -39,8 +39,6 @@ import java.util.List;
 import java.util.concurrent.*;
 
 import static io.nuls.block.constant.CommandConstant.GET_BLOCKS_BY_HEIGHT_MESSAGE;
-import static io.nuls.block.constant.Constant.BATCH_DOWNLOAD_TIMEOUNT;
-import static io.nuls.block.constant.Constant.MAX_LOOP;
 
 /**
  * 区块下载器
@@ -65,6 +63,8 @@ public class BlockWorker implements Callable<BlockDownLoadResult> {
         NulsDigestData messageHash = message.getHash();
         ChainContext context = ContextManager.getContext(chainId);
         NulsLogger commonLog = context.getCommonLog();
+        int batchDownloadTimeount = context.getParameters().getBatchDownloadTimeount();
+        int maxLoop = context.getParameters().getMaxLoop();
         long duration = 0;
         try {
             Future<CompleteMessage> future = CacheHandler.addBatchBlockRequest(chainId, messageHash);
@@ -76,12 +76,12 @@ public class BlockWorker implements Callable<BlockDownLoadResult> {
                 CacheHandler.removeRequest(chainId, messageHash);
                 return new BlockDownLoadResult(messageHash, startHeight, size, node, false, 0);
             }
-            CompleteMessage completeMessage = future.get(BATCH_DOWNLOAD_TIMEOUNT, TimeUnit.SECONDS);
+            CompleteMessage completeMessage = future.get(batchDownloadTimeount, TimeUnit.MILLISECONDS);
             List<Block> blockList = CacheHandler.getBlockList(chainId, messageHash);
             int real = blockList.size();
             int interval = context.getParameters().getWaitInterval();
             int count = 0;
-            while (real < size && count < MAX_LOOP) {
+            while (real < size && count < maxLoop) {
                 commonLog.info("#start-" + message.getStartHeight() + ",end-" + message.getEndHeight() + "#real-" + real + ",expect-" + size + ",count-" + count + ",node-" +node.getId());
                 Thread.sleep(interval * (size - real));
                 blockList = CacheHandler.getBlockList(chainId, messageHash);

@@ -40,9 +40,9 @@ import io.nuls.contract.vm.program.ProgramTransfer;
 import io.nuls.tools.basic.Result;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
-import io.nuls.tools.model.ByteArrayWrapper;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.log.Log;
+import io.nuls.tools.model.ByteArrayWrapper;
 import org.spongycastle.util.encoders.Hex;
 
 import java.io.IOException;
@@ -76,24 +76,24 @@ public class ContractTransferHandler {
         byte[] contractAddress = contractData.getContractAddress();
         // 增加转入
         BigInteger value = contractData.getValue();
-        if(value.compareTo(BigInteger.ZERO) > 0) {
+        if (value.compareTo(BigInteger.ZERO) > 0) {
             tempBalanceManager.addTempBalance(contractAddress, value);
         }
         // 增加转入, 扣除转出
         List<ProgramTransfer> transfers = contractResult.getTransfers();
-        if(transfers != null && transfers.size() > 0) {
+        if (transfers != null && transfers.size() > 0) {
             LinkedHashMap<String, BigInteger>[] contracts = this.filterContractValue(transfers);
             LinkedHashMap<String, BigInteger> contractFromValue = contracts[0];
             LinkedHashMap<String, BigInteger> contractToValue = contracts[1];
             byte[] contractBytes;
             Set<Map.Entry<String, BigInteger>> tos = contractToValue.entrySet();
-            for(Map.Entry<String, BigInteger> to : tos) {
+            for (Map.Entry<String, BigInteger> to : tos) {
                 contractBytes = asBytes(to.getKey());
                 vmContext.getBalance(chainId, contractBytes);
                 tempBalanceManager.addTempBalance(contractBytes, to.getValue());
             }
             Set<Map.Entry<String, BigInteger>> froms = contractFromValue.entrySet();
-            for(Map.Entry<String, BigInteger> from : froms) {
+            for (Map.Entry<String, BigInteger> from : froms) {
                 contractBytes = asBytes(from.getKey());
                 ContractBalance balance = contractHelper.getBalance(chainId, contractBytes);
                 balance.setPreNonce(balance.getNonce());
@@ -103,32 +103,32 @@ public class ContractTransferHandler {
     }
 
     private void rollbackContractTempBalance(int chainId, ContractWrapperTransaction tx, ContractResult contractResult, TempBalanceManager tempBalanceManager) {
-        if(tx != null && tx.getType() == ContractConstant.TX_TYPE_CALL_CONTRACT) {
+        if (tx != null && tx.getType() == ContractConstant.TX_TYPE_CALL_CONTRACT) {
             ContractData contractData = tx.getContractData();
             byte[] contractAddress = contractData.getContractAddress();
             // 增加转出, 扣除转入
             List<ProgramTransfer> transfers = contractResult.getTransfers();
-            if(transfers != null && transfers.size() > 0) {
+            if (transfers != null && transfers.size() > 0) {
                 LinkedHashMap<String, BigInteger>[] contracts = this.filterContractValue(transfers);
                 LinkedHashMap<String, BigInteger> contractFromValue = contracts[0];
                 LinkedHashMap<String, BigInteger> contractToValue = contracts[1];
                 byte[] contractBytes;
                 Set<Map.Entry<String, BigInteger>> froms = contractFromValue.entrySet();
-                for(Map.Entry<String, BigInteger> from : froms) {
+                for (Map.Entry<String, BigInteger> from : froms) {
                     contractBytes = asBytes(from.getKey());
                     ContractBalance balance = contractHelper.getBalance(chainId, contractBytes);
                     balance.setNonce(balance.getPreNonce());
                     tempBalanceManager.addTempBalance(contractBytes, from.getValue());
                 }
                 Set<Map.Entry<String, BigInteger>> tos = contractToValue.entrySet();
-                for(Map.Entry<String, BigInteger> to : tos) {
+                for (Map.Entry<String, BigInteger> to : tos) {
                     contractBytes = asBytes(to.getKey());
                     tempBalanceManager.minusTempBalance(contractBytes, to.getValue());
                 }
             }
             // 扣除转入
             BigInteger value = contractData.getValue();
-            if(value.compareTo(BigInteger.ZERO) > 0) {
+            if (value.compareTo(BigInteger.ZERO) > 0) {
                 tempBalanceManager.minusTempBalance(contractAddress, value);
             }
         }
@@ -141,25 +141,25 @@ public class ContractTransferHandler {
         contracts[0] = contractFromValue;
         contracts[1] = contractToValue;
 
-        byte[] from,to;
+        byte[] from, to;
         BigInteger transferValue;
-        for(ProgramTransfer transfer : transfers) {
+        for (ProgramTransfer transfer : transfers) {
             from = transfer.getFrom();
             to = transfer.getTo();
             transferValue = transfer.getValue();
-            if(ContractUtil.isLegalContractAddress(from)) {
+            if (ContractUtil.isLegalContractAddress(from)) {
                 String contract = asString(from);
                 BigInteger na = contractFromValue.get(contract);
-                if(na == null) {
+                if (na == null) {
                     contractFromValue.put(contract, transferValue);
                 } else {
                     contractFromValue.put(contract, na.add(transferValue));
                 }
             }
-            if(ContractUtil.isLegalContractAddress(to)) {
+            if (ContractUtil.isLegalContractAddress(to)) {
                 String contract = asString(to);
                 BigInteger na = contractToValue.get(contract);
-                if(na == null) {
+                if (na == null) {
                     contractToValue.put(contract, transferValue);
                 } else {
                     contractToValue.put(contract, na.add(transferValue));
@@ -178,7 +178,7 @@ public class ContractTransferHandler {
             do {
                 // 验证合约转账(从合约转出)交易的最小转移金额
                 result = this.verifyTransfer(transfers);
-                if(result.isFailed()) {
+                if (result.isFailed()) {
                     isCorrectContractTransfer = false;
                     break;
                 }
@@ -208,10 +208,10 @@ public class ContractTransferHandler {
     }
 
     private Result verifyTransfer(List<ProgramTransfer> transfers) {
-        if(transfers == null || transfers.size() == 0) {
+        if (transfers == null || transfers.size() == 0) {
             return getSuccess();
         }
-        for(ProgramTransfer transfer : transfers) {
+        for (ProgramTransfer transfer : transfers) {
             if (transfer.getValue().compareTo(MININUM_TRANSFER_AMOUNT) < 0) {
                 return Result.getFailed(TOO_SMALL_AMOUNT);
             }
@@ -226,9 +226,7 @@ public class ContractTransferHandler {
 
         List<ContractTransferTransaction> contractTransferList = new ArrayList<>();
         contractResult.setContractTransferList(contractTransferList);
-        ContractTransferData txData = new ContractTransferData();
-        txData.setContractAddress(contractAddress);
-        txData.setOrginTxHash(tx.getHash());
+        ContractTransferData txData = new ContractTransferData(tx.getHash(), contractAddress);
 
         int assetsId = contractHelper.getChain(chainId).getConfig().getAssetsId();
         Map<String, CoinTo> mergeCoinToMap = MapUtil.createHashMap(transfers.size());
@@ -248,9 +246,9 @@ public class ContractTransferHandler {
             byte[] to = transfer.getTo();
             BigInteger value = transfer.getValue();
             ByteArrayWrapper wrapperFrom = new ByteArrayWrapper(from);
-            if(compareFrom == null || !compareFrom.equals(wrapperFrom)) {
+            if (compareFrom == null || !compareFrom.equals(wrapperFrom)) {
                 // 产生新交易
-                if(compareFrom == null) {
+                if (compareFrom == null) {
                     // 第一次遍历，获取新交易的coinFrom的nonce
                     contractBalance = tempBalanceManager.getBalance(from).getData();
                     nonceBytes = Hex.decode(contractBalance.getNonce());
@@ -269,7 +267,8 @@ public class ContractTransferHandler {
                 coinTo = new CoinTo(to, chainId, assetsId, value, 0L);
                 coinData.getTo().add(coinTo);
                 mergeCoinToMap.put(asString(to), coinTo);
-                timeOffset = tx.getOrder() + (i++);
+                //timeOffset = tx.getOrder() + (i++);
+                timeOffset = 0L;
                 contractTransferTx = this.createContractTransferTx(coinData, txData, blockTime, timeOffset);
                 contractTransferList.add(contractTransferTx);
             } else {
@@ -289,7 +288,7 @@ public class ContractTransferHandler {
     private void mergeCoinTo(Map<String, CoinTo> mergeCoinToMap, CoinData coinData, byte[] to, int chainId, int assetsId, BigInteger value) {
         CoinTo coinTo;
         String key = asString(to);
-        if((coinTo = mergeCoinToMap.get(key)) != null) {
+        if ((coinTo = mergeCoinToMap.get(key)) != null) {
             coinTo.setAmount(coinTo.getAmount().add(value));
         } else {
             coinTo = new CoinTo(to, chainId, assetsId, value, 0L);
@@ -300,7 +299,7 @@ public class ContractTransferHandler {
 
     private List<ContractMergedTransfer> contractTransfer2mergedTransfer(ContractWrapperTransaction tx, List<ContractTransferTransaction> transferList) throws NulsException {
         List<ContractMergedTransfer> resultList = new ArrayList<>();
-        for(ContractTransferTransaction transfer : transferList) {
+        for (ContractTransferTransaction transfer : transferList) {
             resultList.add(this.transformMergedTransfer(tx.getHash(), transfer));
         }
         return resultList;
@@ -315,7 +314,7 @@ public class ContractTransferHandler {
         List<CoinTo> toList = coinData.getTo();
         List<Output> outputs = result.getOutputs();
         Output output;
-        for(CoinTo to : toList) {
+        for (CoinTo to : toList) {
             output = new Output();
             output.setTo(to.getAddress());
             output.setValue(to.getAmount());

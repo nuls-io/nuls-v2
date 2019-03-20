@@ -29,9 +29,6 @@ public class BlockService {
 
     public BlockHeaderInfo getBestBlockHeader(int chainId) {
         ApiCache apiCache = CacheManager.getCache(chainId);
-        if (apiCache == null) {
-            return null;
-        }
         if (apiCache.getBestHeader() == null) {
             SyncInfo syncInfo = chainService.getSyncInfo(chainId);
             if (syncInfo == null) {
@@ -43,9 +40,6 @@ public class BlockService {
     }
 
     public BlockHeaderInfo getBlockHeader(int chainId, long height) {
-        if (!CacheManager.isChainExsit(chainId)) {
-            return null;
-        }
         Document document = mongoDBService.findOne(BLOCK_HEADER_TABLE + chainId, Filters.eq("_id", height));
         if (document == null) {
             return null;
@@ -54,9 +48,6 @@ public class BlockService {
     }
 
     public BlockHeaderInfo getBlockHeaderByHash(int chainId, String hash) {
-        if (!CacheManager.isChainExsit(chainId)) {
-            return null;
-        }
         Document document = mongoDBService.findOne(BLOCK_HEADER_TABLE + chainId, Filters.eq("hash", hash));
         if (document == null) {
             return null;
@@ -70,7 +61,7 @@ public class BlockService {
     }
 
     public PageInfo<BlockHeaderInfo> pageQuery(int chainId, int pageIndex, int pageSize, String packingAddress, boolean filterEmptyBlocks) {
-        if (!CacheManager.isChainExsit(chainId)) {
+        if (!CacheManager.isChainExist(chainId)) {
             return new PageInfo<>(pageIndex, pageSize);
         }
         Bson filter = null;
@@ -96,5 +87,11 @@ public class BlockService {
 
     public long getMaxHeight(int chainId, long endTime) {
         return this.mongoDBService.getMax(BLOCK_HEADER_TABLE + chainId, "_id", Filters.lte("createTime", endTime));
+    }
+
+    public void deleteBlockHeader(int chainId, long height) {
+        mongoDBService.delete(BLOCK_HEADER_TABLE + chainId, Filters.eq("_id", height));
+        ApiCache apiCache = CacheManager.getCache(chainId);
+        apiCache.setBestHeader(null);
     }
 }

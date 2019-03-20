@@ -31,4 +31,25 @@ public class AccountInfo {
      */
     private String encryptedPrikeyHex;
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof AccountInfo)) return false;
+
+        AccountInfo that = (AccountInfo) o;
+
+        if (address != null ? !address.equals(that.address) : that.address != null) return false;
+        if (alias != null ? !alias.equals(that.alias) : that.alias != null) return false;
+        if (pubkeyHex != null ? !pubkeyHex.equals(that.pubkeyHex) : that.pubkeyHex != null) return false;
+        return encryptedPrikeyHex != null ? encryptedPrikeyHex.equals(that.encryptedPrikeyHex) : that.encryptedPrikeyHex == null;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = address != null ? address.hashCode() : 0;
+        result = 31 * result + (alias != null ? alias.hashCode() : 0);
+        result = 31 * result + (pubkeyHex != null ? pubkeyHex.hashCode() : 0);
+        result = 31 * result + (encryptedPrikeyHex != null ? encryptedPrikeyHex.hashCode() : 0);
+        return result;
+    }
 }

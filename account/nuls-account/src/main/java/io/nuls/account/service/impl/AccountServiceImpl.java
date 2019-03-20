@@ -30,6 +30,7 @@ import io.nuls.account.constant.AccountErrorCode;
 import io.nuls.account.model.bo.Account;
 import io.nuls.account.model.bo.AccountKeyStore;
 import io.nuls.account.model.po.AccountPo;
+import io.nuls.account.rpc.call.ContractCall;
 import io.nuls.account.rpc.call.EventCmdCall;
 import io.nuls.account.service.AccountCacheService;
 import io.nuls.account.service.AccountKeyStoreService;
@@ -574,6 +575,9 @@ public class AccountServiceImpl implements AccountService, InitializingBean {
         accountCacheService.localAccountMaps.put(account.getAddress().getBase58(), account);
         //backup account to keystore
         keyStoreService.backupAccountToKeyStore(null, chainId, account.getAddress().getBase58(), password);
+        if(!ContractCall.invokeAccountContract(chainId, account.getAddress().getBase58())){
+            LoggerUtil.logger.warn("importAccountByPrikey invokeAccountContract failed. -address:{}", account.getAddress().getBase58());
+        }
         return account;
     }
 
@@ -647,6 +651,10 @@ public class AccountServiceImpl implements AccountService, InitializingBean {
         accountCacheService.localAccountMaps.put(account.getAddress().getBase58(), account);
         //backup account to keystore
         keyStoreService.backupAccountToKeyStore(null, chainId, account.getAddress().getBase58(), password);
+
+        if(!ContractCall.invokeAccountContract(chainId, account.getAddress().getBase58())){
+            LoggerUtil.logger.warn("importAccountByPrikey invokeAccountContract failed. -address:{}", account.getAddress().getBase58());
+        }
         return account;
     }
 

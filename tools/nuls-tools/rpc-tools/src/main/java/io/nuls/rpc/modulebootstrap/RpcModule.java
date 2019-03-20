@@ -1,18 +1,17 @@
 package io.nuls.rpc.modulebootstrap;
 
-import io.nuls.rpc.model.message.Message;
-import io.nuls.rpc.model.message.MessageType;
-import io.nuls.rpc.model.message.MessageUtil;
-import io.nuls.rpc.model.message.Request;
+import io.nuls.rpc.model.message.*;
 import io.nuls.rpc.netty.bootstrap.NettyServer;
 import io.nuls.rpc.netty.channel.ConnectData;
 import io.nuls.rpc.netty.channel.manager.ConnectManager;
 import io.nuls.rpc.netty.processor.ResponseMessageProcessor;
 import io.nuls.tools.basic.InitializingBean;
+import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Order;
 import io.nuls.tools.model.StringUtils;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.log.Log;
+import io.nuls.tools.parse.MapUtils;
 import io.nuls.tools.thread.ThreadUtils;
 import io.nuls.tools.thread.commom.NulsThreadFactory;
 import lombok.Getter;
@@ -37,11 +36,8 @@ import java.util.concurrent.TimeUnit;
 @Getter
 @Setter
 @Slf4j
-@Order(0)
+@Order(Integer.MIN_VALUE)
 public abstract class RpcModule implements InitializingBean {
-
-    ScheduledThreadPoolExecutor notifyExecutor = ThreadUtils.createScheduledThreadPool(1, new NulsThreadFactory("rpc-follow-notify"));
-
 
     private static final String ROLE = "1.0";
 
@@ -59,6 +55,8 @@ public abstract class RpcModule implements InitializingBean {
      * 当前模块依赖的其他模块的运行状态（是否接收到模块推送的ready通知）
      */
     private Map<Module, Boolean> dependencies = new ConcurrentHashMap<>();
+
+    @Autowired NotifySender notifySender;
 
     @Override
     public final void afterPropertiesSet() throws NulsException {
@@ -124,7 +122,7 @@ public abstract class RpcModule implements InitializingBean {
             }
         }
         if (this.isReady()) {
-            notifyFollowerReady(module,0);
+            notifyFollowerReady(module);
         }
     }
 
@@ -132,31 +130,48 @@ public abstract class RpcModule implements InitializingBean {
      * 通知follower当前模块已经进入ready状态
      * @param module
      */
-    private void notifyFollowerReady(Module module,int tryCount) {
-        notifyExecutor.execute(()->{
+    private void notifyFollowerReady(Module module) {
+        notifySender.send(()->{
             if(followerList.get(module)){
-                return ;
+                return true;
             }
-            Request request = MessageUtil.defaultRequest();
-            request.getRequestMethods().put("listenerDependenciesReady", this.moduleInfo());
-            Message message = MessageUtil.basicMessage(MessageType.Request);
-            message.setMessageData(request);
+            Response cmdResp = null;
             try {
-                ConnectManager.sendMessage(module.getName(), message);
-                log.info("notify follower {} is Ready success",module);
-                followerList.put(module,Boolean.TRUE);
+                cmdResp = ResponseMessageProcessor.requestAndResponse(module.getName(), "listenerDependenciesReady", MapUtils.beanToLinkedMap(this.moduleInfo()));
+                if(cmdResp.isSuccess()){
+                    followerList.put(module,Boolean.TRUE);
+                    log.info("notify follower {} is Ready success",module);
+                    return true;
+                }else{
+                    return false;
+                }
             } catch (Exception e) {
-                if(tryCount > 5){
-                    log.error("notify follower {} is Ready fail ",module,e);
-                    return ;
-                }
-                try {
-                    TimeUnit.SECONDS.sleep(1);
-                    notifyFollowerReady(module, tryCount+1);
-                } catch (InterruptedException e1) {
-                    log.warn("sleep线程发生异常");
-                }
+                log.error("Calling remote interface failed. module:{} - interface:{} - message:{}", module, "registerModuleDependencies", e.getMessage());
+                return false;
             }
+//            Request request = MessageUtil.defaultRequest();
+//            request.getRequestMethods().put("listenerDependenciesReady", this.moduleInfo());
+//            Message message = MessageUtil.basicMessage(MessageType.Request);
+//            message.setMessageData(request);
+//            try {
+//                ConnectManager.sendMessage(module.getName(), message);
+//                log.info("notify follower {} is Ready success",module);
+//                followerList.put(module,Boolean.TRUE);
+//                return true;
+//            } catch (Exception e) {
+//                log.warn("notify follower {} is Ready fail ",module,e);
+//                return false;
+////                if(tryCount > 5){
+////                    log.error("notify follower {} is Ready fail ",module,e);
+////                    return ;
+////                }
+////                try {
+////                    TimeUnit.SECONDS.sleep(1);
+////                    notifyFollowerReady(module, tryCount+1);
+////                } catch (InterruptedException e1) {
+////                    log.warn("sleep线程发生异常");
+////                }
+//            }
         });
     }
 
@@ -164,7 +179,7 @@ public abstract class RpcModule implements InitializingBean {
      * 通知所有follower当前模块已经进入ready状态
      */
     private void notifyFollowerReady() {
-        followerList.keySet().stream().forEach((module)->this.notifyFollowerReady(module,0));
+        followerList.keySet().stream().forEach((module)->this.notifyFollowerReady(module));
     }
 
     /**

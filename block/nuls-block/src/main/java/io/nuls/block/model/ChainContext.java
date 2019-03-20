@@ -26,7 +26,7 @@ import io.nuls.base.data.Block;
 import io.nuls.block.cache.CacheHandler;
 import io.nuls.block.cache.SmallBlockCacher;
 import io.nuls.block.constant.RunningStatusEnum;
-import io.nuls.block.manager.ChainManager;
+import io.nuls.block.manager.BlockChainManager;
 import io.nuls.block.utils.LoggerUtil;
 import io.nuls.tools.log.logback.NulsLogger;
 import io.nuls.tools.protocol.Protocol;
@@ -155,17 +155,17 @@ public class ChainContext {
     }
 
     public void init() {
+        this.setStatus(RunningStatusEnum.INITIALIZING);
         duplicateBlockMap = new HashMap<>();
         systemTransactionType = new ArrayList<>();
         version = 1;
         doSyn = true;
         lock = new StampedLock();
         LoggerUtil.init(chainId, parameters.getLogLevel());
-        this.setStatus(RunningStatusEnum.INITIALIZING);
         //各类缓存初始化
         SmallBlockCacher.init(chainId);
         CacheHandler.init(chainId);
-        ChainManager.init(chainId);
+        BlockChainManager.init(chainId);
     }
 
     public void start() {

@@ -1,12 +1,56 @@
 package io.nuls.transaction.constant;
 
-/**
- * 交易模块配置常量
- * @author: qinyifeng
- * @date: 2018/12/13
- */
-public class TxConfig {
+import io.nuls.tools.core.annotation.Configuration;
+import io.nuls.tools.core.annotation.Value;
+import io.nuls.transaction.model.bo.config.ConfigBean;
+import lombok.Data;
 
-    public static Boolean PACKAGING = null;
-    public static String DB_ROOT_PATH = "../../../../data/tx";
+import java.io.File;
+
+/**
+ * Transaction module setting
+ * @author: Charlie
+ * @date: 2019/03/14
+ */
+@Configuration(persistDomain = "transaction")
+@Data
+public class TxConfig {
+    /** 当前链默认配置*/
+    private ConfigBean chainConfig;
+    /**
+     * ROCK DB 数据库文件存储路径
+     */
+    @Value("DataPath")
+    private String dataPath;
+    /** 交易模块数据根目录*/
+    private String txDataRoot;
+    /** 模块code*/
+    private String moduleCode;
+    /** 主链链ID*/
+    private int mainChainId;
+    /** 主链主资产ID*/
+    private int mainAssetId;
+    /** 语言*/
+    private String language;
+    /** 编码*/
+    private String encoding;
+    /** 本地计算nonce值的hash缓存有效时间 30秒*/
+    private int hashTtl;
+    /** 跨链交易打包确认后需要达到的最低阈值高度才生效*/
+    private long ctxEffectThreshold;
+    /** 跨链验证通过率百分比, 跨链通过率 */
+    private String crossVerifyResultPassRat;
+    /** 链内通过率 */
+    private String chainNodesResultPassRate;
+    /** 友链链内最近N个出块者阈值*/
+    private int recentPackagerThreshold;
+    /** 未确认交易过期毫秒数-30分钟 */
+    private long unconfirmedTxExpireMs;
+    /** h2数据库交易记录表分表数量*/
+    private int h2TxTableNumber;
+
+
+    public String getTxDataRoot() {
+        return dataPath + File.separator + txDataRoot;
+    }
 }

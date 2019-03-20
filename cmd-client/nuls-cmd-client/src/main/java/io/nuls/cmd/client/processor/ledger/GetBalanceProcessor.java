@@ -37,9 +37,13 @@ import io.nuls.cmd.client.CommandResult;
 import io.nuls.cmd.client.Config;
 import io.nuls.cmd.client.processor.CommandProcessor;
 import io.nuls.cmd.client.processor.CommandGroup;
+import io.nuls.cmd.client.utils.Na;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
 import lombok.extern.slf4j.Slf4j;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * @author: zhoulijun
@@ -97,6 +101,10 @@ public class GetBalanceProcessor implements CommandProcessor {
         if(result.isFailed()){
             return CommandResult.getFailed(result);
         }
-        return CommandResult.getSuccess(result);
+        Map<String,Object> r = new HashMap<>(3);
+        r.put("available",Na.valueOf(result.getData().getAvailable()).toNuls());
+        r.put("freeze",Na.valueOf(result.getData().getFreeze()).toNuls());
+        r.put("total",Na.valueOf(result.getData().getTotal()).toNuls());
+        return CommandResult.getSuccess(new Result(r));
     }
 }

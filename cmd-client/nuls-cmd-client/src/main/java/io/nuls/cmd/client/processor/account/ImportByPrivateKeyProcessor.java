@@ -80,7 +80,7 @@ public class ImportByPrivateKeyProcessor extends AccountBaseProcessor implements
         if(StringUtils.isNotBlank(password)){
             CommandHelper.confirmPwd(password);
         }
-        ImportAccountByPrivateKeyReq req = new ImportAccountByPrivateKeyReq(password,prikey,false);
+        ImportAccountByPrivateKeyReq req = new ImportAccountByPrivateKeyReq(password,prikey,true);
         Result<String> result = accountService.importAccountByPrivateKey(req);
         if (result.isFailed()) {
             return CommandResult.getFailed(result);

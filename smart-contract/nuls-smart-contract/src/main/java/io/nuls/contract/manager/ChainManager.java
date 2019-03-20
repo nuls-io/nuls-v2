@@ -24,11 +24,10 @@
  */
 package io.nuls.contract.manager;
 
-import io.nuls.contract.constant.ContractConstant;
+import io.nuls.contract.config.ContractConfig;
 import io.nuls.contract.constant.ContractDBConstant;
 import io.nuls.contract.model.bo.Chain;
 import io.nuls.contract.model.bo.config.ConfigBean;
-import io.nuls.contract.model.bo.config.ConfigItem;
 import io.nuls.contract.model.dto.ContractTxRegisterDto;
 import io.nuls.contract.rpc.call.TransactionCall;
 import io.nuls.contract.storage.ConfigStorageService;
@@ -41,7 +40,6 @@ import io.nuls.rpc.model.ModuleE;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.exception.NulsException;
-import io.nuls.tools.io.IoUtils;
 import io.nuls.tools.log.Log;
 import io.nuls.tools.parse.JSONUtils;
 
@@ -69,6 +67,9 @@ public class ChainManager {
     @Autowired
     private ConfigStorageService configStorageService;
 
+    @Autowired
+    private ContractConfig contractConfig;
+
     private Map<Integer, Chain> chainMap = new ConcurrentHashMap<>();
 
     /**
@@ -88,23 +89,25 @@ public class ChainManager {
             int chainId = entry.getKey();
             chain.setConfig(entry.getValue());
             /*
-            初始化链数据库表/Initialize linked database tables
-            */
+             * 初始化链数据库表/Initialize linked database tables
+             */
             initTable(chain);
             /*
-             *初始化智能合约执行器
+             * 初始化智能合约执行器
              */
             initContractExecutor(chain);
             /*
-             *初始化智能合约nrc20-token管理器
+             * 初始化智能合约nrc20-token管理器
              */
             initTokenBalanceManager(chain);
+            /*
+             * 注册交易到交易管理模块
+             */
             registerTx(chain);
             chainMap.put(chainId, chain);
             //订阅Block模块接口
-//            BlockCall.subscriptionNewBlockHeight(chain);
+            //BlockCall.subscriptionNewBlockHeight(chain);
 
-            Log.debug("\nchain = " + JSONUtils.obj2PrettyJson(chain));
         }
     }
 
@@ -154,9 +157,10 @@ public class ChainManager {
             and the main chain configuration information needs to be read from the configuration file at this time.
             */
             if (configMap == null || configMap.size() == 0) {
-                String configJson = IoUtils.read(ContractConstant.CONFIG_FILE_PATH);
-                List<ConfigItem> configItemList = JSONUtils.json2list(configJson, ConfigItem.class);
-                ConfigBean configBean = ConfigManager.initManager(configItemList);
+                //String configJson = IoUtils.read(ContractConstant.CONFIG_FILE_PATH);
+                //List<ConfigItem> configItemList = JSONUtils.json2list(configJson, ConfigItem.class);
+                //ConfigBean configBean = ConfigManager.initManager(configItemList);
+                ConfigBean configBean = contractConfig.getChainConfig();
                 if (configBean == null) {
                     return null;
                 }

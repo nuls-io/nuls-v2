@@ -38,6 +38,10 @@ public class Chain {
         return config;
     }
 
+    public int getChainId(){
+        return this.config.getChainId();
+    }
+
     public void setConfig(ConfigBean config) {
         this.config = config;
     }

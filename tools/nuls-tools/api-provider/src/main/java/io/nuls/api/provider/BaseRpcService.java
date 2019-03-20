@@ -21,7 +21,7 @@ import java.util.function.Function;
 @Slf4j
 public abstract class BaseRpcService extends BaseService {
 
-    public static final ErrorCode RPC_ERROR_CODE = ErrorCode.init("10002");
+    public static final ErrorCode RPC_ERROR_CODE = ErrorCode.init("10016");
 
     /**
      * 调用其他模块rpc接口
@@ -46,8 +46,8 @@ public abstract class BaseRpcService extends BaseService {
         }
         if (!cmdResp.isSuccess()) {
             log.error("Calling remote interface failed. module:{} - interface:{} - ResponseComment:{}", module, method, cmdResp.getResponseComment());
-            if(cmdResp.getResponseData() != null){
-                Map<String,String> error = (Map)((Map) cmdResp.getResponseData()).get(method);
+            Map<String,String> error = (Map)((Map) cmdResp.getResponseData()).get(method);
+            if(error != null){
                 return fail(RPC_ERROR_CODE,error.get("msg"));
             }else{
                 return fail(RPC_ERROR_CODE,cmdResp.getResponseComment());

@@ -31,7 +31,7 @@ public class TransactionCall {
      */
     public static Object request(String moduleCode, String cmd, Map params) throws NulsException {
         try {
-            params.put(Constants.VERSION_KEY_STR, "1.0");
+            params.put(Constants.VERSION_KEY_STR, TxConstant.RPC_VERSION);
             Response cmdResp = ResponseMessageProcessor.requestAndResponse(moduleCode, cmd, params);
             Map resData = (Map)cmdResp.getResponseData();
             if (!cmdResp.isSuccess()) {
@@ -45,9 +45,6 @@ public class TransactionCall {
                 }
                 throw new Exception(errorMsg);
             }
-            /*if (null == resData) {
-                return null;
-            }*/
             return resData.get(cmd);
         } catch (Exception e) {
             Log.debug("cmd: {}", cmd);
@@ -134,16 +131,21 @@ public class TransactionCall {
      *
      * @param moduleValidator
      * @param txHexList
-     * @return 返回未通过验证的交易hash / return unverified transaction hash
+     * @return 返回未通过验证的交易hash, 如果出现异常那么交易全部返回(不通过) / return unverified transaction hash
      */
-    public static List<String> txModuleValidator(Chain chain, String moduleValidator, String moduleCode, List<String> txHexList) throws NulsException {
+    public static List<String> txModuleValidator(Chain chain, String moduleValidator, String moduleCode, List<String> txHexList) {
 
-        //调用交易模块统一验证器
-        Map<String, Object> params = new HashMap(TxConstant.INIT_CAPACITY_8);
-        params.put("chainId", chain.getChainId());
-        params.put("txHexList", txHexList);
-        Map result = (Map) TransactionCall.request(moduleCode, moduleValidator, params);
-        return (List<String>) result.get("list");
+        try {
+            //调用交易模块统一验证器
+            Map<String, Object> params = new HashMap(TxConstant.INIT_CAPACITY_8);
+            params.put("chainId", chain.getChainId());
+            params.put("txHexList", txHexList);
+            Map result = (Map) TransactionCall.request(moduleCode, moduleValidator, params);
+            return (List<String>) result.get("list");
+        } catch (NulsException e) {
+            return txHexList;
+        }
+
     }
 
 }

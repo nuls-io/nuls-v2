@@ -36,7 +36,7 @@ public interface ApiConstant {
      * 模块配置文件名称
      * Module configuration file name.
      */
-    String MODULES_CONFIG_FILE = "modules.json";
+    String MODULES_CONFIG_FILE = "module.json";
     /**
      * 链ID
      */

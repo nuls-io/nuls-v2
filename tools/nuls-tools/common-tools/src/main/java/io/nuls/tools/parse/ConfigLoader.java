@@ -52,9 +52,23 @@ public class ConfigLoader {
      */
     public static Properties loadProperties(String fileName) throws IOException {
         InputStream is = ConfigLoader.class.getClassLoader().getResourceAsStream(fileName);
-        Properties prop = new Properties();
-        prop.load(is);
-        is.close();
+        return loadProperties(is);
+    }
+
+    public static Properties loadProperties(InputStream is) throws IOException {
+        Properties prop;
+        try {
+            prop = new Properties();
+            prop.load(is);
+        } catch (IOException e) {
+            throw e;
+        } finally {
+            try {
+                if(is != null) {
+                    is.close();
+                }
+            } catch (IOException e) {}
+        }
         return prop;
     }
 
@@ -72,6 +86,21 @@ public class ConfigLoader {
         Ini ini = new Ini();
         ini.setConfig(cfg);
         ini.load(url);
+        return new IniEntity(ini);
+    }
+
+    /**
+     * 读取ini配置文件
+     *
+     * @param inputStream 配置文件
+     * @return ini配置文件类
+     */
+    public static IniEntity loadIni(InputStream inputStream) throws IOException {
+        Config cfg = new Config();
+        cfg.setMultiSection(true);
+        Ini ini = new Ini();
+        ini.setConfig(cfg);
+        ini.load(inputStream);
         return new IniEntity(ini);
     }
 

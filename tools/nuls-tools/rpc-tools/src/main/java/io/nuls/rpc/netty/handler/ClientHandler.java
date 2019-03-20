@@ -49,6 +49,15 @@ public class ClientHandler extends SimpleChannelInboundHandler<Object> {
         return this.handshakeFuture;
     }
 
+    public ClientHandler(WebSocketClientHandshaker handShaker){
+        this.handShaker = handShaker;
+    }
+
+    @Override
+    public void channelActive(ChannelHandlerContext ctx) {
+        handShaker.handshake(ctx.channel());
+    }
+
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, Object msg)throws Exception{
         Channel ch = ctx.channel();
@@ -98,5 +107,9 @@ public class ClientHandler extends SimpleChannelInboundHandler<Object> {
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
         super.exceptionCaught(ctx, cause);
         cause.printStackTrace();
+        if (!handshakeFuture.isDone()) {
+            handshakeFuture.setFailure(cause);
+        }
+        ctx.close();
     }
 }

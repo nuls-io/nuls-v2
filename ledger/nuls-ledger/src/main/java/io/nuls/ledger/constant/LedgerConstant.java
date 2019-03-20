@@ -10,10 +10,10 @@
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- * 
+ *
  * The above copyright notice and this permission notice shall be included in
  * all copies or substantial portions of the Software.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -26,24 +26,14 @@
 package io.nuls.ledger.constant;
 
 /**
- * Created by wangkun23 on 2018/11/19.
+ * Created by ljs on 2018/11/19.
  */
-public interface LedgerConstant {
+public class LedgerConstant {
 
-    /**
-     * 模块配置文件名称
-     * Module configuration file name.
-     */
-    public static String MODULES_CONFIG_FILE = "modules.json";
+    public static final String MODULE_DB_PATH = "/ld";
 
-    /**
-     * 系统使用的编码方式
-     * The encoding used by the nuls system.
-     */
-    public static String DEFAULT_ENCODING = "UTF-8";
-
-    public static int  UNCONFIRMED_NONCE = 0;
-    public static int  CONFIRMED_NONCE = 1;
+    public static int UNCONFIRMED_NONCE = 0;
+    public static int CONFIRMED_NONCE = 1;
 
 
     /**
@@ -66,8 +56,6 @@ public interface LedgerConstant {
      * 缓存的账户初始化nonce
      */
     public static final String INIT_NONCE = "ffffffff";
-    /**
-     * 未确认交易nonce的过期间隔时间，单位ms
-     */
-    public static final int UNCONFIRM_NONCE_EXPIRED_TIME =20*60*1000;
+    public static String DEFAULT_ENCODING = "en";
+    public static int UNCONFIRM_NONCE_EXPIRED_TIME = 100000;
 }

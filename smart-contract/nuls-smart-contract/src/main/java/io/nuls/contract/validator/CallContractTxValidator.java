@@ -45,12 +45,11 @@ import static io.nuls.contract.constant.ContractErrorCode.*;
 import static io.nuls.contract.util.ContractUtil.getSuccess;
 
 /**
- * 
  * @author: PierreLuo
  * @date: 2019-03-07
  */
 @Component
-public class CallContractTxValidator{
+public class CallContractTxValidator {
 
     public Result validate(int chainId, CallContractTransaction tx) throws NulsException {
         CallContractData txData = tx.getTxDataObj();
@@ -59,7 +58,7 @@ public class CallContractTxValidator{
         byte[] sender = txData.getSender();
         Set<String> addressSet = SignatureUtil.getAddressFromTX(tx, chainId);
 
-        if(!ContractLedgerUtil.isExistContractAddress(chainId, contractAddress)) {
+        if (!ContractLedgerUtil.isExistContractAddress(chainId, contractAddress)) {
             Log.error("contract entity error: The contract does not exist.");
             return Result.getFailed(CONTRACT_ADDRESS_NOT_EXIST);
         }

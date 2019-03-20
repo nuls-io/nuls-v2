@@ -25,6 +25,7 @@ import io.nuls.api.analysis.WalletRpcHandler;
 import io.nuls.api.cache.ApiCache;
 import io.nuls.api.db.*;
 import io.nuls.api.exception.JsonRpcException;
+import io.nuls.api.exception.NotFoundException;
 import io.nuls.api.manager.CacheManager;
 import io.nuls.api.model.po.db.*;
 import io.nuls.api.model.rpc.RpcErrorCode;
@@ -73,6 +74,9 @@ public class PocConsensusController {
     public RpcResult getBestRoundItemList(List<Object> params) {
         VerifyUtils.verifyParams(params, 1);
         int chainId = (int) params.get(0);
+        if (!CacheManager.isChainExist(chainId)) {
+            return RpcResult.dataNotFound();
+        }
 
         ApiCache apiCache = CacheManager.getCache(chainId);
         List<PocRoundItem> itemList = apiCache.getCurrentRound().getItemList();
@@ -87,14 +91,16 @@ public class PocConsensusController {
         VerifyUtils.verifyParams(params, 1);
         int chainId = (int) params.get(0);
 
-        Map<String, Long> resultMap = new HashMap<>();
-        resultMap.put("seedsCount", (long) ApiContext.SEED_NODE_ADDRESS.size());
         ApiCache apiCache = CacheManager.getCache(chainId);
-
-        resultMap.put("consensusCount", (long) (apiCache.getCurrentRound().getMemberCount() - ApiContext.SEED_NODE_ADDRESS.size()));
-        long count = agentService.agentsCount(chainId, ApiContext.bestHeight);
+        if (apiCache == null) {
+            return RpcResult.dataNotFound();
+        }
+        Map<String, Long> resultMap = new HashMap<>();
+        resultMap.put("seedsCount", (long) apiCache.getChainInfo().getSeeds().size());
+        resultMap.put("consensusCount", (long) (apiCache.getCurrentRound().getMemberCount() - apiCache.getChainInfo().getSeeds().size()));
+        long count = agentService.agentsCount(chainId, apiCache.getBestHeader().getHeight());
         resultMap.put("agentCount", count);
-        resultMap.put("totalCount", count + ApiContext.SEED_NODE_ADDRESS.size());
+        resultMap.put("totalCount", count + apiCache.getChainInfo().getSeeds().size());
         RpcResult result = new RpcResult();
         result.setResult(resultMap);
         return result;
@@ -119,9 +125,13 @@ public class PocConsensusController {
 //        for (PocRoundItem item : itemList) {
 //            map.put(item.getPackingAddress(), 1);
 //        }
-
-        PageInfo<AgentInfo> list = agentService.getAgentList(chainId, type, pageIndex, pageSize);
-        for (AgentInfo agentInfo : list.getList()) {
+        PageInfo<AgentInfo> pageInfo;
+        if (!CacheManager.isChainExist(chainId)) {
+            pageInfo = new PageInfo<>(pageIndex, pageSize);
+        } else {
+            pageInfo = agentService.getAgentList(chainId, type, pageIndex, pageSize);
+        }
+        for (AgentInfo agentInfo : pageInfo.getList()) {
             Result<AgentInfo> clientResult = WalletRpcHandler.getAgentInfo(chainId, agentInfo.getTxHash());
             if (clientResult.isSuccess()) {
                 agentInfo.setCreditValue(clientResult.getData().getCreditValue());
@@ -135,9 +145,8 @@ public class PocConsensusController {
                 }
             }
         }
-
-        Collections.sort(list.getList(), AgentComparator.getInstance());
-        return new RpcResult().setResult(list);
+        Collections.sort(pageInfo.getList(), AgentComparator.getInstance());
+        return new RpcResult().setResult(pageInfo);
     }
 
     @RpcMethod("getConsensusNode")
@@ -145,15 +154,12 @@ public class PocConsensusController {
         VerifyUtils.verifyParams(params, 2);
         int chainId = (int) params.get(0);
         String agentHash = (String) params.get(1);
-        ApiCache apiCache = CacheManager.getCache(chainId);
-
-        if (apiCache == null) {
-            return RpcResult.failed(RpcErrorCode.DATA_NOT_EXISTS);
+        if (!CacheManager.isChainExist(chainId)) {
+            return RpcResult.dataNotFound();
         }
-
         AgentInfo agentInfo = agentService.getAgentByHash(chainId, agentHash);
         if (agentInfo == null) {
-            return RpcResult.failed(RpcErrorCode.DATA_NOT_EXISTS);
+            return RpcResult.dataNotFound();
         }
         long count = punishService.getYellowCount(chainId, agentInfo.getAgentAddress());
         if (agentInfo.getTotalPackingCount() != 0) {
@@ -192,22 +198,26 @@ public class PocConsensusController {
         return RpcResult.success(agentInfo);
     }
 
-
     @RpcMethod("getConsensusStatistical")
     public RpcResult getConsensusStatistical(List<Object> params) {
         VerifyUtils.verifyParams(params, 2);
         int chainId = (int) params.get(0);
         int type = (int) params.get(1);
+        if (!CacheManager.isChainExist(chainId)) {
+            return RpcResult.success(new ArrayList<>());
+        }
         List list = this.statisticalService.getStatisticalList(chainId, type, CONSENSUS_LOCKED);
         return new RpcResult().setResult(list);
     }
-
 
     @RpcMethod("getConsensusNodeStatistical")
     public RpcResult getConsensusNodeStatistical(List<Object> params) {
         VerifyUtils.verifyParams(params, 2);
         int chainId = (int) params.get(0);
         int type = (int) params.get(1);
+        if (!CacheManager.isChainExist(chainId)) {
+            return RpcResult.success(new ArrayList<>());
+        }
         List list = this.statisticalService.getStatisticalList(chainId, type, "nodeCount");
         return new RpcResult().setResult(list);
     }
@@ -217,6 +227,9 @@ public class PocConsensusController {
         VerifyUtils.verifyParams(params, 2);
         int chainId = (int) params.get(0);
         int type = (int) params.get(1);
+        if (!CacheManager.isChainExist(chainId)) {
+            return RpcResult.success(new ArrayList<>());
+        }
         List list = this.statisticalService.getStatisticalList(chainId, type, "annualizedReward");
         return new RpcResult().setResult(list);
     }
@@ -231,7 +244,7 @@ public class PocConsensusController {
         int type = (int) params.get(3);
         String agentAddress = (String) params.get(4);
         if (!AddressTool.validAddress(chainId, agentAddress)) {
-            throw new JsonRpcException(new RpcResultError(RpcErrorCode.PARAMS_ERROR, "[address] is inValid"));
+            return RpcResult.paramError("[address] is inValid");
         }
         if (pageIndex <= 0) {
             pageIndex = 1;
@@ -239,7 +252,12 @@ public class PocConsensusController {
         if (pageSize <= 0 || pageSize > 100) {
             pageSize = 10;
         }
-        PageInfo<PunishLogInfo> list = punishService.getPunishLogList(chainId, type, agentAddress, pageIndex, pageSize);
+        PageInfo<PunishLogInfo> list;
+        if (!CacheManager.isChainExist(chainId)) {
+            list = new PageInfo<>(pageIndex, pageSize);
+        } else {
+            list = punishService.getPunishLogList(chainId, type, agentAddress, pageIndex, pageSize);
+        }
         return new RpcResult().setResult(list);
     }
 
@@ -252,7 +270,7 @@ public class PocConsensusController {
         String agentHash = (String) params.get(3);
 
         if (StringUtils.isBlank(agentHash)) {
-            throw new JsonRpcException(new RpcResultError(RpcErrorCode.PARAMS_ERROR, "[agentHash] is inValid"));
+            return RpcResult.paramError("[agentHash] is inValid");
         }
         if (pageIndex <= 0) {
             pageIndex = 1;
@@ -260,7 +278,12 @@ public class PocConsensusController {
         if (pageSize <= 0 || pageSize > 100) {
             pageSize = 10;
         }
-        PageInfo<DepositInfo> list = this.depositService.getDepositListByAgentHash(chainId, agentHash, pageIndex, pageSize);
+        PageInfo<DepositInfo> list;
+        if (!CacheManager.isChainExist(chainId)) {
+            list = new PageInfo<>(pageIndex, pageSize);
+        } else {
+            list = this.depositService.getDepositListByAgentHash(chainId, agentHash, pageIndex, pageSize);
+        }
         return new RpcResult().setResult(list);
     }
 
@@ -274,7 +297,7 @@ public class PocConsensusController {
         int type = (int) params.get(4);
 
         if (StringUtils.isBlank(agentHash)) {
-            throw new JsonRpcException(new RpcResultError(RpcErrorCode.PARAMS_ERROR, "[agentHash] is inValid"));
+            return RpcResult.paramError("[agentHash] is inValid");
         }
         if (pageIndex <= 0) {
             pageIndex = 1;
@@ -282,7 +305,12 @@ public class PocConsensusController {
         if (pageSize <= 0 || pageSize > 100) {
             pageSize = 10;
         }
-        PageInfo<DepositInfo> list = this.depositService.getCancelDepositListByAgentHash(chainId, agentHash, type, pageIndex, pageSize);
+        PageInfo<DepositInfo> list;
+        if (!CacheManager.isChainExist(chainId)) {
+            list = new PageInfo<>(pageIndex, pageSize);
+        } else {
+            list = this.depositService.getCancelDepositListByAgentHash(chainId, agentHash, type, pageIndex, pageSize);
+        }
         return new RpcResult().setResult(list);
     }
 
@@ -292,7 +320,7 @@ public class PocConsensusController {
         int chainId = (int) params.get(0);
         ApiCache apiCache = CacheManager.getCache(chainId);
         if (apiCache == null) {
-            throw new JsonRpcException(new RpcResultError(RpcErrorCode.DATA_NOT_EXISTS));
+            return RpcResult.dataNotFound();
         }
         return new RpcResult().setResult(apiCache.getCurrentRound());
     }
@@ -309,6 +337,9 @@ public class PocConsensusController {
         if (pageSize <= 0 || pageSize > 100) {
             pageSize = 10;
         }
+        if (!CacheManager.isChainExist(chainId)) {
+            return RpcResult.success(new PageInfo<>(pageIndex, pageSize));
+        }
         long count = roundService.getTotalCount(chainId);
         List<PocRound> roundList = roundService.getRoundList(chainId, pageIndex, pageSize);
         PageInfo<PocRound> pageInfo = new PageInfo<>();
@@ -324,6 +355,9 @@ public class PocConsensusController {
         VerifyUtils.verifyParams(params, 2);
         int chainId = (int) params.get(0);
         long roundIndex = Long.parseLong(params.get(1) + "");
+        if (!CacheManager.isChainExist(chainId)) {
+            return RpcResult.dataNotFound();
+        }
         if (roundIndex == 1) {
             return getFirstRound(chainId);
         }
@@ -331,7 +365,7 @@ public class PocConsensusController {
         CurrentRound round = new CurrentRound();
         PocRound pocRound = roundService.getRound(chainId, roundIndex);
         if (pocRound == null) {
-            throw new JsonRpcException(new RpcResultError(RpcErrorCode.DATA_NOT_EXISTS));
+            return RpcResult.dataNotFound();
         }
         List<PocRoundItem> itemList = roundService.getRoundItemList(chainId, roundIndex);
         round.setItemList(itemList);

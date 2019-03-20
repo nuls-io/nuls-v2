@@ -1,7 +1,9 @@
 package io.nuls.api.analysis;
 
 import io.nuls.api.ApiContext;
+import io.nuls.api.cache.ApiCache;
 import io.nuls.api.constant.ApiConstant;
+import io.nuls.api.manager.CacheManager;
 import io.nuls.api.model.entity.*;
 import io.nuls.api.model.po.db.*;
 import io.nuls.base.basic.AddressTool;
@@ -54,12 +56,12 @@ public class AnalysisHandler {
         info.setRoundStartTime(extendsData.getRoundStartTime());
         info.setAgentVersion(extendsData.getBlockVersion());
         //是否是种子节点打包的区块
-        if (ApiContext.SEED_NODE_ADDRESS.contains(info.getPackingAddress()) || info.getHeight() == 0) {
+        ApiCache apiCache = CacheManager.getCache(chainId);
+        if (apiCache.getChainInfo().getSeeds().contains(info.getPackingAddress()) || info.getHeight() == 0) {
             info.setSeedPacked(true);
         }
         return info;
     }
-
 
     public static List<TransactionInfo> toTxs(List<Transaction> txList, BlockHeaderInfo blockHeader) throws Exception {
         List<TransactionInfo> txs = new ArrayList<>();
@@ -164,8 +166,8 @@ public class AnalysisHandler {
         } else if (tx.getType() == ApiConstant.TX_TYPE_RED_PUNISH) {
             return toRedPublishLog(tx);
         } else if (tx.getType() == ApiConstant.TX_TYPE_CREATE_CONTRACT) {
-        }
 
+        }
         return null;
     }
 

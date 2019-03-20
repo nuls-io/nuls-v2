@@ -171,9 +171,9 @@ public class MeetingRound {
 
     private boolean validAccount(Chain chain,String address) {
         try {
-            Properties properties = ConfigLoader.loadProperties(ConsensusConstant.PASSWORD_CONFIG_NAME);
-            String password = properties.getProperty(ConsensusConstant.PASSWORD, ConsensusConstant.PASSWORD);
-            HashMap callResult = CallMethodUtils.accountValid(chain.getConfig().getChainId(), address, password);
+            /*Properties properties = ConfigLoader.loadProperties(ConsensusConstant.PASSWORD_CONFIG_NAME);
+            String password = properties.getProperty(ConsensusConstant.PASSWORD, ConsensusConstant.PASSWORD);*/
+            HashMap callResult = CallMethodUtils.accountValid(chain.getConfig().getChainId(), address, chain.getConfig().getPassword());
             String priKey = (String) callResult.get("priKey");
             if (StringUtils.isNotBlank(priKey)){
                 return true;
@@ -225,6 +225,26 @@ public class MeetingRound {
                 myMember = member;
                 break;
             }
+        }
+        if(myMember != null && !chain.isPacker()){
+            CallMethodUtils.sendState(chain,true);
+            chain.setPacker(true);
+        }
+        if(myMember == null && chain.isPacker()){
+            CallMethodUtils.sendState(chain,false);
+            chain.setPacker(false);
+        }
+    }
+
+    public void calcLocalPacker(Chain chain) throws Exception{
+        Properties properties = ConfigLoader.loadProperties(ConsensusConstant.PASSWORD_CONFIG_NAME);
+        String address = properties.getProperty(ConsensusConstant.ADDRESS, ConsensusConstant.ADDRESS);
+        if(address.isEmpty()){
+            return;
+        }
+        MeetingMember member = getMember(AddressTool.getAddress(address),chain);
+        if (null != member) {
+            myMember = member;
         }
         if(myMember != null && !chain.isPacker()){
             CallMethodUtils.sendState(chain,true);

@@ -24,20 +24,35 @@
 package io.nuls.contract.util;
 
 import io.nuls.base.basic.AddressTool;
+import io.nuls.base.data.Address;
 import io.nuls.base.data.BlockHeader;
 import io.nuls.base.data.Transaction;
 import io.nuls.contract.constant.ContractConstant;
 import io.nuls.contract.constant.ContractErrorCode;
 import io.nuls.contract.model.bo.ContractResult;
+import io.nuls.contract.model.bo.ContractTempTransaction;
 import io.nuls.contract.model.bo.ContractWrapperTransaction;
 import io.nuls.contract.model.po.ContractTokenTransferInfoPo;
+import io.nuls.contract.model.tx.CallContractTransaction;
+import io.nuls.contract.model.tx.ContractBaseTransaction;
+import io.nuls.contract.model.tx.CreateContractTransaction;
+import io.nuls.contract.model.tx.DeleteContractTransaction;
+import io.nuls.contract.model.txdata.CallContractData;
+import io.nuls.contract.model.txdata.ContractData;
+import io.nuls.contract.model.txdata.CreateContractData;
+import io.nuls.contract.model.txdata.DeleteContractData;
 import io.nuls.contract.rpc.call.BlockCall;
 import io.nuls.db.service.RocksDBService;
+import io.nuls.rpc.info.Constants;
+import io.nuls.rpc.model.message.MessageUtil;
+import io.nuls.rpc.model.message.Response;
 import io.nuls.tools.basic.Result;
 import io.nuls.tools.basic.VarInt;
+import io.nuls.tools.constant.ErrorCode;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.exception.NulsRuntimeException;
 import io.nuls.tools.log.Log;
+import io.nuls.tools.model.StringUtils;
 import io.nuls.tools.parse.JSONUtils;
 
 import java.lang.reflect.Array;
@@ -57,7 +72,7 @@ public class ContractUtil {
     /**
      * 此长度来源于BlockExtendsData中定长变量的字节总数
      */
-    private static final int BLOCK_EXTENDS_DATA_FIX_LENGTH = 28;
+    private static final int BLOCK_EXTENDS_DATA_FIX_LENGTH = 21;
 
     private static final String STRING = "String";
 
@@ -103,6 +118,62 @@ public class ContractUtil {
             }
             return two;
         }
+    }
+
+    public static byte[] extractContractAddressFromTxData(Transaction tx) {
+        if (tx == null) {
+            return null;
+        }
+        int txType = tx.getType();
+        if (txType == ContractConstant.TX_TYPE_CREATE_CONTRACT
+                || txType == ContractConstant.TX_TYPE_CALL_CONTRACT
+                || txType == ContractConstant.TX_TYPE_DELETE_CONTRACT) {
+            return extractContractAddressFromTxData(tx.getTxData());
+        }
+        return null;
+    }
+
+    private static byte[] extractContractAddressFromTxData(byte[] txData) {
+        if (txData == null) {
+            return null;
+        }
+        int length = txData.length;
+        if (length < Address.ADDRESS_LENGTH * 2) {
+            return null;
+        }
+        byte[] contractAddress = new byte[Address.ADDRESS_LENGTH];
+        System.arraycopy(txData, Address.ADDRESS_LENGTH, contractAddress, 0, Address.ADDRESS_LENGTH);
+        return contractAddress;
+    }
+
+    public static ContractWrapperTransaction parseContractTransaction(ContractTempTransaction tx) throws NulsException {
+        ContractWrapperTransaction contractTransaction = null;
+        ContractData contractData = null;
+        boolean isContractTx = true;
+        switch (tx.getType()) {
+            case TX_TYPE_CREATE_CONTRACT:
+                CreateContractData create = new CreateContractData();
+                create.parse(tx.getTxData(), 0);
+                contractData = create;
+                break;
+            case TX_TYPE_CALL_CONTRACT:
+                CallContractData call = new CallContractData();
+                call.parse(tx.getTxData(), 0);
+                contractData = call;
+                break;
+            case TX_TYPE_DELETE_CONTRACT:
+                DeleteContractData delete = new DeleteContractData();
+                delete.parse(tx.getTxData(), 0);
+                contractData = delete;
+                break;
+            default:
+                isContractTx = false;
+                break;
+        }
+        if (isContractTx) {
+            contractTransaction = new ContractWrapperTransaction(tx, tx.getTxHex(), contractData);
+        }
+        return contractTransaction;
     }
 
     public static String[][] twoDimensionalArray(Object[] args) {
@@ -201,8 +272,17 @@ public class ContractUtil {
         return false;
     }
 
+    public static boolean isLockContract(long lastestHeight, long blockHeight) throws NulsException {
+        if (blockHeight > 0) {
+            long confirmCount = lastestHeight - blockHeight;
+            if (confirmCount < 7) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     public static byte[] getStateRoot(BlockHeader blockHeader) {
-        //TODO pierre stateRoot parse
         if (blockHeader == null || blockHeader.getExtend() == null) {
             return null;
         }
@@ -411,9 +491,41 @@ public class ContractUtil {
 
     public static BigInteger minus(BigInteger a, BigInteger b) {
         BigInteger result = a.subtract(b);
-        if(result.compareTo(BigInteger.ZERO) < 0) {
+        if (result.compareTo(BigInteger.ZERO) < 0) {
             throw new RuntimeException("Negative number detected.");
         }
         return result;
+    }
+
+    public static ContractBaseTransaction convertContractTx(Transaction tx) {
+        ContractBaseTransaction resultTx = null;
+        switch (tx.getType()) {
+            case TX_TYPE_CREATE_CONTRACT:
+                resultTx = new CreateContractTransaction();
+                resultTx.copyTx(tx);
+                break;
+            case TX_TYPE_CALL_CONTRACT:
+                resultTx = new CallContractTransaction();
+                resultTx.copyTx(tx);
+                break;
+            case TX_TYPE_DELETE_CONTRACT:
+                resultTx = new DeleteContractTransaction();
+                resultTx.copyTx(tx);
+                break;
+            default:
+                break;
+        }
+        return resultTx;
+    }
+
+    public static Response wrapperFailed(Result result) {
+        ErrorCode errorCode = result.getErrorCode();
+        String msg = result.getMsg();
+        if(StringUtils.isBlank(msg)) {
+            msg = errorCode.getMsg();
+        }
+        Response response = MessageUtil.newResponse("", Constants.BOOLEAN_FALSE, msg);
+        response.setResponseData(errorCode);
+        return response;
     }
 }

@@ -72,7 +72,7 @@ public class CreateContractTxProcessor {
         byte[] sender = txData.getSender();
 
         // 执行失败的合约直接返回
-        if(!contractResult.isSuccess()) {
+        if (!contractResult.isSuccess()) {
             return getSuccess();
         }
 
@@ -97,7 +97,7 @@ public class CreateContractTxProcessor {
         info.setAcceptDirectTransfer(acceptDirectTransfer);
         info.setNrc20(isNrc20Contract);
         // 获取 token tracker
-        if(isNrc20Contract) {
+        if (isNrc20Contract) {
             // NRC20 token 标准方法获取名称数据
             info.setNrc20TokenName(contractResult.getTokenName());
             info.setNrc20TokenSymbol(contractResult.getTokenSymbol());

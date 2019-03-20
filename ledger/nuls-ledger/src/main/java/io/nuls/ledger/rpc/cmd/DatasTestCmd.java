@@ -24,6 +24,7 @@
  */
 package io.nuls.ledger.rpc.cmd;
 
+import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.CoinData;
 import io.nuls.base.data.CoinFrom;
 import io.nuls.base.data.CoinTo;
@@ -32,13 +33,14 @@ import io.nuls.ledger.model.po.BlockSnapshotAccounts;
 import io.nuls.ledger.model.po.BlockTxs;
 import io.nuls.ledger.service.TransactionService;
 import io.nuls.ledger.storage.Repository;
-import io.nuls.ledger.utils.CoinDataUtils;
+import io.nuls.ledger.utils.CoinDataUtil;
 import io.nuls.rpc.cmd.BaseCmd;
 import io.nuls.rpc.model.CmdAnnotation;
 import io.nuls.rpc.model.Parameter;
 import io.nuls.rpc.model.message.Response;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
+import io.nuls.tools.crypto.HexUtil;
 
 import java.util.HashMap;
 import java.util.List;
@@ -57,6 +59,7 @@ public class DatasTestCmd extends BaseCmd {
     Repository repository;
     @Autowired
     TransactionService transactionService;
+
     @CmdAnnotation(cmd = "getBlockHeight",
             version = 1.0, scope = "private", minEvent = 0, minPeriod = 0,
             description = "")
@@ -88,12 +91,14 @@ public class DatasTestCmd extends BaseCmd {
     @Parameter(parameterName = "blockHeight", parameterType = "long")
     public Response getBlock(Map params) {
         Map<String, Object> rtData = new HashMap<>();
+        int i = 0;
         Integer chainId = (Integer) params.get("chainId");
         long blockHeight = Long.valueOf(params.get("blockHeight").toString());
         BlockTxs blockTxs = repository.getBlock(chainId, blockHeight);
         for (Transaction transaction : blockTxs.getTransactions()) {
-            CoinData coinData = CoinDataUtils.parseCoinData(transaction.getCoinData());
+            CoinData coinData = CoinDataUtil.parseCoinData(transaction.getCoinData());
             dealCoinDatas(coinData);
+
         }
         return success(blockTxs);
     }
@@ -104,12 +109,12 @@ public class DatasTestCmd extends BaseCmd {
         }
         List<CoinFrom> froms = coinData.getFrom();
         for (CoinFrom from : froms) {
-            logger.info("address={},amount = {} nonce = {} locked =  .", from.getAddress(), from.getAmount(), from.getNonce(), from.getLocked());
+            logger.info("address={},amount = {} nonce = {} locked =  .", AddressTool.getStringAddressByBytes(from.getAddress()), from.getAmount(), HexUtil.encode(from.getNonce()), from.getLocked());
 
         }
         List<CoinTo> tos = coinData.getTo();
         for (CoinTo to : tos) {
-            logger.info("address={},amount = {} lock = {}.", to.getAddress(), to.getAmount(), to.getLockTime());
+            logger.info("address={},amount = {} lock = {}.", AddressTool.getStringAddressByBytes(to.getAddress()), to.getAmount(), to.getLockTime());
         }
 
     }
@@ -126,7 +131,7 @@ public class DatasTestCmd extends BaseCmd {
         Integer addressChainId = (Integer) params.get("addressChainId");
         long blockHeight = Long.valueOf(params.get("blockHeight").toString());
         BlockTxs blockTxs = repository.getBlock(chainId, blockHeight);
-        transactionService.confirmBlockProcess(addressChainId,blockTxs.getTransactions(),blockHeight);
+        transactionService.confirmBlockProcess(addressChainId, blockTxs.getTransactions(), blockHeight);
         return success();
     }
 }

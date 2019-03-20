@@ -24,48 +24,40 @@
  */
 package io.nuls.transaction.model.bo.config;
 
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
 import java.io.Serializable;
 
 /**
- * 模块配置类
- * Module Configuration Class
- *
- * @author qinyifeng
- * @date 2018/11/11
+ * Transaction module chain setting
+ * @author: Charlie
+ * @date: 2019/03/14
  */
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class ConfigBean implements Serializable {
-    /**
-     * 资产ID
-     * assets id
-     */
-    private int assetsId;
 
-    /**
-     * chain id
-     */
+    /** chain id*/
     private int chainId;
+    /** assets id*/
+    private int assetId;
+    /** 单个交易数据最大值(B)*/
+    private int txMaxSize;
+    /**
+     * 打包时在获取交易之后留给模块统一验证的时间阈值,
+     * 包括统一验证有被过滤掉的交易时需要重新验证等.
+     */
+    private long moduleVerifyOffset;
+    /** 打包获取交易给RPC传输到共识的预留时间,超时则需要处理交易还原待打包队列*/
+    private long packageRpcReserveTime;
+    /** 接收新交易的文件队列最大容量**/
+    private long txUnverifiedQueueSize;
+    /** 孤儿交易池最大容量**/
+    private int orphanContainerSize;
+    /** 孤儿交易生命时间,超过会被清理**/
+    private long orphanTtl;
 
-    public ConfigBean() {
-    }
-
-    public ConfigBean(int chainId, int assetsId) {
-        this.assetsId = assetsId;
-        this.chainId = chainId;
-    }
-
-    public int getAssetsId() {
-        return assetsId;
-    }
-
-    public void setAssetsId(int assetsId) {
-        this.assetsId = assetsId;
-    }
-
-    public int getChainId() {
-        return chainId;
-    }
-
-    public void setChainId(int chainId) {
-        this.chainId = chainId;
-    }
 }

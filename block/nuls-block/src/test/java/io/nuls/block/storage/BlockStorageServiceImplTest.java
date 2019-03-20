@@ -43,7 +43,7 @@ public class BlockStorageServiceImplTest {
     public static void beforeClass() throws Exception {
         SpringLiteContext.init("io.nuls.block");
         service = SpringLiteContext.getBean(BlockStorageService.class);
-        RocksDBService.init(DATA_PATH);
+        RocksDBService.init("../../../../data/block");
         Block block = BlockGenerator.generate(null);
         header = BlockUtil.toBlockHeaderPo(block);
     }

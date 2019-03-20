@@ -1,7 +1,6 @@
 package io.nuls.account.rpc.cmd;
 
 import io.nuls.account.constant.RpcConstant;
-import io.nuls.account.model.dto.CoinDto;
 import io.nuls.account.model.dto.TransferDto;
 import io.nuls.account.rpc.call.LegerCmdCall;
 import io.nuls.account.rpc.common.CommonRpcOperation;

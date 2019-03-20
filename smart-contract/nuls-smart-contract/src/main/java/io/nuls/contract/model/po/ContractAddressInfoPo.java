@@ -54,10 +54,14 @@ public class ContractAddressInfoPo {
         return ContractUtil.isLockContract(chainId, this.blockHeight);
     }
 
+    public boolean isLock(long latestHeight) throws NulsException {
+        return ContractUtil.isLockContract(latestHeight, this.blockHeight);
+    }
+
     public int compareTo(long thatTime) {
-        if(this.createTime > thatTime) {
+        if (this.createTime > thatTime) {
             return -1;
-        } else if(this.createTime < thatTime) {
+        } else if (this.createTime < thatTime) {
             return 1;
         }
         return 0;

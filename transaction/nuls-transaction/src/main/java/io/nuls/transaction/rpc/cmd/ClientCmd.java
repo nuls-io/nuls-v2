@@ -93,7 +93,7 @@ public class ClientCmd extends BaseCmd {
                 throw new NulsException(TxErrorCode.HASH_ERROR);
             }
             TransactionConfirmedPO tx = txService.getTransaction(chain, NulsDigestData.fromDigestHex(txHash));
-            Map<String, Object> resultMap = new HashMap<>(TxConstant.INIT_CAPACITY_8);
+            Map<String, Object> resultMap = new HashMap<>(TxConstant.INIT_CAPACITY_4);
             if (tx == null) {
                 Log.debug("getTx - from all, fail! tx is null, txHash:{}", txHash);
                 resultMap.put("txHex", null);
@@ -120,7 +120,7 @@ public class ClientCmd extends BaseCmd {
      * @param params
      * @return Response
      */
-    @CmdAnnotation(cmd = TxCmd.CLIENT_GETTX_CONFIRMED, version = 1.0, description = "Get transaction ")
+    @CmdAnnotation(cmd = TxCmd.CLIENT_GETTX_CONFIRMED, version = 1.0, description = "Get confirmed transaction ")
     @Parameter(parameterName = "chainId", parameterType = "int")
     @Parameter(parameterName = "txHash", parameterType = "String")
     public Response getConfirmedTx(Map params) {
@@ -137,7 +137,7 @@ public class ClientCmd extends BaseCmd {
                 throw new NulsException(TxErrorCode.HASH_ERROR);
             }
             TransactionConfirmedPO tx = confirmedTxService.getConfirmedTransaction(chain, NulsDigestData.fromDigestHex(txHash));
-            Map<String, Object> resultMap = new HashMap<>(TxConstant.INIT_CAPACITY_8);
+            Map<String, Object> resultMap = new HashMap<>(TxConstant.INIT_CAPACITY_4);
             if (tx == null) {
                 Log.debug("getConfirmedTransaction fail, tx is null. txHash:{}", txHash);
                 resultMap.put("txHex", null);
@@ -179,7 +179,7 @@ public class ClientCmd extends BaseCmd {
             Integer assetId = null == params.get("assetId") ? null : Integer.parseInt(params.get("assetId").toString());
             Integer type = null == params.get("type") ? null : Integer.parseInt(params.get("type").toString());
             Integer pageSize = null == params.get("pageSize") ? TxConstant.PAGESIZE : Integer.parseInt(params.get("pageSize").toString());
-            Integer pageNumber = null == params.get("pageNumber") ? 1 : Integer.parseInt(params.get("pageNumber").toString());
+            Integer pageNumber = null == params.get("pageNumber") ? TxConstant.PAGENUMBER : Integer.parseInt(params.get("pageNumber").toString());
             String address = (String) params.get("address");
 
             Page<TransactionPO> list = transactionH2Service.getTxs(address, assetChainId, assetId, type, pageNumber, pageSize);

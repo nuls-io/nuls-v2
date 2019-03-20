@@ -186,7 +186,7 @@ public class DepositManager {
         return true;
     }
 
-    public boolean cancelDepositRollBack(Transaction transaction, Chain chain)throws NulsException{
+    public boolean cancelDepositRollBack(Transaction transaction, Chain chain,BlockHeader header)throws NulsException{
         int chainId = chain.getConfig().getChainId();
         CancelDeposit cancelDeposit = new CancelDeposit();
         cancelDeposit.parse(transaction.getTxData(), 0);
@@ -196,7 +196,7 @@ public class DepositManager {
         if (po == null) {
             throw new NulsException(ConsensusErrorCode.DATA_NOT_EXIST);
         }
-        if (po.getDelHeight() != transaction.getBlockHeight()) {
+        if (po.getDelHeight() != header.getHeight()) {
             throw new NulsException(ConsensusErrorCode.DEPOSIT_NEVER_CANCELED);
         }
         po.setDelHeight(-1L);

@@ -1,9 +1,9 @@
 package io.nuls.account;
 
+import io.nuls.account.config.AccountConfig;
 import io.nuls.account.config.NulsConfig;
 import io.nuls.account.constant.AccountConstant;
 import io.nuls.account.constant.AccountErrorCode;
-import io.nuls.account.constant.AccountParam;
 import io.nuls.account.constant.AccountStorageConstant;
 import io.nuls.account.model.bo.Chain;
 import io.nuls.account.rpc.call.TransactionCmdCall;
@@ -17,14 +17,14 @@ import io.nuls.rpc.modulebootstrap.Module;
 import io.nuls.rpc.modulebootstrap.NulsRpcModuleBootstrap;
 import io.nuls.rpc.modulebootstrap.RpcModule;
 import io.nuls.rpc.modulebootstrap.RpcModuleState;
+import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.core.ioc.SpringLiteContext;
-import io.nuls.tools.model.StringUtils;
 import io.nuls.tools.exception.NulsException;
-import io.nuls.tools.parse.ConfigLoader;
+import io.nuls.tools.log.Log;
+import io.nuls.tools.model.StringUtils;
 import io.nuls.tools.parse.I18nUtils;
 
-import java.io.IOException;
 import java.util.Map;
 
 /**
@@ -33,9 +33,13 @@ import java.util.Map;
  */
 @Component
 public class AccountBootstrap extends RpcModule {
+
+    @Autowired
+    AccountConfig accountConfig;
+
     public static void main(String[] args) {
         if (args == null || args.length == 0) {
-            args = new String[]{HostInfo.getLocalIP() + ":8887/ws"};
+            args = new String[]{"ws://" + HostInfo.getLocalIP() + ":8887/ws"};
         }
         NulsRpcModuleBootstrap.run("io.nuls", args);
     }
@@ -68,10 +72,16 @@ public class AccountBootstrap extends RpcModule {
      */
     @Override
     public void init() {
-        super.init();
-        initCfg();
-        //读取配置文件，数据存储根目录，初始化打开该目录下所有表连接并放入缓存
-        RocksDBService.init(AccountParam.getInstance().getDataPath());
+        try {
+            super.init();
+            //初始化配置项
+            initCfg();
+            //初始化数据库
+            initDB();
+        } catch (Exception e) {
+            LoggerUtil.logger.error("AccountBootsrap init error!");
+            throw new RuntimeException(e);
+        }
     }
 
     /**
@@ -83,8 +93,6 @@ public class AccountBootstrap extends RpcModule {
     public boolean doStart() {
         LoggerUtil.logger.info("module ready");
         try {
-            //初始化数据库
-            initDB();
             //启动链
             SpringLiteContext.getBean(ChainManager.class).runChain();
             while (!isDependencieReady(new Module(ModuleE.TX.abbr, "1.0"))) {
@@ -121,31 +129,34 @@ public class AccountBootstrap extends RpcModule {
         return RpcModuleState.Ready;
     }
 
-    public static void initCfg() {
+    public void initCfg() {
         try {
-            NulsConfig.MODULES_CONFIG = ConfigLoader.loadIni(NulsConfig.MODULES_CONFIG_FILE);
-
-            AccountParam accountParam = AccountParam.getInstance();
+//            String configJson = IoUtils.read(NulsConfig.MODULES_CONFIG_FILE);
+//            List<ConfigItem> configItems = JSONUtils.json2list(configJson, ConfigItem.class);
+//            Map<String, ConfigItem> configMap = new HashMap<>();
+//            configItems.forEach(e -> configMap.put(e.getName(), e));
             //set data save path
-            accountParam.setDataPath(NulsConfig.MODULES_CONFIG.getCfgValue(AccountConstant.CFG_DB_SECTION, AccountConstant.DB_DATA_PATH, null));
-
-            try {
-                //set system encoding
-                NulsConfig.DEFAULT_ENCODING = NulsConfig.MODULES_CONFIG.getCfgValue(AccountConstant.CFG_SYSTEM_SECTION, AccountConstant.CFG_SYSTEM_DEFAULT_ENCODING);
-                //set system language
-                String language = NulsConfig.MODULES_CONFIG.getCfgValue(AccountConstant.CFG_SYSTEM_SECTION, AccountConstant.CFG_SYSTEM_LANGUAGE);
-                I18nUtils.loadLanguage(AccountBootstrap.class, "languages", language);
-                I18nUtils.setLanguage(language);
-                //ACCOUNTKEYSTORE_FOLDER_NAME
-                String keystoreFolder = NulsConfig.MODULES_CONFIG.getCfgValue(AccountConstant.CFG_SYSTEM_SECTION, AccountConstant.CFG_SYSTEM_TKEYSTORE_FOLDER);
-                if (StringUtils.isNotBlank(keystoreFolder)) {
-                    NulsConfig.ACCOUNTKEYSTORE_FOLDER_NAME = keystoreFolder;
-                }
-                NulsConfig.KERNEL_MODULE_URL = NulsConfig.MODULES_CONFIG.getCfgValue(AccountConstant.CFG_SYSTEM_SECTION, AccountConstant.KERNEL_MODULE_URL);
-            } catch (Exception e) {
-                LoggerUtil.logger.error(e);
+//            NulsConfig.DATA_PATH = configMap.get(AccountConstant.DB_DATA_PATH).getValue();
+            //改为通过配置文件注入
+            NulsConfig.DATA_PATH = accountConfig.getDataPath();
+            LoggerUtil.logger.info("dataPath:{}",NulsConfig.DATA_PATH);
+            //set system encoding
+//            NulsConfig.DEFAULT_ENCODING = configMap.get(AccountConstant.CFG_SYSTEM_DEFAULT_ENCODING).getValue();
+            //改为通过配置文件注入
+            NulsConfig.DEFAULT_ENCODING = accountConfig.getEncoding();
+            //set system language
+//            String language = configMap.get(AccountConstant.CFG_SYSTEM_LANGUAGE).getValue();
+            //改为通过配置文件注入
+            I18nUtils.loadLanguage(AccountBootstrap.class, "languages", accountConfig.getLanguage());
+            I18nUtils.setLanguage(accountConfig.getLanguage());
+            NulsConfig.MAIN_ASSETS_ID = accountConfig.getMainAssetId();
+            NulsConfig.MAIN_CHAIN_ID = accountConfig.getMainChainId();
+            //set keystore dir
+//            String keystoreFolder = configMap.get(AccountConstant.CFG_SYSTEM_TKEYSTORE_FOLDER).getValue();
+            if (StringUtils.isNotBlank(accountConfig.getKeystoreFolder())) {
+                NulsConfig.ACCOUNTKEYSTORE_FOLDER_NAME = accountConfig.getDataPath() + accountConfig.getKeystoreFolder();
             }
-        } catch (IOException e) {
+        } catch (Exception e) {
             LoggerUtil.logger.error("Account Bootstrap initCfg failed", e);
             throw new RuntimeException("Account Bootstrap initCfg failed");
         }
@@ -155,10 +166,9 @@ public class AccountBootstrap extends RpcModule {
      * 初始化数据库
      * Initialization database
      */
-    private static void initDB() throws Exception {
+    private  void initDB() throws Exception {
         //读取配置文件，数据存储根目录，初始化打开该目录下所有表连接并放入缓存
-        RocksDBService.init(AccountParam.getInstance().getDataPath());
-
+        RocksDBService.init(accountConfig.getDataPath()+AccountConstant.MODULE_DB_PATH);
         //初始化表
         try {
             //If tables do not exist, create tables.

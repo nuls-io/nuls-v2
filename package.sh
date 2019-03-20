@@ -255,9 +255,9 @@ copyModuleNcfToModules(){
 			fi
 		fi
 	done < ./module.ncf
-	# merge common module.ncf and private module.ncf to module.tmep.ncf
-	sh "${PROJECT_PATH}/build/merge-ncf.sh" "${PROJECT_PATH}/module.ncf" $moduleNcf
-	rm $moduleNcf 
+#	 merge common module.ncf and private module.ncf to module.tmep.ncf
+	sh "${PROJECT_PATH}/build/merge-ncf.sh" "${BUILD_PATH}/module-prod.ncf" $moduleNcf
+	rm $moduleNcf
 	sedCommand+=" -e 's/%MAIN_CLASS_NAME%/${mainClassName}/g' "
     echo $sedCommand
 	if [ -z $(echo "${sedCommand}" | grep -o "%JOPT_XMS%") ]; then
@@ -281,7 +281,7 @@ copyModuleNcfToModules(){
         do
             eval "${sedCommand}  $(pwd)/script/${file} > ${moduleBuildPath}/${file}"
             cp "${moduleBuildPath}/${file}" "${MODULES_PATH}/${moduleName}/${version}/${file}"
-            chmod +x "${MODULES_PATH}/${moduleName}/${version}/${file}"
+            chmod u+x "${MODULES_PATH}/${moduleName}/${version}/${file}"
             echo "拷贝 ${moduleBuildPath}/${file} 到 ${MODULES_PATH}/${moduleName}/${version}/${file}"
         done
     else
@@ -361,8 +361,8 @@ if [ -n "${DOMOCK}" ]; then
 	chmod u+x "${MODULES_PATH}/start.sh"
 	cp "${BUILD_PATH}/check-status.sh" "${MODULES_PATH}/"
 	chmod u+x "${MODULES_PATH}/check-status.sh"
-	cp "${BUILD_PATH}/cmd.sh" "${MODULES_PATH}/"
-	chmod u+x "${MODULES_PATH}/cmd.sh"
+#	cp "${BUILD_PATH}/cmd.sh" "${MODULES_PATH}/"
+#	chmod u+x "${MODULES_PATH}/cmd.sh"
 fi
 
 

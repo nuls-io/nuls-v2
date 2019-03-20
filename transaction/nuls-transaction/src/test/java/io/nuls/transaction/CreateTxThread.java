@@ -69,7 +69,7 @@ public class CreateTxThread implements Runnable {
     public CreateTxThread(){
         try {
             chain = new Chain();
-            chain.setConfig(new ConfigBean(assetChainId, assetId));
+            chain.setConfig(new ConfigBean(chainId, assetId, 1024*1024,1000,20,20000L,20000,60000L));
         } catch (Exception e) {
             e.printStackTrace();
         }

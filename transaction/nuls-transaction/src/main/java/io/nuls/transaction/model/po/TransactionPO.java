@@ -1,6 +1,7 @@
 package io.nuls.transaction.model.po;
 
-import io.nuls.transaction.constant.TxConstant;
+import io.nuls.tools.core.ioc.SpringLiteContext;
+import io.nuls.transaction.constant.TxConfig;
 
 import java.math.BigInteger;
 
@@ -26,11 +27,13 @@ public class TransactionPO {
     private BigInteger amount;
 
     /**
-     * 0:转出, 1:转入, 2:冻结, 3:解锁
+     * 0:转出, 1:转入, 2:冻结, 3:解锁 4:智能合约
      */
     private Integer state;
 
     private Long time;
+
+    private static TxConfig txConfig = SpringLiteContext.getBean(TxConfig.class);
 
     /**
      * 以账户地址来分表储存
@@ -39,7 +42,7 @@ public class TransactionPO {
      * @return
      */
     public int createTableIndex(){
-        return (this.address.hashCode() & Integer.MAX_VALUE) % TxConstant.H2_TX_TABLE_NUMBER;
+        return (this.address.hashCode() & Integer.MAX_VALUE) % txConfig.getH2TxTableNumber();
     }
 
 

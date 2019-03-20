@@ -84,7 +84,7 @@ public class ContractTxServiceImpl implements ContractTxService {
                                    String password, String remark) {
         try {
             Result<CreateContractTransaction> result = contractTxHelper.makeCreateTx(chainId, sender, gasLimit, price, contractCode, args, password, remark);
-            if(result.isFailed()) {
+            if (result.isFailed()) {
                 return result;
             }
             CreateContractTransaction tx = result.getData();
@@ -107,7 +107,7 @@ public class ContractTxServiceImpl implements ContractTxService {
             // 保留未确认的创建合约交易到内存中
             this.saveLocalUnconfirmedCreateContractTransaction(sender, resultMap, tx.getTime());
             return getSuccess().setData(resultMap);
-        }  catch (NulsException e) {
+        } catch (NulsException e) {
             Log.error(e);
             return Result.getFailed(e.getErrorCode());
         } catch (IOException e) {
@@ -117,7 +117,6 @@ public class ContractTxServiceImpl implements ContractTxService {
             return result;
         }
     }
-
 
 
     @Override
@@ -229,7 +228,7 @@ public class ContractTxServiceImpl implements ContractTxService {
                                       String password, String remark) {
         try {
             Result<CreateContractTransaction> result = contractTxHelper.makeCreateTx(chainId, sender, gasLimit, price, contractCode, args, password, remark);
-            if(result.isFailed()) {
+            if (result.isFailed()) {
                 return result;
             }
             return getSuccess();
@@ -247,7 +246,7 @@ public class ContractTxServiceImpl implements ContractTxService {
                                  String password, String remark) {
         try {
             Result<CallContractTransaction> result = contractTxHelper.makeCallTx(chainId, sender, value, gasLimit, price, contractAddress, methodName, methodDesc, args, password, remark);
-            if(result.isFailed()) {
+            if (result.isFailed()) {
                 return result;
             }
             CallContractTransaction tx = result.getData();
@@ -259,7 +258,7 @@ public class ContractTxServiceImpl implements ContractTxService {
 
             // 保存未确认Token转账
             Result<byte[]> unConfirmedTokenTransferResult = this.saveUnConfirmedTokenTransfer(chainId, tx, sender, contractAddress, methodName, args);
-            if(unConfirmedTokenTransferResult.isFailed()) {
+            if (unConfirmedTokenTransferResult.isFailed()) {
                 return unConfirmedTokenTransferResult;
             }
             byte[] infoKey = unConfirmedTokenTransferResult.getData();
@@ -297,16 +296,16 @@ public class ContractTxServiceImpl implements ContractTxService {
             byte[] contractAddressBytes = AddressTool.getAddress(contractAddress);
             Result<ContractAddressInfoPo> contractAddressInfoResult = contractHelper.getContractAddressInfo(chainId, contractAddressBytes);
             ContractAddressInfoPo po = contractAddressInfoResult.getData();
-            if(po != null && po.isNrc20() && ContractUtil.isTransferMethod(methodName)) {
+            if (po != null && po.isNrc20() && ContractUtil.isTransferMethod(methodName)) {
                 byte[] txHashBytes = tx.getHash().serialize();
                 byte[] infoKey = ArraysTool.concatenate(senderBytes, txHashBytes, new VarInt(0).encode());
                 ContractTokenTransferInfoPo tokenTransferInfoPo = new ContractTokenTransferInfoPo();
-                if(ContractConstant.NRC20_METHOD_TRANSFER.equals(methodName)) {
+                if (ContractConstant.NRC20_METHOD_TRANSFER.equals(methodName)) {
                     String to = args[0][0];
                     String tokenValue = args[1][0];
                     BigInteger token = new BigInteger(tokenValue);
                     Result result = tokenBalanceManager.subtractContractToken(sender, contractAddress, token);
-                    if(result.isFailed()) {
+                    if (result.isFailed()) {
                         return result;
                     }
                     tokenBalanceManager.addContractToken(to, contractAddress, token);
@@ -316,14 +315,14 @@ public class ContractTxServiceImpl implements ContractTxService {
                 } else {
                     String from = args[0][0];
                     // 转出的不是自己的代币（代币授权逻辑），则不保存token待确认交易，因为有调用合约的待确认交易
-                    if(!sender.equals(from)) {
+                    if (!sender.equals(from)) {
                         return getSuccess();
                     }
                     String to = args[1][0];
                     String tokenValue = args[2][0];
                     BigInteger token = new BigInteger(tokenValue);
                     Result result = tokenBalanceManager.subtractContractToken(from, contractAddress, token);
-                    if(result.isFailed()) {
+                    if (result.isFailed()) {
                         return result;
                     }
                     tokenBalanceManager.addContractToken(to, contractAddress, token);
@@ -341,7 +340,7 @@ public class ContractTxServiceImpl implements ContractTxService {
                 tokenTransferInfoPo.setTxHash(txHashBytes);
                 tokenTransferInfoPo.setStatus((byte) 0);
                 Result result = contractTokenTransferStorageService.saveTokenTransferInfo(chainId, infoKey, tokenTransferInfoPo);
-                if(result.isFailed()) {
+                if (result.isFailed()) {
                     return result;
                 }
                 return getSuccess().setData(infoKey);
@@ -357,12 +356,12 @@ public class ContractTxServiceImpl implements ContractTxService {
 
     @Override
     public Result callTxFee(int chainId, String sender, BigInteger value, Long gasLimit, Long price, String contractAddress,
-                              String methodName, String methodDesc, String[][] args, String remark) {
+                            String methodName, String methodDesc, String[][] args, String remark) {
         try {
             byte[] contractAddressBytes = AddressTool.getAddress(contractAddress);
             byte[] senderBytes = AddressTool.getAddress(sender);
             Result<CallContractTransaction> result = contractTxHelper.newCallTx(chainId, sender, senderBytes, value, gasLimit, price, contractAddressBytes, methodName, methodDesc, args, remark);
-            if(result.isFailed()) {
+            if (result.isFailed()) {
                 return result;
             }
             CallContractTransaction tx = result.getData();
@@ -382,7 +381,7 @@ public class ContractTxServiceImpl implements ContractTxService {
         try {
 
             Result<DeleteContractTransaction> result = contractTxHelper.makeDeleteTx(chainId, sender, contractAddress, password, remark);
-            if(result.isFailed()) {
+            if (result.isFailed()) {
                 return result;
             }
             DeleteContractTransaction tx = result.getData();

@@ -23,8 +23,10 @@
  */
 package io.nuls.contract.rpc.cmd;
 
+import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.Transaction;
 import io.nuls.contract.helper.ContractHelper;
+import io.nuls.contract.manager.ContractTokenBalanceManager;
 import io.nuls.contract.manager.ContractTxProcessorManager;
 import io.nuls.contract.manager.ContractTxValidatorManager;
 import io.nuls.contract.model.bo.ContractTempTransaction;
@@ -51,6 +53,8 @@ import java.util.Map;
 
 import static io.nuls.contract.constant.ContractCmdConstant.*;
 import static io.nuls.contract.constant.ContractConstant.*;
+import static io.nuls.contract.constant.ContractErrorCode.ADDRESS_ERROR;
+import static io.nuls.contract.constant.ContractErrorCode.DATA_ERROR;
 
 /**
  * @author: PierreLuo
@@ -68,38 +72,69 @@ public class ContractCmd extends BaseCmd {
     @Autowired
     private ContractTxValidatorManager contractTxValidatorManager;
 
-    @CmdAnnotation(cmd = INVOKE_CONTRACT, version = 1.0, description = "invoke contract")
+    @CmdAnnotation(cmd = BATCH_BEGIN, version = 1.0, description = "batch begin")
     @Parameter(parameterName = "chainId", parameterType = "int")
     @Parameter(parameterName = "blockHeight", parameterType = "long")
     @Parameter(parameterName = "blockTime", parameterType = "long")
     @Parameter(parameterName = "packingAddress", parameterType = "String")
     @Parameter(parameterName = "preStateRoot", parameterType = "String")
-    @Parameter(parameterName = "txHexList", parameterType = "List<String>")
-    public Response invokeContract(Map<String,Object> params){
+    public Response batchBegin(Map<String, Object> params) {
         try {
             Integer chainId = (Integer) params.get("chainId");
-            Long blockHeight = Long.parseLong(params.get("blockHeight").toString()) ;
-            Long blockTime = Long.parseLong(params.get("blockTime").toString()) ;
+            Long blockHeight = Long.parseLong(params.get("blockHeight").toString());
+            Long blockTime = Long.parseLong(params.get("blockTime").toString());
             String packingAddress = (String) params.get("packingAddress");
             String preStateRoot = (String) params.get("preStateRoot");
-            List<String> txHexList = (List<String>)params.get("txHexList");
 
-            List<ContractTempTransaction> txList = new ArrayList<>();
-            ContractTempTransaction tx;
-            for(String txHex : txHexList) {
-                tx = new ContractTempTransaction();
-                tx.setTxHex(txHex);
-                tx.parse(Hex.decode(txHex), 0);
-                txList.add(tx);
+            Result result = contractService.begin(chainId, blockHeight + 1, blockTime, packingAddress, preStateRoot);
+            if (result.isFailed()) {
+                return failed(result.getErrorCode());
             }
-            Result result = contractService.invokeContract(chainId, txList, blockHeight, blockTime, packingAddress, preStateRoot);
-            if(result.isFailed()){
+
+            return success();
+        } catch (Exception e) {
+            Log.error(e);
+            return failed(e.getMessage());
+        }
+    }
+
+    @CmdAnnotation(cmd = INVOKE_CONTRACT, version = 1.0, description = "invoke contract one by one")
+    @Parameter(parameterName = "chainId", parameterType = "int")
+    @Parameter(parameterName = "txHex", parameterType = "String")
+    public Response invokeContractOneByOne(Map<String, Object> params) {
+        try {
+            Integer chainId = (Integer) params.get("chainId");
+            String txHex = (String) params.get("txHex");
+            ContractTempTransaction tx = new ContractTempTransaction();
+            tx.setTxHex(txHex);
+            tx.parse(Hex.decode(txHex), 0);
+            Result result = contractService.invokeContractOneByOne(chainId, tx);
+            if (result.isSuccess()) {
+                return failed(result.getErrorCode());
+            }
+            return success();
+        } catch (Exception e) {
+            Log.error(e);
+            return failed(e.getMessage());
+        }
+    }
+
+    @CmdAnnotation(cmd = BATCH_END, version = 1.0, description = "batch end")
+    @Parameter(parameterName = "chainId", parameterType = "int")
+    @Parameter(parameterName = "blockHeight", parameterType = "long")
+    public Response invokeContract(Map<String, Object> params) {
+        try {
+            Integer chainId = (Integer) params.get("chainId");
+            Long blockHeight = Long.parseLong(params.get("blockHeight").toString());
+
+            Result result = contractService.end(chainId, blockHeight);
+            if (result.isFailed()) {
                 return failed(result.getErrorCode());
             }
             ContractPackageDto dto = (ContractPackageDto) result.getData();
             List<String> resultTxHexList = new ArrayList<>();
             List<Transaction> resultTxList = dto.getResultTxList();
-            for(Transaction resultTx : resultTxList) {
+            for (Transaction resultTx : resultTxList) {
                 resultTxHexList.add(Hex.toHexString(resultTx.serialize()));
             }
 
@@ -118,18 +153,18 @@ public class ContractCmd extends BaseCmd {
     @CmdAnnotation(cmd = CREATE_VALIDATOR, version = 1.0, description = "create contract validator")
     @Parameter(parameterName = "chainId", parameterType = "int")
     @Parameter(parameterName = "txHex", parameterType = "String")
-    public Response createValidator(Map<String,Object> params){
+    public Response createValidator(Map<String, Object> params) {
         try {
             Integer chainId = (Integer) params.get("chainId");
             String txHex = (String) params.get("txHex");
             CreateContractTransaction tx = new CreateContractTransaction();
             tx.parse(Hex.decode(txHex), 0);
             Map<String, Boolean> result = new HashMap<>(2);
-            if(tx.getType() != TX_TYPE_CREATE_CONTRACT) {
+            if (tx.getType() != TX_TYPE_CREATE_CONTRACT) {
                 return failed("non create contract tx");
             }
             Result validator = contractTxValidatorManager.createValidator(chainId, tx);
-            if(validator.isFailed()) {
+            if (validator.isFailed()) {
                 return failed(validator.getErrorCode());
             }
             result.put("value", true);
@@ -143,18 +178,18 @@ public class ContractCmd extends BaseCmd {
     @CmdAnnotation(cmd = CALL_VALIDATOR, version = 1.0, description = "call contract validator")
     @Parameter(parameterName = "chainId", parameterType = "int")
     @Parameter(parameterName = "txHex", parameterType = "String")
-    public Response callValidator(Map<String,Object> params){
+    public Response callValidator(Map<String, Object> params) {
         try {
             Integer chainId = (Integer) params.get("chainId");
             String txHex = (String) params.get("txHex");
             CallContractTransaction tx = new CallContractTransaction();
             tx.parse(Hex.decode(txHex), 0);
             Map<String, Boolean> result = new HashMap<>(2);
-            if(tx.getType() != TX_TYPE_CALL_CONTRACT) {
+            if (tx.getType() != TX_TYPE_CALL_CONTRACT) {
                 return failed("non call contract tx");
             }
             Result validator = contractTxValidatorManager.callValidator(chainId, tx);
-            if(validator.isFailed()) {
+            if (validator.isFailed()) {
                 return failed(validator.getErrorCode());
             }
             result.put("value", true);
@@ -168,18 +203,18 @@ public class ContractCmd extends BaseCmd {
     @CmdAnnotation(cmd = DELETE_VALIDATOR, version = 1.0, description = "delete contract validator")
     @Parameter(parameterName = "chainId", parameterType = "int")
     @Parameter(parameterName = "txHex", parameterType = "String")
-    public Response deleteValidator(Map<String,Object> params){
+    public Response deleteValidator(Map<String, Object> params) {
         try {
             Integer chainId = (Integer) params.get("chainId");
             String txHex = (String) params.get("txHex");
             DeleteContractTransaction tx = new DeleteContractTransaction();
             tx.parse(Hex.decode(txHex), 0);
             Map<String, Boolean> result = new HashMap<>(2);
-            if(tx.getType() != TX_TYPE_DELETE_CONTRACT) {
+            if (tx.getType() != TX_TYPE_DELETE_CONTRACT) {
                 return failed("non delete contract tx");
             }
             Result validator = contractTxValidatorManager.deleteValidator(chainId, tx);
-            if(validator.isFailed()) {
+            if (validator.isFailed()) {
                 return failed(validator.getErrorCode());
             }
             result.put("value", true);
@@ -193,7 +228,7 @@ public class ContractCmd extends BaseCmd {
     @CmdAnnotation(cmd = INTEGRATE_VALIDATOR, version = 1.0, description = "transaction integrate validator")
     @Parameter(parameterName = "chainId", parameterType = "int")
     @Parameter(parameterName = "txHexList", parameterType = "String")
-    public Response integrateValidator(Map<String,Object> params){
+    public Response integrateValidator(Map<String, Object> params) {
         try {
             Integer chainId = (Integer) params.get("chainId");
             List<String> txHexList = (List<String>) params.get("txHexList");
@@ -211,14 +246,14 @@ public class ContractCmd extends BaseCmd {
     @Parameter(parameterName = "chainId", parameterType = "int")
     @Parameter(parameterName = "txHexList", parameterType = "List<String>")
     @Parameter(parameterName = "blockHeaderHex", parameterType = "String")
-    public Response commit(Map<String,Object> params){
+    public Response commit(Map<String, Object> params) {
         try {
             Integer chainId = (Integer) params.get("chainId");
             List<String> txHexList = (List<String>) params.get("txHexList");
             String blockHeaderHex = (String) params.get("blockHeaderHex");
 
             Result result = contractService.commitProcessor(chainId, txHexList, blockHeaderHex);
-            if(result.isFailed()) {
+            if (result.isFailed()) {
                 return failed(result.getErrorCode(), result.getMsg());
             }
 
@@ -233,16 +268,44 @@ public class ContractCmd extends BaseCmd {
     @Parameter(parameterName = "chainId", parameterType = "int")
     @Parameter(parameterName = "txHexList", parameterType = "List<String>")
     @Parameter(parameterName = "blockHeaderHex", parameterType = "String")
-    public Response rollback(Map<String,Object> params){
+    public Response rollback(Map<String, Object> params) {
         try {
             Integer chainId = (Integer) params.get("chainId");
             List<String> txHexList = (List<String>) params.get("txHexList");
             String blockHeaderHex = (String) params.get("blockHeaderHex");
 
             Result result = contractService.rollbackProcessor(chainId, txHexList, blockHeaderHex);
-            if(result.isFailed()) {
+            if (result.isFailed()) {
                 return failed(result.getErrorCode(), result.getMsg());
             }
+            return success();
+        } catch (Exception e) {
+            Log.error(e);
+            return failed(e.getMessage());
+        }
+    }
+
+    @CmdAnnotation(cmd = INITIAL_ACCOUNT_TOKEN, version = 1.0, description = "initial account token")
+    @Parameter(parameterName = "chainId", parameterType = "int")
+    @Parameter(parameterName = "address", parameterType = "String")
+    public Response initialAccountToken(Map<String, Object> params) {
+        try {
+            Integer chainId = (Integer) params.get("chainId");
+            String address = (String) params.get("address");
+            if (!AddressTool.validAddress(chainId, address)) {
+                return failed(ADDRESS_ERROR);
+            }
+
+            ContractTokenBalanceManager contractTokenBalanceManager = contractHelper.getChain(chainId).getContractTokenBalanceManager();
+            if (contractTokenBalanceManager == null) {
+                return failed(DATA_ERROR);
+            }
+
+            Result result = contractTokenBalanceManager.initAllTokensByAccount(address);
+            if (result.isFailed()) {
+                return failed(result.getErrorCode());
+            }
+
             return success();
         } catch (Exception e) {
             Log.error(e);

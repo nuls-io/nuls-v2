@@ -28,15 +28,12 @@ package io.nuls.contract.model.po;
 
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.basic.NulsOutputStreamBuffer;
-import io.nuls.base.data.Address;
 import io.nuls.base.data.BaseNulsData;
 import io.nuls.base.data.NulsDigestData;
-import io.nuls.base.data.Transaction;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.parse.SerializeUtils;
 
 import java.io.IOException;
-import java.util.List;
 
 /**
  * @author: PierreLuo
@@ -60,26 +57,6 @@ public class TransactionInfoPo extends BaseNulsData {
     private byte status;
 
     public TransactionInfoPo() {
-
-    }
-
-    public TransactionInfoPo(Transaction tx) {
-        if (tx == null) {
-            return;
-        }
-        this.txHash = tx.getHash();
-        this.blockHeight = tx.getBlockHeight();
-        this.time = tx.getTime();
-        //TODO pierre
-        List<byte[]> addressList = null;
-        //List<byte[]> addressList = tx.getAllRelativeAddress();
-
-        byte[] addresses = new byte[addressList.size() * Address.ADDRESS_LENGTH];
-        for (int i = 0; i < addressList.size(); i++) {
-            System.arraycopy(addressList.get(i), 0, addresses, Address.ADDRESS_LENGTH * i, Address.ADDRESS_LENGTH);
-        }
-        this.addresses = addresses;
-        this.txType = tx.getType();
     }
 
     /**
@@ -168,9 +145,9 @@ public class TransactionInfoPo extends BaseNulsData {
     }
 
     public int compareTo(long thatTime) {
-        if(this.time > thatTime) {
+        if (this.time > thatTime) {
             return -1;
-        } else if(this.time < thatTime) {
+        } else if (this.time < thatTime) {
             return 1;
         }
         return 0;

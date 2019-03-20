@@ -6,23 +6,15 @@ import io.nuls.contract.util.ContractUtil;
 import io.nuls.db.service.RocksDBService;
 import io.nuls.tools.basic.InitializingBean;
 import io.nuls.tools.core.annotation.Service;
-import io.nuls.tools.model.ByteUtils;
 import io.nuls.tools.exception.NulsException;
+import io.nuls.tools.model.ByteUtils;
 
 /**
  * @author: PierreLuo
  * @date: 2019-02-26
  */
 @Service
-public class LanguageStorageServiceImpl implements LanguageStorageService, InitializingBean {
-
-    @Override
-    public void afterPropertiesSet() throws NulsException {
-        /**
-         * 一个节点共用，不区分chain
-         */
-        ContractUtil.createTable(ContractDBConstant.DB_NAME_LANGUAGE);
-    }
+public class LanguageStorageServiceImpl implements LanguageStorageService {
 
     @Override
     public boolean saveLanguage(String language) throws Exception {

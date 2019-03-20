@@ -34,7 +34,6 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.math.BigInteger;
-import java.util.Collection;
 
 /**
  * @author: PierreLuo
@@ -42,7 +41,7 @@ import java.util.Collection;
  */
 @Getter
 @Setter
-public class ContractWrapperTransaction extends Transaction{
+public class ContractWrapperTransaction extends Transaction {
 
     private Transaction tx;
 
@@ -52,7 +51,10 @@ public class ContractWrapperTransaction extends Transaction{
 
     private ContractData contractData;
 
-    private int order;
+    /**
+     * 合约内部转账交易的时间的偏移量，用于排序，区块逻辑没有用到时间排序，暂时放弃
+     */
+    //private int order;
 
     private BlockHeader blockHeader;
 
@@ -118,7 +120,7 @@ public class ContractWrapperTransaction extends Transaction{
         return tx.getFee();
     }
 
-    public boolean isMultiSignTx()throws NulsException {
+    public boolean isMultiSignTx() throws NulsException {
         return tx.isMultiSignTx();
     }
 
