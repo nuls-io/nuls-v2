@@ -40,4 +40,5 @@ import java.util.List;
 public class TxPackage {
     private List<String> list;
     private String stateRoot;
+    private long packageHeight;
 }

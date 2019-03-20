@@ -683,15 +683,15 @@ public class TxServiceImpl implements TxService {
                     txHexs.add(txHex);
                     moduleVerifyMap.put(txRegister, txHexs);
                 }
-                //检测打包状态,如果有接收新区块,把取出的交易放回到打包队列
-                if (blockHeight < chain.getBestBlockHeight()) {
+                //如果本地最新区块+1 大于当前在打包区块的高度, 说明本地最新区块已更新,需要重新打包,把取出的交易放回到打包队列
+                if (blockHeight < chain.getBestBlockHeight() + 1) {
                     chain.getLoggerMap().get(TxConstant.LOG_TX).debug("有接收新区块-1,把取出的交易放回到打包队列...");
                     for(int i = packingTxList.size()-1; i >= 0;i--) {
                         Transaction transaction = packingTxList.get(i);
                         chain.getLoggerMap().get(TxConstant.LOG_TX).debug("有接收新区块-1,把取出的交易放回到打包队列, hash:{}", transaction.getHash().getDigestHex());
                         packablePool.addInFirst(chain, transaction, false);
                     }
-                    return getPackableTxs(chain, endtimestamp, maxTxDataSize, chain.getBestBlockHeight(), blockTime, packingAddress, preStateRoot);
+                    return getPackableTxs(chain, endtimestamp, maxTxDataSize, chain.getBestBlockHeight() + 1, blockTime, packingAddress, preStateRoot);
                 }
                 long loopOnce = NetworkCall.getCurrentTimeMillis() - currentTimeMillis;
 //                chain.getLoggerMap().get(TxConstant.LOG_TX).debug("########## 分组花费时间:{} ",  NetworkCall.getCurrentTimeMillis() - debugeMap);
@@ -732,14 +732,14 @@ public class TxServiceImpl implements TxService {
                 }
             }
             //如果有接收新区块,把取出的交易放回到打包队列
-            if (blockHeight < chain.getBestBlockHeight()) {
+            if (blockHeight < chain.getBestBlockHeight() + 1) {
                 chain.getLoggerMap().get(TxConstant.LOG_TX).debug("有接收新区块-2,把取出的交易放回到打包队列...");
                 for(int i = packingTxList.size()-1; i >= 0;i--) {
                     Transaction transaction = packingTxList.get(i);
                     chain.getLoggerMap().get(TxConstant.LOG_TX).debug("有接收新区块-2,把取出的交易放回到打包队列, hash:{}", transaction.getHash().getDigestHex());
                     packablePool.addInFirst(chain, transaction, false);
                 }
-                return getPackableTxs(chain, endtimestamp, maxTxDataSize, chain.getBestBlockHeight(), blockTime, packingAddress, preStateRoot);
+                return getPackableTxs(chain, endtimestamp, maxTxDataSize, chain.getBestBlockHeight() + 1, blockTime, packingAddress, preStateRoot);
             }
             chain.getLoggerMap().get(TxConstant.LOG_TX).debug("---##########--- 批量验证花费时间:{} ", NetworkCall.getCurrentTimeMillis() - debugeBatch);
 
@@ -758,7 +758,7 @@ public class TxServiceImpl implements TxService {
                     }
                 }
             }
-            TxPackage txPackage = new TxPackage(packableTxs, stateRoot);
+            TxPackage txPackage = new TxPackage(packableTxs, stateRoot, blockHeight);
             chain.getLoggerMap().get(TxConstant.LOG_TX).debug("提供给共识的可打包交易packableTxs - size:{}",packableTxs.size());
             chain.getLoggerMap().get(TxConstant.LOG_TX).debug("提供给共识的可打包交易packableTxs - Rs:");
 
