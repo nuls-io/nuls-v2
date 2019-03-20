@@ -18,17 +18,13 @@
  * SOFTWARE.
  */
 
-package io.nuls.block.rpc;
+package io.nuls.block.message.handler;
 
 import io.nuls.base.basic.NulsByteBuffer;
-import io.nuls.base.data.NulsDigestData;
-import io.nuls.base.data.SmallBlock;
-import io.nuls.block.cache.SmallBlockCacher;
+import io.nuls.block.cache.CacheHandler;
 import io.nuls.block.constant.BlockErrorCode;
 import io.nuls.block.manager.ContextManager;
-import io.nuls.block.message.HashMessage;
-import io.nuls.block.message.SmallBlockMessage;
-import io.nuls.block.utils.module.NetworkUtil;
+import io.nuls.block.message.CompleteMessage;
 import io.nuls.rpc.cmd.BaseCmd;
 import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.model.CmdAnnotation;
@@ -40,43 +36,35 @@ import io.nuls.tools.log.logback.NulsLogger;
 
 import java.util.Map;
 
-import static io.nuls.block.constant.CommandConstant.GET_SMALL_BLOCK_MESSAGE;
-import static io.nuls.block.constant.CommandConstant.SMALL_BLOCK_MESSAGE;
+import static io.nuls.block.constant.CommandConstant.COMPLETE_MESSAGE;
 
 
 /**
- * 处理收到的{@link HashMessage},用于区块的广播与转发
+ * 处理收到的{@link CompleteMessage},用于区块的同步
  *
  * @author captain
  * @version 1.0
  * @date 18-11-14 下午4:23
  */
 @Component
-public class GetSmallBlockHandler extends BaseCmd {
+public class CompleteHandler extends BaseCmd {
 
-    @CmdAnnotation(cmd = GET_SMALL_BLOCK_MESSAGE, version = 1.0, scope = Constants.PUBLIC, description = "")
+    @CmdAnnotation(cmd = COMPLETE_MESSAGE, version = 1.0, scope = Constants.PUBLIC, description = "")
     public Response process(Map map) {
         int chainId = Integer.parseInt(map.get("chainId").toString());
         String nodeId = map.get("nodeId").toString();
-        HashMessage message = new HashMessage();
+        CompleteMessage message = new CompleteMessage();
         NulsLogger messageLog = ContextManager.getContext(chainId).getMessageLog();
-        byte[] decode = HexUtil.decode(map.get("messageBody").toString());
         try {
+            byte[] decode = HexUtil.decode(map.get("messageBody").toString());
             message.parse(new NulsByteBuffer(decode));
         } catch (NulsException e) {
             e.printStackTrace();
             messageLog.error(e);
             return failed(BlockErrorCode.PARAMETER_ERROR);
         }
-
-        NulsDigestData blockHash = message.getRequestHash();
-        messageLog.debug("recieve HashMessage from node-" + nodeId + ", chainId:" + chainId + ", hash:" + blockHash);
-        SmallBlock smallBlock = SmallBlockCacher.getSmallBlock(chainId, blockHash).getSmallBlock();
-        if (smallBlock != null) {
-            SmallBlockMessage smallBlockMessage = new SmallBlockMessage();
-            smallBlockMessage.setSmallBlock(smallBlock);
-            NetworkUtil.sendToNode(chainId, smallBlockMessage, nodeId, SMALL_BLOCK_MESSAGE);
-        }
+        messageLog.debug("recieve CompleteMessage from node-" + nodeId + ", chainId:" + chainId);
+        CacheHandler.batchComplete(chainId, message);
         return success();
     }
 

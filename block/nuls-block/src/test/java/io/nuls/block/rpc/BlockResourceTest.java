@@ -26,11 +26,13 @@ import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.data.Block;
 import io.nuls.base.data.BlockHeader;
 import io.nuls.base.data.NulsDigestData;
+import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.info.NoUse;
 import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.model.message.Response;
 import io.nuls.rpc.netty.processor.ResponseMessageProcessor;
 import io.nuls.tools.crypto.HexUtil;
+import org.hamcrest.Matcher;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -43,7 +45,7 @@ import static io.nuls.block.constant.CommandConstant.*;
 
 public class BlockResourceTest {
 
-    private int chainId = 1;
+    private int chainId = 12345;
 
     @BeforeClass
     public static void start() throws Exception {
@@ -52,55 +54,90 @@ public class BlockResourceTest {
 
     @Test
     public void latestHeight() throws Exception {
-        Map<String,Object> params = new HashMap<>();
-        params.put("chainId", chainId);
-        Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.BL.abbr, LATEST_HEIGHT, params);
-        System.out.println(cmdResp.getResponseData());
+        {
+            Map<String,Object> params = new HashMap<>();
+            params.put("chainId", chainId);
+            params.put(Constants.VERSION_KEY_STR, "1.0");
+            Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.BL.abbr, LATEST_HEIGHT, params);
+            Map responseData = (Map) cmdResp.getResponseData();
+            Map map = (Map) responseData.get(LATEST_HEIGHT);
+            Object value = map.get("value");
+            Assert.assertTrue(value.toString().matches("\\d+"));
+        }
+        {
+            Map<String,Object> params = new HashMap<>();
+            params.put("chainId", 333333);
+            params.put(Constants.VERSION_KEY_STR, "1.0");
+            Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.BL.abbr, LATEST_HEIGHT, params);
+            Map responseData = (Map) cmdResp.getResponseData();
+            Object o = responseData.get(LATEST_HEIGHT);
+            Assert.assertNull(o);
+        }
     }
 
     @Test
     public void latestBlockHeader() throws Exception {
-        Map<String,Object> params = new HashMap<>();
-        params.put("chainId", chainId);
-        Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.BL.abbr, LATEST_BLOCK_HEADER, params);
-        Map data = (Map) cmdResp.getResponseData();
-        String hex = (String) data.get(LATEST_BLOCK_HEADER);
-        BlockHeader header = new BlockHeader();
-        header.parse(new NulsByteBuffer(HexUtil.decode(hex)));
-        System.out.println(header.getHeight());
+        {
+            Map<String,Object> params = new HashMap<>();
+            params.put("chainId", chainId);
+            Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.BL.abbr, LATEST_BLOCK_HEADER, params);
+            Map data = (Map) cmdResp.getResponseData();
+            String hex = (String) data.get(LATEST_BLOCK_HEADER);
+            BlockHeader header = new BlockHeader();
+            header.parse(new NulsByteBuffer(HexUtil.decode(hex)));
+            System.out.println(header.getHeight());
+        }
+        {
+            Map<String,Object> params = new HashMap<>();
+            params.put("chainId", 4242);
+            Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.BL.abbr, LATEST_BLOCK_HEADER, params);
+            Map data = (Map) cmdResp.getResponseData();
+            String hex = (String) data.get(LATEST_BLOCK_HEADER);
+            System.out.println(hex);
+        }
     }
 
     @Test
     public void latestBlock() throws Exception {
-        Map<String,Object> params = new HashMap<>();
-        params.put("chainId", chainId);
-        Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.BL.abbr, LATEST_BLOCK, params);
-        Map data = (Map) cmdResp.getResponseData();
-        String hex = (String) data.get(LATEST_BLOCK);
-        Block block = new Block();
-        block.parse(new NulsByteBuffer(HexUtil.decode(hex)));
-        System.out.println(block.getHeader().getHeight());
+        {
+            Map<String,Object> params = new HashMap<>();
+            params.put("chainId", chainId);
+            Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.BL.abbr, LATEST_BLOCK, params);
+            Map data = (Map) cmdResp.getResponseData();
+            String hex = (String) data.get(LATEST_BLOCK);
+            Block block = new Block();
+            block.parse(new NulsByteBuffer(HexUtil.decode(hex)));
+            System.out.println(block.getHeader().getHeight());
+        }
+        {
+            Map<String,Object> params = new HashMap<>();
+            params.put("chainId", 242);
+            Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.BL.abbr, LATEST_BLOCK, params);
+            Map data = (Map) cmdResp.getResponseData();
+            String hex = (String) data.get(LATEST_BLOCK);
+            System.out.println(hex);
+        }
     }
 
     @Test
     public void getBlockHeaderByHeight() throws Exception {
         Map<String,Object> params = new HashMap<>();
         params.put("chainId", chainId);
-        params.put("height", 100);
+        params.put("height", 1);
         Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.BL.abbr, GET_BLOCK_HEADER_BY_HEIGHT, params);
         Map data = (Map) cmdResp.getResponseData();
         String hex = (String) data.get(GET_BLOCK_HEADER_BY_HEIGHT);
         BlockHeader block100 = new BlockHeader();
         block100.parse(new NulsByteBuffer(HexUtil.decode(hex)));
-        Assert.assertEquals(100, block100.getHeight());
+        Assert.assertEquals(1, block100.getHeight());
 
-        params.put("height", 101);
+        params.put("height", 2);
         cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.BL.abbr, GET_BLOCK_HEADER_BY_HEIGHT, params);
         data = (Map) cmdResp.getResponseData();
         hex = (String) data.get(GET_BLOCK_HEADER_BY_HEIGHT);
         BlockHeader block101 = new BlockHeader();
         block101.parse(new NulsByteBuffer(HexUtil.decode(hex)));
-        Assert.assertEquals(101, block101.getHeight());
+        Assert.assertEquals(2, block101.getHeight());
         Assert.assertEquals(block100.getHash(), block101.getPreHash());
     }
 
@@ -122,26 +159,26 @@ public class BlockResourceTest {
     public void getBlockByHeight() throws Exception {
         Map<String,Object> params = new HashMap<>();
         params.put("chainId", chainId);
-        params.put("height", 100);
+        params.put("height", 1);
         Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.BL.abbr, GET_BLOCK_BY_HEIGHT, params);
         Map data = (Map) cmdResp.getResponseData();
         String hex = (String) data.get(GET_BLOCK_BY_HEIGHT);
         Block block100 = new Block();
         block100.parse(new NulsByteBuffer(HexUtil.decode(hex)));
-        Assert.assertEquals(100, block100.getHeader().getHeight());
+        Assert.assertEquals(1, block100.getHeader().getHeight());
     }
 
     @Test
     public void getBlockHeaderByHash() throws Exception {
         Map<String,Object> params = new HashMap<>();
         params.put("chainId", chainId);
-        params.put("height", 100);
+        params.put("height", 1);
         Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.BL.abbr, GET_BLOCK_HEADER_BY_HEIGHT, params);
         Map data = (Map) cmdResp.getResponseData();
         String hex = (String) data.get(GET_BLOCK_HEADER_BY_HEIGHT);
         BlockHeader block100 = new BlockHeader();
         block100.parse(new NulsByteBuffer(HexUtil.decode(hex)));
-        Assert.assertEquals(100, block100.getHeight());
+        Assert.assertEquals(1, block100.getHeight());
         NulsDigestData hash = block100.getHash();
         params.put("chainId", chainId);
         params.put("hash", hash.getDigestHex());
@@ -151,20 +188,20 @@ public class BlockResourceTest {
         BlockHeader block100_ = new BlockHeader();
         block100_.parse(new NulsByteBuffer(HexUtil.decode(hex)));
         Assert.assertEquals(hash, block100_.getHash());
-        Assert.assertEquals(100, block100_.getHeight());
+        Assert.assertEquals(1, block100_.getHeight());
     }
 
     @Test
     public void getBlockByHash() throws Exception {
         Map<String,Object> params = new HashMap<>();
         params.put("chainId", chainId);
-        params.put("height", 100);
+        params.put("height", 1);
         Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.BL.abbr, GET_BLOCK_BY_HEIGHT, params);
         Map data = (Map) cmdResp.getResponseData();
         String hex = (String) data.get(GET_BLOCK_BY_HEIGHT);
         Block block100 = new Block();
         block100.parse(new NulsByteBuffer(HexUtil.decode(hex)));
-        Assert.assertEquals(100, block100.getHeader().getHeight());
+        Assert.assertEquals(1, block100.getHeader().getHeight());
         NulsDigestData hash = block100.getHeader().getHash();
         params.put("chainId", chainId);
         params.put("hash", hash.getDigestHex());
@@ -174,6 +211,6 @@ public class BlockResourceTest {
         Block block100_ = new Block();
         block100_.parse(new NulsByteBuffer(HexUtil.decode(hex)));
         Assert.assertEquals(hash, block100_.getHeader().getHash());
-        Assert.assertEquals(100, block100_.getHeader().getHeight());
+        Assert.assertEquals(1, block100_.getHeader().getHeight());
     }
 }

@@ -29,7 +29,7 @@ import io.nuls.block.model.Chain;
 import io.nuls.block.service.BlockService;
 import io.nuls.block.storage.ChainStorageService;
 import io.nuls.block.utils.BlockUtil;
-import io.nuls.block.utils.module.ConsensusUtil;
+import io.nuls.block.rpc.call.ConsensusUtil;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.exception.NulsRuntimeException;

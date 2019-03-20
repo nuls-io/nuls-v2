@@ -18,17 +18,17 @@
  * SOFTWARE.
  */
 
-package io.nuls.block.rpc;
+package io.nuls.block.message.handler;
 
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.data.NulsDigestData;
-import io.nuls.base.data.Transaction;
+import io.nuls.base.data.SmallBlock;
+import io.nuls.block.cache.SmallBlockCacher;
 import io.nuls.block.constant.BlockErrorCode;
 import io.nuls.block.manager.ContextManager;
-import io.nuls.block.message.HashListMessage;
-import io.nuls.block.message.TxGroupMessage;
-import io.nuls.block.utils.module.NetworkUtil;
-import io.nuls.block.utils.module.TransactionUtil;
+import io.nuls.block.message.HashMessage;
+import io.nuls.block.message.SmallBlockMessage;
+import io.nuls.block.rpc.call.NetworkUtil;
 import io.nuls.rpc.cmd.BaseCmd;
 import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.model.CmdAnnotation;
@@ -38,28 +38,27 @@ import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.log.logback.NulsLogger;
 
-import java.util.List;
 import java.util.Map;
 
-import static io.nuls.block.constant.CommandConstant.GET_TXGROUP_MESSAGE;
-import static io.nuls.block.constant.CommandConstant.TXGROUP_MESSAGE;
+import static io.nuls.block.constant.CommandConstant.GET_SMALL_BLOCK_MESSAGE;
+import static io.nuls.block.constant.CommandConstant.SMALL_BLOCK_MESSAGE;
 
 
 /**
- * 处理收到的{@link HashListMessage},用于区块的广播与转发
+ * 处理收到的{@link HashMessage},用于区块的广播与转发
  *
  * @author captain
  * @version 1.0
  * @date 18-11-14 下午4:23
  */
 @Component
-public class GetTxGroupHandler extends BaseCmd {
+public class GetSmallBlockHandler extends BaseCmd {
 
-    @CmdAnnotation(cmd = GET_TXGROUP_MESSAGE, version = 1.0, scope = Constants.PUBLIC, description = "")
+    @CmdAnnotation(cmd = GET_SMALL_BLOCK_MESSAGE, version = 1.0, scope = Constants.PUBLIC, description = "")
     public Response process(Map map) {
         int chainId = Integer.parseInt(map.get("chainId").toString());
         String nodeId = map.get("nodeId").toString();
-        HashListMessage message = new HashListMessage();
+        HashMessage message = new HashMessage();
         NulsLogger messageLog = ContextManager.getContext(chainId).getMessageLog();
         byte[] decode = HexUtil.decode(map.get("messageBody").toString());
         try {
@@ -70,15 +69,14 @@ public class GetTxGroupHandler extends BaseCmd {
             return failed(BlockErrorCode.PARAMETER_ERROR);
         }
 
-        List<NulsDigestData> hashList = message.getTxHashList();
-        messageLog.debug("recieve HashListMessage from node-" + nodeId + ", chainId:" + chainId + ", txcount:" + hashList.size() + ", hashList:" + hashList);
-        TxGroupMessage request = new TxGroupMessage();
-        List<Transaction> transactions = TransactionUtil.getConfirmedTransactions(chainId, hashList);
-        messageLog.debug("transactions size:" + transactions.size());
-        transactions.forEach(e -> messageLog.debug("transaction hash:" + e.getHash()));
-        request.setBlockHash(message.getBlockHash());
-        request.setTransactions(transactions);
-        NetworkUtil.sendToNode(chainId, request, nodeId, TXGROUP_MESSAGE);
+        NulsDigestData blockHash = message.getRequestHash();
+        messageLog.debug("recieve HashMessage from node-" + nodeId + ", chainId:" + chainId + ", hash:" + blockHash);
+        SmallBlock smallBlock = SmallBlockCacher.getSmallBlock(chainId, blockHash).getSmallBlock();
+        if (smallBlock != null) {
+            SmallBlockMessage smallBlockMessage = new SmallBlockMessage();
+            smallBlockMessage.setSmallBlock(smallBlock);
+            NetworkUtil.sendToNode(chainId, smallBlockMessage, nodeId, SMALL_BLOCK_MESSAGE);
+        }
         return success();
     }
 

@@ -18,7 +18,7 @@
  * SOFTWARE.
  */
 
-package io.nuls.block.rpc;
+package io.nuls.block.message.handler;
 
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.data.*;
@@ -33,8 +33,8 @@ import io.nuls.block.model.ChainContext;
 import io.nuls.block.model.ChainParameters;
 import io.nuls.block.service.BlockService;
 import io.nuls.block.utils.BlockUtil;
-import io.nuls.block.utils.module.NetworkUtil;
-import io.nuls.block.utils.module.TransactionUtil;
+import io.nuls.block.rpc.call.NetworkUtil;
+import io.nuls.block.rpc.call.TransactionUtil;
 import io.nuls.rpc.cmd.BaseCmd;
 import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.model.CmdAnnotation;

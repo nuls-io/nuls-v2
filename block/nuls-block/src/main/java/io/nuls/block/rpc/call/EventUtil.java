@@ -18,7 +18,7 @@
  * SOFTWARE.
  */
 
-package io.nuls.block.utils.module;
+package io.nuls.block.rpc.call;
 
 /**
  * 与事件总线模块交互的工具类
