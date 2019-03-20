@@ -36,10 +36,11 @@ import io.nuls.tools.core.ioc.SpringLiteContext;
 public class TimeUtil {
     static long latestGetTime = System.currentTimeMillis();
     static long offset = 0;
+    final static long timeOutMillis = 30000;
 
     public static long getCurrentTime() {
         long now = System.currentTimeMillis();
-        if (now - latestGetTime > 30000) {
+        if (now - latestGetTime >= timeOutMillis) {
             TimeRpcService timeRpcService = SpringLiteContext.getBean(TimeRpcServiceImpl.class);
             offset = timeRpcService.getTime() - System.currentTimeMillis();
             latestGetTime = now;
