@@ -38,6 +38,7 @@ import io.nuls.contract.util.VMContext;
 import io.nuls.contract.vm.program.ProgramExecutor;
 import io.nuls.tools.basic.Result;
 import io.nuls.tools.core.ioc.SpringLiteContext;
+import io.nuls.tools.log.Log;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -60,7 +61,7 @@ import static io.nuls.contract.util.ContractUtil.*;
 @Setter
 public class ContractTxCallable implements Callable<ContractResult> {
 
-    private ContractExecutor contractVM;
+    private ContractExecutor contractExecutor;
     private ContractHelper contractHelper;
     private VMContext vmContext;
     private ContractTransferHandler contractTransferHandler;
@@ -79,7 +80,7 @@ public class ContractTxCallable implements Callable<ContractResult> {
     public ContractTxCallable(int chainId, long blockTime, ProgramExecutor executor, String contract, ContractWrapperTransaction tx, long number, String preStateRoot, ContractConflictChecker checker, ContractContainer container) {
         this.chainId = chainId;
         this.blockTime = blockTime;
-        this.contractVM = SpringLiteContext.getBean(ContractExecutor.class);
+        this.contractExecutor = SpringLiteContext.getBean(ContractExecutor.class);
         this.contractHelper = SpringLiteContext.getBean(ContractHelper.class);
         this.vmContext = SpringLiteContext.getBean(VMContext.class);
         this.contractTransferHandler = SpringLiteContext.getBean(ContractTransferHandler.class);
@@ -101,27 +102,28 @@ public class ContractTxCallable implements Callable<ContractResult> {
         contractData = tx.getContractData();
         // 创建合约无论成功与否，后续的其他的跳过执行，视作失败 -> 合约锁定中或者合约不存在
         if (container.isHasCreate()) {
-            return ContractResult.getFailed(contractData, "contract lock or not exist.");
+            return ContractResult.genFailed(contractData, "contract lock or not exist.");
         }
         // 删除合约成功后，后续的其他的跳过执行，视作失败 -> 合约已删除
         if (container.isDelete()) {
-            return ContractResult.getFailed(contractData, "contract has been terminated.");
+            return ContractResult.genFailed(contractData, "contract has been terminated.");
         }
         if (!ContractUtil.checkPrice(contractData.getPrice())) {
-            return ContractResult.getFailed(contractData, "The minimum value of price is 25.");
+            return ContractResult.genFailed(contractData, "The minimum value of price is 25.");
         }
         switch (tx.getType()) {
             case TX_TYPE_CREATE_CONTRACT:
                 container.setHasCreate(true);
-                contractResult = contractVM.create(executor, contractData, number, preStateRoot);
+                contractResult = contractExecutor.create(executor, contractData, number, preStateRoot);
+                Log.info("======pierre====contractResult is {}", contractResult);
                 checkCreateResult(tx, callableResult, contractResult);
                 break;
             case TX_TYPE_CALL_CONTRACT:
-                contractResult = contractVM.call(executor, contractData, number, preStateRoot);
+                contractResult = contractExecutor.call(executor, contractData, number, preStateRoot);
                 checkCallResult(tx, callableResult, contractResult);
                 break;
             case TX_TYPE_DELETE_CONTRACT:
-                contractResult = contractVM.delete(executor, contractData, number, preStateRoot);
+                contractResult = contractExecutor.delete(executor, contractData, number, preStateRoot);
                 boolean isDelete = checkDeleteResult(tx, callableResult, contractResult);
                 container.setDelete(isDelete);
                 break;
@@ -135,6 +137,7 @@ public class ContractTxCallable implements Callable<ContractResult> {
         makeContractResult(tx, contractResult);
         if (contractResult.isSuccess()) {
             Result checkResult = contractHelper.validateNrc20Contract(chainId, (ProgramExecutor) contractResult.getTxTrack(), tx, contractResult);
+            Log.info("checkResult is {}", checkResult);
             if (checkResult.isSuccess()) {
                 container.getCommitSet().add(contract);
                 commitContract(contractResult);

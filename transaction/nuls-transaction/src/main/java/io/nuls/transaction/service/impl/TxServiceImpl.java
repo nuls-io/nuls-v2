@@ -245,8 +245,8 @@ public class TxServiceImpl implements TxService {
      * @return Result
      */
     private void validateCoinFromBase(Chain chain, int type, List<CoinFrom> listFrom) throws NulsException {
-        //coinBase交易没有from
-        if (type == TxConstant.TX_TYPE_COINBASE) {
+        //coinBase交易/智能合约退还gas交易没有from
+        if (type == TxConstant.TX_TYPE_COINBASE || type == TxConstant.TX_TYPE_CONTRACT_RETURN_GAS) {
             return;
         }
         if (null == listFrom || listFrom.size() == 0) {
@@ -604,7 +604,7 @@ public class TxServiceImpl implements TxService {
                 Transaction tx = packablePool.get(chain);
                 if (tx == null) {
                     try {
-                        chain.getLoggerMap().get(TxConstant.LOG_TX).debug("************* [获取交易等待]");
+                        //chain.getLoggerMap().get(TxConstant.LOG_TX).debug("************* [获取交易等待]");
                         Thread.sleep(100L);
                     } catch (InterruptedException e) {
                         Log.error("packaging error ", e);

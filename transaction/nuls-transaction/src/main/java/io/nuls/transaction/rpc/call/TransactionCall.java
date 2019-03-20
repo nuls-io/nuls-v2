@@ -34,6 +34,7 @@ public class TransactionCall {
             Response cmdResp = ResponseMessageProcessor.requestAndResponse(moduleCode, cmd, params);
             Map resData = (Map)cmdResp.getResponseData();
             if (!cmdResp.isSuccess()) {
+                Log.error("response error info is {}", cmdResp);
                 String errorMsg = null;
                 if(null == resData){
                     errorMsg = String.format("Remote call fail. ResponseComment: %s ", cmdResp.getResponseComment());

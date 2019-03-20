@@ -166,7 +166,7 @@ public class TxUtil {
             transactionPO.setTime(tx.getTime());
             list.add(transactionPO);
 
-        } else if (TxManager.isSmartContract(chain, tx.getType())) {
+        } else if (TxManager.isUnSystemSmartContract(chain, tx.getType())) {
             TransactionPO transactionPO = new TransactionPO();
             transactionPO.setAddress(extractContractAddress(tx.getTxData()));
             transactionPO.setAssetChainId(chain.getConfig().getChainId());
@@ -302,6 +302,7 @@ public class TxUtil {
     }
 
     public static void txInformationDebugPrint(Chain chain, Transaction tx, NulsLogger nulsLogger) {
+        if(tx.getType() == 1) return;
         nulsLogger.debug("");
         nulsLogger.debug("**************************************************");
         nulsLogger.debug("Transaction information");
