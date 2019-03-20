@@ -27,7 +27,7 @@ public class TransactionPO {
     private BigInteger amount;
 
     /**
-     * 0:转出, 1:转入, 2:冻结, 3:解锁 4:智能合约
+     * 0:转出, 1:转入, 2:冻结(包括红牌), 3:解锁 4:智能合约 5:黄牌
      */
     private Integer state;
 
