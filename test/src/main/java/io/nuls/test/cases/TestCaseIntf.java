@@ -24,6 +24,10 @@ public interface TestCaseIntf<T,P> {
         if(!result.isSuccess()){
             throw new TestFailException(result.getMessage());
         }
+        if(result.getList() == null && result.getData() == null){
+            throw new TestFailException(title() + "测试返回值不符合预期，返回数据为空");
+        }
+
     }
 
     String title();
