@@ -1,5 +1,6 @@
 package io.nuls.test.cases.block;
 
+import io.nuls.api.provider.block.facade.BlockHeaderData;
 import io.nuls.base.data.BlockHeader;
 import io.nuls.test.cases.AbstractRemoteTestCase;
 import io.nuls.test.cases.RemoteTestParam;
@@ -26,7 +27,7 @@ public class LastBlockSyncCase implements TestCaseIntf<Boolean,Void> {
 
     @Override
     public Boolean doTest(Void param, int depth) throws TestFailException {
-        BlockHeader blockHeader = getLastBlockHeaderCase.check(null,depth);
+        BlockHeaderData blockHeader = getLastBlockHeaderCase.check(null,depth);
         Boolean res = new AbstractRemoteTestCase(){
             @Override
             public String title() {

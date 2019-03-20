@@ -4,7 +4,7 @@
     "chainId":12345,
     "assetId":1,
     "txMaxSize":1048576,
-    "moduleVerifyOffset":500,
+    "moduleVerifyOffset":1000,
     "txUnverifiedQueueSize":10000000,
     "orphanContainerSize":200000,
     "orphanTtl":3600000
@@ -14,7 +14,7 @@
   "mainAssetId": 1,
   "language": "en",
   "encoding": "UTF-8",
-  "txDataPath": "tx",
+  "txDataRoot": "tx",
   "hashTtl":30000,
   "ctxEffectThreshold":30,
   "crossVerifyResultPassRate":"0.51",

@@ -25,6 +25,7 @@
 package io.nuls.network.rpc.cmd;
 
 import io.nuls.network.manager.TimeManager;
+import io.nuls.network.utils.LoggerUtil;
 import io.nuls.rpc.cmd.BaseCmd;
 import io.nuls.rpc.model.CmdAnnotation;
 import io.nuls.rpc.model.message.Response;
@@ -43,6 +44,7 @@ public class TimeServiceRpc extends BaseCmd {
     @CmdAnnotation(cmd = "nw_currentTimeMillis", version = 1.0,
             description = "currentTimeMillis")
     public Response currentTimeMillis(Map params) {
+        LoggerUtil.rpcLog.debug("get time");
         Map<String, Long> responseData = new HashMap<>();
         responseData.put("currentTimeMillis", TimeManager.currentTimeMillis());
         return success(responseData);
