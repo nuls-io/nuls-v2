@@ -207,6 +207,7 @@ public class TransactionCmd extends BaseCmd {
             Map<String, Object> map = new HashMap<>(TxConstant.INIT_CAPACITY_4);
             map.put("list", txPackage.getList());
             map.put("stateRoot", txPackage.getStateRoot());
+            map.put("packageHeight", txPackage.getPackageHeight());
             return success(map);
         } catch (NulsException e) {
             errorLogProcess(chain, e);

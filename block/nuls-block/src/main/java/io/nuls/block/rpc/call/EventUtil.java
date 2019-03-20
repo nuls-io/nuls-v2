@@ -1,18 +1,14 @@
 /*
  * MIT License
- *
- * Copyright (c) 2017-2018 nuls.io
- *
+ * Copyright (c) 2017-2019 nuls.io
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- *
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -20,30 +16,43 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
- *
  */
-package io.nuls.ledger.utils;
 
-import io.nuls.ledger.rpc.call.TimeRpcService;
-import io.nuls.ledger.rpc.call.impl.TimeRpcServiceImpl;
-import io.nuls.tools.core.ioc.SpringLiteContext;
+package io.nuls.block.rpc.call;
 
 /**
- * @author lan
- * @description
- * @date 2019/01/07
- **/
-public class TimeUtils {
-    static long latestGetTime = System.currentTimeMillis();
-    static long offset = 0;
+ * 与事件总线模块交互的工具类
+ *
+ * @author captain
+ * @version 1.0
+ * @date 18-11-20 上午10:45
+ */
+public class EventUtil {
 
-    public static long getCurrentTime() {
-        long now = System.currentTimeMillis();
-        if (now - latestGetTime > 30000) {
-            TimeRpcService timeRpcService = SpringLiteContext.getBean(TimeRpcServiceImpl.class);
-            offset = timeRpcService.getTime() - System.currentTimeMillis();
-        }
-        latestGetTime = now;
-        return (System.currentTimeMillis() + offset);
+    /**
+     * 订阅事件
+     *
+     * @param moduleId
+     * @param topic
+     * @return
+     * @throws Exception
+     */
+    public static boolean subscribe(String moduleId, String topic) throws Exception {
+//        String response = ResponseMessageProcessor.request("subscribe", null);
+        return true;
     }
+
+    /**
+     * 发布事件
+     *
+     * @param moduleId
+     * @param topic
+     * @return
+     * @throws Exception
+     */
+    public static boolean send(String moduleId, String topic, String eventJson) throws Exception {
+//        String response = ResponseMessageProcessor.request("send", null);
+        return true;
+    }
+
 }

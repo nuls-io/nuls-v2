@@ -85,11 +85,14 @@ public interface TxService {
 
 
     /**
-     * 打包
-     *
+     *  共识打包获取打包所需交易
      * @param chain
-     * @param endtimestamp
+     * @param endtimestamp 获取交易截止时间
      * @param maxTxDataSize
+     * @param blockTime 区块时间
+     * @param blockHeight 打包高度
+     * @param packingAddress
+     * @param preStateRoot
      * @return
      * @throws NulsException
      */

@@ -71,10 +71,10 @@ import java.math.BigInteger;
 import java.util.*;
 
 import static io.nuls.contract.constant.ContractCmdConstant.*;
+import static io.nuls.contract.constant.ContractConstant.CONTRACT_MINIMUM_PRICE;
 import static io.nuls.contract.constant.ContractConstant.MAX_GASLIMIT;
 import static io.nuls.contract.constant.ContractErrorCode.*;
-import static io.nuls.contract.util.ContractUtil.bigInteger2String;
-import static io.nuls.contract.util.ContractUtil.checkVmResultAndReturn;
+import static io.nuls.contract.util.ContractUtil.*;
 import static org.apache.commons.lang3.StringUtils.EMPTY;
 
 /**
@@ -110,7 +110,8 @@ public class ContractResource extends BaseCmd {
             Long gasLimit = Long.parseLong(params.get("gasLimit").toString());
             Long price = Long.parseLong(params.get("price").toString());
             String contractCode = (String) params.get("contractCode");
-            Object[] args = (Object[]) params.get("args");
+            List argsList = (List) params.get("args");
+            Object[] args = argsList.toArray();
             String remark = (String) params.get("remark");
 
             if (gasLimit < 0 || price < 0) {
@@ -136,7 +137,7 @@ public class ContractResource extends BaseCmd {
             Result result = contractTxService.contractCreateTx(chainId, sender, gasLimit, price, contractCodeBytes, convertArgs, password, remark);
 
             if (result.isFailed()) {
-                return failed(result.getErrorCode());
+                return wrapperFailed(result);
             }
 
             return success(result.getData());
@@ -163,7 +164,8 @@ public class ContractResource extends BaseCmd {
             Long gasLimit = Long.parseLong(params.get("gasLimit").toString());
             Long price = Long.parseLong(params.get("price").toString());
             String contractCode = (String) params.get("contractCode");
-            Object[] args = (Object[]) params.get("args");
+            List argsList = (List) params.get("args");
+            Object[] args = argsList.toArray();
             String remark = (String) params.get("remark");
 
             if (gasLimit < 0 || price < 0) {
@@ -189,10 +191,10 @@ public class ContractResource extends BaseCmd {
             Result result = contractTxService.contractPreCreateTx(chainId, sender, gasLimit, price, contractCodeBytes, convertArgs, password, remark);
 
             if (result.isFailed()) {
-                return failed(result.getErrorCode());
+                return wrapperFailed(result);
             }
 
-            return success(result.getData());
+            return success();
         } catch (Exception e) {
             Log.error(e);
             return failed(e.getMessage());
@@ -202,7 +204,6 @@ public class ContractResource extends BaseCmd {
     @CmdAnnotation(cmd = IMPUTED_CREATE_GAS, version = 1.0, description = "imputed create gas")
     @Parameter(parameterName = "chainId", parameterType = "int")
     @Parameter(parameterName = "sender", parameterType = "String")
-    @Parameter(parameterName = "price", parameterType = "long")
     @Parameter(parameterName = "contractCode", parameterType = "String")
     @Parameter(parameterName = "args", parameterType = "Object[]")
     public Response imputedCreateGas(Map<String, Object> params) {
@@ -214,12 +215,9 @@ public class ContractResource extends BaseCmd {
             do {
                 Integer chainId = (Integer) params.get("chainId");
                 String sender = (String) params.get("sender");
-                Long price = Long.parseLong(params.get("price").toString());
                 String contractCode = (String) params.get("contractCode");
-                Object[] args = (Object[]) params.get("args");
-                if (price < 0) {
-                    break;
-                }
+                List argsList = (List) params.get("args");
+                Object[] args = argsList.toArray();
                 if (!AddressTool.validAddress(chainId, sender)) {
                     break;
                 }
@@ -233,7 +231,7 @@ public class ContractResource extends BaseCmd {
                 if (method != null) {
                     convertArgs = ContractUtil.twoDimensionalArray(args, method.argsType2Array());
                 }
-                result = contractTxService.validateContractCreateTx(chainId, senderBytes, MAX_GASLIMIT, price, contractCodeBytes, convertArgs);
+                result = contractTxService.validateContractCreateTx(chainId, senderBytes, MAX_GASLIMIT, CONTRACT_MINIMUM_PRICE, contractCodeBytes, convertArgs);
                 if (result.isFailed()) {
                     break;
                 }
@@ -269,7 +267,8 @@ public class ContractResource extends BaseCmd {
             Long gasLimit = Long.parseLong(params.get("gasLimit").toString());
             Long price = Long.parseLong(params.get("price").toString());
             String contractCode = (String) params.get("contractCode");
-            Object[] args = (Object[]) params.get("args");
+            List argsList = (List) params.get("args");
+            Object[] args = argsList.toArray();
 
             if (gasLimit < 0 || price < 0) {
                 return failed(ContractErrorCode.PARAMETER_ERROR);
@@ -294,7 +293,7 @@ public class ContractResource extends BaseCmd {
             Result result = contractTxService.validateContractCreateTx(chainId, AddressTool.getAddress(sender), gasLimit, price, contractCodeBytes, convertArgs);
 
             if (result.isFailed()) {
-                return failed(result.getErrorCode());
+                return wrapperFailed(result);
             }
 
             return success();
@@ -326,7 +325,8 @@ public class ContractResource extends BaseCmd {
             String contractAddress = (String) params.get("contractAddress");
             String methodName = (String) params.get("methodName");
             String methodDesc = (String) params.get("methodDesc");
-            Object[] args = (Object[]) params.get("args");
+            List argsList = (List) params.get("args");
+            Object[] args = argsList.toArray();
             String password = (String) params.get("password");
             String remark = (String) params.get("remark");
 
@@ -363,7 +363,7 @@ public class ContractResource extends BaseCmd {
             Result result = contractTxService.contractCallTx(chainId, sender, value, gasLimit, price, contractAddress, methodName, methodDesc, convertArgs, password, remark);
 
             if (result.isFailed()) {
-                return failed(result.getErrorCode());
+                return wrapperFailed(result);
             }
 
             return success(result.getData());
@@ -393,7 +393,8 @@ public class ContractResource extends BaseCmd {
             String contractAddress = (String) params.get("contractAddress");
             String methodName = (String) params.get("methodName");
             String methodDesc = (String) params.get("methodDesc");
-            Object[] args = (Object[]) params.get("args");
+            List argsList = (List) params.get("args");
+            Object[] args = argsList.toArray();
 
             if (value.compareTo(BigInteger.ZERO) < 0 || gasLimit < 0 || price < 0) {
                 return failed(ContractErrorCode.PARAMETER_ERROR);
@@ -429,7 +430,7 @@ public class ContractResource extends BaseCmd {
             Result result = contractTxService.validateContractCallTx(chainId, senderBytes, value, gasLimit, price, contractAddressBytes, methodName, methodDesc, convertArgs);
 
             if (result.isFailed()) {
-                return failed(result.getErrorCode());
+                return wrapperFailed(result);
             }
 
             return success();
@@ -442,9 +443,8 @@ public class ContractResource extends BaseCmd {
     @CmdAnnotation(cmd = IMPUTED_CALL_GAS, version = 1.0, description = "imputed call gas")
     @Parameter(parameterName = "chainId", parameterType = "int")
     @Parameter(parameterName = "sender", parameterType = "String")
-    @Parameter(parameterName = "contractAddress", parameterType = "String")
     @Parameter(parameterName = "value", parameterType = "BigInteger")
-    @Parameter(parameterName = "price", parameterType = "long")
+    @Parameter(parameterName = "contractAddress", parameterType = "String")
     @Parameter(parameterName = "methodName", parameterType = "String")
     @Parameter(parameterName = "methodDesc", parameterType = "String")
     @Parameter(parameterName = "args", parameterType = "Object[]")
@@ -457,13 +457,13 @@ public class ContractResource extends BaseCmd {
             do {
                 Integer chainId = (Integer) params.get("chainId");
                 String sender = (String) params.get("sender");
-                String contractAddress = (String) params.get("contractAddress");
                 BigInteger value = new BigInteger(params.get("value").toString());
-                Long price = Long.parseLong(params.get("price").toString());
+                String contractAddress = (String) params.get("contractAddress");
                 String methodName = (String) params.get("methodName");
                 String methodDesc = (String) params.get("methodDesc");
-                Object[] args = (Object[]) params.get("args");
-                if (value.compareTo(BigInteger.ZERO) < 0 || price < 0) {
+                List argsList = (List) params.get("args");
+                Object[] args = argsList.toArray();
+                if (value.compareTo(BigInteger.ZERO) < 0) {
                     break;
                 }
                 if (!AddressTool.validAddress(chainId, sender)) {
@@ -488,7 +488,7 @@ public class ContractResource extends BaseCmd {
                 if (method != null) {
                     convertArgs = ContractUtil.twoDimensionalArray(args, method.argsType2Array());
                 }
-                result = contractTxService.validateContractCallTx(chainId, senderBytes, value, MAX_GASLIMIT, price, contractAddressBytes, methodName, methodDesc, convertArgs);
+                result = contractTxService.validateContractCallTx(chainId, senderBytes, value, MAX_GASLIMIT, CONTRACT_MINIMUM_PRICE, contractAddressBytes, methodName, methodDesc, convertArgs);
                 if (result.isFailed()) {
                     break;
                 }
@@ -533,7 +533,7 @@ public class ContractResource extends BaseCmd {
             }
             Result result = contractTxService.contractDeleteTx(chainId, sender, contractAddress, password, remark);
             if (result.isFailed()) {
-                return failed(result.getErrorCode());
+                return wrapperFailed(result);
             }
             return success(result.getData());
         } catch (Exception e) {
@@ -559,7 +559,7 @@ public class ContractResource extends BaseCmd {
             }
             Result result = contractTxService.validateContractDeleteTx(chainId, sender, contractAddress);
             if (result.isFailed()) {
-                return failed(result.getErrorCode());
+                return wrapperFailed(result);
             }
             return success();
         } catch (Exception e) {
@@ -611,7 +611,7 @@ public class ContractResource extends BaseCmd {
                     ContractConstant.BALANCE_TRIGGER_METHOD_DESC,
                     null, password, remark);
             if (result.isFailed()) {
-                return failed(result.getErrorCode());
+                return wrapperFailed(result);
             }
 
             return success(result.getData());
@@ -662,7 +662,7 @@ public class ContractResource extends BaseCmd {
                     ContractConstant.BALANCE_TRIGGER_METHOD_DESC,
                     null, remark);
             if (result.isFailed()) {
-                return failed(result.getErrorCode());
+                return wrapperFailed(result);
             }
 
             return success(result.getData());
@@ -727,7 +727,7 @@ public class ContractResource extends BaseCmd {
                     ContractConstant.NRC20_METHOD_TRANSFER, null,
                     ContractUtil.twoDimensionalArray(argsObj), password, remark);
             if (result.isFailed()) {
-                return failed(result.getErrorCode());
+                return wrapperFailed(result);
             }
 
             return success(result.getData());
@@ -751,7 +751,7 @@ public class ContractResource extends BaseCmd {
             BlockHeader blockHeader = BlockCall.getLatestBlockHeader(chainId);
             Result<ContractTokenInfo> result = contractHelper.getContractToken(chainId, blockHeader, address, contractAddress);
             if (result.isFailed()) {
-                return failed(result.getErrorCode());
+                return wrapperFailed(result);
             }
             ContractTokenInfo data = result.getData();
             ContractTokenInfoDto dto = null;
@@ -779,7 +779,8 @@ public class ContractResource extends BaseCmd {
             String contractAddress = (String) params.get("contractAddress");
             String methodName = (String) params.get("methodName");
             String methodDesc = (String) params.get("methodDesc");
-            Object[] args = (Object[]) params.get("args");
+            List argsList = (List) params.get("args");
+            Object[] args = argsList.toArray();
 
             if (!AddressTool.validAddress(chainId, contractAddress)) {
                 return failed(ADDRESS_ERROR);
@@ -814,10 +815,10 @@ public class ContractResource extends BaseCmd {
                 Result newResult = checkVmResultAndReturn(programResult.getErrorMessage(), result);
                 // result没有变化
                 if (newResult == result) {
-                    return failed(result.getErrorCode(), result.getMsg());
+                    return wrapperFailed(result);
                 } else {
                     // Exceeded the maximum GAS limit for contract calls
-                    return failed(result.getErrorCode());
+                    return wrapperFailed(result);
                 }
             } else {
                 Map<String, String> resultMap = MapUtil.createLinkedHashMap(2);
@@ -876,7 +877,7 @@ public class ContractResource extends BaseCmd {
 
             Result<ContractAddressInfoPo> contractAddressInfoResult = contractHelper.getContractAddressInfo(chainId, contractAddressBytes);
             if (contractAddressInfoResult.isFailed()) {
-                return failed(contractAddressInfoResult.getErrorCode());
+                return wrapperFailed(contractAddressInfoResult);
             }
 
             ContractAddressInfoPo contractAddressInfoPo = contractAddressInfoResult.getData();
@@ -1125,7 +1126,7 @@ public class ContractResource extends BaseCmd {
             ContractTokenBalanceManager tokenBalanceManager = contractHelper.getChain(chainId).getContractTokenBalanceManager();
             Result<List<ContractTokenInfo>> tokenListResult = tokenBalanceManager.getAllTokensByAccount(address);
             if (tokenListResult.isFailed()) {
-                return failed(tokenListResult.getErrorCode());
+                return wrapperFailed(tokenListResult);
             }
 
             List<ContractTokenInfo> tokenInfoList = tokenListResult.getData();

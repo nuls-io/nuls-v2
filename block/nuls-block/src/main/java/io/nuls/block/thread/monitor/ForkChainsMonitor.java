@@ -26,7 +26,7 @@ import io.nuls.block.manager.ContextManager;
 import io.nuls.block.model.Chain;
 import io.nuls.block.model.ChainContext;
 import io.nuls.block.model.ChainParameters;
-import io.nuls.block.utils.module.ConsensusUtil;
+import io.nuls.block.rpc.call.ConsensusUtil;
 import io.nuls.tools.log.logback.NulsLogger;
 
 import java.util.SortedSet;

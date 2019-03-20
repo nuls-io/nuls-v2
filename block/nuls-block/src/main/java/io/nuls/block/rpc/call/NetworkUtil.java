@@ -17,7 +17,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package io.nuls.block.utils.module;
+package io.nuls.block.rpc.call;
 
 import io.nuls.base.data.NulsDigestData;
 import io.nuls.block.manager.ContextManager;
@@ -236,8 +236,6 @@ public class NetworkUtil {
      */
     public static long currentTime() {
         try {
-//            Map<String, Object> params = new HashMap<>(1);
-//            params.put(Constants.VERSION_KEY_STR, "1.0");
             Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.NW.abbr, "nw_currentTimeMillis", null);
             Map responseData = (Map) response.getResponseData();
             Map result = (Map) responseData.get("nw_currentTimeMillis");

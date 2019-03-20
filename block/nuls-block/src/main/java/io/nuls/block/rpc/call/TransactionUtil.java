@@ -18,7 +18,7 @@
  * SOFTWARE.
  */
 
-package io.nuls.block.utils.module;
+package io.nuls.block.rpc.call;
 
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.data.NulsDigestData;

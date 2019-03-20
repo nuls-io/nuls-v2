@@ -18,7 +18,7 @@
  * SOFTWARE.
  */
 
-package io.nuls.block.rpc;
+package io.nuls.block.message.handler;
 
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.data.Block;

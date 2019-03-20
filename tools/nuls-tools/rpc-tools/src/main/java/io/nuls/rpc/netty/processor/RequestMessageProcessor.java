@@ -211,7 +211,7 @@ public class RequestMessageProcessor {
             执行成功之后判断该接口是否被订阅过，如果被订阅则改变该接口触发次数
             After successful execution, determine if the interface has been subscribed, and if subscribed, change the number of triggers for the interface
              */
-            if(ConnectManager.SUBSCRIBE_COUNT.containsKey(method) && !isSubscribe){
+            if(ConnectManager.SUBSCRIBE_COUNT.containsKey(method) && isSubscribe){
                 ConnectManager.eventTrigger(method,(Response) rspMessage.getMessageData());
             }
         }

@@ -89,13 +89,13 @@ public class ProgramExecutorImpl implements ProgramExecutor {
     private final Thread thread;
 
     public ProgramExecutorImpl(VMContext vmContext, Chain chain) {
-        this(vmContext, stateSource(chain), null, null, null, null);
+        this(null, vmContext, stateSource(chain), null, null, null, null);
         this.chain = chain;
     }
 
-    private ProgramExecutorImpl(VMContext vmContext, Source<byte[], byte[]> source, Repository repository, byte[] prevStateRoot,
+    private ProgramExecutorImpl(ProgramExecutorImpl programExecutor, VMContext vmContext, Source<byte[], byte[]> source, Repository repository, byte[] prevStateRoot,
                                 Map<ByteArrayWrapper, ProgramAccount> accounts, Thread thread) {
-        this.parent = this;
+        this.parent = programExecutor;
         this.vmContext = vmContext;
         this.source = source;
         this.repository = repository;
@@ -106,7 +106,7 @@ public class ProgramExecutorImpl implements ProgramExecutor {
     }
 
     public ProgramExecutor callProgramExecutor() {
-        return new ProgramExecutorImpl(vmContext, source, repository, prevStateRoot, accounts, thread);
+        return new ProgramExecutorImpl(this, vmContext, source, repository, prevStateRoot, accounts, thread);
     }
 
     @Override
@@ -119,10 +119,15 @@ public class ProgramExecutorImpl implements ProgramExecutor {
     }
 
     private Chain getCurrentChain() {
-        if (this.chain != null) {
-            return chain;
-        } else if (this.parent.chain != null) {
-            return this.parent.chain;
+        ProgramExecutorImpl programExecutor = this;
+        while (programExecutor.chain == null) {
+            programExecutor = programExecutor.parent;
+            if(programExecutor == null) {
+                break;
+            }
+        }
+        if (programExecutor != null) {
+            return programExecutor.chain;
         }
         return null;
     }
@@ -133,7 +138,7 @@ public class ProgramExecutorImpl implements ProgramExecutor {
             log.debug("begin vm root: {}", Hex.toHexString(prevStateRoot));
         }
         Repository repository = new RepositoryRoot(source, prevStateRoot);
-        return new ProgramExecutorImpl(vmContext, source, repository, prevStateRoot, new HashMap<>(), Thread.currentThread());
+        return new ProgramExecutorImpl(this, vmContext, source, repository, prevStateRoot, new HashMap<>(), Thread.currentThread());
     }
 
     @Override
@@ -143,7 +148,7 @@ public class ProgramExecutorImpl implements ProgramExecutor {
             log.debug("startTracking");
         }
         Repository track = repository.startTracking();
-        return new ProgramExecutorImpl(vmContext, source, track, null, new HashMap<>(), thread);
+        return new ProgramExecutorImpl(this, vmContext, source, track, null, new HashMap<>(), thread);
     }
 
     @Override

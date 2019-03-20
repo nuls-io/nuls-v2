@@ -24,15 +24,12 @@
 package io.nuls.contract.tx.base;
 
 
-import com.alibaba.fastjson.JSONObject;
-import io.nuls.base.data.Transaction;
-import io.nuls.contract.model.tx.CallContractTransaction;
+import io.nuls.base.basic.AddressTool;
 import io.nuls.contract.model.txdata.CallContractData;
 import io.nuls.contract.model.txdata.ContractData;
+import io.nuls.contract.util.ContractUtil;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
+import java.math.BigInteger;
 
 /**
  * @author: PierreLuo
@@ -40,26 +37,57 @@ import java.util.Random;
  */
 public class Base {
     static String[] contractAddressSeeds = {
-            "NseKMBJ8Z7WgqfDkF5bGKNCUE6G7FMa8",
-            "NseM7aGB6QUDo2RrKh9ogbrBC6c27aH6",
-            "NseFuqwPHwrZsyBKnhfKQMzSrYsVhjfL",
-            "NseBeLaoi4gFEffqsGzB1zVNU6jsjjhK",
-            "NseMnV77Tii2nY1Qomuoji5bojgTJbrU",
-            "NseBRYKU3vQvZY4XCiSVY5jyL6oVabFr",
-            "NseQLXBFZaZotpNhtBQqDLJTtdsoqURd",
-            "NsePwaJfYBuVvHxo7YmAfAhcjstoPCXY",
-            "NseALLow7yVQyVboH9NreKdccWPGNriq",
-            "NseDWcNqN4zpzvLH59o8RjQDReRi5NEH",
-            "NseHMCgNK5rCKa3bLVGbVXyd3WnziNxX",
-            "NseN7DjnscKKgKH8ckHhAzjHfVapgsz2",
-            "NsePjWf23b2UrZnTQwDaSJtqo9AoLC7G",
-            "NseL4MPxPCvyTFMo8Qj6bvBJ2NTCJbzN",
-            "NseFEH2LC1c9sMzCAHXiuwJtExULZXPt",
-            "NseL6yz3co4RzRwaK96P4eL2c7UwuMBE",
-            "NseFt39WQKWmUFPQ5bQnGzp6Fzi3z8WD",
-            "NseDx4t5u8aR3PoY3YqrxFPJ9bD9rW6F",
-            "NseGzHCstPjHEiWGoUJMTse12ZEgPtv7",
-            "NseEwuKf1rAouBngPaUFiY7xK6Rz9VQL"};
+            "5MR_3PyGq4CgbfoH7sCZ5PoAXPCrzKokBTF",
+            "5MR_3QANzLfMffP22BbyaBnQddkJQArJtJ7",
+            "5MR_3Q7e7a57oWhKLkgjRWYhJCyHbLS8ik9",
+            "5MR_3QAgjbDEjZyzvAoH5NK642m9CZx6NGy",
+            "5MR_3QAbdkWLSbQi5xthL8WtyFAvd4cKeea",
+            "5MR_3Q3E2ByDXf5cwX1abCi4Xb39Kyq6R7q",
+            "5MR_3QDNQCfjP6qM9ZGZDnVy2NzudSWLAW6",
+            "5MR_3Q9S65XtxXeJUmEiPENSSdXLaZSNpbS",
+            "5MR_3Q2wnpwjHKaG9M9rGfyk2YrwThMb57R",
+            "5MR_3QBpHo2nLXMXfysmswjCkfb8PJFVRT8",
+            "5MR_3Q1qQYgNw2URT6Q1G3HMAuxtsWdLrw1",
+            "5MR_3Q79uhPjevBdVMxazc9ncXHXkjiSC3Q",
+            "5MR_3Py5YMtECe4sKuEQrfpEcedVmUXTaBD",
+            "5MR_3Q4T7MqP8uEPKcuNckurf7KCA7yK78V",
+            "5MR_3QD53q4YiszcZqABwoGSuz339MdRsKX",
+            "5MR_3Q2LBUdaZLDFZAHEbtxoC9razeUFa3T",
+            "5MR_3QDNNscDF6RWvkgTrgqMBSZZoz2RGCh",
+            "5MR_3Q6rhNo7FmG94b6dvwDu9SAxQsCj2TX",
+            "5MR_3QDkFRo3tkGagATk8NKkQfeB3NgVoN7",
+            "5MR_3QD9vHcAxDETYevRiSWLPUnYPDWGoKY",
+            "5MR_3QE6m4naDtbQdmJLvf6Vv4cH2q2Zn7V",
+            "5MR_3Q4LrgUoSveo3VShU5iLCJinTdhdc2w",
+            "5MR_3Q5Q9bUQMNh46wrd3WjCtFjy8ub8f31",
+            "5MR_3Q5SzKAqZfMuQH8itmrPayKjMMpoj2a",
+            "5MR_3PzxjVLqrDAfgxV9dp6j8ZfeccN4ugB",
+            "5MR_3QBoJr2Up7xtEv584W8qVo3G5YLREyG",
+            "5MR_3Q8qdssMypCBTxDMt2h4S7x5xmRhgvL",
+            "5MR_3PzCafNm6w8GoEd3tF5KtuNRYQENEVf",
+            "5MR_3QBoW2rFRGztpn3ZYhwaPLVB5tvSG5N",
+            "5MR_3PyvLiZwRKxbE5oPjwFuCGobXkUq5Jy",
+            "5MR_3PymLmXrzSRmsopyjUQSjPT8ddBX5pc",
+            "5MR_3Q33fMwJeCXq2PfuYapjQbAz3cDiJGr",
+            "5MR_3Q5Kq6i8rfubjoktiQCKp7pUB4SzrD4",
+            "5MR_3Q2yPBHjCEy3ukix93AVmYNpWnLjkZA",
+            "5MR_3PyaMBWWj2EvAreGnLZXM6Fkfu986NR",
+            "5MR_3PyBHEuQKeAs4bJpajzSXz6k9VNYP2w",
+            "5MR_3QCRpbhmx9Rrw6WVrjC7ifbtqkUNQx4",
+            "5MR_3QAtLPVLPeqdmYSbwGwFi1HAhnnDKbH",
+            "5MR_3Q1UA633p7n8eo8VTjaopSc5zfPrpbP",
+            "5MR_3Q39PbCdFwcrP5Wg27MbZKB4JFXnpYK",
+            "5MR_3Q643rgT962iQMoXrn6Tw9B7anLMm5z",
+            "5MR_3QBaFvnHN9FtGDekFeWNgG7W9GnphJt",
+            "5MR_3QBGBwPecpjz5x55SXXCTzND9kUSeM6",
+            "5MR_3Q5u1tiyBNXcR8mCFy7M6Nf3KmkGBMq",
+            "5MR_3Q4EG6vgda7w1UNk8XC1VsNk87JL9Tm",
+            "5MR_3Q4nEPa8RQCToidsJH9M2vTektoacSu",
+            "5MR_3QBeEUcF7uNhC4CerF2EpXbAw4Uym6s",
+            "5MR_3QBcfXELZibdvemKdPLdFxFBLxQmbC2",
+            "5MR_3Q2w3eD877yKWp4g9YX7zKhKJSsLE7e",
+            "5MR_3PyVCTAWc35RMqf7j7yBUVsAUdfYUC2"
+    };
 
     static String[] senderSeeds = {
             "5MR_2CWWTDXc32s9Wd1guNQzPztFgkyVEsz",
@@ -81,90 +109,23 @@ public class Base {
     };
 
     static String[][] methodArgsSeeds = {
-            {"Nse3Uaj7Lesh6VNBVJ62bZRRZRpZ4DAG", "10000"},
-            {"Nse3Uaj7Lesh6VNBVJ62bZRRZRpZ4DAG", "10000"},
-            {"Nse3Uaj7Lesh6VNBVJ62bZRRZRpZ4DAG", "10000"},
-            {"Nse3Uaj7Lesh6VNBVJ62bZRRZRpZ4DAG", "10000"}
+            {"5MR_2CeG11nRqx7nGNeh8hTXADibqfSYeNu", "10000"},
+            {"5MR_2CeG11nRqx7nGNeh8hTXADibqfSYeNu", "10000"},
+            {"5MR_2CeG11nRqx7nGNeh8hTXADibqfSYeNu", "10000"},
+            {"5MR_2CeG11nRqx7nGNeh8hTXADibqfSYeNu", "10000"}
     };
 
-    protected List<Transaction> list = new ArrayList<>();
-
-    protected void initData() {
-        initBean();
-        //initTx(30);
-        initTxFromJson();
-    }
-
-    void initTxFromJson() {
-        String json = "[{\"blockHeight\":1111,\"hash\":\"c31a0d2b-e32b-4e45-9dbc-721aaeee8f0c\",\"remark\":\"test multy thread contract\",\"time\":1550806416956,\"txData\":{\"args\":[[\"Nse3Uaj7Lesh6VNBVJ62bZRRZRpZ4DAG\"],[\"10000\"]],\"argsCount\":2,\"contractAddress\":\"NseBeLaoi4gFEffqsGzB1zVNU6jsjjhK\",\"gasLimit\":10000000,\"methodName\":\"approve\",\"price\":25,\"sender\":\"NsdyTeuM3mH5BnAdCLHk3zBGMGUQCqmb\",\"value\":0},\"type\":101},{\"blockHeight\":1111,\"hash\":\"ac5b53d5-6ede-4f2d-b13b-fdb17d3f1e5d\",\"remark\":\"test multy thread contract\",\"time\":1550806416958,\"txData\":{\"args\":[[\"Nse3Uaj7Lesh6VNBVJ62bZRRZRpZ4DAG\"],[\"10000\"]],\"argsCount\":2,\"contractAddress\":\"NseQLXBFZaZotpNhtBQqDLJTtdsoqURd\",\"gasLimit\":10000000,\"methodName\":\"increaseApproval\",\"price\":25,\"sender\":\"NsdyWwhMkWUvJLw8WCEoTRDGp1dc33t9\",\"value\":0},\"type\":101},{\"blockHeight\":1111,\"hash\":\"2b8b6af5-13e2-4f56-9798-1bb41e5d7bbd\",\"remark\":\"test multy thread contract\",\"time\":1550806416958,\"txData\":{\"args\":[[\"Nse3Uaj7Lesh6VNBVJ62bZRRZRpZ4DAG\"],[\"10000\"]],\"argsCount\":2,\"contractAddress\":\"NseBeLaoi4gFEffqsGzB1zVNU6jsjjhK\",\"gasLimit\":10000000,\"methodName\":\"increaseApproval\",\"price\":25,\"sender\":\"Nse9fRpc8buRX1cJkd1ySe3ZB41qZUnH\",\"value\":0},\"type\":101},{\"blockHeight\":1111,\"hash\":\"052fc2c9-5834-4d79-b2d4-0a57afd450d0\",\"remark\":\"test multy thread contract\",\"time\":1550806416958,\"txData\":{\"args\":[[\"Nse3Uaj7Lesh6VNBVJ62bZRRZRpZ4DAG\"],[\"10000\"]],\"argsCount\":2,\"contractAddress\":\"NsePjWf23b2UrZnTQwDaSJtqo9AoLC7G\",\"gasLimit\":10000000,\"methodName\":\"transfer\",\"price\":25,\"sender\":\"Nse4JnTguRYsFpwFuDZAsPJuUjXJ5E9n\",\"value\":0},\"type\":101},{\"blockHeight\":1111,\"hash\":\"b06ec161-012d-406b-be8a-89ca42832fd0\",\"remark\":\"test multy thread contract\",\"time\":1550806416958,\"txData\":{\"args\":[[\"Nse3Uaj7Lesh6VNBVJ62bZRRZRpZ4DAG\"],[\"10000\"]],\"argsCount\":2,\"contractAddress\":\"NseEwuKf1rAouBngPaUFiY7xK6Rz9VQL\",\"gasLimit\":10000000,\"methodName\":\"approve\",\"price\":25,\"sender\":\"Nse6Pmz3TnEyBmfBDE3mcfd5Z4DyppMG\",\"value\":0},\"type\":101},{\"blockHeight\":1111,\"hash\":\"553cb907-c213-4686-ada4-16a89bb801f4\",\"remark\":\"test multy thread contract\",\"time\":1550806416958,\"txData\":{\"args\":[[\"Nse3Uaj7Lesh6VNBVJ62bZRRZRpZ4DAG\"],[\"10000\"]],\"argsCount\":2,\"contractAddress\":\"NsePjWf23b2UrZnTQwDaSJtqo9AoLC7G\",\"gasLimit\":10000000,\"methodName\":\"decreaseApproval\",\"price\":25,\"sender\":\"Nse9fRpc8buRX1cJkd1ySe3ZB41qZUnH\",\"value\":0},\"type\":101},{\"blockHeight\":1111,\"hash\":\"0f17ebbb-e49f-4903-80a2-ae06c2a0405e\",\"remark\":\"test multy thread contract\",\"time\":1550806416958,\"txData\":{\"args\":[[\"Nse3Uaj7Lesh6VNBVJ62bZRRZRpZ4DAG\"],[\"10000\"]],\"argsCount\":2,\"contractAddress\":\"NseHMCgNK5rCKa3bLVGbVXyd3WnziNxX\",\"gasLimit\":10000000,\"methodName\":\"approve\",\"price\":25,\"sender\":\"Nse4JnTguRYsFpwFuDZAsPJuUjXJ5E9n\",\"value\":0},\"type\":101},{\"blockHeight\":1111,\"hash\":\"875b2d98-c9e0-4496-9b05-f250473b8798\",\"remark\":\"test multy thread contract\",\"time\":1550806416958,\"txData\":{\"args\":[[\"Nse3Uaj7Lesh6VNBVJ62bZRRZRpZ4DAG\"],[\"10000\"]],\"argsCount\":2,\"contractAddress\":\"NseHMCgNK5rCKa3bLVGbVXyd3WnziNxX\",\"gasLimit\":10000000,\"methodName\":\"increaseApproval\",\"price\":25,\"sender\":\"Nse4JnTguRYsFpwFuDZAsPJuUjXJ5E9n\",\"value\":0},\"type\":101},{\"blockHeight\":1111,\"hash\":\"7398c558-c24b-463b-9cce-a8b1ee64a4e2\",\"remark\":\"test multy thread contract\",\"time\":1550806416958,\"txData\":{\"args\":[[\"Nse3Uaj7Lesh6VNBVJ62bZRRZRpZ4DAG\"],[\"10000\"]],\"argsCount\":2,\"contractAddress\":\"NseL4MPxPCvyTFMo8Qj6bvBJ2NTCJbzN\",\"gasLimit\":10000000,\"methodName\":\"approve\",\"price\":25,\"sender\":\"Nse6h7646A5bSbgXkbANN6oV57j1C6ae\",\"value\":0},\"type\":101},{\"blockHeight\":1111,\"hash\":\"318d8ec8-707b-46ff-a2ed-dbd4042899b1\",\"remark\":\"test multy thread contract\",\"time\":1550806416958,\"txData\":{\"args\":[[\"Nse3Uaj7Lesh6VNBVJ62bZRRZRpZ4DAG\"],[\"10000\"]],\"argsCount\":2,\"contractAddress\":\"NseM7aGB6QUDo2RrKh9ogbrBC6c27aH6\",\"gasLimit\":10000000,\"methodName\":\"transfer\",\"price\":25,\"sender\":\"NsdyTeuM3mH5BnAdCLHk3zBGMGUQCqmb\",\"value\":0},\"type\":101},{\"blockHeight\":1111,\"hash\":\"c5872515-37fc-46ea-b737-7e7289444243\",\"remark\":\"test multy thread contract\",\"time\":1550806416958,\"txData\":{\"args\":[[\"Nse3Uaj7Lesh6VNBVJ62bZRRZRpZ4DAG\"],[\"10000\"]],\"argsCount\":2,\"contractAddress\":\"NseFuqwPHwrZsyBKnhfKQMzSrYsVhjfL\",\"gasLimit\":10000000,\"methodName\":\"decreaseApproval\",\"price\":25,\"sender\":\"Nse9fRpc8buRX1cJkd1ySe3ZB41qZUnH\",\"value\":0},\"type\":101},{\"blockHeight\":1111,\"hash\":\"52165368-3da2-45f2-8648-ab59a689bd8b\",\"remark\":\"test multy thread contract\",\"time\":1550806416958,\"txData\":{\"args\":[[\"Nse3Uaj7Lesh6VNBVJ62bZRRZRpZ4DAG\"],[\"10000\"]],\"argsCount\":2,\"contractAddress\":\"NseMnV77Tii2nY1Qomuoji5bojgTJbrU\",\"gasLimit\":10000000,\"methodName\":\"transfer\",\"price\":25,\"sender\":\"NsdvBoGQ6Jstzm228KmzwzvLcqPh2ts9\",\"value\":0},\"type\":101},{\"blockHeight\":1111,\"hash\":\"99562241-4c1e-403b-88a8-178aafccddce\",\"remark\":\"test multy thread contract\",\"time\":1550806416958,\"txData\":{\"args\":[[\"Nse3Uaj7Lesh6VNBVJ62bZRRZRpZ4DAG\"],[\"10000\"]],\"argsCount\":2,\"contractAddress\":\"NsePjWf23b2UrZnTQwDaSJtqo9AoLC7G\",\"gasLimit\":10000000,\"methodName\":\"approve\",\"price\":25,\"sender\":\"NsdyWwhMkWUvJLw8WCEoTRDGp1dc33t9\",\"value\":0},\"type\":101},{\"blockHeight\":1111,\"hash\":\"ee120481-8c2d-4223-be81-f870383f76a8\",\"remark\":\"test multy thread contract\",\"time\":1550806416958,\"txData\":{\"args\":[[\"Nse3Uaj7Lesh6VNBVJ62bZRRZRpZ4DAG\"],[\"10000\"]],\"argsCount\":2,\"contractAddress\":\"NseDx4t5u8aR3PoY3YqrxFPJ9bD9rW6F\",\"gasLimit\":10000000,\"methodName\":\"decreaseApproval\",\"price\":25,\"sender\":\"NsdvBoGQ6Jstzm228KmzwzvLcqPh2ts9\",\"value\":0},\"type\":101},{\"blockHeight\":1111,\"hash\":\"d9fa4d12-6bfe-4e9f-b8c2-036f64778876\",\"remark\":\"test multy thread contract\",\"time\":1550806416958,\"txData\":{\"args\":[[\"Nse3Uaj7Lesh6VNBVJ62bZRRZRpZ4DAG\"],[\"10000\"]],\"argsCount\":2,\"contractAddress\":\"NseDx4t5u8aR3PoY3YqrxFPJ9bD9rW6F\",\"gasLimit\":10000000,\"methodName\":\"increaseApproval\",\"price\":25,\"sender\":\"Nsdy51dGPybGbjGnvfSCk1ZdFQs2wPeK\",\"value\":0},\"type\":101},{\"blockHeight\":1111,\"hash\":\"900a8153-f50c-43eb-8f23-71c670660b6c\",\"remark\":\"test multy thread contract\",\"time\":1550806416958,\"txData\":{\"args\":[[\"Nse3Uaj7Lesh6VNBVJ62bZRRZRpZ4DAG\"],[\"10000\"]],\"argsCount\":2,\"contractAddress\":\"NseFuqwPHwrZsyBKnhfKQMzSrYsVhjfL\",\"gasLimit\":10000000,\"methodName\":\"transfer\",\"price\":25,\"sender\":\"NsdtmE55nzonFEyur7Pe9DDNjJqdcnLt\",\"value\":0},\"type\":101},{\"blockHeight\":1111,\"hash\":\"20c07b89-270b-49a1-9074-91e5e8e9b7ea\",\"remark\":\"test multy thread contract\",\"time\":1550806416958,\"txData\":{\"args\":[[\"Nse3Uaj7Lesh6VNBVJ62bZRRZRpZ4DAG\"],[\"10000\"]],\"argsCount\":2,\"contractAddress\":\"NseDx4t5u8aR3PoY3YqrxFPJ9bD9rW6F\",\"gasLimit\":10000000,\"methodName\":\"transfer\",\"price\":25,\"sender\":\"Nse4pEvMHgj2aotePjn2qKR8kiEe8juW\",\"value\":0},\"type\":101},{\"blockHeight\":1111,\"hash\":\"416916ce-e504-4919-9a79-39e0e69f72dd\",\"remark\":\"test multy thread contract\",\"time\":1550806416958,\"txData\":{\"args\":[[\"Nse3Uaj7Lesh6VNBVJ62bZRRZRpZ4DAG\"],[\"10000\"]],\"argsCount\":2,\"contractAddress\":\"NseFEH2LC1c9sMzCAHXiuwJtExULZXPt\",\"gasLimit\":10000000,\"methodName\":\"approve\",\"price\":25,\"sender\":\"NsdvhN4gE4UHd5GRaHcyoQPaeKW7ckU3\",\"value\":0},\"type\":101},{\"blockHeight\":1111,\"hash\":\"6c5b813f-0f6d-4a26-aef1-6ed304d02b3b\",\"remark\":\"test multy thread contract\",\"time\":1550806416958,\"txData\":{\"args\":[[\"Nse3Uaj7Lesh6VNBVJ62bZRRZRpZ4DAG\"],[\"10000\"]],\"argsCount\":2,\"contractAddress\":\"NseFuqwPHwrZsyBKnhfKQMzSrYsVhjfL\",\"gasLimit\":10000000,\"methodName\":\"transfer\",\"price\":25,\"sender\":\"Nsdy51dGPybGbjGnvfSCk1ZdFQs2wPeK\",\"value\":0},\"type\":101},{\"blockHeight\":1111,\"hash\":\"c259aa3b-07a3-4316-b256-e23f83148fc3\",\"remark\":\"test multy thread contract\",\"time\":1550806416958,\"txData\":{\"args\":[[\"Nse3Uaj7Lesh6VNBVJ62bZRRZRpZ4DAG\"],[\"10000\"]],\"argsCount\":2,\"contractAddress\":\"NseGzHCstPjHEiWGoUJMTse12ZEgPtv7\",\"gasLimit\":10000000,\"methodName\":\"decreaseApproval\",\"price\":25,\"sender\":\"Nse4NwMo3hwxxtpTkzaB9VGVfhvzPX1x\",\"value\":0},\"type\":101},{\"blockHeight\":1111,\"hash\":\"0be0114e-d20e-4e80-8a28-882fcf9f049a\",\"remark\":\"test multy thread contract\",\"time\":1550806416958,\"txData\":{\"args\":[[\"Nse3Uaj7Lesh6VNBVJ62bZRRZRpZ4DAG\"],[\"10000\"]],\"argsCount\":2,\"contractAddress\":\"NseKMBJ8Z7WgqfDkF5bGKNCUE6G7FMa8\",\"gasLimit\":10000000,\"methodName\":\"decreaseApproval\",\"price\":25,\"sender\":\"NsdvBoGQ6Jstzm228KmzwzvLcqPh2ts9\",\"value\":0},\"type\":101},{\"blockHeight\":1111,\"hash\":\"08c8a1df-dfbd-413a-abf1-3065e223b67e\",\"remark\":\"test multy thread contract\",\"time\":1550806416958,\"txData\":{\"args\":[[\"Nse3Uaj7Lesh6VNBVJ62bZRRZRpZ4DAG\"],[\"10000\"]],\"argsCount\":2,\"contractAddress\":\"NseDWcNqN4zpzvLH59o8RjQDReRi5NEH\",\"gasLimit\":10000000,\"methodName\":\"approve\",\"price\":25,\"sender\":\"NsdtmE55nzonFEyur7Pe9DDNjJqdcnLt\",\"value\":0},\"type\":101},{\"blockHeight\":1111,\"hash\":\"a8921283-2e2e-4072-8203-adb8383d6975\",\"remark\":\"test multy thread contract\",\"time\":1550806416958,\"txData\":{\"args\":[[\"Nse3Uaj7Lesh6VNBVJ62bZRRZRpZ4DAG\"],[\"10000\"]],\"argsCount\":2,\"contractAddress\":\"NseFEH2LC1c9sMzCAHXiuwJtExULZXPt\",\"gasLimit\":10000000,\"methodName\":\"approve\",\"price\":25,\"sender\":\"Nse6h7646A5bSbgXkbANN6oV57j1C6ae\",\"value\":0},\"type\":101},{\"blockHeight\":1111,\"hash\":\"df803540-c9df-4b43-946d-71e64016d65f\",\"remark\":\"test multy thread contract\",\"time\":1550806416958,\"txData\":{\"args\":[[\"Nse3Uaj7Lesh6VNBVJ62bZRRZRpZ4DAG\"],[\"10000\"]],\"argsCount\":2,\"contractAddress\":\"NsePwaJfYBuVvHxo7YmAfAhcjstoPCXY\",\"gasLimit\":10000000,\"methodName\":\"increaseApproval\",\"price\":25,\"sender\":\"Nse1JZzHAY65rAwTFMxsHwum4kDdaxt8\",\"value\":0},\"type\":101},{\"blockHeight\":1111,\"hash\":\"21c6eccd-09f2-4b50-b2f1-5bf901eaafdb\",\"remark\":\"test multy thread contract\",\"time\":1550806416958,\"txData\":{\"args\":[[\"Nse3Uaj7Lesh6VNBVJ62bZRRZRpZ4DAG\"],[\"10000\"]],\"argsCount\":2,\"contractAddress\":\"NseL4MPxPCvyTFMo8Qj6bvBJ2NTCJbzN\",\"gasLimit\":10000000,\"methodName\":\"decreaseApproval\",\"price\":25,\"sender\":\"NsdwNp1piSRARnJoV9qLWZtqNULkUXSz\",\"value\":0},\"type\":101},{\"blockHeight\":1111,\"hash\":\"13deb4c1-179a-4998-a9e6-1652da0c4d48\",\"remark\":\"test multy thread contract\",\"time\":1550806416958,\"txData\":{\"args\":[[\"Nse3Uaj7Lesh6VNBVJ62bZRRZRpZ4DAG\"],[\"10000\"]],\"argsCount\":2,\"contractAddress\":\"NseM7aGB6QUDo2RrKh9ogbrBC6c27aH6\",\"gasLimit\":10000000,\"methodName\":\"decreaseApproval\",\"price\":25,\"sender\":\"Nse4JUbdj6vrbRGWCzBEoj2WYJvXazS7\",\"value\":0},\"type\":101},{\"blockHeight\":1111,\"hash\":\"6d8e35ab-4f42-4264-98fc-d4c50f6c575d\",\"remark\":\"test multy thread contract\",\"time\":1550806416958,\"txData\":{\"args\":[[\"Nse3Uaj7Lesh6VNBVJ62bZRRZRpZ4DAG\"],[\"10000\"]],\"argsCount\":2,\"contractAddress\":\"NseBRYKU3vQvZY4XCiSVY5jyL6oVabFr\",\"gasLimit\":10000000,\"methodName\":\"approve\",\"price\":25,\"sender\":\"Nse4JnTguRYsFpwFuDZAsPJuUjXJ5E9n\",\"value\":0},\"type\":101},{\"blockHeight\":1111,\"hash\":\"a1e8c62d-dfdd-46f6-9775-25d7e177dfcd\",\"remark\":\"test multy thread contract\",\"time\":1550806416958,\"txData\":{\"args\":[[\"Nse3Uaj7Lesh6VNBVJ62bZRRZRpZ4DAG\"],[\"10000\"]],\"argsCount\":2,\"contractAddress\":\"NseKMBJ8Z7WgqfDkF5bGKNCUE6G7FMa8\",\"gasLimit\":10000000,\"methodName\":\"decreaseApproval\",\"price\":25,\"sender\":\"Nsdzh7uPRoMXM4ErrVuQY1AryPyVfWj4\",\"value\":0},\"type\":101},{\"blockHeight\":1111,\"hash\":\"9a0a32fd-e5c4-4342-b063-9503a6a2d03e\",\"remark\":\"test multy thread contract\",\"time\":1550806416958,\"txData\":{\"args\":[[\"Nse3Uaj7Lesh6VNBVJ62bZRRZRpZ4DAG\"],[\"10000\"]],\"argsCount\":2,\"contractAddress\":\"NseHMCgNK5rCKa3bLVGbVXyd3WnziNxX\",\"gasLimit\":10000000,\"methodName\":\"approve\",\"price\":25,\"sender\":\"Nsdy51dGPybGbjGnvfSCk1ZdFQs2wPeK\",\"value\":0},\"type\":101},{\"blockHeight\":1111,\"hash\":\"a322d6ef-f098-4b04-8a94-acc85e96b225\",\"remark\":\"test multy thread contract\",\"time\":1550806416958,\"txData\":{\"args\":[[\"Nse3Uaj7Lesh6VNBVJ62bZRRZRpZ4DAG\"],[\"10000\"]],\"argsCount\":2,\"contractAddress\":\"NseBRYKU3vQvZY4XCiSVY5jyL6oVabFr\",\"gasLimit\":10000000,\"methodName\":\"approve\",\"price\":25,\"sender\":\"Nse3hf99UwduTKM1qjpGNRxj8bV4XJoi\",\"value\":0},\"type\":101}]";
-        list = JSONObject.parseArray(json, Transaction.class);
-    }
-
-    void initTx(int txCount) {
-        Random random = new Random();
-        for (int i = 0; i < txCount; i++) {
-            int methodIndex = random.nextInt(4);
-            list.add(makeTx(senderSeeds[random.nextInt(20)],
-                    contractAddressSeeds[random.nextInt(20)],
-                    0L,
-                    methodNameSeeds[methodIndex],
-                    methodArgsSeeds[methodIndex]));
-        }
-
-        String jsonString = JSONObject.toJSONString(list);
-        System.out.println(jsonString);
-        //List<Transaction> list1 = JSONObject.parseArray(jsonString, Transaction.class);
-        //System.out.println(JSONObject.toJSONString(list1));
-    }
-
-    //public static void main(String[] args) {
-    //    Base base = new Base();
-    //    base.initTx(3);
-    //
-    //    String aaa = "[{\"blockHeight\":1111,\"hash\":\"fbc89d40-1736-466b-bae4-4611577fb3c9\",\"remark\":\"test multy thread contract\",\"time\":1550804367732,\"txData\":{\"args\":[[\"Nse3Uaj7Lesh6VNBVJ62bZRRZRpZ4DAG\"],[\"10000\"]],\"argsCount\":2,\"contractAddress\":\"NseEwuKf1rAouBngPaUFiY7xK6Rz9VQL\",\"gasLimit\":10000000,\"methodName\":\"approve\",\"price\":25,\"sender\":\"Nse6Pmz3TnEyBmfBDE3mcfd5Z4DyppMG\",\"value\":0},\"type\":101},{\"blockHeight\":1111,\"hash\":\"54bcba01-e796-466b-a3d5-757a686d917b\",\"remark\":\"test multy thread contract\",\"time\":1550804367734,\"txData\":{\"args\":[[\"Nse3Uaj7Lesh6VNBVJ62bZRRZRpZ4DAG\"],[\"10000\"]],\"argsCount\":2,\"contractAddress\":\"NseMnV77Tii2nY1Qomuoji5bojgTJbrU\",\"gasLimit\":10000000,\"methodName\":\"transfer\",\"price\":25,\"sender\":\"Nse5RVMvgr7iUGzTmZSdmoMidoP7ztvC\",\"value\":0},\"type\":101},{\"blockHeight\":1111,\"hash\":\"384e0a25-d420-42f7-a8e8-e877bcd8dc93\",\"remark\":\"test multy thread contract\",\"time\":1550804367734,\"txData\":{\"args\":[[\"Nse3Uaj7Lesh6VNBVJ62bZRRZRpZ4DAG\"],[\"10000\"]],\"argsCount\":2,\"contractAddress\":\"NseBeLaoi4gFEffqsGzB1zVNU6jsjjhK\",\"gasLimit\":10000000,\"methodName\":\"decreaseApproval\",\"price\":25,\"sender\":\"Nse9fRpc8buRX1cJkd1ySe3ZB41qZUnH\",\"value\":0},\"type\":101}]";
-    //    System.out.println(aaa);
-    //    List<Transaction> list1 = JSONObject.parseArray(aaa, Transaction.class);
-    //    System.out.println(JSONObject.toJSONString(list1));
-    //}
-
-
-    void initBean() {
-
-    }
-
-    private Transaction makeTx(String sender, String contractAddress, long value, String methodName, Object[] args) {
-        return newInstance(sender, contractAddress, value, methodName, args);
-    }
-
-    public static Transaction newInstance(String sender, String contractAddress, long value, String methodName, Object[] args) {
-        //int type = 101;
-        //long time = System.currentTimeMillis();
-        //CallContractData txData = new CallContractData();
-        //txData.setSender(sender);
-        //txData.setContractAddress(contractAddress);
-        //txData.setValue(value);
-        //txData.setGasLimit(10000000L);
-        //txData.setPrice(25L);
-        //txData.setMethodName(methodName);
-        //String[][] args2 = ContractUtil.twoDimensionalArray(args);
-        //txData.setArgsCount((byte) args.length);
-        //txData.setArgs(args2);
-        //String remark = "test multy thread contract";
-        CallContractTransaction tx = new CallContractTransaction();
-        return tx;
-    }
-
-    private ContractData makeCallContractData(String sender, String contractAddress) {
+    private ContractData makeCallContractData(String sender, String contractAddress, long value, String methodName, Object[] args) {
         CallContractData txData = new CallContractData();
-        //txData.setSender(sender);
-        //txData.setGasLimit(10000000L);
-        //txData.setPrice(25L);
-        //txData.setValue(0L);
-        //txData.setMethodName("single");
-        //txData.setMethodDesc(EMPTY);
-        //txData.setArgsCount((byte) 0);
-        //txData.setArgs(null);
-        //txData.setContractAddress(contractAddress);
+        txData.setSender(AddressTool.getAddress(sender));
+        txData.setContractAddress(AddressTool.getAddress(contractAddress));
+        txData.setValue(BigInteger.valueOf(value));
+        txData.setGasLimit(200000L);
+        txData.setPrice(25L);
+        txData.setMethodName(methodName);
+        String[][] args2 = ContractUtil.twoDimensionalArray(args);
+        txData.setArgsCount((byte) args.length);
+        txData.setArgs(args2);
         return txData;
     }
 

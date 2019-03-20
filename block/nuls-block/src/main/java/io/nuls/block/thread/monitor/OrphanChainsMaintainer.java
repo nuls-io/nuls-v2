@@ -31,7 +31,7 @@ import io.nuls.block.model.ChainParameters;
 import io.nuls.block.model.Node;
 import io.nuls.block.storage.ChainStorageService;
 import io.nuls.block.utils.BlockUtil;
-import io.nuls.block.utils.module.NetworkUtil;
+import io.nuls.block.rpc.call.NetworkUtil;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.ioc.SpringLiteContext;
 import io.nuls.tools.log.logback.NulsLogger;

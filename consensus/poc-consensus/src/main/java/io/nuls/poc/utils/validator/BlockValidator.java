@@ -21,6 +21,7 @@ import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.log.Log;
+import io.nuls.tools.model.DoubleUtils;
 
 import java.io.IOException;
 import java.util.*;
@@ -219,7 +220,7 @@ public class BlockValidator {
                if (null == item) {
                   item = currentRound.getPreRound().getMemberByAgentAddress(address);
                }
-               if (item.getAgent().getCreditVal() <= ConsensusConstant.RED_PUNISH_CREDIT_VAL) {
+               if (DoubleUtils.compare(item.getAgent().getRealCreditVal(), ConsensusConstant.RED_PUNISH_CREDIT_VAL) <= 0) {
                   punishAddress.add(AddressTool.getStringAddressByBytes(item.getAgent().getAgentAddress()));
                }
             }

@@ -177,6 +177,7 @@ public class ContractBootStrap extends RpcModule {
      */
     @Override
     public RpcModuleState onDependenciesReady() {
+        Log.info("running");
         return RpcModuleState.Running;
     }
 
