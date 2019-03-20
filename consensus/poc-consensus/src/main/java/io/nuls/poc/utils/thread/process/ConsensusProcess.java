@@ -322,10 +322,10 @@ public class ConsensusProcess {
         if(!newBlock.getHeader().getPreHash().equals(bestBlock.getHash())){
             newBlock.getHeader().setPreHash(bestBlock.getHash());
             newBlock.getHeader().setHeight(bestBlock.getHeight());
-        }
-        if(stateRootIsNull){
-            bestExtendsData = new BlockExtendsData(bestBlock.getExtend());
-            extendsData.setStateRoot(bestExtendsData.getStateRoot());
+            if(stateRootIsNull){
+                bestExtendsData = new BlockExtendsData(bestBlock.getExtend());
+                extendsData.setStateRoot(bestExtendsData.getStateRoot());
+            }
         }
         consensusLogger.info("make block height:" + newBlock.getHeader().getHeight() + ",txCount: " + newBlock.getTxs().size() + " , block size: " + newBlock.size() + " , time:" + DateUtils.convertDate(new Date(newBlock.getHeader().getTime())) + ",packEndTime:" +
                 DateUtils.convertDate(new Date(self.getPackEndTime()))+",hash:"+newBlock.getHeader().getHash().getDigestHex()+",preHash:"+newBlock.getHeader().getPreHash().getDigestHex());
