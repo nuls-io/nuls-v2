@@ -42,8 +42,8 @@ public class TimeUtil {
         if (now - latestGetTime > 30000) {
             TimeRpcService timeRpcService = SpringLiteContext.getBean(TimeRpcServiceImpl.class);
             offset = timeRpcService.getTime() - System.currentTimeMillis();
+            latestGetTime = now;
         }
-        latestGetTime = now;
         return (System.currentTimeMillis() + offset);
     }
 }
