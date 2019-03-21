@@ -23,17 +23,11 @@
  */
 package io.nuls.contract.model.bo;
 
-import io.nuls.base.constant.TxStatusEnum;
 import io.nuls.base.data.BlockHeader;
-import io.nuls.base.data.CoinData;
-import io.nuls.base.data.NulsDigestData;
 import io.nuls.base.data.Transaction;
 import io.nuls.contract.model.txdata.ContractData;
-import io.nuls.tools.exception.NulsException;
 import lombok.Getter;
 import lombok.Setter;
-
-import java.math.BigInteger;
 
 /**
  * @author: PierreLuo
@@ -42,8 +36,6 @@ import java.math.BigInteger;
 @Getter
 @Setter
 public class ContractWrapperTransaction extends Transaction {
-
-    private Transaction tx;
 
     private String txHex;
 
@@ -59,75 +51,17 @@ public class ContractWrapperTransaction extends Transaction {
     private BlockHeader blockHeader;
 
     public ContractWrapperTransaction(Transaction tx, String txHex, ContractData contractData) {
-        this.tx = tx;
         this.txHex = txHex;
         this.contractData = contractData;
+        this.copyTx(tx);
     }
 
-
-
-    public byte[] getTxData() {
-        return tx.getTxData();
-    }
-
-    public long getTime() {
-        return tx.getTime();
-    }
-
-    public int getType() {
-        return tx.getType();
-    }
-
-    public byte[] getRemark() {
-        return tx.getRemark();
-    }
-
-    public NulsDigestData getHash() {
-        return tx.getHash();
-    }
-
-    public byte[] getTransactionSignature() {
-        return tx.getTransactionSignature();
-    }
-
-    public long getBlockHeight() {
-        return tx.getBlockHeight();
-    }
-
-    public TxStatusEnum getStatus() {
-        return tx.getStatus();
-    }
-
-    public byte[] getCoinData() {
-        return tx.getCoinData();
-    }
-
-    public int getInBlockIndex() {
-        return tx.getInBlockIndex();
-    }
-
-    public CoinData getCoinDataInstance() throws NulsException {
-        return tx.getCoinDataInstance();
-    }
-
-    public int getSize() {
-        return tx.getSize();
-    }
-
-    public String hex() throws Exception {
-        return tx.hex();
-    }
-
-    public BigInteger getFee() throws NulsException {
-        return tx.getFee();
-    }
-
-    public boolean isMultiSignTx() throws NulsException {
-        return tx.isMultiSignTx();
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        return tx.equals(obj);
+    private void copyTx(Transaction tx) {
+        this.setType(tx.getType());
+        this.setCoinData(tx.getCoinData());
+        this.setTxData(tx.getTxData());
+        this.setTime(tx.getTime());
+        this.setTransactionSignature(tx.getTransactionSignature());
+        this.setRemark(tx.getRemark());
     }
 }
