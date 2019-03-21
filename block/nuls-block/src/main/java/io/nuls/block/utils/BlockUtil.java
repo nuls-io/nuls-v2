@@ -209,7 +209,7 @@ public class BlockUtil {
                 Chain forkChain = ChainGenerator.generate(chainId, block, masterChain, ChainTypeEnum.FORK);
                 BlockChainManager.addForkChain(chainId, forkChain);
                 commonLog.info("chainId:" + chainId + ", received fork blocks of masterChain, height:" + blockHeight + ", hash:" + blockHash);
-                ConsensusUtil.evidence(chainId, context.getLatestBlock().getHeader(), header);
+                ConsensusUtil.evidence(chainId, BlockUtil.fromBlockHeaderPo(blockService.getBlockHeader(chainId, header.getHeight())), header);
                 return Result.getFailed(BlockErrorCode.FORK_BLOCK);
             }
         }
@@ -243,7 +243,7 @@ public class BlockUtil {
                     chainStorageService.save(chainId, block);
                     forkChain.addLast(block);
                     commonLog.debug("chainId:" + chainId + ", received continuous blocks of forkChain, height:" + blockHeight + ", hash:" + blockHash);
-                    ConsensusUtil.evidence(chainId, context.getLatestBlock().getHeader(), header);
+                    ConsensusUtil.evidence(chainId, BlockUtil.fromBlockHeaderPo(blockService.getBlockHeader(chainId, header.getHeight())), header);
                     return Result.getFailed(BlockErrorCode.FORK_BLOCK);
                 }
                 //2.重复,丢弃
@@ -257,7 +257,7 @@ public class BlockUtil {
                     Chain newForkChain = ChainGenerator.generate(chainId, block, forkChain, ChainTypeEnum.FORK);
                     BlockChainManager.addForkChain(chainId, newForkChain);
                     commonLog.debug("chainId:" + chainId + ", received fork blocks of forkChain, height:" + blockHeight + ", hash:" + blockHash);
-                    ConsensusUtil.evidence(chainId, context.getLatestBlock().getHeader(), header);
+                    ConsensusUtil.evidence(chainId, BlockUtil.fromBlockHeaderPo(blockService.getBlockHeader(chainId, header.getHeight())), header);
                     return Result.getFailed(BlockErrorCode.FORK_BLOCK);
                 }
             }
