@@ -618,13 +618,7 @@ public class TxServiceImpl implements TxService {
                     chain.getLoggerMap().get(TxConstant.LOG_TX).debug("交易已达最大容量, 实际值: {} - 预定最大值maxTxDataSize:{}", totalSize + txSize, maxTxDataSize);
                     break;
                 }
-                //从已确认的交易中进行重复交易判断
-                TransactionConfirmedPO txConfirmed = confirmedTxService.getConfirmedTransaction(chain, tx.getHash());
-                if (txConfirmed != null) {
-                    chain.getLoggerMap().get(TxConstant.LOG_TX).info("丢弃已确认过交易,txHash:{}, - type:{}, - time:{}", tx.getHash().getDigestHex(), tx.getType(), tx.getTime());
-                    clearInvalidTx(chain, tx, false);
-                    continue;
-                }
+
                 String txHex = null;
                 try {
                     txHex = tx.hex();
@@ -656,7 +650,13 @@ public class TxServiceImpl implements TxService {
                     continue;
                 }
 
-
+                //从已确认的交易中进行重复交易判断
+                TransactionConfirmedPO txConfirmed = confirmedTxService.getConfirmedTransaction(chain, tx.getHash());
+                if (txConfirmed != null) {
+                    chain.getLoggerMap().get(TxConstant.LOG_TX).info("丢弃已确认过交易,txHash:{}, - type:{}, - time:{}", tx.getHash().getDigestHex(), tx.getType(), tx.getTime());
+                    clearInvalidTx(chain, tx, false);
+                    continue;
+                }
 
                 long debugeMap = NetworkCall.getCurrentTimeMillis();
 //                chain.getLoggerMap().get(TxConstant.LOG_TX).debug("########## 单个VerifyCoinData花费时间:{} ", debugeMap - debugeVerifyCoinDataStart);
@@ -770,7 +770,7 @@ public class TxServiceImpl implements TxService {
             if (blockHeight < chain.getBestBlockHeight() + 1) {
                 //这个阶段已经不够时间再打包,所以直接超时异常处理交易回滚至待打包队列,打空块
                 chain.getLoggerMap().get(TxConstant.LOG_TX).debug("获取交易完整时,当前最新高度已增长,不够时间重新打包,直接超时异常处理交易回滚至待打包队列,打空块");
-                throw new NulsException(TxErrorCode.PACKAGE_TIME_OUT);
+                throw new NulsException(TxErrorCode.HEIGHT_UPDATE_UNABLE_TO_REPACKAGE);
             }
             //检测预留传输时间
             long current = NetworkCall.getCurrentTimeMillis();

@@ -5,7 +5,7 @@ import io.nuls.tools.core.ioc.SpringLiteContext;
 /**
  * @Author: zhoulijun
  * @Time: 2019-03-20 10:18
- * @Description: 功能描述
+ * @Description: 测试用例链
  */
 public abstract class TestCaseChain implements TestCaseIntf<Object,Object> {
 
