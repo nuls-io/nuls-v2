@@ -3,8 +3,9 @@ package io.nuls.test.cases.transcation;
 import io.nuls.api.provider.Result;
 import io.nuls.api.provider.transaction.facade.TransferReq;
 import io.nuls.test.cases.TestFailException;
-import io.nuls.test.cases.account.AccountConstants;
+import io.nuls.test.cases.Constants;
 import io.nuls.tools.core.annotation.Component;
+import static io.nuls.test.cases.Constants.*;
 
 /**
  * @Author: zhoulijun
@@ -24,7 +25,7 @@ public class TransferToAddressCase extends BaseTranscationCase<String, String> {
         String formAddress = config.getSeedAddress();
         TransferReq.TransferReqBuilder builder =
                 new TransferReq.TransferReqBuilder(config.getChainId(), config.getAssetsId())
-                        .addForm(formAddress, AccountConstants.PASSWORD, TRANSFER_AMOUNT)
+                        .addForm(formAddress, Constants.PASSWORD, TRANSFER_AMOUNT)
                         .addTo(toAddress, TRANSFER_AMOUNT);
         builder.setRemark(REMARK);
         Result<String> result = transferService.transfer(builder.build());

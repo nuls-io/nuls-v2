@@ -45,12 +45,12 @@ public class RemoteTestController {
         TestCaseIntf tc = SpringLiteContext.getBean(caseClass);
         try {
             Object param = req.getParam() == null ? null : JSONUtils.json2pojo(req.getParam(), reponseClass);
-            return new RemoteResult(true, tc.check(param, 0));
+            return new RemoteResult(tc.check(param, 0));
         } catch (TestFailException e) {
-            return new RemoteResult(false,null);
+            return new RemoteResult("10002",e.getMessage());
         } catch (IOException e) {
             e.printStackTrace();
-            return new RemoteResult(false,null);
+            return new RemoteResult("10002","系统异常："+e.getMessage());
         }
     }
 

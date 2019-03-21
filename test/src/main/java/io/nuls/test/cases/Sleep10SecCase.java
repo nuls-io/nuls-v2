@@ -20,7 +20,11 @@ public class Sleep10SecCase implements TestCaseIntf<Object,Object> {
     @Override
     public Object doTest(Object param, int depth) throws TestFailException {
         try {
-            TimeUnit.SECONDS.sleep(10L);
+            for (int j = 1; j <= 10; j++) {
+                System.out.print(j + " ");
+                TimeUnit.SECONDS.sleep(1L);
+            }
+            System.out.println();
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
