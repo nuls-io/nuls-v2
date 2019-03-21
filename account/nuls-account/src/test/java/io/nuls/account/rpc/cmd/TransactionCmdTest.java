@@ -48,10 +48,10 @@ public class TransactionCmdTest {
 
     //protected static AccountService accountService;
 
-    protected int chainId = 12345;
-    protected int assetChainId = 12345;
-    protected static String password = "nuls123456";
-    protected String newPassword = "c12345678";
+    protected int chainId = 2;
+    protected int assetChainId = 2;
+    protected static String password = "nuls26";
+    protected String newPassword = "c2678";
     protected String version = "1.0";
     protected String success = "1";
     String address = "5MR_2CWWTDXc32s9Wd1guNQzPztFgkyVEsz";

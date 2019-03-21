@@ -39,8 +39,8 @@ import static org.junit.Assert.assertTrue;
 public class AccountServiceTest {
 
     protected static AccountService accountService;
-    protected int chainId = 12345;
-    protected String password = "nuls123456";
+    protected int chainId = 2;
+    protected String password = "nuls26";
 
     @BeforeClass
     public static void beforeTest() {
@@ -70,7 +70,7 @@ public class AccountServiceTest {
         Account account = result.get(0);
         assertFalse(account.isEncrypted());
         // set password
-        String password = "abc12345890987";
+        String password = "abc2890987";
         accountService.setPassword(chainId, account.getAddress().getBase58(), password);
         //get account
         Account accountAfterSetPassword = accountService.getAccount(chainId, account.getAddress().getBase58());
@@ -95,7 +95,7 @@ public class AccountServiceTest {
         Account account = result.get(0);
         assertFalse(accountService.isEncrypted(chainId, account.getAddress().getBase58()));
         // set password
-        String password = "abc12345890987";
+        String password = "abc2890987";
         accountService.setPassword(chainId, account.getAddress().getBase58(), password);
         assertTrue(accountService.isEncrypted(chainId, account.getAddress().getBase58()));
     }

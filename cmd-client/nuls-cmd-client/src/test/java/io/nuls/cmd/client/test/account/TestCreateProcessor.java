@@ -34,7 +34,7 @@ public class TestCreateProcessor {
 
     @Test
     public void testCreate(){
-        CreateAccountReq req = new CreateAccountReq(1,"nuls123456");
+        CreateAccountReq req = new CreateAccountReq(1,"nuls26");
         Result<String> res = accountService.createAccount(req);
         Assert.assertTrue(res.isSuccess());
         Assert.assertTrue(res.getList().size() == 1);

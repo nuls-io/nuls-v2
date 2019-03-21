@@ -25,7 +25,7 @@ import static org.junit.Assert.assertEquals;
 
 public class BlockHeaderInvokeTest {
 
-    private static int chainId = 12345;
+    private static int chainId = 2;
 
     @BeforeClass
     public static void beforeClass() {

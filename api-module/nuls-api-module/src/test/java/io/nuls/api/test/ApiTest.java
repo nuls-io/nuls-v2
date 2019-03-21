@@ -63,7 +63,7 @@ public class ApiTest {
     public void testCmdCall() {
 //
 //        for (int i = 0; i < 10000; i++) {
-//            BlockInfo block = WalletRpcHandler.getBlockInfo(12345, i);
+//            BlockInfo block = WalletRpcHandler.getBlockInfo(2, i);
 //            for (TransactionInfo tx : block.getTxList()) {
 //                if (tx.getType() == 1) {
 //
@@ -80,13 +80,13 @@ public class ApiTest {
         currentRound.setEndHeight(222);
         apiCache.setCurrentRound(currentRound);
 
-        CacheManager.addApiCache(12345, apiCache);
+        CacheManager.addApiCache(2, apiCache);
     }
 
 
     @Test
     public void updateCurrentRound() {
-        ApiCache apiCache = CacheManager.getCache(12345);
+        ApiCache apiCache = CacheManager.getCache(2);
         CurrentRound currentRound = apiCache.getCurrentRound();
         System.out.println(currentRound.getStartHeight() + "----" + currentRound.getEndHeight());
         CurrentRound beforeRound = new CurrentRound();

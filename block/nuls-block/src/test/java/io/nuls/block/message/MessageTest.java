@@ -222,7 +222,7 @@ public class MessageTest {
         CoinTo coinTo = new CoinTo();
         coinTo.setAddress(AddressTool.getAddress(address));
         coinTo.setAmount(BigInteger.TWO);
-        coinTo.setAssetsChainId(12345);
+        coinTo.setAssetsChainId(2);
         coinTo.setAssetsId(1);
         coinTo.setLockTime(0);
         List<CoinFrom> coinFroms = new ArrayList<>();

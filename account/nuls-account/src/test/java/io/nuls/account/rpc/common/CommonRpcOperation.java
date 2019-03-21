@@ -34,9 +34,9 @@ import static org.junit.Assert.assertNotNull;
 public class CommonRpcOperation {
 
 
-    protected static int chainId = 12345;
-    protected static String password = "nuls123456";
-    protected static String newPassword = "c12345678";
+    protected static int chainId = 2;
+    protected static String password = "nuls26";
+    protected static String newPassword = "c2678";
     protected static String version = "1.0";
     protected static String success = "1";
 

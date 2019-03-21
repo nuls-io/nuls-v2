@@ -88,7 +88,7 @@ public class NulsConfig {
 //    /**
 //     * 当前链ID
 //     */
-//    public static int CURRENT_CHAIN_ID = 12345;
+//    public static int CURRENT_CHAIN_ID = 2;
 //
 //    /**
 //     * 当前链主资产ID

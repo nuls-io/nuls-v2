@@ -400,12 +400,12 @@ public class TestTx {
     static String address29 = "5MR_2CVuGjQ3CYVkhFszxfSt6sodg1gDHYF";
 
     private Chain chain;
-    static int chainId = 12345;
-    static int assetChainId = 12345;
+    static int chainId = 2;
+    static int assetChainId = 2;
     static int assetId = 1;
     static String version = "1.0";
 
-    static String password = "nuls123456";//"nuls123456";
+    static String password = "nuls26";//"nuls26";
 
     @Before
     public void before() throws Exception {
@@ -512,7 +512,7 @@ public class TestTx {
         Map<String, Object> txMap = new HashMap();
         txMap.put("chainId", chainId);
         txMap.put("address", address23);
-        txMap.put("password", "nuls123456");
+        txMap.put("password", "nuls26");
         //调用接口
         Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.CS.abbr, "cs_stopAgent", txMap);
         Map result = (HashMap) (((HashMap) cmdResp2.getResponseData()).get("cs_stopAgent"));

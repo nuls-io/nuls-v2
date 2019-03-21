@@ -47,8 +47,8 @@ import static io.nuls.transaction.utils.LoggerUtil.Log;
  * @date: 2019-01-25
  */
 public class CreateTxThread implements Runnable {
-    static int chainId = 12345;
-    static int assetChainId = 12345;
+    static int chainId = 2;
+    static int assetChainId = 2;
     static int assetId = 1;
 
     static String address20 = "5MR_2CWWTDXc32s9Wd1guNQzPztFgkyVEsz";
@@ -62,7 +62,7 @@ public class CreateTxThread implements Runnable {
     static String address28 = "5MR_2CfUsasd33vQV3HqGw6M3JwVsuVxJ7r";
     static String address29 = "5MR_2CVuGjQ3CYVkhFszxfSt6sodg1gDHYF";
 
-    static String password = "nuls123456";
+    static String password = "nuls26";
 
     private Chain chain;
 
@@ -152,14 +152,14 @@ public class CreateTxThread implements Runnable {
         coinDTO.setAssetsChainId(assetChainId);
         coinDTO.setAddress(address20);
         coinDTO.setAmount(new BigInteger("200000000"));
-        coinDTO.setPassword("nuls123456");
+        coinDTO.setPassword("nuls26");
 
         CoinDTO coinDTO2 = new CoinDTO();
         coinDTO2.setAssetsId(assetId);
         coinDTO2.setAssetsChainId(assetChainId);
         coinDTO2.setAddress(address21);
         coinDTO2.setAmount(new BigInteger("100000000"));
-        coinDTO2.setPassword("nuls123456");
+        coinDTO2.setPassword("nuls26");
         List<CoinDTO> listFrom = new ArrayList<>();
         listFrom.add(coinDTO);
         listFrom.add(coinDTO2);

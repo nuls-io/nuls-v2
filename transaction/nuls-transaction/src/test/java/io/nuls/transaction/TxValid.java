@@ -71,12 +71,12 @@ public class TxValid {
     static String address29 = "5MR_2CVuGjQ3CYVkhFszxfSt6sodg1gDHYF";
 
     private Chain chain;
-    static int chainId = 12345;
-    static int assetChainId = 12345;
+    static int chainId = 2;
+    static int assetChainId = 2;
     static int assetId = 1;
     static String version = "1.0";
 
-    static String password = "nuls123456";//"nuls123456";
+    static String password = "nuls123456";//"nuls26";
 
     @Before
     public void before() throws Exception {

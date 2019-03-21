@@ -61,12 +61,12 @@ public class TestJyc {
     static String address23 = "5MR_2CbdqKcZktcxntG14VuQDy8YHhc6ZqW";
 
     private static Chain chain;
-    static int chainId = 12345;
-    static int assetChainId = 12345;
+    static int chainId = 2;
+    static int assetChainId = 2;
     static int assetId = 1;
     static String version = "1.0";
 
-    static String password = "nuls123456";
+    static String password = "nuls26";
 
     /**
      * 模拟测试 module

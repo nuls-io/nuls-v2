@@ -30,9 +30,9 @@ public class AliasCmdTest {
 
     //protected static AccountService accountService;
 
-    protected int chainId = 12345;
-    protected String password = "nuls123456";
-    protected String newPassword = "c12345678";
+    protected int chainId = 2;
+    protected String password = "nuls26";
+    protected String newPassword = "c2678";
     protected double version2 = 1.0;
     protected String version = "1.0";
 

@@ -1,6 +1,6 @@
 {
   "providerType": "RPC",
-  "chainId": 12345,
+  "chainId": 2,
   "assetsId": 1,
   "configItem": {
     "name": "zlj"

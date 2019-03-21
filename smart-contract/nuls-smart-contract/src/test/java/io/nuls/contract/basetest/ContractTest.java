@@ -72,7 +72,7 @@ public class ContractTest {
         RocksDBService.init("./data");
         Chain chain = new Chain();
         ConfigBean configBean = new ConfigBean();
-        configBean.setChainId(12345);
+        configBean.setChainId(2);
         configBean.setAssetsId(1);
         configBean.setMaxViewGas(100000000L);
         chain.setConfig(configBean);
@@ -84,7 +84,7 @@ public class ContractTest {
 
     @Test
     public void testValidAddress() {
-        Assert.assertTrue(AddressTool.validAddress(12345, "5MR_2CWWTDXc32s9Wd1guNQzPztFgkyVEsz"));
+        Assert.assertTrue(AddressTool.validAddress(2, "5MR_2CWWTDXc32s9Wd1guNQzPztFgkyVEsz"));
     }
 
     @Test

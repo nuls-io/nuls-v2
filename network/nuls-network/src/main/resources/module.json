@@ -2,7 +2,7 @@
   "language": "en",
   "encoding": "UTF-8",
   "port": 9995,
-  "chainId": 12345,
+  "chainId": 2,
   "packetMagic": 615313,
   "maxInCount": 100,
   "maxOutCount": 10,

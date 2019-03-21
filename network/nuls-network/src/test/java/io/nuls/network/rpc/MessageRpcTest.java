@@ -64,7 +64,7 @@ public class MessageRpcTest {
         try {
 //            addNodeGroup();
             Map <String,Object>params = new HashMap<>();
-            int chainId = 12345;
+            int chainId = 2;
             String excludeNodes = "20.30.1020:5599,26.35.52.64:6688";
             VersionMessageBody versionMessageBody = new VersionMessageBody();
             InetAddress inetAddrYou = InetAddress.getByName("192.168.2.3");

@@ -16,7 +16,7 @@ public class CrossTxVerifyResultTest {
     @Before
     public void setUp() throws Exception {
         obj = new CrossTxVerifyResult();
-        obj.setChainId(12345);
+        obj.setChainId(2);
         obj.setHeight(34567890);
         obj.setNodeId("1");
     }
