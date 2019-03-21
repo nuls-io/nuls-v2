@@ -6,7 +6,7 @@
   "packetMagic": 11111286,
   "maxInCount": 100,
   "maxOutCount": 10,
-  "moonNode":true,
+  "moonNode": true,
   "selfSeedIps": "192.168.1.119:8989,192.168.1.120:8989",
   "crossPort": 8004,
   "crossMaxInCount": 100,
