@@ -97,7 +97,7 @@ public class VMContext {
         }
         BlockHeader header;
         try {
-            header = BlockCall.getBlockHeader(chainId, chainId);
+            header = BlockCall.getBlockHeader(chainId, height);
             if (header == null) {
                 return null;
             }

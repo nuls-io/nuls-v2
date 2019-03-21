@@ -245,8 +245,8 @@ public class TxServiceImpl implements TxService {
      * @return Result
      */
     private void validateCoinFromBase(Chain chain, int type, List<CoinFrom> listFrom) throws NulsException {
-        //coinBase交易没有from
-        if (type == TxConstant.TX_TYPE_COINBASE) {
+        //coinBase交易/智能合约退还gas交易没有from
+        if (type == TxConstant.TX_TYPE_COINBASE || type == TxConstant.TX_TYPE_CONTRACT_RETURN_GAS) {
             return;
         }
         if (null == listFrom || listFrom.size() == 0) {
@@ -604,7 +604,7 @@ public class TxServiceImpl implements TxService {
                 Transaction tx = packablePool.get(chain);
                 if (tx == null) {
                     try {
-                        chain.getLoggerMap().get(TxConstant.LOG_TX).debug("************* [获取交易等待]");
+                        //chain.getLoggerMap().get(TxConstant.LOG_TX).debug("************* [获取交易等待]");
                         Thread.sleep(100L);
                     } catch (InterruptedException e) {
                         Log.error("packaging error ", e);
@@ -703,13 +703,11 @@ public class TxServiceImpl implements TxService {
                     }
                     return getPackableTxs(chain, endtimestamp, maxTxDataSize, chain.getBestBlockHeight() + 1, blockTime, packingAddress, preStateRoot);
                 }
-                long loopOnce = NetworkCall.getCurrentTimeMillis() - currentTimeMillis;
 //                chain.getLoggerMap().get(TxConstant.LOG_TX).debug("########## 分组花费时间:{} ",  NetworkCall.getCurrentTimeMillis() - debugeMap);
 //                chain.getLoggerMap().get(TxConstant.LOG_TX).debug("########## 成功取一个交易花费时间(一次循环):{} ", loopOnce);
-                loopDebug += (loopOnce - currentTimeMillis);
                 chain.getLoggerMap().get(TxConstant.LOG_TX).debug("");
             }
-            chain.getLoggerMap().get(TxConstant.LOG_TX).debug("--------------while end----花费时间:{}毫秒-------", loopDebug);
+            chain.getLoggerMap().get(TxConstant.LOG_TX).debug("--------------while end----:");
             chain.getLoggerMap().get(TxConstant.LOG_TX).debug("取出的交易 - size:{}", packingTxList.size());
 
             chain.getLoggerMap().get(TxConstant.LOG_TX).debug("***");

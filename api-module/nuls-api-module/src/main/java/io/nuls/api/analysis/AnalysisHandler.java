@@ -1,6 +1,5 @@
 package io.nuls.api.analysis;
 
-import io.nuls.api.ApiContext;
 import io.nuls.api.cache.ApiCache;
 import io.nuls.api.constant.ApiConstant;
 import io.nuls.api.manager.CacheManager;

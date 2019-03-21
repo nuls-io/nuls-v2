@@ -41,6 +41,10 @@ public interface TxConstant {
     int TX_TYPE_CALL_CONTRACT = 101;
     /** 删除智能合约交易*/
     int TX_TYPE_DELETE_CONTRACT = 102;
+    /** contract transfer tx */
+    int TX_TYPE_CONTRACT_TRANSFER = 103;
+    /** contract return gas tx */
+    int TX_TYPE_CONTRACT_RETURN_GAS = 104;
 
     /** 获取网络时间间隔*/
     long GETTIME_INTERVAL = 30000;
