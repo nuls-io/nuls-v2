@@ -29,4 +29,28 @@ public class Utils {
         System.out.println(ANSI_BLUE + msg + ANSI_RESET);
     }
 
+    public static void failDoubleLine(String msg){
+        fail("=".repeat(msg.length()*2));
+        fail(msg);
+        fail("=".repeat(msg.length()*2));
+    }
+
+    public static void failLine(String msg){
+        fail("-".repeat(msg.length()*2));
+        fail(msg);
+        fail("-".repeat(msg.length()*2));
+    }
+
+    public static void successDoubleLine(String msg){
+        success("=".repeat(msg.length()*2));
+        success(msg);
+        success("=".repeat(msg.length()*2));
+    }
+
+    public static void successLine(String msg){
+        success("-".repeat(msg.length()*2));
+        success(msg);
+        success("-".repeat(msg.length()*2));
+    }
+
 }

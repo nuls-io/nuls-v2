@@ -39,6 +39,11 @@ import java.util.concurrent.TimeUnit;
 @Order(Integer.MIN_VALUE)
 public abstract class RpcModule implements InitializingBean {
 
+    /**
+     * 启动参数
+     */
+    private String[] mainArgs;
+
     private static final String ROLE = "1.0";
 
     /**

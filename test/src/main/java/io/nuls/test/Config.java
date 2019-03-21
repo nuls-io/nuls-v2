@@ -30,6 +30,10 @@ public class Config implements InitializingBean {
     @Value("testSeedAccountPriKey")
     String testSeedAccount;
 
+    int chainId;
+
+    int assetsId;
+
     String seedAddress;
 
     @Override
