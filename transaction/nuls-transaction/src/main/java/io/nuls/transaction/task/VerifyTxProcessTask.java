@@ -21,8 +21,6 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import static io.nuls.transaction.utils.LoggerUtil.Log;
-
 /**
  * @author: Charlie
  * @date: 2018/11/28
@@ -155,7 +153,7 @@ public class VerifyTxProcessTask implements Runnable {
                 return tx.getTime() < (currentTimeMillis - chain.getConfig().getOrphanTtl());
             }
         } catch (Exception e) {
-            Log.error(e);
+            chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).error(e);
             e.printStackTrace();
         }
         return false;
