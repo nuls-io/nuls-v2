@@ -51,18 +51,19 @@ public class CreateTxThread implements Runnable {
     static int assetChainId = 2;
     static int assetId = 1;
 
-    static String address20 = "5MR_2CWWTDXc32s9Wd1guNQzPztFgkyVEsz";
-    static String address21 = "5MR_2CbdqKcZktcxntG14VuQDy8YHhc6ZqW";
-    static String address22 = "5MR_2Cj9tfgQpdeF7nDy5wyaGG6MZ35H3rA";
-    static String address23 = "5MR_2CWKhFuoGVraaxL5FYY3RsQLjLDN7jw";
-    static String address24 = "5MR_2CgwCFRoJ8KX37xNqjjR7ttYuJsg8rk";
-    static String address25 = "5MR_2CjZkQsN7EnEPcaLgNrMrp6wpPGN6xo";
-    static String address26 = "tNULSeBaMvEtDfvZuukDf2mVyfGo3DdiN8KLRG";
-    static String address27 = "5MR_2CVCFWH7o8AmrTBPLkdg2dYH1UCUJiM";
-    static String address28 = "5MR_2CfUsasd33vQV3HqGw6M3JwVsuVxJ7r";
-    static String address29 = "5MR_2CVuGjQ3CYVkhFszxfSt6sodg1gDHYF";
 
-    static String password = "nuls26";
+    static String address20 = "tNULSeBaMvEtDfvZuukDf2mVyfGo3DdiN8KLRG";
+    static String address21 = "tNULSeBaMnrs6JKrCy6TQdzYJZkMZJDng7QAsD";
+    static String address22 = "tNULSeBaMrbMRiFAUeeAt6swb4xVBNyi81YL24";
+    static String address23 = "tNULSeBaMu38g1vnJsSZUCwTDU9GsE5TVNUtpD";
+    static String address24 = "tNULSeBaMp9wC9PcWEcfesY7YmWrPfeQzkN1xL";
+    static String address25 = "tNULSeBaMshNPEnuqiDhMdSA4iNs6LMgjY6tcL";
+    static String address26 = "tNULSeBaMoodYW7AqyJrgYdWiJ6nfwfVHHHyXm";
+    static String address27 = "tNULSeBaMmTNYqywL5ZSHbyAQ662uE3wibrgD1";
+    static String address28 = "tNULSeBaMoNnKitV28JeuUdBaPSR6n1xHfKLj2";
+    static String address29 = "tNULSeBaMqywZjfSrKNQKBfuQtVxAHBQ8rB2Zn";
+
+    static String password = "nuls123456";
 
     private Chain chain;
 
@@ -152,14 +153,14 @@ public class CreateTxThread implements Runnable {
         coinDTO.setAssetsChainId(assetChainId);
         coinDTO.setAddress(address20);
         coinDTO.setAmount(new BigInteger("200000000"));
-        coinDTO.setPassword("nuls26");
+        coinDTO.setPassword("nuls123456");
 
         CoinDTO coinDTO2 = new CoinDTO();
         coinDTO2.setAssetsId(assetId);
         coinDTO2.setAssetsChainId(assetChainId);
         coinDTO2.setAddress(address21);
         coinDTO2.setAmount(new BigInteger("100000000"));
-        coinDTO2.setPassword("nuls26");
+        coinDTO2.setPassword("nuls123456");
         List<CoinDTO> listFrom = new ArrayList<>();
         listFrom.add(coinDTO);
         listFrom.add(coinDTO2);

@@ -53,7 +53,7 @@ public class VoteTest {
     private VMContext vmContext;
     private ProgramExecutor programExecutor;
 
-    private static final String ADDRESS = "5MR_2CWWTDXc32s9Wd1guNQzPztFgkyVEsz";
+    private static final String ADDRESS = "tNULSeBaMvEtDfvZuukDf2mVyfGo3DdiN8KLRG";
     private static final String SENDER = "5MR_2CbdqKcZktcxntG14VuQDy8YHhc6ZqW";
     private static final String BUYER = "5MR_2Cj9tfgQpdeF7nDy5wyaGG6MZ35H3rA";
 

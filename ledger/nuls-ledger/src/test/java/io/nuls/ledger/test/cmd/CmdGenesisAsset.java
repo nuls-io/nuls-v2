@@ -52,7 +52,7 @@ public class CmdGenesisAsset {
     public int chainId = 2;
     int assetChainId = 2;
 //    String address = "JgT2JCQvKGRKRjKqyfxRAj2zSCpGca01f";
-    String address = "5MR_2CkbW7Bn1GpKkh4ZVfudxzTUNPdKp5Z";
+    String address = "tNULSeBaMvEtDfvZuukDf2mVyfGo3DdiN8KLRG";
     int assetId = 1;
     //入账金额
     BigInteger amount = BigInteger.valueOf(100000000000000L);

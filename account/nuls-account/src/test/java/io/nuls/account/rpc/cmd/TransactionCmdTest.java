@@ -50,15 +50,15 @@ public class TransactionCmdTest {
 
     protected int chainId = 2;
     protected int assetChainId = 2;
-    protected static String password = "nuls26";
-    protected String newPassword = "c2678";
+    protected static String password = "nuls123456";
+    protected String newPassword = "c12345678";
     protected String version = "1.0";
     protected String success = "1";
-    String address = "5MR_2CWWTDXc32s9Wd1guNQzPztFgkyVEsz";
-    String address1 = "5MR_2CkYEhXKCmUWTEsWRTnaWgYE8kJdfd5";
-    String address2 = "5MR_2CcRgU3vDGp2uEG3rdzLdyMCbsiLFbJ";
-    String address3 = "5MR_2CckymYvKM7NKpt6fpZproQYMtnGdaT";
-    String address4 = "5MR_4bgJiPmxN4mZV2C89thSEdJ8qWnm9Xi";
+    String address = "tNULSeBaMvEtDfvZuukDf2mVyfGo3DdiN8KLRG";
+    String address1 = "tNULSeBaMvEtDfvZuukDf2mVyfGo3DdiN8KLRG";
+    String address2 = "tNULSeBaMvEtDfvZuukDf2mVyfGo3DdiN8KLRG";
+    String address3 = "tNULSeBaMvEtDfvZuukDf2mVyfGo3DdiN8KLRG";
+    String address4 = "tNULSeBaMvEtDfvZuukDf2mVyfGo3DdiN8KLRG";
 
     static int assetId = 1;
     //入账金额
@@ -71,14 +71,14 @@ public class TransactionCmdTest {
     }
 
     public static void importKeyStore() throws Exception {
-        CommonRpcOperation.importAccountByPriKeyWithOverwrite("5MR_2CWWTDXc32s9Wd1guNQzPztFgkyVEsz",
-                "00c299b105e2f9b260d7811d5cb94c713cc324e55831cb15a18454f7382f0a5f6e",password);
-        CommonRpcOperation.importAccountByPriKeyWithOverwrite("5MR_2CckymYvKM7NKpt6fpZproQYMtnGdaT",
-                "00c940482596e30265f9f9f6216f7d7b507eebc9857c3689efa4378527bab3ba3d",password);
-        CommonRpcOperation.importAccountByPriKeyWithOverwrite("5MR_2CkYEhXKCmUWTEsWRTnaWgYE8kJdfd5",
-                "00ea8818c00c9fd20a54a93bbc749b903ee69617990af9bf0d6c6bc17d51820f",password);
-        CommonRpcOperation.importAccountByPriKeyWithOverwrite("5MR_2CcRgU3vDGp2uEG3rdzLdyMCbsiLFbJ",
-                "00d9a2384a3bc9fca252c8e2c8728efcb98e007b5290d7f01a008731669e433043",password);
+        CommonRpcOperation.importAccountByPriKeyWithOverwrite("tNULSeBaMvEtDfvZuukDf2mVyfGo3DdiN8KLRG",
+                "9ce21dad67e0f0af2599b41b515a7f7018059418bab892a7b68f283d489abc4b",password);
+//        CommonRpcOperation.importAccountByPriKeyWithOverwrite("tNULSeBaMvEtDfvZuukDf2mVyfGo3DdiN8KLRG",
+//                "00c940482596e30265f9f9f6216f7d7b507eebc9857c3689efa4378527bab3ba3d",password);
+//        CommonRpcOperation.importAccountByPriKeyWithOverwrite("tNULSeBaMvEtDfvZuukDf2mVyfGo3DdiN8KLRG",
+//                "00ea8818c00c9fd20a54a93bbc749b903ee69617990af9bf0d6c6bc17d51820f",password);
+//        CommonRpcOperation.importAccountByPriKeyWithOverwrite("tNULSeBaMvEtDfvZuukDf2mVyfGo3DdiN8KLRG",
+//                "00d9a2384a3bc9fca252c8e2c8728efcb98e007b5290d7f01a008731669e433043",password);
     }
 
     /**
@@ -147,8 +147,8 @@ public class TransactionCmdTest {
     @Test
     public void transfer() throws Exception {
         //组装普通转账交易
-        //TransferDto transferDto = CommonRpcOperation.createTransferTx("5MR_2CWWTDXc32s9Wd1guNQzPztFgkyVEsz","5MR_2CckymYvKM7NKpt6fpZproQYMtnGdaT",new BigInteger("10000000000"));
-        TransferDto transferDto = CommonRpcOperation.createTransferTx("5MR_2CckymYvKM7NKpt6fpZproQYMtnGdaT","5MR_2CkYEhXKCmUWTEsWRTnaWgYE8kJdfd5",new BigInteger("199800000"));
+        //TransferDto transferDto = CommonRpcOperation.createTransferTx("tNULSeBaMvEtDfvZuukDf2mVyfGo3DdiN8KLRG","tNULSeBaMvEtDfvZuukDf2mVyfGo3DdiN8KLRG",new BigInteger("10000000000"));
+        TransferDto transferDto = CommonRpcOperation.createTransferTx("tNULSeBaMvEtDfvZuukDf2mVyfGo3DdiN8KLRG","tNULSeBaMvEtDfvZuukDf2mVyfGo3DdiN8KLRG",new BigInteger("199800000"));
         Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_transfer", JSONUtils.json2map(JSONUtils.obj2json(transferDto)));
         HashMap result = (HashMap) (((HashMap) cmdResp.getResponseData()).get("ac_transfer"));
         String txDigestHex = (String) result.get(RpcConstant.VALUE);
@@ -164,7 +164,7 @@ public class TransactionCmdTest {
         List<String> accoutList = CommonRpcOperation.createAccount(1);
         assertTrue(accoutList != null & accoutList.size() == 1);
         String fromAddress = address;
-        String toAddress = "5MR_2CkYEhXKCmUWTEsWRTnaWgYE8kJdfd5";
+        String toAddress = "tNULSeBaMvEtDfvZuukDf2mVyfGo3DdiN8KLRG";
         //铸币
         //addGenesisAsset(fromAddress);
         //ddGenesisAsset(toAddress); //because the to address need to set alias
@@ -296,7 +296,7 @@ public class TransactionCmdTest {
      * @return
      */
     private TransferDto createTransferTx() {
-        return CommonRpcOperation.createTransferTx("5MR_2CWWTDXc32s9Wd1guNQzPztFgkyVEsz","5MR_4bgJiPmxN4mZV2C89thSEdJ8qWnm9Xi",new BigInteger("10000000000"));
+        return CommonRpcOperation.createTransferTx("tNULSeBaMvEtDfvZuukDf2mVyfGo3DdiN8KLRG","tNULSeBaMvEtDfvZuukDf2mVyfGo3DdiN8KLRG",new BigInteger("10000000000"));
     }
 
     /**
@@ -426,14 +426,14 @@ public class TransactionCmdTest {
         MultiSigAccount multiSigAccount = CommonRpcOperation.createMultiSigAccount();
         assertNotNull(multiSigAccount);
         //String fromAddress = AddressTool.getStringAddressByBytes(multiSigAccount.getAddress().getAddressBytes());
-        String fromAddress = "5MR_4bgJiPmxN4mZV2C89thSEdJ8qWnm9Xi";
+        String fromAddress = "tNULSeBaMvEtDfvZuukDf2mVyfGo3DdiN8KLRG";
         assertNotNull(fromAddress);
         String signAddress = AddressTool.getStringAddressByBytes(AddressTool.getAddress(multiSigAccount.getPubKeyList().get(0), chainId));
         assertNotNull(signAddress);
         //创建一个接收方账户
         List<String> accoutList = CommonRpcOperation.createAccount(1);
         assertTrue(accoutList != null & accoutList.size() == 1);
-        String toAddress = "5MR_2Cc14Ph4ZfJTzsfxma8FGZ7FBzcTS87";//accoutList.get(0);
+        String toAddress = "tNULSeBaMvEtDfvZuukDf2mVyfGo3DdiN8KLRG";//accoutList.get(0);
         //铸币
         //addGenesisAsset(fromAddress);
         BigInteger balance = TxUtil.getBalance(chainId, chainId, assetId, AddressTool.getAddress(fromAddress));
@@ -443,7 +443,7 @@ public class TransactionCmdTest {
         Map<String, Object> params = new HashMap<>();
         params.put("chainId", chainId);
         params.put("address", fromAddress);
-        params.put("signAddress", "5MR_2CkYEhXKCmUWTEsWRTnaWgYE8kJdfd5");
+        params.put("signAddress", "tNULSeBaMvEtDfvZuukDf2mVyfGo3DdiN8KLRG");
         params.put("password", password);
         params.put("type", 1);
         params.put("toAddress", toAddress);
@@ -466,7 +466,7 @@ public class TransactionCmdTest {
      */
     @Test
     public void getBalance() {
-        BigInteger balance = LegerCmdCall.getBalance(chainId, assetChainId, assetId, "5MR_2CckymYvKM7NKpt6fpZproQYMtnGdaT");
+        BigInteger balance = LegerCmdCall.getBalance(chainId, assetChainId, assetId, "tNULSeBaMvEtDfvZuukDf2mVyfGo3DdiN8KLRG");
         System.out.println(balance.longValue());
     }
 

@@ -62,7 +62,7 @@ import static io.nuls.contract.constant.ContractCmdConstant.*;
  */
 public class ContractSendTxTest extends Base {
 
-    static String address20 = "5MR_2CWWTDXc32s9Wd1guNQzPztFgkyVEsz";
+    static String address20 = "tNULSeBaMvEtDfvZuukDf2mVyfGo3DdiN8KLRG";
     static String address21 = "5MR_2CbdqKcZktcxntG14VuQDy8YHhc6ZqW";
     static String address22 = "5MR_2Cj9tfgQpdeF7nDy5wyaGG6MZ35H3rA";
     static String address23 = "5MR_2CWKhFuoGVraaxL5FYY3RsQLjLDN7jw";
@@ -79,7 +79,7 @@ public class ContractSendTxTest extends Base {
     static int assetId = 1;
     static String version = "1.0";
 
-    static String password = "nuls26";//"nuls26";
+    static String password = "nuls123456";//"nuls123456";
 
     @Before
     public void before() throws Exception {

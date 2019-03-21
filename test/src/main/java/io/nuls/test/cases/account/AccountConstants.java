@@ -7,6 +7,6 @@ package io.nuls.test.cases.account;
  */
 public class AccountConstants {
 
-    public static final String PASSWORD = "nuls26";
+    public static final String PASSWORD = "nuls123456";
 
 }

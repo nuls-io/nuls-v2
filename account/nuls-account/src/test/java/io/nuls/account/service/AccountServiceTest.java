@@ -40,7 +40,7 @@ public class AccountServiceTest {
 
     protected static AccountService accountService;
     protected int chainId = 2;
-    protected String password = "nuls26";
+    protected String password = "nuls123456";
 
     @BeforeClass
     public static void beforeTest() {

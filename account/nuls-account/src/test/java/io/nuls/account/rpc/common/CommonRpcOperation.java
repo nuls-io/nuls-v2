@@ -35,8 +35,8 @@ public class CommonRpcOperation {
 
 
     protected static int chainId = 2;
-    protected static String password = "nuls26";
-    protected static String newPassword = "c2678";
+    protected static String password = "nuls123456";
+    protected static String newPassword = "c12345678";
     protected static String version = "1.0";
     protected static String success = "1";
 
@@ -133,7 +133,7 @@ public class CommonRpcOperation {
     public static MultiSigAccount createMultiSigAccount() throws Exception {
         MultiSigAccount multiSigAccount = new MultiSigAccount();
         //List<String> accountList = createAccount(3);
-        List<String> accountList = List.of("5MR_2CkYEhXKCmUWTEsWRTnaWgYE8kJdfd5", "5MR_2CcRgU3vDGp2uEG3rdzLdyMCbsiLFbJ", "5MR_2CckymYvKM7NKpt6fpZproQYMtnGdaT");
+        List<String> accountList = List.of("tNULSeBaMvEtDfvZuukDf2mVyfGo3DdiN8KLRG", "tNULSeBaMvEtDfvZuukDf2mVyfGo3DdiN8KLRG", "tNULSeBaMvEtDfvZuukDf2mVyfGo3DdiN8KLRG");
         Map<String, Object> params = new HashMap<>();
         List<String> pubKeys = new ArrayList<>();
         List<byte[]> pubKeysBytesList = new ArrayList<>();

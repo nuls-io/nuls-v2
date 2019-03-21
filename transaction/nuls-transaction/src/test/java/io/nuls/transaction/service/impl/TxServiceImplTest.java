@@ -59,7 +59,7 @@ public class TxServiceImplTest {
         coin1.setAmount(new BigInteger("1"));
         coin1.setAssetsChainId(2);
         coin1.setAssetsId(1);
-        coin1.setPassword("nuls26");
+        coin1.setPassword("nuls123456");
 
         CoinDTO coin2 = (CoinDTO)coin1.clone();
         coin2.setAddress("Qar8HtENUvhf2DmbZtYJcFxeVmNsC3930");
@@ -78,7 +78,7 @@ public class TxServiceImplTest {
         coin4.setAmount(new BigInteger("100"));
         coin4.setAssetsChainId(22222);
         coin4.setAssetsId(2);
-        coin4.setPassword("nuls26");
+        coin4.setPassword("nuls123456");
 
         froms.add(coin4);
         froms.add(coin2);

@@ -177,44 +177,44 @@ public class CmdUnconfirmedTxTest {
 
     @Test
     public void testNonce() throws Exception {
-        LoggerUtil.logger.info(getNonce("5MR_2CWWTDXc32s9Wd1guNQzPztFgkyVEsz"));
+        LoggerUtil.logger.info(getNonce("tNULSeBaMvEtDfvZuukDf2mVyfGo3DdiN8KLRG"));
     }
 
     @Test
     public void testUncomfirmedTx() throws Exception {
         // Build params map
         Map<String, Object> params = new HashMap<>();
-        Transaction transaction = buildTransaction(address, "5MR_2CWWTDXc32s9Wd1guNQzPztFgkyVEsz", new BigInteger("200000000000"));
+        Transaction transaction = buildTransaction(address, "tNULSeBaMvEtDfvZuukDf2mVyfGo3DdiN8KLRG", new BigInteger("200000000000"));
         params.put("chainId", chainId);
         params.put("txHex", transaction.hex());
         Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.LG.abbr, "commitUnconfirmedTx", params);
         LoggerUtil.logger.info("response {}", response);
         LoggerUtil.logger.info("获取 address={},res={}", address, getBalanceNonce(address));
-        LoggerUtil.logger.info("获取 address={},res={}", "5MR_2CWWTDXc32s9Wd1guNQzPztFgkyVEsz", getBalanceNonce("5MR_2CWWTDXc32s9Wd1guNQzPztFgkyVEsz"));
+        LoggerUtil.logger.info("获取 address={},res={}", "tNULSeBaMvEtDfvZuukDf2mVyfGo3DdiN8KLRG", getBalanceNonce("tNULSeBaMvEtDfvZuukDf2mVyfGo3DdiN8KLRG"));
     }
 
     @Test
     public void testUncomfirmedLockedTx() throws Exception {
         // Build params map
         Map<String, Object> params = new HashMap<>();
-        Transaction transaction = buildLockedTimeTransaction(address, "5MR_2CWWTDXc32s9Wd1guNQzPztFgkyVEsz", new BigInteger("200000000000"));
+        Transaction transaction = buildLockedTimeTransaction(address, "tNULSeBaMvEtDfvZuukDf2mVyfGo3DdiN8KLRG", new BigInteger("200000000000"));
         params.put("chainId", chainId);
         params.put("txHex", transaction.hex());
         Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.LG.abbr, "commitUnconfirmedTx", params);
         LoggerUtil.logger.info("response {}", response);
         LoggerUtil.logger.info("获取 address={},res={}", address, getBalanceNonce(address));
-        LoggerUtil.logger.info("获取 address={},res={}", "5MR_2CWWTDXc32s9Wd1guNQzPztFgkyVEsz", getBalanceNonce("5MR_2CWWTDXc32s9Wd1guNQzPztFgkyVEsz"));
+        LoggerUtil.logger.info("获取 address={},res={}", "tNULSeBaMvEtDfvZuukDf2mVyfGo3DdiN8KLRG", getBalanceNonce("tNULSeBaMvEtDfvZuukDf2mVyfGo3DdiN8KLRG"));
     }
     @Test
     public void testUncomfirmedUnLockedTx() throws Exception {
         // Build params map
         Map<String, Object> params = new HashMap<>();
-        Transaction transaction = buildUnLockedTimeTransaction("5MR_2CWWTDXc32s9Wd1guNQzPztFgkyVEsz", "5MR_2CWWTDXc32s9Wd1guNQzPztFgkyVEsz", new BigInteger("200000000000"));
+        Transaction transaction = buildUnLockedTimeTransaction("tNULSeBaMvEtDfvZuukDf2mVyfGo3DdiN8KLRG", "tNULSeBaMvEtDfvZuukDf2mVyfGo3DdiN8KLRG", new BigInteger("200000000000"));
         params.put("chainId", chainId);
         params.put("txHex", transaction.hex());
         Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.LG.abbr, "commitUnconfirmedTx", params);
         LoggerUtil.logger.info("response {}", response);
         LoggerUtil.logger.info("获取 address={},res={}", address, getBalanceNonce(address));
-        LoggerUtil.logger.info("获取 address={},res={}", "5MR_2CWWTDXc32s9Wd1guNQzPztFgkyVEsz", getBalanceNonce("5MR_2CWWTDXc32s9Wd1guNQzPztFgkyVEsz"));
+        LoggerUtil.logger.info("获取 address={},res={}", "tNULSeBaMvEtDfvZuukDf2mVyfGo3DdiN8KLRG", getBalanceNonce("tNULSeBaMvEtDfvZuukDf2mVyfGo3DdiN8KLRG"));
     }
 }

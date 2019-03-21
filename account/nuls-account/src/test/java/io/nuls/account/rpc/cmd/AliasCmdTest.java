@@ -31,8 +31,8 @@ public class AliasCmdTest {
     //protected static AccountService accountService;
 
     protected int chainId = 2;
-    protected String password = "nuls26";
-    protected String newPassword = "c2678";
+    protected String password = "nuls123456";
+    protected String newPassword = "c12345678";
     protected double version2 = 1.0;
     protected String version = "1.0";
 
@@ -112,7 +112,7 @@ public class AliasCmdTest {
     public void setAliasTest() throws Exception {
         //create an account for test
         //String address = createAnAccount();
-        String address="5MR_2CkYEhXKCmUWTEsWRTnaWgYE8kJdfd5";
+        String address="tNULSeBaMvEtDfvZuukDf2mVyfGo3DdiN8KLRG";
         Map<String, Object> params = new HashMap<>();
         params.put(Constants.VERSION_KEY_STR, "1.0");
         params.put("chainId", chainId);
