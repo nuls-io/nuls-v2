@@ -1,9 +1,9 @@
 package io.nuls.test.cases.transcation;
 
 import io.nuls.api.provider.Result;
-import io.nuls.api.provider.transaction.facade.GetTxByHashReq;
+import io.nuls.api.provider.transaction.facade.GetConfirmedTxByHashReq;
+import io.nuls.api.provider.transaction.facade.TransactionData;
 import io.nuls.base.constant.TxStatusEnum;
-import io.nuls.base.data.Transaction;
 import io.nuls.test.cases.TestFailException;
 import io.nuls.tools.core.annotation.Component;
 
@@ -13,7 +13,7 @@ import io.nuls.tools.core.annotation.Component;
  * @Description: 功能描述
  */
 @Component
-public class GetTxInfoCase extends BaseTranscationCase<Transaction,String> {
+public class GetTxInfoCase extends BaseTranscationCase<TransactionData,String> {
 
     @Override
     public String title() {
@@ -21,8 +21,8 @@ public class GetTxInfoCase extends BaseTranscationCase<Transaction,String> {
     }
 
     @Override
-    public Transaction doTest(String param, int depth) throws TestFailException {
-        Result<Transaction> result = transferService.getTxByHash(new GetTxByHashReq(param));
+    public TransactionData doTest(String param, int depth) throws TestFailException {
+        Result<TransactionData> result = transferService.getSimpleTxDataByHash(new GetConfirmedTxByHashReq(param));
         checkResultStatus(result);
         check(result.getData().getStatus().equals(TxStatusEnum.CONFIRMED),"交易状态不符合预期，未确认");
         return result.getData();

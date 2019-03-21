@@ -1,5 +1,6 @@
 package io.nuls.test.cases.transcation;
 
+import io.nuls.api.provider.transaction.facade.TransactionData;
 import io.nuls.base.constant.TxStatusEnum;
 import io.nuls.base.data.Transaction;
 import io.nuls.test.cases.RemoteTestParam;
@@ -14,7 +15,7 @@ import io.nuls.tools.core.annotation.Component;
  * @Description: 功能描述
  */
 @Component
-public class SyncTxInfoCase extends BaseTranscationCase<Transaction,String> {
+public class SyncTxInfoCase extends BaseTranscationCase<TransactionData,String> {
 
     @Autowired GetTxInfoCase getTxInfoCase;
 
@@ -24,9 +25,9 @@ public class SyncTxInfoCase extends BaseTranscationCase<Transaction,String> {
     }
 
     @Override
-    public Transaction doTest(String hash, int depth) throws TestFailException {
-        Transaction transaction = getTxInfoCase.check(hash,depth);
-        new SyncRemoteTestCase<Transaction>(){
+    public TransactionData doTest(String hash, int depth) throws TestFailException {
+        TransactionData transaction = getTxInfoCase.check(hash,depth);
+        new SyncRemoteTestCase<TransactionData>(){
 
             @Override
             public String title() {
