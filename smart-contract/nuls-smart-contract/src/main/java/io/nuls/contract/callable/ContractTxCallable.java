@@ -153,8 +153,10 @@ public class ContractTxCallable implements Callable<ContractResult> {
         List<ContractResult> reCallList = callableResult.getReCallList();
         boolean isConflict = checker.checkConflict(tx, contractResult, container.getCommitSet());
         if (isConflict) {
-            // 冲突后，添加到重新执行的集合中
-            reCallList.add(contractResult);
+            // 冲突后，添加到重新执行的集合中，但是gas消耗完的不再重复执行
+            if(!isNotEnoughGasError(contractResult)) {
+                reCallList.add(contractResult);
+            }
         } else {
             // 没有冲突, 处理合约结果
             dealCallResult(tx, callableResult, contractResult, chainId, blockTime);
@@ -197,11 +199,15 @@ public class ContractTxCallable implements Callable<ContractResult> {
     private void checkConflictWithFailedMap(CallableResult callableResult, ContractResult contractResult) {
         Map<String, Set<ContractResult>> failedMap = callableResult.getFailedMap();
         Set<String> addressSet = collectAddress(contractResult);
-        List<ContractResult> reCallList = callableResult.getReCallList();
         for (String address : addressSet) {
             Set<ContractResult> removedSet = failedMap.remove(address);
             if (removedSet != null) {
-                reCallList.addAll(removedSet);
+                // 失败的合约，gas消耗完的不再重复执行
+                for(ContractResult _contractResult : removedSet) {
+                    if(!isNotEnoughGasError(_contractResult)) {
+                        callableResult.getReCallList().add(_contractResult);
+                    }
+                }
             }
         }
     }

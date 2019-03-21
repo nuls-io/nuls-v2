@@ -81,6 +81,11 @@ public class ContractSendTxTest extends Base {
 
     static String password = "nuls123456";//"nuls123456";
 
+    private String sender = "5MR_2CjZkQsN7EnEPcaLgNrMrp6wpPGN6xo";
+
+    private String hash = "0020db25f9d8d968a25f0741a2205a8bb9af971ec0672ab726fbba5024f2d4ff2bfd";
+    private String contractAddress = "5MR_3Q3pPTA8CsYRXSvpv6aYA6WbFyUWdvt";
+
     @Before
     public void before() throws Exception {
         NoUse.mockModule();
@@ -114,7 +119,7 @@ public class ContractSendTxTest extends Base {
     public void createContract() throws Exception {
         InputStream in = new FileInputStream(ContractTest.class.getResource("/nrc20").getFile());
         byte[] contractCode = IOUtils.toByteArray(in);
-        String sender = "5MR_2CjZkQsN7EnEPcaLgNrMrp6wpPGN6xo";
+        //String sender = "5MR_2CjZkQsN7EnEPcaLgNrMrp6wpPGN6xo";
         String remark = "create contract test - 空气币";
         String name = "KQB";
         String symbol = "KongQiBi";
@@ -149,7 +154,7 @@ public class ContractSendTxTest extends Base {
     public void preCreateContract() throws Exception {
         InputStream in = new FileInputStream(ContractTest.class.getResource("/nrc20").getFile());
         byte[] contractCode = IOUtils.toByteArray(in);
-        String sender = "5MR_2CjZkQsN7EnEPcaLgNrMrp6wpPGN6xo";
+        //String sender = "5MR_2CjZkQsN7EnEPcaLgNrMrp6wpPGN6xo";
         String remark = "create contract test - 空气币";
         String name = "KQB";
         String symbol = "KongQiBi";
@@ -181,7 +186,7 @@ public class ContractSendTxTest extends Base {
     public void imputedCreateGas() throws Exception {
         InputStream in = new FileInputStream(ContractTest.class.getResource("/nrc20").getFile());
         byte[] contractCode = IOUtils.toByteArray(in);
-        String sender = "5MR_2CjZkQsN7EnEPcaLgNrMrp6wpPGN6xo";
+        //String sender = "5MR_2CjZkQsN7EnEPcaLgNrMrp6wpPGN6xo";
         String name = "KQB";
         String symbol = "KongQiBi";
         String amount = BigDecimal.TEN.pow(10).toPlainString();
@@ -208,7 +213,7 @@ public class ContractSendTxTest extends Base {
     public void validateCreate() throws Exception {
         InputStream in = new FileInputStream(ContractTest.class.getResource("/nrc20").getFile());
         byte[] contractCode = IOUtils.toByteArray(in);
-        String sender = "5MR_2CjZkQsN7EnEPcaLgNrMrp6wpPGN6xo";
+        //String sender = "5MR_2CjZkQsN7EnEPcaLgNrMrp6wpPGN6xo";
         String name = "KQB";
         String symbol = "KongQiBi";
         String amount = BigDecimal.TEN.pow(10).toPlainString();
@@ -236,9 +241,9 @@ public class ContractSendTxTest extends Base {
     public void callContract() throws Exception {
         // txHash:0020ea3c6f17d6edaee865b5c1eae0a50fdc27dbcaee19829799c2722b0180b6ca06
         // contractAddress:5MR_3Q7wWxaKnh4X74kYkubbNa4jouHMMYX
-        String sender = "5MR_2CjZkQsN7EnEPcaLgNrMrp6wpPGN6xo";
+        //String sender = "5MR_2CjZkQsN7EnEPcaLgNrMrp6wpPGN6xo";
         BigInteger value = BigInteger.ZERO;
-        String contractAddress = "5MR_3Q7wWxaKnh4X74kYkubbNa4jouHMMYX";//TODO pierre 待定
+        //String contractAddress = "5MR_3Q7wWxaKnh4X74kYkubbNa4jouHMMYX";//TODO pierre 待定
         String methodName = "transfer";
         String methodDesc = "";
         String remark = "call contract test - 空气币转账";
@@ -271,9 +276,9 @@ public class ContractSendTxTest extends Base {
      */
     @Test
     public void validateCall() throws Exception {
-        String sender = "5MR_2CjZkQsN7EnEPcaLgNrMrp6wpPGN6xo";
+        //String sender = "5MR_2CjZkQsN7EnEPcaLgNrMrp6wpPGN6xo";
         BigInteger value = BigInteger.ZERO;
-        String contractAddress = "5MR_3Q7wWxaKnh4X74kYkubbNa4jouHMMYX";//TODO pierre 待定
+        //String contractAddress = "5MR_3Q7wWxaKnh4X74kYkubbNa4jouHMMYX";//TODO pierre 待定
         String methodName = "transfer";
         String methodDesc = "";
         String toAddress = "5MR_2CeG11nRqx7nGNeh8hTXADibqfSYeNu";
@@ -303,9 +308,9 @@ public class ContractSendTxTest extends Base {
      */
     @Test
     public void imputedCallGas() throws Exception {
-        String sender = "5MR_2CjZkQsN7EnEPcaLgNrMrp6wpPGN6xo";
+        //String sender = "5MR_2CjZkQsN7EnEPcaLgNrMrp6wpPGN6xo";
         BigInteger value = BigInteger.ZERO;
-        String contractAddress = "5MR_3Q7wWxaKnh4X74kYkubbNa4jouHMMYX";//TODO pierre 待定
+        //String contractAddress = "5MR_3Q7wWxaKnh4X74kYkubbNa4jouHMMYX";//TODO pierre 待定
         String methodName = "transfer";
         String methodDesc = "";
         String toAddress = "5MR_2CeG11nRqx7nGNeh8hTXADibqfSYeNu";
@@ -333,7 +338,7 @@ public class ContractSendTxTest extends Base {
      */
     @Test
     public void invokeView() throws Exception {
-        String contractAddress = "5MR_3Q7wWxaKnh4X74kYkubbNa4jouHMMYX";//TODO pierre 待定
+        //String contractAddress = "5MR_3Q7wWxaKnh4X74kYkubbNa4jouHMMYX";//TODO pierre 待定
         String methodName = "balanceOf";
         String methodDesc = "";
         String toAddress = "5MR_2CjZkQsN7EnEPcaLgNrMrp6wpPGN6xo";
@@ -378,7 +383,7 @@ public class ContractSendTxTest extends Base {
      */
     @Test
     public void contractInfo() throws Exception {
-        String contractAddress = "5MR_3Q7wWxaKnh4X74kYkubbNa4jouHMMYX";//TODO pierre 待定
+        //String contractAddress = "5MR_3Q7wWxaKnh4X74kYkubbNa4jouHMMYX";//TODO pierre 待定
         Map params = this.makeContractInfoParams(contractAddress);
         Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, CONTRACT_INFO, params);
         Map result = (HashMap) (((HashMap) cmdResp2.getResponseData()).get(CONTRACT_INFO));
@@ -397,7 +402,7 @@ public class ContractSendTxTest extends Base {
      */
     @Test
     public void contractResult() throws Exception {
-        String hash = "0020a8df5ef806e4c65e31ce41e2ebc0e64b19c18fcce8df525a509a3676cb648384";
+        //String hash = "0020d7f0e873fad90b1e8acbc49ae064124d40f249a184b5f73c20521f51545cf98e";
         Map params = this.makeContractResultParams(hash);
         Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, CONTRACT_RESULT, params);
         Map result = (HashMap) (((HashMap) cmdResp2.getResponseData()).get(CONTRACT_RESULT));
@@ -416,7 +421,7 @@ public class ContractSendTxTest extends Base {
      */
     @Test
     public void contractTx() throws Exception {
-        String hash = "0020ea3c6f17d6edaee865b5c1eae0a50fdc27dbcaee19829799c2722b0180b6ca06";
+        //String hash = "0020c26e6b96374dfed30c294e863e872b6a631cdc3d00ce14d562ae9eea8f201187";
         Map params = this.makeContractTxParams(hash);
         Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, CONTRACT_TX, params);
         Map result = (HashMap) (((HashMap) cmdResp2.getResponseData()).get(CONTRACT_TX));
@@ -437,7 +442,9 @@ public class ContractSendTxTest extends Base {
     public void getTxRecord() throws Exception {
         Map<String, Object> params = new HashMap<>();
         params.put("chainId", chainId);
-        params.put("address", "5MR_3Q7wWxaKnh4X74kYkubbNa4jouHMMYX");
+        //params.put("address", sender);
+        params.put("address", contractAddress);
+        //params.put("address", "5MR_3Q71ey34Pi7cC66DZXWpwvMmz4RT1BY");
         params.put("assetChainId", null);
         params.put("assetId", null);
         params.put("type", null);
@@ -453,7 +460,7 @@ public class ContractSendTxTest extends Base {
      */
     @Test
     public void getTx() throws Exception {
-        String hash = "0020ea3c6f17d6edaee865b5c1eae0a50fdc27dbcaee19829799c2722b0180b6ca06";
+        //String hash = "0020c26e6b96374dfed30c294e863e872b6a631cdc3d00ce14d562ae9eea8f201187";
         this.getTxClient(hash);
     }
     private void getTxClient(String hash) throws Exception {
@@ -470,7 +477,7 @@ public class ContractSendTxTest extends Base {
      */
     @Test
     public void getConfirmTx() throws Exception {
-        String hash = "0020ea3c6f17d6edaee865b5c1eae0a50fdc27dbcaee19829799c2722b0180b6ca06";
+        //String hash = "0020c26e6b96374dfed30c294e863e872b6a631cdc3d00ce14d562ae9eea8f201187";
         this.getTxCfmClient(hash);
     }
     private void getTxCfmClient(String hash) throws Exception {
@@ -479,7 +486,7 @@ public class ContractSendTxTest extends Base {
         params.put("txHash", hash);
         Response dpResp = ResponseMessageProcessor.requestAndResponse(ModuleE.TX.abbr, "tx_getConfirmedTxClient", params);
         Map record = (Map) dpResp.getResponseData();
-        Log.info("", JSONUtils.obj2PrettyJson(record));
+        Log.info(JSONUtils.obj2PrettyJson(record));
     }
 
     private void importPriKey(String priKey, String pwd) {
