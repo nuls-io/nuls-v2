@@ -4,18 +4,34 @@ import io.nuls.api.provider.Result;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
+import java.util.List;
+
 /**
  * @Author: zhoulijun
  * @Time: 2019-03-20 11:43
  * @Description: 功能描述
  */
-public class RemoteResult<T> extends Result<T> {
 
-    public RemoteResult(T data) {
-        super(data);
+@Data
+@AllArgsConstructor
+public class RemoteResult<T> {
+
+    boolean success = true;
+
+    T data;
+
+    String msg;
+
+    public RemoteResult() {
     }
 
-    public RemoteResult(String status,String msg){
-        super(status,msg);
+    public RemoteResult(T data){
+        this.data = data;
     }
+
+    public RemoteResult(boolean success,String msg){
+        this.success = success;
+        this.msg = msg;
+    }
+
 }

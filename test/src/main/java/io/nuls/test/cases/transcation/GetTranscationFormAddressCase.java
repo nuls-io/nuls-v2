@@ -1,11 +1,9 @@
 package io.nuls.test.cases.transcation;
 
-import io.nuls.base.data.Transaction;
+import io.nuls.api.provider.transaction.facade.TransactionData;
 import io.nuls.test.cases.TestCaseIntf;
 import io.nuls.test.cases.TestFailException;
 import io.nuls.tools.core.annotation.Component;
-import io.nuls.tools.crypto.HexUtil;
-import io.nuls.tools.exception.NulsException;
 
 /**
  * @Author: zhoulijun
@@ -13,7 +11,7 @@ import io.nuls.tools.exception.NulsException;
  * @Description: 功能描述
  */
 @Component
-public class GetTranscationFormAddressCase implements TestCaseIntf<String, Transaction> {
+public class GetTranscationFormAddressCase implements TestCaseIntf<String, TransactionData> {
 
     @Override
     public String title() {
@@ -21,12 +19,7 @@ public class GetTranscationFormAddressCase implements TestCaseIntf<String, Trans
     }
 
     @Override
-    public String doTest(Transaction param, int depth) throws TestFailException {
-        try {
-            String formAddress = HexUtil.encode(param.getCoinDataInstance().getFrom().get(0).getAddress());
-            return formAddress;
-        } catch (NulsException e) {
-            throw new TestFailException("交易对象中获取coinData失败");
-        }
+    public String doTest(TransactionData param, int depth) throws TestFailException {
+            return param.getForm().get(0).getAddress();
     }
 }

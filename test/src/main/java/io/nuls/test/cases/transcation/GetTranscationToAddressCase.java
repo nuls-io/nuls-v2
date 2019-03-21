@@ -1,5 +1,6 @@
 package io.nuls.test.cases.transcation;
 
+import io.nuls.api.provider.transaction.facade.TransactionData;
 import io.nuls.base.data.Transaction;
 import io.nuls.test.cases.TestCaseIntf;
 import io.nuls.test.cases.TestFailException;
@@ -13,7 +14,7 @@ import io.nuls.tools.exception.NulsException;
  * @Description: 功能描述
  */
 @Component
-public class GetTranscationToAddressCase implements TestCaseIntf<String, Transaction> {
+public class GetTranscationToAddressCase implements TestCaseIntf<String, TransactionData> {
 
     @Override
     public String title() {
@@ -21,12 +22,7 @@ public class GetTranscationToAddressCase implements TestCaseIntf<String, Transac
     }
 
     @Override
-    public String doTest(Transaction param, int depth) throws TestFailException {
-        try {
-            String toAddress = HexUtil.encode(param.getCoinDataInstance().getTo().get(0).getAddress());
-            return toAddress;
-        } catch (NulsException e) {
-            throw new TestFailException("交易对象中获取coinData失败");
-        }
+    public String doTest(TransactionData param, int depth) throws TestFailException {
+            return param.getTo().get(0).getAddress();
     }
 }

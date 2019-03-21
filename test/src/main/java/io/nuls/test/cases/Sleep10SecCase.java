@@ -12,7 +12,7 @@ import java.util.concurrent.TimeUnit;
 @Component
 public class Sleep10SecCase implements TestCaseIntf<Object,Object> {
 
-    static final int SEC = 10;
+    static final int SEC = 20;
 
     @Override
     public String title() {
