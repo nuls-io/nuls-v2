@@ -33,7 +33,7 @@ public class TransferCase extends TestCaseChain {
                 CreateAccountCase.class,
                 TransferToAddressCase.class,
                 Sleep10SecCase.class,
-                GetTxInfoCase.class,
+                SyncTxInfoCase.class,
                 GetTranscationToAddressCase.class,
                 SyncAccountBalance.class
         };

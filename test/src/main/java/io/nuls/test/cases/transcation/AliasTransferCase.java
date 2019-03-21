@@ -28,12 +28,12 @@ public class AliasTransferCase extends TestCaseChain {
         return new Class[]{
                 SetAliasCase.class,
                 Sleep10SecCase.class,
-                GetTxInfoCase.class,
+                SyncTxInfoCase.class,
                 GetTranscationFormAddressCase.class,
                 CheckAliasCase.class,
                 SyncAccountInfo.class,
                 TransferByAliasCase.class,
-                GetTxInfoCase.class,
+                SyncTxInfoCase.class,
                 GetTranscationToAddressCase.class,
                 SyncAccountBalance.class
         };

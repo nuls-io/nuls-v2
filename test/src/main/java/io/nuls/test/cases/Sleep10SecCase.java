@@ -12,15 +12,17 @@ import java.util.concurrent.TimeUnit;
 @Component
 public class Sleep10SecCase implements TestCaseIntf<Object,Object> {
 
+    static final int SEC = 10;
+
     @Override
     public String title() {
-        return "等待10秒";
+        return "等待"+SEC+"秒";
     }
 
     @Override
     public Object doTest(Object param, int depth) throws TestFailException {
         try {
-            for (int j = 1; j <= 10; j++) {
+            for (int j = 1; j <= SEC; j++) {
                 System.out.print(j + " ");
                 TimeUnit.SECONDS.sleep(1L);
             }

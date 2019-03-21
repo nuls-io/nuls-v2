@@ -100,7 +100,6 @@ public class TestModule extends RpcModule {
             }
             if(isSuccess.get()){
                 Utils.successLine(" TEST DONE ");
-
             }else{
                 Utils.failLine(" TEST FAIL ");
             }
