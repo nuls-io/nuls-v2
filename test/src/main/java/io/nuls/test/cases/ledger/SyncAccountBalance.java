@@ -6,13 +6,12 @@ import io.nuls.api.provider.ledger.LedgerProvider;
 import io.nuls.api.provider.ledger.facade.AccountBalanceInfo;
 import io.nuls.api.provider.ledger.facade.GetBalanceReq;
 import io.nuls.test.Config;
-import io.nuls.test.cases.AbstractRemoteTestCase;
-import io.nuls.test.cases.RemoteTestParam;
-import io.nuls.test.cases.TestCaseIntf;
-import io.nuls.test.cases.TestFailException;
+import io.nuls.test.cases.*;
 import io.nuls.test.cases.account.GetAccountPriKeyCase;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
+
+import java.math.BigInteger;
 
 /**
  * @Author: zhoulijun
@@ -43,8 +42,11 @@ public class SyncAccountBalance implements TestCaseIntf<String, String> {
     @Override
     public String doTest(String address, int depth) throws TestFailException {
         Result<AccountBalanceInfo> result = ledgerProvider.getBalance(new GetBalanceReq(config.getAssetsId(),config.getChainId(),address));
+        check(result.getData().getTotal().equals(Constants.TRANSFER_AMOUNT),"接收资产账户总余额不符合预期");
+        check(result.getData().getAvailable().equals(Constants.TRANSFER_AMOUNT),"接收资产账户可用不符合预期");
+        check(result.getData().getTotal().equals(BigInteger.ZERO),"接收资产账户冻结余额不符合预期");
         String priKey = getAccountPriKeyCase.check(address,depth);
-        boolean res = new AbstractRemoteTestCase<AccountBalanceInfo>(){
+        boolean res = new SyncRemoteTestCase<AccountBalanceInfo>(){
 
             @Override
             public String title() {

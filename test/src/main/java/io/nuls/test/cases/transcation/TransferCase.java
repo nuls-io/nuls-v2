@@ -6,6 +6,7 @@ import io.nuls.test.cases.TestCase;
 import io.nuls.test.cases.TestCaseChain;
 import io.nuls.test.cases.TestCaseIntf;
 import io.nuls.test.cases.account.CreateAccountCase;
+import io.nuls.test.cases.ledger.SyncAccountBalance;
 import io.nuls.tools.core.annotation.Component;
 
 /**
@@ -34,7 +35,7 @@ public class TransferCase extends TestCaseChain {
                 Sleep10SecCase.class,
                 GetTxInfoCase.class,
                 GetTranscationFormAddressCase.class,
-
+                SyncAccountBalance.class
         };
     }
 

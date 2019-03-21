@@ -26,7 +26,7 @@ import java.util.stream.Collectors;
  * @Time: 2019-03-20 11:48
  * @Description: 功能描述
  */
-public abstract class AbstractRemoteTestCase<T> implements TestCaseIntf<Boolean, RemoteTestParam<T>> {
+public abstract class SyncRemoteTestCase<T> implements TestCaseIntf<Boolean, RemoteTestParam<T>> {
 
 
     NetworkProvider networkProvider = ServiceManager.get(NetworkProvider.class);
@@ -56,8 +56,6 @@ public abstract class AbstractRemoteTestCase<T> implements TestCaseIntf<Boolean,
             }
             Utils.success(depthSpace(depth)+"节点【"+node+"】测试通过");
         }
-
-
         return true;
     }
 
@@ -70,6 +68,7 @@ public abstract class AbstractRemoteTestCase<T> implements TestCaseIntf<Boolean,
             throw new TestFailException("序列化远程测试参数错误", e);
         }
         RemoteResult<Map> result = RestFulUtils.getInstance().post("remote/call", MapUtils.beanToMap(req));
+        checkResultStatus(result);
         return result.getData();
     }
 

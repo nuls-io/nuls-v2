@@ -1,28 +1,24 @@
 package io.nuls.test;
 
-import io.nuls.api.provider.Provider;
 import io.nuls.api.provider.Result;
 import io.nuls.api.provider.ServiceManager;
 import io.nuls.api.provider.account.AccountService;
 import io.nuls.api.provider.account.facade.ImportAccountByPrivateKeyReq;
 import io.nuls.api.provider.network.NetworkProvider;
 import io.nuls.api.provider.network.facade.NetworkInfo;
-import io.nuls.rpc.info.HostInfo;
 import io.nuls.rpc.modulebootstrap.Module;
-import io.nuls.rpc.modulebootstrap.NulsRpcModuleBootstrap;
 import io.nuls.rpc.modulebootstrap.RpcModule;
 import io.nuls.rpc.modulebootstrap.RpcModuleState;
 import io.nuls.test.cases.TestCase;
 import io.nuls.test.cases.TestCaseIntf;
 import io.nuls.test.cases.TestFailException;
-import io.nuls.test.cases.account.AccountConstants;
+import io.nuls.test.cases.Constants;
 import io.nuls.test.controller.RpcServerManager;
 import io.nuls.test.utils.RestFulUtils;
 import io.nuls.test.utils.Utils;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.core.annotation.Value;
-import io.nuls.tools.core.config.ConfigurationLoader;
 import io.nuls.tools.core.ioc.SpringLiteContext;
 import lombok.extern.slf4j.Slf4j;
 
@@ -61,7 +57,7 @@ public class TestModule extends RpcModule {
     @Override
     public boolean doStart()
     {
-        Result<String> result = accountService.importAccountByPrivateKey(new ImportAccountByPrivateKeyReq(AccountConstants.PASSWORD,config.getTestSeedAccount(),true));
+        Result<String> result = accountService.importAccountByPrivateKey(new ImportAccountByPrivateKeyReq(Constants.PASSWORD,config.getTestSeedAccount(),true));
         config.setSeedAddress(result.getData());
         return true;
     }

@@ -4,6 +4,8 @@ import io.nuls.api.provider.Result;
 import io.nuls.api.provider.transaction.facade.GetTxByHashReq;
 import io.nuls.base.constant.TxStatusEnum;
 import io.nuls.base.data.Transaction;
+import io.nuls.test.cases.RemoteTestParam;
+import io.nuls.test.cases.SyncRemoteTestCase;
 import io.nuls.test.cases.TestFailException;
 import io.nuls.tools.core.annotation.Component;
 
@@ -25,6 +27,13 @@ public class GetTxInfoCase extends BaseTranscationCase<Transaction,String> {
         Result<Transaction> result = transferService.getTxByHash(new GetTxByHashReq(param));
         checkResultStatus(result);
         check(result.getData().getStatus().equals(TxStatusEnum.CONFIRMED),"确认状态不符合预期");
+        new SyncRemoteTestCase<Transaction>(){
+
+            @Override
+            public String title() {
+                return "远程交易状态一致性";
+            }
+        }.check(new RemoteTestParam<>(GetTxInfoCase.class,result.getData(),param),depth);
         return result.getData();
     }
 }

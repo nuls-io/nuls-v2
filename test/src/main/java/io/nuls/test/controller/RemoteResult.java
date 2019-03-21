@@ -1,5 +1,6 @@
 package io.nuls.test.controller;
 
+import io.nuls.api.provider.Result;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
@@ -8,14 +9,13 @@ import lombok.Data;
  * @Time: 2019-03-20 11:43
  * @Description: 功能描述
  */
-@Data
-@AllArgsConstructor
-public class RemoteResult<T> {
+public class RemoteResult<T> extends Result<T> {
 
-    boolean success;
+    public RemoteResult(T data) {
+        super(data);
+    }
 
-    T data;
-
-    public RemoteResult(){}
-
+    public RemoteResult(String status,String msg){
+        super(status,msg);
+    }
 }
