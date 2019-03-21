@@ -94,10 +94,9 @@ public interface TxService {
      * @param packingAddress
      * @param preStateRoot
      * @return
-     * @throws NulsException
      */
     TxPackage getPackableTxs(Chain chain, long endtimestamp, long maxTxDataSize, long blockTime, long blockHeight,
-                             String packingAddress, String preStateRoot) throws NulsException;
+                             String packingAddress, String preStateRoot);
 
     /**
      * 收到新区快时，验证完整交易列表

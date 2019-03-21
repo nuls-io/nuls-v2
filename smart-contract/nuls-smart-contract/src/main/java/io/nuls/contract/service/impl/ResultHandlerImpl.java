@@ -37,6 +37,7 @@ import io.nuls.contract.service.ResultHanlder;
 import io.nuls.contract.util.CompareTx;
 import io.nuls.contract.vm.program.ProgramExecutor;
 import io.nuls.tools.core.annotation.Autowired;
+import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.core.annotation.Service;
 import io.nuls.tools.log.Log;
 import org.spongycastle.util.encoders.Hex;
@@ -52,7 +53,7 @@ import static io.nuls.contract.constant.ContractConstant.TX_TYPE_CALL_CONTRACT;
  * @author: PierreLuo
  * @date: 2018/11/23
  */
-@Service
+@Component
 public class ResultHandlerImpl implements ResultHanlder {
 
     @Autowired
@@ -66,9 +67,8 @@ public class ResultHandlerImpl implements ResultHanlder {
         try {
             BlockHeader currentBlockHeader = contractHelper.getCurrentBlockHeader(chainId);
             long blockTime = currentBlockHeader.getTime();
-            long number = currentBlockHeader.getHeight();
             // 得到重新执行的合约结果
-            List<ContractResult> reCallResultList = this.reCall(batchExecutor, analyzerResult, chainId, blockTime, number, preStateRoot);
+            List<ContractResult> reCallResultList = this.reCall(batchExecutor, analyzerResult, chainId, preStateRoot);
             // 处理调用失败的合约，把需要退还的NULS 生成一笔合约内部转账交易，退还给调用者
             this.handleFailedContract(chainId, analyzerResult, blockTime);
             // 组装所有的合约结果
@@ -126,7 +126,7 @@ public class ResultHandlerImpl implements ResultHanlder {
         }
     }
 
-    private List<ContractResult> reCall(ProgramExecutor batchExecutor, AnalyzerResult analyzerResult, int chainId, long blockTime, long number, String preStateRoot) {
+    private List<ContractResult> reCall(ProgramExecutor batchExecutor, AnalyzerResult analyzerResult, int chainId, String preStateRoot) {
         // 重新执行合约
         List<ContractResult> list = analyzerResult.getReCallTxList();
         List<ContractWrapperTransaction> collect = list.stream().map(c -> c.getTx()).collect(Collectors.toList());

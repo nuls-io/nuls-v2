@@ -3,6 +3,7 @@ package io.nuls.base.data;
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.basic.NulsOutputStreamBuffer;
+import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.parse.SerializeUtils;
 
@@ -85,7 +86,7 @@ public class CoinFrom extends Coin {
                 ", assetsChainId=" + assetsChainId +
                 ", assetsId=" + assetsId +
                 ", amount=" + amount +
-                ", nonce=" + nonce +
+                ", nonce=" + HexUtil.encode(nonce) +
                 ", locked=" + locked +
                 '}';
     }

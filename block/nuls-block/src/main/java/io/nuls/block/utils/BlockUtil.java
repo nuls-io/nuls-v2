@@ -182,8 +182,9 @@ public class BlockUtil {
         NulsDigestData masterChainEndHash = masterChain.getEndHash();
 
         //1.收到的区块与主链最新高度差大于1000(可配置),丢弃
-        ChainParameters parameters = ContextManager.getContext(chainId).getParameters();
-        NulsLogger commonLog = ContextManager.getContext(chainId).getCommonLog();
+        ChainContext context = ContextManager.getContext(chainId);
+        ChainParameters parameters = context.getParameters();
+        NulsLogger commonLog = context.getCommonLog();
         if (Math.abs(blockHeight - masterChainEndHeight) > parameters.getHeightRange()) {
             commonLog.debug("chainId:" + chainId + ", received out of range blocks, height:" + blockHeight + ", hash:" + blockHash);
             return Result.getFailed(BlockErrorCode.OUT_OF_RANGE);
@@ -207,8 +208,8 @@ public class BlockUtil {
                 chainStorageService.save(chainId, block);
                 Chain forkChain = ChainGenerator.generate(chainId, block, masterChain, ChainTypeEnum.FORK);
                 BlockChainManager.addForkChain(chainId, forkChain);
-                ConsensusUtil.evidence(chainId, ContextManager.getContext(chainId).getLatestBlock().getHeader(), header);
                 commonLog.info("chainId:" + chainId + ", received fork blocks of masterChain, height:" + blockHeight + ", hash:" + blockHash);
+                ConsensusUtil.evidence(chainId, context.getLatestBlock().getHeader(), header);
                 return Result.getFailed(BlockErrorCode.FORK_BLOCK);
             }
         }
@@ -224,11 +225,13 @@ public class BlockUtil {
      * @return
      */
     private static Result forkChainProcess(int chainId, Block block) {
-        long blockHeight = block.getHeader().getHeight();
-        NulsDigestData blockHash = block.getHeader().getHash();
-        NulsDigestData blockPreviousHash = block.getHeader().getPreHash();
+        BlockHeader header = block.getHeader();
+        long blockHeight = header.getHeight();
+        NulsDigestData blockHash = header.getHash();
+        NulsDigestData blockPreviousHash = header.getPreHash();
         SortedSet<Chain> forkChains = BlockChainManager.getForkChains(chainId);
-        NulsLogger commonLog = ContextManager.getContext(chainId).getCommonLog();
+        ChainContext context = ContextManager.getContext(chainId);
+        NulsLogger commonLog = context.getCommonLog();
         try {
             for (Chain forkChain : forkChains) {
                 long forkChainStartHeight = forkChain.getStartHeight();
@@ -240,6 +243,7 @@ public class BlockUtil {
                     chainStorageService.save(chainId, block);
                     forkChain.addLast(block);
                     commonLog.debug("chainId:" + chainId + ", received continuous blocks of forkChain, height:" + blockHeight + ", hash:" + blockHash);
+                    ConsensusUtil.evidence(chainId, context.getLatestBlock().getHeader(), header);
                     return Result.getFailed(BlockErrorCode.FORK_BLOCK);
                 }
                 //2.重复,丢弃
@@ -253,6 +257,7 @@ public class BlockUtil {
                     Chain newForkChain = ChainGenerator.generate(chainId, block, forkChain, ChainTypeEnum.FORK);
                     BlockChainManager.addForkChain(chainId, newForkChain);
                     commonLog.debug("chainId:" + chainId + ", received fork blocks of forkChain, height:" + blockHeight + ", hash:" + blockHash);
+                    ConsensusUtil.evidence(chainId, context.getLatestBlock().getHeader(), header);
                     return Result.getFailed(BlockErrorCode.FORK_BLOCK);
                 }
             }

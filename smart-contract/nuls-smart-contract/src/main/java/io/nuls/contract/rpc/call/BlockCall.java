@@ -46,7 +46,7 @@ public class BlockCall {
             params.put(Constants.VERSION_KEY_STR, "1.0");
             params.put("chainId", chainId);
             Map resultMap = (Map) CallHelper.request(ModuleE.BL.abbr, "latestHeight", params);
-            return Long.valueOf(resultMap.get("height").toString());
+            return Long.valueOf(resultMap.get("value").toString());
         } catch (Exception e) {
             throw new NulsException(e);
         }

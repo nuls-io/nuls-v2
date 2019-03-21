@@ -22,13 +22,12 @@
  * SOFTWARE.
  *
  */
-package io.nuls.api.model.entity;
+package io.nuls.base.data;
 
 
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.basic.NulsOutputStreamBuffer;
 import io.nuls.base.basic.TransactionLogicData;
-import io.nuls.base.data.Address;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.parse.SerializeUtils;
 

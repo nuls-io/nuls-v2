@@ -126,6 +126,8 @@ public class ChainManager {
         list.add(new ContractTxRegisterDto(TX_TYPE_CREATE_CONTRACT, CREATE_VALIDATOR, false, false, true));
         list.add(new ContractTxRegisterDto(TX_TYPE_CALL_CONTRACT, CALL_VALIDATOR, false, false, true));
         list.add(new ContractTxRegisterDto(TX_TYPE_DELETE_CONTRACT, DELETE_VALIDATOR, false, false, true));
+        list.add(new ContractTxRegisterDto(TX_TYPE_CONTRACT_TRANSFER, null, true, false, false));
+        list.add(new ContractTxRegisterDto(TX_TYPE_CONTRACT_RETURN_GAS, null, true, false, false));
         TransactionCall.registerTx(chain.getChainId(), ModuleE.SC.abbr, INTEGRATE_VALIDATOR, COMMIT, ROLLBACK, list);
     }
 

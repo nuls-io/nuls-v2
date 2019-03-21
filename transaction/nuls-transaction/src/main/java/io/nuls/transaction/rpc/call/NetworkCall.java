@@ -66,8 +66,8 @@ public class NetworkCall {
             HashMap hashMap = (HashMap) TransactionCall.request(ModuleE.NW.abbr, "nw_currentTimeMillis", params);
             long time = Long.valueOf(hashMap.get("currentTimeMillis").toString());
             offset = time - System.currentTimeMillis();
+            latestGetTime = now;
         }
-        latestGetTime = now;
         return (System.currentTimeMillis() + offset);
     }
 

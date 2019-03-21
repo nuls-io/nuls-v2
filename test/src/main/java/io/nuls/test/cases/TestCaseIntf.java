@@ -11,10 +11,11 @@ import io.nuls.test.utils.Utils;
 public interface TestCaseIntf<T,P> {
 
     default String depthSpace(int depth){
-        return "===".repeat(depth) + ">";
+        return "===".repeat(depth) + (depth > 0 ? ">" : "");
     }
 
     default T check(P param,int depth) throws TestFailException{
+        Utils.success(depthSpace(depth)+"开始测试【"+title()+"】");
         T res = doTest(param,depth+1);
         Utils.success(depthSpace(depth) + title() + "测试通过");
         return res;
@@ -28,6 +29,12 @@ public interface TestCaseIntf<T,P> {
             throw new TestFailException(title() + "测试返回值不符合预期，返回数据为空");
         }
 
+    }
+
+    default void check(boolean condition,String msg) throws TestFailException {
+        if(!condition){
+            throw new TestFailException(title() + "测试结果不符合预期，" + msg);
+        }
     }
 
     String title();
