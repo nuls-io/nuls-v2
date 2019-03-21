@@ -65,11 +65,20 @@ public interface ConfirmedTxService {
 
 
     /**
-     * 获取区块的完整交易
+     * 获取区块的完整交易 只从已确认的交易中查询
      * 如果没有查询到,或者查询到的不是区块完整的交易数据 则返回空list
      * @param chain
      * @param hashList
      * @return List<String> txHex list
      */
     List<String> getTxList(Chain chain, List<String> hashList);
+
+    /**
+     * 获取区块的完整交易 先查未确认交易, 再查已确认交易
+     * 如果没有查询到,或者查询到的不是区块完整的交易数据 则返回空list
+     * @param chain
+     * @param hashList
+     * @return List<String> txHex list
+     */
+    List<String> getTxListExtend(Chain chain, List<String> hashList);
 }

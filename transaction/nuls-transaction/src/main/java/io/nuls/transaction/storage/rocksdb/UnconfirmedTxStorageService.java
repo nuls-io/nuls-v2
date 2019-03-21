@@ -34,6 +34,15 @@ public interface UnconfirmedTxStorageService {
     Transaction getTx(int chainId, NulsDigestData hash);
 
     /**
+     * 根据交易hash查询已验证交易数据
+     *
+     * @param chainId
+     * @param hash
+     * @return 交易数据
+     */
+    Transaction getTx(int chainId, String hash);
+
+    /**
      * 根据交易hash删除已验证交易数据
      *
      * @param chainId
@@ -53,6 +62,7 @@ public interface UnconfirmedTxStorageService {
 
     /**
      * 根据交易hash批量删除已验证交易数据
+     *
      * @param chainId
      * @param hashList NulsDigestData serialize entity
      * @return 删除是否成功
@@ -61,6 +71,7 @@ public interface UnconfirmedTxStorageService {
 
     /**
      * 查询所有已验证交易数据，包含保存时间
+     *
      * @param chainId
      * @return
      */

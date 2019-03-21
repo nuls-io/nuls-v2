@@ -43,6 +43,7 @@ public interface TxCmd {
     String TX_GETTX = "tx_getTx";
     String TX_GETTXS = "tx_getTxs";
     String TX_GET_BLOCK_TXS = "tx_getBlockTxs";
+    String TX_GET_BLOCK_TXS_EXTEND = "tx_getBlockTxsExtend";
     String TX_BATCHVERIFY = "tx_batchVerify";
     String TX_CREATE_CROSS_TX = "tx_createCtx";
 
