@@ -54,10 +54,7 @@ import org.spongycastle.util.encoders.Hex;
 
 import java.io.IOException;
 import java.math.BigInteger;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.LinkedList;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.locks.ReentrantLock;
 
 import static io.nuls.contract.util.ContractUtil.getFailed;
@@ -417,4 +414,15 @@ public class ContractTxServiceImpl implements ContractTxService {
         return contractTxHelper.validateDelete(chainId, senderBytes, contractAddress, contractAddressBytes);
     }
 
+    @Override
+    public Result<List<ContractTokenTransferInfoPo>> getTokenTransferInfoList(int chainId, String address) {
+        try {
+            byte[] addressBytes = AddressTool.getAddress(address);
+            List<ContractTokenTransferInfoPo> tokenTransferInfoListByAddress = contractTokenTransferStorageService.getTokenTransferInfoListByAddress(chainId, addressBytes);
+            return getSuccess().setData(tokenTransferInfoListByAddress);
+        } catch (Exception e) {
+            Log.error(e);
+            return getFailed();
+        }
+    }
 }

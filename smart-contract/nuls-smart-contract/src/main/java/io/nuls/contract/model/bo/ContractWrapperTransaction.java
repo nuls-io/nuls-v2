@@ -64,6 +64,8 @@ public class ContractWrapperTransaction extends Transaction {
         this.contractData = contractData;
     }
 
+
+
     public byte[] getTxData() {
         return tx.getTxData();
     }
