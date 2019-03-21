@@ -50,6 +50,28 @@ import static io.nuls.transaction.utils.LoggerUtil.Log;
  */
 public class NetworkCall {
 
+    static long latestGetTime = System.currentTimeMillis();
+    static long offset = 0;
+
+    /**
+     * 获取当前网络时间
+     * @return
+     * @throws NulsException
+     */
+    public static long getCurrentTimeMillis() throws NulsException  {
+        long now = System.currentTimeMillis();
+        if (now - latestGetTime > TxConstant.GETTIME_INTERVAL) {
+            Map<String, Object> params = new HashMap<>(TxConstant.INIT_CAPACITY_8);
+            params.put(Constants.VERSION_KEY_STR, TxConstant.RPC_VERSION);
+            HashMap hashMap = (HashMap) TransactionCall.request(ModuleE.NW.abbr, "nw_currentTimeMillis", params);
+            long time = Long.valueOf(hashMap.get("currentTimeMillis").toString());
+            offset = time - System.currentTimeMillis();
+            latestGetTime = now;
+        }
+        return (System.currentTimeMillis() + offset);
+    }
+
+
     /**
      * 根据链ID获取可用节点
      *
@@ -204,17 +226,6 @@ public class NetworkCall {
         return NetworkCall.sendToNode(chainId, message, nodeId);
     }
 
-    /**
-     * 获取当前网络时间
-     * @return
-     * @throws NulsException
-     */
-    public static long getCurrentTimeMillis() throws NulsException  {
-        Map<String, Object> params = new HashMap<>(TxConstant.INIT_CAPACITY_8);
-        params.put(Constants.VERSION_KEY_STR, TxConstant.RPC_VERSION);
-        HashMap hashMap = (HashMap)TransactionCall.request(ModuleE.NW.abbr, "nw_currentTimeMillis", params);
-        return (long) hashMap.get("currentTimeMillis");
-    }
 
 
 }

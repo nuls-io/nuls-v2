@@ -16,4 +16,6 @@ public class RemoteResult<T> {
 
     T data;
 
+    public RemoteResult(){}
+
 }

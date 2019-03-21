@@ -421,7 +421,8 @@ public class BlockServiceImpl implements BlockService {
     }
 
     private boolean verifyBlock(int chainId, Block block, boolean localInit, int download) {
-        NulsLogger commonLog = ContextManager.getContext(chainId).getCommonLog();
+        ChainContext context = ContextManager.getContext(chainId);
+        NulsLogger commonLog = context.getCommonLog();
         //1.验证一些基本信息如区块大小限制、字段非空验证
         boolean basicVerify = BlockUtil.basicVerify(chainId, block);
         if (localInit) {

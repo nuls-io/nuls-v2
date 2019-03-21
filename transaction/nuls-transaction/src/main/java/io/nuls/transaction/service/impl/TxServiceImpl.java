@@ -245,8 +245,8 @@ public class TxServiceImpl implements TxService {
      * @return Result
      */
     private void validateCoinFromBase(Chain chain, int type, List<CoinFrom> listFrom) throws NulsException {
-        //coinBase交易没有from
-        if (type == TxConstant.TX_TYPE_COINBASE) {
+        //coinBase交易/智能合约退还gas交易没有from
+        if (type == TxConstant.TX_TYPE_COINBASE || type == TxConstant.TX_TYPE_CONTRACT_RETURN_GAS) {
             return;
         }
         if (null == listFrom || listFrom.size() == 0) {
@@ -561,7 +561,7 @@ public class TxServiceImpl implements TxService {
      * 3.冲突检测，模块统一验证，如果有没验证通过的交易，则将该交易之后的所有交易再从1.开始执行一次
      */
     @Override
-    public TxPackage getPackableTxs(Chain chain, long endtimestamp, long maxTxDataSize, long blockHeight, long blockTime, String packingAddress, String preStateRoot) throws NulsException {
+    public TxPackage getPackableTxs(Chain chain, long endtimestamp, long maxTxDataSize, long blockHeight, long blockTime, String packingAddress, String preStateRoot) {
         packageLock.lock();
         chain.getLoggerMap().get(TxConstant.LOG_TX).debug("%%%%%%%%% TX开始打包 %%%%%%%%%%%% height:{}", blockHeight);
         //重置重新打包标识为false
@@ -604,7 +604,7 @@ public class TxServiceImpl implements TxService {
                 Transaction tx = packablePool.get(chain);
                 if (tx == null) {
                     try {
-                        chain.getLoggerMap().get(TxConstant.LOG_TX).debug("************* [获取交易等待]");
+                        //chain.getLoggerMap().get(TxConstant.LOG_TX).debug("************* [获取交易等待]");
                         Thread.sleep(100L);
                     } catch (InterruptedException e) {
                         Log.error("packaging error ", e);
@@ -656,14 +656,7 @@ public class TxServiceImpl implements TxService {
                     continue;
                 }
 
-                /** 智能合约*/
-                if (TxManager.isSmartContract(chain, tx.getType())) {
-                    /** 出现智能合约,且通知标识为false,则先调用通知 */
-                    if (!contractNotify) {
-                        ContractCall.contractBatchBegin(chain, blockHeight, blockTime, packingAddress, preStateRoot);
-                    }
-                    ContractCall.invokeContract(chain, txHex);
-                }
+
 
                 long debugeMap = NetworkCall.getCurrentTimeMillis();
 //                chain.getLoggerMap().get(TxConstant.LOG_TX).debug("########## 单个VerifyCoinData花费时间:{} ", debugeMap - debugeVerifyCoinDataStart);
@@ -674,6 +667,17 @@ public class TxServiceImpl implements TxService {
                 chain.getLoggerMap().get(TxConstant.LOG_TX).debug("@@@@@ 打包交易单个验证成功 hash:{}", tx.getHash().getDigestHex());
                 packingTxList.add(tx);
                 totalSize += txSize;
+
+                /** 智能合约*/
+                if (TxManager.isSmartContract(chain, tx.getType())) {
+                    /** 出现智能合约,且通知标识为false,则先调用通知 */
+                    if (!contractNotify) {
+                        ContractCall.contractBatchBegin(chain, blockHeight, blockTime, packingAddress, preStateRoot);
+                        contractNotify = true;
+                    }
+                    ContractCall.invokeContract(chain, txHex);
+                }
+
                 //根据模块的统一验证器名，对所有交易进行分组，准备进行各模块的统一验证
                 TxRegister txRegister = TxManager.getTxRegister(chain, tx.getType());
                 if (moduleVerifyMap.containsKey(txRegister)) {
@@ -685,30 +689,27 @@ public class TxServiceImpl implements TxService {
                 }
                 //如果本地最新区块+1 大于当前在打包区块的高度, 说明本地最新区块已更新,需要重新打包,把取出的交易放回到打包队列
                 if (blockHeight < chain.getBestBlockHeight() + 1) {
-                    chain.getLoggerMap().get(TxConstant.LOG_TX).debug("有接收新区块-1,把取出的交易放回到打包队列...");
+                    chain.getLoggerMap().get(TxConstant.LOG_TX).debug("获取交易过程中最新区块高度已增长,把取出的交易放回到打包队列, 重新打包...");
                     for (int i = packingTxList.size() - 1; i >= 0; i--) {
                         Transaction transaction = packingTxList.get(i);
-                        chain.getLoggerMap().get(TxConstant.LOG_TX).debug("有接收新区块-1,把取出的交易放回到打包队列, hash:{}", transaction.getHash().getDigestHex());
+//                        chain.getLoggerMap().get(TxConstant.LOG_TX).debug("有接收新区块-1,把取出的交易放回到打包队列, hash:{}", transaction.getHash().getDigestHex());
                         packablePool.addInFirst(chain, transaction, false);
+                    }
+                    currentTimeMillis = NetworkCall.getCurrentTimeMillis();
+                    if (endtimestamp - currentTimeMillis <= chain.getConfig().getModuleVerifyOffset()) {
+                        chain.getLoggerMap().get(TxConstant.LOG_TX).debug("########## 打包时间到: {}, -endtimestamp:{} , -offset:{}",
+                                currentTimeMillis, endtimestamp, chain.getConfig().getModuleVerifyOffset());
+                        break;
                     }
                     return getPackableTxs(chain, endtimestamp, maxTxDataSize, chain.getBestBlockHeight() + 1, blockTime, packingAddress, preStateRoot);
                 }
-                long loopOnce = NetworkCall.getCurrentTimeMillis() - currentTimeMillis;
 //                chain.getLoggerMap().get(TxConstant.LOG_TX).debug("########## 分组花费时间:{} ",  NetworkCall.getCurrentTimeMillis() - debugeMap);
 //                chain.getLoggerMap().get(TxConstant.LOG_TX).debug("########## 成功取一个交易花费时间(一次循环):{} ", loopOnce);
-                loopDebug += (loopOnce - currentTimeMillis);
                 chain.getLoggerMap().get(TxConstant.LOG_TX).debug("");
             }
-            chain.getLoggerMap().get(TxConstant.LOG_TX).debug("--------------while end----花费时间:{}毫秒-------", loopDebug);
+            chain.getLoggerMap().get(TxConstant.LOG_TX).debug("--------------while end----:");
             chain.getLoggerMap().get(TxConstant.LOG_TX).debug("取出的交易 - size:{}", packingTxList.size());
-/*
-            try {
-                for (int i = 0; i < packingTxList.size(); i++) {
-                    chain.getLoggerMap().get(TxConstant.LOG_TX).debug(i + ": " + ((Transaction) packingTxList.get(i)).getHash().getDigestHex());
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
-            }*/
+
             chain.getLoggerMap().get(TxConstant.LOG_TX).debug("***");
             chain.getLoggerMap().get(TxConstant.LOG_TX).debug("");
             long debugeBatch = NetworkCall.getCurrentTimeMillis();
@@ -731,19 +732,10 @@ public class TxServiceImpl implements TxService {
                     throw new NulsException(e);
                 }
             }
-            //如果有接收新区块,把取出的交易放回到打包队列
-            if (blockHeight < chain.getBestBlockHeight() + 1) {
-                chain.getLoggerMap().get(TxConstant.LOG_TX).debug("有接收新区块-2,把取出的交易放回到打包队列...");
-                for (int i = packingTxList.size() - 1; i >= 0; i--) {
-                    Transaction transaction = packingTxList.get(i);
-                    chain.getLoggerMap().get(TxConstant.LOG_TX).debug("有接收新区块-2,把取出的交易放回到打包队列, hash:{}", transaction.getHash().getDigestHex());
-                    packablePool.addInFirst(chain, transaction, false);
-                }
-                return getPackableTxs(chain, endtimestamp, maxTxDataSize, chain.getBestBlockHeight() + 1, blockTime, packingAddress, preStateRoot);
-            }
+            String stateRoot = preStateRoot;
             chain.getLoggerMap().get(TxConstant.LOG_TX).debug("---##########--- 批量验证花费时间:{} ", NetworkCall.getCurrentTimeMillis() - debugeBatch);
 
-            String stateRoot = preStateRoot;
+
             /**智能合约 当通知标识为true, 则表明有智能合约被调用执行*/
             if (contractNotify) {
                 Map<String, Object> map = ContractCall.contractBatchEnd(chain, blockHeight);
@@ -760,26 +752,43 @@ public class TxServiceImpl implements TxService {
             }
             TxPackage txPackage = new TxPackage(packableTxs, stateRoot, blockHeight);
             chain.getLoggerMap().get(TxConstant.LOG_TX).debug("提供给共识的可打包交易packableTxs - size:{}", packableTxs.size());
-            chain.getLoggerMap().get(TxConstant.LOG_TX).debug("提供给共识的可打包交易packableTxs - Rs:");
+           /* chain.getLoggerMap().get(TxConstant.LOG_TX).debug("提供给共识的可打包交易packableTxs - Rs:");
 
             for (int i = 0; i < packableTxs.size(); i++) {
                 chain.getLoggerMap().get(TxConstant.LOG_TX).debug(i + ": " + TxUtil.getTransaction(packableTxs.get(i)).getHash().getDigestHex());
             }
-            chain.getLoggerMap().get(TxConstant.LOG_TX).debug("");
+            chain.getLoggerMap().get(TxConstant.LOG_TX).debug("");*/
             chain.getLoggerMap().get(TxConstant.LOG_TX).debug("获取打包交易结束,当前待打包队列交易数: {} ", packablePool.getPoolSize(chain));
             chain.getLoggerMap().get(TxConstant.LOG_TX).debug("=================================================");
             chain.getLoggerMap().get(TxConstant.LOG_TX).debug("%%%%%%%%% 打包完成 %%%%%%%%%%%% height:{}", blockHeight);
             chain.getLoggerMap().get(TxConstant.LOG_TX).debug("");
+            long currentdebug = NetworkCall.getCurrentTimeMillis();
+            chain.getLoggerMap().get(TxConstant.LOG_TX).debug("Time endtimestamp-current:{}", endtimestamp - currentdebug);
+            chain.getLoggerMap().get(TxConstant.LOG_TX).debug("");
 
+            //检测最新高度
+            if (blockHeight < chain.getBestBlockHeight() + 1) {
+                //这个阶段已经不够时间再打包,所以直接超时异常处理交易回滚至待打包队列,打空块
+                chain.getLoggerMap().get(TxConstant.LOG_TX).debug("获取交易完整时,当前最新高度已增长,不够时间重新打包,直接超时异常处理交易回滚至待打包队列,打空块");
+                throw new NulsException(TxErrorCode.PACKAGE_TIME_OUT);
+            }
+            //检测预留传输时间
+            long current = NetworkCall.getCurrentTimeMillis();
+            if (endtimestamp - current < chain.getConfig().getPackageRpcReserveTime()) {
+                //超时,留给RPC传输时间不足
+                chain.getLoggerMap().get(TxConstant.LOG_TX).error("getPackableTxs time out, endtimestamp:{}, current:{}, endtimestamp-current:{}, reserveTime:{}",
+                        endtimestamp, current, endtimestamp - current, chain.getConfig().getPackageRpcReserveTime());
+                throw new NulsException(TxErrorCode.PACKAGE_TIME_OUT);
+            }
             return txPackage;
-        } catch (NulsException e) {
+        } catch (Exception e) {
             chain.getLoggerMap().get(TxConstant.LOG_TX).error(e);
             //可打包交易,全加回去
             for (int i = packingTxList.size() - 1; i >= 0; i--) {
                 Transaction tx = packingTxList.get(i);
                 packablePool.addInFirst(chain, tx, false);
             }
-            throw new NulsException(e);
+            return new TxPackage(new ArrayList<>(), preStateRoot, chain.getBestBlockHeight() + 1);
         } finally {
             packageLock.unlock();
         }

@@ -1,5 +1,7 @@
 package io.nuls.test.cases.account;
 
+import io.nuls.api.provider.account.facade.ImportAccountByKeyStoreReq;
+import io.nuls.api.provider.account.facade.UpdatePasswordReq;
 import io.nuls.test.cases.TestCase;
 import io.nuls.test.cases.TestCaseChain;
 import io.nuls.test.cases.TestCaseIntf;
@@ -16,7 +18,17 @@ public class AccountCase extends TestCaseChain {
 
     @Override
     public Class<? extends TestCaseIntf>[] testChain() {
-        return new Class[]{CreateAccountCase.class,GetAccountByAddressCase.class};
+        return new Class[]{
+                CreateAccountCase.class,
+                GetAccountByAddressCase.class,
+                BackupAccountCase.class,
+                RemoveAccountCase.class,
+                ImportAccountKeystoreCase.class,
+                GetAccountPriKeyCase.class,
+                ImportAccountByPriKeyCase.class,
+                UpdatePasswordCase.class,
+                GetAccountListCase.class
+        };
     }
 
     @Override

@@ -36,6 +36,7 @@ import lombok.Setter;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 
@@ -172,7 +173,7 @@ public class ContractResult {
         return result;
     }
 
-    public static ContractResult getFailed(ContractData contractData) {
+    public static ContractResult genFailed(ContractData contractData) {
         ContractResult contractResult = new ContractResult();
         contractResult.setContractAddress(contractData.getContractAddress());
         contractResult.setGasUsed(0L);
@@ -183,29 +184,67 @@ public class ContractResult {
         return contractResult;
     }
 
-    public static ContractResult getFailed(ContractData contractData, String msg) {
-        ContractResult result = getFailed(contractData);
+    public static ContractResult genFailed(ContractData contractData, String msg) {
+        ContractResult result = genFailed(contractData);
         result.setErrorMessage(msg);
         return result;
     }
 
+    //@Override
+    //public String toString() {
+    //    return "ContractResult{" +
+    //            "contractAddress=" + AddressTool.getStringAddressByBytes(contractAddress) +
+    //            ", result='" + result + '\'' +
+    //            ", gasUsed=" + gasUsed +
+    //            ", stateRoot=" + (stateRoot != null ? HexUtil.encode(stateRoot) : stateRoot) +
+    //            ", value=" + value +
+    //            ", revert=" + revert +
+    //            ", error=" + error +
+    //            ", errorMessage='" + errorMessage + '\'' +
+    //            ", stackTrace='" + stackTrace + '\'' +
+    //            ", balance=" + (balance != null ? balance.toString() : 0) +
+    //            ", nonce=" + nonce +
+    //            ", transfersSize=" + (transfers != null ? transfers.size() : 0) +
+    //            ", eventsSize=" + (events != null ? events.size() : 0) +
+    //            ", remark='" + remark + '\'' +
+    //            '}';
+    //}
+
+
     @Override
     public String toString() {
         return "ContractResult{" +
-                "contractAddress=" + AddressTool.getStringAddressByBytes(contractAddress) +
+                "tx=" + tx +
+                ", hash='" + hash + '\'' +
+                ", txTime=" + txTime +
+                ", sender=" + Arrays.toString(sender) +
+                ", contractAddress=" + Arrays.toString(contractAddress) +
                 ", result='" + result + '\'' +
                 ", gasUsed=" + gasUsed +
-                ", stateRoot=" + (stateRoot != null ? HexUtil.encode(stateRoot) : stateRoot) +
+                ", price=" + price +
+                ", stateRoot=" + Arrays.toString(stateRoot) +
                 ", value=" + value +
                 ", revert=" + revert +
                 ", error=" + error +
                 ", errorMessage='" + errorMessage + '\'' +
                 ", stackTrace='" + stackTrace + '\'' +
-                ", balance=" + (balance != null ? balance.toString() : 0) +
+                ", balance=" + balance +
+                ", preBalance=" + preBalance +
                 ", nonce=" + nonce +
-                ", transfersSize=" + (transfers != null ? transfers.size() : 0) +
-                ", eventsSize=" + (events != null ? events.size() : 0) +
+                ", acceptDirectTransfer=" + acceptDirectTransfer +
+                ", isNrc20=" + isNrc20 +
+                ", tokenName='" + tokenName + '\'' +
+                ", tokenSymbol='" + tokenSymbol + '\'' +
+                ", tokenDecimals=" + tokenDecimals +
+                ", tokenTotalSupply=" + tokenTotalSupply +
+                ", transfers=" + transfers +
+                ", mergedTransferList=" + mergedTransferList +
+                ", contractTransferList=" + contractTransferList +
+                ", events=" + events +
                 ", remark='" + remark + '\'' +
+                ", isTerminated=" + isTerminated +
+                ", contractAddressInnerCallSet=" + contractAddressInnerCallSet +
+                ", txTrack=" + txTrack +
                 '}';
     }
 }

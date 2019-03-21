@@ -28,7 +28,7 @@ public interface TxErrorCode {
     ErrorCode PARSE_JSON_FAILD = ErrorCode.init("10017");
     ErrorCode FILE_OPERATION_FAILD = ErrorCode.init("10018");
     ErrorCode ILLEGAL_ACCESS_EXCEPTION = ErrorCode.init("10019");
-    ErrorCode INSTANTIATION_EXCEPTION = ErrorCode.init("10020");
+    ErrorCode PACKAGE_TIME_OUT = ErrorCode.init("10020");
     ErrorCode UPGRADING = ErrorCode.init("10021");
     ErrorCode NOT_UPGRADING = ErrorCode.init("10022");
     ErrorCode VERSION_NOT_NEWEST = ErrorCode.init("10023");

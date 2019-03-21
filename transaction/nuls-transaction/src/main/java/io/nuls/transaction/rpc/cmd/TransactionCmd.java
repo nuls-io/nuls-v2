@@ -198,7 +198,7 @@ public class TransactionCmd extends BaseCmd {
             int maxTxDataSize = (int) params.get("maxTxDataSize");
 
 //            long blockHeight = Long.valueOf(params.get("height").toString());
-            long blockHeight = chain.getBestBlockHeight();
+            long blockHeight = chain.getBestBlockHeight() + 1;
             long blockTime = (long) params.get("blockTime");
             String packingAddress = (String) params.get("packingAddress");
             String preStateRoot = (String) params.get("preStateRoot");

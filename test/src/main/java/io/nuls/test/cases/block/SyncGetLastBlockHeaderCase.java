@@ -15,7 +15,7 @@ import io.nuls.tools.core.annotation.Component;
  * @Description: 功能描述
  */
 @Component
-public class LastBlockSyncCase implements TestCaseIntf<Boolean,Void> {
+public class SyncGetLastBlockHeaderCase extends BaseBlockCase<BlockHeaderData,Void> {
 
     @Autowired
     GetLastBlockHeaderCase getLastBlockHeaderCase;
@@ -26,17 +26,17 @@ public class LastBlockSyncCase implements TestCaseIntf<Boolean,Void> {
     }
 
     @Override
-    public Boolean doTest(Void param, int depth) throws TestFailException {
+    public BlockHeaderData doTest(Void param, int depth) throws TestFailException {
         BlockHeaderData blockHeader = getLastBlockHeaderCase.check(null,depth);
-        Boolean res = new AbstractRemoteTestCase(){
+        Boolean res = new BlockAbstractRemoteTestCase<>() {
             @Override
             public String title() {
-                return "获取远程节点区块头";
+                return "远程节点区块头数据一致性";
             }
         }.check(new RemoteTestParam(GetLastBlockHeaderCase.class,blockHeader,null),depth);
         if(!res){
             throw new TestFailException(title() + "失败，本地节点与远程节点数据不一致");
         }
-        return res;
+        return blockHeader;
     }
 }
