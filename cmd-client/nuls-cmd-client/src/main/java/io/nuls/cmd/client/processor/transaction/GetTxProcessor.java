@@ -30,6 +30,7 @@ import io.nuls.api.provider.Result;
 import io.nuls.api.provider.ServiceManager;
 import io.nuls.api.provider.transaction.TransferService;
 import io.nuls.api.provider.transaction.facade.GetConfirmedTxByHashReq;
+import io.nuls.api.provider.transaction.facade.TransactionData;
 import io.nuls.base.data.Transaction;
 import io.nuls.cmd.client.CommandBuilder;
 import io.nuls.cmd.client.CommandResult;
@@ -38,6 +39,8 @@ import io.nuls.cmd.client.processor.ErrorCodeConstants;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.model.StringUtils;
 import lombok.extern.slf4j.Slf4j;
+
+import java.io.UnsupportedEncodingException;
 
 /**
  * @author zhoulijun
@@ -79,7 +82,9 @@ public class GetTxProcessor extends TransactionBaseProcessor implements CommandP
         if (StringUtils.isBlank(hash)) {
             return CommandResult.getFailed(ErrorCodeConstants.PARAM_ERR.getMsg());
         }
-        Result<Transaction> result = transferService.getConfirmedTxByHash(new GetConfirmedTxByHashReq(hash));
+        Result<TransactionData> result = transferService.getSimpleTxDataByHash(new GetConfirmedTxByHashReq(hash));
+        System.out.println(result.getData().getForm().get(0).getAddress());
+        System.out.println(result.getData().getRemark());
         if (result.isFailed()) {
             return CommandResult.getFailed(result);
         }

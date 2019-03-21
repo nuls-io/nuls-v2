@@ -459,4 +459,31 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
         }
         return txList;
     }
+
+    @Override
+    public List<String> getTxListExtend(Chain chain, List<String> hashList) {
+        List<String> txList = new ArrayList<>();
+        if (hashList == null || hashList.size() == 0) {
+            return txList;
+        }
+        int chainId = chain.getChainId();
+        for(String hashHex : hashList){
+            Transaction tx = unconfirmedTxStorageService.getTx(chain.getChainId(), hashHex);
+            if(null == tx) {
+                TransactionConfirmedPO txCfmPO = confirmedTxStorageService.getTx(chainId, hashHex);
+                if(null == txCfmPO){
+                    //有一个没有获取到, 直接返回空list
+                    return new ArrayList<>();
+                }
+                tx = txCfmPO.getTx();
+            }
+            try {
+                txList.add(tx.hex());
+            } catch (Exception e) {
+                chain.getLoggerMap().get(TxConstant.LOG_TX).error(e);
+                return new ArrayList<>();
+            }
+        }
+        return txList;
+    }
 }
