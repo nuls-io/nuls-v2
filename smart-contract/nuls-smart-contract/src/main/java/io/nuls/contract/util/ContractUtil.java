@@ -330,10 +330,27 @@ public class ContractUtil {
         if (isBlank(errorMessage)) {
             return defaultResult;
         }
-        if (errorMessage.contains(NOT_ENOUGH_GAS)) {
+        if (isNotEnoughGasError(errorMessage)) {
             return Result.getFailed(ContractErrorCode.CONTRACT_GAS_LIMIT);
         }
         return defaultResult;
+    }
+
+    private static boolean isNotEnoughGasError(String errorMessage) {
+        if (errorMessage == null) {
+            return false;
+        }
+        if (errorMessage.contains(NOT_ENOUGH_GAS)) {
+            return true;
+        }
+        return false;
+    }
+
+    public static boolean isNotEnoughGasError(ContractResult contractResult) {
+        if(contractResult.isSuccess()) {
+            return false;
+        }
+        return isNotEnoughGasError(contractResult.getErrorMessage());
     }
 
     public static boolean isTerminatedContract(int status) {
@@ -521,7 +538,7 @@ public class ContractUtil {
     public static Response wrapperFailed(Result result) {
         ErrorCode errorCode = result.getErrorCode();
         String msg = result.getMsg();
-        if(StringUtils.isBlank(msg)) {
+        if (StringUtils.isBlank(msg)) {
             msg = errorCode.getMsg();
         }
         Response response = MessageUtil.newResponse("", Constants.BOOLEAN_FALSE, msg);

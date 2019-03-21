@@ -26,8 +26,7 @@ import java.util.stream.Collectors;
  * @Time: 2019-03-20 11:48
  * @Description: 功能描述
  */
-public abstract class AbstractRemoteTestCase<T> implements TestCaseIntf<Boolean, RemoteTestParam<T>> {
-
+public abstract class SyncRemoteTestCase<T> implements TestCaseIntf<Boolean, RemoteTestParam<T>> {
 
     NetworkProvider networkProvider = ServiceManager.get(NetworkProvider.class);
 
@@ -39,6 +38,9 @@ public abstract class AbstractRemoteTestCase<T> implements TestCaseIntf<Boolean,
     public Boolean doTest(RemoteTestParam<T> param,int depth) throws TestFailException {
         Result<String> nodes = networkProvider.getNodes();
         Config config = SpringLiteContext.getBean(Config.class);
+        if(!config.isMaster()){
+            throw new RuntimeException("非master节点不允许进行远程调用");
+        }
         List<String> nodeList = nodes.getList().stream().map(node->node.split(":")[0]).filter(node->config.getNodeExclude().indexOf(node)==-1).collect(Collectors.toList());
         if(nodeList.isEmpty()){
             throw new TestFailException("remote fail ,network node is empty");
@@ -56,8 +58,6 @@ public abstract class AbstractRemoteTestCase<T> implements TestCaseIntf<Boolean,
             }
             Utils.success(depthSpace(depth)+"节点【"+node+"】测试通过");
         }
-
-
         return true;
     }
 
@@ -70,6 +70,7 @@ public abstract class AbstractRemoteTestCase<T> implements TestCaseIntf<Boolean,
             throw new TestFailException("序列化远程测试参数错误", e);
         }
         RemoteResult<Map> result = RestFulUtils.getInstance().post("remote/call", MapUtils.beanToMap(req));
+        checkResultStatus(result);
         return result.getData();
     }
 

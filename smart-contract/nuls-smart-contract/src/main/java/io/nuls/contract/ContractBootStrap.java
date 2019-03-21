@@ -46,7 +46,8 @@ public class ContractBootStrap extends RpcModule {
     @Autowired
     private ContractConfig contractConfig;
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws Exception {
+        systemConfig();
         if (args == null || args.length == 0) {
             args = new String[]{"ws://" + HostInfo.getLocalIP() + ":8887/ws"};
         }
@@ -61,7 +62,6 @@ public class ContractBootStrap extends RpcModule {
     public void init() {
         try {
             super.init();
-            initSys();
             initNulsConfig();
             initDB();
             initLanguage();
@@ -88,7 +88,7 @@ public class ContractBootStrap extends RpcModule {
      * 初始化系统编码
      * Initialization System Coding
      */
-    private static void initSys() throws Exception {
+    private static void systemConfig() throws Exception {
         System.setProperty("protostuff.runtime.allow_null_array_element", "true");
         System.setProperty(ContractConstant.SYS_FILE_ENCODING, UTF_8.name());
         Field charset = Charset.class.getDeclaredField("defaultCharset");

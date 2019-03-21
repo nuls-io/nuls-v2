@@ -18,4 +18,10 @@ public class RemoteTestParam<T> {
 
     Object param;
 
+    boolean isEquals = true;
+
+    public RemoteTestParam(Class<? extends TestCaseIntf> caseCls,T source,Object param){
+        this(caseCls,source,param,true);
+    }
+
 }

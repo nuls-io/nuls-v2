@@ -6,7 +6,7 @@ import io.nuls.test.utils.Utils;
 /**
  * @Author: zhoulijun
  * @Time: 2019-03-19 20:48
- * @Description: 功能描述
+ * @Description: 测试用例接口
  */
 public interface TestCaseIntf<T,P> {
 

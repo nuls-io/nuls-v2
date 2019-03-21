@@ -71,6 +71,7 @@ public interface TxErrorCode {
     ErrorCode CALLING_REMOTE_INTERFACE_FAILED = ErrorCode.init("10060");
     ErrorCode SIGN_ADDRESS_NOT_MATCH_COINFROM = ErrorCode.init("10061");
     ErrorCode ACCOUNT_NOT_ENCRYPTED = ErrorCode.init("10062");
+    ErrorCode HEIGHT_UPDATE_UNABLE_TO_REPACKAGE  = ErrorCode.init("10063");
 
 
 

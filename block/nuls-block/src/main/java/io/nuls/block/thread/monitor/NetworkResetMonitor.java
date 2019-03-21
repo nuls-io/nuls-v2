@@ -25,7 +25,9 @@ import io.nuls.block.manager.ContextManager;
 import io.nuls.block.model.ChainContext;
 import io.nuls.block.model.ChainParameters;
 import io.nuls.block.rpc.call.NetworkUtil;
+import io.nuls.block.thread.BlockSynchronizer;
 import io.nuls.tools.log.logback.NulsLogger;
+import io.nuls.tools.thread.ThreadUtils;
 
 /**
  * 区块高度监控器
@@ -68,6 +70,9 @@ public class NetworkResetMonitor implements Runnable {
                 if (currentTime - time > reset) {
                     commonLog.info("chainId-" + chainId + ",NetworkReset!");
                     NetworkUtil.resetNetwork(chainId);
+                    //重新开启区块同步线程
+                    ThreadUtils.createAndRunThread("block-synchronizer", BlockSynchronizer.getInstance());
+                    context.setStatus(RunningStatusEnum.SYNCHRONIZING);
                 }
             } catch (Exception e) {
                 e.printStackTrace();
