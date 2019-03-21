@@ -104,8 +104,8 @@ public class TestModule extends RpcModule {
             }else{
                 Utils.failLine(" TEST FAIL ");
             }
+            System.exit(0);
         }
-        System.exit(0);
         return RpcModuleState.Running;
     }
 
