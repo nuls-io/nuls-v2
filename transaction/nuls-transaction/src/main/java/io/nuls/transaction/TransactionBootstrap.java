@@ -24,9 +24,6 @@
 
 package io.nuls.transaction;
 
-import ch.qos.logback.classic.Level;
-import ch.qos.logback.classic.Logger;
-import ch.qos.logback.classic.LoggerContext;
 import io.nuls.db.service.RocksDBService;
 import io.nuls.db.util.DBUtils;
 import io.nuls.h2.utils.MybatisDbHelper;
@@ -57,7 +54,6 @@ import io.nuls.transaction.utils.LoggerUtil;
 import org.apache.ibatis.io.Resources;
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.apache.ibatis.session.SqlSessionFactoryBuilder;
-import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Field;
 import java.nio.charset.Charset;
