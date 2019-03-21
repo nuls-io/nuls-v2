@@ -39,8 +39,6 @@ public class TestModule extends RpcModule {
 
     @Autowired Config config;
 
-    @Value("testNodeType")
-    String nodeType;
 
     NetworkProvider networkProvider = ServiceManager.get(NetworkProvider.class);
 
@@ -66,7 +64,7 @@ public class TestModule extends RpcModule {
     public RpcModuleState onDependenciesReady() {
         log.info("do running");
         RpcServerManager.getInstance().startServer("0.0.0.0",9999);
-        if(nodeType.equals("master")){
+        if(config.getNodeType().equals("master")){
             Result<NetworkInfo> networkInfo = networkProvider.getInfo();
             Utils.success("=".repeat(100));
             Utils.success("网络环境");

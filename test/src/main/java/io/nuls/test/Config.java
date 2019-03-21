@@ -28,6 +28,9 @@ public class Config implements InitializingBean {
     @Value("testSeedAccountPriKey")
     String testSeedAccount;
 
+    @Value("testNodeType")
+    String nodeType;
+
     int chainId;
 
     int assetsId;
@@ -39,4 +42,9 @@ public class Config implements InitializingBean {
         Result<String> result = accountService.importAccountByPrivateKey(new ImportAccountByPrivateKeyReq(Constants.PASSWORD,testSeedAccount,true));
         this.seedAddress = result.getData();
     }
+
+    public boolean isMaster(){
+        return "master".equals(nodeType);
+    }
+
 }
