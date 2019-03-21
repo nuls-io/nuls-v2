@@ -28,7 +28,6 @@ import java.util.stream.Collectors;
  */
 public abstract class SyncRemoteTestCase<T> implements TestCaseIntf<Boolean, RemoteTestParam<T>> {
 
-
     NetworkProvider networkProvider = ServiceManager.get(NetworkProvider.class);
 
     public boolean equals(T source,T remote){
@@ -39,6 +38,9 @@ public abstract class SyncRemoteTestCase<T> implements TestCaseIntf<Boolean, Rem
     public Boolean doTest(RemoteTestParam<T> param,int depth) throws TestFailException {
         Result<String> nodes = networkProvider.getNodes();
         Config config = SpringLiteContext.getBean(Config.class);
+        if(!config.isMaster()){
+            throw new RuntimeException("非master节点不允许进行远程调用");
+        }
         List<String> nodeList = nodes.getList().stream().map(node->node.split(":")[0]).filter(node->config.getNodeExclude().indexOf(node)==-1).collect(Collectors.toList());
         if(nodeList.isEmpty()){
             throw new TestFailException("remote fail ,network node is empty");
