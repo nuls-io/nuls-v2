@@ -5,6 +5,12 @@ package io.nuls.base.constant;
  */
 public class BaseConstant {
     /**
+     * 主网和测试网的默认chainID
+     */
+    public static final short MAINNET_CHAIN_ID = 1;
+    public static final short TESTNET_CHAIN_ID = 2;
+
+    /**
      * hash length
      */
     public static final int ADDRESS_LENGTH = 23;
