@@ -500,7 +500,7 @@ public class TransactionCmd extends BaseCmd {
     @CmdAnnotation(cmd = TxCmd.TX_GET_BLOCK_TXS_EXTEND, version = 1.0, description = "Get block transactions incloud unconfirmed ")
     @Parameter(parameterName = "chainId", parameterType = "int")
     @Parameter(parameterName = "txHashList", parameterType = "list")
-    public Response getBlockTxsIncloudUnconfirmed(Map params) {
+    public Response getBlockTxsExtend(Map params) {
         Chain chain = null;
         try {
             ObjectUtils.canNotEmpty(params.get("chainId"), TxErrorCode.PARAMETER_ERROR.getMsg());
