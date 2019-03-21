@@ -164,7 +164,7 @@ public class MessageTest {
     public void testSmallBlockMessage() throws Exception {
         SmallBlockMessage message = new SmallBlockMessage();
         Block block = BlockGenerator.generate(null);
-        Transaction transaction = buildTransaction("5MR_2Ch2F7jfohNqwwdmMmF3ESQYK2R9bt8");
+        Transaction transaction = buildTransaction("tNULSeBaMvEtDfvZuukDf2mVyfGo3DdiN8KLRG");
         SmallBlock smallBlock = new SmallBlock();
         smallBlock.setHeader(block.getHeader());
         smallBlock.addBaseTx(transaction);
@@ -184,8 +184,8 @@ public class MessageTest {
     public void testTxGroupMessage() throws Exception {
         TxGroupMessage message = new TxGroupMessage();
         message.setBlockHash(NulsDigestData.calcDigestData("00205f3e3489f3625304a0080ab4a0f5b46d15b68f9bb2bc24b54a6128f59b84b774".getBytes()));
-        Transaction t1 = buildTransaction("5MR_2Ch2F7jfohNqwwdmMmF3ESQYK2R9bt8");
-        Transaction t2 = buildTransaction("5MR_2CeG11nRqx7nGNeh8hTXADibqfSYeNu");
+        Transaction t1 = buildTransaction("tNULSeBaMvEtDfvZuukDf2mVyfGo3DdiN8KLRG");
+        Transaction t2 = buildTransaction("tNULSeBaMvEtDfvZuukDf2mVyfGo3DdiN8KLRG");
         List<Transaction> transactions = new ArrayList<>();
         transactions.add(t1);
         transactions.add(t2);
@@ -222,7 +222,7 @@ public class MessageTest {
         CoinTo coinTo = new CoinTo();
         coinTo.setAddress(AddressTool.getAddress(address));
         coinTo.setAmount(BigInteger.TWO);
-        coinTo.setAssetsChainId(12345);
+        coinTo.setAssetsChainId(2);
         coinTo.setAssetsId(1);
         coinTo.setLockTime(0);
         List<CoinFrom> coinFroms = new ArrayList<>();

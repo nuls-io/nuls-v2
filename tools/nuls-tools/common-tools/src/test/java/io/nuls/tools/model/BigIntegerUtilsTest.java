@@ -14,7 +14,7 @@ public class BigIntegerUtilsTest {
     @Test
     public void testSerialize() {
         //测试序列化和反序列化方法是否正确
-        String str = "123456789012345678901234567890";
+        String str = "267890267890267890";
         BigInteger value = new BigInteger(str);
 
         System.out.println(HexUtil.encode(value.toByteArray()));
@@ -28,11 +28,11 @@ public class BigIntegerUtilsTest {
     @Test
     public void testSmallEndian() {
         //确保使用小端序，验证方式：跟旧版本的long行序列化做对比
-        String str = "1234567890123";
+        String str = "267890123";
         BigInteger value = new BigInteger(str);
 
         String newstr = HexUtil.encode(SerializeUtils.bigInteger2Bytes(value));
-        String right = HexUtil.encode(ByteUtils.longToBytes(1234567890123L));
+        String right = HexUtil.encode(ByteUtils.longToBytes(267890123L));
         System.out.println(HexUtil.encode(value.toByteArray()));
         System.out.println(newstr);
         System.out.println(right);

@@ -35,14 +35,14 @@ public class MongoDBTest {
         headerInfo.setTotalFee(new BigInteger("1000000000000000000000000000000000000001"));
 
         BlockService blockService = SpringLiteContext.getBean(BlockService.class);
-        blockService.saveBLockHeaderInfo(12345, headerInfo);
+        blockService.saveBLockHeaderInfo(2, headerInfo);
 
     }
 
     @Test
     public void testDBGet() {
         BlockService blockService = SpringLiteContext.getBean(BlockService.class);
-        BlockHeaderInfo headerInfo = blockService.getBlockHeader(12345, 0L);
+        BlockHeaderInfo headerInfo = blockService.getBlockHeader(2, 0L);
         System.out.println();
     }
 
@@ -61,11 +61,11 @@ public class MongoDBTest {
         blockHeaderInfo.setPackingAddress("dfasdfdasf");
         blockHeaderInfo.setPackingIndexOfRound(1);
         blockHeaderInfo.setPreHash("fdsfsdf");
-        blockHeaderInfo.setReward(new BigInteger("123456"));
+        blockHeaderInfo.setReward(new BigInteger("26"));
         blockHeaderInfo.setRoundIndex(1L);
         blockHeaderInfo.setRoundStartTime(131L);
         blockHeaderInfo.setScriptSign("fdsfsdf");
-        blockHeaderInfo.setTotalFee(new BigInteger("123456"));
+        blockHeaderInfo.setTotalFee(new BigInteger("26"));
         blockHeaderInfo.setTxCount(1);
         blockHeaderInfo.setTxHashList(List.of("abcd", "aset", "sdfsd", "eeee"));
 

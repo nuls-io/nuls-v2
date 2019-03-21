@@ -51,18 +51,18 @@ public class ContractTest {
     private VMContext vmContext;
     private ProgramExecutor programExecutor;
 
-    private static final String ADDRESS = "5MR_2CWWTDXc32s9Wd1guNQzPztFgkyVEsz";
+    private static final String ADDRESS = "tNULSeBaMvEtDfvZuukDf2mVyfGo3DdiN8KLRG";
     private static final String SENDER = "5MR_2CbdqKcZktcxntG14VuQDy8YHhc6ZqW";
     private static final String BUYER = "5MR_2Cj9tfgQpdeF7nDy5wyaGG6MZ35H3rA";
 
     static String[] senderSeeds = {
-            "5MR_2CWWTDXc32s9Wd1guNQzPztFgkyVEsz",
+            "tNULSeBaMvEtDfvZuukDf2mVyfGo3DdiN8KLRG",
             "5MR_2CbdqKcZktcxntG14VuQDy8YHhc6ZqW",
             "5MR_2Cj9tfgQpdeF7nDy5wyaGG6MZ35H3rA",
             "5MR_2CWKhFuoGVraaxL5FYY3RsQLjLDN7jw",
             "5MR_2CgwCFRoJ8KX37xNqjjR7ttYuJsg8rk",
             "5MR_2CjZkQsN7EnEPcaLgNrMrp6wpPGN6xo",
-            "5MR_2CeG11nRqx7nGNeh8hTXADibqfSYeNu",
+            "tNULSeBaMvEtDfvZuukDf2mVyfGo3DdiN8KLRG",
             "5MR_2CVCFWH7o8AmrTBPLkdg2dYH1UCUJiM",
             "5MR_2CfUsasd33vQV3HqGw6M3JwVsuVxJ7r",
             "5MR_2CVuGjQ3CYVkhFszxfSt6sodg1gDHYF"};
@@ -72,7 +72,7 @@ public class ContractTest {
         RocksDBService.init("./data");
         Chain chain = new Chain();
         ConfigBean configBean = new ConfigBean();
-        configBean.setChainId(12345);
+        configBean.setChainId(2);
         configBean.setAssetsId(1);
         configBean.setMaxViewGas(100000000L);
         chain.setConfig(configBean);
@@ -84,7 +84,7 @@ public class ContractTest {
 
     @Test
     public void testValidAddress() {
-        Assert.assertTrue(AddressTool.validAddress(12345, "5MR_2CWWTDXc32s9Wd1guNQzPztFgkyVEsz"));
+        Assert.assertTrue(AddressTool.validAddress(2, "tNULSeBaMvEtDfvZuukDf2mVyfGo3DdiN8KLRG"));
     }
 
     @Test

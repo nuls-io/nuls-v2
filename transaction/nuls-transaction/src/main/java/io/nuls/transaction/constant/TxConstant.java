@@ -150,7 +150,7 @@ public interface TxConstant {
 
 
 //    String MODULE_CODE = "tx";//=
-//    int NULS_CHAINID = 12345;//=
+//    int NULS_CHAINID = 2;//=
 //    int NULS_CHAIN_ASSETID = 1;//=
 
 //    int H2_TX_TABLE_NUMBER = 128;

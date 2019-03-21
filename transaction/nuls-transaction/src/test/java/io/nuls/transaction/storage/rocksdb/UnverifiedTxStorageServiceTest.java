@@ -14,7 +14,7 @@ public class UnverifiedTxStorageServiceTest {
 
     protected static UnverifiedTxStorageService unverifiedTxStorageService;
     protected static ChainManager chainManager;
-    protected int chainId = 12345;
+    protected int chainId = 2;
 
     @Before
     public void beforeTest() throws Exception {

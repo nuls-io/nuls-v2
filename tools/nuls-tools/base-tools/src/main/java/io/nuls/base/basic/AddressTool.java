@@ -188,9 +188,13 @@ public class AddressTool {
             return false;
         }
         byte[] bytes;
+        byte[] body;
         try {
-            bytes = AddressTool.getAddressBytes(address);
-            if (bytes.length != Address.ADDRESS_LENGTH + 1) {
+            String subfix = getRealAddrss(address);
+            body = Base58.decode(subfix);
+            bytes = new byte[body.length - 1];
+            System.arraycopy(body, 0, bytes, 0, body.length - 1);
+            if (body.length != Address.ADDRESS_LENGTH + 1) {
                 return false;
             }
         } catch (Exception e) {
@@ -218,7 +222,7 @@ public class AddressTool {
             return false;
         }
         try {
-            checkXOR(hash160Bytes);
+            checkXOR(body);
         } catch (Exception e) {
             return false;
         }

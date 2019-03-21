@@ -103,8 +103,8 @@ public class CmdTest {
         // Build params map
         Map<String, Object> params = new HashMap<>();
         // Version information ("1.1" or 1.1 is both available)
-        params.put("chainId", 12345);
-        params.put("assetChainId", 12345);
+        params.put("chainId", 2);
+        params.put("assetChainId", 2);
         params.put("address", "QMwz71wTKgp9sZ8g44A9WNgXk11u23930");
 //        params.put("address", "LLbmaw1UNmKmd5PfuzP1Zm9dNuAnia01f");
 

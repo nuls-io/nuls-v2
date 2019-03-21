@@ -15,7 +15,7 @@ import java.util.List;
 public class UnverifiedCtxStorageServiceTest {
 
     protected static UnverifiedCtxStorageService unverifiedCtxStorageService;
-    protected int chainId = 12345;
+    protected int chainId = 2;
     protected String nodeId = "1001";
 
     @BeforeClass

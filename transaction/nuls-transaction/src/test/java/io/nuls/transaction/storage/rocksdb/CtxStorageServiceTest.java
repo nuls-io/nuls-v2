@@ -16,7 +16,7 @@ import java.util.List;
 public class CtxStorageServiceTest {
 
     protected static CtxStorageService ctxStorageService;
-    protected int chainId = 12345;
+    protected int chainId = 2;
     protected String nodeId = "1001";
 
     @BeforeClass

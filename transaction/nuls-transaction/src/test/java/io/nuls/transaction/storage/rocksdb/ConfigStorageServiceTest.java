@@ -13,7 +13,7 @@ import java.util.Map;
 public class ConfigStorageServiceTest {
 
     protected static ConfigStorageService configStorageService;
-    protected int chainId = 12345;
+    protected int chainId = 2;
     protected int assetsId = 1;
 
     @BeforeClass

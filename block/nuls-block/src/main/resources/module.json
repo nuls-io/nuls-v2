@@ -2,7 +2,7 @@
   "dataFolder": "block",
   "defaultChainParameter": {
     "chainName": "nuls2.0",
-    "chainId": 12345,
+    "chainId": 2,
     "blockMaxSize": 2097152,
     "resetTime": 180000,
     "chainSwtichThreshold": 1,

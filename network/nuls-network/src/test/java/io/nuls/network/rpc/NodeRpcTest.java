@@ -50,7 +50,7 @@ public class NodeRpcTest {
     @Test
     public void  getNodes(){
         Map<String, Object> params = new HashMap<>();
-        params.put("chainId", 12345);
+        params.put("chainId", 2);
         params.put("state", 0);
         params.put("isCross", 0);
         params.put("startPage", 0);
@@ -66,7 +66,7 @@ public class NodeRpcTest {
     @Test
     public void  addNodes(){
         Map<String, Object> params = new HashMap<>();
-        params.put("chainId", 12345);
+        params.put("chainId", 2);
         params.put("isCross", 0);
         params.put("nodes", "192.168.1.100:1800");
         try {
