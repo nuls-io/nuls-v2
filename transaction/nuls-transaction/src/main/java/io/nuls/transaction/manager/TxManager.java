@@ -129,4 +129,17 @@ public class TxManager {
         }
         return false;
     }
+
+    /**
+     * 是否是智能合约非系统交易
+     * @param txType
+     * @return
+     */
+    public static boolean isUnSystemSmartContract(Chain chain, int txType){
+        TxRegister txRegister = getTxRegister(chain, txType);
+        if(ModuleE.SC.abbr.equals(txRegister) && !txRegister.getSystemTx()){
+            return true;
+        }
+        return false;
+    }
 }

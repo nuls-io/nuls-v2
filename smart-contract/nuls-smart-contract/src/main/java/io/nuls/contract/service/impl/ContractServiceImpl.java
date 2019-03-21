@@ -24,10 +24,7 @@
 package io.nuls.contract.service.impl;
 
 import io.nuls.base.basic.AddressTool;
-import io.nuls.base.data.CoinData;
-import io.nuls.base.data.CoinTo;
-import io.nuls.base.data.NulsDigestData;
-import io.nuls.base.data.Transaction;
+import io.nuls.base.data.*;
 import io.nuls.contract.constant.ContractErrorCode;
 import io.nuls.contract.helper.ContractConflictChecker;
 import io.nuls.contract.helper.ContractHelper;
@@ -46,6 +43,7 @@ import io.nuls.contract.util.ContractUtil;
 import io.nuls.contract.vm.program.ProgramExecutor;
 import io.nuls.tools.basic.Result;
 import io.nuls.tools.core.annotation.Autowired;
+import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.core.annotation.Service;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.log.Log;
@@ -66,7 +64,7 @@ import static io.nuls.contract.util.ContractUtil.getSuccess;
  * @author: PierreLuo
  * @date: 2018/11/19
  */
-@Service
+@Component
 public class ContractServiceImpl implements ContractService {
 
     @Autowired
@@ -96,26 +94,24 @@ public class ContractServiceImpl implements ContractService {
     public Result begin(int chainId, long blockHeight, long blockTime, String packingAddress, String preStateRoot) {
         Chain chain = contractHelper.getChain(chainId);
         BatchInfo batchInfo = chain.getBatchInfo();
-        boolean canInit = true;
-        if (batchInfo.hasBegan() && !batchInfo.isTimeOut()) {
-            canInit = false;
-        }
-        if (canInit) {
-            batchInfo.init(blockHeight);
-            // 准备临时余额和当前区块头
-            contractHelper.createTempBalanceManagerAndCurrentBlockHeader(chainId, blockHeight, blockTime, Hex.decode(packingAddress));
-            // 准备批量执行器
-            ProgramExecutor batchExecutor = contractExecutor.createBatchExecute(chainId, Hex.decode(preStateRoot));
-            batchInfo.setBatchExecutor(batchExecutor);
-            batchInfo.setPreStateRoot(preStateRoot);
-            // 准备冲突检测器
-            ContractConflictChecker checker = ContractConflictChecker.newInstance();
-            checker.setContractSetList(new ArrayList<>());
-            batchInfo.setChecker(checker);
-            return getSuccess();
-        } else {
-            return getFailed();
-        }
+        // 清空上次批量的所有数据
+        batchInfo.clear();
+        //boolean canInit = true;
+        //if (batchInfo.hasBegan() && !batchInfo.isTimeOut()) {
+        //    canInit = false;
+        //}
+        batchInfo.init(blockHeight);
+        // 准备临时余额和当前区块头
+        contractHelper.createTempBalanceManagerAndCurrentBlockHeader(chainId, blockHeight, blockTime, AddressTool.getAddress(packingAddress));
+        // 准备批量执行器
+        ProgramExecutor batchExecutor = contractExecutor.createBatchExecute(chainId, Hex.decode(preStateRoot));
+        batchInfo.setBatchExecutor(batchExecutor);
+        batchInfo.setPreStateRoot(preStateRoot);
+        // 准备冲突检测器
+        ContractConflictChecker checker = ContractConflictChecker.newInstance();
+        checker.setContractSetList(new ArrayList<>());
+        batchInfo.setChecker(checker);
+        return getSuccess();
     }
 
     @Override
@@ -160,11 +156,15 @@ public class ContractServiceImpl implements ContractService {
             if (!batchInfo.hasBegan()) {
                 return getFailed();
             }
+            BlockHeader currentBlockHeader = batchInfo.getCurrentBlockHeader();
+            long blockTime = currentBlockHeader.getTime();
+
             LinkedHashMap<String, ContractContainer> contractContainerMap = batchInfo.getContractContainerMap();
             Collection<ContractContainer> containerList = contractContainerMap.values();
             CallerResult callerResult = new CallerResult();
             List<CallableResult> resultList = callerResult.getCallableResultList();
             for (ContractContainer container : containerList) {
+                container.loadFutureList();
                 resultList.add(container.getCallableResult());
             }
 
@@ -180,8 +180,10 @@ public class ContractServiceImpl implements ContractService {
                 resultTxList.addAll(contractResult.getContractTransferList());
             }
             // 生成退还剩余Gas的交易
-            ContractReturnGasTransaction contractReturnGasTx = this.makeReturnGasTx(chainId, contractResultList, resultTxList.get(resultTxList.size() - 1).getTime() + 1);
-            resultTxList.add(contractReturnGasTx);
+            ContractReturnGasTransaction contractReturnGasTx = this.makeReturnGasTx(chainId, contractResultList, blockTime);
+            if(contractReturnGasTx != null) {
+                resultTxList.add(contractReturnGasTx);
+            }
             Result<byte[]> batchExecuteResult = contractCaller.commitBatchExecute(batchExecutor);
             byte[] stateRoot = batchExecuteResult.getData();
             ContractPackageDto dto = new ContractPackageDto(stateRoot, resultTxList);
@@ -190,6 +192,16 @@ public class ContractServiceImpl implements ContractService {
 
             return getSuccess().setData(dto);
         } catch (IOException e) {
+            Log.error(e);
+            return getFailed().setMsg(e.getMessage());
+        } catch (InterruptedException e) {
+            Log.error(e);
+            return getFailed().setMsg(e.getMessage());
+        } catch (ExecutionException e) {
+            Log.error(e);
+            return getFailed().setMsg(e.getMessage());
+        } catch (Exception e) {
+            e.printStackTrace();
             Log.error(e);
             return getFailed().setMsg(e.getMessage());
         }
@@ -203,6 +215,7 @@ public class ContractServiceImpl implements ContractService {
                 ContractResult contractResult;
                 ContractWrapperTransaction wrapperTx;
                 for (String txHex : txHexList) {
+                    //TODO pierre  是否根据交易管理模块传来的交易来保存合约结果
                     contractResult = contractResultMap.get(txHex);
                     if (contractResult == null) {
                         Log.warn("empty contract result with txHex: {}", txHex);

@@ -55,6 +55,7 @@ import static io.nuls.contract.constant.ContractCmdConstant.*;
 import static io.nuls.contract.constant.ContractConstant.*;
 import static io.nuls.contract.constant.ContractErrorCode.ADDRESS_ERROR;
 import static io.nuls.contract.constant.ContractErrorCode.DATA_ERROR;
+import static io.nuls.contract.util.ContractUtil.wrapperFailed;
 
 /**
  * @author: PierreLuo
@@ -86,11 +87,7 @@ public class ContractCmd extends BaseCmd {
             String packingAddress = (String) params.get("packingAddress");
             String preStateRoot = (String) params.get("preStateRoot");
 
-            Result result = contractService.begin(chainId, blockHeight + 1, blockTime, packingAddress, preStateRoot);
-            if (result.isFailed()) {
-                return failed(result.getErrorCode());
-            }
-
+            Result result = contractService.begin(chainId, blockHeight, blockTime, packingAddress, preStateRoot);
             return success();
         } catch (Exception e) {
             Log.error(e);
@@ -109,8 +106,8 @@ public class ContractCmd extends BaseCmd {
             tx.setTxHex(txHex);
             tx.parse(Hex.decode(txHex), 0);
             Result result = contractService.invokeContractOneByOne(chainId, tx);
-            if (result.isSuccess()) {
-                return failed(result.getErrorCode());
+            if (result.isFailed()) {
+                return wrapperFailed(result);
             }
             return success();
         } catch (Exception e) {
@@ -129,7 +126,7 @@ public class ContractCmd extends BaseCmd {
 
             Result result = contractService.end(chainId, blockHeight);
             if (result.isFailed()) {
-                return failed(result.getErrorCode());
+                return wrapperFailed(result);
             }
             ContractPackageDto dto = (ContractPackageDto) result.getData();
             List<String> resultTxHexList = new ArrayList<>();
@@ -165,7 +162,7 @@ public class ContractCmd extends BaseCmd {
             }
             Result validator = contractTxValidatorManager.createValidator(chainId, tx);
             if (validator.isFailed()) {
-                return failed(validator.getErrorCode());
+                return wrapperFailed(validator);
             }
             result.put("value", true);
             return success(result);
@@ -190,7 +187,7 @@ public class ContractCmd extends BaseCmd {
             }
             Result validator = contractTxValidatorManager.callValidator(chainId, tx);
             if (validator.isFailed()) {
-                return failed(validator.getErrorCode());
+                return wrapperFailed(validator);
             }
             result.put("value", true);
             return success(result);
@@ -215,7 +212,7 @@ public class ContractCmd extends BaseCmd {
             }
             Result validator = contractTxValidatorManager.deleteValidator(chainId, tx);
             if (validator.isFailed()) {
-                return failed(validator.getErrorCode());
+                return wrapperFailed(validator);
             }
             result.put("value", true);
             return success(result);
@@ -235,7 +232,9 @@ public class ContractCmd extends BaseCmd {
             /**
              *  暂无统一验证器
              */
-            return success();
+            Map<String, Object> result = new HashMap<>(2);
+            result.put("list", new ArrayList<>());
+            return success(result);
         } catch (Exception e) {
             Log.error(e);
             return failed(e.getMessage());
@@ -254,10 +253,12 @@ public class ContractCmd extends BaseCmd {
 
             Result result = contractService.commitProcessor(chainId, txHexList, blockHeaderHex);
             if (result.isFailed()) {
-                return failed(result.getErrorCode(), result.getMsg());
+                return wrapperFailed(result);
             }
 
-            return success();
+            Map<String, Object> resultMap = new HashMap<>(2);
+            resultMap.put("value", true);
+            return success(resultMap);
         } catch (Exception e) {
             Log.error(e);
             return failed(e.getMessage());
@@ -276,7 +277,7 @@ public class ContractCmd extends BaseCmd {
 
             Result result = contractService.rollbackProcessor(chainId, txHexList, blockHeaderHex);
             if (result.isFailed()) {
-                return failed(result.getErrorCode(), result.getMsg());
+                return wrapperFailed(result);
             }
             return success();
         } catch (Exception e) {
@@ -303,7 +304,7 @@ public class ContractCmd extends BaseCmd {
 
             Result result = contractTokenBalanceManager.initAllTokensByAccount(address);
             if (result.isFailed()) {
-                return failed(result.getErrorCode());
+                return wrapperFailed(result);
             }
 
             return success();

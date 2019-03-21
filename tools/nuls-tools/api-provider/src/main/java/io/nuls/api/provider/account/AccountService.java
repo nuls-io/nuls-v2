@@ -2,6 +2,10 @@ package io.nuls.api.provider.account;
 
 import io.nuls.api.provider.Result;
 import io.nuls.api.provider.account.facade.*;
+import io.nuls.tools.log.Log;
+
+import java.io.*;
+import java.net.URLDecoder;
 
 /**
  * @Author: zhoulijun
@@ -95,5 +99,45 @@ public interface AccountService {
      * @return
      */
     Result<String> setAccountAlias(SetAccountAliasReq req);
+
+
+    /**
+     * 根据文件地址获取AccountKeystoreDto对象
+     * Gets the AccountKeystoreDto object based on the file address
+     * @param path
+     * @return
+     */
+    default  String getAccountKeystoreDto(String path) {
+        File file = null;
+        try {
+            file = new File(URLDecoder.decode(path, "UTF-8"));
+        } catch (UnsupportedEncodingException e) {
+            Log.error("未找到文件", e);
+        }
+        if (null != file && file.isFile()) {
+            StringBuilder ks = new StringBuilder();
+            BufferedReader bufferedReader = null;
+            String str;
+            try {
+                bufferedReader = new BufferedReader(new FileReader(file));
+                while ((str = bufferedReader.readLine()) != null) {
+                    if (!str.isEmpty()) {
+                        ks.append(str);
+                    }
+                }
+                return ks.toString();
+            } catch (Exception e) {
+            } finally {
+                if (bufferedReader != null) {
+                    try {
+                        bufferedReader.close();
+                    } catch (IOException e) {
+                        Log.error("system error", e);
+                    }
+                }
+            }
+        }
+        return null;
+    }
 
 }

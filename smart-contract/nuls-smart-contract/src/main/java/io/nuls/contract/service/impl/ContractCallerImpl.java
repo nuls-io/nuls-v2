@@ -35,12 +35,14 @@ import io.nuls.contract.model.bo.ContractContainer;
 import io.nuls.contract.model.bo.ContractResult;
 import io.nuls.contract.model.bo.ContractWrapperTransaction;
 import io.nuls.contract.model.txdata.ContractData;
+import io.nuls.contract.rpc.call.BlockCall;
 import io.nuls.contract.service.ContractCaller;
 import io.nuls.contract.service.ContractExecutor;
 import io.nuls.contract.util.ContractUtil;
 import io.nuls.contract.vm.program.ProgramExecutor;
 import io.nuls.tools.basic.Result;
 import io.nuls.tools.core.annotation.Autowired;
+import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.core.annotation.Service;
 import io.nuls.tools.log.Log;
 
@@ -58,7 +60,7 @@ import static io.nuls.contract.util.ContractUtil.*;
  * @author: PierreLuo
  * @date: 2018/11/19
  */
-@Service
+@Component
 public class ContractCallerImpl implements ContractCaller {
 
     private static final ExecutorService EXECUTOR_SERVICE = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors() * 2);
@@ -84,8 +86,11 @@ public class ContractCallerImpl implements ContractCaller {
             ContractConflictChecker checker = batchInfo.getChecker();
             BlockHeader currentBlockHeader = batchInfo.getCurrentBlockHeader();
             long blockTime = currentBlockHeader.getTime();
-            long number = currentBlockHeader.getHeight();
-            ContractTxCallable txCallable = new ContractTxCallable(chainId, blockTime, batchExecutor, contract, tx, number, preStateRoot, checker, container);
+            long lastestHeight = currentBlockHeader.getHeight() - 1;
+            BlockHeader latestBlockHeader = BlockCall.getLatestBlockHeader(chainId);
+            Log.info("=====pierre======current block header height is {}", currentBlockHeader.getHeight());
+            Log.info("=====pierre======latest block header height is {}", latestBlockHeader.getHeight());
+            ContractTxCallable txCallable = new ContractTxCallable(chainId, blockTime, batchExecutor, contract, tx, lastestHeight, preStateRoot, checker, container);
 
             Future<ContractResult> submit = EXECUTOR_SERVICE.submit(txCallable);
             container.getFutureList().add(submit);
@@ -101,7 +106,7 @@ public class ContractCallerImpl implements ContractCaller {
     public List<ContractResult> callerReCallTx(ProgramExecutor batchExecutor, List<ContractWrapperTransaction> reCallTxList, int chainId, String preStateRoot) {
         BlockHeader currentBlockHeader = contractHelper.getCurrentBlockHeader(chainId);
         long blockTime = currentBlockHeader.getTime();
-        long number = currentBlockHeader.getHeight();
+        long lastestHeight = currentBlockHeader.getHeight() - 1;
         TempBalanceManager tempBalanceManager = contractHelper.getTempBalanceManager(chainId);
         List<ContractResult> resultList = new ArrayList<>();
         ContractData contractData;
@@ -110,7 +115,7 @@ public class ContractCallerImpl implements ContractCaller {
             contractData = tx.getContractData();
             switch (tx.getType()) {
                 case TX_TYPE_CALL_CONTRACT:
-                    contractResult = contractExecutor.call(batchExecutor, contractData, number, preStateRoot);
+                    contractResult = contractExecutor.call(batchExecutor, contractData, lastestHeight, preStateRoot);
                     makeContractResult(tx, contractResult);
                     // 处理重新执行的合约的结果
                     contractTransferHandler.handleContractTransfer(chainId, blockTime, tx, contractResult, tempBalanceManager);

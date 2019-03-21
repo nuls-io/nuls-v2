@@ -31,6 +31,7 @@ import io.nuls.contract.model.txdata.ContractData;
 import io.nuls.contract.service.ContractExecutor;
 import io.nuls.contract.vm.program.*;
 import io.nuls.tools.core.annotation.Autowired;
+import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.core.annotation.Service;
 import lombok.Getter;
 import lombok.Setter;
@@ -47,7 +48,7 @@ import java.util.stream.Collectors;
  */
 @Getter
 @Setter
-@Service
+@Component
 public class ContractExecutorImpl implements ContractExecutor {
 
     @Autowired
@@ -65,7 +66,7 @@ public class ContractExecutorImpl implements ContractExecutor {
         programCreate.setPrice(price);
         programCreate.setGasLimit(create.getGasLimit());
         programCreate.setNumber(number);
-        programCreate.setContractCode(Hex.decode(create.getCode()));
+        programCreate.setContractCode(create.getCode());
         programCreate.setArgs(create.getArgs());
 
         ProgramExecutor track = executor.startTracking();
@@ -98,7 +99,7 @@ public class ContractExecutorImpl implements ContractExecutor {
         contractResult.setRevert(false);
         contractResult.setEvents(programResult.getEvents());
         contractResult.setTransfers(programResult.getTransfers());
-        return null;
+        return contractResult;
     }
 
     @Override

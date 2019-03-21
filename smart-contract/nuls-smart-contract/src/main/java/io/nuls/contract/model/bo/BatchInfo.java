@@ -126,7 +126,7 @@ public class BatchInfo {
         this.status = 0;
         this.preStateRoot = null;
         this.checker = null;
-        this.contractContainerMap = null;
+        this.contractContainerMap = new LinkedHashMap<>();
     }
 
     public ContractContainer newAndGetContractContainer(String contractAddress) {

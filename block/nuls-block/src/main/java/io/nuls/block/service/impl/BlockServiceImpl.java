@@ -433,7 +433,6 @@ public class BlockServiceImpl implements BlockService {
         //分叉验证
         boolean forkVerify = BlockUtil.forkVerify(chainId, block);
         if (!forkVerify) {
-            ConsensusUtil.evidence(chainId, context.getLatestBlock().getHeader(), block.getHeader());
             commonLog.debug("forkVerify-"+forkVerify);
             return false;
         }
