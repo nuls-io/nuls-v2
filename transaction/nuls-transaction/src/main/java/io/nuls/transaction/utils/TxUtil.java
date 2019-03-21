@@ -166,17 +166,6 @@ public class TxUtil {
             transactionPO.setTime(tx.getTime());
             list.add(transactionPO);
 
-        } else if (TxManager.isUnSystemSmartContract(chain, tx.getType())) {
-            TransactionPO transactionPO = new TransactionPO();
-            transactionPO.setAddress(extractContractAddress(tx.getTxData()));
-            transactionPO.setAssetChainId(chain.getConfig().getChainId());
-            transactionPO.setAssetId(chain.getConfig().getAssetId());
-            transactionPO.setAmount(BigInteger.ZERO);
-            transactionPO.setHash(tx.getHash().getDigestHex());
-            transactionPO.setType(tx.getType());
-            transactionPO.setState(4);
-            transactionPO.setTime(tx.getTime());
-            list.add(transactionPO);
         } else {
             if (coinData.getFrom() != null
                     && tx.getType() != TxConstant.TX_TYPE_COINBASE
@@ -226,6 +215,18 @@ public class TxUtil {
                     list.add(transactionPO);
                 }
             }
+        }
+        if (TxManager.isUnSystemSmartContract(chain, tx.getType())) {
+            TransactionPO transactionPO = new TransactionPO();
+            transactionPO.setAddress(extractContractAddress(tx.getTxData()));
+            transactionPO.setAssetChainId(chain.getConfig().getChainId());
+            transactionPO.setAssetId(chain.getConfig().getAssetId());
+            transactionPO.setAmount(BigInteger.ZERO);
+            transactionPO.setHash(tx.getHash().getDigestHex());
+            transactionPO.setType(tx.getType());
+            transactionPO.setState(4);
+            transactionPO.setTime(tx.getTime());
+            list.add(transactionPO);
         }
         return list;
     }
