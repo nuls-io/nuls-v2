@@ -53,34 +53,44 @@ public class ChainManager {
     private BlockManager blockManager;
     @Autowired
     private ConsensusConfig config;
-
     private Map<Integer, Chain> chainMap = new ConcurrentHashMap<>();
 
     /**
-     * 初始化并启动链
-     * Initialize and start the chain
-     */
-    public void runChain() {
+     * 初始化
+     * Initialization chain
+     * */
+    public void initChain(){
         Map<Integer, ConfigBean> configMap = configChain();
         if (configMap == null || configMap.size() == 0) {
             return;
         }
-        List<TxRegisterDetail> txRegisterDetailList = getRegisterTxList();
-        /*
-        根据配置信息创建初始化链
-        Initialize chains based on configuration information
-        */
-        for (Map.Entry<Integer, ConfigBean> entry : configMap.entrySet()) {
+        for (Map.Entry<Integer, ConfigBean> entry : configMap.entrySet()){
             Chain chain = new Chain();
             int chainId = entry.getKey();
             chain.setConfig(entry.getValue());
-
             /*
              * 初始化链日志对象
              * Initialization Chain Log Objects
              * */
             initLogger(chain);
+            /*
+            初始化链数据库表
+            Initialize linked database tables
+            */
+            initTable(chain);
+            chainMap.put(chainId, chain);
 
+        }
+
+    }
+
+    /**
+     * 注册链交易
+     * Registration Chain Transaction
+     * */
+    public void registerTx(){
+        List<TxRegisterDetail> txRegisterDetailList = getRegisterTxList();
+        for (Chain chain:chainMap.values()) {
             /*
              * 链交易注册
              * Chain Trading Registration
@@ -95,13 +105,15 @@ public class ChainManager {
                     e.printStackTrace();
                 }
             }
+        }
+    }
 
-            /*
-            初始化链数据库表
-            Initialize linked database tables
-            */
-            initTable(chain);
-
+    /**
+     * 加载链缓存数据并启动链
+     * Load the chain to cache data and start the chain
+     * */
+    public void runChain(){
+        for (Chain chain:chainMap.values()) {
             /*
             加载链缓存数据
             Load chain caching entity
@@ -113,10 +125,70 @@ public class ChainManager {
             Create and start in-chain tasks
             */
             schedulerManager.createChainScheduler(chain);
+        }
+    }
+
+    /**
+     * 初始化并启动链
+     * Initialize and start the chain
+     */
+    /*public void runChain() {
+        Map<Integer, ConfigBean> configMap = configChain();
+        if (configMap == null || configMap.size() == 0) {
+            return;
+        }
+        List<TxRegisterDetail> txRegisterDetailList = getRegisterTxList();
+        *//*
+        根据配置信息创建初始化链
+        Initialize chains based on configuration information
+        *//*
+        for (Map.Entry<Integer, ConfigBean> entry : configMap.entrySet()) {
+            Chain chain = new Chain();
+            int chainId = entry.getKey();
+            chain.setConfig(entry.getValue());
+
+            *//*
+             * 初始化链日志对象
+             * Initialization Chain Log Objects
+             * *//*
+            initLogger(chain);
+
+            *//*
+             * 链交易注册
+             * Chain Trading Registration
+             * *//*
+            while (true) {
+                if (CallMethodUtils.registerTx(chain, txRegisterDetailList)) {
+                    break;
+                }
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+
+            *//*
+            初始化链数据库表
+            Initialize linked database tables
+            *//*
+            initTable(chain);
+
+            *//*
+            加载链缓存数据
+            Load chain caching entity
+            *//*
+            initCache(chain);
+
+            *//*
+            创建并启动链内任务
+            Create and start in-chain tasks
+            *//*
+            schedulerManager.createChainScheduler(chain);
 
             chainMap.put(chainId, chain);
         }
-    }
+    }*/
 
     /**
      * 停止一条链
