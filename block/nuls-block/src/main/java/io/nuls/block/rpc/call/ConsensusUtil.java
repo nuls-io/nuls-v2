@@ -111,6 +111,9 @@ public class ConsensusUtil {
             return true;
         }
         BlockHeader masterHeader = BlockUtil.fromBlockHeaderPo(blockService.getBlockHeader(chainId, forkHeaderHeight));
+        if (masterHeader.getHash().equals(forkHeader.getHash())) {
+            return true;
+        }
         byte[] masterHeaderPackingAddress = masterHeader.getPackingAddress(chainId);
         byte[] forkHeaderPackingAddress = forkHeader.getPackingAddress(chainId);
         if (!Arrays.equals(masterHeaderPackingAddress, forkHeaderPackingAddress)) {
