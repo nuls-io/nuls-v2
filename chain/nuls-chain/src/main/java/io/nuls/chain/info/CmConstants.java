@@ -76,7 +76,7 @@ public class CmConstants {
     /**
      * 黑洞地址，该地址的资产无法找回
      */
-    public static final byte[] BLACK_HOLE_ADDRESS = AddressTool.getAddress("5MR_2CeoVHSw9D2c8rBrQiib5DgAQ1hiAXj");
+    public static final byte[] BLACK_HOLE_ADDRESS = AddressTool.getAddress("tNULSeBaMkqeHbTxwKqyquFcbewVTUDHPkF11o");
 
     public static final int BAK_BLOCK_MAX_COUNT = 500;
 }
