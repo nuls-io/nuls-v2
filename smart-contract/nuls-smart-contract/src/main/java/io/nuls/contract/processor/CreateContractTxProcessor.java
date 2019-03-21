@@ -64,7 +64,10 @@ public class CreateContractTxProcessor {
     private ContractHelper contractHelper;
 
     public Result onCommit(int chainId, ContractWrapperTransaction tx) {
+        BlockHeader blockHeader = contractHelper.getCurrentBlockHeader(chainId);
+        byte[] stateRoot = blockHeader.getStateRoot();
         ContractResult contractResult = tx.getContractResult();
+        contractResult.setStateRoot(stateRoot);
         contractService.saveContractExecuteResult(chainId, tx.getHash(), contractResult);
 
         ContractData txData = tx.getContractData();
@@ -76,7 +79,7 @@ public class CreateContractTxProcessor {
             return getSuccess();
         }
 
-        BlockHeader blockHeader = contractHelper.getCurrentBlockHeader(chainId);
+
         NulsDigestData hash = tx.getHash();
         long blockHeight = blockHeader.getHeight();
         tx.setBlockHeight(blockHeight);

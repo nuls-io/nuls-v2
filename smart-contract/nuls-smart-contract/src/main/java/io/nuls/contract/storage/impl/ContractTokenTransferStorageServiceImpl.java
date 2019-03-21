@@ -43,7 +43,6 @@ import static io.nuls.contract.util.ContractUtil.getFailed;
 import static io.nuls.contract.util.ContractUtil.getSuccess;
 
 /**
- * @desription:
  * @author: PierreLuo
  * @date: 2018/6/5
  */

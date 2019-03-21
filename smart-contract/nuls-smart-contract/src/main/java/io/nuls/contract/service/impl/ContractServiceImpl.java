@@ -186,6 +186,8 @@ public class ContractServiceImpl implements ContractService {
             }
             Result<byte[]> batchExecuteResult = contractCaller.commitBatchExecute(batchExecutor);
             byte[] stateRoot = batchExecuteResult.getData();
+            currentBlockHeader.setStateRoot(stateRoot);
+
             ContractPackageDto dto = new ContractPackageDto(stateRoot, resultTxList);
             dto.makeContractResultMap(contractResultList);
             contractHelper.getChain(chainId).setContractPackageDto(dto);
@@ -212,9 +214,14 @@ public class ContractServiceImpl implements ContractService {
             ContractPackageDto contractPackageDto = contractHelper.getChain(chainId).getContractPackageDto();
             if (contractPackageDto != null) {
                 Map<String, ContractResult> contractResultMap = contractPackageDto.getContractResultMap();
+                /** pierre test code + */
+                Set<String> txHexSet = contractResultMap.keySet();
+                txHexSet.stream().forEach(hex -> Log.info("contract execute txHex is {}", hex));
+                /** pierre test code - */
                 ContractResult contractResult;
                 ContractWrapperTransaction wrapperTx;
                 for (String txHex : txHexList) {
+                    Log.info("commit txHex is {}", txHex);
                     //TODO pierre  是否根据交易管理模块传来的交易来保存合约结果
                     contractResult = contractResultMap.get(txHex);
                     if (contractResult == null) {

@@ -24,6 +24,8 @@
 package io.nuls.contract.processor;
 
 
+import io.nuls.base.data.BlockHeader;
+import io.nuls.contract.helper.ContractHelper;
 import io.nuls.contract.model.bo.ContractResult;
 import io.nuls.contract.model.bo.ContractWrapperTransaction;
 import io.nuls.contract.service.ContractService;
@@ -43,9 +45,14 @@ public class DeleteContractTxProcessor {
 
     @Autowired
     private ContractService contractService;
+    @Autowired
+    private ContractHelper contractHelper;
 
     public Result onCommit(int chainId, ContractWrapperTransaction tx) {
+        BlockHeader blockHeader = contractHelper.getCurrentBlockHeader(chainId);
+        byte[] stateRoot = blockHeader.getStateRoot();
         ContractResult contractResult = tx.getContractResult();
+        contractResult.setStateRoot(stateRoot);
         contractService.saveContractExecuteResult(chainId, tx.getHash(), contractResult);
         return getSuccess();
     }

@@ -25,6 +25,7 @@ package io.nuls.contract.tx.base;
 
 
 import io.nuls.base.basic.AddressTool;
+import io.nuls.contract.model.bo.Chain;
 import io.nuls.contract.model.txdata.CallContractData;
 import io.nuls.contract.model.txdata.ContractData;
 import io.nuls.contract.util.ContractUtil;
@@ -36,6 +37,27 @@ import java.math.BigInteger;
  * @date: 2018/12/4
  */
 public class Base {
+
+    protected Chain chain;
+    protected static int chainId = 12345;
+    protected static int assetId = 1;
+
+    protected static String password = "nuls123456";//"nuls123456";
+
+    protected String sender = "5MR_2CjZkQsN7EnEPcaLgNrMrp6wpPGN6xo";
+
+    protected String hash = "0020e8497478003a0158420e546f16e51544000c8dec17c0321b51eff2e6a71d3864";
+    protected String contractAddress = "5MR_3Q2vLmFRq1CwtgFBB3b69BJ2efTuZ1S";
+
+    protected String callHash = "002030663e43e65d53a49052e3ad061752326f03a9d40c9dc9dbc817859946512107";
+
+
+
+
+
+
+
+
     static String[] contractAddressSeeds = {
             "5MR_3PyGq4CgbfoH7sCZ5PoAXPCrzKokBTF",
             "5MR_3QANzLfMffP22BbyaBnQddkJQArJtJ7",
