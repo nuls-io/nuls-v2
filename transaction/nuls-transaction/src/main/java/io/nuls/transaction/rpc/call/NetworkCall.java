@@ -132,7 +132,12 @@ public class NetworkCall {
             params.put("excludeNodes", excludeNodes);
             params.put("messageBody", HexUtil.byteToHex(message.serialize()));
             params.put("command", message.getCommand());
-            return ResponseMessageProcessor.requestAndResponse(ModuleE.NW.abbr, "nw_broadcast", params).isSuccess();
+            Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.NW.abbr, "nw_broadcast", params);
+            if(!response.isSuccess()){
+                Log.error("Calling nw_broadcast failed response:{}", response);
+                return false;
+            }
+            return true;
         } catch (Exception e) {
             Log.error("Calling remote interface failed. module:{} - interface:{}", ModuleE.NW.abbr, "nw_broadcast");
             throw new NulsException(e);
@@ -156,7 +161,12 @@ public class NetworkCall {
             params.put("messageBody", HexUtil.byteToHex(message.serialize()));
             params.put("command", message.getCommand());
 
-            return ResponseMessageProcessor.requestAndResponse(ModuleE.NW.abbr, "nw_sendPeersMsg", params).isSuccess();
+            Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.NW.abbr, "nw_sendPeersMsg", params);
+            if(!response.isSuccess()){
+                Log.error("Calling nw_sendPeersMsg failed response:{}", response);
+                return false;
+            }
+            return true;
         } catch (Exception e) {
             Log.error("Calling remote interface failed. module:{} - interface:{}", ModuleE.NW.abbr, "nw_sendPeersMsg");
             throw new NulsException(e);

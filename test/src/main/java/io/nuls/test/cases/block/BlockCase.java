@@ -20,6 +20,7 @@ import io.nuls.tools.core.annotation.Component;
  * 8.通过hash查询远程节点的区块
  * 9.与本地结果进行比对
  */
+@TestCase("block")
 @Component
 public class BlockCase extends TestCaseChain {
 

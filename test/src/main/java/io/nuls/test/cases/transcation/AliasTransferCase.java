@@ -19,7 +19,7 @@ import io.nuls.tools.core.annotation.Component;
  * 4.检查本地别名是否已设置成功
  * 5.检查网络节点账户信息是否一致
  */
-@TestCase("setAlias")
+//@TestCase("setAlias")
 @Component
 public class AliasTransferCase extends TestCaseChain {
 

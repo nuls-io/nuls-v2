@@ -24,7 +24,7 @@ import io.nuls.tools.core.annotation.Component;
  * 7.远程导入此账户，查询余额是否与本地一致
  */
 @Component
-@TestCase("transcation")
+//@TestCase("transcation")
 public class TransferCase extends TestCaseChain {
 
     @Override
