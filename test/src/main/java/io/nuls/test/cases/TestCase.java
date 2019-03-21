@@ -8,10 +8,12 @@ import java.lang.annotation.Target;
 /**
  * @Author: zhoulijun
  * @Time: 2019-03-19 20:49
- * @Description: 功能描述
+ * @Description: 自动启动的测试用例
  */
 @Target({ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
 public @interface TestCase {
+
+    String value();
 
 }

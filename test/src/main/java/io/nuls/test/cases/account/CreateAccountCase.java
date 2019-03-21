@@ -2,6 +2,7 @@ package io.nuls.test.cases.account;
 
 import io.nuls.api.provider.Result;
 import io.nuls.api.provider.account.facade.CreateAccountReq;
+import io.nuls.test.cases.Constants;
 import io.nuls.test.cases.TestFailException;
 import io.nuls.tools.core.annotation.Component;
 
@@ -20,7 +21,7 @@ public class CreateAccountCase extends BaseAccountCase<String,Void> {
 
     @Override
     public String doTest(Void param,int depth) throws TestFailException {
-        Result<String> result = accountService.createAccount(new CreateAccountReq(1,AccountConstants.PASSWORD));
+        Result<String> result = accountService.createAccount(new CreateAccountReq(1, Constants.PASSWORD));
         checkResultStatus(result);
         if(result.getList() == null || result.getList().isEmpty()){
             throw new TestFailException("创建账户返回结果不符合预期，list为空");
