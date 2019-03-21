@@ -18,4 +18,8 @@ public class Constants {
 
     public static final String REMARK = "test_remark";
 
+    public static String getAlias(String address){
+        return address.substring(address.length() - 10,address.length());
+    }
+
 }

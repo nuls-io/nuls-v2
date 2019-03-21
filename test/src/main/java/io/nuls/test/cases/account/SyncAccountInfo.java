@@ -1,13 +1,15 @@
-package io.nuls.test.cases.ledger;
+package io.nuls.test.cases.account;
 
 import io.nuls.api.provider.Result;
 import io.nuls.api.provider.ServiceManager;
+import io.nuls.api.provider.account.facade.AccountInfo;
+import io.nuls.api.provider.account.facade.GetAccountByAddressReq;
+import io.nuls.api.provider.account.facade.GetAccountPrivateKeyByAddressReq;
 import io.nuls.api.provider.ledger.LedgerProvider;
 import io.nuls.api.provider.ledger.facade.AccountBalanceInfo;
 import io.nuls.api.provider.ledger.facade.GetBalanceReq;
 import io.nuls.test.Config;
 import io.nuls.test.cases.*;
-import io.nuls.test.cases.account.GetAccountPriKeyCase;
 import io.nuls.test.cases.ledger.GetAccountBalanceByPriKeyCase;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
@@ -25,7 +27,7 @@ import java.math.BigInteger;
  * 4.比对本地与远程一致性
  */
 @Component
-public class SyncAccountBalance implements TestCaseIntf<String, String> {
+public class SyncAccountInfo extends BaseAccountCase<String, String> {
 
     LedgerProvider ledgerProvider = ServiceManager.get(LedgerProvider.class);
 
@@ -42,20 +44,24 @@ public class SyncAccountBalance implements TestCaseIntf<String, String> {
 
     @Override
     public String doTest(String address, int depth) throws TestFailException {
-        Result<AccountBalanceInfo> result = ledgerProvider.getBalance(new GetBalanceReq(config.getAssetsId(),config.getChainId(),address));
-        check(result.getData().getTotal().equals(Constants.TRANSFER_AMOUNT),"接收资产账户总余额不符合预期");
-        check(result.getData().getAvailable().equals(Constants.TRANSFER_AMOUNT),"接收资产账户可用不符合预期");
-        check(result.getData().getTotal().equals(BigInteger.ZERO),"接收资产账户冻结余额不符合预期");
-        String priKey = getAccountPriKeyCase.check(address,depth);
-        boolean res = new SyncRemoteTestCase<AccountBalanceInfo>(){
+        AccountInfo accountInfo = accountService.getAccountByAddress(new GetAccountByAddressReq(address)).getData();
+        Result<String> priKey = accountService.getAccountPrivateKey(new GetAccountPrivateKeyByAddressReq(Constants.PASSWORD,address));
+        new SyncRemoteTestCase<String>(){
 
             @Override
             public String title() {
-                return "远程比对账户余额";
+                return "远程节点通过私钥导入账户";
             }
-        }.check(new RemoteTestParam<>(GetAccountBalanceByPriKeyCase.class,result.getData(),priKey),depth);
+        }.check(new RemoteTestParam<>(ImportAccountByPriKeyCase.class,address,priKey),depth);
+        boolean res = new SyncRemoteTestCase<AccountInfo>(){
+
+            @Override
+            public String title() {
+                return "远程比对账户信息一致性";
+            }
+        }.check(new RemoteTestParam<>(GetAccountByAddressCase.class,accountInfo,address),depth);
         if(!res){
-            throw new TestFailException("远程账户余额与本地不一致");
+            throw new TestFailException("远程账户信息与本地不一致");
         }
         return address;
     }
