@@ -5,6 +5,7 @@ import io.netty.channel.socket.SocketChannel;
 import io.netty.handler.codec.http.FullHttpResponse;
 import io.netty.handler.codec.http.websocketx.*;
 import io.netty.util.CharsetUtil;
+import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.netty.channel.manager.ConnectManager;
 import io.nuls.rpc.netty.handler.message.TextMessageHandler;
 import io.nuls.tools.log.Log;
@@ -23,7 +24,9 @@ public class ClientHandler extends SimpleChannelInboundHandler<Object> {
     private WebSocketClientHandshaker handShaker;
     private ChannelPromise handshakeFuture;
 
-    private ThreadLocal<ExecutorService> threadExecutorService = ThreadLocal.withInitial(() -> Executors.newFixedThreadPool(Thread.activeCount()));
+    //private ThreadLocal<ExecutorService> threadExecutorService = ThreadLocal.withInitial(() -> Executors.newFixedThreadPool(Constants.THREAD_POOL_SIZE));
+
+    private ExecutorService threadExecutorService =  Executors.newFixedThreadPool(Constants.THREAD_POOL_SIZE);
 
     @Override
     public void handlerAdded(ChannelHandlerContext ctx) {
@@ -86,7 +89,7 @@ public class ClientHandler extends SimpleChannelInboundHandler<Object> {
             } else if(msg instanceof TextWebSocketFrame){
                 TextWebSocketFrame txMsg = (TextWebSocketFrame) msg;
                 TextMessageHandler messageHandler = new TextMessageHandler((SocketChannel) ctx.channel(), txMsg.text());
-                threadExecutorService.get().execute(messageHandler);
+                threadExecutorService.execute(messageHandler);
             } else {
                 Log.warn("Unsupported message format");
             }

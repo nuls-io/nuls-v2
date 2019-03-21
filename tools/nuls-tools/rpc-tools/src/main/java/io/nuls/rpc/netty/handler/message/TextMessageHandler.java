@@ -89,7 +89,6 @@ public class TextMessageHandler implements Runnable {
                     break;
                 case Request:
                     String messageId = message.getMessageId();
-//                    Log.debug("##messageId={}",messageId);
                     /*
                     Request，根据是否需要定时推送放入不同队列，等待处理
                     Request, put in different queues according to the response mode. Wait for processing
@@ -131,11 +130,7 @@ public class TextMessageHandler implements Runnable {
                     break;
                 case NegotiateConnectionResponse:
                 case Ack:
-//                    NegotiateConnectionResponse nres = JSONUtils.map2pojo((Map) message.getMessageData(), NegotiateConnectionResponse.class);
-//                    ResponseContainer resContainer = RequestContainer.getResponseContainer(nres.getRequestId());
-
                     ResponseContainer resContainer = RequestContainer.getResponseContainer(((Map<String, String>) message.getMessageData()).get("requestId"));
-
                     if (resContainer != null && resContainer.getFuture() != null) {
                         resContainer.getFuture().complete(new Response());
                     }

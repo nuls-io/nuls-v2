@@ -160,10 +160,6 @@ public class Constants {
      */
     public static final int SKIP_AND_REMOVE = 4;
 
-
-
-
-
     /**
      * 用以生成messageId，自增长，模块内唯一
      * Used to generate message Id, self-growing, unique within the module
@@ -213,6 +209,8 @@ public class Constants {
     }
 
     public static final int TRY_COUNT = 3;
+
+    public static final int THREAD_POOL_SIZE = 200;
 
     /**
      * 参数类型
