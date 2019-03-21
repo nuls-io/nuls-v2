@@ -96,7 +96,7 @@ public class Base {
             "5MR_2CWKhFuoGVraaxL5FYY3RsQLjLDN7jw",
             "5MR_2CgwCFRoJ8KX37xNqjjR7ttYuJsg8rk",
             "5MR_2CjZkQsN7EnEPcaLgNrMrp6wpPGN6xo",
-            "5MR_2CeG11nRqx7nGNeh8hTXADibqfSYeNu",
+            "tNULSeBaMvEtDfvZuukDf2mVyfGo3DdiN8KLRG",
             "5MR_2CVCFWH7o8AmrTBPLkdg2dYH1UCUJiM",
             "5MR_2CfUsasd33vQV3HqGw6M3JwVsuVxJ7r",
             "5MR_2CVuGjQ3CYVkhFszxfSt6sodg1gDHYF"};
@@ -109,10 +109,10 @@ public class Base {
     };
 
     static String[][] methodArgsSeeds = {
-            {"5MR_2CeG11nRqx7nGNeh8hTXADibqfSYeNu", "10000"},
-            {"5MR_2CeG11nRqx7nGNeh8hTXADibqfSYeNu", "10000"},
-            {"5MR_2CeG11nRqx7nGNeh8hTXADibqfSYeNu", "10000"},
-            {"5MR_2CeG11nRqx7nGNeh8hTXADibqfSYeNu", "10000"}
+            {"tNULSeBaMvEtDfvZuukDf2mVyfGo3DdiN8KLRG", "10000"},
+            {"tNULSeBaMvEtDfvZuukDf2mVyfGo3DdiN8KLRG", "10000"},
+            {"tNULSeBaMvEtDfvZuukDf2mVyfGo3DdiN8KLRG", "10000"},
+            {"tNULSeBaMvEtDfvZuukDf2mVyfGo3DdiN8KLRG", "10000"}
     };
 
     private ContractData makeCallContractData(String sender, String contractAddress, long value, String methodName, Object[] args) {

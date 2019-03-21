@@ -35,11 +35,23 @@ public class AccountToolTest {
     @Test
     public void testValid() {
         String address1 = "tNULSeBaMrNbr7kDHan5tBVms4fUZbfzed6851";
-        boolean result = AddressTool.validAddress(2,address1);
+        boolean result = AddressTool.validAddress(2, address1);
         assertTrue(!result);
 
-         address1 = "NULSeBaMrNbr7kDHan5tBVms4fUZbfzed685k";
-         result = AddressTool.validAddress(1,address1);
+        address1 = "NULSeBaMrNbr7kDHan5tBVms4fUZbfzed685k";
+        result = AddressTool.validAddress(1, address1);
         assertTrue(!result);
+    }
+
+    @Test
+    public void testGetAddress() {
+        String address = "tNULSeBaMvEtDfvZuukDf2mVyfGo3DdiN8KLRG";
+
+        byte[] bytes = AddressTool.getAddress(address);
+
+        String address1 = AddressTool.getStringAddressByBytes(bytes);
+
+        assertTrue(address.equalsIgnoreCase(address1));
+
     }
 }

@@ -57,7 +57,7 @@ public class CreateTxThread implements Runnable {
     static String address23 = "5MR_2CWKhFuoGVraaxL5FYY3RsQLjLDN7jw";
     static String address24 = "5MR_2CgwCFRoJ8KX37xNqjjR7ttYuJsg8rk";
     static String address25 = "5MR_2CjZkQsN7EnEPcaLgNrMrp6wpPGN6xo";
-    static String address26 = "5MR_2CeG11nRqx7nGNeh8hTXADibqfSYeNu";
+    static String address26 = "tNULSeBaMvEtDfvZuukDf2mVyfGo3DdiN8KLRG";
     static String address27 = "5MR_2CVCFWH7o8AmrTBPLkdg2dYH1UCUJiM";
     static String address28 = "5MR_2CfUsasd33vQV3HqGw6M3JwVsuVxJ7r";
     static String address29 = "5MR_2CVuGjQ3CYVkhFszxfSt6sodg1gDHYF";

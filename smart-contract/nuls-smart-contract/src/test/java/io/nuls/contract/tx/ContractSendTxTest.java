@@ -69,7 +69,7 @@ public class ContractSendTxTest extends Base {
     static String address24 = "5MR_2CgwCFRoJ8KX37xNqjjR7ttYuJsg8rk";
 
     static String address25 = "5MR_2CjZkQsN7EnEPcaLgNrMrp6wpPGN6xo";
-    static String address26 = "5MR_2CeG11nRqx7nGNeh8hTXADibqfSYeNu";
+    static String address26 = "tNULSeBaMvEtDfvZuukDf2mVyfGo3DdiN8KLRG";
     static String address27 = "5MR_2CVCFWH7o8AmrTBPLkdg2dYH1UCUJiM";
     static String address28 = "5MR_2CfUsasd33vQV3HqGw6M3JwVsuVxJ7r";
     static String address29 = "5MR_2CVuGjQ3CYVkhFszxfSt6sodg1gDHYF";
@@ -101,7 +101,7 @@ public class ContractSendTxTest extends Base {
     public void importPriKeyTest() {
         importPriKey("00d9748b9ba0cdee3bc9d45c09eb9928b5809c4132a0ef70b19779e72a22258f47", password);//打包地址 5MR_2CbDGZXZRc7SnBEKuCubTUkYi9JXcCu
         importPriKey("00def3b0f4bfad2a6abb5f6957829e752a1a30806edc35e98016425d578fdc4e77", password);//25 5MR_2CjZkQsN7EnEPcaLgNrMrp6wpPGN6xo
-        importPriKey("1c2b9fd4417c1aad8ae9f24c982ff294eb50a6462b873b79a879e805a9990346", password);//26 5MR_2CeG11nRqx7nGNeh8hTXADibqfSYeNu
+        importPriKey("1c2b9fd4417c1aad8ae9f24c982ff294eb50a6462b873b79a879e805a9990346", password);//26 tNULSeBaMvEtDfvZuukDf2mVyfGo3DdiN8KLRG
         importPriKey("00c98ecfd3777745270cacb9afba17ef0284769a83ff2adb4106b8a0baaec9452c", password);//27 5MR_2CVCFWH7o8AmrTBPLkdg2dYH1UCUJiM
         importPriKey("23848d45b4b34aca8ff24b00949a25a2c9175faf283675128e189eee8b085942", password);//28 5MR_2CfUsasd33vQV3HqGw6M3JwVsuVxJ7r
         importPriKey("009560d5ed6587822b7aee6f318f50b312c281e4f330b6990396881c6d3f870bc1", password);//29 5MR_2CVuGjQ3CYVkhFszxfSt6sodg1gDHYF
@@ -242,7 +242,7 @@ public class ContractSendTxTest extends Base {
         String methodName = "transfer";
         String methodDesc = "";
         String remark = "call contract test - 空气币转账";
-        String toAddress = "5MR_2CeG11nRqx7nGNeh8hTXADibqfSYeNu";
+        String toAddress = "tNULSeBaMvEtDfvZuukDf2mVyfGo3DdiN8KLRG";
         String token = BigInteger.TEN.pow(8).toString();
         Map params = this.makeCallParams(sender, value, contractAddress, methodName, methodDesc, remark, toAddress, token);
         Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, CALL, params);
@@ -276,7 +276,7 @@ public class ContractSendTxTest extends Base {
         String contractAddress = "5MR_3Q7wWxaKnh4X74kYkubbNa4jouHMMYX";//TODO pierre 待定
         String methodName = "transfer";
         String methodDesc = "";
-        String toAddress = "5MR_2CeG11nRqx7nGNeh8hTXADibqfSYeNu";
+        String toAddress = "tNULSeBaMvEtDfvZuukDf2mVyfGo3DdiN8KLRG";
         String token = BigInteger.TEN.pow(8).toString();
         Map params = this.makeValidateCallParams(sender, value, contractAddress, methodName, methodDesc, toAddress, token);
         Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, CALL, params);
@@ -308,7 +308,7 @@ public class ContractSendTxTest extends Base {
         String contractAddress = "5MR_3Q7wWxaKnh4X74kYkubbNa4jouHMMYX";//TODO pierre 待定
         String methodName = "transfer";
         String methodDesc = "";
-        String toAddress = "5MR_2CeG11nRqx7nGNeh8hTXADibqfSYeNu";
+        String toAddress = "tNULSeBaMvEtDfvZuukDf2mVyfGo3DdiN8KLRG";
         String token = BigInteger.TEN.pow(8).toString();
         Map params = this.makeImputedCallGasParams(sender, value, contractAddress, methodName, methodDesc, toAddress, token);
         Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, IMPUTED_CALL_GAS, params);
