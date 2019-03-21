@@ -45,7 +45,7 @@ public class SyncAccountBalance implements TestCaseIntf<String, String> {
         Result<AccountBalanceInfo> result = ledgerProvider.getBalance(new GetBalanceReq(config.getAssetsId(),config.getChainId(),address));
         check(result.getData().getTotal().equals(Constants.TRANSFER_AMOUNT),"接收资产账户总余额不符合预期");
         check(result.getData().getAvailable().equals(Constants.TRANSFER_AMOUNT),"接收资产账户可用不符合预期");
-        check(result.getData().getTotal().equals(BigInteger.ZERO),"接收资产账户冻结余额不符合预期");
+        check(result.getData().getFreeze().equals(BigInteger.ZERO),"接收资产账户冻结余额不符合预期");
         String priKey = getAccountPriKeyCase.check(address,depth);
         boolean res = new SyncRemoteTestCase<AccountBalanceInfo>(){
 

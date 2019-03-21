@@ -1,10 +1,12 @@
 package io.nuls.api.provider.transaction;
 
+import com.fasterxml.jackson.core.io.UTF8Writer;
 import io.nuls.api.provider.BaseReq;
 import io.nuls.api.provider.BaseRpcService;
 import io.nuls.api.provider.Provider;
 import io.nuls.api.provider.Result;
 import io.nuls.api.provider.transaction.facade.*;
+import io.nuls.base.basic.AddressTool;
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.constant.TxStatusEnum;
 import io.nuls.base.data.Coin;
@@ -12,6 +14,7 @@ import io.nuls.base.data.Transaction;
 import io.nuls.rpc.model.ModuleE;
 import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.exception.NulsException;
+import io.nuls.tools.model.ByteUtils;
 import io.nuls.tools.model.DateUtils;
 import io.nuls.tools.model.StringUtils;
 import lombok.extern.slf4j.Slf4j;
@@ -19,6 +22,8 @@ import lombok.extern.slf4j.Slf4j;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+
+import static java.nio.charset.StandardCharsets.UTF_8;
 
 /**
  * @Author: zhoulijun
@@ -93,7 +98,7 @@ public class TransferServiceForRpc extends BaseRpcService implements TransferSer
             res.setBlockHeight(transaction.getBlockHeight());
             res.setStatus(transaction.getStatus());
             res.setHash(transaction.getHash().toString());
-            res.setRemark(HexUtil.encode(transaction.getRemark()));
+            res.setRemark(ByteUtils.asString(transaction.getRemark()));
             res.setInBlockIndex(transaction.getInBlockIndex());
             res.setSize(transaction.getSize());
             res.setTime(DateUtils.timeStamp2DateStr(transaction.getTime()));
@@ -114,7 +119,7 @@ public class TransferServiceForRpc extends BaseRpcService implements TransferSer
 
     private TransactionCoinData buildTransactionCoinData(Coin coinData){
         TransactionCoinData tcd = new TransactionCoinData();
-        tcd.setAddress(HexUtil.encode(coinData.getAddress()));
+        tcd.setAddress(AddressTool.getStringAddressByBytes(coinData.getAddress()));
         tcd.setAmount(coinData.getAmount());
         tcd.setAssetsChainId(coinData.getAssetsChainId());
         tcd.setAssetsId(coinData.getAssetsId());
