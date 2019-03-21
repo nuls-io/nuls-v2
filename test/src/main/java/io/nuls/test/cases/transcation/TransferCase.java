@@ -34,7 +34,7 @@ public class TransferCase extends TestCaseChain {
                 TransferToAddressCase.class,
                 Sleep10SecCase.class,
                 GetTxInfoCase.class,
-                GetTranscationFormAddressCase.class,
+                GetTranscationToAddressCase.class,
                 SyncAccountBalance.class
         };
     }
