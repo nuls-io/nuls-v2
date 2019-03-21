@@ -144,15 +144,16 @@ public class CallMethodUtils {
      *
      * @param chainId chain ID
      * @param block   new block Info
+     * @param timeOut 接口超时时间
      * @return Successful Sending
      */
     @SuppressWarnings("unchecked")
-    public static boolean receivePackingBlock(int chainId, String block) throws NulsException {
+    public static boolean receivePackingBlock(int chainId, String block,long timeOut) throws NulsException {
         Map<String, Object> params = new HashMap(4);
         params.put("chainId", chainId);
         params.put("block", block);
         try {
-            Response callResp = ResponseMessageProcessor.requestAndResponse(ModuleE.BL.abbr, "receivePackingBlock", params);
+            Response callResp = ResponseMessageProcessor.requestAndResponse(ModuleE.BL.abbr, "receivePackingBlock", params,timeOut);
             return callResp.isSuccess();
         } catch (Exception e) {
             throw new NulsException(e);
