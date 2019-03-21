@@ -34,8 +34,4 @@ public class RemoteResult<T> {
         this.msg = msg;
     }
 
-    public boolean isSuccss(){
-        return success;
-    }
-
 }

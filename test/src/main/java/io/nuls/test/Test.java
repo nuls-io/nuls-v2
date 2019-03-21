@@ -21,7 +21,7 @@ public class Test {
     public static void main(String[] args) {
         RemoteCaseReq req = new RemoteCaseReq();
         req.setCaseClass(GetLastBlockHeaderCase.class);
-        RestFulUtils.getInstance().setServerUri("http://127.0.0.1:9999/api");
+        RestFulUtils.getInstance().setServerUri("http://192.168.1.66:9999/api");
         RemoteResult<BlockHeaderData> res = RestFulUtils.getInstance().post("/remote/call", MapUtils.beanToMap(req));
         log.info("res:{}",res);
     }
