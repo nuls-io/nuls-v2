@@ -64,7 +64,9 @@ public abstract class SyncRemoteTestCase<T> implements TestCaseIntf<Boolean, Rem
     public Map doRemoteTest(String node, Class<? extends TestCaseIntf> caseCls, Object param) throws TestFailException {
         RemoteCaseReq req = new RemoteCaseReq();
         req.setCaseClass(caseCls);
-        req.setParam(Utils.toJson(param));
+        if(param != null){
+            req.setParam(Utils.toJson(param));
+        }
 //        try {
 //            req.setParam(JSONUtils.obj2json(param));
 //        } catch (JsonProcessingException e) {
@@ -74,7 +76,7 @@ public abstract class SyncRemoteTestCase<T> implements TestCaseIntf<Boolean, Rem
         Log.debug("call {} remote case:{}",node,req);
         RemoteResult<Map> result = RestFulUtils.getInstance().post("remote/call", MapUtils.beanToMap(req));
         Log.debug("call remote case returl :{}",result);
-        checkResultStatus(result);
+        checkResultStatus(new Result(result.getData()));
         return result.getData();
     }
 
