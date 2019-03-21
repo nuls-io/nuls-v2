@@ -165,7 +165,7 @@ public class ConsensusProcess {
             return;
         }
         try {
-            boolean receiveSuccess = CallMethodUtils.receivePackingBlock(chain.getConfig().getChainId(), HexUtil.encode(block.serialize()));
+            boolean receiveSuccess = CallMethodUtils.receivePackingBlock(chain.getConfig().getChainId(), HexUtil.encode(block.serialize()),self.getPackEndTime() - CallMethodUtils.currentTime());
             if(!receiveSuccess){
                 consensusLogger.info("add block interface call failed!");
             }
@@ -183,7 +183,7 @@ public class ConsensusProcess {
         long timeout = chain.getConfig().getPackingInterval()/5;
         long endTime = self.getPackStartTime() + timeout;
         boolean hasReceiveNewestBlock;
-        if(CallMethodUtils.currentTime() >= endTime){
+        if(CallMethodUtils.currentTime() >= endTime+20){
             return;
         }
         try {
