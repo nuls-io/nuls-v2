@@ -90,14 +90,6 @@ public class TransactionBootstrap extends RpcModule {
             initSys();
             //初始化数据库配置文件
             initDB();
-
-            LoggerContext context = (LoggerContext) LoggerFactory.getILoggerFactory();
-            Logger mybatisLogger = context.getLogger("org.apache.ibatis");
-            mybatisLogger.setLevel(Level.DEBUG);
-
-            Logger sqlLogger = context.getLogger("java.sql");
-            mybatisLogger.setLevel(Level.DEBUG);
-//            mybatisLogger.addAppender();
         } catch (Exception e) {
             Log.error("Transaction init error!");
             Log.error(e);
