@@ -108,6 +108,7 @@ public class BlockBootstrap extends RpcModule {
                 List<Integer> systemTypes = TransactionUtil.getSystemTypes(chainId);
                 while (systemTypes == null || systemTypes.size() == 0 || !systemTypes.contains(1)) {
                     Thread.sleep(1000);
+                    systemTypes = TransactionUtil.getSystemTypes(chainId);
                 }
                 //服务初始化
                 service.init(chainId);
