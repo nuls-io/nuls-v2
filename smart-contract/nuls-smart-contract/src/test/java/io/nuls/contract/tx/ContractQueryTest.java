@@ -92,7 +92,7 @@ public class ContractQueryTest extends Base {
         String decimals = "2";
         Map params = this.makePreCreateParams(sender, contractCode, remark, name, symbol, amount, decimals);
         Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, PRE_CREATE, params);
-        Log.info("pre_create-Response:{}", cmdResp2);
+        Log.info("pre_create-Response:{}", JSONUtils.obj2PrettyJson(cmdResp2));
         Assert.assertTrue(cmdResp2.isSuccess());
     }
     private Map makePreCreateParams(String sender, byte[] contractCode, String remark, Object... args) {
@@ -148,7 +148,7 @@ public class ContractQueryTest extends Base {
         String decimals = "2";
         Map params = this.makeValidateCreateParams(sender, contractCode, name, symbol, amount, decimals);
         Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, VALIDATE_CREATE, params);
-        Log.info("validate_create-Response:{}", cmdResp2);
+        Log.info("validate_create-Response:{}", JSONUtils.obj2PrettyJson(cmdResp2));
         Assert.assertTrue(cmdResp2.isSuccess());
     }
     private Map makeValidateCreateParams(String sender, byte[] contractCode, Object... args) {
@@ -174,7 +174,7 @@ public class ContractQueryTest extends Base {
         String token = BigInteger.TEN.pow(8).toString();
         Map params = this.makeValidateCallParams(sender, value, contractAddress, methodName, methodDesc, toAddress, token);
         Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, VALIDATE_CALL, params);
-        Log.info("validateCall-Response:{}", cmdResp2);
+        Log.info("validateCall-Response:{}", JSONUtils.obj2PrettyJson(cmdResp2));
         Assert.assertTrue(cmdResp2.isSuccess());
     }
     private Map makeValidateCallParams(String sender, BigInteger value, String contractAddress, String methodName, String methodDesc, Object... args) {
@@ -387,7 +387,7 @@ public class ContractQueryTest extends Base {
      */
     @Test
     public void contractTx() throws Exception {
-        Map params = this.makeContractTxParams(callHash);
+        Map params = this.makeContractTxParams(hash);
         Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, CONTRACT_TX, params);
         Map result = (HashMap) (((HashMap) cmdResp2.getResponseData()).get(CONTRACT_TX));
         Assert.assertTrue(null != result);
@@ -397,6 +397,24 @@ public class ContractQueryTest extends Base {
         Map<String, Object> params = new HashMap<>();
         params.put("chainId", chainId);
         params.put("hash", hash);
+        return params;
+    }
+
+    /**
+     *  验证删除合约
+     */
+    @Test
+    public void validateDelete() throws Exception {
+        Map params = this.makeValidateDeleteParams(sender, contractAddress);
+        Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, VALIDATE_DELETE, params);
+        Log.info("validateDelete-Response:{}", JSONUtils.obj2PrettyJson(cmdResp2));
+        Assert.assertTrue(cmdResp2.isSuccess());
+    }
+    private Map makeValidateDeleteParams(String sender, String contractAddress) {
+        Map<String, Object> params = new HashMap<>();
+        params.put("chainId", chainId);
+        params.put("sender", sender);
+        params.put("contractAddress", contractAddress);
         return params;
     }
 
