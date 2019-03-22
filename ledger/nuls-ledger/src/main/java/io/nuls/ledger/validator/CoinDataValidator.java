@@ -83,6 +83,7 @@ public class CoinDataValidator {
     @Autowired
     private Repository repository;
 
+
     /**
      * 区块提交时进行校验
      *
@@ -145,15 +146,15 @@ public class CoinDataValidator {
     /**
      * 开始批量校验
      */
-    public boolean blockValidate(int chainId, long height,List<Transaction> txs) {
-        LoggerUtil.logger.debug("peer blocksValidate chainId={},height={},txsNumber={}",chainId,height,txs.size());
+    public boolean blockValidate(int chainId, long height, List<Transaction> txs) {
+        LoggerUtil.logger.debug("peer blocksValidate chainId={},height={},txsNumber={}", chainId, height, txs.size());
         Map<String, String> batchValidateTxMap = new ConcurrentHashMap();
         Map<String, List<TempAccountState>> accountValidateTxMap = new ConcurrentHashMap<>();
-        for(Transaction tx : txs){
-            LoggerUtil.logger.debug("peer blocksValidate chainId={},height={},txHash={}",chainId,height,tx.getHash().toString());
-            ValidateResult validateResult =confirmedTxsValidate(chainId,tx,batchValidateTxMap,accountValidateTxMap);
-            if(VALIDATE_SUCCESS_CODE != validateResult.getValidateCode()){
-                LoggerUtil.logger.error("code={},msg={}",validateResult.getValidateCode(),validateResult.getValidateCode());
+        for (Transaction tx : txs) {
+            LoggerUtil.logger.debug("peer blocksValidate chainId={},height={},txHash={}", chainId, height, tx.getHash().toString());
+            ValidateResult validateResult = confirmedTxsValidate(chainId, tx, batchValidateTxMap, accountValidateTxMap);
+            if (VALIDATE_SUCCESS_CODE != validateResult.getValidateCode()) {
+                LoggerUtil.logger.error("code={},msg={}", validateResult.getValidateCode(), validateResult.getValidateCode());
                 return false;
             }
         }
@@ -177,17 +178,16 @@ public class CoinDataValidator {
      */
     public ValidateResult bathValidatePerTx(int chainId, Transaction tx) {
         Map<String, String> batchValidateTxMap = getBatchValidateTxMap(chainId);
-        return confirmedTxsValidate(chainId, tx, batchValidateTxMap,accountBalanceValidateTxMap);
+        return confirmedTxsValidate(chainId, tx, batchValidateTxMap, accountBalanceValidateTxMap);
     }
 
     /**
-     *
      * @param chainId
      * @param tx
      * @param batchValidateTxMap
      * @return
      */
-    public ValidateResult confirmedTxsValidate(int chainId, Transaction tx, Map<String, String> batchValidateTxMap,Map<String, List<TempAccountState>> accountValidateTxMap) {
+    public ValidateResult confirmedTxsValidate(int chainId, Transaction tx, Map<String, String> batchValidateTxMap, Map<String, List<TempAccountState>> accountValidateTxMap) {
         //先校验，再逐笔放入缓存
         //交易的 hash值如果已存在，返回false，交易的from coin nonce 如果不连续，则存在双花。
         String txHash = tx.getHash().toString();
@@ -211,7 +211,7 @@ public class CoinDataValidator {
             AccountState accountState = accountStateService.getAccountState(AddressTool.getStringAddressByBytes(coinFrom.getAddress()), chainId, coinFrom.getAssetsChainId(), coinFrom.getAssetsId());
             //判断是否是解锁操作
             if (coinFrom.getLocked() == 0) {
-                if (!isValidateCommonTxBatch(accountState, coinFrom, nonce8BytesStr,  accountValidateTxMap)) {
+                if (!isValidateCommonTxBatch(accountState, coinFrom, nonce8BytesStr, accountValidateTxMap)) {
                     return new ValidateResult(VALIDATE_DOUBLE_EXPENSES_CODE, String.format("validate fail"));
                 }
             } else {
@@ -286,7 +286,7 @@ public class CoinDataValidator {
      * @param txNonce
      * @return
      */
-    private boolean isValidateCommonTxBatch(AccountState accountState, CoinFrom coinFrom, String txNonce,Map<String, List<TempAccountState>> accountValidateTxMap) {
+    private boolean isValidateCommonTxBatch(AccountState accountState, CoinFrom coinFrom, String txNonce, Map<String, List<TempAccountState>> accountValidateTxMap) {
         String fromCoinNonce = HexUtil.encode(coinFrom.getNonce());
         String address = AddressTool.getStringAddressByBytes(coinFrom.getAddress());
         String assetKey = LedgerUtil.getKeyStr(address, coinFrom.getAssetsChainId(), coinFrom.getAssetsId());
@@ -445,4 +445,46 @@ public class CoinDataValidator {
         return validateResult;
     }
 
+    /**
+     * 批量打包单笔交易回滚处理
+     */
+    public boolean rollbackTxValidateStatus(int chainId, Transaction tx) {
+        String txHash = tx.getHash().toString();
+        if (null == chainsBatchValidateTxMap.get(txHash)) {
+            logger.info("{} tx not exist!", txHash);
+            return true;
+        }
+        CoinData coinData = CoinDataUtil.parseCoinData(tx.getCoinData());
+        if (null == coinData) {
+            //例如黄牌交易，直接移除返回.
+            chainsBatchValidateTxMap.remove(txHash);
+            return true;
+        }
+        List<CoinFrom> coinFroms = coinData.getFrom();
+        String nonce8BytesStr = LedgerUtil.getNonceStrByTxHash(tx);
+        for (CoinFrom coinFrom : coinFroms) {
+            if (LedgerUtil.isNotLocalChainAccount(chainId, coinFrom.getAddress())) {
+                //非本地网络账户地址,不进行处理
+                continue;
+            }
+            //判断是否是解锁操作
+            if (coinFrom.getLocked() == 0) {
+                String assetKey = LedgerUtil.getKeyStr(AddressTool.getStringAddressByBytes(coinFrom.getAddress()), coinFrom.getAssetsChainId(), coinFrom.getAssetsId());
+                //回滚accountBalanceValidateTxMap缓存数据
+                List<TempAccountState> list = accountBalanceValidateTxMap.get(assetKey);
+                if (null == list) {
+                    continue;
+                } else {
+                    TempAccountState tempAccountState = list.get(list.size() - 1);
+                    if (tempAccountState.getNextNonce().equalsIgnoreCase(nonce8BytesStr)) {
+                        list.remove(list.size() - 1);
+                    }
+                }
+            } else {
+                //解锁交易,暂无缓存记录
+            }
+        }
+        chainsBatchValidateTxMap.remove(tx.getHash().toString());
+        return true;
+    }
 }

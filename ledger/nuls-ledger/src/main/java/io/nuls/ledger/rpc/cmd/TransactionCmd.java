@@ -187,7 +187,7 @@ public class TransactionCmd extends BaseLedgerCmd {
         try {
             Integer chainId = (Integer) params.get("chainId");
             long blockHeight = Long.valueOf(params.get("blockHeight").toString());
-            LoggerUtil.logger.debug("rollBackBlockTxs chainId={},blockHeight={}", chainId, blockHeight);
+            LoggerUtil.txRollBackLog.debug("rollBackBlockTxs chainId={},blockHeight={}", chainId, blockHeight);
             if (transactionService.rollBackConfirmTxs(chainId, blockHeight)) {
                 value = 1;
             } else {
