@@ -8,6 +8,7 @@ import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.core.config.ConfigSetting;
 import io.nuls.tools.core.ioc.SpringLiteContext;
 import io.nuls.tools.parse.JSONUtils;
+import lombok.extern.slf4j.Slf4j;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -28,6 +29,7 @@ import java.util.function.Function;
  */
 @Path("/remote/")
 @Component
+@Slf4j
 public class RemoteTestController {
 
 
@@ -66,6 +68,7 @@ public class RemoteTestController {
         Type[] params = ((ParameterizedType) type).getActualTypeArguments();
         Class<T> reponseClass = (Class) params[1];
         TestCaseIntf tc = SpringLiteContext.getBean(caseClass);
+        log.debug("begin remote call : {}",req);
         try {
             Object param;
             if(ConfigSetting.isPrimitive(reponseClass)){

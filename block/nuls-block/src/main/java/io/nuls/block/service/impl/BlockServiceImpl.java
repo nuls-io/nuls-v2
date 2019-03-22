@@ -224,11 +224,12 @@ public class BlockServiceImpl implements BlockService {
 
             //2.设置最新高度,如果失败则恢复上一个高度
             long startTime2 = System.nanoTime();
-            if (!blockStorageService.setLatestHeight(chainId, height)) {
+            boolean setHeight = blockStorageService.setLatestHeight(chainId, height);
+            if (!setHeight) {
                 if (!blockStorageService.setLatestHeight(chainId, height - 1)) {
                     throw new DbRuntimeException("setLatestHeight error!");
                 }
-                commonLog.error("set latest height fail!chainId-" + chainId + ",height-" + height);
+                commonLog.error("setHeight false, chainId-" + chainId + ",height-" + height);
                 return false;
             }
             long elapsedNanos2 = System.nanoTime() - startTime2;
@@ -237,14 +238,16 @@ public class BlockServiceImpl implements BlockService {
             //3.保存区块头, 保存交易
             long startTime3 = System.nanoTime();
             BlockHeaderPo blockHeaderPo = BlockUtil.toBlockHeaderPo(block);
-            if (!blockStorageService.save(chainId, blockHeaderPo) || !TransactionUtil.save(chainId, blockHeaderPo, block.getTxs(), localInit)) {
+            boolean headerSave = blockStorageService.save(chainId, blockHeaderPo);
+            boolean txSave = TransactionUtil.save(chainId, blockHeaderPo, block.getTxs(), localInit);
+            if (!headerSave || !txSave) {
                 if (!blockStorageService.remove(chainId, height)) {
                     throw new DbRuntimeException("remove blockheader error!");
                 }
                 if (!blockStorageService.setLatestHeight(chainId, height - 1)) {
                     throw new DbRuntimeException("setLatestHeight error!");
                 }
-                commonLog.error("save blockheader fail!chainId-" + chainId + ",height-" + height);
+                commonLog.error("headerSave-"+headerSave+", txsSave-"+txSave+", chainId-" + chainId + ",height-" + height);
                 return false;
             }
             long elapsedNanos3 = System.nanoTime() - startTime3;
@@ -252,7 +255,8 @@ public class BlockServiceImpl implements BlockService {
 
             //4.通知共识模块
             long startTime4 = System.nanoTime();
-            if (!ConsensusUtil.saveNotice(chainId, header, localInit)) {
+            boolean csNotice = ConsensusUtil.saveNotice(chainId, header, localInit);
+            if (!csNotice) {
                 if (!TransactionUtil.rollback(chainId, blockHeaderPo)) {
                     throw new DbRuntimeException("TransactionUtil rollback error!");
                 }
@@ -262,7 +266,7 @@ public class BlockServiceImpl implements BlockService {
                 if (!blockStorageService.setLatestHeight(chainId, height - 1)) {
                     throw new DbRuntimeException("setLatestHeight error!");
                 }
-                commonLog.error("ConsensusUtil saveNotice fail!chainId-" + chainId + ",height-" + height);
+                commonLog.error("csNotice false!chainId-" + chainId + ",height-" + height);
                 return false;
             }
             long elapsedNanos4 = System.nanoTime() - startTime4;

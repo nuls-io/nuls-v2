@@ -43,4 +43,5 @@ public class TransferByAliasReq extends BaseReq {
      */
     private String remark;
 
+
 }

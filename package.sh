@@ -20,7 +20,7 @@ EOF
 
 #获取参数
 #输出目录
-MODULES_PATH="./Modules"
+MODULES_PATH="./RELEASE"
 #是否马上更新代码
 DOPULL=
 #是否生成mykernel模块
@@ -76,7 +76,7 @@ doMvn(){
 		mkdir ${moduleLogDir}
 	fi
 	installLog="${moduleLogDir}/log.log";
-	mvn clean $1 -Dmaven.test.skip=true > "${installLog}" 2>&1
+	#mvn clean $1 -Dmaven.test.skip=true > "${installLog}" 2>&1
 	mvnSuccess=$(grep "BUILD SUCCESS" ${installLog})
 	if [ ! -n "$mvnSuccess" ]; then 
 		echoRed "$1 $2 FAIL"
@@ -104,6 +104,16 @@ fi
 MODULES_PATH=$(cd "$MODULES_PATH"; pwd)
 echoYellow "Modules Path $MODULES_PATH"''
 log "==================BEGIN PACKAGE MODULES=============================="
+if [[ ! -d "$MODULES_PATH/bin" ]]; then
+	mkdir $MODULES_PATH/bin
+fi
+#存放脚本目录
+MODULES_BIN_PATH=$MODULES_PATH/bin
+if [[ ! -d "$MODULES_PATH/Modules" ]]; then
+	#statements
+	mkdir $MODULES_PATH/Modules
+fi
+MODULES_PATH=$MODULES_PATH/Modules
 #创建NULS_2.0公共模块目录
 if [ ! -d "$MODULES_PATH/Nuls" ]; then
 	mkdir $MODULES_PATH/Nuls
@@ -357,10 +367,10 @@ log "============ PACKAGE DONE ==============="
 
 if [ -n "${DOMOCK}" ]; then
 	log "BUILD start-mykernel script"
-	cp "${BUILD_PATH}/start-mykernel.sh" "${MODULES_PATH}/start.sh"
-	chmod u+x "${MODULES_PATH}/start.sh"
-	cp "${BUILD_PATH}/check-status.sh" "${MODULES_PATH}/"
-	chmod u+x "${MODULES_PATH}/check-status.sh"
+	cp "${BUILD_PATH}/start-mykernel.sh" "${MODULES_BIN_PATH}/start.sh"
+	chmod u+x "${MODULES_BIN_PATH}/start.sh"
+	cp "${BUILD_PATH}/check-status.sh" "${MODULES_BIN_PATH}/"
+	chmod u+x "${MODULES_BIN_PATH}/check-status.sh"
 #	cp "${BUILD_PATH}/cmd.sh" "${MODULES_PATH}/"
 #	chmod u+x "${MODULES_PATH}/cmd.sh"
 fi

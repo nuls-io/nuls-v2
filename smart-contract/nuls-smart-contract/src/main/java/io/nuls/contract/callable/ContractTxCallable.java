@@ -102,14 +102,20 @@ public class ContractTxCallable implements Callable<ContractResult> {
         contractData = tx.getContractData();
         // 创建合约无论成功与否，后续的其他的跳过执行，视作失败 -> 合约锁定中或者合约不存在
         if (container.isHasCreate()) {
-            return ContractResult.genFailed(contractData, "contract lock or not exist.");
+            contractResult = ContractResult.genFailed(contractData, "contract lock or not exist.");
+            checkCreateResult(tx, callableResult, contractResult);
+            return contractResult;
         }
         // 删除合约成功后，后续的其他的跳过执行，视作失败 -> 合约已删除
         if (container.isDelete()) {
-            return ContractResult.genFailed(contractData, "contract has been terminated.");
+            contractResult = ContractResult.genFailed(contractData, "contract has been terminated.");
+            checkCreateResult(tx, callableResult, contractResult);
+            return contractResult;
         }
         if (!ContractUtil.checkPrice(contractData.getPrice())) {
-            return ContractResult.genFailed(contractData, "The minimum value of price is 25.");
+            contractResult = ContractResult.genFailed(contractData, "The minimum value of price is 25.");
+            checkCreateResult(tx, callableResult, contractResult);
+            return contractResult;
         }
         switch (tx.getType()) {
             case TX_TYPE_CREATE_CONTRACT:

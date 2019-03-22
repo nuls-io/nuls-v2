@@ -19,7 +19,7 @@ public class GetTranscationToAddressAdapter implements TestCaseIntf<String, Tran
 
     @Override
     public String title() {
-        return "从交易对象中提取出金地址";
+        return "从交易对象中提取入金地址";
     }
 
     @Override

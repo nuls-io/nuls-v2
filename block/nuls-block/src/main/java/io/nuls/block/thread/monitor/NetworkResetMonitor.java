@@ -58,7 +58,7 @@ public class NetworkResetMonitor implements Runnable {
                 //判断该链的运行状态,只有正常运行时才会有区块高度监控
                 RunningStatusEnum status = context.getStatus();
                 if (!status.equals(RunningStatusEnum.RUNNING)) {
-                    commonLog.info("skip process, status is " + status + ", chainId-" + chainId);
+                    commonLog.debug("skip process, status is " + status + ", chainId-" + chainId);
                     return;
                 }
                 ChainParameters parameters = context.getParameters();

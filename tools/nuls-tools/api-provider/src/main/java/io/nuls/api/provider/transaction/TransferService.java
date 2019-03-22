@@ -26,7 +26,7 @@ public interface TransferService {
      * @param req
      * @return
      */
-    Result<String> transferByAlias(TransferByAliasReq req);
+    Result<String> transferByAlias(TransferReq req);
 
     /**
      * 通过hash获取交易信息 包含未确认的交易

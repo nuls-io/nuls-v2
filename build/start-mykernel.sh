@@ -38,7 +38,8 @@ if [ ! -n "$JAVA_EXIST" ]; then
 fi
 #echo "jdk version : `$JAVA -version `"
 MODULE_PATH=$(cd `dirname $0`;pwd)
-
+cd ../Modules/Nuls
+MODULE_PATH=$(pwd)
 if [ -z "${RUNBLOCK}" ];
 then
     ${JAVA} -server -classpath ./libs/*:./mykernel/1.0.0/mykernel-1.0.0.jar io.nuls.mykernel.MyKernelBootstrap startModule $MODULE_PATH $CONFIG
