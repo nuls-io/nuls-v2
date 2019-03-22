@@ -54,4 +54,14 @@ public class AccountToolTest {
         assertTrue(address.equalsIgnoreCase(address1));
 
     }
+
+    @Test
+    public void testChainId() {
+        String address = "tNULSeBaMnrs6JKrCy6TQdzYJZkMZJDng7QAsD";
+        int id = AddressTool.getChainIdByAddress(address);
+        System.out.println(id);
+
+        boolean result = AddressTool.validAddress(2, address);
+        assertTrue(result);
+    }
 }
