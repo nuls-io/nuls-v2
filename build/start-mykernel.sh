@@ -38,12 +38,13 @@ if [ ! -n "$JAVA_EXIST" ]; then
 fi
 #echo "jdk version : `$JAVA -version `"
 MODULE_PATH=$(cd `dirname $0`;pwd)
-
+cd ../Modules/Nuls
+MODULE_PATH=$(pwd)
 if [ -z "${RUNBLOCK}" ];
 then
-    ${JAVA} -server -Dsys.name=mykernel -classpath ./libs/*:./mykernel/1.0.0/mykernel-1.0.0.jar io.nuls.mykernel.MyKernelBootstrap startModule $MODULE_PATH $CONFIG
+    ${JAVA} -server -classpath ./libs/*:./mykernel/1.0.0/mykernel-1.0.0.jar io.nuls.mykernel.MyKernelBootstrap startModule $MODULE_PATH $CONFIG
 else
-    nohup ${JAVA} -server -Dsys.name=mykernel -classpath ./libs/*:./mykernel/1.0.0/mykernel-1.0.0.jar io.nuls.mykernel.MyKernelBootstrap startModule $MODULE_PATH $CONFIG > mykernel.log 2>&1 &
+    nohup ${JAVA} -server -classpath ./libs/*:./mykernel/1.0.0/mykernel-1.0.0.jar io.nuls.mykernel.MyKernelBootstrap startModule $MODULE_PATH $CONFIG > mykernel.log 2>&1 &
 fi
 
 
