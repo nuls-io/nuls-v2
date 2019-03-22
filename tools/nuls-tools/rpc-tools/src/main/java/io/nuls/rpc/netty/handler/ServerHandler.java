@@ -15,27 +15,28 @@ import java.util.concurrent.Executors;
 /**
  * 服务器端事件触发处理类
  * Server-side event trigger processing class
+ *
  * @author tag
  * 2019/2/21
- * */
+ */
 public class ServerHandler extends SimpleChannelInboundHandler<Object> {
 
     //private ThreadLocal<ExecutorService> threadExecutorService = ThreadLocal.withInitial(() -> Executors.newFixedThreadPool(Constants.THREAD_POOL_SIZE));
-    private ExecutorService threadExecutorService =  Executors.newFixedThreadPool(Constants.THREAD_POOL_SIZE);
+    private ExecutorService threadExecutorService = Executors.newFixedThreadPool(Constants.THREAD_POOL_SIZE);
 
     @Override
     public void channelActive(ChannelHandlerContext ctx) throws Exception {
         //SocketChannel socketChannel = (SocketChannel) ctx.channel();
         /*
-        * 缓存链接通道
-        * cache link channel
-        * */
+         * 缓存链接通道
+         * cache link channel
+         * */
         //ConnectManager.createConnectData(socketChannel,ConnectManager.getRemoteUri(socketChannel));
     }
 
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, Object msg) throws Exception {
-        if(msg instanceof TextWebSocketFrame){
+        if (msg instanceof TextWebSocketFrame) {
             TextWebSocketFrame txMsg = (TextWebSocketFrame) msg;
             TextMessageHandler messageHandler = new TextMessageHandler((SocketChannel) ctx.channel(), txMsg.text());
             threadExecutorService.execute(messageHandler);

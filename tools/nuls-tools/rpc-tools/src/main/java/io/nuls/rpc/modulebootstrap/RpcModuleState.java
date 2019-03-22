@@ -22,11 +22,11 @@ public enum RpcModuleState {
 
     final int index;
 
-    RpcModuleState(int index){
+    RpcModuleState(int index) {
         this.index = index;
     }
 
-    public int getIndex(){
+    public int getIndex() {
         return index;
     }
 

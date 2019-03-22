@@ -14,7 +14,7 @@ import java.util.Map;
 
 /**
  * @author tag
- * */
+ */
 public class KernelModule {
     /**
      * 模拟核心模块（Manager），测试专用
@@ -36,7 +36,7 @@ public class KernelModule {
         ConnectManager.startService = true;
         SpringLiteContext.init("io.nuls.rpc.cmd.kernel");
         ConnectManager.scanPackage("io.nuls.rpc.cmd.kernel");
-        ConnectManager.ROLE_MAP.put(ModuleE.KE.abbr,connectionInformation);
+        ConnectManager.ROLE_MAP.put(ModuleE.KE.abbr, connectionInformation);
         ConnectManager.updateStatus();
         // Get information from kernel
         //Thread.sleep(Integer.MAX_VALUE);
@@ -51,9 +51,9 @@ public class KernelModule {
                 .moduleRoles("test_role", new String[]{"1.0"})
                 .moduleVersion("1.0");
 
-        ConnectManager.getConnectByUrl("ws://"+ HostInfo.getLocalIP()+":8887/ws");
+        ConnectManager.getConnectByUrl("ws://" + HostInfo.getLocalIP() + ":8887/ws");
         // Get information from kernel
-        ResponseMessageProcessor.syncKernel("ws://"+ HostInfo.getLocalIP()+":8887/ws");
+        ResponseMessageProcessor.syncKernel("ws://" + HostInfo.getLocalIP() + ":8887/ws");
     }
 
     /**
@@ -65,15 +65,15 @@ public class KernelModule {
                 .moduleRoles("test_role1", new String[]{"1.0"})
                 .moduleVersion("1.0");
 
-        ConnectManager.getConnectByUrl("ws://"+ HostInfo.getLocalIP()+":8887/ws");
+        ConnectManager.getConnectByUrl("ws://" + HostInfo.getLocalIP() + ":8887/ws");
         // Get information from kernel
-        ResponseMessageProcessor.syncKernel("ws://"+ HostInfo.getLocalIP()+":8887/ws");
+        ResponseMessageProcessor.syncKernel("ws://" + HostInfo.getLocalIP() + ":8887/ws");
     }
 
-    public static void main(String[] args){
+    public static void main(String[] args) {
         try {
             mockKernel();
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
