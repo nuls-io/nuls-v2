@@ -16,9 +16,10 @@ import java.util.concurrent.Executors;
 /**
  * 客户端事件触发处理类
  * Client Event Triggering Processing Class
+ *
  * @author tag
  * 2019/2/21
- * */
+ */
 public class ClientHandler extends SimpleChannelInboundHandler<Object> {
 
     private WebSocketClientHandshaker handShaker;
@@ -26,12 +27,13 @@ public class ClientHandler extends SimpleChannelInboundHandler<Object> {
 
     //private ThreadLocal<ExecutorService> threadExecutorService = ThreadLocal.withInitial(() -> Executors.newFixedThreadPool(Constants.THREAD_POOL_SIZE));
 
-    private ExecutorService threadExecutorService =  Executors.newFixedThreadPool(Constants.THREAD_POOL_SIZE);
+    private ExecutorService threadExecutorService = Executors.newFixedThreadPool(Constants.THREAD_POOL_SIZE);
 
     @Override
     public void handlerAdded(ChannelHandlerContext ctx) {
         this.handshakeFuture = ctx.newPromise();
     }
+
     public WebSocketClientHandshaker getHandshaker() {
         return handShaker;
     }
@@ -52,7 +54,7 @@ public class ClientHandler extends SimpleChannelInboundHandler<Object> {
         return this.handshakeFuture;
     }
 
-    public ClientHandler(WebSocketClientHandshaker handShaker){
+    public ClientHandler(WebSocketClientHandshaker handShaker) {
         this.handShaker = handShaker;
     }
 
@@ -62,7 +64,7 @@ public class ClientHandler extends SimpleChannelInboundHandler<Object> {
     }
 
     @Override
-    protected void channelRead0(ChannelHandlerContext ctx, Object msg)throws Exception{
+    protected void channelRead0(ChannelHandlerContext ctx, Object msg) throws Exception {
         Channel ch = ctx.channel();
         FullHttpResponse response;
         if (!this.handShaker.isHandshakeComplete()) {
@@ -86,7 +88,7 @@ public class ClientHandler extends SimpleChannelInboundHandler<Object> {
 
             if (frame instanceof CloseWebSocketFrame) {
                 ch.close();
-            } else if(msg instanceof TextWebSocketFrame){
+            } else if (msg instanceof TextWebSocketFrame) {
                 TextWebSocketFrame txMsg = (TextWebSocketFrame) msg;
                 TextMessageHandler messageHandler = new TextMessageHandler((SocketChannel) ctx.channel(), txMsg.text());
                 threadExecutorService.execute(messageHandler);

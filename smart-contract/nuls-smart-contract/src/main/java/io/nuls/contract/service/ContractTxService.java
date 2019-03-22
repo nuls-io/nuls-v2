@@ -48,14 +48,6 @@ public interface ContractTxService {
     Result contractPreCreateTx(int chainId, String sender, Long gasLimit, Long price,
                                byte[] contractCode, String[][] args, String password, String remark);
 
-    LinkedList<Map<String, String>> getLocalUnconfirmedCreateContractTransaction(String sender);
-
-    void removeLocalUnconfirmedCreateContractTransaction(String sender, String contractAddress, ContractResult contractResult);
-
-    void removeLocalUnconfirmedCreateContractTransaction(String sender, String contractAddress);
-
-    void removeLocalFailedUnconfirmedCreateContractTransaction(String sender, String contractAddress);
-
     Result contractCallTx(int chainId, String sender, BigInteger value, Long gasLimit, Long price, String contractAddress,
                           String methodName, String methodDesc, String[][] args, String password, String remark);
 

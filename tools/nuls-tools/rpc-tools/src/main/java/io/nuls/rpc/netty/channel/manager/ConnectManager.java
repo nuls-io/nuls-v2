@@ -132,7 +132,7 @@ public class ConnectManager {
     /**
      * 当前正在处理的订阅请求数量
      * Number of subscription requests currently being processed
-     * */
+     */
     public static int subRequestCount = 0;
 
     /**
@@ -510,7 +510,7 @@ public class ConnectManager {
                     }
                 }
             }
-        }catch (Exception e){
+        } catch (Exception e) {
             Log.error(e);
         }
     }
@@ -666,7 +666,7 @@ public class ConnectManager {
      * Stop or disconnect a connection
      */
     public static void disConnect(SocketChannel channel) {
-        if(!ROLE_CHANNEL_MAP.values().contains(channel)){
+        if (!ROLE_CHANNEL_MAP.values().contains(channel)) {
             return;
         }
         Iterator<Map.Entry<String, Channel>> entries = ROLE_CHANNEL_MAP.entrySet().iterator();
@@ -713,7 +713,7 @@ public class ConnectManager {
 //                Log.debug("send message:{}",message);
                 channel.writeAndFlush(new TextWebSocketFrame(message));
             });
-        }catch (Exception e){
+        } catch (Exception e) {
             Log.error(e);
         }
     }
