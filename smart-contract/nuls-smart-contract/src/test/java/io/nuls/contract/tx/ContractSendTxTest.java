@@ -177,6 +177,29 @@ public class ContractSendTxTest extends Base {
         return params;
     }
 
+
+    /**
+     *  删除合约
+     */
+    @Test
+    public void delete() throws Exception {
+        String remark = "delete contract";
+        Map params = this.makeDeleteParams(sender, contractAddress, remark);
+        Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, DELETE, params);
+        Map result = (HashMap) (((HashMap) cmdResp2.getResponseData()).get(DELETE));
+        Assert.assertTrue(null != result);
+        Log.info("delete-result:{}", JSONUtils.obj2PrettyJson(result));
+    }
+    private Map makeDeleteParams(String sender, String contractAddress, String remark) {
+        Map<String, Object> params = new HashMap<>();
+        params.put("chainId", chainId);
+        params.put("sender", sender);
+        params.put("contractAddress", contractAddress);
+        params.put("password", password);
+        params.put("remark", remark);
+        return params;
+    }
+
     private void importPriKey(String priKey, String pwd) {
         try {
             //账户已存在则覆盖 If the account exists, it covers.
