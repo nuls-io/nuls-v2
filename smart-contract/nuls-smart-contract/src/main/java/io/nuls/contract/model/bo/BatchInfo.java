@@ -25,7 +25,7 @@ package io.nuls.contract.model.bo;
 
 import io.nuls.base.data.BlockHeader;
 import io.nuls.contract.helper.ContractConflictChecker;
-import io.nuls.contract.manager.TempBalanceManager;
+import io.nuls.contract.manager.ContractTempBalanceManager;
 import io.nuls.contract.model.dto.ContractPackageDto;
 import io.nuls.contract.vm.program.ProgramExecutor;
 import io.nuls.tools.model.StringUtils;
@@ -51,7 +51,7 @@ public class BatchInfo {
     /**
      * 智能合约临时余额
      */
-    private TempBalanceManager tempBalanceManager;
+    private ContractTempBalanceManager tempBalanceManager;
 
     /**
      * 当前正在打包的区块头
