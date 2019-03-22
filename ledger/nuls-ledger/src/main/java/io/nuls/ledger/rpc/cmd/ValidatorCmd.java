@@ -27,6 +27,7 @@ package io.nuls.ledger.rpc.cmd;
 
 import io.nuls.base.data.Transaction;
 import io.nuls.ledger.model.ValidateResult;
+import io.nuls.ledger.service.TransactionService;
 import io.nuls.ledger.utils.LoggerUtil;
 import io.nuls.ledger.validator.CoinDataValidator;
 import io.nuls.rpc.model.CmdAnnotation;
@@ -49,6 +50,8 @@ import java.util.Map;
 public class ValidatorCmd extends BaseLedgerCmd {
     @Autowired
     CoinDataValidator coinDataValidator;
+    @Autowired
+    TransactionService transactionService;
 
     /**
      * validate coin entity
@@ -74,6 +77,9 @@ public class ValidatorCmd extends BaseLedgerCmd {
             if (isBatchValidate) {
                 LoggerUtil.logger.debug("确认交易校验：chainId={},txHash={},isBatchValidate={}", chainId, tx.getHash().toString(), isBatchValidate);
                 validateResult = coinDataValidator.bathValidatePerTx(chainId, tx);
+                if(CoinDataValidator.VALIDATE_SUCCESS_CODE != validateResult.getValidateCode()){
+                      transactionService.rollBackUnconfirmTx(chainId,tx);
+                }
             } else {
                 LoggerUtil.logger.debug("未确认交易校验：chainId={},txHash={},isBatchValidate={}", chainId, tx.getHash().toString(), isBatchValidate);
                 validateResult = coinDataValidator.validateCoinData(chainId, tx);
@@ -86,6 +92,46 @@ public class ValidatorCmd extends BaseLedgerCmd {
             LoggerUtil.logger.error("validateCoinData exception:{}", e.getMessage());
         }
         return response;
+    }
+    /**
+     * 逐笔回滚未确认交易
+     *
+     * @param params
+     * @return
+     */
+    @CmdAnnotation(cmd = "rollbackTxValidateStatus",
+            version = 1.0, scope = "private", minEvent = 0, minPeriod = 0,
+            description = "")
+    @Parameter(parameterName = "chainId", parameterType = "int")
+    @Parameter(parameterName = "txHex", parameterType = "String")
+    public Response rollbackTxValidateStatus(Map params) {
+        Map<String, Object> rtData = new HashMap<>();
+        int value = 0;
+        try {
+            Integer chainId = (Integer) params.get("chainId");
+            String txHex = params.get("txHex").toString();
+            LoggerUtil.logger.debug("rollbackrTxValidateStatus chainId={}", chainId);
+            Transaction tx = parseTxs(txHex);
+            if (null == tx) {
+                LoggerUtil.logger.debug("txHex is invalid chainId={},txHex={}", chainId,txHex);
+                return failed("txHex is invalid");
+            }
+            LoggerUtil.txUnconfirmedRollBackLog.debug("rollbackrTxValidateStatus chainId={},txHash={}", chainId, tx.getHash().toString());
+            //清理未确认回滚
+            transactionService.rollBackUnconfirmTx(chainId,tx);
+            if (coinDataValidator.rollbackTxValidateStatus(chainId, tx)) {
+                value = 1;
+            } else {
+                value = 0;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        rtData.put("value", value);
+        Response response = success(rtData);
+        LoggerUtil.logger.debug("response={}", response);
+        return response;
+
     }
 
     /**
