@@ -1,12 +1,10 @@
 package io.nuls.test.cases.transcation;
 
-import io.nuls.api.provider.Result;
 import io.nuls.api.provider.ServiceManager;
 import io.nuls.api.provider.account.AccountService;
 import io.nuls.api.provider.account.facade.AccountInfo;
 import io.nuls.api.provider.account.facade.GetAccountByAddressReq;
 import io.nuls.test.cases.Constants;
-import io.nuls.test.cases.TestCaseIntf;
 import io.nuls.test.cases.TestFailException;
 import io.nuls.tools.core.annotation.Component;
 
@@ -17,7 +15,7 @@ import io.nuls.tools.core.annotation.Component;
  *
  */
 @Component
-public class CheckAliasCase implements TestCaseIntf<String,String> {
+public class CheckAliasCase extends BaseTranscationCase<String,String> {
 
     AccountService accountService = ServiceManager.get(AccountService.class);
 

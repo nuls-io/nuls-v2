@@ -5,11 +5,13 @@ import io.nuls.base.data.NulsDigestData;
 import io.nuls.base.data.Transaction;
 import io.nuls.db.service.RocksDBService;
 import io.nuls.tools.core.annotation.Service;
+import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.exception.NulsRuntimeException;
+import io.nuls.tools.model.StringUtils;
 import io.nuls.transaction.constant.TxDBConstant;
-import io.nuls.transaction.storage.rocksdb.UnconfirmedTxStorageService;
 import io.nuls.transaction.model.po.TransactionsPO;
+import io.nuls.transaction.storage.rocksdb.UnconfirmedTxStorageService;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -51,27 +53,35 @@ public class UnconfirmedTxStorageServiceImpl implements UnconfirmedTxStorageServ
         return result;
     }
 
-
     @Override
     public Transaction getTx(int chainId, NulsDigestData hash) {
         if (hash == null) {
             return null;
         }
-        byte[] hashBytes;
         try {
-            hashBytes = hash.serialize();
+            return getTx(chainId, hash.serialize());
         } catch (IOException e) {
             Log.error(e);
             throw new NulsRuntimeException(e);
         }
-        byte[] txBytes = RocksDBService.get(TxDBConstant.DB_TRANSACTION_CACHE + chainId, hashBytes);
+    }
+
+    @Override
+    public Transaction getTx(int chainId, String hash) {
+        if(StringUtils.isBlank(hash)){
+            return null;
+        }
+        return getTx(chainId, HexUtil.decode(hash));
+    }
+
+    private Transaction getTx(int chainId, byte[] hashSerialize){
+        byte[] txBytes = RocksDBService.get(TxDBConstant.DB_TRANSACTION_CACHE + chainId, hashSerialize);
         Transaction tx = null;
         if (null != txBytes) {
             try {
                 TransactionsPO txPO = new TransactionsPO();
                 txPO.parse(new NulsByteBuffer(txBytes, 0));
                 tx = txPO.toTransaction();
-                //tx = TxManager.getInstance(new NulsByteBuffer(txBytes, 0));
             } catch (Exception e) {
                 Log.error(e);
                 return null;

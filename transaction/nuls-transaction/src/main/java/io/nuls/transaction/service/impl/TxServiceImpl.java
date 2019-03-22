@@ -654,7 +654,6 @@ public class TxServiceImpl implements TxService {
                 TransactionConfirmedPO txConfirmed = confirmedTxService.getConfirmedTransaction(chain, tx.getHash());
                 if (txConfirmed != null) {
                     chain.getLoggerMap().get(TxConstant.LOG_TX).info("丢弃已确认过交易,txHash:{}, - type:{}, - time:{}", tx.getHash().getDigestHex(), tx.getType(), tx.getTime());
-                    clearInvalidTx(chain, tx, false);
                     continue;
                 }
 
@@ -1012,7 +1011,14 @@ public class TxServiceImpl implements TxService {
         }
     }
 
-    private void clearInvalidTx(Chain chain, Transaction tx, boolean rollbackLedger) {
+    @Override
+    public void clearInvalidTx(Chain chain, Transaction tx) {
+
+        //// TODO: 2019/3/21 判断如果交易已被确认就不用清理了!! 感觉要加锁
+        TransactionConfirmedPO txConfirmed = confirmedTxService.getConfirmedTransaction(chain, tx.getHash());
+        if (txConfirmed != null) {
+            return;
+        }
         chain.getLoggerMap().get(TxConstant.LOG_TX).debug("---------------------- rollbackClear txHash: " + tx.getHash().getDigestHex());
         unconfirmedTxStorageService.removeTx(chain.getChainId(), tx.getHash());
         //移除H2交易记录
@@ -1020,20 +1026,12 @@ public class TxServiceImpl implements TxService {
         try {
             transactionH2Service.deleteTx(chain, tx);
             chain.getLoggerMap().get(TxConstant.LOG_TX).debug("---------------------- rollbackTxLedger -----------------------\n");
-            if (rollbackLedger) {
-                //通知账本回滚nonce
-                LedgerCall.rollBackUnconfirmTx(chain, tx.hex());
-            }
+            //通知账本回滚nonce
+            LedgerCall.rollBackUnconfirmTx(chain, tx.hex());
         } catch (NulsException e) {
             e.printStackTrace();
         } catch (Exception e) {
             e.printStackTrace();
         }
-
-    }
-
-    @Override
-    public void clearInvalidTx(Chain chain, Transaction tx) {
-        clearInvalidTx(chain, tx, true);
     }
 }

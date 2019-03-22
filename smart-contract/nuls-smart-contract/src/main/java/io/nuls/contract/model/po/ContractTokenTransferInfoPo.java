@@ -41,6 +41,7 @@ import java.util.Arrays;
 @Setter
 public class ContractTokenTransferInfoPo implements Serializable {
 
+    private byte[] txHash;
     private byte[] from;
     private byte[] to;
     private BigInteger value;
@@ -48,10 +49,9 @@ public class ContractTokenTransferInfoPo implements Serializable {
     private String name;
     private String symbol;
     private long decimals;
+    private long blockHeight;
     private long time;
     private byte status;
-    private byte[] txHash;
-    private long blockHeight;
 
 
     public String getInfo(byte[] address) {
@@ -71,6 +71,15 @@ public class ContractTokenTransferInfoPo implements Serializable {
         } else {
             return result.toPlainString();
         }
+    }
+
+    public int compareTo(long thatTime) {
+        if(this.time > thatTime) {
+            return -1;
+        } else if(this.time < thatTime) {
+            return 1;
+        }
+        return 0;
     }
 
 }

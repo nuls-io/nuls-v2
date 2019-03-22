@@ -303,7 +303,7 @@ public class TxUtil {
     }
 
     public static void txInformationDebugPrint(Chain chain, Transaction tx, NulsLogger nulsLogger) {
-        if(tx.getType() == 1) return;
+        if(tx.getType() == 1) {return;}
         nulsLogger.debug("");
         nulsLogger.debug("**************************************************");
         nulsLogger.debug("Transaction information");

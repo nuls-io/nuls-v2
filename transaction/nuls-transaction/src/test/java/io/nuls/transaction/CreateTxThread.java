@@ -47,20 +47,21 @@ import static io.nuls.transaction.utils.LoggerUtil.Log;
  * @date: 2019-01-25
  */
 public class CreateTxThread implements Runnable {
-    static int chainId = 12345;
-    static int assetChainId = 12345;
+    static int chainId = 2;
+    static int assetChainId = 2;
     static int assetId = 1;
 
-    static String address20 = "5MR_2CWWTDXc32s9Wd1guNQzPztFgkyVEsz";
-    static String address21 = "5MR_2CbdqKcZktcxntG14VuQDy8YHhc6ZqW";
-    static String address22 = "5MR_2Cj9tfgQpdeF7nDy5wyaGG6MZ35H3rA";
-    static String address23 = "5MR_2CWKhFuoGVraaxL5FYY3RsQLjLDN7jw";
-    static String address24 = "5MR_2CgwCFRoJ8KX37xNqjjR7ttYuJsg8rk";
-    static String address25 = "5MR_2CjZkQsN7EnEPcaLgNrMrp6wpPGN6xo";
-    static String address26 = "5MR_2CeG11nRqx7nGNeh8hTXADibqfSYeNu";
-    static String address27 = "5MR_2CVCFWH7o8AmrTBPLkdg2dYH1UCUJiM";
-    static String address28 = "5MR_2CfUsasd33vQV3HqGw6M3JwVsuVxJ7r";
-    static String address29 = "5MR_2CVuGjQ3CYVkhFszxfSt6sodg1gDHYF";
+
+    static String address20 = "tNULSeBaMvEtDfvZuukDf2mVyfGo3DdiN8KLRG";
+    static String address21 = "tNULSeBaMnrs6JKrCy6TQdzYJZkMZJDng7QAsD";
+    static String address22 = "tNULSeBaMrbMRiFAUeeAt6swb4xVBNyi81YL24";
+    static String address23 = "tNULSeBaMu38g1vnJsSZUCwTDU9GsE5TVNUtpD";
+    static String address24 = "tNULSeBaMp9wC9PcWEcfesY7YmWrPfeQzkN1xL";
+    static String address25 = "tNULSeBaMshNPEnuqiDhMdSA4iNs6LMgjY6tcL";
+    static String address26 = "tNULSeBaMoodYW7AqyJrgYdWiJ6nfwfVHHHyXm";
+    static String address27 = "tNULSeBaMmTNYqywL5ZSHbyAQ662uE3wibrgD1";
+    static String address28 = "tNULSeBaMoNnKitV28JeuUdBaPSR6n1xHfKLj2";
+    static String address29 = "tNULSeBaMqywZjfSrKNQKBfuQtVxAHBQ8rB2Zn";
 
     static String password = "nuls123456";
 

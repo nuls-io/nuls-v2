@@ -58,11 +58,11 @@ import static org.junit.Assert.assertTrue;
  * @date: 2019-01-15
  */
 public class TestJyc {
-    static String address23 = "5MR_2CbdqKcZktcxntG14VuQDy8YHhc6ZqW";
+    static String address23 = "tNULSeBaMu38g1vnJsSZUCwTDU9GsE5TVNUtpD";
 
     private static Chain chain;
-    static int chainId = 12345;
-    static int assetChainId = 12345;
+    static int chainId = 2;
+    static int assetChainId = 2;
     static int assetId = 1;
     static String version = "1.0";
 
@@ -93,8 +93,8 @@ public class TestJyc {
      */
     @Test
     public void importSeed() {
-        importPriKey("00c4a6b90d3f4eb7b50bc85fd0e99ccb717e148b4fde7462e14c590445e589588c", password);//5MR_2CbdqKcZktcxntG14VuQDy8YHhc6ZqW
-        importPriKey("00d9748b9ba0cdee3bc9d45c09eb9928b5809c4132a0ef70b19779e72a22258f47", password);//5MR_2CbDGZXZRc7SnBEKuCubTUkYi9JXcCu
+        importPriKey("bec819ef7d5beeb1593790254583e077e00f481982bce1a43ea2830a2dc4fdf7", password);//5MR_2CbdqKcZktcxntG14VuQDy8YHhc6ZqW
+        importPriKey("ddddb7cb859a467fbe05d5034735de9e62ad06db6557b64d7c139b6db856b200", password);//5MR_2CbDGZXZRc7SnBEKuCubTUkYi9JXcCu
     }
 
     @Test

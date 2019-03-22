@@ -1,8 +1,8 @@
 {
   "providerType": "RPC",
-  "chainId": 12345,
+  "chainId": 2,
   "assetsId": 1,
-  "testNodeType": "s",
+  "testNodeType": "master",
   "testNodeExclude": "192.168.1.145",
   "testSeedAccountPriKey": "1c2b9fd4417c1aad8ae9f24c982ff294eb50a6462b873b79a879e805a9990346"
 }

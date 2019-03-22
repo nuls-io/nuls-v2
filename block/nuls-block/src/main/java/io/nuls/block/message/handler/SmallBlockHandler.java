@@ -142,7 +142,6 @@ public class SmallBlockHandler extends BaseCmd {
                 if (null == tx) {
                     tx = TransactionUtil.getTransaction(chainId, hash);
                     if (tx != null) {
-                        subTxList.add(tx);
                         txMap.put(hash, tx);
                     }
                 }

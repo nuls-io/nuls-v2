@@ -3,6 +3,7 @@ package io.nuls.test.cases.transcation;
 import io.nuls.api.provider.ServiceManager;
 import io.nuls.api.provider.transaction.TransferService;
 import io.nuls.test.Config;
+import io.nuls.test.cases.BaseTestCase;
 import io.nuls.test.cases.TestCaseIntf;
 import io.nuls.tools.core.annotation.Autowired;
 import java.math.BigInteger;
@@ -12,7 +13,7 @@ import java.math.BigInteger;
  * @Time: 2019-03-21 10:13
  * @Description: 功能描述
  */
-public abstract class BaseTranscationCase<T,P> implements TestCaseIntf<T,P> {
+public abstract class BaseTranscationCase<T,P> extends BaseTestCase<T,P> {
 
 
     TransferService transferService = ServiceManager.get(TransferService.class);

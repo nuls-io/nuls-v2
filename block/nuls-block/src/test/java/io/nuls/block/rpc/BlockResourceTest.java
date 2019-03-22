@@ -45,7 +45,7 @@ import static io.nuls.block.constant.CommandConstant.*;
 
 public class BlockResourceTest {
 
-    private int chainId = 12345;
+    private int chainId = 2;
 
     @BeforeClass
     public static void start() throws Exception {

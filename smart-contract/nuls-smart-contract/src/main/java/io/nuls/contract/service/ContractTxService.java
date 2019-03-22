@@ -25,10 +25,12 @@ package io.nuls.contract.service;
 
 
 import io.nuls.contract.model.bo.ContractResult;
+import io.nuls.contract.model.po.ContractTokenTransferInfoPo;
 import io.nuls.tools.basic.Result;
 
 import java.math.BigInteger;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -66,4 +68,6 @@ public interface ContractTxService {
     Result contractDeleteTx(int chainId, String sender, String contractAddress, String password, String remark);
 
     Result validateContractDeleteTx(int chainId, String sender, String contractAddress);
+
+    Result<List<ContractTokenTransferInfoPo>> getTokenTransferInfoList(int chainId, String address);
 }

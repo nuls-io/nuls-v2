@@ -1,7 +1,7 @@
 
 {
   "chainConfig":{
-    "chainId":12345,
+    "chainId":2,
     "assetId":1,
     "txMaxSize":1048576,
     "moduleVerifyOffset":2000,
@@ -11,7 +11,7 @@
     "orphanTtl":3600000
   },
   "moduleCode":"tx",
-  "mainChainId": 12345,
+  "mainChainId": 2,
   "mainAssetId": 1,
   "language": "en",
   "encoding": "UTF-8",
