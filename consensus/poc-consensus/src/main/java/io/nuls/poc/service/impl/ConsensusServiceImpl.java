@@ -861,9 +861,10 @@ public class ConsensusServiceImpl implements ConsensusService {
         }
         if (status == 1) {
             chain.setCanPacking(true);
-            chain.getLoggerMap().get(ConsensusConstant.BASIC_LOGGER_NAME).debug("updateAgentStatus-修改节点打包状态成功......");
+            chain.getLoggerMap().get(ConsensusConstant.BASIC_LOGGER_NAME).debug("updateAgentStatus--节点打包状态修改成功，修改后状态为：可打包状态");
         } else {
             chain.setCanPacking(false);
+            chain.getLoggerMap().get(ConsensusConstant.BASIC_LOGGER_NAME).debug("updateAgentStatus--节点打包状态修改成功，修改后状态为：不可打包状态");
         }
         return Result.getSuccess(ConsensusErrorCode.SUCCESS);
 

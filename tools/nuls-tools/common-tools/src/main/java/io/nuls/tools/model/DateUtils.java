@@ -13,6 +13,8 @@ public class DateUtils {
     public final static long MINUTE_TIME = 1000 * 60;
     public final static long TIME_ZONE;
     public final static String TIME_ZONE_STRING;
+    private static SimpleDateFormat sdf_17 = new SimpleDateFormat(DEFAULT_TIMESTAMP_PATTERN);
+    private static SimpleDateFormat sdf_14 = new SimpleDateFormat(DEFAULT_PATTERN);
 
     static {
         Calendar cal = Calendar.getInstance();
@@ -41,7 +43,7 @@ public class DateUtils {
         if (date == null) {
             return EMPTY_SRING;
         }
-        return new SimpleDateFormat(DEFAULT_PATTERN).format(date);
+        return sdf_14.format(date);
     }
 
     /**
@@ -64,7 +66,7 @@ public class DateUtils {
      */
     public static Date convertStringToDate(String date) {
         try {
-            return new SimpleDateFormat(DEFAULT_PATTERN).parse(date);
+            return sdf_14.parse(date);
         } catch (ParseException e) {
         }
         return new Date();
@@ -678,8 +680,7 @@ public class DateUtils {
      * @return     日期格式字符串
      */
     public static String timeStamp2DateStr(long time) {
-        SimpleDateFormat sdf = new SimpleDateFormat(DEFAULT_TIMESTAMP_PATTERN);
-        return sdf.format(new Date(time));
+        return sdf_17.format(new Date(time));
     }
 
 
