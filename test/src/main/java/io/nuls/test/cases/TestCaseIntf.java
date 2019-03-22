@@ -15,10 +15,15 @@ public interface TestCaseIntf<T,P> {
     }
 
     default T check(P param,int depth) throws TestFailException{
-        Utils.success(depthSpace(depth)+"开始测试【"+title()+"】");
-        T res = doTest(param,depth+1);
-        Utils.success(depthSpace(depth) + title() + "测试通过");
-        return res;
+        if(this.caseType() == CaseType.Test){
+            Utils.success(depthSpace(depth)+"开始测试【"+title()+"】");
+            T res = doTest(param,depth+1);
+            Utils.success(depthSpace(depth) + title() + "测试通过");
+            return res;
+        }else{
+            Utils.msg("执行:【"+this.title()+"】");
+            return doTest(param,depth+1);
+        }
     }
 
     default void checkResultStatus(Result result) throws TestFailException {
@@ -40,5 +45,7 @@ public interface TestCaseIntf<T,P> {
     String title();
 
     T doTest(P param,int depth) throws TestFailException;
+
+    CaseType caseType();
 
 }

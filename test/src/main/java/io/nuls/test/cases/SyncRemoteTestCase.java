@@ -10,6 +10,7 @@ import io.nuls.test.controller.RemoteResult;
 import io.nuls.test.utils.RestFulUtils;
 import io.nuls.test.utils.Utils;
 import io.nuls.tools.core.annotation.Value;
+import io.nuls.tools.core.config.ConfigSetting;
 import io.nuls.tools.core.ioc.SpringLiteContext;
 import io.nuls.tools.log.Log;
 import io.nuls.tools.parse.JSONUtils;
@@ -27,13 +28,14 @@ import java.util.stream.Collectors;
  * @Time: 2019-03-20 11:48
  * @Description: 功能描述
  */
-public abstract class SyncRemoteTestCase<T> implements TestCaseIntf<Boolean, RemoteTestParam<T>> {
+public abstract class SyncRemoteTestCase<T> extends BaseTestCase<Boolean, RemoteTestParam<T>> {
 
     NetworkProvider networkProvider = ServiceManager.get(NetworkProvider.class);
 
     public boolean equals(T source,T remote){
         return source.equals(remote);
     }
+
 
     @Override
     public Boolean doTest(RemoteTestParam<T> param,int depth) throws TestFailException {
@@ -47,12 +49,35 @@ public abstract class SyncRemoteTestCase<T> implements TestCaseIntf<Boolean, Rem
             throw new TestFailException("remote fail ,network node is empty");
         }
         for (String node : nodeList) {
-            Map remoteRes = doRemoteTest(node,param.getCaseCls(),param.getParam());
+//            Map remoteRes = doRemoteTest(node,param.getCaseCls(),param.getParam());
+            RemoteCaseReq req = new RemoteCaseReq();
+            req.setCaseClass(param.getCaseCls());
+            if(param.getParam() != null){
+                req.setParam(Utils.toJson(param.getParam()));
+            }
+//        try {
+//            req.setParam(JSONUtils.obj2json(param));
+//        } catch (JsonProcessingException e) {
+//            throw new TestFailException("序列化远程测试参数错误", e);
+//        }
+            RestFulUtils.getInstance().setServerUri("http://" + node.split(":")[0] + ":9999/api");
+            Log.debug("call {} remote case:{}",node,req);
+            RemoteResult<T> result = RestFulUtils.getInstance().post("remote/call", MapUtils.beanToMap(req));
+            Log.debug("call remote case returl :{}",result);
+
+            checkResultStatus(new Result(result.getData()));
             Type type = this.getClass().getGenericSuperclass();
             Type[] params = ((ParameterizedType) type).getActualTypeArguments();
             Class<T> reponseClass = (Class) params[0];
-            T remoteData = JSONUtils.map2pojo(remoteRes,reponseClass);
-            boolean sync = this.equals(param.getSource(),remoteData);
+            boolean sync;
+            if(ConfigSetting.isPrimitive(reponseClass)){
+                sync = this.equals(param.getSource(),result.getData());
+            }else{
+                T remoteData = JSONUtils.map2pojo((Map)result.getData(),reponseClass);
+                sync = this.equals(param.getSource(),remoteData);
+            }
+//            JSONUtils.
+//            T remoteData = JSONUtils.map2pojo(remoteRes,reponseClass);
             if(!sync){
                 return false;
             }

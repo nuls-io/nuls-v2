@@ -1,7 +1,6 @@
 package io.nuls.test.cases.transcation;
 
-import io.nuls.test.cases.Sleep10SecCase;
-import io.nuls.test.cases.TestCase;
+import io.nuls.test.cases.SleepAdapter;
 import io.nuls.test.cases.TestCaseChain;
 import io.nuls.test.cases.TestCaseIntf;
 import io.nuls.test.cases.account.SyncAccountInfo;
@@ -19,7 +18,6 @@ import io.nuls.tools.core.annotation.Component;
  * 4.检查本地别名是否已设置成功
  * 5.检查网络节点账户信息是否一致
  */
-//@TestCase("setAlias")
 @Component
 public class AliasTransferCase extends TestCaseChain {
 
@@ -27,20 +25,20 @@ public class AliasTransferCase extends TestCaseChain {
     public Class<? extends TestCaseIntf>[] testChain() {
         return new Class[]{
                 SetAliasCase.class,
-                Sleep10SecCase.class,
+                SleepAdapter.$10SEC.class,
                 SyncTxInfoCase.class,
-                GetTranscationFormAddressCase.class,
+                GetTranscationFormAddressAdapter.class,
                 CheckAliasCase.class,
                 SyncAccountInfo.class,
                 TransferByAliasCase.class,
                 SyncTxInfoCase.class,
-                GetTranscationToAddressCase.class,
+                GetTranscationToAddressAdapter.class,
                 SyncAccountBalance.class
         };
     }
 
     @Override
     public String title() {
-        return null;
+        return "别名转账";
     }
 }

@@ -45,7 +45,7 @@ public class SyncAccountInfo extends BaseAccountCase<String, String> {
     @Override
     public String doTest(String address, int depth) throws TestFailException {
         AccountInfo accountInfo = accountService.getAccountByAddress(new GetAccountByAddressReq(address)).getData();
-        Result<String> priKey = accountService.getAccountPrivateKey(new GetAccountPrivateKeyByAddressReq(Constants.PASSWORD,address));
+        String priKey = accountService.getAccountPrivateKey(new GetAccountPrivateKeyByAddressReq(Constants.PASSWORD,address)).getData();
         new SyncRemoteTestCase<String>(){
 
             @Override

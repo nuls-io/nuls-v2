@@ -6,6 +6,7 @@ import io.nuls.api.provider.ledger.LedgerProvider;
 import io.nuls.api.provider.ledger.facade.AccountBalanceInfo;
 import io.nuls.api.provider.ledger.facade.GetBalanceReq;
 import io.nuls.test.Config;
+import io.nuls.test.cases.BaseTestCase;
 import io.nuls.test.cases.TestCaseIntf;
 import io.nuls.test.cases.TestFailException;
 import io.nuls.test.cases.account.ImportAccountByPriKeyCase;
@@ -18,7 +19,7 @@ import io.nuls.tools.core.annotation.Component;
  * @Description: 功能描述
  */
 @Component
-public class GetAccountBalanceByPriKeyCase implements TestCaseIntf<AccountBalanceInfo,String> {
+public class GetAccountBalanceByPriKeyCase extends BaseTestCase<AccountBalanceInfo,String> {
 
     LedgerProvider ledgerProvider = ServiceManager.get(LedgerProvider.class);
 

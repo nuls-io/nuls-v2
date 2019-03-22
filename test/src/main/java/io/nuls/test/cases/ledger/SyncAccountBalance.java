@@ -25,7 +25,7 @@ import java.math.BigInteger;
  * 4.比对本地与远程一致性
  */
 @Component
-public class SyncAccountBalance implements TestCaseIntf<String, String> {
+public class SyncAccountBalance extends BaseTestCase<String, String> {
 
     LedgerProvider ledgerProvider = ServiceManager.get(LedgerProvider.class);
 
