@@ -16,7 +16,7 @@ import io.nuls.tools.core.annotation.Component;
  * @Description: 功能描述
  */
 @Component
-public class GetLastBlockHeaderCase implements TestCaseIntf<BlockHeaderData,Void> {
+public class GetLastBlockHeaderCase extends BaseBlockCase<BlockHeaderData,Void> {
 
     BlockService blockService = ServiceManager.get(BlockService.class);
 

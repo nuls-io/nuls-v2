@@ -4,6 +4,7 @@ import io.nuls.api.provider.Result;
 import io.nuls.api.provider.ServiceManager;
 import io.nuls.api.provider.account.AccountService;
 import io.nuls.api.provider.account.facade.SetAccountAliasReq;
+import io.nuls.test.cases.BaseTestCase;
 import io.nuls.test.cases.Constants;
 import io.nuls.test.cases.TestCaseIntf;
 import io.nuls.test.cases.TestFailException;
@@ -15,7 +16,7 @@ import io.nuls.tools.core.annotation.Component;
  * @Description: 功能描述
  */
 @Component
-public class SetAliasCase implements TestCaseIntf<String,String> {
+public class SetAliasCase extends BaseTestCase<String,String> {
 
     AccountService accountService = ServiceManager.get(AccountService.class);
 

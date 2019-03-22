@@ -1,8 +1,7 @@
 package io.nuls.test.cases.transcation;
 
 import io.nuls.test.Config;
-import io.nuls.test.cases.Sleep10SecCase;
-import io.nuls.test.cases.TestCase;
+import io.nuls.test.cases.SleepAdapter;
 import io.nuls.test.cases.TestCaseChain;
 import io.nuls.test.cases.TestCaseIntf;
 import io.nuls.test.cases.account.CreateAccountCase;
@@ -24,7 +23,6 @@ import io.nuls.tools.core.annotation.Component;
  * 7.远程导入此账户，查询余额是否与本地一致
  */
 @Component
-@TestCase("transcation")
 public class TransferCase extends TestCaseChain {
 
     @Override
@@ -32,9 +30,9 @@ public class TransferCase extends TestCaseChain {
         return new Class[]{
                 CreateAccountCase.class,
                 TransferToAddressCase.class,
-                Sleep10SecCase.class,
+                SleepAdapter.$10SEC.class,
                 SyncTxInfoCase.class,
-                GetTranscationToAddressCase.class,
+                GetTranscationToAddressAdapter.class,
                 SyncAccountBalance.class
         };
     }
