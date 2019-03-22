@@ -94,7 +94,7 @@ public class ValidatorCmd extends BaseLedgerCmd {
         return response;
     }
     /**
-     * 逐笔回滚未确认交易
+     * 回滚打包确认交易状态
      *
      * @param params
      * @return
