@@ -21,7 +21,7 @@ public interface TestCaseIntf<T,P> {
             Utils.success(depthSpace(depth) + title() + "测试通过");
             return res;
         }else{
-            Utils.msg("执行:【"+this.title()+"】");
+            Utils.msg(depthSpace(depth)+"执行:【"+this.title()+"】");
             return doTest(param,depth+1);
         }
     }

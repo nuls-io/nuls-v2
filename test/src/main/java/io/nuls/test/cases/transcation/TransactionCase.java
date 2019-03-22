@@ -23,6 +23,6 @@ public class TransactionCase extends TestCaseChain {
 
     @Override
     public String title() {
-        return "交易测试";
+        return "交易模块";
     }
 }

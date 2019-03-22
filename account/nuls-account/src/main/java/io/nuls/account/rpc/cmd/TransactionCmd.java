@@ -48,6 +48,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 /**
  * @author: qinyifeng
@@ -354,8 +356,17 @@ public class TransactionCmd extends BaseCmd {
             // parse params
             JSONUtils.getInstance().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
             TransferDto transferDto = JSONUtils.json2pojo(JSONUtils.obj2json(params), TransferDto.class);
-            List<CoinDto> inputList = transferDto.getInputs();
-            List<CoinDto> outputList = transferDto.getOutputs();
+            Function<CoinDto,CoinDto> checkAddress = cd->{
+                //如果address 不是地址就当别名处理
+                if(!AddressTool.validAddress(transferDto.getChainId(),cd.getAddress())){
+                    AliasPo aliasPo = aliasStorageService.getAlias(transferDto.getChainId(), cd.getAddress());
+                    Preconditions.checkNotNull(aliasPo,AccountErrorCode.ALIAS_NOT_EXIST);
+                    cd.setAddress(AddressTool.getStringAddressByBytes(aliasPo.getAddress()));
+                }
+                return cd;
+            };
+            List<CoinDto> inputList = transferDto.getInputs().stream().map(checkAddress).collect(Collectors.toList());
+            List<CoinDto> outputList = transferDto.getOutputs().stream().map(checkAddress).collect(Collectors.toList());
             if (inputList == null || outputList == null) {
                 LoggerUtil.logger.warn("ac_transfer params input or output is null");
                 throw new NulsRuntimeException(AccountErrorCode.NULL_PARAMETER);
@@ -413,6 +424,7 @@ public class TransactionCmd extends BaseCmd {
      * @param params
      * @return
      */
+    @Deprecated(since = "使用transfer方法，此方法可接受别名转账")
     @CmdAnnotation(cmd = "ac_transferByAlias", version = 1.0, description = "transfer by alias")
     public Response transferByAlias(Map params) {
         LoggerUtil.logger.debug("ac_transferByAlias start");
@@ -441,13 +453,15 @@ public class TransactionCmd extends BaseCmd {
                 throw new NulsException(AccountErrorCode.PARAMETER_ERROR);
             }
             //根据别名查询出地址
-            AliasPo aliasPo = aliasStorageService.getAlias(chainId, alias);
-            Preconditions.checkNotNull(aliasPo,AccountErrorCode.ALIAS_NOT_EXIST);
+            AliasPo toAddressAliasPo = aliasStorageService.getAlias(chainId, alias);
+            Preconditions.checkNotNull(toAddressAliasPo,AccountErrorCode.ALIAS_NOT_EXIST);
+            AliasPo formAddressAliasPo = aliasStorageService.getAlias(chainId, alias);
+            Preconditions.checkNotNull(formAddressAliasPo,AccountErrorCode.ALIAS_NOT_EXIST);
             Chain chain = chainManager.getChainMap().get(chainId);
             Preconditions.checkNotNull(chain,AccountErrorCode.CHAIN_NOT_EXIST);
             int assetId = chain.getConfig().getAssetsId();
-            CoinDto fromCoinDto = new CoinDto(address, chainId, assetId, amount, password);
-            CoinDto toCoinDto = new CoinDto(AddressTool.getStringAddressByBytes(aliasPo.getAddress()),chainId,assetId,amount,null);
+            CoinDto fromCoinDto = new CoinDto(AddressTool.getStringAddressByBytes(formAddressAliasPo.getAddress()), chainId, assetId, amount, password);
+            CoinDto toCoinDto = new CoinDto(AddressTool.getStringAddressByBytes(toAddressAliasPo.getAddress()),chainId,assetId,amount,null);
             Transaction tx = transactionService.transferByAlias(chainId, fromCoinDto, toCoinDto, remark);
             map.put("txHash", tx.getHash().getDigestHex());
         } catch (NulsException e) {

@@ -126,15 +126,15 @@ public class TransferByAliasProcessor  extends TransactionBaseProcessor implemen
 
     @Override
     public CommandResult execute(String[] args) {
-        String alias = args[1];
-        String toAddress = args[2];
-        BigInteger amount = Na.parseNuls(args[3]).toBigInteger();
-        String remark = null;
-        if(args.length > 4){
-            remark = args[4];
-        }
-        String password = getPwd("Enter your account password");
-        Result<String> result = transferService.transferByAlias(new TransferByAliasReq(alias,toAddress,amount,password,remark));
+//        String alias = args[1];
+//        String toAddress = args[2];
+//        BigInteger amount = Na.parseNuls(args[3]).toBigInteger();
+//        String remark = null;
+//        if(args.length > 4){
+//            remark = args[4];
+//        }
+//        String password = getPwd("Enter your account password");
+        Result<String> result = transferService.transferByAlias(buildTransferReq(args));
         if (result.isFailed()) {
             return CommandResult.getFailed(result);
         }

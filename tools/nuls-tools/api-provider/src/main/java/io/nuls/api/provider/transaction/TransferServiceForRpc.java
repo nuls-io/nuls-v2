@@ -19,6 +19,7 @@ import io.nuls.tools.model.DateUtils;
 import io.nuls.tools.model.StringUtils;
 import lombok.extern.slf4j.Slf4j;
 
+import java.math.BigInteger;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -41,8 +42,19 @@ public class TransferServiceForRpc extends BaseRpcService implements TransferSer
     }
 
     @Override
-    public Result<String> transferByAlias(TransferByAliasReq req) {
-        return callReturnString("ac_transferByAlias",req,"txHash");
+    public Result<String> transferByAlias(TransferReq req) {
+//        String formAddress = req.getAlias();
+//        String toAddress = req.getAddress();
+//        BigInteger amount = req.getAmount();
+//        TransferReq.TransferReqBuilder builder =
+//                new TransferReq.TransferReqBuilder(req.getChainId(),config.get)
+//                        .addForm(formAddress,getPwd("Enter your account password"), amount)
+//                        .addTo(toAddress,amount);
+//        if(args.length == 5){
+//            builder.setRemark(args[4]);
+//        }
+//        return builder.build();
+        return callReturnString("ac_transfer",req,"value");
     }
 
     @Override
@@ -76,7 +88,7 @@ public class TransferServiceForRpc extends BaseRpcService implements TransferSer
     private Result<Transaction> tranderTransaction(Map<String,Object> data){
         try {
             String hexString = (String) data.get("txHex");
-            if(hexString == null){
+            if(StringUtils.isNull(hexString)){
                 return fail(ERROR_CODE,"not found tx");
             }
             Transaction transaction = new Transaction();
@@ -92,6 +104,7 @@ public class TransferServiceForRpc extends BaseRpcService implements TransferSer
     }
 
     private Result<TransactionData> tranderTransactionData(Result<Transaction>  data){
+        if(data.isFailed())return fail(ERROR_CODE,data.getMessage());
         try {
             Transaction transaction = data.getData();
             TransactionData res = new TransactionData();
