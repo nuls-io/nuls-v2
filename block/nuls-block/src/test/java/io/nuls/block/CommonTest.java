@@ -20,10 +20,13 @@
 
 package io.nuls.block;
 
+import io.nuls.base.basic.NulsByteBuffer;
+import io.nuls.base.data.NulsDigestData;
 import io.nuls.block.constant.ChainTypeEnum;
 import io.nuls.block.model.Chain;
 import io.nuls.block.model.Node;
 import io.nuls.tools.cache.LimitHashMap;
+import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.model.CollectionUtils;
 import org.junit.Assert;
 import org.junit.Test;
@@ -36,6 +39,32 @@ import java.util.concurrent.locks.StampedLock;
 import static io.nuls.block.constant.Constant.NODE_COMPARATOR;
 
 public class CommonTest {
+
+    @Test
+    public void name() throws NulsException {
+        {
+            List<NulsDigestData> list = new ArrayList<>();
+            NulsDigestData n1 = new NulsDigestData();
+            n1.parse(new NulsByteBuffer("00205a1df0c7633cab1f457397e7a8d80432d989253376d2123f5ad9189384089d7d".getBytes()));
+            list.add(n1);
+            NulsDigestData n2 = new NulsDigestData();
+            n2.parse(new NulsByteBuffer("0020103f2a6285c17e9c2d18688376315e46d60a2d2613ac3a23f91cada3c4671a2c".getBytes()));
+            list.add(n2);
+            String m1 = NulsDigestData.calcMerkleDigestData(list).toString();
+            System.out.println(m1);
+        }
+        {
+            List<NulsDigestData> list = new ArrayList<>();
+            NulsDigestData n1 = new NulsDigestData();
+            n1.parse(new NulsByteBuffer("0020103f2a6285c17e9c2d18688376315e46d60a2d2613ac3a23f91cada3c4671a2c".getBytes()));
+            list.add(n1);
+            NulsDigestData n2 = new NulsDigestData();
+            n2.parse(new NulsByteBuffer("00205a1df0c7633cab1f457397e7a8d80432d989253376d2123f5ad9189384089d7d".getBytes()));
+            list.add(n2);
+            String m1 = NulsDigestData.calcMerkleDigestData(list).toString();
+            System.out.println(m1);
+        }
+    }
 
     @Test
     public void test() {
