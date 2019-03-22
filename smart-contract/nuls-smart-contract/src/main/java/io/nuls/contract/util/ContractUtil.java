@@ -33,10 +33,7 @@ import io.nuls.contract.model.bo.ContractResult;
 import io.nuls.contract.model.bo.ContractTempTransaction;
 import io.nuls.contract.model.bo.ContractWrapperTransaction;
 import io.nuls.contract.model.po.ContractTokenTransferInfoPo;
-import io.nuls.contract.model.tx.CallContractTransaction;
-import io.nuls.contract.model.tx.ContractBaseTransaction;
-import io.nuls.contract.model.tx.CreateContractTransaction;
-import io.nuls.contract.model.tx.DeleteContractTransaction;
+import io.nuls.contract.model.tx.*;
 import io.nuls.contract.model.txdata.CallContractData;
 import io.nuls.contract.model.txdata.ContractData;
 import io.nuls.contract.model.txdata.CreateContractData;
@@ -528,6 +525,14 @@ public class ContractUtil {
                 break;
             case TX_TYPE_DELETE_CONTRACT:
                 resultTx = new DeleteContractTransaction();
+                resultTx.copyTx(tx);
+                break;
+            case TX_TYPE_CONTRACT_TRANSFER:
+                resultTx = new ContractTransferTransaction();
+                resultTx.copyTx(tx);
+                break;
+            case TX_TYPE_CONTRACT_RETURN_GAS:
+                resultTx = new ContractReturnGasTransaction();
                 resultTx.copyTx(tx);
                 break;
             default:

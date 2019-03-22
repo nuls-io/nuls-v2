@@ -33,6 +33,7 @@ import io.nuls.contract.vm.program.ProgramTransfer;
 import io.nuls.tools.crypto.HexUtil;
 import lombok.Getter;
 import lombok.Setter;
+import org.spongycastle.util.encoders.Hex;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -159,57 +160,35 @@ public class ContractResult {
         return result;
     }
 
-    //@Override
-    //public String toString() {
-    //    return "ContractResult{" +
-    //            "contractAddress=" + AddressTool.getStringAddressByBytes(contractAddress) +
-    //            ", result='" + result + '\'' +
-    //            ", gasUsed=" + gasUsed +
-    //            ", stateRoot=" + (stateRoot != null ? HexUtil.encode(stateRoot) : stateRoot) +
-    //            ", value=" + value +
-    //            ", revert=" + revert +
-    //            ", error=" + error +
-    //            ", errorMessage='" + errorMessage + '\'' +
-    //            ", stackTrace='" + stackTrace + '\'' +
-    //            ", balance=" + (balance != null ? balance.toString() : 0) +
-    //            ", nonce=" + nonce +
-    //            ", transfersSize=" + (transfers != null ? transfers.size() : 0) +
-    //            ", eventsSize=" + (events != null ? events.size() : 0) +
-    //            ", remark='" + remark + '\'' +
-    //            '}';
-    //}
-
-
     @Override
     public String toString() {
         return "ContractResult{" +
-                "tx=" + tx +
+                "success='" + isSuccess() + '\'' +
                 ", hash='" + hash + '\'' +
                 ", txTime=" + txTime +
-                ", sender=" + Arrays.toString(sender) +
-                ", contractAddress=" + Arrays.toString(contractAddress) +
+                ", sender=" + AddressTool.getStringAddressByBytes(sender) +
+                ", contractAddress=" + AddressTool.getStringAddressByBytes(contractAddress) +
                 ", result='" + result + '\'' +
                 ", gasUsed=" + gasUsed +
                 ", price=" + price +
-                ", stateRoot=" + Arrays.toString(stateRoot) +
+                ", stateRoot=" + (stateRoot != null ? HexUtil.encode(stateRoot) : stateRoot) +
                 ", value=" + value +
                 ", revert=" + revert +
                 ", error=" + error +
                 ", errorMessage='" + errorMessage + '\'' +
                 ", stackTrace='" + stackTrace + '\'' +
-                ", balance=" + balance +
+                ", balance=" + (balance != null ? balance.toString() : 0) +
                 ", preBalance=" + preBalance +
                 ", nonce=" + nonce +
                 ", acceptDirectTransfer=" + acceptDirectTransfer +
                 ", isNrc20=" + isNrc20 +
-                ", transfers=" + transfers +
-                ", mergedTransferList=" + mergedTransferList +
-                ", contractTransferList=" + contractTransferList +
+                ", transfersSize=" + (transfers != null ? transfers.size() : 0) +
+                ", mergedTransferList=" + (mergedTransferList != null ? mergedTransferList.size() : 0) +
+                ", contractTransferList=" + (contractTransferList != null ? contractTransferList.size() : 0) +
                 ", events=" + events +
                 ", remark='" + remark + '\'' +
                 ", isTerminated=" + isTerminated +
-                ", contractAddressInnerCallSet=" + contractAddressInnerCallSet +
-                ", txTrack=" + txTrack +
+                ", contractAddressInnerCallSet=" + (contractAddressInnerCallSet != null ? contractAddressInnerCallSet.size() : 0) +
                 '}';
     }
 }
