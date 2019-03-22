@@ -747,13 +747,16 @@ public class ContractResource extends BaseCmd {
             }
             Object[] argsObj = new Object[]{to, value.toString()};
 
+            List list = new ArrayList();
+            list.add(argsObj[0]);
+            list.add(argsObj[1]);
             Map<String, Object> gasParams = new HashMap<>();
             gasParams.put("chainId", chainId);
             gasParams.put("sender", from);
             gasParams.put("value", 0);
             gasParams.put("contractAddress", contractAddress);
             gasParams.put("methodName", NRC20_METHOD_TRANSFER);
-            gasParams.put("args", argsObj);
+            gasParams.put("args", list);
             Response response = this.imputedCallGas(gasParams);
             if(!response.isSuccess()) {
                 return response;
@@ -1051,6 +1054,7 @@ public class ContractResource extends BaseCmd {
                 contractResultDto = new ContractResultDto(chainId, contractExecuteResult, tx1);
             }
         }
+        tx1.setBlockHeight(contractExecuteResult.getBlockHeight());
         return contractResultDto;
     }
 
@@ -1109,11 +1113,11 @@ public class ContractResource extends BaseCmd {
             }
             ContractBaseTransaction tx1 = ContractUtil.convertContractTx(tx);
             tx1.setStatus(TxStatusEnum.CONFIRMED);
+            // 获取合约执行结果
+            ContractResultDto contractResultDto = this.makeContractResultDto(chainId, tx1, txHash);
             ContractTransactionDto txDto = new ContractTransactionDto(chainId, tx1);
             // 计算交易实际发生的金额
             calTransactionValue(txDto);
-            // 获取合约执行结果
-            ContractResultDto contractResultDto = this.makeContractResultDto(chainId, tx1, txHash);
             if (contractResultDto != null) {
                 List<ContractTokenTransferDto> tokenTransfers = contractResultDto.getTokenTransfers();
                 List<ContractTokenTransferDto> realTokenTransfers = this.filterRealTokenTransfers(chainId, tokenTransfers);
