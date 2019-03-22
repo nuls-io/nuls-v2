@@ -461,7 +461,7 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
     }
 
     @Override
-    public List<String> getTxListExtend(Chain chain, List<String> hashList) {
+    public List<String> getTxListExtend(Chain chain, List<String> hashList, boolean allHits) {
         List<String> txList = new ArrayList<>();
         if (hashList == null || hashList.size() == 0) {
             return txList;
@@ -472,8 +472,11 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
             if(null == tx) {
                 TransactionConfirmedPO txCfmPO = confirmedTxStorageService.getTx(chainId, hashHex);
                 if(null == txCfmPO){
-                    //有一个没有获取到, 直接返回空list
-                    return new ArrayList<>();
+                    if(allHits) {
+                        //allHits为true时一旦有一个没有获取到, 直接返回空list
+                        return new ArrayList<>();
+                    }
+                    continue;
                 }
                 tx = txCfmPO.getTx();
             }
@@ -481,7 +484,11 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
                 txList.add(tx.hex());
             } catch (Exception e) {
                 chain.getLoggerMap().get(TxConstant.LOG_TX).error(e);
-                return new ArrayList<>();
+                if(allHits) {
+                    //allHits为true时直接返回空list
+                    return new ArrayList<>();
+                }
+                continue;
             }
         }
         return txList;

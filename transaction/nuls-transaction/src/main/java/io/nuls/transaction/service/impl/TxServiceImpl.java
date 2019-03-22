@@ -1014,7 +1014,7 @@ public class TxServiceImpl implements TxService {
     @Override
     public void clearInvalidTx(Chain chain, Transaction tx) {
 
-        //// TODO: 2019/3/21 判断如果交易已被确认就不用清理了!!
+        //// TODO: 2019/3/21 判断如果交易已被确认就不用清理了!! 感觉要加锁
         TransactionConfirmedPO txConfirmed = confirmedTxService.getConfirmedTransaction(chain, tx.getHash());
         if (txConfirmed != null) {
             return;

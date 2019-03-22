@@ -80,5 +80,5 @@ public interface ConfirmedTxService {
      * @param hashList
      * @return List<String> txHex list
      */
-    List<String> getTxListExtend(Chain chain, List<String> hashList);
+    List<String> getTxListExtend(Chain chain, List<String> hashList, boolean allHits);
 }
