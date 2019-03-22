@@ -117,6 +117,7 @@ public class ContractServiceImpl implements ContractService {
     @Override
     public Result invokeContractOneByOne(int chainId, ContractTempTransaction tx) {
         try {
+            Log.info("=====pierre=====invoke contract Tx type is {}", tx.getType());
             Chain chain = contractHelper.getChain(chainId);
             BatchInfo batchInfo = chain.getBatchInfo();
             if (!batchInfo.hasBegan()) {
@@ -238,7 +239,7 @@ public class ContractServiceImpl implements ContractService {
                             contractTxProcessorManager.callCommit(chainId, wrapperTx);
                             break;
                         case TX_TYPE_DELETE_CONTRACT:
-                            contractTxProcessorManager.callCommit(chainId, wrapperTx);
+                            contractTxProcessorManager.deleteCommit(chainId, wrapperTx);
                             break;
                         default:
                             break;
