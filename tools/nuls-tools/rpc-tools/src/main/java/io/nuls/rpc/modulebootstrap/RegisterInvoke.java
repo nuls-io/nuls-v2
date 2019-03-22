@@ -28,7 +28,7 @@ public class RegisterInvoke extends BaseInvoke {
 
     Module module;
 
-    public RegisterInvoke(Module module,Set<Module> dependenices){
+    public RegisterInvoke(Module module, Set<Module> dependenices) {
         this.dependenices = dependenices;
         this.module = module;
     }
@@ -39,7 +39,7 @@ public class RegisterInvoke extends BaseInvoke {
         Map methodMap = (Map) responseData.get("registerAPI");
         Map dependMap = (Map) methodMap.get("Dependencies");
         StringBuilder logInfo = new StringBuilder("\n有模块信息改变，重新同步：\n");
-        if(response.isSuccess()){
+        if (response.isSuccess()) {
             for (Object object : dependMap.entrySet()) {
                 Map.Entry<String, Map> entry = (Map.Entry<String, Map>) object;
                 logInfo.append("注入：[key=").append(entry.getKey()).append(",value=").append(entry.getValue()).append("]\n");
@@ -47,19 +47,19 @@ public class RegisterInvoke extends BaseInvoke {
             }
             Log.info(logInfo.toString());
             ConnectManager.updateStatus();
-            if(!ConnectManager.isReady()){
-                return ;
+            if (!ConnectManager.isReady()) {
+                return;
             }
             log.info("RMB:module rpc is ready");
-            dependMap.entrySet().forEach(obj->{
+            dependMap.entrySet().forEach(obj -> {
                 Map.Entry<String, Map> entry = (Map.Entry<String, Map>) obj;
-                if(dependenices.stream().anyMatch(d->d.getName().equals(entry.getKey()))){
+                if (dependenices.stream().anyMatch(d -> d.getName().equals(entry.getKey()))) {
                     NotifySender notifySender = SpringLiteContext.getBean(NotifySender.class);
-                    notifySender.send(()->{
+                    notifySender.send(() -> {
                         Response cmdResp = null;
                         try {
                             cmdResp = ResponseMessageProcessor.requestAndResponse(entry.getKey(), "registerModuleDependencies", MapUtils.beanToLinkedMap(module));
-                            log.debug("result : {}",cmdResp);
+                            log.debug("result : {}", cmdResp);
                             return cmdResp.isSuccess();
                         } catch (Exception e) {
                             log.error("Calling remote interface failed. module:{} - interface:{} - message:{}", module, "registerModuleDependencies", e.getMessage());

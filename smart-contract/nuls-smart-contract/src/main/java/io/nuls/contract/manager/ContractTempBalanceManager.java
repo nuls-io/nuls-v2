@@ -48,7 +48,7 @@ import static io.nuls.contract.util.ContractUtil.getSuccess;
  * @author: PierreLuo
  * @date: 2018/6/7
  */
-public class TempBalanceManager {
+public class ContractTempBalanceManager {
 
     private int chainId;
 
@@ -58,15 +58,15 @@ public class TempBalanceManager {
 
     private ContractHelper contractHelper;
 
-    public static TempBalanceManager newInstance(int chainId) {
-        TempBalanceManager temp = new TempBalanceManager();
+    public static ContractTempBalanceManager newInstance(int chainId) {
+        ContractTempBalanceManager temp = new ContractTempBalanceManager();
         temp.chainId = chainId;
         temp.tempBalanceMap = new HashMap<>();
         temp.contractHelper = SpringLiteContext.getBean(ContractHelper.class);
         return temp;
     }
 
-    private TempBalanceManager() {
+    private ContractTempBalanceManager() {
     }
 
     /**

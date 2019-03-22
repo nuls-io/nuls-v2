@@ -71,6 +71,7 @@ public class Response {
 
     /**
      * 回复是否正确 / Whether the response is correct
+     *
      * @return boolean
      */
     @JsonIgnore

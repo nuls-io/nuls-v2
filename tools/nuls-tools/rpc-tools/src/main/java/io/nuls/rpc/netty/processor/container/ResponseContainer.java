@@ -31,9 +31,10 @@ import java.util.concurrent.CompletableFuture;
 /**
  * 结果数据存放容器
  * Response entity storage container
+ *
  * @author ln
  * 2019/2/27
- * */
+ */
 public class ResponseContainer {
 
     private String messageId;

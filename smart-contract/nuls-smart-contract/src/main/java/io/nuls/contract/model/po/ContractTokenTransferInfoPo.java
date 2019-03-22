@@ -51,6 +51,7 @@ public class ContractTokenTransferInfoPo implements Serializable {
     private long decimals;
     private long blockHeight;
     private long time;
+    /** 0 - 确认中， 1 - 已确认， 2 - 失败 + */
     private byte status;
 
 

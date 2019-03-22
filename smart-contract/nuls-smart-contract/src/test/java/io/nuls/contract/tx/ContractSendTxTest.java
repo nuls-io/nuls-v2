@@ -26,12 +26,8 @@ package io.nuls.contract.tx;
 
 
 import io.nuls.contract.basetest.ContractTest;
-import io.nuls.contract.model.bo.Chain;
-import io.nuls.contract.model.bo.config.ConfigBean;
 import io.nuls.contract.tx.base.Base;
 import io.nuls.rpc.info.Constants;
-import io.nuls.rpc.info.HostInfo;
-import io.nuls.rpc.info.NoUse;
 import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.model.message.Response;
 import io.nuls.rpc.netty.processor.ResponseMessageProcessor;
@@ -39,7 +35,6 @@ import io.nuls.tools.log.Log;
 import io.nuls.tools.parse.JSONUtils;
 import org.apache.commons.io.IOUtils;
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Test;
 import org.spongycastle.util.encoders.Hex;
 
@@ -58,22 +53,15 @@ import static io.nuls.contract.constant.ContractCmdConstant.*;
  */
 public class ContractSendTxTest extends Base {
 
-    @Before
-    public void before() throws Exception {
-        NoUse.mockModule();
-        ResponseMessageProcessor.syncKernel("ws://" + HostInfo.getLocalIP() + ":8887/ws");
-        chain = new Chain();
-        chain.setConfig(new ConfigBean(chainId, assetId, 100000000L));
-    }
-
     @Test
     public void importPriKeyTest() {
-        importPriKey("00d9748b9ba0cdee3bc9d45c09eb9928b5809c4132a0ef70b19779e72a22258f47", password);//打包地址 5MR_2CbDGZXZRc7SnBEKuCubTUkYi9JXcCu
-        importPriKey("00def3b0f4bfad2a6abb5f6957829e752a1a30806edc35e98016425d578fdc4e77", password);//25 5MR_2CjZkQsN7EnEPcaLgNrMrp6wpPGN6xo
-        importPriKey("1c2b9fd4417c1aad8ae9f24c982ff294eb50a6462b873b79a879e805a9990346", password);//26 5MR_2CeG11nRqx7nGNeh8hTXADibqfSYeNu
-        importPriKey("00c98ecfd3777745270cacb9afba17ef0284769a83ff2adb4106b8a0baaec9452c", password);//27 5MR_2CVCFWH7o8AmrTBPLkdg2dYH1UCUJiM
-        importPriKey("23848d45b4b34aca8ff24b00949a25a2c9175faf283675128e189eee8b085942", password);//28 5MR_2CfUsasd33vQV3HqGw6M3JwVsuVxJ7r
-        importPriKey("009560d5ed6587822b7aee6f318f50b312c281e4f330b6990396881c6d3f870bc1", password);//29 5MR_2CVuGjQ3CYVkhFszxfSt6sodg1gDHYF
+        importPriKey("b54db432bba7e13a6c4a28f65b925b18e63bcb79143f7b894fa735d5d3d09db5", password);//打包地址 tNULSeBaMkrt4z9FYEkkR9D6choPVvQr94oYZp
+        importPriKey("9ce21dad67e0f0af2599b41b515a7f7018059418bab892a7b68f283d489abc4b", password);//25 tNULSeBaMvEtDfvZuukDf2mVyfGo3DdiN8KLRG
+        importPriKey("477059f40708313626cccd26f276646e4466032cabceccbf571a7c46f954eb75", password);//26 tNULSeBaMnrs6JKrCy6TQdzYJZkMZJDng7QAsD
+        importPriKey("8212e7ba23c8b52790c45b0514490356cd819db15d364cbe08659b5888339e78", password);//27 tNULSeBaMrbMRiFAUeeAt6swb4xVBNyi81YL24
+        importPriKey("4100e2f88c3dba08e5000ed3e8da1ae4f1e0041b856c09d35a26fb399550f530", password);//28 tNULSeBaMu38g1vnJsSZUCwTDU9GsE5TVNUtpD
+        importPriKey("bec819ef7d5beeb1593790254583e077e00f481982bce1a43ea2830a2dc4fdf7", password);//29 tNULSeBaMp9wC9PcWEcfesY7YmWrPfeQzkN1xL
+        importPriKey("ddddb7cb859a467fbe05d5034735de9e62ad06db6557b64d7c139b6db856b200", password);//30 tNULSeBaMshNPEnuqiDhMdSA4iNs6LMgjY6tcL
     }
 
     /**
@@ -116,7 +104,6 @@ public class ContractSendTxTest extends Base {
         String methodName = "transfer";
         String methodDesc = "";
         String remark = "call contract test - 空气币转账";
-        String toAddress = "5MR_2CeG11nRqx7nGNeh8hTXADibqfSYeNu";
         String token = BigInteger.TEN.pow(8).toString();
         Map params = this.makeCallParams(sender, value, contractAddress, methodName, methodDesc, remark, toAddress, token);
         Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, CALL, params);
@@ -171,9 +158,8 @@ public class ContractSendTxTest extends Base {
     @Test
     public void tokenTransfer() throws Exception {
         BigInteger value = BigInteger.TEN.pow(8);
-        String toAddress = "5MR_2CVCFWH7o8AmrTBPLkdg2dYH1UCUJiM";
         String remark = "token transfer to 5MR_2CVCFWH7o8AmrTBPLkdg2dYH1UCUJiM";
-        Map params = this.makeTokenTransferParams(sender, toAddress, contractAddress, value, remark);
+        Map params = this.makeTokenTransferParams(sender, toAddress1, contractAddress, value, remark);
         Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, TOKEN_TRANSFER, params);
         Map result = (HashMap) (((HashMap) cmdResp2.getResponseData()).get(TOKEN_TRANSFER));
         Assert.assertTrue(null != result);

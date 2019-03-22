@@ -44,9 +44,10 @@ import java.util.concurrent.TimeUnit;
 /**
  * 文本类型的消息处理器
  * Text type message handler
+ *
  * @author ln
  * 2019/2/27
- * */
+ */
 public class TextMessageHandler implements Runnable {
 
     private SocketChannel channel;
@@ -100,12 +101,12 @@ public class TextMessageHandler implements Runnable {
                         RequestMessageProcessor.callCommandsWithPeriod(channel, request.getRequestMethods(), messageId, false);
                     } else {
                         int tryCount = 0;
-                        while(connectData == null && tryCount < Constants.TRY_COUNT){
+                        while (connectData == null && tryCount < Constants.TRY_COUNT) {
                             TimeUnit.SECONDS.sleep(2L);
                             connectData = ConnectManager.CHANNEL_DATA_MAP.get(channel);
                             tryCount++;
                         }
-                        if(connectData == null){
+                        if (connectData == null) {
                             RequestMessageProcessor.serviceNotStarted(channel, messageId);
                             break;
                         }
@@ -114,7 +115,7 @@ public class TextMessageHandler implements Runnable {
                             connectData.getIdToPeriodMessageMap().put(messageId, message);
                         }
                         if (ConnectManager.isPureDigital(request.getSubscriptionEventCounter())) {
-                            connectData.subscribeByEvent(message,request);
+                            connectData.subscribeByEvent(message, request);
                             RequestMessageProcessor.callCommandsWithPeriod(channel, request.getRequestMethods(), messageId, true);
 
                         }
@@ -155,7 +156,7 @@ public class TextMessageHandler implements Runnable {
                         connectData.getResponseAutoQueue().offer(response);
                     } else {
                         ResponseContainer responseContainer = RequestContainer.getResponseContainer(response.getRequestId());
-                        if(responseContainer != null && responseContainer.getFuture() != null) {
+                        if (responseContainer != null && responseContainer.getFuture() != null) {
                             responseContainer.getFuture().complete(response);
                         }
                     }

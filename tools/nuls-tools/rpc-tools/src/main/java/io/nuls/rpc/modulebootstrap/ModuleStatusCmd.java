@@ -20,11 +20,12 @@ import java.util.Map;
 @Slf4j
 public class ModuleStatusCmd extends BaseCmd {
 
-    @Autowired RpcModule rpcModule;
+    @Autowired
+    RpcModule rpcModule;
 
     @CmdAnnotation(cmd = "listenerDependenciesReady", version = 1.0, minEvent = 1,
             description = "notify module is ready")
-    public Response listenerDependenciesReady(Map<String, Object> map){
+    public Response listenerDependenciesReady(Map<String, Object> map) {
         Module module = JSONUtils.map2pojo(map, Module.class);
         rpcModule.listenerDependenciesReady(module);
         return success("ModuleReadyListener success");

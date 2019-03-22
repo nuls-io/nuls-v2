@@ -20,10 +20,10 @@ import java.util.Map;
 @Component
 public class ParamCmd extends BaseCmd {
     @CmdAnnotation(cmd = "paramTestCmd", version = 1.0, scope = Constants.PUBLIC, description = "")
-    @Parameter(parameterName = "intCount", parameterType = "int",parameterValidRange = "[0,65535]")
-    @Parameter(parameterName = "byteCount", parameterType = "byte",parameterValidRange = "[-128,127]")
-    @Parameter(parameterName = "shortCount", parameterType = "short",parameterValidRange = "[0,32767]")
-    @Parameter(parameterName = "longCount", parameterType = "long",parameterValidRange = "[0,55555555]")
+    @Parameter(parameterName = "intCount", parameterType = "int", parameterValidRange = "[0,65535]")
+    @Parameter(parameterName = "byteCount", parameterType = "byte", parameterValidRange = "[-128,127]")
+    @Parameter(parameterName = "shortCount", parameterType = "short", parameterValidRange = "[0,32767]")
+    @Parameter(parameterName = "longCount", parameterType = "long", parameterValidRange = "[0,55555555]")
     public Response paramTest(Map map) {
         int count = Integer.parseInt(map.get("intCount").toString());
         int sum = 0;

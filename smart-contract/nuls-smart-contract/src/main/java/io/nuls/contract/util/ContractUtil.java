@@ -243,7 +243,8 @@ public class ContractUtil {
         if (txType == ContractConstant.TX_TYPE_CREATE_CONTRACT
                 || txType == ContractConstant.TX_TYPE_CALL_CONTRACT
                 || txType == ContractConstant.TX_TYPE_DELETE_CONTRACT
-                || txType == ContractConstant.TX_TYPE_CONTRACT_TRANSFER) {
+                || txType == ContractConstant.TX_TYPE_CONTRACT_TRANSFER
+                || txType == ContractConstant.TX_TYPE_CONTRACT_RETURN_GAS) {
             return true;
         }
         return false;
