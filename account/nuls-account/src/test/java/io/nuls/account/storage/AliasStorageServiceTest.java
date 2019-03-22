@@ -31,7 +31,7 @@ public class AliasStorageServiceTest {
     protected static AliasStorageService aliasStorageService;
 
     protected static AccountService accountService;
-    protected static int chainId = 12345;
+    protected static int chainId = 2;
 
     @BeforeClass
     public static void beforeTest() {

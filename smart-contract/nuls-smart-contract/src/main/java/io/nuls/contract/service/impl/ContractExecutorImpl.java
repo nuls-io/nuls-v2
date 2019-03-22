@@ -82,7 +82,7 @@ public class ContractExecutorImpl implements ContractExecutor {
         contractResult.setBalance(programResult.getBalance());
         contractResult.setContractAddress(contractAddress);
         contractResult.setSender(sender);
-        contractResult.setRemark(ContractConstant.CREATE);
+        contractResult.setRemark(ContractConstant.CREATE_REMARK);
         // 批量提交方式，交易track放置到外部处理合约执行结果的方法里去提交
         contractResult.setTxTrack(track);
 
@@ -132,7 +132,7 @@ public class ContractExecutorImpl implements ContractExecutor {
         contractResult.setContractAddress(contractAddress);
         contractResult.setSender(sender);
         contractResult.setValue(programCall.getValue().longValue());
-        contractResult.setRemark(ContractConstant.CALL);
+        contractResult.setRemark(ContractConstant.CALL_REMARK);
         // 批量提交方式，交易track放置到外部处理合约执行结果的方法里去提交
         contractResult.setTxTrack(track);
 
@@ -176,7 +176,7 @@ public class ContractExecutorImpl implements ContractExecutor {
         contractResult.setBalance(programResult.getBalance());
         contractResult.setContractAddress(contractAddress);
         contractResult.setSender(sender);
-        contractResult.setRemark(ContractConstant.DELETE);
+        contractResult.setRemark(ContractConstant.DELETE_REMARK);
         // 批量提交方式，交易track放置到外部处理合约执行结果的方法里去提交
         contractResult.setTxTrack(track);
 

@@ -51,12 +51,12 @@ public class ApiContext {
     //映射地址
     public static Set<String> MAPPING_ADDRESS = new HashSet<>();
     //商务地址
-    public static String BUSINESS_ADDRESS = "5MR_2CjZkQsN7EnEPcaLgNrMrp6wpPGN6x1";
+    public static String BUSINESS_ADDRESS = "tNULSeBaMvEtDfvZuukDf2mVyfGo3DdiN8KLRG";
     //团队地址
-    public static String TEAM_ADDRESS = "5MR_2CjZkQsN7EnEPcaLgNrMrp6wpPGN6x1";
+    public static String TEAM_ADDRESS = "tNULSeBaMvEtDfvZuukDf2mVyfGo3DdiN8KLRG";
     //社区地址
-    public static String COMMUNITY_ADDRESS = "5MR_2CjZkQsN7EnEPcaLgNrMrp6wpPGN6x1";
+    public static String COMMUNITY_ADDRESS = "tNULSeBaMvEtDfvZuukDf2mVyfGo3DdiN8KLRG";
     //销毁地址
-    public static String DESTROY_ADDRESS = "5MR_2CjZkQsN7EnEPcaLgNrMrp6wpPGN6x1";
+    public static String DESTROY_ADDRESS = "tNULSeBaMvEtDfvZuukDf2mVyfGo3DdiN8KLRG";
 
 }

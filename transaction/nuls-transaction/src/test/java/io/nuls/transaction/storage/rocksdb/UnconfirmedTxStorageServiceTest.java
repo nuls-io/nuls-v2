@@ -15,7 +15,7 @@ import java.util.List;
 public class UnconfirmedTxStorageServiceTest {
 
     protected static UnconfirmedTxStorageService unconfirmedTxStorageService;
-    protected int chainId = 12345;
+    protected int chainId = 2;
 
     @BeforeClass
     public static void beforeTest() throws Exception {

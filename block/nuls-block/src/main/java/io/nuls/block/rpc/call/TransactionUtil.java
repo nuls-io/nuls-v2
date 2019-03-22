@@ -241,13 +241,34 @@ public class TransactionUtil {
         List<Transaction> transactions = new ArrayList<>();
         NulsLogger commonLog = ContextManager.getContext(chainId).getCommonLog();
         try {
-            hashList.forEach(e -> transactions.add(getTransaction(chainId, e)));
-            return transactions;
+            Map<String, Object> params = new HashMap<>(2);
+//            params.put(Constants.VERSION_KEY_STR, "1.0");
+            params.put("chainId", chainId);
+            List<String> t = new ArrayList<>();
+            hashList.forEach(e -> t.add(e.getDigestHex()));
+            params.put("txHashList", t);
+            Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.TX.abbr, "tx_getBlockTxsExtend", params);
+            if (response.isSuccess()) {
+                Map responseData = (Map) response.getResponseData();
+                Map map = (Map) responseData.get("tx_getBlockTxsExtend");
+                List<String> txHexList = (List<String>) map.get("txHexList");
+                if (txHexList == null || txHexList.size() == 0) {
+                    return null;
+                }
+                for (String txHex : txHexList) {
+                    Transaction transaction = new Transaction();
+                    transaction.parse(new NulsByteBuffer(HexUtil.decode(txHex)));
+                    transactions.add(transaction);
+                }
+            } else {
+                return null;
+            }
         } catch (Exception e) {
             e.printStackTrace();
             commonLog.error(e);
             return null;
         }
+        return transactions;
     }
 
     /**

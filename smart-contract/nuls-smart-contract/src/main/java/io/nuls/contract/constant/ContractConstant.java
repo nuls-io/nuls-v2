@@ -69,9 +69,9 @@ public interface ContractConstant {
     String CONTRACT_CONSTRUCTOR = "<init>";
 
 
-    String CALL = "call";
-    String CREATE = "create";
-    String DELETE = "delete";
+    String CALL_REMARK = "call";
+    String CREATE_REMARK = "create";
+    String DELETE_REMARK = "delete";
 
     String NOT_ENOUGH_GAS = "not enough gas";
 

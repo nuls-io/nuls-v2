@@ -22,7 +22,7 @@ public class TransactionTest {
         CoinFrom coinFrom =  new CoinFrom();
 
         coinFrom.setAddress(AddressTool.getAddress("WSqyJxB1B83MJaAGYoJDnfqZxNc7o3930"));
-        coinFrom.setAmount(new BigInteger("12345678"));
+        coinFrom.setAmount(new BigInteger("2678"));
         coinFrom.setAssetsChainId(1);
         coinFrom.setAssetsId(2);
         coinFrom.setLocked((byte)0);

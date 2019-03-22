@@ -9,7 +9,7 @@
     "name": "chainId",
     "remark": "链ID",
     "readOnly": "true",
-    "value": "12345"
+    "value": "2"
   },
   {
     "name": "interval",

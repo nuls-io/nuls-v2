@@ -48,7 +48,7 @@ public class H2Test {
         //连接数据库时使用的用户名
         String USER = "sa";
         //连接数据库时使用的密码
-        String PASSWORD = "123456";
+        String PASSWORD = "26";
         String DRIVER_CLASS = "org.h2.Driver";
         try {
             Class.forName(DRIVER_CLASS);

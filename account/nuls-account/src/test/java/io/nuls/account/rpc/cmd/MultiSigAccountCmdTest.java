@@ -31,7 +31,7 @@ import static org.junit.Assert.assertTrue;
  */
 public class MultiSigAccountCmdTest {
 
-    protected int chainId = 12345;
+    protected int chainId = 2;
 
     protected String password = "nuls123456";
 
