@@ -119,11 +119,19 @@ public interface TxService {
     void clearInvalidTx(Chain chain, List<Transaction> txList);
 
     /**
-     * 从已验证未打包交易中删除单个无效的交易, 并回滚账本
+     * 从已验证未打包交易中删除单个无效的交易
      *
      * @param chain
      * @param tx
      * @return
      */
     void clearInvalidTx(Chain chain, Transaction tx);
+
+    /**
+     * 从已验证未打包交易中删除单个无效的交易
+     * @param chain
+     * @param tx
+     * @param cleanLedgerUfmTx 调用账本的未确认回滚
+     */
+    void clearInvalidTx(Chain chain, Transaction tx, boolean cleanLedgerUfmTx);
 }
