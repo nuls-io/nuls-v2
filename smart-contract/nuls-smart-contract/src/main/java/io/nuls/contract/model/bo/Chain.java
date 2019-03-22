@@ -3,7 +3,7 @@ package io.nuls.contract.model.bo;
 import io.nuls.base.data.BlockHeader;
 import io.nuls.contract.manager.ContractTokenBalanceManager;
 import io.nuls.contract.manager.ContractTxCreateUnconfirmedManager;
-import io.nuls.contract.manager.TempBalanceManager;
+import io.nuls.contract.manager.ContractTempBalanceManager;
 import io.nuls.contract.model.bo.config.ConfigBean;
 import io.nuls.contract.model.dto.ContractPackageDto;
 import io.nuls.contract.vm.program.ProgramExecutor;
@@ -55,11 +55,11 @@ public class Chain {
      */
     private BatchInfo batchInfo = new BatchInfo();
 
-    public TempBalanceManager getTempBalanceManager() {
+    public ContractTempBalanceManager getTempBalanceManager() {
         return batchInfo.getTempBalanceManager();
     }
 
-    public void setTempBalanceManager(TempBalanceManager tempBalanceManager) {
+    public void setTempBalanceManager(ContractTempBalanceManager tempBalanceManager) {
         batchInfo.setTempBalanceManager(tempBalanceManager);
     }
 

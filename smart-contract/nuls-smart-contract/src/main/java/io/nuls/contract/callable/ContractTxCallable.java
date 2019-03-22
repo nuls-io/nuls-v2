@@ -26,7 +26,7 @@ package io.nuls.contract.callable;
 import io.nuls.contract.helper.ContractConflictChecker;
 import io.nuls.contract.helper.ContractHelper;
 import io.nuls.contract.helper.ContractTransferHandler;
-import io.nuls.contract.manager.TempBalanceManager;
+import io.nuls.contract.manager.ContractTempBalanceManager;
 import io.nuls.contract.model.bo.CallableResult;
 import io.nuls.contract.model.bo.ContractContainer;
 import io.nuls.contract.model.bo.ContractResult;
@@ -65,7 +65,7 @@ public class ContractTxCallable implements Callable<ContractResult> {
     private ContractHelper contractHelper;
     private VMContext vmContext;
     private ContractTransferHandler contractTransferHandler;
-    private TempBalanceManager tempBalanceManager;
+    private ContractTempBalanceManager tempBalanceManager;
     private ProgramExecutor executor;
     private String contract;
     private ContractWrapperTransaction tx;
@@ -115,15 +115,17 @@ public class ContractTxCallable implements Callable<ContractResult> {
             case TX_TYPE_CREATE_CONTRACT:
                 container.setHasCreate(true);
                 contractResult = contractExecutor.create(executor, contractData, number, preStateRoot);
-                Log.info("======pierre====contractResult is {}", contractResult);
+                Log.info("======pierre====create contractResult is {}", contractResult);
                 checkCreateResult(tx, callableResult, contractResult);
                 break;
             case TX_TYPE_CALL_CONTRACT:
                 contractResult = contractExecutor.call(executor, contractData, number, preStateRoot);
+                Log.info("======pierre====call contractResult is {}", contractResult);
                 checkCallResult(tx, callableResult, contractResult);
                 break;
             case TX_TYPE_DELETE_CONTRACT:
                 contractResult = contractExecutor.delete(executor, contractData, number, preStateRoot);
+                Log.info("======pierre====delete contractResult is {}", contractResult);
                 boolean isDelete = checkDeleteResult(tx, callableResult, contractResult);
                 container.setDelete(isDelete);
                 break;
@@ -137,7 +139,7 @@ public class ContractTxCallable implements Callable<ContractResult> {
         makeContractResult(tx, contractResult);
         if (contractResult.isSuccess()) {
             Result checkResult = contractHelper.validateNrc20Contract(chainId, (ProgramExecutor) contractResult.getTxTrack(), tx, contractResult);
-            Log.info("checkResult is {}", checkResult);
+            Log.info("check validateNrc20Contract Result is {}", checkResult);
             if (checkResult.isSuccess()) {
                 container.getCommitSet().add(contract);
                 commitContract(contractResult);
