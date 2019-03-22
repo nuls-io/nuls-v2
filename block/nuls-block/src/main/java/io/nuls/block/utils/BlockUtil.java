@@ -336,8 +336,8 @@ public class BlockUtil {
         }
         SmallBlock smallBlock = new SmallBlock();
         smallBlock.setHeader(block.getHeader());
-        smallBlock.setTxHashList(block.getTxHashList());
-        block.getTxs().stream().filter(e -> transactionType.contains(e.getType())).forEach(e -> smallBlock.addBaseTx(e));
+        smallBlock.setTxHashList((ArrayList<NulsDigestData>) block.getTxHashList());
+        block.getTxs().stream().filter(e -> transactionType.contains(e.getType())).forEach(smallBlock::addSystemTx);
         return smallBlock;
     }
 

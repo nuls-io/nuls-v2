@@ -201,6 +201,7 @@ public class BlockServiceImpl implements BlockService {
     }
 
     private boolean saveBlock(int chainId, Block block, boolean localInit, int download, boolean needLock) {
+        long startTime = System.nanoTime();
         NulsLogger commonLog = ContextManager.getContext(chainId).getCommonLog();
         BlockHeader header = block.getHeader();
         long height = header.getHeight();
@@ -213,11 +214,16 @@ public class BlockServiceImpl implements BlockService {
         }
         try {
             //1.验证区块
+            long startTime1 = System.nanoTime();
             if (!verifyBlock(chainId, block, localInit, download)) {
                 commonLog.debug("verifyBlock fail!chainId-" + chainId + ",height-" + height);
                 return false;
             }
+            long elapsedNanos1 = System.nanoTime() - startTime1;
+            commonLog.info("1. time-" + elapsedNanos1);
+
             //2.设置最新高度,如果失败则恢复上一个高度
+            long startTime2 = System.nanoTime();
             if (!blockStorageService.setLatestHeight(chainId, height)) {
                 if (!blockStorageService.setLatestHeight(chainId, height - 1)) {
                     throw new DbRuntimeException("setLatestHeight error!");
@@ -225,7 +231,11 @@ public class BlockServiceImpl implements BlockService {
                 commonLog.error("set latest height fail!chainId-" + chainId + ",height-" + height);
                 return false;
             }
+            long elapsedNanos2 = System.nanoTime() - startTime2;
+            commonLog.info("2. time-" + elapsedNanos2);
+
             //3.保存区块头, 保存交易
+            long startTime3 = System.nanoTime();
             BlockHeaderPo blockHeaderPo = BlockUtil.toBlockHeaderPo(block);
             if (!blockStorageService.save(chainId, blockHeaderPo) || !TransactionUtil.save(chainId, blockHeaderPo, block.getTxs(), localInit)) {
                 if (!blockStorageService.remove(chainId, height)) {
@@ -237,7 +247,11 @@ public class BlockServiceImpl implements BlockService {
                 commonLog.error("save blockheader fail!chainId-" + chainId + ",height-" + height);
                 return false;
             }
+            long elapsedNanos3 = System.nanoTime() - startTime3;
+            commonLog.info("3. time-" + elapsedNanos3);
+
             //4.通知共识模块
+            long startTime4 = System.nanoTime();
             if (!ConsensusUtil.saveNotice(chainId, header, localInit)) {
                 if (!TransactionUtil.rollback(chainId, blockHeaderPo)) {
                     throw new DbRuntimeException("TransactionUtil rollback error!");
@@ -251,7 +265,11 @@ public class BlockServiceImpl implements BlockService {
                 commonLog.error("ConsensusUtil saveNotice fail!chainId-" + chainId + ",height-" + height);
                 return false;
             }
+            long elapsedNanos4 = System.nanoTime() - startTime4;
+            commonLog.info("4. time-" + elapsedNanos4);
+
             //5.通知协议升级模块,完全保存,更新标记
+            long startTime5 = System.nanoTime();
             blockHeaderPo.setComplete(true);
             if (!ProtocolUtil.saveNotice(chainId, header) || !blockStorageService.save(chainId, blockHeaderPo)) {
                 if (!ConsensusUtil.rollbackNotice(chainId, height)) {
@@ -269,6 +287,9 @@ public class BlockServiceImpl implements BlockService {
                 commonLog.error("ProtocolUtil saveNotice fail!chainId-" + chainId + ",height-" + height);
                 return false;
             }
+            long elapsedNanos5 = System.nanoTime() - startTime5;
+            commonLog.info("5. time-" + elapsedNanos5);
+
             //6.如果不是第一次启动,则更新主链属性
             if (!localInit) {
                 context.setLatestBlock(block);
@@ -281,7 +302,8 @@ public class BlockServiceImpl implements BlockService {
                 }
                 hashList.addLast(hash);
             }
-            commonLog.info("save block success, height-" + height + ", txCount-" + blockHeaderPo.getTxCount() + ", hash-" + hash);
+            long elapsedNanos = System.nanoTime() - startTime;
+            commonLog.info("save block success, time-" + elapsedNanos + ", height-" + height + ", txCount-" + blockHeaderPo.getTxCount() + ", hash-" + hash);
             Response response = MessageUtil.newResponse("", Constants.BOOLEAN_TRUE, "success");
             Map<String, Long> responseData = new HashMap<>(2);
             responseData.put("value", height);

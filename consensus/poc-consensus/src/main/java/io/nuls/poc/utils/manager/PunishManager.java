@@ -183,9 +183,9 @@ public class PunishManager {
             redPunishData.setAddress(agent.getAgentAddress());
             SmallBlock smallBlock = new SmallBlock();
             smallBlock.setHeader(block.getHeader());
-            smallBlock.setTxHashList(block.getTxHashList());
+            smallBlock.setTxHashList((ArrayList<NulsDigestData>) block.getTxHashList());
             for (Transaction tx : txs) {
-                smallBlock.addBaseTx(tx);
+                smallBlock.addSystemTx(tx);
             }
             redPunishData.setEvidence(smallBlock.serialize());
             redPunishData.setReasonCode(PunishReasonEnum.DOUBLE_SPEND.getCode());
