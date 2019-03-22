@@ -30,6 +30,7 @@ public class AliasTransferCase extends TestCaseChain {
                 GetTranscationFormAddressAdapter.class,
                 CheckAliasCase.class,
                 SyncAccountInfo.class,
+                ReadyBalanceToAddressAdapter.class,
                 TransferByAliasCase.class,
                 SyncTxInfoCase.class,
                 GetTranscationToAddressAdapter.class,

@@ -41,9 +41,9 @@ MODULE_PATH=$(cd `dirname $0`;pwd)
 
 if [ -z "${RUNBLOCK}" ];
 then
-    ${JAVA} -server -classpath ./libs/*:./mykernel/1.0.0/mykernel-1.0.0.jar io.nuls.mykernel.MyKernelBootstrap startModule $MODULE_PATH $CONFIG
+    ${JAVA} -server -Dsys.name=mykernel -classpath ./libs/*:./mykernel/1.0.0/mykernel-1.0.0.jar io.nuls.mykernel.MyKernelBootstrap startModule $MODULE_PATH $CONFIG
 else
-    nohup ${JAVA} -server -classpath ./libs/*:./mykernel/1.0.0/mykernel-1.0.0.jar io.nuls.mykernel.MyKernelBootstrap startModule $MODULE_PATH $CONFIG > mykernel.log 2>&1 &
+    nohup ${JAVA} -server -Dsys.name=mykernel -classpath ./libs/*:./mykernel/1.0.0/mykernel-1.0.0.jar io.nuls.mykernel.MyKernelBootstrap startModule $MODULE_PATH $CONFIG > mykernel.log 2>&1 &
 fi
 
 

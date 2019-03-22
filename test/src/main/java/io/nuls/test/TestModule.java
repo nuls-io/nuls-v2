@@ -55,8 +55,6 @@ public class TestModule extends RpcModule {
     @Override
     public boolean doStart()
     {
-        Result<String> result = accountService.importAccountByPrivateKey(new ImportAccountByPrivateKeyReq(Constants.PASSWORD,config.getTestSeedAccount(),true));
-        config.setSeedAddress(result.getData());
         return true;
     }
 
@@ -65,6 +63,8 @@ public class TestModule extends RpcModule {
         log.info("do running");
         RpcServerManager.getInstance().startServer("0.0.0.0",9999);
         if(config.getNodeType().equals("master")){
+            Result<String> result = accountService.importAccountByPrivateKey(new ImportAccountByPrivateKeyReq(Constants.PASSWORD,config.getTestSeedAccount(),true));
+            config.setSeedAddress(result.getData());
             Result<NetworkInfo> networkInfo = networkProvider.getInfo();
             Utils.success("=".repeat(100));
             Utils.success("网络环境");
