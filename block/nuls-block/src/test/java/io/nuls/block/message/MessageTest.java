@@ -167,7 +167,7 @@ public class MessageTest {
         Transaction transaction = buildTransaction("tNULSeBaMvEtDfvZuukDf2mVyfGo3DdiN8KLRG");
         SmallBlock smallBlock = new SmallBlock();
         smallBlock.setHeader(block.getHeader());
-        smallBlock.addBaseTx(transaction);
+        smallBlock.addSystemTx(transaction);
         smallBlock.setTxHashList(Lists.newArrayList(transaction.getHash()));
         message.setSmallBlock(smallBlock);
         String hex = HexUtil.encode(message.serialize());

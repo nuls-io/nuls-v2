@@ -458,27 +458,6 @@ public class ECKey {
         return priv;
     }
 
-
-    /**
-     * 验证数据签名
-     *
-     * @param data      需验证的数据
-     * @param signature 签名
-     * @param pub       公钥
-     * @return boolean        验证是否通过
-     */
-    public static boolean verify(byte[] data, ECKey1.ECDSASignature signature, byte[] pub) {
-        ECDSASigner signer = new ECDSASigner();
-        ECPublicKeyParameters params = new ECPublicKeyParameters(CURVE.getCurve().decodePoint(pub), CURVE);
-        signer.init(false, params);
-        try {
-            return signer.verifySignature(data, signature.r, signature.s);
-        } catch (NullPointerException e) {
-            log.error("Caught NPE inside bouncy castle", e);
-            return false;
-        }
-    }
-
     public static class MissingPrivateKeyException extends RuntimeException {
         private static final long serialVersionUID = 2789844760773725676L;
     }
@@ -665,7 +644,7 @@ public class ECKey {
         ECPrivateKeyParameters privKey = new ECPrivateKeyParameters(privateKeyForSigning, CURVE);
         signer.init(true, privKey);
         BigInteger[] components = signer.generateSignature(input);
-        return new ECKey1.ECDSASignature(components[0], components[1]).toCanonicalised().encodeToDER();
+        return new ECKey.ECDSASignature(components[0], components[1]).toCanonicalised().encodeToDER();
     }
 
 

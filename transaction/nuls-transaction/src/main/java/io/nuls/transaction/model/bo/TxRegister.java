@@ -188,6 +188,6 @@ public class TxRegister {
 
     @Override
     public int hashCode() {
-        return super.hashCode();
+        return this.getModuleValidator().hashCode();
     }
 }

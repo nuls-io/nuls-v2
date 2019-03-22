@@ -68,8 +68,10 @@ public class CallContractTxProcessor {
         try {
             BlockHeader blockHeader = contractHelper.getCurrentBlockHeader(chainId);
             byte[] stateRoot = blockHeader.getStateRoot();
+            long blockHeight = blockHeader.getHeight();
             ContractResult contractResult = tx.getContractResult();
             contractResult.setStateRoot(stateRoot);
+            contractResult.setBlockHeight(blockHeight);
 
             // 保存代币交易
             ContractData callContractData = tx.getContractData();
@@ -84,12 +86,7 @@ public class CallContractTxProcessor {
                 return Result.getFailed(ContractErrorCode.CONTRACT_ADDRESS_NOT_EXIST);
             }
             contractResult.setNrc20(contractAddressInfoPo.isNrc20());
-
-
-            long blockHeight = blockHeader.getHeight();
             tx.setBlockHeight(blockHeight);
-
-
             // 获取合约当前状态
             ProgramStatus status = contractHelper.getContractStatus(chainId, stateRoot, contractAddress);
             boolean isTerminatedContract = ContractUtil.isTerminatedContract(status.ordinal());

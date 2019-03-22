@@ -171,7 +171,6 @@ public class ContractQueryTest extends Base {
         BigInteger value = BigInteger.ZERO;
         String methodName = "transfer";
         String methodDesc = "";
-        String toAddress = "5MR_2CeG11nRqx7nGNeh8hTXADibqfSYeNu";
         String token = BigInteger.TEN.pow(8).toString();
         Map params = this.makeValidateCallParams(sender, value, contractAddress, methodName, methodDesc, toAddress, token);
         Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, VALIDATE_CALL, params);
@@ -200,7 +199,6 @@ public class ContractQueryTest extends Base {
         BigInteger value = BigInteger.ZERO;
         String methodName = "transfer";
         String methodDesc = "";
-        String toAddress = "5MR_2CeG11nRqx7nGNeh8hTXADibqfSYeNu";
         String token = BigInteger.TEN.pow(8).toString();
         Map params = this.makeImputedCallGasParams(sender, value, contractAddress, methodName, methodDesc, toAddress, token);
         Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, IMPUTED_CALL_GAS, params);
@@ -250,8 +248,7 @@ public class ContractQueryTest extends Base {
      */
     @Test
     public void tokenBalance() throws Exception {
-        String toAddress = "5MR_2CeG11nRqx7nGNeh8hTXADibqfSYeNu";
-        Map params = this.makeTokenBalanceParams(contractAddress, toAddress);
+        Map params = this.makeTokenBalanceParams(contractAddress, toAddress1);
         Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, TOKEN_BALANCE, params);
         Map result = (HashMap) (((HashMap) cmdResp2.getResponseData()).get(TOKEN_BALANCE));
         Assert.assertTrue(null != result);
@@ -270,8 +267,7 @@ public class ContractQueryTest extends Base {
      */
     @Test
     public void tokenAssetsList() throws Exception {
-        String toAddress = "5MR_2CeG11nRqx7nGNeh8hTXADibqfSYeNu";
-        Map params = this.makeTokenAssetsListParams(toAddress, 1, 10);
+        Map params = this.makeTokenAssetsListParams(toAddress1, 1, 10);
         Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, TOKEN_ASSETS_LIST, params);
         Map result = (HashMap) (((HashMap) cmdResp2.getResponseData()).get(TOKEN_ASSETS_LIST));
         Assert.assertTrue(null != result);
@@ -291,7 +287,6 @@ public class ContractQueryTest extends Base {
      */
     @Test
     public void tokenTransferList() throws Exception {
-        String toAddress = "5MR_2CeG11nRqx7nGNeh8hTXADibqfSYeNu";
         Map params = this.makeTokenTransferListParams(sender, 1, 10);
         Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, TOKEN_TRANSFER_LIST, params);
         Map result = (HashMap) (((HashMap) cmdResp2.getResponseData()).get(TOKEN_TRANSFER_LIST));
@@ -315,7 +310,6 @@ public class ContractQueryTest extends Base {
     public void invokeView() throws Exception {
         String methodName = "balanceOf";
         String methodDesc = "";
-        String toAddress = "5MR_2CjZkQsN7EnEPcaLgNrMrp6wpPGN6xo";
         Map params = this.makeInvokeViewParams(contractAddress, methodName, methodDesc, toAddress);
         Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, INVOKE_VIEW, params);
         Map result = (HashMap) (((HashMap) cmdResp2.getResponseData()).get(INVOKE_VIEW));

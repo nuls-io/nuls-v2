@@ -31,7 +31,7 @@ import io.nuls.contract.constant.ContractConstant;
 import io.nuls.contract.constant.ContractErrorCode;
 import io.nuls.contract.manager.ChainManager;
 import io.nuls.contract.manager.ContractTokenBalanceManager;
-import io.nuls.contract.manager.TempBalanceManager;
+import io.nuls.contract.manager.ContractTempBalanceManager;
 import io.nuls.contract.model.bo.*;
 import io.nuls.contract.model.dto.ContractInfoDto;
 import io.nuls.contract.model.po.ContractAddressInfoPo;
@@ -352,7 +352,7 @@ public class ContractHelper {
     }
 
     public ContractBalance getBalance(int chainId, byte[] address) {
-        TempBalanceManager tempBalanceManager = getTempBalanceManager(chainId);
+        ContractTempBalanceManager tempBalanceManager = getTempBalanceManager(chainId);
         if (tempBalanceManager != null) {
             Result<ContractBalance> balance = tempBalanceManager.getBalance(address);
             if (balance.isSuccess()) {
@@ -395,7 +395,7 @@ public class ContractHelper {
     }
 
     public void createTempBalanceManagerAndCurrentBlockHeader(int chainId, long number, long blockTime, byte[] packingAddress) {
-        TempBalanceManager tempBalanceManager = TempBalanceManager.newInstance(chainId);
+        ContractTempBalanceManager tempBalanceManager = ContractTempBalanceManager.newInstance(chainId);
         BlockHeader tempHeader = new BlockHeader();
         tempHeader.setHeight(number);
         tempHeader.setTime(blockTime);
@@ -405,7 +405,7 @@ public class ContractHelper {
         chain.setCurrentBlockHeader(tempHeader);
     }
 
-    public TempBalanceManager getTempBalanceManager(int chainId) {
+    public ContractTempBalanceManager getTempBalanceManager(int chainId) {
         return getChain(chainId).getTempBalanceManager();
     }
 

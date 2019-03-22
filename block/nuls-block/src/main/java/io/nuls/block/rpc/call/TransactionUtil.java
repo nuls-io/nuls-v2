@@ -64,19 +64,19 @@ public class TransactionUtil {
                 Map responseData = (Map) response.getResponseData();
                 return (List<Integer>) responseData.get("tx_getSystemTypes");
             } else {
-                return null;
+                return List.of();
             }
         } catch (Exception e) {
             e.printStackTrace();
             commonLog.error(e);
-            return null;
+            return List.of();
         }
     }
 
     /**
      * 批量验证交易
      *
-     * @param chainId 链Id/chain id
+     * @param chainId      链Id/chain id
      * @param transactions
      * @return
      */
@@ -109,7 +109,7 @@ public class TransactionUtil {
     /**
      * 批量保存交易
      *
-     * @param chainId 链Id/chain id
+     * @param chainId       链Id/chain id
      * @param blockHeaderPo
      * @param txs
      * @param localInit
@@ -126,7 +126,7 @@ public class TransactionUtil {
     /**
      * 批量保存交易
      *
-     * @param chainId 链Id/chain id
+     * @param chainId       链Id/chain id
      * @param blockHeaderPo
      * @return
      */
@@ -158,7 +158,7 @@ public class TransactionUtil {
     /**
      * 批量回滚交易
      *
-     * @param chainId 链Id/chain id
+     * @param chainId       链Id/chain id
      * @param blockHeaderPo
      * @return
      */
@@ -190,7 +190,7 @@ public class TransactionUtil {
     /**
      * 批量获取已确认交易
      *
-     * @param chainId 链Id/chain id
+     * @param chainId  链Id/chain id
      * @param hashList
      * @return
      * @throws IOException
@@ -232,13 +232,16 @@ public class TransactionUtil {
     /**
      * 批量获取交易
      *
-     * @param chainId 链Id/chain id
+     * @param chainId  链Id/chain id
      * @param hashList
      * @return
      * @throws IOException
      */
-    public static List<Transaction> getTransactions(int chainId, List<NulsDigestData> hashList) {
-        List<Transaction> transactions = new ArrayList<>();
+    public static ArrayList<Transaction> getTransactions(int chainId, List<NulsDigestData> hashList, boolean allHits) {
+        if (hashList == null || hashList.size() == 0) {
+            return null;
+        }
+        ArrayList<Transaction> transactions = new ArrayList<>();
         NulsLogger commonLog = ContextManager.getContext(chainId).getCommonLog();
         try {
             Map<String, Object> params = new HashMap<>(2);
@@ -247,6 +250,7 @@ public class TransactionUtil {
             List<String> t = new ArrayList<>();
             hashList.forEach(e -> t.add(e.getDigestHex()));
             params.put("txHashList", t);
+            params.put("allHits", allHits);
             Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.TX.abbr, "tx_getBlockTxsExtend", params);
             if (response.isSuccess()) {
                 Map responseData = (Map) response.getResponseData();
@@ -344,7 +348,7 @@ public class TransactionUtil {
     /**
      * 批量保存交易
      *
-     * @param chainId 链Id/chain id
+     * @param chainId       链Id/chain id
      * @param blockHeaderPo
      * @return
      */

@@ -165,10 +165,11 @@ public class ConsensusProcess {
             return;
         }
         try {
-            boolean receiveSuccess = CallMethodUtils.receivePackingBlock(chain.getConfig().getChainId(), HexUtil.encode(block.serialize()),self.getPackEndTime() - CallMethodUtils.currentTime());
+            CallMethodUtils.receivePackingBlock(chain.getConfig().getChainId(), HexUtil.encode(block.serialize()),self.getPackEndTime() - CallMethodUtils.currentTime());
+            /*boolean receiveSuccess = CallMethodUtils.receivePackingBlock(chain.getConfig().getChainId(), HexUtil.encode(block.serialize()),self.getPackEndTime() - CallMethodUtils.currentTime());
             if(!receiveSuccess){
                 consensusLogger.info("add block interface call failed!");
-            }
+            }*/
         }catch (Exception e){
             consensusLogger.error(e);
         }

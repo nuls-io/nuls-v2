@@ -43,14 +43,10 @@ import java.util.Set;
 @Getter
 @Setter
 public class ContractResult {
-
-
     private transient ContractWrapperTransaction tx;
-
     private String hash;
-
     private long txTime;
-
+    private long blockHeight;
     /**
      * 交易创建者
      */
@@ -83,42 +79,15 @@ public class ContractResult {
      */
     private long value;
 
-    /**
-     * 有错误，还原状态
-     */
     private boolean revert;
-
-    /**
-     * 有错误，状态改变
-     */
     private boolean error;
-
-    /**
-     *
-     */
     private String errorMessage;
-
-    /**
-     *
-     */
     private String stackTrace;
-
-    /**
-     *
-     */
     private BigInteger balance;
-
     private BigInteger preBalance;
-
-    /**
-     *
-     */
     private BigInteger nonce;
-
     private boolean acceptDirectTransfer;
-
     private boolean isNrc20;
-
     private String tokenName;
     private String tokenSymbol;
     private int tokenDecimals;
@@ -233,10 +202,6 @@ public class ContractResult {
                 ", nonce=" + nonce +
                 ", acceptDirectTransfer=" + acceptDirectTransfer +
                 ", isNrc20=" + isNrc20 +
-                ", tokenName='" + tokenName + '\'' +
-                ", tokenSymbol='" + tokenSymbol + '\'' +
-                ", tokenDecimals=" + tokenDecimals +
-                ", tokenTotalSupply=" + tokenTotalSupply +
                 ", transfers=" + transfers +
                 ", mergedTransferList=" + mergedTransferList +
                 ", contractTransferList=" + contractTransferList +

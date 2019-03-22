@@ -37,12 +37,12 @@ import io.nuls.tools.log.Log;
  *
  * @author tag
  * 2019/2/25
- * */
+ */
 public class RequestByPeriodProcessor implements Runnable {
 
     private ConnectData connectData;
 
-    public  RequestByPeriodProcessor(ConnectData connectData){
+    public RequestByPeriodProcessor(ConnectData connectData) {
         this.connectData = connectData;
     }
 

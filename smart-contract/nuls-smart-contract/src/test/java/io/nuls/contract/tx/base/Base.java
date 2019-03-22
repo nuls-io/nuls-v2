@@ -26,9 +26,14 @@ package io.nuls.contract.tx.base;
 
 import io.nuls.base.basic.AddressTool;
 import io.nuls.contract.model.bo.Chain;
+import io.nuls.contract.model.bo.config.ConfigBean;
 import io.nuls.contract.model.txdata.CallContractData;
 import io.nuls.contract.model.txdata.ContractData;
 import io.nuls.contract.util.ContractUtil;
+import io.nuls.rpc.info.HostInfo;
+import io.nuls.rpc.info.NoUse;
+import io.nuls.rpc.netty.processor.ResponseMessageProcessor;
+import org.junit.Before;
 
 import java.math.BigInteger;
 
@@ -38,18 +43,31 @@ import java.math.BigInteger;
  */
 public class Base {
 
+    @Before
+    public void before() throws Exception {
+        NoUse.mockModule();
+        ResponseMessageProcessor.syncKernel("ws://" + HostInfo.getLocalIP() + ":8887/ws");
+        chain = new Chain();
+        chain.setConfig(new ConfigBean(chainId, assetId, 100000000L));
+    }
+
     protected Chain chain;
-    protected static int chainId = 12345;
+    protected static int chainId = 2;
     protected static int assetId = 1;
 
     protected static String password = "nuls123456";//"nuls123456";
 
-    protected String sender = "5MR_2CjZkQsN7EnEPcaLgNrMrp6wpPGN6xo";
+    protected String sender = "tNULSeBaMvEtDfvZuukDf2mVyfGo3DdiN8KLRG";
+    protected String toAddress = "tNULSeBaMnrs6JKrCy6TQdzYJZkMZJDng7QAsD";
+    protected String toAddress1 = "tNULSeBaMrbMRiFAUeeAt6swb4xVBNyi81YL24";
+    protected String toAddress2 = "tNULSeBaMu38g1vnJsSZUCwTDU9GsE5TVNUtpD";
+    protected String toAddress3 = "tNULSeBaMp9wC9PcWEcfesY7YmWrPfeQzkN1xL";
+    protected String toAddress4 = "tNULSeBaMshNPEnuqiDhMdSA4iNs6LMgjY6tcL";
 
-    protected String hash = "0020e8497478003a0158420e546f16e51544000c8dec17c0321b51eff2e6a71d3864";
-    protected String contractAddress = "5MR_3Q2vLmFRq1CwtgFBB3b69BJ2efTuZ1S";
+    protected String hash = "002052af887bcdd8dca28cbbb9689e4a9913a4346ff33558b32b54654076fbb994ed";
+    protected String contractAddress = "tNULSeBaMyZ1jR2tyTZ3pJwiYXt7TufoagaMk5";
 
-    protected String callHash = "002030663e43e65d53a49052e3ad061752326f03a9d40c9dc9dbc817859946512107";
+    protected String callHash = "00207987a58e710d30974e88451840253bf75088940b4efa8de6f366e3568fd9753a";
 
 
 
