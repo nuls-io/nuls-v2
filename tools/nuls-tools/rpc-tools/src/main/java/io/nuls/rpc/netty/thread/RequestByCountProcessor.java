@@ -11,18 +11,18 @@ import io.nuls.tools.log.Log;
  *
  * @author tag
  * 2019/2/25
- * */
-public class RequestByCountProcessor implements Runnable{
+ */
+public class RequestByCountProcessor implements Runnable {
     private ConnectData connectData;
 
-    public  RequestByCountProcessor(ConnectData connectData){
+    public RequestByCountProcessor(ConnectData connectData) {
         this.connectData = connectData;
     }
 
     /**
      * 发送订阅的数据队列
      * Data queue for sending subscriptions
-     * */
+     */
     @Override
     public void run() {
         while (connectData.isConnected()) {

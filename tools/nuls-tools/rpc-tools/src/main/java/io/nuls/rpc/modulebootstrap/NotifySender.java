@@ -16,9 +16,8 @@ import java.util.concurrent.TimeUnit;
 /**
  * @Author: zhoulijun
  * @Time: 2019-03-13 14:47
- * @Description:
- *    模块依赖管理状态通知
- *    通过重试的方式确保通知成功。若失败等待1秒重新通知，直到成功为止
+ * @Description: 模块依赖管理状态通知
+ * 通过重试的方式确保通知成功。若失败等待1秒重新通知，直到成功为止
  */
 @Component
 @Slf4j
@@ -30,12 +29,12 @@ public class NotifySender implements Runnable, InitializingBean {
 
     @Override
     public void run() {
-        while(true){
-            while(!notifyQueue.isEmpty())     {
+        while (true) {
+            while (!notifyQueue.isEmpty()) {
                 Callable<Boolean> caller = notifyQueue.poll();
                 try {
                     Boolean success = caller.call();
-                    if(!success){
+                    if (!success) {
                         notifyQueue.offer(caller);
                     }
                 } catch (Exception e) {
@@ -45,12 +44,12 @@ public class NotifySender implements Runnable, InitializingBean {
             try {
                 TimeUnit.SECONDS.sleep(1L);
             } catch (InterruptedException e) {
-                log.error("notify sender thread error",e);
+                log.error("notify sender thread error", e);
             }
         }
     }
 
-    public void send(Callable<Boolean> caller){
+    public void send(Callable<Boolean> caller) {
         this.notifyQueue.offer(caller);
     }
 

@@ -31,7 +31,6 @@ import io.nuls.contract.constant.ContractErrorCode;
 import io.nuls.contract.helper.ContractHelper;
 import io.nuls.contract.helper.ContractTxHelper;
 import io.nuls.contract.manager.ContractTokenBalanceManager;
-import io.nuls.contract.model.bo.ContractResult;
 import io.nuls.contract.model.po.ContractAddressInfoPo;
 import io.nuls.contract.model.po.ContractTokenTransferInfoPo;
 import io.nuls.contract.model.tx.CallContractTransaction;
@@ -54,8 +53,9 @@ import org.spongycastle.util.encoders.Hex;
 
 import java.io.IOException;
 import java.math.BigInteger;
-import java.util.*;
-import java.util.concurrent.locks.ReentrantLock;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import static io.nuls.contract.util.ContractUtil.getFailed;
 import static io.nuls.contract.util.ContractUtil.getSuccess;
@@ -102,7 +102,7 @@ public class ContractTxServiceImpl implements ContractTxService {
             resultMap.put("txHash", txHash);
             resultMap.put("contractAddress", contractAddressStr);
             // 保留未确认的创建合约交易到内存中
-            this.saveLocalUnconfirmedCreateContractTransaction(sender, resultMap, tx.getTime());
+            contractHelper.getChain(chainId).getContractTxCreateUnconfirmedManager().saveLocalUnconfirmedCreateContractTransaction(sender, resultMap, tx.getTime());
             return getSuccess().setData(resultMap);
         } catch (NulsException e) {
             Log.error(e);
@@ -121,103 +121,6 @@ public class ContractTxServiceImpl implements ContractTxService {
         return contractTxHelper.validateCreate(chainId, sender, null, gasLimit, price, contractCode, args);
     }
 
-    /**
-     * key: accountAddress
-     * value(Map):
-     * key: contractAddress
-     * value(Map):
-     * key: txHash / contractAddress / time/ success(optional)
-     * value: txHash-V / contractAddress-V / time-V/ success-V(true,false)
-     */
-    private static final Map<String, Map<String, Map<String, String>>> LOCAL_UNCONFIRMED_CREATE_CONTRACT_TRANSACTION = MapUtil.createLinkedHashMap(4);
-    private ReentrantLock lock = new ReentrantLock();
-
-    private void saveLocalUnconfirmedCreateContractTransaction(String sender, Map<String, String> resultMap, long time) {
-        lock.lock();
-        try {
-            LinkedHashMap<String, String> map = MapUtil.createLinkedHashMap(3);
-            map.putAll(resultMap);
-            map.put("time", String.valueOf(time));
-            String contractAddress = map.get("contractAddress");
-            Map<String, Map<String, String>> unconfirmedOfAccountMap = LOCAL_UNCONFIRMED_CREATE_CONTRACT_TRANSACTION.get(sender);
-            if (unconfirmedOfAccountMap == null) {
-                unconfirmedOfAccountMap = MapUtil.createLinkedHashMap(4);
-                unconfirmedOfAccountMap.put(contractAddress, map);
-                LOCAL_UNCONFIRMED_CREATE_CONTRACT_TRANSACTION.put(sender, unconfirmedOfAccountMap);
-            } else {
-                unconfirmedOfAccountMap.put(contractAddress, map);
-            }
-        } finally {
-            lock.unlock();
-        }
-    }
-
-    @Override
-    public LinkedList<Map<String, String>> getLocalUnconfirmedCreateContractTransaction(String sender) {
-        Map<String, Map<String, String>> unconfirmedOfAccountMap = LOCAL_UNCONFIRMED_CREATE_CONTRACT_TRANSACTION.get(sender);
-        if (unconfirmedOfAccountMap == null) {
-            return null;
-        }
-        return new LinkedList<>(unconfirmedOfAccountMap.values());
-    }
-
-    @Override
-    public void removeLocalUnconfirmedCreateContractTransaction(String sender, String contractAddress, ContractResult contractResult) {
-        lock.lock();
-        try {
-            Map<String, Map<String, String>> unconfirmedOfAccountMap = LOCAL_UNCONFIRMED_CREATE_CONTRACT_TRANSACTION.get(sender);
-            if (unconfirmedOfAccountMap == null) {
-                return;
-            }
-            // 合约创建成功，删除未确认交易
-            if (contractResult.isSuccess()) {
-                unconfirmedOfAccountMap.remove(contractAddress);
-            } else {
-                // 合约执行失败，保留未确认交易，并标注错误信息
-                Map<String, String> dataMap = unconfirmedOfAccountMap.get(contractAddress);
-                if (dataMap != null) {
-                    dataMap.put("success", "false");
-                    dataMap.put("msg", contractResult.getErrorMessage());
-                }
-            }
-        } finally {
-            lock.unlock();
-        }
-    }
-
-    @Override
-    public void removeLocalUnconfirmedCreateContractTransaction(String sender, String contractAddress) {
-        lock.lock();
-        try {
-            Map<String, Map<String, String>> unconfirmedOfAccountMap = LOCAL_UNCONFIRMED_CREATE_CONTRACT_TRANSACTION.get(sender);
-            if (unconfirmedOfAccountMap == null) {
-                return;
-            }
-            unconfirmedOfAccountMap.remove(contractAddress);
-        } finally {
-            lock.unlock();
-        }
-    }
-
-    @Override
-    public void removeLocalFailedUnconfirmedCreateContractTransaction(String sender, String contractAddress) {
-        lock.lock();
-        try {
-            Map<String, Map<String, String>> unconfirmedOfAccountMap = LOCAL_UNCONFIRMED_CREATE_CONTRACT_TRANSACTION.get(sender);
-            if (unconfirmedOfAccountMap == null) {
-                return;
-            }
-            Map<String, String> dataMap = unconfirmedOfAccountMap.get(contractAddress);
-            if (dataMap != null) {
-                String success = dataMap.get("success");
-                if ("false".equals(success)) {
-                    unconfirmedOfAccountMap.remove(contractAddress);
-                }
-            }
-        } finally {
-            lock.unlock();
-        }
-    }
 
     @Override
     public Result contractPreCreateTx(int chainId, String sender, Long gasLimit, Long price,

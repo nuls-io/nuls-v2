@@ -40,7 +40,7 @@ import io.nuls.tools.log.Log;
 public class ResponseAutoProcessor implements Runnable {
     private ConnectData connectData;
 
-    public ResponseAutoProcessor(ConnectData connectData){
+    public ResponseAutoProcessor(ConnectData connectData) {
         this.connectData = connectData;
     }
 
@@ -58,7 +58,7 @@ public class ResponseAutoProcessor implements Runnable {
                 Get the first item of the queue
                  */
                 Response response = connectData.getResponseAutoQueue().take();
-                if(response.getRequestId() == null) {
+                if (response.getRequestId() == null) {
                     continue;
                 }
                 /*

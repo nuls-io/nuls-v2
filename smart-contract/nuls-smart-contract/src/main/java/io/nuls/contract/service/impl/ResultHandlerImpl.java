@@ -25,7 +25,7 @@ package io.nuls.contract.service.impl;
 
 import io.nuls.base.data.*;
 import io.nuls.contract.helper.ContractHelper;
-import io.nuls.contract.manager.TempBalanceManager;
+import io.nuls.contract.manager.ContractTempBalanceManager;
 import io.nuls.contract.model.bo.AnalyzerResult;
 import io.nuls.contract.model.bo.ContractBalance;
 import io.nuls.contract.model.bo.ContractResult;
@@ -38,7 +38,6 @@ import io.nuls.contract.util.CompareTx;
 import io.nuls.contract.vm.program.ProgramExecutor;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
-import io.nuls.tools.core.annotation.Service;
 import io.nuls.tools.log.Log;
 import org.spongycastle.util.encoders.Hex;
 
@@ -85,7 +84,7 @@ public class ResultHandlerImpl implements ResultHanlder {
     }
 
     private void handleFailedContract(int chainId, AnalyzerResult analyzerResult, long blockTime) throws IOException {
-        TempBalanceManager tempBalanceManager = contractHelper.getTempBalanceManager(chainId);
+        ContractTempBalanceManager tempBalanceManager = contractHelper.getTempBalanceManager(chainId);
         int assetsId = contractHelper.getChain(chainId).getConfig().getAssetsId();
 
         Set<ContractResult> failedSet = analyzerResult.getFailedSet();

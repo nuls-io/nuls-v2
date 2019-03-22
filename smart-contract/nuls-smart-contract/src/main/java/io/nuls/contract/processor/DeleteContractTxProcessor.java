@@ -51,8 +51,10 @@ public class DeleteContractTxProcessor {
     public Result onCommit(int chainId, ContractWrapperTransaction tx) {
         BlockHeader blockHeader = contractHelper.getCurrentBlockHeader(chainId);
         byte[] stateRoot = blockHeader.getStateRoot();
+        long blockHeight = blockHeader.getHeight();
         ContractResult contractResult = tx.getContractResult();
         contractResult.setStateRoot(stateRoot);
+        contractResult.setBlockHeight(blockHeight);
         contractService.saveContractExecuteResult(chainId, tx.getHash(), contractResult);
         return getSuccess();
     }
