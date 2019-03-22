@@ -222,10 +222,10 @@ public class ChainManager {
         TxRegister txRegister = new TxRegister();
         txRegister.setModuleCode(txConfig.getModuleCode());
         txRegister.setTxType(TxConstant.TX_TYPE_CROSS_CHAIN_TRANSFER);
-/*        txRegister.setModuleValidator(TxConstant.TX_MODULE_VALIDATOR);
+        txRegister.setModuleValidator(TxConstant.TX_MODULE_VALIDATOR);
         txRegister.setValidator(TxConstant.CROSS_TRANSFER_VALIDATOR);
         txRegister.setCommit(TxConstant.CROSS_TRANSFER_COMMIT);
-        txRegister.setRollback(TxConstant.CROSS_TRANSFER_ROLLBACK);*/
+        txRegister.setRollback(TxConstant.CROSS_TRANSFER_ROLLBACK);
         txRegister.setSystemTx(false);
         txRegister.setUnlockTx(false);
         txRegister.setVerifySignature(true);
