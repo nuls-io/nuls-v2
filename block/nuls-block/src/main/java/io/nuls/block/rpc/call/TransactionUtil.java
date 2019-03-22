@@ -76,7 +76,7 @@ public class TransactionUtil {
     /**
      * 批量验证交易
      *
-     * @param chainId 链Id/chain id
+     * @param chainId      链Id/chain id
      * @param transactions
      * @return
      */
@@ -109,7 +109,7 @@ public class TransactionUtil {
     /**
      * 批量保存交易
      *
-     * @param chainId 链Id/chain id
+     * @param chainId       链Id/chain id
      * @param blockHeaderPo
      * @param txs
      * @param localInit
@@ -126,7 +126,7 @@ public class TransactionUtil {
     /**
      * 批量保存交易
      *
-     * @param chainId 链Id/chain id
+     * @param chainId       链Id/chain id
      * @param blockHeaderPo
      * @return
      */
@@ -158,7 +158,7 @@ public class TransactionUtil {
     /**
      * 批量回滚交易
      *
-     * @param chainId 链Id/chain id
+     * @param chainId       链Id/chain id
      * @param blockHeaderPo
      * @return
      */
@@ -190,7 +190,7 @@ public class TransactionUtil {
     /**
      * 批量获取已确认交易
      *
-     * @param chainId 链Id/chain id
+     * @param chainId  链Id/chain id
      * @param hashList
      * @return
      * @throws IOException
@@ -232,12 +232,15 @@ public class TransactionUtil {
     /**
      * 批量获取交易
      *
-     * @param chainId 链Id/chain id
+     * @param chainId  链Id/chain id
      * @param hashList
      * @return
      * @throws IOException
      */
     public static ArrayList<Transaction> getTransactions(int chainId, List<NulsDigestData> hashList, boolean allHits) {
+        if (hashList == null || hashList.size() == 0) {
+            return null;
+        }
         ArrayList<Transaction> transactions = new ArrayList<>();
         NulsLogger commonLog = ContextManager.getContext(chainId).getCommonLog();
         try {
@@ -345,7 +348,7 @@ public class TransactionUtil {
     /**
      * 批量保存交易
      *
-     * @param chainId 链Id/chain id
+     * @param chainId       链Id/chain id
      * @param blockHeaderPo
      * @return
      */
