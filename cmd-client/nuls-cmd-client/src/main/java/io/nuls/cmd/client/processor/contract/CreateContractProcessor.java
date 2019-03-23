@@ -32,13 +32,12 @@ import io.nuls.cmd.client.CommandBuilder;
 import io.nuls.cmd.client.CommandHelper;
 import io.nuls.cmd.client.CommandResult;
 import io.nuls.cmd.client.processor.ErrorCodeConstants;
+import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.model.StringUtils;
 import io.nuls.tools.parse.JSONUtils;
 import jline.console.ConsoleReader;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -47,6 +46,7 @@ import java.util.Map;
  * @author: PierreLuo
  * @date: 2018/9/19
  */
+@Component
 public class CreateContractProcessor extends ContractBaseProcessor {
 
     private ThreadLocal<CreateContractReq> paramsData = new ThreadLocal<>();

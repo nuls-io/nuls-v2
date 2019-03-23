@@ -32,6 +32,7 @@ import io.nuls.cmd.client.CommandBuilder;
 import io.nuls.cmd.client.CommandHelper;
 import io.nuls.cmd.client.CommandResult;
 import io.nuls.cmd.client.processor.CommandProcessor;
+import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.model.StringUtils;
 
 import java.math.BigDecimal;
@@ -44,6 +45,7 @@ import java.util.Map;
  * @author: PierreLuo
  * @date: 2018/9/22
  */
+@Component
 public class TokenTransferProcessor extends ContractBaseProcessor {
 
 

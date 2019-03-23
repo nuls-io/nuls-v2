@@ -31,19 +31,18 @@ import io.nuls.api.provider.contract.facade.TransferToContractReq;
 import io.nuls.cmd.client.CommandBuilder;
 import io.nuls.cmd.client.CommandHelper;
 import io.nuls.cmd.client.CommandResult;
-import io.nuls.cmd.client.processor.CommandProcessor;
 import io.nuls.cmd.client.processor.ErrorCodeConstants;
 import io.nuls.cmd.client.utils.Na;
+import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.model.StringUtils;
 
 import java.math.BigInteger;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * Transfer to contract address
  * Created by wangkun23 on 2018/9/25.
  */
+@Component
 public class TransferToContractProcessor extends ContractBaseProcessor {
 
     @Override
