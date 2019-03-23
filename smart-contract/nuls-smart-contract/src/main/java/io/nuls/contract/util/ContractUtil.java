@@ -457,7 +457,7 @@ public class ContractUtil {
      */
     public static List<ContractResult> deduplicationAndOrder(List<ContractResult> contractResultList) {
         return contractResultList.stream().collect(Collectors.toSet()).stream()
-                .collect(Collectors.toList()).stream().sorted(CompareTx.getInstance()).collect(Collectors.toList());
+                .collect(Collectors.toList()).stream().sorted(CompareTxTimeDesc.getInstance()).collect(Collectors.toList());
     }
 
     /**

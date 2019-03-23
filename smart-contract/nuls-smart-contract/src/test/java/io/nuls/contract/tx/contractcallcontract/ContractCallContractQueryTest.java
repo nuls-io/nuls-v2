@@ -255,7 +255,7 @@ public class ContractCallContractQueryTest extends Base {
      */
     @Test
     public void tokenBalance() throws Exception {
-        Map params = this.makeTokenBalanceParams(contractAddress, toAddress1);
+        Map params = this.makeTokenBalanceParams(contractAddress_nrc20, contractAddress);
         Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, TOKEN_BALANCE, params);
         Map result = (HashMap) (((HashMap) cmdResp2.getResponseData()).get(TOKEN_BALANCE));
         Assert.assertTrue(null != result);

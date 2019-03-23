@@ -104,7 +104,7 @@ public class ContractCall {
         try {
            result = (Map) TransactionCall.request(ModuleE.SC.abbr, "sc_batch_end", params);
             chain.getLoggerMap().get(TxConstant.LOG_TX).debug("moduleCode:{}, -cmd:{}, -contractProcess -rs: {}",
-                    ModuleE.SC.abbr, "sc_invoke_contract", JSONUtils.obj2json(result));
+                    ModuleE.SC.abbr, "sc_batch_end", JSONUtils.obj2json(result));
         }catch (JsonProcessingException e) {
             chain.getLoggerMap().get(TxConstant.LOG_TX).error(e);
         }catch (NulsException e) {
