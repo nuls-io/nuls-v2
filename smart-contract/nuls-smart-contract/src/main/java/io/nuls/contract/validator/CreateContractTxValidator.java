@@ -33,7 +33,7 @@ import io.nuls.contract.util.ContractUtil;
 import io.nuls.tools.basic.Result;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.exception.NulsException;
-import io.nuls.tools.log.Log;
+import io.nuls.contract.util.Log;
 
 import java.util.Set;
 

@@ -21,7 +21,7 @@ import io.nuls.tools.core.annotation.Configuration;
 import io.nuls.tools.core.ioc.SpringLiteContext;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.io.IoUtils;
-import io.nuls.tools.log.Log;
+import io.nuls.contract.util.Log;
 import io.nuls.tools.parse.I18nUtils;
 import io.nuls.tools.parse.JSONUtils;
 
