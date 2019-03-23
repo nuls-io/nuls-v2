@@ -78,7 +78,7 @@ public class GetTxGroupHandler extends BaseCmd {
             return success();
         }
         messageLog.debug("transactions size:" + transactions.size());
-        transactions.forEach(e -> messageLog.debug("transaction hash:" + e.getHash()));
+//        transactions.forEach(e -> messageLog.debug("transaction hash:" + e.getHash()));
         request.setBlockHash(message.getBlockHash());
         request.setTransactions(transactions);
         NetworkUtil.sendToNode(chainId, request, nodeId, TXGROUP_MESSAGE);
