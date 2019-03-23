@@ -222,10 +222,20 @@ public class WalletRpcHandler {
         resultInfo.setRemark((String) map.get("remark"));
 
         List<Map<String, Object>> transfers = (List<Map<String, Object>>) map.get("transfers");
+        List<NulsTransfer> transferList = new ArrayList<>();
         if (!transfers.isEmpty()) {
-
+            for (Map map1 : transfers) {
+                NulsTransfer nulsTransfer = new NulsTransfer();
+                nulsTransfer.setTxHash((String) map1.get("txHash"));
+                nulsTransfer.setFrom((String) map.get("from"));
+                nulsTransfer.setValue((String) map.get("value"));
+                nulsTransfer.setOutputs((List<Map<String, Object>>) map.get("outputs"));
+                transferList.add(nulsTransfer);
+            }
         }
+        resultInfo.setNulsTransfers(transferList);
 
+        transfers = (List<Map<String, Object>>) map.get("transfers");
 
         return Result.getSuccess(null).setData(resultInfo);
     }
