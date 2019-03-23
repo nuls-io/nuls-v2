@@ -120,7 +120,15 @@ public class BlockManager {
         }
         chain.setBlockHeaderList(headerList);
         chain.setNewestHeader(headerList.get(headerList.size() - 1));
-        roundManager.rollBackRound(chain, height);
+        long roundIndex;
+        BlockHeader newestBlocHeader = chain.getNewestHeader();
+        BlockExtendsData bestExtendsData = new BlockExtendsData(newestBlocHeader.getExtend());
+        if(bestExtendsData.getPackingIndexOfRound() > 1){
+            roundIndex = bestExtendsData.getRoundIndex();
+        }else{
+            roundIndex = bestExtendsData.getRoundIndex()-1;
+        }
+        roundManager.rollBackRound(chain, roundIndex);
         chain.getLoggerMap().get(ConsensusConstant.BASIC_LOGGER_NAME).info("区块回滚成功，回滚到的高度为：" + height + ",本地最新区块高度为：" + chain.getNewestHeader().getHeight());
     }
 }

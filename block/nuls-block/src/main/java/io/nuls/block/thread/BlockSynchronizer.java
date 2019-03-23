@@ -79,6 +79,7 @@ public class BlockSynchronizer implements Runnable {
     public void run() {
         for (Integer chainId : ContextManager.chainIds) {
             ChainContext context = ContextManager.getContext(chainId);
+            context.setStatus(RunningStatusEnum.SYNCHRONIZING);
             int synSleepInterval = context.getParameters().getSynSleepInterval();
             NulsLogger commonLog = context.getCommonLog();
             try {
@@ -192,7 +193,6 @@ public class BlockSynchronizer implements Runnable {
                 commonLog.warn("chain-" + chainId + ", The local GenesisBlock differ from network");
                 throw new ChainRuntimeException("The local GenesisBlock differ from network");
             }
-            context.setStatus(RunningStatusEnum.SYNCHRONIZING);
             PriorityBlockingQueue<Node> nodes = params.getNodes();
             int nodeCount = nodes.size();
             ThreadPoolExecutor executor = ThreadUtils.createThreadPool(nodeCount * 4, 0, new NulsThreadFactory("worker-" + chainId));

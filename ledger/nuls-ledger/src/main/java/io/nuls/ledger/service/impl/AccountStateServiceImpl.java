@@ -66,12 +66,17 @@ public class AccountStateServiceImpl implements AccountStateService {
         //同步下未确认交易账户数据
         synchronized (LockerUtil.getAccountLocker(assetKey)) {
             AccountState dbAccountState = repository.getAccountState(accountState.getAddressChainId(), assetKey.getBytes(LedgerConstant.DEFAULT_ENCODING));
-            List<UnconfirmedNonce> unconfirmedNonces = CoinDataUtil.getUnconfirmedNonces(accountState.getNonce(), dbAccountState.getUnconfirmedNonces());
-            accountState.setUnconfirmedNonces(unconfirmedNonces);
+            if(accountState.getNonce().equalsIgnoreCase(LedgerConstant.INIT_NONCE) && dbAccountState.getNonce().equalsIgnoreCase(LedgerConstant.INIT_NONCE)){
+                accountState.setUnconfirmedNonces(dbAccountState.getUnconfirmedNonces());
+            }else{
+                List<UnconfirmedNonce> unconfirmedNonces = CoinDataUtil.getUnconfirmedNonces(accountState.getNonce(), dbAccountState.getUnconfirmedNonces());
+                accountState.setUnconfirmedNonces(unconfirmedNonces);
+            }
+           ;
             List<UnconfirmedAmount> unconfirmedAmounts = CoinDataUtil.getUnconfirmedAmounts(accountState.getTxHash(), dbAccountState.getUnconfirmedAmounts());
             accountState.setUnconfirmedAmounts(unconfirmedAmounts);
-            LoggerUtil.logger.debug("更新确认的交易信息：orgNonce={},newNonce={}", dbAccountState.getNonce(), accountState.getNonce());
-            LoggerUtil.logger.debug("更新确认的交易信息:unConfirmedNonce org={},new={}", dbAccountState.getUnconfirmedNoncesStrs(), accountState.getUnconfirmedNoncesStrs());
+            LoggerUtil.logger.debug("更新确认的交易信息：addr={},orgNonce={},newNonce={}",assetKey, dbAccountState.getNonce(), accountState.getNonce());
+            LoggerUtil.logger.debug("更新确认的交易信息:addr={},unConfirmedNonce org={},new={}", assetKey,dbAccountState.getUnconfirmedNoncesStrs(), accountState.getUnconfirmedNoncesStrs());
             repository.updateAccountState(assetKey.getBytes(LedgerConstant.DEFAULT_ENCODING), accountState);
             LoggerUtil.txAmount.debug("hash={},assetKey={},dbAmount={},dbFreeze={},changeTo={},freeze={},oldHash={}", accountState.getTxHash(), assetKey, dbAccountState.getAvailableAmount(),dbAccountState.getFreezeTotal(), accountState.getAvailableAmount(), accountState.getFreezeTotal(),dbAccountState.getTxHash());
             blockSnapshotAccounts.addAccountState(dbAccountState);

@@ -28,7 +28,6 @@ import io.nuls.block.thread.monitor.OrphanChainsMonitor;
 import io.nuls.block.utils.ChainGenerator;
 import io.nuls.block.utils.ConfigLoader;
 import io.nuls.db.service.RocksDBService;
-import io.nuls.tools.core.inteceptor.ModularServiceMethodInterceptor;
 import io.nuls.tools.core.ioc.SpringLiteContext;
 import org.junit.*;
 
@@ -38,7 +37,7 @@ public class BlockChainManagerTest {
 
     @BeforeClass
     public static void set() throws Exception {
-        SpringLiteContext.init("io.nuls.block", new ModularServiceMethodInterceptor());
+        SpringLiteContext.init("io.nuls.block");
     }
 
     @Before
