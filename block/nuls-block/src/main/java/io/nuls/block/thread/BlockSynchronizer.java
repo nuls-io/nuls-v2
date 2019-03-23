@@ -218,10 +218,9 @@ public class BlockSynchronizer implements Runnable {
             executor.shutdownNow();
             if (success) {
                 commonLog.info("block syn complete, total download:" + total + ", total time:" + (end - start) + ", average time:" + (end - start) / total);
-                if (checkIsNewest(chainId, context)) {
+//                if (checkIsNewest(chainId, context)) {
                     //要测试分叉链切换或者孤儿链，放开下面语句，概率会加大
-//                if (true) {
-//                    Thread.sleep(30000);
+                if (true) {
                     commonLog.info("block syn complete successfully, current height-" + params.getNetLatestHeight());
                     context.setStatus(RunningStatusEnum.RUNNING);
                     ConsensusUtil.notice(chainId, CONSENSUS_WORKING);
