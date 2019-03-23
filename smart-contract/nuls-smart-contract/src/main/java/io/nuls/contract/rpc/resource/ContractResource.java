@@ -1057,8 +1057,8 @@ public class ContractResource extends BaseCmd {
             } else {
                 contractResultDto = new ContractResultDto(chainId, contractExecuteResult, tx1);
             }
+            tx1.setBlockHeight(contractExecuteResult.getBlockHeight());
         }
-        tx1.setBlockHeight(contractExecuteResult.getBlockHeight());
         return contractResultDto;
     }
 
