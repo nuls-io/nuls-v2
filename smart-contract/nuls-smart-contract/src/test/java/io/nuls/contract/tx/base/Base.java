@@ -48,7 +48,7 @@ public class Base {
         NoUse.mockModule();
         ResponseMessageProcessor.syncKernel("ws://" + HostInfo.getLocalIP() + ":8887/ws");
         chain = new Chain();
-        chain.setConfig(new ConfigBean(chainId, assetId, 100000000L));
+        chain.setConfig(new ConfigBean(assetId, chainId, 100000000L));
     }
 
     protected Chain chain;
@@ -64,10 +64,12 @@ public class Base {
     protected String toAddress3 = "tNULSeBaMp9wC9PcWEcfesY7YmWrPfeQzkN1xL";
     protected String toAddress4 = "tNULSeBaMshNPEnuqiDhMdSA4iNs6LMgjY6tcL";
 
-    protected String hash = "0020393c317981937950c7a1181021fb5d917efb79c9c03a2f077f2d2760f73e9593";
-    protected String contractAddress = "tNULSeBaN71xpUTKtLyHSsTfB11fNGtA7W2RLS";
+    protected String createHash = "0020ce11ea60f1427a0e034ed6b70958546148c0c1a7b0512cab01487f30379d66a3";
+    protected String contractAddress = "tNULSeBaN7mAhWkNj3ezEY9zv6JriYSfo3fseE";
+    protected String contractAddress_nrc20 = "tNULSeBaMwmibwJwqSEsFmG1XHW3VVzTVyJ9rA";
 
-    protected String callHash = "00207987a58e710d30974e88451840253bf75088940b4efa8de6f366e3568fd9753a";
+    protected String callHash = "002006dc2d87274408d8ec266d439b0f497e6a44a1e50eaeb1f1eaca1d909b7c4612";
+    protected String deleteHash = "0020b2c159dbdf784c2860ec97072feb887466aa50fc147a5b50388886caab113f9a";
 
 
 

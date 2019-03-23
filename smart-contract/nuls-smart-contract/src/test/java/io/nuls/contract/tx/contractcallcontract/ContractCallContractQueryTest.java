@@ -22,13 +22,14 @@
  * SOFTWARE.
  */
 
-package io.nuls.contract.tx;
+package io.nuls.contract.tx.contractcallcontract;
 
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import io.nuls.base.data.BlockHeader;
 import io.nuls.contract.basetest.ContractTest;
 import io.nuls.contract.rpc.call.BlockCall;
+import io.nuls.contract.rpc.call.LedgerCall;
 import io.nuls.contract.tx.base.Base;
 import io.nuls.contract.util.ContractUtil;
 import io.nuls.rpc.model.ModuleE;
@@ -55,7 +56,7 @@ import static io.nuls.contract.constant.ContractCmdConstant.*;
  * @author: PierreLuo
  * @date: 2019-03-15
  */
-public class ContractQueryTest extends Base {
+public class ContractCallContractQueryTest extends Base {
 
     @Test
     public void getBlockHeader() throws NulsException, JsonProcessingException {
@@ -63,20 +64,66 @@ public class ContractQueryTest extends Base {
         Log.info("\nstateRoot is " + Hex.toHexString(ContractUtil.getStateRoot(blockHeader)) + ", " + blockHeader.toString());
     }
 
+    @Test
+    public void getBalance() throws Exception {
+        Map<String, Object> balance = LedgerCall.getBalance(chain, contractAddress);
+        Log.info("balance:{}", JSONUtils.obj2PrettyJson(balance));
+    }
+
+    /**
+     * 验证创建合约
+     */
+    @Test
+    public void validateCreate() throws Exception {
+        InputStream in = new FileInputStream(ContractTest.class.getResource("/contract_call_contract").getFile());
+        byte[] contractCode = IOUtils.toByteArray(in);
+        Map params = this.makeValidateCreateParams(sender, contractCode);
+        Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, VALIDATE_CREATE, params);
+        Log.info("validate_create-Response:{}", JSONUtils.obj2PrettyJson(cmdResp2));
+        Assert.assertTrue(cmdResp2.isSuccess());
+    }
+    private Map makeValidateCreateParams(String sender, byte[] contractCode, Object... args) {
+        Map<String, Object> params = new HashMap<>();
+        params.put("chainId", chainId);
+        params.put("sender", sender);
+        params.put("gasLimit", 200000L);
+        params.put("price", 25);
+        params.put("contractCode", Hex.toHexString(contractCode));
+        params.put("args", args);
+        return params;
+    }
+
+    /**
+     * 估算创建合约的gas
+     */
+    @Test
+    public void imputedCreateGas() throws Exception {
+        InputStream in = new FileInputStream(ContractTest.class.getResource("/contract_call_contract").getFile());
+        byte[] contractCode = IOUtils.toByteArray(in);
+        Map params = this.makeImputedCreateGasParams(sender, contractCode);
+        Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, IMPUTED_CREATE_GAS, params);
+        Map result = (HashMap) (((HashMap) cmdResp2.getResponseData()).get(IMPUTED_CREATE_GAS));
+        Assert.assertTrue(null != result);
+        Log.info("imputed_create_gas-result:{}", JSONUtils.obj2PrettyJson(result));
+    }
+    private Map makeImputedCreateGasParams(String sender, byte[] contractCode, Object... args) {
+        Map<String, Object> params = new HashMap<>();
+        params.put("chainId", chainId);
+        params.put("sender", sender);
+        params.put("contractCode", Hex.toHexString(contractCode));
+        params.put("args", args);
+        return params;
+    }
 
     /**
      * 预创建合约
      */
     @Test
     public void preCreateContract() throws Exception {
-        InputStream in = new FileInputStream(ContractTest.class.getResource("/nrc20").getFile());
+        InputStream in = new FileInputStream(ContractTest.class.getResource("/contract_call_contract").getFile());
         byte[] contractCode = IOUtils.toByteArray(in);
-        String remark = "create contract test - 空气币";
-        String name = "KQB";
-        String symbol = "KongQiBi";
-        String amount = BigDecimal.TEN.pow(10).toPlainString();
-        String decimals = "2";
-        Map params = this.makePreCreateParams(sender, contractCode, remark, name, symbol, amount, decimals);
+        String remark = "create contract test - 合约内部转账，合约调用合约";
+        Map params = this.makePreCreateParams(sender, contractCode, remark);
         Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, PRE_CREATE, params);
         Log.info("pre_create-Response:{}", JSONUtils.obj2PrettyJson(cmdResp2));
         Assert.assertTrue(cmdResp2.isSuccess());
@@ -96,69 +143,18 @@ public class ContractQueryTest extends Base {
 
 
     /**
-     * 估算创建合约的gas
-     */
-    @Test
-    public void imputedCreateGas() throws Exception {
-        InputStream in = new FileInputStream(ContractTest.class.getResource("/nrc20").getFile());
-        byte[] contractCode = IOUtils.toByteArray(in);
-        String name = "KQB";
-        String symbol = "KongQiBi";
-        String amount = BigDecimal.TEN.pow(10).toPlainString();
-        String decimals = "2";
-        Map params = this.makeImputedCreateGasParams(sender, contractCode, name, symbol, amount, decimals);
-        Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, IMPUTED_CREATE_GAS, params);
-        Map result = (HashMap) (((HashMap) cmdResp2.getResponseData()).get(IMPUTED_CREATE_GAS));
-        Assert.assertTrue(null != result);
-        Log.info("imputed_create_gas-result:{}", JSONUtils.obj2PrettyJson(result));
-    }
-    private Map makeImputedCreateGasParams(String sender, byte[] contractCode, Object... args) {
-        Map<String, Object> params = new HashMap<>();
-        params.put("chainId", chainId);
-        params.put("sender", sender);
-        params.put("contractCode", Hex.toHexString(contractCode));
-        params.put("args", args);
-        return params;
-    }
-
-    /**
-     * 验证创建合约
-     */
-    @Test
-    public void validateCreate() throws Exception {
-        InputStream in = new FileInputStream(ContractTest.class.getResource("/nrc20").getFile());
-        byte[] contractCode = IOUtils.toByteArray(in);
-        String name = "KQB";
-        String symbol = "KongQiBi";
-        String amount = BigDecimal.TEN.pow(10).toPlainString();
-        String decimals = "2";
-        Map params = this.makeValidateCreateParams(sender, contractCode, name, symbol, amount, decimals);
-        Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, VALIDATE_CREATE, params);
-        Log.info("validate_create-Response:{}", JSONUtils.obj2PrettyJson(cmdResp2));
-        Assert.assertTrue(cmdResp2.isSuccess());
-    }
-    private Map makeValidateCreateParams(String sender, byte[] contractCode, Object... args) {
-        Map<String, Object> params = new HashMap<>();
-        params.put("chainId", chainId);
-        params.put("sender", sender);
-        params.put("gasLimit", 200000L);
-        params.put("price", 25);
-        params.put("contractCode", Hex.toHexString(contractCode));
-        params.put("args", args);
-        return params;
-    }
-
-
-    /**
-     * 验证调用合约
+     * 验证调用合约 - 合约内部转账
      */
     @Test
     public void validateCall() throws Exception {
         BigInteger value = BigInteger.ZERO;
-        String methodName = "transfer";
+        String methodName = "multyForAddress";
         String methodDesc = "";
-        String token = BigInteger.TEN.pow(8).toString();
-        Map params = this.makeValidateCallParams(sender, value, contractAddress, methodName, methodDesc, toAddress, token);
+        String address1 = toAddress1;
+        String address2 = toAddress2;
+        String value1 = BigInteger.TEN.pow(8).toString();
+        String value2 = BigInteger.TEN.pow(10).toString();
+        Map params = this.makeValidateCallParams(sender, value, contractAddress, methodName, methodDesc, address1, value1, address2, value2);
         Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, VALIDATE_CALL, params);
         Log.info("validateCall-Response:{}", JSONUtils.obj2PrettyJson(cmdResp2));
         Assert.assertTrue(cmdResp2.isSuccess());
@@ -178,15 +174,38 @@ public class ContractQueryTest extends Base {
     }
 
     /**
-     * 估算调用合约的gas
+     * 验证调用合约 - 合约调用合约
+     */
+    @Test
+    public void validateCall_contractCallContract() throws Exception {
+        BigInteger value = BigInteger.ZERO;
+        String methodName = "callContractWithReturnValue";
+        String methodDesc = "";
+
+        String _methodName = "transfer";
+        String _token = BigInteger.TEN.pow(8).toString();
+        String[] _args = new String[]{toAddress1, _token};
+        BigInteger _value = value;
+        Map params = this.makeValidateCallParams(sender, value, contractAddress, methodName, methodDesc,
+                contractAddress_nrc20, _methodName, _args, _value);
+        Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, VALIDATE_CALL, params);
+        Log.info("validateCall-Response:{}", JSONUtils.obj2PrettyJson(cmdResp2));
+        Assert.assertTrue(cmdResp2.isSuccess());
+    }
+
+    /**
+     * 估算调用合约的gas - 合约内部转账
      */
     @Test
     public void imputedCallGas() throws Exception {
         BigInteger value = BigInteger.ZERO;
-        String methodName = "transfer";
+        String methodName = "multyForAddress";
         String methodDesc = "";
-        String token = BigInteger.TEN.pow(8).toString();
-        Map params = this.makeImputedCallGasParams(sender, value, contractAddress, methodName, methodDesc, toAddress, token);
+        String address1 = toAddress1;
+        String address2 = toAddress2;
+        String value1 = BigInteger.TEN.pow(8).toString();
+        String value2 = BigInteger.TEN.pow(10).toString();
+        Map params = this.makeImputedCallGasParams(sender, value, contractAddress, methodName, methodDesc, address1, value1, address2, value2);
         Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, IMPUTED_CALL_GAS, params);
         Map result = (HashMap) (((HashMap) cmdResp2.getResponseData()).get(IMPUTED_CALL_GAS));
         Assert.assertTrue(null != result);
@@ -203,6 +222,27 @@ public class ContractQueryTest extends Base {
         params.put("args", args);
         return params;
     }
+    /**
+     * 估算调用合约的gas - 合约调用合约
+     */
+    @Test
+    public void imputedCallGas_contractCallContract() throws Exception {
+        BigInteger value = BigInteger.ZERO;
+        String methodName = "callContractWithReturnValue";
+        String methodDesc = "";
+
+        String _methodName = "transfer";
+        String _token = BigInteger.TEN.pow(8).toString();
+        String[] _args = new String[]{toAddress1, _token};
+        BigInteger _value = value;
+        Map params = this.makeImputedCallGasParams(sender, value, contractAddress, methodName, methodDesc,
+                contractAddress_nrc20, _methodName, _args, _value);
+
+        Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, IMPUTED_CALL_GAS, params);
+        Map result = (HashMap) (((HashMap) cmdResp2.getResponseData()).get(IMPUTED_CALL_GAS));
+        Assert.assertTrue(null != result);
+        Log.info("imputed_call_gas-result:{}", JSONUtils.obj2PrettyJson(result));
+    }
 
 
     /**
@@ -210,7 +250,7 @@ public class ContractQueryTest extends Base {
      */
     @Test
     public void transfer2ContractFee() throws Exception {
-        BigInteger value = BigInteger.TEN.pow(8);
+        BigInteger value = BigInteger.TEN.pow(11);
         String remark = "transfer 2 contract fee";
         Map params = this.makeTransferFeeParams(sender, contractAddress, value, remark);
         Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, TRANSFER_FEE, params);
@@ -317,7 +357,7 @@ public class ContractQueryTest extends Base {
      */
     @Test
     public void constructor() throws Exception {
-        InputStream in = new FileInputStream(ContractTest.class.getResource("/nrc20").getFile());
+        InputStream in = new FileInputStream(ContractTest.class.getResource("/contract_call_contract").getFile());
         byte[] contractCode = IOUtils.toByteArray(in);
         Map params = this.makeConstructorParams(contractCode);
         Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, CONSTRUCTOR, params);
@@ -373,7 +413,7 @@ public class ContractQueryTest extends Base {
      */
     @Test
     public void contractTx() throws Exception {
-        Map params = this.makeContractTxParams(deleteHash);
+        Map params = this.makeContractTxParams("00204377a5b86ba64ef1f8112eba87d42937e3d46fa998ddf459d99c16855589a0aa");
         Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, CONTRACT_TX, params);
         Map result = (HashMap) (((HashMap) cmdResp2.getResponseData()).get(CONTRACT_TX));
         Assert.assertTrue(null != result);
