@@ -162,14 +162,7 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
                 String txHex = tx.hex();
                 txHexList.add(txHex);
                 txHashs.add(tx.getHash().serialize());
-                TxRegister txRegister = TxManager.getTxRegister(chain, tx.getType());
-                if (moduleVerifyMap.containsKey(txRegister)) {
-                    moduleVerifyMap.get(txRegister).add(txHex);
-                } else {
-                    List<String> txHexs = new ArrayList<>();
-                    txHexs.add(txHex);
-                    moduleVerifyMap.put(txRegister, txHexs);
-                }
+                TxUtil.moduleGroups(chain, moduleVerifyMap, tx);
             }
         } catch (Exception e) {
             chain.getLoggerMap().get(TxConstant.LOG_TX).error(e);
@@ -240,7 +233,7 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
             }
             if (!rs) {
                 result = false;
-                chain.getLoggerMap().get(TxConstant.LOG_TX).debug("failed! commitTxs");
+                chain.getLoggerMap().get(TxConstant.LOG_TX).debug("save tx failed! commitTxs");
                 break;
             }
             successed.put(entry.getKey(), entry.getValue());
@@ -255,7 +248,11 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
     private boolean commitLedger(Chain chain, List<String> txHexList, long blockHeight) {
         //提交账本
         try {
-            return LedgerCall.commitTxsLedger(chain, txHexList, blockHeight);
+            boolean rs = LedgerCall.commitTxsLedger(chain, txHexList, blockHeight);
+            if(!rs){
+                chain.getLoggerMap().get(TxConstant.LOG_TX).debug("save block tx failed! commitLedger");
+            }
+            return rs;
         } catch (NulsException e) {
             chain.getLoggerMap().get(TxConstant.LOG_TX).debug("failed! commitLedger");
             chain.getLoggerMap().get(TxConstant.LOG_TX).error(e);
@@ -264,27 +261,12 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
     }
 
     private boolean removeTxs(Chain chain, List<Transaction> txList, long blockheight, boolean atomicity) {
-        List<Transaction> successedList = new ArrayList<>();
         boolean rs = true;
         if(!confirmedTxStorageService.removeTxList(chain.getChainId(), txList) && atomicity ){
             saveTxs(chain, txList, blockheight, false);
             rs = false;
             chain.getLoggerMap().get(TxConstant.LOG_TX).debug("failed! removeTxs");
         }
-        /*旧代码
-        for (Transaction tx : txList) {
-            if (confirmedTxStorageService.removeTx(chain.getChainId(), tx.getHash())) {
-                successedList.add(tx);
-                chain.getLoggerMap().get(TxConstant.LOG_TX).debug("success! removeTxs  -type[{}], hash:{}", tx.getType(), tx.getHash().getDigestHex());
-            } else {
-                if (atomicity) {
-                    saveTxs(chain, successedList, blockheight, false);
-                }
-                rs = false;
-                chain.getLoggerMap().get(TxConstant.LOG_TX).debug("failed! removeTxs  -type[{}], hash:{}", tx.getType(), tx.getHash().getDigestHex());
-                break;
-            }
-        }*/
         return rs;
     }
 
@@ -320,7 +302,11 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
 
     private boolean rollbackLedger(Chain chain, List<String> txHexList, Long blockHeight) {
         try {
-            return LedgerCall.rollbackTxsLedger(chain, txHexList, blockHeight);
+            boolean rs =  LedgerCall.rollbackTxsLedger(chain, txHexList, blockHeight);
+            if(!rs){
+                chain.getLoggerMap().get(TxConstant.LOG_TX).debug("rollback block tx failed! rollbackLedger");
+            }
+            return rs;
         } catch (NulsException e) {
             chain.getLoggerMap().get(TxConstant.LOG_TX).error(e);
             return false;
@@ -349,14 +335,7 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
                 txList.add(tx);
                 String txHex = tx.hex();
                 txHexList.add(txHex);
-                TxRegister txRegister = TxManager.getTxRegister(chain, tx.getType());
-                if (moduleVerifyMap.containsKey(txRegister)) {
-                    moduleVerifyMap.get(txRegister).add(txHex);
-                } else {
-                    List<String> txHexs = new ArrayList<>();
-                    txHexs.add(txHex);
-                    moduleVerifyMap.put(txRegister, txHexs);
-                }
+                TxUtil.moduleGroups(chain, moduleVerifyMap, tx);
             }
         } catch (Exception e) {
             chain.getLoggerMap().get(TxConstant.LOG_TX).error(e);
