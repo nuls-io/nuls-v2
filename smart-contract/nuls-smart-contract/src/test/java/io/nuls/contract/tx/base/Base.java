@@ -64,8 +64,8 @@ public class Base {
     protected String toAddress3 = "tNULSeBaMp9wC9PcWEcfesY7YmWrPfeQzkN1xL";
     protected String toAddress4 = "tNULSeBaMshNPEnuqiDhMdSA4iNs6LMgjY6tcL";
 
-    protected String hash = "0020450bd84c2f3f4c90a7ae59aeb554fb93a3cd8d6cfa24525a24d310260756e5ae";
-    protected String contractAddress = "tNULSeBaN5zXjYyqhaWajy8PnShQsgzc9zyHzn";
+    protected String hash = "0020393c317981937950c7a1181021fb5d917efb79c9c03a2f077f2d2760f73e9593";
+    protected String contractAddress = "tNULSeBaN71xpUTKtLyHSsTfB11fNGtA7W2RLS";
 
     protected String callHash = "00207987a58e710d30974e88451840253bf75088940b4efa8de6f366e3568fd9753a";
 

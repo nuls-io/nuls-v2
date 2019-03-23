@@ -357,6 +357,8 @@ public class ContractQueryTest extends Base {
         Assert.assertTrue(null != result);
         Log.info("contract_info-result:{}", JSONUtils.obj2PrettyJson(result));
     }
+
+
     private Map makeContractInfoParams(String contractAddress) {
         Map<String, Object> params = new HashMap<>();
         params.put("chainId", chainId);
@@ -369,7 +371,7 @@ public class ContractQueryTest extends Base {
      */
     @Test
     public void contractResult() throws Exception {
-        Map params = this.makeContractResultParams(callHash);
+        Map params = this.makeContractResultParams(hash);
         Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, CONTRACT_RESULT, params);
         Map result = (HashMap) (((HashMap) cmdResp2.getResponseData()).get(CONTRACT_RESULT));
         Assert.assertTrue(null != result);
