@@ -77,9 +77,9 @@ public class ValidatorCmd extends BaseLedgerCmd {
             if (isBatchValidate) {
                 LoggerUtil.logger.debug("确认交易校验：chainId={},txHash={},isBatchValidate={}", chainId, tx.getHash().toString(), isBatchValidate);
                 validateResult = coinDataValidator.bathValidatePerTx(chainId, tx);
-                if(CoinDataValidator.VALIDATE_SUCCESS_CODE != validateResult.getValidateCode()){
-                      transactionService.rollBackUnconfirmTx(chainId,tx);
-                }
+//                if(CoinDataValidator.VALIDATE_SUCCESS_CODE != validateResult.getValidateCode()){
+//                      transactionService.rollBackUnconfirmTx(chainId,tx);
+//                }
             } else {
                 LoggerUtil.logger.debug("未确认交易校验：chainId={},txHash={},isBatchValidate={}", chainId, tx.getHash().toString(), isBatchValidate);
                 validateResult = coinDataValidator.validateCoinData(chainId, tx);

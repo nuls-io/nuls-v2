@@ -6,13 +6,17 @@ import lombok.Data;
 
 /**
  * @Author: zhoulijun
- * @Time: 2019-03-23 15:04
+ * @Time: 2019-03-23 15:52
  * @Description: 功能描述
  */
 @Data
 @AllArgsConstructor
-public class GetContractConstructorArgsReq extends BaseReq {
+public class DeleteContractReq extends BaseReq {
 
-    private String contractCode;
+    private String sender;
+
+    private String contractAddress;
+
+    private String password;
 
 }

@@ -211,8 +211,9 @@ public class CoinDataValidator {
             AccountState accountState = accountStateService.getAccountState(AddressTool.getStringAddressByBytes(coinFrom.getAddress()), chainId, coinFrom.getAssetsChainId(), coinFrom.getAssetsId());
             //判断是否是解锁操作
             if (coinFrom.getLocked() == 0) {
-                if (!isValidateCommonTxBatch(accountState, coinFrom, nonce8BytesStr, accountValidateTxMap)) {
-                    return new ValidateResult(VALIDATE_DOUBLE_EXPENSES_CODE, String.format("validate fail"));
+                ValidateResult validateResult = isValidateCommonTxBatch(accountState, coinFrom, nonce8BytesStr, accountValidateTxMap);
+                if (VALIDATE_SUCCESS_CODE != validateResult.getValidateCode()) {
+                    return validateResult;
                 }
             } else {
                 //解锁交易，需要从from 里去获取需要的高度数据或时间数据，进行校验
@@ -286,7 +287,7 @@ public class CoinDataValidator {
      * @param txNonce
      * @return
      */
-    private boolean isValidateCommonTxBatch(AccountState accountState, CoinFrom coinFrom, String txNonce, Map<String, List<TempAccountState>> accountValidateTxMap) {
+    private ValidateResult isValidateCommonTxBatch(AccountState accountState, CoinFrom coinFrom, String txNonce, Map<String, List<TempAccountState>> accountValidateTxMap) {
         String fromCoinNonce = HexUtil.encode(coinFrom.getNonce());
         String address = AddressTool.getStringAddressByBytes(coinFrom.getAddress());
         String assetKey = LedgerUtil.getKeyStr(address, coinFrom.getAssetsChainId(), coinFrom.getAssetsId());
@@ -294,12 +295,12 @@ public class CoinDataValidator {
         if (accountState.getAvailableAmount().compareTo(coinFrom.getAmount()) == -1) {
             //余额不足
             logger.info("{}=={}=={}==balance is not enough", AddressTool.getStringAddressByBytes(coinFrom.getAddress()), coinFrom.getAssetsChainId(), coinFrom.getAssetsId());
-            return false;
+            return new ValidateResult(VALIDATE_FAIL_CODE, String.format("balance is not enough"));
         }
         if (fromCoinNonce.equalsIgnoreCase(txNonce)) {
             //nonce 重复了
             logger.info("{}=={}=={}== nonce is repeat", AddressTool.getStringAddressByBytes(coinFrom.getAddress()), coinFrom.getAssetsChainId(), coinFrom.getAssetsId());
-            return false;
+            return new ValidateResult(VALIDATE_FAIL_CODE, String.format("repeat"));
         }
         //不是解锁操作
         //从批量校验池中获取缓存交易
@@ -308,7 +309,7 @@ public class CoinDataValidator {
             //从头开始处理
             if (!accountState.getNonce().equalsIgnoreCase(fromCoinNonce)) {
                 logger.error("批量校验失败(BatchValidate failed)： isValidateCommonTxBatch {}=={}=={}==nonce is error!dbNonce:{}!=fromNonce:{}", address, coinFrom.getAssetsChainId(), coinFrom.getAssetsId(), accountState.getNonce(), fromCoinNonce);
-                return false;
+                return new ValidateResult(VALIDATE_ORPHAN_CODE, String.format(VALIDATE_ORPHAN_DESC,address, fromCoinNonce));
             }
             list = new ArrayList<>();
             BigInteger balance = accountState.getAvailableAmount().subtract(coinFrom.getAmount());
@@ -319,18 +320,18 @@ public class CoinDataValidator {
             TempAccountState tempAccountState = list.get(list.size() - 1);
             if (!tempAccountState.getNextNonce().equalsIgnoreCase(fromCoinNonce)) {
                 logger.info("isValidateCommonTxBatch {}=={}=={}==nonce is error!tempNonce:{}!=fromNonce:{}", address, coinFrom.getAssetsChainId(), coinFrom.getAssetsId(), tempAccountState.getNextNonce(), fromCoinNonce);
-                return false;
+                return new ValidateResult(VALIDATE_FAIL_CODE, String.format("nonce={} is error.",address, fromCoinNonce));
             }
             for (TempAccountState tempAccountState1 : list) {
                 //交易池中账户存在一样的nonce
                 if (tempAccountState1.getNonce().equalsIgnoreCase(fromCoinNonce)) {
                     logger.info("isValidateCommonTxBatch {}=={}=={}==nonce is double expenses! fromNonce ={}", address, coinFrom.getAssetsChainId(), coinFrom.getAssetsId(), fromCoinNonce);
-                    return false;
+                    return new ValidateResult(VALIDATE_FAIL_CODE, String.format("nonce is double expenses.nonce={}",address, fromCoinNonce));
                 }
             }
             list.add(new TempAccountState(assetKey, fromCoinNonce, txNonce, tempAccountState.getBalance().subtract(coinFrom.getAmount())));
         }
-        return true;
+        return new ValidateResult(VALIDATE_SUCCESS_CODE, VALIDATE_SUCCESS_DESC);
     }
 
     /**

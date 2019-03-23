@@ -32,13 +32,12 @@ import io.nuls.cmd.client.CommandBuilder;
 import io.nuls.cmd.client.CommandHelper;
 import io.nuls.cmd.client.CommandResult;
 import io.nuls.cmd.client.processor.ErrorCodeConstants;
+import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.model.StringUtils;
 import io.nuls.tools.parse.JSONUtils;
 import jline.console.ConsoleReader;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -47,6 +46,7 @@ import java.util.Map;
  * @author: PierreLuo
  * @date: 2018/9/19
  */
+@Component
 public class CreateContractProcessor extends ContractBaseProcessor {
 
     private ThreadLocal<CreateContractReq> paramsData = new ThreadLocal<>();
@@ -161,8 +161,7 @@ public class CreateContractProcessor extends ContractBaseProcessor {
     }
 
     private Result<Object[]> createContractArgs(String contractCode) {
-        GetContractConstructorArgsReq req = new GetContractConstructorArgsReq();
-        req.setContractCode(contractCode);
+        GetContractConstructorArgsReq req = new GetContractConstructorArgsReq(contractCode);
         Result<Map> result = contractProvider.getContractConstructorArgs(req);
         if (result.isSuccess()) {
             Result rpcClientResult = new Result();
@@ -175,7 +174,7 @@ public class CreateContractProcessor extends ContractBaseProcessor {
                     String argsListStr = JSONUtils.obj2PrettyJson(argsList);
                     // 再次交互输入构造参数
                     String argsJson = getArgsJson(argsListStr);
-                    argsObj = parseArgsJson(argsJson);
+                    argsObj = CommandHelper.parseArgsJson(argsJson);
                 } else {
                     argsObj = new Object[0];
                 }
@@ -215,16 +214,4 @@ public class CreateContractProcessor extends ContractBaseProcessor {
         }
     }
 
-    private Object[] parseArgsJson(String argsJson) {
-        if(StringUtils.isBlank(argsJson)) {
-            return new Object[0];
-        }
-        try {
-            List<Object> list = JSONUtils.json2pojo(argsJson, ArrayList.class);
-            return list.toArray();
-        } catch (Exception e) {
-            e.fillInStackTrace();
-            return null;
-        }
-    }
 }
