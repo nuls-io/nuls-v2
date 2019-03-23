@@ -126,7 +126,7 @@ public class SmallBlockHandler extends BaseCmd {
                 messageLog.info("recieve error SmallBlockMessage from " + nodeId);
                 return success();
             }
-            //共识节点打包的交易包括两种交易,一种是在网络上已经广播的普通交易,一种是共识节点生成的特殊交易(如共识奖励、红黄牌),后面一种交易其他节点的未确认交易池中不可能有,所以都放在SubTxList中
+            //共识节点打包的交易包括两种交易,一种是在网络上已经广播的普通交易,一种是共识节点生成的特殊交易(如共识奖励、红黄牌),后面一种交易其他节点的未确认交易池中不可能有,所以都放在systemTxList中
             //还有一种场景时收到smallBlock时,有一些普通交易还没有缓存在未确认交易池中,此时要再从源节点请求
             //txMap用来组装区块
             Map<NulsDigestData, Transaction> txMap = new HashMap<>(header.getTxCount());
@@ -161,7 +161,7 @@ public class SmallBlockHandler extends BaseCmd {
                 request.setTxHashList(missTxHashList);
                 NetworkUtil.sendToNode(chainId, request, nodeId, GET_TXGROUP_MESSAGE);
                 //这里的smallBlock的subTxList中包含一些非系统交易,用于跟TxGroup组合成完整区块
-                CachedSmallBlock cachedSmallBlock = new CachedSmallBlock(missTxHashList, smallBlock);
+                CachedSmallBlock cachedSmallBlock = new CachedSmallBlock(missTxHashList, smallBlock, txMap);
                 SmallBlockCacher.cacheSmallBlock(chainId, cachedSmallBlock);
                 SmallBlockCacher.setStatus(chainId, blockHash, BlockForwardEnum.INCOMPLETE);
                 return success();
@@ -170,7 +170,7 @@ public class SmallBlockHandler extends BaseCmd {
             Block block = BlockUtil.assemblyBlock(header, txMap, txHashList);
             if (blockService.saveBlock(chainId, block, 1, true)) {
                 SmallBlock newSmallBlock = BlockUtil.getSmallBlock(chainId, block);
-                CachedSmallBlock cachedSmallBlock = new CachedSmallBlock(null, newSmallBlock);
+                CachedSmallBlock cachedSmallBlock = new CachedSmallBlock(null, newSmallBlock, txMap);
                 SmallBlockCacher.cacheSmallBlock(chainId, cachedSmallBlock);
                 SmallBlockCacher.setStatus(chainId, blockHash, BlockForwardEnum.COMPLETE);
                 blockService.forwardBlock(chainId, blockHash, nodeId);
