@@ -480,7 +480,40 @@ public class TransactionCmd extends BaseCmd {
             List<String> txHashList = (List<String>) params.get("txHashList");
             List<String> txHexList = confirmedTxService.getTxList(chain,txHashList);
             Map<String, List<String>> resultMap = new HashMap<>(TxConstant.INIT_CAPACITY_2);
-            Log.debug("getBlockTxs size:{} ", txHexList.size());
+            resultMap.put("txHexList", txHexList);
+            return success(resultMap);
+        } catch (NulsException e) {
+            errorLogProcess(chain, e);
+            return failed(e.getErrorCode());
+        } catch (Exception e) {
+            errorLogProcess(chain, e);
+            return failed(TxErrorCode.SYS_UNKOWN_EXCEPTION);
+        }
+    }
+
+    /**
+     * 根据hash列表,批量获取交易, 先查未确认,再查已确认
+     * @param params allHits 为true时必须全部查到才返回数据, 否则返回空list. false: 查到几个返回几个
+     * @return Response
+     */
+    @CmdAnnotation(cmd = TxCmd.TX_GET_BLOCK_TXS_EXTEND, version = 1.0, description = "Get block transactions incloud unconfirmed ")
+    @Parameter(parameterName = "chainId", parameterType = "int")
+    @Parameter(parameterName = "txHashList", parameterType = "list")
+    @Parameter(parameterName = "allHits", parameterType = "boolean")
+    public Response getBlockTxsExtend(Map params) {
+        Chain chain = null;
+        try {
+            ObjectUtils.canNotEmpty(params.get("chainId"), TxErrorCode.PARAMETER_ERROR.getMsg());
+            ObjectUtils.canNotEmpty(params.get("txHashList"), TxErrorCode.PARAMETER_ERROR.getMsg());
+            ObjectUtils.canNotEmpty(params.get("allHits"), TxErrorCode.PARAMETER_ERROR.getMsg());
+            chain = chainManager.getChain((int) params.get("chainId"));
+            if (null == chain) {
+                throw new NulsException(TxErrorCode.CHAIN_NOT_FOUND);
+            }
+            List<String> txHashList = (List<String>) params.get("txHashList");
+            boolean allHits = (boolean) params.get("allHits");
+            List<String> txHexList = confirmedTxService.getTxListExtend(chain, txHashList, allHits);
+            Map<String, List<String>> resultMap = new HashMap<>(TxConstant.INIT_CAPACITY_2);
             resultMap.put("txHexList", txHexList);
             return success(resultMap);
         } catch (NulsException e) {

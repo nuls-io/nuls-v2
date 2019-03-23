@@ -1,10 +1,7 @@
 package io.nuls.test.cases.block;
 
 import io.nuls.api.provider.block.facade.BlockHeaderData;
-import io.nuls.base.data.BlockHeader;
-import io.nuls.test.cases.AbstractRemoteTestCase;
 import io.nuls.test.cases.RemoteTestParam;
-import io.nuls.test.cases.TestCaseIntf;
 import io.nuls.test.cases.TestFailException;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
@@ -15,7 +12,7 @@ import io.nuls.tools.core.annotation.Component;
  * @Description: 功能描述
  */
 @Component
-public class SyncGetLastBlockHeaderCase extends BaseBlockCase<BlockHeaderData,Void> {
+public class SyncGetLastBlockHeaderCase extends BaseBlockCase<BlockHeaderData,Integer> {
 
     @Autowired
     GetLastBlockHeaderCase getLastBlockHeaderCase;
@@ -26,7 +23,10 @@ public class SyncGetLastBlockHeaderCase extends BaseBlockCase<BlockHeaderData,Vo
     }
 
     @Override
-    public BlockHeaderData doTest(Void param, int depth) throws TestFailException {
+    public BlockHeaderData doTest(Integer testCount, int depth) throws TestFailException {
+        if(testCount == null){
+            testCount = 1;
+        }
         BlockHeaderData blockHeader = getLastBlockHeaderCase.check(null,depth);
         Boolean res = new BlockAbstractRemoteTestCase<>() {
             @Override
@@ -35,6 +35,9 @@ public class SyncGetLastBlockHeaderCase extends BaseBlockCase<BlockHeaderData,Vo
             }
         }.check(new RemoteTestParam(GetLastBlockHeaderCase.class,blockHeader,null),depth);
         if(!res){
+            if(testCount <= 3){
+                return doTest(testCount + 1,depth);
+            }
             throw new TestFailException(title() + "失败，本地节点与远程节点数据不一致");
         }
         return blockHeader;

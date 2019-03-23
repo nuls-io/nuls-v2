@@ -4,10 +4,8 @@ import io.nuls.api.provider.Result;
 import io.nuls.api.provider.ServiceManager;
 import io.nuls.api.provider.account.AccountService;
 import io.nuls.api.provider.account.facade.ImportAccountByPrivateKeyReq;
-import io.nuls.test.cases.account.AccountConstants;
-import io.nuls.test.cases.account.BaseAccountCase;
+import io.nuls.test.cases.Constants;
 import io.nuls.tools.basic.InitializingBean;
-import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Configuration;
 import io.nuls.tools.core.annotation.Value;
 import io.nuls.tools.exception.NulsException;
@@ -30,11 +28,23 @@ public class Config implements InitializingBean {
     @Value("testSeedAccountPriKey")
     String testSeedAccount;
 
+    @Value("testNodeType")
+    String nodeType;
+
+    int chainId;
+
+    int assetsId;
+
     String seedAddress;
 
     @Override
     public void afterPropertiesSet() throws NulsException {
-        Result<String> result = accountService.importAccountByPrivateKey(new ImportAccountByPrivateKeyReq(AccountConstants.PASSWORD,testSeedAccount,true));
+        Result<String> result = accountService.importAccountByPrivateKey(new ImportAccountByPrivateKeyReq(Constants.PASSWORD,testSeedAccount,true));
         this.seedAddress = result.getData();
     }
+
+    public boolean isMaster(){
+        return "master".equals(nodeType);
+    }
+
 }

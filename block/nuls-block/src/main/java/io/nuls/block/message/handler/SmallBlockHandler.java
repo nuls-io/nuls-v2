@@ -45,10 +45,7 @@ import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.log.logback.NulsLogger;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static io.nuls.block.constant.CommandConstant.GET_TXGROUP_MESSAGE;
 import static io.nuls.block.constant.CommandConstant.SMALL_BLOCK_MESSAGE;
@@ -129,46 +126,51 @@ public class SmallBlockHandler extends BaseCmd {
                 messageLog.info("recieve error SmallBlockMessage from " + nodeId);
                 return success();
             }
-            //共识节点打包的交易包括两种交易,一种是在网络上已经广播的普通交易,一种是共识节点生成的特殊交易(如共识奖励、红黄牌),后面一种交易其他节点的未确认交易池中不可能有,所以都放在SubTxList中
+            //共识节点打包的交易包括两种交易,一种是在网络上已经广播的普通交易,一种是共识节点生成的特殊交易(如共识奖励、红黄牌),后面一种交易其他节点的未确认交易池中不可能有,所以都放在systemTxList中
             //还有一种场景时收到smallBlock时,有一些普通交易还没有缓存在未确认交易池中,此时要再从源节点请求
+            //txMap用来组装区块
             Map<NulsDigestData, Transaction> txMap = new HashMap<>(header.getTxCount());
-            List<Transaction> subTxList = smallBlock.getSubTxList();
-            for (Transaction tx : subTxList) {
+            List<Transaction> systemTxList = smallBlock.getSystemTxList();
+            List<NulsDigestData> systemTxHashList = new ArrayList<>();
+            //先把系统交易放入txMap
+            for (Transaction tx : systemTxList) {
                 txMap.put(tx.getHash(), tx);
+                systemTxHashList.add(tx.getHash());
             }
-            List<NulsDigestData> needHashList = new ArrayList<>();
-            for (NulsDigestData hash : smallBlock.getTxHashList()) {
-                Transaction tx = txMap.get(hash);
-                if (null == tx) {
-                    tx = TransactionUtil.getTransaction(chainId, hash);
-                    if (tx != null) {
-                        subTxList.add(tx);
-                        txMap.put(hash, tx);
-                    }
+            ArrayList<NulsDigestData> txHashList = smallBlock.getTxHashList();
+            ArrayList<NulsDigestData> missTxHashList = (ArrayList<NulsDigestData>) txHashList.clone();
+            //移除系统交易hash后请求交易管理模块，批量获取区块中交易
+            missTxHashList.removeAll(systemTxHashList);
+            List<Transaction> existTransactions = TransactionUtil.getTransactions(chainId, missTxHashList, false);
+            if (existTransactions != null) {
+                //把普通交易放入txMap
+                List<NulsDigestData> existTransactionHashs = new ArrayList<>();
+                existTransactions.forEach(e -> existTransactionHashs.add(e.getHash()));
+                for (Transaction existTransaction : existTransactions) {
+                    txMap.put(existTransaction.getHash(), existTransaction);
                 }
-                if (null == tx) {
-                    needHashList.add(hash);
-                }
+                missTxHashList.removeAll(existTransactionHashs);
             }
+
             //获取没有的交易
-            if (!needHashList.isEmpty()) {
-                messageLog.info("block height:" + header.getHeight() + ", total tx count:" + header.getTxCount() + " , get group tx of " + needHashList.size());
-                messageLog.info("needHashList:" + needHashList + ", from:" + nodeId);
+            if (!missTxHashList.isEmpty()) {
+                messageLog.info("block height:" + header.getHeight() + ", total tx count:" + header.getTxCount() + " , get group tx of " + missTxHashList.size());
+                messageLog.info("needHashList:" + missTxHashList + ", from:" + nodeId);
                 HashListMessage request = new HashListMessage();
                 request.setBlockHash(blockHash);
-                request.setTxHashList(needHashList);
+                request.setTxHashList(missTxHashList);
                 NetworkUtil.sendToNode(chainId, request, nodeId, GET_TXGROUP_MESSAGE);
                 //这里的smallBlock的subTxList中包含一些非系统交易,用于跟TxGroup组合成完整区块
-                CachedSmallBlock cachedSmallBlock = new CachedSmallBlock(needHashList, smallBlock);
+                CachedSmallBlock cachedSmallBlock = new CachedSmallBlock(missTxHashList, smallBlock, txMap);
                 SmallBlockCacher.cacheSmallBlock(chainId, cachedSmallBlock);
                 SmallBlockCacher.setStatus(chainId, blockHash, BlockForwardEnum.INCOMPLETE);
                 return success();
             }
 
-            Block block = BlockUtil.assemblyBlock(header, txMap, smallBlock.getTxHashList());
+            Block block = BlockUtil.assemblyBlock(header, txMap, txHashList);
             if (blockService.saveBlock(chainId, block, 1, true)) {
                 SmallBlock newSmallBlock = BlockUtil.getSmallBlock(chainId, block);
-                CachedSmallBlock cachedSmallBlock = new CachedSmallBlock(null, newSmallBlock);
+                CachedSmallBlock cachedSmallBlock = new CachedSmallBlock(null, newSmallBlock, txMap);
                 SmallBlockCacher.cacheSmallBlock(chainId, cachedSmallBlock);
                 SmallBlockCacher.setStatus(chainId, blockHash, BlockForwardEnum.COMPLETE);
                 blockService.forwardBlock(chainId, blockHash, nodeId);

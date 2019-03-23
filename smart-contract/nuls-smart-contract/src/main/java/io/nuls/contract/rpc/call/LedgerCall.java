@@ -71,4 +71,21 @@ public class LedgerCall {
             throw new NulsException(e);
         }
     }
+
+    public static Map<String, Object> getNonce(Chain chain, String address) throws NulsException {
+        Map<String, Object> params = new HashMap(4);
+        params.put("chainId", chain.getConfig().getChainId());
+        params.put("assetChainId", chain.getConfig().getChainId());
+        params.put("address", address);
+        params.put("assetId", chain.getConfig().getAssetsId());
+        try {
+            Response callResp = ResponseMessageProcessor.requestAndResponse(ModuleE.LG.abbr, "getNonce", params);
+            if (!callResp.isSuccess()) {
+                return null;
+            }
+            return (HashMap) ((HashMap) callResp.getResponseData()).get("getNonce");
+        } catch (Exception e) {
+            throw new NulsException(e);
+        }
+    }
 }

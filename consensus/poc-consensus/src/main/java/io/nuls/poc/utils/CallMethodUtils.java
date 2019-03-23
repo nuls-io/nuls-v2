@@ -144,16 +144,18 @@ public class CallMethodUtils {
      *
      * @param chainId chain ID
      * @param block   new block Info
+     * @param timeOut 接口超时时间
      * @return Successful Sending
      */
     @SuppressWarnings("unchecked")
-    public static boolean receivePackingBlock(int chainId, String block) throws NulsException {
+    public static void  receivePackingBlock(int chainId, String block,long timeOut) throws NulsException {
         Map<String, Object> params = new HashMap(4);
         params.put("chainId", chainId);
         params.put("block", block);
         try {
-            Response callResp = ResponseMessageProcessor.requestAndResponse(ModuleE.BL.abbr, "receivePackingBlock", params);
-            return callResp.isSuccess();
+            ResponseMessageProcessor.requestAndResponse(ModuleE.BL.abbr, "receivePackingBlock", params,timeOut);
+            //Response callResp =
+            //return callResp.isSuccess();
         } catch (Exception e) {
             throw new NulsException(e);
         }
@@ -293,7 +295,7 @@ public class CallMethodUtils {
                 return null;
             }
             params.put("endTimestamp", blockTime - PROCESS_TIME);
-            params.put("maxTxDataSize", ConsensusConstant.PACK_TX_MAX_SIZE);
+            params.put("maxTxDataSize", chain.getConfig().getBlockMaxSize());
             //params.put("height", height);
             params.put("blockTime", blockTime);
             params.put("packingAddress", packingAddress);

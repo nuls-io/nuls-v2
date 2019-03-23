@@ -102,50 +102,26 @@ public class TxValidator {
         if (chain == null) {
             throw new NulsException(AccountErrorCode.CHAIN_NOT_EXIST);
         }
-        if (!baseTxValidate(chain, tx)) {
+        if (!txValidate(chain, tx)) {
             return false;
         }
         return true;
     }
 
     /**
-     * 交易基础验证
-     * 基础字段
-     * 交易size
      * 交易类型
-     * 交易签名
      * from的地址必须是发起链的地址（from里面的资产是否存在）
      * to的地址必须是发起链的地址（to里面的资产是否存在）
      * 交易手续费
+     *
+     * 转账交易验证器
+     * 交易基础验证已由交易管理验证
      *
      * @param chain
      * @param tx
      * @return Result
      */
-    private boolean baseTxValidate(Chain chain, Transaction tx) throws NulsException {
-        // 验证字段非空、大小、长度、交易类型
-        if (null == tx) {
-            throw new NulsException(AccountErrorCode.TX_NOT_EXIST);
-        }
-        if (tx.getHash() == null || tx.getHash().size() == 0 || tx.getHash().size() > AccountConstant.TX_HASH_DIGEST_BYTE_MAX_LEN) {
-            throw new NulsException(AccountErrorCode.TX_DATA_VALIDATION_ERROR);
-        }
-        if (tx.getTime() == 0L) {
-            throw new NulsException(AccountErrorCode.TX_DATA_VALIDATION_ERROR);
-        }
-        if (tx.getRemark() != null && tx.getRemark().length > AccountConstant.TX_REMARK_MAX_LEN) {
-            throw new NulsException(AccountErrorCode.TX_DATA_VALIDATION_ERROR);
-        }
-        if (tx.size() > AccountConstant.TX_MAX_SIZE) {
-            throw new NulsException(AccountErrorCode.TX_SIZE_TOO_LARGE);
-        }
-        if (AccountConstant.TX_TYPE_TRANSFER != tx.getType()) {
-            throw new NulsException(AccountErrorCode.TX_TYPE_ERROR);
-        }
-        // 转账交易必须包含coinData
-        if (tx.getCoinData() == null || tx.getCoinData().length == 0) {
-            throw new NulsException(AccountErrorCode.TX_COINDATA_NOT_EXIST);
-        }
+    private boolean txValidate(Chain chain, Transaction tx) throws NulsException {
         //coinData基础验证以及手续费 (from中所有的当前链主资产-to中所有的当前链主资产)
         CoinData coinData = TxUtil.getCoinData(tx);
         if (!validateCoinFromBase(chain, coinData.getFrom())) {
@@ -157,9 +133,10 @@ public class TxValidator {
         if (!validateFee(chain, tx.size(), coinData)) {
             return false;
         }
+       /*交易模块基础校验已验证
         if (!validateSign(chain, tx, coinData)) {
             return false;
-        }
+        }*/
         return true;
     }
 
@@ -223,11 +200,12 @@ public class TxValidator {
             if(Arrays.equals(AccountConstant.BLACK_HOLE_ADDRESS, coinFrom.getAddress())){
                 throw new NulsException(AccountErrorCode.ADDRESS_TRANSFER_BAN);
             }
-            // 发送方from中地址和资产对应的链id必须发起链id
+            // 发送方from中地址和资产对应的链id必须是发起链的id
             if (chainId != addrChainId || chainId != assetsChainId) {
                 throw new NulsException(AccountErrorCode.CHAINID_ERROR);
             }
             // 链中是否存在该资产
+            // TODO: 2019/3/23 如果链本身支持多个资产, 那需要修改此验证
             if (chain.getConfig().getAssetsId() != assetsId) {
                 throw new NulsException(AccountErrorCode.ASSETID_ERROR);
             }

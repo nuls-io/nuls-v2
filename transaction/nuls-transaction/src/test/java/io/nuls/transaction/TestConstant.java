@@ -51,8 +51,8 @@ public class TestConstant {
 
     /** context path */
     public static String CONTEXT_PATH = "io.nuls";
-    public static String address1 = "LU6eNP3pJ5UMn5yn8LeDE3Pxeapsq3930";//pwd:nuls123456"
-    public static String address2 = "JcgbDRvBqQ67Uq4Tb52U22ieJdr3G3930";//pwd:nuls123456"
+    public static String address1 = "LU6eNP3pJ5UMn5yn8LeDE3Pxeapsq3930";//pwd:nuls26"
+    public static String address2 = "JcgbDRvBqQ67Uq4Tb52U22ieJdr3G3930";//pwd:nuls26"
     public static String address3 = "Vxb3xxatcFFTZZe3wynX6CfAsvzAx3930";
     public static String address4 = "R9CxmNqtBDEm9iWX2Cod46QGCNE2M3930";
     public static String address5 = "GmjB8o7sNiQSXZ6aNz5NBP6pdnNrv3930";
@@ -242,7 +242,7 @@ public class TestConstant {
 
     public static CrossTxVerifyResult getCrossTxVerifyResult1() {
         CrossTxVerifyResult obj = new CrossTxVerifyResult();
-        obj.setChainId(12345);
+        obj.setChainId(2);
         obj.setHeight(34);
         obj.setNodeId("1");
         return obj;
@@ -250,7 +250,7 @@ public class TestConstant {
 
     public static CrossTxVerifyResult getCrossTxVerifyResult2() {
         CrossTxVerifyResult obj = new CrossTxVerifyResult();
-        obj.setChainId(12345);
+        obj.setChainId(2);
         obj.setHeight(34);
         obj.setNodeId("23");
         return obj;

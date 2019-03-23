@@ -23,10 +23,11 @@
  */
 package io.nuls.contract.callable;
 
+import io.nuls.base.basic.AddressTool;
 import io.nuls.contract.helper.ContractConflictChecker;
 import io.nuls.contract.helper.ContractHelper;
 import io.nuls.contract.helper.ContractTransferHandler;
-import io.nuls.contract.manager.TempBalanceManager;
+import io.nuls.contract.manager.ContractTempBalanceManager;
 import io.nuls.contract.model.bo.CallableResult;
 import io.nuls.contract.model.bo.ContractContainer;
 import io.nuls.contract.model.bo.ContractResult;
@@ -44,9 +45,7 @@ import lombok.Setter;
 
 import java.io.IOException;
 import java.math.BigInteger;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.Callable;
 
 import static io.nuls.contract.constant.ContractConstant.*;
@@ -65,7 +64,7 @@ public class ContractTxCallable implements Callable<ContractResult> {
     private ContractHelper contractHelper;
     private VMContext vmContext;
     private ContractTransferHandler contractTransferHandler;
-    private TempBalanceManager tempBalanceManager;
+    private ContractTempBalanceManager tempBalanceManager;
     private ProgramExecutor executor;
     private String contract;
     private ContractWrapperTransaction tx;
@@ -100,36 +99,44 @@ public class ContractTxCallable implements Callable<ContractResult> {
         ContractData contractData;
         ContractResult contractResult = null;
         contractData = tx.getContractData();
-        // 创建合约无论成功与否，后续的其他的跳过执行，视作失败 -> 合约锁定中或者合约不存在
-        if (container.isHasCreate()) {
-            return ContractResult.genFailed(contractData, "contract lock or not exist.");
-        }
-        // 删除合约成功后，后续的其他的跳过执行，视作失败 -> 合约已删除
-        if (container.isDelete()) {
-            return ContractResult.genFailed(contractData, "contract has been terminated.");
-        }
-        if (!ContractUtil.checkPrice(contractData.getPrice())) {
-            return ContractResult.genFailed(contractData, "The minimum value of price is 25.");
-        }
-        switch (tx.getType()) {
-            case TX_TYPE_CREATE_CONTRACT:
-                container.setHasCreate(true);
-                contractResult = contractExecutor.create(executor, contractData, number, preStateRoot);
-                Log.info("======pierre====contractResult is {}", contractResult);
-                checkCreateResult(tx, callableResult, contractResult);
+        int type = tx.getType();
+        do {
+            // 创建合约无论成功与否，后续的其他的跳过执行，视作失败 -> 合约锁定中或者合约不存在
+            if (container.isHasCreate()) {
+                contractResult = ContractResult.genFailed(contractData, "contract lock or not exist.");
                 break;
-            case TX_TYPE_CALL_CONTRACT:
-                contractResult = contractExecutor.call(executor, contractData, number, preStateRoot);
-                checkCallResult(tx, callableResult, contractResult);
+            }
+            // 删除合约成功后，后续的其他的跳过执行，视作失败 -> 合约已删除
+            if (container.isDelete()) {
+                contractResult = ContractResult.genFailed(contractData, "contract has been terminated.");
                 break;
-            case TX_TYPE_DELETE_CONTRACT:
-                contractResult = contractExecutor.delete(executor, contractData, number, preStateRoot);
-                boolean isDelete = checkDeleteResult(tx, callableResult, contractResult);
-                container.setDelete(isDelete);
+            }
+
+            if (type != TX_TYPE_DELETE_CONTRACT && !ContractUtil.checkPrice(contractData.getPrice())) {
+                contractResult = ContractResult.genFailed(contractData, "The minimum value of price is 25.");
                 break;
-            default:
-                break;
-        }
+            }
+
+            switch (type) {
+                case TX_TYPE_CREATE_CONTRACT:
+                    container.setHasCreate(true);
+                    contractResult = contractExecutor.create(executor, contractData, number, preStateRoot);
+                    checkCreateResult(tx, callableResult, contractResult);
+                    break;
+                case TX_TYPE_CALL_CONTRACT:
+                    contractResult = contractExecutor.call(executor, contractData, number, preStateRoot);
+                    checkCallResult(tx, callableResult, contractResult);
+                    break;
+                case TX_TYPE_DELETE_CONTRACT:
+                    contractResult = contractExecutor.delete(executor, contractData, number, preStateRoot);
+                    boolean isDelete = checkDeleteResult(tx, callableResult, contractResult);
+                    container.setDelete(isDelete);
+                    break;
+                default:
+                    break;
+            }
+        } while (false);
+        Log.info("======pierre====txType [{}] Execute ContractResult is {}", tx.getType(), contractResult);
         return contractResult;
     }
 
@@ -137,14 +144,16 @@ public class ContractTxCallable implements Callable<ContractResult> {
         makeContractResult(tx, contractResult);
         if (contractResult.isSuccess()) {
             Result checkResult = contractHelper.validateNrc20Contract(chainId, (ProgramExecutor) contractResult.getTxTrack(), tx, contractResult);
-            Log.info("checkResult is {}", checkResult);
+            Log.info("check validateNrc20Contract Result is {}", checkResult);
             if (checkResult.isSuccess()) {
                 container.getCommitSet().add(contract);
                 commitContract(contractResult);
             }
+            callableResult.getResultList().add(contractResult);
+        } else {
+            // 执行失败，添加到执行失败的集合中
+            putAll(callableResult.getFailedMap(), contractResult);
         }
-        List<ContractResult> resultList = callableResult.getResultList();
-        resultList.add(contractResult);
     }
 
 
@@ -153,8 +162,13 @@ public class ContractTxCallable implements Callable<ContractResult> {
         List<ContractResult> reCallList = callableResult.getReCallList();
         boolean isConflict = checker.checkConflict(tx, contractResult, container.getCommitSet());
         if (isConflict) {
-            // 冲突后，添加到重新执行的集合中
-            reCallList.add(contractResult);
+            // 冲突后，添加到重新执行的集合中，但是gas消耗完的不再重复执行
+            if(!isNotEnoughGasError(contractResult)) {
+                reCallList.add(contractResult);
+            } else {
+                // 执行失败，添加到执行失败的集合中
+                putAll(callableResult.getFailedMap(), contractResult);
+            }
         } else {
             // 没有冲突, 处理合约结果
             dealCallResult(tx, callableResult, contractResult, chainId, blockTime);
@@ -169,6 +183,7 @@ public class ContractTxCallable implements Callable<ContractResult> {
             byte[] contractAddress = contractResult.getContractAddress();
             // 获取合约当前余额
             BigInteger balance = vmContext.getBalance(chainId, contractAddress);
+            Log.info("=====pierre======[{}] current balance is {}", AddressTool.getStringAddressByBytes(contractAddress), balance.toString());
             contractResult.setPreBalance(balance);
             // 处理临时余额和合约内部转账
             contractTransferHandler.handleContractTransfer(chainId, blockTime, tx, contractResult, tempBalanceManager);
@@ -197,11 +212,25 @@ public class ContractTxCallable implements Callable<ContractResult> {
     private void checkConflictWithFailedMap(CallableResult callableResult, ContractResult contractResult) {
         Map<String, Set<ContractResult>> failedMap = callableResult.getFailedMap();
         Set<String> addressSet = collectAddress(contractResult);
-        List<ContractResult> reCallList = callableResult.getReCallList();
         for (String address : addressSet) {
-            Set<ContractResult> removedSet = failedMap.remove(address);
+            Set<ContractResult> removedSet = failedMap.get(address);
             if (removedSet != null) {
-                reCallList.addAll(removedSet);
+                List<ContractResult> recallList = new ArrayList<>();
+                // 失败的合约，gas消耗完的不再重复执行
+                for(ContractResult _contractResult : removedSet) {
+                    if(!isNotEnoughGasError(_contractResult)) {
+                        callableResult.getReCallList().add(_contractResult);
+                        recallList.add(_contractResult);
+                    }
+                }
+                // 移除失败合约（已转移到重新执行的合约集合中）
+                if(recallList.size() > 0) {
+                    if(recallList.size() == removedSet.size()) {
+                        failedMap.remove(address);
+                    } else {
+                        removedSet.removeAll(recallList);
+                    }
+                }
             }
         }
     }
@@ -212,9 +241,11 @@ public class ContractTxCallable implements Callable<ContractResult> {
         if (contractResult.isSuccess()) {
             result = true;
             commitContract(contractResult);
+            callableResult.getResultList().add(contractResult);
+        } else {
+            // 执行失败，添加到执行失败的集合中
+            putAll(callableResult.getFailedMap(), contractResult);
         }
-        List<ContractResult> resultList = callableResult.getResultList();
-        resultList.add(contractResult);
         return result;
     }
 }

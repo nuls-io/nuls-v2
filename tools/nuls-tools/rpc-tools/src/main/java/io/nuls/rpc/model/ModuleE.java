@@ -59,11 +59,12 @@ public enum ModuleE {
         this.domain = domain;
     }
 
-    public static ModuleE valueOfAbbr(String abbr){
-        return Arrays.stream(ModuleE.values()).filter(m->m.abbr.equals(abbr)).findFirst().orElseThrow(()->new IllegalArgumentException("can not found abbr of " + abbr));
+    public static ModuleE valueOfAbbr(String abbr) {
+        return Arrays.stream(ModuleE.values()).filter(m -> m.abbr.equals(abbr)).findFirst().orElseThrow(() -> new IllegalArgumentException("can not found abbr of " + abbr));
     }
 
     @Override
     public String toString() {
-        return domain + "/" + name +"/"+ abbr;
-    }}
+        return domain + "/" + name + "/" + abbr;
+    }
+}

@@ -47,29 +47,10 @@ public interface ContractService {
 
     Result rollbackProcessor(int chainId, List<String> txHexList, String blockHeaderHex);
 
-    /**
-     * 保存合约执行结果
-     *
-     * @param hash
-     * @param contractResult
-     * @return
-     */
     Result saveContractExecuteResult(int chainId, NulsDigestData hash, ContractResult contractResult);
 
-    /**
-     * 删除合约执行结果
-     *
-     * @param hash
-     * @return
-     */
     Result deleteContractExecuteResult(int chainId, NulsDigestData hash);
 
-    /**
-     * 获取合约执行结果
-     *
-     * @param hash
-     * @return
-     */
     ContractResult getContractExecuteResult(int chainId, NulsDigestData hash);
 
 }

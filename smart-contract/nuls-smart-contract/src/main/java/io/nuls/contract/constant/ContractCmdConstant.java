@@ -66,4 +66,6 @@ public interface ContractCmdConstant {
     String CONTRACT_TX = "sc_contract_tx";
     String TOKEN_ASSETS_LIST = "sc_token_assets_list";
     String UPLOAD = "sc_upload";
+    String TOKEN_TRANSFER_LIST = "sc_token_transfer_list";
+    String ACCOUNT_CONTRACTS = "sc_account_contracts";
 }

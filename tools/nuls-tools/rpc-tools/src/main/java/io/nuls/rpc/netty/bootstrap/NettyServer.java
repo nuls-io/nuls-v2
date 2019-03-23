@@ -14,9 +14,10 @@ import java.util.Map;
 /**
  * netty服务器端实现类
  * Server-side implementation class
+ *
  * @author tag
  * 2019/2/21
- * */
+ */
 public class NettyServer {
 
     /**
@@ -26,7 +27,7 @@ public class NettyServer {
      * @param moduleE 预定义模块 / Pre-defined module
      * @return WsServer
      */
-    public static NettyServer getInstance(ModuleE moduleE){
+    public static NettyServer getInstance(ModuleE moduleE) {
         return getInstance(moduleE.abbr, moduleE.name, moduleE.domain);
     }
 
@@ -39,7 +40,7 @@ public class NettyServer {
      * @param domain 域名 / Domian
      * @return WsServer
      */
-    public static NettyServer getInstance(String abbr, String name, String domain){
+    public static NettyServer getInstance(String abbr, String name, String domain) {
         int port = HostInfo.randomPort();
         startServer(port);
         ConnectManager.LOCAL.setModuleAbbreviation(abbr);
@@ -58,8 +59,8 @@ public class NettyServer {
     /**
      * 启动netty服务器，监听指定端口
      * Start the netty server to listen on the specified port
-     * */
-    public static void startServer(int port){
+     */
+    public static void startServer(int port) {
         Thread serverThread = new Thread(new StartServerProcessor(port));
         serverThread.start();
     }
@@ -130,10 +131,11 @@ public class NettyServer {
     /**
      * 添加RPC接口
      * add RPC insterface
+     *
      * @param cmdClass
      * @return
      */
-    public NettyServer  addCmdDetail(Class<?> cmdClass){
+    public NettyServer addCmdDetail(Class<?> cmdClass) {
         ConnectManager.addCmdDetail(cmdClass);
         return this;
     }

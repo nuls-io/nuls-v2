@@ -29,7 +29,7 @@ import io.nuls.contract.callable.ContractTxCallable;
 import io.nuls.contract.helper.ContractConflictChecker;
 import io.nuls.contract.helper.ContractHelper;
 import io.nuls.contract.helper.ContractTransferHandler;
-import io.nuls.contract.manager.TempBalanceManager;
+import io.nuls.contract.manager.ContractTempBalanceManager;
 import io.nuls.contract.model.bo.BatchInfo;
 import io.nuls.contract.model.bo.ContractContainer;
 import io.nuls.contract.model.bo.ContractResult;
@@ -43,7 +43,6 @@ import io.nuls.contract.vm.program.ProgramExecutor;
 import io.nuls.tools.basic.Result;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
-import io.nuls.tools.core.annotation.Service;
 import io.nuls.tools.log.Log;
 
 import java.util.ArrayList;
@@ -107,7 +106,7 @@ public class ContractCallerImpl implements ContractCaller {
         BlockHeader currentBlockHeader = contractHelper.getCurrentBlockHeader(chainId);
         long blockTime = currentBlockHeader.getTime();
         long lastestHeight = currentBlockHeader.getHeight() - 1;
-        TempBalanceManager tempBalanceManager = contractHelper.getTempBalanceManager(chainId);
+        ContractTempBalanceManager tempBalanceManager = contractHelper.getTempBalanceManager(chainId);
         List<ContractResult> resultList = new ArrayList<>();
         ContractData contractData;
         ContractResult contractResult;

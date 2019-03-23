@@ -23,15 +23,16 @@ import java.net.URISyntaxException;
 /**
  * netty客服端启动实现类
  * Customer Service Start Implementation Class
+ *
  * @author tag
  * 2019/2/21
- * */
+ */
 public class NettyClient {
     /**
      * 连接服务器，返回连接通道
      * Connect to the server and return to the connection channel
-     * */
-    public static Channel createConnect(String uri){
+     */
+    public static Channel createConnect(String uri) {
         try {
             URI webSocketURI = null;
             try {
@@ -42,8 +43,8 @@ public class NettyClient {
             final ClientHandler handler =
                     new ClientHandler(
                             WebSocketClientHandshakerFactory.newHandshaker(
-                                    webSocketURI, WebSocketVersion.V13, null, true, new DefaultHttpHeaders(), 65536*5));
-            EventLoopGroup group=new NioEventLoopGroup();
+                                    webSocketURI, WebSocketVersion.V13, null, true, new DefaultHttpHeaders(), 65536 * 5));
+            EventLoopGroup group = new NioEventLoopGroup();
             Bootstrap b = new Bootstrap();
             b.group(group)
                     .channel(NioSocketChannel.class)
@@ -53,16 +54,16 @@ public class NettyClient {
                             ChannelPipeline p = ch.pipeline();
                             p.addLast(
                                     new HttpClientCodec(),
-                                    new HttpObjectAggregator(1024*1024*10),
+                                    new HttpObjectAggregator(1024 * 1024 * 10),
                                     WebSocketClientCompressionHandler.INSTANCE,
                                     handler);
                         }
                     });
-            Channel ch = b.connect(webSocketURI.getHost(),webSocketURI.getPort()).sync().channel();
+            Channel ch = b.connect(webSocketURI.getHost(), webSocketURI.getPort()).sync().channel();
             handler.handshakeFuture().sync();
             ResponseMessageProcessor.handshake(ch);
             return ch;
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
             return null;
         }

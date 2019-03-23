@@ -46,7 +46,8 @@ public class ContractBootStrap extends RpcModule {
     @Autowired
     private ContractConfig contractConfig;
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws Exception {
+        systemConfig();
         if (args == null || args.length == 0) {
             args = new String[]{"ws://" + HostInfo.getLocalIP() + ":8887/ws"};
         }
@@ -61,7 +62,6 @@ public class ContractBootStrap extends RpcModule {
     public void init() {
         try {
             super.init();
-            initSys();
             initNulsConfig();
             initDB();
             initLanguage();
@@ -88,7 +88,7 @@ public class ContractBootStrap extends RpcModule {
      * 初始化系统编码
      * Initialization System Coding
      */
-    private static void initSys() throws Exception {
+    private static void systemConfig() throws Exception {
         System.setProperty("protostuff.runtime.allow_null_array_element", "true");
         System.setProperty(ContractConstant.SYS_FILE_ENCODING, UTF_8.name());
         Field charset = Charset.class.getDeclaredField("defaultCharset");
@@ -185,7 +185,7 @@ public class ContractBootStrap extends RpcModule {
     /**
      * 某个外部依赖连接丢失后，会调用此方法，可控制模块状态，如果返回Ready,则表明模块退化到Ready状态，当依赖重新准备完毕后，将重新触发onDependenciesReady方法，若返回的状态是Running，将不会重新触发onDependenciesReady
      *
-     * @param module
+     * @param dependenciesModule
      * @return
      */
     @Override

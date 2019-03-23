@@ -8,6 +8,6 @@ package io.nuls.rpc.netty.channel;
 @FunctionalInterface
 public interface EventListener {
 
-     void apply();
+    void apply();
 
 }

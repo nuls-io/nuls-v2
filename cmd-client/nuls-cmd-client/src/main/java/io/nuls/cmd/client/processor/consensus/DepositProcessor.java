@@ -41,16 +41,15 @@ import io.nuls.cmd.client.utils.Na;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.model.StringUtils;
-import lombok.extern.slf4j.Slf4j;
 
 import java.math.BigInteger;
-import static io.nuls.cmd.client.CommandHelper.*;
+
+import static io.nuls.cmd.client.CommandHelper.getPwd;
 
 /**
  * @author: zhoulijun
  */
 @Component
-@Slf4j
 public class DepositProcessor extends ConsensusBaseProcessor implements CommandProcessor {
 
     ConsensusProvider consensusProvider = ServiceManager.get(ConsensusProvider.class);

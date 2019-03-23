@@ -58,11 +58,11 @@ import static org.junit.Assert.assertTrue;
  * @date: 2019-01-15
  */
 public class TestJyc {
-    static String address23 = "5MR_2CbdqKcZktcxntG14VuQDy8YHhc6ZqW";
+    static String address23 = "tNULSeBaMnrs6JKrCy6TQdzYJZkMZJDng7QAsD";
 
     private static Chain chain;
-    static int chainId = 12345;
-    static int assetChainId = 12345;
+    static int chainId = 2;
+    static int assetChainId = 2;
     static int assetId = 1;
     static String version = "1.0";
 
@@ -83,7 +83,7 @@ public class TestJyc {
 
     @Test
     public void name() throws Exception {
-        String hash = "0020a1632aba562395506888f137e3ebe461b35ada0c8cd38f3652a854d3a902ba0b";
+        String hash = "0020ee93ab0fa93e60a0fdfda71272f4dfc8b57554c6bdbbb3b0aa1462bdde25cb23";
         boolean b = queryTx(hash);
         Log.debug("hash-{} exist-{}", hash, b);
     }
@@ -93,8 +93,8 @@ public class TestJyc {
      */
     @Test
     public void importSeed() {
-        importPriKey("00c4a6b90d3f4eb7b50bc85fd0e99ccb717e148b4fde7462e14c590445e589588c", password);//5MR_2CbdqKcZktcxntG14VuQDy8YHhc6ZqW
-        importPriKey("00d9748b9ba0cdee3bc9d45c09eb9928b5809c4132a0ef70b19779e72a22258f47", password);//5MR_2CbDGZXZRc7SnBEKuCubTUkYi9JXcCu
+        importPriKey("188b255c5a6d58d1eed6f57272a22420447c3d922d5765ebb547bc6624787d9f", password);//tNULSeBaMoGr2RkLZPfJeS5dFzZeNj1oXmaYNe
+        importPriKey("477059f40708313626cccd26f276646e4466032cabceccbf571a7c46f954eb75", password);//tNULSeBaMnrs6JKrCy6TQdzYJZkMZJDng7QAsD
     }
 
     @Test
@@ -388,8 +388,8 @@ public class TestJyc {
             BigInteger balance = LedgerCall.getBalance(chain, AddressTool.getAddress(address23), chainId, assetId);
             Log.debug(address23 + "-----balance:{}", balance);
         }
-        int total = 100_000;
-        int count = 1_000;
+        int total = 10_000;
+        int count = 1_00;
         List<String> accountList = new ArrayList<>();
         Log.debug("##################################################");
         {
@@ -502,10 +502,10 @@ public class TestJyc {
                     Log.debug("transfer from {} to {}, hash:{}", from, to, hash);
                 }
                 Log.debug("##########" + j + " round end##########");
-                Thread.sleep(10000);
+                Thread.sleep(100);
             }
         }
-        Thread.sleep(100000);
+        Thread.sleep(600000);
         {
             boolean b = queryTxs(hashList);
             Log.debug("all tx exist-{}" + b);
@@ -531,7 +531,7 @@ public class TestJyc {
             Log.debug(address23 + "-----balance:{}", balance);
         }
         int total = 100_000_000;
-        int count = 100;
+        int count = 10;
         List<String> accountList;
         Log.debug("##################################################");
         {
@@ -629,7 +629,7 @@ public class TestJyc {
                     assertTrue(response.isSuccess());
                     HashMap result = (HashMap) (((HashMap) response.getResponseData()).get("ac_transfer"));
                     String hash = result.get("value").toString();
-                    hashList.add(hash);
+//                    hashList.add(hash);
                     Log.debug("transfer from {} to {}, hash:{}", from, to, hash);
                 }
                 Log.debug("##########" + j + " round end##########");
@@ -709,10 +709,9 @@ public class TestJyc {
             String txHex = tx.get("txHex").toString();
             Transaction transaction = new Transaction();
             transaction.parse(new NulsByteBuffer(HexUtil.decode(txHex)));
-            if (!hash.equals(transaction.getHash())) {
+            if (!hash.equals(transaction.getHash().getDigestHex())) {
                 Log.debug("hash-{} not exist", hash);
                 result = false;
-                continue;
             }
         }
         return result;
@@ -730,7 +729,7 @@ public class TestJyc {
         String txHex = tx.get("txHex").toString();
         Transaction transaction = new Transaction();
         transaction.parse(new NulsByteBuffer(HexUtil.decode(txHex)));
-        if (!hash.equals(transaction.getHash())) {
+        if (!hash.equals(transaction.getHash().getDigestHex())) {
             Log.debug("hash-{} not exist", hash);
             result = false;
         }

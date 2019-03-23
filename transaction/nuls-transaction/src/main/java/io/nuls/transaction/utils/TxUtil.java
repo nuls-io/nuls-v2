@@ -38,11 +38,13 @@ import io.nuls.transaction.constant.TxConstant;
 import io.nuls.transaction.constant.TxErrorCode;
 import io.nuls.transaction.manager.TxManager;
 import io.nuls.transaction.model.bo.Chain;
+import io.nuls.transaction.model.bo.TxRegister;
 import io.nuls.transaction.model.po.TransactionPO;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import static io.nuls.transaction.utils.LoggerUtil.Log;
 
@@ -166,17 +168,6 @@ public class TxUtil {
             transactionPO.setTime(tx.getTime());
             list.add(transactionPO);
 
-        } else if (TxManager.isUnSystemSmartContract(chain, tx.getType())) {
-            TransactionPO transactionPO = new TransactionPO();
-            transactionPO.setAddress(extractContractAddress(tx.getTxData()));
-            transactionPO.setAssetChainId(chain.getConfig().getChainId());
-            transactionPO.setAssetId(chain.getConfig().getAssetId());
-            transactionPO.setAmount(BigInteger.ZERO);
-            transactionPO.setHash(tx.getHash().getDigestHex());
-            transactionPO.setType(tx.getType());
-            transactionPO.setState(4);
-            transactionPO.setTime(tx.getTime());
-            list.add(transactionPO);
         } else {
             if (coinData.getFrom() != null
                     && tx.getType() != TxConstant.TX_TYPE_COINBASE
@@ -226,6 +217,24 @@ public class TxUtil {
                     list.add(transactionPO);
                 }
             }
+        }
+        if (TxManager.isUnSystemSmartContract(chain, tx.getType())) {
+            do {
+                // 调用合约交易，如果有coinTo，那么它是合约地址，此处地址与交易的关系不重复存储
+                if(tx.getType() == TxConstant.TX_TYPE_CALL_CONTRACT && coinData.getTo().size() > 0) {
+                    break;
+                }
+                TransactionPO transactionPO = new TransactionPO();
+                transactionPO.setAddress(extractContractAddress(tx.getTxData()));
+                transactionPO.setAssetChainId(chain.getConfig().getChainId());
+                transactionPO.setAssetId(chain.getConfig().getAssetId());
+                transactionPO.setAmount(BigInteger.ZERO);
+                transactionPO.setHash(tx.getHash().getDigestHex());
+                transactionPO.setType(tx.getType());
+                transactionPO.setState(4);
+                transactionPO.setTime(tx.getTime());
+                list.add(transactionPO);
+            } while (false);
         }
         return list;
     }
@@ -302,7 +311,7 @@ public class TxUtil {
     }
 
     public static void txInformationDebugPrint(Chain chain, Transaction tx, NulsLogger nulsLogger) {
-        if(tx.getType() == 1) return;
+        if(tx.getType() == 1) {return;}
         nulsLogger.debug("");
         nulsLogger.debug("**************************************************");
         nulsLogger.debug("Transaction information");
@@ -367,5 +376,31 @@ public class TxUtil {
         }
         nulsLogger.debug("**************************************************");
         nulsLogger.debug("");
+    }
+
+
+    /**
+     * 对交易进行模块分组
+     * @param chain
+     * @param moduleVerifyMap
+     * @param tx
+     * @throws NulsException
+     */
+    public static void moduleGroups(Chain chain, Map<TxRegister, List<String>> moduleVerifyMap, Transaction tx) throws NulsException{
+        //根据模块的统一验证器名，对所有交易进行分组，准备进行各模块的统一验证
+        TxRegister txRegister = TxManager.getTxRegister(chain, tx.getType());
+        String txHex;
+        try {
+            txHex = tx.hex();
+        } catch (Exception e) {
+            throw new NulsException(e);
+        }
+        if (moduleVerifyMap.containsKey(txRegister)) {
+            moduleVerifyMap.get(txRegister).add(txHex);
+        } else {
+            List<String> txHexs = new ArrayList<>();
+            txHexs.add(txHex);
+            moduleVerifyMap.put(txRegister, txHexs);
+        }
     }
 }

@@ -4,6 +4,7 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
+import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.netty.channel.manager.ConnectManager;
 import io.nuls.rpc.netty.handler.message.TextMessageHandler;
 import io.nuls.tools.log.Log;
@@ -14,29 +15,31 @@ import java.util.concurrent.Executors;
 /**
  * 服务器端事件触发处理类
  * Server-side event trigger processing class
+ *
  * @author tag
  * 2019/2/21
- * */
+ */
 public class ServerHandler extends SimpleChannelInboundHandler<Object> {
 
-    private ThreadLocal<ExecutorService> threadExecutorService = ThreadLocal.withInitial(() -> Executors.newFixedThreadPool(Thread.activeCount()));
+    //private ThreadLocal<ExecutorService> threadExecutorService = ThreadLocal.withInitial(() -> Executors.newFixedThreadPool(Constants.THREAD_POOL_SIZE));
+    private ExecutorService threadExecutorService = Executors.newFixedThreadPool(Constants.THREAD_POOL_SIZE);
 
     @Override
     public void channelActive(ChannelHandlerContext ctx) throws Exception {
         //SocketChannel socketChannel = (SocketChannel) ctx.channel();
         /*
-        * 缓存链接通道
-        * cache link channel
-        * */
+         * 缓存链接通道
+         * cache link channel
+         * */
         //ConnectManager.createConnectData(socketChannel,ConnectManager.getRemoteUri(socketChannel));
     }
 
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, Object msg) throws Exception {
-        if(msg instanceof TextWebSocketFrame){
+        if (msg instanceof TextWebSocketFrame) {
             TextWebSocketFrame txMsg = (TextWebSocketFrame) msg;
             TextMessageHandler messageHandler = new TextMessageHandler((SocketChannel) ctx.channel(), txMsg.text());
-            threadExecutorService.get().execute(messageHandler);
+            threadExecutorService.execute(messageHandler);
         } else {
             Log.warn("Unsupported message format");
         }

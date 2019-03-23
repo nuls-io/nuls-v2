@@ -139,4 +139,13 @@ public class CoinDataUtil {
             return unconfirmedAmounts;
         }
     }
+    public static void main(String []args){
+        List<String> a = new ArrayList();
+        a.add("1");
+        a.add("2");
+        a.add("3");
+        a.add("4");
+        List<String> leftUnconfirmedNonces = a.subList(1, 4);
+        leftUnconfirmedNonces.forEach(e->System.out.println(e));
+    }
 }

@@ -23,8 +23,8 @@ public class AccountKeyStoreServiceTest {
 
     protected static AccountService accountService;
     protected static AccountKeyStoreService accountKeyStoreService;
-    protected int chainId = 12345;
-    protected String password = "a12345678";
+    protected int chainId = 2;
+    protected String password = "a2678";
 
     @BeforeClass
     public static void beforeTest() {

@@ -276,7 +276,6 @@ public class TxGenerateServiceImpl implements TxGenerateService {
     }
 
 
-
     /**
      * 通过coinfrom计算签名数据的size
      * 如果coinfrom有重复地址则只计算一次；如果有多签地址，只计算m个地址的size
@@ -409,7 +408,7 @@ public class TxGenerateServiceImpl implements TxGenerateService {
         for (CoinDTO coinDTO : listTo) {
             byte[] address = AddressTool.getAddress(coinDTO.getAddress());
             if (null == chainIdOfTo) {
-                chainIdOfTo = AddressTool.getChainIdByAddress(address);
+                chainIdOfTo = (int) AddressTool.getChainIdByAddress(address);
             } else {
                 if (chainIdOfTo != AddressTool.getChainIdByAddress(address)) {
                     throw new NulsException(TxErrorCode.CROSS_TX_PAYEE_CHAINID_NOT_SAME);

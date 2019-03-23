@@ -33,6 +33,7 @@ import io.nuls.contract.vm.program.ProgramTransfer;
 import io.nuls.tools.crypto.HexUtil;
 import lombok.Getter;
 import lombok.Setter;
+import org.spongycastle.util.encoders.Hex;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -43,14 +44,10 @@ import java.util.Set;
 @Getter
 @Setter
 public class ContractResult {
-
-
     private transient ContractWrapperTransaction tx;
-
     private String hash;
-
     private long txTime;
-
+    private long blockHeight;
     /**
      * 交易创建者
      */
@@ -83,42 +80,15 @@ public class ContractResult {
      */
     private long value;
 
-    /**
-     * 有错误，还原状态
-     */
     private boolean revert;
-
-    /**
-     * 有错误，状态改变
-     */
     private boolean error;
-
-    /**
-     *
-     */
     private String errorMessage;
-
-    /**
-     *
-     */
     private String stackTrace;
-
-    /**
-     *
-     */
     private BigInteger balance;
-
     private BigInteger preBalance;
-
-    /**
-     *
-     */
     private BigInteger nonce;
-
     private boolean acceptDirectTransfer;
-
     private boolean isNrc20;
-
     private String tokenName;
     private String tokenSymbol;
     private int tokenDecimals;
@@ -190,61 +160,35 @@ public class ContractResult {
         return result;
     }
 
-    //@Override
-    //public String toString() {
-    //    return "ContractResult{" +
-    //            "contractAddress=" + AddressTool.getStringAddressByBytes(contractAddress) +
-    //            ", result='" + result + '\'' +
-    //            ", gasUsed=" + gasUsed +
-    //            ", stateRoot=" + (stateRoot != null ? HexUtil.encode(stateRoot) : stateRoot) +
-    //            ", value=" + value +
-    //            ", revert=" + revert +
-    //            ", error=" + error +
-    //            ", errorMessage='" + errorMessage + '\'' +
-    //            ", stackTrace='" + stackTrace + '\'' +
-    //            ", balance=" + (balance != null ? balance.toString() : 0) +
-    //            ", nonce=" + nonce +
-    //            ", transfersSize=" + (transfers != null ? transfers.size() : 0) +
-    //            ", eventsSize=" + (events != null ? events.size() : 0) +
-    //            ", remark='" + remark + '\'' +
-    //            '}';
-    //}
-
-
     @Override
     public String toString() {
         return "ContractResult{" +
-                "tx=" + tx +
+                "success='" + isSuccess() + '\'' +
                 ", hash='" + hash + '\'' +
                 ", txTime=" + txTime +
-                ", sender=" + Arrays.toString(sender) +
-                ", contractAddress=" + Arrays.toString(contractAddress) +
+                ", sender=" + AddressTool.getStringAddressByBytes(sender) +
+                ", contractAddress=" + AddressTool.getStringAddressByBytes(contractAddress) +
                 ", result='" + result + '\'' +
                 ", gasUsed=" + gasUsed +
                 ", price=" + price +
-                ", stateRoot=" + Arrays.toString(stateRoot) +
+                ", stateRoot=" + (stateRoot != null ? HexUtil.encode(stateRoot) : stateRoot) +
                 ", value=" + value +
                 ", revert=" + revert +
                 ", error=" + error +
                 ", errorMessage='" + errorMessage + '\'' +
                 ", stackTrace='" + stackTrace + '\'' +
-                ", balance=" + balance +
+                ", balance=" + (balance != null ? balance.toString() : 0) +
                 ", preBalance=" + preBalance +
                 ", nonce=" + nonce +
                 ", acceptDirectTransfer=" + acceptDirectTransfer +
                 ", isNrc20=" + isNrc20 +
-                ", tokenName='" + tokenName + '\'' +
-                ", tokenSymbol='" + tokenSymbol + '\'' +
-                ", tokenDecimals=" + tokenDecimals +
-                ", tokenTotalSupply=" + tokenTotalSupply +
-                ", transfers=" + transfers +
-                ", mergedTransferList=" + mergedTransferList +
-                ", contractTransferList=" + contractTransferList +
+                ", transfersSize=" + (transfers != null ? transfers.size() : 0) +
+                ", mergedTransferList=" + (mergedTransferList != null ? mergedTransferList.size() : 0) +
+                ", contractTransferList=" + (contractTransferList != null ? contractTransferList.size() : 0) +
                 ", events=" + events +
                 ", remark='" + remark + '\'' +
                 ", isTerminated=" + isTerminated +
-                ", contractAddressInnerCallSet=" + contractAddressInnerCallSet +
-                ", txTrack=" + txTrack +
+                ", contractAddressInnerCallSet=" + (contractAddressInnerCallSet != null ? contractAddressInnerCallSet.size() : 0) +
                 '}';
     }
 }

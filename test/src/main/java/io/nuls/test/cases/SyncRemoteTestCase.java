@@ -10,7 +10,9 @@ import io.nuls.test.controller.RemoteResult;
 import io.nuls.test.utils.RestFulUtils;
 import io.nuls.test.utils.Utils;
 import io.nuls.tools.core.annotation.Value;
+import io.nuls.tools.core.config.ConfigSetting;
 import io.nuls.tools.core.ioc.SpringLiteContext;
+import io.nuls.tools.log.Log;
 import io.nuls.tools.parse.JSONUtils;
 import io.nuls.tools.parse.MapUtils;
 import lombok.Setter;
@@ -26,8 +28,7 @@ import java.util.stream.Collectors;
  * @Time: 2019-03-20 11:48
  * @Description: 功能描述
  */
-public abstract class AbstractRemoteTestCase<T> implements TestCaseIntf<Boolean, RemoteTestParam<T>> {
-
+public abstract class SyncRemoteTestCase<T> extends BaseTestCase<Boolean, RemoteTestParam<T>> {
 
     NetworkProvider networkProvider = ServiceManager.get(NetworkProvider.class);
 
@@ -35,41 +36,72 @@ public abstract class AbstractRemoteTestCase<T> implements TestCaseIntf<Boolean,
         return source.equals(remote);
     }
 
+
     @Override
     public Boolean doTest(RemoteTestParam<T> param,int depth) throws TestFailException {
         Result<String> nodes = networkProvider.getNodes();
         Config config = SpringLiteContext.getBean(Config.class);
+        if(!config.isMaster()){
+            throw new RuntimeException("非master节点不允许进行远程调用");
+        }
         List<String> nodeList = nodes.getList().stream().map(node->node.split(":")[0]).filter(node->config.getNodeExclude().indexOf(node)==-1).collect(Collectors.toList());
         if(nodeList.isEmpty()){
             throw new TestFailException("remote fail ,network node is empty");
         }
         for (String node : nodeList) {
+//            Map remoteRes = doRemoteTest(node,param.getCaseCls(),param.getParam());
+            RemoteCaseReq req = new RemoteCaseReq();
+            req.setCaseClass(param.getCaseCls());
+            if(param.getParam() != null){
+                req.setParam(Utils.toJson(param.getParam()));
+            }
+//        try {
+//            req.setParam(JSONUtils.obj2json(param));
+//        } catch (JsonProcessingException e) {
+//            throw new TestFailException("序列化远程测试参数错误", e);
+//        }
             RestFulUtils.getInstance().setServerUri("http://" + node.split(":")[0] + ":9999/api");
-            Map remoteRes = doRemoteTest(param.getCaseCls(),param.getParam());
+            Log.debug("call {} remote case:{}",node,req);
+            RemoteResult<T> result = RestFulUtils.getInstance().post("remote/call", MapUtils.beanToMap(req));
+            Log.debug("call remote case returl :{}",result);
+
+            checkResultStatus(new Result(result.getData()));
             Type type = this.getClass().getGenericSuperclass();
             Type[] params = ((ParameterizedType) type).getActualTypeArguments();
             Class<T> reponseClass = (Class) params[0];
-            T remoteData = JSONUtils.map2pojo(remoteRes,reponseClass);
-            boolean sync = this.equals(param.getSource(),remoteData);
+            boolean sync;
+            if(ConfigSetting.isPrimitive(reponseClass)){
+                sync = this.equals(param.getSource(),result.getData());
+            }else{
+                T remoteData = JSONUtils.map2pojo((Map)result.getData(),reponseClass);
+                sync = this.equals(param.getSource(),remoteData);
+            }
+//            JSONUtils.
+//            T remoteData = JSONUtils.map2pojo(remoteRes,reponseClass);
             if(!sync){
                 return false;
             }
             Utils.success(depthSpace(depth)+"节点【"+node+"】测试通过");
         }
-
-
         return true;
     }
 
-    public Map doRemoteTest(Class<? extends TestCaseIntf> caseCls, Object param) throws TestFailException {
+    public Map doRemoteTest(String node, Class<? extends TestCaseIntf> caseCls, Object param) throws TestFailException {
         RemoteCaseReq req = new RemoteCaseReq();
         req.setCaseClass(caseCls);
-        try {
-            req.setParam(JSONUtils.obj2json(param));
-        } catch (JsonProcessingException e) {
-            throw new TestFailException("序列化远程测试参数错误", e);
+        if(param != null){
+            req.setParam(Utils.toJson(param));
         }
+//        try {
+//            req.setParam(JSONUtils.obj2json(param));
+//        } catch (JsonProcessingException e) {
+//            throw new TestFailException("序列化远程测试参数错误", e);
+//        }
+        RestFulUtils.getInstance().setServerUri("http://" + node.split(":")[0] + ":9999/api");
+        Log.debug("call {} remote case:{}",node,req);
         RemoteResult<Map> result = RestFulUtils.getInstance().post("remote/call", MapUtils.beanToMap(req));
+        Log.debug("call remote case returl :{}",result);
+        checkResultStatus(new Result(result.getData()));
         return result.getData();
     }
 

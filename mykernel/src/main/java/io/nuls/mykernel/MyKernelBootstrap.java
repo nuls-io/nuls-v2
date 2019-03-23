@@ -22,11 +22,10 @@ package io.nuls.mykernel;
 
 import io.nuls.rpc.info.HostInfo;
 import io.nuls.rpc.info.NoUse;
-import io.nuls.rpc.netty.channel.manager.ConnectManager;
+import io.nuls.tools.log.logback.NulsLogger;
 import io.nuls.tools.parse.config.IniEntity;
 import io.nuls.tools.thread.ThreadUtils;
 import lombok.Cleanup;
-import lombok.extern.slf4j.Slf4j;
 import org.ini4j.Config;
 import org.ini4j.Ini;
 
@@ -37,7 +36,6 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -47,12 +45,13 @@ import java.util.concurrent.TimeUnit;
  * @version 1.0
  * @date 18-11-8 上午10:20
  */
-@Slf4j
 public class MyKernelBootstrap {
 
     private static List<String> MODULE_STOP_LIST_SCRIPT = new ArrayList<>();
 
     static String[] args;
+
+    static NulsLogger log = LoggerUtil.logger;
 
     public static void main(String[] args) throws Exception {
         System.setProperty("io.netty.tryReflectionSetAccessible", "true");

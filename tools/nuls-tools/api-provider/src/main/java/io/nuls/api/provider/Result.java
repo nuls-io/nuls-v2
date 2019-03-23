@@ -22,6 +22,10 @@ public class Result<T> {
 
     List<T> list;
 
+    public Result(){
+        this.status = SUCCESS;
+    }
+
     public Result(T data){
         this.status = SUCCESS;
         this.data = data;

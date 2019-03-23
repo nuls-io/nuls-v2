@@ -1,0 +1,3 @@
+2019-03-23 12:22:15.825  [main] INFO  - io.nuls.rpc.modulebootstrap.RpcModule.init(RpcModule.java:348):module inited
+2019-03-23 12:22:17.505  [main] INFO  - io.nuls.rpc.modulebootstrap.RpcModule.run(RpcModule.java:230):RMB:开始连接service manager
+2019-03-23 12:25:51.025  [main] INFO  - io.nuls.rpc.modulebootstrap.RpcModule.init(RpcModule.java:348):module inited

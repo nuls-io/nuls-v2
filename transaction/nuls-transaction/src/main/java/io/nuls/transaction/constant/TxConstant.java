@@ -129,10 +129,10 @@ public interface TxConstant {
     /**
      * 跨链注册信息交易
      */
-//    String TX_MODULE_VALIDATOR = "txProcess";
-//    String CROSS_TRANSFER_VALIDATOR = "crossTxValidator";
-//    String CROSS_TRANSFER_COMMIT = "crossTxCommit";
-//    String CROSS_TRANSFER_ROLLBACK = "crossTxRollback";
+    String TX_MODULE_VALIDATOR = "txProcess";
+    String CROSS_TRANSFER_VALIDATOR = "crossTxValidator";
+    String CROSS_TRANSFER_COMMIT = "crossTxCommit";
+    String CROSS_TRANSFER_ROLLBACK = "crossTxRollback";
 
 //-----------------------------------------------------------------------------------------------------
     /** 单个交易最大2MB */
@@ -150,7 +150,7 @@ public interface TxConstant {
 
 
 //    String MODULE_CODE = "tx";//=
-//    int NULS_CHAINID = 12345;//=
+//    int NULS_CHAINID = 2;//=
 //    int NULS_CHAIN_ASSETID = 1;//=
 
 //    int H2_TX_TABLE_NUMBER = 128;

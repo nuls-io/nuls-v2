@@ -25,7 +25,8 @@
 
 package io.nuls.test.controller;
 
-import lombok.extern.slf4j.Slf4j;
+import io.nuls.test.utils.LoggerUtil;
+import io.nuls.tools.log.logback.NulsLogger;
 import org.glassfish.grizzly.http.server.*;
 import org.glassfish.grizzly.nio.transport.TCPNIOTransport;
 import org.glassfish.grizzly.servlet.WebappContext;
@@ -44,8 +45,9 @@ import java.util.Map;
 /**
  * @author: Niels Wang
  */
-@Slf4j
 public class RpcServerManager {
+
+    static NulsLogger log = LoggerUtil.logger;
 
     private static final RpcServerManager INSTANCE = new RpcServerManager();
 

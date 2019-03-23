@@ -101,6 +101,10 @@ public class ChainManager {
              */
             initTokenBalanceManager(chain);
             /*
+             * 初始化智能合约创建合约未确认交易管理器
+             */
+            initContractTxCreateUnconfirmedManager(chain);
+            /*
              * 注册交易到交易管理模块
              */
             registerTx(chain);
@@ -114,6 +118,11 @@ public class ChainManager {
     private void initTokenBalanceManager(Chain chain) {
         ContractTokenBalanceManager tokenBalanceManager = ContractTokenBalanceManager.newInstance(chain.getChainId());
         chain.setContractTokenBalanceManager(tokenBalanceManager);
+    }
+
+    private void initContractTxCreateUnconfirmedManager(Chain chain) {
+        ContractTxCreateUnconfirmedManager manager = ContractTxCreateUnconfirmedManager.newInstance(chain.getChainId());
+        chain.setContractTxCreateUnconfirmedManager(manager);
     }
 
     private void initContractExecutor(Chain chain) {

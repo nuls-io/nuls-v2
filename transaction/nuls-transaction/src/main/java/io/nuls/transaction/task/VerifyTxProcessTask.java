@@ -21,8 +21,6 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import static io.nuls.transaction.utils.LoggerUtil.Log;
-
 /**
  * @author: Charlie
  * @date: 2018/11/28
@@ -49,7 +47,6 @@ public class VerifyTxProcessTask implements Runnable {
     @Override
     public void run() {
         try {
-//            chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("@@@@@@@@ 0 @@@@@@@@ doTask");
             doTask(chain);
         } catch (Exception e) {
             chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).error(e);
@@ -68,8 +65,6 @@ public class VerifyTxProcessTask implements Runnable {
         }
 
         Transaction tx = null;
-
-//        chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("@@@@@@@@ 1 @@@@@@@@@@ size:{}",  unverifiedTxStorageService.size(chain));
         long startTask = System.currentTimeMillis();
         int i = 0;
         while ((tx = unverifiedTxStorageService.pollTx(chain)) != null && orphanTxList.size() < chain.getConfig().getOrphanContainerSize()) {
@@ -87,12 +82,10 @@ public class VerifyTxProcessTask implements Runnable {
     private boolean processTx(Chain chain, Transaction tx, boolean isOrphanTx){
         try {
             long s1 = System.currentTimeMillis();
-            chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("");
-            chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("Process tx start......");
-//            TxUtil.txInformationDebugPrint(chain, tx, chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS));
+            chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("......hash:{}", tx.getHash().getDigestHex());
             int chainId = chain.getChainId();
             boolean rs = txService.verify(chain, tx);
-            chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("交易验证器花费时间:{}", System.currentTimeMillis() - s1);
+            chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("验证器花费时间:{}", System.currentTimeMillis() - s1);
             //todo 跨链交易单独处理, 是否需要进行跨链验证？
             //只会有本地创建的跨链交易才会进入这里, 其他链广播到跨链交易, 由其他逻辑处理
             if (!rs) {
@@ -112,8 +105,6 @@ public class VerifyTxProcessTask implements Runnable {
             chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("交易验证阶段花费时间:{}", s2 - s1);
             chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("- - - - - -");
             if(verifyTxResult.success()){
-//                chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS)
-//                        .debug("Task-Packaging 判断交易是否进入待打包队列,节点是否是打包节点: {}", chain.getPackaging().get());
                 if(chain.getPackaging().get()) {
                     //当节点是出块节点时, 才将交易放入待打包队列
                     packablePool.add(chain, tx, false);
@@ -140,14 +131,9 @@ public class VerifyTxProcessTask implements Runnable {
 
                 return true;
             }
-            chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("");
-            chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("-- verifyCoinData fail ----------");
             chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug(
                     "coinData not success - code: {}, - reason:{}, type:{} - txhash:{}",
                     verifyTxResult.getCode(),  verifyTxResult.getDesc(), tx.getType(), tx.getHash().getDigestHex());
-            chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("---------------------------------");
-            chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("Process tx fail..................");
-            chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("");
             if(verifyTxResult.getCode() == VerifyTxResult.ORPHAN && !isOrphanTx){
                 processOrphanTx(tx);
             }else if(isOrphanTx){
@@ -155,7 +141,7 @@ public class VerifyTxProcessTask implements Runnable {
                 return tx.getTime() < (currentTimeMillis - chain.getConfig().getOrphanTtl());
             }
         } catch (Exception e) {
-            Log.error(e);
+            chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).error(e);
             e.printStackTrace();
         }
         return false;
@@ -169,6 +155,7 @@ public class VerifyTxProcessTask implements Runnable {
             while (it.hasNext()) {
                 Transaction tx = it.next();
                 boolean success = processTx(chain, tx, true);
+                TxUtil.txInformationDebugPrint(chain, tx, chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS));
                 if (success) {
                     it.remove();
                     chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("*** Debug *** [VerifyTxProcessTask - OrphanTx] " +

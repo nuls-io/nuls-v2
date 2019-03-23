@@ -153,7 +153,7 @@ public class ConsensusProcess {
         */
         long start = System.currentTimeMillis();
         Block block = doPacking(chain, self, round);
-        consensusLogger.info("doPacking use:" + (System.currentTimeMillis() - start) + "ms");
+        consensusLogger.info("doPacking use:" + (System.currentTimeMillis() - start) + "ms" +"\n\n");
 
         /*
         * 打包完成之后，查看打包区块和主链最新区块是否连续，如果不连续表示打包过程中收到了上一个共识节点打包的区块，此时本地节点需要重新打包区块
@@ -165,10 +165,11 @@ public class ConsensusProcess {
             return;
         }
         try {
-            boolean receiveSuccess = CallMethodUtils.receivePackingBlock(chain.getConfig().getChainId(), HexUtil.encode(block.serialize()));
+            CallMethodUtils.receivePackingBlock(chain.getConfig().getChainId(), HexUtil.encode(block.serialize()),self.getPackEndTime() - CallMethodUtils.currentTime());
+            /*boolean receiveSuccess = CallMethodUtils.receivePackingBlock(chain.getConfig().getChainId(), HexUtil.encode(block.serialize()),self.getPackEndTime() - CallMethodUtils.currentTime());
             if(!receiveSuccess){
                 consensusLogger.info("add block interface call failed!");
-            }
+            }*/
         }catch (Exception e){
             consensusLogger.error(e);
         }
@@ -183,7 +184,7 @@ public class ConsensusProcess {
         long timeout = chain.getConfig().getPackingInterval()/5;
         long endTime = self.getPackStartTime() + timeout;
         boolean hasReceiveNewestBlock;
-        if(CallMethodUtils.currentTime() >= endTime){
+        if(CallMethodUtils.currentTime() >= endTime+20){
             return;
         }
         try {

@@ -88,17 +88,15 @@ public class TxGroupHandler extends BaseCmd {
         }
         //2.已收到部分区块,还缺失交易信息,收到的应该就是缺失的交易信息
         if (BlockForwardEnum.INCOMPLETE.equals(status)) {
-            SmallBlock smallBlock = SmallBlockCacher.getSmallBlock(chainId, blockHash).getSmallBlock();
+            CachedSmallBlock cachedSmallBlock = SmallBlockCacher.getSmallBlock(chainId, blockHash);
+            SmallBlock smallBlock = cachedSmallBlock.getSmallBlock();
             if (null == smallBlock) {
                 return failed(BlockErrorCode.PARAMETER_ERROR);
             }
 
             BlockHeader header = smallBlock.getHeader();
             NulsDigestData headerHash = header.getHash();
-            Map<NulsDigestData, Transaction> txMap = new HashMap<>((int) header.getTxCount());
-            for (Transaction tx : smallBlock.getSubTxList()) {
-                txMap.put(tx.getHash(), tx);
-            }
+            Map<NulsDigestData, Transaction> txMap = cachedSmallBlock.getTxMap();
             for (Transaction tx : transactions) {
                 txMap.put(tx.getHash(), tx);
             }
@@ -106,7 +104,7 @@ public class TxGroupHandler extends BaseCmd {
             Block block = BlockUtil.assemblyBlock(header, txMap, smallBlock.getTxHashList());
             if (blockService.saveBlock(chainId, block, 1, true)) {
                 SmallBlock newSmallBlock = BlockUtil.getSmallBlock(chainId, block);
-                CachedSmallBlock cachedSmallBlock = new CachedSmallBlock(null, newSmallBlock);
+                cachedSmallBlock = new CachedSmallBlock(null, newSmallBlock, txMap);
                 SmallBlockCacher.cacheSmallBlock(chainId, cachedSmallBlock);
                 SmallBlockCacher.setStatus(chainId, blockHash, BlockForwardEnum.COMPLETE);
                 blockService.forwardBlock(chainId, headerHash, nodeId);

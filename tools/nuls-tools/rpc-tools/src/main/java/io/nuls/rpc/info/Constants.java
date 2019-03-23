@@ -62,7 +62,7 @@ public class Constants {
     /**
      * 定时任务处理器循环间隔时间
      * Timed task processor cycle interval
-     * */
+     */
     public static final long PROCESSOR_INTERVAL_TIMEMILLIS = 6L * MILLIS_PER_SECOND;
 
     /**
@@ -160,10 +160,6 @@ public class Constants {
      */
     public static final int SKIP_AND_REMOVE = 4;
 
-
-
-
-
     /**
      * 用以生成messageId，自增长，模块内唯一
      * Used to generate message Id, self-growing, unique within the module
@@ -197,8 +193,8 @@ public class Constants {
     /**
      * 参数验证正则表达式
      * Parametric Verification Regular Expressions
-     * */
-    public static final String RANGE_REGEX ="\\[(\\-|\\+)?\\d+(\\.\\d+)?,(\\-|\\+)?\\d+(\\.\\d+)?\\]";
+     */
+    public static final String RANGE_REGEX = "\\[(\\-|\\+)?\\d+(\\.\\d+)?,(\\-|\\+)?\\d+(\\.\\d+)?\\]";
     public static final String PARAM_WRONG_RANGE = "Param wrong range";
     public static final String PARAM_WRONG_FORMAT = "Param wrong format";
     public static final String PARAM_NULL = "Param null";
@@ -214,10 +210,12 @@ public class Constants {
 
     public static final int TRY_COUNT = 3;
 
+    public static final int THREAD_POOL_SIZE = 200;
+
     /**
      * 参数类型
      * Parameter type
-     * */
+     */
     public static final String PARAM_TYPE_BYTE = "byte";
     public static final String PARAM_TYPE_SHORT = "short";
     public static final String PARAM_TYPE_INT = "int";

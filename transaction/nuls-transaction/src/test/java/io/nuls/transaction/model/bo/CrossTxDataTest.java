@@ -20,7 +20,7 @@ public class CrossTxDataTest {
     public void setUp() throws Exception {
         ctd = new CrossTxData();
         ctd.setOriginalTxHash(TestConstant.getHashA().getDigestBytes());
-        ctd.setChainId(12345);
+        ctd.setChainId(2);
 //        ctd.setOriginalTxHash(TestConstant.getHashA().getDigestBytes());
 //        ctd.setChainId(0);
     }

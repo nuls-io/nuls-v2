@@ -35,12 +35,11 @@ import io.nuls.cmd.client.CommandBuilder;
 import io.nuls.cmd.client.CommandHelper;
 import io.nuls.cmd.client.CommandResult;
 import io.nuls.cmd.client.Config;
-import io.nuls.cmd.client.processor.CommandProcessor;
 import io.nuls.cmd.client.processor.CommandGroup;
+import io.nuls.cmd.client.processor.CommandProcessor;
 import io.nuls.cmd.client.utils.Na;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
-import lombok.extern.slf4j.Slf4j;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -49,7 +48,6 @@ import java.util.Map;
  * @author: zhoulijun
  */
 @Component
-@Slf4j
 public class GetBalanceProcessor implements CommandProcessor {
 
     LedgerProvider ledgerProvider = ServiceManager.get(LedgerProvider.class);
