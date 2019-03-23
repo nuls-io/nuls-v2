@@ -221,6 +221,11 @@ public class WalletRpcHandler {
         resultInfo.setBalance((String) map.get("balance"));
         resultInfo.setRemark((String) map.get("remark"));
 
+        List<Map<String, Object>> transfers = (List<Map<String, Object>>) map.get("transfers");
+        if (!transfers.isEmpty()) {
+
+        }
+
 
         return Result.getSuccess(null).setData(resultInfo);
     }

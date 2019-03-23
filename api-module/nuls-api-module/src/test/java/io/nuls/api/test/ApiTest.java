@@ -79,7 +79,7 @@ public class ApiTest {
     @Test
     public void testContract() {
         try {
-            Result<ContractInfo> result = WalletRpcHandler.getContractInfo(2,"tNULSeBaN71xpUTKtLyHSsTfB11fNGtA7W2RLS");
+            Result<ContractInfo> result = WalletRpcHandler.getContractInfo(2,"tNULSeBaN8SVyzZj7P6fMJWvT3F7Gvi71VyJnS");
             result.getData();
         } catch (NulsException e) {
             e.printStackTrace();
@@ -89,7 +89,7 @@ public class ApiTest {
     @Test
     public void testContractResult() {
         try {
-            Result<ContractResultInfo> result = WalletRpcHandler.getContractResultInfo(2,"0020393c317981937950c7a1181021fb5d917efb79c9c03a2f077f2d2760f73e9593");
+            Result<ContractResultInfo> result = WalletRpcHandler.getContractResultInfo(2,"0020cc10c27160b1e0c7dd8590baa16fedbb91661654b48df45ad370c47ce27cefa6");
             result.getData();
         }catch (Exception e) {
             e.printStackTrace();
