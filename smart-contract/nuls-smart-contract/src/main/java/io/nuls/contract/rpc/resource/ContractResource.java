@@ -63,7 +63,7 @@ import io.nuls.tools.basic.VarInt;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.exception.NulsException;
-import io.nuls.tools.log.Log;
+import io.nuls.contract.util.Log;
 import io.nuls.tools.model.ArraysTool;
 import io.nuls.tools.model.StringUtils;
 import org.spongycastle.util.encoders.Hex;

@@ -39,7 +39,7 @@ import io.nuls.contract.util.CompareTxTimeDesc;
 import io.nuls.contract.vm.program.ProgramExecutor;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
-import io.nuls.tools.log.Log;
+import io.nuls.contract.util.Log;
 import org.spongycastle.util.encoders.Hex;
 
 import java.io.IOException;

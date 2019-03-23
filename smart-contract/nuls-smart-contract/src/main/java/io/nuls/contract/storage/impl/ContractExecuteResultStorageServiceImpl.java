@@ -30,7 +30,7 @@ import io.nuls.contract.storage.ContractExecuteResultStorageService;
 import io.nuls.db.service.RocksDBService;
 import io.nuls.tools.basic.Result;
 import io.nuls.tools.core.annotation.Component;
-import io.nuls.tools.log.Log;
+import io.nuls.contract.util.Log;
 
 import static io.nuls.contract.constant.ContractDBConstant.DB_NAME_CONTRACT_EXECUTE_RESULT;
 import static io.nuls.contract.util.ContractDBUtil.getModel;

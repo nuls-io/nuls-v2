@@ -43,7 +43,7 @@ import io.nuls.rpc.model.message.Response;
 import io.nuls.tools.basic.Result;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
-import io.nuls.tools.log.Log;
+import io.nuls.contract.util.Log;
 import org.spongycastle.util.encoders.Hex;
 
 import java.util.ArrayList;
