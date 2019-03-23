@@ -27,7 +27,6 @@ package io.nuls.contract.model.dto;
 
 import io.nuls.base.basic.AddressTool;
 import io.nuls.contract.model.po.ContractAddressInfoPo;
-import io.nuls.contract.rpc.call.BlockCall;
 import io.nuls.tools.exception.NulsException;
 import lombok.Data;
 
@@ -44,13 +43,14 @@ public class ContractAddressDto {
     private long height;
     private long confirmCount;
     private String remarkName;
+    //TODO pierre enum 0 - 创建中, 1 - 正常, 2 - 已删除, 3 - 创建失败
     private int status;
     private String msg;
 
     public ContractAddressDto() {
     }
 
-    public ContractAddressDto(int chainId, ContractAddressInfoPo po, long bestBlockHeight, boolean isCreate, int status) throws NulsException {
+    public ContractAddressDto(ContractAddressInfoPo po, long bestBlockHeight, boolean isCreate, int status) throws NulsException {
         this.contractAddress = AddressTool.getStringAddressByBytes(po.getContractAddress());
         this.createTime = po.getCreateTime();
         this.isCreate = isCreate;
