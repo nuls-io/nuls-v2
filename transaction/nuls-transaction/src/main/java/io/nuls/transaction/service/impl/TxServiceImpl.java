@@ -676,7 +676,7 @@ public class TxServiceImpl implements TxService {
                     chain.getLoggerMap().get(TxConstant.LOG_TX).info("丢弃已确认过交易,txHash:{}, - type:{}, - time:{}", tx.getHash().getDigestHex(), tx.getType(), tx.getTime());
                     continue;
                 }
-                chain.getLoggerMap().get(TxConstant.LOG_TX).debug("@@@@@ 打包交易单个验证成功 hash:{}", tx.getHash().getDigestHex());
+//                chain.getLoggerMap().get(TxConstant.LOG_TX).debug("@@@@@ 打包交易单个验证成功 hash:{}", tx.getHash().getDigestHex());
                 packingTxList.add(tx);
                 totalSize += txSize;
                 /** 智能合约*/
@@ -699,6 +699,23 @@ public class TxServiceImpl implements TxService {
             chain.getLoggerMap().get(TxConstant.LOG_TX).debug("");
             long debugeBatch = NetworkCall.getCurrentTimeMillis();
             txModuleValidatorPackable(chain, moduleVerifyMap, packingTxList);
+
+
+            //检测最新高度
+            if (blockHeight < chain.getBestBlockHeight() + 1) {
+                //这个阶段已经不够时间再打包,所以直接超时异常处理交易回滚至待打包队列,打空块
+                chain.getLoggerMap().get(TxConstant.LOG_TX).debug("获取交易完整时,当前最新高度已增长,不够时间重新打包,直接超时异常处理交易回滚至待打包队列,打空块");
+                throw new NulsException(TxErrorCode.HEIGHT_UPDATE_UNABLE_TO_REPACKAGE);
+            }
+            //检测预留传输时间
+            long current = NetworkCall.getCurrentTimeMillis();
+            if (endtimestamp - current < chain.getConfig().getPackageRpcReserveTime()) {
+                //超时,留给最后数据组装和RPC传输时间不足
+                chain.getLoggerMap().get(TxConstant.LOG_TX).error("getPackableTxs time out, endtimestamp:{}, current:{}, endtimestamp-current:{}, reserveTime:{}",
+                        endtimestamp, current, endtimestamp - current, chain.getConfig().getPackageRpcReserveTime());
+                throw new NulsException(TxErrorCode.PACKAGE_TIME_OUT);
+            }
+
             packableTxs = new ArrayList<>();
             Iterator<Transaction> iterator = packingTxList.iterator();
             while (iterator.hasNext()) {
@@ -744,20 +761,6 @@ public class TxServiceImpl implements TxService {
             chain.getLoggerMap().get(TxConstant.LOG_TX).debug("Time endtimestamp-current:{}", endtimestamp - currentdebug);
             chain.getLoggerMap().get(TxConstant.LOG_TX).debug("");
 
-            //检测最新高度
-            if (blockHeight < chain.getBestBlockHeight() + 1) {
-                //这个阶段已经不够时间再打包,所以直接超时异常处理交易回滚至待打包队列,打空块
-                chain.getLoggerMap().get(TxConstant.LOG_TX).debug("获取交易完整时,当前最新高度已增长,不够时间重新打包,直接超时异常处理交易回滚至待打包队列,打空块");
-                throw new NulsException(TxErrorCode.HEIGHT_UPDATE_UNABLE_TO_REPACKAGE);
-            }
-            //检测预留传输时间
-            long current = NetworkCall.getCurrentTimeMillis();
-            if (endtimestamp - current < chain.getConfig().getPackageRpcReserveTime()) {
-                //超时,留给RPC传输时间不足
-                chain.getLoggerMap().get(TxConstant.LOG_TX).error("getPackableTxs time out, endtimestamp:{}, current:{}, endtimestamp-current:{}, reserveTime:{}",
-                        endtimestamp, current, endtimestamp - current, chain.getConfig().getPackageRpcReserveTime());
-                throw new NulsException(TxErrorCode.PACKAGE_TIME_OUT);
-            }
             return txPackage;
         } catch (Exception e) {
             chain.getLoggerMap().get(TxConstant.LOG_TX).error(e);

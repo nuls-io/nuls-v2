@@ -39,7 +39,7 @@ import io.nuls.contract.util.VMContext;
 import io.nuls.contract.vm.program.ProgramExecutor;
 import io.nuls.tools.basic.Result;
 import io.nuls.tools.core.ioc.SpringLiteContext;
-import io.nuls.tools.log.Log;
+import io.nuls.contract.util.Log;
 import lombok.Getter;
 import lombok.Setter;
 

@@ -46,7 +46,7 @@ import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.core.annotation.Service;
 import io.nuls.tools.exception.NulsException;
-import io.nuls.tools.log.Log;
+import io.nuls.contract.util.Log;
 import io.nuls.tools.model.ByteArrayWrapper;
 import io.nuls.tools.model.LongUtils;
 import org.spongycastle.util.encoders.Hex;
@@ -117,7 +117,7 @@ public class ContractServiceImpl implements ContractService {
     @Override
     public Result invokeContractOneByOne(int chainId, ContractTempTransaction tx) {
         try {
-            Log.info("=====pierre=====invoke contract Tx type is {}", tx.getType());
+            Log.info("=====pierre=====invoke contract TxType is {}, hash is {}", tx.getType(), tx.getHash().toString());
             Chain chain = contractHelper.getChain(chainId);
             BatchInfo batchInfo = chain.getBatchInfo();
             if (!batchInfo.hasBegan()) {
@@ -178,6 +178,7 @@ public class ContractServiceImpl implements ContractService {
             // 归集合约内部转账交易
             List<Transaction> resultTxList = new ArrayList<>();
             for (ContractResult contractResult : contractResultList) {
+                Log.info("=======contractResult 排序时间 is {}", contractResult.getTxTime());
                 resultTxList.addAll(contractResult.getContractTransferList());
             }
             // 生成退还剩余Gas的交易

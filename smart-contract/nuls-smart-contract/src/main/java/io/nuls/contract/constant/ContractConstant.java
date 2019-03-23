@@ -26,6 +26,10 @@ package io.nuls.contract.constant;
 
 import java.math.BigInteger;
 
+/**
+ * @author: PierreLuo
+ * @date: 2019-03-11
+ */
 public interface ContractConstant {
 
     String INITIAL_STATE_ROOT = "56e81f171bcc55a6ff8345e692c0f86e5b48e01b996cadc001622fb5e363b421";

@@ -34,11 +34,12 @@ import io.nuls.contract.model.tx.ContractTransferTransaction;
 import io.nuls.contract.model.txdata.ContractTransferData;
 import io.nuls.contract.service.ContractCaller;
 import io.nuls.contract.service.ResultHanlder;
-import io.nuls.contract.util.CompareTx;
+import io.nuls.contract.util.CompareTxTimeAsc;
+import io.nuls.contract.util.CompareTxTimeDesc;
 import io.nuls.contract.vm.program.ProgramExecutor;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
-import io.nuls.tools.log.Log;
+import io.nuls.contract.util.Log;
 import org.spongycastle.util.encoders.Hex;
 
 import java.io.IOException;
@@ -75,8 +76,8 @@ public class ResultHandlerImpl implements ResultHanlder {
             finalResultList.addAll(analyzerResult.getSuccessList());
             finalResultList.addAll(analyzerResult.getFailedSet());
             finalResultList.addAll(reCallResultList);
-            // 按时间排序
-            return finalResultList.stream().sorted(CompareTx.getInstance()).collect(Collectors.toList());
+            // 按时间升序排序
+            return finalResultList.stream().sorted(CompareTxTimeAsc.getInstance()).collect(Collectors.toList());
         } catch (IOException e) {
             Log.error(e);
             return Collections.emptyList();

@@ -23,6 +23,7 @@
  */
 package io.nuls.contract.helper;
 
+import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.CoinData;
 import io.nuls.base.data.CoinFrom;
 import io.nuls.base.data.CoinTo;
@@ -41,7 +42,7 @@ import io.nuls.tools.basic.Result;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.exception.NulsException;
-import io.nuls.tools.log.Log;
+import io.nuls.contract.util.Log;
 import io.nuls.tools.model.ByteArrayWrapper;
 import org.spongycastle.util.encoders.Hex;
 
@@ -260,6 +261,7 @@ public class ContractTransferHandler {
                     contractBalance = tempBalanceManager.getBalance(from).getData();
                     nonceBytes = Hex.decode(contractBalance.getNonce());
                 }
+                Log.info("=====pierre====from is {}, nonce is {}", AddressTool.getStringAddressByBytes(from), contractBalance.getNonce());
                 compareFrom = wrapperFrom;
                 coinData = new CoinData();
                 coinFrom = new CoinFrom(from, chainId, assetsId, value, nonceBytes, (byte) 0);
@@ -332,6 +334,7 @@ public class ContractTransferHandler {
         byte[] currentNonceBytes = Arrays.copyOfRange(hashBytes, hashBytes.length - 8, hashBytes.length);
         balance.setNonce(Hex.toHexString(currentNonceBytes));
         tx.setHash(hash);
+        Log.info("=====pierre====txType is {}, hash is {}, nextNonce is {}", tx.getType(), hash.toString(), Hex.toHexString(currentNonceBytes));
     }
 
     private ContractTransferTransaction createContractTransferTx(CoinData coinData, ContractTransferData txData, long blockTime, long timeOffset) {

@@ -364,9 +364,11 @@ public class PunishManager {
                 redPunishTransaction.setTxData(redPunishData.serialize());
                 redPunishTransaction.setTime(self.getPackEndTime());
                 CoinData coinData = coinDataManager.getStopAgentCoinData(chain, redPunishData.getAddress(), redPunishTransaction.getTime() + chain.getConfig().getRedPublishLockTime());
-                redPunishTransaction.setCoinData(coinData.serialize());
-                redPunishTransaction.setHash(NulsDigestData.calcDigestData(redPunishTransaction.serializeForHash()));
-                chain.getRedPunishTransactionList().add(redPunishTransaction);
+                if(coinData != null){
+                    redPunishTransaction.setCoinData(coinData.serialize());
+                    redPunishTransaction.setHash(NulsDigestData.calcDigestData(redPunishTransaction.serializeForHash()));
+                    chain.getRedPunishTransactionList().add(redPunishTransaction);
+                }
             }
         }
         /*

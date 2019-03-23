@@ -37,7 +37,7 @@ import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.model.message.Response;
 import io.nuls.rpc.netty.processor.ResponseMessageProcessor;
 import io.nuls.tools.exception.NulsException;
-import io.nuls.tools.log.Log;
+import io.nuls.contract.util.Log;
 import io.nuls.tools.parse.JSONUtils;
 import org.junit.Assert;
 import org.junit.Before;
@@ -77,8 +77,8 @@ public class Base {
     protected String toAddress4 = "tNULSeBaMshNPEnuqiDhMdSA4iNs6LMgjY6tcL";
 
     protected String createHash = "002029ca32525f635a15c82c046114657c0d8a96a7163780ac6b425b2383b240bd56";
-    protected String contractAddress = "tNULSeBaN4qXkpvcXHtPtS6wcRFUDCv7vLeHwB";
-    protected String contractAddress_nrc20 = "tNULSeBaN7CuBiTfqnRk6DuUuUP6251ybd1YEk";
+    protected String contractAddress = "tNULSeBaN2bUyX77RnC1N45iwfvuYEHnmhE6iB";
+    protected String contractAddress_nrc20 = "tNULSeBaN1sf8MkWD6QkMm4WA7tdJiEbGGmUox";
 
     protected String callHash = "002006dc2d87274408d8ec266d439b0f497e6a44a1e50eaeb1f1eaca1d909b7c4612";
     protected String deleteHash = "0020b2c159dbdf784c2860ec97072feb887466aa50fc147a5b50388886caab113f9a";
@@ -91,14 +91,14 @@ public class Base {
 
     @Test
     public void getBalance() throws Exception {
-        Map<String, Object> balance = LedgerCall.getBalance(chain, sender);
-        Log.info("balance:{}", JSONUtils.obj2PrettyJson(balance));
-        Map<String, Object> balance0 = LedgerCall.getBalance(chain, contractAddress);
+        Map<String, Object> balance0 = LedgerCall.getBalanceAndNonce(chain, contractAddress);
         Log.info("balance:{}", JSONUtils.obj2PrettyJson(balance0));
-        Map<String, Object> balance1 = LedgerCall.getBalance(chain, toAddress1);
-        Log.info("balance:{}", JSONUtils.obj2PrettyJson(balance1));
-        Map<String, Object> balance2 = LedgerCall.getBalance(chain, toAddress2);
-        Log.info("balance:{}", JSONUtils.obj2PrettyJson(balance2));
+        //Map<String, Object> balance = LedgerCall.getBalance(chain, sender);
+        //Log.info("balance:{}", JSONUtils.obj2PrettyJson(balance));
+        //Map<String, Object> balance1 = LedgerCall.getBalance(chain, toAddress1);
+        //Log.info("balance:{}", JSONUtils.obj2PrettyJson(balance1));
+        //Map<String, Object> balance2 = LedgerCall.getBalance(chain, toAddress2);
+        //Log.info("balance:{}", JSONUtils.obj2PrettyJson(balance2));
     }
 
     /**
@@ -126,7 +126,7 @@ public class Base {
      */
     @Test
     public void contractInfo() throws Exception {
-        Map params = this.makeContractInfoParams(contractAddress);
+        Map params = this.makeContractInfoParams("tNULSeBaN7CuBiTfqnRk6DuUuUP6251ybd1YEk");
         Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, CONTRACT_INFO, params);
         Map result = (HashMap) (((HashMap) cmdResp2.getResponseData()).get(CONTRACT_INFO));
         Assert.assertTrue(null != result);
@@ -144,7 +144,7 @@ public class Base {
      */
     @Test
     public void contractResult() throws Exception {
-        Map params = this.makeContractResultParams(callHash);
+        Map params = this.makeContractResultParams("002028289c28618cb1337dc8e7e426300c2dfd162ffd7f4c46df7582759eba3d5369");
         Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, CONTRACT_RESULT, params);
         Map result = (HashMap) (((HashMap) cmdResp2.getResponseData()).get(CONTRACT_RESULT));
         Assert.assertTrue(null != result);
@@ -162,7 +162,7 @@ public class Base {
      */
     @Test
     public void contractTx() throws Exception {
-        Map params = this.makeContractTxParams(deleteHash);
+        Map params = this.makeContractTxParams("0020e773a8d3938df93898fcb8d8ac9a1d0cb887d71526c437bf2686dd4008e96146");
         Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, CONTRACT_TX, params);
         Map result = (HashMap) (((HashMap) cmdResp2.getResponseData()).get(CONTRACT_TX));
         Assert.assertTrue(null != result);

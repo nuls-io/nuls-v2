@@ -63,7 +63,7 @@ import io.nuls.tools.basic.VarInt;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.exception.NulsException;
-import io.nuls.tools.log.Log;
+import io.nuls.contract.util.Log;
 import io.nuls.tools.model.ArraysTool;
 import io.nuls.tools.model.StringUtils;
 import org.spongycastle.util.encoders.Hex;
@@ -1057,8 +1057,8 @@ public class ContractResource extends BaseCmd {
             } else {
                 contractResultDto = new ContractResultDto(chainId, contractExecuteResult, tx1);
             }
+            tx1.setBlockHeight(contractExecuteResult.getBlockHeight());
         }
-        tx1.setBlockHeight(contractExecuteResult.getBlockHeight());
         return contractResultDto;
     }
 
@@ -1375,7 +1375,7 @@ public class ContractResource extends BaseCmd {
                 for(ContractAddressInfoPo po : contractAddressInfoPoList) {
                     contractAddressBytes = po.getContractAddress();
                     contractAddress = AddressTool.getStringAddressByBytes(contractAddressBytes);
-                    resultMap.put(contractAddress, new ContractAddressDto(chainId, po, height, true, track.status(contractAddressBytes).ordinal()));
+                    resultMap.put(contractAddress, new ContractAddressDto(po, height, true, track.status(contractAddressBytes).ordinal()));
                 }
             }
             List<ContractAddressDto> infoList = new ArrayList<>(resultMap.values());

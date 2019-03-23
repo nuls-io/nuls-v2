@@ -31,7 +31,7 @@ import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.model.message.Response;
 import io.nuls.rpc.netty.processor.ResponseMessageProcessor;
-import io.nuls.tools.log.Log;
+import io.nuls.contract.util.Log;
 import io.nuls.tools.parse.JSONUtils;
 import org.apache.commons.io.IOUtils;
 import org.junit.Assert;
@@ -85,7 +85,7 @@ public class ContractCallContractSendTxTest extends Base {
      */
     @Test
     public void transfer2Contract() throws Exception {
-        BigInteger value = BigInteger.valueOf(34777633L);
+        BigInteger value = BigInteger.valueOf(888834777633L);
         String remark = "transfer 2 contract";
         Map params = this.makeTransferParams(sender, contractAddress, value, remark);
         Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, TRANSFER, params);
@@ -104,6 +104,16 @@ public class ContractCallContractSendTxTest extends Base {
         return params;
     }
 
+    @Test
+    public void loopCall() throws Exception {
+        int times = 1;
+        for(int i =0;i<times;i++) {
+            callContract_transferOut();
+            callContract_contractCallContract();
+            callContract_transferOut_contractCallContract();
+        }
+    }
+
     /**
      * 调用合约 - 合约内部转账
      */
@@ -113,8 +123,8 @@ public class ContractCallContractSendTxTest extends Base {
         String methodName = "multyForAddress";
         String methodDesc = "";
         String remark = "call contract test - 合约内部转账";
-        String address1 = toAddress1;
-        String address2 = toAddress2;
+        String address1 = toAddress3;
+        String address2 = toAddress4;
         String value1 = BigInteger.valueOf(11888811).toString();
         String value2 = BigInteger.valueOf(22888822).toString();
         Map params = this.makeCallParams(sender, value, contractAddress, methodName, methodDesc, remark,
@@ -151,10 +161,10 @@ public class ContractCallContractSendTxTest extends Base {
         String remark = "call contract test - 合约调用合约";
 
         String _methodName = "transfer";
-        String _token = BigInteger.TEN.pow(8).toString();
-        String[] _args = new String[]{toAddress1, _token};
+        String _token = BigInteger.valueOf(800).toString();
+        String[] _args = new String[]{toAddress3, _token};
         BigInteger _value = value;
-        Map params = this.makeCallParams(sender, value, contractAddress, methodName, methodDesc, remark,
+        Map params = this.makeCallParams(toAddress, value, contractAddress, methodName, methodDesc, remark,
                 contractAddress_nrc20, _methodName, _args, _value);
         Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, CALL, params);
         Map result = (HashMap) (((HashMap) cmdResp2.getResponseData()).get(CALL));
@@ -172,16 +182,16 @@ public class ContractCallContractSendTxTest extends Base {
         String methodDesc = "";
         String remark = "call contract test - 合约内部转账 && 合约调用合约";
 
-        String address1 = toAddress1;
-        String address2 = toAddress2;
+        String address1 = toAddress3;
+        String address2 = toAddress4;
         String value1 = BigInteger.valueOf(11881188L).toString();
         String value2 = BigInteger.valueOf(22882288L).toString();
 
         String _methodName = "transfer";
-        String _token = BigInteger.valueOf(88888888L).toString();
-        String[] _args = new String[]{toAddress1, _token};
+        String _token = BigInteger.valueOf(888L).toString();
+        String[] _args = new String[]{toAddress3, _token};
         BigInteger _value = value;
-        Map params = this.makeCallParams(sender, value, contractAddress, methodName, methodDesc, remark,
+        Map params = this.makeCallParams(toAddress1, value, contractAddress, methodName, methodDesc, remark,
                 address1, value1, address2, value2,
                 contractAddress_nrc20, _methodName, _args, _value);
         Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, CALL, params);
