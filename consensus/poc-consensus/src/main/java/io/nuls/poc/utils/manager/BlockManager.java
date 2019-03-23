@@ -108,6 +108,7 @@ public class BlockManager {
      * @param height block height
      */
     public void chainRollBack(Chain chain, int height) {
+        chain.getLoggerMap().get(ConsensusConstant.BASIC_LOGGER_NAME).info("区块开始回滚，回滚到的高度：" + height);
         List<BlockHeader> headerList = chain.getBlockHeaderList();
         Collections.sort(headerList, new BlockHeaderComparator());
         for (int index = headerList.size() - 1; index >= 0; index--) {
@@ -119,7 +120,15 @@ public class BlockManager {
         }
         chain.setBlockHeaderList(headerList);
         chain.setNewestHeader(headerList.get(headerList.size() - 1));
-        roundManager.rollBackRound(chain, height);
+        long roundIndex;
+        BlockHeader newestBlocHeader = chain.getNewestHeader();
+        BlockExtendsData bestExtendsData = new BlockExtendsData(newestBlocHeader.getExtend());
+        if(bestExtendsData.getPackingIndexOfRound() > 1){
+            roundIndex = bestExtendsData.getRoundIndex();
+        }else{
+            roundIndex = bestExtendsData.getRoundIndex()-1;
+        }
+        roundManager.rollBackRound(chain, roundIndex);
         chain.getLoggerMap().get(ConsensusConstant.BASIC_LOGGER_NAME).info("区块回滚成功，回滚到的高度为：" + height + ",本地最新区块高度为：" + chain.getNewestHeader().getHeight());
     }
 }

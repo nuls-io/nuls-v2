@@ -44,4 +44,8 @@ public interface CommandConstant {
     String GET_AGENT = "cs_getAgentInfo";
 
     String GET_CONSENSUS_CONFIG = "cs_getSeedNodeList";
+    //查询智能合约详情
+    String CONTRACT_INFO = "sc_contract_info";
+    //查询智能合约执行结果
+    String CONTRACT_RESULT = "sc_contract_result";
 }

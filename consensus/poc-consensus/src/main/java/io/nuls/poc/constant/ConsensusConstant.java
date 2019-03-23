@@ -242,4 +242,6 @@ public interface ConsensusConstant {
      * Get the longest waiting time for packaged transactions
      * */
     long GET_TX_MAX_WAIT_TIME = 7000;
+
+    int ROUND_CACHE_COUNT = 10;
  }

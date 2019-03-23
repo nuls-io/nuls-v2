@@ -928,9 +928,9 @@ public class ContractResource extends BaseCmd {
 
             BlockHeader blockHeader = BlockCall.getLatestBlockHeader(chainId);
 
-            if (contractAddressInfoPo.isLock(blockHeader.getHeight())) {
-                return failed(ContractErrorCode.CONTRACT_LOCK);
-            }
+            //if (contractAddressInfoPo.isLock(blockHeader.getHeight())) {
+            //    return failed(ContractErrorCode.CONTRACT_LOCK);
+            //}
 
             // 当前区块状态根
             byte[] prevStateRoot = ContractUtil.getStateRoot(blockHeader);
@@ -1030,7 +1030,7 @@ public class ContractResource extends BaseCmd {
 
     private ContractResultDto makeContractResultDto(int chainId, ContractBaseTransaction tx1, NulsDigestData txHash) throws NulsException, IOException {
         ContractResultDto contractResultDto = null;
-        if (tx1.getType() == ContractConstant.TX_TYPE_CONTRACT_TRANSFER) {
+        if (tx1.getType() == TX_TYPE_CONTRACT_TRANSFER || tx1.getType() == TX_TYPE_CONTRACT_RETURN_GAS) {
             return null;
         }
         ContractResult contractExecuteResult = contractService.getContractExecuteResult(chainId, txHash);

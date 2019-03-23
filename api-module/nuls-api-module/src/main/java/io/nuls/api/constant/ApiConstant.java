@@ -136,7 +136,7 @@ public interface ApiConstant {
     int TX_TYPE_CALL_CONTRACT = 101;
     int TX_TYPE_DELETE_CONTRACT = 102;
     int TX_TYPE_CONTRACT_TRANSFER = 103;
-
+    int TX_TYPE_CONTRACT_RETURN_GAS = 104;
     BigInteger ALIAS_AMOUNT = BigInteger.valueOf(100000000L);
     BigInteger MIN_DEPOSIT = BigInteger.valueOf(20000000000000L);
 }

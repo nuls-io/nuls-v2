@@ -22,7 +22,7 @@
  * SOFTWARE.
  */
 
-package io.nuls.contract.tx;
+package io.nuls.contract.tx.contractcallcontract;
 
 
 import io.nuls.contract.basetest.ContractTest;
@@ -51,32 +51,17 @@ import static io.nuls.contract.constant.ContractCmdConstant.*;
  * @author: PierreLuo
  * @date: 2019-03-15
  */
-public class ContractSendTxTest extends Base {
-
-    @Test
-    public void importPriKeyTest() {
-        importPriKey("b54db432bba7e13a6c4a28f65b925b18e63bcb79143f7b894fa735d5d3d09db5", password);//打包地址 tNULSeBaMkrt4z9FYEkkR9D6choPVvQr94oYZp
-        importPriKey("9ce21dad67e0f0af2599b41b515a7f7018059418bab892a7b68f283d489abc4b", password);//25 tNULSeBaMvEtDfvZuukDf2mVyfGo3DdiN8KLRG
-        importPriKey("477059f40708313626cccd26f276646e4466032cabceccbf571a7c46f954eb75", password);//26 tNULSeBaMnrs6JKrCy6TQdzYJZkMZJDng7QAsD
-        importPriKey("8212e7ba23c8b52790c45b0514490356cd819db15d364cbe08659b5888339e78", password);//27 tNULSeBaMrbMRiFAUeeAt6swb4xVBNyi81YL24
-        importPriKey("4100e2f88c3dba08e5000ed3e8da1ae4f1e0041b856c09d35a26fb399550f530", password);//28 tNULSeBaMu38g1vnJsSZUCwTDU9GsE5TVNUtpD
-        importPriKey("bec819ef7d5beeb1593790254583e077e00f481982bce1a43ea2830a2dc4fdf7", password);//29 tNULSeBaMp9wC9PcWEcfesY7YmWrPfeQzkN1xL
-        importPriKey("ddddb7cb859a467fbe05d5034735de9e62ad06db6557b64d7c139b6db856b200", password);//30 tNULSeBaMshNPEnuqiDhMdSA4iNs6LMgjY6tcL
-    }
+public class ContractCallContractSendTxTest extends Base {
 
     /**
      * 创建合约
      */
     @Test
     public void createContract() throws Exception {
-        InputStream in = new FileInputStream(ContractTest.class.getResource("/nrc20").getFile());
+        InputStream in = new FileInputStream(ContractTest.class.getResource("/contract_call_contract").getFile());
         byte[] contractCode = IOUtils.toByteArray(in);
-        String remark = "create contract test - 空气币";
-        String name = "KQB";
-        String symbol = "KongQiBi";
-        String amount = BigDecimal.TEN.pow(10).toPlainString();
-        String decimals = "2";
-        Map params = this.makeCreateParams(sender, contractCode, remark, name, symbol, amount, decimals);
+        String remark = "create contract test - 合约内部转账，合约调用合约";
+        Map params = this.makeCreateParams(sender, contractCode, remark);
         Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, CREATE, params);
         Map result = (HashMap) (((HashMap) cmdResp2.getResponseData()).get(CREATE));
         Assert.assertTrue(null != result);
@@ -96,16 +81,20 @@ public class ContractSendTxTest extends Base {
     }
 
     /**
-     * 调用合约
+     * 调用合约 - 合约内部转账
      */
     @Test
-    public void callContract() throws Exception {
+    public void callContract_transferOut() throws Exception {
         BigInteger value = BigInteger.ZERO;
-        String methodName = "transfer";
+        String methodName = "multyForAddress";
         String methodDesc = "";
-        String remark = "call contract test - 空气币转账";
-        String token = BigInteger.TEN.pow(8).toString();
-        Map params = this.makeCallParams(sender, value, contractAddress, methodName, methodDesc, remark, toAddress, token);
+        String remark = "call contract test - 合约内部转账";
+        String address1 = toAddress1;
+        String address2 = toAddress2;
+        String value1 = BigInteger.TEN.pow(8).toString();
+        String value2 = BigInteger.TEN.pow(10).toString();
+        Map params = this.makeCallParams(sender, value, contractAddress, methodName, methodDesc, remark,
+                address1, value1, address2, value2);
         Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, CALL, params);
         Map result = (HashMap) (((HashMap) cmdResp2.getResponseData()).get(CALL));
         Assert.assertTrue(null != result);
@@ -127,12 +116,35 @@ public class ContractSendTxTest extends Base {
         return params;
     }
 
+
+    /**
+     * 调用合约 - 合约调用合约
+     */
+    @Test
+    public void callContract_contractCallContract() throws Exception {
+        BigInteger value = BigInteger.ZERO;
+        String methodName = "callContractWithReturnValue";
+        String methodDesc = "";
+        String remark = "call contract test - 合约调用合约";
+
+        String _methodName = "transfer";
+        String _token = BigInteger.TEN.pow(8).toString();
+        String[] _args = new String[]{toAddress1, _token};
+        BigInteger _value = value;
+        Map params = this.makeCallParams(sender, value, contractAddress, methodName, methodDesc, remark,
+                contractAddress_nrc20, _methodName, _args, _value);
+        Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, CALL, params);
+        Map result = (HashMap) (((HashMap) cmdResp2.getResponseData()).get(CALL));
+        Assert.assertTrue(null != result);
+        Log.info("call-result:{}", JSONUtils.obj2PrettyJson(cmdResp2));
+    }
+
     /**
      *  向合约地址转账
      */
     @Test
     public void transfer2Contract() throws Exception {
-        BigInteger value = BigInteger.TEN.pow(8);
+        BigInteger value = BigInteger.TEN.pow(11);
         String remark = "transfer 2 contract";
         Map params = this.makeTransferParams(sender, contractAddress, value, remark);
         Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, TRANSFER, params);
@@ -199,25 +211,6 @@ public class ContractSendTxTest extends Base {
         params.put("password", password);
         params.put("remark", remark);
         return params;
-    }
-
-    private void importPriKey(String priKey, String pwd) {
-        try {
-            //账户已存在则覆盖 If the account exists, it covers.
-            Map<String, Object> params = new HashMap<>();
-            params.put(Constants.VERSION_KEY_STR, "1.0");
-            params.put("chainId", chainId);
-
-            params.put("priKey", priKey);
-            params.put("password", pwd);
-            params.put("overwrite", true);
-            Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_importAccountByPriKey", params);
-            HashMap result = (HashMap) ((HashMap) cmdResp.getResponseData()).get("ac_importAccountByPriKey");
-            String address = (String) result.get("address");
-            Log.info("importPriKey success! address-{}", address);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
     }
 
 }

@@ -185,7 +185,7 @@ public class ContractBootStrap extends RpcModule {
     /**
      * 某个外部依赖连接丢失后，会调用此方法，可控制模块状态，如果返回Ready,则表明模块退化到Ready状态，当依赖重新准备完毕后，将重新触发onDependenciesReady方法，若返回的状态是Running，将不会重新触发onDependenciesReady
      *
-     * @param module
+     * @param dependenciesModule
      * @return
      */
     @Override

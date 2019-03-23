@@ -359,7 +359,7 @@ public class ContractHelper {
                 return balance.getData();
             }
         } else {
-            ContractBalance realBalance = getBalanceAndNonce(chainId, AddressTool.getStringAddressByBytes(address));
+            ContractBalance realBalance = getRealBalance(chainId, AddressTool.getStringAddressByBytes(address));
             if (realBalance != null) {
                 return realBalance;
             }
@@ -369,10 +369,12 @@ public class ContractHelper {
 
     public ContractBalance getRealBalance(int chainId, String address) {
         try {
-            Map<String, Object> balance = LedgerCall.getBalanceAndNonce(getChain(chainId), address);
+            Map<String, Object> balance = LedgerCall.getBalance(getChain(chainId), address);
+            Map<String, Object> nonceMap = LedgerCall.getNonce(getChain(chainId), address);
             ContractBalance contractBalance = ContractBalance.newInstance();
             contractBalance.setBalance(new BigInteger(balance.get("available").toString()));
             contractBalance.setFreeze(new BigInteger(balance.get("freeze").toString()));
+            contractBalance.setNonce((String) nonceMap.get("nonce"));
             return contractBalance;
         } catch (NulsException e) {
             Log.error(e);

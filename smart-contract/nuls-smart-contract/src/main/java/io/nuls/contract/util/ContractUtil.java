@@ -33,10 +33,7 @@ import io.nuls.contract.model.bo.ContractResult;
 import io.nuls.contract.model.bo.ContractTempTransaction;
 import io.nuls.contract.model.bo.ContractWrapperTransaction;
 import io.nuls.contract.model.po.ContractTokenTransferInfoPo;
-import io.nuls.contract.model.tx.CallContractTransaction;
-import io.nuls.contract.model.tx.ContractBaseTransaction;
-import io.nuls.contract.model.tx.CreateContractTransaction;
-import io.nuls.contract.model.tx.DeleteContractTransaction;
+import io.nuls.contract.model.tx.*;
 import io.nuls.contract.model.txdata.CallContractData;
 import io.nuls.contract.model.txdata.ContractData;
 import io.nuls.contract.model.txdata.CreateContractData;
@@ -455,7 +452,7 @@ public class ContractUtil {
     }
 
     /**
-     * @param needReCallList
+     * @param contractResultList
      * @return 去掉重复的交易，并按照时间降序排列
      */
     public static List<ContractResult> deduplicationAndOrder(List<ContractResult> contractResultList) {
@@ -464,7 +461,7 @@ public class ContractUtil {
     }
 
     /**
-     * @param list
+     * @param contractResultList
      * @return 收集合约执行中所有出现过的合约地址，包括内部调用合约，合约转账
      */
     public static Map<String, Set<ContractResult>> collectAddressMap(List<ContractResult> contractResultList) {
@@ -528,6 +525,14 @@ public class ContractUtil {
                 break;
             case TX_TYPE_DELETE_CONTRACT:
                 resultTx = new DeleteContractTransaction();
+                resultTx.copyTx(tx);
+                break;
+            case TX_TYPE_CONTRACT_TRANSFER:
+                resultTx = new ContractTransferTransaction();
+                resultTx.copyTx(tx);
+                break;
+            case TX_TYPE_CONTRACT_RETURN_GAS:
+                resultTx = new ContractReturnGasTransaction();
                 resultTx.copyTx(tx);
                 break;
             default:

@@ -49,6 +49,9 @@ public class RoundManager {
             meetingRound.setPreRound(roundList.get(roundList.size()-1));
         }
         roundList.add(meetingRound);
+        if(roundList.size() > ConsensusConstant.ROUND_CACHE_COUNT){
+            roundList.remove(0);
+        }
     }
 
     /**
@@ -57,9 +60,16 @@ public class RoundManager {
      * @param roundIndex 回滚到指定轮次
      * @param chain      链信息
      * */
-    public void rollBackRound(Chain chain,int roundIndex){
+    public void rollBackRound(Chain chain,long roundIndex){
         List<MeetingRound> roundList = chain.getRoundList();
-        if(roundList.size() >= 0){
+        for (int index = roundList.size()-1 ; index >=0 ; index-- ){
+            if(roundList.get(index).getIndex() > roundIndex){
+                roundList.remove(index);
+            }else{
+                break;
+            }
+        }
+        /*if(roundList.size() >= 0){
             Iterator<MeetingRound> iterator = roundList.iterator();
             while (iterator.hasNext()){
                 MeetingRound round = iterator.next();
@@ -67,7 +77,7 @@ public class RoundManager {
                     iterator.remove();
                 }
             }
-        }
+        }*/
     }
 
     /**

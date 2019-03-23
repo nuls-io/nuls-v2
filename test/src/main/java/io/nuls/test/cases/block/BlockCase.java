@@ -35,6 +35,6 @@ public class BlockCase extends TestCaseChain {
 
     @Override
     public String title() {
-        return "区块数据一致性";
+        return "区块模块";
     }
 }
