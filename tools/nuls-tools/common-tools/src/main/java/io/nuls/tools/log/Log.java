@@ -12,7 +12,9 @@ import io.nuls.tools.log.logback.NulsLogger;
  * 2018/12/18
  * */
 public class Log {
+
     private static final String BASIC_NAME = "common/nuls";
+
     private static final NulsLogger BASIC_LOGGER = LoggerBuilder.getLogger(BASIC_NAME, Level.DEBUG);
 
     /**

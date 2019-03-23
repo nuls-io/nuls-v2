@@ -1,16 +1,14 @@
 package io.nuls.test.controller;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.nuls.test.cases.TestCaseIntf;
 import io.nuls.test.cases.TestFailException;
-import io.nuls.test.cases.account.GetAccountByAddressCase;
+import io.nuls.test.utils.LoggerUtil;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.core.config.ConfigSetting;
 import io.nuls.tools.core.ioc.SpringLiteContext;
+import io.nuls.tools.log.logback.NulsLogger;
 import io.nuls.tools.parse.JSONUtils;
-import lombok.extern.slf4j.Slf4j;
 
-import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
@@ -29,9 +27,9 @@ import java.util.function.Function;
  */
 @Path("/remote/")
 @Component
-@Slf4j
 public class RemoteTestController {
 
+    static NulsLogger log = LoggerUtil.logger;
 
     static Map<Class, Function<String, Object>> transfer = new HashMap<>();
 

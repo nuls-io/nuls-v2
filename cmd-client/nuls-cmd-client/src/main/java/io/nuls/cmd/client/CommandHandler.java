@@ -34,6 +34,7 @@ import io.nuls.cmd.client.processor.consensus.CreateAgentProcessor;
 import io.nuls.cmd.client.processor.consensus.DepositProcessor;
 import io.nuls.cmd.client.processor.consensus.StopAgentProcessor;
 import io.nuls.cmd.client.processor.consensus.WithdrawProcessor;
+import io.nuls.cmd.client.processor.contract.CreateContractProcessor;
 import io.nuls.cmd.client.processor.ledger.GetBalanceProcessor;
 import io.nuls.cmd.client.processor.network.GetNetworkProcessor;
 import io.nuls.cmd.client.processor.system.ExitProcessor;
@@ -143,6 +144,9 @@ public class CommandHandler implements InitializingBean {
         register(SpringLiteContext.getBean(HelpProcessor.class));
 
         register(getBean(GetNetworkProcessor.class));
+
+
+        register(getBean(CreateContractProcessor.class));
     }
 
     public void start() {

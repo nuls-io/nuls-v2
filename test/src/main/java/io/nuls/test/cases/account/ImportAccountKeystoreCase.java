@@ -6,7 +6,6 @@ import io.nuls.api.provider.account.facade.ImportAccountByKeyStoreReq;
 import io.nuls.test.cases.TestFailException;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.crypto.HexUtil;
-import lombok.extern.slf4j.Slf4j;
 
 import java.io.File;
 
@@ -15,7 +14,6 @@ import java.io.File;
  * @Time: 2019-03-20 18:07
  * @Description: 功能描述
  */
-@Slf4j
 @Component
 public class ImportAccountKeystoreCase extends BaseAccountCase<String,String> {
 

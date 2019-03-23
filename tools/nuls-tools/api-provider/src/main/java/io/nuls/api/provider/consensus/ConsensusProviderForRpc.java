@@ -8,7 +8,6 @@ import io.nuls.api.provider.consensus.facade.DepositToAgentReq;
 import io.nuls.api.provider.consensus.facade.StopAgentReq;
 import io.nuls.api.provider.consensus.facade.WithdrawReq;
 import io.nuls.rpc.model.ModuleE;
-import lombok.extern.slf4j.Slf4j;
 
 import java.util.function.Function;
 
@@ -18,7 +17,6 @@ import java.util.function.Function;
  * @Description: 共识
  */
 @Provider(Provider.ProviderType.RPC)
-@Slf4j
 public class ConsensusProviderForRpc extends BaseRpcService implements ConsensusProvider {
 
     @Override

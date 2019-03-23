@@ -76,7 +76,7 @@ doMvn(){
 		mkdir ${moduleLogDir}
 	fi
 	installLog="${moduleLogDir}/log.log";
-	#mvn clean $1 -Dmaven.test.skip=true > "${installLog}" 2>&1
+	mvn clean $1 -Dmaven.test.skip=true > "${installLog}" 2>&1
 	mvnSuccess=$(grep "BUILD SUCCESS" ${installLog})
 	if [ ! -n "$mvnSuccess" ]; then 
 		echoRed "$1 $2 FAIL"
@@ -112,6 +112,12 @@ MODULES_BIN_PATH=$MODULES_PATH/bin
 if [[ ! -d "$MODULES_PATH/Modules" ]]; then
 	#statements
 	mkdir $MODULES_PATH/Modules
+fi
+#默认日志目录
+MODULES_LOGS_PATH=${MODULES_PATH}/logs
+if [[ ! -d "$MODULES_LOGS_PATH" ]]; then
+	#statements
+	mkdir $MODULES_LOGS_PATH
 fi
 MODULES_PATH=$MODULES_PATH/Modules
 #创建NULS_2.0公共模块目录
@@ -259,15 +265,16 @@ copyModuleNcfToModules(){
             if [ "${pname}" != "" ]; then
 			    sedCommand+=" -e 's/%${pname}%/${pvalue}/g' "
 			fi
+			echo $line >> $moduleNcf
 		else
-			if [ "${cfgDomain}" != "[JAVA]" ]; then
+#			if [ "${cfgDomain}" != "[JAVA]" ]; then
 				echo $line >> $moduleNcf
-			fi
+#			fi
 		fi
 	done < ./module.ncf
 #	 merge common module.ncf and private module.ncf to module.tmep.ncf
 	sh "${PROJECT_PATH}/build/merge-ncf.sh" "${BUILD_PATH}/module-prod.ncf" $moduleNcf
-	rm $moduleNcf
+#	rm $moduleNcf
 	sedCommand+=" -e 's/%MAIN_CLASS_NAME%/${mainClassName}/g' "
     echo $sedCommand
 	if [ -z $(echo "${sedCommand}" | grep -o "%JOPT_XMS%") ]; then
@@ -330,7 +337,7 @@ packageModule() {
 	if [ ! -d $(pwd)/$1 ]; then
 		return 0
 	fi
-	if [ $(pwd) == "${PROJECT_PATH}/Modules" ]; then
+	if [ $(pwd) == "${PROJECT_PATH}/RELEASE" ]; then
 		return 0;
 	fi
 	cd $(pwd)/$1
@@ -369,6 +376,10 @@ if [ -n "${DOMOCK}" ]; then
 	log "BUILD start-mykernel script"
 	cp "${BUILD_PATH}/start-mykernel.sh" "${MODULES_BIN_PATH}/start.sh"
 	chmod u+x "${MODULES_BIN_PATH}/start.sh"
+	cp "${BUILD_PATH}/stop-mykernel.sh" "${MODULES_BIN_PATH}/stop.sh"
+	chmod u+x "${MODULES_BIN_PATH}/stop.sh"
+	cp "${BUILD_PATH}/default-config.json" "${MODULES_BIN_PATH}/"
+	chmod u+r "${MODULES_BIN_PATH}/default-config.json"
 	cp "${BUILD_PATH}/check-status.sh" "${MODULES_BIN_PATH}/"
 	chmod u+x "${MODULES_BIN_PATH}/check-status.sh"
 #	cp "${BUILD_PATH}/cmd.sh" "${MODULES_PATH}/"

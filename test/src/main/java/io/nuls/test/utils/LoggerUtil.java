@@ -22,17 +22,11 @@
  * SOFTWARE.
  *
  */
-package io.nuls.account.util;
+package io.nuls.test.utils;
 
 import ch.qos.logback.classic.Level;
-import io.nuls.tools.basic.InitializingBean;
-import io.nuls.tools.core.annotation.Component;
-import io.nuls.tools.core.annotation.Configuration;
-import io.nuls.tools.core.annotation.Value;
-import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.log.logback.LoggerBuilder;
 import io.nuls.tools.log.logback.NulsLogger;
-import io.nuls.tools.model.StringUtils;
 
 /**
  * @author qinyifeng
@@ -41,6 +35,6 @@ import io.nuls.tools.model.StringUtils;
  **/
 public class LoggerUtil {
 
-   public static NulsLogger logger = LoggerBuilder.getLogger("account", "log",Level.ALL);;
+   public static NulsLogger logger = LoggerBuilder.getLogger("test", "log",Level.ALL);;
 
 }

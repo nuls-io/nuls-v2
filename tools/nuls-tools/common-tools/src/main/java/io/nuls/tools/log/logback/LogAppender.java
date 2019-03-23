@@ -13,6 +13,8 @@ import ch.qos.logback.core.util.FileSize;
 import ch.qos.logback.core.util.OptionHelper;
 import org.slf4j.LoggerFactory;
 
+import java.io.File;
+
 /**
  * 日志打印管理类，日志文件创建，日志文件大小，保存时间，日志输出格式等设置管理
  * Log Printing Management Class, Log File Creation, Log File Size, Save Time, Log Output Format and other settings management
@@ -22,7 +24,8 @@ import org.slf4j.LoggerFactory;
  * */
 public class LogAppender {
 
-    public static String PROJECT_PATH = System.getProperty("user.dir");
+    public static String PROJECT_PATH = System.getProperty("user.dir") + File.separator + "logs";
+
     /**
      * 通过传入的名字和级别，动态设置appender
      *
@@ -32,6 +35,12 @@ public class LogAppender {
     @SuppressWarnings("unchecked")
     public static RollingFileAppender getAppender(String fileName, Level level){
         String rootPath = PROJECT_PATH;
+        if(!rootPath.endsWith(File.separator)){
+            rootPath += File.separator;
+        }
+        if(fileName.startsWith(File.separator)){
+            fileName = fileName.replace(File.separator,"");
+        }
         LoggerContext context = (LoggerContext) LoggerFactory.getILoggerFactory();
         RollingFileAppender appender = new RollingFileAppender();
         /*设置上下文，每个logger都关联到logger上下文，默认上下文名称为default。
@@ -45,13 +54,13 @@ public class LogAppender {
         appender.addFilter(levelFilter);
 
         //设置文件名
-        appender.setFile(OptionHelper.substVars(rootPath+"/logs/"+"/"+fileName + ".log",context));
+        appender.setFile(OptionHelper.substVars(rootPath+fileName + ".log",context));
         appender.setAppend(true);
         appender.setPrudent(false);
         //设置文件创建时间及大小的类
         SizeAndTimeBasedRollingPolicy policy = new SizeAndTimeBasedRollingPolicy();
         //文件名格式
-        String fp = OptionHelper.substVars(rootPath+"/logs/"+"/"+ fileName + ".%d{yyyy-MM-dd}.%i.zip",context);
+        String fp = OptionHelper.substVars(rootPath+ fileName + ".%d{yyyy-MM-dd}.%i.zip",context);
         //最大日志文件大小
         policy.setMaxFileSize(FileSize.valueOf("100 MB"));
         //设置文件名模式
