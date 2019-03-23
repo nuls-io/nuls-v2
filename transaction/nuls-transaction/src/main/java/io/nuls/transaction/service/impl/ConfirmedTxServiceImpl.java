@@ -149,7 +149,7 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
         int chainId = chain.getChainId();
         List<byte[]> txHashs = new ArrayList<>();
         //组装统一验证参数数据,key为各模块统一验证器cmd
-        Map<TxRegister, List<String>> moduleVerifyMap = new HashMap<>(TxConstant.INIT_CAPACITY_16);
+        Map<TxRegister, List<String>> moduleVerifyMap = new HashMap<>(TxConstant.INIT_CAPACITY_8);
         BlockHeader blockHeader = null;
         try {
             blockHeader = TxUtil.getInstance(blockHeaderHex, BlockHeader.class);
@@ -216,7 +216,7 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
     //调提交易
     private boolean commitTxs(Chain chain, Map<TxRegister, List<String>> moduleVerifyMap, String blockHeaderHex, boolean atomicity) {
         //调用交易模块统一commit接口 批量
-        Map<TxRegister, List<String>> successed = new HashMap<>(TxConstant.INIT_CAPACITY_16);
+        Map<TxRegister, List<String>> successed = new HashMap<>(TxConstant.INIT_CAPACITY_8);
         boolean result = true;
         for (Map.Entry<TxRegister, List<String>> entry : moduleVerifyMap.entrySet()) {
             boolean rs;
@@ -271,7 +271,7 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
     }
 
     private boolean rollbackTxs(Chain chain, Map<TxRegister, List<String>> moduleVerifyMap, String blockHeaderHex, boolean atomicity) {
-        Map<TxRegister, List<String>> successed = new HashMap<>(TxConstant.INIT_CAPACITY_16);
+        Map<TxRegister, List<String>> successed = new HashMap<>(TxConstant.INIT_CAPACITY_8);
         boolean result = true;
         for (Map.Entry<TxRegister, List<String>> entry : moduleVerifyMap.entrySet()) {
             boolean rs;
@@ -325,7 +325,7 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
         List<Transaction> txList = new ArrayList<>();
         List<String> txHexList = new ArrayList<>();
         //组装统一验证参数数据,key为各模块统一验证器cmd
-        Map<TxRegister, List<String>> moduleVerifyMap = new HashMap<>(TxConstant.INIT_CAPACITY_16);
+        Map<TxRegister, List<String>> moduleVerifyMap = new HashMap<>(TxConstant.INIT_CAPACITY_8);
         try {
             for (int i = 0; i < txHashList.size(); i++) {
                 NulsDigestData hash = txHashList.get(i);
