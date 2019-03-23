@@ -242,7 +242,7 @@ public class ChainManager {
             }
             return configMap;
         } catch (Exception e) {
-            Log.error(e.getMessage());
+            Log.error(e);
             return null;
         }
     }

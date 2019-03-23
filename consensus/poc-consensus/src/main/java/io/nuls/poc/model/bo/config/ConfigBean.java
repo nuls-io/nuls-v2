@@ -94,7 +94,7 @@ public class ConfigBean implements Serializable {
     /**
      * 打包区块最大值
      * */
-    private long blockMaxSIze;
+    private long blockMaxSize;
 
     /**
      * 打包一个区块获得的共识奖励
@@ -223,12 +223,12 @@ public class ConfigBean implements Serializable {
         this.password = password;
     }
 
-    public long getBlockMaxSIze() {
-        return blockMaxSIze;
+    public long getBlockMaxSize() {
+        return blockMaxSize;
     }
 
-    public void setBlockMaxSIze(long blockMaxSIze) {
-        this.blockMaxSIze = blockMaxSIze;
+    public void setBlockMaxSize(long blockMaxSize) {
+        this.blockMaxSize = blockMaxSize;
     }
 
     public BigInteger getBlockReward() {

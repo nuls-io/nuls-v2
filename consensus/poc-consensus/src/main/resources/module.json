@@ -1,11 +1,11 @@
 {
   "dataFolder": "consensus",
-  "consensusConfig":{
+  "configBean":{
     "packingInterval":10000,
     "inflationAmount":500000000000000,
-    "blockSize":10,
     "redPublishLockTime":3600000,
     "stopAgentLockTime":3600000,
+    "commissionRateMin":0,
     "commissionRateMax":80,
     "depositMin":2000000000000,
     "depositMax":50000000000000,
