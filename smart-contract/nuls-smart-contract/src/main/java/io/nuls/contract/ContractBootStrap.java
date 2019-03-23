@@ -16,6 +16,7 @@ import io.nuls.rpc.modulebootstrap.NulsRpcModuleBootstrap;
 import io.nuls.rpc.modulebootstrap.RpcModule;
 import io.nuls.rpc.modulebootstrap.RpcModuleState;
 import io.nuls.tools.core.annotation.Autowired;
+import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.core.annotation.Configuration;
 import io.nuls.tools.core.ioc.SpringLiteContext;
 import io.nuls.tools.exception.NulsException;
@@ -40,7 +41,7 @@ import static java.nio.charset.StandardCharsets.UTF_8;
  * @author: PierreLuo
  * @date: 2019-03-14
  */
-@Configuration(persistDomain = "smart_contract")
+@Component
 public class ContractBootStrap extends RpcModule {
 
     @Autowired

@@ -32,12 +32,14 @@ import io.nuls.cmd.client.CommandBuilder;
 import io.nuls.cmd.client.CommandHelper;
 import io.nuls.cmd.client.CommandResult;
 import io.nuls.cmd.client.processor.ErrorCodeConstants;
+import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.model.StringUtils;
 
 /**
  * Delete contract
  * Created by wangkun23 on 2018/9/21.
  */
+@Component
 public class DeleteContractProcessor extends ContractBaseProcessor {
 
 

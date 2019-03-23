@@ -32,6 +32,7 @@ import io.nuls.cmd.client.CommandHelper;
 import io.nuls.cmd.client.CommandResult;
 import io.nuls.cmd.client.processor.ErrorCodeConstants;
 import io.nuls.cmd.client.utils.Na;
+import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.model.DateUtils;
 import io.nuls.tools.model.StringUtils;
 
@@ -44,6 +45,7 @@ import java.util.Map;
  * @author: PierreLuo
  * @date: 2018/9/19
  */
+@Component
 public class GetContractTxProcessor extends ContractBaseProcessor {
 
     @Override

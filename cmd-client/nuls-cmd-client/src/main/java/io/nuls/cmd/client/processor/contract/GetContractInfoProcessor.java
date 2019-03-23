@@ -31,6 +31,7 @@ import io.nuls.api.provider.contract.facade.GetContractInfoReq;
 import io.nuls.cmd.client.CommandBuilder;
 import io.nuls.cmd.client.CommandResult;
 import io.nuls.cmd.client.processor.ErrorCodeConstants;
+import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.model.StringUtils;
 
 import java.util.Map;
@@ -39,6 +40,7 @@ import java.util.Map;
  * query contract information by contact address.
  * Created by wangkun23 on 2018/9/20.
  */
+@Component
 public class GetContractInfoProcessor extends ContractBaseProcessor {
 
     @Override

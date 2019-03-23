@@ -5,6 +5,8 @@ import io.nuls.api.provider.Provider;
 import io.nuls.api.provider.Result;
 import io.nuls.api.provider.contract.facade.*;
 import io.nuls.rpc.model.ModuleE;
+import io.nuls.tools.model.DateUtils;
+import io.nuls.tools.parse.MapUtils;
 
 import java.util.Map;
 import java.util.function.Function;
@@ -70,6 +72,17 @@ public class ContractProviderForRpc extends BaseRpcService implements ContractPr
     @Override
     public Result<String> tokenTransfer(TokenTransferReq req) {
         return callReturnString("sc_token_transfer",req,"txHash");
+    }
+
+    @Override
+    public Result<AccountContractInfo> getAccountContractList(GetAccountContractListReq req) {
+        Function<Map<String,Object>,Result> callback = res->{
+            AccountContractInfo info = new AccountContractInfo();
+            MapUtils.mapToBean(res,info);
+            info.setCreateTime(DateUtils.timeStamp2DateStr((Long) res.get("createTime")));
+            return success(info);
+        };
+        return call("",req,callback);
     }
 
     private <T> Result<T> _call(String method, Object req, Function<Map, Result> callback){

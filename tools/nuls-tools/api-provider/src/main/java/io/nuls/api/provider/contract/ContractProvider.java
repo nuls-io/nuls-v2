@@ -32,6 +32,7 @@ public interface ContractProvider  {
 
     Result<String> tokenTransfer(TokenTransferReq req);
 
+    Result<AccountContractInfo> getAccountContractList(GetAccountContractListReq req);
 
 
 }
