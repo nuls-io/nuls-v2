@@ -331,9 +331,6 @@ public class TxValidator {
             throw new NulsException(ConsensusErrorCode.AGENT_NOT_EXIST);
         }
         List<DepositPo> poList = this.getDepositListByAgent(chain,deposit.getAgentHash());
-        if(poList != null && poList.size()>chain.getConfig().getDepositNumberMax()){
-            throw new NulsException(ConsensusErrorCode.DEPOSIT_OVER_COUNT);
-        }
         //节点当前委托总金额
         BigInteger total = deposit.getDeposit();
         for (DepositPo cd : poList) {

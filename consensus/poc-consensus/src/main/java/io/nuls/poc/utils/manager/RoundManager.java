@@ -69,15 +69,6 @@ public class RoundManager {
                 break;
             }
         }
-        /*if(roundList.size() >= 0){
-            Iterator<MeetingRound> iterator = roundList.iterator();
-            while (iterator.hasNext()){
-                MeetingRound round = iterator.next();
-                if(round.getIndex() > roundIndex){
-                    iterator.remove();
-                }
-            }
-        }*/
     }
 
     /**
@@ -451,7 +442,7 @@ public class RoundManager {
             节点总的委托金额是否达到出块节点的最小值
             Does the total delegation amount of the node reach the minimum value of the block node?
             */
-            boolean isItIn = realAgent.getTotalDeposit().compareTo(ConsensusConstant.SUM_OF_DEPOSIT_OF_AGENT_LOWER_LIMIT) >= 0 ? true : false;
+            boolean isItIn = realAgent.getTotalDeposit().compareTo(chain.getConfig().getCommissionMin()) >= 0 ? true : false;
             if (isItIn) {
                 realAgent.setCreditVal(calcCreditVal(chain,member, startBlockHeader));
                 memberList.add(member);
