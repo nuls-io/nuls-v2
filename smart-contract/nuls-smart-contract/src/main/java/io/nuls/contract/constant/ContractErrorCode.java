@@ -27,7 +27,6 @@ package io.nuls.contract.constant;
 import io.nuls.tools.constant.ErrorCode;
 
 /**
- * @desription:
  * @author: PierreLuo
  * @date: 2018/6/17
  */

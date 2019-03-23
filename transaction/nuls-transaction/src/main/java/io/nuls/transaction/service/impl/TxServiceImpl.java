@@ -705,7 +705,7 @@ public class TxServiceImpl implements TxService {
                 Transaction tx = iterator.next();
                 if (orphanTxList.contains(tx)) {
                     //如果在账本孤儿记录中 则不打包
-                    clearInvalidTx(chain, tx);
+                    clearInvalidTx(chain, tx, true);
                     continue;
                 }
                 try {

@@ -132,6 +132,7 @@ public class ContractCmd extends BaseCmd {
             List<String> resultTxHexList = new ArrayList<>();
             List<Transaction> resultTxList = dto.getResultTxList();
             for (Transaction resultTx : resultTxList) {
+                Log.info("======pierre=====batch_end txType is {}, hash is {}", resultTx.getType(), resultTx.getHash().toString());
                 resultTxHexList.add(Hex.toHexString(resultTx.serialize()));
             }
 

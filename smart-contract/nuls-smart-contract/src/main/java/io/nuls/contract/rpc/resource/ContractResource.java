@@ -1375,7 +1375,7 @@ public class ContractResource extends BaseCmd {
                 for(ContractAddressInfoPo po : contractAddressInfoPoList) {
                     contractAddressBytes = po.getContractAddress();
                     contractAddress = AddressTool.getStringAddressByBytes(contractAddressBytes);
-                    resultMap.put(contractAddress, new ContractAddressDto(chainId, po, height, true, track.status(contractAddressBytes).ordinal()));
+                    resultMap.put(contractAddress, new ContractAddressDto(po, height, true, track.status(contractAddressBytes).ordinal()));
                 }
             }
             List<ContractAddressDto> infoList = new ArrayList<>(resultMap.values());

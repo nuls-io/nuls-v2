@@ -31,30 +31,24 @@ import java.util.Comparator;
  * @author: PierreLuo
  * @date: 2018/11/23
  */
-public class CompareTx implements Comparator<ContractResult> {
+public class CompareTxTimeAsc implements Comparator<ContractResult> {
 
-    private static CompareTx instance = new CompareTx();
+    private static CompareTxTimeAsc instance = new CompareTxTimeAsc();
 
-    private CompareTx() {
+    private CompareTxTimeAsc() {
 
     }
 
-    public static CompareTx getInstance() {
+    public static CompareTxTimeAsc getInstance() {
         return instance;
     }
 
     @Override
     public int compare(ContractResult o1, ContractResult o2) {
-        if (o1 == null) {
-            return 1;
-        }
-        if (o2 == null) {
-            return -1;
-        }
         if (o1.getTxTime() > o2.getTxTime()) {
-            return -1;
-        } else if (o1.getTxTime() < o2.getTxTime()) {
             return 1;
+        } else if (o1.getTxTime() < o2.getTxTime()) {
+            return -1;
         } else {
             return 0;
         }
