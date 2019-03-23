@@ -21,7 +21,8 @@ import org.slf4j.LoggerFactory;
  * 2018/12/17
  * */
 public class LogAppender {
-    private final static String PROJECT_PATH = "user.dir";
+
+    public static String PROJECT_PATH = System.getProperty("user.dir");
     /**
      * 通过传入的名字和级别，动态设置appender
      *
@@ -30,7 +31,7 @@ public class LogAppender {
      */
     @SuppressWarnings("unchecked")
     public static RollingFileAppender getAppender(String fileName, Level level){
-        String rootPath = System.getProperty(PROJECT_PATH);
+        String rootPath = PROJECT_PATH;
         LoggerContext context = (LoggerContext) LoggerFactory.getILoggerFactory();
         RollingFileAppender appender = new RollingFileAppender();
         /*设置上下文，每个logger都关联到logger上下文，默认上下文名称为default。

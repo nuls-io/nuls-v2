@@ -8,6 +8,9 @@ import io.nuls.rpc.netty.processor.ResponseMessageProcessor;
 import io.nuls.tools.basic.InitializingBean;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Order;
+import io.nuls.tools.core.annotation.Value;
+import io.nuls.tools.log.logback.LogAppender;
+import io.nuls.tools.log.logback.LoggerBuilder;
 import io.nuls.tools.model.StringUtils;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.log.Log;
@@ -39,6 +42,9 @@ import java.util.concurrent.TimeUnit;
 @Order(Integer.MIN_VALUE)
 public abstract class RpcModule implements InitializingBean {
 
+    @Value("logPath")
+    private String logPath;
+
     /**
      * 启动参数
      */
@@ -67,6 +73,10 @@ public abstract class RpcModule implements InitializingBean {
     @Override
     public final void afterPropertiesSet() throws NulsException {
         try {
+            //初始化LogerBuilder
+            if(StringUtils.isNotBlank(logPath)){
+                LogAppender.PROJECT_PATH = logPath;
+            }
             init();
         } catch (Exception e) {
             log.error("rpc module init fail", e);
