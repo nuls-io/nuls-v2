@@ -1,4 +1,5 @@
 {
+  "APP_NAME": "account",
   "chainConfig": {
     "chainId": 2,
     "assetsId": 1

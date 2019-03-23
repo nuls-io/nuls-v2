@@ -295,7 +295,7 @@ public class CallMethodUtils {
                 return null;
             }
             params.put("endTimestamp", blockTime - PROCESS_TIME);
-            params.put("maxTxDataSize", ConsensusConstant.PACK_TX_MAX_SIZE);
+            params.put("maxTxDataSize", chain.getConfig().getBlockMaxSize());
             //params.put("height", height);
             params.put("blockTime", blockTime);
             params.put("packingAddress", packingAddress);

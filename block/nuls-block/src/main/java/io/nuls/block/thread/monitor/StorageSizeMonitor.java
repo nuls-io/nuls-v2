@@ -43,15 +43,15 @@ import static io.nuls.block.constant.RunningStatusEnum.RUNNING;
  * @version 1.0
  * @date 18-11-14 下午3:54
  */
-public class ChainsDbSizeMonitor implements Runnable {
+public class StorageSizeMonitor implements Runnable {
 
-    private static final ChainsDbSizeMonitor INSTANCE = new ChainsDbSizeMonitor();
+    private static final StorageSizeMonitor INSTANCE = new StorageSizeMonitor();
 
-    private ChainsDbSizeMonitor() {
+    private StorageSizeMonitor() {
 
     }
 
-    public static ChainsDbSizeMonitor getInstance() {
+    public static StorageSizeMonitor getInstance() {
         return INSTANCE;
     }
 

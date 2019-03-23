@@ -223,7 +223,6 @@ public class ContractServiceImpl implements ContractService {
                 ContractWrapperTransaction wrapperTx;
                 for (String txHex : txHexList) {
                     Log.info("commit txHex is {}", txHex);
-                    //TODO pierre  是否根据交易管理模块传来的交易来保存合约结果
                     contractResult = contractResultMap.get(txHex);
                     if (contractResult == null) {
                         Log.warn("empty contract result with txHex: {}", txHex);

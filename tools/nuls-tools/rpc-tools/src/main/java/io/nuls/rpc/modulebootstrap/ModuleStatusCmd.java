@@ -7,7 +7,6 @@ import io.nuls.rpc.netty.channel.manager.ConnectManager;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.parse.JSONUtils;
-import lombok.extern.slf4j.Slf4j;
 
 import java.util.Map;
 
@@ -17,7 +16,6 @@ import java.util.Map;
  * @Description: 功能描述
  */
 @Component
-@Slf4j
 public class ModuleStatusCmd extends BaseCmd {
 
     @Autowired

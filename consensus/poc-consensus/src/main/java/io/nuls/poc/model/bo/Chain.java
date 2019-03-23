@@ -4,7 +4,6 @@ import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.BlockHeader;
 import io.nuls.base.data.NulsDigestData;
 import io.nuls.base.data.Transaction;
-import io.nuls.poc.constant.ConsensusConstant;
 import io.nuls.poc.model.bo.config.ConfigBean;
 import io.nuls.poc.model.bo.consensus.Evidence;
 import io.nuls.poc.model.bo.round.MeetingRound;
@@ -158,7 +157,7 @@ public class Chain {
             for (Deposit dtx : cdList) {
                 totalDeposit = totalDeposit.add(dtx.getDeposit());
             }
-            if (totalDeposit.compareTo(ConsensusConstant.SUM_OF_DEPOSIT_OF_AGENT_LOWER_LIMIT) >= 0) {
+            if (totalDeposit.compareTo(config.getCommissionMin()) >= 0) {
                 workAgentList.add(agent);
             }
         }
@@ -190,7 +189,7 @@ public class Chain {
             for (Deposit dtx : cdList) {
                 totalDeposit = totalDeposit.add(dtx.getDeposit());
             }
-            if (totalDeposit.compareTo(ConsensusConstant.SUM_OF_DEPOSIT_OF_AGENT_LOWER_LIMIT) >= 0) {
+            if (totalDeposit.compareTo(config.getCommissionMin()) >= 0) {
                 workAddressList.add(AddressTool.getStringAddressByBytes(agent.getPackingAddress()));
             }
         }

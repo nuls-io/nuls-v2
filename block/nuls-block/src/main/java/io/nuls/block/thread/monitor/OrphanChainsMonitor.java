@@ -20,6 +20,7 @@
 
 package io.nuls.block.thread.monitor;
 
+import io.nuls.base.data.NulsDigestData;
 import io.nuls.block.constant.ChainTypeEnum;
 import io.nuls.block.constant.RunningStatusEnum;
 import io.nuls.block.manager.BlockChainManager;
@@ -28,6 +29,7 @@ import io.nuls.block.model.Chain;
 import io.nuls.block.model.ChainContext;
 import io.nuls.tools.log.logback.NulsLogger;
 
+import java.util.LinkedList;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.concurrent.locks.StampedLock;
@@ -105,6 +107,10 @@ public class OrphanChainsMonitor implements Runnable {
                             commonLog.debug("OrphanChainsMonitor-mark-begin");
                             mark(orphanChain, masterChain, forkChains, orphanChains);
                             commonLog.debug("OrphanChainsMonitor-mark-end");
+                        }
+                        //打印标记后孤儿链的类型
+                        for (Chain orphanChain : orphanChains) {
+                            commonLog.debug(orphanChain.toString());
                         }
                         //复制、清除阶段
                         SortedSet<Chain> maintainedOrphanChains = new TreeSet<>(Chain.COMPARATOR);
@@ -303,7 +309,8 @@ public class OrphanChainsMonitor implements Runnable {
      * @return
      */
     private boolean tryDuplicate(Chain mainChain, Chain subChain) {
-        return mainChain.getHashList().contains(subChain.getEndHash());
+        LinkedList<NulsDigestData> mainChainHashList = mainChain.getHashList();
+        return mainChainHashList.contains(subChain.getEndHash()) && mainChainHashList.contains(subChain.getStartHash());
     }
 
 }

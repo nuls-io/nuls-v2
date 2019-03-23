@@ -87,9 +87,9 @@ public class TxValid {
 
     @Test
     public void transfer() throws Exception {
-        for (int i = 0; i < 10; i++) {
-//            String hash = createTransfer();
-            String hash = createCtxTransfer();
+        for (int i = 0; i < 10000; i++) {
+            String hash = createTransfer();
+//            String hash = createCtxTransfer();
             System.out.println("count:" + (i + 1));
             System.out.println("");
 //            Thread.sleep(500L);

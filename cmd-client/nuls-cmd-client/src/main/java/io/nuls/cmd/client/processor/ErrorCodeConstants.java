@@ -9,7 +9,7 @@ import io.nuls.tools.constant.ErrorCode;
  */
 public final class ErrorCodeConstants {
 
-    public static final String  SYSTEM_ERR = "10001";
+    public static final ErrorCode  SYSTEM_ERR = ErrorCode.init("10001");
 
     /**
      * 参数错误

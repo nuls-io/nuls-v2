@@ -7,20 +7,15 @@ import io.nuls.rpc.netty.processor.ResponseMessageProcessor;
 import io.nuls.tools.core.ioc.SpringLiteContext;
 import io.nuls.tools.log.Log;
 import io.nuls.tools.parse.MapUtils;
-import io.nuls.tools.thread.ThreadUtils;
-import io.nuls.tools.thread.commom.NulsThreadFactory;
-import lombok.extern.slf4j.Slf4j;
 
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
 
 /**
  * @Author: zhoulijun
  * @Time: 2019-02-28 14:52
  * @Description: 功能描述
  */
-@Slf4j
 public class RegisterInvoke extends BaseInvoke {
 
 
@@ -50,7 +45,7 @@ public class RegisterInvoke extends BaseInvoke {
             if (!ConnectManager.isReady()) {
                 return;
             }
-            log.info("RMB:module rpc is ready");
+            Log.info("RMB:module rpc is ready");
             dependMap.entrySet().forEach(obj -> {
                 Map.Entry<String, Map> entry = (Map.Entry<String, Map>) obj;
                 if (dependenices.stream().anyMatch(d -> d.getName().equals(entry.getKey()))) {
@@ -59,10 +54,10 @@ public class RegisterInvoke extends BaseInvoke {
                         Response cmdResp = null;
                         try {
                             cmdResp = ResponseMessageProcessor.requestAndResponse(entry.getKey(), "registerModuleDependencies", MapUtils.beanToLinkedMap(module));
-                            log.debug("result : {}", cmdResp);
+                            Log.debug("result : {}", cmdResp);
                             return cmdResp.isSuccess();
                         } catch (Exception e) {
-                            log.error("Calling remote interface failed. module:{} - interface:{} - message:{}", module, "registerModuleDependencies", e.getMessage());
+                            Log.error("Calling remote interface failed. module:{} - interface:{} - message:{}", module, "registerModuleDependencies", e.getMessage());
                             return false;
                         }
                     });

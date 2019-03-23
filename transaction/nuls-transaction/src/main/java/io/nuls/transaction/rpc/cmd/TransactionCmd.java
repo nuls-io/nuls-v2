@@ -480,7 +480,6 @@ public class TransactionCmd extends BaseCmd {
             List<String> txHashList = (List<String>) params.get("txHashList");
             List<String> txHexList = confirmedTxService.getTxList(chain,txHashList);
             Map<String, List<String>> resultMap = new HashMap<>(TxConstant.INIT_CAPACITY_2);
-            Log.debug("getBlockTxs size:{} ", txHexList.size());
             resultMap.put("txHexList", txHexList);
             return success(resultMap);
         } catch (NulsException e) {
@@ -515,7 +514,6 @@ public class TransactionCmd extends BaseCmd {
             boolean allHits = (boolean) params.get("allHits");
             List<String> txHexList = confirmedTxService.getTxListExtend(chain, txHashList, allHits);
             Map<String, List<String>> resultMap = new HashMap<>(TxConstant.INIT_CAPACITY_2);
-            Log.debug("tx_getBlockTxsExtend size:{} ", txHexList.size());
             resultMap.put("txHexList", txHexList);
             return success(resultMap);
         } catch (NulsException e) {

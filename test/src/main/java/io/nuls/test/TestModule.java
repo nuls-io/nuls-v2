@@ -9,18 +9,18 @@ import io.nuls.api.provider.network.facade.NetworkInfo;
 import io.nuls.rpc.modulebootstrap.Module;
 import io.nuls.rpc.modulebootstrap.RpcModule;
 import io.nuls.rpc.modulebootstrap.RpcModuleState;
+import io.nuls.test.cases.Constants;
 import io.nuls.test.cases.TestCase;
 import io.nuls.test.cases.TestCaseIntf;
 import io.nuls.test.cases.TestFailException;
-import io.nuls.test.cases.Constants;
 import io.nuls.test.controller.RpcServerManager;
+import io.nuls.test.utils.LoggerUtil;
 import io.nuls.test.utils.RestFulUtils;
 import io.nuls.test.utils.Utils;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
-import io.nuls.tools.core.annotation.Value;
 import io.nuls.tools.core.ioc.SpringLiteContext;
-import lombok.extern.slf4j.Slf4j;
+import io.nuls.tools.log.logback.NulsLogger;
 
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -32,8 +32,9 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * @Description: 功能描述
  */
 @Component
-@Slf4j
 public class TestModule extends RpcModule {
+
+    static NulsLogger log = LoggerUtil.logger;
 
     AccountService accountService = ServiceManager.get(AccountService.class);
 

@@ -4,20 +4,17 @@ import io.nuls.tools.core.ioc.SpringLiteContext;
 import io.nuls.tools.exception.NulsRuntimeException;
 import io.nuls.tools.log.Log;
 import io.nuls.tools.thread.ThreadUtils;
-import lombok.extern.slf4j.Slf4j;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.Arrays;
-import java.util.concurrent.CountDownLatch;
 
 /**
  * @Author: zhoulijun
  * @Time: 2019-02-28 14:27
  * @Description: 功能描述
  */
-@Slf4j
 public class NulsRpcModuleBootstrap {
 
     private static final String DEFAULT_SCAN_PACKAGE = "io.nuls";
@@ -77,9 +74,9 @@ public class NulsRpcModuleBootstrap {
             });
         }
 
-        log.info("MODULE INFO : {}:{}", module.moduleInfo().name, module.moduleInfo().version);
-        log.info("MODULE DEPENDENCIES:");
-        Arrays.stream(module.getDependencies()).forEach(d -> log.info("====>{}:{}", d.name, d.version));
+//        System.out.println("MODULE INFO : {}:{}", module.moduleInfo().name, module.moduleInfo().version);
+//        Log.info("MODULE DEPENDENCIES:");
+//        Arrays.stream(module.getDependencies()).forEach(d -> Log.info("====>{}:{}", d.name, d.version));
         module.run(scanPackage, args[0]);
     }
 

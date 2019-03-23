@@ -13,10 +13,9 @@ import io.nuls.base.data.BlockHeader;
 import io.nuls.rpc.model.ModuleE;
 import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.exception.NulsException;
+import io.nuls.tools.log.Log;
 import io.nuls.tools.model.DateUtils;
-import lombok.extern.slf4j.Slf4j;
 
-import java.util.Date;
 import java.util.function.Function;
 
 /**
@@ -25,7 +24,6 @@ import java.util.function.Function;
  * @Description: 功能描述
  */
 @Provider(Provider.ProviderType.RPC)
-@Slf4j
 public class BlockServiceForRpc extends BaseRpcService implements BlockService {
 
     @Override
@@ -74,7 +72,7 @@ public class BlockServiceForRpc extends BaseRpcService implements BlockService {
             res.setRoundStartTime(DateUtils.timeStamp2DateStr(blockExtendsData.getRoundStartTime()));
             return success(res);
         } catch (NulsException e) {
-            log.error("反序列化block header发生异常",e);
+            Log.error("反序列化block header发生异常",e);
             return fail(ERROR_CODE);
         }
     }

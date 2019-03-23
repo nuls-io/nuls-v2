@@ -49,7 +49,7 @@ do
 		titleList[${#titleList[@]}]="$TEMP"
 	fi
 done
-#echo ${titleList[@]}  # Section list
+echo ${titleList[@]}  # Section list
 for title in ${titleList[@]}
 do
 	#echo $title

@@ -2,10 +2,11 @@ package io.nuls.rpc.modulebootstrap;
 
 import io.nuls.tools.basic.InitializingBean;
 import io.nuls.tools.core.annotation.Component;
+import io.nuls.tools.core.annotation.Value;
 import io.nuls.tools.exception.NulsException;
+import io.nuls.tools.log.Log;
 import io.nuls.tools.thread.ThreadUtils;
 import io.nuls.tools.thread.commom.NulsThreadFactory;
-import lombok.extern.slf4j.Slf4j;
 
 import java.util.Queue;
 import java.util.concurrent.Callable;
@@ -20,8 +21,10 @@ import java.util.concurrent.TimeUnit;
  * 通过重试的方式确保通知成功。若失败等待1秒重新通知，直到成功为止
  */
 @Component
-@Slf4j
 public class NotifySender implements Runnable, InitializingBean {
+
+    @Value("APP_NAME")
+    private String appName;
 
     ScheduledThreadPoolExecutor executor = ThreadUtils.createScheduledThreadPool(1, new NulsThreadFactory("notify-sender"));
 
@@ -44,7 +47,7 @@ public class NotifySender implements Runnable, InitializingBean {
             try {
                 TimeUnit.SECONDS.sleep(1L);
             } catch (InterruptedException e) {
-                log.error("notify sender thread error", e);
+                Log.error("notify sender thread error", e);
             }
         }
     }

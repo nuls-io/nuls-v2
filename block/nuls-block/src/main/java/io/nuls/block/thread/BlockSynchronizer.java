@@ -170,7 +170,7 @@ public class BlockSynchronizer implements Runnable {
             }
             //网络上所有节点高度都是0,说明是该链第一次运行
             if (params.getNetLatestHeight() == 0 && size == availableNodes.size()) {
-                commonLog.warn("chain-" + chainId + ", first start");
+                commonLog.info("chain-" + chainId + ", first start");
                 context.setStatus(RunningStatusEnum.RUNNING);
                 ConsensusUtil.notice(chainId, CONSENSUS_WORKING);
                 return true;
@@ -178,7 +178,7 @@ public class BlockSynchronizer implements Runnable {
             //检查本地区块状态
             LocalBlockStateEnum stateEnum = checkLocalBlock(chainId, params);
             if (stateEnum.equals(CONSISTENT)) {
-                commonLog.warn("chain-" + chainId + ", local blocks is newest");
+                commonLog.info("chain-" + chainId + ", local blocks is newest");
                 context.setStatus(RunningStatusEnum.RUNNING);
                 ConsensusUtil.notice(chainId, CONSENSUS_WORKING);
                 return true;
@@ -190,7 +190,7 @@ public class BlockSynchronizer implements Runnable {
                 return false;
             }
             if (stateEnum.equals(CONFLICT)) {
-                commonLog.warn("chain-" + chainId + ", The local GenesisBlock differ from network");
+                commonLog.error("chain-" + chainId + ", The local GenesisBlock differ from network");
                 throw new ChainRuntimeException("The local GenesisBlock differ from network");
             }
             PriorityBlockingQueue<Node> nodes = params.getNodes();
@@ -218,10 +218,9 @@ public class BlockSynchronizer implements Runnable {
             executor.shutdownNow();
             if (success) {
                 commonLog.info("block syn complete, total download:" + total + ", total time:" + (end - start) + ", average time:" + (end - start) / total);
-                if (checkIsNewest(chainId, context)) {
+//                if (checkIsNewest(chainId, context)) {
                     //要测试分叉链切换或者孤儿链，放开下面语句，概率会加大
-//                if (true) {
-//                    Thread.sleep(30000);
+                if (true) {
                     commonLog.info("block syn complete successfully, current height-" + params.getNetLatestHeight());
                     context.setStatus(RunningStatusEnum.RUNNING);
                     ConsensusUtil.notice(chainId, CONSENSUS_WORKING);

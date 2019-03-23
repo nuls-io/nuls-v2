@@ -1,6 +1,5 @@
 package io.nuls.api.provider.transaction;
 
-import com.fasterxml.jackson.core.io.UTF8Writer;
 import io.nuls.api.provider.BaseReq;
 import io.nuls.api.provider.BaseRpcService;
 import io.nuls.api.provider.Provider;
@@ -14,17 +13,14 @@ import io.nuls.base.data.Transaction;
 import io.nuls.rpc.model.ModuleE;
 import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.exception.NulsException;
+import io.nuls.tools.log.Log;
 import io.nuls.tools.model.ByteUtils;
 import io.nuls.tools.model.DateUtils;
 import io.nuls.tools.model.StringUtils;
-import lombok.extern.slf4j.Slf4j;
 
-import java.math.BigInteger;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-
-import static java.nio.charset.StandardCharsets.UTF_8;
 
 /**
  * @Author: zhoulijun
@@ -33,7 +29,6 @@ import static java.nio.charset.StandardCharsets.UTF_8;
  * 交易服务
  */
 @Provider(Provider.ProviderType.RPC)
-@Slf4j
 public class TransferServiceForRpc extends BaseRpcService implements TransferService {
 
     @Override
@@ -98,7 +93,7 @@ public class TransferServiceForRpc extends BaseRpcService implements TransferSer
             transaction.setStatus(state == TxStatusEnum.UNCONFIRM.getStatus() ? TxStatusEnum.UNCONFIRM : TxStatusEnum.CONFIRMED);
             return success(transaction);
         } catch (NulsException e) {
-            log.error("反序列化transaction发生异常",e);
+            Log.error("反序列化transaction发生异常",e);
             return fail(ERROR_CODE);
         }
     }
@@ -125,7 +120,7 @@ public class TransferServiceForRpc extends BaseRpcService implements TransferSer
             res.setTo(transaction.getCoinDataInstance().getTo().stream().map(this::buildTransactionCoinData).collect(Collectors.toList()));
             return success(res);
         } catch (NulsException e) {
-            log.error("反序列化transaction发生异常",e);
+            Log.error("反序列化transaction发生异常",e);
             return fail(ERROR_CODE);
         }
     }
