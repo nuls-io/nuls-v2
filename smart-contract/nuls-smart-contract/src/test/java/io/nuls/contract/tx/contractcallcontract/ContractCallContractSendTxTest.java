@@ -85,7 +85,7 @@ public class ContractCallContractSendTxTest extends Base {
      */
     @Test
     public void transfer2Contract() throws Exception {
-        BigInteger value = BigInteger.TEN.pow(11);
+        BigInteger value = BigInteger.valueOf(34777633L);
         String remark = "transfer 2 contract";
         Map params = this.makeTransferParams(sender, contractAddress, value, remark);
         Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, TRANSFER, params);

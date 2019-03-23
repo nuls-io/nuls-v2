@@ -24,18 +24,30 @@
 package io.nuls.contract.tx.base;
 
 
-import io.nuls.base.basic.AddressTool;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import io.nuls.base.data.BlockHeader;
 import io.nuls.contract.model.bo.Chain;
 import io.nuls.contract.model.bo.config.ConfigBean;
-import io.nuls.contract.model.txdata.CallContractData;
-import io.nuls.contract.model.txdata.ContractData;
+import io.nuls.contract.rpc.call.BlockCall;
+import io.nuls.contract.rpc.call.LedgerCall;
 import io.nuls.contract.util.ContractUtil;
 import io.nuls.rpc.info.HostInfo;
 import io.nuls.rpc.info.NoUse;
+import io.nuls.rpc.model.ModuleE;
+import io.nuls.rpc.model.message.Response;
 import io.nuls.rpc.netty.processor.ResponseMessageProcessor;
+import io.nuls.tools.exception.NulsException;
+import io.nuls.tools.log.Log;
+import io.nuls.tools.parse.JSONUtils;
+import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Test;
+import org.spongycastle.util.encoders.Hex;
 
-import java.math.BigInteger;
+import java.util.HashMap;
+import java.util.Map;
+
+import static io.nuls.contract.constant.ContractCmdConstant.*;
 
 /**
  * @author: PierreLuo
@@ -66,108 +78,120 @@ public class Base {
 
     protected String createHash = "002029ca32525f635a15c82c046114657c0d8a96a7163780ac6b425b2383b240bd56";
     protected String contractAddress = "tNULSeBaN4qXkpvcXHtPtS6wcRFUDCv7vLeHwB";
-    protected String contractAddress_nrc20 = "tNULSeBaMxgUSdgRLoamnbFENFbVsT3hnNtSAf";
+    protected String contractAddress_nrc20 = "tNULSeBaN7CuBiTfqnRk6DuUuUP6251ybd1YEk";
 
     protected String callHash = "002006dc2d87274408d8ec266d439b0f497e6a44a1e50eaeb1f1eaca1d909b7c4612";
     protected String deleteHash = "0020b2c159dbdf784c2860ec97072feb887466aa50fc147a5b50388886caab113f9a";
 
+    @Test
+    public void getBlockHeader() throws NulsException, JsonProcessingException {
+        BlockHeader blockHeader = BlockCall.getBlockHeader(chainId, 20L);
+        Log.info("\nstateRoot is " + Hex.toHexString(ContractUtil.getStateRoot(blockHeader)) + ", " + blockHeader.toString());
+    }
+
+    @Test
+    public void getBalance() throws Exception {
+        Map<String, Object> balance = LedgerCall.getBalance(chain, sender);
+        Log.info("balance:{}", JSONUtils.obj2PrettyJson(balance));
+        Map<String, Object> balance0 = LedgerCall.getBalance(chain, contractAddress);
+        Log.info("balance:{}", JSONUtils.obj2PrettyJson(balance0));
+        Map<String, Object> balance1 = LedgerCall.getBalance(chain, toAddress1);
+        Log.info("balance:{}", JSONUtils.obj2PrettyJson(balance1));
+        Map<String, Object> balance2 = LedgerCall.getBalance(chain, toAddress2);
+        Log.info("balance:{}", JSONUtils.obj2PrettyJson(balance2));
+    }
+
+    /**
+     *  获取账户创建的合约列表
+     */
+    @Test
+    public void accountContracts() throws Exception {
+        Map params = this.makeAccountContractsParams(sender, 1, 10);
+        Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, ACCOUNT_CONTRACTS, params);
+        Map result = (HashMap) (((HashMap) cmdResp2.getResponseData()).get(ACCOUNT_CONTRACTS));
+        Assert.assertTrue(null != result);
+        Log.info("accountContracts-result:{}", JSONUtils.obj2PrettyJson(cmdResp2));
+    }
+    private Map makeAccountContractsParams(String address, int pageNumber, int pageSize) {
+        Map<String, Object> params = new HashMap<>();
+        params.put("chainId", chainId);
+        params.put("address", address);
+        params.put("pageNumber", pageNumber);
+        params.put("pageSize", pageSize);
+        return params;
+    }
+
+    /**
+     * 获取合约基本信息
+     */
+    @Test
+    public void contractInfo() throws Exception {
+        Map params = this.makeContractInfoParams(contractAddress);
+        Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, CONTRACT_INFO, params);
+        Map result = (HashMap) (((HashMap) cmdResp2.getResponseData()).get(CONTRACT_INFO));
+        Assert.assertTrue(null != result);
+        Log.info("contract_info-result:{}", JSONUtils.obj2PrettyJson(cmdResp2));
+    }
+    private Map makeContractInfoParams(String contractAddress) {
+        Map<String, Object> params = new HashMap<>();
+        params.put("chainId", chainId);
+        params.put("contractAddress", contractAddress);
+        return params;
+    }
+
+    /**
+     * 获取合约执行结果
+     */
+    @Test
+    public void contractResult() throws Exception {
+        Map params = this.makeContractResultParams(callHash);
+        Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, CONTRACT_RESULT, params);
+        Map result = (HashMap) (((HashMap) cmdResp2.getResponseData()).get(CONTRACT_RESULT));
+        Assert.assertTrue(null != result);
+        Log.info("contractResult-result:{}", JSONUtils.obj2PrettyJson(result));
+    }
+    private Map makeContractResultParams(String hash) {
+        Map<String, Object> params = new HashMap<>();
+        params.put("chainId", chainId);
+        params.put("hash", hash);
+        return params;
+    }
+
+    /**
+     * 获取合约交易详情
+     */
+    @Test
+    public void contractTx() throws Exception {
+        Map params = this.makeContractTxParams(deleteHash);
+        Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, CONTRACT_TX, params);
+        Map result = (HashMap) (((HashMap) cmdResp2.getResponseData()).get(CONTRACT_TX));
+        Assert.assertTrue(null != result);
+        Log.info("contractTx-result:{}", JSONUtils.obj2PrettyJson(cmdResp2));
+    }
+    private Map makeContractTxParams(String hash) {
+        Map<String, Object> params = new HashMap<>();
+        params.put("chainId", chainId);
+        params.put("hash", hash);
+        return params;
+    }
 
 
-
-
-
-
-    static String[] contractAddressSeeds = {
-            "5MR_3PyGq4CgbfoH7sCZ5PoAXPCrzKokBTF",
-            "5MR_3QANzLfMffP22BbyaBnQddkJQArJtJ7",
-            "5MR_3Q7e7a57oWhKLkgjRWYhJCyHbLS8ik9",
-            "5MR_3QAgjbDEjZyzvAoH5NK642m9CZx6NGy",
-            "5MR_3QAbdkWLSbQi5xthL8WtyFAvd4cKeea",
-            "5MR_3Q3E2ByDXf5cwX1abCi4Xb39Kyq6R7q",
-            "5MR_3QDNQCfjP6qM9ZGZDnVy2NzudSWLAW6",
-            "5MR_3Q9S65XtxXeJUmEiPENSSdXLaZSNpbS",
-            "5MR_3Q2wnpwjHKaG9M9rGfyk2YrwThMb57R",
-            "5MR_3QBpHo2nLXMXfysmswjCkfb8PJFVRT8",
-            "5MR_3Q1qQYgNw2URT6Q1G3HMAuxtsWdLrw1",
-            "5MR_3Q79uhPjevBdVMxazc9ncXHXkjiSC3Q",
-            "5MR_3Py5YMtECe4sKuEQrfpEcedVmUXTaBD",
-            "5MR_3Q4T7MqP8uEPKcuNckurf7KCA7yK78V",
-            "5MR_3QD53q4YiszcZqABwoGSuz339MdRsKX",
-            "5MR_3Q2LBUdaZLDFZAHEbtxoC9razeUFa3T",
-            "5MR_3QDNNscDF6RWvkgTrgqMBSZZoz2RGCh",
-            "5MR_3Q6rhNo7FmG94b6dvwDu9SAxQsCj2TX",
-            "5MR_3QDkFRo3tkGagATk8NKkQfeB3NgVoN7",
-            "5MR_3QD9vHcAxDETYevRiSWLPUnYPDWGoKY",
-            "5MR_3QE6m4naDtbQdmJLvf6Vv4cH2q2Zn7V",
-            "5MR_3Q4LrgUoSveo3VShU5iLCJinTdhdc2w",
-            "5MR_3Q5Q9bUQMNh46wrd3WjCtFjy8ub8f31",
-            "5MR_3Q5SzKAqZfMuQH8itmrPayKjMMpoj2a",
-            "5MR_3PzxjVLqrDAfgxV9dp6j8ZfeccN4ugB",
-            "5MR_3QBoJr2Up7xtEv584W8qVo3G5YLREyG",
-            "5MR_3Q8qdssMypCBTxDMt2h4S7x5xmRhgvL",
-            "5MR_3PzCafNm6w8GoEd3tF5KtuNRYQENEVf",
-            "5MR_3QBoW2rFRGztpn3ZYhwaPLVB5tvSG5N",
-            "5MR_3PyvLiZwRKxbE5oPjwFuCGobXkUq5Jy",
-            "5MR_3PymLmXrzSRmsopyjUQSjPT8ddBX5pc",
-            "5MR_3Q33fMwJeCXq2PfuYapjQbAz3cDiJGr",
-            "5MR_3Q5Kq6i8rfubjoktiQCKp7pUB4SzrD4",
-            "5MR_3Q2yPBHjCEy3ukix93AVmYNpWnLjkZA",
-            "5MR_3PyaMBWWj2EvAreGnLZXM6Fkfu986NR",
-            "5MR_3PyBHEuQKeAs4bJpajzSXz6k9VNYP2w",
-            "5MR_3QCRpbhmx9Rrw6WVrjC7ifbtqkUNQx4",
-            "5MR_3QAtLPVLPeqdmYSbwGwFi1HAhnnDKbH",
-            "5MR_3Q1UA633p7n8eo8VTjaopSc5zfPrpbP",
-            "5MR_3Q39PbCdFwcrP5Wg27MbZKB4JFXnpYK",
-            "5MR_3Q643rgT962iQMoXrn6Tw9B7anLMm5z",
-            "5MR_3QBaFvnHN9FtGDekFeWNgG7W9GnphJt",
-            "5MR_3QBGBwPecpjz5x55SXXCTzND9kUSeM6",
-            "5MR_3Q5u1tiyBNXcR8mCFy7M6Nf3KmkGBMq",
-            "5MR_3Q4EG6vgda7w1UNk8XC1VsNk87JL9Tm",
-            "5MR_3Q4nEPa8RQCToidsJH9M2vTektoacSu",
-            "5MR_3QBeEUcF7uNhC4CerF2EpXbAw4Uym6s",
-            "5MR_3QBcfXELZibdvemKdPLdFxFBLxQmbC2",
-            "5MR_3Q2w3eD877yKWp4g9YX7zKhKJSsLE7e",
-            "5MR_3PyVCTAWc35RMqf7j7yBUVsAUdfYUC2"
-    };
-
-    static String[] senderSeeds = {
-            "tNULSeBaMvEtDfvZuukDf2mVyfGo3DdiN8KLRG",
-            "5MR_2CbdqKcZktcxntG14VuQDy8YHhc6ZqW",
-            "5MR_2Cj9tfgQpdeF7nDy5wyaGG6MZ35H3rA",
-            "5MR_2CWKhFuoGVraaxL5FYY3RsQLjLDN7jw",
-            "5MR_2CgwCFRoJ8KX37xNqjjR7ttYuJsg8rk",
-            "5MR_2CjZkQsN7EnEPcaLgNrMrp6wpPGN6xo",
-            "tNULSeBaMvEtDfvZuukDf2mVyfGo3DdiN8KLRG",
-            "5MR_2CVCFWH7o8AmrTBPLkdg2dYH1UCUJiM",
-            "5MR_2CfUsasd33vQV3HqGw6M3JwVsuVxJ7r",
-            "5MR_2CVuGjQ3CYVkhFszxfSt6sodg1gDHYF"};
-
-    static String[] methodNameSeeds = {
-            "transfer",
-            "approve",
-            "increaseApproval",
-            "decreaseApproval"
-    };
-
-    static String[][] methodArgsSeeds = {
-            {"tNULSeBaMvEtDfvZuukDf2mVyfGo3DdiN8KLRG", "10000"},
-            {"tNULSeBaMvEtDfvZuukDf2mVyfGo3DdiN8KLRG", "10000"},
-            {"tNULSeBaMvEtDfvZuukDf2mVyfGo3DdiN8KLRG", "10000"},
-            {"tNULSeBaMvEtDfvZuukDf2mVyfGo3DdiN8KLRG", "10000"}
-    };
-
-    private ContractData makeCallContractData(String sender, String contractAddress, long value, String methodName, Object[] args) {
-        CallContractData txData = new CallContractData();
-        txData.setSender(AddressTool.getAddress(sender));
-        txData.setContractAddress(AddressTool.getAddress(contractAddress));
-        txData.setValue(BigInteger.valueOf(value));
-        txData.setGasLimit(200000L);
-        txData.setPrice(25L);
-        txData.setMethodName(methodName);
-        String[][] args2 = ContractUtil.twoDimensionalArray(args);
-        txData.setArgsCount((byte) args.length);
-        txData.setArgs(args2);
-        return txData;
+    /**
+     * 查交易
+     */
+    @Test
+    public void getTxRecord() throws Exception {
+        Map<String, Object> params = new HashMap<>();
+        params.put("chainId", chainId);
+        params.put("address", sender);
+        params.put("assetChainId", null);
+        params.put("assetId", null);
+        params.put("type", null);
+        params.put("pageSize", null);
+        params.put("pageNumber", null);
+        Response dpResp = ResponseMessageProcessor.requestAndResponse(ModuleE.TX.abbr, "tx_getTxs", params);
+        Map record = (Map) dpResp.getResponseData();
+        Log.info("Page<TransactionPO>:{}", JSONUtils.obj2PrettyJson(record));
     }
 
 }

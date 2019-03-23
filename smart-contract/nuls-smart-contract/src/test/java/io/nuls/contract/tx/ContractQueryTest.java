@@ -25,16 +25,11 @@
 package io.nuls.contract.tx;
 
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import io.nuls.base.data.BlockHeader;
 import io.nuls.contract.basetest.ContractTest;
-import io.nuls.contract.rpc.call.BlockCall;
 import io.nuls.contract.tx.base.Base;
-import io.nuls.contract.util.ContractUtil;
 import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.model.message.Response;
 import io.nuls.rpc.netty.processor.ResponseMessageProcessor;
-import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.log.Log;
 import io.nuls.tools.parse.JSONUtils;
 import org.apache.commons.io.IOUtils;
@@ -56,32 +51,6 @@ import static io.nuls.contract.constant.ContractCmdConstant.*;
  * @date: 2019-03-15
  */
 public class ContractQueryTest extends Base {
-
-    @Test
-    public void getBlockHeader() throws NulsException, JsonProcessingException {
-        BlockHeader blockHeader = BlockCall.getBlockHeader(chainId, 20L);
-        Log.info("\nstateRoot is " + Hex.toHexString(ContractUtil.getStateRoot(blockHeader)) + ", " + blockHeader.toString());
-    }
-
-    /**
-     *  账户创建的合约列表
-     */
-    @Test
-    public void accountContracts() throws Exception {
-        Map params = this.makeAccountContractsParams(sender, 1, 10);
-        Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, ACCOUNT_CONTRACTS, params);
-        Map result = (HashMap) (((HashMap) cmdResp2.getResponseData()).get(ACCOUNT_CONTRACTS));
-        Assert.assertTrue(null != result);
-        Log.info("accountContracts-result:{}", JSONUtils.obj2PrettyJson(cmdResp2));
-    }
-    private Map makeAccountContractsParams(String address, int pageNumber, int pageSize) {
-        Map<String, Object> params = new HashMap<>();
-        params.put("chainId", chainId);
-        params.put("address", address);
-        params.put("pageNumber", pageNumber);
-        params.put("pageSize", pageSize);
-        return params;
-    }
 
 
     /**
@@ -232,11 +201,11 @@ public class ContractQueryTest extends Base {
     public void transfer2ContractFee() throws Exception {
         BigInteger value = BigInteger.TEN.pow(8);
         String remark = "transfer 2 contract fee";
-        Map params = this.makeTransferFeeParams(sender, contractAddress, value, remark);
+        Map params = this.makeTransferFeeParams(sender, contractAddress_nrc20, value, remark);
         Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, TRANSFER_FEE, params);
         Map result = (HashMap) (((HashMap) cmdResp2.getResponseData()).get(TRANSFER_FEE));
         Assert.assertTrue(null != result);
-        Log.info("transfer2ContractFee-result:{}", JSONUtils.obj2PrettyJson(result));
+        Log.info("transfer2ContractFee-result:{}", JSONUtils.obj2PrettyJson(cmdResp2));
     }
     private Map makeTransferFeeParams(String address, String toAddress, BigInteger amount, String remark) {
         Map<String, Object> params = new HashMap<>();
@@ -353,60 +322,6 @@ public class ContractQueryTest extends Base {
     }
 
     /**
-     * 获取合约基本信息
-     */
-    @Test
-    public void contractInfo() throws Exception {
-        Map params = this.makeContractInfoParams(contractAddress);
-        Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, CONTRACT_INFO, params);
-        Map result = (HashMap) (((HashMap) cmdResp2.getResponseData()).get(CONTRACT_INFO));
-        Assert.assertTrue(null != result);
-        Log.info("contract_info-result:{}", JSONUtils.obj2PrettyJson(cmdResp2));
-    }
-    private Map makeContractInfoParams(String contractAddress) {
-        Map<String, Object> params = new HashMap<>();
-        params.put("chainId", chainId);
-        params.put("contractAddress", contractAddress);
-        return params;
-    }
-
-    /**
-     * 获取合约执行结果
-     */
-    @Test
-    public void contractResult() throws Exception {
-        Map params = this.makeContractResultParams(callHash);
-        Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, CONTRACT_RESULT, params);
-        Map result = (HashMap) (((HashMap) cmdResp2.getResponseData()).get(CONTRACT_RESULT));
-        Assert.assertTrue(null != result);
-        Log.info("contractResult-result:{}", JSONUtils.obj2PrettyJson(result));
-    }
-    private Map makeContractResultParams(String hash) {
-        Map<String, Object> params = new HashMap<>();
-        params.put("chainId", chainId);
-        params.put("hash", hash);
-        return params;
-    }
-
-    /**
-     * 获取合约交易详情
-     */
-    @Test
-    public void contractTx() throws Exception {
-        Map params = this.makeContractTxParams(deleteHash);
-        Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, CONTRACT_TX, params);
-        Map result = (HashMap) (((HashMap) cmdResp2.getResponseData()).get(CONTRACT_TX));
-        Assert.assertTrue(null != result);
-        Log.info("contractTx-result:{}", JSONUtils.obj2PrettyJson(cmdResp2));
-    }
-    private Map makeContractTxParams(String hash) {
-        Map<String, Object> params = new HashMap<>();
-        params.put("chainId", chainId);
-        params.put("hash", hash);
-        return params;
-    }
-
-    /**
      *  验证删除合约
      */
     @Test
@@ -422,40 +337,6 @@ public class ContractQueryTest extends Base {
         params.put("sender", sender);
         params.put("contractAddress", contractAddress);
         return params;
-    }
-
-    /**
-     * 查交易
-     */
-    @Test
-    public void getTxRecord() throws Exception {
-        Map<String, Object> params = new HashMap<>();
-        params.put("chainId", chainId);
-        params.put("address", sender);
-        params.put("assetChainId", null);
-        params.put("assetId", null);
-        params.put("type", null);
-        params.put("pageSize", null);
-        params.put("pageNumber", null);
-        Response dpResp = ResponseMessageProcessor.requestAndResponse(ModuleE.TX.abbr, "tx_getTxs", params);
-        Map record = (Map) dpResp.getResponseData();
-        Log.info("Page<TransactionPO>:{}", JSONUtils.obj2PrettyJson(record));
-    }
-
-    /**
-     * 查交易模块的交易
-     */
-    @Test
-    public void getTx() throws Exception {
-        this.getTxClient(callHash);
-    }
-    private void getTxClient(String hash) throws Exception {
-        Map<String, Object> params = new HashMap<>();
-        params.put("chainId", chainId);
-        params.put("txHash", hash);
-        Response dpResp = ResponseMessageProcessor.requestAndResponse(ModuleE.TX.abbr, "tx_getTxClient", params);
-        Map record = (Map) dpResp.getResponseData();
-        Log.info("{}", JSONUtils.obj2PrettyJson(record));
     }
 
     /**
