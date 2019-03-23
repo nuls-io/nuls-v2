@@ -140,6 +140,15 @@ public class Chain {
     private AtomicInteger age = new AtomicInteger(0);
 
     /**
+     * 获取链的起始hash
+     *
+     * @return
+     */
+    public NulsDigestData getStartHash() {
+        return hashList.getFirst();
+    }
+
+    /**
      * 获取链的结束hash
      *
      * @return

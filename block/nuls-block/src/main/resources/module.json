@@ -1,12 +1,17 @@
 {
   "dataFolder": "block",
+  "forkChainsMonitorInterval": 10,
+  "orphanChainsMonitorInterval": 10,
+  "orphanChainsMaintainerInterval": 1,
+  "storageSizeMonitorInterval": 300,
+  "networkResetMonitorInterval": 300,
   "defaultChainParameter": {
     "chainName": "nuls2.0",
     "chainId": 2,
     "blockMaxSize": 2097152,
     "resetTime": 180000,
     "chainSwtichThreshold": 1,
-    "cacheSize": 100,
+    "cacheSize": 1000,
     "heightRange": 1000,
     "waitInterval": 50,
     "maxRollback": 100,
