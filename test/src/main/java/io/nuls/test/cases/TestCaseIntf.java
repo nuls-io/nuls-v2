@@ -7,6 +7,9 @@ import io.nuls.test.utils.Utils;
  * @Author: zhoulijun
  * @Time: 2019-03-19 20:48
  * @Description: 测试用例接口
+ *
+ * @param <T>  测试完后返回类型
+ * @param <P>  进入测试的参数类型
  */
 public interface TestCaseIntf<T,P> {
 
