@@ -299,7 +299,8 @@ public class BlockChainManager {
      * @return
      */
     public static int removeForkChain(int chainId, Chain chain) {
-        boolean result = false;
+        NulsLogger commonLog = ContextManager.getContext(chainId).getCommonLog();
+        boolean result;
         //无子链
         if (chain.getSons().size() == 0) {
             //更新父链的引用
@@ -309,6 +310,7 @@ public class BlockChainManager {
             //移除内存中对象
             boolean r3 = forkChains.get(chainId).remove(chain);
             result = r1 && r2 && r3;
+            commonLog.info("removeForkChain r1-" + r1 + ", r2-" + r2 + ", r3-" + r3);
             return result ? chain.getHashList().size() : -1;
         }
         //有子链
@@ -336,6 +338,7 @@ public class BlockChainManager {
             //移除内存中对象
             boolean r2 = forkChains.get(chainId).remove(lastSon);
             result = r1 && r2;
+            commonLog.info("removeForkChain r1-" + r1 + ", r2-" + r2);
             return result ? (int) remove : -1;
         }
         return -1;

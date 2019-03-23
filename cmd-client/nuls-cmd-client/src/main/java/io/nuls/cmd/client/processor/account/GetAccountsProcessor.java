@@ -76,7 +76,7 @@ public class GetAccountsProcessor extends AccountBaseProcessor implements Comman
         try {
             return CommandResult.getSuccess(JSONUtils.obj2PrettyJson(result.getList()));
         } catch (JsonProcessingException e) {
-            return CommandResult.failed(ErrorCodeConstants.SYSTEM_ERR);
+            return CommandResult.failed(ErrorCodeConstants.SYSTEM_ERR.getMsg());
         }
     }
 }

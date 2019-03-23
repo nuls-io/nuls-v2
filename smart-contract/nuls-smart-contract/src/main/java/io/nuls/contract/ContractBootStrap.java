@@ -16,6 +16,7 @@ import io.nuls.rpc.modulebootstrap.NulsRpcModuleBootstrap;
 import io.nuls.rpc.modulebootstrap.RpcModule;
 import io.nuls.rpc.modulebootstrap.RpcModuleState;
 import io.nuls.tools.core.annotation.Autowired;
+import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.core.annotation.Configuration;
 import io.nuls.tools.core.ioc.SpringLiteContext;
 import io.nuls.tools.exception.NulsException;
@@ -40,7 +41,7 @@ import static java.nio.charset.StandardCharsets.UTF_8;
  * @author: PierreLuo
  * @date: 2019-03-14
  */
-@Configuration(persistDomain = "smart_contract")
+@Component
 public class ContractBootStrap extends RpcModule {
 
     @Autowired
@@ -185,7 +186,7 @@ public class ContractBootStrap extends RpcModule {
     /**
      * 某个外部依赖连接丢失后，会调用此方法，可控制模块状态，如果返回Ready,则表明模块退化到Ready状态，当依赖重新准备完毕后，将重新触发onDependenciesReady方法，若返回的状态是Running，将不会重新触发onDependenciesReady
      *
-     * @param module
+     * @param dependenciesModule
      * @return
      */
     @Override

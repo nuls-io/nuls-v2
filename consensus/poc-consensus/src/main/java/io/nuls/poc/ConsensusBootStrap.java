@@ -134,8 +134,6 @@ public class ConsensusBootStrap extends RpcModule {
      * Initialization database
      */
     private void initDB() throws Exception {
-//        Properties properties = ConfigLoader.loadProperties(ConsensusConstant.DB_CONFIG_NAME);
-//        String path = properties.getProperty(ConsensusConstant.DB_DATA_PATH, ConsensusConstant.DB_DATA_DEFAULT_PATH);
         RocksDBService.init(consensusConfig.getDataFolder());
         RocksDBService.createTable(ConsensusConstant.DB_NAME_CONSUME_LANGUAGE);
         RocksDBService.createTable(ConsensusConstant.DB_NAME_CONSUME_CONGIF);
@@ -148,7 +146,7 @@ public class ConsensusBootStrap extends RpcModule {
     private void initLanguage() throws Exception {
         LanguageService languageService = SpringLiteContext.getBean(LanguageService.class);
         String languageDB = languageService.getLanguage();
-        I18nUtils.loadLanguage(ConsensusBootStrap.class,"", "");
+        I18nUtils.loadLanguage(ConsensusBootStrap.class,"", consensusConfig.getLanguage());
         String language = null == languageDB ? I18nUtils.getLanguage() : languageDB;
         I18nUtils.setLanguage(language);
         if (null == languageDB) {

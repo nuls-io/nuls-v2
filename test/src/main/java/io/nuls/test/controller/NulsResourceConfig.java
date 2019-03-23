@@ -25,8 +25,9 @@
 package io.nuls.test.controller;
 
 import com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider;
+import io.nuls.test.utils.LoggerUtil;
 import io.nuls.tools.core.ioc.SpringLiteContext;
-import lombok.extern.slf4j.Slf4j;
+import io.nuls.tools.log.logback.NulsLogger;
 import org.glassfish.jersey.media.multipart.MultiPartFeature;
 import org.glassfish.jersey.server.ResourceConfig;
 
@@ -36,8 +37,9 @@ import java.util.Collection;
 /**
  * @author Niels
  */
-@Slf4j
 public class NulsResourceConfig extends ResourceConfig {
+
+    static NulsLogger log = LoggerUtil.logger;
 
     public NulsResourceConfig() {
         register(MultiPartFeature.class);

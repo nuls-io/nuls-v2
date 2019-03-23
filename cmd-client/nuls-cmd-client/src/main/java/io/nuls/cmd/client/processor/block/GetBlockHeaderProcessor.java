@@ -31,14 +31,12 @@ import io.nuls.api.provider.block.BlockService;
 import io.nuls.api.provider.block.facade.BlockHeaderData;
 import io.nuls.api.provider.block.facade.GetBlockHeaderByHashReq;
 import io.nuls.api.provider.block.facade.GetBlockHeaderByHeightReq;
-import io.nuls.base.data.BlockHeader;
 import io.nuls.cmd.client.CommandBuilder;
 import io.nuls.cmd.client.CommandHelper;
 import io.nuls.cmd.client.CommandResult;
-import io.nuls.cmd.client.processor.CommandProcessor;
 import io.nuls.cmd.client.processor.CommandGroup;
+import io.nuls.cmd.client.processor.CommandProcessor;
 import io.nuls.tools.core.annotation.Component;
-import lombok.extern.slf4j.Slf4j;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -48,7 +46,6 @@ import java.util.regex.Pattern;
  * @author: zhoulijun
  */
 @Component
-@Slf4j
 public class GetBlockHeaderProcessor implements CommandProcessor {
 
     Pattern IS_NUMBERIC = Pattern.compile("[0-9]+");

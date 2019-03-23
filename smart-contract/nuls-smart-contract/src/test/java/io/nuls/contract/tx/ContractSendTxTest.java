@@ -105,11 +105,11 @@ public class ContractSendTxTest extends Base {
         String methodDesc = "";
         String remark = "call contract test - 空气币转账";
         String token = BigInteger.TEN.pow(8).toString();
-        Map params = this.makeCallParams(sender, value, contractAddress, methodName, methodDesc, remark, toAddress, token);
+        Map params = this.makeCallParams(sender, value, contractAddress_nrc20, methodName, methodDesc, remark, toAddress, token);
         Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, CALL, params);
         Map result = (HashMap) (((HashMap) cmdResp2.getResponseData()).get(CALL));
         Assert.assertTrue(null != result);
-        Log.info("call-result:{}", JSONUtils.obj2PrettyJson(result));
+        Log.info("call-result:{}", JSONUtils.obj2PrettyJson(cmdResp2));
     }
     private Map makeCallParams(String sender, BigInteger value, String contractAddress, String methodName, String methodDesc, String remark, Object... args) {
         Map<String, Object> params = new HashMap<>();
@@ -134,11 +134,11 @@ public class ContractSendTxTest extends Base {
     public void transfer2Contract() throws Exception {
         BigInteger value = BigInteger.TEN.pow(8);
         String remark = "transfer 2 contract";
-        Map params = this.makeTransferParams(sender, contractAddress, value, remark);
+        Map params = this.makeTransferParams(sender, contractAddress_nrc20, value, remark);
         Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, TRANSFER, params);
         Map result = (HashMap) (((HashMap) cmdResp2.getResponseData()).get(TRANSFER));
         Assert.assertTrue(null != result);
-        Log.info("transfer2Contract-result:{}", JSONUtils.obj2PrettyJson(result));
+        Log.info("transfer2Contract-result:{}", JSONUtils.obj2PrettyJson(cmdResp2));
     }
     private Map makeTransferParams(String address, String toAddress, BigInteger amount, String remark) {
         Map<String, Object> params = new HashMap<>();
@@ -157,13 +157,14 @@ public class ContractSendTxTest extends Base {
      */
     @Test
     public void tokenTransfer() throws Exception {
-        BigInteger value = BigInteger.TEN.pow(8);
-        String remark = "token transfer to 5MR_2CVCFWH7o8AmrTBPLkdg2dYH1UCUJiM";
-        Map params = this.makeTokenTransferParams(sender, toAddress1, contractAddress, value, remark);
+        BigInteger value = BigInteger.TEN.pow(10);
+        String toAddress = contractAddress;
+        String remark = "token transfer to " + toAddress;
+        Map params = this.makeTokenTransferParams(sender, toAddress, contractAddress_nrc20, value, remark);
         Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, TOKEN_TRANSFER, params);
         Map result = (HashMap) (((HashMap) cmdResp2.getResponseData()).get(TOKEN_TRANSFER));
         Assert.assertTrue(null != result);
-        Log.info("tokenTransfer-result:{}", JSONUtils.obj2PrettyJson(result));
+        Log.info("tokenTransfer-result:{}", JSONUtils.obj2PrettyJson(cmdResp2));
     }
     private Map makeTokenTransferParams(String address, String toAddress, String contractAddress, BigInteger amount, String remark) {
         Map<String, Object> params = new HashMap<>();
@@ -184,7 +185,7 @@ public class ContractSendTxTest extends Base {
     @Test
     public void delete() throws Exception {
         String remark = "delete contract";
-        Map params = this.makeDeleteParams(sender, contractAddress, remark);
+        Map params = this.makeDeleteParams(sender, contractAddress_nrc20, remark);
         Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, DELETE, params);
         Map result = (HashMap) (((HashMap) cmdResp2.getResponseData()).get(DELETE));
         Assert.assertTrue(null != result);

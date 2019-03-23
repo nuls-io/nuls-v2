@@ -25,28 +25,25 @@
 
 package io.nuls.cmd.client.processor.account;
 
-import io.nuls.api.provider.ServiceManager;
-import io.nuls.api.provider.account.AccountService;
 import io.nuls.api.provider.account.facade.ImportAccountByKeyStoreReq;
 import io.nuls.cmd.client.CommandBuilder;
 import io.nuls.cmd.client.CommandHelper;
 import io.nuls.cmd.client.CommandResult;
 import io.nuls.cmd.client.processor.CommandProcessor;
+import io.nuls.cmd.client.utils.LoggerUtil;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.crypto.HexUtil;
-import lombok.extern.slf4j.Slf4j;
-
-import java.io.*;
-import java.net.URLDecoder;
+import io.nuls.tools.log.logback.NulsLogger;
 
 /**
  * 根据keystore导出账户,
  * 密码用来验证(keystore), 如果keystore没有密码则可以不输
  * @author: Charlie
  */
-@Slf4j
 @Component
 public class ImportByKeyStoreProcessor extends AccountBaseProcessor implements CommandProcessor {
+
+    static NulsLogger log = LoggerUtil.logger;
 
     @Override
     public String getCommand() {

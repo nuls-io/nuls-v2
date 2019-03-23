@@ -38,7 +38,6 @@ import io.nuls.cmd.client.Config;
 import io.nuls.cmd.client.processor.CommandProcessor;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
-import lombok.extern.slf4j.Slf4j;
 
 import static io.nuls.cmd.client.CommandHelper.getPwd;
 
@@ -46,7 +45,6 @@ import static io.nuls.cmd.client.CommandHelper.getPwd;
  * @author: zhoulijun
  */
 @Component
-@Slf4j
 public class StopAgentProcessor extends ConsensusBaseProcessor implements CommandProcessor {
 
     @Autowired

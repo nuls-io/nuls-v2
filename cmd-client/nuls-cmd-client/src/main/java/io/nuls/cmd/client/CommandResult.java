@@ -30,22 +30,24 @@ package io.nuls.cmd.client;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import io.nuls.api.provider.Result;
 import io.nuls.cmd.client.processor.ErrorCodeConstants;
+import io.nuls.cmd.client.utils.LoggerUtil;
 import io.nuls.tools.constant.ErrorCode;
+import io.nuls.tools.log.logback.NulsLogger;
 import io.nuls.tools.model.StringUtils;
 import io.nuls.tools.parse.JSONUtils;
-import lombok.extern.slf4j.Slf4j;
 
 import java.util.Map;
 
 /**
  * @author Niels
  */
-@Slf4j
 public class CommandResult {
 
     public boolean success;
 
     private String message;
+
+    static NulsLogger log = LoggerUtil.logger;
 
     public boolean isSuccess() {
         return success;
@@ -75,7 +77,7 @@ public class CommandResult {
     }
 
     public static CommandResult failed(String errCode){
-        return getFailed(ErrorCode.init(ErrorCodeConstants.SYSTEM_ERR).getMsg());
+        return getFailed(ErrorCodeConstants.SYSTEM_ERR.getMsg());
     }
 
     public static CommandResult getFailed(String message) {

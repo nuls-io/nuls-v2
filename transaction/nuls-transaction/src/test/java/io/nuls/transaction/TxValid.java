@@ -87,9 +87,9 @@ public class TxValid {
 
     @Test
     public void transfer() throws Exception {
-        for (int i = 0; i < 10; i++) {
-//            String hash = createTransfer();
-            String hash = createCtxTransfer();
+        for (int i = 0; i < 10000; i++) {
+            String hash = createTransfer();
+//            String hash = createCtxTransfer();
             System.out.println("count:" + (i + 1));
             System.out.println("");
 //            Thread.sleep(500L);
@@ -100,18 +100,18 @@ public class TxValid {
 
     @Test
     public void getTx() throws Exception {
-        String hash = createTransfer();
-        Thread.sleep(1000L);
-        getTxClient(hash);
-        Thread.sleep(1000L);
-        getTxClient(hash);
-        Thread.sleep(1000L);
-        getTxClient(hash);
-        Thread.sleep(1000L);
-        getTxClient(hash);
-        Thread.sleep(1000L);
-        getTxClient(hash);
-        getTxCfmClient("002022f34902fa07b53434f8f98959970b2dcb8bb34ce262896820a8b9e1d16e30b4");
+//        String hash = createTransfer();
+//        Thread.sleep(1000L);
+//        getTxClient(hash);
+//        Thread.sleep(1000L);
+//        getTxClient(hash);
+//        Thread.sleep(1000L);
+//        getTxClient(hash);
+//        Thread.sleep(1000L);
+//        getTxClient(hash);
+//        Thread.sleep(1000L);
+//        getTxClient(hash);
+        getTxCfmClient("002037bd6ee432aab018712115891857713d71e378979eb4506561a35b6688b9cfce");
     }
 
     private void getTx(String hash) throws Exception {
@@ -263,7 +263,7 @@ public class TxValid {
         params.put("txHash", hash);
         Response dpResp = ResponseMessageProcessor.requestAndResponse(ModuleE.TX.abbr, "tx_getConfirmedTxClient", params);
         Map record = (Map) dpResp.getResponseData();
-        Log.debug("", JSONUtils.obj2PrettyJson(record));
+        Log.debug(JSONUtils.obj2PrettyJson(record));
     }
 
     /**

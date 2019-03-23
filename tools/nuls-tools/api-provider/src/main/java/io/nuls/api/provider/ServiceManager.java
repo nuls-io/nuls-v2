@@ -1,19 +1,19 @@
 package io.nuls.api.provider;
 
 import io.nuls.tools.core.ioc.ScanUtil;
-import io.nuls.tools.parse.ConfigLoader;
-import lombok.extern.slf4j.Slf4j;
+import io.nuls.tools.log.Log;
 import net.sf.cglib.proxy.Enhancer;
 
-import java.io.IOException;
-import java.util.*;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @Author: zhoulijun
  * @Time: 2019-03-06 14:34
  * @Description: 功能描述
  */
-@Slf4j
 public class ServiceManager {
 
     /**
@@ -71,7 +71,7 @@ public class ServiceManager {
                             serviceImpls.put(intf,service);
                             service.setChainId(defaultChainId);
                         } catch (Exception e) {
-                            log.error("api provider init fail, service : {}",cls,e);
+                            Log.error("api provider init fail, service : {}",cls,e);
                             System.exit(0);
                         }
                     });

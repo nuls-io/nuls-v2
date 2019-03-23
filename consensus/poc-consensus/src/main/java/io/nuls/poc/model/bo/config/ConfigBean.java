@@ -17,21 +17,6 @@ public class ConfigBean implements Serializable {
      */
     private long packingInterval;
     /**
-     * 区块大小
-     * block size
-     */
-    private int blockSize;
-    /**
-     * 出块最小金额
-     * Minimum amount of output
-     */
-    private BigInteger packingAmount;
-    /**
-     * 奖励金锁定块数
-     * Number of Bonus Locking Blocks
-     */
-    private int coinbaseUnlockHeight;
-    /**
      * 获得红牌保证金锁定时间
      * Lock-in time to get a red card margin
      */
@@ -79,11 +64,6 @@ public class ConfigBean implements Serializable {
     private BigInteger entrusterDepositMin;
 
     /**
-     * 节点最多能被多少人委托
-     * How many people can a node be delegated at most
-     */
-    private int depositNumberMax;
-    /**
      * 种子节点
      * Seed node
      */
@@ -111,6 +91,17 @@ public class ConfigBean implements Serializable {
      * */
     private String password;
 
+    /**
+     * 打包区块最大值
+     * */
+    private long blockMaxSize;
+
+    /**
+     * 打包一个区块获得的共识奖励
+     * 每年通胀/每年出块数
+     * */
+    private BigInteger blockReward;
+
     public long getPackingInterval() {
         return packingInterval;
     }
@@ -119,29 +110,6 @@ public class ConfigBean implements Serializable {
         this.packingInterval = packingInterval;
     }
 
-    public int getBlockSize() {
-        return blockSize;
-    }
-
-    public void setBlockSize(int blockSize) {
-        this.blockSize = blockSize;
-    }
-
-    public BigInteger getPackingAmount() {
-        return packingAmount;
-    }
-
-    public void setPackingAmount(BigInteger packingAmount) {
-        this.packingAmount = packingAmount;
-    }
-
-    public int getCoinbaseUnlockHeight() {
-        return coinbaseUnlockHeight;
-    }
-
-    public void setCoinbaseUnlockHeight(int coinbaseUnlockHeight) {
-        this.coinbaseUnlockHeight = coinbaseUnlockHeight;
-    }
 
     public long getRedPublishLockTime() {
         return redPublishLockTime;
@@ -215,14 +183,6 @@ public class ConfigBean implements Serializable {
         this.entrusterDepositMin = entrusterDepositMin;
     }
 
-    public int getDepositNumberMax() {
-        return depositNumberMax;
-    }
-
-    public void setDepositNumberMax(int depositNumberMax) {
-        this.depositNumberMax = depositNumberMax;
-    }
-
     public String getSeedNodes() {
         return seedNodes;
     }
@@ -261,5 +221,21 @@ public class ConfigBean implements Serializable {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public long getBlockMaxSize() {
+        return blockMaxSize;
+    }
+
+    public void setBlockMaxSize(long blockMaxSize) {
+        this.blockMaxSize = blockMaxSize;
+    }
+
+    public BigInteger getBlockReward() {
+        return blockReward;
+    }
+
+    public void setBlockReward(BigInteger blockReward) {
+        this.blockReward = blockReward;
     }
 }

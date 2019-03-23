@@ -330,44 +330,44 @@ public class CommandHelper {
 //
 //    }
 
-//
-//    private static String getArgsJson() {
-//        String prompt = "Please enter the arguments according to the arguments structure(eg. \"a\",2,[\"c\",4],\"\",\"e\" or \"'a',2,['c',4],'','e'\")," +
-//                "\nIf this method has no arguments(Refer to the command named \"getcontractinfo\" for the arguments structure of the method.), return directly.\nEnter the arguments:";
-//        System.out.print(prompt);
-//        ConsoleReader reader = null;
-//        try {
-//            reader = new ConsoleReader();
-//            String args = reader.readLine();
-//            if(StringUtils.isNotBlank(args)) {
-//                args = "[" + args + "]";
-//            }
-//            return args;
-//        } catch (IOException e) {
-//            return null;
-//        } finally {
-//            try {
-//                if (!reader.delete()) {
-//                    reader.close();
-//                }
-//            } catch (IOException e) {
-//                e.printStackTrace();
-//            }
-//        }
-//    }
-//
-//    private static Object[] parseArgsJson(String argsJson) {
-//        if(StringUtils.isBlank(argsJson)) {
-//            return new Object[0];
-//        }
-//        try {
-//            List<Object> list = JSONUtils.json2pojo(argsJson, ArrayList.class);
-//            return list.toArray();
-//        } catch (Exception e) {
-//            e.fillInStackTrace();
-//            return null;
-//        }
-//    }
+
+    public static String getArgsJson() {
+        String prompt = "Please enter the arguments according to the arguments structure(eg. \"a\",2,[\"c\",4],\"\",\"e\" or \"'a',2,['c',4],'','e'\")," +
+                "\nIf this method has no arguments(Refer to the command named \"getcontractinfo\" for the arguments structure of the method.), return directly.\nEnter the arguments:";
+        System.out.print(prompt);
+        ConsoleReader reader = null;
+        try {
+            reader = new ConsoleReader();
+            String args = reader.readLine();
+            if(StringUtils.isNotBlank(args)) {
+                args = "[" + args + "]";
+            }
+            return args;
+        } catch (IOException e) {
+            return null;
+        } finally {
+            try {
+                if (!reader.delete()) {
+                    reader.close();
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    public static Object[] parseArgsJson(String argsJson) {
+        if(StringUtils.isBlank(argsJson)) {
+            return new Object[0];
+        }
+        try {
+            List<Object> list = JSONUtils.json2pojo(argsJson, ArrayList.class);
+            return list.toArray();
+        } catch (Exception e) {
+            e.fillInStackTrace();
+            return null;
+        }
+    }
 //
 //    public static RpcClientResult getContractCallArgsJson() {
 //        RpcClientResult rpcClientResult = new RpcClientResult();
