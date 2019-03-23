@@ -219,16 +219,22 @@ public class TxUtil {
             }
         }
         if (TxManager.isUnSystemSmartContract(chain, tx.getType())) {
-            TransactionPO transactionPO = new TransactionPO();
-            transactionPO.setAddress(extractContractAddress(tx.getTxData()));
-            transactionPO.setAssetChainId(chain.getConfig().getChainId());
-            transactionPO.setAssetId(chain.getConfig().getAssetId());
-            transactionPO.setAmount(BigInteger.ZERO);
-            transactionPO.setHash(tx.getHash().getDigestHex());
-            transactionPO.setType(tx.getType());
-            transactionPO.setState(4);
-            transactionPO.setTime(tx.getTime());
-            list.add(transactionPO);
+            do {
+                // 调用合约交易，如果有coinTo，那么它是合约地址，此处地址与交易的关系不重复存储
+                if(tx.getType() == TxConstant.TX_TYPE_CALL_CONTRACT && coinData.getTo().size() > 0) {
+                    break;
+                }
+                TransactionPO transactionPO = new TransactionPO();
+                transactionPO.setAddress(extractContractAddress(tx.getTxData()));
+                transactionPO.setAssetChainId(chain.getConfig().getChainId());
+                transactionPO.setAssetId(chain.getConfig().getAssetId());
+                transactionPO.setAmount(BigInteger.ZERO);
+                transactionPO.setHash(tx.getHash().getDigestHex());
+                transactionPO.setType(tx.getType());
+                transactionPO.setState(4);
+                transactionPO.setTime(tx.getTime());
+                list.add(transactionPO);
+            } while (false);
         }
         return list;
     }
