@@ -155,13 +155,13 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
             blockHeader = TxUtil.getInstance(blockHeaderHex, BlockHeader.class);
             chain.getLoggerMap().get(TxConstant.LOG_TX).debug("saveBlockTxList block height:{}", blockHeader.getHeight());
             for (Transaction tx : txList) {
-                if(TxManager.isSystemSmartContract(chain, tx.getType())) {
-                    continue;
-                }
                 tx.setBlockHeight(blockHeader.getHeight());
                 String txHex = tx.hex();
                 txHexList.add(txHex);
                 txHashs.add(tx.getHash().serialize());
+                if(TxManager.isSystemSmartContract(chain, tx.getType())) {
+                    continue;
+                }
                 TxUtil.moduleGroups(chain, moduleVerifyMap, tx);
             }
         } catch (Exception e) {
