@@ -928,9 +928,9 @@ public class ContractResource extends BaseCmd {
 
             BlockHeader blockHeader = BlockCall.getLatestBlockHeader(chainId);
 
-            if (contractAddressInfoPo.isLock(blockHeader.getHeight())) {
-                return failed(ContractErrorCode.CONTRACT_LOCK);
-            }
+            //if (contractAddressInfoPo.isLock(blockHeader.getHeight())) {
+            //    return failed(ContractErrorCode.CONTRACT_LOCK);
+            //}
 
             // 当前区块状态根
             byte[] prevStateRoot = ContractUtil.getStateRoot(blockHeader);
