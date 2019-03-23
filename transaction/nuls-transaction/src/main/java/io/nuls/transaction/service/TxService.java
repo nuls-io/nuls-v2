@@ -47,6 +47,15 @@ public interface TxService {
     boolean verify(Chain chain, Transaction tx);
 
     /**
+     * 验证交易,不执行基础的校验
+     * @param chain
+     * @param tx
+     * @param incloudBasic
+     * @return
+     */
+    boolean verify(Chain chain, Transaction tx, boolean incloudBasic);
+
+    /**
      * Get a transaction, first check the database from the confirmation transaction,
      * if not found, then query from the confirmed transaction
      *

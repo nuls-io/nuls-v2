@@ -8,6 +8,7 @@ import io.nuls.api.model.po.db.*;
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.data.*;
+import io.nuls.tools.basic.Result;
 import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.exception.NulsException;
 
@@ -22,7 +23,7 @@ public class AnalysisHandler {
     public static BlockInfo toBlockInfo(Block block, int chainId) throws Exception {
         BlockInfo blockInfo = new BlockInfo();
         BlockHeaderInfo blockHeader = toBlockHeaderInfo(block.getHeader(), chainId);
-        blockInfo.setTxList(toTxs(block.getTxs(), blockHeader));
+        blockInfo.setTxList(toTxs(chainId, block.getTxs(), blockHeader));
         //计算coinbase奖励
         blockHeader.setReward(calcCoinBaseReward(blockInfo.getTxList().get(0)));
         //计算总手续费
@@ -62,10 +63,10 @@ public class AnalysisHandler {
         return info;
     }
 
-    public static List<TransactionInfo> toTxs(List<Transaction> txList, BlockHeaderInfo blockHeader) throws Exception {
+    public static List<TransactionInfo> toTxs(int chainId, List<Transaction> txList, BlockHeaderInfo blockHeader) throws Exception {
         List<TransactionInfo> txs = new ArrayList<>();
         for (int i = 0; i < txList.size(); i++) {
-            TransactionInfo txInfo = toTransaction(txList.get(i));
+            TransactionInfo txInfo = toTransaction(chainId, txList.get(i));
             if (txInfo.getType() == ApiConstant.TX_TYPE_RED_PUNISH) {
                 PunishLogInfo punishLog = (PunishLogInfo) txInfo.getTxData();
                 punishLog.setRoundIndex(blockHeader.getRoundIndex());
@@ -82,7 +83,7 @@ public class AnalysisHandler {
         return txs;
     }
 
-    public static TransactionInfo toTransaction(Transaction tx) throws Exception {
+    public static TransactionInfo toTransaction(int chainId, Transaction tx) throws Exception {
         TransactionInfo info = new TransactionInfo();
         info.setHash(tx.getHash().getDigestHex());
         info.setHeight(tx.getBlockHeight());
@@ -108,7 +109,7 @@ public class AnalysisHandler {
         if (info.getType() == ApiConstant.TX_TYPE_YELLOW_PUNISH) {
             info.setTxDataList(toYellowPunish(tx));
         } else {
-            info.setTxData(toTxData(tx));
+            info.setTxData(toTxData(chainId, tx));
         }
         info.calcValue();
         return info;
@@ -151,7 +152,7 @@ public class AnalysisHandler {
     }
 
 
-    public static TxDataInfo toTxData(Transaction tx) throws NulsException {
+    public static TxDataInfo toTxData(int chainId, Transaction tx) throws NulsException {
         if (tx.getType() == ApiConstant.TX_TYPE_ALIAS) {
             return toAlias(tx);
         } else if (tx.getType() == ApiConstant.TX_TYPE_REGISTER_AGENT) {
@@ -165,6 +166,14 @@ public class AnalysisHandler {
         } else if (tx.getType() == ApiConstant.TX_TYPE_RED_PUNISH) {
             return toRedPublishLog(tx);
         } else if (tx.getType() == ApiConstant.TX_TYPE_CREATE_CONTRACT) {
+            return toCreateContractData(chainId, tx);
+        } else if (tx.getType() == ApiConstant.TX_TYPE_CALL_CONTRACT) {
+
+        } else if (tx.getType() == ApiConstant.TX_TYPE_DELETE_CONTRACT) {
+
+        } else if (tx.getType() == ApiConstant.TX_TYPE_CONTRACT_TRANSFER) {
+
+        } else if (tx.getType() == ApiConstant.TX_TYPE_CONTRACT_RETURN_GAS) {
 
         }
         return null;
@@ -268,6 +277,14 @@ public class AnalysisHandler {
         punishLog.setBlockHeight(tx.getBlockHeight());
         punishLog.setTime(tx.getTime());
         return punishLog;
+    }
+
+    public static ContractInfo toCreateContractData(int chainId, Transaction tx) throws NulsException {
+        CreateContractData data = new CreateContractData();
+        data.parse(new NulsByteBuffer(tx.getTxData()));
+
+        Result<ContractInfo> result = WalletRpcHandler.getContractInfo(chainId, AddressTool.getStringAddressByBytes(data.getContractAddress()));
+        return result.getData();
     }
 
     public static BigInteger calcCoinBaseReward(TransactionInfo coinBaseTx) {

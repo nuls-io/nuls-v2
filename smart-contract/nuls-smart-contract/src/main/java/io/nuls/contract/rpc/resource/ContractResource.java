@@ -37,6 +37,7 @@ import io.nuls.contract.model.bo.ContractResult;
 import io.nuls.contract.model.bo.ContractTokenInfo;
 import io.nuls.contract.model.dto.*;
 import io.nuls.contract.model.po.ContractAddressInfoPo;
+import io.nuls.contract.model.po.ContractCollectionInfoPo;
 import io.nuls.contract.model.po.ContractTokenTransferInfoPo;
 import io.nuls.contract.model.tx.ContractBaseTransaction;
 import io.nuls.contract.model.txdata.ContractData;
@@ -44,6 +45,7 @@ import io.nuls.contract.rpc.call.BlockCall;
 import io.nuls.contract.rpc.call.TransactionCall;
 import io.nuls.contract.service.ContractService;
 import io.nuls.contract.service.ContractTxService;
+import io.nuls.contract.storage.ContractAddressStorageService;
 import io.nuls.contract.storage.ContractTokenTransferStorageService;
 import io.nuls.contract.util.ContractLedgerUtil;
 import io.nuls.contract.util.ContractUtil;
@@ -91,6 +93,8 @@ public class ContractResource extends BaseCmd {
     private ContractTxService contractTxService;
     @Autowired
     private ContractTokenTransferStorageService contractTokenTransferStorageService;
+    @Autowired
+    private ContractAddressStorageService contractAddressStorageService;
 
     @CmdAnnotation(cmd = CREATE, version = 1.0, description = "invoke contract")
     @Parameter(parameterName = "chainId", parameterType = "int")
@@ -928,9 +932,9 @@ public class ContractResource extends BaseCmd {
 
             BlockHeader blockHeader = BlockCall.getLatestBlockHeader(chainId);
 
-            if (contractAddressInfoPo.isLock(blockHeader.getHeight())) {
-                return failed(ContractErrorCode.CONTRACT_LOCK);
-            }
+            //if (contractAddressInfoPo.isLock(blockHeader.getHeight())) {
+            //    return failed(ContractErrorCode.CONTRACT_LOCK);
+            //}
 
             // 当前区块状态根
             byte[] prevStateRoot = ContractUtil.getStateRoot(blockHeader);
@@ -1164,6 +1168,16 @@ public class ContractResource extends BaseCmd {
             Integer pageNumber = (Integer) params.get("pageNumber");
             Integer pageSize = (Integer) params.get("pageSize");
 
+            if (null == pageNumber || pageNumber == 0) {
+                pageNumber = 1;
+            }
+            if (null == pageSize || pageSize == 0) {
+                pageSize = 10;
+            }
+            if (pageNumber < 0 || pageSize < 0 || pageSize > 100) {
+                return failed(PARAMETER_ERROR);
+            }
+
             if (!AddressTool.validAddress(chainId, address)) {
                 return failed(ADDRESS_ERROR);
             }
@@ -1223,6 +1237,16 @@ public class ContractResource extends BaseCmd {
             Integer pageNumber = (Integer) params.get("pageNumber");
             Integer pageSize = (Integer) params.get("pageSize");
 
+            if (null == pageNumber || pageNumber == 0) {
+                pageNumber = 1;
+            }
+            if (null == pageSize || pageSize == 0) {
+                pageSize = 10;
+            }
+            if (pageNumber < 0 || pageSize < 0 || pageSize > 100) {
+                return failed(PARAMETER_ERROR);
+            }
+
             if (!AddressTool.validAddress(chainId, address)) {
                 return failed(ADDRESS_ERROR);
             }
@@ -1265,6 +1289,112 @@ public class ContractResource extends BaseCmd {
             }
 
             page.setList(result);
+
+            return success(page);
+        } catch (Exception e) {
+            Log.error(e);
+            return failed(e.getMessage());
+        }
+    }
+
+
+    @CmdAnnotation(cmd = ACCOUNT_CONTRACTS, version = 1.0, description = "account contract list")
+    @Parameter(parameterName = "chainId", parameterType = "int")
+    @Parameter(parameterName = "address", parameterType = "String")
+    @Parameter(parameterName = "pageNumber", parameterType = "int")
+    @Parameter(parameterName = "pageSize", parameterType = "int")
+    public Response accountContracts(Map<String, Object> params) {
+        try {
+            Integer chainId = (Integer) params.get("chainId");
+            String address = (String) params.get("address");
+            Integer pageNumber = (Integer) params.get("pageNumber");
+            Integer pageSize = (Integer) params.get("pageSize");
+
+            if (null == pageNumber || pageNumber == 0) {
+                pageNumber = 1;
+            }
+            if (null == pageSize || pageSize == 0) {
+                pageSize = 10;
+            }
+            if (pageNumber < 0 || pageSize < 0 || pageSize > 100) {
+                return failed(PARAMETER_ERROR);
+            }
+
+            if (!AddressTool.validAddress(chainId, address)) {
+                return failed(ADDRESS_ERROR);
+            }
+
+            byte[] addressBytes = AddressTool.getAddress(address);
+
+
+            LinkedHashMap<String, ContractAddressDto> resultMap = new LinkedHashMap<>();
+            // 该账户创建的未确认的合约
+            LinkedList<Map<String, String>> list = contractHelper.getChain(chainId).getContractTxCreateUnconfirmedManager().getLocalUnconfirmedCreateContractTransaction(address);
+            if(list != null) {
+                String contractAddress;
+                Long time;
+                ContractAddressDto dto;
+                String success;
+                for(Map<String, String> map : list) {
+                    contractAddress = map.get("contractAddress");
+                    time = Long.valueOf(map.get("time"));
+                    dto = new ContractAddressDto();
+                    dto.setCreate(true);
+                    dto.setContractAddress(contractAddress);
+                    dto.setCreateTime(time);
+
+                    success = map.get("success");
+                    if(StringUtils.isNotBlank(success)) {
+                        // 合约创建失败
+                        dto.setStatus(3);
+                        dto.setMsg(map.get("msg"));
+                    } else {
+                        dto.setStatus(0);
+                    }
+                    resultMap.put(contractAddress, dto);
+                }
+            }
+            BlockHeader blockHeader = BlockCall.getLatestBlockHeader(chainId);
+            long height = blockHeader.getHeight();
+            byte[] prevStateRoot = ContractUtil.getStateRoot(blockHeader);
+            ProgramExecutor track = contractHelper.getChain(chainId).getProgramExecutor().begin(prevStateRoot);
+            byte[] contractAddressBytes;
+            String contractAddress;
+
+            // 获取该账户创建的合约地址
+            Result<List<ContractAddressInfoPo>> contractInfoListResult = contractAddressStorageService.getContractInfoList(chainId, addressBytes);
+
+            List<ContractAddressInfoPo> contractAddressInfoPoList = contractInfoListResult.getData();
+            if(contractAddressInfoPoList != null && contractAddressInfoPoList.size() > 0) {
+                contractAddressInfoPoList.sort(new Comparator<ContractAddressInfoPo>() {
+                    @Override
+                    public int compare(ContractAddressInfoPo o1, ContractAddressInfoPo o2) {
+                        return o1.compareTo(o2.getCreateTime());
+                    }
+                });
+                for(ContractAddressInfoPo po : contractAddressInfoPoList) {
+                    contractAddressBytes = po.getContractAddress();
+                    contractAddress = AddressTool.getStringAddressByBytes(contractAddressBytes);
+                    resultMap.put(contractAddress, new ContractAddressDto(chainId, po, height, true, track.status(contractAddressBytes).ordinal()));
+                }
+            }
+            List<ContractAddressDto> infoList = new ArrayList<>(resultMap.values());
+            List<ContractAddressDto> contractAddressDtoList = new ArrayList<>();
+            Page<ContractAddressDto> page = new Page<>(pageNumber, pageSize, infoList.size());
+            int start = pageNumber * pageSize - pageSize;
+            if (start >= page.getTotal()) {
+                return success(page);
+            }
+            int end = start + pageSize;
+            if (end > page.getTotal()) {
+                end = (int) page.getTotal();
+            }
+            if(infoList.size() > 0) {
+                for (int i = start; i < end; i++) {
+                    contractAddressDtoList.add(infoList.get(i));
+                }
+            }
+            page.setList(contractAddressDtoList);
 
             return success(page);
         } catch (Exception e) {

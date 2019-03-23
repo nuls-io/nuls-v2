@@ -452,7 +452,7 @@ public class ContractUtil {
     }
 
     /**
-     * @param needReCallList
+     * @param contractResultList
      * @return 去掉重复的交易，并按照时间降序排列
      */
     public static List<ContractResult> deduplicationAndOrder(List<ContractResult> contractResultList) {
@@ -461,7 +461,7 @@ public class ContractUtil {
     }
 
     /**
-     * @param list
+     * @param contractResultList
      * @return 收集合约执行中所有出现过的合约地址，包括内部调用合约，合约转账
      */
     public static Map<String, Set<ContractResult>> collectAddressMap(List<ContractResult> contractResultList) {

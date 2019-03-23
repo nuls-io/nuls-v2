@@ -75,7 +75,6 @@ public class LedgerCall {
             params.put("chainId", chain.getChainId());
             params.put("txHexList", txHexList);
             params.put("blockHeight", blockHeight);
-            chain.getLoggerMap().get(TxConstant.LOG_TX).debug("%%%%%%%%% 验证区块交易, %%%%%%%%%%%%");
             HashMap result = (HashMap)TransactionCall.request(ModuleE.LG.abbr, "blockValidate", params);
             return (int) result.get("value") == 1;
         } catch (Exception e) {

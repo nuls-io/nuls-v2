@@ -81,6 +81,30 @@ public class ContractCallContractSendTxTest extends Base {
     }
 
     /**
+     *  向合约地址转账
+     */
+    @Test
+    public void transfer2Contract() throws Exception {
+        BigInteger value = BigInteger.valueOf(34777633L);
+        String remark = "transfer 2 contract";
+        Map params = this.makeTransferParams(sender, contractAddress, value, remark);
+        Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, TRANSFER, params);
+        Map result = (HashMap) (((HashMap) cmdResp2.getResponseData()).get(TRANSFER));
+        Assert.assertTrue(null != result);
+        Log.info("transfer2Contract-result:{}", JSONUtils.obj2PrettyJson(cmdResp2));
+    }
+    private Map makeTransferParams(String address, String toAddress, BigInteger amount, String remark) {
+        Map<String, Object> params = new HashMap<>();
+        params.put("chainId", chainId);
+        params.put("address", address);
+        params.put("toAddress", toAddress);
+        params.put("password", password);
+        params.put("amount", amount);
+        params.put("remark", remark);
+        return params;
+    }
+
+    /**
      * 调用合约 - 合约内部转账
      */
     @Test
@@ -91,8 +115,8 @@ public class ContractCallContractSendTxTest extends Base {
         String remark = "call contract test - 合约内部转账";
         String address1 = toAddress1;
         String address2 = toAddress2;
-        String value1 = BigInteger.TEN.pow(8).toString();
-        String value2 = BigInteger.TEN.pow(10).toString();
+        String value1 = BigInteger.valueOf(11888811).toString();
+        String value2 = BigInteger.valueOf(22888822).toString();
         Map params = this.makeCallParams(sender, value, contractAddress, methodName, methodDesc, remark,
                 address1, value1, address2, value2);
         Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, CALL, params);
@@ -115,7 +139,6 @@ public class ContractCallContractSendTxTest extends Base {
         params.put("remark", remark);
         return params;
     }
-
 
     /**
      * 调用合约 - 合约调用合约
@@ -140,27 +163,31 @@ public class ContractCallContractSendTxTest extends Base {
     }
 
     /**
-     *  向合约地址转账
+     * 调用合约 - 合约内部转账 && 合约调用合约
      */
     @Test
-    public void transfer2Contract() throws Exception {
-        BigInteger value = BigInteger.TEN.pow(11);
-        String remark = "transfer 2 contract";
-        Map params = this.makeTransferParams(sender, contractAddress, value, remark);
-        Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, TRANSFER, params);
-        Map result = (HashMap) (((HashMap) cmdResp2.getResponseData()).get(TRANSFER));
+    public void callContract_transferOut_contractCallContract() throws Exception {
+        BigInteger value = BigInteger.ZERO;
+        String methodName = "multyForAddressAndcallContractWithReturnValue";
+        String methodDesc = "";
+        String remark = "call contract test - 合约内部转账 && 合约调用合约";
+
+        String address1 = toAddress1;
+        String address2 = toAddress2;
+        String value1 = BigInteger.valueOf(11881188L).toString();
+        String value2 = BigInteger.valueOf(22882288L).toString();
+
+        String _methodName = "transfer";
+        String _token = BigInteger.valueOf(88888888L).toString();
+        String[] _args = new String[]{toAddress1, _token};
+        BigInteger _value = value;
+        Map params = this.makeCallParams(sender, value, contractAddress, methodName, methodDesc, remark,
+                address1, value1, address2, value2,
+                contractAddress_nrc20, _methodName, _args, _value);
+        Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, CALL, params);
+        Map result = (HashMap) (((HashMap) cmdResp2.getResponseData()).get(CALL));
         Assert.assertTrue(null != result);
-        Log.info("transfer2Contract-result:{}", JSONUtils.obj2PrettyJson(cmdResp2));
-    }
-    private Map makeTransferParams(String address, String toAddress, BigInteger amount, String remark) {
-        Map<String, Object> params = new HashMap<>();
-        params.put("chainId", chainId);
-        params.put("address", address);
-        params.put("toAddress", toAddress);
-        params.put("password", password);
-        params.put("amount", amount);
-        params.put("remark", remark);
-        return params;
+        Log.info("call-result:{}", JSONUtils.obj2PrettyJson(cmdResp2));
     }
 
 
@@ -170,9 +197,9 @@ public class ContractCallContractSendTxTest extends Base {
     @Test
     public void tokenTransfer() throws Exception {
         BigInteger value = BigInteger.TEN.pow(8);
-        String toAddress = toAddress1;
+        String toAddress = contractAddress;
         String remark = "token transfer to " + toAddress;
-        Map params = this.makeTokenTransferParams(sender, toAddress, contractAddress, value, remark);
+        Map params = this.makeTokenTransferParams(sender, toAddress, contractAddress_nrc20, value, remark);
         Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, TOKEN_TRANSFER, params);
         Map result = (HashMap) (((HashMap) cmdResp2.getResponseData()).get(TOKEN_TRANSFER));
         Assert.assertTrue(null != result);

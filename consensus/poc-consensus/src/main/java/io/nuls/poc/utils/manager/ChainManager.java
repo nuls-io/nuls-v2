@@ -3,10 +3,10 @@ package io.nuls.poc.utils.manager;
 import ch.qos.logback.classic.Level;
 import io.nuls.db.constant.DBErrorCode;
 import io.nuls.db.service.RocksDBService;
+import io.nuls.poc.config.ConsensusConfig;
 import io.nuls.poc.constant.ConsensusConstant;
 import io.nuls.poc.model.bo.Chain;
 import io.nuls.poc.model.bo.config.ConfigBean;
-import io.nuls.poc.config.ConsensusConfig;
 import io.nuls.poc.model.bo.tx.TxRegisterDetail;
 import io.nuls.poc.storage.ConfigService;
 import io.nuls.poc.utils.CallMethodUtils;
@@ -22,6 +22,7 @@ import io.nuls.tools.log.logback.NulsLogger;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -62,6 +63,7 @@ public class ChainManager {
     public void initChain(){
         Map<Integer, ConfigBean> configMap = configChain();
         if (configMap == null || configMap.size() == 0) {
+            Log.info("链初始化失败！");
             return;
         }
         for (Map.Entry<Integer, ConfigBean> entry : configMap.entrySet()){
@@ -79,7 +81,6 @@ public class ChainManager {
             */
             initTable(chain);
             chainMap.put(chainId, chain);
-
         }
 
     }
@@ -233,11 +234,15 @@ public class ChainManager {
                     return null;
                 }*/
                 ConfigBean configBean = config.getConfigBean();
-                configMap.put(configBean.getChainId(), configBean);
+                configBean.setBlockReward(configBean.getInflationAmount().divide(ConsensusConstant.YEAR_MILLISECOND.divide(BigInteger.valueOf(configBean.getPackingInterval()))));
+                boolean saveSuccess = configService.save(configBean,configBean.getChainId());
+                if(saveSuccess){
+                    configMap.put(configBean.getChainId(), configBean);
+                }
             }
             return configMap;
         } catch (Exception e) {
-            Log.error(e.getMessage());
+            Log.error(e);
             return null;
         }
     }

@@ -169,7 +169,7 @@ public class SyncService {
             } else if (tx.getType() == ApiConstant.TX_TYPE_RED_PUNISH) {
                 processRedPunishTx(chainId, tx);
             } else if (tx.getType() == ApiConstant.TX_TYPE_CREATE_CONTRACT) {
-                //                processCreateContract(tx);
+                processCreateContract(chainId, tx);
             } else if (tx.getType() == ApiConstant.TX_TYPE_CALL_CONTRACT) {
                 //                processCallContract(tx);
             } else if (tx.getType() == ApiConstant.TX_TYPE_DELETE_CONTRACT) {
@@ -424,6 +424,13 @@ public class SyncService {
             }
         }
     }
+
+    private void processCreateContract(int chainId, TransactionInfo tx) {
+        ContractInfo contractInfo = (ContractInfo) tx.getTxData();
+
+
+    }
+
 
     private AccountLedgerInfo calcBalance(int chainId, CoinToInfo output) {
         ChainInfo chainInfo = CacheManager.getChainInfo(chainId);
