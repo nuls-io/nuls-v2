@@ -155,7 +155,7 @@ public class SmallBlockHandler extends BaseCmd {
             //获取没有的交易
             if (!missTxHashList.isEmpty()) {
                 messageLog.info("block height:" + header.getHeight() + ", total tx count:" + header.getTxCount() + " , get group tx of " + missTxHashList.size());
-                messageLog.info("needHashList:" + missTxHashList + ", from:" + nodeId);
+                messageLog.debug("needHashList:" + missTxHashList + ", from:" + nodeId);
                 HashListMessage request = new HashListMessage();
                 request.setBlockHash(blockHash);
                 request.setTxHashList(missTxHashList);
