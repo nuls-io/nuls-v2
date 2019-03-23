@@ -136,7 +136,6 @@ public class CreateContractProcessor extends ContractBaseProcessor {
         if (null == form) {
             return CommandResult.getFailed("parameter error.");
         }
-        String sender = form.getSender();
         String password = CommandHelper.getPwd("Enter account password please.");
         String contractCode = form.getContractCode();
         Result<Object[]> res = createContractArgs(contractCode);
@@ -144,6 +143,7 @@ public class CreateContractProcessor extends ContractBaseProcessor {
             return CommandResult.getFailed(res);
         }
         form.setArgs(res.getData());
+        form.setPassword(password);
 //        Map<String, Object> parameters = new HashMap<>();
 //        parameters.put("sender", sender);
 //        parameters.put("gasLimit", form.getGasLimit());
