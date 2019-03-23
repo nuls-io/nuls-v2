@@ -6,12 +6,16 @@ import io.nuls.api.provider.account.AccountService;
 import io.nuls.api.provider.account.facade.AccountInfo;
 import io.nuls.api.provider.account.facade.GetAccountByAddressReq;
 import io.nuls.api.provider.transaction.facade.TransferByAliasReq;
+import io.nuls.api.provider.transaction.facade.TransferReq;
 import io.nuls.test.cases.Constants;
 import io.nuls.test.cases.TestFailException;
 import io.nuls.test.cases.account.CreateAccountCase;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.model.StringUtils;
+
+import static io.nuls.test.cases.Constants.REMARK;
+import static io.nuls.test.cases.Constants.TRANSFER_AMOUNT;
 
 /**
  * @Author: zhoulijun
@@ -36,7 +40,12 @@ public class TransferByAliasCase extends BaseTranscationCase<String,String> {
         String toAddress = createAccountCase.check(null,depth);
         AccountInfo accountInfo = accountService.getAccountByAddress(new GetAccountByAddressReq(address)).getData();
         check(StringUtils.isNotBlank(accountInfo.getAlias()),"别名转账异常，转出账户别名为空");
-        Result<String> result = transferService.transferByAlias(new TransferByAliasReq(accountInfo.getAlias(),toAddress, Constants.TRANSFER_AMOUNT,Constants.PASSWORD,Constants.REMARK));
+        TransferReq.TransferReqBuilder builder =
+                new TransferReq.TransferReqBuilder(config.getChainId(), config.getAssetsId())
+                        .addForm(accountInfo.getAlias(), Constants.PASSWORD, TRANSFER_AMOUNT)
+                        .addTo(toAddress, TRANSFER_AMOUNT);
+        builder.setRemark(REMARK);
+        Result<String> result = transferService.transfer(builder.build());
         checkResultStatus(result);
         return result.getData();
     }

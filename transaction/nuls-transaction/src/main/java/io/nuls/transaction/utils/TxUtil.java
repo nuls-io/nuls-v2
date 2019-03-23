@@ -38,11 +38,13 @@ import io.nuls.transaction.constant.TxConstant;
 import io.nuls.transaction.constant.TxErrorCode;
 import io.nuls.transaction.manager.TxManager;
 import io.nuls.transaction.model.bo.Chain;
+import io.nuls.transaction.model.bo.TxRegister;
 import io.nuls.transaction.model.po.TransactionPO;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import static io.nuls.transaction.utils.LoggerUtil.Log;
 
@@ -368,5 +370,31 @@ public class TxUtil {
         }
         nulsLogger.debug("**************************************************");
         nulsLogger.debug("");
+    }
+
+
+    /**
+     * 对交易进行模块分组
+     * @param chain
+     * @param moduleVerifyMap
+     * @param tx
+     * @throws NulsException
+     */
+    public static void moduleGroups(Chain chain, Map<TxRegister, List<String>> moduleVerifyMap, Transaction tx) throws NulsException{
+        //根据模块的统一验证器名，对所有交易进行分组，准备进行各模块的统一验证
+        TxRegister txRegister = TxManager.getTxRegister(chain, tx.getType());
+        String txHex;
+        try {
+            txHex = tx.hex();
+        } catch (Exception e) {
+            throw new NulsException(e);
+        }
+        if (moduleVerifyMap.containsKey(txRegister)) {
+            moduleVerifyMap.get(txRegister).add(txHex);
+        } else {
+            List<String> txHexs = new ArrayList<>();
+            txHexs.add(txHex);
+            moduleVerifyMap.put(txRegister, txHexs);
+        }
     }
 }

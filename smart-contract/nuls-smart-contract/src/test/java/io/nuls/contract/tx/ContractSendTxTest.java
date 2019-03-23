@@ -109,7 +109,7 @@ public class ContractSendTxTest extends Base {
         Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, CALL, params);
         Map result = (HashMap) (((HashMap) cmdResp2.getResponseData()).get(CALL));
         Assert.assertTrue(null != result);
-        Log.info("call-result:{}", JSONUtils.obj2PrettyJson(result));
+        Log.info("call-result:{}", JSONUtils.obj2PrettyJson(cmdResp2));
     }
     private Map makeCallParams(String sender, BigInteger value, String contractAddress, String methodName, String methodDesc, String remark, Object... args) {
         Map<String, Object> params = new HashMap<>();
@@ -138,7 +138,7 @@ public class ContractSendTxTest extends Base {
         Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, TRANSFER, params);
         Map result = (HashMap) (((HashMap) cmdResp2.getResponseData()).get(TRANSFER));
         Assert.assertTrue(null != result);
-        Log.info("transfer2Contract-result:{}", JSONUtils.obj2PrettyJson(result));
+        Log.info("transfer2Contract-result:{}", JSONUtils.obj2PrettyJson(cmdResp2));
     }
     private Map makeTransferParams(String address, String toAddress, BigInteger amount, String remark) {
         Map<String, Object> params = new HashMap<>();
@@ -158,12 +158,13 @@ public class ContractSendTxTest extends Base {
     @Test
     public void tokenTransfer() throws Exception {
         BigInteger value = BigInteger.TEN.pow(8);
-        String remark = "token transfer to 5MR_2CVCFWH7o8AmrTBPLkdg2dYH1UCUJiM";
-        Map params = this.makeTokenTransferParams(sender, toAddress1, contractAddress, value, remark);
+        String toAddress = toAddress1;
+        String remark = "token transfer to " + toAddress;
+        Map params = this.makeTokenTransferParams(sender, toAddress, contractAddress, value, remark);
         Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, TOKEN_TRANSFER, params);
         Map result = (HashMap) (((HashMap) cmdResp2.getResponseData()).get(TOKEN_TRANSFER));
         Assert.assertTrue(null != result);
-        Log.info("tokenTransfer-result:{}", JSONUtils.obj2PrettyJson(result));
+        Log.info("tokenTransfer-result:{}", JSONUtils.obj2PrettyJson(cmdResp2));
     }
     private Map makeTokenTransferParams(String address, String toAddress, String contractAddress, BigInteger amount, String remark) {
         Map<String, Object> params = new HashMap<>();

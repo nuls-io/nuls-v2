@@ -129,10 +129,10 @@ public interface TxConstant {
     /**
      * 跨链注册信息交易
      */
-//    String TX_MODULE_VALIDATOR = "txProcess";
-//    String CROSS_TRANSFER_VALIDATOR = "crossTxValidator";
-//    String CROSS_TRANSFER_COMMIT = "crossTxCommit";
-//    String CROSS_TRANSFER_ROLLBACK = "crossTxRollback";
+    String TX_MODULE_VALIDATOR = "txProcess";
+    String CROSS_TRANSFER_VALIDATOR = "crossTxValidator";
+    String CROSS_TRANSFER_COMMIT = "crossTxCommit";
+    String CROSS_TRANSFER_ROLLBACK = "crossTxRollback";
 
 //-----------------------------------------------------------------------------------------------------
     /** 单个交易最大2MB */

@@ -190,7 +190,7 @@ public class WalletRpcHandler {
             methodList.add(method);
         }
         contractInfo.setMethods(methodList);
-        return Result.getSuccess(null).setData(map);
+        return Result.getSuccess(null).setData(contractInfo);
 
     }
 
@@ -200,7 +200,9 @@ public class WalletRpcHandler {
         params.put("hash", hash);
         Map map = (Map) RpcCall.request(ModuleE.SC.abbr, CommandConstant.CONTRACT_RESULT, params);
         map = (Map) map.get("data");
-
+        if (map == null) {
+            return Result.getFailed(ApiErrorCode.DATA_NOT_FOUND);
+        }
         ContractResultInfo resultInfo = new ContractResultInfo();
         resultInfo.setSuccess((Boolean) map.get("success"));
         resultInfo.setTxHash((String) map.get("txHash"));
@@ -220,6 +222,6 @@ public class WalletRpcHandler {
         resultInfo.setRemark((String) map.get("remark"));
 
 
-        return null;
+        return Result.getSuccess(null).setData(resultInfo);
     }
 }

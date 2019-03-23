@@ -4,6 +4,7 @@ import io.nuls.api.analysis.WalletRpcHandler;
 import io.nuls.api.cache.ApiCache;
 import io.nuls.api.manager.CacheManager;
 import io.nuls.api.model.po.db.ContractInfo;
+import io.nuls.api.model.po.db.ContractResultInfo;
 import io.nuls.api.model.po.db.CurrentRound;
 import io.nuls.rpc.info.HostInfo;
 import io.nuls.rpc.info.NoUse;
@@ -81,6 +82,16 @@ public class ApiTest {
             Result<ContractInfo> result = WalletRpcHandler.getContractInfo(2,"tNULSeBaN71xpUTKtLyHSsTfB11fNGtA7W2RLS");
             result.getData();
         } catch (NulsException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Test
+    public void testContractResult() {
+        try {
+            Result<ContractResultInfo> result = WalletRpcHandler.getContractResultInfo(2,"0020393c317981937950c7a1181021fb5d917efb79c9c03a2f077f2d2760f73e9593");
+            result.getData();
+        }catch (Exception e) {
             e.printStackTrace();
         }
     }
