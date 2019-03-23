@@ -63,6 +63,26 @@ public class ContractQueryTest extends Base {
         Log.info("\nstateRoot is " + Hex.toHexString(ContractUtil.getStateRoot(blockHeader)) + ", " + blockHeader.toString());
     }
 
+    /**
+     *  账户创建的合约列表
+     */
+    @Test
+    public void accountContracts() throws Exception {
+        Map params = this.makeAccountContractsParams(sender, 1, 10);
+        Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, ACCOUNT_CONTRACTS, params);
+        Map result = (HashMap) (((HashMap) cmdResp2.getResponseData()).get(ACCOUNT_CONTRACTS));
+        Assert.assertTrue(null != result);
+        Log.info("accountContracts-result:{}", JSONUtils.obj2PrettyJson(cmdResp2));
+    }
+    private Map makeAccountContractsParams(String address, int pageNumber, int pageSize) {
+        Map<String, Object> params = new HashMap<>();
+        params.put("chainId", chainId);
+        params.put("address", address);
+        params.put("pageNumber", pageNumber);
+        params.put("pageSize", pageSize);
+        return params;
+    }
+
 
     /**
      * 预创建合约
@@ -234,7 +254,7 @@ public class ContractQueryTest extends Base {
      */
     @Test
     public void tokenBalance() throws Exception {
-        Map params = this.makeTokenBalanceParams(contractAddress, toAddress1);
+        Map params = this.makeTokenBalanceParams(contractAddress_nrc20, toAddress1);
         Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, TOKEN_BALANCE, params);
         Map result = (HashMap) (((HashMap) cmdResp2.getResponseData()).get(TOKEN_BALANCE));
         Assert.assertTrue(null != result);
@@ -411,7 +431,7 @@ public class ContractQueryTest extends Base {
     public void getTxRecord() throws Exception {
         Map<String, Object> params = new HashMap<>();
         params.put("chainId", chainId);
-        params.put("address", contractAddress);
+        params.put("address", sender);
         params.put("assetChainId", null);
         params.put("assetId", null);
         params.put("type", null);

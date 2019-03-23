@@ -413,7 +413,7 @@ public class ContractCallContractQueryTest extends Base {
      */
     @Test
     public void contractTx() throws Exception {
-        Map params = this.makeContractTxParams("00204377a5b86ba64ef1f8112eba87d42937e3d46fa998ddf459d99c16855589a0aa");
+        Map params = this.makeContractTxParams("002029ca32525f635a15c82c046114657c0d8a96a7163780ac6b425b2383b240bd56");
         Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, CONTRACT_TX, params);
         Map result = (HashMap) (((HashMap) cmdResp2.getResponseData()).get(CONTRACT_TX));
         Assert.assertTrue(null != result);
