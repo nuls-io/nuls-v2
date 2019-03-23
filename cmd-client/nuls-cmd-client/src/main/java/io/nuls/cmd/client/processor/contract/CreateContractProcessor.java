@@ -161,8 +161,7 @@ public class CreateContractProcessor extends ContractBaseProcessor {
     }
 
     private Result<Object[]> createContractArgs(String contractCode) {
-        GetContractConstructorArgsReq req = new GetContractConstructorArgsReq();
-        req.setContractCode(contractCode);
+        GetContractConstructorArgsReq req = new GetContractConstructorArgsReq(contractCode);
         Result<Map> result = contractProvider.getContractConstructorArgs(req);
         if (result.isSuccess()) {
             Result rpcClientResult = new Result();
@@ -175,7 +174,7 @@ public class CreateContractProcessor extends ContractBaseProcessor {
                     String argsListStr = JSONUtils.obj2PrettyJson(argsList);
                     // 再次交互输入构造参数
                     String argsJson = getArgsJson(argsListStr);
-                    argsObj = parseArgsJson(argsJson);
+                    argsObj = CommandHelper.parseArgsJson(argsJson);
                 } else {
                     argsObj = new Object[0];
                 }
@@ -215,16 +214,4 @@ public class CreateContractProcessor extends ContractBaseProcessor {
         }
     }
 
-    private Object[] parseArgsJson(String argsJson) {
-        if(StringUtils.isBlank(argsJson)) {
-            return new Object[0];
-        }
-        try {
-            List<Object> list = JSONUtils.json2pojo(argsJson, ArrayList.class);
-            return list.toArray();
-        } catch (Exception e) {
-            e.fillInStackTrace();
-            return null;
-        }
-    }
 }

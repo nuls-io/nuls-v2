@@ -146,7 +146,7 @@ public class CommandHandler implements InitializingBean {
         register(getBean(GetNetworkProcessor.class));
 
 
-        register(getBean(CreateContractProcessor.class));
+//        register(getBean(CreateContractProcessor.class));
     }
 
     public void start() {

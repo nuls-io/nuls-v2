@@ -62,4 +62,12 @@ public abstract class BaseRpcService extends BaseService {
         return call(method,req,fun);
     }
 
+    protected Result<Map> callResutlMap(String method,Object req){
+        Function<Map,Result> fun = res->{
+            return success(res);
+        };
+        return call(method,req,fun);
+    }
+
+
 }
