@@ -586,7 +586,7 @@ public class RoundManager {
      * @param chain       chain info
      * @param roundIndex  轮次下标
      * */
-    private BlockHeader getFirstBlockOfPreRound(Chain chain,long roundIndex){
+    public BlockHeader getFirstBlockOfPreRound(Chain chain,long roundIndex){
         BlockHeader firstBlockHeader = null;
         long startRoundIndex = 0L;
         List<BlockHeader> blockHeaderList = chain.getBlockHeaderList();
