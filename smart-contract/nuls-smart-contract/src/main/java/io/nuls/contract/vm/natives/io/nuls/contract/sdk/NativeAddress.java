@@ -179,7 +179,7 @@ public class NativeAddress {
 
         ProgramResult programResult = call(address, methodName, methodDesc, args, value, frame);
 
-        if(!programResult.isSuccess()) {
+        if (!programResult.isSuccess()) {
             return new Result();
         }
 

@@ -35,6 +35,7 @@ import io.nuls.contract.model.tx.CallContractTransaction;
 import io.nuls.contract.model.tx.CreateContractTransaction;
 import io.nuls.contract.model.tx.DeleteContractTransaction;
 import io.nuls.contract.service.ContractService;
+import io.nuls.contract.util.Log;
 import io.nuls.contract.util.MapUtil;
 import io.nuls.rpc.cmd.BaseCmd;
 import io.nuls.rpc.model.CmdAnnotation;
@@ -43,7 +44,6 @@ import io.nuls.rpc.model.message.Response;
 import io.nuls.tools.basic.Result;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
-import io.nuls.contract.util.Log;
 import org.spongycastle.util.encoders.Hex;
 
 import java.util.ArrayList;
@@ -132,14 +132,14 @@ public class ContractCmd extends BaseCmd {
             List<String> resultTxHexList = new ArrayList<>();
             List<Transaction> resultTxList = dto.getResultTxList();
             for (Transaction resultTx : resultTxList) {
-                Log.info("======pierre=====batch_end txType is {}, hash is {}", resultTx.getType(), resultTx.getHash().toString());
+                Log.info("======pierre=====batch_end txType is [{}], hash is {}", resultTx.getType(), resultTx.getHash().toString());
                 resultTxHexList.add(Hex.toHexString(resultTx.serialize()));
             }
 
             Map<String, Object> resultMap = MapUtil.createHashMap(2);
             resultMap.put("stateRoot", Hex.toHexString(dto.getStateRoot()));
             resultMap.put("txHexList", resultTxHexList);
-
+            Log.info("=====pierre=====end contract batch, packaging blockHeight is [{}], packaging StateRoot is {}", blockHeight, Hex.toHexString(dto.getStateRoot()));
             return success(resultMap);
         } catch (Exception e) {
             Log.error(e);

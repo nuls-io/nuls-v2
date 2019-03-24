@@ -33,11 +33,9 @@ import io.nuls.contract.vm.program.ProgramTransfer;
 import io.nuls.tools.crypto.HexUtil;
 import lombok.Getter;
 import lombok.Setter;
-import org.spongycastle.util.encoders.Hex;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 

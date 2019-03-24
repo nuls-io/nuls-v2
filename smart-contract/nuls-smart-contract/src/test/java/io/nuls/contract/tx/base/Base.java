@@ -31,13 +31,13 @@ import io.nuls.contract.model.bo.config.ConfigBean;
 import io.nuls.contract.rpc.call.BlockCall;
 import io.nuls.contract.rpc.call.LedgerCall;
 import io.nuls.contract.util.ContractUtil;
+import io.nuls.contract.util.Log;
 import io.nuls.rpc.info.HostInfo;
 import io.nuls.rpc.info.NoUse;
 import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.model.message.Response;
 import io.nuls.rpc.netty.processor.ResponseMessageProcessor;
 import io.nuls.tools.exception.NulsException;
-import io.nuls.contract.util.Log;
 import io.nuls.tools.parse.JSONUtils;
 import org.junit.Assert;
 import org.junit.Before;
@@ -102,7 +102,7 @@ public class Base {
     }
 
     /**
-     *  获取账户创建的合约列表
+     * 获取账户创建的合约列表
      */
     @Test
     public void accountContracts() throws Exception {
@@ -112,6 +112,7 @@ public class Base {
         Assert.assertTrue(null != result);
         Log.info("accountContracts-result:{}", JSONUtils.obj2PrettyJson(cmdResp2));
     }
+
     private Map makeAccountContractsParams(String address, int pageNumber, int pageSize) {
         Map<String, Object> params = new HashMap<>();
         params.put("chainId", chainId);
@@ -132,6 +133,7 @@ public class Base {
         Assert.assertTrue(null != result);
         Log.info("contract_info-result:{}", JSONUtils.obj2PrettyJson(cmdResp2));
     }
+
     private Map makeContractInfoParams(String contractAddress) {
         Map<String, Object> params = new HashMap<>();
         params.put("chainId", chainId);
@@ -144,12 +146,13 @@ public class Base {
      */
     @Test
     public void contractResult() throws Exception {
-        Map params = this.makeContractResultParams("002028289c28618cb1337dc8e7e426300c2dfd162ffd7f4c46df7582759eba3d5369");
+        Map params = this.makeContractResultParams("00206be26d4d20d39c26df5284331e35cf9b63ce1fae8003f06664deb8c0aaa1fd59");
         Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, CONTRACT_RESULT, params);
         Map result = (HashMap) (((HashMap) cmdResp2.getResponseData()).get(CONTRACT_RESULT));
         Assert.assertTrue(null != result);
         Log.info("contractResult-result:{}", JSONUtils.obj2PrettyJson(result));
     }
+
     private Map makeContractResultParams(String hash) {
         Map<String, Object> params = new HashMap<>();
         params.put("chainId", chainId);
@@ -168,6 +171,7 @@ public class Base {
         Assert.assertTrue(null != result);
         Log.info("contractTx-result:{}", JSONUtils.obj2PrettyJson(cmdResp2));
     }
+
     private Map makeContractTxParams(String hash) {
         Map<String, Object> params = new HashMap<>();
         params.put("chainId", chainId);

@@ -11,7 +11,6 @@ import java.lang.reflect.Field;
 import java.nio.charset.Charset;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
-import static org.junit.Assert.*;
 
 public class ContractDBUtilTest {
 

@@ -1,11 +1,8 @@
 package io.nuls.contract.model.bo;
 
-import io.nuls.base.data.BlockHeader;
 import io.nuls.contract.manager.ContractTokenBalanceManager;
 import io.nuls.contract.manager.ContractTxCreateUnconfirmedManager;
-import io.nuls.contract.manager.ContractTempBalanceManager;
 import io.nuls.contract.model.bo.config.ConfigBean;
-import io.nuls.contract.model.dto.ContractPackageDto;
 import io.nuls.contract.vm.program.ProgramExecutor;
 import lombok.Getter;
 import lombok.Setter;
@@ -54,31 +51,6 @@ public class Chain {
      * 批量执行信息
      */
     private BatchInfo batchInfo = new BatchInfo();
-
-    public ContractTempBalanceManager getTempBalanceManager() {
-        return batchInfo.getTempBalanceManager();
-    }
-
-    public void setTempBalanceManager(ContractTempBalanceManager tempBalanceManager) {
-        batchInfo.setTempBalanceManager(tempBalanceManager);
-    }
-
-    public BlockHeader getCurrentBlockHeader() {
-        return batchInfo.getCurrentBlockHeader();
-    }
-
-    public void setCurrentBlockHeader(BlockHeader currentBlockHeader) {
-        batchInfo.setCurrentBlockHeader(currentBlockHeader);
-    }
-
-    public ContractPackageDto getContractPackageDto() {
-        return batchInfo.getContractPackageDto();
-    }
-
-    public void setContractPackageDto(ContractPackageDto contractPackageDto) {
-        batchInfo.setContractPackageDto(contractPackageDto);
-    }
-
 
     public int getChainId() {
         return config.getChainId();

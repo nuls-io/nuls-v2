@@ -2,6 +2,10 @@ package io.nuls.tools.log.logback;
 
 import ch.qos.logback.classic.Logger;
 
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+
 /**
  * 系统日志类
  * System Log Class
@@ -10,11 +14,13 @@ import ch.qos.logback.classic.Logger;
  * 2018/12/18
  * */
 public class NulsLogger {
+    private Set<String> BASIC_PATH_MAP = new HashSet<>();
     private String BASIC_PATH = "io.nuls.tools.log.Log";
     private Logger logger;
 
     public NulsLogger(Logger logger){
         this.logger = logger;
+        BASIC_PATH_MAP.add(BASIC_PATH);
     }
 
     /**
@@ -165,7 +171,7 @@ public class NulsLogger {
         if (stack.length > 1) {
             // index为3上一级调用的堆栈信息，index为1和2都为Log类自己调两次（可忽略），index为0为主线程触发（可忽略）
             StackTraceElement ste = stack[3];
-            if(BASIC_PATH.equals(ste.getClassName())){
+            if(BASIC_PATH_MAP.contains(ste.getClassName())){
                 ste = stack[4];
             }
             if (ste != null) {
@@ -189,5 +195,9 @@ public class NulsLogger {
 
     public void setLogger(Logger logger) {
         this.logger = logger;
+    }
+
+    public void addBasicPath(String basicPath) {
+        BASIC_PATH_MAP.add(basicPath);
     }
 }
