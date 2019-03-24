@@ -132,14 +132,14 @@ public class ContractCmd extends BaseCmd {
             List<String> resultTxHexList = new ArrayList<>();
             List<Transaction> resultTxList = dto.getResultTxList();
             for (Transaction resultTx : resultTxList) {
-                Log.info("======pierre=====batch_end txType is [{}], hash is {}", resultTx.getType(), resultTx.getHash().toString());
+                Log.info("======pierre=====batch_end txType is [{}], hash is [{}]", resultTx.getType(), resultTx.getHash().toString());
                 resultTxHexList.add(Hex.toHexString(resultTx.serialize()));
             }
 
             Map<String, Object> resultMap = MapUtil.createHashMap(2);
             resultMap.put("stateRoot", Hex.toHexString(dto.getStateRoot()));
             resultMap.put("txHexList", resultTxHexList);
-            Log.info("=====pierre=====end contract batch, packaging blockHeight is [{}], packaging StateRoot is {}", blockHeight, Hex.toHexString(dto.getStateRoot()));
+            Log.info("=====pierre=====end contract batch, packaging blockHeight is [{}], packaging StateRoot is [{}]", blockHeight, Hex.toHexString(dto.getStateRoot()));
             return success(resultMap);
         } catch (Exception e) {
             Log.error(e);

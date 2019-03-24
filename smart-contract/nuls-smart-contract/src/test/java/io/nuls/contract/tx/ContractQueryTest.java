@@ -26,7 +26,7 @@ package io.nuls.contract.tx;
 
 
 import io.nuls.contract.basetest.ContractTest;
-import io.nuls.contract.tx.base.Base;
+import io.nuls.contract.tx.base.BaseQuery;
 import io.nuls.contract.util.Log;
 import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.model.message.Response;
@@ -50,7 +50,7 @@ import static io.nuls.contract.constant.ContractCmdConstant.*;
  * @author: PierreLuo
  * @date: 2019-03-15
  */
-public class ContractQueryTest extends Base {
+public class ContractQueryTest extends BaseQuery {
 
 
     /**

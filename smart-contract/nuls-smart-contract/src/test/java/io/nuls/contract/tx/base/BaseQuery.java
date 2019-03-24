@@ -53,7 +53,7 @@ import static io.nuls.contract.constant.ContractCmdConstant.*;
  * @author: PierreLuo
  * @date: 2018/12/4
  */
-public class Base {
+public class BaseQuery {
 
     @Before
     public void before() throws Exception {
@@ -146,7 +146,7 @@ public class Base {
      */
     @Test
     public void contractResult() throws Exception {
-        Map params = this.makeContractResultParams("00206be26d4d20d39c26df5284331e35cf9b63ce1fae8003f06664deb8c0aaa1fd59");
+        Map params = this.makeContractResultParams("0020a764748fcf517d5f3e2cda47de67994549d1c0c39036087ceb441ff4748fb22c");
         Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, CONTRACT_RESULT, params);
         Map result = (HashMap) (((HashMap) cmdResp2.getResponseData()).get(CONTRACT_RESULT));
         Assert.assertTrue(null != result);
@@ -165,7 +165,7 @@ public class Base {
      */
     @Test
     public void contractTx() throws Exception {
-        Map params = this.makeContractTxParams("0020e773a8d3938df93898fcb8d8ac9a1d0cb887d71526c437bf2686dd4008e96146");
+        Map params = this.makeContractTxParams("00208214ed51707803fa54ddf5f5b00a6739d12b284f96d3cd29852b2619efed6d09");
         Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, CONTRACT_TX, params);
         Map result = (HashMap) (((HashMap) cmdResp2.getResponseData()).get(CONTRACT_TX));
         Assert.assertTrue(null != result);
