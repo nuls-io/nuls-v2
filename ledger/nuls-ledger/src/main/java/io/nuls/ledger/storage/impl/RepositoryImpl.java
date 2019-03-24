@@ -28,7 +28,6 @@ package io.nuls.ledger.storage.impl;
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.db.model.Entry;
 import io.nuls.db.service.RocksDBService;
-import io.nuls.ledger.config.LedgerConfig;
 import io.nuls.ledger.constant.LedgerConstant;
 import io.nuls.ledger.model.ChainHeight;
 import io.nuls.ledger.model.po.AccountState;
@@ -39,7 +38,6 @@ import io.nuls.ledger.storage.InitDB;
 import io.nuls.ledger.storage.Repository;
 import io.nuls.ledger.utils.LoggerUtil;
 import io.nuls.tools.basic.InitializingBean;
-import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Service;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.model.ByteUtils;
@@ -56,8 +54,6 @@ import static io.nuls.ledger.utils.LoggerUtil.logger;
  */
 @Service
 public class RepositoryImpl implements Repository, InitDB, InitializingBean {
-    @Autowired
-    LedgerConfig ledgerConfig;
 
     public RepositoryImpl() {
 
@@ -286,7 +282,7 @@ public class RepositoryImpl implements Repository, InitDB, InitializingBean {
         }
         Map<byte[], byte[]> saveMap = new HashMap<>();
         for (Map.Entry<String, Integer> m : noncesMap.entrySet()) {
-            saveMap.put(ByteUtils.toBytes(m.getKey(), ledgerConfig.getEncoding()), ByteUtils.intToBytes(m.getValue()));
+            saveMap.put(ByteUtils.toBytes(m.getKey(), LedgerConstant.DEFAULT_ENCODING), ByteUtils.intToBytes(m.getValue()));
         }
         if (saveMap.size() > 0) {
             RocksDBService.batchPut(table, saveMap);
@@ -295,11 +291,11 @@ public class RepositoryImpl implements Repository, InitDB, InitializingBean {
 
     @Override
     public void deleteAccountNonces(int chainId, String accountNonceKey) throws Exception {
-        RocksDBService.delete(getLedgerNonceTableName(chainId), ByteUtils.toBytes(accountNonceKey, ledgerConfig.getEncoding()));
+        RocksDBService.delete(getLedgerNonceTableName(chainId), ByteUtils.toBytes(accountNonceKey, LedgerConstant.DEFAULT_ENCODING));
     }
 
     @Override
     public boolean existAccountNonce(int chainId, String accountNonceKey) throws Exception {
-        return (null != RocksDBService.get(getLedgerNonceTableName(chainId), ByteUtils.toBytes(accountNonceKey, ledgerConfig.getEncoding())));
+        return (null != RocksDBService.get(getLedgerNonceTableName(chainId), ByteUtils.toBytes(accountNonceKey, LedgerConstant.DEFAULT_ENCODING)));
     }
 }

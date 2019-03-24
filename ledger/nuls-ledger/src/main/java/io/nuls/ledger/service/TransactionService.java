@@ -27,7 +27,7 @@ package io.nuls.ledger.service;
 
 
 import io.nuls.base.data.Transaction;
-import io.nuls.ledger.model.po.AccountState;
+import io.nuls.ledger.model.po.AccountStateSnapshot;
 
 import java.util.List;
 
@@ -53,7 +53,7 @@ public interface TransactionService {
     /**
      * 确认交易回滚处理
      */
-    boolean rollBackBlock(int addressChainId, List<AccountState> preAccountStates,long blockHeight);
+    boolean rollBackBlock(int addressChainId, List<AccountStateSnapshot> preAccountStates, long blockHeight);
     /**
      * 确认交易回滚处理
      */

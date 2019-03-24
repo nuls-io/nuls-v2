@@ -30,61 +30,55 @@ import io.nuls.base.basic.NulsOutputStreamBuffer;
 import io.nuls.base.data.BaseNulsData;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.parse.SerializeUtils;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Created by cody on 2019/01/09.
+ * @author lanjinsheng
+ * @date 2018/11/19
  */
 @ToString
+@NoArgsConstructor
 @AllArgsConstructor
-public class BlockSnapshotAccounts extends BaseNulsData {
-    /**
-     *  accounts
-     */
+public class AccountStateSnapshot extends BaseNulsData {
     @Setter
     @Getter
-    private List<AccountStateSnapshot> accounts = new ArrayList<AccountStateSnapshot>();
-    public void addAccountState(AccountStateSnapshot accountState){
-        accounts.add(accountState);
-    }
-    public BlockSnapshotAccounts() {
-        super();
-    }
+    private AccountState accountState;
+    @Setter
+    @Getter
+    private List<String> nonces = new ArrayList<>();
+
+
+
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
-        stream.writeUint16(accounts.size());
-        for (AccountStateSnapshot accountState : accounts) {
-            stream.writeNulsData(accountState);
+        stream.writeNulsData(accountState);
+        stream.writeUint16(nonces.size());
+        for (String nonce : nonces) {
+            stream.writeString(nonce);
         }
+
     }
 
     @Override
     public void parse(NulsByteBuffer byteBuffer) throws NulsException {
-        int accountsCount = byteBuffer.readUint16();
-        for (int i = 0; i < accountsCount; i++) {
-            try {
-                AccountStateSnapshot accountState = new AccountStateSnapshot();
-                byteBuffer.readNulsData(accountState);
-                this.accounts.add(accountState);
-            } catch (Exception e) {
-                throw new NulsException(e);
-            }
+        this.accountState = byteBuffer.readNulsData(new AccountState());
+        int nonceCount = byteBuffer.readUint16();
+        for (int i = 0; i < nonceCount; i++) {
+            this.nonces.add(byteBuffer.readString());
         }
     }
 
     @Override
     public int size() {
         int size = 0;
+        size += SerializeUtils.sizeOfNulsData(accountState);
         size += SerializeUtils.sizeOfUint16();
-        for (AccountStateSnapshot accountState : accounts) {
-            size +=accountState.size();
+        for (String nonce : nonces) {
+            size += SerializeUtils.sizeOfString(nonce);
         }
         return size;
     }
