@@ -279,24 +279,27 @@ public class RepositoryImpl implements Repository, InitDB, InitializingBean {
     }
 
     @Override
-    public void saveAccountNonces(int chainId, Map<String,Integer> noncesMap) throws Exception {
+    public void saveAccountNonces(int chainId, Map<String, Integer> noncesMap) throws Exception {
         String table = getLedgerNonceTableName(chainId);
         if (!RocksDBService.existTable(table)) {
             RocksDBService.createTable(table);
         }
-        Map<byte [],byte[]> saveMap=new HashMap<>();
+        Map<byte[], byte[]> saveMap = new HashMap<>();
         for (Map.Entry<String, Integer> m : noncesMap.entrySet()) {
-            saveMap.put( ByteUtils.toBytes(m.getKey(), ledgerConfig.getEncoding()), ByteUtils.intToBytes(m.getValue()));
+            saveMap.put(ByteUtils.toBytes(m.getKey(), ledgerConfig.getEncoding()), ByteUtils.intToBytes(m.getValue()));
         }
-        RocksDBService.batchPut(table, saveMap);
+        if (saveMap.size() > 0) {
+            RocksDBService.batchPut(table, saveMap);
+        }
     }
 
     @Override
     public void deleteAccountNonces(int chainId, String accountNonceKey) throws Exception {
         RocksDBService.delete(getLedgerNonceTableName(chainId), ByteUtils.toBytes(accountNonceKey, ledgerConfig.getEncoding()));
     }
+
     @Override
-    public  boolean existAccountNonce(int chainId,String accountNonceKey) throws Exception{
-        return (null !=RocksDBService.get(getLedgerNonceTableName(chainId),ByteUtils.toBytes(accountNonceKey, ledgerConfig.getEncoding())));
+    public boolean existAccountNonce(int chainId, String accountNonceKey) throws Exception {
+        return (null != RocksDBService.get(getLedgerNonceTableName(chainId), ByteUtils.toBytes(accountNonceKey, ledgerConfig.getEncoding())));
     }
 }
