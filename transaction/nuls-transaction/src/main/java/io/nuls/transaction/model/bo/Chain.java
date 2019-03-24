@@ -1,9 +1,7 @@
 package io.nuls.transaction.model.bo;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import io.nuls.base.data.NulsDigestData;
 import io.nuls.base.data.Transaction;
-import io.nuls.tools.cache.LimitHashMap;
 import io.nuls.tools.log.logback.NulsLogger;
 import io.nuls.transaction.model.bo.config.ConfigBean;
 import io.nuls.transaction.utils.queue.entity.PersistentQueue;
@@ -64,7 +62,7 @@ public class Chain {
     /**
      * 孤儿交易
      */
-    private LimitHashMap<NulsDigestData, Transaction> orphanContainer;
+//    private LimitHashMap<NulsDigestData, Transaction> orphanContainer;
 
     /**
      * 未进行验证的交易队列
@@ -138,13 +136,13 @@ public class Chain {
         this.txQueue = txQueue;
     }
 
-    public LimitHashMap<NulsDigestData, Transaction> getOrphanContainer() {
-        return orphanContainer;
-    }
-
-    public void setOrphanContainer(LimitHashMap<NulsDigestData, Transaction> orphanContainer) {
-        this.orphanContainer = orphanContainer;
-    }
+//    public LimitHashMap<NulsDigestData, Transaction> getOrphanContainer() {
+//        return orphanContainer;
+//    }
+//
+//    public void setOrphanContainer(LimitHashMap<NulsDigestData, Transaction> orphanContainer) {
+//        this.orphanContainer = orphanContainer;
+//    }
 
     public PersistentQueue getUnverifiedQueue() {
         return unverifiedQueue;

@@ -185,7 +185,7 @@ public class CtxServiceImpl implements CtxService {
 
         if(chain.getPackaging().get()) {
             //当节点是出块节点时, 才将交易放入待打包队列
-            packablePool.add(chain, tx, false);
+            packablePool.add(chain, tx);
         }
         //保存到rocksdb
         unconfirmedTxStorageService.putTx(chain.getChainId(),tx);

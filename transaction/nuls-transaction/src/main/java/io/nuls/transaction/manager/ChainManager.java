@@ -27,7 +27,6 @@ package io.nuls.transaction.manager;
 import ch.qos.logback.classic.Level;
 import io.nuls.db.constant.DBErrorCode;
 import io.nuls.db.service.RocksDBService;
-import io.nuls.tools.cache.LimitHashMap;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Service;
 import io.nuls.tools.log.logback.LoggerBuilder;
@@ -195,7 +194,7 @@ public class ChainManager {
     private void initCache(Chain chain) throws Exception {
         chain.setUnverifiedQueue(new PersistentQueue(TxConstant.TX_UNVERIFIED_QUEUE_PREFIX + chain.getChainId(),
                 chain.getConfig().getTxUnverifiedQueueSize()));
-        chain.setOrphanContainer(new LimitHashMap(chain.getConfig().getOrphanContainerSize()));
+//        chain.setOrphanContainer(new LimitHashMap(chain.getConfig().getOrphanContainerSize()));
     }
 
     private void initLogger(Chain chain) {
