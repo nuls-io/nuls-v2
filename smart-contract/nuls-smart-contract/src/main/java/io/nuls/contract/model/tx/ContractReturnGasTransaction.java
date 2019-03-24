@@ -26,7 +26,6 @@ package io.nuls.contract.model.tx;
 
 
 import io.nuls.base.basic.TransactionLogicData;
-import io.nuls.base.data.Transaction;
 
 import static io.nuls.contract.constant.ContractConstant.TX_TYPE_CONTRACT_RETURN_GAS;
 

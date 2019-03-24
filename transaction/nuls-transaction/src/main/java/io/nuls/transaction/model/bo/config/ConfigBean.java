@@ -55,8 +55,6 @@ public class ConfigBean implements Serializable {
     private long packageRpcReserveTime;
     /** 接收新交易的文件队列最大容量**/
     private long txUnverifiedQueueSize;
-    /** 孤儿交易池最大容量**/
-    private int orphanContainerSize;
     /** 孤儿交易生命时间,超过会被清理**/
     private long orphanTtl;
 

@@ -47,4 +47,9 @@ public interface DataBaseArea {
      *   存区块交易缓存数据
      */
     String TB_LEDGER_BLOCKS = "chainBlocks";
+
+    /**
+     *   存区块交易缓存数据
+     */
+    String TB_LEDGER_NONCES = "ledgerNonces";
 }

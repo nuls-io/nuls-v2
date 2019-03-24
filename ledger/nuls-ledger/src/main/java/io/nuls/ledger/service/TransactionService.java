@@ -57,11 +57,16 @@ public interface TransactionService {
     /**
      * 确认交易回滚处理
      */
-    boolean rollBackConfirmTxs(int addressChainId,long blockHeight);
+    boolean rollBackConfirmTxs(int addressChainId,long blockHeight,List<Transaction> txs);
 
     /**
      * 未确认交易回滚处理
      */
     boolean rollBackUnconfirmTx(int addressChainId,Transaction transaction);
+
+    /**
+     * 是否提交过
+     */
+    boolean hadCommit(int addressChainId,String accountNonceKey) throws Exception;
 
 }

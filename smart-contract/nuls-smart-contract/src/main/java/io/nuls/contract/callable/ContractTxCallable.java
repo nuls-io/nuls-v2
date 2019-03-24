@@ -35,17 +35,20 @@ import io.nuls.contract.model.bo.ContractWrapperTransaction;
 import io.nuls.contract.model.txdata.ContractData;
 import io.nuls.contract.service.ContractExecutor;
 import io.nuls.contract.util.ContractUtil;
+import io.nuls.contract.util.Log;
 import io.nuls.contract.util.VMContext;
 import io.nuls.contract.vm.program.ProgramExecutor;
 import io.nuls.tools.basic.Result;
 import io.nuls.tools.core.ioc.SpringLiteContext;
-import io.nuls.contract.util.Log;
 import lombok.Getter;
 import lombok.Setter;
 
 import java.io.IOException;
 import java.math.BigInteger;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.Callable;
 
 import static io.nuls.contract.constant.ContractConstant.*;
@@ -83,7 +86,7 @@ public class ContractTxCallable implements Callable<ContractResult> {
         this.contractHelper = SpringLiteContext.getBean(ContractHelper.class);
         this.vmContext = SpringLiteContext.getBean(VMContext.class);
         this.contractTransferHandler = SpringLiteContext.getBean(ContractTransferHandler.class);
-        this.tempBalanceManager = contractHelper.getTempBalanceManager(chainId);
+        this.tempBalanceManager = contractHelper.getBatchInfoTempBalanceManager(chainId);
         this.executor = executor;
         this.contract = contract;
         this.tx = tx;
@@ -163,7 +166,7 @@ public class ContractTxCallable implements Callable<ContractResult> {
         boolean isConflict = checker.checkConflict(tx, contractResult, container.getCommitSet());
         if (isConflict) {
             // 冲突后，添加到重新执行的集合中，但是gas消耗完的不再重复执行
-            if(!isNotEnoughGasError(contractResult)) {
+            if (!isNotEnoughGasError(contractResult)) {
                 reCallList.add(contractResult);
             } else {
                 // 执行失败，添加到执行失败的集合中
@@ -217,15 +220,15 @@ public class ContractTxCallable implements Callable<ContractResult> {
             if (removedSet != null) {
                 List<ContractResult> recallList = new ArrayList<>();
                 // 失败的合约，gas消耗完的不再重复执行
-                for(ContractResult _contractResult : removedSet) {
-                    if(!isNotEnoughGasError(_contractResult)) {
+                for (ContractResult _contractResult : removedSet) {
+                    if (!isNotEnoughGasError(_contractResult)) {
                         callableResult.getReCallList().add(_contractResult);
                         recallList.add(_contractResult);
                     }
                 }
                 // 移除失败合约（已转移到重新执行的合约集合中）
-                if(recallList.size() > 0) {
-                    if(recallList.size() == removedSet.size()) {
+                if (recallList.size() > 0) {
+                    if (recallList.size() == removedSet.size()) {
                         failedMap.remove(address);
                     } else {
                         removedSet.removeAll(recallList);

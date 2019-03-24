@@ -181,14 +181,28 @@ public class TransactionCmd extends BaseLedgerCmd {
             description = "")
     @Parameter(parameterName = "chainId", parameterType = "int")
     @Parameter(parameterName = "blockHeight", parameterType = "long")
+    @Parameter(parameterName = "txHexList", parameterType = "List")
     public Response rollBackBlockTxs(Map params) {
         Map<String, Object> rtData = new HashMap<>();
         int value = 0;
         try {
             Integer chainId = (Integer) params.get("chainId");
             long blockHeight = Long.valueOf(params.get("blockHeight").toString());
+            List<String> txHexList = (List) params.get("txHexList");
+            if (null == txHexList || 0 == txHexList.size()) {
+                LoggerUtil.logger.error("txHexList is blank");
+                return failed("txHexList is blank");
+            }
+            LoggerUtil.logger.debug("rollBackBlockTxs txHexList={}", txHexList.size());
+            List<Transaction> txList = new ArrayList<>();
+            Response parseResponse = parseTxs(txHexList, txList);
+            if (!parseResponse.isSuccess()) {
+                LoggerUtil.logger.debug("commitBlockTxs response={}", parseResponse);
+                return parseResponse;
+            }
+
             LoggerUtil.txRollBackLog.debug("rollBackBlockTxs chainId={},blockHeight={}", chainId, blockHeight);
-            if (transactionService.rollBackConfirmTxs(chainId, blockHeight)) {
+            if (transactionService.rollBackConfirmTxs(chainId, blockHeight,txList)) {
                 value = 1;
             } else {
                 value = 0;

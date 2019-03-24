@@ -377,7 +377,7 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
     private boolean savePackable(Chain chain, Transaction tx) {
         //不是系统交易 并且节点是打包节点则重新放回待打包队列的最前端
         if (!TxManager.isSystemTx(chain, tx) && chain.getPackaging().get()) {
-            return packablePool.addInFirst(chain, tx, false);
+            packablePool.addInFirst(chain, tx);
         }
         return true;
     }
