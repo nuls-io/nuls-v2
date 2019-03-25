@@ -90,7 +90,7 @@ public class TestJyc {
      */
     @Test
     public void importSeed() {
-        importPriKey("b54db432bba7e13a6c4a28f65b925b18e63bcb79143f7b894fa735d5d3d09db5", password);//种子出块地址 tNULSeBaMkrt4z9FYEkkR9D6choPVvQr94oYZp
+//        importPriKey("b54db432bba7e13a6c4a28f65b925b18e63bcb79143f7b894fa735d5d3d09db5", password);//种子出块地址 tNULSeBaMkrt4z9FYEkkR9D6choPVvQr94oYZp
         importPriKey("188b255c5a6d58d1eed6f57272a22420447c3d922d5765ebb547bc6624787d9f", password);//tNULSeBaMoGr2RkLZPfJeS5dFzZeNj1oXmaYNe
         importPriKey("477059f40708313626cccd26f276646e4466032cabceccbf571a7c46f954eb75", password);//tNULSeBaMnrs6JKrCy6TQdzYJZkMZJDng7QAsD
     }
@@ -386,8 +386,8 @@ public class TestJyc {
             BigInteger balance = LedgerCall.getBalance(chain, AddressTool.getAddress(address23), chainId, assetId);
             Log.debug(address23 + "-----balance:{}", balance);
         }
-        int total = 10_000;
-        int count = 1_00;
+        int total = 100_000;
+        int count = 1_000;
         List<String> accountList = new ArrayList<>();
         Log.debug("##################################################");
         {
@@ -528,8 +528,8 @@ public class TestJyc {
             BigInteger balance = LedgerCall.getBalance(chain, AddressTool.getAddress(address23), chainId, assetId);
             Log.debug(address23 + "-----balance:{}", balance);
         }
-        int total = 100_000;
-        int count = 10;
+        int total = 100_000_000;
+        int count = 5;
         List<String> accountList;
         Log.debug("##################################################");
         {
@@ -592,6 +592,7 @@ public class TestJyc {
         }
         Thread.sleep(10000);
         List<String> hashList = new ArrayList<>();
+        int intervel = 20;
         {
             Log.debug("3.##########" + count + " accounts Transfer to each other##########");
             //100个地址之间互相转账
@@ -631,7 +632,9 @@ public class TestJyc {
                     Log.debug("transfer from {} to {}, hash:{}", from, to, hash);
                 }
                 Log.debug("##########" + j + " round end##########");
-                Thread.sleep(2000);
+                Thread.sleep(intervel * 1000);
+                intervel--;
+                intervel = intervel < 1 ? 20 : intervel;
             }
         }
         Thread.sleep(100000);

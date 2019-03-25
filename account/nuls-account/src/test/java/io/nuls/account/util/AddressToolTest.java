@@ -8,12 +8,13 @@ import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.parse.SerializeUtils;
 import org.junit.Test;
 
+import static junit.framework.TestCase.assertEquals;
 import static junit.framework.TestCase.assertTrue;
 
 /**
  * @author Niels
  */
-public class AccountToolTest {
+public class AddressToolTest {
 
     @Test
     public void createAccount() throws NulsException {
@@ -29,6 +30,17 @@ public class AccountToolTest {
             Address address = new Address(1, (byte) 1, SerializeUtils.sha256hash160(key.getPubKey()));
             System.out.println(address.getBase58() + "===========" + key.getPrivateKeyAsHex());
         }
+        System.out.println("=======================other net=======================");
+        for (int i = 3; i < 100; i++) {
+            ECKey key = new ECKey();
+            Address address = new Address(i, (byte) 1, SerializeUtils.sha256hash160(key.getPubKey()));
+            System.out.println(i + "==========" + address.getBase58() + "===========" + key.getPrivateKeyAsHex());
+        }
+        for (int i = 65535; i > 65400; i--) {
+            ECKey key = new ECKey();
+            Address address = new Address(i, (byte) 1, SerializeUtils.sha256hash160(key.getPubKey()));
+            System.out.println(i + "==========" + address.getBase58() + "===========" + key.getPrivateKeyAsHex());
+        }
     }
 
 
@@ -41,6 +53,11 @@ public class AccountToolTest {
         address1 = "NULSeBaMrNbr7kDHan5tBVms4fUZbfzed685k";
         result = AddressTool.validAddress(1, address1);
         assertTrue(!result);
+
+        address1 = "AHUcC84FN4CWrhuMgvvGPy6UacBvcutgQ4rAR";
+        result = AddressTool.validAddress(65401, address1);
+        assertTrue(!result);
+
     }
 
     @Test
@@ -63,5 +80,19 @@ public class AccountToolTest {
 
         boolean result = AddressTool.validAddress(2, address);
         assertTrue(result);
+    }
+
+    @Test
+    public void testGetPrefix() {
+        String address1 = "tNULSeBaMrNbr7kDHan5tBVms4fUZbfzed6851";
+        String address2 = "NULSeBaMrNbr7kDHan5tBVms4fUZbfzed685k";
+        String address3 = "APNcCm4yik6XXquTHUNbHqfPhGrfcSoGoMudc";
+
+
+        assertEquals("tNULS", AddressTool.getPrefix(address1));
+        assertEquals("NULS", AddressTool.getPrefix(address2));
+        assertEquals("APN", AddressTool.getPrefix(address3));
+
+
     }
 }

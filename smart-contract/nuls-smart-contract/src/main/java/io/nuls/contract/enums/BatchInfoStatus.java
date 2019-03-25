@@ -1,7 +1,7 @@
 /**
  * MIT License
  * <p>
- * Copyright (c) 2017-2019 nuls.io
+ * Copyright (c) 2017-2018 nuls.io
  * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -21,42 +21,40 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package io.nuls.contract.model.dto;
+package io.nuls.contract.enums;
 
-
-import io.nuls.contract.model.bo.ContractTokenInfo;
-import io.nuls.contract.util.ContractUtil;
-import lombok.Getter;
-import lombok.Setter;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * @author: PierreLuo
- * @date: 2018/8/19
+ * @date: 2019-03-25
  */
-@Getter
-@Setter
-public class ContractTokenInfoDto {
+public enum BatchInfoStatus {
+    // 0 - 未开始, 1 - 已开始
+    NOT_STARTING(0),
+    STARTING(1);
 
-    private String contractAddress;
-    private String name;
-    private String symbol;
-    private String amount;
-    private long decimals;
-    private long blockHeight;
-    // enum ContractStatus
     private int status;
+    private static Map<Integer, BatchInfoStatus> map;
 
-    public ContractTokenInfoDto() {
+    private BatchInfoStatus(int status) {
+        this.status = status;
+        putStatus(status, this);
     }
 
-    public ContractTokenInfoDto(ContractTokenInfo info) {
-        this.contractAddress = info.getContractAddress();
-        this.name = info.getName();
-        this.symbol = info.getSymbol();
-        this.amount = ContractUtil.bigInteger2String(info.getAmount());
-        this.decimals = info.getDecimals();
-        this.blockHeight = info.getBlockHeight();
-        this.status = info.getStatus().status();
+    public int status() {
+        return status;
     }
 
+    private static BatchInfoStatus putStatus(int status, BatchInfoStatus statusEnum) {
+        if(map == null) {
+            map = new HashMap<>(8);
+        }
+        return map.put(status, statusEnum);
+    }
+
+    public static BatchInfoStatus getStatus(int status) {
+        return map.get(status);
+    }
 }
