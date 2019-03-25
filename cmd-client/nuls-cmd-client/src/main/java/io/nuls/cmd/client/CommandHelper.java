@@ -364,7 +364,7 @@ public class CommandHelper {
             List<Object> list = JSONUtils.json2pojo(argsJson, ArrayList.class);
             return list.toArray();
         } catch (Exception e) {
-            e.fillInStackTrace();
+            System.out.println("arguments format error (eg. \"a\",2,[\"c\",4],\"\",\"e\" or \"'a',2,['c',4],'','e'\")");
             return null;
         }
     }

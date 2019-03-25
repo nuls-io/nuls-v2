@@ -180,21 +180,9 @@ public class CallContractProcessor extends ContractBaseProcessor {
         if (null == form) {
             return CommandResult.getFailed("parameter error.");
         }
-        String sender = form.getSender();
         String password = CommandHelper.getPwd("Please Enter your account password");
         form.setArgs(getContractCallArgsJson());
-//        Map<String, Object> parameters = new HashMap<>();
-//        parameters.put("sender", sender);
-//        parameters.put("gasLimit", form.getGasLimit());
-//        parameters.put("price", form.getPrice());
-//        parameters.put("password", password);
-//        parameters.put("remark", form.getRemark());
-//        parameters.put("contractAddress", form.getContractAddress());
-//        parameters.put("value", form.getValue());
-//        parameters.put("methodName", form.getMethodName());
-//        parameters.put("methodDesc", form.getMethodDesc());
-//        parameters.put("args", contractArgs);
-//        RpcClientResult result = restFul.post("/contract/call", parameters);
+        form.setPassword(password);
         Result<String> result = contractProvider.callContract(form);
         if (result.isFailed()) {
             return CommandResult.getFailed(result);
