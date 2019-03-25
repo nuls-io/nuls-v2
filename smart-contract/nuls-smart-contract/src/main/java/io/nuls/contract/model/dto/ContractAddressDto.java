@@ -26,6 +26,7 @@ package io.nuls.contract.model.dto;
 
 
 import io.nuls.base.basic.AddressTool;
+import io.nuls.contract.enums.ContractStatus;
 import io.nuls.contract.model.po.ContractAddressInfoPo;
 import io.nuls.tools.exception.NulsException;
 import lombok.Data;
@@ -43,7 +44,7 @@ public class ContractAddressDto {
     private long height;
     private long confirmCount;
     private String remarkName;
-    //TODO pierre enum 0 - 创建中, 1 - 正常, 2 - 已删除, 3 - 创建失败
+    // enum - ContractStatus
     private int status;
     private String msg;
 
@@ -59,12 +60,13 @@ public class ContractAddressDto {
         if (this.height > 0) {
             this.confirmCount = bestBlockHeight - this.height;
             if (this.confirmCount == 0) {
-                this.status = 0;
+                this.status = ContractStatus.NOT_EXISTS_OR_CONFIRMING.status();
             } else if (this.confirmCount < 7) {
-                this.status = 4;
+                this.status = ContractStatus.LOCKED.status();
             }
         } else {
             this.confirmCount = 0L;
         }
     }
+
 }

@@ -798,6 +798,8 @@ public class TxServiceImpl implements TxService {
                 txHashList = transactionModuleValidator(chain, moduleList);
             } else {
                 txHashList = TransactionCall.txModuleValidator(chain, txRegister.getModuleValidator(), txRegister.getModuleCode(), moduleList);
+                chain.getLoggerMap().get(TxConstant.LOG_TX).debug("[调用模块统一验证器] module:{}, module-code:{}, count:{}",
+                        txRegister.getModuleValidator(), txRegister.getModuleCode(), moduleList.size());
             }
             if (null == txHashList || txHashList.size() == 0) {
                 //模块统一验证没有冲突的，从map中干掉
