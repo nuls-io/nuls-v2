@@ -303,7 +303,7 @@ public class ContractCmd extends BaseCmd {
                 return failed(DATA_ERROR);
             }
 
-            Result result = contractTokenBalanceManager.initAllTokensByAccount(address);
+            Result result = contractTokenBalanceManager.initAllTokensByImportAccount(address);
             if (result.isFailed()) {
                 return wrapperFailed(result);
             }
