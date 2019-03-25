@@ -105,8 +105,8 @@ public class TransactionCmd extends BaseLedgerCmd {
     public Response commitBlockTxs(Map params) {
         Map<String, Object> rtData = new HashMap<>();
         Integer chainId = (Integer) params.get("chainId");
-        List<String> txHexList = (List) params.get("txHexList");
         long blockHeight = Long.valueOf(params.get("blockHeight").toString());
+        List<String> txHexList = (List) params.get("txHexList");
         if(blockHeight == 0){
             //进行创世初始化
             try {

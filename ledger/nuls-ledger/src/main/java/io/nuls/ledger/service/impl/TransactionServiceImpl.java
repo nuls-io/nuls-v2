@@ -166,7 +166,6 @@ public class TransactionServiceImpl implements TransactionService {
             Map<String, AccountBalance> updateAccounts = new HashMap<>();
             //整体区块备份
             BlockSnapshotAccounts blockSnapshotAccounts = new BlockSnapshotAccounts();
-
             for (Transaction transaction : txList) {
                 LoggerUtil.txCommitLog.debug("start confirmBlockProcess addressChainId={},blockHeight={},hash={}", addressChainId, blockHeight, transaction.getHash().toString());
                 //从缓存校验交易
@@ -203,9 +202,11 @@ public class TransactionServiceImpl implements TransactionService {
                         logger.info("address={},txHash = {} processFromCoinData is fail.", addressChainId, transaction.getHash().toString());
                         return false;
                     }
+
                 }
                 List<CoinTo> tos = coinData.getTo();
                 for (CoinTo to : tos) {
+
                     if (LedgerUtil.isNotLocalChainAccount(addressChainId, to.getAddress())) {
                         //非本地网络账户地址,不进行处理
                         logger.info("address={} not localChainAccount", AddressTool.getStringAddressByBytes(to.getAddress()));
