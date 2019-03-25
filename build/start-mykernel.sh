@@ -17,7 +17,10 @@ help()
 EOF
     exit 0
 }
-
+export JAVA_HOME="$(cd $(dirname "../Libraries/JAVA/11.0.2"); pwd)/11.0.2"
+export PATH=${PATH}:${JAVA_HOME}/bin
+echo "JAVA_HOME:${JAVA_HOME}"
+echo `java -version`
 BIN_PATH=$(cd $(dirname $0); pwd);
 cd $BIN_PATH;
 function get_fullpath()
@@ -77,14 +80,18 @@ if [ -n "$LOGPATH" ];
 then
     LOGPATH="-Dlog.path=${LOGPATH}"
     else
-    mkdir ../logs
+    if [ ! -d ../logs ]; then
+        mkdir ../logs
+    fi
     LOGPATH="-Dlog.path=`get_fullpath ../logs`"
 fi
 if [ -n "$DATAPATH" ];
 then
     DATAPATH="-DDataPath=${DATAPATH}"
     else
-    mkdir ../Modules/Nuls/data
+    if [ ! -d ../Modules/Nuls/data ]; then
+        mkdir ../Modules/Nuls/data
+    fi
     DATAPATH="-DDataPath=`get_fullpath ../Modules/Nuls/data`"
 fi
 echo "log path : ${LOGPATH}"

@@ -13,6 +13,6 @@ import lombok.Data;
 @AllArgsConstructor
 public class GetContractInfoReq extends BaseReq {
 
-    private String address;
+    private String contractAddress;
 
 }

@@ -12,6 +12,7 @@ help()
     		-m 生成mykernel模块以及启动脚本
     		-h 查看帮助
     		-j JAVA_HOME
+    		-J 输出的jvm虚拟机目录，脚本将会把这个目录复制到程序依赖中
     		-i 跳过mvn打包
     Author: zlj
 EOF
@@ -28,7 +29,7 @@ DOPULL=
 DOMOCK=
 #更新代码的 git 分支
 GIT_BRANCH=
-while getopts pmhb:o:j:i name
+while getopts pmhb:o:j:iJ: name
 do
             case $name in
             p)	   DOPULL=1
@@ -41,6 +42,7 @@ do
 			h)     help ;;
 			j)     JAVA_HOME="$OPTARG";;
 			i)     IGNROEMVN="1";;
+			J)     JRE_HOME="$OPTARG";;
             ?)     exit 2;;
            esac
 done
@@ -381,7 +383,27 @@ do
     fi
 done
 log "============ PACKAGE DONE ==============="
+cd $PROJECT_PATH
+echo $JRE_HOME
+if [ -n "${JRE_HOME}" ]; then
+log "============ COPY JRE TO libs ==========="
 
+    if [ ! -d "${JRE_HOME}" ];
+    then
+        echoRed "JRE_HOME 必须是文件夹"
+        else
+        log "JRE_HOME IS ${JRE_HOME}"
+        LIBS_PATH="${RELEASE_PATH}/Libraries"
+        if [ ! -d "${LIBS_PATH}" ]; then
+            mkdir ${LIBS_PATH}
+        fi
+        if [ ! -d "${LIBS_PATH}/JAVA" ]; then
+            mkdir "${LIBS_PATH}/JAVA"
+        fi
+        cp -r ${JRE_HOME} "${LIBS_PATH}/JAVA/11.0.2"
+    fi
+log "============ COPY JRE TO libs done ============"
+fi
 if [ -n "${DOMOCK}" ]; then
 	log "BUILD start-mykernel script"
 	cp "${BUILD_PATH}/start-mykernel.sh" "${MODULES_BIN_PATH}/start.sh"
@@ -396,7 +418,7 @@ if [ -n "${DOMOCK}" ]; then
 #	chmod u+x "${MODULES_PATH}/cmd.sh"
 fi
 log "============ build ${RELEASE_PATH}.tar.gz ==================="
-tar -cvjf "${RELEASE_PATH}.tar.gz" ${RELEASE_PATH}
+tar -cjf "${RELEASE_PATH}.tar.gz" ${RELEASE_PATH}
 log "============ build ${RELEASE_PATH}.tar.gz FINISH==================="
 
 

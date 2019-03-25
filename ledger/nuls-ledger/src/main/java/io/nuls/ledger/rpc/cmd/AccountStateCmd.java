@@ -75,7 +75,7 @@ public class AccountStateCmd extends BaseCmd {
         Integer assetChainId = (Integer) params.get("assetChainId");
         String address = (String) params.get("address");
         Integer assetId = (Integer) params.get("assetId");
-        LoggerUtil.logger.debug("chainId={},assetChainId={},address={},assetId={}", chainId, assetChainId, address, assetId);
+        LoggerUtil.logger(chainId).debug("chainId={},assetChainId={},address={},assetId={}", chainId, assetChainId, address, assetId);
         AccountState accountState = accountStateService.getAccountState(address, chainId, assetChainId, assetId);
         Map<String, Object> rtMap = new HashMap<>();
         rtMap.put("freeze", accountState.getFreezeTotal());
@@ -96,7 +96,7 @@ public class AccountStateCmd extends BaseCmd {
         rtMap.put("permanentLocked",permanentLocked);
         rtMap.put("timeHeightLocked", timeHeightLocked);
         Response response = success(rtMap);
-        LoggerUtil.logger.debug("response={}",response);
+        LoggerUtil.logger(chainId).debug("response={}",response);
         return  response;
     }
 
@@ -145,7 +145,7 @@ public class AccountStateCmd extends BaseCmd {
         Integer assetChainId = (Integer) params.get("assetChainId");
         String address = (String) params.get("address");
         Integer assetId = (Integer) params.get("assetId");
-        LoggerUtil.logger.debug("chainId={},assetChainId={},address={},assetId={}", chainId, assetChainId, address, assetId);
+        LoggerUtil.logger(chainId).debug("chainId={},assetChainId={},address={},assetId={}", chainId, assetChainId, address, assetId);
         AccountState accountState = accountStateService.getAccountState(address, chainId, assetChainId, assetId);
         Map<String, Object> rtMap = new HashMap<>();
         List<UnconfirmedNonce> unconfirmedNonces = accountState.getUnconfirmedNonces();
@@ -159,7 +159,7 @@ public class AccountStateCmd extends BaseCmd {
         if (accountState.getUnconfirmedAmounts().size() > 0) {
             rtMap.put("available", accountState.getAvailableAmount().add(accountState.getUnconfirmedAmount()));
             rtMap.put("freeze", accountState.getFreezeTotal().add(accountState.getUnconfirmedFreezeAmount()));
-            LoggerUtil.logger.debug("UnconfirmedAmounts=true");
+            LoggerUtil.logger(chainId).debug("UnconfirmedAmounts=true");
 
         } else {
             rtMap.put("available", accountState.getAvailableAmount());
@@ -167,7 +167,7 @@ public class AccountStateCmd extends BaseCmd {
         }
 
         Response response =  success(rtMap);
-        LoggerUtil.logger.debug("response={}", response);
+        LoggerUtil.logger(chainId).debug("response={}", response);
         return response;
     }
 
