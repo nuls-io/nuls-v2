@@ -35,6 +35,7 @@ import io.nuls.contract.model.tx.ContractTransferTransaction;
 import io.nuls.contract.model.txdata.ContractData;
 import io.nuls.contract.model.txdata.ContractTransferData;
 import io.nuls.contract.util.ContractUtil;
+import io.nuls.contract.util.Log;
 import io.nuls.contract.util.MapUtil;
 import io.nuls.contract.util.VMContext;
 import io.nuls.contract.vm.program.ProgramTransfer;
@@ -42,7 +43,6 @@ import io.nuls.tools.basic.Result;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.exception.NulsException;
-import io.nuls.contract.util.Log;
 import io.nuls.tools.model.ByteArrayWrapper;
 import org.spongycastle.util.encoders.Hex;
 

@@ -32,7 +32,6 @@ import io.nuls.contract.service.ContractExecutor;
 import io.nuls.contract.vm.program.*;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
-import io.nuls.tools.core.annotation.Service;
 import lombok.Getter;
 import lombok.Setter;
 import org.spongycastle.util.encoders.Hex;

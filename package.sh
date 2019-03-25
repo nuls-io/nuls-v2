@@ -395,8 +395,10 @@ if [ -n "${DOMOCK}" ]; then
 #	cp "${BUILD_PATH}/cmd.sh" "${MODULES_PATH}/"
 #	chmod u+x "${MODULES_PATH}/cmd.sh"
 fi
-
+log "============ build ${RELEASE_PATH}.tar.gz ==================="
 tar -cvjf "${RELEASE_PATH}.tar.gz" ${RELEASE_PATH}
+log "============ build ${RELEASE_PATH}.tar.gz FINISH==================="
+
 
 
 

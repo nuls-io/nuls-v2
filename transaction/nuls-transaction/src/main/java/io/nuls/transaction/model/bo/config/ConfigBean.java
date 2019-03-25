@@ -50,13 +50,11 @@ public class ConfigBean implements Serializable {
      * 打包时在获取交易之后留给模块统一验证的时间阈值,
      * 包括统一验证有被过滤掉的交易时需要重新验证等.
      */
-    private long moduleVerifyOffset;
+    private float moduleVerifyPercent;
     /** 打包获取交易给RPC传输到共识的预留时间,超时则需要处理交易还原待打包队列*/
     private long packageRpcReserveTime;
     /** 接收新交易的文件队列最大容量**/
     private long txUnverifiedQueueSize;
-    /** 孤儿交易池最大容量**/
-    private int orphanContainerSize;
     /** 孤儿交易生命时间,超过会被清理**/
     private long orphanTtl;
 

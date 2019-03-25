@@ -40,13 +40,12 @@ import io.nuls.contract.model.txdata.DeleteContractData;
 import io.nuls.contract.service.*;
 import io.nuls.contract.storage.ContractExecuteResultStorageService;
 import io.nuls.contract.util.ContractUtil;
+import io.nuls.contract.util.Log;
 import io.nuls.contract.vm.program.ProgramExecutor;
 import io.nuls.tools.basic.Result;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
-import io.nuls.tools.core.annotation.Service;
 import io.nuls.tools.exception.NulsException;
-import io.nuls.contract.util.Log;
 import io.nuls.tools.model.ByteArrayWrapper;
 import io.nuls.tools.model.LongUtils;
 import org.spongycastle.util.encoders.Hex;
@@ -92,6 +91,7 @@ public class ContractServiceImpl implements ContractService {
 
     @Override
     public Result begin(int chainId, long blockHeight, long blockTime, String packingAddress, String preStateRoot) {
+        Log.info("=====pierre=====begin contract batch, packaging blockHeight is [{}], packaging address is [{}], preStateRoot is [{}]", blockHeight, packingAddress, preStateRoot);
         Chain chain = contractHelper.getChain(chainId);
         BatchInfo batchInfo = chain.getBatchInfo();
         // 清空上次批量的所有数据
@@ -117,7 +117,7 @@ public class ContractServiceImpl implements ContractService {
     @Override
     public Result invokeContractOneByOne(int chainId, ContractTempTransaction tx) {
         try {
-            Log.info("=====pierre=====invoke contract TxType is {}, hash is {}", tx.getType(), tx.getHash().toString());
+            Log.info("=====pierre=====invoke contract TxType is [{}], hash is [{}]", tx.getType(), tx.getHash().toString());
             Chain chain = contractHelper.getChain(chainId);
             BatchInfo batchInfo = chain.getBatchInfo();
             if (!batchInfo.hasBegan()) {
@@ -183,7 +183,7 @@ public class ContractServiceImpl implements ContractService {
             }
             // 生成退还剩余Gas的交易
             ContractReturnGasTransaction contractReturnGasTx = this.makeReturnGasTx(chainId, contractResultList, blockTime);
-            if(contractReturnGasTx != null) {
+            if (contractReturnGasTx != null) {
                 resultTxList.add(contractReturnGasTx);
             }
             Result<byte[]> batchExecuteResult = contractCaller.commitBatchExecute(batchExecutor);
@@ -192,7 +192,7 @@ public class ContractServiceImpl implements ContractService {
 
             ContractPackageDto dto = new ContractPackageDto(stateRoot, resultTxList);
             dto.makeContractResultMap(contractResultList);
-            contractHelper.getChain(chainId).setContractPackageDto(dto);
+            contractHelper.getChain(chainId).getBatchInfo().setContractPackageDto(dto);
 
             return getSuccess().setData(dto);
         } catch (IOException e) {
@@ -213,7 +213,7 @@ public class ContractServiceImpl implements ContractService {
 
     public Result commitProcessor(int chainId, List<String> txHexList, String blockHeaderHex) {
         try {
-            ContractPackageDto contractPackageDto = contractHelper.getChain(chainId).getContractPackageDto();
+            ContractPackageDto contractPackageDto = contractHelper.getChain(chainId).getBatchInfo().getContractPackageDto();
             if (contractPackageDto != null) {
                 Map<String, ContractResult> contractResultMap = contractPackageDto.getContractResultMap();
                 /** pierre test code + */

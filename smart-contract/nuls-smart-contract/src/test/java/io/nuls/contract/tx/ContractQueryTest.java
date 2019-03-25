@@ -26,11 +26,11 @@ package io.nuls.contract.tx;
 
 
 import io.nuls.contract.basetest.ContractTest;
-import io.nuls.contract.tx.base.Base;
+import io.nuls.contract.tx.base.BaseQuery;
+import io.nuls.contract.util.Log;
 import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.model.message.Response;
 import io.nuls.rpc.netty.processor.ResponseMessageProcessor;
-import io.nuls.contract.util.Log;
 import io.nuls.tools.parse.JSONUtils;
 import org.apache.commons.io.IOUtils;
 import org.junit.Assert;
@@ -50,7 +50,7 @@ import static io.nuls.contract.constant.ContractCmdConstant.*;
  * @author: PierreLuo
  * @date: 2019-03-15
  */
-public class ContractQueryTest extends Base {
+public class ContractQueryTest extends BaseQuery {
 
 
     /**
@@ -70,6 +70,7 @@ public class ContractQueryTest extends Base {
         Log.info("pre_create-Response:{}", JSONUtils.obj2PrettyJson(cmdResp2));
         Assert.assertTrue(cmdResp2.isSuccess());
     }
+
     private Map makePreCreateParams(String sender, byte[] contractCode, String remark, Object... args) {
         Map<String, Object> params = new HashMap<>();
         params.put("chainId", chainId);
@@ -101,6 +102,7 @@ public class ContractQueryTest extends Base {
         Assert.assertTrue(null != result);
         Log.info("imputed_create_gas-result:{}", JSONUtils.obj2PrettyJson(result));
     }
+
     private Map makeImputedCreateGasParams(String sender, byte[] contractCode, Object... args) {
         Map<String, Object> params = new HashMap<>();
         params.put("chainId", chainId);
@@ -126,6 +128,7 @@ public class ContractQueryTest extends Base {
         Log.info("validate_create-Response:{}", JSONUtils.obj2PrettyJson(cmdResp2));
         Assert.assertTrue(cmdResp2.isSuccess());
     }
+
     private Map makeValidateCreateParams(String sender, byte[] contractCode, Object... args) {
         Map<String, Object> params = new HashMap<>();
         params.put("chainId", chainId);
@@ -152,6 +155,7 @@ public class ContractQueryTest extends Base {
         Log.info("validateCall-Response:{}", JSONUtils.obj2PrettyJson(cmdResp2));
         Assert.assertTrue(cmdResp2.isSuccess());
     }
+
     private Map makeValidateCallParams(String sender, BigInteger value, String contractAddress, String methodName, String methodDesc, Object... args) {
         Map<String, Object> params = new HashMap<>();
         params.put("chainId", chainId);
@@ -181,6 +185,7 @@ public class ContractQueryTest extends Base {
         Assert.assertTrue(null != result);
         Log.info("imputed_call_gas-result:{}", JSONUtils.obj2PrettyJson(result));
     }
+
     private Map makeImputedCallGasParams(String sender, BigInteger value, String contractAddress, String methodName, String methodDesc, Object... args) {
         Map<String, Object> params = new HashMap<>();
         params.put("chainId", chainId);
@@ -195,7 +200,7 @@ public class ContractQueryTest extends Base {
 
 
     /**
-     *  获取向合约地址转账的手续费
+     * 获取向合约地址转账的手续费
      */
     @Test
     public void transfer2ContractFee() throws Exception {
@@ -207,6 +212,7 @@ public class ContractQueryTest extends Base {
         Assert.assertTrue(null != result);
         Log.info("transfer2ContractFee-result:{}", JSONUtils.obj2PrettyJson(cmdResp2));
     }
+
     private Map makeTransferFeeParams(String address, String toAddress, BigInteger amount, String remark) {
         Map<String, Object> params = new HashMap<>();
         params.put("chainId", chainId);
@@ -219,7 +225,7 @@ public class ContractQueryTest extends Base {
 
 
     /**
-     *  token余额
+     * token余额
      */
     @Test
     public void tokenBalance() throws Exception {
@@ -229,6 +235,7 @@ public class ContractQueryTest extends Base {
         Assert.assertTrue(null != result);
         Log.info("tokenBalance-result:{}", JSONUtils.obj2PrettyJson(result));
     }
+
     private Map makeTokenBalanceParams(String contractAddress, String address) {
         Map<String, Object> params = new HashMap<>();
         params.put("chainId", chainId);
@@ -238,7 +245,7 @@ public class ContractQueryTest extends Base {
     }
 
     /**
-     *  账户token资产
+     * 账户token资产
      */
     @Test
     public void tokenAssetsList() throws Exception {
@@ -248,6 +255,7 @@ public class ContractQueryTest extends Base {
         Assert.assertTrue(null != result);
         Log.info("tokenAssetsList-result:{}", JSONUtils.obj2PrettyJson(cmdResp2));
     }
+
     private Map makeTokenAssetsListParams(String address, int pageNumber, int pageSize) {
         Map<String, Object> params = new HashMap<>();
         params.put("chainId", chainId);
@@ -258,7 +266,7 @@ public class ContractQueryTest extends Base {
     }
 
     /**
-     *  账户token交易列表
+     * 账户token交易列表
      */
     @Test
     public void tokenTransferList() throws Exception {
@@ -268,6 +276,7 @@ public class ContractQueryTest extends Base {
         Assert.assertTrue(null != result);
         Log.info("tokenAssetsList-result:{}", JSONUtils.obj2PrettyJson(result));
     }
+
     private Map makeTokenTransferListParams(String address, int pageNumber, int pageSize) {
         Map<String, Object> params = new HashMap<>();
         params.put("chainId", chainId);
@@ -291,6 +300,7 @@ public class ContractQueryTest extends Base {
         Assert.assertTrue(null != result);
         Log.info("invoke_view-result:{}", JSONUtils.obj2PrettyJson(cmdResp2));
     }
+
     private Map makeInvokeViewParams(String contractAddress, String methodName, String methodDesc, Object... args) {
         Map<String, Object> params = new HashMap<>();
         params.put("chainId", chainId);
@@ -314,6 +324,7 @@ public class ContractQueryTest extends Base {
         Assert.assertTrue(null != result);
         Log.info("constructor-result:{}", JSONUtils.obj2PrettyJson(result));
     }
+
     private Map makeConstructorParams(byte[] contractCode) {
         Map<String, Object> params = new HashMap<>();
         params.put("chainId", chainId);
@@ -322,7 +333,7 @@ public class ContractQueryTest extends Base {
     }
 
     /**
-     *  验证删除合约
+     * 验证删除合约
      */
     @Test
     public void validateDelete() throws Exception {
@@ -331,6 +342,7 @@ public class ContractQueryTest extends Base {
         Log.info("validateDelete-Response:{}", JSONUtils.obj2PrettyJson(cmdResp2));
         Assert.assertTrue(cmdResp2.isSuccess());
     }
+
     private Map makeValidateDeleteParams(String sender, String contractAddress) {
         Map<String, Object> params = new HashMap<>();
         params.put("chainId", chainId);
@@ -346,6 +358,7 @@ public class ContractQueryTest extends Base {
     public void getConfirmTx() throws Exception {
         this.getTxCfmClient(callHash);
     }
+
     private void getTxCfmClient(String hash) throws Exception {
         Map<String, Object> params = new HashMap<>();
         params.put("chainId", chainId);

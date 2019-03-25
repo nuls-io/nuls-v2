@@ -31,7 +31,7 @@ package io.nuls.transaction.model.bo;
  */
 public class VerifyTxResult {
 
-    /** 1校验通过，2孤儿交易 3双花 4 其他异常*/
+    /** 1校验通过，2孤儿交易 3双花 4 其他异常 5重复交易(已确认过)*/
     private int code;
     /** 校验返回描述*/
     private String desc;
@@ -40,6 +40,7 @@ public class VerifyTxResult {
     public static final int ORPHAN = 2;
     public static final int DOUBLE_SPENDING = 3;
     public static final int OTHER_EXCEPTION = 4;
+    public static final int CONFIRMED = 5;
 
     public VerifyTxResult(int code, String desc) {
         this.code = code;

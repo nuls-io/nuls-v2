@@ -27,13 +27,10 @@ package io.nuls.contract.storage.impl;
 import io.nuls.contract.constant.ContractDBConstant;
 import io.nuls.contract.model.bo.config.ConfigBean;
 import io.nuls.contract.storage.ConfigStorageService;
-import io.nuls.contract.util.ContractUtil;
+import io.nuls.contract.util.Log;
 import io.nuls.db.model.Entry;
 import io.nuls.db.service.RocksDBService;
-import io.nuls.tools.basic.InitializingBean;
 import io.nuls.tools.core.annotation.Service;
-import io.nuls.tools.exception.NulsException;
-import io.nuls.contract.util.Log;
 import io.nuls.tools.model.ByteUtils;
 import io.nuls.tools.model.ObjectUtils;
 

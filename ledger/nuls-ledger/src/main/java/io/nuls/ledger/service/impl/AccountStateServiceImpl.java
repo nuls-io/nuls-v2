@@ -27,10 +27,7 @@ package io.nuls.ledger.service.impl;
 
 import io.nuls.ledger.constant.LedgerConstant;
 import io.nuls.ledger.model.UnconfirmedTx;
-import io.nuls.ledger.model.po.AccountState;
-import io.nuls.ledger.model.po.BlockSnapshotAccounts;
-import io.nuls.ledger.model.po.UnconfirmedAmount;
-import io.nuls.ledger.model.po.UnconfirmedNonce;
+import io.nuls.ledger.model.po.*;
 import io.nuls.ledger.service.AccountStateService;
 import io.nuls.ledger.service.FreezeStateService;
 import io.nuls.ledger.storage.Repository;
@@ -39,6 +36,7 @@ import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Service;
 
 import java.math.BigInteger;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -79,15 +77,29 @@ public class AccountStateServiceImpl implements AccountStateService {
             LoggerUtil.logger.debug("更新确认的交易信息:addr={},unConfirmedNonce org={},new={}", assetKey,dbAccountState.getUnconfirmedNoncesStrs(), accountState.getUnconfirmedNoncesStrs());
             repository.updateAccountState(assetKey.getBytes(LedgerConstant.DEFAULT_ENCODING), accountState);
             LoggerUtil.txAmount.debug("hash={},assetKey={},dbAmount={},dbFreeze={},changeTo={},freeze={},oldHash={}", accountState.getTxHash(), assetKey, dbAccountState.getAvailableAmount(),dbAccountState.getFreezeTotal(), accountState.getAvailableAmount(), accountState.getFreezeTotal(),dbAccountState.getTxHash());
-            blockSnapshotAccounts.addAccountState(dbAccountState);
+//            blockSnapshotAccounts.addAccountState(dbAccountState);
         }
     }
 
     @Override
-    public void rollAccountState(String assetKey, AccountState accountState) throws Exception {
+    public void rollAccountState(String assetKey, AccountStateSnapshot accountStateSnapshot) throws Exception {
         //同步下未确认交易账户数据
         synchronized (LockerUtil.getAccountLocker(assetKey)) {
-            repository.updateAccountState(assetKey.getBytes(LedgerConstant.DEFAULT_ENCODING), accountState);
+            //获取当前数据库值
+            AccountState dbAccountState = repository.getAccountState(accountStateSnapshot.getAccountState().getAddressChainId(),assetKey.getBytes(LedgerConstant.DEFAULT_ENCODING));
+            List<UnconfirmedNonce> unconfirmedNonces =  new ArrayList<>();
+            accountStateSnapshot.getNonces().forEach(nonce->{
+                UnconfirmedNonce unconfirmedNonce = new UnconfirmedNonce();
+                unconfirmedNonce.setNonce(nonce);
+                unconfirmedNonce.setTime(TimeUtil.getCurrentTime());
+                unconfirmedNonces.add(unconfirmedNonce);
+            });
+            dbAccountState.getUnconfirmedNonces().forEach(unconfirmedNonce -> {
+                unconfirmedNonce.setTime(TimeUtil.getCurrentTime());
+                unconfirmedNonces.add(unconfirmedNonce);
+            });
+            accountStateSnapshot.getAccountState().setUnconfirmedNonces(unconfirmedNonces);
+            repository.updateAccountState(assetKey.getBytes(LedgerConstant.DEFAULT_ENCODING), accountStateSnapshot.getAccountState());
         }
     }
 

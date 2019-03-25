@@ -174,7 +174,6 @@ public class TransactionCmd extends BaseCmd {
     @Parameter(parameterName = "chainId", parameterType = "int")
     @Parameter(parameterName = "endTimestamp", parameterType = "long")
     @Parameter(parameterName = "maxTxDataSize", parameterType = "int")
-//    @Parameter(parameterName = "height", parameterType = "long")
     @Parameter(parameterName = "blockTime", parameterType = "long")
     @Parameter(parameterName = "packingAddress", parameterType = "String")
     @Parameter(parameterName = "preStateRoot", parameterType = "String")
@@ -184,7 +183,6 @@ public class TransactionCmd extends BaseCmd {
             ObjectUtils.canNotEmpty(params.get("chainId"), TxErrorCode.PARAMETER_ERROR.getMsg());
             ObjectUtils.canNotEmpty(params.get("endTimestamp"), TxErrorCode.PARAMETER_ERROR.getMsg());
             ObjectUtils.canNotEmpty(params.get("maxTxDataSize"), TxErrorCode.PARAMETER_ERROR.getMsg());
-//            ObjectUtils.canNotEmpty(params.get("height"), TxErrorCode.PARAMETER_ERROR.getMsg());
             ObjectUtils.canNotEmpty(params.get("blockTime"), TxErrorCode.PARAMETER_ERROR.getMsg());
             ObjectUtils.canNotEmpty(params.get("packingAddress"), TxErrorCode.PARAMETER_ERROR.getMsg());
             ObjectUtils.canNotEmpty(params.get("preStateRoot"), TxErrorCode.PARAMETER_ERROR.getMsg());
@@ -197,7 +195,6 @@ public class TransactionCmd extends BaseCmd {
             //交易数据最大容量值
             int maxTxDataSize = (int) params.get("maxTxDataSize");
 
-//            long blockHeight = Long.valueOf(params.get("height").toString());
             long blockHeight = chain.getBestBlockHeight() + 1;
             long blockTime = (long) params.get("blockTime");
             String packingAddress = (String) params.get("packingAddress");
@@ -537,22 +534,36 @@ public class TransactionCmd extends BaseCmd {
      */
     @CmdAnnotation(cmd = TxCmd.TX_BATCHVERIFY, version = 1.0, description = "")
     @Parameter(parameterName = "chainId", parameterType = "int")
+    @Parameter(parameterName = "height", parameterType = "long")
+    @Parameter(parameterName = "txList", parameterType = "List")
+    @Parameter(parameterName = "blockTime", parameterType = "long")
+    @Parameter(parameterName = "packingAddress", parameterType = "String")
+    @Parameter(parameterName = "stateRoot", parameterType = "String")
+    @Parameter(parameterName = "preStateRoot", parameterType = "String")
     public Response batchVerify(Map params) {
         VerifyTxResult verifyTxResult = null;
         Chain chain = null;
         try {
-            Object chainIdObj = params == null ? null : params.get("chainId");
-            Object txHexListObj = params == null ? null : params.get("txList");
-            Object heightStr = params == null ? null : params.get("height");
-            // check parameters
-            if (params == null || chainIdObj == null || txHexListObj == null || heightStr == null) {
-                throw new NulsException(TxErrorCode.NULL_PARAMETER);
+            ObjectUtils.canNotEmpty(params.get("chainId"), TxErrorCode.PARAMETER_ERROR.getMsg());
+            ObjectUtils.canNotEmpty(params.get("height"), TxErrorCode.PARAMETER_ERROR.getMsg());
+            ObjectUtils.canNotEmpty(params.get("txList"), TxErrorCode.PARAMETER_ERROR.getMsg());
+            ObjectUtils.canNotEmpty(params.get("blockTime"), TxErrorCode.PARAMETER_ERROR.getMsg());
+            ObjectUtils.canNotEmpty(params.get("packingAddress"), TxErrorCode.PARAMETER_ERROR.getMsg());
+            ObjectUtils.canNotEmpty(params.get("stateRoot"), TxErrorCode.PARAMETER_ERROR.getMsg());
+            ObjectUtils.canNotEmpty(params.get("preStateRoot"), TxErrorCode.PARAMETER_ERROR.getMsg());
+            chain = chainManager.getChain((int) params.get("chainId"));
+            if (null == chain) {
+                throw new NulsException(TxErrorCode.CHAIN_NOT_FOUND);
             }
-            int chainId = (Integer) chainIdObj;
-            chain = chainManager.getChain(chainId);
-            Long height = Long.valueOf(heightStr.toString());
-            List<String> txHexList = (List<String>) txHexListObj;
-            verifyTxResult = txService.batchVerify(chainManager.getChain(chainId), txHexList, height);
+            Long height = Long.valueOf(params.get("height").toString());
+            List<String> txHexList = (List<String>)  params.get("txList");
+
+            long blockTime = (long) params.get("blockTime");
+            String packingAddress = (String) params.get("packingAddress");
+            String stateRoot = (String) params.get("stateRoot");
+            String preStateRoot = (String) params.get("preStateRoot");
+
+            verifyTxResult = txService.batchVerify(chain, txHexList, height, blockTime, packingAddress, stateRoot, preStateRoot);
         } catch (NulsException e) {
             errorLogProcess(chain, e);
             return failed(e.getErrorCode());

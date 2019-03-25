@@ -26,12 +26,11 @@ package io.nuls.contract.tx.contractcallcontract;
 
 
 import io.nuls.contract.basetest.ContractTest;
-import io.nuls.contract.tx.base.Base;
-import io.nuls.rpc.info.Constants;
+import io.nuls.contract.tx.base.BaseQuery;
+import io.nuls.contract.util.Log;
 import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.model.message.Response;
 import io.nuls.rpc.netty.processor.ResponseMessageProcessor;
-import io.nuls.contract.util.Log;
 import io.nuls.tools.parse.JSONUtils;
 import org.apache.commons.io.IOUtils;
 import org.junit.Assert;
@@ -40,7 +39,6 @@ import org.spongycastle.util.encoders.Hex;
 
 import java.io.FileInputStream;
 import java.io.InputStream;
-import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.HashMap;
 import java.util.Map;
@@ -51,7 +49,7 @@ import static io.nuls.contract.constant.ContractCmdConstant.*;
  * @author: PierreLuo
  * @date: 2019-03-15
  */
-public class ContractCallContractSendTxTest extends Base {
+public class ContractCallContractSendTxTest extends BaseQuery {
 
     /**
      * 创建合约
@@ -67,6 +65,7 @@ public class ContractCallContractSendTxTest extends Base {
         Assert.assertTrue(null != result);
         Log.info("createContract-result:{}", JSONUtils.obj2PrettyJson(result));
     }
+
     private Map makeCreateParams(String sender, byte[] contractCode, String remark, Object... args) {
         Map<String, Object> params = new HashMap<>();
         params.put("chainId", chainId);
@@ -81,7 +80,7 @@ public class ContractCallContractSendTxTest extends Base {
     }
 
     /**
-     *  向合约地址转账
+     * 向合约地址转账
      */
     @Test
     public void transfer2Contract() throws Exception {
@@ -93,6 +92,7 @@ public class ContractCallContractSendTxTest extends Base {
         Assert.assertTrue(null != result);
         Log.info("transfer2Contract-result:{}", JSONUtils.obj2PrettyJson(cmdResp2));
     }
+
     private Map makeTransferParams(String address, String toAddress, BigInteger amount, String remark) {
         Map<String, Object> params = new HashMap<>();
         params.put("chainId", chainId);
@@ -107,7 +107,7 @@ public class ContractCallContractSendTxTest extends Base {
     @Test
     public void loopCall() throws Exception {
         int times = 1;
-        for(int i =0;i<times;i++) {
+        for (int i = 0; i < times; i++) {
             callContract_transferOut();
             callContract_contractCallContract();
             callContract_transferOut_contractCallContract();
@@ -134,6 +134,7 @@ public class ContractCallContractSendTxTest extends Base {
         Assert.assertTrue(null != result);
         Log.info("call-result:{}", JSONUtils.obj2PrettyJson(cmdResp2));
     }
+
     private Map makeCallParams(String sender, BigInteger value, String contractAddress, String methodName, String methodDesc, String remark, Object... args) {
         Map<String, Object> params = new HashMap<>();
         params.put("chainId", chainId);
@@ -202,7 +203,7 @@ public class ContractCallContractSendTxTest extends Base {
 
 
     /**
-     *  token转账
+     * token转账
      */
     @Test
     public void tokenTransfer() throws Exception {
@@ -215,6 +216,7 @@ public class ContractCallContractSendTxTest extends Base {
         Assert.assertTrue(null != result);
         Log.info("tokenTransfer-result:{}", JSONUtils.obj2PrettyJson(cmdResp2));
     }
+
     private Map makeTokenTransferParams(String address, String toAddress, String contractAddress, BigInteger amount, String remark) {
         Map<String, Object> params = new HashMap<>();
         params.put("chainId", chainId);
@@ -229,7 +231,7 @@ public class ContractCallContractSendTxTest extends Base {
 
 
     /**
-     *  删除合约
+     * 删除合约
      */
     @Test
     public void delete() throws Exception {
@@ -240,6 +242,7 @@ public class ContractCallContractSendTxTest extends Base {
         Assert.assertTrue(null != result);
         Log.info("delete-result:{}", JSONUtils.obj2PrettyJson(result));
     }
+
     private Map makeDeleteParams(String sender, String contractAddress, String remark) {
         Map<String, Object> params = new HashMap<>();
         params.put("chainId", chainId);

@@ -35,6 +35,7 @@ import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Service;
 import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.exception.NulsException;
+import io.nuls.tools.log.logback.NulsLogger;
 import io.nuls.tools.model.BigIntegerUtils;
 import io.nuls.transaction.cache.PackablePool;
 import io.nuls.transaction.constant.TxConfig;
@@ -574,7 +575,13 @@ public class TxServiceImpl implements TxService {
     @Override
     public TxPackage getPackableTxs(Chain chain, long endtimestamp, long maxTxDataSize, long blockHeight, long blockTime, String packingAddress, String preStateRoot) {
         packageLock.lock();
-        chain.getLoggerMap().get(TxConstant.LOG_TX).debug("%%%%%%%%% TX开始打包 %%%%%%%%%%%% height:{}", blockHeight);
+        NulsLogger nulsLogger = chain.getLoggerMap().get(TxConstant.LOG_TX);
+        nulsLogger.debug("");
+        nulsLogger.debug("============");
+        nulsLogger.debug("========================");
+        nulsLogger.debug("=================================================");
+        nulsLogger.info("%%%%%%%%% TX开始打包 %%%%%%%%%%%% height:{}", blockHeight);
+
         //组装统一验证参数数据,key为各模块统一验证器cmd
         Map<TxRegister, List<String>> moduleVerifyMap = new HashMap<>(TxConstant.INIT_CAPACITY_8);
         List<Transaction> packingTxList = new ArrayList<>();
@@ -590,54 +597,56 @@ public class TxServiceImpl implements TxService {
          */
         boolean contractNotify = false;
         try {
+            long startTime = NetworkCall.getCurrentTimeMillis();
+            float batchValidReserveTemp = chain.getConfig().getModuleVerifyPercent() * (endtimestamp - startTime);
+            long batchValidReserve = Float.valueOf(batchValidReserveTemp).longValue();
+
             if (!LedgerCall.coinDataBatchNotify(chain)) {
-                chain.getLoggerMap().get(TxConstant.LOG_TX).error("Call ledger bathValidateBegin interface failed");
+                nulsLogger.error("Call ledger bathValidateBegin interface failed");
                 throw new NulsException(TxErrorCode.CALLING_REMOTE_INTERFACE_FAILED);
             }
-            chain.getLoggerMap().get(TxConstant.LOG_TX).info("获取打包交易开始,当前待打包队列交易数: {} , height:{}", packablePool.getPoolSize(chain), blockHeight);
-            chain.getLoggerMap().get(TxConstant.LOG_TX).debug("--------------while-----------");
-            long loopDebug = NetworkCall.getCurrentTimeMillis();
+            nulsLogger.info("获取打包交易开始,当前待打包队列交易数: {} , height:{}", packablePool.getPoolSize(chain), blockHeight);
+            nulsLogger.debug("--------------while-----------");
+
             while (true) {
                 long currentTimeMillis = NetworkCall.getCurrentTimeMillis();
-
                 //如果本地最新区块+1 大于当前在打包区块的高度, 说明本地最新区块已更新,需要重新打包,把取出的交易放回到打包队列
                 if (blockHeight < chain.getBestBlockHeight() + 1) {
-                    chain.getLoggerMap().get(TxConstant.LOG_TX).debug("获取交易过程中最新区块高度已增长,把取出的交易放回到打包队列, 重新打包...");
+                    nulsLogger.debug("获取交易过程中最新区块高度已增长,把取出的交易放回到打包队列, 重新打包...");
                     for (int i = packingTxList.size() - 1; i >= 0; i--) {
                         Transaction transaction = packingTxList.get(i);
-                        packablePool.addInFirst(chain, transaction, false);
+                        packablePool.addInFirst(chain, transaction);
                     }
-                    currentTimeMillis = NetworkCall.getCurrentTimeMillis();
-                    if (endtimestamp - currentTimeMillis <= chain.getConfig().getModuleVerifyOffset()) {
-                        chain.getLoggerMap().get(TxConstant.LOG_TX).debug("########## 打包时间到: {}, -endtimestamp:{} , -offset:{}",
-                                currentTimeMillis, endtimestamp, chain.getConfig().getModuleVerifyOffset());
+                    if (endtimestamp - currentTimeMillis <= batchValidReserve) {
+                        nulsLogger.debug("########## 打包时间到: {}, -endtimestamp:{} , -offset:{}",
+                                currentTimeMillis, endtimestamp, batchValidReserve);
                         break;
                     }
                     return getPackableTxs(chain, endtimestamp, maxTxDataSize, chain.getBestBlockHeight() + 1, blockTime, packingAddress, preStateRoot);
                 }
 
-//                chain.getLoggerMap().get(TxConstant.LOG_TX).debug("########## (循环开始)当前网络时间: {} ", currentTimeMillis);
-//                chain.getLoggerMap().get(TxConstant.LOG_TX).debug("########## 预留的[获取打包交易]结束时间: {}, 还剩{}秒 ", endtimestamp, (endtimestamp - currentTimeMillis)/1000.0);
-                if (endtimestamp - currentTimeMillis <= chain.getConfig().getModuleVerifyOffset()) {
-                    chain.getLoggerMap().get(TxConstant.LOG_TX).debug("########## 打包时间到: {}, -endtimestamp:{} , -offset:{}",
-                            currentTimeMillis, endtimestamp, chain.getConfig().getModuleVerifyOffset());
+//                nulsLogger.debug("########## (循环开始)当前网络时间: {} ", currentTimeMillis);
+//                nulsLogger.debug("########## 预留的[获取打包交易]结束时间: {}, 还剩{}秒 ", endtimestamp, (endtimestamp - currentTimeMillis)/1000.0);
+                if (endtimestamp - currentTimeMillis <= batchValidReserve) {
+                    nulsLogger.debug("########## 打包时间到: {}, -endtimestamp:{} , -offset:{}",
+                            currentTimeMillis, endtimestamp, batchValidReserve);
                     break;
                 }
                 Transaction tx = packablePool.get(chain);
                 if (tx == null) {
                     try {
-                        //chain.getLoggerMap().get(TxConstant.LOG_TX).debug("************* [获取交易等待]");
+                        //nulsLogger.debug("************* [获取交易等待]");
                         Thread.sleep(100L);
                     } catch (InterruptedException e) {
-                        Log.error("packaging error ", e);
+                        nulsLogger.error("packaging error ", e);
                     }
                     continue;
                 }
-                chain.getLoggerMap().get(TxConstant.LOG_TX).debug("@@@@@ 打包取出交易 hash:{}", tx.getHash().getDigestHex());
+                nulsLogger.debug("@@@@@ 打包取出交易 hash:{}", tx.getHash().getDigestHex());
                 long txSize = tx.size();
                 if ((totalSize + txSize) > maxTxDataSize) {
-                    packablePool.addInFirst(chain, tx, false);
-                    chain.getLoggerMap().get(TxConstant.LOG_TX).debug("交易已达最大容量, 实际值: {} - 预定最大值maxTxDataSize:{}", totalSize + txSize, maxTxDataSize);
+                    packablePool.addInFirst(chain, tx);
+                    nulsLogger.debug("交易已达最大容量, 实际值: {} - 预定最大值maxTxDataSize:{}", totalSize + txSize, maxTxDataSize);
                     break;
                 }
 
@@ -645,38 +654,35 @@ public class TxServiceImpl implements TxService {
                 try {
                     txHex = tx.hex();
                 } catch (Exception e) {
-                    chain.getLoggerMap().get(TxConstant.LOG_TX).warn(e.getMessage(), e);
-                    chain.getLoggerMap().get(TxConstant.LOG_TX).info("丢弃获取hex出错交易,txHash:{}, - type:{}, - time:{}", tx.getHash().getDigestHex(), tx.getType(), tx.getTime());
+                    nulsLogger.warn(e.getMessage(), e);
+                    nulsLogger.info("丢弃获取hex出错交易,txHash:{}, - type:{}, - time:{}", tx.getHash().getDigestHex(), tx.getType(), tx.getTime());
                     clearInvalidTx(chain, tx);
                     continue;
                 }
                 //交易业务验证tx
                 if (!this.verify(chain, tx, false)) {
-                    chain.getLoggerMap().get(TxConstant.LOG_TX).info("丢弃验证器未验证通过交易,txHash:{}, - type:{}, - time:{}", tx.getHash().getDigestHex(), tx.getType(), tx.getTime());
+                    nulsLogger.info("丢弃验证器未验证通过交易,txHash:{}, - type:{}, - time:{}", tx.getHash().getDigestHex(), tx.getType(), tx.getTime());
                     clearInvalidTx(chain, tx);
                     continue;
                 }
                 //批量验证coinData, 单个发送
                 VerifyTxResult verifyTxResult = LedgerCall.verifyCoinData(chain, txHex, true);
                 if (!verifyTxResult.success()) {
-                    //-----debug 打印第一个coinfrom 的nonce
                     String nonce = HexUtil.encode(TxUtil.getCoinData(tx).getFrom().get(0).getNonce());
-                    chain.getLoggerMap().get(TxConstant.LOG_TX).info("coinData打包批量验证未通过 coinData not success - code: {}, - reason:{}, - type:{}, - first coinFrom nonce:{} - txhash:{}",
+                    nulsLogger.info("coinData打包批量验证未通过 coinData not success - code: {}, - reason:{}, - type:{}, - first coinFrom nonce:{} - txhash:{}",
                             verifyTxResult.getCode(), verifyTxResult.getDesc(), tx.getType(), nonce, tx.getHash().getDigestHex());
                     if (verifyTxResult.getCode() == VerifyTxResult.ORPHAN) {
                         orphanTxList.add(tx);
                     } else {
-                        clearInvalidTx(chain, tx);
                         continue;
                     }
                 }
                 //从已确认的交易中进行重复交易判断
                 TransactionConfirmedPO txConfirmed = confirmedTxService.getConfirmedTransaction(chain, tx.getHash());
                 if (txConfirmed != null) {
-                    chain.getLoggerMap().get(TxConstant.LOG_TX).info("丢弃已确认过交易,txHash:{}, - type:{}, - time:{}", tx.getHash().getDigestHex(), tx.getType(), tx.getTime());
+                    nulsLogger.info("丢弃已确认过交易,txHash:{}, - type:{}, - time:{}", tx.getHash().getDigestHex(), tx.getType(), tx.getTime());
                     continue;
                 }
-//                chain.getLoggerMap().get(TxConstant.LOG_TX).debug("@@@@@ 打包交易单个验证成功 hash:{}", tx.getHash().getDigestHex());
                 packingTxList.add(tx);
                 totalSize += txSize;
                 /** 智能合约*/
@@ -690,39 +696,20 @@ public class TxServiceImpl implements TxService {
                 }
                 //根据模块的统一验证器名，对所有交易进行分组，准备进行各模块的统一验证
                 TxUtil.moduleGroups(chain, moduleVerifyMap, tx);
-                chain.getLoggerMap().get(TxConstant.LOG_TX).debug("");
+                nulsLogger.debug("");
             }
-            chain.getLoggerMap().get(TxConstant.LOG_TX).debug("--------------while end----:");
-            chain.getLoggerMap().get(TxConstant.LOG_TX).debug("取出的交易 - size:{}", packingTxList.size());
+            nulsLogger.debug("--------------while end----取出的交易 - size:{}", packingTxList.size());
 
-            chain.getLoggerMap().get(TxConstant.LOG_TX).debug("***");
-            chain.getLoggerMap().get(TxConstant.LOG_TX).debug("");
-            long debugeBatch = NetworkCall.getCurrentTimeMillis();
+
+            long whileTime = NetworkCall.getCurrentTimeMillis() - startTime;
+            long batchStart = NetworkCall.getCurrentTimeMillis();
             txModuleValidatorPackable(chain, moduleVerifyMap, packingTxList);
-
-
-            //检测最新高度
-            if (blockHeight < chain.getBestBlockHeight() + 1) {
-                //这个阶段已经不够时间再打包,所以直接超时异常处理交易回滚至待打包队列,打空块
-                chain.getLoggerMap().get(TxConstant.LOG_TX).debug("获取交易完整时,当前最新高度已增长,不够时间重新打包,直接超时异常处理交易回滚至待打包队列,打空块");
-                throw new NulsException(TxErrorCode.HEIGHT_UPDATE_UNABLE_TO_REPACKAGE);
-            }
-            //检测预留传输时间
-            long current = NetworkCall.getCurrentTimeMillis();
-            if (endtimestamp - current < chain.getConfig().getPackageRpcReserveTime()) {
-                //超时,留给最后数据组装和RPC传输时间不足
-                chain.getLoggerMap().get(TxConstant.LOG_TX).error("getPackableTxs time out, endtimestamp:{}, current:{}, endtimestamp-current:{}, reserveTime:{}",
-                        endtimestamp, current, endtimestamp - current, chain.getConfig().getPackageRpcReserveTime());
-                throw new NulsException(TxErrorCode.PACKAGE_TIME_OUT);
-            }
 
             packableTxs = new ArrayList<>();
             Iterator<Transaction> iterator = packingTxList.iterator();
             while (iterator.hasNext()) {
                 Transaction tx = iterator.next();
                 if (orphanTxList.contains(tx)) {
-                    //如果在账本孤儿记录中 则不打包
-                    clearInvalidTx(chain, tx, true);
                     continue;
                 }
                 try {
@@ -734,9 +721,10 @@ public class TxServiceImpl implements TxService {
                 }
             }
             String stateRoot = preStateRoot;
-            chain.getLoggerMap().get(TxConstant.LOG_TX).debug("---##########--- 批量验证花费时间:{} ", NetworkCall.getCurrentTimeMillis() - debugeBatch);
+            long batchTime = NetworkCall.getCurrentTimeMillis() - batchStart;
 
-            /**智能合约 当通知标识为true, 则表明有智能合约被调用执行*/
+            long contractStart = NetworkCall.getCurrentTimeMillis();
+            /** 智能合约 当通知标识为true, 则表明有智能合约被调用执行*/
             if (contractNotify) {
                 Map<String, Object> map = ContractCall.contractBatchEnd(chain, blockHeight);
                 if (null != map) {
@@ -750,24 +738,47 @@ public class TxServiceImpl implements TxService {
                     }
                 }
             }
+            long contractTime = NetworkCall.getCurrentTimeMillis() - contractStart;
+            long totalTime = NetworkCall.getCurrentTimeMillis() - startTime;
+            nulsLogger.debug("打包交易时间统计, 开始时间戳:{}, 获取交易(循环)执行时间:{}, 模块统一验证执行时间:{}, 合约执行时间:{}, 总执行时间:{}, 剩余时间:{}",
+                    startTime, whileTime, batchTime, contractTime, totalTime, endtimestamp - NetworkCall.getCurrentTimeMillis());
+            //检测最新高度
+            if (blockHeight < chain.getBestBlockHeight() + 1) {
+                //这个阶段已经不够时间再打包,所以直接超时异常处理交易回滚至待打包队列,打空块
+                nulsLogger.debug("获取交易完整时,当前最新高度已增长,不够时间重新打包,直接超时异常处理交易回滚至待打包队列,打空块");
+                throw new NulsException(TxErrorCode.HEIGHT_UPDATE_UNABLE_TO_REPACKAGE);
+            }
+            //检测预留传输时间
+            long current = NetworkCall.getCurrentTimeMillis();
+            if (endtimestamp - current < chain.getConfig().getPackageRpcReserveTime()) {
+                //超时,留给最后数据组装和RPC传输时间不足
+                nulsLogger.error("getPackableTxs time out, endtimestamp:{}, current:{}, endtimestamp-current:{}, reserveTime:{}",
+                        endtimestamp, current, endtimestamp - current, chain.getConfig().getPackageRpcReserveTime());
+                throw new NulsException(TxErrorCode.PACKAGE_TIME_OUT);
+            }
 
+            //孤儿交易,全加回待打包队列去
+            for (int i = orphanTxList.size() - 1; i >= 0; i--) {
+                Transaction tx = orphanTxList.get(i);
+                packablePool.addInFirst(chain, tx);
+            }
             TxPackage txPackage = new TxPackage(packableTxs, stateRoot, blockHeight);
-            chain.getLoggerMap().get(TxConstant.LOG_TX).debug("提供给共识的可打包交易packableTxs - size:{}", packableTxs.size());
-            chain.getLoggerMap().get(TxConstant.LOG_TX).debug("获取打包交易结束,当前待打包队列交易数: {} ", packablePool.getPoolSize(chain));
-            chain.getLoggerMap().get(TxConstant.LOG_TX).debug("=================================================");
-            chain.getLoggerMap().get(TxConstant.LOG_TX).debug("%%%%%%%%% 打包完成 %%%%%%%%%%%% height:{}", blockHeight);
-            chain.getLoggerMap().get(TxConstant.LOG_TX).debug("");
-            long currentdebug = NetworkCall.getCurrentTimeMillis();
-            chain.getLoggerMap().get(TxConstant.LOG_TX).debug("Time endtimestamp-current:{}", endtimestamp - currentdebug);
-            chain.getLoggerMap().get(TxConstant.LOG_TX).debug("");
+            nulsLogger.debug("提供给共识的可打包交易packableTxs - size:{}", packableTxs.size());
+            nulsLogger.debug("获取打包交易结束,当前待打包队列交易数: {} ", packablePool.getPoolSize(chain));
+
+            nulsLogger.debug("%%%%%%%%% 打包完成 %%%%%%%%%%%% height:{}", blockHeight);
+            nulsLogger.debug("=================================================");
+            nulsLogger.debug("========================");
+            nulsLogger.debug("============");
+            nulsLogger.debug("");
 
             return txPackage;
         } catch (Exception e) {
-            chain.getLoggerMap().get(TxConstant.LOG_TX).error(e);
+            nulsLogger.error(e);
             //可打包交易,全加回去
             for (int i = packingTxList.size() - 1; i >= 0; i--) {
                 Transaction tx = packingTxList.get(i);
-                packablePool.addInFirst(chain, tx, false);
+                packablePool.addInFirst(chain, tx);
             }
             return new TxPackage(new ArrayList<>(), preStateRoot, chain.getBestBlockHeight() + 1);
         } finally {
@@ -875,25 +886,37 @@ public class TxServiceImpl implements TxService {
     }
 
     @Override
-    public VerifyTxResult batchVerify(Chain chain, List<String> txHexList, long blockHeight) throws NulsException {
+    public VerifyTxResult batchVerify(Chain chain, List<String> txHexList, long blockHeight, long blockTime, String packingAddress, String stateRoot, String preStateRoot) throws NulsException {
         chain.getLoggerMap().get(TxConstant.LOG_TX).debug("");
         chain.getLoggerMap().get(TxConstant.LOG_TX).debug("开始区块交易批量验证......");
         long s1 = NetworkCall.getCurrentTimeMillis();
+        Log.debug("[验区块交易] -开始-------------高度:{} ----------区块交易数:{} -------------", blockHeight, txHexList.size());//----
         Log.debug("[验区块交易] -开始时间:{}", s1);//----
         VerifyTxResult verifyTxResult = new VerifyTxResult(VerifyTxResult.OTHER_EXCEPTION);
         List<Transaction> txList = new ArrayList<>();
         //组装统一验证参数数据,key为各模块统一验证器cmd
         Map<TxRegister, List<String>> moduleVerifyMap = new HashMap<>(TxConstant.INIT_CAPACITY_8);
+        /**
+         * 智能合约通知标识
+         * 当本次打包过程中,出现的第一个智能合约交易并且调用验证器通过时,
+         * 就对智能合约模块进行调用合约的通知,本次打包之后再出现智能合约交易则不会再次通知.
+         * 打包时没有智能合约交易则不通知, 有则只第一次时通知.
+         */
+        boolean contractNotify = false;
         for (String txHex : txHexList) {
             //将txHex转换为Transaction对象
             Transaction tx = TxUtil.getTransaction(txHex);
+            txList.add(tx);
+            //如果是系统智能合约就不单个验证
+            if (TxManager.isSystemSmartContract(chain, tx.getType())) {
+                continue;
+            }
             TransactionConfirmedPO txConfirmed = confirmedTxService.getConfirmedTransaction(chain, tx.getHash());
             if (null != txConfirmed) {
                 //交易已存在于已确认块中
                 chain.getLoggerMap().get(TxConstant.LOG_TX).debug("batchVerify failed, tx is existed. hash:{}, -type:{}", tx.getHash().getDigestHex(), tx.getType());
                 return verifyTxResult;
             }
-            txList.add(tx);
             if (tx.getType() == TxConstant.TX_TYPE_CROSS_CHAIN_TRANSFER) {
                 CrossTxData crossTxData = TxUtil.getInstance(tx.getTxData(), CrossTxData.class);
                 if (crossTxData.getChainId() != chain.getChainId()) {
@@ -912,11 +935,46 @@ public class TxServiceImpl implements TxService {
                 chain.getLoggerMap().get(TxConstant.LOG_TX).debug("batchVerify failed, single tx verify failed. hash:{}, -type:{}", tx.getHash().getDigestHex(), tx.getType());
                 return verifyTxResult;
             }
+
+            /** 智能合约*/
+            if (TxManager.isSmartContract(chain, tx.getType())) {
+                /** 出现智能合约,且通知标识为false,则先调用通知 */
+                if (!contractNotify) {
+                    ContractCall.contractBatchBegin(chain, blockHeight, blockTime, packingAddress, preStateRoot);
+                    contractNotify = true;
+                }
+                ContractCall.invokeContract(chain, txHex);
+            }
             //根据模块的统一验证器名，对所有交易进行分组，准备进行各模块的统一验证
             TxUtil.moduleGroups(chain, moduleVerifyMap, tx);
         }
         Log.debug("[验区块交易] 单个 -(距方法开始的)时间:{}", NetworkCall.getCurrentTimeMillis() - s1);//----
         Log.debug("");//----
+
+
+        /** 智能合约 当通知标识为true, 则表明有智能合约被调用执行*/
+        if (contractNotify) {
+            Map<String, Object> map = ContractCall.contractBatchEnd(chain, blockHeight);
+            if (null != map) {
+                String sr = (String) map.get("stateRoot");
+                if (!stateRoot.equals(sr)) {
+                    chain.getLoggerMap().get(TxConstant.LOG_TX).debug("contract stateRoot error.");
+                    return verifyTxResult;
+                }
+                List<String> scNewList = (List<String>) map.get("txHexList");
+                if (null != scNewList) {
+                    //验证智能合约执行返回的交易hex 是否正确.打包时返回的交易是加入到区块交易的队尾
+                    int size = scNewList.size();
+                    for (int i = 0; i < size; i++) {
+                        int j = txHexList.size() - size + i;
+                        if (!txHexList.get(j).equals(scNewList.get(i))) {
+                            chain.getLoggerMap().get(TxConstant.LOG_TX).debug("contract new tx hex error.");
+                            return verifyTxResult;
+                        }
+                    }
+                }
+            }
+        }
 
         long coinDataV = NetworkCall.getCurrentTimeMillis();//-----
         if (!LedgerCall.verifyBlockTxsCoinData(chain, txHexList, blockHeight)) {
@@ -933,14 +991,14 @@ public class TxServiceImpl implements TxService {
         boolean rs = true;
         while (it.hasNext()) {
             Map.Entry<TxRegister, List<String>> entry = it.next();
-            List<String> txhashList = null;
+            List<String> txHashList = null;
             if (entry.getKey().getModuleCode().equals(ModuleE.TX.abbr)) {
                 //模块统一验证,交易模块,不用调RPC接口
-                txhashList = transactionModuleValidator(chain, entry.getValue());
+                txHashList = transactionModuleValidator(chain, entry.getValue());
             } else {
-                txhashList = TransactionCall.txModuleValidator(chain, entry.getKey().getModuleValidator(), entry.getKey().getModuleCode(), entry.getValue());
+                txHashList = TransactionCall.txModuleValidator(chain, entry.getKey().getModuleValidator(), entry.getKey().getModuleCode(), entry.getValue());
             }
-            if (txhashList != null && txhashList.size() > 0) {
+            if (txHashList != null && txHashList.size() > 0) {
                 rs = false;
                 break;
             }
@@ -964,10 +1022,11 @@ public class TxServiceImpl implements TxService {
             Log.debug("");//----
         }
         if (verifyTxResult.success()) {
-            Log.debug("[验区块交易] 通过 -结束时间:{}", NetworkCall.getCurrentTimeMillis() - s1);//----
+            Log.debug("[验区块交易] 通过 ---------------总计执行时间:{}", NetworkCall.getCurrentTimeMillis() - s1);//----
         } else {
-            Log.debug("[验区块交易] 未通过 -结束时间:{}", NetworkCall.getCurrentTimeMillis() - s1);//----
+            Log.debug("[验区块交易] 未通过 ---------------总计执行时间:{}", NetworkCall.getCurrentTimeMillis() - s1);//----
         }
+        Log.debug("");//----
         return verifyTxResult;
     }
 

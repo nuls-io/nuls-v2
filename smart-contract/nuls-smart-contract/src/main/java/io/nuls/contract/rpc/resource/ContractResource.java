@@ -37,7 +37,6 @@ import io.nuls.contract.model.bo.ContractResult;
 import io.nuls.contract.model.bo.ContractTokenInfo;
 import io.nuls.contract.model.dto.*;
 import io.nuls.contract.model.po.ContractAddressInfoPo;
-import io.nuls.contract.model.po.ContractCollectionInfoPo;
 import io.nuls.contract.model.po.ContractTokenTransferInfoPo;
 import io.nuls.contract.model.tx.ContractBaseTransaction;
 import io.nuls.contract.model.txdata.ContractData;
@@ -49,6 +48,7 @@ import io.nuls.contract.storage.ContractAddressStorageService;
 import io.nuls.contract.storage.ContractTokenTransferStorageService;
 import io.nuls.contract.util.ContractLedgerUtil;
 import io.nuls.contract.util.ContractUtil;
+import io.nuls.contract.util.Log;
 import io.nuls.contract.util.MapUtil;
 import io.nuls.contract.vm.program.ProgramExecutor;
 import io.nuls.contract.vm.program.ProgramMethod;
@@ -63,7 +63,6 @@ import io.nuls.tools.basic.VarInt;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.exception.NulsException;
-import io.nuls.contract.util.Log;
 import io.nuls.tools.model.ArraysTool;
 import io.nuls.tools.model.StringUtils;
 import org.spongycastle.util.encoders.Hex;
@@ -606,7 +605,7 @@ public class ContractResource extends BaseCmd {
             if (po == null) {
                 return failed(CONTRACT_ADDRESS_NOT_EXIST);
             }
-            if(!po.isAcceptDirectTransfer()) {
+            if (!po.isAcceptDirectTransfer()) {
                 return failed(CONTRACT_NO_ACCEPT_DIRECT_TRANSFER);
             }
 
@@ -619,7 +618,7 @@ public class ContractResource extends BaseCmd {
             gasParams.put("methodDesc", BALANCE_TRIGGER_METHOD_DESC);
 
             Response response = this.imputedCallGas(gasParams);
-            if(!response.isSuccess()) {
+            if (!response.isSuccess()) {
                 return response;
             }
             Map<String, Object> responseData = (Map<String, Object>) response.getResponseData();
@@ -654,7 +653,7 @@ public class ContractResource extends BaseCmd {
             BigInteger value = new BigInteger(params.get("amount").toString());
             String remark = (String) params.get("remark");
 
-            if (value.compareTo(BigInteger.ZERO) < 0 ) {
+            if (value.compareTo(BigInteger.ZERO) < 0) {
                 return failed(ContractErrorCode.PARAMETER_ERROR);
             }
 
@@ -672,7 +671,7 @@ public class ContractResource extends BaseCmd {
             if (po == null) {
                 return failed(CONTRACT_ADDRESS_NOT_EXIST);
             }
-            if(!po.isAcceptDirectTransfer()) {
+            if (!po.isAcceptDirectTransfer()) {
                 return failed(CONTRACT_NO_ACCEPT_DIRECT_TRANSFER);
             }
 
@@ -685,7 +684,7 @@ public class ContractResource extends BaseCmd {
             gasParams.put("methodDesc", BALANCE_TRIGGER_METHOD_DESC);
 
             Response response = this.imputedCallGas(gasParams);
-            if(!response.isSuccess()) {
+            if (!response.isSuccess()) {
                 return response;
             }
             Map<String, Object> responseData = (Map<String, Object>) response.getResponseData();
@@ -762,7 +761,7 @@ public class ContractResource extends BaseCmd {
             gasParams.put("methodName", NRC20_METHOD_TRANSFER);
             gasParams.put("args", list);
             Response response = this.imputedCallGas(gasParams);
-            if(!response.isSuccess()) {
+            if (!response.isSuccess()) {
                 return response;
             }
             Map<String, Object> responseData = (Map<String, Object>) response.getResponseData();
@@ -1258,10 +1257,10 @@ public class ContractResource extends BaseCmd {
             }
 
             List<ContractTokenTransferInfoPo> list = tokenTransferInfoListResult.getData();
-            if(list == null) {
+            if (list == null) {
                 list = new ArrayList<>();
             }
-            if(list.size() > 0) {
+            if (list.size() > 0) {
                 list.sort(new Comparator<ContractTokenTransferInfoPo>() {
                     @Override
                     public int compare(ContractTokenTransferInfoPo o1, ContractTokenTransferInfoPo o2) {
@@ -1330,12 +1329,12 @@ public class ContractResource extends BaseCmd {
             LinkedHashMap<String, ContractAddressDto> resultMap = new LinkedHashMap<>();
             // 该账户创建的未确认的合约
             LinkedList<Map<String, String>> list = contractHelper.getChain(chainId).getContractTxCreateUnconfirmedManager().getLocalUnconfirmedCreateContractTransaction(address);
-            if(list != null) {
+            if (list != null) {
                 String contractAddress;
                 Long time;
                 ContractAddressDto dto;
                 String success;
-                for(Map<String, String> map : list) {
+                for (Map<String, String> map : list) {
                     contractAddress = map.get("contractAddress");
                     time = Long.valueOf(map.get("time"));
                     dto = new ContractAddressDto();
@@ -1344,7 +1343,7 @@ public class ContractResource extends BaseCmd {
                     dto.setCreateTime(time);
 
                     success = map.get("success");
-                    if(StringUtils.isNotBlank(success)) {
+                    if (StringUtils.isNotBlank(success)) {
                         // 合约创建失败
                         dto.setStatus(3);
                         dto.setMsg(map.get("msg"));
@@ -1365,14 +1364,14 @@ public class ContractResource extends BaseCmd {
             Result<List<ContractAddressInfoPo>> contractInfoListResult = contractAddressStorageService.getContractInfoList(chainId, addressBytes);
 
             List<ContractAddressInfoPo> contractAddressInfoPoList = contractInfoListResult.getData();
-            if(contractAddressInfoPoList != null && contractAddressInfoPoList.size() > 0) {
+            if (contractAddressInfoPoList != null && contractAddressInfoPoList.size() > 0) {
                 contractAddressInfoPoList.sort(new Comparator<ContractAddressInfoPo>() {
                     @Override
                     public int compare(ContractAddressInfoPo o1, ContractAddressInfoPo o2) {
                         return o1.compareTo(o2.getCreateTime());
                     }
                 });
-                for(ContractAddressInfoPo po : contractAddressInfoPoList) {
+                for (ContractAddressInfoPo po : contractAddressInfoPoList) {
                     contractAddressBytes = po.getContractAddress();
                     contractAddress = AddressTool.getStringAddressByBytes(contractAddressBytes);
                     resultMap.put(contractAddress, new ContractAddressDto(po, height, true, track.status(contractAddressBytes).ordinal()));
@@ -1389,7 +1388,7 @@ public class ContractResource extends BaseCmd {
             if (end > page.getTotal()) {
                 end = (int) page.getTotal();
             }
-            if(infoList.size() > 0) {
+            if (infoList.size() > 0) {
                 for (int i = start; i < end; i++) {
                     contractAddressDtoList.add(infoList.get(i));
                 }

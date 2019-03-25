@@ -41,13 +41,13 @@ import io.nuls.contract.rpc.call.TransactionCall;
 import io.nuls.contract.service.ContractTxService;
 import io.nuls.contract.storage.ContractTokenTransferStorageService;
 import io.nuls.contract.util.ContractUtil;
+import io.nuls.contract.util.Log;
 import io.nuls.contract.util.MapUtil;
 import io.nuls.tools.basic.Result;
 import io.nuls.tools.basic.VarInt;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.exception.NulsException;
-import io.nuls.contract.util.Log;
 import io.nuls.tools.model.ArraysTool;
 import org.spongycastle.util.encoders.Hex;
 

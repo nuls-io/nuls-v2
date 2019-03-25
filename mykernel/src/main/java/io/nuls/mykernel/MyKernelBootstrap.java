@@ -156,7 +156,7 @@ public class MyKernelBootstrap {
                                     + " --jre " + System.getProperty("java.home")
                                     + " --managerurl " + "ws://"+ HostInfo.getLocalIP()+":8887/ws "
                                     + (StringUtils.isNotBlank(System.getProperty("log.path")) ? " --logpath " + System.getProperty("log.path") : "")
-                                    + (StringUtils.isNotBlank(System.getProperty("DataPath")) ? " --datapath " + System.getProperty("DataPath") : "")
+//                                    + (StringUtils.isNotBlank(System.getProperty("DataPath")) ? " --datapath " + System.getProperty("DataPath") : "")
                                     + (StringUtils.isNotBlank(System.getProperty("debug")) ? " --debug " : "")
                                     + (args.length > 2 ? " --config " + args[2] : "")
                                     + " -r "

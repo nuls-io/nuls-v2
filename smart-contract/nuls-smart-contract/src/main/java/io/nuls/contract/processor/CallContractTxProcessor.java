@@ -36,12 +36,12 @@ import io.nuls.contract.model.txdata.ContractData;
 import io.nuls.contract.service.ContractService;
 import io.nuls.contract.storage.ContractTokenTransferStorageService;
 import io.nuls.contract.util.ContractUtil;
+import io.nuls.contract.util.Log;
 import io.nuls.contract.vm.program.ProgramStatus;
 import io.nuls.tools.basic.Result;
 import io.nuls.tools.basic.VarInt;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
-import io.nuls.contract.util.Log;
 import org.spongycastle.util.Arrays;
 
 import static io.nuls.contract.util.ContractUtil.getFailed;
@@ -66,7 +66,7 @@ public class CallContractTxProcessor {
 
     public Result onCommit(int chainId, ContractWrapperTransaction tx) {
         try {
-            BlockHeader blockHeader = contractHelper.getCurrentBlockHeader(chainId);
+            BlockHeader blockHeader = contractHelper.getBatchInfoCurrentBlockHeader(chainId);
             byte[] stateRoot = blockHeader.getStateRoot();
             long blockHeight = blockHeader.getHeight();
             ContractResult contractResult = tx.getContractResult();
