@@ -98,6 +98,13 @@ public class TxServiceImpl implements TxService {
 
     private Lock packageLock = new ReentrantLock();
 
+    /**
+     * 是否有智能合约交易在打包时,
+     * 模块统一验证的二次验证时验证不通过.
+     * (这样在当次打包时就不需要获取智能合约的执行结果)
+     */
+    private boolean isContractTxFail = false;
+
     @Override
     public boolean register(Chain chain, TxRegister txRegister) {
         return TxManager.register(chain, txRegister);
@@ -576,7 +583,8 @@ public class TxServiceImpl implements TxService {
         NulsLogger nulsLogger = chain.getLoggerMap().get(TxConstant.LOG_TX);
         nulsLogger.info("");
         nulsLogger.info("%%%%%%%%% TX开始打包 %%%%%%%%%%%% height:{}", blockHeight);
-
+        //重置标志
+        isContractTxFail = false;
         //组装统一验证参数数据,key为各模块统一验证器cmd
         Map<TxRegister, List<String>> moduleVerifyMap = new HashMap<>(TxConstant.INIT_CAPACITY_8);
         List<Transaction> packingTxList = new ArrayList<>();
@@ -711,7 +719,7 @@ public class TxServiceImpl implements TxService {
 
             long contractStart = NetworkCall.getCurrentTimeMillis();
             /** 智能合约 当通知标识为true, 则表明有智能合约被调用执行*/
-            if (contractNotify) {
+            if (contractNotify && !isContractTxFail) {
                 Map<String, Object> map = ContractCall.contractBatchEnd(chain, blockHeight);
                 if (null != map) {
                     List<String> scNewList = (List<String>) map.get("txHexList");
@@ -822,7 +830,6 @@ public class TxServiceImpl implements TxService {
         return txModuleValidatorPackable(chain, moduleVerifyMap, packingTxList);
     }
 
-
     private void verifyAgain(Chain chain, Map<TxRegister, List<String>> moduleVerifyMap, List<Transaction> packingTxList) throws NulsException {
         //向账本模块发送要批量验证coinData的标识
         chain.getLoggerMap().get(TxConstant.LOG_TX).debug("%%%%%%%%% verifyAgain 打包再次批量校验通知 %%%%%%%%%%%%");
@@ -831,8 +838,13 @@ public class TxServiceImpl implements TxService {
             throw new NulsException(TxErrorCode.CALLING_REMOTE_INTERFACE_FAILED);
         }
         Iterator<Transaction> it = packingTxList.iterator();
+
         while (it.hasNext()) {
             Transaction tx = it.next();
+            if(TxManager.isSystemSmartContract(chain, tx.getType())){
+                //智能合约系统交易不需要验证账本
+                continue;
+            }
             //批量验证coinData, 单个发送
             String txHex = null;
             try {
@@ -845,7 +857,13 @@ public class TxServiceImpl implements TxService {
                 chain.getLoggerMap().get(TxConstant.LOG_TX).debug("[verifyAgain] " +
                                 "coinData not success - code: {}, - reason:{}, type:{} - txhash:{}",
                         verifyTxResult.getCode(), verifyTxResult.getDesc(), tx.getType(), tx.getHash().getDigestHex());
-                clearInvalidTx(chain, tx);
+                if(TxManager.isUnSystemSmartContract(chain,tx.getType())){
+                    //如果是智能合约的非系统交易,未验证通过,则放回待打包队列.
+                    packablePool.addInFirst(chain, tx);
+                    isContractTxFail = true;
+                }else{
+                    clearInvalidTx(chain, tx);
+                }
                 it.remove();
                 continue;
             }
