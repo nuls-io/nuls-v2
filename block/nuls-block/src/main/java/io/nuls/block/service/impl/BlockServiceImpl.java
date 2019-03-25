@@ -519,18 +519,9 @@ public class BlockServiceImpl implements BlockService {
 
     @Override
     public void init(int chainId) {
-        NulsLogger commonLog = ContextManager.getContext(chainId).getCommonLog();
-        try {
-            RocksDBService.createTable(BLOCK_HEADER + chainId);
-            RocksDBService.createTable(BLOCK_HEADER_INDEX + chainId);
-            if (RocksDBService.existTable(CACHED_BLOCK + chainId)) {
-                RocksDBService.destroyTable(CACHED_BLOCK + chainId);
-            }
-            RocksDBService.createTable(CACHED_BLOCK + chainId);
-            initLocalBlocks(chainId);
-        } catch (Exception e) {
-            e.printStackTrace();
-            commonLog.error(e);
+        boolean initLocalBlocks = initLocalBlocks(chainId);
+        if (!initLocalBlocks) {
+            throw new ChainRuntimeException("error occur when init Local Block!");
         }
     }
 

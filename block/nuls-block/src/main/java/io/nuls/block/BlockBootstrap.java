@@ -1,14 +1,12 @@
 package io.nuls.block;
 
 import io.nuls.block.constant.BlockConfig;
+import io.nuls.block.manager.ChainManager;
 import io.nuls.block.manager.ContextManager;
 import io.nuls.block.rpc.call.NetworkUtil;
 import io.nuls.block.rpc.call.ProtocolUtil;
-import io.nuls.block.rpc.call.TransactionUtil;
-import io.nuls.block.service.BlockService;
 import io.nuls.block.thread.BlockSynchronizer;
 import io.nuls.block.thread.monitor.*;
-import io.nuls.block.utils.ConfigLoader;
 import io.nuls.db.service.RocksDBService;
 import io.nuls.rpc.info.HostInfo;
 import io.nuls.rpc.model.ModuleE;
@@ -97,7 +95,7 @@ public class BlockBootstrap extends RpcModule {
      * 初始化数据库
      * Initialization database
      */
-    private static void initDB() throws Exception {
+    private void initDB() throws Exception {
         //读取配置文件，数据存储根目录，初始化打开该目录下所有表连接并放入缓存
         RocksDBService.init(blockConfig.getDataFolder());
         RocksDBService.createTable(CHAIN_LATEST_HEIGHT);
@@ -117,24 +115,12 @@ public class BlockBootstrap extends RpcModule {
     @Override
     public boolean doStart() {
         try {
-            //加载配置
-            ConfigLoader.load();
             while (!isDependencieReady(new Module(ModuleE.TX.abbr, "1.0"))) {
                 Thread.sleep(1000);
             }
-            List<Integer> chainIds = ContextManager.chainIds;
-            BlockService service = SpringLiteContext.getBean(BlockService.class);
-            for (Integer chainId : chainIds) {
-                List<Integer> systemTypes = TransactionUtil.getSystemTypes(chainId);
-                while (systemTypes == null || systemTypes.size() == 0 || !systemTypes.contains(1)) {
-                    Thread.sleep(1000);
-                    systemTypes = TransactionUtil.getSystemTypes(chainId);
-                }
-                //服务初始化
-                service.init(chainId);
-            }
+            //启动链
+            SpringLiteContext.getBean(ChainManager.class).runChain();
         } catch (Exception e) {
-            e.printStackTrace();
             Log.error("block module doStart error!");
             return false;
         }
