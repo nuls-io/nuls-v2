@@ -42,11 +42,11 @@ public class LoggerUtil {
      */
     private static Map<String, NulsLogger> loggerMap = new HashMap<>();
     public static final String LOGGER_KEY1 = "ld";
-    public static final String LOGGER_KEY2 = "tx";
-    public static final String LOGGER_KEY3 = "txRb";
-    public static final String LOGGER_KEY4 = "txUncfRb";
-    public static final String LOGGER_KEY5 = "txAmount";
-    public static final String LOGGER_KEY6 = "txUncfRb2";
+    public static final String LOGGER_KEY2 = "ld_tx";
+    public static final String LOGGER_KEY3 = "ld_txRb";
+    public static final String LOGGER_KEY4 = "ld_txUncfRb";
+    public static final String LOGGER_KEY5 = "ld_txAmount";
+    public static final String LOGGER_KEY6 = "ld_txUncfRb2";
 
     public static NulsLogger logger = LoggerBuilder.getLogger("./ld", LOGGER_KEY1, Level.ALL);
     public static NulsLogger txCommitLog = LoggerBuilder.getLogger("./ld", LOGGER_KEY2, Level.ALL);
