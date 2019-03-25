@@ -393,7 +393,7 @@ log "============ COPY JRE TO libs ==========="
         echoRed "JRE_HOME 必须是文件夹"
         else
         log "JRE_HOME IS ${JRE_HOME}"
-        LIBS_PATH="${LIBS_PATH}/Libraries"
+        LIBS_PATH="${RELEASE_PATH}/Libraries"
         if [ ! -d "${LIBS_PATH}" ]; then
             mkdir ${LIBS_PATH}
         fi
