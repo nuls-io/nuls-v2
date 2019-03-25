@@ -97,24 +97,24 @@ public class DatasTestCmd extends BaseCmd {
         BlockTxs blockTxs = repository.getBlock(chainId, blockHeight);
         for (Transaction transaction : blockTxs.getTransactions()) {
             CoinData coinData = CoinDataUtil.parseCoinData(transaction.getCoinData());
-            dealCoinDatas(coinData);
+            dealCoinDatas(coinData,chainId);
 
         }
         return success(blockTxs);
     }
 
-    public void dealCoinDatas(CoinData coinData) {
+    public void dealCoinDatas(CoinData coinData,int chainId) {
         if (coinData == null) {
             return;
         }
         List<CoinFrom> froms = coinData.getFrom();
         for (CoinFrom from : froms) {
-            logger.info("address={},amount = {} nonce = {} locked =  .", AddressTool.getStringAddressByBytes(from.getAddress()), from.getAmount(), HexUtil.encode(from.getNonce()), from.getLocked());
+            logger(chainId).info("address={},amount = {} nonce = {} locked =  .", AddressTool.getStringAddressByBytes(from.getAddress()), from.getAmount(), HexUtil.encode(from.getNonce()), from.getLocked());
 
         }
         List<CoinTo> tos = coinData.getTo();
         for (CoinTo to : tos) {
-            logger.info("address={},amount = {} lock = {}.", AddressTool.getStringAddressByBytes(to.getAddress()), to.getAmount(), to.getLockTime());
+            logger(chainId).info("address={},amount = {} lock = {}.", AddressTool.getStringAddressByBytes(to.getAddress()), to.getAmount(), to.getLockTime());
         }
 
     }

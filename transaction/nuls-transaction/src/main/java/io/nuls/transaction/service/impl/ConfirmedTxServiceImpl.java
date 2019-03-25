@@ -82,7 +82,6 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
         if (null == chain || txList == null || txList.size() == 0) {
             throw new NulsException(TxErrorCode.PARAMETER_ERROR);
         }
-        LedgerCall.coinDataBatchNotify(chain);
         List<NulsDigestData> txHashList = new ArrayList<>();
         for (Transaction tx : txList) {
             txHashList.add(tx.getHash());

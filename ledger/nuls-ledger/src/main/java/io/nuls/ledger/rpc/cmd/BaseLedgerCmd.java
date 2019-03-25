@@ -42,7 +42,7 @@ import static io.nuls.ledger.utils.LoggerUtil.logger;
  * @date 2019/03/13
  **/
 public class BaseLedgerCmd extends BaseCmd {
-    Response parseTxs(List<String> txHexList, List<Transaction> txList) {
+    Response parseTxs(List<String> txHexList, List<Transaction> txList,int chainId) {
         for (String txHex : txHexList) {
             if (StringUtils.isBlank(txHex)) {
                 return failed("txHex is blank");
@@ -53,14 +53,14 @@ public class BaseLedgerCmd extends BaseCmd {
                 tx.parse(new NulsByteBuffer(txStream));
                 txList.add(tx);
             } catch (NulsException e) {
-                logger.error("transaction parse error", e);
+                logger(chainId).error("transaction parse error", e);
                 return failed("transaction parse error");
             }
         }
         return success();
     }
 
-    Transaction parseTxs(String txHex) {
+    Transaction parseTxs(String txHex,int chainId) {
         if (StringUtils.isBlank(txHex)) {
             return null;
         }
@@ -69,7 +69,7 @@ public class BaseLedgerCmd extends BaseCmd {
         try {
             tx.parse(new NulsByteBuffer(txStream));
         } catch (NulsException e) {
-            logger.error("transaction parse error", e);
+            logger(chainId).error("transaction parse error", e);
             return null;
         }
         return tx;

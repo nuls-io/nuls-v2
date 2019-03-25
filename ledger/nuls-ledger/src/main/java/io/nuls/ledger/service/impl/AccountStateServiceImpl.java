@@ -60,6 +60,9 @@ public class AccountStateServiceImpl implements AccountStateService {
         //同步下未确认交易账户数据
         synchronized (LockerUtil.getAccountLocker(assetKey)) {
             AccountState dbAccountState = repository.getAccountState(accountState.getAddressChainId(), assetKey.getBytes(LedgerConstant.DEFAULT_ENCODING));
+            if(dbAccountState == null){
+                dbAccountState = new AccountState(accountState.getAddress(), accountState.getAddressChainId(), accountState.getAssetChainId(), accountState.getAssetId(), LedgerConstant.INIT_NONCE);
+            }
             if (accountState.getNonce().equalsIgnoreCase(LedgerConstant.INIT_NONCE) && dbAccountState.getNonce().equalsIgnoreCase(LedgerConstant.INIT_NONCE)) {
                 accountState.setUnconfirmedNonces(dbAccountState.getUnconfirmedNonces());
             } else {
