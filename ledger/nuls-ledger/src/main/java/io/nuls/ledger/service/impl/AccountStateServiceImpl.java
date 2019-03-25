@@ -72,9 +72,9 @@ public class AccountStateServiceImpl implements AccountStateService {
             ;
             List<UnconfirmedAmount> unconfirmedAmounts = CoinDataUtil.getUnconfirmedAmounts(accountState.getTxHash(), dbAccountState.getUnconfirmedAmounts());
             accountState.setUnconfirmedAmounts(unconfirmedAmounts);
-            LoggerUtil.logger.debug("更新打包的交易信息:addr={},orgNonce={},newNonce={},unConfirmedNonce org={},new={}", assetKey,dbAccountState.getNonce(), accountState.getNonce(), dbAccountState.getUnconfirmedNoncesStrs(), accountState.getUnconfirmedNoncesStrs());
+            LoggerUtil.logger(accountState.getAddressChainId()).debug("更新打包的交易信息:addr={},orgNonce={},newNonce={},unConfirmedNonce org={},new={}", assetKey,dbAccountState.getNonce(), accountState.getNonce(), dbAccountState.getUnconfirmedNoncesStrs(), accountState.getUnconfirmedNoncesStrs());
             repository.updateAccountState(assetKey.getBytes(LedgerConstant.DEFAULT_ENCODING), accountState);
-            LoggerUtil.txAmount.debug("hash={},assetKey={},dbAmount={},dbFreeze={},changeTo={},freeze={},oldHash={}", accountState.getTxHash(), assetKey, dbAccountState.getAvailableAmount(), dbAccountState.getFreezeTotal(), accountState.getAvailableAmount(), accountState.getFreezeTotal(), dbAccountState.getTxHash());
+            LoggerUtil.txAmount(accountState.getAddressChainId()).debug("hash={},assetKey={},dbAmount={},dbFreeze={},changeTo={},freeze={},oldHash={}", accountState.getTxHash(), assetKey, dbAccountState.getAvailableAmount(), dbAccountState.getFreezeTotal(), accountState.getAvailableAmount(), accountState.getFreezeTotal(), dbAccountState.getTxHash());
 //            blockSnapshotAccounts.addAccountState(dbAccountState);
         }
     }
@@ -137,7 +137,7 @@ public class AccountStateServiceImpl implements AccountStateService {
         //从第list的index=i-1起进行清空
         if (hadRoll) {
             for (int j = size; j >= i; j--) {
-                LoggerUtil.logger.debug("roll j={},nonce = {}", j, list.get(j - 1).getNonce());
+                LoggerUtil.logger(accountState.getAddressChainId()).debug("roll j={},nonce = {}", j, list.get(j - 1).getNonce());
                 list.remove(j - 1);
             }
 
@@ -160,7 +160,7 @@ public class AccountStateServiceImpl implements AccountStateService {
         //从第list的index=i-1起进行清空
         if (hadRoll) {
             for (int j = size; j >= i; j--) {
-                LoggerUtil.logger.debug("roll j={},hash = {}", j, list.get(j - 1).getTxHash());
+                LoggerUtil.logger(accountState.getAddressChainId()).debug("roll j={},hash = {}", j, list.get(j - 1).getTxHash());
                 list.remove(j - 1);
             }
 
@@ -260,10 +260,10 @@ public class AccountStateServiceImpl implements AccountStateService {
         synchronized (LockerUtil.getAccountLocker(unconfirmedTx.getAddress(), unconfirmedTx.getAssetChainId(), unconfirmedTx.getAssetId())) {
             AccountState accountState = getAccountState(unconfirmedTx.getAddress(), addressChainId, unconfirmedTx.getAssetChainId(), unconfirmedTx.getAssetId());
             if (unconfirmedTx.getSpendAmount().compareTo(BigInteger.ZERO) != 0) {
-                LoggerUtil.logger.debug("非确认交易nonce提交：txHash={},key={},addNonce={}", unconfirmedTx.getTxHash(), unconfirmedTx.getAddress() + "-" + unconfirmedTx.getAssetChainId() + "-" + unconfirmedTx.getAssetId(), newNonce);
+                LoggerUtil.logger(addressChainId).debug("非确认交易nonce提交：txHash={},key={},addNonce={}", unconfirmedTx.getTxHash(), unconfirmedTx.getAddress() + "-" + unconfirmedTx.getAssetChainId() + "-" + unconfirmedTx.getAssetId(), newNonce);
                 UnconfirmedNonce unconfirmedNonce = new UnconfirmedNonce(newNonce);
                 accountState.addUnconfirmedNonce(unconfirmedNonce);
-                LoggerUtil.logger.debug("非确认交易nonce提交后：txHash={},dbNonce={},nonces={}", unconfirmedTx.getTxHash(), accountState.getNonce(), accountState.getUnconfirmedNoncesStrs());
+                LoggerUtil.logger(addressChainId).debug("非确认交易nonce提交后：txHash={},dbNonce={},nonces={}", unconfirmedTx.getTxHash(), accountState.getNonce(), accountState.getUnconfirmedNoncesStrs());
             }
             UnconfirmedAmount unconfirmedAmount = new UnconfirmedAmount(unconfirmedTx.getEarnAmount(), unconfirmedTx.getSpendAmount(),
                     unconfirmedTx.getFromUnLockedAmount(), unconfirmedTx.getToLockedAmount());

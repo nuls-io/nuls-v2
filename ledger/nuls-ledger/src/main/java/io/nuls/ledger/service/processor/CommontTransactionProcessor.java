@@ -49,7 +49,7 @@ public class CommontTransactionProcessor implements TxProcessor {
 
     @Override
     public boolean processFromCoinData(CoinFrom coin, String nonce, String hash, AccountState accountState) {
-        logger.debug("processFromCoinData address={},amount={},oldNonce={},updateNonce={},hash={} ", AddressTool.getStringAddressByBytes(coin.getAddress()), coin.getAmount(), HexUtil.encode(coin.getNonce()), nonce, hash);
+        logger(accountState.getAddressChainId()).debug("processFromCoinData address={},amount={},oldNonce={},updateNonce={},hash={} ", AddressTool.getStringAddressByBytes(coin.getAddress()), coin.getAmount(), HexUtil.encode(coin.getNonce()), nonce, hash);
         accountState.addTotalFromAmount(coin.getAmount());
         accountState.setNonce(nonce);
         return true;
@@ -57,7 +57,7 @@ public class CommontTransactionProcessor implements TxProcessor {
 
     @Override
     public boolean processToCoinData(CoinTo coin, String nonce, String hash, AccountState accountState) {
-        logger.debug("processToCoinData address={},amount={},lockedTime={},hash={} ", AddressTool.getStringAddressByBytes(coin.getAddress()), coin.getAmount(), coin.getLockTime(), hash);
+        logger(accountState.getAddressChainId()).debug("processToCoinData address={},amount={},lockedTime={},hash={} ", AddressTool.getStringAddressByBytes(coin.getAddress()), coin.getAmount(), coin.getLockTime(), hash);
         accountState.addTotalToAmount(coin.getAmount());
         return true;
     }

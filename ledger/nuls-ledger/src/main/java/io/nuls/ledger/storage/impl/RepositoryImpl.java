@@ -70,7 +70,7 @@ public class RepositoryImpl implements Repository, InitDB, InitializingBean {
         try {
             RocksDBService.put(getLedgerAccountTableName(accountState.getAddressChainId()), key, accountState.serialize());
         } catch (Exception e) {
-            logger.error("createAccountState serialize error.", e);
+            logger(accountState.getAddressChainId()).error("createAccountState serialize error.", e);
         }
     }
 
@@ -83,8 +83,8 @@ public class RepositoryImpl implements Repository, InitDB, InitializingBean {
     @Override
     public void updateAccountState(byte[] key, AccountState nowAccountState) throws Exception {
         //update account
-        LoggerUtil.logger.debug("updateAccountState hash={},nonce={},UnconfirmedNoncesNum={}", nowAccountState.getTxHash(), nowAccountState.getNonce(), nowAccountState.getUnconfirmedNonces().size());
-        LoggerUtil.logger.debug("updateAccountState address={},addressChainId={},assetChainId={},assetId={},getAvailableAmount={}," +
+        LoggerUtil.logger(nowAccountState.getAddressChainId()).debug("updateAccountState hash={},nonce={},UnconfirmedNoncesNum={}", nowAccountState.getTxHash(), nowAccountState.getNonce(), nowAccountState.getUnconfirmedNonces().size());
+        LoggerUtil.logger(nowAccountState.getAddressChainId()).debug("updateAccountState address={},addressChainId={},assetChainId={},assetId={},getAvailableAmount={}," +
                         "getFreezeTotal={},getUnconfirmedAmount={},getUnconfirmedFreezeAmount={}",
                 nowAccountState.getAddress(), nowAccountState.getAddressChainId(), nowAccountState.getAssetChainId(), nowAccountState.getAssetId(),
                 nowAccountState.getAvailableAmount(), nowAccountState.getFreezeTotal(), nowAccountState.getUnconfirmedAmount(), nowAccountState.getUnconfirmedFreezeAmount());
@@ -114,7 +114,7 @@ public class RepositoryImpl implements Repository, InitDB, InitializingBean {
         try {
             blockSnapshotAccounts.parse(new NulsByteBuffer(stream));
         } catch (NulsException e) {
-            logger.error("getAccountState serialize error.", e);
+            logger(chainId).error("getAccountState serialize error.", e);
         }
         return blockSnapshotAccounts;
     }
@@ -136,7 +136,7 @@ public class RepositoryImpl implements Repository, InitDB, InitializingBean {
         try {
             accountState.parse(new NulsByteBuffer(stream));
         } catch (NulsException e) {
-            logger.error("getAccountState serialize error.", e);
+            logger(chainId).error("getAccountState serialize error.", e);
         }
         return accountState;
     }
@@ -151,7 +151,7 @@ public class RepositoryImpl implements Repository, InitDB, InitializingBean {
             long height = ByteUtils.byteToLong(stream);
             return height;
         } catch (Exception e) {
-            logger.error("getBlockHeight serialize error.", e);
+            logger(chainId).error("getBlockHeight serialize error.", e);
         }
         return -1;
     }
@@ -161,7 +161,7 @@ public class RepositoryImpl implements Repository, InitDB, InitializingBean {
         try {
             RocksDBService.put(getChainsHeightTableName(), ByteUtils.intToBytes(chainId), ByteUtils.longToBytes(height));
         } catch (Exception e) {
-            logger.error("saveBlockHeight serialize error.", e);
+            logger(chainId).error("saveBlockHeight serialize error.", e);
         }
 
     }
@@ -221,7 +221,7 @@ public class RepositoryImpl implements Repository, InitDB, InitializingBean {
                 RocksDBService.createTable(getLedgerNonceTableName(addressChainId));
             }
         } catch (Exception e) {
-            logger.error(e);
+            logger(addressChainId).error(e);
         }
     }
 
@@ -236,7 +236,7 @@ public class RepositoryImpl implements Repository, InitDB, InitializingBean {
             RocksDBService.put(table, ByteUtils.longToBytes(height), blockTxs.serialize());
             RocksDBService.delete(table, ByteUtils.longToBytes(height - LedgerConstant.CACHE_ACCOUNT_BLOCK));
         } catch (Exception e) {
-            logger.error("saveBlock serialize error.", e);
+            logger(chainId).error("saveBlock serialize error.", e);
         }
 
     }
@@ -253,7 +253,7 @@ public class RepositoryImpl implements Repository, InitDB, InitializingBean {
             blockTxs.parse(new NulsByteBuffer(stream));
             return blockTxs;
         } catch (Exception e) {
-            logger.error("getBlock serialize error.", e);
+            logger(chainId).error("getBlock serialize error.", e);
         }
         return null;
     }
@@ -270,7 +270,7 @@ public class RepositoryImpl implements Repository, InitDB, InitializingBean {
             if (!RocksDBService.existTable(getChainsHeightTableName())) {
                 RocksDBService.createTable(getChainsHeightTableName());
             } else {
-                logger.info("table {} exist.", getChainsHeightTableName());
+                LoggerUtil.logger.info("table {} exist.", getChainsHeightTableName());
             }
         } catch (Exception e) {
             e.printStackTrace();

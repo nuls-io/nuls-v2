@@ -107,16 +107,16 @@ public class ValidatorCmd extends BaseLedgerCmd {
     public Response rollbackTxValidateStatus(Map params) {
         Map<String, Object> rtData = new HashMap<>();
         int value = 0;
+        Integer chainId = (Integer) params.get("chainId");
         try {
-            Integer chainId = (Integer) params.get("chainId");
             String txHex = params.get("txHex").toString();
-            LoggerUtil.logger.debug("rollbackrTxValidateStatus chainId={}", chainId);
+            LoggerUtil.logger(chainId).debug("rollbackrTxValidateStatus chainId={}", chainId);
             Transaction tx = parseTxs(txHex,chainId);
             if (null == tx) {
-                LoggerUtil.logger.debug("txHex is invalid chainId={},txHex={}", chainId,txHex);
+                LoggerUtil.logger(chainId).debug("txHex is invalid chainId={},txHex={}", chainId,txHex);
                 return failed("txHex is invalid");
             }
-            LoggerUtil.txUnconfirmedRollBackLog.debug("rollbackrTxValidateStatus chainId={},txHash={}", chainId, tx.getHash().toString());
+            LoggerUtil.txUnconfirmedRollBackLog(chainId).debug("rollbackrTxValidateStatus chainId={},txHash={}", chainId, tx.getHash().toString());
             //清理未确认回滚
             transactionService.rollBackUnconfirmTx(chainId,tx);
             if (coinDataValidator.rollbackTxValidateStatus(chainId, tx)) {
@@ -129,7 +129,7 @@ public class ValidatorCmd extends BaseLedgerCmd {
         }
         rtData.put("value", value);
         Response response = success(rtData);
-        LoggerUtil.logger.debug("response={}", response);
+        LoggerUtil.logger(chainId).debug("response={}", response);
         return response;
 
     }
@@ -146,11 +146,11 @@ public class ValidatorCmd extends BaseLedgerCmd {
     @Parameter(parameterName = "chainId", parameterType = "int")
     public Response bathValidateBegin(Map params) {
         Integer chainId = (Integer) params.get("chainId");
-        LoggerUtil.logger.debug("chainId={} bathValidateBegin", chainId);
+        LoggerUtil.logger(chainId).debug("chainId={} bathValidateBegin", chainId);
         coinDataValidator.beginBatchPerTxValidate(chainId);
         Map<String, Object> rtData = new HashMap<>();
         rtData.put("value", 1);
-        LoggerUtil.logger.debug("return={}", success(rtData));
+        LoggerUtil.logger(chainId).debug("return={}", success(rtData));
         return success(rtData);
     }
 
@@ -171,16 +171,16 @@ public class ValidatorCmd extends BaseLedgerCmd {
         Integer chainId = (Integer) params.get("chainId");
         long blockHeight = Long.valueOf(params.get("blockHeight").toString());
         List<String> txHexList = (List) params.get("txHexList");
-        LoggerUtil.logger.debug("chainId={} blockHeight={} blockValidate", chainId, blockHeight);
+        LoggerUtil.logger(chainId).debug("chainId={} blockHeight={} blockValidate", chainId, blockHeight);
         if (null == txHexList || 0 == txHexList.size()) {
-            LoggerUtil.logger.error("txHexList is blank");
+            LoggerUtil.logger(chainId).error("txHexList is blank");
             return failed("txHexList is blank");
         }
-        LoggerUtil.logger.debug("commitBlockTxs txHexListSize={}", txHexList.size());
+        LoggerUtil.logger(chainId).debug("commitBlockTxs txHexListSize={}", txHexList.size());
         List<Transaction> txList = new ArrayList<>();
         Response parseResponse = parseTxs(txHexList, txList,chainId);
         if (!parseResponse.isSuccess()) {
-            LoggerUtil.logger.debug("commitBlockTxs response={}", parseResponse);
+            LoggerUtil.logger(chainId).debug("commitBlockTxs response={}", parseResponse);
             return parseResponse;
         }
         Map<String, Object> rtData = new HashMap<>();
@@ -189,7 +189,7 @@ public class ValidatorCmd extends BaseLedgerCmd {
         } else {
             rtData.put("value", 0);
         }
-        LoggerUtil.logger.debug("chainId={} blockHeight={},return={}", chainId, blockHeight, success(rtData));
+        LoggerUtil.logger(chainId).debug("chainId={} blockHeight={},return={}", chainId, blockHeight, success(rtData));
         return success(rtData);
     }
 }
