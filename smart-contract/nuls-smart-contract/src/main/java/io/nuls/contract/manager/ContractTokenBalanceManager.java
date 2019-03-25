@@ -80,7 +80,12 @@ public class ContractTokenBalanceManager {
     private ContractTokenBalanceManager() {
     }
 
-    public Result initAllTokensByAccount(String account) throws NulsException {
+    public Result initAllTokensByImportAccount(String account) throws NulsException {
+        initializedAddressSet.remove(account);
+        return this.initAllTokensByAccount(account);
+    }
+
+    private Result initAllTokensByAccount(String account) throws NulsException {
         if (!initializedAddressSet.add(account)) {
             return getSuccess();
         }
@@ -215,4 +220,5 @@ public class ContractTokenBalanceManager {
         }
         return getSuccess();
     }
+
 }

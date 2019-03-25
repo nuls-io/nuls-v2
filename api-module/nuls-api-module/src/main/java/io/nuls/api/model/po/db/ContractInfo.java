@@ -1,11 +1,15 @@
 package io.nuls.api.model.po.db;
 
+import io.nuls.api.utils.DocumentTransferTool;
 import lombok.Data;
+import org.bson.Document;
 
+import java.math.BigInteger;
+import java.util.ArrayList;
 import java.util.List;
 
 @Data
-public class ContractInfo extends TxDataInfo{
+public class ContractInfo extends TxDataInfo {
 
     private String contractAddress;
 
@@ -17,7 +21,7 @@ public class ContractInfo extends TxDataInfo{
 
     private boolean success;
 
-    private long balance;
+    private BigInteger balance;
 
     private String errorMsg;
 
@@ -37,8 +41,6 @@ public class ContractInfo extends TxDataInfo{
 
     private List<ContractMethod> methods;
 
-    private String methodStr;
-
     //以下字段，为NRC20合约特有
     private String tokenName;
 
@@ -55,4 +57,34 @@ public class ContractInfo extends TxDataInfo{
     private boolean isNew;
 
     private ContractResultInfo resultInfo;
+
+
+    public Document toDocument() {
+        Document document = DocumentTransferTool.toDocument(this, "contractAddress");
+        List<Document> methodsList = new ArrayList<>();
+        for (ContractMethod method : methods) {
+            Document doc = DocumentTransferTool.toDocument(method);
+            methodsList.add(doc);
+        }
+
+        document.put("methods", methodsList);
+        //document.put("resultInfo", resultInfo.toDocument());
+        document.remove("resultInfo");
+        return document;
+    }
+
+    public static ContractInfo toInfo(Document document) {
+        List<ContractMethod> methods = new ArrayList<>();
+        List<Document> methodsList = (List<Document>) document.get("methods");
+        for (Document doc : methodsList) {
+            ContractMethod method = DocumentTransferTool.toInfo(doc, ContractMethod.class);
+            methods.add(method);
+        }
+        document.remove("methods");
+        ContractInfo info = DocumentTransferTool.toInfo(document, "contractAddress", ContractInfo.class);
+
+        info.setMethods(methods);
+        return info;
+
+    }
 }

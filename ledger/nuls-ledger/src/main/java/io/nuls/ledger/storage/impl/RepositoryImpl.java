@@ -68,7 +68,6 @@ public class RepositoryImpl implements Repository, InitDB, InitializingBean {
     @Override
     public void createAccountState(byte[] key, AccountState accountState) {
         try {
-            initChainDb(accountState.getAddressChainId());
             RocksDBService.put(getLedgerAccountTableName(accountState.getAddressChainId()), key, accountState.serialize());
         } catch (Exception e) {
             logger.error("createAccountState serialize error.", e);
@@ -215,7 +214,12 @@ public class RepositoryImpl implements Repository, InitDB, InitializingBean {
             if (!RocksDBService.existTable(getBlockSnapshotTableName(addressChainId))) {
                 RocksDBService.createTable(getBlockSnapshotTableName(addressChainId));
             }
-
+            if (!RocksDBService.existTable(getBlockTableName(addressChainId))) {
+                RocksDBService.createTable(getBlockTableName(addressChainId));
+            }
+            if (!RocksDBService.existTable(getLedgerNonceTableName(addressChainId))) {
+                RocksDBService.createTable(getLedgerNonceTableName(addressChainId));
+            }
         } catch (Exception e) {
             logger.error(e);
         }

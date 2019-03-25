@@ -16,8 +16,8 @@
     "heightRange": 1000,
     "waitInterval": 50,
     "maxRollback": 100,
-    "consistencyNodePercent": 60,
-    "minNodeAmount": 2,
+    "consistencyNodePercent": 80,
+    "minNodeAmount": 1,
     "downloadNumber": 20,
     "extendMaxSize": 1024,
     "validBlockInterval": 60000,
@@ -29,7 +29,7 @@
     "batchDownloadTimeount": 15000,
     "maxLoop": 10,
     "synSleepInterval": 1000,
-    "waitNetworkInterval": 15000,
+    "waitNetworkInterval": 5000,
     "cleanParam": 2
   }
 }

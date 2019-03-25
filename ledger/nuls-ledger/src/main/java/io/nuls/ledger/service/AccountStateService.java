@@ -34,15 +34,17 @@ import io.nuls.ledger.model.po.BlockSnapshotAccounts;
  * Created by wangkun23 on 2018/11/29.
  */
 public interface AccountStateService {
+
     /**
      *
+     * 不用同步锁获取账户信息
      * @param address
-     * @param addressChainId
      * @param assetChainId
      * @param assetId
      * @return
      */
-    AccountState createAccount(String address,int addressChainId, int assetChainId, int assetId);
+    AccountState getAccountStateUnSyn(String address,int addressChainId, int assetChainId, int assetId);
+
 
     /**
      *

@@ -1,10 +1,12 @@
 package io.nuls.api.analysis;
 
+import ch.qos.logback.core.subst.Token;
 import io.nuls.api.ApiContext;
 import io.nuls.api.constant.ApiConstant;
 import io.nuls.api.constant.ApiErrorCode;
 import io.nuls.api.constant.CommandConstant;
 import io.nuls.api.model.po.db.*;
+import io.nuls.api.model.rpc.BalanceInfo;
 import io.nuls.api.rpc.RpcCall;
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.data.Block;
@@ -14,6 +16,7 @@ import io.nuls.rpc.model.ModuleE;
 import io.nuls.tools.basic.Result;
 import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.exception.NulsException;
+import io.nuls.tools.log.Log;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -40,7 +43,7 @@ public class WalletRpcHandler {
 
             return Result.getSuccess(null).setData(blockInfo);
         } catch (Exception e) {
-            e.printStackTrace();
+            Log.error(e);
         }
         return Result.getFailed(ApiErrorCode.DATA_PARSE_ERROR);
     }
@@ -61,8 +64,7 @@ public class WalletRpcHandler {
             BlockInfo blockInfo = AnalysisHandler.toBlockInfo(block, chainID);
             return Result.getSuccess(null).setData(blockInfo);
         } catch (Exception e) {
-            e.printStackTrace();
-            // return Result.getFailed()
+            Log.error(e);
         }
         return Result.getFailed(ApiErrorCode.DATA_PARSE_ERROR);
     }
@@ -84,10 +86,33 @@ public class WalletRpcHandler {
 
             return accountInfo;
         } catch (Exception e) {
-            e.printStackTrace();
+            Log.error(e);
         }
         return null;
     }
+
+    public static BalanceInfo getBalance(int chainId, String address, int assetChainId, int assetId) {
+        Map<String, Object> params = new HashMap<>(ApiConstant.INIT_CAPACITY_8);
+        params.put(Constants.VERSION_KEY_STR, ApiContext.VERSION);
+        params.put("chainId", chainId);
+        params.put("address", address);
+        params.put("assetChainId", assetChainId);
+        params.put("assetId", assetId);
+        try {
+            Map map = (Map) RpcCall.request(ModuleE.LG.abbr, CommandConstant.GET_BALANCE, params);
+            BalanceInfo balanceInfo = new BalanceInfo();
+            balanceInfo.setTotalBalance(new BigInteger(map.get("total").toString()));
+            balanceInfo.setBalance(new BigInteger(map.get("available").toString()));
+            balanceInfo.setTimeLock(new BigInteger(map.get("timeHeightLocked").toString()));
+            balanceInfo.setConsensusLock(new BigInteger(map.get("permanentLocked").toString()));
+
+            return balanceInfo;
+        } catch (Exception e) {
+            Log.error(e);
+        }
+        return null;
+    }
+
 
     public static Result<TransactionInfo> getTx(int chainId, String hash) {
         Map<String, Object> params = new HashMap<>();
@@ -139,31 +164,30 @@ public class WalletRpcHandler {
         }
     }
 
-    public Result<ContractResultInfo> getContractResult(int chainId, String txHash) {
+    public static Result<ContractInfo> getContractInfo(int chainId, ContractInfo contractInfo) throws NulsException {
         Map<String, Object> params = new HashMap<>();
         params.put("chainId", chainId);
-        params.put("hash", txHash);
+        params.put("contractAddress", contractInfo.getContractAddress());
+        params.put("hash", contractInfo.getCreateTxHash());
+        //查询智能合约详情之前，先查询创建智能合约的执行结果是否成功
+        Result<ContractResultInfo> result = getContractResultInfo(params);
+        ContractResultInfo resultInfo = result.getData();
+        contractInfo.setResultInfo(resultInfo);
+        if (!resultInfo.isSuccess()) {
+            contractInfo.setSuccess(false);
+            contractInfo.setStatus(-1);
+            contractInfo.setErrorMsg(resultInfo.getErrorMessage());
 
-        try {
-            Map map = (Map) RpcCall.request(ModuleE.CS.abbr, CommandConstant.GET_CONSENSUS_CONFIG, params);
-            return Result.getSuccess(null).setData(map);
-        } catch (NulsException e) {
-            return Result.getFailed(e.getErrorCode());
+            return Result.getSuccess(null).setData(contractInfo);
         }
-    }
 
-    public static Result<ContractInfo> getContractInfo(int chainId, String contractAddress) throws NulsException {
-        Map<String, Object> params = new HashMap<>();
-        params.put("chainId", chainId);
-        params.put("contractAddress", contractAddress);
+        contractInfo.setSuccess(true);
         Map map = (Map) RpcCall.request(ModuleE.SC.abbr, CommandConstant.CONTRACT_INFO, params);
-
-        ContractInfo contractInfo = new ContractInfo();
-        contractInfo.setCreateTxHash(map.get("createTxHash").toString());
-        contractInfo.setContractAddress(map.get("address").toString());
+//        contractInfo.setCreateTxHash(map.get("createTxHash").toString());
+//        contractInfo.setContractAddress(map.get("address").toString());
+//        contractInfo.setCreateTime(Long.parseLong(map.get("createTime").toString()));
+//        contractInfo.setBlockHeight(Long.parseLong(map.get("blockHeight").toString()));
         contractInfo.setCreater(map.get("creater").toString());
-        contractInfo.setCreateTime(Long.parseLong(map.get("createTime").toString()));
-        contractInfo.setBlockHeight(Long.parseLong(map.get("blockHeight").toString()));
         contractInfo.setNrc20((Boolean) map.get("isNrc20"));
         contractInfo.setStatus(0);
         if (contractInfo.isNrc20()) {
@@ -171,6 +195,7 @@ public class WalletRpcHandler {
             contractInfo.setSymbol(map.get("nrc20TokenSymbol").toString());
             contractInfo.setDecimals((Integer) map.get("decimals"));
             contractInfo.setTotalSupply(map.get("totalSupply").toString());
+            contractInfo.setOwners(new ArrayList<>());
         }
 
         List<Map<String, Object>> methodMap = (List<Map<String, Object>>) map.get("method");
@@ -191,21 +216,24 @@ public class WalletRpcHandler {
         }
         contractInfo.setMethods(methodList);
         return Result.getSuccess(null).setData(contractInfo);
-
     }
 
     public static Result<ContractResultInfo> getContractResultInfo(int chainId, String hash) throws NulsException {
         Map<String, Object> params = new HashMap<>();
         params.put("chainId", chainId);
         params.put("hash", hash);
+        return getContractResultInfo(params);
+    }
+
+    private static Result<ContractResultInfo> getContractResultInfo(Map<String, Object> params) throws NulsException {
         Map map = (Map) RpcCall.request(ModuleE.SC.abbr, CommandConstant.CONTRACT_RESULT, params);
         map = (Map) map.get("data");
         if (map == null) {
             return Result.getFailed(ApiErrorCode.DATA_NOT_FOUND);
         }
         ContractResultInfo resultInfo = new ContractResultInfo();
+        resultInfo.setTxHash((String) params.get("hash"));
         resultInfo.setSuccess((Boolean) map.get("success"));
-        resultInfo.setTxHash((String) map.get("txHash"));
         resultInfo.setContractAddress((String) map.get("contractAddress"));
         resultInfo.setErrorMessage((String) map.get("errorMessage"));
         resultInfo.setResult((String) map.get("result"));
@@ -223,20 +251,31 @@ public class WalletRpcHandler {
 
         List<Map<String, Object>> transfers = (List<Map<String, Object>>) map.get("transfers");
         List<NulsTransfer> transferList = new ArrayList<>();
-        if (!transfers.isEmpty()) {
-            for (Map map1 : transfers) {
-                NulsTransfer nulsTransfer = new NulsTransfer();
-                nulsTransfer.setTxHash((String) map1.get("txHash"));
-                nulsTransfer.setFrom((String) map.get("from"));
-                nulsTransfer.setValue((String) map.get("value"));
-                nulsTransfer.setOutputs((List<Map<String, Object>>) map.get("outputs"));
-                transferList.add(nulsTransfer);
-            }
+        for (Map map1 : transfers) {
+            NulsTransfer nulsTransfer = new NulsTransfer();
+            nulsTransfer.setTxHash((String) map1.get("txHash"));
+            nulsTransfer.setFrom((String) map1.get("from"));
+            nulsTransfer.setValue((String) map1.get("value"));
+            nulsTransfer.setOutputs((List<Map<String, Object>>) map1.get("outputs"));
+            transferList.add(nulsTransfer);
         }
         resultInfo.setNulsTransfers(transferList);
 
-        transfers = (List<Map<String, Object>>) map.get("transfers");
-
+        transfers = (List<Map<String, Object>>) map.get("tokenTransfers");
+        List<TokenTransfer> tokenTransferList = new ArrayList<>();
+        for (Map map1 : transfers) {
+            TokenTransfer tokenTransfer = new TokenTransfer();
+            tokenTransfer.setContractAddress((String) map1.get("contractAddress"));
+            tokenTransfer.setFromAddress((String) map1.get("from"));
+            tokenTransfer.setToAddress((String) map1.get("to"));
+            tokenTransfer.setValue((String) map1.get("value"));
+            tokenTransfer.setName((String) map1.get("name"));
+            tokenTransfer.setSymbol((String) map1.get("symbol"));
+            tokenTransfer.setDecimals((Integer) map1.get("decimals"));
+            tokenTransferList.add(tokenTransfer);
+        }
+        resultInfo.setTokenTransfers(tokenTransferList);
         return Result.getSuccess(null).setData(resultInfo);
     }
+
 }
