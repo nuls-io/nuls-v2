@@ -45,8 +45,8 @@ import java.util.List;
  */
 public class AddressTool {
 
-    public static final String MAINNET_PREFIX = "NULS";
-    public static final String TESTNET_PREFIX = "tNULS";
+    public static final String MAINNET_PREFIX = BaseConstant.MAINNET_DEFAULT_ADDRESS_PREFIX;
+    public static final String TESTNET_PREFIX = BaseConstant.TESTNET_DEFAULT_ADDRESS_PREFIX;
 
     private static final String ERROR_MESSAGE = "Address prefix can not be null!";
     private static final String[] LENGTHPREFIX = new String[]{"", "a", "b", "c", "d", "e"};
@@ -131,7 +131,7 @@ public class AddressTool {
         } else if (chainId == 2) {
             return getAddress(publicKey, chainId, "tNULS");
         }
-        throw new RuntimeException();
+        return getAddress(publicKey, chainId, "DEF");
     }
 
     public static byte[] getAddress(byte[] publicKey, int chainId, String prefix) {
