@@ -28,7 +28,6 @@ package io.nuls.transaction.storage.rocksdb.impl;
 
 import io.nuls.base.data.Transaction;
 import io.nuls.tools.core.annotation.Service;
-import io.nuls.transaction.constant.TxConstant;
 import io.nuls.transaction.model.bo.Chain;
 import io.nuls.transaction.storage.rocksdb.UnverifiedTxStorageService;
 import io.nuls.transaction.utils.TxUtil;
@@ -50,7 +49,6 @@ public class UnverifiedTxStorageServiceImpl implements UnverifiedTxStorageServic
     public boolean putTx(Chain chain, Transaction tx) {
         try {
             chain.getUnverifiedQueue().offer(tx.serialize());
-            chain.getLoggerMap().get(TxConstant.LOG_TX).debug("UnverifiedTxQueue putTx - size: {}", chain.getUnverifiedQueue().size());
             return true;
         } catch (IOException e) {
             Log.error(e);
@@ -64,7 +62,6 @@ public class UnverifiedTxStorageServiceImpl implements UnverifiedTxStorageServic
         if (null == bytes) {
             return null;
         }
-        chain.getLoggerMap().get(TxConstant.LOG_TX).debug("UnverifiedTxQueue pollTx - size: {}", chain.getUnverifiedQueue().size());
         try {
             return TxUtil.getTransaction(bytes);
         } catch (Exception e) {

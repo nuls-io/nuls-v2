@@ -81,18 +81,6 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
         if (null == chain || txList == null || txList.size() == 0) {
             throw new NulsException(TxErrorCode.PARAMETER_ERROR);
         }
-      /*  LedgerCall.coinDataBatchNotify(chain);
-        List<NulsDigestData> txHashList = new ArrayList<>();
-        for (Transaction tx : txList) {
-            txHashList.add(tx.getHash());
-            //todo 批量验证coinData，接口和单个的区别？
-            VerifyTxResult verifyTxResult = LedgerCall.verifyCoinData(chain, tx, true);
-            if (!verifyTxResult.success()) {
-                chain.getLoggerMap().get(TxConstant.LOG_TX).debug("*** Debug *** [保存创世块交易失败] " +
-                        "coinData not success - code: {}, - reason:{}, type:{} - txhash:{}", verifyTxResult.getCode(), verifyTxResult.getDesc(), tx.getType(), tx.getHash().getDigestHex());
-                return false;
-            }
-        }*/
         if (!saveBlockTxList(chain, txList, blockHeaderHex, true)) {
             chain.getLoggerMap().get(TxConstant.LOG_TX).debug("保存创世块交易失败");
             return false;

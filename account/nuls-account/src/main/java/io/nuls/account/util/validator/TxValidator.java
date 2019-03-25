@@ -29,32 +29,24 @@ import io.nuls.account.constant.AccountErrorCode;
 import io.nuls.account.model.bo.Chain;
 import io.nuls.account.service.MultiSignAccountService;
 import io.nuls.account.service.TransactionService;
+import io.nuls.account.util.LoggerUtil;
 import io.nuls.account.util.TxUtil;
 import io.nuls.account.util.manager.ChainManager;
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.basic.TransactionFeeCalculator;
-import io.nuls.base.data.Coin;
-import io.nuls.base.data.CoinData;
-import io.nuls.base.data.CoinFrom;
-import io.nuls.base.data.CoinTo;
-import io.nuls.base.data.MultiSigAccount;
-import io.nuls.base.data.Transaction;
+import io.nuls.base.data.*;
 import io.nuls.base.signture.MultiSignTxSignature;
 import io.nuls.base.signture.SignatureUtil;
 import io.nuls.tools.basic.Result;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.crypto.HexUtil;
-import io.nuls.tools.model.BigIntegerUtils;
 import io.nuls.tools.exception.NulsException;
+import io.nuls.tools.model.BigIntegerUtils;
 
 import java.io.IOException;
 import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /**
  * 交易验证工具类
@@ -122,6 +114,7 @@ public class TxValidator {
      * @return Result
      */
     private boolean txValidate(Chain chain, Transaction tx) throws NulsException {
+        LoggerUtil.logger.debug("[转账交易验证器]");
         //coinData基础验证以及手续费 (from中所有的当前链主资产-to中所有的当前链主资产)
         CoinData coinData = TxUtil.getCoinData(tx);
         if (!validateCoinFromBase(chain, coinData.getFrom())) {

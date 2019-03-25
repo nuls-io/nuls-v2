@@ -42,6 +42,7 @@ import io.nuls.account.service.TransactionService;
 import io.nuls.account.util.LoggerUtil;
 import io.nuls.account.util.TxUtil;
 import io.nuls.account.util.manager.ChainManager;
+import io.nuls.account.util.validator.TxValidator;
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.basic.TransactionFeeCalculator;
@@ -75,6 +76,8 @@ public class TransactionServiceImpl implements TransactionService {
     private ChainManager chainManager;
     @Autowired
     private AliasService aliasService;
+    @Autowired
+    private TxValidator txValidator;
 
     @Autowired
     private MultiSignAccountService multiSignAccountService;
@@ -121,6 +124,18 @@ public class TransactionServiceImpl implements TransactionService {
                         continue;
                     } else {
                         accountAddressMap.put(address, transaction);
+                    }
+                }
+                if (transaction.getType() == AccountConstant.TX_TYPE_TRANSFER) {
+                    try {
+                        if(!txValidator.validateTx(chainId, transaction)){
+                            result.add(transaction);
+                            continue;
+                        }
+                    } catch (Exception e) {
+                        LoggerUtil.logger.error(e);
+                        result.add(transaction);
+                        continue;
                     }
                 }
             }
