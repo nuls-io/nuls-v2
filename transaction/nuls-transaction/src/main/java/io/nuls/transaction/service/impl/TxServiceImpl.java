@@ -598,15 +598,18 @@ public class TxServiceImpl implements TxService {
         boolean contractNotify = false;
         try {
             long startTime = NetworkCall.getCurrentTimeMillis();
+            float batchValidReserveTemp = chain.getConfig().getModuleVerifyPercent() * (endtimestamp - startTime);
+            long batchValidReserve = Float.valueOf(batchValidReserveTemp).longValue();
+
             if (!LedgerCall.coinDataBatchNotify(chain)) {
                 nulsLogger.error("Call ledger bathValidateBegin interface failed");
                 throw new NulsException(TxErrorCode.CALLING_REMOTE_INTERFACE_FAILED);
             }
             nulsLogger.info("获取打包交易开始,当前待打包队列交易数: {} , height:{}", packablePool.getPoolSize(chain), blockHeight);
             nulsLogger.debug("--------------while-----------");
+
             while (true) {
                 long currentTimeMillis = NetworkCall.getCurrentTimeMillis();
-
                 //如果本地最新区块+1 大于当前在打包区块的高度, 说明本地最新区块已更新,需要重新打包,把取出的交易放回到打包队列
                 if (blockHeight < chain.getBestBlockHeight() + 1) {
                     nulsLogger.debug("获取交易过程中最新区块高度已增长,把取出的交易放回到打包队列, 重新打包...");
@@ -614,10 +617,9 @@ public class TxServiceImpl implements TxService {
                         Transaction transaction = packingTxList.get(i);
                         packablePool.addInFirst(chain, transaction);
                     }
-                    currentTimeMillis = NetworkCall.getCurrentTimeMillis();
-                    if (endtimestamp - currentTimeMillis <= chain.getConfig().getModuleVerifyOffset()) {
+                    if (endtimestamp - currentTimeMillis <= batchValidReserve) {
                         nulsLogger.debug("########## 打包时间到: {}, -endtimestamp:{} , -offset:{}",
-                                currentTimeMillis, endtimestamp, chain.getConfig().getModuleVerifyOffset());
+                                currentTimeMillis, endtimestamp, batchValidReserve);
                         break;
                     }
                     return getPackableTxs(chain, endtimestamp, maxTxDataSize, chain.getBestBlockHeight() + 1, blockTime, packingAddress, preStateRoot);
@@ -625,9 +627,9 @@ public class TxServiceImpl implements TxService {
 
 //                nulsLogger.debug("########## (循环开始)当前网络时间: {} ", currentTimeMillis);
 //                nulsLogger.debug("########## 预留的[获取打包交易]结束时间: {}, 还剩{}秒 ", endtimestamp, (endtimestamp - currentTimeMillis)/1000.0);
-                if (endtimestamp - currentTimeMillis <= chain.getConfig().getModuleVerifyOffset()) {
+                if (endtimestamp - currentTimeMillis <= batchValidReserve) {
                     nulsLogger.debug("########## 打包时间到: {}, -endtimestamp:{} , -offset:{}",
-                            currentTimeMillis, endtimestamp, chain.getConfig().getModuleVerifyOffset());
+                            currentTimeMillis, endtimestamp, batchValidReserve);
                     break;
                 }
                 Transaction tx = packablePool.get(chain);
@@ -888,7 +890,7 @@ public class TxServiceImpl implements TxService {
         chain.getLoggerMap().get(TxConstant.LOG_TX).debug("");
         chain.getLoggerMap().get(TxConstant.LOG_TX).debug("开始区块交易批量验证......");
         long s1 = NetworkCall.getCurrentTimeMillis();
-        Log.debug("[验区块交易] 高度:{} -开始------------------------------------", blockHeight);//----
+        Log.debug("[验区块交易] -开始-------------高度:{} ----------区块交易数:{} -------------", blockHeight, txHexList.size());//----
         Log.debug("[验区块交易] -开始时间:{}", s1);//----
         VerifyTxResult verifyTxResult = new VerifyTxResult(VerifyTxResult.OTHER_EXCEPTION);
         List<Transaction> txList = new ArrayList<>();
@@ -1020,10 +1022,11 @@ public class TxServiceImpl implements TxService {
             Log.debug("");//----
         }
         if (verifyTxResult.success()) {
-            Log.debug("[验区块交易] 通过 -结束时间:{}", NetworkCall.getCurrentTimeMillis() - s1);//----
+            Log.debug("[验区块交易] 通过 ---------------总计执行时间:{}", NetworkCall.getCurrentTimeMillis() - s1);//----
         } else {
-            Log.debug("[验区块交易] 未通过 -结束时间:{}", NetworkCall.getCurrentTimeMillis() - s1);//----
+            Log.debug("[验区块交易] 未通过 ---------------总计执行时间:{}", NetworkCall.getCurrentTimeMillis() - s1);//----
         }
+        Log.debug("");//----
         return verifyTxResult;
     }
 
