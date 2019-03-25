@@ -33,8 +33,7 @@ import io.nuls.network.model.Node;
 import io.nuls.network.model.NodeGroup;
 import io.nuls.network.model.message.TimeMessage;
 import io.nuls.network.model.message.base.BaseMessage;
-
-import static io.nuls.network.utils.LoggerUtil.Log;
+import io.nuls.network.utils.LoggerUtil;
 
 /**
  * time message handler
@@ -65,7 +64,7 @@ public class TimeMessageHandler extends BaseMessageHandler {
     @Override
     public NetworkEventResult recieve(BaseMessage message, Node node) {
         NodeGroup nodeGroup = NodeGroupManager.getInstance().getNodeGroupByMagic(message.getHeader().getMagicNumber());
-        Log.debug("TimeMessageHandler Recieve:" + (node.isServer() ? "Server" : "Client") + ":" + node.getIp() + ":" + node.getRemotePort() + "==CMD=" + message.getHeader().getCommandStr());
+        LoggerUtil.logger(nodeGroup.getChainId()).debug("TimeMessageHandler Recieve:" + (node.isServer() ? "Server" : "Client") + ":" + node.getIp() + ":" + node.getRemotePort() + "==CMD=" + message.getHeader().getCommandStr());
         /*
          * 处理应答消息
          */
@@ -84,7 +83,7 @@ public class TimeMessageHandler extends BaseMessageHandler {
      */
     @Override
     public NetworkEventResult send(BaseMessage message, Node node, boolean asyn) {
-        Log.debug("TimeMessageHandler Send:" + (node.isServer() ? "Server" : "Client") + ":" + node.getIp() + ":" + node.getRemotePort() + "==CMD=" + message.getHeader().getCommandStr());
+        LoggerUtil.logger(node.getNodeGroup().getChainId()).debug("TimeMessageHandler Send:" + (node.isServer() ? "Server" : "Client") + ":" + node.getIp() + ":" + node.getRemotePort() + "==CMD=" + message.getHeader().getCommandStr());
         return super.send(message, node, asyn);
     }
 }

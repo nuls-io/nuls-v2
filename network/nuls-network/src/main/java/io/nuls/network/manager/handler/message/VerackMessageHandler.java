@@ -35,8 +35,7 @@ import io.nuls.network.model.NodeGroup;
 import io.nuls.network.model.message.VerackMessage;
 import io.nuls.network.model.message.base.BaseMessage;
 import io.nuls.network.model.message.body.VerackMessageBody;
-
-import static io.nuls.network.utils.LoggerUtil.Log;
+import io.nuls.network.utils.LoggerUtil;
 
 /**
  * version ack message handler
@@ -68,13 +67,13 @@ public class VerackMessageHandler extends BaseMessageHandler {
         long magicNumber = message.getHeader().getMagicNumber();
         NodeGroup nodeGroup = NodeGroupManager.getInstance().getNodeGroupByMagic(magicNumber);
         VerackMessage verackMessage = (VerackMessage) message;
-        Log.debug("VerackMessageHandler Recieve:{}-{}", node.getIp() + ":" + node.getRemotePort(), message.getHeader().getCommandStr());
+        LoggerUtil.logger(nodeGroup.getChainId()).debug("VerackMessageHandler Recieve:{}-{}", node.getIp() + ":" + node.getRemotePort(), message.getHeader().getCommandStr());
         /*
          *server端能收到verack消息,接收消息并将连接状态跃迁为握手完成
          *The server can receive the verack message, receive the message and transition the connection state to the handshake.
          */
         if (VerackMessageBody.VER_CONNECT_MAX == verackMessage.getMsgBody().getAckCode()) {
-            Log.info("recieve versionAck peer max!peer = {}s",node.getId());
+            LoggerUtil.logger(nodeGroup.getChainId()).info("recieve versionAck peer max!peer = {}s",node.getId());
             node.getChannel().close();
 
         } else {
@@ -99,7 +98,7 @@ public class VerackMessageHandler extends BaseMessageHandler {
      */
     @Override
     public NetworkEventResult send(BaseMessage message, Node node, boolean asyn) {
-        Log.debug("VerackMessageHandler send:" + (node.isServer() ? "Server" : "Client") + ":" + node.getIp() + ":" + node.getRemotePort() + "==CMD=" + message.getHeader().getCommandStr());
+        LoggerUtil.logger(node.getNodeGroup().getChainId()).debug("VerackMessageHandler send:" + (node.isServer() ? "Server" : "Client") + ":" + node.getIp() + ":" + node.getRemotePort() + "==CMD=" + message.getHeader().getCommandStr());
         return super.send(message, node, asyn);
     }
 }

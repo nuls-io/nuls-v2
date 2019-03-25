@@ -34,8 +34,7 @@ import io.nuls.network.model.Node;
 import io.nuls.network.model.message.GetTimeMessage;
 import io.nuls.network.model.message.TimeMessage;
 import io.nuls.network.model.message.base.BaseMessage;
-
-import static io.nuls.network.utils.LoggerUtil.Log;
+import io.nuls.network.utils.LoggerUtil;
 
 /**
  * get time message handler
@@ -65,7 +64,7 @@ public class GetTimeMessageHandler extends BaseMessageHandler {
      */
     @Override
     public NetworkEventResult recieve(BaseMessage message, Node node) {
-        Log.debug("GetTimeMessageHandler Recieve:" + (node.isServer() ? "Server" : "Client") + ":" + node.getIp() + ":" + node.getRemotePort() + "==CMD=" + message.getHeader().getCommandStr());
+        LoggerUtil.logger(node.getNodeGroup().getChainId()).debug("GetTimeMessageHandler Recieve:" + (node.isServer() ? "Server" : "Client") + ":" + node.getIp() + ":" + node.getRemotePort() + "==CMD=" + message.getHeader().getCommandStr());
         GetTimeMessage getTimeMessage = (GetTimeMessage) message;
         /*
          *  回复时间消息
@@ -85,7 +84,7 @@ public class GetTimeMessageHandler extends BaseMessageHandler {
      */
     @Override
     public NetworkEventResult send(BaseMessage message, Node node, boolean asyn) {
-        Log.debug("GetTimeMessageHandler Send:" + (node.isServer() ? "Server" : "Client") + ":" + node.getIp() + ":" + node.getRemotePort() + "==CMD=" + message.getHeader().getCommandStr());
+        LoggerUtil.logger(node.getNodeGroup().getChainId()).debug("GetTimeMessageHandler Send:" + (node.isServer() ? "Server" : "Client") + ":" + node.getIp() + ":" + node.getRemotePort() + "==CMD=" + message.getHeader().getCommandStr());
         return super.send(message, node, asyn);
     }
 }

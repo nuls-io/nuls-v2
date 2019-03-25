@@ -43,21 +43,33 @@ import java.util.Map;
  * @date 2018/12/17
  **/
 public class LoggerUtil {
-    public static NulsLogger Log = LoggerBuilder.getLogger("nw.log", Level.ALL);
-    public static NulsLogger blockMsLog = LoggerBuilder.getLogger( "block.log", Level.ALL);
-    public static NulsLogger txMsLog = LoggerBuilder.getLogger("tx.log", Level.ALL);
-    public static NulsLogger csMsLog = LoggerBuilder.getLogger("cs.log", Level.ALL);
-    public static NulsLogger rpcLog = LoggerBuilder.getLogger("rpc.log", Level.ALL);
+    public static final String LOGGER_KEY1 = "nw";
+    public static final String LOGGER_KEY2 = ModuleE.BL.abbr;
+    public static final String LOGGER_KEY3 = ModuleE.TX.abbr;
+    public static final String LOGGER_KEY4 = ModuleE.CS.abbr;
+    public static NulsLogger Log = LoggerBuilder.getLogger("nwLogs", "nw.log", Level.ALL);
     public static Map<String, NulsLogger> logMap = new HashMap<>();
 
-    static {
-        logMap.put(ModuleE.BL.abbr, blockMsLog);
-        logMap.put(ModuleE.TX.abbr, txMsLog);
-        logMap.put(ModuleE.CS.abbr, csMsLog);
+    public static void createLogs(int chainId) {
+        String folderName = "nwLogs/" + chainId;
+        if (null == logMap.get(LOGGER_KEY1 + chainId)) {
+            logMap.put(LOGGER_KEY1 + chainId, LoggerBuilder.getLogger(folderName, LOGGER_KEY1, Level.ALL));
+            logMap.put(LOGGER_KEY2 + chainId, LoggerBuilder.getLogger(folderName, LOGGER_KEY2, Level.ALL));
+            logMap.put(LOGGER_KEY3 + chainId, LoggerBuilder.getLogger(folderName, LOGGER_KEY3, Level.ALL));
+            logMap.put(LOGGER_KEY4 + chainId, LoggerBuilder.getLogger(folderName, LOGGER_KEY4, Level.ALL));
+        }
+    }
+
+    public static NulsLogger logger(int chainId) {
+        if (null == logMap.get(LOGGER_KEY1 + chainId)) {
+            createLogs(chainId);
+        }
+        return logMap.get(LOGGER_KEY1 + chainId);
     }
 
     /**
-     *  调试代码
+     * 调试代码
+     *
      * @param cmd
      * @param node
      * @param payLoadBody
@@ -65,21 +77,23 @@ public class LoggerUtil {
      */
     public static void modulesMsgLogs(String cmd, Node node, byte[] payLoadBody, String sendOrRecieved) {
         Collection<ProtocolRoleHandler> protocolRoleHandlers = MessageHandlerFactory.getInstance().getProtocolRoleHandlerMap(cmd);
+        int chainId = node.getNodeGroup().getChainId();
         if (null == protocolRoleHandlers) {
-            Log.error("unknown mssages. cmd={},may be handle had not be registered to network.", cmd);
+            logger(chainId).error("unknown mssages. cmd={},may be handle had not be registered to network.", cmd);
         } else {
             for (ProtocolRoleHandler protocolRoleHandler : protocolRoleHandlers) {
-                if (null != logMap.get(protocolRoleHandler.getRole())) {
-                    logMap.get(protocolRoleHandler.getRole()).debug("net {} cmd={},peer={},hash={}", sendOrRecieved, cmd, node.getId(), NulsDigestData.calcDigestData(payLoadBody).getDigestHex());
+                if (null != logMap.get(protocolRoleHandler.getRole() + chainId)) {
+                    logMap.get(protocolRoleHandler.getRole() + chainId).debug("net {} cmd={},peer={},hash={}", sendOrRecieved, cmd, node.getId(), NulsDigestData.calcDigestData(payLoadBody).getDigestHex());
                 } else {
-                    Log.debug("net {} cmd={},peer={},hash={}", sendOrRecieved, cmd, node.getId(), NulsDigestData.calcDigestData(payLoadBody).getDigestHex());
+                    logger(chainId).debug("net {} cmd={},peer={},hash={}", sendOrRecieved, cmd, node.getId(), NulsDigestData.calcDigestData(payLoadBody).getDigestHex());
                 }
             }
         }
     }
 
     /**
-     *  调试代码
+     * 调试代码
+     *
      * @param role
      * @param cmd
      * @param node
@@ -87,10 +101,11 @@ public class LoggerUtil {
      * @param result
      */
     public static void modulesMsgLogs(String role, String cmd, Node node, byte[] payLoadBody, String result) {
-        if (null != logMap.get(role)) {
-            logMap.get(role).debug("cmd={},peer={},hash={},rpcResult={}", cmd, node.getId(), NulsDigestData.calcDigestData(payLoadBody).getDigestHex(), result);
+        int chainId = node.getNodeGroup().getChainId();
+        if (null != logMap.get(role + chainId)) {
+            logMap.get(role + chainId).debug("cmd={},peer={},hash={},rpcResult={}", cmd, node.getId(), NulsDigestData.calcDigestData(payLoadBody).getDigestHex(), result);
         } else {
-            Log.debug("cmd={},peer={},hash={},rpcResult={}", cmd, node.getId(), NulsDigestData.calcDigestData(payLoadBody).getDigestHex(), result);
+            logger(chainId).debug("cmd={},peer={},hash={},rpcResult={}", cmd, node.getId(), NulsDigestData.calcDigestData(payLoadBody).getDigestHex(), result);
         }
     }
 }

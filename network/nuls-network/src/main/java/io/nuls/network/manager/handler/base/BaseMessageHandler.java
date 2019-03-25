@@ -33,8 +33,8 @@ import io.nuls.network.model.NetworkEventResult;
 import io.nuls.network.model.Node;
 import io.nuls.network.model.message.base.BaseMessage;
 import io.nuls.network.model.message.base.MessageHeader;
+import io.nuls.network.utils.LoggerUtil;
 
-import static io.nuls.network.utils.LoggerUtil.Log;
 
 /**
  * base message handler
@@ -69,7 +69,7 @@ public abstract class BaseMessageHandler implements BaseMeesageHandlerInf {
             }
         } catch (Exception e) {
             e.printStackTrace();
-            Log.error(e.getMessage());
+            LoggerUtil.logger(node.getNodeGroup().getChainId()).error(e.getMessage());
             return NetworkEventResult.getResultFail(NetworkErrorCode.NET_MESSAGE_SEND_EXCEPTION);
         }
         return NetworkEventResult.getResultSuccess();

@@ -35,6 +35,7 @@ import io.nuls.network.model.dto.IpAddress;
 import io.nuls.network.model.message.*;
 import io.nuls.network.model.message.base.BaseMessage;
 import io.nuls.network.model.message.body.*;
+import io.nuls.network.utils.LoggerUtil;
 import io.nuls.tools.core.ioc.SpringLiteContext;
 
 import java.net.InetAddress;
@@ -124,7 +125,7 @@ public class MessageFactory {
             return new VersionMessage(nodeGroup.getMagicNumber(), NetworkConstant.CMD_MESSAGE_VERSION, versionMessageBody);
         } catch (UnknownHostException e) {
             e.printStackTrace();
-            Log.error(e.getMessage());
+            LoggerUtil.logger(nodeGroup.getChainId()).error(e.getMessage());
         }
 
         return null;

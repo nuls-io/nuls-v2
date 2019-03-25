@@ -35,10 +35,9 @@ import io.nuls.network.model.dto.IpAddress;
 import io.nuls.network.model.message.AddrMessage;
 import io.nuls.network.model.message.base.BaseMessage;
 import io.nuls.network.utils.IpUtil;
+import io.nuls.network.utils.LoggerUtil;
 
 import java.util.List;
-
-import static io.nuls.network.utils.LoggerUtil.Log;
 
 
 /**
@@ -69,15 +68,15 @@ public class AddrMessageHandler extends BaseMessageHandler {
     @Override
     public NetworkEventResult recieve(BaseMessage message, Node node) {
         NodeGroup nodeGroup = NodeGroupManager.getInstance().getNodeGroupByMagic(message.getHeader().getMagicNumber());
-
-        Log.debug("AddrMessageHandler Recieve:" + (node.isServer() ? "Server" : "Client") + ":" + node.getIp() + ":" + node.getRemotePort() + "==CMD=" + message.getHeader().getCommandStr());
+        int chainId = nodeGroup.getChainId();
+        LoggerUtil.logger(chainId).debug("AddrMessageHandler Recieve:" + (node.isServer() ? "Server" : "Client") + ":" + node.getIp() + ":" + node.getRemotePort() + "==CMD=" + message.getHeader().getCommandStr());
         AddrMessage addrMessage = (AddrMessage) message;
         /*
          *空消息错误返回
          *Empty message error return
          */
         if (null == addrMessage.getMsgBody()) {
-            Log.error("rec error addr message.");
+            LoggerUtil.logger(chainId).error("rec error addr message.");
             return NetworkEventResult.getResultFail(NetworkErrorCode.NET_MESSAGE_ERROR);
         }
         List<IpAddress> ipAddressList = addrMessage.getMsgBody().getIpAddressList();
@@ -89,7 +88,7 @@ public class AddrMessageHandler extends BaseMessageHandler {
             if (!IpUtil.isboolIp(ipAddress.getIp().getHostAddress())) {
                 continue;
             }
-            Log.info("add check node addr ={}:{}",ipAddress.getIp(),ipAddress.getPort());
+            LoggerUtil.logger(chainId).info("add check node addr ={}:{}",ipAddress.getIp(),ipAddress.getPort());
             nodeGroup.addNeedCheckNode(ipAddress, node.isCrossConnect());
         }
         return NetworkEventResult.getResultSuccess();
@@ -105,7 +104,7 @@ public class AddrMessageHandler extends BaseMessageHandler {
      */
     @Override
     public NetworkEventResult send(BaseMessage message, Node node, boolean asyn) {
-        Log.debug("AddrMessageHandler Send:" + (node.isServer() ? "Server" : "Client") + ":" + node.getIp() + ":" + node.getRemotePort() + "==CMD=" + message.getHeader().getCommandStr());
+        LoggerUtil.logger(node.getNodeGroup().getChainId()).debug("AddrMessageHandler Send:" + (node.isServer() ? "Server" : "Client") + ":" + node.getIp() + ":" + node.getRemotePort() + "==CMD=" + message.getHeader().getCommandStr());
         return super.send(message, node, asyn);
     }
 }

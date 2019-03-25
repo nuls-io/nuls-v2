@@ -43,8 +43,10 @@ import io.nuls.network.netty.NettyClient;
 import io.nuls.network.netty.NettyServer;
 import io.nuls.network.netty.container.NodesContainer;
 import io.nuls.network.utils.IpUtil;
+import io.nuls.network.utils.LoggerUtil;
 import io.nuls.rpc.netty.channel.manager.ConnectManager;
 import io.nuls.tools.core.ioc.SpringLiteContext;
+import io.nuls.tools.log.Log;
 import io.nuls.tools.thread.ThreadUtils;
 import io.nuls.tools.thread.TimeService;
 
@@ -52,8 +54,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-
-import static io.nuls.network.utils.LoggerUtil.Log;
 
 /**
  * 连接管理器,连接的启动，停止，连接引用缓存管理
@@ -141,7 +141,7 @@ public class ConnectionManager extends BaseManager {
         nodesContainer.getConnectedNodes().put(node.getId(), node);
         nodesContainer.getCanConnectNodes().remove(node.getId());
         node.setConnectStatus(NodeConnectStatusEnum.CONNECTED);
-        Log.debug("client node {} connect success !", node.getId());
+        LoggerUtil.logger(nodeGroup.getChainId()).debug("client node {} connect success !", node.getId());
         //发送握手
         VersionMessage versionMessage = MessageFactory.getInstance().buildVersionMessage(node, nodeGroup.getMagicNumber());
         BaseMeesageHandlerInf handler = MessageHandlerFactory.getInstance().getHandler(versionMessage.getHeader().getCommandStr());
@@ -169,7 +169,7 @@ public class ConnectionManager extends BaseManager {
         if (channel.localAddress().getPort() == networkConfig.getCrossPort()) {
             isCross = true;
         }
-        Log.debug("peer = {}:{} connectIn",ip,port);
+        LoggerUtil.Log.debug("peer = {}:{} connectIn", ip, port);
         //此时无法判定业务所属的网络id，所以无法归属哪个group,只有在version消息处理时才能知道
         Node node = new Node(0L, ip, port, Node.IN, isCross);
         node.setConnectStatus(NodeConnectStatusEnum.CONNECTED);
@@ -213,7 +213,7 @@ public class ConnectionManager extends BaseManager {
      */
     private void nettyBoot() {
         serverStart();
-        Log.info("==========================NettyBoot");
+        LoggerUtil.Log.info("==========================NettyBoot");
     }
 
     /**
@@ -229,7 +229,7 @@ public class ConnectionManager extends BaseManager {
                 server.start();
             } catch (InterruptedException e) {
                 e.printStackTrace();
-                Log.error(e.getMessage());
+                LoggerUtil.Log.error(e.getMessage());
             }
         }, false);
         ThreadUtils.createAndRunThread("node crossServer start", () -> {
@@ -237,11 +237,12 @@ public class ConnectionManager extends BaseManager {
                 serverCross.start();
             } catch (InterruptedException e) {
                 e.printStackTrace();
-                Log.error(e.getMessage());
+                LoggerUtil.Log.error(e.getMessage());
             }
         }, false);
 
     }
+
     public boolean connection(Node node) {
         try {
             NettyClient client = new NettyClient(node);
@@ -269,7 +270,7 @@ public class ConnectionManager extends BaseManager {
 
     @Override
     public void start() throws Exception {
-        while(!ConnectManager.isReady()){
+        while (!ConnectManager.isReady()) {
             Log.debug("wait depend modules ready");
             Thread.sleep(2000L);
         }

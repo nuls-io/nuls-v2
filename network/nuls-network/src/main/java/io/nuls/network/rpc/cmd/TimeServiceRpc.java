@@ -44,7 +44,6 @@ public class TimeServiceRpc extends BaseCmd {
     @CmdAnnotation(cmd = "nw_currentTimeMillis", version = 1.0,
             description = "currentTimeMillis")
     public Response currentTimeMillis(Map params) {
-//        LoggerUtil.rpcLog.debug("get time");
         Map<String, Long> responseData = new HashMap<>();
         responseData.put("currentTimeMillis", TimeManager.currentTimeMillis());
         return success(responseData);
