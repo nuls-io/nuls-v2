@@ -25,16 +25,12 @@ BIN_PATH=$(cd $(dirname $0); pwd);
 cd $BIN_PATH;
 function get_fullpath()
 {
-   _PWD=`pwd`
-   if [ -d $1 ]; then
-      cd $1
-   elif [ -f $1 ]; then
-      cd `dirname $1`
-   else
-      cd
-   fi
-   echo $(cd ..; cd -)
-   cd ${_PWD} >/dev/null
+    if [ -f $1 ];
+    then
+        echo $(cd $(dirname $1); pwd);
+        else
+        echo $(cd $1; pwd);
+    fi
 }
 
 RUNBLOCK=

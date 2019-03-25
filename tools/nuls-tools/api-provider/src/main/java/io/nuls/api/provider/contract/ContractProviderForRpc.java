@@ -3,13 +3,16 @@ package io.nuls.api.provider.contract;
 import io.nuls.api.provider.BaseRpcService;
 import io.nuls.api.provider.Provider;
 import io.nuls.api.provider.Result;
+import io.nuls.api.provider.account.facade.AccountInfo;
 import io.nuls.api.provider.contract.facade.*;
 import io.nuls.rpc.model.ModuleE;
 import io.nuls.tools.model.DateUtils;
 import io.nuls.tools.parse.MapUtils;
 
+import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 /**
  * @Author: zhoulijun
@@ -77,12 +80,14 @@ public class ContractProviderForRpc extends BaseRpcService implements ContractPr
     @Override
     public Result<AccountContractInfo> getAccountContractList(GetAccountContractListReq req) {
         Function<Map<String,Object>,Result> callback = res->{
-            AccountContractInfo info = new AccountContractInfo();
-            MapUtils.mapToBean(res,info);
-            info.setCreateTime(DateUtils.timeStamp2DateStr((Long) res.get("createTime")));
-            return success(info);
+            List<Map<String,Object>> list = (List<Map<String, Object>>) res.get("list");
+            List<AccountContractInfo> resData =list.stream().map(d->{
+                d.put("createTime",DateUtils.timeStamp2DateStr((Long) d.get("createTime")));
+                return MapUtils.mapToBean(d,new AccountContractInfo());
+            }).collect(Collectors.toList());
+            return success(resData);
         };
-        return call("",req,callback);
+        return call("sc_account_contracts",req,callback);
     }
 
     private <T> Result<T> _call(String method, Object req, Function<Map, Result> callback){

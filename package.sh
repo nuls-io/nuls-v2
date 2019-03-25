@@ -414,8 +414,8 @@ if [ -n "${DOMOCK}" ]; then
 	chmod u+r "${MODULES_BIN_PATH}/default-config.json"
 	cp "${BUILD_PATH}/check-status.sh" "${MODULES_BIN_PATH}/"
 	chmod u+x "${MODULES_BIN_PATH}/check-status.sh"
-#	cp "${BUILD_PATH}/cmd.sh" "${MODULES_PATH}/"
-#	chmod u+x "${MODULES_PATH}/cmd.sh"
+	cp "${BUILD_PATH}/cmd.sh" "${MODULES_PATH}/"
+	chmod u+x "${MODULES_PATH}/cmd.sh"
 fi
 log "============ build ${RELEASE_PATH}.tar.gz ==================="
 tar -cjf "${RELEASE_PATH}.tar.gz" ${RELEASE_PATH}
