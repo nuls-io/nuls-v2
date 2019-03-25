@@ -4,6 +4,7 @@ import io.nuls.api.utils.DocumentTransferTool;
 import lombok.Data;
 import org.bson.Document;
 
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -20,7 +21,7 @@ public class ContractInfo extends TxDataInfo {
 
     private boolean success;
 
-    private long balance;
+    private BigInteger balance;
 
     private String errorMsg;
 

@@ -1,9 +1,13 @@
 package io.nuls.api.rpc.controller;
 
+import io.nuls.api.analysis.WalletRpcHandler;
+import io.nuls.api.cache.ApiCache;
 import io.nuls.api.db.ContractService;
 import io.nuls.api.db.TokenService;
 import io.nuls.api.exception.JsonRpcException;
+import io.nuls.api.manager.CacheManager;
 import io.nuls.api.model.po.db.*;
+import io.nuls.api.model.rpc.BalanceInfo;
 import io.nuls.api.model.rpc.RpcErrorCode;
 import io.nuls.api.model.rpc.RpcResult;
 import io.nuls.api.model.rpc.RpcResultError;
@@ -40,6 +44,10 @@ public class ContractController {
             if (contractInfo == null) {
                 rpcResult.setError(new RpcResultError(RpcErrorCode.DATA_NOT_EXISTS));
             } else {
+                ApiCache apiCache = CacheManager.getCache(chainId);
+                AssetInfo defaultAsset = apiCache.getChainInfo().getDefaultAsset();
+                BalanceInfo balanceInfo = WalletRpcHandler.getBalance(chainId, contractAddress, defaultAsset.getChainId(), defaultAsset.getAssetId());
+                contractInfo.setBalance(balanceInfo.getTotalBalance());
                 rpcResult.setResult(contractInfo);
             }
         } catch (Exception e) {

@@ -6,6 +6,7 @@ import io.nuls.api.constant.ApiConstant;
 import io.nuls.api.constant.ApiErrorCode;
 import io.nuls.api.constant.CommandConstant;
 import io.nuls.api.model.po.db.*;
+import io.nuls.api.model.rpc.BalanceInfo;
 import io.nuls.api.rpc.RpcCall;
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.data.Block;
@@ -15,6 +16,7 @@ import io.nuls.rpc.model.ModuleE;
 import io.nuls.tools.basic.Result;
 import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.exception.NulsException;
+import io.nuls.tools.log.Log;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -41,7 +43,7 @@ public class WalletRpcHandler {
 
             return Result.getSuccess(null).setData(blockInfo);
         } catch (Exception e) {
-            e.printStackTrace();
+            Log.error(e);
         }
         return Result.getFailed(ApiErrorCode.DATA_PARSE_ERROR);
     }
@@ -62,8 +64,7 @@ public class WalletRpcHandler {
             BlockInfo blockInfo = AnalysisHandler.toBlockInfo(block, chainID);
             return Result.getSuccess(null).setData(blockInfo);
         } catch (Exception e) {
-            e.printStackTrace();
-            // return Result.getFailed()
+            Log.error(e);
         }
         return Result.getFailed(ApiErrorCode.DATA_PARSE_ERROR);
     }
@@ -85,10 +86,33 @@ public class WalletRpcHandler {
 
             return accountInfo;
         } catch (Exception e) {
-            e.printStackTrace();
+            Log.error(e);
         }
         return null;
     }
+
+    public static BalanceInfo getBalance(int chainId, String address, int assetChainId, int assetId) {
+        Map<String, Object> params = new HashMap<>(ApiConstant.INIT_CAPACITY_8);
+        params.put(Constants.VERSION_KEY_STR, ApiContext.VERSION);
+        params.put("chainId", chainId);
+        params.put("address", address);
+        params.put("assetChainId", assetChainId);
+        params.put("assetId", assetId);
+        try {
+            Map map = (Map) RpcCall.request(ModuleE.LG.abbr, CommandConstant.GET_BALANCE, params);
+            BalanceInfo balanceInfo = new BalanceInfo();
+            balanceInfo.setTotalBalance(new BigInteger(map.get("total").toString()));
+            balanceInfo.setBalance(new BigInteger(map.get("available").toString()));
+            balanceInfo.setTimeLock(new BigInteger(map.get("timeHeightLocked").toString()));
+            balanceInfo.setConsensusLock(new BigInteger(map.get("permanentLocked").toString()));
+
+            return balanceInfo;
+        } catch (Exception e) {
+            Log.error(e);
+        }
+        return null;
+    }
+
 
     public static Result<TransactionInfo> getTx(int chainId, String hash) {
         Map<String, Object> params = new HashMap<>();

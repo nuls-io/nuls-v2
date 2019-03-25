@@ -53,7 +53,6 @@ public class MongoDBTest {
     public void testGetContract() {
         ContractService contractService = SpringLiteContext.getBean(ContractService.class);
         ContractInfo contractInfo = contractService.getContractInfo(2, "tNULSeBaN32a2hucBYT9o4BnNoHQcM8WDmpPgq");
-        System.out.println(contractInfo.getBalance());
     }
 
     @Test
