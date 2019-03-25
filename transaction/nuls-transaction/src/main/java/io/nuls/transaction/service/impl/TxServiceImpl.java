@@ -697,6 +697,8 @@ public class TxServiceImpl implements TxService {
                 nulsLogger.debug("");
             }
             nulsLogger.debug("--------------while end----取出的交易 - size:{}", packingTxList.size());
+
+
             long whileTime = NetworkCall.getCurrentTimeMillis() - startTime;
             long batchStart = NetworkCall.getCurrentTimeMillis();
             txModuleValidatorPackable(chain, moduleVerifyMap, packingTxList);
@@ -757,7 +759,6 @@ public class TxServiceImpl implements TxService {
             for (int i = orphanTxList.size() - 1; i >= 0; i--) {
                 Transaction tx = orphanTxList.get(i);
                 packablePool.addInFirst(chain, tx);
-                nulsLogger.debug("获取交易完整时,当前最新高度已增长,不够时间重新打包,直接超时异常处理交易回滚至待打包队列,打空块");
             }
             TxPackage txPackage = new TxPackage(packableTxs, stateRoot, blockHeight);
             nulsLogger.debug("提供给共识的可打包交易packableTxs - size:{}", packableTxs.size());

@@ -27,6 +27,7 @@ package io.nuls.ledger.service;
 
 import io.nuls.ledger.model.UnconfirmedTx;
 import io.nuls.ledger.model.po.AccountState;
+import io.nuls.ledger.model.po.AccountStateSnapshot;
 import io.nuls.ledger.model.po.BlockSnapshotAccounts;
 
 /**
@@ -65,10 +66,10 @@ public interface AccountStateService {
     /**
      * 回滚账户信息
      * @param assetKey
-     * @param accountState
+     * @param accountStateSnapshot
      * @throws Exception
      */
-    void rollAccountState(String assetKey, AccountState accountState) throws Exception;
+    void rollAccountState(String assetKey, AccountStateSnapshot accountStateSnapshot) throws Exception;
 
 
 

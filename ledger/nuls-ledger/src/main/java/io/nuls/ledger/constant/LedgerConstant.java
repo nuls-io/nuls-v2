@@ -56,6 +56,6 @@ public class LedgerConstant {
      * 缓存的账户初始化nonce
      */
     public static final String INIT_NONCE = "ffffffff";
-    public static String DEFAULT_ENCODING = "en";
+    public static String DEFAULT_ENCODING = "UTF-8";
     public static int UNCONFIRM_NONCE_EXPIRED_TIME = 100000;
 }

@@ -41,6 +41,7 @@ import io.nuls.rpc.modulebootstrap.RpcModuleState;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.core.ioc.SpringLiteContext;
+import io.nuls.tools.parse.I18nUtils;
 
 import static io.nuls.ledger.utils.LoggerUtil.logger;
 
@@ -101,6 +102,9 @@ public class LedgerBootstrap extends RpcModule {
             super.init();
             LedgerConstant.UNCONFIRM_NONCE_EXPIRED_TIME = ledgerConfig.getUnconfirmedTxExpired();
             LedgerConstant.DEFAULT_ENCODING = ledgerConfig.getEncoding();
+            //改为通过配置文件注入
+            I18nUtils.loadLanguage(LedgerBootstrap.class, "languages", ledgerConfig.getLanguage());
+            I18nUtils.setLanguage(ledgerConfig.getLanguage());
             initRocksDb();
             initLedgerDatas();
         } catch (Exception e) {
