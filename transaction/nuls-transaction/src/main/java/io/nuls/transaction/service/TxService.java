@@ -109,13 +109,17 @@ public interface TxService {
 
     /**
      * 收到新区快时，验证完整交易列表
-     *
      * @param chain
      * @param list
+     * @param blockHeight
+     * @param blockTime
+     * @param packingAddress
+     * @param stateRoot
+     * @param preStateRoot
      * @return
      * @throws NulsException
      */
-    VerifyTxResult batchVerify(Chain chain, List<String> list, long blockHeight) throws NulsException;
+    VerifyTxResult batchVerify(Chain chain, List<String> list, long blockHeight, long blockTime, String packingAddress, String stateRoot, String preStateRoot) throws NulsException;
 
 
     /**

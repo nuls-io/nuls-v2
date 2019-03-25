@@ -671,7 +671,7 @@ public class TxServiceImpl implements TxService {
                             verifyTxResult.getCode(), verifyTxResult.getDesc(), tx.getType(), nonce, tx.getHash().getDigestHex());
                     if (verifyTxResult.getCode() == VerifyTxResult.ORPHAN) {
                         orphanTxList.add(tx);
-                    }else{
+                    } else {
                         continue;
                     }
                 }
@@ -883,7 +883,7 @@ public class TxServiceImpl implements TxService {
     }
 
     @Override
-    public VerifyTxResult batchVerify(Chain chain, List<String> txHexList, long blockHeight) throws NulsException {
+    public VerifyTxResult batchVerify(Chain chain, List<String> txHexList, long blockHeight, long blockTime, String packingAddress, String stateRoot, String preStateRoot) throws NulsException {
         chain.getLoggerMap().get(TxConstant.LOG_TX).debug("");
         chain.getLoggerMap().get(TxConstant.LOG_TX).debug("开始区块交易批量验证......");
         long s1 = NetworkCall.getCurrentTimeMillis();
@@ -903,6 +903,10 @@ public class TxServiceImpl implements TxService {
         for (String txHex : txHexList) {
             //将txHex转换为Transaction对象
             Transaction tx = TxUtil.getTransaction(txHex);
+            //如果是系统智能合约就不单个验证
+            if (TxManager.isSystemSmartContract(chain, tx.getType())) {
+                continue;
+            }
             TransactionConfirmedPO txConfirmed = confirmedTxService.getConfirmedTransaction(chain, tx.getHash());
             if (null != txConfirmed) {
                 //交易已存在于已确认块中
@@ -930,24 +934,44 @@ public class TxServiceImpl implements TxService {
             }
 
             /** 智能合约*/
-//            if (TxManager.isSmartContract(chain, tx.getType())) {
-//                /** 出现智能合约,且通知标识为false,则先调用通知 */
-//                if (!contractNotify) {
-//                    ContractCall.contractBatchBegin(chain, blockHeight, blockTime, packingAddress, preStateRoot);
-//                    contractNotify = true;
-//                }
-//                ContractCall.invokeContract(chain, txHex);
-//            }
-
-
-
-
-
+            if (TxManager.isSmartContract(chain, tx.getType())) {
+                /** 出现智能合约,且通知标识为false,则先调用通知 */
+                if (!contractNotify) {
+                    ContractCall.contractBatchBegin(chain, blockHeight, blockTime, packingAddress, preStateRoot);
+                    contractNotify = true;
+                }
+                ContractCall.invokeContract(chain, txHex);
+            }
             //根据模块的统一验证器名，对所有交易进行分组，准备进行各模块的统一验证
             TxUtil.moduleGroups(chain, moduleVerifyMap, tx);
         }
         Log.debug("[验区块交易] 单个 -(距方法开始的)时间:{}", NetworkCall.getCurrentTimeMillis() - s1);//----
         Log.debug("");//----
+
+
+        /** 智能合约 当通知标识为true, 则表明有智能合约被调用执行*/
+        if (contractNotify) {
+            Map<String, Object> map = ContractCall.contractBatchEnd(chain, blockHeight);
+            if (null != map) {
+                String sr = (String) map.get("stateRoot");
+                if (!stateRoot.equals(sr)) {
+                    chain.getLoggerMap().get(TxConstant.LOG_TX).debug("contract stateRoot error.");
+                    return verifyTxResult;
+                }
+                List<String> scNewList = (List<String>) map.get("txHexList");
+                if (null != scNewList) {
+                    //验证智能合约执行返回的交易hex 是否正确.打包时返回的交易是加入到区块交易的队尾
+                    int size = scNewList.size();
+                    for (int i = 0; i < size; i++) {
+                        int j = txHexList.size() - size + i;
+                        if (!txHexList.get(j).equals(scNewList.get(i))) {
+                            chain.getLoggerMap().get(TxConstant.LOG_TX).debug("contract new tx hex error.");
+                            return verifyTxResult;
+                        }
+                    }
+                }
+            }
+        }
 
         long coinDataV = NetworkCall.getCurrentTimeMillis();//-----
         if (!LedgerCall.verifyBlockTxsCoinData(chain, txHexList, blockHeight)) {
@@ -964,14 +988,14 @@ public class TxServiceImpl implements TxService {
         boolean rs = true;
         while (it.hasNext()) {
             Map.Entry<TxRegister, List<String>> entry = it.next();
-            List<String> txhashList = null;
+            List<String> txHashList = null;
             if (entry.getKey().getModuleCode().equals(ModuleE.TX.abbr)) {
                 //模块统一验证,交易模块,不用调RPC接口
-                txhashList = transactionModuleValidator(chain, entry.getValue());
+                txHashList = transactionModuleValidator(chain, entry.getValue());
             } else {
-                txhashList = TransactionCall.txModuleValidator(chain, entry.getKey().getModuleValidator(), entry.getKey().getModuleCode(), entry.getValue());
+                txHashList = TransactionCall.txModuleValidator(chain, entry.getKey().getModuleValidator(), entry.getKey().getModuleCode(), entry.getValue());
             }
-            if (txhashList != null && txhashList.size() > 0) {
+            if (txHashList != null && txHashList.size() > 0) {
                 rs = false;
                 break;
             }
