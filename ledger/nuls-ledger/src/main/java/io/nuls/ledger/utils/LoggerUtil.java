@@ -49,11 +49,11 @@ public class LoggerUtil {
     public static final String LOGGER_KEY6 = "ld_txUncfRb2";
 
     public static NulsLogger logger = LoggerBuilder.getLogger("./ld", LOGGER_KEY1, Level.ALL);
-    public static NulsLogger txCommitLog = LoggerBuilder.getLogger("./ld", LOGGER_KEY2, Level.ALL);
-    public static NulsLogger txRollBackLog = LoggerBuilder.getLogger("./ld", LOGGER_KEY3, Level.ALL);
-    public static NulsLogger txUnconfirmedRollBackLog = LoggerBuilder.getLogger("./ld", LOGGER_KEY4, Level.ALL);
-    public static NulsLogger txAmount = LoggerBuilder.getLogger("./ld", LOGGER_KEY5, Level.ALL);
-    public static NulsLogger txUnconfirmedRollBackLog2 = LoggerBuilder.getLogger("./ld", LOGGER_KEY6, Level.ALL);
+//    public static NulsLogger txCommitLog = LoggerBuilder.getLogger("./ld", LOGGER_KEY2, Level.ALL);
+//    public static NulsLogger txRollBackLog = LoggerBuilder.getLogger("./ld", LOGGER_KEY3, Level.ALL);
+//    public static NulsLogger txUnconfirmedRollBackLog = LoggerBuilder.getLogger("./ld", LOGGER_KEY4, Level.ALL);
+//    public static NulsLogger txAmount = LoggerBuilder.getLogger("./ld", LOGGER_KEY5, Level.ALL);
+//    public static NulsLogger txUnconfirmedRollBackLog2 = LoggerBuilder.getLogger("./ld", LOGGER_KEY6, Level.ALL);
 
     public static NulsLogger logger(int chainId) {
         if(null == loggerMap.get(LOGGER_KEY1+chainId)){
