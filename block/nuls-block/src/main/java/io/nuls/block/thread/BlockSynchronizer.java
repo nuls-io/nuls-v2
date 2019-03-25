@@ -42,6 +42,7 @@ import io.nuls.block.rpc.call.NetworkUtil;
 import io.nuls.block.rpc.call.TransactionUtil;
 import io.nuls.tools.core.ioc.SpringLiteContext;
 import io.nuls.tools.log.logback.NulsLogger;
+import io.nuls.tools.model.DoubleUtils;
 import io.nuls.tools.thread.ThreadUtils;
 import io.nuls.tools.thread.commom.NulsThreadFactory;
 
@@ -121,6 +122,7 @@ public class BlockSynchronizer implements Runnable {
 
     /**
      * 等待网络稳定
+     * 每隔5秒请求一次getAvailableNodes，连续3次节点数一致就认为网络稳定
      *
      * @param chainId
      * @return
@@ -133,13 +135,19 @@ public class BlockSynchronizer implements Runnable {
         List<Node> availableNodesSecond;
         int sizeFirst = availableNodesFirst.size();
         int sizeSecond;
+        int count = 0;
         while (true) {
             Thread.sleep(waitNetworkInterval);
             availableNodesSecond = NetworkUtil.getAvailableNodes(chainId);
             sizeSecond = availableNodesSecond.size();
             commonLog.info("sizeFirst=" + sizeFirst + ", sizeSecond=" + sizeSecond + ", wait Until Network Stable..........");
             if (sizeSecond == sizeFirst) {
-                break;
+                count++;
+            } else {
+                count = 0;
+            }
+            if (count >= 3) {
+                return;
             }
             sizeFirst = sizeSecond;
         }
@@ -299,8 +307,8 @@ public class BlockSynchronizer implements Runnable {
             }
         }
         ChainParameters parameters = context.getParameters();
-        int config = availableNodes.size() * parameters.getConsistencyNodePercent() / 100;
-        if (count < config) {
+        double div = DoubleUtils.div(count, availableNodes.size(), 2);
+        if (div * 100 < parameters.getConsistencyNodePercent()) {
             return params;
         }
         List<Node> nodeList = nodeMap.get(key);

@@ -132,7 +132,7 @@ public class ContractCmd extends BaseCmd {
             List<String> resultTxHexList = new ArrayList<>();
             List<Transaction> resultTxList = dto.getResultTxList();
             for (Transaction resultTx : resultTxList) {
-                Log.info("======pierre=====batch_end txType is [{}], hash is [{}]", resultTx.getType(), resultTx.getHash().toString());
+                Log.info("======pierre=====batch txType is [{}], hash is [{}]", resultTx.getType(), resultTx.getHash().toString());
                 resultTxHexList.add(Hex.toHexString(resultTx.serialize()));
             }
 
@@ -303,7 +303,7 @@ public class ContractCmd extends BaseCmd {
                 return failed(DATA_ERROR);
             }
 
-            Result result = contractTokenBalanceManager.initAllTokensByAccount(address);
+            Result result = contractTokenBalanceManager.initAllTokensByImportAccount(address);
             if (result.isFailed()) {
                 return wrapperFailed(result);
             }

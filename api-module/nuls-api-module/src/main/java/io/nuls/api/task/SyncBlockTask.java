@@ -87,7 +87,7 @@ public class SyncBlockTask implements Runnable {
             Thread.sleep(5000L);
             return false;
         }
-        if (!checkBlockContinuity(localBestBlockHeader, newBlock.getHeader())) {
+        if (checkBlockContinuity(localBestBlockHeader, newBlock.getHeader())) {
             return syncService.syncNewBlock(chainId, newBlock);
         } else {
             return rollbackService.rollbackBlock(chainId, localBestBlockHeader.getHeight());

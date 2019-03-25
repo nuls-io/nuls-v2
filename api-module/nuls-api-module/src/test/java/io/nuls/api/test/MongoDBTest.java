@@ -3,11 +3,14 @@ package io.nuls.api.test;
 import com.mongodb.MongoClient;
 import com.mongodb.client.MongoDatabase;
 import io.nuls.api.db.BlockService;
+import io.nuls.api.db.ContractService;
 import io.nuls.api.db.MongoDBService;
 import io.nuls.api.model.po.db.BlockHeaderInfo;
+import io.nuls.api.model.po.db.ContractInfo;
 import io.nuls.api.utils.DocumentTransferTool;
 import io.nuls.tools.core.ioc.SpringLiteContext;
 import org.bson.Document;
+import org.checkerframework.dataflow.qual.TerminatesExecution;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -46,6 +49,11 @@ public class MongoDBTest {
         System.out.println();
     }
 
+    @Test
+    public void testGetContract() {
+        ContractService contractService = SpringLiteContext.getBean(ContractService.class);
+        ContractInfo contractInfo = contractService.getContractInfo(2, "tNULSeBaN32a2hucBYT9o4BnNoHQcM8WDmpPgq");
+    }
 
     @Test
     public void testTransferUseTime() {
@@ -103,4 +111,6 @@ public class MongoDBTest {
         }
         System.out.println("-------------time;" + (System.currentTimeMillis() - time1));
     }
+
+
 }

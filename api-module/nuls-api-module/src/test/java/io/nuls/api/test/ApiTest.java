@@ -11,6 +11,7 @@ import io.nuls.rpc.info.NoUse;
 import io.nuls.rpc.netty.processor.ResponseMessageProcessor;
 import io.nuls.tools.basic.Result;
 import io.nuls.tools.exception.NulsException;
+import org.bson.Document;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -79,8 +80,13 @@ public class ApiTest {
     @Test
     public void testContract() {
         try {
-            Result<ContractInfo> result = WalletRpcHandler.getContractInfo(2,"tNULSeBaN8SVyzZj7P6fMJWvT3F7Gvi71VyJnS");
-            result.getData();
+            ContractInfo contractInfo = new ContractInfo();
+            contractInfo.setCreateTxHash("0020f0b5b43fb165413938030266ebdcfb780b7a213ebddc2db8665cbfcb6a936cb5");
+            contractInfo.setContractAddress("tNULSeBaNAsdgUuiYL5WCtVqb8r9gCkpw8QH86");
+            Result<ContractInfo> result = WalletRpcHandler.getContractInfo(2, contractInfo);
+            contractInfo = result.getData();
+            Document document = contractInfo.toDocument();
+            System.out.println(1);
         } catch (NulsException e) {
             e.printStackTrace();
         }
@@ -89,11 +95,14 @@ public class ApiTest {
     @Test
     public void testContractResult() {
         try {
-            Result<ContractResultInfo> result = WalletRpcHandler.getContractResultInfo(2,"0020cc10c27160b1e0c7dd8590baa16fedbb91661654b48df45ad370c47ce27cefa6");
-            result.getData();
-        }catch (Exception e) {
+            Result<ContractResultInfo> result = WalletRpcHandler.getContractResultInfo(2, "0020cc10c27160b1e0c7dd8590baa16fedbb91661654b48df45ad370c47ce27cefa6");
+            ContractResultInfo resultInfo = result.getData();
+            Document document = resultInfo.toDocument();
+            System.out.println(1);
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
+
 
 }

@@ -31,8 +31,10 @@ import io.nuls.block.model.Node;
 import io.nuls.tools.log.logback.NulsLogger;
 
 import java.util.List;
-import java.util.Set;
-import java.util.concurrent.*;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.Future;
+import java.util.concurrent.PriorityBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
 
 import static io.nuls.block.constant.Constant.BLOCK_COMPARATOR;
 

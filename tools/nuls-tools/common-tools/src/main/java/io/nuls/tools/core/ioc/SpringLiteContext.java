@@ -451,7 +451,7 @@ public class SpringLiteContext {
         Enhancer enhancer = new Enhancer();
         enhancer.setSuperclass(clazz);
         enhancer.setCallback(interceptor);
-        System.out.println(clazz);
+//        System.out.println(clazz);
         return enhancer.create();
     }
 

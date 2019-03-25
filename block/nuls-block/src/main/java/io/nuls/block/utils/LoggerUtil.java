@@ -37,12 +37,13 @@ import io.nuls.tools.log.logback.NulsLogger;
  **/
 public class LoggerUtil {
 
-    public static NulsLogger commonLog = LoggerBuilder.getLogger("block","common", Level.INFO);
+    //update by zlj:  common.log->block.log
+    public static NulsLogger commonLog = LoggerBuilder.getLogger("block", Level.INFO);
 
     public static void init(int chainId, String levelString) {
         Level level = Level.valueOf(levelString);
-        NulsLogger commonLog = LoggerBuilder.getLogger("block/chain-"+chainId+"/","common", level);
-        NulsLogger messageLog = LoggerBuilder.getLogger("block/chain-"+chainId+"/","message", level);
+        NulsLogger commonLog = LoggerBuilder.getLogger("chain-"+chainId+"/","common", level);
+        NulsLogger messageLog = LoggerBuilder.getLogger("chain-"+chainId+"/","message", level);
         ChainContext context = ContextManager.getContext(chainId);
         context.setCommonLog(commonLog);
         context.setMessageLog(messageLog);

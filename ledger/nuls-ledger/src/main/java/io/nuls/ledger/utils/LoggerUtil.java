@@ -34,10 +34,10 @@ import io.nuls.tools.log.logback.NulsLogger;
  * @date 2018/12/17
  **/
 public class LoggerUtil {
-   public static NulsLogger logger = LoggerBuilder.getLogger("./ld", "ld",Level.ALL);
-   public static NulsLogger txCommitLog = LoggerBuilder.getLogger("./ld", "tx",Level.ALL);
-   public static NulsLogger txRollBackLog = LoggerBuilder.getLogger("./ld", "txRb",Level.ALL);
-   public static NulsLogger txUnconfirmedRollBackLog = LoggerBuilder.getLogger("./ld", "txUncfRb",Level.ALL);
-   public static NulsLogger txAmount = LoggerBuilder.getLogger("./ld", "accountAmount",Level.ALL);
-   public static NulsLogger txUnconfirmedRollBackLog2 = LoggerBuilder.getLogger("./ld", "txUncfRb2",Level.ALL);
+   public static NulsLogger logger = LoggerBuilder.getLogger("ld",Level.ALL);
+   public static NulsLogger txCommitLog = LoggerBuilder.getLogger("tx",Level.ALL);
+   public static NulsLogger txRollBackLog = LoggerBuilder.getLogger( "txRb",Level.ALL);
+   public static NulsLogger txUnconfirmedRollBackLog = LoggerBuilder.getLogger("txUncfRb",Level.ALL);
+   public static NulsLogger txAmount = LoggerBuilder.getLogger( "accountAmount",Level.ALL);
+   public static NulsLogger txUnconfirmedRollBackLog2 = LoggerBuilder.getLogger( "txUncfRb2",Level.ALL);
 }

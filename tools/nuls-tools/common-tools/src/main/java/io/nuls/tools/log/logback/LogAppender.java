@@ -11,6 +11,7 @@ import ch.qos.logback.core.rolling.RollingFileAppender;
 import ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy;
 import ch.qos.logback.core.util.FileSize;
 import ch.qos.logback.core.util.OptionHelper;
+import io.nuls.tools.model.StringUtils;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
@@ -24,7 +25,7 @@ import java.io.File;
  * */
 public class LogAppender {
 
-    public static String PROJECT_PATH = System.getProperty("user.dir") + File.separator + "logs";
+    public static String PROJECT_PATH = StringUtils.isNotBlank(System.getProperty("log.path")) ? System.getProperty("log.path") : (System.getProperty("user.dir") + File.separator + "logs");
 
     /**
      * 通过传入的名字和级别，动态设置appender

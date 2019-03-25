@@ -40,11 +40,11 @@ import io.nuls.tools.log.logback.NulsLogger;
  */
 public class LoggerUtil {
 
-    public static NulsLogger commonLog = LoggerBuilder.getLogger("protocol","common", Level.INFO);
+    public static NulsLogger commonLog = LoggerBuilder.getLogger("protocol",Level.INFO);
 
     public static void init(int chainId, String levelString) {
         Level level = Level.valueOf(levelString);
-        NulsLogger commonLog = LoggerBuilder.getLogger("protocol/chain-"+chainId+"/","common", level);
+        NulsLogger commonLog = LoggerBuilder.getLogger("chain-"+chainId+"/","common", level);
         ProtocolContext context = ContextManager.getContext(chainId);
         context.setCommonLog(commonLog);
     }

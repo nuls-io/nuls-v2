@@ -91,7 +91,7 @@ public class ContractServiceImpl implements ContractService {
 
     @Override
     public Result begin(int chainId, long blockHeight, long blockTime, String packingAddress, String preStateRoot) {
-        Log.info("=====pierre=====begin contract batch, packaging blockHeight is [{}], preStateRoot is [{}]", blockHeight, preStateRoot);
+        Log.info("=====pierre=====begin contract batch, packaging blockHeight is [{}], packaging address is [{}], preStateRoot is [{}]", blockHeight, packingAddress, preStateRoot);
         Chain chain = contractHelper.getChain(chainId);
         BatchInfo batchInfo = chain.getBatchInfo();
         // 清空上次批量的所有数据
