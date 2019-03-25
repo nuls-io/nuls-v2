@@ -415,7 +415,7 @@ if [ -n "${DOMOCK}" ]; then
 	cp "${BUILD_PATH}/check-status.sh" "${MODULES_BIN_PATH}/"
 	chmod u+x "${MODULES_BIN_PATH}/check-status.sh"
 	cp "${BUILD_PATH}/cmd.sh" "${MODULES_BIN_PATH}/"
-	chmod u+x "${MODULES_PATH}/cmd.sh"
+	chmod u+x "${MODULES_BIN_PATH}/cmd.sh"
 fi
 log "============ build ${RELEASE_PATH}.tar.gz ==================="
 tar -cjf "${RELEASE_PATH}.tar.gz" ${RELEASE_PATH}
