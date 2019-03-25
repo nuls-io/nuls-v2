@@ -111,7 +111,7 @@ public class AddressTool {
         try {
             byte[] addressBytes = AddressTool.getAddressBytes(addressString);
             NulsByteBuffer byteBuffer = new NulsByteBuffer(addressBytes);
-            chainId = byteBuffer.readShort();
+            chainId = byteBuffer.readUint16();
         } catch (Exception e) {
             Log.error(e);
             throw new NulsRuntimeException(e);
@@ -206,7 +206,7 @@ public class AddressTool {
         byte type;
         byte[] hash160Bytes;
         try {
-            chainid = byteBuffer.readShort();
+            chainid = byteBuffer.readUint16();
             type = byteBuffer.readByte();
             hash160Bytes = byteBuffer.readBytes(Address.RIPEMD160_LENGTH);
         } catch (NulsException e) {
@@ -236,13 +236,13 @@ public class AddressTool {
      * @param bytes
      * @return
      */
-    public static short getChainIdByAddress(byte[] bytes) {
+    public static int getChainIdByAddress(byte[] bytes) {
         if (null == bytes || bytes.length != Address.ADDRESS_LENGTH) {
             return 0;
         }
         NulsByteBuffer byteBuffer = new NulsByteBuffer(bytes);
         try {
-            return byteBuffer.readShort();
+            return byteBuffer.readUint16();
         } catch (NulsException e) {
             Log.error(e);
             return 0;
@@ -265,7 +265,7 @@ public class AddressTool {
         int chainid;
         byte type;
         try {
-            chainid = byteBuffer.readShort();
+            chainid = byteBuffer.readUint16();
             type = byteBuffer.readByte();
         } catch (NulsException e) {
             Log.error(e);
@@ -298,7 +298,7 @@ public class AddressTool {
         int chainid;
         byte type;
         try {
-            chainid = byteBuffer.readShort();
+            chainid = byteBuffer.readUint16();
             type = byteBuffer.readByte();
         } catch (NulsException e) {
             Log.error(e);
@@ -321,7 +321,7 @@ public class AddressTool {
      * @return
      */
     public static String getStringAddressByBytes(byte[] addressBytes) {
-        short chainId = getChainIdByAddress(addressBytes);
+        int chainId = getChainIdByAddress(addressBytes);
         if (BaseConstant.MAINNET_CHAIN_ID == chainId) {
             return getStringAddressByBytes(addressBytes, MAINNET_PREFIX);
         } else if (chainId == BaseConstant.TESTNET_CHAIN_ID) {
@@ -412,7 +412,7 @@ public class AddressTool {
         byte type;
         byte[] hash160Bytes;
         try {
-            chainid = byteBuffer.readShort();
+            chainid = byteBuffer.readUint16();
             type = byteBuffer.readByte();
             hash160Bytes = byteBuffer.readBytes(Address.RIPEMD160_LENGTH);
         } catch (NulsException e) {
