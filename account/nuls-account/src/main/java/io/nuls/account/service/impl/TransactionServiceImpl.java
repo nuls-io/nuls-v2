@@ -36,6 +36,7 @@ import io.nuls.account.model.dto.MultiSignTransactionResultDto;
 import io.nuls.account.rpc.call.NetworkCall;
 import io.nuls.account.rpc.call.TransactionCmdCall;
 import io.nuls.account.service.AccountService;
+import io.nuls.account.service.AliasService;
 import io.nuls.account.service.MultiSignAccountService;
 import io.nuls.account.service.TransactionService;
 import io.nuls.account.util.LoggerUtil;
@@ -44,12 +45,7 @@ import io.nuls.account.util.manager.ChainManager;
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.basic.TransactionFeeCalculator;
-import io.nuls.base.data.CoinData;
-import io.nuls.base.data.CoinFrom;
-import io.nuls.base.data.CoinTo;
-import io.nuls.base.data.MultiSigAccount;
-import io.nuls.base.data.NulsDigestData;
-import io.nuls.base.data.Transaction;
+import io.nuls.base.data.*;
 import io.nuls.base.signture.MultiSignTxSignature;
 import io.nuls.base.signture.P2PHKSignature;
 import io.nuls.base.signture.SignatureUtil;
@@ -65,14 +61,7 @@ import io.nuls.tools.model.StringUtils;
 
 import java.io.IOException;
 import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.ListIterator;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * @author: qinyifeng
@@ -84,6 +73,8 @@ public class TransactionServiceImpl implements TransactionService {
     private AccountService accountService;
     @Autowired
     private ChainManager chainManager;
+    @Autowired
+    private AliasService aliasService;
 
     @Autowired
     private MultiSignAccountService multiSignAccountService;
@@ -99,15 +90,24 @@ public class TransactionServiceImpl implements TransactionService {
         try {
             for (Transaction transaction : txList) {
                 if (transaction.getType() == AccountConstant.TX_TYPE_ACCOUNT_ALIAS) {
+                    try {
+                        if(!aliasService.aliasTxValidate(chainId, transaction)){
+                            result.add(transaction);
+                            continue;
+                        }
+                    } catch (Exception e) {
+                        LoggerUtil.logger.error(e);
+                        result.add(transaction);
+                        continue;
+                    }
                     Alias alias = new Alias();
                     alias.parse(new NulsByteBuffer(transaction.getTxData()));
                     String address = AddressTool.getStringAddressByBytes(alias.getAddress());
-                    //check alias
+                    //check alias, 当有两笔交易冲突时,只需要把后一笔交易作为冲突者返回去
                     Transaction tmp = aliasNamesMap.get(alias.getAlias());
                     // the alias is already exist
                     if (tmp != null) {
                         result.add(transaction);
-                        result.add(tmp);
                         LoggerUtil.logger.error("the alias is already exist,alias: " + alias.getAlias() + ",address: " + alias.getAddress());
                         continue;
                     } else {
@@ -118,7 +118,6 @@ public class TransactionServiceImpl implements TransactionService {
                     // the address is already exist
                     if (tmp != null) {
                         result.add(transaction);
-                        result.add(tmp);
                         continue;
                     } else {
                         accountAddressMap.put(address, transaction);

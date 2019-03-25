@@ -97,7 +97,7 @@ public class BlockManager {
         }
         chain.getBlockHeaderList().add(blockHeader);
         chain.setNewestHeader(blockHeader);
-        chain.getLoggerMap().get(ConsensusConstant.BASIC_LOGGER_NAME).info("区块保存，高度为：" + blockHeader.getHeight() + "txCount: " + blockHeader.getTxCount() + ",本地最新区块高度为：" + chain.getNewestHeader().getHeight());
+        chain.getLoggerMap().get(ConsensusConstant.BASIC_LOGGER_NAME).info("区块保存，高度为：" + blockHeader.getHeight() + " , txCount: " + blockHeader.getTxCount() + ",本地最新区块高度为：" + chain.getNewestHeader().getHeight());
     }
 
     /**

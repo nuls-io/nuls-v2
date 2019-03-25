@@ -6,7 +6,6 @@ import io.nuls.base.data.*;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Service;
 import io.nuls.tools.exception.NulsException;
-import io.nuls.tools.exception.NulsRuntimeException;
 import io.nuls.transaction.cache.PackablePool;
 import io.nuls.transaction.constant.TxConfig;
 import io.nuls.transaction.constant.TxConstant;
@@ -33,6 +32,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import static io.nuls.transaction.utils.LoggerUtil.Log;
 
 /**
  * @author: Charlie
@@ -74,13 +75,6 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
             return null;
         }
         return confirmedTxStorageService.getTx(chain.getChainId(), hash);
-    }
-
-    private boolean saveTx(Chain chain, TransactionConfirmedPO tx) {
-        if (null == tx) {
-            throw new NulsRuntimeException(TxErrorCode.PARAMETER_ERROR);
-        }
-        return confirmedTxStorageService.saveTx(chain.getChainId(), tx);
     }
 
     @Override
@@ -145,6 +139,7 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
     }
 
     private boolean saveBlockTxList(Chain chain, List<Transaction> txList, String blockHeaderHex, boolean gengsis) throws NulsException {
+        long start = NetworkCall.getCurrentTimeMillis();//-----
         List<String> txHexList = new ArrayList<>();
         int chainId = chain.getChainId();
         List<byte[]> txHashs = new ArrayList<>();
@@ -153,6 +148,7 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
         BlockHeader blockHeader = null;
         try {
             blockHeader = TxUtil.getInstance(blockHeaderHex, BlockHeader.class);
+            Log.debug("[保存区块] ==========开始==========高度:{}==========数量:{}", blockHeader.getHeight(), txList.size());//----
             chain.getLoggerMap().get(TxConstant.LOG_TX).debug("saveBlockTxList block height:{}", blockHeader.getHeight());
             for (Transaction tx : txList) {
                 tx.setBlockHeight(blockHeader.getHeight());
@@ -168,13 +164,25 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
             chain.getLoggerMap().get(TxConstant.LOG_TX).error(e);
             return false;
         }
+        Log.debug("[保存区块] 组装数据 执行时间:{}", NetworkCall.getCurrentTimeMillis() - start);//----
+        Log.debug("");//----
+
+        long dbStart = NetworkCall.getCurrentTimeMillis();//-----
         if (!saveTxs(chain, txList, blockHeader.getHeight(), true)) {
             return false;
         }
+        Log.debug("[保存区块] 存已确认交易DB 执行时间:{}", NetworkCall.getCurrentTimeMillis() - dbStart);//----
+        Log.debug("");//----
+
+        long commitStart = NetworkCall.getCurrentTimeMillis();//-----
         if (!gengsis && !commitTxs(chain, moduleVerifyMap, blockHeaderHex, true)) {
             removeTxs(chain, txList, blockHeader.getHeight(), false);
             return false;
         }
+        Log.debug("[保存区块] 交易业务提交 执行时间:{}", NetworkCall.getCurrentTimeMillis() - commitStart);//----
+        Log.debug("");//----
+
+        long ledgerStart = NetworkCall.getCurrentTimeMillis();//-----
         if (!commitLedger(chain, txHexList, blockHeader.getHeight())) {
             if (!gengsis) {
                 rollbackTxs(chain, moduleVerifyMap, blockHeaderHex, false);
@@ -182,24 +190,40 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
             removeTxs(chain, txList, blockHeader.getHeight(), false);
             return false;
         }
+        Log.debug("[保存区块] 账本模块提交 执行时间:{}", NetworkCall.getCurrentTimeMillis() - ledgerStart);//----
+        Log.debug("");//----
         //如果确认交易成功，则从未打包交易库中删除交易
         unconfirmedTxStorageService.removeTxList(chainId, txHashs);
+        Log.debug("[保存区块] ======/========/结束======/========/合计执行时间:{}", NetworkCall.getCurrentTimeMillis() - start);//----
+        Log.debug("");//----
+        chain.getLoggerMap().get(TxConstant.LOG_TX).debug("save block Txs success! height:{}, txSize:{}", blockHeader.getHeight(), txList.size());
         return true;
     }
 
 
-    //保存交易
+    /**保存交易*/
     private boolean saveTxs(Chain chain, List<Transaction> txList, long blockHeight, boolean atomicity) {
-        List<Transaction> savedList = new ArrayList<>();
         boolean rs = true;
+        List<TransactionConfirmedPO> toSaveList = new ArrayList<>();
         for (Transaction tx : txList) {
             tx.setStatus(TxStatusEnum.CONFIRMED);
+            TransactionConfirmedPO txConfirmedPO = new TransactionConfirmedPO(tx, blockHeight, TxStatusEnum.CONFIRMED.getStatus());
+            toSaveList.add(txConfirmedPO);
+        }
+        if(!confirmedTxStorageService.saveTxList(chain.getChainId(), toSaveList)){
+            if (atomicity) {
+                removeTxs(chain, txList, blockHeight, false);
+            }
+            rs = false;
+            chain.getLoggerMap().get(TxConstant.LOG_TX).debug("save block Txs rocksdb failed! ");
+        }
+       /* for (Transaction tx : txList) {
+            tx.setStatus(TxStatusEnum.CONFIRMED);
             TransactionConfirmedPO transactionConfirmedPO = new TransactionConfirmedPO(tx, blockHeight, TxStatusEnum.CONFIRMED.getStatus());
-            if (saveTx(chain, transactionConfirmedPO)) {
+            if (confirmedTxStorageService.saveTx(chain.getChainId(), transactionConfirmedPO)) {
                 chain.getLoggerMap().get(TxConstant.LOG_TX).debug("success! saveTxs -type[{}], hash:{}", tx.getType(), tx.getHash().getDigestHex());
                 chain.getLoggerMap().get(TxConstant.LOG_TX).debug("get hash:{}, txObj:{}",
                         tx.getType(), tx.getHash().getDigestHex(), confirmedTxStorageService.getTx(chain.getChainId(), tx.getHash().getDigestHex()).getTx());
-                TxUtil.txInformationDebugPrint(chain, tx, chain.getLoggerMap().get(TxConstant.LOG_TX));
                 savedList.add(tx);
             } else {
                 if (atomicity) {
@@ -209,11 +233,11 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
                 chain.getLoggerMap().get(TxConstant.LOG_TX).debug("failed! saveTxs  -type[{}], hash:{}", tx.getType(), tx.getHash().getDigestHex());
                 break;
             }
-        }
+        }*/
         return rs;
     }
 
-    //调提交易
+    /**调提交易*/
     private boolean commitTxs(Chain chain, Map<TxRegister, List<String>> moduleVerifyMap, String blockHeaderHex, boolean atomicity) {
         //调用交易模块统一commit接口 批量
         Map<TxRegister, List<String>> successed = new HashMap<>(TxConstant.INIT_CAPACITY_8);
@@ -245,8 +269,8 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
         return true;
     }
 
+    /**提交账本*/
     private boolean commitLedger(Chain chain, List<String> txHexList, long blockHeight) {
-        //提交账本
         try {
             boolean rs = LedgerCall.commitTxsLedger(chain, txHexList, blockHeight);
             if(!rs){
@@ -260,6 +284,7 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
         }
     }
 
+    /**从已确认库中删除交易*/
     private boolean removeTxs(Chain chain, List<Transaction> txList, long blockheight, boolean atomicity) {
         boolean rs = true;
         if(!confirmedTxStorageService.removeTxList(chain.getChainId(), txList) && atomicity ){
@@ -270,6 +295,7 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
         return rs;
     }
 
+    /**回滚交易业务数据*/
     private boolean rollbackTxs(Chain chain, Map<TxRegister, List<String>> moduleVerifyMap, String blockHeaderHex, boolean atomicity) {
         Map<TxRegister, List<String>> successed = new HashMap<>(TxConstant.INIT_CAPACITY_8);
         boolean result = true;
@@ -300,6 +326,7 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
         return true;
     }
 
+    /**回滚已确认交易账本*/
     private boolean rollbackLedger(Chain chain, List<String> txHexList, Long blockHeight) {
         try {
             boolean rs =  LedgerCall.rollbackTxsLedger(chain, txHexList, blockHeight);

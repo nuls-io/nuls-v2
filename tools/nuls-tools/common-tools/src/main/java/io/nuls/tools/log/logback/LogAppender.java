@@ -40,7 +40,7 @@ public class LogAppender {
             rootPath += File.separator;
         }
         if(fileName.startsWith(File.separator)){
-            fileName = fileName.replace(File.separator,"");
+            fileName = fileName.substring(1);
         }
         LoggerContext context = (LoggerContext) LoggerFactory.getILoggerFactory();
         RollingFileAppender appender = new RollingFileAppender();
