@@ -32,7 +32,7 @@ import io.nuls.contract.manager.ContractTxProcessorManager;
 import io.nuls.contract.manager.ContractTxValidatorManager;
 import io.nuls.contract.model.bo.*;
 import io.nuls.contract.model.dto.ContractPackageDto;
-import io.nuls.contract.model.tx.ContractReturnGasTransaction;
+import io.nuls.contract.model.tx.*;
 import io.nuls.contract.model.txdata.CallContractData;
 import io.nuls.contract.model.txdata.ContractData;
 import io.nuls.contract.model.txdata.CreateContractData;
@@ -112,6 +112,36 @@ public class ContractServiceImpl implements ContractService {
         checker.setContractSetList(new ArrayList<>());
         batchInfo.setChecker(checker);
         return getSuccess();
+    }
+
+    @Override
+    public Result validContractTx(int chainId, Transaction tx) {
+        try {
+            Result result;
+            switch (tx.getType()) {
+                case TX_TYPE_CREATE_CONTRACT:
+                    CreateContractTransaction create = new CreateContractTransaction();
+                    create.copyTx(tx);
+                    result = contractTxValidatorManager.createValidator(chainId, create);
+                    break;
+                case TX_TYPE_CALL_CONTRACT:
+                    CallContractTransaction call = new CallContractTransaction();
+                    call.copyTx(tx);
+                    result = contractTxValidatorManager.callValidator(chainId, call);
+                    break;
+                case TX_TYPE_DELETE_CONTRACT:
+                    DeleteContractTransaction delete = new DeleteContractTransaction();
+                    delete.copyTx(tx);
+                    result = contractTxValidatorManager.deleteValidator(chainId, delete);
+                    break;
+                default:
+                    result = getSuccess();
+                    break;
+            }
+            return result;
+        } catch (NulsException e) {
+            return getFailed();
+        }
     }
 
     @Override

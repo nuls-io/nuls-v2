@@ -25,9 +25,11 @@ package io.nuls.contract.service;
 
 
 import io.nuls.base.data.NulsDigestData;
+import io.nuls.base.data.Transaction;
 import io.nuls.contract.model.bo.ContractResult;
 import io.nuls.contract.model.bo.ContractTempTransaction;
 import io.nuls.tools.basic.Result;
+import io.nuls.tools.exception.NulsException;
 
 import java.util.List;
 
@@ -40,6 +42,8 @@ public interface ContractService {
     Result begin(int chainId, long blockHeight, long blockTime, String packingAddress, String preStateRoot);
 
     Result end(int chainId, long blockHeight);
+
+    Result validContractTx(int chainId, Transaction tx) throws NulsException;
 
     Result invokeContractOneByOne(int chainId, ContractTempTransaction tx);
 
