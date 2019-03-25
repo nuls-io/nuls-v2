@@ -59,19 +59,13 @@ public class AddressTool {
             return TESTNET_PREFIX;
         }
         char[] arr = addressString.toCharArray();
-        List<Character> list = new ArrayList<>();
-        for (char c : arr) {
-            if (c >= 97) {
-                break;
+        for (int i = 0; i < arr.length; i++) {
+            char val = arr[i];
+            if (val >= 97) {
+                return addressString.substring(0, i);
             }
-            list.add(c);
         }
-        char[] carr = new char[list.size()];
-        int index = 0;
-        for (Character c : list) {
-            carr[index++] = c;
-        }
-        return String.valueOf(carr);
+        throw new RuntimeException(ERROR_MESSAGE);
     }
 
     private static String getRealAddrss(String addressString) {
@@ -80,6 +74,13 @@ public class AddressTool {
         }
         if (addressString.startsWith(TESTNET_PREFIX)) {
             return addressString.substring(TESTNET_PREFIX.length() + 1);
+        }
+        char[] arr = addressString.toCharArray();
+        for (int i = 0; i < arr.length; i++) {
+            char val = arr[i];
+            if (val >= 97) {
+                return addressString.substring(i + 1);
+            }
         }
         throw new RuntimeException(ERROR_MESSAGE);
     }
@@ -110,7 +111,7 @@ public class AddressTool {
         try {
             byte[] addressBytes = AddressTool.getAddressBytes(addressString);
             NulsByteBuffer byteBuffer = new NulsByteBuffer(addressBytes);
-            chainId = byteBuffer.readShort();
+            chainId = byteBuffer.readUint16();
         } catch (Exception e) {
             Log.error(e);
             throw new NulsRuntimeException(e);
@@ -131,7 +132,7 @@ public class AddressTool {
         } else if (chainId == 2) {
             return getAddress(publicKey, chainId, "tNULS");
         }
-        return getAddress(publicKey, chainId, "DEF");
+        return getAddress(publicKey, chainId, Base58.encode(SerializeUtils.int16ToBytes(chainId)).toUpperCase());
     }
 
     public static byte[] getAddress(byte[] publicKey, int chainId, String prefix) {
@@ -205,7 +206,7 @@ public class AddressTool {
         byte type;
         byte[] hash160Bytes;
         try {
-            chainid = byteBuffer.readShort();
+            chainid = byteBuffer.readUint16();
             type = byteBuffer.readByte();
             hash160Bytes = byteBuffer.readBytes(Address.RIPEMD160_LENGTH);
         } catch (NulsException e) {
@@ -235,13 +236,13 @@ public class AddressTool {
      * @param bytes
      * @return
      */
-    public static short getChainIdByAddress(byte[] bytes) {
+    public static int getChainIdByAddress(byte[] bytes) {
         if (null == bytes || bytes.length != Address.ADDRESS_LENGTH) {
             return 0;
         }
         NulsByteBuffer byteBuffer = new NulsByteBuffer(bytes);
         try {
-            return byteBuffer.readShort();
+            return byteBuffer.readUint16();
         } catch (NulsException e) {
             Log.error(e);
             return 0;
@@ -264,7 +265,7 @@ public class AddressTool {
         int chainid;
         byte type;
         try {
-            chainid = byteBuffer.readShort();
+            chainid = byteBuffer.readUint16();
             type = byteBuffer.readByte();
         } catch (NulsException e) {
             Log.error(e);
@@ -297,7 +298,7 @@ public class AddressTool {
         int chainid;
         byte type;
         try {
-            chainid = byteBuffer.readShort();
+            chainid = byteBuffer.readUint16();
             type = byteBuffer.readByte();
         } catch (NulsException e) {
             Log.error(e);
@@ -320,13 +321,14 @@ public class AddressTool {
      * @return
      */
     public static String getStringAddressByBytes(byte[] addressBytes) {
-        short chainId = getChainIdByAddress(addressBytes);
+        int chainId = getChainIdByAddress(addressBytes);
         if (BaseConstant.MAINNET_CHAIN_ID == chainId) {
             return getStringAddressByBytes(addressBytes, MAINNET_PREFIX);
         } else if (chainId == BaseConstant.TESTNET_CHAIN_ID) {
             return getStringAddressByBytes(addressBytes, TESTNET_PREFIX);
+        } else {
+            return getStringAddressByBytes(addressBytes, Base58.encode(SerializeUtils.int16ToBytes(chainId)).toUpperCase());
         }
-        throw new RuntimeException(ERROR_MESSAGE);
     }
 
     public static String getStringAddressByBytes(byte[] addressBytes, String prefix) {
@@ -410,7 +412,7 @@ public class AddressTool {
         byte type;
         byte[] hash160Bytes;
         try {
-            chainid = byteBuffer.readShort();
+            chainid = byteBuffer.readUint16();
             type = byteBuffer.readByte();
             hash160Bytes = byteBuffer.readBytes(Address.RIPEMD160_LENGTH);
         } catch (NulsException e) {

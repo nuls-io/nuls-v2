@@ -24,6 +24,7 @@
 package io.nuls.contract.model.bo;
 
 import io.nuls.base.data.BlockHeader;
+import io.nuls.contract.enums.BatchInfoStatus;
 import io.nuls.contract.helper.ContractConflictChecker;
 import io.nuls.contract.manager.ContractTempBalanceManager;
 import io.nuls.contract.model.dto.ContractPackageDto;
@@ -77,7 +78,7 @@ public class BatchInfo {
     /**
      * 0 - 未开始， 1 - 已开始
      */
-    private int status;
+    private BatchInfoStatus status;
 
     /**
      * 上一区块世界状态根
@@ -96,12 +97,12 @@ public class BatchInfo {
 
 
     public BatchInfo() {
-        this.status = 0;
+        this.status = BatchInfoStatus.NOT_STARTING;
         this.contractContainerMap = new LinkedHashMap<>();
     }
 
     public boolean hasBegan() {
-        return status > 0;
+        return status.status() > 0;
     }
 
     public boolean isTimeOut() {
@@ -113,7 +114,7 @@ public class BatchInfo {
         this.clear();
         this.height = height;
         this.beginTime = TimeService.currentTimeMillis();
-        this.status = 1;
+        this.status = BatchInfoStatus.STARTING;
     }
 
     public void clear() {
@@ -123,7 +124,7 @@ public class BatchInfo {
         this.batchExecutor = null;
         this.height = -1L;
         this.beginTime = -1L;
-        this.status = 0;
+        this.status = BatchInfoStatus.NOT_STARTING;
         this.preStateRoot = null;
         this.checker = null;
         this.contractContainerMap = new LinkedHashMap<>();

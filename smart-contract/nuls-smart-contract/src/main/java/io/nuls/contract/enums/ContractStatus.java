@@ -1,7 +1,7 @@
 /**
  * MIT License
  * <p>
- * Copyright (c) 2017-2019 nuls.io
+ * Copyright (c) 2017-2018 nuls.io
  * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -21,42 +21,43 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package io.nuls.contract.model.dto;
+package io.nuls.contract.enums;
 
-
-import io.nuls.contract.model.bo.ContractTokenInfo;
-import io.nuls.contract.util.ContractUtil;
-import lombok.Getter;
-import lombok.Setter;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * @author: PierreLuo
- * @date: 2018/8/19
+ * @date: 2019-03-25
  */
-@Getter
-@Setter
-public class ContractTokenInfoDto {
+public enum ContractStatus {
+    // 0 - 不存在或者创建中, 1 - 正常, 2 - 已删除, 3 - 创建失败, 4 - 锁定中
+    NOT_EXISTS_OR_CONFIRMING(0),
+    NORMAL(1),
+    HAS_STOPPED(2),
+    CREATION_FAILED(3),
+    LOCKED(4);
 
-    private String contractAddress;
-    private String name;
-    private String symbol;
-    private String amount;
-    private long decimals;
-    private long blockHeight;
-    // enum ContractStatus
     private int status;
+    private static Map<Integer, ContractStatus> map;
 
-    public ContractTokenInfoDto() {
+    private ContractStatus(int status) {
+        this.status = status;
+        putStatus(status, this);
     }
 
-    public ContractTokenInfoDto(ContractTokenInfo info) {
-        this.contractAddress = info.getContractAddress();
-        this.name = info.getName();
-        this.symbol = info.getSymbol();
-        this.amount = ContractUtil.bigInteger2String(info.getAmount());
-        this.decimals = info.getDecimals();
-        this.blockHeight = info.getBlockHeight();
-        this.status = info.getStatus().status();
+    public int status() {
+        return status;
     }
 
+    private static ContractStatus putStatus(int status, ContractStatus statusEnum) {
+        if(map == null) {
+            map = new HashMap<>(8);
+        }
+        return map.put(status, statusEnum);
+    }
+
+    public static ContractStatus getStatus(int status) {
+        return map.get(status);
+    }
 }
