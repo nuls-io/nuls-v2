@@ -690,7 +690,6 @@ public class TxServiceImpl implements TxService {
                 }
                 //根据模块的统一验证器名，对所有交易进行分组，准备进行各模块的统一验证
                 TxUtil.moduleGroups(chain, moduleVerifyMap, tx);
-                nulsLogger.debug("");
             }
             nulsLogger.debug("--------------while end----取出的交易 - size:{}", packingTxList.size());
 
