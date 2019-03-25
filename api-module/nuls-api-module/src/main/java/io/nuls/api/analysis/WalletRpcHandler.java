@@ -157,6 +157,7 @@ public class WalletRpcHandler {
             return Result.getSuccess(null).setData(contractInfo);
         }
 
+        contractInfo.setSuccess(true);
         Map map = (Map) RpcCall.request(ModuleE.SC.abbr, CommandConstant.CONTRACT_INFO, params);
 //        contractInfo.setCreateTxHash(map.get("createTxHash").toString());
 //        contractInfo.setContractAddress(map.get("address").toString());
@@ -170,6 +171,7 @@ public class WalletRpcHandler {
             contractInfo.setSymbol(map.get("nrc20TokenSymbol").toString());
             contractInfo.setDecimals((Integer) map.get("decimals"));
             contractInfo.setTotalSupply(map.get("totalSupply").toString());
+            contractInfo.setOwners(new ArrayList<>());
         }
 
         List<Map<String, Object>> methodMap = (List<Map<String, Object>>) map.get("method");
@@ -206,8 +208,8 @@ public class WalletRpcHandler {
             return Result.getFailed(ApiErrorCode.DATA_NOT_FOUND);
         }
         ContractResultInfo resultInfo = new ContractResultInfo();
+        resultInfo.setTxHash((String) params.get("hash"));
         resultInfo.setSuccess((Boolean) map.get("success"));
-        resultInfo.setTxHash((String) map.get("txHash"));
         resultInfo.setContractAddress((String) map.get("contractAddress"));
         resultInfo.setErrorMessage((String) map.get("errorMessage"));
         resultInfo.setResult((String) map.get("result"));

@@ -77,8 +77,8 @@ public class Base {
     protected String toAddress4 = "tNULSeBaMshNPEnuqiDhMdSA4iNs6LMgjY6tcL";
 
     protected String createHash = "002029ca32525f635a15c82c046114657c0d8a96a7163780ac6b425b2383b240bd56";
-    protected String contractAddress = "tNULSeBaN2bUyX77RnC1N45iwfvuYEHnmhE6iB";
-    protected String contractAddress_nrc20 = "tNULSeBaN1sf8MkWD6QkMm4WA7tdJiEbGGmUox";
+    protected String contractAddress = "tNULSeBaN32a2hucBYT9o4BnNoHQcM8WDmpPgq";
+    protected String contractAddress_nrc20 = "tNULSeBaNC46Z66DgUTEXwfgmoSarz9nGDmP1G";
 
     protected String callHash = "002006dc2d87274408d8ec266d439b0f497e6a44a1e50eaeb1f1eaca1d909b7c4612";
     protected String deleteHash = "0020b2c159dbdf784c2860ec97072feb887466aa50fc147a5b50388886caab113f9a";

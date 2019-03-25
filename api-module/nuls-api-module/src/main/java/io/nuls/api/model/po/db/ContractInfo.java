@@ -57,6 +57,7 @@ public class ContractInfo extends TxDataInfo {
 
     private ContractResultInfo resultInfo;
 
+
     public Document toDocument() {
         Document document = DocumentTransferTool.toDocument(this, "contractAddress");
         List<Document> methodsList = new ArrayList<>();
@@ -66,7 +67,23 @@ public class ContractInfo extends TxDataInfo {
         }
 
         document.put("methods", methodsList);
-        document.put("resultInfo", resultInfo.toDocument());
+        //document.put("resultInfo", resultInfo.toDocument());
+        document.remove("resultInfo");
         return document;
+    }
+
+    public static ContractInfo toInfo(Document document) {
+        List<ContractMethod> methods = new ArrayList<>();
+        List<Document> methodsList = (List<Document>) document.get("methods");
+        for (Document doc : methodsList) {
+            ContractMethod method = DocumentTransferTool.toInfo(doc, ContractMethod.class);
+            methods.add(method);
+        }
+        document.remove("methods");
+        ContractInfo info = DocumentTransferTool.toInfo(document, "contractAddress", ContractInfo.class);
+
+        info.setMethods(methods);
+        return info;
+
     }
 }

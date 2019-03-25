@@ -493,7 +493,6 @@ public class SyncService {
         if (tokenTransfers.isEmpty()) {
             return;
         }
-
         AccountTokenInfo tokenInfo;
         TokenTransfer tokenTransfer;
         ContractInfo contractInfo;
@@ -511,10 +510,10 @@ public class SyncService {
 
             if (tokenTransfer.getFromAddress() != null) {
                 tokenInfo = processAccountNrc20(chainId, contractInfo, tokenTransfer.getFromAddress(), new BigInteger(tokenTransfer.getValue()), -1);
-                tokenTransfer.setFromBalance(tokenInfo.getBalance());
+                tokenTransfer.setFromBalance(tokenInfo.getBalance().toString());
             }
             tokenInfo = processAccountNrc20(chainId, contractInfo, tokenTransfer.getToAddress(), new BigInteger(tokenTransfer.getValue()), 1);
-            tokenTransfer.setToBalance(tokenInfo.getBalance());
+            tokenTransfer.setToBalance(tokenInfo.getBalance().toString());
 
             tokenTransferList.add(tokenTransfer);
         }
@@ -523,24 +522,22 @@ public class SyncService {
 
     private AccountTokenInfo processAccountNrc20(int chainId, ContractInfo contractInfo, String address, BigInteger value, int type) {
         AccountTokenInfo tokenInfo = queryAccountTokenInfo(chainId, address + contractInfo.getContractAddress());
-        BigInteger balanceValue;
         if (tokenInfo == null) {
             AccountInfo accountInfo = queryAccountInfo(chainId, address);
             accountInfo.getTokens().add(contractInfo.getContractAddress() + "," + contractInfo.getSymbol());
 
             tokenInfo = new AccountTokenInfo(address, contractInfo.getContractAddress(), contractInfo.getTokenName(), contractInfo.getSymbol(), contractInfo.getDecimals());
         }
-        balanceValue = new BigInteger(tokenInfo.getBalance());
+
         if (type == 1) {
-            balanceValue = balanceValue.add(value);
+            tokenInfo.setBalance(tokenInfo.getBalance().add(value));
         } else {
-            balanceValue = balanceValue.subtract(value);
+            tokenInfo.setBalance(tokenInfo.getBalance().subtract(value));
         }
 
-        if (balanceValue.compareTo(BigInteger.ZERO) < 0) {
+        if (tokenInfo.getBalance().compareTo(BigInteger.ZERO) < 0) {
             throw new RuntimeException("data error: " + address + " token[" + contractInfo.getSymbol() + "] balance < 0");
         }
-        tokenInfo.setBalance(balanceValue.toString());
         if (!accountTokenMap.containsKey(tokenInfo.getKey())) {
             accountTokenMap.put(tokenInfo.getKey(), tokenInfo);
         }

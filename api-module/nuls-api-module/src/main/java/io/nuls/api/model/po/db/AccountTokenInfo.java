@@ -2,6 +2,8 @@ package io.nuls.api.model.po.db;
 
 import lombok.Data;
 
+import java.math.BigInteger;
+
 @Data
 public class AccountTokenInfo {
 
@@ -15,7 +17,7 @@ public class AccountTokenInfo {
 
     private String contractAddress;
 
-    private String balance;
+    private BigInteger balance;
 
     private int decimals;
 
@@ -31,7 +33,7 @@ public class AccountTokenInfo {
         this.tokenName = tokenName;
         this.tokenSymbol = tokenSymbol;
         this.contractAddress = contractAddress;
-        this.balance = "0";
+        this.balance = BigInteger.ZERO;
         this.decimals = decimals;
         this.isNew = true;
     }

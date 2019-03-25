@@ -73,5 +73,27 @@ public class ContractResultInfo {
         return document;
     }
 
+    public static ContractResultInfo toInfo(Document document) {
+        List<Document> documentList = (List<Document>) document.get("nulsTransfers");
+        List<NulsTransfer> nulsTransferList = new ArrayList<>();
+        for (Document doc : documentList) {
+            NulsTransfer nulsTransfer = DocumentTransferTool.toInfo(doc, NulsTransfer.class);
+            nulsTransferList.add(nulsTransfer);
+        }
 
+        documentList = (List<Document>) document.get("tokenTransfers");
+        List<TokenTransfer> tokenTransferList = new ArrayList<>();
+        for (Document doc : documentList) {
+            TokenTransfer tokenTransfer = DocumentTransferTool.toInfo(doc, TokenTransfer.class);
+            tokenTransferList.add(tokenTransfer);
+        }
+
+        document.remove("nulsTransfers");
+        document.remove("tokenTransfers");
+
+        ContractResultInfo resultInfo = DocumentTransferTool.toInfo(document, "txHash", ContractResultInfo.class);
+        resultInfo.setNulsTransfers(nulsTransferList);
+        resultInfo.setTokenTransfers(tokenTransferList);
+        return resultInfo;
+    }
 }
