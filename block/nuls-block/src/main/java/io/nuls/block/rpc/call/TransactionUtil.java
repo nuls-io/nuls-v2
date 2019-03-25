@@ -21,6 +21,8 @@
 package io.nuls.block.rpc.call;
 
 import io.nuls.base.basic.NulsByteBuffer;
+import io.nuls.base.data.BlockExtendsData;
+import io.nuls.base.data.BlockHeader;
 import io.nuls.base.data.NulsDigestData;
 import io.nuls.base.data.Transaction;
 import io.nuls.block.manager.ContextManager;
@@ -80,7 +82,7 @@ public class TransactionUtil {
      * @param transactions
      * @return
      */
-    public static boolean verify(int chainId, List<Transaction> transactions, long height) {
+    public static boolean verify(int chainId, List<Transaction> transactions, BlockHeader header, BlockHeader lastHeader) {
         NulsLogger commonLog = ContextManager.getContext(chainId).getCommonLog();
         try {
             Map<String, Object> params = new HashMap<>(2);
@@ -90,13 +92,21 @@ public class TransactionUtil {
             for (Transaction transaction : transactions) {
                 txHashList.add(transaction.hex());
             }
+            params.put("height", header.getHeight());
             params.put("txList", txHashList);
-            params.put("height", height);
+            params.put("blockTime", header.getTime());
+            params.put("packingAddress", header.getPackingAddress(chainId));
+            BlockExtendsData data = new BlockExtendsData();
+            data.parse(new NulsByteBuffer(header.getExtend()));
+            params.put("stateRoot", data.getStateRoot());
+            BlockExtendsData lastData = new BlockExtendsData();
+            lastData.parse(new NulsByteBuffer(lastHeader.getExtend()));
+            params.put("preStateRoot", lastData.getStateRoot());
             Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.TX.abbr, "tx_batchVerify", params);
             if (response.isSuccess()) {
                 Map responseData = (Map) response.getResponseData();
-                Map data = (Map) responseData.get("tx_batchVerify");
-                return (Boolean) data.get("value");
+                Map v = (Map) responseData.get("tx_batchVerify");
+                return (Boolean) v.get("value");
             }
             return false;
         } catch (Exception e) {
