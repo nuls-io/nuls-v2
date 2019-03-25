@@ -25,88 +25,67 @@
 
 package io.nuls.cmd.client.processor.contract;
 
-
 import io.nuls.api.provider.Result;
-import io.nuls.api.provider.contract.facade.TransferToContractReq;
+import io.nuls.api.provider.contract.facade.AccountContractInfo;
+import io.nuls.api.provider.contract.facade.GetAccountContractListReq;
+import io.nuls.api.provider.contract.facade.GetContractTxReq;
 import io.nuls.cmd.client.CommandBuilder;
 import io.nuls.cmd.client.CommandHelper;
 import io.nuls.cmd.client.CommandResult;
 import io.nuls.cmd.client.processor.ErrorCodeConstants;
 import io.nuls.cmd.client.utils.Na;
 import io.nuls.tools.core.annotation.Component;
+import io.nuls.tools.model.DateUtils;
 import io.nuls.tools.model.StringUtils;
 
-import java.math.BigInteger;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
 
 /**
- * Transfer to contract address
- * Created by wangkun23 on 2018/9/25.
+ * @desription:
+ * @author: PierreLuo
+ * @date: 2018/9/19
  */
 @Component
-public class TransferToContractProcessor extends ContractBaseProcessor {
+public class GetAccountContractListProcessor extends ContractBaseProcessor {
 
     @Override
     public String getCommand() {
-        return "transfertocontract";
+        return "getaccountcontracts";
     }
 
     @Override
     public String getHelp() {
-        CommandBuilder builder = new CommandBuilder();
-        builder.newLine(getCommandDescription())
-                .newLine("\t<address> address -required")
-                .newLine("\t<toAddress> toAddress -required")
-                .newLine("\t<amount> transfer amount -required")
-                .newLine("\t[remark] remark not -required");
-        return builder.toString();
+        CommandBuilder bulider = new CommandBuilder();
+        bulider.newLine(getCommandDescription())
+                .newLine("\t<address>  account address -required");
+        return bulider.toString();
     }
 
     @Override
     public String getCommandDescription() {
-        return "transfertocontract <address> <toAddress> <amount> [remark] --create transfer to contract address";
+        return "getaccountcontracts <address> --get contract list by account";
     }
 
     @Override
     public boolean argsValidate(String[] args) {
         int length = args.length;
-        if (length <6) {
-            return false;
-        }
-        if (length >7) {
+        if (length != 2) {
             return false;
         }
         return true;
     }
 
-    /**
-     * {
-     * "address": "Nsdv1Hbu4TokdgbXreypXmVttYKdPT1g",
-     * "toAddress": "NseDqffhWEB52a9cWfiyEhiP3wPGcjcJ",
-     * "password": "nuls123456",
-     * "amount": 10000000,
-     * "remark": ""
-     * }
-     *
-     * @param args
-     * @return
-     */
     @Override
     public CommandResult execute(String[] args) {
         String address = args[1];
-        if (StringUtils.isBlank(address)) {
+        if(StringUtils.isBlank(address)) {
             return CommandResult.getFailed(ErrorCodeConstants.PARAM_ERR.getMsg());
         }
-        String password = CommandHelper.getPwd("Please enter your account password");
-        String toAddress = args[2];
-        BigInteger amount = Na.parseNuls(args[3]).toBigInteger();
-        TransferToContractReq req = new TransferToContractReq(address,toAddress,amount,password,null);
-        Result<String> result = contractProvider.transferToContract(req);
-        if(args.length > 4){
-            req.setRemark(args[4]);
-        }
-        if (result.isFailed()) {
-            return CommandResult.getFailed(result);
-        }
-        return CommandResult.getResult(result);
+        Result<AccountContractInfo> result = contractProvider.getAccountContractList(new GetAccountContractListReq(address));
+        return CommandResult.getResult(CommandResult.dataTransformList(result));
     }
+
+
 }

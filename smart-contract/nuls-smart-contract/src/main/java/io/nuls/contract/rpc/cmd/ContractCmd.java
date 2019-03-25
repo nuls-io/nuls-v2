@@ -105,7 +105,11 @@ public class ContractCmd extends BaseCmd {
             ContractTempTransaction tx = new ContractTempTransaction();
             tx.setTxHex(txHex);
             tx.parse(Hex.decode(txHex), 0);
-            Result result = contractService.invokeContractOneByOne(chainId, tx);
+            Result result = contractService.validContractTx(chainId, tx);
+            if (result.isFailed()) {
+                return failed(result.getErrorCode());
+            }
+            result = contractService.invokeContractOneByOne(chainId, tx);
             if (result.isFailed()) {
                 return wrapperFailed(result);
             }
@@ -228,8 +232,8 @@ public class ContractCmd extends BaseCmd {
     @Parameter(parameterName = "txHexList", parameterType = "String")
     public Response integrateValidator(Map<String, Object> params) {
         try {
-            Integer chainId = (Integer) params.get("chainId");
-            List<String> txHexList = (List<String>) params.get("txHexList");
+            //Integer chainId = (Integer) params.get("chainId");
+            //List<String> txHexList = (List<String>) params.get("txHexList");
             /**
              *  暂无统一验证器
              */

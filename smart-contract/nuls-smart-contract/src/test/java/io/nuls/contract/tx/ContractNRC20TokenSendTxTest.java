@@ -51,7 +51,7 @@ import static io.nuls.contract.constant.ContractCmdConstant.*;
  * @author: PierreLuo
  * @date: 2019-03-15
  */
-public class ContractSendTxTest extends BaseQuery {
+public class ContractNRC20TokenSendTxTest extends BaseQuery {
 
     @Test
     public void importPriKeyTest() {

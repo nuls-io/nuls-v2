@@ -9,7 +9,6 @@ import java.util.concurrent.TimeUnit;
  * @Time: 2019-03-21 10:50
  * @Description: 功能描述
  */
-@Component
 public abstract class SleepAdapter implements TestCaseIntf<Object,Object> {
 
 

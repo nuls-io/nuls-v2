@@ -157,6 +157,7 @@ public class CommandHandler implements InitializingBean {
         register(getBean(TokenTransferProcessor.class));
         register(getBean(TransferToContractProcessor.class));
         register(getBean(ViewContractProcessor.class));
+        register(getBean(GetAccountContractListProcessor.class));
     }
 
     public void start() {

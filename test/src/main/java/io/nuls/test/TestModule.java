@@ -6,6 +6,7 @@ import io.nuls.api.provider.account.AccountService;
 import io.nuls.api.provider.account.facade.ImportAccountByPrivateKeyReq;
 import io.nuls.api.provider.network.NetworkProvider;
 import io.nuls.api.provider.network.facade.NetworkInfo;
+import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.modulebootstrap.Module;
 import io.nuls.rpc.modulebootstrap.RpcModule;
 import io.nuls.rpc.modulebootstrap.RpcModuleState;
@@ -45,7 +46,15 @@ public class TestModule extends RpcModule {
 
     @Override
     public Module[] getDependencies() {
-        return new Module[0];
+        return new Module[]{
+                new Module(ModuleE.NW.abbr,"1.0"),
+                new Module(ModuleE.BL.abbr,"1.0"),
+                new Module(ModuleE.SC.abbr,"1.0"),
+                new Module(ModuleE.AC.abbr,"1.0"),
+                new Module(ModuleE.TX.abbr,"1.0"),
+                new Module(ModuleE.LG.abbr,"1.0"),
+                new Module(ModuleE.CS.abbr,"1.0")
+        };
     }
 
     @Override
