@@ -638,7 +638,7 @@ public class TxServiceImpl implements TxService {
                     }
                     continue;
                 }
-                nulsLogger.debug("@@@@@ 打包取出交易 hash:{}", tx.getHash().getDigestHex());
+//                nulsLogger.debug("@@@@@ 打包取出交易 hash:{}", tx.getHash().getDigestHex());
                 long txSize = tx.size();
                 if ((totalSize + txSize) > maxTxDataSize) {
                     packablePool.addInFirst(chain, tx);
