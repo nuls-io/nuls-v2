@@ -17,9 +17,9 @@ help()
 EOF
     exit 0
 }
-exprot JAVA_HOME=../Libraries/JAVA/11.0.2
+export JAVA_HOME="$(cd $(dirname "../Libraries/JAVA/11.0.2"); pwd)/11.0.2"
 export PATH=${PATH}:${JAVA_HOME}/bin
-ehco "JAVA_HOME:${JAVA_HOME}"
+echo "JAVA_HOME:${JAVA_HOME}"
 echo `java -version`
 BIN_PATH=$(cd $(dirname $0); pwd);
 cd $BIN_PATH;
@@ -89,7 +89,7 @@ if [ -n "$DATAPATH" ];
 then
     DATAPATH="-DDataPath=${DATAPATH}"
     else
-    if [ -d ../Modules/Nuls/data ]; then
+    if [ ! -d ../Modules/Nuls/data ]; then
         mkdir ../Modules/Nuls/data
     fi
     DATAPATH="-DDataPath=`get_fullpath ../Modules/Nuls/data`"

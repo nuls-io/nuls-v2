@@ -309,7 +309,6 @@ public class TxServiceImpl implements TxService {
             int chainId = AddressTool.getChainIdByAddress(coinTo.getAddress());
             if (null == addressChainId) {
                 addressChainId = chainId;
-                continue;
             } else if (addressChainId != chainId) {
                 throw new NulsException(TxErrorCode.CROSS_TX_PAYER_CHAINID_MISMATCH);
             }
