@@ -96,7 +96,7 @@ public class AccountStateCmd extends BaseCmd {
         rtMap.put("permanentLocked",permanentLocked);
         rtMap.put("timeHeightLocked", timeHeightLocked);
         Response response = success(rtMap);
-        LoggerUtil.logger.debug("response={}",response);
+        LoggerUtil.logger(chainId).debug("response={}",response);
         return  response;
     }
 

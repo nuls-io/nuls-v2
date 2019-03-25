@@ -152,8 +152,8 @@ public class TransactionServiceImpl implements TransactionService {
     public boolean confirmBlockProcess(int addressChainId, List<Transaction> txList, long blockHeight) {
         try {
             ledgerNonce.clear();
-            /*--begin 缓存区块交易数据,作为接口交互联调使用*/
-            blockDataService.saveLatestBlockDatas(addressChainId, blockHeight, txList);
+            /*--begin 缓存区块交易数据,作为接口交互联调使用test*/
+            // blockDataService.saveLatestBlockDatas(addressChainId, blockHeight, txList);
             /*--end*/
             LockerUtil.BLOCK_SYNC_LOCKER.lock();
             long currentDbHeight = repository.getBlockHeight(addressChainId);
@@ -274,7 +274,7 @@ public class TransactionServiceImpl implements TransactionService {
         AccountBalance accountBalance = updateAccounts.get(key);
         if (null == accountBalance) {
             //交易里的账户处理缓存AccountBalance
-            AccountState accountState = accountStateService.getAccountState(address, addressChainId, assetChainId, assetId);
+            AccountState accountState = accountStateService.getAccountStateUnSyn(address, addressChainId, assetChainId, assetId);
             AccountState orgAccountState = (AccountState) accountState.deepClone();
             accountState.setTxHash(txHash);
             accountState.setHeight(height);
