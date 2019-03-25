@@ -14,7 +14,6 @@ import io.nuls.transaction.manager.ChainManager;
 import io.nuls.transaction.manager.TxManager;
 import io.nuls.transaction.model.bo.Chain;
 import io.nuls.transaction.model.bo.TxRegister;
-import io.nuls.transaction.model.bo.VerifyTxResult;
 import io.nuls.transaction.model.po.TransactionConfirmedPO;
 import io.nuls.transaction.rpc.call.LedgerCall;
 import io.nuls.transaction.rpc.call.NetworkCall;
@@ -82,6 +81,7 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
         if (null == chain || txList == null || txList.size() == 0) {
             throw new NulsException(TxErrorCode.PARAMETER_ERROR);
         }
+      /*  LedgerCall.coinDataBatchNotify(chain);
         List<NulsDigestData> txHashList = new ArrayList<>();
         for (Transaction tx : txList) {
             txHashList.add(tx.getHash());
@@ -92,7 +92,7 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
                         "coinData not success - code: {}, - reason:{}, type:{} - txhash:{}", verifyTxResult.getCode(), verifyTxResult.getDesc(), tx.getType(), tx.getHash().getDigestHex());
                 return false;
             }
-        }
+        }*/
         if (!saveBlockTxList(chain, txList, blockHeaderHex, true)) {
             chain.getLoggerMap().get(TxConstant.LOG_TX).debug("保存创世块交易失败");
             return false;
