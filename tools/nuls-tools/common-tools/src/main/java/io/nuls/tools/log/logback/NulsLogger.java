@@ -3,7 +3,6 @@ package io.nuls.tools.log.logback;
 import ch.qos.logback.classic.Logger;
 
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 
 /**

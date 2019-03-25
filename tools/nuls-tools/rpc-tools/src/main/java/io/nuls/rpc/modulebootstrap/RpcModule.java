@@ -71,9 +71,9 @@ public abstract class RpcModule implements InitializingBean {
     public final void afterPropertiesSet() throws NulsException {
         try {
             //初始化LogerBuilder
-            if(StringUtils.isNotBlank(logPath)){
-                LogAppender.PROJECT_PATH = logPath;
-            }
+//            if(StringUtils.isNotBlank(logPath)){
+//                LogAppender.PROJECT_PATH = logPath;
+//            }
             init();
         } catch (Exception e) {
             Log.error("rpc module init fail", e);

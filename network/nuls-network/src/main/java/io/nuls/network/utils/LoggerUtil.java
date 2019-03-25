@@ -43,11 +43,11 @@ import java.util.Map;
  * @date 2018/12/17
  **/
 public class LoggerUtil {
-    public static NulsLogger Log = LoggerBuilder.getLogger("./nwLogs", "nw.log", Level.ALL);
-    public static NulsLogger blockMsLog = LoggerBuilder.getLogger("./nwLogs", "block.log", Level.ALL);
-    public static NulsLogger txMsLog = LoggerBuilder.getLogger("./nwLogs", "tx.log", Level.ALL);
-    public static NulsLogger csMsLog = LoggerBuilder.getLogger("./nwLogs", "cs.log", Level.ALL);
-    public static NulsLogger rpcLog = LoggerBuilder.getLogger("./nwLogs", "rpc.log", Level.ALL);
+    public static NulsLogger Log = LoggerBuilder.getLogger("nw.log", Level.ALL);
+    public static NulsLogger blockMsLog = LoggerBuilder.getLogger( "block.log", Level.ALL);
+    public static NulsLogger txMsLog = LoggerBuilder.getLogger("tx.log", Level.ALL);
+    public static NulsLogger csMsLog = LoggerBuilder.getLogger("cs.log", Level.ALL);
+    public static NulsLogger rpcLog = LoggerBuilder.getLogger("rpc.log", Level.ALL);
     public static Map<String, NulsLogger> logMap = new HashMap<>();
 
     static {

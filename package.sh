@@ -12,6 +12,7 @@ help()
     		-m 生成mykernel模块以及启动脚本
     		-h 查看帮助
     		-j JAVA_HOME
+    		-i 跳过mvn打包
     Author: zlj
 EOF
     exit 0
@@ -27,7 +28,7 @@ DOPULL=
 DOMOCK=
 #更新代码的 git 分支
 GIT_BRANCH=
-while getopts pmhb:o:j: name
+while getopts pmhb:o:j:i name
 do
             case $name in
             p)	   DOPULL=1
@@ -39,6 +40,7 @@ do
 			o)	   MODULES_PATH="$OPTARG";;
 			h)     help ;;
 			j)     JAVA_HOME="$OPTARG";;
+			i)     IGNROEMVN="1";;
             ?)     exit 2;;
            esac
 done
@@ -70,6 +72,10 @@ checkJavaVersion
 
 #执行mvn函数打包java工程  $1 命令 $2 模块名称
 doMvn(){
+    if [ -n "$IGNROEMVN" ]; then
+        log "skip mvn package";
+        return ;
+    fi
 	log "$1 $2"
 	moduleLogDir="${BUILD_PATH}/tmp/$2";
 	if [ ! -d ${moduleLogDir} ]; then
@@ -102,6 +108,7 @@ if [ ! -d "${MODULES_PATH}" ]; then
 	mkdir "${MODULES_PATH}"
 fi
 MODULES_PATH=$(cd "$MODULES_PATH"; pwd)
+RELEASE_PATH=$MODULES_PATH
 echoYellow "Modules Path $MODULES_PATH"''
 log "==================BEGIN PACKAGE MODULES=============================="
 if [[ ! -d "$MODULES_PATH/bin" ]]; then
@@ -201,6 +208,9 @@ getModuleItem(){
 
 #拷贝打好的jar包到Moules/Nuls/<Module Name>/<Version> 下
 copyJarToModules(){
+    if [ -n "$IGNROEMVN" ]; then
+        return ;
+    fi
 	moduleName=$(getModuleItem "APP_NAME");
 	version=$(getModuleItem "VERSION");
 	if [ ! -d "${MODULES_PATH}/${moduleName}" ];then
@@ -267,9 +277,9 @@ copyModuleNcfToModules(){
 			fi
 			echo $line >> $moduleNcf
 		else
-#			if [ "${cfgDomain}" != "[JAVA]" ]; then
+			if [ "${cfgDomain}" != "[JAVA]" ]; then
 				echo $line >> $moduleNcf
-#			fi
+			fi
 		fi
 	done < ./module.ncf
 #	 merge common module.ncf and private module.ncf to module.tmep.ncf
@@ -385,6 +395,10 @@ if [ -n "${DOMOCK}" ]; then
 #	cp "${BUILD_PATH}/cmd.sh" "${MODULES_PATH}/"
 #	chmod u+x "${MODULES_PATH}/cmd.sh"
 fi
+log "============ build ${RELEASE_PATH}.tar.gz ==================="
+tar -cvjf "${RELEASE_PATH}.tar.gz" ${RELEASE_PATH}
+log "============ build ${RELEASE_PATH}.tar.gz FINISH==================="
+
 
 
 
