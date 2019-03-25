@@ -108,9 +108,9 @@ public class ContractService {
     public PageInfo<ContractInfo> getContractList(int chainId, int pageNumber, int pageSize, boolean onlyNrc20, boolean isHidden) {
         Bson filter = null;
         if (onlyNrc20) {
-            filter = Filters.eq("isNrc20", 1);
+            filter = Filters.eq("isNrc20", true);
         } else if (isHidden) {
-            filter = Filters.ne("isNrc20", 1);
+            filter = Filters.ne("isNrc20", true);
         }
         Bson sort = Sorts.descending("createTime");
         List<Document> docsList = this.mongoDBService.pageQuery(CONTRACT_TABLE + chainId, filter, sort, pageNumber, pageSize);

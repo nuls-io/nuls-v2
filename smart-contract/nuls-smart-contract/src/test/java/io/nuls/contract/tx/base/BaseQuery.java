@@ -78,7 +78,7 @@ public class BaseQuery {
 
     protected String createHash = "002029ca32525f635a15c82c046114657c0d8a96a7163780ac6b425b2383b240bd56";
     protected String contractAddress = "tNULSeBaNBh9RUsVrVmMy8NHcZJ2BhNVsM1Vta";
-    protected String contractAddress_nrc20 = "tNULSeBaNC46Z66DgUTEXwfgmoSarz9nGDmP1G";
+    protected String contractAddress_nrc20 = "tNULSeBaN8sRod44u8n7w4veHLThrc6tVnEu8w";
 
     protected String callHash = "0020874dca08dbf4784540e26c0c31f728a2c2fd2e18bf71c896d8f88955d53e77b7";
     protected String deleteHash = "0020b2c159dbdf784c2860ec97072feb887466aa50fc147a5b50388886caab113f9a";

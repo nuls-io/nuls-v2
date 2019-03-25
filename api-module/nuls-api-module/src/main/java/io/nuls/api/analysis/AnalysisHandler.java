@@ -173,12 +173,11 @@ public class AnalysisHandler {
             return toContractCallInfo(chainId, tx);
         } else if (tx.getType() == ApiConstant.TX_TYPE_DELETE_CONTRACT) {
             return toContractDeleteInfo(chainId, tx);
+        } else if (tx.getType() == ApiConstant.TX_TYPE_CONTRACT_TRANSFER) {
+            return toContractTransferInfo(tx);
+        } else if (tx.getType() == ApiConstant.TX_TYPE_CONTRACT_RETURN_GAS) {
+
         }
-//        else if (tx.getType() == ApiConstant.TX_TYPE_CONTRACT_TRANSFER) {
-//            return toContractTransferInfo(tx);
-//        } else if (tx.getType() == ApiConstant.TX_TYPE_CONTRACT_RETURN_GAS) {
-//
-//        }
         return null;
     }
 
@@ -343,6 +342,7 @@ public class AnalysisHandler {
         data.parse(new NulsByteBuffer(tx.getTxData()));
 
         ContractTransferInfo info = new ContractTransferInfo();
+        info.setTxHash(tx.getHash().getDigestHex());
         info.setContractAddress(AddressTool.getStringAddressByBytes(data.getContractAddress()));
         info.setOrginTxHash(data.getOrginTxHash().getDigestHex());
         return info;
