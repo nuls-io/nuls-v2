@@ -30,8 +30,8 @@ import io.nuls.base.data.Transaction;
 import io.nuls.contract.constant.ContractConstant;
 import io.nuls.contract.constant.ContractErrorCode;
 import io.nuls.contract.manager.ChainManager;
-import io.nuls.contract.manager.ContractTokenBalanceManager;
 import io.nuls.contract.manager.ContractTempBalanceManager;
+import io.nuls.contract.manager.ContractTokenBalanceManager;
 import io.nuls.contract.model.bo.*;
 import io.nuls.contract.model.dto.ContractInfoDto;
 import io.nuls.contract.model.po.ContractAddressInfoPo;
@@ -42,6 +42,7 @@ import io.nuls.contract.rpc.call.LedgerCall;
 import io.nuls.contract.storage.ContractAddressStorageService;
 import io.nuls.contract.storage.ContractTokenTransferStorageService;
 import io.nuls.contract.util.ContractUtil;
+import io.nuls.contract.util.Log;
 import io.nuls.contract.util.MapUtil;
 import io.nuls.contract.util.VMContext;
 import io.nuls.contract.vm.program.*;
@@ -50,7 +51,6 @@ import io.nuls.tools.basic.VarInt;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.exception.NulsException;
-import io.nuls.tools.log.Log;
 import io.nuls.tools.model.StringUtils;
 import org.spongycastle.util.Arrays;
 
@@ -352,7 +352,7 @@ public class ContractHelper {
     }
 
     public ContractBalance getBalance(int chainId, byte[] address) {
-        ContractTempBalanceManager tempBalanceManager = getTempBalanceManager(chainId);
+        ContractTempBalanceManager tempBalanceManager = getBatchInfoTempBalanceManager(chainId);
         if (tempBalanceManager != null) {
             Result<ContractBalance> balance = tempBalanceManager.getBalance(address);
             if (balance.isSuccess()) {
@@ -382,7 +382,7 @@ public class ContractHelper {
         }
     }
 
-    public ContractBalance getBalanceAndNonce(int chainId, String address) {
+    public ContractBalance getTempBalanceAndNonce(int chainId, String address) {
         try {
             Map<String, Object> balance = LedgerCall.getBalanceAndNonce(getChain(chainId), address);
             ContractBalance contractBalance = ContractBalance.newInstance();
@@ -403,16 +403,16 @@ public class ContractHelper {
         tempHeader.setTime(blockTime);
         tempHeader.setPackingAddress(packingAddress);
         Chain chain = getChain(chainId);
-        chain.setTempBalanceManager(tempBalanceManager);
-        chain.setCurrentBlockHeader(tempHeader);
+        chain.getBatchInfo().setTempBalanceManager(tempBalanceManager);
+        chain.getBatchInfo().setCurrentBlockHeader(tempHeader);
     }
 
-    public ContractTempBalanceManager getTempBalanceManager(int chainId) {
-        return getChain(chainId).getTempBalanceManager();
+    public ContractTempBalanceManager getBatchInfoTempBalanceManager(int chainId) {
+        return getChain(chainId).getBatchInfo().getTempBalanceManager();
     }
 
-    public BlockHeader getCurrentBlockHeader(int chainId) {
-        return getChain(chainId).getCurrentBlockHeader();
+    public BlockHeader getBatchInfoCurrentBlockHeader(int chainId) {
+        return getChain(chainId).getBatchInfo().getCurrentBlockHeader();
     }
 
     public Result<ContractAddressInfoPo> getContractAddressInfo(int chainId, byte[] contractAddressBytes) {

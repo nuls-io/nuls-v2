@@ -34,6 +34,7 @@ import io.nuls.ledger.model.TempAccountState;
 import io.nuls.ledger.model.ValidateResult;
 import io.nuls.ledger.model.po.*;
 import io.nuls.ledger.service.AccountStateService;
+import io.nuls.ledger.service.TransactionService;
 import io.nuls.ledger.storage.Repository;
 import io.nuls.ledger.utils.CoinDataUtil;
 import io.nuls.ledger.utils.LedgerUtil;
@@ -77,9 +78,12 @@ public class CoinDataValidator {
     private static final String VALIDATE_DOUBLE_EXPENSES_DESC = "address {%s},nonce {%s} is double expenses";
     public static final int VALIDATE_FAIL_CODE = 4;
     private static final String VALIDATE_FAIL_DESC = "address {%s},nonce {%s} validate fail:{%s}";
-
+    public static final int VALIDATE_TX_EXIST_CODE = 5;
+    private static final String VALIDATE_TX_EXIST_DESC = "address={%s},hash={%s} in packing";
     @Autowired
     private AccountStateService accountStateService;
+    @Autowired
+    private TransactionService transactionService;
     @Autowired
     private Repository repository;
 
@@ -211,6 +215,15 @@ public class CoinDataValidator {
             AccountState accountState = accountStateService.getAccountState(AddressTool.getStringAddressByBytes(coinFrom.getAddress()), chainId, coinFrom.getAssetsChainId(), coinFrom.getAssetsId());
             //判断是否是解锁操作
             if (coinFrom.getLocked() == 0) {
+                //判断是否已经在打包中的交易
+                try {
+                    if(transactionService.hadCommit(chainId,LedgerUtil.getAccountNoncesStrKey(accountState.getAddress(),accountState.getAssetChainId(),accountState.getAssetId(),nonce8BytesStr))){
+                        return new ValidateResult(VALIDATE_TX_EXIST_CODE, String.format(VALIDATE_TX_EXIST_DESC,accountState.getAddress(),txHash));
+                    }
+                } catch (Exception e) {
+                    LoggerUtil.logger.error(e);
+                    return new ValidateResult(VALIDATE_FAIL_CODE, "unknown error");
+                }
                 ValidateResult validateResult = isValidateCommonTxBatch(accountState, coinFrom, nonce8BytesStr, accountValidateTxMap);
                 if (VALIDATE_SUCCESS_CODE != validateResult.getValidateCode()) {
                     return validateResult;

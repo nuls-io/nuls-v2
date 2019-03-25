@@ -1,6 +1,6 @@
 {
   "dataFolder": "consensus",
-  "configBean":{
+  "consensusConfig":{
     "packingInterval":10000,
     "inflationAmount":500000000000000,
     "redPublishLockTime":3600000,

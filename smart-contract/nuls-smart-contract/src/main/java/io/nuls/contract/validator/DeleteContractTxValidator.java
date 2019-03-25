@@ -33,11 +33,11 @@ import io.nuls.contract.model.bo.ContractBalance;
 import io.nuls.contract.model.po.ContractAddressInfoPo;
 import io.nuls.contract.model.tx.DeleteContractTransaction;
 import io.nuls.contract.model.txdata.DeleteContractData;
+import io.nuls.contract.util.Log;
 import io.nuls.tools.basic.Result;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.exception.NulsException;
-import io.nuls.tools.log.Log;
 
 import java.math.BigInteger;
 import java.util.Arrays;

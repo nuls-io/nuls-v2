@@ -58,9 +58,9 @@ public class ContractAddressDto {
         this.status = status;
         if (this.height > 0) {
             this.confirmCount = bestBlockHeight - this.height;
-            if(this.confirmCount == 0) {
+            if (this.confirmCount == 0) {
                 this.status = 0;
-            } else if(this.confirmCount < 7) {
+            } else if (this.confirmCount < 7) {
                 this.status = 4;
             }
         } else {

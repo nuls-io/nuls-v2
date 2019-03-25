@@ -35,11 +35,10 @@ import io.nuls.contract.model.txdata.ContractTransferData;
 import io.nuls.contract.service.ContractCaller;
 import io.nuls.contract.service.ResultHanlder;
 import io.nuls.contract.util.CompareTxTimeAsc;
-import io.nuls.contract.util.CompareTxTimeDesc;
+import io.nuls.contract.util.Log;
 import io.nuls.contract.vm.program.ProgramExecutor;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
-import io.nuls.tools.log.Log;
 import org.spongycastle.util.encoders.Hex;
 
 import java.io.IOException;
@@ -65,7 +64,7 @@ public class ResultHandlerImpl implements ResultHanlder {
     @Override
     public List<ContractResult> handleAnalyzerResult(int chainId, ProgramExecutor batchExecutor, AnalyzerResult analyzerResult, String preStateRoot) {
         try {
-            BlockHeader currentBlockHeader = contractHelper.getCurrentBlockHeader(chainId);
+            BlockHeader currentBlockHeader = contractHelper.getBatchInfoCurrentBlockHeader(chainId);
             long blockTime = currentBlockHeader.getTime();
             // 得到重新执行的合约结果
             List<ContractResult> reCallResultList = this.reCall(batchExecutor, analyzerResult, chainId, preStateRoot);
@@ -85,7 +84,7 @@ public class ResultHandlerImpl implements ResultHanlder {
     }
 
     private void handleFailedContract(int chainId, AnalyzerResult analyzerResult, long blockTime) throws IOException {
-        ContractTempBalanceManager tempBalanceManager = contractHelper.getTempBalanceManager(chainId);
+        ContractTempBalanceManager tempBalanceManager = contractHelper.getBatchInfoTempBalanceManager(chainId);
         int assetsId = contractHelper.getChain(chainId).getConfig().getAssetsId();
 
         Set<ContractResult> failedSet = analyzerResult.getFailedSet();

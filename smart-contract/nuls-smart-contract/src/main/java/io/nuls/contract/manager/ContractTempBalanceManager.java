@@ -87,7 +87,7 @@ public class ContractTempBalanceManager {
             ContractBalance balance = tempBalanceMap.get(addressKey);
             // 临时余额区没有余额，则从真实余额中取值
             if (balance == null) {
-                // 真实余额区也没有值时，初始化真实余额区和临时余额区
+                // 初始化临时余额区
                 balance = contractHelper.getRealBalance(chainId, AddressTool.getStringAddressByBytes(address));
                 tempBalanceMap.put(addressKey, balance);
             }

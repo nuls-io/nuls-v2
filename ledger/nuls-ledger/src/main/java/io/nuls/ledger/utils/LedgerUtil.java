@@ -132,4 +132,32 @@ public class LedgerUtil {
             return false;
         }
     }
+    /**
+     * rockdb key
+     *
+     * @param address address
+     * @param assetId assetId
+     * @return byte[]
+     */
+    public static byte[] getAccountNoncesByteKey(String address, int assetChainId, int assetId,String nonce) {
+        LedgerConfig ledgerConfig = SpringLiteContext.getBean(LedgerConfig.class);
+        String key = address + "-" + assetChainId + "-" + assetId+"-"+nonce;
+        try {
+            return (key.getBytes(LedgerConstant.DEFAULT_ENCODING));
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+    /**
+     * rockdb key
+     *
+     * @param address address
+     * @param assetId assetId
+     * @return String
+     */
+    public static String getAccountNoncesStrKey(String address, int assetChainId, int assetId,String nonce) {
+        LedgerConfig ledgerConfig = SpringLiteContext.getBean(LedgerConfig.class);
+        return address + "-" + assetChainId + "-" + assetId+"-"+nonce;
+    }
 }

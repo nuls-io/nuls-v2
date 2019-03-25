@@ -51,7 +51,9 @@ public class ContractTokenTransferInfoPo implements Serializable {
     private long decimals;
     private long blockHeight;
     private long time;
-    /** 0 - 确认中， 1 - 已确认， 2 - 失败 + */
+    /**
+     * 0 - 确认中， 1 - 已确认， 2 - 失败 +
+     */
     private byte status;
 
 
@@ -75,9 +77,9 @@ public class ContractTokenTransferInfoPo implements Serializable {
     }
 
     public int compareTo(long thatTime) {
-        if(this.time > thatTime) {
+        if (this.time > thatTime) {
             return -1;
-        } else if(this.time < thatTime) {
+        } else if (this.time < thatTime) {
             return 1;
         }
         return 0;

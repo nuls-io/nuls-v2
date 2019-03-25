@@ -39,11 +39,11 @@ import io.nuls.contract.rpc.call.BlockCall;
 import io.nuls.contract.service.ContractCaller;
 import io.nuls.contract.service.ContractExecutor;
 import io.nuls.contract.util.ContractUtil;
+import io.nuls.contract.util.Log;
 import io.nuls.contract.vm.program.ProgramExecutor;
 import io.nuls.tools.basic.Result;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
-import io.nuls.tools.log.Log;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -103,10 +103,10 @@ public class ContractCallerImpl implements ContractCaller {
 
     @Override
     public List<ContractResult> callerReCallTx(ProgramExecutor batchExecutor, List<ContractWrapperTransaction> reCallTxList, int chainId, String preStateRoot) {
-        BlockHeader currentBlockHeader = contractHelper.getCurrentBlockHeader(chainId);
+        BlockHeader currentBlockHeader = contractHelper.getBatchInfoCurrentBlockHeader(chainId);
         long blockTime = currentBlockHeader.getTime();
         long lastestHeight = currentBlockHeader.getHeight() - 1;
-        ContractTempBalanceManager tempBalanceManager = contractHelper.getTempBalanceManager(chainId);
+        ContractTempBalanceManager tempBalanceManager = contractHelper.getBatchInfoTempBalanceManager(chainId);
         List<ContractResult> resultList = new ArrayList<>();
         ContractData contractData;
         ContractResult contractResult;

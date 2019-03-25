@@ -82,12 +82,12 @@ public class TxValid {
         NoUse.mockModule();
         ResponseMessageProcessor.syncKernel("ws://" + HostInfo.getLocalIP() + ":8887/ws");
         chain = new Chain();
-        chain.setConfig(new ConfigBean(chainId, assetId, 1024 * 1024, 1000, 20, 20000L, 20000, 60000L));
+        chain.setConfig(new ConfigBean(chainId, assetId, 1024 * 1024, 1000, 20, 20000L, 60000L));
     }
 
     @Test
     public void transfer() throws Exception {
-        for (int i = 0; i < 10000; i++) {
+        for (int i = 0; i < 5000; i++) {
             String hash = createTransfer();
 //            String hash = createCtxTransfer();
             System.out.println("count:" + (i + 1));

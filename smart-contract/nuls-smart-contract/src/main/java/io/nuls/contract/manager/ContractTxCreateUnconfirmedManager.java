@@ -56,7 +56,8 @@ public class ContractTxCreateUnconfirmedManager {
         return manager;
     }
 
-    private ContractTxCreateUnconfirmedManager() {}
+    private ContractTxCreateUnconfirmedManager() {
+    }
 
     public void saveLocalUnconfirmedCreateContractTransaction(String sender, Map<String, String> resultMap, long time) {
         lock.lock();

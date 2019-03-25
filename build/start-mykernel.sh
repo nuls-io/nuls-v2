@@ -24,10 +24,10 @@ do
             j)     JAVA_HOME="$OPTARG";;
             c)     
                     CONFIG="`get_fullpath $OPTARG`/${OPTARG##*/}"
-                    if [ "${CONFIG##*.}"x != "properties"x ]; then
-                        echo "-c setting config file must be *.ncf"
-                        exit 1;
-                    fi
+#                    if [ "${CONFIG##*.}"x != "properties"x ]; then
+#                        echo "-c setting config file must be *.ncf"
+#                        exit 1;
+#                    fi
                     ;;
             ?)     exit 2;;
            esac

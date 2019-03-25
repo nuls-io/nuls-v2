@@ -48,7 +48,6 @@ import io.nuls.tools.basic.VarInt;
 import io.nuls.tools.constant.ErrorCode;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.exception.NulsRuntimeException;
-import io.nuls.tools.log.Log;
 import io.nuls.tools.model.StringUtils;
 import io.nuls.tools.parse.JSONUtils;
 
@@ -345,7 +344,7 @@ public class ContractUtil {
     }
 
     public static boolean isNotEnoughGasError(ContractResult contractResult) {
-        if(contractResult.isSuccess()) {
+        if (contractResult.isSuccess()) {
             return false;
         }
         return isNotEnoughGasError(contractResult.getErrorMessage());
@@ -517,26 +516,24 @@ public class ContractUtil {
         switch (tx.getType()) {
             case TX_TYPE_CREATE_CONTRACT:
                 resultTx = new CreateContractTransaction();
-                resultTx.copyTx(tx);
                 break;
             case TX_TYPE_CALL_CONTRACT:
                 resultTx = new CallContractTransaction();
-                resultTx.copyTx(tx);
                 break;
             case TX_TYPE_DELETE_CONTRACT:
                 resultTx = new DeleteContractTransaction();
-                resultTx.copyTx(tx);
                 break;
             case TX_TYPE_CONTRACT_TRANSFER:
                 resultTx = new ContractTransferTransaction();
-                resultTx.copyTx(tx);
                 break;
             case TX_TYPE_CONTRACT_RETURN_GAS:
                 resultTx = new ContractReturnGasTransaction();
-                resultTx.copyTx(tx);
                 break;
             default:
                 break;
+        }
+        if (resultTx != null) {
+            resultTx.copyTx(tx);
         }
         return resultTx;
     }

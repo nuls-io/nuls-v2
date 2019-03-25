@@ -26,7 +26,6 @@ package io.nuls.contract.util;
 import io.nuls.contract.model.bo.ModelWrapper;
 import io.nuls.db.manager.RocksDBManager;
 import io.nuls.db.service.RocksDBService;
-import io.nuls.tools.log.Log;
 import io.nuls.tools.model.StringUtils;
 import io.protostuff.LinkedBuffer;
 import io.protostuff.ProtostuffIOUtil;

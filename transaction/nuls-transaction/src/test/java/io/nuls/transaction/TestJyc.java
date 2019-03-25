@@ -44,10 +44,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static io.nuls.transaction.utils.LoggerUtil.Log;
 import static org.junit.Assert.assertEquals;
@@ -78,12 +75,12 @@ public class TestJyc {
         NoUse.mockModule();
         ResponseMessageProcessor.syncKernel("ws://" + HostInfo.getLocalIP() + ":8887/ws");
         chain = new Chain();
-        chain.setConfig(new ConfigBean(chainId, assetId, 1024*1024,1000,20,20000L,20000,60000L));
+        chain.setConfig(new ConfigBean(chainId, assetId, 1024*1024,1000,20,20000L,60000L));
     }
 
     @Test
     public void name() throws Exception {
-        String hash = "0020ee93ab0fa93e60a0fdfda71272f4dfc8b57554c6bdbbb3b0aa1462bdde25cb23";
+        String hash = "0020abfd1be7f51136e626ad5c302sdads9998202108a2a45a8f23d24c7d7c75ae92b64a7";
         boolean b = queryTx(hash);
         Log.debug("hash-{} exist-{}", hash, b);
     }
@@ -93,6 +90,7 @@ public class TestJyc {
      */
     @Test
     public void importSeed() {
+        importPriKey("b54db432bba7e13a6c4a28f65b925b18e63bcb79143f7b894fa735d5d3d09db5", password);//种子出块地址 tNULSeBaMkrt4z9FYEkkR9D6choPVvQr94oYZp
         importPriKey("188b255c5a6d58d1eed6f57272a22420447c3d922d5765ebb547bc6624787d9f", password);//tNULSeBaMoGr2RkLZPfJeS5dFzZeNj1oXmaYNe
         importPriKey("477059f40708313626cccd26f276646e4466032cabceccbf571a7c46f954eb75", password);//tNULSeBaMnrs6JKrCy6TQdzYJZkMZJDng7QAsD
     }
@@ -530,7 +528,7 @@ public class TestJyc {
             BigInteger balance = LedgerCall.getBalance(chain, AddressTool.getAddress(address23), chainId, assetId);
             Log.debug(address23 + "-----balance:{}", balance);
         }
-        int total = 100_000_000;
+        int total = 100_000;
         int count = 10;
         List<String> accountList;
         Log.debug("##################################################");
@@ -629,27 +627,27 @@ public class TestJyc {
                     assertTrue(response.isSuccess());
                     HashMap result = (HashMap) (((HashMap) response.getResponseData()).get("ac_transfer"));
                     String hash = result.get("value").toString();
-//                    hashList.add(hash);
+                    hashList.add(hash);
                     Log.debug("transfer from {} to {}, hash:{}", from, to, hash);
                 }
                 Log.debug("##########" + j + " round end##########");
-                Thread.sleep(10000);
+                Thread.sleep(2000);
             }
         }
         Thread.sleep(100000);
         {
-            for (String hash : hashList) {
-                Map<String, Object> params = new HashMap<>();
-                params.put("chainId", chainId);
-                params.put("txHash", hash);
-                Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.TX.abbr, "tx_getConfirmedTx", params);
-                assertTrue(response.isSuccess());
-                Map map = (Map) response.getResponseData();
-                Map tx = (Map) map.get("tx_getConfirmedTx");
-                String txHex = tx.get("txHex").toString();
-                Transaction transaction = new Transaction();
-                transaction.parse(new NulsByteBuffer(HexUtil.decode(txHex)));
-                assertEquals(hash, transaction.getHash());
+            while (true) {
+                for (Iterator<String> iterator = hashList.iterator(); iterator.hasNext(); ) {
+                    String hash = iterator.next();
+                    if (queryTx(hash)) {
+                        iterator.remove();
+                    }
+                }
+                if (hashList.size() == 0) {
+                    break;
+                }
+                Log.debug("remain " + hashList.size() + " hash not verify");
+                Thread.sleep(10000);
             }
         }
     }

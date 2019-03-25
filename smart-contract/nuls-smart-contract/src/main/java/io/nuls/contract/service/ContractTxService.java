@@ -24,14 +24,11 @@
 package io.nuls.contract.service;
 
 
-import io.nuls.contract.model.bo.ContractResult;
 import io.nuls.contract.model.po.ContractTokenTransferInfoPo;
 import io.nuls.tools.basic.Result;
 
 import java.math.BigInteger;
-import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 
 /**
  * @author: PierreLuo

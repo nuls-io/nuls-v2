@@ -27,10 +27,10 @@ package io.nuls.contract.storage.impl;
 import io.nuls.base.data.NulsDigestData;
 import io.nuls.contract.model.bo.ContractResult;
 import io.nuls.contract.storage.ContractExecuteResultStorageService;
+import io.nuls.contract.util.Log;
 import io.nuls.db.service.RocksDBService;
 import io.nuls.tools.basic.Result;
 import io.nuls.tools.core.annotation.Component;
-import io.nuls.tools.log.Log;
 
 import static io.nuls.contract.constant.ContractDBConstant.DB_NAME_CONTRACT_EXECUTE_RESULT;
 import static io.nuls.contract.util.ContractDBUtil.getModel;
