@@ -76,7 +76,6 @@ public class GetContractInfoProcessor extends ContractBaseProcessor {
         if (StringUtils.isBlank(address)) {
             return CommandResult.getFailed(ErrorCodeConstants.PARAM_ERR.getMsg());
         }
-        String url = "/contract/info/" + address;
         Result<Map> result = contractProvider.getContractInfo(new GetContractInfoReq(address));
         if (result.isFailed()) {
             return CommandResult.getFailed(result);
