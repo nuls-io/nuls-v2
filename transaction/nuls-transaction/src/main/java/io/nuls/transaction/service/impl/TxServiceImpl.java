@@ -906,6 +906,7 @@ public class TxServiceImpl implements TxService {
         for (String txHex : txHexList) {
             //将txHex转换为Transaction对象
             Transaction tx = TxUtil.getTransaction(txHex);
+            txList.add(tx);
             //如果是系统智能合约就不单个验证
             if (TxManager.isSystemSmartContract(chain, tx.getType())) {
                 continue;
@@ -916,7 +917,6 @@ public class TxServiceImpl implements TxService {
                 chain.getLoggerMap().get(TxConstant.LOG_TX).debug("batchVerify failed, tx is existed. hash:{}, -type:{}", tx.getHash().getDigestHex(), tx.getType());
                 return verifyTxResult;
             }
-            txList.add(tx);
             if (tx.getType() == TxConstant.TX_TYPE_CROSS_CHAIN_TRANSFER) {
                 CrossTxData crossTxData = TxUtil.getInstance(tx.getTxData(), CrossTxData.class);
                 if (crossTxData.getChainId() != chain.getChainId()) {
