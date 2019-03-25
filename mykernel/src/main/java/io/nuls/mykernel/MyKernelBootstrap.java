@@ -23,6 +23,7 @@ package io.nuls.mykernel;
 import io.nuls.rpc.info.HostInfo;
 import io.nuls.rpc.info.NoUse;
 import io.nuls.tools.log.logback.NulsLogger;
+import io.nuls.tools.model.StringUtils;
 import io.nuls.tools.parse.config.IniEntity;
 import io.nuls.tools.thread.ThreadUtils;
 import lombok.Cleanup;
@@ -154,7 +155,10 @@ public class MyKernelBootstrap {
                             modules.getAbsolutePath() + File.separator + "start.sh "
                                     + " --jre " + System.getProperty("java.home")
                                     + " --managerurl " + "ws://"+ HostInfo.getLocalIP()+":8887/ws "
-                                    + (args.length > 2 ? "--config " + args[2] : "")
+                                    + (StringUtils.isNotBlank(System.getProperty("log.path")) ? " --logpath " + System.getProperty("log.path") : "")
+                                    + (StringUtils.isNotBlank(System.getProperty("DataPath")) ? " --datapath " + System.getProperty("DataPath") : "")
+                                    + (StringUtils.isNotBlank(System.getProperty("debug")) ? " --debug " : "")
+                                    + (args.length > 2 ? " --config " + args[2] : "")
                                     + " -r "
                     );
                     synchronized (MODULE_STOP_LIST_SCRIPT){

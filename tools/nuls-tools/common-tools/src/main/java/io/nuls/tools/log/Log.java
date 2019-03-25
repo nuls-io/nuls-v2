@@ -13,7 +13,7 @@ import io.nuls.tools.log.logback.NulsLogger;
  * */
 public class Log {
 
-    private static final String BASIC_NAME = "common/nuls";
+    private static final String BASIC_NAME = "common";
 
     private static final NulsLogger BASIC_LOGGER = LoggerBuilder.getLogger(BASIC_NAME, Level.DEBUG);
 

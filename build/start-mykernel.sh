@@ -1,5 +1,23 @@
 #!/bin/bash
 #cd ./mykernel/1.0.0
+
+help()
+{
+    cat <<- EOF
+    Desc: 启动NULS 2.0钱包，
+    Usage: ./start.sh
+    		-c <module.json> 使用指定配置文件 如果不配置将使用./default-config.json
+    		-b 后台运行
+    		-l <logs path> 输出的日志目录
+    		-d <data path> 数据存储目录
+    		-j JAVA_HOME
+    		-D debug模式，在logs目录下输出名为stdut.log的全日志文件
+    		-h help
+    Author: zlj
+EOF
+    exit 0
+}
+
 BIN_PATH=$(cd $(dirname $0); pwd);
 cd $BIN_PATH;
 function get_fullpath()
@@ -17,7 +35,7 @@ function get_fullpath()
 }
 
 RUNBLOCK=
-while getopts bj:c: name
+while getopts bj:c:l:d:Dh name
 do
             case $name in
             b)     RUNBLOCK="1";;
@@ -29,12 +47,46 @@ do
 #                        exit 1;
 #                    fi
                     ;;
+            l)
+                   if [ ! -d "$OPTARG" ]; then
+                       mkdir $OPTARG
+                       if [ ! -d "$OPTARG" ]; then
+                          echo "$OPTARG not a folder"
+                       exit 0 ;
+                       fi
+                   fi
+                   LOGPATH="`get_fullpath $OPTARG`";;
+            d)
+                   if [ ! -d "$OPTARG" ]; then
+                       mkdir $OPTARG
+                       if [ ! -d "$OPTARG" ]; then
+                          echo "$OPTARG not a folder"
+                       exit 0 ;
+                       fi
+                   fi
+                   DATAPATH="`get_fullpath $OPTARG`";;
+            D)     DEBUG="1";;
+            h)     help ;;
             ?)     exit 2;;
            esac
 done
 if [ ! -f "$CONFIG" ]; then
     CONFIG="${BIN_PATH}/default-config.json"
 fi
+if [ -n "$LOGPATH" ];
+then
+    LOGPATH="-Dlog.path=${LOGPATH}"
+    else
+    LOGPATH="-Dlog.path=`get_fullpath ../logs`"
+fi
+if [ -n "$DATAPATH" ];
+then
+    DATAPATH="-DDataPath=${DATAPATH}"
+    else
+    DATAPATH="-DDataPath=`get_fullpath ../Modules/Nuls/data`"
+fi
+echo "log path : ${LOGPATH}"
+echo "data path : ${DATAPATH}"
 #
 #if [ -f "$CONFIG" ]; then
 #    if [ -f "./config.temp.properties" ]; then
@@ -84,9 +136,9 @@ cd ../Modules/Nuls
 MODULE_PATH=$(pwd)
 if [ -z "${RUNBLOCK}" ];
 then
-    ${JAVA} -server -Dapp.name=mykernel  -classpath ./libs/*:./mykernel/1.0.0/mykernel-1.0.0.jar io.nuls.mykernel.MyKernelBootstrap startModule $MODULE_PATH $CONFIG
+    ${JAVA} -server -Ddebug=${DEBUG} -Dapp.name=mykernel ${LOGPATH} ${DATAPATH} -classpath ./libs/*:./mykernel/1.0.0/mykernel-1.0.0.jar io.nuls.mykernel.MyKernelBootstrap startModule $MODULE_PATH $CONFIG
 else
-    nohup ${JAVA} -server -Dapp.name=mykernel  -classpath ./libs/*:./mykernel/1.0.0/mykernel-1.0.0.jar io.nuls.mykernel.MyKernelBootstrap startModule $MODULE_PATH $CONFIG > mykernel.log 2>&1 &
+    nohup ${JAVA} -server -Ddebug=${DEBUG} -Dapp.name=mykernel ${LOGPATH} ${DATAPATH}  -classpath ./libs/*:./mykernel/1.0.0/mykernel-1.0.0.jar io.nuls.mykernel.MyKernelBootstrap startModule $MODULE_PATH $CONFIG > mykernel.log 2>&1 &
 fi
 
 

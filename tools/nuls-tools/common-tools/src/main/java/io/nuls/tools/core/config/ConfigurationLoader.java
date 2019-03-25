@@ -4,6 +4,7 @@ import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.core.config.persist.PersistManager;
 import io.nuls.tools.log.Log;
 import io.nuls.tools.model.StringUtils;
+import io.nuls.tools.parse.JSONUtils;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -66,7 +67,8 @@ public class ConfigurationLoader {
     public void load() {
         loadResourceModule();
         loadJarPathModule();
-        loadJvmOptionActiveModule();
+        loadJvmActiveModuleFile();
+        loadJvmOptionConfigItem();
         loadForPersist();
         if(configData.isEmpty()){
             Log.info("config item list is empty");
@@ -83,11 +85,22 @@ public class ConfigurationLoader {
         });
     }
 
+    /**
+     * 通过jvm option -DXXX=XXX 的方式设置配置项
+     */
+    private void loadJvmOptionConfigItem() {
+        configData.entrySet().forEach(entry->{
+            if(StringUtils.isNotBlank(System.getProperty(entry.getKey()))){
+                configData.put(entry.getKey(),new ConfigurationLoader.ConfigItem("-D" + entry.getKey(), System.getProperty(entry.getKey())));
+            }
+        });
+    }
+
     private void loadForPersist() {
         persistConfigData = PersistManager.loadPersist();
     }
 
-    private void loadJvmOptionActiveModule() {
+    private void loadJvmActiveModuleFile() {
         String fileName = System.getProperty(JVM_OPTION_ACTIVE_MODULE);
         if (StringUtils.isNotBlank(fileName)) {
             parserMap.entrySet().forEach(entry -> {
