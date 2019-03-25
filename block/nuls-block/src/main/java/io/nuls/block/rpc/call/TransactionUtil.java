@@ -20,6 +20,7 @@
 
 package io.nuls.block.rpc.call;
 
+import io.nuls.base.basic.AddressTool;
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.data.BlockExtendsData;
 import io.nuls.base.data.BlockHeader;
@@ -95,13 +96,13 @@ public class TransactionUtil {
             params.put("height", header.getHeight());
             params.put("txList", txHashList);
             params.put("blockTime", header.getTime());
-            params.put("packingAddress", header.getPackingAddress(chainId));
+            params.put("packingAddress", AddressTool.getStringAddressByBytes(header.getPackingAddress(chainId)));
             BlockExtendsData data = new BlockExtendsData();
             data.parse(new NulsByteBuffer(header.getExtend()));
-            params.put("stateRoot", data.getStateRoot());
+            params.put("stateRoot", HexUtil.encode(data.getStateRoot()));
             BlockExtendsData lastData = new BlockExtendsData();
             lastData.parse(new NulsByteBuffer(lastHeader.getExtend()));
-            params.put("preStateRoot", lastData.getStateRoot());
+            params.put("preStateRoot", HexUtil.encode(lastData.getStateRoot()));
             Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.TX.abbr, "tx_batchVerify", params);
             if (response.isSuccess()) {
                 Map responseData = (Map) response.getResponseData();

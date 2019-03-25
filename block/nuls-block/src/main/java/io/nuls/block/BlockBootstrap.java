@@ -2,13 +2,13 @@ package io.nuls.block;
 
 import io.nuls.block.constant.BlockConfig;
 import io.nuls.block.manager.ContextManager;
+import io.nuls.block.rpc.call.NetworkUtil;
+import io.nuls.block.rpc.call.ProtocolUtil;
 import io.nuls.block.rpc.call.TransactionUtil;
 import io.nuls.block.service.BlockService;
 import io.nuls.block.thread.BlockSynchronizer;
 import io.nuls.block.thread.monitor.*;
 import io.nuls.block.utils.ConfigLoader;
-import io.nuls.block.rpc.call.NetworkUtil;
-import io.nuls.block.rpc.call.ProtocolUtil;
 import io.nuls.db.service.RocksDBService;
 import io.nuls.rpc.info.HostInfo;
 import io.nuls.rpc.model.ModuleE;
@@ -19,7 +19,9 @@ import io.nuls.rpc.modulebootstrap.RpcModuleState;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.core.ioc.SpringLiteContext;
+import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.log.Log;
+import io.nuls.tools.parse.I18nUtils;
 import io.nuls.tools.thread.ThreadUtils;
 import io.nuls.tools.thread.commom.NulsThreadFactory;
 
@@ -81,10 +83,31 @@ public class BlockBootstrap extends RpcModule {
      */
     @Override
     public void init() {
-        super.init();
-        initCfg();
+        try {
+            super.init();
+            initDB();
+            initLanguage();
+        } catch (Exception e) {
+            Log.error("AccountBootsrap init error!");
+            throw new RuntimeException(e);
+        }
+    }
+
+    /**
+     * 初始化数据库
+     * Initialization database
+     */
+    private static void initDB() throws Exception {
         //读取配置文件，数据存储根目录，初始化打开该目录下所有表连接并放入缓存
         RocksDBService.init(blockConfig.getDataFolder());
+        RocksDBService.createTable(CHAIN_LATEST_HEIGHT);
+        RocksDBService.createTable(CHAIN_PARAMETERS);
+        RocksDBService.createTable(PROTOCOL_CONFIG);
+    }
+
+    private void initLanguage() throws NulsException {
+        I18nUtils.loadLanguage(BlockBootstrap.class, "languages", blockConfig.getLanguage());
+        I18nUtils.setLanguage(blockConfig.getLanguage());
     }
 
     /**
@@ -94,9 +117,6 @@ public class BlockBootstrap extends RpcModule {
     @Override
     public boolean doStart() {
         try {
-            RocksDBService.createTable(CHAIN_LATEST_HEIGHT);
-            RocksDBService.createTable(CHAIN_PARAMETERS);
-            RocksDBService.createTable(PROTOCOL_CONFIG);
             //加载配置
             ConfigLoader.load();
             while (!isDependencieReady(new Module(ModuleE.TX.abbr, "1.0"))) {
@@ -162,10 +182,6 @@ public class BlockBootstrap extends RpcModule {
     @Override
     public RpcModuleState onDependenciesLoss(Module module) {
         return RpcModuleState.Ready;
-    }
-
-    public static void initCfg() {
-
     }
 
 }

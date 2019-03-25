@@ -25,6 +25,13 @@ public class BlockConfig {
     private String dataFolder;
 
     /**
+     * 国际化
+     */
+    @Setter
+    @Getter
+    private String language;
+
+    /**
      * 分叉链监视线程执行间隔
      */
     @Setter
