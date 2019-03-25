@@ -424,7 +424,7 @@ public class TransactionCmd extends BaseCmd {
      * @param params
      * @return
      */
-    @Deprecated(since = "使用transfer方法，此方法可接受别名转账")
+    @Deprecated(since = "此方法废弃，请使用transfer方法，该方法可接受别名转账")
     @CmdAnnotation(cmd = "ac_transferByAlias", version = 1.0, description = "transfer by alias")
     public Response transferByAlias(Map params) {
 //        LoggerUtil.logger.debug("ac_transferByAlias start");

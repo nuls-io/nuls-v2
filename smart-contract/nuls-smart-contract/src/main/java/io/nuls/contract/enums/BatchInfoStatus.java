@@ -21,40 +21,40 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package io.nuls.contract.service;
+package io.nuls.contract.enums;
 
-
-import io.nuls.base.data.NulsDigestData;
-import io.nuls.base.data.Transaction;
-import io.nuls.contract.model.bo.ContractResult;
-import io.nuls.contract.model.bo.ContractTempTransaction;
-import io.nuls.tools.basic.Result;
-import io.nuls.tools.exception.NulsException;
-
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * @author: PierreLuo
- * @date: 2018/11/19
+ * @date: 2019-03-25
  */
-public interface ContractService {
+public enum BatchInfoStatus {
+    // 0 - 未开始, 1 - 已开始
+    NOT_STARTING(0),
+    STARTING(1);
 
-    Result begin(int chainId, long blockHeight, long blockTime, String packingAddress, String preStateRoot);
+    private int status;
+    private static Map<Integer, BatchInfoStatus> map;
 
-    Result end(int chainId, long blockHeight);
+    private BatchInfoStatus(int status) {
+        this.status = status;
+        putStatus(status, this);
+    }
 
-    Result validContractTx(int chainId, Transaction tx) throws NulsException;
+    public int status() {
+        return status;
+    }
 
-    Result invokeContractOneByOne(int chainId, ContractTempTransaction tx);
+    private static BatchInfoStatus putStatus(int status, BatchInfoStatus statusEnum) {
+        if(map == null) {
+            map = new HashMap<>(8);
+        }
+        return map.put(status, statusEnum);
+    }
 
-    Result commitProcessor(int chainId, List<String> txHexList, String blockHeaderHex);
-
-    Result rollbackProcessor(int chainId, List<String> txHexList, String blockHeaderHex);
-
-    Result saveContractExecuteResult(int chainId, NulsDigestData hash, ContractResult contractResult);
-
-    Result deleteContractExecuteResult(int chainId, NulsDigestData hash);
-
-    ContractResult getContractExecuteResult(int chainId, NulsDigestData hash);
-
+    public static BatchInfoStatus getStatus(int status) {
+        return map.get(status);
+    }
 }

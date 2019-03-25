@@ -1,0 +1,9 @@
+{
+  "port": 18001,
+  "packetMagic": 20190328,
+  "selfSeedIps": "39.98.226.51:18001,47.244.186.65:18001",
+  "consensusConfig": {
+    "seedNodes": "tNULSeBaMkrt4z9FYEkkR9D6choPVvQr94oYZp,tNULSeBaMoGr2RkLZPfJeS5dFzZeNj1oXmaYNe",
+    "password": "nuls123456"
+  }
+}

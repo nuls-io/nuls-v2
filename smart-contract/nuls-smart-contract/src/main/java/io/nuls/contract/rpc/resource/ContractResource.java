@@ -31,6 +31,7 @@ import io.nuls.base.data.Page;
 import io.nuls.base.data.Transaction;
 import io.nuls.contract.constant.ContractConstant;
 import io.nuls.contract.constant.ContractErrorCode;
+import io.nuls.contract.enums.ContractStatus;
 import io.nuls.contract.helper.ContractHelper;
 import io.nuls.contract.manager.ContractTokenBalanceManager;
 import io.nuls.contract.model.bo.ContractResult;
@@ -801,7 +802,7 @@ public class ContractResource extends BaseCmd {
             ContractTokenInfoDto dto = null;
             if (data != null) {
                 dto = new ContractTokenInfoDto(data);
-                dto.setStatus(data.getStatus());
+                dto.setStatus(data.getStatus().status());
             }
 
             return success(dto);
@@ -1345,10 +1346,10 @@ public class ContractResource extends BaseCmd {
                     success = map.get("success");
                     if (StringUtils.isNotBlank(success)) {
                         // 合约创建失败
-                        dto.setStatus(3);
+                        dto.setStatus(ContractStatus.CREATION_FAILED.status());
                         dto.setMsg(map.get("msg"));
                     } else {
-                        dto.setStatus(0);
+                        dto.setStatus(ContractStatus.NOT_EXISTS_OR_CONFIRMING.status());
                     }
                     resultMap.put(contractAddress, dto);
                 }

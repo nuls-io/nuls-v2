@@ -26,6 +26,8 @@ package io.nuls.transaction.rpc.call;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import io.nuls.rpc.model.ModuleE;
+import io.nuls.rpc.model.message.Response;
+import io.nuls.rpc.netty.processor.ResponseMessageProcessor;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.parse.JSONUtils;
 import io.nuls.transaction.constant.TxConstant;
@@ -80,9 +82,12 @@ public class ContractCall {
         params.put("chainId", chain.getChainId());
         params.put("txHex", txHex);
         try {
-            TransactionCall.request(ModuleE.SC.abbr, "sc_invoke_contract", params);
+            Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, "sc_invoke_contract", params);
+            if(!response.isSuccess()){
+                return false;
+            }
             return true;
-        } catch (NulsException e) {
+        } catch (Exception e) {
             chain.getLoggerMap().get(TxConstant.LOG_TX).error(e);
             return false;
         }

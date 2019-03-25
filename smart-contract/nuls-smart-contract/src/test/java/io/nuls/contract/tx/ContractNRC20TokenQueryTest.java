@@ -50,7 +50,7 @@ import static io.nuls.contract.constant.ContractCmdConstant.*;
  * @author: PierreLuo
  * @date: 2019-03-15
  */
-public class ContractQueryTest extends BaseQuery {
+public class ContractNRC20TokenQueryTest extends BaseQuery {
 
 
     /**

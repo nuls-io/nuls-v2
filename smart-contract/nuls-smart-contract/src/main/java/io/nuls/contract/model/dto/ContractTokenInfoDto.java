@@ -43,6 +43,7 @@ public class ContractTokenInfoDto {
     private String amount;
     private long decimals;
     private long blockHeight;
+    // enum ContractStatus
     private int status;
 
     public ContractTokenInfoDto() {
@@ -55,7 +56,7 @@ public class ContractTokenInfoDto {
         this.amount = ContractUtil.bigInteger2String(info.getAmount());
         this.decimals = info.getDecimals();
         this.blockHeight = info.getBlockHeight();
-        this.status = info.getStatus();
+        this.status = info.getStatus().status();
     }
 
 }

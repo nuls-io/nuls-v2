@@ -28,14 +28,13 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import io.nuls.base.data.Transaction;
 import io.nuls.rpc.model.ModuleE;
 import io.nuls.tools.parse.JSONUtils;
+import io.nuls.transaction.constant.TxConstant;
 import io.nuls.transaction.model.bo.Chain;
 import io.nuls.transaction.model.bo.TxRegister;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-
-import static io.nuls.transaction.utils.LoggerUtil.Log;
 
 /**
  * 交易管理类，存储管理交易注册的基本信息
@@ -63,9 +62,8 @@ public class TxManager {
         boolean rs = false;
         if (!chain.getTxRegisterMap().containsKey(txRegister.getTxType())) {
             chain.getTxRegisterMap().put(txRegister.getTxType(), txRegister);
-
             try {
-                Log.debug("\nTxRegisterMap = " + JSONUtils.obj2PrettyJson(chain.getTxRegisterMap()));
+                chain.getLoggerMap().get(TxConstant.LOG_TX).info("new tx register: {}", JSONUtils.obj2json(txRegister));
             } catch (JsonProcessingException e) {
                 e.printStackTrace();
             }

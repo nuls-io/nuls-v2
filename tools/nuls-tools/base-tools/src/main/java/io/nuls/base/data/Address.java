@@ -27,9 +27,11 @@ package io.nuls.base.data;
 
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.constant.BaseConstant;
+import io.nuls.tools.crypto.Base58;
 import io.nuls.tools.model.ByteUtils;
 import io.nuls.tools.exception.NulsRuntimeException;
 import io.nuls.tools.log.Log;
+import io.nuls.tools.parse.SerializeUtils;
 
 /**
  * @author: Chralie
@@ -89,10 +91,10 @@ public class Address {
             this.prefix = AddressTool.MAINNET_PREFIX;
         } else if (chainId == BaseConstant.TESTNET_CHAIN_ID) {
             this.prefix = AddressTool.TESTNET_PREFIX;
+        } else {
+            this.prefix = Base58.encode(SerializeUtils.int16ToBytes(chainId)).toUpperCase();
         }
-//        else {
-//            throw new RuntimeException("Address prefix can not be null!");
-//        }
+
     }
 
     public Address(int chainId, String prefix, byte addressType, byte[] hash160) {
