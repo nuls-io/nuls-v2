@@ -89,7 +89,6 @@ public class ClientChannelHandler extends BaseChannelHandler {
         SocketChannel socketChannel = (SocketChannel) ctx.channel();
         String remoteIP = socketChannel.remoteAddress().getHostString();
         int port = socketChannel.remoteAddress().getPort();
-        Log.info("{}-----------------client channelRead-----------------{}:{}", TimeManager.currentTimeMillis(), remoteIP, port);
         ByteBuf buf = (ByteBuf) msg;
         NulsByteBuffer byteBuffer = null;
         Node node = null;
@@ -97,12 +96,11 @@ public class ClientChannelHandler extends BaseChannelHandler {
             Attribute<Node> nodeAttribute = ctx.channel().attr(key);
             node = nodeAttribute.get();
             if (node != null) {
-                Log.info("-----------------client channelRead  node={} -----------------", node.getId());
                 byte[] bytes = new byte[buf.readableBytes()];
                 buf.readBytes(bytes);
                 byteBuffer = new NulsByteBuffer(bytes);
             } else {
-                Log.info("-----------------client channelRead  node is null -----------------" + remoteIP + ":" + port);
+                Log.error("-----------------client channelRead  node is null -----------------" + remoteIP + ":" + port);
                 ctx.channel().close();
             }
         } catch (Exception e) {
