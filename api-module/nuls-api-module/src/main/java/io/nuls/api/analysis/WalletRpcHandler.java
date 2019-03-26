@@ -175,12 +175,11 @@ public class WalletRpcHandler {
         contractInfo.setResultInfo(resultInfo);
         if (!resultInfo.isSuccess()) {
             contractInfo.setSuccess(false);
-            contractInfo.setStatus(-1);
+            contractInfo.setStatus(ApiConstant.CONTRACT_STATUS_FAIL);
             contractInfo.setErrorMsg(resultInfo.getErrorMessage());
-
             return Result.getSuccess(null).setData(contractInfo);
         }
-
+        contractInfo.setStatus(ApiConstant.CONTRACT_STATUS_NORMAL);
         contractInfo.setSuccess(true);
         Map map = (Map) RpcCall.request(ModuleE.SC.abbr, CommandConstant.CONTRACT_INFO, params);
 //        contractInfo.setCreateTxHash(map.get("createTxHash").toString());
@@ -189,7 +188,6 @@ public class WalletRpcHandler {
 //        contractInfo.setBlockHeight(Long.parseLong(map.get("blockHeight").toString()));
         contractInfo.setCreater(map.get("creater").toString());
         contractInfo.setNrc20((Boolean) map.get("isNrc20"));
-        contractInfo.setStatus(0);
         if (contractInfo.isNrc20()) {
             contractInfo.setTokenName(map.get("nrc20TokenName").toString());
             contractInfo.setSymbol(map.get("nrc20TokenSymbol").toString());

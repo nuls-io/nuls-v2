@@ -33,7 +33,6 @@ import io.nuls.rpc.modulebootstrap.RpcModule;
 import io.nuls.rpc.modulebootstrap.RpcModuleState;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
-import io.nuls.tools.core.annotation.Configuration;
 import io.nuls.tools.core.ioc.SpringLiteContext;
 import io.nuls.tools.log.Log;
 
@@ -111,8 +110,6 @@ public class ApiModuleBootstrap extends RpcModule {
 
         } catch (Exception e) {
             Log.error(e);
-            //LoggerUtil.logger.error("AccountBootsrap init error!");
-            throw new RuntimeException(e);
         }
     }
 

@@ -42,8 +42,6 @@ public class ContractService {
             return null;
         }
         ContractInfo tokenInfo = DocumentTransferTool.toInfo(document, "contractAddress", ContractInfo.class);
-//        tokenInfo.setMethods(JSONUtils.json2list(tokenInfo.getMethodStr(), ContractMethod.class));
-//        tokenInfo.setMethodStr(null);
         return tokenInfo;
     }
 
@@ -63,6 +61,23 @@ public class ContractService {
         mongoDBService.bulkWrite(CONTRACT_TABLE + chainId, modelList);
     }
 
+    public void rollbackContractInfos(int chainId, Map<String, ContractInfo> contractInfoMap) {
+        if (contractInfoMap.isEmpty()) {
+            return;
+        }
+        List<WriteModel<Document>> modelList = new ArrayList<>();
+        for (ContractInfo contractInfo : contractInfoMap.values()) {
+            Document document = contractInfo.toDocument();
+
+            if (contractInfo.isNew()) {
+                modelList.add(new DeleteOneModel<>(Filters.eq("_id", contractInfo.getContractAddress())));
+            } else {
+                modelList.add(new ReplaceOneModel<>(Filters.eq("_id", contractInfo.getContractAddress()), document));
+            }
+        }
+        mongoDBService.bulkWrite(CONTRACT_TABLE + chainId, modelList);
+    }
+
     public void saveContractTxInfos(int chainId, List<ContractTxInfo> contractTxInfos) {
         if (contractTxInfos.isEmpty()) {
             return;
@@ -75,6 +90,14 @@ public class ContractService {
         mongoDBService.insertMany(CONTRACT_TX_TABLE + chainId, documentList);
     }
 
+    public void rollbackContractTxInfos(int chainId, List<String> contractTxHashList) {
+        if (contractTxHashList.isEmpty()) {
+            return;
+        }
+        mongoDBService.delete(CONTRACT_TX_TABLE + chainId, Filters.in("txHash", contractTxHashList));
+    }
+
+
     public void saveContractResults(int chainId, List<ContractResultInfo> contractResultInfos) {
         if (contractResultInfos.isEmpty()) {
             return;
@@ -85,6 +108,13 @@ public class ContractService {
             documentList.add(document);
         }
         mongoDBService.insertMany(CONTRACT_RESULT_TABLE + chainId, documentList);
+    }
+
+    public void rollbackContractResults(int chainId, List<String> contractTxHashList) {
+        if (contractTxHashList.isEmpty()) {
+            return;
+        }
+        mongoDBService.delete(CONTRACT_RESULT_TABLE + chainId, Filters.in("_id", contractTxHashList));
     }
 
     public PageInfo<ContractTxInfo> getContractTxList(int chainId, String contractAddress, int type, int pageNumber, int pageSize) {
@@ -125,7 +155,7 @@ public class ContractService {
         return pageInfo;
     }
 
-    public ContractResultInfo getContractResultInfo(int chainId, String txHash) throws Exception {
+    public ContractResultInfo getContractResultInfo(int chainId, String txHash) {
         Document document = mongoDBService.findOne(CONTRACT_RESULT_TABLE + chainId, Filters.eq("_id", txHash));
         if (document == null) {
             return null;
