@@ -9,7 +9,9 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
+    <groupId>io.nuls.nuls-tools</groupId>
     <artifactId>api-provider</artifactId>
+    <name>api-provider</name>
 
     <dependencies>
         <dependency>
