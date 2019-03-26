@@ -86,7 +86,7 @@ public class ContractCallContractSendTxTest extends BaseQuery {
     public void transfer2Contract() throws Exception {
         BigInteger value = BigInteger.valueOf(888834777633L);
         String remark = "transfer 2 contract";
-        Map params = this.makeTransferParams(sender, contractAddress, value, remark);
+        Map params = this.makeTransferParams(sender, contractAddress0, value, remark);
         Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, TRANSFER, params);
         Map result = (HashMap) (((HashMap) cmdResp2.getResponseData()).get(TRANSFER));
         Assert.assertTrue(null != result);
@@ -104,35 +104,6 @@ public class ContractCallContractSendTxTest extends BaseQuery {
         return params;
     }
 
-    @Test
-    public void loopCallInit() throws Exception {
-        // 创建NRC20合约, 调用ContractNRC20TokenSendTxTest.createContract, 得到合约地址，赋值给成员变量contractAddress_nrc20
-        // 创建ContractCallContract合约, 调用ContractCallContractSendTxTest.createContract, 得到合约地址，赋值给成员变量contractAddress
-        sender = sender;
-        tokenTransfer();
-        sender = toAddress;
-        transfer2Contract();
-    }
-
-    @Test
-    public void loopCall() throws Exception {
-        int times = 1;
-        for (int i = 0; i < times; i++) {
-            sender = sender;
-            callContract_transferOut();
-            sender = toAddress;
-            callContract_contractCallContract();
-            sender = toAddress1;
-            callContract_transferOut_contractCallContract();
-            sender = toAddress2;
-            callContract_transferOut();
-            sender = toAddress3;
-            callContract_contractCallContract();
-            sender = toAddress4;
-            callContract_transferOut_contractCallContract();
-        }
-    }
-
     /**
      * 调用合约 - 合约内部转账
      */
@@ -146,7 +117,7 @@ public class ContractCallContractSendTxTest extends BaseQuery {
         String address2 = toAddress4;
         String value1 = BigInteger.valueOf(11888811).toString();
         String value2 = BigInteger.valueOf(22888822).toString();
-        Map params = this.makeCallParams(sender, value, contractAddress, methodName, methodDesc, remark,
+        Map params = this.makeCallParams(sender, value, contractAddress0, methodName, methodDesc, remark,
                 address1, value1, address2, value2);
         Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, CALL, params);
         Map result = (HashMap) (((HashMap) cmdResp2.getResponseData()).get(CALL));
@@ -154,14 +125,14 @@ public class ContractCallContractSendTxTest extends BaseQuery {
         Log.info("call-result:{}", JSONUtils.obj2PrettyJson(cmdResp2));
     }
 
-    private Map makeCallParams(String sender, BigInteger value, String contractAddress, String methodName, String methodDesc, String remark, Object... args) {
+    private Map makeCallParams(String sender, BigInteger value, String contractAddress0, String methodName, String methodDesc, String remark, Object... args) {
         Map<String, Object> params = new HashMap<>();
         params.put("chainId", chainId);
         params.put("sender", sender);
         params.put("value", value);
         params.put("gasLimit", 200000L);
         params.put("price", 25);
-        params.put("contractAddress", contractAddress);
+        params.put("contractAddress", contractAddress0);
         params.put("methodName", methodName);
         params.put("methodDesc", methodDesc);
         params.put("args", args);
@@ -184,8 +155,8 @@ public class ContractCallContractSendTxTest extends BaseQuery {
         String _token = BigInteger.valueOf(800).toString();
         String[] _args = new String[]{toAddress3, _token};
         BigInteger _value = value;
-        Map params = this.makeCallParams(sender, value, contractAddress, methodName, methodDesc, remark,
-                contractAddress_nrc20, _methodName, _args, _value);
+        Map params = this.makeCallParams(sender, value, contractAddress0, methodName, methodDesc, remark,
+                contractAddress_nrc200, _methodName, _args, _value);
         Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, CALL, params);
         Map result = (HashMap) (((HashMap) cmdResp2.getResponseData()).get(CALL));
         Assert.assertTrue(null != result);
@@ -211,9 +182,9 @@ public class ContractCallContractSendTxTest extends BaseQuery {
         String _token = BigInteger.valueOf(888L).toString();
         String[] _args = new String[]{toAddress3, _token};
         BigInteger _value = value;
-        Map params = this.makeCallParams(sender, value, contractAddress, methodName, methodDesc, remark,
+        Map params = this.makeCallParams(sender, value, contractAddress0, methodName, methodDesc, remark,
                 address1, value1, address2, value2,
-                contractAddress_nrc20, _methodName, _args, _value);
+                contractAddress_nrc200, _methodName, _args, _value);
         Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, CALL, params);
         Map result = (HashMap) (((HashMap) cmdResp2.getResponseData()).get(CALL));
         Assert.assertTrue(null != result);
@@ -227,21 +198,21 @@ public class ContractCallContractSendTxTest extends BaseQuery {
     @Test
     public void tokenTransfer() throws Exception {
         BigInteger value = BigInteger.TEN.pow(8);
-        String toAddress = contractAddress;
+        String toAddress = contractAddress0;
         String remark = "token transfer to " + toAddress;
-        Map params = this.makeTokenTransferParams(sender, toAddress, contractAddress_nrc20, value, remark);
+        Map params = this.makeTokenTransferParams(sender, toAddress, contractAddress_nrc200, value, remark);
         Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, TOKEN_TRANSFER, params);
         Map result = (HashMap) (((HashMap) cmdResp2.getResponseData()).get(TOKEN_TRANSFER));
         Assert.assertTrue(null != result);
         Log.info("tokenTransfer-result:{}", JSONUtils.obj2PrettyJson(cmdResp2));
     }
 
-    private Map makeTokenTransferParams(String address, String toAddress, String contractAddress, BigInteger amount, String remark) {
+    private Map makeTokenTransferParams(String address, String toAddress, String contractAddress0, BigInteger amount, String remark) {
         Map<String, Object> params = new HashMap<>();
         params.put("chainId", chainId);
         params.put("address", address);
         params.put("toAddress", toAddress);
-        params.put("contractAddress", contractAddress);
+        params.put("contractAddress", contractAddress0);
         params.put("password", password);
         params.put("amount", amount);
         params.put("remark", remark);
@@ -255,18 +226,18 @@ public class ContractCallContractSendTxTest extends BaseQuery {
     @Test
     public void delete() throws Exception {
         String remark = "delete contract";
-        Map params = this.makeDeleteParams(sender, contractAddress, remark);
+        Map params = this.makeDeleteParams(sender, contractAddress0, remark);
         Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, DELETE, params);
         Map result = (HashMap) (((HashMap) cmdResp2.getResponseData()).get(DELETE));
         Assert.assertTrue(null != result);
         Log.info("delete-result:{}", JSONUtils.obj2PrettyJson(result));
     }
 
-    private Map makeDeleteParams(String sender, String contractAddress, String remark) {
+    private Map makeDeleteParams(String sender, String contractAddress0, String remark) {
         Map<String, Object> params = new HashMap<>();
         params.put("chainId", chainId);
         params.put("sender", sender);
-        params.put("contractAddress", contractAddress);
+        params.put("contractAddress", contractAddress0);
         params.put("password", password);
         params.put("remark", remark);
         return params;

@@ -135,7 +135,7 @@ public class ContractTxCallable implements Callable<ContractResult> {
                     break;
             }
         } while (false);
-        Log.info("======pierre====txType [{}] Execute ContractResult is {}", tx.getType(), contractResult);
+        Log.info("TxType [{}] Execute ContractResult is {}", tx.getType(), contractResult);
         return contractResult;
     }
 
@@ -143,7 +143,9 @@ public class ContractTxCallable implements Callable<ContractResult> {
         makeContractResult(tx, contractResult);
         if (contractResult.isSuccess()) {
             Result checkResult = contractHelper.validateNrc20Contract(chainId, (ProgramExecutor) contractResult.getTxTrack(), tx, contractResult);
-            Log.info("check validateNrc20Contract Result is {}", checkResult);
+            if(checkResult.isFailed()) {
+                Log.error("check validateNrc20Contract Result is {}", checkResult);
+            }
             if (checkResult.isSuccess()) {
                 container.getCommitSet().add(contract);
                 commitContract(contractResult);
@@ -182,7 +184,7 @@ public class ContractTxCallable implements Callable<ContractResult> {
             byte[] contractAddress = contractResult.getContractAddress();
             // 获取合约当前余额
             BigInteger balance = vmContext.getBalance(chainId, contractAddress);
-            Log.info("=====pierre======[{}] current balance is {}", AddressTool.getStringAddressByBytes(contractAddress), balance.toString());
+            Log.info("[{}] current balance is {}", AddressTool.getStringAddressByBytes(contractAddress), balance.toString());
             contractResult.setPreBalance(balance);
             // 处理临时余额和合约内部转账
             contractTransferHandler.handleContractTransfer(chainId, blockTime, tx, contractResult, tempBalanceManager);

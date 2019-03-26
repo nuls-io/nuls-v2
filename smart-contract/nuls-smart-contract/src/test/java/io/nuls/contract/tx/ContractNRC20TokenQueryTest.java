@@ -150,20 +150,20 @@ public class ContractNRC20TokenQueryTest extends BaseQuery {
         String methodName = "transfer";
         String methodDesc = "";
         String token = BigInteger.TEN.pow(8).toString();
-        Map params = this.makeValidateCallParams(sender, value, contractAddress, methodName, methodDesc, toAddress, token);
+        Map params = this.makeValidateCallParams(sender, value, contractAddress0, methodName, methodDesc, toAddress0, token);
         Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, VALIDATE_CALL, params);
         Log.info("validateCall-Response:{}", JSONUtils.obj2PrettyJson(cmdResp2));
         Assert.assertTrue(cmdResp2.isSuccess());
     }
 
-    private Map makeValidateCallParams(String sender, BigInteger value, String contractAddress, String methodName, String methodDesc, Object... args) {
+    private Map makeValidateCallParams(String sender, BigInteger value, String contractAddress0, String methodName, String methodDesc, Object... args) {
         Map<String, Object> params = new HashMap<>();
         params.put("chainId", chainId);
         params.put("sender", sender);
         params.put("value", value);
         params.put("gasLimit", 200000L);
         params.put("price", 25);
-        params.put("contractAddress", contractAddress);
+        params.put("contractAddress", contractAddress0);
         params.put("methodName", methodName);
         params.put("methodDesc", methodDesc);
         params.put("args", args);
@@ -179,19 +179,19 @@ public class ContractNRC20TokenQueryTest extends BaseQuery {
         String methodName = "transfer";
         String methodDesc = "";
         String token = BigInteger.TEN.pow(8).toString();
-        Map params = this.makeImputedCallGasParams(sender, value, contractAddress, methodName, methodDesc, toAddress, token);
+        Map params = this.makeImputedCallGasParams(sender, value, contractAddress0, methodName, methodDesc, toAddress0, token);
         Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, IMPUTED_CALL_GAS, params);
         Map result = (HashMap) (((HashMap) cmdResp2.getResponseData()).get(IMPUTED_CALL_GAS));
         Assert.assertTrue(null != result);
         Log.info("imputed_call_gas-result:{}", JSONUtils.obj2PrettyJson(result));
     }
 
-    private Map makeImputedCallGasParams(String sender, BigInteger value, String contractAddress, String methodName, String methodDesc, Object... args) {
+    private Map makeImputedCallGasParams(String sender, BigInteger value, String contractAddress0, String methodName, String methodDesc, Object... args) {
         Map<String, Object> params = new HashMap<>();
         params.put("chainId", chainId);
         params.put("sender", sender);
         params.put("value", value);
-        params.put("contractAddress", contractAddress);
+        params.put("contractAddress", contractAddress0);
         params.put("methodName", methodName);
         params.put("methodDesc", methodDesc);
         params.put("args", args);
@@ -206,7 +206,7 @@ public class ContractNRC20TokenQueryTest extends BaseQuery {
     public void transfer2ContractFee() throws Exception {
         BigInteger value = BigInteger.TEN.pow(8);
         String remark = "transfer 2 contract fee";
-        Map params = this.makeTransferFeeParams(sender, contractAddress_nrc20, value, remark);
+        Map params = this.makeTransferFeeParams(sender, contractAddress_nrc200, value, remark);
         Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, TRANSFER_FEE, params);
         Map result = (HashMap) (((HashMap) cmdResp2.getResponseData()).get(TRANSFER_FEE));
         Assert.assertTrue(null != result);
@@ -229,17 +229,17 @@ public class ContractNRC20TokenQueryTest extends BaseQuery {
      */
     @Test
     public void tokenBalance() throws Exception {
-        Map params = this.makeTokenBalanceParams(contractAddress_nrc20, toAddress1);
+        Map params = this.makeTokenBalanceParams(contractAddress_nrc200, toAddress1);
         Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, TOKEN_BALANCE, params);
         Map result = (HashMap) (((HashMap) cmdResp2.getResponseData()).get(TOKEN_BALANCE));
         Assert.assertTrue(null != result);
         Log.info("tokenBalance-result:{}", JSONUtils.obj2PrettyJson(result));
     }
 
-    private Map makeTokenBalanceParams(String contractAddress, String address) {
+    private Map makeTokenBalanceParams(String contractAddress0, String address) {
         Map<String, Object> params = new HashMap<>();
         params.put("chainId", chainId);
-        params.put("contractAddress", contractAddress);
+        params.put("contractAddress", contractAddress0);
         params.put("address", address);
         return params;
     }
@@ -294,17 +294,17 @@ public class ContractNRC20TokenQueryTest extends BaseQuery {
     public void invokeView() throws Exception {
         String methodName = "balanceOf";
         String methodDesc = "";
-        Map params = this.makeInvokeViewParams(contractAddress, methodName, methodDesc, toAddress);
+        Map params = this.makeInvokeViewParams(contractAddress0, methodName, methodDesc, toAddress0);
         Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, INVOKE_VIEW, params);
         Map result = (HashMap) (((HashMap) cmdResp2.getResponseData()).get(INVOKE_VIEW));
         Assert.assertTrue(null != result);
         Log.info("invoke_view-result:{}", JSONUtils.obj2PrettyJson(cmdResp2));
     }
 
-    private Map makeInvokeViewParams(String contractAddress, String methodName, String methodDesc, Object... args) {
+    private Map makeInvokeViewParams(String contractAddress0, String methodName, String methodDesc, Object... args) {
         Map<String, Object> params = new HashMap<>();
         params.put("chainId", chainId);
-        params.put("contractAddress", contractAddress);
+        params.put("contractAddress", contractAddress0);
         params.put("methodName", methodName);
         params.put("methodDesc", methodDesc);
         params.put("args", args);
@@ -337,17 +337,17 @@ public class ContractNRC20TokenQueryTest extends BaseQuery {
      */
     @Test
     public void validateDelete() throws Exception {
-        Map params = this.makeValidateDeleteParams(sender, contractAddress);
+        Map params = this.makeValidateDeleteParams(sender, contractAddress0);
         Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, VALIDATE_DELETE, params);
         Log.info("validateDelete-Response:{}", JSONUtils.obj2PrettyJson(cmdResp2));
         Assert.assertTrue(cmdResp2.isSuccess());
     }
 
-    private Map makeValidateDeleteParams(String sender, String contractAddress) {
+    private Map makeValidateDeleteParams(String sender, String contractAddress0) {
         Map<String, Object> params = new HashMap<>();
         params.put("chainId", chainId);
         params.put("sender", sender);
-        params.put("contractAddress", contractAddress);
+        params.put("contractAddress", contractAddress0);
         return params;
     }
 
