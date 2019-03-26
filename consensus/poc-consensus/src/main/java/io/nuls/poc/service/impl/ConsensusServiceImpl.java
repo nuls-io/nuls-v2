@@ -1426,7 +1426,7 @@ public class ConsensusServiceImpl implements ConsensusService {
         if (round == null) {
             return;
         }
-        MeetingMember member = round.getMember(agent.getPackingAddress(),chain);
+        MeetingMember member = round.getOnlyMember(agent.getPackingAddress(),chain);
         if (null == member) {
             agent.setStatus(0);
             return;

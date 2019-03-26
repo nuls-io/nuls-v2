@@ -158,6 +158,15 @@ public class MeetingRound {
         return this.memberList.get(order - 1);
     }
 
+    public MeetingMember getOnlyMember(byte[] address,Chain chain){
+        for (MeetingMember member : memberList) {
+            if (Arrays.equals(address, member.getAgent().getPackingAddress())) {
+                return member;
+            }
+        }
+        return null;
+    }
+
     public MeetingMember getMember(byte[] address,Chain chain) {
         for (MeetingMember member : memberList) {
             if (Arrays.equals(address, member.getAgent().getPackingAddress()) && validAccount(chain, AddressTool.getStringAddressByBytes(member.getAgent().getPackingAddress()))) {
