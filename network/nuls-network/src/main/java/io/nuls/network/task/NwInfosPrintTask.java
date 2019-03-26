@@ -52,19 +52,14 @@ public class NwInfosPrintTask implements Runnable {
         //test
         LoggerUtil.NwInfosLog.info("");
         LoggerUtil.NwInfosLog.info("");
-        LoggerUtil.NwInfosLog.info("");
         LoggerUtil.NwInfosLog.info("BEGIN @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
         printlnNwTime();
         LoggerUtil.NwInfosLog.info("");
-        LoggerUtil.NwInfosLog.info("");
         printlnPeer();
-        LoggerUtil.NwInfosLog.info("");
         LoggerUtil.NwInfosLog.info("");
         printlnMem();
         LoggerUtil.NwInfosLog.info("");
-        LoggerUtil.NwInfosLog.info("");
         printlnProtocolMap();
-        LoggerUtil.NwInfosLog.info("");
         LoggerUtil.NwInfosLog.info("");
         LoggerUtil.NwInfosLog.info("END @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
     }
@@ -102,7 +97,7 @@ public class NwInfosPrintTask implements Runnable {
             NodesContainer crossNodesContainer = nodeGroup.getCrossNodeContainer();
             LoggerUtil.NwInfosLog.info("######################################################################");
             LoggerUtil.NwInfosLog.info("@@@@@@@@@@@ chainId={},magicNumber={},localNetStatus(本地网络)={},crossNetStatus(跨链)={}",
-                    nodeGroup.getChainId(), nodeGroup.getMagicNumber(),nodeGroup.getLocalStatus(),nodeGroup.getCrossNodeContainer());
+                    nodeGroup.getChainId(), nodeGroup.getMagicNumber(),nodeGroup.getLocalStatus(),nodeGroup.getCrossStatus());
 
             Collection<Node> c1 = localNodesContainer.getConnectedNodes().values();
             Collection<Node> c2 = localNodesContainer.getCanConnectNodes().values();
