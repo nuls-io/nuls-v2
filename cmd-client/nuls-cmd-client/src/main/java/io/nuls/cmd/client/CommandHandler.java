@@ -31,10 +31,7 @@ import io.nuls.cmd.client.processor.CommandProcessor;
 import io.nuls.cmd.client.processor.account.*;
 import io.nuls.cmd.client.processor.block.GetBestBlockHeaderProcessor;
 import io.nuls.cmd.client.processor.block.GetBlockHeaderProcessor;
-import io.nuls.cmd.client.processor.consensus.CreateAgentProcessor;
-import io.nuls.cmd.client.processor.consensus.DepositProcessor;
-import io.nuls.cmd.client.processor.consensus.StopAgentProcessor;
-import io.nuls.cmd.client.processor.consensus.WithdrawProcessor;
+import io.nuls.cmd.client.processor.consensus.*;
 import io.nuls.cmd.client.processor.contract.*;
 import io.nuls.cmd.client.processor.ledger.GetBalanceProcessor;
 import io.nuls.cmd.client.processor.network.GetNetworkProcessor;
@@ -138,6 +135,8 @@ public class CommandHandler implements InitializingBean {
         register(getBean(DepositProcessor.class));
         //withdraw
         register(getBean(WithdrawProcessor.class));
+        register(getBean(GetAgentsProcessor.class));
+        register(getBean(GetAgentInfoProcessor.class));
         /**
          * system
          */

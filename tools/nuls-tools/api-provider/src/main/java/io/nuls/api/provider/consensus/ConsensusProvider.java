@@ -1,10 +1,7 @@
 package io.nuls.api.provider.consensus;
 
 import io.nuls.api.provider.Result;
-import io.nuls.api.provider.consensus.facade.CreateAgentReq;
-import io.nuls.api.provider.consensus.facade.DepositToAgentReq;
-import io.nuls.api.provider.consensus.facade.StopAgentReq;
-import io.nuls.api.provider.consensus.facade.WithdrawReq;
+import io.nuls.api.provider.consensus.facade.*;
 
 /**
  * @Author: zhoulijun
@@ -45,6 +42,20 @@ public interface ConsensusProvider {
     Result<String> withdraw(WithdrawReq req);
 
 
+    /**
+     * 查询节点信息
+     * @param req
+     * @return
+     */
+    Result<AgentInfo> getAgentInfo(GetAgentInfoReq req);
+
+
+    /**
+     * 查询节点列表
+     * @param req
+     * @return
+     */
+    Result<AgentInfo> getAgentList(GetAgentListReq req);
 
 
 }
