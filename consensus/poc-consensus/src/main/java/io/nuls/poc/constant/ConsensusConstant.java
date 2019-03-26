@@ -99,7 +99,7 @@ public interface ConsensusConstant {
     int INIT_PUNISH_OF_ROUND_COUNT = 200;
 
     /**
-     * 系统启动时缓存指定数量的区块
+     * 系统启动时缓存指定轮次的区块
      * Buffer a specified number of blocks at system startup
      * */
     int INIT_BLOCK_HEADER_COUNT = 110;
