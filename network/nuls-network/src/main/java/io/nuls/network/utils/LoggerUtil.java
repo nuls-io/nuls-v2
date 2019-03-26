@@ -47,7 +47,7 @@ public class LoggerUtil {
     public static final String LOGGER_KEY2 = ModuleE.BL.abbr;
     public static final String LOGGER_KEY3 = ModuleE.TX.abbr;
     public static final String LOGGER_KEY4 = ModuleE.CS.abbr;
-    public static NulsLogger Log = LoggerBuilder.getLogger("nwLogs", "nw.log", Level.ALL);
+    public static NulsLogger Log = LoggerBuilder.getLogger("nwLogs", "nw", Level.ALL);
     public static Map<String, NulsLogger> logMap = new HashMap<>();
 
     public static void createLogs(int chainId) {
@@ -62,7 +62,7 @@ public class LoggerUtil {
 
     public static NulsLogger logger(int chainId) {
         if (null == logMap.get(LOGGER_KEY1 + chainId)) {
-            createLogs(chainId);
+            return Log;
         }
         return logMap.get(LOGGER_KEY1 + chainId);
     }
