@@ -38,10 +38,10 @@ import java.util.List;
  */
 public interface ContractCaller {
 
-    Result caller(int chainId, ContractContainer executorServiceContainer, ProgramExecutor batchExecutor, ContractWrapperTransaction tx, String preStateRoot);
+    Result callTx(int chainId, ContractContainer executorServiceContainer, ProgramExecutor batchExecutor, ContractWrapperTransaction tx, String preStateRoot);
 
-    List<ContractResult> callerReCallTx(ProgramExecutor batchExecutor, List<ContractWrapperTransaction> reCallTxList, int chainId, String preStateRoot);
+    Result callBatchEnd(int chainId, long blockHeight);
 
-    Result<byte[]> commitBatchExecute(ProgramExecutor executor);
+    List<ContractResult> reCallTx(ProgramExecutor batchExecutor, List<ContractWrapperTransaction> reCallTxList, int chainId, String preStateRoot);
 
 }
