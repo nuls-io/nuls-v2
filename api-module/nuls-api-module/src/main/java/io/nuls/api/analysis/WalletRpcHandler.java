@@ -1,6 +1,5 @@
 package io.nuls.api.analysis;
 
-import ch.qos.logback.core.subst.Token;
 import io.nuls.api.ApiContext;
 import io.nuls.api.constant.ApiConstant;
 import io.nuls.api.constant.ApiErrorCode;

@@ -1,7 +1,6 @@
 package io.nuls.api.db;
 
 import com.mongodb.client.model.*;
-import io.nuls.api.constant.MongoTableConstant;
 import io.nuls.api.model.po.db.AccountTokenInfo;
 import io.nuls.api.model.po.db.PageInfo;
 import io.nuls.api.model.po.db.TokenTransfer;
