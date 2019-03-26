@@ -351,7 +351,7 @@ packageModule() {
 	if [ ! -d $(pwd)/$1 ]; then
 		return 0
 	fi
-	if [ $(pwd) == "${PROJECT_PATH}/RELEASE" ]; then
+	if [ $(pwd) == "${RELEASE_PATH}" ]; then
 		return 0;
 	fi
 	cd $(pwd)/$1
@@ -422,7 +422,7 @@ fi
 
 if [ -n "${BUILDTAR}" ]; then
     log "============ build ${RELEASE_PATH}.tar.gz ==================="
-    tar -cjf "${RELEASE_PATH}.tar.gz" ${RELEASE_PATH}
+    tar -zcPf "${RELEASE_PATH}.tar.gz" ${RELEASE_PATH}
     log "============ build ${RELEASE_PATH}.tar.gz FINISH==================="
 fi
 
