@@ -149,8 +149,7 @@ public class OrphanChainsMaintainer implements Runnable {
         NulsDigestData previousHash = orphanChain.getPreviousHash();
         Block block;
         //向其他节点请求孤儿链起始区块的上一个区块
-        for (int i = 0, availableNodesSize = availableNodes.size(); i < availableNodesSize; i++) {
-            Node availableNode = availableNodes.get(i);
+        for (Node availableNode : availableNodes) {
             block = BlockUtil.downloadBlockByHash(chainId, previousHash, availableNode.getId());
             if (block != null) {
                 orphanChain.addFirst(block);

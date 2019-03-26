@@ -192,15 +192,15 @@ public class BlockServiceImpl implements BlockService {
 
     @Override
     public boolean saveBlock(int chainId, Block block, boolean needLock) {
-        return saveBlock(chainId, block, false, 0, needLock);
+        return saveBlock(chainId, block, false, 0, needLock, false, false);
     }
 
     @Override
-    public boolean saveBlock(int chainId, Block block, int download, boolean needLock) {
-        return saveBlock(chainId, block, false, download, needLock);
+    public boolean saveBlock(int chainId, Block block, int download, boolean needLock, boolean broadcast, boolean forward) {
+        return saveBlock(chainId, block, false, download, needLock, broadcast, forward);
     }
 
-    private boolean saveBlock(int chainId, Block block, boolean localInit, int download, boolean needLock) {
+    private boolean saveBlock(int chainId, Block block, boolean localInit, int download, boolean needLock, boolean broadcast, boolean forward) {
         long startTime = System.nanoTime();
         NulsLogger commonLog = ContextManager.getContext(chainId).getCommonLog();
         BlockHeader header = block.getHeader();
@@ -221,6 +221,13 @@ public class BlockServiceImpl implements BlockService {
             }
             long elapsedNanos1 = System.nanoTime() - startTime1;
             commonLog.info("1. time-" + elapsedNanos1);
+
+            if (broadcast) {
+                broadcastBlock(chainId, block);
+            }
+            if (forward) {
+                forwardBlock(chainId, hash, null);
+            }
 
             //2.设置最新高度,如果失败则恢复上一个高度
             long startTime2 = System.nanoTime();
@@ -488,7 +495,7 @@ public class BlockServiceImpl implements BlockService {
             //1.判断有没有创世块,如果没有就初始化创世块并保存
             if (null == genesisBlock) {
                 genesisBlock = GenesisBlock.getInstance();
-                boolean b = saveBlock(chainId, genesisBlock, true, 0, false);
+                boolean b = saveBlock(chainId, genesisBlock, true, 0, false, false, false);
                 if (!b) {
                     throw new ChainRuntimeException("error occur when saving GenesisBlock!");
                 }

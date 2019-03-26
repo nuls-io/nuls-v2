@@ -95,4 +95,9 @@ public interface Constant {
      * 节点比较器,默认按信用值排序
      */
     Comparator<Node> NODE_COMPARATOR = Comparator.comparingInt(Node::getCredit).reversed();
+
+    /**
+     * 获取网络时间间隔
+     */
+    long GETTIME_INTERVAL = 30000L;
 }
