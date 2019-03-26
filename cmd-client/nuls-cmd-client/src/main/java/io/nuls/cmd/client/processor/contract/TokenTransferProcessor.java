@@ -132,7 +132,7 @@ public class TokenTransferProcessor extends ContractBaseProcessor {
             form = getTokenTransferForm(args);
         }
         String address = form.getAddress();
-        String password = CommandHelper.getPwd("Please enter your account password");
+        String password = CommandHelper.getPwd();
         String contractAddress = form.getContractAddress();
         String url = "/contract/" + contractAddress;
         Result<Map> contract = contractProvider.getContractInfo(new GetContractInfoReq(contractAddress));
