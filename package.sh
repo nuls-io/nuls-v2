@@ -140,10 +140,12 @@ fi
 MODULES_PATH=$MODULES_PATH/Nuls
 #模块公共依赖jar存放目录
 COMMON_LIBS_PATH=$MODULES_PATH/libs
-if [ -d ${COMMON_LIBS_PATH} ]; then
-    rm -r ${COMMON_LIBS_PATH}
+if [[ -z "${$IGNROEMVN}" ]]; then
+    if [ -d ${COMMON_LIBS_PATH} ]; then
+        rm -r ${COMMON_LIBS_PATH}
+    fi
+    mkdir ${COMMON_LIBS_PATH}
 fi
-	mkdir ${COMMON_LIBS_PATH}
 
 #模块数据库文件存放位置
 COMMON_DATA_PATH=$MODULES_PATH/data
