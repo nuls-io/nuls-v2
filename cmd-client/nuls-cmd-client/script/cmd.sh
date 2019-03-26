@@ -39,7 +39,7 @@ JAVA_OPTS="-Xms128m -Xmx128m"
 
 CONF_PATH=$SERVER_HOME/conf
 CLASSPATH=$CLASSPATH:$CONF_PATH:$PUB_LIB:.
-echo $CLASSPATH
+#echo $CLASSPATH
 if  [ -x ${SERVER_HOME}/jre/bin/java ]; then
   ${SERVER_HOME}/jre/bin/java $JAVA_OPTS -classpath $CLASSPATH $MAIN_CLASS
   exit 0
