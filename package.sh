@@ -23,7 +23,9 @@ EOF
 
 #获取参数
 #输出目录
+
 MODULES_PATH="./NULS-Walltet-linux64-alpha1"
+#RELEASE_OUT_PATH="./NULS-Walltet-linux64-alpha1"
 #是否马上更新代码
 DOPULL=
 #是否生成mykernel模块
@@ -292,7 +294,7 @@ copyModuleNcfToModules(){
 	sh "${PROJECT_PATH}/build/merge-ncf.sh" "${BUILD_PATH}/module-prod.ncf" $moduleNcf
 #	rm $moduleNcf
 	sedCommand+=" -e 's/%MAIN_CLASS_NAME%/${mainClassName}/g' "
-    echo $sedCommand
+#    echo $sedCommand
 	if [ -z $(echo "${sedCommand}" | grep -o "%JOPT_XMS%") ]; then
 		sedCommand="${sedCommand}  -e 's/%JOPT_XMS%/256/g' "
 	fi
@@ -353,7 +355,7 @@ packageModule() {
 	if [ ! -d $(pwd)/$1 ]; then
 		return 0
 	fi
-	if [ $(pwd) == "${RELEASE_PATH}" ]; then
+	if [ $(pwd) == "${MODULES_PATH}" ]; then
 		return 0;
 	fi
 	cd $(pwd)/$1
@@ -425,12 +427,13 @@ if [ -n "${DOMOCK}" ]; then
 	chmod u+x "${MODULES_BIN_PATH}/cmd.sh"
 fi
 
+
 if [ -n "${BUILDTAR}" ]; then
     log "============ build ${RELEASE_PATH}.tar.gz ==================="
     tar -zcPf "${RELEASE_PATH}.tar.gz" ${RELEASE_PATH}
     log "============ build ${RELEASE_PATH}.tar.gz FINISH==================="
 fi
 
-
+#cp -R ${RELEASE_PATH} ${RELEASE_OUT_PATH}
 
 
