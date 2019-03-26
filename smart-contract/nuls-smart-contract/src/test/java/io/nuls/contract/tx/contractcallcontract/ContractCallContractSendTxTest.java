@@ -105,11 +105,30 @@ public class ContractCallContractSendTxTest extends BaseQuery {
     }
 
     @Test
+    public void loopCallInit() throws Exception {
+        // 创建NRC20合约, 调用ContractNRC20TokenSendTxTest.createContract, 得到合约地址，赋值给成员变量contractAddress_nrc20
+        // 创建ContractCallContract合约, 调用ContractCallContractSendTxTest.createContract, 得到合约地址，赋值给成员变量contractAddress
+        sender = sender;
+        tokenTransfer();
+        sender = toAddress;
+        transfer2Contract();
+    }
+
+    @Test
     public void loopCall() throws Exception {
         int times = 1;
         for (int i = 0; i < times; i++) {
+            sender = sender;
             callContract_transferOut();
+            sender = toAddress;
             callContract_contractCallContract();
+            sender = toAddress1;
+            callContract_transferOut_contractCallContract();
+            sender = toAddress2;
+            callContract_transferOut();
+            sender = toAddress3;
+            callContract_contractCallContract();
+            sender = toAddress4;
             callContract_transferOut_contractCallContract();
         }
     }
@@ -165,7 +184,7 @@ public class ContractCallContractSendTxTest extends BaseQuery {
         String _token = BigInteger.valueOf(800).toString();
         String[] _args = new String[]{toAddress3, _token};
         BigInteger _value = value;
-        Map params = this.makeCallParams(toAddress, value, contractAddress, methodName, methodDesc, remark,
+        Map params = this.makeCallParams(sender, value, contractAddress, methodName, methodDesc, remark,
                 contractAddress_nrc20, _methodName, _args, _value);
         Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, CALL, params);
         Map result = (HashMap) (((HashMap) cmdResp2.getResponseData()).get(CALL));
@@ -192,7 +211,7 @@ public class ContractCallContractSendTxTest extends BaseQuery {
         String _token = BigInteger.valueOf(888L).toString();
         String[] _args = new String[]{toAddress3, _token};
         BigInteger _value = value;
-        Map params = this.makeCallParams(toAddress1, value, contractAddress, methodName, methodDesc, remark,
+        Map params = this.makeCallParams(sender, value, contractAddress, methodName, methodDesc, remark,
                 address1, value1, address2, value2,
                 contractAddress_nrc20, _methodName, _args, _value);
         Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, CALL, params);

@@ -99,7 +99,7 @@ public interface ConsensusConstant {
     int INIT_PUNISH_OF_ROUND_COUNT = 200;
 
     /**
-     * 系统启动时缓存指定数量的区块
+     * 系统启动时缓存指定轮次的区块
      * Buffer a specified number of blocks at system startup
      * */
     int INIT_BLOCK_HEADER_COUNT = 110;
@@ -125,7 +125,7 @@ public interface ConsensusConstant {
      * 每出一个块获得的共识奖励，一年总的共识奖励金5000000，一年总出块数3154600,相除得到每一块的奖励金
      * value = 5000000/3154600
      */
-    BigInteger YEAR_MILLISECOND = new BigInteger("31546000000");
+    BigInteger YEAR_MILLISECOND = new BigInteger("31536000000");
 
     /**
      * 信誉值的最小值，小于等于该值会给红牌处罚

@@ -21,16 +21,16 @@
 package io.nuls.block.service.impl;
 
 import io.nuls.base.basic.NulsByteBuffer;
-import io.nuls.base.data.Block;
-import io.nuls.base.data.BlockHeader;
-import io.nuls.base.data.NulsDigestData;
-import io.nuls.base.data.Transaction;
+import io.nuls.base.data.*;
+import io.nuls.block.cache.SmallBlockCacher;
+import io.nuls.block.constant.BlockForwardEnum;
 import io.nuls.block.exception.ChainRuntimeException;
 import io.nuls.block.exception.DbRuntimeException;
 import io.nuls.block.manager.BlockChainManager;
 import io.nuls.block.manager.ContextManager;
 import io.nuls.block.message.HashMessage;
 import io.nuls.block.message.SmallBlockMessage;
+import io.nuls.block.model.CachedSmallBlock;
 import io.nuls.block.model.Chain;
 import io.nuls.block.model.ChainContext;
 import io.nuls.block.model.GenesisBlock;
@@ -192,15 +192,15 @@ public class BlockServiceImpl implements BlockService {
 
     @Override
     public boolean saveBlock(int chainId, Block block, boolean needLock) {
-        return saveBlock(chainId, block, false, 0, needLock);
+        return saveBlock(chainId, block, false, 0, needLock, false, false);
     }
 
     @Override
-    public boolean saveBlock(int chainId, Block block, int download, boolean needLock) {
-        return saveBlock(chainId, block, false, download, needLock);
+    public boolean saveBlock(int chainId, Block block, int download, boolean needLock, boolean broadcast, boolean forward) {
+        return saveBlock(chainId, block, false, download, needLock, broadcast, forward);
     }
 
-    private boolean saveBlock(int chainId, Block block, boolean localInit, int download, boolean needLock) {
+    private boolean saveBlock(int chainId, Block block, boolean localInit, int download, boolean needLock, boolean broadcast, boolean forward) {
         long startTime = System.nanoTime();
         NulsLogger commonLog = ContextManager.getContext(chainId).getCommonLog();
         BlockHeader header = block.getHeader();
@@ -219,9 +219,20 @@ public class BlockServiceImpl implements BlockService {
                 commonLog.debug("verifyBlock fail!chainId-" + chainId + ",height-" + height);
                 return false;
             }
+            SmallBlock smallBlock = BlockUtil.getSmallBlock(chainId, block);
+            Map<NulsDigestData, Transaction> txMap = new HashMap<>(header.getTxCount());
+            block.getTxs().forEach(e -> txMap.put(e.getHash(), e));
+            CachedSmallBlock cachedSmallBlock = new CachedSmallBlock(null, smallBlock, txMap);
+            SmallBlockCacher.cacheSmallBlock(chainId, cachedSmallBlock);
+            SmallBlockCacher.setStatus(chainId, hash, BlockForwardEnum.COMPLETE);
+            if (broadcast) {
+                broadcastBlock(chainId, block);
+            }
+            if (forward) {
+                forwardBlock(chainId, hash, null);
+            }
             long elapsedNanos1 = System.nanoTime() - startTime1;
             commonLog.info("1. time-" + elapsedNanos1);
-
             //2.设置最新高度,如果失败则恢复上一个高度
             long startTime2 = System.nanoTime();
             boolean setHeight = blockStorageService.setLatestHeight(chainId, height);
@@ -488,7 +499,7 @@ public class BlockServiceImpl implements BlockService {
             //1.判断有没有创世块,如果没有就初始化创世块并保存
             if (null == genesisBlock) {
                 genesisBlock = GenesisBlock.getInstance();
-                boolean b = saveBlock(chainId, genesisBlock, true, 0, false);
+                boolean b = saveBlock(chainId, genesisBlock, true, 0, false, false, false);
                 if (!b) {
                     throw new ChainRuntimeException("error occur when saving GenesisBlock!");
                 }

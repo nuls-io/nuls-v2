@@ -33,6 +33,7 @@ import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.core.annotation.Order;
 import io.nuls.tools.exception.NulsException;
+import io.nuls.tools.log.Log;
 import org.bson.Document;
 import org.bson.conversions.Bson;
 
@@ -61,10 +62,17 @@ public class MongoDBService implements InitializingBean {
 
     @Override
     public void afterPropertiesSet() {
-        MongoClient mongoClient = new MongoClient(ApiContext.mongoIp, ApiContext.mongoPort);
-        MongoDatabase mongoDatabase = mongoClient.getDatabase("nuls-api");
-        this.client = mongoClient;
-        this.db = mongoDatabase;
+        try {
+            MongoClient mongoClient = new MongoClient(ApiContext.mongoIp, ApiContext.mongoPort);
+            MongoDatabase mongoDatabase = mongoClient.getDatabase("nuls-api");
+
+            this.client = mongoClient;
+            this.db = mongoDatabase;
+        }catch (Exception e) {
+            Log.error(e);
+            System.exit(-1);
+        }
+
     }
 
     public void createCollection(String collName) {
