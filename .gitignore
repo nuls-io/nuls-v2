@@ -119,6 +119,6 @@ data/
 !tools/nuls-tools/base-tools/src/main/java/io/nuls/base/data
 keystore/
 Modules/
-RELEASE/
+NULS-Walltet-linux64-alpha1/
 config_tmp/
-RELEASE.tar.gz
+NULS-Walltet-linux64-alpha1.tar.gz

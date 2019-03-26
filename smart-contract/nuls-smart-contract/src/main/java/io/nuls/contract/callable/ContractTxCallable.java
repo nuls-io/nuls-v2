@@ -40,8 +40,6 @@ import io.nuls.contract.util.VMContext;
 import io.nuls.contract.vm.program.ProgramExecutor;
 import io.nuls.tools.basic.Result;
 import io.nuls.tools.core.ioc.SpringLiteContext;
-import lombok.Getter;
-import lombok.Setter;
 
 import java.io.IOException;
 import java.math.BigInteger;
@@ -59,8 +57,6 @@ import static io.nuls.contract.util.ContractUtil.*;
  * @author: PierreLuo
  * @date: 2018/11/19
  */
-@Getter
-@Setter
 public class ContractTxCallable implements Callable<ContractResult> {
 
     private ContractExecutor contractExecutor;

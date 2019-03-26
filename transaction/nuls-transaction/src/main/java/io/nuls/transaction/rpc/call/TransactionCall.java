@@ -24,14 +24,24 @@ import static io.nuls.transaction.utils.LoggerUtil.Log;
  */
 public class TransactionCall {
 
+
+
+    public static Object request(String moduleCode, String cmd, Map params) throws NulsException {
+        return request(moduleCode, cmd, params, null);
+    }
     /**
      * 调用其他模块接口
      * Call other module interfaces
      */
-    public static Object request(String moduleCode, String cmd, Map params) throws NulsException {
+    public static Object request(String moduleCode, String cmd, Map params, Long timeout) throws NulsException {
         try {
             params.put(Constants.VERSION_KEY_STR, TxConstant.RPC_VERSION);
-            Response cmdResp = ResponseMessageProcessor.requestAndResponse(moduleCode, cmd, params);
+            Response cmdResp;
+            if(null == timeout) {
+                cmdResp = ResponseMessageProcessor.requestAndResponse(moduleCode, cmd, params);
+            }else{
+                cmdResp = ResponseMessageProcessor.requestAndResponse(moduleCode, cmd, params, timeout);
+            }
             Map resData = (Map)cmdResp.getResponseData();
             if (!cmdResp.isSuccess()) {
                 Log.error("response error info is {}", cmdResp);
