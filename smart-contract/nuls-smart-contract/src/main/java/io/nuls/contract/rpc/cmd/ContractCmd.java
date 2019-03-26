@@ -120,10 +120,25 @@ public class ContractCmd extends BaseCmd {
         }
     }
 
+    @CmdAnnotation(cmd = BATCH_BEFORE_END, version = 1.0, description = "batch before end")
+    @Parameter(parameterName = "chainId", parameterType = "int")
+    @Parameter(parameterName = "blockHeight", parameterType = "long")
+    public Response batchBeforeEnd(Map<String, Object> params) {
+        try {
+            Integer chainId = (Integer) params.get("chainId");
+            Long blockHeight = Long.parseLong(params.get("blockHeight").toString());
+
+            return success();
+        } catch (Exception e) {
+            Log.error(e);
+            return failed(e.getMessage());
+        }
+    }
+
     @CmdAnnotation(cmd = BATCH_END, version = 1.0, description = "batch end")
     @Parameter(parameterName = "chainId", parameterType = "int")
     @Parameter(parameterName = "blockHeight", parameterType = "long")
-    public Response invokeContract(Map<String, Object> params) {
+    public Response batchEnd(Map<String, Object> params) {
         try {
             Integer chainId = (Integer) params.get("chainId");
             Long blockHeight = Long.parseLong(params.get("blockHeight").toString());
