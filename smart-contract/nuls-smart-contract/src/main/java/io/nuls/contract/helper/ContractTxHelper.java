@@ -42,6 +42,7 @@ import io.nuls.contract.model.txdata.DeleteContractData;
 import io.nuls.contract.rpc.call.AccountCall;
 import io.nuls.contract.rpc.call.BlockCall;
 import io.nuls.contract.util.ContractUtil;
+import io.nuls.contract.util.Log;
 import io.nuls.contract.vm.program.*;
 import io.nuls.tools.basic.NulsData;
 import io.nuls.tools.basic.Result;
@@ -49,7 +50,6 @@ import io.nuls.tools.basic.VarInt;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.exception.NulsException;
-import io.nuls.tools.log.Log;
 import io.nuls.tools.model.ArraysTool;
 import io.nuls.tools.model.LongUtils;
 import io.nuls.tools.model.StringUtils;
@@ -176,7 +176,7 @@ public class ContractTxHelper {
 
             // 执行结果失败时，交易直接返回错误，不上链，不消耗Gas，
             if (!programResult.isSuccess()) {
-                Log.error(programResult.getStackTrace());
+                Log.error(programResult.getErrorMessage() + ", " + programResult.getStackTrace());
                 Result result = Result.getFailed(DATA_ERROR);
                 result.setMsg(ContractUtil.simplifyErrorMsg(programResult.getErrorMessage()));
                 result = checkVmResultAndReturn(programResult.getErrorMessage(), result);
@@ -219,7 +219,7 @@ public class ContractTxHelper {
 
         Chain chain = contractHelper.getChain(chainId);
         int assetsId = chain.getConfig().getAssetsId();
-        ContractBalance senderBalance = contractHelper.getBalanceAndNonce(chainId, sender);
+        ContractBalance senderBalance = contractHelper.getTempBalanceAndNonce(chainId, sender);
         CoinFrom coinFrom = new CoinFrom(senderBytes, chainId, assetsId, totalValue, Hex.decode(senderBalance.getNonce()), UNLOCKED_TX);
         coinData.addFrom(coinFrom);
 
@@ -354,8 +354,12 @@ public class ContractTxHelper {
             programCall.setMethodDesc(methodDesc);
             programCall.setArgs(args);
 
+            ProgramMethod method = contractHelper.getMethodInfoByContractAddress(chainId, prevStateRoot, methodName, methodDesc, contractAddressBytes);
+            if (method == null) {
+                return Result.getFailed(CONTRACT_METHOD_NOT_EXIST);
+            }
             // 如果方法是不上链的合约调用，同步执行合约代码，不改变状态根，并返回值
-            if ((contractHelper.getMethodInfoByContractAddress(chainId, prevStateRoot, methodName, methodDesc, contractAddressBytes)).isView()) {
+            if (method.isView()) {
                 return Result.getFailed(CONTRACT_NOT_EXECUTE_VIEW);
             }
             // 创建链上交易，包含智能合约
@@ -373,7 +377,7 @@ public class ContractTxHelper {
 
             // 执行结果失败时，交易直接返回错误，不上链，不消耗Gas
             if (!programResult.isSuccess()) {
-                Log.error(programResult.getStackTrace());
+                Log.error(programResult.getErrorMessage() + ", " + programResult.getStackTrace());
                 Result result = Result.getFailed(DATA_ERROR);
                 result.setMsg(ContractUtil.simplifyErrorMsg(programResult.getErrorMessage()));
                 result = checkVmResultAndReturn(programResult.getErrorMessage(), result);
@@ -431,9 +435,7 @@ public class ContractTxHelper {
             tx.setTime(TimeService.currentTimeMillis());
 
             // 组装txData
-            DeleteContractData deleteContractData = new DeleteContractData();
-            deleteContractData.setContractAddress(contractAddressBytes);
-            deleteContractData.setSender(senderBytes);
+            DeleteContractData deleteContractData = this.getDeleteContractData(contractAddressBytes, senderBytes);
 
             // 计算CoinData
             /*
@@ -458,7 +460,7 @@ public class ContractTxHelper {
         }
     }
 
-    private DeleteContractData getDeleteContractData(byte[] senderBytes, byte[] contractAddressBytes) {
+    private DeleteContractData getDeleteContractData(byte[] contractAddressBytes, byte[] senderBytes) {
         DeleteContractData deleteContractData = new DeleteContractData();
         deleteContractData.setContractAddress(contractAddressBytes);
         deleteContractData.setSender(senderBytes);

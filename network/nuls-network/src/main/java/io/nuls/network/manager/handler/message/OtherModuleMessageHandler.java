@@ -44,8 +44,6 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
-import static io.nuls.network.utils.LoggerUtil.Log;
-
 ;
 
 /**
@@ -92,15 +90,15 @@ public class OtherModuleMessageHandler extends BaseMessageHandler {
         paramMap.put("messageBody", HexUtil.byteToHex(payLoadBody));
         Collection<ProtocolRoleHandler> protocolRoleHandlers = MessageHandlerFactory.getInstance().getProtocolRoleHandlerMap(header.getCommandStr());
         if (null == protocolRoleHandlers) {
-            Log.error("unknown mssages. cmd={},handler may be unRegistered to network.", header.getCommandStr());
+            LoggerUtil.logger(chainId).error("unknown mssages. cmd={},handler may be unRegistered to network.", header.getCommandStr());
         } else {
-            Log.debug("==============================other module message protocolRoleHandlers-size:{}", protocolRoleHandlers.size());
+            LoggerUtil.logger(chainId).debug("==============================other module message protocolRoleHandlers-size:{}", protocolRoleHandlers.size());
             for (ProtocolRoleHandler protocolRoleHandler : protocolRoleHandlers) {
                 try {
-                    Log.debug("request：{}=={}", protocolRoleHandler.getRole(), protocolRoleHandler.getHandler());
+                    LoggerUtil.logger(chainId).debug("request：{}=={}", protocolRoleHandler.getRole(), protocolRoleHandler.getHandler());
                     Request request = MessageUtil.newRequest( protocolRoleHandler.getHandler(), paramMap, Constants.BOOLEAN_FALSE, Constants.ZERO, Constants.ZERO);
                     ResponseContainer responseContainer =ResponseMessageProcessor.sendRequest(protocolRoleHandler.getRole(), request);
-                    Log.debug("responseContainer：" + responseContainer.getMessageId());
+                    LoggerUtil.logger(chainId).debug("responseContainer：" + responseContainer.getMessageId());
                     LoggerUtil.modulesMsgLogs(protocolRoleHandler.getRole(), header.getCommandStr(), node, payLoadBody, responseContainer.getMessageId());
                 } catch (Exception e) {
                     e.printStackTrace();

@@ -26,6 +26,7 @@ import java.util.*;
 public class BlockManager {
     @Autowired
     private RoundManager roundManager;
+
     /**
      * 初始化链区块头数据，缓存指定数量的区块头
      * Initialize chain block header entity to cache a specified number of block headers
@@ -40,13 +41,13 @@ public class BlockManager {
         Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.BL.abbr, "getLatestRoundBlockHeaders", params);
         Map<String, Object> resultMap;
         List<String> blockHeaderHexs = new ArrayList<>();
-        if(cmdResp.isSuccess()){
+        if (cmdResp.isSuccess()) {
             resultMap = (Map<String, Object>) cmdResp.getResponseData();
             blockHeaderHexs = (List<String>) resultMap.get("getLatestRoundBlockHeaders");
         }
-        while(!cmdResp.isSuccess() && blockHeaderHexs.size() == 0){
+        while (!cmdResp.isSuccess() && blockHeaderHexs.size() == 0) {
             cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.BL.abbr, "getLatestRoundBlockHeaders", params);
-            if(cmdResp.isSuccess()){
+            if (cmdResp.isSuccess()) {
                 resultMap = (Map<String, Object>) cmdResp.getResponseData();
                 blockHeaderHexs = (List<String>) resultMap.get("getLatestRoundBlockHeaders");
                 break;
@@ -83,20 +84,20 @@ public class BlockManager {
         long receiveRoundIndex = receiveExtendsData.getRoundIndex();
         BlockExtendsData lastExtendsData = new BlockExtendsData(chain.getBlockHeaderList().get(0).getExtend());
         long lastRoundIndex = lastExtendsData.getRoundIndex();
-        if(receiveRoundIndex > newestExtendsData.getRoundIndex() && (receiveRoundIndex - ConsensusConstant.INIT_BLOCK_HEADER_COUNT > lastRoundIndex)){
+        if (receiveRoundIndex > newestExtendsData.getRoundIndex() && (receiveRoundIndex - ConsensusConstant.INIT_BLOCK_HEADER_COUNT > lastRoundIndex)) {
             Iterator<BlockHeader> iterator = chain.getBlockHeaderList().iterator();
-            while (iterator.hasNext()){
+            while (iterator.hasNext()) {
                 lastExtendsData = new BlockExtendsData(iterator.next().getExtend());
-                if(lastExtendsData.getRoundIndex() == lastRoundIndex){
+                if (lastExtendsData.getRoundIndex() == lastRoundIndex) {
                     iterator.remove();
-                }else if(lastExtendsData.getRoundIndex() > lastRoundIndex){
+                } else if (lastExtendsData.getRoundIndex() > lastRoundIndex) {
                     break;
                 }
             }
         }
         chain.getBlockHeaderList().add(blockHeader);
         chain.setNewestHeader(blockHeader);
-        chain.getLoggerMap().get(ConsensusConstant.BASIC_LOGGER_NAME).info("新区块保存成功，新区块高度为：" + blockHeader.getHeight() + ",本地最新区块高度为：" + chain.getNewestHeader().getHeight());
+        chain.getLoggerMap().get(ConsensusConstant.BASIC_LOGGER_NAME).info("区块保存，高度为：" + blockHeader.getHeight() + " , txCount: " + blockHeader.getTxCount() + ",本地最新区块高度为：" + chain.getNewestHeader().getHeight());
     }
 
     /**
@@ -107,6 +108,7 @@ public class BlockManager {
      * @param height block height
      */
     public void chainRollBack(Chain chain, int height) {
+        chain.getLoggerMap().get(ConsensusConstant.BASIC_LOGGER_NAME).info("区块开始回滚，回滚到的高度：" + height);
         List<BlockHeader> headerList = chain.getBlockHeaderList();
         Collections.sort(headerList, new BlockHeaderComparator());
         for (int index = headerList.size() - 1; index >= 0; index--) {
@@ -118,7 +120,15 @@ public class BlockManager {
         }
         chain.setBlockHeaderList(headerList);
         chain.setNewestHeader(headerList.get(headerList.size() - 1));
-        roundManager.rollBackRound(chain,height);
+        long roundIndex;
+        BlockHeader newestBlocHeader = chain.getNewestHeader();
+        BlockExtendsData bestExtendsData = new BlockExtendsData(newestBlocHeader.getExtend());
+        if(bestExtendsData.getPackingIndexOfRound() > 1){
+            roundIndex = bestExtendsData.getRoundIndex();
+        }else{
+            roundIndex = bestExtendsData.getRoundIndex()-1;
+        }
+        roundManager.rollBackRound(chain, roundIndex);
         chain.getLoggerMap().get(ConsensusConstant.BASIC_LOGGER_NAME).info("区块回滚成功，回滚到的高度为：" + height + ",本地最新区块高度为：" + chain.getNewestHeader().getHeight());
     }
 }

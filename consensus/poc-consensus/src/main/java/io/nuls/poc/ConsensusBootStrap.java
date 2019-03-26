@@ -15,12 +15,10 @@ import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.core.ioc.SpringLiteContext;
 import io.nuls.tools.log.Log;
-import io.nuls.tools.parse.ConfigLoader;
 import io.nuls.tools.parse.I18nUtils;
 
 import java.lang.reflect.Field;
 import java.nio.charset.Charset;
-import java.util.Properties;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 /**
@@ -34,7 +32,9 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 public class ConsensusBootStrap extends RpcModule {
 
     @Autowired
-    ConsensusConfig consensusConfig;
+    private ConsensusConfig consensusConfig;
+    @Autowired
+    private ChainManager chainManager;
 
     public static void main(String[] args){
         if (args == null || args.length == 0) {
@@ -53,6 +53,7 @@ public class ConsensusBootStrap extends RpcModule {
             initSys();
             initDB();
             initLanguage();
+            chainManager.initChain();
         }catch (Exception e){
             Log.error(e);
         }
@@ -84,6 +85,16 @@ public class ConsensusBootStrap extends RpcModule {
     @Override
     public boolean doStart() {
         try {
+            while (!isDependencieReady(new Module(ModuleE.TX.abbr, "1.0"))){
+                Log.debug("wait transaction module ready");
+                Thread.sleep(2000L);
+            }
+            chainManager.registerTx();
+            /*
+            * 交易模块启动成功之后则向交易模块注册交易
+            * After the transaction module starts successfully, register the transaction with the transaction module.
+            * */
+
             while (!isDependencieReady()){
                 Log.debug("wait depend modules ready");
                 Thread.sleep(2000L);
@@ -123,8 +134,6 @@ public class ConsensusBootStrap extends RpcModule {
      * Initialization database
      */
     private void initDB() throws Exception {
-//        Properties properties = ConfigLoader.loadProperties(ConsensusConstant.DB_CONFIG_NAME);
-//        String path = properties.getProperty(ConsensusConstant.DB_DATA_PATH, ConsensusConstant.DB_DATA_DEFAULT_PATH);
         RocksDBService.init(consensusConfig.getDataFolder());
         RocksDBService.createTable(ConsensusConstant.DB_NAME_CONSUME_LANGUAGE);
         RocksDBService.createTable(ConsensusConstant.DB_NAME_CONSUME_CONGIF);
@@ -137,7 +146,7 @@ public class ConsensusBootStrap extends RpcModule {
     private void initLanguage() throws Exception {
         LanguageService languageService = SpringLiteContext.getBean(LanguageService.class);
         String languageDB = languageService.getLanguage();
-        I18nUtils.loadLanguage(ConsensusBootStrap.class,"", "");
+        I18nUtils.loadLanguage(ConsensusBootStrap.class,"", consensusConfig.getLanguage());
         String language = null == languageDB ? I18nUtils.getLanguage() : languageDB;
         I18nUtils.setLanguage(language);
         if (null == languageDB) {

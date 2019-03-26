@@ -49,10 +49,10 @@ import java.util.Map;
  * @date 2019/01/14
  **/
 public class CmdGenesisAsset {
-    public int chainId = 12345;
-    int assetChainId = 12345;
+    public int chainId = 2;
+    int assetChainId = 2;
 //    String address = "JgT2JCQvKGRKRjKqyfxRAj2zSCpGca01f";
-    String address = "5MR_2CkbW7Bn1GpKkh4ZVfudxzTUNPdKp5Z";
+    String address = "tNULSeBaMvEtDfvZuukDf2mVyfGo3DdiN8KLRG";
     int assetId = 1;
     //入账金额
     BigInteger amount = BigInteger.valueOf(100000000000000L);
@@ -113,8 +113,8 @@ public class CmdGenesisAsset {
         // Build params map
         Map<String, Object> params = new HashMap<>();
         // Version information ("1.1" or 1.1 is both available)
-        params.put("chainId", 12345);
-        params.put("assetChainId", 12345);
+        params.put("chainId", 2);
+        params.put("assetChainId", 2);
         params.put("assetId", 1);
         params.put("address", address);
 //        params.put("address", "LLbmaw1UNmKmd5PfuzP1Zm9dNuAnia01f");

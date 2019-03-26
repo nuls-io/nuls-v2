@@ -31,6 +31,7 @@ import io.nuls.contract.model.bo.config.ConfigBean;
 import io.nuls.contract.model.dto.ContractTxRegisterDto;
 import io.nuls.contract.rpc.call.TransactionCall;
 import io.nuls.contract.storage.ConfigStorageService;
+import io.nuls.contract.util.Log;
 import io.nuls.contract.util.VMContext;
 import io.nuls.contract.vm.program.ProgramExecutor;
 import io.nuls.contract.vm.program.impl.ProgramExecutorImpl;
@@ -40,8 +41,6 @@ import io.nuls.rpc.model.ModuleE;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.exception.NulsException;
-import io.nuls.tools.log.Log;
-import io.nuls.tools.parse.JSONUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -101,6 +100,10 @@ public class ChainManager {
              */
             initTokenBalanceManager(chain);
             /*
+             * 初始化智能合约创建合约未确认交易管理器
+             */
+            initContractTxCreateUnconfirmedManager(chain);
+            /*
              * 注册交易到交易管理模块
              */
             registerTx(chain);
@@ -116,6 +119,11 @@ public class ChainManager {
         chain.setContractTokenBalanceManager(tokenBalanceManager);
     }
 
+    private void initContractTxCreateUnconfirmedManager(Chain chain) {
+        ContractTxCreateUnconfirmedManager manager = ContractTxCreateUnconfirmedManager.newInstance(chain.getChainId());
+        chain.setContractTxCreateUnconfirmedManager(manager);
+    }
+
     private void initContractExecutor(Chain chain) {
         ProgramExecutor programExecutor = new ProgramExecutorImpl(vmContext, chain);
         chain.setProgramExecutor(programExecutor);
@@ -126,6 +134,8 @@ public class ChainManager {
         list.add(new ContractTxRegisterDto(TX_TYPE_CREATE_CONTRACT, CREATE_VALIDATOR, false, false, true));
         list.add(new ContractTxRegisterDto(TX_TYPE_CALL_CONTRACT, CALL_VALIDATOR, false, false, true));
         list.add(new ContractTxRegisterDto(TX_TYPE_DELETE_CONTRACT, DELETE_VALIDATOR, false, false, true));
+        list.add(new ContractTxRegisterDto(TX_TYPE_CONTRACT_TRANSFER, null, true, false, false));
+        list.add(new ContractTxRegisterDto(TX_TYPE_CONTRACT_RETURN_GAS, null, true, false, false));
         TransactionCall.registerTx(chain.getChainId(), ModuleE.SC.abbr, INTEGRATE_VALIDATOR, COMMIT, ROLLBACK, list);
     }
 

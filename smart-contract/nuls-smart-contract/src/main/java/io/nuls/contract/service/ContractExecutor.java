@@ -27,6 +27,7 @@ package io.nuls.contract.service;
 import io.nuls.contract.model.bo.ContractResult;
 import io.nuls.contract.model.txdata.ContractData;
 import io.nuls.contract.vm.program.ProgramExecutor;
+import io.nuls.tools.basic.Result;
 
 /**
  * @author: PierreLuo
@@ -41,5 +42,7 @@ public interface ContractExecutor {
     ContractResult delete(ProgramExecutor executor, ContractData contractData, long number, String preStateRoot);
 
     ProgramExecutor createBatchExecute(int chainId, byte[] stateRoot);
+
+    Result<byte[]> commitBatchExecute(ProgramExecutor executor);
 
 }

@@ -1,8 +1,7 @@
 package io.nuls.cmd.client;
 
 import io.nuls.api.provider.Provider;
-import io.nuls.api.provider.ServiceManager;
-import io.nuls.api.provider.account.AccountService;
+import io.nuls.cmd.client.utils.LoggerUtil;
 import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.modulebootstrap.Module;
 import io.nuls.rpc.modulebootstrap.RpcModule;
@@ -10,17 +9,9 @@ import io.nuls.rpc.modulebootstrap.RpcModuleState;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.core.annotation.Value;
-import io.nuls.tools.exception.NulsException;
-import io.nuls.tools.model.StringUtils;
+import io.nuls.tools.log.logback.NulsLogger;
 import io.nuls.tools.parse.I18nUtils;
 import io.nuls.tools.thread.ThreadUtils;
-import jline.console.ConsoleReader;
-import lombok.extern.slf4j.Slf4j;
-import org.junit.Before;
-
-import java.io.IOException;
-import java.net.ServerSocket;
-import java.net.Socket;
 
 /**
  * @Author: zhoulijun
@@ -28,7 +19,6 @@ import java.net.Socket;
  * @Description: 功能描述
  */
 @Component
-@Slf4j
 public class CmdClientModule extends RpcModule {
 
     @Autowired Config config;
@@ -44,6 +34,8 @@ public class CmdClientModule extends RpcModule {
     Provider.ProviderType providerType;
 
     @Autowired CommandHandler commandHandler;
+
+    static NulsLogger log = LoggerUtil.logger;
 
     @Override
     public Module[] getDependencies() {

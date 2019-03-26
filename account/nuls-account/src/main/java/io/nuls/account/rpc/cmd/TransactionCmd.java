@@ -48,6 +48,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 /**
  * @author: qinyifeng
@@ -117,7 +119,7 @@ public class TransactionCmd extends BaseCmd {
         }
         Map<String, List<Transaction>> resultMap = new HashMap<>();
         resultMap.put("list", result);
-        LoggerUtil.logger.debug("ac_accountTxValidate end");
+//        LoggerUtil.logger.debug("ac_accountTxValidate end");
         return success(resultMap);
     }
 
@@ -193,7 +195,7 @@ public class TransactionCmd extends BaseCmd {
 
         Map<String, Boolean> resultMap = new HashMap<>();
         resultMap.put("value", result);
-        LoggerUtil.logger.debug("ac_commitTx end");
+//        LoggerUtil.logger.debug("ac_commitTx end");
         return success(resultMap);
     }
 
@@ -270,7 +272,7 @@ public class TransactionCmd extends BaseCmd {
 
         Map<String, Boolean> resultMap = new HashMap<>();
         resultMap.put("value", result);
-        LoggerUtil.logger.debug("ac_rollbackTx end");
+//        LoggerUtil.logger.debug("ac_rollbackTx end");
         return success(resultMap);
     }
 
@@ -283,7 +285,7 @@ public class TransactionCmd extends BaseCmd {
     @Parameter(parameterName = RpcParameterNameConstant.CHAIN_ID, parameterType = "int")
     @Parameter(parameterName = RpcParameterNameConstant.TX_HEX, parameterType = "String")
     public Response transferTxValidate(Map<String, Object> params) {
-        LoggerUtil.logger.debug("ac_transferTxValidate start");
+//        LoggerUtil.logger.debug("ac_transferTxValidate start");
         Map<String, Boolean> resultMap = new HashMap<>();
         boolean result;
         try {
@@ -307,7 +309,7 @@ public class TransactionCmd extends BaseCmd {
         }
 
         resultMap.put("value", result);
-        LoggerUtil.logger.debug("ac_transferTxValidate end");
+//        LoggerUtil.logger.debug("ac_transferTxValidate end");
         return success(resultMap);
     }
 
@@ -342,7 +344,7 @@ public class TransactionCmd extends BaseCmd {
      */
     @CmdAnnotation(cmd = "ac_transfer", version = 1.0, description = "create a multi-account transfer transaction")
     public Response transfer(Map params) {
-        LoggerUtil.logger.debug("ac_transfer start");
+//        LoggerUtil.logger.debug("ac_transfer start");
         Map<String, String> map = new HashMap<>(1);
         try {
             // check parameters
@@ -354,8 +356,17 @@ public class TransactionCmd extends BaseCmd {
             // parse params
             JSONUtils.getInstance().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
             TransferDto transferDto = JSONUtils.json2pojo(JSONUtils.obj2json(params), TransferDto.class);
-            List<CoinDto> inputList = transferDto.getInputs();
-            List<CoinDto> outputList = transferDto.getOutputs();
+            Function<CoinDto,CoinDto> checkAddress = cd->{
+                //如果address 不是地址就当别名处理
+                if(!AddressTool.validAddress(transferDto.getChainId(),cd.getAddress())){
+                    AliasPo aliasPo = aliasStorageService.getAlias(transferDto.getChainId(), cd.getAddress());
+                    Preconditions.checkNotNull(aliasPo,AccountErrorCode.ALIAS_NOT_EXIST);
+                    cd.setAddress(AddressTool.getStringAddressByBytes(aliasPo.getAddress()));
+                }
+                return cd;
+            };
+            List<CoinDto> inputList = transferDto.getInputs().stream().map(checkAddress).collect(Collectors.toList());
+            List<CoinDto> outputList = transferDto.getOutputs().stream().map(checkAddress).collect(Collectors.toList());
             if (inputList == null || outputList == null) {
                 LoggerUtil.logger.warn("ac_transfer params input or output is null");
                 throw new NulsRuntimeException(AccountErrorCode.NULL_PARAMETER);
@@ -401,7 +412,7 @@ public class TransactionCmd extends BaseCmd {
         } catch (Exception e) {
             return failed(e.getMessage());
         }
-        LoggerUtil.logger.debug("ac_transfer end");
+//        LoggerUtil.logger.debug("ac_transfer end");
         return success(map);
     }
 
@@ -413,9 +424,10 @@ public class TransactionCmd extends BaseCmd {
      * @param params
      * @return
      */
+    @Deprecated(since = "此方法废弃，请使用transfer方法，该方法可接受别名转账")
     @CmdAnnotation(cmd = "ac_transferByAlias", version = 1.0, description = "transfer by alias")
     public Response transferByAlias(Map params) {
-        LoggerUtil.logger.debug("ac_transferByAlias start");
+//        LoggerUtil.logger.debug("ac_transferByAlias start");
         Map<String, String> map = new HashMap<>(1);
         try {
             Preconditions.checkNotNull(params,AccountErrorCode.NULL_PARAMETER);
@@ -441,13 +453,15 @@ public class TransactionCmd extends BaseCmd {
                 throw new NulsException(AccountErrorCode.PARAMETER_ERROR);
             }
             //根据别名查询出地址
-            AliasPo aliasPo = aliasStorageService.getAlias(chainId, alias);
-            Preconditions.checkNotNull(aliasPo,AccountErrorCode.ALIAS_NOT_EXIST);
+            AliasPo toAddressAliasPo = aliasStorageService.getAlias(chainId, alias);
+            Preconditions.checkNotNull(toAddressAliasPo,AccountErrorCode.ALIAS_NOT_EXIST);
+            AliasPo formAddressAliasPo = aliasStorageService.getAlias(chainId, alias);
+            Preconditions.checkNotNull(formAddressAliasPo,AccountErrorCode.ALIAS_NOT_EXIST);
             Chain chain = chainManager.getChainMap().get(chainId);
             Preconditions.checkNotNull(chain,AccountErrorCode.CHAIN_NOT_EXIST);
             int assetId = chain.getConfig().getAssetsId();
-            CoinDto fromCoinDto = new CoinDto(address, chainId, assetId, amount, password);
-            CoinDto toCoinDto = new CoinDto(AddressTool.getStringAddressByBytes(aliasPo.getAddress()),chainId,assetId,amount,null);
+            CoinDto fromCoinDto = new CoinDto(AddressTool.getStringAddressByBytes(formAddressAliasPo.getAddress()), chainId, assetId, amount, password);
+            CoinDto toCoinDto = new CoinDto(AddressTool.getStringAddressByBytes(toAddressAliasPo.getAddress()),chainId,assetId,amount,null);
             Transaction tx = transactionService.transferByAlias(chainId, fromCoinDto, toCoinDto, remark);
             map.put("txHash", tx.getHash().getDigestHex());
         } catch (NulsException e) {
@@ -457,7 +471,7 @@ public class TransactionCmd extends BaseCmd {
         } catch (Exception e) {
             return failed(e.getMessage());
         }
-        LoggerUtil.logger.debug("ac_transferByAlias end");
+//        LoggerUtil.logger.debug("ac_transferByAlias end");
         return success(map);
     }
 
@@ -471,7 +485,7 @@ public class TransactionCmd extends BaseCmd {
      */
     @CmdAnnotation(cmd = "ac_createMultiSignTransfer", version = 1.0, description = "create multi sign transfer")
     public Response createMultiSignTransfer(Map params) {
-        LoggerUtil.logger.debug("ac_createMultiSignTransfer start");
+//        LoggerUtil.logger.debug("ac_createMultiSignTransfer start");
         Map<String, String> map = new HashMap<>(1);
         MultiSigAccount multiSigAccount = null;
         try {
@@ -546,7 +560,7 @@ public class TransactionCmd extends BaseCmd {
         } catch (Exception e) {
             return failed(e.getMessage());
         }
-        LoggerUtil.logger.debug("ac_createMultiSignTransfer end");
+//        LoggerUtil.logger.debug("ac_createMultiSignTransfer end");
         return success(map);
     }
 
@@ -560,7 +574,7 @@ public class TransactionCmd extends BaseCmd {
      */
     @CmdAnnotation(cmd = "ac_signMultiSignTransaction", version = 1.0, description = "sign MultiSign Transaction")
     public Response signMultiSignTransaction(Map params) {
-        LoggerUtil.logger.debug("ac_signMultiSignTransaction start");
+//        LoggerUtil.logger.debug("ac_signMultiSignTransaction start");
         Map<String, String> map = new HashMap<>(1);
         Object chainIdObj = params == null ? null : params.get(RpcParameterNameConstant.CHAIN_ID);
         Object passwordObj = params == null ? null : params.get(RpcParameterNameConstant.PASSWORD);
@@ -595,7 +609,7 @@ public class TransactionCmd extends BaseCmd {
         } catch (Exception e) {
             return failed(e.getMessage());
         }
-        LoggerUtil.logger.debug("ac_signMultiSignTransaction end");
+//        LoggerUtil.logger.debug("ac_signMultiSignTransaction end");
         return success(map);
     }
 

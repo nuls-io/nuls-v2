@@ -37,6 +37,7 @@ import java.util.List;
 import java.util.Map;
 
 import static io.nuls.block.constant.CommandConstant.*;
+import static io.nuls.block.constant.Constant.GETTIME_INTERVAL;
 import static io.nuls.block.utils.LoggerUtil.commonLog;
 
 
@@ -48,6 +49,9 @@ import static io.nuls.block.utils.LoggerUtil.commonLog;
  * @date 18-11-9 下午3:48
  */
 public class NetworkUtil {
+
+    private static long latestGetTime = System.currentTimeMillis();
+    private static long offset = 0;
 
     /**
      * 根据链ID获取可用节点
@@ -235,16 +239,23 @@ public class NetworkUtil {
      * @return
      */
     public static long currentTime() {
-        try {
-            Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.NW.abbr, "nw_currentTimeMillis", null);
-            Map responseData = (Map) response.getResponseData();
-            Map result = (Map) responseData.get("nw_currentTimeMillis");
-            return (Long) result.get("currentTimeMillis");
-        } catch (Exception e) {
-            e.printStackTrace();
-            commonLog.error("get nw_currentTimeMillis fail");
+        long now = System.currentTimeMillis();
+        if (now - latestGetTime > GETTIME_INTERVAL) {
+            try {
+                Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.NW.abbr, "nw_currentTimeMillis", null);
+                if (response.isSuccess()) {
+                    Map responseData = (Map) response.getResponseData();
+                    Map result = (Map) responseData.get("nw_currentTimeMillis");
+                    long time = Long.valueOf(result.get("currentTimeMillis").toString());
+                    offset = time - System.currentTimeMillis();
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+                commonLog.error("get nw_currentTimeMillis fail");
+            }
+            latestGetTime = now;
         }
-        return System.currentTimeMillis();
+        return (System.currentTimeMillis() + offset);
     }
 
     /**

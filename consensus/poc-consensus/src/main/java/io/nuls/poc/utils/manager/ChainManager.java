@@ -3,10 +3,10 @@ package io.nuls.poc.utils.manager;
 import ch.qos.logback.classic.Level;
 import io.nuls.db.constant.DBErrorCode;
 import io.nuls.db.service.RocksDBService;
+import io.nuls.poc.config.ConsensusConfig;
 import io.nuls.poc.constant.ConsensusConstant;
 import io.nuls.poc.model.bo.Chain;
 import io.nuls.poc.model.bo.config.ConfigBean;
-import io.nuls.poc.config.ConsensusConfig;
 import io.nuls.poc.model.bo.tx.TxRegisterDetail;
 import io.nuls.poc.storage.ConfigService;
 import io.nuls.poc.utils.CallMethodUtils;
@@ -22,6 +22,7 @@ import io.nuls.tools.log.logback.NulsLogger;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -53,34 +54,44 @@ public class ChainManager {
     private BlockManager blockManager;
     @Autowired
     private ConsensusConfig config;
-
     private Map<Integer, Chain> chainMap = new ConcurrentHashMap<>();
 
     /**
-     * 初始化并启动链
-     * Initialize and start the chain
-     */
-    public void runChain() {
+     * 初始化
+     * Initialization chain
+     * */
+    public void initChain(){
         Map<Integer, ConfigBean> configMap = configChain();
         if (configMap == null || configMap.size() == 0) {
+            Log.info("链初始化失败！");
             return;
         }
-        List<TxRegisterDetail> txRegisterDetailList = getRegisterTxList();
-        /*
-        根据配置信息创建初始化链
-        Initialize chains based on configuration information
-        */
-        for (Map.Entry<Integer, ConfigBean> entry : configMap.entrySet()) {
+        for (Map.Entry<Integer, ConfigBean> entry : configMap.entrySet()){
             Chain chain = new Chain();
             int chainId = entry.getKey();
             chain.setConfig(entry.getValue());
-
             /*
              * 初始化链日志对象
              * Initialization Chain Log Objects
              * */
             initLogger(chain);
+            /*
+            初始化链数据库表
+            Initialize linked database tables
+            */
+            initTable(chain);
+            chainMap.put(chainId, chain);
+        }
 
+    }
+
+    /**
+     * 注册链交易
+     * Registration Chain Transaction
+     * */
+    public void registerTx(){
+        List<TxRegisterDetail> txRegisterDetailList = getRegisterTxList();
+        for (Chain chain:chainMap.values()) {
             /*
              * 链交易注册
              * Chain Trading Registration
@@ -95,13 +106,15 @@ public class ChainManager {
                     e.printStackTrace();
                 }
             }
+        }
+    }
 
-            /*
-            初始化链数据库表
-            Initialize linked database tables
-            */
-            initTable(chain);
-
+    /**
+     * 加载链缓存数据并启动链
+     * Load the chain to cache data and start the chain
+     * */
+    public void runChain(){
+        for (Chain chain:chainMap.values()) {
             /*
             加载链缓存数据
             Load chain caching entity
@@ -113,10 +126,70 @@ public class ChainManager {
             Create and start in-chain tasks
             */
             schedulerManager.createChainScheduler(chain);
+        }
+    }
+
+    /**
+     * 初始化并启动链
+     * Initialize and start the chain
+     */
+    /*public void runChain() {
+        Map<Integer, ConfigBean> configMap = configChain();
+        if (configMap == null || configMap.size() == 0) {
+            return;
+        }
+        List<TxRegisterDetail> txRegisterDetailList = getRegisterTxList();
+        *//*
+        根据配置信息创建初始化链
+        Initialize chains based on configuration information
+        *//*
+        for (Map.Entry<Integer, ConfigBean> entry : configMap.entrySet()) {
+            Chain chain = new Chain();
+            int chainId = entry.getKey();
+            chain.setConfig(entry.getValue());
+
+            *//*
+             * 初始化链日志对象
+             * Initialization Chain Log Objects
+             * *//*
+            initLogger(chain);
+
+            *//*
+             * 链交易注册
+             * Chain Trading Registration
+             * *//*
+            while (true) {
+                if (CallMethodUtils.registerTx(chain, txRegisterDetailList)) {
+                    break;
+                }
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+
+            *//*
+            初始化链数据库表
+            Initialize linked database tables
+            *//*
+            initTable(chain);
+
+            *//*
+            加载链缓存数据
+            Load chain caching entity
+            *//*
+            initCache(chain);
+
+            *//*
+            创建并启动链内任务
+            Create and start in-chain tasks
+            *//*
+            schedulerManager.createChainScheduler(chain);
 
             chainMap.put(chainId, chain);
         }
-    }
+    }*/
 
     /**
      * 停止一条链
@@ -161,11 +234,15 @@ public class ChainManager {
                     return null;
                 }*/
                 ConfigBean configBean = config.getConfigBean();
-                configMap.put(configBean.getChainId(), configBean);
+                configBean.setBlockReward(configBean.getInflationAmount().divide(ConsensusConstant.YEAR_MILLISECOND.divide(BigInteger.valueOf(configBean.getPackingInterval()))));
+                boolean saveSuccess = configService.save(configBean,configBean.getChainId());
+                if(saveSuccess){
+                    configMap.put(configBean.getChainId(), configBean);
+                }
             }
             return configMap;
         } catch (Exception e) {
-            Log.error(e.getMessage());
+            Log.error(e);
             return null;
         }
     }
@@ -231,7 +308,7 @@ public class ChainManager {
             agentManager.loadAgents(chain);
             depositManager.loadDeposits(chain);
             punishManager.loadPunishes(chain);
-            roundManager.initRound(chain);
+            //roundManager.initRound(chain);
         } catch (Exception e) {
             chain.getLoggerMap().get(ConsensusConstant.CONSENSUS_LOGGER_NAME).error(e);
         }

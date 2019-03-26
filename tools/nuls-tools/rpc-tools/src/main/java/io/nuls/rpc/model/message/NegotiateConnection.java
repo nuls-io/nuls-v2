@@ -39,7 +39,7 @@ import lombok.ToString;
 public class NegotiateConnection {
     /**
      * module abbreviation
-     * */
+     */
     private String abbreviation;
 
     /**

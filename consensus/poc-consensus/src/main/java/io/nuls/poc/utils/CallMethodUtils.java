@@ -33,6 +33,9 @@ import java.util.Map;
  * 2018/12/26
  */
 public class CallMethodUtils {
+    public static final long MIN_PACK_SURPLUS_TIME = 2000;
+    public static final long TIME_OUT = 1000;
+    public static final long PROCESS_TIME = 1200;
 
     /**
      * 账户验证
@@ -141,16 +144,18 @@ public class CallMethodUtils {
      *
      * @param chainId chain ID
      * @param block   new block Info
+     * @param timeOut 接口超时时间
      * @return Successful Sending
      */
     @SuppressWarnings("unchecked")
-    public static boolean receivePackingBlock(int chainId, String block) throws NulsException {
+    public static void  receivePackingBlock(int chainId, String block,long timeOut) throws NulsException {
         Map<String, Object> params = new HashMap(4);
         params.put("chainId", chainId);
         params.put("block", block);
         try {
-            Response callResp = ResponseMessageProcessor.requestAndResponse(ModuleE.BL.abbr, "receivePackingBlock", params);
-            return callResp.isSuccess();
+            ResponseMessageProcessor.requestAndResponse(ModuleE.BL.abbr, "receivePackingBlock", params,timeOut);
+            //Response callResp =
+            //return callResp.isSuccess();
         } catch (Exception e) {
             throw new NulsException(e);
         }
@@ -284,15 +289,20 @@ public class CallMethodUtils {
         try {
             Map<String, Object> params = new HashMap(4);
             params.put("chainId", chain.getConfig().getChainId());
-            params.put("endTimestamp", currentTime() + ConsensusConstant.GET_TX_MAX_WAIT_TIME);
-            params.put("maxTxDataSize", ConsensusConstant.PACK_TX_MAX_SIZE);
+            long currentTime = currentTime();
+            long surplusTime = blockTime - currentTime;
+            if(surplusTime <= MIN_PACK_SURPLUS_TIME){
+                return null;
+            }
+            params.put("endTimestamp", blockTime - PROCESS_TIME);
+            params.put("maxTxDataSize", chain.getConfig().getBlockMaxSize());
             //params.put("height", height);
             params.put("blockTime", blockTime);
             params.put("packingAddress", packingAddress);
             BlockExtendsData preExtendsData = new BlockExtendsData(chain.getNewestHeader().getExtend());
             byte[] preStateRoot = preExtendsData.getStateRoot();
             params.put("preStateRoot", HexUtil.encode(preStateRoot));
-            Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.TX.abbr, "tx_packableTxs", params,ConsensusConstant.GET_TX_MAX_WAIT_TIME);
+            Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.TX.abbr, "tx_packableTxs", params,surplusTime-TIME_OUT);
             if (!cmdResp.isSuccess()) {
                 chain.getLoggerMap().get(ConsensusConstant.CONSENSUS_LOGGER_NAME).error("Packaging transaction acquisition failure!");
                 return null;

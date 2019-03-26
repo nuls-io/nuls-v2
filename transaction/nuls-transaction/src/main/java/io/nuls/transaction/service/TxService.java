@@ -47,6 +47,15 @@ public interface TxService {
     boolean verify(Chain chain, Transaction tx);
 
     /**
+     * 验证交易,不执行基础的校验
+     * @param chain
+     * @param tx
+     * @param incloudBasic
+     * @return
+     */
+    boolean verify(Chain chain, Transaction tx, boolean incloudBasic);
+
+    /**
      * Get a transaction, first check the database from the confirmation transaction,
      * if not found, then query from the confirmed transaction
      *
@@ -94,20 +103,23 @@ public interface TxService {
      * @param packingAddress
      * @param preStateRoot
      * @return
-     * @throws NulsException
      */
     TxPackage getPackableTxs(Chain chain, long endtimestamp, long maxTxDataSize, long blockTime, long blockHeight,
-                             String packingAddress, String preStateRoot) throws NulsException;
+                             String packingAddress, String preStateRoot);
 
     /**
      * 收到新区快时，验证完整交易列表
-     *
      * @param chain
      * @param list
+     * @param blockHeight
+     * @param blockTime
+     * @param packingAddress
+     * @param stateRoot
+     * @param preStateRoot
      * @return
      * @throws NulsException
      */
-    VerifyTxResult batchVerify(Chain chain, List<String> list, long blockHeight) throws NulsException;
+    VerifyTxResult batchVerify(Chain chain, List<String> list, long blockHeight, long blockTime, String packingAddress, String stateRoot, String preStateRoot) throws NulsException;
 
 
     /**
@@ -120,11 +132,19 @@ public interface TxService {
     void clearInvalidTx(Chain chain, List<Transaction> txList);
 
     /**
-     * 从已验证未打包交易中删除单个无效的交易, 并回滚账本
+     * 从已验证未打包交易中删除单个无效的交易
      *
      * @param chain
      * @param tx
      * @return
      */
     void clearInvalidTx(Chain chain, Transaction tx);
+
+    /**
+     * 从已验证未打包交易中删除单个无效的交易
+     * @param chain
+     * @param tx
+     * @param cleanLedgerUfmTx 调用账本的未确认回滚
+     */
+    void clearInvalidTx(Chain chain, Transaction tx, boolean cleanLedgerUfmTx);
 }

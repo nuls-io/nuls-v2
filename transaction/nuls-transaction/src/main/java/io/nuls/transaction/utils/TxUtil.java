@@ -38,11 +38,13 @@ import io.nuls.transaction.constant.TxConstant;
 import io.nuls.transaction.constant.TxErrorCode;
 import io.nuls.transaction.manager.TxManager;
 import io.nuls.transaction.model.bo.Chain;
+import io.nuls.transaction.model.bo.TxRegister;
 import io.nuls.transaction.model.po.TransactionPO;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import static io.nuls.transaction.utils.LoggerUtil.Log;
 
@@ -131,91 +133,124 @@ public class TxUtil {
         return false;
     }
 
-    public static List<TransactionPO> tx2PO(Transaction tx) throws NulsException {
-        return tx2PO(null, tx);
-    }
-
     public static List<TransactionPO> tx2PO(Chain chain, Transaction tx) throws NulsException {
         List<TransactionPO> list = new ArrayList<>();
         if (null == tx.getCoinData()) {
             return list;
         }
         CoinData coinData = tx.getCoinDataInstance();
-        if (coinData.getFrom() != null
-                && tx.getType() != TxConstant.TX_TYPE_COINBASE
-                && tx.getType() != TxConstant.TX_TYPE_REGISTER_AGENT
-                && tx.getType() != TxConstant.TX_TYPE_JOIN_CONSENSUS
-                && tx.getType() != TxConstant.TX_TYPE_CANCEL_DEPOSIT
-                && tx.getType() != TxConstant.TX_TYPE_STOP_AGENT
-                && tx.getType() != TxConstant.TX_TYPE_RED_PUNISH) {
-            TransactionPO transactionPO = null;
-            for (CoinFrom coinFrom : coinData.getFrom()) {
-                transactionPO = new TransactionPO();
-                transactionPO.setAddress(AddressTool.getStringAddressByBytes(coinFrom.getAddress()));
+        if (tx.getType() == TxConstant.TX_TYPE_YELLOW_PUNISH) {
+            YellowPunishData punishData = new YellowPunishData();
+            punishData.parse(tx.getTxData(), 0);
+            for (byte[] address : punishData.getAddressList()) {
+                TransactionPO transactionPO = new TransactionPO();
+                transactionPO.setAddress(AddressTool.getStringAddressByBytes(address));
+                transactionPO.setAssetChainId(chain.getConfig().getChainId());
+                transactionPO.setAssetId(chain.getConfig().getAssetId());
+                transactionPO.setAmount(BigInteger.ZERO);
                 transactionPO.setHash(tx.getHash().getDigestHex());
                 transactionPO.setType(tx.getType());
-                transactionPO.setAssetChainId(coinFrom.getAssetsChainId());
-                transactionPO.setAssetId(coinFrom.getAssetsId());
-                transactionPO.setAmount(coinFrom.getAmount());
-                // 0普通交易，(-1:按时间解锁, 1:按高度解锁)解锁金额交易（退出共识，退出委托）
-                byte locked = coinFrom.getLocked();
-                int state = 0;
-                if (locked == -1 || locked == 1) {
-                    //解锁金额交易
-                    break;
-                }
-                transactionPO.setState(state);
+                transactionPO.setState(5);
                 transactionPO.setTime(tx.getTime());
                 list.add(transactionPO);
             }
-        }
-        if (coinData.getTo() != null) {
-            TransactionPO transactionPO = null;
-            for (CoinTo coinTo : coinData.getTo()) {
-                transactionPO = new TransactionPO();
-                transactionPO.setAddress(AddressTool.getStringAddressByBytes(coinTo.getAddress()));
-                transactionPO.setAssetChainId(coinTo.getAssetsChainId());
-                transactionPO.setAssetId(coinTo.getAssetsId());
-                transactionPO.setAmount(coinTo.getAmount());
-                transactionPO.setHash(tx.getHash().getDigestHex());
-                transactionPO.setType(tx.getType());
-                // 解锁高度或解锁时间，-1为永久锁定
-                Long lockTime = coinTo.getLockTime();
-                int state = 1;
-                if (lockTime != 0) {
-                    state = 2;
-                }
-                transactionPO.setState(state);
-                transactionPO.setTime(tx.getTime());
-                list.add(transactionPO);
-            }
-        }
-        if(TxManager.isSmartContract(chain, tx.getType())){
+        } else if (tx.getType() == TxConstant.TX_TYPE_RED_PUNISH) {
+            RedPunishData punishData = new RedPunishData();
+            punishData.parse(tx.getTxData(), 0);
             TransactionPO transactionPO = new TransactionPO();
-            transactionPO.setAddress(extractContractAddress(tx.getTxData()));
+            transactionPO.setAddress(AddressTool.getStringAddressByBytes(punishData.getAddress()));
             transactionPO.setAssetChainId(chain.getConfig().getChainId());
             transactionPO.setAssetId(chain.getConfig().getAssetId());
             transactionPO.setAmount(BigInteger.ZERO);
             transactionPO.setHash(tx.getHash().getDigestHex());
             transactionPO.setType(tx.getType());
-            transactionPO.setState(4);
+            transactionPO.setState(3);
             transactionPO.setTime(tx.getTime());
             list.add(transactionPO);
+
+        } else {
+            if (coinData.getFrom() != null
+                    && tx.getType() != TxConstant.TX_TYPE_COINBASE
+                    && tx.getType() != TxConstant.TX_TYPE_REGISTER_AGENT
+                    && tx.getType() != TxConstant.TX_TYPE_JOIN_CONSENSUS
+                    && tx.getType() != TxConstant.TX_TYPE_CANCEL_DEPOSIT
+                    && tx.getType() != TxConstant.TX_TYPE_STOP_AGENT) {
+                TransactionPO transactionPO = null;
+                for (CoinFrom coinFrom : coinData.getFrom()) {
+                    transactionPO = new TransactionPO();
+                    transactionPO.setAddress(AddressTool.getStringAddressByBytes(coinFrom.getAddress()));
+                    transactionPO.setHash(tx.getHash().getDigestHex());
+                    transactionPO.setType(tx.getType());
+                    transactionPO.setAssetChainId(coinFrom.getAssetsChainId());
+                    transactionPO.setAssetId(coinFrom.getAssetsId());
+                    transactionPO.setAmount(coinFrom.getAmount());
+                    // 0普通交易，(-1:按时间解锁, 1:按高度解锁)解锁金额交易（退出共识，退出委托）
+                    byte locked = coinFrom.getLocked();
+                    int state = 0;
+                    if (locked == -1 || locked == 1) {
+                        //解锁金额交易
+                        break;
+                    }
+                    transactionPO.setState(state);
+                    transactionPO.setTime(tx.getTime());
+                    list.add(transactionPO);
+                }
+            }
+            if (coinData.getTo() != null) {
+                TransactionPO transactionPO = null;
+                for (CoinTo coinTo : coinData.getTo()) {
+                    transactionPO = new TransactionPO();
+                    transactionPO.setAddress(AddressTool.getStringAddressByBytes(coinTo.getAddress()));
+                    transactionPO.setAssetChainId(coinTo.getAssetsChainId());
+                    transactionPO.setAssetId(coinTo.getAssetsId());
+                    transactionPO.setAmount(coinTo.getAmount());
+                    transactionPO.setHash(tx.getHash().getDigestHex());
+                    transactionPO.setType(tx.getType());
+                    // 解锁高度或解锁时间，-1为永久锁定
+                    Long lockTime = coinTo.getLockTime();
+                    int state = 1;
+                    if (lockTime != 0) {
+                        state = 2;
+                    }
+                    transactionPO.setState(state);
+                    transactionPO.setTime(tx.getTime());
+                    list.add(transactionPO);
+                }
+            }
+        }
+        if (TxManager.isUnSystemSmartContract(chain, tx.getType())) {
+            do {
+                // 调用合约交易，如果有coinTo，那么它是合约地址，此处地址与交易的关系不重复存储
+                if(tx.getType() == TxConstant.TX_TYPE_CALL_CONTRACT && coinData.getTo().size() > 0) {
+                    break;
+                }
+                TransactionPO transactionPO = new TransactionPO();
+                transactionPO.setAddress(extractContractAddress(tx.getTxData()));
+                transactionPO.setAssetChainId(chain.getConfig().getChainId());
+                transactionPO.setAssetId(chain.getConfig().getAssetId());
+                transactionPO.setAmount(BigInteger.ZERO);
+                transactionPO.setHash(tx.getHash().getDigestHex());
+                transactionPO.setType(tx.getType());
+                transactionPO.setState(4);
+                transactionPO.setTime(tx.getTime());
+                list.add(transactionPO);
+            } while (false);
         }
         return list;
     }
 
     /**
      * 从智能合约TxData中获取地址
+     *
      * @param txData
      * @return
      */
     public static String extractContractAddress(byte[] txData) {
-        if(txData == null) {
+        if (txData == null) {
             return null;
         }
         int length = txData.length;
-        if(length < Address.ADDRESS_LENGTH * 2) {
+        if (length < Address.ADDRESS_LENGTH * 2) {
             return null;
         }
         byte[] contractAddress = new byte[Address.ADDRESS_LENGTH];
@@ -254,7 +289,7 @@ public class TxUtil {
     }
 
     public static boolean isLegalContractAddress(byte[] addressBytes, Chain chain) {
-        if(addressBytes == null) {
+        if (addressBytes == null) {
             return false;
         }
         return AddressTool.validContractAddress(addressBytes, chain.getChainId());
@@ -276,6 +311,7 @@ public class TxUtil {
     }
 
     public static void txInformationDebugPrint(Chain chain, Transaction tx, NulsLogger nulsLogger) {
+        if(tx.getType() == 1) {return;}
         nulsLogger.debug("");
         nulsLogger.debug("**************************************************");
         nulsLogger.debug("Transaction information");
@@ -288,7 +324,7 @@ public class TxUtil {
         nulsLogger.debug("remark: {}", remark == null ? "" : HexUtil.encode(tx.getRemark()));
         CoinData coinData = null;
         try {
-            if(tx.getCoinData()!=null) {
+            if (tx.getCoinData() != null) {
                 coinData = tx.getCoinDataInstance();
             }
         } catch (NulsException e) {
@@ -340,5 +376,31 @@ public class TxUtil {
         }
         nulsLogger.debug("**************************************************");
         nulsLogger.debug("");
+    }
+
+
+    /**
+     * 对交易进行模块分组
+     * @param chain
+     * @param moduleVerifyMap
+     * @param tx
+     * @throws NulsException
+     */
+    public static void moduleGroups(Chain chain, Map<TxRegister, List<String>> moduleVerifyMap, Transaction tx) throws NulsException{
+        //根据模块的统一验证器名，对所有交易进行分组，准备进行各模块的统一验证
+        TxRegister txRegister = TxManager.getTxRegister(chain, tx.getType());
+        String txHex;
+        try {
+            txHex = tx.hex();
+        } catch (Exception e) {
+            throw new NulsException(e);
+        }
+        if (moduleVerifyMap.containsKey(txRegister)) {
+            moduleVerifyMap.get(txRegister).add(txHex);
+        } else {
+            List<String> txHexs = new ArrayList<>();
+            txHexs.add(txHex);
+            moduleVerifyMap.put(txRegister, txHexs);
+        }
     }
 }

@@ -36,12 +36,12 @@ import io.nuls.contract.model.txdata.ContractData;
 import io.nuls.contract.service.ContractService;
 import io.nuls.contract.storage.ContractTokenTransferStorageService;
 import io.nuls.contract.util.ContractUtil;
+import io.nuls.contract.util.Log;
 import io.nuls.contract.vm.program.ProgramStatus;
 import io.nuls.tools.basic.Result;
 import io.nuls.tools.basic.VarInt;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
-import io.nuls.tools.log.Log;
 import org.spongycastle.util.Arrays;
 
 import static io.nuls.contract.util.ContractUtil.getFailed;
@@ -66,7 +66,12 @@ public class CallContractTxProcessor {
 
     public Result onCommit(int chainId, ContractWrapperTransaction tx) {
         try {
+            BlockHeader blockHeader = contractHelper.getBatchInfoCurrentBlockHeader(chainId);
+            byte[] stateRoot = blockHeader.getStateRoot();
+            long blockHeight = blockHeader.getHeight();
             ContractResult contractResult = tx.getContractResult();
+            contractResult.setStateRoot(stateRoot);
+            contractResult.setBlockHeight(blockHeight);
 
             // 保存代币交易
             ContractData callContractData = tx.getContractData();
@@ -81,15 +86,9 @@ public class CallContractTxProcessor {
                 return Result.getFailed(ContractErrorCode.CONTRACT_ADDRESS_NOT_EXIST);
             }
             contractResult.setNrc20(contractAddressInfoPo.isNrc20());
-
-            BlockHeader blockHeader = contractHelper.getCurrentBlockHeader(chainId);
-            byte[] newestStateRoot = blockHeader.getStateRoot();
-            long blockHeight = blockHeader.getHeight();
             tx.setBlockHeight(blockHeight);
-
-
             // 获取合约当前状态
-            ProgramStatus status = contractHelper.getContractStatus(chainId, newestStateRoot, contractAddress);
+            ProgramStatus status = contractHelper.getContractStatus(chainId, stateRoot, contractAddress);
             boolean isTerminatedContract = ContractUtil.isTerminatedContract(status.ordinal());
 
             // 处理合约执行失败 - 没有transferEvent的情况, 直接从数据库中获取, 若是本地创建的交易，获取到修改为失败交易
@@ -112,10 +111,10 @@ public class CallContractTxProcessor {
                         } else {
 
                             if (po.getFrom() != null) {
-                                contractHelper.refreshTokenBalance(chainId, newestStateRoot, blockHeight, contractAddressInfoPo, AddressTool.getStringAddressByBytes(po.getFrom()), po.getContractAddress());
+                                contractHelper.refreshTokenBalance(chainId, stateRoot, blockHeight, contractAddressInfoPo, AddressTool.getStringAddressByBytes(po.getFrom()), po.getContractAddress());
                             }
                             if (po.getTo() != null) {
-                                contractHelper.refreshTokenBalance(chainId, newestStateRoot, blockHeight, contractAddressInfoPo, AddressTool.getStringAddressByBytes(po.getTo()), po.getContractAddress());
+                                contractHelper.refreshTokenBalance(chainId, stateRoot, blockHeight, contractAddressInfoPo, AddressTool.getStringAddressByBytes(po.getTo()), po.getContractAddress());
                             }
                         }
                     }
@@ -124,7 +123,7 @@ public class CallContractTxProcessor {
 
             if (!isTerminatedContract) {
                 // 处理合约事件
-                contractHelper.dealNrc20Events(chainId, newestStateRoot, tx, contractResult, contractAddressInfoPo);
+                contractHelper.dealNrc20Events(chainId, stateRoot, tx, contractResult, contractAddressInfoPo);
             }
 
             // 保存合约执行结果

@@ -7,7 +7,6 @@ import io.nuls.api.provider.Result;
 import io.nuls.api.provider.network.facade.NetworkInfo;
 import io.nuls.rpc.model.ModuleE;
 import io.nuls.tools.parse.MapUtils;
-import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;
 import java.util.Map;
@@ -19,7 +18,6 @@ import java.util.function.Function;
  * @Description: 功能描述
  */
 @Provider(Provider.ProviderType.RPC)
-@Slf4j
 public class NetworkProviderForRpc extends BaseRpcService implements NetworkProvider {
     @Override
     protected <T, R> Result<T> call(String method, Object req, Function<R, Result> callback) {

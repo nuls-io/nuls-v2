@@ -20,9 +20,12 @@ public class Module {
      */
     String version;
 
-    public Module(){};
+    public Module() {
+    }
 
-    public Module(String name,String version){
+    ;
+
+    public Module(String name, String version) {
         this.name = name;
         this.version = version;
     }

@@ -133,9 +133,11 @@ public interface BlockService {
      * @param block    待保存区块
      * @param download 是否最新区块,最新区块-1,非最新区块-0
      * @param needLock 是否需要加同步锁
+     * @param broadcast 是否需要广播该区块
+     * @param forward 是否需要转发该区块
      * @return
      */
-    boolean saveBlock(int chainId, Block block, int download, boolean needLock);
+    boolean saveBlock(int chainId, Block block, int download, boolean needLock, boolean broadcast, boolean forward);
 
     /**
      * 回滚区块,已经考虑失败回滚操作,不抛出异常情况下,不会有垃圾数据

@@ -24,8 +24,9 @@
 
 package io.nuls.transaction.rpc.call;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import io.nuls.rpc.model.ModuleE;
+import io.nuls.rpc.model.message.Response;
+import io.nuls.rpc.netty.processor.ResponseMessageProcessor;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.parse.JSONUtils;
 import io.nuls.transaction.constant.TxConstant;
@@ -80,9 +81,36 @@ public class ContractCall {
         params.put("chainId", chain.getChainId());
         params.put("txHex", txHex);
         try {
-            TransactionCall.request(ModuleE.SC.abbr, "sc_invoke_contract", params);
+            Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, "sc_invoke_contract", params);
+            if(!response.isSuccess()){
+                return false;
+            }
             return true;
-        } catch (NulsException e) {
+        } catch (Exception e) {
+            chain.getLoggerMap().get(TxConstant.LOG_TX).error(e);
+            return false;
+        }
+    }
+
+    /**
+     * 调用智能合约
+     * @param chain
+     * @param blockHeight
+     * @return
+     * @throws NulsException
+     */
+    public static boolean contractBatchBefore(Chain chain, long blockHeight) {
+
+        Map<String, Object> params = new HashMap(TxConstant.INIT_CAPACITY_8);
+        params.put("chainId", chain.getChainId());
+        params.put("blockHeight", blockHeight);
+        try {
+            Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, "sc_batch_before_end", params);
+            if(!response.isSuccess()){
+                return false;
+            }
+            return true;
+        }catch (Exception e) {
             chain.getLoggerMap().get(TxConstant.LOG_TX).error(e);
             return false;
         }
@@ -100,16 +128,14 @@ public class ContractCall {
         Map<String, Object> params = new HashMap(TxConstant.INIT_CAPACITY_8);
         params.put("chainId", chain.getChainId());
         params.put("blockHeight", blockHeight);
-        Map result = null;
         try {
-           result = (Map) TransactionCall.request(ModuleE.SC.abbr, "sc_batch_end", params);
+            Map result = (Map) TransactionCall.request(ModuleE.SC.abbr, "sc_batch_end", params);
             chain.getLoggerMap().get(TxConstant.LOG_TX).debug("moduleCode:{}, -cmd:{}, -contractProcess -rs: {}",
-                    ModuleE.SC.abbr, "sc_invoke_contract", JSONUtils.obj2json(result));
-        }catch (JsonProcessingException e) {
-            chain.getLoggerMap().get(TxConstant.LOG_TX).error(e);
-        }catch (NulsException e) {
-            chain.getLoggerMap().get(TxConstant.LOG_TX).error(e);
+                    ModuleE.SC.abbr, "sc_batch_end", JSONUtils.obj2json(result));
+            return result;
+        }catch (Exception e) {
+            throw new NulsException(e);
         }
-        return result;
+
     }
 }

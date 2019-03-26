@@ -102,13 +102,10 @@ public class CacheHandler {
         NulsDigestData requestHash = message.getRequestHash();
         List<Block> blockList = workerBlockCacher.get(chainId).get(requestHash);
         Block block = message.getBlock();
-        NulsLogger commonLog = ContextManager.getContext(chainId).getCommonLog();
         if (blockList != null && !blockList.contains(block)) {
-//            commonLog.info("###height###" + block.getHeader().getHeight() + "###hash###" + block.getHeader().getHash() + "###true");
             blockList.add(block);
             return;
         }
-//        commonLog.info("###height###" + block.getHeader().getHeight() + "###hash###" + block.getHeader().getHash() + "###false");
         singleBlockCacher.get(chainId).complete(requestHash, block);
     }
 

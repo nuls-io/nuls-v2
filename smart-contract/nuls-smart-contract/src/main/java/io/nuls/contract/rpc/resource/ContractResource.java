@@ -31,6 +31,7 @@ import io.nuls.base.data.Page;
 import io.nuls.base.data.Transaction;
 import io.nuls.contract.constant.ContractConstant;
 import io.nuls.contract.constant.ContractErrorCode;
+import io.nuls.contract.enums.ContractStatus;
 import io.nuls.contract.helper.ContractHelper;
 import io.nuls.contract.manager.ContractTokenBalanceManager;
 import io.nuls.contract.model.bo.ContractResult;
@@ -44,9 +45,11 @@ import io.nuls.contract.rpc.call.BlockCall;
 import io.nuls.contract.rpc.call.TransactionCall;
 import io.nuls.contract.service.ContractService;
 import io.nuls.contract.service.ContractTxService;
+import io.nuls.contract.storage.ContractAddressStorageService;
 import io.nuls.contract.storage.ContractTokenTransferStorageService;
 import io.nuls.contract.util.ContractLedgerUtil;
 import io.nuls.contract.util.ContractUtil;
+import io.nuls.contract.util.Log;
 import io.nuls.contract.util.MapUtil;
 import io.nuls.contract.vm.program.ProgramExecutor;
 import io.nuls.contract.vm.program.ProgramMethod;
@@ -61,7 +64,6 @@ import io.nuls.tools.basic.VarInt;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.exception.NulsException;
-import io.nuls.tools.log.Log;
 import io.nuls.tools.model.ArraysTool;
 import io.nuls.tools.model.StringUtils;
 import org.spongycastle.util.encoders.Hex;
@@ -71,8 +73,7 @@ import java.math.BigInteger;
 import java.util.*;
 
 import static io.nuls.contract.constant.ContractCmdConstant.*;
-import static io.nuls.contract.constant.ContractConstant.CONTRACT_MINIMUM_PRICE;
-import static io.nuls.contract.constant.ContractConstant.MAX_GASLIMIT;
+import static io.nuls.contract.constant.ContractConstant.*;
 import static io.nuls.contract.constant.ContractErrorCode.*;
 import static io.nuls.contract.util.ContractUtil.*;
 import static org.apache.commons.lang3.StringUtils.EMPTY;
@@ -92,6 +93,8 @@ public class ContractResource extends BaseCmd {
     private ContractTxService contractTxService;
     @Autowired
     private ContractTokenTransferStorageService contractTokenTransferStorageService;
+    @Autowired
+    private ContractAddressStorageService contractAddressStorageService;
 
     @CmdAnnotation(cmd = CREATE, version = 1.0, description = "invoke contract")
     @Parameter(parameterName = "chainId", parameterType = "int")
@@ -111,7 +114,7 @@ public class ContractResource extends BaseCmd {
             Long price = Long.parseLong(params.get("price").toString());
             String contractCode = (String) params.get("contractCode");
             List argsList = (List) params.get("args");
-            Object[] args = argsList.toArray();
+            Object[] args = argsList != null ? argsList.toArray() : null;
             String remark = (String) params.get("remark");
 
             if (gasLimit < 0 || price < 0) {
@@ -165,7 +168,7 @@ public class ContractResource extends BaseCmd {
             Long price = Long.parseLong(params.get("price").toString());
             String contractCode = (String) params.get("contractCode");
             List argsList = (List) params.get("args");
-            Object[] args = argsList.toArray();
+            Object[] args = argsList != null ? argsList.toArray() : null;
             String remark = (String) params.get("remark");
 
             if (gasLimit < 0 || price < 0) {
@@ -217,7 +220,7 @@ public class ContractResource extends BaseCmd {
                 String sender = (String) params.get("sender");
                 String contractCode = (String) params.get("contractCode");
                 List argsList = (List) params.get("args");
-                Object[] args = argsList.toArray();
+                Object[] args = argsList != null ? argsList.toArray() : null;
                 if (!AddressTool.validAddress(chainId, sender)) {
                     break;
                 }
@@ -268,7 +271,7 @@ public class ContractResource extends BaseCmd {
             Long price = Long.parseLong(params.get("price").toString());
             String contractCode = (String) params.get("contractCode");
             List argsList = (List) params.get("args");
-            Object[] args = argsList.toArray();
+            Object[] args = argsList != null ? argsList.toArray() : null;
 
             if (gasLimit < 0 || price < 0) {
                 return failed(ContractErrorCode.PARAMETER_ERROR);
@@ -326,7 +329,7 @@ public class ContractResource extends BaseCmd {
             String methodName = (String) params.get("methodName");
             String methodDesc = (String) params.get("methodDesc");
             List argsList = (List) params.get("args");
-            Object[] args = argsList.toArray();
+            Object[] args = argsList != null ? argsList.toArray() : null;
             String password = (String) params.get("password");
             String remark = (String) params.get("remark");
 
@@ -394,7 +397,7 @@ public class ContractResource extends BaseCmd {
             String methodName = (String) params.get("methodName");
             String methodDesc = (String) params.get("methodDesc");
             List argsList = (List) params.get("args");
-            Object[] args = argsList.toArray();
+            Object[] args = argsList != null ? argsList.toArray() : null;
 
             if (value.compareTo(BigInteger.ZERO) < 0 || gasLimit < 0 || price < 0) {
                 return failed(ContractErrorCode.PARAMETER_ERROR);
@@ -462,7 +465,7 @@ public class ContractResource extends BaseCmd {
                 String methodName = (String) params.get("methodName");
                 String methodDesc = (String) params.get("methodDesc");
                 List argsList = (List) params.get("args");
-                Object[] args = argsList.toArray();
+                Object[] args = argsList != null ? argsList.toArray() : null;
                 if (value.compareTo(BigInteger.ZERO) < 0) {
                     break;
                 }
@@ -573,8 +576,6 @@ public class ContractResource extends BaseCmd {
     @Parameter(parameterName = "chainId", parameterType = "int")
     @Parameter(parameterName = "address", parameterType = "String")
     @Parameter(parameterName = "toAddress", parameterType = "String")
-    @Parameter(parameterName = "gasLimit", parameterType = "long")
-    @Parameter(parameterName = "price", parameterType = "long")
     @Parameter(parameterName = "password", parameterType = "String")
     @Parameter(parameterName = "amount", parameterType = "BigInteger")
     @Parameter(parameterName = "remark", parameterType = "remark")
@@ -583,13 +584,11 @@ public class ContractResource extends BaseCmd {
             Integer chainId = (Integer) params.get("chainId");
             String sender = (String) params.get("address");
             String contractAddress = (String) params.get("toAddress");
-            Long gasLimit = Long.parseLong(params.get("gasLimit").toString());
-            Long price = Long.parseLong(params.get("price").toString());
             String password = (String) params.get("password");
             BigInteger value = new BigInteger(params.get("amount").toString());
             String remark = (String) params.get("remark");
 
-            if (value.compareTo(BigInteger.ZERO) < 0 || gasLimit < 0 || price < 0) {
+            if (value.compareTo(BigInteger.ZERO) < 0) {
                 return failed(ContractErrorCode.PARAMETER_ERROR);
             }
 
@@ -602,13 +601,32 @@ public class ContractResource extends BaseCmd {
             }
 
             byte[] contractAddressBytes = AddressTool.getAddress(contractAddress);
-            if (!ContractLedgerUtil.isExistContractAddress(chainId, contractAddressBytes)) {
+            Result<ContractAddressInfoPo> contractAddressInfoResult = contractHelper.getContractAddressInfo(chainId, contractAddressBytes);
+            ContractAddressInfoPo po = contractAddressInfoResult.getData();
+            if (po == null) {
                 return failed(CONTRACT_ADDRESS_NOT_EXIST);
             }
+            if (!po.isAcceptDirectTransfer()) {
+                return failed(CONTRACT_NO_ACCEPT_DIRECT_TRANSFER);
+            }
 
-            Result result = contractTxService.contractCallTx(chainId, sender, value, gasLimit, price, contractAddress,
-                    ContractConstant.BALANCE_TRIGGER_METHOD_NAME,
-                    ContractConstant.BALANCE_TRIGGER_METHOD_DESC,
+            Map<String, Object> gasParams = new HashMap<>();
+            gasParams.put("chainId", chainId);
+            gasParams.put("sender", sender);
+            gasParams.put("value", value);
+            gasParams.put("contractAddress", contractAddress);
+            gasParams.put("methodName", BALANCE_TRIGGER_METHOD_NAME);
+            gasParams.put("methodDesc", BALANCE_TRIGGER_METHOD_DESC);
+
+            Response response = this.imputedCallGas(gasParams);
+            if (!response.isSuccess()) {
+                return response;
+            }
+            Map<String, Object> responseData = (Map<String, Object>) response.getResponseData();
+            Long gasLimit = Long.valueOf(responseData.get("gasLimit").toString());
+            Result result = contractTxService.contractCallTx(chainId, sender, value, gasLimit, CONTRACT_MINIMUM_PRICE, contractAddress,
+                    BALANCE_TRIGGER_METHOD_NAME,
+                    BALANCE_TRIGGER_METHOD_DESC,
                     null, password, remark);
             if (result.isFailed()) {
                 return wrapperFailed(result);
@@ -626,8 +644,6 @@ public class ContractResource extends BaseCmd {
     @Parameter(parameterName = "chainId", parameterType = "int")
     @Parameter(parameterName = "address", parameterType = "String")
     @Parameter(parameterName = "toAddress", parameterType = "String")
-    @Parameter(parameterName = "gasLimit", parameterType = "long")
-    @Parameter(parameterName = "price", parameterType = "long")
     @Parameter(parameterName = "amount", parameterType = "BigInteger")
     @Parameter(parameterName = "remark", parameterType = "remark")
     public Response transferFee(Map<String, Object> params) {
@@ -635,12 +651,10 @@ public class ContractResource extends BaseCmd {
             Integer chainId = (Integer) params.get("chainId");
             String sender = (String) params.get("address");
             String contractAddress = (String) params.get("toAddress");
-            Long gasLimit = Long.parseLong(params.get("gasLimit").toString());
-            Long price = Long.parseLong(params.get("price").toString());
             BigInteger value = new BigInteger(params.get("amount").toString());
             String remark = (String) params.get("remark");
 
-            if (value.compareTo(BigInteger.ZERO) < 0 || gasLimit < 0 || price < 0) {
+            if (value.compareTo(BigInteger.ZERO) < 0) {
                 return failed(ContractErrorCode.PARAMETER_ERROR);
             }
 
@@ -653,13 +667,32 @@ public class ContractResource extends BaseCmd {
             }
 
             byte[] contractAddressBytes = AddressTool.getAddress(contractAddress);
-            if (!ContractLedgerUtil.isExistContractAddress(chainId, contractAddressBytes)) {
+            Result<ContractAddressInfoPo> contractAddressInfoResult = contractHelper.getContractAddressInfo(chainId, contractAddressBytes);
+            ContractAddressInfoPo po = contractAddressInfoResult.getData();
+            if (po == null) {
                 return failed(CONTRACT_ADDRESS_NOT_EXIST);
             }
+            if (!po.isAcceptDirectTransfer()) {
+                return failed(CONTRACT_NO_ACCEPT_DIRECT_TRANSFER);
+            }
 
-            Result result = contractTxService.callTxFee(chainId, sender, value, gasLimit, price, contractAddress,
-                    ContractConstant.BALANCE_TRIGGER_METHOD_NAME,
-                    ContractConstant.BALANCE_TRIGGER_METHOD_DESC,
+            Map<String, Object> gasParams = new HashMap<>();
+            gasParams.put("chainId", chainId);
+            gasParams.put("sender", sender);
+            gasParams.put("value", value);
+            gasParams.put("contractAddress", contractAddress);
+            gasParams.put("methodName", BALANCE_TRIGGER_METHOD_NAME);
+            gasParams.put("methodDesc", BALANCE_TRIGGER_METHOD_DESC);
+
+            Response response = this.imputedCallGas(gasParams);
+            if (!response.isSuccess()) {
+                return response;
+            }
+            Map<String, Object> responseData = (Map<String, Object>) response.getResponseData();
+            Long gasLimit = Long.valueOf(responseData.get("gasLimit").toString());
+            Result result = contractTxService.callTxFee(chainId, sender, value, gasLimit, CONTRACT_MINIMUM_PRICE, contractAddress,
+                    BALANCE_TRIGGER_METHOD_NAME,
+                    BALANCE_TRIGGER_METHOD_DESC,
                     null, remark);
             if (result.isFailed()) {
                 return wrapperFailed(result);
@@ -678,8 +711,6 @@ public class ContractResource extends BaseCmd {
     @Parameter(parameterName = "address", parameterType = "String")
     @Parameter(parameterName = "toAddress", parameterType = "String")
     @Parameter(parameterName = "contractAddress", parameterType = "String")
-    @Parameter(parameterName = "gasLimit", parameterType = "long")
-    @Parameter(parameterName = "price", parameterType = "long")
     @Parameter(parameterName = "password", parameterType = "String")
     @Parameter(parameterName = "amount", parameterType = "BigInteger")
     @Parameter(parameterName = "remark", parameterType = "remark")
@@ -689,13 +720,11 @@ public class ContractResource extends BaseCmd {
             String from = (String) params.get("address");
             String to = (String) params.get("toAddress");
             String contractAddress = (String) params.get("contractAddress");
-            Long gasLimit = Long.parseLong(params.get("gasLimit").toString());
-            Long price = Long.parseLong(params.get("price").toString());
             String password = (String) params.get("password");
             BigInteger value = new BigInteger(params.get("amount").toString());
             String remark = (String) params.get("remark");
 
-            if (value.compareTo(BigInteger.ZERO) < 0 || gasLimit < 0 || price < 0) {
+            if (value.compareTo(BigInteger.ZERO) < 0) {
                 return failed(ContractErrorCode.PARAMETER_ERROR);
             }
 
@@ -722,8 +751,24 @@ public class ContractResource extends BaseCmd {
             }
             Object[] argsObj = new Object[]{to, value.toString()};
 
+            List list = new ArrayList();
+            list.add(argsObj[0]);
+            list.add(argsObj[1]);
+            Map<String, Object> gasParams = new HashMap<>();
+            gasParams.put("chainId", chainId);
+            gasParams.put("sender", from);
+            gasParams.put("value", 0);
+            gasParams.put("contractAddress", contractAddress);
+            gasParams.put("methodName", NRC20_METHOD_TRANSFER);
+            gasParams.put("args", list);
+            Response response = this.imputedCallGas(gasParams);
+            if (!response.isSuccess()) {
+                return response;
+            }
+            Map<String, Object> responseData = (Map<String, Object>) response.getResponseData();
+            Long gasLimit = Long.valueOf(responseData.get("gasLimit").toString());
 
-            Result result = contractTxService.contractCallTx(chainId, from, BigInteger.ZERO, gasLimit, price, contractAddress,
+            Result result = contractTxService.contractCallTx(chainId, from, BigInteger.ZERO, gasLimit, CONTRACT_MINIMUM_PRICE, contractAddress,
                     ContractConstant.NRC20_METHOD_TRANSFER, null,
                     ContractUtil.twoDimensionalArray(argsObj), password, remark);
             if (result.isFailed()) {
@@ -757,7 +802,7 @@ public class ContractResource extends BaseCmd {
             ContractTokenInfoDto dto = null;
             if (data != null) {
                 dto = new ContractTokenInfoDto(data);
-                dto.setStatus(data.getStatus());
+                dto.setStatus(data.getStatus().status());
             }
 
             return success(dto);
@@ -780,7 +825,7 @@ public class ContractResource extends BaseCmd {
             String methodName = (String) params.get("methodName");
             String methodDesc = (String) params.get("methodDesc");
             List argsList = (List) params.get("args");
-            Object[] args = argsList.toArray();
+            Object[] args = argsList != null ? argsList.toArray() : null;
 
             if (!AddressTool.validAddress(chainId, contractAddress)) {
                 return failed(ADDRESS_ERROR);
@@ -887,9 +932,9 @@ public class ContractResource extends BaseCmd {
 
             BlockHeader blockHeader = BlockCall.getLatestBlockHeader(chainId);
 
-            if (contractAddressInfoPo.isLock(blockHeader.getHeight())) {
-                return failed(ContractErrorCode.CONTRACT_LOCK);
-            }
+            //if (contractAddressInfoPo.isLock(blockHeader.getHeight())) {
+            //    return failed(ContractErrorCode.CONTRACT_LOCK);
+            //}
 
             // 当前区块状态根
             byte[] prevStateRoot = ContractUtil.getStateRoot(blockHeader);
@@ -989,7 +1034,7 @@ public class ContractResource extends BaseCmd {
 
     private ContractResultDto makeContractResultDto(int chainId, ContractBaseTransaction tx1, NulsDigestData txHash) throws NulsException, IOException {
         ContractResultDto contractResultDto = null;
-        if (tx1.getType() == ContractConstant.TX_TYPE_CONTRACT_TRANSFER) {
+        if (tx1.getType() == TX_TYPE_CONTRACT_TRANSFER || tx1.getType() == TX_TYPE_CONTRACT_RETURN_GAS) {
             return null;
         }
         ContractResult contractExecuteResult = contractService.getContractExecuteResult(chainId, txHash);
@@ -1012,6 +1057,7 @@ public class ContractResource extends BaseCmd {
             } else {
                 contractResultDto = new ContractResultDto(chainId, contractExecuteResult, tx1);
             }
+            tx1.setBlockHeight(contractExecuteResult.getBlockHeight());
         }
         return contractResultDto;
     }
@@ -1071,12 +1117,15 @@ public class ContractResource extends BaseCmd {
             }
             ContractBaseTransaction tx1 = ContractUtil.convertContractTx(tx);
             tx1.setStatus(TxStatusEnum.CONFIRMED);
+            // 获取合约执行结果
+            ContractResultDto contractResultDto = this.makeContractResultDto(chainId, tx1, txHash);
             ContractTransactionDto txDto = new ContractTransactionDto(chainId, tx1);
             // 计算交易实际发生的金额
             calTransactionValue(txDto);
-            // 获取合约执行结果
-            ContractResultDto contractResultDto = this.makeContractResultDto(chainId, tx1, txHash);
             if (contractResultDto != null) {
+                List<ContractTokenTransferDto> tokenTransfers = contractResultDto.getTokenTransfers();
+                List<ContractTokenTransferDto> realTokenTransfers = this.filterRealTokenTransfers(chainId, tokenTransfers);
+                contractResultDto.setTokenTransfers(realTokenTransfers);
                 txDto.setContractResult(contractResultDto);
             }
 
@@ -1118,6 +1167,16 @@ public class ContractResource extends BaseCmd {
             String address = (String) params.get("address");
             Integer pageNumber = (Integer) params.get("pageNumber");
             Integer pageSize = (Integer) params.get("pageSize");
+
+            if (null == pageNumber || pageNumber == 0) {
+                pageNumber = 1;
+            }
+            if (null == pageSize || pageSize == 0) {
+                pageSize = 10;
+            }
+            if (pageNumber < 0 || pageSize < 0 || pageSize > 100) {
+                return failed(PARAMETER_ERROR);
+            }
 
             if (!AddressTool.validAddress(chainId, address)) {
                 return failed(ADDRESS_ERROR);
@@ -1163,6 +1222,184 @@ public class ContractResource extends BaseCmd {
         } catch (NulsException e) {
             Log.error(e);
             return failed(e.getErrorCode());
+        }
+    }
+
+    @CmdAnnotation(cmd = TOKEN_TRANSFER_LIST, version = 1.0, description = "token transfer list")
+    @Parameter(parameterName = "chainId", parameterType = "int")
+    @Parameter(parameterName = "address", parameterType = "String")
+    @Parameter(parameterName = "pageNumber", parameterType = "int")
+    @Parameter(parameterName = "pageSize", parameterType = "int")
+    public Response tokenTransferList(Map<String, Object> params) {
+        try {
+            Integer chainId = (Integer) params.get("chainId");
+            String address = (String) params.get("address");
+            Integer pageNumber = (Integer) params.get("pageNumber");
+            Integer pageSize = (Integer) params.get("pageSize");
+
+            if (null == pageNumber || pageNumber == 0) {
+                pageNumber = 1;
+            }
+            if (null == pageSize || pageSize == 0) {
+                pageSize = 10;
+            }
+            if (pageNumber < 0 || pageSize < 0 || pageSize > 100) {
+                return failed(PARAMETER_ERROR);
+            }
+
+            if (!AddressTool.validAddress(chainId, address)) {
+                return failed(ADDRESS_ERROR);
+            }
+            byte[] addressBytes = AddressTool.getAddress(address);
+
+            Result<List<ContractTokenTransferInfoPo>> tokenTransferInfoListResult = contractTxService.getTokenTransferInfoList(chainId, address);
+            if (tokenTransferInfoListResult.isFailed()) {
+                return wrapperFailed(tokenTransferInfoListResult);
+            }
+
+            List<ContractTokenTransferInfoPo> list = tokenTransferInfoListResult.getData();
+            if (list == null) {
+                list = new ArrayList<>();
+            }
+            if (list.size() > 0) {
+                list.sort(new Comparator<ContractTokenTransferInfoPo>() {
+                    @Override
+                    public int compare(ContractTokenTransferInfoPo o1, ContractTokenTransferInfoPo o2) {
+                        return o1.compareTo(o2.getTime());
+                    }
+                });
+            }
+
+            List<ContractTokenTransferTransactionDto> result = new ArrayList<>();
+            Page<ContractTokenTransferTransactionDto> page = new Page<>(pageNumber, pageSize, list.size());
+            int start = pageNumber * pageSize - pageSize;
+            if (start >= page.getTotal()) {
+                return success(page);
+            }
+
+            int end = start + pageSize;
+            if (end > page.getTotal()) {
+                end = (int) page.getTotal();
+            }
+
+            ContractTokenTransferInfoPo info;
+            for (int i = start; i < end; i++) {
+                info = list.get(i);
+                result.add(new ContractTokenTransferTransactionDto(info, addressBytes));
+            }
+
+            page.setList(result);
+
+            return success(page);
+        } catch (Exception e) {
+            Log.error(e);
+            return failed(e.getMessage());
+        }
+    }
+
+
+    @CmdAnnotation(cmd = ACCOUNT_CONTRACTS, version = 1.0, description = "account contract list")
+    @Parameter(parameterName = "chainId", parameterType = "int")
+    @Parameter(parameterName = "address", parameterType = "String")
+    @Parameter(parameterName = "pageNumber", parameterType = "int")
+    @Parameter(parameterName = "pageSize", parameterType = "int")
+    public Response accountContracts(Map<String, Object> params) {
+        try {
+            Integer chainId = (Integer) params.get("chainId");
+            String address = (String) params.get("address");
+            Integer pageNumber = (Integer) params.get("pageNumber");
+            Integer pageSize = (Integer) params.get("pageSize");
+
+            if (null == pageNumber || pageNumber == 0) {
+                pageNumber = 1;
+            }
+            if (null == pageSize || pageSize == 0) {
+                pageSize = 10;
+            }
+            if (pageNumber < 0 || pageSize < 0 || pageSize > 100) {
+                return failed(PARAMETER_ERROR);
+            }
+
+            if (!AddressTool.validAddress(chainId, address)) {
+                return failed(ADDRESS_ERROR);
+            }
+
+            byte[] addressBytes = AddressTool.getAddress(address);
+
+
+            LinkedHashMap<String, ContractAddressDto> resultMap = new LinkedHashMap<>();
+            // 该账户创建的未确认的合约
+            LinkedList<Map<String, String>> list = contractHelper.getChain(chainId).getContractTxCreateUnconfirmedManager().getLocalUnconfirmedCreateContractTransaction(address);
+            if (list != null) {
+                String contractAddress;
+                Long time;
+                ContractAddressDto dto;
+                String success;
+                for (Map<String, String> map : list) {
+                    contractAddress = map.get("contractAddress");
+                    time = Long.valueOf(map.get("time"));
+                    dto = new ContractAddressDto();
+                    dto.setCreate(true);
+                    dto.setContractAddress(contractAddress);
+                    dto.setCreateTime(time);
+
+                    success = map.get("success");
+                    if (StringUtils.isNotBlank(success)) {
+                        // 合约创建失败
+                        dto.setStatus(ContractStatus.CREATION_FAILED.status());
+                        dto.setMsg(map.get("msg"));
+                    } else {
+                        dto.setStatus(ContractStatus.NOT_EXISTS_OR_CONFIRMING.status());
+                    }
+                    resultMap.put(contractAddress, dto);
+                }
+            }
+            BlockHeader blockHeader = BlockCall.getLatestBlockHeader(chainId);
+            long height = blockHeader.getHeight();
+            byte[] prevStateRoot = ContractUtil.getStateRoot(blockHeader);
+            ProgramExecutor track = contractHelper.getChain(chainId).getProgramExecutor().begin(prevStateRoot);
+            byte[] contractAddressBytes;
+            String contractAddress;
+
+            // 获取该账户创建的合约地址
+            Result<List<ContractAddressInfoPo>> contractInfoListResult = contractAddressStorageService.getContractInfoList(chainId, addressBytes);
+
+            List<ContractAddressInfoPo> contractAddressInfoPoList = contractInfoListResult.getData();
+            if (contractAddressInfoPoList != null && contractAddressInfoPoList.size() > 0) {
+                contractAddressInfoPoList.sort(new Comparator<ContractAddressInfoPo>() {
+                    @Override
+                    public int compare(ContractAddressInfoPo o1, ContractAddressInfoPo o2) {
+                        return o1.compareTo(o2.getCreateTime());
+                    }
+                });
+                for (ContractAddressInfoPo po : contractAddressInfoPoList) {
+                    contractAddressBytes = po.getContractAddress();
+                    contractAddress = AddressTool.getStringAddressByBytes(contractAddressBytes);
+                    resultMap.put(contractAddress, new ContractAddressDto(po, height, true, track.status(contractAddressBytes).ordinal()));
+                }
+            }
+            List<ContractAddressDto> infoList = new ArrayList<>(resultMap.values());
+            List<ContractAddressDto> contractAddressDtoList = new ArrayList<>();
+            Page<ContractAddressDto> page = new Page<>(pageNumber, pageSize, infoList.size());
+            int start = pageNumber * pageSize - pageSize;
+            if (start >= page.getTotal()) {
+                return success(page);
+            }
+            int end = start + pageSize;
+            if (end > page.getTotal()) {
+                end = (int) page.getTotal();
+            }
+            if (infoList.size() > 0) {
+                for (int i = start; i < end; i++) {
+                    contractAddressDtoList.add(infoList.get(i));
+                }
+            }
+            page.setList(contractAddressDtoList);
+
+            return success(page);
+        } catch (Exception e) {
+            Log.error(e);
+            return failed(e.getMessage());
         }
     }
 

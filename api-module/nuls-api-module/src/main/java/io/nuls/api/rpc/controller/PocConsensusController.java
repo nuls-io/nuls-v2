@@ -20,17 +20,12 @@
 
 package io.nuls.api.rpc.controller;
 
-import io.nuls.api.ApiContext;
 import io.nuls.api.analysis.WalletRpcHandler;
 import io.nuls.api.cache.ApiCache;
 import io.nuls.api.db.*;
-import io.nuls.api.exception.JsonRpcException;
-import io.nuls.api.exception.NotFoundException;
 import io.nuls.api.manager.CacheManager;
 import io.nuls.api.model.po.db.*;
-import io.nuls.api.model.rpc.RpcErrorCode;
 import io.nuls.api.model.rpc.RpcResult;
-import io.nuls.api.model.rpc.RpcResultError;
 import io.nuls.api.utils.AgentComparator;
 import io.nuls.api.utils.VerifyUtils;
 import io.nuls.base.basic.AddressTool;
@@ -165,23 +160,24 @@ public class PocConsensusController {
         if (agentInfo.getTotalPackingCount() != 0) {
             agentInfo.setLostRate(DoubleUtils.div(count, count + agentInfo.getTotalPackingCount()));
         }
-//
-//        List<PocRoundItem> itemList = apiCache.getCurrentRound().getItemList();
-//        PocRoundItem roundItem = null;
-//        if (null != itemList) {
-//            for (PocRoundItem item : itemList) {
-//                if (item.getPackingAddress().equals(agentInfo.getPackingAddress())) {
-//                    roundItem = item;
-//                    break;
-//                }
-//            }
-//        }
-//        if (null == roundItem) {
-//            agentInfo.setStatus(0);
-//        } else {
-//            agentInfo.setRoundPackingTime(apiCache.getCurrentRound().getStartTime() + roundItem.getOrder() * 10000);
-//            agentInfo.setStatus(1);
-//        }
+
+        ApiCache apiCache = CacheManager.getCache(chainId);
+        List<PocRoundItem> itemList = apiCache.getCurrentRound().getItemList();
+        PocRoundItem roundItem = null;
+        if (null != itemList) {
+            for (PocRoundItem item : itemList) {
+                if (item.getPackingAddress().equals(agentInfo.getPackingAddress())) {
+                    roundItem = item;
+                    break;
+                }
+            }
+        }
+        if (null == roundItem) {
+            agentInfo.setStatus(0);
+        } else {
+            agentInfo.setRoundPackingTime(apiCache.getCurrentRound().getStartTime() + roundItem.getOrder() * 10000);
+            agentInfo.setStatus(1);
+        }
 
         Result<AgentInfo> result = WalletRpcHandler.getAgentInfo(chainId, agentHash);
         if (result.isSuccess()) {

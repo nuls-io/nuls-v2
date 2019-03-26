@@ -6,6 +6,7 @@ import io.nuls.contract.constant.ContractConstant;
 import io.nuls.contract.constant.ContractDBConstant;
 import io.nuls.contract.manager.ChainManager;
 import io.nuls.contract.util.ContractUtil;
+import io.nuls.contract.util.Log;
 import io.nuls.contract.util.VMContext;
 import io.nuls.contract.vm.program.ProgramMethod;
 import io.nuls.db.service.RocksDBService;
@@ -16,11 +17,10 @@ import io.nuls.rpc.modulebootstrap.NulsRpcModuleBootstrap;
 import io.nuls.rpc.modulebootstrap.RpcModule;
 import io.nuls.rpc.modulebootstrap.RpcModuleState;
 import io.nuls.tools.core.annotation.Autowired;
-import io.nuls.tools.core.annotation.Configuration;
+import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.core.ioc.SpringLiteContext;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.io.IoUtils;
-import io.nuls.tools.log.Log;
 import io.nuls.tools.parse.I18nUtils;
 import io.nuls.tools.parse.JSONUtils;
 
@@ -40,13 +40,14 @@ import static java.nio.charset.StandardCharsets.UTF_8;
  * @author: PierreLuo
  * @date: 2019-03-14
  */
-@Configuration(persistDomain = "smart_contract")
+@Component
 public class ContractBootStrap extends RpcModule {
 
     @Autowired
     private ContractConfig contractConfig;
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws Exception {
+        systemConfig();
         if (args == null || args.length == 0) {
             args = new String[]{"ws://" + HostInfo.getLocalIP() + ":8887/ws"};
         }
@@ -61,7 +62,6 @@ public class ContractBootStrap extends RpcModule {
     public void init() {
         try {
             super.init();
-            initSys();
             initNulsConfig();
             initDB();
             initLanguage();
@@ -88,7 +88,7 @@ public class ContractBootStrap extends RpcModule {
      * 初始化系统编码
      * Initialization System Coding
      */
-    private static void initSys() throws Exception {
+    private static void systemConfig() throws Exception {
         System.setProperty("protostuff.runtime.allow_null_array_element", "true");
         System.setProperty(ContractConstant.SYS_FILE_ENCODING, UTF_8.name());
         Field charset = Charset.class.getDeclaredField("defaultCharset");
@@ -185,7 +185,7 @@ public class ContractBootStrap extends RpcModule {
     /**
      * 某个外部依赖连接丢失后，会调用此方法，可控制模块状态，如果返回Ready,则表明模块退化到Ready状态，当依赖重新准备完毕后，将重新触发onDependenciesReady方法，若返回的状态是Running，将不会重新触发onDependenciesReady
      *
-     * @param module
+     * @param dependenciesModule
      * @return
      */
     @Override

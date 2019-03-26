@@ -1,11 +1,9 @@
 package io.nuls.api.task;
 
-import io.nuls.api.ApiContext;
 import io.nuls.api.analysis.WalletRpcHandler;
 import io.nuls.api.model.po.db.BlockHeaderInfo;
 import io.nuls.api.model.po.db.BlockInfo;
 import io.nuls.api.model.po.db.SyncInfo;
-import io.nuls.api.model.rpc.RpcResult;
 import io.nuls.api.service.RollbackService;
 import io.nuls.api.service.SyncService;
 import io.nuls.tools.basic.Result;
@@ -89,7 +87,7 @@ public class SyncBlockTask implements Runnable {
             Thread.sleep(5000L);
             return false;
         }
-        if (!checkBlockContinuity(localBestBlockHeader, newBlock.getHeader())) {
+        if (checkBlockContinuity(localBestBlockHeader, newBlock.getHeader())) {
             return syncService.syncNewBlock(chainId, newBlock);
         } else {
             return rollbackService.rollbackBlock(chainId, localBestBlockHeader.getHeight());

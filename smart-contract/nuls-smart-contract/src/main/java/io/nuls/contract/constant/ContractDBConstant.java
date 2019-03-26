@@ -29,7 +29,7 @@ package io.nuls.contract.constant;
  * 交易数据存储常量
  * Transaction entity storage constants
  *
- * @author: qinyifeng
+ * @author: PierreLuo
  */
 public interface ContractDBConstant {
 

@@ -17,6 +17,7 @@ public enum CommandGroup {
     Ledger,
     Transaction,
     Block,
+    Smart_Contract,
     System;
 
     final String title;

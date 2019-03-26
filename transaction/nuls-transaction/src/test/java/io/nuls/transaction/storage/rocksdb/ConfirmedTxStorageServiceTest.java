@@ -19,7 +19,7 @@ import java.util.List;
 public class ConfirmedTxStorageServiceTest {
 
     protected static ConfirmedTxStorageService confirmedTxStorageService;
-    protected int chainId = 12345;
+    protected int chainId = 2;
     protected long height = 100;
 
     @BeforeClass

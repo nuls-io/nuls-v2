@@ -29,9 +29,11 @@ import io.nuls.contract.helper.ContractHelper;
 import io.nuls.contract.model.bo.ContractResult;
 import io.nuls.contract.model.txdata.ContractData;
 import io.nuls.contract.service.ContractExecutor;
+import io.nuls.contract.util.ContractUtil;
 import io.nuls.contract.vm.program.*;
+import io.nuls.tools.basic.Result;
 import io.nuls.tools.core.annotation.Autowired;
-import io.nuls.tools.core.annotation.Service;
+import io.nuls.tools.core.annotation.Component;
 import lombok.Getter;
 import lombok.Setter;
 import org.spongycastle.util.encoders.Hex;
@@ -47,7 +49,7 @@ import java.util.stream.Collectors;
  */
 @Getter
 @Setter
-@Service
+@Component
 public class ContractExecutorImpl implements ContractExecutor {
 
     @Autowired
@@ -65,7 +67,7 @@ public class ContractExecutorImpl implements ContractExecutor {
         programCreate.setPrice(price);
         programCreate.setGasLimit(create.getGasLimit());
         programCreate.setNumber(number);
-        programCreate.setContractCode(Hex.decode(create.getCode()));
+        programCreate.setContractCode(create.getCode());
         programCreate.setArgs(create.getArgs());
 
         ProgramExecutor track = executor.startTracking();
@@ -81,7 +83,7 @@ public class ContractExecutorImpl implements ContractExecutor {
         contractResult.setBalance(programResult.getBalance());
         contractResult.setContractAddress(contractAddress);
         contractResult.setSender(sender);
-        contractResult.setRemark(ContractConstant.CREATE);
+        contractResult.setRemark(ContractConstant.CREATE_REMARK);
         // 批量提交方式，交易track放置到外部处理合约执行结果的方法里去提交
         contractResult.setTxTrack(track);
 
@@ -98,7 +100,7 @@ public class ContractExecutorImpl implements ContractExecutor {
         contractResult.setRevert(false);
         contractResult.setEvents(programResult.getEvents());
         contractResult.setTransfers(programResult.getTransfers());
-        return null;
+        return contractResult;
     }
 
     @Override
@@ -131,7 +133,7 @@ public class ContractExecutorImpl implements ContractExecutor {
         contractResult.setContractAddress(contractAddress);
         contractResult.setSender(sender);
         contractResult.setValue(programCall.getValue().longValue());
-        contractResult.setRemark(ContractConstant.CALL);
+        contractResult.setRemark(ContractConstant.CALL_REMARK);
         // 批量提交方式，交易track放置到外部处理合约执行结果的方法里去提交
         contractResult.setTxTrack(track);
 
@@ -175,7 +177,7 @@ public class ContractExecutorImpl implements ContractExecutor {
         contractResult.setBalance(programResult.getBalance());
         contractResult.setContractAddress(contractAddress);
         contractResult.setSender(sender);
-        contractResult.setRemark(ContractConstant.DELETE);
+        contractResult.setRemark(ContractConstant.DELETE_REMARK);
         // 批量提交方式，交易track放置到外部处理合约执行结果的方法里去提交
         contractResult.setTxTrack(track);
 
@@ -201,6 +203,16 @@ public class ContractExecutorImpl implements ContractExecutor {
         }
         ProgramExecutor executor = contractHelper.getProgramExecutor(chainId).begin(stateRoot);
         return executor;
+    }
+
+    @Override
+    public Result<byte[]> commitBatchExecute(ProgramExecutor executor) {
+        if (executor == null) {
+            return ContractUtil.getSuccess();
+        }
+        executor.commit();
+        byte[] stateRoot = executor.getRoot();
+        return ContractUtil.getSuccess().setData(stateRoot);
     }
 
 }

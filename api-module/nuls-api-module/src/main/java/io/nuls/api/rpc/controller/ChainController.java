@@ -82,7 +82,7 @@ public class ChainController {
             if (isAddress) {
                 byte[] address = AddressTool.getAddress(text);
                 if (address[2] == AddressType.CONTRACT_ADDRESS_TYPE) {
-                    result = getContractByAddress(text);
+                    result = getContractByAddress(chainId, text);
                 } else {
                     result = getAccountByAddress(chainId, text);
                 }
@@ -96,10 +96,10 @@ public class ChainController {
         return new RpcResult().setResult(result);
     }
 
-    private SearchResultDTO getContractByAddress(String text) {
+    private SearchResultDTO getContractByAddress(int chainId, String text) {
         ContractInfo contractInfo = null;
         try {
-            contractInfo = contractService.getContractInfo(text);
+            contractInfo = contractService.getContractInfo(chainId, text);
         } catch (Exception e) {
             Log.error(e);
             throw new JsonRpcException();

@@ -27,6 +27,7 @@ package io.nuls.network.manager;
 import io.nuls.network.cfg.NetworkConfig;
 import io.nuls.network.constant.ManagerStatusEnum;
 import io.nuls.network.model.NodeGroup;
+import io.nuls.network.utils.LoggerUtil;
 import io.nuls.tools.core.ioc.SpringLiteContext;
 
 import java.util.ArrayList;
@@ -114,6 +115,7 @@ public class NodeGroupManager extends BaseManager {
     public void addNodeGroup(int chainId, NodeGroup nodeGroup) {
         nodeGroupMap.put(String.valueOf(chainId), nodeGroup);
         mgicNumChainIdMap.put(String.valueOf(nodeGroup.getMagicNumber()), String.valueOf(chainId));
+        LoggerUtil.createLogs(chainId);
     }
 
     public void removeNodeGroup(int chainId) {

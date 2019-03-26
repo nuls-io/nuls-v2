@@ -74,20 +74,19 @@ public class ServerChannelHandler extends BaseChannelHandler {
         super.channelInactive(ctx);
         SocketChannel channel = (SocketChannel) ctx.channel();
         String nodeId = IpUtil.getNodeId(channel.remoteAddress());
-        Log.info("Server Node is Inactive:" + nodeId);
+        Log.info("Server Node is Inactive:{}" ,nodeId);
     }
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
         SocketChannel channel = (SocketChannel) ctx.channel();
         String remoteIP = channel.remoteAddress().getHostString();
-        Log.info("Server Node is exceptionCaught:{}:{}", remoteIP, channel.remoteAddress().getPort());
+        Log.error("Server Node is exceptionCaught:{}:{}", remoteIP, channel.remoteAddress().getPort());
         Log.error(cause.getMessage());
-        Log.error("----------------- server exceptionCaught -------------------");
         if (!(cause instanceof IOException)) {
             String nodeId = IpUtil.getNodeId(channel.remoteAddress());
             //通常发生IOException是因为连接的节点断开了
-            Log.error("----------------nodeId:" + nodeId);
+            Log.error("-----------exceptionCaught-----nodeId:{}", nodeId);
             Log.error(cause);
         }
         ctx.close();
@@ -107,12 +106,11 @@ public class ServerChannelHandler extends BaseChannelHandler {
             Attribute<Node> nodeAttribute = channel.attr(AttributeKey.valueOf("node-" + nodeId));
             node = nodeAttribute.get();
             if (node != null) {
-                Log.info("-----------------server channelRead  node={} -----------------", node.getId());
                 byte[] bytes = new byte[buf.readableBytes()];
                 buf.readBytes(bytes);
                 byteBuffer = new NulsByteBuffer(bytes);
             } else {
-                Log.info("-----------------Server channelRead  node is null -----------------" + remoteIP + ":" + channel.remoteAddress().getPort());
+                Log.error("-----------------Server channelRead  node is null -----------------" + remoteIP + ":" + channel.remoteAddress().getPort());
                 ctx.channel().close();
             }
         } catch (Exception e) {

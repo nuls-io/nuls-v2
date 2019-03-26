@@ -145,6 +145,7 @@ public class TxUtil {
         String key = address + "_" + assetChainId + "_" + assetId;
         NonceHashData nonceHashData = PRE_HASH_MAP.get(key);
         if (null == nonceHashData || (NetworkCall.getCurrentTimeMillis() - nonceHashData.getCacheTimestamp() > AccountConstant.HASH_TTL)) {
+            LoggerUtil.logger.debug("getNonce重新向账本获取新的nonce...........");
             return LegerCmdCall.getNonce(chainId, assetChainId, assetId, address);
         } else {
             return TxUtil.getNonceByPreHash(nonceHashData.getHash());

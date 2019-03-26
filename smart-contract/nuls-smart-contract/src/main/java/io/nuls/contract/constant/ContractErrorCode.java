@@ -27,7 +27,6 @@ package io.nuls.contract.constant;
 import io.nuls.tools.constant.ErrorCode;
 
 /**
- * @desription:
  * @author: PierreLuo
  * @date: 2018/6/17
  */
@@ -84,5 +83,7 @@ public interface ContractErrorCode {
     ErrorCode CONTRACT_DELETED = ErrorCode.init("100019");
     ErrorCode CONTRACT_GAS_LIMIT = ErrorCode.init("100020");
     ErrorCode CONTRACT_NOT_EXECUTE_VIEW = ErrorCode.init("100021");
+    ErrorCode CONTRACT_NO_ACCEPT_DIRECT_TRANSFER = ErrorCode.init("100022");
+    ErrorCode CONTRACT_METHOD_NOT_EXIST = ErrorCode.init("100023");
     ErrorCode CONTRACT_OTHER_ERROR = ErrorCode.init("100099");
 }

@@ -28,6 +28,7 @@ import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.basic.NulsOutputStreamBuffer;
 import io.nuls.base.data.BaseNulsData;
 import io.nuls.base.data.NulsDigestData;
+import io.nuls.network.utils.LoggerUtil;
 import io.nuls.tools.constant.ToolsConstant;
 import io.nuls.tools.crypto.Sha256Hash;
 import io.nuls.tools.model.ByteUtils;
@@ -97,7 +98,7 @@ public abstract class BaseMessage<T extends BaseNulsData> extends BaseNulsData {
             return getCheckSum() == this.getHeader().getChecksum();
         } catch (IOException e) {
             e.printStackTrace();
-            Log.error(e.getMessage());
+            LoggerUtil.Log.error(e.getMessage());
             return false;
 
         }

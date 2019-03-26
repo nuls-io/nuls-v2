@@ -1,10 +1,7 @@
 package io.nuls.api.provider.transaction;
 
 import io.nuls.api.provider.Result;
-import io.nuls.api.provider.transaction.facade.GetConfirmedTxByHashReq;
-import io.nuls.api.provider.transaction.facade.GetTxByHashReq;
-import io.nuls.api.provider.transaction.facade.TransferByAliasReq;
-import io.nuls.api.provider.transaction.facade.TransferReq;
+import io.nuls.api.provider.transaction.facade.*;
 import io.nuls.base.data.Transaction;
 
 /**
@@ -29,7 +26,7 @@ public interface TransferService {
      * @param req
      * @return
      */
-    Result<String> transferByAlias(TransferByAliasReq req);
+    Result<String> transferByAlias(TransferReq req);
 
     /**
      * 通过hash获取交易信息 包含未确认的交易
@@ -47,5 +44,12 @@ public interface TransferService {
      * @return
      */
     Result<Transaction> getConfirmedTxByHash(GetConfirmedTxByHashReq req);
+
+    /**
+     * 通过hash获取已确认的交易的简要数据
+     * @param req
+     * @return
+     */
+    Result<TransactionData> getSimpleTxDataByHash(GetConfirmedTxByHashReq req);
 
 }

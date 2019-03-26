@@ -23,17 +23,19 @@
  */
 package io.nuls.contract.helper;
 
+import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.CoinData;
 import io.nuls.base.data.CoinFrom;
 import io.nuls.base.data.CoinTo;
 import io.nuls.base.data.NulsDigestData;
 import io.nuls.contract.constant.ContractConstant;
-import io.nuls.contract.manager.TempBalanceManager;
+import io.nuls.contract.manager.ContractTempBalanceManager;
 import io.nuls.contract.model.bo.*;
 import io.nuls.contract.model.tx.ContractTransferTransaction;
 import io.nuls.contract.model.txdata.ContractData;
 import io.nuls.contract.model.txdata.ContractTransferData;
 import io.nuls.contract.util.ContractUtil;
+import io.nuls.contract.util.Log;
 import io.nuls.contract.util.MapUtil;
 import io.nuls.contract.util.VMContext;
 import io.nuls.contract.vm.program.ProgramTransfer;
@@ -41,7 +43,6 @@ import io.nuls.tools.basic.Result;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.exception.NulsException;
-import io.nuls.tools.log.Log;
 import io.nuls.tools.model.ByteArrayWrapper;
 import org.spongycastle.util.encoders.Hex;
 
@@ -65,12 +66,12 @@ public class ContractTransferHandler {
     @Autowired
     private VMContext vmContext;
 
-    public void handleContractTransfer(int chainId, long blockTime, ContractWrapperTransaction tx, ContractResult contractResult, TempBalanceManager tempBalanceManager) {
+    public void handleContractTransfer(int chainId, long blockTime, ContractWrapperTransaction tx, ContractResult contractResult, ContractTempBalanceManager tempBalanceManager) {
         this.refreshTempBalance(chainId, tx, contractResult, tempBalanceManager);
         this.handleContractTransferTxs(contractResult, tempBalanceManager, chainId, blockTime);
     }
 
-    private void refreshTempBalance(int chainId, ContractWrapperTransaction tx, ContractResult contractResult, TempBalanceManager tempBalanceManager) {
+    private void refreshTempBalance(int chainId, ContractWrapperTransaction tx, ContractResult contractResult, ContractTempBalanceManager tempBalanceManager) {
         ContractData contractData = tx.getContractData();
 
         byte[] contractAddress = contractData.getContractAddress();
@@ -102,7 +103,7 @@ public class ContractTransferHandler {
         }
     }
 
-    private void rollbackContractTempBalance(int chainId, ContractWrapperTransaction tx, ContractResult contractResult, TempBalanceManager tempBalanceManager) {
+    private void rollbackContractTempBalance(int chainId, ContractWrapperTransaction tx, ContractResult contractResult, ContractTempBalanceManager tempBalanceManager) {
         if (tx != null && tx.getType() == ContractConstant.TX_TYPE_CALL_CONTRACT) {
             ContractData contractData = tx.getContractData();
             byte[] contractAddress = contractData.getContractAddress();
@@ -169,7 +170,7 @@ public class ContractTransferHandler {
         return contracts;
     }
 
-    private void handleContractTransferTxs(ContractResult contractResult, TempBalanceManager tempBalanceManager, int chainId, long blockTime) {
+    private void handleContractTransferTxs(ContractResult contractResult, ContractTempBalanceManager tempBalanceManager, int chainId, long blockTime) {
         boolean isCorrectContractTransfer = true;
         List<ProgramTransfer> transfers = contractResult.getTransfers();
         // 创建合约转账(从合约转出)交易
@@ -219,7 +220,7 @@ public class ContractTransferHandler {
         return getSuccess();
     }
 
-    private void mergeContractTransfer(ContractResult contractResult, int chainId, long blockTime, TempBalanceManager tempBalanceManager) throws Exception {
+    private void mergeContractTransfer(ContractResult contractResult, int chainId, long blockTime, ContractTempBalanceManager tempBalanceManager) throws Exception {
         ContractWrapperTransaction tx = contractResult.getTx();
         List<ProgramTransfer> transfers = contractResult.getTransfers();
         byte[] contractAddress = contractResult.getContractAddress();
@@ -260,6 +261,7 @@ public class ContractTransferHandler {
                     contractBalance = tempBalanceManager.getBalance(from).getData();
                     nonceBytes = Hex.decode(contractBalance.getNonce());
                 }
+                Log.info("=====pierre====from is {}, nonce is {}", AddressTool.getStringAddressByBytes(from), contractBalance.getNonce());
                 compareFrom = wrapperFrom;
                 coinData = new CoinData();
                 coinFrom = new CoinFrom(from, chainId, assetsId, value, nonceBytes, (byte) 0);
@@ -332,6 +334,7 @@ public class ContractTransferHandler {
         byte[] currentNonceBytes = Arrays.copyOfRange(hashBytes, hashBytes.length - 8, hashBytes.length);
         balance.setNonce(Hex.toHexString(currentNonceBytes));
         tx.setHash(hash);
+        Log.info("=====pierre====txType is {}, hash is {}, nextNonce is {}", tx.getType(), hash.toString(), Hex.toHexString(currentNonceBytes));
     }
 
     private ContractTransferTransaction createContractTransferTx(CoinData coinData, ContractTransferData txData, long blockTime, long timeOffset) {

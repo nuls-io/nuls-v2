@@ -23,12 +23,17 @@ package io.nuls.block.rpc.call;
 import io.nuls.base.data.Block;
 import io.nuls.base.data.BlockHeader;
 import io.nuls.block.manager.ContextManager;
+import io.nuls.block.model.ChainContext;
+import io.nuls.block.service.BlockService;
+import io.nuls.block.utils.BlockUtil;
 import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.netty.processor.ResponseMessageProcessor;
 import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.log.logback.NulsLogger;
 
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -98,8 +103,27 @@ public class ConsensusUtil {
      * @param chainId 链Id/chain id
      * @return
      */
-    public static boolean evidence(int chainId, BlockHeader masterHeader, BlockHeader forkHeader) {
-        NulsLogger commonLog = ContextManager.getContext(chainId).getCommonLog();
+    public static boolean evidence(int chainId, BlockService blockService, BlockHeader forkHeader) {
+        ChainContext context = ContextManager.getContext(chainId);
+        NulsLogger commonLog = context.getCommonLog();
+        long forkHeaderHeight = forkHeader.getHeight();
+        if (context.getLatestHeight() < forkHeaderHeight) {
+            return true;
+        }
+        BlockHeader masterHeader = BlockUtil.fromBlockHeaderPo(blockService.getBlockHeader(chainId, forkHeaderHeight));
+        if (masterHeader.getHash().equals(forkHeader.getHash())) {
+            return true;
+        }
+        byte[] masterHeaderPackingAddress = masterHeader.getPackingAddress(chainId);
+        byte[] forkHeaderPackingAddress = forkHeader.getPackingAddress(chainId);
+        if (!Arrays.equals(masterHeaderPackingAddress, forkHeaderPackingAddress)) {
+            return true;
+        }
+        List<byte[]> packingAddressList = context.getPackingAddressList();
+        if (packingAddressList.contains(masterHeaderPackingAddress)) {
+            return true;
+        }
+        packingAddressList.add(masterHeaderPackingAddress);
         try {
             Map<String, Object> params = new HashMap<>(5);
 //            params.put(Constants.VERSION_KEY_STR, "1.0");

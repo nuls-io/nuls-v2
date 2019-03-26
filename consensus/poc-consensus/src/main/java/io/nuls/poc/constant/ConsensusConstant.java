@@ -65,10 +65,6 @@ public interface ConsensusConstant {
      * */
     String RPC_PATH = "io.nuls.poc.rpc";
 
-    /**
-     * config file path
-     * */
-    String CONFIG_FILE_PATH = "consensus-config.json";
 
     /**
      * system params
@@ -76,13 +72,6 @@ public interface ConsensusConstant {
     String SYS_ALLOW_NULL_ARRAY_ELEMENT = "protostuff.runtime.allow_null_array_element";
     String SYS_FILE_ENCODING = "file.encoding";
 
-    /**
-     * webSocket config
-     * */
-    String CONSENSUS_MODULE_NAME = "consensus";
-    String CONSENSUS_RPC_PATH = "io.nuls.poc.rpc";
-    int CONSENSUS_RPC_PORT = 8888;
-    String KERNEL_URL = "ws://127.0.0.1:8887";
 
     /**
      * DB config
@@ -91,33 +80,6 @@ public interface ConsensusConstant {
     String DB_DATA_PATH ="rocksdb.datapath";
     String DB_DATA_DEFAULT_PATH ="rocksdb.datapath";
 
-    /**
-     * password config
-     * */
-    String PASSWORD_CONFIG_NAME ="password.properties";
-    String PASSWORD = "password";
-    String ADDRESS = "address";
-
-    /**
-     * RPC_VERSION
-     */
-    double RPC_VERSION = 1.0;
-    int MAIN_VERSION =1;
-
-    /**
-     * Regularly clear the round before the specified number of rounds of the main chain
-     * 定期清理主链指定轮数之前的轮次信息
-     */
-    int CLEAR_MASTER_CHAIN_ROUND_COUNT = 5;
-
-    /**
-     * Maximum acceptable number of delegate
-     */
-    int MAX_ACCEPT_NUM_OF_DEPOSIT = 250;
-    int MAX_AGENT_COUNT_OF_ADRRESS = 1;
-
-    BigInteger SUM_OF_DEPOSIT_OF_AGENT_LOWER_LIMIT = new BigInteger("20000000000000");
-    BigInteger SUM_OF_DEPOSIT_OF_AGENT_UPPER_LIMIT = new BigInteger("50000000000000");
 
     /**
      * unit:round of consensus
@@ -137,7 +99,7 @@ public interface ConsensusConstant {
     int INIT_PUNISH_OF_ROUND_COUNT = 200;
 
     /**
-     * 系统启动时缓存指定数量的区块
+     * 系统启动时缓存指定轮次的区块
      * Buffer a specified number of blocks at system startup
      * */
     int INIT_BLOCK_HEADER_COUNT = 110;
@@ -163,7 +125,7 @@ public interface ConsensusConstant {
      * 每出一个块获得的共识奖励，一年总的共识奖励金5000000，一年总出块数3154600,相除得到每一块的奖励金
      * value = 5000000/3154600
      */
-    BigInteger BLOCK_REWARD = BigInteger.valueOf(158548960);
+    BigInteger YEAR_MILLISECOND = new BigInteger("31536000000");
 
     /**
      * 信誉值的最小值，小于等于该值会给红牌处罚
@@ -179,22 +141,6 @@ public interface ConsensusConstant {
      * lock of lockTime,(max of int48)(281474976710655L)
      */
     long LOCK_OF_LOCK_TIME = -1L ;
-
-    /**
-     * 主链ID（卫星链ID）
-     * */
-    int MAIN_CHAIN_ID = 1;
-
-    /**
-     * 主链资产ID卫星链资产ID）
-     * */
-    int MAIN_ASSETS_ID =1;
-
-    /**
-     * 跨链交易手续费主链收取比例
-     * */
-    int MAIN_COMMISSION_RATIO = 60;
-    int TOTLA_COMMISSION_RATIO = 100;
 
     /**
      * Map初始值
@@ -229,17 +175,6 @@ public interface ConsensusConstant {
     String CONSENSUS_LOGGER_NAME = "consensus/consensus";
     String BASIC_LOGGER_NAME = "rpc/rpc";
 
-    String MODULE_VALIDATOR = "cs_batchValid";
 
-    /**
-     * 区块交易大小（字节）
-     * Block transaction size (bytes)
-     * */
-    int PACK_TX_MAX_SIZE = 30000*1000;
-
-    /**
-     * 获取打包交易最长等待时间(毫秒)
-     * Get the longest waiting time for packaged transactions
-     * */
-    long GET_TX_MAX_WAIT_TIME = 7000;
+    int ROUND_CACHE_COUNT = 10;
  }

@@ -26,14 +26,10 @@ package io.nuls.contract.util;
 import io.nuls.contract.model.bo.ModelWrapper;
 import io.nuls.db.manager.RocksDBManager;
 import io.nuls.db.service.RocksDBService;
-import io.nuls.tools.log.Log;
 import io.nuls.tools.model.StringUtils;
 import io.protostuff.LinkedBuffer;
 import io.protostuff.ProtostuffIOUtil;
 import io.protostuff.runtime.RuntimeSchema;
-
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * @author: PierreLuo
@@ -41,7 +37,7 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class ContractDBUtil {
 
-    private static final Map<Class, RuntimeSchema> SCHEMA_MAP = new ConcurrentHashMap<>();
+    private static final RuntimeSchema MODEL_WRAPPER_SCHEMA = RuntimeSchema.createFrom(ModelWrapper.class);
 
     public static <T> boolean putModel(String area, byte[] key, T value) {
         if (!baseCheckArea(area)) {
@@ -71,9 +67,8 @@ public class ContractDBUtil {
             return null;
         }
         try {
-            RuntimeSchema schema = SCHEMA_MAP.get(ModelWrapper.class);
             ModelWrapper model = new ModelWrapper();
-            ProtostuffIOUtil.mergeFrom(value, model, schema);
+            ProtostuffIOUtil.mergeFrom(value, model, MODEL_WRAPPER_SCHEMA);
             if (clazz != null && model.getT() != null) {
                 return clazz.cast(model.getT());
             }
@@ -85,13 +80,8 @@ public class ContractDBUtil {
     }
 
     private static <T> byte[] getModelSerialize(T value) {
-        if (SCHEMA_MAP.get(ModelWrapper.class) == null) {
-            RuntimeSchema schema = RuntimeSchema.createFrom(ModelWrapper.class);
-            SCHEMA_MAP.put(ModelWrapper.class, schema);
-        }
-        RuntimeSchema schema = SCHEMA_MAP.get(ModelWrapper.class);
         ModelWrapper modelWrapper = new ModelWrapper(value);
-        byte[] bytes = ProtostuffIOUtil.toByteArray(modelWrapper, schema, LinkedBuffer.allocate(LinkedBuffer.DEFAULT_BUFFER_SIZE));
+        byte[] bytes = ProtostuffIOUtil.toByteArray(modelWrapper, MODEL_WRAPPER_SCHEMA, LinkedBuffer.allocate(LinkedBuffer.DEFAULT_BUFFER_SIZE));
         return bytes;
     }
 
@@ -107,9 +97,8 @@ public class ContractDBUtil {
             if (bytes == null) {
                 return null;
             }
-            RuntimeSchema schema = SCHEMA_MAP.get(ModelWrapper.class);
             ModelWrapper model = new ModelWrapper();
-            ProtostuffIOUtil.mergeFrom(bytes, model, schema);
+            ProtostuffIOUtil.mergeFrom(bytes, model, MODEL_WRAPPER_SCHEMA);
             if (clazz != null && model.getT() != null) {
                 return clazz.cast(model.getT());
             }
@@ -119,4 +108,5 @@ public class ContractDBUtil {
             return null;
         }
     }
+
 }

@@ -24,7 +24,7 @@ public class TxServiceImplTest {
      * KXUoxve8142puKYLUMq2p4suUJ7zy3930
      * NJLo16NgDoPEjnzU36uxpbu2huqYq3930
      * PGkq3ZJiLbUhhm4g6YdvoTQAfvCnd3930
-     * pwd:nuls123456 chainId:12345
+     * pwd:nuls26 chainId:2
      */
 
     static List<CoinDTO> froms = new ArrayList<>();
@@ -57,7 +57,7 @@ public class TxServiceImplTest {
         CoinDTO coin1 = new CoinDTO();
         coin1.setAddress("Q9TwCWfw3uhW11mHLUExT48e8pb9s3930");
         coin1.setAmount(new BigInteger("1"));
-        coin1.setAssetsChainId(12345);
+        coin1.setAssetsChainId(2);
         coin1.setAssetsId(1);
         coin1.setPassword("nuls123456");
 

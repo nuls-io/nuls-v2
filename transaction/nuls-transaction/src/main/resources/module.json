@@ -1,22 +1,21 @@
 
 {
   "chainConfig":{
-    "chainId":12345,
+    "chainId":2,
     "assetId":1,
     "txMaxSize":1048576,
-    "moduleVerifyOffset":1000,
+    "moduleVerifyPercent":0.3,
     "packageRpcReserveTime":20,
     "txUnverifiedQueueSize":10000000,
-    "orphanContainerSize":200000,
     "orphanTtl":3600000
   },
   "moduleCode":"tx",
-  "mainChainId": 12345,
+  "mainChainId": 2,
   "mainAssetId": 1,
   "language": "en",
   "encoding": "UTF-8",
   "txDataRoot": "tx",
-  "hashTtl":30000,
+  "hashTtl":6000,
   "ctxEffectThreshold":30,
   "crossVerifyResultPassRate":"0.51",
   "chainNodesResultPassRate":"0.8",

@@ -23,6 +23,7 @@
  */
 package io.nuls.contract.model.bo;
 
+import io.nuls.contract.enums.ContractStatus;
 import io.nuls.contract.util.ContractUtil;
 import io.nuls.tools.exception.NulsException;
 import lombok.Getter;
@@ -44,7 +45,7 @@ public class ContractTokenInfo {
     private BigInteger amount;
     private long decimals;
     private long blockHeight;
-    private int status;
+    private ContractStatus status;
 
     public ContractTokenInfo() {
     }
@@ -73,7 +74,7 @@ public class ContractTokenInfo {
     }
 
     public boolean isStop() {
-        return ContractUtil.isTerminatedContract(this.status);
+        return ContractUtil.isTerminatedContract(this.status.status());
     }
 
 }

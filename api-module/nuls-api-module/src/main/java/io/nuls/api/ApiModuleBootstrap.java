@@ -33,8 +33,8 @@ import io.nuls.rpc.modulebootstrap.RpcModule;
 import io.nuls.rpc.modulebootstrap.RpcModuleState;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
-import io.nuls.tools.core.annotation.Configuration;
 import io.nuls.tools.core.ioc.SpringLiteContext;
+import io.nuls.tools.log.Log;
 
 import java.util.List;
 
@@ -89,8 +89,11 @@ public class ApiModuleBootstrap extends RpcModule {
 
     @Override
     public Module[] getDependencies() {
-        return new Module[]{new Module(ModuleE.CS.abbr, "1.0"),
-                new Module(ModuleE.BL.abbr, "1.0")};
+        return new Module[]{
+                new Module(ModuleE.CS.abbr, "1.0"),
+                new Module(ModuleE.BL.abbr, "1.0"),
+                new Module(ModuleE.SC.abbr, "1.0")
+        };
     }
 
     @Override
@@ -106,8 +109,7 @@ public class ApiModuleBootstrap extends RpcModule {
             initCfg();
 
         } catch (Exception e) {
-            //LoggerUtil.logger.error("AccountBootsrap init error!");
-            throw new RuntimeException(e);
+            Log.error(e);
         }
     }
 
@@ -122,7 +124,9 @@ public class ApiModuleBootstrap extends RpcModule {
             server.startServer(ApiContext.listenerIp, ApiContext.rpcPort);
             return true;
         } catch (Exception e) {
-            e.printStackTrace();
+            Log.error("------------------------api module启动失败---------------------------");
+            Log.error(e);
+            System.exit(-1);
             return false;
         }
     }

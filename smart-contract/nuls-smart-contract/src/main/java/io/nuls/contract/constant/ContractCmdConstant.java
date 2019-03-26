@@ -37,6 +37,7 @@ public interface ContractCmdConstant {
     String INTEGRATE_VALIDATOR = "sc_integrate_validator";
     String BATCH_BEGIN = "sc_batch_begin";
     String INVOKE_CONTRACT = "sc_invoke_contract";
+    String BATCH_BEFORE_END = "sc_batch_before_end";
     String BATCH_END = "sc_batch_end";
     String CREATE_VALIDATOR = "sc_create_validator";
     String CALL_VALIDATOR = "sc_call_validator";
@@ -66,4 +67,6 @@ public interface ContractCmdConstant {
     String CONTRACT_TX = "sc_contract_tx";
     String TOKEN_ASSETS_LIST = "sc_token_assets_list";
     String UPLOAD = "sc_upload";
+    String TOKEN_TRANSFER_LIST = "sc_token_transfer_list";
+    String ACCOUNT_CONTRACTS = "sc_account_contracts";
 }

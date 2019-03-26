@@ -24,6 +24,7 @@
 package io.nuls.contract.processor;
 
 
+import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.BlockHeader;
 import io.nuls.base.data.NulsDigestData;
 import io.nuls.contract.helper.ContractHelper;
@@ -32,8 +33,8 @@ import io.nuls.contract.model.bo.ContractWrapperTransaction;
 import io.nuls.contract.model.po.ContractAddressInfoPo;
 import io.nuls.contract.model.txdata.ContractData;
 import io.nuls.contract.service.ContractService;
+import io.nuls.contract.service.ContractTxService;
 import io.nuls.contract.storage.ContractAddressStorageService;
-import io.nuls.contract.storage.ContractExecuteResultStorageService;
 import io.nuls.contract.storage.ContractTokenAddressStorageService;
 import io.nuls.tools.basic.Result;
 import io.nuls.tools.core.annotation.Autowired;
@@ -59,28 +60,35 @@ public class CreateContractTxProcessor {
     @Autowired
     private ContractService contractService;
     @Autowired
-    private ContractExecuteResultStorageService contractExecuteResultStorageService;
+    private ContractTxService contractTxService;
     @Autowired
     private ContractHelper contractHelper;
 
     public Result onCommit(int chainId, ContractWrapperTransaction tx) {
+        BlockHeader blockHeader = contractHelper.getBatchInfoCurrentBlockHeader(chainId);
+        byte[] stateRoot = blockHeader.getStateRoot();
+        long blockHeight = blockHeader.getHeight();
         ContractResult contractResult = tx.getContractResult();
+        contractResult.setStateRoot(stateRoot);
+        contractResult.setBlockHeight(blockHeight);
         contractService.saveContractExecuteResult(chainId, tx.getHash(), contractResult);
 
         ContractData txData = tx.getContractData();
         byte[] contractAddress = txData.getContractAddress();
         byte[] sender = txData.getSender();
+        String senderStr = AddressTool.getStringAddressByBytes(sender);
+        String contractAddressStr = AddressTool.getStringAddressByBytes(contractAddress);
+        // 移除未确认的创建合约交易
+        contractHelper.getChain(chainId).getContractTxCreateUnconfirmedManager().removeLocalUnconfirmedCreateContractTransaction(senderStr, contractAddressStr, contractResult);
 
         // 执行失败的合约直接返回
         if (!contractResult.isSuccess()) {
             return getSuccess();
         }
 
-        BlockHeader blockHeader = contractHelper.getCurrentBlockHeader(chainId);
-        NulsDigestData hash = tx.getHash();
-        long blockHeight = blockHeader.getHeight();
-        tx.setBlockHeight(blockHeight);
 
+        NulsDigestData hash = tx.getHash();
+        tx.setBlockHeight(blockHeight);
         ContractAddressInfoPo info = new ContractAddressInfoPo();
         info.setContractAddress(contractAddress);
         info.setSender(sender);

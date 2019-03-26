@@ -12,6 +12,9 @@ help()
     		-m 生成mykernel模块以及启动脚本
     		-h 查看帮助
     		-j JAVA_HOME
+    		-J 输出的jvm虚拟机目录，脚本将会把这个目录复制到程序依赖中
+    		-i 跳过mvn打包
+    		-z 生成压缩包
     Author: zlj
 EOF
     exit 0
@@ -20,14 +23,14 @@ EOF
 
 #获取参数
 #输出目录
-MODULES_PATH="./Modules"
+MODULES_PATH="./NULS-Walltet-linux64-alpha1"
 #是否马上更新代码
 DOPULL=
 #是否生成mykernel模块
 DOMOCK=
 #更新代码的 git 分支
 GIT_BRANCH=
-while getopts pmhb:o:j: name
+while getopts pmhb:o:j:iJ:z name
 do
             case $name in
             p)	   DOPULL=1
@@ -39,6 +42,9 @@ do
 			o)	   MODULES_PATH="$OPTARG";;
 			h)     help ;;
 			j)     JAVA_HOME="$OPTARG";;
+			i)     IGNROEMVN="1";;
+			J)     JRE_HOME="$OPTARG";;
+			z)     BUILDTAR="1";;
             ?)     exit 2;;
            esac
 done
@@ -70,6 +76,10 @@ checkJavaVersion
 
 #执行mvn函数打包java工程  $1 命令 $2 模块名称
 doMvn(){
+    if [ -n "$IGNROEMVN" ]; then
+        log "skip mvn package";
+        return ;
+    fi
 	log "$1 $2"
 	moduleLogDir="${BUILD_PATH}/tmp/$2";
 	if [ ! -d ${moduleLogDir} ]; then
@@ -102,8 +112,25 @@ if [ ! -d "${MODULES_PATH}" ]; then
 	mkdir "${MODULES_PATH}"
 fi
 MODULES_PATH=$(cd "$MODULES_PATH"; pwd)
+RELEASE_PATH=$MODULES_PATH
 echoYellow "Modules Path $MODULES_PATH"''
 log "==================BEGIN PACKAGE MODULES=============================="
+if [[ ! -d "$MODULES_PATH/bin" ]]; then
+	mkdir $MODULES_PATH/bin
+fi
+#存放脚本目录
+MODULES_BIN_PATH=$MODULES_PATH/bin
+if [[ ! -d "$MODULES_PATH/Modules" ]]; then
+	#statements
+	mkdir $MODULES_PATH/Modules
+fi
+#默认日志目录
+MODULES_LOGS_PATH=${MODULES_PATH}/logs
+if [[ ! -d "$MODULES_LOGS_PATH" ]]; then
+	#statements
+	mkdir $MODULES_LOGS_PATH
+fi
+MODULES_PATH=$MODULES_PATH/Modules
 #创建NULS_2.0公共模块目录
 if [ ! -d "$MODULES_PATH/Nuls" ]; then
 	mkdir $MODULES_PATH/Nuls
@@ -185,6 +212,9 @@ getModuleItem(){
 
 #拷贝打好的jar包到Moules/Nuls/<Module Name>/<Version> 下
 copyJarToModules(){
+    if [ -n "$IGNROEMVN" ]; then
+        return ;
+    fi
 	moduleName=$(getModuleItem "APP_NAME");
 	version=$(getModuleItem "VERSION");
 	if [ ! -d "${MODULES_PATH}/${moduleName}" ];then
@@ -226,10 +256,10 @@ copyModuleNcfToModules(){
 	do
 		TEMP=$(echo $line|grep -Eo '\[.+\]')
 		if [ -n "$TEMP" ]; then
-		  #echo "set cfg domain ${TEMP}"
+#		  echo "set cfg domain ${TEMP}"
 		  cfgDomain=$TEMP
 		fi
-		if [ "${cfgDomain}" == "[JAVA]" -a ! -n "$TEMP" ]; 
+		if [ "${cfgDomain}" == "[JAVA]" -a ! -n "$TEMP" ];
 		then
 			pname=$(echo $line | awk -F '=' '{print $1}')
 			#pvalue=$(echo $line | awk -F '=' '{print $2}')
@@ -246,18 +276,20 @@ copyModuleNcfToModules(){
 							print r
 						}
 					')
-            if [ "${pname}" != "" ]; then
+            if [[ "${pname}" != "" ]]; then
 			    sedCommand+=" -e 's/%${pname}%/${pvalue}/g' "
 			fi
+			echo $line >> $moduleNcf
 		else
-			if [ "${cfgDomain}" != "[JAVA]" ]; then
+
+			if [[ "${cfgDomain}" != "[JAVA]" ]]; then
 				echo $line >> $moduleNcf
 			fi
 		fi
 	done < ./module.ncf
 #	 merge common module.ncf and private module.ncf to module.tmep.ncf
 	sh "${PROJECT_PATH}/build/merge-ncf.sh" "${BUILD_PATH}/module-prod.ncf" $moduleNcf
-	rm $moduleNcf
+#	rm $moduleNcf
 	sedCommand+=" -e 's/%MAIN_CLASS_NAME%/${mainClassName}/g' "
     echo $sedCommand
 	if [ -z $(echo "${sedCommand}" | grep -o "%JOPT_XMS%") ]; then
@@ -320,7 +352,7 @@ packageModule() {
 	if [ ! -d $(pwd)/$1 ]; then
 		return 0
 	fi
-	if [ $(pwd) == "${PROJECT_PATH}/Modules" ]; then
+	if [ $(pwd) == "${RELEASE_PATH}" ]; then
 		return 0;
 	fi
 	cd $(pwd)/$1
@@ -354,16 +386,47 @@ do
     fi
 done
 log "============ PACKAGE DONE ==============="
+cd $PROJECT_PATH
+echo $JRE_HOME
+if [ -n "${JRE_HOME}" ]; then
+log "============ COPY JRE TO libs ==========="
 
+    if [ ! -d "${JRE_HOME}" ];
+    then
+        echoRed "JRE_HOME 必须是文件夹"
+        else
+        log "JRE_HOME IS ${JRE_HOME}"
+        LIBS_PATH="${RELEASE_PATH}/Libraries"
+        if [ ! -d "${LIBS_PATH}" ]; then
+            mkdir ${LIBS_PATH}
+        fi
+        if [ ! -d "${LIBS_PATH}/JAVA" ]; then
+            mkdir "${LIBS_PATH}/JAVA"
+        fi
+        cp -r ${JRE_HOME} "${LIBS_PATH}/JAVA/11.0.2"
+    fi
+log "============ COPY JRE TO libs done ============"
+fi
 if [ -n "${DOMOCK}" ]; then
 	log "BUILD start-mykernel script"
-	cp "${BUILD_PATH}/start-mykernel.sh" "${MODULES_PATH}/start.sh"
-	chmod u+x "${MODULES_PATH}/start.sh"
-	cp "${BUILD_PATH}/check-status.sh" "${MODULES_PATH}/"
-	chmod u+x "${MODULES_PATH}/check-status.sh"
-#	cp "${BUILD_PATH}/cmd.sh" "${MODULES_PATH}/"
-#	chmod u+x "${MODULES_PATH}/cmd.sh"
+	cp "${BUILD_PATH}/start-mykernel.sh" "${MODULES_BIN_PATH}/start.sh"
+	chmod u+x "${MODULES_BIN_PATH}/start.sh"
+	cp "${BUILD_PATH}/stop-mykernel.sh" "${MODULES_BIN_PATH}/stop.sh"
+	chmod u+x "${MODULES_BIN_PATH}/stop.sh"
+	cp "${BUILD_PATH}/default-config.json" "${MODULES_BIN_PATH}/"
+	chmod u+r "${MODULES_BIN_PATH}/default-config.json"
+	cp "${BUILD_PATH}/check-status.sh" "${MODULES_BIN_PATH}/"
+	chmod u+x "${MODULES_BIN_PATH}/check-status.sh"
+	cp "${BUILD_PATH}/cmd.sh" "${MODULES_BIN_PATH}/"
+	chmod u+x "${MODULES_BIN_PATH}/cmd.sh"
 fi
+
+if [ -n "${BUILDTAR}" ]; then
+    log "============ build ${RELEASE_PATH}.tar.gz ==================="
+    tar -zcPf "${RELEASE_PATH}.tar.gz" ${RELEASE_PATH}
+    log "============ build ${RELEASE_PATH}.tar.gz FINISH==================="
+fi
+
 
 
 

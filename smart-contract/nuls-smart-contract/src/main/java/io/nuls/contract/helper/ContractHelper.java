@@ -29,9 +29,10 @@ import io.nuls.base.data.BlockHeader;
 import io.nuls.base.data.Transaction;
 import io.nuls.contract.constant.ContractConstant;
 import io.nuls.contract.constant.ContractErrorCode;
+import io.nuls.contract.enums.ContractStatus;
 import io.nuls.contract.manager.ChainManager;
+import io.nuls.contract.manager.ContractTempBalanceManager;
 import io.nuls.contract.manager.ContractTokenBalanceManager;
-import io.nuls.contract.manager.TempBalanceManager;
 import io.nuls.contract.model.bo.*;
 import io.nuls.contract.model.dto.ContractInfoDto;
 import io.nuls.contract.model.po.ContractAddressInfoPo;
@@ -42,6 +43,7 @@ import io.nuls.contract.rpc.call.LedgerCall;
 import io.nuls.contract.storage.ContractAddressStorageService;
 import io.nuls.contract.storage.ContractTokenTransferStorageService;
 import io.nuls.contract.util.ContractUtil;
+import io.nuls.contract.util.Log;
 import io.nuls.contract.util.MapUtil;
 import io.nuls.contract.util.VMContext;
 import io.nuls.contract.vm.program.*;
@@ -50,7 +52,6 @@ import io.nuls.tools.basic.VarInt;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.exception.NulsException;
-import io.nuls.tools.log.Log;
 import io.nuls.tools.model.StringUtils;
 import org.spongycastle.util.Arrays;
 
@@ -352,14 +353,14 @@ public class ContractHelper {
     }
 
     public ContractBalance getBalance(int chainId, byte[] address) {
-        TempBalanceManager tempBalanceManager = getTempBalanceManager(chainId);
+        ContractTempBalanceManager tempBalanceManager = getBatchInfoTempBalanceManager(chainId);
         if (tempBalanceManager != null) {
             Result<ContractBalance> balance = tempBalanceManager.getBalance(address);
             if (balance.isSuccess()) {
                 return balance.getData();
             }
         } else {
-            ContractBalance realBalance = getBalanceAndNonce(chainId, AddressTool.getStringAddressByBytes(address));
+            ContractBalance realBalance = getRealBalance(chainId, AddressTool.getStringAddressByBytes(address));
             if (realBalance != null) {
                 return realBalance;
             }
@@ -369,10 +370,12 @@ public class ContractHelper {
 
     public ContractBalance getRealBalance(int chainId, String address) {
         try {
-            Map<String, Object> balance = LedgerCall.getBalanceAndNonce(getChain(chainId), address);
+            Map<String, Object> balance = LedgerCall.getBalance(getChain(chainId), address);
+            Map<String, Object> nonceMap = LedgerCall.getNonce(getChain(chainId), address);
             ContractBalance contractBalance = ContractBalance.newInstance();
             contractBalance.setBalance(new BigInteger(balance.get("available").toString()));
             contractBalance.setFreeze(new BigInteger(balance.get("freeze").toString()));
+            contractBalance.setNonce((String) nonceMap.get("nonce"));
             return contractBalance;
         } catch (NulsException e) {
             Log.error(e);
@@ -380,7 +383,7 @@ public class ContractHelper {
         }
     }
 
-    public ContractBalance getBalanceAndNonce(int chainId, String address) {
+    public ContractBalance getTempBalanceAndNonce(int chainId, String address) {
         try {
             Map<String, Object> balance = LedgerCall.getBalanceAndNonce(getChain(chainId), address);
             ContractBalance contractBalance = ContractBalance.newInstance();
@@ -395,22 +398,22 @@ public class ContractHelper {
     }
 
     public void createTempBalanceManagerAndCurrentBlockHeader(int chainId, long number, long blockTime, byte[] packingAddress) {
-        TempBalanceManager tempBalanceManager = TempBalanceManager.newInstance(chainId);
+        ContractTempBalanceManager tempBalanceManager = ContractTempBalanceManager.newInstance(chainId);
         BlockHeader tempHeader = new BlockHeader();
         tempHeader.setHeight(number);
         tempHeader.setTime(blockTime);
         tempHeader.setPackingAddress(packingAddress);
         Chain chain = getChain(chainId);
-        chain.setTempBalanceManager(tempBalanceManager);
-        chain.setCurrentBlockHeader(tempHeader);
+        chain.getBatchInfo().setTempBalanceManager(tempBalanceManager);
+        chain.getBatchInfo().setCurrentBlockHeader(tempHeader);
     }
 
-    public TempBalanceManager getTempBalanceManager(int chainId) {
-        return getChain(chainId).getTempBalanceManager();
+    public ContractTempBalanceManager getBatchInfoTempBalanceManager(int chainId) {
+        return getChain(chainId).getBatchInfo().getTempBalanceManager();
     }
 
-    public BlockHeader getCurrentBlockHeader(int chainId) {
-        return getChain(chainId).getCurrentBlockHeader();
+    public BlockHeader getBatchInfoCurrentBlockHeader(int chainId) {
+        return getChain(chainId).getBatchInfo().getCurrentBlockHeader();
     }
 
     public Result<ContractAddressInfoPo> getContractAddressInfo(int chainId, byte[] contractAddressBytes) {
@@ -450,7 +453,7 @@ public class ContractHelper {
                 result = getSuccess();
                 ContractTokenInfo tokenInfo = new ContractTokenInfo(contractAddress, po.getNrc20TokenName(), po.getDecimals(), new BigInteger(programResult.getResult()), po.getNrc20TokenSymbol(), po.getBlockHeight());
                 ProgramExecutor track = getProgramExecutor(chainId).begin(currentStateRoot);
-                tokenInfo.setStatus(track.status(AddressTool.getAddress(tokenInfo.getContractAddress())).ordinal());
+                tokenInfo.setStatus(ContractStatus.getStatus(track.status(AddressTool.getAddress(tokenInfo.getContractAddress())).ordinal()));
                 result.setData(tokenInfo);
             }
             return result;

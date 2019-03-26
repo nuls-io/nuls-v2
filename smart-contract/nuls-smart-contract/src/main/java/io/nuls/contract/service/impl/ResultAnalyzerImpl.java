@@ -27,7 +27,7 @@ import io.nuls.contract.model.bo.AnalyzerResult;
 import io.nuls.contract.model.bo.CallableResult;
 import io.nuls.contract.model.bo.ContractResult;
 import io.nuls.contract.service.ResultAnalyzer;
-import io.nuls.tools.core.annotation.Service;
+import io.nuls.tools.core.annotation.Component;
 
 import java.util.Collection;
 import java.util.List;
@@ -38,7 +38,7 @@ import java.util.Set;
  * @author: PierreLuo
  * @date: 2019-01-17
  */
-@Service
+@Component
 public class ResultAnalyzerImpl implements ResultAnalyzer {
 
     @Override

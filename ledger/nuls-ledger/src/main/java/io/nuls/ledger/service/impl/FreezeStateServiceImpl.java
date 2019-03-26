@@ -64,12 +64,12 @@ public class FreezeStateServiceImpl implements FreezeStateService {
                 break;
             }
         }
-        BigInteger addFromAmount = BigInteger.ZERO;
+        BigInteger addToAmount = BigInteger.ZERO;
         for (FreezeLockTimeState freezeLockTimeState : timeRemove) {
             timeList.remove(freezeLockTimeState);
-            addFromAmount = addFromAmount.add(freezeLockTimeState.getAmount());
+            addToAmount = addToAmount.add(freezeLockTimeState.getAmount());
         }
-        return addFromAmount;
+        return addToAmount;
     }
 
     private BigInteger unFreezeLockHeightState(List<FreezeHeightState> heightList, AccountState accountState) {
@@ -87,12 +87,12 @@ public class FreezeStateServiceImpl implements FreezeStateService {
                 break;
             }
         }
-        BigInteger addFromAmount = BigInteger.ZERO;
+        BigInteger addToAmount = BigInteger.ZERO;
         for (FreezeHeightState freezeHeightState : heightRemove) {
             heightList.remove(freezeHeightState);
-            addFromAmount = addFromAmount.add(freezeHeightState.getAmount());
+            addToAmount = addToAmount.add(freezeHeightState.getAmount());
         }
-        return addFromAmount;
+        return addToAmount;
     }
 
     /**
@@ -110,8 +110,8 @@ public class FreezeStateServiceImpl implements FreezeStateService {
         }
         BigInteger addTimeAmount = unFreezeLockTimeState(timeList, accountState);
         BigInteger addHeightAmount = unFreezeLockHeightState(heightList, accountState);
-        accountState.addTotalFromAmount(addTimeAmount);
-        accountState.addTotalFromAmount(addHeightAmount);
+        accountState.addTotalToAmount(addTimeAmount);
+        accountState.addTotalToAmount(addHeightAmount);
         return true;
     }
 }

@@ -78,24 +78,12 @@ public class ConfirmedTxStorageServiceImpl implements ConfirmedTxStorageService 
         if (hash == null) {
             return null;
         }
-        byte[] hashBytes = null;
         try {
-            hashBytes = hash.serialize();
+            return getTx(chainId, hash.serialize());
         } catch (IOException e) {
             Log.error(e);
             throw new NulsRuntimeException(e);
         }
-        byte[] txBytes = RocksDBService.get(TxDBConstant.DB_TRANSACTION_CONFIRMED + chainId, hashBytes);
-        TransactionConfirmedPO tx = null;
-        if (null != txBytes) {
-            try {
-                tx = TxUtil.getInstance(txBytes, TransactionConfirmedPO.class);
-            } catch (Exception e) {
-                Log.error(e);
-                return null;
-            }
-        }
-        return tx;
     }
 
     @Override
@@ -103,7 +91,11 @@ public class ConfirmedTxStorageServiceImpl implements ConfirmedTxStorageService 
         if(StringUtils.isBlank(hash)){
             return null;
         }
-        byte[] txBytes = RocksDBService.get(TxDBConstant.DB_TRANSACTION_CONFIRMED + chainId, HexUtil.decode(hash));
+        return getTx(chainId, HexUtil.decode(hash));
+    }
+
+    private TransactionConfirmedPO getTx(int chainId, byte[] hashSerialize){
+        byte[] txBytes = RocksDBService.get(TxDBConstant.DB_TRANSACTION_CONFIRMED + chainId, hashSerialize);
         TransactionConfirmedPO tx = null;
         if (null != txBytes) {
             try {

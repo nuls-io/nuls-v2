@@ -103,7 +103,6 @@ public class ContractTransactionDto {
     protected ContractResultDto contractResult;
 
     public ContractTransactionDto(int chainId, ContractBaseTransaction tx) throws NulsException {
-        long bestBlockHeight = BlockCall.getLatestHeight(chainId);
         this.hash = tx.getHash().getDigestHex();
         this.type = tx.getType();
         this.time = tx.getTime();
@@ -111,7 +110,7 @@ public class ContractTransactionDto {
         this.fee = bigInteger2String(tx.getFee());
         this.size = tx.getSize();
         this.txData = makeTxData(tx);
-
+        long bestBlockHeight = BlockCall.getLatestHeight(chainId);
         if (this.blockHeight > 0 || TxStatusEnum.CONFIRMED.equals(tx.getStatus())) {
             this.confirmCount = bestBlockHeight - this.blockHeight;
         } else {

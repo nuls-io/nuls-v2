@@ -27,15 +27,13 @@ package io.nuls.poc.model.bo.round;
 
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.Address;
-import io.nuls.poc.constant.ConsensusConstant;
 import io.nuls.poc.constant.ConsensusErrorCode;
 import io.nuls.poc.model.bo.Chain;
 import io.nuls.poc.utils.CallMethodUtils;
-import io.nuls.tools.model.DoubleUtils;
-import io.nuls.tools.model.StringUtils;
 import io.nuls.tools.exception.NulsRuntimeException;
 import io.nuls.tools.log.Log;
-import io.nuls.tools.parse.ConfigLoader;
+import io.nuls.tools.model.DoubleUtils;
+import io.nuls.tools.model.StringUtils;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -160,6 +158,15 @@ public class MeetingRound {
         return this.memberList.get(order - 1);
     }
 
+    public MeetingMember getOnlyMember(byte[] address,Chain chain){
+        for (MeetingMember member : memberList) {
+            if (Arrays.equals(address, member.getAgent().getPackingAddress())) {
+                return member;
+            }
+        }
+        return null;
+    }
+
     public MeetingMember getMember(byte[] address,Chain chain) {
         for (MeetingMember member : memberList) {
             if (Arrays.equals(address, member.getAgent().getPackingAddress()) && validAccount(chain, AddressTool.getStringAddressByBytes(member.getAgent().getPackingAddress()))) {
@@ -171,8 +178,6 @@ public class MeetingRound {
 
     private boolean validAccount(Chain chain,String address) {
         try {
-            /*Properties properties = ConfigLoader.loadProperties(ConsensusConstant.PASSWORD_CONFIG_NAME);
-            String password = properties.getProperty(ConsensusConstant.PASSWORD, ConsensusConstant.PASSWORD);*/
             HashMap callResult = CallMethodUtils.accountValid(chain.getConfig().getChainId(), address, chain.getConfig().getPassword());
             String priKey = (String) callResult.get("priKey");
             if (StringUtils.isNotBlank(priKey)){
@@ -225,26 +230,6 @@ public class MeetingRound {
                 myMember = member;
                 break;
             }
-        }
-        if(myMember != null && !chain.isPacker()){
-            CallMethodUtils.sendState(chain,true);
-            chain.setPacker(true);
-        }
-        if(myMember == null && chain.isPacker()){
-            CallMethodUtils.sendState(chain,false);
-            chain.setPacker(false);
-        }
-    }
-
-    public void calcLocalPacker(Chain chain) throws Exception{
-        Properties properties = ConfigLoader.loadProperties(ConsensusConstant.PASSWORD_CONFIG_NAME);
-        String address = properties.getProperty(ConsensusConstant.ADDRESS, ConsensusConstant.ADDRESS);
-        if(address.isEmpty()){
-            return;
-        }
-        MeetingMember member = getMember(AddressTool.getAddress(address),chain);
-        if (null != member) {
-            myMember = member;
         }
         if(myMember != null && !chain.isPacker()){
             CallMethodUtils.sendState(chain,true);

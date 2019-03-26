@@ -5,6 +5,7 @@ import io.netty.channel.socket.SocketChannel;
 import io.netty.handler.codec.http.FullHttpResponse;
 import io.netty.handler.codec.http.websocketx.*;
 import io.netty.util.CharsetUtil;
+import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.netty.channel.manager.ConnectManager;
 import io.nuls.rpc.netty.handler.message.TextMessageHandler;
 import io.nuls.tools.log.Log;
@@ -15,20 +16,24 @@ import java.util.concurrent.Executors;
 /**
  * 客户端事件触发处理类
  * Client Event Triggering Processing Class
+ *
  * @author tag
  * 2019/2/21
- * */
+ */
 public class ClientHandler extends SimpleChannelInboundHandler<Object> {
 
     private WebSocketClientHandshaker handShaker;
     private ChannelPromise handshakeFuture;
 
-    private ThreadLocal<ExecutorService> threadExecutorService = ThreadLocal.withInitial(() -> Executors.newFixedThreadPool(Thread.activeCount()));
+    //private ThreadLocal<ExecutorService> threadExecutorService = ThreadLocal.withInitial(() -> Executors.newFixedThreadPool(Constants.THREAD_POOL_SIZE));
+
+    private ExecutorService threadExecutorService = Executors.newFixedThreadPool(Constants.THREAD_POOL_SIZE);
 
     @Override
     public void handlerAdded(ChannelHandlerContext ctx) {
         this.handshakeFuture = ctx.newPromise();
     }
+
     public WebSocketClientHandshaker getHandshaker() {
         return handShaker;
     }
@@ -49,7 +54,7 @@ public class ClientHandler extends SimpleChannelInboundHandler<Object> {
         return this.handshakeFuture;
     }
 
-    public ClientHandler(WebSocketClientHandshaker handShaker){
+    public ClientHandler(WebSocketClientHandshaker handShaker) {
         this.handShaker = handShaker;
     }
 
@@ -59,7 +64,7 @@ public class ClientHandler extends SimpleChannelInboundHandler<Object> {
     }
 
     @Override
-    protected void channelRead0(ChannelHandlerContext ctx, Object msg)throws Exception{
+    protected void channelRead0(ChannelHandlerContext ctx, Object msg) throws Exception {
         Channel ch = ctx.channel();
         FullHttpResponse response;
         if (!this.handShaker.isHandshakeComplete()) {
@@ -83,10 +88,10 @@ public class ClientHandler extends SimpleChannelInboundHandler<Object> {
 
             if (frame instanceof CloseWebSocketFrame) {
                 ch.close();
-            } else if(msg instanceof TextWebSocketFrame){
+            } else if (msg instanceof TextWebSocketFrame) {
                 TextWebSocketFrame txMsg = (TextWebSocketFrame) msg;
                 TextMessageHandler messageHandler = new TextMessageHandler((SocketChannel) ctx.channel(), txMsg.text());
-                threadExecutorService.get().execute(messageHandler);
+                threadExecutorService.execute(messageHandler);
             } else {
                 Log.warn("Unsupported message format");
             }

@@ -33,10 +33,7 @@ import io.nuls.contract.model.bo.ContractResult;
 import io.nuls.contract.model.bo.ContractTempTransaction;
 import io.nuls.contract.model.bo.ContractWrapperTransaction;
 import io.nuls.contract.model.po.ContractTokenTransferInfoPo;
-import io.nuls.contract.model.tx.CallContractTransaction;
-import io.nuls.contract.model.tx.ContractBaseTransaction;
-import io.nuls.contract.model.tx.CreateContractTransaction;
-import io.nuls.contract.model.tx.DeleteContractTransaction;
+import io.nuls.contract.model.tx.*;
 import io.nuls.contract.model.txdata.CallContractData;
 import io.nuls.contract.model.txdata.ContractData;
 import io.nuls.contract.model.txdata.CreateContractData;
@@ -51,7 +48,6 @@ import io.nuls.tools.basic.VarInt;
 import io.nuls.tools.constant.ErrorCode;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.exception.NulsRuntimeException;
-import io.nuls.tools.log.Log;
 import io.nuls.tools.model.StringUtils;
 import io.nuls.tools.parse.JSONUtils;
 
@@ -243,7 +239,8 @@ public class ContractUtil {
         if (txType == ContractConstant.TX_TYPE_CREATE_CONTRACT
                 || txType == ContractConstant.TX_TYPE_CALL_CONTRACT
                 || txType == ContractConstant.TX_TYPE_DELETE_CONTRACT
-                || txType == ContractConstant.TX_TYPE_CONTRACT_TRANSFER) {
+                || txType == ContractConstant.TX_TYPE_CONTRACT_TRANSFER
+                || txType == ContractConstant.TX_TYPE_CONTRACT_RETURN_GAS) {
             return true;
         }
         return false;
@@ -330,10 +327,27 @@ public class ContractUtil {
         if (isBlank(errorMessage)) {
             return defaultResult;
         }
-        if (errorMessage.contains(NOT_ENOUGH_GAS)) {
+        if (isNotEnoughGasError(errorMessage)) {
             return Result.getFailed(ContractErrorCode.CONTRACT_GAS_LIMIT);
         }
         return defaultResult;
+    }
+
+    private static boolean isNotEnoughGasError(String errorMessage) {
+        if (errorMessage == null) {
+            return false;
+        }
+        if (errorMessage.contains(NOT_ENOUGH_GAS)) {
+            return true;
+        }
+        return false;
+    }
+
+    public static boolean isNotEnoughGasError(ContractResult contractResult) {
+        if (contractResult.isSuccess()) {
+            return false;
+        }
+        return isNotEnoughGasError(contractResult.getErrorMessage());
     }
 
     public static boolean isTerminatedContract(int status) {
@@ -437,16 +451,16 @@ public class ContractUtil {
     }
 
     /**
-     * @param needReCallList
+     * @param contractResultList
      * @return 去掉重复的交易，并按照时间降序排列
      */
     public static List<ContractResult> deduplicationAndOrder(List<ContractResult> contractResultList) {
         return contractResultList.stream().collect(Collectors.toSet()).stream()
-                .collect(Collectors.toList()).stream().sorted(CompareTx.getInstance()).collect(Collectors.toList());
+                .collect(Collectors.toList()).stream().sorted(CompareTxTimeDesc.getInstance()).collect(Collectors.toList());
     }
 
     /**
-     * @param list
+     * @param contractResultList
      * @return 收集合约执行中所有出现过的合约地址，包括内部调用合约，合约转账
      */
     public static Map<String, Set<ContractResult>> collectAddressMap(List<ContractResult> contractResultList) {
@@ -502,18 +516,24 @@ public class ContractUtil {
         switch (tx.getType()) {
             case TX_TYPE_CREATE_CONTRACT:
                 resultTx = new CreateContractTransaction();
-                resultTx.copyTx(tx);
                 break;
             case TX_TYPE_CALL_CONTRACT:
                 resultTx = new CallContractTransaction();
-                resultTx.copyTx(tx);
                 break;
             case TX_TYPE_DELETE_CONTRACT:
                 resultTx = new DeleteContractTransaction();
-                resultTx.copyTx(tx);
+                break;
+            case TX_TYPE_CONTRACT_TRANSFER:
+                resultTx = new ContractTransferTransaction();
+                break;
+            case TX_TYPE_CONTRACT_RETURN_GAS:
+                resultTx = new ContractReturnGasTransaction();
                 break;
             default:
                 break;
+        }
+        if (resultTx != null) {
+            resultTx.copyTx(tx);
         }
         return resultTx;
     }
@@ -521,7 +541,7 @@ public class ContractUtil {
     public static Response wrapperFailed(Result result) {
         ErrorCode errorCode = result.getErrorCode();
         String msg = result.getMsg();
-        if(StringUtils.isBlank(msg)) {
+        if (StringUtils.isBlank(msg)) {
             msg = errorCode.getMsg();
         }
         Response response = MessageUtil.newResponse("", Constants.BOOLEAN_FALSE, msg);

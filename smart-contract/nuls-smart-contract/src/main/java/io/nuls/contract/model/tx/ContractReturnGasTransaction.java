@@ -25,7 +25,7 @@
 package io.nuls.contract.model.tx;
 
 
-import io.nuls.base.data.Transaction;
+import io.nuls.base.basic.TransactionLogicData;
 
 import static io.nuls.contract.constant.ContractConstant.TX_TYPE_CONTRACT_RETURN_GAS;
 
@@ -33,9 +33,14 @@ import static io.nuls.contract.constant.ContractConstant.TX_TYPE_CONTRACT_RETURN
  * @author: PierreLuo
  * @date: 2019-03-08
  */
-public class ContractReturnGasTransaction extends Transaction {
+public class ContractReturnGasTransaction extends ContractBaseTransaction {
 
     public ContractReturnGasTransaction() {
         this.setType(TX_TYPE_CONTRACT_RETURN_GAS);
+    }
+
+    @Override
+    protected TransactionLogicData newInstance() {
+        return null;
     }
 }

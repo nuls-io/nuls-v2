@@ -25,12 +25,9 @@
  */
 package io.nuls.ledger;
 
-import io.nuls.db.service.RocksDBService;
 import io.nuls.ledger.config.LedgerConfig;
 import io.nuls.ledger.constant.LedgerConstant;
-import io.nuls.ledger.service.BlockDataService;
-import io.nuls.ledger.storage.InitDB;
-import io.nuls.ledger.storage.impl.RepositoryImpl;
+import io.nuls.ledger.manager.LedgerChainManager;
 import io.nuls.ledger.utils.LoggerUtil;
 import io.nuls.rpc.info.HostInfo;
 import io.nuls.rpc.model.ModuleE;
@@ -41,8 +38,7 @@ import io.nuls.rpc.modulebootstrap.RpcModuleState;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.core.ioc.SpringLiteContext;
-
-import static io.nuls.ledger.utils.LoggerUtil.logger;
+import io.nuls.tools.parse.I18nUtils;
 
 /**
  * @author: Niels Wang
@@ -52,8 +48,7 @@ import static io.nuls.ledger.utils.LoggerUtil.logger;
 public class LedgerBootstrap extends RpcModule {
     @Autowired
     LedgerConfig ledgerConfig;
-    @Autowired
-    BlockDataService blockDataService;
+
     public static void main(String[] args) {
         if (args == null || args.length == 0) {
             args = new String[]{"ws://" + HostInfo.getLocalIP() + ":8887/ws"};
@@ -61,26 +56,6 @@ public class LedgerBootstrap extends RpcModule {
         NulsRpcModuleBootstrap.run("io.nuls", args);
     }
 
-    /**
-     * 进行数据的校验处理,比如异常关闭模块造成的数据不一致。
-     * 确认的高度是x,则进行x高度的数据恢复处理
-     */
-    public  void initLedgerDatas() throws Exception {
-        blockDataService.initBlockDatas();
-    }
-
-    /**
-     * 初始化数据库
-     */
-    public  void initRocksDb() {
-        try {
-            RocksDBService.init(ledgerConfig.getDataPath()+LedgerConstant.MODULE_DB_PATH);
-            InitDB initDB = SpringLiteContext.getBean(RepositoryImpl.class);
-            initDB.initTableName();
-        } catch (Exception e) {
-            logger.error(e);
-        }
-    }
 
     @Override
     public Module[] getDependencies() {
@@ -101,8 +76,11 @@ public class LedgerBootstrap extends RpcModule {
             super.init();
             LedgerConstant.UNCONFIRM_NONCE_EXPIRED_TIME = ledgerConfig.getUnconfirmedTxExpired();
             LedgerConstant.DEFAULT_ENCODING = ledgerConfig.getEncoding();
-            initRocksDb();
-            initLedgerDatas();
+            //改为通过配置文件注入
+            I18nUtils.loadLanguage(LedgerBootstrap.class, "languages", ledgerConfig.getLanguage());
+            I18nUtils.setLanguage(ledgerConfig.getLanguage());
+            LedgerChainManager ledgerChainManager = SpringLiteContext.getBean(LedgerChainManager.class);
+            ledgerChainManager.initChains();
         } catch (Exception e) {
             e.printStackTrace();
             System.exit(-1);

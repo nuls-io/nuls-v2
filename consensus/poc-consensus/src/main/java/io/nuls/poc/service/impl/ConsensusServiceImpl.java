@@ -115,7 +115,7 @@ public class ConsensusServiceImpl implements ConsensusService {
         }
         try {
             //1.参数验证
-            if (!AddressTool.isPackingAddress(dto.getPackingAddress(), (short) dto.getChainId()) || !AddressTool.validAddress((short) dto.getChainId(), dto.getAgentAddress())) {
+            if (!AddressTool.isNormalAddress(dto.getPackingAddress(), (short) dto.getChainId())) {
                 throw new NulsRuntimeException(ConsensusErrorCode.ADDRESS_ERROR);
             }
             //2.账户验证
@@ -141,6 +141,10 @@ public class ConsensusServiceImpl implements ConsensusService {
             //4.交易签名
             String priKey = (String) callResult.get("priKey");
             CallMethodUtils.transactionSignature(dto.getChainId(), dto.getAgentAddress(), dto.getPassword(), priKey, tx);
+            boolean validResult = validatorManager.validateTx(chain, tx);
+            if (!validResult) {
+                return Result.getFailed(ConsensusErrorCode.TX_DATA_VALIDATION_ERROR);
+            }
             CallMethodUtils.sendTx(chain,HexUtil.encode(tx.serialize()));
             Map<String, Object> result = new HashMap<>(2);
             result.put("txHash", tx.getHash().getDigestHex());
@@ -209,6 +213,10 @@ public class ConsensusServiceImpl implements ConsensusService {
             //交易签名
             String priKey = (String) callResult.get("priKey");
             CallMethodUtils.transactionSignature(dto.getChainId(), dto.getAddress(), dto.getPassword(), priKey, tx);
+            boolean validResult = validatorManager.validateTx(chain, tx);
+            if (!validResult) {
+                return Result.getFailed(ConsensusErrorCode.TX_DATA_VALIDATION_ERROR);
+            }
             CallMethodUtils.sendTx(chain,HexUtil.encode(tx.serialize()));
             Map<String, Object> result = new HashMap<>(ConsensusConstant.INIT_CAPACITY);
             result.put("txHash", tx.getHash().getDigestHex());
@@ -264,6 +272,10 @@ public class ConsensusServiceImpl implements ConsensusService {
             //交易签名
             String priKey = (String) callResult.get("priKey");
             CallMethodUtils.transactionSignature(dto.getChainId(), dto.getAddress(), dto.getPassword(), priKey, tx);
+            boolean validResult = validatorManager.validateTx(chain, tx);
+            if (!validResult) {
+                return Result.getFailed(ConsensusErrorCode.TX_DATA_VALIDATION_ERROR);
+            }
             CallMethodUtils.sendTx(chain,HexUtil.encode(tx.serialize()));
             Map<String, Object> result = new HashMap<>(ConsensusConstant.INIT_CAPACITY);
             result.put("txHash", tx.getHash().getDigestHex());
@@ -330,6 +342,10 @@ public class ConsensusServiceImpl implements ConsensusService {
             //交易签名
             String priKey = (String) callResult.get("priKey");
             CallMethodUtils.transactionSignature(dto.getChainId(), dto.getAddress(), dto.getPassword(), priKey, cancelDepositTransaction);
+            boolean validResult = validatorManager.validateTx(chain, cancelDepositTransaction);
+            if (!validResult) {
+                return Result.getFailed(ConsensusErrorCode.TX_DATA_VALIDATION_ERROR);
+            }
             CallMethodUtils.sendTx(chain,HexUtil.encode(cancelDepositTransaction.serialize()));
             Map<String, Object> result = new HashMap<>(ConsensusConstant.INIT_CAPACITY);
             result.put("txHash", cancelDepositTransaction.getHash().getDigestHex());
@@ -861,9 +877,10 @@ public class ConsensusServiceImpl implements ConsensusService {
         }
         if (status == 1) {
             chain.setCanPacking(true);
-            chain.getLoggerMap().get(ConsensusConstant.BASIC_LOGGER_NAME).debug("updateAgentStatus-修改节点打包状态成功......");
+            chain.getLoggerMap().get(ConsensusConstant.BASIC_LOGGER_NAME).debug("updateAgentStatus--节点打包状态修改成功，修改后状态为：可打包状态");
         } else {
             chain.setCanPacking(false);
+            chain.getLoggerMap().get(ConsensusConstant.BASIC_LOGGER_NAME).debug("updateAgentStatus--节点打包状态修改成功，修改后状态为：不可打包状态");
         }
         return Result.getSuccess(ConsensusErrorCode.SUCCESS);
 
@@ -1409,7 +1426,7 @@ public class ConsensusServiceImpl implements ConsensusService {
         if (round == null) {
             return;
         }
-        MeetingMember member = round.getMember(agent.getPackingAddress(),chain);
+        MeetingMember member = round.getOnlyMember(agent.getPackingAddress(),chain);
         if (null == member) {
             agent.setStatus(0);
             return;

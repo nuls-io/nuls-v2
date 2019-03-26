@@ -30,10 +30,10 @@ import io.nuls.base.signture.SignatureUtil;
 import io.nuls.contract.model.tx.CreateContractTransaction;
 import io.nuls.contract.model.txdata.CreateContractData;
 import io.nuls.contract.util.ContractUtil;
+import io.nuls.contract.util.Log;
 import io.nuls.tools.basic.Result;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.exception.NulsException;
-import io.nuls.tools.log.Log;
 
 import java.util.Set;
 
@@ -53,13 +53,13 @@ public class CreateContractTxValidator {
         byte[] sender = txData.getSender();
         byte[] contractAddress = txData.getContractAddress();
         if (!ContractUtil.isLegalContractAddress(contractAddress)) {
-            Log.error("contract entity error: Illegal contract address.");
+            Log.error("contract create error: Illegal contract address.");
             return Result.getFailed(ILLEGAL_CONTRACT_ADDRESS);
         }
         Set<String> addressSet = SignatureUtil.getAddressFromTX(tx, chainId);
 
         if (!addressSet.contains(AddressTool.getStringAddressByBytes(sender))) {
-            Log.error("contract entity error: The contract creater is not the transaction creator.");
+            Log.error("contract create error: The contract creater is not the transaction creator.");
             return Result.getFailed(TX_DATA_VALIDATION_ERROR);
         }
 

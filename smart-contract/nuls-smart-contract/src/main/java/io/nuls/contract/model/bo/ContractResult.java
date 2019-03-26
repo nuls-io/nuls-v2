@@ -42,14 +42,10 @@ import java.util.Set;
 @Getter
 @Setter
 public class ContractResult {
-
-
     private transient ContractWrapperTransaction tx;
-
     private String hash;
-
     private long txTime;
-
+    private long blockHeight;
     /**
      * 交易创建者
      */
@@ -82,42 +78,15 @@ public class ContractResult {
      */
     private long value;
 
-    /**
-     * 有错误，还原状态
-     */
     private boolean revert;
-
-    /**
-     * 有错误，状态改变
-     */
     private boolean error;
-
-    /**
-     *
-     */
     private String errorMessage;
-
-    /**
-     *
-     */
     private String stackTrace;
-
-    /**
-     *
-     */
     private BigInteger balance;
-
     private BigInteger preBalance;
-
-    /**
-     *
-     */
     private BigInteger nonce;
-
     private boolean acceptDirectTransfer;
-
     private boolean isNrc20;
-
     private String tokenName;
     private String tokenSymbol;
     private int tokenDecimals;
@@ -172,7 +141,7 @@ public class ContractResult {
         return result;
     }
 
-    public static ContractResult getFailed(ContractData contractData) {
+    public static ContractResult genFailed(ContractData contractData) {
         ContractResult contractResult = new ContractResult();
         contractResult.setContractAddress(contractData.getContractAddress());
         contractResult.setGasUsed(0L);
@@ -183,8 +152,8 @@ public class ContractResult {
         return contractResult;
     }
 
-    public static ContractResult getFailed(ContractData contractData, String msg) {
-        ContractResult result = getFailed(contractData);
+    public static ContractResult genFailed(ContractData contractData, String msg) {
+        ContractResult result = genFailed(contractData);
         result.setErrorMessage(msg);
         return result;
     }
@@ -192,9 +161,14 @@ public class ContractResult {
     @Override
     public String toString() {
         return "ContractResult{" +
-                "contractAddress=" + AddressTool.getStringAddressByBytes(contractAddress) +
+                "success='" + isSuccess() + '\'' +
+                ", hash='" + hash + '\'' +
+                ", txTime=" + txTime +
+                ", sender=" + AddressTool.getStringAddressByBytes(sender) +
+                ", contractAddress=" + AddressTool.getStringAddressByBytes(contractAddress) +
                 ", result='" + result + '\'' +
                 ", gasUsed=" + gasUsed +
+                ", price=" + price +
                 ", stateRoot=" + (stateRoot != null ? HexUtil.encode(stateRoot) : stateRoot) +
                 ", value=" + value +
                 ", revert=" + revert +
@@ -202,10 +176,17 @@ public class ContractResult {
                 ", errorMessage='" + errorMessage + '\'' +
                 ", stackTrace='" + stackTrace + '\'' +
                 ", balance=" + (balance != null ? balance.toString() : 0) +
+                ", preBalance=" + preBalance +
                 ", nonce=" + nonce +
+                ", acceptDirectTransfer=" + acceptDirectTransfer +
+                ", isNrc20=" + isNrc20 +
                 ", transfersSize=" + (transfers != null ? transfers.size() : 0) +
-                ", eventsSize=" + (events != null ? events.size() : 0) +
+                ", mergedTransferList=" + (mergedTransferList != null ? mergedTransferList.size() : 0) +
+                ", contractTransferList=" + (contractTransferList != null ? contractTransferList.size() : 0) +
+                ", events=" + events +
                 ", remark='" + remark + '\'' +
+                ", isTerminated=" + isTerminated +
+                ", contractAddressInnerCallSet=" + (contractAddressInnerCallSet != null ? contractAddressInnerCallSet.size() : 0) +
                 '}';
     }
 }

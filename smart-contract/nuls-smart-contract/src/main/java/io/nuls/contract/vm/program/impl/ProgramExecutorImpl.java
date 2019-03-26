@@ -122,7 +122,7 @@ public class ProgramExecutorImpl implements ProgramExecutor {
         ProgramExecutorImpl programExecutor = this;
         while (programExecutor.chain == null) {
             programExecutor = programExecutor.parent;
-            if(programExecutor == null) {
+            if (programExecutor == null) {
                 break;
             }
         }

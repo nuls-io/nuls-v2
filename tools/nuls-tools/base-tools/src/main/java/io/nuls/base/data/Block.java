@@ -41,6 +41,7 @@ public class Block extends BaseNulsData implements Cloneable {
 
     private BlockHeader header;
     private List<Transaction> txs;
+    private transient List<NulsDigestData> txHashList;
 
     @Override
     public int size() {
@@ -94,14 +95,16 @@ public class Block extends BaseNulsData implements Cloneable {
 //     * Loop through the list of trades to remove all of the trading hash, in the same order as the list of transactions.
 //     */
     public List<NulsDigestData> getTxHashList() {
-        List<NulsDigestData> list = new ArrayList<>();
-        for (Transaction tx : txs) {
-            if (null == tx) {
-                continue;
+        if (txHashList == null) {
+            txHashList = new ArrayList<>();
+            for (Transaction tx : txs) {
+                if (null == tx) {
+                    continue;
+                }
+                txHashList.add(tx.getHash());
             }
-            list.add(tx.getHash());
         }
-        return list;
+        return txHashList;
     }
 
 }

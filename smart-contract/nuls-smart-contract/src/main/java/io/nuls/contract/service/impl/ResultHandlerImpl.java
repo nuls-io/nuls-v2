@@ -25,7 +25,7 @@ package io.nuls.contract.service.impl;
 
 import io.nuls.base.data.*;
 import io.nuls.contract.helper.ContractHelper;
-import io.nuls.contract.manager.TempBalanceManager;
+import io.nuls.contract.manager.ContractTempBalanceManager;
 import io.nuls.contract.model.bo.AnalyzerResult;
 import io.nuls.contract.model.bo.ContractBalance;
 import io.nuls.contract.model.bo.ContractResult;
@@ -34,11 +34,11 @@ import io.nuls.contract.model.tx.ContractTransferTransaction;
 import io.nuls.contract.model.txdata.ContractTransferData;
 import io.nuls.contract.service.ContractCaller;
 import io.nuls.contract.service.ResultHanlder;
-import io.nuls.contract.util.CompareTx;
+import io.nuls.contract.util.CompareTxTimeAsc;
+import io.nuls.contract.util.Log;
 import io.nuls.contract.vm.program.ProgramExecutor;
 import io.nuls.tools.core.annotation.Autowired;
-import io.nuls.tools.core.annotation.Service;
-import io.nuls.tools.log.Log;
+import io.nuls.tools.core.annotation.Component;
 import org.spongycastle.util.encoders.Hex;
 
 import java.io.IOException;
@@ -52,7 +52,7 @@ import static io.nuls.contract.constant.ContractConstant.TX_TYPE_CALL_CONTRACT;
  * @author: PierreLuo
  * @date: 2018/11/23
  */
-@Service
+@Component
 public class ResultHandlerImpl implements ResultHanlder {
 
     @Autowired
@@ -64,11 +64,10 @@ public class ResultHandlerImpl implements ResultHanlder {
     @Override
     public List<ContractResult> handleAnalyzerResult(int chainId, ProgramExecutor batchExecutor, AnalyzerResult analyzerResult, String preStateRoot) {
         try {
-            BlockHeader currentBlockHeader = contractHelper.getCurrentBlockHeader(chainId);
+            BlockHeader currentBlockHeader = contractHelper.getBatchInfoCurrentBlockHeader(chainId);
             long blockTime = currentBlockHeader.getTime();
-            long number = currentBlockHeader.getHeight();
             // 得到重新执行的合约结果
-            List<ContractResult> reCallResultList = this.reCall(batchExecutor, analyzerResult, chainId, blockTime, number, preStateRoot);
+            List<ContractResult> reCallResultList = this.reCall(batchExecutor, analyzerResult, chainId, preStateRoot);
             // 处理调用失败的合约，把需要退还的NULS 生成一笔合约内部转账交易，退还给调用者
             this.handleFailedContract(chainId, analyzerResult, blockTime);
             // 组装所有的合约结果
@@ -76,8 +75,8 @@ public class ResultHandlerImpl implements ResultHanlder {
             finalResultList.addAll(analyzerResult.getSuccessList());
             finalResultList.addAll(analyzerResult.getFailedSet());
             finalResultList.addAll(reCallResultList);
-            // 按时间排序
-            return finalResultList.stream().sorted(CompareTx.getInstance()).collect(Collectors.toList());
+            // 按时间升序排序
+            return finalResultList.stream().sorted(CompareTxTimeAsc.getInstance()).collect(Collectors.toList());
         } catch (IOException e) {
             Log.error(e);
             return Collections.emptyList();
@@ -85,7 +84,7 @@ public class ResultHandlerImpl implements ResultHanlder {
     }
 
     private void handleFailedContract(int chainId, AnalyzerResult analyzerResult, long blockTime) throws IOException {
-        TempBalanceManager tempBalanceManager = contractHelper.getTempBalanceManager(chainId);
+        ContractTempBalanceManager tempBalanceManager = contractHelper.getBatchInfoTempBalanceManager(chainId);
         int assetsId = contractHelper.getChain(chainId).getConfig().getAssetsId();
 
         Set<ContractResult> failedSet = analyzerResult.getFailedSet();
@@ -126,11 +125,11 @@ public class ResultHandlerImpl implements ResultHanlder {
         }
     }
 
-    private List<ContractResult> reCall(ProgramExecutor batchExecutor, AnalyzerResult analyzerResult, int chainId, long blockTime, long number, String preStateRoot) {
+    private List<ContractResult> reCall(ProgramExecutor batchExecutor, AnalyzerResult analyzerResult, int chainId, String preStateRoot) {
         // 重新执行合约
         List<ContractResult> list = analyzerResult.getReCallTxList();
         List<ContractWrapperTransaction> collect = list.stream().map(c -> c.getTx()).collect(Collectors.toList());
-        List<ContractResult> resultList = contractCaller.callerReCallTx(batchExecutor, collect, chainId, preStateRoot);
+        List<ContractResult> resultList = contractCaller.reCallTx(batchExecutor, collect, chainId, preStateRoot);
         return resultList;
     }
 }

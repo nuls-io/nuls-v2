@@ -37,7 +37,7 @@ public class NoUse {
         ConnectManager.startService = true;
         SpringLiteContext.init("io.nuls.rpc.cmd.kernel");
         ConnectManager.scanPackage("io.nuls.rpc.cmd.kernel");
-        ConnectManager.ROLE_MAP.put(ModuleE.KE.abbr,connectionInformation);
+        ConnectManager.ROLE_MAP.put(ModuleE.KE.abbr, connectionInformation);
         ConnectManager.updateStatus();
     }
 
@@ -50,8 +50,8 @@ public class NoUse {
                 .moduleRoles("test_role", new String[]{"1.0"})
                 .moduleVersion("1.0");
 
-        ConnectManager.getConnectByUrl("ws://"+ HostInfo.getLocalIP()+":8887/ws");
+        ConnectManager.getConnectByUrl("ws://" + HostInfo.getLocalIP() + ":8887/ws");
         // Get information from kernel
-        ResponseMessageProcessor.syncKernel("ws://"+ HostInfo.getLocalIP()+":8887/ws");
+        ResponseMessageProcessor.syncKernel("ws://" + HostInfo.getLocalIP() + ":8887/ws");
     }
 }

@@ -34,7 +34,6 @@ import io.nuls.tools.core.inteceptor.base.BeanMethodInterceptorManager;
 import io.nuls.tools.model.StringUtils;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.exception.NulsRuntimeException;
-import io.nuls.tools.log.Log;
 import net.sf.cglib.proxy.Enhancer;
 import net.sf.cglib.proxy.MethodInterceptor;
 
@@ -90,7 +89,7 @@ public class SpringLiteContext {
         }
         SpringLiteContext.interceptor = interceptor;
         Set<Class> classes = new HashSet<>();
-        Log.info("spring lite scan package : {}", Arrays.toString(packName));
+        System.out.println("spring lite scan package : " + Arrays.toString(packName));
         classes.addAll(ScanUtil.scan("io.nuls.tools.core.config"));
         Arrays.stream(packName).forEach(pack -> {
             classes.addAll(ScanUtil.scan(pack));
@@ -162,7 +161,9 @@ public class SpringLiteContext {
                     //call afterPropertiesSet 代码迁移到 callAfterPropertiesSet方法执行
                 }
             } catch (Exception e) {
-                Log.debug(key + " autowire fields failed!");
+                System.err.println("spring lite autowire fields failed! ");
+                e.printStackTrace();
+                System.exit(0);
             }
         }
     }
@@ -180,7 +181,8 @@ public class SpringLiteContext {
                         try {
                             ((InitializingBean) bean).afterPropertiesSet();
                         } catch (Exception e) {
-                            Log.error("spring lite callAfterPropertiesSet fail : {} ", bean.getClass(), e.getMessage(), e);
+                            System.err.println("spring lite callAfterPropertiesSet fail :  "  + bean.getClass());
+                            e.printStackTrace();
                             System.exit(0);
                         }
                     }
@@ -350,7 +352,9 @@ public class SpringLiteContext {
             try {
                 loadBean(beanName, clazz, aopProxy);
             } catch (NulsException e) {
-                Log.error(e.getMessage());
+                System.err.println("spring lite load bean fail :  "  + clazz);
+                e.printStackTrace();
+                System.exit(0);
                 return;
             }
         }
@@ -361,7 +365,9 @@ public class SpringLiteContext {
                 Constructor constructor = clazz.getDeclaredConstructor();
                 interceptor = (BeanMethodInterceptor) constructor.newInstance();
             } catch (Exception e) {
-                Log.error(e.getMessage());
+                System.err.println("spring lite instance bean fail :  "  + clazz);
+                e.printStackTrace();
+                System.exit(0);
                 return;
             }
             BeanMethodInterceptorManager.addBeanMethodInterceptor(((Interceptor) interceptorAnn).value(), interceptor);
@@ -410,11 +416,11 @@ public class SpringLiteContext {
      */
     private static Object loadBean(String beanName, Class clazz, boolean proxy) throws NulsException {
         if (BEAN_OK_MAP.containsKey(beanName)) {
-            Log.error("model name repetition (" + beanName + "):" + clazz.getName());
+            System.err.println("model name repetition (" + beanName + "):" + clazz.getName());
             return BEAN_OK_MAP.get(beanName);
         }
         if (BEAN_TEMP_MAP.containsKey(beanName)) {
-            Log.error("model name repetition (" + beanName + "):" + clazz.getName());
+            System.err.println("model name repetition (" + beanName + "):" + clazz.getName());
             return BEAN_TEMP_MAP.get(beanName);
         }
         Object bean = null;
@@ -424,10 +430,10 @@ public class SpringLiteContext {
             try {
                 bean = clazz.newInstance();
             } catch (InstantiationException e) {
-                Log.error(e.getMessage());
+                System.err.println(e.getMessage());
                 throw new NulsException(e);
             } catch (IllegalAccessException e) {
-                Log.error(e.getMessage());
+                System.err.println(e.getMessage());
                 throw new NulsException(e);
             }
         }
@@ -445,7 +451,7 @@ public class SpringLiteContext {
         Enhancer enhancer = new Enhancer();
         enhancer.setSuperclass(clazz);
         enhancer.setCallback(interceptor);
-        System.out.println(clazz);
+//        System.out.println(clazz);
         return enhancer.create();
     }
 

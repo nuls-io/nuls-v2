@@ -29,7 +29,6 @@ import io.nuls.tools.core.ioc.SpringLiteContext;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import static io.nuls.block.constant.Constant.*;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 

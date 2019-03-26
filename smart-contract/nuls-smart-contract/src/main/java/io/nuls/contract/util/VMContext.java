@@ -34,7 +34,6 @@ import io.nuls.contract.vm.program.ProgramMethod;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.exception.NulsException;
-import io.nuls.tools.log.Log;
 import io.nuls.tools.model.StringUtils;
 import org.spongycastle.util.encoders.Hex;
 
@@ -97,7 +96,7 @@ public class VMContext {
         }
         BlockHeader header;
         try {
-            header = BlockCall.getBlockHeader(chainId, chainId);
+            header = BlockCall.getBlockHeader(chainId, height);
             if (header == null) {
                 return null;
             }
@@ -135,7 +134,7 @@ public class VMContext {
      * @throws IOException
      */
     public BlockHeaderDto getCurrentBlockHeader(int chainId) {
-        BlockHeader blockHeader = contractHelper.getCurrentBlockHeader(chainId);
+        BlockHeader blockHeader = contractHelper.getBatchInfoCurrentBlockHeader(chainId);
         if (blockHeader == null) {
             return getNewestBlockHeader(chainId);
         }
@@ -179,7 +178,7 @@ public class VMContext {
     }
 
     public long getBestHeight(int chainId) {
-        BlockHeader currentBlockHeader = contractHelper.getCurrentBlockHeader(chainId);
+        BlockHeader currentBlockHeader = contractHelper.getBatchInfoCurrentBlockHeader(chainId);
         if (currentBlockHeader != null) {
             return currentBlockHeader.getHeight() - 1;
         } else {

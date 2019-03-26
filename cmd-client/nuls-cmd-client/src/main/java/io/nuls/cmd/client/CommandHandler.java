@@ -26,14 +26,13 @@
 package io.nuls.cmd.client;
 
 
+import io.nuls.api.provider.contract.facade.CallContractReq;
 import io.nuls.cmd.client.processor.CommandProcessor;
 import io.nuls.cmd.client.processor.account.*;
 import io.nuls.cmd.client.processor.block.GetBestBlockHeaderProcessor;
 import io.nuls.cmd.client.processor.block.GetBlockHeaderProcessor;
-import io.nuls.cmd.client.processor.consensus.CreateAgentProcessor;
-import io.nuls.cmd.client.processor.consensus.DepositProcessor;
-import io.nuls.cmd.client.processor.consensus.StopAgentProcessor;
-import io.nuls.cmd.client.processor.consensus.WithdrawProcessor;
+import io.nuls.cmd.client.processor.consensus.*;
+import io.nuls.cmd.client.processor.contract.*;
 import io.nuls.cmd.client.processor.ledger.GetBalanceProcessor;
 import io.nuls.cmd.client.processor.network.GetNetworkProcessor;
 import io.nuls.cmd.client.processor.system.ExitProcessor;
@@ -136,6 +135,8 @@ public class CommandHandler implements InitializingBean {
         register(getBean(DepositProcessor.class));
         //withdraw
         register(getBean(WithdrawProcessor.class));
+        register(getBean(GetAgentsProcessor.class));
+        register(getBean(GetAgentInfoProcessor.class));
         /**
          * system
          */
@@ -143,6 +144,19 @@ public class CommandHandler implements InitializingBean {
         register(SpringLiteContext.getBean(HelpProcessor.class));
 
         register(getBean(GetNetworkProcessor.class));
+
+
+        register(getBean(CreateContractProcessor.class));
+        register(getBean(CallContractProcessor.class));
+        register(getBean(DeleteContractProcessor.class));
+        register(getBean(GetContractConstructorProcessor.class));
+        register(getBean(GetContractInfoProcessor.class));
+        register(getBean(GetContractResultProcessor.class));
+        register(getBean(GetContractTxProcessor.class));
+        register(getBean(TokenTransferProcessor.class));
+        register(getBean(TransferToContractProcessor.class));
+        register(getBean(ViewContractProcessor.class));
+        register(getBean(GetAccountContractListProcessor.class));
     }
 
     public void start() {

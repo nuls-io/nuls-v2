@@ -31,19 +31,16 @@ import io.nuls.api.provider.ServiceManager;
 import io.nuls.api.provider.block.BlockService;
 import io.nuls.api.provider.block.facade.BlockHeaderData;
 import io.nuls.api.provider.block.facade.GetBlockHeaderByLastHeightReq;
-import io.nuls.base.data.BlockHeader;
 import io.nuls.cmd.client.CommandBuilder;
 import io.nuls.cmd.client.CommandResult;
-import io.nuls.cmd.client.processor.CommandProcessor;
 import io.nuls.cmd.client.processor.CommandGroup;
+import io.nuls.cmd.client.processor.CommandProcessor;
 import io.nuls.tools.core.annotation.Component;
-import lombok.extern.slf4j.Slf4j;
 
 /**
  * @author: Charlie
  */
 @Component
-@Slf4j
 public class GetBestBlockHeaderProcessor implements CommandProcessor {
 
     BlockService blockService = ServiceManager.get(BlockService.class);

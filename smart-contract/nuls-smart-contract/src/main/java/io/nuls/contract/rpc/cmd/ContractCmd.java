@@ -35,6 +35,7 @@ import io.nuls.contract.model.tx.CallContractTransaction;
 import io.nuls.contract.model.tx.CreateContractTransaction;
 import io.nuls.contract.model.tx.DeleteContractTransaction;
 import io.nuls.contract.service.ContractService;
+import io.nuls.contract.util.Log;
 import io.nuls.contract.util.MapUtil;
 import io.nuls.rpc.cmd.BaseCmd;
 import io.nuls.rpc.model.CmdAnnotation;
@@ -43,7 +44,6 @@ import io.nuls.rpc.model.message.Response;
 import io.nuls.tools.basic.Result;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
-import io.nuls.tools.log.Log;
 import org.spongycastle.util.encoders.Hex;
 
 import java.util.ArrayList;
@@ -55,6 +55,7 @@ import static io.nuls.contract.constant.ContractCmdConstant.*;
 import static io.nuls.contract.constant.ContractConstant.*;
 import static io.nuls.contract.constant.ContractErrorCode.ADDRESS_ERROR;
 import static io.nuls.contract.constant.ContractErrorCode.DATA_ERROR;
+import static io.nuls.contract.util.ContractUtil.wrapperFailed;
 
 /**
  * @author: PierreLuo
@@ -86,11 +87,7 @@ public class ContractCmd extends BaseCmd {
             String packingAddress = (String) params.get("packingAddress");
             String preStateRoot = (String) params.get("preStateRoot");
 
-            Result result = contractService.begin(chainId, blockHeight + 1, blockTime, packingAddress, preStateRoot);
-            if (result.isFailed()) {
-                return failed(result.getErrorCode());
-            }
-
+            Result result = contractService.begin(chainId, blockHeight, blockTime, packingAddress, preStateRoot);
             return success();
         } catch (Exception e) {
             Log.error(e);
@@ -108,9 +105,32 @@ public class ContractCmd extends BaseCmd {
             ContractTempTransaction tx = new ContractTempTransaction();
             tx.setTxHex(txHex);
             tx.parse(Hex.decode(txHex), 0);
-            Result result = contractService.invokeContractOneByOne(chainId, tx);
-            if (result.isSuccess()) {
+            Result result = contractService.validContractTx(chainId, tx);
+            if (result.isFailed()) {
                 return failed(result.getErrorCode());
+            }
+            result = contractService.invokeContractOneByOne(chainId, tx);
+            if (result.isFailed()) {
+                return wrapperFailed(result);
+            }
+            return success();
+        } catch (Exception e) {
+            Log.error(e);
+            return failed(e.getMessage());
+        }
+    }
+
+    @CmdAnnotation(cmd = BATCH_BEFORE_END, version = 1.0, description = "batch before end")
+    @Parameter(parameterName = "chainId", parameterType = "int")
+    @Parameter(parameterName = "blockHeight", parameterType = "long")
+    public Response batchBeforeEnd(Map<String, Object> params) {
+        try {
+            Integer chainId = (Integer) params.get("chainId");
+            Long blockHeight = Long.parseLong(params.get("blockHeight").toString());
+            Result result = contractService.beforeEnd(chainId, blockHeight);
+            Log.info("=====pierre=====[before] end contract batch, result is {}", result.toString());
+            if (result.isFailed()) {
+                return wrapperFailed(result);
             }
             return success();
         } catch (Exception e) {
@@ -122,26 +142,27 @@ public class ContractCmd extends BaseCmd {
     @CmdAnnotation(cmd = BATCH_END, version = 1.0, description = "batch end")
     @Parameter(parameterName = "chainId", parameterType = "int")
     @Parameter(parameterName = "blockHeight", parameterType = "long")
-    public Response invokeContract(Map<String, Object> params) {
+    public Response batchEnd(Map<String, Object> params) {
         try {
             Integer chainId = (Integer) params.get("chainId");
             Long blockHeight = Long.parseLong(params.get("blockHeight").toString());
 
             Result result = contractService.end(chainId, blockHeight);
             if (result.isFailed()) {
-                return failed(result.getErrorCode());
+                return wrapperFailed(result);
             }
             ContractPackageDto dto = (ContractPackageDto) result.getData();
             List<String> resultTxHexList = new ArrayList<>();
             List<Transaction> resultTxList = dto.getResultTxList();
             for (Transaction resultTx : resultTxList) {
+                Log.info("======pierre=====batch txType is [{}], hash is [{}]", resultTx.getType(), resultTx.getHash().toString());
                 resultTxHexList.add(Hex.toHexString(resultTx.serialize()));
             }
 
             Map<String, Object> resultMap = MapUtil.createHashMap(2);
             resultMap.put("stateRoot", Hex.toHexString(dto.getStateRoot()));
             resultMap.put("txHexList", resultTxHexList);
-
+            Log.info("=====pierre=====end contract batch, packaging blockHeight is [{}], packaging StateRoot is [{}]", blockHeight, Hex.toHexString(dto.getStateRoot()));
             return success(resultMap);
         } catch (Exception e) {
             Log.error(e);
@@ -165,7 +186,7 @@ public class ContractCmd extends BaseCmd {
             }
             Result validator = contractTxValidatorManager.createValidator(chainId, tx);
             if (validator.isFailed()) {
-                return failed(validator.getErrorCode());
+                return wrapperFailed(validator);
             }
             result.put("value", true);
             return success(result);
@@ -190,7 +211,7 @@ public class ContractCmd extends BaseCmd {
             }
             Result validator = contractTxValidatorManager.callValidator(chainId, tx);
             if (validator.isFailed()) {
-                return failed(validator.getErrorCode());
+                return wrapperFailed(validator);
             }
             result.put("value", true);
             return success(result);
@@ -215,7 +236,7 @@ public class ContractCmd extends BaseCmd {
             }
             Result validator = contractTxValidatorManager.deleteValidator(chainId, tx);
             if (validator.isFailed()) {
-                return failed(validator.getErrorCode());
+                return wrapperFailed(validator);
             }
             result.put("value", true);
             return success(result);
@@ -230,12 +251,14 @@ public class ContractCmd extends BaseCmd {
     @Parameter(parameterName = "txHexList", parameterType = "String")
     public Response integrateValidator(Map<String, Object> params) {
         try {
-            Integer chainId = (Integer) params.get("chainId");
-            List<String> txHexList = (List<String>) params.get("txHexList");
+            //Integer chainId = (Integer) params.get("chainId");
+            //List<String> txHexList = (List<String>) params.get("txHexList");
             /**
              *  暂无统一验证器
              */
-            return success();
+            Map<String, Object> result = new HashMap<>(2);
+            result.put("list", new ArrayList<>());
+            return success(result);
         } catch (Exception e) {
             Log.error(e);
             return failed(e.getMessage());
@@ -254,10 +277,12 @@ public class ContractCmd extends BaseCmd {
 
             Result result = contractService.commitProcessor(chainId, txHexList, blockHeaderHex);
             if (result.isFailed()) {
-                return failed(result.getErrorCode(), result.getMsg());
+                return wrapperFailed(result);
             }
 
-            return success();
+            Map<String, Object> resultMap = new HashMap<>(2);
+            resultMap.put("value", true);
+            return success(resultMap);
         } catch (Exception e) {
             Log.error(e);
             return failed(e.getMessage());
@@ -276,7 +301,7 @@ public class ContractCmd extends BaseCmd {
 
             Result result = contractService.rollbackProcessor(chainId, txHexList, blockHeaderHex);
             if (result.isFailed()) {
-                return failed(result.getErrorCode(), result.getMsg());
+                return wrapperFailed(result);
             }
             return success();
         } catch (Exception e) {
@@ -301,9 +326,9 @@ public class ContractCmd extends BaseCmd {
                 return failed(DATA_ERROR);
             }
 
-            Result result = contractTokenBalanceManager.initAllTokensByAccount(address);
+            Result result = contractTokenBalanceManager.initAllTokensByImportAccount(address);
             if (result.isFailed()) {
-                return failed(result.getErrorCode());
+                return wrapperFailed(result);
             }
 
             return success();

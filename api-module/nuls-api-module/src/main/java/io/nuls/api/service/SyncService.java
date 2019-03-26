@@ -10,6 +10,7 @@ import io.nuls.api.model.po.db.*;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.exception.NulsRuntimeException;
+import io.nuls.tools.log.Log;
 
 import java.math.BigInteger;
 import java.util.*;
@@ -37,6 +38,10 @@ public class SyncService {
     private PunishService punishService;
     @Autowired
     private RoundManager roundManager;
+    @Autowired
+    private ContractService contractService;
+    @Autowired
+    private TokenService tokenService;
 
     //记录每个区块打包交易涉及到的账户的余额变动
     private Map<String, AccountInfo> accountInfoMap = new HashMap<>();
@@ -54,6 +59,17 @@ public class SyncService {
     private List<PunishLogInfo> punishLogList = new ArrayList<>();
 
     private List<CoinDataInfo> coinDataList = new ArrayList<>();
+    //记录每个区块新创建的智能合约信息
+    private Map<String, ContractInfo> contractInfoMap = new HashMap<>();
+    //记录智能合约执行结果
+    private List<ContractResultInfo> contractResultList = new ArrayList<>();
+    //记录智能合约相关的交易信息
+    private List<ContractTxInfo> contractTxInfoList = new ArrayList<>();
+    //记录每个区块智能合约相关的账户token信息
+    private Map<String, AccountTokenInfo> accountTokenMap = new HashMap<>();
+    //记录合约转账信息
+    private List<TokenTransfer> tokenTransferList = new ArrayList<>();
+
 
     public SyncInfo getSyncInfo(int chainId) {
         return chainService.getSyncInfo(chainId);
@@ -63,7 +79,7 @@ public class SyncService {
         return blockService.getBestBlockHeader(chainId);
     }
 
-    public boolean syncNewBlock(int chainId, BlockInfo blockInfo) throws Exception {
+    public boolean syncNewBlock(int chainId, BlockInfo blockInfo) {
         clear();
         findAddProcessAgentOfBlock(chainId, blockInfo);
         //处理交易
@@ -75,7 +91,7 @@ public class SyncService {
 
         ApiCache apiCache = CacheManager.getCache(chainId);
         apiCache.setBestHeader(blockInfo.getHeader());
-        System.out.println(blockInfo.getHeader().getHeight() + "--------------");
+        Log.info(blockInfo.getHeader().getHeight() + "--------------");
         return true;
     }
 
@@ -142,7 +158,6 @@ public class SyncService {
      * 处理各种交易
      *
      * @param txs
-     * @throws Exception
      */
     private void processTxs(int chainId, List<TransactionInfo> txs) {
         for (int i = 0; i < txs.size(); i++) {
@@ -169,13 +184,15 @@ public class SyncService {
             } else if (tx.getType() == ApiConstant.TX_TYPE_RED_PUNISH) {
                 processRedPunishTx(chainId, tx);
             } else if (tx.getType() == ApiConstant.TX_TYPE_CREATE_CONTRACT) {
-                //                processCreateContract(tx);
+                processCreateContract(chainId, tx);
             } else if (tx.getType() == ApiConstant.TX_TYPE_CALL_CONTRACT) {
-                //                processCallContract(tx);
+                processCallContract(chainId, tx);
             } else if (tx.getType() == ApiConstant.TX_TYPE_DELETE_CONTRACT) {
-                //                processDeleteContract(tx);
+                processDeleteContract(chainId, tx);
             } else if (tx.getType() == ApiConstant.TX_TYPE_CONTRACT_TRANSFER) {
-                //                processContractTransfer(tx);
+                processTransferTx(chainId, tx);
+            } else if (tx.getType() == ApiConstant.TX_TYPE_CONTRACT_RETURN_GAS) {
+                processCoinBaseTx(chainId, tx);
             }
         }
     }
@@ -425,6 +442,127 @@ public class SyncService {
         }
     }
 
+    private void processCreateContract(int chainId, TransactionInfo tx) {
+        CoinFromInfo coinFromInfo = tx.getCoinFroms().get(0);
+        AccountInfo accountInfo = queryAccountInfo(chainId, coinFromInfo.getAddress());
+        accountInfo.setTxCount(accountInfo.getTxCount() + 1);
+        accountInfo.setTotalOut(accountInfo.getTotalOut().add(tx.getFee()));
+        accountInfo.setTotalBalance(accountInfo.getTotalBalance().subtract(tx.getFee()));
+        txRelationInfoSet.add(new TxRelationInfo(accountInfo.getAddress(), tx, coinFromInfo.getChainId(), coinFromInfo.getAssetsId(), BigInteger.ZERO, accountInfo.getTotalBalance()));
+
+        ContractInfo contractInfo = (ContractInfo) tx.getTxData();
+        contractInfo.setTxCount(1);
+        contractInfo.setNew(true);
+        contractInfo.setRemark(tx.getRemark());
+        createContractTxInfo(tx, contractInfo);
+        contractInfoMap.put(contractInfo.getContractAddress(), contractInfo);
+
+        if (contractInfo.isSuccess() && contractInfo.isNrc20()) {
+            processTokenTransfers(chainId, contractInfo.getResultInfo().getTokenTransfers(), tx);
+        }
+    }
+
+    private void processCallContract(int chainId, TransactionInfo tx) {
+        processTransferTx(chainId, tx);
+        ContractCallInfo callInfo = (ContractCallInfo) tx.getTxData();
+        ContractInfo contractInfo = queryContractInfo(chainId, callInfo.getContractAddress());
+        contractInfo.setTxCount(contractInfo.getTxCount() + 1);
+
+        contractResultList.add(callInfo.getResultInfo());
+        createContractTxInfo(tx, contractInfo);
+
+        if (callInfo.getResultInfo().isSuccess() && contractInfo.isNrc20()) {
+            processTokenTransfers(chainId, callInfo.getResultInfo().getTokenTransfers(), tx);
+        }
+    }
+
+    private void processDeleteContract(int chainId, TransactionInfo tx) {
+        CoinFromInfo coinFromInfo = tx.getCoinFroms().get(0);
+        AccountInfo accountInfo = queryAccountInfo(chainId, coinFromInfo.getAddress());
+        accountInfo.setTxCount(accountInfo.getTxCount() + 1);
+        accountInfo.setTotalOut(accountInfo.getTotalOut().add(tx.getFee()));
+        accountInfo.setTotalBalance(accountInfo.getTotalBalance().subtract(tx.getFee()));
+        txRelationInfoSet.add(new TxRelationInfo(accountInfo.getAddress(), tx, coinFromInfo.getChainId(), coinFromInfo.getAssetsId(), BigInteger.ZERO, accountInfo.getTotalBalance()));
+
+        ContractDeleteInfo deleteInfo = (ContractDeleteInfo) tx.getTxData();
+        ContractResultInfo resultInfo = deleteInfo.getResultInfo();
+        ContractInfo contractInfo = queryContractInfo(chainId, resultInfo.getContractAddress());
+        contractInfo.setTxCount(contractInfo.getTxCount() + 1);
+
+        contractResultList.add(resultInfo);
+        createContractTxInfo(tx, contractInfo);
+        if (resultInfo.isSuccess()) {
+            contractInfo.setStatus(ApiConstant.CONTRACT_STATUS_DELETE);
+        }
+    }
+
+    private void processTokenTransfers(int chainId, List<TokenTransfer> tokenTransfers, TransactionInfo tx) {
+        if (tokenTransfers.isEmpty()) {
+            return;
+        }
+        AccountTokenInfo tokenInfo;
+        TokenTransfer tokenTransfer;
+        ContractInfo contractInfo;
+        for (int i = 0; i < tokenTransfers.size(); i++) {
+            tokenTransfer = tokenTransfers.get(i);
+            tokenTransfer.setTxHash(tx.getHash());
+            tokenTransfer.setHeight(tx.getHeight());
+            tokenTransfer.setTime(tx.getCreateTime());
+
+            contractInfo = queryContractInfo(chainId, tokenTransfer.getContractAddress());
+            if (!contractInfo.getOwners().contains(tokenTransfer.getToAddress())) {
+                contractInfo.getOwners().add(tokenTransfer.getToAddress());
+            }
+            contractInfo.setTransferCount(contractInfo.getTransferCount() + 1);
+
+            if (tokenTransfer.getFromAddress() != null) {
+                tokenInfo = processAccountNrc20(chainId, contractInfo, tokenTransfer.getFromAddress(), new BigInteger(tokenTransfer.getValue()), -1);
+                tokenTransfer.setFromBalance(tokenInfo.getBalance().toString());
+            }
+            tokenInfo = processAccountNrc20(chainId, contractInfo, tokenTransfer.getToAddress(), new BigInteger(tokenTransfer.getValue()), 1);
+            tokenTransfer.setToBalance(tokenInfo.getBalance().toString());
+
+            tokenTransferList.add(tokenTransfer);
+        }
+    }
+
+    private AccountTokenInfo processAccountNrc20(int chainId, ContractInfo contractInfo, String address, BigInteger value, int type) {
+        AccountTokenInfo tokenInfo = queryAccountTokenInfo(chainId, address + contractInfo.getContractAddress());
+        if (tokenInfo == null) {
+            AccountInfo accountInfo = queryAccountInfo(chainId, address);
+            accountInfo.getTokens().add(contractInfo.getContractAddress() + "," + contractInfo.getSymbol());
+
+            tokenInfo = new AccountTokenInfo(address, contractInfo.getContractAddress(), contractInfo.getTokenName(), contractInfo.getSymbol(), contractInfo.getDecimals());
+        }
+
+        if (type == 1) {
+            tokenInfo.setBalance(tokenInfo.getBalance().add(value));
+        } else {
+            tokenInfo.setBalance(tokenInfo.getBalance().subtract(value));
+        }
+
+        if (tokenInfo.getBalance().compareTo(BigInteger.ZERO) < 0) {
+            throw new RuntimeException("data error: " + address + " token[" + contractInfo.getSymbol() + "] balance < 0");
+        }
+        if (!accountTokenMap.containsKey(tokenInfo.getKey())) {
+            accountTokenMap.put(tokenInfo.getKey(), tokenInfo);
+        }
+
+        return tokenInfo;
+    }
+
+    private void createContractTxInfo(TransactionInfo tx, ContractInfo contractInfo) {
+        ContractTxInfo contractTxInfo = new ContractTxInfo();
+        contractTxInfo.setTxHash(tx.getHash());
+        contractTxInfo.setBlockHeight(tx.getHeight());
+        contractTxInfo.setContractAddress(contractInfo.getContractAddress());
+        contractTxInfo.setTime(tx.getCreateTime());
+        contractTxInfo.setType(tx.getType());
+        contractTxInfo.setFee(tx.getFee().toString());
+
+        contractTxInfoList.add(contractTxInfo);
+    }
+
     private AccountLedgerInfo calcBalance(int chainId, CoinToInfo output) {
         ChainInfo chainInfo = CacheManager.getChainInfo(chainId);
         if (output.getChainId() == chainInfo.getChainId() && output.getAssetsId() == chainInfo.getDefaultAsset().getAssetId()) {
@@ -475,7 +613,7 @@ public class SyncService {
      * 解析区块和所有交易后，将数据存储到数据库中
      * Store entity in the database after parsing the block and all transactions
      */
-    public void save(int chainId, BlockInfo blockInfo) throws Exception {
+    public void save(int chainId, BlockInfo blockInfo) {
         long height = blockInfo.getHeader().getHeight();
         SyncInfo syncInfo = chainService.saveNewSyncInfo(chainId, height);
         //存储区块头信息
@@ -492,6 +630,13 @@ public class SyncService {
         punishService.savePunishList(chainId, punishLogList);
         //存储委托/取消委托记录
         depositService.saveDepositList(chainId, depositInfoList);
+        //存储智能合约交易关系记录
+        contractService.saveContractTxInfos(chainId, contractTxInfoList);
+        //存入智能合约执行结果记录
+        contractService.saveContractResults(chainId, contractResultList);
+        //存储token转账信息
+        tokenService.saveTokenTransfers(chainId, tokenTransferList);
+
         /*
             涉及到统计类的表放在最后来存储，便于回滚
          */
@@ -505,8 +650,18 @@ public class SyncService {
         chainService.updateStep(syncInfo);
         ledgerService.saveLedgerList(chainId, accountLedgerInfoMap);
 
-        //修改账户信息表
+        //存储智能合约信息表
         syncInfo.setStep(30);
+        chainService.updateStep(syncInfo);
+        contractService.saveContractInfos(chainId, contractInfoMap);
+
+        //存储账户token信息
+        syncInfo.setStep(40);
+        chainService.updateStep(syncInfo);
+        tokenService.saveAccountTokens(chainId, accountTokenMap);
+
+        //存储账户信息表
+        syncInfo.setStep(50);
         chainService.updateStep(syncInfo);
         accountService.saveAccounts(chainId, accountInfoMap);
 
@@ -566,6 +721,23 @@ public class SyncService {
         return agentInfo;
     }
 
+    private ContractInfo queryContractInfo(int chainId, String contractAddress) {
+        ContractInfo contractInfo = contractInfoMap.get(contractAddress);
+        if (contractInfo == null) {
+            contractInfo = contractService.getContractInfo(chainId, contractAddress);
+            contractInfoMap.put(contractInfo.getContractAddress(), contractInfo);
+        }
+        return contractInfo;
+    }
+
+    private AccountTokenInfo queryAccountTokenInfo(int chainId, String key) {
+        AccountTokenInfo accountTokenInfo = accountTokenMap.get(key);
+        if (accountTokenInfo == null) {
+            accountTokenInfo = tokenService.getAccountTokenInfo(chainId, key);
+        }
+        return accountTokenInfo;
+    }
+
     private void clear() {
         accountInfoMap.clear();
         accountLedgerInfoMap.clear();
@@ -575,5 +747,10 @@ public class SyncService {
         depositInfoList.clear();
         punishLogList.clear();
         coinDataList.clear();
+        contractInfoMap.clear();
+        contractResultList.clear();
+        contractTxInfoList.clear();
+        accountTokenMap.clear();
+        tokenTransferList.clear();
     }
 }

@@ -91,7 +91,23 @@ public class NodeGroup implements Dto {
     public final static int OK = 3;
     private final static int DESTROY = -1;
     private final static int RECONNECT = -2;
+    public static Map<String,String> statusMap = new HashMap<>();
 
+    static{
+        statusMap.put(String.valueOf(WAIT1),"netInit(初始化)");
+        statusMap.put(String.valueOf(WAIT2),"waitConnected(待组网)");
+        statusMap.put(String.valueOf(OK),"running(运行中)");
+        statusMap.put(String.valueOf(DESTROY),"destroy(注销中)");
+        statusMap.put(String.valueOf(RECONNECT),"reconnect(重连中)");
+    }
+
+    public String getLocalStatus(){
+       return statusMap.get(String.valueOf(localNetNodeContainer.getStatus()));
+    }
+
+    public String getCrossStatus(){
+        return statusMap.get(String.valueOf(crossNodeContainer.getStatus()));
+    }
     public NodeGroup(long magicNumber, int chainId, int maxIn, int maxOut, int minAvailableCount) {
         this.magicNumber = magicNumber;
         this.chainId = chainId;

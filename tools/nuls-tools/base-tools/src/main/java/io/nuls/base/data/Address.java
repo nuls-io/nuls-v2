@@ -26,9 +26,12 @@
 package io.nuls.base.data;
 
 import io.nuls.base.basic.AddressTool;
+import io.nuls.base.constant.BaseConstant;
+import io.nuls.tools.crypto.Base58;
 import io.nuls.tools.model.ByteUtils;
 import io.nuls.tools.exception.NulsRuntimeException;
 import io.nuls.tools.log.Log;
+import io.nuls.tools.parse.SerializeUtils;
 
 /**
  * @author: Chralie
@@ -41,14 +44,11 @@ public class Address {
     public static final int ADDRESS_LENGTH = 23;
 
     /**
-     * origin address hash length：addressType+hash160(pubKey)
-     */
-    public static final int ADDRESS_ORIGIN_LENGTH = 21;
-
-    /**
      * RIPEMD160 length
      */
-    private static final int LENGTH = 20;
+    public static final int RIPEMD160_LENGTH = 20;
+
+    private String prefix;
 
     /**
      * chain id
@@ -76,6 +76,7 @@ public class Address {
             this.addressType = addressTmp.getAddressType();
             this.hash160 = addressTmp.getHash160();
             this.addressBytes = calcAddressbytes();
+            this.prefix = AddressTool.getPrefix(address);
         } catch (Exception e) {
             Log.error(e);
         }
@@ -86,12 +87,31 @@ public class Address {
         this.addressType = addressType;
         this.hash160 = hash160;
         this.addressBytes = calcAddressbytes();
+        if (chainId == BaseConstant.MAINNET_CHAIN_ID) {
+            this.prefix = AddressTool.MAINNET_PREFIX;
+        } else if (chainId == BaseConstant.TESTNET_CHAIN_ID) {
+            this.prefix = AddressTool.TESTNET_PREFIX;
+        } else {
+            this.prefix = Base58.encode(SerializeUtils.int16ToBytes(chainId)).toUpperCase();
+        }
+
+    }
+
+    public Address(int chainId, String prefix, byte addressType, byte[] hash160) {
+        this.chainId = chainId;
+        this.addressType = addressType;
+        this.hash160 = hash160;
+        this.addressBytes = calcAddressbytes();
+        this.prefix = prefix;
     }
 
     public byte[] getHash160() {
         return hash160;
     }
 
+    public String getPrefix() {
+        return prefix;
+    }
 
     public int getChainId() {
         return chainId;
@@ -109,8 +129,8 @@ public class Address {
 
         int chainId = ByteUtils.bytesToShort(hashs);
         byte addressType = hashs[2];
-        byte[] content = new byte[LENGTH];
-        System.arraycopy(hashs, 3, content, 0, LENGTH);
+        byte[] content = new byte[RIPEMD160_LENGTH];
+        System.arraycopy(hashs, 3, content, 0, RIPEMD160_LENGTH);
 
         Address address = new Address(chainId, addressType, content);
         return address;
@@ -118,7 +138,7 @@ public class Address {
 
     public byte[] calcAddressbytes() {
         byte[] body = new byte[ADDRESS_LENGTH];
-        System.arraycopy(ByteUtils.shortToBytes((short)chainId), 0, body, 0, 2);
+        System.arraycopy(ByteUtils.shortToBytes((short) chainId), 0, body, 0, 2);
         body[2] = this.addressType;
         System.arraycopy(hash160, 0, body, 3, hash160.length);
         return body;

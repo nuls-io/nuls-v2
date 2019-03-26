@@ -5,11 +5,9 @@ import io.nuls.api.provider.BaseRpcService;
 import io.nuls.api.provider.Provider;
 import io.nuls.api.provider.Result;
 import io.nuls.api.provider.account.facade.*;
-import io.nuls.base.data.BlockHeader;
 import io.nuls.rpc.model.ModuleE;
-import io.nuls.tools.constant.ErrorCode;
+import io.nuls.tools.log.Log;
 import io.nuls.tools.parse.MapUtils;
-import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;
 import java.util.Map;
@@ -21,7 +19,6 @@ import java.util.function.Function;
  * @Description: 功能描述
  */
 @Provider(Provider.ProviderType.RPC)
-@Slf4j
 public class AccountServiceForRpc extends BaseRpcService implements AccountService {
 
     @Override
@@ -73,10 +70,10 @@ public class AccountServiceForRpc extends BaseRpcService implements AccountServi
                 List<AccountInfo> list = MapUtils.mapsToObjects((List<Map<String, Object>>) res.get("list"),AccountInfo.class);
                 return success(list);
             } catch (InstantiationException e) {
-                log.error("getAccountList fail",e);
+                Log.error("getAccountList fail",e);
                 return fail(ERROR_CODE);
             } catch (IllegalAccessException e) {
-                log.error("getAccountList fail",e);
+                Log.error("getAccountList fail",e);
                 return fail(ERROR_CODE);
             }
         });

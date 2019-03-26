@@ -1,6 +1,5 @@
 package io.nuls.api.analysis;
 
-import io.nuls.api.ApiContext;
 import io.nuls.api.cache.ApiCache;
 import io.nuls.api.constant.ApiConstant;
 import io.nuls.api.manager.CacheManager;
@@ -9,6 +8,7 @@ import io.nuls.api.model.po.db.*;
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.data.*;
+import io.nuls.tools.basic.Result;
 import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.exception.NulsException;
 
@@ -16,14 +16,16 @@ import java.io.IOException;
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class AnalysisHandler {
 
     public static BlockInfo toBlockInfo(Block block, int chainId) throws Exception {
         BlockInfo blockInfo = new BlockInfo();
         BlockHeaderInfo blockHeader = toBlockHeaderInfo(block.getHeader(), chainId);
-        blockInfo.setTxList(toTxs(block.getTxs(), blockHeader));
+        blockInfo.setTxList(toTxs(chainId, block.getTxs(), blockHeader));
         //计算coinbase奖励
         blockHeader.setReward(calcCoinBaseReward(blockInfo.getTxList().get(0)));
         //计算总手续费
@@ -63,10 +65,10 @@ public class AnalysisHandler {
         return info;
     }
 
-    public static List<TransactionInfo> toTxs(List<Transaction> txList, BlockHeaderInfo blockHeader) throws Exception {
+    public static List<TransactionInfo> toTxs(int chainId, List<Transaction> txList, BlockHeaderInfo blockHeader) throws Exception {
         List<TransactionInfo> txs = new ArrayList<>();
         for (int i = 0; i < txList.size(); i++) {
-            TransactionInfo txInfo = toTransaction(txList.get(i));
+            TransactionInfo txInfo = toTransaction(chainId, txList.get(i));
             if (txInfo.getType() == ApiConstant.TX_TYPE_RED_PUNISH) {
                 PunishLogInfo punishLog = (PunishLogInfo) txInfo.getTxData();
                 punishLog.setRoundIndex(blockHeader.getRoundIndex());
@@ -83,7 +85,7 @@ public class AnalysisHandler {
         return txs;
     }
 
-    public static TransactionInfo toTransaction(Transaction tx) throws Exception {
+    public static TransactionInfo toTransaction(int chainId, Transaction tx) throws Exception {
         TransactionInfo info = new TransactionInfo();
         info.setHash(tx.getHash().getDigestHex());
         info.setHeight(tx.getBlockHeight());
@@ -109,7 +111,7 @@ public class AnalysisHandler {
         if (info.getType() == ApiConstant.TX_TYPE_YELLOW_PUNISH) {
             info.setTxDataList(toYellowPunish(tx));
         } else {
-            info.setTxData(toTxData(tx));
+            info.setTxData(toTxData(chainId, tx));
         }
         info.calcValue();
         return info;
@@ -152,7 +154,7 @@ public class AnalysisHandler {
     }
 
 
-    public static TxDataInfo toTxData(Transaction tx) throws NulsException {
+    public static TxDataInfo toTxData(int chainId, Transaction tx) throws NulsException {
         if (tx.getType() == ApiConstant.TX_TYPE_ALIAS) {
             return toAlias(tx);
         } else if (tx.getType() == ApiConstant.TX_TYPE_REGISTER_AGENT) {
@@ -166,6 +168,14 @@ public class AnalysisHandler {
         } else if (tx.getType() == ApiConstant.TX_TYPE_RED_PUNISH) {
             return toRedPublishLog(tx);
         } else if (tx.getType() == ApiConstant.TX_TYPE_CREATE_CONTRACT) {
+            return toContractInfo(chainId, tx);
+        } else if (tx.getType() == ApiConstant.TX_TYPE_CALL_CONTRACT) {
+            return toContractCallInfo(chainId, tx);
+        } else if (tx.getType() == ApiConstant.TX_TYPE_DELETE_CONTRACT) {
+            return toContractDeleteInfo(chainId, tx);
+        } else if (tx.getType() == ApiConstant.TX_TYPE_CONTRACT_TRANSFER) {
+            return toContractTransferInfo(tx);
+        } else if (tx.getType() == ApiConstant.TX_TYPE_CONTRACT_RETURN_GAS) {
 
         }
         return null;
@@ -188,8 +198,10 @@ public class AnalysisHandler {
         agentInfo.init();
         agentInfo.setAgentAddress(AddressTool.getStringAddressByBytes(agent.getAgentAddress()));
         agentInfo.setPackingAddress(AddressTool.getStringAddressByBytes(agent.getPackingAddress()));
-        agentInfo.setRewardAddress(AddressTool.getStringAddressByBytes(agent.getPackingAddress()));
+        agentInfo.setRewardAddress(AddressTool.getStringAddressByBytes(agent.getRewardAddress()));
         agentInfo.setDeposit(agent.getDeposit());
+        agentInfo.setCreateTime(tx.getTime());
+
         agentInfo.setCommissionRate(agent.getCommissionRate());
         agentInfo.setTxHash(tx.getHash().getDigestHex());
         agentInfo.setAgentId(agentInfo.getTxHash().substring(agentInfo.getTxHash().length() - 8));
@@ -269,6 +281,73 @@ public class AnalysisHandler {
         punishLog.setBlockHeight(tx.getBlockHeight());
         punishLog.setTime(tx.getTime());
         return punishLog;
+    }
+
+    public static ContractInfo toContractInfo(int chainId, Transaction tx) throws NulsException {
+        CreateContractData data = new CreateContractData();
+        data.parse(new NulsByteBuffer(tx.getTxData()));
+        ContractInfo contractInfo = new ContractInfo();
+        contractInfo.setCreateTxHash(tx.getHash().getDigestHex());
+        contractInfo.setContractAddress(AddressTool.getStringAddressByBytes(data.getContractAddress()));
+        contractInfo.setBlockHeight(tx.getBlockHeight());
+        contractInfo.setCreateTime(tx.getTime());
+        Result<ContractInfo> result = WalletRpcHandler.getContractInfo(chainId, contractInfo);
+        return result.getData();
+    }
+
+    public static ContractCallInfo toContractCallInfo(int chainId, Transaction tx) throws NulsException {
+        CallContractData data = new CallContractData();
+        data.parse(new NulsByteBuffer(tx.getTxData()));
+
+        ContractCallInfo callInfo = new ContractCallInfo();
+        callInfo.setCreater(AddressTool.getStringAddressByBytes(data.getSender()));
+        callInfo.setContractAddress(AddressTool.getStringAddressByBytes(data.getContractAddress()));
+        callInfo.setGasLimit(data.getGasLimit());
+        callInfo.setPrice(data.getPrice());
+        callInfo.setMethodName(data.getMethodName());
+        callInfo.setMethodDesc(data.getMethodDesc());
+        callInfo.setCreateTxHash(tx.getHash().getDigestHex());
+        String args = "";
+        String[][] arrays = data.getArgs();
+        if (arrays != null) {
+            for (String[] arg : arrays) {
+                if (arg != null) {
+                    for (String s : arg) {
+                        args = args + s + ",";
+                    }
+                }
+            }
+        }
+        callInfo.setArgs(args);
+
+        //查询智能合约详情之前，先查询创建智能合约的执行结果是否成功
+        Result<ContractResultInfo> result = WalletRpcHandler.getContractResultInfo(chainId, callInfo.getCreateTxHash());
+        callInfo.setResultInfo(result.getData());
+        return callInfo;
+    }
+
+    public static ContractDeleteInfo toContractDeleteInfo(int chainId, Transaction tx) throws NulsException {
+        DeleteContractData data = new DeleteContractData();
+        data.parse(new NulsByteBuffer(tx.getTxData()));
+
+        ContractDeleteInfo info = new ContractDeleteInfo();
+        info.setTxHash(tx.getHash().getDigestHex());
+        info.setCreater(AddressTool.getStringAddressByBytes(data.getSender()));
+        info.setContractAddress(AddressTool.getStringAddressByBytes(data.getContractAddress()));
+        Result<ContractResultInfo> result = WalletRpcHandler.getContractResultInfo(chainId, info.getTxHash());
+        info.setResultInfo(result.getData());
+        return info;
+    }
+
+    private static ContractTransferInfo toContractTransferInfo(Transaction tx) throws NulsException {
+        ContractTransferData data = new ContractTransferData();
+        data.parse(new NulsByteBuffer(tx.getTxData()));
+
+        ContractTransferInfo info = new ContractTransferInfo();
+        info.setTxHash(tx.getHash().getDigestHex());
+        info.setContractAddress(AddressTool.getStringAddressByBytes(data.getContractAddress()));
+        info.setOrginTxHash(data.getOrginTxHash().getDigestHex());
+        return info;
     }
 
     public static BigInteger calcCoinBaseReward(TransactionInfo coinBaseTx) {

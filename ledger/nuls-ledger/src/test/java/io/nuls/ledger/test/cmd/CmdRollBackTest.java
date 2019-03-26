@@ -49,8 +49,8 @@ import static io.nuls.ledger.utils.LoggerUtil.logger;
  * @date 2019/01/11
  **/
 public class CmdRollBackTest {
-    public int chainId = 12345;
-    int assetChainId = 12345;
+    public int chainId = 2;
+    int assetChainId = 2;
     //    String address = "JgT2JCQvKGRKRjKqyfxRAj2zSCpGca01f";
     String address = "LU6eNP3pJ5UMn5yn8LeDE3Pxeapsq3930";
     String addressTo = "RceDy24yjrhQ72J8xynubWn55PgZj3930";

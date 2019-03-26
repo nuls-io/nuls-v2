@@ -86,14 +86,14 @@ public class H2Test {
 //                TxConstant.H2_TX_TABLE_INDEX_NAME_PREFIX,
 //                TxConstant.H2_TX_TABLE_UNIQUE_NAME_PREFIX,
 //                TxConstant.H2_TX_TABLE_NUMBER);
-//        Page<TransactionPO> page = service.getTxs("5MR_2CeG11nRqx7nGNeh8hTXADibqfSYeNu", null, null, null, null, null, null, 1, 10);
+//        Page<TransactionPO> page = service.getTxs("tNULSeBaMvEtDfvZuukDf2mVyfGo3DdiN8KLRG", null, null, null, null, null, null, 1, 10);
 //        System.out.println(page.getTotal());
 //
 //    }
 //
 //    private static void testInsert() {
 //        TransactionService service = SpringLiteContext.getBean(TransactionService.class);
-//        TransactionPO tx = createTxPo("5MR_2CeG11nRqx7nGNeh8hTXADibqfSYeNu");
+//        TransactionPO tx = createTxPo("tNULSeBaMvEtDfvZuukDf2mVyfGo3DdiN8KLRG");
 //        service.saveTx(tx);
 //    }
 

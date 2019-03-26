@@ -41,9 +41,15 @@ public interface TxConstant {
     int TX_TYPE_CALL_CONTRACT = 101;
     /** 删除智能合约交易*/
     int TX_TYPE_DELETE_CONTRACT = 102;
+    /** contract transfer tx */
+    int TX_TYPE_CONTRACT_TRANSFER = 103;
+    /** contract return gas tx */
+    int TX_TYPE_CONTRACT_RETURN_GAS = 104;
 
     /** 获取网络时间间隔*/
-    long GETTIME_INTERVAL = 30000;
+    long GETTIME_INTERVAL = 30000L;
+
+    long GETTIME_INTERFACE_TIMEOUT = 200L;
 
 
     String LOG_TX = "tx/txChain";
@@ -125,49 +131,9 @@ public interface TxConstant {
     /**
      * 跨链注册信息交易
      */
-//    String TX_MODULE_VALIDATOR = "txProcess";
-//    String CROSS_TRANSFER_VALIDATOR = "crossTxValidator";
-//    String CROSS_TRANSFER_COMMIT = "crossTxCommit";
-//    String CROSS_TRANSFER_ROLLBACK = "crossTxRollback";
+    String TX_MODULE_VALIDATOR = "txProcess";
+    String CROSS_TRANSFER_VALIDATOR = "crossTxValidator";
+    String CROSS_TRANSFER_COMMIT = "crossTxCommit";
+    String CROSS_TRANSFER_ROLLBACK = "crossTxRollback";
 
-//-----------------------------------------------------------------------------------------------------
-    /** 单个交易最大2MB */
-//    int TX_MAX_SIZE = 1024 * 1024 * 2;//=
-
-
-    /** 接收新交易的文件队列最大容量**/
-//    long TX_UNVERIFIED_QUEUE_MAXSIZE = 10000000L;//=
-
-    /** 孤儿交易池最大容量**/
-//    int ORPHAN_CONTAINER_MAX_SIZE = 200000;//=
-
-
-
-
-
-//    String MODULE_CODE = "tx";//=
-//    int NULS_CHAINID = 12345;//=
-//    int NULS_CHAIN_ASSETID = 1;//=
-
-//    int H2_TX_TABLE_NUMBER = 128;
-    /**
-     * 跨链交易打包确认后需要达到的最低阈值高度才生效
-     */
-//    long CTX_EFFECT_THRESHOLD = 30;//=
-
-
-    /** 跨链验证通过率百分比, 跨链通过率 */
-//    String CROSS_VERIFY_RESULT_PASS_RATE = "0.51";//=
-
-    /** 链内通过率 */
-//    String CHAIN_NODES_RESULT_PASS_RATE = "0.8";//=
-
-//    /** 友链链内最近N个出块者阈值*/
-//    int RECENT_PACKAGER_THRESHOLD = 30;//=
-
-//    /** 未确认交易过期毫秒数-30分钟 */
-//    long UNCONFIRMED_TX_EXPIRE_MS = 30 * 60 * 1000;//=
-
-//    /** 本地计算nonce值的hash缓存有效时间 30秒*/
-//    int HASH_TTL = 30000;//=
 }

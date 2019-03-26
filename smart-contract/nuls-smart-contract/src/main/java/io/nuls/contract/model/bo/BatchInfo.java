@@ -24,8 +24,9 @@
 package io.nuls.contract.model.bo;
 
 import io.nuls.base.data.BlockHeader;
+import io.nuls.contract.enums.BatchInfoStatus;
 import io.nuls.contract.helper.ContractConflictChecker;
-import io.nuls.contract.manager.TempBalanceManager;
+import io.nuls.contract.manager.ContractTempBalanceManager;
 import io.nuls.contract.model.dto.ContractPackageDto;
 import io.nuls.contract.vm.program.ProgramExecutor;
 import io.nuls.tools.model.StringUtils;
@@ -36,6 +37,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Set;
+import java.util.concurrent.Future;
 
 /**
  * @author: PierreLuo
@@ -51,7 +53,7 @@ public class BatchInfo {
     /**
      * 智能合约临时余额
      */
-    private TempBalanceManager tempBalanceManager;
+    private ContractTempBalanceManager tempBalanceManager;
 
     /**
      * 当前正在打包的区块头
@@ -77,7 +79,7 @@ public class BatchInfo {
     /**
      * 0 - 未开始， 1 - 已开始
      */
-    private int status;
+    private BatchInfoStatus status;
 
     /**
      * 上一区块世界状态根
@@ -94,14 +96,19 @@ public class BatchInfo {
      */
     private ContractConflictChecker checker;
 
+    /**
+     * 打包异步执行结果
+     */
+    private Future<ContractPackageDto> contractPackageDtoFuture;
+
 
     public BatchInfo() {
-        this.status = 0;
+        this.status = BatchInfoStatus.NOT_STARTING;
         this.contractContainerMap = new LinkedHashMap<>();
     }
 
     public boolean hasBegan() {
-        return status > 0;
+        return status.status() > 0;
     }
 
     public boolean isTimeOut() {
@@ -113,7 +120,7 @@ public class BatchInfo {
         this.clear();
         this.height = height;
         this.beginTime = TimeService.currentTimeMillis();
-        this.status = 1;
+        this.status = BatchInfoStatus.STARTING;
     }
 
     public void clear() {
@@ -123,10 +130,10 @@ public class BatchInfo {
         this.batchExecutor = null;
         this.height = -1L;
         this.beginTime = -1L;
-        this.status = 0;
+        this.status = BatchInfoStatus.NOT_STARTING;
         this.preStateRoot = null;
         this.checker = null;
-        this.contractContainerMap = null;
+        this.contractContainerMap = new LinkedHashMap<>();
     }
 
     public ContractContainer newAndGetContractContainer(String contractAddress) {

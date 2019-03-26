@@ -82,6 +82,12 @@ public class DBUtils {
     }
 
     public static String genAbsolutePath(String path) {
+        File file = new File(path);
+        if(file.exists()){
+            if(file.isAbsolute()){
+                return path;
+            }
+        }
         String[] paths = path.split("/|\\\\");
         URL resource = ClassLoader.getSystemClassLoader().getResource(".");
         String classPath = "";
@@ -93,7 +99,7 @@ public class DBUtils {
             classPath = resource.getPath();
             Log.info("3.classPath = {}", classPath);
         }
-        File file = new File(classPath);
+        file = new File(classPath);
         String resultPath = null;
         boolean isFileName = false;
         for (String p : paths) {

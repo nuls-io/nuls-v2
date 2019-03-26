@@ -24,6 +24,48 @@ public class BlockConfig {
     @Setter
     private String dataFolder;
 
+    /**
+     * 国际化
+     */
+    @Setter
+    @Getter
+    private String language;
+
+    /**
+     * 分叉链监视线程执行间隔
+     */
+    @Setter
+    @Getter
+    private int forkChainsMonitorInterval;
+
+    /**
+     * 孤儿链监视线程执行间隔
+     */
+    @Setter
+    @Getter
+    private int orphanChainsMonitorInterval;
+
+    /**
+     * 孤儿链维护线程执行间隔
+     */
+    @Setter
+    @Getter
+    private int orphanChainsMaintainerInterval;
+
+    /**
+     * 数据库监视线程执行间隔
+     */
+    @Setter
+    @Getter
+    private int storageSizeMonitorInterval;
+
+    /**
+     * 网络监视线程执行间隔
+     */
+    @Setter
+    @Getter
+    private int networkResetMonitorInterval;
+
     @Value("DataPath")
     @Setter
     @Getter

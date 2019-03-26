@@ -30,7 +30,7 @@ import static org.junit.Assert.assertTrue;
 public class AccountStorageServiceTest {
 
     protected static AccountStorageService accountStorageService;
-    protected int chainId = 12345;
+    protected int chainId = 2;
 
     @BeforeClass
     public static void beforeTest() {
@@ -50,7 +50,7 @@ public class AccountStorageServiceTest {
     public void saveAccountListTest() throws Exception {
         List<AccountPo> accountPos = new ArrayList<>();
         int count = 10;
-        String password = "a12345678";
+        String password = "a2678";
         for (int i = 0; i < count; i++) {
             //create account
             Account account = AccountTool.createAccount(chainId);

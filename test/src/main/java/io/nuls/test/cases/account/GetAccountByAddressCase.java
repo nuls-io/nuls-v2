@@ -26,6 +26,7 @@ public class GetAccountByAddressCase extends BaseAccountCase<AccountInfo,String>
         if(result.getData() == null){
             throw new TestFailException("通过地址查询账户返回结果不符合预期，data为空");
         }
+        check(result.getData().getAddress().equals(address),"数据不一致");
         return result.getData();
     }
 }

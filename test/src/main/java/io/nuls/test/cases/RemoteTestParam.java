@@ -10,12 +10,18 @@ import lombok.Data;
  */
 @Data
 @AllArgsConstructor
-public class RemoteTestParam {
+public class RemoteTestParam<T> {
 
     Class<? extends TestCaseIntf> caseCls;
 
-    Object source;
+    T source;
 
     Object param;
+
+    boolean isEquals = true;
+
+    public RemoteTestParam(Class<? extends TestCaseIntf> caseCls,T source,Object param){
+        this(caseCls,source,param,true);
+    }
 
 }

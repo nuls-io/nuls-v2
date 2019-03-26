@@ -6,9 +6,6 @@ import io.nuls.api.provider.Result;
 import io.nuls.api.provider.ledger.facade.AccountBalanceInfo;
 import io.nuls.api.provider.ledger.facade.GetBalanceReq;
 import io.nuls.rpc.model.ModuleE;
-import io.nuls.tools.core.annotation.Component;
-import io.nuls.tools.parse.MapUtils;
-import lombok.extern.slf4j.Slf4j;
 
 import java.math.BigInteger;
 import java.util.Map;
@@ -20,7 +17,6 @@ import java.util.function.Function;
  * @Description: 功能描述
  */
 @Provider(Provider.ProviderType.RPC)
-@Slf4j
 public class LedgerProviderForRpc extends BaseRpcService implements LedgerProvider {
 
     @Override

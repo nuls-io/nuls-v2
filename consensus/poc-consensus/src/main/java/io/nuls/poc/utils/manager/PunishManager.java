@@ -8,7 +8,10 @@ import io.nuls.poc.model.bo.Chain;
 import io.nuls.poc.model.bo.consensus.Evidence;
 import io.nuls.poc.model.bo.round.MeetingMember;
 import io.nuls.poc.model.bo.round.MeetingRound;
-import io.nuls.poc.model.bo.tx.txdata.*;
+import io.nuls.poc.model.bo.tx.txdata.Agent;
+import io.nuls.poc.model.bo.tx.txdata.CancelDeposit;
+import io.nuls.poc.model.bo.tx.txdata.Deposit;
+import io.nuls.poc.model.bo.tx.txdata.StopAgent;
 import io.nuls.poc.model.po.AgentPo;
 import io.nuls.poc.model.po.DepositPo;
 import io.nuls.poc.model.po.PunishLogPo;
@@ -180,9 +183,9 @@ public class PunishManager {
             redPunishData.setAddress(agent.getAgentAddress());
             SmallBlock smallBlock = new SmallBlock();
             smallBlock.setHeader(block.getHeader());
-            smallBlock.setTxHashList(block.getTxHashList());
+            smallBlock.setTxHashList((ArrayList<NulsDigestData>) block.getTxHashList());
             for (Transaction tx : txs) {
-                smallBlock.addBaseTx(tx);
+                smallBlock.addSystemTx(tx);
             }
             redPunishData.setEvidence(smallBlock.serialize());
             redPunishData.setReasonCode(PunishReasonEnum.DOUBLE_SPEND.getCode());
@@ -282,7 +285,7 @@ public class PunishManager {
             */
             byte[][] headers = new byte[ConsensusConstant.REDPUNISH_BIFURCATION * 2][];
             Map<String, List<Evidence>> currentChainEvidences = chain.getEvidenceMap();
-            List<Evidence> list = currentChainEvidences.get(AddressTool.getStringAddressByBytes(agent.getPackingAddress()));
+            List<Evidence> list = currentChainEvidences.remove(AddressTool.getStringAddressByBytes(agent.getPackingAddress()));
             for (int i = 0; i < list.size() && i < ConsensusConstant.REDPUNISH_BIFURCATION; i++) {
                 Evidence evidence = list.get(i);
                 int s = i * 2;
@@ -328,6 +331,9 @@ public class PunishManager {
     public void punishTx(Chain chain, BlockHeader bestBlock, List<Transaction> txList, MeetingMember self, MeetingRound round) throws Exception{
         Transaction yellowPunishTransaction = createYellowPunishTx(chain,bestBlock, self, round);
         if (null == yellowPunishTransaction) {
+            if(chain.getRedPunishTransactionList().size() > 0){
+                conflictValid(chain,txList);
+            }
             return;
         }
         txList.add(yellowPunishTransaction);
@@ -358,9 +364,11 @@ public class PunishManager {
                 redPunishTransaction.setTxData(redPunishData.serialize());
                 redPunishTransaction.setTime(self.getPackEndTime());
                 CoinData coinData = coinDataManager.getStopAgentCoinData(chain, redPunishData.getAddress(), redPunishTransaction.getTime() + chain.getConfig().getRedPublishLockTime());
-                redPunishTransaction.setCoinData(coinData.serialize());
-                redPunishTransaction.setHash(NulsDigestData.calcDigestData(redPunishTransaction.serializeForHash()));
-                chain.getRedPunishTransactionList().add(redPunishTransaction);
+                if(coinData != null){
+                    redPunishTransaction.setCoinData(coinData.serialize());
+                    redPunishTransaction.setHash(NulsDigestData.calcDigestData(redPunishTransaction.serializeForHash()));
+                    chain.getRedPunishTransactionList().add(redPunishTransaction);
+                }
             }
         }
         /*
@@ -441,7 +449,12 @@ public class PunishManager {
             else {
                 preRound = round.getPreRound();
                 if(preRound == null){
-                    preRound = roundManager.getRoundByRoundIndex(chain,round.getIndex(),round.getStartTime());
+                    /*
+                    * 找到round前一轮的第一个区块
+                    * */
+                    BlockHeader preRoundHeader = roundManager.getFirstBlockOfPreRound(chain,round.getIndex()-1);
+                    BlockExtendsData preRoundExtendsData = new BlockExtendsData(preRoundHeader.getExtend());
+                    preRound = roundManager.getRoundByRoundIndex(chain,preRoundExtendsData.getRoundIndex(),preRoundExtendsData.getRoundStartTime());
                 }
                 member = preRound.getMember(index + preRound.getMemberCount());
                 if (member.getAgent() == null || member.getAgent().getDelHeight() > 0 || member.getAgent().getDeposit().equals(BigInteger.ZERO)) {
@@ -752,7 +765,7 @@ public class PunishManager {
         int deleteIndex = 1;
         int chainId = chain.getConfig().getChainId();
         for (byte[] address : punishData.getAddressList()) {
-            boolean result = punishStorageService.delete(getPoKey(address, PunishType.YELLOW.getCode(), blockHeight, deleteIndex++),chainId);
+            boolean result = punishStorageService.delete(getPoKey(address, PunishType.YELLOW.getCode(), blockHeight, deleteIndex),chainId);
             if (!result) {
                 for (PunishLogPo po : deletedList) {
                     punishStorageService.save(po,chainId);
@@ -769,6 +782,7 @@ public class PunishManager {
                 po.setType(PunishType.YELLOW.getCode());
                 deletedList.add(po);
             }
+            deleteIndex++;
         }
         chain.getYellowPunishList().removeAll(deletedList);
         return true;

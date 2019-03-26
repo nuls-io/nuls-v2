@@ -28,6 +28,7 @@ import io.nuls.network.model.Node;
 import io.nuls.network.model.NodeGroup;
 import io.nuls.network.netty.NettyClient;
 import io.nuls.network.task.*;
+import io.nuls.network.utils.LoggerUtil;
 import io.nuls.tools.thread.ThreadUtils;
 import io.nuls.tools.thread.commom.NulsThreadFactory;
 
@@ -85,7 +86,7 @@ public class TaskManager extends BaseManager {
         connectTasks();
         scheduleGroupStatusMonitor();
         timeServiceThreadStart();
-        testThread();
+        nwInfosThread();
     }
 
     private void connectTasks() {
@@ -96,9 +97,9 @@ public class TaskManager extends BaseManager {
 
     }
 
-    private void testThread() {
+    private void nwInfosThread() {
         //测试调试专用 开始
-        executorService.scheduleAtFixedRate(new DataShowMonitorTest(), 5, 10, TimeUnit.SECONDS);
+        executorService.scheduleAtFixedRate(new NwInfosPrintTask(), 5, 60, TimeUnit.SECONDS);
         //测试调试专用 结束
     }
 
@@ -111,7 +112,7 @@ public class TaskManager extends BaseManager {
      * Start the time synchronization thread.
      */
     private void timeServiceThreadStart() {
-        Log.debug("----------- TimeService start -------------");
+        LoggerUtil.Log.debug("----------- TimeService start -------------");
         TimeManager.getInstance().initWebTimeServer();
         ThreadUtils.createAndRunThread("TimeTask", new TimeTask(), true);
     }
@@ -120,12 +121,12 @@ public class TaskManager extends BaseManager {
      * 地址请求分享线程
      */
     private void RunOnceAfterNetStableThreadStart() {
-        Log.debug("----------- RunOnceAfterNetStableThread start -------------");
+        LoggerUtil.Log.debug("----------- RunOnceAfterNetStableThread start -------------");
         ThreadUtils.createAndRunThread("share-mine-node", new RunAfterNetStableTask());
     }
 
     public void createShareAddressTask(NodeGroup nodeGroup, boolean isCross) {
-        Log.debug("----------- createShareAddressTask start -------------");
+        LoggerUtil.Log.debug("----------- createShareAddressTask start -------------");
         ThreadUtils.createAndRunThread("share-mine-node", new ShareAddressTask(nodeGroup));
     }
 }

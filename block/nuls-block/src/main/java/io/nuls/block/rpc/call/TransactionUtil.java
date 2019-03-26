@@ -20,7 +20,10 @@
 
 package io.nuls.block.rpc.call;
 
+import io.nuls.base.basic.AddressTool;
 import io.nuls.base.basic.NulsByteBuffer;
+import io.nuls.base.data.BlockExtendsData;
+import io.nuls.base.data.BlockHeader;
 import io.nuls.base.data.NulsDigestData;
 import io.nuls.base.data.Transaction;
 import io.nuls.block.manager.ContextManager;
@@ -64,23 +67,23 @@ public class TransactionUtil {
                 Map responseData = (Map) response.getResponseData();
                 return (List<Integer>) responseData.get("tx_getSystemTypes");
             } else {
-                return null;
+                return List.of();
             }
         } catch (Exception e) {
             e.printStackTrace();
             commonLog.error(e);
-            return null;
+            return List.of();
         }
     }
 
     /**
      * 批量验证交易
      *
-     * @param chainId 链Id/chain id
+     * @param chainId      链Id/chain id
      * @param transactions
      * @return
      */
-    public static boolean verify(int chainId, List<Transaction> transactions, long height) {
+    public static boolean verify(int chainId, List<Transaction> transactions, BlockHeader header, BlockHeader lastHeader) {
         NulsLogger commonLog = ContextManager.getContext(chainId).getCommonLog();
         try {
             Map<String, Object> params = new HashMap<>(2);
@@ -90,13 +93,21 @@ public class TransactionUtil {
             for (Transaction transaction : transactions) {
                 txHashList.add(transaction.hex());
             }
+            params.put("height", header.getHeight());
             params.put("txList", txHashList);
-            params.put("height", height);
+            params.put("blockTime", header.getTime());
+            params.put("packingAddress", AddressTool.getStringAddressByBytes(header.getPackingAddress(chainId)));
+            BlockExtendsData data = new BlockExtendsData();
+            data.parse(new NulsByteBuffer(header.getExtend()));
+            params.put("stateRoot", HexUtil.encode(data.getStateRoot()));
+            BlockExtendsData lastData = new BlockExtendsData();
+            lastData.parse(new NulsByteBuffer(lastHeader.getExtend()));
+            params.put("preStateRoot", HexUtil.encode(lastData.getStateRoot()));
             Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.TX.abbr, "tx_batchVerify", params);
             if (response.isSuccess()) {
                 Map responseData = (Map) response.getResponseData();
-                Map data = (Map) responseData.get("tx_batchVerify");
-                return (Boolean) data.get("value");
+                Map v = (Map) responseData.get("tx_batchVerify");
+                return (Boolean) v.get("value");
             }
             return false;
         } catch (Exception e) {
@@ -109,7 +120,7 @@ public class TransactionUtil {
     /**
      * 批量保存交易
      *
-     * @param chainId 链Id/chain id
+     * @param chainId       链Id/chain id
      * @param blockHeaderPo
      * @param txs
      * @param localInit
@@ -126,7 +137,7 @@ public class TransactionUtil {
     /**
      * 批量保存交易
      *
-     * @param chainId 链Id/chain id
+     * @param chainId       链Id/chain id
      * @param blockHeaderPo
      * @return
      */
@@ -158,7 +169,7 @@ public class TransactionUtil {
     /**
      * 批量回滚交易
      *
-     * @param chainId 链Id/chain id
+     * @param chainId       链Id/chain id
      * @param blockHeaderPo
      * @return
      */
@@ -190,7 +201,7 @@ public class TransactionUtil {
     /**
      * 批量获取已确认交易
      *
-     * @param chainId 链Id/chain id
+     * @param chainId  链Id/chain id
      * @param hashList
      * @return
      * @throws IOException
@@ -232,22 +243,47 @@ public class TransactionUtil {
     /**
      * 批量获取交易
      *
-     * @param chainId 链Id/chain id
+     * @param chainId  链Id/chain id
      * @param hashList
      * @return
      * @throws IOException
      */
-    public static List<Transaction> getTransactions(int chainId, List<NulsDigestData> hashList) {
-        List<Transaction> transactions = new ArrayList<>();
+    public static ArrayList<Transaction> getTransactions(int chainId, List<NulsDigestData> hashList, boolean allHits) {
+        if (hashList == null || hashList.size() == 0) {
+            return null;
+        }
+        ArrayList<Transaction> transactions = new ArrayList<>();
         NulsLogger commonLog = ContextManager.getContext(chainId).getCommonLog();
         try {
-            hashList.forEach(e -> transactions.add(getTransaction(chainId, e)));
-            return transactions;
+            Map<String, Object> params = new HashMap<>(2);
+//            params.put(Constants.VERSION_KEY_STR, "1.0");
+            params.put("chainId", chainId);
+            List<String> t = new ArrayList<>();
+            hashList.forEach(e -> t.add(e.getDigestHex()));
+            params.put("txHashList", t);
+            params.put("allHits", allHits);
+            Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.TX.abbr, "tx_getBlockTxsExtend", params);
+            if (response.isSuccess()) {
+                Map responseData = (Map) response.getResponseData();
+                Map map = (Map) responseData.get("tx_getBlockTxsExtend");
+                List<String> txHexList = (List<String>) map.get("txHexList");
+                if (txHexList == null || txHexList.size() == 0) {
+                    return null;
+                }
+                for (String txHex : txHexList) {
+                    Transaction transaction = new Transaction();
+                    transaction.parse(new NulsByteBuffer(HexUtil.decode(txHex)));
+                    transactions.add(transaction);
+                }
+            } else {
+                return null;
+            }
         } catch (Exception e) {
             e.printStackTrace();
             commonLog.error(e);
             return null;
         }
+        return transactions;
     }
 
     /**
@@ -323,7 +359,7 @@ public class TransactionUtil {
     /**
      * 批量保存交易
      *
-     * @param chainId 链Id/chain id
+     * @param chainId       链Id/chain id
      * @param blockHeaderPo
      * @return
      */
