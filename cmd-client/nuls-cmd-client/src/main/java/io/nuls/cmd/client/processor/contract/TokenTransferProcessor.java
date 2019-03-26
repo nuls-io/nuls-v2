@@ -63,8 +63,6 @@ public class TokenTransferProcessor extends ContractBaseProcessor {
                 .newLine("\t<address>           source address - Required")
                 .newLine("\t<toaddress>         receiving address - Required")
                 .newLine("\t<contractAddress>   contract address    -Required")
-                .newLine("\t<gasLimit>          gas limit    -Required")
-                .newLine("\t<price>             price (Unit: Na/Gas)    -Required")
                 .newLine("\t<amount>            amount, you can have up to [decimals of the contract] valid digits after the decimal point - Required")
                 .newLine("\t[remark]            remark -not required");
         return builder.toString();
@@ -72,7 +70,7 @@ public class TokenTransferProcessor extends ContractBaseProcessor {
 
     @Override
     public String getCommandDescription() {
-        return "tokentransfer <address> <toAddress> <contractAddress> <gasLimit> <price> <amount> [remark] --token transfer";
+        return "tokentransfer <address> <toAddress> <contractAddress> <amount> [remark] --token transfer";
     }
 
     @Override
@@ -80,7 +78,7 @@ public class TokenTransferProcessor extends ContractBaseProcessor {
         boolean result;
         do {
             int length = args.length;
-            if (length != 7 && length != 8) {
+            if (length != 5 && length != 6) {
                 result = false;
                 break;
             }
@@ -89,18 +87,8 @@ public class TokenTransferProcessor extends ContractBaseProcessor {
                 break;
             }
 
-            // gasLimit
-            if (!StringUtils.isNumeric(args[4])) {
-                result = false;
-                break;
-            }
-            // price
-            if (!StringUtils.isNumeric(args[5])) {
-                result = false;
-                break;
-            }
             // amount
-            if (!StringUtils.isNumberGtZero(args[6])) {
+            if (!StringUtils.isNumberGtZero(args[4])) {
                 result = false;
                 break;
             }
@@ -126,11 +114,9 @@ public class TokenTransferProcessor extends ContractBaseProcessor {
             transfer.setAddress(args[1].trim());
             transfer.setToAddress(args[2].trim());
             transfer.setContractAddress(args[3].trim());
-            transfer.setGasLimit(Long.valueOf(args[4].trim()));
-            transfer.setPrice(Long.valueOf(args[5].trim()));
-            transfer.setAmount(args[6].trim());
-            if(args.length == 8) {
-                transfer.setRemark(args[7].trim());
+            transfer.setAmount(args[4].trim());
+            if(args.length == 6) {
+                transfer.setRemark(args[5].trim());
             }
             return transfer;
         } catch (Exception e) {

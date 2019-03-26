@@ -35,6 +35,7 @@ import io.nuls.tools.core.annotation.Component;
 
 import java.util.Arrays;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
  * @author: Charlie
@@ -55,9 +56,9 @@ public class HelpProcessor implements CommandProcessor {
     @Override
     public String getHelp() {
         CommandBuilder bulider = new CommandBuilder();
-        bulider.newLine("help [-a | grep | command]")
+        bulider.newLine("help [-a | group | command]")
                 .newLine("\t[-a] show all commands and options of command - optional")
-                .newLine("\t[group] show commands and options of this group ")
+                .newLine("\t[group] show commands and options of this group. group list: " + Arrays.stream(CommandGroup.values()).map(g->g.getTitle().toLowerCase()).collect(Collectors.toList()))
                 .newLine("\t[command] shwo this command info ");
         return bulider.toString();
     }

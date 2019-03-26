@@ -309,9 +309,9 @@ public final class Na implements Comparable<Na>, Serializable {
 //     * @param object
 //     * @return
 //     */
-    public static double naToNuls(Object object) {
+    public static String naToNuls(Object object) {
         if (null == object) {
-            return 0;
+            return "0";
         }
         Long na = null;
         if (object instanceof Long) {
@@ -319,12 +319,12 @@ public final class Na implements Comparable<Na>, Serializable {
         } else if (object instanceof Integer) {
             na = ((Integer) object).longValue();
         } else if (object instanceof Double) {
-            return (Double) object;
+            return String.valueOf(object);
         } else if (object instanceof Float) {
-            return Double.parseDouble(String.valueOf(object));
+            return String.valueOf(object);
         } else {
-            return 0;
+            return "0";
         }
-        return (Na.valueOf(na)).toDouble();
+        return (Na.valueOf(na)).toText();
     }
 }
