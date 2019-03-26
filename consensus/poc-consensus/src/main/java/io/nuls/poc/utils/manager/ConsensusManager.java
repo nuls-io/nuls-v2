@@ -172,7 +172,7 @@ public class ConsensusManager {
         本轮次总的出块奖励金(本轮次出块节点数*共识基础奖励 )
         Total reward in this round
         */
-        BigDecimal totalAll = DoubleUtils.mul(new BigDecimal(localRound.getMemberCount()), new BigDecimal(config.getConfigBean().getPackingInterval()));
+        BigDecimal totalAll = DoubleUtils.mul(new BigDecimal(localRound.getMemberCount()), new BigDecimal(config.getConfigBean().getBlockReward()));
         double commissionRate = DoubleUtils.div(self.getAgent().getCommissionRate(), 100, 2);
         BigInteger selfAllDeposit = self.getAgent().getDeposit().add(self.getAgent().getTotalDeposit());
         BigDecimal agentWeight = DoubleUtils.mul(new BigDecimal(selfAllDeposit), self.getAgent().getCreditVal());

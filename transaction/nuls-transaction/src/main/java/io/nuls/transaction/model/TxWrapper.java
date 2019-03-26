@@ -22,27 +22,44 @@
  * SOFTWARE.
  */
 
-package io.nuls.contract.service;
+package io.nuls.transaction.model;
 
-import io.nuls.contract.model.bo.ContractResult;
-import io.nuls.contract.model.txdata.ContractData;
-import io.nuls.contract.vm.program.ProgramExecutor;
-import io.nuls.tools.basic.Result;
+import io.nuls.base.data.Transaction;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
- * @author: PierreLuo
- * @date: 2018/11/19
+ * @author: Charlie
+ * @date: 2019/3/26
  */
-public interface ContractExecutor {
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+public class TxWrapper{
 
-    ContractResult create(ProgramExecutor executor, ContractData contractData, long number, String preStateRoot);
+    private Transaction tx;
 
-    ContractResult call(ProgramExecutor executor, ContractData contractData, long number, String preStateRoot);
+    private int index;
 
-    ContractResult delete(ProgramExecutor executor, ContractData contractData, long number, String preStateRoot);
+    public int compareTo(int index) {
+        if (this.index > index) {
+            return -1;
+        } else if (this.index < index) {
+            return 1;
+        }
+        return 0;
+    }
 
-    ProgramExecutor createBatchExecute(int chainId, byte[] stateRoot);
-
-    Result<byte[]> commitBatchExecute(ProgramExecutor executor);
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null) {
+            return false;
+        }
+        if (!(obj instanceof TxWrapper)) {
+            return false;
+        }
+        return this.tx.equals(((TxWrapper) obj).getTx());
+    }
 
 }

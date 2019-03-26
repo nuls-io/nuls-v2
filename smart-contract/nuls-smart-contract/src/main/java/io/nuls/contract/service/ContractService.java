@@ -41,6 +41,8 @@ public interface ContractService {
 
     Result begin(int chainId, long blockHeight, long blockTime, String packingAddress, String preStateRoot);
 
+    Result beforeEnd(int chainId, long blockHeight);
+
     Result end(int chainId, long blockHeight);
 
     Result validContractTx(int chainId, Transaction tx) throws NulsException;
