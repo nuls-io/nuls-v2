@@ -23,7 +23,9 @@ EOF
 
 #获取参数
 #输出目录
+
 MODULES_PATH="./NULS-Walltet-linux64-alpha1"
+#RELEASE_OUT_PATH="./NULS-Walltet-linux64-alpha1"
 #是否马上更新代码
 DOPULL=
 #是否生成mykernel模块
@@ -138,8 +140,11 @@ fi
 MODULES_PATH=$MODULES_PATH/Nuls
 #模块公共依赖jar存放目录
 COMMON_LIBS_PATH=$MODULES_PATH/libs
-if [ ! -d ${COMMON_LIBS_PATH} ]; then
-	mkdir ${COMMON_LIBS_PATH}
+if [[ -z "${IGNROEMVN}" ]]; then
+    if [ -d ${COMMON_LIBS_PATH} ]; then
+        rm -r ${COMMON_LIBS_PATH}
+    fi
+    mkdir ${COMMON_LIBS_PATH}
 fi
 
 #模块数据库文件存放位置
@@ -202,7 +207,7 @@ getModuleItem(){
 							print r
 						}
 					')
-		if [ ${pname} == $1 ]; then
+		if [ "${pname}" == $1 ]; then
 			echo ${pvalue};
 			return 1;
 		fi
@@ -291,7 +296,7 @@ copyModuleNcfToModules(){
 	sh "${PROJECT_PATH}/build/merge-ncf.sh" "${BUILD_PATH}/module-prod.ncf" $moduleNcf
 #	rm $moduleNcf
 	sedCommand+=" -e 's/%MAIN_CLASS_NAME%/${mainClassName}/g' "
-    echo $sedCommand
+#    echo $sedCommand
 	if [ -z $(echo "${sedCommand}" | grep -o "%JOPT_XMS%") ]; then
 		sedCommand="${sedCommand}  -e 's/%JOPT_XMS%/256/g' "
 	fi
@@ -352,7 +357,7 @@ packageModule() {
 	if [ ! -d $(pwd)/$1 ]; then
 		return 0
 	fi
-	if [ $(pwd) == "${RELEASE_PATH}" ]; then
+	if [ $(pwd) == "${MODULES_PATH}" ]; then
 		return 0;
 	fi
 	cd $(pwd)/$1
@@ -362,13 +367,16 @@ packageModule() {
 			echoRed "模块配置文件必须与pom.xml在同一个目录 : $(pwd)"
 			exit 0;
 		fi
-		doMvn "package" $1
-		checkModuleItem "APP_NAME" "$1"
-		checkModuleItem "VERSION" "$1"
-		checkModuleItem "MAIN_CLASS" "$1"
-		copyJarToModules $1
-		copyModuleNcfToModules $1
-		log "$1 SUCCESS"
+		managed=$(getModuleItem "Managed");
+		if [[ $managed != "-1" ]]; then
+		    doMvn "package" $1
+            checkModuleItem "APP_NAME" "$1"
+            checkModuleItem "VERSION" "$1"
+            checkModuleItem "MAIN_CLASS" "$1"
+            copyJarToModules $1
+            copyModuleNcfToModules $1
+            log "$1 SUCCESS"
+		fi
 		cd ..
 		return 0
 	fi
@@ -421,12 +429,13 @@ if [ -n "${DOMOCK}" ]; then
 	chmod u+x "${MODULES_BIN_PATH}/cmd.sh"
 fi
 
+
 if [ -n "${BUILDTAR}" ]; then
     log "============ build ${RELEASE_PATH}.tar.gz ==================="
     tar -zcPf "${RELEASE_PATH}.tar.gz" ${RELEASE_PATH}
     log "============ build ${RELEASE_PATH}.tar.gz FINISH==================="
 fi
 
-
+#cp -R ${RELEASE_PATH} ${RELEASE_OUT_PATH}
 
 
