@@ -21,16 +21,16 @@
 package io.nuls.block.service.impl;
 
 import io.nuls.base.basic.NulsByteBuffer;
-import io.nuls.base.data.Block;
-import io.nuls.base.data.BlockHeader;
-import io.nuls.base.data.NulsDigestData;
-import io.nuls.base.data.Transaction;
+import io.nuls.base.data.*;
+import io.nuls.block.cache.SmallBlockCacher;
+import io.nuls.block.constant.BlockForwardEnum;
 import io.nuls.block.exception.ChainRuntimeException;
 import io.nuls.block.exception.DbRuntimeException;
 import io.nuls.block.manager.BlockChainManager;
 import io.nuls.block.manager.ContextManager;
 import io.nuls.block.message.HashMessage;
 import io.nuls.block.message.SmallBlockMessage;
+import io.nuls.block.model.CachedSmallBlock;
 import io.nuls.block.model.Chain;
 import io.nuls.block.model.ChainContext;
 import io.nuls.block.model.GenesisBlock;
@@ -219,16 +219,20 @@ public class BlockServiceImpl implements BlockService {
                 commonLog.debug("verifyBlock fail!chainId-" + chainId + ",height-" + height);
                 return false;
             }
-            long elapsedNanos1 = System.nanoTime() - startTime1;
-            commonLog.info("1. time-" + elapsedNanos1);
-
+            SmallBlock smallBlock = BlockUtil.getSmallBlock(chainId, block);
+            Map<NulsDigestData, Transaction> txMap = new HashMap<>(header.getTxCount());
+            block.getTxs().forEach(e -> txMap.put(e.getHash(), e));
+            CachedSmallBlock cachedSmallBlock = new CachedSmallBlock(null, smallBlock, txMap);
+            SmallBlockCacher.cacheSmallBlock(chainId, cachedSmallBlock);
+            SmallBlockCacher.setStatus(chainId, hash, BlockForwardEnum.COMPLETE);
             if (broadcast) {
                 broadcastBlock(chainId, block);
             }
             if (forward) {
                 forwardBlock(chainId, hash, null);
             }
-
+            long elapsedNanos1 = System.nanoTime() - startTime1;
+            commonLog.info("1. time-" + elapsedNanos1);
             //2.设置最新高度,如果失败则恢复上一个高度
             long startTime2 = System.nanoTime();
             boolean setHeight = blockStorageService.setLatestHeight(chainId, height);
