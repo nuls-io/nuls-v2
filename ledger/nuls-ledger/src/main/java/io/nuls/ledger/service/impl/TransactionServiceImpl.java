@@ -396,7 +396,7 @@ public class TransactionServiceImpl implements TransactionService {
             hadRoll = (hadRoll || accountStateService.rollUnconfirmTx(addressChainId, assetKey, rollNonce, txHash));
         }
         if (hadRoll) {
-            LoggerUtil.txUnconfirmedRollBackLog2(addressChainId).debug("hash={}", txHash);
+            LoggerUtil.txUnconfirmedRollBackLog(addressChainId).debug("####hash={}", txHash);
         }
         return true;
     }

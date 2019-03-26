@@ -10,6 +10,7 @@ import io.nuls.api.model.po.db.*;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.exception.NulsRuntimeException;
+import io.nuls.tools.log.Log;
 
 import java.math.BigInteger;
 import java.util.*;
@@ -90,7 +91,7 @@ public class SyncService {
 
         ApiCache apiCache = CacheManager.getCache(chainId);
         apiCache.setBestHeader(blockInfo.getHeader());
-        System.out.println(blockInfo.getHeader().getHeight() + "--------------");
+        Log.info(blockInfo.getHeader().getHeight() + "--------------");
         return true;
     }
 

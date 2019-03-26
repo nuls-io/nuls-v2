@@ -16,7 +16,7 @@
     "blockMaxSize":30000000,
     "assetsId":1,
     "chainId":2,
-    "seedNodes":"tNULSeBaMkrt4z9FYEkkR9D6choPVvQr94oYZp",
+    "seedNodes":"tNULSeBaMmdvMtiXETDsDzJZHZHgk4rghdiSin",
     "password":"nuls123456"
   },
   "moduleCode":"cs",

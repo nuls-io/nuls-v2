@@ -35,6 +35,7 @@ import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.core.annotation.Configuration;
 import io.nuls.tools.core.ioc.SpringLiteContext;
+import io.nuls.tools.log.Log;
 
 import java.util.List;
 
@@ -109,6 +110,7 @@ public class ApiModuleBootstrap extends RpcModule {
             initCfg();
 
         } catch (Exception e) {
+            Log.error(e);
             //LoggerUtil.logger.error("AccountBootsrap init error!");
             throw new RuntimeException(e);
         }
@@ -125,7 +127,7 @@ public class ApiModuleBootstrap extends RpcModule {
             server.startServer(ApiContext.listenerIp, ApiContext.rpcPort);
             return true;
         } catch (Exception e) {
-            e.printStackTrace();
+            Log.error(e);
             return false;
         }
     }
