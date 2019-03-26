@@ -140,7 +140,7 @@ fi
 MODULES_PATH=$MODULES_PATH/Nuls
 #模块公共依赖jar存放目录
 COMMON_LIBS_PATH=$MODULES_PATH/libs
-if [[ -z "${$IGNROEMVN}" ]]; then
+if [[ -z "${IGNROEMVN}" ]]; then
     if [ -d ${COMMON_LIBS_PATH} ]; then
         rm -r ${COMMON_LIBS_PATH}
     fi
