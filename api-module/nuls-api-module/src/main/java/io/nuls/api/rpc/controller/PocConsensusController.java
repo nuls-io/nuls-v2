@@ -165,23 +165,23 @@ public class PocConsensusController {
         if (agentInfo.getTotalPackingCount() != 0) {
             agentInfo.setLostRate(DoubleUtils.div(count, count + agentInfo.getTotalPackingCount()));
         }
-//
-//        List<PocRoundItem> itemList = apiCache.getCurrentRound().getItemList();
-//        PocRoundItem roundItem = null;
-//        if (null != itemList) {
-//            for (PocRoundItem item : itemList) {
-//                if (item.getPackingAddress().equals(agentInfo.getPackingAddress())) {
-//                    roundItem = item;
-//                    break;
-//                }
-//            }
-//        }
-//        if (null == roundItem) {
-//            agentInfo.setStatus(0);
-//        } else {
-//            agentInfo.setRoundPackingTime(apiCache.getCurrentRound().getStartTime() + roundItem.getOrder() * 10000);
-//            agentInfo.setStatus(1);
-//        }
+        ApiCache apiCache = CacheManager.getCache(chainId);
+        List<PocRoundItem> itemList = apiCache.getCurrentRound().getItemList();
+        PocRoundItem roundItem = null;
+        if (null != itemList) {
+            for (PocRoundItem item : itemList) {
+                if (item.getPackingAddress().equals(agentInfo.getPackingAddress())) {
+                    roundItem = item;
+                    break;
+                }
+            }
+        }
+        if (null == roundItem) {
+            agentInfo.setStatus(0);
+        } else {
+            agentInfo.setRoundPackingTime(apiCache.getCurrentRound().getStartTime() + roundItem.getOrder() * 10000);
+            agentInfo.setStatus(1);
+        }
 
         Result<AgentInfo> result = WalletRpcHandler.getAgentInfo(chainId, agentHash);
         if (result.isSuccess()) {
