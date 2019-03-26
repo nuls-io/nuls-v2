@@ -75,7 +75,7 @@ fi
 if [ -n "$LOGPATH" ];
 then
     LOGPATH="-Dlog.path=${LOGPATH}"
-    else
+else
     if [ ! -d ../logs ]; then
         mkdir ../logs
     fi
@@ -84,11 +84,11 @@ fi
 if [ -n "$DATAPATH" ];
 then
     DATAPATH="-DDataPath=${DATAPATH}"
-    else
-    if [ ! -d ../Modules/Nuls/data ]; then
-        mkdir ../Modules/Nuls/data
+else
+    if [ ! -d ../data ]; then
+        mkdir ../data
     fi
-    DATAPATH="-DDataPath=`get_fullpath ../Modules/Nuls/data`"
+    DATAPATH="-DDataPath=`get_fullpath ../data`"
 fi
 echo "log path : ${LOGPATH}"
 echo "data path : ${DATAPATH}"

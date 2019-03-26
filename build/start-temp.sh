@@ -1,12 +1,7 @@
 #!/bin/bash
 MODULE_PATH=$(cd `dirname $0`;pwd)
 cd "${MODULE_PATH}"
-LOGS_DIR="$MODULE_PATH/log"
-if [ ! -d $LOGS_DIR ]; then 
-    mkdir $LOGS_DIR
-fi
-START_DATE=`date +%Y%m%d%H%M%S`
-STDOUT_FILE=$LOGS_DIR/stdout.log
+
 
 APP_NAME="%APP_NAME%" # %APP_NAME 注入
 if [ -z "${APP_NAME}" ]; then
@@ -55,6 +50,7 @@ while [ ! -z $1 ] ; do
             config=$2;
             shift 2 ;;
         "--logpath")
+            LOGS_DIR="$2/$APP_NAME"
             logpath="-Dlog.path=$2/$APP_NAME";
             shift 2 ;;
         "--datapath")
@@ -66,6 +62,12 @@ while [ ! -z $1 ] ; do
         * ) shift
     esac
 done  
+
+if [ ! -d $LOGS_DIR ]; then
+    mkdir $LOGS_DIR
+fi
+START_DATE=`date +%Y%m%d%H%M%S`
+STDOUT_FILE=$LOGS_DIR/stdout.log
 
 checkLogDir(){
     if [ ! -d ${LOGS_DIR} ]; then

@@ -256,10 +256,10 @@ copyModuleNcfToModules(){
 	do
 		TEMP=$(echo $line|grep -Eo '\[.+\]')
 		if [ -n "$TEMP" ]; then
-		  #echo "set cfg domain ${TEMP}"
+#		  echo "set cfg domain ${TEMP}"
 		  cfgDomain=$TEMP
 		fi
-		if [ "${cfgDomain}" == "[JAVA]" -a ! -n "$TEMP" ]; 
+		if [ "${cfgDomain}" == "[JAVA]" -a ! -n "$TEMP" ];
 		then
 			pname=$(echo $line | awk -F '=' '{print $1}')
 			#pvalue=$(echo $line | awk -F '=' '{print $2}')
@@ -276,12 +276,13 @@ copyModuleNcfToModules(){
 							print r
 						}
 					')
-            if [ "${pname}" != "" ]; then
+            if [[ "${pname}" != "" ]]; then
 			    sedCommand+=" -e 's/%${pname}%/${pvalue}/g' "
 			fi
 			echo $line >> $moduleNcf
 		else
-			if [ "${cfgDomain}" != "[JAVA]" ]; then
+
+			if [[ "${cfgDomain}" != "[JAVA]" ]]; then
 				echo $line >> $moduleNcf
 			fi
 		fi
