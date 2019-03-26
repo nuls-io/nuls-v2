@@ -198,8 +198,10 @@ public class AnalysisHandler {
         agentInfo.init();
         agentInfo.setAgentAddress(AddressTool.getStringAddressByBytes(agent.getAgentAddress()));
         agentInfo.setPackingAddress(AddressTool.getStringAddressByBytes(agent.getPackingAddress()));
-        agentInfo.setRewardAddress(AddressTool.getStringAddressByBytes(agent.getPackingAddress()));
+        agentInfo.setRewardAddress(AddressTool.getStringAddressByBytes(agent.getRewardAddress()));
         agentInfo.setDeposit(agent.getDeposit());
+        agentInfo.setCreateTime(tx.getTime());
+
         agentInfo.setCommissionRate(agent.getCommissionRate());
         agentInfo.setTxHash(tx.getHash().getDigestHex());
         agentInfo.setAgentId(agentInfo.getTxHash().substring(agentInfo.getTxHash().length() - 8));

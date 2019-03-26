@@ -145,7 +145,7 @@ public class WalletRpcHandler {
             AgentInfo agentInfo = new AgentInfo();
             agentInfo.setCreditValue(Double.parseDouble(map.get("creditVal").toString()));
             agentInfo.setDepositCount((Integer) map.get("memberCount"));
-            agentInfo.setDepositCount((Integer) map.get("status"));
+            agentInfo.setStatus((Integer) map.get("status"));
 
             return Result.getSuccess(null).setData(agentInfo);
         } catch (NulsException e) {
