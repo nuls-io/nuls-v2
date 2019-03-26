@@ -35,6 +35,12 @@
             <groupId>org.glassfish.jersey.containers</groupId>
             <artifactId>jersey-container-grizzly2-http</artifactId>
             <version>${glassfish.jersey.version}</version>
+            <exclusions>
+                <exclusion>
+                    <artifactId>grizzly-http-server</artifactId>
+                    <groupId>org.glassfish.grizzly</groupId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.glassfish.jersey.inject</groupId>
@@ -49,24 +55,22 @@
         <dependency>
             <groupId>org.glassfish.grizzly</groupId>
             <artifactId>grizzly-http-server-multipart</artifactId>
-            <version>2.4.3</version>
+            <version>2.4.3.1</version>
         </dependency>
         <dependency>
             <groupId>org.glassfish.grizzly</groupId>
             <artifactId>grizzly-http-servlet</artifactId>
-            <version>2.4.3</version>
+            <version>2.4.3.1</version>
+        </dependency>
+        <dependency>
+            <groupId>org.glassfish.jersey.containers</groupId>
+            <artifactId>jersey-container-servlet-core</artifactId>
+            <version>${glassfish.jersey.version}</version>
         </dependency>
         <dependency>
             <groupId>org.glassfish.grizzly</groupId>
             <artifactId>grizzly-http-server</artifactId>
             <version>2.4.3.1</version>
-            <scope>compile</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.glassfish.jersey.containers</groupId>
-            <artifactId>jersey-container-servlet-core</artifactId>
-            <version>2.27</version>
-            <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>javax.servlet</groupId>

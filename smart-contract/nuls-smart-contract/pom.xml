@@ -27,6 +27,12 @@
             <groupId>io.nuls.nuls-tools</groupId>
             <artifactId>common-tools</artifactId>
             <version>${tool.version}</version>
+            <exclusions>
+                <exclusion>
+                    <artifactId>asm</artifactId>
+                    <groupId>org.ow2.asm</groupId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <!-- base-tools -->
         <dependency>

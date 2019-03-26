@@ -138,9 +138,10 @@ fi
 MODULES_PATH=$MODULES_PATH/Nuls
 #模块公共依赖jar存放目录
 COMMON_LIBS_PATH=$MODULES_PATH/libs
-if [ ! -d ${COMMON_LIBS_PATH} ]; then
-	mkdir ${COMMON_LIBS_PATH}
+if [ -d ${COMMON_LIBS_PATH} ]; then
+    rm -r ${COMMON_LIBS_PATH}
 fi
+	mkdir ${COMMON_LIBS_PATH}
 
 #模块数据库文件存放位置
 COMMON_DATA_PATH=$MODULES_PATH/data
@@ -202,7 +203,7 @@ getModuleItem(){
 							print r
 						}
 					')
-		if [ ${pname} == $1 ]; then
+		if [ "${pname}" == $1 ]; then
 			echo ${pvalue};
 			return 1;
 		fi
@@ -362,13 +363,16 @@ packageModule() {
 			echoRed "模块配置文件必须与pom.xml在同一个目录 : $(pwd)"
 			exit 0;
 		fi
-		doMvn "package" $1
-		checkModuleItem "APP_NAME" "$1"
-		checkModuleItem "VERSION" "$1"
-		checkModuleItem "MAIN_CLASS" "$1"
-		copyJarToModules $1
-		copyModuleNcfToModules $1
-		log "$1 SUCCESS"
+		managed=$(getModuleItem "Managed");
+		if [[ $managed != "-1" ]]; then
+		    doMvn "package" $1
+            checkModuleItem "APP_NAME" "$1"
+            checkModuleItem "VERSION" "$1"
+            checkModuleItem "MAIN_CLASS" "$1"
+            copyJarToModules $1
+            copyModuleNcfToModules $1
+            log "$1 SUCCESS"
+		fi
 		cd ..
 		return 0
 	fi
