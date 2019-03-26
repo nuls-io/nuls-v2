@@ -54,9 +54,18 @@ public class NwInfosPrintTask implements Runnable {
         LoggerUtil.NwInfosLog.info("");
         LoggerUtil.NwInfosLog.info("");
         LoggerUtil.NwInfosLog.info("BEGIN @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
+        printlnNwTime();
+        LoggerUtil.NwInfosLog.info("");
+        LoggerUtil.NwInfosLog.info("");
         printlnPeer();
+        LoggerUtil.NwInfosLog.info("");
+        LoggerUtil.NwInfosLog.info("");
         printlnMem();
+        LoggerUtil.NwInfosLog.info("");
+        LoggerUtil.NwInfosLog.info("");
         printlnProtocolMap();
+        LoggerUtil.NwInfosLog.info("");
+        LoggerUtil.NwInfosLog.info("");
         LoggerUtil.NwInfosLog.info("END @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
     }
     private void printlnNwTime() {
@@ -79,8 +88,6 @@ public class NwInfosPrintTask implements Runnable {
 
     private void printlnMem() {
 //       byte[] bys = new byte[1024*1024];//申请1M内存
-        LoggerUtil.NwInfosLog.info("");
-        LoggerUtil.NwInfosLog.info("");
         LoggerUtil.NwInfosLog.info("=================内存情况=============");
         LoggerUtil.NwInfosLog.debug("Java进程可以向操作系统申请到的最大内存:"+(Runtime.getRuntime().maxMemory())/(1024*1024)+"M");
         LoggerUtil.NwInfosLog.debug("Java进程空闲内存:"+(Runtime.getRuntime().freeMemory())/(1024*1024)+"M");
@@ -88,8 +95,6 @@ public class NwInfosPrintTask implements Runnable {
     }
 
     private void printlnPeer() {
-        LoggerUtil.NwInfosLog.info("");
-        LoggerUtil.NwInfosLog.info("");
         NodeGroupManager nodeGroupManager = NodeGroupManager.getInstance();
         List<NodeGroup> nodeGroupList = nodeGroupManager.getNodeGroups();
         for (NodeGroup nodeGroup : nodeGroupList) {
