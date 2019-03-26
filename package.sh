@@ -23,14 +23,14 @@ EOF
 
 #获取参数
 #输出目录
-MODULES_PATH="./NULS_2.0"
+MODULES_PATH="./NULS-Walltet-linux64-alpha1"
 #是否马上更新代码
 DOPULL=
 #是否生成mykernel模块
 DOMOCK=
 #更新代码的 git 分支
 GIT_BRANCH=
-while getopts pmhb:o:j:iJ: name
+while getopts pmhb:o:j:iJ:z name
 do
             case $name in
             p)	   DOPULL=1
@@ -351,7 +351,7 @@ packageModule() {
 	if [ ! -d $(pwd)/$1 ]; then
 		return 0
 	fi
-	if [ $(pwd) == "${PROJECT_PATH}/RELEASE" ]; then
+	if [ $(pwd) == "${RELEASE_PATH}" ]; then
 		return 0;
 	fi
 	cd $(pwd)/$1
@@ -422,7 +422,7 @@ fi
 
 if [ -n "${BUILDTAR}" ]; then
     log "============ build ${RELEASE_PATH}.tar.gz ==================="
-    tar -cjf "${RELEASE_PATH}.tar.gz" ${RELEASE_PATH}
+    tar -zcPf "${RELEASE_PATH}.tar.gz" ${RELEASE_PATH}
     log "============ build ${RELEASE_PATH}.tar.gz FINISH==================="
 fi
 

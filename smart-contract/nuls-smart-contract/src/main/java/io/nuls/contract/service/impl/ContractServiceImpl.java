@@ -54,6 +54,7 @@ import java.io.IOException;
 import java.math.BigInteger;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 
 import static io.nuls.contract.constant.ContractConstant.*;
 import static io.nuls.contract.util.ContractUtil.getFailed;
@@ -164,7 +165,7 @@ public class ContractServiceImpl implements ContractService {
             container.loadFutureList();
             // 多线程执行合约
             ContractWrapperTransaction wrapperTx = ContractUtil.parseContractTransaction(tx);
-            Result result = contractCaller.caller(chainId, container, batchExecutor, wrapperTx, preStateRoot);
+            Result result = contractCaller.callTx(chainId, container, batchExecutor, wrapperTx, preStateRoot);
             return result;
         } catch (InterruptedException e) {
             Log.error(e);
@@ -179,63 +180,43 @@ public class ContractServiceImpl implements ContractService {
     }
 
     @Override
-    public Result end(int chainId, long blockHeight) {
-
-        BatchInfo batchInfo;
+    public Result beforeEnd(int chainId, long blockHeight) {
         try {
-            batchInfo = contractHelper.getChain(chainId).getBatchInfo();
+            BatchInfo batchInfo = contractHelper.getChain(chainId).getBatchInfo();
             if (!batchInfo.hasBegan()) {
                 return getFailed();
             }
+            Result result = contractCaller.callBatchEnd(chainId, blockHeight);
+            return result;
+        } catch (Exception e) {
+            Log.error(e);
+            return getFailed();
+        }
+    }
+
+    @Override
+    public Result end(int chainId, long blockHeight) {
+
+        try {
+            BatchInfo batchInfo = contractHelper.getChain(chainId).getBatchInfo();
+            if (!batchInfo.hasBegan()) {
+                return getFailed();
+            }
+            Future<ContractPackageDto> future = batchInfo.getContractPackageDtoFuture();
+            // 等待before_end执行完成
+            future.get();
+            ContractPackageDto dto = batchInfo.getContractPackageDto();
+            if(dto == null) {
+                return getFailed();
+            }
             BlockHeader currentBlockHeader = batchInfo.getCurrentBlockHeader();
-            long blockTime = currentBlockHeader.getTime();
-
-            LinkedHashMap<String, ContractContainer> contractContainerMap = batchInfo.getContractContainerMap();
-            Collection<ContractContainer> containerList = contractContainerMap.values();
-            CallerResult callerResult = new CallerResult();
-            List<CallableResult> resultList = callerResult.getCallableResultList();
-            for (ContractContainer container : containerList) {
-                container.loadFutureList();
-                resultList.add(container.getCallableResult());
-            }
-
             ProgramExecutor batchExecutor = batchInfo.getBatchExecutor();
-            String preStateRoot = batchInfo.getPreStateRoot();
-            // 合约执行结果归类
-            AnalyzerResult analyzerResult = resultAnalyzer.analysis(callerResult.getCallableResultList());
-            // 重新执行冲突合约，处理失败合约的金额退还
-            List<ContractResult> contractResultList = resultHanlder.handleAnalyzerResult(chainId, batchExecutor, analyzerResult, preStateRoot);
-            // 归集合约内部转账交易
-            List<Transaction> resultTxList = new ArrayList<>();
-            for (ContractResult contractResult : contractResultList) {
-                Log.info("=======contractResult 排序时间 is {}", contractResult.getTxTime());
-                resultTxList.addAll(contractResult.getContractTransferList());
-            }
-            // 生成退还剩余Gas的交易
-            ContractReturnGasTransaction contractReturnGasTx = this.makeReturnGasTx(chainId, contractResultList, blockTime);
-            if (contractReturnGasTx != null) {
-                resultTxList.add(contractReturnGasTx);
-            }
-            Result<byte[]> batchExecuteResult = contractCaller.commitBatchExecute(batchExecutor);
+            Result<byte[]> batchExecuteResult = contractExecutor.commitBatchExecute(batchExecutor);
             byte[] stateRoot = batchExecuteResult.getData();
             currentBlockHeader.setStateRoot(stateRoot);
-
-            ContractPackageDto dto = new ContractPackageDto(stateRoot, resultTxList);
-            dto.makeContractResultMap(contractResultList);
-            contractHelper.getChain(chainId).getBatchInfo().setContractPackageDto(dto);
-
+            dto.setStateRoot(stateRoot);
             return getSuccess().setData(dto);
-        } catch (IOException e) {
-            Log.error(e);
-            return getFailed().setMsg(e.getMessage());
-        } catch (InterruptedException e) {
-            Log.error(e);
-            return getFailed().setMsg(e.getMessage());
-        } catch (ExecutionException e) {
-            Log.error(e);
-            return getFailed().setMsg(e.getMessage());
         } catch (Exception e) {
-            e.printStackTrace();
             Log.error(e);
             return getFailed().setMsg(e.getMessage());
         }
@@ -323,57 +304,6 @@ public class ContractServiceImpl implements ContractService {
             Log.error(e);
             return getFailed().setMsg(e.getMessage());
         }
-    }
-
-
-    private ContractReturnGasTransaction makeReturnGasTx(int chainId, List<ContractResult> resultList, long time) throws IOException {
-        int assetsId = contractHelper.getChain(chainId).getConfig().getAssetsId();
-        ContractWrapperTransaction wrapperTx;
-        ContractData contractData;
-        Map<ByteArrayWrapper, BigInteger> returnMap = new HashMap<>();
-        for (ContractResult contractResult : resultList) {
-            wrapperTx = contractResult.getTx();
-            // 终止合约不消耗Gas，跳过
-            if (wrapperTx.getType() == TX_TYPE_DELETE_CONTRACT) {
-                continue;
-            }
-            contractData = wrapperTx.getContractData();
-            long realGasUsed = contractResult.getGasUsed();
-            long txGasUsed = contractData.getGasLimit();
-            long returnGas;
-
-            BigInteger returnValue;
-            if (txGasUsed > realGasUsed) {
-                returnGas = txGasUsed - realGasUsed;
-                returnValue = BigInteger.valueOf(LongUtils.mul(returnGas, contractData.getPrice()));
-
-                ByteArrayWrapper sender = new ByteArrayWrapper(contractData.getSender());
-                BigInteger senderValue = returnMap.get(sender);
-                if (senderValue == null) {
-                    senderValue = returnValue;
-                } else {
-                    senderValue = senderValue.add(returnValue);
-                }
-                returnMap.put(sender, senderValue);
-            }
-        }
-        if (!returnMap.isEmpty()) {
-            CoinData coinData = new CoinData();
-            List<CoinTo> toList = coinData.getTo();
-            Set<Map.Entry<ByteArrayWrapper, BigInteger>> entries = returnMap.entrySet();
-            CoinTo returnCoin;
-            for (Map.Entry<ByteArrayWrapper, BigInteger> entry : entries) {
-                returnCoin = new CoinTo(entry.getKey().getBytes(), chainId, assetsId, entry.getValue(), 0L);
-                toList.add(returnCoin);
-            }
-            ContractReturnGasTransaction tx = new ContractReturnGasTransaction();
-            tx.setTime(time);
-            tx.setCoinData(coinData.serialize());
-            tx.setHash(NulsDigestData.calcDigestData(tx.serializeForHash()));
-            return tx;
-        }
-
-        return null;
     }
 
     @Override

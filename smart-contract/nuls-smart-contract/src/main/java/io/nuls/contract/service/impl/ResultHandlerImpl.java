@@ -129,7 +129,7 @@ public class ResultHandlerImpl implements ResultHanlder {
         // 重新执行合约
         List<ContractResult> list = analyzerResult.getReCallTxList();
         List<ContractWrapperTransaction> collect = list.stream().map(c -> c.getTx()).collect(Collectors.toList());
-        List<ContractResult> resultList = contractCaller.callerReCallTx(batchExecutor, collect, chainId, preStateRoot);
+        List<ContractResult> resultList = contractCaller.reCallTx(batchExecutor, collect, chainId, preStateRoot);
         return resultList;
     }
 }

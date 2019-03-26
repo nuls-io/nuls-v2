@@ -180,7 +180,7 @@ public class CallContractProcessor extends ContractBaseProcessor {
         if (null == form) {
             return CommandResult.getFailed("parameter error.");
         }
-        String password = CommandHelper.getPwd("Please Enter your account password");
+        String password = CommandHelper.getPwd();
         form.setArgs(getContractCallArgsJson());
         form.setPassword(password);
         Result<String> result = contractProvider.callContract(form);

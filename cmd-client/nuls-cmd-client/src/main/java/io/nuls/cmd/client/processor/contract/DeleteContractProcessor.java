@@ -76,7 +76,7 @@ public class DeleteContractProcessor extends ContractBaseProcessor {
         if (StringUtils.isBlank(sender)) {
             return CommandResult.getFailed(ErrorCodeConstants.PARAM_ERR.getMsg());
         }
-        String password = CommandHelper.getPwd("Please enter your account password");
+        String password = CommandHelper.getPwd();
         String contractAddress = args[2];
         Result<String> result = contractProvider.deleteContract(new DeleteContractReq(sender,contractAddress,password));
         if (result.isFailed()) {

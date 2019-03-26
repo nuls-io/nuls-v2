@@ -63,9 +63,15 @@ public class NetworkCall {
         if (now - latestGetTime > TxConstant.GETTIME_INTERVAL) {
             Map<String, Object> params = new HashMap<>(TxConstant.INIT_CAPACITY_8);
             params.put(Constants.VERSION_KEY_STR, TxConstant.RPC_VERSION);
-            HashMap hashMap = (HashMap) TransactionCall.request(ModuleE.NW.abbr, "nw_currentTimeMillis", params);
-            long time = Long.valueOf(hashMap.get("currentTimeMillis").toString());
-            offset = time - System.currentTimeMillis();
+            try {
+                HashMap hashMap = (HashMap) TransactionCall.request(ModuleE.NW.abbr, "nw_currentTimeMillis", params, TxConstant.GETTIME_INTERFACE_TIMEOUT);
+                long time = Long.valueOf(hashMap.get("currentTimeMillis").toString());
+                offset = time - System.currentTimeMillis();
+            } catch (NulsException e) {
+                e.printStackTrace();
+            } catch (NumberFormatException e) {
+                e.printStackTrace();
+            }
             latestGetTime = now;
         }
         return (System.currentTimeMillis() + offset);

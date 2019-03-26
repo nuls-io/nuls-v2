@@ -25,6 +25,7 @@ package io.nuls.contract.service.impl;
 
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.BlockHeader;
+import io.nuls.contract.callable.ContractBatchEndCallable;
 import io.nuls.contract.callable.ContractTxCallable;
 import io.nuls.contract.helper.ContractConflictChecker;
 import io.nuls.contract.helper.ContractHelper;
@@ -34,11 +35,11 @@ import io.nuls.contract.model.bo.BatchInfo;
 import io.nuls.contract.model.bo.ContractContainer;
 import io.nuls.contract.model.bo.ContractResult;
 import io.nuls.contract.model.bo.ContractWrapperTransaction;
+import io.nuls.contract.model.dto.ContractPackageDto;
 import io.nuls.contract.model.txdata.ContractData;
 import io.nuls.contract.rpc.call.BlockCall;
 import io.nuls.contract.service.ContractCaller;
 import io.nuls.contract.service.ContractExecutor;
-import io.nuls.contract.util.ContractUtil;
 import io.nuls.contract.util.Log;
 import io.nuls.contract.vm.program.ProgramExecutor;
 import io.nuls.tools.basic.Result;
@@ -62,7 +63,8 @@ import static io.nuls.contract.util.ContractUtil.*;
 @Component
 public class ContractCallerImpl implements ContractCaller {
 
-    private static final ExecutorService EXECUTOR_SERVICE = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors() * 2);
+    private static final ExecutorService TX_EXECUTOR_SERVICE = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors() * 2);
+    private static final ExecutorService BATCH_END_SERVICE = Executors.newSingleThreadExecutor();
 
     @Autowired
     private ContractExecutor contractExecutor;
@@ -74,7 +76,7 @@ public class ContractCallerImpl implements ContractCaller {
     private ContractTransferHandler contractTransferHandler;
 
     @Override
-    public Result caller(int chainId, ContractContainer container, ProgramExecutor batchExecutor, ContractWrapperTransaction tx, String preStateRoot) {
+    public Result callTx(int chainId, ContractContainer container, ProgramExecutor batchExecutor, ContractWrapperTransaction tx, String preStateRoot) {
 
         try {
 
@@ -91,8 +93,8 @@ public class ContractCallerImpl implements ContractCaller {
             Log.info("=====pierre======latest block header height is {}", latestBlockHeader.getHeight());
             ContractTxCallable txCallable = new ContractTxCallable(chainId, blockTime, batchExecutor, contract, tx, lastestHeight, preStateRoot, checker, container);
 
-            Future<ContractResult> submit = EXECUTOR_SERVICE.submit(txCallable);
-            container.getFutureList().add(submit);
+            Future<ContractResult> contractResultFuture = TX_EXECUTOR_SERVICE.submit(txCallable);
+            container.getFutureList().add(contractResultFuture);
 
             return getSuccess();
         } catch (Exception e) {
@@ -102,7 +104,22 @@ public class ContractCallerImpl implements ContractCaller {
     }
 
     @Override
-    public List<ContractResult> callerReCallTx(ProgramExecutor batchExecutor, List<ContractWrapperTransaction> reCallTxList, int chainId, String preStateRoot) {
+    public Result callBatchEnd(int chainId, long blockHeight) {
+        try {
+            Log.info("=====pierre======batch before end blockHeight is {}", blockHeight);
+            BatchInfo batchInfo = contractHelper.getChain(chainId).getBatchInfo();
+            ContractBatchEndCallable callable = new ContractBatchEndCallable(chainId, blockHeight);
+            Future<ContractPackageDto> contractPackageDtoFuture = BATCH_END_SERVICE.submit(callable);
+            batchInfo.setContractPackageDtoFuture(contractPackageDtoFuture);
+            return getSuccess();
+        } catch (Exception e) {
+            Log.error(e);
+            return getFailed();
+        }
+    }
+
+    @Override
+    public List<ContractResult> reCallTx(ProgramExecutor batchExecutor, List<ContractWrapperTransaction> reCallTxList, int chainId, String preStateRoot) {
         BlockHeader currentBlockHeader = contractHelper.getBatchInfoCurrentBlockHeader(chainId);
         long blockTime = currentBlockHeader.getTime();
         long lastestHeight = currentBlockHeader.getHeight() - 1;
@@ -125,16 +142,6 @@ public class ContractCallerImpl implements ContractCaller {
             }
         }
         return resultList;
-    }
-
-    @Override
-    public Result<byte[]> commitBatchExecute(ProgramExecutor executor) {
-        if (executor == null) {
-            return ContractUtil.getSuccess();
-        }
-        executor.commit();
-        byte[] stateRoot = executor.getRoot();
-        return ContractUtil.getSuccess().setData(stateRoot);
     }
 
 }

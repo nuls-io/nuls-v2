@@ -69,10 +69,10 @@ public class TransferToContractProcessor extends ContractBaseProcessor {
     @Override
     public boolean argsValidate(String[] args) {
         int length = args.length;
-        if (length <5) {
+        if (length <4) {
             return false;
         }
-        if (length >6) {
+        if (length >5) {
             return false;
         }
         return true;
@@ -96,7 +96,7 @@ public class TransferToContractProcessor extends ContractBaseProcessor {
         if (StringUtils.isBlank(address)) {
             return CommandResult.getFailed(ErrorCodeConstants.PARAM_ERR.getMsg());
         }
-        String password = CommandHelper.getPwd("Please enter your account password");
+        String password = CommandHelper.getPwd();
         String toAddress = args[2];
         BigInteger amount = Na.parseNuls(args[3]).toBigInteger();
         TransferToContractReq req = new TransferToContractReq(address,toAddress,amount,password,null);

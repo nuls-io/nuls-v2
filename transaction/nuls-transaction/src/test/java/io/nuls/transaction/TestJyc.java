@@ -90,8 +90,7 @@ public class TestJyc {
      */
     @Test
     public void importSeed() {
-//        importPriKey("b54db432bba7e13a6c4a28f65b925b18e63bcb79143f7b894fa735d5d3d09db5", password);//种子出块地址 tNULSeBaMkrt4z9FYEkkR9D6choPVvQr94oYZp
-        importPriKey("188b255c5a6d58d1eed6f57272a22420447c3d922d5765ebb547bc6624787d9f", password);//tNULSeBaMoGr2RkLZPfJeS5dFzZeNj1oXmaYNe
+//        importPriKey("7ea2077a48bdc98dd90064b77210b66c9a6e25b2bd3ceba57cfbaaf3700ff99d", password);//种子出块地址 tNULSeBaMmdvMtiXETDsDzJZHZHgk4rghdiSin
         importPriKey("477059f40708313626cccd26f276646e4466032cabceccbf571a7c46f954eb75", password);//tNULSeBaMnrs6JKrCy6TQdzYJZkMZJDng7QAsD
     }
 
@@ -529,7 +528,7 @@ public class TestJyc {
             Log.debug(address23 + "-----balance:{}", balance);
         }
         int total = 100_000_000;
-        int count = 10;
+        int count = 100;
         List<String> accountList;
         Log.debug("##################################################");
         {
@@ -587,10 +586,10 @@ public class TestJyc {
                 assertTrue(response.isSuccess());
                 HashMap result = (HashMap) (((HashMap) response.getResponseData()).get("ac_transfer"));
                 Log.debug(i + "---transfer from {} to {}, hash:{}", address23, account, result.get("value"));
-                Thread.sleep(1000);
+                Thread.sleep(100);
             }
         }
-        Thread.sleep(10000);
+        Thread.sleep(60000);
         List<String> hashList = new ArrayList<>();
         int intervel = 200;
         {

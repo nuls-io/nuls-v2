@@ -127,7 +127,9 @@ public class ApiModuleBootstrap extends RpcModule {
             server.startServer(ApiContext.listenerIp, ApiContext.rpcPort);
             return true;
         } catch (Exception e) {
+            Log.error("------------------------api module启动失败---------------------------");
             Log.error(e);
+            System.exit(-1);
             return false;
         }
     }

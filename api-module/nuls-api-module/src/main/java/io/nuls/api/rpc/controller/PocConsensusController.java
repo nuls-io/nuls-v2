@@ -165,6 +165,7 @@ public class PocConsensusController {
         if (agentInfo.getTotalPackingCount() != 0) {
             agentInfo.setLostRate(DoubleUtils.div(count, count + agentInfo.getTotalPackingCount()));
         }
+
         ApiCache apiCache = CacheManager.getCache(chainId);
         List<PocRoundItem> itemList = apiCache.getCurrentRound().getItemList();
         PocRoundItem roundItem = null;

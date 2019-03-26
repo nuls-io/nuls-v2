@@ -127,7 +127,11 @@ public class ContractCmd extends BaseCmd {
         try {
             Integer chainId = (Integer) params.get("chainId");
             Long blockHeight = Long.parseLong(params.get("blockHeight").toString());
-
+            Result result = contractService.beforeEnd(chainId, blockHeight);
+            Log.info("=====pierre=====[before] end contract batch, result is {}", result.toString());
+            if (result.isFailed()) {
+                return wrapperFailed(result);
+            }
             return success();
         } catch (Exception e) {
             Log.error(e);
