@@ -9,6 +9,7 @@ import io.nuls.api.model.po.db.ChainInfo;
 import io.nuls.tools.basic.Result;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
+import io.nuls.tools.log.Log;
 
 import java.math.BigInteger;
 import java.util.List;
@@ -43,6 +44,7 @@ public class DBTableService {
     }
 
     public void addDefaultChain() {
+        Log.info("------------------addDefaultChain--------{defaultChainId:" + ApiContext.defaultChainId + ",defaultAssetId:" + ApiContext.defaultAssetId);
         addChain(ApiContext.defaultChainId, ApiContext.defaultAssetId, "NULS");
     }
 
