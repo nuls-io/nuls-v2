@@ -217,7 +217,7 @@ public class TxValidator {
             throw new NulsException(ConsensusErrorCode.COMMISSION_RATE_OUT_OF_RANGE);
         }
         BigInteger deposit = agent.getDeposit();
-        if(deposit.compareTo(chain.getConfig().getDepositMin())<0 && deposit.compareTo(chain.getConfig().getDepositMax())>0){
+        if(deposit.compareTo(chain.getConfig().getDepositMin())<0 || deposit.compareTo(chain.getConfig().getDepositMax())>0){
             throw new NulsException(ConsensusErrorCode.DEPOSIT_OUT_OF_RANGE);
         }
         CoinData coinData = new CoinData();
