@@ -86,7 +86,7 @@ public class TaskManager extends BaseManager {
         connectTasks();
         scheduleGroupStatusMonitor();
         timeServiceThreadStart();
-        testThread();
+//        testThread();
     }
 
     private void connectTasks() {
