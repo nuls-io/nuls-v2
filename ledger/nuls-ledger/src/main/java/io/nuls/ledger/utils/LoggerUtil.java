@@ -46,7 +46,6 @@ public class LoggerUtil {
     public static final String LOGGER_KEY3 = "ld_txRb";
     public static final String LOGGER_KEY4 = "ld_txUncfRb";
     public static final String LOGGER_KEY5 = "ld_txAmount";
-    public static final String LOGGER_KEY6 = "ld_txUncfRb2";
 
     public static NulsLogger logger = LoggerBuilder.getLogger("./ld", LOGGER_KEY1, Level.ALL);
 //    public static NulsLogger txCommitLog = LoggerBuilder.getLogger("./ld", LOGGER_KEY2, Level.ALL);
@@ -90,13 +89,6 @@ public class LoggerUtil {
         return loggerMap.get(LOGGER_KEY5+chainId);
     }
 
-    public static NulsLogger txUnconfirmedRollBackLog2(int chainId) {
-        if(null == loggerMap.get(LOGGER_KEY6+chainId)){
-            createLogger(chainId);
-        }
-        return loggerMap.get(LOGGER_KEY6+chainId);
-    }
-
     public static void createLogger(int chainId) {
         String folderName = "./ld/" + chainId;
         loggerMap.put(LOGGER_KEY1+chainId, LoggerBuilder.getLogger(folderName, "ld", Level.ALL));
@@ -104,7 +96,6 @@ public class LoggerUtil {
         loggerMap.put(LOGGER_KEY3+chainId, LoggerBuilder.getLogger(folderName, "txRb", Level.ALL));
         loggerMap.put(LOGGER_KEY4+chainId, LoggerBuilder.getLogger(folderName, "txUncfRb", Level.ALL));
         loggerMap.put(LOGGER_KEY5+chainId, LoggerBuilder.getLogger(folderName, "txAmount", Level.ALL));
-        loggerMap.put(LOGGER_KEY6+chainId, LoggerBuilder.getLogger(folderName, "txUncfRb2", Level.ALL));
     }
 
 }
