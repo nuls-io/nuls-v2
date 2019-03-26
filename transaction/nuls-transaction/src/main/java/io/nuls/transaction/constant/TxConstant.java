@@ -49,6 +49,8 @@ public interface TxConstant {
     /** 获取网络时间间隔*/
     long GETTIME_INTERVAL = 30000;
 
+    long GETTIME_INTERFACE_TIMEOUT = 200;
+
 
     String LOG_TX = "tx/txChain";
     String LOG_NEW_TX_PROCESS = "tx/newTxProcess";
