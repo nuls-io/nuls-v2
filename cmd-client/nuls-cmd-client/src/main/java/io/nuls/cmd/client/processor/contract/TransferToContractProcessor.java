@@ -69,10 +69,10 @@ public class TransferToContractProcessor extends ContractBaseProcessor {
     @Override
     public boolean argsValidate(String[] args) {
         int length = args.length;
-        if (length <6) {
+        if (length <5) {
             return false;
         }
-        if (length >7) {
+        if (length >6) {
             return false;
         }
         return true;
