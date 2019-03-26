@@ -99,12 +99,16 @@ public class BlockValidator {
       }
       MeetingRound currentRound = roundManager.getCurrentRound(chain);
       boolean hasChangeRound = false;
+
       if(currentRound == null || extendsData.getRoundIndex() < currentRound.getIndex()){
          MeetingRound round = roundManager.getRoundByIndex(chain, extendsData.getRoundIndex());
          if (round != null) {
             currentRound = round;
          }else{
             currentRound = roundManager.getRound(chain,extendsData,false);
+         }
+         if(chain.getRoundList().isEmpty()){
+            chain.getRoundList().add(currentRound);
          }
       }
       else if(extendsData.getRoundIndex() > currentRound.getIndex()){
