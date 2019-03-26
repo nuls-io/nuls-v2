@@ -37,6 +37,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Set;
+import java.util.concurrent.Future;
 
 /**
  * @author: PierreLuo
@@ -94,6 +95,11 @@ public class BatchInfo {
      * 合约执行冲突检测器
      */
     private ContractConflictChecker checker;
+
+    /**
+     * 打包异步执行结果
+     */
+    private Future<ContractPackageDto> contractPackageDtoFuture;
 
 
     public BatchInfo() {

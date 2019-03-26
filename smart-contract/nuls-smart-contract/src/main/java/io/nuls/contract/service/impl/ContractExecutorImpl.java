@@ -29,7 +29,9 @@ import io.nuls.contract.helper.ContractHelper;
 import io.nuls.contract.model.bo.ContractResult;
 import io.nuls.contract.model.txdata.ContractData;
 import io.nuls.contract.service.ContractExecutor;
+import io.nuls.contract.util.ContractUtil;
 import io.nuls.contract.vm.program.*;
+import io.nuls.tools.basic.Result;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
 import lombok.Getter;
@@ -201,6 +203,16 @@ public class ContractExecutorImpl implements ContractExecutor {
         }
         ProgramExecutor executor = contractHelper.getProgramExecutor(chainId).begin(stateRoot);
         return executor;
+    }
+
+    @Override
+    public Result<byte[]> commitBatchExecute(ProgramExecutor executor) {
+        if (executor == null) {
+            return ContractUtil.getSuccess();
+        }
+        executor.commit();
+        byte[] stateRoot = executor.getRoot();
+        return ContractUtil.getSuccess().setData(stateRoot);
     }
 
 }
