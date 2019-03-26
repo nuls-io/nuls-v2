@@ -529,7 +529,7 @@ public class TestJyc {
             Log.debug(address23 + "-----balance:{}", balance);
         }
         int total = 100_000_000;
-        int count = 5;
+        int count = 10;
         List<String> accountList;
         Log.debug("##################################################");
         {
@@ -592,7 +592,7 @@ public class TestJyc {
         }
         Thread.sleep(10000);
         List<String> hashList = new ArrayList<>();
-        int intervel = 20;
+        int intervel = 200;
         {
             Log.debug("3.##########" + count + " accounts Transfer to each other##########");
             //100个地址之间互相转账
@@ -632,9 +632,9 @@ public class TestJyc {
                     Log.debug("transfer from {} to {}, hash:{}", from, to, hash);
                 }
                 Log.debug("##########" + j + " round end##########");
-                Thread.sleep(intervel * 1000);
+                Thread.sleep(intervel * 100);
                 intervel--;
-                intervel = intervel < 1 ? 20 : intervel;
+                intervel = intervel < 1 ? 200 : intervel;
             }
         }
         Thread.sleep(100000);

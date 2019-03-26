@@ -59,7 +59,7 @@ public class TestModule extends RpcModule {
 
     @Override
     public Module moduleInfo() {
-        return new Module("test","1,0");
+        return new Module("test","1.0");
     }
 
     @Override
