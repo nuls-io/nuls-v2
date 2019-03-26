@@ -141,6 +141,10 @@ public class ConsensusServiceImpl implements ConsensusService {
             //4.交易签名
             String priKey = (String) callResult.get("priKey");
             CallMethodUtils.transactionSignature(dto.getChainId(), dto.getAgentAddress(), dto.getPassword(), priKey, tx);
+            boolean validResult = validatorManager.validateTx(chain, tx);
+            if (!validResult) {
+                return Result.getFailed(ConsensusErrorCode.TX_DATA_VALIDATION_ERROR);
+            }
             CallMethodUtils.sendTx(chain,HexUtil.encode(tx.serialize()));
             Map<String, Object> result = new HashMap<>(2);
             result.put("txHash", tx.getHash().getDigestHex());
@@ -209,6 +213,10 @@ public class ConsensusServiceImpl implements ConsensusService {
             //交易签名
             String priKey = (String) callResult.get("priKey");
             CallMethodUtils.transactionSignature(dto.getChainId(), dto.getAddress(), dto.getPassword(), priKey, tx);
+            boolean validResult = validatorManager.validateTx(chain, tx);
+            if (!validResult) {
+                return Result.getFailed(ConsensusErrorCode.TX_DATA_VALIDATION_ERROR);
+            }
             CallMethodUtils.sendTx(chain,HexUtil.encode(tx.serialize()));
             Map<String, Object> result = new HashMap<>(ConsensusConstant.INIT_CAPACITY);
             result.put("txHash", tx.getHash().getDigestHex());
@@ -264,6 +272,10 @@ public class ConsensusServiceImpl implements ConsensusService {
             //交易签名
             String priKey = (String) callResult.get("priKey");
             CallMethodUtils.transactionSignature(dto.getChainId(), dto.getAddress(), dto.getPassword(), priKey, tx);
+            boolean validResult = validatorManager.validateTx(chain, tx);
+            if (!validResult) {
+                return Result.getFailed(ConsensusErrorCode.TX_DATA_VALIDATION_ERROR);
+            }
             CallMethodUtils.sendTx(chain,HexUtil.encode(tx.serialize()));
             Map<String, Object> result = new HashMap<>(ConsensusConstant.INIT_CAPACITY);
             result.put("txHash", tx.getHash().getDigestHex());
@@ -330,6 +342,10 @@ public class ConsensusServiceImpl implements ConsensusService {
             //交易签名
             String priKey = (String) callResult.get("priKey");
             CallMethodUtils.transactionSignature(dto.getChainId(), dto.getAddress(), dto.getPassword(), priKey, cancelDepositTransaction);
+            boolean validResult = validatorManager.validateTx(chain, cancelDepositTransaction);
+            if (!validResult) {
+                return Result.getFailed(ConsensusErrorCode.TX_DATA_VALIDATION_ERROR);
+            }
             CallMethodUtils.sendTx(chain,HexUtil.encode(cancelDepositTransaction.serialize()));
             Map<String, Object> result = new HashMap<>(ConsensusConstant.INIT_CAPACITY);
             result.put("txHash", cancelDepositTransaction.getHash().getDigestHex());

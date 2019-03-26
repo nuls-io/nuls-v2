@@ -765,7 +765,7 @@ public class PunishManager {
         int deleteIndex = 1;
         int chainId = chain.getConfig().getChainId();
         for (byte[] address : punishData.getAddressList()) {
-            boolean result = punishStorageService.delete(getPoKey(address, PunishType.YELLOW.getCode(), blockHeight, deleteIndex++),chainId);
+            boolean result = punishStorageService.delete(getPoKey(address, PunishType.YELLOW.getCode(), blockHeight, deleteIndex),chainId);
             if (!result) {
                 for (PunishLogPo po : deletedList) {
                     punishStorageService.save(po,chainId);
@@ -782,6 +782,7 @@ public class PunishManager {
                 po.setType(PunishType.YELLOW.getCode());
                 deletedList.add(po);
             }
+            deleteIndex++;
         }
         chain.getYellowPunishList().removeAll(deletedList);
         return true;
