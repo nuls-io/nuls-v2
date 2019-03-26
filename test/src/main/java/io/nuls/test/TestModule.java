@@ -47,13 +47,13 @@ public class TestModule extends RpcModule {
     @Override
     public Module[] getDependencies() {
         return new Module[]{
-//                new Module(ModuleE.NW.abbr,"1.0"),
-//                new Module(ModuleE.BL.abbr,"1.0"),
-//                new Module(ModuleE.SC.abbr,"1.0"),
-//                new Module(ModuleE.AC.abbr,"1.0"),
-//                new Module(ModuleE.TX.abbr,"1.0"),
-//                new Module(ModuleE.LG.abbr,"1.0"),
-//                new Module(ModuleE.CS.abbr,"1.0")
+                new Module(ModuleE.NW.abbr,"1.0"),
+                new Module(ModuleE.BL.abbr,"1.0"),
+                new Module(ModuleE.SC.abbr,"1.0"),
+                new Module(ModuleE.AC.abbr,"1.0"),
+                new Module(ModuleE.TX.abbr,"1.0"),
+                new Module(ModuleE.LG.abbr,"1.0"),
+                new Module(ModuleE.CS.abbr,"1.0")
         };
     }
 
@@ -65,6 +65,7 @@ public class TestModule extends RpcModule {
     @Override
     public boolean doStart()
     {
+        log.info("等待依赖模块准备就绪");
         return true;
     }
 
@@ -85,6 +86,10 @@ public class TestModule extends RpcModule {
             Utils.success("outCount:"+networkInfo.getData().getOutCount());
             Utils.success("nodes:" + networkProvider.getNodes().getList().toString());
             Utils.success("=".repeat(100));
+            if(networkProvider.getNodes().getList().isEmpty()){
+                log.error("网络节点数量为0，不能进行测试");
+                System.exit(0);
+            }
             System.out.println();
             System.out.println();
             AtomicBoolean isSuccess = new AtomicBoolean(true);
