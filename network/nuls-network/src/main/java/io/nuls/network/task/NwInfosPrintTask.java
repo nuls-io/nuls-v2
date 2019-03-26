@@ -50,6 +50,9 @@ public class NwInfosPrintTask implements Runnable {
     @Override
     public void run() {
         //test
+        LoggerUtil.NwInfosLog.info("");
+        LoggerUtil.NwInfosLog.info("");
+        LoggerUtil.NwInfosLog.info("");
         LoggerUtil.NwInfosLog.info("BEGIN @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
         printlnPeer();
         printlnMem();
@@ -76,19 +79,24 @@ public class NwInfosPrintTask implements Runnable {
 
     private void printlnMem() {
 //       byte[] bys = new byte[1024*1024];//申请1M内存
+        LoggerUtil.NwInfosLog.info("");
+        LoggerUtil.NwInfosLog.info("");
+        LoggerUtil.NwInfosLog.info("=================内存情况=============");
         LoggerUtil.NwInfosLog.debug("Java进程可以向操作系统申请到的最大内存:"+(Runtime.getRuntime().maxMemory())/(1024*1024)+"M");
         LoggerUtil.NwInfosLog.debug("Java进程空闲内存:"+(Runtime.getRuntime().freeMemory())/(1024*1024)+"M");
         LoggerUtil.NwInfosLog.debug("Java进程现在从操作系统那里已经申请了内存:"+(Runtime.getRuntime().totalMemory())/(1024*1024)+"M");
     }
 
     private void printlnPeer() {
+        LoggerUtil.NwInfosLog.info("");
+        LoggerUtil.NwInfosLog.info("");
         NodeGroupManager nodeGroupManager = NodeGroupManager.getInstance();
         List<NodeGroup> nodeGroupList = nodeGroupManager.getNodeGroups();
         for (NodeGroup nodeGroup : nodeGroupList) {
             NodesContainer localNodesContainer = nodeGroup.getLocalNetNodeContainer();
             NodesContainer crossNodesContainer = nodeGroup.getCrossNodeContainer();
-            LoggerUtil.NwInfosLog.info("##################################################################################");
-            Log.info("@@@@@@@@@@@ chainId={},magicNumber={},localNetStatus(本地网络)={},crossNetStatus(跨链)={}",
+            LoggerUtil.NwInfosLog.info("######################################################################");
+            LoggerUtil.NwInfosLog.info("@@@@@@@@@@@ chainId={},magicNumber={},localNetStatus(本地网络)={},crossNetStatus(跨链)={}",
                     nodeGroup.getChainId(), nodeGroup.getMagicNumber(),nodeGroup.getLocalStatus(),nodeGroup.getCrossNodeContainer());
 
             Collection<Node> c1 = localNodesContainer.getConnectedNodes().values();
@@ -117,7 +125,7 @@ public class NwInfosPrintTask implements Runnable {
             for (Node n : c5) {
                 LoggerUtil.NwInfosLog.info("**{},FailCount = {},info:blockHash={},blockHeight={},version={}", n.getId(), n.getFailCount(), n.getBlockHash(), n.getBlockHeight(), n.getVersion());
             }
-            LoggerUtil.NwInfosLog.info("==================================================================================================");
+            LoggerUtil.NwInfosLog.info("======================================================================");
 
 
             Collection<Node> d1 = crossNodesContainer.getConnectedNodes().values();
@@ -146,8 +154,9 @@ public class NwInfosPrintTask implements Runnable {
             for (Node n : d5) {
                 LoggerUtil.NwInfosLog.info("*****failed:{},FailCount = {},info:blockHash={},blockHeight={},version={}", n.getId(), n.getFailCount(), n.getBlockHash(), n.getBlockHeight(), n.getVersion());
             }
-            LoggerUtil.NwInfosLog.info("@@@@@@@@@@@ @@@@@@@@@@@ @@@@@@@@@@@ @@@@@@@@@@@ end============================");
-            LoggerUtil.NwInfosLog.info("##################################################################################");
+            LoggerUtil.NwInfosLog.info("@@@@@@@@@@@ @@@@@@@@@@@ @@@@@@@@@@@ @@@@@@@@@@@ end==============");
+            LoggerUtil.NwInfosLog.info("#####################################################################");
+            LoggerUtil.NwInfosLog.info("");
         }
     }
 }
