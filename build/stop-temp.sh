@@ -4,7 +4,7 @@ APP_NAME="%APP_NAME%"
 KILL_WAIT_COUNT=120
 MODULE_PATH=$(cd `dirname $0`;pwd)
 LOGS_DIR="$MODULE_PATH/log"
-STDOUT_FILE=$LOGS_DIR/stdout.log
+#STDOUT_FILE=$LOGS_DIR/stdout.log
 APP_PID=`ps -ef|grep -w "name=${APP_NAME} "|grep -v grep|awk '{print $2}'`
 APP=0
 echoRed() { echo $'\e[0;31m'$1$'\e[0m'; }
@@ -12,7 +12,7 @@ echoGreen() { echo $'\e[0;32m'$1$'\e[0m'; }
 echoYellow() { echo $'\e[0;33m'$1$'\e[0m'; }
 log(){
     now=`date "+%Y-%m-%d %H:%M:%S"`
-    echo "${now}    $@" >> STDOUT_FILE
+    echo "${now}    $@"
     echoGreen "$@"
 }
 isRunning() {

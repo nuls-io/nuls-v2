@@ -14,6 +14,7 @@ help()
     		-j JAVA_HOME
     		-J 输出的jvm虚拟机目录，脚本将会把这个目录复制到程序依赖中
     		-i 跳过mvn打包
+    		-z 生成压缩包
     Author: zlj
 EOF
     exit 0
@@ -22,7 +23,7 @@ EOF
 
 #获取参数
 #输出目录
-MODULES_PATH="./RELEASE"
+MODULES_PATH="./NULS_2.0"
 #是否马上更新代码
 DOPULL=
 #是否生成mykernel模块
@@ -43,6 +44,7 @@ do
 			j)     JAVA_HOME="$OPTARG";;
 			i)     IGNROEMVN="1";;
 			J)     JRE_HOME="$OPTARG";;
+			z)     BUILDTAR="1";;
             ?)     exit 2;;
            esac
 done
@@ -417,9 +419,12 @@ if [ -n "${DOMOCK}" ]; then
 	cp "${BUILD_PATH}/cmd.sh" "${MODULES_BIN_PATH}/"
 	chmod u+x "${MODULES_BIN_PATH}/cmd.sh"
 fi
-log "============ build ${RELEASE_PATH}.tar.gz ==================="
-tar -cjf "${RELEASE_PATH}.tar.gz" ${RELEASE_PATH}
-log "============ build ${RELEASE_PATH}.tar.gz FINISH==================="
+
+if [ -n "${BUILDTAR}" ]; then
+    log "============ build ${RELEASE_PATH}.tar.gz ==================="
+    tar -cjf "${RELEASE_PATH}.tar.gz" ${RELEASE_PATH}
+    log "============ build ${RELEASE_PATH}.tar.gz FINISH==================="
+fi
 
 
 
