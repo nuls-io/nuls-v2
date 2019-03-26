@@ -1,10 +1,8 @@
 package io.nuls.api.provider.consensus;
 
-import io.nuls.api.provider.BaseReq;
 import io.nuls.api.provider.BaseRpcService;
 import io.nuls.api.provider.Provider;
 import io.nuls.api.provider.Result;
-import io.nuls.api.provider.account.facade.AccountInfo;
 import io.nuls.api.provider.consensus.facade.*;
 import io.nuls.rpc.model.ModuleE;
 import io.nuls.tools.log.Log;
