@@ -26,7 +26,7 @@ public class AliasService {
         for (ApiCache apiCache : CacheManager.getApiCaches().values()) {
             List<Document> documentList = mongoDBService.query(ALIAS_TABLE + apiCache.getChainInfo().getChainId());
             for (Document document : documentList) {
-                AliasInfo aliasInfo = DocumentTransferTool.toInfo(document, "alias", AliasInfo.class);
+                AliasInfo aliasInfo = DocumentTransferTool.toInfo(document, "address", AliasInfo.class);
                 apiCache.addAlias(aliasInfo);
             }
         }
@@ -36,11 +36,11 @@ public class AliasService {
         ApiCache apiCache = CacheManager.getCache(chainId);
         AliasInfo aliasInfo = apiCache.getAlias(address);
         if (aliasInfo == null) {
-            Document document = mongoDBService.findOne(ALIAS_TABLE + chainId, Filters.eq("address", address));
+            Document document = mongoDBService.findOne(ALIAS_TABLE + chainId, Filters.eq("_id", address));
             if (document == null) {
                 return null;
             }
-            aliasInfo = DocumentTransferTool.toInfo(document, "alias", AliasInfo.class);
+            aliasInfo = DocumentTransferTool.toInfo(document, "address", AliasInfo.class);
 
             apiCache.addAlias(aliasInfo);
         }
@@ -51,11 +51,11 @@ public class AliasService {
         ApiCache apiCache = CacheManager.getCache(chainId);
         AliasInfo aliasInfo = apiCache.getAlias(alias);
         if (aliasInfo == null) {
-            Document document = mongoDBService.findOne(ALIAS_TABLE + chainId, Filters.eq("_id", alias));
+            Document document = mongoDBService.findOne(ALIAS_TABLE + chainId, Filters.eq("alias", alias));
             if (document == null) {
                 return null;
             }
-            aliasInfo = DocumentTransferTool.toInfo(document, "alias", AliasInfo.class);
+            aliasInfo = DocumentTransferTool.toInfo(document, "address", AliasInfo.class);
 
             apiCache.addAlias(aliasInfo);
         }

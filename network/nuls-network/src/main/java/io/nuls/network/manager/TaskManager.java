@@ -86,7 +86,7 @@ public class TaskManager extends BaseManager {
         connectTasks();
         scheduleGroupStatusMonitor();
         timeServiceThreadStart();
-        testThread();
+        nwInfosThread();
     }
 
     private void connectTasks() {
@@ -97,9 +97,9 @@ public class TaskManager extends BaseManager {
 
     }
 
-    private void testThread() {
+    private void nwInfosThread() {
         //测试调试专用 开始
-        executorService.scheduleAtFixedRate(new DataShowMonitorTest(), 5, 10, TimeUnit.SECONDS);
+        executorService.scheduleAtFixedRate(new NwInfosPrintTask(), 5, 60, TimeUnit.SECONDS);
         //测试调试专用 结束
     }
 
