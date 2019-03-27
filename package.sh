@@ -216,8 +216,8 @@ getModuleItem(){
 
 #拷贝打好的jar包到Moules/Nuls/<Module Name>/<Version> 下
 copyJarToModules(){
-    if [ -n "$IGNROEMVN" ]; then
-        return ;
+    if [ -z "$IGNROEMVN" ]; then
+       doMvn "package" $1
     fi
 	moduleName=$(getModuleItem "APP_NAME");
 	version=$(getModuleItem "VERSION");
@@ -229,7 +229,7 @@ copyJarToModules(){
 	fi	
 	mkdir "${MODULES_PATH}/${moduleName}/${version}"
 	jarName=`ls target |grep .jar`
-	echo "拷贝 $(pwd)/target/${moduleName}-${version}.jar to ${MODULES_PATH}/${moduleName}/${version}/${moduleName}-${version}.jar"
+	echo "copy $(pwd)/target/${moduleName}-${version}.jar to ${MODULES_PATH}/${moduleName}/${version}/${moduleName}-${version}.jar"
 	cp ./target/${jarName} "${MODULES_PATH}/${moduleName}/${version}/${moduleName}-${version}.jar"
 	if [ -d ./target/libs ]; then
 		for jar in `ls ./target/libs`; do
@@ -361,20 +361,23 @@ packageModule() {
 	fi
 	cd $(pwd)/$1
 	if [ -f "./module.ncf" ]; then
-		echo "find module.ncf in $(pwd)"
+		echoYellow "find module.ncf in $(pwd)"
 		if [ ! -f "./pom.xml" ]; then
 			echoRed "模块配置文件必须与pom.xml在同一个目录 : $(pwd)"
 			exit 0;
 		fi
 		managed=$(getModuleItem "Managed");
-		if [[ $managed != "-1" ]]; then
-		    doMvn "package" $1
+		if [[ $managed != "-1" ]];
+		then
             checkModuleItem "APP_NAME" "$1"
             checkModuleItem "VERSION" "$1"
             checkModuleItem "MAIN_CLASS" "$1"
+		    log "build $1"
             copyJarToModules $1
             copyModuleNcfToModules $1
-            log "$1 SUCCESS"
+            log "build $1 done"
+        else
+            echoYellow "$1 skip"
 		fi
 		cd ..
 		return 0

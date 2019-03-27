@@ -23,6 +23,9 @@
  */
 package io.nuls.contract.util;
 
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.Logger;
+import ch.qos.logback.classic.LoggerContext;
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.Address;
 import io.nuls.base.data.BlockHeader;
@@ -48,8 +51,10 @@ import io.nuls.tools.basic.VarInt;
 import io.nuls.tools.constant.ErrorCode;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.exception.NulsRuntimeException;
+import io.nuls.tools.log.logback.LoggerBuilder;
 import io.nuls.tools.model.StringUtils;
 import io.nuls.tools.parse.JSONUtils;
+import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Array;
 import java.math.BigInteger;
@@ -547,5 +552,17 @@ public class ContractUtil {
         Response response = MessageUtil.newResponse("", Constants.BOOLEAN_FALSE, msg);
         response.setResponseData(errorCode);
         return response;
+    }
+
+    public static void configLog(String filePath, String fileName, Level fileLevel, Level consoleLevel) {
+        int rootLevelInt = Math.min(fileLevel.toInt(), consoleLevel.toInt());
+
+        LoggerContext context = (LoggerContext) LoggerFactory.getILoggerFactory();
+        Logger logger = context.getLogger(Logger.ROOT_LOGGER_NAME);
+        logger.setAdditive(false);
+        logger.setLevel(Level.toLevel(rootLevelInt));
+
+        Log.BASIC_LOGGER = LoggerBuilder.getLogger(filePath, fileName, fileLevel, consoleLevel);
+        Log.BASIC_LOGGER.addBasicPath(Log.class.getName());
     }
 }
