@@ -265,36 +265,42 @@ public class ProgramExecutorImpl implements ProgramExecutor {
         logTime("start");
 
         try {
+            byte[] contractAddressBytes = programInvoke.getContractAddress();
+            String contractAddress = programInvoke.getAddress();
+            String methodName = programInvoke.getMethodName();
+            String methodDescBase = programInvoke.getMethodDesc();
+            byte[] contractCodeData = programInvoke.getData();
+            BigInteger transferValue = programInvoke.getValue();
             Map<String, ClassCode> classCodes;
             if (programInvoke.isCreate()) {
-                if (programInvoke.getData() == null) {
+                if (contractCodeData == null) {
                     return revert("contract code can't be null");
                 }
-                classCodes = ClassCodeLoader.loadJarCache(programInvoke.getData());
+                classCodes = ClassCodeLoader.loadJarCache(contractCodeData);
                 logTime("load new code");
                 ProgramChecker.check(classCodes);
                 logTime("check code");
-                AccountState accountState = repository.getAccountState(programInvoke.getContractAddress());
+                AccountState accountState = repository.getAccountState(contractAddressBytes);
                 if (accountState != null) {
-                    return revert(String.format("contract[%s] already exists", programInvoke.getAddress()));
+                    return revert(String.format("contract[%s] already exists", contractAddress));
                 }
-                accountState = repository.createAccount(programInvoke.getContractAddress(), programInvoke.getSender());
+                accountState = repository.createAccount(contractAddressBytes, programInvoke.getSender());
                 logTime("new account state");
-                repository.saveCode(programInvoke.getContractAddress(), programInvoke.getData());
+                repository.saveCode(contractAddressBytes, contractCodeData);
                 logTime("save code");
             } else {
-                if ("<init>".equals(programInvoke.getMethodName())) {
+                if ("<init>".equals(methodName)) {
                     return revert("can't invoke <init> method");
                 }
-                AccountState accountState = repository.getAccountState(programInvoke.getContractAddress());
+                AccountState accountState = repository.getAccountState(contractAddressBytes);
                 if (accountState == null) {
-                    return revert(String.format("contract[%s] does not exist", programInvoke.getAddress()));
+                    return revert(String.format("contract[%s] does not exist", contractAddress));
                 }
                 logTime("load account state");
                 if (accountState.getNonce().compareTo(BigInteger.ZERO) <= 0) {
-                    return revert(String.format("contract[%s] has stopped", programInvoke.getAddress()));
+                    return revert(String.format("contract[%s] has stopped", contractAddress));
                 }
-                byte[] codes = repository.getCode(programInvoke.getContractAddress());
+                byte[] codes = repository.getCode(contractAddressBytes);
                 classCodes = ClassCodeLoader.loadJarCache(codes);
                 logTime("load code");
             }
@@ -309,16 +315,16 @@ public class ProgramExecutorImpl implements ProgramExecutor {
             logTime("load classes");
 
             ClassCode contractClassCode = getContractClassCode(classCodes);
-            String methodDesc = ProgramDescriptors.parseDesc(programInvoke.getMethodDesc());
-            MethodCode methodCode = vm.methodArea.loadMethod(contractClassCode.name, programInvoke.getMethodName(), methodDesc);
+            String methodDesc = ProgramDescriptors.parseDesc(methodDescBase);
+            MethodCode methodCode = vm.methodArea.loadMethod(contractClassCode.name, methodName, methodDesc);
 
             if (methodCode == null) {
-                return revert(String.format("can't find method %s%s", programInvoke.getMethodName(), programInvoke.getMethodDesc() == null ? "" : programInvoke.getMethodDesc()));
+                return revert(String.format("can't find method %s%s", methodName, methodDescBase == null ? "" : methodDescBase));
             }
             if (!methodCode.isPublic) {
                 return revert("can only invoke public method");
             }
-            if (!methodCode.hasPayableAnnotation() && programInvoke.getValue().compareTo(BigInteger.ZERO) > 0) {
+            if (!methodCode.hasPayableAnnotation() && transferValue.compareTo(BigInteger.ZERO) > 0) {
                 return revert("not a payable method");
             }
             if (methodCode.argsVariableType.size() != programInvoke.getArgs().length) {
@@ -330,20 +336,20 @@ public class ProgramExecutorImpl implements ProgramExecutor {
 
             ObjectRef objectRef;
             if (programInvoke.isCreate()) {
-                objectRef = vm.heap.newContract(programInvoke.getContractAddress(), contractClassCode, repository);
+                objectRef = vm.heap.newContract(contractAddressBytes, contractClassCode, repository);
             } else {
-                objectRef = vm.heap.loadContract(programInvoke.getContractAddress(), contractClassCode, repository);
+                objectRef = vm.heap.loadContract(contractAddressBytes, contractClassCode, repository);
             }
 
             logTime("load contract ref");
 
-            if (programInvoke.getValue().compareTo(BigInteger.ZERO) > 0) {
-                getAccount(programInvoke.getContractAddress()).addBalance(programInvoke.getValue());
+            if (transferValue.compareTo(BigInteger.ZERO) > 0) {
+                getAccount(contractAddressBytes).addBalance(transferValue);
             }
             vm.setProgramExecutor(this);
             vm.setRepository(repository);
             vm.setGas(programInvoke.getGasLimit());
-            vm.addGasUsed(programInvoke.getData() == null ? 0 : programInvoke.getData().length);
+            vm.addGasUsed(contractCodeData == null ? 0 : contractCodeData.length);
 
             logTime("load end");
 
@@ -379,7 +385,9 @@ public class ProgramExecutorImpl implements ProgramExecutor {
             programResult.setTransfers(vm.getTransfers());
             programResult.setInternalCalls(vm.getInternalCalls());
             programResult.setEvents(vm.getEvents());
-            programResult.setBalance(getAccount(programInvoke.getContractAddress()).getBalance());
+            /** pierre test code + */
+            //programResult.setBalance(getAccount(contractAddressBytes).getBalance());
+            /** pierre test code - */
 
             if (resultValue != null) {
                 if (resultValue instanceof ObjectRef) {
@@ -405,12 +413,17 @@ public class ProgramExecutorImpl implements ProgramExecutor {
             for (Map.Entry<DataWord, DataWord> entry : contractState.entrySet()) {
                 DataWord key = entry.getKey();
                 DataWord value = entry.getValue();
-                repository.addStorageRow(programInvoke.getContractAddress(), key, value);
+                repository.addStorageRow(contractAddressBytes, key, value);
             }
             logTime("add contract state");
 
-            repository.increaseNonce(programInvoke.getContractAddress());
-            programResult.setNonce(repository.getNonce(programInvoke.getContractAddress()));
+            /** pierre test code + */
+            //repository.increaseNonce(contractAddressBytes);
+            //programResult.setNonce(repository.getNonce(contractAddressBytes));
+            if(programInvoke.isCreate()) {
+                repository.setNonce(contractAddressBytes, BigInteger.ONE);
+            }
+            /** pierre test code - */
             programResult.setGasUsed(vm.getGasUsed());
 
             return programResult;

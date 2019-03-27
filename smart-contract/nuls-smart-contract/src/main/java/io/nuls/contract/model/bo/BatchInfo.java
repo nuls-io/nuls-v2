@@ -69,6 +69,10 @@ public class BatchInfo {
      */
     private ProgramExecutor batchExecutor;
     /**
+     * 打包的交易计数器
+     */
+    private int txCounter;
+    /**
      * 打包的区块高度
      */
     private long height;
@@ -112,14 +116,15 @@ public class BatchInfo {
     }
 
     public boolean isTimeOut() {
-        long time = TimeService.currentTimeMillis() - this.beginTime;
+        long time = System.currentTimeMillis() - this.beginTime;
         return time > TIME_OUT;
     }
 
     public void init(long height) {
         this.clear();
+        this.txCounter = 0;
         this.height = height;
-        this.beginTime = TimeService.currentTimeMillis();
+        this.beginTime = System.currentTimeMillis();
         this.status = BatchInfoStatus.STARTING;
     }
 
@@ -128,6 +133,7 @@ public class BatchInfo {
         this.currentBlockHeader = null;
         this.contractPackageDto = null;
         this.batchExecutor = null;
+        this.txCounter = -1;
         this.height = -1L;
         this.beginTime = -1L;
         this.status = BatchInfoStatus.NOT_STARTING;
@@ -148,5 +154,9 @@ public class BatchInfo {
             contractContainerMap.put(contractAddress, container);
         }
         return container;
+    }
+
+    public int getAndIncreaseTxCounter() {
+        return txCounter++;
     }
 }

@@ -17,11 +17,11 @@ help()
 EOF
     exit 0
 }
-BIN_PATH=$(cd $(dirname $0); pwd);
-cd $BIN_PATH;
+cd `dirname $0`;
+BIN_PATH=`pwd`
 if [[ -d ../Libraries/JAVA/11.0.2 ]]; then
-    export JAVA_HOME="$(cd $(dirname "../Libraries/JAVA/11.0.2"); pwd)/11.0.2"
-    export PATH=${PATH}:${JAVA_HOME}/bin
+    JAVA_HOME=`dirname "../Libraries/JAVA/11.0.2/bin"`;
+    JAVA_HOME=`cd $JAVA_HOME; pwd`
     JAVA="${JAVA_HOME}/bin/java"
 else
     JAVA='java'
@@ -36,11 +36,12 @@ echo "JAVA_HOME:${JAVA_HOME}"
 echo `java -version`
 function get_fullpath()
 {
-    if [ -f $1 ];
+    if [ -f "$1" ];
     then
-        echo $(cd $(dirname $1); pwd);
+        tempDir=`dirname $1`;
+        echo `cd $tempDir; pwd`;
         else
-        echo $(cd $1; pwd);
+        echo `cd $1; pwd`;
     fi
 }
 
@@ -104,7 +105,7 @@ echo "log path : ${LOGPATH}"
 echo "data path : ${DATAPATH}"
 
 cd ../Modules/Nuls
-MODULE_PATH=$(pwd)
+MODULE_PATH=`pwd`
 if [ -n "${RUNFRONT}" ];
 then
     ${JAVA} -server -Ddebug="${DEBUG}" -Dapp.name=mykernel -Dlog.path="${LOGPATH}" ${DATAPATH} -Dactive.module="$CONFIG" -classpath ./libs/*:./mykernel/1.0.0/mykernel-1.0.0.jar io.nuls.mykernel.MyKernelBootstrap startModule $MODULE_PATH $CONFIG

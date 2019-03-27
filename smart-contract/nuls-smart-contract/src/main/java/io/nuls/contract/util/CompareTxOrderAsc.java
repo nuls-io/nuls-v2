@@ -21,47 +21,36 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package io.nuls.contract.model.bo;
+package io.nuls.contract.util;
 
-import io.nuls.base.data.BlockHeader;
-import io.nuls.base.data.Transaction;
-import io.nuls.contract.model.txdata.ContractData;
-import lombok.Data;
-import lombok.Getter;
-import lombok.Setter;
+import io.nuls.contract.model.bo.ContractResult;
+
+import java.util.Comparator;
 
 /**
  * @author: PierreLuo
- * @date: 2019-02-27
+ * @date: 2018/11/23
  */
-@Data
-public class ContractWrapperTransaction extends Transaction {
+public class CompareTxOrderAsc implements Comparator<ContractResult> {
 
-    private String txHex;
+    private static CompareTxOrderAsc instance = new CompareTxOrderAsc();
 
-    private ContractResult contractResult;
+    private CompareTxOrderAsc() {
 
-    private ContractData contractData;
-
-    /**
-     * 接收到的交易顺序
-     */
-    private int order;
-
-    private BlockHeader blockHeader;
-
-    public ContractWrapperTransaction(Transaction tx, String txHex, ContractData contractData) {
-        this.txHex = txHex;
-        this.contractData = contractData;
-        this.copyTx(tx);
     }
 
-    private void copyTx(Transaction tx) {
-        this.setType(tx.getType());
-        this.setCoinData(tx.getCoinData());
-        this.setTxData(tx.getTxData());
-        this.setTime(tx.getTime());
-        this.setTransactionSignature(tx.getTransactionSignature());
-        this.setRemark(tx.getRemark());
+    public static CompareTxOrderAsc getInstance() {
+        return instance;
+    }
+
+    @Override
+    public int compare(ContractResult o1, ContractResult o2) {
+        if (o1.getTxOrder() > o2.getTxOrder()) {
+            return 1;
+        } else if (o1.getTxOrder() < o2.getTxOrder()) {
+            return -1;
+        } else {
+            return 0;
+        }
     }
 }

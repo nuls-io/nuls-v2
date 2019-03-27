@@ -78,6 +78,7 @@ public class ContractTransferHandler {
         // 增加转入
         BigInteger value = contractData.getValue();
         if (value.compareTo(BigInteger.ZERO) > 0) {
+            vmContext.getBalance(chainId, contractAddress);
             tempBalanceManager.addTempBalance(contractAddress, value);
         }
         // 增加转入, 扣除转出
@@ -199,7 +200,7 @@ public class ContractTransferHandler {
                 contractResult.setError(true);
                 contractResult.setErrorMessage(result.getErrorCode().getMsg());
                 // 余额还原到上一次的余额
-                contractResult.setBalance(contractResult.getPreBalance());
+                //contractResult.setBalance(contractResult.getPreBalance());
                 // 回滚临时余额
                 this.rollbackContractTempBalance(chainId, contractResult.getTx(), contractResult, tempBalanceManager);
                 // 清空内部转账列表

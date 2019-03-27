@@ -6,6 +6,7 @@ import io.nuls.network.manager.MessageManager;
 import io.nuls.network.model.Node;
 import io.nuls.network.model.NodeGroup;
 import io.nuls.network.model.dto.IpAddress;
+import io.nuls.network.utils.LoggerUtil;
 import io.nuls.tools.core.ioc.SpringLiteContext;
 
 import java.util.*;
@@ -54,6 +55,7 @@ public class ShareAddressTask implements Runnable {
                 doShare(externalIp, nodeGroup.getLocalNetNodeContainer().getConnectedNodes().values(), networkConfig.getPort());
             });
             myNode.setDisconnectListener(() -> myNode.setChannel(null));
+            LoggerUtil.TestLog.debug("ShareAddressTask doLocalNet {}",myNode.getId());
             connectionManager.connection(myNode);
         }
     }
@@ -76,6 +78,7 @@ public class ShareAddressTask implements Runnable {
                 crossNode.getChannel().close();
                 doShare(externalIp, nodeGroup.getCrossNodeContainer().getConnectedNodes().values(), networkConfig.getCrossPort());
             });
+            LoggerUtil.TestLog.debug("ShareAddressTask doCrossNet {}",crossNode.getId());
             connectionManager.connection(crossNode);
         }
     }

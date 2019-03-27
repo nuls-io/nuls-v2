@@ -134,6 +134,7 @@ public class ContractCallerImpl implements ContractCaller {
         ContractData contractData;
         ContractResult contractResult;
         for (ContractWrapperTransaction tx : reCallTxList) {
+            Log.info("[ReCall] Tx hash is {}", tx.getHash());
             contractData = tx.getContractData();
             switch (tx.getType()) {
                 case TX_TYPE_CALL_CONTRACT:

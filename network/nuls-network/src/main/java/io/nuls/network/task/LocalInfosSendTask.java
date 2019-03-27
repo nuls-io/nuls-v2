@@ -66,14 +66,15 @@ public class LocalInfosSendTask implements Runnable {
         NodeGroupManager nodeGroupManager = NodeGroupManager.getInstance();
         List<NodeGroup> nodeGroupList = nodeGroupManager.getNodeGroups();
         for (NodeGroup nodeGroup : nodeGroupList) {
-            if (NodeGroup.OK == nodeGroup.getLocalNetNodeContainer().getStatus()) {
                 //获取本地高度与hash
                 BlockRpcServiceImpl blockRpcServiceImpl = SpringLiteContext.getBean(BlockRpcServiceImpl.class);
                 BestBlockInfo bestBlockInfo = blockRpcServiceImpl.getBestBlockHeader(nodeGroup.getChainId());
+                if (bestBlockInfo.getBlockHeight() == 0) {
+                    continue;
+                }
                 PeerInfoMessage peerInfoMessage = MessageFactory.getInstance().buildPeerInfoMessage(nodeGroup.getMagicNumber(), bestBlockInfo);
                 NetworkEventResult result = MessageManager.getInstance().broadcastToAllNode(peerInfoMessage, null, false, true);
-                LoggerUtil.Log.info("broadcastLocalInfos result = {}",result.isSuccess());
-            }
+                LoggerUtil.Log.info("broadcastLocalInfos result = {}", result.isSuccess());
         }
     }
 }

@@ -150,7 +150,13 @@ public class NodeGroupManager extends BaseManager {
          */
         List<NodeGroup> list = storageManager.getAllNodeGroupFromDb();
         for (NodeGroup dbNodeGroup : list) {
+            if(dbNodeGroup.getChainId() == nodeGroup.getChainId()){
+                continue;
+            }
             dbNodeGroup.setCrossActive(true);
+            if(dbNodeGroup.getChainId() == nodeGroup.getChainId()){
+                continue;
+            }
             nodeGroupManager.addNodeGroup(dbNodeGroup.getChainId(), dbNodeGroup);
         }
     }

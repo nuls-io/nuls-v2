@@ -1,6 +1,5 @@
 #!/bin/sh
-BIN_PATH=$(cd $(dirname $0); pwd);
-cd $BIN_PATH;
+cd `dirname $0`;
 if [[ -d ../Libraries/JAVA/11.0.2 ]]; then
     export JAVA_HOME="$(cd $(dirname "../Libraries/JAVA/11.0.2"); pwd)/11.0.2"
     export PATH=${PATH}:${JAVA_HOME}/bin
@@ -18,10 +17,13 @@ echo "JAVA_HOME:${JAVA_HOME}"
 echo `java -version`
 cd ../Modules/Nuls/test/1.0.0
 APP_PID=`ps -ef|grep -w "name=test "|grep -v grep|awk '{print $2}'`
-PID_EXIST=`ps -f -p ${APP_PID} | grep java`
-if [ ! -z "$PID_EXIST" ]; then
-    echo "test module is running. please stop test module";
-    exit 0
+APP=`ps -ef|grep -w "name=${APP_NAME} "|grep -v grep|wc -l`
+if [[ $APP -eq 1 ]]; then
+    PID_EXIST=`ps -f -p ${APP_PID} | grep java`
+    if [ ! -z "$PID_EXIST" ]; then
+        echo "test module is running. please stop test module";
+        exit 0
+    fi
 fi
 LIBS="../../libs"
 PUB_LIB=""
