@@ -218,7 +218,7 @@ public abstract class RpcModule implements InitializingBean {
                     Log.error("onDependenciesReady return null state", new NullPointerException("onDependenciesReady return null state"));
                     System.exit(0);
                 }
-                Log.info("RMB: module state : {}", state);
+                Log.info("RMB:module state : {}", state);
             }
         } else {
             Log.info("RMB:dependencie state");
