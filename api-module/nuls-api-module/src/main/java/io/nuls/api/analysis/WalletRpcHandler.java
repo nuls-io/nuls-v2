@@ -243,7 +243,7 @@ public class WalletRpcHandler {
         resultInfo.setActualContractFee((String) map.get("actualContractFee"));
         resultInfo.setRefundFee((String) map.get("refundFee"));
         resultInfo.setValue((String) map.get("value"));
-        resultInfo.setBalance((String) map.get("balance"));
+        //resultInfo.setBalance((String) map.get("balance"));
         resultInfo.setRemark((String) map.get("remark"));
 
         List<Map<String, Object>> transfers = (List<Map<String, Object>>) map.get("transfers");

@@ -45,6 +45,9 @@ public class ContractMultyTxTest extends BaseQuery {
         // TestAddress.createAccount 生成地址，得到 importPriKey 语句，放入 contractNRC20TokenSendTxTest.importPriKeyTest 中执行
     }
 
+    /**
+     * 依赖于contractNRC20TokenSendTxTest.transfer()
+     */
     @Test
     public void multyCreateNRC20() throws Exception {
         // 执行后，复制contract module日志的合约地址，赋值给成员变量contractAddress_nrc20X (X -> [0,34])
@@ -54,6 +57,9 @@ public class ContractMultyTxTest extends BaseQuery {
         }
     }
 
+    /**
+     * 依赖于contractNRC20TokenSendTxTest.transfer()
+     */
     @Test
     public void multyCreateContractCallContract() throws Exception {
         // 执行后，复制contract module日志的合约地址，赋值给成员变量contractAddressX (X -> [0,34])

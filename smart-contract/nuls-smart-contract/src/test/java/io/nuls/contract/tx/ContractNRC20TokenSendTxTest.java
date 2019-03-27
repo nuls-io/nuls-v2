@@ -176,10 +176,13 @@ public class ContractNRC20TokenSendTxTest extends BaseQuery {
         if(StringUtils.isBlank(methodName)) {
             methodName = "transfer";
         }
+        if(StringUtils.isBlank(tokenReceiver)) {
+            tokenReceiver = toAddress0;
+        }
         String methodDesc = "";
         String remark = "call contract test - 空气币转账";
-        String token = BigInteger.valueOf(8000L).toString();
-        Map params = this.makeCallParams(sender, value, contractAddress_nrc20, methodName, methodDesc, remark, toAddress0, token);
+        String token = BigInteger.valueOf(800L).toString();
+        Map params = this.makeCallParams(sender, value, contractAddress_nrc20, methodName, methodDesc, remark, tokenReceiver, token);
         Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, CALL, params);
         Map result = (HashMap) (((HashMap) cmdResp2.getResponseData()).get(CALL));
         Assert.assertTrue(null != result);
