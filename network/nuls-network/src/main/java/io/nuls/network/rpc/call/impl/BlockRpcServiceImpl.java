@@ -62,7 +62,7 @@ public class BlockRpcServiceImpl implements BlockRpcService {
         map.put("chainId", chainId);
         try {
             LoggerUtil.Log.debug("getBestBlockHeader begin time={}", TimeManager.currentTimeMillis());
-            Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.BL.abbr, NetworkConstant.CMD_BL_BEST_BLOCK_HEADER, map, 2000);
+            Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.BL.abbr, NetworkConstant.CMD_BL_BEST_BLOCK_HEADER, map, 1000);
             if (null != response && response.isSuccess()) {
                 Map responseData = (Map) response.getResponseData();
                 String hex = (String) responseData.get(NetworkConstant.CMD_BL_BEST_BLOCK_HEADER);
