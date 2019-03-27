@@ -491,6 +491,7 @@ public class ContractUtil {
         contractResult.setTx(tx);
         contractResult.setTxTime(tx.getTime());
         contractResult.setHash(tx.getHash().toString());
+        contractResult.setTxOrder(tx.getOrder());
     }
 
     public static Result getSuccess() {

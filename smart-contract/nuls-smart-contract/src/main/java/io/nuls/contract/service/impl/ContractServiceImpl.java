@@ -167,6 +167,7 @@ public class ContractServiceImpl implements ContractService {
             container.loadFutureList();
             // 多线程执行合约
             ContractWrapperTransaction wrapperTx = ContractUtil.parseContractTransaction(tx);
+            wrapperTx.setOrder(batchInfo.getAndIncreaseTxCounter());
             Result result = contractCaller.callTx(chainId, container, batchExecutor, wrapperTx, preStateRoot);
             return result;
         } catch (InterruptedException e) {

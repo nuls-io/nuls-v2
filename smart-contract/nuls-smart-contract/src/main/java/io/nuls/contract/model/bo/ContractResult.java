@@ -31,6 +31,7 @@ import io.nuls.contract.model.tx.ContractTransferTransaction;
 import io.nuls.contract.model.txdata.ContractData;
 import io.nuls.contract.vm.program.ProgramTransfer;
 import io.nuls.tools.crypto.HexUtil;
+import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -39,12 +40,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-@Getter
-@Setter
+@Data
 public class ContractResult {
     private transient ContractWrapperTransaction tx;
     private String hash;
     private long txTime;
+    private int txOrder;
     private long blockHeight;
     /**
      * 交易创建者
@@ -163,6 +164,7 @@ public class ContractResult {
         return "ContractResult{" +
                 "success='" + isSuccess() + '\'' +
                 ", hash='" + hash + '\'' +
+                ", txOrder=" + txOrder +
                 ", txTime=" + txTime +
                 ", sender=" + AddressTool.getStringAddressByBytes(sender) +
                 ", contractAddress=" + AddressTool.getStringAddressByBytes(contractAddress) +
