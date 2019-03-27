@@ -82,9 +82,9 @@ public class ContractResult {
     private boolean error;
     private String errorMessage;
     private String stackTrace;
-    private BigInteger balance;
-    private BigInteger preBalance;
-    private BigInteger nonce;
+    //private BigInteger balance;
+    //private BigInteger preBalance;
+    //private BigInteger nonce;
     private boolean acceptDirectTransfer;
     private boolean isNrc20;
     private String tokenName;
@@ -175,9 +175,9 @@ public class ContractResult {
                 ", error=" + error +
                 ", errorMessage='" + errorMessage + '\'' +
                 ", stackTrace='" + stackTrace + '\'' +
-                ", balance=" + (balance != null ? balance.toString() : 0) +
-                ", preBalance=" + preBalance +
-                ", nonce=" + nonce +
+                //", balance=" + (balance != null ? balance.toString() : 0) +
+                //", preBalance=" + preBalance +
+                //", nonce=" + nonce +
                 ", acceptDirectTransfer=" + acceptDirectTransfer +
                 ", isNrc20=" + isNrc20 +
                 ", transfersSize=" + (transfers != null ? transfers.size() : 0) +

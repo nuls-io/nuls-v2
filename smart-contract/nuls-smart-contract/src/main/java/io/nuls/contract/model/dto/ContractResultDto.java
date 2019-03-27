@@ -78,7 +78,7 @@ public class ContractResultDto {
 
     private String stackTrace;
 
-    private String balance;
+    //private String balance;
 
     private List<ContractMergedTransferDto> transfers;
 
@@ -104,7 +104,7 @@ public class ContractResultDto {
         this.refundFee = bigInteger2String(contractFee.subtract(actualContractFee));
         this.txSizeFee = bigInteger2String(totalFee.subtract(contractFee));
         this.value = String.valueOf(result.getValue());
-        this.balance = bigInteger2String(result.getBalance());
+        //this.balance = bigInteger2String(result.getBalance());
         this.contractAddress = AddressTool.getStringAddressByBytes(result.getContractAddress());
         this.result = result.getResult();
         this.stateRoot = (result.getStateRoot() != null ? Hex.toHexString(result.getStateRoot()) : null);

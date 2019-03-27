@@ -379,7 +379,9 @@ public class ProgramExecutorImpl implements ProgramExecutor {
             programResult.setTransfers(vm.getTransfers());
             programResult.setInternalCalls(vm.getInternalCalls());
             programResult.setEvents(vm.getEvents());
-            programResult.setBalance(getAccount(programInvoke.getContractAddress()).getBalance());
+            /** pierre test code + */
+            //programResult.setBalance(getAccount(programInvoke.getContractAddress()).getBalance());
+            /** pierre test code - */
 
             if (resultValue != null) {
                 if (resultValue instanceof ObjectRef) {
@@ -409,8 +411,10 @@ public class ProgramExecutorImpl implements ProgramExecutor {
             }
             logTime("add contract state");
 
-            repository.increaseNonce(programInvoke.getContractAddress());
-            programResult.setNonce(repository.getNonce(programInvoke.getContractAddress()));
+            /** pierre test code + */
+            //repository.increaseNonce(programInvoke.getContractAddress());
+            //programResult.setNonce(repository.getNonce(programInvoke.getContractAddress()));
+            /** pierre test code - */
             programResult.setGasUsed(vm.getGasUsed());
 
             return programResult;

@@ -184,11 +184,11 @@ public class ContractTxCallable implements Callable<ContractResult> {
             // 执行成功，检查与执行失败的交易是否有冲突，把执行失败的交易添加到重新执行的集合中
             checkConflictWithFailedMap(callableResult, contractResult);
             // 本合约与成功执行的其他合约没有冲突，处理业务逻辑，提交本合约
-            byte[] contractAddress = contractResult.getContractAddress();
+            /*byte[] contractAddress = contractResult.getContractAddress();
             // 获取合约当前余额
             BigInteger balance = vmContext.getBalance(chainId, contractAddress);
             Log.info("[{}] current balance is {}", AddressTool.getStringAddressByBytes(contractAddress), balance.toString());
-            contractResult.setPreBalance(balance);
+            contractResult.setPreBalance(balance);*/
             // 处理临时余额和合约内部转账
             contractTransferHandler.handleContractTransfer(chainId, blockTime, tx, contractResult, tempBalanceManager);
         }
