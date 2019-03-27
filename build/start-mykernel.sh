@@ -33,6 +33,7 @@ EOF
 #echo "JAVA_HOME:${JAVA_HOME}"
 #echo `java -version`
 sh ./check-jdk.sh
+JAVA="${JAVA_HOME}/bin/java"
 BIN_PATH=$(cd $(dirname $0); pwd);
 cd $BIN_PATH;
 function get_fullpath()
