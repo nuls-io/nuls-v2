@@ -40,7 +40,7 @@ import io.nuls.tools.log.logback.NulsLogger;
  */
 public class LoggerUtil {
 
-    public static NulsLogger commonLog = LoggerBuilder.getLogger("protocol",Level.INFO);
+    public static NulsLogger commonLog = LoggerBuilder.getLogger("protocol");
 
     public static void init(int chainId, String levelString) {
         Level level = Level.valueOf(levelString);
