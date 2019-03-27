@@ -452,9 +452,13 @@ public class PunishManager {
                     /*
                     * 找到round前一轮的第一个区块
                     * */
-                    BlockHeader preRoundHeader = roundManager.getFirstBlockOfPreRound(chain,round.getIndex()-1);
-                    BlockExtendsData preRoundExtendsData = new BlockExtendsData(preRoundHeader.getExtend());
-                    preRound = roundManager.getRoundByRoundIndex(chain,preRoundExtendsData.getRoundIndex(),preRoundExtendsData.getRoundStartTime());
+                    if(chain.getRoundList().size() > 0){
+                        preRound = chain.getRoundList().get(chain.getRoundList().size()-1);
+                    }else{
+                        BlockHeader preRoundHeader = roundManager.getFirstBlockOfPreRound(chain,round.getIndex()-1);
+                        BlockExtendsData preRoundExtendsData = new BlockExtendsData(preRoundHeader.getExtend());
+                        preRound = roundManager.getRoundByRoundIndex(chain,preRoundExtendsData.getRoundIndex(),preRoundExtendsData.getRoundStartTime());
+                    }
                 }
                 member = preRound.getMember(index + preRound.getMemberCount());
                 if (member.getAgent() == null || member.getAgent().getDelHeight() > 0 || member.getAgent().getDeposit().equals(BigInteger.ZERO)) {
