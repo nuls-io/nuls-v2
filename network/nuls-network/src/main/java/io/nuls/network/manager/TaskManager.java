@@ -63,20 +63,6 @@ public class TaskManager extends BaseManager {
         return taskManager;
     }
 
-
-    /**
-     * 所有client主动连接通过该方法调用线程发出
-     * client connect thread
-     *
-     * @param node Node
-     */
-    void doConnect(Node node) {
-        ThreadUtils.createAndRunThread("doConnect", () -> {
-            NettyClient client = new NettyClient(node);
-            client.start();
-        });
-    }
-
     @Override
     public void init() throws Exception {
 
