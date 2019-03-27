@@ -45,6 +45,7 @@ import io.nuls.transaction.manager.TxManager;
 import io.nuls.transaction.model.TxWrapper;
 import io.nuls.transaction.model.bo.*;
 import io.nuls.transaction.model.po.TransactionConfirmedPO;
+import io.nuls.transaction.model.po.TransactionPO;
 import io.nuls.transaction.rpc.call.*;
 import io.nuls.transaction.service.ConfirmedTxService;
 import io.nuls.transaction.service.CtxService;
@@ -1070,14 +1071,18 @@ public class TxServiceImpl implements TxService {
 
         if (rs) {
             long save = NetworkCall.getCurrentTimeMillis();//-----
+            List<Transaction> unconfirmedTxSaveList = new ArrayList<>();
+            List<TransactionPO> h2SaveList = new ArrayList<>();
             for (Transaction tx : txList) {
                 //如果该交易不在交易管理待打包库中，则进行保存
-                if (null == unconfirmedTxStorageService.getTx(chain.getChainId(), tx.getHash())) {
-                    unconfirmedTxStorageService.putTx(chain.getChainId(), tx);
-                    //保存到h2数据库
-                    transactionH2Service.saveTxs(TxUtil.tx2PO(chain, tx));
+                if (!unconfirmedTxStorageService.isExists(chain.getChainId(), tx.getHash())) {
+                    unconfirmedTxSaveList.add(tx);
+                    h2SaveList.addAll(TxUtil.tx2PO(chain, tx));
                 }
             }
+            unconfirmedTxStorageService.putTxList(chain.getChainId(), unconfirmedTxSaveList);
+            transactionH2Service.saveTxs(h2SaveList);
+            Log.debug("[验区块交易] 本地不存在的交易保存数据H2:{}条记录", h2SaveList.size());//----
             verifyTxResult.setCode(VerifyTxResult.SUCCESS);
             Log.debug("[验区块交易] 本地不存在的交易保存数据时间:{}", NetworkCall.getCurrentTimeMillis() - save);//----
             Log.debug("[验区块交易] 本地不存在的交易保存数据 -距方法开始的时间:{}", NetworkCall.getCurrentTimeMillis() - s1);//----
