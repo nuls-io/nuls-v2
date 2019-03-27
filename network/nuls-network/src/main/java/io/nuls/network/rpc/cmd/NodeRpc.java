@@ -24,6 +24,7 @@
  */
 package io.nuls.network.rpc.cmd;
 
+import io.nuls.network.cfg.NetworkConfig;
 import io.nuls.network.constant.NetworkErrorCode;
 import io.nuls.network.constant.NodeConnectStatusEnum;
 import io.nuls.network.manager.NodeGroupManager;
@@ -37,6 +38,7 @@ import io.nuls.rpc.cmd.BaseCmd;
 import io.nuls.rpc.model.CmdAnnotation;
 import io.nuls.rpc.model.Parameter;
 import io.nuls.rpc.model.message.Response;
+import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.model.StringUtils;
 
@@ -58,6 +60,8 @@ public class NodeRpc extends BaseCmd {
     private static final int STATE_ALL = 0;
     private static final int STATE_CONNECT = 1;
     private static final int STATE_DIS_CONNECT = 2;
+    @Autowired
+    NetworkConfig networkConfig;
 
     /**
      * nw_addNodes
@@ -89,7 +93,7 @@ public class NodeRpc extends BaseCmd {
                 IpAddress address = new IpAddress(ipPort[0], Integer.valueOf(ipPort[1]));
                 nodeGroup.addNeedCheckNode(address, blCross);
             }
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
             return failed(e.getMessage());
         }
@@ -223,7 +227,11 @@ public class NodeRpc extends BaseCmd {
     @Parameter(parameterName = "blockHeight", parameterType = "long")
     @Parameter(parameterName = "blockHash", parameterType = "String")
     public Response updateNodeInfo(Map params) {
-        int chainId = Integer.valueOf(String.valueOf(params.get("chainId")));
+        if (1 == networkConfig.getUpdatePeerInfoType()){
+            Log.info("@@@@@@ block rpc update node info  fail,because use updatePeerInfoType = 1");
+            return failed("use network module protocol update node Info");
+        }
+            int chainId = Integer.valueOf(String.valueOf(params.get("chainId")));
         String nodeId = String.valueOf(params.get("nodeId"));
         long blockHeight = Long.valueOf(String.valueOf(params.get("blockHeight")));
         String blockHash = String.valueOf(params.get("blockHash"));

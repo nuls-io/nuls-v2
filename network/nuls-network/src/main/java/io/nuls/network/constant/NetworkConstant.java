@@ -80,7 +80,7 @@ public interface NetworkConstant {
     String CMD_MESSAGE_BYE = "bye";
     String CMD_MESSAGE_GET_TIME = "getTime";
     String CMD_MESSAGE_RESPONSE_TIME = "responseTime";
-
+    String CMD_MESSAGE_SEND_LOCAL_INFOS = "peerInfos";
     /**
      * ========================================
      * --------[RPC CMD] -------

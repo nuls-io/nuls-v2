@@ -308,7 +308,9 @@ public class ChainManager {
             agentManager.loadAgents(chain);
             depositManager.loadDeposits(chain);
             punishManager.loadPunishes(chain);
-            //roundManager.initRound(chain);
+            if(chain.getBlockHeaderList().size()>1){
+                roundManager.initRound(chain);
+            }
         } catch (Exception e) {
             chain.getLoggerMap().get(ConsensusConstant.CONSENSUS_LOGGER_NAME).error(e);
         }

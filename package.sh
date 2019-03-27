@@ -116,6 +116,7 @@ MODULES_PATH=$(cd "$MODULES_PATH"; pwd)
 RELEASE_PATH=$MODULES_PATH
 echoYellow "Modules Path $MODULES_PATH"''
 log "==================BEGIN PACKAGE MODULES=============================="
+declare -a managedModules
 if [[ ! -d "$MODULES_PATH/bin" ]]; then
 	mkdir $MODULES_PATH/bin
 fi
@@ -217,7 +218,7 @@ getModuleItem(){
 #拷贝打好的jar包到Moules/Nuls/<Module Name>/<Version> 下
 copyJarToModules(){
     if [ -z "$IGNROEMVN" ]; then
-       doMvn "package" $1
+       doMvn "clean package" $1
     fi
 	moduleName=$(getModuleItem "APP_NAME");
 	version=$(getModuleItem "VERSION");
@@ -375,6 +376,10 @@ packageModule() {
 		    log "build $1"
             copyJarToModules $1
             copyModuleNcfToModules $1
+            if [[ $managed == "1" ]]; then
+                moduleName=$(getModuleItem "APP_NAME");
+                managedModules[${#managedModules[@]}]="$moduleName"
+            fi
             log "build $1 done"
         else
             echoYellow "$1 skip"
@@ -424,10 +429,22 @@ if [ -n "${DOMOCK}" ]; then
 	chmod u+x "${MODULES_BIN_PATH}/stop.sh"
 	cp "${BUILD_PATH}/default-config.json" "${MODULES_BIN_PATH}/"
 	chmod u+r "${MODULES_BIN_PATH}/default-config.json"
-	cp "${BUILD_PATH}/check-status.sh" "${MODULES_BIN_PATH}/"
-	chmod u+x "${MODULES_BIN_PATH}/check-status.sh"
 	cp "${BUILD_PATH}/cmd.sh" "${MODULES_BIN_PATH}/"
 	chmod u+x "${MODULES_BIN_PATH}/cmd.sh"
+	cp "${BUILD_PATH}/test.sh" "${MODULES_BIN_PATH}/"
+	chmod u+x "${MODULES_BIN_PATH}/test.sh"
+	cp "${BUILD_PATH}/check-jdk.sh" "${MODULES_BIN_PATH}/"
+	chmod u+x "${MODULES_BIN_PATH}/check-jdk.sh"
+
+	tempModuleList=
+	for m in ${managedModules[@]}
+	do
+	    tempModuleList+=" \"${m}\""
+	done
+	eval "sed -e 's/%MODULES%/${tempModuleList}/g' ${BUILD_PATH}/check-status.sh > ${BUILD_PATH}/tmp/check-status-temp.sh"
+	cp "${BUILD_PATH}/tmp/check-status-temp.sh" "${MODULES_BIN_PATH}/check-status.sh"
+	chmod u+x "${MODULES_BIN_PATH}/check-status.sh"
+
 	log "============== BUILD start-mykernel script done ================"
 fi
 
