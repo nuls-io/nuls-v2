@@ -92,7 +92,7 @@ public class ContractServiceImpl implements ContractService {
 
     @Override
     public Result begin(int chainId, long blockHeight, long blockTime, String packingAddress, String preStateRoot) {
-        Log.info("=====pierre=====begin contract batch, packaging blockHeight is [{}], packaging address is [{}], preStateRoot is [{}]", blockHeight, packingAddress, preStateRoot);
+        Log.info("Begin contract batch, packaging blockHeight is [{}], packaging address is [{}], preStateRoot is [{}]", blockHeight, packingAddress, preStateRoot);
         Chain chain = contractHelper.getChain(chainId);
         BatchInfo batchInfo = chain.getBatchInfo();
         // 清空上次批量的所有数据
@@ -148,7 +148,7 @@ public class ContractServiceImpl implements ContractService {
     @Override
     public Result invokeContractOneByOne(int chainId, ContractTempTransaction tx) {
         try {
-            Log.info("=====pierre=====invoke contract TxType is [{}], hash is [{}]", tx.getType(), tx.getHash().toString());
+            Log.info("Invoke contract TxType is [{}], hash is [{}]", tx.getType(), tx.getHash().toString());
             Chain chain = contractHelper.getChain(chainId);
             BatchInfo batchInfo = chain.getBatchInfo();
             if (!batchInfo.hasBegan()) {
@@ -229,12 +229,12 @@ public class ContractServiceImpl implements ContractService {
                 Map<String, ContractResult> contractResultMap = contractPackageDto.getContractResultMap();
                 /** pierre test code + */
                 Set<String> txHexSet = contractResultMap.keySet();
-                txHexSet.stream().forEach(hex -> Log.info("contract execute txHex is {}", hex));
+                Log.info("contract execute txHexSize is {}", txHexSet.size());
                 /** pierre test code - */
                 ContractResult contractResult;
                 ContractWrapperTransaction wrapperTx;
+                Log.info("commit txHexSize is {}", txHexList.size());
                 for (String txHex : txHexList) {
-                    Log.info("commit txHex is {}", txHex);
                     contractResult = contractResultMap.get(txHex);
                     if (contractResult == null) {
                         Log.warn("empty contract result with txHex: {}", txHex);

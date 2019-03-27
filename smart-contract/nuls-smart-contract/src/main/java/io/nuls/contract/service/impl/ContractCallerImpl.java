@@ -89,8 +89,8 @@ public class ContractCallerImpl implements ContractCaller {
             long blockTime = currentBlockHeader.getTime();
             long lastestHeight = currentBlockHeader.getHeight() - 1;
             BlockHeader latestBlockHeader = BlockCall.getLatestBlockHeader(chainId);
-            Log.info("=====pierre======current block header height is {}", currentBlockHeader.getHeight());
-            Log.info("=====pierre======latest block header height is {}", latestBlockHeader.getHeight());
+            Log.debug("Current block header height is {}", currentBlockHeader.getHeight());
+            Log.debug("Latest block header height is {}", latestBlockHeader.getHeight());
             ContractTxCallable txCallable = new ContractTxCallable(chainId, blockTime, batchExecutor, contract, tx, lastestHeight, preStateRoot, checker, container);
 
             Future<ContractResult> contractResultFuture = TX_EXECUTOR_SERVICE.submit(txCallable);
@@ -106,7 +106,7 @@ public class ContractCallerImpl implements ContractCaller {
     @Override
     public Result callBatchEnd(int chainId, long blockHeight) {
         try {
-            Log.info("=====pierre======batch before end blockHeight is {}", blockHeight);
+            Log.info("Batch Before End blockHeight is {}", blockHeight);
             BatchInfo batchInfo = contractHelper.getChain(chainId).getBatchInfo();
             ContractBatchEndCallable callable = new ContractBatchEndCallable(chainId, blockHeight);
             Future<ContractPackageDto> contractPackageDtoFuture = BATCH_END_SERVICE.submit(callable);

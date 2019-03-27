@@ -27,8 +27,16 @@ package io.nuls.account.rpc.cmd;
 import io.nuls.account.model.bo.Account;
 import io.nuls.account.util.AccountTool;
 import io.nuls.base.basic.AddressTool;
+import io.nuls.base.constant.BaseConstant;
+import io.nuls.base.data.Address;
+import io.nuls.tools.crypto.ECKey;
 import io.nuls.tools.exception.NulsException;
+import io.nuls.tools.parse.SerializeUtils;
 import org.junit.Test;
+import org.spongycastle.util.encoders.Hex;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author lan
@@ -36,6 +44,8 @@ import org.junit.Test;
  * @date 2018/12/14
  **/
 public class TestAddress {
+    private int chainId = 2;
+
     @Test
     public void test1(){
         try {
@@ -49,5 +59,41 @@ public class TestAddress {
     @Test
     public void test2(){
             System.out.println( AddressTool.validAddress(8964,"JQJmP5xKDzAgJ8tJSQkCtKwbodAu20423"));
+    }
+
+    @Test
+    public void createAccount() throws NulsException {
+        int start = 5, count = 30;
+        List<Account> list = new ArrayList<>();
+        for(int i=0;i<count;i++) {
+            list.add(createAccount(chainId));
+        }
+        System.out.println();
+        System.out.println();
+        for(Account account : list) {
+            System.out.println("importPriKey(\""+ Hex.toHexString(account.getPriKey()) +"\", password);//"+(start++)+" "+account.getAddress().toString());
+        }
+        System.out.println();
+        System.out.println();
+        start = 5;
+        for(Account account : list) {
+            System.out.println("protected String toAddress"+(start++)+" = \""+account.getAddress().toString()+"\";");
+        }
+        System.out.println();
+        System.out.println();
+    }
+
+    private static Account createAccount(int chainId) throws NulsException {
+        ECKey key = new ECKey();
+        Address address = new Address(chainId, BaseConstant.DEFAULT_ADDRESS_TYPE, SerializeUtils.sha256hash160(key.getPubKey()));
+        Account account = new Account();
+        account.setChainId(chainId);
+        account.setAddress(address);
+        account.setPubKey(key.getPubKey());
+        account.setPriKey(key.getPrivKeyBytes());
+        account.setEncryptedPriKey(new byte[0]);
+        account.setCreateTime(System.currentTimeMillis());
+        account.setEcKey(key);
+        return account;
     }
 }
