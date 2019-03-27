@@ -430,6 +430,7 @@ public class ContractUtil {
     }
 
     public static void putAll(Map<String, Set<ContractResult>> map, ContractResult contractResult) {
+        Log.error("Failed TxType [{}] Execute ContractResult is {}", contractResult.getTx().getType(), contractResult);
         Set<String> addressSet = collectAddress(contractResult);
         for (String address : addressSet) {
             put(map, address, contractResult);

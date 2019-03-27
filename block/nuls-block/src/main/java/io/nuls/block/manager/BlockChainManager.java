@@ -161,6 +161,7 @@ public class BlockChainManager {
                 commonLog.info("*switchChain0 fail masterChain-" + masterChain);
                 commonLog.info("*switchChain0 fail chain-" + chain);
                 commonLog.info("*switchChain0 fail subChain-" + subChain);
+                commonLog.info("*switchChain0 fail masterForkChain-" + masterForkChain);
                 removeForkChain(chainId, topForkChain);
                 append(masterChain, masterForkChain);
                 return false;

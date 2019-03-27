@@ -23,7 +23,7 @@ EOF
 #获取参数
 #输出目录
 
-MODULES_PATH="./NULS-Walltet-linux64-alpha1"
+MODULES_PATH="./NULS-Wallet-linux64-alpha1"
 #RELEASE_OUT_PATH="./NULS-Walltet-linux64-alpha1"
 #是否马上更新代码
 DOPULL=

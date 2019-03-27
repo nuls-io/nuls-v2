@@ -122,7 +122,8 @@ public class BaseQuery {
     protected String toAddress34 = "tNULSeBaMvQr8dVnk3f3DPvwCYX3ctTRtrTurD";
 
     protected String createHash = "002029ca32525f635a15c82c046114657c0d8a96a7163780ac6b425b2383b240bd56";
-    protected String contractAddress0   = "tNULSeBaNAxpCQbLKYhWhW84ZejejrMgkDbFh6";
+    protected String contractAddress   = "";
+    protected String contractAddress0  = "tNULSeBaNAxpCQbLKYhWhW84ZejejrMgkDbFh6";
     protected String contractAddress1  = "tNULSeBaMzp6pDpTGzTaAftWrUTsuHNwvGnFau";
     protected String contractAddress2  = "tNULSeBaN1xsrTTNtaUW26vXknL74RAfBD5zTX";
     protected String contractAddress3  = "tNULSeBaMwwMhq9cY89cWGEEzdFwtMQcW8YtoM";
@@ -157,6 +158,7 @@ public class BaseQuery {
     protected String contractAddress32 = "tNULSeBaMxHP255JFCtuuCtVj1nZg1krgQnryK";
     protected String contractAddress33 = "tNULSeBaN1oAoP3GMNNk6Y4bqHpdSHocpUyCoQ";
     protected String contractAddress34 = "tNULSeBaN3mDa2KfSKw1vSd87NnnoZamE8o6Qt";
+    protected String contractAddress_nrc20   = "";
     protected String contractAddress_nrc200   = "tNULSeBaN1o2SDwJnt9WM7HzTFh7eFPB3hiPfB";
     protected String contractAddress_nrc201  = "tNULSeBaN4AZpjVFhCmW8VS8G6cyWKStex4S3V";
     protected String contractAddress_nrc202  = "tNULSeBaN6GbG4WmSdt1LZhLgQkGA8vcZwk7vW";
@@ -192,6 +194,8 @@ public class BaseQuery {
     protected String contractAddress_nrc2032 = "tNULSeBaNBbdirjfcQqQ6G9wkUkm3AdsDXWg6e";
     protected String contractAddress_nrc2033 = "tNULSeBaN8cnwCPXhrt1ew4nqFTnonArUY55YC";
     protected String contractAddress_nrc2034 = "tNULSeBaNBrZZASqjGWkiH81gnu8HbeacnneFB";
+
+    protected String methodName = "";
 
     protected String callHash = "0020874dca08dbf4784540e26c0c31f728a2c2fd2e18bf71c896d8f88955d53e77b7";
     protected String deleteHash = "0020b2c159dbdf784c2860ec97072feb887466aa50fc147a5b50388886caab113f9a";
