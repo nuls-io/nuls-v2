@@ -29,7 +29,11 @@ public class CmdClientBootstrap {
         Provider.ProviderType providerType = Provider.ProviderType.valueOf(configurationLoader.getValue("providerType"));
         int defaultChainId = Integer.parseInt(configurationLoader.getValue("chainId"));
         ServiceManager.init(defaultChainId,providerType);
-        NulsRpcModuleBootstrap.run("io.nuls.cmd.client",args);
+        try {
+            NulsRpcModuleBootstrap.run("io.nuls.cmd.client",args);
+        }catch (Exception e){
+            Log.error("module start fail {}",e.getMessage());
+        }
     }
 
 }
