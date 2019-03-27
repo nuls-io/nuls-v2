@@ -24,7 +24,9 @@
 package io.nuls.contract.service.impl;
 
 import io.nuls.base.basic.AddressTool;
-import io.nuls.base.data.*;
+import io.nuls.base.data.BlockHeader;
+import io.nuls.base.data.NulsDigestData;
+import io.nuls.base.data.Transaction;
 import io.nuls.contract.constant.ContractErrorCode;
 import io.nuls.contract.helper.ContractConflictChecker;
 import io.nuls.contract.helper.ContractHelper;
@@ -32,9 +34,10 @@ import io.nuls.contract.manager.ContractTxProcessorManager;
 import io.nuls.contract.manager.ContractTxValidatorManager;
 import io.nuls.contract.model.bo.*;
 import io.nuls.contract.model.dto.ContractPackageDto;
-import io.nuls.contract.model.tx.*;
+import io.nuls.contract.model.tx.CallContractTransaction;
+import io.nuls.contract.model.tx.CreateContractTransaction;
+import io.nuls.contract.model.tx.DeleteContractTransaction;
 import io.nuls.contract.model.txdata.CallContractData;
-import io.nuls.contract.model.txdata.ContractData;
 import io.nuls.contract.model.txdata.CreateContractData;
 import io.nuls.contract.model.txdata.DeleteContractData;
 import io.nuls.contract.service.*;
@@ -46,13 +49,12 @@ import io.nuls.tools.basic.Result;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.exception.NulsException;
-import io.nuls.tools.model.ByteArrayWrapper;
-import io.nuls.tools.model.LongUtils;
 import org.spongycastle.util.encoders.Hex;
 
-import java.io.IOException;
-import java.math.BigInteger;
-import java.util.*;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
@@ -110,7 +112,7 @@ public class ContractServiceImpl implements ContractService {
         batchInfo.setPreStateRoot(preStateRoot);
         // 准备冲突检测器
         ContractConflictChecker checker = ContractConflictChecker.newInstance();
-        checker.setContractSetList(new ArrayList<>());
+        checker.setContractSetList(new CopyOnWriteArrayList<>());
         batchInfo.setChecker(checker);
         return getSuccess();
     }
@@ -165,6 +167,7 @@ public class ContractServiceImpl implements ContractService {
             container.loadFutureList();
             // 多线程执行合约
             ContractWrapperTransaction wrapperTx = ContractUtil.parseContractTransaction(tx);
+            wrapperTx.setOrder(batchInfo.getAndIncreaseTxCounter());
             Result result = contractCaller.callTx(chainId, container, batchExecutor, wrapperTx, preStateRoot);
             return result;
         } catch (InterruptedException e) {

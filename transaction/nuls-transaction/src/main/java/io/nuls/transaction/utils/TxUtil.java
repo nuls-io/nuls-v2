@@ -166,7 +166,7 @@ public class TxUtil {
             transactionPO.setAmount(BigInteger.ZERO);
             transactionPO.setHash(tx.getHash().getDigestHex());
             transactionPO.setType(tx.getType());
-            transactionPO.setState(3);
+            transactionPO.setState(2);
             transactionPO.setTime(tx.getTime());
             list.add(transactionPO);
         } else {
@@ -197,32 +197,41 @@ public class TxUtil {
                     list.add(transactionPO);
                 }
             }
-            if (coinData.getTo() != null) {
-                TransactionPO transactionPO = null;
-                for (CoinTo coinTo : coinData.getTo()) {
-                    transactionPO = new TransactionPO();
-                    transactionPO.setAddress(AddressTool.getStringAddressByBytes(coinTo.getAddress()));
-                    transactionPO.setAssetChainId(coinTo.getAssetsChainId());
-                    transactionPO.setAssetId(coinTo.getAssetsId());
-                    transactionPO.setAmount(coinTo.getAmount());
-                    transactionPO.setHash(tx.getHash().getDigestHex());
-                    transactionPO.setType(tx.getType());
-                    // 解锁高度或解锁时间，-1为永久锁定
-                    Long lockTime = coinTo.getLockTime();
-                    int state = 1;
-                    if (lockTime != 0) {
-                        state = 2;
-                    }
-                    transactionPO.setState(state);
-                    transactionPO.setTime(tx.getTime());
-                    list.add(transactionPO);
+        }
+        //红牌交易也会记录to的解锁
+        if (coinData.getTo() != null) {
+            TransactionPO transactionPO = null;
+            for (CoinTo coinTo : coinData.getTo()) {
+                transactionPO = new TransactionPO();
+                transactionPO.setAddress(AddressTool.getStringAddressByBytes(coinTo.getAddress()));
+                transactionPO.setAssetChainId(coinTo.getAssetsChainId());
+                transactionPO.setAssetId(coinTo.getAssetsId());
+                transactionPO.setAmount(coinTo.getAmount());
+                transactionPO.setHash(tx.getHash().getDigestHex());
+                transactionPO.setType(tx.getType());
+                // 解锁高度或解锁时间，-1为永久锁定
+
+                Long lockTime = coinTo.getLockTime();
+                int state = 1;
+                if (lockTime == -1) {
+                    //锁定
+                    state = 2;
+                } else if (lockTime == 0) {
+                    //普通转入
+                    state = 1;
+                } else {
+                    //解锁
+                    state = 3;
                 }
+                transactionPO.setState(state);
+                transactionPO.setTime(tx.getTime());
+                list.add(transactionPO);
             }
         }
         if (TxManager.isUnSystemSmartContract(chain, tx.getType())) {
             do {
                 // 调用合约交易，如果有coinTo，那么它是合约地址，此处地址与交易的关系不重复存储
-                if(tx.getType() == TxConstant.TX_TYPE_CALL_CONTRACT && coinData.getTo().size() > 0) {
+                if (tx.getType() == TxConstant.TX_TYPE_CALL_CONTRACT && coinData.getTo().size() > 0) {
                     break;
                 }
                 TransactionPO transactionPO = new TransactionPO();
@@ -312,7 +321,9 @@ public class TxUtil {
     }
 
     public static void txInformationDebugPrint(Chain chain, Transaction tx, NulsLogger nulsLogger) {
-        if(tx.getType() == 1) {return;}
+        if (tx.getType() == 1) {
+            return;
+        }
         nulsLogger.debug("");
         nulsLogger.debug("**************************************************");
         nulsLogger.debug("Transaction information");
@@ -382,12 +393,13 @@ public class TxUtil {
 
     /**
      * 对交易进行模块分组
+     *
      * @param chain
      * @param moduleVerifyMap
      * @param tx
      * @throws NulsException
      */
-    public static void moduleGroups(Chain chain, Map<TxRegister, List<String>> moduleVerifyMap, Transaction tx) throws NulsException{
+    public static void moduleGroups(Chain chain, Map<TxRegister, List<String>> moduleVerifyMap, Transaction tx) throws NulsException {
         //根据模块的统一验证器名，对所有交易进行分组，准备进行各模块的统一验证
         TxRegister txRegister = TxManager.getTxRegister(chain, tx.getType());
         String txHex;
