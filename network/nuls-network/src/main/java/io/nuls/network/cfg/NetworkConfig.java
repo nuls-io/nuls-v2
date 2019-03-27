@@ -47,7 +47,7 @@ public class NetworkConfig {
     private String encoding;
 
     private List<String> localIps = new ArrayList<>();
-
+    private int updatePeerInfoType = 0;
     /**
      * ROCK DB 数据库文件存储路径
      */
