@@ -135,10 +135,6 @@ public class TxUtil {
 
     public static List<TransactionPO> tx2PO(Chain chain, Transaction tx) throws NulsException {
         List<TransactionPO> list = new ArrayList<>();
-        if (null == tx.getCoinData()) {
-            return list;
-        }
-        CoinData coinData = tx.getCoinDataInstance();
         if (tx.getType() == TxConstant.TX_TYPE_YELLOW_PUNISH) {
             YellowPunishData punishData = new YellowPunishData();
             punishData.parse(tx.getTxData(), 0);
@@ -154,7 +150,13 @@ public class TxUtil {
                 transactionPO.setTime(tx.getTime());
                 list.add(transactionPO);
             }
-        } else if (tx.getType() == TxConstant.TX_TYPE_RED_PUNISH) {
+            return list;
+        }
+        if (null == tx.getCoinData()) {
+            return list;
+        }
+        CoinData coinData = tx.getCoinDataInstance();
+        if (tx.getType() == TxConstant.TX_TYPE_RED_PUNISH) {
             RedPunishData punishData = new RedPunishData();
             punishData.parse(tx.getTxData(), 0);
             TransactionPO transactionPO = new TransactionPO();
@@ -167,7 +169,6 @@ public class TxUtil {
             transactionPO.setState(3);
             transactionPO.setTime(tx.getTime());
             list.add(transactionPO);
-
         } else {
             if (coinData.getFrom() != null
                     && tx.getType() != TxConstant.TX_TYPE_COINBASE

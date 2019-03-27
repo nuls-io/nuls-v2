@@ -227,12 +227,6 @@ public class ChainManager {
             and the main chain configuration information needs to be read from the configuration file at this time.
             */
             if (configMap == null || configMap.size() == 0) {
-                /*String configJson = IoUtils.read(ConsensusConstant.CONFIG_FILE_PATH);
-                List<ConfigItem> configItemList = JSONUtils.json2list(configJson, ConfigItem.class);
-                ConfigBean configBean = ConfigManager.initManager(configItemList);
-                if (configBean == null) {
-                    return null;
-                }*/
                 ConfigBean configBean = config.getConfigBean();
                 configBean.setBlockReward(configBean.getInflationAmount().divide(ConsensusConstant.YEAR_MILLISECOND.divide(BigInteger.valueOf(configBean.getPackingInterval()))));
                 boolean saveSuccess = configService.save(configBean,configBean.getChainId());

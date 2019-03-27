@@ -65,11 +65,11 @@ public class PeerInfoMessageHandler extends BaseMessageHandler {
     @Override
     public NetworkEventResult recieve(BaseMessage message, Node node) {
         NodeGroup nodeGroup = NodeGroupManager.getInstance().getNodeGroupByMagic(message.getHeader().getMagicNumber());
-        LoggerUtil.logger(nodeGroup.getChainId()).debug("PeerInfoMessageHandler Recieve:" + (node.isServer() ? "Server" : "Client") + ":" + node.getIp() + ":" + node.getRemotePort() + "==CMD=" + message.getHeader().getCommandStr());
-        /*
+           /*
          * 处理应答消息
          */
         PeerInfoMessage peerInfoMessage = (PeerInfoMessage) message;
+        LoggerUtil.logger(nodeGroup.getChainId()).debug("PeerInfoMessageHandler Recieve:{},CMD={},height={} ", node.getId(), message.getHeader().getCommandStr(),peerInfoMessage.getMsgBody().getBlockHeight());
         node.setBlockHash(peerInfoMessage.getMsgBody().getBlockHash());
         node.setBlockHeight(peerInfoMessage.getMsgBody().getBlockHeight());
         return NetworkEventResult.getResultSuccess();

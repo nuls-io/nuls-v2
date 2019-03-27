@@ -69,6 +69,19 @@ public class TxValid {
     static String address27 = "tNULSeBaMmTNYqywL5ZSHbyAQ662uE3wibrgD1";
     static String address28 = "tNULSeBaMoNnKitV28JeuUdBaPSR6n1xHfKLj2";
     static String address29 = "tNULSeBaMqywZjfSrKNQKBfuQtVxAHBQ8rB2Zn";
+
+    /** 空地址
+     * tNULSeBaMkuPakKx47WduYbgcf1nkN13XamndS
+     * tNULSeBaMkZyA7bbbjUvPA9qQ7bjW9mowha5Df
+     * tNULSeBaMuzakuM2FpTEezAeTMchiVNavHbgiL
+     * tNULSeBaMk6mPhky8vb1XgxEfkWABNN1xdURzS
+     * tNULSeBaMkFykqCnXinMrJ6Ho1SaGzzq4kQDgY
+     * tNULSeBaMkQ2jm1rbPVZ9JsekQ2jJmkUhB4V7G
+     * tNULSeBaMpkdW1hCBA1xnTQ64qvADaAFLebCDM
+     * tNULSeBaMfWi3GxjU2dUzjtSn1xvhCAWnZXisP
+     * tNULSeBaMiAcrt2bgUXYPZkgw7UhdCth1tJVHn
+     * tNULSeBaMoRVvrr9noCDWwNNe3ZAbCvRWEPtij
+     */
     private Chain chain;
     static int chainId = 2;
     static int assetChainId = 2;
@@ -111,7 +124,8 @@ public class TxValid {
 //        getTxClient(hash);
 //        Thread.sleep(1000L);
 //        getTxClient(hash);
-        getTxCfmClient("002037bd6ee432aab018712115891857713d71e378979eb4506561a35b6688b9cfce");
+//        getTxCfmClient("002037bd6ee432aab018712115891857713d71e378979eb4506561a35b6688b9cfce");
+        System.out.println(Runtime.getRuntime().availableProcessors());
     }
 
     private void getTx(String hash) throws Exception {
@@ -131,16 +145,24 @@ public class TxValid {
 
     @Test
     public void importPriKeyTest() {
-        importPriKey("b54db432bba7e13a6c4a28f65b925b18e63bcb79143f7b894fa735d5d3d09db5", password);//种子出块地址 tNULSeBaMkrt4z9FYEkkR9D6choPVvQr94oYZp
+//        importPriKey("b54db432bba7e13a6c4a28f65b925b18e63bcb79143f7b894fa735d5d3d09db5", password);//种子出块地址 tNULSeBaMkrt4z9FYEkkR9D6choPVvQr94oYZp
 //        importPriKey("188b255c5a6d58d1eed6f57272a22420447c3d922d5765ebb547bc6624787d9f", password);//种子出块地址 tNULSeBaMoGr2RkLZPfJeS5dFzZeNj1oXmaYNe
-        importPriKey("477059f40708313626cccd26f276646e4466032cabceccbf571a7c46f954eb75", password);//21 tNULSeBaMvEtDfvZuukDf2mVyfGo3DdiN8KLRG
-        importPriKey("9ce21dad67e0f0af2599b41b515a7f7018059418bab892a7b68f283d489abc4b", password);//20 tNULSeBaMnrs6JKrCy6TQdzYJZkMZJDng7QAsD
+//        importPriKey("9ce21dad67e0f0af2599b41b515a7f7018059418bab892a7b68f283d489abc4b", password);//20 tNULSeBaMvEtDfvZuukDf2mVyfGo3DdiN8KLRG
+//        importPriKey("477059f40708313626cccd26f276646e4466032cabceccbf571a7c46f954eb75", password);//21 tNULSeBaMnrs6JKrCy6TQdzYJZkMZJDng7QAsD
+//        importPriKey("8212e7ba23c8b52790c45b0514490356cd819db15d364cbe08659b5888339e78", password);//22 tNULSeBaMrbMRiFAUeeAt6swb4xVBNyi81YL24
+//        importPriKey("4100e2f88c3dba08e5000ed3e8da1ae4f1e0041b856c09d35a26fb399550f530", password);//23 tNULSeBaMu38g1vnJsSZUCwTDU9GsE5TVNUtpD
+//        importPriKey("bec819ef7d5beeb1593790254583e077e00f481982bce1a43ea2830a2dc4fdf7", password);//24 tNULSeBaMp9wC9PcWEcfesY7YmWrPfeQzkN1xL
+        importPriKey("ddddb7cb859a467fbe05d5034735de9e62ad06db6557b64d7c139b6db856b200", password);//25 tNULSeBaMshNPEnuqiDhMdSA4iNs6LMgjY6tcL
+        importPriKey("4efb6c23991f56626bc77cdb341d64e891e0412b03cbcb948aba6d4defb4e60a", password);//26 tNULSeBaMoodYW7AqyJrgYdWiJ6nfwfVHHHyXm
+//        importPriKey("3dadac00b523736f38f8c57deb81aa7ec612b68448995856038bd26addd80ec1", password);//27 tNULSeBaMmTNYqywL5ZSHbyAQ662uE3wibrgD1
+//        importPriKey("27dbdcd1f2d6166001e5a722afbbb86a845ef590433ab4fcd13b9a433af6e66e", password);//28 tNULSeBaMoNnKitV28JeuUdBaPSR6n1xHfKLj2
+//        importPriKey("76b7beaa98db863fb680def099af872978209ed9422b7acab8ab57ad95ab218b", password);//29 tNULSeBaMqywZjfSrKNQKBfuQtVxAHBQ8rB2Zn
     }
 
     @Test
     public void createAgentTx() throws Exception {
         //组装创建节点交易
-        Map agentTxMap = this.createAgentTx(address20, address21);
+        Map agentTxMap = this.createAgentTx(address25, "tNULSeBaMkuPakKx47WduYbgcf1nkN13XamndS");
         //调用接口
         Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.CS.abbr, "cs_createAgent", agentTxMap);
         Map result = (HashMap) (((HashMap) cmdResp2.getResponseData()).get("cs_createAgent"));
@@ -156,10 +178,10 @@ public class TxValid {
     @Test
     public void depositToAgent() throws Exception {
         //组装委托节点交易
-        String agentHash = "00205989de73d03c4a0560d4caa436d387738bbd2baccf4ce3440d6cbfae1149e63d";
+        String agentHash = "0020233bb38524c5e69b7b4bb342448c4f7dff7037ade6fd72f539a297e3c5b24b65";
         Map<String, Object> dpParams = new HashMap<>();
         dpParams.put("chainId", chainId);
-        dpParams.put("address", address20);
+        dpParams.put("address", address25);
         dpParams.put("password", password);
         dpParams.put("agentHash", agentHash);
         dpParams.put("deposit", 200000 * 100000000L);
@@ -167,6 +189,8 @@ public class TxValid {
         HashMap dpResult = (HashMap) ((HashMap) dpResp.getResponseData()).get("cs_depositToAgent");
         String txHash = (String) dpResult.get("txHash");
         Log.debug("deposit-txHash:{}", txHash);
+
+        //00201c4f7f9735072eddcf203122ea2d940c8abda3625131319024a06c845ca54e1b
     }
 
     /**
@@ -178,7 +202,7 @@ public class TxValid {
     public void withdraw() throws Exception {
         Map<String, Object> params = new HashMap<>();
         params.put("chainId", chainId);
-        params.put("address", address20);
+        params.put("address", address25);
         params.put("password", password);
         params.put("txHash", "0020b8a42eb4c70196189e607e9434fe09b595d5753711f21819113f40d64a1c82c1");
         Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.CS.abbr, "cs_withdraw", params);
@@ -191,7 +215,7 @@ public class TxValid {
     public void stopAgentTx() throws Exception {
         Map<String, Object> txMap = new HashMap();
         txMap.put("chainId", chainId);
-        txMap.put("address", address20);
+        txMap.put("address", address25);
         txMap.put("password", password);
         //调用接口
         Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.CS.abbr, "cs_stopAgent", txMap);
@@ -211,7 +235,7 @@ public class TxValid {
         Map<String, Object> params = new HashMap<>();
         params.put(Constants.VERSION_KEY_STR, "1.0");
         params.put("chainId", chainId);
-        params.put("address", address20);
+        params.put("address", address25);
         params.put("password", password);
         params.put("alias", alias);
         Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_setAlias", params);
@@ -231,7 +255,7 @@ public class TxValid {
     public void getTxRecord() throws Exception {
         Map<String, Object> params = new HashMap<>();
         params.put("chainId", chainId);
-        params.put("address", address20);
+        params.put("address", "tNULSeBaMk4LBr1y1tsneiHvy5H2Rc3Lns4QuN");//tNULSeBaMk4LBr1y1tsneiHvy5H2Rc3Lns4QuN
         params.put("assetChainId", null);
         params.put("assetId", null);
         params.put("type", null);
@@ -280,7 +304,7 @@ public class TxValid {
      */
     @Test
     public void removeAccountTest() throws Exception {
-        removeAccount(address20, password);
+        removeAccount(address25, password);
 //        removeAccount(address20, password);
     }
 
@@ -430,14 +454,14 @@ public class TxValid {
         CoinDTO coinDTO = new CoinDTO();
         coinDTO.setAssetsId(assetId);
         coinDTO.setAssetsChainId(assetChainId);
-        coinDTO.setAddress(address20);
+        coinDTO.setAddress(address25);
         coinDTO.setAmount(new BigInteger("200000000"));
         coinDTO.setPassword(password);
 
         CoinDTO coinDTO2 = new CoinDTO();
         coinDTO2.setAssetsId(assetId);
         coinDTO2.setAssetsChainId(assetChainId);
-        coinDTO2.setAddress(address21);
+        coinDTO2.setAddress(address26);
         coinDTO2.setAmount(new BigInteger("100000000"));
         coinDTO2.setPassword(password);
         List<CoinDTO> listFrom = new ArrayList<>();
@@ -477,7 +501,7 @@ public class TxValid {
         List<CoinDTO> inputs = new ArrayList<>();
         List<CoinDTO> outputs = new ArrayList<>();
         CoinDTO inputCoin1 = new CoinDTO();
-        inputCoin1.setAddress(address20);
+        inputCoin1.setAddress(address25);
         inputCoin1.setPassword(password);
         inputCoin1.setAssetsChainId(chainId);
         inputCoin1.setAssetsId(assetId);
@@ -485,7 +509,7 @@ public class TxValid {
         inputs.add(inputCoin1);
 
         CoinDTO outputCoin1 = new CoinDTO();
-        outputCoin1.setAddress(address21);
+        outputCoin1.setAddress(address26);
         outputCoin1.setPassword(password);
         outputCoin1.setAssetsChainId(chainId);
         outputCoin1.setAssetsId(assetId);
