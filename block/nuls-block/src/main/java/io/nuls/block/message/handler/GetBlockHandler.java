@@ -74,7 +74,7 @@ public class GetBlockHandler extends BaseCmd {
         }
 
         NulsDigestData requestHash = message.getRequestHash();
-        messageLog.info("recieve HashMessage from node-" + nodeId + ", chainId:" + chainId + ", hash:" + requestHash);
+        messageLog.debug("recieve HashMessage from node-" + nodeId + ", chainId:" + chainId + ", hash:" + requestHash);
         sendBlock(chainId, service.getBlock(chainId, requestHash), nodeId, requestHash);
         return success();
     }
