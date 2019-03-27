@@ -160,11 +160,6 @@ public class MyKernelBootstrap {
             ThreadUtils.createAndRunThread("module-start", () -> {
                 Process process = null;
                 try {
-//                    try {
-//                        TimeUnit.SECONDS.sleep(new Random().nextInt(100) % 10);
-//                    } catch (InterruptedException e) {
-//                        e.printStackTrace();
-//                    }
                     process = Runtime.getRuntime().exec(
                             modules.getAbsolutePath() + File.separator + "start.sh "
                                     + " --jre " + System.getProperty("java.home")
