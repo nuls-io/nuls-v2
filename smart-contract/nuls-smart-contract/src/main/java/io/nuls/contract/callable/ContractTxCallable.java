@@ -135,7 +135,9 @@ public class ContractTxCallable implements Callable<ContractResult> {
                     break;
             }
         } while (false);
-        Log.info("TxType [{}] Execute ContractResult is {}", tx.getType(), contractResult);
+        if(!contractResult.isSuccess()) {
+            Log.error("TxType [{}] Execute ContractResult is {}", tx.getType(), contractResult);
+        }
         return contractResult;
     }
 
@@ -165,6 +167,7 @@ public class ContractTxCallable implements Callable<ContractResult> {
         if (isConflict) {
             // 冲突后，添加到重新执行的集合中，但是gas消耗完的不再重复执行
             if (!isNotEnoughGasError(contractResult)) {
+                Log.error("Conflict TxType [{}] Execute ContractResult is {}", tx.getType(), contractResult);
                 reCallList.add(contractResult);
             } else {
                 // 执行失败，添加到执行失败的集合中

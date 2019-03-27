@@ -2,9 +2,6 @@
 cd `dirname $0`
 APP_NAME="%APP_NAME%"
 KILL_WAIT_COUNT=120
-MODULE_PATH=$(cd `dirname $0`;pwd)
-LOGS_DIR="$MODULE_PATH/log"
-#STDOUT_FILE=$LOGS_DIR/stdout.log
 APP_PID=`ps -ef|grep -w "name=${APP_NAME} "|grep -v grep|awk '{print $2}'`
 APP=0
 echoRed() { echo $'\e[0;31m'$1$'\e[0m'; }
@@ -39,10 +36,6 @@ stop(){
     kill -9 $pid > /dev/null 2>&1
 }
 
-#if [ x$1 = x ]; then
-#      echoRed "Usage: $0 appName";
-#      exit 1;
-#fi
 APP=`ps -ef|grep -w "name=${APP_NAME} "|grep -v grep|wc -l`
 if [[ $APP -eq 1 ]]; then
     PID_EXIST=`ps -f -p ${APP_PID} | grep java`

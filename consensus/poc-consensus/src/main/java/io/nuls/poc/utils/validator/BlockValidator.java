@@ -8,6 +8,7 @@ import io.nuls.poc.constant.ConsensusErrorCode;
 import io.nuls.poc.model.bo.Chain;
 import io.nuls.poc.model.bo.round.MeetingMember;
 import io.nuls.poc.model.bo.round.MeetingRound;
+import io.nuls.poc.model.bo.round.RoundValidResult;
 import io.nuls.poc.model.bo.tx.txdata.Agent;
 import io.nuls.poc.model.bo.tx.txdata.RedPunishData;
 import io.nuls.poc.model.bo.tx.txdata.YellowPunishData;
@@ -57,21 +58,27 @@ public class BlockValidator {
       if (!blockHeader.getMerkleHash().equals(NulsDigestData.calcMerkleDigestData(block.getTxHashList()))) {
          throw new NulsException(ConsensusErrorCode.MERKEL_HASH_ERROR);
       }
-      MeetingRound currentRound ;
+      RoundValidResult roundValidResult;
       try {
-         currentRound = roundValidate(isDownload,chain,blockHeader);
+         roundValidResult = roundValidate(isDownload,chain,blockHeader);
       }catch (Exception e){
          throw new NulsException(e);
       }
-
+      MeetingRound currentRound = roundValidResult.getRound();
       BlockExtendsData extendsData = new BlockExtendsData(blockHeader.getExtend());
       MeetingMember member = currentRound.getMember(extendsData.getPackingIndexOfRound());
       boolean validResult = punishValidate(block,currentRound,member,chain);
       if(!validResult){
+         if(roundValidResult.isValidResult()){
+            roundManager.rollBackRound(chain,currentRound.getIndex());
+         }
          throw new NulsException(ConsensusErrorCode.BLOCK_PUNISH_VALID_ERROR);
       }
       validResult = coinBaseValidate(block,currentRound,member,chain);
       if(!validResult){
+         if(roundValidResult.isValidResult()){
+            roundManager.rollBackRound(chain,currentRound.getIndex());
+         }
          throw new NulsException(ConsensusErrorCode.BLOCK_COINBASE_VALID_ERROR);
       }
    }
@@ -84,11 +91,12 @@ public class BlockValidator {
     * @param chain             chain info
     * @param blockHeader       block header info
     * */
-   private MeetingRound roundValidate(boolean isDownload, Chain chain, BlockHeader blockHeader)throws Exception {
+   private RoundValidResult roundValidate(boolean isDownload, Chain chain, BlockHeader blockHeader)throws Exception {
       BlockExtendsData extendsData = new BlockExtendsData(blockHeader.getExtend());
       BlockHeader bestBlockHeader = chain.getNewestHeader();
       BlockExtendsData bestExtendsData = new BlockExtendsData(bestBlockHeader.getExtend());
 
+      RoundValidResult roundValidResult = new RoundValidResult();
       /*
       该区块为本地最新区块之前的区块
       * */
@@ -108,7 +116,7 @@ public class BlockValidator {
             currentRound = roundManager.getRound(chain,extendsData,false);
          }
          if(chain.getRoundList().isEmpty()){
-            chain.getRoundList().add(currentRound);
+            hasChangeRound = true;
          }
       }
       else if(extendsData.getRoundIndex() > currentRound.getIndex()){
@@ -151,8 +159,10 @@ public class BlockValidator {
       }
       if (hasChangeRound) {
          roundManager.addRound(chain, currentRound);
+         roundValidResult.setValidResult(true);
       }
-      return currentRound;
+      roundValidResult.setRound(currentRound);
+      return roundValidResult;
    }
 
    /**

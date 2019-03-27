@@ -195,6 +195,7 @@ public abstract class RpcModule implements InitializingBean {
             tryRunModule();
         } catch (Exception e) {
             Log.error(moduleInfo().toString() + " initServer failed", e);
+            System.exit(0);
         }
     }
 

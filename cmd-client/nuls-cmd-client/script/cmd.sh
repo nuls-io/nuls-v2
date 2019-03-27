@@ -35,7 +35,11 @@ do
 done
 PUB_LIB="${PUB_LIB}:./cmdclient-1.0.0.jar"
 # Get standard environment variables
-JAVA_OPTS="-Xms128m -Xmx128m -Dapp.name=cmd-client --illegal-access=warn"
+logLevel=$1
+if [[ -z "$logLevel" ]]; then
+    logLevel="ERROR"
+fi
+JAVA_OPTS="-Xms128m -Xmx128m -Dapp.name=cmd-client --illegal-access=warn -Dlog.level=${logLevel} "
 
 CONF_PATH=$SERVER_HOME/conf
 CLASSPATH=$CLASSPATH:$CONF_PATH:$PUB_LIB:.

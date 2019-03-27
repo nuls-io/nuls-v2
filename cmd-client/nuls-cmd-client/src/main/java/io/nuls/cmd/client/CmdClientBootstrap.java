@@ -18,7 +18,6 @@ public class CmdClientBootstrap {
 
     public static void main(String[] args) {
         NulsRpcModuleBootstrap.printLogo("/cli-logo");
-        Log.BASIC_LOGGER = LoggerBuilder.getLogger(Log.BASIC_NAME, Level.ERROR);
         if (args == null || args.length == 0) {
             args = new String[]{"ws://" + HostInfo.getLocalIP() + ":8887/ws","0"};
         }else{
