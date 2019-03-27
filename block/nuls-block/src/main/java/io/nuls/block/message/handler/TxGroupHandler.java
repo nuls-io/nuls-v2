@@ -95,7 +95,6 @@ public class TxGroupHandler extends BaseCmd {
             }
 
             BlockHeader header = smallBlock.getHeader();
-            NulsDigestData headerHash = header.getHash();
             Map<NulsDigestData, Transaction> txMap = cachedSmallBlock.getTxMap();
             for (Transaction tx : transactions) {
                 txMap.put(tx.getHash(), tx);
