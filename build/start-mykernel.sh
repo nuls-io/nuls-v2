@@ -7,7 +7,7 @@ help()
     Desc: 启动NULS 2.0钱包，
     Usage: ./start.sh
     		-c <module.json> 使用指定配置文件 如果不配置将使用./default-config.json
-    		-b 后台运行
+    		-f 前台运行
     		-l <logs path> 输出的日志目录
     		-d <data path> 数据存储目录
     		-j JAVA_HOME
@@ -103,14 +103,10 @@ fi
 echo "log path : ${LOGPATH}"
 echo "data path : ${DATAPATH}"
 
-
-#echo "jdk version : `$JAVA -version `"
-#MODULE_PATH=$(cd `dirname $0`;pwd)
 cd ../Modules/Nuls
 MODULE_PATH=$(pwd)
 if [ -n "${RUNFRONT}" ];
 then
-    echo "${JAVA} -server -Ddebug=${DEBUG} -Dapp.name=mykernel -Dlog.path=${LOGPATH} ${DATAPATH} -Dactive.module=$CONFIG -classpath ./libs/*:./mykernel/1.0.0/mykernel-1.0.0.jar io.nuls.mykernel.MyKernelBootstrap startModule $MODULE_PATH $CONFIG"
     ${JAVA} -server -Ddebug="${DEBUG}" -Dapp.name=mykernel -Dlog.path="${LOGPATH}" ${DATAPATH} -Dactive.module="$CONFIG" -classpath ./libs/*:./mykernel/1.0.0/mykernel-1.0.0.jar io.nuls.mykernel.MyKernelBootstrap startModule $MODULE_PATH $CONFIG
 else
     nohup ${JAVA} -server -Ddebug="${DEBUG}" -Dapp.name=mykernel -Dlog.path="${LOGPATH}" ${DATAPATH}  -Dactive.module="$CONFIG"  -classpath ./libs/*:./mykernel/1.0.0/mykernel-1.0.0.jar io.nuls.mykernel.MyKernelBootstrap startModule $MODULE_PATH $CONFIG > "${LOGPATH}/stdut.log" 2>&1 &

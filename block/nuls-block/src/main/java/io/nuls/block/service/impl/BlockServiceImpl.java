@@ -232,7 +232,7 @@ public class BlockServiceImpl implements BlockService {
                 forwardBlock(chainId, hash, null);
             }
             long elapsedNanos1 = System.nanoTime() - startTime1;
-            commonLog.info("1. time-" + elapsedNanos1);
+            commonLog.debug("1. time-" + elapsedNanos1);
             //2.设置最新高度,如果失败则恢复上一个高度
             long startTime2 = System.nanoTime();
             boolean setHeight = blockStorageService.setLatestHeight(chainId, height);
@@ -244,7 +244,7 @@ public class BlockServiceImpl implements BlockService {
                 return false;
             }
             long elapsedNanos2 = System.nanoTime() - startTime2;
-            commonLog.info("2. time-" + elapsedNanos2);
+            commonLog.debug("2. time-" + elapsedNanos2);
 
             //3.保存区块头, 保存交易
             long startTime3 = System.nanoTime();
@@ -262,7 +262,7 @@ public class BlockServiceImpl implements BlockService {
                 return false;
             }
             long elapsedNanos3 = System.nanoTime() - startTime3;
-            commonLog.info("3. time-" + elapsedNanos3);
+            commonLog.debug("3. time-" + elapsedNanos3);
 
             //4.通知共识模块
             long startTime4 = System.nanoTime();
@@ -281,7 +281,7 @@ public class BlockServiceImpl implements BlockService {
                 return false;
             }
             long elapsedNanos4 = System.nanoTime() - startTime4;
-            commonLog.info("4. time-" + elapsedNanos4);
+            commonLog.debug("4. time-" + elapsedNanos4);
 
             //5.通知协议升级模块,完全保存,更新标记
             long startTime5 = System.nanoTime();
@@ -303,7 +303,7 @@ public class BlockServiceImpl implements BlockService {
                 return false;
             }
             long elapsedNanos5 = System.nanoTime() - startTime5;
-            commonLog.info("5. time-" + elapsedNanos5);
+            commonLog.debug("5. time-" + elapsedNanos5);
 
             //6.如果不是第一次启动,则更新主链属性
             if (!localInit) {
