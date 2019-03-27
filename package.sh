@@ -437,8 +437,6 @@ if [ -n "${DOMOCK}" ]; then
 	chmod u+x "${MODULES_BIN_PATH}/cmd.sh"
 	cp "${BUILD_PATH}/test.sh" "${MODULES_BIN_PATH}/"
 	chmod u+x "${MODULES_BIN_PATH}/test.sh"
-	cp "${BUILD_PATH}/check-jdk.sh" "${MODULES_BIN_PATH}/"
-	chmod u+x "${MODULES_BIN_PATH}/check-jdk.sh"
 
 	tempModuleList=
 	for m in ${managedModules[@]}
