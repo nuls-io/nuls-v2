@@ -3,11 +3,13 @@ package io.nuls.rpc.modulebootstrap;
 import io.nuls.tools.core.ioc.SpringLiteContext;
 import io.nuls.tools.exception.NulsRuntimeException;
 import io.nuls.tools.log.Log;
+import io.nuls.tools.parse.config.IniEntity;
 import io.nuls.tools.thread.ThreadUtils;
+import org.ini4j.Config;
+import org.ini4j.Ini;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.*;
+import java.net.URL;
 import java.util.Arrays;
 
 /**
@@ -19,6 +21,8 @@ public class NulsRpcModuleBootstrap {
 
     private static final String DEFAULT_SCAN_PACKAGE = "io.nuls";
 
+    private static boolean printLogoed = false;
+
     public static void main(String[] args) {
         NulsRpcModuleBootstrap.run(args);
     }
@@ -28,6 +32,7 @@ public class NulsRpcModuleBootstrap {
     }
 
     public static void run(String scanPackage, String[] args) {
+        printLogo("/logo");
         SpringLiteContext.init(scanPackage, "io.nuls.rpc.modulebootstrap", "io.nuls.rpc.cmd");
         RpcModule module;
         try {
@@ -78,6 +83,23 @@ public class NulsRpcModuleBootstrap {
 //        Log.info("MODULE DEPENDENCIES:");
 //        Arrays.stream(module.getDependencies()).forEach(d -> Log.info("====>{}:{}", d.name, d.version));
         module.run(scanPackage, args[0]);
+    }
+
+    public static void printLogo(String logoFile) {
+        if(printLogoed)return ;
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(Class.forName(NulsRpcModuleBootstrap.class.getName()).getResourceAsStream(logoFile)))){
+            String line = reader.readLine();
+            while(line != null){
+                System.out.println(line);
+                line = reader.readLine();
+            }
+            System.out.println("Module:" + System.getProperty("app.name"));
+            System.out.println();
+        } catch (IOException | ClassNotFoundException e) {
+            e.printStackTrace();
+            System.exit(0);
+        }
+        printLogoed = true;
     }
 
 }

@@ -40,7 +40,7 @@ public class RegisterInvoke extends BaseInvoke {
                 logInfo.append("注入：[key=").append(entry.getKey()).append(",value=").append(entry.getValue()).append("]\n");
                 ConnectManager.ROLE_MAP.put(entry.getKey(), entry.getValue());
             }
-            Log.info(logInfo.toString());
+            Log.debug(logInfo.toString());
             ConnectManager.updateStatus();
             if (!ConnectManager.isReady()) {
                 return;

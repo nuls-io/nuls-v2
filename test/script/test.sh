@@ -1,6 +1,11 @@
 #!/bin/sh
 PRG="$0"
-
+APP_PID=`ps -ef|grep -w "name=test "|grep -v grep|awk '{print $2}'`
+PID_EXIST=`ps -f -p ${APP_PID} | grep java`
+if [ ! -z "$PID_EXIST" ]; then
+    echo "test module is running. please stop test module";
+    exit 0
+fi
 while [ -h "$PRG" ]; do
   ls=`ls -ld "$PRG"`
   link=`expr "$ls" : '.*-> \(.*\)$'`
@@ -35,7 +40,7 @@ do
 done
 PUB_LIB="${PUB_LIB}:./test-1.0.0.jar"
 # Get standard environment variables
-JAVA_OPTS="-Xms128m -Xmx128m -DtestNodeType=master "
+JAVA_OPTS="-Xms128m -Xmx128m -DtestNodeType=master -Dapp.name=test "
 
 CONF_PATH=$SERVER_HOME/conf
 CLASSPATH=$CLASSPATH:$CONF_PATH:$PUB_LIB:.
@@ -45,7 +50,7 @@ if  [ -x ${SERVER_HOME}/jre/bin/java ]; then
   exit 0
 fi
 
-JAVA_BIN=`which java`
+JAVA="${JAVA_HOME}/bin/java"
 # try to use JAVA_HOME jre
 if [ -x ${JAVA_BIN} ]; then
   ${JAVA_BIN} $JAVA_OPTS -classpath $CLASSPATH $MAIN_CLASS
