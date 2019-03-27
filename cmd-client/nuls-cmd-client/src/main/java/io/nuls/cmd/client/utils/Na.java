@@ -322,6 +322,8 @@ public final class Na implements Comparable<Na>, Serializable {
             return String.valueOf(object);
         } else if (object instanceof Float) {
             return String.valueOf(object);
+        } else if (object instanceof String) {
+            return Na.valueOf(Long.parseLong(object.toString())).toText();
         } else {
             return "0";
         }

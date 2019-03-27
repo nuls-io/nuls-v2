@@ -103,7 +103,7 @@ public class ConsensusUtil {
      * @param chainId 链Id/chain id
      * @return
      */
-    public static boolean evidence(int chainId, BlockService blockService, BlockHeader forkHeader) {
+    public synchronized static boolean evidence(int chainId, BlockService blockService, BlockHeader forkHeader) {
         ChainContext context = ContextManager.getContext(chainId);
         NulsLogger commonLog = context.getCommonLog();
         long forkHeaderHeight = forkHeader.getHeight();

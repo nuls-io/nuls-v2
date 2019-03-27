@@ -38,6 +38,7 @@ public class WalletRpcHandler {
             byte[] bytes = HexUtil.decode(blockHex);
             Block block = new Block();
             block.parse(new NulsByteBuffer(bytes));
+            block.getHeader().setSize(bytes.length);
             BlockInfo blockInfo = AnalysisHandler.toBlockInfo(block, chainID);
 
             return Result.getSuccess(null).setData(blockInfo);
@@ -60,6 +61,7 @@ public class WalletRpcHandler {
             byte[] bytes = HexUtil.decode(blockHex);
             Block block = new Block();
             block.parse(new NulsByteBuffer(bytes));
+            block.getHeader().setSize(bytes.length);
             BlockInfo blockInfo = AnalysisHandler.toBlockInfo(block, chainID);
             return Result.getSuccess(null).setData(blockInfo);
         } catch (Exception e) {

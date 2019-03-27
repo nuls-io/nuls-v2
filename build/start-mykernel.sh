@@ -20,7 +20,8 @@ EOF
 cd `dirname $0`;
 BIN_PATH=`pwd`
 if [[ -d ../Libraries/JAVA/11.0.2 ]]; then
-    export JAVA_HOME=`dirname "../Libraries/JAVA/11.0.2/bin"`;
+    JAVA_HOME=`dirname "../Libraries/JAVA/11.0.2/bin"`;
+    JAVA_HOME=`cd $JAVA_HOME; pwd`
     JAVA="${JAVA_HOME}/bin/java"
 else
     JAVA='java'
