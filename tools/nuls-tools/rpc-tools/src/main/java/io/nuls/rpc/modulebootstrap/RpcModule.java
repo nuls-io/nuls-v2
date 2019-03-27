@@ -36,12 +36,6 @@ import java.util.concurrent.TimeUnit;
 @Order(Integer.MIN_VALUE)
 public abstract class RpcModule implements InitializingBean {
 
-    @Value("logPath")
-    private String logPath;
-
-    @Value("APP_NAME")
-    private String appName;
-
     /**
      * 启动参数
      */
@@ -70,10 +64,6 @@ public abstract class RpcModule implements InitializingBean {
     @Override
     public final void afterPropertiesSet() throws NulsException {
         try {
-            //初始化LogerBuilder
-//            if(StringUtils.isNotBlank(logPath)){
-//                LogAppender.PROJECT_PATH = logPath;
-//            }
             init();
         } catch (Exception e) {
             Log.error("rpc module init fail", e);
@@ -151,9 +141,8 @@ public abstract class RpcModule implements InitializingBean {
             if (followerList.get(module)) {
                 return true;
             }
-            Response cmdResp = null;
             try {
-                cmdResp = ResponseMessageProcessor.requestAndResponse(module.getName(), "listenerDependenciesReady", MapUtils.beanToLinkedMap(this.moduleInfo()));
+                Response cmdResp = ResponseMessageProcessor.requestAndResponse(module.getName(), "listenerDependenciesReady", MapUtils.beanToLinkedMap(this.moduleInfo()));
                 if (cmdResp.isSuccess()) {
                     followerList.put(module, Boolean.TRUE);
                     Log.info("notify follower {} is Ready success", module);
@@ -165,29 +154,6 @@ public abstract class RpcModule implements InitializingBean {
                 Log.error("Calling remote interface failed. module:{} - interface:{} - message:{}", module, "registerModuleDependencies", e.getMessage());
                 return false;
             }
-//            Request request = MessageUtil.defaultRequest();
-//            request.getRequestMethods().put("listenerDependenciesReady", this.moduleInfo());
-//            Message message = MessageUtil.basicMessage(MessageType.Request);
-//            message.setMessageData(request);
-//            try {
-//                ConnectManager.sendMessage(module.getName(), message);
-//                log.info("notify follower {} is Ready success",module);
-//                followerList.put(module,Boolean.TRUE);
-//                return true;
-//            } catch (Exception e) {
-//                log.warn("notify follower {} is Ready fail ",module,e);
-//                return false;
-////                if(tryCount > 5){
-////                    log.error("notify follower {} is Ready fail ",module,e);
-////                    return ;
-////                }
-////                try {
-////                    TimeUnit.SECONDS.sleep(1);
-////                    notifyFollowerReady(module, tryCount+1);
-////                } catch (InterruptedException e1) {
-////                    log.warn("sleep线程发生异常");
-////                }
-//            }
         });
     }
 
@@ -252,7 +218,7 @@ public abstract class RpcModule implements InitializingBean {
                     Log.error("onDependenciesReady return null state", new NullPointerException("onDependenciesReady return null state"));
                     System.exit(0);
                 }
-                Log.info("RMB:module state : {}", state);
+                Log.info("RMB:{} module state : {}", state);
             }
         } else {
             Log.info("RMB:dependencie state");

@@ -20,8 +20,10 @@
 
 package io.nuls.mykernel;
 
+import ch.qos.logback.classic.Level;
 import io.nuls.rpc.info.HostInfo;
 import io.nuls.rpc.info.NoUse;
+import io.nuls.tools.log.logback.LoggerBuilder;
 import io.nuls.tools.log.logback.NulsLogger;
 import io.nuls.tools.model.StringUtils;
 import io.nuls.tools.parse.config.IniEntity;
@@ -52,28 +54,15 @@ public class MyKernelBootstrap {
 
     static String[] args;
 
-    static NulsLogger log = LoggerUtil.logger;
+    static NulsLogger log = LoggerBuilder.getLogger("kernel", Level.INFO);
 
     public static void main(String[] args) throws Exception {
         System.setProperty("io.netty.tryReflectionSetAccessible", "true");
         //增加程序结束的钩子，监听到主线程停止时，调用./stop.sh停止所有的子模块
         MyKernelBootstrap.args = args;
-        Runtime.getRuntime().addShutdownHook(new Thread(()->{
-            log.info("jvm shutdown");
-            log.info("停止子模块");
-            log.info("停止脚本列表");
-            MODULE_STOP_LIST_SCRIPT.stream().forEach(log::info);
-            MODULE_STOP_LIST_SCRIPT.stream().forEach(stop->{
-                try {
-                    printRuntimeConsole(Runtime.getRuntime().exec(stop));
-                    log.info("停止子模块:{}",stop);
-                } catch (IOException e) {
-                    log.error("调用脚本停止模块出现异常：{}",stop);
-                }
-            });
-        }));
         startOtherModule(args);
-        NoUse.mockKernel();
+        int port = NoUse.mockKernel();
+        log.info("MYKERNEL STARTED. PORT:{}",port);
     }
 
     /**
@@ -85,6 +74,20 @@ public class MyKernelBootstrap {
     private static void startOtherModule(String[] args) {
         //启动时第一个参数值为"startModule"时启动所有子模块
         if (args.length > 0 && "startModule".equals(args[0])) {
+            Runtime.getRuntime().addShutdownHook(new Thread(()->{
+                log.info("jvm shutdown");
+                log.info("停止子模块");
+                log.info("停止脚本列表");
+                MODULE_STOP_LIST_SCRIPT.stream().forEach(log::info);
+                MODULE_STOP_LIST_SCRIPT.stream().forEach(stop->{
+                    try {
+                        printRuntimeConsole(Runtime.getRuntime().exec(stop));
+                        log.info("停止子模块:{}",stop);
+                    } catch (IOException e) {
+                        log.error("调用脚本停止模块出现异常：{}",stop);
+                    }
+                });
+            }));
             ThreadUtils.createAndRunThread("startModule",()->{
                 try {
                     //等待mykernel启动完毕
