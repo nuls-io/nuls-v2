@@ -64,8 +64,11 @@ public class UnconfirmedTxStorageServiceImpl implements UnconfirmedTxStorageServ
         Map<byte[], byte[]> txPoMap = new HashMap<>();
         try {
             for (Transaction tx : txList) {
+                TransactionsPO txPO = new TransactionsPO(tx);
+                //设置入库保存时间
+                txPO.setCreateTime(System.currentTimeMillis());
                 //序列化对象为byte数组存储
-                txPoMap.put(tx.getHash().serialize(), tx.serialize());
+                txPoMap.put(tx.getHash().serialize(), txPO.serialize());
             }
             return RocksDBService.batchPut(TxDBConstant.DB_TRANSACTION_CACHE + chainId, txPoMap);
         } catch (Exception e) {
