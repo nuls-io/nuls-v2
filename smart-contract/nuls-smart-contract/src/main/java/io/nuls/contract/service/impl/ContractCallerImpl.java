@@ -45,12 +45,11 @@ import io.nuls.contract.vm.program.ProgramExecutor;
 import io.nuls.tools.basic.Result;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
+import io.nuls.tools.thread.commom.NulsThreadFactory;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
+import java.util.concurrent.*;
 
 import static io.nuls.contract.constant.ContractConstant.TX_TYPE_CALL_CONTRACT;
 import static io.nuls.contract.util.ContractUtil.*;
@@ -63,8 +62,15 @@ import static io.nuls.contract.util.ContractUtil.*;
 @Component
 public class ContractCallerImpl implements ContractCaller {
 
-    private static final ExecutorService TX_EXECUTOR_SERVICE = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors() * 2);
-    private static final ExecutorService BATCH_END_SERVICE = Executors.newSingleThreadExecutor();
+    private static final ExecutorService TX_EXECUTOR_SERVICE =
+            new ThreadPoolExecutor(
+                    Runtime.getRuntime().availableProcessors(),
+                    Runtime.getRuntime().availableProcessors() * 2,
+                    10L,
+                    TimeUnit.SECONDS,
+                    new LinkedBlockingQueue<Runnable>(),
+                    new NulsThreadFactory("contract-tx-executor-pool"));
+    private static final ExecutorService BATCH_END_SERVICE = Executors.newSingleThreadExecutor(new NulsThreadFactory("contract-batch-end-pool"));
 
     @Autowired
     private ContractExecutor contractExecutor;
@@ -106,7 +112,7 @@ public class ContractCallerImpl implements ContractCaller {
     @Override
     public Result callBatchEnd(int chainId, long blockHeight) {
         try {
-            Log.info("Batch Before End blockHeight is {}", blockHeight);
+            Log.info("[Before End] contract batch, blockHeight is {}", blockHeight);
             BatchInfo batchInfo = contractHelper.getChain(chainId).getBatchInfo();
             ContractBatchEndCallable callable = new ContractBatchEndCallable(chainId, blockHeight);
             Future<ContractPackageDto> contractPackageDtoFuture = BATCH_END_SERVICE.submit(callable);
