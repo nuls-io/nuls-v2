@@ -3,6 +3,7 @@ package io.nuls.tools.log;
 import ch.qos.logback.classic.Level;
 import io.nuls.tools.log.logback.LoggerBuilder;
 import io.nuls.tools.log.logback.NulsLogger;
+import io.nuls.tools.model.StringUtils;
 
 /**
  * 公共日志类
@@ -15,7 +16,7 @@ public class Log {
 
     public static final String BASIC_NAME = "common";
 
-    public static NulsLogger BASIC_LOGGER = LoggerBuilder.getLogger(BASIC_NAME, Level.DEBUG);
+    public static NulsLogger BASIC_LOGGER = LoggerBuilder.getLogger(BASIC_NAME);
 
     /**
      * 提供debug级别基本的日志输出

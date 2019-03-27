@@ -1,4 +1,4 @@
-#/bin/bash
+#!/bin/bash
 if [[ -d ../Libraries/JAVA/11.0.2 ]]; then
     export JAVA_HOME="$(cd $(dirname "../Libraries/JAVA/11.0.2"); pwd)/11.0.2"
     export PATH=${PATH}:${JAVA_HOME}/bin
