@@ -33,6 +33,7 @@ import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.model.message.Response;
 import io.nuls.rpc.netty.processor.ResponseMessageProcessor;
+import io.nuls.tools.model.StringUtils;
 import io.nuls.tools.parse.JSONUtils;
 import org.apache.commons.io.IOUtils;
 import org.junit.Assert;
@@ -172,11 +173,13 @@ public class ContractNRC20TokenSendTxTest extends BaseQuery {
     @Test
     public void callContract() throws Exception {
         BigInteger value = BigInteger.ZERO;
-        String methodName = "transfer";
+        if(StringUtils.isBlank(methodName)) {
+            methodName = "transfer";
+        }
         String methodDesc = "";
         String remark = "call contract test - 空气币转账";
-        String token = BigInteger.TEN.pow(8).toString();
-        Map params = this.makeCallParams(sender, value, contractAddress_nrc200, methodName, methodDesc, remark, toAddress0, token);
+        String token = BigInteger.valueOf(8000L).toString();
+        Map params = this.makeCallParams(sender, value, contractAddress_nrc20, methodName, methodDesc, remark, toAddress0, token);
         Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, CALL, params);
         Map result = (HashMap) (((HashMap) cmdResp2.getResponseData()).get(CALL));
         Assert.assertTrue(null != result);
@@ -200,40 +203,13 @@ public class ContractNRC20TokenSendTxTest extends BaseQuery {
     }
 
     /**
-     * 向合约地址转账
-     */
-    @Test
-    public void transfer2Contract() throws Exception {
-        BigInteger value = BigInteger.TEN.pow(8);
-        String remark = "transfer 2 contract";
-        Map params = this.makeTransferParams(sender, contractAddress_nrc200, value, remark);
-        Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, TRANSFER, params);
-        Map result = (HashMap) (((HashMap) cmdResp2.getResponseData()).get(TRANSFER));
-        Assert.assertTrue(null != result);
-        Log.info("transfer2Contract-result:{}", JSONUtils.obj2PrettyJson(cmdResp2));
-    }
-
-    private Map makeTransferParams(String address, String toAddress, BigInteger amount, String remark) {
-        Map<String, Object> params = new HashMap<>();
-        params.put("chainId", chainId);
-        params.put("address", address);
-        params.put("toAddress", toAddress);
-        params.put("password", password);
-        params.put("amount", amount);
-        params.put("remark", remark);
-        return params;
-    }
-
-
-    /**
      * token转账
      */
     @Test
     public void tokenTransfer() throws Exception {
         BigInteger value = BigInteger.TEN.pow(10);
-        String toAddress = contractAddress0;
-        String remark = "token transfer to " + toAddress;
-        Map params = this.makeTokenTransferParams(sender, toAddress, contractAddress_nrc200, value, remark);
+        String remark = "token transfer to " + contractAddress;
+        Map params = this.makeTokenTransferParams(sender, contractAddress, contractAddress_nrc20, value, remark);
         Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, TOKEN_TRANSFER, params);
         Map result = (HashMap) (((HashMap) cmdResp2.getResponseData()).get(TOKEN_TRANSFER));
         Assert.assertTrue(null != result);
@@ -265,13 +241,36 @@ public class ContractNRC20TokenSendTxTest extends BaseQuery {
         Assert.assertTrue(null != result);
         Log.info("delete-result:{}", JSONUtils.obj2PrettyJson(result));
     }
-
     private Map makeDeleteParams(String sender, String contractAddress, String remark) {
         Map<String, Object> params = new HashMap<>();
         params.put("chainId", chainId);
         params.put("sender", sender);
         params.put("contractAddress", contractAddress);
         params.put("password", password);
+        params.put("remark", remark);
+        return params;
+    }
+
+    /**
+     * 向合约地址转账(失败情况，NRC20合约不接受NULS转账)
+     */
+    @Test
+    public void transfer2ContractFailed() throws Exception {
+        BigInteger value = BigInteger.TEN.pow(8);
+        String remark = "transfer 2 contract";
+        Map params = this.makeTransferParams(sender, contractAddress_nrc20, value, remark);
+        Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, TRANSFER, params);
+        Map result = (HashMap) (((HashMap) cmdResp2.getResponseData()).get(TRANSFER));
+        Assert.assertTrue(null != result);
+        Log.info("transfer2Contract-result:{}", JSONUtils.obj2PrettyJson(cmdResp2));
+    }
+    private Map makeTransferParams(String address, String toAddress, BigInteger amount, String remark) {
+        Map<String, Object> params = new HashMap<>();
+        params.put("chainId", chainId);
+        params.put("address", address);
+        params.put("toAddress", toAddress);
+        params.put("password", password);
+        params.put("amount", amount);
         params.put("remark", remark);
         return params;
     }

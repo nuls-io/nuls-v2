@@ -105,6 +105,7 @@ public class ContractBatchEndCallable implements Callable<ContractPackageDto> {
             dto.makeContractResultMap(contractResultList);
             batchInfo.setContractPackageDto(dto);
 
+            Log.info("[Before End] Contract Execution, BlockHeight is {}, Cost Time is {}", currentBlockHeader.getHeight(), System.currentTimeMillis() - batchInfo.getBeginTime());
             return dto;
         } catch (IOException e) {
             Log.error(e);

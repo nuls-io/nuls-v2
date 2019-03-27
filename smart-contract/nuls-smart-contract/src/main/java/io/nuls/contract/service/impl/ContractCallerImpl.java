@@ -112,7 +112,7 @@ public class ContractCallerImpl implements ContractCaller {
     @Override
     public Result callBatchEnd(int chainId, long blockHeight) {
         try {
-            Log.info("[Before End] contract batch, blockHeight is {}", blockHeight);
+            Log.info("[Call Before End] contract batch, blockHeight is {}", blockHeight);
             BatchInfo batchInfo = contractHelper.getChain(chainId).getBatchInfo();
             ContractBatchEndCallable callable = new ContractBatchEndCallable(chainId, blockHeight);
             Future<ContractPackageDto> contractPackageDtoFuture = BATCH_END_SERVICE.submit(callable);
