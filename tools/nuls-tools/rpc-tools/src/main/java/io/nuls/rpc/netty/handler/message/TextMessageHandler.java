@@ -51,11 +51,11 @@ import java.util.concurrent.TimeUnit;
 public class TextMessageHandler implements Runnable {
 
     private SocketChannel channel;
-    private String msg;
+    private Message message;
 
-    public TextMessageHandler(SocketChannel channel, String msg) {
+    public TextMessageHandler(SocketChannel channel, Message message) {
         this.channel = channel;
-        this.msg = msg;
+        this.message = message;
     }
 
     @Override
@@ -66,9 +66,6 @@ public class TextMessageHandler implements Runnable {
     private void handler() {
         try {
             ConnectData connectData = ConnectManager.CHANNEL_DATA_MAP.get(channel);
-
-
-            Message message = JSONUtils.json2pojo(msg, Message.class);
 
             /*
              * 获取该链接对应的ConnectData对象
@@ -85,7 +82,6 @@ public class TextMessageHandler implements Runnable {
                     /*
                     取消订阅，直接响应
                      */
-                    Log.debug("UnsubscribeFrom<" + channel.remoteAddress().getHostString() + ":" + channel.remoteAddress().getPort() + ">: " + msg);
                     RequestMessageProcessor.unsubscribe(connectData, message);
                     break;
                 case Request:
