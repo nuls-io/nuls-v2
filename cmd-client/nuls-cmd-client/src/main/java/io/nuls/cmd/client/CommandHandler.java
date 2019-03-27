@@ -26,7 +26,6 @@
 package io.nuls.cmd.client;
 
 
-import io.nuls.api.provider.contract.facade.CallContractReq;
 import io.nuls.cmd.client.processor.CommandProcessor;
 import io.nuls.cmd.client.processor.account.*;
 import io.nuls.cmd.client.processor.block.GetBestBlockHeaderProcessor;
