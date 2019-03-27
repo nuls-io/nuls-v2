@@ -116,6 +116,7 @@ MODULES_PATH=$(cd "$MODULES_PATH"; pwd)
 RELEASE_PATH=$MODULES_PATH
 echoYellow "Modules Path $MODULES_PATH"''
 log "==================BEGIN PACKAGE MODULES=============================="
+declare -a managedModules
 if [[ ! -d "$MODULES_PATH/bin" ]]; then
 	mkdir $MODULES_PATH/bin
 fi
@@ -217,7 +218,7 @@ getModuleItem(){
 #拷贝打好的jar包到Moules/Nuls/<Module Name>/<Version> 下
 copyJarToModules(){
     if [ -z "$IGNROEMVN" ]; then
-       doMvn "package" $1
+       doMvn "clean package" $1
     fi
 	moduleName=$(getModuleItem "APP_NAME");
 	version=$(getModuleItem "VERSION");
@@ -375,6 +376,9 @@ packageModule() {
 		    log "build $1"
             copyJarToModules $1
             copyModuleNcfToModules $1
+            if [[ $managed == "1" ]]; then
+                managedModules[${#managedModules[@]}]="$1"
+            fi
             log "build $1 done"
         else
             echoYellow "$1 skip"
