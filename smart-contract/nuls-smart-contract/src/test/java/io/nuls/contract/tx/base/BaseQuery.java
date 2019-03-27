@@ -65,6 +65,7 @@ public class BaseQuery {
 
     @BeforeClass
     public static void initClass() {
+        Log.info("init log.");
         ServiceManager.init(chainId, Provider.ProviderType.RPC);
     }
 

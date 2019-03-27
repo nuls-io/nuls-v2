@@ -133,6 +133,8 @@ public interface ContractConstant {
     String RPC_PATH = "io.nuls.contract.rpc";
 
     String NRC20_STANDARD_FILE = "nrc20.json";
+
+    String MODULE_CONFIG_FILE = "module.json";
     /**
      * DB config
      */

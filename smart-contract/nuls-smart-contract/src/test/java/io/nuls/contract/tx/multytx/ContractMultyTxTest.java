@@ -42,6 +42,7 @@ public class ContractMultyTxTest extends BaseQuery {
     public void beforeTest() {
         contractCallContractSendTxTest = new ContractCallContractSendTxTest();
         contractNRC20TokenSendTxTest = new ContractNRC20TokenSendTxTest();
+        // TestAddress.createAccount 生成地址，得到 importPriKey 语句，放入 contractNRC20TokenSendTxTest.importPriKeyTest 中执行
     }
 
     @Test

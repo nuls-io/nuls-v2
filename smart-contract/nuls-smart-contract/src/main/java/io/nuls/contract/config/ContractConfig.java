@@ -47,6 +47,14 @@ public class ContractConfig {
 
     private String kernelUrl;
 
+    /**
+     * 模块日志配置信息
+     */
+    private String logFilePath;
+    private String logFileName;
+    private String logFileLevel;
+    private String logConsoleLevel;
+
     private int mainChainId;
 
     private int mainAssetId;

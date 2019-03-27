@@ -1,5 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<configuration debug="false">
-    <!-- 日志输出级别 -->
-    <root level="INFO"/>
-</configuration>
