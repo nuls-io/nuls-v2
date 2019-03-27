@@ -35,6 +35,6 @@ import io.nuls.tools.log.logback.NulsLogger;
  **/
 public class LoggerUtil {
 
-   public static NulsLogger logger = LoggerBuilder.getLogger("cmd", Level.ALL);
+   public static NulsLogger logger = LoggerBuilder.getLogger("cmd", Level.WARN);
 
 }

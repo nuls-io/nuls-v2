@@ -1,8 +1,8 @@
 #!/bin/bash
-modules=("network" "ledger" "account" "block" "poc-consensus" "test" "transaction" "smart-contract" "api-module")
+modules=(%MODULES%)
 
 if [ ! -d "$1" ]; then
-    echo "必须指定logs目录"
+    echo "必须指定logs目录: ./check-status.sh <log path>"
     exit 0;
 fi
 
