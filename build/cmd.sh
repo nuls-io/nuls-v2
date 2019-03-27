@@ -11,8 +11,7 @@ help()
 EOF
     exit 0
 }
-BIN_PATH=$(cd $(dirname $0); pwd);
-cd $BIN_PATH;
+cd `dirname $0`;
 if [[ -d ../Libraries/JAVA/11.0.2 ]]; then
     export JAVA_HOME="$(cd $(dirname "../Libraries/JAVA/11.0.2"); pwd)/11.0.2"
     export PATH=${PATH}:${JAVA_HOME}/bin
