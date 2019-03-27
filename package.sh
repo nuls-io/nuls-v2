@@ -377,7 +377,8 @@ packageModule() {
             copyJarToModules $1
             copyModuleNcfToModules $1
             if [[ $managed == "1" ]]; then
-                managedModules[${#managedModules[@]}]="$1"
+                moduleName=$(getModuleItem "APP_NAME");
+                managedModules[${#managedModules[@]}]="$moduleName"
             fi
             log "build $1 done"
         else
@@ -428,10 +429,22 @@ if [ -n "${DOMOCK}" ]; then
 	chmod u+x "${MODULES_BIN_PATH}/stop.sh"
 	cp "${BUILD_PATH}/default-config.json" "${MODULES_BIN_PATH}/"
 	chmod u+r "${MODULES_BIN_PATH}/default-config.json"
-	cp "${BUILD_PATH}/check-status.sh" "${MODULES_BIN_PATH}/"
-	chmod u+x "${MODULES_BIN_PATH}/check-status.sh"
 	cp "${BUILD_PATH}/cmd.sh" "${MODULES_BIN_PATH}/"
 	chmod u+x "${MODULES_BIN_PATH}/cmd.sh"
+	cp "${BUILD_PATH}/test.sh" "${MODULES_BIN_PATH}/"
+	chmod u+x "${MODULES_BIN_PATH}/test.sh"
+	cp "${BUILD_PATH}/check-jdk.sh" "${MODULES_BIN_PATH}/"
+	chmod u+x "${MODULES_BIN_PATH}/check-jdk.sh"
+
+	tempModuleList=
+	for m in ${managedModules[@]}
+	do
+	    tempModuleList+=" \"${m}\""
+	done
+	eval "sed -e 's/%MODULES%/${tempModuleList}/g' ${BUILD_PATH}/check-status.sh > ${BUILD_PATH}/tmp/check-status-temp.sh"
+	cp "${BUILD_PATH}/tmp/check-status-temp.sh" "${MODULES_BIN_PATH}/check-status.sh"
+	chmod u+x "${MODULES_BIN_PATH}/check-status.sh"
+
 	log "============== BUILD start-mykernel script done ================"
 fi
 

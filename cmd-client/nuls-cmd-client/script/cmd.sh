@@ -35,7 +35,7 @@ do
 done
 PUB_LIB="${PUB_LIB}:./cmdclient-1.0.0.jar"
 # Get standard environment variables
-JAVA_OPTS="-Xms128m -Xmx128m"
+JAVA_OPTS="-Xms128m -Xmx128m -Dapp.name=cmd-client --illegal-access=warn"
 
 CONF_PATH=$SERVER_HOME/conf
 CLASSPATH=$CLASSPATH:$CONF_PATH:$PUB_LIB:.

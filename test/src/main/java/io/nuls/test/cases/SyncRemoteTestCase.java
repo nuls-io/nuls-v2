@@ -48,6 +48,8 @@ public abstract class SyncRemoteTestCase<T> extends BaseTestCase<Boolean, Remote
         if(nodeList.isEmpty()){
             throw new TestFailException("remote fail ,network node is empty");
         }
+        int testNodeCount = config.getTestNodeCount() > nodeList.size() ? nodeList.size() : config.getTestNodeCount();
+        nodeList = nodeList.subList(0,testNodeCount - 1 );
         for (String node : nodeList) {
 //            Map remoteRes = doRemoteTest(node,param.getCaseCls(),param.getParam());
             RemoteCaseReq req = new RemoteCaseReq();
