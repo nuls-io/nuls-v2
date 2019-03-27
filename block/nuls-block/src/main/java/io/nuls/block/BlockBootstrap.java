@@ -86,7 +86,7 @@ public class BlockBootstrap extends RpcModule {
             initDB();
             initLanguage();
         } catch (Exception e) {
-            Log.error("AccountBootsrap init error!");
+            Log.error("BlockBootstrap init error!");
             throw new RuntimeException(e);
         }
     }
