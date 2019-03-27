@@ -136,7 +136,7 @@ public class CreateContractProcessor extends ContractBaseProcessor {
         if (null == form) {
             return CommandResult.getFailed("parameter error.");
         }
-        String password = CommandHelper.getPwd("Enter account password please.");
+        String password = CommandHelper.getPwd();
         String contractCode = form.getContractCode();
         Result<Object[]> res = createContractArgs(contractCode);
         if(!res.isSuccess()){

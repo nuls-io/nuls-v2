@@ -91,7 +91,6 @@ public class AccountBootstrap extends RpcModule {
      */
     @Override
     public boolean doStart() {
-        LoggerUtil.logger.info("module ready");
         try {
             //启动链
             SpringLiteContext.getBean(ChainManager.class).runChain();

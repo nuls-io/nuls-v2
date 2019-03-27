@@ -168,13 +168,7 @@ public class SmallBlockHandler extends BaseCmd {
             }
 
             Block block = BlockUtil.assemblyBlock(header, txMap, txHashList);
-            if (blockService.saveBlock(chainId, block, 1, true)) {
-                SmallBlock newSmallBlock = BlockUtil.getSmallBlock(chainId, block);
-                CachedSmallBlock cachedSmallBlock = new CachedSmallBlock(null, newSmallBlock, txMap);
-                SmallBlockCacher.cacheSmallBlock(chainId, cachedSmallBlock);
-                SmallBlockCacher.setStatus(chainId, blockHash, BlockForwardEnum.COMPLETE);
-                blockService.forwardBlock(chainId, blockHash, nodeId);
-            }
+            blockService.saveBlock(chainId, block, 1, true, false, true);
         }
         return success();
     }

@@ -261,7 +261,7 @@ public class ContractTransferHandler {
                     contractBalance = tempBalanceManager.getBalance(from).getData();
                     nonceBytes = Hex.decode(contractBalance.getNonce());
                 }
-                Log.info("=====pierre====from is {}, nonce is {}", AddressTool.getStringAddressByBytes(from), contractBalance.getNonce());
+                Log.info("From is {}, nonce is {}", AddressTool.getStringAddressByBytes(from), contractBalance.getNonce());
                 compareFrom = wrapperFrom;
                 coinData = new CoinData();
                 coinFrom = new CoinFrom(from, chainId, assetsId, value, nonceBytes, (byte) 0);
@@ -334,7 +334,7 @@ public class ContractTransferHandler {
         byte[] currentNonceBytes = Arrays.copyOfRange(hashBytes, hashBytes.length - 8, hashBytes.length);
         balance.setNonce(Hex.toHexString(currentNonceBytes));
         tx.setHash(hash);
-        Log.info("=====pierre====txType is {}, hash is {}, nextNonce is {}", tx.getType(), hash.toString(), Hex.toHexString(currentNonceBytes));
+        Log.info("TxType is {}, hash is {}, nextNonce is {}", tx.getType(), hash.toString(), Hex.toHexString(currentNonceBytes));
     }
 
     private ContractTransferTransaction createContractTransferTx(CoinData coinData, ContractTransferData txData, long blockTime, long timeOffset) {

@@ -9,7 +9,6 @@ help()
     		-b <branch> 打包前同步最新代码 参数为同步的远程分支名称
     		-p 打包前同步最新代码 从master分支拉取
     		-o <目录>  指定输出目录
-    		-m 生成mykernel模块以及启动脚本
     		-h 查看帮助
     		-j JAVA_HOME
     		-J 输出的jvm虚拟机目录，脚本将会把这个目录复制到程序依赖中
@@ -23,14 +22,16 @@ EOF
 
 #获取参数
 #输出目录
+
 MODULES_PATH="./NULS-Walltet-linux64-alpha1"
+#RELEASE_OUT_PATH="./NULS-Walltet-linux64-alpha1"
 #是否马上更新代码
 DOPULL=
 #是否生成mykernel模块
-DOMOCK=
+DOMOCK=1
 #更新代码的 git 分支
 GIT_BRANCH=
-while getopts pmhb:o:j:iJ:z name
+while getopts phb:o:j:iJ:z name
 do
             case $name in
             p)	   DOPULL=1
@@ -38,7 +39,7 @@ do
             b)     DOPULL=1
 				   GIT_BRANCH="$OPTARG"	 
 					;;
-            m)     DOMOCK=1;;
+#            m)     DOMOCK=1;;
 			o)	   MODULES_PATH="$OPTARG";;
 			h)     help ;;
 			j)     JAVA_HOME="$OPTARG";;
@@ -138,8 +139,11 @@ fi
 MODULES_PATH=$MODULES_PATH/Nuls
 #模块公共依赖jar存放目录
 COMMON_LIBS_PATH=$MODULES_PATH/libs
-if [ ! -d ${COMMON_LIBS_PATH} ]; then
-	mkdir ${COMMON_LIBS_PATH}
+if [[ -z "${IGNROEMVN}" ]]; then
+    if [ -d ${COMMON_LIBS_PATH} ]; then
+        rm -r ${COMMON_LIBS_PATH}
+    fi
+    mkdir ${COMMON_LIBS_PATH}
 fi
 
 #模块数据库文件存放位置
@@ -202,7 +206,7 @@ getModuleItem(){
 							print r
 						}
 					')
-		if [ ${pname} == $1 ]; then
+		if [ "${pname}" == $1 ]; then
 			echo ${pvalue};
 			return 1;
 		fi
@@ -256,10 +260,10 @@ copyModuleNcfToModules(){
 	do
 		TEMP=$(echo $line|grep -Eo '\[.+\]')
 		if [ -n "$TEMP" ]; then
-		  #echo "set cfg domain ${TEMP}"
+#		  echo "set cfg domain ${TEMP}"
 		  cfgDomain=$TEMP
 		fi
-		if [ "${cfgDomain}" == "[JAVA]" -a ! -n "$TEMP" ]; 
+		if [ "${cfgDomain}" == "[JAVA]" -a ! -n "$TEMP" ];
 		then
 			pname=$(echo $line | awk -F '=' '{print $1}')
 			#pvalue=$(echo $line | awk -F '=' '{print $2}')
@@ -276,12 +280,13 @@ copyModuleNcfToModules(){
 							print r
 						}
 					')
-            if [ "${pname}" != "" ]; then
+            if [[ "${pname}" != "" ]]; then
 			    sedCommand+=" -e 's/%${pname}%/${pvalue}/g' "
 			fi
 			echo $line >> $moduleNcf
 		else
-			if [ "${cfgDomain}" != "[JAVA]" ]; then
+
+			if [[ "${cfgDomain}" != "[JAVA]" ]]; then
 				echo $line >> $moduleNcf
 			fi
 		fi
@@ -290,7 +295,7 @@ copyModuleNcfToModules(){
 	sh "${PROJECT_PATH}/build/merge-ncf.sh" "${BUILD_PATH}/module-prod.ncf" $moduleNcf
 #	rm $moduleNcf
 	sedCommand+=" -e 's/%MAIN_CLASS_NAME%/${mainClassName}/g' "
-    echo $sedCommand
+#    echo $sedCommand
 	if [ -z $(echo "${sedCommand}" | grep -o "%JOPT_XMS%") ]; then
 		sedCommand="${sedCommand}  -e 's/%JOPT_XMS%/256/g' "
 	fi
@@ -313,7 +318,7 @@ copyModuleNcfToModules(){
             eval "${sedCommand}  $(pwd)/script/${file} > ${moduleBuildPath}/${file}"
             cp "${moduleBuildPath}/${file}" "${MODULES_PATH}/${moduleName}/${version}/${file}"
             chmod u+x "${MODULES_PATH}/${moduleName}/${version}/${file}"
-            echo "拷贝 ${moduleBuildPath}/${file} 到 ${MODULES_PATH}/${moduleName}/${version}/${file}"
+            echo "copy ${moduleBuildPath}/${file} to ${MODULES_PATH}/${moduleName}/${version}/${file}"
         done
     else
     	startSh="${BUILD_PATH}/start-temp.sh"
@@ -324,26 +329,26 @@ copyModuleNcfToModules(){
         eval "${sedCommand}  ${startSh} > ${moduleBuildPath}/start.sh"
         cp "${moduleBuildPath}/start.sh" "${MODULES_PATH}/${moduleName}/${version}/start.sh"
         chmod +x "${MODULES_PATH}/${moduleName}/${version}/start.sh"
-        echo "拷贝 ${moduleBuildPath}/start.sh 到 ${MODULES_PATH}/${moduleName}/${version}/start.sh"
+        echo "copy ${moduleBuildPath}/start.sh to ${MODULES_PATH}/${moduleName}/${version}/start.sh"
 
         eval "${sedCommand}  ${startBat} > ${moduleBuildPath}/start.bat"
         cp "${moduleBuildPath}/start.bat" "${MODULES_PATH}/${moduleName}/${version}/start.bat"
     #    cp "${moduleBuildPath}/start.bat" "/Volumes/share/start.bat"
-        echo "拷贝 ${moduleBuildPath}/start.bat 到 ${MODULES_PATH}/${moduleName}/${version}/start.bat"
+        echo "copy ${moduleBuildPath}/start.bat to ${MODULES_PATH}/${moduleName}/${version}/start.bat"
 
         eval "${sedCommand}  ${stopSh} > ${moduleBuildPath}/stop.sh"
         cp "${moduleBuildPath}/stop.sh" "${MODULES_PATH}/${moduleName}/${version}/stop.sh"
         chmod +x "${MODULES_PATH}/${moduleName}/${version}/stop.sh"
-        echo "拷贝 ${moduleBuildPath}/stop.sh 到 ${MODULES_PATH}/${moduleName}/${version}/stop.sh"
+        echo "copy ${moduleBuildPath}/stop.sh to ${MODULES_PATH}/${moduleName}/${version}/stop.sh"
 
         eval "${sedCommand}  ${stopBat} > ${moduleBuildPath}/stop.bat"
         cp "${moduleBuildPath}/stop.bat" "${MODULES_PATH}/${moduleName}/${version}/stop.bat"
         #cp "${moduleBuildPath}/stop.bat" "/Volumes/share/stop.bat"
-        echo "拷贝 ${moduleBuildPath}/stop.bat 到 ${MODULES_PATH}/${moduleName}/${version}/stop.bat"
+        echo "copy ${moduleBuildPath}/stop.bat to ${MODULES_PATH}/${moduleName}/${version}/stop.bat"
 
     fi
 	cp "${moduleBuildPath}/module.temp.ncf" "${MODULES_PATH}/${moduleName}/${version}/Module.ncf"
-	echo "拷贝 ${moduleBuildPath}/module.temp.ncf 到 ${MODULES_PATH}/${moduleName}/${version}/Module.ncf"
+	echo "copy ${moduleBuildPath}/module.temp.ncf to ${MODULES_PATH}/${moduleName}/${version}/Module.ncf"
 }
 
 #2.遍历文件夹，检查第一个pom 发现pom文件后通过mvn进行打包，完成后把文件jar文件和module.ncf文件复制到Modules文件夹下
@@ -351,7 +356,7 @@ packageModule() {
 	if [ ! -d $(pwd)/$1 ]; then
 		return 0
 	fi
-	if [ $(pwd) == "${RELEASE_PATH}" ]; then
+	if [ $(pwd) == "${MODULES_PATH}" ]; then
 		return 0;
 	fi
 	cd $(pwd)/$1
@@ -361,13 +366,16 @@ packageModule() {
 			echoRed "模块配置文件必须与pom.xml在同一个目录 : $(pwd)"
 			exit 0;
 		fi
-		doMvn "package" $1
-		checkModuleItem "APP_NAME" "$1"
-		checkModuleItem "VERSION" "$1"
-		checkModuleItem "MAIN_CLASS" "$1"
-		copyJarToModules $1
-		copyModuleNcfToModules $1
-		log "$1 SUCCESS"
+		managed=$(getModuleItem "Managed");
+		if [[ $managed != "-1" ]]; then
+		    doMvn "package" $1
+            checkModuleItem "APP_NAME" "$1"
+            checkModuleItem "VERSION" "$1"
+            checkModuleItem "MAIN_CLASS" "$1"
+            copyJarToModules $1
+            copyModuleNcfToModules $1
+            log "$1 SUCCESS"
+		fi
 		cd ..
 		return 0
 	fi
@@ -384,11 +392,10 @@ do
     	packageModule $fi
     fi
 done
-log "============ PACKAGE DONE ==============="
+log "============ PACKAGE MODULES DONE ==============="
 cd $PROJECT_PATH
-echo $JRE_HOME
 if [ -n "${JRE_HOME}" ]; then
-log "============ COPY JRE TO libs ==========="
+log "============ COPY JRE TO libs ==================="
 
     if [ ! -d "${JRE_HOME}" ];
     then
@@ -407,7 +414,7 @@ log "============ COPY JRE TO libs ==========="
 log "============ COPY JRE TO libs done ============"
 fi
 if [ -n "${DOMOCK}" ]; then
-	log "BUILD start-mykernel script"
+	log "============== BUILD start-mykernel script ====================="
 	cp "${BUILD_PATH}/start-mykernel.sh" "${MODULES_BIN_PATH}/start.sh"
 	chmod u+x "${MODULES_BIN_PATH}/start.sh"
 	cp "${BUILD_PATH}/stop-mykernel.sh" "${MODULES_BIN_PATH}/stop.sh"
@@ -418,14 +425,13 @@ if [ -n "${DOMOCK}" ]; then
 	chmod u+x "${MODULES_BIN_PATH}/check-status.sh"
 	cp "${BUILD_PATH}/cmd.sh" "${MODULES_BIN_PATH}/"
 	chmod u+x "${MODULES_BIN_PATH}/cmd.sh"
+	log "============== BUILD start-mykernel script done ================"
 fi
+
 
 if [ -n "${BUILDTAR}" ]; then
-    log "============ build ${RELEASE_PATH}.tar.gz ==================="
+    log "============ BUILD ${RELEASE_PATH}.tar.gz ==================="
     tar -zcPf "${RELEASE_PATH}.tar.gz" ${RELEASE_PATH}
-    log "============ build ${RELEASE_PATH}.tar.gz FINISH==================="
+    log "============ BUILD ${RELEASE_PATH}.tar.gz FINISH==================="
 fi
-
-
-
-
+log "============ ${RELEASE_PATH} PACKAGE FINISH 🍺🍺🍺🎉🎉🎉 ==============="

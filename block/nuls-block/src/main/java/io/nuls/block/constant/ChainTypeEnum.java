@@ -69,7 +69,24 @@ public enum ChainTypeEnum {
      * 重复
      * duplicate chain
      */
-    DUPLICATE,
+    MASTER_DUPLICATE,
+
+    /**
+     * 重复
+     * duplicate chain
+     */
+    FORK_DUPLICATE,
+
+    /**
+     * 重复
+     * duplicate chain
+     */
+    ORPHAN_DUPLICATE,
+
+    /**
+     * 部分重复
+     */
+    PARTIALLY_DUPLICATE,
 
     /**
      * 孤儿链

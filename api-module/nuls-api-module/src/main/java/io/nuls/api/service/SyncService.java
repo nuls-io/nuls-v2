@@ -79,7 +79,7 @@ public class SyncService {
         return blockService.getBestBlockHeader(chainId);
     }
 
-    public boolean syncNewBlock(int chainId, BlockInfo blockInfo) throws Exception {
+    public boolean syncNewBlock(int chainId, BlockInfo blockInfo) {
         clear();
         findAddProcessAgentOfBlock(chainId, blockInfo);
         //处理交易
@@ -158,9 +158,8 @@ public class SyncService {
      * 处理各种交易
      *
      * @param txs
-     * @throws Exception
      */
-    private void processTxs(int chainId, List<TransactionInfo> txs) throws Exception {
+    private void processTxs(int chainId, List<TransactionInfo> txs) {
         for (int i = 0; i < txs.size(); i++) {
             TransactionInfo tx = txs.get(i);
             CoinDataInfo coinDataInfo = new CoinDataInfo(tx.getHash(), tx.getCoinFroms(), tx.getCoinTos());
@@ -443,7 +442,14 @@ public class SyncService {
         }
     }
 
-    private void processCreateContract(int chainId, TransactionInfo tx) throws Exception {
+    private void processCreateContract(int chainId, TransactionInfo tx) {
+        CoinFromInfo coinFromInfo = tx.getCoinFroms().get(0);
+        AccountInfo accountInfo = queryAccountInfo(chainId, coinFromInfo.getAddress());
+        accountInfo.setTxCount(accountInfo.getTxCount() + 1);
+        accountInfo.setTotalOut(accountInfo.getTotalOut().add(tx.getFee()));
+        accountInfo.setTotalBalance(accountInfo.getTotalBalance().subtract(tx.getFee()));
+        txRelationInfoSet.add(new TxRelationInfo(accountInfo.getAddress(), tx, coinFromInfo.getChainId(), coinFromInfo.getAssetsId(), BigInteger.ZERO, accountInfo.getTotalBalance()));
+
         ContractInfo contractInfo = (ContractInfo) tx.getTxData();
         contractInfo.setTxCount(1);
         contractInfo.setNew(true);
@@ -451,12 +457,12 @@ public class SyncService {
         createContractTxInfo(tx, contractInfo);
         contractInfoMap.put(contractInfo.getContractAddress(), contractInfo);
 
-        if (contractInfo.isSuccess()) {
+        if (contractInfo.isSuccess() && contractInfo.isNrc20()) {
             processTokenTransfers(chainId, contractInfo.getResultInfo().getTokenTransfers(), tx);
         }
     }
 
-    private void processCallContract(int chainId, TransactionInfo tx) throws Exception {
+    private void processCallContract(int chainId, TransactionInfo tx) {
         processTransferTx(chainId, tx);
         ContractCallInfo callInfo = (ContractCallInfo) tx.getTxData();
         ContractInfo contractInfo = queryContractInfo(chainId, callInfo.getContractAddress());
@@ -465,12 +471,12 @@ public class SyncService {
         contractResultList.add(callInfo.getResultInfo());
         createContractTxInfo(tx, contractInfo);
 
-        if (callInfo.getResultInfo().isSuccess()) {
+        if (callInfo.getResultInfo().isSuccess() && contractInfo.isNrc20()) {
             processTokenTransfers(chainId, callInfo.getResultInfo().getTokenTransfers(), tx);
         }
     }
 
-    private void processDeleteContract(int chainId, TransactionInfo tx) throws Exception {
+    private void processDeleteContract(int chainId, TransactionInfo tx) {
         CoinFromInfo coinFromInfo = tx.getCoinFroms().get(0);
         AccountInfo accountInfo = queryAccountInfo(chainId, coinFromInfo.getAddress());
         accountInfo.setTxCount(accountInfo.getTxCount() + 1);
@@ -490,7 +496,7 @@ public class SyncService {
         }
     }
 
-    private void processTokenTransfers(int chainId, List<TokenTransfer> tokenTransfers, TransactionInfo tx) throws Exception {
+    private void processTokenTransfers(int chainId, List<TokenTransfer> tokenTransfers, TransactionInfo tx) {
         if (tokenTransfers.isEmpty()) {
             return;
         }
@@ -518,7 +524,6 @@ public class SyncService {
 
             tokenTransferList.add(tokenTransfer);
         }
-
     }
 
     private AccountTokenInfo processAccountNrc20(int chainId, ContractInfo contractInfo, String address, BigInteger value, int type) {
@@ -608,7 +613,7 @@ public class SyncService {
      * 解析区块和所有交易后，将数据存储到数据库中
      * Store entity in the database after parsing the block and all transactions
      */
-    public void save(int chainId, BlockInfo blockInfo) throws Exception {
+    public void save(int chainId, BlockInfo blockInfo) {
         long height = blockInfo.getHeader().getHeight();
         SyncInfo syncInfo = chainService.saveNewSyncInfo(chainId, height);
         //存储区块头信息
@@ -716,7 +721,7 @@ public class SyncService {
         return agentInfo;
     }
 
-    private ContractInfo queryContractInfo(int chainId, String contractAddress) throws Exception {
+    private ContractInfo queryContractInfo(int chainId, String contractAddress) {
         ContractInfo contractInfo = contractInfoMap.get(contractAddress);
         if (contractInfo == null) {
             contractInfo = contractService.getContractInfo(chainId, contractAddress);

@@ -102,13 +102,7 @@ public class TxGroupHandler extends BaseCmd {
             }
 
             Block block = BlockUtil.assemblyBlock(header, txMap, smallBlock.getTxHashList());
-            if (blockService.saveBlock(chainId, block, 1, true)) {
-                SmallBlock newSmallBlock = BlockUtil.getSmallBlock(chainId, block);
-                cachedSmallBlock = new CachedSmallBlock(null, newSmallBlock, txMap);
-                SmallBlockCacher.cacheSmallBlock(chainId, cachedSmallBlock);
-                SmallBlockCacher.setStatus(chainId, blockHash, BlockForwardEnum.COMPLETE);
-                blockService.forwardBlock(chainId, headerHash, nodeId);
-            }
+            blockService.saveBlock(chainId, block, 1, true, false, true);
             return success();
         }
         //3.未收到区块

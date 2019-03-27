@@ -1,5 +1,5 @@
 #!/bin/bash
-modules=("network" "ledger" "account" "block" "poc-consensus" "protocol" "transaction" "chain")
+modules=("network" "ledger" "account" "block" "poc-consensus" "test" "transaction" "smart-contract" "api-module")
 
 if [ ! -d "$1" ]; then
     echo "必须指定logs目录"

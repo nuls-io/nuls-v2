@@ -22,7 +22,7 @@ public class NoUse {
      * For internal debugging only
      * Simulate a kernel module
      */
-    public static void mockKernel() throws Exception {
+    public static int mockKernel() throws Exception {
         int port = 8887;
         NettyServer.startServer(port);
         // Start server instance
@@ -39,6 +39,7 @@ public class NoUse {
         ConnectManager.scanPackage("io.nuls.rpc.cmd.kernel");
         ConnectManager.ROLE_MAP.put(ModuleE.KE.abbr, connectionInformation);
         ConnectManager.updateStatus();
+        return port;
     }
 
     /**

@@ -17,8 +17,19 @@ help()
 EOF
     exit 0
 }
-export JAVA_HOME="$(cd $(dirname "../Libraries/JAVA/11.0.2"); pwd)/11.0.2"
-export PATH=${PATH}:${JAVA_HOME}/bin
+if [[ -d ../Libraries/JAVA/11.0.2 ]]; then
+    export JAVA_HOME="$(cd $(dirname "../Libraries/JAVA/11.0.2"); pwd)/11.0.2"
+    export PATH=${PATH}:${JAVA_HOME}/bin
+    JAVA="${JAVA_HOME}/bin/java"
+else
+    JAVA='java'
+fi
+JAVA_EXIST=`${JAVA} -version 2>&1 |grep 11`
+if [ ! -n "$JAVA_EXIST" ]; then
+    echo "JDK version is not 11"
+    ${JAVA} -version
+    exit 0;
+fi
 echo "JAVA_HOME:${JAVA_HOME}"
 echo `java -version`
 BIN_PATH=$(cd $(dirname $0); pwd);
@@ -75,7 +86,7 @@ fi
 if [ -n "$LOGPATH" ];
 then
     LOGPATH="-Dlog.path=${LOGPATH}"
-    else
+else
     if [ ! -d ../logs ]; then
         mkdir ../logs
     fi
@@ -84,57 +95,16 @@ fi
 if [ -n "$DATAPATH" ];
 then
     DATAPATH="-DDataPath=${DATAPATH}"
-    else
-    if [ ! -d ../Modules/Nuls/data ]; then
-        mkdir ../Modules/Nuls/data
+else
+    if [ ! -d ../data ]; then
+        mkdir ../data
     fi
-    DATAPATH="-DDataPath=`get_fullpath ../Modules/Nuls/data`"
+    DATAPATH="-DDataPath=`get_fullpath ../data`"
 fi
 echo "log path : ${LOGPATH}"
 echo "data path : ${DATAPATH}"
-#
-#if [ -f "$CONFIG" ]; then
-#    if [ -f "./config.temp.properties" ]; then
-#        rm ./config.temp.properties
-#    fi
-#    touch ./config.temp.properties
-#    while read line
-#	do
-#	    pname=$(echo $line | awk -F '=' '{print $1}')
-#        pvalue=$(awk -v a="$line" '
-#                            BEGIN{
-#                                len = split(a,ary,"=")
-#                                r=""
-#                                for ( i = 2; i <= len; i++ ){
-#                                    if(r != ""){
-#                                        r = (r"=")
-#                                    }
-#                                    r=(r""ary[i])
-#                                }
-#                                print r
-#                            }
-#                        ')
-#        if [ -d "$pvalue" ]; then
-#            pvalue=$(`dirname $pvalue`)
-#        fi
-#        if [ -f "$pvalue" ]; then
-#            pvalue="`get_fullpath $pvalue`/${pvalue##*/}"
-#        fi
-#		echo "${pname}=${pvalue}" >> ./config.temp.properties
-#	done < $CONFIG
-#fi
-#exit 0
-JAVA="$JAVA_HOME/bin/java"
-if [[ ! -r "$JAVA" ]]; then
-    JAVA='java'
-fi
 
-JAVA_EXIST=`${JAVA} -version 2>&1 |grep 11`
-if [ ! -n "$JAVA_EXIST" ]; then
-    echo "JDK version is not 11"
-    ${JAVA} -version
-    exit 0;
-fi
+
 #echo "jdk version : `$JAVA -version `"
 MODULE_PATH=$(cd `dirname $0`;pwd)
 cd ../Modules/Nuls
