@@ -37,18 +37,6 @@ public enum RunningStatusEnum {
     INITIALIZING,
 
     /**
-     * 初始化完成
-     * initialized
-     */
-    INITIALIZED,
-
-    /**
-     * 等待中
-     * waiting
-     */
-    WAITING,
-
-    /**
      * 同步区块中
      * synchronizing
      */
@@ -65,18 +53,6 @@ public enum RunningStatusEnum {
      * running
      */
     RUNNING,
-
-    /**
-     * 正在停止
-     * stopping
-     */
-    STOPPING,
-
-    /**
-     * 运行出现异常
-     * Running exception
-     */
-    EXCEPTION,
 
     /**
      * 维护孤儿链

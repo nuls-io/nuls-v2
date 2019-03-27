@@ -26,6 +26,7 @@ package io.nuls.contract.model.bo;
 import io.nuls.base.data.BlockHeader;
 import io.nuls.base.data.Transaction;
 import io.nuls.contract.model.txdata.ContractData;
+import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -33,8 +34,7 @@ import lombok.Setter;
  * @author: PierreLuo
  * @date: 2019-02-27
  */
-@Getter
-@Setter
+@Data
 public class ContractWrapperTransaction extends Transaction {
 
     private String txHex;
@@ -44,9 +44,9 @@ public class ContractWrapperTransaction extends Transaction {
     private ContractData contractData;
 
     /**
-     * 合约内部转账交易的时间的偏移量，用于排序，区块逻辑没有用到时间排序，暂时放弃
+     * 接收到的交易顺序
      */
-    //private int order;
+    private int order;
 
     private BlockHeader blockHeader;
 

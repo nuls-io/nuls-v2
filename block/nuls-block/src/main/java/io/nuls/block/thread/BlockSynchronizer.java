@@ -122,7 +122,7 @@ public class BlockSynchronizer implements Runnable {
 
     /**
      * 等待网络稳定
-     * 每隔5秒请求一次getAvailableNodes，连续3次节点数一致就认为网络稳定
+     * 每隔5秒请求一次getAvailableNodes，连续5次节点数一致就认为网络稳定
      *
      * @param chainId
      * @return
@@ -140,13 +140,13 @@ public class BlockSynchronizer implements Runnable {
             Thread.sleep(waitNetworkInterval);
             availableNodesSecond = NetworkUtil.getAvailableNodes(chainId);
             sizeSecond = availableNodesSecond.size();
-            commonLog.info("sizeFirst=" + sizeFirst + ", sizeSecond=" + sizeSecond + ", wait Until Network Stable..........");
+            commonLog.info("last nodes amount=" + sizeFirst + ", current nodes amount=" + sizeSecond + ", wait Until Network Stable..........");
             if (sizeSecond == sizeFirst) {
                 count++;
             } else {
                 count = 0;
             }
-            if (count >= 3) {
+            if (count >= 5) {
                 return;
             }
             sizeFirst = sizeSecond;
@@ -162,7 +162,7 @@ public class BlockSynchronizer implements Runnable {
         ChainParameters parameters = context.getParameters();
         int minNodeAmount = parameters.getMinNodeAmount();
         if (minNodeAmount == 0) {
-            commonLog.info("skip block syn, because minNodeAmount=0");
+            commonLog.info("skip block syn, because minNodeAmount is set to 0, minNodeAmount should't set to 0 otherwise you want run local node without connect with network");
             context.setStatus(RunningStatusEnum.RUNNING);
             ConsensusUtil.notice(chainId, CONSENSUS_WORKING);
             return true;
@@ -173,7 +173,7 @@ public class BlockSynchronizer implements Runnable {
             int size = params.getNodes().size();
             //网络上没有可用的一致节点,就是节点高度都不一致，或者一致的节点比例不够
             if (size == 0) {
-                commonLog.warn("chain-" + chainId + ", no consistent nodes");
+                commonLog.warn("chain-" + chainId + ", no consistent nodes, availableNodes-" + availableNodes);
                 return false;
             }
             //网络上所有节点高度都是0,说明是该链第一次运行
@@ -226,9 +226,9 @@ public class BlockSynchronizer implements Runnable {
             executor.shutdownNow();
             if (success) {
                 commonLog.info("block syn complete, total download:" + total + ", total time:" + (end - start) + ", average time:" + (end - start) / total);
-//                if (checkIsNewest(chainId, context)) {
+                if (checkIsNewest(chainId, context)) {
                     //要测试分叉链切换或者孤儿链，放开下面语句，概率会加大
-                if (true) {
+//                if (true) {
                     commonLog.info("block syn complete successfully, current height-" + params.getNetLatestHeight());
                     context.setStatus(RunningStatusEnum.RUNNING);
                     ConsensusUtil.notice(chainId, CONSENSUS_WORKING);
@@ -241,7 +241,7 @@ public class BlockSynchronizer implements Runnable {
                 context.setDoSyn(true);
             }
         } else {
-            commonLog.warn("chain-" + chainId + ", available nodes not enough");
+            commonLog.warn("chain-" + chainId + ", available nodes not enough, minNodeAmount-" + minNodeAmount + ", availableNodes-" + availableNodes.size());
         }
         return false;
     }

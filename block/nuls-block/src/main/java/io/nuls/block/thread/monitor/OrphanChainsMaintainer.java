@@ -147,6 +147,10 @@ public class OrphanChainsMaintainer implements Runnable {
             return;
         }
         NulsDigestData previousHash = orphanChain.getPreviousHash();
+        Chain masterChain = BlockChainManager.getMasterChain(chainId);
+        if (masterChain.getHashList().contains(previousHash)) {
+            return;
+        }
         Block block;
         //向其他节点请求孤儿链起始区块的上一个区块
         for (Node availableNode : availableNodes) {

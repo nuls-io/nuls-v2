@@ -227,12 +227,6 @@ public class ChainManager {
             and the main chain configuration information needs to be read from the configuration file at this time.
             */
             if (configMap == null || configMap.size() == 0) {
-                /*String configJson = IoUtils.read(ConsensusConstant.CONFIG_FILE_PATH);
-                List<ConfigItem> configItemList = JSONUtils.json2list(configJson, ConfigItem.class);
-                ConfigBean configBean = ConfigManager.initManager(configItemList);
-                if (configBean == null) {
-                    return null;
-                }*/
                 ConfigBean configBean = config.getConfigBean();
                 configBean.setBlockReward(configBean.getInflationAmount().divide(ConsensusConstant.YEAR_MILLISECOND.divide(BigInteger.valueOf(configBean.getPackingInterval()))));
                 boolean saveSuccess = configService.save(configBean,configBean.getChainId());
@@ -308,7 +302,9 @@ public class ChainManager {
             agentManager.loadAgents(chain);
             depositManager.loadDeposits(chain);
             punishManager.loadPunishes(chain);
-            //roundManager.initRound(chain);
+            if(chain.getBlockHeaderList().size()>1){
+                roundManager.initRound(chain);
+            }
         } catch (Exception e) {
             chain.getLoggerMap().get(ConsensusConstant.CONSENSUS_LOGGER_NAME).error(e);
         }

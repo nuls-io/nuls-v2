@@ -115,6 +115,11 @@ public class ApiModuleBootstrap extends RpcModule {
 
     @Override
     public boolean doStart() {
+        return true;
+    }
+
+    @Override
+    public RpcModuleState onDependenciesReady() {
         try {
             initDB();
             ScheduleManager scheduleManager = SpringLiteContext.getBean(ScheduleManager.class);
@@ -122,17 +127,11 @@ public class ApiModuleBootstrap extends RpcModule {
             Thread.sleep(3000);
             JsonRpcServer server = new JsonRpcServer();
             server.startServer(ApiContext.listenerIp, ApiContext.rpcPort);
-            return true;
         } catch (Exception e) {
-            Log.error("------------------------api module启动失败---------------------------");
+            Log.error("------------------------api-module running failed---------------------------");
             Log.error(e);
             System.exit(-1);
-            return false;
         }
-    }
-
-    @Override
-    public RpcModuleState onDependenciesReady() {
         return RpcModuleState.Running;
     }
 

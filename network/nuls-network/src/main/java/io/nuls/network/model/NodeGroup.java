@@ -274,6 +274,7 @@ public class NodeGroup implements Dto {
         if (nodePoList != null) {
             for (NodePo nodePo : nodePoList) {
                 Node node = (Node) nodePo.parseDto();
+                node.setMagicNumber(magicNumber);
                 if (null == nodeMap.get(node.getId())) {
                     nodeMap.put(node.getId(), node);
                 }

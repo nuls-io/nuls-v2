@@ -92,7 +92,11 @@ public class PocConsensusController {
         }
         Map<String, Long> resultMap = new HashMap<>();
         resultMap.put("seedsCount", (long) apiCache.getChainInfo().getSeeds().size());
-        resultMap.put("consensusCount", (long) (apiCache.getCurrentRound().getMemberCount() - apiCache.getChainInfo().getSeeds().size()));
+        int consensusCount = apiCache.getCurrentRound().getMemberCount() - apiCache.getChainInfo().getSeeds().size();
+        if (consensusCount < 0) {
+            consensusCount = 0;
+        }
+        resultMap.put("consensusCount", (long) consensusCount);
         long count = agentService.agentsCount(chainId, apiCache.getBestHeader().getHeight());
         resultMap.put("agentCount", count);
         resultMap.put("totalCount", count + apiCache.getChainInfo().getSeeds().size());

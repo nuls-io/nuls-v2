@@ -121,7 +121,7 @@ public class GetContractTxProcessor extends ContractBaseProcessor {
             contractResultMap.put("refundFee", Na.naToNuls(contractResultMap.get("refundFee")));
             contractResultMap.put("value", Na.naToNuls(contractResultMap.get("value")));
             contractResultMap.put("price", Na.naToNuls(contractResultMap.get("price")));
-            contractResultMap.put("balance", Na.naToNuls(contractResultMap.get("balance")));
+            //contractResultMap.put("balance", Na.naToNuls(contractResultMap.get("balance")));
         }
 
 

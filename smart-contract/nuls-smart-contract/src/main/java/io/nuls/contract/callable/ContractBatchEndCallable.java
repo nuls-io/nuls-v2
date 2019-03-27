@@ -92,7 +92,7 @@ public class ContractBatchEndCallable implements Callable<ContractPackageDto> {
             // 归集合约内部转账交易
             List<Transaction> resultTxList = new ArrayList<>();
             for (ContractResult contractResult : contractResultList) {
-                Log.info("=======contractResult 地址 is {}, 排序时间 is {}", AddressTool.getStringAddressByBytes(contractResult.getContractAddress()), contractResult.getTxTime());
+                Log.info("ContractResult Address is {}, Order is {}", AddressTool.getStringAddressByBytes(contractResult.getContractAddress()), contractResult.getTxOrder());
                 resultTxList.addAll(contractResult.getContractTransferList());
             }
             // 生成退还剩余Gas的交易
@@ -105,6 +105,7 @@ public class ContractBatchEndCallable implements Callable<ContractPackageDto> {
             dto.makeContractResultMap(contractResultList);
             batchInfo.setContractPackageDto(dto);
 
+            Log.info("[Before End] Contract Execution, BlockHeight is {}, Cost Time is {}", currentBlockHeader.getHeight(), System.currentTimeMillis() - batchInfo.getBeginTime());
             return dto;
         } catch (IOException e) {
             Log.error(e);

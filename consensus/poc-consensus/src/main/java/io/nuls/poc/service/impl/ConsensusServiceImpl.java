@@ -1430,8 +1430,9 @@ public class ConsensusServiceImpl implements ConsensusService {
         if (null == member) {
             agent.setStatus(0);
             return;
+        }else{
+            agent.setStatus(1);
         }
-        agent.setStatus(1);
         agent.setCreditVal(member.getAgent().getRealCreditVal());
     }
 }

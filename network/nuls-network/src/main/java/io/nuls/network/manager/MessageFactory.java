@@ -31,6 +31,7 @@ import io.nuls.network.manager.handler.base.BaseMeesageHandlerInf;
 import io.nuls.network.manager.handler.message.*;
 import io.nuls.network.model.Node;
 import io.nuls.network.model.NodeGroup;
+import io.nuls.network.model.dto.BestBlockInfo;
 import io.nuls.network.model.dto.IpAddress;
 import io.nuls.network.model.message.*;
 import io.nuls.network.model.message.base.BaseMessage;
@@ -74,6 +75,7 @@ public class MessageFactory {
         MessageFactory.putMessage(AddrMessage.class, AddrMessageHandler.getInstance());
         MessageFactory.putMessage(GetTimeMessage.class, GetTimeMessageHandler.getInstance());
         MessageFactory.putMessage(TimeMessage.class, TimeMessageHandler.getInstance());
+        MessageFactory.putMessage(PeerInfoMessage.class, PeerInfoMessageHandler.getInstance());
     }
 
     /**
@@ -195,5 +197,18 @@ public class MessageFactory {
         messageBody.setMessageId(messageId);
         messageBody.setTime(System.currentTimeMillis());
         return new TimeMessage(magicNumber, NetworkConstant.CMD_MESSAGE_RESPONSE_TIME, messageBody);
+    }
+
+    /**
+     * 构造PeerInfoMessage消息
+     * @param magicNumber
+     * @param bestBlockInfo
+     * @return
+     */
+    public PeerInfoMessage buildPeerInfoMessage(long magicNumber, BestBlockInfo bestBlockInfo) {
+        PeerInfoMessageBody messageBody = new PeerInfoMessageBody();
+        messageBody.setBlockHash(bestBlockInfo.getHash());
+        messageBody.setBlockHeight(bestBlockInfo.getBlockHeight());
+        return new PeerInfoMessage(magicNumber, NetworkConstant.CMD_MESSAGE_SEND_LOCAL_INFOS, messageBody);
     }
 }

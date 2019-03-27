@@ -1,5 +1,6 @@
 package io.nuls.contract;
 
+import ch.qos.logback.classic.Level;
 import io.nuls.contract.config.ContractConfig;
 import io.nuls.contract.config.NulsConfig;
 import io.nuls.contract.constant.ContractConstant;
@@ -62,6 +63,7 @@ public class ContractBootStrap extends RpcModule {
     public void init() {
         try {
             super.init();
+            initContractLog();
             initNulsConfig();
             initDB();
             initLanguage();
@@ -97,9 +99,18 @@ public class ContractBootStrap extends RpcModule {
     }
 
     /**
+     * 初始化模块日志
+     */
+    private void initContractLog() {
+        Level fileLevel = Level.toLevel(contractConfig.getLogFileLevel());
+        Level consoleLevel = Level.toLevel(contractConfig.getLogConsoleLevel());
+        ContractUtil.configLog(contractConfig.getLogFilePath(), contractConfig.getLogFileName(), fileLevel, consoleLevel);
+    }
+
+    /**
      * 初始化NRC20合约标准格式
      */
-    private static void initNRC20Standard() {
+    private void initNRC20Standard() {
         String json = null;
         try {
             json = IoUtils.read(NRC20_STANDARD_FILE);
@@ -124,7 +135,7 @@ public class ContractBootStrap extends RpcModule {
      * 初始化数据库
      * Initialization database
      */
-    private static void initDB() throws IOException {
+    private void initDB() throws IOException {
         RocksDBService.init(NulsConfig.DATA_PATH);
         ContractUtil.createTable(ContractDBConstant.DB_NAME_CONGIF);
         ContractUtil.createTable(ContractDBConstant.DB_NAME_LANGUAGE);

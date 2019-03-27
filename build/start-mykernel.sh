@@ -7,7 +7,7 @@ help()
     Desc: 启动NULS 2.0钱包，
     Usage: ./start.sh
     		-c <module.json> 使用指定配置文件 如果不配置将使用./default-config.json
-    		-b 后台运行
+    		-f 前台运行
     		-l <logs path> 输出的日志目录
     		-d <data path> 数据存储目录
     		-j JAVA_HOME
@@ -17,27 +17,39 @@ help()
 EOF
     exit 0
 }
-export JAVA_HOME="$(cd $(dirname "../Libraries/JAVA/11.0.2"); pwd)/11.0.2"
-export PATH=${PATH}:${JAVA_HOME}/bin
+cd `dirname $0`;
+BIN_PATH=`pwd`
+if [[ -d ../Libraries/JAVA/11.0.2 ]]; then
+    JAVA_HOME=`dirname "../Libraries/JAVA/11.0.2/bin"`;
+    JAVA_HOME=`cd $JAVA_HOME; pwd`
+    JAVA="${JAVA_HOME}/bin/java"
+else
+    JAVA='java'
+fi
+JAVA_EXIST=`${JAVA} -version 2>&1 |grep 11`
+if [ ! -n "$JAVA_EXIST" ]; then
+    echo "JDK version is not 11"
+    ${JAVA} -version
+    exit 0;
+fi
 echo "JAVA_HOME:${JAVA_HOME}"
 echo `java -version`
-BIN_PATH=$(cd $(dirname $0); pwd);
-cd $BIN_PATH;
 function get_fullpath()
 {
-    if [ -f $1 ];
+    if [ -f "$1" ];
     then
-        echo $(cd $(dirname $1); pwd);
+        tempDir=`dirname $1`;
+        echo `cd $tempDir; pwd`;
         else
-        echo $(cd $1; pwd);
+        echo `cd $1; pwd`;
     fi
 }
 
-RUNBLOCK=
-while getopts bj:c:l:d:Dh name
+RUNFRONT=
+while getopts fj:c:l:d:Dh name
 do
             case $name in
-            b)     RUNBLOCK="1";;
+            f)     RUNFRONT="1";;
             j)     JAVA_HOME="$OPTARG";;
             c)     
                     CONFIG="`get_fullpath $OPTARG`/${OPTARG##*/}"
@@ -72,15 +84,14 @@ done
 if [ ! -f "$CONFIG" ]; then
     CONFIG="${BIN_PATH}/default-config.json"
 fi
-if [ -n "$LOGPATH" ];
+if [ ! -n "$LOGPATH" ];
 then
-    LOGPATH="-Dlog.path=${LOGPATH}"
-else
-    if [ ! -d ../logs ]; then
-        mkdir ../logs
-    fi
-    LOGPATH="-Dlog.path=`get_fullpath ../logs`"
+    LOGPATH="`get_fullpath ../logs`"
 fi
+if [ ! -d "$LOGPATH" ]; then
+   mkdir $LOGPATH
+fi
+
 if [ -n "$DATAPATH" ];
 then
     DATAPATH="-DDataPath=${DATAPATH}"
@@ -92,58 +103,14 @@ else
 fi
 echo "log path : ${LOGPATH}"
 echo "data path : ${DATAPATH}"
-#
-#if [ -f "$CONFIG" ]; then
-#    if [ -f "./config.temp.properties" ]; then
-#        rm ./config.temp.properties
-#    fi
-#    touch ./config.temp.properties
-#    while read line
-#	do
-#	    pname=$(echo $line | awk -F '=' '{print $1}')
-#        pvalue=$(awk -v a="$line" '
-#                            BEGIN{
-#                                len = split(a,ary,"=")
-#                                r=""
-#                                for ( i = 2; i <= len; i++ ){
-#                                    if(r != ""){
-#                                        r = (r"=")
-#                                    }
-#                                    r=(r""ary[i])
-#                                }
-#                                print r
-#                            }
-#                        ')
-#        if [ -d "$pvalue" ]; then
-#            pvalue=$(`dirname $pvalue`)
-#        fi
-#        if [ -f "$pvalue" ]; then
-#            pvalue="`get_fullpath $pvalue`/${pvalue##*/}"
-#        fi
-#		echo "${pname}=${pvalue}" >> ./config.temp.properties
-#	done < $CONFIG
-#fi
-#exit 0
-JAVA="$JAVA_HOME/bin/java"
-if [[ ! -r "$JAVA" ]]; then
-    JAVA='java'
-fi
 
-JAVA_EXIST=`${JAVA} -version 2>&1 |grep 11`
-if [ ! -n "$JAVA_EXIST" ]; then
-    echo "JDK version is not 11"
-    ${JAVA} -version
-    exit 0;
-fi
-#echo "jdk version : `$JAVA -version `"
-MODULE_PATH=$(cd `dirname $0`;pwd)
 cd ../Modules/Nuls
-MODULE_PATH=$(pwd)
-if [ -z "${RUNBLOCK}" ];
+MODULE_PATH=`pwd`
+if [ -n "${RUNFRONT}" ];
 then
-    ${JAVA} -server -Ddebug=${DEBUG} -Dapp.name=mykernel ${LOGPATH} ${DATAPATH} -classpath ./libs/*:./mykernel/1.0.0/mykernel-1.0.0.jar io.nuls.mykernel.MyKernelBootstrap startModule $MODULE_PATH $CONFIG
+    ${JAVA} -server -Ddebug="${DEBUG}" -Dapp.name=mykernel -Dlog.path="${LOGPATH}" ${DATAPATH} -Dactive.module="$CONFIG" -classpath ./libs/*:./mykernel/1.0.0/mykernel-1.0.0.jar io.nuls.mykernel.MyKernelBootstrap startModule $MODULE_PATH $CONFIG
 else
-    nohup ${JAVA} -server -Ddebug=${DEBUG} -Dapp.name=mykernel ${LOGPATH} ${DATAPATH}  -classpath ./libs/*:./mykernel/1.0.0/mykernel-1.0.0.jar io.nuls.mykernel.MyKernelBootstrap startModule $MODULE_PATH $CONFIG > mykernel.log 2>&1 &
+    nohup ${JAVA} -server -Ddebug="${DEBUG}" -Dapp.name=mykernel -Dlog.path="${LOGPATH}" ${DATAPATH}  -Dactive.module="$CONFIG"  -classpath ./libs/*:./mykernel/1.0.0/mykernel-1.0.0.jar io.nuls.mykernel.MyKernelBootstrap startModule $MODULE_PATH $CONFIG > "${LOGPATH}/stdut.log" 2>&1 &
 fi
 
 

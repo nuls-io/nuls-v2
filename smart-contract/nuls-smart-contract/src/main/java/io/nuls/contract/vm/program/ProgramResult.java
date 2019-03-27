@@ -42,7 +42,7 @@ public class ProgramResult {
 
     private String stackTrace;
 
-    private BigInteger balance;
+    //private BigInteger balance;
 
     private BigInteger nonce;
 
@@ -130,13 +130,13 @@ public class ProgramResult {
         this.stackTrace = stackTrace;
     }
 
-    public BigInteger getBalance() {
-        return balance;
-    }
-
-    public void setBalance(BigInteger balance) {
-        this.balance = balance;
-    }
+    //public BigInteger getBalance() {
+    //    return balance;
+    //}
+    //
+    //public void setBalance(BigInteger balance) {
+    //    this.balance = balance;
+    //}
 
     public BigInteger getNonce() {
         return nonce;
@@ -199,9 +199,9 @@ public class ProgramResult {
         if (stackTrace != null ? !stackTrace.equals(that.stackTrace) : that.stackTrace != null) {
             return false;
         }
-        if (balance != null ? !balance.equals(that.balance) : that.balance != null) {
-            return false;
-        }
+        //if (balance != null ? !balance.equals(that.balance) : that.balance != null) {
+        //    return false;
+        //}
         if (nonce != null ? !nonce.equals(that.nonce) : that.nonce != null) {
             return false;
         }
@@ -222,7 +222,7 @@ public class ProgramResult {
         result1 = 31 * result1 + (error ? 1 : 0);
         result1 = 31 * result1 + (errorMessage != null ? errorMessage.hashCode() : 0);
         result1 = 31 * result1 + (stackTrace != null ? stackTrace.hashCode() : 0);
-        result1 = 31 * result1 + (balance != null ? balance.hashCode() : 0);
+        //result1 = 31 * result1 + (balance != null ? balance.hashCode() : 0);
         result1 = 31 * result1 + (nonce != null ? nonce.hashCode() : 0);
         result1 = 31 * result1 + (transfers != null ? transfers.hashCode() : 0);
         result1 = 31 * result1 + (internalCalls != null ? internalCalls.hashCode() : 0);
@@ -239,7 +239,7 @@ public class ProgramResult {
                 ", error=" + error +
                 ", errorMessage=" + errorMessage +
                 ", stackTrace=" + stackTrace +
-                ", balance=" + balance +
+                //", balance=" + balance +
                 ", nonce=" + nonce +
                 ", transfers=" + transfers +
                 ", internalCalls=" + internalCalls +

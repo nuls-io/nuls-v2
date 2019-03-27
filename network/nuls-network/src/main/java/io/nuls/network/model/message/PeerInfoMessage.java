@@ -22,19 +22,39 @@
  * SOFTWARE.
  *
  */
-package io.nuls.mykernel;
+package io.nuls.network.model.message;
 
-import ch.qos.logback.classic.Level;
-import io.nuls.tools.log.logback.LoggerBuilder;
-import io.nuls.tools.log.logback.NulsLogger;
+import io.nuls.base.basic.NulsByteBuffer;
+import io.nuls.network.constant.NetworkConstant;
+import io.nuls.network.model.message.base.BaseMessage;
+import io.nuls.network.model.message.body.GetTimeMessageBody;
+import io.nuls.network.model.message.body.PeerInfoMessageBody;
+import io.nuls.tools.exception.NulsException;
 
 /**
- * @author qinyifeng
- * @description
- * @date 2019/03/07
- **/
-public class LoggerUtil {
+ * 请求 时间协议消息
+ * get time message
+ *
+ * @author lan
+ * @date 2018/11/01
+ */
+public class PeerInfoMessage extends BaseMessage<PeerInfoMessageBody> {
 
-   public static NulsLogger logger = LoggerBuilder.getLogger("kernel", Level.INFO);
+    @Override
+    protected PeerInfoMessageBody parseMessageBody(NulsByteBuffer byteBuffer) throws NulsException {
+        try {
+            return byteBuffer.readNulsData(new PeerInfoMessageBody());
+        } catch (Exception e) {
+            throw new NulsException(e);
+        }
+    }
 
+    public PeerInfoMessage() {
+        super(NetworkConstant.CMD_MESSAGE_SEND_LOCAL_INFOS);
+    }
+
+    public PeerInfoMessage(long magicNumber, String cmd, PeerInfoMessageBody body) {
+        super(cmd, magicNumber);
+        this.setMsgBody(body);
+    }
 }

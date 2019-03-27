@@ -36,7 +36,7 @@ public class ContractResultInfo {
 
     private String value;
 
-    private String balance;
+    //private String balance;
 
     private List<NulsTransfer> nulsTransfers;
 

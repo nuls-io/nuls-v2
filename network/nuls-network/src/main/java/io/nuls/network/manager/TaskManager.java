@@ -24,11 +24,13 @@
  */
 package io.nuls.network.manager;
 
+import io.nuls.network.cfg.NetworkConfig;
 import io.nuls.network.model.Node;
 import io.nuls.network.model.NodeGroup;
 import io.nuls.network.netty.NettyClient;
 import io.nuls.network.task.*;
 import io.nuls.network.utils.LoggerUtil;
+import io.nuls.tools.core.ioc.SpringLiteContext;
 import io.nuls.tools.thread.ThreadUtils;
 import io.nuls.tools.thread.commom.NulsThreadFactory;
 
@@ -82,11 +84,15 @@ public class TaskManager extends BaseManager {
 
     @Override
     public void start() throws Exception {
-        executorService = ThreadUtils.createScheduledThreadPool(4, new NulsThreadFactory("NetWorkThread"));
+        executorService = ThreadUtils.createScheduledThreadPool(5, new NulsThreadFactory("NetWorkThread"));
         connectTasks();
         scheduleGroupStatusMonitor();
         timeServiceThreadStart();
         nwInfosThread();
+        NetworkConfig networkConfig = SpringLiteContext.getBean(NetworkConfig.class);
+        if(1 == networkConfig.getUpdatePeerInfoType()){
+            localInfosSendTask();
+        }
     }
 
     private void connectTasks() {
@@ -96,11 +102,12 @@ public class TaskManager extends BaseManager {
         RunOnceAfterNetStableThreadStart();
 
     }
-
+    private void localInfosSendTask() {
+        //进行本地信息广播线程
+        executorService.scheduleAtFixedRate(new LocalInfosSendTask(), 5, 5, TimeUnit.SECONDS);
+    }
     private void nwInfosThread() {
-        //测试调试专用 开始
         executorService.scheduleAtFixedRate(new NwInfosPrintTask(), 5, 60, TimeUnit.SECONDS);
-        //测试调试专用 结束
     }
 
     private void scheduleGroupStatusMonitor() {

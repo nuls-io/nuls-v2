@@ -78,6 +78,7 @@ public class ContractTransferHandler {
         // 增加转入
         BigInteger value = contractData.getValue();
         if (value.compareTo(BigInteger.ZERO) > 0) {
+            vmContext.getBalance(chainId, contractAddress);
             tempBalanceManager.addTempBalance(contractAddress, value);
         }
         // 增加转入, 扣除转出
@@ -199,7 +200,7 @@ public class ContractTransferHandler {
                 contractResult.setError(true);
                 contractResult.setErrorMessage(result.getErrorCode().getMsg());
                 // 余额还原到上一次的余额
-                contractResult.setBalance(contractResult.getPreBalance());
+                //contractResult.setBalance(contractResult.getPreBalance());
                 // 回滚临时余额
                 this.rollbackContractTempBalance(chainId, contractResult.getTx(), contractResult, tempBalanceManager);
                 // 清空内部转账列表
@@ -261,7 +262,7 @@ public class ContractTransferHandler {
                     contractBalance = tempBalanceManager.getBalance(from).getData();
                     nonceBytes = Hex.decode(contractBalance.getNonce());
                 }
-                Log.info("=====pierre====from is {}, nonce is {}", AddressTool.getStringAddressByBytes(from), contractBalance.getNonce());
+                Log.info("From is {}, nonce is {}", AddressTool.getStringAddressByBytes(from), contractBalance.getNonce());
                 compareFrom = wrapperFrom;
                 coinData = new CoinData();
                 coinFrom = new CoinFrom(from, chainId, assetsId, value, nonceBytes, (byte) 0);
@@ -334,7 +335,7 @@ public class ContractTransferHandler {
         byte[] currentNonceBytes = Arrays.copyOfRange(hashBytes, hashBytes.length - 8, hashBytes.length);
         balance.setNonce(Hex.toHexString(currentNonceBytes));
         tx.setHash(hash);
-        Log.info("=====pierre====txType is {}, hash is {}, nextNonce is {}", tx.getType(), hash.toString(), Hex.toHexString(currentNonceBytes));
+        Log.info("TxType is {}, hash is {}, nextNonce is {}", tx.getType(), hash.toString(), Hex.toHexString(currentNonceBytes));
     }
 
     private ContractTransferTransaction createContractTransferTx(CoinData coinData, ContractTransferData txData, long blockTime, long timeOffset) {

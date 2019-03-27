@@ -34,6 +34,7 @@ import io.nuls.contract.model.tx.ContractTransferTransaction;
 import io.nuls.contract.model.txdata.ContractTransferData;
 import io.nuls.contract.service.ContractCaller;
 import io.nuls.contract.service.ResultHanlder;
+import io.nuls.contract.util.CompareTxOrderAsc;
 import io.nuls.contract.util.CompareTxTimeAsc;
 import io.nuls.contract.util.Log;
 import io.nuls.contract.vm.program.ProgramExecutor;
@@ -75,8 +76,8 @@ public class ResultHandlerImpl implements ResultHanlder {
             finalResultList.addAll(analyzerResult.getSuccessList());
             finalResultList.addAll(analyzerResult.getFailedSet());
             finalResultList.addAll(reCallResultList);
-            // 按时间升序排序
-            return finalResultList.stream().sorted(CompareTxTimeAsc.getInstance()).collect(Collectors.toList());
+            // 按接收交易的顺序升序排序
+            return finalResultList.stream().sorted(CompareTxOrderAsc.getInstance()).collect(Collectors.toList());
         } catch (IOException e) {
             Log.error(e);
             return Collections.emptyList();
@@ -128,8 +129,8 @@ public class ResultHandlerImpl implements ResultHanlder {
     private List<ContractResult> reCall(ProgramExecutor batchExecutor, AnalyzerResult analyzerResult, int chainId, String preStateRoot) {
         // 重新执行合约
         List<ContractResult> list = analyzerResult.getReCallTxList();
-        List<ContractWrapperTransaction> collect = list.stream().map(c -> c.getTx()).collect(Collectors.toList());
-        List<ContractResult> resultList = contractCaller.reCallTx(batchExecutor, collect, chainId, preStateRoot);
+        List<ContractWrapperTransaction> collectTxs = list.stream().sorted(CompareTxOrderAsc.getInstance()).map(c -> c.getTx()).collect(Collectors.toList());
+        List<ContractResult> resultList = contractCaller.reCallTx(batchExecutor, collectTxs, chainId, preStateRoot);
         return resultList;
     }
 }
