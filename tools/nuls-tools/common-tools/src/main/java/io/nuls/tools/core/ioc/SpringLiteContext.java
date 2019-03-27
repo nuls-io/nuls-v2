@@ -31,6 +31,7 @@ import io.nuls.tools.core.config.ConfigurationLoader;
 import io.nuls.tools.core.inteceptor.DefaultMethodInterceptor;
 import io.nuls.tools.core.inteceptor.base.BeanMethodInterceptor;
 import io.nuls.tools.core.inteceptor.base.BeanMethodInterceptorManager;
+import io.nuls.tools.log.Log;
 import io.nuls.tools.model.StringUtils;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.exception.NulsRuntimeException;
@@ -89,7 +90,7 @@ public class SpringLiteContext {
         }
         SpringLiteContext.interceptor = interceptor;
         Set<Class> classes = new HashSet<>();
-        System.out.println("spring lite scan package : " + Arrays.toString(packName));
+        Log.info("spring lite scan package : " + Arrays.toString(packName));
         classes.addAll(ScanUtil.scan("io.nuls.tools.core.config"));
         Arrays.stream(packName).forEach(pack -> {
             classes.addAll(ScanUtil.scan(pack));
@@ -161,8 +162,7 @@ public class SpringLiteContext {
                     //call afterPropertiesSet 代码迁移到 callAfterPropertiesSet方法执行
                 }
             } catch (Exception e) {
-                System.err.println("spring lite autowire fields failed! ");
-                e.printStackTrace();
+                Log.error("spring lite autowire fields failed! ",e);
                 System.exit(0);
             }
         }
@@ -181,8 +181,7 @@ public class SpringLiteContext {
                         try {
                             ((InitializingBean) bean).afterPropertiesSet();
                         } catch (Exception e) {
-                            System.err.println("spring lite callAfterPropertiesSet fail :  "  + bean.getClass());
-                            e.printStackTrace();
+                            Log.error("spring lite callAfterPropertiesSet fail :  " + bean.getClass(),e);
                             System.exit(0);
                         }
                     }
@@ -352,8 +351,7 @@ public class SpringLiteContext {
             try {
                 loadBean(beanName, clazz, aopProxy);
             } catch (NulsException e) {
-                System.err.println("spring lite load bean fail :  "  + clazz);
-                e.printStackTrace();
+                Log.error("spring lite load bean fail :  "  + clazz,e);
                 System.exit(0);
                 return;
             }
@@ -365,8 +363,7 @@ public class SpringLiteContext {
                 Constructor constructor = clazz.getDeclaredConstructor();
                 interceptor = (BeanMethodInterceptor) constructor.newInstance();
             } catch (Exception e) {
-                System.err.println("spring lite instance bean fail :  "  + clazz);
-                e.printStackTrace();
+                Log.error("spring lite instance bean fail :  " + clazz,e);
                 System.exit(0);
                 return;
             }
@@ -416,11 +413,11 @@ public class SpringLiteContext {
      */
     private static Object loadBean(String beanName, Class clazz, boolean proxy) throws NulsException {
         if (BEAN_OK_MAP.containsKey(beanName)) {
-            System.err.println("model name repetition (" + beanName + "):" + clazz.getName());
+            Log.error("model name repetition (" + beanName + "):" + clazz.getName());
             return BEAN_OK_MAP.get(beanName);
         }
         if (BEAN_TEMP_MAP.containsKey(beanName)) {
-            System.err.println("model name repetition (" + beanName + "):" + clazz.getName());
+            Log.error("model name repetition (" + beanName + "):" + clazz.getName());
             return BEAN_TEMP_MAP.get(beanName);
         }
         Object bean = null;
@@ -430,10 +427,10 @@ public class SpringLiteContext {
             try {
                 bean = clazz.newInstance();
             } catch (InstantiationException e) {
-                System.err.println(e.getMessage());
+                Log.error(e.getMessage(),e);
                 throw new NulsException(e);
             } catch (IllegalAccessException e) {
-                System.err.println(e.getMessage());
+                Log.error(e.getMessage(),e);
                 throw new NulsException(e);
             }
         }

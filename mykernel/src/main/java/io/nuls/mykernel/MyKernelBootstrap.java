@@ -23,6 +23,7 @@ package io.nuls.mykernel;
 import ch.qos.logback.classic.Level;
 import io.nuls.rpc.info.HostInfo;
 import io.nuls.rpc.info.NoUse;
+import io.nuls.rpc.modulebootstrap.NulsRpcModuleBootstrap;
 import io.nuls.tools.log.logback.LoggerBuilder;
 import io.nuls.tools.log.logback.NulsLogger;
 import io.nuls.tools.model.StringUtils;
@@ -57,6 +58,7 @@ public class MyKernelBootstrap {
     static NulsLogger log = LoggerBuilder.getLogger("kernel", Level.INFO);
 
     public static void main(String[] args) throws Exception {
+        NulsRpcModuleBootstrap.printLogo("/logo");
         System.setProperty("io.netty.tryReflectionSetAccessible", "true");
         //增加程序结束的钩子，监听到主线程停止时，调用./stop.sh停止所有的子模块
         MyKernelBootstrap.args = args;

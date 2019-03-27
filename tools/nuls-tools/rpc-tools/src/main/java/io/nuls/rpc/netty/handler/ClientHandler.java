@@ -74,7 +74,7 @@ public class ClientHandler extends SimpleChannelInboundHandler<Object> {
                 this.handShaker.finishHandshake(ch, response);
                 //设置成功
                 this.handshakeFuture.setSuccess();
-                Log.info("WebSocket Client connected! response headers[sec-webSocket-extensions]:{}" + response.headers());
+                Log.debug("WebSocket Client connected! response headers[sec-webSocket-extensions]:{}" + response.headers());
             } catch (WebSocketHandshakeException var7) {
                 FullHttpResponse res = (FullHttpResponse) msg;
                 String errorMsg = String.format("WebSocket Client failed to connect,status:%s,reason:%s", res.status(), res.content().toString(CharsetUtil.UTF_8));

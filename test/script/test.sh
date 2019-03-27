@@ -1,6 +1,11 @@
 #!/bin/sh
 PRG="$0"
-
+APP_PID=`ps -ef|grep -w "name=test "|grep -v grep|awk '{print $2}'`
+PID_EXIST=`ps -f -p ${APP_PID} | grep java`
+if [ ! -z "$PID_EXIST" ]; then
+    echo "test module is running. please stop test module";
+    exit 0
+fi
 while [ -h "$PRG" ]; do
   ls=`ls -ld "$PRG"`
   link=`expr "$ls" : '.*-> \(.*\)$'`

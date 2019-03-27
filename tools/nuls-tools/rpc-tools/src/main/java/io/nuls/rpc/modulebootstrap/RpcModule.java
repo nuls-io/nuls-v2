@@ -222,7 +222,7 @@ public abstract class RpcModule implements InitializingBean {
             }
         } else {
             Log.info("RMB:dependencie state");
-            dependencies.entrySet().forEach(entry -> Log.info("{}:{}", entry.getKey().getName(), entry.getValue()));
+            dependencies.entrySet().forEach(entry -> Log.debug("{}:{}", entry.getKey().getName(), entry.getValue()));
         }
     }
 
