@@ -27,7 +27,7 @@ SERVER_HOME="../../"
 LIBS=$SERVER_HOME/libs
 PUB_LIB=""
 MAIN_CLASS=io.nuls.cmd.client.CmdClientBootstrap
-
+JAVA=${JAVA_HOME}/bin/java
 for jar in `find $LIBS -name "*.jar"`
 
 do
@@ -45,14 +45,14 @@ if  [ -x ${SERVER_HOME}/jre/bin/java ]; then
   exit 0
 fi
 
-JAVA_BIN=`which java`
+#JAVA_BIN=`which java`
 # try to use JAVA_HOME jre
-if [ -x ${JAVA_BIN} ]; then
-  ${JAVA_BIN} $JAVA_OPTS -classpath $CLASSPATH $MAIN_CLASS
+if [ -x ${JAVA} ]; then
+  ${JAVA} $JAVA_OPTS -classpath $CLASSPATH $MAIN_CLASS
   exit 0
 fi
 
- $JAVA_OPTS -classpath $CLASSPATH $MAIN_CLASS
+# $JAVA_OPTS -classpath $CLASSPATH $MAIN_CLASS
 
 echo "The JAVA_HOME environment variable is not defined"
 echo "This environment variable is needed to run this program"
