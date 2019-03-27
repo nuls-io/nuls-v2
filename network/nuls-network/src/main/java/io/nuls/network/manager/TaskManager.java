@@ -104,7 +104,7 @@ public class TaskManager extends BaseManager {
     }
     private void localInfosSendTask() {
         //进行本地信息广播线程
-        executorService.scheduleAtFixedRate(new LocalInfosSendTask(), 5, 10, TimeUnit.SECONDS);
+        executorService.scheduleAtFixedRate(new LocalInfosSendTask(), 5, 5, TimeUnit.SECONDS);
     }
     private void nwInfosThread() {
         executorService.scheduleAtFixedRate(new NwInfosPrintTask(), 5, 60, TimeUnit.SECONDS);
