@@ -39,9 +39,7 @@ public class CmdClientModule extends RpcModule {
 
     @Override
     public Module[] getDependencies() {
-        return new Module[]{
-                new Module(ModuleE.AC.abbr,"1.0")
-        };
+        return new Module[0];
     }
 
     @Override
