@@ -10,7 +10,7 @@
 
     <dependencies>
         <dependency>
-            <groupId>io.nuls</groupId>
+            <groupId>io.nuls.nuls-tools</groupId>
             <artifactId>api-provider</artifactId>
             <version>1.0.0-SNAPSHOT</version>
         </dependency>
