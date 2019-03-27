@@ -23,6 +23,7 @@
  */
 package io.nuls.contract.callable;
 
+import io.nuls.base.basic.AddressTool;
 import io.nuls.contract.helper.ContractConflictChecker;
 import io.nuls.contract.helper.ContractHelper;
 import io.nuls.contract.helper.ContractTransferHandler;
@@ -208,6 +209,7 @@ public class ContractTxCallable implements Callable<ContractResult> {
         if (txTrackObj != null && txTrackObj instanceof ProgramExecutor) {
             ProgramExecutor txTrack = (ProgramExecutor) txTrackObj;
             txTrack.commit();
+            Log.info("One of Batch contract[{}] commit", AddressTool.getStringAddressByBytes(contractResult.getContractAddress()));
         }
     }
 
