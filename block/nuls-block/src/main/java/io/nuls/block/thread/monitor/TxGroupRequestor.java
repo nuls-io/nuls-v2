@@ -62,14 +62,19 @@ public class TxGroupRequestor implements Runnable {
 
     public static void addTask(int chainId, String hash, TxGroupTask task) {
         NulsLogger commonLog = ContextManager.getContext(chainId).getCommonLog();
-        boolean add = map.get(chainId).get(hash).add(task);
+        DelayQueue<TxGroupTask> txGroupTasks = map.get(chainId).get(hash);
+        if (txGroupTasks == null) {
+            txGroupTasks = new DelayQueue<>();
+            map.get(chainId).put(hash, txGroupTasks);
+        }
+        boolean add = txGroupTasks.add(task);
         commonLog.debug("TxGroupRequestor add TxGroupTask, hash-" + hash + ", task-" + task + ", result-" + add + ", chianId-" + chainId);
     }
 
     public static void removeTask(int chainId, String hash) {
         NulsLogger commonLog = ContextManager.getContext(chainId).getCommonLog();
-        map.get(chainId).remove(hash);
-        commonLog.debug("TxGroupRequestor remove TxGroupTask, hash-" + hash + ", chianId-" + chainId);
+        DelayQueue<TxGroupTask> remove = map.get(chainId).remove(hash);
+        commonLog.debug("TxGroupRequestor remove TxGroupTask, hash-" + hash + ", size-" +remove.size()+", chianId-" + chainId);
     }
 
     @Override
