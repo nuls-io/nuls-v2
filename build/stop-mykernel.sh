@@ -1,22 +1,15 @@
 #!/bin/bash
-cd `dirname $0`
 APP_NAME="mykernel"
 KILL_WAIT_COUNT=120
-MODULE_PATH=$(cd `dirname $0`;pwd)
-LOGS_DIR="$MODULE_PATH/log"
-STDOUT_FILE=$LOGS_DIR/stdout.log
-APP_PID=`ps -ef|grep -w "name=${APP_NAME} "|grep -v grep|awk '{print $2}'`
-APP=0
+MODULE_PATH=`dirname $0`
+MODULE_PATH=`cd $MODULE_PATH; pwd`;
 echoRed() { echo $'\e[0;31m'$1$'\e[0m'; }
 echoGreen() { echo $'\e[0;32m'$1$'\e[0m'; }
 echoYellow() { echo $'\e[0;33m'$1$'\e[0m'; }
 log(){
     now=`date "+%Y-%m-%d %H:%M:%S"`
-    echo "${now}    $@" >> STDOUT_FILE
+    echo "${now}    $@"
     echoGreen "$@"
-}
-isRunning() {
-  ps -p $1 &> /dev/null
 }
 stop(){
     pid=$1;
@@ -34,15 +27,11 @@ stop(){
             exit 0;
         fi
     done
-
     log "stop ${APP_NAME}@${pid} failure,dump and kill it."
     kill $pid > /dev/null 2>&1
 }
-
-#if [ x$1 = x ]; then
-#      echoRed "Usage: $0 appName";
-#      exit 1;
-#fi
+APP=0
+APP_PID=`ps -ef|grep -w "name=${APP_NAME} "|grep -v grep|awk '{print $2}'`
 APP=`ps -ef|grep -w "name=${APP_NAME} "|grep -v grep|wc -l`
 if [ $APP -eq 1 ]; then
     PID_EXIST=`ps -f -p ${APP_PID} | grep java`
