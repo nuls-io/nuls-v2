@@ -377,7 +377,7 @@ public class ContractTxHelper {
 
             // 执行结果失败时，交易直接返回错误，不上链，不消耗Gas
             if (!programResult.isSuccess()) {
-                Log.error(programResult.getErrorMessage() + ", " + programResult.getStackTrace());
+                Log.error("sender[{}], contractAddress[{}]" + programResult.getErrorMessage() + ", " + programResult.getStackTrace(), AddressTool.getStringAddressByBytes(senderBytes), AddressTool.getStringAddressByBytes(contractAddressBytes));
                 Result result = Result.getFailed(DATA_ERROR);
                 result.setMsg(ContractUtil.simplifyErrorMsg(programResult.getErrorMessage()));
                 result = checkVmResultAndReturn(programResult.getErrorMessage(), result);

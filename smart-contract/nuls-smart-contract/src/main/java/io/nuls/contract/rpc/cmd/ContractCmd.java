@@ -128,7 +128,7 @@ public class ContractCmd extends BaseCmd {
             Integer chainId = (Integer) params.get("chainId");
             Long blockHeight = Long.parseLong(params.get("blockHeight").toString());
             Result result = contractService.beforeEnd(chainId, blockHeight);
-            Log.info("[Before End] contract batch, result is {}", result.toString());
+            Log.info("[Before End Result] contract batch, result is {}", result.toString());
             if (result.isFailed()) {
                 return wrapperFailed(result);
             }
@@ -162,7 +162,7 @@ public class ContractCmd extends BaseCmd {
             Map<String, Object> resultMap = MapUtil.createHashMap(2);
             resultMap.put("stateRoot", Hex.toHexString(dto.getStateRoot()));
             resultMap.put("txHexList", resultTxHexList);
-            Log.info("End contract batch, packaging blockHeight is [{}], packaging StateRoot is [{}]", blockHeight, Hex.toHexString(dto.getStateRoot()));
+            Log.info("[End Contract Batch] packaging blockHeight is [{}], packaging StateRoot is [{}]", blockHeight, Hex.toHexString(dto.getStateRoot()));
             return success(resultMap);
         } catch (Exception e) {
             Log.error(e);
