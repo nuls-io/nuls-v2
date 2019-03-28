@@ -86,10 +86,9 @@ public class NodeMaintenanceTask implements Runnable {
         node.setConnectedListener(() -> connectionManager.nodeClientConnectSuccess(node));
 
         node.setDisconnectListener(() -> {
-            Log.info("-----------out node disconnect:" + node.getId());
+            Log.debug("-----------out node disconnect:" + node.getId());
             connectionManager.nodeConnectDisconnect(node);
         });
-        LoggerUtil.TestLog.debug("NodeMaintenanceTask connectionNode {}",node.getId());
         return connectionManager.connection(node);
     }
 

@@ -61,7 +61,7 @@ log(){ #print date prefix and green
 # 检查java版本 must be 11
 checkJavaVersion(){
     JAVA="$JAVA_HOME/bin/java"
-    if [[ ! -r "$JAVA" ]]; then
+    if [ ! -r "$JAVA" ]; then
         JAVA='java'
     fi
 
@@ -118,18 +118,18 @@ RELEASE_PATH=$MODULES_PATH
 echoYellow "Modules Path $MODULES_PATH"''
 log "==================BEGIN PACKAGE MODULES=============================="
 declare -a managedModules
-if [[ ! -d "$MODULES_PATH/bin" ]]; then
+if [ ! -d "$MODULES_PATH/bin" ]; then
 	mkdir $MODULES_PATH/bin
 fi
 #存放脚本目录
 MODULES_BIN_PATH=$MODULES_PATH/bin
-if [[ ! -d "$MODULES_PATH/Modules" ]]; then
+if [ ! -d "$MODULES_PATH/Modules" ]; then
 	#statements
 	mkdir $MODULES_PATH/Modules
 fi
 #默认日志目录
 MODULES_LOGS_PATH=${MODULES_PATH}/logs
-if [[ ! -d "$MODULES_LOGS_PATH" ]]; then
+if [ ! -d "$MODULES_LOGS_PATH" ]; then
 	#statements
 	mkdir $MODULES_LOGS_PATH
 fi
@@ -141,7 +141,7 @@ fi
 MODULES_PATH=$MODULES_PATH/Nuls
 #模块公共依赖jar存放目录
 COMMON_LIBS_PATH=$MODULES_PATH/libs
-if [[ -z "${IGNROEMVN}" ]]; then
+if [ -z "${IGNROEMVN}" ]; then
     if [ -d ${COMMON_LIBS_PATH} ]; then
         rm -r ${COMMON_LIBS_PATH}
     fi
@@ -283,13 +283,13 @@ copyModuleNcfToModules(){
 							print r
 						}
 					'`
-            if [[ "${pname}" != "" ]]; then
+            if [ "${pname}" != "" ]; then
 			    sedCommand+=" -e 's/%${pname}%/${pvalue}/g' "
 			fi
 			echo $line >> $moduleNcf
 		else
 
-			if [[ "${cfgDomain}" != "[JAVA]" ]]; then
+			if [ "${cfgDomain}" != "[JAVA]" ]; then
 				echo $line >> $moduleNcf
 			fi
 		fi
@@ -372,7 +372,7 @@ packageModule() {
 			exit 0;
 		fi
 		managed=`getModuleItem "Managed"`;
-		if [[ $managed != "-1" ]];
+		if [ $managed != "-1" ];
 		then
             checkModuleItem "APP_NAME" "$1"
             checkModuleItem "VERSION" "$1"
@@ -380,7 +380,7 @@ packageModule() {
 		    log "build $1"
             copyJarToModules $1
             copyModuleNcfToModules $1
-            if [[ $managed == "1" ]]; then
+            if [ $managed == "1" ]; then
                 moduleName=`getModuleItem "APP_NAME"`;
                 managedModules[${#managedModules[@]}]="$moduleName"
             fi

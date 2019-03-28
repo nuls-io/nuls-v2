@@ -237,7 +237,6 @@ public class NodeDiscoverTask implements Runnable {
                 future.complete(PROBE_STATUS_FAIL);
             }
         });
-        LoggerUtil.TestLog.debug("NodeDiscover doProbe {}",node.getId());
         boolean result = connectionManager.connection(node);
         if (!result) {
             return PROBE_STATUS_FAIL;

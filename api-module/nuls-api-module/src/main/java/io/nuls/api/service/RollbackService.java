@@ -55,8 +55,6 @@ public class RollbackService {
     private List<String> punishTxHashList = new ArrayList<>();
     //记录每个区块新创建的智能合约信息
     private Map<String, ContractInfo> contractInfoMap = new HashMap<>();
-    //记录智能合约执行结果
-    private List<ContractResultInfo> contractResultList = new ArrayList<>();
     //记录智能合约相关的交易信息
     private List<String> contractTxHashList = new ArrayList<>();
     //记录每个区块智能合约相关的账户token信息
@@ -450,6 +448,49 @@ public class RollbackService {
         return tokenInfo;
     }
 
+
+    private AccountLedgerInfo calcBalance(int chainId, CoinToInfo output) {
+        ChainInfo chainInfo = CacheManager.getChainInfo(chainId);
+        if (output.getChainId() == chainInfo.getChainId() && output.getAssetsId() == chainInfo.getDefaultAsset().getAssetId()) {
+            AccountInfo accountInfo = queryAccountInfo(chainId, output.getAddress());
+            accountInfo.setTotalIn(accountInfo.getTotalIn().subtract(output.getAmount()));
+            accountInfo.setTotalBalance(accountInfo.getTotalBalance().subtract(output.getAmount()));
+            if (accountInfo.getTotalBalance().compareTo(BigInteger.ZERO) < 0) {
+                throw new NulsRuntimeException(ApiErrorCode.DATA_ERROR, "account[" + accountInfo.getAddress() + "] totalBalance < 0");
+            }
+        }
+
+        AccountLedgerInfo ledgerInfo = queryLedgerInfo(chainId, output.getAddress(), output.getChainId(), output.getAssetsId());
+        ledgerInfo.setTotalBalance(ledgerInfo.getTotalBalance().subtract(output.getAmount()));
+        if (ledgerInfo.getTotalBalance().compareTo(BigInteger.ZERO) < 0) {
+            throw new NulsRuntimeException(ApiErrorCode.DATA_ERROR, "account[" + ledgerInfo.getAddress() + "] totalBalance < 0");
+        }
+        return ledgerInfo;
+    }
+
+    private AccountLedgerInfo calcBalance(int chainId, CoinFromInfo input) {
+        ChainInfo chainInfo = CacheManager.getChainInfo(chainId);
+        if (input.getChainId() == chainInfo.getChainId() && input.getAssetsId() == chainInfo.getDefaultAsset().getAssetId()) {
+            AccountInfo accountInfo = queryAccountInfo(chainId, input.getAddress());
+            accountInfo.setTotalOut(accountInfo.getTotalOut().subtract(input.getAmount()));
+            accountInfo.setTotalBalance(accountInfo.getTotalBalance().add(input.getAmount()));
+
+        }
+        AccountLedgerInfo ledgerInfo = queryLedgerInfo(chainId, input.getAddress(), input.getChainId(), input.getAssetsId());
+        ledgerInfo.setTotalBalance(ledgerInfo.getTotalBalance().add(input.getAmount()));
+        return ledgerInfo;
+    }
+
+    private AccountLedgerInfo calcBalance(int chainId, AccountInfo accountInfo, BigInteger fee, CoinFromInfo input) {
+        accountInfo.setTotalOut(accountInfo.getTotalOut().subtract(fee));
+        accountInfo.setTotalBalance(accountInfo.getTotalBalance().add(fee));
+
+        AccountLedgerInfo ledgerInfo = queryLedgerInfo(chainId, input.getAddress(), input.getChainId(), input.getAssetsId());
+        ledgerInfo.setTotalBalance(ledgerInfo.getTotalBalance().add(fee));
+
+        return ledgerInfo;
+    }
+
     private void save(int chainId, BlockInfo blockInfo) {
         SyncInfo syncInfo = chainService.getSyncInfo(chainId);
         if (blockInfo.getHeader().getHeight() != syncInfo.getBestHeight()) {
@@ -501,49 +542,6 @@ public class RollbackService {
         syncInfo.setBestHeight(blockInfo.getHeader().getHeight() - 1);
         chainService.updateStep(syncInfo);
     }
-
-    private AccountLedgerInfo calcBalance(int chainId, CoinToInfo output) {
-        ChainInfo chainInfo = CacheManager.getChainInfo(chainId);
-        if (output.getChainId() == chainInfo.getChainId() && output.getAssetsId() == chainInfo.getDefaultAsset().getAssetId()) {
-            AccountInfo accountInfo = queryAccountInfo(chainId, output.getAddress());
-            accountInfo.setTotalIn(accountInfo.getTotalIn().subtract(output.getAmount()));
-            accountInfo.setTotalBalance(accountInfo.getTotalBalance().subtract(output.getAmount()));
-            if (accountInfo.getTotalBalance().compareTo(BigInteger.ZERO) < 0) {
-                throw new NulsRuntimeException(ApiErrorCode.DATA_ERROR, "account[" + accountInfo.getAddress() + "] totalBalance < 0");
-            }
-        }
-
-        AccountLedgerInfo ledgerInfo = queryLedgerInfo(chainId, output.getAddress(), output.getChainId(), output.getAssetsId());
-        ledgerInfo.setTotalBalance(ledgerInfo.getTotalBalance().subtract(output.getAmount()));
-        if (ledgerInfo.getTotalBalance().compareTo(BigInteger.ZERO) < 0) {
-            throw new NulsRuntimeException(ApiErrorCode.DATA_ERROR, "account[" + ledgerInfo.getAddress() + "] totalBalance < 0");
-        }
-        return ledgerInfo;
-    }
-
-    private AccountLedgerInfo calcBalance(int chainId, CoinFromInfo input) {
-        ChainInfo chainInfo = CacheManager.getChainInfo(chainId);
-        if (input.getChainId() == chainInfo.getChainId() && input.getAssetsId() == chainInfo.getDefaultAsset().getAssetId()) {
-            AccountInfo accountInfo = queryAccountInfo(chainId, input.getAddress());
-            accountInfo.setTotalIn(accountInfo.getTotalIn().add(input.getAmount()));
-            accountInfo.setTotalBalance(accountInfo.getTotalBalance().add(input.getAmount()));
-
-        }
-        AccountLedgerInfo ledgerInfo = queryLedgerInfo(chainId, input.getAddress(), input.getChainId(), input.getAssetsId());
-        ledgerInfo.setTotalBalance(ledgerInfo.getTotalBalance().add(input.getAmount()));
-        return ledgerInfo;
-    }
-
-    private AccountLedgerInfo calcBalance(int chainId, AccountInfo accountInfo, BigInteger fee, CoinFromInfo input) {
-        accountInfo.setTotalOut(accountInfo.getTotalOut().subtract(fee));
-        accountInfo.setTotalBalance(accountInfo.getTotalBalance().add(fee));
-
-        AccountLedgerInfo ledgerInfo = queryLedgerInfo(chainId, input.getAddress(), input.getChainId(), input.getAssetsId());
-        ledgerInfo.setTotalBalance(ledgerInfo.getTotalBalance().add(fee));
-
-        return ledgerInfo;
-    }
-
 
     private BlockInfo queryBlock(int chainId, long blockHeight) {
         BlockHeaderInfo headerInfo = blockService.getBlockHeader(chainId, blockHeight);
@@ -638,5 +636,9 @@ public class RollbackService {
         aliasInfoList.clear();
         depositInfoList.clear();
         punishTxHashList.clear();
+        contractInfoMap.clear();
+        contractTxHashList.clear();
+        accountTokenMap.clear();
+        tokenTransferHashList.clear();
     }
 }

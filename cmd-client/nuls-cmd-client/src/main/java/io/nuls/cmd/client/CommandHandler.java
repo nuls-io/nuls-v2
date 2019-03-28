@@ -108,7 +108,7 @@ public class CommandHandler implements InitializingBean {
         //transfer
         register(getBean(TransferProcessor.class));
         //transfer by alias
-        register(getBean(TransferByAliasProcessor.class));
+//        register(getBean(TransferByAliasProcessor.class));
 
         //get last height block header
         register(getBean(GetBestBlockHeaderProcessor.class));
