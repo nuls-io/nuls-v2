@@ -94,7 +94,7 @@ public class ContractServiceImpl implements ContractService {
 
     @Override
     public Result begin(int chainId, long blockHeight, long blockTime, String packingAddress, String preStateRoot) {
-        Log.info("Begin contract batch, packaging blockHeight is [{}], packaging address is [{}], preStateRoot is [{}]", blockHeight, packingAddress, preStateRoot);
+        Log.info("[Begin contract batch] packaging blockHeight is [{}], packaging address is [{}], preStateRoot is [{}]", blockHeight, packingAddress, preStateRoot);
         Chain chain = contractHelper.getChain(chainId);
         BatchInfo batchInfo = chain.getBatchInfo();
         // 清空上次批量的所有数据
@@ -150,7 +150,7 @@ public class ContractServiceImpl implements ContractService {
     @Override
     public Result invokeContractOneByOne(int chainId, ContractTempTransaction tx) {
         try {
-            Log.info("Invoke contract TxType is [{}], hash is [{}]", tx.getType(), tx.getHash().toString());
+            Log.info("[Invoke Contract] TxType is [{}], hash is [{}]", tx.getType(), tx.getHash().toString());
             Chain chain = contractHelper.getChain(chainId);
             BatchInfo batchInfo = chain.getBatchInfo();
             if (!batchInfo.hasBegan()) {

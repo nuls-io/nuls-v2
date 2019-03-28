@@ -42,6 +42,7 @@ import io.nuls.tools.model.StringUtils;
 
 import static io.nuls.cmd.client.CommandHelper.*;
 
+import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.HashMap;
 import java.util.Map;
@@ -104,8 +105,8 @@ public class TransferProcessor extends TransactionBaseProcessor implements Comma
 //            if (!result) {
 //                break;
 //            }
-            BigInteger amount = new BigInteger(args[3]);
-            result = amount.compareTo(BigInteger.ZERO) > 0;
+            BigDecimal amount = new BigDecimal(args[3]);
+            result = amount.compareTo(BigDecimal.valueOf(0.1D)) >= 0;
         } while (false);
         return result;
     }

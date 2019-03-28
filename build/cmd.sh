@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 help()
 {
@@ -12,9 +12,9 @@ EOF
     exit 0
 }
 cd `dirname $0`;
-if [[ -d ../Libraries/JAVA/11.0.2 ]]; then
-    export JAVA_HOME="$(cd $(dirname "../Libraries/JAVA/11.0.2"); pwd)/11.0.2"
-    export PATH=${PATH}:${JAVA_HOME}/bin
+if [ -d ../Libraries/JAVA/11.0.2 ]; then
+    JAVA_HOME=`dirname "../Libraries/JAVA/11.0.2/bin"`;
+    JAVA_HOME=`cd $JAVA_HOME; pwd`
     JAVA="${JAVA_HOME}/bin/java"
 else
     JAVA='java'
@@ -37,4 +37,4 @@ do
             ?)     exit 2;;
            esac
 done
-sh ./cmd.sh ${LOGLEVEL}
+./cmd.sh ${LOGLEVEL}

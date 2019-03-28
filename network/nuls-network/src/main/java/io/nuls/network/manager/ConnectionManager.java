@@ -63,7 +63,6 @@ import java.util.concurrent.ConcurrentHashMap;
  * @date 2018/11/01
  */
 public class ConnectionManager extends BaseManager {
-    private TaskManager taskManager = TaskManager.getInstance();
     NetworkConfig networkConfig = SpringLiteContext.getBean(NetworkConfig.class);
     private static ConnectionManager instance = new ConnectionManager();
     /**
