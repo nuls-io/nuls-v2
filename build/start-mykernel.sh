@@ -1,5 +1,4 @@
 #!/bin/bash
-#cd ./mykernel/1.0.0
 
 help()
 {
@@ -19,7 +18,7 @@ EOF
 }
 cd `dirname $0`;
 BIN_PATH=`pwd`
-if [[ -d ../Libraries/JAVA/11.0.2 ]]; then
+if [ -d ../Libraries/JAVA/11.0.2 ]; then
     JAVA_HOME=`dirname "../Libraries/JAVA/11.0.2/bin"`;
     JAVA_HOME=`cd $JAVA_HOME; pwd`
     JAVA="${JAVA_HOME}/bin/java"

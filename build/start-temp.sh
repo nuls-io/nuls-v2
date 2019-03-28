@@ -99,7 +99,7 @@ checkIsRunning(){
 # 检查java版本
 checkJavaVersion(){
     JAVA="$JAVA_HOME/bin/java"
-    if [[ ! -r "$JAVA" ]]; then
+    if [ ! -r "$JAVA" ]; then
         JAVA='java'
     fi
 
