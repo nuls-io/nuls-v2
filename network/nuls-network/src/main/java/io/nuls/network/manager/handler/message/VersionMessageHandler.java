@@ -25,6 +25,7 @@
 
 package io.nuls.network.manager.handler.message;
 
+import io.nuls.network.cfg.NetworkConfig;
 import io.nuls.network.constant.NodeConnectStatusEnum;
 import io.nuls.network.constant.NodeStatusEnum;
 import io.nuls.network.manager.MessageFactory;
@@ -90,12 +91,25 @@ public class VersionMessageHandler extends BaseMessageHandler {
         Map<String, Node> connectedNodes = nodesContainer.getConnectedNodes();
 
         int sameIpCount = 0;
+        NetworkConfig networkConfig = SpringLiteContext.getBean(NetworkConfig.class);
 
         for (Node node : connectedNodes.values()) {
             //不会存在两次被动连接都是同一个端口的，即使是同一台服务器
             //if(ip.equals(node.getIp()) && (node.getPort().intValue() == port || node.getType() == Node.OUT)) {
             if (ip.equals(node.getIp()) && node.getType() == Node.OUT) {
-                return false;
+                //这里需要一个机制来判定相互连接时候保留哪个
+                if(NodeConnectStatusEnum.AVAILABLE == node.getConnectStatus()){
+                    return false;
+                }else{
+                    //保留IP地址大的那个连接作为server
+                    if(String.valueOf(ip).compareTo(networkConfig.getExternalIp())>0){
+                        node.close();
+                        return true;
+                    }else{
+                        return false;
+                    }
+
+                }
             }
             if (ip.equals(node.getIp())) {
                 sameIpCount++;
