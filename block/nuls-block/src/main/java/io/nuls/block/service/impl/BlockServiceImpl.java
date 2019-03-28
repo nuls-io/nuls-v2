@@ -220,18 +220,21 @@ public class BlockServiceImpl implements BlockService {
                 commonLog.debug("verifyBlock fail!chainId-" + chainId + ",height-" + height);
                 return false;
             }
-            SmallBlock smallBlock = BlockUtil.getSmallBlock(chainId, block);
-            Map<NulsDigestData, Transaction> txMap = new HashMap<>(header.getTxCount());
-            block.getTxs().forEach(e -> txMap.put(e.getHash(), e));
-            CachedSmallBlock cachedSmallBlock = new CachedSmallBlock(null, smallBlock, txMap);
-            SmallBlockCacher.cacheSmallBlock(chainId, cachedSmallBlock);
-            SmallBlockCacher.setStatus(chainId, hash, BlockForwardEnum.COMPLETE);
-            TxGroupRequestor.removeTask(chainId, hash.toString());
-            if (broadcast) {
-                broadcastBlock(chainId, block);
-            }
-            if (forward) {
-                forwardBlock(chainId, hash, null);
+            //同步\链切换\孤儿链对接过程中不进行区块广播
+            if (download == 1) {
+                SmallBlock smallBlock = BlockUtil.getSmallBlock(chainId, block);
+                Map<NulsDigestData, Transaction> txMap = new HashMap<>(header.getTxCount());
+                block.getTxs().forEach(e -> txMap.put(e.getHash(), e));
+                CachedSmallBlock cachedSmallBlock = new CachedSmallBlock(null, smallBlock, txMap);
+                SmallBlockCacher.cacheSmallBlock(chainId, cachedSmallBlock);
+                SmallBlockCacher.setStatus(chainId, hash, BlockForwardEnum.COMPLETE);
+                TxGroupRequestor.removeTask(chainId, hash.toString());
+                if (broadcast) {
+                    broadcastBlock(chainId, block);
+                }
+                if (forward) {
+                    forwardBlock(chainId, hash, null);
+                }
             }
             long elapsedNanos1 = System.nanoTime() - startTime1;
             commonLog.debug("1. time-" + elapsedNanos1);
