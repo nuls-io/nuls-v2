@@ -38,6 +38,7 @@ import io.nuls.block.model.po.BlockHeaderPo;
 import io.nuls.block.service.BlockService;
 import io.nuls.block.storage.BlockStorageService;
 import io.nuls.block.storage.ChainStorageService;
+import io.nuls.block.thread.monitor.TxGroupRequestor;
 import io.nuls.block.utils.BlockUtil;
 import io.nuls.block.utils.ChainGenerator;
 import io.nuls.block.rpc.call.ConsensusUtil;
@@ -225,6 +226,7 @@ public class BlockServiceImpl implements BlockService {
             CachedSmallBlock cachedSmallBlock = new CachedSmallBlock(null, smallBlock, txMap);
             SmallBlockCacher.cacheSmallBlock(chainId, cachedSmallBlock);
             SmallBlockCacher.setStatus(chainId, hash, BlockForwardEnum.COMPLETE);
+            TxGroupRequestor.removeTask(chainId, hash.toString());
             if (broadcast) {
                 broadcastBlock(chainId, block);
             }

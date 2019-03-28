@@ -34,10 +34,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.StampedLock;
@@ -186,5 +183,14 @@ public class ChainContext {
 
     public void destroy() {
 
+    }
+
+    public void printChains() {
+        Chain masterChain = BlockChainManager.getMasterChain(chainId);
+        commonLog.info("masterChain-" + masterChain);
+        SortedSet<Chain> forkChains = BlockChainManager.getForkChains(chainId);
+        forkChains.forEach(e -> commonLog.info("forkChain-" + e));
+        SortedSet<Chain> orphanChains = BlockChainManager.getOrphanChains(chainId);
+        orphanChains.forEach(e -> commonLog.info("orphanChain-" + e));
     }
 }
