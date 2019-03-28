@@ -36,10 +36,10 @@ PUB_LIB="${PUB_LIB}:./test-1.0.0.jar"
 # Get standard environment variables
 JAVA_OPTS="-Xms128m -Xmx128m -DtestNodeType=master -Dapp.name=test "
 CLASSPATH=$CLASSPATH:$PUB_LIB:.
-if [ -x ${JAVA} ]; then
+#if [ -x "${JAVA}" ]; then
   ${JAVA} $JAVA_OPTS -classpath $CLASSPATH $MAIN_CLASS
   exit 0
-fi
+#fi
 echo "The JAVA_HOME environment variable is not defined"
 echo "This environment variable is needed to run this program"
 exit 1
