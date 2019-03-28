@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.StringJoiner;
 import java.util.concurrent.Delayed;
 import java.util.concurrent.TimeUnit;
 
@@ -43,5 +44,15 @@ public class TxGroupTask implements Delayed {
     @Override
     public long getDelay(TimeUnit unit) {
         return unit.convert(this.excuteTime - System.nanoTime(), TimeUnit.NANOSECONDS);
+    }
+
+    @Override
+    public String toString() {
+        return new StringJoiner(", ", TxGroupTask.class.getSimpleName() + "[", "]")
+                .add("id=" + id)
+                .add("request=" + request)
+                .add("nodeId='" + nodeId + "'")
+                .add("excuteTime=" + excuteTime)
+                .toString();
     }
 }

@@ -23,13 +23,9 @@ package io.nuls.block.thread.monitor;
 import io.nuls.block.constant.RunningStatusEnum;
 import io.nuls.block.manager.ContextManager;
 import io.nuls.block.model.ChainContext;
-import io.nuls.block.model.ChainParameters;
-import io.nuls.block.rpc.call.ConsensusUtil;
 import io.nuls.block.rpc.call.NetworkUtil;
-import io.nuls.block.thread.BlockSynchronizer;
 import io.nuls.block.thread.TxGroupTask;
 import io.nuls.tools.log.logback.NulsLogger;
-import io.nuls.tools.thread.ThreadUtils;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -37,14 +33,13 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.DelayQueue;
 
 import static io.nuls.block.constant.CommandConstant.GET_TXGROUP_MESSAGE;
-import static io.nuls.block.constant.Constant.CONSENSUS_WAITING;
 
 /**
  * 区块广播过程中，获取本地没有的交易
  *
  * @author captain
  * @version 1.0
- * @date 18-11-14 下午3:53
+ * @date 19-3-28 下午3:54
  */
 public class TxGroupRequestor implements Runnable {
 
@@ -66,11 +61,15 @@ public class TxGroupRequestor implements Runnable {
     }
 
     public static void addTask(int chainId, String hash, TxGroupTask task) {
-        map.get(chainId).get(hash).add(task);
+        NulsLogger commonLog = ContextManager.getContext(chainId).getCommonLog();
+        boolean add = map.get(chainId).get(hash).add(task);
+        commonLog.debug("TxGroupRequestor add TxGroupTask, hash-" + hash + ", task-" + task + ", result-" + add + ", chianId-" + chainId);
     }
 
     public static void removeTask(int chainId, String hash) {
+        NulsLogger commonLog = ContextManager.getContext(chainId).getCommonLog();
         map.get(chainId).remove(hash);
+        commonLog.debug("TxGroupRequestor remove TxGroupTask, hash-" + hash + ", chianId-" + chainId);
     }
 
     @Override
@@ -84,17 +83,17 @@ public class TxGroupRequestor implements Runnable {
                     commonLog.debug("skip process, status is " + status + ", chainId-" + chainId);
                     return;
                 }
-                ChainParameters parameters = context.getParameters();
                 Map<String, DelayQueue<TxGroupTask>> delayQueueMap = map.get(chainId);
                 delayQueueMap.values().forEach(e -> {
                     TxGroupTask task = e.poll();
                     if (task != null) {
-                        NetworkUtil.sendToNode(chainId, task.getRequest(), task.getNodeId(), GET_TXGROUP_MESSAGE);
+                        boolean b = NetworkUtil.sendToNode(chainId, task.getRequest(), task.getNodeId(), GET_TXGROUP_MESSAGE);
+                        commonLog.debug("TxGroupRequestor send getTxgroupMessage to " + task.getNodeId() + ", result-" + b + ", chianId-" + chainId);
                     }
                 });
             } catch (Exception e) {
                 e.printStackTrace();
-                commonLog.error("chainId-" + chainId + ",NetworkReset error!");
+                commonLog.error("chainId-" + chainId + ",TxGroupRequestor error!");
             }
         }
     }
