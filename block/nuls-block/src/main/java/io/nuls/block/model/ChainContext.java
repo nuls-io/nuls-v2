@@ -27,6 +27,7 @@ import io.nuls.block.cache.CacheHandler;
 import io.nuls.block.cache.SmallBlockCacher;
 import io.nuls.block.constant.RunningStatusEnum;
 import io.nuls.block.manager.BlockChainManager;
+import io.nuls.block.thread.monitor.TxGroupRequestor;
 import io.nuls.block.utils.LoggerUtil;
 import io.nuls.tools.log.logback.NulsLogger;
 import io.nuls.tools.protocol.Protocol;
@@ -171,6 +172,7 @@ public class ChainContext {
         SmallBlockCacher.init(chainId);
         CacheHandler.init(chainId);
         BlockChainManager.init(chainId);
+        TxGroupRequestor.init(chainId);
     }
 
     public void start() {

@@ -60,7 +60,7 @@ public class TxGroupRequestor implements Runnable {
         return INSTANCE;
     }
 
-    private void init(int chainId) {
+    public static void init(int chainId) {
         Map<String, DelayQueue<TxGroupTask>> cMap = new ConcurrentHashMap<>(4);
         map.put(chainId, cMap);
     }
@@ -70,7 +70,7 @@ public class TxGroupRequestor implements Runnable {
     }
 
     public static void removeTask(int chainId, String hash) {
-        map.get(chainId).remove(hash).clear();
+        map.get(chainId).remove(hash);
     }
 
     @Override
