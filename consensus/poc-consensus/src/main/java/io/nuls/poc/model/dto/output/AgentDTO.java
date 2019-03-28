@@ -73,7 +73,7 @@ public class AgentDTO {
         this.blockHeight = agent.getBlockHeight();
         this.delHeight = agent.getDelHeight();
         this.status = agent.getStatus();
-        this.creditVal = agent.getCreditVal();
+        this.creditVal = agent.getRealCreditVal();
         this.totalDeposit = String.valueOf(agent.getTotalDeposit());
         this.txHash = agent.getTxHash().getDigestHex();
         this.memberCount = agent.getMemberCount();
