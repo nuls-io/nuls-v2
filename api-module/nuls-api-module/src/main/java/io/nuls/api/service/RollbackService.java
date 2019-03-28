@@ -55,8 +55,6 @@ public class RollbackService {
     private List<String> punishTxHashList = new ArrayList<>();
     //记录每个区块新创建的智能合约信息
     private Map<String, ContractInfo> contractInfoMap = new HashMap<>();
-    //记录智能合约执行结果
-    private List<ContractResultInfo> contractResultList = new ArrayList<>();
     //记录智能合约相关的交易信息
     private List<String> contractTxHashList = new ArrayList<>();
     //记录每个区块智能合约相关的账户token信息
@@ -638,5 +636,9 @@ public class RollbackService {
         aliasInfoList.clear();
         depositInfoList.clear();
         punishTxHashList.clear();
+        contractInfoMap.clear();
+        contractTxHashList.clear();
+        accountTokenMap.clear();
+        tokenTransferHashList.clear();
     }
 }
