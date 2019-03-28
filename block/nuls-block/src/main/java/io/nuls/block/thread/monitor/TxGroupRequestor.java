@@ -74,7 +74,7 @@ public class TxGroupRequestor implements Runnable {
     public static void removeTask(int chainId, String hash) {
         NulsLogger commonLog = ContextManager.getContext(chainId).getCommonLog();
         DelayQueue<TxGroupTask> remove = map.get(chainId).remove(hash);
-        commonLog.debug("TxGroupRequestor remove TxGroupTask, hash-" + hash + ", size-" +remove.size()+", chianId-" + chainId);
+        commonLog.debug("TxGroupRequestor remove TxGroupTask, hash-" + hash + ", size-" + (remove == null ? 0 : remove.size()) + ", chianId-" + chainId);
     }
 
     @Override
