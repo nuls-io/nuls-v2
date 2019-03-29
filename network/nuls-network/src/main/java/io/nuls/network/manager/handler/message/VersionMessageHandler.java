@@ -91,8 +91,6 @@ public class VersionMessageHandler extends BaseMessageHandler {
         Map<String, Node> connectedNodes = nodesContainer.getConnectedNodes();
 
         int sameIpCount = 0;
-        NetworkConfig networkConfig = SpringLiteContext.getBean(NetworkConfig.class);
-
         for (Node node : connectedNodes.values()) {
             //不会存在两次被动连接都是同一个端口的，即使是同一台服务器
             //if(ip.equals(node.getIp()) && (node.getPort().intValue() == port || node.getType() == Node.OUT)) {
@@ -216,7 +214,7 @@ public class VersionMessageHandler extends BaseMessageHandler {
      */
     @Override
     public NetworkEventResult recieve(BaseMessage message, Node node) {
-        LoggerUtil.Log.debug("VersionMessageHandler recieve:"+(node.isServer()?"Server":"Client")+":"+node.getIp()+":"+node.getRemotePort()+"==CMD=" +message.getHeader().getCommandStr());
+        LoggerUtil.Log.debug("VersionMessageHandler recieve:" + (node.isServer() ? "Server" : "Client") + ":" + node.getIp() + ":" + node.getRemotePort() + "==CMD=" + message.getHeader().getCommandStr());
         if (Node.IN == node.getType()) {
             serverRecieveHandler(message, node);
         } else {
@@ -227,7 +225,7 @@ public class VersionMessageHandler extends BaseMessageHandler {
 
     @Override
     public NetworkEventResult send(BaseMessage message, Node node, boolean asyn) {
-        LoggerUtil.Log.debug("VersionMessageHandler send:"+(node.isServer()?"Server":"Client")+":"+node.getIp()+":"+node.getRemotePort()+"==CMD=" +message.getHeader().getCommandStr());
+        LoggerUtil.Log.debug("VersionMessageHandler send:" + (node.isServer() ? "Server" : "Client") + ":" + node.getIp() + ":" + node.getRemotePort() + "==CMD=" + message.getHeader().getCommandStr());
         BlockRpcService blockRpcService = SpringLiteContext.getBean(BlockRpcServiceImpl.class);
         int chainId = NodeGroupManager.getInstance().getChainIdByMagicNum(message.getHeader().getMagicNumber());
         BestBlockInfo bestBlockInfo = blockRpcService.getBestBlockHeader(chainId);
