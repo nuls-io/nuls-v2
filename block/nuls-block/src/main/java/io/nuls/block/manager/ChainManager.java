@@ -24,12 +24,10 @@
  */
 package io.nuls.block.manager;
 
-import io.nuls.block.constant.BlockConfig;
 import io.nuls.block.rpc.call.TransactionUtil;
 import io.nuls.block.service.BlockService;
 import io.nuls.block.utils.ConfigLoader;
 import io.nuls.db.service.RocksDBService;
-import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.core.ioc.SpringLiteContext;
 import io.nuls.tools.log.logback.NulsLogger;
@@ -47,9 +45,6 @@ import static io.nuls.block.constant.Constant.*;
  */
 @Component
 public class ChainManager {
-
-    @Autowired
-    private BlockConfig blockConfig;
 
     /**
      * 初始化并启动链

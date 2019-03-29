@@ -80,9 +80,19 @@ public class TestJyc {
 
     @Test
     public void name() throws Exception {
-        String hash = "0020abfd1be7f51136e626ad5c302sdads9998202108a2a45a8f23d24c7d7c75ae92b64a7";
-        boolean b = queryTx(hash);
-        Log.debug("hash-{} exist-{}", hash, b);
+        {
+            Log.debug("10.##########删除节点##########");
+            //停止节点
+            Map<String, Object> txMap = new HashMap();
+            txMap.put("chainId", chainId);
+            txMap.put("address", "tNULSeBaMkzTffKDZLy9v5SWbooFFhefwM4dff");
+            txMap.put("password", password);
+            Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.CS.abbr, "cs_stopAgent", txMap);
+            assertTrue(response.isSuccess());
+            Map result = (HashMap) (((HashMap) response.getResponseData()).get("cs_stopAgent"));
+            String txHash = (String) result.get("txHash");
+            Log.debug("stopAgent-txHash:{}", txHash);
+        }
     }
 
     /**
@@ -90,7 +100,8 @@ public class TestJyc {
      */
     @Test
     public void importSeed() {
-//        importPriKey("7ea2077a48bdc98dd90064b77210b66c9a6e25b2bd3ceba57cfbaaf3700ff99d", password);//种子出块地址 tNULSeBaMmdvMtiXETDsDzJZHZHgk4rghdiSin
+//        importPriKey("b54db432bba7e13a6c4a28f65b925b18e63bcb79143f7b894fa735d5d3d09db5", password);//种子出块地址 tNULSeBaMkrt4z9FYEkkR9D6choPVvQr94oYZp
+//        importPriKey("188b255c5a6d58d1eed6f57272a22420447c3d922d5765ebb547bc6624787d9f", password);//种子出块地址 tNULSeBaMoGr2RkLZPfJeS5dFzZeNj1oXmaYNe
         importPriKey("477059f40708313626cccd26f276646e4466032cabceccbf571a7c46f954eb75", password);//tNULSeBaMnrs6JKrCy6TQdzYJZkMZJDng7QAsD
     }
 
@@ -193,7 +204,7 @@ public class TestJyc {
                     Log.debug(packingAddress + "-----balance:{}", packingBalance);
                     assertEquals(new BigInteger("500000000"), packingBalance);
                     {
-                        String alias = "test_" + System.currentTimeMillis();
+                        String alias = "jyc_" + System.currentTimeMillis();
                         Map<String, Object> params = new HashMap<>();
                         params.put(Constants.VERSION_KEY_STR, "1.0");
                         params.put("chainId", chainId);
@@ -207,7 +218,7 @@ public class TestJyc {
                         Log.debug("agentAddress alias-txHash:{}", txHash);
                     }
                     {
-                        String alias = "test_" + System.currentTimeMillis();
+                        String alias = "jyc_" + System.currentTimeMillis();
                         Map<String, Object> params = new HashMap<>();
                         params.put(Constants.VERSION_KEY_STR, "1.0");
                         params.put("chainId", chainId);
@@ -292,10 +303,10 @@ public class TestJyc {
                     HashMap result = (HashMap) ((HashMap) cmdResp.getResponseData()).get("ac_getPriKeyByAddress");
                     String priKey = (String) result.get("priKey");
                     removeAccount(packingAddress, password);
-                    Thread.sleep(60000000);
+                    Thread.sleep(600000);
                     Log.debug("9.##########导入节点账户，重新加入共识##########");
                     importPriKey(priKey, password);
-                    Thread.sleep(60000);
+                    Thread.sleep(600000);
                 }
 
                 {
@@ -528,7 +539,7 @@ public class TestJyc {
             Log.debug(address23 + "-----balance:{}", balance);
         }
         int total = 100_000_000;
-        int count = 100;
+        int count = 3;
         List<String> accountList;
         Log.debug("##################################################");
         {

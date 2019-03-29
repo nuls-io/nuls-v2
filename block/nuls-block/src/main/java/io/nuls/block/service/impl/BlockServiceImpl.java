@@ -38,6 +38,7 @@ import io.nuls.block.model.po.BlockHeaderPo;
 import io.nuls.block.service.BlockService;
 import io.nuls.block.storage.BlockStorageService;
 import io.nuls.block.storage.ChainStorageService;
+import io.nuls.block.thread.monitor.TxGroupRequestor;
 import io.nuls.block.utils.BlockUtil;
 import io.nuls.block.utils.ChainGenerator;
 import io.nuls.block.rpc.call.ConsensusUtil;
@@ -219,17 +220,21 @@ public class BlockServiceImpl implements BlockService {
                 commonLog.debug("verifyBlock fail!chainId-" + chainId + ",height-" + height);
                 return false;
             }
-            SmallBlock smallBlock = BlockUtil.getSmallBlock(chainId, block);
-            Map<NulsDigestData, Transaction> txMap = new HashMap<>(header.getTxCount());
-            block.getTxs().forEach(e -> txMap.put(e.getHash(), e));
-            CachedSmallBlock cachedSmallBlock = new CachedSmallBlock(null, smallBlock, txMap);
-            SmallBlockCacher.cacheSmallBlock(chainId, cachedSmallBlock);
-            SmallBlockCacher.setStatus(chainId, hash, BlockForwardEnum.COMPLETE);
-            if (broadcast) {
-                broadcastBlock(chainId, block);
-            }
-            if (forward) {
-                forwardBlock(chainId, hash, null);
+            //同步\链切换\孤儿链对接过程中不进行区块广播
+            if (download == 1) {
+                SmallBlock smallBlock = BlockUtil.getSmallBlock(chainId, block);
+                Map<NulsDigestData, Transaction> txMap = new HashMap<>(header.getTxCount());
+                block.getTxs().forEach(e -> txMap.put(e.getHash(), e));
+                CachedSmallBlock cachedSmallBlock = new CachedSmallBlock(null, smallBlock, txMap);
+                SmallBlockCacher.cacheSmallBlock(chainId, cachedSmallBlock);
+                SmallBlockCacher.setStatus(chainId, hash, BlockForwardEnum.COMPLETE);
+                TxGroupRequestor.removeTask(chainId, hash.toString());
+                if (broadcast) {
+                    broadcastBlock(chainId, block);
+                }
+                if (forward) {
+                    forwardBlock(chainId, hash, null);
+                }
             }
             long elapsedNanos1 = System.nanoTime() - startTime1;
             commonLog.debug("1. time-" + elapsedNanos1);
@@ -445,16 +450,6 @@ public class BlockServiceImpl implements BlockService {
         boolean broadcast = NetworkUtil.broadcast(chainId, message, SMALL_BLOCK_MESSAGE);
         messageLog.debug("chainId-" + chainId + ", hash-" + block.getHeader().getHash() + ", broadcast-" + broadcast);
         return broadcast;
-    }
-
-    @Override
-    public boolean startChain(int chainId) {
-        return false;
-    }
-
-    @Override
-    public boolean stopChain(int chainId, boolean cleanData) {
-        return false;
     }
 
     private boolean verifyBlock(int chainId, Block block, boolean localInit, int download) {
