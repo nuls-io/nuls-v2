@@ -8,8 +8,7 @@
   "networkResetMonitorInterval": 300000,
   "txGroupRequestorInterval": 1000,
   "txGroupTaskDelay": 3000,
-  "testAutoRollbackHeight": 1,
-  "testAutoRollbackAmount": 200,
+  "testAutoRollbackAmount": 0,
   "defaultChainParameter": {
     "chainName": "nuls2.0",
     "chainId": 2,

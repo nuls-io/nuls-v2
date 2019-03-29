@@ -86,6 +86,13 @@ public class BlockConfig {
     private String dataPath;
 
     /**
+     * 启动后自动回滚多少个区块
+     */
+    @Setter
+    @Getter
+    private int testAutoRollbackAmount;
+
+    /**
      * 默认链配置
      */
     @Setter
