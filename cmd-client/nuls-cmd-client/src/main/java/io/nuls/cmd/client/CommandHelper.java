@@ -34,12 +34,33 @@ import jline.console.ConsoleReader;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 /**
  * @author: Charlie
  */
 public class CommandHelper {
+
+    public static void checkArgsNumber(String[] args,int...numbers) throws ParameterException{
+        if(!Arrays.stream(numbers).anyMatch(number->args.length == number)){
+            ParameterException.throwParameterException();
+        }
+    }
+
+    public static void checkArgs(boolean condition,String message) throws ParameterException{
+        if(!condition){
+            ParameterException.throwParameterException(message);
+        }
+    }
+
+    public static void checkArgs(Supplier<Boolean> check,String message) throws ParameterException{
+        if(!check.get()){
+            ParameterException.throwParameterException(message);
+        }
+    }
 
     public static boolean checkArgsIsNull(String... args) {
         for (String arg : args) {
@@ -50,36 +71,6 @@ public class CommandHelper {
         return true;
     }
 
-//    //
-////    /**
-////     * 获取用户的新密码 必填
-////     * @return
-////     */
-//    public static String getNewPwd() {
-//        System.out.print("Please enter the new password(8-20 characters, the combination of letters and numbers).\nEnter your new password:");
-//        ConsoleReader reader = null;
-//        try {
-//            reader = new ConsoleReader();
-//            String pwd = null;
-//            do {
-//                pwd = reader.readLine('*');
-//                if (!StringUtils.validPassword(pwd)) {
-//                    System.out.print("The password is invalid, (8-20 characters, the combination of letters and numbers) .\nReenter the new password: ");
-//                }
-//            } while (!StringUtils.validPassword(pwd));
-//            return pwd;
-//        } catch (IOException e) {
-//            return null;
-//        } finally {
-//            try {
-//                if (!reader.delete()) {
-//                    reader.close();
-//                }
-//            } catch (IOException e) {
-//                e.printStackTrace();
-//            }
-//        }
-//    }
 
 
     //    /**
@@ -287,50 +278,6 @@ public class CommandHelper {
         }
     }
 
-
-    //    /**
-//     * 根据账户获取密码
-//     * 1.如果账户有密码, 则让用户输入密码
-//     * 2.如果账户没有设置密码, 直接返回
-//     *
-//     * @param address
-//     * @param restFul
-//     * @return RpcClientResult
-//     */
-//    public static Result<String> getPassword(String address) {
-//        return getPassword(address, null);
-//    }
-
-    //    /**
-//     * 根据账户获取密码
-//     * 1.如果账户有密码, 则让用户输入密码
-//     * 2.如果账户没有设置密码, 直接返回
-//     *
-//     * @param address
-//     * @param restFul
-//     * @param prompt 自定义提示
-//     * @return RpcClientResult
-//     */
-//    public static Result getPassword(String address,  String prompt) {
-//        if (StringUtils.isBlank(address)) {
-//            return Result.fail(30002,ErrorCode.init("30002").getMsg());
-//        }
-//
-//        RpcClientResult result = restFul.get("/account/encrypted/" + address, null);
-//        if (result.isSuccess()) {
-//            RpcClientResult rpcClientResult = new RpcClientResult();
-//            rpcClientResult.setSuccess(true);
-//            if (result.dataToBooleanValue()) {
-//                String pwd = getPwd(prompt);
-//                rpcClientResult.setData(pwd);
-//            }
-//            return rpcClientResult;
-//        }
-//        return result;
-//
-//    }
-
-
     public static String getArgsJson() {
         String prompt = "Please enter the arguments according to the arguments structure(eg. \"a\",2,[\"c\",4],\"\",\"e\" or \"'a',2,['c',4],'','e'\")," +
                 "\nIf this method has no arguments(Refer to the command named \"getcontractinfo\" for the arguments structure of the method.), return directly.\nEnter the arguments:";
@@ -368,28 +315,4 @@ public class CommandHelper {
             return null;
         }
     }
-//
-//    public static RpcClientResult getContractCallArgsJson() {
-//        RpcClientResult rpcClientResult = new RpcClientResult();
-//        rpcClientResult.setSuccess(true);
-//        try {
-//            Object[] argsObj;
-//            // 再次交互输入构造参数
-//            String argsJson = getArgsJson();
-//            argsObj = parseArgsJson(argsJson);
-//            rpcClientResult.setData(argsObj);
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//            rpcClientResult.setSuccess(false);
-//        }
-//        return rpcClientResult;
-//    }
-//
-//
-//    public static String tokenRecovery(String amount, Integer decimals) {
-//        if(StringUtils.isBlank(amount) || decimals == null) {
-//            return null;
-//        }
-//        return new BigDecimal(amount).divide(BigDecimal.TEN.pow(decimals)).toPlainString();
-//    }
 }

@@ -26,12 +26,113 @@
 package io.nuls.cmd.client.processor;
 
 
+import io.nuls.api.provider.Result;
+import io.nuls.base.basic.AddressTool;
 import io.nuls.cmd.client.CommandResult;
+import io.nuls.cmd.client.ParameterException;
+import io.nuls.tools.log.Log;
+import io.nuls.tools.model.StringUtils;
+import io.nuls.tools.parse.JSONUtils;
+import jline.console.ConsoleReader;
+
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.Map;
+import java.util.function.Supplier;
 
 /**
  * 命令行处理接口，其他模块的RPC实现须实现该接口
  */
 public interface CommandProcessor {
+
+
+    default void checkArgsNumber(String[] args,int...numbers) throws ParameterException {
+        if(!Arrays.stream(numbers).anyMatch(number->args.length-1 == number)){
+            ParameterException.throwParameterException();
+        }
+    }
+
+    default void checkArgs(boolean condition,String message) throws ParameterException{
+        if(!condition){
+            ParameterException.throwParameterException(message);
+        }
+    }
+
+    default void checkAddress(int chainId,String address) throws ParameterException{
+        checkArgs(AddressTool.validAddress(chainId, address),"address format error");
+    }
+
+    default void checkArgs(Supplier<Boolean> check, String message) throws ParameterException{
+        if(!check.get()){
+            ParameterException.throwParameterException(message);
+        }
+    }
+
+    default String getPwd(){
+        return getPwd(null);
+    }
+
+    default String getPwd(String prompt) {
+        if (StringUtils.isBlank(prompt)) {
+            prompt = "Please enter the password.\nEnter your password:";
+        }
+        System.out.print(prompt);
+        ConsoleReader reader = null;
+        try {
+            reader = new ConsoleReader();
+            String npwd = null;
+            do {
+                npwd = reader.readLine('*');
+                if ("".equals(npwd)) {
+                    System.out.print("The password is required.\nEnter your password:");
+                }
+            } while ("".equals(npwd));
+            return npwd;
+        } catch (IOException e) {
+            return null;
+        } finally {
+            try {
+                if (!reader.delete()) {
+                    reader.close();
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    default Result dataTransformList(Result rpcResult) {
+        rpcResult.setData(rpcResult.getList());
+        return rpcResult;
+    }
+
+    default CommandResult getResult(Result rpcResult) {
+        if (null == rpcResult) {
+            return CommandResult.getFailed("Result is null!");
+        }
+        CommandResult result = new CommandResult();
+        result.setSuccess(rpcResult.isSuccess());
+        String message = "";
+        if (!rpcResult.isSuccess()) {
+            Map<String, Object> map = (Map) rpcResult.getData();
+            message = (String) map.get("msg");
+            //message += ":";
+        } else {
+            try {
+                if(rpcResult.getData() != null){
+                    message += JSONUtils.obj2PrettyJson(rpcResult.getData());
+                } else if(rpcResult.getList() != null){
+                    message += JSONUtils.obj2PrettyJson(rpcResult.getList());
+                } else {
+                    message += "success";
+                }
+            } catch (Exception e) {
+                Log.error("return data format exception :",e);
+            }
+        }
+        result.setMessage(message);
+        return result;
+    }
 
     String getCommand();
 

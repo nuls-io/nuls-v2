@@ -90,26 +90,18 @@ public class CreateProcessor extends AccountBaseProcessor implements CommandProc
 
     @Override
     public boolean argsValidate(String[] args) {
-        int length = args.length;
-        if (length < 1 || length > 2) {
-            return false;
-
+        checkArgsNumber(args,0,1);
+        if(args.length==1){
+            return true;
         }
-        if (!CommandHelper.checkArgsIsNull(args)) {
-            return false;
-        }
-        if (length == 2 && !StringUtils.isNumeric(args[1])) {
-            return false;
-        }
-        if(length == 2 && Integer.parseInt(args[1]) < 1 ){
-            return false;
-        }
+        checkArgs(StringUtils.isNumeric(args[1]),"must enter a number");
+        checkArgs(Integer.parseInt(args[1]) > 1,"must be greater than zero");
         return true;
     }
 
     @Override
     public CommandResult execute(String[] args) {
-        String password = CommandHelper.getPwd("Please enter the new password(8-20 characters, the combination of letters and numbers).\nEnter your new password:");
+        String password = getPwd("Please enter the new password(8-20 characters, the combination of letters and numbers).\nEnter your new password:");
         if(StringUtils.isNotBlank(password)){
             CommandHelper.confirmPwd(password);
         }
@@ -121,6 +113,6 @@ public class CreateProcessor extends AccountBaseProcessor implements CommandProc
         if(!result.isSuccess()){
             return CommandResult.getFailed(result);
         }
-        return CommandResult.getResult(CommandResult.dataTransformList(result));
+        return CommandResult.getResult(result);
     }
 }

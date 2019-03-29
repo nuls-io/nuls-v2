@@ -2,8 +2,10 @@ package io.nuls.cmd.client.processor.account;
 
 import io.nuls.api.provider.ServiceManager;
 import io.nuls.api.provider.account.AccountService;
+import io.nuls.cmd.client.Config;
 import io.nuls.cmd.client.processor.CommandProcessor;
 import io.nuls.cmd.client.processor.CommandGroup;
+import io.nuls.tools.core.annotation.Autowired;
 
 /**
  * @Author: zhoulijun
@@ -11,6 +13,9 @@ import io.nuls.cmd.client.processor.CommandGroup;
  * @Description:
  */
 public abstract class AccountBaseProcessor implements CommandProcessor {
+
+    @Autowired
+    Config config;
 
     AccountService accountService = ServiceManager.get(AccountService.class);
 
