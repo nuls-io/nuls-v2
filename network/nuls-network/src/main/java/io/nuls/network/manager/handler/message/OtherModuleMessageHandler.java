@@ -83,13 +83,15 @@ public class OtherModuleMessageHandler extends BaseMessageHandler {
      * @return
      */
     public NetworkEventResult recieve(MessageHeader header, byte[] payLoadBody, Node node) {
+        long beginTime = System.currentTimeMillis();
         long magicNum = header.getMagicNumber();
         int chainId = NodeGroupManager.getInstance().getChainIdByMagicNum(magicNum);
         Map<String, Object> paramMap = new HashMap<>();
         paramMap.put("chainId", chainId);
         paramMap.put("nodeId", node.getId());
+        long time0 = System.currentTimeMillis();
         paramMap.put("messageBody", HexUtil.byteToHex(payLoadBody));
-        long beginTime = System.currentTimeMillis();
+        long time1 = System.currentTimeMillis();
         Collection<ProtocolRoleHandler> protocolRoleHandlers = MessageHandlerFactory.getInstance().getProtocolRoleHandlerMap(header.getCommandStr());
         if (null == protocolRoleHandlers) {
             LoggerUtil.logger(chainId).error("unknown mssages. cmd={},handler may be unRegistered to network.", header.getCommandStr());
@@ -115,7 +117,7 @@ public class OtherModuleMessageHandler extends BaseMessageHandler {
             long endTime = System.currentTimeMillis();
             if (endTime - beginTime > 3000) {
                 LoggerUtil.TestLog.error("####2-Deal time too long,message cmd ={},useTime={},hash={}", header.getCommandStr(), (endTime - beginTime), NulsDigestData.calcDigestData(payLoadBody).getDigestHex());
-                LoggerUtil.TestLog.error("####2-time begin ={},time2={},time3={},time4={},end={}", beginTime, time2, time3, time4, endTime);
+                LoggerUtil.TestLog.error("####2-time begin ={},time0={},time1={},time2={},time3={},time4={},end={}", beginTime,time0,time1, time2, time3, time4, endTime);
 
             }
         }
