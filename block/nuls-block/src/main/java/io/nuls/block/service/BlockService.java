@@ -179,25 +179,6 @@ public interface BlockService {
     boolean broadcastBlock(int chainId, Block block);
 
     /**
-     * todo 待实现
-     * 启动一条链
-     *
-     * @param chainId 链Id/chain id
-     * @return
-     */
-    boolean startChain(int chainId);
-
-    /**
-     * todo 待实现
-     * 停止一条链
-     *
-     * @param chainId 链Id/chain id
-     * @param cleanData 是否清理数据
-     * @return
-     */
-    boolean stopChain(int chainId, boolean cleanData);
-
-    /**
      * 初始化方法
      *
      * @param chainId 链Id/chain id

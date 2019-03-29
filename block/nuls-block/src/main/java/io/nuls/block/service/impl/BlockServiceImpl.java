@@ -452,16 +452,6 @@ public class BlockServiceImpl implements BlockService {
         return broadcast;
     }
 
-    @Override
-    public boolean startChain(int chainId) {
-        return false;
-    }
-
-    @Override
-    public boolean stopChain(int chainId, boolean cleanData) {
-        return false;
-    }
-
     private boolean verifyBlock(int chainId, Block block, boolean localInit, int download) {
         ChainContext context = ContextManager.getContext(chainId);
         NulsLogger commonLog = context.getCommonLog();
