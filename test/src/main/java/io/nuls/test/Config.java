@@ -41,6 +41,8 @@ public class Config implements InitializingBean {
 
     String seedAddress;
 
+    String packetMagic;
+
     @Override
     public void afterPropertiesSet() throws NulsException {
         Result<String> result = accountService.importAccountByPrivateKey(new ImportAccountByPrivateKeyReq(Constants.PASSWORD,testSeedAccount,true));

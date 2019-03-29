@@ -1,9 +1,5 @@
 {
-  "APP_NAME": "cmdclient",
   "providerType": "RPC",
   "chainId": 2,
-  "assetsId": 1,
-  "configItem": {
-    "name": "zlj"
-  }
+  "assetsId": 1
 }

@@ -1,10 +1,7 @@
 package io.nuls.api.model.po.db;
 
-import lombok.Data;
-
 import java.math.BigInteger;
 
-@Data
 public class ContextInfo {
 
     private BigInteger total;
@@ -17,5 +14,29 @@ public class ContextInfo {
         total = BigInteger.ZERO;
         consensusTotal = BigInteger.ZERO;
         circulation = BigInteger.ZERO;
+    }
+
+    public BigInteger getTotal() {
+        return total;
+    }
+
+    public void setTotal(BigInteger total) {
+        this.total = total;
+    }
+
+    public BigInteger getConsensusTotal() {
+        return consensusTotal;
+    }
+
+    public void setConsensusTotal(BigInteger consensusTotal) {
+        this.consensusTotal = consensusTotal;
+    }
+
+    public BigInteger getCirculation() {
+        return circulation;
+    }
+
+    public void setCirculation(BigInteger circulation) {
+        this.circulation = circulation;
     }
 }
