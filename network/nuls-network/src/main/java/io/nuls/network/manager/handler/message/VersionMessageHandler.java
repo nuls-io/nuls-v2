@@ -98,18 +98,19 @@ public class VersionMessageHandler extends BaseMessageHandler {
             //if(ip.equals(node.getIp()) && (node.getPort().intValue() == port || node.getType() == Node.OUT)) {
             if (ip.equals(node.getIp()) && node.getType() == Node.OUT) {
                 //这里需要一个机制来判定相互连接时候保留哪个
-                if(NodeConnectStatusEnum.AVAILABLE == node.getConnectStatus()){
-                    return false;
-                }else{
-                    //保留IP地址大的那个连接作为server
-                    if(String.valueOf(ip).compareTo(networkConfig.getExternalIp())>0){
-                        node.close();
-                        return true;
-                    }else{
-                        return false;
-                    }
-
-                }
+//                if(NodeConnectStatusEnum.AVAILABLE == node.getConnectStatus()){
+//                    return false;
+//                }else{
+//                    //保留IP地址大的那个连接作为server
+//                    if(String.valueOf(ip).compareTo(networkConfig.getExternalIp())>0){
+//                        node.close();
+//                        return true;
+//                    }else{
+//                        return false;
+//                    }
+//
+//                }
+                return false;
             }
             if (ip.equals(node.getIp())) {
                 sameIpCount++;
