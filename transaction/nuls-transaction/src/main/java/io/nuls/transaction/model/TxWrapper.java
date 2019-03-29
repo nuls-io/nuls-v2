@@ -25,22 +25,25 @@
 package io.nuls.transaction.model;
 
 import io.nuls.base.data.Transaction;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 
 /**
  * @author: Charlie
  * @date: 2019/3/26
  */
-@Data
-@AllArgsConstructor
-@NoArgsConstructor
+
 public class TxWrapper{
 
     private Transaction tx;
 
     private int index;
+
+    public TxWrapper() {
+    }
+
+    public TxWrapper(Transaction tx, int index) {
+        this.tx = tx;
+        this.index = index;
+    }
 
     public int compareTo(int index) {
         if (this.index > index) {
@@ -49,6 +52,22 @@ public class TxWrapper{
             return 1;
         }
         return 0;
+    }
+
+    public Transaction getTx() {
+        return tx;
+    }
+
+    public void setTx(Transaction tx) {
+        this.tx = tx;
+    }
+
+    public int getIndex() {
+        return index;
+    }
+
+    public void setIndex(int index) {
+        this.index = index;
     }
 
     @Override

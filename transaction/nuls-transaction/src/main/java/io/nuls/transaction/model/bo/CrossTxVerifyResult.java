@@ -29,8 +29,6 @@ import io.nuls.base.basic.NulsOutputStreamBuffer;
 import io.nuls.base.data.BaseNulsData;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.parse.SerializeUtils;
-import lombok.Getter;
-import lombok.Setter;
 
 import java.io.IOException;
 
@@ -45,22 +43,40 @@ public class CrossTxVerifyResult extends BaseNulsData {
     /**
      * 链ID
      */
-    @Getter
-    @Setter
     private int chainId;
     /**
      * 节点ID
      */
-    @Getter
-    @Setter
     private String nodeId;
 
     /**
      * 确认高度
      */
-    @Getter
-    @Setter
     private long height;
+
+    public int getChainId() {
+        return chainId;
+    }
+
+    public void setChainId(int chainId) {
+        this.chainId = chainId;
+    }
+
+    public String getNodeId() {
+        return nodeId;
+    }
+
+    public void setNodeId(String nodeId) {
+        this.nodeId = nodeId;
+    }
+
+    public long getHeight() {
+        return height;
+    }
+
+    public void setHeight(long height) {
+        this.height = height;
+    }
 
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
