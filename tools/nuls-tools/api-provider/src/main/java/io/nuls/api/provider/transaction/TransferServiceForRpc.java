@@ -38,17 +38,6 @@ public class TransferServiceForRpc extends BaseRpcService implements TransferSer
 
     @Override
     public Result<String> transferByAlias(TransferReq req) {
-//        String formAddress = req.getAlias();
-//        String toAddress = req.getAddress();
-//        BigInteger amount = req.getAmount();
-//        TransferReq.TransferReqBuilder builder =
-//                new TransferReq.TransferReqBuilder(req.getChainId(),config.get)
-//                        .addForm(formAddress,getPwd("Enter your account password"), amount)
-//                        .addTo(toAddress,amount);
-//        if(args.length == 5){
-//            builder.setRemark(args[4]);
-//        }
-//        return builder.build();
         return callReturnString("ac_transfer",req,"value");
     }
 
@@ -64,8 +53,9 @@ public class TransferServiceForRpc extends BaseRpcService implements TransferSer
 
     @Override
     public Result<TransactionData> getSimpleTxDataByHash(GetConfirmedTxByHashReq req) {
-        Function<Map,Result> callback = res->tranderTransactionData(tranderTransaction(res));
-        return callRpc(ModuleE.TX.abbr,"tx_getConfirmedTxClient",req,callback);
+        return callRpc(ModuleE.TX.abbr,"tx_getConfirmedTxClient",req,
+                (Function<Map,Result>)res->tranderTransactionData(tranderTransaction(res))
+        );
     }
 
     @Override
@@ -74,10 +64,7 @@ public class TransferServiceForRpc extends BaseRpcService implements TransferSer
     }
 
     private Result<Transaction> getTx(String method, BaseReq req){
-        Function<Map,Result> callback = res->{
-            return tranderTransaction(res);
-        };
-        return callRpc(ModuleE.TX.abbr,method,req,callback);
+        return callRpc(ModuleE.TX.abbr,method,req,(Function<Map,Result>)this::tranderTransaction);
     }
 
     private Result<Transaction> tranderTransaction(Map<String,Object> data){
