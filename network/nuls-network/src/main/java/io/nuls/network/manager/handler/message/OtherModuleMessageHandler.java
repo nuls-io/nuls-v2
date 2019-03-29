@@ -40,6 +40,7 @@ import io.nuls.rpc.model.message.Request;
 import io.nuls.rpc.netty.processor.ResponseMessageProcessor;
 import io.nuls.rpc.netty.processor.container.ResponseContainer;
 import io.nuls.tools.crypto.HexUtil;
+import io.nuls.tools.model.ByteUtils;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -97,18 +98,13 @@ public class OtherModuleMessageHandler extends BaseMessageHandler {
             LoggerUtil.logger(chainId).error("unknown mssages. cmd={},handler may be unRegistered to network.", header.getCommandStr());
         } else {
             LoggerUtil.logger(chainId).debug("==============================other module message protocolRoleHandlers-size:{}", protocolRoleHandlers.size());
-            long time2 = System.currentTimeMillis();
-            long time3 = 0;
-            long time4 = 0;
             for (ProtocolRoleHandler protocolRoleHandler : protocolRoleHandlers) {
                 try {
-                    time3 = System.currentTimeMillis();
                     LoggerUtil.logger(chainId).debug("request：{}=={}", protocolRoleHandler.getRole(), protocolRoleHandler.getHandler());
                     Request request = MessageUtil.newRequest(protocolRoleHandler.getHandler(), paramMap, Constants.BOOLEAN_FALSE, Constants.ZERO, Constants.ZERO);
                     ResponseContainer responseContainer = ResponseMessageProcessor.sendRequest(protocolRoleHandler.getRole(), request);
                     LoggerUtil.logger(chainId).debug("responseContainer：" + responseContainer.getMessageId());
                     LoggerUtil.modulesMsgLogs(protocolRoleHandler.getRole(), header.getCommandStr(), node, payLoadBody, responseContainer.getMessageId());
-                    time4 = System.currentTimeMillis();
                 } catch (Exception e) {
                     LoggerUtil.logger(chainId).error(e);
                     e.printStackTrace();
@@ -117,7 +113,6 @@ public class OtherModuleMessageHandler extends BaseMessageHandler {
             long endTime = System.currentTimeMillis();
             if (endTime - beginTime > 3000) {
                 LoggerUtil.TestLog.error("####2-Deal time too long,message cmd ={},useTime={},hash={}", header.getCommandStr(), (endTime - beginTime), NulsDigestData.calcDigestData(payLoadBody).getDigestHex());
-                LoggerUtil.TestLog.error("####2-time begin ={},time0={},time1={},time2={},time3={},time4={},end={}", beginTime,time0,time1, time2, time3, time4, endTime);
 
             }
         }

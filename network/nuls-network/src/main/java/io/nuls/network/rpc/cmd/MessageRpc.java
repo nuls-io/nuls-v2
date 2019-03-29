@@ -74,7 +74,6 @@ public class MessageRpc extends BaseCmd {
     public Response protocolRegister(Map params) {
         try {
             String role = String.valueOf(params.get("role"));
-            Log.info(role);
             /*
              * 如果外部模块修改了调用注册信息，进行重启，则清理缓存信息，并重新注册
              * clear cache protocolRoleHandler

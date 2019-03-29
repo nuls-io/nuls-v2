@@ -156,17 +156,12 @@ public class MessageManager extends BaseManager {
                     //外部消息，转外部接口
                     long beginTime = System.currentTimeMillis();
                     LoggerUtil.modulesMsgLogs(header.getCommandStr(), node, payLoadBody, "received");
-                    long time2 = System.currentTimeMillis();
                     OtherModuleMessageHandler handler = MessageHandlerFactory.getInstance().getOtherModuleHandler();
-                    long time3 = System.currentTimeMillis();
                     result = handler.recieve(header, payLoadBody, node);
-                    long time4 = System.currentTimeMillis();
                     long endTime = System.currentTimeMillis();
                     //时间测试专用
                     if (endTime - beginTime > 3000) {
                         LoggerUtil.TestLog.error("1-Deal time too long,message cmd ={},useTime={},hash={},result={}", header.getCommandStr(), (endTime - beginTime), NulsDigestData.calcDigestData(payLoadBody).getDigestHex(), result.isSuccess());
-                        LoggerUtil.TestLog.error("1-beginTime ={},time2={},time3={},time4={},endTime={}",beginTime,time2,time3,time4,endTime);
-
                     }
                     byteBuffer.setCursor(payLoad.length);
                 }
