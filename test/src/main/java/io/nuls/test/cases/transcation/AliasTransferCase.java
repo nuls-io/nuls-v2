@@ -25,7 +25,7 @@ public class AliasTransferCase extends TestCaseChain {
     public Class<? extends TestCaseIntf>[] testChain() {
         return new Class[]{
                 SetAliasCase.class,
-                SleepAdapter.$10SEC.class,
+                SleepAdapter.$15SEC.class,
                 SyncTxInfoCase.class,
                 GetTranscationFormAddressAdapter.class,
                 CheckAliasCase.class,

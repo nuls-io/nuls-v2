@@ -6,6 +6,7 @@ import io.nuls.network.manager.MessageManager;
 import io.nuls.network.model.Node;
 import io.nuls.network.model.NodeGroup;
 import io.nuls.network.model.dto.IpAddress;
+import io.nuls.network.utils.LoggerUtil;
 import io.nuls.tools.core.ioc.SpringLiteContext;
 
 import java.util.*;

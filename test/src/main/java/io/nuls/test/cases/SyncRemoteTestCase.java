@@ -13,12 +13,14 @@ import io.nuls.tools.core.annotation.Value;
 import io.nuls.tools.core.config.ConfigSetting;
 import io.nuls.tools.core.ioc.SpringLiteContext;
 import io.nuls.tools.log.Log;
+import io.nuls.tools.model.StringUtils;
 import io.nuls.tools.parse.JSONUtils;
 import io.nuls.tools.parse.MapUtils;
 import lombok.Setter;
 
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -44,10 +46,18 @@ public abstract class SyncRemoteTestCase<T> extends BaseTestCase<Boolean, Remote
         if(!config.isMaster()){
             throw new RuntimeException("非master节点不允许进行远程调用");
         }
-        List<String> nodeList = nodes.getList().stream().map(node->node.split(":")[0]).filter(node->config.getNodeExclude().indexOf(node)==-1).collect(Collectors.toList());
+        List<String> nodeList;
+        if(StringUtils.isNotBlank(config.getTestNodeList())){
+            nodeList = Arrays.asList(config.getTestNodeList().split(","));
+        }else{
+            nodeList = nodes.getList().stream().map(node->node.split(":")[0]).filter(node->config.getNodeExclude().indexOf(node)==-1).collect(Collectors.toList());
+
+        }
         if(nodeList.isEmpty()){
             throw new TestFailException("remote fail ,network node is empty");
         }
+        int testNodeCount = config.getTestNodeCount() > nodeList.size() ? nodeList.size() : config.getTestNodeCount();
+        nodeList = nodeList.subList(0,testNodeCount);
         for (String node : nodeList) {
 //            Map remoteRes = doRemoteTest(node,param.getCaseCls(),param.getParam());
             RemoteCaseReq req = new RemoteCaseReq();

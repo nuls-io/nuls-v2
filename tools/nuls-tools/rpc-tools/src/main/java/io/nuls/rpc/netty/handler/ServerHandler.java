@@ -5,9 +5,12 @@ import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
 import io.nuls.rpc.info.Constants;
+import io.nuls.rpc.model.message.Message;
+import io.nuls.rpc.model.message.MessageType;
 import io.nuls.rpc.netty.channel.manager.ConnectManager;
 import io.nuls.rpc.netty.handler.message.TextMessageHandler;
 import io.nuls.tools.log.Log;
+import io.nuls.tools.parse.JSONUtils;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -22,7 +25,9 @@ import java.util.concurrent.Executors;
 public class ServerHandler extends SimpleChannelInboundHandler<Object> {
 
     //private ThreadLocal<ExecutorService> threadExecutorService = ThreadLocal.withInitial(() -> Executors.newFixedThreadPool(Constants.THREAD_POOL_SIZE));
-    private ExecutorService threadExecutorService = Executors.newFixedThreadPool(Constants.THREAD_POOL_SIZE);
+    private ExecutorService requestExecutorService = Executors.newFixedThreadPool(Constants.THREAD_POOL_SIZE);
+
+    private ExecutorService responseExecutorService = Executors.newFixedThreadPool(Constants.THREAD_POOL_SIZE);
 
     @Override
     public void channelActive(ChannelHandlerContext ctx) throws Exception {
@@ -38,8 +43,16 @@ public class ServerHandler extends SimpleChannelInboundHandler<Object> {
     protected void channelRead0(ChannelHandlerContext ctx, Object msg) throws Exception {
         if (msg instanceof TextWebSocketFrame) {
             TextWebSocketFrame txMsg = (TextWebSocketFrame) msg;
-            TextMessageHandler messageHandler = new TextMessageHandler((SocketChannel) ctx.channel(), txMsg.text());
-            threadExecutorService.execute(messageHandler);
+            Message message = JSONUtils.json2pojo(txMsg.text(), Message.class);
+            MessageType messageType = MessageType.valueOf(message.getMessageType());
+            TextMessageHandler messageHandler = new TextMessageHandler((SocketChannel) ctx.channel(), message);
+            if(messageType.equals(MessageType.Response)
+                    || messageType.equals(MessageType.NegotiateConnectionResponse)
+                    || messageType.equals(MessageType.Ack) ){
+                responseExecutorService.execute(messageHandler);
+            }else{
+                requestExecutorService.execute(messageHandler);
+            }
         } else {
             Log.warn("Unsupported message format");
         }

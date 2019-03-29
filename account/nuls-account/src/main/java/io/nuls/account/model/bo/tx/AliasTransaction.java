@@ -39,9 +39,4 @@ public class AliasTransaction extends Transaction {
     public AliasTransaction() {
         super(AccountConstant.TX_TYPE_ACCOUNT_ALIAS);
     }
-
-    protected AliasTransaction(int type) {
-        super(type);
-    }
-
 }

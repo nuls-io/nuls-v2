@@ -32,6 +32,7 @@ import io.nuls.network.model.NodeGroup;
 import io.nuls.network.model.dto.IpAddress;
 import io.nuls.network.model.message.AddrMessage;
 import io.nuls.network.netty.container.NodesContainer;
+import io.nuls.network.utils.LoggerUtil;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -236,7 +237,6 @@ public class NodeDiscoverTask implements Runnable {
                 future.complete(PROBE_STATUS_FAIL);
             }
         });
-
         boolean result = connectionManager.connection(node);
         if (!result) {
             return PROBE_STATUS_FAIL;

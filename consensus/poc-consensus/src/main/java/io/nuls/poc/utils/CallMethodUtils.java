@@ -12,6 +12,7 @@ import io.nuls.poc.constant.ConsensusConstant;
 import io.nuls.poc.constant.ConsensusErrorCode;
 import io.nuls.poc.model.bo.Chain;
 import io.nuls.poc.model.bo.tx.TxRegisterDetail;
+import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.model.message.Response;
 import io.nuls.rpc.netty.processor.ResponseMessageProcessor;
@@ -445,4 +446,27 @@ public class CallMethodUtils {
         }
         return packingAddressList;
     }
+
+    /**
+     * 查询账户别名
+     * Query account alias
+     * */
+    public static String getAlias(Chain chain,String address){
+        String alias = null ;
+        try {
+            Map<String, Object> params = new HashMap<>(2);
+            params.put(Constants.VERSION_KEY_STR, "1.0");
+            params.put("chainId", chain.getConfig().getChainId());
+            params.put("address", address);
+            Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_getAliasByAddress", params);
+            HashMap result = (HashMap) ((HashMap) cmdResp.getResponseData()).get("ac_getAliasByAddress");
+            if(result.get("alias") != null){
+                alias = (String) result.get("alias");
+            }
+        }catch (Exception e){
+            chain.getLoggerMap().get(ConsensusConstant.CONSENSUS_LOGGER_NAME).error(e);
+        }
+        return alias;
+    }
+
 }

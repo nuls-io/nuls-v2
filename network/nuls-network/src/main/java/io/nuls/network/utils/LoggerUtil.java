@@ -49,6 +49,7 @@ public class LoggerUtil {
     public static final String LOGGER_KEY4 = ModuleE.CS.abbr;
     public static NulsLogger Log = LoggerBuilder.getLogger("nwLogs", "nw", Level.ALL);
     public static NulsLogger NwInfosLog = LoggerBuilder.getLogger("nwLogs", "nwInfos", Level.ALL);
+    public static NulsLogger TestLog = LoggerBuilder.getLogger("nwLogs", "debug", Level.ALL);
     public static Map<String, NulsLogger> logMap = new HashMap<>();
 
     public static void createLogs(int chainId) {

@@ -358,6 +358,8 @@ public class ContractHelper {
             Result<ContractBalance> balance = tempBalanceManager.getBalance(address);
             if (balance.isSuccess()) {
                 return balance.getData();
+            } else {
+                Log.error("[{}] Get balance error.", AddressTool.getStringAddressByBytes(address));
             }
         } else {
             ContractBalance realBalance = getRealBalance(chainId, AddressTool.getStringAddressByBytes(address));

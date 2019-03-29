@@ -30,6 +30,7 @@ import io.nuls.network.manager.ConnectionManager;
 import io.nuls.network.manager.NodeGroupManager;
 import io.nuls.network.model.Node;
 import io.nuls.network.model.NodeGroup;
+import io.nuls.network.utils.LoggerUtil;
 import io.nuls.tools.core.ioc.SpringLiteContext;
 
 import java.util.ArrayList;
@@ -85,7 +86,7 @@ public class NodeMaintenanceTask implements Runnable {
         node.setConnectedListener(() -> connectionManager.nodeClientConnectSuccess(node));
 
         node.setDisconnectListener(() -> {
-            Log.info("-----------out node disconnect:" + node.getId());
+            Log.debug("-----------out node disconnect:" + node.getId());
             connectionManager.nodeConnectDisconnect(node);
         });
         return connectionManager.connection(node);

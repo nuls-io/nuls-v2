@@ -43,7 +43,8 @@ public class TransactionInfo {
         BigInteger value = BigInteger.ZERO;
         if (type == ApiConstant.TX_TYPE_COINBASE ||
                 type == ApiConstant.TX_TYPE_STOP_AGENT ||
-                type == ApiConstant.TX_TYPE_CANCEL_DEPOSIT) {
+                type == ApiConstant.TX_TYPE_CANCEL_DEPOSIT ||
+                type == ApiConstant.TX_TYPE_CONTRACT_RETURN_GAS) {
             if (coinTos != null) {
                 for (CoinToInfo output : coinTos) {
                     value = value.add(output.getAmount());

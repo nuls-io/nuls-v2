@@ -5,6 +5,7 @@ import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.core.Appender;
 import ch.qos.logback.core.rolling.RollingFileAppender;
+import io.nuls.tools.model.StringUtils;
 import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
@@ -64,8 +65,11 @@ public class LoggerBuilder {
     }
 
     public static NulsLogger getLogger(String fileName) {
-        return getLogger(fileName, DEFAULT_LEVEL, DEFAULT_LEVEL);
+        Level level = StringUtils.isNotBlank(System.getProperty("log.level"))  ? Level.toLevel(System.getProperty("log.level")) : DEFAULT_LEVEL;
+        return getLogger(fileName, level, level);
     }
+
+
 
     public static NulsLogger getLogger(String fileName, Level level) {
         return getLogger(fileName, level, level);

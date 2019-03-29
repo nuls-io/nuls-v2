@@ -22,7 +22,12 @@ public class NoUse {
      * For internal debugging only
      * Simulate a kernel module
      */
-    public static void mockKernel() throws Exception {
+    public static int mockKernel() throws Exception {
+        SpringLiteContext.init("io.nuls.rpc.cmd.kernel");
+        return startKernel();
+    }
+
+    public static int startKernel() throws Exception {
         int port = 8887;
         NettyServer.startServer(port);
         // Start server instance
@@ -35,10 +40,10 @@ public class NoUse {
         connectionInformation.put(Constants.KEY_PORT, port + "");
         ConnectManager.LOCAL.setConnectionInformation(connectionInformation);
         ConnectManager.startService = true;
-        SpringLiteContext.init("io.nuls.rpc.cmd.kernel");
         ConnectManager.scanPackage("io.nuls.rpc.cmd.kernel");
         ConnectManager.ROLE_MAP.put(ModuleE.KE.abbr, connectionInformation);
         ConnectManager.updateStatus();
+        return port;
     }
 
     /**

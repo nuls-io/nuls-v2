@@ -6,9 +6,12 @@ import io.netty.handler.codec.http.FullHttpResponse;
 import io.netty.handler.codec.http.websocketx.*;
 import io.netty.util.CharsetUtil;
 import io.nuls.rpc.info.Constants;
+import io.nuls.rpc.model.message.Message;
+import io.nuls.rpc.model.message.MessageType;
 import io.nuls.rpc.netty.channel.manager.ConnectManager;
 import io.nuls.rpc.netty.handler.message.TextMessageHandler;
 import io.nuls.tools.log.Log;
+import io.nuls.tools.parse.JSONUtils;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -27,7 +30,9 @@ public class ClientHandler extends SimpleChannelInboundHandler<Object> {
 
     //private ThreadLocal<ExecutorService> threadExecutorService = ThreadLocal.withInitial(() -> Executors.newFixedThreadPool(Constants.THREAD_POOL_SIZE));
 
-    private ExecutorService threadExecutorService = Executors.newFixedThreadPool(Constants.THREAD_POOL_SIZE);
+    private ExecutorService requestExecutorService = Executors.newFixedThreadPool(Constants.THREAD_POOL_SIZE);
+
+    private ExecutorService responseExecutorService = Executors.newFixedThreadPool(Constants.THREAD_POOL_SIZE);
 
     @Override
     public void handlerAdded(ChannelHandlerContext ctx) {
@@ -74,7 +79,7 @@ public class ClientHandler extends SimpleChannelInboundHandler<Object> {
                 this.handShaker.finishHandshake(ch, response);
                 //设置成功
                 this.handshakeFuture.setSuccess();
-                Log.info("WebSocket Client connected! response headers[sec-webSocket-extensions]:{}" + response.headers());
+                Log.debug("WebSocket Client connected! response headers[sec-webSocket-extensions]:{}" + response.headers());
             } catch (WebSocketHandshakeException var7) {
                 FullHttpResponse res = (FullHttpResponse) msg;
                 String errorMsg = String.format("WebSocket Client failed to connect,status:%s,reason:%s", res.status(), res.content().toString(CharsetUtil.UTF_8));
@@ -90,8 +95,16 @@ public class ClientHandler extends SimpleChannelInboundHandler<Object> {
                 ch.close();
             } else if (msg instanceof TextWebSocketFrame) {
                 TextWebSocketFrame txMsg = (TextWebSocketFrame) msg;
-                TextMessageHandler messageHandler = new TextMessageHandler((SocketChannel) ctx.channel(), txMsg.text());
-                threadExecutorService.execute(messageHandler);
+                Message message = JSONUtils.json2pojo(txMsg.text(), Message.class);
+                MessageType messageType = MessageType.valueOf(message.getMessageType());
+                TextMessageHandler messageHandler = new TextMessageHandler((SocketChannel) ctx.channel(), message);
+                if(messageType.equals(MessageType.Response)
+                        || messageType.equals(MessageType.NegotiateConnectionResponse)
+                        || messageType.equals(MessageType.Ack) ){
+                    responseExecutorService.execute(messageHandler);
+                }else{
+                    requestExecutorService.execute(messageHandler);
+                }
             } else {
                 Log.warn("Unsupported message format");
             }

@@ -93,7 +93,7 @@ public class GetContractResultProcessor extends ContractBaseProcessor {
             dataMap.put("refundFee", Na.naToNuls(dataMap.get("refundFee")));
             dataMap.put("value", Na.naToNuls(dataMap.get("value")));
             dataMap.put("price", Na.naToNuls(dataMap.get("price")));
-            dataMap.put("balance", Na.naToNuls(dataMap.get("balance")));
+            //dataMap.put("balance", Na.naToNuls(dataMap.get("balance")));
         }
 
         result.setData(dataMap);

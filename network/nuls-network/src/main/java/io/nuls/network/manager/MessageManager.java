@@ -49,6 +49,7 @@ import io.nuls.tools.crypto.Sha256Hash;
 import io.nuls.tools.log.Log;
 import io.nuls.tools.model.ByteUtils;
 import io.nuls.tools.exception.NulsException;
+import io.nuls.tools.model.LongUtils;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
@@ -99,7 +100,7 @@ public class MessageManager extends BaseManager {
             return msgClass.getDeclaredConstructor().newInstance();
         } catch (InstantiationException | IllegalAccessException e) {
             e.printStackTrace();
-           LoggerUtil.Log.error(e.getMessage());
+            LoggerUtil.Log.error(e.getMessage());
         } catch (NoSuchMethodException e) {
             e.printStackTrace();
         } catch (InvocationTargetException e) {
@@ -153,10 +154,15 @@ public class MessageManager extends BaseManager {
                     result = handler.recieve(message, node);
                 } else {
                     //外部消息，转外部接口
+                    long beginTime = System.currentTimeMillis();
                     LoggerUtil.modulesMsgLogs(header.getCommandStr(), node, payLoadBody, "received");
-                    LoggerUtil.logger(chainId).debug("==============================receive other module message, hash-" + NulsDigestData.calcDigestData(payLoadBody).getDigestHex() + "node-" + node.getId());
                     OtherModuleMessageHandler handler = MessageHandlerFactory.getInstance().getOtherModuleHandler();
                     result = handler.recieve(header, payLoadBody, node);
+                    long endTime = System.currentTimeMillis();
+                    //时间测试专用
+                    if(endTime-beginTime>3000){
+                        LoggerUtil.TestLog.error("Deal time too long,message cmd ={},endTime={},beginTime={}",header.getCommand(),endTime,beginTime);
+                    }
                     byteBuffer.setCursor(payLoad.length);
                 }
                 if (!result.isSuccess()) {
@@ -273,16 +279,13 @@ public class MessageManager extends BaseManager {
             MessageHeader header = message.getHeader();
             BaseNulsData body = message.getMsgBody();
             header.setPayloadLength(body.size());
-            LoggerUtil.logger(node.getNodeGroup().getChainId()).debug("node={},isWritable={}", node.getId(),node.getChannel().isWritable());
             ChannelFuture future = node.getChannel().writeAndFlush(Unpooled.wrappedBuffer(message.serialize()));
-            Log.debug("==================writeAndFlush end");
+            LoggerUtil.logger(node.getNodeGroup().getChainId()).debug("node={},isWritable={}", node.getId(), node.getChannel().isWritable());
             if (!asyn) {
                 future.await();
-                Log.debug("{}==================ChannelFuture1", TimeManager.currentTimeMillis());
                 if (!future.isSuccess()) {
                     return new NetworkEventResult(false, NetworkErrorCode.NET_BROADCAST_FAIL);
                 }
-                Log.debug("{}==================ChannelFuture2", TimeManager.currentTimeMillis());
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -301,22 +304,16 @@ public class MessageManager extends BaseManager {
      * @return
      */
     public NetworkEventResult broadcastToNodes(byte[] message, List<Node> nodes, boolean asyn) {
-        Log.debug("{}==================broadcastToNodes begin", TimeManager.currentTimeMillis());
         for (Node node : nodes) {
-            Log.debug("==================node {}", node.getId());
             if (node.getChannel() == null || !node.getChannel().isActive()) {
-                Log.info(node.getId() + "is inActive");
+                Log.info(node.getId() + "is not Active");
                 continue;
             }
             try {
-                Log.debug("node={},isWritable={}", node.getId(),node.getChannel().isWritable());
                 ChannelFuture future = node.getChannel().writeAndFlush(Unpooled.wrappedBuffer(message));
-                Log.debug("==================writeAndFlush end");
                 if (!asyn) {
-                    Log.debug("{}==========B========ChannelFuture", TimeManager.currentTimeMillis());
                     future.await();
                     boolean success = future.isSuccess();
-                    Log.debug("==========B========{}success?{}", node.getId(), success);
                     if (!success) {
                         return new NetworkEventResult(false, NetworkErrorCode.NET_BROADCAST_FAIL);
                     }

@@ -31,6 +31,10 @@ public class Config implements InitializingBean {
     @Value("testNodeType")
     String nodeType;
 
+    String testNodeList;
+
+    int testNodeCount;
+
     int chainId;
 
     int assetsId;

@@ -28,6 +28,7 @@ package io.nuls.contract.basetest;
 import io.nuls.base.basic.AddressTool;
 import io.nuls.contract.model.bo.Chain;
 import io.nuls.contract.model.bo.config.ConfigBean;
+import io.nuls.contract.util.Log;
 import io.nuls.contract.util.VMContext;
 import io.nuls.contract.vm.natives.io.nuls.contract.sdk.NativeAddress;
 import io.nuls.contract.vm.program.*;
@@ -36,6 +37,7 @@ import io.nuls.db.service.RocksDBService;
 import org.apache.commons.io.IOUtils;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.spongycastle.util.encoders.Hex;
 
@@ -66,6 +68,11 @@ public class ContractTest {
             "5MR_2CVCFWH7o8AmrTBPLkdg2dYH1UCUJiM",
             "5MR_2CfUsasd33vQV3HqGw6M3JwVsuVxJ7r",
             "5MR_2CVuGjQ3CYVkhFszxfSt6sodg1gDHYF"};
+
+    @BeforeClass
+    public static void initClass() {
+        Log.info("init log.");
+    }
 
     @Before
     public void setUp() {
