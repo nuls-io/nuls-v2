@@ -1,10 +1,7 @@
 package io.nuls.api.model.po.db;
 
-import lombok.Data;
-
 import java.util.List;
 
-@Data
 public class ContractMethod {
 
     private String name;
@@ -12,4 +9,28 @@ public class ContractMethod {
     private String returnType;
 
     private List<String> params;
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getReturnType() {
+        return returnType;
+    }
+
+    public void setReturnType(String returnType) {
+        this.returnType = returnType;
+    }
+
+    public List<String> getParams() {
+        return params;
+    }
+
+    public void setParams(List<String> params) {
+        this.params = params;
+    }
 }

@@ -1,16 +1,12 @@
 package io.nuls.api.model.po.db;
 
 import io.nuls.api.utils.DocumentTransferTool;
-import lombok.Data;
 import org.bson.Document;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
-@Data
 public class ChainInfo {
 
     private int chainId;
@@ -57,5 +53,45 @@ public class ChainInfo {
         String inflationCoins = document.getString("inflationCoins");
         chainInfo.setInflationCoins(new BigInteger(inflationCoins));
         return chainInfo;
+    }
+
+    public int getChainId() {
+        return chainId;
+    }
+
+    public void setChainId(int chainId) {
+        this.chainId = chainId;
+    }
+
+    public AssetInfo getDefaultAsset() {
+        return defaultAsset;
+    }
+
+    public void setDefaultAsset(AssetInfo defaultAsset) {
+        this.defaultAsset = defaultAsset;
+    }
+
+    public List<AssetInfo> getAssets() {
+        return assets;
+    }
+
+    public void setAssets(List<AssetInfo> assets) {
+        this.assets = assets;
+    }
+
+    public List<String> getSeeds() {
+        return seeds;
+    }
+
+    public void setSeeds(List<String> seeds) {
+        this.seeds = seeds;
+    }
+
+    public BigInteger getInflationCoins() {
+        return inflationCoins;
+    }
+
+    public void setInflationCoins(BigInteger inflationCoins) {
+        this.inflationCoins = inflationCoins;
     }
 }
