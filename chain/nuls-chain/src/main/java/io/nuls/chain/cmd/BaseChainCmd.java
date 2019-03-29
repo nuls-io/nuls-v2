@@ -144,7 +144,7 @@ public class BaseChainCmd extends BaseCmd {
 
     BlockChain buildChainWithTxData(String txHex, Transaction tx, boolean isDelete) {
         try {
-            byte[] txBytes = HexUtil.hexToByte(txHex);
+            byte[] txBytes = HexUtil.decode(txHex);
             tx.parse(txBytes, 0);
             TxChain txChain = new TxChain();
             txChain.parse(tx.getTxData(), 0);
@@ -167,7 +167,7 @@ public class BaseChainCmd extends BaseCmd {
 
     Asset buildAssetWithTxChain(String txHex, Transaction tx) {
         try {
-            byte[] txBytes = HexUtil.hexToByte(txHex);
+            byte[] txBytes = HexUtil.decode(txHex);
             tx.parse(txBytes, 0);
             TxChain txChain = new TxChain();
             txChain.parse(tx.getTxData(), 0);

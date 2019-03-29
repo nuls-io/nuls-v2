@@ -90,7 +90,7 @@ public class OtherModuleMessageHandler extends BaseMessageHandler {
         paramMap.put("chainId", chainId);
         paramMap.put("nodeId", node.getId());
         long time0 = System.currentTimeMillis();
-        paramMap.put("messageBody", HexUtil.byteToHex(payLoadBody));
+        paramMap.put("messageBody", HexUtil.encode(payLoadBody));
         long time1 = System.currentTimeMillis();
         Collection<ProtocolRoleHandler> protocolRoleHandlers = MessageHandlerFactory.getInstance().getProtocolRoleHandlerMap(header.getCommandStr());
         if (null == protocolRoleHandlers) {
