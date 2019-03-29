@@ -24,7 +24,6 @@ import io.nuls.api.analysis.WalletRpcHandler;
 import io.nuls.api.cache.ApiCache;
 import io.nuls.api.db.AccountService;
 import io.nuls.api.db.BlockService;
-import io.nuls.api.exception.JsonRpcException;
 import io.nuls.api.manager.CacheManager;
 import io.nuls.api.model.po.db.AccountInfo;
 import io.nuls.api.model.po.db.AssetInfo;
@@ -33,11 +32,13 @@ import io.nuls.api.model.po.db.TxRelationInfo;
 import io.nuls.api.model.rpc.RpcErrorCode;
 import io.nuls.api.model.rpc.RpcResult;
 import io.nuls.api.model.rpc.RpcResultError;
+import io.nuls.api.provider.ServiceManager;
 import io.nuls.api.utils.VerifyUtils;
 import io.nuls.base.basic.AddressTool;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Controller;
 import io.nuls.tools.core.annotation.RpcMethod;
+import io.nuls.tools.model.FormatValidUtils;
 
 import java.util.List;
 
@@ -51,6 +52,8 @@ public class AccountController {
     private AccountService accountService;
     @Autowired
     private BlockService blockHeaderService;
+
+    private io.nuls.api.provider.account.AccountService cmdAccountService = ServiceManager.get(io.nuls.api.provider.account.AccountService.class);
 
     @RpcMethod("getAccountList")
     public RpcResult getAccountList(List<Object> params) {
@@ -153,13 +156,13 @@ public class AccountController {
     @RpcMethod("getCoinRanking")
     public RpcResult getCoinRanking(List<Object> params) {
         VerifyUtils.verifyParams(params, 4);
-        int chainId,pageIndex,pageSize,sortType;
+        int chainId, pageIndex, pageSize, sortType;
         try {
             chainId = (int) params.get(0);
             pageIndex = (int) params.get(1);
             pageSize = (int) params.get(2);
             sortType = (int) params.get(3);
-        }catch (Exception e) {
+        } catch (Exception e) {
             return RpcResult.paramError();
         }
 
@@ -170,6 +173,26 @@ public class AccountController {
             pageInfo = new PageInfo<>(pageIndex, pageSize);
         }
         return new RpcResult().setResult(pageInfo);
+    }
+
+    @RpcMethod("createAccount")
+    public RpcResult createAccount(List<Object> params) {
+        VerifyUtils.verifyParams(params, 3);
+        int chainId, count;
+        String password;
+        try {
+            chainId = (int) params.get(0);
+            count = (int) params.get(1);
+            password = (String) params.get(2);
+        } catch (Exception e) {
+            return RpcResult.paramError();
+        }
+        if(!FormatValidUtils.validPassword(password)) {
+            return RpcResult.paramError("[password] is inValid");
+        }
+
+
+        return null;
     }
 
 //    @RpcMethod("getAccountTokens")
