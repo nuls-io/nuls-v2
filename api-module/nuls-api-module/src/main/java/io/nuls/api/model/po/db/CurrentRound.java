@@ -20,7 +20,6 @@
 
 package io.nuls.api.model.po.db;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
 import org.apache.tools.ant.util.DateUtils;
 
 import java.util.Date;
@@ -29,7 +28,6 @@ import java.util.List;
 /**
  * @author Niels
  */
-@JsonInclude(JsonInclude.Include.NON_NULL)
 public class CurrentRound extends PocRound {
 
     public CurrentRound() {
@@ -113,4 +111,6 @@ public class CurrentRound extends PocRound {
         this.setIndex(round.getIndex());
         this.setLostRate(round.getLostRate());
     }
+
+
 }

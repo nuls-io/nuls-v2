@@ -1,16 +1,10 @@
 package io.nuls.api.model.po.db;
 
 import io.nuls.api.utils.DocumentTransferTool;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 import org.bson.Document;
 
 import java.util.List;
 
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
 public class CoinDataInfo {
 
     private String txHash;
@@ -18,6 +12,15 @@ public class CoinDataInfo {
     private List<CoinFromInfo> fromList;
 
     private List<CoinToInfo> toList;
+
+    public CoinDataInfo() {
+    }
+
+    public CoinDataInfo(String txHash, List<CoinFromInfo> fromList, List<CoinToInfo> toList) {
+        this.txHash = txHash;
+        this.fromList = fromList;
+        this.toList = toList;
+    }
 
     public Document toDocument() {
         Document document = new Document();
@@ -33,5 +36,29 @@ public class CoinDataInfo {
         info.setFromList(DocumentTransferTool.toInfoList((List<Document>) document.get("fromList"), CoinFromInfo.class));
         info.setToList(DocumentTransferTool.toInfoList((List<Document>) document.get("toList"), CoinToInfo.class));
         return info;
+    }
+
+    public String getTxHash() {
+        return txHash;
+    }
+
+    public void setTxHash(String txHash) {
+        this.txHash = txHash;
+    }
+
+    public List<CoinFromInfo> getFromList() {
+        return fromList;
+    }
+
+    public void setFromList(List<CoinFromInfo> fromList) {
+        this.fromList = fromList;
+    }
+
+    public List<CoinToInfo> getToList() {
+        return toList;
+    }
+
+    public void setToList(List<CoinToInfo> toList) {
+        this.toList = toList;
     }
 }

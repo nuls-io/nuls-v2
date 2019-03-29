@@ -9,7 +9,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-@Data
 public class TransactionInfo {
 
     private String hash;
@@ -93,5 +92,109 @@ public class TransactionInfo {
 
         info.setValue(new BigInteger(document.getString("value")));
         return info;
+    }
+
+    public String getHash() {
+        return hash;
+    }
+
+    public void setHash(String hash) {
+        this.hash = hash;
+    }
+
+    public int getType() {
+        return type;
+    }
+
+    public void setType(int type) {
+        this.type = type;
+    }
+
+    public long getHeight() {
+        return height;
+    }
+
+    public void setHeight(long height) {
+        this.height = height;
+    }
+
+    public int getSize() {
+        return size;
+    }
+
+    public void setSize(int size) {
+        this.size = size;
+    }
+
+    public BigInteger getFee() {
+        return fee;
+    }
+
+    public void setFee(BigInteger fee) {
+        this.fee = fee;
+    }
+
+    public long getCreateTime() {
+        return createTime;
+    }
+
+    public void setCreateTime(long createTime) {
+        this.createTime = createTime;
+    }
+
+    public String getRemark() {
+        return remark;
+    }
+
+    public void setRemark(String remark) {
+        this.remark = remark;
+    }
+
+    public String getTxDataHex() {
+        return txDataHex;
+    }
+
+    public void setTxDataHex(String txDataHex) {
+        this.txDataHex = txDataHex;
+    }
+
+    public TxDataInfo getTxData() {
+        return txData;
+    }
+
+    public void setTxData(TxDataInfo txData) {
+        this.txData = txData;
+    }
+
+    public List<TxDataInfo> getTxDataList() {
+        return txDataList;
+    }
+
+    public void setTxDataList(List<TxDataInfo> txDataList) {
+        this.txDataList = txDataList;
+    }
+
+    public List<CoinFromInfo> getCoinFroms() {
+        return coinFroms;
+    }
+
+    public void setCoinFroms(List<CoinFromInfo> coinFroms) {
+        this.coinFroms = coinFroms;
+    }
+
+    public List<CoinToInfo> getCoinTos() {
+        return coinTos;
+    }
+
+    public void setCoinTos(List<CoinToInfo> coinTos) {
+        this.coinTos = coinTos;
+    }
+
+    public BigInteger getValue() {
+        return value;
+    }
+
+    public void setValue(BigInteger value) {
+        this.value = value;
     }
 }
