@@ -161,7 +161,7 @@ public class MessageManager extends BaseManager {
                     long endTime = System.currentTimeMillis();
                     //时间测试专用
                     if(endTime-beginTime>3000){
-                        LoggerUtil.TestLog.error("Deal time too long,message cmd ={},endTime={},beginTime={}",header.getCommand(),endTime,beginTime);
+                        LoggerUtil.TestLog.error("Deal time too long,message cmd ={},useTime={},hash={},result={}",header.getCommandStr(),(endTime-beginTime),NulsDigestData.calcDigestData(payLoadBody).getDigestHex(),result.isSuccess());
                     }
                     byteBuffer.setCursor(payLoad.length);
                 }

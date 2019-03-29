@@ -24,6 +24,7 @@
  */
 package io.nuls.network.manager.handler.message;
 
+import io.nuls.base.data.NulsDigestData;
 import io.nuls.network.manager.NodeGroupManager;
 import io.nuls.network.manager.handler.MessageHandlerFactory;
 import io.nuls.network.manager.handler.base.BaseMessageHandler;
@@ -93,6 +94,7 @@ public class OtherModuleMessageHandler extends BaseMessageHandler {
             LoggerUtil.logger(chainId).error("unknown mssages. cmd={},handler may be unRegistered to network.", header.getCommandStr());
         } else {
             LoggerUtil.logger(chainId).debug("==============================other module message protocolRoleHandlers-size:{}", protocolRoleHandlers.size());
+            long  beginTime = System.currentTimeMillis();
             for (ProtocolRoleHandler protocolRoleHandler : protocolRoleHandlers) {
                 try {
                     LoggerUtil.logger(chainId).debug("request：{}=={}", protocolRoleHandler.getRole(), protocolRoleHandler.getHandler());
@@ -101,8 +103,14 @@ public class OtherModuleMessageHandler extends BaseMessageHandler {
                     LoggerUtil.logger(chainId).debug("responseContainer：" + responseContainer.getMessageId());
                     LoggerUtil.modulesMsgLogs(protocolRoleHandler.getRole(), header.getCommandStr(), node, payLoadBody, responseContainer.getMessageId());
                 } catch (Exception e) {
+                    LoggerUtil.logger(chainId).error(e);
                     e.printStackTrace();
                 }
+            }
+            long  endTime = System.currentTimeMillis();
+            if(endTime-beginTime>3000){
+                LoggerUtil.TestLog.error("####Deal time too long,message cmd ={},useTime={},hash={}",header.getCommandStr(),(endTime-beginTime),NulsDigestData.calcDigestData(payLoadBody).getDigestHex());
+
             }
         }
         return NetworkEventResult.getResultSuccess();
