@@ -56,7 +56,7 @@ public class NettyServer {
     }
 
     public void init() {
-        boss = new NioEventLoopGroup();
+        boss = new NioEventLoopGroup(1);
         worker = new NioEventLoopGroup();
         serverBootstrap = new ServerBootstrap();
         serverBootstrap.group(boss, worker)

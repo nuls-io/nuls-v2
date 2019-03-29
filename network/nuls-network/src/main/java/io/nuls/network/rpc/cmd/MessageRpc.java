@@ -74,7 +74,6 @@ public class MessageRpc extends BaseCmd {
     public Response protocolRegister(Map params) {
         try {
             String role = String.valueOf(params.get("role"));
-            Log.info(role);
             /*
              * 如果外部模块修改了调用注册信息，进行重启，则清理缓存信息，并重新注册
              * clear cache protocolRoleHandler
@@ -120,7 +119,7 @@ public class MessageRpc extends BaseCmd {
             Log.debug("==================broadcast begin");
             int chainId = Integer.valueOf(String.valueOf(params.get("chainId")));
             String excludeNodes = String.valueOf(params.get("excludeNodes"));
-            byte[] messageBody = HexUtil.hexStringToBytes(String.valueOf(params.get("messageBody")));
+            byte[] messageBody = HexUtil.decode(String.valueOf(params.get("messageBody")));
             String cmd = String.valueOf(params.get("command"));
             MessageManager messageManager = MessageManager.getInstance();
             NodeGroup nodeGroup = NodeGroupManager.getInstance().getNodeGroupByChainId(chainId);
@@ -175,7 +174,7 @@ public class MessageRpc extends BaseCmd {
         try {
             int chainId = Integer.valueOf(String.valueOf(params.get("chainId")));
             String nodes = String.valueOf(params.get("nodes"));
-            byte[] messageBody = HexUtil.hexStringToBytes(String.valueOf(params.get("messageBody")));
+            byte[] messageBody = HexUtil.decode(String.valueOf(params.get("messageBody")));
             String cmd = String.valueOf(params.get("command"));
             Log.debug("{}==================sendPeersMsg begin, cmd-{}", TimeManager.currentTimeMillis(), cmd);
             MessageManager messageManager = MessageManager.getInstance();

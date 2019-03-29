@@ -49,6 +49,7 @@ import io.nuls.tools.crypto.Sha256Hash;
 import io.nuls.tools.log.Log;
 import io.nuls.tools.model.ByteUtils;
 import io.nuls.tools.exception.NulsException;
+import io.nuls.tools.model.LongUtils;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
@@ -153,9 +154,15 @@ public class MessageManager extends BaseManager {
                     result = handler.recieve(message, node);
                 } else {
                     //外部消息，转外部接口
+                    long beginTime = System.currentTimeMillis();
                     LoggerUtil.modulesMsgLogs(header.getCommandStr(), node, payLoadBody, "received");
                     OtherModuleMessageHandler handler = MessageHandlerFactory.getInstance().getOtherModuleHandler();
                     result = handler.recieve(header, payLoadBody, node);
+                    long endTime = System.currentTimeMillis();
+                    //时间测试专用
+                    if (endTime - beginTime > 3000) {
+                        LoggerUtil.TestLog.error("1-Deal time too long,message cmd ={},useTime={},hash={},result={}", header.getCommandStr(), (endTime - beginTime), NulsDigestData.calcDigestData(payLoadBody).getDigestHex(), result.isSuccess());
+                    }
                     byteBuffer.setCursor(payLoad.length);
                 }
                 if (!result.isSuccess()) {

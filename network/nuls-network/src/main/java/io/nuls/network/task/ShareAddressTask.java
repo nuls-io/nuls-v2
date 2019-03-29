@@ -55,7 +55,6 @@ public class ShareAddressTask implements Runnable {
                 doShare(externalIp, nodeGroup.getLocalNetNodeContainer().getConnectedNodes().values(), networkConfig.getPort());
             });
             myNode.setDisconnectListener(() -> myNode.setChannel(null));
-            LoggerUtil.TestLog.debug("ShareAddressTask doLocalNet {}",myNode.getId());
             connectionManager.connection(myNode);
         }
     }
@@ -78,7 +77,6 @@ public class ShareAddressTask implements Runnable {
                 crossNode.getChannel().close();
                 doShare(externalIp, nodeGroup.getCrossNodeContainer().getConnectedNodes().values(), networkConfig.getCrossPort());
             });
-            LoggerUtil.TestLog.debug("ShareAddressTask doCrossNet {}",crossNode.getId());
             connectionManager.connection(crossNode);
         }
     }

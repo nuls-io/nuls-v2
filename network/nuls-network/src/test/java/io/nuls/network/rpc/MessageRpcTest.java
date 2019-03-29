@@ -79,7 +79,7 @@ public class MessageRpcTest {
 //            versionMessage.getHeader().setChecksum(  versionMessage.getHeader().);
             params.put("chainId",chainId);
             params.put("excludeNodes",excludeNodes);
-            params.put("messageBody",HexUtil.byteToHex(versionMessageBody.serialize()));
+            params.put("messageBody",HexUtil.encode(versionMessageBody.serialize()));
             params.put("command","block");
             Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.NW.abbr, "nw_broadcast", params);
             LoggerUtil.Log.info("response {}", response);

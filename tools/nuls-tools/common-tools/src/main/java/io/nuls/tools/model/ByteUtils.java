@@ -137,15 +137,15 @@ public class ByteUtils {
      * @return  转换都的字符串
      * */
     public static String bytesToString(byte[] bytearray) {
-        String result = "";
+        StringBuilder result = new StringBuilder();
         char temp;
 
         int length = bytearray.length;
         for (int i = 0; i < length; i++) {
             temp = (char) bytearray[i];
-            result += temp;
+            result.append(temp);
         }
-        return result;
+        return result.toString();
     }
 
     /**

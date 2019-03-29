@@ -38,6 +38,7 @@ import io.nuls.block.model.po.BlockHeaderPo;
 import io.nuls.block.service.BlockService;
 import io.nuls.block.storage.BlockStorageService;
 import io.nuls.block.storage.ChainStorageService;
+import io.nuls.block.thread.monitor.TxGroupRequestor;
 import io.nuls.block.utils.BlockUtil;
 import io.nuls.block.utils.ChainGenerator;
 import io.nuls.block.rpc.call.ConsensusUtil;
@@ -219,17 +220,21 @@ public class BlockServiceImpl implements BlockService {
                 commonLog.debug("verifyBlock fail!chainId-" + chainId + ",height-" + height);
                 return false;
             }
-            SmallBlock smallBlock = BlockUtil.getSmallBlock(chainId, block);
-            Map<NulsDigestData, Transaction> txMap = new HashMap<>(header.getTxCount());
-            block.getTxs().forEach(e -> txMap.put(e.getHash(), e));
-            CachedSmallBlock cachedSmallBlock = new CachedSmallBlock(null, smallBlock, txMap);
-            SmallBlockCacher.cacheSmallBlock(chainId, cachedSmallBlock);
-            SmallBlockCacher.setStatus(chainId, hash, BlockForwardEnum.COMPLETE);
-            if (broadcast) {
-                broadcastBlock(chainId, block);
-            }
-            if (forward) {
-                forwardBlock(chainId, hash, null);
+            //同步\链切换\孤儿链对接过程中不进行区块广播
+            if (download == 1) {
+                SmallBlock smallBlock = BlockUtil.getSmallBlock(chainId, block);
+                Map<NulsDigestData, Transaction> txMap = new HashMap<>(header.getTxCount());
+                block.getTxs().forEach(e -> txMap.put(e.getHash(), e));
+                CachedSmallBlock cachedSmallBlock = new CachedSmallBlock(null, smallBlock, txMap);
+                SmallBlockCacher.cacheSmallBlock(chainId, cachedSmallBlock);
+                SmallBlockCacher.setStatus(chainId, hash, BlockForwardEnum.COMPLETE);
+                TxGroupRequestor.removeTask(chainId, hash.toString());
+                if (broadcast) {
+                    broadcastBlock(chainId, block);
+                }
+                if (forward) {
+                    forwardBlock(chainId, hash, null);
+                }
             }
             long elapsedNanos1 = System.nanoTime() - startTime1;
             commonLog.debug("1. time-" + elapsedNanos1);
@@ -342,6 +347,7 @@ public class BlockServiceImpl implements BlockService {
 
     @Override
     public boolean rollbackBlock(int chainId, BlockHeaderPo blockHeaderPo, boolean needLock) {
+        long startTime = System.nanoTime();
         NulsLogger commonLog = ContextManager.getContext(chainId).getCommonLog();
         long height = blockHeaderPo.getHeight();
         if (height == 0) {
@@ -356,6 +362,7 @@ public class BlockServiceImpl implements BlockService {
         }
         try {
             BlockHeader blockHeader = BlockUtil.fromBlockHeaderPo(blockHeaderPo);
+            long startTime1 = System.nanoTime();
             if (!ProtocolUtil.rollbackNotice(chainId, blockHeader)) {
                 commonLog.error("ProtocolUtil rollbackNotice fail!chainId-" + chainId + ",height-" + height);
                 return false;
@@ -368,7 +375,10 @@ public class BlockServiceImpl implements BlockService {
                 commonLog.error("ConsensusUtil rollbackNotice fail!chainId-" + chainId + ",height-" + height);
                 return false;
             }
+            long elapsedNanos1 = System.nanoTime() - startTime1;
+            commonLog.debug("1. time-" + elapsedNanos1);
 
+            long startTime2 = System.nanoTime();
             if (!TransactionUtil.rollback(chainId, blockHeaderPo)) {
                 if (!ConsensusUtil.saveNotice(chainId, blockHeader, false)) {
                     throw new DbRuntimeException("ConsensusUtil saveNotice error!");
@@ -379,6 +389,10 @@ public class BlockServiceImpl implements BlockService {
                 commonLog.error("TransactionUtil rollback fail!chainId-" + chainId + ",height-" + height);
                 return false;
             }
+            long elapsedNanos2 = System.nanoTime() - startTime2;
+            commonLog.debug("2. time-" + elapsedNanos2);
+
+            long startTime3 = System.nanoTime();
             if (!blockStorageService.remove(chainId, height)) {
                 if (!blockStorageService.save(chainId, blockHeaderPo)) {
                     throw new DbRuntimeException("blockStorageService save error!");
@@ -414,6 +428,8 @@ public class BlockServiceImpl implements BlockService {
                 commonLog.error("rollback setLatestHeight fail!chainId-" + chainId + ",height-" + height);
                 return false;
             }
+            long elapsedNanos3 = System.nanoTime() - startTime3;
+            commonLog.debug("3. time-" + elapsedNanos3);
             context.setLatestBlock(getBlock(chainId, height - 1));
             Chain masterChain = BlockChainManager.getMasterChain(chainId);
             masterChain.setEndHeight(height - 1);
@@ -423,6 +439,8 @@ public class BlockServiceImpl implements BlockService {
             if (height - heightRange >= 0) {
                 hashList.addFirst(getBlockHash(chainId, height - heightRange));
             }
+            long elapsedNanos = System.nanoTime() - startTime;
+            commonLog.info("rollback block success, time-" + elapsedNanos + ", height-" + height + ", txCount-" + blockHeaderPo.getTxCount() + ", hash-" + blockHeaderPo.getHash());
             return true;
         } finally {
             if (needLock) {
@@ -445,16 +463,6 @@ public class BlockServiceImpl implements BlockService {
         boolean broadcast = NetworkUtil.broadcast(chainId, message, SMALL_BLOCK_MESSAGE);
         messageLog.debug("chainId-" + chainId + ", hash-" + block.getHeader().getHash() + ", broadcast-" + broadcast);
         return broadcast;
-    }
-
-    @Override
-    public boolean startChain(int chainId) {
-        return false;
-    }
-
-    @Override
-    public boolean stopChain(int chainId, boolean cleanData) {
-        return false;
     }
 
     private boolean verifyBlock(int chainId, Block block, boolean localInit, int download) {

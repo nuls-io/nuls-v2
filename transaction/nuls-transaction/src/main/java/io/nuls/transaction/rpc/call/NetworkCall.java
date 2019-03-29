@@ -136,7 +136,7 @@ public class NetworkCall {
             params.put(Constants.VERSION_KEY_STR, TxConstant.RPC_VERSION);
             params.put("chainId", chainId);
             params.put("excludeNodes", excludeNodes);
-            params.put("messageBody", HexUtil.byteToHex(message.serialize()));
+            params.put("messageBody", HexUtil.encode(message.serialize()));
             params.put("command", message.getCommand());
             Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.NW.abbr, "nw_broadcast", params);
             if(!response.isSuccess()){
@@ -164,7 +164,7 @@ public class NetworkCall {
             params.put(Constants.VERSION_KEY_STR, TxConstant.RPC_VERSION);
             params.put("chainId", chainId);
             params.put("nodes", nodeId);
-            params.put("messageBody", HexUtil.byteToHex(message.serialize()));
+            params.put("messageBody", HexUtil.encode(message.serialize()));
             params.put("command", message.getCommand());
 
             Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.NW.abbr, "nw_sendPeersMsg", params);
