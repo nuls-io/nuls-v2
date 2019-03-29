@@ -24,10 +24,6 @@
  */
 package io.nuls.transaction.model.bo.config;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-
 import java.io.Serializable;
 
 /**
@@ -35,9 +31,7 @@ import java.io.Serializable;
  * @author: Charlie
  * @date: 2019/03/14
  */
-@Data
-@AllArgsConstructor
-@NoArgsConstructor
+
 public class ConfigBean implements Serializable {
 
     /** chain id*/
@@ -58,4 +52,72 @@ public class ConfigBean implements Serializable {
     /** 孤儿交易生命时间,超过会被清理**/
     private long orphanTtl;
 
+    public ConfigBean() {
+    }
+
+    public ConfigBean(int chainId, int assetId, int txMaxSize, float moduleVerifyPercent, long packageRpcReserveTime, long txUnverifiedQueueSize, long orphanTtl) {
+        this.chainId = chainId;
+        this.assetId = assetId;
+        this.txMaxSize = txMaxSize;
+        this.moduleVerifyPercent = moduleVerifyPercent;
+        this.packageRpcReserveTime = packageRpcReserveTime;
+        this.txUnverifiedQueueSize = txUnverifiedQueueSize;
+        this.orphanTtl = orphanTtl;
+    }
+
+    public int getChainId() {
+        return chainId;
+    }
+
+    public void setChainId(int chainId) {
+        this.chainId = chainId;
+    }
+
+    public int getAssetId() {
+        return assetId;
+    }
+
+    public void setAssetId(int assetId) {
+        this.assetId = assetId;
+    }
+
+    public int getTxMaxSize() {
+        return txMaxSize;
+    }
+
+    public void setTxMaxSize(int txMaxSize) {
+        this.txMaxSize = txMaxSize;
+    }
+
+    public float getModuleVerifyPercent() {
+        return moduleVerifyPercent;
+    }
+
+    public void setModuleVerifyPercent(float moduleVerifyPercent) {
+        this.moduleVerifyPercent = moduleVerifyPercent;
+    }
+
+    public long getPackageRpcReserveTime() {
+        return packageRpcReserveTime;
+    }
+
+    public void setPackageRpcReserveTime(long packageRpcReserveTime) {
+        this.packageRpcReserveTime = packageRpcReserveTime;
+    }
+
+    public long getTxUnverifiedQueueSize() {
+        return txUnverifiedQueueSize;
+    }
+
+    public void setTxUnverifiedQueueSize(long txUnverifiedQueueSize) {
+        this.txUnverifiedQueueSize = txUnverifiedQueueSize;
+    }
+
+    public long getOrphanTtl() {
+        return orphanTtl;
+    }
+
+    public void setOrphanTtl(long orphanTtl) {
+        this.orphanTtl = orphanTtl;
+    }
 }

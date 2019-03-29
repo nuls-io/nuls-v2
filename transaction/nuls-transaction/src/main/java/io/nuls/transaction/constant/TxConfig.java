@@ -3,7 +3,6 @@ package io.nuls.transaction.constant;
 import io.nuls.tools.core.annotation.Configuration;
 import io.nuls.tools.core.annotation.Value;
 import io.nuls.transaction.model.bo.config.ConfigBean;
-import lombok.Data;
 
 import java.io.File;
 
@@ -13,7 +12,6 @@ import java.io.File;
  * @date: 2019/03/14
  */
 @Configuration(persistDomain = "transaction")
-@Data
 public class TxConfig {
     /** 当前链默认配置*/
     private ConfigBean chainConfig;
@@ -49,8 +47,124 @@ public class TxConfig {
     /** h2数据库交易记录表分表数量*/
     private int h2TxTableNumber;
 
+    public ConfigBean getChainConfig() {
+        return chainConfig;
+    }
+
+    public void setChainConfig(ConfigBean chainConfig) {
+        this.chainConfig = chainConfig;
+    }
+
+    public String getDataPath() {
+        return dataPath;
+    }
+
+    public void setDataPath(String dataPath) {
+        this.dataPath = dataPath;
+    }
 
     public String getTxDataRoot() {
         return dataPath + File.separator + txDataRoot;
     }
+
+    public void setTxDataRoot(String txDataRoot) {
+        this.txDataRoot = txDataRoot;
+    }
+
+    public String getModuleCode() {
+        return moduleCode;
+    }
+
+    public void setModuleCode(String moduleCode) {
+        this.moduleCode = moduleCode;
+    }
+
+    public int getMainChainId() {
+        return mainChainId;
+    }
+
+    public void setMainChainId(int mainChainId) {
+        this.mainChainId = mainChainId;
+    }
+
+    public int getMainAssetId() {
+        return mainAssetId;
+    }
+
+    public void setMainAssetId(int mainAssetId) {
+        this.mainAssetId = mainAssetId;
+    }
+
+    public String getLanguage() {
+        return language;
+    }
+
+    public void setLanguage(String language) {
+        this.language = language;
+    }
+
+    public String getEncoding() {
+        return encoding;
+    }
+
+    public void setEncoding(String encoding) {
+        this.encoding = encoding;
+    }
+
+    public int getHashTtl() {
+        return hashTtl;
+    }
+
+    public void setHashTtl(int hashTtl) {
+        this.hashTtl = hashTtl;
+    }
+
+    public long getCtxEffectThreshold() {
+        return ctxEffectThreshold;
+    }
+
+    public void setCtxEffectThreshold(long ctxEffectThreshold) {
+        this.ctxEffectThreshold = ctxEffectThreshold;
+    }
+
+    public String getCrossVerifyResultPassRat() {
+        return crossVerifyResultPassRat;
+    }
+
+    public void setCrossVerifyResultPassRat(String crossVerifyResultPassRat) {
+        this.crossVerifyResultPassRat = crossVerifyResultPassRat;
+    }
+
+    public String getChainNodesResultPassRate() {
+        return chainNodesResultPassRate;
+    }
+
+    public void setChainNodesResultPassRate(String chainNodesResultPassRate) {
+        this.chainNodesResultPassRate = chainNodesResultPassRate;
+    }
+
+    public int getRecentPackagerThreshold() {
+        return recentPackagerThreshold;
+    }
+
+    public void setRecentPackagerThreshold(int recentPackagerThreshold) {
+        this.recentPackagerThreshold = recentPackagerThreshold;
+    }
+
+    public long getUnconfirmedTxExpireMs() {
+        return unconfirmedTxExpireMs;
+    }
+
+    public void setUnconfirmedTxExpireMs(long unconfirmedTxExpireMs) {
+        this.unconfirmedTxExpireMs = unconfirmedTxExpireMs;
+    }
+
+    public int getH2TxTableNumber() {
+        return h2TxTableNumber;
+    }
+
+    public void setH2TxTableNumber(int h2TxTableNumber) {
+        this.h2TxTableNumber = h2TxTableNumber;
+    }
+
 }
