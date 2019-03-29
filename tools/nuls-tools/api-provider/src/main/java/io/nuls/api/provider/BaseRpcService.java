@@ -37,11 +37,11 @@ public abstract class BaseRpcService extends BaseService {
             cmdResp = ResponseMessageProcessor.requestAndResponse(module, method, params);
             Log.debug("result : {}",cmdResp);
         } catch (Exception e) {
-            Log.error("Calling remote interface failed. module:{} - interface:{} - message:{}", module, method, e.getMessage());
+            Log.warn("Calling remote interface failed. module:{} - interface:{} - message:{}", module, method, e.getMessage());
             return fail(BaseService.ERROR_CODE,e.getMessage());
         }
         if (!cmdResp.isSuccess()) {
-            Log.error("Calling remote interface failed. module:{} - interface:{} - ResponseComment:{}", module, method, cmdResp.getResponseComment());
+            Log.warn("Calling remote interface failed. module:{} - interface:{} - ResponseComment:{}", module, method, cmdResp.getResponseComment());
             Map<String,String> error = (Map)((Map) cmdResp.getResponseData()).get(method);
             if(error != null){
                 return fail(RPC_ERROR_CODE,error.get("msg"));

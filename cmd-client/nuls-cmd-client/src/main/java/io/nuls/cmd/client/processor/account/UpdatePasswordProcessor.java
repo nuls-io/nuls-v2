@@ -30,6 +30,7 @@ import io.nuls.api.provider.Result;
 import io.nuls.api.provider.ServiceManager;
 import io.nuls.api.provider.account.AccountService;
 import io.nuls.api.provider.account.facade.UpdatePasswordReq;
+import io.nuls.base.basic.AddressTool;
 import io.nuls.cmd.client.CommandBuilder;
 import io.nuls.cmd.client.CommandHelper;
 import io.nuls.cmd.client.CommandResult;
@@ -72,7 +73,7 @@ public class UpdatePasswordProcessor extends AccountBaseProcessor implements Com
         if (!CommandHelper.checkArgsIsNull(args)) {
             return false;
         }
-        return true;
+        return AddressTool.validAddress(config.getChainId(),args[1]);
     }
 
     @Override

@@ -35,6 +35,7 @@ import io.nuls.api.provider.account.facade.GetAccountByAddressReq;
 import io.nuls.api.provider.ledger.LedgerProvider;
 import io.nuls.api.provider.ledger.facade.AccountBalanceInfo;
 import io.nuls.api.provider.ledger.facade.GetBalanceReq;
+import io.nuls.base.basic.AddressTool;
 import io.nuls.cmd.client.CommandBuilder;
 import io.nuls.cmd.client.CommandHelper;
 import io.nuls.cmd.client.CommandResult;
@@ -83,15 +84,8 @@ public class GetAccountProcessor extends AccountBaseProcessor implements Command
 
     @Override
     public boolean argsValidate(String[] args) {
-        if (args.length != 2) {
-            return false;
-        }
-        if (!CommandHelper.checkArgsIsNull(args)) {
-            return false;
-        }
-        if (StringUtils.isBlank(args[1])) {
-            return false;
-        }
+        checkArgsNumber(args,1);
+        checkAddress(config.getChainId(), args[1]);
         return true;
     }
 

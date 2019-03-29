@@ -24,21 +24,50 @@
 
 package io.nuls.transaction.model.bo;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-
 import java.util.List;
 
 /**
  * @author: Charlie
  * @date: 2019/3/15
  */
-@Data
-@AllArgsConstructor
-@NoArgsConstructor
 public class TxPackage {
+
     private List<String> list;
+
     private String stateRoot;
+
     private long packageHeight;
+
+    public TxPackage() {
+    }
+
+    public TxPackage(List<String> list, String stateRoot, long packageHeight) {
+        this.list = list;
+        this.stateRoot = stateRoot;
+        this.packageHeight = packageHeight;
+    }
+
+    public List<String> getList() {
+        return list;
+    }
+
+    public void setList(List<String> list) {
+        this.list = list;
+    }
+
+    public String getStateRoot() {
+        return stateRoot;
+    }
+
+    public void setStateRoot(String stateRoot) {
+        this.stateRoot = stateRoot;
+    }
+
+    public long getPackageHeight() {
+        return packageHeight;
+    }
+
+    public void setPackageHeight(long packageHeight) {
+        this.packageHeight = packageHeight;
+    }
 }
