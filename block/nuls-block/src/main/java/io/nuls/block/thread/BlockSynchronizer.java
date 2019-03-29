@@ -52,6 +52,7 @@ import java.util.Map;
 import java.util.concurrent.*;
 import java.util.concurrent.locks.StampedLock;
 
+import static io.nuls.block.BlockBootstrap.blockConfig;
 import static io.nuls.block.constant.Constant.*;
 import static io.nuls.block.constant.LocalBlockStateEnum.*;
 
@@ -63,6 +64,8 @@ import static io.nuls.block.constant.LocalBlockStateEnum.*;
  * @date 18-11-8 下午5:49
  */
 public class BlockSynchronizer implements Runnable {
+
+    private static boolean firstStart = true;
 
     private static final BlockSynchronizer INSTANCE = new BlockSynchronizer();
     /**
@@ -108,6 +111,20 @@ public class BlockSynchronizer implements Runnable {
                     //本地区块维护成功
                     context.setLatestBlock(block);
                     BlockChainManager.setMasterChain(chainId, ChainGenerator.generateMasterChain(chainId, block, blockService));
+                }
+                //todo 系统启动后自动回滚区块，回滚数量写在配置文件中
+                if (firstStart) {
+                    firstStart = false;
+                    int testAutoRollbackAmount = blockConfig.getTestAutoRollbackAmount();
+                    if (latestHeight < testAutoRollbackAmount) {
+                        testAutoRollbackAmount = (int) (latestHeight - 0);
+                    }
+                    for (int i = 0; i < testAutoRollbackAmount; i++) {
+                        boolean b = blockService.rollbackBlock(chainId, latestHeight--, true);
+                        if (!b || latestHeight == 0) {
+                            break;
+                        }
+                    }
                 }
                 waitUntilNetworkStable(chainId);
                 while (!synchronize(chainId)) {

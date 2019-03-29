@@ -2,13 +2,10 @@ package io.nuls.transaction.message;
 
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.basic.NulsOutputStreamBuffer;
-import io.nuls.base.data.Block;
 import io.nuls.base.data.Transaction;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.parse.SerializeUtils;
 import io.nuls.transaction.message.base.BaseMessage;
-import lombok.Getter;
-import lombok.Setter;
 
 import java.io.IOException;
 
@@ -23,9 +20,15 @@ public class TransactionMessage extends BaseMessage {
     /**
      * 交易
      */
-    @Getter
-    @Setter
     private Transaction tx;
+
+    public Transaction getTx() {
+        return tx;
+    }
+
+    public void setTx(Transaction tx) {
+        this.tx = tx;
+    }
 
     @Override
     public int size() {

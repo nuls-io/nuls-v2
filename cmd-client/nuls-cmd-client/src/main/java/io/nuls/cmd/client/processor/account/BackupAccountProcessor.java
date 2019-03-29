@@ -44,16 +44,8 @@ public class BackupAccountProcessor extends AccountBaseProcessor implements Comm
 
     @Override
     public boolean argsValidate(String[] args) {
-        int length = args.length;
-        if (length < 2 || length > 3) {
-            return false;
-        }
-        if (!CommandHelper.checkArgsIsNull(args)) {
-            return false;
-        }
-        if (!AddressTool.validAddress(config.getChainId(), args[1])) {
-            return false;
-        }
+        checkArgsNumber(args,1,2);
+        checkAddress(config.getChainId(),args[1]);
         return true;
     }
 
@@ -61,7 +53,7 @@ public class BackupAccountProcessor extends AccountBaseProcessor implements Comm
     public CommandResult execute(String[] args) {
         String address = args[1];
         String path = args.length == 3 ? args[2] : "";
-        String password = CommandHelper.getPwd("Enter account password");
+        String password = getPwd();
         BackupAccountReq req = new BackupAccountReq(password, address, path);
         Result<String> res = accountService.backupAccount(req);
         if (!res.isSuccess()) {

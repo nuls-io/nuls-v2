@@ -29,6 +29,7 @@ package io.nuls.cmd.client.processor.transaction;
 import io.nuls.api.provider.Result;
 import io.nuls.api.provider.transaction.facade.GetConfirmedTxByHashReq;
 import io.nuls.api.provider.transaction.facade.TransactionData;
+import io.nuls.base.data.NulsDigestData;
 import io.nuls.cmd.client.CommandBuilder;
 import io.nuls.cmd.client.CommandResult;
 import io.nuls.cmd.client.processor.CommandProcessor;
@@ -41,7 +42,6 @@ import io.nuls.tools.model.StringUtils;
  */
 @Component
 public class GetTxProcessor extends TransactionBaseProcessor implements CommandProcessor {
-
     @Override
     public String getCommand() {
         return "gettx";
@@ -62,22 +62,15 @@ public class GetTxProcessor extends TransactionBaseProcessor implements CommandP
 
     @Override
     public boolean argsValidate(String[] args) {
-        int length = args.length;
-        if (length != 2) {
-            return false;
-        }
+        checkArgsNumber(args,1);
+        checkArgs(NulsDigestData.validHash(args[1]),"hash format error");
         return true;
     }
 
     @Override
     public CommandResult execute(String[] args) {
         String hash = args[1];
-        if (StringUtils.isBlank(hash)) {
-            return CommandResult.getFailed(ErrorCodeConstants.PARAM_ERR.getMsg());
-        }
         Result<TransactionData> result = transferService.getSimpleTxDataByHash(new GetConfirmedTxByHashReq(hash));
-        System.out.println(result.getData().getForm().get(0).getAddress());
-        System.out.println(result.getData().getRemark());
         if (result.isFailed()) {
             return CommandResult.getFailed(result);
         }

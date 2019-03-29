@@ -6,8 +6,6 @@ import io.nuls.base.data.Transaction;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.parse.SerializeUtils;
 import io.nuls.transaction.message.base.BaseMessage;
-import lombok.Getter;
-import lombok.Setter;
 
 import java.io.IOException;
 
@@ -22,9 +20,15 @@ public class CrossTxMessage extends BaseMessage {
     /**
      * 交易
      */
-    @Getter
-    @Setter
     private Transaction tx;
+
+    public Transaction getTx() {
+        return tx;
+    }
+
+    public void setTx(Transaction tx) {
+        this.tx = tx;
+    }
 
     @Override
     public int size() {

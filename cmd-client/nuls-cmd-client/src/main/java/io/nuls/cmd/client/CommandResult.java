@@ -107,9 +107,15 @@ public class CommandResult {
             //message += ":";
         } else {
             try {
-                message += JSONUtils.obj2PrettyJson(rpcResult.getData());
+                if(rpcResult.getData() != null){
+                    message += JSONUtils.obj2PrettyJson(rpcResult.getData());
+                } else if(rpcResult.getList() != null){
+                    message += JSONUtils.obj2PrettyJson(rpcResult.getList());
+                } else {
+                    message += "success";
+                }
             } catch (Exception e) {
-                log.error("",e);
+                log.error("return data format exception :",e);
             }
         }
         result.setMessage(message);

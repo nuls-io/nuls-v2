@@ -1,10 +1,7 @@
 package io.nuls.api.model.po.db;
 
-import lombok.Data;
-
 import java.math.BigInteger;
 
-@Data
 public class AccountTokenInfo {
 
     private String key;
@@ -36,5 +33,69 @@ public class AccountTokenInfo {
         this.balance = BigInteger.ZERO;
         this.decimals = decimals;
         this.isNew = true;
+    }
+
+    public String getKey() {
+        return key;
+    }
+
+    public void setKey(String key) {
+        this.key = key;
+    }
+
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
+    }
+
+    public String getTokenName() {
+        return tokenName;
+    }
+
+    public void setTokenName(String tokenName) {
+        this.tokenName = tokenName;
+    }
+
+    public String getTokenSymbol() {
+        return tokenSymbol;
+    }
+
+    public void setTokenSymbol(String tokenSymbol) {
+        this.tokenSymbol = tokenSymbol;
+    }
+
+    public String getContractAddress() {
+        return contractAddress;
+    }
+
+    public void setContractAddress(String contractAddress) {
+        this.contractAddress = contractAddress;
+    }
+
+    public BigInteger getBalance() {
+        return balance;
+    }
+
+    public void setBalance(BigInteger balance) {
+        this.balance = balance;
+    }
+
+    public int getDecimals() {
+        return decimals;
+    }
+
+    public void setDecimals(int decimals) {
+        this.decimals = decimals;
+    }
+
+    public boolean isNew() {
+        return isNew;
+    }
+
+    public void setNew(boolean aNew) {
+        isNew = aNew;
     }
 }

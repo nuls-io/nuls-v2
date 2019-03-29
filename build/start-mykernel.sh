@@ -32,7 +32,7 @@ if [ ! -n "$JAVA_EXIST" ]; then
     exit 0;
 fi
 echo "JAVA_HOME:${JAVA_HOME}"
-echo `java -version`
+echo `${JAVA} -version`
 function get_fullpath()
 {
     if [ -f "$1" ];

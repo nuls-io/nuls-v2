@@ -1,4 +1,5 @@
 {
+  "providerType": "RPC",
   "defaultChainId": 2,
   "defaultAssetId": 1,
   "language": "en",
