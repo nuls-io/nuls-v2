@@ -192,11 +192,13 @@ public class Chain {
     @Override
     public String toString() {
         return new StringJoiner(", ", Chain.class.getSimpleName() + "[", "]")
+                .add("parentStartHashCode=" + (this.getParent() == null ? null : this.getParent().getStartHashCode()))
+                .add("startHashCode=" + startHashCode)
                 .add("startHeight=" + startHeight)
                 .add("endHeight=" + endHeight)
-                .add("hashList=" + hashList)
                 .add("type=" + type)
                 .add("age=" + age)
+                .add("hashList=" + hashList)
                 .toString();
     }
 

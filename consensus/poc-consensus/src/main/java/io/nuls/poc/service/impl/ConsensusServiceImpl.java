@@ -152,7 +152,7 @@ public class ConsensusServiceImpl implements ConsensusService {
         } catch (IOException e) {
             chain.getLoggerMap().get(ConsensusConstant.BASIC_LOGGER_NAME).error(e);
             return Result.getFailed(ConsensusErrorCode.DATA_PARSE_ERROR);
-        } catch (NulsRuntimeException e) {
+        } catch (NulsException e) {
             chain.getLoggerMap().get(ConsensusConstant.BASIC_LOGGER_NAME).error(e);
             return Result.getFailed(e.getErrorCode());
         } catch (Exception e) {
@@ -401,14 +401,17 @@ public class ConsensusServiceImpl implements ConsensusService {
                 String agentAddress = AddressTool.getStringAddressByBytes(agent.getAgentAddress()).toUpperCase();
                 String packingAddress = AddressTool.getStringAddressByBytes(agent.getPackingAddress()).toUpperCase();
                 String agentId = agentManager.getAgentId(agent.getTxHash()).toUpperCase();
-                //todo
                 //从账户模块获取账户别名
-                String alias = "";
-                boolean b = agentId.indexOf(keyword) >= 0;
+                String agentAlias = CallMethodUtils.getAlias(chain,agentAddress);
+                String packingAlias = CallMethodUtils.getAlias(chain,packingAddress);
+                boolean b = agentId.contains(keyword);
                 b = b || agentAddress.equals(keyword) || packingAddress.equals(keyword);
-                if (StringUtils.isNotBlank(alias)) {
-                    b = b || alias.toUpperCase().indexOf(keyword) >= 0;
-                    agent.setAlais(alias);
+                if (StringUtils.isNotBlank(agentAlias)) {
+                    b = b || agentAlias.toUpperCase().contains(keyword);
+                    agent.setAlais(agentAlias);
+                }
+                if (!b && StringUtils.isNotBlank(packingAlias)) {
+                    b = agentAlias.toUpperCase().contains(keyword);
                 }
                 if (!b) {
                     continue;
@@ -423,7 +426,6 @@ public class ConsensusServiceImpl implements ConsensusService {
             return Result.getSuccess(ConsensusErrorCode.SUCCESS).setData(page);
         }
         fillAgentList(chain, handleList, null);
-        //todo 是否要添加排序功能
         List<AgentDTO> resultList = new ArrayList<>();
         for (int i = start; i < handleList.size() && i < (start + pageSize); i++) {
             AgentDTO agentDTO = new AgentDTO(handleList.get(i));

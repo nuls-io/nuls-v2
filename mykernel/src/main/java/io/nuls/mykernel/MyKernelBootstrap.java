@@ -69,7 +69,6 @@ public class MyKernelBootstrap {
     public static void main(String[] args) throws Exception {
         NulsRpcModuleBootstrap.printLogo("/logo");
         System.setProperty("io.netty.tryReflectionSetAccessible", "true");
-        //增加程序结束的钩子，监听到主线程停止时，调用./stop.sh停止所有的子模块
         MyKernelBootstrap.args = args;
         SpringLiteContext.init("io.nuls.mykernel","io.nuls.rpc.cmd.kernel");
         MyKernelBootstrap bootstrap = SpringLiteContext.getBean(MyKernelBootstrap.class);
@@ -85,6 +84,7 @@ public class MyKernelBootstrap {
     private void startOtherModule(String[] args) {
         //启动时第一个参数值为"startModule"时启动所有子模块
         if (args.length > 0 && "startModule".equals(args[0])) {
+            //增加程序结束的钩子，监听到主线程停止时，调用./stop.sh停止所有的子模块
             Runtime.getRuntime().addShutdownHook(new Thread(()->{
                 log.info("jvm shutdown");
                 log.info("停止子模块");

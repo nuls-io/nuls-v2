@@ -103,6 +103,8 @@ public interface TxConstant {
     /** DB config */
     String DB_CONFIG_NAME = "db_config.properties";
 
+    int PACKAGE_ORPHAN_MAXCOUNT = 5;
+
     /**
      * 交易hash最大长度
      */

@@ -333,14 +333,17 @@ public class TxValidator {
         List<DepositPo> poList = this.getDepositListByAgent(chain,deposit.getAgentHash());
         //节点当前委托总金额
         BigInteger total = deposit.getDeposit();
+        if(total.compareTo(chain.getConfig().getEntrusterDepositMin())<0){
+            throw new NulsException(ConsensusErrorCode.DEPOSIT_NOT_ENOUGH);
+        }
+        if(total.compareTo(chain.getConfig().getDepositMax())>0){
+            throw new NulsException(ConsensusErrorCode.DEPOSIT_OVER_AMOUNT);
+        }
         for (DepositPo cd : poList) {
             total = total.add(cd.getDeposit());
         }
         if(total.compareTo(chain.getConfig().getDepositMax())>0){
             throw new NulsException(ConsensusErrorCode.DEPOSIT_OVER_AMOUNT);
-        }
-        if(total.compareTo(chain.getConfig().getDepositMin())<0){
-            throw new NulsException(ConsensusErrorCode.DEPOSIT_NOT_ENOUGH);
         }
         return true;
     }

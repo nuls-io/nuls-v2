@@ -106,7 +106,7 @@ public class TransactionService {
         for (Document document : docList) {
             txList.add(TransactionInfo.fromDocument(document));
         }
-        PageInfo<TransactionInfo> pageInfo = new PageInfo<>(pageIndex, pageSize, blockInfo.getHeight(), txList);
+        PageInfo<TransactionInfo> pageInfo = new PageInfo<>(pageIndex, pageSize, blockInfo.getTxHashList().size(), txList);
         return pageInfo;
     }
 

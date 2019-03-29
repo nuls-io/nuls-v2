@@ -144,7 +144,6 @@ public class VersionMessageHandler extends BaseMessageHandler {
 
         //监听被动连接的断开
         node.setDisconnectListener(() -> {
-            LoggerUtil.Log.info("------------in node disconnect:" + node.getId());
             if (node.isCrossConnect()) {
                 nodeGroup.getCrossNodeContainer().getConnectedNodes().remove(node.getId());
                 nodeGroup.getCrossNodeContainer().markCanuseNodeByIp(ip, NodeStatusEnum.CONNECTABLE);
@@ -202,6 +201,7 @@ public class VersionMessageHandler extends BaseMessageHandler {
      */
     @Override
     public NetworkEventResult recieve(BaseMessage message, Node node) {
+        LoggerUtil.Log.debug("VersionMessageHandler recieve:"+(node.isServer()?"Server":"Client")+":"+node.getIp()+":"+node.getRemotePort()+"==CMD=" +message.getHeader().getCommandStr());
         if (Node.IN == node.getType()) {
             serverRecieveHandler(message, node);
         } else {

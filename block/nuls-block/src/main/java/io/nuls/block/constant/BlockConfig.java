@@ -9,7 +9,7 @@ import lombok.Setter;
 import java.io.File;
 
 /**
- * 配置信息
+ * 配置信息,所有时间配置默认单位为毫秒
  *
  * @author captain
  * @version 1.0
@@ -65,6 +65,20 @@ public class BlockConfig {
     @Setter
     @Getter
     private int networkResetMonitorInterval;
+
+    /**
+     * TxGroup请求器线程执行间隔
+     */
+    @Setter
+    @Getter
+    private int txGroupRequestorInterval;
+
+    /**
+     * TxGroup请求器任务执行延时
+     */
+    @Setter
+    @Getter
+    private int txGroupTaskDelay;
 
     @Value("DataPath")
     @Setter

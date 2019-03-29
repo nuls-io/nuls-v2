@@ -32,6 +32,8 @@ import io.nuls.block.model.CachedSmallBlock;
 import io.nuls.block.model.ChainContext;
 import io.nuls.block.model.ChainParameters;
 import io.nuls.block.service.BlockService;
+import io.nuls.block.thread.TxGroupTask;
+import io.nuls.block.thread.monitor.TxGroupRequestor;
 import io.nuls.block.utils.BlockUtil;
 import io.nuls.block.rpc.call.NetworkUtil;
 import io.nuls.block.rpc.call.TransactionUtil;
@@ -47,6 +49,7 @@ import io.nuls.tools.log.logback.NulsLogger;
 
 import java.util.*;
 
+import static io.nuls.block.BlockBootstrap.blockConfig;
 import static io.nuls.block.constant.CommandConstant.GET_TXGROUP_MESSAGE;
 import static io.nuls.block.constant.CommandConstant.SMALL_BLOCK_MESSAGE;
 
@@ -115,7 +118,12 @@ public class SmallBlockHandler extends BaseCmd {
             HashListMessage request = new HashListMessage();
             request.setBlockHash(blockHash);
             request.setTxHashList(block.getMissingTransactions());
-            NetworkUtil.sendToNode(chainId, request, nodeId, GET_TXGROUP_MESSAGE);
+            TxGroupTask task = new TxGroupTask();
+            task.setId(System.nanoTime());
+            task.setNodeId(nodeId);
+            task.setRequest(request);
+            task.setExcuteTime(blockConfig.getTxGroupTaskDelay());
+            TxGroupRequestor.addTask(chainId, blockHash.toString(), task);
             return success();
         }
 
