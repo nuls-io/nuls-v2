@@ -6,8 +6,6 @@ import io.nuls.base.data.NulsDigestData;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.parse.SerializeUtils;
 import io.nuls.transaction.message.base.BaseMessage;
-import lombok.Getter;
-import lombok.Setter;
 
 import java.io.IOException;
 
@@ -21,9 +19,16 @@ public class BroadcastCrossTxHashMessage extends BaseMessage {
     /**
      * 交易hash
      */
-    @Getter
-    @Setter
+
     private NulsDigestData requestHash;
+
+    public NulsDigestData getRequestHash() {
+        return requestHash;
+    }
+
+    public void setRequestHash(NulsDigestData requestHash) {
+        this.requestHash = requestHash;
+    }
 
     @Override
     public int size() {

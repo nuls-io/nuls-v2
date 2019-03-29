@@ -7,8 +7,6 @@ import io.nuls.base.signture.P2PHKSignature;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.parse.SerializeUtils;
 import io.nuls.transaction.message.base.BaseMessage;
-import lombok.Getter;
-import lombok.Setter;
 
 import java.io.IOException;
 
@@ -23,23 +21,41 @@ public class BroadcastCrossNodeRsMessage extends BaseMessage {
     /**
      * 转换NULS主网协议后交易hash
      */
-    @Getter
-    @Setter
     private NulsDigestData requestHash;
 
     /**
      * 验证的节点对交易的签名
      */
-    @Getter
-    @Setter
     private P2PHKSignature signature;
 
     /**
      * 节点地址
      */
-    @Getter
-    @Setter
     private String packingAddress;
+
+    public NulsDigestData getRequestHash() {
+        return requestHash;
+    }
+
+    public void setRequestHash(NulsDigestData requestHash) {
+        this.requestHash = requestHash;
+    }
+
+    public P2PHKSignature getSignature() {
+        return signature;
+    }
+
+    public void setSignature(P2PHKSignature signature) {
+        this.signature = signature;
+    }
+
+    public String getPackingAddress() {
+        return packingAddress;
+    }
+
+    public void setPackingAddress(String packingAddress) {
+        this.packingAddress = packingAddress;
+    }
 
     @Override
     public int size() {
