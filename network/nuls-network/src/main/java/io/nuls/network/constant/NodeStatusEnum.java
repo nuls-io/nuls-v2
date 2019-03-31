@@ -25,9 +25,9 @@
 package io.nuls.network.constant;
 
 /**
- * 节点状态类型描述：
+ * 节点状态类型描述：探测到节点的状态，代表peer节点的常规状态。
  * UNCHECK 未确认peer连接
- * AVAILABLE 可用的连接(server in 进来的连接)
+ * AVAILABLE 可用的连接(server in 进来的连接，已经生效中了)
  * CONNECTABLE 可用的连接(已验证可连接的ip)
  * UNAVAILABLE  无效的连接
  *
