@@ -285,6 +285,22 @@ public class ResponseMessageProcessor {
         }
     }
 
+    /**
+     * 发送Request，不接收返回
+     * Send Request and wait for Response
+     *
+     * @param role       远程方法所属的角色，The role of remote method
+     * @param request    远程方法的命令，Command of the remote method
+     * @return 远程方法的返回结果，Response of the remote method
+     * @throws Exception 请求超时（1分钟），timeout (1 minute)
+     */
+    public static String requestOnly(String role, Request request)throws Exception{
+        Message message = MessageUtil.basicMessage(MessageType.Request);
+        message.setMessageData(request);
+        Channel channel = ConnectManager.getConnectByRole(role);
+        ConnectManager.sendMessage(channel, JSONUtils.obj2json(message));
+        message.getMessageId();
+    }
 
     /**
      * 发送Request，返回该Request的messageId
@@ -295,7 +311,7 @@ public class ResponseMessageProcessor {
      * @return messageId，用以取消订阅 / messageId, used to unsubscribe
      * @throws Exception JSON格式转换错误、连接失败 / JSON format conversion error, connection failure
      */
-    public static ResponseContainer sendRequest(String role, Request request) throws Exception {
+    private static ResponseContainer sendRequest(String role, Request request) throws Exception {
 
         Message message = MessageUtil.basicMessage(MessageType.Request);
         message.setMessageData(request);
