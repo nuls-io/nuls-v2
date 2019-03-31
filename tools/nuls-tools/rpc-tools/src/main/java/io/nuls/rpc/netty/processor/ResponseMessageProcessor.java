@@ -299,7 +299,7 @@ public class ResponseMessageProcessor {
         message.setMessageData(request);
         Channel channel = ConnectManager.getConnectByRole(role);
         ConnectManager.sendMessage(channel, JSONUtils.obj2json(message));
-        message.getMessageId();
+        return message.getMessageId();
     }
 
     /**
