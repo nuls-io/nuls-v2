@@ -30,7 +30,6 @@ import io.nuls.rpc.util.RPCUtil;
 import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.log.Log;
 import io.nuls.tools.model.ByteUtils;
-import org.apache.commons.codec.DecoderException;
 import org.junit.Test;
 import org.spongycastle.util.encoders.Hex;
 
@@ -98,7 +97,7 @@ public class HexTest {
     }
 
     @Test
-    public void testHexs() throws IOException, DecoderException {
+    public void testHexs() throws IOException{
         TranList list = new TranList();
         for (int i = 0; i < 100000; i++) {
             Transaction tx = buildTransaction();
@@ -117,10 +116,10 @@ public class HexTest {
         Log.info("{} time used - org.spongycastle.util.encoders.Hex.encode && decode ===StringLenght= {}", (time3 - time2), hex1.length());
 
 
-        String hex2 = org.apache.commons.codec.binary.Hex.encodeHexString(bytes);
-        byte[] bytes2 = org.apache.commons.codec.binary.Hex.decodeHex(hex2.toCharArray());
+//        String hex2 = org.apache.commons.codec.binary.Hex.encodeHexString(bytes);
+//        byte[] bytes2 = org.apache.commons.codec.binary.Hex.decodeHex(hex2.toCharArray());
         long time4 = System.currentTimeMillis();
-        Log.info("{} time used - org.apache.commons.codec.binary.Hex.encode && decode ===StringLenght= {}", (time4 - time3), hex2.length());
+//        Log.info("{} time used - org.apache.commons.codec.binary.Hex.encode && decode ===StringLenght= {}", (time4 - time3), hex2.length());
 
         String base0 = RPCUtil.encode(bytes);
         byte[] bytes3 = RPCUtil.decode(base0);
@@ -137,10 +136,10 @@ public class HexTest {
         long time7 = System.currentTimeMillis();
         Log.info("{} time used - org.apache.commons.net.util.Base64.encode && decode ===StringLenght= {}", (time7 - time6), base2.length());
 
-        String base3 = org.apache.commons.codec.binary.Base64.encodeBase64String(bytes);
-        byte[] bytes7 = org.apache.commons.codec.binary.Base64.decodeBase64(base3);
-        long time8 = System.currentTimeMillis();
-        Log.info("{} time used - org.apache.commons.codec.binary.Base64.encode && decode ===StringLenght= {}", (time8 - time7), base3.length());
+//        String base3 = org.apache.commons.codec.binary.Base64.encodeBase64String(bytes);
+//        byte[] bytes7 = org.apache.commons.codec.binary.Base64.decodeBase64(base3);
+//        long time8 = System.currentTimeMillis();
+//        Log.info("{} time used - org.apache.commons.codec.binary.Base64.encode && decode ===StringLenght= {}", (time8 - time7), base3.length());
 
     }
 
