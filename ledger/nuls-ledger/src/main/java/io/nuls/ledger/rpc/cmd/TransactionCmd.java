@@ -160,8 +160,8 @@ public class TransactionCmd extends BaseLedgerCmd {
             LoggerUtil.logger(chainId).debug("rollBackUnconfirmTx chainId={}", chainId);
             Transaction tx = parseTxs(txStr,chainId);
             if (null == tx) {
-                LoggerUtil.logger(chainId).debug("txHex is invalid chainId={},txHex={}", chainId,txStr);
-                return failed("txHex is invalid");
+                LoggerUtil.logger(chainId).debug("tx is invalid chainId={},txHex={}", chainId,txStr);
+                return failed("tx is invalid");
             }
             LoggerUtil.txUnconfirmedRollBackLog(chainId).debug("rollBackUnconfirmTx chainId={},txHash={}", chainId, tx.getHash().toString());
             if (transactionService.rollBackUnconfirmTx(chainId, tx)) {

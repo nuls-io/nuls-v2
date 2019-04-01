@@ -30,6 +30,7 @@ import io.nuls.base.data.CoinData;
 import io.nuls.base.data.CoinFrom;
 import io.nuls.base.data.CoinTo;
 import io.nuls.base.data.Transaction;
+import io.nuls.ledger.test.constant.TestConfig;
 import io.nuls.rpc.info.NoUse;
 import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.model.message.Response;
@@ -55,7 +56,8 @@ public class CmdWrongDataTest {
     public void before() throws Exception {
         NoUse.mockModule();
     }
-
+    String address = "tNULSeBaMfi17CxRHVqFZbSFGYeyRLHWw2ctho";
+    String addressTo = "tNULSeBaMmp4U2k653V5FmmPf4HDECWK2ExYVr";
     /**
      * 校验孤儿交易，校验nonce双花
      * @throws Exception
@@ -66,10 +68,6 @@ public class CmdWrongDataTest {
         // Build params map
         Map<String, Object> params = new HashMap<>();
         // Version information ("1.1" or 1.1 is both available)
-        int chainId = 8096;
-        int assetChainId = 445;
-        String address = "JgT2JCQvKGRKRjKqyfxRAj2zSCpGca01f";
-        int assetId = 222;
 //        Response response = CmdDispatcher.requestAndResponse(ModuleE.LG.abbr, "getNonce", params);
 //        String nonce =  ((Map)((Map)response.getResponseData()).get("getNonce")).get("nonce").toString();
         //封装交易执行
@@ -79,8 +77,8 @@ public class CmdWrongDataTest {
         CoinTo coinTo = new CoinTo();
         coinFrom.setAddress(AddressTool.getAddress(address));
         coinFrom.setAmount(BigInteger.valueOf(50));
-        coinFrom.setAssetsChainId(assetChainId);
-        coinFrom.setAssetsId(assetId);
+        coinFrom.setAssetsChainId(TestConfig.assetChainId);
+        coinFrom.setAssetsId(TestConfig.assetId);
         coinFrom.setNonce(RPCUtil.decode("AAAAAAAA"));
         coinFrom.setLocked((byte)0);
         List<CoinFrom> coinFroms =new ArrayList<>();
@@ -90,10 +88,10 @@ public class CmdWrongDataTest {
         coinData.setFrom(coinFroms);
         coinData.setTo(coinTos);
         tx.setCoinData(coinData.serialize());
-        params.put("chainId", chainId);
-        List<String> txHexList = new ArrayList<>();
-        txHexList.add(RPCUtil.encode(tx.serialize()));
-        params.put("txHexList",txHexList);
+        params.put("chainId", TestConfig.chainId);
+        List<String> txList = new ArrayList<>();
+        txList.add(RPCUtil.encode(tx.serialize()));
+        params.put("txList",txList);
         Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.LG.abbr, "validateCoinData", params);
         logger.info("response {}", response);
     }
@@ -109,10 +107,6 @@ public class CmdWrongDataTest {
         // Build params map
         Map<String, Object> params = new HashMap<>();
         // Version information ("1.1" or 1.1 is both available)
-        int chainId = 8096;
-        int assetChainId = 445;
-        String address = "JgT2JCQvKGRKRjKqyfxRAj2zSCpGca01f";
-        int assetId = 222;
 //        Response response = CmdDispatcher.requestAndResponse(ModuleE.LG.abbr, "getNonce", params);
 //        String nonce =  ((Map)((Map)response.getResponseData()).get("getNonce")).get("nonce").toString();
         //封装交易执行
@@ -122,8 +116,8 @@ public class CmdWrongDataTest {
         CoinTo coinTo = new CoinTo();
         coinFrom.setAddress(AddressTool.getAddress(address));
         coinFrom.setAmount(BigInteger.valueOf(50));
-        coinFrom.setAssetsChainId(assetChainId);
-        coinFrom.setAssetsId(assetId);
+        coinFrom.setAssetsChainId(TestConfig.assetChainId);
+        coinFrom.setAssetsId(TestConfig.assetId);
         coinFrom.setNonce(RPCUtil.decode("AAAAAAAA"));
         coinFrom.setLocked((byte)0);
         List<CoinFrom> coinFroms =new ArrayList<>();
@@ -133,7 +127,7 @@ public class CmdWrongDataTest {
         coinData.setFrom(coinFroms);
         coinData.setTo(coinTos);
         tx.setCoinData(coinData.serialize());
-        params.put("chainId", chainId);
+        params.put("chainId", TestConfig.chainId);
         params.put("txHex",RPCUtil.encode(tx.serialize()));
         params.put("isBatchValidate",true);
         Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.LG.abbr, "validateCoinData", params);

@@ -26,6 +26,7 @@ package io.nuls.ledger.test.cmd;
 
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.*;
+import io.nuls.ledger.test.constant.TestConfig;
 import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.model.message.Response;
 import io.nuls.rpc.netty.processor.ResponseMessageProcessor;
@@ -48,11 +49,8 @@ import java.util.Map;
  * @date 2019/01/14
  **/
 public class CmdGenesisAsset {
-    public int chainId = 2;
-    int assetChainId = 2;
     //    String address = "JgT2JCQvKGRKRjKqyfxRAj2zSCpGca01f";
     String address = "tNULSeBaMvEtDfvZuukDf2mVyfGo3DdiN8KLRG";
-    int assetId = 1;
     //入账金额
     BigInteger amount = BigInteger.valueOf(100000000000000L);
 
@@ -63,8 +61,8 @@ public class CmdGenesisAsset {
         CoinTo coinTo = new CoinTo();
         coinTo.setAddress(AddressTool.getAddress(address));
         coinTo.setAmount(amount);
-        coinTo.setAssetsChainId(assetChainId);
-        coinTo.setAssetsId(assetId);
+        coinTo.setAssetsChainId(TestConfig.assetChainId);
+        coinTo.setAssetsId(TestConfig.assetId);
         coinTo.setLockTime(0);
         List<CoinFrom> coinFroms = new ArrayList<>();
 //        coinFroms.add(coinFrom);
@@ -93,17 +91,17 @@ public class CmdGenesisAsset {
     public void addGenesisAsset() throws Exception {
         // Build params map
         Map<String, Object> params = new HashMap<>();
-        params.put("chainId", chainId);
+        params.put("chainId", TestConfig.chainId);
         Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.LG.abbr, "bathValidateBegin", params);
         logger.info("response {}", response);
         params.put("isBatchValidate", true);
         Transaction transaction = buildTransaction();
-        List<String> txHexList = new ArrayList<>();
-        txHexList.add(RPCUtil.encode(transaction.serialize()));
-        params.put("txHex", RPCUtil.encode(transaction.serialize()));
+        List<String> txList = new ArrayList<>();
+        txList.add(RPCUtil.encode(transaction.serialize()));
+        params.put("tx", RPCUtil.encode(transaction.serialize()));
         response = ResponseMessageProcessor.requestAndResponse(ModuleE.LG.abbr, "validateCoinData", params);
         logger.info("response {}", response);
-        params.put("txHexList", txHexList);
+        params.put("txList", txList);
         params.put("blockHeight", 0);
         params.put("isConfirmTx", true);
         response = ResponseMessageProcessor.requestAndResponse(ModuleE.LG.abbr, "commitTx", params);
@@ -115,9 +113,9 @@ public class CmdGenesisAsset {
         // Build params map
         Map<String, Object> params = new HashMap<>();
         // Version information ("1.1" or 1.1 is both available)
-        params.put("chainId", 2);
-        params.put("assetChainId", 2);
-        params.put("assetId", 1);
+        params.put("chainId", TestConfig.chainId);
+        params.put("assetChainId", TestConfig.assetChainId);
+        params.put("assetId", TestConfig.assetId);
         params.put("address", address);
 //        params.put("address", "LLbmaw1UNmKmd5PfuzP1Zm9dNuAnia01f");
 
