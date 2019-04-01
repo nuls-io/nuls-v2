@@ -24,9 +24,7 @@
  */
 package io.nuls.ledger.model;
 
-import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 import lombok.ToString;
 
 import java.math.BigInteger;
@@ -40,36 +38,91 @@ import java.math.BigInteger;
 @NoArgsConstructor
 public class UnconfirmedTx {
 
-    @Setter
-    @Getter
     private String txHash;
-    @Setter
-    @Getter
+
     private BigInteger spendAmount = BigInteger.ZERO;
-    @Setter
-    @Getter
+
     private BigInteger  earnAmount = BigInteger.ZERO;
-    @Setter
-    @Getter
+
     private BigInteger fromUnLockedAmount = BigInteger.ZERO;
-    @Setter
-    @Getter
+
     private BigInteger toLockedAmount = BigInteger.ZERO;
-    @Setter
-    @Getter
+
     private String  address = "";
 
-    @Setter
-    @Getter
+
     private int  assetChainId = 0;
 
-    @Setter
-    @Getter
+
     private int  assetId = 0;
 
     public UnconfirmedTx(String address,int assetChainId,int assetId){
         this.address = address;
         this.assetChainId = assetChainId;
+        this.assetId = assetId;
+    }
+
+    public String getTxHash() {
+        return txHash;
+    }
+
+    public void setTxHash(String txHash) {
+        this.txHash = txHash;
+    }
+
+    public BigInteger getSpendAmount() {
+        return spendAmount;
+    }
+
+    public void setSpendAmount(BigInteger spendAmount) {
+        this.spendAmount = spendAmount;
+    }
+
+    public BigInteger getEarnAmount() {
+        return earnAmount;
+    }
+
+    public void setEarnAmount(BigInteger earnAmount) {
+        this.earnAmount = earnAmount;
+    }
+
+    public BigInteger getFromUnLockedAmount() {
+        return fromUnLockedAmount;
+    }
+
+    public void setFromUnLockedAmount(BigInteger fromUnLockedAmount) {
+        this.fromUnLockedAmount = fromUnLockedAmount;
+    }
+
+    public BigInteger getToLockedAmount() {
+        return toLockedAmount;
+    }
+
+    public void setToLockedAmount(BigInteger toLockedAmount) {
+        this.toLockedAmount = toLockedAmount;
+    }
+
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
+    }
+
+    public int getAssetChainId() {
+        return assetChainId;
+    }
+
+    public void setAssetChainId(int assetChainId) {
+        this.assetChainId = assetChainId;
+    }
+
+    public int getAssetId() {
+        return assetId;
+    }
+
+    public void setAssetId(int assetId) {
         this.assetId = assetId;
     }
 }

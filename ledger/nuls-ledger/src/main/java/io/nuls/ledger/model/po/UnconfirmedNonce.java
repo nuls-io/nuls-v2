@@ -30,10 +30,6 @@ import io.nuls.base.data.BaseNulsData;
 import io.nuls.ledger.utils.TimeUtil;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.parse.SerializeUtils;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
 
 import java.io.IOException;
 
@@ -42,17 +38,15 @@ import java.io.IOException;
  * @description
  * @date 2019/01/10
  **/
-@ToString
-@NoArgsConstructor
 public class UnconfirmedNonce extends BaseNulsData {
-    @Setter
-    @Getter
     private long time;
-    @Setter
-    @Getter
     private String nonce;
 
-    public UnconfirmedNonce(String nonce){
+    public UnconfirmedNonce() {
+        super();
+    }
+
+    public UnconfirmedNonce(String nonce) {
         this.nonce = nonce;
         this.time = TimeUtil.getCurrentTime();
     }
@@ -75,5 +69,21 @@ public class UnconfirmedNonce extends BaseNulsData {
         size += SerializeUtils.sizeOfUint48();
         size += SerializeUtils.sizeOfString(nonce);
         return size;
+    }
+
+    public long getTime() {
+        return time;
+    }
+
+    public void setTime(long time) {
+        this.time = time;
+    }
+
+    public String getNonce() {
+        return nonce;
+    }
+
+    public void setNonce(String nonce) {
+        this.nonce = nonce;
     }
 }

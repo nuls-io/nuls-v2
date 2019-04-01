@@ -30,7 +30,6 @@ import io.nuls.base.basic.NulsOutputStreamBuffer;
 import io.nuls.base.data.BaseNulsData;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.parse.SerializeUtils;
-import lombok.*;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -40,18 +39,34 @@ import java.util.List;
  * @author lanjinsheng
  * @date 2018/11/19
  */
-@ToString
-@NoArgsConstructor
-@AllArgsConstructor
 public class AccountStateSnapshot extends BaseNulsData {
-    @Setter
-    @Getter
     private AccountState accountState;
-    @Setter
-    @Getter
     private List<String> nonces = new ArrayList<>();
 
+    public AccountStateSnapshot() {
+        super();
+    }
 
+    public AccountStateSnapshot(AccountState accountState, List nonces) {
+        this.accountState = accountState;
+        this.nonces = nonces;
+    }
+
+    public AccountState getAccountState() {
+        return accountState;
+    }
+
+    public void setAccountState(AccountState accountState) {
+        this.accountState = accountState;
+    }
+
+    public List<String> getNonces() {
+        return nonces;
+    }
+
+    public void setNonces(List<String> nonces) {
+        this.nonces = nonces;
+    }
 
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {

@@ -31,7 +31,6 @@ import io.nuls.base.data.BaseNulsData;
 import io.nuls.ledger.constant.LedgerConstant;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.parse.SerializeUtils;
-import lombok.*;
 
 import java.io.*;
 import java.math.BigInteger;
@@ -41,82 +40,63 @@ import java.util.List;
 /**
  * Created by wangkun23 on 2018/11/19.
  */
-@ToString
-@NoArgsConstructor
-@AllArgsConstructor
+
 public class AccountState extends BaseNulsData {
-    @Setter
-    @Getter
+
     private String address;
-    @Setter
-    @Getter
+
     private int addressChainId;
-    @Setter
-    @Getter
+
     private int assetChainId;
-    @Setter
-    @Getter
+
     private int assetId;
 
-    @Setter
-    @Getter
+
     private String nonce = LedgerConstant.INIT_NONCE;
 
-    @Setter
-    @Getter
+
     private String txHash;
-    @Setter
-    @Getter
+
     private long height = 0;
     /**
      * 最近一次的账本数据处理时间,存储毫秒
      */
-    @Setter
-    @Getter
     private long latestUnFreezeTime = 0;
     /**
      * 未确认交易的nonce列表，有花费的余额的交易会更改这部分Nonce数据
      */
-    @Setter
-    @Getter
+
     private List<UnconfirmedNonce> unconfirmedNonces = new ArrayList<>();
     /**
      * 未确认交易，存储交易金额数据
      */
-    @Setter
-    @Getter
     private List<UnconfirmedAmount> unconfirmedAmounts = new ArrayList<>();
     /**
      * 账户总金额出账
      * 对应coindata里的coinfrom 累加值
      */
-    @Setter
-    @Getter
     private BigInteger totalFromAmount = BigInteger.ZERO;
 
     /**
      * 账户总金额入账
      * 对应coindata里的cointo 累加值
      */
-    @Setter
-    @Getter
     private BigInteger totalToAmount = BigInteger.ZERO;
 
 
     /**
      * 账户冻结的资产(高度冻结)
      */
-    @Setter
-    @Getter
     private List<FreezeHeightState> freezeHeightStates = new ArrayList<>();
 
     /**
      * 账户冻结的资产(时间冻结)
      */
-    @Setter
-    @Getter
     private List<FreezeLockTimeState> freezeLockTimeStates = new ArrayList<>();
 
+    public AccountState() {
+        super();
+    }
 
     public AccountState(String address, int addressChainId, int assetChainId, int assetId, String nonce) {
         this.address = address;
@@ -394,4 +374,115 @@ public class AccountState extends BaseNulsData {
         return null;
     }
 
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
+    }
+
+    public int getAddressChainId() {
+        return addressChainId;
+    }
+
+    public void setAddressChainId(int addressChainId) {
+        this.addressChainId = addressChainId;
+    }
+
+    public int getAssetChainId() {
+        return assetChainId;
+    }
+
+    public void setAssetChainId(int assetChainId) {
+        this.assetChainId = assetChainId;
+    }
+
+    public int getAssetId() {
+        return assetId;
+    }
+
+    public void setAssetId(int assetId) {
+        this.assetId = assetId;
+    }
+
+    public String getNonce() {
+        return nonce;
+    }
+
+    public void setNonce(String nonce) {
+        this.nonce = nonce;
+    }
+
+    public String getTxHash() {
+        return txHash;
+    }
+
+    public void setTxHash(String txHash) {
+        this.txHash = txHash;
+    }
+
+    public long getHeight() {
+        return height;
+    }
+
+    public void setHeight(long height) {
+        this.height = height;
+    }
+
+    public long getLatestUnFreezeTime() {
+        return latestUnFreezeTime;
+    }
+
+    public void setLatestUnFreezeTime(long latestUnFreezeTime) {
+        this.latestUnFreezeTime = latestUnFreezeTime;
+    }
+
+    public List<UnconfirmedNonce> getUnconfirmedNonces() {
+        return unconfirmedNonces;
+    }
+
+    public void setUnconfirmedNonces(List<UnconfirmedNonce> unconfirmedNonces) {
+        this.unconfirmedNonces = unconfirmedNonces;
+    }
+
+    public List<UnconfirmedAmount> getUnconfirmedAmounts() {
+        return unconfirmedAmounts;
+    }
+
+    public void setUnconfirmedAmounts(List<UnconfirmedAmount> unconfirmedAmounts) {
+        this.unconfirmedAmounts = unconfirmedAmounts;
+    }
+
+    public BigInteger getTotalFromAmount() {
+        return totalFromAmount;
+    }
+
+    public void setTotalFromAmount(BigInteger totalFromAmount) {
+        this.totalFromAmount = totalFromAmount;
+    }
+
+    public BigInteger getTotalToAmount() {
+        return totalToAmount;
+    }
+
+    public void setTotalToAmount(BigInteger totalToAmount) {
+        this.totalToAmount = totalToAmount;
+    }
+
+    public List<FreezeHeightState> getFreezeHeightStates() {
+        return freezeHeightStates;
+    }
+
+    public void setFreezeHeightStates(List<FreezeHeightState> freezeHeightStates) {
+        this.freezeHeightStates = freezeHeightStates;
+    }
+
+    public List<FreezeLockTimeState> getFreezeLockTimeStates() {
+        return freezeLockTimeStates;
+    }
+
+    public void setFreezeLockTimeStates(List<FreezeLockTimeState> freezeLockTimeStates) {
+        this.freezeLockTimeStates = freezeLockTimeStates;
+    }
 }

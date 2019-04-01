@@ -30,10 +30,6 @@ import io.nuls.base.basic.NulsOutputStreamBuffer;
 import io.nuls.base.data.BaseNulsData;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.parse.SerializeUtils;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.ToString;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -42,21 +38,28 @@ import java.util.List;
 /**
  * Created by cody on 2019/01/09.
  */
-@ToString
-@AllArgsConstructor
 public class BlockSnapshotAccounts extends BaseNulsData {
     /**
-     *  accounts
+     * accounts
      */
-    @Setter
-    @Getter
     private List<AccountStateSnapshot> accounts = new ArrayList<AccountStateSnapshot>();
-    public void addAccountState(AccountStateSnapshot accountState){
+
+    public void addAccountState(AccountStateSnapshot accountState) {
         accounts.add(accountState);
     }
+
     public BlockSnapshotAccounts() {
         super();
     }
+
+    public List<AccountStateSnapshot> getAccounts() {
+        return accounts;
+    }
+
+    public void setAccounts(List<AccountStateSnapshot> accounts) {
+        this.accounts = accounts;
+    }
+
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
         stream.writeUint16(accounts.size());
@@ -84,7 +87,7 @@ public class BlockSnapshotAccounts extends BaseNulsData {
         int size = 0;
         size += SerializeUtils.sizeOfUint16();
         for (AccountStateSnapshot accountState : accounts) {
-            size +=accountState.size();
+            size += accountState.size();
         }
         return size;
     }
