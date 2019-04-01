@@ -119,7 +119,7 @@ public interface RpcConstant {
     /**
      * 交易数据HEX编码
      */
-    String TX_DATA_HEX = "txHex";
+    String TX_DATA = "tx";
     /**
      * 交易所属链ID
      */
