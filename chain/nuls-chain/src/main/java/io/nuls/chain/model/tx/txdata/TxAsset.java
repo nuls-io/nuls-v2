@@ -5,9 +5,6 @@ import io.nuls.base.basic.NulsOutputStreamBuffer;
 import io.nuls.base.basic.TransactionLogicData;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.parse.SerializeUtils;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.ToString;
 
 import java.io.IOException;
 import java.math.BigInteger;
@@ -18,9 +15,7 @@ import java.util.Set;
  * @date 2018/11/6
  * @description
  */
-@EqualsAndHashCode(callSuper = true)
-@Data
-@ToString
+
 public class TxAsset extends TransactionLogicData {
     private int chainId;
     private int assetId;
@@ -78,5 +73,69 @@ public class TxAsset extends TransactionLogicData {
     @Override
     public Set<byte[]> getAddresses() {
         return null;
+    }
+
+    public int getChainId() {
+        return chainId;
+    }
+
+    public void setChainId(int chainId) {
+        this.chainId = chainId;
+    }
+
+    public int getAssetId() {
+        return assetId;
+    }
+
+    public void setAssetId(int assetId) {
+        this.assetId = assetId;
+    }
+
+    public String getSymbol() {
+        return symbol;
+    }
+
+    public void setSymbol(String symbol) {
+        this.symbol = symbol;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public int getDepositNuls() {
+        return depositNuls;
+    }
+
+    public void setDepositNuls(int depositNuls) {
+        this.depositNuls = depositNuls;
+    }
+
+    public BigInteger getInitNumber() {
+        return initNumber;
+    }
+
+    public void setInitNumber(BigInteger initNumber) {
+        this.initNumber = initNumber;
+    }
+
+    public short getDecimalPlaces() {
+        return decimalPlaces;
+    }
+
+    public void setDecimalPlaces(short decimalPlaces) {
+        this.decimalPlaces = decimalPlaces;
+    }
+
+    public byte[] getAddress() {
+        return address;
+    }
+
+    public void setAddress(byte[] address) {
+        this.address = address;
     }
 }

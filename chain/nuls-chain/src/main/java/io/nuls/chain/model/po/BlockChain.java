@@ -6,8 +6,6 @@ import io.nuls.base.data.BaseNulsData;
 import io.nuls.chain.model.tx.txdata.TxChain;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.parse.SerializeUtils;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -18,8 +16,6 @@ import java.util.List;
  * @date 2018/11/7
  * @description
  */
-@EqualsAndHashCode(callSuper = true)
-@Data
 public class BlockChain extends BaseNulsData {
     /**
      * 链序号
@@ -290,5 +286,157 @@ public class BlockChain extends BaseNulsData {
         txChain.setInitNumber(asset.getInitNumber());
         txChain.setDecimalPlaces(asset.getDecimalPlaces());
         return txChain.serialize();
+    }
+
+    public int getChainId() {
+        return chainId;
+    }
+
+    public void setChainId(int chainId) {
+        this.chainId = chainId;
+    }
+
+    public String getChainName() {
+        return chainName;
+    }
+
+    public void setChainName(String chainName) {
+        this.chainName = chainName;
+    }
+
+    public String getAddressType() {
+        return addressType;
+    }
+
+    public void setAddressType(String addressType) {
+        this.addressType = addressType;
+    }
+
+    public long getMagicNumber() {
+        return magicNumber;
+    }
+
+    public void setMagicNumber(long magicNumber) {
+        this.magicNumber = magicNumber;
+    }
+
+    public boolean isSupportInflowAsset() {
+        return supportInflowAsset;
+    }
+
+    public void setSupportInflowAsset(boolean supportInflowAsset) {
+        this.supportInflowAsset = supportInflowAsset;
+    }
+
+    public int getMinAvailableNodeNum() {
+        return minAvailableNodeNum;
+    }
+
+    public void setMinAvailableNodeNum(int minAvailableNodeNum) {
+        this.minAvailableNodeNum = minAvailableNodeNum;
+    }
+
+    public int getSingleNodeMinConnectionNum() {
+        return singleNodeMinConnectionNum;
+    }
+
+    public void setSingleNodeMinConnectionNum(int singleNodeMinConnectionNum) {
+        this.singleNodeMinConnectionNum = singleNodeMinConnectionNum;
+    }
+
+    public int getTxConfirmedBlockNum() {
+        return txConfirmedBlockNum;
+    }
+
+    public void setTxConfirmedBlockNum(int txConfirmedBlockNum) {
+        this.txConfirmedBlockNum = txConfirmedBlockNum;
+    }
+
+    public boolean isDelete() {
+        return isDelete;
+    }
+
+    public void setDelete(boolean delete) {
+        isDelete = delete;
+    }
+
+    public long getCreateTime() {
+        return createTime;
+    }
+
+    public void setCreateTime(long createTime) {
+        this.createTime = createTime;
+    }
+
+    public long getLastUpdateTime() {
+        return lastUpdateTime;
+    }
+
+    public void setLastUpdateTime(long lastUpdateTime) {
+        this.lastUpdateTime = lastUpdateTime;
+    }
+
+    public byte[] getRegAddress() {
+        return regAddress;
+    }
+
+    public void setRegAddress(byte[] regAddress) {
+        this.regAddress = regAddress;
+    }
+
+    public String getRegTxHash() {
+        return regTxHash;
+    }
+
+    public void setRegTxHash(String regTxHash) {
+        this.regTxHash = regTxHash;
+    }
+
+    public int getRegAssetId() {
+        return regAssetId;
+    }
+
+    public void setRegAssetId(int regAssetId) {
+        this.regAssetId = regAssetId;
+    }
+
+    public byte[] getDelAddress() {
+        return delAddress;
+    }
+
+    public void setDelAddress(byte[] delAddress) {
+        this.delAddress = delAddress;
+    }
+
+    public String getDelTxHash() {
+        return delTxHash;
+    }
+
+    public void setDelTxHash(String delTxHash) {
+        this.delTxHash = delTxHash;
+    }
+
+    public int getDelAssetId() {
+        return delAssetId;
+    }
+
+    public void setDelAssetId(int delAssetId) {
+        this.delAssetId = delAssetId;
+    }
+
+    public List<String> getSelfAssetKeyList() {
+        return selfAssetKeyList;
+    }
+
+    public void setSelfAssetKeyList(List<String> selfAssetKeyList) {
+        this.selfAssetKeyList = selfAssetKeyList;
+    }
+
+    public List<String> getTotalAssetKeyList() {
+        return totalAssetKeyList;
+    }
+
+    public void setTotalAssetKeyList(List<String> totalAssetKeyList) {
+        this.totalAssetKeyList = totalAssetKeyList;
     }
 }

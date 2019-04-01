@@ -7,7 +7,6 @@ import io.nuls.chain.model.tx.txdata.TxAsset;
 import io.nuls.chain.model.tx.txdata.TxChain;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.parse.SerializeUtils;
-import lombok.*;
 
 import java.io.IOException;
 import java.math.BigInteger;
@@ -19,9 +18,6 @@ import java.util.List;
  * @date 2018/11/6
  * @description
  */
-@EqualsAndHashCode(callSuper = true)
-@Data
-@ToString
 public class Asset extends BaseNulsData {
     /**
      * 资产是在哪条链上注册的
@@ -169,5 +165,109 @@ public class Asset extends BaseNulsData {
 
     public Asset() {
         super();
+    }
+
+    public int getChainId() {
+        return chainId;
+    }
+
+    public void setChainId(int chainId) {
+        this.chainId = chainId;
+    }
+
+    public int getAssetId() {
+        return assetId;
+    }
+
+    public void setAssetId(int assetId) {
+        this.assetId = assetId;
+    }
+
+    public String getSymbol() {
+        return symbol;
+    }
+
+    public void setSymbol(String symbol) {
+        this.symbol = symbol;
+    }
+
+    public String getAssetName() {
+        return assetName;
+    }
+
+    public void setAssetName(String assetName) {
+        this.assetName = assetName;
+    }
+
+    public int getDepositNuls() {
+        return depositNuls;
+    }
+
+    public void setDepositNuls(int depositNuls) {
+        this.depositNuls = depositNuls;
+    }
+
+    public BigInteger getInitNumber() {
+        return initNumber;
+    }
+
+    public void setInitNumber(BigInteger initNumber) {
+        this.initNumber = initNumber;
+    }
+
+    public short getDecimalPlaces() {
+        return decimalPlaces;
+    }
+
+    public void setDecimalPlaces(short decimalPlaces) {
+        this.decimalPlaces = decimalPlaces;
+    }
+
+    public boolean isAvailable() {
+        return available;
+    }
+
+    public void setAvailable(boolean available) {
+        this.available = available;
+    }
+
+    public long getCreateTime() {
+        return createTime;
+    }
+
+    public void setCreateTime(long createTime) {
+        this.createTime = createTime;
+    }
+
+    public long getLastUpdateTime() {
+        return lastUpdateTime;
+    }
+
+    public void setLastUpdateTime(long lastUpdateTime) {
+        this.lastUpdateTime = lastUpdateTime;
+    }
+
+    public byte[] getAddress() {
+        return address;
+    }
+
+    public void setAddress(byte[] address) {
+        this.address = address;
+    }
+
+    public String getTxHash() {
+        return txHash;
+    }
+
+    public void setTxHash(String txHash) {
+        this.txHash = txHash;
+    }
+
+    public List<Integer> getChainIds() {
+        return chainIds;
+    }
+
+    public void setChainIds(List<Integer> chainIds) {
+        this.chainIds = chainIds;
     }
 }
