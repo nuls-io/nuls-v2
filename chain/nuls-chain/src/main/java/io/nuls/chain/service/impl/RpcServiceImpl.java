@@ -183,11 +183,11 @@ public class RpcServiceImpl  implements RpcService {
             map.put("chainId",CmConstants.CHAIN_ASSET_MAP.get(CmConstants.NULS_CHAIN_ID));
             map.put("assetChainId",CmConstants.CHAIN_ASSET_MAP.get(CmConstants.NULS_CHAIN_ID));
             map.put("assetId",CmConstants.CHAIN_ASSET_MAP.get(CmConstants.NULS_ASSET_ID));
-            Response response =  ResponseMessageProcessor.requestAndResponse(CmConstants.MODULE_ROLE, RpcConstants.CMD_NW_CREATE_NODEGROUP,map );
-            Map resultMap =  ResponseUtil.getResultMap(response,RpcConstants.CMD_NW_CREATE_NODEGROUP);
+            Response response =  ResponseMessageProcessor.requestAndResponse(CmConstants.MODULE_ROLE, RpcConstants.CMD_LG_GET_COINDATA,map );
+            Map resultMap =  ResponseUtil.getResultMap(response,RpcConstants.CMD_LG_GET_COINDATA);
             if(null != resultMap){
                String available = resultMap.get("available").toString();
-               String nonce = resultMap.get("nonce").toString();
+               byte [] nonce = RPCUtil.decode(resultMap.get("nonce").toString());
                return new AccountBalance(available,nonce);
             }
         } catch (Exception e) {
