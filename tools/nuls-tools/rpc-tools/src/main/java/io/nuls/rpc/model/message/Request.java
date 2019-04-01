@@ -24,8 +24,7 @@
  */
 package io.nuls.rpc.model.message;
 
-import lombok.Data;
-import lombok.ToString;
+
 
 import java.util.Map;
 
@@ -36,8 +35,7 @@ import java.util.Map;
  * @author tangyi
  * @date 2018/11/15
  */
-@Data
-@ToString
+
 public class Request {
     /**
      * (Default: 0): This is a boolean value.
@@ -82,4 +80,52 @@ public class Request {
      * An map that holds all methods being requested with their respective parameters
      */
     private Map<String, Object> requestMethods;
+
+    public String getRequestAck() {
+        return requestAck;
+    }
+
+    public void setRequestAck(String requestAck) {
+        this.requestAck = requestAck;
+    }
+
+    public String getSubscriptionEventCounter() {
+        return subscriptionEventCounter;
+    }
+
+    public void setSubscriptionEventCounter(String subscriptionEventCounter) {
+        this.subscriptionEventCounter = subscriptionEventCounter;
+    }
+
+    public String getSubscriptionPeriod() {
+        return subscriptionPeriod;
+    }
+
+    public void setSubscriptionPeriod(String subscriptionPeriod) {
+        this.subscriptionPeriod = subscriptionPeriod;
+    }
+
+    public String getSubscriptionRange() {
+        return subscriptionRange;
+    }
+
+    public void setSubscriptionRange(String subscriptionRange) {
+        this.subscriptionRange = subscriptionRange;
+    }
+
+    public String getResponseMaxSize() {
+        return responseMaxSize;
+    }
+
+    public void setResponseMaxSize(String responseMaxSize) {
+        this.responseMaxSize = responseMaxSize;
+    }
+
+    public Map<String, Object> getRequestMethods() {
+        return requestMethods;
+    }
+
+    public void setRequestMethods(Map<String, Object> requestMethods) {
+        this.requestMethods = requestMethods;
+    }
 }

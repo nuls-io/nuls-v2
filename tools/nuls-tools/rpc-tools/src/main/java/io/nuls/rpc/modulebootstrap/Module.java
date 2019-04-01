@@ -1,13 +1,13 @@
 package io.nuls.rpc.modulebootstrap;
 
-import lombok.Data;
+
 
 /**
  * @Author: zhoulijun
  * @Time: 2019-02-27 17:50
  * @Description: Module 描述对象
  */
-@Data
+
 public class Module {
 
     /**
@@ -46,5 +46,21 @@ public class Module {
         int result = name != null ? name.hashCode() : 0;
         result = 31 * result + (version != null ? version.hashCode() : 0);
         return result;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getVersion() {
+        return version;
+    }
+
+    public void setVersion(String version) {
+        this.version = version;
     }
 }

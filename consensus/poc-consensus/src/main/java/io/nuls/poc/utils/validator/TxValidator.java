@@ -336,13 +336,13 @@ public class TxValidator {
         if(total.compareTo(chain.getConfig().getEntrusterDepositMin())<0){
             throw new NulsException(ConsensusErrorCode.DEPOSIT_NOT_ENOUGH);
         }
-        if(total.compareTo(chain.getConfig().getDepositMax())>0){
+        if(total.compareTo(chain.getConfig().getCommissionMax())>0){
             throw new NulsException(ConsensusErrorCode.DEPOSIT_OVER_AMOUNT);
         }
         for (DepositPo cd : poList) {
             total = total.add(cd.getDeposit());
         }
-        if(total.compareTo(chain.getConfig().getDepositMax())>0){
+        if(total.compareTo(chain.getConfig().getCommissionMax())>0){
             throw new NulsException(ConsensusErrorCode.DEPOSIT_OVER_AMOUNT);
         }
         return true;

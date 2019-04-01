@@ -35,16 +35,16 @@ import io.nuls.block.model.Chain;
 import io.nuls.block.model.ChainContext;
 import io.nuls.block.model.GenesisBlock;
 import io.nuls.block.model.po.BlockHeaderPo;
+import io.nuls.block.rpc.call.ConsensusUtil;
+import io.nuls.block.rpc.call.NetworkUtil;
+import io.nuls.block.rpc.call.ProtocolUtil;
+import io.nuls.block.rpc.call.TransactionUtil;
 import io.nuls.block.service.BlockService;
 import io.nuls.block.storage.BlockStorageService;
 import io.nuls.block.storage.ChainStorageService;
 import io.nuls.block.thread.monitor.TxGroupRequestor;
 import io.nuls.block.utils.BlockUtil;
 import io.nuls.block.utils.ChainGenerator;
-import io.nuls.block.rpc.call.ConsensusUtil;
-import io.nuls.block.rpc.call.NetworkUtil;
-import io.nuls.block.rpc.call.ProtocolUtil;
-import io.nuls.block.rpc.call.TransactionUtil;
 import io.nuls.db.service.RocksDBService;
 import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.model.message.MessageUtil;
@@ -59,7 +59,7 @@ import java.util.*;
 import java.util.concurrent.locks.StampedLock;
 
 import static io.nuls.block.constant.CommandConstant.*;
-import static io.nuls.block.constant.Constant.*;
+import static io.nuls.block.constant.Constant.BLOCK_HEADER_INDEX;
 
 /**
  * 区块服务实现类

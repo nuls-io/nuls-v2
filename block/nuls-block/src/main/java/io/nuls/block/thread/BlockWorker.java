@@ -32,7 +32,6 @@ import io.nuls.block.model.ChainContext;
 import io.nuls.block.model.Node;
 import io.nuls.block.rpc.call.NetworkUtil;
 import io.nuls.tools.log.logback.NulsLogger;
-import lombok.AllArgsConstructor;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -47,7 +46,6 @@ import static io.nuls.block.constant.CommandConstant.GET_BLOCKS_BY_HEIGHT_MESSAG
  * @version 1.0
  * @date 18-12-4 下午8:29
  */
-@AllArgsConstructor
 public class BlockWorker implements Callable<BlockDownLoadResult> {
 
     private long startHeight;
@@ -55,6 +53,14 @@ public class BlockWorker implements Callable<BlockDownLoadResult> {
     private int chainId;
     private Node node;
     private HeightRangeMessage message;
+
+    public BlockWorker(long startHeight, int size, int chainId, Node node, HeightRangeMessage message) {
+        this.startHeight = startHeight;
+        this.size = size;
+        this.chainId = chainId;
+        this.node = node;
+        this.message = message;
+    }
 
     @Override
     public BlockDownLoadResult call() {
