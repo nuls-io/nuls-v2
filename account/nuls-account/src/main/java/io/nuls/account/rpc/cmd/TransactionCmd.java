@@ -88,7 +88,7 @@ public class TransactionCmd extends BaseCmd {
         List<Transaction> lists = new ArrayList<>();
         List<Transaction> result = null;
         Object chainIdObj = params == null ? null : params.get(RpcParameterNameConstant.CHAIN_ID);
-        Object txHexListObj = params == null ? null : params.get(RpcParameterNameConstant.TX_HEX_LIST);
+        Object txHexListObj = params == null ? null : params.get(RpcParameterNameConstant.TX_LIST);
         try {
             // check parameters
             if (params == null || chainIdObj == null || txHexListObj == null) {
@@ -136,7 +136,7 @@ public class TransactionCmd extends BaseCmd {
         int chainId;
         List<String> txHexList;
         Object chainIdObj = params == null ? null : params.get(RpcParameterNameConstant.CHAIN_ID);
-        Object txHexListgObj = params == null ? null : params.get(RpcParameterNameConstant.TX_HEX_LIST);
+        Object txHexListgObj = params == null ? null : params.get(RpcParameterNameConstant.TX_LIST);
         Object blockHeaderDigest = params == null ? null : params.get(RpcParameterNameConstant.BLOCK_HEADER_DIGEST);
         List<Transaction> commitSucTxList = new ArrayList<>();
         // check parameters
@@ -213,7 +213,7 @@ public class TransactionCmd extends BaseCmd {
         int chainId;
         List<String> txHexList;
         Object chainIdObj = params == null ? null : params.get(RpcParameterNameConstant.CHAIN_ID);
-        Object txHexListgObj = params == null ? null : params.get(RpcParameterNameConstant.TX_HEX_LIST);
+        Object txHexListgObj = params == null ? null : params.get(RpcParameterNameConstant.TX_LIST);
         Object blockHeaderDigest = params == null ? null : params.get(RpcParameterNameConstant.BLOCK_HEADER_DIGEST);
         List<Transaction> rollbackSucTxList = new ArrayList<>();
         // check parameters
@@ -283,18 +283,18 @@ public class TransactionCmd extends BaseCmd {
     @CmdAnnotation(cmd = "ac_transferTxValidate", version = 1.0, description = "create transfer transaction validate 1.0")
     @ResisterTx(txType = AccountConstant.TX_TYPE_TRANSFER, methodType = TxMethodType.VALID, methodName = "ac_transferTxValidate")
     @Parameter(parameterName = RpcParameterNameConstant.CHAIN_ID, parameterType = "int")
-    @Parameter(parameterName = RpcParameterNameConstant.TX_HEX, parameterType = "String")
+    @Parameter(parameterName = RpcParameterNameConstant.TX, parameterType = "String")
     public Response transferTxValidate(Map<String, Object> params) {
 //        LoggerUtil.logger.debug("ac_transferTxValidate start");
         Map<String, Boolean> resultMap = new HashMap<>();
         boolean result;
         try {
-            if (params.get(RpcParameterNameConstant.CHAIN_ID) == null || params.get(RpcParameterNameConstant.TX_HEX) == null) {
+            if (params.get(RpcParameterNameConstant.CHAIN_ID) == null || params.get(RpcParameterNameConstant.TX) == null) {
                 LoggerUtil.logger.warn("ac_transferTxValidate params is null");
                 throw new NulsException(AccountErrorCode.PARAMETER_ERROR);
             }
             int chainId = (Integer) params.get(RpcParameterNameConstant.CHAIN_ID);
-            String txHex = (String) params.get(RpcParameterNameConstant.TX_HEX);
+            String txHex = (String) params.get(RpcParameterNameConstant.TX);
             if (chainId <= 0) {
                 throw new NulsException(AccountErrorCode.PARAMETER_ERROR);
             }
@@ -579,7 +579,7 @@ public class TransactionCmd extends BaseCmd {
         Object chainIdObj = params == null ? null : params.get(RpcParameterNameConstant.CHAIN_ID);
         Object passwordObj = params == null ? null : params.get(RpcParameterNameConstant.PASSWORD);
         Object signAddressObj = params == null ? null : params.get(RpcParameterNameConstant.SIGN_ADDREESS);
-        Object txHexObj = params == null ? null : params.get(RpcParameterNameConstant.TX_HEX);
+        Object txHexObj = params == null ? null : params.get(RpcParameterNameConstant.TX);
         try {
             // check parameters
             if (params == null || chainIdObj == null || signAddressObj == null ||

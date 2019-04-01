@@ -5,6 +5,7 @@ import io.nuls.base.data.NulsDigestData;
 import io.nuls.base.data.Transaction;
 import io.nuls.base.signture.P2PHKSignature;
 import io.nuls.base.signture.SignatureUtil;
+import io.nuls.rpc.util.RPCUtil;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Service;
 import io.nuls.tools.exception.NulsException;
@@ -193,7 +194,7 @@ public class CtxServiceImpl implements CtxService {
         transactionH2Service.saveTxs(TxUtil.tx2PO(chain, tx));
         //调账本记录未确认交易
         try {
-            LedgerCall.commitUnconfirmedTx(chain, tx.hex());
+            LedgerCall.commitUnconfirmedTx(chain, RPCUtil.encode(tx.serialize()));
         } catch (Exception e) {
             throw new NulsException(e);
         }
@@ -313,7 +314,8 @@ public class CtxServiceImpl implements CtxService {
             //超过全部链接节点51%的节点验证通过,则节点判定交易的验证通过
             if (rs.compareTo(agents.multiply(passRate)) >= 0) {
                 //使用该地址到账户模块对跨链交易atx_trans_hash签名
-                P2PHKSignature signature = AccountCall.signDigest(packingAddress, null, message.getRequestHash().getDigestHex());
+                //todo获取打包地址默认密码, 调共识模块接口?
+                P2PHKSignature signature = AccountCall.signDigest(packingAddress, null, message.getRequestHash().getDigestBytes());
                 BroadcastCrossNodeRsMessage rsMessage = new BroadcastCrossNodeRsMessage();
                 rsMessage.setCommand(TxCmd.NW_CROSS_NODE_RS);
                 rsMessage.setRequestHash(message.getRequestHash());

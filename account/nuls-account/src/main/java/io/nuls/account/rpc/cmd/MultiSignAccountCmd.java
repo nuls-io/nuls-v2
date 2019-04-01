@@ -1,5 +1,6 @@
 package io.nuls.account.rpc.cmd;
 
+import io.nuls.account.constant.AccountConstant;
 import io.nuls.account.constant.AccountErrorCode;
 import io.nuls.account.constant.RpcParameterNameConstant;
 import io.nuls.account.model.dto.MultiSignTransactionResultDto;
@@ -11,12 +12,13 @@ import io.nuls.base.data.MultiSigAccount;
 import io.nuls.rpc.cmd.BaseCmd;
 import io.nuls.rpc.model.CmdAnnotation;
 import io.nuls.rpc.model.message.Response;
+import io.nuls.rpc.util.RPCUtil;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.crypto.HexUtil;
+import io.nuls.tools.exception.NulsRuntimeException;
 import io.nuls.tools.model.FormatValidUtils;
 import io.nuls.tools.model.StringUtils;
-import io.nuls.tools.exception.NulsRuntimeException;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -240,6 +242,10 @@ public class MultiSignAccountCmd extends BaseCmd {
                 throw new NulsRuntimeException(AccountErrorCode.ADDRESS_ERROR);
             }
             multiSigAccount = multiSignAccountService.getMultiSigAccountByAddress(chainId, address);
+            String data = null == multiSigAccount ? null : RPCUtil.encode(multiSigAccount.serialize());
+            Map<String, String> map = new HashMap<>(AccountConstant.INIT_CAPACITY_2);
+            map.put("value", data);
+            return success(map);
         } catch (NulsRuntimeException e) {
             LoggerUtil.logger.info("", e);
             return failed(e.getErrorCode());
@@ -247,8 +253,6 @@ public class MultiSignAccountCmd extends BaseCmd {
             LoggerUtil.logger.error("", e);
             return failed(AccountErrorCode.SYS_UNKOWN_EXCEPTION);
         }
-        LoggerUtil.logger.debug("ac_getMultiSigAccount end");
-        return success(multiSigAccount);
     }
 
 }

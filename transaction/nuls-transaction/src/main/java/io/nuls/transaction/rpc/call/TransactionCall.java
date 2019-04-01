@@ -67,11 +67,11 @@ public class TransactionCall {
      * 调用各交易验证器
      * @param chain
      * @param txRegister 交易注册信息
-     * @param txHex
+     * @param tx
      * @return
      * @throws NulsException
      */
-    public static boolean txValidatorProcess(Chain chain, TxRegister txRegister, String txHex) throws NulsException {
+    public static boolean txValidatorProcess(Chain chain, TxRegister txRegister, String tx) throws NulsException {
 
         if(StringUtils.isBlank(txRegister.getValidator())){
             //交易没有注册验证器cmd的交易,包括系统交易,则直接返回true
@@ -80,13 +80,8 @@ public class TransactionCall {
         //调用单个交易验证器
         Map<String, Object> params = new HashMap(TxConstant.INIT_CAPACITY_8);
         params.put("chainId", chain.getChainId());
-        params.put("txHex", txHex);
+        params.put("tx", tx);
         Map result = (Map) TransactionCall.request(txRegister.getModuleCode(), txRegister.getValidator(), params);
-/*        try {
-            chain.getLoggerMap().get(TxConstant.LOG_TX).debug("moduleCode:{}, -cmd:{}, -txProcess -rs: {}", txRegister.getModuleCode(), txRegister.getValidator(), JSONUtils.obj2json(result));
-        } catch (JsonProcessingException e) {
-            e.printStackTrace();
-        }*/
         return (Boolean) result.get("value");
     }
 
@@ -95,18 +90,17 @@ public class TransactionCall {
      * @param chain
      * @param cmd
      * @param moduleCode
-     * @param txHexList
+     * @param txList
      * @return
      */
-    public static boolean txProcess(Chain chain, String cmd, String moduleCode,  List<String> txHexList, String blockHeaderHex) {
+    public static boolean txProcess(Chain chain, String cmd, String moduleCode,  List<String> txList, String blockHeader) {
         try {
             //调用单个交易验证器
             Map<String, Object> params = new HashMap(TxConstant.INIT_CAPACITY_8);
             params.put("chainId", chain.getChainId());
-            params.put("txHexList", txHexList);
-            params.put("blockHeaderHex", blockHeaderHex);
+            params.put("txList", txList);
+            params.put("blockHeader", blockHeader);
             Map result = (Map) TransactionCall.request(moduleCode, cmd, params);
-//            chain.getLoggerMap().get(TxConstant.LOG_TX).debug("moduleCode:{}, -cmd:{}, -txProcess -rs: {}",moduleCode, cmd, JSONUtils.obj2json(result));
             return (Boolean) result.get("value");
         } catch (Exception e) {
             chain.getLoggerMap().get(TxConstant.LOG_TX).error(e);
@@ -140,20 +134,20 @@ public class TransactionCall {
      * Single module transaction integrate validator
      *
      * @param moduleValidator
-     * @param txHexList
+     * @param txList
      * @return 返回未通过验证的交易hash, 如果出现异常那么交易全部返回(不通过) / return unverified transaction hash
      */
-    public static List<String> txModuleValidator(Chain chain, String moduleValidator, String moduleCode, List<String> txHexList) {
+    public static List<String> txModuleValidator(Chain chain, String moduleValidator, String moduleCode, List<String> txList) {
 
         try {
             //调用交易模块统一验证器
             Map<String, Object> params = new HashMap(TxConstant.INIT_CAPACITY_8);
             params.put("chainId", chain.getChainId());
-            params.put("txHexList", txHexList);
+            params.put("txList", txList);
             Map result = (Map) TransactionCall.request(moduleCode, moduleValidator, params);
             return (List<String>) result.get("list");
         } catch (NulsException e) {
-            return txHexList;
+            return txList;
         }
 
     }

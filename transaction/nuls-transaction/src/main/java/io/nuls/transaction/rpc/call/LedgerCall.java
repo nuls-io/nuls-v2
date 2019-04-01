@@ -4,7 +4,7 @@ import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.Transaction;
 import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.model.ModuleE;
-import io.nuls.tools.crypto.HexUtil;
+import io.nuls.rpc.util.RPCUtil;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.model.BigIntegerUtils;
 import io.nuls.transaction.constant.TxConstant;
@@ -27,15 +27,15 @@ public class LedgerCall {
     /**
      * 验证CoinData
      * @param chain
-     * @param txHex
+     * @param tx
      * @return
      */
-    public static VerifyTxResult verifyCoinData(Chain chain, String txHex, boolean batch) {
+    public static VerifyTxResult verifyCoinData(Chain chain, String tx, boolean batch) {
         try {
             Map<String, Object> params = new HashMap<>(TxConstant.INIT_CAPACITY_8);
             params.put(Constants.VERSION_KEY_STR, TxConstant.RPC_VERSION);
             params.put("chainId", chain.getChainId());
-            params.put("txHex", txHex);
+            params.put("tx", tx);
             params.put("isBatchValidate", batch);
             HashMap result = (HashMap) TransactionCall.request(ModuleE.LG.abbr,"validateCoinData", params);
             return new VerifyTxResult((int)result.get("validateCode"), (String)result.get("validateDesc"));
@@ -53,7 +53,7 @@ public class LedgerCall {
      */
     public static VerifyTxResult verifyCoinData(Chain chain, Transaction tx, boolean batch) throws NulsException {
         try {
-            return verifyCoinData(chain, tx.hex(), batch);
+            return verifyCoinData(chain, RPCUtil.encode(tx.serialize()), batch);
         } catch (Exception e) {
             throw new NulsException(e);
         }
@@ -62,17 +62,17 @@ public class LedgerCall {
     /**
      * 验证区块中的交易CoinData
      * @param chain
-     * @param txHexList
+     * @param txList
      * @param blockHeight
      * @return
      * @throws NulsException
      */
-    public static boolean verifyBlockTxsCoinData(Chain chain, List<String> txHexList, Long blockHeight) throws NulsException {
+    public static boolean verifyBlockTxsCoinData(Chain chain, List<String> txList, Long blockHeight) throws NulsException {
         try {
             Map<String, Object> params = new HashMap<>(TxConstant.INIT_CAPACITY_8);
             params.put(Constants.VERSION_KEY_STR, TxConstant.RPC_VERSION);
             params.put("chainId", chain.getChainId());
-            params.put("txHexList", txHexList);
+            params.put("txList", txList);
             params.put("blockHeight", blockHeight);
             HashMap result = (HashMap)TransactionCall.request(ModuleE.LG.abbr, "blockValidate", params);
             return (int) result.get("value") == 1;
@@ -101,7 +101,7 @@ public class LedgerCall {
             params.put("assetId", assetId);
             HashMap result = (HashMap) TransactionCall.request(ModuleE.LG.abbr, "getNonce", params);
             String nonce = (String) result.get("nonce");
-            return HexUtil.decode(nonce);
+            return RPCUtil.decode(nonce);
         } catch (Exception e) {
             throw new NulsException(e);
         }
@@ -173,14 +173,14 @@ public class LedgerCall {
     /**
      * 提交未确认交易给账本
      * @param chain
-     * @param txHex
+     * @param txStr
      */
-    public static boolean commitUnconfirmedTx(Chain chain, String txHex) throws NulsException {
+    public static boolean commitUnconfirmedTx(Chain chain, String txStr) throws NulsException {
         try {
             Map<String, Object> params = new HashMap<>(TxConstant.INIT_CAPACITY_8);
             params.put(Constants.VERSION_KEY_STR, TxConstant.RPC_VERSION);
             params.put("chainId", chain.getChainId());
-            params.put("txHex", txHex);
+            params.put("tx", txStr);
             HashMap result = (HashMap)TransactionCall.request(ModuleE.LG.abbr, "commitUnconfirmedTx", params);
             return (int) result.get("value") == 1;
         } catch (Exception e) {
@@ -191,14 +191,14 @@ public class LedgerCall {
     /**
      * 提交已确认交易给账本
      * @param chain
-     * @param txHexList
+     * @param txList
      */
-    public static boolean commitTxsLedger(Chain chain, List<String> txHexList, Long blockHeight) throws NulsException {
+    public static boolean commitTxsLedger(Chain chain, List<String> txList, Long blockHeight) throws NulsException {
         try {
             Map<String, Object> params = new HashMap<>(TxConstant.INIT_CAPACITY_8);
             params.put(Constants.VERSION_KEY_STR, TxConstant.RPC_VERSION);
             params.put("chainId", chain.getChainId());
-            params.put("txHexList", txHexList);
+            params.put("txList", txList);
             params.put("blockHeight", blockHeight);
             HashMap result = (HashMap)TransactionCall.request(ModuleE.LG.abbr, "commitBlockTxs", params);
             return (int) result.get("value") == 1;
@@ -211,14 +211,14 @@ public class LedgerCall {
     /**
      * 调用账本回滚未确认的交易
      * @param chain
-     * @param txHex
+     * @param txStr
      */
-    public static boolean rollbackTxValidateStatus(Chain chain, String txHex) throws NulsException {
+    public static boolean rollbackTxValidateStatus(Chain chain, String txStr) throws NulsException {
         try {
             Map<String, Object> params = new HashMap<>(TxConstant.INIT_CAPACITY_8);
             params.put(Constants.VERSION_KEY_STR, TxConstant.RPC_VERSION);
             params.put("chainId", chain.getChainId());
-            params.put("txHex", txHex);
+            params.put("tx", txStr);
             HashMap result = (HashMap)TransactionCall.request(ModuleE.LG.abbr, "rollbackTxValidateStatus", params);
             return (int) result.get("value") == 1;
         } catch (Exception e) {
@@ -229,14 +229,14 @@ public class LedgerCall {
     /**
      * 调用账本回滚未确认的交易
      * @param chain
-     * @param txHex
+     * @param txStr
      */
-    public static boolean rollBackUnconfirmTx(Chain chain, String txHex) throws NulsException {
+    public static boolean rollBackUnconfirmTx(Chain chain, String txStr) throws NulsException {
         try {
             Map<String, Object> params = new HashMap<>(TxConstant.INIT_CAPACITY_8);
             params.put(Constants.VERSION_KEY_STR, TxConstant.RPC_VERSION);
             params.put("chainId", chain.getChainId());
-            params.put("txHex", txHex);
+            params.put("tx", txStr);
             HashMap result = (HashMap)TransactionCall.request(ModuleE.LG.abbr, "rollBackUnconfirmTx", params);
             return (int) result.get("value") == 1;
         } catch (Exception e) {
@@ -247,14 +247,14 @@ public class LedgerCall {
     /**
      * 调用账本回滚已确认的交易
      * @param chain
-     * @param txHexList
+     * @param txList
      */
-    public static boolean rollbackTxsLedger(Chain chain, List<String> txHexList, Long blockHeight) throws NulsException {
+    public static boolean rollbackTxsLedger(Chain chain, List<String> txList, Long blockHeight) throws NulsException {
         try {
             Map<String, Object> params = new HashMap<>(TxConstant.INIT_CAPACITY_8);
             params.put(Constants.VERSION_KEY_STR, TxConstant.RPC_VERSION);
             params.put("chainId", chain.getChainId());
-            params.put("txHexList", txHexList);
+            params.put("txList", txList);
             params.put("blockHeight", blockHeight);
             HashMap result = (HashMap)TransactionCall.request(ModuleE.LG.abbr, "rollBackBlockTxs", params);
             return (int) result.get("value") == 1;

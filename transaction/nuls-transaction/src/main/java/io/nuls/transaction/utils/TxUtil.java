@@ -27,6 +27,7 @@ package io.nuls.transaction.utils;
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.data.*;
+import io.nuls.rpc.util.RPCUtil;
 import io.nuls.tools.core.ioc.SpringLiteContext;
 import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.exception.NulsException;
@@ -104,6 +105,30 @@ public class TxUtil {
         }
     }
 
+    /**
+     * RPCUtil 反序列化
+     * @param data
+     * @param clazz
+     * @param <T>
+     * @return
+     * @throws NulsException
+     */
+    public static <T> T getInstanceRpcStr(String data, Class<? extends BaseNulsData> clazz) throws NulsException {
+        if (StringUtils.isBlank(data)) {
+            throw new NulsException(TxErrorCode.DATA_NOT_FOUND);
+        }
+        return getInstance(RPCUtil.decode(data), clazz);
+    }
+
+
+    /**
+     * HEX反序列化
+     * @param hex
+     * @param clazz
+     * @param <T>
+     * @return
+     * @throws NulsException
+     */
     public static <T> T getInstance(String hex, Class<? extends BaseNulsData> clazz) throws NulsException {
         if (StringUtils.isBlank(hex)) {
             throw new NulsException(TxErrorCode.DATA_NOT_FOUND);
@@ -316,8 +341,7 @@ public class TxUtil {
         byte[] in = hash.getDigestBytes();
         int copyEnd = in.length;
         System.arraycopy(in, (copyEnd - 8), out, 0, 8);
-        String nonce8BytesStr = HexUtil.encode(out);
-        return HexUtil.decode(nonce8BytesStr);
+        return out;
     }
 
     public static void txInformationDebugPrint(Chain chain, Transaction tx, NulsLogger nulsLogger) {
@@ -333,7 +357,7 @@ public class TxUtil {
         nulsLogger.debug("size: {}B,  -{}KB, -{}MB",
                 String.valueOf(tx.getSize()), String.valueOf(tx.getSize() / 1024), String.valueOf(tx.getSize() / 1024 / 1024));
         byte[] remark = tx.getRemark();
-        nulsLogger.debug("remark: {}", remark == null ? "" : HexUtil.encode(tx.getRemark()));
+        nulsLogger.debug("remark: {}", remark == null ? "" : tx.getRemark().toString());
         CoinData coinData = null;
         try {
             if (tx.getCoinData() != null) {
@@ -402,18 +426,18 @@ public class TxUtil {
     public static void moduleGroups(Chain chain, Map<TxRegister, List<String>> moduleVerifyMap, Transaction tx) throws NulsException {
         //根据模块的统一验证器名，对所有交易进行分组，准备进行各模块的统一验证
         TxRegister txRegister = TxManager.getTxRegister(chain, tx.getType());
-        String txHex;
+        String txStr;
         try {
-            txHex = tx.hex();
+            txStr = RPCUtil.encode(tx.serialize());
         } catch (Exception e) {
             throw new NulsException(e);
         }
         if (moduleVerifyMap.containsKey(txRegister)) {
-            moduleVerifyMap.get(txRegister).add(txHex);
+            moduleVerifyMap.get(txRegister).add(txStr);
         } else {
-            List<String> txHexs = new ArrayList<>();
-            txHexs.add(txHex);
-            moduleVerifyMap.put(txRegister, txHexs);
+            List<String> txStrList = new ArrayList<>();
+            txStrList.add(txStr);
+            moduleVerifyMap.put(txRegister, txStrList);
         }
     }
 }

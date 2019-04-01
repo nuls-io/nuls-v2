@@ -30,6 +30,7 @@ import io.nuls.rpc.cmd.BaseCmd;
 import io.nuls.rpc.model.CmdAnnotation;
 import io.nuls.rpc.model.Parameter;
 import io.nuls.rpc.model.message.Response;
+import io.nuls.rpc.util.RPCUtil;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.exception.NulsException;
@@ -96,10 +97,10 @@ public class ClientCmd extends BaseCmd {
             Map<String, Object> resultMap = new HashMap<>(TxConstant.INIT_CAPACITY_4);
             if (tx == null) {
                 Log.debug("getTx - from all, fail! tx is null, txHash:{}", txHash);
-                resultMap.put("txHex", null);
+                resultMap.put("tx", null);
             } else {
                 Log.debug("getTx - from all, success txHash : " + tx.getTx().getHash().getDigestHex());
-                resultMap.put("txHex", tx.getTx().hex());
+                resultMap.put("tx", RPCUtil.encode(tx.getTx().serialize()));
                 resultMap.put("height", tx.getBlockHeight());
                 resultMap.put("status", tx.getStatus());
             }
@@ -140,10 +141,10 @@ public class ClientCmd extends BaseCmd {
             Map<String, Object> resultMap = new HashMap<>(TxConstant.INIT_CAPACITY_4);
             if (tx == null) {
                 Log.debug("getConfirmedTransaction fail, tx is null. txHash:{}", txHash);
-                resultMap.put("txHex", null);
+                resultMap.put("tx", null);
             } else {
                 Log.debug("getConfirmedTransaction success. txHash:{}", txHash);
-                resultMap.put("txHex", tx.getTx().hex());
+                resultMap.put("tx", RPCUtil.encode(tx.getTx().serialize()));
                 resultMap.put("height", tx.getBlockHeight());
                 resultMap.put("status", tx.getStatus());
             }
