@@ -24,7 +24,7 @@
  */
 package io.nuls.rpc.model;
 
-import lombok.*;
+
 
 import java.util.List;
 import java.util.Map;
@@ -36,8 +36,7 @@ import java.util.Map;
  * @author tangyi
  * @date 2018/11/19
  */
-@Data
-@ToString
+
 public class RegisterApi {
 
 
@@ -60,4 +59,68 @@ public class RegisterApi {
     private String moduleAbbreviation;
 
     private String moduleName;
+
+    public List<CmdDetail> getApiMethods() {
+        return apiMethods;
+    }
+
+    public void setApiMethods(List<CmdDetail> apiMethods) {
+        this.apiMethods = apiMethods;
+    }
+
+    public Map<String, String> getDependencies() {
+        return dependencies;
+    }
+
+    public void setDependencies(Map<String, String> dependencies) {
+        this.dependencies = dependencies;
+    }
+
+    public Map<String, String> getConnectionInformation() {
+        return connectionInformation;
+    }
+
+    public void setConnectionInformation(Map<String, String> connectionInformation) {
+        this.connectionInformation = connectionInformation;
+    }
+
+    public String getModuleDomain() {
+        return moduleDomain;
+    }
+
+    public void setModuleDomain(String moduleDomain) {
+        this.moduleDomain = moduleDomain;
+    }
+
+    public Map<String, String[]> getModuleRoles() {
+        return moduleRoles;
+    }
+
+    public void setModuleRoles(Map<String, String[]> moduleRoles) {
+        this.moduleRoles = moduleRoles;
+    }
+
+    public String getModuleVersion() {
+        return moduleVersion;
+    }
+
+    public void setModuleVersion(String moduleVersion) {
+        this.moduleVersion = moduleVersion;
+    }
+
+    public String getModuleAbbreviation() {
+        return moduleAbbreviation;
+    }
+
+    public void setModuleAbbreviation(String moduleAbbreviation) {
+        this.moduleAbbreviation = moduleAbbreviation;
+    }
+
+    public String getModuleName() {
+        return moduleName;
+    }
+
+    public void setModuleName(String moduleName) {
+        this.moduleName = moduleName;
+    }
 }
