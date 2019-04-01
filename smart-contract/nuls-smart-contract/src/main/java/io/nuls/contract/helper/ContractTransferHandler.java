@@ -42,9 +42,9 @@ import io.nuls.contract.vm.program.ProgramTransfer;
 import io.nuls.tools.basic.Result;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
+import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.model.ByteArrayWrapper;
-import org.spongycastle.util.encoders.Hex;
 
 import java.io.IOException;
 import java.math.BigInteger;
@@ -253,14 +253,14 @@ public class ContractTransferHandler {
                 if (compareFrom == null) {
                     // 第一次遍历，获取新交易的coinFrom的nonce
                     contractBalance = tempBalanceManager.getBalance(from).getData();
-                    nonceBytes = Hex.decode(contractBalance.getNonce());
+                    nonceBytes = HexUtil.decode(contractBalance.getNonce());
                 } else {
                     // 产生另一个合并交易，更新之前的合并交易的hash和账户的nonce
                     this.updatePreTxHashAndAccountNonce(contractTransferTx, contractBalance);
                     mergeCoinToMap.clear();
                     // 获取新交易的coinFrom的nonce
                     contractBalance = tempBalanceManager.getBalance(from).getData();
-                    nonceBytes = Hex.decode(contractBalance.getNonce());
+                    nonceBytes = HexUtil.decode(contractBalance.getNonce());
                 }
                 Log.info("From is {}, nonce is {}", AddressTool.getStringAddressByBytes(from), contractBalance.getNonce());
                 compareFrom = wrapperFrom;
@@ -333,9 +333,9 @@ public class ContractTransferHandler {
         NulsDigestData hash = NulsDigestData.calcDigestData(tx.serializeForHash());
         byte[] hashBytes = hash.serialize();
         byte[] currentNonceBytes = Arrays.copyOfRange(hashBytes, hashBytes.length - 8, hashBytes.length);
-        balance.setNonce(Hex.toHexString(currentNonceBytes));
+        balance.setNonce(HexUtil.encode(currentNonceBytes));
         tx.setHash(hash);
-        Log.info("TxType is {}, hash is {}, nextNonce is {}", tx.getType(), hash.toString(), Hex.toHexString(currentNonceBytes));
+        Log.info("TxType is {}, hash is {}, nextNonce is {}", tx.getType(), hash.toString(), HexUtil.encode(currentNonceBytes));
     }
 
     private ContractTransferTransaction createContractTransferTx(CoinData coinData, ContractTransferData txData, long blockTime, long timeOffset) {

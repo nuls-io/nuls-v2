@@ -37,11 +37,11 @@ import io.nuls.contract.vm.program.ProgramExecutor;
 import io.nuls.contract.vm.program.ProgramResult;
 import io.nuls.contract.vm.program.impl.ProgramExecutorImpl;
 import io.nuls.db.service.RocksDBService;
+import io.nuls.tools.crypto.HexUtil;
 import org.apache.commons.io.IOUtils;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.spongycastle.util.encoders.Hex;
 
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -82,7 +82,7 @@ public class VoteTest {
 
     @Test
     public void testBatchBlock() throws IOException {
-        byte[] prevStateRoot = Hex.decode("56e81f171bcc55a6ff8345e692c0f86e5b48e01b996cadc001622fb5e363b421");
+        byte[] prevStateRoot = HexUtil.decode("56e81f171bcc55a6ff8345e692c0f86e5b48e01b996cadc001622fb5e363b421");
         List transactions = createTransactions();
         prevStateRoot = testBatch(prevStateRoot, transactions);
         System.out.println("第1个块");
@@ -95,7 +95,7 @@ public class VoteTest {
 
     @Test
     public void testOneBlock() throws IOException {
-        byte[] prevStateRoot = Hex.decode("56e81f171bcc55a6ff8345e692c0f86e5b48e01b996cadc001622fb5e363b421");
+        byte[] prevStateRoot = HexUtil.decode("56e81f171bcc55a6ff8345e692c0f86e5b48e01b996cadc001622fb5e363b421");
         List transactions = createTransactions();
         prevStateRoot = testOne(prevStateRoot, transactions);
         System.out.println("第1个块");
@@ -146,7 +146,7 @@ public class VoteTest {
 
         byte[] root = track.getRoot();
 
-        System.out.println("stateRoot: " + Hex.toHexString(root));
+        System.out.println("stateRoot: " + HexUtil.encode(root));
         System.out.println("总耗时：" + (System.currentTimeMillis() - start) + "ms");
         return root;
     }
@@ -171,7 +171,7 @@ public class VoteTest {
 
                 System.out.println(programResult);
                 prevStateRoot = track.getRoot();
-                System.out.println("stateRoot: " + Hex.toHexString(prevStateRoot));
+                System.out.println("stateRoot: " + HexUtil.encode(prevStateRoot));
             } else if (transaction instanceof ProgramCall) {
 
                 ProgramCall call = (ProgramCall) transaction;
@@ -182,7 +182,7 @@ public class VoteTest {
 
                 System.out.println(programResult);
                 prevStateRoot = track.getRoot();
-                System.out.println("stateRoot: " + Hex.toHexString(prevStateRoot));
+                System.out.println("stateRoot: " + HexUtil.encode(prevStateRoot));
             }
             System.out.println("交易" + i + ", 耗时：" + (System.currentTimeMillis() - transactionStart) + "ms");
         }
@@ -195,7 +195,7 @@ public class VoteTest {
 //        track.commit();
 //        System.out.println("提交耗时：" + (System.currentTimeMillis() - commitStart) + "ms");
 
-        //System.out.println("stateRoot: " + Hex.toHexString(track.getRoot()));
+        //System.out.println("stateRoot: " + HexUtil.encode(track.getRoot()));
         //System.out.println("总耗时：" + (System.currentTimeMillis() - start) + "ms");
         return prevStateRoot;
     }

@@ -17,7 +17,7 @@
  */
 package org.ethereum.trie;
 
-import org.spongycastle.util.encoders.Hex;
+import io.nuls.tools.crypto.HexUtil;
 
 /**
  * @author Roman Mandeleil
@@ -30,7 +30,7 @@ public class TraceAllNodes implements TrieImpl.ScanAction {
     @Override
     public void doOnNode(byte[] hash, TrieImpl.Node node) {
 
-        output.append(Hex.toHexString(hash)).append(" ==> ").append(node.toString()).append("\n");
+        output.append(HexUtil.encode(hash)).append(" ==> ").append(node.toString()).append("\n");
     }
 
     @Override

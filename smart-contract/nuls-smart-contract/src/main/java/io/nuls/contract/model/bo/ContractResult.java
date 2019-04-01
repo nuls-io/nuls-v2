@@ -32,8 +32,6 @@ import io.nuls.contract.model.txdata.ContractData;
 import io.nuls.contract.vm.program.ProgramTransfer;
 import io.nuls.tools.crypto.HexUtil;
 import lombok.Data;
-import lombok.Getter;
-import lombok.Setter;
 
 import java.math.BigInteger;
 import java.util.ArrayList;

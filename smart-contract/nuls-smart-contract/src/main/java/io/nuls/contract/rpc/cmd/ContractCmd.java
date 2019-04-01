@@ -44,7 +44,7 @@ import io.nuls.rpc.model.message.Response;
 import io.nuls.tools.basic.Result;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
-import org.spongycastle.util.encoders.Hex;
+import io.nuls.tools.crypto.HexUtil;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -104,7 +104,7 @@ public class ContractCmd extends BaseCmd {
             String txHex = (String) params.get("txHex");
             ContractTempTransaction tx = new ContractTempTransaction();
             tx.setTxHex(txHex);
-            tx.parse(Hex.decode(txHex), 0);
+            tx.parse(HexUtil.decode(txHex), 0);
             Result result = contractService.validContractTx(chainId, tx);
             if (result.isFailed()) {
                 return failed(result.getErrorCode());
@@ -156,13 +156,13 @@ public class ContractCmd extends BaseCmd {
             List<Transaction> resultTxList = dto.getResultTxList();
             for (Transaction resultTx : resultTxList) {
                 Log.info("Batch txType is [{}], hash is [{}]", resultTx.getType(), resultTx.getHash().toString());
-                resultTxHexList.add(Hex.toHexString(resultTx.serialize()));
+                resultTxHexList.add(HexUtil.encode(resultTx.serialize()));
             }
 
             Map<String, Object> resultMap = MapUtil.createHashMap(2);
-            resultMap.put("stateRoot", Hex.toHexString(dto.getStateRoot()));
+            resultMap.put("stateRoot", HexUtil.encode(dto.getStateRoot()));
             resultMap.put("txHexList", resultTxHexList);
-            Log.info("[End Contract Batch] packaging blockHeight is [{}], packaging StateRoot is [{}]", blockHeight, Hex.toHexString(dto.getStateRoot()));
+            Log.info("[End Contract Batch] packaging blockHeight is [{}], packaging StateRoot is [{}]", blockHeight, HexUtil.encode(dto.getStateRoot()));
             return success(resultMap);
         } catch (Exception e) {
             Log.error(e);
@@ -179,7 +179,7 @@ public class ContractCmd extends BaseCmd {
             Integer chainId = (Integer) params.get("chainId");
             String txHex = (String) params.get("txHex");
             CreateContractTransaction tx = new CreateContractTransaction();
-            tx.parse(Hex.decode(txHex), 0);
+            tx.parse(HexUtil.decode(txHex), 0);
             Map<String, Boolean> result = new HashMap<>(2);
             if (tx.getType() != TX_TYPE_CREATE_CONTRACT) {
                 return failed("non create contract tx");
@@ -204,7 +204,7 @@ public class ContractCmd extends BaseCmd {
             Integer chainId = (Integer) params.get("chainId");
             String txHex = (String) params.get("txHex");
             CallContractTransaction tx = new CallContractTransaction();
-            tx.parse(Hex.decode(txHex), 0);
+            tx.parse(HexUtil.decode(txHex), 0);
             Map<String, Boolean> result = new HashMap<>(2);
             if (tx.getType() != TX_TYPE_CALL_CONTRACT) {
                 return failed("non call contract tx");
@@ -229,7 +229,7 @@ public class ContractCmd extends BaseCmd {
             Integer chainId = (Integer) params.get("chainId");
             String txHex = (String) params.get("txHex");
             DeleteContractTransaction tx = new DeleteContractTransaction();
-            tx.parse(Hex.decode(txHex), 0);
+            tx.parse(HexUtil.decode(txHex), 0);
             Map<String, Boolean> result = new HashMap<>(2);
             if (tx.getType() != TX_TYPE_DELETE_CONTRACT) {
                 return failed("non delete contract tx");

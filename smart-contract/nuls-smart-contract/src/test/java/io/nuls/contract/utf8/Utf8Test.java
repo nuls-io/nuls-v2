@@ -21,45 +21,28 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package io.nuls.contract.model.bo;
+package io.nuls.contract.utf8;
 
-import io.nuls.base.data.BlockHeader;
-import io.nuls.base.data.Transaction;
-import io.nuls.contract.model.txdata.ContractData;
-import lombok.Data;
+import io.nuls.contract.util.Log;
+import io.nuls.rpc.util.RPCUtil;
+import org.junit.Test;
+
+import java.math.BigInteger;
+import java.util.Arrays;
 
 /**
  * @author: PierreLuo
- * @date: 2019-02-27
+ * @date: 2019-04-01
  */
-@Data
-public class ContractWrapperTransaction extends Transaction {
+public class Utf8Test {
 
-    private String txHex;
-
-    private ContractResult contractResult;
-
-    private ContractData contractData;
-
-    /**
-     * 接收到的交易顺序
-     */
-    private int order;
-
-    private BlockHeader blockHeader;
-
-    public ContractWrapperTransaction(Transaction tx, String txHex, ContractData contractData) {
-        this.txHex = txHex;
-        this.contractData = contractData;
-        this.copyTx(tx);
-    }
-
-    private void copyTx(Transaction tx) {
-        this.setType(tx.getType());
-        this.setCoinData(tx.getCoinData());
-        this.setTxData(tx.getTxData());
-        this.setTime(tx.getTime());
-        this.setTransactionSignature(tx.getTransactionSignature());
-        this.setRemark(tx.getRemark());
+    @Test
+    public void test() {
+        BigInteger big = new BigInteger("4575686876978963521234324564567568679789632426456767978946235346");
+        byte[] bytes = big.toByteArray();
+        String encodeStr = RPCUtil.encode(bytes);
+        Log.info("encode str is {}", encodeStr);
+        byte[] decodeBytes = RPCUtil.decode(encodeStr);
+        Log.info("compare bytes result is {}", Arrays.equals(bytes, decodeBytes));
     }
 }

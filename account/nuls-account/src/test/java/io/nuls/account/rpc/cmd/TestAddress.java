@@ -30,10 +30,10 @@ import io.nuls.base.basic.AddressTool;
 import io.nuls.base.constant.BaseConstant;
 import io.nuls.base.data.Address;
 import io.nuls.tools.crypto.ECKey;
+import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.parse.SerializeUtils;
 import org.junit.Test;
-import org.spongycastle.util.encoders.Hex;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -71,7 +71,7 @@ public class TestAddress {
         System.out.println();
         System.out.println();
         for(Account account : list) {
-            System.out.println("importPriKey(\""+ Hex.toHexString(account.getPriKey()) +"\", password);//"+(start++)+" "+account.getAddress().toString());
+            System.out.println("importPriKey(\""+ HexUtil.encode(account.getPriKey()) +"\", password);//"+(start++)+" "+account.getAddress().toString());
         }
         System.out.println();
         System.out.println();

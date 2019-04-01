@@ -20,10 +20,10 @@ package org.ethereum.config;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 import com.typesafe.config.ConfigRenderOptions;
+import io.nuls.tools.crypto.HexUtil;
 import org.ethereum.util.ByteUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.spongycastle.util.encoders.Hex;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -596,7 +596,7 @@ public class SystemProperties {
         if (!config.hasPath("sync.fast.pivotBlockHash")) {
             return null;
         }
-        byte[] ret = Hex.decode(config.getString("sync.fast.pivotBlockHash"));
+        byte[] ret = HexUtil.decode(config.getString("sync.fast.pivotBlockHash"));
         if (ret.length != 32) {
             throw new RuntimeException("Invalid block hash length: " + toHexString(ret));
         }
@@ -657,7 +657,7 @@ public class SystemProperties {
     public byte[] getMineExtraData() {
         byte[] bytes;
         if (config.hasPath("mine.extraDataHex")) {
-            bytes = Hex.decode(config.getString("mine.extraDataHex"));
+            bytes = HexUtil.decode(config.getString("mine.extraDataHex"));
         } else {
             bytes = config.getString("mine.extraData").getBytes();
         }

@@ -17,7 +17,7 @@
  */
 package org.ethereum.util;
 
-import org.spongycastle.util.encoders.Hex;
+import io.nuls.tools.crypto.HexUtil;
 
 import java.io.Serializable;
 
@@ -49,7 +49,7 @@ public class DecodeResult implements Serializable {
         if (decoded instanceof String) {
             return (String) decoded;
         } else if (decoded instanceof byte[]) {
-            return Hex.toHexString((byte[]) decoded);
+            return HexUtil.encode((byte[]) decoded);
         } else if (decoded instanceof Object[]) {
             String result = "";
             for (Object item : (Object[]) decoded) {

@@ -47,9 +47,9 @@ import io.nuls.tools.basic.Result;
 import io.nuls.tools.basic.VarInt;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
+import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.model.ArraysTool;
-import org.spongycastle.util.encoders.Hex;
 
 import java.io.IOException;
 import java.math.BigInteger;
@@ -92,7 +92,7 @@ public class ContractTxServiceImpl implements ContractTxService {
             AccountCall.transactionSignature(chainId, sender, password, tx);
 
             // 广播交易
-            boolean broadcast = TransactionCall.newTx(chainId, Hex.toHexString(tx.serialize()));
+            boolean broadcast = TransactionCall.newTx(chainId, HexUtil.encode(tx.serialize()));
             if (!broadcast) {
                 return getFailed();
             }
@@ -164,7 +164,7 @@ public class ContractTxServiceImpl implements ContractTxService {
             byte[] infoKey = unConfirmedTokenTransferResult.getData();
 
             // 广播交易
-            boolean broadcast = TransactionCall.newTx(chainId, Hex.toHexString(tx.serialize()));
+            boolean broadcast = TransactionCall.newTx(chainId, HexUtil.encode(tx.serialize()));
             if (!broadcast) {
                 return getFailed();
             }
@@ -292,7 +292,7 @@ public class ContractTxServiceImpl implements ContractTxService {
             AccountCall.transactionSignature(chainId, sender, password, tx);
 
             // 广播交易
-            boolean broadcast = TransactionCall.newTx(chainId, Hex.toHexString(tx.serialize()));
+            boolean broadcast = TransactionCall.newTx(chainId, HexUtil.encode(tx.serialize()));
             if (!broadcast) {
                 return getFailed();
             }

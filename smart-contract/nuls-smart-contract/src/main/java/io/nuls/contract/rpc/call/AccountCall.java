@@ -33,9 +33,9 @@ import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.model.message.Response;
 import io.nuls.rpc.netty.processor.ResponseMessageProcessor;
 import io.nuls.tools.basic.Result;
+import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.model.StringUtils;
-import org.spongycastle.util.encoders.Hex;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -90,13 +90,13 @@ public class AccountCall {
             callParams.put("chainId", chainId);
             callParams.put("address", address);
             callParams.put("password", password);
-            callParams.put("dataHex", Hex.toHexString(tx.getHash().getDigestBytes()));
+            callParams.put("dataHex", HexUtil.encode(tx.getHash().getDigestBytes()));
             Response signResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_signDigest", callParams);
             if (!signResp.isSuccess()) {
                 throw new NulsException(SIGNATURE_ERROR);
             }
             HashMap signResult = (HashMap) ((HashMap) signResp.getResponseData()).get("ac_signDigest");
-            p2PHKSignature.parse(Hex.decode((String) signResult.get("signatureHex")), 0);
+            p2PHKSignature.parse(HexUtil.decode((String) signResult.get("signatureHex")), 0);
             TransactionSignature signature = new TransactionSignature();
             List<P2PHKSignature> p2PHKSignatures = new ArrayList<>();
             p2PHKSignatures.add(p2PHKSignature);

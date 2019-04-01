@@ -27,9 +27,9 @@ package io.nuls.contract.model.dto;
 import io.nuls.base.basic.AddressTool;
 import io.nuls.contract.model.po.ContractTokenTransferInfoPo;
 import io.nuls.contract.util.ContractUtil;
+import io.nuls.tools.crypto.HexUtil;
 import lombok.Getter;
 import lombok.Setter;
-import org.spongycastle.util.encoders.Hex;
 
 /**
  * @author: PierreLuo
@@ -63,7 +63,7 @@ public class ContractTokenTransferTransactionDto {
         this.value = ContractUtil.bigInteger2String(po.getValue());
         this.time = po.getTime();
         this.status = po.getStatus();
-        this.txHash = Hex.toHexString(po.getTxHash());
+        this.txHash = HexUtil.encode(po.getTxHash());
         this.blockHeight = po.getBlockHeight();
         this.name = po.getName();
         this.symbol = po.getSymbol();

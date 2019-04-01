@@ -36,7 +36,6 @@ import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
 import lombok.Getter;
 import lombok.Setter;
-import org.spongycastle.util.encoders.Hex;
 
 import java.math.BigInteger;
 import java.util.List;
@@ -79,7 +78,7 @@ public class ContractExecutorImpl implements ContractExecutor {
         //contractResult.setNonce(programResult.getNonce());
         contractResult.setGasUsed(programResult.getGasUsed());
         contractResult.setPrice(price);
-        //contractResult.setStateRoot(Hex.decode(preStateRoot));
+        //contractResult.setStateRoot(HexUtil.decode(preStateRoot));
         //contractResult.setBalance(programResult.getBalance());
         contractResult.setContractAddress(contractAddress);
         contractResult.setSender(sender);
@@ -128,7 +127,7 @@ public class ContractExecutorImpl implements ContractExecutor {
         //contractResult.setNonce(programResult.getNonce());
         contractResult.setGasUsed(programResult.getGasUsed());
         contractResult.setPrice(price);
-        //contractResult.setStateRoot(Hex.decode(preStateRoot));
+        //contractResult.setStateRoot(HexUtil.decode(preStateRoot));
         //contractResult.setBalance(programResult.getBalance());
         contractResult.setContractAddress(contractAddress);
         contractResult.setSender(sender);
@@ -173,7 +172,7 @@ public class ContractExecutorImpl implements ContractExecutor {
 
         //contractResult.setNonce(programResult.getNonce());
         contractResult.setGasUsed(programResult.getGasUsed());
-        //contractResult.setStateRoot(Hex.decode(preStateRoot));
+        //contractResult.setStateRoot(HexUtil.decode(preStateRoot));
         //contractResult.setBalance(programResult.getBalance());
         contractResult.setContractAddress(contractAddress);
         contractResult.setSender(sender);
