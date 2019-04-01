@@ -152,7 +152,7 @@ public class TransactionUtil {
             List<String> list = new ArrayList<>();
             txHashList.forEach(e -> list.add(e.getDigestHex()));
             params.put("txHashList", list);
-            params.put("blockHeaderHex", RPCUtil.encode(BlockUtil.fromBlockHeaderPo(blockHeaderPo).serialize()));
+            params.put("blockHeader", RPCUtil.encode(BlockUtil.fromBlockHeaderPo(blockHeaderPo).serialize()));
             Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.TX.abbr, "tx_save", params);
             if (response.isSuccess()) {
                 Map responseData = (Map) response.getResponseData();
@@ -184,7 +184,7 @@ public class TransactionUtil {
             List<String> list = new ArrayList<>();
             txHashList.forEach(e -> list.add(e.getDigestHex()));
             params.put("txHashList", list);
-            params.put("blockHeaderHex", RPCUtil.encode(BlockUtil.fromBlockHeaderPo(blockHeaderPo).serialize()));
+            params.put("blockHeader", RPCUtil.encode(BlockUtil.fromBlockHeaderPo(blockHeaderPo).serialize()));
             Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.TX.abbr, "tx_rollback", params);
             if (response.isSuccess()) {
                 Map responseData = (Map) response.getResponseData();
@@ -221,7 +221,7 @@ public class TransactionUtil {
             if (response.isSuccess()) {
                 Map responseData = (Map) response.getResponseData();
                 Map map = (Map) responseData.get("tx_getBlockTxs");
-                List<String> txHexList = (List<String>) map.get("txHexList");
+                List<String> txHexList = (List<String>) map.get("txList");
                 if (txHexList == null || txHexList.size() == 0) {
                     return null;
                 }
@@ -267,7 +267,7 @@ public class TransactionUtil {
             if (response.isSuccess()) {
                 Map responseData = (Map) response.getResponseData();
                 Map map = (Map) responseData.get("tx_getBlockTxsExtend");
-                List<String> txHexList = (List<String>) map.get("txHexList");
+                List<String> txHexList = (List<String>) map.get("txList");
                 if (txHexList == null || txHexList.size() == 0) {
                     return null;
                 }
@@ -305,7 +305,7 @@ public class TransactionUtil {
             if (response.isSuccess()) {
                 Map responseData = (Map) response.getResponseData();
                 Map map = (Map) responseData.get("tx_getTx");
-                String txHex = (String) map.get("txHex");
+                String txHex = (String) map.get("tx");
                 if (txHex == null) {
                     return null;
                 }
@@ -340,7 +340,7 @@ public class TransactionUtil {
             if (response.isSuccess()) {
                 Map responseData = (Map) response.getResponseData();
                 Map map = (Map) responseData.get("tx_getConfirmedTx");
-                String txHex = (String) map.get("txHex");
+                String txHex = (String) map.get("tx");
                 if (txHex == null) {
                     return null;
                 }
@@ -378,8 +378,8 @@ public class TransactionUtil {
                     e1.printStackTrace();
                 }
             });
-            params.put("txHexList", list);
-            params.put("blockHeaderHex", RPCUtil.encode(BlockUtil.fromBlockHeaderPo(blockHeaderPo).serialize()));
+            params.put("txList", list);
+            params.put("blockHeader", RPCUtil.encode(BlockUtil.fromBlockHeaderPo(blockHeaderPo).serialize()));
             Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.TX.abbr, "tx_gengsisSave", params);
             if (response.isSuccess()) {
                 Map responseData = (Map) response.getResponseData();

@@ -10,7 +10,7 @@ import io.nuls.poc.model.bo.ChargeResultData;
 import io.nuls.poc.model.bo.round.MeetingMember;
 import io.nuls.poc.model.bo.round.MeetingRound;
 import io.nuls.poc.model.bo.tx.txdata.Deposit;
-import io.nuls.poc.utils.CallMethodUtils;
+import io.nuls.poc.rpc.call.CallMethodUtils;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.exception.NulsException;

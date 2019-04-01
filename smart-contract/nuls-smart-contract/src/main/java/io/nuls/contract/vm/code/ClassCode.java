@@ -143,14 +143,14 @@ public class ClassCode {
      * will break existing code using it</b>. The internal name of the nest host class of this class.
      * May be <tt>null</tt>.
      */
-    public final String nestHostClassExperimental;
+    public final String nestHostClass;
 
     /**
      * <b>Experimental, use at your own risk. This field will be renamed when it becomes stable, this
      * will break existing code using it</b>. The internal names of the nest members of this class.
      * May be <tt>null</tt>.
      */
-    public final List<String> nestMembersExperimental;
+    public final List<String> nestMembers;
 
     /**
      * The fields of this class.
@@ -198,8 +198,8 @@ public class ClassCode {
         invisibleTypeAnnotations = ListUtils.emptyIfNull(classNode.invisibleTypeAnnotations);
         attrs = ListUtils.emptyIfNull(classNode.attrs);
         innerClasses = ListUtils.emptyIfNull(classNode.innerClasses);
-        nestHostClassExperimental = classNode.nestHostClassExperimental;
-        nestMembersExperimental = ListUtils.emptyIfNull(classNode.nestMembersExperimental);
+        nestHostClass = classNode.nestHostClass;
+        nestMembers = ListUtils.emptyIfNull(classNode.nestMembers);
         //fields = ListUtils.emptyIfNull(classNode.fields);
         //methods = ListUtils.emptyIfNull(classNode.methods);
         final List<FieldNode> fieldNodes = ListUtils.emptyIfNull(classNode.fields);

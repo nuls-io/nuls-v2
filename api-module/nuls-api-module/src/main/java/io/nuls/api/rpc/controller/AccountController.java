@@ -34,6 +34,7 @@ import io.nuls.api.model.rpc.RpcResult;
 import io.nuls.api.model.rpc.RpcResultError;
 import io.nuls.api.provider.Result;
 import io.nuls.api.provider.ServiceManager;
+import io.nuls.api.provider.account.facade.BackupAccountReq;
 import io.nuls.api.provider.account.facade.CreateAccountReq;
 import io.nuls.api.utils.VerifyUtils;
 import io.nuls.base.basic.AddressTool;
@@ -175,34 +176,6 @@ public class AccountController {
             pageInfo = new PageInfo<>(pageIndex, pageSize);
         }
         return new RpcResult().setResult(pageInfo);
-    }
-
-    @RpcMethod("createAccount")
-    public RpcResult createAccount(List<Object> params) {
-        VerifyUtils.verifyParams(params, 3);
-        int chainId, count;
-        String password;
-        try {
-            chainId = (int) params.get(0);
-            count = (int) params.get(1);
-            password = (String) params.get(2);
-        } catch (Exception e) {
-            return RpcResult.paramError();
-        }
-        if (!FormatValidUtils.validPassword(password)) {
-            return RpcResult.paramError("[password] is inValid");
-        }
-
-        CreateAccountReq req = new CreateAccountReq(count, password);
-        Result<String> result = cmdAccountService.createAccount(req);
-        RpcResult rpcResult = new RpcResult();
-        if (result.getMessage() != null) {
-            RpcResultError error = new RpcResultError(result.getStatus(), result.getMessage(), null);
-            rpcResult.setError(error);
-        } else {
-            rpcResult.setResult(result.getList());
-        }
-        return rpcResult;
     }
 
 //    @RpcMethod("getAccountTokens")

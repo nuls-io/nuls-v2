@@ -1,4 +1,4 @@
-package io.nuls.poc.utils;
+package io.nuls.poc.rpc.call;
 
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.BlockExtendsData;
@@ -12,19 +12,18 @@ import io.nuls.poc.constant.ConsensusConstant;
 import io.nuls.poc.constant.ConsensusErrorCode;
 import io.nuls.poc.model.bo.Chain;
 import io.nuls.poc.model.bo.tx.TxRegisterDetail;
+import io.nuls.poc.utils.compare.BlockHeaderComparator;
 import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.model.message.Response;
 import io.nuls.rpc.netty.processor.ResponseMessageProcessor;
+import io.nuls.rpc.util.RPCUtil;
 import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.log.Log;
 import io.nuls.tools.model.StringUtils;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * 公共远程方法调用工具类
@@ -88,13 +87,13 @@ public class CallMethodUtils {
                 callParams.put("chainId", chainId);
                 callParams.put("address", address);
                 callParams.put("password", password);
-                callParams.put("dataHex", HexUtil.encode(tx.getHash().getDigestBytes()));
+                callParams.put("data", RPCUtil.encode(tx.getHash().getDigestBytes()));
                 Response signResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_signDigest", callParams);
                 if (!signResp.isSuccess()) {
                     throw new NulsException(ConsensusErrorCode.TX_SIGNTURE_ERROR);
                 }
                 HashMap signResult = (HashMap) ((HashMap) signResp.getResponseData()).get("ac_signDigest");
-                p2PHKSignature.parse(HexUtil.decode((String) signResult.get("signatureHex")), 0);
+                p2PHKSignature.parse(RPCUtil.decode((String) signResult.get("signature")), 0);
             }
             TransactionSignature signature = new TransactionSignature();
             List<P2PHKSignature> p2PHKSignatures = new ArrayList<>();
@@ -118,20 +117,18 @@ public class CallMethodUtils {
      */
     public static void blockSignature(Chain chain, String address, BlockHeader header) throws NulsException {
         try {
-            /*Properties properties = ConfigLoader.loadProperties(ConsensusConstant.PASSWORD_CONFIG_NAME);
-            String password = properties.getProperty(ConsensusConstant.PASSWORD, ConsensusConstant.PASSWORD);*/
             Map<String, Object> callParams = new HashMap<>(4);
             callParams.put("chainId", chain.getConfig().getChainId());
             callParams.put("address", address);
             callParams.put("password", chain.getConfig().getPassword());
-            callParams.put("dataHex", HexUtil.encode(header.getHash().getDigestBytes()));
+            callParams.put("data", RPCUtil.encode(header.getHash().getDigestBytes()));
             Response signResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_signBlockDigest", callParams);
             if (!signResp.isSuccess()) {
                 throw new NulsException(ConsensusErrorCode.TX_SIGNTURE_ERROR);
             }
             HashMap signResult = (HashMap) ((HashMap) signResp.getResponseData()).get("ac_signBlockDigest");
             BlockSignature blockSignature = new BlockSignature();
-            blockSignature.parse(HexUtil.decode((String) signResult.get("signatureHex")), 0);
+            blockSignature.parse(RPCUtil.decode((String) signResult.get("signature")), 0);
             header.setBlockSignature(blockSignature);
         } catch (NulsException e) {
             throw e;
@@ -155,8 +152,6 @@ public class CallMethodUtils {
         params.put("block", block);
         try {
             ResponseMessageProcessor.requestAndResponse(ModuleE.BL.abbr, "receivePackingBlock", params,timeOut);
-            //Response callResp =
-            //return callResp.isSuccess();
         } catch (Exception e) {
             throw new NulsException(e);
         }
@@ -297,32 +292,18 @@ public class CallMethodUtils {
             }
             params.put("endTimestamp", blockTime - PROCESS_TIME);
             params.put("maxTxDataSize", chain.getConfig().getBlockMaxSize());
-            //params.put("height", height);
             params.put("blockTime", blockTime);
             params.put("packingAddress", packingAddress);
             BlockExtendsData preExtendsData = new BlockExtendsData(chain.getNewestHeader().getExtend());
             byte[] preStateRoot = preExtendsData.getStateRoot();
-            params.put("preStateRoot", HexUtil.encode(preStateRoot));
+            params.put("preStateRoot", RPCUtil.encode(preStateRoot));
             Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.TX.abbr, "tx_packableTxs", params,surplusTime-TIME_OUT);
             if (!cmdResp.isSuccess()) {
                 chain.getLoggerMap().get(ConsensusConstant.CONSENSUS_LOGGER_NAME).error("Packaging transaction acquisition failure!");
                 return null;
             }
             return (HashMap) ((HashMap) cmdResp.getResponseData()).get("tx_packableTxs");
-            /*List<String> txHexList = (List) signResult.get("list");
-            List<Transaction> txList = new ArrayList<>();
-            for (String txHex : txHexList) {
-                Transaction tx = new Transaction();
-                tx.parse(HexUtil.decode(txHex), 0);
-                txList.add(tx);
-            }
-            String stateRoot = (String) signResult.get("stateRoot");
-            if (StringUtils.isBlank(stateRoot)) {
-                extendsData.setStateRoot(preStateRoot);
-            }else{
-                extendsData.setStateRoot(HexUtil.decode(stateRoot));
-            }
-            return txList;*/
+
         } catch (Exception e) {
             chain.getLoggerMap().get(ConsensusConstant.CONSENSUS_LOGGER_NAME).error(e);
             return null;
@@ -350,9 +331,9 @@ public class CallMethodUtils {
             Map responseData = (Map) cmdResp.getResponseData();
             Transaction tx = new Transaction();
             Map realData = (Map) responseData.get("tx_getConfirmedTx");
-            String txHex = (String) realData.get("txHex");
+            String txHex = (String) realData.get("tx");
             if (!StringUtils.isBlank(txHex)) {
-                tx.parse(HexUtil.decode(txHex), 0);
+                tx.parse(RPCUtil.decode(txHex), 0);
             }
             return tx;
         } catch (Exception e) {
@@ -374,7 +355,7 @@ public class CallMethodUtils {
         try {
             Map<String, Object> params = new HashMap(4);
             params.put("chainId", chain.getConfig().getChainId());
-            params.put("txHex", txHex);
+            params.put("tx", txHex);
             Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.TX.abbr, "tx_newTx", params);
             if (!cmdResp.isSuccess()) {
                 chain.getLoggerMap().get(ConsensusConstant.CONSENSUS_LOGGER_NAME).error("Transaction failed to send!");
@@ -469,4 +450,43 @@ public class CallMethodUtils {
         return alias;
     }
 
+    /**
+     * 初始化链区块头数据，缓存指定数量的区块头
+     * Initialize chain block header entity to cache a specified number of block headers
+     *
+     * @param chain chain info
+     */
+    @SuppressWarnings("unchecked")
+    public static void loadBlockHeader(Chain chain)throws Exception{
+        Map params = new HashMap(ConsensusConstant.INIT_CAPACITY);
+        params.put("chainId", chain.getConfig().getChainId());
+        params.put("round", ConsensusConstant.INIT_BLOCK_HEADER_COUNT);
+        Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.BL.abbr, "getLatestRoundBlockHeaders", params);
+        Map<String, Object> resultMap;
+        List<String> blockHeaderHexs = new ArrayList<>();
+        if (cmdResp.isSuccess()) {
+            resultMap = (Map<String, Object>) cmdResp.getResponseData();
+            blockHeaderHexs = (List<String>) resultMap.get("getLatestRoundBlockHeaders");
+        }
+        while (!cmdResp.isSuccess() && blockHeaderHexs.size() == 0) {
+            cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.BL.abbr, "getLatestRoundBlockHeaders", params);
+            if (cmdResp.isSuccess()) {
+                resultMap = (Map<String, Object>) cmdResp.getResponseData();
+                blockHeaderHexs = (List<String>) resultMap.get("getLatestRoundBlockHeaders");
+                break;
+            }
+            Log.info("---------------------------区块加载失败！");
+            Thread.sleep(1000);
+        }
+        List<BlockHeader> blockHeaders = new ArrayList<>();
+        for (String blockHeaderHex : blockHeaderHexs) {
+            BlockHeader blockHeader = new BlockHeader();
+            blockHeader.parse(RPCUtil.decode(blockHeaderHex), 0);
+            blockHeaders.add(blockHeader);
+        }
+        Collections.sort(blockHeaders, new BlockHeaderComparator());
+        chain.setBlockHeaderList(blockHeaders);
+        chain.setNewestHeader(blockHeaders.get(blockHeaders.size() - 1));
+        Log.info("---------------------------区块加载成功！");
+    }
 }

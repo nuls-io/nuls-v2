@@ -57,9 +57,9 @@ public class BlockCall {
             Map<String, Object> params = new HashMap<>(4);
             params.put(Constants.VERSION_KEY_STR, "1.0");
             params.put("chainId", chainId);
-            String blockHeaderHex = (String) CallHelper.request(ModuleE.BL.abbr, "latestBlockHeader", params);
+            String blockHeaderData = (String) CallHelper.request(ModuleE.BL.abbr, "latestBlockHeader", params);
             BlockHeader header = new BlockHeader();
-            header.parse(RPCUtil.decode(blockHeaderHex), 0);
+            header.parse(RPCUtil.decode(blockHeaderData), 0);
             return header;
         } catch (Exception e) {
             throw new NulsException(e);
@@ -72,9 +72,9 @@ public class BlockCall {
             params.put(Constants.VERSION_KEY_STR, "1.0");
             params.put("chainId", chainId);
             params.put("height", height);
-            String blockHeaderHex = (String) CallHelper.request(ModuleE.BL.abbr, "getBlockHeaderByHeight", params);
+            String blockHeaderData = (String) CallHelper.request(ModuleE.BL.abbr, "getBlockHeaderByHeight", params);
             BlockHeader header = new BlockHeader();
-            header.parse(RPCUtil.decode(blockHeaderHex), 0);
+            header.parse(RPCUtil.decode(blockHeaderData), 0);
             return header;
         } catch (Exception e) {
             throw new NulsException(e);
@@ -87,9 +87,9 @@ public class BlockCall {
             params.put(Constants.VERSION_KEY_STR, "1.0");
             params.put("chainId", chainId);
             params.put("hash", hash);
-            String blockHeaderHex = (String) CallHelper.request(ModuleE.BL.abbr, "getBlockHeaderByHash", params);
+            String blockHeaderData = (String) CallHelper.request(ModuleE.BL.abbr, "getBlockHeaderByHash", params);
             BlockHeader header = new BlockHeader();
-            header.parse(RPCUtil.decode(blockHeaderHex), 0);
+            header.parse(RPCUtil.decode(blockHeaderData), 0);
             return header;
         } catch (Exception e) {
             throw new NulsException(e);
