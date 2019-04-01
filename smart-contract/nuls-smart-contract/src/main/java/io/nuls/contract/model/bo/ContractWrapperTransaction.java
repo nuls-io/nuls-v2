@@ -27,8 +27,6 @@ import io.nuls.base.data.BlockHeader;
 import io.nuls.base.data.Transaction;
 import io.nuls.contract.model.txdata.ContractData;
 import lombok.Data;
-import lombok.Getter;
-import lombok.Setter;
 
 /**
  * @author: PierreLuo

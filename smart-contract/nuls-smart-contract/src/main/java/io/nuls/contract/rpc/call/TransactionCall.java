@@ -26,9 +26,9 @@ package io.nuls.contract.rpc.call;
 import io.nuls.base.data.Transaction;
 import io.nuls.contract.rpc.CallHelper;
 import io.nuls.rpc.model.ModuleE;
+import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.model.StringUtils;
-import org.spongycastle.util.encoders.Hex;
 
 import java.util.HashMap;
 import java.util.List;
@@ -79,7 +79,7 @@ public class TransactionCall {
                 return null;
             }
             Transaction tx = new Transaction();
-            tx.parse(Hex.decode(txHex), 0);
+            tx.parse(HexUtil.decode(txHex), 0);
             return tx;
         } catch (Exception e) {
             throw new NulsException(e);

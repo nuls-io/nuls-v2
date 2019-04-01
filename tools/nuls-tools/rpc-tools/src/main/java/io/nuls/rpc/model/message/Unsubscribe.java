@@ -24,7 +24,6 @@
  */
 package io.nuls.rpc.model.message;
 
-import lombok.*;
 
 /**
  * 取消订阅
@@ -33,7 +32,7 @@ import lombok.*;
  * @author tangyi
  * @date 2018/11/15
  */
-@ToString
+
 public class Unsubscribe {
     /**
      * An array that holds all methods that the caller wants to unsubscribe

@@ -33,12 +33,12 @@ import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.model.message.Response;
 import io.nuls.rpc.netty.processor.ResponseMessageProcessor;
+import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.model.StringUtils;
 import io.nuls.tools.parse.JSONUtils;
 import org.apache.commons.io.IOUtils;
 import org.junit.Assert;
 import org.junit.Test;
-import org.spongycastle.util.encoders.Hex;
 
 import java.io.FileInputStream;
 import java.io.InputStream;
@@ -161,7 +161,7 @@ public class ContractNRC20TokenSendTxTest extends BaseQuery {
         params.put("password", password);
         params.put("gasLimit", 200000L);
         params.put("price", 25);
-        params.put("contractCode", Hex.toHexString(contractCode));
+        params.put("contractCode", HexUtil.encode(contractCode));
         params.put("args", args);
         params.put("remark", remark);
         return params;

@@ -26,7 +26,6 @@ import io.nuls.base.data.NulsDigestData;
 import io.nuls.block.message.base.BaseMessage;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.parse.SerializeUtils;
-import lombok.Data;
 
 import java.io.IOException;
 
@@ -37,7 +36,6 @@ import java.io.IOException;
  * @version 1.0
  * @date 18-11-9 下午2:37
  */
-@Data
 public class CompleteMessage extends BaseMessage {
 
     private NulsDigestData requestHash;
@@ -50,6 +48,22 @@ public class CompleteMessage extends BaseMessage {
 
     public CompleteMessage() {
 
+    }
+
+    public NulsDigestData getRequestHash() {
+        return requestHash;
+    }
+
+    public void setRequestHash(NulsDigestData requestHash) {
+        this.requestHash = requestHash;
+    }
+
+    public boolean isSuccess() {
+        return success;
+    }
+
+    public void setSuccess(boolean success) {
+        this.success = success;
     }
 
     @Override

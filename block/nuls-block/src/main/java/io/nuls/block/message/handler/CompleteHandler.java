@@ -29,8 +29,8 @@ import io.nuls.rpc.cmd.BaseCmd;
 import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.model.CmdAnnotation;
 import io.nuls.rpc.model.message.Response;
+import io.nuls.rpc.util.RPCUtil;
 import io.nuls.tools.core.annotation.Component;
-import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.log.logback.NulsLogger;
 
@@ -56,7 +56,7 @@ public class CompleteHandler extends BaseCmd {
         CompleteMessage message = new CompleteMessage();
         NulsLogger messageLog = ContextManager.getContext(chainId).getMessageLog();
         try {
-            byte[] decode = HexUtil.decode(map.get("messageBody").toString());
+            byte[] decode = RPCUtil.decode(map.get("messageBody").toString());
             message.parse(new NulsByteBuffer(decode));
         } catch (NulsException e) {
             e.printStackTrace();

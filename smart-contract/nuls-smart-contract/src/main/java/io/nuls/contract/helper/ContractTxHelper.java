@@ -49,12 +49,12 @@ import io.nuls.tools.basic.Result;
 import io.nuls.tools.basic.VarInt;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
+import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.model.ArraysTool;
 import io.nuls.tools.model.LongUtils;
 import io.nuls.tools.model.StringUtils;
 import io.nuls.tools.thread.TimeService;
-import org.spongycastle.util.encoders.Hex;
 
 import java.io.IOException;
 import java.math.BigInteger;
@@ -220,7 +220,7 @@ public class ContractTxHelper {
         Chain chain = contractHelper.getChain(chainId);
         int assetsId = chain.getConfig().getAssetsId();
         ContractBalance senderBalance = contractHelper.getTempBalanceAndNonce(chainId, sender);
-        CoinFrom coinFrom = new CoinFrom(senderBytes, chainId, assetsId, totalValue, Hex.decode(senderBalance.getNonce()), UNLOCKED_TX);
+        CoinFrom coinFrom = new CoinFrom(senderBytes, chainId, assetsId, totalValue, HexUtil.decode(senderBalance.getNonce()), UNLOCKED_TX);
         coinData.addFrom(coinFrom);
 
         if (value.compareTo(BigInteger.ZERO) > 0) {

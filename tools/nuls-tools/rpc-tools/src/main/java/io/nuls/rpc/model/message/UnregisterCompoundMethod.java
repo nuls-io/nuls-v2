@@ -24,8 +24,6 @@
  */
 package io.nuls.rpc.model.message;
 
-import lombok.Data;
-import lombok.ToString;
 
 /**
  * 取消订阅多个远程方法
@@ -34,8 +32,7 @@ import lombok.ToString;
  * @author tangyi
  * @date 2018/11/15
  */
-@Data
-@ToString
+
 public class UnregisterCompoundMethod {
     /**
      * This is the string that identifies the virtual method.
@@ -43,4 +40,11 @@ public class UnregisterCompoundMethod {
      */
     private String unregisterCompoundMethodName;
 
+    public String getUnregisterCompoundMethodName() {
+        return unregisterCompoundMethodName;
+    }
+
+    public void setUnregisterCompoundMethodName(String unregisterCompoundMethodName) {
+        this.unregisterCompoundMethodName = unregisterCompoundMethodName;
+    }
 }

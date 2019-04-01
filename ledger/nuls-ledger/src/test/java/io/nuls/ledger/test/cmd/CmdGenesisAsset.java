@@ -26,11 +26,12 @@ package io.nuls.ledger.test.cmd;
 
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.*;
-import io.nuls.rpc.info.NoUse;
 import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.model.message.Response;
 import io.nuls.rpc.netty.processor.ResponseMessageProcessor;
+import io.nuls.rpc.util.RPCUtil;
 import io.nuls.tools.crypto.HexUtil;
+import io.nuls.tools.model.ByteUtils;
 import org.junit.Before;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -51,11 +52,12 @@ import java.util.Map;
 public class CmdGenesisAsset {
     public int chainId = 2;
     int assetChainId = 2;
-//    String address = "JgT2JCQvKGRKRjKqyfxRAj2zSCpGca01f";
+    //    String address = "JgT2JCQvKGRKRjKqyfxRAj2zSCpGca01f";
     String address = "tNULSeBaMvEtDfvZuukDf2mVyfGo3DdiN8KLRG";
     int assetId = 1;
     //入账金额
     BigInteger amount = BigInteger.valueOf(100000000000000L);
+
     Transaction buildTransaction() throws IOException {
         //封装交易执行
         Transaction tx = new Transaction();
@@ -66,9 +68,9 @@ public class CmdGenesisAsset {
         coinTo.setAssetsChainId(assetChainId);
         coinTo.setAssetsId(assetId);
         coinTo.setLockTime(0);
-        List<CoinFrom> coinFroms =new ArrayList<>();
+        List<CoinFrom> coinFroms = new ArrayList<>();
 //        coinFroms.add(coinFrom);
-        List<CoinTo> coinTos =new ArrayList<>();
+        List<CoinTo> coinTos = new ArrayList<>();
         coinTos.add(coinTo);
         coinData.setFrom(coinFroms);
         coinData.setTo(coinTos);
@@ -82,9 +84,10 @@ public class CmdGenesisAsset {
 
 
     final Logger logger = LoggerFactory.getLogger(getClass());
+
     @Before
     public void before() throws Exception {
-        NoUse.mockModule();
+//        NoUse.mockModule();
     }
 
 
@@ -99,15 +102,16 @@ public class CmdGenesisAsset {
         Transaction transaction = buildTransaction();
         List<String> txHexList = new ArrayList<>();
         txHexList.add(HexUtil.encode(transaction.serialize()));
-        params.put("txHex",HexUtil.encode(transaction.serialize()));
-         response = ResponseMessageProcessor.requestAndResponse(ModuleE.LG.abbr, "validateCoinData", params);
+        params.put("txHex", HexUtil.encode(transaction.serialize()));
+        response = ResponseMessageProcessor.requestAndResponse(ModuleE.LG.abbr, "validateCoinData", params);
         logger.info("response {}", response);
-        params.put("txHexList",txHexList);
-        params.put("blockHeight",0);
-        params.put("isConfirmTx",true);
+        params.put("txHexList", txHexList);
+        params.put("blockHeight", 0);
+        params.put("isConfirmTx", true);
         response = ResponseMessageProcessor.requestAndResponse(ModuleE.LG.abbr, "commitTx", params);
         logger.info("response {}", response);
     }
+
     @Test
     public void getBalanceNonce() throws Exception {
         // Build params map
@@ -121,5 +125,33 @@ public class CmdGenesisAsset {
 
         Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.LG.abbr, "getBalanceNonce", params);
         logger.info("response {}", response);
+    }
+
+    @Test
+    public void testHex() throws IOException {
+        TranList list = new TranList();
+        for (int i = 0; i < 10000; i++) {
+            Transaction tx = buildTransaction();
+            list.getTxs().add(tx);
+        }
+        byte[] bytes = list.serialize();
+        long time1 = System.currentTimeMillis();
+        String hex0 = HexUtil.encode(bytes);
+        long time2 = System.currentTimeMillis();
+        System.out.println("HexUtil.byteToHex useTime=" + (time2 - time1) + "==StringLenght=" + hex0.length());
+        String hex = HexUtil.encode(bytes);
+        long time3 = System.currentTimeMillis();
+        System.out.println("HexUtil.encode useTime=" + (time3 - time2) + "===StringLenght=" + hex.length());
+        String s = ByteUtils.asString(bytes);
+        long time4 = System.currentTimeMillis();
+        System.out.println(" ByteUtils.asString useTime=" + (time4 - time3) + "===StringLenght" + s.length());
+
+    }
+    @Test
+    public void testHex2() throws IOException {
+         String t="dfss3234234";
+        System.out.println(RPCUtil.encode(RPCUtil.decode(t)));
+
+
     }
 }

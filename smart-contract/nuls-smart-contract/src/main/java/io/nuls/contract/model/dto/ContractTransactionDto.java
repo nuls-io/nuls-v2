@@ -35,10 +35,10 @@ import io.nuls.contract.model.txdata.ContractData;
 import io.nuls.contract.model.txdata.ContractTransferData;
 import io.nuls.contract.rpc.call.BlockCall;
 import io.nuls.contract.util.MapUtil;
+import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.exception.NulsException;
 import lombok.Getter;
 import lombok.Setter;
-import org.spongycastle.util.encoders.Hex;
 
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -126,7 +126,7 @@ public class ContractTransactionDto {
             this.setRemark(new String(tx.getRemark(), StandardCharsets.UTF_8));
         }
         if (tx.getTransactionSignature() != null) {
-            this.setScriptSig(Hex.toHexString(tx.getTransactionSignature()));
+            this.setScriptSig(HexUtil.encode(tx.getTransactionSignature()));
         }
 
         CoinData coinData = tx.getCoinDataObj();

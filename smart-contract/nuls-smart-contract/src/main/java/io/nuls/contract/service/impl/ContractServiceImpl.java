@@ -48,8 +48,8 @@ import io.nuls.contract.vm.program.ProgramExecutor;
 import io.nuls.tools.basic.Result;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
+import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.exception.NulsException;
-import org.spongycastle.util.encoders.Hex;
 
 import java.util.List;
 import java.util.Map;
@@ -107,7 +107,7 @@ public class ContractServiceImpl implements ContractService {
         // 准备临时余额和当前区块头
         contractHelper.createTempBalanceManagerAndCurrentBlockHeader(chainId, blockHeight, blockTime, AddressTool.getAddress(packingAddress));
         // 准备批量执行器
-        ProgramExecutor batchExecutor = contractExecutor.createBatchExecute(chainId, Hex.decode(preStateRoot));
+        ProgramExecutor batchExecutor = contractExecutor.createBatchExecute(chainId, HexUtil.decode(preStateRoot));
         batchInfo.setBatchExecutor(batchExecutor);
         batchInfo.setPreStateRoot(preStateRoot);
         // 准备冲突检测器
@@ -277,7 +277,7 @@ public class ContractServiceImpl implements ContractService {
             Transaction tx;
             for (String txHex : txHexList) {
                 tx = new Transaction();
-                tx.parse(Hex.decode(txHex), 0);
+                tx.parse(HexUtil.decode(txHex), 0);
                 switch (tx.getType()) {
                     case TX_TYPE_CREATE_CONTRACT:
                         CreateContractData create = new CreateContractData();

@@ -34,12 +34,12 @@ import io.nuls.contract.vm.natives.io.nuls.contract.sdk.NativeAddress;
 import io.nuls.contract.vm.program.*;
 import io.nuls.contract.vm.program.impl.ProgramExecutorImpl;
 import io.nuls.db.service.RocksDBService;
+import io.nuls.tools.crypto.HexUtil;
 import org.apache.commons.io.IOUtils;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.spongycastle.util.encoders.Hex;
 
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -110,14 +110,14 @@ public class ContractTest {
         //programCreate.args();
         System.out.println(programCreate);
 
-        byte[] prevStateRoot = Hex.decode("56e81f171bcc55a6ff8345e692c0f86e5b48e01b996cadc001622fb5e363b421");
+        byte[] prevStateRoot = HexUtil.decode("56e81f171bcc55a6ff8345e692c0f86e5b48e01b996cadc001622fb5e363b421");
 
         ProgramExecutor track = programExecutor.begin(prevStateRoot);
         ProgramResult programResult = track.create(programCreate);
         track.commit();
 
         System.out.println(programResult);
-        System.out.println("stateRoot: " + Hex.toHexString(track.getRoot()));
+        System.out.println("stateRoot: " + HexUtil.encode(track.getRoot()));
         System.out.println();
         sleep();
     }
@@ -135,14 +135,14 @@ public class ContractTest {
         programCall.args(BUYER, "1000");
         System.out.println(programCall);
 
-        byte[] prevStateRoot = Hex.decode("4bf7c234e14628f029875a6e172c74df7d6b87875ecc845918cb41dfd521f5a5");
+        byte[] prevStateRoot = HexUtil.decode("4bf7c234e14628f029875a6e172c74df7d6b87875ecc845918cb41dfd521f5a5");
 
         ProgramExecutor track = programExecutor.begin(prevStateRoot);
         ProgramResult programResult = track.call(programCall);
         track.commit();
 
         System.out.println(programResult);
-        System.out.println("pierre - stateRoot: " + Hex.toHexString(track.getRoot()));
+        System.out.println("pierre - stateRoot: " + HexUtil.encode(track.getRoot()));
         System.out.println();
 
         programCall.setMethodName("balanceOf");
@@ -155,7 +155,7 @@ public class ContractTest {
         track.commit();
 
         System.out.println(programResult);
-        System.out.println("pierre - stateRoot: " + Hex.toHexString(track.getRoot()));
+        System.out.println("pierre - stateRoot: " + HexUtil.encode(track.getRoot()));
         System.out.println();
         sleep();
     }
@@ -173,21 +173,21 @@ public class ContractTest {
         programCall.setValue(new BigInteger("100"));
         System.out.println(programCall);
 
-        byte[] prevStateRoot = Hex.decode("5649c2c5e4899b1565db76c029b39fcbec36d6e878ea8f4d9c3955386ef008a4");
+        byte[] prevStateRoot = HexUtil.decode("5649c2c5e4899b1565db76c029b39fcbec36d6e878ea8f4d9c3955386ef008a4");
 
         ProgramExecutor track = programExecutor.begin(prevStateRoot);
         ProgramResult programResult = track.call(programCall);
         track.commit();
 
         System.out.println(programResult);
-        System.out.println("pierre - stateRoot: " + Hex.toHexString(track.getRoot()));
+        System.out.println("pierre - stateRoot: " + HexUtil.encode(track.getRoot()));
         System.out.println();
         sleep();
     }
 
     @Test
     public void testStop() throws IOException {
-        byte[] prevStateRoot = Hex.decode("5649c2c5e4899b1565db76c029b39fcbec36d6e878ea8f4d9c3955386ef008a4");
+        byte[] prevStateRoot = HexUtil.decode("5649c2c5e4899b1565db76c029b39fcbec36d6e878ea8f4d9c3955386ef008a4");
         byte[] address = NativeAddress.toBytes(ADDRESS);
         byte[] sender = NativeAddress.toBytes(SENDER);
 
@@ -196,15 +196,15 @@ public class ContractTest {
         track.commit();
 
         System.out.println(programResult);
-        System.out.println("stateRoot: " + Hex.toHexString(track.getRoot()));
+        System.out.println("stateRoot: " + HexUtil.encode(track.getRoot()));
         System.out.println();
         sleep();
     }
 
     @Test
     public void testStatus() throws IOException {
-        byte[] prevStateRoot = Hex.decode("f4c8f955a79de88ceb9de02ecb2dc6fb997e21a0f1b9ff4be063d5bc282e5b2b");
-        //byte[] prevStateRoot = Hex.decode("5649c2c5e4899b1565db76c029b39fcbec36d6e878ea8f4d9c3955386ef008a4");
+        byte[] prevStateRoot = HexUtil.decode("f4c8f955a79de88ceb9de02ecb2dc6fb997e21a0f1b9ff4be063d5bc282e5b2b");
+        //byte[] prevStateRoot = HexUtil.decode("5649c2c5e4899b1565db76c029b39fcbec36d6e878ea8f4d9c3955386ef008a4");
         byte[] address = NativeAddress.toBytes(ADDRESS);
         byte[] sender = NativeAddress.toBytes(SENDER);
 
@@ -212,7 +212,7 @@ public class ContractTest {
         ProgramStatus programStatus = track.status(address);
 
         System.out.println(programStatus);
-        System.out.println("stateRoot: " + Hex.toHexString(track.getRoot()));
+        System.out.println("stateRoot: " + HexUtil.encode(track.getRoot()));
         System.out.println();
         sleep();
     }
@@ -245,7 +245,7 @@ public class ContractTest {
         System.out.println(programCall1);
         transactions.add(programCall1);
 
-        byte[] prevStateRoot = Hex.decode("5649c2c5e4899b1565db76c029b39fcbec36d6e878ea8f4d9c3955386ef008a4");
+        byte[] prevStateRoot = HexUtil.decode("5649c2c5e4899b1565db76c029b39fcbec36d6e878ea8f4d9c3955386ef008a4");
 
         for (ProgramCall transaction : transactions) {
             ProgramExecutor track = programExecutor.begin(prevStateRoot);
@@ -255,7 +255,7 @@ public class ContractTest {
             prevStateRoot = track.getRoot();
 
             System.out.println("programResult: " + programResult);
-            System.out.println("stateRoot: " + Hex.toHexString(track.getRoot()));
+            System.out.println("stateRoot: " + HexUtil.encode(track.getRoot()));
             System.out.println();
         }
         sleep();
@@ -263,7 +263,7 @@ public class ContractTest {
 
     @Test
     public void testMethod() throws IOException {
-        byte[] prevStateRoot = Hex.decode("5649c2c5e4899b1565db76c029b39fcbec36d6e878ea8f4d9c3955386ef008a4");
+        byte[] prevStateRoot = HexUtil.decode("5649c2c5e4899b1565db76c029b39fcbec36d6e878ea8f4d9c3955386ef008a4");
         byte[] address = NativeAddress.toBytes(ADDRESS);
         byte[] sender = NativeAddress.toBytes(SENDER);
 
@@ -303,14 +303,14 @@ public class ContractTest {
         programCall.args(BUYER, "-1000");
         System.out.println(programCall);
 
-        byte[] prevStateRoot = Hex.decode("5649c2c5e4899b1565db76c029b39fcbec36d6e878ea8f4d9c3955386ef008a4");
+        byte[] prevStateRoot = HexUtil.decode("5649c2c5e4899b1565db76c029b39fcbec36d6e878ea8f4d9c3955386ef008a4");
 
         ProgramExecutor track = programExecutor.begin(prevStateRoot);
         ProgramResult programResult = track.call(programCall);
         track.commit();
 
         System.out.println(programResult);
-        System.out.println("pierre - stateRoot: " + Hex.toHexString(track.getRoot()));
+        System.out.println("pierre - stateRoot: " + HexUtil.encode(track.getRoot()));
         System.out.println();
 
         programCall.setMethodName("balanceOf");
@@ -323,7 +323,7 @@ public class ContractTest {
         track.commit();
 
         System.out.println(programResult);
-        System.out.println("pierre - stateRoot: " + Hex.toHexString(track.getRoot()));
+        System.out.println("pierre - stateRoot: " + HexUtil.encode(track.getRoot()));
         System.out.println();
         sleep();
     }
@@ -341,21 +341,21 @@ public class ContractTest {
         programCall.setValue(new BigInteger("0"));
         System.out.println(programCall);
 
-        byte[] prevStateRoot = Hex.decode("5649c2c5e4899b1565db76c029b39fcbec36d6e878ea8f4d9c3955386ef008a4");
+        byte[] prevStateRoot = HexUtil.decode("5649c2c5e4899b1565db76c029b39fcbec36d6e878ea8f4d9c3955386ef008a4");
 
         ProgramExecutor track = programExecutor.begin(prevStateRoot);
         ProgramResult programResult = track.call(programCall);
         track.commit();
 
         System.out.println(programResult);
-        System.out.println("pierre - stateRoot: " + Hex.toHexString(track.getRoot()));
+        System.out.println("pierre - stateRoot: " + HexUtil.encode(track.getRoot()));
         System.out.println();
         sleep();
     }
 
     @Test
     public void testThread() {
-        byte[] prevStateRoot = Hex.decode("56e81f171bcc55a6ff8345e692c0f86e5b48e01b996cadc001622fb5e363b421");
+        byte[] prevStateRoot = HexUtil.decode("56e81f171bcc55a6ff8345e692c0f86e5b48e01b996cadc001622fb5e363b421");
         //ProgramExecutor track = programExecutor.begin(prevStateRoot);
         new Thread(new Runnable() {
             @Override

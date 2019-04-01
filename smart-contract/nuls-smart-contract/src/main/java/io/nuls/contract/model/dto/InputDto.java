@@ -28,9 +28,9 @@ package io.nuls.contract.model.dto;
 
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.CoinFrom;
+import io.nuls.tools.crypto.HexUtil;
 import lombok.Getter;
 import lombok.Setter;
-import org.spongycastle.util.encoders.Hex;
 
 import static io.nuls.contract.util.ContractUtil.bigInteger2String;
 
@@ -55,7 +55,7 @@ public class InputDto {
         this.assetsChainId = from.getAssetsChainId();
         this.assetsId = from.getAssetsId();
         this.amount = bigInteger2String(from.getAmount());
-        this.nonce = Hex.toHexString(from.getNonce());
+        this.nonce = HexUtil.encode(from.getNonce());
         this.locked = from.getLocked();
     }
 }

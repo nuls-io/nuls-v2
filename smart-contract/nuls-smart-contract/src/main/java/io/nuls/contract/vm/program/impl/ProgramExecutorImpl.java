@@ -39,6 +39,7 @@ import io.nuls.contract.vm.exception.ErrorException;
 import io.nuls.contract.vm.natives.io.nuls.contract.sdk.NativeAddress;
 import io.nuls.contract.vm.program.*;
 import io.nuls.contract.vm.util.Constants;
+import io.nuls.tools.crypto.HexUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.ethereum.config.CommonConfig;
 import org.ethereum.config.DefaultConfig;
@@ -54,7 +55,6 @@ import org.ethereum.util.FastByteComparisons;
 import org.ethereum.vm.DataWord;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.spongycastle.util.encoders.Hex;
 
 import java.math.BigInteger;
 import java.util.*;
@@ -135,7 +135,7 @@ public class ProgramExecutorImpl implements ProgramExecutor {
     @Override
     public ProgramExecutor begin(byte[] prevStateRoot) {
         if (log.isDebugEnabled()) {
-            log.debug("begin vm root: {}", Hex.toHexString(prevStateRoot));
+            log.debug("begin vm root: {}", HexUtil.encode(prevStateRoot));
         }
         Repository repository = new RepositoryRoot(source, prevStateRoot);
         return new ProgramExecutorImpl(this, vmContext, source, repository, prevStateRoot, new HashMap<>(), Thread.currentThread());
@@ -171,8 +171,8 @@ public class ProgramExecutorImpl implements ProgramExecutor {
                     } catch (Exception e) {
                         throw new RuntimeException(e);
                     }
-                    byte[] parentHash = Hex.decode(blockHeaderDto.getPreHash());
-                    byte[] hash = Hex.decode(blockHeaderDto.getHash());
+                    byte[] parentHash = HexUtil.decode(blockHeaderDto.getPreHash());
+                    byte[] hash = HexUtil.decode(blockHeaderDto.getHash());
                     Block block = new Block(parentHash, hash, blockNumber);
                     getCurrentChain().getDefaultConfig().blockStore().saveBlock(block, BigInteger.ONE, true);
                     getCurrentChain().getDefaultConfig().pruneManager().blockCommitted(block.getHeader());
@@ -193,7 +193,7 @@ public class ProgramExecutorImpl implements ProgramExecutor {
             root = this.prevStateRoot;
         }
         if (log.isDebugEnabled()) {
-            log.debug("end vm root: {}, runtime: {}", Hex.toHexString(root), System.currentTimeMillis() - beginTime);
+            log.debug("end vm root: {}, runtime: {}", HexUtil.encode(root), System.currentTimeMillis() - beginTime);
         }
         return root;
     }

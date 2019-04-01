@@ -1,8 +1,6 @@
 package io.nuls.api.provider.block.facade;
 
 import io.nuls.api.provider.BaseReq;
-import lombok.AllArgsConstructor;
-import lombok.Data;
 
 /**
  * @Author: zhoulijun
@@ -11,10 +9,19 @@ import lombok.Data;
  * 通过区块高度获取区块头
  * get block header by height
  */
-@Data
-@AllArgsConstructor
 public class GetBlockHeaderByHeightReq extends BaseReq {
 
     private Long height;
 
+    public GetBlockHeaderByHeightReq(Long height) {
+        this.height = height;
+    }
+
+    public Long getHeight() {
+        return height;
+    }
+
+    public void setHeight(Long height) {
+        this.height = height;
+    }
 }

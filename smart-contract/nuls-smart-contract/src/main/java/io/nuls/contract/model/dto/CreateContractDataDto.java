@@ -26,9 +26,9 @@ package io.nuls.contract.model.dto;
 
 import io.nuls.base.basic.AddressTool;
 import io.nuls.contract.model.txdata.ContractData;
+import io.nuls.tools.crypto.HexUtil;
 import lombok.Getter;
 import lombok.Setter;
-import org.spongycastle.util.encoders.Hex;
 
 import static io.nuls.contract.util.ContractUtil.bigInteger2String;
 
@@ -50,7 +50,7 @@ public class CreateContractDataDto {
         this.sender = AddressTool.getStringAddressByBytes(create.getSender());
         this.contractAddress = AddressTool.getStringAddressByBytes(create.getContractAddress());
         this.value = bigInteger2String(create.getValue());
-        this.hexCode = Hex.toHexString(create.getCode());
+        this.hexCode = HexUtil.encode(create.getCode());
         this.gasLimit = create.getGasLimit();
         this.price = create.getPrice();
         this.args = create.getArgs();

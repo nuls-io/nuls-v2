@@ -1,14 +1,12 @@
 package io.nuls.api.provider.contract.facade;
 
 import io.nuls.api.provider.BaseReq;
-import lombok.Data;
 
 /**
  * @Author: zhoulijun
  * @Time: 2019-03-23 15:45
  * @Description: 功能描述
  */
-@Data
 public class ViewContractReq extends BaseReq {
 
     private String contractAddress;
@@ -19,4 +17,35 @@ public class ViewContractReq extends BaseReq {
 
     private Object[] args;
 
+    public String getContractAddress() {
+        return contractAddress;
+    }
+
+    public void setContractAddress(String contractAddress) {
+        this.contractAddress = contractAddress;
+    }
+
+    public String getMethodName() {
+        return methodName;
+    }
+
+    public void setMethodName(String methodName) {
+        this.methodName = methodName;
+    }
+
+    public String getMethodDesc() {
+        return methodDesc;
+    }
+
+    public void setMethodDesc(String methodDesc) {
+        this.methodDesc = methodDesc;
+    }
+
+    public Object[] getArgs() {
+        return args;
+    }
+
+    public void setArgs(Object[] args) {
+        this.args = args;
+    }
 }

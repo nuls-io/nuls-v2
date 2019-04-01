@@ -24,14 +24,12 @@
  */
 package io.nuls.rpc.util;
 
-import static java.nio.charset.StandardCharsets.UTF_8;
-
 public class RPCUtil {
     public static String encode(byte[] src) {
-        return (src == null) ? null : new String(src, UTF_8);
+        return (src == null) ? null : java.util.Base64.getEncoder().encodeToString(src);
     }
 
     public static byte[] decode(String src) {
-        return src.getBytes(UTF_8);
+        return (src == null) ? null : java.util.Base64.getDecoder().decode(src);
     }
 }

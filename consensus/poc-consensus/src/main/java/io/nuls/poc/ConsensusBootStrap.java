@@ -1,7 +1,7 @@
 package io.nuls.poc;
 
 import io.nuls.db.service.RocksDBService;
-import io.nuls.poc.config.ConsensusConfig;
+import io.nuls.poc.constant.ConsensusConfig;
 import io.nuls.poc.constant.ConsensusConstant;
 import io.nuls.poc.storage.LanguageService;
 import io.nuls.poc.utils.manager.ChainManager;

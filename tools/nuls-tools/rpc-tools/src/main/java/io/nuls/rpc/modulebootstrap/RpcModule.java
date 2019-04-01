@@ -8,14 +8,13 @@ import io.nuls.rpc.netty.processor.ResponseMessageProcessor;
 import io.nuls.tools.basic.InitializingBean;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Order;
-import io.nuls.tools.core.annotation.Value;
+
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.log.Log;
-import io.nuls.tools.log.logback.LogAppender;
+
 import io.nuls.tools.model.StringUtils;
 import io.nuls.tools.parse.MapUtils;
-import lombok.Getter;
-import lombok.Setter;
+
 
 import java.util.Arrays;
 import java.util.Map;
@@ -31,8 +30,6 @@ import java.util.concurrent.TimeUnit;
  * 管理模块生命周期，根据依赖模块的运行状况控制模块本身的生命周期。
  * 定义抽象方法onStart,onDependenciesReady,ononDependenciesLoss等方式抽象生命周期的实现
  */
-@Getter
-@Setter
 @Order(Integer.MIN_VALUE)
 public abstract class RpcModule implements InitializingBean {
 
@@ -333,4 +330,43 @@ public abstract class RpcModule implements InitializingBean {
      */
     public abstract RpcModuleState onDependenciesLoss(Module dependenciesModule);
 
+    public String[] getMainArgs() {
+        return mainArgs;
+    }
+
+    public void setMainArgs(String[] mainArgs) {
+        this.mainArgs = mainArgs;
+    }
+
+    public static String getROLE() {
+        return ROLE;
+    }
+
+    public RpcModuleState getState() {
+        return state;
+    }
+
+    public void setState(RpcModuleState state) {
+        this.state = state;
+    }
+
+    public Map<Module, Boolean> getFollowerList() {
+        return followerList;
+    }
+
+    public void setFollowerList(Map<Module, Boolean> followerList) {
+        this.followerList = followerList;
+    }
+
+    public void setDependencies(Map<Module, Boolean> dependencies) {
+        this.dependencies = dependencies;
+    }
+
+    public NotifySender getNotifySender() {
+        return notifySender;
+    }
+
+    public void setNotifySender(NotifySender notifySender) {
+        this.notifySender = notifySender;
+    }
 }

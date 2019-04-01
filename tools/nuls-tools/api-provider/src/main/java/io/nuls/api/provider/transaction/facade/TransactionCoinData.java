@@ -1,7 +1,5 @@
 package io.nuls.api.provider.transaction.facade;
 
-import lombok.Data;
-
 import java.math.BigInteger;
 
 /**
@@ -9,7 +7,6 @@ import java.math.BigInteger;
  * @Time: 2019-03-21 16:40
  * @Description: 功能描述
  */
-@Data
 public class TransactionCoinData {
 
     /**
@@ -37,4 +34,43 @@ public class TransactionCoinData {
      */
     private String nonce;
 
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
+    }
+
+    public int getAssetsChainId() {
+        return assetsChainId;
+    }
+
+    public void setAssetsChainId(int assetsChainId) {
+        this.assetsChainId = assetsChainId;
+    }
+
+    public int getAssetsId() {
+        return assetsId;
+    }
+
+    public void setAssetsId(int assetsId) {
+        this.assetsId = assetsId;
+    }
+
+    public BigInteger getAmount() {
+        return amount;
+    }
+
+    public void setAmount(BigInteger amount) {
+        this.amount = amount;
+    }
+
+    public String getNonce() {
+        return nonce;
+    }
+
+    public void setNonce(String nonce) {
+        this.nonce = nonce;
+    }
 }

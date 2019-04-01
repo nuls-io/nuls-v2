@@ -29,7 +29,6 @@ import io.nuls.base.data.NulsDigestData;
 import io.nuls.base.signture.BlockSignature;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.parse.SerializeUtils;
-import lombok.Data;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -42,7 +41,6 @@ import java.util.List;
  * @version 1.0
  * @date 18-12-10 下午3:50
  */
-@Data
 public class BlockHeaderPo extends BaseNulsData {
 
     private NulsDigestData hash;
@@ -56,6 +54,94 @@ public class BlockHeaderPo extends BaseNulsData {
     private byte[] extend;
     private transient int size;
     private List<NulsDigestData> txHashList;
+
+    public NulsDigestData getHash() {
+        return hash;
+    }
+
+    public void setHash(NulsDigestData hash) {
+        this.hash = hash;
+    }
+
+    public boolean isComplete() {
+        return complete;
+    }
+
+    public void setComplete(boolean complete) {
+        this.complete = complete;
+    }
+
+    public NulsDigestData getPreHash() {
+        return preHash;
+    }
+
+    public void setPreHash(NulsDigestData preHash) {
+        this.preHash = preHash;
+    }
+
+    public NulsDigestData getMerkleHash() {
+        return merkleHash;
+    }
+
+    public void setMerkleHash(NulsDigestData merkleHash) {
+        this.merkleHash = merkleHash;
+    }
+
+    public long getTime() {
+        return time;
+    }
+
+    public void setTime(long time) {
+        this.time = time;
+    }
+
+    public long getHeight() {
+        return height;
+    }
+
+    public void setHeight(long height) {
+        this.height = height;
+    }
+
+    public int getTxCount() {
+        return txCount;
+    }
+
+    public void setTxCount(int txCount) {
+        this.txCount = txCount;
+    }
+
+    public BlockSignature getBlockSignature() {
+        return blockSignature;
+    }
+
+    public void setBlockSignature(BlockSignature blockSignature) {
+        this.blockSignature = blockSignature;
+    }
+
+    public byte[] getExtend() {
+        return extend;
+    }
+
+    public void setExtend(byte[] extend) {
+        this.extend = extend;
+    }
+
+    public int getSize() {
+        return size;
+    }
+
+    public void setSize(int size) {
+        this.size = size;
+    }
+
+    public List<NulsDigestData> getTxHashList() {
+        return txHashList;
+    }
+
+    public void setTxHashList(List<NulsDigestData> txHashList) {
+        this.txHashList = txHashList;
+    }
 
     @Override
     public int size() {

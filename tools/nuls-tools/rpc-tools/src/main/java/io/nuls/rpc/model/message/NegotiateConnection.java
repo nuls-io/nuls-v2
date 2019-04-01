@@ -24,8 +24,7 @@
  */
 package io.nuls.rpc.model.message;
 
-import lombok.Data;
-import lombok.ToString;
+
 
 /**
  * 握手请求
@@ -34,8 +33,7 @@ import lombok.ToString;
  * @author tangyi
  * @date 2018/11/15
  */
-@Data
-@ToString
+
 public class NegotiateConnection {
     /**
      * module abbreviation
@@ -58,4 +56,36 @@ public class NegotiateConnection {
      * 0 means no compression while 9 maximum compression
      */
     private String compressionRate;
+
+    public String getAbbreviation() {
+        return abbreviation;
+    }
+
+    public void setAbbreviation(String abbreviation) {
+        this.abbreviation = abbreviation;
+    }
+
+    public String getProtocolVersion() {
+        return protocolVersion;
+    }
+
+    public void setProtocolVersion(String protocolVersion) {
+        this.protocolVersion = protocolVersion;
+    }
+
+    public String getCompressionAlgorithm() {
+        return compressionAlgorithm;
+    }
+
+    public void setCompressionAlgorithm(String compressionAlgorithm) {
+        this.compressionAlgorithm = compressionAlgorithm;
+    }
+
+    public String getCompressionRate() {
+        return compressionRate;
+    }
+
+    public void setCompressionRate(String compressionRate) {
+        this.compressionRate = compressionRate;
+    }
 }

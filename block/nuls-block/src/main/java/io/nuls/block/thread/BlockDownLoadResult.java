@@ -22,8 +22,6 @@ package io.nuls.block.thread;
 
 import io.nuls.base.data.NulsDigestData;
 import io.nuls.block.model.Node;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 
 /**
  * 一个区块下载线程的下载结果
@@ -32,8 +30,6 @@ import lombok.NoArgsConstructor;
  * @version 1.0
  * @date 18-11-9 下午4:17
  */
-@Data
-@NoArgsConstructor
 public class BlockDownLoadResult {
     /**
      * 下载区块起始高度
@@ -59,6 +55,54 @@ public class BlockDownLoadResult {
      * 对应的请求hash
      */
     private NulsDigestData messageHash;
+
+    public long getStartHeight() {
+        return startHeight;
+    }
+
+    public void setStartHeight(long startHeight) {
+        this.startHeight = startHeight;
+    }
+
+    public int getSize() {
+        return size;
+    }
+
+    public void setSize(int size) {
+        this.size = size;
+    }
+
+    public Node getNode() {
+        return node;
+    }
+
+    public void setNode(Node node) {
+        this.node = node;
+    }
+
+    public boolean isSuccess() {
+        return success;
+    }
+
+    public void setSuccess(boolean success) {
+        this.success = success;
+    }
+
+    public long getDuration() {
+        return duration;
+    }
+
+    public void setDuration(long duration) {
+        this.duration = duration;
+    }
+
+    public NulsDigestData getMessageHash() {
+        return messageHash;
+    }
+
+    public void setMessageHash(NulsDigestData messageHash) {
+        this.messageHash = messageHash;
+    }
 
     BlockDownLoadResult(NulsDigestData messageHash, long startHeight, int size, Node node, boolean b, long duration) {
         this.messageHash = messageHash;

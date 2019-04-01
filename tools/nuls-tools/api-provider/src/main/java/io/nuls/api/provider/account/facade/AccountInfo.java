@@ -27,7 +27,6 @@ public class AccountInfo {
      * 已加密私钥Hex.encode(byte[])
      */
     private String encryptedPrikeyHex;
-    
 
     @Override
     public boolean equals(Object o) {
@@ -50,7 +49,6 @@ public class AccountInfo {
         result = 31 * result + (encryptedPrikeyHex != null ? encryptedPrikeyHex.hashCode() : 0);
         return result;
     }
-
 
     public String getAddress() {
         return address;

@@ -24,8 +24,7 @@
  */
 package io.nuls.rpc.model.message;
 
-import lombok.Data;
-import lombok.ToString;
+
 
 /**
  * 通知
@@ -34,8 +33,7 @@ import lombok.ToString;
  * @author tangyi
  * @date 2018/11/15
  */
-@Data
-@ToString
+
 public class Notification {
     /**
      * (Default: 0): This is a boolean value.
@@ -58,4 +56,36 @@ public class Notification {
      * Data relevant to the notification, it is not required the target service to process this field
      */
     private String notificationData;
+
+    public String getNotificationAck() {
+        return notificationAck;
+    }
+
+    public void setNotificationAck(String notificationAck) {
+        this.notificationAck = notificationAck;
+    }
+
+    public String getNotificationType() {
+        return notificationType;
+    }
+
+    public void setNotificationType(String notificationType) {
+        this.notificationType = notificationType;
+    }
+
+    public String getNotificationComment() {
+        return notificationComment;
+    }
+
+    public void setNotificationComment(String notificationComment) {
+        this.notificationComment = notificationComment;
+    }
+
+    public String getNotificationData() {
+        return notificationData;
+    }
+
+    public void setNotificationData(String notificationData) {
+        this.notificationData = notificationData;
+    }
 }

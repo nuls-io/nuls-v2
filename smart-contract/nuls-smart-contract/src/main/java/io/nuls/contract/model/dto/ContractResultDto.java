@@ -30,11 +30,11 @@ import io.nuls.contract.model.po.ContractTokenTransferInfoPo;
 import io.nuls.contract.model.tx.ContractBaseTransaction;
 import io.nuls.contract.model.txdata.ContractData;
 import io.nuls.contract.util.ContractUtil;
+import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.model.LongUtils;
 import lombok.Getter;
 import lombok.Setter;
-import org.spongycastle.util.encoders.Hex;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -107,7 +107,7 @@ public class ContractResultDto {
         //this.balance = bigInteger2String(result.getBalance());
         this.contractAddress = AddressTool.getStringAddressByBytes(result.getContractAddress());
         this.result = result.getResult();
-        this.stateRoot = (result.getStateRoot() != null ? Hex.toHexString(result.getStateRoot()) : null);
+        this.stateRoot = (result.getStateRoot() != null ? HexUtil.encode(result.getStateRoot()) : null);
         this.success = result.isSuccess();
         this.errorMessage = result.getErrorMessage();
         this.stackTrace = result.getStackTrace();

@@ -20,10 +20,9 @@
 
 package io.nuls.block.manager;
 
-import io.nuls.tools.protocol.Protocol;
 import io.nuls.block.model.ChainContext;
 import io.nuls.block.model.ChainParameters;
-import lombok.Data;
+import io.nuls.tools.protocol.Protocol;
 
 import java.util.List;
 import java.util.Map;
@@ -39,7 +38,6 @@ import static io.nuls.block.utils.LoggerUtil.commonLog;
  * @version 1.0
  * @date 18-11-20 上午10:46
  */
-@Data
 public class ContextManager {
 
     public static List<Integer> chainIds = new CopyOnWriteArrayList<>();

@@ -1,8 +1,6 @@
 package io.nuls.api.provider.account.facade;
 
 import io.nuls.api.provider.BaseReq;
-import lombok.AllArgsConstructor;
-import lombok.Data;
 
 /**
  * @Author: zhoulijun
@@ -11,10 +9,19 @@ import lombok.Data;
  * 根据地址获取账户信息
  * get account info by address
  */
-@Data
-@AllArgsConstructor
 public class GetAccountByAddressReq extends BaseReq {
 
     private String address;
 
+    public GetAccountByAddressReq(String address) {
+        this.address = address;
+    }
+
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
+    }
 }

@@ -35,12 +35,11 @@ import io.nuls.contract.model.txdata.ContractTransferData;
 import io.nuls.contract.service.ContractCaller;
 import io.nuls.contract.service.ResultHanlder;
 import io.nuls.contract.util.CompareTxOrderAsc;
-import io.nuls.contract.util.CompareTxTimeAsc;
 import io.nuls.contract.util.Log;
 import io.nuls.contract.vm.program.ProgramExecutor;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
-import org.spongycastle.util.encoders.Hex;
+import io.nuls.tools.crypto.HexUtil;
 
 import java.io.IOException;
 import java.math.BigInteger;
@@ -102,7 +101,8 @@ public class ResultHandlerImpl implements ResultHanlder {
 
                 CoinData coinData = new CoinData();
                 ContractBalance balance = tempBalanceManager.getBalance(contractAddress).getData();
-                byte[] nonceBytes = Hex.decode(balance.getNonce());
+                byte[] nonceBytes = HexUtil.decode(balance.getNonce());
+
                 CoinFrom coinFrom = new CoinFrom(contractAddress, chainId, assetsId, BigInteger.valueOf(value), nonceBytes, (byte) 0);
                 coinData.getFrom().add(coinFrom);
                 CoinTo coinTo = new CoinTo(contractResult.getSender(), chainId, assetsId, BigInteger.valueOf(value), 0L);
@@ -119,7 +119,7 @@ public class ResultHandlerImpl implements ResultHanlder {
                 NulsDigestData hash = NulsDigestData.calcDigestData(tx.serializeForHash());
                 byte[] hashBytes = hash.serialize();
                 byte[] currentNonceBytes = Arrays.copyOfRange(hashBytes, hashBytes.length - 8, hashBytes.length);
-                balance.setNonce(Hex.toHexString(currentNonceBytes));
+                balance.setNonce(HexUtil.encode(currentNonceBytes));
                 tx.setHash(hash);
                 contractResult.getContractTransferList().add(tx);
             }
