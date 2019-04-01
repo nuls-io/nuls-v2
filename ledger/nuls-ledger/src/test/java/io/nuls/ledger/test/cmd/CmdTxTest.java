@@ -31,7 +31,7 @@ import io.nuls.rpc.info.NoUse;
 import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.model.message.Response;
 import io.nuls.rpc.netty.processor.ResponseMessageProcessor;
-import io.nuls.tools.crypto.HexUtil;
+import io.nuls.rpc.util.RPCUtil;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -96,7 +96,7 @@ public class CmdTxTest {
         tx.setHash(NulsDigestData.calcDigestData(tx.serializeForHash()));
         params.put("chainId", chainId);
         List<String> txHexList = new ArrayList<>();
-        txHexList.add(HexUtil.encode(tx.serialize()));
+        txHexList.add(RPCUtil.encode(tx.serialize()));
         params.put("txHexList",txHexList);
         params.put("isConfirmTx",false);
         response = ResponseMessageProcessor.requestAndResponse(ModuleE.LG.abbr, "commitTx", params);
@@ -145,7 +145,7 @@ public class CmdTxTest {
         tx.setHash(NulsDigestData.calcDigestData(tx.serializeForHash()));
         params.put("chainId", chainId);
         List<String> txHexList = new ArrayList<>();
-        txHexList.add(HexUtil.encode(tx.serialize()));
+        txHexList.add(RPCUtil.encode(tx.serialize()));
         params.put("txHexList",txHexList);
         params.put("isConfirmTx",false);
         response = ResponseMessageProcessor.requestAndResponse(ModuleE.LG.abbr, "commitTx", params);
@@ -183,7 +183,7 @@ public class CmdTxTest {
         coinFrom.setAssetsChainId(assetChainId);
         coinFrom.setAssetsId(assetId);
         coinFrom.setLocked((byte)0);
-        coinFrom.setNonce(HexUtil.decode(nonce));
+        coinFrom.setNonce(RPCUtil.decode(nonce));
         List<CoinFrom> coinFroms =new ArrayList<>();
         coinFroms.add(coinFrom);
         List<CoinTo> coinTos =new ArrayList<>();
@@ -194,7 +194,7 @@ public class CmdTxTest {
         tx.setHash(NulsDigestData.calcDigestData(tx.serializeForHash()));
         params.put("chainId", chainId);
         List<String> txHexList = new ArrayList<>();
-        txHexList.add(HexUtil.encode(tx.serialize()));
+        txHexList.add(RPCUtil.encode(tx.serialize()));
         params.put("txHexList",txHexList);
         params.put("isConfirmTx",false);
         response = ResponseMessageProcessor.requestAndResponse(ModuleE.LG.abbr, "commitTx", params);
@@ -243,7 +243,7 @@ public class CmdTxTest {
         tx.setHash(NulsDigestData.calcDigestData(tx.serializeForHash()));
         params.put("chainId", chainId);
         List<String> txHexList = new ArrayList<>();
-        txHexList.add(HexUtil.encode(tx.serialize()));
+        txHexList.add(RPCUtil.encode(tx.serialize()));
         params.put("txHexList",txHexList);
         params.put("isConfirmTx",true);
         response = ResponseMessageProcessor.requestAndResponse(ModuleE.LG.abbr, "commitTx", params);
@@ -280,7 +280,7 @@ public class CmdTxTest {
         CoinFrom coinFrom = new CoinFrom();
 
         coinFrom.setAddress(AddressTool.getAddress(address));
-        coinFrom.setNonce(HexUtil.decode(nonce));
+        coinFrom.setNonce(RPCUtil.decode(nonce));
         coinFrom.setAssetsId(assetId);
         coinFrom.setAssetsChainId(assetChainId);
         coinFrom.setAmount(BigInteger.valueOf(21));
@@ -311,8 +311,8 @@ public class CmdTxTest {
         params.put("isBatchValidate", true);
         Transaction transaction = buildTx2();
         List<String> txHexList = new ArrayList<>();
-        txHexList.add(HexUtil.encode(transaction.serialize()));
-        params.put("txHex",HexUtil.encode(transaction.serialize()));
+        txHexList.add(RPCUtil.encode(transaction.serialize()));
+        params.put("txHex",RPCUtil.encode(transaction.serialize()));
         response = ResponseMessageProcessor.requestAndResponse(ModuleE.LG.abbr, "validateCoinData", params);
         logger.info("response {}", response);
         params.put("txHexList",txHexList);
@@ -362,7 +362,7 @@ public class CmdTxTest {
         tx.setHash(NulsDigestData.calcDigestData(tx.serializeForHash()));
         params.put("chainId", chainId);
         List<String> txHexList = new ArrayList<>();
-        txHexList.add(HexUtil.encode(tx.serialize()));
+        txHexList.add(RPCUtil.encode(tx.serialize()));
         params.put("txHexList",txHexList);
         params.put("isConfirmTx",true);
         response = ResponseMessageProcessor.requestAndResponse(ModuleE.LG.abbr, "commitTx", params);

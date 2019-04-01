@@ -30,7 +30,7 @@ import io.nuls.rpc.info.NoUse;
 import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.model.message.Response;
 import io.nuls.rpc.netty.processor.ResponseMessageProcessor;
-import io.nuls.tools.crypto.HexUtil;
+import io.nuls.rpc.util.RPCUtil;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -77,7 +77,7 @@ public class CmdRollBackTest {
             CoinData coinData = new CoinData();
             CoinFrom coinFrom = new CoinFrom();
             coinFrom.setAddress(AddressTool.getAddress(address));
-            coinFrom.setNonce(HexUtil.decode(nonce));
+            coinFrom.setNonce(RPCUtil.decode(nonce));
             coinFrom.setAssetsId(assetId);
             coinFrom.setAssetsChainId(assetChainId);
             coinFrom.setAmount(BigInteger.valueOf(21));
@@ -115,7 +115,7 @@ public class CmdRollBackTest {
             Map<String, Object> params = new HashMap<>();
             params.put("chainId", chainId);
             List<String> txHexList = new ArrayList<>();
-            txHexList.add(HexUtil.encode(tx.serialize()));
+            txHexList.add(RPCUtil.encode(tx.serialize()));
             params.put("txHexList", txHexList);
             params.put("blockHeight", 1);
             params.put("isConfirmTx", true);

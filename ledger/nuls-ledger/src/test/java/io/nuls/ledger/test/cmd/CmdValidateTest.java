@@ -31,7 +31,7 @@ import io.nuls.rpc.info.NoUse;
 import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.model.message.Response;
 import io.nuls.rpc.netty.processor.ResponseMessageProcessor;
-import io.nuls.tools.crypto.HexUtil;
+import io.nuls.rpc.util.RPCUtil;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -85,7 +85,7 @@ public class CmdValidateTest {
         coinData.setTo(coinTos);
         tx.setCoinData(coinData.serialize());
         params.put("chainId", chainId);
-        params.put("txHex",HexUtil.encode(tx.serialize()));
+        params.put("txHex",RPCUtil.encode(tx.serialize()));
         Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.LG.abbr, "validateCoinData", params);
         logger.info("response {}", response);
     }
@@ -137,7 +137,7 @@ public class CmdValidateTest {
         tx.setCoinData(coinData.serialize());
         tx.setHash(NulsDigestData.calcDigestData(tx.serializeForHash()));
         params.put("chainId", chainId);
-        params.put("txHex",HexUtil.encode(tx.serialize()));
+        params.put("txHex",RPCUtil.encode(tx.serialize()));
         params.put("isBatchValidate",true);
         Response  response = ResponseMessageProcessor.requestAndResponse(ModuleE.LG.abbr, "validateCoinData", params);
         logger.info("response {}", response);
@@ -165,7 +165,7 @@ public class CmdValidateTest {
         CoinData coinData = new CoinData();
         CoinFrom coinFrom = new CoinFrom();
         coinFrom.setAddress(AddressTool.getAddress(address));
-        coinFrom.setNonce(HexUtil.decode(nonce));
+        coinFrom.setNonce(RPCUtil.decode(nonce));
         coinFrom.setAssetsId(assetId);
         coinFrom.setAssetsChainId(assetChainId);
         coinFrom.setAmount(BigInteger.valueOf(21));
@@ -186,7 +186,7 @@ public class CmdValidateTest {
         tx.setCoinData(coinData.serialize());
         tx.setHash(NulsDigestData.calcDigestData(tx.serializeForHash()));
         params.put("chainId", chainId);
-        params.put("txHex",HexUtil.encode(tx.serialize()));
+        params.put("txHex",RPCUtil.encode(tx.serialize()));
         params.put("isBatchValidate",true);
           response = ResponseMessageProcessor.requestAndResponse(ModuleE.LG.abbr, "validateCoinData", params);
         logger.info("response {}", response);

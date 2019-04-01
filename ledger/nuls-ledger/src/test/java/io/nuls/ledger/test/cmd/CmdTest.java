@@ -34,7 +34,7 @@ import io.nuls.rpc.info.NoUse;
 import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.model.message.Response;
 import io.nuls.rpc.netty.processor.ResponseMessageProcessor;
-import io.nuls.tools.crypto.HexUtil;
+import io.nuls.rpc.util.RPCUtil;
 import io.nuls.tools.model.BigIntegerUtils;
 import org.junit.Before;
 import org.junit.Test;
@@ -61,8 +61,8 @@ public class CmdTest {
     @Test
     public void lg_getBalance() throws Exception {
        String nonce = "ffffffff";
-       System.out.println(HexUtil.decode(nonce));
-       System.out.println(HexUtil.encode(HexUtil.decode(nonce)));
+       System.out.println(RPCUtil.decode(nonce));
+       System.out.println(RPCUtil.encode(RPCUtil.decode(nonce)));
     }
     @Test
     public void getBalance() throws Exception {
@@ -155,7 +155,7 @@ public class CmdTest {
         coinData.setTo(coinTos);
         tx.setCoinData(coinData.serialize());
         params.put("chainId", chainId);
-        params.put("txHex",HexUtil.encode(tx.serialize()));
+        params.put("txHex",RPCUtil.encode(tx.serialize()));
         Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.LG.abbr, "validateCoinData", params);
         logger.info("response {}", response);
     }

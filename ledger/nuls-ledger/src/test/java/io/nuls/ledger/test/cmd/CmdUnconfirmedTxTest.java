@@ -33,7 +33,7 @@ import io.nuls.rpc.info.NoUse;
 import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.model.message.Response;
 import io.nuls.rpc.netty.processor.ResponseMessageProcessor;
-import io.nuls.tools.crypto.HexUtil;
+import io.nuls.rpc.util.RPCUtil;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -71,7 +71,7 @@ public class CmdUnconfirmedTxTest {
         coinFrom.setAmount(tranAmount);
         coinFrom.setAssetsChainId(assetChainId);
         coinFrom.setAssetsId(assetId);
-        coinFrom.setNonce(HexUtil.decode(getNonce(fromAddr)));
+        coinFrom.setNonce(RPCUtil.decode(getNonce(fromAddr)));
         coinFrom.setLocked((byte) 0);
 
         CoinTo coinTo = new CoinTo();
@@ -101,7 +101,7 @@ public class CmdUnconfirmedTxTest {
         coinFrom.setAmount(tranAmount);
         coinFrom.setAssetsChainId(assetChainId);
         coinFrom.setAssetsId(assetId);
-        coinFrom.setNonce(HexUtil.decode(getNonce(fromAddr)));
+        coinFrom.setNonce(RPCUtil.decode(getNonce(fromAddr)));
         coinFrom.setLocked((byte) 0);
 
         CoinTo coinTo = new CoinTo();
@@ -134,7 +134,7 @@ public class CmdUnconfirmedTxTest {
         coinFrom.setAmount(tranAmount);
         coinFrom.setAssetsChainId(assetChainId);
         coinFrom.setAssetsId(assetId);
-        coinFrom.setNonce(HexUtil.decode(unLockNonce));
+        coinFrom.setNonce(RPCUtil.decode(unLockNonce));
         coinFrom.setLocked((byte)-1);
 
         CoinTo coinTo = new CoinTo();

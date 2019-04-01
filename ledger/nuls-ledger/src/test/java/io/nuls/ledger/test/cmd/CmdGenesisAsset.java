@@ -30,8 +30,6 @@ import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.model.message.Response;
 import io.nuls.rpc.netty.processor.ResponseMessageProcessor;
 import io.nuls.rpc.util.RPCUtil;
-import io.nuls.tools.crypto.HexUtil;
-import io.nuls.tools.model.ByteUtils;
 import org.junit.Before;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -101,8 +99,8 @@ public class CmdGenesisAsset {
         params.put("isBatchValidate", true);
         Transaction transaction = buildTransaction();
         List<String> txHexList = new ArrayList<>();
-        txHexList.add(HexUtil.encode(transaction.serialize()));
-        params.put("txHex", HexUtil.encode(transaction.serialize()));
+        txHexList.add(RPCUtil.encode(transaction.serialize()));
+        params.put("txHex", RPCUtil.encode(transaction.serialize()));
         response = ResponseMessageProcessor.requestAndResponse(ModuleE.LG.abbr, "validateCoinData", params);
         logger.info("response {}", response);
         params.put("txHexList", txHexList);
@@ -125,33 +123,5 @@ public class CmdGenesisAsset {
 
         Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.LG.abbr, "getBalanceNonce", params);
         logger.info("response {}", response);
-    }
-
-    @Test
-    public void testHex() throws IOException {
-        TranList list = new TranList();
-        for (int i = 0; i < 10000; i++) {
-            Transaction tx = buildTransaction();
-            list.getTxs().add(tx);
-        }
-        byte[] bytes = list.serialize();
-        long time1 = System.currentTimeMillis();
-        String hex0 = HexUtil.encode(bytes);
-        long time2 = System.currentTimeMillis();
-        System.out.println("HexUtil.byteToHex useTime=" + (time2 - time1) + "==StringLenght=" + hex0.length());
-        String hex = HexUtil.encode(bytes);
-        long time3 = System.currentTimeMillis();
-        System.out.println("HexUtil.encode useTime=" + (time3 - time2) + "===StringLenght=" + hex.length());
-        String s = ByteUtils.asString(bytes);
-        long time4 = System.currentTimeMillis();
-        System.out.println(" ByteUtils.asString useTime=" + (time4 - time3) + "===StringLenght" + s.length());
-
-    }
-    @Test
-    public void testHex2() throws IOException {
-         String t="dfss3234234";
-        System.out.println(RPCUtil.encode(RPCUtil.decode(t)));
-
-
     }
 }
