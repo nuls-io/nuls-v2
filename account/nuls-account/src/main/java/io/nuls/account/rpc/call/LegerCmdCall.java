@@ -5,11 +5,11 @@ import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.model.message.Response;
 import io.nuls.rpc.netty.processor.ResponseMessageProcessor;
-import io.nuls.tools.crypto.HexUtil;
-import io.nuls.tools.model.BigIntegerUtils;
-import io.nuls.tools.model.StringUtils;
+import io.nuls.rpc.util.RPCUtil;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.log.Log;
+import io.nuls.tools.model.BigIntegerUtils;
+import io.nuls.tools.model.StringUtils;
 
 import java.math.BigInteger;
 import java.util.HashMap;
@@ -93,7 +93,7 @@ public class LegerCmdCall {
             HashMap result = (HashMap) ((HashMap) cmdResp.getResponseData()).get("getNonce");
             String nonce = (String) result.get("nonce");
             if (StringUtils.isNotBlank(nonce)) {
-                return HexUtil.decode(nonce);
+                return RPCUtil.decode(nonce);
             }
         } catch (Exception e) {
             e.printStackTrace();

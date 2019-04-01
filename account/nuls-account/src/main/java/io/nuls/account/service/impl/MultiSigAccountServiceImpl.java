@@ -44,6 +44,7 @@ import io.nuls.base.data.Address;
 import io.nuls.base.data.MultiSigAccount;
 import io.nuls.base.data.Transaction;
 import io.nuls.base.signture.TransactionSignature;
+import io.nuls.rpc.util.RPCUtil;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Service;
 import io.nuls.tools.crypto.HexUtil;
@@ -197,7 +198,7 @@ public class MultiSigAccountServiceImpl implements MultiSignAccountService {
     public void txMutilProcessing(MultiSigAccount multiSigAccount, Transaction tx, TransactionSignature transactionSignature) throws NulsException, IOException {
         //当已签名数等于M则自动广播该交易
         if (multiSigAccount.getM() == transactionSignature.getP2PHKSignatures().size()) {
-            TransactionCmdCall.newTx(multiSigAccount.getChainId(), HexUtil.encode(tx.serialize()));
+            TransactionCmdCall.newTx(multiSigAccount.getChainId(), RPCUtil.encode(tx.serialize()));
             // Result saveResult = accountLedgerService.verifyAndSaveUnconfirmedTransaction(tx);
 //            if (saveResult.isFailed()) {
 //                if (KernelErrorCode.DATA_SIZE_ERROR.getCode().equals(saveResult.getErrorCode().getCode())) {

@@ -212,17 +212,17 @@ public class AliasCmd extends BaseCmd {
         LoggerUtil.logger.debug("ac_aliasTxValidate start,params size:{}", params == null ? 0 : params.size());
         boolean result;
         int chainId;
-        String txHex;
+        String tx;
         Object chainIdObj = params == null ? null : params.get(RpcParameterNameConstant.CHAIN_ID);
-        Object txHexObj = params == null ? null : params.get(RpcParameterNameConstant.TX);
+        Object txObj = params == null ? null : params.get(RpcParameterNameConstant.TX);
         try {
             // check parameters
-            if (params == null || chainIdObj == null || txHexObj == null) {
+            if (params == null || chainIdObj == null || txObj == null) {
                 throw new NulsRuntimeException(AccountErrorCode.NULL_PARAMETER);
             }
             chainId = (Integer) chainIdObj;
-            txHex = (String) txHexObj;
-            Transaction transaction = Transaction.getInstance(txHex);
+            tx = (String) txObj;
+            Transaction transaction = Transaction.getInstance(tx);
             result = aliasService.aliasTxValidate(chainId, transaction);
         } catch (NulsRuntimeException e) {
             LoggerUtil.logger.info("", e);
@@ -246,19 +246,19 @@ public class AliasCmd extends BaseCmd {
         LoggerUtil.logger.debug("ac_aliasTxCommit start,params size:{}", params == null ? 0 : params.size());
         boolean result = false;
         int chainId = 0;
-        String txHex;
-        //TODO is it need to verify secondaryDataHex?
+        String tx;
+        //TODO is it need to verify secondaryData?
         Object chainIdObj = params == null ? null : params.get(RpcParameterNameConstant.CHAIN_ID);
-        Object txHexObj = params == null ? null : params.get(RpcParameterNameConstant.TX);
+        Object txObj = params == null ? null : params.get(RpcParameterNameConstant.TX);
         Object blockHeaderDigest = params == null ? null : params.get(RpcParameterNameConstant.BLOCK_HEADER_DIGEST);
         try {
             // check parameters
-            if (params == null || chainIdObj == null || txHexObj == null) {
+            if (params == null || chainIdObj == null || txObj == null) {
                 throw new NulsRuntimeException(AccountErrorCode.NULL_PARAMETER);
             }
             chainId = (Integer) chainIdObj;
-            txHex = (String) txHexObj;
-            Transaction transaction = Transaction.getInstance(txHex);
+            tx = (String) txObj;
+            Transaction transaction = Transaction.getInstance(tx);
             Alias alias = new Alias();
             alias.parse(new NulsByteBuffer(transaction.getTxData()));
             result = aliasService.aliasTxCommit(chainId, alias);
@@ -287,19 +287,19 @@ public class AliasCmd extends BaseCmd {
         LoggerUtil.logger.debug("ac_aliasTxRollback start,params size:{}", params == null ? 0 : params.size());
         boolean result = false;
         int chainId = 0;
-        String txHex;
-        //TODO is it need to verify secondaryDataHex?
+        String tx;
+        //TODO is it need to verify secondaryData?
         Object chainIdObj = params == null ? null : params.get(RpcParameterNameConstant.CHAIN_ID);
-        Object txHexObj = params == null ? null : params.get(RpcParameterNameConstant.TX);
+        Object txObj = params == null ? null : params.get(RpcParameterNameConstant.TX);
         Object blockHeaderDigest = params == null ? null : params.get(RpcParameterNameConstant.BLOCK_HEADER_DIGEST);
         try {
             // check parameters
-            if (params == null || chainIdObj == null || txHexObj == null) {
+            if (params == null || chainIdObj == null || txObj == null) {
                 throw new NulsRuntimeException(AccountErrorCode.NULL_PARAMETER);
             }
             chainId = (Integer) chainIdObj;
-            txHex = (String) txHexObj;
-            Transaction transaction = Transaction.getInstance(txHex);
+            tx = (String) txObj;
+            Transaction transaction = Transaction.getInstance(tx);
             Alias alias = new Alias();
             alias.parse(new NulsByteBuffer(transaction.getTxData()));
             result = aliasService.rollbackAlias(chainId, alias);
