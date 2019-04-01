@@ -638,7 +638,7 @@ public class ConnectManager {
 
         Channel channel = NettyClient.createConnect(url);
         long start = TimeService.currentTimeMillis();
-        while (!channel.isOpen()) {
+        while (channel==null || !channel.isOpen()) {
             if (TimeService.currentTimeMillis() - start > Constants.MILLIS_PER_SECOND * 5) {
                 throw new Exception("Failed to connect " + url);
             }
