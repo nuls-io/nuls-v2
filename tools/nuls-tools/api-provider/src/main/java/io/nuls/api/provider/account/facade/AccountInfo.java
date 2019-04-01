@@ -1,13 +1,10 @@
 package io.nuls.api.provider.account.facade;
 
-import lombok.Data;
-
 /**
  * @Author: zhoulijun
  * @Time: 2019-03-08 13:44
  * @Description: account info
  */
-@Data
 public class AccountInfo {
 
     /**
@@ -30,6 +27,7 @@ public class AccountInfo {
      * 已加密私钥Hex.encode(byte[])
      */
     private String encryptedPrikeyHex;
+    
 
     @Override
     public boolean equals(Object o) {
@@ -51,5 +49,38 @@ public class AccountInfo {
         result = 31 * result + (pubkeyHex != null ? pubkeyHex.hashCode() : 0);
         result = 31 * result + (encryptedPrikeyHex != null ? encryptedPrikeyHex.hashCode() : 0);
         return result;
+    }
+
+
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
+    }
+
+    public String getAlias() {
+        return alias;
+    }
+
+    public void setAlias(String alias) {
+        this.alias = alias;
+    }
+
+    public String getPubkeyHex() {
+        return pubkeyHex;
+    }
+
+    public void setPubkeyHex(String pubkeyHex) {
+        this.pubkeyHex = pubkeyHex;
+    }
+
+    public String getEncryptedPrikeyHex() {
+        return encryptedPrikeyHex;
+    }
+
+    public void setEncryptedPrikeyHex(String encryptedPrikeyHex) {
+        this.encryptedPrikeyHex = encryptedPrikeyHex;
     }
 }
