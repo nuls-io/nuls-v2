@@ -56,10 +56,10 @@ public class TransactionCall {
         }
     }
 
-    public static boolean newTx(int chainId, String txHex) throws NulsException {
+    public static boolean newTx(int chainId, String txData) throws NulsException {
         Map<String, Object> params = new HashMap(4);
         params.put("chainId", chainId);
-        params.put("txHex", txHex);
+        params.put("tx", txData);
         try {
             Map<String, Boolean> registerResult = (Map<String, Boolean>) CallHelper.request(ModuleE.TX.abbr, "tx_newTx", params);
             return registerResult.get("value");
@@ -74,12 +74,12 @@ public class TransactionCall {
         params.put("txHash", txHash);
         try {
             Map result = (Map) CallHelper.request(ModuleE.TX.abbr, "tx_getConfirmedTx", params);
-            String txHex = (String) result.get("txHex");
-            if (StringUtils.isBlank(txHex)) {
+            String txData = (String) result.get("tx");
+            if (StringUtils.isBlank(txData)) {
                 return null;
             }
             Transaction tx = new Transaction();
-            tx.parse(RPCUtil.decode(txHex), 0);
+            tx.parse(RPCUtil.decode(txData), 0);
             return tx;
         } catch (Exception e) {
             throw new NulsException(e);

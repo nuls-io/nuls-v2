@@ -97,14 +97,14 @@ public class ContractCmd extends BaseCmd {
 
     @CmdAnnotation(cmd = INVOKE_CONTRACT, version = 1.0, description = "invoke contract one by one")
     @Parameter(parameterName = "chainId", parameterType = "int")
-    @Parameter(parameterName = "txHex", parameterType = "String")
+    @Parameter(parameterName = "tx", parameterType = "String")
     public Response invokeContractOneByOne(Map<String, Object> params) {
         try {
             Integer chainId = (Integer) params.get("chainId");
-            String txHex = (String) params.get("txHex");
+            String txData = (String) params.get("tx");
             ContractTempTransaction tx = new ContractTempTransaction();
-            tx.setTxHex(txHex);
-            tx.parse(RPCUtil.decode(txHex), 0);
+            tx.setTxHex(txData);
+            tx.parse(RPCUtil.decode(txData), 0);
             Result result = contractService.validContractTx(chainId, tx);
             if (result.isFailed()) {
                 return failed(result.getErrorCode());
@@ -152,16 +152,16 @@ public class ContractCmd extends BaseCmd {
                 return wrapperFailed(result);
             }
             ContractPackageDto dto = (ContractPackageDto) result.getData();
-            List<String> resultTxHexList = new ArrayList<>();
+            List<String> resultTxDataList = new ArrayList<>();
             List<Transaction> resultTxList = dto.getResultTxList();
             for (Transaction resultTx : resultTxList) {
                 Log.info("Batch txType is [{}], hash is [{}]", resultTx.getType(), resultTx.getHash().toString());
-                resultTxHexList.add(RPCUtil.encode(resultTx.serialize()));
+                resultTxDataList.add(RPCUtil.encode(resultTx.serialize()));
             }
 
             Map<String, Object> resultMap = MapUtil.createHashMap(2);
             resultMap.put("stateRoot", RPCUtil.encode(dto.getStateRoot()));
-            resultMap.put("txHexList", resultTxHexList);
+            resultMap.put("txList", resultTxDataList);
             Log.info("[End Contract Batch] packaging blockHeight is [{}], packaging StateRoot is [{}]", blockHeight, RPCUtil.encode(dto.getStateRoot()));
             return success(resultMap);
         } catch (Exception e) {
@@ -173,13 +173,13 @@ public class ContractCmd extends BaseCmd {
 
     @CmdAnnotation(cmd = CREATE_VALIDATOR, version = 1.0, description = "create contract validator")
     @Parameter(parameterName = "chainId", parameterType = "int")
-    @Parameter(parameterName = "txHex", parameterType = "String")
+    @Parameter(parameterName = "tx", parameterType = "String")
     public Response createValidator(Map<String, Object> params) {
         try {
             Integer chainId = (Integer) params.get("chainId");
-            String txHex = (String) params.get("txHex");
+            String txData = (String) params.get("tx");
             CreateContractTransaction tx = new CreateContractTransaction();
-            tx.parse(RPCUtil.decode(txHex), 0);
+            tx.parse(RPCUtil.decode(txData), 0);
             Map<String, Boolean> result = new HashMap<>(2);
             if (tx.getType() != TX_TYPE_CREATE_CONTRACT) {
                 return failed("non create contract tx");
@@ -198,13 +198,13 @@ public class ContractCmd extends BaseCmd {
 
     @CmdAnnotation(cmd = CALL_VALIDATOR, version = 1.0, description = "call contract validator")
     @Parameter(parameterName = "chainId", parameterType = "int")
-    @Parameter(parameterName = "txHex", parameterType = "String")
+    @Parameter(parameterName = "tx", parameterType = "String")
     public Response callValidator(Map<String, Object> params) {
         try {
             Integer chainId = (Integer) params.get("chainId");
-            String txHex = (String) params.get("txHex");
+            String txData = (String) params.get("tx");
             CallContractTransaction tx = new CallContractTransaction();
-            tx.parse(RPCUtil.decode(txHex), 0);
+            tx.parse(RPCUtil.decode(txData), 0);
             Map<String, Boolean> result = new HashMap<>(2);
             if (tx.getType() != TX_TYPE_CALL_CONTRACT) {
                 return failed("non call contract tx");
@@ -223,13 +223,13 @@ public class ContractCmd extends BaseCmd {
 
     @CmdAnnotation(cmd = DELETE_VALIDATOR, version = 1.0, description = "delete contract validator")
     @Parameter(parameterName = "chainId", parameterType = "int")
-    @Parameter(parameterName = "txHex", parameterType = "String")
+    @Parameter(parameterName = "tx", parameterType = "String")
     public Response deleteValidator(Map<String, Object> params) {
         try {
             Integer chainId = (Integer) params.get("chainId");
-            String txHex = (String) params.get("txHex");
+            String txData = (String) params.get("tx");
             DeleteContractTransaction tx = new DeleteContractTransaction();
-            tx.parse(RPCUtil.decode(txHex), 0);
+            tx.parse(RPCUtil.decode(txData), 0);
             Map<String, Boolean> result = new HashMap<>(2);
             if (tx.getType() != TX_TYPE_DELETE_CONTRACT) {
                 return failed("non delete contract tx");
@@ -248,7 +248,7 @@ public class ContractCmd extends BaseCmd {
 
     @CmdAnnotation(cmd = INTEGRATE_VALIDATOR, version = 1.0, description = "transaction integrate validator")
     @Parameter(parameterName = "chainId", parameterType = "int")
-    @Parameter(parameterName = "txHexList", parameterType = "String")
+    @Parameter(parameterName = "txList", parameterType = "String")
     public Response integrateValidator(Map<String, Object> params) {
         try {
             //Integer chainId = (Integer) params.get("chainId");
@@ -267,15 +267,15 @@ public class ContractCmd extends BaseCmd {
 
     @CmdAnnotation(cmd = COMMIT, version = 1.0, description = "commit contract")
     @Parameter(parameterName = "chainId", parameterType = "int")
-    @Parameter(parameterName = "txHexList", parameterType = "List<String>")
-    @Parameter(parameterName = "blockHeaderHex", parameterType = "String")
+    @Parameter(parameterName = "txList", parameterType = "List<String>")
+    @Parameter(parameterName = "blockHeader", parameterType = "String")
     public Response commit(Map<String, Object> params) {
         try {
             Integer chainId = (Integer) params.get("chainId");
-            List<String> txHexList = (List<String>) params.get("txHexList");
-            String blockHeaderHex = (String) params.get("blockHeaderHex");
+            List<String> txDataList = (List<String>) params.get("txList");
+            String blockHeaderData = (String) params.get("blockHeader");
 
-            Result result = contractService.commitProcessor(chainId, txHexList, blockHeaderHex);
+            Result result = contractService.commitProcessor(chainId, txDataList, blockHeaderData);
             if (result.isFailed()) {
                 return wrapperFailed(result);
             }
@@ -291,15 +291,15 @@ public class ContractCmd extends BaseCmd {
 
     @CmdAnnotation(cmd = ROLLBACK, version = 1.0, description = "commit contract")
     @Parameter(parameterName = "chainId", parameterType = "int")
-    @Parameter(parameterName = "txHexList", parameterType = "List<String>")
-    @Parameter(parameterName = "blockHeaderHex", parameterType = "String")
+    @Parameter(parameterName = "txList", parameterType = "List<String>")
+    @Parameter(parameterName = "blockHeader", parameterType = "String")
     public Response rollback(Map<String, Object> params) {
         try {
             Integer chainId = (Integer) params.get("chainId");
-            List<String> txHexList = (List<String>) params.get("txHexList");
-            String blockHeaderHex = (String) params.get("blockHeaderHex");
+            List<String> txDataList = (List<String>) params.get("txList");
+            String blockHeaderData = (String) params.get("blockHeader");
 
-            Result result = contractService.rollbackProcessor(chainId, txHexList, blockHeaderHex);
+            Result result = contractService.rollbackProcessor(chainId, txDataList, blockHeaderData);
             if (result.isFailed()) {
                 return wrapperFailed(result);
             }

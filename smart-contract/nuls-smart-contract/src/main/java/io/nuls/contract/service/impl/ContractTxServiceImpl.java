@@ -43,6 +43,7 @@ import io.nuls.contract.storage.ContractTokenTransferStorageService;
 import io.nuls.contract.util.ContractUtil;
 import io.nuls.contract.util.Log;
 import io.nuls.contract.util.MapUtil;
+import io.nuls.rpc.util.RPCUtil;
 import io.nuls.tools.basic.Result;
 import io.nuls.tools.basic.VarInt;
 import io.nuls.tools.core.annotation.Autowired;
@@ -92,7 +93,7 @@ public class ContractTxServiceImpl implements ContractTxService {
             AccountCall.transactionSignature(chainId, sender, password, tx);
 
             // 广播交易
-            boolean broadcast = TransactionCall.newTx(chainId, HexUtil.encode(tx.serialize()));
+            boolean broadcast = TransactionCall.newTx(chainId, RPCUtil.encode(tx.serialize()));
             if (!broadcast) {
                 return getFailed();
             }
@@ -164,7 +165,7 @@ public class ContractTxServiceImpl implements ContractTxService {
             byte[] infoKey = unConfirmedTokenTransferResult.getData();
 
             // 广播交易
-            boolean broadcast = TransactionCall.newTx(chainId, HexUtil.encode(tx.serialize()));
+            boolean broadcast = TransactionCall.newTx(chainId, RPCUtil.encode(tx.serialize()));
             if (!broadcast) {
                 return getFailed();
             }
@@ -292,7 +293,7 @@ public class ContractTxServiceImpl implements ContractTxService {
             AccountCall.transactionSignature(chainId, sender, password, tx);
 
             // 广播交易
-            boolean broadcast = TransactionCall.newTx(chainId, HexUtil.encode(tx.serialize()));
+            boolean broadcast = TransactionCall.newTx(chainId, RPCUtil.encode(tx.serialize()));
             if (!broadcast) {
                 return getFailed();
             }
