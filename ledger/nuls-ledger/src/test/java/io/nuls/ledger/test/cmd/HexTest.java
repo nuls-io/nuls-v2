@@ -24,9 +24,9 @@
  */
 package io.nuls.ledger.test.cmd;
 
-import com.google.common.io.BaseEncoding;
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.*;
+import io.nuls.rpc.util.RPCUtil;
 import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.log.Log;
 import io.nuls.tools.model.ByteUtils;
@@ -100,7 +100,7 @@ public class HexTest {
     @Test
     public void testHexs() throws IOException, DecoderException {
         TranList list = new TranList();
-        for (int i = 0; i < 10000; i++) {
+        for (int i = 0; i < 100000; i++) {
             Transaction tx = buildTransaction();
             list.getTxs().add(tx);
         }
@@ -118,12 +118,12 @@ public class HexTest {
 
 
         String hex2 = org.apache.commons.codec.binary.Hex.encodeHexString(bytes);
-        byte[] bytes2 = org.apache.commons.codec.binary.Hex.decodeHex(hex2);
+        byte[] bytes2 = org.apache.commons.codec.binary.Hex.decodeHex(hex2.toCharArray());
         long time4 = System.currentTimeMillis();
         Log.info("{} time used - org.apache.commons.codec.binary.Hex.encode && decode ===StringLenght= {}", (time4 - time3), hex2.length());
 
-        String base0 = java.util.Base64.getEncoder().encodeToString(bytes);
-        byte[] bytes3 = java.util.Base64.getDecoder().decode(base0);
+        String base0 = RPCUtil.encode(bytes);
+        byte[] bytes3 = RPCUtil.decode(base0);
         long time5 = System.currentTimeMillis();
         Log.info("{} time used - java.util.Base64.encode && decode ===StringLenght= {}", (time5 - time4), base0.length());
 
