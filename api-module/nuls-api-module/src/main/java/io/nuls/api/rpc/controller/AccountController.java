@@ -32,6 +32,7 @@ import io.nuls.api.model.po.db.TxRelationInfo;
 import io.nuls.api.model.rpc.RpcErrorCode;
 import io.nuls.api.model.rpc.RpcResult;
 import io.nuls.api.model.rpc.RpcResultError;
+import io.nuls.api.provider.Result;
 import io.nuls.api.provider.ServiceManager;
 import io.nuls.api.provider.account.facade.CreateAccountReq;
 import io.nuls.api.utils.VerifyUtils;
@@ -188,14 +189,20 @@ public class AccountController {
         } catch (Exception e) {
             return RpcResult.paramError();
         }
-        if(!FormatValidUtils.validPassword(password)) {
+        if (!FormatValidUtils.validPassword(password)) {
             return RpcResult.paramError("[password] is inValid");
         }
-//
-//        CreateAccountReq req = new CreateAccountReq();
-//        cmdAccountService.createAccount()
 
-        return null;
+        CreateAccountReq req = new CreateAccountReq(count, password);
+        Result<String> result = cmdAccountService.createAccount(req);
+        RpcResult rpcResult = new RpcResult();
+        if (result.getMessage() != null) {
+            RpcResultError error = new RpcResultError(result.getStatus(), result.getMessage(), null);
+            rpcResult.setError(error);
+        } else {
+            rpcResult.setResult(result.getList());
+        }
+        return rpcResult;
     }
 
 //    @RpcMethod("getAccountTokens")

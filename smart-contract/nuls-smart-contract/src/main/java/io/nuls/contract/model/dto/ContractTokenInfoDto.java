@@ -26,15 +26,11 @@ package io.nuls.contract.model.dto;
 
 import io.nuls.contract.model.bo.ContractTokenInfo;
 import io.nuls.contract.util.ContractUtil;
-import lombok.Getter;
-import lombok.Setter;
 
 /**
  * @author: PierreLuo
  * @date: 2018/8/19
  */
-@Getter
-@Setter
 public class ContractTokenInfoDto {
 
     private String contractAddress;
@@ -59,4 +55,59 @@ public class ContractTokenInfoDto {
         this.status = info.getStatus().status();
     }
 
+    public String getContractAddress() {
+        return contractAddress;
+    }
+
+    public void setContractAddress(String contractAddress) {
+        this.contractAddress = contractAddress;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getSymbol() {
+        return symbol;
+    }
+
+    public void setSymbol(String symbol) {
+        this.symbol = symbol;
+    }
+
+    public String getAmount() {
+        return amount;
+    }
+
+    public void setAmount(String amount) {
+        this.amount = amount;
+    }
+
+    public long getDecimals() {
+        return decimals;
+    }
+
+    public void setDecimals(long decimals) {
+        this.decimals = decimals;
+    }
+
+    public long getBlockHeight() {
+        return blockHeight;
+    }
+
+    public void setBlockHeight(long blockHeight) {
+        this.blockHeight = blockHeight;
+    }
+
+    public int getStatus() {
+        return status;
+    }
+
+    public void setStatus(int status) {
+        this.status = status;
+    }
 }

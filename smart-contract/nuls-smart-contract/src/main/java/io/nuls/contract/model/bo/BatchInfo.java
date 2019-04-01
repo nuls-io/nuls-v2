@@ -30,7 +30,6 @@ import io.nuls.contract.manager.ContractTempBalanceManager;
 import io.nuls.contract.model.dto.ContractPackageDto;
 import io.nuls.contract.vm.program.ProgramExecutor;
 import io.nuls.tools.model.StringUtils;
-import lombok.Data;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -42,7 +41,6 @@ import java.util.concurrent.Future;
  * @author: PierreLuo
  * @date: 2019-03-16
  */
-@Data
 public class BatchInfo {
 
     /**
@@ -157,5 +155,101 @@ public class BatchInfo {
 
     public int getAndIncreaseTxCounter() {
         return txCounter++;
+    }
+
+    public ContractTempBalanceManager getTempBalanceManager() {
+        return tempBalanceManager;
+    }
+
+    public void setTempBalanceManager(ContractTempBalanceManager tempBalanceManager) {
+        this.tempBalanceManager = tempBalanceManager;
+    }
+
+    public BlockHeader getCurrentBlockHeader() {
+        return currentBlockHeader;
+    }
+
+    public void setCurrentBlockHeader(BlockHeader currentBlockHeader) {
+        this.currentBlockHeader = currentBlockHeader;
+    }
+
+    public ContractPackageDto getContractPackageDto() {
+        return contractPackageDto;
+    }
+
+    public void setContractPackageDto(ContractPackageDto contractPackageDto) {
+        this.contractPackageDto = contractPackageDto;
+    }
+
+    public ProgramExecutor getBatchExecutor() {
+        return batchExecutor;
+    }
+
+    public void setBatchExecutor(ProgramExecutor batchExecutor) {
+        this.batchExecutor = batchExecutor;
+    }
+
+    public int getTxCounter() {
+        return txCounter;
+    }
+
+    public void setTxCounter(int txCounter) {
+        this.txCounter = txCounter;
+    }
+
+    public long getHeight() {
+        return height;
+    }
+
+    public void setHeight(long height) {
+        this.height = height;
+    }
+
+    public long getBeginTime() {
+        return beginTime;
+    }
+
+    public void setBeginTime(long beginTime) {
+        this.beginTime = beginTime;
+    }
+
+    public BatchInfoStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(BatchInfoStatus status) {
+        this.status = status;
+    }
+
+    public String getPreStateRoot() {
+        return preStateRoot;
+    }
+
+    public void setPreStateRoot(String preStateRoot) {
+        this.preStateRoot = preStateRoot;
+    }
+
+    public LinkedHashMap<String, ContractContainer> getContractContainerMap() {
+        return contractContainerMap;
+    }
+
+    public void setContractContainerMap(LinkedHashMap<String, ContractContainer> contractContainerMap) {
+        this.contractContainerMap = contractContainerMap;
+    }
+
+    public ContractConflictChecker getChecker() {
+        return checker;
+    }
+
+    public void setChecker(ContractConflictChecker checker) {
+        this.checker = checker;
+    }
+
+    public Future<ContractPackageDto> getContractPackageDtoFuture() {
+        return contractPackageDtoFuture;
+    }
+
+    public void setContractPackageDtoFuture(Future<ContractPackageDto> contractPackageDtoFuture) {
+        this.contractPackageDtoFuture = contractPackageDtoFuture;
     }
 }

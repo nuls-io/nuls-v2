@@ -27,14 +27,10 @@ package io.nuls.contract.model.dto;
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.NulsDigestData;
 import io.nuls.contract.model.txdata.ContractTransferData;
-import lombok.Getter;
-import lombok.Setter;
 
 /**
  * @Author: PierreLuo
  */
-@Getter
-@Setter
 public class ContractTransferDataDto {
     private String orginTxHash;
     private String contractAddress;
@@ -45,4 +41,19 @@ public class ContractTransferDataDto {
         this.contractAddress = AddressTool.getStringAddressByBytes(transferData.getContractAddress());
     }
 
+    public String getOrginTxHash() {
+        return orginTxHash;
+    }
+
+    public void setOrginTxHash(String orginTxHash) {
+        this.orginTxHash = orginTxHash;
+    }
+
+    public String getContractAddress() {
+        return contractAddress;
+    }
+
+    public void setContractAddress(String contractAddress) {
+        this.contractAddress = contractAddress;
+    }
 }

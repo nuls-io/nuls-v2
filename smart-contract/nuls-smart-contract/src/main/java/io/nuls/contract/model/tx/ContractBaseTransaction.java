@@ -28,8 +28,6 @@ import io.nuls.base.data.CoinData;
 import io.nuls.base.data.Transaction;
 import io.nuls.contract.model.bo.ContractResult;
 import io.nuls.tools.exception.NulsException;
-import lombok.Getter;
-import lombok.Setter;
 
 import java.io.IOException;
 
@@ -37,10 +35,8 @@ import java.io.IOException;
  * @author: PierreLuo
  * @date: 2019-03-07
  */
-@Setter
 public abstract class ContractBaseTransaction<T extends TransactionLogicData> extends Transaction {
 
-    @Getter
     private ContractResult contractResult;
 
     private CoinData coinDataObj;
@@ -92,5 +88,21 @@ public abstract class ContractBaseTransaction<T extends TransactionLogicData> ex
         this.setTime(tx.getTime());
         this.setTransactionSignature(tx.getTransactionSignature());
         this.setRemark(tx.getRemark());
+    }
+
+    public ContractResult getContractResult() {
+        return contractResult;
+    }
+
+    public void setContractResult(ContractResult contractResult) {
+        this.contractResult = contractResult;
+    }
+
+    public void setCoinDataObj(CoinData coinDataObj) {
+        this.coinDataObj = coinDataObj;
+    }
+
+    public void setTxDataObj(T txDataObj) {
+        this.txDataObj = txDataObj;
     }
 }
