@@ -33,7 +33,7 @@ import io.nuls.rpc.info.NoUse;
 import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.model.message.Response;
 import io.nuls.rpc.netty.processor.ResponseMessageProcessor;
-import io.nuls.tools.crypto.HexUtil;
+import io.nuls.rpc.util.RPCUtil;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.parse.JSONUtils;
 import io.nuls.transaction.model.bo.Chain;
@@ -717,9 +717,9 @@ public class TestJyc {
             assertTrue(response.isSuccess());
             Map map = (Map) response.getResponseData();
             Map tx = (Map) map.get("tx_getConfirmedTx");
-            String txHex = tx.get("txHex").toString();
+            String txStr = tx.get("tx").toString();
             Transaction transaction = new Transaction();
-            transaction.parse(new NulsByteBuffer(HexUtil.decode(txHex)));
+            transaction.parse(new NulsByteBuffer(RPCUtil.decode(txStr)));
             if (!hash.equals(transaction.getHash().getDigestHex())) {
                 Log.debug("hash-{} not exist", hash);
                 result = false;
@@ -737,9 +737,9 @@ public class TestJyc {
         assertTrue(response.isSuccess());
         Map map = (Map) response.getResponseData();
         Map tx = (Map) map.get("tx_getConfirmedTx");
-        String txHex = tx.get("txHex").toString();
+        String txStr = tx.get("tx").toString();
         Transaction transaction = new Transaction();
-        transaction.parse(new NulsByteBuffer(HexUtil.decode(txHex)));
+        transaction.parse(new NulsByteBuffer(RPCUtil.decode(txStr)));
         if (!hash.equals(transaction.getHash().getDigestHex())) {
             Log.debug("hash-{} not exist", hash);
             result = false;
