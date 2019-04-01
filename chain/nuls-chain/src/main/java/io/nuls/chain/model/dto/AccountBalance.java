@@ -30,7 +30,7 @@ package io.nuls.chain.model.dto;
  */
  public class AccountBalance {
     private String available;
-    private String nonce;
+    private byte[] nonce;
 
     public String getAvailable() {
         return available;
@@ -40,15 +40,15 @@ package io.nuls.chain.model.dto;
         this.available = available;
     }
 
-    public String getNonce() {
+    public byte[] getNonce() {
         return nonce;
     }
 
-    public void setNonce(String nonce) {
+    public void setNonce(byte[] nonce) {
         this.nonce = nonce;
     }
 
-    public AccountBalance(String available, String nonce){
+    public AccountBalance(String available, byte[] nonce){
         this.available = available;
         this.nonce = nonce;
     }
