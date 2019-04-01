@@ -34,8 +34,8 @@ import io.nuls.network.utils.LoggerUtil;
 import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.model.message.Response;
 import io.nuls.rpc.netty.processor.ResponseMessageProcessor;
+import io.nuls.rpc.util.RPCUtil;
 import io.nuls.tools.core.annotation.Service;
-import io.nuls.tools.crypto.HexUtil;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -67,7 +67,7 @@ public class BlockRpcServiceImpl implements BlockRpcService {
                 Map responseData = (Map) response.getResponseData();
                 String hex = (String) responseData.get(NetworkConstant.CMD_BL_BEST_BLOCK_HEADER);
                 BlockHeader header = new BlockHeader();
-                header.parse(new NulsByteBuffer(HexUtil.decode(hex)));
+                header.parse(new NulsByteBuffer(RPCUtil.decode(hex)));
                 bestBlockInfo.setHash(header.getHash().getDigestHex());
                 bestBlockInfo.setBlockHeight(header.getHeight());
 

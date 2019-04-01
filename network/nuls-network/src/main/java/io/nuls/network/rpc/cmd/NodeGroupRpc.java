@@ -95,7 +95,7 @@ public class NodeGroupRpc extends BaseCmd {
         NodeGroupManager nodeGroupManager = NodeGroupManager.getInstance();
         NodeGroup nodeGroup = nodeGroupManager.getNodeGroupByMagic(magicNumber);
         if (null != nodeGroup) {
-            Log.info("getNodeGroupByMagic: nodeGroup  exist");
+            Log.error("getNodeGroupByMagic: nodeGroup  exist");
             return failed(NetworkErrorCode.PARAMETER_ERROR);
         }
         nodeGroup = new NodeGroup(magicNumber, chainId, maxIn, maxOut, minAvailableCount);
@@ -138,11 +138,11 @@ public class NodeGroupRpc extends BaseCmd {
         //友链的跨链协议调用
         NodeGroup nodeGroup = nodeGroupManager.getNodeGroupByChainId(chainId);
         if (null == nodeGroup) {
-            Log.info("getNodeGroupByMagic is null");
+            Log.error("getNodeGroupByMagic is null");
             return failed(NetworkErrorCode.PARAMETER_ERROR);
         }
         if (chainId != nodeGroup.getChainId()) {
-            Log.info("chainId != nodeGroup.getChainId()");
+            Log.error("chainId != nodeGroup.getChainId()");
             return failed(NetworkErrorCode.PARAMETER_ERROR);
         }
         nodeGroup.setMaxCrossIn(maxIn);
@@ -258,7 +258,6 @@ public class NodeGroupRpc extends BaseCmd {
     @Parameter(parameterName = "chainId", parameterType = "int", parameterValidRange = "[1,65535]")
     public Response getCrossSeeds(List params) {
         int chainId = Integer.valueOf(String.valueOf(params.get(0)));
-        Log.info("chainId:" + chainId);
         List<String> seeds = networkConfig.getMoonSeedIpList();
         if (null == seeds) {
             return success();
@@ -284,7 +283,6 @@ public class NodeGroupRpc extends BaseCmd {
     @Parameter(parameterName = "chainId", parameterType = "int", parameterValidRange = "[1,65535]")
     public Response reconnect(Map params) {
         int chainId = Integer.valueOf(String.valueOf(params.get("chainId")));
-        Log.info("chainId:" + chainId);
         NodeGroup nodeGroup = NodeGroupManager.getInstance().getNodeGroupByChainId(chainId);
         nodeGroup.reconnect();
         return success();

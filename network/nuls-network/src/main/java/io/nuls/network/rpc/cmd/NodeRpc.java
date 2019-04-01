@@ -46,8 +46,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import static io.nuls.network.utils.LoggerUtil.Log;
-
 /**
  * @author lan
  * @description Open peer connection remote call node rpc
@@ -77,7 +75,6 @@ public class NodeRpc extends BaseCmd {
             int chainId = Integer.valueOf(String.valueOf(params.get("chainId")));
             int isCross = Integer.valueOf(String.valueOf(params.get("isCross")));
             String nodes = String.valueOf(params.get("nodes"));
-            Log.info("chainId:" + chainId + "==nodes:" + nodes);
             if (chainId < 0 || StringUtils.isBlank(nodes)) {
                 return failed(NetworkErrorCode.PARAMETER_ERROR);
             }
@@ -111,7 +108,6 @@ public class NodeRpc extends BaseCmd {
     public Response delNodes(Map params) {
         int chainId = Integer.valueOf(String.valueOf(params.get("chainId")));
         String nodes = String.valueOf(params.get("nodes"));
-        Log.info("chainId:" + chainId + "==nodes:" + nodes);
         if (chainId < 0 || StringUtils.isBlank(nodes)) {
             return failed(NetworkErrorCode.PARAMETER_ERROR);
         }
@@ -228,7 +224,6 @@ public class NodeRpc extends BaseCmd {
     @Parameter(parameterName = "blockHash", parameterType = "String")
     public Response updateNodeInfo(Map params) {
         if (1 == networkConfig.getUpdatePeerInfoType()){
-            Log.info("@@@@@@ block rpc update node info  fail,because use updatePeerInfoType = 1");
             return failed("use network module protocol update node Info");
         }
             int chainId = Integer.valueOf(String.valueOf(params.get("chainId")));
@@ -243,7 +238,6 @@ public class NodeRpc extends BaseCmd {
         if (null == node) {
             return failed(NetworkErrorCode.PARAMETER_ERROR);
         }
-        Log.info("update nodeinfo:{}, chainId:{}, height:{}, hash:{}", nodeId, chainId, blockHeight, blockHash);
         node.setBlockHash(blockHash);
         node.setBlockHeight(blockHeight);
         return success();
