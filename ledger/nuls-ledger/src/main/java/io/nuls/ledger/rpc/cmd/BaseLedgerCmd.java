@@ -42,12 +42,12 @@ import static io.nuls.ledger.utils.LoggerUtil.logger;
  * @date 2019/03/13
  **/
 public class BaseLedgerCmd extends BaseCmd {
-    Response parseTxs(List<String> txHexList, List<Transaction> txList,int chainId) {
-        for (String txHex : txHexList) {
-            if (StringUtils.isBlank(txHex)) {
-                return failed("txHex is blank");
+    Response parseTxs(List<String> txStrList, List<Transaction> txList,int chainId) {
+        for (String txStr : txStrList) {
+            if (StringUtils.isBlank(txStr)) {
+                return failed("tx is blank");
             }
-            byte[] txStream = RPCUtil.decode(txHex);
+            byte[] txStream = RPCUtil.decode(txStr);
             Transaction tx = new Transaction();
             try {
                 tx.parse(new NulsByteBuffer(txStream));
@@ -60,11 +60,11 @@ public class BaseLedgerCmd extends BaseCmd {
         return success();
     }
 
-    Transaction parseTxs(String txHex,int chainId) {
-        if (StringUtils.isBlank(txHex)) {
+    Transaction parseTxs(String txStr,int chainId) {
+        if (StringUtils.isBlank(txStr)) {
             return null;
         }
-        byte[] txStream = RPCUtil.decode(txHex);
+        byte[] txStream = RPCUtil.decode(txStr);
         Transaction tx = new Transaction();
         try {
             tx.parse(new NulsByteBuffer(txStream));
