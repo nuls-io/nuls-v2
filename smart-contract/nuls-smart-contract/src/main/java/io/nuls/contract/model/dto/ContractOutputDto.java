@@ -25,8 +25,6 @@ package io.nuls.contract.model.dto;
 
 import io.nuls.base.basic.AddressTool;
 import io.nuls.contract.model.bo.Output;
-import lombok.Getter;
-import lombok.Setter;
 
 import static io.nuls.contract.util.ContractUtil.bigInteger2String;
 
@@ -34,8 +32,6 @@ import static io.nuls.contract.util.ContractUtil.bigInteger2String;
  * @author: PierreLuo
  * @date: 2019-03-06
  */
-@Getter
-@Setter
 public class ContractOutputDto {
     private String to;
     private String value;
@@ -43,5 +39,21 @@ public class ContractOutputDto {
     public ContractOutputDto(Output output) {
         this.to = AddressTool.getStringAddressByBytes(output.getTo());
         this.value = bigInteger2String(output.getValue());
+    }
+
+    public String getTo() {
+        return to;
+    }
+
+    public void setTo(String to) {
+        this.to = to;
+    }
+
+    public String getValue() {
+        return value;
+    }
+
+    public void setValue(String value) {
+        this.value = value;
     }
 }

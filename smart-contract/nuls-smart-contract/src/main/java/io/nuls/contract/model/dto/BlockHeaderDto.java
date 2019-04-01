@@ -27,8 +27,6 @@ package io.nuls.contract.model.dto;
 
 import io.nuls.base.data.BlockHeader;
 import io.nuls.contract.util.ContractUtil;
-import lombok.Getter;
-import lombok.Setter;
 
 import java.io.Serializable;
 
@@ -36,8 +34,6 @@ import java.io.Serializable;
  * @Author: PierreLuo
  * @Date: 2018/5/2
  */
-@Getter
-@Setter
 public class BlockHeaderDto implements Serializable {
 
     private String hash;
@@ -62,4 +58,59 @@ public class BlockHeaderDto implements Serializable {
         this.stateRoot = ContractUtil.getStateRoot(header);
     }
 
+    public String getHash() {
+        return hash;
+    }
+
+    public void setHash(String hash) {
+        this.hash = hash;
+    }
+
+    public String getPreHash() {
+        return preHash;
+    }
+
+    public void setPreHash(String preHash) {
+        this.preHash = preHash;
+    }
+
+    public long getTime() {
+        return time;
+    }
+
+    public void setTime(long time) {
+        this.time = time;
+    }
+
+    public long getHeight() {
+        return height;
+    }
+
+    public void setHeight(long height) {
+        this.height = height;
+    }
+
+    public long getTxCount() {
+        return txCount;
+    }
+
+    public void setTxCount(long txCount) {
+        this.txCount = txCount;
+    }
+
+    public byte[] getPackingAddress() {
+        return packingAddress;
+    }
+
+    public void setPackingAddress(byte[] packingAddress) {
+        this.packingAddress = packingAddress;
+    }
+
+    public byte[] getStateRoot() {
+        return stateRoot;
+    }
+
+    public void setStateRoot(byte[] stateRoot) {
+        this.stateRoot = stateRoot;
+    }
 }

@@ -24,10 +24,6 @@
  */
 package io.nuls.contract.model.bo.config;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.Setter;
-
 import java.io.Serializable;
 
 /**
@@ -37,9 +33,6 @@ import java.io.Serializable;
  * @author: PierreLuo
  * @date: 2019-02-26
  */
-@Getter
-@Setter
-@AllArgsConstructor
 public class ConfigBean implements Serializable {
     /**
      * 资产ID
@@ -58,5 +51,35 @@ public class ConfigBean implements Serializable {
     private long maxViewGas;
 
     public ConfigBean() {
+    }
+
+    public ConfigBean(int assetsId, int chainId, long maxViewGas) {
+        this.assetsId = assetsId;
+        this.chainId = chainId;
+        this.maxViewGas = maxViewGas;
+    }
+
+    public int getAssetsId() {
+        return assetsId;
+    }
+
+    public void setAssetsId(int assetsId) {
+        this.assetsId = assetsId;
+    }
+
+    public int getChainId() {
+        return chainId;
+    }
+
+    public void setChainId(int chainId) {
+        this.chainId = chainId;
+    }
+
+    public long getMaxViewGas() {
+        return maxViewGas;
+    }
+
+    public void setMaxViewGas(long maxViewGas) {
+        this.maxViewGas = maxViewGas;
     }
 }

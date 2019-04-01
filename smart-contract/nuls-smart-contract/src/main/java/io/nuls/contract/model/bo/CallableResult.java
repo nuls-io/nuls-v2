@@ -24,8 +24,6 @@
 package io.nuls.contract.model.bo;
 
 import io.nuls.contract.model.tx.ContractTransferTransaction;
-import lombok.Getter;
-import lombok.Setter;
 
 import java.util.*;
 
@@ -33,8 +31,6 @@ import java.util.*;
  * @author: PierreLuo
  * @date: 2018/11/21
  */
-@Getter
-@Setter
 public class CallableResult {
 
     private String contract;
@@ -55,4 +51,43 @@ public class CallableResult {
         this.transferTransactions = new ArrayList<>();
     }
 
+    public String getContract() {
+        return contract;
+    }
+
+    public void setContract(String contract) {
+        this.contract = contract;
+    }
+
+    public List<ContractResult> getResultList() {
+        return resultList;
+    }
+
+    public void setResultList(List<ContractResult> resultList) {
+        this.resultList = resultList;
+    }
+
+    public List<ContractResult> getReCallList() {
+        return reCallList;
+    }
+
+    public void setReCallList(List<ContractResult> reCallList) {
+        this.reCallList = reCallList;
+    }
+
+    public Map<String, Set<ContractResult>> getFailedMap() {
+        return failedMap;
+    }
+
+    public void setFailedMap(Map<String, Set<ContractResult>> failedMap) {
+        this.failedMap = failedMap;
+    }
+
+    public List<ContractTransferTransaction> getTransferTransactions() {
+        return transferTransactions;
+    }
+
+    public void setTransferTransactions(List<ContractTransferTransaction> transferTransactions) {
+        this.transferTransactions = transferTransactions;
+    }
 }

@@ -24,8 +24,6 @@
 package io.nuls.contract.model.bo;
 
 import io.nuls.base.data.NulsDigestData;
-import lombok.Getter;
-import lombok.Setter;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -34,8 +32,6 @@ import java.util.List;
 /**
  * @author: PierreLuo
  */
-@Getter
-@Setter
 public class ContractMergedTransfer {
 
     private byte[] from;
@@ -57,5 +53,43 @@ public class ContractMergedTransfer {
         outputs = new ArrayList<>();
     }
 
+    public byte[] getFrom() {
+        return from;
+    }
 
+    public void setFrom(byte[] from) {
+        this.from = from;
+    }
+
+    public BigInteger getValue() {
+        return value;
+    }
+
+    public void setValue(BigInteger value) {
+        this.value = value;
+    }
+
+    public List<Output> getOutputs() {
+        return outputs;
+    }
+
+    public void setOutputs(List<Output> outputs) {
+        this.outputs = outputs;
+    }
+
+    public NulsDigestData getOrginHash() {
+        return orginHash;
+    }
+
+    public void setOrginHash(NulsDigestData orginHash) {
+        this.orginHash = orginHash;
+    }
+
+    public NulsDigestData getHash() {
+        return hash;
+    }
+
+    public void setHash(NulsDigestData hash) {
+        this.hash = hash;
+    }
 }

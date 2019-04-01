@@ -26,8 +26,6 @@ package io.nuls.contract.model.bo;
 import io.nuls.contract.enums.ContractStatus;
 import io.nuls.contract.util.ContractUtil;
 import io.nuls.tools.exception.NulsException;
-import lombok.Getter;
-import lombok.Setter;
 
 import java.math.BigInteger;
 
@@ -35,8 +33,6 @@ import java.math.BigInteger;
  * @author: PierreLuo
  * @date: 2018/8/19
  */
-@Getter
-@Setter
 public class ContractTokenInfo {
 
     private String contractAddress;
@@ -77,4 +73,51 @@ public class ContractTokenInfo {
         return ContractUtil.isTerminatedContract(this.status.status());
     }
 
+    public String getContractAddress() {
+        return contractAddress;
+    }
+
+    public void setContractAddress(String contractAddress) {
+        this.contractAddress = contractAddress;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public String getSymbol() {
+        return symbol;
+    }
+
+    public void setSymbol(String symbol) {
+        this.symbol = symbol;
+    }
+
+    public BigInteger getAmount() {
+        return amount;
+    }
+
+    public long getDecimals() {
+        return decimals;
+    }
+
+    public void setDecimals(long decimals) {
+        this.decimals = decimals;
+    }
+
+    public long getBlockHeight() {
+        return blockHeight;
+    }
+
+    public void setBlockHeight(long blockHeight) {
+        this.blockHeight = blockHeight;
+    }
+
+    public ContractStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(ContractStatus status) {
+        this.status = status;
+    }
 }

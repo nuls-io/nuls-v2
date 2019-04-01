@@ -24,15 +24,19 @@
 package io.nuls.contract.model.bo;
 
 import io.nuls.base.data.Transaction;
-import lombok.Getter;
-import lombok.Setter;
 
 /**
  * @author: PierreLuo
  * @date: 2019-02-27
  */
-@Getter
-@Setter
 public class ContractTempTransaction extends Transaction {
     private String txHex;
+
+    public String getTxHex() {
+        return txHex;
+    }
+
+    public void setTxHex(String txHex) {
+        this.txHex = txHex;
+    }
 }
