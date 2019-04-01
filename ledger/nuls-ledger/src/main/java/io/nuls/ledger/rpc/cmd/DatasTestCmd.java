@@ -38,9 +38,9 @@ import io.nuls.rpc.cmd.BaseCmd;
 import io.nuls.rpc.model.CmdAnnotation;
 import io.nuls.rpc.model.Parameter;
 import io.nuls.rpc.model.message.Response;
+import io.nuls.rpc.util.RPCUtil;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
-import io.nuls.tools.crypto.HexUtil;
 
 import java.util.HashMap;
 import java.util.List;
@@ -109,7 +109,7 @@ public class DatasTestCmd extends BaseCmd {
         }
         List<CoinFrom> froms = coinData.getFrom();
         for (CoinFrom from : froms) {
-            logger(chainId).info("address={},amount = {} nonce = {} locked =  .", AddressTool.getStringAddressByBytes(from.getAddress()), from.getAmount(), HexUtil.encode(from.getNonce()), from.getLocked());
+            logger(chainId).info("address={},amount = {} nonce = {} locked =  .", AddressTool.getStringAddressByBytes(from.getAddress()), from.getAmount(), RPCUtil.encode(from.getNonce()), from.getLocked());
 
         }
         List<CoinTo> tos = coinData.getTo();
