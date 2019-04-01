@@ -99,7 +99,7 @@ public class ModularServiceMethodInterceptor implements MethodInterceptor {
         if (annotationList.isEmpty()) {
             return methodProxy.invokeSuper(obj, params);
         }
-        return BeanMethodInterceptorManager.doInterceptor(annotationList.toArray(new Annotation[annotationList.size()]), obj, method, params, methodProxy);
+        return BeanMethodInterceptorManager.doInterceptor(annotationList.toArray(new Annotation[0]), obj, method, params, methodProxy);
 
     }
 

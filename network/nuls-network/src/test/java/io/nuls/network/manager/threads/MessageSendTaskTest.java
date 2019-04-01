@@ -30,7 +30,7 @@ import io.nuls.network.utils.LoggerUtil;
 import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.model.message.Response;
 import io.nuls.rpc.netty.processor.ResponseMessageProcessor;
-import io.nuls.tools.crypto.HexUtil;
+import io.nuls.rpc.util.RPCUtil;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -64,7 +64,7 @@ public class MessageSendTaskTest implements Runnable  {
         TimeMessageBody messageBody =  new TimeMessageBody();
         messageBody.setMessageId(id++);
         try {
-            params.put("messageBody", HexUtil.encode(messageBody.serialize()));
+            params.put("messageBody", RPCUtil.encode(messageBody.serialize()));
         } catch (IOException e) {
             e.printStackTrace();
         }

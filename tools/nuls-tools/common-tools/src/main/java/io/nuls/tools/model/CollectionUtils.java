@@ -76,7 +76,7 @@ public class CollectionUtils {
      * @param list 对象集合
      * @return     集合里的对象toString拼接后得到的字符串
      * */
-    public static String join(List<? extends Object> list) {
+    public static String join(List<?> list) {
         if (list == null) {
             return null;
         }

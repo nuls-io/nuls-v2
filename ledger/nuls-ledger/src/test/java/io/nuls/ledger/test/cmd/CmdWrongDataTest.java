@@ -34,7 +34,7 @@ import io.nuls.rpc.info.NoUse;
 import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.model.message.Response;
 import io.nuls.rpc.netty.processor.ResponseMessageProcessor;
-import io.nuls.tools.crypto.HexUtil;
+import io.nuls.rpc.util.RPCUtil;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -81,7 +81,7 @@ public class CmdWrongDataTest {
         coinFrom.setAmount(BigInteger.valueOf(50));
         coinFrom.setAssetsChainId(assetChainId);
         coinFrom.setAssetsId(assetId);
-        coinFrom.setNonce(HexUtil.decode("AAAAAAAA"));
+        coinFrom.setNonce(RPCUtil.decode("AAAAAAAA"));
         coinFrom.setLocked((byte)0);
         List<CoinFrom> coinFroms =new ArrayList<>();
 //        coinFroms.add(coinFrom);
@@ -92,7 +92,7 @@ public class CmdWrongDataTest {
         tx.setCoinData(coinData.serialize());
         params.put("chainId", chainId);
         List<String> txHexList = new ArrayList<>();
-        txHexList.add(HexUtil.encode(tx.serialize()));
+        txHexList.add(RPCUtil.encode(tx.serialize()));
         params.put("txHexList",txHexList);
         Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.LG.abbr, "validateCoinData", params);
         logger.info("response {}", response);
@@ -124,7 +124,7 @@ public class CmdWrongDataTest {
         coinFrom.setAmount(BigInteger.valueOf(50));
         coinFrom.setAssetsChainId(assetChainId);
         coinFrom.setAssetsId(assetId);
-        coinFrom.setNonce(HexUtil.decode("AAAAAAAA"));
+        coinFrom.setNonce(RPCUtil.decode("AAAAAAAA"));
         coinFrom.setLocked((byte)0);
         List<CoinFrom> coinFroms =new ArrayList<>();
 //        coinFroms.add(coinFrom);
@@ -134,7 +134,7 @@ public class CmdWrongDataTest {
         coinData.setTo(coinTos);
         tx.setCoinData(coinData.serialize());
         params.put("chainId", chainId);
-        params.put("txHex",HexUtil.encode(tx.serialize()));
+        params.put("txHex",RPCUtil.encode(tx.serialize()));
         params.put("isBatchValidate",true);
         Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.LG.abbr, "validateCoinData", params);
         logger.info("response {}", response);

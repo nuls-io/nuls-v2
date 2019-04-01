@@ -28,6 +28,7 @@ import io.nuls.block.service.BlockService;
 import io.nuls.block.utils.BlockUtil;
 import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.netty.processor.ResponseMessageProcessor;
+import io.nuls.rpc.util.RPCUtil;
 import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.log.logback.NulsLogger;
 
@@ -60,7 +61,7 @@ public class ConsensusUtil {
 //            params.put(Constants.VERSION_KEY_STR, "1.0");
             params.put("chainId", chainId);
             params.put("download", download);
-            params.put("block", HexUtil.encode(block.serialize()));
+            params.put("block", RPCUtil.encode(block.serialize()));
 
             return ResponseMessageProcessor.requestAndResponse(ModuleE.CS.abbr, "cs_validBlock", params).isSuccess();
         } catch (Exception e) {
@@ -128,8 +129,8 @@ public class ConsensusUtil {
             Map<String, Object> params = new HashMap<>(5);
 //            params.put(Constants.VERSION_KEY_STR, "1.0");
             params.put("chainId", chainId);
-            params.put("blockHeader", HexUtil.encode(masterHeader.serialize()));
-            params.put("evidenceHeader", HexUtil.encode(forkHeader.serialize()));
+            params.put("blockHeader", RPCUtil.encode(masterHeader.serialize()));
+            params.put("evidenceHeader", RPCUtil.encode(forkHeader.serialize()));
 
             return ResponseMessageProcessor.requestAndResponse(ModuleE.CS.abbr, "cs_addEvidenceRecord", params).isSuccess();
         } catch (Exception e) {
@@ -178,7 +179,7 @@ public class ConsensusUtil {
             Map<String, Object> params = new HashMap<>(3);
 //            params.put(Constants.VERSION_KEY_STR, "1.0");
             params.put("chainId", chainId);
-            params.put("blockHeader", HexUtil.encode(blockHeader.serialize()));
+            params.put("blockHeader", RPCUtil.encode(blockHeader.serialize()));
 
             return ResponseMessageProcessor.requestAndResponse(ModuleE.CS.abbr, "cs_addBlock", params).isSuccess();
         } catch (Exception e) {

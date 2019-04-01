@@ -28,7 +28,7 @@ import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.data.Transaction;
 import io.nuls.rpc.cmd.BaseCmd;
 import io.nuls.rpc.model.message.Response;
-import io.nuls.tools.crypto.HexUtil;
+import io.nuls.rpc.util.RPCUtil;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.model.StringUtils;
 
@@ -47,7 +47,7 @@ public class BaseLedgerCmd extends BaseCmd {
             if (StringUtils.isBlank(txHex)) {
                 return failed("txHex is blank");
             }
-            byte[] txStream = HexUtil.decode(txHex);
+            byte[] txStream = RPCUtil.decode(txHex);
             Transaction tx = new Transaction();
             try {
                 tx.parse(new NulsByteBuffer(txStream));
@@ -64,7 +64,7 @@ public class BaseLedgerCmd extends BaseCmd {
         if (StringUtils.isBlank(txHex)) {
             return null;
         }
-        byte[] txStream = HexUtil.decode(txHex);
+        byte[] txStream = RPCUtil.decode(txHex);
         Transaction tx = new Transaction();
         try {
             tx.parse(new NulsByteBuffer(txStream));

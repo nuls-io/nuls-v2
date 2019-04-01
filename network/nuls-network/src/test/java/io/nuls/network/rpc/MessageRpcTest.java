@@ -35,7 +35,7 @@ import io.nuls.rpc.info.NoUse;
 import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.model.message.Response;
 import io.nuls.rpc.netty.processor.ResponseMessageProcessor;
-import io.nuls.tools.crypto.HexUtil;
+import io.nuls.rpc.util.RPCUtil;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -79,7 +79,7 @@ public class MessageRpcTest {
 //            versionMessage.getHeader().setChecksum(  versionMessage.getHeader().);
             params.put("chainId",chainId);
             params.put("excludeNodes",excludeNodes);
-            params.put("messageBody",HexUtil.encode(versionMessageBody.serialize()));
+            params.put("messageBody",RPCUtil.encode(versionMessageBody.serialize()));
             params.put("command","block");
             Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.NW.abbr, "nw_broadcast", params);
             LoggerUtil.Log.info("response {}", response);

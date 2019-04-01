@@ -43,9 +43,9 @@ import io.nuls.ledger.utils.LedgerUtil;
 import io.nuls.ledger.utils.LockerUtil;
 import io.nuls.ledger.utils.LoggerUtil;
 import io.nuls.ledger.validator.CoinDataValidator;
+import io.nuls.rpc.util.RPCUtil;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Service;
-import io.nuls.tools.crypto.HexUtil;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -188,8 +188,8 @@ public class TransactionServiceImpl implements TransactionService {
                     boolean process = false;
                     AccountBalance accountBalance = getAccountBalance(addressChainId, from, txHash, blockHeight, updateAccounts);
                     if (from.getLocked() == 0) {
-                        if (!coinDataValidator.validateNonces(accountBalance, nonce8BytesStr, HexUtil.encode(from.getNonce()))) {
-                            logger(addressChainId).info("nonce1={},nonce2={} validate fail.", accountBalance.getNonces().get(accountBalance.getNonces().size() - 1), HexUtil.encode(from.getNonce()));
+                        if (!coinDataValidator.validateNonces(accountBalance, nonce8BytesStr, RPCUtil.encode(from.getNonce()))) {
+                            logger(addressChainId).info("nonce1={},nonce2={} validate fail.", accountBalance.getNonces().get(accountBalance.getNonces().size() - 1), RPCUtil.encode(from.getNonce()));
                             return false;
                         }
                         //非解锁交易处理

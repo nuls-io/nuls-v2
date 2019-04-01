@@ -170,8 +170,7 @@ public class ThreadUtils {
      * @return Thread
      */
     public static Thread getThread(String threadName) {
-        Thread thread = THREAD_DATA_CACHE.getThread(threadName);
-        return thread;
+        return THREAD_DATA_CACHE.getThread(threadName);
     }
 
     /**
@@ -181,8 +180,7 @@ public class ThreadUtils {
      * @return List<Thread>
      */
     public static List<Thread> getPoolThread(String poolName) {
-        List<Thread> threadList = THREAD_DATA_CACHE.getThreadList(poolName);
-        return threadList;
+        return THREAD_DATA_CACHE.getThreadList(poolName);
     }
 
     /**
@@ -190,10 +188,8 @@ public class ThreadUtils {
      */
     public static void stopAllThread() {
         List<ThreadPoolExecutor> poolList = THREAD_DATA_CACHE.getPoolList();
-        if (null != poolList) {
-            for (ThreadPoolExecutor pool : poolList) {
-                pool.shutdown();
-            }
+        for (ThreadPoolExecutor pool : poolList) {
+            pool.shutdown();
         }
         List<Thread> threadList = THREAD_DATA_CACHE.getThreadList();
         if (threadList.size() > 0) {

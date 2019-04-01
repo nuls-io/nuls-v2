@@ -26,8 +26,7 @@ public class IoUtils {
         conn.setConnectTimeout(60 * 1000);
         conn.setRequestProperty("User-Agent", "Mozilla/4.0 (compatible; MSIE 5.0; Windows NT; DigExt)");
         InputStream inputStream = conn.getInputStream();
-        byte[] getData = readInputStream(inputStream);
-        return getData;
+        return readInputStream(inputStream);
     }
 
 
@@ -56,17 +55,8 @@ public class IoUtils {
      */
     public static String read(String path) throws Exception {
         ObjectUtils.canNotEmpty(path, "null parameter");
-        InputStream stream = null;
-        try {
-            stream = IoUtils.class.getClassLoader().getResourceAsStream(path);
-            String string = readRealPath(stream);
-            return string;
-        } catch (Exception e) {
-            throw e;
-        } finally {
-            if (stream != null) {
-                stream.close();
-            }
+        try (InputStream stream = IoUtils.class.getClassLoader().getResourceAsStream(path)) {
+            return readRealPath(stream);
         }
     }
 
@@ -182,8 +172,6 @@ public class IoUtils {
             bytes = outWriter.toByteArray();
             outWriter.close();
 
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -221,8 +209,6 @@ public class IoUtils {
 
             chars = outWriter.toCharArray();
             outWriter.close();
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -341,8 +327,6 @@ public class IoUtils {
             bos.close();
             os.close();
 
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -386,8 +370,6 @@ public class IoUtils {
             osw.close();
             os.close();
 
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -492,8 +474,6 @@ public class IoUtils {
             osw.close();
             os.close();
 
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
         }

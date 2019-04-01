@@ -41,12 +41,12 @@ import io.nuls.chain.model.tx.txdata.TxChain;
 import io.nuls.rpc.cmd.BaseCmd;
 import io.nuls.rpc.model.message.Response;
 import io.nuls.rpc.netty.processor.ResponseMessageProcessor;
-import io.nuls.tools.crypto.HexUtil;
+import io.nuls.rpc.util.RPCUtil;
+import io.nuls.tools.exception.NulsException;
+import io.nuls.tools.exception.NulsRuntimeException;
 import io.nuls.tools.model.BigIntegerUtils;
 import io.nuls.tools.model.ByteUtils;
 import io.nuls.tools.model.StringUtils;
-import io.nuls.tools.exception.NulsException;
-import io.nuls.tools.exception.NulsRuntimeException;
 import io.nuls.tools.thread.TimeService;
 
 import java.math.BigDecimal;
@@ -74,7 +74,7 @@ public class BaseChainCmd extends BaseCmd {
             if (StringUtils.isBlank(txHex)) {
                 return failed("txHex is blank");
             }
-            byte[] txStream = HexUtil.decode(txHex);
+            byte[] txStream = RPCUtil.decode(txHex);
             Transaction tx = new Transaction();
             try {
                 tx.parse(new NulsByteBuffer(txStream));
@@ -144,7 +144,7 @@ public class BaseChainCmd extends BaseCmd {
 
     BlockChain buildChainWithTxData(String txHex, Transaction tx, boolean isDelete) {
         try {
-            byte[] txBytes = HexUtil.decode(txHex);
+            byte[] txBytes = RPCUtil.decode(txHex);
             tx.parse(txBytes, 0);
             TxChain txChain = new TxChain();
             txChain.parse(tx.getTxData(), 0);
@@ -167,7 +167,7 @@ public class BaseChainCmd extends BaseCmd {
 
     Asset buildAssetWithTxChain(String txHex, Transaction tx) {
         try {
-            byte[] txBytes = HexUtil.decode(txHex);
+            byte[] txBytes = RPCUtil.decode(txHex);
             tx.parse(txBytes, 0);
             TxChain txChain = new TxChain();
             txChain.parse(tx.getTxData(), 0);
@@ -216,7 +216,7 @@ public class BaseChainCmd extends BaseCmd {
 
         Map responseData = (Map) response.getResponseData();
         String signatureHex = (String) responseData.get("signatureHex");
-        tx.setTransactionSignature(HexUtil.decode(signatureHex));
+        tx.setTransactionSignature(RPCUtil.decode(signatureHex));
 
         return tx;
     }

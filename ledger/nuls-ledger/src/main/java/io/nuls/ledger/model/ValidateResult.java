@@ -24,9 +24,6 @@
  */
 package io.nuls.ledger.model;
 
-import lombok.Getter;
-import lombok.Setter;
-
 /**
  * @description
  * @author lan
@@ -37,17 +34,29 @@ public class ValidateResult {
        this.validateCode = validateCode;
        this.validateDesc = validateDesc;
    }
+
     /**
      * 校验返回编码
      */
-    @Setter
-    @Getter
    private int validateCode;
     /**
      * 校验返回描述
      */
-    @Setter
-    @Getter
    private String validateDesc;
 
+    public int getValidateCode() {
+        return validateCode;
+    }
+
+    public void setValidateCode(int validateCode) {
+        this.validateCode = validateCode;
+    }
+
+    public String getValidateDesc() {
+        return validateDesc;
+    }
+
+    public void setValidateDesc(String validateDesc) {
+        this.validateDesc = validateDesc;
+    }
 }

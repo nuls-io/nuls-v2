@@ -90,7 +90,7 @@ public class ByteUtils {
     public static int bytesToInt(byte[] bytes) {
         int num = 0;
         int temp;
-        temp = (0x000000ff & (bytes[0])) << 0;
+        temp = (0x000000ff & (bytes[0]));
         num = num | temp;
         temp = (0x000000ff & (bytes[1])) << 8;
         num = num | temp;
@@ -167,7 +167,7 @@ public class ByteUtils {
      */
     public static byte[] shortToBytes(short num) {
         byte[] bytes = new byte[2];
-        bytes[0] = (byte) (0xff & (num >> 0));
+        bytes[0] = (byte) (0xff & (num));
         bytes[1] = (byte) (0xff & (num >> 8));
         return bytes;
     }
@@ -179,7 +179,7 @@ public class ByteUtils {
      * */
     public static byte[] intToBytes(int num) {
         byte[] bytes = new byte[4];
-        bytes[0] = (byte) (0xff & (num >> 0));
+        bytes[0] = (byte) (0xff & (num));
         bytes[1] = (byte) (0xff & (num >> 8));
         bytes[2] = (byte) (0xff & (num >> 16));
         bytes[3] = (byte) (0xff & (num >> 24));
@@ -249,9 +249,7 @@ public class ByteUtils {
      * */
     public static byte[] subBytes(byte[] input, int startIndex, int length) {
         byte[] bt = new byte[length];
-        for (int i = 0; i < length; i++) {
-            bt[i] = input[i + startIndex];
-        }
+        System.arraycopy(input, startIndex, bt, 0, length);
         return bt;
     }
 

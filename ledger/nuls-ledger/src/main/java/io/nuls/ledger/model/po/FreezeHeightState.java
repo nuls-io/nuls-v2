@@ -30,10 +30,6 @@ import io.nuls.base.basic.NulsOutputStreamBuffer;
 import io.nuls.base.data.BaseNulsData;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.parse.SerializeUtils;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
 
 import java.io.IOException;
 import java.math.BigInteger;
@@ -42,38 +38,26 @@ import java.math.BigInteger;
  * account balance lock
  * Created by wangkun23 on 2018/11/21.
  */
-@ToString
-@NoArgsConstructor
 public class FreezeHeightState extends BaseNulsData {
 
     /**
      * 交易的hash值
      */
-    @Setter
-    @Getter
     private String txHash;
     /**
      * 交易的nonce值
      */
-    @Setter
-    @Getter
     private String nonce;
     /**
      * 锁定金额
      */
-    @Setter
-    @Getter
     private BigInteger amount;
 
     /**
      * 锁定高度
      */
-    @Setter
-    @Getter
     private long height;
 
-    @Setter
-    @Getter
     private long createTime;
 
     @Override
@@ -103,5 +87,45 @@ public class FreezeHeightState extends BaseNulsData {
         size += SerializeUtils.sizeOfUint32();
         size += SerializeUtils.sizeOfUint48();
         return size;
+    }
+
+    public String getTxHash() {
+        return txHash;
+    }
+
+    public void setTxHash(String txHash) {
+        this.txHash = txHash;
+    }
+
+    public String getNonce() {
+        return nonce;
+    }
+
+    public void setNonce(String nonce) {
+        this.nonce = nonce;
+    }
+
+    public BigInteger getAmount() {
+        return amount;
+    }
+
+    public void setAmount(BigInteger amount) {
+        this.amount = amount;
+    }
+
+    public long getHeight() {
+        return height;
+    }
+
+    public void setHeight(long height) {
+        this.height = height;
+    }
+
+    public long getCreateTime() {
+        return createTime;
+    }
+
+    public void setCreateTime(long createTime) {
+        this.createTime = createTime;
     }
 }

@@ -76,12 +76,12 @@ public class ConfigurationLoader {
         }
         Log.info("config item list:");
         int maxKeyLength = configData.keySet().stream().max((d1,d2)->d1.length() > d2.length() ? 1 : -1).get().length();
-        configData.entrySet().forEach(entry->{
+        configData.forEach((key, value) -> {
             StringBuilder space = new StringBuilder();
-            for(var i = 0;i<maxKeyLength - entry.getKey().length();i++){
+            for (var i = 0; i < maxKeyLength - key.length(); i++) {
                 space.append(" ");
             }
-            Log.info("{} : {} ==> {}",entry.getKey() + space,entry.getValue().value,entry.getValue().configFile);
+            Log.info("{} : {} ==> {}", key + space, value.value, value.configFile);
         });
     }
 
@@ -89,9 +89,9 @@ public class ConfigurationLoader {
      * 通过jvm option -DXXX=XXX 的方式设置配置项
      */
     private void loadJvmOptionConfigItem() {
-        configData.entrySet().forEach(entry->{
-            if(StringUtils.isNotBlank(System.getProperty(entry.getKey()))){
-                configData.put(entry.getKey(),new ConfigurationLoader.ConfigItem("-D" + entry.getKey(), System.getProperty(entry.getKey())));
+        configData.forEach((key, value) -> {
+            if (StringUtils.isNotBlank(System.getProperty(key))) {
+                configData.put(key, new ConfigItem("-D" + key, System.getProperty(key)));
             }
         });
     }
@@ -103,18 +103,16 @@ public class ConfigurationLoader {
     private void loadJvmActiveModuleFile() {
         String fileName = System.getProperty(JVM_OPTION_ACTIVE_MODULE);
         if (StringUtils.isNotBlank(fileName)) {
-            parserMap.entrySet().forEach(entry -> {
-                if (fileName.endsWith(entry.getKey())) {
-                    loadForFile(fileName, entry.getValue());
+            parserMap.forEach((key, value) -> {
+                if (fileName.endsWith(key)) {
+                    loadForFile(fileName, value);
                 }
             });
         }
     }
 
     private void loadJarPathModule() {
-        parserMap.entrySet().forEach(parserEntry -> {
-            loadForFile(parserEntry.getValue().getFileName(), parserEntry.getValue());
-        });
+        parserMap.forEach((key, value) -> loadForFile(value.getFileName(), value));
     }
 
     private void loadForFile(String fileName, ModuleConfigParser parser) {
@@ -150,14 +148,14 @@ public class ConfigurationLoader {
     }
 
     private void loadResourceModule() {
-        parserMap.entrySet().forEach(parserEntry -> {
-            URL url = getClass().getClassLoader().getResource(parserEntry.getValue().getFileName());
+        parserMap.forEach((key, value) -> {
+            URL url = getClass().getClassLoader().getResource(value.getFileName());
             if (url == null) {
                 return;
             }
-            Log.info("found config file : {}", parserEntry.getValue().getFileName());
+            Log.info("found config file : {}", value.getFileName());
             try {
-                configData.putAll(parserEntry.getValue().parse(url.getPath(),url.openStream()));
+                configData.putAll(value.parse(url.getPath(), url.openStream()));
             } catch (Exception e) {
                 e.printStackTrace();
             }

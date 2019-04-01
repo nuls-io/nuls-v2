@@ -30,8 +30,6 @@ import io.nuls.base.data.BaseNulsData;
 import io.nuls.base.data.Transaction;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.parse.SerializeUtils;
-import lombok.Getter;
-import lombok.Setter;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -46,8 +44,6 @@ public class BlockTxs extends BaseNulsData {
     /**
      *  accounts
      */
-    @Setter
-    @Getter
     private List<Transaction> transactions = new ArrayList<Transaction>();
 
     public BlockTxs() {
@@ -83,5 +79,13 @@ public class BlockTxs extends BaseNulsData {
             size +=transaction.size();
         }
         return size;
+    }
+
+    public List<Transaction> getTransactions() {
+        return transactions;
+    }
+
+    public void setTransactions(List<Transaction> transactions) {
+        this.transactions = transactions;
     }
 }

@@ -22,11 +22,11 @@ import java.util.Properties;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 /**
- * 共识模块启动及初始化管理
- * Consensus Module Startup and Initialization Management
+ * 跨链模块启动及初始化管理
+ * Cross Chain Module Startup and Initialization Management
  *
  * @author tag
- * 2018/3/5
+ * 2019/04/01
  */
 @Component
 public class CrossChainBootStrap extends RpcModule {

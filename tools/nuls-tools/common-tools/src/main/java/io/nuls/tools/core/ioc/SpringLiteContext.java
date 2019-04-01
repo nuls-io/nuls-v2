@@ -88,16 +88,15 @@ public class SpringLiteContext {
             throw new IllegalArgumentException("spring lite init package can't be null");
         }
         SpringLiteContext.interceptor = interceptor;
-        Set<Class> classes = new HashSet<>();
         Log.info("spring lite scan package : " + Arrays.toString(packName));
-        classes.addAll(ScanUtil.scan("io.nuls.tools.core.config"));
+        Set<Class> classes = new HashSet<>(ScanUtil.scan("io.nuls.tools.core.config"));
         Arrays.stream(packName).forEach(pack -> {
             classes.addAll(ScanUtil.scan(pack));
         });
         classes.stream()
                 //通过Order注解控制类加载顺序
                 .sorted((b1, b2) -> getOrderByClass(b1) > getOrderByClass(b2) ? 1 : -1)
-                .forEach((Class clazz) -> checkBeanClass(clazz));
+                .forEach(SpringLiteContext::checkBeanClass);
         configurationInjectToBean();
         autowireFields();
         callAfterPropertiesSet();
@@ -214,9 +213,7 @@ public class SpringLiteContext {
     private static Set<Field> getFieldSet(Class objType) {
         Set<Field> set = new HashSet<>();
         Field[] fields = objType.getDeclaredFields();
-        for (Field field : fields) {
-            set.add(field);
-        }
+        Collections.addAll(set, fields);
         if (!objType.getSuperclass().equals(Object.class)) {
             set.addAll(getFieldSet(objType.getSuperclass()));
         }
@@ -241,8 +238,7 @@ public class SpringLiteContext {
             return true;
         }
         String name = ((Autowired) automired).value();
-        Object value = null;
-        if (null == name || name.trim().length() == 0) {
+        if (name.trim().length() == 0) {
             Set<String> nameSet = CLASS_NAME_SET_MAP.get(field.getType());
             if (nameSet == null || nameSet.isEmpty()) {
                 throw new Exception("Can't find the model,field:" + field.getName());
@@ -252,7 +248,7 @@ public class SpringLiteContext {
                 name = field.getName();
             }
         }
-        value = getBean(name);
+        Object value = getBean(name);
         if (null == value) {
             throw new Exception("Can't find the model named:" + name);
         }
@@ -450,11 +446,7 @@ public class SpringLiteContext {
      * @param beanName 对象实例名称
      */
     private static void addClassNameMap(Class clazz, String beanName) {
-        Set<String> nameSet = CLASS_NAME_SET_MAP.get(clazz);
-        if (null == nameSet) {
-            nameSet = new HashSet<>();
-            CLASS_NAME_SET_MAP.put(clazz, nameSet);
-        }
+        Set<String> nameSet = CLASS_NAME_SET_MAP.computeIfAbsent(clazz, k -> new HashSet<>());
         nameSet.add(beanName);
         if (null != clazz.getSuperclass() && !clazz.getSuperclass().equals(Object.class)) {
             addClassNameMap(clazz.getSuperclass(), beanName);
@@ -491,7 +483,7 @@ public class SpringLiteContext {
         if (!(clazz.getSuperclass() instanceof Object) && clazz.getSuperclass() != null) {
             List<Annotation> supperAnno = getAnnotationForBean(clazz.getSuperclass());
             supperAnno.forEach(sa -> {
-                if (!res.stream().anyMatch(a -> a.annotationType().equals(sa.annotationType()))) {
+                if (res.stream().noneMatch(a -> a.annotationType().equals(sa.annotationType()))) {
                     res.add(sa);
                 }
             });

@@ -24,13 +24,11 @@
  */
 package io.nuls.network.rpc.cmd;
 
-import io.nuls.base.data.NulsDigestData;
 import io.nuls.network.constant.NetworkConstant;
 import io.nuls.network.constant.NetworkErrorCode;
 import io.nuls.network.manager.MessageManager;
 import io.nuls.network.manager.NodeGroupManager;
 import io.nuls.network.manager.StorageManager;
-import io.nuls.network.manager.TimeManager;
 import io.nuls.network.manager.handler.MessageHandlerFactory;
 import io.nuls.network.model.NetworkEventResult;
 import io.nuls.network.model.Node;
@@ -51,8 +49,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-
-import static io.nuls.network.utils.LoggerUtil.Log;
 
 /**
  * @author lan
@@ -116,7 +112,6 @@ public class MessageRpc extends BaseCmd {
     @Parameter(parameterName = "isCross", parameterType = "boolean")
     public Response broadcast(Map params) {
         try {
-            Log.debug("==================broadcast begin");
             int chainId = Integer.valueOf(String.valueOf(params.get("chainId")));
             String excludeNodes = String.valueOf(params.get("excludeNodes"));
             byte[] messageBody = RPCUtil.decode(String.valueOf(params.get("messageBody")));
@@ -124,7 +119,7 @@ public class MessageRpc extends BaseCmd {
             MessageManager messageManager = MessageManager.getInstance();
             NodeGroup nodeGroup = NodeGroupManager.getInstance().getNodeGroupByChainId(chainId);
             if (null == nodeGroup) {
-                Log.error("chain is not exist!");
+                LoggerUtil.logger(chainId).error("chain is not exist!");
                 return failed(NetworkErrorCode.PARAMETER_ERROR);
             }
             long magicNumber = nodeGroup.getMagicNumber();
@@ -150,13 +145,11 @@ public class MessageRpc extends BaseCmd {
                     /*end test code*/
                 }
             }
-            Log.debug("==================broadcast nodes==size={}", nodes.size());
             messageManager.broadcastToNodes(message, nodes, true);
         } catch (Exception e) {
             e.printStackTrace();
             return failed(NetworkErrorCode.PARAMETER_ERROR);
         }
-        Log.debug("==================broadcast end");
         return success();
     }
 
@@ -176,7 +169,6 @@ public class MessageRpc extends BaseCmd {
             String nodes = String.valueOf(params.get("nodes"));
             byte[] messageBody = RPCUtil.decode(String.valueOf(params.get("messageBody")));
             String cmd = String.valueOf(params.get("command"));
-            Log.debug("{}==================sendPeersMsg begin, cmd-{}", TimeManager.currentTimeMillis(), cmd);
             MessageManager messageManager = MessageManager.getInstance();
             NodeGroupManager nodeGroupManager = NodeGroupManager.getInstance();
             NodeGroup nodeGroup = nodeGroupManager.getNodeGroupByChainId(chainId);
@@ -197,17 +189,14 @@ public class MessageRpc extends BaseCmd {
                     /*end test code*/
                     nodesList.add(availableNode);
                 }else{
-                    Log.info("node = {} is not available!");
+                    LoggerUtil.logger(chainId).error("node = {} is not available!");
                 }
             }
-            Log.debug("==================sendPeersMsg nodesList size={}, cmd-{}, hash-{}", nodesList.size(), cmd, NulsDigestData.calcDigestData(messageBody).getDigestHex());
             NetworkEventResult networkEventResult = messageManager.broadcastToNodes(message, nodesList, true);
-            Log.debug("=======================networkEventResult {}, cmd-{}", networkEventResult.isSuccess(), cmd);
         } catch (Exception e) {
             e.printStackTrace();
             return failed(NetworkErrorCode.PARAMETER_ERROR);
         }
-        Log.debug("==================sendPeersMsg end");
         return success();
     }
 }
