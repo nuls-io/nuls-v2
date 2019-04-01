@@ -37,8 +37,8 @@ import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.model.message.Response;
 import io.nuls.rpc.netty.processor.ResponseMessageProcessor;
+import io.nuls.rpc.util.RPCUtil;
 import io.nuls.tools.core.annotation.Service;
-import io.nuls.tools.crypto.HexUtil;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -133,7 +133,7 @@ public class RpcServiceImpl  implements RpcService {
         try {
             Map<String, Object> params = new HashMap<>();
             params.put(RpcConstants.TX_CHAIN_ID,  CmConstants.CHAIN_ASSET_MAP.get(CmConstants.NULS_CHAIN_ID));
-            params.put(RpcConstants.TX_DATA_HEX,HexUtil.encode(tx.serialize()));
+            params.put(RpcConstants.TX_DATA_HEX,RPCUtil.encode(tx.serialize()));
             Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.TX.abbr, RpcConstants.CMD_TX_NEW, params);
             Log.debug("response={}",cmdResp);
             return cmdResp.isSuccess();
