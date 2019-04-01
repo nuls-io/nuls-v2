@@ -1,7 +1,5 @@
 package io.nuls.api.provider.ledger.facade;
 
-import lombok.Data;
-
 import java.math.BigInteger;
 
 /**
@@ -9,7 +7,6 @@ import java.math.BigInteger;
  * @Time: 2019-03-08 15:39
  * @Description: 功能描述
  */
-@Data
 public class AccountBalanceInfo {
 
     private BigInteger freeze;
@@ -18,4 +15,27 @@ public class AccountBalanceInfo {
 
     private BigInteger available;
 
+    public BigInteger getFreeze() {
+        return freeze;
+    }
+
+    public void setFreeze(BigInteger freeze) {
+        this.freeze = freeze;
+    }
+
+    public BigInteger getTotal() {
+        return total;
+    }
+
+    public void setTotal(BigInteger total) {
+        this.total = total;
+    }
+
+    public BigInteger getAvailable() {
+        return available;
+    }
+
+    public void setAvailable(BigInteger available) {
+        this.available = available;
+    }
 }

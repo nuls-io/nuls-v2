@@ -1,18 +1,41 @@
 package io.nuls.api.provider.consensus.facade;
 
 import io.nuls.api.provider.BaseReq;
-import lombok.Data;
 
 /**
  * @Author: zhoulijun
  * @Time: 2019-03-26 15:54
  * @Description: 功能描述
  */
-@Data
 public class GetAgentListReq extends BaseReq {
 
-    private int pageNumber,pageSize;
+    private int pageNumber;
+
+    private int pageSize;
 
     private String keyWord;
 
+    public int getPageNumber() {
+        return pageNumber;
+    }
+
+    public void setPageNumber(int pageNumber) {
+        this.pageNumber = pageNumber;
+    }
+
+    public int getPageSize() {
+        return pageSize;
+    }
+
+    public void setPageSize(int pageSize) {
+        this.pageSize = pageSize;
+    }
+
+    public String getKeyWord() {
+        return keyWord;
+    }
+
+    public void setKeyWord(String keyWord) {
+        this.keyWord = keyWord;
+    }
 }

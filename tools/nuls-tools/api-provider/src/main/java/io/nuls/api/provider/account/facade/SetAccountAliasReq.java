@@ -1,8 +1,6 @@
 package io.nuls.api.provider.account.facade;
 
 import io.nuls.api.provider.BaseReq;
-import lombok.AllArgsConstructor;
-import lombok.Data;
 
 /**
  * @Author: zhoulijun
@@ -11,8 +9,6 @@ import lombok.Data;
  * 设置账户别名
  * set account alias
  */
-@Data
-@AllArgsConstructor
 public class SetAccountAliasReq extends BaseReq {
 
     private String password;
@@ -21,4 +17,33 @@ public class SetAccountAliasReq extends BaseReq {
 
     private String alias;
 
+    public SetAccountAliasReq(String password, String address, String alias) {
+        this.password = password;
+        this.address = address;
+        this.alias = alias;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
+    }
+
+    public String getAlias() {
+        return alias;
+    }
+
+    public void setAlias(String alias) {
+        this.alias = alias;
+    }
 }

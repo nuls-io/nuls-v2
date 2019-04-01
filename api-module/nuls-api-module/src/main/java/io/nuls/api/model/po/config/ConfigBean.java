@@ -24,10 +24,6 @@
  */
 package io.nuls.api.model.po.config;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-
 import java.io.Serializable;
 
 /**
@@ -37,9 +33,6 @@ import java.io.Serializable;
  * @author vivi
  * @date 2019/02/28
  */
-@Data
-@AllArgsConstructor
-@NoArgsConstructor
 public class ConfigBean implements Serializable {
 
     private int chainId;
@@ -49,4 +42,47 @@ public class ConfigBean implements Serializable {
     private String dbIp;
 
     private int port;
+
+    public ConfigBean() {
+
+    }
+
+    public ConfigBean(int chainId, int assetId, String dbIp, int port) {
+        this.chainId = chainId;
+        this.assetId = assetId;
+        this.dbIp = dbIp;
+        this.port = port;
+    }
+
+    public int getChainId() {
+        return chainId;
+    }
+
+    public void setChainId(int chainId) {
+        this.chainId = chainId;
+    }
+
+    public int getAssetId() {
+        return assetId;
+    }
+
+    public void setAssetId(int assetId) {
+        this.assetId = assetId;
+    }
+
+    public String getDbIp() {
+        return dbIp;
+    }
+
+    public void setDbIp(String dbIp) {
+        this.dbIp = dbIp;
+    }
+
+    public int getPort() {
+        return port;
+    }
+
+    public void setPort(int port) {
+        this.port = port;
+    }
 }

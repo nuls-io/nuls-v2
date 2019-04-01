@@ -1,12 +1,10 @@
 package io.nuls.api.cache;
 
 import io.nuls.api.model.po.db.*;
-import lombok.Data;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-@Data
 public class ApiCache {
 
     private ChainInfo chainInfo;
@@ -62,4 +60,68 @@ public class ApiCache {
         return aliasMap.get(key);
     }
 
+
+    public ChainInfo getChainInfo() {
+        return chainInfo;
+    }
+
+    public void setChainInfo(ChainInfo chainInfo) {
+        this.chainInfo = chainInfo;
+    }
+
+    public ContextInfo getContextInfo() {
+        return contextInfo;
+    }
+
+    public void setContextInfo(ContextInfo contextInfo) {
+        this.contextInfo = contextInfo;
+    }
+
+    public BlockHeaderInfo getBestHeader() {
+        return bestHeader;
+    }
+
+    public void setBestHeader(BlockHeaderInfo bestHeader) {
+        this.bestHeader = bestHeader;
+    }
+
+    public CurrentRound getCurrentRound() {
+        return currentRound;
+    }
+
+    public void setCurrentRound(CurrentRound currentRound) {
+        this.currentRound = currentRound;
+    }
+
+    public Map<String, AccountInfo> getAccountMap() {
+        return accountMap;
+    }
+
+    public void setAccountMap(Map<String, AccountInfo> accountMap) {
+        this.accountMap = accountMap;
+    }
+
+    public Map<String, AccountLedgerInfo> getLedgerMap() {
+        return ledgerMap;
+    }
+
+    public void setLedgerMap(Map<String, AccountLedgerInfo> ledgerMap) {
+        this.ledgerMap = ledgerMap;
+    }
+
+    public Map<String, AgentInfo> getAgentMap() {
+        return agentMap;
+    }
+
+    public void setAgentMap(Map<String, AgentInfo> agentMap) {
+        this.agentMap = agentMap;
+    }
+
+    public Map<String, AliasInfo> getAliasMap() {
+        return aliasMap;
+    }
+
+    public void setAliasMap(Map<String, AliasInfo> aliasMap) {
+        this.aliasMap = aliasMap;
+    }
 }

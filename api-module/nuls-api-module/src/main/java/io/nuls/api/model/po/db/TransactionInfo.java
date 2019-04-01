@@ -1,7 +1,6 @@
 package io.nuls.api.model.po.db;
 
 import io.nuls.api.constant.ApiConstant;
-import lombok.Data;
 import org.bson.Document;
 
 import java.math.BigInteger;

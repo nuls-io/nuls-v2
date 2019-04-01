@@ -33,6 +33,7 @@ import io.nuls.api.model.rpc.RpcErrorCode;
 import io.nuls.api.model.rpc.RpcResult;
 import io.nuls.api.model.rpc.RpcResultError;
 import io.nuls.api.provider.ServiceManager;
+import io.nuls.api.provider.account.facade.CreateAccountReq;
 import io.nuls.api.utils.VerifyUtils;
 import io.nuls.base.basic.AddressTool;
 import io.nuls.tools.core.annotation.Autowired;
@@ -190,7 +191,9 @@ public class AccountController {
         if(!FormatValidUtils.validPassword(password)) {
             return RpcResult.paramError("[password] is inValid");
         }
-
+//
+//        CreateAccountReq req = new CreateAccountReq();
+//        cmdAccountService.createAccount()
 
         return null;
     }

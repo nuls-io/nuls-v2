@@ -1,8 +1,6 @@
 package io.nuls.api.provider.account.facade;
 
 import io.nuls.api.provider.BaseReq;
-import lombok.AllArgsConstructor;
-import lombok.Data;
 
 /**
  * @Author: zhoulijun
@@ -11,12 +9,30 @@ import lombok.Data;
  * 查询账户私钥
  * get account private key
  */
-@Data
-@AllArgsConstructor
 public class GetAccountPrivateKeyByAddressReq extends BaseReq {
 
     private String password;
 
     private String address;
 
+    public GetAccountPrivateKeyByAddressReq(String password, String address) {
+        this.password = password;
+        this.address = address;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
+    }
 }

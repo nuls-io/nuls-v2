@@ -1,7 +1,5 @@
 package io.nuls.api.model.po.db;
 
-import lombok.Data;
-
 public class ContractTxInfo {
 
     private String contractAddress;

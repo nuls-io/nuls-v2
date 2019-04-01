@@ -1,8 +1,6 @@
 package io.nuls.api.provider.consensus.facade;
 
 import io.nuls.api.provider.BaseReq;
-import lombok.AllArgsConstructor;
-import lombok.Data;
 
 /**
  * @Author: zhoulijun
@@ -10,8 +8,6 @@ import lombok.Data;
  * @Description:
  * 退出共识
  */
-@Data
-@AllArgsConstructor
 public class WithdrawReq extends BaseReq {
 
     String address;
@@ -20,4 +16,33 @@ public class WithdrawReq extends BaseReq {
 
     String password;
 
+    public WithdrawReq(String address, String txHash, String password) {
+        this.address = address;
+        this.txHash = txHash;
+        this.password = password;
+    }
+
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
+    }
+
+    public String getTxHash() {
+        return txHash;
+    }
+
+    public void setTxHash(String txHash) {
+        this.txHash = txHash;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
 }
