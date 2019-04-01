@@ -25,18 +25,15 @@
 package io.nuls.account.service;
 
 import io.nuls.account.model.bo.Account;
-import io.nuls.account.model.bo.Chain;
 import io.nuls.account.model.dto.CoinDto;
 import io.nuls.account.model.dto.MultiSignTransactionResultDto;
 import io.nuls.base.data.MultiSigAccount;
 import io.nuls.base.data.Transaction;
-import io.nuls.tools.basic.Result;
 import io.nuls.tools.exception.NulsException;
 
 import java.io.IOException;
 import java.math.BigInteger;
 import java.util.List;
-import java.util.Map;
 
 /**
  * 账户相关交易接口定义
@@ -112,11 +109,11 @@ public interface TransactionService {
      * @param chainId  chainId
      * @param account  the account which will sign the transaction
      * @param password the account's password
-     * @param txHex    the hex data of transaction
+     * @param txStr   the hex data of transaction
      * @return MultiSignTransactionResultDto it contains two element:is broadcast and the transactio
      * @auther EdwardChan
      */
-    MultiSignTransactionResultDto signMultiSignTransaction(int chainId, Account account, String password, String txHex)
+    MultiSignTransactionResultDto signMultiSignTransaction(int chainId, Account account, String password, String txStr)
             throws NulsException, IOException;
 
     /**

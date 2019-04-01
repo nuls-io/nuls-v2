@@ -51,10 +51,10 @@ import io.nuls.base.signture.MultiSignTxSignature;
 import io.nuls.base.signture.P2PHKSignature;
 import io.nuls.base.signture.SignatureUtil;
 import io.nuls.base.signture.TransactionSignature;
+import io.nuls.rpc.util.RPCUtil;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Service;
 import io.nuls.tools.crypto.ECKey;
-import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.exception.NulsRuntimeException;
 import io.nuls.tools.model.BigIntegerUtils;
@@ -185,11 +185,11 @@ public class TransactionServiceImpl implements TransactionService {
     }
 
     @Override
-    public MultiSignTransactionResultDto signMultiSignTransaction(int chainId, Account account, String password, String txHex)
+    public MultiSignTransactionResultDto signMultiSignTransaction(int chainId, Account account, String password, String txStr)
             throws NulsException, IOException {
         //create transaction
         Transaction transaction = new Transaction();
-        transaction.parse(new NulsByteBuffer(HexUtil.decode(txHex)));
+        transaction.parse(new NulsByteBuffer(RPCUtil.decode(txStr)));
 
         CoinData coinData = new CoinData();
         coinData.parse(new NulsByteBuffer(transaction.getCoinData()));
@@ -691,7 +691,7 @@ public class TransactionServiceImpl implements TransactionService {
     public boolean txMutilProcessing(MultiSigAccount multiSigAccount, Transaction tx, TransactionSignature transactionSignature) throws IOException {
         //当已签名数等于M则自动广播该交易
         if (multiSigAccount.getM() == transactionSignature.getP2PHKSignatures().size()) {
-            TransactionCmdCall.newTx(multiSigAccount.getChainId(), HexUtil.encode(tx.serialize()));
+            TransactionCmdCall.newTx(multiSigAccount.getChainId(), RPCUtil.encode(tx.serialize()));
             // Result saveResult = accountLedgerService.verifyAndSaveUnconfirmedTransaction(tx);
 //            if (saveResult.isFailed()) {
 //                if (KernelErrorCode.DATA_SIZE_ERROR.getCode().equals(saveResult.getErrorCode().getCode())) {

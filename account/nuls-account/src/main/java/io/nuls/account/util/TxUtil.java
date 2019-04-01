@@ -32,14 +32,8 @@ import io.nuls.account.rpc.call.LegerCmdCall;
 import io.nuls.account.rpc.call.NetworkCall;
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.basic.NulsByteBuffer;
-import io.nuls.base.data.BaseNulsData;
-import io.nuls.base.data.Coin;
-import io.nuls.base.data.CoinData;
-import io.nuls.base.data.CoinFrom;
-import io.nuls.base.data.NonceHashData;
-import io.nuls.base.data.NulsDigestData;
-import io.nuls.base.data.Transaction;
-import io.nuls.tools.crypto.HexUtil;
+import io.nuls.base.data.*;
+import io.nuls.rpc.util.RPCUtil;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.model.BigIntegerUtils;
 import io.nuls.tools.model.StringUtils;
@@ -242,7 +236,22 @@ public class TxUtil {
         if (StringUtils.isBlank(hex)) {
             throw new NulsException(AccountErrorCode.DATA_NOT_FOUND);
         }
-        return getTransaction(HexUtil.decode(hex));
+        return getTransaction(RPCUtil.decode(hex));
+    }
+
+    /**
+     * RPCUtil 反序列化
+     * @param data
+     * @param clazz
+     * @param <T>
+     * @return
+     * @throws NulsException
+     */
+    public static <T> T getInstanceRpcStr(String data, Class<? extends BaseNulsData> clazz) throws NulsException {
+        if (StringUtils.isBlank(data)) {
+            throw new NulsException(AccountErrorCode.DATA_NOT_FOUND);
+        }
+        return getInstance(RPCUtil.decode(data), clazz);
     }
 
     public static <T> T getInstance(byte[] bytes, Class<? extends BaseNulsData> clazz) throws NulsException {
@@ -266,7 +275,7 @@ public class TxUtil {
         if (StringUtils.isBlank(hex)) {
             throw new NulsException(AccountErrorCode.DATA_NOT_FOUND);
         }
-        return getInstance(HexUtil.decode(hex), clazz);
+        return getInstance(RPCUtil.decode(hex), clazz);
     }
 
 }

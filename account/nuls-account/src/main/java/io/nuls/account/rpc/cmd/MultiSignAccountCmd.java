@@ -15,7 +15,6 @@ import io.nuls.rpc.model.message.Response;
 import io.nuls.rpc.util.RPCUtil;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
-import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.exception.NulsRuntimeException;
 import io.nuls.tools.model.FormatValidUtils;
 import io.nuls.tools.model.StringUtils;
@@ -71,7 +70,7 @@ public class MultiSignAccountCmd extends BaseCmd {
             List<Map<String,String>> pubKeys = new ArrayList<>();
             for (byte[] pubKeyBytes : multiSigAccount.getPubKeyList()) {
                 Map<String,String> tmpMap = new HashMap<>();
-                tmpMap.put("pubKey", HexUtil.encode(pubKeyBytes));
+                tmpMap.put("pubKey", RPCUtil.encode(pubKeyBytes));
                 tmpMap.put("address",AddressTool.getStringAddressByBytes(AddressTool.getAddress(pubKeyBytes,chainId)));
                 pubKeys.add(tmpMap);
             }
@@ -204,7 +203,7 @@ public class MultiSignAccountCmd extends BaseCmd {
             if (multiSignTransactionResultDto.isBroadcasted()) {
                 map.put("txHash", multiSignTransactionResultDto.getTransaction().getHash().getDigestHex());
             } else {
-                map.put("txHex", HexUtil.encode(multiSignTransactionResultDto.getTransaction().serialize()));
+                map.put("tx", RPCUtil.encode(multiSignTransactionResultDto.getTransaction().serialize()));
             }
         } catch (NulsRuntimeException e) {
             LoggerUtil.logger.info("", e);

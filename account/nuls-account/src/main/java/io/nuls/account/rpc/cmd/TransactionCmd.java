@@ -32,13 +32,13 @@ import io.nuls.rpc.cmd.BaseCmd;
 import io.nuls.rpc.model.CmdAnnotation;
 import io.nuls.rpc.model.Parameter;
 import io.nuls.rpc.model.message.Response;
+import io.nuls.rpc.util.RPCUtil;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
-import io.nuls.tools.crypto.HexUtil;
-import io.nuls.tools.model.BigIntegerUtils;
-import io.nuls.tools.model.StringUtils;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.exception.NulsRuntimeException;
+import io.nuls.tools.model.BigIntegerUtils;
+import io.nuls.tools.model.StringUtils;
 import io.nuls.tools.parse.JSONUtils;
 
 import java.io.IOException;
@@ -84,23 +84,23 @@ public class TransactionCmd extends BaseCmd {
     public Response accountTxValidate(Map params) {
         LoggerUtil.logger.debug("ac_accountTxValidate start,params size:{}", params == null ? 0 : params.size());
         int chainId = 0;
-        List<String> txHexList;
+        List<String> txList;
         List<Transaction> lists = new ArrayList<>();
         List<Transaction> result = null;
         Object chainIdObj = params == null ? null : params.get(RpcParameterNameConstant.CHAIN_ID);
-        Object txHexListObj = params == null ? null : params.get(RpcParameterNameConstant.TX_LIST);
+        Object txListObj = params == null ? null : params.get(RpcParameterNameConstant.TX_LIST);
         try {
             // check parameters
-            if (params == null || chainIdObj == null || txHexListObj == null) {
+            if (params == null || chainIdObj == null || txListObj == null) {
                 LoggerUtil.logger.warn("ac_accountTxValidate params is null");
                 throw new NulsRuntimeException(AccountErrorCode.NULL_PARAMETER);
             }
             chainId = (Integer) chainIdObj;
-            txHexList = (List<String>) txHexListObj;
-            if (txHexList != null) {
-                txHexList.forEach(txHex -> {
+            txList = (List<String>) txListObj;
+            if (txList != null) {
+                txList.forEach(tx -> {
                     try {
-                        lists.add(Transaction.getInstance(txHex));
+                        lists.add(Transaction.getInstance(tx));
                     } catch (NulsException e) {
                         LoggerUtil.logger.error("ac_accountTxValidate tx format error",e);
                     }
@@ -134,22 +134,22 @@ public class TransactionCmd extends BaseCmd {
         LoggerUtil.logger.debug("ac_commitTx start,params size:{}", params == null ? 0 : params.size());
         boolean result = true;
         int chainId;
-        List<String> txHexList;
+        List<String> txList;
         Object chainIdObj = params == null ? null : params.get(RpcParameterNameConstant.CHAIN_ID);
-        Object txHexListgObj = params == null ? null : params.get(RpcParameterNameConstant.TX_LIST);
+        Object txListgObj = params == null ? null : params.get(RpcParameterNameConstant.TX_LIST);
         Object blockHeaderDigest = params == null ? null : params.get(RpcParameterNameConstant.BLOCK_HEADER_DIGEST);
         List<Transaction> commitSucTxList = new ArrayList<>();
         // check parameters
-        if (params == null || chainIdObj == null || txHexListgObj == null) {
+        if (params == null || chainIdObj == null || txListgObj == null) {
             LoggerUtil.logger.warn("ac_commitTx params is null");
             return failed(AccountErrorCode.NULL_PARAMETER);
         }
         chainId = (Integer) chainIdObj;
-        txHexList = (List<String>) txHexListgObj;
+        txList = (List<String>) txListgObj;
         //交易提交
         try {
-            for (String txHex : txHexList) {
-                Transaction tx = Transaction.getInstance(txHex);
+            for (String txStr : txList) {
+                Transaction tx = Transaction.getInstance(txStr);
                 //别名交易
                 if (AccountConstant.TX_TYPE_ACCOUNT_ALIAS == tx.getType()) {
                     Alias alias = new Alias();
@@ -211,22 +211,22 @@ public class TransactionCmd extends BaseCmd {
         //默认回滚成功
         boolean result = true;
         int chainId;
-        List<String> txHexList;
+        List<String> txList;
         Object chainIdObj = params == null ? null : params.get(RpcParameterNameConstant.CHAIN_ID);
-        Object txHexListgObj = params == null ? null : params.get(RpcParameterNameConstant.TX_LIST);
+        Object txListgObj = params == null ? null : params.get(RpcParameterNameConstant.TX_LIST);
         Object blockHeaderDigest = params == null ? null : params.get(RpcParameterNameConstant.BLOCK_HEADER_DIGEST);
         List<Transaction> rollbackSucTxList = new ArrayList<>();
         // check parameters
-        if (params == null || chainIdObj == null || txHexListgObj == null) {
+        if (params == null || chainIdObj == null || txListgObj == null) {
             LoggerUtil.logger.warn("ac_rollbackTx params is null");
             return failed(AccountErrorCode.NULL_PARAMETER);
         }
         chainId = (Integer) chainIdObj;
-        txHexList = (List<String>) txHexListgObj;
+        txList = (List<String>) txListgObj;
         //交易回滚
         try {
-            for (String txHex : txHexList) {
-                Transaction tx = Transaction.getInstance(txHex);
+            for (String txStr : txList) {
+                Transaction tx = Transaction.getInstance(txStr);
                 //别名交易
                 if (AccountConstant.TX_TYPE_ACCOUNT_ALIAS == tx.getType()) {
                     Alias alias = new Alias();
@@ -294,11 +294,11 @@ public class TransactionCmd extends BaseCmd {
                 throw new NulsException(AccountErrorCode.PARAMETER_ERROR);
             }
             int chainId = (Integer) params.get(RpcParameterNameConstant.CHAIN_ID);
-            String txHex = (String) params.get(RpcParameterNameConstant.TX);
+            String tx = (String) params.get(RpcParameterNameConstant.TX);
             if (chainId <= 0) {
                 throw new NulsException(AccountErrorCode.PARAMETER_ERROR);
             }
-            Transaction transaction = TxUtil.getTransaction(txHex);
+            Transaction transaction = TxUtil.getInstanceRpcStr(tx, Transaction.class);
             result = txValidator.validateTx(chainId, transaction);
         } catch (NulsException e) {
             LoggerUtil.logger.warn("", e);
@@ -401,8 +401,8 @@ public class TransactionCmd extends BaseCmd {
             if (!validTxRemark(transferDto.getRemark())) {
                 throw new NulsException(AccountErrorCode.PARAMETER_ERROR);
             }
-            String txDigestHex = transactionService.transfer(transferDto.getChainId(), inputList, outputList, transferDto.getRemark());
-            map.put("value", txDigestHex);
+            String hash = transactionService.transfer(transferDto.getChainId(), inputList, outputList, transferDto.getRemark());
+            map.put("value", hash);
         } catch (NulsException e) {
             return failed(e.getErrorCode());
         } catch (NulsRuntimeException e) {
@@ -551,7 +551,7 @@ public class TransactionCmd extends BaseCmd {
             if (multiSignTransactionResultDto.isBroadcasted()) {
                 map.put("txHash", multiSignTransactionResultDto.getTransaction().getHash().getDigestHex());
             } else {
-                map.put("txHex", HexUtil.encode(multiSignTransactionResultDto.getTransaction().serialize()));
+                map.put("tx", RPCUtil.encode(multiSignTransactionResultDto.getTransaction().serialize()));
             }
         } catch (NulsException e) {
             return failed(e.getErrorCode());
@@ -579,28 +579,28 @@ public class TransactionCmd extends BaseCmd {
         Object chainIdObj = params == null ? null : params.get(RpcParameterNameConstant.CHAIN_ID);
         Object passwordObj = params == null ? null : params.get(RpcParameterNameConstant.PASSWORD);
         Object signAddressObj = params == null ? null : params.get(RpcParameterNameConstant.SIGN_ADDREESS);
-        Object txHexObj = params == null ? null : params.get(RpcParameterNameConstant.TX);
+        Object txStrObj = params == null ? null : params.get(RpcParameterNameConstant.TX);
         try {
             // check parameters
             if (params == null || chainIdObj == null || signAddressObj == null ||
-                    txHexObj == null) {
+                    txStrObj == null) {
                 LoggerUtil.logger.warn("ac_signMultiSignTransaction params is null");
                 throw new NulsRuntimeException(AccountErrorCode.NULL_PARAMETER);
             }
             int chainId = (int) chainIdObj;
             String password = (String) passwordObj;
             String signAddress = (String) signAddressObj;
-            String txHex = (String) txHexObj;
+            String txStr = (String) txStrObj;
             //查询出账户
             Account account = accountService.getAccount(chainId, signAddress);
             if (account == null) {
                 throw new NulsRuntimeException(AccountErrorCode.ACCOUNT_NOT_EXIST);
             }
-            MultiSignTransactionResultDto multiSignTransactionResultDto = transactionService.signMultiSignTransaction(chainId, account, password, txHex);
+            MultiSignTransactionResultDto multiSignTransactionResultDto = transactionService.signMultiSignTransaction(chainId, account, password, txStr);
             if (multiSignTransactionResultDto.isBroadcasted()) {
                 map.put("txHash", multiSignTransactionResultDto.getTransaction().getHash().getDigestHex());
             } else {
-                map.put("txHex", HexUtil.encode(multiSignTransactionResultDto.getTransaction().serialize()));
+                map.put("tx", RPCUtil.encode(multiSignTransactionResultDto.getTransaction().serialize()));
             }
         } catch (NulsException e) {
             return failed(e.getErrorCode());

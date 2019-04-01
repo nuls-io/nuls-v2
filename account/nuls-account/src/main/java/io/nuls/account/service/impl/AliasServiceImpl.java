@@ -47,25 +47,20 @@ import io.nuls.base.basic.AddressTool;
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.basic.TransactionFeeCalculator;
 import io.nuls.base.constant.BaseConstant;
-import io.nuls.base.data.Coin;
-import io.nuls.base.data.CoinData;
-import io.nuls.base.data.CoinFrom;
-import io.nuls.base.data.CoinTo;
-import io.nuls.base.data.NulsDigestData;
-import io.nuls.base.data.Transaction;
+import io.nuls.base.data.*;
 import io.nuls.base.signture.P2PHKSignature;
 import io.nuls.base.signture.SignatureUtil;
 import io.nuls.base.signture.TransactionSignature;
+import io.nuls.rpc.util.RPCUtil;
 import io.nuls.tools.basic.InitializingBean;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Service;
 import io.nuls.tools.crypto.ECKey;
-import io.nuls.tools.crypto.HexUtil;
+import io.nuls.tools.exception.NulsException;
+import io.nuls.tools.exception.NulsRuntimeException;
 import io.nuls.tools.model.BigIntegerUtils;
 import io.nuls.tools.model.FormatValidUtils;
 import io.nuls.tools.model.StringUtils;
-import io.nuls.tools.exception.NulsException;
-import io.nuls.tools.exception.NulsRuntimeException;
 
 import java.io.IOException;
 import java.math.BigInteger;
@@ -137,7 +132,7 @@ public class AliasServiceImpl implements AliasService, InitializingBean {
         //签名别名交易
         signTransaction(tx, account, password);
         //广播别名交易
-        TransactionCmdCall.newTx(account.getChainId(), HexUtil.encode(tx.serialize()));
+        TransactionCmdCall.newTx(account.getChainId(), RPCUtil.encode(tx.serialize()));
         return tx;
     }
 

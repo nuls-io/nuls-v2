@@ -26,11 +26,10 @@ import io.nuls.rpc.util.RPCUtil;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.crypto.ECKey;
-import io.nuls.tools.crypto.HexUtil;
-import io.nuls.tools.model.FormatValidUtils;
-import io.nuls.tools.model.StringUtils;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.exception.NulsRuntimeException;
+import io.nuls.tools.model.FormatValidUtils;
+import io.nuls.tools.model.StringUtils;
 import io.nuls.tools.parse.JSONUtils;
 
 import java.io.IOException;
@@ -657,7 +656,7 @@ public class AccountCmd extends BaseCmd {
 
             AccountKeyStoreDto accountKeyStoreDto;
             try {
-                accountKeyStoreDto = JSONUtils.json2pojo(new String(HexUtil.decode(keyStore)), AccountKeyStoreDto.class);
+                accountKeyStoreDto = JSONUtils.json2pojo(new String(RPCUtil.decode(keyStore)), AccountKeyStoreDto.class);
             } catch (IOException e) {
                 throw new NulsRuntimeException(AccountErrorCode.ACCOUNTKEYSTORE_FILE_DAMAGED);
             }
@@ -1029,8 +1028,8 @@ public class AccountCmd extends BaseCmd {
             Object chainIdObj = params == null ? null : params.get(RpcParameterNameConstant.CHAIN_ID);
             Object addressObj = params == null ? null : params.get(RpcParameterNameConstant.ADDRESS);
             Object passwordObj = params == null ? null : params.get(RpcParameterNameConstant.PASSWORD);
-            Object dataHexObj = params == null ? null : params.get(RpcParameterNameConstant.DATA);
-            if (params == null || chainIdObj == null || addressObj == null || passwordObj == null || dataHexObj == null) {
+            Object dataObj = params == null ? null : params.get(RpcParameterNameConstant.DATA);
+            if (params == null || chainIdObj == null || addressObj == null || passwordObj == null || dataObj == null) {
                 throw new NulsRuntimeException(AccountErrorCode.NULL_PARAMETER);
             }
 
@@ -1042,16 +1041,16 @@ public class AccountCmd extends BaseCmd {
             //账户密码
             String password = (String) passwordObj;
             //待签名的数据
-            String dataHex = (String) dataHexObj;
+            String dataStr = (String) dataObj;
             //数据解码为字节数组
-            byte[] data = HexUtil.decode(dataHex);
+            byte[] data = RPCUtil.decode(dataStr);
             //sign digest data
             BlockSignature signature = accountService.signBlockDigest(data, chainId, address, password);
             if (null == signature || signature.getSignData() == null) {
                 throw new NulsRuntimeException(AccountErrorCode.SIGNATURE_ERROR);
             }
             try {
-                map.put(RpcConstant.SIGNATURE, HexUtil.encode(signature.serialize()));
+                map.put(RpcConstant.SIGNATURE, RPCUtil.encode(signature.serialize()));
             } catch (IOException e) {
                 throw new NulsRuntimeException(AccountErrorCode.SERIALIZE_ERROR);
             }
@@ -1081,19 +1080,19 @@ public class AccountCmd extends BaseCmd {
                 throw new NulsRuntimeException(AccountErrorCode.NULL_PARAMETER);
             }
             Object addressObj = params == null ? null : params.get(RpcParameterNameConstant.ADDRESS);
-            Object pubKeyHexObj = params == null ? null : params.get(RpcParameterNameConstant.PUB_KEY);
-            Object sigHexObj = params == null ? null : params.get(RpcParameterNameConstant.SIG);
-            Object dataHexObj = params == null ? null : params.get(RpcParameterNameConstant.DATA);
-            if (params == null || addressObj == null || pubKeyHexObj == null || sigHexObj == null || dataHexObj == null) {
+            Object pubKeyObj = params == null ? null : params.get(RpcParameterNameConstant.PUB_KEY);
+            Object sigObj = params == null ? null : params.get(RpcParameterNameConstant.SIG);
+            Object dataObj = params == null ? null : params.get(RpcParameterNameConstant.DATA);
+            if (params == null || addressObj == null || pubKeyObj == null || sigObj == null || dataObj == null) {
                 throw new NulsRuntimeException(AccountErrorCode.NULL_PARAMETER);
             }
             String address = addressObj.toString();
             //根据地址查询账户
             //TODO 如果需要验证账户是否存在，则需要chainId
             //account = accountService.getAccount(chainId, address);
-            byte[] pubKey = HexUtil.decode(pubKeyHexObj.toString());
-            byte[] sig = HexUtil.decode(sigHexObj.toString());
-            byte[] data = HexUtil.decode(dataHexObj.toString());
+            byte[] pubKey = RPCUtil.decode(pubKeyObj.toString());
+            byte[] sig = RPCUtil.decode(sigObj.toString());
+            byte[] data = RPCUtil.decode(dataObj.toString());
             boolean result = true;
             if (!ECKey.verify(data, sig, pubKey)) {
                 result = false;
