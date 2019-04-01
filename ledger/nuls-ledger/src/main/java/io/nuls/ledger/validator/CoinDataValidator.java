@@ -39,9 +39,9 @@ import io.nuls.ledger.storage.Repository;
 import io.nuls.ledger.utils.CoinDataUtil;
 import io.nuls.ledger.utils.LedgerUtil;
 import io.nuls.ledger.utils.LoggerUtil;
+import io.nuls.rpc.util.RPCUtil;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
-import io.nuls.tools.crypto.HexUtil;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -231,7 +231,7 @@ public class CoinDataValidator {
             } else {
                 //解锁交易，需要从from 里去获取需要的高度数据或时间数据，进行校验
                 //解锁交易只需要从已确认的数据中去获取数据进行校验
-                if (!isValidateFreezeTx(coinFrom.getLocked(), accountState, coinFrom.getAmount(), HexUtil.encode(coinFrom.getNonce()))) {
+                if (!isValidateFreezeTx(coinFrom.getLocked(), accountState, coinFrom.getAmount(), RPCUtil.encode(coinFrom.getNonce()))) {
                     return new ValidateResult(VALIDATE_DOUBLE_EXPENSES_CODE, String.format("validate fail"));
                 }
             }
@@ -302,7 +302,7 @@ public class CoinDataValidator {
      */
     private ValidateResult isValidateCommonTxBatch(AccountState accountState, CoinFrom coinFrom, String txNonce, Map<String, List<TempAccountState>> accountValidateTxMap) {
         int chainId = accountState.getAddressChainId();
-        String fromCoinNonce = HexUtil.encode(coinFrom.getNonce());
+        String fromCoinNonce = RPCUtil.encode(coinFrom.getNonce());
         String address = AddressTool.getStringAddressByBytes(coinFrom.getAddress());
         String assetKey = LedgerUtil.getKeyStr(address, coinFrom.getAssetsChainId(), coinFrom.getAssetsId());
         //余额判断
@@ -440,7 +440,7 @@ public class CoinDataValidator {
                 continue;
             }
             String address = AddressTool.getStringAddressByBytes(coinFrom.getAddress());
-            String nonce = HexUtil.encode(coinFrom.getNonce());
+            String nonce = RPCUtil.encode(coinFrom.getNonce());
             AccountState accountState = accountStateService.getAccountState(address, addressChainId, coinFrom.getAssetsChainId(), coinFrom.getAssetsId());
             //初始花费交易,nonce为 fffffff;已兼容处理。
             //普通交易
