@@ -33,6 +33,7 @@ import io.nuls.ledger.validator.CoinDataValidator;
 import io.nuls.rpc.model.CmdAnnotation;
 import io.nuls.rpc.model.Parameter;
 import io.nuls.rpc.model.message.Response;
+import io.nuls.rpc.util.RPCUtil;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.crypto.HexUtil;
@@ -73,7 +74,7 @@ public class ValidatorCmd extends BaseLedgerCmd {
         Response response = null;
         ValidateResult validateResult = null;
         try {
-            tx.parse(HexUtil.decode(txHex), 0);
+            tx.parse(RPCUtil.decode(txHex), 0);
             if (isBatchValidate) {
                 LoggerUtil.logger(chainId).debug("确认交易校验：chainId={},txHash={},isBatchValidate={}", chainId, tx.getHash().toString(), isBatchValidate);
                 validateResult = coinDataValidator.bathValidatePerTx(chainId, tx);
