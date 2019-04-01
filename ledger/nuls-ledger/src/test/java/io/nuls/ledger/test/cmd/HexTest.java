@@ -24,11 +24,15 @@
  */
 package io.nuls.ledger.test.cmd;
 
+import com.google.common.io.BaseEncoding;
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.*;
 import io.nuls.tools.crypto.HexUtil;
+import io.nuls.tools.log.Log;
 import io.nuls.tools.model.ByteUtils;
+import org.apache.commons.codec.DecoderException;
 import org.junit.Test;
+import org.spongycastle.util.encoders.Hex;
 
 import java.io.IOException;
 import java.math.BigInteger;
@@ -90,6 +94,53 @@ public class HexTest {
         String s = ByteUtils.asString(bytes);
         long time4 = System.currentTimeMillis();
         System.out.println(" ByteUtils.asString useTime=" + (time4 - time3) + "===StringLenght" + s.length());
+
+    }
+
+    @Test
+    public void testHexs() throws IOException, DecoderException {
+        TranList list = new TranList();
+        for (int i = 0; i < 10000; i++) {
+            Transaction tx = buildTransaction();
+            list.getTxs().add(tx);
+        }
+        byte[] bytes = list.serialize();
+        long time1 = System.currentTimeMillis();
+        String hex0 = HexUtil.encode(bytes);
+        byte[] bytes0 = HexUtil.decode(hex0);
+        long time2 = System.currentTimeMillis();
+        Log.info("{} time used - io.nuls.tools.crypto.HexUtil.encode && decode ===StringLenght= {}", (time2 - time1), hex0.length());
+
+        String hex1 = Hex.toHexString(bytes);
+        byte[] bytes1 = Hex.decode(hex1);
+        long time3 = System.currentTimeMillis();
+        Log.info("{} time used - org.spongycastle.util.encoders.Hex.encode && decode ===StringLenght= {}", (time3 - time2), hex1.length());
+
+
+        String hex2 = org.apache.commons.codec.binary.Hex.encodeHexString(bytes);
+        byte[] bytes2 = org.apache.commons.codec.binary.Hex.decodeHex(hex2);
+        long time4 = System.currentTimeMillis();
+        Log.info("{} time used - org.apache.commons.codec.binary.Hex.encode && decode ===StringLenght= {}", (time4 - time3), hex2.length());
+
+        String base0 = java.util.Base64.getEncoder().encodeToString(bytes);
+        byte[] bytes3 = java.util.Base64.getDecoder().decode(base0);
+        long time5 = System.currentTimeMillis();
+        Log.info("{} time used - java.util.Base64.encode && decode ===StringLenght= {}", (time5 - time4), base0.length());
+
+        String base1 = org.spongycastle.util.encoders.Base64.toBase64String(bytes);
+        byte[] bytes5 = org.spongycastle.util.encoders.Base64.decode(base1);
+        long time6 = System.currentTimeMillis();
+        Log.info("{} time used - org.spongycastle.util.encoders.Base64.encode && decode ===StringLenght= {}", (time6 - time5), base1.length());
+
+        String base2 = org.apache.commons.net.util.Base64.encodeBase64String(bytes);
+        byte[] bytes6 = org.apache.commons.net.util.Base64.decodeBase64(base2);
+        long time7 = System.currentTimeMillis();
+        Log.info("{} time used - org.apache.commons.net.util.Base64.encode && decode ===StringLenght= {}", (time7 - time6), base2.length());
+
+        String base3 = org.apache.commons.codec.binary.Base64.encodeBase64String(bytes);
+        byte[] bytes7 = org.apache.commons.codec.binary.Base64.decodeBase64(base3);
+        long time8 = System.currentTimeMillis();
+        Log.info("{} time used - org.apache.commons.codec.binary.Base64.encode && decode ===StringLenght= {}", (time8 - time7), base3.length());
 
     }
 
