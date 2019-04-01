@@ -1,6 +1,7 @@
 package io.nuls.transaction.model.bo;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import io.nuls.base.data.NulsDigestData;
 import io.nuls.base.data.Transaction;
 import io.nuls.tools.log.logback.NulsLogger;
 import io.nuls.transaction.model.bo.config.ConfigBean;
@@ -60,11 +61,6 @@ public class Chain {
     private BlockingDeque<Transaction> txQueue;
 
     /**
-     * 孤儿交易
-     */
-//    private LimitHashMap<NulsDigestData, Transaction> orphanContainer;
-
-    /**
      * 未进行验证的交易队列
      */
     @JsonIgnore
@@ -82,14 +78,24 @@ public class Chain {
     @JsonIgnore
     private ScheduledThreadPoolExecutor scheduledThreadPoolExecutor;
 
-    public Chain() throws Exception {
+
+    /**
+     * 是否有智能合约交易在打包时,
+     * 模块统一验证的二次验证时验证不通过.
+     * (这样在当次打包时就不需要获取智能合约的执行结果)
+     */
+    private boolean contractTxFail;
+
+    private Map<NulsDigestData, Integer> txPackageOrphanMap;
+
+    public Chain() {
         this.packaging =  new AtomicBoolean(false);
         this.rePackage = new AtomicBoolean(true);
         this.txRegisterMap = new HashMap<>();
         this.txQueue = new LinkedBlockingDeque<>();
-//        this.orphanContainer = new LimitHashMap(TxConstant.ORPHAN_CONTAINER_MAX_SIZE);
-//        this.unverifiedQueue = new PersistentQueue(TxConstant.TX_UNVERIFIED_QUEUE, TxConstant.TX_UNVERIFIED_QUEUE_MAXSIZE);
         this.loggerMap = new HashMap<>();
+        contractTxFail = false;
+        txPackageOrphanMap = new HashMap<>();
     }
 
     public int getChainId(){
@@ -136,14 +142,6 @@ public class Chain {
         this.txQueue = txQueue;
     }
 
-//    public LimitHashMap<NulsDigestData, Transaction> getOrphanContainer() {
-//        return orphanContainer;
-//    }
-//
-//    public void setOrphanContainer(LimitHashMap<NulsDigestData, Transaction> orphanContainer) {
-//        this.orphanContainer = orphanContainer;
-//    }
-
     public PersistentQueue getUnverifiedQueue() {
         return unverifiedQueue;
     }
@@ -174,5 +172,21 @@ public class Chain {
 
     public void setRePackage(AtomicBoolean rePackage) {
         this.rePackage = rePackage;
+    }
+
+    public boolean getContractTxFail() {
+        return contractTxFail;
+    }
+
+    public void setContractTxFail(boolean contractTxFail) {
+        this.contractTxFail = contractTxFail;
+    }
+
+    public Map<NulsDigestData, Integer> getTxPackageOrphanMap() {
+        return txPackageOrphanMap;
+    }
+
+    public void setTxPackageOrphanMap(Map<NulsDigestData, Integer> txPackageOrphanMap) {
+        this.txPackageOrphanMap = txPackageOrphanMap;
     }
 }

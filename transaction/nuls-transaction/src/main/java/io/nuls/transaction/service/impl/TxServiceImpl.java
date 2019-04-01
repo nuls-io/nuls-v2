@@ -59,8 +59,6 @@ import io.nuls.transaction.utils.TxUtil;
 
 import java.math.BigInteger;
 import java.util.*;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 
 import static io.nuls.transaction.utils.LoggerUtil.Log;
 
@@ -97,17 +95,6 @@ public class TxServiceImpl implements TxService {
 
     @Autowired
     private TxConfig txConfig;
-
-    private Lock packageLock = new ReentrantLock();
-
-    /**
-     * 是否有智能合约交易在打包时,
-     * 模块统一验证的二次验证时验证不通过.
-     * (这样在当次打包时就不需要获取智能合约的执行结果)
-     */
-    private boolean isContractTxFail = false;
-
-    private static final Map<NulsDigestData, Integer> TX_PACKAGE_ORPHAN_MAP = new HashMap<NulsDigestData, Integer>(TxConstant.INIT_CAPACITY_8);
 
     @Override
     public boolean register(Chain chain, TxRegister txRegister) {
@@ -595,12 +582,11 @@ public class TxServiceImpl implements TxService {
      */
     @Override
     public TxPackage getPackableTxs(Chain chain, long endtimestamp, long maxTxDataSize, long blockHeight, long blockTime, String packingAddress, String preStateRoot) {
-        packageLock.lock();
         NulsLogger nulsLogger = chain.getLoggerMap().get(TxConstant.LOG_TX);
         nulsLogger.info("");
         nulsLogger.info("%%%%%%%%% TX开始打包 %%%%%%%%%%%% height:{}", blockHeight);
         //重置标志
-        isContractTxFail = false;
+        chain.setContractTxFail(false);
         //组装统一验证参数数据,key为各模块统一验证器cmd
         Map<TxRegister, List<String>> moduleVerifyMap = new HashMap<>(TxConstant.INIT_CAPACITY_8);
         List<TxWrapper> packingTxList = new ArrayList<>();
@@ -679,7 +665,7 @@ public class TxServiceImpl implements TxService {
                     nulsLogger.error("coinData打包批量验证未通过 coinData not success - code: {}, - reason:{}, - type:{}, - first coinFrom nonce:{} - txhash:{}",
                             verifyTxResult.getCode(), verifyTxResult.getDesc(), tx.getType(), nonce, tx.getHash().getDigestHex());
                     if (verifyTxResult.getCode() == VerifyTxResult.ORPHAN) {
-                        addOrphanTxSet(orphanTxSet, txWrapper);
+                        addOrphanTxSet(chain, orphanTxSet, txWrapper);
                     }
                     continue;
                 }
@@ -724,7 +710,7 @@ public class TxServiceImpl implements TxService {
             long contractStart = NetworkCall.getCurrentTimeMillis();
             /** 智能合约 当通知标识为true, 则表明有智能合约被调用执行*/
             List<String> contractGenerateTxs = new ArrayList<>();
-            if (contractNotify && !isContractTxFail) {
+            if (contractNotify && !chain.getContractTxFail()) {
                 /**当contractBefore通知失败,或者contractBatchEnd失败则需要将智能合约交易换回待打包队列*/
                 boolean isRollbackPackablePool = false;
                 if (!contractBefore) {
@@ -768,8 +754,8 @@ public class TxServiceImpl implements TxService {
             while (iterator.hasNext()) {
                 TxWrapper txWrapper = iterator.next();
                 Transaction tx = txWrapper.getTx();
-                if (TX_PACKAGE_ORPHAN_MAP.containsKey(tx.getHash())) {
-                    TX_PACKAGE_ORPHAN_MAP.remove(tx.getHash());
+                if (chain.getTxPackageOrphanMap().containsKey(tx.getHash())) {
+                    chain.getTxPackageOrphanMap().remove(tx.getHash());
                 }
                 try {
                     packableTxs.add(tx.hex());
@@ -813,17 +799,15 @@ public class TxServiceImpl implements TxService {
             //可打包交易,孤儿交易,全加回去
             putBackPackablePool(chain, packingTxList, orphanTxSet);
             return new TxPackage(new ArrayList<>(), preStateRoot, chain.getBestBlockHeight() + 1);
-        } finally {
-            packageLock.unlock();
         }
     }
 
     /**
      * 将孤儿交易加回待打包队列时, 要判断加了几次(因为下次打包时又验证为孤儿交易会再次被加回), 达到阈值就不再加回了
      */
-    private void addOrphanTxSet(Set<TxWrapper> orphanTxSet, TxWrapper txWrapper) {
+    private void addOrphanTxSet(Chain chain, Set<TxWrapper> orphanTxSet, TxWrapper txWrapper) {
         NulsDigestData hash = txWrapper.getTx().getHash();
-        Integer count = TX_PACKAGE_ORPHAN_MAP.get(hash);
+        Integer count = chain.getTxPackageOrphanMap().get(hash);
         if (count == null || count < TxConstant.PACKAGE_ORPHAN_MAXCOUNT) {
             orphanTxSet.add(txWrapper);
             if (count == null) {
@@ -831,10 +815,10 @@ public class TxServiceImpl implements TxService {
             } else {
                 count++;
             }
-            TX_PACKAGE_ORPHAN_MAP.put(hash, count);
+            chain.getTxPackageOrphanMap().put(hash, count);
         } else {
             //不加回(丢弃),同时删除map中的key
-            TX_PACKAGE_ORPHAN_MAP.remove(hash);
+            chain.getTxPackageOrphanMap().remove(hash);
         }
     }
 
@@ -955,9 +939,9 @@ public class TxServiceImpl implements TxService {
                 if (TxManager.isUnSystemSmartContract(chain, tx.getType())) {
                     //如果是智能合约的非系统交易,未验证通过,则放回待打包队列.
                     packablePool.addInFirst(chain, tx);
-                    isContractTxFail = true;
+                    chain.setContractTxFail(true);
                 } else if (verifyTxResult.getCode() == VerifyTxResult.ORPHAN) {
-                    addOrphanTxSet(orphanTxSet, txWrapper);
+                    addOrphanTxSet(chain, orphanTxSet, txWrapper);
                 } else {
                     clearInvalidTx(chain, tx);
                 }
