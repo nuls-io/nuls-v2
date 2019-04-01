@@ -209,7 +209,7 @@ public class CmdUnconfirmedTxTest {
         Map<String, Object> params = new HashMap<>();
         Transaction transaction = buildUnLockedTimeTransaction("tNULSeBaMvEtDfvZuukDf2mVyfGo3DdiN8KLRG", "tNULSeBaMvEtDfvZuukDf2mVyfGo3DdiN8KLRG", new BigInteger("200000000000"));
         params.put("chainId", TestConfig.chainId);
-        params.put("txHex", transaction.hex());
+        params.put("tx", RPCUtil.encode(transaction.serialize()));
         Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.LG.abbr, "commitUnconfirmedTx", params);
         LoggerUtil.logger.info("response {}", response);
         LoggerUtil.logger.info("获取 address={},res={}", address, getBalanceNonce(address));

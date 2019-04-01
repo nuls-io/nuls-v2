@@ -102,7 +102,7 @@ public class TransactionCmdCall {
             Map<String, Object> params = new HashMap<>();
             params.put(Constants.VERSION_KEY_STR, RpcConstant.TX_NEW_VERSION);
             params.put(RpcConstant.TX_CHAIN_ID, chainId);
-            params.put(RpcConstant.TX_DATA_HEX, txHex);
+            params.put(RpcConstant.TX_DATA, txHex);
             Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.TX.abbr, RpcConstant.TX_NEW_CMD, params);
         } catch (Exception e) {
             e.printStackTrace();

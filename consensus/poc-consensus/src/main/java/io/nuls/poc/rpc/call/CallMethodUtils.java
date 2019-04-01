@@ -348,14 +348,14 @@ public class CallMethodUtils {
      * The newly created transaction is sent to the transaction management module
      *
      * @param chain chain info
-     * @param txHex transaction hex
+     * @param tx transaction hex
      */
     @SuppressWarnings("unchecked")
-    public static void sendTx(Chain chain, String txHex) {
+    public static void sendTx(Chain chain, String tx) {
         try {
             Map<String, Object> params = new HashMap(4);
             params.put("chainId", chain.getConfig().getChainId());
-            params.put("tx", txHex);
+            params.put("tx", tx);
             Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.TX.abbr, "tx_newTx", params);
             if (!cmdResp.isSuccess()) {
                 chain.getLoggerMap().get(ConsensusConstant.CONSENSUS_LOGGER_NAME).error("Transaction failed to send!");

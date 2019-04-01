@@ -452,7 +452,7 @@ public class TransactionCmdTest {
         Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_createMultiSignTransfer", params);
         System.out.println("ac_createMultiSignTransfer response:" + JSONUtils.obj2json(cmdResp));
         HashMap result = (HashMap) (((HashMap) cmdResp.getResponseData()).get("ac_createMultiSignTransfer"));
-        String txHex = (String) result.get(RpcConstant.TX_DATA_HEX);
+        String txHex = (String) result.get(RpcConstant.TX_DATA);
         System.out.println(txHex);
         assertNotNull(txHex);
         Map<String, Object> map = new HashMap<>();
