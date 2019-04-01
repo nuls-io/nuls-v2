@@ -24,14 +24,14 @@
  */
 package io.nuls.rpc.util;
 
-import static java.nio.charset.StandardCharsets.UTF_8;
+import io.nuls.tools.crypto.HexUtil;
 
 public class RPCUtil {
     public static String encode(byte[] src) {
-        return (src == null) ? null : new String(src, UTF_8);
+       return HexUtil.encode(src);
     }
 
     public static byte[] decode(String src) {
-        return src.getBytes(UTF_8);
+        return HexUtil.decode(src);
     }
 }
