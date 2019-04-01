@@ -37,14 +37,14 @@ stop(){
 }
 
 APP=`ps -ef|grep -w "name=${APP_NAME} "|grep -v grep|wc -l`
-if [[ $APP -eq 1 ]]; then
+if [ $APP -eq 1 ]; then
     PID_EXIST=`ps -f -p ${APP_PID} | grep java`
     if [ ! -z "$PID_EXIST" ]; then
         stop ${APP_PID}
     else
         echoRed "${APP_NAME} is not running"
     fi
-elif [[ $APP -eq 0 ]]; then
+elif [ $APP -eq 0 ]; then
     echoRed "${APP_NAME} is not running"
 else
     echoRed "${APP_NAME} is exception"
