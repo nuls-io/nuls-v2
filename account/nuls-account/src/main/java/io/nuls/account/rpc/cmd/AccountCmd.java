@@ -1,5 +1,6 @@
 package io.nuls.account.rpc.cmd;
 
+import io.nuls.account.constant.AccountConstant;
 import io.nuls.account.constant.AccountErrorCode;
 import io.nuls.account.constant.RpcConstant;
 import io.nuls.account.constant.RpcParameterNameConstant;
@@ -21,6 +22,7 @@ import io.nuls.rpc.model.CmdAnnotation;
 import io.nuls.rpc.model.Parameter;
 import io.nuls.rpc.model.Parameters;
 import io.nuls.rpc.model.message.Response;
+import io.nuls.rpc.util.RPCUtil;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.crypto.ECKey;
@@ -971,15 +973,14 @@ public class AccountCmd extends BaseCmd {
      */
     @CmdAnnotation(cmd = "ac_signDigest", version = 1.0, scope = "private", minEvent = 0, minPeriod = 0, description = "data digest signature")
     public Response signDigest(Map params) {
-        LoggerUtil.logger.debug("ac_signDigest start");
-        Map<String, String> map = new HashMap<>(1);
+        Map<String, String> map = new HashMap<>(AccountConstant.INIT_CAPACITY_2);
         try {
             // check parameters
             Object chainIdObj = params == null ? null : params.get(RpcParameterNameConstant.CHAIN_ID);
             Object addressObj = params == null ? null : params.get(RpcParameterNameConstant.ADDRESS);
             Object passwordObj = params == null ? null : params.get(RpcParameterNameConstant.PASSWORD);
-            Object dataHexObj = params == null ? null : params.get(RpcParameterNameConstant.DATA_HEX);
-            if (params == null || chainIdObj == null || addressObj == null || passwordObj == null || dataHexObj == null) {
+            Object dataObj = params == null ? null : params.get(RpcParameterNameConstant.DATA);
+            if (params == null || chainIdObj == null || addressObj == null || passwordObj == null || dataObj == null) {
                 throw new NulsRuntimeException(AccountErrorCode.NULL_PARAMETER);
             }
 
@@ -991,16 +992,16 @@ public class AccountCmd extends BaseCmd {
             //账户密码
             String password = (String) passwordObj;
             //待签名的数据
-            String dataHex = (String) dataHexObj;
+            String dataStr = (String) dataObj;
             //数据解码为字节数组
-            byte[] data = HexUtil.decode(dataHex);
+            byte[] data = RPCUtil.decode(dataStr);
             //sign digest data
             P2PHKSignature signature = accountService.signDigest(data, chainId, address, password);
             if (null == signature || signature.getSignData() == null) {
                 throw new NulsRuntimeException(AccountErrorCode.SIGNATURE_ERROR);
             }
             try {
-                map.put(RpcConstant.SIGNATURE_HEX, HexUtil.encode(signature.serialize()));
+                map.put(RpcConstant.SIGNATURE, RPCUtil.encode(signature.serialize()));
             } catch (IOException e) {
                 throw new NulsRuntimeException(AccountErrorCode.SERIALIZE_ERROR);
             }
@@ -1009,7 +1010,6 @@ public class AccountCmd extends BaseCmd {
         } catch (NulsException e) {
             return failed(e.getErrorCode());
         }
-        LoggerUtil.logger.debug("ac_signDigest end");
         return success(map);
     }
 
@@ -1029,7 +1029,7 @@ public class AccountCmd extends BaseCmd {
             Object chainIdObj = params == null ? null : params.get(RpcParameterNameConstant.CHAIN_ID);
             Object addressObj = params == null ? null : params.get(RpcParameterNameConstant.ADDRESS);
             Object passwordObj = params == null ? null : params.get(RpcParameterNameConstant.PASSWORD);
-            Object dataHexObj = params == null ? null : params.get(RpcParameterNameConstant.DATA_HEX);
+            Object dataHexObj = params == null ? null : params.get(RpcParameterNameConstant.DATA);
             if (params == null || chainIdObj == null || addressObj == null || passwordObj == null || dataHexObj == null) {
                 throw new NulsRuntimeException(AccountErrorCode.NULL_PARAMETER);
             }
@@ -1051,7 +1051,7 @@ public class AccountCmd extends BaseCmd {
                 throw new NulsRuntimeException(AccountErrorCode.SIGNATURE_ERROR);
             }
             try {
-                map.put(RpcConstant.SIGNATURE_HEX, HexUtil.encode(signature.serialize()));
+                map.put(RpcConstant.SIGNATURE, HexUtil.encode(signature.serialize()));
             } catch (IOException e) {
                 throw new NulsRuntimeException(AccountErrorCode.SERIALIZE_ERROR);
             }
@@ -1081,9 +1081,9 @@ public class AccountCmd extends BaseCmd {
                 throw new NulsRuntimeException(AccountErrorCode.NULL_PARAMETER);
             }
             Object addressObj = params == null ? null : params.get(RpcParameterNameConstant.ADDRESS);
-            Object pubKeyHexObj = params == null ? null : params.get(RpcParameterNameConstant.PUB_KEY_HEX);
-            Object sigHexObj = params == null ? null : params.get(RpcParameterNameConstant.SIG_HEX);
-            Object dataHexObj = params == null ? null : params.get(RpcParameterNameConstant.DATA_HEX);
+            Object pubKeyHexObj = params == null ? null : params.get(RpcParameterNameConstant.PUB_KEY);
+            Object sigHexObj = params == null ? null : params.get(RpcParameterNameConstant.SIG);
+            Object dataHexObj = params == null ? null : params.get(RpcParameterNameConstant.DATA);
             if (params == null || addressObj == null || pubKeyHexObj == null || sigHexObj == null || dataHexObj == null) {
                 throw new NulsRuntimeException(AccountErrorCode.NULL_PARAMETER);
             }

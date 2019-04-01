@@ -214,7 +214,7 @@ public class AliasCmd extends BaseCmd {
         int chainId;
         String txHex;
         Object chainIdObj = params == null ? null : params.get(RpcParameterNameConstant.CHAIN_ID);
-        Object txHexObj = params == null ? null : params.get(RpcParameterNameConstant.TX_HEX);
+        Object txHexObj = params == null ? null : params.get(RpcParameterNameConstant.TX);
         try {
             // check parameters
             if (params == null || chainIdObj == null || txHexObj == null) {
@@ -249,7 +249,7 @@ public class AliasCmd extends BaseCmd {
         String txHex;
         //TODO is it need to verify secondaryDataHex?
         Object chainIdObj = params == null ? null : params.get(RpcParameterNameConstant.CHAIN_ID);
-        Object txHexObj = params == null ? null : params.get(RpcParameterNameConstant.TX_HEX);
+        Object txHexObj = params == null ? null : params.get(RpcParameterNameConstant.TX);
         Object blockHeaderDigest = params == null ? null : params.get(RpcParameterNameConstant.BLOCK_HEADER_DIGEST);
         try {
             // check parameters
@@ -290,7 +290,7 @@ public class AliasCmd extends BaseCmd {
         String txHex;
         //TODO is it need to verify secondaryDataHex?
         Object chainIdObj = params == null ? null : params.get(RpcParameterNameConstant.CHAIN_ID);
-        Object txHexObj = params == null ? null : params.get(RpcParameterNameConstant.TX_HEX);
+        Object txHexObj = params == null ? null : params.get(RpcParameterNameConstant.TX);
         Object blockHeaderDigest = params == null ? null : params.get(RpcParameterNameConstant.BLOCK_HEADER_DIGEST);
         try {
             // check parameters

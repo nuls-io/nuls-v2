@@ -733,7 +733,7 @@ public class AccountCmdTest {
             params.put("dataHex", dataHex);
             Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_signDigest", params);
             HashMap result = (HashMap) (((HashMap) cmdResp.getResponseData()).get("ac_signDigest"));
-            String signatureHex = (String) result.get(RpcConstant.SIGNATURE_HEX);
+            String signatureHex = (String) result.get(RpcConstant.SIGNATURE);
             assertNotNull(signatureHex);
 
             //测试密码不正确

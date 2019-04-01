@@ -32,6 +32,7 @@ import io.nuls.base.signture.MultiSignTxSignature;
 import io.nuls.base.signture.P2PHKSignature;
 import io.nuls.base.signture.SignatureUtil;
 import io.nuls.base.signture.TransactionSignature;
+import io.nuls.rpc.util.RPCUtil;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Service;
 import io.nuls.tools.crypto.ECKey;
@@ -102,7 +103,7 @@ public class TxGenerateServiceImpl implements TxGenerateService {
             if (null == accountSignDTO) {
                 //如果密码为空直接返回未签名的多签交易
                 Map<String, String> map = new HashMap<>(2);
-                map.put(TxConstant.MULTI_TX_HEX, HexUtil.encode(tx.serialize()));
+                map.put(TxConstant.MULTI_TX, RPCUtil.encode(tx.serialize()));
                 return map;
             } else {
                 //获多签交易发起者的eckey,进行第一个签名
@@ -163,8 +164,7 @@ public class TxGenerateServiceImpl implements TxGenerateService {
             TransactionSignature transactionSignature = new TransactionSignature();
             List<P2PHKSignature> p2PHKSignatures = new ArrayList<>();
             for (CoinDTO coinDTO : listFrom) {
-                String digestBytesStr = HexUtil.encode(tx.getHash().getDigestBytes());
-                P2PHKSignature p2PHKSignature = AccountCall.signDigest(coinDTO.getAddress(), coinDTO.getPassword(), digestBytesStr);
+                P2PHKSignature p2PHKSignature = AccountCall.signDigest(coinDTO.getAddress(), coinDTO.getPassword(), tx.getHash().getDigestBytes());
                 p2PHKSignatures.add(p2PHKSignature);
             }
             transactionSignature.setP2PHKSignatures(p2PHKSignatures);
@@ -207,7 +207,7 @@ public class TxGenerateServiceImpl implements TxGenerateService {
         if (!AccountCall.isEncrypted(address)) {
             throw new NulsException(TxErrorCode.ACCOUNT_NOT_ENCRYPTED);
         }
-        Transaction transaction = TxUtil.getTransaction(tx);
+        Transaction transaction = TxUtil.getInstanceRpcStr(tx, Transaction.class);
         String priKey = AccountCall.getPrikey(address, password);
         ECKey ecKey = ECKey.fromPrivate(new BigInteger(ECKey.SIGNUM, HexUtil.decode(priKey)));
         MultiSignTxSignature multiSignTxSignature = new MultiSignTxSignature();
@@ -266,7 +266,7 @@ public class TxGenerateServiceImpl implements TxGenerateService {
             } else {
                 multiSignTxSignature.setP2PHKSignatures(p2PHKSignatures);
                 tx.setTransactionSignature(multiSignTxSignature.serialize());
-                map.put(TxConstant.MULTI_TX_HEX, HexUtil.encode(tx.serialize()));
+                map.put(TxConstant.MULTI_TX, RPCUtil.encode(tx.serialize()));
             }
             return map;
         } catch (IOException e) {

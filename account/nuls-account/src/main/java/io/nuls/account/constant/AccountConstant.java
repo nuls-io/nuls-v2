@@ -183,7 +183,10 @@ public interface AccountConstant {
     /**
      * Map初始值
      */
-    int INIT_CAPACITY = 16;
+    int INIT_CAPACITY_16 = 16;
+    int INIT_CAPACITY_8 = 8;
+    int INIT_CAPACITY_4 = 4;
+    int INIT_CAPACITY_2 = 2;
 
     /**
      * account root path

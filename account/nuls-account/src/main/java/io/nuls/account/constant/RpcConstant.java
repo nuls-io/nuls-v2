@@ -148,9 +148,9 @@ public interface RpcConstant {
      */
     String PATH = "path";
     /**
-     * 签名数据HEX编码
+     * 签名数据
      */
-    String SIGNATURE_HEX = "signatureHex";
+    String SIGNATURE = "signature";
 
     /**
      * --------[RPC Module role constants] -------

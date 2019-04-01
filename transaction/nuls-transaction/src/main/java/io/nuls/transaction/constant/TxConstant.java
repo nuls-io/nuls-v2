@@ -91,7 +91,7 @@ public interface TxConstant {
      * 创建多签交易时，返回map的key
      */
     String MULTI_TX_HASH = "txHash";
-    String MULTI_TX_HEX = "txHex";
+    String MULTI_TX = "tx";
 
     /** 接收新交易的文件队列名**/
     String TX_UNVERIFIED_QUEUE_PREFIX = "tx_unverified_queue_";

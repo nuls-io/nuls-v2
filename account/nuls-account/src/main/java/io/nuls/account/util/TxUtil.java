@@ -56,7 +56,7 @@ import java.util.Map;
  */
 public class TxUtil {
 
-    public static final Map<String, NonceHashData> PRE_HASH_MAP = new HashMap<>(AccountConstant.INIT_CAPACITY);
+    public static final Map<String, NonceHashData> PRE_HASH_MAP = new HashMap<>(AccountConstant.INIT_CAPACITY_16);
 
 //    public static boolean isCurrentChainMainAsset2(Coin coin) {
 //        return isCurrentChainMainAsset(coin.getAssetsChainId(), coin.getAssetsId());
@@ -178,8 +178,7 @@ public class TxUtil {
         byte[] in = hash.getDigestBytes();
         int copyEnd = in.length;
         System.arraycopy(in, (copyEnd - 8), out, 0, 8);
-        String nonce8BytesStr = HexUtil.encode(out);
-        return HexUtil.decode(nonce8BytesStr);
+        return out;
     }
 
     /**

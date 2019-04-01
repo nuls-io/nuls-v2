@@ -30,6 +30,7 @@ import io.nuls.base.constant.TxStatusEnum;
 import io.nuls.base.data.*;
 import io.nuls.base.signture.SignatureUtil;
 import io.nuls.rpc.model.ModuleE;
+import io.nuls.rpc.util.RPCUtil;
 import io.nuls.tools.basic.Result;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Service;
@@ -143,7 +144,7 @@ public class TxServiceImpl implements TxService {
             if (tx.getType() == TxConstant.TX_TYPE_CROSS_CHAIN_TRANSFER) {
                 return this.crossTransactionValidator(chain, tx);
             }
-            return TransactionCall.txValidatorProcess(chain, txRegister, tx.hex());
+            return TransactionCall.txValidatorProcess(chain, txRegister, RPCUtil.encode(tx.serialize()));
         } catch (NulsException e) {
             chain.getLoggerMap().get(TxConstant.LOG_TX).error("tx type: " + tx.getType(), e);
             return false;
@@ -430,25 +431,25 @@ public class TxServiceImpl implements TxService {
     }
 
     @Override
-    public List<String> transactionModuleValidator(Chain chain, List<String> txHexList) throws NulsException {
+    public List<String> transactionModuleValidator(Chain chain, List<String> txList) throws NulsException {
 
         //验证不同的交易是否含有相同的CrossTxData(原始交易hash),如果有则不通过
         Map<String, CrossTxData> map = new HashMap<>(TxConstant.INIT_CAPACITY_8);
         List<String> list = new ArrayList<>();
         //todo 有测试代码
         /*int test = 0;*///测试代码 主动制造不通过的情况, 会造成不通过交易之后含有相同地址资产的交易不通过
-        for (String hex : txHexList) {
-            Transaction tx = TxUtil.getTransaction(hex);
+        for (String txStr : txList) {
+            Transaction tx = TxUtil.getInstanceRpcStr(txStr, Transaction.class);
             try {
                 //模块统一验证器,包含单个验证器内容
                 if (!crossTransactionValidator(chain, tx)) {
-                    list.add(hex);
+                    list.add(txStr);
                     continue;
                 }
             } catch (NulsException e) {
                 chain.getLoggerMap().get(TxConstant.LOG_TX).error("transactionModuleValidator single error");
                 chain.getLoggerMap().get(TxConstant.LOG_TX).error(e);
-                list.add(hex);
+                list.add(txStr);
                 continue;
             }
             CrossTxData crossTxData = TxUtil.getInstance(tx.getTxData(), CrossTxData.class);
@@ -515,64 +516,85 @@ public class TxServiceImpl implements TxService {
 
 
     @Override
-    public boolean crossTransactionCommit(Chain chain, List<String> txHexList, String blockHeaderHex) throws NulsException {
-        List<NulsDigestData> txHash = new ArrayList<>();
-        List<String> successedCoinDataHexs = new ArrayList<>();
+    public boolean crossTransactionCommit(Chain chain, List<String> txList, String blockHeaderStr) throws NulsException {
+        if (ChainCall.ctxAssetCirculateCommit(chain, txList, blockHeaderStr)) {
+            List<NulsDigestData> txHash = new ArrayList<>();
+            for (String txStr : txList) {
+                Transaction tx = TxUtil.getInstanceRpcStr(txStr, Transaction.class);
+                txHash.add(tx.getHash());
+            }
+            //保存生效高度
+            BlockHeader blockHeader = TxUtil.getInstanceRpcStr(blockHeaderStr, BlockHeader.class);
+            long effectHeight = blockHeader.getHeight() + txConfig.getMainAssetId();
+            return confirmedTxStorageService.saveCrossTxEffectList(chain.getChainId(), effectHeight, txHash);
+        }
+        return false;
+
+
+       /* List<NulsDigestData> txHash = new ArrayList<>();
+        List<String> successedCoinDataStr = new ArrayList<>();
         boolean rs = true;
-        for (String txHex : txHexList) {
-            Transaction tx = TxUtil.getTransaction(txHex);
+        for (String txStr : txList) {
+            Transaction tx = TxUtil.getInstanceRpcStr(txStr, Transaction.class);
             txHash.add(tx.getHash());
-            String coinDataHex = HexUtil.encode(tx.getCoinData());
-            /**有效代码 占时未使用
-             *  if (!ChainCall.ctxAssetCirculateCommit(chain, txHexList, blockHeaderHex)) {
-             rs = false;
-             break;
-             }*/
-            successedCoinDataHexs.add(coinDataHex);
+            String coinDataStr = RPCUtil.encode(tx.getCoinData());
+            //有效代码 占时未使用
+             if (!ChainCall.ctxAssetCirculateCommit(chain, txList, blockHeaderStr)) {
+                 rs = false;
+                 break;
+             }
+            successedCoinDataStr.add(coinDataStr);
         }
         if (rs) {
             //保存生效高度
-            BlockHeader blockHeader = TxUtil.getInstance(blockHeaderHex, BlockHeader.class);
+            BlockHeader blockHeader = TxUtil.getInstanceRpcStr(blockHeaderStr, BlockHeader.class);
             long effectHeight = blockHeader.getHeight() + txConfig.getMainAssetId();
             return confirmedTxStorageService.saveCrossTxEffectList(chain.getChainId(), effectHeight, txHash);
         } else {
-            for (String coinDataHex : successedCoinDataHexs) {
-                /**有效代码 占时未使用
-                 * if (!ChainCall.ctxAssetCirculateRollback(chain, txHexList, blockHeaderHex)) {
-                 throw new NulsException(TxErrorCode.FAILED);
-                 }*/
+            for (String coinDataStr : successedCoinDataStr) {
+                //有效代码 占时未使用
+                 if (!ChainCall.ctxAssetCirculateRollback(chain, txList, blockHeaderStr)) {
+                  throw new NulsException(TxErrorCode.FAILED);
+                 }
             }
             return false;
-        }
+        }*/
     }
 
     @Override
-    public boolean crossTransactionRollback(Chain chain, List<String> txHexList, String blockHeaderHex) throws NulsException {
-        List<String> successedCoinDataHexs = new ArrayList<>();
+    public boolean crossTransactionRollback(Chain chain, List<String> txList, String blockHeaderStr) throws NulsException {
+        if (ChainCall.ctxAssetCirculateRollback(chain, txList, blockHeaderStr)) {
+            BlockHeader blockHeader = TxUtil.getInstanceRpcStr(blockHeaderStr, BlockHeader.class);
+            long effectHeight = blockHeader.getHeight() + txConfig.getMainAssetId();
+            return confirmedTxStorageService.removeCrossTxEffectList(chain.getChainId(), effectHeight);
+        }
+        return false;
+
+    /*    List<String> successedCoinDataStr = new ArrayList<>();
         boolean rs = true;
-        for (String txHex : txHexList) {
-            Transaction tx = TxUtil.getTransaction(txHex);
-            String coinDataHex = HexUtil.encode(tx.getCoinData());
-            /**有效代码 占时未使用
-             *  if (!ChainCall.ctxAssetCirculateRollback(chain, txHexList, blockHeaderHex)) {
+        for (String txStr : txList) {
+            Transaction tx = TxUtil.getInstanceRpcStr(txStr, Transaction.class);
+            String coinDataStr = RPCUtil.encode(tx.getCoinData());
+            //有效代码 占时未使用
+             if (!ChainCall.ctxAssetCirculateRollback(chain, txList, blockHeaderStr)) {
              rs = false;
              break;
-             }*/
-            successedCoinDataHexs.add(coinDataHex);
+             }
+            successedCoinDataStr.add(coinDataStr);
         }
         if (rs) {
-            BlockHeader blockHeader = TxUtil.getInstance(blockHeaderHex, BlockHeader.class);
+            BlockHeader blockHeader = TxUtil.getInstanceRpcStr(blockHeaderStr, BlockHeader.class);
             long effectHeight = blockHeader.getHeight() + txConfig.getMainAssetId();
             return confirmedTxStorageService.removeCrossTxEffectList(chain.getChainId(), effectHeight);
         } else {
-            for (String coinDataHex : successedCoinDataHexs) {
-                /**有效代码 占时未使用
-                 * if (!ChainCall.ctxAssetCirculateCommit(chain, txHexList, blockHeaderHex)) {
-                 throw new NulsException(TxErrorCode.FAILED);
-                 }*/
+            for (String coinDataHex : successedCoinDataStr) {
+                //有效代码 占时未使用
+                 if (!ChainCall.ctxAssetCirculateCommit(chain, txList, blockHeaderStr)) {
+                     throw new NulsException(TxErrorCode.FAILED);
+                 }
             }
             return false;
-        }
+        }*/
     }
 
     /**
@@ -649,9 +671,9 @@ public class TxServiceImpl implements TxService {
                     break;
                 }
 
-                String txHex = null;
+                String txStr = null;
                 try {
-                    txHex = tx.hex();
+                    txStr = RPCUtil.encode(tx.serialize());
                 } catch (Exception e) {
                     nulsLogger.warn(e.getMessage(), e);
                     nulsLogger.error("丢弃获取hex出错交易,txHash:{}, - type:{}, - time:{}", tx.getHash().getDigestHex(), tx.getType(), tx.getTime());
@@ -659,7 +681,7 @@ public class TxServiceImpl implements TxService {
                     continue;
                 }
                 //批量验证coinData, 单个发送
-                VerifyTxResult verifyTxResult = LedgerCall.verifyCoinData(chain, txHex, true);
+                VerifyTxResult verifyTxResult = LedgerCall.verifyCoinData(chain, txStr, true);
                 if (!verifyTxResult.success()) {
                     String nonce = HexUtil.encode(TxUtil.getCoinData(tx).getFrom().get(0).getNonce());
                     nulsLogger.error("coinData打包批量验证未通过 coinData not success - code: {}, - reason:{}, - type:{}, - first coinFrom nonce:{} - txhash:{}",
@@ -683,7 +705,7 @@ public class TxServiceImpl implements TxService {
                         ContractCall.contractBatchBegin(chain, blockHeight, blockTime, packingAddress, preStateRoot);
                         contractNotify = true;
                     }
-                    if (!ContractCall.invokeContract(chain, txHex)) {
+                    if (!ContractCall.invokeContract(chain, txStr)) {
                         clearInvalidTx(chain, tx);
                         continue;
                     }
@@ -925,13 +947,13 @@ public class TxServiceImpl implements TxService {
                 continue;
             }
             //批量验证coinData, 单个发送
-            String txHex = null;
+            String txStr = null;
             try {
-                txHex = tx.hex();
+                txStr = RPCUtil.encode(tx.serialize());
             } catch (Exception e) {
                 throw new NulsException(e);
             }
-            VerifyTxResult verifyTxResult = LedgerCall.verifyCoinData(chain, txHex, true);
+            VerifyTxResult verifyTxResult = LedgerCall.verifyCoinData(chain, txStr, true);
             if (!verifyTxResult.success()) {
                 chain.getLoggerMap().get(TxConstant.LOG_TX).debug("[verifyAgain] " +
                                 "coinData not success - code: {}, - reason:{}, type:{} - txhash:{}",
@@ -960,11 +982,11 @@ public class TxServiceImpl implements TxService {
     }
 
     @Override
-    public VerifyTxResult batchVerify(Chain chain, List<String> txHexList, long blockHeight, long blockTime, String packingAddress, String stateRoot, String preStateRoot) throws NulsException {
+    public VerifyTxResult batchVerify(Chain chain, List<String> txStrList, long blockHeight, long blockTime, String packingAddress, String stateRoot, String preStateRoot) throws NulsException {
         chain.getLoggerMap().get(TxConstant.LOG_TX).debug("");
         chain.getLoggerMap().get(TxConstant.LOG_TX).debug("开始区块交易批量验证......");
         long s1 = NetworkCall.getCurrentTimeMillis();
-        Log.debug("[验区块交易] -开始-------------高度:{} ----------区块交易数:{} -------------", blockHeight, txHexList.size());//----
+        Log.debug("[验区块交易] -开始-------------高度:{} ----------区块交易数:{} -------------", blockHeight, txStrList.size());//----
         Log.debug("[验区块交易] -开始时间:{}", s1);//----
         Log.debug("");//----
         VerifyTxResult verifyTxResult = new VerifyTxResult(VerifyTxResult.OTHER_EXCEPTION);
@@ -973,7 +995,7 @@ public class TxServiceImpl implements TxService {
         Map<TxRegister, List<String>> moduleVerifyMap = new HashMap<>(TxConstant.INIT_CAPACITY_8);
 
         long coinDataV = NetworkCall.getCurrentTimeMillis();//-----
-        if (!LedgerCall.verifyBlockTxsCoinData(chain, txHexList, blockHeight)) {
+        if (!LedgerCall.verifyBlockTxsCoinData(chain, txStrList, blockHeight)) {
             chain.getLoggerMap().get(TxConstant.LOG_TX).debug("batch verifyCoinData failed.");
             return verifyTxResult;
         }
@@ -989,9 +1011,9 @@ public class TxServiceImpl implements TxService {
          */
         boolean contractNotify = false;
         long singleStart = NetworkCall.getCurrentTimeMillis();//-----
-        for (String txHex : txHexList) {
+        for (String txStr : txStrList) {
             //将txHex转换为Transaction对象
-            Transaction tx = TxUtil.getTransaction(txHex);
+            Transaction tx = TxUtil.getInstanceRpcStr(txStr, Transaction.class);
             txList.add(tx);
             //如果是系统智能合约就不单个验证
             if (TxManager.isSystemSmartContract(chain, tx.getType())) {
@@ -1033,7 +1055,7 @@ public class TxServiceImpl implements TxService {
                     ContractCall.contractBatchBegin(chain, blockHeight, blockTime, packingAddress, preStateRoot);
                     contractNotify = true;
                 }
-                if (!ContractCall.invokeContract(chain, txHex)) {
+                if (!ContractCall.invokeContract(chain, txStr)) {
                     return verifyTxResult;
                 }
             }
@@ -1085,15 +1107,15 @@ public class TxServiceImpl implements TxService {
                 chain.getLoggerMap().get(TxConstant.LOG_TX).debug("contract stateRoot error.");
                 return verifyTxResult;
             }
-            List<String> scNewList = (List<String>) map.get("txHexList");
+            List<String> scNewList = (List<String>) map.get("txList");
             if (null == scNewList) {
                 return verifyTxResult;
             }
             //验证智能合约执行返回的交易hex 是否正确.打包时返回的交易是加入到区块交易的队尾
             int size = scNewList.size();
             for (int i = 0; i < size; i++) {
-                int j = txHexList.size() - size + i;
-                if (!txHexList.get(j).equals(scNewList.get(i))) {
+                int j = txStrList.size() - size + i;
+                if (!txStrList.get(j).equals(scNewList.get(i))) {
                     chain.getLoggerMap().get(TxConstant.LOG_TX).debug("contract new tx hex error.");
                     return verifyTxResult;
                 }
@@ -1159,10 +1181,10 @@ public class TxServiceImpl implements TxService {
             transactionH2Service.deleteTx(chain, tx);
             if (cleanLedgerUfmTx) {
                 //如果是清理机制调用, 则调用账本未确认回滚
-                LedgerCall.rollBackUnconfirmTx(chain, tx.hex());
+                LedgerCall.rollBackUnconfirmTx(chain, RPCUtil.encode(tx.serialize()));
             } else {
                 //通知账本状态变更
-                LedgerCall.rollbackTxValidateStatus(chain, tx.hex());
+                LedgerCall.rollbackTxValidateStatus(chain, RPCUtil.encode(tx.serialize()));
             }
         } catch (NulsException e) {
             e.printStackTrace();

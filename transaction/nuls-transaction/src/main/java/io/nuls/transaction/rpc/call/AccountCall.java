@@ -5,8 +5,8 @@ import io.nuls.base.data.MultiSigAccount;
 import io.nuls.base.signture.P2PHKSignature;
 import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.model.ModuleE;
+import io.nuls.rpc.util.RPCUtil;
 import io.nuls.tools.exception.NulsException;
-import io.nuls.tools.parse.JSONUtils;
 import io.nuls.transaction.constant.TxConstant;
 import io.nuls.transaction.utils.TxUtil;
 
@@ -66,17 +66,15 @@ public class AccountCall {
      */
     public static MultiSigAccount getMultiSigAccount(byte[] multiSignAddress) throws NulsException {
         try {
-            MultiSigAccount multiSigAccount = null;
             String address = AddressTool.getStringAddressByBytes(multiSignAddress);
             int chainId = AddressTool.getChainIdByAddress(address);
             Map<String, Object> params = new HashMap<>(TxConstant.INIT_CAPACITY_8);
             params.put(Constants.VERSION_KEY_STR, TxConstant.RPC_VERSION);
             params.put("chainId", chainId);
             params.put("address", address);
-
-            Object result = TransactionCall.request(ModuleE.AC.abbr, "ac_getMultiSigAccount", params);
-            multiSigAccount = JSONUtils.json2pojo(JSONUtils.obj2json(result), MultiSigAccount.class);
-            return multiSigAccount;
+            HashMap result = (HashMap) TransactionCall.request(ModuleE.AC.abbr, "ac_getMultiSigAccount", params);
+            String mAccountStr = (String) result.get("value");
+            return null == mAccountStr ? null : TxUtil.getInstanceRpcStr(mAccountStr, MultiSigAccount.class);
         } catch (Exception e) {
             throw new NulsException(e);
         }
@@ -86,11 +84,11 @@ public class AccountCall {
      * 通过账户模块对数据进行签名
      * @param address
      * @param password
-     * @param dataHex 待签名的数据
+     * @param data 待签名的数据
      * @return P2PHKSignature
      * @throws NulsException
      */
-    public static P2PHKSignature signDigest(String address, String password, String dataHex) throws NulsException {
+    public static P2PHKSignature signDigest(String address, String password, byte[] data) throws NulsException {
         try {
             int chainId = AddressTool.getChainIdByAddress(address);
             Map<String, Object> params = new HashMap<>(TxConstant.INIT_CAPACITY_8);
@@ -98,10 +96,10 @@ public class AccountCall {
             params.put("chainId", chainId);
             params.put("address", address);
             params.put("password", password);
-            params.put("dataHex", dataHex);
+            params.put("data", RPCUtil.encode(data));
             HashMap result = (HashMap) TransactionCall.request(ModuleE.AC.abbr, "ac_signDigest", params);
-            String signatureHex = (String)result.get("signatureHex");
-            P2PHKSignature signature = TxUtil.getInstance(signatureHex, P2PHKSignature.class);
+            String signatureStr = (String)result.get("signature");
+            P2PHKSignature signature = TxUtil.getInstanceRpcStr(signatureStr, P2PHKSignature.class);
             return signature;
         } catch (Exception e) {
             throw new NulsException(e);

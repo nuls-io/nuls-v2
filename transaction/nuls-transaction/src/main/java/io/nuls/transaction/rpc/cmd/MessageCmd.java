@@ -7,11 +7,11 @@ import io.nuls.rpc.cmd.BaseCmd;
 import io.nuls.rpc.model.CmdAnnotation;
 import io.nuls.rpc.model.Parameter;
 import io.nuls.rpc.model.message.Response;
+import io.nuls.rpc.util.RPCUtil;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
-import io.nuls.tools.crypto.HexUtil;
-import io.nuls.tools.model.ObjectUtils;
 import io.nuls.tools.exception.NulsException;
+import io.nuls.tools.model.ObjectUtils;
 import io.nuls.transaction.cache.TxDuplicateRemoval;
 import io.nuls.transaction.constant.TxCmd;
 import io.nuls.transaction.constant.TxConfig;
@@ -78,7 +78,7 @@ public class MessageCmd extends BaseCmd {
             String nodeId = params.get(KEY_NODE_ID).toString();
             //解析广播交易hash消息
             BroadcastTxMessage message = new BroadcastTxMessage();
-            byte[] decode = HexUtil.decode(params.get(KEY_MESSAGE_BODY).toString());
+            byte[] decode = RPCUtil.decode(params.get(KEY_MESSAGE_BODY).toString());
             message.parse(new NulsByteBuffer(decode));
             if (message == null) {
                 chain.getLoggerMap().get(TxConstant.LOG_TX_MESSAGE).debug(
@@ -130,7 +130,7 @@ public class MessageCmd extends BaseCmd {
             String nodeId = params.get(KEY_NODE_ID).toString();
             //解析获取完整交易消息
             GetTxMessage message = new GetTxMessage();
-            byte[] decode = HexUtil.decode(params.get(KEY_MESSAGE_BODY).toString());
+            byte[] decode = RPCUtil.decode(params.get(KEY_MESSAGE_BODY).toString());
             message.parse(new NulsByteBuffer(decode));
             if (message == null) {
                 chain.getLoggerMap().get(TxConstant.LOG_TX_MESSAGE).debug(
@@ -180,7 +180,7 @@ public class MessageCmd extends BaseCmd {
             chain = chainManager.getChain(chainId);
             //解析新的交易消息
             TransactionMessage message = new TransactionMessage();
-            byte[] decode = HexUtil.decode(params.get(KEY_MESSAGE_BODY).toString());
+            byte[] decode = RPCUtil.decode(params.get(KEY_MESSAGE_BODY).toString());
             message.parse(new NulsByteBuffer(decode));
             if (message == null) {
                 chain.getLoggerMap().get(TxConstant.LOG_TX_MESSAGE).debug(
@@ -230,7 +230,7 @@ public class MessageCmd extends BaseCmd {
             String nodeId = params.get(KEY_NODE_ID).toString();
             //解析广播跨链交易hash消息
             BroadcastTxMessage message = new BroadcastTxMessage();
-            byte[] decode = HexUtil.decode(params.get(KEY_MESSAGE_BODY).toString());
+            byte[] decode = RPCUtil.decode(params.get(KEY_MESSAGE_BODY).toString());
             message.parse(new NulsByteBuffer(decode));
             if (message == null) {
                 chain.getLoggerMap().get(TxConstant.LOG_TX_MESSAGE).debug(
@@ -282,7 +282,7 @@ public class MessageCmd extends BaseCmd {
             String nodeId = params.get(KEY_NODE_ID).toString();
             //解析获取完整跨链交易消息
             GetTxMessage message = new GetTxMessage();
-            byte[] decode = HexUtil.decode(params.get(KEY_MESSAGE_BODY).toString());
+            byte[] decode = RPCUtil.decode(params.get(KEY_MESSAGE_BODY).toString());
             message.parse(new NulsByteBuffer(decode));
             if (message == null) {
                 return failed(TxErrorCode.PARAMETER_ERROR);
@@ -340,7 +340,7 @@ public class MessageCmd extends BaseCmd {
             String nodeId = params.get(KEY_NODE_ID).toString();
             //解析获取完整跨链交易消息
             GetTxMessage message = new GetTxMessage();
-            byte[] decode = HexUtil.decode(params.get(KEY_MESSAGE_BODY).toString());
+            byte[] decode = RPCUtil.decode(params.get(KEY_MESSAGE_BODY).toString());
             message.parse(new NulsByteBuffer(decode));
             if (message == null) {
                 return failed(TxErrorCode.PARAMETER_ERROR);
@@ -403,7 +403,7 @@ public class MessageCmd extends BaseCmd {
             String nodeId = params.get(KEY_NODE_ID).toString();
             //解析获取完整跨链交易消息
             GetTxMessage message = new GetTxMessage();
-            byte[] decode = HexUtil.decode(params.get(KEY_MESSAGE_BODY).toString());
+            byte[] decode = RPCUtil.decode(params.get(KEY_MESSAGE_BODY).toString());
             message.parse(new NulsByteBuffer(decode));
             if (message == null) {
                 chain.getLoggerMap().get(TxConstant.LOG_TX_MESSAGE).debug(
@@ -463,7 +463,7 @@ public class MessageCmd extends BaseCmd {
             String nodeId = params.get(KEY_NODE_ID).toString();
             //解析新的跨链交易消息
             CrossTxMessage message = new CrossTxMessage();
-            byte[] decode = HexUtil.decode(params.get(KEY_MESSAGE_BODY).toString());
+            byte[] decode = RPCUtil.decode(params.get(KEY_MESSAGE_BODY).toString());
             message.parse(new NulsByteBuffer(decode));
             if (message == null) {
                 chain.getLoggerMap().get(TxConstant.LOG_TX_MESSAGE).debug(
@@ -513,7 +513,7 @@ public class MessageCmd extends BaseCmd {
             String nodeId = params.get(KEY_NODE_ID).toString();
             //解析跨链交易验证消息
             VerifyCrossWithFCMessage message = new VerifyCrossWithFCMessage();
-            byte[] decode = HexUtil.decode(params.get(KEY_MESSAGE_BODY).toString());
+            byte[] decode = RPCUtil.decode(params.get(KEY_MESSAGE_BODY).toString());
             message.parse(new NulsByteBuffer(decode));
             if (message == null) {
                 return failed(TxErrorCode.PARAMETER_ERROR);
@@ -526,7 +526,7 @@ public class MessageCmd extends BaseCmd {
             }
             //解析原始交易hash
             byte[] origTxHashByte = message.getOriginalTxHash();
-            NulsDigestData originalTxHash = NulsDigestData.fromDigestHex(HexUtil.encode(origTxHashByte));
+            NulsDigestData originalTxHash = NulsDigestData.fromDigestHex(RPCUtil.encode(origTxHashByte));
             chain.getLoggerMap().get(TxConstant.LOG_TX_MESSAGE).debug(
                     "recieve [verifyFc] message from node-{}, chainId:{}, originalTxHash:{}", nodeId, chainId, originalTxHash.getDigestHex());
             //查询已确认跨链交易
@@ -577,7 +577,7 @@ public class MessageCmd extends BaseCmd {
             String nodeId = params.get(KEY_NODE_ID).toString();
             //解析跨链交易验证结果消息
             VerifyCrossResultMessage message = new VerifyCrossResultMessage();
-            byte[] decode = HexUtil.decode(params.get(KEY_MESSAGE_BODY).toString());
+            byte[] decode = RPCUtil.decode(params.get(KEY_MESSAGE_BODY).toString());
             message.parse(new NulsByteBuffer(decode));
             if (message == null) {
                 chain.getLoggerMap().get(TxConstant.LOG_TX_MESSAGE).debug(
@@ -618,7 +618,7 @@ public class MessageCmd extends BaseCmd {
             String nodeId = params.get(KEY_NODE_ID).toString();
             //解析跨链交易验证消息
             VerifyCrossWithFCMessage message = new VerifyCrossWithFCMessage();
-            byte[] decode = HexUtil.decode(params.get(KEY_MESSAGE_BODY).toString());
+            byte[] decode = RPCUtil.decode(params.get(KEY_MESSAGE_BODY).toString());
             message.parse(new NulsByteBuffer(decode));
             if (message == null) {
                 chain.getLoggerMap().get(TxConstant.LOG_TX_MESSAGE).debug(
@@ -631,7 +631,7 @@ public class MessageCmd extends BaseCmd {
             }
             //解析原始交易hash
             byte[] origTxHashByte = message.getOriginalTxHash();
-            NulsDigestData originalTxHash = NulsDigestData.fromDigestHex(HexUtil.encode(origTxHashByte));
+            NulsDigestData originalTxHash = NulsDigestData.fromDigestHex(RPCUtil.encode(origTxHashByte));
             chain.getLoggerMap().get(TxConstant.LOG_TX_MESSAGE).debug(
                     "recieve [verifyMn] message from node-{}, chainId:{}, txHash:{}", nodeId, chainId, originalTxHash.getDigestHex());
             //查询已确认跨链交易
@@ -691,7 +691,7 @@ public class MessageCmd extends BaseCmd {
             String nodeId = (String) params.get(KEY_NODE_ID);
             //解析验证结果消息
             BroadcastCrossNodeRsMessage message = new BroadcastCrossNodeRsMessage();
-            byte[] decode = HexUtil.decode((String) params.get(KEY_MESSAGE_BODY));
+            byte[] decode = RPCUtil.decode((String) params.get(KEY_MESSAGE_BODY));
             message.parse(new NulsByteBuffer(decode));
             //查询处理中的跨链交易
  /*           CrossTx ctx = ctxStorageService.getTx(chain.getChainId(), message.getRequestHash());

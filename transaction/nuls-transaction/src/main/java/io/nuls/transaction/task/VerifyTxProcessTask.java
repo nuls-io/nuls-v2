@@ -1,6 +1,7 @@
 package io.nuls.transaction.task;
 
 import io.nuls.base.data.Transaction;
+import io.nuls.rpc.util.RPCUtil;
 import io.nuls.tools.core.ioc.SpringLiteContext;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.transaction.cache.PackablePool;
@@ -120,7 +121,7 @@ public class VerifyTxProcessTask implements Runnable {
 
                 long timeCmtLed = System.currentTimeMillis();
                 //调账本记录未确认交易
-                LedgerCall.commitUnconfirmedTx(chain, tx.hex());
+                LedgerCall.commitUnconfirmedTx(chain, RPCUtil.encode(tx.serialize()));
                 chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("提交未确认交易到账本花费时间:{}", System.currentTimeMillis() - timeCmtLed);
                 //广播交易hash
                 NetworkCall.broadcastTxHash(chain.getChainId(),tx.getHash());
