@@ -24,7 +24,7 @@
  */
 package io.nuls.rpc.model.message;
 
-import lombok.*;
+
 
 /**
  * 消息确认对象，表示已经收到
@@ -33,12 +33,19 @@ import lombok.*;
  * @author tangyi
  * @date 2018/11/15
  */
-@Data
-@ToString
+
 public class Ack {
     /**
      * 请求的消息号
      * This is the original request ID referred by a Request message
      */
     private String requestId;
+
+    public String getRequestId() {
+        return requestId;
+    }
+
+    public void setRequestId(String requestId) {
+        this.requestId = requestId;
+    }
 }

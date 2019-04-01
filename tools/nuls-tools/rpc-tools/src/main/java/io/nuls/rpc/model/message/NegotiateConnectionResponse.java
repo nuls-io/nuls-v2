@@ -24,8 +24,7 @@
  */
 package io.nuls.rpc.model.message;
 
-import lombok.Data;
-import lombok.ToString;
+
 
 /**
  * 握手确认
@@ -34,8 +33,7 @@ import lombok.ToString;
  * @author tangyi
  * @date 2018/11/15
  */
-@Data
-@ToString
+
 public class NegotiateConnectionResponse {
     private String requestId;
     /**
@@ -47,4 +45,28 @@ public class NegotiateConnectionResponse {
      * A string value, useful to describe what exactly went wrong when the connection was rejected.
      */
     private String negotiationComment;
+
+    public String getRequestId() {
+        return requestId;
+    }
+
+    public void setRequestId(String requestId) {
+        this.requestId = requestId;
+    }
+
+    public String getNegotiationStatus() {
+        return negotiationStatus;
+    }
+
+    public void setNegotiationStatus(String negotiationStatus) {
+        this.negotiationStatus = negotiationStatus;
+    }
+
+    public String getNegotiationComment() {
+        return negotiationComment;
+    }
+
+    public void setNegotiationComment(String negotiationComment) {
+        this.negotiationComment = negotiationComment;
+    }
 }
