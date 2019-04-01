@@ -768,6 +768,9 @@ public class TxServiceImpl implements TxService {
             while (iterator.hasNext()) {
                 TxWrapper txWrapper = iterator.next();
                 Transaction tx = txWrapper.getTx();
+                if (TX_PACKAGE_ORPHAN_MAP.containsKey(tx.getHash())) {
+                    TX_PACKAGE_ORPHAN_MAP.remove(tx.getHash());
+                }
                 try {
                     packableTxs.add(tx.hex());
                 } catch (Exception e) {
@@ -816,7 +819,7 @@ public class TxServiceImpl implements TxService {
     }
 
     /**
-     * 将孤儿交易加回待打包队列时,要判断加了几次, 达到阈值就不再加回了
+     * 将孤儿交易加回待打包队列时, 要判断加了几次(因为下次打包时又验证为孤儿交易会再次被加回), 达到阈值就不再加回了
      */
     private void addOrphanTxSet(Set<TxWrapper> orphanTxSet, TxWrapper txWrapper) {
         NulsDigestData hash = txWrapper.getTx().getHash();
@@ -829,6 +832,9 @@ public class TxServiceImpl implements TxService {
                 count++;
             }
             TX_PACKAGE_ORPHAN_MAP.put(hash, count);
+        } else {
+            //不加回(丢弃),同时删除map中的key
+            TX_PACKAGE_ORPHAN_MAP.remove(hash);
         }
     }
 

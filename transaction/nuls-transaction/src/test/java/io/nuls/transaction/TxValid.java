@@ -92,12 +92,12 @@ public class TxValid {
 
     @Test
     public void transfer() throws Exception {
-        for (int i = 0; i < 500; i++) {
+        for (int i = 0; i < 5; i++) {
             String hash = createTransfer(address25, address21);
 //            String hash = createCtxTransfer();
             System.out.println("count:" + (i + 1));
             System.out.println("");
-            Thread.sleep(500L);
+//            Thread.sleep(500L);
             //getTx(hash);
         }
 //        createCtxTransfer();
@@ -515,7 +515,7 @@ public class TxValid {
         inputCoin1.setPassword(password);
         inputCoin1.setAssetsChainId(chainId);
         inputCoin1.setAssetsId(assetId);
-        inputCoin1.setAmount(new BigInteger("10010000"));
+        inputCoin1.setAmount(new BigInteger("100100000"));
         inputs.add(inputCoin1);
 
         CoinDTO outputCoin1 = new CoinDTO();

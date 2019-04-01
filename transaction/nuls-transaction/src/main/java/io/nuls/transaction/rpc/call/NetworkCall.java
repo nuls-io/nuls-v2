@@ -25,7 +25,7 @@ import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.model.message.Response;
 import io.nuls.rpc.netty.processor.ResponseMessageProcessor;
-import io.nuls.tools.crypto.HexUtil;
+import io.nuls.rpc.util.RPCUtil;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.model.StringUtils;
 import io.nuls.transaction.constant.TxConstant;
@@ -136,7 +136,7 @@ public class NetworkCall {
             params.put(Constants.VERSION_KEY_STR, TxConstant.RPC_VERSION);
             params.put("chainId", chainId);
             params.put("excludeNodes", excludeNodes);
-            params.put("messageBody", HexUtil.encode(message.serialize()));
+            params.put("messageBody", RPCUtil.encode(message.serialize()));
             params.put("command", message.getCommand());
             Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.NW.abbr, "nw_broadcast", params);
             if(!response.isSuccess()){
@@ -164,7 +164,7 @@ public class NetworkCall {
             params.put(Constants.VERSION_KEY_STR, TxConstant.RPC_VERSION);
             params.put("chainId", chainId);
             params.put("nodes", nodeId);
-            params.put("messageBody", HexUtil.encode(message.serialize()));
+            params.put("messageBody", RPCUtil.encode(message.serialize()));
             params.put("command", message.getCommand());
 
             Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.NW.abbr, "nw_sendPeersMsg", params);
