@@ -61,7 +61,7 @@ public class TransactionCmd extends BaseLedgerCmd {
             version = 1.0, scope = "private", minEvent = 0, minPeriod = 0,
             description = "")
     @Parameter(parameterName = "chainId", parameterType = "int")
-    @Parameter(parameterName = "txHex", parameterType = "String")
+    @Parameter(parameterName = "tx", parameterType = "String")
     public Response commitUnconfirmedTx(Map params) {
         Map<String, Object> rtData = new HashMap<>();
         Integer chainId = (Integer) params.get("chainId");
@@ -69,8 +69,8 @@ public class TransactionCmd extends BaseLedgerCmd {
             String txStr = params.get("tx").toString();
             Transaction tx = parseTxs(txStr,chainId);
             if (null == tx) {
-                LoggerUtil.logger(chainId).error("txHex is invalid chainId={},txHex={}", chainId, txStr);
-                return failed("txHex is invalid");
+                LoggerUtil.logger(chainId).error("txStr is invalid chainId={},txHex={}", chainId, txStr);
+                return failed("txStr is invalid");
             }
             LoggerUtil.logger(chainId).debug("commitUnconfirmedTx chainId={},txHash={}", chainId, tx.getHash().toString());
             int value = 0;
