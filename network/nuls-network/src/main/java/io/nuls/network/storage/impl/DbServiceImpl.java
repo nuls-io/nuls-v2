@@ -85,7 +85,7 @@ public class DbServiceImpl implements DbService,InitDB,InitializingBean {
             groupNodesPo.setSelfNodeContainer(nodeGroup.getLocalNetNodeContainer().parseToNodesContainerPo());
             RocksDBService.put(NetworkConstant.DB_NAME_NETWORK_GROUP_NODES,
                     ByteUtils.intToBytes(chainId), groupNodesPo.serialize());
-            LoggerUtil.Log.info("save group={} nodes",nodeGroup.getChainId());
+//            LoggerUtil.Log.info("save group={} nodes",nodeGroup.getChainId());
         } catch (Exception e) {
             e.printStackTrace();
         }

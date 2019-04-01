@@ -90,9 +90,8 @@ public class OtherModuleMessageHandler extends BaseMessageHandler {
         Map<String, Object> paramMap = new HashMap<>();
         paramMap.put("chainId", chainId);
         paramMap.put("nodeId", node.getId());
-        long time0 = System.currentTimeMillis();
-        paramMap.put("messageBody", HexUtil.encode(payLoadBody));
         long time1 = System.currentTimeMillis();
+        paramMap.put("messageBody", HexUtil.encode(payLoadBody));
         Collection<ProtocolRoleHandler> protocolRoleHandlers = MessageHandlerFactory.getInstance().getProtocolRoleHandlerMap(header.getCommandStr());
         if (null == protocolRoleHandlers) {
             LoggerUtil.logger(chainId).error("unknown mssages. cmd={},handler may be unRegistered to network.", header.getCommandStr());
@@ -102,9 +101,9 @@ public class OtherModuleMessageHandler extends BaseMessageHandler {
                 try {
                     LoggerUtil.logger(chainId).debug("request：{}=={}", protocolRoleHandler.getRole(), protocolRoleHandler.getHandler());
                     Request request = MessageUtil.newRequest(protocolRoleHandler.getHandler(), paramMap, Constants.BOOLEAN_FALSE, Constants.ZERO, Constants.ZERO);
-                    ResponseContainer responseContainer = ResponseMessageProcessor.sendRequest(protocolRoleHandler.getRole(), request);
-                    LoggerUtil.logger(chainId).debug("responseContainer：" + responseContainer.getMessageId());
-                    LoggerUtil.modulesMsgLogs(protocolRoleHandler.getRole(), header.getCommandStr(), node, payLoadBody, responseContainer.getMessageId());
+                    String requestId = ResponseMessageProcessor.requestOnly(protocolRoleHandler.getRole(), request);
+                    LoggerUtil.logger(chainId).debug("requestId：{}" + requestId);
+                    LoggerUtil.modulesMsgLogs(protocolRoleHandler.getRole(), header.getCommandStr(), node, payLoadBody, requestId);
                 } catch (Exception e) {
                     LoggerUtil.logger(chainId).error(e);
                     e.printStackTrace();
@@ -112,7 +111,7 @@ public class OtherModuleMessageHandler extends BaseMessageHandler {
             }
             long endTime = System.currentTimeMillis();
             if (endTime - beginTime > 3000) {
-                LoggerUtil.TestLog.error("####2-Deal time too long,message cmd ={},useTime={},hash={}", header.getCommandStr(), (endTime - beginTime), NulsDigestData.calcDigestData(payLoadBody).getDigestHex());
+                LoggerUtil.TestLog.error("####Deal time too long,message cmd ={},useTime={},hash={}", header.getCommandStr(), (endTime - beginTime), NulsDigestData.calcDigestData(payLoadBody).getDigestHex());
 
             }
         }

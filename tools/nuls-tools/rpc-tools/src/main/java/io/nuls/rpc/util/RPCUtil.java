@@ -22,21 +22,16 @@
  * SOFTWARE.
  *
  */
-package io.nuls.network.constant;
+package io.nuls.rpc.util;
 
-/**
- * 节点状态类型描述：探测到节点的状态，代表peer节点的常规状态。
- * UNCHECK 未确认peer连接
- * AVAILABLE 可用的连接(server in 进来的连接，已经生效中了)
- * CONNECTABLE 可用的连接(已验证可连接的ip)
- * UNAVAILABLE  无效的连接
- *
- * @author lan
- */
-public class NodeStatusEnum {
+import static java.nio.charset.StandardCharsets.UTF_8;
 
-    public final static int UNCHECK = 0;
-    public final static int AVAILABLE = 1;
-    public final static int CONNECTABLE = 2;
-    public final static int UNAVAILABLE = 3;
+public class RPCUtil {
+    public static String encode(byte[] src) {
+        return (src == null) ? null : new String(src, UTF_8);
+    }
+
+    public static byte[] decode(String src) {
+        return src.getBytes(UTF_8);
+    }
 }
