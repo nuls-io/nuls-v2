@@ -38,9 +38,7 @@ import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.model.message.MessageUtil;
 import io.nuls.rpc.model.message.Request;
 import io.nuls.rpc.netty.processor.ResponseMessageProcessor;
-import io.nuls.rpc.netty.processor.container.ResponseContainer;
-import io.nuls.tools.crypto.HexUtil;
-import io.nuls.tools.model.ByteUtils;
+import io.nuls.rpc.util.RPCUtil;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -91,7 +89,7 @@ public class OtherModuleMessageHandler extends BaseMessageHandler {
         paramMap.put("chainId", chainId);
         paramMap.put("nodeId", node.getId());
         long time1 = System.currentTimeMillis();
-        paramMap.put("messageBody", HexUtil.encode(payLoadBody));
+        paramMap.put("messageBody", RPCUtil.encode(payLoadBody));
         Collection<ProtocolRoleHandler> protocolRoleHandlers = MessageHandlerFactory.getInstance().getProtocolRoleHandlerMap(header.getCommandStr());
         if (null == protocolRoleHandlers) {
             LoggerUtil.logger(chainId).error("unknown mssages. cmd={},handler may be unRegistered to network.", header.getCommandStr());
