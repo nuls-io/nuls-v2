@@ -147,4 +147,5 @@ public interface TxService {
      * @param cleanLedgerUfmTx 调用账本的未确认回滚
      */
     void clearInvalidTx(Chain chain, Transaction tx, boolean cleanLedgerUfmTx);
+
 }

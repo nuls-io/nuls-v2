@@ -700,6 +700,34 @@ public class TransactionCmd extends BaseCmd {
         }
     }
 
+    /**
+     * 返回打包时验证为孤儿交易的集合
+     *
+     * @param params
+     * @return
+     */
+    @CmdAnnotation(cmd = "txPackageOrphanMap", version = 1.0, description = "")
+    @Parameter(parameterName = "chainId", parameterType = "int")
+    public Response getTxPackageOrphanMap(Map params) {
+        Chain chain = null;
+        try {
+            ObjectUtils.canNotEmpty(params.get("chainId"), TxErrorCode.PARAMETER_ERROR.getMsg());
+            chain = chainManager.getChain((int) params.get("chainId"));
+            if (null == chain) {
+                throw new NulsException(TxErrorCode.CHAIN_NOT_FOUND);
+            }
+            Map<String, Object> resultMap = new HashMap<>(TxConstant.INIT_CAPACITY_2);
+            resultMap.put("value", chain.getTxRegisterMap());
+            return success(resultMap);
+        } catch (NulsException e) {
+            errorLogProcess(chain, e);
+            return failed(e.getErrorCode());
+        } catch (Exception e) {
+            errorLogProcess(chain, e);
+            return failed(TxErrorCode.SYS_UNKOWN_EXCEPTION);
+        }
+    }
+
 
     private void errorLogProcess(Chain chain, Exception e) {
         if (chain == null) {
