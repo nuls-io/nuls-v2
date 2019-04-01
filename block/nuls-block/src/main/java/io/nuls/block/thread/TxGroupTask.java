@@ -47,6 +47,9 @@ public class TxGroupTask implements Delayed {
         this.excuteTime = excuteTime;
     }
 
+    public TxGroupTask() {
+    }
+
     public TxGroupTask(long id, HashListMessage request, long delayTime) {
         this.id = id;
         this.request = request;

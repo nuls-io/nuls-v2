@@ -336,6 +336,36 @@ public class ChainParameters extends BaseNulsData {
         this.cleanParam = cleanParam;
     }
 
+    public ChainParameters() {
+    }
+
+    public ChainParameters(String chainName, int chainId, int blockMaxSize, int resetTime, int chainSwtichThreshold, int cacheSize, int heightRange, int waitInterval, int maxRollback, int consistencyNodePercent, int minNodeAmount, int downloadNumber, int extendMaxSize, int validBlockInterval, int blockCache, int smallBlockCache, int orphanChainMaxAge, String logLevel, int singleDownloadTimeount, int batchDownloadTimeount, int maxLoop, int synSleepInterval, int waitNetworkInterval, int cleanParam) {
+        this.chainName = chainName;
+        this.chainId = chainId;
+        this.blockMaxSize = blockMaxSize;
+        this.resetTime = resetTime;
+        this.chainSwtichThreshold = chainSwtichThreshold;
+        this.cacheSize = cacheSize;
+        this.heightRange = heightRange;
+        this.waitInterval = waitInterval;
+        this.maxRollback = maxRollback;
+        this.consistencyNodePercent = consistencyNodePercent;
+        this.minNodeAmount = minNodeAmount;
+        this.downloadNumber = downloadNumber;
+        this.extendMaxSize = extendMaxSize;
+        this.validBlockInterval = validBlockInterval;
+        this.blockCache = blockCache;
+        this.smallBlockCache = smallBlockCache;
+        this.orphanChainMaxAge = orphanChainMaxAge;
+        this.logLevel = logLevel;
+        this.singleDownloadTimeount = singleDownloadTimeount;
+        this.batchDownloadTimeount = batchDownloadTimeount;
+        this.maxLoop = maxLoop;
+        this.synSleepInterval = synSleepInterval;
+        this.waitNetworkInterval = waitNetworkInterval;
+        this.cleanParam = cleanParam;
+    }
+
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
         stream.writeString(chainName);

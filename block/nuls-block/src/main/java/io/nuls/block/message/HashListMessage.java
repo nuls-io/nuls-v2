@@ -45,6 +45,22 @@ public class HashListMessage extends BaseMessage {
 
     private List<NulsDigestData> txHashList = new ArrayList<>();
 
+    public NulsDigestData getBlockHash() {
+        return blockHash;
+    }
+
+    public void setBlockHash(NulsDigestData blockHash) {
+        this.blockHash = blockHash;
+    }
+
+    public List<NulsDigestData> getTxHashList() {
+        return txHashList;
+    }
+
+    public void setTxHashList(List<NulsDigestData> txHashList) {
+        this.txHashList = txHashList;
+    }
+
     @Override
     public int size() {
         int size = 0;

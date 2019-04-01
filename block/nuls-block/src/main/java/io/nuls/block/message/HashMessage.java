@@ -43,6 +43,14 @@ public class HashMessage extends BaseMessage {
     public HashMessage() {
     }
 
+    public NulsDigestData getRequestHash() {
+        return requestHash;
+    }
+
+    public void setRequestHash(NulsDigestData requestHash) {
+        this.requestHash = requestHash;
+    }
+
     public HashMessage(NulsDigestData hash) {
         this.requestHash = hash;
     }

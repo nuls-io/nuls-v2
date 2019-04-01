@@ -54,6 +54,22 @@ public class TxGroupMessage extends BaseMessage {
         this.transactions = transactions;
     }
 
+    public NulsDigestData getBlockHash() {
+        return blockHash;
+    }
+
+    public void setBlockHash(NulsDigestData blockHash) {
+        this.blockHash = blockHash;
+    }
+
+    public List<Transaction> getTransactions() {
+        return transactions;
+    }
+
+    public void setTransactions(List<Transaction> transactions) {
+        this.transactions = transactions;
+    }
+
     @Override
     public int size() {
         int size = 0;
