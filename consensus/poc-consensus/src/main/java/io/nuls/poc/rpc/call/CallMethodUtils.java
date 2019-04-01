@@ -87,13 +87,13 @@ public class CallMethodUtils {
                 callParams.put("chainId", chainId);
                 callParams.put("address", address);
                 callParams.put("password", password);
-                callParams.put("dataHex", RPCUtil.encode(tx.getHash().getDigestBytes()));
+                callParams.put("data", RPCUtil.encode(tx.getHash().getDigestBytes()));
                 Response signResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_signDigest", callParams);
                 if (!signResp.isSuccess()) {
                     throw new NulsException(ConsensusErrorCode.TX_SIGNTURE_ERROR);
                 }
                 HashMap signResult = (HashMap) ((HashMap) signResp.getResponseData()).get("ac_signDigest");
-                p2PHKSignature.parse(RPCUtil.decode((String) signResult.get("signatureHex")), 0);
+                p2PHKSignature.parse(RPCUtil.decode((String) signResult.get("signature")), 0);
             }
             TransactionSignature signature = new TransactionSignature();
             List<P2PHKSignature> p2PHKSignatures = new ArrayList<>();
@@ -121,14 +121,14 @@ public class CallMethodUtils {
             callParams.put("chainId", chain.getConfig().getChainId());
             callParams.put("address", address);
             callParams.put("password", chain.getConfig().getPassword());
-            callParams.put("dataHex", RPCUtil.encode(header.getHash().getDigestBytes()));
+            callParams.put("data", RPCUtil.encode(header.getHash().getDigestBytes()));
             Response signResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_signBlockDigest", callParams);
             if (!signResp.isSuccess()) {
                 throw new NulsException(ConsensusErrorCode.TX_SIGNTURE_ERROR);
             }
             HashMap signResult = (HashMap) ((HashMap) signResp.getResponseData()).get("ac_signBlockDigest");
             BlockSignature blockSignature = new BlockSignature();
-            blockSignature.parse(RPCUtil.decode((String) signResult.get("signatureHex")), 0);
+            blockSignature.parse(RPCUtil.decode((String) signResult.get("signature")), 0);
             header.setBlockSignature(blockSignature);
         } catch (NulsException e) {
             throw e;
@@ -331,7 +331,7 @@ public class CallMethodUtils {
             Map responseData = (Map) cmdResp.getResponseData();
             Transaction tx = new Transaction();
             Map realData = (Map) responseData.get("tx_getConfirmedTx");
-            String txHex = (String) realData.get("txHex");
+            String txHex = (String) realData.get("tx");
             if (!StringUtils.isBlank(txHex)) {
                 tx.parse(RPCUtil.decode(txHex), 0);
             }
@@ -355,7 +355,7 @@ public class CallMethodUtils {
         try {
             Map<String, Object> params = new HashMap(4);
             params.put("chainId", chain.getConfig().getChainId());
-            params.put("txHex", txHex);
+            params.put("tx", txHex);
             Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.TX.abbr, "tx_newTx", params);
             if (!cmdResp.isSuccess()) {
                 chain.getLoggerMap().get(ConsensusConstant.CONSENSUS_LOGGER_NAME).error("Transaction failed to send!");
