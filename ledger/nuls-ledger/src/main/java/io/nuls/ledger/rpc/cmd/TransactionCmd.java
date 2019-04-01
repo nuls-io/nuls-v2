@@ -66,10 +66,10 @@ public class TransactionCmd extends BaseLedgerCmd {
         Map<String, Object> rtData = new HashMap<>();
         Integer chainId = (Integer) params.get("chainId");
         try {
-            String txHex = params.get("txHex").toString();
-            Transaction tx = parseTxs(txHex,chainId);
+            String txStr = params.get("tx").toString();
+            Transaction tx = parseTxs(txStr,chainId);
             if (null == tx) {
-                LoggerUtil.logger(chainId).error("txHex is invalid chainId={},txHex={}", chainId, txHex);
+                LoggerUtil.logger(chainId).error("txHex is invalid chainId={},txHex={}", chainId, txStr);
                 return failed("txHex is invalid");
             }
             LoggerUtil.logger(chainId).debug("commitUnconfirmedTx chainId={},txHash={}", chainId, tx.getHash().toString());
