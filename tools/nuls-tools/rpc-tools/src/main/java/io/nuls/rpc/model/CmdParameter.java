@@ -63,7 +63,10 @@ public class CmdParameter {
 
     private String parameterValidRegExp;
 
-    public CmdParameter(String parameterName,String parameterType,String parameterValidRange,String parameterValidRegExp){
+    public CmdParameter() {
+    }
+
+    public CmdParameter(String parameterName, String parameterType, String parameterValidRange, String parameterValidRegExp){
         this.parameterName = parameterName;
         this.parameterType = parameterType;
         this.parameterValidRange = parameterValidRange;

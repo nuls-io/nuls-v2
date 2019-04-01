@@ -41,6 +41,7 @@ import net.sf.cglib.proxy.MethodInterceptor;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -60,8 +61,6 @@ public class SpringLiteContext {
     private static final Map<Class, Set<String>> CLASS_NAME_SET_MAP = new ConcurrentHashMap<>();
 
     private static MethodInterceptor interceptor;
-
-    private static boolean success;
 
     /**
      * 使用默认的拦截器加载roc环境
@@ -102,7 +101,6 @@ public class SpringLiteContext {
         configurationInjectToBean();
         autowireFields();
         callAfterPropertiesSet();
-        success = true;
     }
 
     /**
@@ -113,29 +111,28 @@ public class SpringLiteContext {
         ConfigurationLoader configLoader = getBean(ConfigurationLoader.class);
         //加载配置项
         configLoader.load();
-        BEAN_TEMP_MAP.entrySet().forEach(entry -> {
-            Object bean = entry.getValue();
-            Class<?> cls = BEAN_TYPE_MAP.get(entry.getKey());
+        BEAN_TEMP_MAP.forEach((key1, bean) -> {
+            Class<?> cls = BEAN_TYPE_MAP.get(key1);
             Configuration configuration = cls.getAnnotation(Configuration.class);
             if (configuration != null) {
                 Set<Field> fields = getFieldSet(cls);
-                fields.stream().forEach(field -> {
+                fields.forEach(field -> {
                     Value annValue = field.getAnnotation(Value.class);
                     String key = field.getName();
-                    if(annValue != null){
+                    if (annValue != null) {
                         key = annValue.value();
                     }
                     Persist persist = field.getAnnotation(Persist.class);
                     boolean readPersist = persist != null;
-                    if(readPersist){
-                        ConfigSetting.set(bean, field, configLoader.getValue(key,configuration.persistDomain()));
-                    }else{
+                    if (readPersist) {
+                        ConfigSetting.set(bean, field, configLoader.getValue(key, configuration.persistDomain()));
+                    } else {
                         ConfigSetting.set(bean, field, configLoader.getValue(key));
                     }
                 });
-            }else{
+            } else {
                 Set<Field> fields = getFieldSet(cls);
-                fields.stream().forEach(field -> {
+                fields.forEach(field -> {
                     Value annValue = field.getAnnotation(Value.class);
                     if (annValue != null) {
                         String key = annValue.value();
@@ -358,7 +355,7 @@ public class SpringLiteContext {
         }
         Annotation interceptorAnn = getFromArray(anns, Interceptor.class);
         if (null != interceptorAnn) {
-            BeanMethodInterceptor interceptor = null;
+            BeanMethodInterceptor interceptor;
             try {
                 Constructor constructor = clazz.getDeclaredConstructor();
                 interceptor = (BeanMethodInterceptor) constructor.newInstance();
@@ -411,25 +408,20 @@ public class SpringLiteContext {
      * @param clazz    对象类型
      * @param proxy    是否返回动态代理的对象
      */
-    private static Object loadBean(String beanName, Class clazz, boolean proxy) throws NulsException {
+    private static void loadBean(String beanName, Class clazz, boolean proxy) throws NulsException {
         if (BEAN_OK_MAP.containsKey(beanName)) {
             Log.error("model name repetition (" + beanName + "):" + clazz.getName());
-            return BEAN_OK_MAP.get(beanName);
         }
         if (BEAN_TEMP_MAP.containsKey(beanName)) {
             Log.error("model name repetition (" + beanName + "):" + clazz.getName());
-            return BEAN_TEMP_MAP.get(beanName);
         }
-        Object bean = null;
+        Object bean;
         if (proxy) {
             bean = createProxy(clazz, interceptor);
         } else {
             try {
-                bean = clazz.newInstance();
-            } catch (InstantiationException e) {
-                Log.error(e.getMessage(),e);
-                throw new NulsException(e);
-            } catch (IllegalAccessException e) {
+                bean = clazz.getDeclaredConstructor().newInstance();
+            } catch (InstantiationException | IllegalAccessException | NoSuchMethodException | InvocationTargetException e) {
                 Log.error(e.getMessage(),e);
                 throw new NulsException(e);
             }
@@ -437,7 +429,6 @@ public class SpringLiteContext {
         BEAN_TEMP_MAP.put(beanName, bean);
         BEAN_TYPE_MAP.put(beanName, clazz);
         addClassNameMap(clazz, beanName);
-        return bean;
     }
 
     /**
@@ -448,7 +439,6 @@ public class SpringLiteContext {
         Enhancer enhancer = new Enhancer();
         enhancer.setSuperclass(clazz);
         enhancer.setCallback(interceptor);
-//        System.out.println(clazz);
         return enhancer.create();
     }
 
@@ -463,9 +453,9 @@ public class SpringLiteContext {
         Set<String> nameSet = CLASS_NAME_SET_MAP.get(clazz);
         if (null == nameSet) {
             nameSet = new HashSet<>();
+            CLASS_NAME_SET_MAP.put(clazz, nameSet);
         }
         nameSet.add(beanName);
-        CLASS_NAME_SET_MAP.put(clazz, nameSet);
         if (null != clazz.getSuperclass() && !clazz.getSuperclass().equals(Object.class)) {
             addClassNameMap(clazz.getSuperclass(), beanName);
         }
@@ -612,10 +602,6 @@ public class SpringLiteContext {
             }
         }
         return tlist;
-    }
-
-    public static boolean isInitSuccess() {
-        return success;
     }
 
     public static Collection<Object> getAllBeanList() {
