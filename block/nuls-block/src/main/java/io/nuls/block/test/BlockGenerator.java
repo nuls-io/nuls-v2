@@ -28,7 +28,6 @@ import io.nuls.base.signture.SignatureUtil;
 import io.nuls.block.model.GenesisBlock;
 import io.nuls.tools.crypto.ECKey;
 import io.nuls.tools.crypto.HexUtil;
-import lombok.Data;
 
 import java.io.IOException;
 import java.math.BigInteger;
@@ -42,7 +41,6 @@ import java.util.List;
  * @version 1.0
  * @date 18-11-13 下午5:11
  */
-@Data
 public final class BlockGenerator extends Thread {
 
     private static final String PRIVATE_KEY = "009cf05b6b3fe8c09b84c13783140c0f1958e8841f8b6f894ef69431522bc65712";

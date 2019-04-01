@@ -21,9 +21,6 @@
 package io.nuls.block.model;
 
 import io.nuls.base.data.NulsDigestData;
-import lombok.Data;
-
-import java.util.Comparator;
 
 /**
  * 节点
@@ -32,7 +29,6 @@ import java.util.Comparator;
  * @version 1.0
  * @date 18-11-30 下午2:48
  */
-@Data
 public class Node {
 
     /**
@@ -57,6 +53,46 @@ public class Node {
      */
     private long duration;
 
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public long getHeight() {
+        return height;
+    }
+
+    public void setHeight(long height) {
+        this.height = height;
+    }
+
+    public NulsDigestData getHash() {
+        return hash;
+    }
+
+    public void setHash(NulsDigestData hash) {
+        this.hash = hash;
+    }
+
+    public int getCredit() {
+        return credit;
+    }
+
+    public void setCredit(int credit) {
+        this.credit = credit;
+    }
+
+    public long getDuration() {
+        return duration;
+    }
+
+    public void setDuration(long duration) {
+        this.duration = duration;
+    }
+
     /**
      * 根据下载是否成功、下载耗费时间调整信用值
      */
@@ -69,6 +105,5 @@ public class Node {
             //下载失败，信用值减半，下限为0
             credit /= 2;
         }
-//        System.out.println("################################node-" + id + ", duration-" + duration + ", credit-" + credit);
     }
 }

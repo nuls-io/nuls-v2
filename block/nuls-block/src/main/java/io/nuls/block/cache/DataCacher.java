@@ -21,7 +21,6 @@
 package io.nuls.block.cache;
 
 import io.nuls.base.data.NulsDigestData;
-import lombok.NoArgsConstructor;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -34,8 +33,10 @@ import java.util.concurrent.CompletableFuture;
  * @version 1.0
  * @date 18-11-12 下午2:35
  */
-@NoArgsConstructor
 public class DataCacher<T> {
+
+    DataCacher() {
+    }
 
     private Map<NulsDigestData, CompletableFuture<T>> cacher = new HashMap<>();
 

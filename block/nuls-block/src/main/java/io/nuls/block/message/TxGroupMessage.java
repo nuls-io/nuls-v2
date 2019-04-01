@@ -28,7 +28,6 @@ import io.nuls.block.message.base.BaseMessage;
 import io.nuls.tools.basic.VarInt;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.parse.SerializeUtils;
-import lombok.Data;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -42,7 +41,6 @@ import java.util.List;
  * @version 1.0
  * @date 18-11-9 下午2:37
  */
-@Data
 public class TxGroupMessage extends BaseMessage {
 
     private NulsDigestData blockHash;

@@ -117,7 +117,7 @@ public class BlockSynchronizer implements Runnable {
                     firstStart = false;
                     int testAutoRollbackAmount = blockConfig.getTestAutoRollbackAmount();
                     if (latestHeight < testAutoRollbackAmount) {
-                        testAutoRollbackAmount = (int) (latestHeight - 0);
+                        testAutoRollbackAmount = (int) (latestHeight);
                     }
                     for (int i = 0; i < testAutoRollbackAmount; i++) {
                         boolean b = blockService.rollbackBlock(chainId, latestHeight--, true);

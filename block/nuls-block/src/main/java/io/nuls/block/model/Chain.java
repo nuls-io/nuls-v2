@@ -20,13 +20,11 @@
 
 package io.nuls.block.model;
 
+import com.google.common.base.Objects;
 import io.nuls.base.data.Block;
 import io.nuls.base.data.BlockHeader;
 import io.nuls.base.data.NulsDigestData;
 import io.nuls.block.constant.ChainTypeEnum;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.Setter;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -64,7 +62,6 @@ import java.util.concurrent.atomic.AtomicInteger;
  * @version 1.0
  * @date 18-11-15 下午1:54
  */
-@EqualsAndHashCode
 public class Chain {
 
     public static final Comparator<Chain> COMPARATOR = Comparator.comparingLong(Chain::getStartHeight).thenComparingInt(Chain::getStartHashCode);
@@ -72,71 +69,51 @@ public class Chain {
     /**
      * 标记这个链是从哪个链分叉来的,一个链的parent不一定是主链
      */
-    @Getter
-    @Setter
     private Chain parent;
 
     /**
      * 标记所有从本链直接分叉出去的链集合,默认按起始高度从低到高排序,起始高度相同时,按照起始区块hash转换成int从低到高排序,在移除链时有用
      */
-    @Getter
-    @Setter
     private SortedSet<Chain> sons = new TreeSet<>(COMPARATOR);
 
     /**
      * 链ID
      */
-    @Getter
-    @Setter
     private int chainId;
 
     /**
      * 链上起始区块的previousHash
      */
-    @Getter
-    @Setter
     private NulsDigestData previousHash;
 
     /**
      * 链的起始高度(包含)
      */
-    @Getter
-    @Setter
     private long startHeight;
 
     /**
      * 链的起始hash转换为int,排序时用
      */
-    @Getter
-    @Setter
     private int startHashCode;
 
     /**
      * 链的结束高度(包含)
      */
-    @Getter
-    @Setter
     private long endHeight;
 
     /**
      * 链上所有区块hash列表,分叉链、孤儿链维护所有区块的hash在内存中,主链只维护ConfigConstant.HEIGHT_RANGE个hash在内存中
      */
-    @Getter
-    @Setter
     private LinkedList<NulsDigestData> hashList;
 
     /**
      * 标记该链的类型
      */
-    @Getter
-    @Setter
     private ChainTypeEnum type;
 
     /**
      * 标记该链的年龄，适用于孤儿链
      */
-    @Getter
-    @Setter
     private AtomicInteger age = new AtomicInteger(0);
 
     /**
@@ -164,6 +141,90 @@ public class Chain {
      */
     public boolean isMaster() {
         return type.equals(ChainTypeEnum.MASTER);
+    }
+
+    public static Comparator<Chain> getCOMPARATOR() {
+        return COMPARATOR;
+    }
+
+    public Chain getParent() {
+        return parent;
+    }
+
+    public void setParent(Chain parent) {
+        this.parent = parent;
+    }
+
+    public SortedSet<Chain> getSons() {
+        return sons;
+    }
+
+    public void setSons(SortedSet<Chain> sons) {
+        this.sons = sons;
+    }
+
+    public int getChainId() {
+        return chainId;
+    }
+
+    public void setChainId(int chainId) {
+        this.chainId = chainId;
+    }
+
+    public NulsDigestData getPreviousHash() {
+        return previousHash;
+    }
+
+    public void setPreviousHash(NulsDigestData previousHash) {
+        this.previousHash = previousHash;
+    }
+
+    public long getStartHeight() {
+        return startHeight;
+    }
+
+    public void setStartHeight(long startHeight) {
+        this.startHeight = startHeight;
+    }
+
+    public int getStartHashCode() {
+        return startHashCode;
+    }
+
+    public void setStartHashCode(int startHashCode) {
+        this.startHashCode = startHashCode;
+    }
+
+    public long getEndHeight() {
+        return endHeight;
+    }
+
+    public void setEndHeight(long endHeight) {
+        this.endHeight = endHeight;
+    }
+
+    public LinkedList<NulsDigestData> getHashList() {
+        return hashList;
+    }
+
+    public void setHashList(LinkedList<NulsDigestData> hashList) {
+        this.hashList = hashList;
+    }
+
+    public ChainTypeEnum getType() {
+        return type;
+    }
+
+    public void setType(ChainTypeEnum type) {
+        this.type = type;
+    }
+
+    public AtomicInteger getAge() {
+        return age;
+    }
+
+    public void setAge(AtomicInteger age) {
+        this.age = age;
     }
 
     /**
@@ -207,5 +268,29 @@ public class Chain {
         Chain clone = new Chain();
 
         return super.clone();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        Chain chain = (Chain) o;
+        return chainId == chain.chainId &&
+                startHeight == chain.startHeight &&
+                startHashCode == chain.startHashCode &&
+                endHeight == chain.endHeight &&
+                Objects.equal(previousHash, chain.previousHash) &&
+                Objects.equal(hashList, chain.hashList) &&
+                type == chain.type &&
+                Objects.equal(age, chain.age);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(chainId, previousHash, startHeight, startHashCode, endHeight, hashList, type, age);
     }
 }
