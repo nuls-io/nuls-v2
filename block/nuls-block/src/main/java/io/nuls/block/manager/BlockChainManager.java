@@ -465,9 +465,15 @@ public class BlockChainManager {
         if (mainChain.isMaster()) {
             ConsensusUtil.notice(chainId, CONSENSUS_WAITING);
             List<Block> blockList = chainStorageService.query(subChain.getChainId(), subChain.getHashList());
+            List<Block> savedBlockList = new ArrayList<>();
             for (Block block : blockList) {
                 if (!blockService.saveBlock(chainId, block, false)) {
+                    for (int i = savedBlockList.size() - 1; i >= 0; i--) {
+                        blockService.rollbackBlock(chainId, savedBlockList.get(i).getHeader().getHeight(), false);
+                    }
                     throw new NulsRuntimeException(BlockErrorCode.CHAIN_MERGE_ERROR);
+                } else {
+                    savedBlockList.add(block);
                 }
             }
             ConsensusUtil.notice(chainId, CONSENSUS_WORKING);

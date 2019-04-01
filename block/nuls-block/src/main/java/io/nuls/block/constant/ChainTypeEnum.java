@@ -66,19 +66,19 @@ public enum ChainTypeEnum {
     ORPHAN_FORK,
 
     /**
-     * 重复
+     * 与主链重复
      * duplicate chain
      */
     MASTER_DUPLICATE,
 
     /**
-     * 重复
+     * 与分叉链重复
      * duplicate chain
      */
     FORK_DUPLICATE,
 
     /**
-     * 重复
+     * 与孤儿链重复
      * duplicate chain
      */
     ORPHAN_DUPLICATE,
@@ -87,6 +87,12 @@ public enum ChainTypeEnum {
      * 部分重复
      */
     PARTIALLY_DUPLICATE,
+
+    /**
+     * 链上区块数据错误
+     * orphan chain
+     */
+    DATA_ERROR,
 
     /**
      * 孤儿链
