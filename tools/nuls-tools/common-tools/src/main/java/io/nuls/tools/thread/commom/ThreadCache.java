@@ -80,7 +80,7 @@ public class ThreadCache {
     }
 
     public final List<ThreadPoolExecutor> getPoolList() {
-        return new ArrayList<ThreadPoolExecutor>(POOL_EXECUTOR_MAP.values());
+        return new ArrayList<>(POOL_EXECUTOR_MAP.values());
     }
 
     public void removeAllThread() {

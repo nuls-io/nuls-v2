@@ -1,6 +1,6 @@
 package io.nuls.tools.model;
 
-import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 
 /**
  * @author tag
@@ -38,23 +38,15 @@ public class FormatValidUtils {
      * @return       验证结果
      */
     public static boolean validAlias(String alias) {
-        try {
-            if (StringUtils.isBlank(alias)) {
-                return false;
-            }
-            alias = alias.trim();
-            byte[] aliasBytes = alias.getBytes("UTF-8");
-            if (aliasBytes.length < 1 || aliasBytes.length > 20) {
-                return false;
-            }
-            if (alias.matches("^([a-z0-9]+[a-z0-9_]*[a-z0-9]+)|[a-z0-9]+${1,20}")) {
-                return true;
-            } else {
-                return false;
-            }
-        } catch (UnsupportedEncodingException e) {
+        if (StringUtils.isBlank(alias)) {
             return false;
         }
+        alias = alias.trim();
+        byte[] aliasBytes = alias.getBytes(StandardCharsets.UTF_8);
+        if (aliasBytes.length < 1 || aliasBytes.length > 20) {
+            return false;
+        }
+        return alias.matches("^([a-z0-9]+[a-z0-9_]*[a-z0-9]+)|[a-z0-9]+${1,20}");
     }
 
     /**
@@ -63,28 +55,20 @@ public class FormatValidUtils {
      * @return       验证结果
      */
     public static boolean validTokenNameOrSymbol(String name) {
-        try {
-            if (StringUtils.isBlank(name)) {
-                return false;
-            }
-
-            String upperCaseName = name.toUpperCase();
-            if(upperCaseName.contains(NULS)) {
-                return false;
-            }
-
-            byte[] aliasBytes = name.getBytes("UTF-8");
-            if (aliasBytes.length < 1 || aliasBytes.length > 20) {
-                return false;
-            }
-            if (name.matches("^([a-zA-Z0-9]+[a-zA-Z0-9_]*[a-zA-Z0-9]+)|[a-zA-Z0-9]+${1,20}")) {
-                return true;
-            } else {
-                return false;
-            }
-        } catch (UnsupportedEncodingException e) {
+        if (StringUtils.isBlank(name)) {
             return false;
         }
+
+        String upperCaseName = name.toUpperCase();
+        if(upperCaseName.contains(NULS)) {
+            return false;
+        }
+
+        byte[] aliasBytes = name.getBytes(StandardCharsets.UTF_8);
+        if (aliasBytes.length < 1 || aliasBytes.length > 20) {
+            return false;
+        }
+        return name.matches("^([a-zA-Z0-9]+[a-zA-Z0-9_]*[a-zA-Z0-9]+)|[a-zA-Z0-9]+${1,20}");
     }
 
     /**
@@ -93,18 +77,11 @@ public class FormatValidUtils {
      * @return         验证结果
      */
     public static boolean validRemark(String remark) {
-        try {
-            if (null == remark) {
-                return true;
-            }
-            remark = remark.trim();
-            byte[] aliasBytes = remark.getBytes("UTF-8");
-            if (aliasBytes.length < 0 || aliasBytes.length > 60) {
-                return false;
-            }
+        if (null == remark) {
             return true;
-        } catch (UnsupportedEncodingException e) {
-            return false;
         }
+        remark = remark.trim();
+        byte[] aliasBytes = remark.getBytes(StandardCharsets.UTF_8);
+        return aliasBytes.length <= 60;
     }
 }

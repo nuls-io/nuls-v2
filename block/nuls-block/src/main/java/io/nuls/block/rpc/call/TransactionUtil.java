@@ -32,6 +32,7 @@ import io.nuls.block.utils.BlockUtil;
 import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.model.message.Response;
 import io.nuls.rpc.netty.processor.ResponseMessageProcessor;
+import io.nuls.rpc.util.RPCUtil;
 import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.log.logback.NulsLogger;
 
@@ -99,10 +100,10 @@ public class TransactionUtil {
             params.put("packingAddress", AddressTool.getStringAddressByBytes(header.getPackingAddress(chainId)));
             BlockExtendsData data = new BlockExtendsData();
             data.parse(new NulsByteBuffer(header.getExtend()));
-            params.put("stateRoot", HexUtil.encode(data.getStateRoot()));
+            params.put("stateRoot", RPCUtil.encode(data.getStateRoot()));
             BlockExtendsData lastData = new BlockExtendsData();
             lastData.parse(new NulsByteBuffer(lastHeader.getExtend()));
-            params.put("preStateRoot", HexUtil.encode(lastData.getStateRoot()));
+            params.put("preStateRoot", RPCUtil.encode(lastData.getStateRoot()));
             Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.TX.abbr, "tx_batchVerify", params);
             if (response.isSuccess()) {
                 Map responseData = (Map) response.getResponseData();
@@ -151,7 +152,7 @@ public class TransactionUtil {
             List<String> list = new ArrayList<>();
             txHashList.forEach(e -> list.add(e.getDigestHex()));
             params.put("txHashList", list);
-            params.put("blockHeaderHex", HexUtil.encode(BlockUtil.fromBlockHeaderPo(blockHeaderPo).serialize()));
+            params.put("blockHeaderHex", RPCUtil.encode(BlockUtil.fromBlockHeaderPo(blockHeaderPo).serialize()));
             Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.TX.abbr, "tx_save", params);
             if (response.isSuccess()) {
                 Map responseData = (Map) response.getResponseData();
@@ -183,7 +184,7 @@ public class TransactionUtil {
             List<String> list = new ArrayList<>();
             txHashList.forEach(e -> list.add(e.getDigestHex()));
             params.put("txHashList", list);
-            params.put("blockHeaderHex", HexUtil.encode(BlockUtil.fromBlockHeaderPo(blockHeaderPo).serialize()));
+            params.put("blockHeaderHex", RPCUtil.encode(BlockUtil.fromBlockHeaderPo(blockHeaderPo).serialize()));
             Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.TX.abbr, "tx_rollback", params);
             if (response.isSuccess()) {
                 Map responseData = (Map) response.getResponseData();
@@ -226,7 +227,7 @@ public class TransactionUtil {
                 }
                 for (String txHex : txHexList) {
                     Transaction transaction = new Transaction();
-                    transaction.parse(new NulsByteBuffer(HexUtil.decode(txHex)));
+                    transaction.parse(new NulsByteBuffer(RPCUtil.decode(txHex)));
                     transactions.add(transaction);
                 }
             } else {
@@ -272,7 +273,7 @@ public class TransactionUtil {
                 }
                 for (String txHex : txHexList) {
                     Transaction transaction = new Transaction();
-                    transaction.parse(new NulsByteBuffer(HexUtil.decode(txHex)));
+                    transaction.parse(new NulsByteBuffer(RPCUtil.decode(txHex)));
                     transactions.add(transaction);
                 }
             } else {
@@ -309,7 +310,7 @@ public class TransactionUtil {
                     return null;
                 }
                 Transaction transaction = new Transaction();
-                transaction.parse(new NulsByteBuffer(HexUtil.decode(txHex)));
+                transaction.parse(new NulsByteBuffer(RPCUtil.decode(txHex)));
                 return transaction;
             } else {
                 return null;
@@ -344,7 +345,7 @@ public class TransactionUtil {
                     return null;
                 }
                 Transaction transaction = new Transaction();
-                transaction.parse(new NulsByteBuffer(HexUtil.decode(txHex)));
+                transaction.parse(new NulsByteBuffer(RPCUtil.decode(txHex)));
                 return transaction;
             } else {
                 return null;
@@ -378,7 +379,7 @@ public class TransactionUtil {
                 }
             });
             params.put("txHexList", list);
-            params.put("blockHeaderHex", HexUtil.encode(BlockUtil.fromBlockHeaderPo(blockHeaderPo).serialize()));
+            params.put("blockHeaderHex", RPCUtil.encode(BlockUtil.fromBlockHeaderPo(blockHeaderPo).serialize()));
             Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.TX.abbr, "tx_gengsisSave", params);
             if (response.isSuccess()) {
                 Map responseData = (Map) response.getResponseData();

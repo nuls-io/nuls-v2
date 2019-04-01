@@ -25,7 +25,6 @@ import io.nuls.base.data.NulsDigestData;
 import io.nuls.block.constant.ChainTypeEnum;
 import io.nuls.block.model.Chain;
 import io.nuls.block.model.Node;
-import io.nuls.tools.cache.LimitHashMap;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.model.CollectionUtils;
 import org.junit.Assert;
@@ -64,18 +63,6 @@ public class CommonTest {
             String m1 = NulsDigestData.calcMerkleDigestData(list).toString();
             System.out.println(m1);
         }
-    }
-
-    @Test
-    public void test() {
-        LimitHashMap map = new LimitHashMap(100);
-        long start = System.currentTimeMillis();
-        for (int i = 0; i < 20000000; i++) {
-            map.put(i, "hello" + i);
-        }
-        long end = System.currentTimeMillis();
-        System.out.println(end - start);
-        System.out.println(map.size());
     }
 
     @Test
