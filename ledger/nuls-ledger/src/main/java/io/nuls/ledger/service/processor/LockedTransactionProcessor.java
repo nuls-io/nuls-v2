@@ -34,7 +34,7 @@ import io.nuls.ledger.model.po.FreezeHeightState;
 import io.nuls.ledger.model.po.FreezeLockTimeState;
 import io.nuls.ledger.service.AccountStateService;
 import io.nuls.ledger.storage.Repository;
-import io.nuls.rpc.util.RPCUtil;
+import io.nuls.ledger.utils.LedgerUtil;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
 
@@ -67,8 +67,8 @@ public class LockedTransactionProcessor implements TxProcessor {
             //按时间移除锁定
             List<FreezeLockTimeState> list = accountState.getFreezeLockTimeStates();
             for (FreezeLockTimeState freezeLockTimeState : list) {
-                logger.debug("processFromCoinData remove TimeUnlocked address={},amount={}={},nonce={}={},hash={} ", AddressTool.getStringAddressByBytes(coin.getAddress()), coin.getAmount(), freezeLockTimeState.getAmount(), RPCUtil.encode(coin.getNonce()), freezeLockTimeState.getNonce(), hash);
-                if (freezeLockTimeState.getNonce().equalsIgnoreCase(RPCUtil.encode(coin.getNonce()))) {
+                logger.debug("processFromCoinData remove TimeUnlocked address={},amount={}={},nonce={}={},hash={} ", AddressTool.getStringAddressByBytes(coin.getAddress()), coin.getAmount(), freezeLockTimeState.getAmount(), LedgerUtil.getNonceEncode(coin.getNonce()), freezeLockTimeState.getNonce(), hash);
+                if (freezeLockTimeState.getNonce().equalsIgnoreCase(LedgerUtil.getNonceEncode(coin.getNonce()))) {
                     if (0 == freezeLockTimeState.getAmount().compareTo(coin.getAmount())) {
                         //金额一致，移除
                         list.remove(freezeLockTimeState);
@@ -82,8 +82,8 @@ public class LockedTransactionProcessor implements TxProcessor {
             //按高度移除锁定
             List<FreezeHeightState> list = accountState.getFreezeHeightStates();
             for (FreezeHeightState freezeHeightState : list) {
-                logger.debug("processFromCoinData remove HeightUnlocked address={},amount={}={},nonce={}={},hash={} ", AddressTool.getStringAddressByBytes(coin.getAddress()), coin.getAmount(), freezeHeightState.getAmount(), RPCUtil.encode(coin.getNonce()), freezeHeightState.getNonce(), hash);
-                if (freezeHeightState.getNonce().equalsIgnoreCase(RPCUtil.encode(coin.getNonce()))) {
+                logger.debug("processFromCoinData remove HeightUnlocked address={},amount={}={},nonce={}={},hash={} ", AddressTool.getStringAddressByBytes(coin.getAddress()), coin.getAmount(), freezeHeightState.getAmount(), LedgerUtil.getNonceEncode(coin.getNonce()), freezeHeightState.getNonce(), hash);
+                if (freezeHeightState.getNonce().equalsIgnoreCase(LedgerUtil.getNonceEncode(coin.getNonce()))) {
                     if (0 == freezeHeightState.getAmount().compareTo(coin.getAmount())) {
                         //金额一致，移除
                         list.remove(freezeHeightState);

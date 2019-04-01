@@ -27,6 +27,7 @@ package io.nuls.ledger.test.cmd;
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.*;
 import io.nuls.ledger.test.constant.TestConfig;
+import io.nuls.ledger.utils.LedgerUtil;
 import io.nuls.rpc.info.NoUse;
 import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.model.message.Response;
@@ -75,7 +76,7 @@ public class CmdRollBackTest {
             CoinData coinData = new CoinData();
             CoinFrom coinFrom = new CoinFrom();
             coinFrom.setAddress(AddressTool.getAddress(address));
-            coinFrom.setNonce(RPCUtil.decode(nonce));
+            coinFrom.setNonce(LedgerUtil.getNonceDecode(nonce));
             coinFrom.setAssetsId(TestConfig.assetId);
             coinFrom.setAssetsChainId(TestConfig.assetChainId);
             coinFrom.setAmount(BigInteger.valueOf(21));

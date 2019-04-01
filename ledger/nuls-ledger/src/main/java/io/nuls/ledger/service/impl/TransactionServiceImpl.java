@@ -43,7 +43,6 @@ import io.nuls.ledger.utils.LedgerUtil;
 import io.nuls.ledger.utils.LockerUtil;
 import io.nuls.ledger.utils.LoggerUtil;
 import io.nuls.ledger.validator.CoinDataValidator;
-import io.nuls.rpc.util.RPCUtil;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Service;
 
@@ -94,7 +93,7 @@ public class TransactionServiceImpl implements TransactionService {
 //            logger.error("validateResult = {}={}", validateResult.getValidateCode(), validateResult.getValidateDesc());
 //            return false;
 //        }
-        String currentTxNonce = LedgerUtil.getNonceStrByTxHash(transaction);
+        String currentTxNonce = LedgerUtil.getNonceEncodeByTx(transaction);
         Map<String, UnconfirmedTx> accountsMap = new ConcurrentHashMap<>();
         List<CoinFrom> froms = coinData.getFrom();
         List<CoinTo> tos = coinData.getTo();
@@ -176,7 +175,7 @@ public class TransactionServiceImpl implements TransactionService {
                     continue;
                 }
                 //更新账户状态
-                String nonce8BytesStr = LedgerUtil.getNonceStrByTxHash(transaction);
+                String nonce8BytesStr = LedgerUtil.getNonceEncodeByTx(transaction);
                 String txHash = transaction.getHash().toString();
                 List<CoinFrom> froms = coinData.getFrom();
                 for (CoinFrom from : froms) {
@@ -188,8 +187,8 @@ public class TransactionServiceImpl implements TransactionService {
                     boolean process = false;
                     AccountBalance accountBalance = getAccountBalance(addressChainId, from, txHash, blockHeight, updateAccounts);
                     if (from.getLocked() == 0) {
-                        if (!coinDataValidator.validateNonces(accountBalance, nonce8BytesStr, RPCUtil.encode(from.getNonce()))) {
-                            logger(addressChainId).info("nonce1={},nonce2={} validate fail.", accountBalance.getNonces().get(accountBalance.getNonces().size() - 1), RPCUtil.encode(from.getNonce()));
+                        if (!coinDataValidator.validateNonces(accountBalance, nonce8BytesStr, LedgerUtil.getNonceEncode(from.getNonce()))) {
+                            logger(addressChainId).info("nonce1={},nonce2={} validate fail.", accountBalance.getNonces().get(accountBalance.getNonces().size() - 1), LedgerUtil.getNonceEncode(from.getNonce()));
                             return false;
                         }
                         //非解锁交易处理
@@ -345,7 +344,7 @@ public class TransactionServiceImpl implements TransactionService {
                 CoinData coinData = CoinDataUtil.parseCoinData(tx.getCoinData());
                 if (null != coinData) {
                     //更新账户状态
-                    String nonce8BytesStr = LedgerUtil.getNonceStrByTxHash(tx);
+                    String nonce8BytesStr = LedgerUtil.getNonceEncodeByTx(tx);
                     List<CoinFrom> froms = coinData.getFrom();
                     for (CoinFrom from : froms) {
                         if (LedgerUtil.isNotLocalChainAccount(addressChainId, from.getAddress())) {
@@ -382,7 +381,7 @@ public class TransactionServiceImpl implements TransactionService {
         }
         List<CoinFrom> froms = coinData.getFrom();
         String txHash = transaction.getHash().toString();
-        String rollNonce = LedgerUtil.getNonceStrByTxHash(txHash);
+        String rollNonce = LedgerUtil.getNonceEncodeByTxHash(txHash);
         boolean hadRoll = false;
         for (CoinFrom from : froms) {
             if (LedgerUtil.isNotLocalChainAccount(addressChainId, from.getAddress())) {

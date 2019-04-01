@@ -128,7 +128,7 @@ public class CmdWrongDataTest {
         coinData.setTo(coinTos);
         tx.setCoinData(coinData.serialize());
         params.put("chainId", TestConfig.chainId);
-        params.put("txHex",RPCUtil.encode(tx.serialize()));
+        params.put("tx",RPCUtil.encode(tx.serialize()));
         params.put("isBatchValidate",true);
         Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.LG.abbr, "validateCoinData", params);
         logger.info("response {}", response);

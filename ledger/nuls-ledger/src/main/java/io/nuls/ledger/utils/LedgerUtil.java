@@ -6,8 +6,8 @@ import io.nuls.ledger.config.LedgerConfig;
 import io.nuls.ledger.constant.LedgerConstant;
 import io.nuls.ledger.model.po.UnconfirmedAmount;
 import io.nuls.ledger.model.po.UnconfirmedNonce;
-import io.nuls.rpc.util.RPCUtil;
 import io.nuls.tools.core.ioc.SpringLiteContext;
+import io.nuls.tools.crypto.HexUtil;
 
 import java.io.UnsupportedEncodingException;
 
@@ -87,21 +87,26 @@ public class LedgerUtil {
         return assetKey+ "-"+height;
     }
 
-
-    public static String getNonceStrByTxHash(Transaction tx){
+    public static byte[] getNonceDecode(String nonceStr){
+        return HexUtil.decode(nonceStr);
+    }
+    public static String getNonceEncode(byte []nonce){
+        return HexUtil.encode(nonce);
+    }
+    public static String getNonceEncodeByTx(Transaction tx){
         byte[] out = new byte[8];
         byte [] in = tx.getHash().getDigestBytes();
         int copyEnd = in.length;
         System.arraycopy(in,  (copyEnd-8), out, 0, 8);
-        String nonce8BytesStr = RPCUtil.encode(out);
+        String nonce8BytesStr = HexUtil.encode(out);
         return nonce8BytesStr;
     }
-    public static String getNonceStrByTxHash(String txHash){
+    public static String getNonceEncodeByTxHash(String txHash){
         byte[] out = new byte[8];
-        byte [] in = RPCUtil.decode(txHash);
+        byte [] in = HexUtil.decode(txHash);
         int copyEnd = in.length;
         System.arraycopy(in,  (copyEnd-8), out, 0, 8);
-        String nonce8BytesStr = RPCUtil.encode(out);
+        String nonce8BytesStr = HexUtil.encode(out);
         return nonce8BytesStr;
     }
 

@@ -31,11 +31,13 @@ import io.nuls.ledger.model.po.FreezeHeightState;
 import io.nuls.ledger.model.po.FreezeLockTimeState;
 import io.nuls.ledger.model.po.UnconfirmedNonce;
 import io.nuls.ledger.service.AccountStateService;
+import io.nuls.ledger.utils.LedgerUtil;
 import io.nuls.ledger.utils.LoggerUtil;
 import io.nuls.rpc.cmd.BaseCmd;
 import io.nuls.rpc.model.CmdAnnotation;
 import io.nuls.rpc.model.Parameter;
 import io.nuls.rpc.model.message.Response;
+import io.nuls.rpc.util.RPCUtil;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.model.StringUtils;
@@ -123,10 +125,10 @@ public class AccountStateCmd extends BaseCmd {
         Map<String, Object> rtMap = new HashMap<>();
         String unconfirmedNonce = accountState.getLatestUnconfirmedNonce();
         if (StringUtils.isNotBlank(unconfirmedNonce)) {
-            rtMap.put("nonce", unconfirmedNonce);
+            rtMap.put("nonce", RPCUtil.encode(LedgerUtil.getNonceDecode(unconfirmedNonce)));
             rtMap.put("nonceType", LedgerConstant.UNCONFIRMED_NONCE);
         } else {
-            rtMap.put("nonce", accountState.getNonce());
+            rtMap.put("nonce",  RPCUtil.encode(LedgerUtil.getNonceDecode(accountState.getNonce())));
             rtMap.put("nonceType", LedgerConstant.CONFIRMED_NONCE);
         }
 
@@ -150,10 +152,10 @@ public class AccountStateCmd extends BaseCmd {
         Map<String, Object> rtMap = new HashMap<>();
         List<UnconfirmedNonce> unconfirmedNonces = accountState.getUnconfirmedNonces();
         if (unconfirmedNonces.size() > 0) {
-            rtMap.put("nonce", accountState.getLatestUnconfirmedNonce());
+            rtMap.put("nonce",  RPCUtil.encode(LedgerUtil.getNonceDecode(accountState.getLatestUnconfirmedNonce())));
             rtMap.put("nonceType", LedgerConstant.UNCONFIRMED_NONCE);
         } else {
-            rtMap.put("nonce", accountState.getNonce());
+            rtMap.put("nonce",  RPCUtil.encode(LedgerUtil.getNonceDecode(accountState.getNonce())));
             rtMap.put("nonceType", LedgerConstant.CONFIRMED_NONCE);
         }
         if (accountState.getUnconfirmedAmounts().size() > 0) {

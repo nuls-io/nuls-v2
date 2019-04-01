@@ -123,7 +123,7 @@ public class CmdUnconfirmedTxTest {
     Transaction buildUnLockedTimeTransaction(String fromAddr, String toAddr, BigInteger tranAmount) throws Exception {
         //封装交易执行
         String hash = "00202f4c51b04d06b338e9917e99ecb4dfe3b02147e7f206a4c3b3aaf7a1dd86aea1";
-        String unLockNonce = LedgerUtil.getNonceStrByTxHash(hash);
+        String unLockNonce = LedgerUtil.getNonceEncodeByTxHash(hash);
         Transaction tx = new Transaction();
         CoinData coinData = new CoinData();
         CoinFrom coinFrom = new CoinFrom();

@@ -31,6 +31,7 @@ import io.nuls.base.data.CoinFrom;
 import io.nuls.base.data.CoinTo;
 import io.nuls.base.data.Transaction;
 import io.nuls.ledger.test.constant.TestConfig;
+import io.nuls.ledger.utils.LedgerUtil;
 import io.nuls.rpc.info.NoUse;
 import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.model.message.Response;
@@ -62,8 +63,8 @@ public class CmdTest {
     @Test
     public void lg_getBalance() throws Exception {
        String nonce = "ffffffff";
-       System.out.println(RPCUtil.decode(nonce));
-       System.out.println(RPCUtil.encode(RPCUtil.decode(nonce)));
+       System.out.println(LedgerUtil.getNonceDecode(nonce));
+       System.out.println(RPCUtil.encode(LedgerUtil.getNonceDecode(nonce)));
     }
     @Test
     public void getBalance() throws Exception {
