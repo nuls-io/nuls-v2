@@ -4,8 +4,6 @@ import io.nuls.contract.manager.ContractTokenBalanceManager;
 import io.nuls.contract.manager.ContractTxCreateUnconfirmedManager;
 import io.nuls.contract.model.bo.config.ConfigBean;
 import io.nuls.contract.vm.program.ProgramExecutor;
-import lombok.Getter;
-import lombok.Setter;
 import org.ethereum.config.CommonConfig;
 import org.ethereum.config.DefaultConfig;
 
@@ -16,8 +14,6 @@ import org.ethereum.config.DefaultConfig;
  * @author: PierreLuo
  * @date: 2019-02-26
  */
-@Getter
-@Setter
 public class Chain {
 
     /**
@@ -56,4 +52,59 @@ public class Chain {
         return config.getChainId();
     }
 
+    public ConfigBean getConfig() {
+        return config;
+    }
+
+    public void setConfig(ConfigBean config) {
+        this.config = config;
+    }
+
+    public ProgramExecutor getProgramExecutor() {
+        return programExecutor;
+    }
+
+    public void setProgramExecutor(ProgramExecutor programExecutor) {
+        this.programExecutor = programExecutor;
+    }
+
+    public CommonConfig getCommonConfig() {
+        return commonConfig;
+    }
+
+    public void setCommonConfig(CommonConfig commonConfig) {
+        this.commonConfig = commonConfig;
+    }
+
+    public DefaultConfig getDefaultConfig() {
+        return defaultConfig;
+    }
+
+    public void setDefaultConfig(DefaultConfig defaultConfig) {
+        this.defaultConfig = defaultConfig;
+    }
+
+    public ContractTokenBalanceManager getContractTokenBalanceManager() {
+        return contractTokenBalanceManager;
+    }
+
+    public void setContractTokenBalanceManager(ContractTokenBalanceManager contractTokenBalanceManager) {
+        this.contractTokenBalanceManager = contractTokenBalanceManager;
+    }
+
+    public ContractTxCreateUnconfirmedManager getContractTxCreateUnconfirmedManager() {
+        return contractTxCreateUnconfirmedManager;
+    }
+
+    public void setContractTxCreateUnconfirmedManager(ContractTxCreateUnconfirmedManager contractTxCreateUnconfirmedManager) {
+        this.contractTxCreateUnconfirmedManager = contractTxCreateUnconfirmedManager;
+    }
+
+    public BatchInfo getBatchInfo() {
+        return batchInfo;
+    }
+
+    public void setBatchInfo(BatchInfo batchInfo) {
+        this.batchInfo = batchInfo;
+    }
 }

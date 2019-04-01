@@ -28,8 +28,6 @@ package io.nuls.contract.model.dto;
 
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.CoinTo;
-import lombok.Getter;
-import lombok.Setter;
 
 import static io.nuls.contract.util.ContractUtil.bigInteger2String;
 
@@ -37,8 +35,6 @@ import static io.nuls.contract.util.ContractUtil.bigInteger2String;
  * @author: PierreLuo
  * @date: 2019-03-14
  */
-@Getter
-@Setter
 public class OutputDto {
 
     private String address;
@@ -53,5 +49,45 @@ public class OutputDto {
         this.assetsId = to.getAssetsId();
         this.amount = bigInteger2String(to.getAmount());
         this.lockTime = to.getLockTime();
+    }
+
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
+    }
+
+    public int getAssetsChainId() {
+        return assetsChainId;
+    }
+
+    public void setAssetsChainId(int assetsChainId) {
+        this.assetsChainId = assetsChainId;
+    }
+
+    public int getAssetsId() {
+        return assetsId;
+    }
+
+    public void setAssetsId(int assetsId) {
+        this.assetsId = assetsId;
+    }
+
+    public String getAmount() {
+        return amount;
+    }
+
+    public void setAmount(String amount) {
+        this.amount = amount;
+    }
+
+    public long getLockTime() {
+        return lockTime;
+    }
+
+    public void setLockTime(long lockTime) {
+        this.lockTime = lockTime;
     }
 }

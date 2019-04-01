@@ -34,8 +34,6 @@ import io.nuls.contract.vm.program.*;
 import io.nuls.tools.basic.Result;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
-import lombok.Getter;
-import lombok.Setter;
 
 import java.math.BigInteger;
 import java.util.List;
@@ -46,8 +44,6 @@ import java.util.stream.Collectors;
  * @author: PierreLuo
  * @date: 2019/1/7
  */
-@Getter
-@Setter
 @Component
 public class ContractExecutorImpl implements ContractExecutor {
 

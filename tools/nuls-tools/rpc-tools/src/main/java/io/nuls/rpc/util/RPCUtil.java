@@ -24,12 +24,14 @@
  */
 package io.nuls.rpc.util;
 
+import io.nuls.tools.crypto.HexUtil;
+
 public class RPCUtil {
     public static String encode(byte[] src) {
-        return (src == null) ? null : java.util.Base64.getEncoder().encodeToString(src);
+        return (src == null) ? null :HexUtil.encode(src);
     }
 
     public static byte[] decode(String src) {
-        return (src == null) ? null : java.util.Base64.getDecoder().decode(src);
+        return (src == null) ? null : HexUtil.decode(src);
     }
 }

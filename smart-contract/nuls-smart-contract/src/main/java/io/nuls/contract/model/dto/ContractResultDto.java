@@ -33,8 +33,6 @@ import io.nuls.contract.util.ContractUtil;
 import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.model.LongUtils;
-import lombok.Getter;
-import lombok.Setter;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -46,8 +44,6 @@ import static io.nuls.contract.util.ContractUtil.bigInteger2String;
 /**
  * @author: PierreLuo
  */
-@Getter
-@Setter
 public class ContractResultDto {
 
     private boolean success;
@@ -164,4 +160,135 @@ public class ContractResultDto {
         }
     }
 
+    public boolean isSuccess() {
+        return success;
+    }
+
+    public void setSuccess(boolean success) {
+        this.success = success;
+    }
+
+    public String getErrorMessage() {
+        return errorMessage;
+    }
+
+    public void setErrorMessage(String errorMessage) {
+        this.errorMessage = errorMessage;
+    }
+
+    public String getContractAddress() {
+        return contractAddress;
+    }
+
+    public void setContractAddress(String contractAddress) {
+        this.contractAddress = contractAddress;
+    }
+
+    public String getResult() {
+        return result;
+    }
+
+    public void setResult(String result) {
+        this.result = result;
+    }
+
+    public long getGasLimit() {
+        return gasLimit;
+    }
+
+    public void setGasLimit(long gasLimit) {
+        this.gasLimit = gasLimit;
+    }
+
+    public long getGasUsed() {
+        return gasUsed;
+    }
+
+    public void setGasUsed(long gasUsed) {
+        this.gasUsed = gasUsed;
+    }
+
+    public long getPrice() {
+        return price;
+    }
+
+    public void setPrice(long price) {
+        this.price = price;
+    }
+
+    public String getTotalFee() {
+        return totalFee;
+    }
+
+    public void setTotalFee(String totalFee) {
+        this.totalFee = totalFee;
+    }
+
+    public String getTxSizeFee() {
+        return txSizeFee;
+    }
+
+    public void setTxSizeFee(String txSizeFee) {
+        this.txSizeFee = txSizeFee;
+    }
+
+    public String getActualContractFee() {
+        return actualContractFee;
+    }
+
+    public void setActualContractFee(String actualContractFee) {
+        this.actualContractFee = actualContractFee;
+    }
+
+    public String getRefundFee() {
+        return refundFee;
+    }
+
+    public void setRefundFee(String refundFee) {
+        this.refundFee = refundFee;
+    }
+
+    public String getStateRoot() {
+        return stateRoot;
+    }
+
+    public void setStateRoot(String stateRoot) {
+        this.stateRoot = stateRoot;
+    }
+
+    public String getValue() {
+        return value;
+    }
+
+    public void setValue(String value) {
+        this.value = value;
+    }
+
+    public String getStackTrace() {
+        return stackTrace;
+    }
+
+    public void setStackTrace(String stackTrace) {
+        this.stackTrace = stackTrace;
+    }
+
+    public void setTransfers(List<ContractMergedTransferDto> transfers) {
+        this.transfers = transfers;
+    }
+
+    public List<String> getEvents() {
+        return events;
+    }
+
+    public void setEvents(List<String> events) {
+        this.events = events;
+    }
+
+    public String getRemark() {
+        return remark;
+    }
+
+    public void setRemark(String remark) {
+        this.remark = remark;
+    }
 }
