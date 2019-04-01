@@ -8,7 +8,7 @@
     "commissionRateMin":10,
     "commissionRateMax":100,
     "depositMin":2000000000000,
-    "depositMax":50000000000000,
+    "depositMax":20000000000000,
     "commissionMin":20000000000000,
     "commissionMax":50000000000000,
     "entrusterDepositMin":200000000000,
