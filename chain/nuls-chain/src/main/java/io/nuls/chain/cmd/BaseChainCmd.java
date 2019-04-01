@@ -103,7 +103,7 @@ public class BaseChainCmd extends BaseCmd {
         coinData.addTo(to2);
         txSize += to2.size();
         //手续费
-        CoinFrom from = new CoinFrom(address, chainId, assetsId, new BigDecimal(amount).toBigInteger(), ByteUtils.copyOf(accountBalance.getNonce().getBytes(), 8), (byte) 0);
+        CoinFrom from = new CoinFrom(address, chainId, assetsId, new BigDecimal(amount).toBigInteger(), accountBalance.getNonce(), (byte) 0);
         txSize += from.size();
         BigInteger fee = TransactionFeeCalculator.getNormalTxFee(txSize);
         String fromAmount = BigIntegerUtils.addToString(amount, fee.toString());
