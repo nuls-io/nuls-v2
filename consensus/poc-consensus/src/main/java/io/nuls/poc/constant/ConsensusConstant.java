@@ -3,6 +3,7 @@ package io.nuls.poc.constant;
 import java.math.BigInteger;
 
 /**
+ * 共识模块常量类
  * @author tag
  * 2018/11/6
  * */

@@ -1,4 +1,4 @@
-package io.nuls.poc.config;
+package io.nuls.poc.constant;
 
 import io.nuls.poc.model.bo.config.ConfigBean;
 import io.nuls.tools.core.annotation.Configuration;
@@ -9,6 +9,7 @@ import java.io.File;
 /**
  * 共识模块配置类
  * @author tag
+ * @date 2019-03-26
  * */
 @Configuration(persistDomain = "consensus")
 public class ConsensusConfig {
@@ -38,6 +39,10 @@ public class ConsensusConfig {
     /** 编码*/
     private String encoding;
 
+    /**
+     * 跨链交易手续费主链收取手续费比例
+     * Cross-Chain Transaction Fee Proportion of Main Chain Fee Collection
+     * */
     private int mainChainCommissionRatio;
 
 

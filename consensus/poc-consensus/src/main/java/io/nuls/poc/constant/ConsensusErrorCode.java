@@ -3,6 +3,7 @@ package io.nuls.poc.constant;
 import io.nuls.tools.constant.ErrorCode;
 
 /**
+ * 共识模块错误码对应类
  * @author tag
  * 2018/11/12
  * */
