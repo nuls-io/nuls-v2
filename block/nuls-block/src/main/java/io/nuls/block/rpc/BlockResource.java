@@ -36,6 +36,7 @@ import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.model.CmdAnnotation;
 import io.nuls.rpc.model.Parameter;
 import io.nuls.rpc.model.message.Response;
+import io.nuls.rpc.util.RPCUtil;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.crypto.HexUtil;
@@ -96,7 +97,7 @@ public class BlockResource extends BaseCmd {
                 return success(null);
             }
             BlockHeader blockHeader = service.getLatestBlockHeader(chainId);
-            return success(HexUtil.encode(blockHeader.serialize()));
+            return success(RPCUtil.encode(blockHeader.serialize()));
         } catch (Exception e) {
             e.printStackTrace();
             commonLog.error(e);
@@ -120,7 +121,7 @@ public class BlockResource extends BaseCmd {
                 return success(null);
             }
             Block block = service.getLatestBlock(chainId);
-            return success(HexUtil.encode(block.serialize()));
+            return success(RPCUtil.encode(block.serialize()));
         } catch (Exception e) {
             e.printStackTrace();
             commonLog.error(e);
@@ -147,7 +148,7 @@ public class BlockResource extends BaseCmd {
             Long height = Long.parseLong(map.get("height").toString());
             BlockHeaderPo po = service.getBlockHeader(chainId, height);
             BlockHeader blockHeader = BlockUtil.fromBlockHeaderPo(po);
-            return success(HexUtil.encode(blockHeader.serialize()));
+            return success(RPCUtil.encode(blockHeader.serialize()));
         } catch (Exception e) {
             e.printStackTrace();
             commonLog.error(e);
@@ -178,7 +179,7 @@ public class BlockResource extends BaseCmd {
             List<BlockHeader> blockHeaders = service.getBlockHeader(chainId, startHeight, latestHeight);
             List<String> hexList = new ArrayList<>();
             for (BlockHeader blockHeader : blockHeaders) {
-                hexList.add(HexUtil.encode(blockHeader.serialize()));
+                hexList.add(RPCUtil.encode(blockHeader.serialize()));
             }
             return success(hexList);
         } catch (Exception e) {
@@ -214,7 +215,7 @@ public class BlockResource extends BaseCmd {
             List<String> hexList = new ArrayList<>();
             BlockHeaderPo latestBlockHeader = service.getBlockHeader(chainId, latestHeight);
             if (latestBlockHeader.isComplete()) {
-                hexList.add(HexUtil.encode(latestBlock.getHeader().serialize()));
+                hexList.add(RPCUtil.encode(latestBlock.getHeader().serialize()));
             }
             while (count < round) {
                 latestHeight--;
@@ -228,7 +229,7 @@ public class BlockResource extends BaseCmd {
                     count++;
                     roundIndex = newRoundIndex;
                 }
-                hexList.add(HexUtil.encode(BlockUtil.fromBlockHeaderPo(blockHeader).serialize()));
+                hexList.add(RPCUtil.encode(BlockUtil.fromBlockHeaderPo(blockHeader).serialize()));
             }
             return success(hexList);
         } catch (Exception e) {
@@ -260,7 +261,7 @@ public class BlockResource extends BaseCmd {
             List<BlockHeader> blockHeaders = service.getBlockHeader(chainId, startHeight, endheight);
             List<String> hexList = new ArrayList<>();
             for (BlockHeader blockHeader : blockHeaders) {
-                hexList.add(HexUtil.encode(blockHeader.serialize()));
+                hexList.add(RPCUtil.encode(blockHeader.serialize()));
             }
             return success(hexList);
         } catch (Exception e) {
@@ -291,7 +292,7 @@ public class BlockResource extends BaseCmd {
             if(block == null) {
                 return success(null);
             }
-            return success(HexUtil.encode(block.serialize()));
+            return success(RPCUtil.encode(block.serialize()));
         } catch (Exception e) {
             e.printStackTrace();
             commonLog.error(e);
@@ -317,7 +318,7 @@ public class BlockResource extends BaseCmd {
             }
             NulsDigestData hash = NulsDigestData.fromDigestHex(map.get("hash").toString());
             BlockHeader blockHeader = service.getBlockHeader(chainId, hash);
-            return success(HexUtil.encode(blockHeader.serialize()));
+            return success(RPCUtil.encode(blockHeader.serialize()));
         } catch (Exception e) {
             e.printStackTrace();
             commonLog.error(e);
@@ -343,7 +344,7 @@ public class BlockResource extends BaseCmd {
             }
             NulsDigestData hash = NulsDigestData.fromDigestHex(map.get("hash").toString());
             Block block = service.getBlock(chainId, hash);
-            return success(HexUtil.encode(block.serialize()));
+            return success(RPCUtil.encode(block.serialize()));
         } catch (Exception e) {
             e.printStackTrace();
             commonLog.error(e);

@@ -26,14 +26,12 @@ package io.nuls.contract.config;
 import io.nuls.contract.model.bo.config.ConfigBean;
 import io.nuls.tools.core.annotation.Configuration;
 import io.nuls.tools.core.annotation.Value;
-import lombok.Data;
 
 /**
  * @author: PierreLuo
  * @date: 2019-03-15
  */
 @Configuration(persistDomain = "smart_contract")
-@Data
 public class ContractConfig {
     /**
      * 编码方式
@@ -67,4 +65,92 @@ public class ContractConfig {
 
 
     private ConfigBean chainConfig;
+
+    public String getEncoding() {
+        return encoding;
+    }
+
+    public void setEncoding(String encoding) {
+        this.encoding = encoding;
+    }
+
+    public String getLanguage() {
+        return language;
+    }
+
+    public void setLanguage(String language) {
+        this.language = language;
+    }
+
+    public String getKernelUrl() {
+        return kernelUrl;
+    }
+
+    public void setKernelUrl(String kernelUrl) {
+        this.kernelUrl = kernelUrl;
+    }
+
+    public String getLogFilePath() {
+        return logFilePath;
+    }
+
+    public void setLogFilePath(String logFilePath) {
+        this.logFilePath = logFilePath;
+    }
+
+    public String getLogFileName() {
+        return logFileName;
+    }
+
+    public void setLogFileName(String logFileName) {
+        this.logFileName = logFileName;
+    }
+
+    public String getLogFileLevel() {
+        return logFileLevel;
+    }
+
+    public void setLogFileLevel(String logFileLevel) {
+        this.logFileLevel = logFileLevel;
+    }
+
+    public String getLogConsoleLevel() {
+        return logConsoleLevel;
+    }
+
+    public void setLogConsoleLevel(String logConsoleLevel) {
+        this.logConsoleLevel = logConsoleLevel;
+    }
+
+    public int getMainChainId() {
+        return mainChainId;
+    }
+
+    public void setMainChainId(int mainChainId) {
+        this.mainChainId = mainChainId;
+    }
+
+    public int getMainAssetId() {
+        return mainAssetId;
+    }
+
+    public void setMainAssetId(int mainAssetId) {
+        this.mainAssetId = mainAssetId;
+    }
+
+    public String getDataPath() {
+        return dataPath;
+    }
+
+    public void setDataPath(String dataPath) {
+        this.dataPath = dataPath;
+    }
+
+    public ConfigBean getChainConfig() {
+        return chainConfig;
+    }
+
+    public void setChainConfig(ConfigBean chainConfig) {
+        this.chainConfig = chainConfig;
+    }
 }

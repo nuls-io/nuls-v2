@@ -28,14 +28,10 @@ import io.nuls.base.basic.AddressTool;
 import io.nuls.contract.model.po.ContractTokenTransferInfoPo;
 import io.nuls.contract.util.ContractUtil;
 import io.nuls.tools.crypto.HexUtil;
-import lombok.Getter;
-import lombok.Setter;
 
 /**
  * @author: PierreLuo
  */
-@Getter
-@Setter
 public class ContractTokenTransferTransactionDto {
 
 
@@ -78,5 +74,101 @@ public class ContractTokenTransferTransactionDto {
             return 1;
         }
         return 0;
+    }
+
+    public String getContractAddress() {
+        return contractAddress;
+    }
+
+    public void setContractAddress(String contractAddress) {
+        this.contractAddress = contractAddress;
+    }
+
+    public String getFrom() {
+        return from;
+    }
+
+    public void setFrom(String from) {
+        this.from = from;
+    }
+
+    public String getTo() {
+        return to;
+    }
+
+    public void setTo(String to) {
+        this.to = to;
+    }
+
+    public String getValue() {
+        return value;
+    }
+
+    public void setValue(String value) {
+        this.value = value;
+    }
+
+    public long getTime() {
+        return time;
+    }
+
+    public void setTime(long time) {
+        this.time = time;
+    }
+
+    public byte getStatus() {
+        return status;
+    }
+
+    public void setStatus(byte status) {
+        this.status = status;
+    }
+
+    public String getTxHash() {
+        return txHash;
+    }
+
+    public void setTxHash(String txHash) {
+        this.txHash = txHash;
+    }
+
+    public long getBlockHeight() {
+        return blockHeight;
+    }
+
+    public void setBlockHeight(long blockHeight) {
+        this.blockHeight = blockHeight;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getSymbol() {
+        return symbol;
+    }
+
+    public void setSymbol(String symbol) {
+        this.symbol = symbol;
+    }
+
+    public long getDecimals() {
+        return decimals;
+    }
+
+    public void setDecimals(long decimals) {
+        this.decimals = decimals;
+    }
+
+    public String getInfo() {
+        return info;
+    }
+
+    public void setInfo(String info) {
+        this.info = info;
     }
 }

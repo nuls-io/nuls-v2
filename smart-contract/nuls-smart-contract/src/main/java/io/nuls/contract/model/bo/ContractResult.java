@@ -31,14 +31,12 @@ import io.nuls.contract.model.tx.ContractTransferTransaction;
 import io.nuls.contract.model.txdata.ContractData;
 import io.nuls.contract.vm.program.ProgramTransfer;
 import io.nuls.tools.crypto.HexUtil;
-import lombok.Data;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-@Data
 public class ContractResult {
     private transient ContractWrapperTransaction tx;
     private String hash;
@@ -188,5 +186,241 @@ public class ContractResult {
                 ", isTerminated=" + isTerminated +
                 ", contractAddressInnerCallSet=" + (contractAddressInnerCallSet != null ? contractAddressInnerCallSet.size() : 0) +
                 '}';
+    }
+
+    public ContractWrapperTransaction getTx() {
+        return tx;
+    }
+
+    public void setTx(ContractWrapperTransaction tx) {
+        this.tx = tx;
+    }
+
+    public String getHash() {
+        return hash;
+    }
+
+    public void setHash(String hash) {
+        this.hash = hash;
+    }
+
+    public long getTxTime() {
+        return txTime;
+    }
+
+    public void setTxTime(long txTime) {
+        this.txTime = txTime;
+    }
+
+    public int getTxOrder() {
+        return txOrder;
+    }
+
+    public void setTxOrder(int txOrder) {
+        this.txOrder = txOrder;
+    }
+
+    public long getBlockHeight() {
+        return blockHeight;
+    }
+
+    public void setBlockHeight(long blockHeight) {
+        this.blockHeight = blockHeight;
+    }
+
+    public byte[] getSender() {
+        return sender;
+    }
+
+    public void setSender(byte[] sender) {
+        this.sender = sender;
+    }
+
+    public byte[] getContractAddress() {
+        return contractAddress;
+    }
+
+    public void setContractAddress(byte[] contractAddress) {
+        this.contractAddress = contractAddress;
+    }
+
+    public String getResult() {
+        return result;
+    }
+
+    public void setResult(String result) {
+        this.result = result;
+    }
+
+    public long getGasUsed() {
+        return gasUsed;
+    }
+
+    public void setGasUsed(long gasUsed) {
+        this.gasUsed = gasUsed;
+    }
+
+    public long getPrice() {
+        return price;
+    }
+
+    public void setPrice(long price) {
+        this.price = price;
+    }
+
+    public byte[] getStateRoot() {
+        return stateRoot;
+    }
+
+    public void setStateRoot(byte[] stateRoot) {
+        this.stateRoot = stateRoot;
+    }
+
+    public long getValue() {
+        return value;
+    }
+
+    public void setValue(long value) {
+        this.value = value;
+    }
+
+    public boolean isRevert() {
+        return revert;
+    }
+
+    public void setRevert(boolean revert) {
+        this.revert = revert;
+    }
+
+    public boolean isError() {
+        return error;
+    }
+
+    public void setError(boolean error) {
+        this.error = error;
+    }
+
+    public String getErrorMessage() {
+        return errorMessage;
+    }
+
+    public void setErrorMessage(String errorMessage) {
+        this.errorMessage = errorMessage;
+    }
+
+    public String getStackTrace() {
+        return stackTrace;
+    }
+
+    public void setStackTrace(String stackTrace) {
+        this.stackTrace = stackTrace;
+    }
+
+    public boolean isAcceptDirectTransfer() {
+        return acceptDirectTransfer;
+    }
+
+    public void setAcceptDirectTransfer(boolean acceptDirectTransfer) {
+        this.acceptDirectTransfer = acceptDirectTransfer;
+    }
+
+    public boolean isNrc20() {
+        return isNrc20;
+    }
+
+    public void setNrc20(boolean nrc20) {
+        isNrc20 = nrc20;
+    }
+
+    public String getTokenName() {
+        return tokenName;
+    }
+
+    public void setTokenName(String tokenName) {
+        this.tokenName = tokenName;
+    }
+
+    public String getTokenSymbol() {
+        return tokenSymbol;
+    }
+
+    public void setTokenSymbol(String tokenSymbol) {
+        this.tokenSymbol = tokenSymbol;
+    }
+
+    public int getTokenDecimals() {
+        return tokenDecimals;
+    }
+
+    public void setTokenDecimals(int tokenDecimals) {
+        this.tokenDecimals = tokenDecimals;
+    }
+
+    public BigInteger getTokenTotalSupply() {
+        return tokenTotalSupply;
+    }
+
+    public void setTokenTotalSupply(BigInteger tokenTotalSupply) {
+        this.tokenTotalSupply = tokenTotalSupply;
+    }
+
+    public List<ProgramTransfer> getTransfers() {
+        return transfers;
+    }
+
+    public void setTransfers(List<ProgramTransfer> transfers) {
+        this.transfers = transfers;
+    }
+
+    public List<ContractMergedTransfer> getMergedTransferList() {
+        return mergedTransferList;
+    }
+
+    public void setMergedTransferList(List<ContractMergedTransfer> mergedTransferList) {
+        this.mergedTransferList = mergedTransferList;
+    }
+
+    public List<ContractTransferTransaction> getContractTransferList() {
+        return contractTransferList;
+    }
+
+    public void setContractTransferList(List<ContractTransferTransaction> contractTransferList) {
+        this.contractTransferList = contractTransferList;
+    }
+
+    public List<String> getEvents() {
+        return events;
+    }
+
+    public void setEvents(List<String> events) {
+        this.events = events;
+    }
+
+    public String getRemark() {
+        return remark;
+    }
+
+    public void setRemark(String remark) {
+        this.remark = remark;
+    }
+
+    public boolean isTerminated() {
+        return isTerminated;
+    }
+
+    public void setTerminated(boolean terminated) {
+        isTerminated = terminated;
+    }
+
+    public Set<String> getContractAddressInnerCallSet() {
+        return contractAddressInnerCallSet;
+    }
+
+    public void setContractAddressInnerCallSet(Set<String> contractAddressInnerCallSet) {
+        this.contractAddressInnerCallSet = contractAddressInnerCallSet;
+    }
+
+    public void setTxTrack(Object txTrack) {
+        this.txTrack = txTrack;
     }
 }

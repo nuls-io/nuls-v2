@@ -102,16 +102,16 @@ public class Result<T> implements Serializable {
     public String toString() {
         StringBuffer buffer = new StringBuffer();
         buffer.append("result:{");
-        buffer.append("\"success\": " + success + ",");
-        buffer.append("\"msg\": \"" + msg + "\",");
+        buffer.append("\"success\": ").append(success).append(",");
+        buffer.append("\"msg\": \"").append(msg).append("\",");
         if (errorCode == null) {
             buffer.append("\"errorCode\": \"\",");
         } else {
-            buffer.append("\"errorCode\": \"" + errorCode.getCode() + "\",");
+            buffer.append("\"errorCode\": \"").append(errorCode.getCode()).append("\",");
         }
         if (data != null) {
             try {
-                buffer.append("\"entity\":" + JSONUtils.obj2json(data));
+                buffer.append("\"entity\":").append(JSONUtils.obj2json(data));
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -125,8 +125,7 @@ public class Result<T> implements Serializable {
     }
 
     public static Result getFailed(ErrorCode errorCode) {
-        Result result = new Result(false, errorCode, null);
-        return result;
+        return new Result(false, errorCode, null);
     }
 
     public T getData() {

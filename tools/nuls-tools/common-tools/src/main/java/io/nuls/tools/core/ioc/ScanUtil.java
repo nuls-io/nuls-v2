@@ -46,9 +46,9 @@ import java.util.jar.JarFile;
 public class ScanUtil {
     private static final ClassLoader CLASS_LOADER = ScanUtil.class.getClassLoader();
 
-    public static final String FILE_TYPE = "file";
-    public static final String JAR_TYPE = "jar";
-    public static final String CLASS_TYPE = ".class";
+    private static final String FILE_TYPE = "file";
+    private static final String JAR_TYPE = "jar";
+    private static final String CLASS_TYPE = ".class";
 
     /**
      * 扫描执行包名称下的所有类型
@@ -126,9 +126,7 @@ public class ScanUtil {
             if (!jarEntryName.contains(packageName) || jarEntryName.equals(packageName + "/")) {
                 continue;
             }
-            if (jarEntry.isDirectory()) {
-                continue;
-            } else if (jarEntryName.endsWith(CLASS_TYPE)) {
+            if (jarEntryName.endsWith(CLASS_TYPE)) {
                 Class<?> clazz;
                 try {
                     String className = jarEntry.getName().replace("/", ".").replace(CLASS_TYPE, "");
@@ -152,7 +150,7 @@ public class ScanUtil {
         private List<Class> list;
         private String packageName;
 
-        public LocalFileFilter(String packageName, List<Class> list) {
+        LocalFileFilter(String packageName, List<Class> list) {
             this.list = list;
             this.packageName = packageName;
         }

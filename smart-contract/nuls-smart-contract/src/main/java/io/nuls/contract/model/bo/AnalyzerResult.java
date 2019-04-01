@@ -23,9 +23,6 @@
  */
 package io.nuls.contract.model.bo;
 
-import lombok.Getter;
-import lombok.Setter;
-
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -35,8 +32,6 @@ import java.util.Set;
  * @author: PierreLuo
  * @date: 2018/11/19
  */
-@Getter
-@Setter
 public class AnalyzerResult {
 
     private List<ContractResult> reCallTxList;
@@ -55,4 +50,27 @@ public class AnalyzerResult {
         this.failedSet = new HashSet<>();
     }
 
+    public List<ContractResult> getReCallTxList() {
+        return reCallTxList;
+    }
+
+    public void setReCallTxList(List<ContractResult> reCallTxList) {
+        this.reCallTxList = reCallTxList;
+    }
+
+    public List<ContractResult> getSuccessList() {
+        return successList;
+    }
+
+    public void setSuccessList(List<ContractResult> successList) {
+        this.successList = successList;
+    }
+
+    public Set<ContractResult> getFailedSet() {
+        return failedSet;
+    }
+
+    public void setFailedSet(Set<ContractResult> failedSet) {
+        this.failedSet = failedSet;
+    }
 }

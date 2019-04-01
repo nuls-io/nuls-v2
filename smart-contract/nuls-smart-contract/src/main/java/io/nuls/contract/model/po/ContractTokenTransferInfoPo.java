@@ -25,9 +25,6 @@
 
 package io.nuls.contract.model.po;
 
-import lombok.Getter;
-import lombok.Setter;
-
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -37,8 +34,6 @@ import java.util.Arrays;
  * @author: PierreLuo
  * @date: 2018/7/23
  */
-@Getter
-@Setter
 public class ContractTokenTransferInfoPo implements Serializable {
 
     private byte[] txHash;
@@ -85,4 +80,91 @@ public class ContractTokenTransferInfoPo implements Serializable {
         return 0;
     }
 
+    public byte[] getTxHash() {
+        return txHash;
+    }
+
+    public void setTxHash(byte[] txHash) {
+        this.txHash = txHash;
+    }
+
+    public byte[] getFrom() {
+        return from;
+    }
+
+    public void setFrom(byte[] from) {
+        this.from = from;
+    }
+
+    public byte[] getTo() {
+        return to;
+    }
+
+    public void setTo(byte[] to) {
+        this.to = to;
+    }
+
+    public BigInteger getValue() {
+        return value;
+    }
+
+    public void setValue(BigInteger value) {
+        this.value = value;
+    }
+
+    public String getContractAddress() {
+        return contractAddress;
+    }
+
+    public void setContractAddress(String contractAddress) {
+        this.contractAddress = contractAddress;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getSymbol() {
+        return symbol;
+    }
+
+    public void setSymbol(String symbol) {
+        this.symbol = symbol;
+    }
+
+    public long getDecimals() {
+        return decimals;
+    }
+
+    public void setDecimals(long decimals) {
+        this.decimals = decimals;
+    }
+
+    public long getBlockHeight() {
+        return blockHeight;
+    }
+
+    public void setBlockHeight(long blockHeight) {
+        this.blockHeight = blockHeight;
+    }
+
+    public long getTime() {
+        return time;
+    }
+
+    public void setTime(long time) {
+        this.time = time;
+    }
+
+    public byte getStatus() {
+        return status;
+    }
+
+    public void setStatus(byte status) {
+        this.status = status;
+    }
 }

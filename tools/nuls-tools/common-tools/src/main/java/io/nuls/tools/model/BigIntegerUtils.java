@@ -35,7 +35,7 @@ public class BigIntegerUtils {
         String value = bigInteger.toString();
         int length = size - value.length();
         if (length > 0) {
-            StringBuffer buffer = new StringBuffer("");
+            StringBuilder buffer = new StringBuilder();
             for (int i = 0; i < length; i++) {
                 buffer.append(0);
             }
@@ -163,70 +163,46 @@ public class BigIntegerUtils {
      * 第一个是等于第二个数
      */
     public static boolean isEqual(String str1, String str2) {
-        if (compare(str1, str2) == 0) {
-            return true;
-        }
-        return false;
+        return compare(str1, str2) == 0;
     }
 
     public static boolean isEqual(BigInteger b1, BigInteger b2) {
-        if (b1.compareTo(b2) == 0) {
-            return true;
-        }
-        return false;
+        return b1.compareTo(b2) == 0;
     }
 
     /**
      * 第一个是小于第二个数
      */
     public static boolean isLessThan(String str1, String str2) {
-        if (compare(str1, str2) >= 0) {
-            return false;
-        }
-        return true;
+        return compare(str1, str2) < 0;
     }
 
     public static boolean isLessThan(BigInteger b1, BigInteger b2) {
-        if (b1.compareTo(b2) >= 0) {
-            return false;
-        }
-        return true;
+        return b1.compareTo(b2) < 0;
     }
 
     /**
      * 第一个是大于第二个数
      */
     public static boolean isGreaterThan(String str1, String str2) {
-        if (compare(str1, str2) <= 0) {
-            return false;
-        }
-        return true;
+        return compare(str1, str2) > 0;
     }
 
     public static boolean isGreaterThan(BigInteger b1, BigInteger b2) {
-        if (b1.compareTo(b2) <= 0) {
-            return false;
-        }
-        return true;
+        return b1.compareTo(b2) > 0;
     }
 
     /**
      * 第一个是大于等于第二个数
      */
     public static boolean isEqualOrGreaterThan(BigInteger b1, BigInteger b2) {
-        if (b1.compareTo(b2) < 0) {
-            return false;
-        }
-        return true;
+        return b1.compareTo(b2) >= 0;
     }
 
     /**
      * 第一个小于等于第二个数
      */
     public static boolean isEqualOrLessThan(BigInteger b1, BigInteger b2) {
-        if (b1.compareTo(b2) > 0) {
-            return false;
-        }
-        return true;
+        return b1.compareTo(b2) <= 0;
     }
 }

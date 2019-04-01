@@ -26,13 +26,11 @@ package io.nuls.contract.model.bo;
 import io.nuls.base.data.BlockHeader;
 import io.nuls.base.data.Transaction;
 import io.nuls.contract.model.txdata.ContractData;
-import lombok.Data;
 
 /**
  * @author: PierreLuo
  * @date: 2019-02-27
  */
-@Data
 public class ContractWrapperTransaction extends Transaction {
 
     private String txHex;
@@ -61,5 +59,45 @@ public class ContractWrapperTransaction extends Transaction {
         this.setTime(tx.getTime());
         this.setTransactionSignature(tx.getTransactionSignature());
         this.setRemark(tx.getRemark());
+    }
+
+    public String getTxHex() {
+        return txHex;
+    }
+
+    public void setTxHex(String txHex) {
+        this.txHex = txHex;
+    }
+
+    public ContractResult getContractResult() {
+        return contractResult;
+    }
+
+    public void setContractResult(ContractResult contractResult) {
+        this.contractResult = contractResult;
+    }
+
+    public ContractData getContractData() {
+        return contractData;
+    }
+
+    public void setContractData(ContractData contractData) {
+        this.contractData = contractData;
+    }
+
+    public int getOrder() {
+        return order;
+    }
+
+    public void setOrder(int order) {
+        this.order = order;
+    }
+
+    public BlockHeader getBlockHeader() {
+        return blockHeader;
+    }
+
+    public void setBlockHeader(BlockHeader blockHeader) {
+        this.blockHeader = blockHeader;
     }
 }
