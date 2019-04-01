@@ -8,7 +8,9 @@ import io.nuls.poc.constant.ConsensusErrorCode;
 import io.nuls.poc.model.bo.Chain;
 import io.nuls.poc.model.bo.tx.txdata.Agent;
 import io.nuls.poc.model.bo.tx.txdata.Deposit;
-import io.nuls.poc.utils.CallMethodUtils;
+
+import io.nuls.poc.rpc.call.CallMethodUtils;
+import io.nuls.rpc.util.RPCUtil;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.model.BigIntegerUtils;
@@ -46,7 +48,7 @@ public class CoinDataManager {
         coinData.addTo(to);
         txSize += to.size();
         Map<String,Object> result = CallMethodUtils.getBalanceAndNonce(chain, AddressTool.getStringAddressByBytes(address));
-        byte[] nonce = HexUtil.decode((String)result.get("nonce"));
+        byte[] nonce = RPCUtil.decode((String)result.get("nonce"));
         BigInteger available = new BigInteger(result.get("available").toString());
         //手续费
         CoinFrom from = new CoinFrom(address,chain.getConfig().getChainId(),chain.getConfig().getAssetsId(),amount,nonce, (byte)0);

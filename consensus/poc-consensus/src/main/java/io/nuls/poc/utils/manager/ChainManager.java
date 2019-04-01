@@ -9,7 +9,7 @@ import io.nuls.poc.model.bo.Chain;
 import io.nuls.poc.model.bo.config.ConfigBean;
 import io.nuls.poc.model.bo.tx.TxRegisterDetail;
 import io.nuls.poc.storage.ConfigService;
-import io.nuls.poc.utils.CallMethodUtils;
+import io.nuls.poc.rpc.call.CallMethodUtils;
 import io.nuls.poc.utils.annotation.ResisterTx;
 import io.nuls.poc.utils.enumeration.TxMethodType;
 import io.nuls.poc.utils.enumeration.TxProperty;
@@ -50,8 +50,6 @@ public class ChainManager {
     private RoundManager roundManager;
     @Autowired
     private SchedulerManager schedulerManager;
-    @Autowired
-    private BlockManager blockManager;
     @Autowired
     private ConsensusConfig config;
     private Map<Integer, Chain> chainMap = new ConcurrentHashMap<>();
@@ -298,7 +296,7 @@ public class ChainManager {
      */
     private void initCache(Chain chain) {
         try {
-            blockManager.loadBlockHeader(chain);
+            CallMethodUtils.loadBlockHeader(chain);
             agentManager.loadAgents(chain);
             depositManager.loadDeposits(chain);
             punishManager.loadPunishes(chain);
