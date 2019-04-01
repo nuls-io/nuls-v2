@@ -41,7 +41,6 @@ import io.nuls.rpc.modulebootstrap.RpcModule;
 import io.nuls.rpc.modulebootstrap.RpcModuleState;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
-import io.nuls.tools.core.annotation.Configuration;
 import io.nuls.tools.core.ioc.SpringLiteContext;
 import io.nuls.tools.parse.I18nUtils;
 
@@ -147,7 +146,6 @@ public class NetworkBootstrap extends RpcModule {
     @Override
     public boolean doStart() {
         Log.debug("doStart begin=========");
-        LoggerUtil.Log.info("NW doStart 1");
         try {
             NodeGroupManager.getInstance().start();
 //            RpcManager.getInstance().start();
@@ -156,7 +154,6 @@ public class NetworkBootstrap extends RpcModule {
             System.exit(-1);
         }
         Log.debug("doStart end=========");
-        LoggerUtil.Log.info("NW doStart 2");
         return true;
     }
 
