@@ -423,12 +423,13 @@ public class CoinDataValidator {
      * @param tx
      * @return
      */
-    public ValidateResult validateCoinData(int addressChainId, Transaction tx) {
+    public ValidateResult validateCoinData(int addressChainId, Transaction tx) throws Exception {
         CoinData coinData = CoinDataUtil.parseCoinData(tx.getCoinData());
         if (null == coinData) {
             //例如黄牌交易，直接返回
             return new ValidateResult(VALIDATE_SUCCESS_CODE, VALIDATE_SUCCESS_DESC);
         }
+        String txNonce = LedgerUtil.getNonceEncodeByTx(tx);
         /*
          * 先校验nonce值是否正常
          */
@@ -438,8 +439,13 @@ public class CoinDataValidator {
                 //非本地网络账户地址,不进行处理
                 continue;
             }
+
             String address = AddressTool.getStringAddressByBytes(coinFrom.getAddress());
             String nonce = LedgerUtil.getNonceEncode(coinFrom.getNonce());
+
+            if (transactionService.hadCommit(addressChainId, LedgerUtil.getAccountNoncesStrKey(address, coinFrom.getAssetsChainId(), coinFrom.getAssetsId(), txNonce))) {
+                return new ValidateResult(VALIDATE_TX_EXIST_CODE, String.format(VALIDATE_TX_EXIST_DESC, address, tx.getHash().toString()));
+            }
             AccountState accountState = accountStateService.getAccountState(address, addressChainId, coinFrom.getAssetsChainId(), coinFrom.getAssetsId());
             //初始花费交易,nonce为 fffffff;已兼容处理。
             //普通交易
