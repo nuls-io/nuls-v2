@@ -73,6 +73,7 @@ public class VerifyTxProcessTask implements Runnable {
             processTx(chain, tx, false);
             i++;
             chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("@@@@@@@@ 2 @@@@@@@@@@ one processTx:{}毫秒",System.currentTimeMillis()-start);
+            chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("");
         }
         if(i>0) {
             chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("@@@@@@@@ 3 @@@@@@@@@@ one Task:{}毫秒, count:{}笔交易",
@@ -128,8 +129,6 @@ public class VerifyTxProcessTask implements Runnable {
                 NetworkCall.broadcastTxHash(chain.getChainId(),tx.getHash());
                 long s3 = System.currentTimeMillis();
                 chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("交易保存阶段花费时间:{}", s3 - s2);
-                chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("");
-
                 return true;
             }
             chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug(
