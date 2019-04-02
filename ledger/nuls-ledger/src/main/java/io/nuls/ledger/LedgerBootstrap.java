@@ -74,6 +74,7 @@ public class LedgerBootstrap extends RpcModule {
     public void init() {
         try {
             super.init();
+            LoggerUtil.logLevel = ledgerConfig.getLogLevel();
             LedgerConstant.UNCONFIRM_NONCE_EXPIRED_TIME = ledgerConfig.getUnconfirmedTxExpired();
             LedgerConstant.DEFAULT_ENCODING = ledgerConfig.getEncoding();
             //改为通过配置文件注入
@@ -91,13 +92,13 @@ public class LedgerBootstrap extends RpcModule {
     @Override
     public boolean doStart() {
         //springLite容器初始化AppInitializing
-        LoggerUtil.logger.info("Ledger READY");
+        LoggerUtil.logger().info("Ledger READY");
         return true;
     }
 
     @Override
     public RpcModuleState onDependenciesReady() {
-        LoggerUtil.logger.info("Ledger onDependenciesReady");
+        LoggerUtil.logger().info("Ledger onDependenciesReady");
         return RpcModuleState.Running;
     }
 

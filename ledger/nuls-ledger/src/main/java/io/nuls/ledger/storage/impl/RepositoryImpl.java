@@ -270,7 +270,7 @@ public class RepositoryImpl implements Repository, InitDB, InitializingBean {
             if (!RocksDBService.existTable(getChainsHeightTableName())) {
                 RocksDBService.createTable(getChainsHeightTableName());
             } else {
-                LoggerUtil.logger.info("table {} exist.", getChainsHeightTableName());
+                LoggerUtil.logger().info("table {} exist.", getChainsHeightTableName());
             }
         } catch (Exception e) {
             e.printStackTrace();

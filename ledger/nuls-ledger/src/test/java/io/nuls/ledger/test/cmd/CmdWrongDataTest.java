@@ -31,6 +31,7 @@ import io.nuls.base.data.CoinFrom;
 import io.nuls.base.data.CoinTo;
 import io.nuls.base.data.Transaction;
 import io.nuls.ledger.test.constant.TestConfig;
+import io.nuls.ledger.utils.LoggerUtil;
 import io.nuls.rpc.info.NoUse;
 import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.model.message.Response;
@@ -44,8 +45,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import static io.nuls.ledger.utils.LoggerUtil.logger;
 
 /**
  * 捣乱数据测试
@@ -93,7 +92,7 @@ public class CmdWrongDataTest {
         txList.add(RPCUtil.encode(tx.serialize()));
         params.put("txList",txList);
         Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.LG.abbr, "validateCoinData", params);
-        logger.info("response {}", response);
+        LoggerUtil.logger().info("response {}", response);
     }
 
 
@@ -131,7 +130,7 @@ public class CmdWrongDataTest {
         params.put("tx",RPCUtil.encode(tx.serialize()));
         params.put("isBatchValidate",true);
         Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.LG.abbr, "validateCoinData", params);
-        logger.info("response {}", response);
+        LoggerUtil.logger().info("response {}", response);
     }
     @Test
    public void test2(){

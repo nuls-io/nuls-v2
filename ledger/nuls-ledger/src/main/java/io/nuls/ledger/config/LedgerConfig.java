@@ -10,6 +10,7 @@ import io.nuls.tools.core.annotation.Value;
  */
 @Configuration(persistDomain = "ledger")
 public class LedgerConfig {
+    private String logLevel = "DEBUG";
     private String language;
     private String encoding;
     private int unconfirmedTxExpired;
@@ -50,5 +51,13 @@ public class LedgerConfig {
 
     public void setDataPath(String dataPath) {
         this.dataPath = dataPath;
+    }
+
+    public String getLogLevel() {
+        return logLevel;
+    }
+
+    public void setLogLevel(String logLevel) {
+        this.logLevel = logLevel;
     }
 }

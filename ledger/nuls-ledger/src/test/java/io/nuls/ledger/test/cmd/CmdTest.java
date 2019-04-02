@@ -32,6 +32,7 @@ import io.nuls.base.data.CoinTo;
 import io.nuls.base.data.Transaction;
 import io.nuls.ledger.test.constant.TestConfig;
 import io.nuls.ledger.utils.LedgerUtil;
+import io.nuls.ledger.utils.LoggerUtil;
 import io.nuls.rpc.info.NoUse;
 import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.model.message.Response;
@@ -46,8 +47,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import static io.nuls.ledger.utils.LoggerUtil.logger;
 
 /**
  * Created by ljs on 2019/01/06.
@@ -77,7 +76,7 @@ public class CmdTest {
         params.put("address", address);
         params.put("assetId", TestConfig.assetId);
         Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.LG.abbr, "getBalance", params);
-        logger.info("response {}", response);
+        LoggerUtil.logger().info("response {}", response);
         BigInteger bigInteger= BigIntegerUtils.stringToBigInteger(((Map)((Map)(response.getResponseData())).get("getBalance")).get("total").toString());
         System.out.print(bigInteger.toString());
 
@@ -96,7 +95,7 @@ public class CmdTest {
 
         params.put("assetId", TestConfig.assetId);
         Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.LG.abbr, "getBalanceNonce", params);
-        logger.info("response {}", response);
+        LoggerUtil.logger().info("response {}", response);
     }
     @Test
     public void getBalanceNonce2() throws Exception {
@@ -112,7 +111,7 @@ public class CmdTest {
 
         params.put("assetId", TestConfig.assetId);
         Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.LG.abbr, "getBalanceNonce", params);
-        logger.info("response {}", response);
+        LoggerUtil.logger().info("response {}", response);
     }
     @Test
     public void getNonce() throws Exception {
@@ -125,7 +124,7 @@ public class CmdTest {
         params.put("address", address);
         params.put("assetId", TestConfig.assetId);
         Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.LG.abbr, "getNonce", params);
-        logger.info("response {}", response);
+        LoggerUtil.logger().info("response {}", response);
     }
     @Test
     public void validateCoinData() throws Exception {
@@ -158,7 +157,7 @@ public class CmdTest {
         params.put("chainId", chainId);
         params.put("tx",RPCUtil.encode(tx.serialize()));
         Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.LG.abbr, "validateCoinData", params);
-        logger.info("response {}", response);
+        LoggerUtil.logger().info("response {}", response);
     }
 
 }

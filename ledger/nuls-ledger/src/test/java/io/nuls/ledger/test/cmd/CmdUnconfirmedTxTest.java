@@ -162,7 +162,7 @@ public class CmdUnconfirmedTxTest {
         params.put("assetId", TestConfig.assetId);
         params.put("address", address);
         Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.LG.abbr, "getBalanceNonce", params);
-        LoggerUtil.logger.info("response ={}", response);
+        LoggerUtil.logger().info("response ={}", response);
         return response;
     }
 
@@ -174,7 +174,7 @@ public class CmdUnconfirmedTxTest {
 
     @Test
     public void testNonce() throws Exception {
-        LoggerUtil.logger.info(getNonce("tNULSeBaMvEtDfvZuukDf2mVyfGo3DdiN8KLRG"));
+        LoggerUtil.logger().info(getNonce("tNULSeBaMvEtDfvZuukDf2mVyfGo3DdiN8KLRG"));
     }
 
     @Test
@@ -185,9 +185,9 @@ public class CmdUnconfirmedTxTest {
         params.put("chainId", TestConfig.chainId);
         params.put("tx", transaction.hex());
         Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.LG.abbr, "commitUnconfirmedTx", params);
-        LoggerUtil.logger.info("response {}", response);
-        LoggerUtil.logger.info("获取 address={},res={}", address, getBalanceNonce(address));
-        LoggerUtil.logger.info("获取 address={},res={}", "tNULSeBaMvEtDfvZuukDf2mVyfGo3DdiN8KLRG", getBalanceNonce("tNULSeBaMvEtDfvZuukDf2mVyfGo3DdiN8KLRG"));
+        LoggerUtil.logger().info("response {}", response);
+        LoggerUtil.logger().info("获取 address={},res={}", address, getBalanceNonce(address));
+        LoggerUtil.logger().info("获取 address={},res={}", "tNULSeBaMvEtDfvZuukDf2mVyfGo3DdiN8KLRG", getBalanceNonce("tNULSeBaMvEtDfvZuukDf2mVyfGo3DdiN8KLRG"));
     }
 
     @Test
@@ -198,9 +198,9 @@ public class CmdUnconfirmedTxTest {
         params.put("chainId", TestConfig.chainId);
         params.put("tx", transaction.hex());
         Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.LG.abbr, "commitUnconfirmedTx", params);
-        LoggerUtil.logger.info("response {}", response);
-        LoggerUtil.logger.info("获取 address={},res={}", address, getBalanceNonce(address));
-        LoggerUtil.logger.info("获取 address={},res={}", "tNULSeBaMvEtDfvZuukDf2mVyfGo3DdiN8KLRG", getBalanceNonce("tNULSeBaMvEtDfvZuukDf2mVyfGo3DdiN8KLRG"));
+        LoggerUtil.logger().info("response {}", response);
+        LoggerUtil.logger().info("获取 address={},res={}", address, getBalanceNonce(address));
+        LoggerUtil.logger().info("获取 address={},res={}", "tNULSeBaMvEtDfvZuukDf2mVyfGo3DdiN8KLRG", getBalanceNonce("tNULSeBaMvEtDfvZuukDf2mVyfGo3DdiN8KLRG"));
     }
 
     @Test
@@ -211,8 +211,8 @@ public class CmdUnconfirmedTxTest {
         params.put("chainId", TestConfig.chainId);
         params.put("tx", RPCUtil.encode(transaction.serialize()));
         Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.LG.abbr, "commitUnconfirmedTx", params);
-        LoggerUtil.logger.info("response {}", response);
-        LoggerUtil.logger.info("获取 address={},res={}", address, getBalanceNonce(address));
-        LoggerUtil.logger.info("获取 address={},res={}", "tNULSeBaMvEtDfvZuukDf2mVyfGo3DdiN8KLRG", getBalanceNonce("tNULSeBaMvEtDfvZuukDf2mVyfGo3DdiN8KLRG"));
+        LoggerUtil.logger().info("response {}", response);
+        LoggerUtil.logger().info("获取 address={},res={}", address, getBalanceNonce(address));
+        LoggerUtil.logger().info("获取 address={},res={}", "tNULSeBaMvEtDfvZuukDf2mVyfGo3DdiN8KLRG", getBalanceNonce("tNULSeBaMvEtDfvZuukDf2mVyfGo3DdiN8KLRG"));
     }
 }

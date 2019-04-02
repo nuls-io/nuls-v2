@@ -28,6 +28,7 @@ import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.*;
 import io.nuls.ledger.test.constant.TestConfig;
 import io.nuls.ledger.utils.LedgerUtil;
+import io.nuls.ledger.utils.LoggerUtil;
 import io.nuls.rpc.info.NoUse;
 import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.model.message.Response;
@@ -42,8 +43,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import static io.nuls.ledger.utils.LoggerUtil.logger;
 
 /**
  * @author lan
@@ -119,7 +118,7 @@ public class CmdRollBackTest {
             params.put("blockHeight", 1);
             params.put("isConfirmTx", true);
             Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.LG.abbr, "rollBackConfirmTx", params);
-            logger.info("response {}", response);
+            LoggerUtil.logger().info("response {}", response);
         } catch (IOException e) {
             e.printStackTrace();
         } catch (Exception e) {
@@ -134,7 +133,7 @@ public class CmdRollBackTest {
                 params.put("chainId", TestConfig.chainId);
                 params.put("blockHeight",1);
                 Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.LG.abbr, "getSnapshot", params);
-                logger.info("response {}", response);
+                LoggerUtil.logger().info("response {}", response);
             } catch (IOException e) {
                 e.printStackTrace();
             } catch (Exception e) {
@@ -149,7 +148,7 @@ public class CmdRollBackTest {
             params.put("chainId", TestConfig.chainId);
             params.put("blockHeight",44);
             Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.LG.abbr, "getBlock", params);
-            logger.info("response {}", response);
+            LoggerUtil.logger().info("response {}", response);
         } catch (IOException e) {
             e.printStackTrace();
         } catch (Exception e) {
@@ -163,7 +162,7 @@ public class CmdRollBackTest {
             Map<String,Object> params = new HashMap<>();
             params.put("chainId", TestConfig.chainId);
             Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.LG.abbr, "getBlockHeight", params);
-            logger.info("response {}", response);
+            LoggerUtil.logger().info("response {}", response);
         } catch (IOException e) {
             e.printStackTrace();
         } catch (Exception e) {
