@@ -9,7 +9,7 @@ import io.nuls.rpc.model.Parameter;
 import io.nuls.rpc.model.message.Response;
 import io.nuls.rpc.util.RPCUtil;
 import io.nuls.tools.core.annotation.Autowired;
-import io.nuls.tools.core.annotation.Service;
+import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.model.ObjectUtils;
 import io.nuls.tools.parse.JSONUtils;
@@ -45,7 +45,7 @@ import static io.nuls.transaction.utils.LoggerUtil.Log;
  * @author: Charlie
  * @date: 2018/11/12
  */
-@Service
+@Component
 public class TransactionCmd extends BaseCmd {
 
     @Autowired

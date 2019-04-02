@@ -26,21 +26,22 @@ package io.nuls.transaction.storage.rocksdb.impl;
 
 import io.nuls.base.data.NulsDigestData;
 import io.nuls.db.service.RocksDBService;
-import io.nuls.tools.core.annotation.Service;
-import static io.nuls.transaction.utils.LoggerUtil.Log;
+import io.nuls.tools.core.annotation.Component;
 import io.nuls.transaction.constant.TxDBConstant;
-import io.nuls.transaction.storage.rocksdb.UnverifiedCtxStorageService;
 import io.nuls.transaction.model.bo.CrossTx;
+import io.nuls.transaction.storage.rocksdb.UnverifiedCtxStorageService;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import static io.nuls.transaction.utils.LoggerUtil.Log;
+
 /**
  * @author: Charlie
  * @date: 2018-12-27
  */
-@Service
+@Component
 public class UnverifiedCtxStorageServiceImpl implements UnverifiedCtxStorageService {
 
     @Override

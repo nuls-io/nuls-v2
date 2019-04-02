@@ -7,7 +7,7 @@ import io.nuls.base.data.NulsDigestData;
 import io.nuls.base.data.Transaction;
 import io.nuls.db.service.RocksDBService;
 import io.nuls.tools.basic.VarInt;
-import io.nuls.tools.core.annotation.Service;
+import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.exception.NulsRuntimeException;
@@ -31,7 +31,7 @@ import static io.nuls.transaction.utils.LoggerUtil.Log;
  * @author: Charlie
  * @date: 2018/11/13
  */
-@Service
+@Component
 public class ConfirmedTxStorageServiceImpl implements ConfirmedTxStorageService {
 
     @Override

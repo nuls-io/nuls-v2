@@ -1,7 +1,7 @@
 package io.nuls.transaction.storage.rocksdb.impl;
 
 import io.nuls.db.service.RocksDBService;
-import io.nuls.tools.core.annotation.Service;
+import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.model.ByteUtils;
 import io.nuls.transaction.constant.TxDBConstant;
 import io.nuls.transaction.storage.rocksdb.LanguageStorageService;
@@ -10,7 +10,7 @@ import io.nuls.transaction.storage.rocksdb.LanguageStorageService;
  * @author: Charlie
  * @date: 2018/11/12
  */
-@Service
+@Component
 public class LanguageStorageServiceImpl implements LanguageStorageService {
 
     @Override

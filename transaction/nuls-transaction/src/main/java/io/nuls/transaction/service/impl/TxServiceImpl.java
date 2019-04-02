@@ -34,7 +34,7 @@ import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.util.RPCUtil;
 import io.nuls.tools.basic.Result;
 import io.nuls.tools.core.annotation.Autowired;
-import io.nuls.tools.core.annotation.Service;
+import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.log.logback.NulsLogger;
@@ -69,7 +69,7 @@ import static io.nuls.transaction.utils.LoggerUtil.Log;
  * @author: Charlie
  * @date: 2018/11/22
  */
-@Service
+@Component
 public class TxServiceImpl implements TxService {
 
     @Autowired
@@ -606,6 +606,7 @@ public class TxServiceImpl implements TxService {
      */
     @Override
     public TxPackage getPackableTxs(Chain chain, long endtimestamp, long maxTxDataSize, long blockHeight, long blockTime, String packingAddress, String preStateRoot) {
+        chain.getPackageLock().lock();
         NulsLogger nulsLogger = chain.getLoggerMap().get(TxConstant.LOG_TX);
         nulsLogger.info("");
         nulsLogger.info("%%%%%%%%% TX开始打包 %%%%%%%%%%%% height:{}", blockHeight);
@@ -823,6 +824,8 @@ public class TxServiceImpl implements TxService {
             //可打包交易,孤儿交易,全加回去
             putBackPackablePool(chain, packingTxList, orphanTxSet);
             return new TxPackage(new ArrayList<>(), preStateRoot, chain.getBestBlockHeight() + 1);
+        }finally {
+            chain.getPackageLock().unlock();
         }
     }
 
