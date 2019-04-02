@@ -50,6 +50,10 @@ public class ChainParameters extends BaseNulsData {
      */
     private int chainId;
     /**
+     * 默认资产ID
+     */
+    private int assetId;
+    /**
      * 区块大小阈值
      */
     private int blockMaxSize;
@@ -336,12 +340,21 @@ public class ChainParameters extends BaseNulsData {
         this.cleanParam = cleanParam;
     }
 
+    public int getAssetId() {
+        return assetId;
+    }
+
+    public void setAssetId(int assetId) {
+        this.assetId = assetId;
+    }
+
     public ChainParameters() {
     }
 
-    public ChainParameters(String chainName, int chainId, int blockMaxSize, int resetTime, int chainSwtichThreshold, int cacheSize, int heightRange, int waitInterval, int maxRollback, int consistencyNodePercent, int minNodeAmount, int downloadNumber, int extendMaxSize, int validBlockInterval, int blockCache, int smallBlockCache, int orphanChainMaxAge, String logLevel, int singleDownloadTimeount, int batchDownloadTimeount, int maxLoop, int synSleepInterval, int waitNetworkInterval, int cleanParam) {
+    public ChainParameters(String chainName, int chainId, int assetId, int blockMaxSize, int resetTime, int chainSwtichThreshold, int cacheSize, int heightRange, int waitInterval, int maxRollback, int consistencyNodePercent, int minNodeAmount, int downloadNumber, int extendMaxSize, int validBlockInterval, int blockCache, int smallBlockCache, int orphanChainMaxAge, String logLevel, int singleDownloadTimeount, int batchDownloadTimeount, int maxLoop, int synSleepInterval, int waitNetworkInterval, int cleanParam) {
         this.chainName = chainName;
         this.chainId = chainId;
+        this.assetId = assetId;
         this.blockMaxSize = blockMaxSize;
         this.resetTime = resetTime;
         this.chainSwtichThreshold = chainSwtichThreshold;
@@ -370,6 +383,7 @@ public class ChainParameters extends BaseNulsData {
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
         stream.writeString(chainName);
         stream.writeUint16(chainId);
+        stream.writeUint16(assetId);
         stream.writeUint32(blockMaxSize);
         stream.writeUint16(resetTime);
         stream.writeUint16(chainSwtichThreshold);
@@ -398,6 +412,7 @@ public class ChainParameters extends BaseNulsData {
     public void parse(NulsByteBuffer byteBuffer) throws NulsException {
         this.chainName = byteBuffer.readString();
         this.chainId = byteBuffer.readUint16();
+        this.assetId = byteBuffer.readUint16();
         this.blockMaxSize = (int) byteBuffer.readUint32();
         this.resetTime = byteBuffer.readUint16();
         this.chainSwtichThreshold = byteBuffer.readUint16();
@@ -425,7 +440,7 @@ public class ChainParameters extends BaseNulsData {
     @Override
     public int size() {
         int size = 0;
-        size += (23 * SerializeUtils.sizeOfUint16());
+        size += (24 * SerializeUtils.sizeOfUint16());
         size += SerializeUtils.sizeOfString(chainName);
         size += SerializeUtils.sizeOfString(logLevel);
         return size;

@@ -110,6 +110,7 @@ public class SpringLiteContext {
         ConfigurationLoader configLoader = getBean(ConfigurationLoader.class);
         //加载配置项
         configLoader.load();
+        Map<String,ConfigurationLoader.ConfigItem> values = new HashMap<>();
         BEAN_TEMP_MAP.forEach((key1, bean) -> {
             Class<?> cls = BEAN_TYPE_MAP.get(key1);
             Configuration configuration = cls.getAnnotation(Configuration.class);
@@ -123,22 +124,48 @@ public class SpringLiteContext {
                     }
                     Persist persist = field.getAnnotation(Persist.class);
                     boolean readPersist = persist != null;
+                    ConfigurationLoader.ConfigItem configItem;
                     if (readPersist) {
-                        ConfigSetting.set(bean, field, configLoader.getValue(key, configuration.persistDomain()));
+                        configItem = configLoader.getConfigItemForPersist(configuration.domain(),key);
                     } else {
-                        ConfigSetting.set(bean, field, configLoader.getValue(key));
+                        configItem = configLoader.getConfigItem(configuration.domain(),key);
+                    }
+                    if(configItem == null){
+                        Log.warn("config item :{} not setting",key);
+                    }else{
+                        ConfigSetting.set(bean, field, configItem.getValue());
+                        values.put(cls.getSimpleName() + "." + field.getName(),configItem);
                     }
                 });
-            } else {
+            }
+            else {
                 Set<Field> fields = getFieldSet(cls);
                 fields.forEach(field -> {
                     Value annValue = field.getAnnotation(Value.class);
                     if (annValue != null) {
                         String key = annValue.value();
-                        ConfigSetting.set(bean, field, configLoader.getValue(key));
+                        //检查key在指定了domain的配置项列表里面是否出现多次
+                        if(configLoader.getConfigData().entrySet().stream().filter(entry->!entry.getKey().equals(ConfigurationLoader.GLOBAL_DOMAIN) && entry.getValue().containsKey(key)).count() > 1){
+                            throw new IllegalArgumentException("io.nuls.tools.core.annotation.Value "+key+" config item Find more " );
+                        }
+                        ConfigurationLoader.ConfigItem configItem = configLoader.getConfigItem(key);
+                        if(configItem == null){
+                            throw new IllegalArgumentException("not found config item : " + key + " to " + cls);
+                        }
+                        ConfigSetting.set(bean, field, configItem.getValue());
+                        values.put(cls.getSimpleName() + "." + field.getName(),configItem);
                     }
                 });
             }
+        });
+        int maxKeyLength = values.keySet().stream().max((d1,d2)->d1.length() > d2.length() ? 1 : -1).get().length();
+        Log.info("Configuration information:");
+        values.forEach((key, value) -> {
+            StringBuilder space = new StringBuilder();
+            for (var i = 0; i < maxKeyLength - key.length(); i++) {
+                space.append(" ");
+            }
+            Log.info("{} : {} ==> {}", key + space, value.getValue(), value.getConfigFile());
         });
     }
 

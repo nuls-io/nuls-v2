@@ -276,7 +276,7 @@ public class BlockUtil {
      * @param block
      * @return
      */
-    private static Result orphanChainProcess(int chainId, Block block) {
+    private static void orphanChainProcess(int chainId, Block block) {
         long blockHeight = block.getHeader().getHeight();
         NulsDigestData blockHash = block.getHeader().getHash();
         NulsDigestData blockPreviousHash = block.getHeader().getPreHash();
@@ -293,18 +293,18 @@ public class BlockUtil {
                     chainStorageService.save(chainId, block);
                     orphanChain.addLast(block);
                     commonLog.debug("chainId:" + chainId + ", received continuous tail block of orphanChain, height:" + blockHeight + ", hash:" + blockHash);
-                    return Result.getFailed(BlockErrorCode.ORPHAN_BLOCK);
+                    return;
                 }
                 if (blockHeight == orphanChainStartHeight - 1 && blockHash.equals(orphanChainPreviousHash)) {
                     chainStorageService.save(chainId, block);
                     orphanChain.addFirst(block);
                     commonLog.info("chainId:" + chainId + ", received continuous head block of orphanChain, height:" + blockHeight + ", hash:" + blockHash);
-                    return Result.getFailed(BlockErrorCode.ORPHAN_BLOCK);
+                    return;
                 }
                 //2.重复,丢弃
                 if (orphanChainStartHeight <= blockHeight && blockHeight <= orphanChainEndHeight && orphanChain.getHashList().contains(blockHash)) {
                     commonLog.debug("chainId:" + chainId + ", received duplicate block of orphanChain, height:" + blockHeight + ", hash:" + blockHash);
-                    return Result.getFailed(BlockErrorCode.ORPHAN_BLOCK);
+                    return;
                 }
                 //3.分叉
                 if (orphanChainStartHeight <= blockHeight && blockHeight <= orphanChainEndHeight && orphanChain.getHashList().contains(blockPreviousHash)) {
@@ -312,7 +312,7 @@ public class BlockUtil {
                     Chain forkOrphanChain = ChainGenerator.generate(chainId, block, orphanChain, ChainTypeEnum.ORPHAN);
                     BlockChainManager.addOrphanChain(chainId, forkOrphanChain);
                     commonLog.info("chainId:" + chainId + ", received fork block of orphanChain, height:" + blockHeight + ", hash:" + blockHash);
-                    return Result.getFailed(BlockErrorCode.ORPHAN_BLOCK);
+                    return;
                 }
             }
             //4.与主链、分叉链、孤儿链都无关,形成一个新的孤儿链
@@ -320,12 +320,10 @@ public class BlockUtil {
             Chain newOrphanChain = ChainGenerator.generate(chainId, block, null, ChainTypeEnum.ORPHAN);
             BlockChainManager.addOrphanChain(chainId, newOrphanChain);
             commonLog.info("chainId:" + chainId + ", received orphan block, height:" + blockHeight + ", hash:" + blockHash);
-            return Result.getFailed(BlockErrorCode.ORPHAN_BLOCK);
         } catch (Exception e) {
             e.printStackTrace();
             commonLog.error(e);
         }
-        return Result.getFailed(BlockErrorCode.UNDEFINED_ERROR);
     }
 
     public static SmallBlock getSmallBlock(int chainId, Block block) {

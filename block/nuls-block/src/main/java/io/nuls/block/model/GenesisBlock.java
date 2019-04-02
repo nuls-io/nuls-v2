@@ -24,6 +24,7 @@ import io.nuls.base.data.*;
 import io.nuls.base.signture.BlockSignature;
 import io.nuls.base.signture.SignatureUtil;
 import io.nuls.block.constant.BlockErrorCode;
+import io.nuls.block.manager.ContextManager;
 import io.nuls.tools.crypto.ECKey;
 import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.model.StringUtils;
@@ -49,7 +50,7 @@ import static io.nuls.block.utils.LoggerUtil.commonLog;
  */
 public final class GenesisBlock extends Block {
 
-    private final static String GENESIS_BLOCK_FILE = "genesis-block.json";
+    private static final String GENESIS_BLOCK_FILE = "genesis-block.json";
     private static final String CONFIG_FILED_TIME = "time";
     private static final String CONFIG_FILED_HEIGHT = "height";
     private static final String CONFIG_FILED_EXTEND = "extend";
@@ -58,36 +59,14 @@ public final class GenesisBlock extends Block {
     private static final String CONFIG_FILED_AMOUNT = "amount";
     private static final String CONFIG_FILED_LOCK_TIME = "lockTime";
     private static final String CONFIG_FILED_REMARK = "remark";
-    private static final String PRIVATE_KEY = "009cf05b6b3fe8c09b84c13783140c0f1958e8841f8b6f894ef69431522bc65712";
-
-    private static GenesisBlock INSTANCE = new GenesisBlock();
+    private static final String CONFIG_FILED_PRIVATE_KEY = "privateKey";
 
     private transient long blockTime;
+    private int chainId;
+    private int assetsId;
+    private BigInteger priKey;
 
-    private transient int status = 0;
-
-    private GenesisBlock() {
-
-    }
-
-    public static GenesisBlock getInstance() throws Exception {
-        if (INSTANCE.status == 0) {
-            String json = null;
-            try {
-                json = IoUtils.read(GENESIS_BLOCK_FILE);
-            } catch (NulsException e) {
-                e.printStackTrace();
-                commonLog.error(e);
-            }
-            INSTANCE.init(json);
-        }
-        return INSTANCE;
-    }
-
-    private void init(String json) throws Exception {
-        if (status > 0) {
-            return;
-        }
+    private GenesisBlock(int chainId, String json) throws Exception {
         Map<String, Object> jsonMap = null;
         try {
             jsonMap = JSONUtils.json2map(json);
@@ -97,9 +76,25 @@ public final class GenesisBlock extends Block {
         }
         String time = (String) jsonMap.get(CONFIG_FILED_TIME);
         blockTime = Long.parseLong(time);
+        this.chainId = chainId;
+        assetsId = ContextManager.getContext(chainId).getParameters().getAssetId();
         this.initGengsisTxs(jsonMap);
         this.fillHeader(jsonMap);
-        this.status = 1;
+    }
+
+    public static GenesisBlock getInstance(int chainId, String json) throws Exception {
+        return new GenesisBlock(chainId, json);
+    }
+
+    public static GenesisBlock getInstance(int chainId) throws Exception {
+        String json = null;
+        try {
+            json = IoUtils.read(GENESIS_BLOCK_FILE);
+        } catch (NulsException e) {
+            e.printStackTrace();
+            commonLog.error(e);
+        }
+        return new GenesisBlock(chainId, json);
     }
 
     private void initGengsisTxs(Map<String, Object> jsonMap) throws Exception {
@@ -107,23 +102,18 @@ public final class GenesisBlock extends Block {
         if (null == list || list.isEmpty()) {
             throw new NulsRuntimeException(BlockErrorCode.DATA_ERROR);
         }
-
         CoinData coinData = new CoinData();
-
         for (Map<String, Object> map : list) {
             String address = (String) map.get(CONFIG_FILED_ADDRESS);
             String amount = map.get(CONFIG_FILED_AMOUNT).toString();
-            Long lockTime = Long.valueOf("" + map.get(CONFIG_FILED_LOCK_TIME));
-
+            long lockTime = Long.parseLong("" + map.get(CONFIG_FILED_LOCK_TIME));
             Address ads = Address.fromHashs(address);
-
             CoinTo coin = new CoinTo();
             coin.setAddress(ads.getAddressBytes());
             coin.setAmount(new BigInteger(amount));
-            coin.setAssetsChainId(2);
-            coin.setAssetsId(1);
-            coin.setLockTime(lockTime == null ? 0 : lockTime.longValue());
-
+            coin.setAssetsChainId(chainId);
+            coin.setAssetsId(assetsId);
+            coin.setLockTime(lockTime);
             coinData.addTo(coin);
         }
 
@@ -157,10 +147,10 @@ public final class GenesisBlock extends Block {
         }
         header.setMerkleHash(NulsDigestData.calcMerkleDigestData(txHashList));
         header.setExtend(HexUtil.decode(extend));
-
         header.setHash(NulsDigestData.calcDigestData(header));
 
         BlockSignature p2PKHScriptSig = new BlockSignature();
+        priKey = new BigInteger(1, HexUtil.decode((String) jsonMap.get(CONFIG_FILED_PRIVATE_KEY)));
         NulsSignData signData = this.signature(header.getHash().getDigestBytes());
         p2PKHScriptSig.setSignData(signData);
         p2PKHScriptSig.setPublicKey(getGenesisPubkey());
@@ -168,11 +158,11 @@ public final class GenesisBlock extends Block {
     }
 
     private NulsSignData signature(byte[] bytes) {
-        return SignatureUtil.signDigest(bytes, ECKey.fromPrivate(new BigInteger(1, HexUtil.decode(PRIVATE_KEY))));
+        return SignatureUtil.signDigest(bytes, ECKey.fromPrivate(priKey));
     }
 
     private byte[] getGenesisPubkey() {
-        return ECKey.fromPrivate(new BigInteger(1, HexUtil.decode(PRIVATE_KEY))).getPubKey();
+        return ECKey.fromPrivate(priKey).getPubKey();
     }
 }
 

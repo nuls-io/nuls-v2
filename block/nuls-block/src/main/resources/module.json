@@ -12,6 +12,7 @@
   "defaultChainParameter": {
     "chainName": "nuls2.0",
     "chainId": 2,
+    "assetId": 1,
     "blockMaxSize": 3145728,
     "resetTime": 180000,
     "chainSwtichThreshold": 3,

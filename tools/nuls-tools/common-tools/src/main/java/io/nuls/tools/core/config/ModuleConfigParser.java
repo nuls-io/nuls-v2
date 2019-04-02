@@ -28,6 +28,6 @@ public interface ModuleConfigParser {
      * @param inputStream
      * @return
      */
-    Map<String, ConfigurationLoader.ConfigItem> parse(String fileName,InputStream inputStream) throws Exception;
+    Map<String, Map<String,ConfigurationLoader.ConfigItem>> parse(String fileName,InputStream inputStream) throws Exception;
 
 }

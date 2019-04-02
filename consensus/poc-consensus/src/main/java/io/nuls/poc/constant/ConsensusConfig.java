@@ -11,7 +11,7 @@ import java.io.File;
  * @author tag
  * @date 2019-03-26
  * */
-@Configuration(persistDomain = "consensus")
+@Configuration(domain = "consensus")
 public class ConsensusConfig {
     /**
      * 初始链配置文件

@@ -6,6 +6,13 @@ import java.util.StringJoiner;
 import java.util.concurrent.Delayed;
 import java.util.concurrent.TimeUnit;
 
+/**
+ * TxGroup请求线程
+ *
+ * @author captain
+ * @version 1.0
+ * @date 18-12-4 下午8:29
+ */
 public class TxGroupTask implements Delayed {
     private long id;
     private HashListMessage request;

@@ -147,7 +147,7 @@ public class ContractNRC20TokenSendTxTest extends BaseQuery {
         String symbol = "KongQiBi";
         String amount = BigDecimal.TEN.pow(10).toPlainString();
         String decimals = "2";
-        Map params = this.makeCreateParams(sender, contractCode, remark, name, symbol, amount, decimals);
+        Map params = this.makeCreateParams(toAddress0, contractCode, remark, name, symbol, amount, decimals);
         Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, CREATE, params);
         Map result = (HashMap) (((HashMap) cmdResp2.getResponseData()).get(CREATE));
         Assert.assertTrue(null != result);

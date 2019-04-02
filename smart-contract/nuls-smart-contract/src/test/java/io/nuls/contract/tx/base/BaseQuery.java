@@ -206,7 +206,7 @@ public class BaseQuery {
 
     @Test
     public void getBalance() throws Exception {
-        Map<String, Object> balance0 = LedgerCall.getBalanceAndNonce(chain, contractAddress0);
+        Map<String, Object> balance0 = LedgerCall.getBalance(chain, "tNULSeBaMvEtDfvZuukDf2mVyfGo3DdiN8KLRG");
         Log.info("balance:{}", JSONUtils.obj2PrettyJson(balance0));
     }
 
@@ -214,11 +214,11 @@ public class BaseQuery {
     public void getTxClient() throws Exception {
         Map<String, Object> params = new HashMap<>();
         params.put("chainId", chainId);
-        params.put("txHash", "00202c7282a29d99daad03be2211ae9d9b648eaa2092fabd077a06183fbf3a280463");
+        params.put("txHash", "0020b7c4b1a097a544e19e3f61fd2950cf8264e9ee8fa77d40ba745aa160dbb16f79");
         Response dpResp = ResponseMessageProcessor.requestAndResponse(ModuleE.TX.abbr, "tx_getTxClient", params);
         Map record = (Map) dpResp.getResponseData();
         Map resultMap = (Map) record.get("tx_getTxClient");
-        String txHex = (String) resultMap.get("txHex");
+        String txHex = (String) resultMap.get("tx");
         Transaction tx = Transaction.getInstance(txHex);
         Log.info("tx is {}", JSONUtils.obj2PrettyJson(tx));
 
@@ -269,7 +269,7 @@ public class BaseQuery {
      */
     @Test
     public void contractResult() throws Exception {
-        Map params = this.makeContractResultParams("0020a764748fcf517d5f3e2cda47de67994549d1c0c39036087ceb441ff4748fb22c");
+        Map params = this.makeContractResultParams("0020b807a23be5ed7969ab3bc30a56bf3c20ba37512c9de17a6f33700889dc46960c");
         Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, CONTRACT_RESULT, params);
         Map result = (HashMap) (((HashMap) cmdResp2.getResponseData()).get(CONTRACT_RESULT));
         Assert.assertTrue(null != result);
@@ -288,7 +288,7 @@ public class BaseQuery {
      */
     @Test
     public void contractTx() throws Exception {
-        Map params = this.makeContractTxParams("0020c251fe9fd04e78c15dfdf660b5db477df684e6352191e02bd2d6f640774c0309");
+        Map params = this.makeContractTxParams("0020b807a23be5ed7969ab3bc30a56bf3c20ba37512c9de17a6f33700889dc46960c");
         Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, CONTRACT_TX, params);
         Map result = (HashMap) (((HashMap) cmdResp2.getResponseData()).get(CONTRACT_TX));
         Assert.assertTrue(null != result);
@@ -310,7 +310,7 @@ public class BaseQuery {
     public void getTxRecord() throws Exception {
         Map<String, Object> params = new HashMap<>();
         params.put("chainId", chainId);
-        params.put("address", "tNULSeBaMqywZjfSrKNQKBfuQtVxAHBQ8rB2Zn");
+        params.put("address", sender);
         params.put("assetChainId", null);
         params.put("assetId", null);
         params.put("type", null);

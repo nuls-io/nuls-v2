@@ -25,5 +25,5 @@ Scripted=1
 StartScript=start
 StopScript=stop
 
-[Module]
+[global]
 DataPath=../../data

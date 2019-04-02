@@ -24,7 +24,7 @@ public interface CrossChainConstant {
     /**
      * rpc file path
      */
-    String RPC_PATH = "io.nuls.crosschain.rpc";
+    String RPC_PATH = "io.nuls.crosschain.rpc.cmd";
 
     /**
      * config

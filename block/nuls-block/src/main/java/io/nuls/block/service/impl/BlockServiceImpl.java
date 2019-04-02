@@ -506,7 +506,7 @@ public class BlockServiceImpl implements BlockService {
             genesisBlock = getGenesisBlock(chainId);
             //1.判断有没有创世块,如果没有就初始化创世块并保存
             if (null == genesisBlock) {
-                genesisBlock = GenesisBlock.getInstance();
+                genesisBlock = GenesisBlock.getInstance(chainId);
                 boolean b = saveBlock(chainId, genesisBlock, true, 0, false, false, false);
                 if (!b) {
                     throw new ChainRuntimeException("error occur when saving GenesisBlock!");

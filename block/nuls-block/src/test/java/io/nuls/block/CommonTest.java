@@ -40,6 +40,20 @@ import static io.nuls.block.constant.Constant.NODE_COMPARATOR;
 public class CommonTest {
 
     @Test
+    public void name1() throws InterruptedException {
+        AtomicInteger integer = new AtomicInteger(0);
+        int count = 0;
+        while (true) {
+            int i = integer.incrementAndGet();
+            if (i % 100000000 ==0) {
+                System.out.println(count++ + "-" + i);
+                Thread.sleep(1000);
+            }
+        }
+
+    }
+
+    @Test
     public void name() throws NulsException {
         {
             List<NulsDigestData> list = new ArrayList<>();

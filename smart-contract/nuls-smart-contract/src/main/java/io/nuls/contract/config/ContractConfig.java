@@ -31,7 +31,7 @@ import io.nuls.tools.core.annotation.Value;
  * @author: PierreLuo
  * @date: 2019-03-15
  */
-@Configuration(persistDomain = "smart_contract")
+@Configuration(domain = "smart_contract")
 public class ContractConfig {
     /**
      * 编码方式

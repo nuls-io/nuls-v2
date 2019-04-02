@@ -70,7 +70,7 @@ public final class BlockGenerator extends Thread {
      */
     public static Block generate(Block latestBlock, long seed, String symbol) throws Exception {
         if (latestBlock == null) {
-            return GenesisBlock.getInstance();
+            return GenesisBlock.getInstance(0);
         }
         Block block = new Block();
         block.setTxs(getTransactions(TX_COUNT, seed, symbol));
@@ -110,9 +110,8 @@ public final class BlockGenerator extends Thread {
     public static List<Transaction> getTransactions(int size, long seed, String symbol) throws IOException {
         List<Transaction> txlist = new ArrayList<>();
         CoinData coinData = new CoinData();
-        String address = ADDRESS;
         String amount = "10000000" + seed + symbol;
-        Address ads = Address.fromHashs(address);
+        Address ads = Address.fromHashs(ADDRESS);
         CoinTo coin = new CoinTo();
         coin.setAddress(ads.getAddressBytes());
         coin.setAmount(new BigInteger(amount));
