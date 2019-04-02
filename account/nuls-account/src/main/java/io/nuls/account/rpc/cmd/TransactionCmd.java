@@ -119,7 +119,6 @@ public class TransactionCmd extends BaseCmd {
         }
         Map<String, List<Transaction>> resultMap = new HashMap<>();
         resultMap.put("list", result);
-//        LoggerUtil.logger.debug("ac_accountTxValidate end");
         return success(resultMap);
     }
 
@@ -195,7 +194,6 @@ public class TransactionCmd extends BaseCmd {
 
         Map<String, Boolean> resultMap = new HashMap<>();
         resultMap.put("value", result);
-//        LoggerUtil.logger.debug("ac_commitTx end");
         return success(resultMap);
     }
 
@@ -272,7 +270,6 @@ public class TransactionCmd extends BaseCmd {
 
         Map<String, Boolean> resultMap = new HashMap<>();
         resultMap.put("value", result);
-//        LoggerUtil.logger.debug("ac_rollbackTx end");
         return success(resultMap);
     }
 
@@ -285,7 +282,6 @@ public class TransactionCmd extends BaseCmd {
     @Parameter(parameterName = RpcParameterNameConstant.CHAIN_ID, parameterType = "int")
     @Parameter(parameterName = RpcParameterNameConstant.TX, parameterType = "String")
     public Response transferTxValidate(Map<String, Object> params) {
-//        LoggerUtil.logger.debug("ac_transferTxValidate start");
         Map<String, Boolean> resultMap = new HashMap<>();
         boolean result;
         try {
@@ -309,7 +305,6 @@ public class TransactionCmd extends BaseCmd {
         }
 
         resultMap.put("value", result);
-//        LoggerUtil.logger.debug("ac_transferTxValidate end");
         return success(resultMap);
     }
 
@@ -317,7 +312,6 @@ public class TransactionCmd extends BaseCmd {
      * 转账交易提交
      */
     @CmdAnnotation(cmd = "ac_transferTxCommit", version = 1.0, description = "create transfer transaction commit 1.0")
-    //@ResisterTx(txType = AccountConstant.TX_TYPE_TRANSFER, methodType = TxMethodType.COMMIT, methodName = "ac_transferTxCommit")
     public Response transferTxCommit(Map<String, Object> params) {
         Map<String, Boolean> resultMap = new HashMap<>();
         resultMap.put("value", true);
@@ -328,7 +322,6 @@ public class TransactionCmd extends BaseCmd {
      * 转账交易回滚
      */
     @CmdAnnotation(cmd = "ac_transferTxRollback", version = 1.0, description = "create transfer transaction rollback 1.0")
-    //@ResisterTx(txType = AccountConstant.TX_TYPE_TRANSFER, methodType = TxMethodType.ROLLBACK, methodName = "ac_transferTxRollback")
     public Response transferTxRollback(Map<String, Object> params) {
         Map<String, Boolean> resultMap = new HashMap<>();
         resultMap.put("value", true);
@@ -344,7 +337,6 @@ public class TransactionCmd extends BaseCmd {
      */
     @CmdAnnotation(cmd = "ac_transfer", version = 1.0, description = "create a multi-account transfer transaction")
     public Response transfer(Map params) {
-//        LoggerUtil.logger.debug("ac_transfer start");
         Map<String, String> map = new HashMap<>(1);
         try {
             // check parameters
@@ -412,7 +404,6 @@ public class TransactionCmd extends BaseCmd {
         } catch (Exception e) {
             return failed(e.getMessage());
         }
-//        LoggerUtil.logger.debug("ac_transfer end");
         return success(map);
     }
 
@@ -427,7 +418,6 @@ public class TransactionCmd extends BaseCmd {
     @Deprecated(since = "此方法废弃，请使用transfer方法，该方法可接受别名转账")
     @CmdAnnotation(cmd = "ac_transferByAlias", version = 1.0, description = "transfer by alias")
     public Response transferByAlias(Map params) {
-//        LoggerUtil.logger.debug("ac_transferByAlias start");
         Map<String, String> map = new HashMap<>(1);
         try {
             Preconditions.checkNotNull(params,AccountErrorCode.NULL_PARAMETER);
@@ -471,7 +461,6 @@ public class TransactionCmd extends BaseCmd {
         } catch (Exception e) {
             return failed(e.getMessage());
         }
-//        LoggerUtil.logger.debug("ac_transferByAlias end");
         return success(map);
     }
 
@@ -485,7 +474,6 @@ public class TransactionCmd extends BaseCmd {
      */
     @CmdAnnotation(cmd = "ac_createMultiSignTransfer", version = 1.0, description = "create multi sign transfer")
     public Response createMultiSignTransfer(Map params) {
-//        LoggerUtil.logger.debug("ac_createMultiSignTransfer start");
         Map<String, String> map = new HashMap<>(1);
         MultiSigAccount multiSigAccount = null;
         try {
@@ -506,7 +494,8 @@ public class TransactionCmd extends BaseCmd {
             int assetsId;
             Chain chain = chainManager.getChainMap().get(chainId);
             Preconditions.checkNotNull(chain,AccountErrorCode.CHAIN_NOT_EXIST);
-            if (assetsIdObj == null) { // if the assetsId is null,the default assetsId is the chain's main assets
+            // if the assetsId is null,the default assetsId is the chain's main assets
+            if (assetsIdObj == null) {
                 assetsId = chain.getConfig().getAssetsId();
             } else {
                 assetsId = (int) assetsIdObj;
@@ -560,7 +549,6 @@ public class TransactionCmd extends BaseCmd {
         } catch (Exception e) {
             return failed(e.getMessage());
         }
-//        LoggerUtil.logger.debug("ac_createMultiSignTransfer end");
         return success(map);
     }
 
@@ -574,7 +562,6 @@ public class TransactionCmd extends BaseCmd {
      */
     @CmdAnnotation(cmd = "ac_signMultiSignTransaction", version = 1.0, description = "sign MultiSign Transaction")
     public Response signMultiSignTransaction(Map params) {
-//        LoggerUtil.logger.debug("ac_signMultiSignTransaction start");
         Map<String, String> map = new HashMap<>(1);
         Object chainIdObj = params == null ? null : params.get(RpcParameterNameConstant.CHAIN_ID);
         Object passwordObj = params == null ? null : params.get(RpcParameterNameConstant.PASSWORD);
@@ -609,7 +596,6 @@ public class TransactionCmd extends BaseCmd {
         } catch (Exception e) {
             return failed(e.getMessage());
         }
-//        LoggerUtil.logger.debug("ac_signMultiSignTransaction end");
         return success(map);
     }
 

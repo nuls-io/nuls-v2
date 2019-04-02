@@ -82,6 +82,7 @@ public class VerifyTxProcessTask implements Runnable {
 
     private boolean processTx(Chain chain, Transaction tx, boolean isOrphanTx){
         try {
+            chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("新交易处理.....hash:{}", tx.getHash().getDigestHex());
             long s1 = System.currentTimeMillis();
             int chainId = chain.getChainId();
             boolean rs = txService.verify(chain, tx);
@@ -108,7 +109,7 @@ public class VerifyTxProcessTask implements Runnable {
                 if(chain.getPackaging().get()) {
                     //当节点是出块节点时, 才将交易放入待打包队列
                     packablePool.add(chain, tx);
-                    chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("交易加入待打包队列.....hash:{}", tx.getHash().getDigestHex());
+                    chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("交易[加入待打包队列].....");
 //                    TxUtil.txInformationDebugPrint(chain, tx, chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS));
                 }
                 //保存到rocksdb
@@ -159,7 +160,6 @@ public class VerifyTxProcessTask implements Runnable {
             while (it.hasNext()) {
                 Transaction tx = it.next();
                 boolean success = processTx(chain, tx, true);
-//                TxUtil.txInformationDebugPrint(chain, tx, chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS));
                 if (success) {
                     it.remove();
                     chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("*** Debug *** [VerifyTxProcessTask - OrphanTx] " +
