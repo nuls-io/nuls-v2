@@ -40,65 +40,65 @@ public class Message {
     /**
      * 消息号 / Message ID
      */
-    private String messageId;
+    private String MessageId;
 
     /**
      * 消息发送时间 / Message sending time
      */
-    private String timestamp;
+    private String Timestamp;
 
     /**
-     * 消息发送时区 / Message sending timezone
+     * 消息发送时区 / Message sending Timezone
      */
-    private String timezone;
+    private String Timezone;
 
     /**
      * 消息类型，共9种 / Message type, 9 types
      */
-    private String messageType;
+    private String MessageType;
 
     /**
-     * 消息体，根据messageType有不同的结构
+     * 消息体，根据MessageType有不同的结构
      */
-    private Object messageData;
+    private Object MessageData;
 
     public String getMessageId() {
-        return messageId;
+        return MessageId;
     }
 
-    public void setMessageId(String messageId) {
-        this.messageId = messageId;
+    public void setMessageId(String MessageId) {
+        this.MessageId = MessageId;
     }
 
     public String getTimestamp() {
-        return timestamp;
+        return Timestamp;
     }
 
-    public void setTimestamp(String timestamp) {
-        this.timestamp = timestamp;
+    public void setTimestamp(String Timestamp) {
+        this.Timestamp = Timestamp;
     }
 
     public String getTimezone() {
-        return timezone;
+        return Timezone;
     }
 
-    public void setTimezone(String timezone) {
-        this.timezone = timezone;
+    public void setTimezone(String Timezone) {
+        this.Timezone = Timezone;
     }
 
     public String getMessageType() {
-        return messageType;
+        return MessageType;
     }
 
-    public void setMessageType(String messageType) {
-        this.messageType = messageType;
+    public void setMessageType(String MessageType) {
+        this.MessageType = MessageType;
     }
 
     public Object getMessageData() {
-        return messageData;
+        return MessageData;
     }
 
-    public void setMessageData(Object messageData) {
-        this.messageData = messageData;
+    public void setMessageData(Object MessageData) {
+        this.MessageData = MessageData;
     }
 }

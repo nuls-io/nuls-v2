@@ -37,13 +37,13 @@ public class Unsubscribe {
     /**
      * An array that holds all methods that the caller wants to unsubscribe
      */
-    private String[] unsubscribeMethods;
+    private String[] UnsubscribeMethods;
 
     public String[] getUnsubscribeMethods() {
-        return unsubscribeMethods.clone();
+        return UnsubscribeMethods.clone();
     }
 
-    public void setUnsubscribeMethods(String[] unsubscribeMethods) {
-        this.unsubscribeMethods = unsubscribeMethods.clone();
+    public void setUnsubscribeMethods(String[] UnsubscribeMethods) {
+        this.UnsubscribeMethods = UnsubscribeMethods.clone();
     }
 }

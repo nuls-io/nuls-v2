@@ -40,32 +40,32 @@ public class Response {
     /**
      * This is the original request ID referred by a Request message
      */
-    private String requestId;
+    private String RequestId;
 
     /**
      * The time that the target service took to process the request in milliseconds.
      */
-    private String responseProcessingTime;
+    private String ResponseProcessingTime;
 
     /**
      * The response status, 1 if successful, 0 otherwise.
      */
-    private String responseStatus;
+    private String ResponseStatus;
 
     /**
      * A string that could offer more clarification about the result of the process.
      */
-    private String responseComment;
+    private String ResponseComment;
 
     /**
      * The maximum number of objects that the response contains per request.
      */
-    private String responseMaxSize;
+    private String ResponseMaxSize;
 
     /**
      * An object array that contains the result of the method processed, one object per request
      */
-    private Object responseData;
+    private Object ResponseData;
 
     /**
      * 回复是否正确 / Whether the response is correct
@@ -74,54 +74,54 @@ public class Response {
      */
     @JsonIgnore
     public boolean isSuccess() {
-        return Constants.BOOLEAN_TRUE.equals(responseStatus);
+        return Constants.BOOLEAN_TRUE.equals(ResponseStatus);
     }
 
     public String getRequestId() {
-        return requestId;
+        return RequestId;
     }
 
-    public void setRequestId(String requestId) {
-        this.requestId = requestId;
+    public void setRequestId(String RequestId) {
+        this.RequestId = RequestId;
     }
 
     public String getResponseProcessingTime() {
-        return responseProcessingTime;
+        return ResponseProcessingTime;
     }
 
-    public void setResponseProcessingTime(String responseProcessingTime) {
-        this.responseProcessingTime = responseProcessingTime;
+    public void setResponseProcessingTime(String ResponseProcessingTime) {
+        this.ResponseProcessingTime = ResponseProcessingTime;
     }
 
     public String getResponseStatus() {
-        return responseStatus;
+        return ResponseStatus;
     }
 
-    public void setResponseStatus(String responseStatus) {
-        this.responseStatus = responseStatus;
+    public void setResponseStatus(String ResponseStatus) {
+        this.ResponseStatus = ResponseStatus;
     }
 
     public String getResponseComment() {
-        return responseComment;
+        return ResponseComment;
     }
 
-    public void setResponseComment(String responseComment) {
-        this.responseComment = responseComment;
+    public void setResponseComment(String ResponseComment) {
+        this.ResponseComment = ResponseComment;
     }
 
     public String getResponseMaxSize() {
-        return responseMaxSize;
+        return ResponseMaxSize;
     }
 
-    public void setResponseMaxSize(String responseMaxSize) {
-        this.responseMaxSize = responseMaxSize;
+    public void setResponseMaxSize(String ResponseMaxSize) {
+        this.ResponseMaxSize = ResponseMaxSize;
     }
 
     public Object getResponseData() {
-        return responseData;
+        return ResponseData;
     }
 
-    public void setResponseData(Object responseData) {
-        this.responseData = responseData;
+    public void setResponseData(Object ResponseData) {
+        this.ResponseData = ResponseData;
     }
 }
