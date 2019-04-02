@@ -32,7 +32,6 @@ import io.nuls.network.model.dto.ProtocolRoleHandler;
 import io.nuls.rpc.model.ModuleE;
 import io.nuls.tools.log.logback.LoggerBuilder;
 import io.nuls.tools.log.logback.NulsLogger;
-import io.nuls.tools.model.StringUtils;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -44,27 +43,21 @@ import java.util.Map;
  * @date 2018/12/17
  **/
 public class LoggerUtil {
-    public static final String LOGGER_KEY1 = "nw";
-    public static final String LOGGER_KEY2 = ModuleE.BL.abbr;
-    public static final String LOGGER_KEY3 = ModuleE.TX.abbr;
-    public static final String LOGGER_KEY4 = ModuleE.CS.abbr;
-    public static Map<String, NulsLogger> logMap = new HashMap<>();
-    public static NulsLogger Log = null;
-    public static NulsLogger NwInfosLog = null;
-    public static String defalultLogLevel = "INFO";
+    private static final String LOGGER_KEY1 = "nw";
+    private static final String LOGGER_KEY2 = ModuleE.BL.abbr;
+    private static final String LOGGER_KEY3 = ModuleE.TX.abbr;
+    private static final String LOGGER_KEY4 = ModuleE.CS.abbr;
+    private static Map<String, NulsLogger> logMap = new HashMap<>();
+    private static NulsLogger logger = null;
+    private static NulsLogger nwInfosLog = null;
+
     public static void defaultLogInit(String logLevel) {
-        if(StringUtils.isBlank(logLevel)){
-            logLevel = defalultLogLevel;
-        }
-        Log = LoggerBuilder.getLogger("nwLogs", "nw",  Level.valueOf(logLevel));
-        NwInfosLog = LoggerBuilder.getLogger("nwLogs", "nwInfos",  Level.valueOf(logLevel));
+        logger = LoggerBuilder.getLogger("nwLogs", "nw", Level.valueOf(logLevel));
+        nwInfosLog = LoggerBuilder.getLogger("nwLogs", "nwInfos", Level.valueOf(logLevel));
     }
 
     public static void createLogs(int chainId, String logLevel) {
         String folderName = "nwLogs/" + chainId;
-        if(StringUtils.isBlank(logLevel)){
-            logLevel = defalultLogLevel;
-        }
         if (null == logMap.get(LOGGER_KEY1 + chainId)) {
             logMap.put(LOGGER_KEY1 + chainId, LoggerBuilder.getLogger(folderName, LOGGER_KEY1, Level.valueOf(logLevel)));
             logMap.put(LOGGER_KEY2 + chainId, LoggerBuilder.getLogger(folderName, LOGGER_KEY2, Level.valueOf(logLevel)));
@@ -75,9 +68,20 @@ public class LoggerUtil {
 
     public static NulsLogger logger(int chainId) {
         if (null == logMap.get(LOGGER_KEY1 + chainId)) {
-            return Log;
+            return logger;
         }
         return logMap.get(LOGGER_KEY1 + chainId);
+    }
+
+    public static NulsLogger logger() {
+        if (null == logger) {
+            defaultLogInit("DEBUG");
+        }
+        return logger;
+    }
+
+    public static NulsLogger nwInfosLogger() {
+        return nwInfosLog;
     }
 
     /**

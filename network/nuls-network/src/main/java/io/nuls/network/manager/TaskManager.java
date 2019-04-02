@@ -25,9 +25,7 @@
 package io.nuls.network.manager;
 
 import io.nuls.network.cfg.NetworkConfig;
-import io.nuls.network.model.Node;
 import io.nuls.network.model.NodeGroup;
-import io.nuls.network.netty.NettyClient;
 import io.nuls.network.task.*;
 import io.nuls.network.utils.LoggerUtil;
 import io.nuls.tools.core.ioc.SpringLiteContext;
@@ -36,8 +34,6 @@ import io.nuls.tools.thread.commom.NulsThreadFactory;
 
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
-
-import static io.nuls.network.utils.LoggerUtil.Log;
 
 /**
  * 线程任务管理
@@ -105,7 +101,7 @@ public class TaskManager extends BaseManager {
      * Start the time synchronization thread.
      */
     private void timeServiceThreadStart() {
-        LoggerUtil.Log.debug("----------- TimeService start -------------");
+        LoggerUtil.logger().debug("----------- TimeService start -------------");
         TimeManager.getInstance().initWebTimeServer();
         ThreadUtils.createAndRunThread("TimeTask", new TimeTask(), true);
     }
@@ -114,12 +110,12 @@ public class TaskManager extends BaseManager {
      * 地址请求分享线程
      */
     private void RunOnceAfterNetStableThreadStart() {
-        LoggerUtil.Log.debug("----------- RunOnceAfterNetStableThread start -------------");
+        LoggerUtil.logger().debug("----------- RunOnceAfterNetStableThread start -------------");
         ThreadUtils.createAndRunThread("share-mine-node", new RunAfterNetStableTask());
     }
 
     public void createShareAddressTask(NodeGroup nodeGroup, boolean isCross) {
-        LoggerUtil.Log.debug("----------- createShareAddressTask start -------------");
+        LoggerUtil.logger().debug("----------- createShareAddressTask start -------------");
         ThreadUtils.createAndRunThread("share-mine-node", new ShareAddressTask(nodeGroup));
     }
 }

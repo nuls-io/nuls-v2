@@ -13,7 +13,7 @@ import java.util.List;
  */
 @Configuration(persistDomain = "network")
 public class NetworkConfig {
-    private String logLevel;
+    private String logLevel = "DEBUG";
     private int chainId;
 
     private int port;

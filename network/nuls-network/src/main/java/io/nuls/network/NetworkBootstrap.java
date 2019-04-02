@@ -48,8 +48,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import static io.nuls.network.utils.LoggerUtil.Log;
-
 /**
  * boot strap
  *
@@ -88,7 +86,7 @@ public class NetworkBootstrap extends RpcModule {
             networkConfig.getLocalIps().addAll(IpUtil.getIps());
         } catch (Exception e) {
             e.printStackTrace();
-            Log.error("Network NetworkBootstrap cfgInit failed", e);
+            LoggerUtil.logger().error("Network NetworkBootstrap cfgInit failed", e);
             throw new RuntimeException("Network NetworkBootstrap cfgInit failed");
         }
     }
@@ -144,7 +142,7 @@ public class NetworkBootstrap extends RpcModule {
 
     @Override
     public boolean doStart() {
-        Log.debug("doStart begin=========");
+        LoggerUtil.logger().debug("doStart begin=========");
         try {
             NodeGroupManager.getInstance().start();
 //            RpcManager.getInstance().start();
@@ -152,13 +150,13 @@ public class NetworkBootstrap extends RpcModule {
             e.printStackTrace();
             System.exit(-1);
         }
-        Log.debug("doStart end=========");
+        LoggerUtil.logger().debug("doStart end=========");
         return true;
     }
 
     @Override
     public RpcModuleState onDependenciesReady() {
-        LoggerUtil.Log.info("network onDependenciesReady");
+        LoggerUtil.logger().info("network onDependenciesReady");
         try {
             ConnectionManager.getInstance().start();
             TaskManager.getInstance().start();
@@ -166,7 +164,7 @@ public class NetworkBootstrap extends RpcModule {
             e.printStackTrace();
             System.exit(-1);
         }
-        LoggerUtil.Log.info("NW RUNNING");
+        LoggerUtil.logger().info("NW RUNNING");
         return RpcModuleState.Running;
     }
 

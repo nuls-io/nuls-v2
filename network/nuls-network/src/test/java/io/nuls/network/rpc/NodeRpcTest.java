@@ -57,7 +57,7 @@ public class NodeRpcTest {
         params.put("pageSize", 0);
         try {
             Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.NW.abbr, "nw_getNodes", params);
-            LoggerUtil.Log.info("response {}", response);
+            LoggerUtil.logger().info("response {}", response);
         }catch (Exception e){
             e.printStackTrace();
         }
@@ -71,7 +71,7 @@ public class NodeRpcTest {
         params.put("nodes", "192.168.1.100:1800");
         try {
             Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.NW.abbr, "nw_addNodes", params);
-            LoggerUtil.Log.info("response {}", response);
+            LoggerUtil.logger().info("response {}", response);
         }catch (Exception e){
             e.printStackTrace();
         }

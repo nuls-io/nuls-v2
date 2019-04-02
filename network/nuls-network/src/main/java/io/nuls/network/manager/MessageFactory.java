@@ -45,7 +45,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static io.nuls.network.utils.LoggerUtil.Log;
 
 /**
  * 消息工厂，用于组装消息
@@ -201,6 +200,7 @@ public class MessageFactory {
 
     /**
      * 构造PeerInfoMessage消息
+     *
      * @param magicNumber
      * @param bestBlockInfo
      * @return

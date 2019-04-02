@@ -26,8 +26,7 @@
 package io.nuls.network.task;
 
 import io.nuls.network.manager.TimeManager;
-
-import static io.nuls.network.utils.LoggerUtil.Log;
+import io.nuls.network.utils.LoggerUtil;
 
 /**
  * 时间服务类：用于同步网络标准时间
@@ -49,7 +48,7 @@ public class TimeTask implements Runnable {
         while (true) {
             long newTime = System.currentTimeMillis();
             if (Math.abs(newTime - lastTime) > TimeManager.TIME_OFFSET_BOUNDARY) {
-                Log.debug("local time changed ：{}", newTime - lastTime);
+                LoggerUtil.logger().debug("local time changed ：{}", newTime - lastTime);
                 timeManager.syncWebTime();
             } else if (TimeManager.currentTimeMillis() - TimeManager.lastSyncTime > TimeManager.NET_REFRESH_TIME) {
                 //每隔一段时间更新网络时间

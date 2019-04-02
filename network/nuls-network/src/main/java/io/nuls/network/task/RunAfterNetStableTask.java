@@ -5,11 +5,10 @@ import io.nuls.network.manager.NodeGroupManager;
 import io.nuls.network.manager.TaskManager;
 import io.nuls.network.model.NodeGroup;
 import io.nuls.network.netty.container.NodesContainer;
+import io.nuls.network.utils.LoggerUtil;
 import io.nuls.tools.core.ioc.SpringLiteContext;
 
 import java.util.List;
-
-import static io.nuls.network.utils.LoggerUtil.Log;
 
 /**
  * @author ljs
@@ -29,7 +28,7 @@ public class RunAfterNetStableTask implements Runnable {
                     //让子线程执行一会儿
                     Thread.sleep(10000L);
                 } catch (InterruptedException e) {
-                    Log.error(e);
+                    LoggerUtil.logger().error(e);
                 }
             }
         }
@@ -52,7 +51,7 @@ public class RunAfterNetStableTask implements Runnable {
                 //让子线程执行一会儿
                 Thread.sleep(1000L);
             } catch (InterruptedException e) {
-                Log.error(e);
+                LoggerUtil.logger().error(e);
             }
         }
         return count;
@@ -74,7 +73,7 @@ public class RunAfterNetStableTask implements Runnable {
                 //让子线程执行一会儿
                 Thread.sleep(1000L);
             } catch (InterruptedException e) {
-                Log.error(e);
+                LoggerUtil.logger().error(e);
             }
         }
         return count;

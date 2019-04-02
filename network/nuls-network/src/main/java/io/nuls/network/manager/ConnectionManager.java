@@ -168,7 +168,7 @@ public class ConnectionManager extends BaseManager {
         if (channel.localAddress().getPort() == networkConfig.getCrossPort()) {
             isCross = true;
         }
-        LoggerUtil.Log.debug("peer = {}:{} connectIn", ip, port);
+        LoggerUtil.logger().debug("peer = {}:{} connectIn", ip, port);
         //此时无法判定业务所属的网络id，所以无法归属哪个group,只有在version消息处理时才能知道
         Node node = new Node(0L, ip, port, Node.IN, isCross);
         node.setConnectStatus(NodeConnectStatusEnum.CONNECTED);
@@ -212,7 +212,7 @@ public class ConnectionManager extends BaseManager {
      */
     private void nettyBoot() {
         serverStart();
-        LoggerUtil.Log.info("==========================NettyBoot");
+        LoggerUtil.logger().info("==========================NettyServerBoot");
     }
 
     /**
@@ -228,7 +228,7 @@ public class ConnectionManager extends BaseManager {
                 server.start();
             } catch (InterruptedException e) {
                 e.printStackTrace();
-                LoggerUtil.Log.error(e.getMessage());
+                LoggerUtil.logger().error(e.getMessage());
             }
         }, false);
         ThreadUtils.createAndRunThread("node crossServer start", () -> {
@@ -236,7 +236,7 @@ public class ConnectionManager extends BaseManager {
                 serverCross.start();
             } catch (InterruptedException e) {
                 e.printStackTrace();
-                LoggerUtil.Log.error(e.getMessage());
+                LoggerUtil.logger().error(e.getMessage());
             }
         }, false);
 

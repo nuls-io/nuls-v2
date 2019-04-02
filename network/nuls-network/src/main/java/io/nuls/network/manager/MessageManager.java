@@ -53,8 +53,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import static io.nuls.network.utils.LoggerUtil.Log;
-
 /**
  * 消息管理器，用于收发消息
  * message manager：  send and rec msg
@@ -97,7 +95,7 @@ public class MessageManager extends BaseManager {
             return msgClass.getDeclaredConstructor().newInstance();
         } catch (InstantiationException | IllegalAccessException e) {
             e.printStackTrace();
-            LoggerUtil.Log.error(e.getMessage());
+            LoggerUtil.logger().error(e.getMessage());
         } catch (NoSuchMethodException e) {
             e.printStackTrace();
         } catch (InvocationTargetException e) {
@@ -161,7 +159,7 @@ public class MessageManager extends BaseManager {
             }
         } catch (Exception e) {
             e.printStackTrace();
-            LoggerUtil.Log.error("{}",e);
+            LoggerUtil.logger().error("{}",e);
 //            throw new NulsException(NetworkErrorCode.DATA_ERROR, e);
         }
     }
@@ -258,12 +256,12 @@ public class MessageManager extends BaseManager {
          */
         if (!isHandShakeMessage(message)) {
             if (NodeConnectStatusEnum.AVAILABLE != node.getConnectStatus()) {
-                LoggerUtil.Log.error("============={} status is not handshake(AVAILABLE)", node.getId());
+                LoggerUtil.logger().error("============={} status is not handshake(AVAILABLE)", node.getId());
                 return new NetworkEventResult(false, NetworkErrorCode.NET_NODE_DEAD);
             }
         }
         if (node.getChannel() == null || !node.getChannel().isActive()) {
-            LoggerUtil.Log.error("============={} getChannel is not Active", node.getId());
+            LoggerUtil.logger().error("============={} getChannel is not Active", node.getId());
             return new NetworkEventResult(false, NetworkErrorCode.NET_NODE_MISS_CHANNEL);
         }
         try {
@@ -280,7 +278,7 @@ public class MessageManager extends BaseManager {
             }
         } catch (Exception e) {
             e.printStackTrace();
-            Log.error(e.getMessage());
+            LoggerUtil.logger().error(e.getMessage());
             return new NetworkEventResult(false, NetworkErrorCode.NET_MESSAGE_ERROR);
         }
         return new NetworkEventResult(true, NetworkErrorCode.SUCCESS);
@@ -297,7 +295,7 @@ public class MessageManager extends BaseManager {
     public NetworkEventResult broadcastToNodes(byte[] message, List<Node> nodes, boolean asyn) {
         for (Node node : nodes) {
             if (node.getChannel() == null || !node.getChannel().isActive()) {
-                Log.info(node.getId() + "is not Active");
+                LoggerUtil.logger().info(node.getId() + "is not Active");
                 continue;
             }
             try {
@@ -311,7 +309,7 @@ public class MessageManager extends BaseManager {
                 }
             } catch (Exception e) {
                 e.printStackTrace();
-                Log.error(e.getMessage());
+                LoggerUtil.logger().error(e.getMessage());
             }
         }
         return new NetworkEventResult(true, NetworkErrorCode.SUCCESS);
