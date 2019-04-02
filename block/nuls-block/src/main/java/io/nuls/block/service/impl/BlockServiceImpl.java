@@ -502,14 +502,15 @@ public class BlockServiceImpl implements BlockService {
     }
 
     private boolean initLocalBlocks(int chainId) {
-        NulsLogger commonLog = ContextManager.getContext(chainId).getCommonLog();
+        ChainContext context = ContextManager.getContext(chainId);
+        NulsLogger commonLog = context.getCommonLog();
         Block block = null;
         Block genesisBlock;
         try {
             genesisBlock = getGenesisBlock(chainId);
             //1.判断有没有创世块,如果没有就初始化创世块并保存
             if (null == genesisBlock) {
-                genesisBlock = GenesisBlock.getInstance(chainId);
+                genesisBlock = GenesisBlock.getInstance(chainId, context.getParameters().getAssetId());
                 boolean b = saveBlock(chainId, genesisBlock, true, 0, false, false, false);
                 if (!b) {
                     throw new NulsRuntimeException(BlockErrorCode.CHAIN_MERGE_ERROR);
@@ -529,8 +530,8 @@ public class BlockServiceImpl implements BlockService {
             //4.latestHeight已经维护成功,上面的步骤保证了latestHeight这个高度的区块数据在本地是完整的,但是区块数据的内容并不一定是正确的,区块同步之前会继续验证latestBlock
             block = getBlock(chainId, latestHeight);
             //5.本地区块维护成功
-            ContextManager.getContext(chainId).setLatestBlock(block);
-            ContextManager.getContext(chainId).setGenesisBlock(genesisBlock);
+            context.setLatestBlock(block);
+            context.setGenesisBlock(genesisBlock);
             BlockChainManager.setMasterChain(chainId, ChainGenerator.generateMasterChain(chainId, block, this));
         } catch (Exception e) {
             e.printStackTrace();

@@ -40,20 +40,6 @@ import static io.nuls.block.constant.Constant.NODE_COMPARATOR;
 public class CommonTest {
 
     @Test
-    public void name1() throws InterruptedException {
-        AtomicInteger integer = new AtomicInteger(0);
-        int count = 0;
-        while (true) {
-            int i = integer.incrementAndGet();
-            if (i % 100000000 ==0) {
-                System.out.println(count++ + "-" + i);
-                Thread.sleep(1000);
-            }
-        }
-
-    }
-
-    @Test
     public void name() throws NulsException {
         {
             List<NulsDigestData> list = new ArrayList<>();
@@ -137,21 +123,6 @@ public class CommonTest {
     }
 
     @Test
-    public void testLock() {
-        for (int i = 0; i < 10; i++) {
-            try {
-                if (true) {
-                    System.out.println("22222222222222");
-                    throw new RuntimeException();
-                }
-                System.out.println("888888888");
-            } finally {
-                System.out.println("1111111111111");
-            }
-        }
-    }
-
-    @Test
     public void testLock1() {
         StampedLock lock = new StampedLock();
         long lock1 = lock.writeLock();
@@ -188,42 +159,5 @@ public class CommonTest {
         clone.pop();
         Assert.assertEquals(1, clone.size());
         Assert.assertEquals(4, list.size());
-    }
-
-    @Test
-    public void test4() {
-        TreeSet<Chain> chains = new TreeSet<>(Chain.COMPARATOR);
-        chains.forEach(e -> e.setType(ChainTypeEnum.FORK));
-        SortedSet<Chain> ss = Collections.emptySortedSet();
-        ss.forEach(e -> e.setType(ChainTypeEnum.FORK));
-    }
-
-    @Test
-    public void test5() {
-        {
-            SortedSet<Node> nodes = new TreeSet<>(NODE_COMPARATOR);
-            Random random = new Random();
-            long l = System.currentTimeMillis();
-            for (int i = 0; i < 10000000; i++) {
-                nodes.add(getNode(random.nextInt()));
-            }
-            System.out.println("SortedSet-"+(System.currentTimeMillis() - l));
-        }
-        {
-            List<Node> nodes = new ArrayList<>();
-            Random random = new Random();
-            long l = System.currentTimeMillis();
-            for (int i = 0; i < 10000000; i++) {
-                nodes.add(getNode(random.nextInt()));
-            }
-            nodes.sort(NODE_COMPARATOR);
-            System.out.println("List-"+(System.currentTimeMillis() - l));
-        }
-    }
-
-    private Node getNode(int credit){
-        Node node = new Node();
-        node.setCredit(credit);
-        return node;
     }
 }

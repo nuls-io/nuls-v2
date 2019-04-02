@@ -35,8 +35,10 @@ public class GenesisBlockTest {
 
     @Test
     public void getInstance() throws Exception {
-        GenesisBlock genesisBlock = GenesisBlock.getInstance(0);
+        GenesisBlock genesisBlock = GenesisBlock.getInstance(0, 0);
+        //创世区块高度为0
         Assert.assertEquals(0, genesisBlock.getHeader().getHeight());
+        //创世区块只有一个交易
         Assert.assertEquals(1, genesisBlock.getHeader().getTxCount());
     }
 }

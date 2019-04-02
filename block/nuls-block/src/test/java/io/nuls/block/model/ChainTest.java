@@ -29,10 +29,6 @@ import java.util.SortedSet;
 
 public class ChainTest {
 
-    @Test
-    public void testMerge() {
-    }
-
     /**
      * 主要测试Chain的比较排序
      */

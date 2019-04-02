@@ -24,8 +24,11 @@ package io.nuls.block.service.impl;
 
 import io.nuls.base.data.Block;
 import io.nuls.base.data.NulsDigestData;
+import io.nuls.block.constant.RunningStatusEnum;
+import io.nuls.block.manager.ContextManager;
 import io.nuls.block.storage.ChainStorageService;
 import io.nuls.block.test.BlockGenerator;
+import io.nuls.block.utils.ConfigLoader;
 import io.nuls.db.service.RocksDBService;
 import io.nuls.tools.core.ioc.SpringLiteContext;
 import org.junit.BeforeClass;
@@ -36,15 +39,21 @@ import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 
+/**
+ * todo 测试未通过
+ */
 public class ChainStorageServiceImplTest {
 
+    private static int chainId = 2;
     private static ChainStorageService service;
     private static Block block;
 
     @BeforeClass
     public static void beforeClass() throws Exception {
-        SpringLiteContext.init("io.nuls.block");
+        SpringLiteContext.init("io.nuls.block", "io.nuls.rpc.modulebootstrap", "io.nuls.rpc.cmd");
         RocksDBService.init("../../../../data/block");
+        ConfigLoader.load();
+        ContextManager.getContext(chainId).setStatus(RunningStatusEnum.RUNNING);
         service = SpringLiteContext.getBean(ChainStorageService.class);
         block = BlockGenerator.generate(null);
     }
@@ -52,8 +61,8 @@ public class ChainStorageServiceImplTest {
     @Test
     public void singleSave() {
         NulsDigestData hash = block.getHeader().getHash();
-        service.save(1, block);
-        Block block1 = service.query(1, hash);
+        service.save(chainId, block);
+        Block block1 = service.query(chainId, hash);
         NulsDigestData hash1 = block1.getHeader().getHash();
         System.out.println(hash);
         assertEquals(hash, hash1);
@@ -62,9 +71,9 @@ public class ChainStorageServiceImplTest {
     @Test
     public void singleRemove() {
         NulsDigestData hash = block.getHeader().getHash();
-        service.save(1, block);
-        service.remove(1, hash);
-        Block block1 = service.query(1, hash);
+        service.save(chainId, block);
+        service.remove(chainId, hash);
+        Block block1 = service.query(chainId, hash);
         assertEquals(null, block1);
     }
 
@@ -87,8 +96,8 @@ public class ChainStorageServiceImplTest {
         list.add(block2);
         list.add(block3);
         list.add(block4);
-        service.save(1, list);
-        List<Block> blocks = service.query(1, hashList);
+        service.save(chainId, list);
+        List<Block> blocks = service.query(chainId, hashList);
         NulsDigestData hash1_ = blocks.get(0).getHeader().getHash();
         NulsDigestData hash2_ = blocks.get(1).getHeader().getHash();
         NulsDigestData hash3_ = blocks.get(2).getHeader().getHash();
@@ -110,9 +119,9 @@ public class ChainStorageServiceImplTest {
         hashList.add(hash2);
         list.add(block);
         list.add(block2);
-        service.save(1, list);
-        service.remove(1, hashList);
-        List<Block> blocks = service.query(1, hashList);
+        service.save(chainId, list);
+        service.remove(chainId, hashList);
+        List<Block> blocks = service.query(chainId, hashList);
         assertEquals(null, blocks);
     }
 }

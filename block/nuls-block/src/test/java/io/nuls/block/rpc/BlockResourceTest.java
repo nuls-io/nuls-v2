@@ -43,6 +43,9 @@ import java.util.Map;
 
 import static io.nuls.block.constant.CommandConstant.*;
 
+/**
+ * 需要单节点运行起来，再执行这个测试类，测试的都是RPC接口
+ */
 public class BlockResourceTest {
 
     private int chainId = 2;
