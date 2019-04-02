@@ -37,9 +37,9 @@ import io.nuls.contract.service.ResultHanlder;
 import io.nuls.contract.util.CompareTxOrderAsc;
 import io.nuls.contract.util.Log;
 import io.nuls.contract.vm.program.ProgramExecutor;
+import io.nuls.rpc.util.RPCUtil;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
-import io.nuls.tools.crypto.HexUtil;
 
 import java.io.IOException;
 import java.math.BigInteger;
@@ -101,7 +101,7 @@ public class ResultHandlerImpl implements ResultHanlder {
 
                 CoinData coinData = new CoinData();
                 ContractBalance balance = tempBalanceManager.getBalance(contractAddress).getData();
-                byte[] nonceBytes = HexUtil.decode(balance.getNonce());
+                byte[] nonceBytes = RPCUtil.decode(balance.getNonce());
 
                 CoinFrom coinFrom = new CoinFrom(contractAddress, chainId, assetsId, BigInteger.valueOf(value), nonceBytes, (byte) 0);
                 coinData.getFrom().add(coinFrom);
@@ -119,7 +119,7 @@ public class ResultHandlerImpl implements ResultHanlder {
                 NulsDigestData hash = NulsDigestData.calcDigestData(tx.serializeForHash());
                 byte[] hashBytes = hash.serialize();
                 byte[] currentNonceBytes = Arrays.copyOfRange(hashBytes, hashBytes.length - 8, hashBytes.length);
-                balance.setNonce(HexUtil.encode(currentNonceBytes));
+                balance.setNonce(RPCUtil.encode(currentNonceBytes));
                 tx.setHash(hash);
                 contractResult.getContractTransferList().add(tx);
             }
