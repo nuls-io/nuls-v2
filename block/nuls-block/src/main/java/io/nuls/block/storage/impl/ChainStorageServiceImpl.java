@@ -23,12 +23,13 @@ package io.nuls.block.storage.impl;
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.data.Block;
 import io.nuls.base.data.NulsDigestData;
-import io.nuls.block.exception.DbRuntimeException;
+import io.nuls.block.constant.BlockErrorCode;
 import io.nuls.block.manager.ContextManager;
 import io.nuls.block.storage.ChainStorageService;
 import io.nuls.db.service.RocksDBService;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.exception.NulsException;
+import io.nuls.tools.exception.NulsRuntimeException;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -104,7 +105,7 @@ public class ChainStorageServiceImpl implements ChainStorageService {
             commonLog.debug("ChainStorageServiceImpl-save-block-"+hash+"-"+b);
             return b;
         } catch (Exception e) {
-            throw new DbRuntimeException("save block error!");
+            throw new NulsRuntimeException(BlockErrorCode.CHAIN_MERGE_ERROR);
         }
     }
 
@@ -183,7 +184,7 @@ public class ChainStorageServiceImpl implements ChainStorageService {
         } catch (Exception e) {
             e.printStackTrace();
             commonLog.error(e);
-            throw new DbRuntimeException("remove blocks error!");
+            throw new NulsRuntimeException(BlockErrorCode.CHAIN_MERGE_ERROR);
         }
     }
 
@@ -205,7 +206,7 @@ public class ChainStorageServiceImpl implements ChainStorageService {
         } catch (Exception e) {
             e.printStackTrace();
             commonLog.error(e);
-            throw new DbRuntimeException("remove block error!");
+            throw new NulsRuntimeException(BlockErrorCode.CHAIN_MERGE_ERROR);
         }
     }
 
@@ -217,7 +218,7 @@ public class ChainStorageServiceImpl implements ChainStorageService {
         } catch (Exception e) {
             e.printStackTrace();
             commonLog.error(e);
-            throw new DbRuntimeException("destroy table error!");
+            throw new NulsRuntimeException(BlockErrorCode.CHAIN_MERGE_ERROR);
         }
     }
 

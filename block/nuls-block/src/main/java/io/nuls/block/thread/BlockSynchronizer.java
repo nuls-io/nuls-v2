@@ -24,23 +24,24 @@ import com.google.common.collect.Lists;
 import io.nuls.base.data.Block;
 import io.nuls.base.data.BlockHeader;
 import io.nuls.base.data.NulsDigestData;
+import io.nuls.block.constant.BlockErrorCode;
 import io.nuls.block.constant.LocalBlockStateEnum;
 import io.nuls.block.constant.RunningStatusEnum;
-import io.nuls.block.exception.ChainRuntimeException;
 import io.nuls.block.manager.BlockChainManager;
 import io.nuls.block.manager.ContextManager;
 import io.nuls.block.model.ChainContext;
 import io.nuls.block.model.ChainParameters;
 import io.nuls.block.model.Node;
 import io.nuls.block.model.po.BlockHeaderPo;
+import io.nuls.block.rpc.call.ConsensusUtil;
+import io.nuls.block.rpc.call.NetworkUtil;
+import io.nuls.block.rpc.call.TransactionUtil;
 import io.nuls.block.service.BlockService;
 import io.nuls.block.storage.BlockStorageService;
 import io.nuls.block.utils.BlockUtil;
 import io.nuls.block.utils.ChainGenerator;
-import io.nuls.block.rpc.call.ConsensusUtil;
-import io.nuls.block.rpc.call.NetworkUtil;
-import io.nuls.block.rpc.call.TransactionUtil;
 import io.nuls.tools.core.ioc.SpringLiteContext;
+import io.nuls.tools.exception.NulsRuntimeException;
 import io.nuls.tools.log.logback.NulsLogger;
 import io.nuls.tools.model.DoubleUtils;
 import io.nuls.tools.thread.ThreadUtils;
@@ -53,7 +54,8 @@ import java.util.concurrent.*;
 import java.util.concurrent.locks.StampedLock;
 
 import static io.nuls.block.BlockBootstrap.blockConfig;
-import static io.nuls.block.constant.Constant.*;
+import static io.nuls.block.constant.Constant.CONSENSUS_WORKING;
+import static io.nuls.block.constant.Constant.NODE_COMPARATOR;
 import static io.nuls.block.constant.LocalBlockStateEnum.*;
 
 /**
@@ -216,7 +218,7 @@ public class BlockSynchronizer implements Runnable {
             }
             if (stateEnum.equals(CONFLICT)) {
                 commonLog.error("chain-" + chainId + ", The local GenesisBlock differ from network");
-                throw new ChainRuntimeException("The local GenesisBlock differ from network");
+                throw new NulsRuntimeException(BlockErrorCode.CHAIN_MERGE_ERROR);
             }
             PriorityBlockingQueue<Node> nodes = params.getNodes();
             int nodeCount = nodes.size();

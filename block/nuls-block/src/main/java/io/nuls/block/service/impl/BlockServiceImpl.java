@@ -23,9 +23,8 @@ package io.nuls.block.service.impl;
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.data.*;
 import io.nuls.block.cache.SmallBlockCacher;
+import io.nuls.block.constant.BlockErrorCode;
 import io.nuls.block.constant.BlockForwardEnum;
-import io.nuls.block.exception.ChainRuntimeException;
-import io.nuls.block.exception.DbRuntimeException;
 import io.nuls.block.manager.BlockChainManager;
 import io.nuls.block.manager.ContextManager;
 import io.nuls.block.message.HashMessage;
@@ -52,6 +51,7 @@ import io.nuls.rpc.model.message.Response;
 import io.nuls.rpc.netty.channel.manager.ConnectManager;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
+import io.nuls.tools.exception.NulsRuntimeException;
 import io.nuls.tools.log.logback.NulsLogger;
 import io.nuls.tools.parse.SerializeUtils;
 
@@ -243,7 +243,7 @@ public class BlockServiceImpl implements BlockService {
             boolean setHeight = blockStorageService.setLatestHeight(chainId, height);
             if (!setHeight) {
                 if (!blockStorageService.setLatestHeight(chainId, height - 1)) {
-                    throw new DbRuntimeException("setLatestHeight error!");
+                    throw new NulsRuntimeException(BlockErrorCode.CHAIN_MERGE_ERROR);
                 }
                 commonLog.error("setHeight false, chainId-" + chainId + ",height-" + height);
                 return false;
@@ -258,10 +258,10 @@ public class BlockServiceImpl implements BlockService {
             boolean txSave = TransactionUtil.save(chainId, blockHeaderPo, block.getTxs(), localInit);
             if (!headerSave || !txSave) {
                 if (!blockStorageService.remove(chainId, height)) {
-                    throw new DbRuntimeException("remove blockheader error!");
+                    throw new NulsRuntimeException(BlockErrorCode.CHAIN_MERGE_ERROR);
                 }
                 if (!blockStorageService.setLatestHeight(chainId, height - 1)) {
-                    throw new DbRuntimeException("setLatestHeight error!");
+                    throw new NulsRuntimeException(BlockErrorCode.CHAIN_MERGE_ERROR);
                 }
                 commonLog.error("headerSave-"+headerSave+", txsSave-"+txSave+", chainId-" + chainId + ",height-" + height);
                 return false;
@@ -274,13 +274,13 @@ public class BlockServiceImpl implements BlockService {
             boolean csNotice = ConsensusUtil.saveNotice(chainId, header, localInit);
             if (!csNotice) {
                 if (!TransactionUtil.rollback(chainId, blockHeaderPo)) {
-                    throw new DbRuntimeException("TransactionUtil rollback error!");
+                    throw new NulsRuntimeException(BlockErrorCode.CHAIN_MERGE_ERROR);
                 }
                 if (!blockStorageService.remove(chainId, height)) {
-                    throw new DbRuntimeException("remove blockheader error!");
+                    throw new NulsRuntimeException(BlockErrorCode.CHAIN_MERGE_ERROR);
                 }
                 if (!blockStorageService.setLatestHeight(chainId, height - 1)) {
-                    throw new DbRuntimeException("setLatestHeight error!");
+                    throw new NulsRuntimeException(BlockErrorCode.CHAIN_MERGE_ERROR);
                 }
                 commonLog.error("csNotice false!chainId-" + chainId + ",height-" + height);
                 return false;
@@ -293,16 +293,16 @@ public class BlockServiceImpl implements BlockService {
             blockHeaderPo.setComplete(true);
             if (!ProtocolUtil.saveNotice(chainId, header) || !blockStorageService.save(chainId, blockHeaderPo)) {
                 if (!ConsensusUtil.rollbackNotice(chainId, height)) {
-                    throw new DbRuntimeException("ConsensusUtil rollbackNotice error!");
+                    throw new NulsRuntimeException(BlockErrorCode.CHAIN_MERGE_ERROR);
                 }
                 if (!TransactionUtil.rollback(chainId, blockHeaderPo)) {
-                    throw new DbRuntimeException("TransactionUtil rollback error!");
+                    throw new NulsRuntimeException(BlockErrorCode.CHAIN_MERGE_ERROR);
                 }
                 if (!blockStorageService.remove(chainId, height)) {
-                    throw new DbRuntimeException("blockStorageService remove error!");
+                    throw new NulsRuntimeException(BlockErrorCode.CHAIN_MERGE_ERROR);
                 }
                 if (!blockStorageService.setLatestHeight(chainId, height - 1)) {
-                    throw new DbRuntimeException("blockStorageService setLatestHeight error!");
+                    throw new NulsRuntimeException(BlockErrorCode.CHAIN_MERGE_ERROR);
                 }
                 commonLog.error("ProtocolUtil saveNotice fail!chainId-" + chainId + ",height-" + height);
                 return false;
@@ -371,7 +371,7 @@ public class BlockServiceImpl implements BlockService {
 
             if (!ConsensusUtil.rollbackNotice(chainId, height)) {
                 if (!ProtocolUtil.saveNotice(chainId, blockHeader)) {
-                    throw new DbRuntimeException("ProtocolUtil saveNotice error!");
+                    throw new NulsRuntimeException(BlockErrorCode.CHAIN_MERGE_ERROR);
                 }
                 commonLog.error("ConsensusUtil rollbackNotice fail!chainId-" + chainId + ",height-" + height);
                 return false;
@@ -382,10 +382,10 @@ public class BlockServiceImpl implements BlockService {
             long startTime2 = System.nanoTime();
             if (!TransactionUtil.rollback(chainId, blockHeaderPo)) {
                 if (!ConsensusUtil.saveNotice(chainId, blockHeader, false)) {
-                    throw new DbRuntimeException("ConsensusUtil saveNotice error!");
+                    throw new NulsRuntimeException(BlockErrorCode.CHAIN_MERGE_ERROR);
                 }
                 if (!ProtocolUtil.saveNotice(chainId, blockHeader)) {
-                    throw new DbRuntimeException("ProtocolUtil saveNotice error!");
+                    throw new NulsRuntimeException(BlockErrorCode.CHAIN_MERGE_ERROR);
                 }
                 commonLog.error("TransactionUtil rollback fail!chainId-" + chainId + ",height-" + height);
                 return false;
@@ -397,36 +397,36 @@ public class BlockServiceImpl implements BlockService {
             if (!blockStorageService.remove(chainId, height)) {
                 blockHeaderPo.setComplete(true);
                 if (!blockStorageService.save(chainId, blockHeaderPo)) {
-                    throw new DbRuntimeException("blockStorageService save error!");
+                    throw new NulsRuntimeException(BlockErrorCode.CHAIN_MERGE_ERROR);
                 }
                 if (!TransactionUtil.saveNormal(chainId, blockHeaderPo)) {
-                    throw new DbRuntimeException("TransactionUtil saveNormal error!");
+                    throw new NulsRuntimeException(BlockErrorCode.CHAIN_MERGE_ERROR);
                 }
                 if (!ConsensusUtil.saveNotice(chainId, blockHeader, false)) {
-                    throw new DbRuntimeException("ConsensusUtil saveNotice error!");
+                    throw new NulsRuntimeException(BlockErrorCode.CHAIN_MERGE_ERROR);
                 }
                 if (!ProtocolUtil.saveNotice(chainId, blockHeader)) {
-                    throw new DbRuntimeException("ProtocolUtil saveNotice error!");
+                    throw new NulsRuntimeException(BlockErrorCode.CHAIN_MERGE_ERROR);
                 }
                 commonLog.error("blockStorageService remove fail!chainId-" + chainId + ",height-" + height);
                 return false;
             }
             if (!blockStorageService.setLatestHeight(chainId, height - 1)) {
                 if (!blockStorageService.setLatestHeight(chainId, height)) {
-                    throw new DbRuntimeException("rollback setLatestHeight error!");
+                    throw new NulsRuntimeException(BlockErrorCode.CHAIN_MERGE_ERROR);
                 }
                 blockHeaderPo.setComplete(true);
                 if (!blockStorageService.save(chainId, blockHeaderPo)) {
-                    throw new DbRuntimeException("blockStorageService save error!");
+                    throw new NulsRuntimeException(BlockErrorCode.CHAIN_MERGE_ERROR);
                 }
                 if (!TransactionUtil.saveNormal(chainId, blockHeaderPo)) {
-                    throw new DbRuntimeException("TransactionUtil saveNormal error!");
+                    throw new NulsRuntimeException(BlockErrorCode.CHAIN_MERGE_ERROR);
                 }
                 if (!ConsensusUtil.saveNotice(chainId, blockHeader, false)) {
-                    throw new DbRuntimeException("ConsensusUtil saveNotice error!");
+                    throw new NulsRuntimeException(BlockErrorCode.CHAIN_MERGE_ERROR);
                 }
                 if (!ProtocolUtil.saveNotice(chainId, blockHeader)) {
-                    throw new DbRuntimeException("ProtocolUtil saveNotice error!");
+                    throw new NulsRuntimeException(BlockErrorCode.CHAIN_MERGE_ERROR);
                 }
                 commonLog.error("rollback setLatestHeight fail!chainId-" + chainId + ",height-" + height);
                 return false;
@@ -512,7 +512,7 @@ public class BlockServiceImpl implements BlockService {
                 genesisBlock = GenesisBlock.getInstance(chainId);
                 boolean b = saveBlock(chainId, genesisBlock, true, 0, false, false, false);
                 if (!b) {
-                    throw new ChainRuntimeException("error occur when saving GenesisBlock!");
+                    throw new NulsRuntimeException(BlockErrorCode.CHAIN_MERGE_ERROR);
                 }
             }
 
@@ -526,7 +526,7 @@ public class BlockServiceImpl implements BlockService {
                 latestHeight = latestHeight - 1;
                 blockStorageService.setLatestHeight(chainId, latestHeight);
             }
-            //4.latestHeight已经维护成功,上面的步骤保证了latestHeight这个高度的区块数据在本地是完整的,但是区块数据的内容并不一定是正确的,所以要继续验证latestBlock
+            //4.latestHeight已经维护成功,上面的步骤保证了latestHeight这个高度的区块数据在本地是完整的,但是区块数据的内容并不一定是正确的,区块同步之前会继续验证latestBlock
             block = getBlock(chainId, latestHeight);
             //5.本地区块维护成功
             ContextManager.getContext(chainId).setLatestBlock(block);
@@ -543,7 +543,7 @@ public class BlockServiceImpl implements BlockService {
     public void init(int chainId) {
         boolean initLocalBlocks = initLocalBlocks(chainId);
         if (!initLocalBlocks) {
-            throw new ChainRuntimeException("error occur when init Local Block!");
+            throw new NulsRuntimeException(BlockErrorCode.CHAIN_MERGE_ERROR);
         }
     }
 
