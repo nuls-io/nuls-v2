@@ -74,7 +74,7 @@ public class ConsensusProcess {
         检查网络状态是否正常（调用网络模块接口获取当前链接节点数）
         Check whether the network status is normal
          */
-        int availableNodes = 5;
+        int availableNodes = CallMethodUtils.getAvailableNodeAmount(chain.getConfig().getChainId(),false);
 
         if(availableNodes < ConsensusConstant.ALIVE_MIN_NODE_COUNT){
             return false;

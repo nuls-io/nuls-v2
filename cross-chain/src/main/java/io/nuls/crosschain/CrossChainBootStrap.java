@@ -65,7 +65,8 @@ public class CrossChainBootStrap extends RpcModule {
     @Override
     public Module[] getDependencies() {
         return new Module[]{
-
+                new Module(ModuleE.TX.abbr, "1.0"),
+                new Module(ModuleE.NW.abbr, "1.0")
         };
     }
 
