@@ -1,16 +1,15 @@
 package io.nuls.account.storage;
 
-import io.nuls.account.constant.AccountParam;
 import io.nuls.account.AccountBootstrap;
+import io.nuls.account.config.NulsConfig;
 import io.nuls.account.model.bo.Account;
 import io.nuls.account.model.po.AccountPo;
 import io.nuls.account.util.AccountTool;
 import io.nuls.db.service.RocksDBService;
 import io.nuls.tools.core.inteceptor.ModularServiceMethodInterceptor;
 import io.nuls.tools.core.ioc.SpringLiteContext;
-import io.nuls.tools.data.DateUtils;
-import io.nuls.tools.data.StringUtils;
-import io.nuls.tools.thread.TimeService;
+import io.nuls.tools.model.DateUtils;
+import io.nuls.tools.model.StringUtils;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -31,16 +30,17 @@ import static org.junit.Assert.assertTrue;
 public class AccountStorageServiceTest {
 
     protected static AccountStorageService accountStorageService;
-    protected int chainId = 12345;
+    protected int chainId = 2;
 
     @BeforeClass
     public static void beforeTest() {
-        //初始化配置
-        AccountBootstrap.initCfg();
-        //读取配置文件，数据存储根目录，初始化打开该目录下所有表连接并放入缓存
-        RocksDBService.init(AccountParam.getInstance().getDataPath());
-        //springLite容器初始化
         SpringLiteContext.init("io.nuls.account", new ModularServiceMethodInterceptor());
+        AccountBootstrap accountBootstrap = SpringLiteContext.getBean(AccountBootstrap.class);
+        //初始化配置
+        accountBootstrap.initCfg();
+        //读取配置文件，数据存储根目录，初始化打开该目录下所有表连接并放入缓存
+        RocksDBService.init(NulsConfig.DATA_PATH);
+        //springLite容器初始化
         //启动时间同步线程
         //TimeService.getInstance().start();
         accountStorageService = SpringLiteContext.getBean(AccountStorageService.class);
@@ -50,7 +50,7 @@ public class AccountStorageServiceTest {
     public void saveAccountListTest() throws Exception {
         List<AccountPo> accountPos = new ArrayList<>();
         int count = 10;
-        String password = "a12345678";
+        String password = "a2678";
         for (int i = 0; i < count; i++) {
             //create account
             Account account = AccountTool.createAccount(chainId);

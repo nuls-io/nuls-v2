@@ -30,10 +30,11 @@ import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * 请求的数据存放容器
- * Requested data storage container
+ * Requested entity storage container
+ *
  * @author ln
  * 2019/2/27
- * */
+ */
 public final class RequestContainer {
 
     private static Map<String, ResponseContainer> REQUEST_MESSAGE_MAP = new ConcurrentHashMap<>();

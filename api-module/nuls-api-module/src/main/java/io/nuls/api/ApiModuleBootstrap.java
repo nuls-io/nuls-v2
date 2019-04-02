@@ -20,26 +20,23 @@
 
 package io.nuls.api;
 
-import com.mongodb.MongoClient;
-import com.mongodb.client.MongoDatabase;
-import io.nuls.api.constant.RunningStatusEnum;
 import io.nuls.api.db.DBTableService;
-import io.nuls.api.db.MongoDBService;
 import io.nuls.api.manager.ScheduleManager;
+import io.nuls.api.model.po.config.ApiConfig;
 import io.nuls.api.model.po.db.ChainInfo;
-import io.nuls.api.utils.ConfigLoader;
+import io.nuls.api.rpc.jsonRpc.JsonRpcServer;
 import io.nuls.rpc.info.HostInfo;
 import io.nuls.rpc.model.ModuleE;
-import io.nuls.rpc.netty.bootstrap.NettyServer;
-import io.nuls.rpc.netty.channel.manager.ConnectManager;
-import io.nuls.rpc.netty.processor.ResponseMessageProcessor;
+import io.nuls.rpc.modulebootstrap.Module;
+import io.nuls.rpc.modulebootstrap.NulsRpcModuleBootstrap;
+import io.nuls.rpc.modulebootstrap.RpcModule;
+import io.nuls.rpc.modulebootstrap.RpcModuleState;
+import io.nuls.tools.core.annotation.Autowired;
+import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.core.ioc.SpringLiteContext;
+import io.nuls.tools.log.Log;
 
 import java.util.List;
-
-import static io.nuls.api.constant.Constant.DEFAULT_SCAN_PACKAGE;
-import static io.nuls.api.constant.Constant.RPC_DEFAULT_SCAN_PACKAGE;
-import static io.nuls.api.utils.LoggerUtil.commonLog;
 
 /**
  * api-module模块启动类
@@ -49,49 +46,38 @@ import static io.nuls.api.utils.LoggerUtil.commonLog;
  * @version 1.0
  * @date 19-1-25 上午10:48
  */
-public class ApiModuleBootstrap {
+@Component
+public class ApiModuleBootstrap extends RpcModule {
+
+    @Autowired
+    private ApiConfig apiConfig;
 
     public static void main(String[] args) {
+        if (args == null || args.length == 0) {
+            args = new String[]{"ws://" + HostInfo.getLocalIP() + ":8887/ws"};
+        }
         Thread.currentThread().setName("api-module-main");
-        init();
-//        start();
-//        loop();
+        NulsRpcModuleBootstrap.run("io.nuls", args);
     }
 
     /**
-     * 初始化，完成后系统状态变更为{@link RunningStatusEnum#READY}
+     * 初始化模块相关配置
+     * 有关mongoDB的连接初始化见：MongoDBService.afterPropertiesSet();
      */
-    private static void init() {
-        try {
-            //加载配置
-            ConfigLoader.load();
-            //扫描包路径io.nuls.api,初始化bean
-            springInit();
-            //初始化数据库相关
-            initDB();
-            initServer();
-        } catch (Exception e) {
-            e.printStackTrace();
-            commonLog.error("error occur when init, " + e.getMessage());
-        }
-    }
-
-
-    private static void springInit() {
-        String dbName = "nuls-api";
-        MongoClient mongoClient = new MongoClient(ApiContext.dbIp, ApiContext.port);
-        MongoDatabase mongoDatabase = mongoClient.getDatabase(dbName);
-        MongoDBService mongoDBService = new MongoDBService(mongoClient, mongoDatabase);
-        SpringLiteContext.putBean("dbService", mongoDBService);
-
-        SpringLiteContext.init(DEFAULT_SCAN_PACKAGE);
+    private void initCfg() {
+        ApiContext.mongoIp = apiConfig.getMongoIp();
+        ApiContext.mongoPort = apiConfig.getMongoPort();
+        ApiContext.defaultChainId = apiConfig.getDefaultChainId();
+        ApiContext.defaultAssetId = apiConfig.getDefaultAssetId();
+        ApiContext.listenerIp = apiConfig.getListenerIp();
+        ApiContext.rpcPort = apiConfig.getRpcPort();
     }
 
     /**
      * Initialize the database connection
      * 初始化数据库连接
      */
-    private static void initDB() {
+    private void initDB() {
         DBTableService tableService = SpringLiteContext.getBean(DBTableService.class);
         List<ChainInfo> chainList = tableService.getChainList();
         if (chainList == null) {
@@ -101,46 +87,56 @@ public class ApiModuleBootstrap {
         }
     }
 
+    @Override
+    public Module[] getDependencies() {
+        return new Module[]{
+                new Module(ModuleE.CS.abbr, "1.0"),
+                new Module(ModuleE.BL.abbr, "1.0"),
+                new Module(ModuleE.SC.abbr, "1.0")
+        };
+    }
 
-    private static void initServer() {
+    @Override
+    public Module moduleInfo() {
+        return new Module(ModuleE.AP.abbr, "1.0");
+    }
+
+    @Override
+    public void init() {
         try {
-            //rpc服务初始化
-            NettyServer.getInstance(ModuleE.AP)
-                    .moduleRoles(new String[]{"1.0"})
-                    .moduleVersion("1.0")
-                    .dependencies(ModuleE.KE.abbr, "1.0")
-//                    .dependencies(ModuleE.CM.abbr, "1.0")
-//                    .dependencies(ModuleE.AC.abbr, "1.0")
-//                    .dependencies(ModuleE.NW.abbr, "1.0")
-//                    .dependencies(ModuleE.CS.abbr, "1.0")
-                    .dependencies(ModuleE.BL.abbr, "1.0")
-//                    .dependencies(ModuleE.LG.abbr, "1.0")
-//                    .dependencies(ModuleE.TX.abbr, "1.0")
-//                    .dependencies(ModuleE.PU.abbr, "1.0")
-                    .scanPackage(RPC_DEFAULT_SCAN_PACKAGE);
-            // Get information from kernel
-            String kernelUrl = "ws://" + HostInfo.getLocalIP() + ":8887/ws";
-            ConnectManager.getConnectByUrl(kernelUrl);
-            ResponseMessageProcessor.syncKernel(kernelUrl);
+            super.init();
+            //初始化配置项
+            initCfg();
+
         } catch (Exception e) {
-            e.printStackTrace();
-            commonLog.error("error occur when init, " + e.getMessage());
+            Log.error(e);
         }
     }
 
-    /**
-     * 启动，完成后系统状态变更为{@link RunningStatusEnum#RUNNING}
-     */
-    private static void start() {
-        ScheduleManager scheduleManager = SpringLiteContext.getBean(ScheduleManager.class);
-        scheduleManager.start();
+    @Override
+    public boolean doStart() {
+        return true;
     }
 
-    /**
-     * 循环记录一些日志信息
-     */
-    private static void loop() {
-
+    @Override
+    public RpcModuleState onDependenciesReady() {
+        try {
+            initDB();
+            ScheduleManager scheduleManager = SpringLiteContext.getBean(ScheduleManager.class);
+            scheduleManager.start();
+            Thread.sleep(3000);
+            JsonRpcServer server = new JsonRpcServer();
+            server.startServer(ApiContext.listenerIp, ApiContext.rpcPort);
+        } catch (Exception e) {
+            Log.error("------------------------api module启动失败---------------------------");
+            Log.error(e);
+            System.exit(-1);
+        }
+        return RpcModuleState.Running;
     }
 
+    @Override
+    public RpcModuleState onDependenciesLoss(Module dependenciesModule) {
+        return RpcModuleState.Ready;
+    }
 }

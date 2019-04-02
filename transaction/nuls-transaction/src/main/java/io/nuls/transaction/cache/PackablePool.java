@@ -1,9 +1,7 @@
 package io.nuls.transaction.cache;
 
-import io.nuls.base.data.NulsDigestData;
 import io.nuls.base.data.Transaction;
 import io.nuls.tools.core.annotation.Component;
-import io.nuls.tools.core.annotation.Service;
 import io.nuls.transaction.model.bo.Chain;
 
 import java.util.ArrayList;
@@ -19,38 +17,12 @@ import java.util.List;
 @Component
 public class PackablePool {
 
-    public boolean addInFirst(Chain chain, Transaction tx, boolean isOrphan) {
-        try {
-            if (tx == null) {
-                return false;
-            }
-            //check Repeatability
-            if (isOrphan) {
-                NulsDigestData hash = tx.getHash();
-                chain.getOrphanContainer().put(hash, tx);
-            } else {
-                chain.getTxQueue().addFirst(tx);
-            }
-            return true;
-        } finally {
-        }
+    public void addInFirst(Chain chain, Transaction tx) {
+        chain.getTxQueue().addFirst(tx);
     }
 
-    public boolean add(Chain chain, Transaction tx, boolean isOrphan) {
-        try {
-            if (tx == null) {
-                return false;
-            }
-            //check Repeatability
-            if (isOrphan) {
-                NulsDigestData hash = tx.getHash();
-                chain.getOrphanContainer().put(hash, tx);
-            } else {
-                chain.getTxQueue().offer(tx);
-            }
-            return true;
-        } finally {
-        }
+    public void add(Chain chain, Transaction tx) {
+        chain.getTxQueue().offer(tx);
     }
 
     /**
@@ -73,40 +45,18 @@ public class PackablePool {
         return txs;
     }
 
-    public boolean exist(Chain chain, Transaction tx, boolean isOrphan) {
-        if (isOrphan) {
-            return chain.getOrphanContainer().containsKey(tx.getHash());
-        } else {
-            return chain.getTxQueue().contains(tx);
-        }
+    public boolean exist(Chain chain, Transaction tx) {
+        return chain.getTxQueue().contains(tx);
     }
 
     public int getPoolSize(Chain chain) {
         return chain.getTxQueue().size();
     }
 
-    public List<Transaction> getAllOrphan(Chain chain) {
-        return new ArrayList<>(chain.getOrphanContainer().values());
-    }
 
-    public void removeOrphan(Chain chain, NulsDigestData hash) {
-        chain.getOrphanContainer().remove(hash);
-    }
-
-    public boolean existOrphan(Chain chain, NulsDigestData hash) {
-        return chain.getOrphanContainer().containsKey(hash);
-    }
 
     public void clear(Chain chain) {
-        try {
-            chain.getTxQueue().clear();
-            chain.getOrphanContainer().clear();
-        } finally {
-        }
-    }
-
-    public int getOrphanPoolSize(Chain chain) {
-        return chain.getOrphanContainer().size();
+        chain.getTxQueue().clear();
     }
 
 }

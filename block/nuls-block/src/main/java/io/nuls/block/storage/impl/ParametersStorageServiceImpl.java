@@ -27,8 +27,8 @@ import io.nuls.block.constant.Constant;
 import io.nuls.block.model.ChainParameters;
 import io.nuls.block.storage.ParametersStorageService;
 import io.nuls.db.service.RocksDBService;
-import io.nuls.tools.core.annotation.Service;
-import io.nuls.tools.data.ByteUtils;
+import io.nuls.tools.core.annotation.Component;
+import io.nuls.tools.model.ByteUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -42,7 +42,7 @@ import static io.nuls.block.utils.LoggerUtil.commonLog;
  * @version 1.0
  * @date 19-2-26 上午10:50
  */
-@Service
+@Component
 public class ParametersStorageServiceImpl implements ParametersStorageService {
     @Override
     public boolean save(ChainParameters chainParameters, int chainId) {

@@ -11,7 +11,10 @@ import ch.qos.logback.core.rolling.RollingFileAppender;
 import ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy;
 import ch.qos.logback.core.util.FileSize;
 import ch.qos.logback.core.util.OptionHelper;
+import io.nuls.tools.model.StringUtils;
 import org.slf4j.LoggerFactory;
+
+import java.io.File;
 
 /**
  * 日志打印管理类，日志文件创建，日志文件大小，保存时间，日志输出格式等设置管理
@@ -21,7 +24,9 @@ import org.slf4j.LoggerFactory;
  * 2018/12/17
  * */
 public class LogAppender {
-    private final static String PROJECT_PATH = "user.dir";
+
+    public static String PROJECT_PATH = StringUtils.isNotBlank(System.getProperty("log.path")) ? System.getProperty("log.path") : (System.getProperty("user.dir") + File.separator + "logs");
+
     /**
      * 通过传入的名字和级别，动态设置appender
      *
@@ -30,7 +35,13 @@ public class LogAppender {
      */
     @SuppressWarnings("unchecked")
     public static RollingFileAppender getAppender(String fileName, Level level){
-        String rootPath = System.getProperty(PROJECT_PATH);
+        String rootPath = PROJECT_PATH;
+        if(!rootPath.endsWith(File.separator)){
+            rootPath += File.separator;
+        }
+        if(fileName.startsWith(File.separator)){
+            fileName = fileName.substring(1);
+        }
         LoggerContext context = (LoggerContext) LoggerFactory.getILoggerFactory();
         RollingFileAppender appender = new RollingFileAppender();
         /*设置上下文，每个logger都关联到logger上下文，默认上下文名称为default。
@@ -44,13 +55,13 @@ public class LogAppender {
         appender.addFilter(levelFilter);
 
         //设置文件名
-        appender.setFile(OptionHelper.substVars(rootPath+"/logs/"+"/"+fileName + ".log",context));
+        appender.setFile(OptionHelper.substVars(rootPath+fileName + ".log",context));
         appender.setAppend(true);
         appender.setPrudent(false);
         //设置文件创建时间及大小的类
         SizeAndTimeBasedRollingPolicy policy = new SizeAndTimeBasedRollingPolicy();
         //文件名格式
-        String fp = OptionHelper.substVars(rootPath+"/logs/"+"/"+ fileName + ".%d{yyyy-MM-dd}.%i.zip",context);
+        String fp = OptionHelper.substVars(rootPath+ fileName + ".%d{yyyy-MM-dd}.%i.zip",context);
         //最大日志文件大小
         policy.setMaxFileSize(FileSize.valueOf("100 MB"));
         //设置文件名模式

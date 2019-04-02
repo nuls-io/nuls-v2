@@ -30,6 +30,7 @@ import io.nuls.account.constant.AccountErrorCode;
 import io.nuls.account.model.bo.Account;
 import io.nuls.account.model.bo.AccountKeyStore;
 import io.nuls.account.model.po.AccountPo;
+import io.nuls.account.rpc.call.ContractCall;
 import io.nuls.account.rpc.call.EventCmdCall;
 import io.nuls.account.service.AccountCacheService;
 import io.nuls.account.service.AccountKeyStoreService;
@@ -50,8 +51,8 @@ import io.nuls.tools.core.annotation.Service;
 import io.nuls.tools.crypto.AESEncrypt;
 import io.nuls.tools.crypto.ECKey;
 import io.nuls.tools.crypto.HexUtil;
-import io.nuls.tools.data.FormatValidUtils;
-import io.nuls.tools.data.StringUtils;
+import io.nuls.tools.model.FormatValidUtils;
+import io.nuls.tools.model.StringUtils;
 import io.nuls.tools.exception.CryptoException;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.exception.NulsRuntimeException;
@@ -95,11 +96,11 @@ public class AccountServiceImpl implements AccountService, InitializingBean {
     @Override
     public List<Account> createAccount(int chainId, int count, String password) {
         //check params
-        //|| StringUtils.isBlank(password)
-        if (chainId <= 0 || count <= 0 || count > AccountTool.CREATE_MAX_SIZE ) {
+        //
+        if (chainId <= 0 || count <= 0 || count > AccountTool.CREATE_MAX_SIZE || StringUtils.isBlank(password)) {
             throw new NulsRuntimeException(AccountErrorCode.PARAMETER_ERROR);
         }
-        if (!StringUtils.isBlank(password) && !FormatValidUtils.validPassword(password)) {
+        if (!FormatValidUtils.validPassword(password)) {
             throw new NulsRuntimeException(AccountErrorCode.PASSWORD_FORMAT_WRONG);
         }
         locker.lock();
@@ -325,7 +326,7 @@ public class AccountServiceImpl implements AccountService, InitializingBean {
         if (StringUtils.isBlank(priKey) || !ECKey.isValidPrivteHex(priKey)) {
             throw new NulsRuntimeException(AccountErrorCode.PRIVATE_KEY_WRONG);
         }
-        if (StringUtils.isBlank(password) || !FormatValidUtils.validPassword(password)) {
+        if (!FormatValidUtils.validPassword(password)) {
             throw new NulsRuntimeException(AccountErrorCode.PASSWORD_FORMAT_WRONG);
         }
         try {
@@ -352,10 +353,10 @@ public class AccountServiceImpl implements AccountService, InitializingBean {
         if (StringUtils.isBlank(priKey)) {
             throw new NulsRuntimeException(AccountErrorCode.PARAMETER_ERROR);
         }
-        if (StringUtils.isBlank(oldPassword) || !FormatValidUtils.validPassword(oldPassword)) {
+        if (!FormatValidUtils.validPassword(oldPassword)) {
             throw new NulsRuntimeException(AccountErrorCode.PASSWORD_FORMAT_WRONG);
         }
-        if (StringUtils.isBlank(newPassword) || !FormatValidUtils.validPassword(newPassword)) {
+        if (!FormatValidUtils.validPassword(newPassword)) {
             throw new NulsRuntimeException(AccountErrorCode.PASSWORD_FORMAT_WRONG);
         }
 
@@ -537,7 +538,7 @@ public class AccountServiceImpl implements AccountService, InitializingBean {
         if (!ECKey.isValidPrivteHex(prikey)) {
             throw new NulsRuntimeException(AccountErrorCode.PRIVATE_KEY_WRONG);
         }
-        if (StringUtils.isNotBlank(password) && !FormatValidUtils.validPassword(password)) {
+        if (!FormatValidUtils.validPassword(password)) {
             throw new NulsRuntimeException(AccountErrorCode.PASSWORD_IS_WRONG);
         }
         //not allowed to cover
@@ -557,9 +558,7 @@ public class AccountServiceImpl implements AccountService, InitializingBean {
             throw new NulsRuntimeException(AccountErrorCode.PRIVATE_KEY_WRONG);
         }
         //encrypting account private key
-        if (StringUtils.isNotBlank(password) && FormatValidUtils.validPassword(password)) {
-            account.encrypt(password);
-        }
+        account.encrypt(password);
         //Query account already exists
         Account acc = getAccountByAddress(chainId, account.getAddress().getBase58());
         if (null == acc) {
@@ -576,6 +575,9 @@ public class AccountServiceImpl implements AccountService, InitializingBean {
         accountCacheService.localAccountMaps.put(account.getAddress().getBase58(), account);
         //backup account to keystore
         keyStoreService.backupAccountToKeyStore(null, chainId, account.getAddress().getBase58(), password);
+        if(!ContractCall.invokeAccountContract(chainId, account.getAddress().getBase58())){
+            LoggerUtil.logger.warn("importAccountByPrikey invokeAccountContract failed. -address:{}", account.getAddress().getBase58());
+        }
         return account;
     }
 
@@ -649,6 +651,10 @@ public class AccountServiceImpl implements AccountService, InitializingBean {
         accountCacheService.localAccountMaps.put(account.getAddress().getBase58(), account);
         //backup account to keystore
         keyStoreService.backupAccountToKeyStore(null, chainId, account.getAddress().getBase58(), password);
+
+        if(!ContractCall.invokeAccountContract(chainId, account.getAddress().getBase58())){
+            LoggerUtil.logger.warn("importAccountByPrikey invokeAccountContract failed. -address:{}", account.getAddress().getBase58());
+        }
         return account;
     }
 

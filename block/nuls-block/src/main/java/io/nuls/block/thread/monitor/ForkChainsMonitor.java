@@ -21,12 +21,12 @@
 package io.nuls.block.thread.monitor;
 
 import io.nuls.block.constant.RunningStatusEnum;
-import io.nuls.block.manager.ChainManager;
+import io.nuls.block.manager.BlockChainManager;
 import io.nuls.block.manager.ContextManager;
 import io.nuls.block.model.Chain;
 import io.nuls.block.model.ChainContext;
 import io.nuls.block.model.ChainParameters;
-import io.nuls.block.utils.module.ConsensusUtil;
+import io.nuls.block.rpc.call.ConsensusUtil;
 import io.nuls.tools.log.logback.NulsLogger;
 
 import java.util.SortedSet;
@@ -76,7 +76,7 @@ public class ForkChainsMonitor implements Runnable {
                             continue;
                         }
                         // possibly racy reads
-                        SortedSet<Chain> forkChains = ChainManager.getForkChains(chainId);
+                        SortedSet<Chain> forkChains = BlockChainManager.getForkChains(chainId);
                         if (!lock.validate(stamp)) {
                             continue;
                         }
@@ -88,7 +88,7 @@ public class ForkChainsMonitor implements Runnable {
                             commonLog.info("#" + forkChain);
                         }
                         //遍历当前分叉链,与主链进行比对,找出最大高度差,与默认参数chainSwtichThreshold对比,确定要切换的分叉链
-                        Chain masterChain = ChainManager.getMasterChain(chainId);
+                        Chain masterChain = BlockChainManager.getMasterChain(chainId);
                         ChainParameters parameters = context.getParameters();
                         int chainSwtichThreshold = parameters.getChainSwtichThreshold();
                         Chain switchChain = new Chain();
@@ -113,7 +113,7 @@ public class ForkChainsMonitor implements Runnable {
                         //进行切换,切换前变更模块运行状态
                         context.setStatus(RunningStatusEnum.SWITCHING);
                         ConsensusUtil.notice(chainId, CONSENSUS_WAITING);
-                        if (ChainManager.switchChain(chainId, masterChain, switchChain)) {
+                        if (BlockChainManager.switchChain(chainId, masterChain, switchChain)) {
                             commonLog.info("chainId-" + chainId + ", switchChain success");
                         } else {
                             commonLog.info("chainId-" + chainId + ", switchChain fail, auto rollback success");

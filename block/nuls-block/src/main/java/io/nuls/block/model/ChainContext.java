@@ -23,24 +23,23 @@
 package io.nuls.block.model;
 
 import io.nuls.base.data.Block;
-import io.nuls.tools.protocol.Protocol;
 import io.nuls.block.cache.CacheHandler;
 import io.nuls.block.cache.SmallBlockCacher;
 import io.nuls.block.constant.RunningStatusEnum;
-import io.nuls.block.manager.ChainManager;
-import io.nuls.block.service.BlockService;
+import io.nuls.block.manager.BlockChainManager;
 import io.nuls.block.utils.LoggerUtil;
-import io.nuls.block.utils.module.ProtocolUtil;
-import io.nuls.block.utils.module.TransactionUtil;
-import io.nuls.tools.core.ioc.SpringLiteContext;
 import io.nuls.tools.log.logback.NulsLogger;
+import io.nuls.tools.protocol.Protocol;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.StampedLock;
 
 /**
@@ -142,6 +141,18 @@ public class ChainContext {
     @Setter
     private NulsLogger messageLog;
 
+    /**
+     * 分叉链、孤儿链中重复hash计数器
+     */
+    @Getter
+    private Map<String, AtomicInteger> duplicateBlockMap;
+
+    /**
+     * 记录某个打包地址是否已经进行过分叉通知，每个地址只通知一次
+     */
+    @Getter
+    private List<byte []> packingAddressList;
+
     public synchronized void setStatus(RunningStatusEnum status) {
         this.status = status;
     }
@@ -151,16 +162,18 @@ public class ChainContext {
     }
 
     public void init() {
+        this.setStatus(RunningStatusEnum.INITIALIZING);
+        packingAddressList = new CopyOnWriteArrayList<>();
+        duplicateBlockMap = new HashMap<>();
         systemTransactionType = new ArrayList<>();
         version = 1;
         doSyn = true;
         lock = new StampedLock();
         LoggerUtil.init(chainId, parameters.getLogLevel());
-        this.setStatus(RunningStatusEnum.INITIALIZING);
         //各类缓存初始化
         SmallBlockCacher.init(chainId);
         CacheHandler.init(chainId);
-        ChainManager.init(chainId);
+        BlockChainManager.init(chainId);
     }
 
     public void start() {

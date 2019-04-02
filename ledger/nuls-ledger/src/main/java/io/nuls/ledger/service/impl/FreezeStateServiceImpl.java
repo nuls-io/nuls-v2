@@ -10,10 +10,10 @@
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- * 
+ *
  * The above copyright notice and this permission notice shall be included in
  * all copies or substantial portions of the Software.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -31,7 +31,7 @@ import io.nuls.ledger.model.po.FreezeHeightState;
 import io.nuls.ledger.model.po.FreezeLockTimeState;
 import io.nuls.ledger.service.FreezeStateService;
 import io.nuls.ledger.storage.Repository;
-import io.nuls.ledger.utils.TimeUtils;
+import io.nuls.ledger.utils.TimeUtil;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Service;
 
@@ -46,83 +46,72 @@ import java.util.List;
 public class FreezeStateServiceImpl implements FreezeStateService {
     @Autowired
     Repository repository;
-    private boolean timeAllow(long latestUnfreezeTime){
-        //是否改为网络时间？
-        long nowTime = TimeUtils.getCurrentTime();
-        if(nowTime - latestUnfreezeTime > LedgerConstant.TIME_RECALCULATE_FREEZE){
-            //解锁时间超时了,进行重新计算
-            return true;
-        }
-        return false;
-    }
-    private BigInteger unFreezeLockTimeState(List<FreezeLockTimeState> timeList,AccountState accountState){
-        long nowTime = TimeUtils.getCurrentTime();
+
+    private BigInteger unFreezeLockTimeState(List<FreezeLockTimeState> timeList, AccountState accountState) {
+        long nowTime = TimeUtil.getCurrentTime();
         //可移除的时间锁列表
-        List<FreezeLockTimeState>  timeRemove =  new ArrayList<>();
-        timeList.sort((x, y) -> Long.compare(x.getLockTime(),y.getLockTime()));
-        for(FreezeLockTimeState freezeLockTimeState : timeList){
-            if(freezeLockTimeState.getLockTime() >= nowTime){
+        List<FreezeLockTimeState> timeRemove = new ArrayList<>();
+        timeList.sort((x, y) -> Long.compare(x.getLockTime(), y.getLockTime()));
+        for (FreezeLockTimeState freezeLockTimeState : timeList) {
+            if (freezeLockTimeState.getLockTime() <= nowTime) {
                 //永久锁定的,继续处理
-                if(freezeLockTimeState.getLockTime() == LedgerConstant.PERMANENT_LOCK){
+                if (freezeLockTimeState.getLockTime() == LedgerConstant.PERMANENT_LOCK) {
                     continue;
                 }
                 timeRemove.add(freezeLockTimeState);
-            }else{
+            } else {
                 //因为正序排列，所以可以跳出
                 break;
             }
         }
-        BigInteger addFromAmount = BigInteger.ZERO;
-        for(FreezeLockTimeState freezeLockTimeState : timeRemove){
+        BigInteger addToAmount = BigInteger.ZERO;
+        for (FreezeLockTimeState freezeLockTimeState : timeRemove) {
             timeList.remove(freezeLockTimeState);
-            addFromAmount.add(freezeLockTimeState.getAmount());
+            addToAmount = addToAmount.add(freezeLockTimeState.getAmount());
         }
-        return addFromAmount;
+        return addToAmount;
     }
-    private BigInteger unFreezeLockHeightState(List<FreezeHeightState> heightList,AccountState accountState){
+
+    private BigInteger unFreezeLockHeightState(List<FreezeHeightState> heightList, AccountState accountState) {
+        //TODO:此处高度可以做个时间缓存
         long nowHeight = repository.getBlockHeight(accountState.getAddressChainId());
         //可移除的高度锁列表
-        List<FreezeHeightState>  heightRemove =  new ArrayList<>();
-        heightList.sort((x, y) -> Long.compare(x.getHeight(),y.getHeight()));
-        for(FreezeHeightState freezeHeightState : heightList){
-            if(freezeHeightState.getHeight()  <= nowHeight){
+        List<FreezeHeightState> heightRemove = new ArrayList<>();
+        heightList.sort((x, y) -> Long.compare(x.getHeight(), y.getHeight()));
+        for (FreezeHeightState freezeHeightState : heightList) {
+            if (freezeHeightState.getHeight() <= nowHeight) {
                 //时间到期，进行解锁
                 heightRemove.add(freezeHeightState);
-            }else{
+            } else {
                 //因为正序排列，所以可以跳出
                 break;
             }
         }
-        BigInteger addFromAmount = BigInteger.ZERO;
-        for(FreezeHeightState freezeHeightState : heightRemove){
+        BigInteger addToAmount = BigInteger.ZERO;
+        for (FreezeHeightState freezeHeightState : heightRemove) {
             heightList.remove(freezeHeightState);
-            addFromAmount.add(freezeHeightState.getAmount());
+            addToAmount = addToAmount.add(freezeHeightState.getAmount());
         }
-        return addFromAmount;
+        return addToAmount;
     }
 
     /**
      * 释放账户的锁定记录
+     *
      * @param accountState
      * @return
      */
     @Override
     public boolean recalculateFreeze(AccountState accountState) {
-        if (timeAllow(accountState.getLatestUnFreezeTime())) {
-            List<FreezeLockTimeState> timeList = accountState.getFreezeLockTimeStates();
-            List<FreezeHeightState> heightList = accountState.getFreezeHeightStates();
-            if (timeList.size() == 0 && heightList.size() == 0) {
-                accountState.setLatestUnFreezeTime(TimeUtils.getCurrentTime());
-                return true;
-            }
-            BigInteger addTimeAmount = unFreezeLockTimeState(timeList, accountState);
-            BigInteger addHeightAmount = unFreezeLockHeightState(heightList, accountState);
-            accountState.addTotalFromAmount(addTimeAmount);
-            accountState.addTotalFromAmount(addHeightAmount);
-            accountState.setLatestUnFreezeTime(TimeUtils.getCurrentTime());
-        }else{
-            return false;
+        List<FreezeLockTimeState> timeList = accountState.getFreezeLockTimeStates();
+        List<FreezeHeightState> heightList = accountState.getFreezeHeightStates();
+        if (timeList.size() == 0 && heightList.size() == 0) {
+            return true;
         }
+        BigInteger addTimeAmount = unFreezeLockTimeState(timeList, accountState);
+        BigInteger addHeightAmount = unFreezeLockHeightState(heightList, accountState);
+        accountState.addTotalToAmount(addTimeAmount);
+        accountState.addTotalToAmount(addHeightAmount);
         return true;
     }
 }

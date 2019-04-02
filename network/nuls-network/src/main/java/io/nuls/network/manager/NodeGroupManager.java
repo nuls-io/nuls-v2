@@ -24,9 +24,11 @@
  */
 package io.nuls.network.manager;
 
+import io.nuls.network.cfg.NetworkConfig;
 import io.nuls.network.constant.ManagerStatusEnum;
-import io.nuls.network.constant.NetworkParam;
 import io.nuls.network.model.NodeGroup;
+import io.nuls.network.utils.LoggerUtil;
+import io.nuls.tools.core.ioc.SpringLiteContext;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -42,6 +44,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * @date 2018/11/01
  **/
 public class NodeGroupManager extends BaseManager {
+
     public static NodeGroupManager getInstance() {
         return nodeGroupManager;
     }
@@ -49,6 +52,7 @@ public class NodeGroupManager extends BaseManager {
 
     private static NodeGroupManager nodeGroupManager = new NodeGroupManager();
     private StorageManager storageManager = StorageManager.getInstance();
+
     /**
      * key:chainId
      */
@@ -82,8 +86,9 @@ public class NodeGroupManager extends BaseManager {
     }
 
     public NodeGroup getMoonMainNet() {
-        if (NetworkParam.getInstance().isMoonNode()) {
-            return getNodeGroupByChainId(NetworkParam.getInstance().getChainId());
+        NetworkConfig networkConfig = SpringLiteContext.getBean(NetworkConfig.class);
+        if (networkConfig.isMoonNode()) {
+            return getNodeGroupByChainId(networkConfig.getChainId());
         }
         return null;
     }
@@ -110,6 +115,7 @@ public class NodeGroupManager extends BaseManager {
     public void addNodeGroup(int chainId, NodeGroup nodeGroup) {
         nodeGroupMap.put(String.valueOf(chainId), nodeGroup);
         mgicNumChainIdMap.put(String.valueOf(nodeGroup.getMagicNumber()), String.valueOf(chainId));
+        LoggerUtil.createLogs(chainId);
     }
 
     public void removeNodeGroup(int chainId) {
@@ -127,14 +133,14 @@ public class NodeGroupManager extends BaseManager {
     @Override
     public void init() throws Exception {
         NodeGroupManager nodeGroupManager = NodeGroupManager.getInstance();
-        NetworkParam networkParam = NetworkParam.getInstance();
+        NetworkConfig networkConfig = SpringLiteContext.getBean(NetworkConfig.class);
         /*
          * 获取配置的信息，进行自有网络的nodeGroup配置初始化
          * Obtain the configuration information and initialize the nodeGroup configuration of the own netw
          */
-        NodeGroup nodeGroup = new NodeGroup(networkParam.getPacketMagic(), networkParam.getChainId(), networkParam.getMaxInCount(), networkParam.getMaxOutCount(),
+        NodeGroup nodeGroup = new NodeGroup(networkConfig.getPacketMagic(), networkConfig.getChainId(), networkConfig.getMaxInCount(), networkConfig.getMaxOutCount(),
                 0);
-        nodeGroupManager.addNodeGroup(networkParam.getChainId(), nodeGroup);
+        nodeGroupManager.addNodeGroup(networkConfig.getChainId(), nodeGroup);
 
         /*
          *友链跨链部分等待跨链模块的初始化调用，卫星链的跨链group通过数据库进行初始化

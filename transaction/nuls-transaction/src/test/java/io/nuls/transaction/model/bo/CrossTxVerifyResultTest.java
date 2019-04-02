@@ -1,15 +1,12 @@
 package io.nuls.transaction.model.bo;
 
 import io.nuls.base.basic.NulsByteBuffer;
-import io.nuls.transaction.TestConstant;
-import io.nuls.transaction.constant.TxConstant;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.io.IOException;
-import java.util.Arrays;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 public class CrossTxVerifyResultTest {
 
@@ -19,7 +16,7 @@ public class CrossTxVerifyResultTest {
     @Before
     public void setUp() throws Exception {
         obj = new CrossTxVerifyResult();
-        obj.setChainId(TxConstant.NULS_CHAINID);
+        obj.setChainId(2);
         obj.setHeight(34567890);
         obj.setNodeId("1");
     }

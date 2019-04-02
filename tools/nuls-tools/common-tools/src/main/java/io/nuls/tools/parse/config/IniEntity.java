@@ -24,7 +24,7 @@
  */
 package io.nuls.tools.parse.config;
 
-import io.nuls.tools.data.StringUtils;
+import io.nuls.tools.model.StringUtils;
 import org.ini4j.Ini;
 import org.ini4j.Profile;
 

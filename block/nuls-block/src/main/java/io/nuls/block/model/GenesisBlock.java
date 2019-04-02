@@ -26,7 +26,7 @@ import io.nuls.base.signture.SignatureUtil;
 import io.nuls.block.constant.BlockErrorCode;
 import io.nuls.tools.crypto.ECKey;
 import io.nuls.tools.crypto.HexUtil;
-import io.nuls.tools.data.StringUtils;
+import io.nuls.tools.model.StringUtils;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.exception.NulsRuntimeException;
 import io.nuls.tools.io.IoUtils;
@@ -120,7 +120,7 @@ public final class GenesisBlock extends Block {
             CoinTo coin = new CoinTo();
             coin.setAddress(ads.getAddressBytes());
             coin.setAmount(new BigInteger(amount));
-            coin.setAssetsChainId(12345);
+            coin.setAssetsChainId(2);
             coin.setAssetsId(1);
             coin.setLockTime(lockTime == null ? 0 : lockTime.longValue());
 

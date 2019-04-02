@@ -1,8 +1,8 @@
 package io.nuls.account.service;
 
-import io.nuls.account.constant.AccountErrorCode;
-import io.nuls.account.constant.AccountParam;
 import io.nuls.account.AccountBootstrap;
+import io.nuls.account.config.NulsConfig;
+import io.nuls.account.constant.AccountErrorCode;
 import io.nuls.account.model.bo.Account;
 import io.nuls.account.model.bo.tx.AliasTransaction;
 import io.nuls.account.model.bo.tx.txdata.Alias;
@@ -15,9 +15,9 @@ import io.nuls.db.service.RocksDBService;
 import io.nuls.tools.core.inteceptor.ModularServiceMethodInterceptor;
 import io.nuls.tools.core.ioc.SpringLiteContext;
 import io.nuls.tools.crypto.HexUtil;
-import io.nuls.tools.data.ByteUtils;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.exception.NulsRuntimeException;
+import io.nuls.tools.model.ByteUtils;
 import io.nuls.tools.thread.TimeService;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -25,7 +25,11 @@ import org.junit.Test;
 import java.math.BigInteger;
 import java.util.List;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 /**
  * @author: qinyifeng
@@ -35,17 +39,17 @@ import static org.junit.Assert.*;
 public class AccountServiceTest {
 
     protected static AccountService accountService;
-    protected int chainId = 12345;
+    protected int chainId = 2;
     protected String password = "nuls123456";
 
     @BeforeClass
     public static void beforeTest() {
         //初始化配置
-        AccountBootstrap.initCfg();
-        //读取配置文件，数据存储根目录，初始化打开该目录下所有表连接并放入缓存
-        RocksDBService.init(AccountParam.getInstance().getDataPath());
-        //springLite容器初始化
         SpringLiteContext.init("io.nuls.account", new ModularServiceMethodInterceptor());
+        AccountBootstrap accountBootstrap = SpringLiteContext.getBean(AccountBootstrap.class);
+        //初始化配置
+        accountBootstrap.initCfg();        //读取配置文件，数据存储根目录，初始化打开该目录下所有表连接并放入缓存
+        RocksDBService.init(NulsConfig.DATA_PATH);
         //启动时间同步线程
         TimeService.getInstance().start();
         accountService = SpringLiteContext.getBean(AccountService.class);
@@ -66,7 +70,7 @@ public class AccountServiceTest {
         Account account = result.get(0);
         assertFalse(account.isEncrypted());
         // set password
-        String password = "abc12345890987";
+        String password = "abc2890987";
         accountService.setPassword(chainId, account.getAddress().getBase58(), password);
         //get account
         Account accountAfterSetPassword = accountService.getAccount(chainId, account.getAddress().getBase58());
@@ -91,7 +95,7 @@ public class AccountServiceTest {
         Account account = result.get(0);
         assertFalse(accountService.isEncrypted(chainId, account.getAddress().getBase58()));
         // set password
-        String password = "abc12345890987";
+        String password = "abc2890987";
         accountService.setPassword(chainId, account.getAddress().getBase58(), password);
         assertTrue(accountService.isEncrypted(chainId, account.getAddress().getBase58()));
     }

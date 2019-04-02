@@ -191,8 +191,8 @@ public class TimeManager extends BaseManager {
         for (String anUrlList : urlList) {
             long begin = System.currentTimeMillis();
             long netTime = getWebTime(anUrlList);
-            Log.info(anUrlList + "netTime:===" + netTime);
-            Log.info("localtime:===" + System.currentTimeMillis());
+            LoggerUtil.Log.info(anUrlList + "netTime:===" + netTime);
+            LoggerUtil.Log.info("localtime:===" + System.currentTimeMillis());
             if (netTime == 0) {
                 continue;
             }
@@ -216,8 +216,8 @@ public class TimeManager extends BaseManager {
         for (int i = 0; i < netTimeUrls.size(); i++) {
             long localBeforeTime = System.currentTimeMillis();
             long netTime = getWebTime(netTimeUrls.get(i).getUrl());
-            Log.info(urlList.get(i) + "netTime:===" + netTime);
-            Log.info("localtime:===" + System.currentTimeMillis());
+            LoggerUtil.Log.info(urlList.get(i) + "netTime:===" + netTime);
+            LoggerUtil.Log.info("localtime:===" + System.currentTimeMillis());
             if (netTime == 0) {
                 continue;
             }

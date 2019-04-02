@@ -1,18 +1,12 @@
 package io.nuls.transaction.model.po;
 
-import io.nuls.base.basic.AddressTool;
-import io.nuls.base.data.CoinData;
-import io.nuls.base.data.CoinFrom;
-import io.nuls.base.data.CoinTo;
-import io.nuls.base.data.Transaction;
-import io.nuls.tools.exception.NulsException;
-import io.nuls.transaction.constant.TxConstant;
+import io.nuls.tools.core.ioc.SpringLiteContext;
+import io.nuls.transaction.constant.TxConfig;
 
 import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
+ * H2关系数据库表
  * @author: Charlie
  * @date: 2018/11/14
  */
@@ -33,11 +27,13 @@ public class TransactionPO {
     private BigInteger amount;
 
     /**
-     * 0:转出, 1:转入, 2:冻结, 3:解锁
+     * 0:转出, 1:转入, 2:冻结(包括红牌), 3:解锁 4:智能合约 5:黄牌
      */
     private Integer state;
 
     private Long time;
+
+    private static TxConfig txConfig = SpringLiteContext.getBean(TxConfig.class);
 
     /**
      * 以账户地址来分表储存
@@ -46,7 +42,7 @@ public class TransactionPO {
      * @return
      */
     public int createTableIndex(){
-        return (this.address.hashCode() & Integer.MAX_VALUE) % TxConstant.H2_TX_TABLE_NUMBER;
+        return (this.address.hashCode() & Integer.MAX_VALUE) % txConfig.getH2TxTableNumber();
     }
 
 

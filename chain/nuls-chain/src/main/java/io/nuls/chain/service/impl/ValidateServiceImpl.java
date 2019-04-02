@@ -36,7 +36,7 @@ import io.nuls.chain.service.ChainService;
 import io.nuls.chain.service.ValidateService;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Service;
-import io.nuls.tools.data.ByteUtils;
+import io.nuls.tools.model.ByteUtils;
 import io.nuls.tools.log.Log;
 
 import java.math.BigDecimal;

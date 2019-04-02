@@ -21,6 +21,7 @@ import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.log.Log;
+import io.nuls.tools.model.DoubleUtils;
 
 import java.io.IOException;
 import java.util.*;
@@ -56,7 +57,13 @@ public class BlockValidator {
       if (!blockHeader.getMerkleHash().equals(NulsDigestData.calcMerkleDigestData(block.getTxHashList()))) {
          throw new NulsException(ConsensusErrorCode.MERKEL_HASH_ERROR);
       }
-      MeetingRound currentRound = roundValidate(isDownload,chain,blockHeader);
+      MeetingRound currentRound ;
+      try {
+         currentRound = roundValidate(isDownload,chain,blockHeader);
+      }catch (Exception e){
+         throw new NulsException(e);
+      }
+
       BlockExtendsData extendsData = new BlockExtendsData(blockHeader.getExtend());
       MeetingMember member = currentRound.getMember(extendsData.getPackingIndexOfRound());
       boolean validResult = punishValidate(block,currentRound,member,chain);
@@ -77,7 +84,7 @@ public class BlockValidator {
     * @param chain             chain info
     * @param blockHeader       block header info
     * */
-   private MeetingRound roundValidate(boolean isDownload, Chain chain, BlockHeader blockHeader)throws NulsException {
+   private MeetingRound roundValidate(boolean isDownload, Chain chain, BlockHeader blockHeader)throws Exception {
       BlockExtendsData extendsData = new BlockExtendsData(blockHeader.getExtend());
       BlockHeader bestBlockHeader = chain.getNewestHeader();
       BlockExtendsData bestExtendsData = new BlockExtendsData(bestBlockHeader.getExtend());
@@ -92,12 +99,16 @@ public class BlockValidator {
       }
       MeetingRound currentRound = roundManager.getCurrentRound(chain);
       boolean hasChangeRound = false;
+
       if(currentRound == null || extendsData.getRoundIndex() < currentRound.getIndex()){
          MeetingRound round = roundManager.getRoundByIndex(chain, extendsData.getRoundIndex());
          if (round != null) {
             currentRound = round;
          }else{
             currentRound = roundManager.getRound(chain,extendsData,false);
+         }
+         if(chain.getRoundList().isEmpty()){
+            chain.getRoundList().add(currentRound);
          }
       }
       else if(extendsData.getRoundIndex() > currentRound.getIndex()){
@@ -121,8 +132,6 @@ public class BlockValidator {
          currentRound = tempRound;
       }
       if (extendsData.getRoundIndex() != currentRound.getIndex() || extendsData.getRoundStartTime() != currentRound.getStartTime()) {
-         chain.getLoggerMap().get(ConsensusConstant.BASIC_LOGGER_NAME).info("接收最新区块轮次:"+extendsData.getRoundIndex()+";本地计算轮次:"+currentRound.getIndex());
-         chain.getLoggerMap().get(ConsensusConstant.BASIC_LOGGER_NAME).info("接收最新区块轮次开始时间:"+extendsData.getRoundStartTime()+";本地计算轮次开始时间:"+currentRound.getStartTime());
          chain.getLoggerMap().get(ConsensusConstant.BASIC_LOGGER_NAME).error("block height " + blockHeader.getHeight() + " round startTime is error! hash :" + blockHeader.getHash());
          throw new NulsException(ConsensusErrorCode.BLOCK_ROUND_VALIDATE_ERROR);
       }
@@ -186,7 +195,7 @@ public class BlockValidator {
       Check the correctness of yellow card trading in block trading
       */
       try {
-         Transaction newYellowPunishTX = punishManager.createYellowPunishTx(chain.getNewestHeader(), member, currentRound);
+         Transaction newYellowPunishTX = punishManager.createYellowPunishTx(chain,chain.getNewestHeader(), member, currentRound);
          if(yellowPunishTx == null && newYellowPunishTX == null){
 
          }else if(yellowPunishTx == null || newYellowPunishTX == null){
@@ -215,7 +224,7 @@ public class BlockValidator {
                if (null == item) {
                   item = currentRound.getPreRound().getMemberByAgentAddress(address);
                }
-               if (item.getAgent().getCreditVal() <= ConsensusConstant.RED_PUNISH_CREDIT_VAL) {
+               if (DoubleUtils.compare(item.getAgent().getRealCreditVal(), ConsensusConstant.RED_PUNISH_CREDIT_VAL) <= 0) {
                   punishAddress.add(AddressTool.getStringAddressByBytes(item.getAgent().getAgentAddress()));
                }
             }
@@ -338,9 +347,7 @@ public class BlockValidator {
 
       Transaction coinBaseTransaction = consensusManager.createCoinBaseTx(chain ,member, block.getTxs(), currentRound, 0);
       if (null == coinBaseTransaction || !tx.getHash().equals(coinBaseTransaction.getHash())) {
-         Log.info(AddressTool.getStringAddressByBytes(member.getAgent().getAgentAddress()));
          BlockExtendsData extendsData = new BlockExtendsData(block.getHeader().getExtend());
-         Log.info(extendsData.getRoundIndex()+"");
          chain.getLoggerMap().get(ConsensusConstant.BASIC_LOGGER_NAME).error("the coin base tx is wrong! height: " + block.getHeader().getHeight() + " , hash : " + block.getHeader().getHash());
          return false;
       }

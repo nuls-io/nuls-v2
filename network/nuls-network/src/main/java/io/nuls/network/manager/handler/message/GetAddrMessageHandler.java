@@ -25,7 +25,7 @@
 
 package io.nuls.network.manager.handler.message;
 
-import io.nuls.network.constant.NetworkParam;
+import io.nuls.network.cfg.NetworkConfig;
 import io.nuls.network.manager.MessageFactory;
 import io.nuls.network.manager.MessageManager;
 import io.nuls.network.manager.NodeGroupManager;
@@ -36,13 +36,12 @@ import io.nuls.network.model.NodeGroup;
 import io.nuls.network.model.dto.IpAddress;
 import io.nuls.network.model.message.AddrMessage;
 import io.nuls.network.model.message.base.BaseMessage;
-import io.nuls.network.netty.container.NodesContainer;
+import io.nuls.network.utils.LoggerUtil;
+import io.nuls.tools.core.ioc.SpringLiteContext;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.*;
-
-import static io.nuls.network.utils.LoggerUtil.Log;
 
 /**
  * 发送与接收 连接地址 协议消息处理类
@@ -74,12 +73,13 @@ public class GetAddrMessageHandler extends BaseMessageHandler {
      */
     @Override
     public NetworkEventResult recieve(BaseMessage message, Node node) {
-        Log.debug("GetAddrMessageHandler Recieve:" + (node.isServer() ? "Server" : "Client") + ":" + node.getIp() + ":" + node.getRemotePort() + "==CMD=" + message.getHeader().getCommandStr());
+        int chainId = node.getNodeGroup().getChainId();
+        LoggerUtil.logger(chainId).debug("GetAddrMessageHandler Recieve:" + (node.isServer() ? "Server" : "Client") + ":" + node.getIp() + ":" + node.getRemotePort() + "==CMD=" + message.getHeader().getCommandStr());
         //发送addr消息
         List<IpAddress> ipAddresses = getAvailableNodes(node);
         AddrMessage addressMessage = MessageFactory.getInstance().buildAddrMessage(ipAddresses, message.getHeader().getMagicNumber());
         if (0 == addressMessage.getMsgBody().getIpAddressList().size()) {
-            Log.info("No Address");
+            LoggerUtil.logger(chainId).info("No Address");
         } else {
             MessageManager.getInstance().sendToNode(addressMessage, node, true);
         }
@@ -88,14 +88,15 @@ public class GetAddrMessageHandler extends BaseMessageHandler {
 
     @Override
     public NetworkEventResult send(BaseMessage message, Node node, boolean asyn) {
-        Log.debug("GetAddrMessageHandler Send:" + (node.isServer() ? "Server" : "Client") + ":" + node.getIp() + ":" + node.getRemotePort() + "==CMD=" + message.getHeader().getCommandStr());
+        LoggerUtil.logger(node.getNodeGroup().getChainId()).debug("GetAddrMessageHandler Send:" + (node.isServer() ? "Server" : "Client") + ":" + node.getIp() + ":" + node.getRemotePort() + "==CMD=" + message.getHeader().getCommandStr());
         return super.send(message, node, asyn);
     }
 
     private List<IpAddress> getAvailableNodes(Node node) {
+        NetworkConfig networkConfig = SpringLiteContext.getBean(NetworkConfig.class);
         NodeGroup nodeGroup = null;
         List<IpAddress> addressList = new ArrayList<>();
-        if (NetworkParam.getInstance().isMoonNode()) {
+        if (networkConfig.isMoonNode()) {
             //是主网节点，回复
             //从跨链连接过来的请求
             nodeGroup = NodeGroupManager.getInstance().getMoonMainNet();

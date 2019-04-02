@@ -31,6 +31,9 @@ package io.nuls.network.constant;
  * @author lan
  */
 public interface NetworkConstant {
+
+
+    String MODULE_DB_PATH="/nw";
     /**
      * ========================================
      * -----------[netty configs ] -------
@@ -55,45 +58,13 @@ public interface NetworkConstant {
      */
     int CONNETCI_TIME_OUT = 6000;
 
-    /**
-     * 握手被拒绝后,锁定的时间,即下次再连接的间隔时间,单位 分钟
-     * After the handshake is rejected, the time of the lock, that is, the interval between the next reconnection, in minutes
-     */
-    int CONNECT_FAIL_LOCK_MINUTE = 10;
 
     /**
      * 10秒链内网络数量与高度无变更,则认为网络状态已稳定
      * 10 seconds The number and speed of the network in the chain are unchanged, and the network status is considered stable.
      */
     int NODEGROUP_NET_STABLE_TIME_MILLIONS = 10 * 1000;
-    /**
-     * 连接重复最大次数
-     * connect try number of times
-     */
-    int NODE_CONNECT_TRY_MAX_TIMES = 50;
-    /**
-     * ========================================
-     * --------[network configs] -------
-     * ========================================
-     */
-    String NETWORK_SECTION = "network";
-    String NETWORK_LANGUAGE = "language";
-    String NETWORK_ENCODING = "encoding";
-    String NETWORK_DBPATH = "rocksdb.datapath";
 
-
-    String NETWORK_SELF_SERVER_PORT = "network.self.server.port";
-    String NETWORK_SELF_MAGIC = "network.self.magic";
-    String NETWORK_SELF_NODE_MAX_IN = "network.self.max.in";
-    String NETWORK_SELF_NODE_MAX_OUT = "network.self.max.out";
-    String NETWORK_SELF_SEED_IP = "network.self.seed.ip";
-    String NETWORK_SELF_CHAIN_ID = "network.self.chainId";
-
-    String NETWORK_MOON_NODE = "network.moon.node";
-    String NETWORK_CROSS_SERVER_PORT = "network.cross.server.port";
-    String NETWORK_CROSS_NODE_MAX_IN = "network.cross.max.in";
-    String NETWORK_CROSS_NODE_MAX_OUT = "network.cross.max.out";
-    String NETWORK_MOON_SEED_IP = "network.moon.seed.ip";
 
     /**
      * ========================================
@@ -109,7 +80,7 @@ public interface NetworkConstant {
     String CMD_MESSAGE_BYE = "bye";
     String CMD_MESSAGE_GET_TIME = "getTime";
     String CMD_MESSAGE_RESPONSE_TIME = "responseTime";
-
+    String CMD_MESSAGE_SEND_LOCAL_INFOS = "peerInfos";
     /**
      * ========================================
      * --------[RPC CMD] -------

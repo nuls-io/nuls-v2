@@ -9,7 +9,7 @@ import io.nuls.eventbus.rpc.processor.EventDispatchProcessor;
 import io.nuls.rpc.cmd.BaseCmd;
 import io.nuls.rpc.model.CmdAnnotation;
 import io.nuls.rpc.model.Parameter;
-import io.nuls.tools.data.StringUtils;
+import io.nuls.tools.model.StringUtils;
 import io.nuls.tools.exception.NulsRuntimeException;
 import static io.nuls.eventbus.util.EbLog.Log;
 
@@ -93,7 +93,7 @@ public class EventBusCmd extends BaseCmd {
      * @param params required parameters for the command
      * @return success/failure response
      */
-    @CmdAnnotation(cmd = EbConstants.EB_SEND, version = 1.0, description = "Publish the event data to subscribers")
+    @CmdAnnotation(cmd = EbConstants.EB_SEND, version = 1.0, description = "Publish the event entity to subscribers")
     @Parameter(parameterName = EbConstants.CMD_PARAM_TOPIC, parameterType = "String")
     @Parameter(parameterName = EbConstants.CMD_PARAM_ROLE, parameterType = "String")
     @Parameter(parameterName = EbConstants.CMD_PARAM_ROLE_NAME, parameterType = "String")

@@ -25,13 +25,9 @@
  */
 package io.nuls.ledger;
 
-import io.nuls.db.service.RocksDBService;
-import io.nuls.ledger.config.AppConfig;
-import io.nuls.ledger.model.ModuleConfig;
-import io.nuls.ledger.service.BlockDataService;
-import io.nuls.ledger.service.impl.BlockDataServiceImpl;
-import io.nuls.ledger.storage.InitDB;
-import io.nuls.ledger.storage.impl.RepositoryImpl;
+import io.nuls.ledger.config.LedgerConfig;
+import io.nuls.ledger.constant.LedgerConstant;
+import io.nuls.ledger.manager.LedgerChainManager;
 import io.nuls.ledger.utils.LoggerUtil;
 import io.nuls.rpc.info.HostInfo;
 import io.nuls.rpc.model.ModuleE;
@@ -39,10 +35,10 @@ import io.nuls.rpc.modulebootstrap.Module;
 import io.nuls.rpc.modulebootstrap.NulsRpcModuleBootstrap;
 import io.nuls.rpc.modulebootstrap.RpcModule;
 import io.nuls.rpc.modulebootstrap.RpcModuleState;
+import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.core.ioc.SpringLiteContext;
-
-import static io.nuls.ledger.utils.LoggerUtil.logger;
+import io.nuls.tools.parse.I18nUtils;
 
 /**
  * @author: Niels Wang
@@ -50,44 +46,27 @@ import static io.nuls.ledger.utils.LoggerUtil.logger;
  */
 @Component
 public class LedgerBootstrap extends RpcModule {
+    @Autowired
+    LedgerConfig ledgerConfig;
 
     public static void main(String[] args) {
         if (args == null || args.length == 0) {
-            args = new String[]{HostInfo.getLocalIP() + ":8887/ws"};
+            args = new String[]{"ws://" + HostInfo.getLocalIP() + ":8887/ws"};
         }
         NulsRpcModuleBootstrap.run("io.nuls", args);
     }
-    /**
-     * 进行数据的校验处理,比如异常关闭模块造成的数据不一致。
-     * 确认的高度是x,则进行x高度的数据恢复处理
-     */
-    public static void initLedgerDatas() throws Exception {
-        BlockDataService blockDataService = SpringLiteContext.getBean(BlockDataServiceImpl.class);
-        blockDataService.initBlockDatas();
-    }
 
-    /**
-     * 初始化数据库
-     */
-    public static void initRocksDb() {
-        try {
-            RocksDBService.init(ModuleConfig.getInstance().getDatabaseDir());
-            InitDB initDB = SpringLiteContext.getBean(RepositoryImpl.class);
-            initDB.initTableName();
-        } catch (Exception e) {
-            logger.error(e);
-        }
-    }
 
     @Override
     public Module[] getDependencies() {
-        return new Module[]{new Module(ModuleE.NW.abbr, "1.0")};
+        return new Module[]{};
     }
 
     @Override
     public Module moduleInfo() {
         return new Module(ModuleE.LG.abbr, "1.0");
     }
+
     /**
      * 初始化模块信息，比如初始化RockDB等，在此处初始化后，可在其他bean的afterPropertiesSet中使用
      */
@@ -95,15 +74,20 @@ public class LedgerBootstrap extends RpcModule {
     public void init() {
         try {
             super.init();
-            AppConfig.loadModuleConfig();
-            initRocksDb();
-            initLedgerDatas();
+            LedgerConstant.UNCONFIRM_NONCE_EXPIRED_TIME = ledgerConfig.getUnconfirmedTxExpired();
+            LedgerConstant.DEFAULT_ENCODING = ledgerConfig.getEncoding();
+            //改为通过配置文件注入
+            I18nUtils.loadLanguage(LedgerBootstrap.class, "languages", ledgerConfig.getLanguage());
+            I18nUtils.setLanguage(ledgerConfig.getLanguage());
+            LedgerChainManager ledgerChainManager = SpringLiteContext.getBean(LedgerChainManager.class);
+            ledgerChainManager.initChains();
         } catch (Exception e) {
             e.printStackTrace();
             System.exit(-1);
         }
 
     }
+
     @Override
     public boolean doStart() {
         //springLite容器初始化AppInitializing

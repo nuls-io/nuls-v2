@@ -61,9 +61,9 @@ import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Service;
 import io.nuls.tools.crypto.ECKey;
 import io.nuls.tools.crypto.HexUtil;
-import io.nuls.tools.data.BigIntegerUtils;
-import io.nuls.tools.data.FormatValidUtils;
-import io.nuls.tools.data.StringUtils;
+import io.nuls.tools.model.BigIntegerUtils;
+import io.nuls.tools.model.FormatValidUtils;
+import io.nuls.tools.model.StringUtils;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.exception.NulsRuntimeException;
 
@@ -322,7 +322,7 @@ public class AliasServiceImpl implements AliasService, InitializingBean {
         CoinFrom coinFrom = new CoinFrom(account.getAddress().getAddressBytes(), account.getChainId(), assetsId, AccountConstant.ALIAS_FEE, nonce, AccountConstant.NORMAL_TX_LOCKED);
         coinFrom.setAddress(account.getAddress().getAddressBytes());
         CoinTo coinTo = new CoinTo(AccountConstant.BLACK_HOLE_ADDRESS, account.getChainId(), assetsId, AccountConstant.ALIAS_FEE);
-        int txSize = tx.size() + coinFrom.size() + coinTo.size() + 72;
+        int txSize = tx.size() + coinFrom.size() + coinTo.size() + P2PHKSignature.SERIALIZE_LENGTH;
         //计算手续费
         BigInteger fee = TransactionFeeCalculator.getNormalTxFee(txSize);
         //总费用为
@@ -341,7 +341,7 @@ public class AliasServiceImpl implements AliasService, InitializingBean {
         //计算交易数据摘要哈希
         tx.setHash(NulsDigestData.calcDigestData(tx.serializeForHash()));
         //缓存当前交易hash
-        TxUtil.PRE_HASH_MAP.put(AddressTool.getStringAddressByBytes(coinFrom.getAddress()), tx.getHash());
+        TxUtil.cacheTxHash(tx);
         return tx;
     }
 

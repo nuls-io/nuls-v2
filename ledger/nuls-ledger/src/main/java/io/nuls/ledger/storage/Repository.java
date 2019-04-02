@@ -31,6 +31,7 @@ import io.nuls.ledger.model.po.BlockSnapshotAccounts;
 import io.nuls.ledger.model.po.BlockTxs;
 
 import java.util.List;
+import java.util.Map;
 
 public interface Repository {
 
@@ -102,5 +103,29 @@ public interface Repository {
      * @return
      */
     BlockTxs getBlock(int chainId, long height);
+
+    /**
+     *
+     * @param chainId
+     * @param noncesMap
+     * @throws Exception
+     */
+    void saveAccountNonces(int chainId, Map<String ,Integer> noncesMap) throws Exception;
+
+    /**
+     *
+     * @param chainId
+     * @param accountNonceKey
+     */
+    void deleteAccountNonces(int chainId,String accountNonceKey) throws Exception;
+
+    /**
+     *
+     * @param chainId
+     * @param accountNonceKey
+     * @return
+     * @throws Exception
+     */
+    boolean existAccountNonce(int chainId,String accountNonceKey) throws Exception;
 
 }

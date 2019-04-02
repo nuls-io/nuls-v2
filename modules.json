@@ -1,0 +1,24 @@
+{
+  "port": 18001,
+  "packetMagic": 20190326,
+  "selfSeedIps": "39.98.226.51:18001,47.244.186.65:18001,47.252.86.42:18001,122.114.0.96:18001",
+  "consensusConfig": {
+    "packingInterval": 10000,
+    "inflationAmount": 500000000000000,
+    "redPublishLockTime": 3600000,
+    "stopAgentLockTime": 3600000,
+    "commissionRateMin": 10,
+    "commissionRateMax": 100,
+    "depositMin": 2000000000000,
+    "depositMax": 50000000000000,
+    "commissionMin": 20000000000000,
+    "commissionMax": 50000000000000,
+    "entrusterDepositMin": 200000000000,
+    "blockReward": 0,
+    "blockMaxSize": 30000000,
+    "assetsId": 1,
+    "chainId": 2,
+    "seedNodes": "tNULSeBaMkrt4z9FYEkkR9D6choPVvQr94oYZp,tNULSeBaMoGr2RkLZPfJeS5dFzZeNj1oXmaYNe,tNULSeBaMnG8hGcyeygVeyaL5cXV38bQm1rw9M",
+    "password": "nuls123456"
+  }
+}

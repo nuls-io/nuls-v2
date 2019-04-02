@@ -26,9 +26,9 @@ import io.nuls.base.data.NulsDigestData;
 import io.nuls.block.model.po.BlockHeaderPo;
 import io.nuls.block.storage.BlockStorageService;
 import io.nuls.db.service.RocksDBService;
-import io.nuls.tools.core.annotation.Service;
-import io.nuls.tools.data.ByteUtils;
+import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.exception.NulsException;
+import io.nuls.tools.model.ByteUtils;
 import io.nuls.tools.parse.SerializeUtils;
 
 import java.util.ArrayList;
@@ -44,7 +44,7 @@ import static io.nuls.block.utils.LoggerUtil.commonLog;
  * @version 1.0
  * @date 18-11-20 上午11:09
  */
-@Service
+@Component
 public class BlockStorageServiceImpl implements BlockStorageService {
 
     @Override

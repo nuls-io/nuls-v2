@@ -27,8 +27,8 @@ import io.nuls.poc.utils.manager.CoinDataManager;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.crypto.HexUtil;
-import io.nuls.tools.data.BigIntegerUtils;
-import io.nuls.tools.data.StringUtils;
+import io.nuls.tools.model.BigIntegerUtils;
+import io.nuls.tools.model.StringUtils;
 import io.nuls.tools.exception.NulsException;
 
 import java.io.IOException;
@@ -217,7 +217,7 @@ public class TxValidator {
             throw new NulsException(ConsensusErrorCode.COMMISSION_RATE_OUT_OF_RANGE);
         }
         BigInteger deposit = agent.getDeposit();
-        if(deposit.compareTo(chain.getConfig().getDepositMin())<0 && deposit.compareTo(chain.getConfig().getDepositMax())>0){
+        if(deposit.compareTo(chain.getConfig().getDepositMin())<0 || deposit.compareTo(chain.getConfig().getDepositMax())>0){
             throw new NulsException(ConsensusErrorCode.DEPOSIT_OUT_OF_RANGE);
         }
         CoinData coinData = new CoinData();
@@ -331,9 +331,6 @@ public class TxValidator {
             throw new NulsException(ConsensusErrorCode.AGENT_NOT_EXIST);
         }
         List<DepositPo> poList = this.getDepositListByAgent(chain,deposit.getAgentHash());
-        if(poList != null && poList.size()>chain.getConfig().getDepositNumberMax()){
-            throw new NulsException(ConsensusErrorCode.DEPOSIT_OVER_COUNT);
-        }
         //节点当前委托总金额
         BigInteger total = deposit.getDeposit();
         for (DepositPo cd : poList) {

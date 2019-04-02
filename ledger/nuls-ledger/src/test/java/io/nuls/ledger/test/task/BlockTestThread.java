@@ -24,7 +24,7 @@
  */
 package io.nuls.ledger.test.task;
 
-import io.nuls.ledger.utils.LockerUtils;
+import io.nuls.ledger.utils.LockerUtil;
 
 /**
  * @author lan
@@ -39,7 +39,7 @@ public class BlockTestThread extends Thread {
     @Override
     public void run() {
         try {
-            LockerUtils.BLOCK_SYNC_LOCKER.lock();
+            LockerUtil.BLOCK_SYNC_LOCKER.lock();
             for(int j = 0 ;j<1000;j++) {
                 System.out.print(Thread.currentThread().getName() + ":");
                 System.out.println(i++);
@@ -47,7 +47,7 @@ public class BlockTestThread extends Thread {
         }catch(Exception e){
             e.printStackTrace();
         }finally {
-            LockerUtils.BLOCK_SYNC_LOCKER.unlock();
+            LockerUtil.BLOCK_SYNC_LOCKER.unlock();
         }
     }
 }

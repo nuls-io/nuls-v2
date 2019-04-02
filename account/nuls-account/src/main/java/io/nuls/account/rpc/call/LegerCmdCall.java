@@ -6,8 +6,8 @@ import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.model.message.Response;
 import io.nuls.rpc.netty.processor.ResponseMessageProcessor;
 import io.nuls.tools.crypto.HexUtil;
-import io.nuls.tools.data.BigIntegerUtils;
-import io.nuls.tools.data.StringUtils;
+import io.nuls.tools.model.BigIntegerUtils;
+import io.nuls.tools.model.StringUtils;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.log.Log;
 
@@ -22,6 +22,31 @@ import java.util.Map;
  * @date: 2018/12/12
  */
 public class LegerCmdCall {
+
+    /**
+     * 查询账户余额
+     */
+    public static HashMap getBalanceNonce(int chainId, int assetChainId, int assetId, String address) {
+        try {
+            Map<String, Object> params = new HashMap<>();
+            params.put(Constants.VERSION_KEY_STR, "1.0");
+            params.put("chainId", chainId);
+            params.put("assetChainId", assetChainId);
+            params.put("assetId", assetId);
+            params.put("address", address);
+            Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.LG.abbr, "getBalanceNonce", params);
+            if (!cmdResp.isSuccess()) {
+                Log.error("Calling remote interface failed. module:{} - interface:{} - ResponseComment:{}", ModuleE.LG.abbr, "getBalanceNonce", cmdResp.getResponseComment());
+                throw new NulsException(AccountErrorCode.FAILED);
+            }
+            HashMap result = (HashMap) ((HashMap) cmdResp.getResponseData()).get("getBalanceNonce");
+            return result;
+        } catch (Exception e) {
+            Log.error("Calling remote interface failed. module:{} - interface:{}", ModuleE.LG.abbr, "getBalanceNonce");
+            e.printStackTrace();
+        }
+        return null;
+    }
 
     /**
      * 查询账户余额

@@ -22,23 +22,19 @@
 
 package io.nuls.block.utils;
 
-import io.nuls.block.constant.ConfigConstant;
-import io.nuls.block.manager.ConfigManager;
+import io.nuls.block.constant.BlockConfig;
 import io.nuls.block.manager.ContextManager;
 import io.nuls.block.model.ChainParameters;
 import io.nuls.block.storage.ParametersStorageService;
 import io.nuls.tools.core.ioc.SpringLiteContext;
 import io.nuls.tools.io.IoUtils;
 import io.nuls.tools.parse.JSONUtils;
-import io.nuls.tools.parse.config.ConfigItem;
 import io.nuls.tools.protocol.*;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
+import static io.nuls.block.BlockBootstrap.blockConfig;
 import static io.nuls.block.constant.Constant.*;
 
 /**
@@ -83,14 +79,8 @@ public class ConfigLoader {
         List<ProtocolConfigJson> protocolConfigs = JSONUtils.json2list(json, ProtocolConfigJson.class);
         protocolConfigs.sort(PROTOCOL_CONFIG_COMPARATOR);
         Map<Short, Protocol> protocolMap = ProtocolLoader.load(protocolConfigs);
-        String configJson = IoUtils.read(MODULES_CONFIG_FILE);
-        List<ConfigItem> configItems = JSONUtils.json2list(configJson, ConfigItem.class);
-        Map<String, ConfigItem> map = new HashMap<>(configItems.size());
-        configItems.forEach(e -> map.put(e.getName(), e));
-        int chainId = Integer.parseInt(map.get(ConfigConstant.CHAIN_ID).getValue());
-        ConfigManager.add(chainId, map);
-        ChainParameters po = new ChainParameters();
-        po.init(map);
+        int chainId = blockConfig.getDefaultChainParameter().getChainId();
+        ChainParameters po = blockConfig.getDefaultChainParameter();
         ContextManager.init(po, protocolMap);
         service.save(po, chainId);
         service.saveProtocolConfigJson(json, chainId);

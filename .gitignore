@@ -116,5 +116,9 @@ buildNumber.properties
 # log
 logs/
 data/
+!tools/nuls-tools/base-tools/src/main/java/io/nuls/base/data
 keystore/
 Modules/
+NULS-Walltet-linux64-alpha1/
+config_tmp/
+NULS-Walltet-linux64-alpha1.tar.gz

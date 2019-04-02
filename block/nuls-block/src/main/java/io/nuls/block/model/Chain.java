@@ -137,7 +137,16 @@ public class Chain {
      */
     @Getter
     @Setter
-    private AtomicInteger age;
+    private AtomicInteger age = new AtomicInteger(0);
+
+    /**
+     * 获取链的起始hash
+     *
+     * @return
+     */
+    public NulsDigestData getStartHash() {
+        return hashList.getFirst();
+    }
 
     /**
      * 获取链的结束hash
@@ -185,9 +194,16 @@ public class Chain {
         return new StringJoiner(", ", Chain.class.getSimpleName() + "[", "]")
                 .add("startHeight=" + startHeight)
                 .add("endHeight=" + endHeight)
-//                .add("hashList=" + hashList)
+                .add("hashList=" + hashList)
                 .add("type=" + type)
                 .add("age=" + age)
                 .toString();
+    }
+
+    @Override
+    protected Object clone() throws CloneNotSupportedException {
+        Chain clone = new Chain();
+
+        return super.clone();
     }
 }

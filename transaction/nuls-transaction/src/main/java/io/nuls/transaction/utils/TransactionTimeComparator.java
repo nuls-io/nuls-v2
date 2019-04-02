@@ -42,27 +42,26 @@ public class TransactionTimeComparator implements Comparator<Transaction> {
 
     @Override
     public int compare(Transaction o1, Transaction o2) {
-        if(o1.getHash().equals(o2.getHash())){
+        if (o1.getHash().equals(o2.getHash())) {
             return 0;
         }
-        if(o1.getTime() < o2.getTime()){
+        if (o1.getTime() < o2.getTime()) {
             return -1;
-        }else if(o1.getTime() > o2.getTime()){
+        } else if (o1.getTime() > o2.getTime()) {
             return 1;
-        }else{
+        } else {
             //比较交易hash和nonce的关系
             try {
-                if(null == o1.getCoinData() || null == o2.getCoinData()) {
+                if (null == o1.getCoinData() || null == o2.getCoinData()) {
                     return 0;
                 }
                 CoinData o1CoinData = o1.getCoinDataInstance();
-                if(null == o1CoinData.getFrom()){
+                if (null == o1CoinData.getFrom()) {
                     return 0;
                 }
-                for(CoinFrom coinFrom : o1CoinData.getFrom()){
-                    byte[] o2Hash = o2.getHash().getDigestBytes();
-                    byte[] o2HashPrefix = Arrays.copyOfRange(o2Hash, 0 ,7);
-                    if(Arrays.equals(o2HashPrefix, coinFrom.getNonce())){
+                byte[] hashPrefix = Arrays.copyOfRange(o2.getHash().getDigestBytes(), 0, 7);
+                for (CoinFrom coinFrom : o1CoinData.getFrom()) {
+                    if (Arrays.equals(hashPrefix, coinFrom.getNonce())) {
                         //o1其中一个账户的nonce等于o2的hash，则需要交换位置(说明o2是o1的前一笔交易)
                         //命中一个from直接返回
                         return 1;
@@ -70,13 +69,13 @@ public class TransactionTimeComparator implements Comparator<Transaction> {
                 }
 
                 CoinData o2CoinData = o2.getCoinDataInstance();
-                if(null == o2CoinData.getFrom()){
+                if (null == o2CoinData.getFrom()) {
                     return 0;
                 }
-                for(CoinFrom coinFrom : o2CoinData.getFrom()){
-                    byte[] o1Hash = o1.getHash().getDigestBytes();
-                    byte[] o1HashPrefix = Arrays.copyOfRange(o1Hash, 0 ,7);
-                    if(Arrays.equals(o1HashPrefix, coinFrom.getNonce())){
+                hashPrefix = Arrays.copyOfRange(o1.getHash().getDigestBytes(), 0, 7);
+                for (CoinFrom coinFrom : o2CoinData.getFrom()) {
+
+                    if (Arrays.equals(hashPrefix, coinFrom.getNonce())) {
                         //o2其中一个账户的nonce等于o1的hash，则不需要交换位置(说明o1是o2的前一笔交易)
                         //命中一个from直接返回
                         return -1;

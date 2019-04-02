@@ -49,13 +49,13 @@ import java.util.Map;
  * @date 2019/01/14
  **/
 public class CmdGenesisAsset {
-    public int chainId = 12345;
-    int assetChainId = 12345;
+    public int chainId = 2;
+    int assetChainId = 2;
 //    String address = "JgT2JCQvKGRKRjKqyfxRAj2zSCpGca01f";
-    String address = "LU6eNP3pJ5UMn5yn8LeDE3Pxeapsq3930";
+    String address = "tNULSeBaMvEtDfvZuukDf2mVyfGo3DdiN8KLRG";
     int assetId = 1;
     //入账金额
-    BigInteger amount = BigInteger.valueOf(100000000000L);
+    BigInteger amount = BigInteger.valueOf(100000000000000L);
     Transaction buildTransaction() throws IOException {
         //封装交易执行
         Transaction tx = new Transaction();
@@ -76,7 +76,7 @@ public class CmdGenesisAsset {
         tx.setCoinData(coinData.serialize());
         tx.setHash(NulsDigestData.calcDigestData(tx.serializeForHash()));
         tx.setBlockHeight(0);
-        tx.setTime(50000000000L);
+        tx.setTime(500000000000000L);
         return tx;
     }
 
@@ -103,7 +103,7 @@ public class CmdGenesisAsset {
          response = ResponseMessageProcessor.requestAndResponse(ModuleE.LG.abbr, "validateCoinData", params);
         logger.info("response {}", response);
         params.put("txHexList",txHexList);
-        params.put("blockHeight",35);
+        params.put("blockHeight",0);
         params.put("isConfirmTx",true);
         response = ResponseMessageProcessor.requestAndResponse(ModuleE.LG.abbr, "commitTx", params);
         logger.info("response {}", response);
@@ -113,10 +113,9 @@ public class CmdGenesisAsset {
         // Build params map
         Map<String, Object> params = new HashMap<>();
         // Version information ("1.1" or 1.1 is both available)
-        params.put("chainId", 12345);
-        params.put("assetChainId", 12345);
-        params.put("assetId", 12345);
-        address ="H3eriRPPdbSMxXfg5MFYVfGmypNma3930";
+        params.put("chainId", 2);
+        params.put("assetChainId", 2);
+        params.put("assetId", 1);
         params.put("address", address);
 //        params.put("address", "LLbmaw1UNmKmd5PfuzP1Zm9dNuAnia01f");
 

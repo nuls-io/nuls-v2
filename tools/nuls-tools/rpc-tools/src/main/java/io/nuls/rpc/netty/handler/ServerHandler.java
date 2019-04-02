@@ -4,10 +4,13 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
-import io.nuls.rpc.netty.channel.ConnectData;
+import io.nuls.rpc.info.Constants;
+import io.nuls.rpc.model.message.Message;
+import io.nuls.rpc.model.message.MessageType;
 import io.nuls.rpc.netty.channel.manager.ConnectManager;
 import io.nuls.rpc.netty.handler.message.TextMessageHandler;
 import io.nuls.tools.log.Log;
+import io.nuls.tools.parse.JSONUtils;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -15,29 +18,41 @@ import java.util.concurrent.Executors;
 /**
  * 服务器端事件触发处理类
  * Server-side event trigger processing class
+ *
  * @author tag
  * 2019/2/21
- * */
+ */
 public class ServerHandler extends SimpleChannelInboundHandler<Object> {
 
-    private ThreadLocal<ExecutorService> threadExecutorService = ThreadLocal.withInitial(() -> Executors.newFixedThreadPool(Thread.activeCount()));
+    //private ThreadLocal<ExecutorService> threadExecutorService = ThreadLocal.withInitial(() -> Executors.newFixedThreadPool(Constants.THREAD_POOL_SIZE));
+    private ExecutorService requestExecutorService = Executors.newFixedThreadPool(Constants.THREAD_POOL_SIZE);
+
+    private ExecutorService responseExecutorService = Executors.newFixedThreadPool(Constants.THREAD_POOL_SIZE);
 
     @Override
     public void channelActive(ChannelHandlerContext ctx) throws Exception {
         //SocketChannel socketChannel = (SocketChannel) ctx.channel();
         /*
-        * 缓存链接通道
-        * cache link channel
-        * */
+         * 缓存链接通道
+         * cache link channel
+         * */
         //ConnectManager.createConnectData(socketChannel,ConnectManager.getRemoteUri(socketChannel));
     }
 
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, Object msg) throws Exception {
-        if(msg instanceof TextWebSocketFrame){
+        if (msg instanceof TextWebSocketFrame) {
             TextWebSocketFrame txMsg = (TextWebSocketFrame) msg;
-            TextMessageHandler messageHandler = new TextMessageHandler((SocketChannel) ctx.channel(), txMsg.text());
-            threadExecutorService.get().execute(messageHandler);
+            Message message = JSONUtils.json2pojo(txMsg.text(), Message.class);
+            MessageType messageType = MessageType.valueOf(message.getMessageType());
+            TextMessageHandler messageHandler = new TextMessageHandler((SocketChannel) ctx.channel(), message);
+            if(messageType.equals(MessageType.Response)
+                    || messageType.equals(MessageType.NegotiateConnectionResponse)
+                    || messageType.equals(MessageType.Ack) ){
+                responseExecutorService.execute(messageHandler);
+            }else{
+                requestExecutorService.execute(messageHandler);
+            }
         } else {
             Log.warn("Unsupported message format");
         }
@@ -45,14 +60,8 @@ public class ServerHandler extends SimpleChannelInboundHandler<Object> {
 
     @Override
     public void channelUnregistered(ChannelHandlerContext ctx) throws Exception {
-        SocketChannel socketChannel = (SocketChannel) ctx.channel();
-        ConnectData connectData = ConnectManager.CHANNEL_DATA_MAP.get(socketChannel);
-
-        if(connectData != null) {
-            connectData.setConnected(false);
-        }
-
-        Log.info("链接断开:"+ConnectManager.getRemoteUri(socketChannel));
+        /*SocketChannel socketChannel = (SocketChannel) ctx.channel();
+        Log.info("链接断开:"+ConnectManager.getRemoteUri(socketChannel));*/
     }
 
     @Override
@@ -60,4 +69,9 @@ public class ServerHandler extends SimpleChannelInboundHandler<Object> {
         ConnectManager.disConnect((SocketChannel) ctx.channel());
     }
 
+    @Override
+    public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
+        super.exceptionCaught(ctx, cause);
+        cause.printStackTrace();
+    }
 }

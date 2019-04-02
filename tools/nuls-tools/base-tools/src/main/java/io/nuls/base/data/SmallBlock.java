@@ -47,22 +47,19 @@ public class SmallBlock extends BaseNulsData {
      * 区块头
      * block header
      */
-
     private BlockHeader header;
 
     /**
      * 交易摘要列表
      * transaction hash list
      */
-
-    private List<NulsDigestData> txHashList;
+    private ArrayList<NulsDigestData> txHashList;
 
     /**
-     * 共识交易列表（其他节点一定没有的交易）
+     * 系统交易列表（其他节点一定没有的交易，如共识奖励交易、红牌交易、黄牌交易）
      * Consensus trading list (transactions that no other node must have)
      */
-
-    private List<Transaction> subTxList = new ArrayList<>();
+    private List<Transaction> systemTxList = new ArrayList<>();
 
     public SmallBlock() {
     }
@@ -74,8 +71,8 @@ public class SmallBlock extends BaseNulsData {
         for (NulsDigestData hash : txHashList) {
             size += SerializeUtils.sizeOfNulsData(hash);
         }
-        size += SerializeUtils.sizeOfVarInt(subTxList.size());
-        for (Transaction tx : subTxList) {
+        size += SerializeUtils.sizeOfVarInt(systemTxList.size());
+        for (Transaction tx : systemTxList) {
             size += SerializeUtils.sizeOfNulsData(tx);
         }
         return size;
@@ -88,8 +85,8 @@ public class SmallBlock extends BaseNulsData {
         for (NulsDigestData hash : txHashList) {
             stream.writeNulsData(hash);
         }
-        stream.writeVarInt(subTxList.size());
-        for (Transaction tx : subTxList) {
+        stream.writeVarInt(systemTxList.size());
+        for (Transaction tx : systemTxList) {
             stream.writeNulsData(tx);
         }
     }
@@ -104,18 +101,19 @@ public class SmallBlock extends BaseNulsData {
             this.txHashList.add(byteBuffer.readHash());
         }
 
-        this.subTxList = new ArrayList<>();
+        this.systemTxList = new ArrayList<>();
         long subTxListSize = byteBuffer.readVarInt();
         for (int i = 0; i < subTxListSize; i++) {
             Transaction tx = byteBuffer.readTransaction();
             tx.setBlockHeight(header.getHeight());
-            this.subTxList.add(tx);
+            this.systemTxList.add(tx);
         }
     }
 
     /**
      * 区块头
      * block header
+     *
      * @return BlockHeader
      */
     public BlockHeader getHeader() {
@@ -130,11 +128,11 @@ public class SmallBlock extends BaseNulsData {
 //     * 交易摘要列表
 //     * transaction hash list
 //     */
-    public List<NulsDigestData> getTxHashList() {
+    public ArrayList<NulsDigestData> getTxHashList() {
         return txHashList;
     }
 
-    public void setTxHashList(List<NulsDigestData> txHashList) {
+    public void setTxHashList(ArrayList<NulsDigestData> txHashList) {
         this.txHashList = txHashList;
     }
 
@@ -142,12 +140,12 @@ public class SmallBlock extends BaseNulsData {
 //     * 共识交易列表（其他节点一定没有的交易）
 //     * Consensus trading list (transactions that no other node must have)
 //     */
-    public List<Transaction> getSubTxList() {
-        return subTxList;
+    public List<Transaction> getSystemTxList() {
+        return systemTxList;
     }
 
-    public void addBaseTx(Transaction tx) {
-        this.subTxList.add(tx);
+    public void addSystemTx(Transaction tx) {
+        this.systemTxList.add(tx);
     }
 
 }

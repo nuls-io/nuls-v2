@@ -1,6 +1,6 @@
 package io.nuls.api.model.po.db;
 
-import io.nuls.api.constant.Constant;
+import io.nuls.api.constant.ApiConstant;
 import lombok.Data;
 import org.bson.Document;
 
@@ -41,41 +41,44 @@ public class TransactionInfo {
 
     public void calcValue() {
         BigInteger value = BigInteger.ZERO;
-        if (type == Constant.TX_TYPE_COINBASE ||
-                type == Constant.TX_TYPE_STOP_AGENT ||
-                type == Constant.TX_TYPE_CANCEL_DEPOSIT) {
+        if (type == ApiConstant.TX_TYPE_COINBASE ||
+                type == ApiConstant.TX_TYPE_STOP_AGENT ||
+                type == ApiConstant.TX_TYPE_CANCEL_DEPOSIT) {
             if (coinTos != null) {
                 for (CoinToInfo output : coinTos) {
-                    value.add(output.getAmount());
+                    value = value.add(output.getAmount());
                 }
             }
-        } else if (type == Constant.TX_TYPE_TRANSFER ||
-                type == Constant.TX_TYPE_ALIAS ||
-                type == Constant.TX_TYPE_CONTRACT_TRANSFER) {
+        } else if (type == ApiConstant.TX_TYPE_TRANSFER ||
+                type == ApiConstant.TX_TYPE_CALL_CONTRACT ||
+                type == ApiConstant.TX_TYPE_CONTRACT_TRANSFER ||
+                type == ApiConstant.TX_TYPE_DATA) {
             Set<String> addressSet = new HashSet<>();
             for (CoinFromInfo input : coinFroms) {
                 addressSet.add(input.getAddress());
             }
             for (CoinToInfo output : coinTos) {
                 if (!addressSet.contains(output.getAddress())) {
-                    value.add(output.getAmount());
+                    value = value.add(output.getAmount());
                 }
             }
-        } else if (type == Constant.TX_TYPE_REGISTER_AGENT || type == Constant.TX_TYPE_JOIN_CONSENSUS) {
+        } else if (type == ApiConstant.TX_TYPE_REGISTER_AGENT || type == ApiConstant.TX_TYPE_JOIN_CONSENSUS) {
             for (CoinToInfo output : coinTos) {
                 if (output.getLockTime() == -1) {
-                    value.add(output.getAmount());
+                    value = value.add(output.getAmount());
                 }
             }
+        } else if (type == ApiConstant.TX_TYPE_ALIAS) {
+            value = ApiConstant.ALIAS_AMOUNT;
         } else {
             value = this.fee;
         }
-        this.value = value;
+        this.value = value.abs();
     }
 
     public Document toDocument() {
         Document document = new Document();
-        document.append("_id", hash).append("height", height).append("createTime", createTime).append("type", type).append("value", value).append("fee", fee);
+        document.append("_id", hash).append("height", height).append("createTime", createTime).append("type", type).append("value", value.toString()).append("fee", fee.toString());
         return document;
     }
 

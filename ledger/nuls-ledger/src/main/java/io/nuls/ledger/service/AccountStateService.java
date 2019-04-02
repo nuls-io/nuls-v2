@@ -27,21 +27,24 @@ package io.nuls.ledger.service;
 
 import io.nuls.ledger.model.UnconfirmedTx;
 import io.nuls.ledger.model.po.AccountState;
+import io.nuls.ledger.model.po.AccountStateSnapshot;
 import io.nuls.ledger.model.po.BlockSnapshotAccounts;
 
 /**
  * Created by wangkun23 on 2018/11/29.
  */
 public interface AccountStateService {
+
     /**
      *
+     * 不用同步锁获取账户信息
      * @param address
-     * @param addressChainId
      * @param assetChainId
      * @param assetId
      * @return
      */
-    AccountState createAccount(String address,int addressChainId, int assetChainId, int assetId);
+    AccountState getAccountStateUnSyn(String address,int addressChainId, int assetChainId, int assetId);
+
 
     /**
      *
@@ -53,7 +56,7 @@ public interface AccountStateService {
     AccountState getAccountState(String address,int addressChainId, int assetChainId, int assetId);
 
     /**
-     * 存储新的账户信息时，进行快照存储
+     * 存储新的账户信息
      * @param assetKey
      * @param blockSnapshotAccounts
      * @param accountState
@@ -65,10 +68,10 @@ public interface AccountStateService {
     /**
      * 回滚账户信息
      * @param assetKey
-     * @param accountState
+     * @param accountStateSnapshot
      * @throws Exception
      */
-    void rollAccountState(String assetKey, AccountState accountState) throws Exception;
+    void rollAccountState(String assetKey, AccountStateSnapshot accountStateSnapshot) throws Exception;
 
 
 
@@ -79,7 +82,7 @@ public interface AccountStateService {
      * @param nonce
      * @param txHash
      */
-    void rollUnconfirmTx(int addressChainId,String assetKey,String nonce,String txHash);
+    boolean rollUnconfirmTx(int addressChainId,String assetKey,String nonce,String txHash);
 
     /**
      *

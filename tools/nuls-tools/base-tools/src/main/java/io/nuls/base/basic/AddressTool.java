@@ -28,14 +28,14 @@ package io.nuls.base.basic;
 import io.nuls.base.constant.BaseConstant;
 import io.nuls.base.data.Address;
 import io.nuls.tools.crypto.Base58;
-import io.nuls.tools.crypto.HexUtil;
-import io.nuls.tools.data.ByteUtils;
-import io.nuls.tools.data.StringUtils;
+import io.nuls.tools.model.ByteUtils;
+import io.nuls.tools.model.StringUtils;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.exception.NulsRuntimeException;
 import io.nuls.tools.log.Log;
 import io.nuls.tools.parse.SerializeUtils;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -45,7 +45,45 @@ import java.util.List;
  */
 public class AddressTool {
 
-    public static String UNDERLINE = "_";
+    public static final String MAINNET_PREFIX = BaseConstant.MAINNET_DEFAULT_ADDRESS_PREFIX;
+    public static final String TESTNET_PREFIX = BaseConstant.TESTNET_DEFAULT_ADDRESS_PREFIX;
+
+    private static final String ERROR_MESSAGE = "Address prefix can not be null!";
+    private static final String[] LENGTHPREFIX = new String[]{"", "a", "b", "c", "d", "e"};
+
+    public static String getPrefix(String addressString) {
+        if (addressString.startsWith(MAINNET_PREFIX)) {
+            return MAINNET_PREFIX;
+        }
+        if (addressString.startsWith(TESTNET_PREFIX)) {
+            return TESTNET_PREFIX;
+        }
+        char[] arr = addressString.toCharArray();
+        for (int i = 0; i < arr.length; i++) {
+            char val = arr[i];
+            if (val >= 97) {
+                return addressString.substring(0, i);
+            }
+        }
+        throw new RuntimeException(ERROR_MESSAGE);
+    }
+
+    private static String getRealAddrss(String addressString) {
+        if (addressString.startsWith(MAINNET_PREFIX)) {
+            return addressString.substring(MAINNET_PREFIX.length() + 1);
+        }
+        if (addressString.startsWith(TESTNET_PREFIX)) {
+            return addressString.substring(TESTNET_PREFIX.length() + 1);
+        }
+        char[] arr = addressString.toCharArray();
+        for (int i = 0; i < arr.length; i++) {
+            char val = arr[i];
+            if (val >= 97) {
+                return addressString.substring(i + 1);
+            }
+        }
+        throw new RuntimeException(ERROR_MESSAGE);
+    }
 
     /**
      * 根据地址字符串查询地址字节数组
@@ -54,15 +92,12 @@ public class AddressTool {
      * @return
      */
     public static byte[] getAddress(String addressString) {
-        byte[] result = new byte[Address.ADDRESS_LENGTH];
         try {
-            byte[] addressBytes = AddressTool.getAddressBytes(addressString);
-            System.arraycopy(addressBytes, 0, result, 0, 23);
+            return AddressTool.getAddressBytes(addressString);
         } catch (Exception e) {
             Log.error(e);
             throw new NulsRuntimeException(e);
         }
-        return result;
     }
 
     /**
@@ -76,7 +111,7 @@ public class AddressTool {
         try {
             byte[] addressBytes = AddressTool.getAddressBytes(addressString);
             NulsByteBuffer byteBuffer = new NulsByteBuffer(addressBytes);
-            chainId = byteBuffer.readShort();
+            chainId = byteBuffer.readUint16();
         } catch (Exception e) {
             Log.error(e);
             throw new NulsRuntimeException(e);
@@ -92,11 +127,20 @@ public class AddressTool {
      * @return
      */
     public static byte[] getAddress(byte[] publicKey, int chainId) {
+        if (chainId == 1) {
+            return getAddress(publicKey, chainId, "NULS");
+        } else if (chainId == 2) {
+            return getAddress(publicKey, chainId, "tNULS");
+        }
+        return getAddress(publicKey, chainId, Base58.encode(SerializeUtils.int16ToBytes(chainId)).toUpperCase());
+    }
+
+    public static byte[] getAddress(byte[] publicKey, int chainId, String prefix) {
         if (publicKey == null) {
             return null;
         }
         byte[] hash160 = SerializeUtils.sha256hash160(publicKey);
-        Address address = new Address(chainId, BaseConstant.DEFAULT_ADDRESS_TYPE, hash160);
+        Address address = new Address(chainId, prefix, BaseConstant.DEFAULT_ADDRESS_TYPE, hash160);
         return address.getAddressBytes();
     }
 
@@ -120,15 +164,15 @@ public class AddressTool {
      * @param hashs
      */
     public static void checkXOR(byte[] hashs) {
-        byte[] body = new byte[Address.ADDRESS_ORIGIN_LENGTH];
-        System.arraycopy(hashs, 0, body, 0, Address.ADDRESS_ORIGIN_LENGTH);
+        byte[] body = new byte[Address.ADDRESS_LENGTH];
+        System.arraycopy(hashs, 0, body, 0, Address.ADDRESS_LENGTH);
 
         byte xor = 0x00;
         for (int i = 0; i < body.length; i++) {
             xor ^= body[i];
         }
 
-        if (xor != hashs[Address.ADDRESS_ORIGIN_LENGTH]) {
+        if (xor != hashs[Address.ADDRESS_LENGTH]) {
             throw new NulsRuntimeException(new Exception());
         }
     }
@@ -145,9 +189,13 @@ public class AddressTool {
             return false;
         }
         byte[] bytes;
+        byte[] body;
         try {
-            bytes = AddressTool.getAddressBytes(address);
-            if (bytes.length != Address.ADDRESS_LENGTH + 1) {
+            String subfix = getRealAddrss(address);
+            body = Base58.decode(subfix);
+            bytes = new byte[body.length - 1];
+            System.arraycopy(body, 0, bytes, 0, body.length - 1);
+            if (body.length != Address.ADDRESS_LENGTH + 1) {
                 return false;
             }
         } catch (Exception e) {
@@ -156,11 +204,11 @@ public class AddressTool {
         NulsByteBuffer byteBuffer = new NulsByteBuffer(bytes);
         int chainid;
         byte type;
-        byte[] hash160Bytes = new byte[Address.ADDRESS_ORIGIN_LENGTH + 1];
+        byte[] hash160Bytes;
         try {
-            chainid = byteBuffer.readShort();
+            chainid = byteBuffer.readUint16();
             type = byteBuffer.readByte();
-            System.arraycopy(bytes, 2, hash160Bytes, 0, Address.ADDRESS_ORIGIN_LENGTH + 1);
+            hash160Bytes = byteBuffer.readBytes(Address.RIPEMD160_LENGTH);
         } catch (NulsException e) {
             Log.error(e);
             return false;
@@ -175,7 +223,7 @@ public class AddressTool {
             return false;
         }
         try {
-            checkXOR(hash160Bytes);
+            checkXOR(body);
         } catch (Exception e) {
             return false;
         }
@@ -194,7 +242,7 @@ public class AddressTool {
         }
         NulsByteBuffer byteBuffer = new NulsByteBuffer(bytes);
         try {
-            return (int) byteBuffer.readShort();
+            return byteBuffer.readUint16();
         } catch (NulsException e) {
             Log.error(e);
             return 0;
@@ -217,7 +265,7 @@ public class AddressTool {
         int chainid;
         byte type;
         try {
-            chainid = byteBuffer.readShort();
+            chainid = byteBuffer.readUint16();
             type = byteBuffer.readByte();
         } catch (NulsException e) {
             Log.error(e);
@@ -250,7 +298,7 @@ public class AddressTool {
         int chainid;
         byte type;
         try {
-            chainid = byteBuffer.readShort();
+            chainid = byteBuffer.readUint16();
             type = byteBuffer.readByte();
         } catch (NulsException e) {
             Log.error(e);
@@ -273,25 +321,26 @@ public class AddressTool {
      * @return
      */
     public static String getStringAddressByBytes(byte[] addressBytes) {
+        int chainId = getChainIdByAddress(addressBytes);
+        if (BaseConstant.MAINNET_CHAIN_ID == chainId) {
+            return getStringAddressByBytes(addressBytes, MAINNET_PREFIX);
+        } else if (chainId == BaseConstant.TESTNET_CHAIN_ID) {
+            return getStringAddressByBytes(addressBytes, TESTNET_PREFIX);
+        } else {
+            return getStringAddressByBytes(addressBytes, Base58.encode(SerializeUtils.int16ToBytes(chainId)).toUpperCase());
+        }
+    }
+
+    public static String getStringAddressByBytes(byte[] addressBytes, String prefix) {
         if (addressBytes == null) {
             return null;
         }
         if (addressBytes.length != Address.ADDRESS_LENGTH) {
             return null;
         }
-        byte[] chainIdByte = new byte[2];
-        System.arraycopy(addressBytes, 0, chainIdByte, 0, 2);
-        byte[] userTypeByte = new byte[2];
-        System.arraycopy(addressBytes, 2, userTypeByte, 0, 1);
-        byte[] hash160 = new byte[20];
-        System.arraycopy(addressBytes, 3, hash160, 0, 20);
 
-        byte[] body = ByteUtils.concatenate(userTypeByte, hash160);
-        byte[] bytes = ByteUtils.concatenate(body, new byte[]{getXor(body)});
-        String prefix = Base58.encode(chainIdByte);
-        String suffix = Base58.encode(bytes);
-        return prefix + "_" + suffix;
-        //return Base58.encode(bytes) + HexUtil.encode(chainIdByte);
+        byte[] bytes = ByteUtils.concatenate(addressBytes, new byte[]{getXor(addressBytes)});
+        return prefix + LENGTHPREFIX[prefix.length()] + Base58.encode(bytes);
     }
 
     /**
@@ -303,16 +352,12 @@ public class AddressTool {
      * @return
      */
     private static byte[] getAddressBytes(String addressString) {
-        byte[] result;// = new byte[Address.ADDRESS_LENGTH + 1];
-        byte[] chainIdBytes;
-        byte[] addressTypeBytes;
-        byte[] hash160Bytes = new byte[Address.ADDRESS_ORIGIN_LENGTH];
+        byte[] result;
         try {
-            chainIdBytes = Base58.decode(addressString.split(UNDERLINE)[0]);
-            byte[] body = Base58.decode(addressString.split(UNDERLINE)[1]);
-            addressTypeBytes = new byte[]{body[0]};
-            System.arraycopy(body, 2, hash160Bytes, 0, 21);
-            result = ByteUtils.concatenate(chainIdBytes, addressTypeBytes, hash160Bytes);
+            String address = getRealAddrss(addressString);
+            byte[] body = Base58.decode(address);
+            result = new byte[body.length - 1];
+            System.arraycopy(body, 0, result, 0, body.length - 1);
         } catch (Exception e) {
             Log.error(e);
             throw new NulsRuntimeException(e);
@@ -321,7 +366,6 @@ public class AddressTool {
     }
 
     public static boolean checkPublicKeyHash(byte[] address, byte[] pubKeyHash) {
-
         if (address == null || pubKeyHash == null) {
             return false;
         }
@@ -349,14 +393,15 @@ public class AddressTool {
         return isMultiSignAddress(addr);
     }
 
-    public static boolean isPackingAddress(String address, int chainId) {
-        if (StringUtils.isBlank(address)) {
-            return false;
-        }
+    public static boolean isNormalAddress(String address, int chainId) {
         byte[] bytes;
+        byte[] body;
         try {
-            bytes = AddressTool.getAddressBytes(address);
-            if (bytes.length != Address.ADDRESS_LENGTH + 1) {
+            String subfix = getRealAddrss(address);
+            body = Base58.decode(subfix);
+            bytes = new byte[body.length - 1];
+            System.arraycopy(body, 0, bytes, 0, body.length - 1);
+            if (body.length != Address.ADDRESS_LENGTH + 1) {
                 return false;
             }
         } catch (Exception e) {
@@ -365,11 +410,11 @@ public class AddressTool {
         NulsByteBuffer byteBuffer = new NulsByteBuffer(bytes);
         int chainid;
         byte type;
-        byte[] hash160Bytes = new byte[Address.ADDRESS_ORIGIN_LENGTH + 1];
+        byte[] hash160Bytes;
         try {
-            chainid = byteBuffer.readShort();
+            chainid = byteBuffer.readUint16();
             type = byteBuffer.readByte();
-            System.arraycopy(bytes, 2, hash160Bytes, 0, Address.ADDRESS_ORIGIN_LENGTH + 1);
+            hash160Bytes = byteBuffer.readBytes(Address.RIPEMD160_LENGTH);
         } catch (NulsException e) {
             Log.error(e);
             return false;
@@ -377,11 +422,14 @@ public class AddressTool {
         if (chainId != chainid) {
             return false;
         }
+//        if (BaseConstant.MAIN_NET_VERSION <= 1 && BaseConstant.DEFAULT_ADDRESS_TYPE != type) {
+//            return false;
+//        }
         if (BaseConstant.DEFAULT_ADDRESS_TYPE != type) {
             return false;
         }
         try {
-            checkXOR(hash160Bytes);
+            checkXOR(body);
         } catch (Exception e) {
             return false;
         }

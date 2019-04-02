@@ -26,13 +26,15 @@ package io.nuls.tools.core.ioc;
 
 import io.nuls.tools.basic.InitializingBean;
 import io.nuls.tools.core.annotation.*;
+import io.nuls.tools.core.config.ConfigSetting;
+import io.nuls.tools.core.config.ConfigurationLoader;
 import io.nuls.tools.core.inteceptor.DefaultMethodInterceptor;
 import io.nuls.tools.core.inteceptor.base.BeanMethodInterceptor;
 import io.nuls.tools.core.inteceptor.base.BeanMethodInterceptorManager;
-import io.nuls.tools.data.StringUtils;
+import io.nuls.tools.log.Log;
+import io.nuls.tools.model.StringUtils;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.exception.NulsRuntimeException;
-import io.nuls.tools.log.Log;
 import net.sf.cglib.proxy.Enhancer;
 import net.sf.cglib.proxy.MethodInterceptor;
 
@@ -68,7 +70,7 @@ public class SpringLiteContext {
      * @param packName 扫描的根路径,The root package of the scan.
      */
     public static void init(final String... packName) {
-        init(new DefaultMethodInterceptor(),packName);
+        init(new DefaultMethodInterceptor(), packName);
     }
 
     /**
@@ -79,26 +81,69 @@ public class SpringLiteContext {
      * @param interceptor 方法拦截器,Method interceptor
      */
     public static void init(final String packName, MethodInterceptor interceptor) {
-        init(interceptor,packName);
+        init(interceptor, packName);
     }
 
-    public static void init(MethodInterceptor interceptor,String... packName){
-        if(packName.length == 0){
+    public static void init(MethodInterceptor interceptor, String... packName) {
+        if (packName.length == 0) {
             throw new IllegalArgumentException("spring lite init package can't be null");
         }
         SpringLiteContext.interceptor = interceptor;
         Set<Class> classes = new HashSet<>();
-        Log.info("spring lite scan package : {}", Arrays.toString(packName));
-        Arrays.stream(packName).forEach(pack->{
+        Log.info("spring lite scan package : " + Arrays.toString(packName));
+        classes.addAll(ScanUtil.scan("io.nuls.tools.core.config"));
+        Arrays.stream(packName).forEach(pack -> {
             classes.addAll(ScanUtil.scan(pack));
         });
         classes.stream()
                 //通过Order注解控制类加载顺序
                 .sorted((b1, b2) -> getOrderByClass(b1) > getOrderByClass(b2) ? 1 : -1)
                 .forEach((Class clazz) -> checkBeanClass(clazz));
+        configurationInjectToBean();
         autowireFields();
         callAfterPropertiesSet();
         success = true;
+    }
+
+    /**
+     * 将配置项注入到bean中
+     * inject config to bean
+     */
+    private static void configurationInjectToBean() {
+        ConfigurationLoader configLoader = getBean(ConfigurationLoader.class);
+        //加载配置项
+        configLoader.load();
+        BEAN_TEMP_MAP.entrySet().forEach(entry -> {
+            Object bean = entry.getValue();
+            Class<?> cls = BEAN_TYPE_MAP.get(entry.getKey());
+            Configuration configuration = cls.getAnnotation(Configuration.class);
+            if (configuration != null) {
+                Set<Field> fields = getFieldSet(cls);
+                fields.stream().forEach(field -> {
+                    Value annValue = field.getAnnotation(Value.class);
+                    String key = field.getName();
+                    if(annValue != null){
+                        key = annValue.value();
+                    }
+                    Persist persist = field.getAnnotation(Persist.class);
+                    boolean readPersist = persist != null;
+                    if(readPersist){
+                        ConfigSetting.set(bean, field, configLoader.getValue(key,configuration.persistDomain()));
+                    }else{
+                        ConfigSetting.set(bean, field, configLoader.getValue(key));
+                    }
+                });
+            }else{
+                Set<Field> fields = getFieldSet(cls);
+                fields.stream().forEach(field -> {
+                    Value annValue = field.getAnnotation(Value.class);
+                    if (annValue != null) {
+                        String key = annValue.value();
+                        ConfigSetting.set(bean, field, configLoader.getValue(key));
+                    }
+                });
+            }
+        });
     }
 
     /**
@@ -117,7 +162,8 @@ public class SpringLiteContext {
                     //call afterPropertiesSet 代码迁移到 callAfterPropertiesSet方法执行
                 }
             } catch (Exception e) {
-                Log.debug(key + " autowire fields failed!");
+                Log.error("spring lite autowire fields failed! ",e);
+                System.exit(0);
             }
         }
     }
@@ -128,14 +174,15 @@ public class SpringLiteContext {
     private static void callAfterPropertiesSet() {
         BEAN_OK_MAP.entrySet().stream()
                 .sorted((e1, e2) ->
-                    getOrderByClass(e1.getValue().getClass()) > getOrderByClass(e2.getValue().getClass()) ? 1 : -1)
+                        getOrderByClass(e1.getValue().getClass()) > getOrderByClass(e2.getValue().getClass()) ? 1 : -1)
                 .forEach(entry -> {
                     Object bean = entry.getValue();
                     if (bean instanceof InitializingBean) {
                         try {
                             ((InitializingBean) bean).afterPropertiesSet();
                         } catch (Exception e) {
-                            Log.error(e.getMessage());
+                            Log.error("spring lite callAfterPropertiesSet fail :  " + bean.getClass(),e);
+                            System.exit(0);
                         }
                     }
                 });
@@ -266,18 +313,37 @@ public class SpringLiteContext {
         if (anns == null || anns.length == 0) {
             return;
         }
-        Annotation ann = getFromArray(anns, Service.class);
         String beanName = null;
         boolean aopProxy = false;
+        Annotation ann = getFromArray(anns, Service.class);
+
+        if (null != ann) {
+            beanName = ((Service) ann).value();
+            aopProxy = true;
+        }
         if (null == ann) {
             ann = getFromArray(anns, Component.class);
             if (null != ann) {
                 beanName = ((Component) ann).value();
             }
-        } else {
-            beanName = ((Service) ann).value();
-            aopProxy = true;
         }
+        if (null == ann) {
+            ann = getFromArray(anns, Controller.class);
+            if (null != ann) {
+                beanName = ((Controller) ann).value();
+            }
+        }
+
+        if (null == ann) {
+            ann = getFromArray(anns, Configuration.class);
+            if(null != ann) {
+                aopProxy = true;
+            }
+//            if (null != ann) {
+//                beanName = ((Configuration) ann).value();
+//            }
+        }
+
         if (ann != null) {
             if (beanName == null || beanName.trim().length() == 0) {
                 beanName = getBeanName(clazz);
@@ -285,7 +351,8 @@ public class SpringLiteContext {
             try {
                 loadBean(beanName, clazz, aopProxy);
             } catch (NulsException e) {
-                Log.error(e.getMessage());
+                Log.error("spring lite load bean fail :  "  + clazz,e);
+                System.exit(0);
                 return;
             }
         }
@@ -296,7 +363,8 @@ public class SpringLiteContext {
                 Constructor constructor = clazz.getDeclaredConstructor();
                 interceptor = (BeanMethodInterceptor) constructor.newInstance();
             } catch (Exception e) {
-                Log.error(e.getMessage());
+                Log.error("spring lite instance bean fail :  " + clazz,e);
+                System.exit(0);
                 return;
             }
             BeanMethodInterceptorManager.addBeanMethodInterceptor(((Interceptor) interceptorAnn).value(), interceptor);
@@ -325,7 +393,7 @@ public class SpringLiteContext {
      * @param clazz 目标注解类型，Target annotation type
      * @return Annotation
      */
-    private static Annotation getFromArray(Annotation[] anns, Class clazz) {
+    public static Annotation getFromArray(Annotation[] anns, Class clazz) {
         for (Annotation ann : anns) {
             if (ann.annotationType().equals(clazz)) {
                 return ann;
@@ -359,10 +427,10 @@ public class SpringLiteContext {
             try {
                 bean = clazz.newInstance();
             } catch (InstantiationException e) {
-                Log.error(e.getMessage());
+                Log.error(e.getMessage(),e);
                 throw new NulsException(e);
             } catch (IllegalAccessException e) {
-                Log.error(e.getMessage());
+                Log.error(e.getMessage(),e);
                 throw new NulsException(e);
             }
         }
@@ -380,7 +448,7 @@ public class SpringLiteContext {
         Enhancer enhancer = new Enhancer();
         enhancer.setSuperclass(clazz);
         enhancer.setCallback(interceptor);
-        System.out.println(clazz);
+//        System.out.println(clazz);
         return enhancer.create();
     }
 
@@ -452,10 +520,10 @@ public class SpringLiteContext {
     public static <T> T getBean(Class<T> beanClass) {
         Set<String> nameSet = CLASS_NAME_SET_MAP.get(beanClass);
         if (null == nameSet || nameSet.isEmpty()) {
-            throw new NulsRuntimeException(new Error());
+            throw new NulsRuntimeException(new Error("can not found " + beanClass + " in beans"));
         }
         if (nameSet.size() > 1) {
-            throw new NulsRuntimeException(new Error());
+            throw new NulsRuntimeException(new Error("find multiple implementations {} " + beanClass));
         }
         T value = null;
         String beanName = null;

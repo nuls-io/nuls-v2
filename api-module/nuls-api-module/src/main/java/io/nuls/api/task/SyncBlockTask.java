@@ -1,12 +1,12 @@
 package io.nuls.api.task;
 
-import io.nuls.api.ApiContext;
 import io.nuls.api.analysis.WalletRpcHandler;
 import io.nuls.api.model.po.db.BlockHeaderInfo;
 import io.nuls.api.model.po.db.BlockInfo;
 import io.nuls.api.model.po.db.SyncInfo;
 import io.nuls.api.service.RollbackService;
 import io.nuls.api.service.SyncService;
+import io.nuls.tools.basic.Result;
 import io.nuls.tools.core.ioc.SpringLiteContext;
 import io.nuls.tools.log.Log;
 
@@ -27,14 +27,15 @@ public class SyncBlockTask implements Runnable {
     @Override
     public void run() {
         //每次同步数据前都查看一下最新的同步信息，如果最新块的数据并没有在一次事务中完全处理，需要对区块数据进行回滚
-        //Check the latest synchronization information before each data synchronization.
-        //If the latest block data is not completely processed in one transaction, you need to roll back the block data.
+        //Check the latest synchronization information before each entity synchronization.
+        //If the latest block entity is not completely processed in one transaction, you need to roll back the block entity.
         SyncInfo syncInfo = syncService.getSyncInfo(chainId);
         if (syncInfo != null && !syncInfo.isFinish()) {
             //rollback();
         }
 
         boolean running = true;
+        long time1 = System.currentTimeMillis();
         while (running) {
             try {
                 running = syncBlock();
@@ -43,6 +44,9 @@ public class SyncBlockTask implements Runnable {
                 running = false;
             }
         }
+        long time2 = System.currentTimeMillis();
+
+        System.out.println((time2 - time1) + "-------------------");
     }
 
     /**
@@ -60,16 +64,7 @@ public class SyncBlockTask implements Runnable {
      * @return boolean 是否还继续同步
      */
     private boolean syncBlock() {
-        long localBestHeight;
         BlockHeaderInfo localBestBlockHeader = syncService.getBestBlockHeader(chainId);
-        if (localBestBlockHeader == null) {
-            localBestHeight = -1;
-        } else {
-            localBestHeight = localBestBlockHeader.getHeight();
-        }
-
-        ApiContext.bestHeight = localBestHeight;
-
         try {
             return process(localBestBlockHeader);
         } catch (Exception e) {
@@ -83,11 +78,19 @@ public class SyncBlockTask implements Runnable {
         if (localBestBlockHeader != null) {
             nextHeight = localBestBlockHeader.getHeight() + 1;
         }
-        BlockInfo newBlock = WalletRpcHandler.getBlockInfo(chainId, nextHeight);
+        Result<BlockInfo> result = WalletRpcHandler.getBlockInfo(chainId, nextHeight);
+        if (result.isFailed()) {
+            return false;
+        }
+        BlockInfo newBlock = result.getData();
+        if (null == newBlock) {
+            Thread.sleep(5000L);
+            return false;
+        }
         if (checkBlockContinuity(localBestBlockHeader, newBlock.getHeader())) {
             return syncService.syncNewBlock(chainId, newBlock);
         } else {
-            return rollbackService.rollbackBlock();
+            return rollbackService.rollbackBlock(chainId, localBestBlockHeader.getHeight());
         }
     }
 

@@ -24,10 +24,13 @@
  */
 package io.nuls.network.manager;
 
+import io.nuls.network.cfg.NetworkConfig;
 import io.nuls.network.model.Node;
 import io.nuls.network.model.NodeGroup;
 import io.nuls.network.netty.NettyClient;
 import io.nuls.network.task.*;
+import io.nuls.network.utils.LoggerUtil;
+import io.nuls.tools.core.ioc.SpringLiteContext;
 import io.nuls.tools.thread.ThreadUtils;
 import io.nuls.tools.thread.commom.NulsThreadFactory;
 
@@ -81,11 +84,15 @@ public class TaskManager extends BaseManager {
 
     @Override
     public void start() throws Exception {
-        executorService = ThreadUtils.createScheduledThreadPool(4, new NulsThreadFactory("NetWorkThread"));
+        executorService = ThreadUtils.createScheduledThreadPool(5, new NulsThreadFactory("NetWorkThread"));
         connectTasks();
         scheduleGroupStatusMonitor();
         timeServiceThreadStart();
-        testThread();
+        nwInfosThread();
+        NetworkConfig networkConfig = SpringLiteContext.getBean(NetworkConfig.class);
+        if(1 == networkConfig.getUpdatePeerInfoType()){
+            localInfosSendTask();
+        }
     }
 
     private void connectTasks() {
@@ -95,11 +102,12 @@ public class TaskManager extends BaseManager {
         RunOnceAfterNetStableThreadStart();
 
     }
-
-    private void testThread() {
-        //测试调试专用 开始
-        executorService.scheduleAtFixedRate(new DataShowMonitorTest(), 5, 10, TimeUnit.SECONDS);
-        //测试调试专用 结束
+    private void localInfosSendTask() {
+        //进行本地信息广播线程
+        executorService.scheduleAtFixedRate(new LocalInfosSendTask(), 5, 5, TimeUnit.SECONDS);
+    }
+    private void nwInfosThread() {
+        executorService.scheduleAtFixedRate(new NwInfosPrintTask(), 5, 60, TimeUnit.SECONDS);
     }
 
     private void scheduleGroupStatusMonitor() {
@@ -111,7 +119,7 @@ public class TaskManager extends BaseManager {
      * Start the time synchronization thread.
      */
     private void timeServiceThreadStart() {
-        Log.debug("----------- TimeService start -------------");
+        LoggerUtil.Log.debug("----------- TimeService start -------------");
         TimeManager.getInstance().initWebTimeServer();
         ThreadUtils.createAndRunThread("TimeTask", new TimeTask(), true);
     }
@@ -120,12 +128,12 @@ public class TaskManager extends BaseManager {
      * 地址请求分享线程
      */
     private void RunOnceAfterNetStableThreadStart() {
-        Log.debug("----------- RunOnceAfterNetStableThread start -------------");
+        LoggerUtil.Log.debug("----------- RunOnceAfterNetStableThread start -------------");
         ThreadUtils.createAndRunThread("share-mine-node", new RunAfterNetStableTask());
     }
 
     public void createShareAddressTask(NodeGroup nodeGroup, boolean isCross) {
-        Log.debug("----------- createShareAddressTask start -------------");
+        LoggerUtil.Log.debug("----------- createShareAddressTask start -------------");
         ThreadUtils.createAndRunThread("share-mine-node", new ShareAddressTask(nodeGroup));
     }
 }

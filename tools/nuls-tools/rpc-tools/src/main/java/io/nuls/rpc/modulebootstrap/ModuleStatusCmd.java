@@ -7,7 +7,6 @@ import io.nuls.rpc.netty.channel.manager.ConnectManager;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.parse.JSONUtils;
-import lombok.extern.slf4j.Slf4j;
 
 import java.util.Map;
 
@@ -17,14 +16,14 @@ import java.util.Map;
  * @Description: 功能描述
  */
 @Component
-@Slf4j
 public class ModuleStatusCmd extends BaseCmd {
 
-    @Autowired RpcModule rpcModule;
+    @Autowired
+    RpcModule rpcModule;
 
     @CmdAnnotation(cmd = "listenerDependenciesReady", version = 1.0, minEvent = 1,
             description = "notify module is ready")
-    public Response listenerDependenciesReady(Map<String, Object> map){
+    public Response listenerDependenciesReady(Map<String, Object> map) {
         Module module = JSONUtils.map2pojo(map, Module.class);
         rpcModule.listenerDependenciesReady(module);
         return success("ModuleReadyListener success");

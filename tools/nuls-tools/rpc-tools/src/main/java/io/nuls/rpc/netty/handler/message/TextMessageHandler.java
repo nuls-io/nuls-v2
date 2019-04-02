@@ -26,7 +26,10 @@ package io.nuls.rpc.netty.handler.message;
 
 import io.netty.channel.socket.SocketChannel;
 import io.nuls.rpc.info.Constants;
-import io.nuls.rpc.model.message.*;
+import io.nuls.rpc.model.message.Message;
+import io.nuls.rpc.model.message.MessageType;
+import io.nuls.rpc.model.message.Request;
+import io.nuls.rpc.model.message.Response;
 import io.nuls.rpc.netty.channel.ConnectData;
 import io.nuls.rpc.netty.channel.manager.ConnectManager;
 import io.nuls.rpc.netty.processor.RequestMessageProcessor;
@@ -36,21 +39,23 @@ import io.nuls.tools.log.Log;
 import io.nuls.tools.parse.JSONUtils;
 
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 /**
  * 文本类型的消息处理器
  * Text type message handler
+ *
  * @author ln
  * 2019/2/27
- * */
+ */
 public class TextMessageHandler implements Runnable {
 
     private SocketChannel channel;
-    private String msg;
+    private Message message;
 
-    public TextMessageHandler(SocketChannel channel, String msg) {
+    public TextMessageHandler(SocketChannel channel, Message message) {
         this.channel = channel;
-        this.msg = msg;
+        this.message = message;
     }
 
     @Override
@@ -61,9 +66,6 @@ public class TextMessageHandler implements Runnable {
     private void handler() {
         try {
             ConnectData connectData = ConnectManager.CHANNEL_DATA_MAP.get(channel);
-
-
-            Message message = JSONUtils.json2pojo(msg, Message.class);
 
             /*
              * 获取该链接对应的ConnectData对象
@@ -80,20 +82,10 @@ public class TextMessageHandler implements Runnable {
                     /*
                     取消订阅，直接响应
                      */
-                    Log.debug("UnsubscribeFrom<" + channel.remoteAddress().getHostString() + ":" + channel.remoteAddress().getPort() + ">: " + msg);
                     RequestMessageProcessor.unsubscribe(connectData, message);
                     break;
                 case Request:
                     String messageId = message.getMessageId();
-                    /*
-                    如果不能提供服务，则直接返回
-                    If no service is available, return directly
-                     */
-                    if (!ConnectManager.isReady()) {
-                        RequestMessageProcessor.serviceNotStarted(channel, messageId);
-                        break;
-                    }
-
                     /*
                     Request，根据是否需要定时推送放入不同队列，等待处理
                     Request, put in different queues according to the response mode. Wait for processing
@@ -102,14 +94,26 @@ public class TextMessageHandler implements Runnable {
 
                     if (!ConnectManager.isPureDigital(request.getSubscriptionEventCounter())
                             && !ConnectManager.isPureDigital(request.getSubscriptionPeriod())) {
-                        RequestMessageProcessor.callCommandsWithPeriod(channel, request.getRequestMethods(), messageId);
+                        RequestMessageProcessor.callCommandsWithPeriod(channel, request.getRequestMethods(), messageId, false);
                     } else {
+                        int tryCount = 0;
+                        while (connectData == null && tryCount < Constants.TRY_COUNT) {
+                            TimeUnit.SECONDS.sleep(2L);
+                            connectData = ConnectManager.CHANNEL_DATA_MAP.get(channel);
+                            tryCount++;
+                        }
+                        if (connectData == null) {
+                            RequestMessageProcessor.serviceNotStarted(channel, messageId);
+                            break;
+                        }
                         if (ConnectManager.isPureDigital(request.getSubscriptionPeriod())) {
                             connectData.getRequestPeriodLoopQueue().offer(new Object[]{message, request});
                             connectData.getIdToPeriodMessageMap().put(messageId, message);
                         }
                         if (ConnectManager.isPureDigital(request.getSubscriptionEventCounter())) {
-                            connectData.subscribeByEvent(message);
+                            connectData.subscribeByEvent(message, request);
+                            RequestMessageProcessor.callCommandsWithPeriod(channel, request.getRequestMethods(), messageId, true);
+
                         }
                     }
 
@@ -123,11 +127,7 @@ public class TextMessageHandler implements Runnable {
                     break;
                 case NegotiateConnectionResponse:
                 case Ack:
-//                    NegotiateConnectionResponse nres = JSONUtils.map2pojo((Map) message.getMessageData(), NegotiateConnectionResponse.class);
-//                    ResponseContainer resContainer = RequestContainer.getResponseContainer(nres.getRequestId());
-
                     ResponseContainer resContainer = RequestContainer.getResponseContainer(((Map<String, String>) message.getMessageData()).get("requestId"));
-
                     if (resContainer != null && resContainer.getFuture() != null) {
                         resContainer.getFuture().complete(new Response());
                     }
@@ -152,7 +152,7 @@ public class TextMessageHandler implements Runnable {
                         connectData.getResponseAutoQueue().offer(response);
                     } else {
                         ResponseContainer responseContainer = RequestContainer.getResponseContainer(response.getRequestId());
-                        if(responseContainer != null && responseContainer.getFuture() != null) {
+                        if (responseContainer != null && responseContainer.getFuture() != null) {
                             responseContainer.getFuture().complete(response);
                         }
                     }

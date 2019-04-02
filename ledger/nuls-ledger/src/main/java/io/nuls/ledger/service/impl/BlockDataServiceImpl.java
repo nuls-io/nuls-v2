@@ -26,13 +26,13 @@ package io.nuls.ledger.service.impl;
 
 import io.nuls.base.data.Transaction;
 import io.nuls.ledger.model.ChainHeight;
-import io.nuls.ledger.model.po.AccountState;
+import io.nuls.ledger.model.po.AccountStateSnapshot;
 import io.nuls.ledger.model.po.BlockSnapshotAccounts;
 import io.nuls.ledger.model.po.BlockTxs;
 import io.nuls.ledger.service.AccountStateService;
 import io.nuls.ledger.service.BlockDataService;
 import io.nuls.ledger.storage.Repository;
-import io.nuls.ledger.utils.LedgerUtils;
+import io.nuls.ledger.utils.LedgerUtil;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Service;
 
@@ -59,13 +59,13 @@ public class BlockDataServiceImpl implements BlockDataService {
             for(ChainHeight chainHeight : list ){
                 BlockSnapshotAccounts blockSnapshotAccounts = repository.getBlockSnapshot(chainHeight.getChainId(),chainHeight.getBlockHeight()+1) ;
                 if(null != blockSnapshotAccounts){
-                    List<AccountState> preAccountStates = blockSnapshotAccounts.getAccounts();
+                    List<AccountStateSnapshot> preAccountStates = blockSnapshotAccounts.getAccounts();
                     //回滚高度
-                    for (AccountState accountState :preAccountStates) {
-                        String key = LedgerUtils.getKeyStr(accountState.getAddress(), accountState.getAssetChainId(), accountState.getAssetId());
-                        accountStateService.rollAccountState(key,accountState);
-                        logger.info("rollBack account={},assetChainId={},assetId={}, height={},lastHash= {} ", key, accountState.getAssetChainId(),accountState.getAssetId(),
-                                accountState.getHeight(), accountState.getTxHash());
+                    for (AccountStateSnapshot accountStateSnapshot :preAccountStates) {
+                        String key = LedgerUtil.getKeyStr(accountStateSnapshot.getAccountState().getAddress(), accountStateSnapshot.getAccountState().getAssetChainId(), accountStateSnapshot.getAccountState().getAssetId());
+                        accountStateService.rollAccountState(key,accountStateSnapshot);
+                        logger.info("rollBack account={},assetChainId={},assetId={}, height={},lastHash= {} ", key,  accountStateSnapshot.getAccountState().getAssetChainId(), accountStateSnapshot.getAccountState().getAssetId(),
+                                accountStateSnapshot.getAccountState().getHeight(), accountStateSnapshot.getAccountState().getTxHash());
                     }
                 }
             }

@@ -35,11 +35,10 @@ import io.nuls.base.data.Address;
 import io.nuls.tools.crypto.ECKey;
 import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.crypto.Sha256Hash;
-import io.nuls.tools.data.StringUtils;
+import io.nuls.tools.model.StringUtils;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.exception.NulsRuntimeException;
 import io.nuls.tools.parse.SerializeUtils;
-import io.nuls.tools.thread.TimeService;
 
 import java.io.ByteArrayOutputStream;
 import java.math.BigInteger;
@@ -47,8 +46,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
-
-import static io.nuls.base.script.ScriptOpCodes.OP_CHECKMULTISIG;
 
 /**
  * @author: qinyifeng

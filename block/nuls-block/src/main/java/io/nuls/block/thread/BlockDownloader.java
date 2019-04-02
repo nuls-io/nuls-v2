@@ -78,7 +78,7 @@ public class BlockDownloader implements Callable<Boolean> {
         ChainContext context = ContextManager.getContext(chainId);
         NulsLogger commonLog = context.getCommonLog();
         try {
-            commonLog.info("BlockDownloader start work from " + startHeight + " to " + netLatestHeight);
+            commonLog.info("BlockDownloader start work from " + startHeight + " to " + netLatestHeight + ", nodes-" + nodes);
             ChainParameters chainParameters = context.getParameters();
             int blockCache = chainParameters.getBlockCache();
             int maxDowncount = chainParameters.getDownloadNumber();
@@ -113,7 +113,6 @@ public class BlockDownloader implements Callable<Boolean> {
             context.setDoSyn(false);
             return false;
         }
-        executor.shutdown();
         return context.isDoSyn();
     }
 

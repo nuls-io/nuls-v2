@@ -44,8 +44,9 @@ public abstract class BaseCmd {
     /**
      * 设置模块配置参数
      * Setting Module Configuration Parameters
-     * @param key Key
-     * @param value Value
+     *
+     * @param key      Key
+     * @param value    Value
      * @param readOnly Read only?
      */
     protected void setConfigItem(String key, Object value, boolean readOnly) {
@@ -56,6 +57,7 @@ public abstract class BaseCmd {
     /**
      * 返回基本的成功对象
      * Returns the basic success object
+     *
      * @return Response
      */
     protected Response success() {
@@ -66,6 +68,7 @@ public abstract class BaseCmd {
     /**
      * 返回有特定内容的成功对象
      * Returns a success object with specific content
+     *
      * @param responseData Object, can be any values
      * @return Response
      */
@@ -78,6 +81,7 @@ public abstract class BaseCmd {
     /**
      * 返回预定义的失败对象
      * Returns the predefined failed object
+     *
      * @param errorCode ErrorCode
      * @return Response
      */
@@ -90,6 +94,7 @@ public abstract class BaseCmd {
     /**
      * 返回自定义错误消息的失败对象
      * Returns the failed object of the custom error message
+     *
      * @param errMsg User defined error message
      * @return Response
      */
@@ -100,8 +105,9 @@ public abstract class BaseCmd {
     /**
      * 预定义失败对象，同时带有自定义错误消息
      * Predefined failed object with a custom error message
+     *
      * @param errorCode ErrorCode
-     * @param errMsg User defined error message
+     * @param errMsg    User defined error message
      * @return Response
      */
     protected Response failed(ErrorCode errorCode, String errMsg) {

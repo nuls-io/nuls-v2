@@ -29,13 +29,23 @@ package io.nuls.api.constant;
  */
 public interface CommandConstant {
 
-    //网络消息对应的RPC命令
-
-
-    //普通服务对应的RPC命令
-
-    /**
-     * 根据区块高度获取区块
-     */
+    //根据区块高度获取区块
     String GET_BLOCK_BY_HEIGHT = "getBlockByHeight";
+    //根据区块hash获取区块
+    String GET_BLOCK_BY_HASH = "downloadBlockByHash";
+    //获取账户余额
+    String GET_BALANCE = "getBalance";
+
+    //查询交易详情
+    String GET_TX = "tx_getTx";
+    String CLIENT_GETTX = "tx_getTxClient";
+
+    //查询节点详情
+    String GET_AGENT = "cs_getAgentInfo";
+
+    String GET_CONSENSUS_CONFIG = "cs_getSeedNodeList";
+    //查询智能合约详情
+    String CONTRACT_INFO = "sc_contract_info";
+    //查询智能合约执行结果
+    String CONTRACT_RESULT = "sc_contract_result";
 }

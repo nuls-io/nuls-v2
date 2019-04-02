@@ -21,12 +21,10 @@ public interface MongoTableConstant {
     String TX_RELATION_TABLE = "tx_relation_table_";
     //交易表
     String TX_TABLE = "tx_table_";
-    //红黄牌记录表
-    String PUNISH_TABLE = "punish_table_";
-    //UTXO记录
-    String UTXO_TABLE = "utxo_table_";
     //coinData记录
     String COINDATA_TABLE = "coin_data_table_";
+    //红黄牌记录表
+    String PUNISH_TABLE = "punish_table_";
 
     String ROUND_TABLE = "round_table_";
 
@@ -41,7 +39,15 @@ public interface MongoTableConstant {
     String TOKEN_TRANSFER_TABLE = "token_transfer_table_";
     //智能合约结果记录
     String CONTRACT_RESULT_TABLE = "contract_result_table_";
-
+    //统计表
     String STATISTICAL_TABLE = "statistical_table_";
 
+
+    //---------------------------------字段(field)------------------------------
+    //new_info表，最新统计的时间点
+    String LAST_STATISTICAL_TIME = "last_statistical_time";
+
+    String TX_COUNT = "txCount";
+    String ANNUALIZE_REWARD = "annualizedReward";
+    String CONSENSUS_LOCKED = "consensusLocked";
 }

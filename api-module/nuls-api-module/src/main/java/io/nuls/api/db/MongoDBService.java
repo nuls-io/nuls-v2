@@ -26,6 +26,14 @@ import com.mongodb.client.*;
 import com.mongodb.client.model.IndexModel;
 import com.mongodb.client.model.Sorts;
 import com.mongodb.client.model.WriteModel;
+import io.nuls.api.ApiContext;
+import io.nuls.api.model.po.config.ApiConfig;
+import io.nuls.tools.basic.InitializingBean;
+import io.nuls.tools.core.annotation.Autowired;
+import io.nuls.tools.core.annotation.Component;
+import io.nuls.tools.core.annotation.Order;
+import io.nuls.tools.exception.NulsException;
+import io.nuls.tools.log.Log;
 import org.bson.Document;
 import org.bson.conversions.Bson;
 
@@ -37,17 +45,34 @@ import java.util.function.Consumer;
 /**
  * @author Niels
  */
-public class MongoDBService {
+@Component
+@Order(0)
+public class MongoDBService implements InitializingBean {
 
-    private final MongoClient client;
-    private final MongoDatabase db;
+    private MongoClient client;
+    private MongoDatabase db;
 
-    public MongoDBService(MongoClient client, MongoDatabase db) {
-        this.client = client;
-        this.db = db;
-        if (null == db) {
-            throw new RuntimeException();
+    public MongoDBService() {
+    }
+
+    public MongoDBService(MongoClient mongoClient, MongoDatabase mongoDatabase) {
+        this.client = mongoClient;
+        this.db = mongoDatabase;
+    }
+
+    @Override
+    public void afterPropertiesSet() {
+        try {
+            MongoClient mongoClient = new MongoClient(ApiContext.mongoIp, ApiContext.mongoPort);
+            MongoDatabase mongoDatabase = mongoClient.getDatabase("nuls-api");
+
+            this.client = mongoClient;
+            this.db = mongoDatabase;
+        }catch (Exception e) {
+            Log.error(e);
+            System.exit(-1);
         }
+
     }
 
     public void createCollection(String collName) {
@@ -270,4 +295,5 @@ public class MongoDBService {
 
         return null;
     }
+
 }

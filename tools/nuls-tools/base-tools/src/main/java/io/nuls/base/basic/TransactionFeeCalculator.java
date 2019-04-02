@@ -26,6 +26,7 @@
 package io.nuls.base.basic;
 
 
+import io.nuls.base.signture.P2PHKSignature;
 import io.nuls.tools.exception.NulsRuntimeException;
 
 import java.math.BigInteger;
@@ -56,6 +57,20 @@ public class TransactionFeeCalculator {
     }
 
     /**
+     * 根据未签名的交易大小计算需要交纳的手续费
+     * @param size 未签名的交易大小/ size of the unsigned transaction
+     * @return 交易手续费
+     */
+    public static final BigInteger getNormalUnsignedTxFee(int size) {
+        size += P2PHKSignature.SERIALIZE_LENGTH;
+        BigInteger fee = NORMAL_PRICE_PRE_1024_BYTES.multiply(new BigInteger(String.valueOf(size/KB)));
+        if (size % KB > 0) {
+            fee = fee.add(NORMAL_PRICE_PRE_1024_BYTES);
+        }
+        return fee;
+    }
+
+    /**
      * 根据交易大小计算需要交纳的手续费
      * According to the transaction size calculate the handling fee.
      * @param size 交易大小/size of the transaction
@@ -75,10 +90,10 @@ public class TransactionFeeCalculator {
      */
     public static final BigInteger getFee(int size, BigInteger price) {
         if(price.compareTo(NORMAL_PRICE_PRE_1024_BYTES)<0){
-            throw new NulsRuntimeException(new Exception("data is error"));
+            throw new NulsRuntimeException(new Exception("entity is error"));
         }
         if(price.compareTo(CROSSTX_PRICE_PRE_1024_BYTES)>0) {
-            throw new NulsRuntimeException(new Exception("data is error"));
+            throw new NulsRuntimeException(new Exception("entity is error"));
         }
         BigInteger fee = price.multiply(new BigInteger(String.valueOf(size/KB)));
         if (size % KB > 0) {

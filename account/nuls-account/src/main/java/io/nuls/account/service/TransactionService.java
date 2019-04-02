@@ -55,8 +55,7 @@ public interface TransactionService {
      * 2.Detecting an acount can only set one alias.
      *
      * @param chainId
-     * @param txList 需要检查的交易列表/A list of transactions to be checked.
-     *
+     * @param txList  需要检查的交易列表/A list of transactions to be checked.
      * @return
      */
     List<Transaction> accountTxValidate(int chainId, List<Transaction> txList) throws Exception;
@@ -75,75 +74,66 @@ public interface TransactionService {
 
     /**
      * 别名转账
-     *
+     * <p>
      * the receipt address is alias
      *
      * @param chainId chainId
-     * @param from       the from coin dto
-     * @param to         the to coin dto
-     * @param remark         remark
+     * @param from    the from coin dto
+     * @param to      the to coin dto
+     * @param remark  remark
      * @return transfer transaction
-     *
      */
-    Transaction transferByAlias(int chainId, CoinDto from, CoinDto to, String remark);
+    Transaction transferByAlias(int chainId, CoinDto from, CoinDto to, String remark) throws NulsException;
 
 
     /**
-     *
      * 创建多签交易
-     *
+     * <p>
      * create multi sign transfer transaction
      *
-     *
-     * @param chainId chainId
-     * @param assetsId assetId
-     * @param account       the account which will sign the transaction
-     * @param password      the account's password
-     * @param multiSigAccount         the multi sign account
-     * @param toAddress         the to address
-     * @param amount         the amount
-     * @param remark         remark
+     * @param chainId         chainId
+     * @param assetsId        assetId
+     * @param account         the account which will sign the transaction
+     * @param password        the account's password
+     * @param multiSigAccount the multi sign account
+     * @param toAddress       the to address
+     * @param amount          the amount
+     * @param remark          remark
      * @return MultiSignTransactionResultDto it contains two element:is broadcast and the transaction
-     *
      */
     MultiSignTransactionResultDto createMultiSignTransfer(int chainId, int assetsId, Account account, String password, MultiSigAccount multiSigAccount, String toAddress, BigInteger amount, String remark)
-            throws NulsException,IOException;
+            throws NulsException, IOException;
 
     /**
      * 多签交易签名
-     *
+     * <p>
      * sign multi sign transaction
      *
-     * @auther EdwardChan
-     *
-     * @param chainId chainId
-     * @param account       the account which will sign the transaction
-     * @param password         the account's password
-     * @param txHex         the hex data of transaction
+     * @param chainId  chainId
+     * @param account  the account which will sign the transaction
+     * @param password the account's password
+     * @param txHex    the hex data of transaction
      * @return MultiSignTransactionResultDto it contains two element:is broadcast and the transactio
-     *
+     * @auther EdwardChan
      */
     MultiSignTransactionResultDto signMultiSignTransaction(int chainId, Account account, String password, String txHex)
-            throws NulsException,IOException;
+            throws NulsException, IOException;
 
     /**
-     *
      * 创建多签账户设置别名交易
-     *
+     * <p>
      * create multi sign account set alias transaction
      *
-     *
-     * @param chainId chainId
-     * @param account       the account which will sign the transaction
-     * @param password      the account's password
-     * @param multiSigAccount         the multi sign account
-     * @param toAddress         the to address
-     * @param remark         remark
+     * @param chainId         chainId
+     * @param account         the account which will sign the transaction
+     * @param password        the account's password
+     * @param multiSigAccount the multi sign account
+     * @param toAddress       the to address
+     * @param remark          remark
      * @return MultiSignTransactionResultDto it contains two element:is broadcast and the transaction
-     *
      */
     MultiSignTransactionResultDto createSetAliasMultiSignTransaction(int chainId, Account account, String password, MultiSigAccount multiSigAccount, String toAddress, String aliasName, String remark)
-            throws NulsException,IOException;
+            throws NulsException, IOException;
 
     /**
      * 校验该链是否有该资产

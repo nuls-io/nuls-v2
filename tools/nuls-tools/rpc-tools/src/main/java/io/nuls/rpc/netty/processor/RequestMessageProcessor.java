@@ -2,7 +2,6 @@ package io.nuls.rpc.netty.processor;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import io.netty.channel.Channel;
-import io.netty.channel.socket.SocketChannel;
 import io.nuls.rpc.cmd.BaseCmd;
 import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.model.CmdDetail;
@@ -10,8 +9,8 @@ import io.nuls.rpc.model.CmdParameter;
 import io.nuls.rpc.model.message.*;
 import io.nuls.rpc.netty.channel.ConnectData;
 import io.nuls.rpc.netty.channel.manager.ConnectManager;
-import io.nuls.tools.data.StringUtils;
 import io.nuls.tools.log.Log;
+import io.nuls.tools.model.StringUtils;
 import io.nuls.tools.parse.JSONUtils;
 import io.nuls.tools.thread.TimeService;
 
@@ -27,9 +26,10 @@ import static io.nuls.rpc.info.Constants.CMD_NOT_FOUND;
 /**
  * 消息处理器
  * Receive message processor
- * @author  tag
+ *
+ * @author tag
  * 2019/2/25
- * */
+ */
 public class RequestMessageProcessor {
     public static final Map<String, Object> handlerMap = new HashMap<>();
     public static final Map<String, Class<?>> classMap = new ConcurrentHashMap<>();
@@ -49,14 +49,11 @@ public class RequestMessageProcessor {
 
         Message rspMsg = MessageUtil.basicMessage(MessageType.NegotiateConnectionResponse);
         rspMsg.setMessageData(negotiateConnectionResponse);
-        ConnectManager.sendMessage(channel,JSONUtils.obj2json(rspMsg));
+        ConnectManager.sendMessage(channel, JSONUtils.obj2json(rspMsg));
 
         //握手成功之后保存channel与角色的对应信息
         NegotiateConnection negotiateConnection = JSONUtils.map2pojo((Map) message.getMessageData(), NegotiateConnection.class);
-        Log.info("当前已建立在连接："+ConnectManager.ROLE_CHANNEL_MAP);
-        Log.info("当前正在建立在连接："+negotiateConnection.getAbbreviation());
-        ConnectManager.ROLE_CHANNEL_MAP.put(negotiateConnection.getAbbreviation(),channel);
-        ConnectManager.createConnectData((SocketChannel) channel);
+        ConnectManager.cacheConnect(negotiateConnection.getAbbreviation(), channel, false);
     }
 
 
@@ -64,7 +61,7 @@ public class RequestMessageProcessor {
      * 确认收到Request
      * Confirm receipt of Request
      *
-     * @param channel 用于发送消息 / Used to send message
+     * @param channel   用于发送消息 / Used to send message
      * @param messageId 原始消息ID / The origin message ID
      * @throws JsonProcessingException JSON解析错误 / JSON parsing error
      */
@@ -73,29 +70,29 @@ public class RequestMessageProcessor {
         ack.setRequestId(messageId);
         Message rspMsg = MessageUtil.basicMessage(MessageType.Ack);
         rspMsg.setMessageData(ack);
-        ConnectManager.sendMessage(channel,JSONUtils.obj2json(rspMsg));
+        ConnectManager.sendMessage(channel, JSONUtils.obj2json(rspMsg));
     }
 
     /**
      * 服务还未启动完成
      * The service has not been started yet.
      *
-     * @param channel 链接通道
+     * @param channel   链接通道
      * @param messageId 请求ID
-     * */
+     */
     public static void serviceNotStarted(Channel channel, String messageId) throws JsonProcessingException {
         Response response = MessageUtil.newResponse(messageId, Constants.BOOLEAN_FALSE, "Service not started!");
         Message rspMsg = MessageUtil.basicMessage(MessageType.Response);
         rspMsg.setMessageData(response);
-        ConnectManager.sendMessage(channel,JSONUtils.obj2json(rspMsg));
+        ConnectManager.sendMessage(channel, JSONUtils.obj2json(rspMsg));
     }
 
     /**
      * 取消订阅
      * For Unsubscribe
      *
-     * @serialData   取消订阅的客户端连接信息/Unsubscribed client connection information
      * @param message 取消订阅的消息体 / Unsubscribe message
+     * @serialData 取消订阅的客户端连接信息/Unsubscribed client connection information
      */
     public static synchronized void unsubscribe(ConnectData channelData, Message message) {
         Unsubscribe unsubscribe = JSONUtils.map2pojo((Map) message.getMessageData(), Unsubscribe.class);
@@ -109,12 +106,12 @@ public class RequestMessageProcessor {
      * After current processing, do need to keep the Request information and wait for the next processing?
      * True: keep, False: remove
      *
-     * @param channelData     用于发送消息 / Used to send message
-     * @param message    原始消息 / The origin message
-     * @param request    请求 / The request
+     * @param channelData 用于发送消息 / Used to send message
+     * @param message     原始消息 / The origin message
+     * @param request     请求 / The request
      * @return boolean
      */
-    public static boolean responseWithPeriod(ConnectData channelData,Message message, Request request) {
+    public static boolean responseWithPeriod(ConnectData channelData, Message message, Request request) {
         /*
         计算如何处理该Request
         Calculate how to handle the Request
@@ -127,11 +124,11 @@ public class RequestMessageProcessor {
              */
             switch (nextProcess) {
                 case Constants.EXECUTE_AND_KEEP:
-                    callCommandsWithPeriod(channelData.getChannel(), request.getRequestMethods(), message.getMessageId());
+                    callCommandsWithPeriod(channelData.getChannel(), request.getRequestMethods(), message.getMessageId(), false);
                     channelData.getCmdInvokeTime().put(message, TimeService.currentTimeMillis());
                     return true;
                 case Constants.EXECUTE_AND_REMOVE:
-                    callCommandsWithPeriod(channelData.getChannel(), request.getRequestMethods(), message.getMessageId());
+                    callCommandsWithPeriod(channelData.getChannel(), request.getRequestMethods(), message.getMessageId(), false);
                     channelData.getCmdInvokeTime().put(message, TimeService.currentTimeMillis());
                     return false;
                 case Constants.SKIP_AND_KEEP:
@@ -155,10 +152,11 @@ public class RequestMessageProcessor {
      * @param channel        用于发送消息 / Used to send message
      * @param requestMethods 请求的方法集合 / The collections of request method
      * @param messageId      原始消息ID / The origin message ID
-     * @throws Exception 连接失败 / Connected failed
+     * @param isSubscribe    is subscribe message
+     * @throws JsonProcessingException 服务器端处理异常
      */
     @SuppressWarnings("unchecked")
-    public static void callCommandsWithPeriod(Channel channel, Map requestMethods, String messageId) throws Exception {
+    public static void callCommandsWithPeriod(Channel channel, Map requestMethods, String messageId, boolean isSubscribe) throws JsonProcessingException {
         for (Object object : requestMethods.entrySet()) {
             Map.Entry<String, Map> entry = (Map.Entry<String, Map>) object;
             String method = entry.getKey();
@@ -172,48 +170,56 @@ public class RequestMessageProcessor {
             response.setRequestId(messageId);
             response.setResponseStatus(Constants.BOOLEAN_FALSE);
 
-            /*
-            从本地注册的cmd中得到对应的方法
-            Get the corresponding method from the locally registered CMD
-             */
-            CmdDetail cmdDetail = params == null || params.get(Constants.VERSION_KEY_STR) == null
-                    ? ConnectManager.getLocalInvokeCmd(method)
-                    : ConnectManager.getLocalInvokeCmd(method, Double.parseDouble(params.get(Constants.VERSION_KEY_STR).toString()));
+            try {
+                 /*
+                从本地注册的cmd中得到对应的方法
+                Get the corresponding method from the locally registered CMD
+                */
+                CmdDetail cmdDetail = params == null || params.get(Constants.VERSION_KEY_STR) == null
+                        ? ConnectManager.getLocalInvokeCmd(method)
+                        : ConnectManager.getLocalInvokeCmd(method, Double.parseDouble(params.get(Constants.VERSION_KEY_STR).toString()));
 
-            /*
-            找不到本地方法，则返回"CMD_NOT_FOUND"错误
-            If the local method cannot be found, the "CMD_NOT_FOUND" error is returned
-             */
-            if (cmdDetail == null) {
-                response.setResponseComment(Constants.CMD_NOT_FOUND + ":" + method + "," + (params != null ? params.get(Constants.VERSION_KEY_STR) : ""));
+                /*
+                找不到本地方法，则返回"CMD_NOT_FOUND"错误
+                If the local method cannot be found, the "CMD_NOT_FOUND" error is returned
+                */
+                if (cmdDetail == null) {
+                    response.setResponseComment(Constants.CMD_NOT_FOUND + ":" + method + "," + (params != null ? params.get(Constants.VERSION_KEY_STR) : ""));
+                    Message rspMessage = MessageUtil.basicMessage(MessageType.Response);
+                    rspMessage.setMessageData(response);
+                    ConnectManager.sendMessage(channel, JSONUtils.obj2json(rspMessage));
+                    return;
+                }
+
+                /*
+                根据注册信息进行参数的基础验证
+                Basic verification of parameters based on registration information
+                */
+                String validationString = paramsValidation(cmdDetail, params);
+                if (validationString != null) {
+                    response.setResponseComment(validationString);
+                    Message rspMessage = MessageUtil.basicMessage(MessageType.Response);
+                    rspMessage.setMessageData(response);
+                    ConnectManager.sendMessage(channel, JSONUtils.obj2json(rspMessage));
+                    return;
+                }
+
+                Message rspMessage = execute(cmdDetail, params, messageId);
+                ConnectManager.sendMessage(channel, JSONUtils.obj2json(rspMessage));
+
+                /*
+                执行成功之后判断该接口是否被订阅过，如果被订阅则改变该接口触发次数
+                After successful execution, determine if the interface has been subscribed, and if subscribed, change the number of triggers for the interface
+                */
+                if (ConnectManager.SUBSCRIBE_COUNT.containsKey(method) && isSubscribe) {
+                    ConnectManager.eventTrigger(method, (Response) rspMessage.getMessageData());
+                }
+            } catch (Exception e) {
+                Log.error(e);
+                response.setResponseComment("Server-side processing failed!");
                 Message rspMessage = MessageUtil.basicMessage(MessageType.Response);
                 rspMessage.setMessageData(response);
-                ConnectManager.sendMessage(channel,JSONUtils.obj2json(rspMessage));
-                return;
-            }
-
-            /*
-            根据注册信息进行参数的基础验证
-            Basic verification of parameters based on registration information
-             */
-            String validationString = paramsValidation(cmdDetail, params);
-            if (validationString != null) {
-                response.setResponseComment(validationString);
-                Message rspMessage = MessageUtil.basicMessage(MessageType.Response);
-                rspMessage.setMessageData(response);
-                ConnectManager.sendMessage(channel,JSONUtils.obj2json(rspMessage));
-                return;
-            }
-
-            Message rspMessage = execute(cmdDetail, params, messageId);
-            ConnectManager.sendMessage(channel,JSONUtils.obj2json(rspMessage));
-
-            /*
-            执行成功之后判断该接口是否被订阅过，如果被订阅则改变该接口触发次数
-            After successful execution, determine if the interface has been subscribed, and if subscribed, change the number of triggers for the interface
-             */
-            if(ConnectManager.SUBSCRIBE_COUNT.containsKey(method)){
-                ConnectManager.eventTrigger(method,(Response) rspMessage.getMessageData());
+                ConnectManager.sendMessage(channel, JSONUtils.obj2json(rspMessage));
             }
         }
     }
@@ -246,15 +252,15 @@ public class RequestMessageProcessor {
      * 处理Request，如果达到EventCount的发送条件，则发送
      * Processing Request, if EventCount's sending condition is met, then send
      *
-     * @param channel     用于发送消息 / Used to send message
-     * @param realResponse  订阅事件触发，返回数据
+     * @param channel      用于发送消息 / Used to send message
+     * @param realResponse 订阅事件触发，返回数据
      */
     public static void responseWithEventCount(Channel channel, Response realResponse) {
         Message rspMessage = MessageUtil.basicMessage(MessageType.Response);
         rspMessage.setMessageData(realResponse);
         try {
             Log.debug("responseWithEventCount: " + JSONUtils.obj2json(rspMessage));
-            ConnectManager.sendMessage(channel,JSONUtils.obj2json(rspMessage));
+            ConnectManager.sendMessage(channel, JSONUtils.obj2json(rspMessage));
         } catch (JsonProcessingException e) {
             Log.error(e);
         }
@@ -265,9 +271,9 @@ public class RequestMessageProcessor {
      * 计算如何处理该Request
      * Calculate how to handle the Request
      *
-     * @param channelData             服务器端链接信息 / Server-side Link Information
-     * @param message                 原始消息 / The origin message
-     * @param subscriptionPeriod      Unit: second
+     * @param channelData        服务器端链接信息 / Server-side Link Information
+     * @param message            原始消息 / The origin message
+     * @param subscriptionPeriod Unit: second
      * @return int
      */
     private static int nextProcess(ConnectData channelData, Message message, int subscriptionPeriod) {
@@ -401,7 +407,7 @@ public class RequestMessageProcessor {
         判断是否在范围内
         Judge whether it is within the range
          */
-        return value.compareTo(start)>=0 && value.compareTo(end)<=0;
+        return value.compareTo(start) >= 0 && value.compareTo(end) <= 0;
     }
 
     /**

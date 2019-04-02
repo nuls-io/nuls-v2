@@ -1,11 +1,10 @@
 package io.nuls.transaction.rpc.call;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.model.message.Response;
 import io.nuls.rpc.netty.processor.ResponseMessageProcessor;
-import io.nuls.tools.data.StringUtils;
 import io.nuls.tools.exception.NulsException;
+import io.nuls.tools.model.StringUtils;
 import io.nuls.tools.parse.JSONUtils;
 import io.nuls.transaction.constant.TxConstant;
 import io.nuls.transaction.model.bo.Chain;
@@ -25,16 +24,27 @@ import static io.nuls.transaction.utils.LoggerUtil.Log;
  */
 public class TransactionCall {
 
+
+
+    public static Object request(String moduleCode, String cmd, Map params) throws NulsException {
+        return request(moduleCode, cmd, params, null);
+    }
     /**
      * 调用其他模块接口
      * Call other module interfaces
      */
-    public static Object request(String moduleCode, String cmd, Map params) throws NulsException {
+    public static Object request(String moduleCode, String cmd, Map params, Long timeout) throws NulsException {
         try {
-            params.put(Constants.VERSION_KEY_STR, "1.0");
-            Response cmdResp = ResponseMessageProcessor.requestAndResponse(moduleCode, cmd, params);
+            params.put(Constants.VERSION_KEY_STR, TxConstant.RPC_VERSION);
+            Response cmdResp;
+            if(null == timeout) {
+                cmdResp = ResponseMessageProcessor.requestAndResponse(moduleCode, cmd, params);
+            }else{
+                cmdResp = ResponseMessageProcessor.requestAndResponse(moduleCode, cmd, params, timeout);
+            }
             Map resData = (Map)cmdResp.getResponseData();
             if (!cmdResp.isSuccess()) {
+                Log.error("response error info is {}", cmdResp);
                 String errorMsg = null;
                 if(null == resData){
                     errorMsg = String.format("Remote call fail. ResponseComment: %s ", cmdResp.getResponseComment());
@@ -45,9 +55,6 @@ public class TransactionCall {
                 }
                 throw new Exception(errorMsg);
             }
-            /*if (null == resData) {
-                return null;
-            }*/
             return resData.get(cmd);
         } catch (Exception e) {
             Log.debug("cmd: {}", cmd);
@@ -75,11 +82,11 @@ public class TransactionCall {
         params.put("chainId", chain.getChainId());
         params.put("txHex", txHex);
         Map result = (Map) TransactionCall.request(txRegister.getModuleCode(), txRegister.getValidator(), params);
-        try {
-            chain.getLogger().debug("moduleCode:{}, -cmd:{}, -txProcess -rs: {}", txRegister.getModuleCode(), txRegister.getValidator(), JSONUtils.obj2json(result));
+/*        try {
+            chain.getLoggerMap().get(TxConstant.LOG_TX).debug("moduleCode:{}, -cmd:{}, -txProcess -rs: {}", txRegister.getModuleCode(), txRegister.getValidator(), JSONUtils.obj2json(result));
         } catch (JsonProcessingException e) {
             e.printStackTrace();
-        }
+        }*/
         return (Boolean) result.get("value");
     }
 
@@ -99,10 +106,10 @@ public class TransactionCall {
             params.put("txHexList", txHexList);
             params.put("blockHeaderHex", blockHeaderHex);
             Map result = (Map) TransactionCall.request(moduleCode, cmd, params);
-            chain.getLogger().debug("moduleCode:{}, -cmd:{}, -txProcess -rs: {}",moduleCode, cmd, JSONUtils.obj2json(result));
+//            chain.getLoggerMap().get(TxConstant.LOG_TX).debug("moduleCode:{}, -cmd:{}, -txProcess -rs: {}",moduleCode, cmd, JSONUtils.obj2json(result));
             return (Boolean) result.get("value");
         } catch (Exception e) {
-            chain.getLogger().error(e);
+            chain.getLoggerMap().get(TxConstant.LOG_TX).error(e);
             return false;
         }
     }
@@ -134,16 +141,21 @@ public class TransactionCall {
      *
      * @param moduleValidator
      * @param txHexList
-     * @return 返回未通过验证的交易hash / return unverified transaction hash
+     * @return 返回未通过验证的交易hash, 如果出现异常那么交易全部返回(不通过) / return unverified transaction hash
      */
-    public static List<String> txModuleValidator(Chain chain, String moduleValidator, String moduleCode, List<String> txHexList) throws NulsException {
+    public static List<String> txModuleValidator(Chain chain, String moduleValidator, String moduleCode, List<String> txHexList) {
 
-        //调用交易模块统一验证器
-        Map<String, Object> params = new HashMap(TxConstant.INIT_CAPACITY_8);
-        params.put("chainId", chain.getChainId());
-        params.put("txHexList", txHexList);
-        Map result = (Map) TransactionCall.request(moduleCode, moduleValidator, params);
-        return (List<String>) result.get("list");
+        try {
+            //调用交易模块统一验证器
+            Map<String, Object> params = new HashMap(TxConstant.INIT_CAPACITY_8);
+            params.put("chainId", chain.getChainId());
+            params.put("txHexList", txHexList);
+            Map result = (Map) TransactionCall.request(moduleCode, moduleValidator, params);
+            return (List<String>) result.get("list");
+        } catch (NulsException e) {
+            return txHexList;
+        }
+
     }
 
 }

@@ -11,7 +11,7 @@ import io.nuls.chain.storage.AssetStorage;
 import io.nuls.chain.storage.ChainAssetStorage;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
-import io.nuls.tools.data.ByteUtils;
+import io.nuls.tools.model.ByteUtils;
 import io.nuls.tools.thread.TimeService;
 
 import java.util.List;

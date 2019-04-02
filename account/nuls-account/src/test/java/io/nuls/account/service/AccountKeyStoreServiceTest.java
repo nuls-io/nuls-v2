@@ -1,7 +1,7 @@
 package io.nuls.account.service;
 
-import io.nuls.account.constant.AccountParam;
 import io.nuls.account.AccountBootstrap;
+import io.nuls.account.config.NulsConfig;
 import io.nuls.account.model.bo.Account;
 import io.nuls.db.service.RocksDBService;
 import io.nuls.tools.core.inteceptor.ModularServiceMethodInterceptor;
@@ -23,17 +23,18 @@ public class AccountKeyStoreServiceTest {
 
     protected static AccountService accountService;
     protected static AccountKeyStoreService accountKeyStoreService;
-    protected int chainId = 12345;
-    protected String password = "a12345678";
+    protected int chainId = 2;
+    protected String password = "a2678";
 
     @BeforeClass
     public static void beforeTest() {
         //初始化配置
-        AccountBootstrap.initCfg();
-        //读取配置文件，数据存储根目录，初始化打开该目录下所有表连接并放入缓存
-        RocksDBService.init(AccountParam.getInstance().getDataPath());
-        //springLite容器初始化
         SpringLiteContext.init("io.nuls.account", new ModularServiceMethodInterceptor());
+        AccountBootstrap accountBootstrap = SpringLiteContext.getBean(AccountBootstrap.class);
+        //初始化配置
+        accountBootstrap.initCfg();
+        //读取配置文件，数据存储根目录，初始化打开该目录下所有表连接并放入缓存
+        RocksDBService.init(NulsConfig.DATA_PATH);
         //启动时间同步线程
         TimeService.getInstance().start();
         accountService = SpringLiteContext.getBean(AccountService.class);

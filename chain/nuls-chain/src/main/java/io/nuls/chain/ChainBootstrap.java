@@ -38,7 +38,7 @@ import static io.nuls.chain.util.LoggerUtil.Log;
 public class ChainBootstrap extends RpcModule {
     public static void main(String[] args) {
         if (args == null || args.length == 0) {
-            args = new String[]{HostInfo.getLocalIP() + ":8887/ws"};
+            args = new String[]{"ws://" + HostInfo.getLocalIP() + ":8887/ws"};
         }
         NulsRpcModuleBootstrap.run("io.nuls", args);
     }
@@ -111,7 +111,7 @@ public class ChainBootstrap extends RpcModule {
 
     /**
      * 如果数据库中有相同的配置，则以数据库为准
-     * If the database has the same configuration, use the database data
+     * If the database has the same configuration, use the database entity
      *
      * @throws Exception Any error will throw an exception
      */

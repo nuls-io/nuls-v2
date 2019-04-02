@@ -25,119 +25,31 @@
  */
 package io.nuls.ledger.rpc.cmd;
 
-import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.data.Transaction;
+import io.nuls.ledger.manager.LedgerChainManager;
 import io.nuls.ledger.service.TransactionService;
-import io.nuls.rpc.cmd.BaseCmd;
+import io.nuls.ledger.utils.LoggerUtil;
 import io.nuls.rpc.model.CmdAnnotation;
 import io.nuls.rpc.model.Parameter;
 import io.nuls.rpc.model.message.Response;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
-import io.nuls.tools.crypto.HexUtil;
-import io.nuls.tools.data.StringUtils;
-import io.nuls.tools.exception.NulsException;
+import io.nuls.tools.core.ioc.SpringLiteContext;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static io.nuls.ledger.utils.LoggerUtil.logger;
-
 /**
  * 未确认交易提交，提交失败直接返回错误信息
  * Created by wangkun23 on 2018/11/20.
  */
 @Component
-public class TransactionCmd extends BaseCmd {
+public class TransactionCmd extends BaseLedgerCmd {
 
     @Autowired
     private TransactionService transactionService;
-
-
-    Response parseTxs(List<String> txHexList, List<Transaction> txList) {
-        for (String txHex : txHexList) {
-            if (StringUtils.isBlank(txHex)) {
-                return failed("txHex is blank");
-            }
-            byte[] txStream = HexUtil.decode(txHex);
-            Transaction tx = new Transaction();
-            try {
-                tx.parse(new NulsByteBuffer(txStream));
-                txList.add(tx);
-            } catch (NulsException e) {
-                logger.error("transaction parse error", e);
-                return failed("transaction parse error");
-            }
-        }
-        return success();
-    }
-
-    Transaction parseTxs(String txHex) {
-        if (StringUtils.isBlank(txHex)) {
-            return null;
-        }
-        byte[] txStream = HexUtil.decode(txHex);
-        Transaction tx = new Transaction();
-        try {
-            tx.parse(new NulsByteBuffer(txStream));
-        } catch (NulsException e) {
-            logger.error("transaction parse error", e);
-            return null;
-        }
-        return tx;
-    }
-
-    /**
-     * 确认与未确认交易提交
-     *
-     * @param params
-     * @return
-     */
-    @CmdAnnotation(cmd = "commitTx",
-            version = 1.0, scope = "private", minEvent = 0, minPeriod = 0,
-            description = "")
-    @Parameter(parameterName = "chainId", parameterType = "int")
-    @Parameter(parameterName = "txHexList", parameterType = "List")
-    @Parameter(parameterName = "blockHeight", parameterType = "long")
-    @Parameter(parameterName = "isConfirmTx", parameterType = "boolean")
-    public Response commitTx(Map params) {
-        Map<String, Object> rtData = new HashMap<>();
-        Integer chainId = (Integer) params.get("chainId");
-        List<String> txHexList = (List) params.get("txHexList");
-        boolean isConfirmTx = Boolean.valueOf(params.get("isConfirmTx").toString());
-        if (null == txHexList || 0 == txHexList.size()) {
-            return failed("txHexList is blank");
-        }
-        int value = 0;
-        List<Transaction> txList = new ArrayList<>();
-        Response parseResponse = parseTxs(txHexList, txList);
-        if (!parseResponse.isSuccess()) {
-            return parseResponse;
-        }
-        if (isConfirmTx) {
-            long blockHeight = Long.valueOf(params.get("blockHeight").toString());
-            if (transactionService.confirmBlockProcess(chainId, txList, blockHeight)) {
-                value = 1;
-            } else {
-                value = 0;
-            }
-        } else {
-            //未确认交易按单笔来提交
-            if (txList.size() != 1) {
-                value = 0;
-            } else {
-                if (transactionService.unConfirmTxProcess(chainId, txList.get(0))) {
-                    value = 1;
-                } else {
-                    value = 0;
-                }
-            }
-        }
-        rtData.put("value", value);
-        return success(rtData);
-    }
 
     /**
      * 未确认交易提交
@@ -153,19 +65,29 @@ public class TransactionCmd extends BaseCmd {
     public Response commitUnconfirmedTx(Map params) {
         Map<String, Object> rtData = new HashMap<>();
         Integer chainId = (Integer) params.get("chainId");
-        String txHex = params.get("txHex").toString();
-        Transaction tx = parseTxs(txHex);
-        if (null == tx) {
-            return failed("txHex is invalid");
+        try {
+            String txHex = params.get("txHex").toString();
+            Transaction tx = parseTxs(txHex,chainId);
+            if (null == tx) {
+                LoggerUtil.logger(chainId).error("txHex is invalid chainId={},txHex={}", chainId, txHex);
+                return failed("txHex is invalid");
+            }
+            LoggerUtil.logger(chainId).debug("commitUnconfirmedTx chainId={},txHash={}", chainId, tx.getHash().toString());
+            int value = 0;
+            if (transactionService.unConfirmTxProcess(chainId, tx)) {
+                value = 1;
+            } else {
+                value = 0;
+            }
+            rtData.put("value", value);
+            LoggerUtil.logger(chainId).debug(" chainId={},txHash={},value={}", chainId, tx.getHash().toString(), value);
+        } catch (Exception e) {
+            e.printStackTrace();
+            LoggerUtil.logger(chainId).error("commitUnconfirmedTx exception ={}",e.getMessage());
+            return failed(e.getMessage());
         }
-        int value = 0;
-        if (transactionService.unConfirmTxProcess(chainId, tx)) {
-            value = 1;
-        } else {
-            value = 0;
-        }
-        rtData.put("value", value);
-        return success(rtData);
+        Response response = success(rtData);
+        return response;
     }
 
     /**
@@ -183,78 +105,39 @@ public class TransactionCmd extends BaseCmd {
     public Response commitBlockTxs(Map params) {
         Map<String, Object> rtData = new HashMap<>();
         Integer chainId = (Integer) params.get("chainId");
+        long blockHeight = Long.valueOf(params.get("blockHeight").toString());
         List<String> txHexList = (List) params.get("txHexList");
+        if(blockHeight == 0){
+            //进行创世初始化
+            try {
+                SpringLiteContext.getBean(LedgerChainManager.class).addChain(chainId);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        LoggerUtil.logger(chainId).debug("commitBlockTxs chainId={},blockHeight={}", chainId, blockHeight);
         if (null == txHexList || 0 == txHexList.size()) {
+            LoggerUtil.logger(chainId).error("txHexList is blank");
             return failed("txHexList is blank");
         }
+        LoggerUtil.logger(chainId).debug("commitBlockTxs txHexList={}", txHexList.size());
         int value = 0;
         List<Transaction> txList = new ArrayList<>();
-        Response parseResponse = parseTxs(txHexList, txList);
+        Response parseResponse = parseTxs(txHexList, txList,chainId);
         if (!parseResponse.isSuccess()) {
+            LoggerUtil.logger(chainId).debug("commitBlockTxs response={}", parseResponse);
             return parseResponse;
         }
-        long blockHeight = Long.valueOf(params.get("blockHeight").toString());
+
         if (transactionService.confirmBlockProcess(chainId, txList, blockHeight)) {
             value = 1;
         } else {
             value = 0;
         }
         rtData.put("value", value);
-        return success(rtData);
-    }
-
-    /**
-     * 逐笔回滚交易
-     *
-     * @param params
-     * @return
-     */
-    @CmdAnnotation(cmd = "rollBackConfirmTx",
-            version = 1.0, scope = "private", minEvent = 0, minPeriod = 0,
-            description = "")
-    @Parameter(parameterName = "chainId", parameterType = "int")
-    @Parameter(parameterName = "txHexList", parameterType = "List")
-    @Parameter(parameterName = "blockHeight", parameterType = "long")
-    @Parameter(parameterName = "isConfirmTx", parameterType = "boolean")
-    public Response rollBackConfirmTx(Map params) {
-        Map<String, Object> rtData = new HashMap<>();
-        int value = 0;
-        try {
-            Integer chainId = (Integer) params.get("chainId");
-            List<String> txHexList = (List) params.get("txHexList");
-            boolean isConfirmTx = Boolean.valueOf(params.get("isConfirmTx").toString());
-            if (null == txHexList || 0 == txHexList.size()) {
-                return failed("txHexList is blank");
-            }
-            List<Transaction> txList = new ArrayList<>();
-            Response parseResponse = parseTxs(txHexList, txList);
-            if (!parseResponse.isSuccess()) {
-                return parseResponse;
-            }
-            if (isConfirmTx) {
-                long blockHeight = Long.valueOf(params.get("blockHeight").toString());
-                if (transactionService.rollBackConfirmTxs(chainId, blockHeight)) {
-                    value = 1;
-                } else {
-                    value = 0;
-                }
-            } else {
-                //未确认交易按单笔来提交
-                if (txList.size() != 1) {
-                    value = 0;
-                } else {
-                    if (transactionService.rollBackUnconfirmTx(chainId, txList.get(0))) {
-                        value = 1;
-                    } else {
-                        value = 0;
-                    }
-                }
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        rtData.put("value", value);
-        return success(rtData);
+        Response response = success(rtData);
+        LoggerUtil.logger(chainId).debug("response={}", response);
+        return response;
     }
 
     /**
@@ -271,13 +154,16 @@ public class TransactionCmd extends BaseCmd {
     public Response rollBackUnconfirmTx(Map params) {
         Map<String, Object> rtData = new HashMap<>();
         int value = 0;
+        Integer chainId = (Integer) params.get("chainId");
         try {
-            Integer chainId = (Integer) params.get("chainId");
             String txHex = params.get("txHex").toString();
-            Transaction tx = parseTxs(txHex);
+            LoggerUtil.logger(chainId).debug("rollBackUnconfirmTx chainId={}", chainId);
+            Transaction tx = parseTxs(txHex,chainId);
             if (null == tx) {
+                LoggerUtil.logger(chainId).debug("txHex is invalid chainId={},txHex={}", chainId,txHex);
                 return failed("txHex is invalid");
             }
+            LoggerUtil.txUnconfirmedRollBackLog(chainId).debug("rollBackUnconfirmTx chainId={},txHash={}", chainId, tx.getHash().toString());
             if (transactionService.rollBackUnconfirmTx(chainId, tx)) {
                 value = 1;
             } else {
@@ -287,7 +173,10 @@ public class TransactionCmd extends BaseCmd {
             e.printStackTrace();
         }
         rtData.put("value", value);
-        return success(rtData);
+        Response response = success(rtData);
+        LoggerUtil.logger(chainId).debug("response={}", response);
+        return response;
+
     }
 
 
@@ -302,21 +191,39 @@ public class TransactionCmd extends BaseCmd {
             description = "")
     @Parameter(parameterName = "chainId", parameterType = "int")
     @Parameter(parameterName = "blockHeight", parameterType = "long")
+    @Parameter(parameterName = "txHexList", parameterType = "List")
     public Response rollBackBlockTxs(Map params) {
         Map<String, Object> rtData = new HashMap<>();
         int value = 0;
+        Integer chainId = (Integer) params.get("chainId");
         try {
-            Integer chainId = (Integer) params.get("chainId");
             long blockHeight = Long.valueOf(params.get("blockHeight").toString());
-            if (transactionService.rollBackConfirmTxs(chainId, blockHeight)) {
+            List<String> txHexList = (List) params.get("txHexList");
+            if (null == txHexList || 0 == txHexList.size()) {
+                LoggerUtil.logger(chainId).error("txHexList is blank");
+                return failed("txHexList is blank");
+            }
+            LoggerUtil.logger(chainId).debug("rollBackBlockTxs txHexList={}", txHexList.size());
+            List<Transaction> txList = new ArrayList<>();
+            Response parseResponse = parseTxs(txHexList, txList,chainId);
+            if (!parseResponse.isSuccess()) {
+                LoggerUtil.logger(chainId).debug("commitBlockTxs response={}", parseResponse);
+                return parseResponse;
+            }
+
+            LoggerUtil.txRollBackLog(chainId).debug("rollBackBlockTxs chainId={},blockHeight={}", chainId, blockHeight);
+            if (transactionService.rollBackConfirmTxs(chainId, blockHeight,txList)) {
                 value = 1;
             } else {
                 value = 0;
             }
         } catch (Exception e) {
+            LoggerUtil.logger(chainId).error(e);
             e.printStackTrace();
         }
         rtData.put("value", value);
-        return success(rtData);
+        Response response = success(rtData);
+        LoggerUtil.logger(chainId).debug("rollBackBlockTxs response={}", response);
+        return response;
     }
 }

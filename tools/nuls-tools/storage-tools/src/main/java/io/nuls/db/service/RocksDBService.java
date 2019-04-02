@@ -21,7 +21,7 @@ package io.nuls.db.service;
 
 import io.nuls.db.manager.RocksDBManager;
 import io.nuls.db.model.Entry;
-import io.nuls.tools.data.StringUtils;
+import io.nuls.tools.model.StringUtils;
 import io.nuls.tools.log.Log;
 
 import java.util.Arrays;
@@ -34,8 +34,7 @@ public class RocksDBService {
         try {
             RocksDBManager.init(path);
         } catch (Exception e) {
-            Log.error(e.getMessage());
-            e.printStackTrace();
+            Log.error(e.getMessage(),e);
         }
     }
 
@@ -52,6 +51,21 @@ public class RocksDBService {
 
     public static String[] listTable() {
         return RocksDBManager.listTable();
+    }
+
+    /**
+     * 如果表不存在就创建表
+     * if table not exist then create this;
+     * @param table
+     * @return
+     * @throws Exception
+     */
+    public static boolean createTableIfNotExist(String table) throws Exception {
+        boolean exist = existTable(table);
+        if(!exist){
+            createTable(table);
+        }
+        return exist;
     }
 
     /**

@@ -7,22 +7,22 @@ import io.netty.channel.ChannelOption;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
-import io.netty.handler.logging.LogLevel;
-import io.netty.handler.logging.LoggingHandler;
 import io.nuls.rpc.info.HostInfo;
 import io.nuls.rpc.netty.initializer.ServerInitializer;
 
 import java.net.InetSocketAddress;
+
 /**
  * 消息处理器
  * Send message processor
- * @author  tag
+ *
+ * @author tag
  * 2019/2/26
- * */
-public class StartServerProcessor implements Runnable{
+ */
+public class StartServerProcessor implements Runnable {
     private int port;
 
-    public StartServerProcessor(int port){
+    public StartServerProcessor(int port) {
         this.port = port;
     }
 
@@ -38,13 +38,12 @@ public class StartServerProcessor implements Runnable{
         EventLoopGroup workerGroup = new NioEventLoopGroup();
         try {
             ServerBootstrap serverBootstrap = new ServerBootstrap();
-            serverBootstrap.group(bossGroup,workerGroup)
+            serverBootstrap.group(bossGroup, workerGroup)
                     .channel(NioServerSocketChannel.class)
                     .option(ChannelOption.ALLOCATOR, PooledByteBufAllocator.DEFAULT)
-                    .option(ChannelOption.SO_KEEPALIVE,true)
-                    .handler(new LoggingHandler(LogLevel.TRACE))
+                    .option(ChannelOption.SO_KEEPALIVE, true)
                     .childHandler(new ServerInitializer());
-            ChannelFuture channelFuture = serverBootstrap.bind(new InetSocketAddress(HostInfo.getLocalIP(),port)).sync();
+            ChannelFuture channelFuture = serverBootstrap.bind(new InetSocketAddress(HostInfo.getLocalIP(), port)).sync();
             channelFuture.channel().closeFuture().sync();
         } catch (Exception e) {
             e.printStackTrace();

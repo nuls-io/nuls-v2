@@ -24,12 +24,13 @@
  */
 package io.nuls.network.task;
 
-import io.nuls.network.constant.NetworkParam;
+import io.nuls.network.cfg.NetworkConfig;
 import io.nuls.network.constant.NodeConnectStatusEnum;
 import io.nuls.network.manager.ConnectionManager;
 import io.nuls.network.manager.NodeGroupManager;
 import io.nuls.network.model.Node;
 import io.nuls.network.model.NodeGroup;
+import io.nuls.tools.core.ioc.SpringLiteContext;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -46,7 +47,7 @@ import static io.nuls.network.utils.LoggerUtil.Log;
  */
 public class NodeMaintenanceTask implements Runnable {
 
-    private final NetworkParam networkParam = NetworkParam.getInstance();
+    private final NetworkConfig networkConfig = SpringLiteContext.getBean(NetworkConfig.class);
     private final ConnectionManager connectionManager = ConnectionManager.getInstance();
 
     @Override
@@ -92,7 +93,7 @@ public class NodeMaintenanceTask implements Runnable {
 
     private List<Node> getNeedConnectNodes(NodeGroup nodeGroup, boolean isCross) {
         Collection<Node> connectedNodes = nodeGroup.getConnectedNodes(isCross);
-        if (connectedNodes.size() >= networkParam.getMaxOutCount()) {
+        if (connectedNodes.size() >= networkConfig.getMaxOutCount()) {
             //进行种子节点的断链
             nodeGroup.stopConnectedSeeds(isCross);
             return null;
@@ -106,7 +107,7 @@ public class NodeMaintenanceTask implements Runnable {
 
         nodeList.removeAll(connectedNodes);
 
-        int maxCount = networkParam.getMaxOutCount() - connectedNodes.size();
+        int maxCount = networkConfig.getMaxOutCount() - connectedNodes.size();
         if (nodeList.size() < maxCount) {
             return nodeList;
         }

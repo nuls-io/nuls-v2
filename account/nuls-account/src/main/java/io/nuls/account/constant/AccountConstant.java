@@ -39,6 +39,8 @@ import java.util.Comparator;
  */
 public interface AccountConstant {
 
+    String MODULE_DB_PATH = "/ac";
+
     /**
      * ----[ System] ----
      */
@@ -64,19 +66,19 @@ public interface AccountConstant {
      * 系统配置中语言设置的字段名
      * The field name of the language set in the system configuration.
      */
-    String CFG_SYSTEM_TKEYSTORE_FOLDER = "keydir";
+    String CFG_SYSTEM_TKEYSTORE_FOLDER = "keyDir";
 
     /**
-     * 内核模块地址
-     * Kernel module address
+     * 内核模块地址端口
+     * Kernel module address port
      */
-    String KERNEL_MODULE_URL = "kernelUrl";
+    String KERNEL_MODULE_PORT = "kernelPort";
 
     /**
      * --------[storage configs] -------
      */
     String CFG_DB_SECTION = "storage";
-    String DB_DATA_PATH = "rocksdb.datapath";
+    String DB_DATA_PATH = "dataDir";
 
     /**
      * --------[chain constant] -------
@@ -146,13 +148,13 @@ public interface AccountConstant {
     /**
      * DEFAULT PAGE_SIZE
      */
-    int PAGE_SIZE = 10;
+    int PAGE_SIZE = 20;
 
     /**
      * 黑洞地址，该地址的资产无法找回
      * //TODO 测试地址，后期需修改
      */
-    byte[] BLACK_HOLE_ADDRESS = AddressTool.getAddress("5MR_2CW59jPsSMabykKEvbjeEQsbw7nDyZ3");
+    byte[] BLACK_HOLE_ADDRESS = AddressTool.getAddress("tNULSeBaMkqeHbTxwKqyquFcbewVTUDHPkF11o");
 
     /**
      * --------[EVENT constant] -------
@@ -214,4 +216,8 @@ public interface AccountConstant {
     int TX_HASH_DIGEST_BYTE_MAX_LEN = 70;
     int TX_MAX_BYTES = 300;
     int TX_MAX_SIZE = TX_MAX_BYTES * 1024;
+    /**
+     * 本地计算nonce值的hash缓存有效时间 30秒
+     */
+    int HASH_TTL = 30000;
 }

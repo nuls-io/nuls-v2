@@ -24,6 +24,15 @@ public interface UnconfirmedTxStorageService {
      */
     boolean putTx(int chainId, Transaction tx);
 
+
+    /**
+     * 批量保存未确认交易
+     * @param chainId
+     * @param txList
+     * @return
+     */
+    boolean putTxList(int chainId, List<Transaction> txList);
+
     /**
      * 根据交易hash查询已验证交易数据
      *
@@ -32,6 +41,23 @@ public interface UnconfirmedTxStorageService {
      * @return 交易数据
      */
     Transaction getTx(int chainId, NulsDigestData hash);
+
+    /**
+     * 判断交易是否在未确认交易数据库中存在
+     * @param chainId
+     * @param hash
+     * @return
+     */
+    boolean isExists(int chainId, NulsDigestData hash);
+
+    /**
+     * 根据交易hash查询已验证交易数据
+     *
+     * @param chainId
+     * @param hash
+     * @return 交易数据
+     */
+    Transaction getTx(int chainId, String hash);
 
     /**
      * 根据交易hash删除已验证交易数据
@@ -46,21 +72,23 @@ public interface UnconfirmedTxStorageService {
      * 根据交易hash批量查询已验证交易数据
      *
      * @param chainId
-     * @param hashList NulsDigestData serialize data
+     * @param hashList NulsDigestData serialize entity
      * @return 交易数据列表
      */
     List<Transaction> getTxList(int chainId, List<byte[]> hashList);
 
     /**
      * 根据交易hash批量删除已验证交易数据
+     *
      * @param chainId
-     * @param hashList NulsDigestData serialize data
+     * @param hashList NulsDigestData serialize entity
      * @return 删除是否成功
      */
     boolean removeTxList(int chainId, List<byte[]> hashList);
 
     /**
      * 查询所有已验证交易数据，包含保存时间
+     *
      * @param chainId
      * @return
      */

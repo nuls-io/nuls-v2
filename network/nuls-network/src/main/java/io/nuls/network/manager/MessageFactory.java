@@ -24,22 +24,26 @@
  */
 package io.nuls.network.manager;
 
+import io.nuls.network.cfg.NetworkConfig;
 import io.nuls.network.constant.NetworkConstant;
-import io.nuls.network.constant.NetworkParam;
 import io.nuls.network.manager.handler.MessageHandlerFactory;
 import io.nuls.network.manager.handler.base.BaseMeesageHandlerInf;
 import io.nuls.network.manager.handler.message.*;
 import io.nuls.network.model.Node;
 import io.nuls.network.model.NodeGroup;
+import io.nuls.network.model.dto.BestBlockInfo;
 import io.nuls.network.model.dto.IpAddress;
 import io.nuls.network.model.message.*;
 import io.nuls.network.model.message.base.BaseMessage;
 import io.nuls.network.model.message.body.*;
-import io.nuls.network.netty.container.NodesContainer;
+import io.nuls.network.utils.LoggerUtil;
+import io.nuls.tools.core.ioc.SpringLiteContext;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import static io.nuls.network.utils.LoggerUtil.Log;
 
@@ -53,6 +57,7 @@ import static io.nuls.network.utils.LoggerUtil.Log;
 public class MessageFactory {
     private static MessageFactory instance = new MessageFactory();
     private static final Map<String, Class<? extends BaseMessage>> MESSAGE_MAP = new HashMap<>();
+    NetworkConfig networkConfig = SpringLiteContext.getBean(NetworkConfig.class);
     private NodeGroupManager nodeGroupManager = NodeGroupManager.getInstance();
 
     private MessageFactory() {
@@ -70,6 +75,7 @@ public class MessageFactory {
         MessageFactory.putMessage(AddrMessage.class, AddrMessageHandler.getInstance());
         MessageFactory.putMessage(GetTimeMessage.class, GetTimeMessageHandler.getInstance());
         MessageFactory.putMessage(TimeMessage.class, TimeMessageHandler.getInstance());
+        MessageFactory.putMessage(PeerInfoMessage.class, PeerInfoMessageHandler.getInstance());
     }
 
     /**
@@ -111,17 +117,17 @@ public class MessageFactory {
             versionMessageBody.setPortYouCross(node.getRemoteCrossPort());
             int localPort = 0;
             if (node.isCrossConnect()) {
-                localPort = NetworkParam.getInstance().getCrossPort();
+                localPort = networkConfig.getCrossPort();
             } else {
-                localPort = NetworkParam.getInstance().getPort();
+                localPort = networkConfig.getPort();
             }
-            IpAddress addrMe = new IpAddress(NetworkParam.getInstance().getExternalIp(), localPort);
+            IpAddress addrMe = new IpAddress(networkConfig.getExternalIp(), localPort);
             versionMessageBody.setAddrMe(addrMe);
-            versionMessageBody.setPortMeCross(NetworkParam.getInstance().getCrossPort());
+            versionMessageBody.setPortMeCross(networkConfig.getCrossPort());
             return new VersionMessage(nodeGroup.getMagicNumber(), NetworkConstant.CMD_MESSAGE_VERSION, versionMessageBody);
         } catch (UnknownHostException e) {
             e.printStackTrace();
-            Log.error(e.getMessage());
+            LoggerUtil.logger(nodeGroup.getChainId()).error(e.getMessage());
         }
 
         return null;
@@ -191,5 +197,18 @@ public class MessageFactory {
         messageBody.setMessageId(messageId);
         messageBody.setTime(System.currentTimeMillis());
         return new TimeMessage(magicNumber, NetworkConstant.CMD_MESSAGE_RESPONSE_TIME, messageBody);
+    }
+
+    /**
+     * 构造PeerInfoMessage消息
+     * @param magicNumber
+     * @param bestBlockInfo
+     * @return
+     */
+    public PeerInfoMessage buildPeerInfoMessage(long magicNumber, BestBlockInfo bestBlockInfo) {
+        PeerInfoMessageBody messageBody = new PeerInfoMessageBody();
+        messageBody.setBlockHash(bestBlockInfo.getHash());
+        messageBody.setBlockHeight(bestBlockInfo.getBlockHeight());
+        return new PeerInfoMessage(magicNumber, NetworkConstant.CMD_MESSAGE_SEND_LOCAL_INFOS, messageBody);
     }
 }

@@ -1,5 +1,6 @@
 package io.nuls.poc.utils.manager;
 
+import io.nuls.base.data.BlockExtendsData;
 import io.nuls.base.data.BlockHeader;
 import io.nuls.poc.constant.ConsensusConstant;
 import io.nuls.poc.model.bo.Chain;
@@ -25,9 +26,10 @@ import java.util.*;
 public class BlockManager {
     @Autowired
     private RoundManager roundManager;
+
     /**
      * 初始化链区块头数据，缓存指定数量的区块头
-     * Initialize chain block header data to cache a specified number of block headers
+     * Initialize chain block header entity to cache a specified number of block headers
      *
      * @param chain chain info
      */
@@ -35,19 +37,19 @@ public class BlockManager {
     public void loadBlockHeader(Chain chain) throws Exception {
         Map params = new HashMap(ConsensusConstant.INIT_CAPACITY);
         params.put("chainId", chain.getConfig().getChainId());
-        params.put("size", ConsensusConstant.INIT_BLOCK_HEADER_COUNT);
-        Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.BL.abbr, "getLatestBlockHeaders", params);
+        params.put("round", ConsensusConstant.INIT_BLOCK_HEADER_COUNT);
+        Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.BL.abbr, "getLatestRoundBlockHeaders", params);
         Map<String, Object> resultMap;
         List<String> blockHeaderHexs = new ArrayList<>();
-        if(cmdResp.isSuccess()){
+        if (cmdResp.isSuccess()) {
             resultMap = (Map<String, Object>) cmdResp.getResponseData();
-            blockHeaderHexs = (List<String>) resultMap.get("getLatestBlockHeaders");
+            blockHeaderHexs = (List<String>) resultMap.get("getLatestRoundBlockHeaders");
         }
-        while(!cmdResp.isSuccess() && blockHeaderHexs.size() == 0){
-            cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.BL.abbr, "getLatestBlockHeaders", params);
-            if(cmdResp.isSuccess()){
+        while (!cmdResp.isSuccess() && blockHeaderHexs.size() == 0) {
+            cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.BL.abbr, "getLatestRoundBlockHeaders", params);
+            if (cmdResp.isSuccess()) {
                 resultMap = (Map<String, Object>) cmdResp.getResponseData();
-                blockHeaderHexs = (List<String>) resultMap.get("getLatestBlockHeaders");
+                blockHeaderHexs = (List<String>) resultMap.get("getLatestRoundBlockHeaders");
                 break;
             }
             Log.info("---------------------------区块加载失败！");
@@ -67,18 +69,35 @@ public class BlockManager {
 
     /**
      * 收到最新区块头，更新链区块缓存数据
-     * Receive the latest block header, update the chain block cache data
+     * Receive the latest block header, update the chain block cache entity
      *
      * @param chain       chain info
      * @param blockHeader block header
      */
     public void addNewBlock(Chain chain, BlockHeader blockHeader) {
-        chain.getBlockHeaderList().add(blockHeader);
-        if (chain.getBlockHeaderList().size() > ConsensusConstant.INIT_BLOCK_HEADER_COUNT) {
-            chain.getBlockHeaderList().remove(0);
+        /*
+        如果新增区块有轮次变化，则删除最小轮次区块
+         */
+        BlockHeader newestHeader = chain.getNewestHeader();
+        BlockExtendsData newestExtendsData = new BlockExtendsData(newestHeader.getExtend());
+        BlockExtendsData receiveExtendsData = new BlockExtendsData(blockHeader.getExtend());
+        long receiveRoundIndex = receiveExtendsData.getRoundIndex();
+        BlockExtendsData lastExtendsData = new BlockExtendsData(chain.getBlockHeaderList().get(0).getExtend());
+        long lastRoundIndex = lastExtendsData.getRoundIndex();
+        if (receiveRoundIndex > newestExtendsData.getRoundIndex() && (receiveRoundIndex - ConsensusConstant.INIT_BLOCK_HEADER_COUNT > lastRoundIndex)) {
+            Iterator<BlockHeader> iterator = chain.getBlockHeaderList().iterator();
+            while (iterator.hasNext()) {
+                lastExtendsData = new BlockExtendsData(iterator.next().getExtend());
+                if (lastExtendsData.getRoundIndex() == lastRoundIndex) {
+                    iterator.remove();
+                } else if (lastExtendsData.getRoundIndex() > lastRoundIndex) {
+                    break;
+                }
+            }
         }
+        chain.getBlockHeaderList().add(blockHeader);
         chain.setNewestHeader(blockHeader);
-        chain.getLoggerMap().get(ConsensusConstant.BASIC_LOGGER_NAME).info("新区块保存成功，新区块高度为：" + blockHeader.getHeight() + ",本地最新区块高度为：" + chain.getNewestHeader().getHeight());
+        chain.getLoggerMap().get(ConsensusConstant.BASIC_LOGGER_NAME).info("区块保存，高度为：" + blockHeader.getHeight() + " , txCount: " + blockHeader.getTxCount() + ",本地最新区块高度为：" + chain.getNewestHeader().getHeight());
     }
 
     /**
@@ -89,6 +108,7 @@ public class BlockManager {
      * @param height block height
      */
     public void chainRollBack(Chain chain, int height) {
+        chain.getLoggerMap().get(ConsensusConstant.BASIC_LOGGER_NAME).info("区块开始回滚，回滚到的高度：" + height);
         List<BlockHeader> headerList = chain.getBlockHeaderList();
         Collections.sort(headerList, new BlockHeaderComparator());
         for (int index = headerList.size() - 1; index >= 0; index--) {
@@ -100,7 +120,15 @@ public class BlockManager {
         }
         chain.setBlockHeaderList(headerList);
         chain.setNewestHeader(headerList.get(headerList.size() - 1));
-        roundManager.rollBackRound(chain,height);
+        long roundIndex;
+        BlockHeader newestBlocHeader = chain.getNewestHeader();
+        BlockExtendsData bestExtendsData = new BlockExtendsData(newestBlocHeader.getExtend());
+        if(bestExtendsData.getPackingIndexOfRound() > 1){
+            roundIndex = bestExtendsData.getRoundIndex();
+        }else{
+            roundIndex = bestExtendsData.getRoundIndex()-1;
+        }
+        roundManager.rollBackRound(chain, roundIndex);
         chain.getLoggerMap().get(ConsensusConstant.BASIC_LOGGER_NAME).info("区块回滚成功，回滚到的高度为：" + height + ",本地最新区块高度为：" + chain.getNewestHeader().getHeight());
     }
 }

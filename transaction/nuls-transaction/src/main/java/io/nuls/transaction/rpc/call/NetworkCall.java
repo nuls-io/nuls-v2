@@ -26,9 +26,8 @@ import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.model.message.Response;
 import io.nuls.rpc.netty.processor.ResponseMessageProcessor;
 import io.nuls.tools.crypto.HexUtil;
-import io.nuls.tools.data.StringUtils;
 import io.nuls.tools.exception.NulsException;
-import static io.nuls.transaction.utils.LoggerUtil.Log;
+import io.nuls.tools.model.StringUtils;
 import io.nuls.transaction.constant.TxConstant;
 import io.nuls.transaction.message.BroadcastTxMessage;
 import io.nuls.transaction.message.TransactionMessage;
@@ -41,6 +40,7 @@ import java.util.List;
 import java.util.Map;
 
 import static io.nuls.transaction.constant.TxCmd.*;
+import static io.nuls.transaction.utils.LoggerUtil.Log;
 
 /**
  * 调用网络模块接口的工具
@@ -49,6 +49,34 @@ import static io.nuls.transaction.constant.TxCmd.*;
  * @date 2018/12/25
  */
 public class NetworkCall {
+
+    static long latestGetTime = System.currentTimeMillis();
+    static long offset = 0;
+
+    /**
+     * 获取当前网络时间
+     * @return
+     * @throws NulsException
+     */
+    public static long getCurrentTimeMillis() throws NulsException  {
+        long now = System.currentTimeMillis();
+        if (now - latestGetTime > TxConstant.GETTIME_INTERVAL) {
+            Map<String, Object> params = new HashMap<>(TxConstant.INIT_CAPACITY_8);
+            params.put(Constants.VERSION_KEY_STR, TxConstant.RPC_VERSION);
+            try {
+                HashMap hashMap = (HashMap) TransactionCall.request(ModuleE.NW.abbr, "nw_currentTimeMillis", params, TxConstant.GETTIME_INTERFACE_TIMEOUT);
+                long time = Long.valueOf(hashMap.get("currentTimeMillis").toString());
+                offset = time - System.currentTimeMillis();
+            } catch (NulsException e) {
+                e.printStackTrace();
+            } catch (NumberFormatException e) {
+                e.printStackTrace();
+            }
+            latestGetTime = now;
+        }
+        return (System.currentTimeMillis() + offset);
+    }
+
 
     /**
      * 根据链ID获取可用节点
@@ -59,7 +87,7 @@ public class NetworkCall {
      */
     public static List<Node> getAvailableNodes(int chainId, int isCross, String excludeNodes) throws NulsException{
         Map<String, Object> params = new HashMap<>(TxConstant.INIT_CAPACITY_8);
-        params.put(Constants.VERSION_KEY_STR, "1.0");
+        params.put(Constants.VERSION_KEY_STR, TxConstant.RPC_VERSION);
         params.put("chainId", chainId);
         params.put("state", 1);
         params.put("isCross", isCross);
@@ -105,12 +133,17 @@ public class NetworkCall {
     public static boolean broadcast(int chainId, BaseMessage message, String excludeNodes) throws NulsException {
         try {
             Map<String, Object> params = new HashMap<>(TxConstant.INIT_CAPACITY_8);
-            params.put(Constants.VERSION_KEY_STR, "1.0");
+            params.put(Constants.VERSION_KEY_STR, TxConstant.RPC_VERSION);
             params.put("chainId", chainId);
             params.put("excludeNodes", excludeNodes);
             params.put("messageBody", HexUtil.byteToHex(message.serialize()));
             params.put("command", message.getCommand());
-            return ResponseMessageProcessor.requestAndResponse(ModuleE.NW.abbr, "nw_broadcast", params).isSuccess();
+            Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.NW.abbr, "nw_broadcast", params);
+            if(!response.isSuccess()){
+                Log.error("Calling nw_broadcast failed response:{}", response);
+                return false;
+            }
+            return true;
         } catch (Exception e) {
             Log.error("Calling remote interface failed. module:{} - interface:{}", ModuleE.NW.abbr, "nw_broadcast");
             throw new NulsException(e);
@@ -128,13 +161,18 @@ public class NetworkCall {
     public static boolean sendToNode(int chainId, BaseMessage message, String nodeId) throws NulsException {
         try {
             Map<String, Object> params = new HashMap<>(TxConstant.INIT_CAPACITY_8);
-            params.put(Constants.VERSION_KEY_STR, "1.0");
+            params.put(Constants.VERSION_KEY_STR, TxConstant.RPC_VERSION);
             params.put("chainId", chainId);
             params.put("nodes", nodeId);
             params.put("messageBody", HexUtil.byteToHex(message.serialize()));
             params.put("command", message.getCommand());
 
-            return ResponseMessageProcessor.requestAndResponse(ModuleE.NW.abbr, "nw_sendPeersMsg", params).isSuccess();
+            Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.NW.abbr, "nw_sendPeersMsg", params);
+            if(!response.isSuccess()){
+                Log.error("Calling nw_sendPeersMsg failed response:{}", response);
+                return false;
+            }
+            return true;
         } catch (Exception e) {
             Log.error("Calling remote interface failed. module:{} - interface:{}", ModuleE.NW.abbr, "nw_sendPeersMsg");
             throw new NulsException(e);
@@ -204,17 +242,6 @@ public class NetworkCall {
         return NetworkCall.sendToNode(chainId, message, nodeId);
     }
 
-    /**
-     * 获取当前网络时间
-     * @return
-     * @throws NulsException
-     */
-    public static long getCurrentTimeMillis() throws NulsException  {
-        Map<String, Object> params = new HashMap<>(TxConstant.INIT_CAPACITY_8);
-        params.put(Constants.VERSION_KEY_STR, "1.0");
-        HashMap hashMap = (HashMap)TransactionCall.request(ModuleE.NW.abbr, "nw_currentTimeMillis", params);
-        return (long) hashMap.get("currentTimeMillis");
-    }
 
 
 }

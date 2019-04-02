@@ -1,0 +1,12 @@
+{
+  "chainConfig": {
+    "chainId": 2,
+    "assetsId": 1
+  },
+  "mainChainId": 2,
+  "mainAssetId": 1,
+  "language": "en",
+  "encoding": "UTF-8",
+  "keystoreFolder": "/keystore/backup",
+  "kernelUrl": "ws://127.0.0.1:8887/ws"
+}

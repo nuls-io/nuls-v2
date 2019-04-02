@@ -10,37 +10,32 @@ import io.nuls.rpc.model.message.Response;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.crypto.HexUtil;
-import io.nuls.tools.data.ObjectUtils;
+import io.nuls.tools.model.ObjectUtils;
 import io.nuls.tools.exception.NulsException;
-import static io.nuls.transaction.utils.LoggerUtil.Log;
 import io.nuls.transaction.cache.TxDuplicateRemoval;
 import io.nuls.transaction.constant.TxCmd;
+import io.nuls.transaction.constant.TxConfig;
 import io.nuls.transaction.constant.TxConstant;
 import io.nuls.transaction.constant.TxErrorCode;
-import io.nuls.transaction.storage.rocksdb.CtxStorageService;
 import io.nuls.transaction.manager.ChainManager;
-import io.nuls.transaction.message.BroadcastCrossNodeRsMessage;
-import io.nuls.transaction.message.BroadcastTxMessage;
-import io.nuls.transaction.message.CrossTxMessage;
-import io.nuls.transaction.message.GetTxMessage;
-import io.nuls.transaction.message.TransactionMessage;
-import io.nuls.transaction.message.VerifyCrossResultMessage;
-import io.nuls.transaction.message.VerifyCrossWithFCMessage;
+import io.nuls.transaction.message.*;
 import io.nuls.transaction.model.bo.Chain;
 import io.nuls.transaction.model.bo.CrossTx;
+import io.nuls.transaction.model.po.TransactionConfirmedPO;
 import io.nuls.transaction.rpc.call.NetworkCall;
 import io.nuls.transaction.service.ConfirmedTxService;
 import io.nuls.transaction.service.CtxService;
 import io.nuls.transaction.service.TxService;
+import io.nuls.transaction.storage.rocksdb.CtxStorageService;
+import io.nuls.transaction.utils.TxUtil;
 
 import java.util.HashMap;
 import java.util.Map;
 
 import static io.nuls.transaction.constant.TxCmd.NW_NEW_MN_TX;
 import static io.nuls.transaction.constant.TxCmd.NW_VERIFYR_ESULT;
-import static io.nuls.transaction.constant.TxConstant.KEY_CHAIN_ID;
-import static io.nuls.transaction.constant.TxConstant.KEY_MESSAGE_BODY;
-import static io.nuls.transaction.constant.TxConstant.KEY_NODE_ID;
+import static io.nuls.transaction.constant.TxConstant.*;
+import static io.nuls.transaction.utils.LoggerUtil.Log;
 
 /**
  * 处理网络协议数据
@@ -60,6 +55,8 @@ public class MessageCmd extends BaseCmd {
     private CtxStorageService ctxStorageService;
     @Autowired
     private ChainManager chainManager;
+    @Autowired
+    private TxConfig txConfig;
 
     /**
      * 接收链内广播的新交易hash
@@ -84,9 +81,13 @@ public class MessageCmd extends BaseCmd {
             byte[] decode = HexUtil.decode(params.get(KEY_MESSAGE_BODY).toString());
             message.parse(new NulsByteBuffer(decode));
             if (message == null) {
+                chain.getLoggerMap().get(TxConstant.LOG_TX_MESSAGE).debug(
+                        "recieve [newHash], message is null from node-{}, chainId:{}", nodeId, chainId);
                 return failed(TxErrorCode.PARAMETER_ERROR);
             }
             NulsDigestData hash = message.getRequestHash();
+            chain.getLoggerMap().get(TxConstant.LOG_TX_MESSAGE).debug(
+                    "recieve [newHash] message from node-{}, chainId:{}, hash:{}", nodeId, chainId, hash.getDigestHex());
             //交易缓存中是否已存在该交易hash
             boolean consains = TxDuplicateRemoval.mightContain(hash);
             if (consains) {
@@ -112,12 +113,12 @@ public class MessageCmd extends BaseCmd {
 
     /**
      * 获取完整链内交易数据,包含还未开始跨链处理的跨链交易
-     * get complete transaction data
+     * get complete transaction entity
      *
      * @param params
      * @return
      */
-    @CmdAnnotation(cmd = TxCmd.NW_ASK_TX, version = 1.0, description = "get complete transaction data")
+    @CmdAnnotation(cmd = TxCmd.NW_ASK_TX, version = 1.0, description = "get complete transaction entity")
     @Parameter(parameterName = KEY_CHAIN_ID, parameterType = "int")
     @Parameter(parameterName = KEY_NODE_ID, parameterType = "String")
     public Response askTx(Map params) {
@@ -132,6 +133,8 @@ public class MessageCmd extends BaseCmd {
             byte[] decode = HexUtil.decode(params.get(KEY_MESSAGE_BODY).toString());
             message.parse(new NulsByteBuffer(decode));
             if (message == null) {
+                chain.getLoggerMap().get(TxConstant.LOG_TX_MESSAGE).debug(
+                        "recieve [askTx], message is null from node-{}, chainId:{}", nodeId, chainId);
                 return failed(TxErrorCode.PARAMETER_ERROR);
             }
             chain = chainManager.getChain(chainId);
@@ -139,11 +142,13 @@ public class MessageCmd extends BaseCmd {
                 throw new NulsException(TxErrorCode.CHAIN_NOT_FOUND);
             }
             NulsDigestData txHash = message.getRequestHash();
-            Transaction tx = txService.getTransaction(chain, txHash);
+            chain.getLoggerMap().get(TxConstant.LOG_TX_MESSAGE).debug(
+                    "recieve [askTx] message from node-{}, chainId:{}, hash:{}", nodeId, chainId, txHash.getDigestHex());
+            TransactionConfirmedPO tx = txService.getTransaction(chain, txHash);
             if (tx == null) {
                 throw new NulsException(TxErrorCode.TX_NOT_EXIST);
             }
-            result = NetworkCall.sendTxToNode(chainId, nodeId, tx);
+            result = NetworkCall.sendTxToNode(chainId, nodeId, tx.getTx());
         } catch (NulsException e) {
             errorLogProcess(chain, e);
             return failed(e.getErrorCode());
@@ -164,21 +169,28 @@ public class MessageCmd extends BaseCmd {
      */
     @CmdAnnotation(cmd = TxCmd.NW_RECEIVE_TX, version = 1.0, description = "receive new transactions from other nodes")
     @Parameter(parameterName = KEY_CHAIN_ID, parameterType = "int")
+    @Parameter(parameterName = KEY_NODE_ID, parameterType = "String")
     public Response receiveTx(Map params) {
         Map<String, Boolean> map = new HashMap<>();
         boolean result;
         Chain chain = null;
         try {
             Integer chainId = Integer.parseInt(params.get(KEY_CHAIN_ID).toString());
+            String nodeId = params.get(KEY_NODE_ID).toString();
             chain = chainManager.getChain(chainId);
             //解析新的交易消息
             TransactionMessage message = new TransactionMessage();
             byte[] decode = HexUtil.decode(params.get(KEY_MESSAGE_BODY).toString());
             message.parse(new NulsByteBuffer(decode));
             if (message == null) {
+                chain.getLoggerMap().get(TxConstant.LOG_TX_MESSAGE).debug(
+                        "recieve [receiveTx], message is null from node-{}, chainId:{}", nodeId, chainId);
                 return failed(TxErrorCode.PARAMETER_ERROR);
             }
             Transaction transaction = message.getTx();
+            chain.getLoggerMap().get(TxConstant.LOG_TX_MESSAGE).debug(
+                    "recieve [receiveTx] message from node-{}, chainId:{}, hash:{}", nodeId, chainId, transaction.getHash().getDigestHex());
+            TxUtil.txInformationDebugPrint(chain, transaction, chain.getLoggerMap().get(TxConstant.LOG_TX_MESSAGE));
             //交易缓存中是否已存在该交易hash
             boolean consains = TxDuplicateRemoval.mightContain(transaction.getHash());
             if (!consains) {
@@ -221,9 +233,13 @@ public class MessageCmd extends BaseCmd {
             byte[] decode = HexUtil.decode(params.get(KEY_MESSAGE_BODY).toString());
             message.parse(new NulsByteBuffer(decode));
             if (message == null) {
+                chain.getLoggerMap().get(TxConstant.LOG_TX_MESSAGE).debug(
+                        "recieve [newCrossHash], message is null from node-{}, chainId:{}", nodeId, chainId);
                 return failed(TxErrorCode.PARAMETER_ERROR);
             }
             NulsDigestData hash = message.getRequestHash();
+            chain.getLoggerMap().get(TxConstant.LOG_TX_MESSAGE).debug(
+                    "recieve [newCrossHash] message from node-{}, chainId:{}, hash:{}", nodeId, chainId, hash.getDigestHex());
             //交易缓存中是否已存在该交易hash
             boolean consains = TxDuplicateRemoval.mightContain(hash);
             if (consains) {
@@ -273,22 +289,26 @@ public class MessageCmd extends BaseCmd {
             }
             chain = chainManager.getChain(chainId);
             if (null == chain) {
+                chain.getLoggerMap().get(TxConstant.LOG_TX_MESSAGE).debug(
+                        "recieve [askCrossTxM2Fc], message is null from node-{}, chainId:{}", nodeId, chainId);
                 throw new NulsException(TxErrorCode.CHAIN_NOT_FOUND);
             }
             //查询已确认跨链交易
             NulsDigestData txHash = message.getRequestHash();
-            Transaction tx = confirmedTxService.getConfirmedTransaction(chain, txHash);
+            chain.getLoggerMap().get(TxConstant.LOG_TX_MESSAGE).debug(
+                    "recieve [askCrossTxM2Fc] message from node-{}, chainId:{}, hash:{}", nodeId, chainId, txHash.getDigestHex());
+            TransactionConfirmedPO tx = confirmedTxService.getConfirmedTransaction(chain, txHash);
             if (tx == null) {
                 throw new NulsException(TxErrorCode.TX_NOT_EXIST);
             }
             //交易是否被确认超过指定高度
-            if (chain.getBestBlockHeight() < (tx.getBlockHeight() + TxConstant.CTX_EFFECT_THRESHOLD)) {
+            if (chain.getBestBlockHeight() < (tx.getBlockHeight() + txConfig.getCtxEffectThreshold())) {
                 throw new NulsException(TxErrorCode.TX_NOT_EFFECTIVE_HEIGHT);
             }
             //发送跨链交易到指定节点
             CrossTxMessage crossTxMessage = new CrossTxMessage();
             crossTxMessage.setCommand(NW_NEW_MN_TX);
-            crossTxMessage.setTx(tx);
+            crossTxMessage.setTx(tx.getTx());
             result = NetworkCall.sendToNode(chainId, crossTxMessage, nodeId);
         } catch (NulsException e) {
             errorLogProcess(chain, e);
@@ -327,9 +347,13 @@ public class MessageCmd extends BaseCmd {
             }
             chain = chainManager.getChain(chainId);
             if (null == chain) {
+                chain.getLoggerMap().get(TxConstant.LOG_TX_MESSAGE).debug(
+                        "recieve [askCrossTxM2M], message is null from node-{}, chainId:{}", nodeId, chainId);
                 throw new NulsException(TxErrorCode.CHAIN_NOT_FOUND);
             }
             NulsDigestData txHash = message.getRequestHash();
+            chain.getLoggerMap().get(TxConstant.LOG_TX_MESSAGE).debug(
+                    "recieve [askCrossTxM2M] message from node-{}, chainId:{}, hash:{}", nodeId, chainId, txHash.getDigestHex());
             //查询处理中的跨链交易
             CrossTx ctx = ctxStorageService.getTx(chain.getChainId(), message.getRequestHash());
             if (ctx == null) {
@@ -338,10 +362,11 @@ public class MessageCmd extends BaseCmd {
             Transaction tx = ctx.getTx();
             if (tx == null) {
                 //查询已确认跨链交易
-                tx = confirmedTxService.getConfirmedTransaction(chain, txHash);
-                if (tx == null) {
+                TransactionConfirmedPO txConfirmed = confirmedTxService.getConfirmedTransaction(chain, txHash);
+                if (txConfirmed == null) {
                     throw new NulsException(TxErrorCode.TX_NOT_EXIST);
                 }
+                tx = txConfirmed.getTx();
             }
             //发送跨链交易到指定节点
             CrossTxMessage crossTxMessage = new CrossTxMessage();
@@ -381,6 +406,8 @@ public class MessageCmd extends BaseCmd {
             byte[] decode = HexUtil.decode(params.get(KEY_MESSAGE_BODY).toString());
             message.parse(new NulsByteBuffer(decode));
             if (message == null) {
+                chain.getLoggerMap().get(TxConstant.LOG_TX_MESSAGE).debug(
+                        "recieve [askCrossTxFc2M], message is null from node-{}, chainId:{}", nodeId, chainId);
                 return failed(TxErrorCode.PARAMETER_ERROR);
             }
             chain = chainManager.getChain(chainId);
@@ -389,18 +416,21 @@ public class MessageCmd extends BaseCmd {
             }
             //查询已确认跨链交易
             NulsDigestData txHash = message.getRequestHash();
-            Transaction tx = confirmedTxService.getConfirmedTransaction(chain, txHash);
+            chain.getLoggerMap().get(TxConstant.LOG_TX_MESSAGE).debug(
+                    "recieve [askCrossTxFc2M] message from node-{}, chainId:{}, hash:{}", nodeId, chainId, txHash.getDigestHex());
+
+            TransactionConfirmedPO tx = confirmedTxService.getConfirmedTransaction(chain, txHash);
             if (tx == null) {
                 throw new NulsException(TxErrorCode.TX_NOT_EXIST);
             }
             //交易是否被确认超过指定高度
-            if (chain.getBestBlockHeight() < (tx.getBlockHeight() + TxConstant.CTX_EFFECT_THRESHOLD)) {
+            if (chain.getBestBlockHeight() < (tx.getBlockHeight() + txConfig.getMainAssetId())) {
                 throw new NulsException(TxErrorCode.TX_NOT_EFFECTIVE_HEIGHT);
             }
             //发送跨链交易到指定节点
             CrossTxMessage crossTxMessage = new CrossTxMessage();
             crossTxMessage.setCommand(NW_NEW_MN_TX);
-            crossTxMessage.setTx(tx);
+            crossTxMessage.setTx(tx.getTx());
             result = NetworkCall.sendToNode(chainId, crossTxMessage, nodeId);
         } catch (NulsException e) {
             errorLogProcess(chain, e);
@@ -436,9 +466,15 @@ public class MessageCmd extends BaseCmd {
             byte[] decode = HexUtil.decode(params.get(KEY_MESSAGE_BODY).toString());
             message.parse(new NulsByteBuffer(decode));
             if (message == null) {
+                chain.getLoggerMap().get(TxConstant.LOG_TX_MESSAGE).debug(
+                        "recieve [newMnTx], message is null from node-{}, chainId:{}", nodeId, chainId);
                 return failed(TxErrorCode.PARAMETER_ERROR);
             }
             Transaction transaction = message.getTx();
+            chain.getLoggerMap().get(TxConstant.LOG_TX_MESSAGE).debug(
+                    "recieve [newMnTx] message from node-{}, chainId:{}, hash:{}", nodeId, chainId, transaction.getHash().getDigestHex());
+            TxUtil.txInformationDebugPrint(chain, transaction, chain.getLoggerMap().get(TxConstant.LOG_TX_MESSAGE));
+
             //交易缓存中是否已存在该交易hash
             boolean consains = TxDuplicateRemoval.mightContain(transaction.getHash());
             if (!consains) {
@@ -484,18 +520,22 @@ public class MessageCmd extends BaseCmd {
             }
             chain = chainManager.getChain(chainId);
             if (null == chain) {
+                chain.getLoggerMap().get(TxConstant.LOG_TX_MESSAGE).debug(
+                        "recieve [verifyFc], message is null from node-{}, chainId:{}", nodeId, chainId);
                 throw new NulsException(TxErrorCode.CHAIN_NOT_FOUND);
             }
             //解析原始交易hash
             byte[] origTxHashByte = message.getOriginalTxHash();
             NulsDigestData originalTxHash = NulsDigestData.fromDigestHex(HexUtil.encode(origTxHashByte));
+            chain.getLoggerMap().get(TxConstant.LOG_TX_MESSAGE).debug(
+                    "recieve [verifyFc] message from node-{}, chainId:{}, originalTxHash:{}", nodeId, chainId, originalTxHash.getDigestHex());
             //查询已确认跨链交易
-            Transaction tx = confirmedTxService.getConfirmedTransaction(chainManager.getChain(chainId), originalTxHash);
+            TransactionConfirmedPO tx = confirmedTxService.getConfirmedTransaction(chainManager.getChain(chainId), originalTxHash);
             if (tx == null) {
                 throw new NulsException(TxErrorCode.TX_NOT_EXIST);
             }
             //验证该交易所在的区块是否被确认超过指定高度
-            if (chain.getBestBlockHeight() < (tx.getBlockHeight() + TxConstant.CTX_EFFECT_THRESHOLD)) {
+            if (chain.getBestBlockHeight() < (tx.getBlockHeight() + txConfig.getMainAssetId())) {
                 throw new NulsException(TxErrorCode.TX_NOT_EFFECTIVE_HEIGHT);
             }
 
@@ -540,8 +580,12 @@ public class MessageCmd extends BaseCmd {
             byte[] decode = HexUtil.decode(params.get(KEY_MESSAGE_BODY).toString());
             message.parse(new NulsByteBuffer(decode));
             if (message == null) {
+                chain.getLoggerMap().get(TxConstant.LOG_TX_MESSAGE).debug(
+                        "recieve [verifyResult], message is null from node-{}, chainId:{}", nodeId, chainId);
                 return failed(TxErrorCode.PARAMETER_ERROR);
             }
+            chain.getLoggerMap().get(TxConstant.LOG_TX_MESSAGE).debug(
+                    "recieve [verifyResult] message from node-{}, chainId:{}, txHash:{}", nodeId, chainId, message.getRequestHash().getDigestHex());
             //处理跨链节点验证结果
             ctxService.ctxResultProcess(chain, message, nodeId);
         } catch (NulsException e) {
@@ -577,6 +621,8 @@ public class MessageCmd extends BaseCmd {
             byte[] decode = HexUtil.decode(params.get(KEY_MESSAGE_BODY).toString());
             message.parse(new NulsByteBuffer(decode));
             if (message == null) {
+                chain.getLoggerMap().get(TxConstant.LOG_TX_MESSAGE).debug(
+                        "recieve [verifyMn], message is null from node-{}, chainId:{}", nodeId, chainId);
                 return failed(TxErrorCode.PARAMETER_ERROR);
             }
             chain = chainManager.getChain(chainId);
@@ -586,13 +632,15 @@ public class MessageCmd extends BaseCmd {
             //解析原始交易hash
             byte[] origTxHashByte = message.getOriginalTxHash();
             NulsDigestData originalTxHash = NulsDigestData.fromDigestHex(HexUtil.encode(origTxHashByte));
+            chain.getLoggerMap().get(TxConstant.LOG_TX_MESSAGE).debug(
+                    "recieve [verifyMn] message from node-{}, chainId:{}, txHash:{}", nodeId, chainId, originalTxHash.getDigestHex());
             //查询已确认跨链交易
-            Transaction tx = confirmedTxService.getConfirmedTransaction(chainManager.getChain(chainId), originalTxHash);
+            TransactionConfirmedPO tx = confirmedTxService.getConfirmedTransaction(chainManager.getChain(chainId), originalTxHash);
             if (tx == null) {
                 throw new NulsException(TxErrorCode.TX_NOT_EXIST);
             }
             //验证该交易所在的区块是否被确认超过指定高度
-            if (chain.getBestBlockHeight() < (tx.getBlockHeight() + TxConstant.CTX_EFFECT_THRESHOLD)) {
+            if (chain.getBestBlockHeight() < (tx.getBlockHeight() + txConfig.getMainAssetId())) {
                 throw new NulsException(TxErrorCode.TX_NOT_EFFECTIVE_HEIGHT);
             }
 
@@ -679,11 +727,11 @@ public class MessageCmd extends BaseCmd {
     }
 
 
-    private void errorLogProcess(Chain chain, Exception e){
-        if(chain == null){
+    private void errorLogProcess(Chain chain, Exception e) {
+        if (chain == null) {
             Log.error(e);
-        }else{
-            chain.getLogger().error(e);
+        } else {
+            chain.getLoggerMap().get(TxConstant.LOG_TX_MESSAGE).error(e);
         }
     }
 }

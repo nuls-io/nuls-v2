@@ -29,8 +29,8 @@ import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.*;
 import io.nuls.ledger.model.AccountBalance;
 import io.nuls.ledger.model.UnconfirmedTx;
-import io.nuls.ledger.model.ValidateResult;
 import io.nuls.ledger.model.po.AccountState;
+import io.nuls.ledger.model.po.AccountStateSnapshot;
 import io.nuls.ledger.model.po.BlockSnapshotAccounts;
 import io.nuls.ledger.service.AccountStateService;
 import io.nuls.ledger.service.BlockDataService;
@@ -38,9 +38,10 @@ import io.nuls.ledger.service.TransactionService;
 import io.nuls.ledger.service.processor.CommontTransactionProcessor;
 import io.nuls.ledger.service.processor.LockedTransactionProcessor;
 import io.nuls.ledger.storage.Repository;
-import io.nuls.ledger.utils.CoinDataUtils;
-import io.nuls.ledger.utils.LedgerUtils;
-import io.nuls.ledger.utils.LockerUtils;
+import io.nuls.ledger.utils.CoinDataUtil;
+import io.nuls.ledger.utils.LedgerUtil;
+import io.nuls.ledger.utils.LockerUtil;
+import io.nuls.ledger.utils.LoggerUtil;
 import io.nuls.ledger.validator.CoinDataValidator;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Service;
@@ -71,6 +72,7 @@ public class TransactionServiceImpl implements TransactionService {
 
     @Autowired
     Repository repository;
+    Map<String, Integer> ledgerNonce = new HashMap<String, Integer>();
 
     /**
      * 未确认交易数据处理
@@ -81,49 +83,50 @@ public class TransactionServiceImpl implements TransactionService {
     @Override
     public boolean unConfirmTxProcess(int addressChainId, Transaction transaction) {
         //直接更新未确认交易
-        CoinData coinData = CoinDataUtils.parseCoinData(transaction.getCoinData());
+        CoinData coinData = CoinDataUtil.parseCoinData(transaction.getCoinData());
         if (null == coinData) {
             //例如黄牌交易，直接返回
             return true;
         }
-        ValidateResult validateResult = coinDataValidator.validateCoinData(addressChainId, transaction);
-        if (validateResult.getValidateCode() != CoinDataValidator.VALIDATE_SUCCESS_CODE) {
-            logger.error("validateResult = {}={}", validateResult.getValidateCode(), validateResult.getValidateDesc());
-            return false;
-        }
-        String currentTxNonce = LedgerUtils.getNonceStrByTxHash(transaction);
+        /*取消未确认交易的校验，到这个接口的都通过了未确认校验*/
+//        ValidateResult validateResult = coinDataValidator.validateCoinData(addressChainId, transaction);
+//        if (validateResult.getValidateCode() != CoinDataValidator.VALIDATE_SUCCESS_CODE) {
+//            logger.error("validateResult = {}={}", validateResult.getValidateCode(), validateResult.getValidateDesc());
+//            return false;
+//        }
+        String currentTxNonce = LedgerUtil.getNonceStrByTxHash(transaction);
         Map<String, UnconfirmedTx> accountsMap = new ConcurrentHashMap<>();
         List<CoinFrom> froms = coinData.getFrom();
         List<CoinTo> tos = coinData.getTo();
         String txHash = transaction.getHash().toString();
         for (CoinFrom from : froms) {
-            if (LedgerUtils.isNotLocalChainAccount(addressChainId, from.getAddress())) {
+            if (LedgerUtil.isNotLocalChainAccount(addressChainId, from.getAddress())) {
                 //非本地网络账户地址,不进行处理
                 continue;
             }
             String address = AddressTool.getStringAddressByBytes(from.getAddress());
             int assetChainId = from.getAssetsChainId();
             int assetId = from.getAssetsId();
-            String accountKey = LedgerUtils.getKeyStr(address, assetChainId, assetId);
+            String accountKey = LedgerUtil.getKeyStr(address, assetChainId, assetId);
             if (from.getLocked() == 0) {
                 //非解锁交易处理
-                CoinDataUtils.calTxFromAmount(accountsMap, from, txHash, accountKey);
+                CoinDataUtil.calTxFromAmount(accountsMap, from, txHash, accountKey);
             } else {
                 //解锁交易处理[未确认解锁交易From
-                CoinDataUtils.calTxFromUnlockedAmount(accountsMap, from, txHash, accountKey);
-                logger.debug("unConfirmTxProcess account = {} unlocked tx.txHash = {}", accountKey, txHash);
+                CoinDataUtil.calTxFromUnlockedAmount(accountsMap, from, txHash, accountKey);
+                logger(addressChainId).debug("unConfirmTxProcess account = {} unlocked tx.txHash = {}", accountKey, txHash);
             }
         }
         for (CoinTo to : tos) {
             String address = AddressTool.getStringAddressByBytes(to.getAddress());
             int assetChainId = to.getAssetsChainId();
             int assetId = to.getAssetsId();
-            String accountKey = LedgerUtils.getKeyStr(address, assetChainId, assetId);
+            String accountKey = LedgerUtil.getKeyStr(address, assetChainId, assetId);
             if (to.getLockTime() == 0) {
                 //普通交易
-                CoinDataUtils.calTxToAmount(accountsMap, to, txHash, accountKey);
-            }else{
-                CoinDataUtils.calTxToLockedAmount(accountsMap, to, txHash, accountKey);
+                CoinDataUtil.calTxToAmount(accountsMap, to, txHash, accountKey);
+            } else {
+                CoinDataUtil.calTxToLockedAmount(accountsMap, to, txHash, accountKey);
             }
         }
         Set keys = accountsMap.keySet();
@@ -148,14 +151,15 @@ public class TransactionServiceImpl implements TransactionService {
     @Override
     public boolean confirmBlockProcess(int addressChainId, List<Transaction> txList, long blockHeight) {
         try {
-            /*--begin 缓存区块交易数据,作为接口交互联调使用*/
-            blockDataService.saveLatestBlockDatas(addressChainId, blockHeight, txList);
+            ledgerNonce.clear();
+            /*--begin 缓存区块交易数据,作为接口交互联调使用test*/
+            // blockDataService.saveLatestBlockDatas(addressChainId, blockHeight, txList);
             /*--end*/
-            LockerUtils.BLOCK_SYNC_LOCKER.lock();
+            LockerUtil.BLOCK_SYNC_LOCKER.lock();
             long currentDbHeight = repository.getBlockHeight(addressChainId);
             if ((blockHeight - currentDbHeight) != 1) {
                 //高度不一致，数据出问题了
-                logger.error("addressChainId ={},blockHeight={},ledgerBlockHeight={}", addressChainId, blockHeight, currentDbHeight);
+                logger(addressChainId).error("addressChainId ={},blockHeight={},ledgerBlockHeight={}", addressChainId, blockHeight, currentDbHeight);
                 return false;
             }
             //批量交易按交易进行账户的金额处理，再按区块为原子性进行提交,updateAccounts用于账户缓存，最后统一处理
@@ -163,89 +167,89 @@ public class TransactionServiceImpl implements TransactionService {
             //整体区块备份
             BlockSnapshotAccounts blockSnapshotAccounts = new BlockSnapshotAccounts();
             for (Transaction transaction : txList) {
+                LoggerUtil.txCommitLog(addressChainId).debug("start confirmBlockProcess addressChainId={},blockHeight={},hash={}", addressChainId, blockHeight, transaction.getHash().toString());
                 //从缓存校验交易
-                if (coinDataValidator.hadValidateTx(addressChainId, transaction)) {
-                    CoinData coinData = CoinDataUtils.parseCoinData(transaction.getCoinData());
-                    if (null == coinData) {
-                        //例如黄牌交易，直接返回
+                CoinData coinData = CoinDataUtil.parseCoinData(transaction.getCoinData());
+                if (null == coinData) {
+                    //例如黄牌交易，直接返回
+                    LoggerUtil.logger(addressChainId).debug("coinData is null continue.");
+                    continue;
+                }
+                //更新账户状态
+                String nonce8BytesStr = LedgerUtil.getNonceStrByTxHash(transaction);
+                String txHash = transaction.getHash().toString();
+                List<CoinFrom> froms = coinData.getFrom();
+                for (CoinFrom from : froms) {
+                    if (LedgerUtil.isNotLocalChainAccount(addressChainId, from.getAddress())) {
+                        //非本地网络账户地址,不进行处理
+                        logger(addressChainId).info("address={} not localChainAccount", AddressTool.getStringAddressByBytes(from.getAddress()));
                         continue;
                     }
-                    //更新账户状态
-                    String nonce8BytesStr = LedgerUtils.getNonceStrByTxHash(transaction);
-                    String txHash = transaction.getHash().toString();
-                    List<CoinFrom> froms = coinData.getFrom();
-                    for (CoinFrom from : froms) {
-                        if (LedgerUtils.isNotLocalChainAccount(addressChainId, from.getAddress())) {
-                            //非本地网络账户地址,不进行处理
-                            logger.info("address={} not localChainAccount", AddressTool.getStringAddressByBytes(from.getAddress()));
-                            continue;
-                        }
-                        boolean process = false;
-                        AccountBalance accountBalance = getAccountBalance(addressChainId, from, txHash, blockHeight, updateAccounts);
-                        if (from.getLocked() == 0) {
-                            if (!coinDataValidator.validateNonces(accountBalance, nonce8BytesStr, HexUtil.encode(from.getNonce()))) {
-                                logger.info("nonce1={},nonce2={} validate fail.", accountBalance.getNonces().get(accountBalance.getNonces().size() - 1), HexUtil.encode(from.getNonce()));
-                                return false;
-                            }
-                            //非解锁交易处理
-                            process = commontTransactionProcessor.processFromCoinData(from, nonce8BytesStr, transaction.getHash().toString(), accountBalance.getNowAccountState());
-                        } else {
-                            process = lockedTransactionProcessor.processFromCoinData(from, nonce8BytesStr, transaction.getHash().toString(), accountBalance.getNowAccountState());
-                        }
-                        if (!process) {
-                            logger.info("address={},txHash = {} processFromCoinData is fail.", addressChainId, transaction.getHash().toString());
+                    boolean process = false;
+                    AccountBalance accountBalance = getAccountBalance(addressChainId, from, txHash, blockHeight, updateAccounts);
+                    if (from.getLocked() == 0) {
+                        if (!coinDataValidator.validateNonces(accountBalance, nonce8BytesStr, HexUtil.encode(from.getNonce()))) {
+                            logger(addressChainId).info("nonce1={},nonce2={} validate fail.", accountBalance.getNonces().get(accountBalance.getNonces().size() - 1), HexUtil.encode(from.getNonce()));
                             return false;
                         }
+                        //非解锁交易处理
+                        process = commontTransactionProcessor.processFromCoinData(from, nonce8BytesStr, transaction.getHash().toString(), accountBalance.getNowAccountState());
+                        ledgerNonce.put(LedgerUtil.getAccountNoncesStrKey(accountBalance.getNowAccountState().getAddress(), accountBalance.getNowAccountState().getAssetChainId(), accountBalance.getNowAccountState().getAssetId(), nonce8BytesStr), 1);
+                    } else {
+                        process = lockedTransactionProcessor.processFromCoinData(from, nonce8BytesStr, transaction.getHash().toString(), accountBalance.getNowAccountState());
                     }
-                    List<CoinTo> tos = coinData.getTo();
-                    for (CoinTo to : tos) {
-                        if (LedgerUtils.isNotLocalChainAccount(addressChainId, to.getAddress())) {
-                            //非本地网络账户地址,不进行处理
-                            logger.info("address={} not localChainAccount", AddressTool.getStringAddressByBytes(to.getAddress()));
-                            continue;
-                        }
-                        AccountBalance accountBalance = getAccountBalance(addressChainId, to, txHash, transaction.getBlockHeight(), updateAccounts);
+                    if (!process) {
+                        logger(addressChainId).info("address={},txHash = {} processFromCoinData is fail.", addressChainId, transaction.getHash().toString());
+                        return false;
+                    }
 
-                        if (to.getLockTime() == 0) {
-                            //非锁定交易处理
-                            commontTransactionProcessor.processToCoinData(to, nonce8BytesStr, transaction.getHash().toString(), accountBalance.getNowAccountState());
-                        } else {
-                            //锁定交易处理
-                            lockedTransactionProcessor.processToCoinData(to, nonce8BytesStr, transaction.getHash().toString(), accountBalance.getNowAccountState());
-                        }
-                    }
-                } else {
-                    return false;
                 }
+                List<CoinTo> tos = coinData.getTo();
+                for (CoinTo to : tos) {
 
+                    if (LedgerUtil.isNotLocalChainAccount(addressChainId, to.getAddress())) {
+                        //非本地网络账户地址,不进行处理
+                        logger(addressChainId).info("address={} not localChainAccount", AddressTool.getStringAddressByBytes(to.getAddress()));
+                        continue;
+                    }
+                    AccountBalance accountBalance = getAccountBalance(addressChainId, to, txHash, transaction.getBlockHeight(), updateAccounts);
+
+                    if (to.getLockTime() == 0) {
+                        //非锁定交易处理
+                        commontTransactionProcessor.processToCoinData(to, nonce8BytesStr, transaction.getHash().toString(), accountBalance.getNowAccountState());
+                    } else {
+                        //锁定交易处理
+                        lockedTransactionProcessor.processToCoinData(to, nonce8BytesStr, transaction.getHash().toString(), accountBalance.getNowAccountState());
+                    }
+                }
             }
             //整体交易的处理
             try {
                 for (Map.Entry<String, AccountBalance> entry : updateAccounts.entrySet()) {
                     //缓存数据
-                    blockSnapshotAccounts.addAccountState(entry.getValue().getPreAccountState());
+                    AccountStateSnapshot accountStateSnapshot = new AccountStateSnapshot(entry.getValue().getPreAccountState(), entry.getValue().getNonces());
+                    blockSnapshotAccounts.addAccountState(accountStateSnapshot);
                 }
             } catch (Exception e) {
                 e.printStackTrace();
-                logger.error("confirmBlockProcess blockSnapshotAccounts addAccountState error!");
+                logger(addressChainId).error("confirmBlockProcess blockSnapshotAccounts addAccountState error!");
                 return false;
             }
             //提交整体数据
             try {
                 //备份历史
                 repository.saveBlockSnapshot(addressChainId, blockHeight, blockSnapshotAccounts);
-                blockSnapshotAccounts.getAccounts().clear();
                 //更新账本信息
                 for (Map.Entry<String, AccountBalance> entry : updateAccounts.entrySet()) {
                     accountStateService.updateAccountStateByTx(entry.getKey(), blockSnapshotAccounts, entry.getValue().getNowAccountState());
-                    logger.info("updateAccountStateByTx account={} Available  balance={}", entry.getKey(), entry.getValue().getNowAccountState().getAvailableAmount());
+                    logger(addressChainId).info("updateAccountStateByTx account={} Available  balance={}", entry.getKey(), entry.getValue().getNowAccountState().getAvailableAmount());
                 }
-                //更新备份历史，因为执行期间可能存在未确认交易的变更（非必须逻辑）
-                repository.saveBlockSnapshot(addressChainId, blockHeight, blockSnapshotAccounts);
+                repository.saveAccountNonces(addressChainId, ledgerNonce);
             } catch (Exception e) {
                 e.printStackTrace();
                 //需要回滚数据
-                logger.error("confirmBlockProcess  error! go rollBackBlock!");
+                logger(addressChainId).error("confirmBlockProcess  error! go rollBackBlock!");
+                LoggerUtil.txRollBackLog(addressChainId).error("confirmBlockProcess  error! go rollBackBlock!addrChainId={},height={}", addressChainId, blockHeight);
                 rollBackBlock(addressChainId, blockSnapshotAccounts.getAccounts(), blockHeight);
                 return false;
             }
@@ -253,10 +257,12 @@ public class TransactionServiceImpl implements TransactionService {
             repository.saveOrUpdateBlockHeight(addressChainId, blockHeight);
             return true;
         } catch (Exception e) {
-            logger.error("confirmBlockProcess error", e);
+            e.printStackTrace();
+            logger(addressChainId).error("confirmBlockProcess error", e);
             return false;
         } finally {
-            LockerUtils.BLOCK_SYNC_LOCKER.unlock();
+            LockerUtil.BLOCK_SYNC_LOCKER.unlock();
+            ledgerNonce.clear();
         }
 
     }
@@ -265,11 +271,11 @@ public class TransactionServiceImpl implements TransactionService {
         String address = AddressTool.getStringAddressByBytes(coin.getAddress());
         int assetChainId = coin.getAssetsChainId();
         int assetId = coin.getAssetsId();
-        String key = LedgerUtils.getKeyStr(address, assetChainId, assetId);
+        String key = LedgerUtil.getKeyStr(address, assetChainId, assetId);
         AccountBalance accountBalance = updateAccounts.get(key);
         if (null == accountBalance) {
             //交易里的账户处理缓存AccountBalance
-            AccountState accountState = accountStateService.getAccountState(address, addressChainId, assetChainId, assetId);
+            AccountState accountState = accountStateService.getAccountStateUnSyn(address, addressChainId, assetChainId, assetId);
             AccountState orgAccountState = (AccountState) accountState.deepClone();
             accountState.setTxHash(txHash);
             accountState.setHeight(height);
@@ -286,19 +292,19 @@ public class TransactionServiceImpl implements TransactionService {
      * @return
      */
     @Override
-    public synchronized boolean rollBackBlock(int addressChainId, List<AccountState> preAccountStates, long blockHeight) {
+    public synchronized boolean rollBackBlock(int addressChainId, List<AccountStateSnapshot> preAccountStates, long blockHeight) {
         try {
             //回滚账号信息
-            for (AccountState accountState : preAccountStates) {
-                String key = LedgerUtils.getKeyStr(accountState.getAddress(), accountState.getAssetChainId(), accountState.getAssetId());
-                accountStateService.rollAccountState(key, accountState);
-                logger.info("rollBack account={},assetChainId={},assetId={}, height={},lastHash= {} ", key, accountState.getAssetChainId(), accountState.getAssetId(),
-                        accountState.getHeight(), accountState.getTxHash());
+            for (AccountStateSnapshot accountStateSnapshot : preAccountStates) {
+                String key = LedgerUtil.getKeyStr(accountStateSnapshot.getAccountState().getAddress(), accountStateSnapshot.getAccountState().getAssetChainId(), accountStateSnapshot.getAccountState().getAssetId());
+                accountStateService.rollAccountState(key, accountStateSnapshot);
+                logger(addressChainId).info("rollBack account={},assetChainId={},assetId={}, height={},lastHash= {} ", key, accountStateSnapshot.getAccountState().getAssetChainId(), accountStateSnapshot.getAccountState().getAssetId(),
+                        accountStateSnapshot.getAccountState().getHeight(), accountStateSnapshot.getAccountState().getTxHash());
             }
             //回滚备份数据
             repository.delBlockSnapshot(addressChainId, blockHeight);
         } catch (Exception e) {
-            logger.error("rollBackBlock error!!", e);
+            logger(addressChainId).error("rollBackBlock error!!", e);
             e.printStackTrace();
             return false;
         }
@@ -310,35 +316,58 @@ public class TransactionServiceImpl implements TransactionService {
      * @return
      */
     @Override
-    public boolean rollBackConfirmTxs(int addressChainId, long blockHeight) {
+    public boolean rollBackConfirmTxs(int addressChainId, long blockHeight, List<Transaction> txs) {
         try {
-            LockerUtils.BLOCK_SYNC_LOCKER.lock();
+            LockerUtil.BLOCK_SYNC_LOCKER.lock();
             long currentDbHeight = repository.getBlockHeight(addressChainId);
             if (blockHeight != currentDbHeight) {
                 //高度不一致，数据出问题了
-                logger.error("addressChainId ={},blockHeight={},ledgerBlockHeight={}", addressChainId, blockHeight, currentDbHeight);
+                logger(addressChainId).error("addressChainId ={},blockHeight={},ledgerBlockHeight={}", addressChainId, blockHeight, currentDbHeight);
                 return false;
             }
             //回滚高度
             repository.saveOrUpdateBlockHeight(addressChainId, (blockHeight - 1));
             BlockSnapshotAccounts blockSnapshotAccounts = repository.getBlockSnapshot(addressChainId, blockHeight);
-            List<AccountState> preAccountStates = blockSnapshotAccounts.getAccounts();
-            for (AccountState accountState : preAccountStates) {
-                String key = LedgerUtils.getKeyStr(accountState.getAddress(), accountState.getAssetChainId(), accountState.getAssetId());
-                accountStateService.rollAccountState(key, accountState);
-                logger.info("rollBack account={},assetChainId={},assetId={}, height={},lastHash= {} ", key, accountState.getAssetChainId(), accountState.getAssetId(),
-                        accountState.getHeight(), accountState.getTxHash());
+            List<AccountStateSnapshot> preAccountStates = blockSnapshotAccounts.getAccounts();
+            for (AccountStateSnapshot accountStateSnapshot : preAccountStates) {
+
+                String key = LedgerUtil.getKeyStr(accountStateSnapshot.getAccountState().getAddress(), accountStateSnapshot.getAccountState().getAssetChainId(), accountStateSnapshot.getAccountState().getAssetId());
+                LoggerUtil.txRollBackLog(addressChainId).debug("#####start rollBackConfirmTxs acountKey={},blockHeight={},preHash={}", key, blockHeight, accountStateSnapshot.getAccountState().getTxHash());
+                accountStateService.rollAccountState(key, accountStateSnapshot);
+                logger(addressChainId).info("rollBack account={},assetChainId={},assetId={}, height={},lastHash= {} ", key, accountStateSnapshot.getAccountState().getAssetChainId(), accountStateSnapshot.getAccountState().getAssetId(),
+                        accountStateSnapshot.getAccountState().getHeight(), accountStateSnapshot.getAccountState().getTxHash());
             }
             //删除备份数据
             repository.delBlockSnapshot(addressChainId, blockHeight);
-
+            //回滚nonce缓存信息
+            txs.forEach(tx -> {
+                //从缓存校验交易
+                CoinData coinData = CoinDataUtil.parseCoinData(tx.getCoinData());
+                if (null != coinData) {
+                    //更新账户状态
+                    String nonce8BytesStr = LedgerUtil.getNonceStrByTxHash(tx);
+                    List<CoinFrom> froms = coinData.getFrom();
+                    for (CoinFrom from : froms) {
+                        if (LedgerUtil.isNotLocalChainAccount(addressChainId, from.getAddress())) {
+                            continue;
+                        }
+                        if (from.getLocked() == 0) {
+                            try {
+                                repository.deleteAccountNonces(addressChainId, LedgerUtil.getAccountNoncesStrKey(AddressTool.getStringAddressByBytes(from.getAddress()), from.getAssetsChainId(), from.getAssetsId(), nonce8BytesStr));
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    }
+                }
+            });
         } catch (Exception e) {
-            logger.error("rollBackConfirmTxs error!!", e);
+            logger(addressChainId).error("rollBackConfirmTxs error!!", e);
             e.printStackTrace();
             repository.saveOrUpdateBlockHeight(addressChainId, blockHeight);
             return false;
         } finally {
-            LockerUtils.BLOCK_SYNC_LOCKER.unlock();
+            LockerUtil.BLOCK_SYNC_LOCKER.unlock();
         }
         return true;
     }
@@ -346,24 +375,37 @@ public class TransactionServiceImpl implements TransactionService {
     @Override
     public boolean rollBackUnconfirmTx(int addressChainId, Transaction transaction) {
         //回滚未确认交易,就是回滚未确认nonce值
-        CoinData coinData = CoinDataUtils.parseCoinData(transaction.getCoinData());
+        CoinData coinData = CoinDataUtil.parseCoinData(transaction.getCoinData());
         if (null == coinData) {
             //例如黄牌交易，直接返回
             return true;
         }
         List<CoinFrom> froms = coinData.getFrom();
         String txHash = transaction.getHash().toString();
+        String rollNonce = LedgerUtil.getNonceStrByTxHash(txHash);
+        boolean hadRoll = false;
         for (CoinFrom from : froms) {
-            if (LedgerUtils.isNotLocalChainAccount(addressChainId, from.getAddress())) {
+            if (LedgerUtil.isNotLocalChainAccount(addressChainId, from.getAddress())) {
                 //非本地网络账户地址,不进行处理
                 continue;
             }
             String address = AddressTool.getStringAddressByBytes(from.getAddress());
             int assetChainId = from.getAssetsChainId();
             int assetId = from.getAssetsId();
-            String assetKey = LedgerUtils.getKeyStr(address, assetChainId, assetId);
-            accountStateService.rollUnconfirmTx(addressChainId, assetKey, HexUtil.encode(from.getNonce()), txHash);
+            String assetKey = LedgerUtil.getKeyStr(address, assetChainId, assetId);
+            hadRoll = (hadRoll || accountStateService.rollUnconfirmTx(addressChainId, assetKey, rollNonce, txHash));
+        }
+        if (hadRoll) {
+            LoggerUtil.txUnconfirmedRollBackLog(addressChainId).debug("####hash={}", txHash);
         }
         return true;
+    }
+
+    @Override
+    public boolean hadCommit(int addressChainId, String accountNonceKey) throws Exception {
+        if (null != ledgerNonce.get(accountNonceKey)) {
+            return true;
+        }
+        return (repository.existAccountNonce(addressChainId, accountNonceKey));
     }
 }

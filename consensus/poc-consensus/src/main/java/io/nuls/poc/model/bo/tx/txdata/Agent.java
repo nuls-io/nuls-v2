@@ -201,6 +201,10 @@ public class Agent extends TransactionLogicData {
         return creditVal < 0d ? 0D : this.creditVal;
     }
 
+    public double getRealCreditVal(){
+        return this.creditVal;
+    }
+
     public void setTxHash(NulsDigestData txHash) {
         this.txHash = txHash;
     }

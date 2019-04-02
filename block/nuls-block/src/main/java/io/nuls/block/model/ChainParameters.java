@@ -121,6 +121,35 @@ public class ChainParameters extends BaseNulsData {
      * 日志级别
      */
     private String logLevel;
+    /**
+     * 下载单个区块的超时时间
+     */
+    private int singleDownloadTimeount;
+
+    /**
+     * 下载多个区块的超时时间
+     */
+    private int batchDownloadTimeount;
+
+    /**
+     * 批量下载区块时,如果收到CompleteMessage时,区块还没有保存完,最多循环等待几个回合
+     */
+    private int maxLoop;
+
+    /**
+     * 两次区块同步之间的时间间隔
+     */
+    private int synSleepInterval;
+
+    /**
+     * 等待网络稳定的时间间隔
+     */
+    private int waitNetworkInterval;
+
+    /**
+     * 分叉链、孤儿链清理时每次清理几分之一
+     */
+    private int cleanParam;
 
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
@@ -142,6 +171,12 @@ public class ChainParameters extends BaseNulsData {
         stream.writeUint16(smallBlockCache);
         stream.writeUint16(orphanChainMaxAge);
         stream.writeString(logLevel);
+        stream.writeUint16(singleDownloadTimeount);
+        stream.writeUint16(batchDownloadTimeount);
+        stream.writeUint16(maxLoop);
+        stream.writeUint16(synSleepInterval);
+        stream.writeUint16(waitNetworkInterval);
+        stream.writeUint16(cleanParam);
     }
 
     @Override
@@ -164,35 +199,41 @@ public class ChainParameters extends BaseNulsData {
         this.smallBlockCache = byteBuffer.readUint16();
         this.orphanChainMaxAge = byteBuffer.readUint16();
         this.logLevel = byteBuffer.readString();
+        this.singleDownloadTimeount = byteBuffer.readUint16();
+        this.batchDownloadTimeount = byteBuffer.readUint16();
+        this.maxLoop = byteBuffer.readUint16();
+        this.synSleepInterval = byteBuffer.readUint16();
+        this.waitNetworkInterval = byteBuffer.readUint16();
+        this.cleanParam = byteBuffer.readUint16();
     }
 
     @Override
     public int size() {
         int size = 0;
-        size += (17 * SerializeUtils.sizeOfUint16());
+        size += (23 * SerializeUtils.sizeOfUint16());
         size += SerializeUtils.sizeOfString(chainName);
         size += SerializeUtils.sizeOfString(logLevel);
         return size;
     }
 
     public void init(Map<String, ConfigItem> map) {
-        this.chainName = map.get(ConfigConstant.CHAIN_NAME).getValue();
-        this.chainId = Integer.parseInt(map.get(ConfigConstant.CHAIN_ID).getValue());
-        this.blockMaxSize = Integer.parseInt(map.get(ConfigConstant.BLOCK_MAX_SIZE).getValue());
-        this.resetTime = Integer.parseInt(map.get(ConfigConstant.RESET_TIME).getValue());
-        this.chainSwtichThreshold = Integer.parseInt(map.get(ConfigConstant.CHAIN_SWTICH_THRESHOLD).getValue());
-        this.cacheSize = Integer.parseInt(map.get(ConfigConstant.CACHE_SIZE).getValue());
-        this.heightRange = Integer.parseInt(map.get(ConfigConstant.HEIGHT_RANGE).getValue());
-        this.waitInterval = Integer.parseInt(map.get(ConfigConstant.WAIT_INTERVAL).getValue());
-        this.maxRollback = Integer.parseInt(map.get(ConfigConstant.MAX_ROLLBACK).getValue());
-        this.consistencyNodePercent = Integer.parseInt(map.get(ConfigConstant.CONSISTENCY_NODE_PERCENT).getValue());
-        this.minNodeAmount = Integer.parseInt(map.get(ConfigConstant.MIN_NODE_AMOUNT).getValue());
-        this.downloadNumber = Integer.parseInt(map.get(ConfigConstant.DOWNLOAD_NUMBER).getValue());
-        this.extendMaxSize = Integer.parseInt(map.get(ConfigConstant.EXTEND_MAX_SIZE).getValue());
-        this.validBlockInterval = Integer.parseInt(map.get(ConfigConstant.VALID_BLOCK_INTERVAL).getValue());
-        this.blockCache = Integer.parseInt(map.get(ConfigConstant.BLOCK_CACHE).getValue());
-        this.smallBlockCache = Integer.parseInt(map.get(ConfigConstant.SMALL_BLOCK_CACHE).getValue());
-        this.orphanChainMaxAge = Integer.parseInt(map.get(ConfigConstant.ORPHAN_CHAIN_MAX_AGE).getValue());
-        this.logLevel = map.get(ConfigConstant.LOG_LEVEL).getValue();
+//        this.chainName = map.get(ConfigConstant.CHAIN_NAME).getValue();
+//        this.chainId = Integer.parseInt(map.get(ConfigConstant.CHAIN_ID).getValue());
+//        this.blockMaxSize = Integer.parseInt(map.get(ConfigConstant.BLOCK_MAX_SIZE).getValue());
+//        this.resetTime = Integer.parseInt(map.get(ConfigConstant.RESET_TIME).getValue());
+//        this.chainSwtichThreshold = Integer.parseInt(map.get(ConfigConstant.CHAIN_SWTICH_THRESHOLD).getValue());
+//        this.cacheSize = Integer.parseInt(map.get(ConfigConstant.CACHE_SIZE).getValue());
+//        this.heightRange = Integer.parseInt(map.get(ConfigConstant.HEIGHT_RANGE).getValue());
+//        this.waitInterval = Integer.parseInt(map.get(ConfigConstant.WAIT_INTERVAL).getValue());
+//        this.maxRollback = Integer.parseInt(map.get(ConfigConstant.MAX_ROLLBACK).getValue());
+//        this.consistencyNodePercent = Integer.parseInt(map.get(ConfigConstant.CONSISTENCY_NODE_PERCENT).getValue());
+//        this.minNodeAmount = Integer.parseInt(map.get(ConfigConstant.MIN_NODE_AMOUNT).getValue());
+//        this.downloadNumber = Integer.parseInt(map.get(ConfigConstant.DOWNLOAD_NUMBER).getValue());
+//        this.extendMaxSize = Integer.parseInt(map.get(ConfigConstant.EXTEND_MAX_SIZE).getValue());
+//        this.validBlockInterval = Integer.parseInt(map.get(ConfigConstant.VALID_BLOCK_INTERVAL).getValue());
+//        this.blockCache = Integer.parseInt(map.get(ConfigConstant.BLOCK_CACHE).getValue());
+//        this.smallBlockCache = Integer.parseInt(map.get(ConfigConstant.SMALL_BLOCK_CACHE).getValue());
+//        this.orphanChainMaxAge = Integer.parseInt(map.get(ConfigConstant.ORPHAN_CHAIN_MAX_AGE).getValue());
+//        this.logLevel = map.get(ConfigConstant.LOG_LEVEL).getValue();
     }
 }

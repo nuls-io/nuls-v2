@@ -27,14 +27,14 @@ package io.nuls.transaction.task;
 import io.nuls.base.data.Transaction;
 import io.nuls.tools.core.ioc.SpringLiteContext;
 import io.nuls.tools.exception.NulsException;
-import static io.nuls.transaction.utils.LoggerUtil.Log;
 import io.nuls.transaction.cache.PackablePool;
+import io.nuls.transaction.constant.TxConfig;
 import io.nuls.transaction.constant.TxConstant;
-import io.nuls.transaction.storage.rocksdb.UnconfirmedTxStorageService;
 import io.nuls.transaction.model.bo.Chain;
 import io.nuls.transaction.model.po.TransactionsPO;
 import io.nuls.transaction.rpc.call.NetworkCall;
 import io.nuls.transaction.service.TxService;
+import io.nuls.transaction.storage.rocksdb.UnconfirmedTxStorageService;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -51,7 +51,7 @@ public class UnconfirmedTxProcessTask implements Runnable {
     private PackablePool packablePool = SpringLiteContext.getBean(PackablePool.class);
     private TxService txService = SpringLiteContext.getBean(TxService.class);
     private UnconfirmedTxStorageService unconfirmedTxStorageService = SpringLiteContext.getBean(UnconfirmedTxStorageService.class);
-
+    private TxConfig txConfig = SpringLiteContext.getBean(TxConfig.class);
     private Chain chain;
 
     public UnconfirmedTxProcessTask(Chain chain) {
@@ -63,35 +63,35 @@ public class UnconfirmedTxProcessTask implements Runnable {
         try {
             doTask(chain);
         } catch (Exception e) {
-            chain.getLogger().error(e);
+            chain.getLoggerMap().get(TxConstant.LOG_TX).error(e);
         }
     }
 
     private void doTask(Chain chain) {
         List<TransactionsPO> txPOList = unconfirmedTxStorageService.getAllTxPOList(chain.getChainId());
-        chain.getLogger().debug("*** Debug *** [UnconfirmedTxProcessTask] unconfirmed list size: {}", txPOList.size());
+        chain.getLoggerMap().get(TxConstant.LOG_TX).debug("%%%%% Clean %%%%% [UnconfirmedTxProcessTask] unconfirmed list size: {}", txPOList.size());
         if (txPOList == null || txPOList.size() == 0) {
             return;
         }
 
         List<Transaction> expireTxList = this.getExpireTxList(txPOList);
-        chain.getLogger().debug("*** Debug *** [UnconfirmedTxProcessTask] expire list size: {}", expireTxList.size());
+        chain.getLoggerMap().get(TxConstant.LOG_TX).debug("%%%%% Clean %%%%% [UnconfirmedTxProcessTask] expire list size: {}", expireTxList.size());
         Transaction tx;
         for (int i = 0; i < expireTxList.size(); i++) {
             tx = expireTxList.get(i);
             //如果该未确认交易不在待打包池中，则认为是过期脏数据，需要清理
-            if (!packablePool.exist(chain, tx, false)) {
+            if (!packablePool.exist(chain, tx)) {
                 processTx(chain, tx);
-                chain.getLogger().debug("*** Debug *** [UnconfirmedTxProcessTask] destroy tx - type:{}, - hash:{}", tx.getType(), tx.getHash().getDigestHex());
+                chain.getLoggerMap().get(TxConstant.LOG_TX).debug("%%%%% Clean %%%%% [UnconfirmedTxProcessTask] destroy tx - type:{}, - hash:{}", tx.getType(), tx.getHash().getDigestHex());
             }
         }
     }
 
     private boolean processTx(Chain chain, Transaction tx) {
         try {
-            txService.clearInvalidTx(chain, tx);
+            txService.clearInvalidTx(chain, tx, true);
         } catch (Exception e) {
-            Log.error(e);
+            chain.getLoggerMap().get(TxConstant.LOG_TX).error(e);
         }
         return false;
     }
@@ -107,11 +107,12 @@ public class UnconfirmedTxProcessTask implements Runnable {
         try {
             long currentTime = NetworkCall.getCurrentTimeMillis();
             //过滤指定时间内过期的交易
-            List<TransactionsPO> expireTxPOList = txPOList.stream().filter(txPo -> currentTime - TxConstant.UNCONFIRMED_TX_EXPIRE_MS > txPo.getCreateTime()).collect(Collectors.toList());
+            List<TransactionsPO> expireTxPOList = txPOList.stream().filter(txPo -> currentTime - txConfig.getUnconfirmedTxExpireMs() > txPo.getCreateTime()).collect(Collectors.toList());
             expireTxPOList.forEach(txPo -> expireTxList.add(txPo.toTransaction()));
         } catch (NulsException e) {
-            Log.error(e);
+            chain.getLoggerMap().get(TxConstant.LOG_TX).error(e);
         }
         return expireTxList;
     }
+
 }

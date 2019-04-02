@@ -46,7 +46,8 @@ import io.nuls.network.model.message.base.BaseMessage;
 import io.nuls.network.model.message.base.MessageHeader;
 import io.nuls.network.utils.LoggerUtil;
 import io.nuls.tools.crypto.Sha256Hash;
-import io.nuls.tools.data.ByteUtils;
+import io.nuls.tools.log.Log;
+import io.nuls.tools.model.ByteUtils;
 import io.nuls.tools.exception.NulsException;
 
 import java.lang.reflect.InvocationTargetException;
@@ -98,7 +99,7 @@ public class MessageManager extends BaseManager {
             return msgClass.getDeclaredConstructor().newInstance();
         } catch (InstantiationException | IllegalAccessException e) {
             e.printStackTrace();
-            Log.error(e.getMessage());
+           LoggerUtil.Log.error(e.getMessage());
         } catch (NoSuchMethodException e) {
             e.printStackTrace();
         } catch (InvocationTargetException e) {
@@ -113,7 +114,7 @@ public class MessageManager extends BaseManager {
      * 验证消息
      * validate message checkSum
      *
-     * @param data data
+     * @param data entity
      * @return boolean
      */
     private boolean validate(byte[] data, long pChecksum) {
@@ -134,31 +135,32 @@ public class MessageManager extends BaseManager {
             byte[] payLoad = byteBuffer.getPayload();
             byte[] payLoadBody = ByteUtils.subBytes(payLoad, headerSize, payLoad.length - headerSize);
             byte[] headerByte = ByteUtils.copyOf(payLoad, headerSize);
+            int chainId = NodeGroupManager.getInstance().getChainIdByMagicNum(header.getMagicNumber());
             header.parse(headerByte, 0);
             if (!validate(payLoadBody, header.getChecksum())) {
-                Log.error("validate  false ======================");
+                LoggerUtil.logger(chainId).error("validate  false ======================");
                 return;
             }
             BaseMessage message = MessageManager.getInstance().getMessageInstance(header.getCommandStr());
             byteBuffer.setCursor(0);
             while (!byteBuffer.isFinished()) {
-                Log.debug((node.isServer() ? "Server" : "Client") + ":----receive message-- magicNumber:" + header.getMagicNumber() + "==CMD:" + header.getCommandStr());
+                LoggerUtil.logger(chainId).debug((node.isServer() ? "Server" : "Client") + ":----receive message-- magicNumber:" + header.getMagicNumber() + "==CMD:" + header.getCommandStr());
                 NetworkEventResult result = null;
                 if (null != message) {
-                    Log.debug("==============================Network module self message");
+                    LoggerUtil.logger(chainId).debug("==============================Network module self message");
                     message = byteBuffer.readNulsData(message);
                     BaseMeesageHandlerInf handler = MessageHandlerFactory.getInstance().getHandler(header.getCommandStr());
                     result = handler.recieve(message, node);
                 } else {
                     //外部消息，转外部接口
                     LoggerUtil.modulesMsgLogs(header.getCommandStr(), node, payLoadBody, "received");
-                    Log.debug("==============================receive other module message, hash-" + NulsDigestData.calcDigestData(payLoadBody).getDigestHex() + "node-" + node.getId());
+                    LoggerUtil.logger(chainId).debug("==============================receive other module message, hash-" + NulsDigestData.calcDigestData(payLoadBody).getDigestHex() + "node-" + node.getId());
                     OtherModuleMessageHandler handler = MessageHandlerFactory.getInstance().getOtherModuleHandler();
                     result = handler.recieve(header, payLoadBody, node);
                     byteBuffer.setCursor(payLoad.length);
                 }
                 if (!result.isSuccess()) {
-                    Log.error("receiveMessage deal fail:" + result.getErrorCode().getMsg());
+                    LoggerUtil.logger(chainId).error("receiveMessage deal fail:" + result.getErrorCode().getMsg());
                 }
             }
         } catch (Exception e) {
@@ -174,7 +176,7 @@ public class MessageManager extends BaseManager {
                 List<IpAddress> addressesList = new ArrayList<>();
                 addressesList.add(ipAddress);
                 AddrMessage addrMessage = MessageFactory.getInstance().buildAddrMessage(addressesList, connectNode.getMagicNumber());
-                Log.debug("broadcastSelfAddrToAllNode================" + addrMessage.getMsgBody().size() + "==getIpAddressList()==" + addrMessage.getMsgBody().getIpAddressList().size());
+                LoggerUtil.logger(connectNode.getNodeGroup().getChainId()).debug("broadcastSelfAddrToAllNode================" + addrMessage.getMsgBody().size() + "==getIpAddressList()==" + addrMessage.getMsgBody().getIpAddressList().size());
                 this.sendToNode(addrMessage, connectNode, asyn);
             }
         }
@@ -259,19 +261,19 @@ public class MessageManager extends BaseManager {
          */
         if (!isHandShakeMessage(message)) {
             if (NodeConnectStatusEnum.AVAILABLE != node.getConnectStatus()) {
-                Log.error("============={} status is not handshake(AVAILABLE)", node.getId());
+                LoggerUtil.Log.error("============={} status is not handshake(AVAILABLE)", node.getId());
                 return new NetworkEventResult(false, NetworkErrorCode.NET_NODE_DEAD);
             }
         }
         if (node.getChannel() == null || !node.getChannel().isActive()) {
-            Log.error("============={} getChannel is not Active", node.getId());
+            LoggerUtil.Log.error("============={} getChannel is not Active", node.getId());
             return new NetworkEventResult(false, NetworkErrorCode.NET_NODE_MISS_CHANNEL);
         }
         try {
             MessageHeader header = message.getHeader();
             BaseNulsData body = message.getMsgBody();
             header.setPayloadLength(body.size());
-            Log.debug("node={},isWritable={}", node.getId(),node.getChannel().isWritable());
+            LoggerUtil.logger(node.getNodeGroup().getChainId()).debug("node={},isWritable={}", node.getId(),node.getChannel().isWritable());
             ChannelFuture future = node.getChannel().writeAndFlush(Unpooled.wrappedBuffer(message.serialize()));
             Log.debug("==================writeAndFlush end");
             if (!asyn) {

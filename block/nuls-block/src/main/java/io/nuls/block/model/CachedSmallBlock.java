@@ -24,12 +24,14 @@ package io.nuls.block.model;
 
 import io.nuls.base.data.NulsDigestData;
 import io.nuls.base.data.SmallBlock;
+import io.nuls.base.data.Transaction;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * 缓存的区块对象,用于区块广播、转发
@@ -49,5 +51,9 @@ public class CachedSmallBlock {
     @Getter
     @Setter
     private SmallBlock smallBlock;
+
+    @Getter
+    @Setter
+    private Map<NulsDigestData, Transaction> txMap;
 
 }

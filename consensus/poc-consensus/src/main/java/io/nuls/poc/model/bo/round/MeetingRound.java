@@ -25,19 +25,19 @@
  */
 package io.nuls.poc.model.bo.round;
 
+import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.Address;
 import io.nuls.poc.constant.ConsensusErrorCode;
 import io.nuls.poc.model.bo.Chain;
 import io.nuls.poc.utils.CallMethodUtils;
-import io.nuls.tools.data.DoubleUtils;
 import io.nuls.tools.exception.NulsRuntimeException;
+import io.nuls.tools.log.Log;
+import io.nuls.tools.model.DoubleUtils;
+import io.nuls.tools.model.StringUtils;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 /**
  * 轮次信息类
@@ -128,7 +128,7 @@ public class MeetingRound {
         Collections.sort(memberList);
         this.memberCount = memberList.size();
         totalWeight = 0d;
-        MeetingMember member = null;
+        MeetingMember member;
         for (int i = 0; i < memberCount; i++) {
             member = memberList.get(i);
             member.setRoundStartTime(this.getStartTime());
@@ -158,13 +158,35 @@ public class MeetingRound {
         return this.memberList.get(order - 1);
     }
 
-    public MeetingMember getMember(byte[] address) {
+    public MeetingMember getOnlyMember(byte[] address,Chain chain){
         for (MeetingMember member : memberList) {
             if (Arrays.equals(address, member.getAgent().getPackingAddress())) {
                 return member;
             }
         }
         return null;
+    }
+
+    public MeetingMember getMember(byte[] address,Chain chain) {
+        for (MeetingMember member : memberList) {
+            if (Arrays.equals(address, member.getAgent().getPackingAddress()) && validAccount(chain, AddressTool.getStringAddressByBytes(member.getAgent().getPackingAddress()))) {
+                return member;
+            }
+        }
+        return null;
+    }
+
+    private boolean validAccount(Chain chain,String address) {
+        try {
+            HashMap callResult = CallMethodUtils.accountValid(chain.getConfig().getChainId(), address, chain.getConfig().getPassword());
+            String priKey = (String) callResult.get("priKey");
+            if (StringUtils.isNotBlank(priKey)){
+                return true;
+            }
+        }catch (Exception e){
+            Log.error(e);
+        }
+        return false;
     }
 
     /**
@@ -201,13 +223,21 @@ public class MeetingRound {
         return myMember;
     }
 
-    public void calcLocalPacker(List<byte[]> localAddressList) {
+    public void calcLocalPacker(List<byte[]> localAddressList,Chain chain) {
         for (byte[] address:localAddressList) {
-            MeetingMember member = getMember(address);
+            MeetingMember member = getMember(address,chain);
             if (null != member) {
                 myMember = member;
-                return;
+                break;
             }
+        }
+        if(myMember != null && !chain.isPacker()){
+            CallMethodUtils.sendState(chain,true);
+            chain.setPacker(true);
+        }
+        if(myMember == null && chain.isPacker()){
+            CallMethodUtils.sendState(chain,false);
+            chain.setPacker(false);
         }
     }
 
@@ -218,7 +248,7 @@ public class MeetingRound {
             str.append(Address.fromHashs(member.getAgent().getPackingAddress()).getBase58());
             str.append(" ,order:" + member.getPackingIndexOfRound());
             str.append(",packTime:" + new Date(member.getPackEndTime()));
-            str.append(",creditVal:" + member.getAgent().getCreditVal());
+            str.append(",creditVal:" + member.getAgent().getRealCreditVal());
             str.append("\n");
         }
         if (null == this.getPreRound()) {

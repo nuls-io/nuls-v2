@@ -5,10 +5,13 @@ import io.netty.channel.socket.SocketChannel;
 import io.netty.handler.codec.http.FullHttpResponse;
 import io.netty.handler.codec.http.websocketx.*;
 import io.netty.util.CharsetUtil;
-import io.nuls.rpc.netty.channel.ConnectData;
+import io.nuls.rpc.info.Constants;
+import io.nuls.rpc.model.message.Message;
+import io.nuls.rpc.model.message.MessageType;
 import io.nuls.rpc.netty.channel.manager.ConnectManager;
 import io.nuls.rpc.netty.handler.message.TextMessageHandler;
 import io.nuls.tools.log.Log;
+import io.nuls.tools.parse.JSONUtils;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -16,20 +19,26 @@ import java.util.concurrent.Executors;
 /**
  * 客户端事件触发处理类
  * Client Event Triggering Processing Class
+ *
  * @author tag
  * 2019/2/21
- * */
+ */
 public class ClientHandler extends SimpleChannelInboundHandler<Object> {
 
     private WebSocketClientHandshaker handShaker;
     private ChannelPromise handshakeFuture;
 
-    private ThreadLocal<ExecutorService> threadExecutorService = ThreadLocal.withInitial(() -> Executors.newFixedThreadPool(Thread.activeCount()));
+    //private ThreadLocal<ExecutorService> threadExecutorService = ThreadLocal.withInitial(() -> Executors.newFixedThreadPool(Constants.THREAD_POOL_SIZE));
+
+    private ExecutorService requestExecutorService = Executors.newFixedThreadPool(Constants.THREAD_POOL_SIZE);
+
+    private ExecutorService responseExecutorService = Executors.newFixedThreadPool(Constants.THREAD_POOL_SIZE);
 
     @Override
     public void handlerAdded(ChannelHandlerContext ctx) {
         this.handshakeFuture = ctx.newPromise();
     }
+
     public WebSocketClientHandshaker getHandshaker() {
         return handShaker;
     }
@@ -50,8 +59,17 @@ public class ClientHandler extends SimpleChannelInboundHandler<Object> {
         return this.handshakeFuture;
     }
 
+    public ClientHandler(WebSocketClientHandshaker handShaker) {
+        this.handShaker = handShaker;
+    }
+
     @Override
-    protected void channelRead0(ChannelHandlerContext ctx, Object msg)throws Exception{
+    public void channelActive(ChannelHandlerContext ctx) {
+        handShaker.handshake(ctx.channel());
+    }
+
+    @Override
+    protected void channelRead0(ChannelHandlerContext ctx, Object msg) throws Exception {
         Channel ch = ctx.channel();
         FullHttpResponse response;
         if (!this.handShaker.isHandshakeComplete()) {
@@ -61,7 +79,7 @@ public class ClientHandler extends SimpleChannelInboundHandler<Object> {
                 this.handShaker.finishHandshake(ch, response);
                 //设置成功
                 this.handshakeFuture.setSuccess();
-                Log.info("WebSocket Client connected! response headers[sec-webSocket-extensions]:{}" + response.headers());
+                Log.debug("WebSocket Client connected! response headers[sec-webSocket-extensions]:{}" + response.headers());
             } catch (WebSocketHandshakeException var7) {
                 FullHttpResponse res = (FullHttpResponse) msg;
                 String errorMsg = String.format("WebSocket Client failed to connect,status:%s,reason:%s", res.status(), res.content().toString(CharsetUtil.UTF_8));
@@ -75,10 +93,18 @@ public class ClientHandler extends SimpleChannelInboundHandler<Object> {
 
             if (frame instanceof CloseWebSocketFrame) {
                 ch.close();
-            } else if(msg instanceof TextWebSocketFrame){
+            } else if (msg instanceof TextWebSocketFrame) {
                 TextWebSocketFrame txMsg = (TextWebSocketFrame) msg;
-                TextMessageHandler messageHandler = new TextMessageHandler((SocketChannel) ctx.channel(), txMsg.text());
-                threadExecutorService.get().execute(messageHandler);
+                Message message = JSONUtils.json2pojo(txMsg.text(), Message.class);
+                MessageType messageType = MessageType.valueOf(message.getMessageType());
+                TextMessageHandler messageHandler = new TextMessageHandler((SocketChannel) ctx.channel(), message);
+                if(messageType.equals(MessageType.Response)
+                        || messageType.equals(MessageType.NegotiateConnectionResponse)
+                        || messageType.equals(MessageType.Ack) ){
+                    responseExecutorService.execute(messageHandler);
+                }else{
+                    requestExecutorService.execute(messageHandler);
+                }
             } else {
                 Log.warn("Unsupported message format");
             }
@@ -87,16 +113,21 @@ public class ClientHandler extends SimpleChannelInboundHandler<Object> {
 
     @Override
     public void channelUnregistered(ChannelHandlerContext ctx) throws Exception {
-        SocketChannel socketChannel = (SocketChannel) ctx.channel();
-        ConnectData connectData = ConnectManager.CHANNEL_DATA_MAP.get(socketChannel);
-        if (connectData != null) {
-            connectData.setConnected(false);
-        }
-        Log.info("链接断开:"+ConnectManager.getRemoteUri((SocketChannel) ctx.channel()));
+        //Log.info("链接断开:"+ConnectManager.getRemoteUri((SocketChannel) ctx.channel()));
     }
 
     @Override
     public void channelInactive(ChannelHandlerContext ctx) throws Exception {
         ConnectManager.disConnect((SocketChannel) ctx.channel());
+    }
+
+    @Override
+    public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
+        super.exceptionCaught(ctx, cause);
+        cause.printStackTrace();
+        if (!handshakeFuture.isDone()) {
+            handshakeFuture.setFailure(cause);
+        }
+        ctx.close();
     }
 }

@@ -28,7 +28,7 @@ public interface TxErrorCode {
     ErrorCode PARSE_JSON_FAILD = ErrorCode.init("10017");
     ErrorCode FILE_OPERATION_FAILD = ErrorCode.init("10018");
     ErrorCode ILLEGAL_ACCESS_EXCEPTION = ErrorCode.init("10019");
-    ErrorCode INSTANTIATION_EXCEPTION = ErrorCode.init("10020");
+    ErrorCode PACKAGE_TIME_OUT = ErrorCode.init("10020");
     ErrorCode UPGRADING = ErrorCode.init("10021");
     ErrorCode NOT_UPGRADING = ErrorCode.init("10022");
     ErrorCode VERSION_NOT_NEWEST = ErrorCode.init("10023");
@@ -71,6 +71,7 @@ public interface TxErrorCode {
     ErrorCode CALLING_REMOTE_INTERFACE_FAILED = ErrorCode.init("10060");
     ErrorCode SIGN_ADDRESS_NOT_MATCH_COINFROM = ErrorCode.init("10061");
     ErrorCode ACCOUNT_NOT_ENCRYPTED = ErrorCode.init("10062");
+    ErrorCode HEIGHT_UPDATE_UNABLE_TO_REPACKAGE  = ErrorCode.init("10063");
 
 
 

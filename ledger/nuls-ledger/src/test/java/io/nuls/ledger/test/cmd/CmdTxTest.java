@@ -253,8 +253,8 @@ public class CmdTxTest {
      * 测试含有coinFrom与coinTo的交易
      * @throws Exception
      */
-    public int chainId = 12345;
-    int assetChainId = 12345;
+    public int chainId = 2;
+    int assetChainId = 2;
     //    String address = "JgT2JCQvKGRKRjKqyfxRAj2zSCpGca01f";
     String address = "LU6eNP3pJ5UMn5yn8LeDE3Pxeapsq3930";
     String addressTo = "RceDy24yjrhQ72J8xynubWn55PgZj3930";
@@ -267,7 +267,7 @@ public class CmdTxTest {
         Map<String, Object> params = new HashMap<>();
         params.put("assetChainId", assetChainId);
         address = "Hev98WnFwR55FJffop8H2J24VJe5y3930";
-        assetId = 12345;
+        assetId = 2;
         params.put("address", address);
         params.put("assetId", assetId);
         params.put("chainId", chainId);

@@ -36,13 +36,16 @@ import io.nuls.ledger.model.po.BlockTxs;
 import io.nuls.ledger.storage.DataBaseArea;
 import io.nuls.ledger.storage.InitDB;
 import io.nuls.ledger.storage.Repository;
+import io.nuls.ledger.utils.LoggerUtil;
 import io.nuls.tools.basic.InitializingBean;
 import io.nuls.tools.core.annotation.Service;
-import io.nuls.tools.data.ByteUtils;
 import io.nuls.tools.exception.NulsException;
+import io.nuls.tools.model.ByteUtils;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static io.nuls.ledger.utils.LoggerUtil.logger;
 
@@ -65,10 +68,9 @@ public class RepositoryImpl implements Repository, InitDB, InitializingBean {
     @Override
     public void createAccountState(byte[] key, AccountState accountState) {
         try {
-            initChainDb(accountState.getAddressChainId());
             RocksDBService.put(getLedgerAccountTableName(accountState.getAddressChainId()), key, accountState.serialize());
         } catch (Exception e) {
-            logger.error("createAccountState serialize error.", e);
+            logger(accountState.getAddressChainId()).error("createAccountState serialize error.", e);
         }
     }
 
@@ -81,6 +83,11 @@ public class RepositoryImpl implements Repository, InitDB, InitializingBean {
     @Override
     public void updateAccountState(byte[] key, AccountState nowAccountState) throws Exception {
         //update account
+        LoggerUtil.logger(nowAccountState.getAddressChainId()).debug("updateAccountState hash={},nonce={},UnconfirmedNoncesNum={}", nowAccountState.getTxHash(), nowAccountState.getNonce(), nowAccountState.getUnconfirmedNonces().size());
+        LoggerUtil.logger(nowAccountState.getAddressChainId()).debug("updateAccountState address={},addressChainId={},assetChainId={},assetId={},getAvailableAmount={}," +
+                        "getFreezeTotal={},getUnconfirmedAmount={},getUnconfirmedFreezeAmount={}",
+                nowAccountState.getAddress(), nowAccountState.getAddressChainId(), nowAccountState.getAssetChainId(), nowAccountState.getAssetId(),
+                nowAccountState.getAvailableAmount(), nowAccountState.getFreezeTotal(), nowAccountState.getUnconfirmedAmount(), nowAccountState.getUnconfirmedFreezeAmount());
         RocksDBService.put(getLedgerAccountTableName(nowAccountState.getAddressChainId()), key, nowAccountState.serialize());
 
     }
@@ -107,7 +114,7 @@ public class RepositoryImpl implements Repository, InitDB, InitializingBean {
         try {
             blockSnapshotAccounts.parse(new NulsByteBuffer(stream));
         } catch (NulsException e) {
-            logger.error("getAccountState serialize error.", e);
+            logger(chainId).error("getAccountState serialize error.", e);
         }
         return blockSnapshotAccounts;
     }
@@ -129,7 +136,7 @@ public class RepositoryImpl implements Repository, InitDB, InitializingBean {
         try {
             accountState.parse(new NulsByteBuffer(stream));
         } catch (NulsException e) {
-            logger.error("getAccountState serialize error.", e);
+            logger(chainId).error("getAccountState serialize error.", e);
         }
         return accountState;
     }
@@ -144,7 +151,7 @@ public class RepositoryImpl implements Repository, InitDB, InitializingBean {
             long height = ByteUtils.byteToLong(stream);
             return height;
         } catch (Exception e) {
-            logger.error("getBlockHeight serialize error.", e);
+            logger(chainId).error("getBlockHeight serialize error.", e);
         }
         return -1;
     }
@@ -154,7 +161,7 @@ public class RepositoryImpl implements Repository, InitDB, InitializingBean {
         try {
             RocksDBService.put(getChainsHeightTableName(), ByteUtils.intToBytes(chainId), ByteUtils.longToBytes(height));
         } catch (Exception e) {
-            logger.error("saveBlockHeight serialize error.", e);
+            logger(chainId).error("saveBlockHeight serialize error.", e);
         }
 
     }
@@ -192,6 +199,10 @@ public class RepositoryImpl implements Repository, InitDB, InitializingBean {
         return DataBaseArea.TB_LEDGER_BLOCKS + chainId;
     }
 
+    String getLedgerNonceTableName(int chainId) {
+        return DataBaseArea.TB_LEDGER_NONCES + chainId;
+    }
+
     /**
      * 初始化数据库
      */
@@ -203,9 +214,14 @@ public class RepositoryImpl implements Repository, InitDB, InitializingBean {
             if (!RocksDBService.existTable(getBlockSnapshotTableName(addressChainId))) {
                 RocksDBService.createTable(getBlockSnapshotTableName(addressChainId));
             }
-
+            if (!RocksDBService.existTable(getBlockTableName(addressChainId))) {
+                RocksDBService.createTable(getBlockTableName(addressChainId));
+            }
+            if (!RocksDBService.existTable(getLedgerNonceTableName(addressChainId))) {
+                RocksDBService.createTable(getLedgerNonceTableName(addressChainId));
+            }
         } catch (Exception e) {
-            logger.error(e);
+            logger(addressChainId).error(e);
         }
     }
 
@@ -220,7 +236,7 @@ public class RepositoryImpl implements Repository, InitDB, InitializingBean {
             RocksDBService.put(table, ByteUtils.longToBytes(height), blockTxs.serialize());
             RocksDBService.delete(table, ByteUtils.longToBytes(height - LedgerConstant.CACHE_ACCOUNT_BLOCK));
         } catch (Exception e) {
-            logger.error("saveBlock serialize error.", e);
+            logger(chainId).error("saveBlock serialize error.", e);
         }
 
     }
@@ -237,10 +253,11 @@ public class RepositoryImpl implements Repository, InitDB, InitializingBean {
             blockTxs.parse(new NulsByteBuffer(stream));
             return blockTxs;
         } catch (Exception e) {
-            logger.error("getBlock serialize error.", e);
+            logger(chainId).error("getBlock serialize error.", e);
         }
         return null;
     }
+
 
     @Override
     public void afterPropertiesSet() throws NulsException {
@@ -253,11 +270,36 @@ public class RepositoryImpl implements Repository, InitDB, InitializingBean {
             if (!RocksDBService.existTable(getChainsHeightTableName())) {
                 RocksDBService.createTable(getChainsHeightTableName());
             } else {
-                logger.info("table {} exist.", getChainsHeightTableName());
+                LoggerUtil.logger.info("table {} exist.", getChainsHeightTableName());
             }
         } catch (Exception e) {
             e.printStackTrace();
             throw new NulsException(e);
         }
+    }
+
+    @Override
+    public void saveAccountNonces(int chainId, Map<String, Integer> noncesMap) throws Exception {
+        String table = getLedgerNonceTableName(chainId);
+        if (!RocksDBService.existTable(table)) {
+            RocksDBService.createTable(table);
+        }
+        Map<byte[], byte[]> saveMap = new HashMap<>();
+        for (Map.Entry<String, Integer> m : noncesMap.entrySet()) {
+            saveMap.put(ByteUtils.toBytes(m.getKey(), LedgerConstant.DEFAULT_ENCODING), ByteUtils.intToBytes(m.getValue()));
+        }
+        if (saveMap.size() > 0) {
+            RocksDBService.batchPut(table, saveMap);
+        }
+    }
+
+    @Override
+    public void deleteAccountNonces(int chainId, String accountNonceKey) throws Exception {
+        RocksDBService.delete(getLedgerNonceTableName(chainId), ByteUtils.toBytes(accountNonceKey, LedgerConstant.DEFAULT_ENCODING));
+    }
+
+    @Override
+    public boolean existAccountNonce(int chainId, String accountNonceKey) throws Exception {
+        return (null != RocksDBService.get(getLedgerNonceTableName(chainId), ByteUtils.toBytes(accountNonceKey, LedgerConstant.DEFAULT_ENCODING)));
     }
 }

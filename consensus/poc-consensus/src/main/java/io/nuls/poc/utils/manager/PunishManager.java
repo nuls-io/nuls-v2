@@ -8,14 +8,16 @@ import io.nuls.poc.model.bo.Chain;
 import io.nuls.poc.model.bo.consensus.Evidence;
 import io.nuls.poc.model.bo.round.MeetingMember;
 import io.nuls.poc.model.bo.round.MeetingRound;
-import io.nuls.poc.model.bo.tx.txdata.*;
+import io.nuls.poc.model.bo.tx.txdata.Agent;
+import io.nuls.poc.model.bo.tx.txdata.CancelDeposit;
+import io.nuls.poc.model.bo.tx.txdata.Deposit;
+import io.nuls.poc.model.bo.tx.txdata.StopAgent;
 import io.nuls.poc.model.po.AgentPo;
 import io.nuls.poc.model.po.DepositPo;
 import io.nuls.poc.model.po.PunishLogPo;
 import io.nuls.poc.storage.AgentStorageService;
 import io.nuls.poc.storage.DepositStorageService;
 import io.nuls.poc.storage.PunishStorageService;
-import io.nuls.poc.utils.compare.EvidenceComparator;
 import io.nuls.poc.utils.compare.PunishLogComparator;
 import io.nuls.poc.utils.enumeration.PunishReasonEnum;
 import io.nuls.poc.utils.enumeration.PunishType;
@@ -23,9 +25,9 @@ import io.nuls.tools.basic.VarInt;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.crypto.HexUtil;
-import io.nuls.tools.data.ByteUtils;
-import io.nuls.tools.data.DoubleUtils;
 import io.nuls.tools.exception.NulsException;
+import io.nuls.tools.model.ByteUtils;
+import io.nuls.tools.model.DoubleUtils;
 import io.nuls.tools.parse.SerializeUtils;
 
 import java.io.IOException;
@@ -34,7 +36,7 @@ import java.util.*;
 
 /**
  * 惩罚信息管理，用于惩罚数据证据的记录，红黄牌惩罚生成等
- * Punishment information management, records of punishment data evidence, red and yellow card punishment generation, etc.
+ * Punishment information management, records of punishment entity evidence, red and yellow card punishment generation, etc.
  *
  * @author tag
  * 2018/12/5
@@ -53,9 +55,11 @@ public class PunishManager {
     private DepositManager depositManager;
     @Autowired
     private AgentManager agentManager;
+    @Autowired
+    private RoundManager roundManager;
     /**
      * 加载所有的红牌信息和最近X黃牌数据到缓存
-     * Load all red card information and latest X rotation card data to the cache
+     * Load all red card information and latest X rotation card entity to the cache
      *
      * @param chain 链信息/chain info
      * */
@@ -87,7 +91,7 @@ public class PunishManager {
 
     /**
      * 清理黄牌数据
-     * Clean up yellow card data
+     * Clean up yellow card entity
      *
      * @param chain 链信息/chain info
      * */
@@ -179,9 +183,9 @@ public class PunishManager {
             redPunishData.setAddress(agent.getAgentAddress());
             SmallBlock smallBlock = new SmallBlock();
             smallBlock.setHeader(block.getHeader());
-            smallBlock.setTxHashList(block.getTxHashList());
+            smallBlock.setTxHashList((ArrayList<NulsDigestData>) block.getTxHashList());
             for (Transaction tx : txs) {
-                smallBlock.addBaseTx(tx);
+                smallBlock.addSystemTx(tx);
             }
             redPunishData.setEvidence(smallBlock.serialize());
             redPunishData.setReasonCode(PunishReasonEnum.DOUBLE_SPEND.getCode());
@@ -206,7 +210,7 @@ public class PunishManager {
      * @return boolean
      * */
     private boolean isRedPunish(Chain chain, BlockHeader firstHeader, BlockHeader secondHeader)throws NulsException{
-        //验证出块地址PackingAddress，记录分叉的连续次数，如达到连续3轮则红牌惩罚
+        //验证出块地址PackingAddress，记录分叉的连续次数，如达到连续3轮则红牌惩罚/最近100轮中有3次分叉
         String packingAddress = AddressTool.getStringAddressByBytes(firstHeader.getPackingAddress(chain.getConfig().getChainId()));
         BlockExtendsData extendsData = new BlockExtendsData(firstHeader.getExtend());
         long currentRoundIndex = extendsData.getRoundIndex();
@@ -244,19 +248,21 @@ public class PunishManager {
         */
         else{
             List<Evidence> list = currentChainEvidences.get(packingAddress);
-            Collections.sort(list,new EvidenceComparator());
-            long preRoundIndex = list.get(list.size()-1).getRoundIndex();
-            if(currentRoundIndex - preRoundIndex != 1){
-                currentChainEvidences.remove(packingAddress);
-                return false;
-            }else{
-                list.add(evidence);
-                currentChainEvidences.put(packingAddress,list);
-                if(list.size()>= ConsensusConstant.REDPUNISH_BIFURCATION){
-                    return true;
+
+            Iterator<Evidence> iterator = list.iterator();
+            while (iterator.hasNext()){
+                Evidence e = iterator.next();
+                if(e.getRoundIndex() <= currentRoundIndex - ConsensusConstant.CREDIT_MAGIC_NUM){
+                    iterator.remove();
                 }
-                return false;
             }
+            list.add(evidence);
+            currentChainEvidences.put(packingAddress,list);
+            chain.setEvidenceMap(currentChainEvidences);
+            if(list.size() >= ConsensusConstant.REDPUNISH_BIFURCATION){
+                return true;
+            }
+            return false;
         }
     }
 
@@ -279,7 +285,7 @@ public class PunishManager {
             */
             byte[][] headers = new byte[ConsensusConstant.REDPUNISH_BIFURCATION * 2][];
             Map<String, List<Evidence>> currentChainEvidences = chain.getEvidenceMap();
-            List<Evidence> list = currentChainEvidences.get(AddressTool.getStringAddressByBytes(agent.getPackingAddress()));
+            List<Evidence> list = currentChainEvidences.remove(AddressTool.getStringAddressByBytes(agent.getPackingAddress()));
             for (int i = 0; i < list.size() && i < ConsensusConstant.REDPUNISH_BIFURCATION; i++) {
                 Evidence evidence = list.get(i);
                 int s = i * 2;
@@ -322,9 +328,12 @@ public class PunishManager {
      * @param self       Local Node Packing Information/本地节点打包信息
      * @param round      Local latest rounds information/本地最新轮次信息
      */
-    public void punishTx(Chain chain, BlockHeader bestBlock, List<Transaction> txList, MeetingMember self, MeetingRound round) throws NulsException, IOException {
-        Transaction yellowPunishTransaction = createYellowPunishTx(bestBlock, self, round);
+    public void punishTx(Chain chain, BlockHeader bestBlock, List<Transaction> txList, MeetingMember self, MeetingRound round) throws Exception{
+        Transaction yellowPunishTransaction = createYellowPunishTx(chain,bestBlock, self, round);
         if (null == yellowPunishTransaction) {
+            if(chain.getRedPunishTransactionList().size() > 0){
+                conflictValid(chain,txList);
+            }
             return;
         }
         txList.add(yellowPunishTransaction);
@@ -341,7 +350,7 @@ public class PunishManager {
             if (null == member) {
                 member = round.getPreRound().getMemberByAgentAddress(address);
             }
-            if (DoubleUtils.compare(member.getAgent().getCreditVal(), ConsensusConstant.RED_PUNISH_CREDIT_VAL) == -1) {
+            if (DoubleUtils.compare(member.getAgent().getRealCreditVal(), ConsensusConstant.RED_PUNISH_CREDIT_VAL) <= 0) {
                 if (!punishedSet.add(member.getPackingIndexOfRound())) {
                     continue;
                 }
@@ -355,9 +364,11 @@ public class PunishManager {
                 redPunishTransaction.setTxData(redPunishData.serialize());
                 redPunishTransaction.setTime(self.getPackEndTime());
                 CoinData coinData = coinDataManager.getStopAgentCoinData(chain, redPunishData.getAddress(), redPunishTransaction.getTime() + chain.getConfig().getRedPublishLockTime());
-                redPunishTransaction.setCoinData(coinData.serialize());
-                redPunishTransaction.setHash(NulsDigestData.calcDigestData(redPunishTransaction.serializeForHash()));
-                chain.getRedPunishTransactionList().add(redPunishTransaction);
+                if(coinData != null){
+                    redPunishTransaction.setCoinData(coinData.serialize());
+                    redPunishTransaction.setHash(NulsDigestData.calcDigestData(redPunishTransaction.serializeForHash()));
+                    chain.getRedPunishTransactionList().add(redPunishTransaction);
+                }
             }
         }
         /*
@@ -378,7 +389,7 @@ public class PunishManager {
      * @param round     Local latest rounds information/本地最新轮次信息
      * @return  Transaction
      */
-    public Transaction createYellowPunishTx(BlockHeader preBlock, MeetingMember self, MeetingRound round) throws IOException {
+    public Transaction createYellowPunishTx(Chain chain,BlockHeader preBlock, MeetingMember self, MeetingRound round) throws Exception{
         BlockExtendsData preBlockRoundData = new BlockExtendsData(preBlock.getExtend());
         /*
         如果本节点当前打包轮次比本地最新区块的轮次大一轮以上则返回不生成黄牌交易
@@ -437,6 +448,14 @@ public class PunishManager {
             */
             else {
                 preRound = round.getPreRound();
+                if(preRound == null){
+                    /*
+                    * 找到round前一轮的第一个区块
+                    * */
+                    BlockHeader preRoundHeader = roundManager.getFirstBlockOfPreRound(chain,round.getIndex()-1);
+                    BlockExtendsData preRoundExtendsData = new BlockExtendsData(preRoundHeader.getExtend());
+                    preRound = roundManager.getRoundByRoundIndex(chain,preRoundExtendsData.getRoundIndex(),preRoundExtendsData.getRoundStartTime());
+                }
                 member = preRound.getMember(index + preRound.getMemberCount());
                 if (member.getAgent() == null || member.getAgent().getDelHeight() > 0 || member.getAgent().getDeposit().equals(BigInteger.ZERO)) {
                     continue;
@@ -533,13 +552,14 @@ public class PunishManager {
     }
 
     public boolean redPunishCommit(Transaction tx,Chain chain,BlockHeader blockHeader)throws NulsException{
+        long blockHeight = blockHeader.getHeight();
         int chainId = chain.getConfig().getChainId();
         RedPunishData punishData = new RedPunishData();
         punishData.parse(tx.getTxData(),0);
         BlockExtendsData roundData = new BlockExtendsData(blockHeader.getExtend());
         PunishLogPo punishLogPo = new PunishLogPo();
         punishLogPo.setAddress(punishData.getAddress());
-        punishLogPo.setHeight(blockHeader.getHeight());
+        punishLogPo.setHeight(blockHeight);
         punishLogPo.setRoundIndex(roundData.getRoundIndex());
         punishLogPo.setTime(tx.getTime());
         punishLogPo.setType(PunishType.RED.getCode());
@@ -578,49 +598,58 @@ public class PunishManager {
             if (!po.getAgentHash().equals(agent.getHash())) {
                 continue;
             }
-            po.setDelHeight(tx.getBlockHeight());
+            po.setDelHeight(blockHeight);
             boolean b = depositStorageService.save(po,chainId);
             if (!b) {
                 for (DepositPo po2 : updatedList) {
                     po2.setDelHeight(-1);
                     this.depositStorageService.save(po2,chainId);
-                    depositManager.updateDeposit(chain,depositManager.poToDeposit(po2));
                 }
                 return false;
             }
-            depositManager.updateDeposit(chain,depositManager.poToDeposit(po));
             updatedList.add(po);
         }
-
+        /*
+        * 保存红牌惩罚信息
+        * */
         boolean success = punishStorageService.save(punishLogPo,chainId);
         if (!success) {
             for (DepositPo po2 : updatedList) {
                 po2.setDelHeight(-1);
                 this.depositStorageService.save(po2,chainId);
-                depositManager.updateDeposit(chain,depositManager.poToDeposit(po2));
             }
             return false;
         }
-        chain.getRedPunishList().add(punishLogPo);
-
+        /*
+        * 修改惩罚节点信息
+        * */
         AgentPo agentPo = agent;
-        agentPo.setDelHeight(tx.getBlockHeight());
+        agentPo.setDelHeight(blockHeight);
         success = agentStorageService.save(agentPo,chainId);
         if (!success) {
             for (DepositPo po2 : updatedList) {
                 po2.setDelHeight(-1);
                 this.depositStorageService.save(po2,chainId);
-                depositManager.updateDeposit(chain,depositManager.poToDeposit(po2));
             }
             this.punishStorageService.delete(punishLogPo.getKey(),chainId);
-            chain.getRedPunishList().remove(punishLogPo);
             return false;
         }
+
+        /*
+        * 更新缓存
+        * */
+        if(!updatedList.isEmpty()){
+            for (DepositPo depositPo:updatedList) {
+                depositManager.updateDeposit(chain,depositManager.poToDeposit(depositPo));
+            }
+        }
+        chain.getRedPunishList().add(punishLogPo);
         agentManager.updateAgent(chain,agentManager.poToAgent(agentPo));
         return true;
     }
 
     public boolean redPunishRollback(Transaction tx,Chain chain,BlockHeader blockHeader)throws NulsException{
+        long blockHeight = blockHeader.getHeight();
         int chainId = chain.getConfig().getChainId();
         RedPunishData punishData = new RedPunishData();
         punishData.parse(tx.getTxData(),0);
@@ -631,7 +660,7 @@ public class PunishManager {
         List<AgentPo> agentList = agentStorageService.getList(chainId);
         AgentPo agent = null;
         for (AgentPo agentPo : agentList) {
-            if (agentPo.getDelHeight() > 0) {
+            if (agentPo.getDelHeight() <= 0) {
                 continue;
             }
             if (Arrays.equals(agentPo.getAgentAddress(), punishData.getAddress())) {
@@ -653,14 +682,12 @@ public class PunishManager {
             po.setDelHeight(-1);
             boolean success = this.depositStorageService.save(po,chainId);
             if (!success) {
-                for (DepositPo po2 : depositPoList) {
-                    po2.setDelHeight(tx.getBlockHeight());
+                for (DepositPo po2 : updatedList) {
+                    po2.setDelHeight(blockHeight);
                     this.depositStorageService.save(po2,chainId);
-                    depositManager.updateDeposit(chain,depositManager.poToDeposit(po2));
                 }
                 return false;
             }
-            depositManager.updateDeposit(chain,depositManager.poToDeposit(po));
             updatedList.add(po);
         }
 
@@ -669,27 +696,33 @@ public class PunishManager {
         boolean success = agentStorageService.save(agentPo,chainId);
         if (!success) {
             for (DepositPo po2 : depositPoList) {
-                po2.setDelHeight(tx.getBlockHeight());
+                po2.setDelHeight(blockHeight);
                 this.depositStorageService.save(po2,chainId);
-                depositManager.updateDeposit(chain,depositManager.poToDeposit(po2));
             }
             return false;
         }
-        agentManager.updateAgent(chain,agentManager.poToAgent(agentPo));
 
-        byte[] key = ByteUtils.concatenate(punishData.getAddress(), new byte[]{PunishType.RED.getCode()}, SerializeUtils.uint64ToByteArray(tx.getBlockHeight()), new byte[]{0});
+        byte[] key = ByteUtils.concatenate(punishData.getAddress(), new byte[]{PunishType.RED.getCode()}, SerializeUtils.uint64ToByteArray(blockHeight), new byte[]{0});
         success = punishStorageService.delete(key,chainId);
         if (!success) {
             for (DepositPo po2 : depositPoList) {
-                po2.setDelHeight(tx.getBlockHeight());
+                po2.setDelHeight(blockHeight);
                 this.depositStorageService.save(po2,chainId);
-                depositManager.updateDeposit(chain,depositManager.poToDeposit(po2));
             }
-            agentPo.setDelHeight(tx.getBlockHeight());
+            agentPo.setDelHeight(blockHeight);
             agentStorageService.save(agentPo,chainId);
-            agentManager.updateAgent(chain,agentManager.poToAgent(agentPo));
             return false;
         }
+
+        /*
+        * 修改缓存
+        * */
+        if(!updatedList.isEmpty()){
+            for (DepositPo po2 : updatedList) {
+                depositManager.updateDeposit(chain,depositManager.poToDeposit(po2));
+            }
+        }
+        agentManager.updateAgent(chain,agentManager.poToAgent(agentPo));
         return true;
     }
 
@@ -724,6 +757,7 @@ public class PunishManager {
     }
 
     public boolean yellowPunishRollback(Transaction tx,Chain chain,BlockHeader blockHeader)throws NulsException{
+        long blockHeight = blockHeader.getHeight();
         YellowPunishData punishData = new YellowPunishData();
         punishData.parse(tx.getTxData(),0);
         List<PunishLogPo> deletedList = new ArrayList<>();
@@ -731,7 +765,7 @@ public class PunishManager {
         int deleteIndex = 1;
         int chainId = chain.getConfig().getChainId();
         for (byte[] address : punishData.getAddressList()) {
-            boolean result = punishStorageService.delete(getPoKey(address, PunishType.YELLOW.getCode(), tx.getBlockHeight(), deleteIndex++),chainId);
+            boolean result = punishStorageService.delete(getPoKey(address, PunishType.YELLOW.getCode(), blockHeight, deleteIndex),chainId);
             if (!result) {
                 for (PunishLogPo po : deletedList) {
                     punishStorageService.save(po,chainId);
@@ -741,13 +775,14 @@ public class PunishManager {
             } else {
                 PunishLogPo po = new PunishLogPo();
                 po.setAddress(address);
-                po.setHeight(tx.getBlockHeight());
+                po.setHeight(blockHeight);
                 po.setRoundIndex(roundData.getRoundIndex());
                 po.setTime(tx.getTime());
                 po.setIndex(deleteIndex);
                 po.setType(PunishType.YELLOW.getCode());
                 deletedList.add(po);
             }
+            deleteIndex++;
         }
         chain.getYellowPunishList().removeAll(deletedList);
         return true;

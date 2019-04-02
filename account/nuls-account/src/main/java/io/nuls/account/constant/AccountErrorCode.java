@@ -109,4 +109,6 @@ public interface AccountErrorCode {
     ErrorCode ADDRESS_ALREADY_SIGNED = ErrorCode.init("30043");
     ErrorCode COINTO_DUPLICATE_COIN = ErrorCode.init("30044");
     ErrorCode ALIAS_SAVE_ERROR = ErrorCode.init("30045");
+    ErrorCode AMOUNT_TOO_SMALL = ErrorCode.init("30046");
+    ErrorCode ADDRESS_TRANSFER_BAN = ErrorCode.init("30047");
 }

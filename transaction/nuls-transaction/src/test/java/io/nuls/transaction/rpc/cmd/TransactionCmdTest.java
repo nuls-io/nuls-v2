@@ -24,7 +24,7 @@ import static org.junit.Assert.assertTrue;
  */
 public class TransactionCmdTest {
 
-    protected int chainId = 12345;
+    protected int chainId = 2;
     protected String version = "1.0";
     //protected String moduleCode = "ac";
 

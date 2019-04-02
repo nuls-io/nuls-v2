@@ -25,8 +25,9 @@
 package io.nuls.transaction.utils.queue.fqueue.internal;
 
 import io.nuls.kernel.utils.queue.fqueue.exception.FileEOFException;
+import io.nuls.tools.core.ioc.SpringLiteContext;
 import io.nuls.tools.thread.ThreadUtils;
-import io.nuls.transaction.constant.TxConstant;
+import io.nuls.transaction.constant.TxConfig;
 import io.nuls.transaction.utils.MappedBufferCleanUtil;
 
 import java.io.File;
@@ -116,7 +117,8 @@ public class Entity {
                 readerPosition = MESSAGE_START_POSITION;
             }
         }
-        ThreadUtils.createAndRunThread(TxConstant.MODULE_CODE + "_" + path, new Sync());
+        TxConfig txConfig = SpringLiteContext.getBean(TxConfig.class);
+        ThreadUtils.createAndRunThread(txConfig.getModuleCode() + "_" + path, new Sync());
     }
 
     public int getCurrentFileNumber() {

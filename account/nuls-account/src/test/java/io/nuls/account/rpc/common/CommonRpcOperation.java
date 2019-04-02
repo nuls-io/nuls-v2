@@ -12,7 +12,11 @@ import io.nuls.rpc.netty.processor.ResponseMessageProcessor;
 import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.parse.JSONUtils;
 
-import java.io.*;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -30,7 +34,7 @@ import static org.junit.Assert.assertNotNull;
 public class CommonRpcOperation {
 
 
-    protected static int chainId = 12345;
+    protected static int chainId = 2;
     protected static String password = "nuls123456";
     protected static String newPassword = "c12345678";
     protected static String version = "1.0";
@@ -129,7 +133,7 @@ public class CommonRpcOperation {
     public static MultiSigAccount createMultiSigAccount() throws Exception {
         MultiSigAccount multiSigAccount = new MultiSigAccount();
         //List<String> accountList = createAccount(3);
-        List<String> accountList = List.of("5MR_2CkYEhXKCmUWTEsWRTnaWgYE8kJdfd5", "5MR_2CcRgU3vDGp2uEG3rdzLdyMCbsiLFbJ", "5MR_2CckymYvKM7NKpt6fpZproQYMtnGdaT");
+        List<String> accountList = List.of("tNULSeBaMvEtDfvZuukDf2mVyfGo3DdiN8KLRG", "tNULSeBaMvEtDfvZuukDf2mVyfGo3DdiN8KLRG", "tNULSeBaMvEtDfvZuukDf2mVyfGo3DdiN8KLRG");
         Map<String, Object> params = new HashMap<>();
         List<String> pubKeys = new ArrayList<>();
         List<byte[]> pubKeysBytesList = new ArrayList<>();

@@ -3,15 +3,14 @@ package io.nuls.transaction.model.bo;
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.transaction.TestConstant;
-import io.nuls.transaction.constant.TxConstant;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.io.IOException;
 import java.util.Arrays;
 
-import static org.junit.Assert.*;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 public class CrossTxDataTest {
 
@@ -21,7 +20,7 @@ public class CrossTxDataTest {
     public void setUp() throws Exception {
         ctd = new CrossTxData();
         ctd.setOriginalTxHash(TestConstant.getHashA().getDigestBytes());
-        ctd.setChainId(TxConstant.NULS_CHAINID);
+        ctd.setChainId(2);
 //        ctd.setOriginalTxHash(TestConstant.getHashA().getDigestBytes());
 //        ctd.setChainId(0);
     }

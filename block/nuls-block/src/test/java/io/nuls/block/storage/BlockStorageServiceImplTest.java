@@ -29,7 +29,6 @@ import io.nuls.tools.core.ioc.SpringLiteContext;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import static io.nuls.block.constant.Constant.*;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 
@@ -43,7 +42,7 @@ public class BlockStorageServiceImplTest {
     public static void beforeClass() throws Exception {
         SpringLiteContext.init("io.nuls.block");
         service = SpringLiteContext.getBean(BlockStorageService.class);
-        RocksDBService.init(DATA_PATH);
+        RocksDBService.init("../../../../data/block");
         Block block = BlockGenerator.generate(null);
         header = BlockUtil.toBlockHeaderPo(block);
     }

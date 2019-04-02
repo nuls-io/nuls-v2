@@ -37,10 +37,11 @@ import io.nuls.account.service.AliasService;
 import io.nuls.account.storage.AccountStorageService;
 import io.nuls.account.util.LoggerUtil;
 import io.nuls.base.basic.AddressTool;
+import io.nuls.db.util.DBUtils;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Service;
 import io.nuls.tools.crypto.HexUtil;
-import io.nuls.tools.data.StringUtils;
+import io.nuls.tools.model.StringUtils;
 import io.nuls.tools.exception.NulsRuntimeException;
 import io.nuls.tools.parse.JSONUtils;
 
@@ -93,12 +94,12 @@ public class AccountKeyStoreServiceImpl implements AccountKeyStoreService {
             throw new NulsRuntimeException(AccountErrorCode.ACCOUNT_NOT_EXIST);
         }
         AccountKeyStore accountKeyStore = new AccountKeyStore();
-        //如果账户加密,就验证密码
-        //if the account is encrypted, verify the password
-        if (account.isEncrypted() && !account.validatePassword(password)) {
+        //验证密码
+        //verify the password
+        if (!account.validatePassword(password)) {
             throw new NulsRuntimeException(AccountErrorCode.PASSWORD_IS_WRONG);
         }
-        //如果账户加密,都不导出明文私钥
+        //如果账户加密,不导出明文私钥
         //if the account is encrypted , the plaintext private key is not exported
         if (account.isEncrypted()) {
             accountKeyStore.setEncryptedPrivateKey(HexUtil.encode(account.getEncryptedPriKey()));
@@ -130,7 +131,7 @@ public class AccountKeyStoreServiceImpl implements AccountKeyStoreService {
                 e.printStackTrace();
             }
         }
-        File backupFile = new File(path);
+        File backupFile = DBUtils.loadDataPath(path);
         //if not directory,create directory
         if (!backupFile.isDirectory()) {
             if (!backupFile.mkdirs()) {

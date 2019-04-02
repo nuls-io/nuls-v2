@@ -59,7 +59,7 @@ public class Transaction extends BaseNulsData implements Cloneable {
 
     private transient NulsDigestData hash;
 
-    private long blockHeight = -1L;
+    private transient long blockHeight = -1L;
 
     private transient TxStatusEnum status = TxStatusEnum.UNCONFIRM;
 
@@ -268,15 +268,17 @@ public class Transaction extends BaseNulsData implements Cloneable {
         BigInteger fee = BigInteger.ZERO;
         if (null != coinData && type > 1) {
             CoinData cData = getCoinDataInstance();
-            BigInteger toAmount = BigInteger.ZERO;
-            for (CoinTo coinTo : cData.getTo()) {
-                toAmount = toAmount.add(coinTo.getAmount());
+            if(cData.getFrom().size() > 0) {
+                BigInteger toAmount = BigInteger.ZERO;
+                for (CoinTo coinTo : cData.getTo()) {
+                    toAmount = toAmount.add(coinTo.getAmount());
+                }
+                BigInteger fromAmount = BigInteger.ZERO;
+                for (CoinFrom coinFrom : cData.getFrom()) {
+                    fromAmount = fromAmount.add(coinFrom.getAmount());
+                }
+                fee =  fromAmount.subtract(toAmount);
             }
-            BigInteger fromAmount = BigInteger.ZERO;
-            for (CoinFrom coinFrom : cData.getFrom()) {
-                fromAmount = fromAmount.add(coinFrom.getAmount());
-            }
-            fee =  fromAmount.subtract(toAmount);
         }
         return fee;
     }

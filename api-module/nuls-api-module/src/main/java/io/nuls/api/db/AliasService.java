@@ -13,6 +13,8 @@ import org.bson.Document;
 import java.util.ArrayList;
 import java.util.List;
 
+import static io.nuls.api.constant.MongoTableConstant.ALIAS_TABLE;
+
 
 @Component
 public class AliasService {
@@ -22,9 +24,9 @@ public class AliasService {
 
     public void initCache() {
         for (ApiCache apiCache : CacheManager.getApiCaches().values()) {
-            List<Document> documentList = mongoDBService.query(MongoTableConstant.ALIAS_TABLE + apiCache.getChainInfo().getChainId());
+            List<Document> documentList = mongoDBService.query(ALIAS_TABLE + apiCache.getChainInfo().getChainId());
             for (Document document : documentList) {
-                AliasInfo aliasInfo = DocumentTransferTool.toInfo(document, "alias", AliasInfo.class);
+                AliasInfo aliasInfo = DocumentTransferTool.toInfo(document, "address", AliasInfo.class);
                 apiCache.addAlias(aliasInfo);
             }
         }
@@ -34,11 +36,11 @@ public class AliasService {
         ApiCache apiCache = CacheManager.getCache(chainId);
         AliasInfo aliasInfo = apiCache.getAlias(address);
         if (aliasInfo == null) {
-            Document document = mongoDBService.findOne(MongoTableConstant.ALIAS_TABLE + chainId, Filters.eq("address", address));
+            Document document = mongoDBService.findOne(ALIAS_TABLE + chainId, Filters.eq("_id", address));
             if (document == null) {
                 return null;
             }
-            aliasInfo = DocumentTransferTool.toInfo(document, "alias", AliasInfo.class);
+            aliasInfo = DocumentTransferTool.toInfo(document, "address", AliasInfo.class);
 
             apiCache.addAlias(aliasInfo);
         }
@@ -49,11 +51,11 @@ public class AliasService {
         ApiCache apiCache = CacheManager.getCache(chainId);
         AliasInfo aliasInfo = apiCache.getAlias(alias);
         if (aliasInfo == null) {
-            Document document = mongoDBService.findOne(MongoTableConstant.ALIAS_TABLE + chainId, Filters.eq("_id", alias));
+            Document document = mongoDBService.findOne(ALIAS_TABLE + chainId, Filters.eq("alias", alias));
             if (document == null) {
                 return null;
             }
-            aliasInfo = DocumentTransferTool.toInfo(document, "alias", AliasInfo.class);
+            aliasInfo = DocumentTransferTool.toInfo(document, "address", AliasInfo.class);
 
             apiCache.addAlias(aliasInfo);
         }
@@ -70,7 +72,21 @@ public class AliasService {
             Document document = DocumentTransferTool.toDocument(info, "address");
             documentList.add(document);
         }
-        mongoDBService.insertMany(MongoTableConstant.ALIAS_TABLE + chainId, documentList);
+        mongoDBService.insertMany(ALIAS_TABLE + chainId, documentList);
     }
 
+
+    public void rollbackAliasList(int chainId, List<AliasInfo> aliasInfoList) {
+        if (aliasInfoList.isEmpty()) {
+            return;
+        }
+        ApiCache apiCache = CacheManager.getCache(chainId);
+        List<String> list = new ArrayList<>();
+        for (AliasInfo aliasInfo : aliasInfoList) {
+            list.add(aliasInfo.getAddress());
+            apiCache.getAliasMap().remove(aliasInfo.getAddress());
+            apiCache.getAliasMap().remove(aliasInfo.getAlias());
+        }
+        mongoDBService.delete(ALIAS_TABLE + chainId, Filters.in("_id", list));
+    }
 }

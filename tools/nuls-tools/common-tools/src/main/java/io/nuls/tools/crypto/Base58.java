@@ -85,10 +85,10 @@ public class Base58 {
     }
 
     /**
-     * Decodes the given base58 string into the original data bytes./将给定的Base58字符串解码为原始数据字节
+     * Decodes the given base58 string into the original entity bytes./将给定的Base58字符串解码为原始数据字节
      *
      * @param input the base58-encoded string to decode
-     * @return the decoded data bytes
+     * @return the decoded entity bytes
      * @throws Exception if the given string is not a valid base58 string
      */
     public static byte[] decode(String input) throws Exception {
@@ -123,7 +123,7 @@ public class Base58 {
         while (outputStart < decoded.length && decoded[outputStart] == 0) {
             ++outputStart;
         }
-        // Return decoded data (including original number of leading zeros).
+        // Return decoded entity (including original number of leading zeros).
         return Arrays.copyOfRange(decoded, outputStart - zeros, decoded.length);
     }
 
@@ -136,9 +136,9 @@ public class Base58 {
     }
 
     /**
-     * Decodes the given base58 string into the original data bytes, using the checksum in the
-     * last 4 bytes of the decoded data to verify that the rest are correct. The checksum is
-     * removed from the returned data.
+     * Decodes the given base58 string into the original entity bytes, using the checksum in the
+     * last 4 bytes of the decoded entity to verify that the rest are correct. The checksum is
+     * removed from the returned entity.
      * 将给定的Base58字符串解码为原始数据字节，使用解码数据的最后4字节以验证其余数据是否正确校验和是从返回的数据中删除
      *
      * @param input the base58-encoded string to decode (which should include the checksum)

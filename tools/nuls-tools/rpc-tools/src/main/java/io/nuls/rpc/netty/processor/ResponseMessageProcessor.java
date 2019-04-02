@@ -19,9 +19,10 @@ import java.util.concurrent.TimeUnit;
 /**
  * 消息处理器
  * Send message processor
- * @author  tag
+ *
+ * @author tag
  * 2019/2/25
- * */
+ */
 public class ResponseMessageProcessor {
     /**
      * 与已连接的模块握手
@@ -45,7 +46,37 @@ public class ResponseMessageProcessor {
 
         ResponseContainer responseContainer = RequestContainer.putRequest(message.getMessageId());
 
-        ConnectManager.sendMessage(channel,JSONUtils.obj2json(message));
+        ConnectManager.sendMessage(channel, JSONUtils.obj2json(message));
+
+        try {
+            return responseContainer.getFuture().get(Constants.TIMEOUT_TIMEMILLIS, TimeUnit.MILLISECONDS) != null;
+        } catch (Exception e) {
+            //Timeout Error
+            return false;
+        } finally {
+            RequestContainer.removeResponseContainer(message.getMessageId());
+        }
+    }
+
+
+    /**
+     * 与已连接的模块握手
+     * Shake hands with the core module (Manager)
+     *
+     * @return boolean
+     * @throws Exception 握手失败, handshake failed
+     */
+    public static boolean handshake(Channel channel) throws Exception {
+        /*
+        发送握手消息
+        Send handshake message
+         */
+        Message message = MessageUtil.basicMessage(MessageType.NegotiateConnection);
+        message.setMessageData(MessageUtil.defaultNegotiateConnection());
+
+        ResponseContainer responseContainer = RequestContainer.putRequest(message.getMessageId());
+
+        ConnectManager.sendMessage(channel, JSONUtils.obj2json(message));
 
         try {
             return responseContainer.getFuture().get(Constants.TIMEOUT_TIMEMILLIS, TimeUnit.MILLISECONDS) != null;
@@ -58,7 +89,7 @@ public class ResponseMessageProcessor {
     }
 
     public static void syncKernel(String kernelUrl) throws Exception {
-        syncKernel(kernelUrl,new KernelInvoke());
+        syncKernel(kernelUrl, new KernelInvoke());
     }
 
     /**
@@ -72,7 +103,7 @@ public class ResponseMessageProcessor {
      *
      * @throws Exception 核心模块（Manager）不可用，Core Module (Manager) Not Available
      */
-    public static void syncKernel(String kernelUrl,BaseInvoke callbackInvoke) throws Exception {
+    public static void syncKernel(String kernelUrl, BaseInvoke callbackInvoke) throws Exception {
         /*
         打造用于同步的Request
         Create Request for Synchronization
@@ -87,7 +118,7 @@ public class ResponseMessageProcessor {
         Connect to Core Module (Manager)
          */
         Channel channel = ConnectManager.getConnectByUrl(kernelUrl);
-        if(channel == null){
+        if (channel == null) {
             throw new Exception("Kernel not available");
         }
 
@@ -101,9 +132,23 @@ public class ResponseMessageProcessor {
 
         /*
         获取返回的数据，放入本地变量
-        Get the returned data and place it in the local variable
+        Get the returned entity and place it in the local variable
          */
         Response response = receiveResponse(responseContainer, Constants.TIMEOUT_TIMEMILLIS);
+        /*
+        注册消息发送失败，重新发送
+        */
+        int tryCount = 0;
+        while (!response.isSuccess() && tryCount < Constants.TRY_COUNT) {
+            Log.info("向核心注册消息发送失败第" + (tryCount + 1) + "次");
+            responseContainer = RequestContainer.putRequest(message.getMessageId());
+            ConnectManager.sendMessage(channel, JSONUtils.obj2json(message));
+            response = receiveResponse(responseContainer, Constants.TIMEOUT_TIMEMILLIS);
+            tryCount++;
+        }
+        if (!response.isSuccess()) {
+            throw new Exception("向核心注册失败！");
+        }
 //        BaseInvoke baseInvoke = new KernelInvoke();
         callbackInvoke.callBack(response);
 
@@ -236,7 +281,7 @@ public class ResponseMessageProcessor {
         if (Constants.BOOLEAN_FALSE.equals(request.getRequestAck())) {
             return responseContainer.getMessageId();
         } else {
-            return  receiveResponse(responseContainer, Constants.TIMEOUT_TIMEMILLIS) != null ? responseContainer.getMessageId() : null;
+            return receiveResponse(responseContainer, Constants.TIMEOUT_TIMEMILLIS) != null ? responseContainer.getMessageId() : null;
         }
     }
 
@@ -259,7 +304,7 @@ public class ResponseMessageProcessor {
 
         ResponseContainer responseContainer = RequestContainer.putRequest(message.getMessageId());
 
-        ConnectManager.sendMessage(channel,JSONUtils.obj2json(message));
+        ConnectManager.sendMessage(channel, JSONUtils.obj2json(message));
         if (ConnectManager.isPureDigital(request.getSubscriptionPeriod())
                 || ConnectManager.isPureDigital(request.getSubscriptionEventCounter())) {
             /*
@@ -295,7 +340,7 @@ public class ResponseMessageProcessor {
          */
         Channel channel = ConnectManager.MSG_ID_KEY_CHANNEL_MAP.get(messageId);
         if (channel != null) {
-            ConnectManager.sendMessage(channel,JSONUtils.obj2json(message));
+            ConnectManager.sendMessage(channel, JSONUtils.obj2json(message));
             Log.debug("取消订阅：" + JSONUtils.obj2json(message));
             ConnectManager.INVOKE_MAP.remove(messageId);
         }
@@ -305,8 +350,8 @@ public class ResponseMessageProcessor {
      * 根据messageId获取Response
      * Get response by messageId
      *
-     * @param responseContainer         结果容器/ Result container
-     * @param timeOut                   超时时间，单位毫秒 / Timeout, in milliseconds
+     * @param responseContainer 结果容器/ Result container
+     * @param timeOut           超时时间，单位毫秒 / Timeout, in milliseconds
      * @return Response
      * @throws Exception JSON格式转换错误、连接失败 / JSON format conversion error, connection failure
      */

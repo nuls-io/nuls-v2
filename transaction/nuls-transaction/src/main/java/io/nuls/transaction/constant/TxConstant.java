@@ -6,60 +6,6 @@ package io.nuls.transaction.constant;
  */
 public interface TxConstant {
 
-    String MODULE_CODE = "tx";
-    String TX_LOGGER_NAME = "tx/tx";
-
-    int NULS_CHAINID = 12345;
-    int NULS_CHAIN_ASSETID = 1;
-
-    /**
-     * Map初始值
-     */
-    int INIT_CAPACITY_16 = 16;
-    int INIT_CAPACITY_8 = 8;
-
-    int PAGESIZE = 20;
-
-    /**
-     * context path
-     */
-    String CONTEXT_PATH = "io.nuls";
-
-    /**
-     * webSocket config
-     */
-    String TX_MODULE_NAME = "transaction";
-
-    String TX_CMD_PATH = "io.nuls.transaction.rpc.cmd";
-    int TX_CMD_PORT = 8823;
-    String KERNEL_URL = "ws://127.0.0.1:8887";
-
-    /**
-     * system params
-     */
-    String SYS_ALLOW_NULL_ARRAY_ELEMENT = "protostuff.runtime.allow_null_array_element";
-    String SYS_FILE_ENCODING = "file.encoding";
-
-    /**
-     * DB config
-     */
-    String DB_CONFIG_NAME = "db_config.properties";
-    String DB_DATA_PATH = "rocksdb.datapath";
-    String TX_UNVERIFIED_QUEUE = "tx_unverified_queue";
-    long TX_UNVERIFIED_QUEUE_MAXSIZE = 10000000L;
-
-
-    /**
-     * H2
-     */
-    String H2_TX_TABLE_NAME_PREFIX = "transaction_";
-    String H2_TX_TABLE_INDEX_NAME_PREFIX = "tx_index_";
-    String H2_TX_TABLE_UNIQUE_NAME_PREFIX = "tx_unique_";
-    int H2_TX_TABLE_NUMBER = 128;
-
-
-    int ORPHAN_CONTAINER_MAX_SIZE = 200000;
-
 
     /** coinbase交易*/
     int TX_TYPE_COINBASE = 1;
@@ -89,63 +35,50 @@ public interface TxConstant {
     int TX_TYPE_ADD_ASSET_TO_CHAIN = 13;
     /** 删除链上资产*/
     int TX_TYPE_REMOVE_ASSET_FROM_CHAIN = 14;
+    /** 创建智能合约交易*/
+    int TX_TYPE_CREATE_CONTRACT = 100;
+    /** 调用智能合约交易*/
+    int TX_TYPE_CALL_CONTRACT = 101;
+    /** 删除智能合约交易*/
+    int TX_TYPE_DELETE_CONTRACT = 102;
+    /** contract transfer tx */
+    int TX_TYPE_CONTRACT_TRANSFER = 103;
+    /** contract return gas tx */
+    int TX_TYPE_CONTRACT_RETURN_GAS = 104;
+
+    /** 获取网络时间间隔*/
+    long GETTIME_INTERVAL = 30000L;
+
+    long GETTIME_INTERFACE_TIMEOUT = 200L;
 
 
+    String LOG_TX = "tx/txChain";
+    String LOG_NEW_TX_PROCESS = "tx/newTxProcess";
+    String LOG_TX_MESSAGE = "tx/message";
 
-    /**
-     * 跨链交易
-     */
-    String TX_MODULE_VALIDATOR = "txProcess";
-    String CROSS_TRANSFER_VALIDATOR = "crossTxValidator";
-    String CROSS_TRANSFER_COMMIT = "crossTxCommit";
-    String CROSS_TRANSFER_ROLLBACK = "crossTxCommit";
 
-    /**
-     * 跨链交易打包确认后需要达到的最低阈值高度才生效
-     */
-    long CTX_EFFECT_THRESHOLD = 30;
+    String TX_CMD_PATH = "io.nuls.transaction.rpc.cmd";
 
-//    /**
-//     * 跨链交易验证过程
-//     */
-//    /** 接收新的跨链交易创建 */
-//    int CTX_UNPROCESSED_0 = 0;
-//    /** 已发送请求跨链验证消息 */
-//    int CTX_VERIFY_REQUEST_1 = 1;
-//    /** 已接收到跨链验证结果 广播本节点验证结果给本链其他节点进行统计 */
-//    int CTX_VERIFY_RESULT_2 = 2;
-//    /** 接收到其他节点发送的验证结果，并已统计出结果，放入待打包 */
-//    int CTX_NODE_STATISTICS_RESULT_3 = 3;
-//    /** 已进入区块并确认 */
-//    int CTX_COMFIRM_4 = 4;
+    /** system params */
+    String SYS_ALLOW_NULL_ARRAY_ELEMENT = "protostuff.runtime.allow_null_array_element";
+    String SYS_FILE_ENCODING = "file.encoding";
 
-    /**
-     * 跨链交易固定为非解锁交易
-     */
-    byte CORSS_TX_LOCKED = 0;
+    String RPC_VERSION = "1.0";
 
-    /**
-     * 交易基础信息
-     */
-    int TX_HASH_DIGEST_BYTE_MAX_LEN = 70;
-    int TX_MAX_BYTES = 300;
-    int TX_MAX_SIZE = TX_MAX_BYTES * 1024;
+    /** 新本地交易task,初始延迟值(秒) */
+    int TX_TASK_INITIALDELAY = 5;
+    /** 新本地交易task, 运行周期间隔(秒) */
+    int TX_TASK_PERIOD = 3;
 
-    /**
-     * 创建多签交易时，返回map的key
-     */
-    String MULTI_TX_HASH = "txHash";
-    String MULTI_TX_HEX = "txHex";
+    /** 新跨链交易task,初始延迟值(秒) */
+    int CTX_TASK_INITIALDELAY = 5;
+    /** 新跨链交易task, 运行周期间隔(秒) */
+    int CTX_TASK_PERIOD = 10;
 
-    /**
-     * config file path
-     */
-    String CONFIG_FILE_PATH = "transaction-config.json";
-
-    /**
-     * 打包交易，预留模块统一验证的时间 毫秒
-     */
-    long VERIFY_OFFSET = 500L;
+    /** 未确认交易清理机制task,初始延迟值(秒) */
+    int CLEAN_TASK_INITIALDELAY = 5;
+    /** 未确认交易清理机制task, 运行周期间隔(分钟) */
+    int CLEAN_TASK_PERIOD = 5;
 
     /**
      * 参数key
@@ -154,15 +87,53 @@ public interface TxConstant {
     String KEY_NODE_ID="nodeId";
     String KEY_MESSAGE_BODY="messageBody";
 
-    /** 跨链验证通过率百分比, 跨链通过率 */
-    String CROSS_VERIFY_RESULT_PASS_RATE = "0.51";
+    /**
+     * 创建多签交易时，返回map的key
+     */
+    String MULTI_TX_HASH = "txHash";
+    String MULTI_TX_HEX = "txHex";
 
-    /** 链内通过率 */
-    String CHAIN_NODES_RESULT_PASS_RATE = "0.8";
+    /** 接收新交易的文件队列名**/
+    String TX_UNVERIFIED_QUEUE_PREFIX = "tx_unverified_queue_";
 
-    /** 友链链内最近N个出块者阈值*/
-    int RECENT_PACKAGER_THRESHOLD = 30;
+    int PAGESIZE = 20;
 
-    /** 未确认交易过期毫秒数-30分钟 */
-    int UNCONFIRMED_TX_EXPIRE_MS = 30000;// 30 * 60 * 1000;
+    int PAGENUMBER = 1;
+
+    /** DB config */
+    String DB_CONFIG_NAME = "db_config.properties";
+
+    /**
+     * 交易hash最大长度
+     */
+    int TX_HASH_DIGEST_BYTE_MAX_LEN = 70;
+
+    /**
+     * 跨链交易固定为非解锁交易
+     */
+    byte CORSS_TX_LOCKED = 0;
+
+    /**
+     * Map初始值
+     */
+    int INIT_CAPACITY_16 = 16;
+    int INIT_CAPACITY_8 = 8;
+    int INIT_CAPACITY_4 = 4;
+    int INIT_CAPACITY_2 = 2;
+
+    /** H2 数据库交易表名前缀 */
+    String H2_TX_TABLE_NAME_PREFIX = "transaction_";
+    /** H2 数据库交易表索引前缀 */
+    String H2_TX_TABLE_INDEX_NAME_PREFIX = "tx_index_";
+    /** H2 数据库交易表唯一键前缀(暂取消未使用) */
+    String H2_TX_TABLE_UNIQUE_NAME_PREFIX = "tx_unique_";
+
+    /**
+     * 跨链注册信息交易
+     */
+    String TX_MODULE_VALIDATOR = "txProcess";
+    String CROSS_TRANSFER_VALIDATOR = "crossTxValidator";
+    String CROSS_TRANSFER_COMMIT = "crossTxCommit";
+    String CROSS_TRANSFER_ROLLBACK = "crossTxRollback";
+
 }

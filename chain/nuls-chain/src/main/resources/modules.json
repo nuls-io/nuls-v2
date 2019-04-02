@@ -16,7 +16,7 @@
     "name": "rocksdb.datapath",
     "remark": "数据库路径",
     "readOnly": "true",
-    "value": "../../../../data/nulsChain"
+    "value": "./data/nulsChain"
   },
 
 
@@ -87,7 +87,7 @@
     "name": "nuls_chain_id",
     "remark": "主网id",
     "readOnly": "true",
-    "value": "12345"
+    "value": "2"
   },
   {
     "name": "nuls_chain_name",

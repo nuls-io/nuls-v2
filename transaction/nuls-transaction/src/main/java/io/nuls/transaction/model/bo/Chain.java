@@ -1,11 +1,8 @@
 package io.nuls.transaction.model.bo;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import io.nuls.base.data.NulsDigestData;
 import io.nuls.base.data.Transaction;
-import io.nuls.tools.cache.LimitHashMap;
 import io.nuls.tools.log.logback.NulsLogger;
-import io.nuls.transaction.constant.TxConstant;
 import io.nuls.transaction.model.bo.config.ConfigBean;
 import io.nuls.transaction.utils.queue.entity.PersistentQueue;
 
@@ -32,12 +29,6 @@ public class Chain {
     private ConfigBean config;
 
     /**
-     * 运行状态
-     * Chain running state
-     */
-//    private RunningStatus runningStatus;
-
-    /**
      * 是否正在共识出块中
      */
     private AtomicBoolean packaging;
@@ -50,8 +41,7 @@ public class Chain {
     /**
      * 日志
      */
-    @JsonIgnore
-    private NulsLogger logger;
+    private Map<String, NulsLogger> loggerMap;
 
     /**
      * 管理接收的其他链创建的跨链交易(如果有), 暂存验证中的跨链交易.
@@ -72,7 +62,7 @@ public class Chain {
     /**
      * 孤儿交易
      */
-    private LimitHashMap<NulsDigestData, Transaction> orphanContainer;
+//    private LimitHashMap<NulsDigestData, Transaction> orphanContainer;
 
     /**
      * 未进行验证的交易队列
@@ -93,14 +83,13 @@ public class Chain {
     private ScheduledThreadPoolExecutor scheduledThreadPoolExecutor;
 
     public Chain() throws Exception {
-//        this.runningStatus = RunningStatus.INITING;
-//        this.crossTxVerifyingMap = new HashMap<>();
         this.packaging =  new AtomicBoolean(false);
         this.rePackage = new AtomicBoolean(true);
         this.txRegisterMap = new HashMap<>();
         this.txQueue = new LinkedBlockingDeque<>();
-        this.orphanContainer = new LimitHashMap(TxConstant.ORPHAN_CONTAINER_MAX_SIZE);
-        this.unverifiedQueue = new PersistentQueue(TxConstant.TX_UNVERIFIED_QUEUE, TxConstant.TX_UNVERIFIED_QUEUE_MAXSIZE);
+//        this.orphanContainer = new LimitHashMap(TxConstant.ORPHAN_CONTAINER_MAX_SIZE);
+//        this.unverifiedQueue = new PersistentQueue(TxConstant.TX_UNVERIFIED_QUEUE, TxConstant.TX_UNVERIFIED_QUEUE_MAXSIZE);
+        this.loggerMap = new HashMap<>();
     }
 
     public int getChainId(){
@@ -114,13 +103,6 @@ public class Chain {
         this.config = config;
     }
 
-//    public RunningStatus getRunningStatus() {
-//        return runningStatus;
-//    }
-//
-//    public void setRunningStatus(RunningStatus runningStatus) {
-//        this.runningStatus = runningStatus;
-//    }
 
     public ScheduledThreadPoolExecutor getScheduledThreadPoolExecutor() {
         return scheduledThreadPoolExecutor;
@@ -130,21 +112,13 @@ public class Chain {
         this.scheduledThreadPoolExecutor = scheduledThreadPoolExecutor;
     }
 
-    public NulsLogger getLogger() {
-        return logger;
+    public Map<String, NulsLogger> getLoggerMap() {
+        return loggerMap;
     }
 
-    public void setLogger(NulsLogger logger) {
-        this.logger = logger;
+    public void setLoggerMap(Map<String, NulsLogger> loggerMap) {
+        this.loggerMap = loggerMap;
     }
-
-//    public Map<NulsDigestData, CrossTx> getCrossTxVerifyingMap() {
-//        return crossTxVerifyingMap;
-//    }
-//
-//    public void setCrossTxVerifyingMap(Map<NulsDigestData, CrossTx> crossTxVerifyingMap) {
-//        this.crossTxVerifyingMap = crossTxVerifyingMap;
-//    }
 
     public Map<Integer, TxRegister> getTxRegisterMap() {
         return txRegisterMap;
@@ -162,13 +136,13 @@ public class Chain {
         this.txQueue = txQueue;
     }
 
-    public LimitHashMap<NulsDigestData, Transaction> getOrphanContainer() {
-        return orphanContainer;
-    }
-
-    public void setOrphanContainer(LimitHashMap<NulsDigestData, Transaction> orphanContainer) {
-        this.orphanContainer = orphanContainer;
-    }
+//    public LimitHashMap<NulsDigestData, Transaction> getOrphanContainer() {
+//        return orphanContainer;
+//    }
+//
+//    public void setOrphanContainer(LimitHashMap<NulsDigestData, Transaction> orphanContainer) {
+//        this.orphanContainer = orphanContainer;
+//    }
 
     public PersistentQueue getUnverifiedQueue() {
         return unverifiedQueue;

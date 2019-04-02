@@ -1,0 +1,395 @@
+/*
+ * MIT License
+ * Copyright (c) 2017-2019 nuls.io
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+
+package io.nuls.block.rpc.call;
+
+import io.nuls.base.basic.AddressTool;
+import io.nuls.base.basic.NulsByteBuffer;
+import io.nuls.base.data.BlockExtendsData;
+import io.nuls.base.data.BlockHeader;
+import io.nuls.base.data.NulsDigestData;
+import io.nuls.base.data.Transaction;
+import io.nuls.block.manager.ContextManager;
+import io.nuls.block.model.po.BlockHeaderPo;
+import io.nuls.block.utils.BlockUtil;
+import io.nuls.rpc.model.ModuleE;
+import io.nuls.rpc.model.message.Response;
+import io.nuls.rpc.netty.processor.ResponseMessageProcessor;
+import io.nuls.tools.crypto.HexUtil;
+import io.nuls.tools.log.logback.NulsLogger;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+/**
+ * 调用交易管理模块的工具类
+ *
+ * @author captain
+ * @version 1.0
+ * @date 18-11-9 上午10:44
+ */
+public class TransactionUtil {
+
+    /**
+     * 获取系统交易类型
+     *
+     * @param chainId 链Id/chain id
+     * @return
+     */
+    public static List<Integer> getSystemTypes(int chainId) {
+        NulsLogger commonLog = ContextManager.getContext(chainId).getCommonLog();
+        try {
+            Map<String, Object> params = new HashMap<>(2);
+//            params.put(Constants.VERSION_KEY_STR, "1.0");
+            params.put("chainId", chainId);
+            Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.TX.abbr, "tx_getSystemTypes", params);
+            if (response.isSuccess()) {
+                Map responseData = (Map) response.getResponseData();
+                return (List<Integer>) responseData.get("tx_getSystemTypes");
+            } else {
+                return List.of();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            commonLog.error(e);
+            return List.of();
+        }
+    }
+
+    /**
+     * 批量验证交易
+     *
+     * @param chainId      链Id/chain id
+     * @param transactions
+     * @return
+     */
+    public static boolean verify(int chainId, List<Transaction> transactions, BlockHeader header, BlockHeader lastHeader) {
+        NulsLogger commonLog = ContextManager.getContext(chainId).getCommonLog();
+        try {
+            Map<String, Object> params = new HashMap<>(2);
+//            params.put(Constants.VERSION_KEY_STR, "1.0");
+            params.put("chainId", chainId);
+            List<String> txHashList = new ArrayList<>();
+            for (Transaction transaction : transactions) {
+                txHashList.add(transaction.hex());
+            }
+            params.put("height", header.getHeight());
+            params.put("txList", txHashList);
+            params.put("blockTime", header.getTime());
+            params.put("packingAddress", AddressTool.getStringAddressByBytes(header.getPackingAddress(chainId)));
+            BlockExtendsData data = new BlockExtendsData();
+            data.parse(new NulsByteBuffer(header.getExtend()));
+            params.put("stateRoot", HexUtil.encode(data.getStateRoot()));
+            BlockExtendsData lastData = new BlockExtendsData();
+            lastData.parse(new NulsByteBuffer(lastHeader.getExtend()));
+            params.put("preStateRoot", HexUtil.encode(lastData.getStateRoot()));
+            Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.TX.abbr, "tx_batchVerify", params);
+            if (response.isSuccess()) {
+                Map responseData = (Map) response.getResponseData();
+                Map v = (Map) responseData.get("tx_batchVerify");
+                return (Boolean) v.get("value");
+            }
+            return false;
+        } catch (Exception e) {
+            e.printStackTrace();
+            commonLog.error(e);
+            return false;
+        }
+    }
+
+    /**
+     * 批量保存交易
+     *
+     * @param chainId       链Id/chain id
+     * @param blockHeaderPo
+     * @param txs
+     * @param localInit
+     * @return
+     */
+    public static boolean save(int chainId, BlockHeaderPo blockHeaderPo, List<Transaction> txs, boolean localInit) {
+        if (localInit) {
+            return saveGengsisTransaction(chainId, blockHeaderPo, txs);
+        } else {
+            return saveNormal(chainId, blockHeaderPo);
+        }
+    }
+
+    /**
+     * 批量保存交易
+     *
+     * @param chainId       链Id/chain id
+     * @param blockHeaderPo
+     * @return
+     */
+    public static boolean saveNormal(int chainId, BlockHeaderPo blockHeaderPo) {
+        NulsLogger commonLog = ContextManager.getContext(chainId).getCommonLog();
+        try {
+            Map<String, Object> params = new HashMap<>(2);
+//            params.put(Constants.VERSION_KEY_STR, "1.0");
+            params.put("chainId", chainId);
+            List<NulsDigestData> txHashList = blockHeaderPo.getTxHashList();
+            List<String> list = new ArrayList<>();
+            txHashList.forEach(e -> list.add(e.getDigestHex()));
+            params.put("txHashList", list);
+            params.put("blockHeaderHex", HexUtil.encode(BlockUtil.fromBlockHeaderPo(blockHeaderPo).serialize()));
+            Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.TX.abbr, "tx_save", params);
+            if (response.isSuccess()) {
+                Map responseData = (Map) response.getResponseData();
+                Map data = (Map) responseData.get("tx_save");
+                return (Boolean) data.get("value");
+            }
+            return false;
+        } catch (Exception e) {
+            e.printStackTrace();
+            commonLog.error(e);
+            return false;
+        }
+    }
+
+    /**
+     * 批量回滚交易
+     *
+     * @param chainId       链Id/chain id
+     * @param blockHeaderPo
+     * @return
+     */
+    public static boolean rollback(int chainId, BlockHeaderPo blockHeaderPo) {
+        NulsLogger commonLog = ContextManager.getContext(chainId).getCommonLog();
+        try {
+            Map<String, Object> params = new HashMap<>(2);
+//            params.put(Constants.VERSION_KEY_STR, "1.0");
+            params.put("chainId", chainId);
+            List<NulsDigestData> txHashList = blockHeaderPo.getTxHashList();
+            List<String> list = new ArrayList<>();
+            txHashList.forEach(e -> list.add(e.getDigestHex()));
+            params.put("txHashList", list);
+            params.put("blockHeaderHex", HexUtil.encode(BlockUtil.fromBlockHeaderPo(blockHeaderPo).serialize()));
+            Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.TX.abbr, "tx_rollback", params);
+            if (response.isSuccess()) {
+                Map responseData = (Map) response.getResponseData();
+                Map data = (Map) responseData.get("tx_rollback");
+                return (Boolean) data.get("value");
+            }
+            return false;
+        } catch (Exception e) {
+            e.printStackTrace();
+            commonLog.error(e);
+            return false;
+        }
+    }
+
+    /**
+     * 批量获取已确认交易
+     *
+     * @param chainId  链Id/chain id
+     * @param hashList
+     * @return
+     * @throws IOException
+     */
+    public static List<Transaction> getConfirmedTransactions(int chainId, List<NulsDigestData> hashList) {
+        List<Transaction> transactions = new ArrayList<>();
+        NulsLogger commonLog = ContextManager.getContext(chainId).getCommonLog();
+        try {
+            Map<String, Object> params = new HashMap<>(2);
+//            params.put(Constants.VERSION_KEY_STR, "1.0");
+            params.put("chainId", chainId);
+            List<String> t = new ArrayList<>();
+            hashList.forEach(e -> t.add(e.getDigestHex()));
+            params.put("txHashList", t);
+            Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.TX.abbr, "tx_getBlockTxs", params);
+            if (response.isSuccess()) {
+                Map responseData = (Map) response.getResponseData();
+                Map map = (Map) responseData.get("tx_getBlockTxs");
+                List<String> txHexList = (List<String>) map.get("txHexList");
+                if (txHexList == null || txHexList.size() == 0) {
+                    return null;
+                }
+                for (String txHex : txHexList) {
+                    Transaction transaction = new Transaction();
+                    transaction.parse(new NulsByteBuffer(HexUtil.decode(txHex)));
+                    transactions.add(transaction);
+                }
+            } else {
+                return null;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            commonLog.error(e);
+            return null;
+        }
+        return transactions;
+    }
+
+    /**
+     * 批量获取交易
+     *
+     * @param chainId  链Id/chain id
+     * @param hashList
+     * @return
+     * @throws IOException
+     */
+    public static ArrayList<Transaction> getTransactions(int chainId, List<NulsDigestData> hashList, boolean allHits) {
+        if (hashList == null || hashList.size() == 0) {
+            return null;
+        }
+        ArrayList<Transaction> transactions = new ArrayList<>();
+        NulsLogger commonLog = ContextManager.getContext(chainId).getCommonLog();
+        try {
+            Map<String, Object> params = new HashMap<>(2);
+//            params.put(Constants.VERSION_KEY_STR, "1.0");
+            params.put("chainId", chainId);
+            List<String> t = new ArrayList<>();
+            hashList.forEach(e -> t.add(e.getDigestHex()));
+            params.put("txHashList", t);
+            params.put("allHits", allHits);
+            Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.TX.abbr, "tx_getBlockTxsExtend", params);
+            if (response.isSuccess()) {
+                Map responseData = (Map) response.getResponseData();
+                Map map = (Map) responseData.get("tx_getBlockTxsExtend");
+                List<String> txHexList = (List<String>) map.get("txHexList");
+                if (txHexList == null || txHexList.size() == 0) {
+                    return null;
+                }
+                for (String txHex : txHexList) {
+                    Transaction transaction = new Transaction();
+                    transaction.parse(new NulsByteBuffer(HexUtil.decode(txHex)));
+                    transactions.add(transaction);
+                }
+            } else {
+                return null;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            commonLog.error(e);
+            return null;
+        }
+        return transactions;
+    }
+
+    /**
+     * 获取单个交易
+     *
+     * @param chainId 链Id/chain id
+     * @param hash
+     * @return
+     */
+    public static Transaction getTransaction(int chainId, NulsDigestData hash) {
+        NulsLogger commonLog = ContextManager.getContext(chainId).getCommonLog();
+        try {
+            Map<String, Object> params = new HashMap<>(2);
+//            params.put(Constants.VERSION_KEY_STR, "1.0");
+            params.put("chainId", chainId);
+            params.put("txHash", hash.getDigestHex());
+            Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.TX.abbr, "tx_getTx", params);
+            if (response.isSuccess()) {
+                Map responseData = (Map) response.getResponseData();
+                Map map = (Map) responseData.get("tx_getTx");
+                String txHex = (String) map.get("txHex");
+                if (txHex == null) {
+                    return null;
+                }
+                Transaction transaction = new Transaction();
+                transaction.parse(new NulsByteBuffer(HexUtil.decode(txHex)));
+                return transaction;
+            } else {
+                return null;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            commonLog.error(e);
+            return null;
+        }
+    }
+
+    /**
+     * 获取单个交易
+     *
+     * @param chainId 链Id/chain id
+     * @param hash
+     * @return
+     */
+    private static Transaction getConfirmedTransaction(int chainId, NulsDigestData hash) {
+        NulsLogger commonLog = ContextManager.getContext(chainId).getCommonLog();
+        try {
+            Map<String, Object> params = new HashMap<>(2);
+//            params.put(Constants.VERSION_KEY_STR, "1.0");
+            params.put("chainId", chainId);
+            params.put("txHash", hash.getDigestHex());
+            Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.TX.abbr, "tx_getConfirmedTx", params);
+            if (response.isSuccess()) {
+                Map responseData = (Map) response.getResponseData();
+                Map map = (Map) responseData.get("tx_getConfirmedTx");
+                String txHex = (String) map.get("txHex");
+                if (txHex == null) {
+                    return null;
+                }
+                Transaction transaction = new Transaction();
+                transaction.parse(new NulsByteBuffer(HexUtil.decode(txHex)));
+                return transaction;
+            } else {
+                return null;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            commonLog.error(e);
+            return null;
+        }
+    }
+
+    /**
+     * 批量保存交易
+     *
+     * @param chainId       链Id/chain id
+     * @param blockHeaderPo
+     * @return
+     */
+    public static boolean saveGengsisTransaction(int chainId, BlockHeaderPo blockHeaderPo, List<Transaction> txs) {
+        NulsLogger commonLog = ContextManager.getContext(chainId).getCommonLog();
+        try {
+            Map<String, Object> params = new HashMap<>(2);
+//            params.put(Constants.VERSION_KEY_STR, "1.0");
+            params.put("chainId", chainId);
+            List<String> list = new ArrayList<>();
+            txs.forEach(e -> {
+                try {
+                    list.add(e.hex());
+                } catch (Exception e1) {
+                    e1.printStackTrace();
+                }
+            });
+            params.put("txHexList", list);
+            params.put("blockHeaderHex", HexUtil.encode(BlockUtil.fromBlockHeaderPo(blockHeaderPo).serialize()));
+            Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.TX.abbr, "tx_gengsisSave", params);
+            if (response.isSuccess()) {
+                Map responseData = (Map) response.getResponseData();
+                Map data = (Map) responseData.get("tx_gengsisSave");
+                return (Boolean) data.get("value");
+            }
+            return false;
+        } catch (Exception e) {
+            e.printStackTrace();
+            commonLog.error(e);
+            return false;
+        }
+    }
+}

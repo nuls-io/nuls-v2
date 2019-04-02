@@ -20,14 +20,16 @@
 
 package io.nuls.block.thread.monitor;
 
+import io.nuls.base.data.NulsDigestData;
 import io.nuls.block.constant.ChainTypeEnum;
 import io.nuls.block.constant.RunningStatusEnum;
-import io.nuls.block.manager.ChainManager;
+import io.nuls.block.manager.BlockChainManager;
 import io.nuls.block.manager.ContextManager;
 import io.nuls.block.model.Chain;
 import io.nuls.block.model.ChainContext;
 import io.nuls.tools.log.logback.NulsLogger;
 
+import java.util.LinkedList;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.concurrent.locks.StampedLock;
@@ -72,7 +74,6 @@ public class OrphanChainsMonitor implements Runnable {
                     commonLog.debug("skip process, status is " + status + ", chainId-" + chainId);
                     continue;
                 }
-
                 StampedLock lock = context.getLock();
                 long stamp = lock.tryOptimisticRead();
                 try {
@@ -81,7 +82,7 @@ public class OrphanChainsMonitor implements Runnable {
                             continue;
                         }
                         // possibly racy reads
-                        SortedSet<Chain> orphanChains = ChainManager.getOrphanChains(chainId);
+                        SortedSet<Chain> orphanChains = BlockChainManager.getOrphanChains(chainId);
                         if (!lock.validate(stamp)) {
                             continue;
                         }
@@ -98,13 +99,17 @@ public class OrphanChainsMonitor implements Runnable {
                             commonLog.info("#" + orphanChain);
                         }
                         context.setStatus(MAINTAIN_ORPHAN_CHAINS);
-                        Chain masterChain = ChainManager.getMasterChain(chainId);
-                        SortedSet<Chain> forkChains = ChainManager.getForkChains(chainId);
+                        Chain masterChain = BlockChainManager.getMasterChain(chainId);
+                        SortedSet<Chain> forkChains = BlockChainManager.getForkChains(chainId);
                         //标记、变更链属性阶段
                         for (Chain orphanChain : orphanChains) {
                             commonLog.debug("OrphanChainsMonitor-mark-begin");
                             mark(orphanChain, masterChain, forkChains, orphanChains);
                             commonLog.debug("OrphanChainsMonitor-mark-end");
+                        }
+                        //打印标记后孤儿链的类型
+                        for (Chain orphanChain : orphanChains) {
+                            commonLog.debug(orphanChain.toString());
                         }
                         //复制、清除阶段
                         SortedSet<Chain> maintainedOrphanChains = new TreeSet<>(Chain.COMPARATOR);
@@ -113,7 +118,7 @@ public class OrphanChainsMonitor implements Runnable {
                             copy(chainId, maintainedOrphanChains, orphanChain);
                             commonLog.debug("OrphanChainsMonitor-copy-end");
                         }
-                        ChainManager.setOrphanChains(chainId, maintainedOrphanChains);
+                        BlockChainManager.setOrphanChains(chainId, maintainedOrphanChains);
                         forkChains.forEach(e -> e.setType(ChainTypeEnum.FORK));
                         maintainedOrphanChains.forEach(e -> e.setType(ChainTypeEnum.ORPHAN));
                         break;
@@ -133,12 +138,21 @@ public class OrphanChainsMonitor implements Runnable {
     }
 
     private void copy(Integer chainId, SortedSet<Chain> maintainedOrphanChains, Chain orphanChain) {
-        //如果标记为重复,orphanChain不会复制到新的孤儿链集合,也不会进入分叉链集合,所有orphanChain的直接子链标记为ChainTypeEnum.DUPLICATE
-        if (orphanChain.getType().equals(ChainTypeEnum.DUPLICATE)) {
-            orphanChain.getSons().forEach(e -> e.setType(ChainTypeEnum.DUPLICATE));
+        //如果标记为主链重复,orphanChain不会复制到新的孤儿链集合,也不会进入分叉链集合,所有orphanChain的直接子链标记为ChainTypeEnum.MASTER_FORK
+        if (orphanChain.getType().equals(ChainTypeEnum.MASTER_DUPLICATE)) {
+            orphanChain.getSons().forEach(e -> e.setType(ChainTypeEnum.MASTER_FORK));
             return;
         }
-
+        //如果标记为分叉链重复,orphanChain不会复制到新的孤儿链集合,也不会进入分叉链集合,所有orphanChain的直接子链标记为ChainTypeEnum.FORK_FORK
+        if (orphanChain.getType().equals(ChainTypeEnum.FORK_DUPLICATE)) {
+            orphanChain.getSons().forEach(e -> e.setType(ChainTypeEnum.FORK_FORK));
+            return;
+        }
+        //如果标记为孤儿链重复,orphanChain不会复制到新的孤儿链集合,也不会进入分叉链集合,所有orphanChain的直接子链标记为ChainTypeEnum.ORPHAN_FORK
+        if (orphanChain.getType().equals(ChainTypeEnum.ORPHAN_DUPLICATE)) {
+            orphanChain.getSons().forEach(e -> e.setType(ChainTypeEnum.ORPHAN_FORK));
+            return;
+        }
         //如果标记为与主链相连,orphanChain不会复制到新的孤儿链集合,也不会进入分叉链集合,但是所有orphanChain的直接子链标记为ChainTypeEnum.MASTER_FORK
         if (orphanChain.getType().equals(ChainTypeEnum.MASTER_APPEND)) {
             orphanChain.getSons().forEach(e -> e.setType(ChainTypeEnum.MASTER_FORK));
@@ -146,11 +160,10 @@ public class OrphanChainsMonitor implements Runnable {
         }
         //如果标记为从主链分叉,orphanChain不会复制到新的孤儿链集合,但是会进入分叉链集合,所有orphanChain的直接子链标记为ChainTypeEnum.FORK_FORK
         if (orphanChain.getType().equals(ChainTypeEnum.MASTER_FORK)) {
-            ChainManager.addForkChain(chainId, orphanChain);
+            BlockChainManager.addForkChain(chainId, orphanChain);
             orphanChain.getSons().forEach(e -> e.setType(ChainTypeEnum.FORK_FORK));
             return;
         }
-
         //如果标记为与分叉链相连,orphanChain不会复制到新的孤儿链集合,也不会进入分叉链集合,但是所有orphanChain的直接子链标记为ChainTypeEnum.FORK_FORK
         if (orphanChain.getType().equals(ChainTypeEnum.FORK_APPEND)) {
             orphanChain.getSons().forEach(e -> e.setType(ChainTypeEnum.FORK_FORK));
@@ -158,22 +171,19 @@ public class OrphanChainsMonitor implements Runnable {
         }
         //如果标记为从分叉链分叉,orphanChain不会复制到新的孤儿链集合,但是会进入分叉链集合,所有orphanChain的直接子链标记为ChainTypeEnum.FORK_FORK
         if (orphanChain.getType().equals(ChainTypeEnum.FORK_FORK)) {
-            ChainManager.addForkChain(chainId, orphanChain);
+            BlockChainManager.addForkChain(chainId, orphanChain);
             orphanChain.getSons().forEach(e -> e.setType(ChainTypeEnum.FORK_FORK));
             return;
         }
-
         //如果标记为与孤儿链相连,不会复制到新的孤儿链集合,所有orphanChain的直接子链会复制到新的孤儿链集合,类型不变
         if (orphanChain.getType().equals(ChainTypeEnum.ORPHAN_APPEND)) {
             return;
         }
-
         //如果标记为与孤儿链分叉,会复制到新的孤儿链集合,所有orphanChain的直接子链会复制到新的孤儿链集合,类型不变
         if (orphanChain.getType().equals(ChainTypeEnum.ORPHAN_FORK)) {
             maintainedOrphanChains.add(orphanChain);
             return;
         }
-
         //如果标记为孤儿链(未变化),或者从孤儿链分叉,复制到新的孤儿链集合
         if (orphanChain.getType().equals(ChainTypeEnum.ORPHAN)) {
             maintainedOrphanChains.add(orphanChain);
@@ -199,9 +209,9 @@ public class OrphanChainsMonitor implements Runnable {
             orphanChain.setType(ChainTypeEnum.MASTER_APPEND);
             return;
         }
-        //2.判断是否从主链重复
+        //2.判断是否与主链重复
         if (orphanChain.getParent() == null && tryDuplicate(masterChain, orphanChain)) {
-            orphanChain.setType(ChainTypeEnum.DUPLICATE);
+            orphanChain.setType(ChainTypeEnum.MASTER_DUPLICATE);
             return;
         }
         //3.判断是否从主链分叉
@@ -209,7 +219,6 @@ public class OrphanChainsMonitor implements Runnable {
             orphanChain.setType(ChainTypeEnum.MASTER_FORK);
             return;
         }
-
         for (Chain forkChain : forkChains) {
             //4.判断与分叉链是否相连
             if (orphanChain.getParent() == null && tryAppend(forkChain, orphanChain)) {
@@ -218,7 +227,7 @@ public class OrphanChainsMonitor implements Runnable {
             }
             //5.判断与分叉链是否重复
             if (orphanChain.getParent() == null && tryDuplicate(forkChain, orphanChain)) {
-                orphanChain.setType(ChainTypeEnum.DUPLICATE);
+                orphanChain.setType(ChainTypeEnum.FORK_DUPLICATE);
                 return;
             }
             //6.判断是否从分叉链分叉
@@ -227,7 +236,6 @@ public class OrphanChainsMonitor implements Runnable {
                 return;
             }
         }
-
         for (Chain anotherOrphanChain : orphanChains) {
             //排除自身
             if (anotherOrphanChain.equals(orphanChain)) {
@@ -242,17 +250,15 @@ public class OrphanChainsMonitor implements Runnable {
                 orphanChain.setType(ChainTypeEnum.ORPHAN_APPEND);
                 return;
             }
-
             //8.判断与孤儿链是否重复
             if (anotherOrphanChain.getParent() == null && tryDuplicate(orphanChain, anotherOrphanChain)) {
-                anotherOrphanChain.setType(ChainTypeEnum.DUPLICATE);
+                anotherOrphanChain.setType(ChainTypeEnum.ORPHAN_DUPLICATE);
                 return;
             }
             if (orphanChain.getParent() == null && tryDuplicate(anotherOrphanChain, orphanChain)) {
-                orphanChain.setType(ChainTypeEnum.DUPLICATE);
+                orphanChain.setType(ChainTypeEnum.ORPHAN_DUPLICATE);
                 return;
             }
-
             //9.判断是否从孤儿链分叉
             if (anotherOrphanChain.getParent() == null && tryFork(orphanChain, anotherOrphanChain)) {
                 anotherOrphanChain.setType(ChainTypeEnum.ORPHAN_FORK);
@@ -275,7 +281,7 @@ public class OrphanChainsMonitor implements Runnable {
      */
     private boolean tryAppend(Chain mainChain, Chain subChain) {
         if (mainChain.getEndHeight() + 1 == subChain.getStartHeight() && mainChain.getEndHash().equals(subChain.getPreviousHash())) {
-            return ChainManager.append(mainChain, subChain);
+            return BlockChainManager.append(mainChain, subChain);
         }
         return false;
     }
@@ -290,7 +296,7 @@ public class OrphanChainsMonitor implements Runnable {
      */
     private boolean tryFork(Chain mainChain, Chain subChain) {
         if (mainChain.getHashList().contains(subChain.getPreviousHash())) {
-            return ChainManager.fork(mainChain, subChain);
+            return BlockChainManager.fork(mainChain, subChain);
         }
         return false;
     }
@@ -303,7 +309,8 @@ public class OrphanChainsMonitor implements Runnable {
      * @return
      */
     private boolean tryDuplicate(Chain mainChain, Chain subChain) {
-        return mainChain.getHashList().contains(subChain.getEndHash());
+        LinkedList<NulsDigestData> mainChainHashList = mainChain.getHashList();
+        return mainChainHashList.contains(subChain.getEndHash()) && mainChainHashList.contains(subChain.getStartHash());
     }
 
 }

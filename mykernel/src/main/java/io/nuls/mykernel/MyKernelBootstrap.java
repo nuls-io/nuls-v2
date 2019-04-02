@@ -20,13 +20,16 @@
 
 package io.nuls.mykernel;
 
+import ch.qos.logback.classic.Level;
 import io.nuls.rpc.info.HostInfo;
 import io.nuls.rpc.info.NoUse;
-import io.nuls.rpc.netty.channel.manager.ConnectManager;
+import io.nuls.rpc.modulebootstrap.NulsRpcModuleBootstrap;
+import io.nuls.tools.log.logback.LoggerBuilder;
+import io.nuls.tools.log.logback.NulsLogger;
+import io.nuls.tools.model.StringUtils;
 import io.nuls.tools.parse.config.IniEntity;
 import io.nuls.tools.thread.ThreadUtils;
 import lombok.Cleanup;
-import lombok.extern.slf4j.Slf4j;
 import org.ini4j.Config;
 import org.ini4j.Ini;
 
@@ -37,7 +40,6 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -47,30 +49,22 @@ import java.util.concurrent.TimeUnit;
  * @version 1.0
  * @date 18-11-8 上午10:20
  */
-@Slf4j
 public class MyKernelBootstrap {
 
     private static List<String> MODULE_STOP_LIST_SCRIPT = new ArrayList<>();
 
+    static String[] args;
+
+    static NulsLogger log = LoggerBuilder.getLogger("kernel", Level.INFO);
+
     public static void main(String[] args) throws Exception {
+        NulsRpcModuleBootstrap.printLogo("/logo");
         System.setProperty("io.netty.tryReflectionSetAccessible", "true");
         //增加程序结束的钩子，监听到主线程停止时，调用./stop.sh停止所有的子模块
-        Runtime.getRuntime().addShutdownHook(new Thread(()->{
-            log.info("jvm shutdown");
-            log.info("停止子模块");
-            log.info("停止脚本列表");
-            MODULE_STOP_LIST_SCRIPT.stream().forEach(log::info);
-            MODULE_STOP_LIST_SCRIPT.stream().forEach(stop->{
-                try {
-                    printRuntimeConsole(Runtime.getRuntime().exec(stop));
-                    log.info("停止子模块:{}",stop);
-                } catch (IOException e) {
-                    log.error("调用脚本停止模块出现异常：{}",stop);
-                }
-            });
-        }));
+        MyKernelBootstrap.args = args;
         startOtherModule(args);
-        NoUse.mockKernel();
+        int port = NoUse.mockKernel();
+        log.info("MYKERNEL STARTED. PORT:{}",port);
     }
 
     /**
@@ -82,6 +76,20 @@ public class MyKernelBootstrap {
     private static void startOtherModule(String[] args) {
         //启动时第一个参数值为"startModule"时启动所有子模块
         if (args.length > 0 && "startModule".equals(args[0])) {
+            Runtime.getRuntime().addShutdownHook(new Thread(()->{
+                log.info("jvm shutdown");
+                log.info("停止子模块");
+                log.info("停止脚本列表");
+                MODULE_STOP_LIST_SCRIPT.stream().forEach(log::info);
+                MODULE_STOP_LIST_SCRIPT.stream().forEach(stop->{
+                    try {
+                        printRuntimeConsole(Runtime.getRuntime().exec(stop));
+                        log.info("停止子模块:{}",stop);
+                    } catch (IOException e) {
+                        log.error("调用脚本停止模块出现异常：{}",stop);
+                    }
+                });
+            }));
             ThreadUtils.createAndRunThread("startModule",()->{
                 try {
                     //等待mykernel启动完毕
@@ -151,7 +159,12 @@ public class MyKernelBootstrap {
                     process = Runtime.getRuntime().exec(
                             modules.getAbsolutePath() + File.separator + "start.sh "
                                     + " --jre " + System.getProperty("java.home")
-                                    + " --managerurl " + ""+ HostInfo.getLocalIP()+":8887/ws"
+                                    + " --managerurl " + "ws://"+ HostInfo.getLocalIP()+":8887/ws "
+                                    + (StringUtils.isNotBlank(System.getProperty("log.path")) ? " --logpath " + System.getProperty("log.path") : "")
+                                    + (StringUtils.isNotBlank(System.getProperty("DataPath")) ? " --datapath " + System.getProperty("DataPath") : "")
+                                    + (StringUtils.isNotBlank(System.getProperty("debug")) ? " --debug " : "")
+                                    + (args.length > 2 ? " --config " + args[2] : "")
+                                    + " -r "
                     );
                     synchronized (MODULE_STOP_LIST_SCRIPT){
                         MODULE_STOP_LIST_SCRIPT.add(modules.getAbsolutePath() + File.separator + "stop.sh ");

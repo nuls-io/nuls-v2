@@ -23,19 +23,14 @@
 package io.nuls.api.utils;
 
 import io.nuls.api.ApiContext;
-import io.nuls.api.constant.Constant;
-import io.nuls.api.manager.ChainManager;
-import io.nuls.api.model.po.config.ConfigBean;
-import io.nuls.api.service.ConfigStorageService;
-import io.nuls.tools.core.ioc.SpringLiteContext;
+import io.nuls.api.constant.ApiConstant;
 import io.nuls.tools.io.IoUtils;
 import io.nuls.tools.parse.JSONUtils;
 import io.nuls.tools.parse.config.ConfigItem;
 
 import java.util.List;
-import java.util.Map;
 
-import static io.nuls.api.constant.Constant.MODULES_CONFIG_FILE;
+import static io.nuls.api.constant.ApiConstant.MODULES_CONFIG_FILE;
 
 /**
  * 配置加载器
@@ -64,28 +59,31 @@ public class ConfigLoader {
 //        }
 //    }
     public static void load() throws Exception {
-        String configJson = IoUtils.read(MODULES_CONFIG_FILE);
-        List<ConfigItem> configItems = JSONUtils.json2list(configJson, ConfigItem.class);
+//        String configJson = IoUtils.read(MODULES_CONFIG_FILE);
+//        List<ConfigItem> configItems = JSONUtils.json2list(configJson, ConfigItem.class);
+//
+//        for (ConfigItem item : configItems) {
+//            if (item.getName().equals(ApiConstant.CHAIN_ID)) {
+//                ApiContext.defaultChainId = Integer.parseInt(item.getValue());
+//            } else if (item.getName().equals(ApiConstant.ASSET_ID)) {
+//                ApiContext.defaultAssetId = Integer.parseInt(item.getValue());
+//            } else if (item.getName().equals(ApiConstant.DB_IP)) {
+//                ApiContext.dbIp = item.getValue();
+//            } else if (item.getName().equals(ApiConstant.DB_PORT)) {
+//                ApiContext.port = Integer.parseInt(item.getValue());
+//            }
+//        }
 
-        for (ConfigItem item : configItems) {
-            if (item.getName().equals(Constant.CHAIN_ID)) {
-                ApiContext.defaultChainId = Integer.parseInt(item.getValue());
-            } else if (item.getName().equals(Constant.ASSET_ID)) {
-                ApiContext.defaultAssetId = Integer.parseInt(item.getValue());
-            } else if (item.getName().equals(Constant.DB_IP)) {
-                ApiContext.dbIp = item.getValue();
-            } else if (item.getName().equals(Constant.DB_PORT)) {
-                ApiContext.port = Integer.parseInt(item.getValue());
-            }
-        }
+//        ApiContext.SEED_NODE_ADDRESS.add("5MR_2CVzGriCSBRf9KCFqPW4mq26uEK5Vig");
+//        ApiContext.SEED_NODE_ADDRESS.add("5MR_2CfTWAk7qwYyuzU76q9zrR54txuthNn");
 
 //        ConfigBean bean = new ConfigBean();
 //        for (ConfigItem item : configItems) {
-//            if (item.getName().equals(Constant.CHAIN_ID)) {
+//            if (item.getName().equals(ApiConstant.CHAIN_ID)) {
 //                bean.setChainId(Integer.parseInt(item.getValue()));
-//            } else if (item.getName().equals(Constant.DB_IP)) {
+//            } else if (item.getName().equals(ApiConstant.DB_IP)) {
 //                bean.setDbIp(item.getValue());
-//            } else if (item.getName().equals(Constant.DB_PORT)) {
+//            } else if (item.getName().equals(ApiConstant.DB_PORT)) {
 //                bean.setPort(Integer.parseInt(item.getValue()));
 //            }
 //        }

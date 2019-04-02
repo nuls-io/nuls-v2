@@ -12,8 +12,10 @@ import io.nuls.tools.log.logback.NulsLogger;
  * 2018/12/18
  * */
 public class Log {
-    private static final String BASIC_NAME = "common/nuls";
-    private static final NulsLogger BASIC_LOGGER = LoggerBuilder.getLogger(BASIC_NAME, Level.DEBUG);
+
+    public static final String BASIC_NAME = "common";
+
+    public static NulsLogger BASIC_LOGGER = LoggerBuilder.getLogger(BASIC_NAME, Level.DEBUG);
 
     /**
      * 提供debug级别基本的日志输出
