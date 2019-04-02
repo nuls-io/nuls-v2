@@ -665,6 +665,13 @@ public class TxServiceImpl implements TxService {
                     }
                     continue;
                 }
+                //从已确认的交易中进行重复交易判断
+                TransactionConfirmedPO txConfirmed = confirmedTxService.getConfirmedTransaction(chain, tx.getHash());
+                if (txConfirmed != null) {
+                    nulsLogger.debug("丢弃已确认过交易,txHash:{}, - type:{}, - time:{}", tx.getHash().getDigestHex(), tx.getType(), tx.getTime());
+                    continue;
+                }
+
                 TxWrapper txWrapper = new TxWrapper(tx, index);
 
                 long txSize = tx.size();
@@ -696,8 +703,8 @@ public class TxServiceImpl implements TxService {
                     }
                     continue;
                 }
-                //从已确认的交易中进行重复交易判断
-                TransactionConfirmedPO txConfirmed = confirmedTxService.getConfirmedTransaction(chain, tx.getHash());
+                //再次重复交易判断
+                txConfirmed = confirmedTxService.getConfirmedTransaction(chain, tx.getHash());
                 if (txConfirmed != null) {
                     nulsLogger.debug("丢弃已确认过交易,txHash:{}, - type:{}, - time:{}", tx.getHash().getDigestHex(), tx.getType(), tx.getTime());
                     continue;
