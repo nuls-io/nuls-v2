@@ -319,6 +319,10 @@ public class TransactionServiceImpl implements TransactionService {
         try {
             LockerUtil.BLOCK_SYNC_LOCKER.lock();
             long currentDbHeight = repository.getBlockHeight(addressChainId);
+            if ((blockHeight - currentDbHeight) == 1) {
+                logger(addressChainId).debug("addressChainId ={},blockHeight={},ledgerBlockHeight={}", addressChainId, blockHeight, currentDbHeight);
+                return true;
+            }
             if (blockHeight != currentDbHeight) {
                 //高度不一致，数据出问题了
                 logger(addressChainId).error("addressChainId ={},blockHeight={},ledgerBlockHeight={}", addressChainId, blockHeight, currentDbHeight);
