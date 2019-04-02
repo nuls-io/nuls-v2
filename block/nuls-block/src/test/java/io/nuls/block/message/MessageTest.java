@@ -70,7 +70,7 @@ public class MessageTest {
     public void testBlockMessage() throws Exception {
         BlockMessage message = new BlockMessage();
 
-        message.setBlock(GenesisBlock.getInstance());
+        message.setBlock(GenesisBlock.getInstance(0));
         String hex = HexUtil.encode(message.serialize());
         System.out.println(hex);
 
