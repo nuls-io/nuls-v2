@@ -24,6 +24,7 @@
  */
 package io.nuls.transaction.service.impl;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.basic.TransactionFeeCalculator;
 import io.nuls.base.constant.TxStatusEnum;
@@ -38,6 +39,7 @@ import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.log.logback.NulsLogger;
 import io.nuls.tools.model.BigIntegerUtils;
+import io.nuls.tools.parse.JSONUtils;
 import io.nuls.transaction.cache.PackablePool;
 import io.nuls.transaction.constant.TxConfig;
 import io.nuls.transaction.constant.TxConstant;
@@ -740,7 +742,7 @@ public class TxServiceImpl implements TxService {
                 } else {
                     try {
                         Map<String, Object> map = ContractCall.contractBatchEnd(chain, blockHeight);
-                        List<String> scNewList = (List<String>) map.get("txHexList");
+                        List<String> scNewList = (List<String>) map.get("txList");
                         if (null != scNewList) {
                             contractGenerateTxs.addAll(scNewList);
                         }
@@ -906,7 +908,7 @@ public class TxServiceImpl implements TxService {
             if (null == txHashList || txHashList.size() == 0) {
                 //模块统一验证没有冲突的，从map中干掉
                 it.remove();
-                break;
+                continue;
             }
 
             /**冲突检测有不通过的, 执行清除和未确认回滚 从packingTxList删除, 放弃分组?*/
@@ -922,6 +924,20 @@ public class TxServiceImpl implements TxService {
                 }
             }
         }
+
+        Iterator<Map.Entry<TxRegister, List<String>>> its = moduleVerifyMap.entrySet().iterator();
+        while (its.hasNext()) {
+            Map.Entry<TxRegister, List<String>> entry = its.next();
+            try {
+                chain.getLoggerMap().get(TxConstant.LOG_TX).debug("key:{}", JSONUtils.obj2json(entry.getKey()));
+                for (String str : entry.getValue()){
+                chain.getLoggerMap().get(TxConstant.LOG_TX).debug("value:{}", str);
+                }
+            } catch (JsonProcessingException e) {
+                e.printStackTrace();
+            }
+        }
+
         if (moduleVerifyMap.isEmpty()) {
             return true;
         }
