@@ -360,7 +360,7 @@ packageModule() {
 	if [ ! -d ./$1 ]; then
 		return 0
 	fi
-	if [ `pwd` == "${MODULES_PATH}" ]; then
+	if [ `pwd` == "${RELEASE_PATH}" ]; then
 		return 0;
 	fi
 	cd ./$1

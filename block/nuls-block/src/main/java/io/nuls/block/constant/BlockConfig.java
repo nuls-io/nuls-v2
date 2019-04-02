@@ -13,7 +13,7 @@ import java.io.File;
  * @version 1.0
  * @date 18-11-20 上午11:01
  */
-@Configuration(persistDomain = "block")
+@Configuration(domain = "block")
 public class BlockConfig {
 
     /**

@@ -8,7 +8,7 @@ import io.nuls.tools.core.annotation.Value;
  * @Time: 2019-03-14 14:11
  * @Description: 配置文件
  */
-@Configuration(persistDomain = "ledger")
+@Configuration(domain = "ledger")
 public class LedgerConfig {
     private String language;
     private String encoding;

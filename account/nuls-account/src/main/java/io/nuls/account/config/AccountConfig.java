@@ -11,7 +11,7 @@ import io.nuls.tools.core.annotation.Value;
  * @Description:
  * 配置文件
  */
-@Configuration(persistDomain = "account")
+@Configuration(domain = "account")
 @Persist
 public class AccountConfig {
 
@@ -41,7 +41,6 @@ public class AccountConfig {
      */
     @Value("DataPath")
     private String dataPath;
-
 
     private ConfigBean chainConfig;
 

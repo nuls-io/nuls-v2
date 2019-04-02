@@ -16,7 +16,7 @@ import lombok.Data;
  * @Time: 2019-03-20 14:31
  * @Description: 功能描述
  */
-@Configuration(persistDomain = "test")
+@Configuration(domain = "test")
 @Data
 public class Config implements InitializingBean {
 
