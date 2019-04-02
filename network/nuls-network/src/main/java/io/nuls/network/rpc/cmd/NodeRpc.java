@@ -223,10 +223,10 @@ public class NodeRpc extends BaseCmd {
     @Parameter(parameterName = "blockHeight", parameterType = "long")
     @Parameter(parameterName = "blockHash", parameterType = "String")
     public Response updateNodeInfo(Map params) {
-        if (1 == networkConfig.getUpdatePeerInfoType()){
-            return failed("use network module protocol update node Info");
-        }
-            int chainId = Integer.valueOf(String.valueOf(params.get("chainId")));
+//        if (1 == networkConfig.getUpdatePeerInfoType()){
+//            return failed("use network module protocol update node Info");
+//        }
+        int chainId = Integer.valueOf(String.valueOf(params.get("chainId")));
         String nodeId = String.valueOf(params.get("nodeId"));
         long blockHeight = Long.valueOf(String.valueOf(params.get("blockHeight")));
         String blockHash = String.valueOf(params.get("blockHash"));
