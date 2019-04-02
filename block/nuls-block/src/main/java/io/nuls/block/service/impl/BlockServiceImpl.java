@@ -203,11 +203,11 @@ public class BlockServiceImpl implements BlockService {
 
     private boolean saveBlock(int chainId, Block block, boolean localInit, int download, boolean needLock, boolean broadcast, boolean forward) {
         long startTime = System.nanoTime();
-        NulsLogger commonLog = ContextManager.getContext(chainId).getCommonLog();
+        ChainContext context = ContextManager.getContext(chainId);
+        NulsLogger commonLog = context.getCommonLog();
         BlockHeader header = block.getHeader();
         long height = header.getHeight();
         NulsDigestData hash = header.getHash();
-        ChainContext context = ContextManager.getContext(chainId);
         StampedLock lock = context.getLock();
         long l = 0;
         if (needLock) {
@@ -348,13 +348,13 @@ public class BlockServiceImpl implements BlockService {
     @Override
     public boolean rollbackBlock(int chainId, BlockHeaderPo blockHeaderPo, boolean needLock) {
         long startTime = System.nanoTime();
-        NulsLogger commonLog = ContextManager.getContext(chainId).getCommonLog();
+        ChainContext context = ContextManager.getContext(chainId);
+        NulsLogger commonLog = context.getCommonLog();
         long height = blockHeaderPo.getHeight();
         if (height == 0) {
             commonLog.warn("can't rollback GenesisBlock!chainId-" + chainId);
             return true;
         }
-        ChainContext context = ContextManager.getContext(chainId);
         StampedLock lock = context.getLock();
         long l = 0;
         if (needLock) {
@@ -363,7 +363,8 @@ public class BlockServiceImpl implements BlockService {
         try {
             BlockHeader blockHeader = BlockUtil.fromBlockHeaderPo(blockHeaderPo);
             long startTime1 = System.nanoTime();
-            if (!ProtocolUtil.rollbackNotice(chainId, blockHeader)) {
+            blockHeaderPo.setComplete(false);
+            if (!blockStorageService.save(chainId, blockHeaderPo) || !ProtocolUtil.rollbackNotice(chainId, blockHeader)) {
                 commonLog.error("ProtocolUtil rollbackNotice fail!chainId-" + chainId + ",height-" + height);
                 return false;
             }
@@ -394,6 +395,7 @@ public class BlockServiceImpl implements BlockService {
 
             long startTime3 = System.nanoTime();
             if (!blockStorageService.remove(chainId, height)) {
+                blockHeaderPo.setComplete(true);
                 if (!blockStorageService.save(chainId, blockHeaderPo)) {
                     throw new DbRuntimeException("blockStorageService save error!");
                 }
@@ -413,6 +415,7 @@ public class BlockServiceImpl implements BlockService {
                 if (!blockStorageService.setLatestHeight(chainId, height)) {
                     throw new DbRuntimeException("rollback setLatestHeight error!");
                 }
+                blockHeaderPo.setComplete(true);
                 if (!blockStorageService.save(chainId, blockHeaderPo)) {
                     throw new DbRuntimeException("blockStorageService save error!");
                 }
