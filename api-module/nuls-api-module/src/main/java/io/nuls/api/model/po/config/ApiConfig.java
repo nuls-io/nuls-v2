@@ -2,7 +2,7 @@ package io.nuls.api.model.po.config;
 
 import io.nuls.tools.core.annotation.Configuration;
 
-@Configuration(persistDomain = "apiModule")
+@Configuration(domain = "apiModule")
 public class ApiConfig {
 
     /**

@@ -11,7 +11,7 @@ import java.util.List;
  * @Time: 2019-03-14 14:11
  * @Description: 配置文件
  */
-@Configuration(persistDomain = "network")
+@Configuration(domain = "network")
 public class NetworkConfig {
     private String logLevel = "DEBUG";
     private int chainId;

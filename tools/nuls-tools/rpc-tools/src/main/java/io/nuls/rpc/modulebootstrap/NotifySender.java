@@ -23,9 +23,6 @@ import java.util.concurrent.TimeUnit;
 @Component
 public class NotifySender implements Runnable, InitializingBean {
 
-    @Value("APP_NAME")
-    private String appName;
-
     ScheduledThreadPoolExecutor executor = ThreadUtils.createScheduledThreadPool(1, new NulsThreadFactory("notify-sender"));
 
     Queue<Callable<Boolean>> notifyQueue = new ConcurrentLinkedQueue<>();

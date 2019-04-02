@@ -11,7 +11,7 @@ import java.io.File;
  * @author: Charlie
  * @date: 2019/03/14
  */
-@Configuration(persistDomain = "transaction")
+@Configuration(domain = "transaction")
 public class TxConfig {
     /** 当前链默认配置*/
     private ConfigBean chainConfig;

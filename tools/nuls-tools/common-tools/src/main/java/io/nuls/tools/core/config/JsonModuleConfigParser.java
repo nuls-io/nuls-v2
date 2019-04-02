@@ -20,7 +20,7 @@ public class JsonModuleConfigParser implements ModuleConfigParser {
     }
 
     @Override
-    public Map<String, ConfigurationLoader.ConfigItem> parse(String configFile,InputStream inputStream) {
+    public Map<String,Map<String, ConfigurationLoader.ConfigItem>> parse(String configFile,InputStream inputStream) {
         try {
             String configJson = IoUtils.readRealPath(inputStream);
             Map<String,Object> data = JSONUtils.json2map(configJson);
@@ -36,7 +36,7 @@ public class JsonModuleConfigParser implements ModuleConfigParser {
                     throw new RuntimeException("json配置文件解析错误：" + key);
                 }
             });
-            return res;
+            return Map.of(ConfigurationLoader.GLOBAL_DOMAIN,res);
         } catch (Exception e) {
             throw new RuntimeException("json配置文件解析错误");
         }
