@@ -104,6 +104,8 @@ public class RoundManager {
             round = roundList.get(i);
             if (round.getIndex() == roundIndex) {
                 return round;
+            }else if(round.getIndex() < roundIndex){
+                break;
             }
         }
         return null;
@@ -306,9 +308,13 @@ public class RoundManager {
             startTime = bestRoundData.getRoundStartTime();
         } else {
             long diffTime = nowTime - bestRoundEndTime;
-            int diffRoundCount = (int) (diffTime / (bestRoundData.getConsensusMemberCount() * packingInterval));
+            int consensusMemberCount = bestRoundData.getConsensusMemberCount();
+            if(bestBlockHeader.getHeight() == 0){
+                consensusMemberCount = chain.getConfig().getSeedNodes().split(",").length;
+            }
+            int diffRoundCount = (int) (diffTime / (consensusMemberCount * packingInterval));
             index = bestRoundData.getRoundIndex() + diffRoundCount + 1;
-            startTime = bestRoundEndTime + diffRoundCount * bestRoundData.getConsensusMemberCount() * packingInterval;
+            startTime = bestRoundEndTime + diffRoundCount * consensusMemberCount * packingInterval;
         }
         return calculationRound(chain,startBlockHeader, index, startTime);
     }

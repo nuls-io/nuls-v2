@@ -105,6 +105,9 @@ public class BlockValidator {
          chain.getLoggerMap().get(ConsensusConstant.BASIC_LOGGER_NAME).error("new block roundData error, block height : " + blockHeader.getHeight() + " , hash :" + blockHeader.getHash());
          throw new NulsException(ConsensusErrorCode.BLOCK_ROUND_VALIDATE_ERROR);
       }
+      if(chain.getNewestHeader().getHeight() == 0){
+         chain.getRoundList().clear();
+      }
       MeetingRound currentRound = roundManager.getCurrentRound(chain);
       boolean hasChangeRound = false;
 
