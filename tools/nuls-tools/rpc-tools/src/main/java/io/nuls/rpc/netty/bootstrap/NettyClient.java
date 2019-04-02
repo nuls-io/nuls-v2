@@ -43,7 +43,7 @@ public class NettyClient {
             final ClientHandler handler =
                     new ClientHandler(
                             WebSocketClientHandshakerFactory.newHandshaker(
-                                    webSocketURI, WebSocketVersion.V13, null, true, new DefaultHttpHeaders(), 65536 * 10));
+                                    webSocketURI, WebSocketVersion.V13, null, true, new DefaultHttpHeaders(), 10 * 1024 * 1024));
             EventLoopGroup group = new NioEventLoopGroup();
             Bootstrap b = new Bootstrap();
             b.group(group)
@@ -54,7 +54,7 @@ public class NettyClient {
                             ChannelPipeline p = ch.pipeline();
                             p.addLast(
                                     new HttpClientCodec(),
-                                    new HttpObjectAggregator(1024 * 1024 * 10),
+                                    new HttpObjectAggregator(10 * 1024 * 1024),
                                     WebSocketClientCompressionHandler.INSTANCE,
                                     handler);
                         }

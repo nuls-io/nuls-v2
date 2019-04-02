@@ -47,7 +47,7 @@ public class BlockConsumer implements Callable<Boolean> {
     private BlockingQueue<Block> queue;
     private BlockService blockService;
 
-    public BlockConsumer(int chainId, BlockingQueue<Block> queue, BlockDownloaderParams params) {
+    BlockConsumer(int chainId, BlockingQueue<Block> queue, BlockDownloaderParams params) {
         this.params = params;
         this.chainId = chainId;
         this.queue = queue;

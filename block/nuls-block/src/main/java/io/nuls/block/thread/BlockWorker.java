@@ -54,7 +54,7 @@ public class BlockWorker implements Callable<BlockDownLoadResult> {
     private Node node;
     private HeightRangeMessage message;
 
-    public BlockWorker(long startHeight, int size, int chainId, Node node, HeightRangeMessage message) {
+    BlockWorker(long startHeight, int size, int chainId, Node node, HeightRangeMessage message) {
         this.startHeight = startHeight;
         this.size = size;
         this.chainId = chainId;

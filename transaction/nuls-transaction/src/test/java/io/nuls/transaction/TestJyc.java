@@ -420,8 +420,8 @@ public class TestJyc {
             BigInteger balance = LedgerCall.getBalance(chain, AddressTool.getAddress(address23), chainId, assetId);
             Log.debug(address23 + "-----balance:{}", balance);
         }
-        int total = 10_000;
-        int count = 100;
+        int total = 1000_000;
+        int count = 1000;
         List<String> accountList = new ArrayList<>();
         Log.debug("##################################################");
         {
@@ -534,10 +534,10 @@ public class TestJyc {
                     Log.debug("transfer from {} to {}, hash:{}", from, to, hash);
                 }
                 Log.debug("##########" + j + " round end##########");
-                Thread.sleep(5000);
+                Thread.sleep(1000);
             }
         }
-        Thread.sleep(1200000);
+        Thread.sleep(120000);
         {
             while (true) {
                 for (Iterator<String> iterator = hashList.iterator(); iterator.hasNext(); ) {
@@ -552,6 +552,7 @@ public class TestJyc {
                 Log.debug("remain " + hashList.size() + " hash not verify");
                 Thread.sleep(10000);
             }
+            Log.debug("all txs exist");
         }
     }
 
