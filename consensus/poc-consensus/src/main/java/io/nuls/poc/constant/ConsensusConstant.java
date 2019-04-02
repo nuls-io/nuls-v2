@@ -109,7 +109,7 @@ public interface ConsensusConstant {
      * 系统运行的最小连接节点数量
      * The number of minimum connection nodes that the system runs.
      */
-    int ALIVE_MIN_NODE_COUNT = 2;
+    int ALIVE_MIN_NODE_COUNT = 1;
 
     /**
      * 同一个出块地址连续3轮发出两个相同高度，但不同hash的block，节点将会被红牌惩罚
