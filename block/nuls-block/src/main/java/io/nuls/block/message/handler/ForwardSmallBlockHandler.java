@@ -38,14 +38,14 @@ import io.nuls.rpc.model.CmdAnnotation;
 import io.nuls.rpc.model.message.Response;
 import io.nuls.rpc.util.RPCUtil;
 import io.nuls.tools.core.annotation.Component;
-import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.log.logback.NulsLogger;
 
 import java.util.Map;
 
 import static io.nuls.block.BlockBootstrap.blockConfig;
-import static io.nuls.block.constant.CommandConstant.*;
+import static io.nuls.block.constant.CommandConstant.FORWARD_SMALL_BLOCK_MESSAGE;
+import static io.nuls.block.constant.CommandConstant.GET_SMALL_BLOCK_MESSAGE;
 
 /**
  * 处理收到的{@link HashMessage},用于区块的广播与转发

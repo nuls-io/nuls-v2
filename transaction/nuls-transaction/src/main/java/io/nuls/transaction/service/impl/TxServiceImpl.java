@@ -665,6 +665,13 @@ public class TxServiceImpl implements TxService {
                     }
                     continue;
                 }
+                //从已确认的交易中进行重复交易判断
+                TransactionConfirmedPO txConfirmed = confirmedTxService.getConfirmedTransaction(chain, tx.getHash());
+                if (txConfirmed != null) {
+                    nulsLogger.debug("丢弃已确认过交易,txHash:{}, - type:{}, - time:{}", tx.getHash().getDigestHex(), tx.getType(), tx.getTime());
+                    continue;
+                }
+
                 TxWrapper txWrapper = new TxWrapper(tx, index);
 
                 long txSize = tx.size();
@@ -686,16 +693,18 @@ public class TxServiceImpl implements TxService {
                 //批量验证coinData, 单个发送
                 VerifyTxResult verifyTxResult = LedgerCall.verifyCoinData(chain, txStr, true);
                 if (!verifyTxResult.success()) {
-                    String nonce = HexUtil.encode(TxUtil.getCoinData(tx).getFrom().get(0).getNonce());
-                    nulsLogger.error("coinData打包批量验证未通过 coinData not success - code: {}, - reason:{}, - type:{}, - first coinFrom nonce:{} - txhash:{}",
-                            verifyTxResult.getCode(), verifyTxResult.getDesc(), tx.getType(), nonce, tx.getHash().getDigestHex());
+                    if (verifyTxResult.getCode() != 5) {
+                        String nonce = HexUtil.encode(TxUtil.getCoinData(tx).getFrom().get(0).getNonce());
+                        nulsLogger.error("coinData打包批量验证未通过 coinData not success - code: {}, - reason:{}, - type:{}, - first coinFrom nonce:{} - txhash:{}",
+                                verifyTxResult.getCode(), verifyTxResult.getDesc(), tx.getType(), nonce, tx.getHash().getDigestHex());
+                    }
                     if (verifyTxResult.getCode() == VerifyTxResult.ORPHAN) {
                         addOrphanTxSet(chain, orphanTxSet, txWrapper);
                     }
                     continue;
                 }
-                //从已确认的交易中进行重复交易判断
-                TransactionConfirmedPO txConfirmed = confirmedTxService.getConfirmedTransaction(chain, tx.getHash());
+                //再次重复交易判断
+                txConfirmed = confirmedTxService.getConfirmedTransaction(chain, tx.getHash());
                 if (txConfirmed != null) {
                     nulsLogger.debug("丢弃已确认过交易,txHash:{}, - type:{}, - time:{}", tx.getHash().getDigestHex(), tx.getType(), tx.getTime());
                     continue;
