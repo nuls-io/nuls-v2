@@ -18,10 +18,9 @@
  * SOFTWARE.
  */
 
-package io.nuls.block.rpc;
+package io.nuls.block.message;
 
 import io.nuls.base.data.NulsDigestData;
-import io.nuls.block.message.HashMessage;
 import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.model.message.Response;
@@ -32,12 +31,16 @@ import org.junit.Test;
 import java.util.HashMap;
 import java.util.Map;
 
+import static io.nuls.block.constant.CommandConstant.GET_BLOCKS_BY_HEIGHT_MESSAGE;
 import static io.nuls.block.constant.CommandConstant.GET_BLOCK_MESSAGE;
 
-public class GetBlockHandlerTest {
+/**
+ * 需要单节点运行起来，再执行这个测试类，测试的是消息收发逻辑
+ */
+public class MessageHandlerTest {
 
     @Test
-    public void process() throws Exception {
+    public void getBlock() throws Exception {
         Map<String, Object> params = new HashMap<>();
         params.put(Constants.VERSION_KEY_STR, "1.0");
         params.put("chainId", 1);
@@ -47,6 +50,21 @@ public class GetBlockHandlerTest {
         params.put("messageBody", HexUtil.encode(message.serialize()));
         params.put("command", GET_BLOCK_MESSAGE);
         Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.BL.abbr, GET_BLOCK_MESSAGE, params);
+        System.out.println(response);
+    }
+
+    @Test
+    public void getBlocks() throws Exception {
+        Map<String, Object> params = new HashMap<>();
+        params.put(Constants.VERSION_KEY_STR, "1.0");
+        params.put("chainId", 1);
+        params.put("nodes", "192.168.1.191:8003");
+        HeightRangeMessage message = new HeightRangeMessage();
+        message.setStartHeight(1000);
+        message.setEndHeight(1010);
+        params.put("messageBody", HexUtil.encode(message.serialize()));
+        params.put("command", GET_BLOCKS_BY_HEIGHT_MESSAGE);
+        Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.BL.abbr, GET_BLOCKS_BY_HEIGHT_MESSAGE, params);
         System.out.println(response);
     }
 }
