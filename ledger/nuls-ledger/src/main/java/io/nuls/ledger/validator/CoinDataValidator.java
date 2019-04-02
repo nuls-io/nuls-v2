@@ -281,6 +281,16 @@ public class CoinDataValidator {
         } else {
             //不存在未确认交易
             if (!accountState.getNonce().equalsIgnoreCase(fromNonce)) {
+                //如果fromnonce存储过了，则代表双花了
+                try {
+                    if (transactionService.hadCommit(accountState.getAddressChainId(), LedgerUtil.getAccountNoncesStrKey(address, accountState.getAssetChainId(), accountState.getAssetId(), fromNonce))) {
+                        return new ValidateResult(VALIDATE_DOUBLE_EXPENSES_CODE, String.format(VALIDATE_DOUBLE_EXPENSES_DESC, address,fromNonce));
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    LoggerUtil.logger(accountState.getAddressChainId()).error(e);
+                    return new ValidateResult(VALIDATE_FAIL_CODE, String.format("address={} nonce={} validate Exception.", address, fromNonce));
+                }
                 //提交的nonce 不等于 已确认的账本 nonce，则可能是孤儿交易
                 ValidateResult validateResult = new ValidateResult(VALIDATE_ORPHAN_CODE, String.format(VALIDATE_ORPHAN_DESC, address, fromNonce));
                 return validateResult;
@@ -322,7 +332,18 @@ public class CoinDataValidator {
             //从头开始处理
             if (!accountState.getNonce().equalsIgnoreCase(fromCoinNonce)) {
                 logger(chainId).error("批量校验失败(BatchValidate failed)： isValidateCommonTxBatch {}=={}=={}==nonce is error!dbNonce:{}!=fromNonce:{}", address, coinFrom.getAssetsChainId(), coinFrom.getAssetsId(), accountState.getNonce(), fromCoinNonce);
-                return new ValidateResult(VALIDATE_ORPHAN_CODE, String.format(VALIDATE_ORPHAN_DESC, address, fromCoinNonce));
+                //判断是否fromNonce是否已经存储了,如果存储了，则这笔是异常交易双花
+                try {
+                    if (transactionService.hadCommit(chainId, LedgerUtil.getAccountNoncesStrKey(address, accountState.getAssetChainId(), accountState.getAssetId(), fromCoinNonce))) {
+                        return new ValidateResult(VALIDATE_DOUBLE_EXPENSES_CODE, String.format(VALIDATE_DOUBLE_EXPENSES_DESC, address, fromCoinNonce));
+                    } else {
+                        return new ValidateResult(VALIDATE_ORPHAN_CODE, String.format(VALIDATE_ORPHAN_DESC, address, fromCoinNonce));
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    LoggerUtil.logger(chainId).error(e);
+                    return new ValidateResult(VALIDATE_FAIL_CODE, String.format("address={} nonce={} validate Exception.", address, fromCoinNonce));
+                }
             }
             list = new ArrayList<>();
             BigInteger balance = accountState.getAvailableAmount().subtract(coinFrom.getAmount());
@@ -333,13 +354,13 @@ public class CoinDataValidator {
             TempAccountState tempAccountState = list.get(list.size() - 1);
             if (!tempAccountState.getNextNonce().equalsIgnoreCase(fromCoinNonce)) {
                 logger(chainId).info("isValidateCommonTxBatch {}=={}=={}==nonce is error!tempNonce:{}!=fromNonce:{}", address, coinFrom.getAssetsChainId(), coinFrom.getAssetsId(), tempAccountState.getNextNonce(), fromCoinNonce);
-                return new ValidateResult(VALIDATE_FAIL_CODE, String.format("nonce={} is error.", address, fromCoinNonce));
+                return new ValidateResult(VALIDATE_FAIL_CODE, String.format("address={} nonce={} is error.", address, fromCoinNonce));
             }
             for (TempAccountState tempAccountState1 : list) {
                 //交易池中账户存在一样的nonce
                 if (tempAccountState1.getNonce().equalsIgnoreCase(fromCoinNonce)) {
                     logger(chainId).info("isValidateCommonTxBatch {}=={}=={}==nonce is double expenses! fromNonce ={}", address, coinFrom.getAssetsChainId(), coinFrom.getAssetsId(), fromCoinNonce);
-                    return new ValidateResult(VALIDATE_FAIL_CODE, String.format("nonce is double expenses.nonce={}", address, fromCoinNonce));
+                    return new ValidateResult(VALIDATE_FAIL_CODE, String.format("address={},nonce={} is double expenses.", address, fromCoinNonce));
                 }
             }
             list.add(new TempAccountState(assetKey, fromCoinNonce, txNonce, tempAccountState.getBalance().subtract(coinFrom.getAmount())));
