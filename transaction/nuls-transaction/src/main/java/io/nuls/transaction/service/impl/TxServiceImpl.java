@@ -686,9 +686,11 @@ public class TxServiceImpl implements TxService {
                 //批量验证coinData, 单个发送
                 VerifyTxResult verifyTxResult = LedgerCall.verifyCoinData(chain, txStr, true);
                 if (!verifyTxResult.success()) {
-                    String nonce = HexUtil.encode(TxUtil.getCoinData(tx).getFrom().get(0).getNonce());
-                    nulsLogger.error("coinData打包批量验证未通过 coinData not success - code: {}, - reason:{}, - type:{}, - first coinFrom nonce:{} - txhash:{}",
-                            verifyTxResult.getCode(), verifyTxResult.getDesc(), tx.getType(), nonce, tx.getHash().getDigestHex());
+                    if (verifyTxResult.getCode() != 5) {
+                        String nonce = HexUtil.encode(TxUtil.getCoinData(tx).getFrom().get(0).getNonce());
+                        nulsLogger.error("coinData打包批量验证未通过 coinData not success - code: {}, - reason:{}, - type:{}, - first coinFrom nonce:{} - txhash:{}",
+                                verifyTxResult.getCode(), verifyTxResult.getDesc(), tx.getType(), nonce, tx.getHash().getDigestHex());
+                    }
                     if (verifyTxResult.getCode() == VerifyTxResult.ORPHAN) {
                         addOrphanTxSet(chain, orphanTxSet, txWrapper);
                     }
