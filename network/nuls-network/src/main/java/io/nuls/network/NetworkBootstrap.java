@@ -94,7 +94,7 @@ public class NetworkBootstrap extends RpcModule {
     }
 
     private void dbInit() throws Exception {
-        RocksDBService.init(networkConfig.getDataPath()+NetworkConstant.MODULE_DB_PATH);
+        RocksDBService.init(networkConfig.getDataPath() + NetworkConstant.MODULE_DB_PATH);
         InitDB dbService = SpringLiteContext.getBean(DbServiceImpl.class);
         dbService.initTableName();
     }
@@ -121,8 +121,7 @@ public class NetworkBootstrap extends RpcModule {
         try {
             super.init();
             System.setProperty("io.netty.tryReflectionSetAccessible", "true");
-//            --add-exports java.base/jdk.internal.misc=ALL-UNNAMED
-//            --add-exports java.base/jdk.internal.ref=ALL-UNNAMED --add-exports java.base/sun.nio.ch=ALL-UNNAMED
+            LoggerUtil.defaultLogInit(networkConfig.getLogLevel());
             jsonCfgInit();
             dbInit();
             managerInit();
