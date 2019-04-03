@@ -63,7 +63,7 @@ public class Transfer implements Runnable {
     @Override
     public void run() {
         try {
-            for (int i = 0; i < 20000; i++) {
+            for (int i = 0; i < 5000; i++) {
                 createTransfer(addressFrom, addressTo);
                 System.out.println("count:" + (i + 1));
             }
