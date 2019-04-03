@@ -172,7 +172,7 @@ public class TxGenerateServiceImpl implements TxGenerateService {
             tx.setTransactionSignature(transactionSignature.serialize());
 
             //调用交易验证器
-            if(!txService.verify(chain, tx, false)){
+            if(!txService.verify(chain, tx)){
                 chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).error("new ctx validator failed...");
                 throw new NulsRuntimeException(TxErrorCode.TX_VERIFY_FAIL);
             }
@@ -276,7 +276,7 @@ public class TxGenerateServiceImpl implements TxGenerateService {
                 multiSignTxSignature.setP2PHKSignatures(p2PHKSignatures);
                 tx.setTransactionSignature(multiSignTxSignature.serialize());
                 //调用交易验证器
-                if(!txService.verify(chain, tx, false)){
+                if(!txService.verify(chain, tx)){
                     chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).error("new ctx validator failed...");
                     throw new NulsRuntimeException(TxErrorCode.TX_VERIFY_FAIL);
                 }

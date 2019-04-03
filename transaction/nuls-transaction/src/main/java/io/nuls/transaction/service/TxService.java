@@ -65,6 +65,24 @@ public interface TxService {
     boolean verify(Chain chain, Transaction tx, boolean incloudBasic);
 
     /**
+     * 交易基础验证
+     * 基础字段
+     * 交易size
+     * 交易类型
+     * 交易签名
+     * from的地址必须全部是发起链(本链or相同链）地址
+     * from里面的资产是否存在
+     * to里面的地址必须是相同链的地址
+     * 交易手续费
+     *
+     * @param chain
+     * @param tx
+     * @param txRegister
+     * @throws NulsException
+     */
+    void baseValidateTx(Chain chain, Transaction tx, TxRegister txRegister) throws NulsException;
+
+    /**
      * Get a transaction, first check the database from the confirmation transaction,
      * if not found, then query from the confirmed transaction
      *

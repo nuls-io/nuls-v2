@@ -81,4 +81,8 @@ public class TxWrapper{
         return this.tx.equals(((TxWrapper) obj).getTx());
     }
 
+    @Override
+    public int hashCode() {
+        return this.tx.getHash().hashCode();
+    }
 }

@@ -60,6 +60,7 @@ public interface TxCmd {
 
 
     String TX_NEWTX = "tx_newTx";
+    String TX_BASE_VALIDATE = "tx_baseValidateTx";
     /**
      * 接收本地新的主网协议的跨链交易 ??????
      * todo

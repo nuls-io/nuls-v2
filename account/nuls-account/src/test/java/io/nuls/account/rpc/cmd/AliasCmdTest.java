@@ -10,6 +10,7 @@ import io.nuls.rpc.info.NoUse;
 import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.model.message.Response;
 import io.nuls.rpc.netty.processor.ResponseMessageProcessor;
+import io.nuls.rpc.util.RPCUtil;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -93,7 +94,7 @@ public class AliasCmdTest {
         Map<String, Object> params = new HashMap<>();
         params.put(Constants.VERSION_KEY_STR, "1.0");
         params.put("chainId", chainId);
-        params.put("txHex", transaction.hex());
+        params.put("txHex", RPCUtil.encode(transaction.serialize()));
         //TODO How to get secondaryDataHex?
         params.put("secondaryDataHex", "111234134adfadfadfadfad");
         return params;

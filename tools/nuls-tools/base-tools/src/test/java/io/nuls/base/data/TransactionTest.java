@@ -2,6 +2,7 @@ package io.nuls.base.data;
 
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.basic.NulsByteBuffer;
+import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.model.StringUtils;
 import io.nuls.tools.parse.JSONUtils;
 import io.nuls.tools.thread.TimeService;
@@ -76,7 +77,7 @@ public class TransactionTest {
         try {
             tx.setCoinData(coinData.serialize());
             //String hex = HexUtil.encode(tx.serialize());
-            String hex = tx.hex();
+            String hex = HexUtil.encode(tx.serialize());
             System.out.println(hex);
             Transaction transaction = Transaction.getInstance(hex);
             Assert.assertTrue(Arrays.equals(tx.getCoinData(), transaction.getCoinData()));

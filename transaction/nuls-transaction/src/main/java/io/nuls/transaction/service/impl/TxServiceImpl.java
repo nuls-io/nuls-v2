@@ -120,7 +120,7 @@ public class TxServiceImpl implements TxService {
             if(null == existTx){
                 TxRegister txRegister = TxManager.getTxRegister(chain, tx.getType());
                 //调基础验证
-                baseValidateTx(chain, tx, txRegister);
+//                baseValidateTx(chain, tx, txRegister);
                 if(chain.getPackaging().get()) {
                     //当节点是出块节点时, 才将交易放入待打包队列
                     packablePool.add(chain, tx);
@@ -185,22 +185,8 @@ public class TxServiceImpl implements TxService {
         }
     }
 
-    /**
-     * 交易基础验证
-     * 基础字段
-     * 交易size
-     * 交易类型
-     * 交易签名
-     * from的地址必须全部是发起链(本链or相同链）地址
-     * from里面的资产是否存在
-     * to里面的地址必须是相同链的地址
-     * 交易手续费
-     *
-     * @param chain
-     * @param tx
-     * @return Result
-     */
-    private void baseValidateTx(Chain chain, Transaction tx, TxRegister txRegister) throws NulsException {
+    @Override
+    public void baseValidateTx(Chain chain, Transaction tx, TxRegister txRegister) throws NulsException {
         if (null == tx) {
             throw new NulsException(TxErrorCode.TX_NOT_EXIST);
         }
@@ -821,7 +807,7 @@ public class TxServiceImpl implements TxService {
                     chain.getTxPackageOrphanMap().remove(tx.getHash());
                 }
                 try {
-                    packableTxs.add(tx.hex());
+                    packableTxs.add(RPCUtil.encode(tx.serialize()));
                 } catch (Exception e) {
                     clearInvalidTx(chain, tx);
                     iterator.remove();
