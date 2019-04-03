@@ -111,16 +111,23 @@ public class ContractMakeAndBroadcastTx extends BaseQuery {
                 break;
             }
             CreateContractTransaction tx = (CreateContractTransaction) result.getData();
-            /**
-             * 此刻的tx则可以任意修改原数据，以此造假数据
-             */
-            //TODO ....
-
+            // 造假
+            this.createTxFake(tx);
+            tx.setTxData(null);
+            tx.setCoinData(null);
+            tx.serializeData();
             // 签名、广播交易
             result = this.broadcastCreateTx(tx);
         } while (false);
 
         Log.info("createContract-result:{}", JSONUtils.obj2PrettyJson(result));
+    }
+
+    private void createTxFake(CreateContractTransaction tx) {
+        /**
+         * 此刻的tx则可以任意修改原数据，以此造假数据
+         */
+        //TODO ....
     }
 
     private Result<CreateContractTransaction> makeCreateTx(int chainId, String sender, Long gasLimit, Long price,
@@ -174,29 +181,36 @@ public class ContractMakeAndBroadcastTx extends BaseQuery {
             methodName = "transfer";
         }
         if(StringUtils.isBlank(tokenReceiver)) {
-            tokenReceiver = toAddress0;
+            tokenReceiver = toAddress1;
         }
         String methodDesc = "";
         String remark = "call contract test - 空气币转账";
         String token = BigInteger.valueOf(800L).toString();
         String[][] args = ContractUtil.twoDimensionalArray(new Object[]{tokenReceiver, token});
-        Result result = this.makeCallTx(chainId, sender, value, 20000L, 25L, contractAddress,
+        Result result = this.makeCallTx(chainId, sender, value, 20000L, 25L, contractAddress_nrc20,
                 methodName, methodDesc, args, password, remark);
         do {
             if (result.isFailed()) {
                 break;
             }
             CallContractTransaction tx = (CallContractTransaction) result.getData();
-            /**
-             * 此刻的tx则可以任意修改原数据，以此造假数据
-             */
-            //TODO ....
-
+            // 造假
+            this.callTxFake(tx);
+            tx.setTxData(null);
+            tx.setCoinData(null);
+            tx.serializeData();
             // 签名、广播交易
             result = this.broadcastCallTx(tx);
         } while (false);
 
         Log.info("callContract-result:{}", JSONUtils.obj2PrettyJson(result));
+    }
+
+    private void callTxFake(CallContractTransaction tx) {
+        /**
+         * 此刻的tx则可以任意修改原数据，以此造假数据
+         */
+        //TODO ....
     }
 
     private Result<CallContractTransaction> makeCallTx(int chainId, String sender, BigInteger value, Long gasLimit, Long price, String contractAddress,
@@ -244,16 +258,23 @@ public class ContractMakeAndBroadcastTx extends BaseQuery {
                 break;
             }
             DeleteContractTransaction tx = (DeleteContractTransaction) result.getData();
-            /**
-             * 此刻的tx则可以任意修改原数据，以此造假数据
-             */
-            //TODO ....
-
+            // 造假
+            this.deleteTxFake(tx);
+            tx.setTxData(null);
+            tx.setCoinData(null);
+            tx.serializeData();
             // 签名、广播交易
             result = this.broadcastDeleteTx(tx);
         } while (false);
 
         Log.info("callContract-result:{}", JSONUtils.obj2PrettyJson(result));
+    }
+
+    private void deleteTxFake(DeleteContractTransaction tx) {
+        /**
+         * 此刻的tx则可以任意修改原数据，以此造假数据
+         */
+        //TODO ....
     }
 
     public Result<DeleteContractTransaction> makeDeleteTx(int chainId, String sender, String contractAddress, String password, String remark) {
