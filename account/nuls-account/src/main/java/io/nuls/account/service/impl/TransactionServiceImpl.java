@@ -29,10 +29,12 @@ import io.nuls.account.constant.AccountConstant;
 import io.nuls.account.constant.AccountErrorCode;
 import io.nuls.account.model.bo.Account;
 import io.nuls.account.model.bo.Chain;
+import io.nuls.account.model.bo.VerifyTxResult;
 import io.nuls.account.model.bo.tx.AliasTransaction;
 import io.nuls.account.model.bo.tx.txdata.Alias;
 import io.nuls.account.model.dto.CoinDto;
 import io.nuls.account.model.dto.MultiSignTransactionResultDto;
+import io.nuls.account.rpc.call.LegerCmdCall;
 import io.nuls.account.rpc.call.NetworkCall;
 import io.nuls.account.rpc.call.TransactionCmdCall;
 import io.nuls.account.service.AccountService;
@@ -338,10 +340,21 @@ public class TransactionServiceImpl implements TransactionService {
             }
             //交易签名
             SignatureUtil.createTransactionSignture(tx, signEcKeys);
+
+            // TODO: 2019/4/2  需要掉验证器, 提交账本
+            if(!txValidator.validateTx(chainId, tx)){
+                LoggerUtil.logger.error("new tx validator failed...");
+                throw new NulsRuntimeException(AccountErrorCode.TX_DATA_VALIDATION_ERROR);
+            }
+            VerifyTxResult verifyTxResult = LegerCmdCall.verifyCoinData(chainId, tx);
+            if(!verifyTxResult.success()){
+                LoggerUtil.logger.error("new tx verifyCoinData failed...");
+                throw new NulsRuntimeException(AccountErrorCode.TX_DATA_VALIDATION_ERROR);
+            }
             //缓存当前交易hash
             TxUtil.cacheTxHash(tx);
             //发起新交易
-            TransactionCmdCall.newTx(chainId, tx.hex());
+            TransactionCmdCall.newTx(chainId, RPCUtil.encode(tx.serialize()));
         } catch (NulsException e) {
             LoggerUtil.logger.error("assemblyTransaction exception.", e);
             throw new NulsException(e.getErrorCode());

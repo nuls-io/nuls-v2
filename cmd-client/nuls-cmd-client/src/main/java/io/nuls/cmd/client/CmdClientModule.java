@@ -23,16 +23,6 @@ public class CmdClientModule extends RpcModule {
 
     @Autowired Config config;
 
-//    ServerSocket serverSocket;
-//
-//    int port = 1122;
-
-    @Value("chain-id")
-    int defaultChainId;
-
-    @Value("provider-type")
-    Provider.ProviderType providerType;
-
     @Autowired CommandHandler commandHandler;
 
     static NulsLogger log = LoggerUtil.logger;
