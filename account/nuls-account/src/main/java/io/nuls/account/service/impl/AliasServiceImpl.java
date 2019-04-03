@@ -134,7 +134,12 @@ public class AliasServiceImpl implements AliasService, InitializingBean {
         //签名别名交易
         signTransaction(tx, account, password);
 
+        String txStr = RPCUtil.encode(tx.serialize());
         //调用交易验证器
+        if(!TransactionCmdCall.baseValidateTx(chainId, txStr)){
+            LoggerUtil.logger.error("new tx base validator failed...");
+            throw new NulsRuntimeException(AccountErrorCode.TX_DATA_VALIDATION_ERROR);
+        }
         if(!this.aliasTxValidate(chainId, tx)){
             LoggerUtil.logger.error("new tx validator failed...");
             throw new NulsRuntimeException(AccountErrorCode.TX_DATA_VALIDATION_ERROR);
@@ -145,9 +150,9 @@ public class AliasServiceImpl implements AliasService, InitializingBean {
             throw new NulsRuntimeException(AccountErrorCode.TX_DATA_VALIDATION_ERROR);
         }
         //发起新交易
-        if(!TransactionCmdCall.newTx(chainId, RPCUtil.encode(tx.serialize()))) {
+        if(!TransactionCmdCall.newTx(chainId, txStr)) {
             //如果发给交易模块失败,
-            LedgerCmdCall.rollBackUnconfirmTx(chainId, RPCUtil.encode(tx.serialize()));
+            LedgerCmdCall.rollBackUnconfirmTx(chainId, txStr);
         }
         return tx;
     }

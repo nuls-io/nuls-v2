@@ -341,6 +341,12 @@ public class TransactionServiceImpl implements TransactionService {
             SignatureUtil.createTransactionSignture(tx, signEcKeys);
 
             //调用交易验证器
+            String txStr = RPCUtil.encode(tx.serialize());
+            //调用交易验证器
+            if(!TransactionCmdCall.baseValidateTx(chainId, txStr)){
+                LoggerUtil.logger.error("new tx base validator failed...");
+                throw new NulsRuntimeException(AccountErrorCode.TX_DATA_VALIDATION_ERROR);
+            }
             if(!txValidator.validateTx(chainId, tx)){
                 LoggerUtil.logger.error("new tx validator failed...");
                 throw new NulsRuntimeException(AccountErrorCode.TX_DATA_VALIDATION_ERROR);
@@ -350,12 +356,11 @@ public class TransactionServiceImpl implements TransactionService {
                 LoggerUtil.logger.error("new tx verifyCoinData failed...");
                 throw new NulsRuntimeException(AccountErrorCode.TX_DATA_VALIDATION_ERROR);
             }
-            //缓存当前交易hash
-//            TxUtil.cacheTxHash(tx);
+
             //发起新交易
-            if(!TransactionCmdCall.newTx(chainId, RPCUtil.encode(tx.serialize()))) {
+            if(!TransactionCmdCall.newTx(chainId, txStr)) {
                 //如果发给交易模块失败,
-                LedgerCmdCall.rollBackUnconfirmTx(chainId, RPCUtil.encode(tx.serialize()));
+                LedgerCmdCall.rollBackUnconfirmTx(chainId, txStr);
             }
 
         } catch (NulsException e) {
@@ -710,6 +715,14 @@ public class TransactionServiceImpl implements TransactionService {
 
             try {
                 int chainId = multiSigAccount.getChainId();
+
+                //调用交易验证器
+                String txStr = RPCUtil.encode(tx.serialize());
+                //调用交易验证器
+                if(!TransactionCmdCall.baseValidateTx(chainId, txStr)){
+                    LoggerUtil.logger.error("new tx base validator failed...");
+                    throw new NulsRuntimeException(AccountErrorCode.TX_DATA_VALIDATION_ERROR);
+                }
                 //调用交易验证器
                 if(!txValidator.validateTx(chainId, tx)){
                     LoggerUtil.logger.error("new tx validator failed...");
@@ -721,9 +734,9 @@ public class TransactionServiceImpl implements TransactionService {
                     throw new NulsRuntimeException(AccountErrorCode.TX_DATA_VALIDATION_ERROR);
                 }
                 //发起新交易
-                if(!TransactionCmdCall.newTx(chainId, RPCUtil.encode(tx.serialize()))) {
+                if(!TransactionCmdCall.newTx(chainId, txStr)) {
                     //如果发给交易模块失败,
-                    LedgerCmdCall.rollBackUnconfirmTx(chainId, RPCUtil.encode(tx.serialize()));
+                    LedgerCmdCall.rollBackUnconfirmTx(chainId, txStr);
                 }
             } catch (NulsException e) {
                 e.printStackTrace();

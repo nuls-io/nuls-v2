@@ -118,9 +118,6 @@ public class TxServiceImpl implements TxService {
         try {
             TransactionConfirmedPO existTx = getTransaction(chain, tx.getHash());
             if(null == existTx){
-                TxRegister txRegister = TxManager.getTxRegister(chain, tx.getType());
-                //调基础验证
-//                baseValidateTx(chain, tx, txRegister);
                 if(chain.getPackaging().get()) {
                     //当节点是出块节点时, 才将交易放入待打包队列
                     packablePool.add(chain, tx);

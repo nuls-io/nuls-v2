@@ -97,14 +97,35 @@ public class TransactionCmdCall {
     /**
      * 发起新交易
      */
-    public static boolean newTx(int chainId, String txHex) {
+    public static boolean newTx(int chainId, String txStr) {
         try {
             Map<String, Object> params = new HashMap<>(AccountConstant.INIT_CAPACITY_8);
             params.put(Constants.VERSION_KEY_STR, RpcConstant.TX_NEW_VERSION);
             params.put(RpcConstant.TX_CHAIN_ID, chainId);
-            params.put(RpcConstant.TX_DATA, txHex);
+            params.put(RpcConstant.TX_DATA, txStr);
             Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.TX.abbr, RpcConstant.TX_NEW_CMD, params);
             return cmdResp.isSuccess();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    /**
+     * 发起新交易
+     */
+    public static boolean baseValidateTx(int chainId, String txStr) {
+        try {
+            Map<String, Object> params = new HashMap<>(AccountConstant.INIT_CAPACITY_8);
+            params.put(Constants.VERSION_KEY_STR, RpcConstant.TX_NEW_VERSION);
+            params.put(RpcConstant.TX_CHAIN_ID, chainId);
+            params.put(RpcConstant.TX_DATA, txStr);
+            Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.TX.abbr, RpcConstant.TX_BASE_VALIDATE, params);
+            if (!cmdResp.isSuccess()) {
+                return false;
+            }
+            HashMap hashMap = (HashMap)((HashMap) cmdResp.getResponseData()).get("tx_baseValidateTx");
+            return (boolean) hashMap.get("value");
         } catch (Exception e) {
             e.printStackTrace();
             return false;
