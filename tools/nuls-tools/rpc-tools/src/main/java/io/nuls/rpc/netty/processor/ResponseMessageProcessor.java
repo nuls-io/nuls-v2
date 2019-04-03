@@ -109,7 +109,7 @@ public class ResponseMessageProcessor {
         Create Request for Synchronization
          */
         Request request = MessageUtil.defaultRequest();
-        request.getRequestMethods().put("registerAPI", ConnectManager.LOCAL);
+        request.getRequestMethods().put("RegisterAPI", ConnectManager.LOCAL);
         Message message = MessageUtil.basicMessage(MessageType.Request);
         message.setMessageData(request);
 
@@ -155,7 +155,7 @@ public class ResponseMessageProcessor {
         /*
         当有新模块注册到Kernel(Manager)时，需要同步连接信息
          */
-        requestAndInvoke(ModuleE.KE.abbr, "registerAPI", JSONUtils.json2map(JSONUtils.obj2json(ConnectManager.LOCAL)), "0", "1", callbackInvoke);
+        requestAndInvoke(ModuleE.KE.abbr, "RegisterAPI", JSONUtils.json2map(JSONUtils.obj2json(ConnectManager.LOCAL)), "0", "1", callbackInvoke);
         Log.debug("Sync manager success. " + JSONUtils.obj2json(ConnectManager.ROLE_MAP));
 
         /*

@@ -26,6 +26,9 @@ package io.nuls.rpc.model;
 
 
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import java.util.List;
 import java.util.Map;
 
@@ -40,87 +43,111 @@ import java.util.Map;
 public class RegisterApi {
 
 
-    private List<CmdDetail> apiMethods;
+    @JsonProperty
+    private List<CmdDetail> ApiMethods;
 
     /**
      * Key: Role
      * Value: Version
      */
-    private Map<String, String> dependencies;
+    @JsonProperty
+    private Map<String, String> Dependencies;
 
-    private Map<String, String> connectionInformation;
+    @JsonProperty
+    private Map<String, String> ConnectionInformation;
 
-    private String moduleDomain;
+    @JsonProperty
+    private String ModuleDomain;
 
-    private Map<String, String[]> moduleRoles;
+    @JsonProperty
+    private Map<String, String[]> ModuleRoles;
 
-    private String moduleVersion;
+    @JsonProperty
+    private String ModuleVersion;
 
-    private String moduleAbbreviation;
+    @JsonProperty
+    private String ModuleAbbreviation;
 
-    private String moduleName;
+    @JsonProperty
+    private String ModuleName;
 
+    @JsonIgnore
     public List<CmdDetail> getApiMethods() {
-        return apiMethods;
+        return ApiMethods;
     }
 
+    @JsonIgnore
     public void setApiMethods(List<CmdDetail> apiMethods) {
-        this.apiMethods = apiMethods;
+        this.ApiMethods = apiMethods;
     }
 
+    @JsonIgnore
     public Map<String, String> getDependencies() {
-        return dependencies;
+        return Dependencies;
     }
 
+    @JsonIgnore
     public void setDependencies(Map<String, String> dependencies) {
-        this.dependencies = dependencies;
+        this.Dependencies = dependencies;
     }
 
+    @JsonIgnore
     public Map<String, String> getConnectionInformation() {
-        return connectionInformation;
+        return ConnectionInformation;
     }
 
+    @JsonIgnore
     public void setConnectionInformation(Map<String, String> connectionInformation) {
-        this.connectionInformation = connectionInformation;
+        this.ConnectionInformation = connectionInformation;
     }
 
+    @JsonIgnore
     public String getModuleDomain() {
-        return moduleDomain;
+        return ModuleDomain;
     }
 
+    @JsonIgnore
     public void setModuleDomain(String moduleDomain) {
-        this.moduleDomain = moduleDomain;
+        this.ModuleDomain = moduleDomain;
     }
 
+    @JsonIgnore
     public Map<String, String[]> getModuleRoles() {
-        return moduleRoles;
+        return ModuleRoles;
     }
 
+    @JsonIgnore
     public void setModuleRoles(Map<String, String[]> moduleRoles) {
-        this.moduleRoles = moduleRoles;
+        this.ModuleRoles = moduleRoles;
     }
 
+    @JsonIgnore
     public String getModuleVersion() {
-        return moduleVersion;
+        return ModuleVersion;
     }
 
+    @JsonIgnore
     public void setModuleVersion(String moduleVersion) {
-        this.moduleVersion = moduleVersion;
+        this.ModuleVersion = moduleVersion;
     }
 
+    @JsonIgnore
     public String getModuleAbbreviation() {
-        return moduleAbbreviation;
+        return ModuleAbbreviation;
     }
 
+    @JsonIgnore
     public void setModuleAbbreviation(String moduleAbbreviation) {
-        this.moduleAbbreviation = moduleAbbreviation;
+        this.ModuleAbbreviation = moduleAbbreviation;
     }
 
+    @JsonIgnore
     public String getModuleName() {
-        return moduleName;
+        return ModuleName;
     }
 
+    @JsonIgnore
     public void setModuleName(String moduleName) {
-        this.moduleName = moduleName;
+        this.ModuleName = moduleName;
     }
 }

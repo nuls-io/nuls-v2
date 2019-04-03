@@ -25,6 +25,9 @@
 package io.nuls.rpc.model.message;
 
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 /**
  * 取消订阅多个远程方法
  * Unsubscribe to multiple remote methods
@@ -38,12 +41,15 @@ public class UnregisterCompoundMethod {
      * This is the string that identifies the virtual method.
      * If it is empty then all virtual methods registered by the caller should be unregistered.
      */
+    @JsonProperty
     private String UnregisterCompoundMethodName;
 
+    @JsonIgnore
     public String getUnregisterCompoundMethodName() {
         return UnregisterCompoundMethodName;
     }
 
+    @JsonIgnore
     public void setUnregisterCompoundMethodName(String UnregisterCompoundMethodName) {
         this.UnregisterCompoundMethodName = UnregisterCompoundMethodName;
     }

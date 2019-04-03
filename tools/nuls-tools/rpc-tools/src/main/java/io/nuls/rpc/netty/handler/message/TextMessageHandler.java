@@ -127,7 +127,7 @@ public class TextMessageHandler implements Runnable {
                     break;
                 case NegotiateConnectionResponse:
                 case Ack:
-                    ResponseContainer resContainer = RequestContainer.getResponseContainer(((Map<String, String>) message.getMessageData()).get("requestId"));
+                    ResponseContainer resContainer = RequestContainer.getResponseContainer(((Map<String, String>) message.getMessageData()).get("RequestId"));
                     if (resContainer != null && resContainer.getFuture() != null) {
                         resContainer.getFuture().complete(new Response());
                     }

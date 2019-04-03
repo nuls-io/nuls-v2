@@ -25,6 +25,8 @@
 package io.nuls.rpc.model.message;
 
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
  * 握手确认
@@ -35,37 +37,46 @@ package io.nuls.rpc.model.message;
  */
 
 public class NegotiateConnectionResponse {
+    @JsonProperty
     private String RequestId;
     /**
      * An unsigned small integer value, 0 if negotiation was a failure and 1 if it was successful
      */
+    @JsonProperty
     private String NegotiationStatus;
 
     /**
      * A string value, useful to describe what exactly went wrong when the connection was rejected.
      */
+    @JsonProperty
     private String NegotiationComment;
 
+    @JsonIgnore
     public String getRequestId() {
         return RequestId;
     }
 
+    @JsonIgnore
     public void setRequestId(String RequestId) {
         this.RequestId = RequestId;
     }
 
+    @JsonIgnore
     public String getNegotiationStatus() {
         return NegotiationStatus;
     }
 
+    @JsonIgnore
     public void setNegotiationStatus(String NegotiationStatus) {
         this.NegotiationStatus = NegotiationStatus;
     }
 
+    @JsonIgnore
     public String getNegotiationComment() {
         return NegotiationComment;
     }
 
+    @JsonIgnore
     public void setNegotiationComment(String NegotiationComment) {
         this.NegotiationComment = NegotiationComment;
     }

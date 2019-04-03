@@ -25,6 +25,8 @@
 package io.nuls.rpc.model;
 
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
  * 对外提供的方法的参数信息
@@ -39,69 +41,70 @@ public class CmdParameter {
      * 参数名称
      * Parameter name
      */
-
-    private String parameterName;
+    @JsonProperty
+    private String ParameterName;
 
     /**
      * 参数类型（可以是任何类型，包括基础类型或者自定义类型）
      * Parameter type(can be any type, including base type or custom type)
      */
-
-    private String parameterType;
+    @JsonProperty
+    private String ParameterType;
 
     /**
      * 数值类型参数的范围，格式为：[(\[]\d+,\d+[)\]] 。例如：(1,100]表示1< x <=100
      * The range of numerical type parameters, format: [(\[] d+, \ d+ [)]]. For example, (1,100] means 1 < x <=100
      */
-
-    private String parameterValidRange;
+    @JsonProperty
+    private String ParameterValidRange;
 
     /**
      * 字符类型参数的格式，值为正则表达式
      * Format of character type parameters with regular expression
      */
-
-    private String parameterValidRegExp;
+    @JsonProperty
+    private String ParameterValidRegExp;
 
     public CmdParameter() {
     }
 
     public CmdParameter(String parameterName, String parameterType, String parameterValidRange, String parameterValidRegExp){
-        this.parameterName = parameterName;
-        this.parameterType = parameterType;
-        this.parameterValidRange = parameterValidRange;
-        this.parameterValidRegExp = parameterValidRegExp;
+        this.ParameterName = parameterName;
+        this.ParameterType = parameterType;
+        this.ParameterValidRange = parameterValidRange;
+        this.ParameterValidRegExp = parameterValidRegExp;
     }
 
+    @JsonIgnore
     public String getParameterName() {
-        return parameterName;
+        return ParameterName;
     }
-
+    @JsonIgnore
     public void setParameterName(String parameterName) {
-        this.parameterName = parameterName;
+        ParameterName = parameterName;
     }
-
+    @JsonIgnore
     public String getParameterType() {
-        return parameterType;
+        return ParameterType;
     }
-
+    @JsonIgnore
     public void setParameterType(String parameterType) {
-        this.parameterType = parameterType;
+        ParameterType = parameterType;
     }
-
+    @JsonIgnore
     public String getParameterValidRange() {
-        return parameterValidRange;
+        return ParameterValidRange;
     }
-
+    @JsonIgnore
     public void setParameterValidRange(String parameterValidRange) {
-        this.parameterValidRange = parameterValidRange;
+        ParameterValidRange = parameterValidRange;
     }
-
+    @JsonIgnore
     public String getParameterValidRegExp() {
-        return parameterValidRegExp;
+        return ParameterValidRegExp;
     }
-
+    @JsonIgnore
     public void setParameterValidRegExp(String parameterValidRegExp) {
-        this.parameterValidRegExp = parameterValidRegExp;
+        ParameterValidRegExp = parameterValidRegExp;
     }
 }

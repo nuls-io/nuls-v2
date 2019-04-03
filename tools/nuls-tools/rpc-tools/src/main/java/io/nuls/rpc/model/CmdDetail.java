@@ -26,7 +26,7 @@
 package io.nuls.rpc.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 
 import java.util.List;
@@ -41,17 +41,18 @@ import java.util.List;
 
 public class CmdDetail {
 
-    private String methodName;
-
-    private String methodDescription;
-
-    private String methodMinEvent;
-
-    private String methodMinPeriod;
-
-    private String methodScope;
-
-    private List<CmdParameter> parameters;
+    @JsonProperty
+    private String MethodName;
+    @JsonProperty
+    private String MethodDescription;
+    @JsonProperty
+    private String MethodMinEvent;
+    @JsonProperty
+    private String MethodMinPeriod;
+    @JsonProperty
+    private String MethodScope;
+    @JsonProperty
+    private List<CmdParameter> Parameters;
 
     @JsonIgnore
     private double version;
@@ -61,75 +62,75 @@ public class CmdDetail {
 
     @JsonIgnore
     private String invokeMethod;
-
+    @JsonIgnore
     public String getMethodName() {
-        return methodName;
+        return MethodName;
     }
-
+    @JsonIgnore
     public void setMethodName(String methodName) {
-        this.methodName = methodName;
+        this.MethodName = methodName;
     }
-
+    @JsonIgnore
     public String getMethodDescription() {
-        return methodDescription;
+        return MethodDescription;
     }
-
+    @JsonIgnore
     public void setMethodDescription(String methodDescription) {
-        this.methodDescription = methodDescription;
+        this.MethodDescription = methodDescription;
     }
-
+    @JsonIgnore
     public String getMethodMinEvent() {
-        return methodMinEvent;
+        return MethodMinEvent;
     }
-
+    @JsonIgnore
     public void setMethodMinEvent(String methodMinEvent) {
-        this.methodMinEvent = methodMinEvent;
+        this.MethodMinEvent = methodMinEvent;
     }
-
+    @JsonIgnore
     public String getMethodMinPeriod() {
-        return methodMinPeriod;
+        return MethodMinPeriod;
     }
-
+    @JsonIgnore
     public void setMethodMinPeriod(String methodMinPeriod) {
-        this.methodMinPeriod = methodMinPeriod;
+        this.MethodMinPeriod = methodMinPeriod;
     }
-
+    @JsonIgnore
     public String getMethodScope() {
-        return methodScope;
+        return MethodScope;
     }
-
+    @JsonIgnore
     public void setMethodScope(String methodScope) {
-        this.methodScope = methodScope;
+        this.MethodScope = methodScope;
     }
-
+    @JsonIgnore
     public List<CmdParameter> getParameters() {
-        return parameters;
+        return Parameters;
     }
-
+    @JsonIgnore
     public void setParameters(List<CmdParameter> parameters) {
-        this.parameters = parameters;
+        this.Parameters = parameters;
     }
-
+    @JsonIgnore
     public double getVersion() {
         return version;
     }
-
+    @JsonIgnore
     public void setVersion(double version) {
         this.version = version;
     }
-
+    @JsonIgnore
     public String getInvokeClass() {
         return invokeClass;
     }
-
+    @JsonIgnore
     public void setInvokeClass(String invokeClass) {
         this.invokeClass = invokeClass;
     }
-
+    @JsonIgnore
     public String getInvokeMethod() {
         return invokeMethod;
     }
-
+    @JsonIgnore
     public void setInvokeMethod(String invokeMethod) {
         this.invokeMethod = invokeMethod;
     }
