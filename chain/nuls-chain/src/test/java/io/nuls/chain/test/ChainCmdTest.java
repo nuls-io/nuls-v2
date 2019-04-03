@@ -6,7 +6,6 @@ import io.nuls.chain.info.CmConstants;
 import io.nuls.chain.model.dto.Seed;
 import io.nuls.chain.model.po.Asset;
 import io.nuls.chain.model.po.BlockChain;
-import io.nuls.chain.util.LoggerUtil;
 import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.netty.processor.ResponseMessageProcessor;
 import io.nuls.tools.parse.JSONUtils;
@@ -86,6 +85,6 @@ public class ChainCmdTest {
     }
     @Test
     public void logTest(){
-        LoggerUtil.Log.info("this chain log test");
+//        LoggerUtil.Log.info("this chain log test");
     }
 }

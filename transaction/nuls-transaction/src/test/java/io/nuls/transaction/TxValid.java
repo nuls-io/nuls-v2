@@ -124,6 +124,27 @@ public class TxValid {
         }
     }
 
+    /**多个地址转账*/
+    @Test
+    public void mAddressTransfer() throws Exception {
+        int count = 10000;
+        List<String> list = createAccount(chainId, count, password);
+        //给新生成账户转账
+        for(int i = 0; i < count; i++){
+            String address = list.get(i);
+            createTransfer(address28, address, new BigInteger("10000000000"));
+            System.out.println("count:" + (i + 1));
+        }
+        //睡30秒
+        Thread.sleep(30000L);
+        //新生成账户各执行一笔转账
+        for(int i = 0; i < count; i++){
+            String address = list.get(i);
+            createTransfer(address, address28, new BigInteger("9000000000"));
+            System.out.println("count:" + (i + 1));
+        }
+    }
+
     @Test
     public void mixedTransfer() throws Exception {
         String agentHash = null;
@@ -131,7 +152,7 @@ public class TxValid {
         String withdrawHash = null;
         String stopAgent = null;
         for (int i = 0; i < 20000; i++) {
-            String hash = createTransfer(address25, address21);
+            String hash = createTransfer(address25, address21, new BigInteger("10000000000"));
             switch (i){
                 case 0:
                     //创建节点
@@ -364,8 +385,8 @@ public class TxValid {
 //        removeAccount(address20, password);
     }
 
-    private String createTransfer(String addressFrom, String addressTo) throws Exception {
-        Map transferMap = this.createTransferTx(addressFrom, addressTo);
+    private String createTransfer(String addressFrom, String addressTo, BigInteger amount) throws Exception {
+        Map transferMap = this.createTransferTx(addressFrom, addressTo, amount);
         //调用接口
         Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_transfer", transferMap);
         if(!cmdResp.isSuccess()){
@@ -566,7 +587,7 @@ public class TxValid {
      *
      * @return
      */
-    private Map createTransferTx(String addressFrom, String addressTo) {
+    private Map createTransferTx(String addressFrom, String addressTo, BigInteger amount) {
         Map transferMap = new HashMap();
         transferMap.put("chainId", chainId);
         transferMap.put("remark", "transfer test");
@@ -577,7 +598,7 @@ public class TxValid {
         inputCoin1.setPassword(password);
         inputCoin1.setAssetsChainId(chainId);
         inputCoin1.setAssetsId(assetId);
-        inputCoin1.setAmount(new BigInteger("100100000"));
+        inputCoin1.setAmount(new BigInteger("100000000").add(amount));
         inputs.add(inputCoin1);
 
         CoinDTO outputCoin1 = new CoinDTO();
@@ -585,7 +606,7 @@ public class TxValid {
         outputCoin1.setPassword(password);
         outputCoin1.setAssetsChainId(chainId);
         outputCoin1.setAssetsId(assetId);
-        outputCoin1.setAmount(new BigInteger("100000000"));
+        outputCoin1.setAmount(amount);
         outputs.add(outputCoin1);
 
         transferMap.put("inputs", inputs);
@@ -608,19 +629,19 @@ public class TxValid {
         return params;
     }
 
-    /*
-    @Test
-    public void multiThreadCreateTx() {
-        for (int i = 0; i < 1; i++) {
-            Thread thread = new Thread(new CreateTxThread(), "MR" + i);
-            thread.start();
-        }
+    public static List<String> createAccount(int chainId, int count, String password) {
+        List<String> accountList = null;
         try {
-            while (true) {
-                Thread.sleep(1000000L);
-            }
-        } catch (InterruptedException e) {
+            Map<String, Object> params = new HashMap<>();
+            params.put(Constants.VERSION_KEY_STR, version);
+            params.put("chainId", chainId);
+            params.put("count", count);
+            params.put("password", password);
+            Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_createAccount", params);
+            accountList = (List<String>) ((HashMap) ((HashMap) cmdResp.getResponseData()).get("ac_createAccount")).get("list");
+        } catch (Exception e) {
             e.printStackTrace();
         }
-    }*/
+        return accountList;
+    }
 }
