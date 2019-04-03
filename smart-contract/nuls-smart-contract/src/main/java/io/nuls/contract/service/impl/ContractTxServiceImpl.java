@@ -58,6 +58,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static io.nuls.contract.constant.ContractErrorCode.FAILED;
 import static io.nuls.contract.util.ContractUtil.getFailed;
 import static io.nuls.contract.util.ContractUtil.getSuccess;
 
@@ -89,13 +90,10 @@ public class ContractTxServiceImpl implements ContractTxService {
 
             tx.setHash(NulsDigestData.calcDigestData(tx.serializeForHash()));
 
-            // 生成签名
-            AccountCall.transactionSignature(chainId, sender, password, tx);
-
-            // 广播交易
-            boolean broadcast = TransactionCall.newTx(chainId, RPCUtil.encode(tx.serialize()));
-            if (!broadcast) {
-                return getFailed();
+            // 验证、签名、记账、广播交易
+            Result signAndBroadcastTxResult = contractTxHelper.signAndBroadcastTx(chainId, sender, password, tx);
+            if(signAndBroadcastTxResult.isFailed()) {
+                return signAndBroadcastTxResult;
             }
             Map<String, String> resultMap = MapUtil.createHashMap(2);
             String txHash = tx.getHash().getDigestHex();
@@ -107,7 +105,7 @@ public class ContractTxServiceImpl implements ContractTxService {
             return getSuccess().setData(resultMap);
         } catch (NulsException e) {
             Log.error(e);
-            return Result.getFailed(e.getErrorCode());
+            return Result.getFailed(e.getErrorCode() == null ? FAILED : e.getErrorCode());
         } catch (IOException e) {
             Log.error(e);
             Result result = Result.getFailed(ContractErrorCode.CONTRACT_TX_CREATE_ERROR);
@@ -154,8 +152,11 @@ public class ContractTxServiceImpl implements ContractTxService {
 
             tx.setHash(NulsDigestData.calcDigestData(tx.serializeForHash()));
 
-            //生成签名
-            AccountCall.transactionSignature(chainId, sender, password, tx);
+            // 验证、签名、记账、广播交易
+            Result signAndBroadcastTxResult = contractTxHelper.signAndBroadcastTx(chainId, sender, password, tx);
+            if(signAndBroadcastTxResult.isFailed()) {
+                return signAndBroadcastTxResult;
+            }
 
             // 保存未确认Token转账
             Result<byte[]> unConfirmedTokenTransferResult = this.saveUnConfirmedTokenTransfer(chainId, tx, sender, contractAddress, methodName, args);
@@ -163,12 +164,6 @@ public class ContractTxServiceImpl implements ContractTxService {
                 return unConfirmedTokenTransferResult;
             }
             byte[] infoKey = unConfirmedTokenTransferResult.getData();
-
-            // 广播交易
-            boolean broadcast = TransactionCall.newTx(chainId, RPCUtil.encode(tx.serialize()));
-            if (!broadcast) {
-                return getFailed();
-            }
 
             Map<String, Object> resultMap = new HashMap<>(2);
             resultMap.put("txHash", tx.getHash().getDigestHex());
@@ -178,9 +173,6 @@ public class ContractTxServiceImpl implements ContractTxService {
             Result result = Result.getFailed(ContractErrorCode.CONTRACT_EXECUTE_ERROR);
             result.setMsg(e.getMessage());
             return result;
-        } catch (NulsException e) {
-            Log.error(e);
-            return Result.getFailed(e.getErrorCode());
         }
     }
 
@@ -272,7 +264,7 @@ public class ContractTxServiceImpl implements ContractTxService {
             return getSuccess().setData(map);
         } catch (NulsException e) {
             Log.error(e);
-            return Result.getFailed(e.getErrorCode());
+            return Result.getFailed(e.getErrorCode() == null ? FAILED : e.getErrorCode());
         }
     }
 
@@ -286,16 +278,12 @@ public class ContractTxServiceImpl implements ContractTxService {
                 return result;
             }
             DeleteContractTransaction tx = result.getData();
-
             tx.setHash(NulsDigestData.calcDigestData(tx.serializeForHash()));
 
-            // 生成签名
-            AccountCall.transactionSignature(chainId, sender, password, tx);
-
-            // 广播交易
-            boolean broadcast = TransactionCall.newTx(chainId, RPCUtil.encode(tx.serialize()));
-            if (!broadcast) {
-                return getFailed();
+            // 验证、签名、记账、广播交易
+            Result signAndBroadcastTxResult = contractTxHelper.signAndBroadcastTx(chainId, sender, password, tx);
+            if(signAndBroadcastTxResult.isFailed()) {
+                return signAndBroadcastTxResult;
             }
             Map<String, Object> resultMap = new HashMap<>(2);
             resultMap.put("txHash", tx.getHash().getDigestHex());
@@ -305,9 +293,6 @@ public class ContractTxServiceImpl implements ContractTxService {
             Result result = Result.getFailed(ContractErrorCode.CONTRACT_OTHER_ERROR);
             result.setMsg(e.getMessage());
             return result;
-        } catch (NulsException e) {
-            Log.error(e);
-            return Result.getFailed(e.getErrorCode());
         }
     }
 

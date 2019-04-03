@@ -39,7 +39,6 @@ import io.nuls.transaction.model.bo.config.ConfigBean;
 import io.nuls.transaction.model.dto.CoinDTO;
 import io.nuls.transaction.model.dto.CrossTxTransferDTO;
 import io.nuls.transaction.rpc.call.LedgerCall;
-import io.nuls.transaction.tx.Transfer;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -95,34 +94,34 @@ public class TxValid {
 
     @Test
     public void transfer() throws Exception {
-//        for (int i = 0; i < 50000; i++) {
-//            String hash = createTransfer(address25, address21);
-////            String hash = createCtxTransfer();
-//            System.out.println("count:" + (i + 1));
-//            System.out.println("");
-////            Thread.sleep(500L);
-//            //getTx(hash);
-//        }
-
-        Transfer transfer1 = new Transfer(address25, address21);
-        Thread thread1 = new Thread(transfer1);
-        thread1.start();
-        Transfer transfer2 = new Transfer(address26, address22);
-        Thread thread2 = new Thread(transfer2);
-        thread2.start();
-        Transfer transfer3 = new Transfer(address27, address23);
-        Thread thread3 = new Thread(transfer3);
-        thread3.start();
-        Transfer transfer4 = new Transfer(address28, address24);
-        Thread thread4 = new Thread(transfer4);
-        thread4.start();
-        try {
-            while (true) {
-                Thread.sleep(1000000000L);
-            }
-        } catch (InterruptedException e) {
-            e.printStackTrace();
+        for (int i = 0; i < 1; i++) {
+            String hash = createTransfer(address28, address21);
+//            String hash = createCtxTransfer();
+            System.out.println("count:" + (i + 1));
+            System.out.println("");
+//            Thread.sleep(500L);
+            //getTx(hash);
         }
+
+//        Transfer transfer1 = new Transfer(address25, address21);
+//        Thread thread1 = new Thread(transfer1);
+//        thread1.start();
+//        Transfer transfer2 = new Transfer(address26, address22);
+//        Thread thread2 = new Thread(transfer2);
+//        thread2.start();
+//        Transfer transfer3 = new Transfer(address27, address23);
+//        Thread thread3 = new Thread(transfer3);
+//        thread3.start();
+//        Transfer transfer4 = new Transfer(address28, address24);
+//        Thread thread4 = new Thread(transfer4);
+//        thread4.start();
+//        try {
+//            while (true) {
+//                Thread.sleep(1000000000L);
+//            }
+//        } catch (InterruptedException e) {
+//            e.printStackTrace();
+//        }
     }
 
     @Test
@@ -369,6 +368,9 @@ public class TxValid {
         Map transferMap = this.createTransferTx(addressFrom, addressTo);
         //调用接口
         Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_transfer", transferMap);
+        if(!cmdResp.isSuccess()){
+            return "fail";
+        }
         HashMap result = (HashMap) (((HashMap) cmdResp.getResponseData()).get("ac_transfer"));
         Assert.assertTrue(null != result);
         String hash = (String) result.get("value");

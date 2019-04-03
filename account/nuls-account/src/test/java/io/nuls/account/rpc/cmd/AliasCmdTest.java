@@ -2,7 +2,7 @@ package io.nuls.account.rpc.cmd;
 
 import io.nuls.account.constant.AccountConstant;
 import io.nuls.account.model.bo.tx.txdata.Alias;
-import io.nuls.account.rpc.call.LegerCmdCall;
+import io.nuls.account.rpc.call.LedgerCmdCall;
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.Transaction;
 import io.nuls.rpc.info.Constants;
@@ -10,6 +10,7 @@ import io.nuls.rpc.info.NoUse;
 import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.model.message.Response;
 import io.nuls.rpc.netty.processor.ResponseMessageProcessor;
+import io.nuls.rpc.util.RPCUtil;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -93,7 +94,7 @@ public class AliasCmdTest {
         Map<String, Object> params = new HashMap<>();
         params.put(Constants.VERSION_KEY_STR, "1.0");
         params.put("chainId", chainId);
-        params.put("txHex", transaction.hex());
+        params.put("txHex", RPCUtil.encode(transaction.serialize()));
         //TODO How to get secondaryDataHex?
         params.put("secondaryDataHex", "111234134adfadfadfadfad");
         return params;
@@ -125,7 +126,7 @@ public class AliasCmdTest {
         assertNotNull(result);
         String fee = (String) result.get("txHash");
         assertNotNull(fee);
-        BigInteger balance = LegerCmdCall.getBalance(chainId, chainId, 1, address);
+        BigInteger balance = LedgerCmdCall.getBalance(chainId, chainId, 1, address);
         System.out.println(balance.longValue());
     }
 

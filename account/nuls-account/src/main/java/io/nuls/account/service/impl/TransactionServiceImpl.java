@@ -34,7 +34,7 @@ import io.nuls.account.model.bo.tx.AliasTransaction;
 import io.nuls.account.model.bo.tx.txdata.Alias;
 import io.nuls.account.model.dto.CoinDto;
 import io.nuls.account.model.dto.MultiSignTransactionResultDto;
-import io.nuls.account.rpc.call.LegerCmdCall;
+import io.nuls.account.rpc.call.LedgerCmdCall;
 import io.nuls.account.rpc.call.NetworkCall;
 import io.nuls.account.rpc.call.TransactionCmdCall;
 import io.nuls.account.service.AccountService;
@@ -177,7 +177,7 @@ public class TransactionServiceImpl implements TransactionService {
         //sign
         TransactionSignature transactionSignature = buildMultiSignTransactionSignature(transaction, multiSigAccount, account, password);
         //缓存当前交易hash
-        TxUtil.cacheTxHash(transaction);
+//        TxUtil.cacheTxHash(transaction);
         //process transaction
         boolean isBroadcasted = txMutilProcessing(multiSigAccount, transaction, transactionSignature);
         MultiSignTransactionResultDto multiSignTransactionResultDto = new MultiSignTransactionResultDto();
@@ -210,7 +210,6 @@ public class TransactionServiceImpl implements TransactionService {
         }
         TransactionSignature transactionSignature = buildMultiSignTransactionSignature(transaction, null, account, password);
         //process transaction
-        txMutilProcessing(multiSigAccount, transaction, transactionSignature);
         boolean isBroadcasted = txMutilProcessing(multiSigAccount, transaction, transactionSignature);
         MultiSignTransactionResultDto multiSignTransactionResultDto = new MultiSignTransactionResultDto();
         multiSignTransactionResultDto.setBroadcasted(isBroadcasted);
@@ -232,7 +231,7 @@ public class TransactionServiceImpl implements TransactionService {
         //sign
         TransactionSignature transactionSignature = buildMultiSignTransactionSignature(transaction, multiSigAccount, account, password);
         //缓存当前交易hash
-        TxUtil.cacheTxHash(transaction);
+//        TxUtil.cacheTxHash(transaction);
         //process transaction
         boolean isBroadcasted = txMutilProcessing(multiSigAccount, transaction, transactionSignature);
         MultiSignTransactionResultDto multiSignTransactionResultDto = new MultiSignTransactionResultDto();
@@ -341,20 +340,29 @@ public class TransactionServiceImpl implements TransactionService {
             //交易签名
             SignatureUtil.createTransactionSignture(tx, signEcKeys);
 
-            // TODO: 2019/4/2  需要掉验证器, 提交账本
+            //调用交易验证器
+            String txStr = RPCUtil.encode(tx.serialize());
+            //调用交易验证器
+            if(!TransactionCmdCall.baseValidateTx(chainId, txStr)){
+                LoggerUtil.logger.error("new tx base validator failed...");
+                throw new NulsRuntimeException(AccountErrorCode.TX_DATA_VALIDATION_ERROR);
+            }
             if(!txValidator.validateTx(chainId, tx)){
                 LoggerUtil.logger.error("new tx validator failed...");
                 throw new NulsRuntimeException(AccountErrorCode.TX_DATA_VALIDATION_ERROR);
             }
-            VerifyTxResult verifyTxResult = LegerCmdCall.verifyCoinData(chainId, tx);
+            VerifyTxResult verifyTxResult = LedgerCmdCall.commitUnconfirmedTx(chainId, RPCUtil.encode(tx.serialize()));
             if(!verifyTxResult.success()){
                 LoggerUtil.logger.error("new tx verifyCoinData failed...");
                 throw new NulsRuntimeException(AccountErrorCode.TX_DATA_VALIDATION_ERROR);
             }
-            //缓存当前交易hash
-            TxUtil.cacheTxHash(tx);
+
             //发起新交易
-            TransactionCmdCall.newTx(chainId, RPCUtil.encode(tx.serialize()));
+            if(!TransactionCmdCall.newTx(chainId, txStr)) {
+                //如果发给交易模块失败,
+                LedgerCmdCall.rollBackUnconfirmTx(chainId, txStr);
+            }
+
         } catch (NulsException e) {
             LoggerUtil.logger.error("assemblyTransaction exception.", e);
             throw new NulsException(e.getErrorCode());
@@ -704,7 +712,36 @@ public class TransactionServiceImpl implements TransactionService {
     public boolean txMutilProcessing(MultiSigAccount multiSigAccount, Transaction tx, TransactionSignature transactionSignature) throws IOException {
         //当已签名数等于M则自动广播该交易
         if (multiSigAccount.getM() == transactionSignature.getP2PHKSignatures().size()) {
-            TransactionCmdCall.newTx(multiSigAccount.getChainId(), RPCUtil.encode(tx.serialize()));
+
+            try {
+                int chainId = multiSigAccount.getChainId();
+
+                //调用交易验证器
+                String txStr = RPCUtil.encode(tx.serialize());
+                //调用交易验证器
+                if(!TransactionCmdCall.baseValidateTx(chainId, txStr)){
+                    LoggerUtil.logger.error("new tx base validator failed...");
+                    throw new NulsRuntimeException(AccountErrorCode.TX_DATA_VALIDATION_ERROR);
+                }
+                //调用交易验证器
+                if(!txValidator.validateTx(chainId, tx)){
+                    LoggerUtil.logger.error("new tx validator failed...");
+                    throw new NulsRuntimeException(AccountErrorCode.TX_DATA_VALIDATION_ERROR);
+                }
+                VerifyTxResult verifyTxResult = LedgerCmdCall.commitUnconfirmedTx(chainId, RPCUtil.encode(tx.serialize()));
+                if(!verifyTxResult.success()){
+                    LoggerUtil.logger.error("new tx verifyCoinData failed...");
+                    throw new NulsRuntimeException(AccountErrorCode.TX_DATA_VALIDATION_ERROR);
+                }
+                //发起新交易
+                if(!TransactionCmdCall.newTx(chainId, txStr)) {
+                    //如果发给交易模块失败,
+                    LedgerCmdCall.rollBackUnconfirmTx(chainId, txStr);
+                }
+            } catch (NulsException e) {
+                e.printStackTrace();
+                return false;
+            }
             // Result saveResult = accountLedgerService.verifyAndSaveUnconfirmedTransaction(tx);
 //            if (saveResult.isFailed()) {
 //                if (KernelErrorCode.DATA_SIZE_ERROR.getCode().equals(saveResult.getErrorCode().getCode())) {

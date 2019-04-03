@@ -49,6 +49,7 @@ import static io.nuls.cmd.client.CommandHelper.getPwd;
  * @author: zhoulijun
  */
 @Component
+@Deprecated
 public class TransferByAliasProcessor  extends TransactionBaseProcessor implements CommandProcessor {
 
 

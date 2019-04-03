@@ -33,7 +33,6 @@ import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.model.message.Response;
 import io.nuls.rpc.netty.processor.ResponseMessageProcessor;
 import io.nuls.rpc.util.RPCUtil;
-import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.log.logback.NulsLogger;
 
 import java.io.IOException;
@@ -92,7 +91,7 @@ public class TransactionUtil {
             params.put("chainId", chainId);
             List<String> txHashList = new ArrayList<>();
             for (Transaction transaction : transactions) {
-                txHashList.add(transaction.hex());
+                txHashList.add(RPCUtil.encode(transaction.serialize()));
             }
             params.put("height", header.getHeight());
             params.put("txList", txHashList);
@@ -373,7 +372,7 @@ public class TransactionUtil {
             List<String> list = new ArrayList<>();
             txs.forEach(e -> {
                 try {
-                    list.add(e.hex());
+                    list.add(RPCUtil.encode(e.serialize()));
                 } catch (Exception e1) {
                     e1.printStackTrace();
                 }

@@ -66,7 +66,7 @@ public class TransferProcessor extends TransactionBaseProcessor implements Comma
 
     @Override
     public String getCommandDescription() {
-        return "transfer <address> <toAddress> <amount> [remark] --transfer";
+        return "transfer <address>|<alias> <toAddress>|<alias> <amount> [remark] --transfer";
     }
 
     @Override

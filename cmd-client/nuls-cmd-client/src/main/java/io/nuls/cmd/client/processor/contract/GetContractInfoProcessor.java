@@ -63,10 +63,8 @@ public class GetContractInfoProcessor extends ContractBaseProcessor {
 
     @Override
     public boolean argsValidate(String[] args) {
-        int length = args.length;
-        if (length != 2) {
-            return false;
-        }
+        checkArgsNumber(args,1);
+        checkAddress(config.getChainId(),args[1]);
         return true;
     }
 
@@ -83,8 +81,6 @@ public class GetContractInfoProcessor extends ContractBaseProcessor {
         /**
          * assemble display data info
          */
-        //Map<String, Object> map = (Map) result.getData();
-        //Map<String, Object> dataMap = (Map) map.get("data");
         return CommandResult.getResult(result);
     }
 }

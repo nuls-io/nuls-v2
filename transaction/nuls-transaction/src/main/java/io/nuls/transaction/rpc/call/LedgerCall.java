@@ -1,7 +1,6 @@
 package io.nuls.transaction.rpc.call;
 
 import io.nuls.base.basic.AddressTool;
-import io.nuls.base.data.Transaction;
 import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.util.RPCUtil;
@@ -25,37 +24,22 @@ import java.util.Map;
 public class LedgerCall {
 
     /**
-     * 验证CoinData
+     * 批量验证CoinData时的单个发送(不用于单个交易的独立验证)
      * @param chain
      * @param tx
      * @return
      */
-    public static VerifyTxResult verifyCoinData(Chain chain, String tx, boolean batch) {
+    public static VerifyTxResult verifyCoinData(Chain chain, String tx) {
         try {
             Map<String, Object> params = new HashMap<>(TxConstant.INIT_CAPACITY_8);
             params.put(Constants.VERSION_KEY_STR, TxConstant.RPC_VERSION);
             params.put("chainId", chain.getChainId());
             params.put("tx", tx);
-            params.put("isBatchValidate", batch);
             HashMap result = (HashMap) TransactionCall.request(ModuleE.LG.abbr,"validateCoinData", params);
             return new VerifyTxResult((int)result.get("validateCode"), (String)result.get("validateDesc"));
         } catch (Exception e) {
             chain.getLoggerMap().get(TxConstant.LOG_TX).error(e);
             return new VerifyTxResult(VerifyTxResult.OTHER_EXCEPTION, "Call validateCoinData failed!");
-        }
-    }
-
-    /**
-     * 验证CoinData
-     * @param chain
-     * @param tx
-     * @return
-     */
-    public static VerifyTxResult verifyCoinData(Chain chain, Transaction tx) throws NulsException {
-        try {
-            return verifyCoinData(chain, RPCUtil.encode(tx.serialize()), false);
-        } catch (Exception e) {
-            throw new NulsException(e);
         }
     }
 
@@ -171,20 +155,21 @@ public class LedgerCall {
     }
 
     /**
-     * 提交未确认交易给账本
+     * 验证单个交易与未确认交易提交
      * @param chain
      * @param txStr
      */
-    public static boolean commitUnconfirmedTx(Chain chain, String txStr) throws NulsException {
+    public static VerifyTxResult commitUnconfirmedTx(Chain chain, String txStr) throws NulsException {
         try {
             Map<String, Object> params = new HashMap<>(TxConstant.INIT_CAPACITY_8);
             params.put(Constants.VERSION_KEY_STR, TxConstant.RPC_VERSION);
             params.put("chainId", chain.getChainId());
             params.put("tx", txStr);
             HashMap result = (HashMap)TransactionCall.request(ModuleE.LG.abbr, "commitUnconfirmedTx", params);
-            return (int) result.get("value") == 1;
+            return new VerifyTxResult((int)result.get("validateCode"), (String)result.get("validateDesc"));
         } catch (Exception e) {
-            throw new NulsException(e);
+            chain.getLoggerMap().get(TxConstant.LOG_TX).error(e);
+            return new VerifyTxResult(VerifyTxResult.OTHER_EXCEPTION, "Call validateCoinData failed!");
         }
     }
 
@@ -209,7 +194,7 @@ public class LedgerCall {
 
 
     /**
-     * 调用账本回滚未确认的交易
+     * 调用账本修改未确认的交易状态
      * @param chain
      * @param txStr
      */

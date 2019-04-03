@@ -69,10 +69,7 @@ public class GetBestBlockHeaderProcessor implements CommandProcessor {
 
     @Override
     public boolean argsValidate(String[] args) {
-        int length = args.length;
-        if(length > 1) {
-            return false;
-        }
+        checkArgsNumber(args,0);
         return true;
     }
 

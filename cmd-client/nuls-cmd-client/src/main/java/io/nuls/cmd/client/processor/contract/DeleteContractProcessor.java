@@ -63,10 +63,8 @@ public class DeleteContractProcessor extends ContractBaseProcessor {
 
     @Override
     public boolean argsValidate(String[] args) {
-        int length = args.length;
-        if (length != 3) {
-            return false;
-        }
+        checkArgsNumber(args,2);
+        checkAddress(config.getChainId(),args[1],args[2]);
         return true;
     }
 

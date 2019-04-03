@@ -372,7 +372,7 @@ packageModule() {
 			exit 0;
 		fi
 		managed=`getModuleItem "Managed"`;
-		if [ $managed != "-1" ];
+		if [ "${managed}" != "-1" ];
 		then
             checkModuleItem "APP_NAME" "$1"
             checkModuleItem "VERSION" "$1"
@@ -380,7 +380,7 @@ packageModule() {
 		    log "build $1"
             copyJarToModules $1
             copyModuleNcfToModules $1
-            if [ $managed == "1" ]; then
+            if [ "${managed}" == "1" ]; then
                 moduleName=`getModuleItem "APP_NAME"`;
                 managedModules[${#managedModules[@]}]="$moduleName"
             fi

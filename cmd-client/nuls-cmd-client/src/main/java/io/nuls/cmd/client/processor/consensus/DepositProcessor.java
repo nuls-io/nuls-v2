@@ -78,24 +78,17 @@ public class DepositProcessor extends ConsensusBaseProcessor implements CommandP
 
     @Override
     public boolean argsValidate(String[] args) {
-        int length = args.length;
-        if(length != 4){
-            return false;
-        }
-        if (!CommandHelper.checkArgsIsNull(args)) {
-            return false;
-        }
-        if(!AddressTool.validAddress(config.getChainId(),args[1]) || !NulsDigestData.validHash(args[2])
-                || StringUtils.isBlank(args[3]) || !StringUtils.isNuls(args[3])){
-            return false;
-        }
+        checkArgsNumber(args,3);
+        checkAddress(config.getChainId(),args[1]);
+        checkIsNumeric(args[3],"deposit");
+        checkArgs(NulsDigestData.validHash(args[2]),"agentHash format error");
         return true;
     }
 
     @Override
     public CommandResult execute(String[] args) {
         String address = args[1];
-        String password = getPwd("Enter your account password");
+        String password = getPwd();
         BigInteger deposit = Na.parseNuls(args[3]).toBigInteger();
         String agentHash = args[2];
         Result<String> result = consensusProvider.depositToAgent(new DepositToAgentReq(address,agentHash,deposit,password));

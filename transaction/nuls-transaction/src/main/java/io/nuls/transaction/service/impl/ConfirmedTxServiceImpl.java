@@ -431,7 +431,7 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
         for(String hashHex : hashList){
             TransactionConfirmedPO txCfmPO = confirmedTxStorageService.getTx(chainId, hashHex);
             try {
-                txList.add(txCfmPO.getTx().hex());
+                txList.add(RPCUtil.encode(txCfmPO.getTx().serialize()));
             } catch (Exception e) {
                 chain.getLoggerMap().get(TxConstant.LOG_TX).error(e);
                 return new ArrayList<>();
@@ -461,7 +461,7 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
                 tx = txCfmPO.getTx();
             }
             try {
-                txList.add(tx.hex());
+                txList.add(RPCUtil.encode(tx.serialize()));
             } catch (Exception e) {
                 chain.getLoggerMap().get(TxConstant.LOG_TX).error(e);
                 if(allHits) {

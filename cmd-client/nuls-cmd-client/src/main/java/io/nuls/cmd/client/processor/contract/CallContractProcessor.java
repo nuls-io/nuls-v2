@@ -34,6 +34,7 @@ import io.nuls.cmd.client.utils.Na;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.model.StringUtils;
 
+import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -75,43 +76,20 @@ public class CallContractProcessor extends ContractBaseProcessor {
 
     @Override
     public boolean argsValidate(String[] args) {
-        boolean result;
-        do {
-            int length = args.length;
-            if (length != 7 && length != 9 && length != 11) {
-                result = false;
-                break;
-            }
-            if (!CommandHelper.checkArgsIsNull(args)) {
-                result = false;
-                break;
-            }
-
-            // gasLimit
-            if (!StringUtils.isNumeric(args[2])) {
-                result = false;
-                break;
-            }
-            // price
-            if (!StringUtils.isNumeric(args[3])) {
-                result = false;
-                break;
-            }
-            // value
-            if (!StringUtils.isNumeric(args[6])) {
-                result = false;
-                break;
-            }
-            CallContractReq form = getContractCall(args);
-            if(null == form){
-                result = false;
-                break;
-            }
-            paramsData.set(form);
-
-            result = form.getValue() >= 0;
-        } while (false);
-        return result;
+        checkArgsNumber(args,6,7,8);
+        checkAddress(config.getChainId(),args[1],args[4]);
+        checkIsNumeric(args[2],"gasLimit");
+        checkIsNumeric(args[3],"price");
+        checkArgs(()->{
+            BigDecimal amount = new BigDecimal(args[6]);
+            return amount.compareTo(BigDecimal.valueOf(0.01D)) >= 0;
+        },"value must be a numeric and greater than 0.01");
+        CallContractReq form = getContractCall(args);
+        if(null == form){
+            return false;
+        }
+        paramsData.set(form);
+        return true;
     }
 
     private CallContractReq getContractCall(String[] args) {

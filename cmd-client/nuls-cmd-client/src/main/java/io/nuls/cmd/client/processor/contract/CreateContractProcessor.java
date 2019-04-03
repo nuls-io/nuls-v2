@@ -75,37 +75,16 @@ public class CreateContractProcessor extends ContractBaseProcessor {
 
     @Override
     public boolean argsValidate(String[] args) {
-        boolean result;
-        do {
-            int length = args.length;
-            if (length != 5 && length != 6) {
-                result = false;
-                break;
-            }
-            if (!CommandHelper.checkArgsIsNull(args)) {
-                result = false;
-                break;
-            }
-
-            // gasLimit
-            if (!StringUtils.isNumeric(args[2])) {
-                result = false;
-                break;
-            }
-            // price
-            if (!StringUtils.isNumeric(args[3])) {
-                result = false;
-                break;
-            }
-            CreateContractReq form = getContractCreate(args);
-            if(null == form){
-                result = false;
-                break;
-            }
-            paramsData.set(form);
-            result = true;
-        } while (false);
-        return result;
+        checkArgsNumber(args,4,5);
+        checkAddress(config.getChainId(),args[1]);
+        checkIsNumeric(args[2],"gasLimit");
+        checkIsNumeric(args[3],"price");
+        CreateContractReq form = getContractCreate(args);
+        if(null == form){
+            return false;
+        }
+        paramsData.set(form);
+        return true;
     }
 
     private CreateContractReq getContractCreate(String[] args) {

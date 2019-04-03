@@ -75,36 +75,15 @@ public class TokenTransferProcessor extends ContractBaseProcessor {
 
     @Override
     public boolean argsValidate(String[] args) {
-        boolean result;
-        do {
-            int length = args.length;
-            if (length != 5 && length != 6) {
-                result = false;
-                break;
-            }
-            if (!CommandHelper.checkArgsIsNull(args)) {
-                result = false;
-                break;
-            }
-
-            // amount
-            if (!StringUtils.isNumberGtZero(args[4])) {
-                result = false;
-                break;
-            }
-            TokenTransferReq form = getTokenTransferForm(args);
-            if(null == form){
-                result = false;
-                break;
-            }
-            paramsData = form;
-            result = StringUtils.isNotBlank(form.getToAddress());
-            if (!result) {
-                break;
-            }
-            result = true;
-        } while (false);
-        return result;
+        checkArgsNumber(args,4,5);
+        checkAddress(config.getChainId(),args[1],args[2],args[3]);
+        checkIsNumeric(args[4],args[4]);
+        TokenTransferReq form = getTokenTransferForm(args);
+        if(null == form){
+            return false;
+        }
+        paramsData = form;
+        return true;
     }
 
     private TokenTransferReq getTokenTransferForm(String[] args) {

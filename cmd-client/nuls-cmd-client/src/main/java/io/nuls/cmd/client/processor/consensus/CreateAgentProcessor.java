@@ -35,6 +35,7 @@ import io.nuls.cmd.client.processor.CommandProcessor;
 import io.nuls.cmd.client.utils.Na;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.model.StringUtils;
+import org.spongycastle.util.test.FixedSecureRandom;
 
 import java.math.BigInteger;
 
@@ -45,6 +46,7 @@ import static io.nuls.cmd.client.CommandHelper.getPwd;
  */
 @Component
 public class CreateAgentProcessor extends ConsensusBaseProcessor implements CommandProcessor {
+
 
     @Override
     public String getCommand() {
@@ -70,26 +72,12 @@ public class CreateAgentProcessor extends ConsensusBaseProcessor implements Comm
 
     @Override
     public boolean argsValidate(String[] args) {
-        int length = args.length;
-        if(length < 5 || length > 6){
-            return false;
-        }
-        if (!CommandHelper.checkArgsIsNull(args)) {
-            return false;
-        }
-        if(!AddressTool.validAddress(config.getChainId(),args[1]) || !AddressTool.validAddress(config.getChainId(),args[2]) || StringUtils.isBlank(args[3])
-                || StringUtils.isBlank(args[4])){
-            return false;
-        }
-        if(!StringUtils.isNumberGtZeroLimitTwo(args[3])){
-            return false;
-        }
-        if(!StringUtils.isNuls(args[4])){
-            return false;
-        }
-        if(length == 6 && !AddressTool.validAddress(config.getChainId(),args[5])){
-            return false;
-        }
+        checkIsNumeric(args[3],"commissionRate");
+        checkArgs(()->{
+            BigInteger commission = new BigInteger(args[3]);
+            //commission 取值范围 10~100
+            return commission.compareTo(BigInteger.TEN) >= 0 && commission.compareTo(BigInteger.valueOf(100L)) <= 0;
+        },"commission rate (10~100)");
         return true;
     }
 

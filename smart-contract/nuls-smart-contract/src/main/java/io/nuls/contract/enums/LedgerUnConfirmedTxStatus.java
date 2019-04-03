@@ -21,68 +21,43 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+package io.nuls.contract.enums;
 
-package io.nuls.transaction.model;
-
-import io.nuls.base.data.Transaction;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
- * @author: Charlie
- * @date: 2019/3/26
+ * @author: PierreLuo
+ * @date: 2019-04-03
  */
+public enum LedgerUnConfirmedTxStatus {
+    // 1 校验通过，2 孤儿交易 3 双花  4 其他异常  5 交易已存在
+    SUCCESS(1),
+    ORPHAN(2),
+    DOUBLE_SPEND(3),
+    OTHER(4),
+    TX_EXITS(5);
 
-public class TxWrapper{
+    private int status;
+    private static Map<Integer, LedgerUnConfirmedTxStatus> map;
 
-    private Transaction tx;
-
-    private int index;
-
-    public TxWrapper() {
+    private LedgerUnConfirmedTxStatus(int status) {
+        this.status = status;
+        putStatus(status, this);
     }
 
-    public TxWrapper(Transaction tx, int index) {
-        this.tx = tx;
-        this.index = index;
+    public int status() {
+        return status;
     }
 
-    public int compareTo(int index) {
-        if (this.index > index) {
-            return -1;
-        } else if (this.index < index) {
-            return 1;
+    private static LedgerUnConfirmedTxStatus putStatus(int status, LedgerUnConfirmedTxStatus statusEnum) {
+        if(map == null) {
+            map = new HashMap<>(8);
         }
-        return 0;
+        return map.put(status, statusEnum);
     }
 
-    public Transaction getTx() {
-        return tx;
-    }
-
-    public void setTx(Transaction tx) {
-        this.tx = tx;
-    }
-
-    public int getIndex() {
-        return index;
-    }
-
-    public void setIndex(int index) {
-        this.index = index;
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (obj == null) {
-            return false;
-        }
-        if (!(obj instanceof TxWrapper)) {
-            return false;
-        }
-        return this.tx.equals(((TxWrapper) obj).getTx());
-    }
-
-    @Override
-    public int hashCode() {
-        return this.tx.getHash().hashCode();
+    public static LedgerUnConfirmedTxStatus getStatus(int status) {
+        return map.get(status);
     }
 }
