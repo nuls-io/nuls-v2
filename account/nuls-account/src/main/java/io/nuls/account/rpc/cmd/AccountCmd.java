@@ -61,7 +61,7 @@ public class AccountCmd extends BaseCmd {
      */
     @CmdAnnotation(cmd = "ac_createAccount", version = 1.0, scope = "private", minEvent = 0, minPeriod = 0, description = "create a specified number of accounts")
     public Response createAccount(Map params) {
-        Map<String, List<String>> map = new HashMap<>();
+        Map<String, List<String>> map = new HashMap<>(AccountConstant.INIT_CAPACITY_2);
         List<String> list = new ArrayList<>();
         try {
             // check parameters

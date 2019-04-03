@@ -124,11 +124,20 @@ public class TxValid {
         }
     }
 
+
+    private List<String> createAddress() throws Exception{
+        List<String> addressList = new ArrayList<>();
+        for(int i = 0; i < 100; i++) {
+            List<String> list = createAccount(chainId, 100, password);
+            addressList.addAll(list);
+        }
+        return addressList;
+    }
     /**多个地址转账*/
     @Test
     public void mAddressTransfer() throws Exception {
         int count = 10000;
-        List<String> list = createAccount(chainId, count, password);
+        List<String> list = createAddress();
         //给新生成账户转账
         for(int i = 0; i < count; i++){
             String address = list.get(i);
@@ -137,10 +146,12 @@ public class TxValid {
         }
         //睡30秒
         Thread.sleep(30000L);
+        List<String> listTo = createAddress();
         //新生成账户各执行一笔转账
         for(int i = 0; i < count; i++){
             String address = list.get(i);
-            createTransfer(address, address28, new BigInteger("9000000000"));
+            String addressTo = listTo.get(i);
+            createTransfer(address, addressTo, new BigInteger("9000000000"));
             System.out.println("count:" + (i + 1));
         }
     }
