@@ -112,7 +112,7 @@ public class TransactionCmdCall {
     }
 
     /**
-     * 发起新交易
+     * 交易基础验证
      */
     public static boolean baseValidateTx(int chainId, String txStr) {
         try {

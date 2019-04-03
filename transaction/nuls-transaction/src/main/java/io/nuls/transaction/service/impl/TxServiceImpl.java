@@ -1144,7 +1144,7 @@ public class TxServiceImpl implements TxService {
             }
             String sr = (String) map.get("stateRoot");
             if (!stateRoot.equals(sr)) {
-                chain.getLoggerMap().get(TxConstant.LOG_TX).debug("contract stateRoot error.");
+                chain.getLoggerMap().get(TxConstant.LOG_TX).warn("contract stateRoot error.");
                 return verifyTxResult;
             }
             List<String> scNewList = (List<String>) map.get("txList");
@@ -1156,7 +1156,7 @@ public class TxServiceImpl implements TxService {
             for (int i = 0; i < size; i++) {
                 int j = txStrList.size() - size + i;
                 if (!txStrList.get(j).equals(scNewList.get(i))) {
-                    chain.getLoggerMap().get(TxConstant.LOG_TX).debug("contract new tx hex error.");
+                    chain.getLoggerMap().get(TxConstant.LOG_TX).warn("contract new tx hex error.");
                     return verifyTxResult;
                 }
             }
