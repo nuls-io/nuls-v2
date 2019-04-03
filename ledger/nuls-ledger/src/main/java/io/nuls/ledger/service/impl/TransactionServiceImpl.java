@@ -27,13 +27,14 @@ package io.nuls.ledger.service.impl;
 
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.*;
+import io.nuls.ledger.constant.ValidateEnum;
 import io.nuls.ledger.model.AccountBalance;
 import io.nuls.ledger.model.UnconfirmedTx;
+import io.nuls.ledger.model.ValidateResult;
 import io.nuls.ledger.model.po.AccountState;
 import io.nuls.ledger.model.po.AccountStateSnapshot;
 import io.nuls.ledger.model.po.BlockSnapshotAccounts;
 import io.nuls.ledger.service.AccountStateService;
-import io.nuls.ledger.service.BlockDataService;
 import io.nuls.ledger.service.TransactionService;
 import io.nuls.ledger.service.processor.CommontTransactionProcessor;
 import io.nuls.ledger.service.processor.LockedTransactionProcessor;
@@ -63,12 +64,9 @@ public class TransactionServiceImpl implements TransactionService {
     @Autowired
     CoinDataValidator coinDataValidator;
     @Autowired
-    BlockDataService blockDataService;
-    @Autowired
     LockedTransactionProcessor lockedTransactionProcessor;
     @Autowired
     CommontTransactionProcessor commontTransactionProcessor;
-
     @Autowired
     Repository repository;
     Map<String, Integer> ledgerNonce = new HashMap<String, Integer>();
@@ -80,19 +78,19 @@ public class TransactionServiceImpl implements TransactionService {
      */
 
     @Override
-    public boolean unConfirmTxProcess(int addressChainId, Transaction transaction) {
+    public ValidateResult unConfirmTxProcess(int addressChainId, Transaction transaction) throws Exception {
         //直接更新未确认交易
         CoinData coinData = CoinDataUtil.parseCoinData(transaction.getCoinData());
         if (null == coinData) {
             //例如黄牌交易，直接返回
-            return true;
+            return ValidateResult.getSuccess();
         }
         /*取消未确认交易的校验，到这个接口的都通过了未确认校验*/
-//        ValidateResult validateResult = coinDataValidator.validateCoinData(addressChainId, transaction);
-//        if (validateResult.getValidateCode() != CoinDataValidator.VALIDATE_SUCCESS_CODE) {
-//            logger.error("validateResult = {}={}", validateResult.getValidateCode(), validateResult.getValidateDesc());
-//            return false;
-//        }
+        ValidateResult validateResult = coinDataValidator.validateCoinData(addressChainId, transaction);
+        if (validateResult.getValidateCode() != ValidateEnum.SUCCESS_CODE.getValue()) {
+            LoggerUtil.logger(addressChainId).error("validateResult = {}={}", validateResult.getValidateCode(), validateResult.getValidateDesc());
+            return validateResult;
+        }
         String currentTxNonce = LedgerUtil.getNonceEncodeByTx(transaction);
         Map<String, UnconfirmedTx> accountsMap = new ConcurrentHashMap<>();
         List<CoinFrom> froms = coinData.getFrom();
@@ -134,7 +132,7 @@ public class TransactionServiceImpl implements TransactionService {
             UnconfirmedTx unconfirmedTx = accountsMap.get(it.next());
             accountStateService.setUnconfirmTx(addressChainId, currentTxNonce, unconfirmedTx);
         }
-        return true;
+        return ValidateResult.getSuccess();
     }
 
 
