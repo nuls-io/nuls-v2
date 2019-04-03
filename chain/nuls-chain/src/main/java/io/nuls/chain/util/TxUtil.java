@@ -68,7 +68,7 @@ public class TxUtil {
             }
             return blockChain;
         } catch (Exception e) {
-            LoggerUtil.Log.error(e);
+            LoggerUtil.logger().error(e);
             return null;
         }
     }
@@ -84,7 +84,7 @@ public class TxUtil {
 
         } catch (Exception e) {
             e.printStackTrace();
-            LoggerUtil.Log.error("transaction parse error", e);
+            LoggerUtil.logger().error("transaction parse error", e);
             return null;
         }
         return null;
