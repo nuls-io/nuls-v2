@@ -116,6 +116,8 @@ public interface RpcConstant {
      * 发起新交易接口
      */
     String TX_NEW_CMD = "tx_newTx";
+
+    String TX_BASE_VALIDATE = "tx_baseValidateTx";
     /**
      * 交易数据HEX编码
      */

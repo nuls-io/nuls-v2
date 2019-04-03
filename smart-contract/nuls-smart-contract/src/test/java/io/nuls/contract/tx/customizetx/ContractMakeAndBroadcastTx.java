@@ -25,15 +25,19 @@ package io.nuls.contract.tx.customizetx;
 
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.NulsDigestData;
+import io.nuls.base.data.Transaction;
 import io.nuls.contract.basetest.ContractTest;
 import io.nuls.contract.constant.ContractErrorCode;
+import io.nuls.contract.enums.LedgerUnConfirmedTxStatus;
 import io.nuls.contract.helper.ContractHelper;
 import io.nuls.contract.helper.ContractTxHelper;
 import io.nuls.contract.manager.ChainManager;
 import io.nuls.contract.model.tx.CallContractTransaction;
 import io.nuls.contract.model.tx.CreateContractTransaction;
 import io.nuls.contract.model.tx.DeleteContractTransaction;
+import io.nuls.contract.model.txdata.ContractData;
 import io.nuls.contract.rpc.call.AccountCall;
+import io.nuls.contract.rpc.call.LedgerCall;
 import io.nuls.contract.rpc.call.TransactionCall;
 import io.nuls.contract.tx.base.BaseQuery;
 import io.nuls.contract.util.ContractUtil;
@@ -139,29 +143,22 @@ public class ContractMakeAndBroadcastTx extends BaseQuery {
 
     private Result broadcastCreateTx(CreateContractTransaction tx) {
         try {
-            // 生成交易hash
-            tx.setHash(NulsDigestData.calcDigestData(tx.serializeForHash()));
-            // 生成签名
-            AccountCall.transactionSignature(chainId, sender, password, tx);
-            // 广播交易
-            boolean broadcast = TransactionCall.newTx(chainId, RPCUtil.encode(tx.serialize()));
-            if (!broadcast) {
-                return getFailed();
+            ContractData contractData = tx.getTxDataObj();
+            byte[] contractAddressBytes = contractData.getContractAddress();
+            byte[] senderBytes = contractData.getSender();
+            Result result = this.broadcastTx(chainId, AddressTool.getStringAddressByBytes(senderBytes), password, tx);
+            if(result.isFailed()) {
+                return result;
             }
             Map<String, String> resultMap = MapUtil.createHashMap(2);
             String txHash = tx.getHash().getDigestHex();
-            String contractAddressStr = AddressTool.getStringAddressByBytes(tx.getTxDataObj().getContractAddress());
+            String contractAddressStr = AddressTool.getStringAddressByBytes(contractAddressBytes);
             resultMap.put("txHash", txHash);
             resultMap.put("contractAddress", contractAddressStr);
             return getSuccess().setData(resultMap);
         } catch (NulsException e) {
             Log.error(e);
             return Result.getFailed(e.getErrorCode());
-        } catch (IOException e) {
-            Log.error(e);
-            Result result = Result.getFailed(ContractErrorCode.CONTRACT_TX_CREATE_ERROR);
-            result.setMsg(e.getMessage());
-            return result;
         }
     }
 
@@ -218,23 +215,15 @@ public class ContractMakeAndBroadcastTx extends BaseQuery {
 
     private Result broadcastCallTx(CallContractTransaction tx) {
         try {
-            // 生成交易hash
-            tx.setHash(NulsDigestData.calcDigestData(tx.serializeForHash()));
-            //生成签名
-            AccountCall.transactionSignature(chainId, sender, password, tx);
-            // 广播交易
-            boolean broadcast = TransactionCall.newTx(chainId, RPCUtil.encode(tx.serialize()));
-            if (!broadcast) {
-                return getFailed();
+            ContractData contractData = tx.getTxDataObj();
+            byte[] senderBytes = contractData.getSender();
+            Result result = this.broadcastTx(chainId, AddressTool.getStringAddressByBytes(senderBytes), password, tx);
+            if(result.isFailed()) {
+                return result;
             }
             Map<String, Object> resultMap = new HashMap<>(2);
             resultMap.put("txHash", tx.getHash().getDigestHex());
             return getSuccess().setData(resultMap);
-        } catch (IOException e) {
-            Log.error(e);
-            Result result = Result.getFailed(ContractErrorCode.CONTRACT_EXECUTE_ERROR);
-            result.setMsg(e.getMessage());
-            return result;
         } catch (NulsException e) {
             Log.error(e);
             return Result.getFailed(e.getErrorCode());
@@ -278,28 +267,50 @@ public class ContractMakeAndBroadcastTx extends BaseQuery {
 
     public Result broadcastDeleteTx(DeleteContractTransaction tx) {
         try {
-            // 生成交易hash
-            tx.setHash(NulsDigestData.calcDigestData(tx.serializeForHash()));
-            // 生成签名
-            AccountCall.transactionSignature(chainId, sender, password, tx);
-            // 广播交易
-            boolean broadcast = TransactionCall.newTx(chainId, RPCUtil.encode(tx.serialize()));
-            if (!broadcast) {
-                return getFailed();
+            ContractData contractData = tx.getTxDataObj();
+            byte[] senderBytes = contractData.getSender();
+            Result result = this.broadcastTx(chainId, AddressTool.getStringAddressByBytes(senderBytes), password, tx);
+            if(result.isFailed()) {
+                return result;
             }
             Map<String, Object> resultMap = new HashMap<>(2);
             resultMap.put("txHash", tx.getHash().getDigestHex());
             return getSuccess().setData(resultMap);
-        } catch (IOException e) {
-            Log.error(e);
-            Result result = Result.getFailed(ContractErrorCode.CONTRACT_OTHER_ERROR);
-            result.setMsg(e.getMessage());
-            return result;
         } catch (NulsException e) {
             Log.error(e);
             return Result.getFailed(e.getErrorCode());
         }
     }
 
+    private Result broadcastTx(int chainId, String sender, String password, Transaction tx) {
+        try {
+            // 生成交易hash
+            tx.setHash(NulsDigestData.calcDigestData(tx.serializeForHash()));
+            // 生成签名
+            AccountCall.transactionSignature(chainId, sender, password, tx);
+            String txData = RPCUtil.encode(tx.serialize());
 
+            // 通知账本
+            int commitStatus = LedgerCall.commitUnconfirmedTx(chainId, txData);
+            if(commitStatus != LedgerUnConfirmedTxStatus.SUCCESS.status()) {
+                return getFailed().setMsg(LedgerUnConfirmedTxStatus.getStatus(commitStatus).name());
+            }
+            // 广播交易
+            boolean broadcast = TransactionCall.newTx(chainId, txData);
+            if (!broadcast) {
+                // 广播失败，回滚账本的未确认交易
+                LedgerCall.rollBackUnconfirmTx(chainId, txData);
+                return getFailed();
+            }
+            return getSuccess();
+        } catch (NulsException e) {
+            Log.error(e);
+            return Result.getFailed(e.getErrorCode());
+        } catch (IOException e) {
+            Log.error(e);
+            Result result = Result.getFailed(ContractErrorCode.CONTRACT_TX_CREATE_ERROR);
+            result.setMsg(e.getMessage());
+            return result;
+        }
+    }
 }

@@ -67,7 +67,6 @@ public class TransactionCall {
             throw new NulsException(e);
         }
     }
-
     public static Transaction getConfirmedTx(int chainId, String txHash) throws NulsException {
         Map<String, Object> params = new HashMap(4);
         params.put("chainId", chainId);
@@ -81,6 +80,18 @@ public class TransactionCall {
             Transaction tx = new Transaction();
             tx.parse(RPCUtil.decode(txData), 0);
             return tx;
+        } catch (Exception e) {
+            throw new NulsException(e);
+        }
+    }
+
+    public static boolean baseValidateTx(int chainId, String txData) throws NulsException {
+        Map<String, Object> params = new HashMap(4);
+        params.put("chainId", chainId);
+        params.put("tx", txData);
+        try {
+            Map<String, Boolean> baseValidateResult = (Map<String, Boolean>) CallHelper.request(ModuleE.TX.abbr, "tx_baseValidateTx", params);
+            return baseValidateResult.get("value");
         } catch (Exception e) {
             throw new NulsException(e);
         }
