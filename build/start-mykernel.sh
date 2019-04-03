@@ -92,7 +92,7 @@ do
            esac
 done
 if [ ! -f "$CONFIG" ]; then
-    CONFIG="${BIN_PATH}/default-config.json"
+    CONFIG="${BIN_PATH}/default-config.ncf"
 fi
 if [ ! -n "$LOGPATH" ];
 then
