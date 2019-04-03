@@ -51,6 +51,20 @@ public class BlockCmd extends BaseCmd {
     }
 
     /**
+     * 接收需缓存的区块
+     * */
+    @CmdAnnotation(cmd = "cs_receiveHeaderList", version = 1.0, description = "verify block correctness 1.0")
+    @Parameter(parameterName = "chainId", parameterType = "int")
+    @Parameter(parameterName = "headerList", parameterType = "List<String>")
+    public Response receiveHeaderList(Map<String,Object> params){
+        Result result = service.receiveHeaderList(params);
+        if(result.isFailed()){
+            return failed(result.getErrorCode());
+        }
+        return success(result.getData());
+    }
+
+    /**
      * 区块回滚
      * */
     @CmdAnnotation(cmd = "cs_chainRollBack", version = 1.0, description = "chain roll back 1.0")

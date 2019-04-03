@@ -17,9 +17,12 @@ import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Service;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.parse.JSONUtils;
+import org.apache.tools.ant.taskdefs.email.Header;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -93,6 +96,38 @@ public class BlockServiceImpl implements BlockService {
         Map<String, Object> validResult = new HashMap<>(2);
         validResult.put("value", true);
         return Result.getSuccess(ConsensusErrorCode.SUCCESS).setData(validResult);
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public Result receiveHeaderList(Map<String, Object> params) {
+        if (params.get(ConsensusConstant.PARAM_CHAIN_ID) == null || params.get(ConsensusConstant.HEADER_LIST) == null) {
+            return Result.getFailed(ConsensusErrorCode.PARAM_ERROR);
+        }
+        int chainId = (Integer) params.get(ConsensusConstant.PARAM_CHAIN_ID);
+        if (chainId <= ConsensusConstant.MIN_VALUE) {
+            return Result.getFailed(ConsensusErrorCode.PARAM_ERROR);
+        }
+        Chain chain = chainManager.getChainMap().get(chainId);
+        if (chain == null) {
+            return Result.getFailed(ConsensusErrorCode.CHAIN_NOT_EXIST);
+        }
+        try {
+            List<String> headerList = (List<String>) params.get(ConsensusConstant.HEADER_LIST);
+            List<BlockHeader> blockHeaderList = new ArrayList<>();
+            for (String header:headerList) {
+                BlockHeader blockHeader = new BlockHeader();
+                blockHeader.parse(RPCUtil.decode(header),0);
+                blockHeaderList.add(blockHeader);
+            }
+            chain.getBlockHeaderList().addAll(0,blockHeaderList);
+            Map<String, Object> validResult = new HashMap<>(2);
+            validResult.put("value", true);
+            return Result.getSuccess(ConsensusErrorCode.SUCCESS).setData(validResult);
+        } catch (NulsException e) {
+            chain.getLoggerMap().get(ConsensusConstant.BASIC_LOGGER_NAME).error(e);
+            return Result.getFailed(e.getErrorCode());
+        }
     }
 
     /**
