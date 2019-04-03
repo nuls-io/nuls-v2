@@ -66,14 +66,9 @@ public class UpdatePasswordProcessor extends AccountBaseProcessor implements Com
 
     @Override
     public boolean argsValidate(String[] args) {
-        int length = args.length;
-        if (length != 2) {
-            return false;
-        }
-        if (!CommandHelper.checkArgsIsNull(args)) {
-            return false;
-        }
-        return AddressTool.validAddress(config.getChainId(),args[1]);
+        checkArgsNumber(args,1);
+        checkAddress(config.getChainId(),args[1]);
+        return true;
     }
 
     @Override

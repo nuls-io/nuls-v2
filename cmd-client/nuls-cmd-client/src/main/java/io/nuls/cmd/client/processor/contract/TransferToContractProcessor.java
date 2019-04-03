@@ -68,13 +68,9 @@ public class TransferToContractProcessor extends ContractBaseProcessor {
 
     @Override
     public boolean argsValidate(String[] args) {
-        int length = args.length;
-        if (length <4) {
-            return false;
-        }
-        if (length >5) {
-            return false;
-        }
+        checkArgsNumber(args,3,4);
+        checkAddress(config.getChainId(),args[1],args[2]);
+        checkIsNumeric(args[3],"amount");
         return true;
     }
 

@@ -69,18 +69,8 @@ public class GetNetworkProcessor implements CommandProcessor {
 
     @Override
     public boolean argsValidate(String[] args) {
-        if (args.length != 2) {
-            return false;
-        }
-        if (!CommandHelper.checkArgsIsNull(args)) {
-            return false;
-        }
-        if (StringUtils.isBlank(args[1])) {
-            return false;
-        }
-        if (!("info".equals(args[1]) || "nodes".equals(args[1]))){
-            return false;
-        }
+        checkArgsNumber(args,1);
+        checkArgs(("info".equals(args[1]) || "nodes".equals(args[1])),getCommandDescription());
         return true;
     }
 

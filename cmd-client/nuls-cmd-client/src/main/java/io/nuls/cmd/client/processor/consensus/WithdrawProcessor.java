@@ -74,16 +74,9 @@ public class WithdrawProcessor extends ConsensusBaseProcessor implements Command
 
     @Override
     public boolean argsValidate(String[] args) {
-        int length = args.length;
-        if(length != 3){
-            return false;
-        }
-        if (!CommandHelper.checkArgsIsNull(args)) {
-            return false;
-        }
-        if(!AddressTool.validAddress(config.getChainId(),args[1]) || !NulsDigestData.validHash(args[2])){
-            return false;
-        }
+        checkArgsNumber(args,2);
+        checkAddress(config.getChainId(),args[1]);
+        checkArgs(NulsDigestData.validHash(args[2]),"txHash format error");
         return true;
     }
 
@@ -91,7 +84,7 @@ public class WithdrawProcessor extends ConsensusBaseProcessor implements Command
     public CommandResult execute(String[] args) {
         String address = args[1];
         String txHash = args[2];
-        String password = getPwd("Enter your account password");
+        String password = getPwd();
         Result<String> result = consensusProvider.withdraw(new WithdrawReq(address,txHash,password));
         if (result.isFailed()) {
             return CommandResult.getFailed(result);

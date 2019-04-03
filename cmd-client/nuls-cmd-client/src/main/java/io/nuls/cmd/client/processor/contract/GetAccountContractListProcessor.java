@@ -70,10 +70,8 @@ public class GetAccountContractListProcessor extends ContractBaseProcessor {
 
     @Override
     public boolean argsValidate(String[] args) {
-        int length = args.length;
-        if (length != 2) {
-            return false;
-        }
+        checkArgsNumber(args,1);
+        checkAddress(config.getChainId(),args[1]);
         return true;
     }
 

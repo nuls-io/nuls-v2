@@ -61,9 +61,7 @@ public class ExitProcessor implements CommandProcessor {
 
     @Override
     public boolean argsValidate(String[] args) {
-        if(args.length > 1) {
-            return false;
-        }
+        checkArgsNumber(args,1);
         return true;
     }
 

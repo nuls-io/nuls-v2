@@ -16,6 +16,7 @@ help()
 EOF
     exit 0
 }
+APP_NAME="mykernel"
 cd `dirname $0`;
 BIN_PATH=`pwd`
 if [ -d ../Libraries/JAVA/11.0.2 ]; then
@@ -43,6 +44,16 @@ function get_fullpath()
         echo `cd $1; pwd`;
     fi
 }
+
+checkIsRunning(){
+    if [ ! -z "`ps -ef|grep -w "name=${APP_NAME} "|grep -v grep|awk '{print $2}'`" ]; then
+        pid=`ps -ef|grep -w "name=${APP_NAME} "|grep -v grep|awk '{print $2}'`
+        echo "$APP_NAME Already running pid=$pid";
+        exit 0;
+    fi
+}
+
+checkIsRunning
 
 RUNFRONT=
 while getopts fj:c:l:d:Dh name
