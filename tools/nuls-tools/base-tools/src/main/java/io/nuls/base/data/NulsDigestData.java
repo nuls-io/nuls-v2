@@ -43,6 +43,8 @@ import java.util.List;
  */
 public class NulsDigestData extends BaseNulsData {
 
+    public static final int HASH_LENGTH = 32;
+
     protected byte[] digestBytes;
 
     public NulsDigestData() {
@@ -59,12 +61,12 @@ public class NulsDigestData extends BaseNulsData {
 
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer buffer) throws IOException {
-        buffer.writeBytesWithLength(digestBytes);
+        buffer.write(digestBytes);
     }
 
     @Override
     public void parse(NulsByteBuffer byteBuffer) throws NulsException {
-        this.digestBytes = byteBuffer.readByLengthByte();
+        this.digestBytes = byteBuffer.readBytes(HASH_LENGTH);
     }
 
     public String getDigestHex() {
