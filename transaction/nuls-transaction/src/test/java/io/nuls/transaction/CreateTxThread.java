@@ -85,10 +85,8 @@ public class CreateTxThread implements Runnable {
         }
     }
     private void creatTx() throws Exception{
-        for(int i = 0; i<999999; i++) {
-//            createCtxTransfer();
+        for(int i = 0; i<50000; i++) {
             createTransfer();
-            Thread.sleep(1000L);
         }
     }
 

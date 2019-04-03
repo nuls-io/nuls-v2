@@ -44,12 +44,12 @@ import io.nuls.contract.rpc.call.BlockCall;
 import io.nuls.contract.util.ContractUtil;
 import io.nuls.contract.util.Log;
 import io.nuls.contract.vm.program.*;
+import io.nuls.rpc.util.RPCUtil;
 import io.nuls.tools.basic.NulsData;
 import io.nuls.tools.basic.Result;
 import io.nuls.tools.basic.VarInt;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
-import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.model.ArraysTool;
 import io.nuls.tools.model.LongUtils;
@@ -80,8 +80,6 @@ public class ContractTxHelper {
                                                           byte[] contractCode, String[][] args,
                                                           String password, String remark) {
         try {
-            BigInteger value = BigInteger.ZERO;
-
             Result accountResult = AccountCall.validationPassword(chainId, sender, password);
             if (accountResult.isFailed()) {
                 return accountResult;
@@ -97,6 +95,18 @@ public class ContractTxHelper {
             if (validateCreate.isFailed()) {
                 return validateCreate;
             }
+            Result<CreateContractTransaction> result = this.newCreateTx(chainId, sender, senderBytes, contractAddressBytes, gasLimit, price, contractCode, args, remark);
+            return result;
+        } catch (NulsException e) {
+            Log.error(e);
+            return Result.getFailed(e.getErrorCode());
+        }
+    }
+
+    public Result<CreateContractTransaction> newCreateTx(int chainId, String sender, byte[] senderBytes, byte[] contractAddressBytes, Long gasLimit, Long price,
+                                                          byte[] contractCode, String[][] args, String remark) {
+        try {
+            BigInteger value = BigInteger.ZERO;
 
             CreateContractTransaction tx = new CreateContractTransaction();
             if (StringUtils.isNotBlank(remark)) {
@@ -125,9 +135,6 @@ public class ContractTxHelper {
             tx.serializeData();
 
             return getSuccess().setData(tx);
-        } catch (NulsException e) {
-            Log.error(e);
-            return Result.getFailed(e.getErrorCode());
         } catch (IOException e) {
             Log.error(e);
             Result result = Result.getFailed(ContractErrorCode.CONTRACT_TX_CREATE_ERROR);
@@ -220,7 +227,7 @@ public class ContractTxHelper {
         Chain chain = contractHelper.getChain(chainId);
         int assetsId = chain.getConfig().getAssetsId();
         ContractBalance senderBalance = contractHelper.getTempBalanceAndNonce(chainId, sender);
-        CoinFrom coinFrom = new CoinFrom(senderBytes, chainId, assetsId, totalValue, HexUtil.decode(senderBalance.getNonce()), UNLOCKED_TX);
+        CoinFrom coinFrom = new CoinFrom(senderBytes, chainId, assetsId, totalValue, RPCUtil.decode(senderBalance.getNonce()), UNLOCKED_TX);
         coinData.addFrom(coinFrom);
 
         if (value.compareTo(BigInteger.ZERO) > 0) {

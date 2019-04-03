@@ -12,8 +12,8 @@ import io.nuls.base.data.Block;
 import io.nuls.base.data.Transaction;
 import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.model.ModuleE;
+import io.nuls.rpc.util.RPCUtil;
 import io.nuls.tools.basic.Result;
-import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.log.Log;
 
@@ -35,7 +35,7 @@ public class WalletRpcHandler {
             if (null == blockHex) {
                 return Result.getSuccess(null);
             }
-            byte[] bytes = HexUtil.decode(blockHex);
+            byte[] bytes = RPCUtil.decode(blockHex);
             Block block = new Block();
             block.parse(new NulsByteBuffer(bytes));
             block.getHeader().setSize(bytes.length);
@@ -58,7 +58,7 @@ public class WalletRpcHandler {
             if (null == blockHex) {
                 return Result.getSuccess(null);
             }
-            byte[] bytes = HexUtil.decode(blockHex);
+            byte[] bytes = RPCUtil.decode(blockHex);
             Block block = new Block();
             block.parse(new NulsByteBuffer(bytes));
             block.getHeader().setSize(bytes.length);

@@ -25,7 +25,6 @@
 package io.nuls.transaction;
 
 import io.nuls.base.basic.AddressTool;
-import io.nuls.base.data.Transaction;
 import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.info.HostInfo;
 import io.nuls.rpc.info.NoUse;
@@ -40,7 +39,7 @@ import io.nuls.transaction.model.bo.config.ConfigBean;
 import io.nuls.transaction.model.dto.CoinDTO;
 import io.nuls.transaction.model.dto.CrossTxTransferDTO;
 import io.nuls.transaction.rpc.call.LedgerCall;
-import io.nuls.transaction.utils.TxUtil;
+import io.nuls.transaction.tx.Transfer;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -83,6 +82,9 @@ public class TxValid {
 
     static String password = "nuls123456";//"nuls123456";
 
+
+
+
     @Before
     public void before() throws Exception {
         NoUse.mockModule();
@@ -93,15 +95,34 @@ public class TxValid {
 
     @Test
     public void transfer() throws Exception {
-        for (int i = 0; i < 10000; i++) {
-            String hash = createTransfer(address25, address21);
-//            String hash = createCtxTransfer();
-            System.out.println("count:" + (i + 1));
-            System.out.println("");
-//            Thread.sleep(500L);
-            //getTx(hash);
+//        for (int i = 0; i < 50000; i++) {
+//            String hash = createTransfer(address25, address21);
+////            String hash = createCtxTransfer();
+//            System.out.println("count:" + (i + 1));
+//            System.out.println("");
+////            Thread.sleep(500L);
+//            //getTx(hash);
+//        }
+
+        Transfer transfer1 = new Transfer(address25, address21);
+        Thread thread1 = new Thread(transfer1);
+        thread1.start();
+        Transfer transfer2 = new Transfer(address26, address22);
+        Thread thread2 = new Thread(transfer2);
+        thread2.start();
+        Transfer transfer3 = new Transfer(address27, address23);
+        Thread thread3 = new Thread(transfer3);
+        thread3.start();
+        Transfer transfer4 = new Transfer(address28, address24);
+        Thread thread4 = new Thread(transfer4);
+        thread4.start();
+        try {
+            while (true) {
+                Thread.sleep(1000000000L);
+            }
+        } catch (InterruptedException e) {
+            e.printStackTrace();
         }
-//        createCtxTransfer();
     }
 
     @Test
@@ -110,24 +131,24 @@ public class TxValid {
         String depositHash = null;
         String withdrawHash = null;
         String stopAgent = null;
-        for (int i = 0; i < 1500; i++) {
+        for (int i = 0; i < 20000; i++) {
             String hash = createTransfer(address25, address21);
             switch (i){
-                case 2000:
+                case 0:
                     //创建节点
-                    agentHash = createAgent(address28, address29);
+                    agentHash = createAgent(address29, address27);
                     break;
                 case 4000:
                     //委托
-                    depositHash = deposit(address28, agentHash);
+                    depositHash = deposit(address29, agentHash);
                     break;
-                case 13000:
+                case 16000:
                     //取消委托
-                    withdrawHash = withdraw(address28, depositHash);
+                    withdrawHash = withdraw(address29, depositHash);
                     break;
-                case 14800:
+                case 19000:
                     //停止节点
-                    stopAgent = stopAgent(address28);
+                    stopAgent = stopAgent(address29);
                     break;
             }
 
@@ -139,10 +160,8 @@ public class TxValid {
 
     @Test
     public void getTx() throws Exception {
-       getTx("0020b930763a8b1bf1e05d8538a3378f873523ce89d34c126af083356a9545b77b4d");
-//        getTxCfmClient("002037bd6ee432aab018712115891857713d71e378979eb4506561a35b6688b9cfce");
-        getTxCfmClient("0020e132f6ec43a0b9c9e56a056d9895bdda0c231f929773b2b4e6b2eeb9c8c8261e");
-        getTxCfmClient("0020356cadc61fab8fe058dbb208cc7b96f4d757222277f4aca96697dfdb9b5497f1");
+        getTxCfmClient("0020e87c15cc8509a46cf5c802641864dc609f87b4e1d6120a3de3d3d31e6075173a");
+        getTxCfmClient("00209a152f8a93c05463c970a12b875cb23effb59b0dd177b47ec1e56fca0d3c80e8");//最后一条
     }
 
     private void getTx(String hash) throws Exception {
@@ -155,15 +174,15 @@ public class TxValid {
         HashMap result = (HashMap) (((HashMap) cmdResp.getResponseData()).get("tx_getTx"));
         Assert.assertTrue(null != result);
         Log.debug("{}", JSONUtils.obj2PrettyJson(result));
-        String txStr = (String) result.get("tx");
-        Log.debug("getTx -hash:{}", ((Transaction)TxUtil.getInstanceRpcStr(txStr, Transaction.class)).getHash().getDigestHex());
+       /* String txStr = (String) result.get("tx");
+        Log.debug("getTx -hash:{}", ((Transaction)TxUtil.getInstanceRpcStr(txStr, Transaction.class)).getHash().getDigestHex());*/
     }
 
 
     @Test
     public void importPriKeyTest() {
-//        importPriKey("b54db432bba7e13a6c4a28f65b925b18e63bcb79143f7b894fa735d5d3d09db5", password);//种子出块地址 tNULSeBaMkrt4z9FYEkkR9D6choPVvQr94oYZp
-        importPriKey("188b255c5a6d58d1eed6f57272a22420447c3d922d5765ebb547bc6624787d9f", password);//种子出块地址 tNULSeBaMoGr2RkLZPfJeS5dFzZeNj1oXmaYNe
+        importPriKey("b54db432bba7e13a6c4a28f65b925b18e63bcb79143f7b894fa735d5d3d09db5", password);//种子出块地址 tNULSeBaMkrt4z9FYEkkR9D6choPVvQr94oYZp
+//        importPriKey("188b255c5a6d58d1eed6f57272a22420447c3d922d5765ebb547bc6624787d9f", password);//种子出块地址 tNULSeBaMoGr2RkLZPfJeS5dFzZeNj1oXmaYNe
 //        importPriKey("9ce21dad67e0f0af2599b41b515a7f7018059418bab892a7b68f283d489abc4b", password);//20 tNULSeBaMvEtDfvZuukDf2mVyfGo3DdiN8KLRG
 //        importPriKey("477059f40708313626cccd26f276646e4466032cabceccbf571a7c46f954eb75", password);//21 tNULSeBaMnrs6JKrCy6TQdzYJZkMZJDng7QAsD
 //        importPriKey("8212e7ba23c8b52790c45b0514490356cd819db15d364cbe08659b5888339e78", password);//22 tNULSeBaMrbMRiFAUeeAt6swb4xVBNyi81YL24

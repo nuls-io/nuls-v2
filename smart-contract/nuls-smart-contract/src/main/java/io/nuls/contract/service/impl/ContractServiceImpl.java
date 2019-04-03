@@ -45,10 +45,10 @@ import io.nuls.contract.storage.ContractExecuteResultStorageService;
 import io.nuls.contract.util.ContractUtil;
 import io.nuls.contract.util.Log;
 import io.nuls.contract.vm.program.ProgramExecutor;
+import io.nuls.rpc.util.RPCUtil;
 import io.nuls.tools.basic.Result;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
-import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.exception.NulsException;
 
 import java.util.List;
@@ -107,7 +107,7 @@ public class ContractServiceImpl implements ContractService {
         // 准备临时余额和当前区块头
         contractHelper.createTempBalanceManagerAndCurrentBlockHeader(chainId, blockHeight, blockTime, AddressTool.getAddress(packingAddress));
         // 准备批量执行器
-        ProgramExecutor batchExecutor = contractExecutor.createBatchExecute(chainId, HexUtil.decode(preStateRoot));
+        ProgramExecutor batchExecutor = contractExecutor.createBatchExecute(chainId, RPCUtil.decode(preStateRoot));
         batchInfo.setBatchExecutor(batchExecutor);
         batchInfo.setPreStateRoot(preStateRoot);
         // 准备冲突检测器
@@ -225,22 +225,22 @@ public class ContractServiceImpl implements ContractService {
         }
     }
 
-    public Result commitProcessor(int chainId, List<String> txHexList, String blockHeaderHex) {
+    public Result commitProcessor(int chainId, List<String> txDataList, String blockHeaderHex) {
         try {
             ContractPackageDto contractPackageDto = contractHelper.getChain(chainId).getBatchInfo().getContractPackageDto();
             if (contractPackageDto != null) {
                 Map<String, ContractResult> contractResultMap = contractPackageDto.getContractResultMap();
                 /** pierre test code + */
-                Set<String> txHexSet = contractResultMap.keySet();
-                Log.info("contract execute txHexSize is {}", txHexSet.size());
+                Set<String> txDataSet = contractResultMap.keySet();
+                Log.info("contract execute txDataSize is {}", txDataSet.size());
                 /** pierre test code - */
                 ContractResult contractResult;
                 ContractWrapperTransaction wrapperTx;
-                Log.info("commit txHexSize is {}", txHexList.size());
-                for (String txHex : txHexList) {
-                    contractResult = contractResultMap.get(txHex);
+                Log.info("commit txDataSize is {}", txDataList.size());
+                for (String txData : txDataList) {
+                    contractResult = contractResultMap.get(txData);
                     if (contractResult == null) {
-                        Log.warn("empty contract result with txHex: {}", txHex);
+                        Log.warn("empty contract result with txData: {}", txData);
                         continue;
                     }
                     wrapperTx = contractResult.getTx();
@@ -272,12 +272,12 @@ public class ContractServiceImpl implements ContractService {
         }
     }
 
-    public Result rollbackProcessor(int chainId, List<String> txHexList, String blockHeaderHex) {
+    public Result rollbackProcessor(int chainId, List<String> txDataList, String blockHeaderHex) {
         try {
             Transaction tx;
-            for (String txHex : txHexList) {
+            for (String txData : txDataList) {
                 tx = new Transaction();
-                tx.parse(HexUtil.decode(txHex), 0);
+                tx.parse(RPCUtil.decode(txData), 0);
                 switch (tx.getType()) {
                     case TX_TYPE_CREATE_CONTRACT:
                         CreateContractData create = new CreateContractData();

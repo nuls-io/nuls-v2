@@ -198,7 +198,7 @@ public class MessageCmd extends BaseCmd {
                 TxDuplicateRemoval.insert(transaction.getHash());
             }
             //将交易放入待验证本地交易队列中
-            txService.newTx(chainManager.getChain(chainId), transaction);
+            txService.newBroadcastTx(chainManager.getChain(chainId), transaction);
         } catch (NulsException e) {
             errorLogProcess(chain, e);
             return failed(e.getErrorCode());

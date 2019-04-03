@@ -66,7 +66,7 @@ public final class GenesisBlock extends Block {
     private int assetsId;
     private BigInteger priKey;
 
-    private GenesisBlock(int chainId, String json) throws Exception {
+    private GenesisBlock(int chainId, int assetsId, String json) throws Exception {
         Map<String, Object> jsonMap = null;
         try {
             jsonMap = JSONUtils.json2map(json);
@@ -77,16 +77,16 @@ public final class GenesisBlock extends Block {
         String time = (String) jsonMap.get(CONFIG_FILED_TIME);
         blockTime = Long.parseLong(time);
         this.chainId = chainId;
-        assetsId = ContextManager.getContext(chainId).getParameters().getAssetId();
+        this.assetsId = assetsId;
         this.initGengsisTxs(jsonMap);
         this.fillHeader(jsonMap);
     }
 
-    public static GenesisBlock getInstance(int chainId, String json) throws Exception {
-        return new GenesisBlock(chainId, json);
+    public static GenesisBlock getInstance(int chainId, int assetsId, String json) throws Exception {
+        return new GenesisBlock(chainId, assetsId, json);
     }
 
-    public static GenesisBlock getInstance(int chainId) throws Exception {
+    public static GenesisBlock getInstance(int chainId, int assetsId) throws Exception {
         String json = null;
         try {
             json = IoUtils.read(GENESIS_BLOCK_FILE);
@@ -94,7 +94,7 @@ public final class GenesisBlock extends Block {
             e.printStackTrace();
             commonLog.error(e);
         }
-        return new GenesisBlock(chainId, json);
+        return new GenesisBlock(chainId, assetsId, json);
     }
 
     private void initGengsisTxs(Map<String, Object> jsonMap) throws Exception {
