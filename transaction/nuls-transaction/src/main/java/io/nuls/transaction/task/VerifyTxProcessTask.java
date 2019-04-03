@@ -102,7 +102,7 @@ public class VerifyTxProcessTask implements Runnable {
             }
             chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("交易获取花费时间:{}", System.currentTimeMillis() - get);
             long timeCoinData = System.currentTimeMillis();
-            VerifyTxResult verifyTxResult = LedgerCall.verifyCoinData(chain, tx);
+            VerifyTxResult verifyTxResult = LedgerCall.commitUnconfirmedTx(chain, RPCUtil.encode(tx.serialize()));
             chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("验证CoinData花费时间:{}", System.currentTimeMillis() - timeCoinData);
             long s2 = System.currentTimeMillis();
             chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("交易验证阶段花费时间:{}", s2 - s1);
@@ -122,10 +122,6 @@ public class VerifyTxProcessTask implements Runnable {
                 transactionH2Service.saveTxs(TxUtil.tx2PO(chain,tx));
                 chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("保存H2数据库花费时间:{}", System.currentTimeMillis() - timeH2);
 
-                long timeCmtLed = System.currentTimeMillis();
-                //调账本记录未确认交易
-                LedgerCall.commitUnconfirmedTx(chain, RPCUtil.encode(tx.serialize()));
-                chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("提交未确认交易到账本花费时间:{}", System.currentTimeMillis() - timeCmtLed);
                 //广播交易hash
                 NetworkCall.broadcastTxHash(chain.getChainId(),tx.getHash());
                 long s3 = System.currentTimeMillis();

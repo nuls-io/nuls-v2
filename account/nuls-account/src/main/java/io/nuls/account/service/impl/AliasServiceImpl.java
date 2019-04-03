@@ -29,10 +29,12 @@ import io.nuls.account.constant.AccountConstant;
 import io.nuls.account.constant.AccountErrorCode;
 import io.nuls.account.model.bo.Account;
 import io.nuls.account.model.bo.Chain;
+import io.nuls.account.model.bo.VerifyTxResult;
 import io.nuls.account.model.bo.tx.AliasTransaction;
 import io.nuls.account.model.bo.tx.txdata.Alias;
 import io.nuls.account.model.po.AccountPo;
 import io.nuls.account.model.po.AliasPo;
+import io.nuls.account.rpc.call.LedgerCmdCall;
 import io.nuls.account.rpc.call.NetworkCall;
 import io.nuls.account.rpc.call.TransactionCmdCall;
 import io.nuls.account.service.AccountCacheService;
@@ -131,8 +133,22 @@ public class AliasServiceImpl implements AliasService, InitializingBean {
         tx = createAliasTrasactionWithoutSign(account, aliasName);
         //签名别名交易
         signTransaction(tx, account, password);
-        //广播别名交易
-        TransactionCmdCall.newTx(account.getChainId(), RPCUtil.encode(tx.serialize()));
+
+        //调用交易验证器
+        if(!this.aliasTxValidate(chainId, tx)){
+            LoggerUtil.logger.error("new tx validator failed...");
+            throw new NulsRuntimeException(AccountErrorCode.TX_DATA_VALIDATION_ERROR);
+        }
+        VerifyTxResult verifyTxResult = LedgerCmdCall.commitUnconfirmedTx(chainId, RPCUtil.encode(tx.serialize()));
+        if(!verifyTxResult.success()){
+            LoggerUtil.logger.error("new tx verifyCoinData failed...");
+            throw new NulsRuntimeException(AccountErrorCode.TX_DATA_VALIDATION_ERROR);
+        }
+        //发起新交易
+        if(!TransactionCmdCall.newTx(chainId, RPCUtil.encode(tx.serialize()))) {
+            //如果发给交易模块失败,
+            LedgerCmdCall.rollBackUnconfirmTx(chainId, RPCUtil.encode(tx.serialize()));
+        }
         return tx;
     }
 
@@ -336,7 +352,7 @@ public class AliasServiceImpl implements AliasService, InitializingBean {
         //计算交易数据摘要哈希
         tx.setHash(NulsDigestData.calcDigestData(tx.serializeForHash()));
         //缓存当前交易hash
-        TxUtil.cacheTxHash(tx);
+//        TxUtil.cacheTxHash(tx);
         return tx;
     }
 

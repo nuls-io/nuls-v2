@@ -30,7 +30,6 @@ import io.nuls.account.constant.AccountErrorCode;
 import io.nuls.account.model.bo.Account;
 import io.nuls.account.model.dto.MultiSignTransactionResultDto;
 import io.nuls.account.model.po.MultiSigAccountPo;
-import io.nuls.account.rpc.call.TransactionCmdCall;
 import io.nuls.account.service.AccountService;
 import io.nuls.account.service.MultiSignAccountService;
 import io.nuls.account.service.TransactionService;
@@ -42,17 +41,12 @@ import io.nuls.base.basic.AddressTool;
 import io.nuls.base.constant.BaseConstant;
 import io.nuls.base.data.Address;
 import io.nuls.base.data.MultiSigAccount;
-import io.nuls.base.data.Transaction;
-import io.nuls.base.signture.TransactionSignature;
-import io.nuls.rpc.util.RPCUtil;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Service;
 import io.nuls.tools.crypto.HexUtil;
-import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.exception.NulsRuntimeException;
 import io.nuls.tools.parse.SerializeUtils;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -190,38 +184,5 @@ public class MultiSigAccountServiceImpl implements MultiSignAccountService {
         }
         return multiSigAccount;
     }
-
-
-    /**
-     * 多签交易处理
-     **/
-    public void txMutilProcessing(MultiSigAccount multiSigAccount, Transaction tx, TransactionSignature transactionSignature) throws NulsException, IOException {
-        //当已签名数等于M则自动广播该交易
-        if (multiSigAccount.getM() == transactionSignature.getP2PHKSignatures().size()) {
-            TransactionCmdCall.newTx(multiSigAccount.getChainId(), RPCUtil.encode(tx.serialize()));
-            // Result saveResult = accountLedgerService.verifyAndSaveUnconfirmedTransaction(tx);
-//            if (saveResult.isFailed()) {
-//                if (KernelErrorCode.DATA_SIZE_ERROR.getCode().equals(saveResult.getErrorCode().getCode())) {
-//                    //重新算一次交易(不超出最大交易数据大小下)的最大金额
-//                    Result rs = accountLedgerService.getMaxAmountOfOnce(fromAddr, tx, TransactionFeeCalculator.OTHER_PRECE_PRE_1024_BYTES);
-//                    if (rs.isSuccess()) {
-//                        Na maxAmount = (Na) rs.getData();
-//                        rs = Result.getFailed(KernelErrorCode.DATA_SIZE_ERROR_EXTEND);
-//                        rs.setMsg(rs.getMsg() + maxAmount.toDouble());
-//                    }
-//                    return rs;
-//                }
-//                return saveResult;
-//            }
-//            transactionService.newTx(tx);
-//            Result sendResult = transactionService.broadcastTx(tx);
-//            if (sendResult.isFailed()) {
-//                accountLedgerService.deleteTransaction(tx);
-//                return sendResult;
-//            }
-//            return Result.getSuccess().setData(tx.getHash().getDigestHex());
-        }
-    }
-
 
 }

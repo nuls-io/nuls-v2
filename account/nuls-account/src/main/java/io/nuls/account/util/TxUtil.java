@@ -28,8 +28,7 @@ import io.nuls.account.config.NulsConfig;
 import io.nuls.account.constant.AccountConstant;
 import io.nuls.account.constant.AccountErrorCode;
 import io.nuls.account.model.bo.Chain;
-import io.nuls.account.rpc.call.LegerCmdCall;
-import io.nuls.account.rpc.call.NetworkCall;
+import io.nuls.account.rpc.call.LedgerCmdCall;
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.data.*;
@@ -119,9 +118,9 @@ public class TxUtil {
      * @param addressByte
      * @return
      */
-    public static byte[] getNonce2(int chainId, int assetChainId, int assetId, byte[] addressByte) {
+    public static byte[] getNonce(int chainId, int assetChainId, int assetId, byte[] addressByte) {
         String address = AddressTool.getStringAddressByBytes(addressByte);
-        return LegerCmdCall.getNonce(chainId, assetChainId, assetId, address);
+        return LedgerCmdCall.getNonce(chainId, assetChainId, assetId, address);
     }
 
     /**
@@ -134,17 +133,17 @@ public class TxUtil {
      * @param addressByte
      * @return
      */
-    public static byte[] getNonce(int chainId, int assetChainId, int assetId, byte[] addressByte) throws NulsException {
-        String address = AddressTool.getStringAddressByBytes(addressByte);
-        String key = address + "_" + assetChainId + "_" + assetId;
-        NonceHashData nonceHashData = PRE_HASH_MAP.get(key);
-        if (null == nonceHashData || (NetworkCall.getCurrentTimeMillis() - nonceHashData.getCacheTimestamp() > AccountConstant.HASH_TTL)) {
-            LoggerUtil.logger.debug("getNonce重新向账本获取新的nonce...........");
-            return LegerCmdCall.getNonce(chainId, assetChainId, assetId, address);
-        } else {
-            return TxUtil.getNonceByPreHash(nonceHashData.getHash());
-        }
-    }
+//    public static byte[] getNonce(int chainId, int assetChainId, int assetId, byte[] addressByte) throws NulsException {
+//        String address = AddressTool.getStringAddressByBytes(addressByte);
+//        String key = address + "_" + assetChainId + "_" + assetId;
+//        NonceHashData nonceHashData = PRE_HASH_MAP.get(key);
+//        if (null == nonceHashData || (NetworkCall.getCurrentTimeMillis() - nonceHashData.getCacheTimestamp() > AccountConstant.HASH_TTL)) {
+//            LoggerUtil.logger.debug("getNonce重新向账本获取新的nonce...........");
+//            return LedgerCmdCall.getNonce(chainId, assetChainId, assetId, address);
+//        } else {
+//            return TxUtil.getNonceByPreHash(nonceHashData.getHash());
+//        }
+//    }
 
     /**
      * 缓存发出的交易hash
@@ -152,14 +151,14 @@ public class TxUtil {
      * @param tx
      * @throws NulsException
      */
-    public static void cacheTxHash(Transaction tx) throws NulsException {
-        CoinData coinData = TxUtil.getCoinData(tx);
-        for (CoinFrom coinFrom : coinData.getFrom()) {
-            String address = AddressTool.getStringAddressByBytes(coinFrom.getAddress());
-            String key = address + "_" + coinFrom.getAssetsChainId() + "_" + coinFrom.getAssetsId();
-            TxUtil.PRE_HASH_MAP.put(key, new NonceHashData(tx.getHash(), NetworkCall.getCurrentTimeMillis()));
-        }
-    }
+//    public static void cacheTxHash(Transaction tx) throws NulsException {
+//        CoinData coinData = TxUtil.getCoinData(tx);
+//        for (CoinFrom coinFrom : coinData.getFrom()) {
+//            String address = AddressTool.getStringAddressByBytes(coinFrom.getAddress());
+//            String key = address + "_" + coinFrom.getAssetsChainId() + "_" + coinFrom.getAssetsId();
+//            TxUtil.PRE_HASH_MAP.put(key, new NonceHashData(tx.getHash(), NetworkCall.getCurrentTimeMillis()));
+//        }
+//    }
 
     /**
      * 根据上一个交易hash获取下一个合法的nonce
@@ -167,13 +166,13 @@ public class TxUtil {
      * @param hash
      * @return
      */
-    public static byte[] getNonceByPreHash(NulsDigestData hash) {
-        byte[] out = new byte[8];
-        byte[] in = hash.getDigestBytes();
-        int copyEnd = in.length;
-        System.arraycopy(in, (copyEnd - 8), out, 0, 8);
-        return out;
-    }
+//    public static byte[] getNonceByPreHash(NulsDigestData hash) {
+//        byte[] out = new byte[8];
+//        byte[] in = hash.getDigestBytes();
+//        int copyEnd = in.length;
+//        System.arraycopy(in, (copyEnd - 8), out, 0, 8);
+//        return out;
+//    }
 
     /**
      * 查询账户余额（未确认）
@@ -186,7 +185,7 @@ public class TxUtil {
      */
     public static BigInteger getBalance(int chainId, int assetChainId, int assetId, byte[] addressByte) {
         String address = AddressTool.getStringAddressByBytes(addressByte);
-        HashMap balanceNonce = LegerCmdCall.getBalanceNonce(chainId, assetChainId, assetId, address);
+        HashMap balanceNonce = LedgerCmdCall.getBalanceNonce(chainId, assetChainId, assetId, address);
         if (balanceNonce != null) {
             Object available = balanceNonce.get("available");
             return BigIntegerUtils.stringToBigInteger(String.valueOf(available));
@@ -205,7 +204,7 @@ public class TxUtil {
      */
     public static BigInteger getConfirmedBalance(int chainId, int assetChainId, int assetId, byte[] addressByte) {
         String address = AddressTool.getStringAddressByBytes(addressByte);
-        return LegerCmdCall.getBalance(chainId, assetChainId, assetId, address);
+        return LedgerCmdCall.getBalance(chainId, assetChainId, assetId, address);
     }
 
     public static CoinData getCoinData(Transaction tx) throws NulsException {

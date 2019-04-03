@@ -336,13 +336,13 @@ public class TxUtil {
      * @param hash
      * @return
      */
-    public static byte[] getNonceByPreHash(NulsDigestData hash) {
-        byte[] out = new byte[8];
-        byte[] in = hash.getDigestBytes();
-        int copyEnd = in.length;
-        System.arraycopy(in, (copyEnd - 8), out, 0, 8);
-        return out;
-    }
+//    public static byte[] getNonceByPreHash(NulsDigestData hash) {
+//        byte[] out = new byte[8];
+//        byte[] in = hash.getDigestBytes();
+//        int copyEnd = in.length;
+//        System.arraycopy(in, (copyEnd - 8), out, 0, 8);
+//        return out;
+//    }
 
     public static void txInformationDebugPrint(Chain chain, Transaction tx, NulsLogger nulsLogger) {
         if (tx.getType() == 1) {

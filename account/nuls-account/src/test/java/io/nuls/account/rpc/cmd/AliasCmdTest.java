@@ -2,7 +2,7 @@ package io.nuls.account.rpc.cmd;
 
 import io.nuls.account.constant.AccountConstant;
 import io.nuls.account.model.bo.tx.txdata.Alias;
-import io.nuls.account.rpc.call.LegerCmdCall;
+import io.nuls.account.rpc.call.LedgerCmdCall;
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.Transaction;
 import io.nuls.rpc.info.Constants;
@@ -125,7 +125,7 @@ public class AliasCmdTest {
         assertNotNull(result);
         String fee = (String) result.get("txHash");
         assertNotNull(fee);
-        BigInteger balance = LegerCmdCall.getBalance(chainId, chainId, 1, address);
+        BigInteger balance = LedgerCmdCall.getBalance(chainId, chainId, 1, address);
         System.out.println(balance.longValue());
     }
 
