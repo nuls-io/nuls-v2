@@ -23,6 +23,7 @@ import java.util.Iterator;
 import java.util.List;
 
 /**
+ * 处理由其他节点广播的交易
  * @author: Charlie
  * @date: 2018/11/28
  */
@@ -101,7 +102,7 @@ public class VerifyTxProcessTask implements Runnable {
             }
             chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("交易获取花费时间:{}", System.currentTimeMillis() - get);
             long timeCoinData = System.currentTimeMillis();
-            VerifyTxResult verifyTxResult = LedgerCall.verifyCoinData(chain, tx, false);
+            VerifyTxResult verifyTxResult = LedgerCall.verifyCoinData(chain, tx);
             chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("验证CoinData花费时间:{}", System.currentTimeMillis() - timeCoinData);
             long s2 = System.currentTimeMillis();
             chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("交易验证阶段花费时间:{}", s2 - s1);

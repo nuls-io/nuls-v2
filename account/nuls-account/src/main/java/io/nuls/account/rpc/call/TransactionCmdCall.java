@@ -99,7 +99,7 @@ public class TransactionCmdCall {
      */
     public static void newTx(int chainId, String txHex) {
         try {
-            Map<String, Object> params = new HashMap<>();
+            Map<String, Object> params = new HashMap<>(AccountConstant.INIT_CAPACITY_8);
             params.put(Constants.VERSION_KEY_STR, RpcConstant.TX_NEW_VERSION);
             params.put(RpcConstant.TX_CHAIN_ID, chainId);
             params.put(RpcConstant.TX_DATA, txHex);

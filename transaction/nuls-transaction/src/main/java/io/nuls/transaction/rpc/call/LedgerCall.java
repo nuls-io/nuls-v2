@@ -51,9 +51,9 @@ public class LedgerCall {
      * @param tx
      * @return
      */
-    public static VerifyTxResult verifyCoinData(Chain chain, Transaction tx, boolean batch) throws NulsException {
+    public static VerifyTxResult verifyCoinData(Chain chain, Transaction tx) throws NulsException {
         try {
-            return verifyCoinData(chain, RPCUtil.encode(tx.serialize()), batch);
+            return verifyCoinData(chain, RPCUtil.encode(tx.serialize()), false);
         } catch (Exception e) {
             throw new NulsException(e);
         }
