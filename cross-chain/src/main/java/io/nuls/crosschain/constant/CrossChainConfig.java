@@ -7,7 +7,7 @@ import io.nuls.tools.core.annotation.Configuration;
  * @author tag
  * @date 2019/04/01
  * */
-@Configuration(persistDomain = "crossChain")
+@Configuration(domain = "crossChain")
 public class CrossChainConfig {
 
 }
