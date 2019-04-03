@@ -35,8 +35,6 @@ import io.nuls.tools.core.ioc.SpringLiteContext;
 
 import java.util.*;
 
-import static io.nuls.network.utils.LoggerUtil.Log;
-
 public class ShareAddressTask implements Runnable {
 
     private final NetworkConfig networkConfig = SpringLiteContext.getBean(NetworkConfig.class);
@@ -70,7 +68,7 @@ public class ShareAddressTask implements Runnable {
         networkConfig.getLocalIps().add(externalIp);
         /*自有网络的连接分享*/
         if (!nodeGroup.isMoonCrossGroup()) {
-            Log.info("share self ip  is {}", externalIp);
+            LoggerUtil.logger().info("share self ip  is {}", externalIp);
             Node myNode = new Node(nodeGroup.getMagicNumber(), externalIp, networkConfig.getPort(), Node.OUT, false);
             myNode.setConnectedListener(() -> {
                 myNode.getChannel().close();

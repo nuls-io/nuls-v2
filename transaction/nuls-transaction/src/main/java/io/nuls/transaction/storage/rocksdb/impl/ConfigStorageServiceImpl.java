@@ -26,13 +26,13 @@ package io.nuls.transaction.storage.rocksdb.impl;
 
 import io.nuls.db.model.Entry;
 import io.nuls.db.service.RocksDBService;
-import io.nuls.tools.core.annotation.Service;
+import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.model.ByteUtils;
 import io.nuls.tools.model.ObjectUtils;
 import io.nuls.transaction.constant.TxConstant;
 import io.nuls.transaction.constant.TxDBConstant;
-import io.nuls.transaction.storage.rocksdb.ConfigStorageService;
 import io.nuls.transaction.model.bo.config.ConfigBean;
+import io.nuls.transaction.storage.rocksdb.ConfigStorageService;
 
 import java.util.HashMap;
 import java.util.List;
@@ -47,7 +47,7 @@ import static io.nuls.transaction.utils.LoggerUtil.Log;
  * @author qinyifeng
  * @date 2018/12/11
  * */
-@Service
+@Component
 public class ConfigStorageServiceImpl implements ConfigStorageService {
 
     @Override

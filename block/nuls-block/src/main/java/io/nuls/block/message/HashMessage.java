@@ -72,4 +72,22 @@ public class HashMessage extends BaseMessage {
         this.requestHash = byteBuffer.readHash();
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+
+        HashMessage that = (HashMessage) o;
+
+        return requestHash != null ? requestHash.equals(that.requestHash) : that.requestHash == null;
+    }
+
+    @Override
+    public int hashCode() {
+        return requestHash != null ? requestHash.hashCode() : 0;
+    }
 }

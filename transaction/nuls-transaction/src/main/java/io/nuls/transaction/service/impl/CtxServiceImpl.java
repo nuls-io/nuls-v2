@@ -7,7 +7,7 @@ import io.nuls.base.signture.P2PHKSignature;
 import io.nuls.base.signture.SignatureUtil;
 import io.nuls.rpc.util.RPCUtil;
 import io.nuls.tools.core.annotation.Autowired;
-import io.nuls.tools.core.annotation.Service;
+import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.model.StringUtils;
 import io.nuls.transaction.cache.PackablePool;
@@ -45,7 +45,7 @@ import java.util.concurrent.locks.ReentrantLock;
  * @author: qinyifeng
  * @date: 2018/12/19
  */
-@Service
+@Component
 public class CtxServiceImpl implements CtxService {
 
     private final Lock CTX_LOCK = new ReentrantLock();

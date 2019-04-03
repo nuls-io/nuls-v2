@@ -42,7 +42,7 @@ public class BlockGeneratorTest {
         int count = 10;
         List<Block> blocks = new ArrayList<>();
 
-        GenesisBlock genesisBlock = GenesisBlock.getInstance();
+        GenesisBlock genesisBlock = GenesisBlock.getInstance(0, 0);
         blocks.add(genesisBlock);
 
         Block preBlock = genesisBlock;

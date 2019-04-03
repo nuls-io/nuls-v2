@@ -3,6 +3,7 @@ package io.nuls.poc.rpc.call;
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.BlockExtendsData;
 import io.nuls.base.data.BlockHeader;
+import io.nuls.base.data.NulsDigestData;
 import io.nuls.base.data.Transaction;
 import io.nuls.base.signture.BlockSignature;
 import io.nuls.base.signture.P2PHKSignature;
@@ -21,6 +22,7 @@ import io.nuls.rpc.util.RPCUtil;
 import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.log.Log;
+import io.nuls.tools.log.logback.NulsLogger;
 import io.nuls.tools.model.StringUtils;
 
 import java.util.*;

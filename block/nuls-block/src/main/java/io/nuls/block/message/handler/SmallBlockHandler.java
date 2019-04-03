@@ -164,7 +164,6 @@ public class SmallBlockHandler extends BaseCmd {
             //获取没有的交易
             if (!missTxHashList.isEmpty()) {
                 messageLog.info("block height:" + header.getHeight() + ", total tx count:" + header.getTxCount() + " , get group tx of " + missTxHashList.size());
-                messageLog.debug("needHashList:" + missTxHashList + ", from:" + nodeId);
                 //这里的smallBlock的subTxList中包含一些非系统交易,用于跟TxGroup组合成完整区块
                 CachedSmallBlock cachedSmallBlock = new CachedSmallBlock(missTxHashList, smallBlock, txMap);
                 SmallBlockCacher.cacheSmallBlock(chainId, cachedSmallBlock);

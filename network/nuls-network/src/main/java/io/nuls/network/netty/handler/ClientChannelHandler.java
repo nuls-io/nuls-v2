@@ -32,13 +32,11 @@ import io.netty.util.Attribute;
 import io.netty.util.AttributeKey;
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.network.manager.MessageManager;
-import io.nuls.network.manager.TimeManager;
 import io.nuls.network.manager.handler.base.BaseChannelHandler;
 import io.nuls.network.model.Node;
+import io.nuls.network.utils.LoggerUtil;
 
 import java.io.IOException;
-
-import static io.nuls.network.utils.LoggerUtil.Log;
 
 /**
  * client channel handler
@@ -76,7 +74,7 @@ public class ClientChannelHandler extends BaseChannelHandler {
         if (node != null && node.getConnectedListener() != null) {
             node.getConnectedListener().action();
         }
-        Log.info("Client Node is active:{}", node.getId());
+        LoggerUtil.logger().info("Client Node is active:{}", node.getId());
     }
 
     @Override
@@ -100,7 +98,7 @@ public class ClientChannelHandler extends BaseChannelHandler {
                 buf.readBytes(bytes);
                 byteBuffer = new NulsByteBuffer(bytes);
             } else {
-                Log.error("-----------------client channelRead  node is null -----------------" + remoteIP + ":" + port);
+                LoggerUtil.logger().error("-----------------client channelRead  node is null -----------------" + remoteIP + ":" + port);
                 ctx.channel().close();
             }
         } catch (Exception e) {
@@ -118,10 +116,10 @@ public class ClientChannelHandler extends BaseChannelHandler {
         Attribute<Node> nodeAttribute = ctx.channel().attr(key);
         Node node = nodeAttribute.get();
         if (node != null && node.getDisconnectListener() != null) {
-            Log.debug("-----------------client channelInactive  node is channelUnregistered node={}-----------------",node.getId());
+            LoggerUtil.logger().debug("-----------------client channelInactive  node is channelUnregistered node={}-----------------",node.getId());
             node.getDisconnectListener().action();
         }
-        Log.info("-----------------client channelInactive  node is channelUnregistered -----------------");
+        LoggerUtil.logger().info("-----------------client channelInactive  node is channelUnregistered -----------------");
 
     }
 
@@ -130,7 +128,7 @@ public class ClientChannelHandler extends BaseChannelHandler {
         cause.printStackTrace();
         if (!(cause instanceof IOException)) {
             cause.printStackTrace();
-            Log.error(cause.getMessage());
+            LoggerUtil.logger().error(cause.getMessage());
         }
         ctx.channel().close();
     }

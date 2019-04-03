@@ -27,7 +27,7 @@ package io.nuls.transaction.storage.rocksdb.impl;
 
 
 import io.nuls.base.data.Transaction;
-import io.nuls.tools.core.annotation.Service;
+import io.nuls.tools.core.annotation.Component;
 import io.nuls.transaction.model.bo.Chain;
 import io.nuls.transaction.storage.rocksdb.UnverifiedTxStorageService;
 import io.nuls.transaction.utils.TxUtil;
@@ -42,7 +42,7 @@ import static io.nuls.transaction.utils.LoggerUtil.Log;
  * @author: qinyifeng
  * @date: 2018/11/29
  */
-@Service
+@Component
 public class UnverifiedTxStorageServiceImpl implements UnverifiedTxStorageService {
 
     @Override

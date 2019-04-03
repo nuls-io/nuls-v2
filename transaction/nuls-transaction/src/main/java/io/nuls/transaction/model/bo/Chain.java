@@ -13,6 +13,8 @@ import java.util.concurrent.BlockingDeque;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * 链信息类
@@ -87,6 +89,8 @@ public class Chain {
     private boolean contractTxFail;
 
     private Map<NulsDigestData, Integer> txPackageOrphanMap;
+
+    private final Lock packageLock = new ReentrantLock();
 
     public Chain() {
         this.packaging =  new AtomicBoolean(false);
@@ -186,7 +190,13 @@ public class Chain {
         return txPackageOrphanMap;
     }
 
+    public Lock getPackageLock() {
+        return packageLock;
+    }
+
     public void setTxPackageOrphanMap(Map<NulsDigestData, Integer> txPackageOrphanMap) {
         this.txPackageOrphanMap = txPackageOrphanMap;
+
+
     }
 }

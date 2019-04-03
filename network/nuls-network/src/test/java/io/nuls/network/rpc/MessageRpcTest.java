@@ -82,7 +82,7 @@ public class MessageRpcTest {
             params.put("messageBody",RPCUtil.encode(versionMessageBody.serialize()));
             params.put("command","block");
             Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.NW.abbr, "nw_broadcast", params);
-            LoggerUtil.Log.info("response {}", response);
+            LoggerUtil.logger().info("response {}", response);
 
         }catch (Exception e){
             e.printStackTrace();

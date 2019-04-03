@@ -24,12 +24,11 @@ import io.nuls.base.data.Block;
 import io.nuls.base.data.NulsDigestData;
 import io.nuls.block.constant.BlockErrorCode;
 import io.nuls.block.constant.ChainTypeEnum;
-import io.nuls.block.exception.ChainRuntimeException;
 import io.nuls.block.model.Chain;
+import io.nuls.block.rpc.call.ConsensusUtil;
 import io.nuls.block.service.BlockService;
 import io.nuls.block.storage.ChainStorageService;
 import io.nuls.block.utils.BlockUtil;
-import io.nuls.block.rpc.call.ConsensusUtil;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.exception.NulsRuntimeException;
@@ -177,7 +176,7 @@ public class BlockChainManager {
         //主链回滚中途失败,把前面回滚的区块再加回主链
         for (Block block : blockList) {
             if (!blockService.saveBlock(chainId, block, false)) {
-                throw new ChainRuntimeException("*switch chain fail, auto saveBlockToMasterChain fail");
+                throw new NulsRuntimeException(BlockErrorCode.CHAIN_MERGE_ERROR);
             }
         }
     }

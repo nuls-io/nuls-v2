@@ -35,38 +35,38 @@ package io.nuls.rpc.model.message;
  */
 
 public class NegotiateConnectionResponse {
-    private String requestId;
+    private String RequestId;
     /**
      * An unsigned small integer value, 0 if negotiation was a failure and 1 if it was successful
      */
-    private String negotiationStatus;
+    private String NegotiationStatus;
 
     /**
      * A string value, useful to describe what exactly went wrong when the connection was rejected.
      */
-    private String negotiationComment;
+    private String NegotiationComment;
 
     public String getRequestId() {
-        return requestId;
+        return RequestId;
     }
 
-    public void setRequestId(String requestId) {
-        this.requestId = requestId;
+    public void setRequestId(String RequestId) {
+        this.RequestId = RequestId;
     }
 
     public String getNegotiationStatus() {
-        return negotiationStatus;
+        return NegotiationStatus;
     }
 
-    public void setNegotiationStatus(String negotiationStatus) {
-        this.negotiationStatus = negotiationStatus;
+    public void setNegotiationStatus(String NegotiationStatus) {
+        this.NegotiationStatus = NegotiationStatus;
     }
 
     public String getNegotiationComment() {
-        return negotiationComment;
+        return NegotiationComment;
     }
 
-    public void setNegotiationComment(String negotiationComment) {
-        this.negotiationComment = negotiationComment;
+    public void setNegotiationComment(String NegotiationComment) {
+        this.NegotiationComment = NegotiationComment;
     }
 }

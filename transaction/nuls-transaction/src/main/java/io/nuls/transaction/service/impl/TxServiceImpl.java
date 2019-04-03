@@ -24,6 +24,7 @@
  */
 package io.nuls.transaction.service.impl;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.basic.TransactionFeeCalculator;
 import io.nuls.base.constant.TxStatusEnum;
@@ -33,11 +34,12 @@ import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.util.RPCUtil;
 import io.nuls.tools.basic.Result;
 import io.nuls.tools.core.annotation.Autowired;
-import io.nuls.tools.core.annotation.Service;
+import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.log.logback.NulsLogger;
 import io.nuls.tools.model.BigIntegerUtils;
+import io.nuls.tools.parse.JSONUtils;
 import io.nuls.transaction.cache.PackablePool;
 import io.nuls.transaction.constant.TxConfig;
 import io.nuls.transaction.constant.TxConstant;
@@ -58,6 +60,7 @@ import io.nuls.transaction.storage.rocksdb.UnconfirmedTxStorageService;
 import io.nuls.transaction.storage.rocksdb.UnverifiedTxStorageService;
 import io.nuls.transaction.utils.TxUtil;
 
+import java.io.IOException;
 import java.math.BigInteger;
 import java.util.*;
 
@@ -67,7 +70,7 @@ import static io.nuls.transaction.utils.LoggerUtil.Log;
  * @author: Charlie
  * @date: 2018/11/22
  */
-@Service
+@Component
 public class TxServiceImpl implements TxService {
 
     @Autowired
@@ -103,10 +106,35 @@ public class TxServiceImpl implements TxService {
     }
 
     @Override
-    public void newTx(Chain chain, Transaction tx) throws NulsException {
+    public void newBroadcastTx(Chain chain, Transaction tx) throws NulsException {
         TransactionConfirmedPO txExist = getTransaction(chain, tx.getHash());
         if (null == txExist) {
             unverifiedTxStorageService.putTx(chain, tx);
+        }
+    }
+
+
+    @Override
+    public void newTx(Chain chain, Transaction tx) throws NulsException {
+        TransactionConfirmedPO existTx = getTransaction(chain, tx.getHash());
+        if(null == existTx){
+            if(chain.getPackaging().get()) {
+                //当节点是出块节点时, 才将交易放入待打包队列
+                packablePool.add(chain, tx);
+                chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("交易[加入待打包队列].....hash:{}", tx.getHash().getDigestHex());
+            }
+            //保存到rocksdb
+            unconfirmedTxStorageService.putTx(chain.getChainId(), tx);
+            //保存到h2数据库
+            transactionH2Service.saveTxs(TxUtil.tx2PO(chain,tx));
+            // TODO: 2019/4/2 应该去掉,因为在各模块验证账本时已提交 调账本记录未确认交易
+            try {
+                LedgerCall.commitUnconfirmedTx(chain, RPCUtil.encode(tx.serialize()));
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            //广播交易hash
+            NetworkCall.broadcastTxHash(chain.getChainId(),tx.getHash());
         }
     }
 
@@ -604,6 +632,7 @@ public class TxServiceImpl implements TxService {
      */
     @Override
     public TxPackage getPackableTxs(Chain chain, long endtimestamp, long maxTxDataSize, long blockHeight, long blockTime, String packingAddress, String preStateRoot) {
+        chain.getPackageLock().lock();
         NulsLogger nulsLogger = chain.getLoggerMap().get(TxConstant.LOG_TX);
         nulsLogger.info("");
         nulsLogger.info("%%%%%%%%% TX开始打包 %%%%%%%%%%%% height:{}", blockHeight);
@@ -662,6 +691,13 @@ public class TxServiceImpl implements TxService {
                     }
                     continue;
                 }
+                //从已确认的交易中进行重复交易判断
+                TransactionConfirmedPO txConfirmed = confirmedTxService.getConfirmedTransaction(chain, tx.getHash());
+                if (txConfirmed != null) {
+                    nulsLogger.debug("丢弃已确认过交易,txHash:{}, - type:{}, - time:{}", tx.getHash().getDigestHex(), tx.getType(), tx.getTime());
+                    continue;
+                }
+
                 TxWrapper txWrapper = new TxWrapper(tx, index);
 
                 long txSize = tx.size();
@@ -683,16 +719,18 @@ public class TxServiceImpl implements TxService {
                 //批量验证coinData, 单个发送
                 VerifyTxResult verifyTxResult = LedgerCall.verifyCoinData(chain, txStr, true);
                 if (!verifyTxResult.success()) {
-                    String nonce = HexUtil.encode(TxUtil.getCoinData(tx).getFrom().get(0).getNonce());
-                    nulsLogger.error("coinData打包批量验证未通过 coinData not success - code: {}, - reason:{}, - type:{}, - first coinFrom nonce:{} - txhash:{}",
-                            verifyTxResult.getCode(), verifyTxResult.getDesc(), tx.getType(), nonce, tx.getHash().getDigestHex());
+                    if (verifyTxResult.getCode() != 5) {
+                        String nonce = HexUtil.encode(TxUtil.getCoinData(tx).getFrom().get(0).getNonce());
+                        nulsLogger.error("coinData打包批量验证未通过 coinData not success - code: {}, - reason:{}, - type:{}, - first coinFrom nonce:{} - txhash:{}",
+                                verifyTxResult.getCode(), verifyTxResult.getDesc(), tx.getType(), nonce, tx.getHash().getDigestHex());
+                    }
                     if (verifyTxResult.getCode() == VerifyTxResult.ORPHAN) {
                         addOrphanTxSet(chain, orphanTxSet, txWrapper);
                     }
                     continue;
                 }
-                //从已确认的交易中进行重复交易判断
-                TransactionConfirmedPO txConfirmed = confirmedTxService.getConfirmedTransaction(chain, tx.getHash());
+                //再次重复交易判断
+                txConfirmed = confirmedTxService.getConfirmedTransaction(chain, tx.getHash());
                 if (txConfirmed != null) {
                     nulsLogger.debug("丢弃已确认过交易,txHash:{}, - type:{}, - time:{}", tx.getHash().getDigestHex(), tx.getType(), tx.getTime());
                     continue;
@@ -740,7 +778,7 @@ public class TxServiceImpl implements TxService {
                 } else {
                     try {
                         Map<String, Object> map = ContractCall.contractBatchEnd(chain, blockHeight);
-                        List<String> scNewList = (List<String>) map.get("txHexList");
+                        List<String> scNewList = (List<String>) map.get("txList");
                         if (null != scNewList) {
                             contractGenerateTxs.addAll(scNewList);
                         }
@@ -821,6 +859,8 @@ public class TxServiceImpl implements TxService {
             //可打包交易,孤儿交易,全加回去
             putBackPackablePool(chain, packingTxList, orphanTxSet);
             return new TxPackage(new ArrayList<>(), preStateRoot, chain.getBestBlockHeight() + 1);
+        }finally {
+            chain.getPackageLock().unlock();
         }
     }
 
@@ -906,7 +946,7 @@ public class TxServiceImpl implements TxService {
             if (null == txHashList || txHashList.size() == 0) {
                 //模块统一验证没有冲突的，从map中干掉
                 it.remove();
-                break;
+                continue;
             }
 
             /**冲突检测有不通过的, 执行清除和未确认回滚 从packingTxList删除, 放弃分组?*/
@@ -922,6 +962,20 @@ public class TxServiceImpl implements TxService {
                 }
             }
         }
+
+        Iterator<Map.Entry<TxRegister, List<String>>> its = moduleVerifyMap.entrySet().iterator();
+        while (its.hasNext()) {
+            Map.Entry<TxRegister, List<String>> entry = its.next();
+            try {
+                chain.getLoggerMap().get(TxConstant.LOG_TX).debug("key:{}", JSONUtils.obj2json(entry.getKey()));
+                for (String str : entry.getValue()){
+                chain.getLoggerMap().get(TxConstant.LOG_TX).debug("value:{}", str);
+                }
+            } catch (JsonProcessingException e) {
+                e.printStackTrace();
+            }
+        }
+
         if (moduleVerifyMap.isEmpty()) {
             return true;
         }

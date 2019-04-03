@@ -9,12 +9,11 @@ import java.util.List;
 /**
  * @Author: lanjinsheng
  * @Time: 2019-03-14 14:11
- * @Description:
- * 配置文件
+ * @Description: 配置文件
  */
-@Configuration(persistDomain = "network")
+@Configuration(domain = "network")
 public class NetworkConfig {
-
+    private String logLevel = "DEBUG";
     private int chainId;
 
     private int port;
@@ -55,6 +54,14 @@ public class NetworkConfig {
     public List<String> getLocalIps() {
 
         return localIps;
+    }
+
+    public String getLogLevel() {
+        return logLevel;
+    }
+
+    public void setLogLevel(String logLevel) {
+        this.logLevel = logLevel;
     }
 
     public String getExternalIp() {

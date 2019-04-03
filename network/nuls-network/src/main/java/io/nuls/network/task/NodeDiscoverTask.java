@@ -40,8 +40,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
-import static io.nuls.network.utils.LoggerUtil.Log;
-
 /**
  * 节点发现任务
  *
@@ -80,7 +78,7 @@ public class NodeDiscoverTask implements Runnable {
             }
 
         } catch (Exception e) {
-            Log.error(e);
+            LoggerUtil.logger().error(e);
         }
     }
 
@@ -110,7 +108,7 @@ public class NodeDiscoverTask implements Runnable {
             }
 
         } catch (Exception e) {
-            Log.error(e);
+            LoggerUtil.logger().error(e);
         }
     }
 
@@ -125,11 +123,11 @@ public class NodeDiscoverTask implements Runnable {
                 Thread.sleep(3000L);
             }
         } catch (Exception e) {
-            Log.error(e);
+            LoggerUtil.logger().error(e);
             try {
                 Thread.sleep(3000L);
             } catch (InterruptedException e1) {
-                Log.error(e1);
+                LoggerUtil.logger().error(e1);
             }
         }
     }
@@ -249,7 +247,7 @@ public class NodeDiscoverTask implements Runnable {
         try {
             return future.get();
         } catch (Exception e) {
-            Log.error(e);
+            LoggerUtil.logger().error(e);
             return PROBE_STATUS_IGNORE;
         }
     }

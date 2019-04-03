@@ -75,7 +75,7 @@ public class MessageSendTaskTest implements Runnable  {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        LoggerUtil.Log.info("response {}", response);
+        LoggerUtil.logger().info("response {}", response);
       }
  }
 

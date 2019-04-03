@@ -38,13 +38,13 @@ public class UnregisterCompoundMethod {
      * This is the string that identifies the virtual method.
      * If it is empty then all virtual methods registered by the caller should be unregistered.
      */
-    private String unregisterCompoundMethodName;
+    private String UnregisterCompoundMethodName;
 
     public String getUnregisterCompoundMethodName() {
-        return unregisterCompoundMethodName;
+        return UnregisterCompoundMethodName;
     }
 
-    public void setUnregisterCompoundMethodName(String unregisterCompoundMethodName) {
-        this.unregisterCompoundMethodName = unregisterCompoundMethodName;
+    public void setUnregisterCompoundMethodName(String UnregisterCompoundMethodName) {
+        this.UnregisterCompoundMethodName = UnregisterCompoundMethodName;
     }
 }

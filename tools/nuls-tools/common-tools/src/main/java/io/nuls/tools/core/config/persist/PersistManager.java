@@ -21,7 +21,7 @@ import java.util.Map;
  * 配置项持久化管理类
  * 1.保存配置项到文本文件中，已json<string,string>格式存储。通过拦截器拦截{@link Configuration}注解宿主类的setter方法实现触发修改。通过判断field的{@link Persist}注解判断此field是否需要持久化
  * 2.将配置信息从文本文件中读取出来。
- * 存储目录为{user.dir}/config_tmp，每个{@link Configuration}可以指定一个domain（也就是一个独立的存储文件），通过{@link Configuration#persistDomain}注解属性指定
+ * 存储目录为{user.dir}/config_tmp，每个{@link Configuration}可以指定一个domain（也就是一个独立的存储文件），通过{@link Configuration#domain}注解属性指定
  *
  */
 public class PersistManager {
@@ -71,7 +71,7 @@ public class PersistManager {
             return;
         }
         //获取域名
-        String configFileName = annotation.persistDomain();
+        String configFileName = annotation.domain();
         File configFile = new File(CONFIG_FOLDER + File.separator + configFileName);
         //将配置存储文件中的数据读取到内存中，如果没有找到配置文件初始化一个空map。
         Map<String, String> configValue;

@@ -39,13 +39,13 @@ public class Ack {
      * 请求的消息号
      * This is the original request ID referred by a Request message
      */
-    private String requestId;
+    private String RequestId;
 
     public String getRequestId() {
-        return requestId;
+        return RequestId;
     }
 
-    public void setRequestId(String requestId) {
-        this.requestId = requestId;
+    public void setRequestId(String RequestId) {
+        this.RequestId = RequestId;
     }
 }

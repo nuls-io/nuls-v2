@@ -41,61 +41,64 @@ public class LoggerUtil {
      * 日志
      */
     private static Map<String, NulsLogger> loggerMap = new HashMap<>();
-    public static final String LOGGER_KEY1 = "ld";
-    public static final String LOGGER_KEY2 = "ld_tx";
-    public static final String LOGGER_KEY3 = "ld_txRb";
-    public static final String LOGGER_KEY4 = "ld_txUncfRb";
-    public static final String LOGGER_KEY5 = "ld_txAmount";
+    public static String logLevel = "DEBUG";
+    private static final String LOGGER_KEY1 = "ld";
+    private static final String LOGGER_KEY2 = "ld_tx";
+    private static final String LOGGER_KEY3 = "ld_txRb";
+    private static final String LOGGER_KEY4 = "ld_txUncfRb";
+    private static final String LOGGER_KEY5 = "ld_txAmount";
 
-    public static NulsLogger logger = LoggerBuilder.getLogger("./ld", LOGGER_KEY1, Level.ALL);
-//    public static NulsLogger txCommitLog = LoggerBuilder.getLogger("./ld", LOGGER_KEY2, Level.ALL);
-//    public static NulsLogger txRollBackLog = LoggerBuilder.getLogger("./ld", LOGGER_KEY3, Level.ALL);
-//    public static NulsLogger txUnconfirmedRollBackLog = LoggerBuilder.getLogger("./ld", LOGGER_KEY4, Level.ALL);
-//    public static NulsLogger txAmount = LoggerBuilder.getLogger("./ld", LOGGER_KEY5, Level.ALL);
-//    public static NulsLogger txUnconfirmedRollBackLog2 = LoggerBuilder.getLogger("./ld", LOGGER_KEY6, Level.ALL);
+    private static NulsLogger defaultLogger = null;
+
+    public static NulsLogger logger() {
+        if (null == defaultLogger) {
+            defaultLogger = LoggerBuilder.getLogger("./ld", "ld", Level.valueOf(logLevel));
+        }
+        return defaultLogger;
+    }
 
     public static NulsLogger logger(int chainId) {
-        if(null == loggerMap.get(LOGGER_KEY1+chainId)){
+        if (null == loggerMap.get(LOGGER_KEY1 + chainId)) {
             createLogger(chainId);
         }
-        return loggerMap.get(LOGGER_KEY1+chainId);
+        return loggerMap.get(LOGGER_KEY1 + chainId);
     }
 
     public static NulsLogger txCommitLog(int chainId) {
-        if(null == loggerMap.get(LOGGER_KEY2+chainId)){
+        if (null == loggerMap.get(LOGGER_KEY2 + chainId)) {
             createLogger(chainId);
         }
-        return loggerMap.get(LOGGER_KEY2+chainId);
+        return loggerMap.get(LOGGER_KEY2 + chainId);
     }
 
     public static NulsLogger txRollBackLog(int chainId) {
-        if(null == loggerMap.get(LOGGER_KEY3+chainId)){
+        if (null == loggerMap.get(LOGGER_KEY3 + chainId)) {
             createLogger(chainId);
         }
-        return loggerMap.get(LOGGER_KEY3+chainId);
+        return loggerMap.get(LOGGER_KEY3 + chainId);
     }
 
     public static NulsLogger txUnconfirmedRollBackLog(int chainId) {
-        if(null == loggerMap.get(LOGGER_KEY4+chainId)){
+        if (null == loggerMap.get(LOGGER_KEY4 + chainId)) {
             createLogger(chainId);
         }
-        return loggerMap.get(LOGGER_KEY4+chainId);
+        return loggerMap.get(LOGGER_KEY4 + chainId);
     }
 
     public static NulsLogger txAmount(int chainId) {
-        if(null == loggerMap.get(LOGGER_KEY5+chainId)){
+        if (null == loggerMap.get(LOGGER_KEY5 + chainId)) {
             createLogger(chainId);
         }
-        return loggerMap.get(LOGGER_KEY5+chainId);
+        return loggerMap.get(LOGGER_KEY5 + chainId);
     }
 
     public static void createLogger(int chainId) {
         String folderName = "./ld/" + chainId;
-        loggerMap.put(LOGGER_KEY1+chainId, LoggerBuilder.getLogger(folderName, "ld", Level.ALL));
-        loggerMap.put(LOGGER_KEY2+chainId, LoggerBuilder.getLogger(folderName, "tx", Level.ALL));
-        loggerMap.put(LOGGER_KEY3+chainId, LoggerBuilder.getLogger(folderName, "txRb", Level.ALL));
-        loggerMap.put(LOGGER_KEY4+chainId, LoggerBuilder.getLogger(folderName, "txUncfRb", Level.ALL));
-        loggerMap.put(LOGGER_KEY5+chainId, LoggerBuilder.getLogger(folderName, "txAmount", Level.ALL));
+        loggerMap.put(LOGGER_KEY1 + chainId, LoggerBuilder.getLogger(folderName, "ld", Level.valueOf(logLevel)));
+        loggerMap.put(LOGGER_KEY2 + chainId, LoggerBuilder.getLogger(folderName, "tx", Level.valueOf(logLevel)));
+        loggerMap.put(LOGGER_KEY3 + chainId, LoggerBuilder.getLogger(folderName, "txRb", Level.valueOf(logLevel)));
+        loggerMap.put(LOGGER_KEY4 + chainId, LoggerBuilder.getLogger(folderName, "txUncfRb", Level.valueOf(logLevel)));
+        loggerMap.put(LOGGER_KEY5 + chainId, LoggerBuilder.getLogger(folderName, "txAmount", Level.valueOf(logLevel)));
     }
 
 }

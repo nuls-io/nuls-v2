@@ -33,12 +33,11 @@ import io.nuls.ledger.service.AccountStateService;
 import io.nuls.ledger.service.BlockDataService;
 import io.nuls.ledger.storage.Repository;
 import io.nuls.ledger.utils.LedgerUtil;
+import io.nuls.ledger.utils.LoggerUtil;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Service;
 
 import java.util.List;
-
-import static io.nuls.ledger.utils.LoggerUtil.logger;
 
 /**
  * @author lan
@@ -64,7 +63,7 @@ public class BlockDataServiceImpl implements BlockDataService {
                     for (AccountStateSnapshot accountStateSnapshot :preAccountStates) {
                         String key = LedgerUtil.getKeyStr(accountStateSnapshot.getAccountState().getAddress(), accountStateSnapshot.getAccountState().getAssetChainId(), accountStateSnapshot.getAccountState().getAssetId());
                         accountStateService.rollAccountState(key,accountStateSnapshot);
-                        logger.info("rollBack account={},assetChainId={},assetId={}, height={},lastHash= {} ", key,  accountStateSnapshot.getAccountState().getAssetChainId(), accountStateSnapshot.getAccountState().getAssetId(),
+                        LoggerUtil.logger().info("rollBack account={},assetChainId={},assetId={}, height={},lastHash= {} ", key,  accountStateSnapshot.getAccountState().getAssetChainId(), accountStateSnapshot.getAccountState().getAssetId(),
                                 accountStateSnapshot.getAccountState().getHeight(), accountStateSnapshot.getAccountState().getTxHash());
                     }
                 }

@@ -40,8 +40,9 @@ public class NetworkInfoRpc extends BaseCmd {
         long netBestHeight = 0;
         int inCount = 0;
         int outCount = 0;
+        BlockRpcService blockRpcService = SpringLiteContext.getBean(BlockRpcServiceImpl.class);
         for (Node node : nodes) {
-            if (node.getBlockHeight() > localBestHeight) {
+            if (node.getBlockHeight() > netBestHeight) {
                 netBestHeight = node.getBlockHeight();
             }
             if (node.getType() == Node.IN) {
@@ -50,10 +51,13 @@ public class NetworkInfoRpc extends BaseCmd {
                 outCount++;
             }
         }
-        BlockRpcService blockRpcService = SpringLiteContext.getBean(BlockRpcServiceImpl.class);
+        localBestHeight = blockRpcService.getBestBlockHeader(chainId).getBlockHeight();
         //本地最新高度
-        res.put("localBestHeight", blockRpcService.getBestBlockHeader(chainId).getBlockHeight());
+        res.put("localBestHeight", localBestHeight);
         //网络最新高度
+        if (localBestHeight > netBestHeight) {
+            netBestHeight = localBestHeight;
+        }
         res.put("netBestHeight", netBestHeight);
         //网络时间偏移
         res.put("timeOffset", TimeManager.netTimeOffset);

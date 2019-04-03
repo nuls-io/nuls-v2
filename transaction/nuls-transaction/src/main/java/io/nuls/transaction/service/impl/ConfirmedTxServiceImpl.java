@@ -5,7 +5,7 @@ import io.nuls.base.constant.TxStatusEnum;
 import io.nuls.base.data.*;
 import io.nuls.rpc.util.RPCUtil;
 import io.nuls.tools.core.annotation.Autowired;
-import io.nuls.tools.core.annotation.Service;
+import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.transaction.cache.PackablePool;
 import io.nuls.transaction.constant.TxConfig;
@@ -39,7 +39,7 @@ import static io.nuls.transaction.utils.LoggerUtil.Log;
  * @author: Charlie
  * @date: 2018/11/30
  */
-@Service
+@Component
 public class ConfirmedTxServiceImpl implements ConfirmedTxService {
 
     @Autowired

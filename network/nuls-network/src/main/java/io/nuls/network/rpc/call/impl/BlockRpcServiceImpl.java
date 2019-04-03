@@ -61,7 +61,7 @@ public class BlockRpcServiceImpl implements BlockRpcService {
         Map<String, Object> map = new HashMap<>();
         map.put("chainId", chainId);
         try {
-            LoggerUtil.Log.debug("getBestBlockHeader begin time={}", TimeManager.currentTimeMillis());
+            LoggerUtil.logger().debug("getBestBlockHeader begin time={}", TimeManager.currentTimeMillis());
             Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.BL.abbr, NetworkConstant.CMD_BL_BEST_BLOCK_HEADER, map, 1000);
             if (null != response && response.isSuccess()) {
                 Map responseData = (Map) response.getResponseData();
@@ -73,12 +73,10 @@ public class BlockRpcServiceImpl implements BlockRpcService {
 
             }
         } catch (Exception e) {
-            LoggerUtil.Log.error("getBestBlockHeader error,chainId={}.exception={}", chainId, e.getMessage());
+            LoggerUtil.logger().error("getBestBlockHeader error,chainId={}.exception={}", chainId, e.getMessage());
         } finally {
-            LoggerUtil.Log.info("getBestBlockHeader end time={}", TimeManager.currentTimeMillis());
-            LoggerUtil.Log.debug("getBestBlockHeader height ={},hash={}", bestBlockInfo.getBlockHeight(), bestBlockInfo.getHash());
+            LoggerUtil.logger().debug("getBestBlockHeader height ={},hash={}", bestBlockInfo.getBlockHeight(), bestBlockInfo.getHash());
         }
-
         return bestBlockInfo;
     }
 }

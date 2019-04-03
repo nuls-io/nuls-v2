@@ -28,6 +28,7 @@ package io.nuls.ledger.test.cmd;
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.*;
 import io.nuls.ledger.test.constant.TestConfig;
+import io.nuls.ledger.utils.LoggerUtil;
 import io.nuls.rpc.info.NoUse;
 import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.model.message.Response;
@@ -41,8 +42,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import static io.nuls.ledger.utils.LoggerUtil.logger;
 
 /**
  * Created by ljs on 2019/01/06.
@@ -85,7 +84,7 @@ public class CmdValidateTest {
         params.put("chainId", TestConfig.chainId);
         params.put("tx",RPCUtil.encode(tx.serialize()));
         Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.LG.abbr, "validateCoinData", params);
-        logger.info("response {}", response);
+        LoggerUtil.logger().info("response {}", response);
     }
 
 
@@ -100,7 +99,7 @@ public class CmdValidateTest {
 //        String nonce =  ((Map)((Map)response.getResponseData()).get("getNonce")).get("nonce").toString();
         params.put("chainId", TestConfig.chainId);
         Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.LG.abbr, "bathValidateBegin", params);
-        logger.info("response {}", response);
+        LoggerUtil.logger().info("response {}", response);
     }
 
     @Test
@@ -134,7 +133,7 @@ public class CmdValidateTest {
         params.put("tx",RPCUtil.encode(tx.serialize()));
         params.put("isBatchValidate",true);
         Response  response = ResponseMessageProcessor.requestAndResponse(ModuleE.LG.abbr, "validateCoinData", params);
-        logger.info("response {}", response);
+        LoggerUtil.logger().info("response {}", response);
     }
 
     @Test
@@ -179,6 +178,6 @@ public class CmdValidateTest {
         params.put("tx",RPCUtil.encode(tx.serialize()));
         params.put("isBatchValidate",true);
           response = ResponseMessageProcessor.requestAndResponse(ModuleE.LG.abbr, "validateCoinData", params);
-        logger.info("response {}", response);
+        LoggerUtil.logger().info("response {}", response);
     }
 }

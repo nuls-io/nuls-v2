@@ -28,7 +28,7 @@ package io.nuls.contract.model.dto;
 
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.CoinFrom;
-import io.nuls.tools.crypto.HexUtil;
+import io.nuls.rpc.util.RPCUtil;
 
 import static io.nuls.contract.util.ContractUtil.bigInteger2String;
 
@@ -51,7 +51,7 @@ public class InputDto {
         this.assetsChainId = from.getAssetsChainId();
         this.assetsId = from.getAssetsId();
         this.amount = bigInteger2String(from.getAmount());
-        this.nonce = HexUtil.encode(from.getNonce());
+        this.nonce = RPCUtil.encode(from.getNonce());
         this.locked = from.getLocked();
     }
 

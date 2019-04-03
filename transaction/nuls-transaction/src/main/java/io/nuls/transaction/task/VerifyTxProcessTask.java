@@ -23,6 +23,7 @@ import java.util.Iterator;
 import java.util.List;
 
 /**
+ * 处理由其他节点广播的交易
  * @author: Charlie
  * @date: 2018/11/28
  */
@@ -73,6 +74,7 @@ public class VerifyTxProcessTask implements Runnable {
             processTx(chain, tx, false);
             i++;
             chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("@@@@@@@@ 2 @@@@@@@@@@ one processTx:{}毫秒",System.currentTimeMillis()-start);
+            chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("");
         }
         if(i>0) {
             chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("@@@@@@@@ 3 @@@@@@@@@@ one Task:{}毫秒, count:{}笔交易",
@@ -82,6 +84,7 @@ public class VerifyTxProcessTask implements Runnable {
 
     private boolean processTx(Chain chain, Transaction tx, boolean isOrphanTx){
         try {
+            chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("新交易处理.....hash:{}", tx.getHash().getDigestHex());
             long s1 = System.currentTimeMillis();
             int chainId = chain.getChainId();
             boolean rs = txService.verify(chain, tx);
@@ -99,7 +102,7 @@ public class VerifyTxProcessTask implements Runnable {
             }
             chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("交易获取花费时间:{}", System.currentTimeMillis() - get);
             long timeCoinData = System.currentTimeMillis();
-            VerifyTxResult verifyTxResult = LedgerCall.verifyCoinData(chain, tx, false);
+            VerifyTxResult verifyTxResult = LedgerCall.verifyCoinData(chain, tx);
             chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("验证CoinData花费时间:{}", System.currentTimeMillis() - timeCoinData);
             long s2 = System.currentTimeMillis();
             chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("交易验证阶段花费时间:{}", s2 - s1);
@@ -108,7 +111,7 @@ public class VerifyTxProcessTask implements Runnable {
                 if(chain.getPackaging().get()) {
                     //当节点是出块节点时, 才将交易放入待打包队列
                     packablePool.add(chain, tx);
-                    chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("交易加入待打包队列.....hash:{}", tx.getHash().getDigestHex());
+                    chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("交易[加入待打包队列].....");
 //                    TxUtil.txInformationDebugPrint(chain, tx, chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS));
                 }
                 //保存到rocksdb
@@ -127,8 +130,6 @@ public class VerifyTxProcessTask implements Runnable {
                 NetworkCall.broadcastTxHash(chain.getChainId(),tx.getHash());
                 long s3 = System.currentTimeMillis();
                 chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("交易保存阶段花费时间:{}", s3 - s2);
-                chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("");
-
                 return true;
             }
             chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug(
@@ -159,7 +160,6 @@ public class VerifyTxProcessTask implements Runnable {
             while (it.hasNext()) {
                 Transaction tx = it.next();
                 boolean success = processTx(chain, tx, true);
-//                TxUtil.txInformationDebugPrint(chain, tx, chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS));
                 if (success) {
                     it.remove();
                     chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("*** Debug *** [VerifyTxProcessTask - OrphanTx] " +

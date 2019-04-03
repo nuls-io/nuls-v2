@@ -1,6 +1,9 @@
 package io.nuls.account.rpc.call;
 
+import io.nuls.account.constant.AccountConstant;
 import io.nuls.account.constant.AccountErrorCode;
+import io.nuls.account.model.bo.VerifyTxResult;
+import io.nuls.base.data.Transaction;
 import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.model.message.Response;
@@ -22,6 +25,49 @@ import java.util.Map;
  * @date: 2018/12/12
  */
 public class LegerCmdCall {
+
+    /**
+     * 验证CoinData
+     * @param chainId
+     * @param tx
+     * @return
+     */
+    public static VerifyTxResult verifyCoinData(int chainId, String tx, boolean batch) {
+        try {
+            Map<String, Object> params = new HashMap<>(AccountConstant.INIT_CAPACITY_8);
+            params.put(Constants.VERSION_KEY_STR, AccountConstant.RPC_VERSION);
+            params.put("chainId", chainId);
+            params.put("tx", tx);
+            params.put("isBatchValidate", batch);
+            Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.LG.abbr, "validateCoinData", params);
+            if (!cmdResp.isSuccess()) {
+                Log.error("Calling remote interface failed. module:{} - interface:{} - ResponseComment:{}", ModuleE.LG.abbr, "validateCoinData", cmdResp.getResponseComment());
+                throw new NulsException(AccountErrorCode.FAILED);
+            }
+            HashMap result = (HashMap) ((HashMap) cmdResp.getResponseData()).get("validateCoinData");
+            return new VerifyTxResult((int)result.get("validateCode"), (String)result.get("validateDesc"));
+
+        } catch (Exception e) {
+            Log.error("Calling remote interface failed. module:{} - interface:{}", ModuleE.LG.abbr, "validateCoinData");
+            e.printStackTrace();
+            return new VerifyTxResult(VerifyTxResult.OTHER_EXCEPTION, "Call validateCoinData failed!");
+        }
+    }
+
+    /**
+     * 验证CoinData
+     * @param chainId
+     * @param tx
+     * @return
+     */
+    public static VerifyTxResult verifyCoinData(int chainId, Transaction tx) throws NulsException {
+        try {
+            return verifyCoinData(chainId, RPCUtil.encode(tx.serialize()), false);
+        } catch (Exception e) {
+            throw new NulsException(e);
+        }
+    }
+
 
     /**
      * 查询账户余额

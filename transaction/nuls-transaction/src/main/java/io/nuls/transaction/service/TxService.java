@@ -35,6 +35,15 @@ public interface TxService {
      * @return boolean
      * @throws NulsException NulsException
      */
+    void newBroadcastTx(Chain chain, Transaction transaction) throws NulsException;
+
+
+    /**
+     * 由节点产生的新交易,该交易已通过验证器验证和账本验证,可放入待打包队列以及未确认存储
+     * @param chain
+     * @param transaction
+     * @throws NulsException
+     */
     void newTx(Chain chain, Transaction transaction) throws NulsException;
 
 

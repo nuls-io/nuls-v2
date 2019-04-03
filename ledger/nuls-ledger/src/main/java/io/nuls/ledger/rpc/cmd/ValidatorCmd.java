@@ -90,6 +90,10 @@ public class ValidatorCmd extends BaseLedgerCmd {
             e.printStackTrace();
             response = failed(e.getErrorCode());
             LoggerUtil.logger(chainId).error("validateCoinData exception:{}", e.getMessage());
+        } catch (Exception e) {
+            e.printStackTrace();
+            response = failed("validateCoinData exception");
+            LoggerUtil.logger(chainId).error("validateCoinData exception:{}", e.getMessage());
         }
         return response;
     }

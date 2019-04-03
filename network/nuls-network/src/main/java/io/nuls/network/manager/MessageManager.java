@@ -28,7 +28,6 @@ import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelFuture;
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.data.BaseNulsData;
-import io.nuls.base.data.NulsDigestData;
 import io.nuls.network.constant.NetworkConstant;
 import io.nuls.network.constant.NetworkErrorCode;
 import io.nuls.network.constant.NodeConnectStatusEnum;
@@ -46,17 +45,13 @@ import io.nuls.network.model.message.base.BaseMessage;
 import io.nuls.network.model.message.base.MessageHeader;
 import io.nuls.network.utils.LoggerUtil;
 import io.nuls.tools.crypto.Sha256Hash;
-import io.nuls.tools.log.Log;
-import io.nuls.tools.model.ByteUtils;
 import io.nuls.tools.exception.NulsException;
-import io.nuls.tools.model.LongUtils;
+import io.nuls.tools.model.ByteUtils;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-
-import static io.nuls.network.utils.LoggerUtil.Log;
 
 /**
  * 消息管理器，用于收发消息
@@ -100,7 +95,7 @@ public class MessageManager extends BaseManager {
             return msgClass.getDeclaredConstructor().newInstance();
         } catch (InstantiationException | IllegalAccessException e) {
             e.printStackTrace();
-            LoggerUtil.Log.error(e.getMessage());
+            LoggerUtil.logger().error(e.getMessage());
         } catch (NoSuchMethodException e) {
             e.printStackTrace();
         } catch (InvocationTargetException e) {
@@ -139,7 +134,7 @@ public class MessageManager extends BaseManager {
             int chainId = NodeGroupManager.getInstance().getChainIdByMagicNum(header.getMagicNumber());
             header.parse(headerByte, 0);
             if (!validate(payLoadBody, header.getChecksum())) {
-                LoggerUtil.logger(chainId).error("validate  false ======================");
+                LoggerUtil.logger(chainId).error("validate  false ======================cmd:{}",header.getCommandStr());
                 return;
             }
             BaseMessage message = MessageManager.getInstance().getMessageInstance(header.getCommandStr());
@@ -148,21 +143,14 @@ public class MessageManager extends BaseManager {
                 LoggerUtil.logger(chainId).debug((node.isServer() ? "Server" : "Client") + ":----receive message-- magicNumber:" + header.getMagicNumber() + "==CMD:" + header.getCommandStr());
                 NetworkEventResult result = null;
                 if (null != message) {
-                    LoggerUtil.logger(chainId).debug("==============================Network module self message");
                     message = byteBuffer.readNulsData(message);
                     BaseMeesageHandlerInf handler = MessageHandlerFactory.getInstance().getHandler(header.getCommandStr());
                     result = handler.recieve(message, node);
                 } else {
                     //外部消息，转外部接口
-                    long beginTime = System.currentTimeMillis();
                     LoggerUtil.modulesMsgLogs(header.getCommandStr(), node, payLoadBody, "received");
                     OtherModuleMessageHandler handler = MessageHandlerFactory.getInstance().getOtherModuleHandler();
                     result = handler.recieve(header, payLoadBody, node);
-                    long endTime = System.currentTimeMillis();
-                    //时间测试专用
-                    if (endTime - beginTime > 3000) {
-                        LoggerUtil.TestLog.error("1-Deal time too long,message cmd ={},useTime={},hash={},result={}", header.getCommandStr(), (endTime - beginTime), NulsDigestData.calcDigestData(payLoadBody).getDigestHex(), result.isSuccess());
-                    }
                     byteBuffer.setCursor(payLoad.length);
                 }
                 if (!result.isSuccess()) {
@@ -171,6 +159,7 @@ public class MessageManager extends BaseManager {
             }
         } catch (Exception e) {
             e.printStackTrace();
+            LoggerUtil.logger().error("{}",e);
 //            throw new NulsException(NetworkErrorCode.DATA_ERROR, e);
         }
     }
@@ -267,12 +256,12 @@ public class MessageManager extends BaseManager {
          */
         if (!isHandShakeMessage(message)) {
             if (NodeConnectStatusEnum.AVAILABLE != node.getConnectStatus()) {
-                LoggerUtil.Log.error("============={} status is not handshake(AVAILABLE)", node.getId());
+                LoggerUtil.logger().error("============={} status is not handshake(AVAILABLE)", node.getId());
                 return new NetworkEventResult(false, NetworkErrorCode.NET_NODE_DEAD);
             }
         }
         if (node.getChannel() == null || !node.getChannel().isActive()) {
-            LoggerUtil.Log.error("============={} getChannel is not Active", node.getId());
+            LoggerUtil.logger().error("============={} getChannel is not Active", node.getId());
             return new NetworkEventResult(false, NetworkErrorCode.NET_NODE_MISS_CHANNEL);
         }
         try {
@@ -289,7 +278,7 @@ public class MessageManager extends BaseManager {
             }
         } catch (Exception e) {
             e.printStackTrace();
-            Log.error(e.getMessage());
+            LoggerUtil.logger().error(e.getMessage());
             return new NetworkEventResult(false, NetworkErrorCode.NET_MESSAGE_ERROR);
         }
         return new NetworkEventResult(true, NetworkErrorCode.SUCCESS);
@@ -306,7 +295,7 @@ public class MessageManager extends BaseManager {
     public NetworkEventResult broadcastToNodes(byte[] message, List<Node> nodes, boolean asyn) {
         for (Node node : nodes) {
             if (node.getChannel() == null || !node.getChannel().isActive()) {
-                Log.info(node.getId() + "is not Active");
+                LoggerUtil.logger().info(node.getId() + "is not Active");
                 continue;
             }
             try {
@@ -320,7 +309,7 @@ public class MessageManager extends BaseManager {
                 }
             } catch (Exception e) {
                 e.printStackTrace();
-                Log.error(e.getMessage());
+                LoggerUtil.logger().error(e.getMessage());
             }
         }
         return new NetworkEventResult(true, NetworkErrorCode.SUCCESS);

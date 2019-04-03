@@ -25,7 +25,6 @@
 package io.nuls.transaction;
 
 import io.nuls.base.basic.AddressTool;
-import io.nuls.base.data.Transaction;
 import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.info.HostInfo;
 import io.nuls.rpc.info.NoUse;
@@ -40,7 +39,7 @@ import io.nuls.transaction.model.bo.config.ConfigBean;
 import io.nuls.transaction.model.dto.CoinDTO;
 import io.nuls.transaction.model.dto.CrossTxTransferDTO;
 import io.nuls.transaction.rpc.call.LedgerCall;
-import io.nuls.transaction.utils.TxUtil;
+import io.nuls.transaction.tx.Transfer;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -83,6 +82,9 @@ public class TxValid {
 
     static String password = "nuls123456";//"nuls123456";
 
+
+
+
     @Before
     public void before() throws Exception {
         NoUse.mockModule();
@@ -93,32 +95,73 @@ public class TxValid {
 
     @Test
     public void transfer() throws Exception {
-        for (int i = 0; i < 5; i++) {
+//        for (int i = 0; i < 50000; i++) {
+//            String hash = createTransfer(address25, address21);
+////            String hash = createCtxTransfer();
+//            System.out.println("count:" + (i + 1));
+//            System.out.println("");
+////            Thread.sleep(500L);
+//            //getTx(hash);
+//        }
+
+        Transfer transfer1 = new Transfer(address25, address21);
+        Thread thread1 = new Thread(transfer1);
+        thread1.start();
+        Transfer transfer2 = new Transfer(address26, address22);
+        Thread thread2 = new Thread(transfer2);
+        thread2.start();
+        Transfer transfer3 = new Transfer(address27, address23);
+        Thread thread3 = new Thread(transfer3);
+        thread3.start();
+        Transfer transfer4 = new Transfer(address28, address24);
+        Thread thread4 = new Thread(transfer4);
+        thread4.start();
+        try {
+            while (true) {
+                Thread.sleep(1000000000L);
+            }
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Test
+    public void mixedTransfer() throws Exception {
+        String agentHash = null;
+        String depositHash = null;
+        String withdrawHash = null;
+        String stopAgent = null;
+        for (int i = 0; i < 20000; i++) {
             String hash = createTransfer(address25, address21);
-//            String hash = createCtxTransfer();
+            switch (i){
+                case 0:
+                    //创建节点
+                    agentHash = createAgent(address29, address27);
+                    break;
+                case 4000:
+                    //委托
+                    depositHash = deposit(address29, agentHash);
+                    break;
+                case 16000:
+                    //取消委托
+                    withdrawHash = withdraw(address29, depositHash);
+                    break;
+                case 19000:
+                    //停止节点
+                    stopAgent = stopAgent(address29);
+                    break;
+            }
+
             System.out.println("count:" + (i + 1));
             System.out.println("");
-//            Thread.sleep(500L);
-            //getTx(hash);
+
         }
-//        createCtxTransfer();
     }
 
     @Test
     public void getTx() throws Exception {
-//        String hash = createTransfer();
-//        Thread.sleep(1000L);
-//        getTxClient(hash);
-//        Thread.sleep(1000L);
-//        getTxClient(hash);
-//        Thread.sleep(1000L);
-//        getTxClient(hash);
-//        Thread.sleep(1000L);
-//        getTxClient(hash);
-//        Thread.sleep(1000L);
-//        getTxClient(hash);
-//        getTxCfmClient("002037bd6ee432aab018712115891857713d71e378979eb4506561a35b6688b9cfce");
-        System.out.println(Runtime.getRuntime().availableProcessors());
+        getTxCfmClient("0020e87c15cc8509a46cf5c802641864dc609f87b4e1d6120a3de3d3d31e6075173a");
+        getTxCfmClient("00209a152f8a93c05463c970a12b875cb23effb59b0dd177b47ec1e56fca0d3c80e8");//最后一条
     }
 
     private void getTx(String hash) throws Exception {
@@ -131,8 +174,8 @@ public class TxValid {
         HashMap result = (HashMap) (((HashMap) cmdResp.getResponseData()).get("tx_getTx"));
         Assert.assertTrue(null != result);
         Log.debug("{}", JSONUtils.obj2PrettyJson(result));
-        String txStr = (String) result.get("tx");
-        Log.debug("getTx -hash:{}", ((Transaction)TxUtil.getInstanceRpcStr(txStr, Transaction.class)).getHash().getDigestHex());
+       /* String txStr = (String) result.get("tx");
+        Log.debug("getTx -hash:{}", ((Transaction)TxUtil.getInstanceRpcStr(txStr, Transaction.class)).getHash().getDigestHex());*/
     }
 
 
@@ -155,27 +198,32 @@ public class TxValid {
 
     @Test
     public void createAgentTx() throws Exception {
+        createAgent(address26, "tNULSeBaMoRVvrr9noCDWwNNe3ZAbCvRWEPtij");
+    }
+    private String createAgent(String address, String packing)  throws Exception{
         //组装创建节点交易
-        Map agentTxMap = this.createAgentTx(address26, "tNULSeBaMoRVvrr9noCDWwNNe3ZAbCvRWEPtij");
+        Map agentTxMap = this.createAgentTx(address, packing);
         //调用接口
         Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.CS.abbr, "cs_createAgent", agentTxMap);
         Map result = (HashMap) (((HashMap) cmdResp2.getResponseData()).get("cs_createAgent"));
         Assert.assertTrue(null != result);
         String hash = (String) result.get("txHash");
         Log.debug("createAgent-txHash:{}", hash);
+        return hash;
     }
-
-
     /**
      * 委托节点
      */
     @Test
     public void depositToAgent() throws Exception {
         //组装委托节点交易
-        String agentHash = "002060610770d93621b5cf9f604d7e48435641461e507ae7596aea58969a173059ff";
+        String hash = deposit(address26, "");
+    }
+
+    private String deposit(String address, String agentHash) throws Exception {
         Map<String, Object> dpParams = new HashMap<>();
         dpParams.put("chainId", chainId);
-        dpParams.put("address", address26);
+        dpParams.put("address", address);
         dpParams.put("password", password);
         dpParams.put("agentHash", agentHash);
         dpParams.put("deposit", 200000 * 100000000L);
@@ -183,8 +231,7 @@ public class TxValid {
         HashMap dpResult = (HashMap) ((HashMap) dpResp.getResponseData()).get("cs_depositToAgent");
         String txHash = (String) dpResult.get("txHash");
         Log.debug("deposit-txHash:{}", txHash);
-
-        //00201c4f7f9735072eddcf203122ea2d940c8abda3625131319024a06c845ca54e1b
+        return txHash;
     }
 
     /**
@@ -194,28 +241,40 @@ public class TxValid {
      */
     @Test
     public void withdraw() throws Exception {
+        String hash = withdraw(address25, "0020b8a42eb4c70196189e607e9434fe09b595d5753711f21819113f40d64a1c82c1");
+        Log.debug("withdraw-txHash:{}", hash);
+    }
+
+    private String withdraw(String address, String depositHash) throws Exception {
         Map<String, Object> params = new HashMap<>();
         params.put("chainId", chainId);
-        params.put("address", address25);
+        params.put("address", address);
         params.put("password", password);
-        params.put("txHash", "0020b8a42eb4c70196189e607e9434fe09b595d5753711f21819113f40d64a1c82c1");
+        params.put("txHash", depositHash);
         Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.CS.abbr, "cs_withdraw", params);
         HashMap dpResult = (HashMap) ((HashMap) cmdResp.getResponseData()).get("cs_withdraw");
         String hash = (String) dpResult.get("txHash");
         Log.debug("withdraw-txHash:{}", hash);
+        return hash;
     }
 
     @Test
     public void stopAgentTx() throws Exception {
+        String hash = stopAgent(address25);
+        Log.debug("stopAgent-txHash:{}", hash);
+    }
+
+    private String stopAgent(String address) throws Exception {
         Map<String, Object> txMap = new HashMap();
         txMap.put("chainId", chainId);
-        txMap.put("address", address25);
+        txMap.put("address", address);
         txMap.put("password", password);
         //调用接口
         Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.CS.abbr, "cs_stopAgent", txMap);
         Map result = (HashMap) (((HashMap) cmdResp2.getResponseData()).get("cs_stopAgent"));
         String txHash = (String) result.get("txHash");
         Log.debug("stopAgent-txHash:{}", txHash);
+        return txHash;
     }
 
     /**
@@ -247,7 +306,7 @@ public class TxValid {
     public void getTxRecord() throws Exception {
         Map<String, Object> params = new HashMap<>();
         params.put("chainId", chainId);
-        params.put("address", address26);//tNULSeBaMk4LBr1y1tsneiHvy5H2Rc3Lns4QuN
+        params.put("address", address20);//tNULSeBaMk4LBr1y1tsneiHvy5H2Rc3Lns4QuN
         params.put("assetChainId", null);
         params.put("assetId", null);
         params.put("type", null);
