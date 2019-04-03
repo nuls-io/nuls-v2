@@ -25,11 +25,10 @@ package io.nuls.contract.helper;
 
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.basic.TransactionFeeCalculator;
-import io.nuls.base.data.BlockHeader;
-import io.nuls.base.data.CoinData;
-import io.nuls.base.data.CoinFrom;
-import io.nuls.base.data.CoinTo;
+import io.nuls.base.data.*;
 import io.nuls.contract.constant.ContractErrorCode;
+import io.nuls.contract.enums.LedgerUnConfirmedTxStatus;
+import io.nuls.contract.manager.ContractTxValidatorManager;
 import io.nuls.contract.model.bo.Chain;
 import io.nuls.contract.model.bo.ContractBalance;
 import io.nuls.contract.model.po.ContractAddressInfoPo;
@@ -41,6 +40,8 @@ import io.nuls.contract.model.txdata.CreateContractData;
 import io.nuls.contract.model.txdata.DeleteContractData;
 import io.nuls.contract.rpc.call.AccountCall;
 import io.nuls.contract.rpc.call.BlockCall;
+import io.nuls.contract.rpc.call.LedgerCall;
+import io.nuls.contract.rpc.call.TransactionCall;
 import io.nuls.contract.util.ContractUtil;
 import io.nuls.contract.util.Log;
 import io.nuls.contract.vm.program.*;
@@ -60,11 +61,9 @@ import java.io.IOException;
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 
-import static io.nuls.contract.constant.ContractConstant.MAX_GASLIMIT;
-import static io.nuls.contract.constant.ContractConstant.UNLOCKED_TX;
+import static io.nuls.contract.constant.ContractConstant.*;
 import static io.nuls.contract.constant.ContractErrorCode.*;
-import static io.nuls.contract.util.ContractUtil.checkVmResultAndReturn;
-import static io.nuls.contract.util.ContractUtil.getSuccess;
+import static io.nuls.contract.util.ContractUtil.*;
 
 /**
  * @author: PierreLuo
@@ -75,6 +74,8 @@ public class ContractTxHelper {
 
     @Autowired
     private ContractHelper contractHelper;
+    @Autowired
+    private ContractTxValidatorManager contractTxValidatorManager;
 
     public Result<CreateContractTransaction> makeCreateTx(int chainId, String sender, Long gasLimit, Long price,
                                                           byte[] contractCode, String[][] args,
@@ -515,6 +516,52 @@ public class ContractTxHelper {
         } catch (NulsException e) {
             Log.error(e);
             return Result.getFailed(e.getErrorCode());
+        }
+    }
+
+    public Result signAndBroadcastTx(int chainId, String sender, String password, Transaction tx) {
+        try {
+            // 生成签名
+            AccountCall.transactionSignature(chainId, sender, password, tx);
+            // 验证交易
+            Result validator;
+            switch (tx.getType()) {
+                case TX_TYPE_CREATE_CONTRACT:
+                    validator = contractTxValidatorManager.createValidator(chainId, (CreateContractTransaction) tx);
+                    break;
+                case TX_TYPE_CALL_CONTRACT:
+                    validator = contractTxValidatorManager.callValidator(chainId, (CallContractTransaction) tx);
+                    break;
+                case TX_TYPE_DELETE_CONTRACT:
+                    validator = contractTxValidatorManager.deleteValidator(chainId, (DeleteContractTransaction) tx);
+                    break;
+                default:
+                    validator = getFailed();
+                    break;
+            }
+            if(validator.isFailed()) {
+                return validator;
+            }
+            String txData = RPCUtil.encode(tx.serialize());
+            // 通知账本
+            int commitStatus = LedgerCall.commitUnconfirmedTx(chainId, txData);
+            if(commitStatus != LedgerUnConfirmedTxStatus.SUCCESS.status()) {
+                return getFailed().setMsg(LedgerUnConfirmedTxStatus.getStatus(commitStatus).name());
+            }
+            // 广播交易
+            boolean broadcast = TransactionCall.newTx(chainId, txData);
+            if (!broadcast) {
+                // 广播失败，回滚账本的未确认交易
+                LedgerCall.rollBackUnconfirmTx(chainId, txData);
+                return getFailed();
+            }
+            return getSuccess();
+        } catch (NulsException e) {
+            Log.error(e);
+            return Result.getFailed(e.getErrorCode());
+        } catch (IOException e) {
+            Log.error(e);
+            return getFailed().setMsg(e.getMessage());
         }
     }
 }
