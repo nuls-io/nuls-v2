@@ -140,7 +140,7 @@ public class TransactionCmd extends BaseCmd {
     @Parameter(parameterName = "chainId", parameterType = "int")
     @Parameter(parameterName = "tx", parameterType = "String")
     public Response newTx(Map params) {
-        Map<String, Boolean> map = new HashMap<>(TxConstant.INIT_CAPACITY_2);
+
         Chain chain = null;
         try {
             ObjectUtils.canNotEmpty(params.get("chainId"), TxErrorCode.PARAMETER_ERROR.getMsg());
@@ -153,7 +153,12 @@ public class TransactionCmd extends BaseCmd {
             //将txStr转换为Transaction对象
             Transaction transaction = TxUtil.getInstanceRpcStr(txStr, Transaction.class);
             //将交易放入待验证本地交易队列中
-            txService.newTx(chain, transaction);
+            if(!txService.newTx(chain, transaction)){
+                return failed(TxErrorCode.SYS_UNKOWN_EXCEPTION);
+            }
+            Map<String, Boolean> map = new HashMap<>(TxConstant.INIT_CAPACITY_2);
+            map.put("value", true);
+            return success(map);
         } catch (NulsException e) {
             errorLogProcess(chain, e);
             return failed(e.getErrorCode());
@@ -161,8 +166,41 @@ public class TransactionCmd extends BaseCmd {
             errorLogProcess(chain, e);
             return failed(TxErrorCode.SYS_UNKOWN_EXCEPTION);
         }
-        map.put("value", true);
-        return success(map);
+    }
+
+    /**
+     * 新交易基础验证
+     * @param params
+     * @return Response
+     */
+    @CmdAnnotation(cmd = TxCmd.TX_BASE_VALIDATE, version = 1.0, description = "baseValidateTx")
+    @Parameter(parameterName = "chainId", parameterType = "int")
+    @Parameter(parameterName = "tx", parameterType = "String")
+    public Response baseValidateTx(Map params) {
+        Chain chain = null;
+        try {
+            ObjectUtils.canNotEmpty(params.get("chainId"), TxErrorCode.PARAMETER_ERROR.getMsg());
+            ObjectUtils.canNotEmpty(params.get("tx"), TxErrorCode.PARAMETER_ERROR.getMsg());
+            chain = chainManager.getChain((int) params.get("chainId"));
+            if (null == chain) {
+                throw new NulsException(TxErrorCode.CHAIN_NOT_FOUND);
+            }
+            String txStr = (String) params.get("tx");
+            //将txStr转换为Transaction对象
+            Transaction tx = TxUtil.getInstanceRpcStr(txStr, Transaction.class);
+            TxRegister txRegister = TxManager.getTxRegister(chain, tx.getType());
+            //将交易放入待验证本地交易队列中
+            txService.baseValidateTx(chain, tx, txRegister);
+            Map<String, Boolean> map = new HashMap<>(TxConstant.INIT_CAPACITY_2);
+            map.put("value", true);
+            return success(map);
+        } catch (NulsException e) {
+            errorLogProcess(chain, e);
+            return failed(e.getErrorCode());
+        } catch (Exception e) {
+            errorLogProcess(chain, e);
+            return failed(TxErrorCode.SYS_UNKOWN_EXCEPTION);
+        }
     }
 
     /**

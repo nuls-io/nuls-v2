@@ -168,6 +168,7 @@ public interface ConsensusConstant {
     String VALID_RESULT ="valid";
     String PARAM_RESULT_VALUE ="value";
     String PARAM_STATUS = "status";
+    String HEADER_LIST = "headerList";
 
     /**
      * 共识模块日志管理

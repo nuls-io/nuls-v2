@@ -64,26 +64,16 @@ public class ValidatorCmd extends BaseLedgerCmd {
             version = 1.0, scope = "private", minEvent = 0, minPeriod = 0, description = "")
     @Parameter(parameterName = "chainId", parameterType = "int")
     @Parameter(parameterName = "tx", parameterType = "String")
-    @Parameter(parameterName = "isBatchValidate", parameterType = "boolean")
     public Response validateCoinData(Map params) {
         Integer chainId = (Integer) params.get("chainId");
         String txStr = (String) params.get("tx");
-        boolean isBatchValidate = Boolean.valueOf(params.get("isBatchValidate").toString());
         Transaction tx = new Transaction();
         Response response = null;
         ValidateResult validateResult = null;
         try {
             tx.parse(RPCUtil.decode(txStr), 0);
-            if (isBatchValidate) {
-                LoggerUtil.logger(chainId).debug("确认交易校验：chainId={},txHash={},isBatchValidate={}", chainId, tx.getHash().toString(), isBatchValidate);
-                validateResult = coinDataValidator.bathValidatePerTx(chainId, tx);
-//                if(CoinDataValidator.VALIDATE_SUCCESS_CODE != validateResult.getValidateCode()){
-//                      transactionService.rollBackUnconfirmTx(chainId,tx);
-//                }
-            } else {
-                LoggerUtil.logger(chainId).debug("未确认交易校验：chainId={},txHash={},isBatchValidate={}", chainId, tx.getHash().toString(), isBatchValidate);
-                validateResult = coinDataValidator.validateCoinData(chainId, tx);
-            }
+            LoggerUtil.logger(chainId).debug("确认交易校验：chainId={},txHash={}", chainId, tx.getHash().toString());
+            validateResult = coinDataValidator.bathValidatePerTx(chainId, tx);
             response = success(validateResult);
             LoggerUtil.logger(chainId).debug("validateCoinData returnCode={},returnMsg={}", validateResult.getValidateCode(), validateResult.getValidateDesc());
         } catch (NulsException e) {

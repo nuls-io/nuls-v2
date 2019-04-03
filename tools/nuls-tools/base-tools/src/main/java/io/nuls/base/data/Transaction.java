@@ -255,10 +255,6 @@ public class Transaction extends BaseNulsData implements Cloneable {
         return transaction;
     }
 
-    public String hex() throws Exception {
-        return HexUtil.encode(this.serialize());
-    }
-
     /**
      * 获取交易的手续费
      * @return

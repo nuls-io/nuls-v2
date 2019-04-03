@@ -60,7 +60,6 @@ import io.nuls.transaction.storage.rocksdb.UnconfirmedTxStorageService;
 import io.nuls.transaction.storage.rocksdb.UnverifiedTxStorageService;
 import io.nuls.transaction.utils.TxUtil;
 
-import java.io.IOException;
 import java.math.BigInteger;
 import java.util.*;
 
@@ -115,27 +114,31 @@ public class TxServiceImpl implements TxService {
 
 
     @Override
-    public void newTx(Chain chain, Transaction tx) throws NulsException {
-        TransactionConfirmedPO existTx = getTransaction(chain, tx.getHash());
-        if(null == existTx){
-            if(chain.getPackaging().get()) {
-                //当节点是出块节点时, 才将交易放入待打包队列
-                packablePool.add(chain, tx);
-                chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("交易[加入待打包队列].....hash:{}", tx.getHash().getDigestHex());
+    public boolean newTx(Chain chain, Transaction tx) throws NulsException {
+        try {
+            TransactionConfirmedPO existTx = getTransaction(chain, tx.getHash());
+            if(null == existTx){
+                TxRegister txRegister = TxManager.getTxRegister(chain, tx.getType());
+                //调基础验证
+//                baseValidateTx(chain, tx, txRegister);
+                if(chain.getPackaging().get()) {
+                    //当节点是出块节点时, 才将交易放入待打包队列
+                    packablePool.add(chain, tx);
+                    chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("交易[加入待打包队列].....hash:{}", tx.getHash().getDigestHex());
+                }
+                //保存到rocksdb
+                unconfirmedTxStorageService.putTx(chain.getChainId(), tx);
+                //保存到h2数据库
+                transactionH2Service.saveTxs(TxUtil.tx2PO(chain,tx));
+                //广播交易hash
+                NetworkCall.broadcastTxHash(chain.getChainId(),tx.getHash());
             }
-            //保存到rocksdb
-            unconfirmedTxStorageService.putTx(chain.getChainId(), tx);
-            //保存到h2数据库
-            transactionH2Service.saveTxs(TxUtil.tx2PO(chain,tx));
-            // TODO: 2019/4/2 应该去掉,因为在各模块验证账本时已提交 调账本记录未确认交易
-            try {
-                LedgerCall.commitUnconfirmedTx(chain, RPCUtil.encode(tx.serialize()));
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            //广播交易hash
-            NetworkCall.broadcastTxHash(chain.getChainId(),tx.getHash());
+            return true;
+        } catch (NulsException e) {
+            chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).error(e);
+            return false;
         }
+
     }
 
     @Override
@@ -182,22 +185,8 @@ public class TxServiceImpl implements TxService {
         }
     }
 
-    /**
-     * 交易基础验证
-     * 基础字段
-     * 交易size
-     * 交易类型
-     * 交易签名
-     * from的地址必须全部是发起链(本链or相同链）地址
-     * from里面的资产是否存在
-     * to里面的地址必须是相同链的地址
-     * 交易手续费
-     *
-     * @param chain
-     * @param tx
-     * @return Result
-     */
-    private void baseValidateTx(Chain chain, Transaction tx, TxRegister txRegister) throws NulsException {
+    @Override
+    public void baseValidateTx(Chain chain, Transaction tx, TxRegister txRegister) throws NulsException {
         if (null == tx) {
             throw new NulsException(TxErrorCode.TX_NOT_EXIST);
         }
@@ -717,7 +706,7 @@ public class TxServiceImpl implements TxService {
                     continue;
                 }
                 //批量验证coinData, 单个发送
-                VerifyTxResult verifyTxResult = LedgerCall.verifyCoinData(chain, txStr, true);
+                VerifyTxResult verifyTxResult = LedgerCall.verifyCoinData(chain, txStr);
                 if (!verifyTxResult.success()) {
                     if (verifyTxResult.getCode() != 5) {
                         String nonce = HexUtil.encode(TxUtil.getCoinData(tx).getFrom().get(0).getNonce());
@@ -818,7 +807,7 @@ public class TxServiceImpl implements TxService {
                     chain.getTxPackageOrphanMap().remove(tx.getHash());
                 }
                 try {
-                    packableTxs.add(tx.hex());
+                    packableTxs.add(RPCUtil.encode(tx.serialize()));
                 } catch (Exception e) {
                     clearInvalidTx(chain, tx);
                     iterator.remove();
@@ -1007,7 +996,7 @@ public class TxServiceImpl implements TxService {
             } catch (Exception e) {
                 throw new NulsException(e);
             }
-            VerifyTxResult verifyTxResult = LedgerCall.verifyCoinData(chain, txStr, true);
+            VerifyTxResult verifyTxResult = LedgerCall.verifyCoinData(chain, txStr);
             if (!verifyTxResult.success()) {
                 chain.getLoggerMap().get(TxConstant.LOG_TX).debug("[verifyAgain] " +
                                 "coinData not success - code: {}, - reason:{}, type:{} - txhash:{}",

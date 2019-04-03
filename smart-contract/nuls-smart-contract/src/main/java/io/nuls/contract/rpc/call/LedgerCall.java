@@ -23,6 +23,7 @@
  */
 package io.nuls.contract.rpc.call;
 
+import io.nuls.contract.enums.LedgerUnConfirmedTxStatus;
 import io.nuls.contract.model.bo.Chain;
 import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.model.message.Response;
@@ -84,6 +85,45 @@ public class LedgerCall {
                 return null;
             }
             return (HashMap) ((HashMap) callResp.getResponseData()).get("getNonce");
+        } catch (Exception e) {
+            throw new NulsException(e);
+        }
+    }
+
+
+    /**
+     * 提交未确认交易给账本
+     */
+    public static int commitUnconfirmedTx(int chainId, String txData) throws NulsException {
+        try {
+            Map<String, Object> params = new HashMap<>(4);
+            params.put("chainId", chainId);
+            params.put("tx", txData);
+            Response callResp = ResponseMessageProcessor.requestAndResponse(ModuleE.LG.abbr, "commitUnconfirmedTx", params);
+            if (!callResp.isSuccess()) {
+                return LedgerUnConfirmedTxStatus.OTHER.status();
+            }
+            HashMap result = (HashMap) ((HashMap) callResp.getResponseData()).get("commitUnconfirmedTx");
+            return (int) result.get("value");
+        } catch (Exception e) {
+            throw new NulsException(e);
+        }
+    }
+
+    /**
+     * 调用账本回滚未确认的交易
+     */
+    public static boolean rollBackUnconfirmTx(int chainId, String txData) throws NulsException {
+        try {
+            Map<String, Object> params = new HashMap<>(4);
+            params.put("chainId", chainId);
+            params.put("tx", txData);
+            Response callResp = ResponseMessageProcessor.requestAndResponse(ModuleE.LG.abbr, "rollBackUnconfirmTx", params);
+            if (!callResp.isSuccess()) {
+                return false;
+            }
+            HashMap result = (HashMap) ((HashMap) callResp.getResponseData()).get("rollBackUnconfirmTx");
+            return (int) result.get("value") == 1;
         } catch (Exception e) {
             throw new NulsException(e);
         }

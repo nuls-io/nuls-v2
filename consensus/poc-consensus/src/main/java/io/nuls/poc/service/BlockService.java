@@ -24,6 +24,13 @@ public interface BlockService {
     Result addBlock(Map<String,Object> params);
 
     /**
+     * 接收需缓存的区块
+     * @param params
+     * @return Result
+     * */
+    Result receiveHeaderList(Map<String,Object> params);
+
+    /**
      * 连分叉区块回滚
      * @param params
      * @return Result
