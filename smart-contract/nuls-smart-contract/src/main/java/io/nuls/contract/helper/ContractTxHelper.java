@@ -100,7 +100,7 @@ public class ContractTxHelper {
             return result;
         } catch (NulsException e) {
             Log.error(e);
-            return Result.getFailed(e.getErrorCode());
+            return Result.getFailed(e.getErrorCode() == null ? FAILED : e.getErrorCode());
         }
     }
 
@@ -206,7 +206,7 @@ public class ContractTxHelper {
             return getSuccess().setData(programResult);
         } catch (NulsException e) {
             Log.error(e);
-            return Result.getFailed(e.getErrorCode());
+            return Result.getFailed(e.getErrorCode() == null ? FAILED : e.getErrorCode());
         }
     }
 
@@ -409,7 +409,7 @@ public class ContractTxHelper {
 
         } catch (NulsException e) {
             Log.error(e);
-            return Result.getFailed(e.getErrorCode());
+            return Result.getFailed(e.getErrorCode() == null ? FAILED : e.getErrorCode());
         }
     }
 
@@ -515,7 +515,7 @@ public class ContractTxHelper {
             return getSuccess();
         } catch (NulsException e) {
             Log.error(e);
-            return Result.getFailed(e.getErrorCode());
+            return Result.getFailed(e.getErrorCode() == null ? FAILED : e.getErrorCode());
         }
     }
 
@@ -565,7 +565,7 @@ public class ContractTxHelper {
             return getSuccess();
         } catch (NulsException e) {
             Log.error(e);
-            return Result.getFailed(e.getErrorCode());
+            return Result.getFailed(e.getErrorCode() == null ? FAILED : e.getErrorCode());
         } catch (IOException e) {
             Log.error(e);
             return getFailed().setMsg(e.getMessage());

@@ -61,6 +61,7 @@ import java.math.BigInteger;
 import java.util.HashMap;
 import java.util.Map;
 
+import static io.nuls.contract.constant.ContractErrorCode.FAILED;
 import static io.nuls.contract.util.ContractUtil.getFailed;
 import static io.nuls.contract.util.ContractUtil.getSuccess;
 
@@ -137,7 +138,7 @@ public class ContractMakeAndBroadcastTx extends BaseQuery {
             return contractTxHelper.newCreateTx(chainId, sender, senderBytes, contractAddressBytes, gasLimit, price, contractCode, args, remark);
         } catch (NulsException e) {
             Log.error(e);
-            return Result.getFailed(e.getErrorCode());
+            return Result.getFailed(e.getErrorCode() == null ? FAILED : e.getErrorCode());
         }
     }
 
@@ -158,7 +159,7 @@ public class ContractMakeAndBroadcastTx extends BaseQuery {
             return getSuccess().setData(resultMap);
         } catch (NulsException e) {
             Log.error(e);
-            return Result.getFailed(e.getErrorCode());
+            return Result.getFailed(e.getErrorCode() == null ? FAILED : e.getErrorCode());
         }
     }
 
@@ -226,7 +227,7 @@ public class ContractMakeAndBroadcastTx extends BaseQuery {
             return getSuccess().setData(resultMap);
         } catch (NulsException e) {
             Log.error(e);
-            return Result.getFailed(e.getErrorCode());
+            return Result.getFailed(e.getErrorCode() == null ? FAILED : e.getErrorCode());
         }
     }
 
@@ -278,7 +279,7 @@ public class ContractMakeAndBroadcastTx extends BaseQuery {
             return getSuccess().setData(resultMap);
         } catch (NulsException e) {
             Log.error(e);
-            return Result.getFailed(e.getErrorCode());
+            return Result.getFailed(e.getErrorCode() == null ? FAILED : e.getErrorCode());
         }
     }
 
@@ -305,7 +306,7 @@ public class ContractMakeAndBroadcastTx extends BaseQuery {
             return getSuccess();
         } catch (NulsException e) {
             Log.error(e);
-            return Result.getFailed(e.getErrorCode());
+            return Result.getFailed(e.getErrorCode() == null ? FAILED : e.getErrorCode());
         } catch (IOException e) {
             Log.error(e);
             Result result = Result.getFailed(ContractErrorCode.CONTRACT_TX_CREATE_ERROR);
