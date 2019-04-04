@@ -29,6 +29,7 @@ import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.basic.NulsOutputStreamBuffer;
 import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.crypto.Sha256Hash;
+import io.nuls.tools.exception.NulsRuntimeException;
 import io.nuls.tools.model.ByteUtils;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.log.Log;
@@ -52,11 +53,14 @@ public class NulsDigestData extends BaseNulsData {
 
     public NulsDigestData(byte[] bytes) {
         this.digestBytes = bytes;
+        if (bytes.length != HASH_LENGTH) {
+            throw new RuntimeException("the length is not eq 32 byte");
+        }
     }
 
     @Override
     public int size() {
-        return SerializeUtils.sizeOfBytes(digestBytes);
+        return HASH_LENGTH;
     }
 
     @Override
