@@ -73,8 +73,6 @@ public class TxGenerateServiceImpl implements TxGenerateService {
     @Autowired
     private TxConfig txConfig;
 
-    private static final Map<String, NonceHashData> PRE_HASH_MAP = new HashMap<>(TxConstant.INIT_CAPACITY_16);
-
     @Override
     public Map<String, String> createCrossMultiTransaction(Chain chain, List<CoinDTO> listFrom, List<CoinDTO> listTo, String remark) throws NulsException {
         return createCrossMultiTransaction(chain, listFrom, listTo, remark, null);
@@ -399,41 +397,6 @@ public class TxGenerateServiceImpl implements TxGenerateService {
         return LedgerCall.getNonce(chain, address, assetChainId, assetId);
     }
 
-    /**
-     * 获取nonce
-     * 先获取上一个发出去的交易的hash,用来计算当前交易的nonce,如果没有缓存上一个交易hash则直接向账本获取nonce
-     *
-     * @param chain
-     * @param address
-     * @param assetChainId
-     * @param assetId
-     * @return
-     * @throws NulsException
-     */
-//    public byte[] getNonce(Chain chain, String address, int assetChainId, int assetId) throws NulsException {
-//        String key = address + "_" + assetChainId + "_" + assetId;
-//        NonceHashData nonceHashData = PRE_HASH_MAP.get(key);
-//        if (null == nonceHashData || (NetworkCall.getCurrentTimeMillis() - nonceHashData.getCacheTimestamp() > txConfig.getHashTtl())) {
-//            return LedgerCall.getNonce(chain, address, assetChainId, assetId);
-//        } else {
-//            return TxUtil.getNonceByPreHash(nonceHashData.getHash());
-//        }
-//    }
-
-    /**
-     * 缓存发出的交易hash
-     *
-     * @param tx
-     * @throws NulsException
-     */
-//    private void cacheTxHash(Transaction tx) throws NulsException {
-//        CoinData coinData = TxUtil.getCoinData(tx);
-//        for (CoinFrom coinFrom : coinData.getFrom()) {
-//            String address = AddressTool.getStringAddressByBytes(coinFrom.getAddress());
-//            String key = address + "_" + coinFrom.getAssetsChainId() + "_" + coinFrom.getAssetsId();
-//            PRE_HASH_MAP.put(key, new NonceHashData(tx.getHash(), NetworkCall.getCurrentTimeMillis()));
-//        }
-//    }
 
     /**
      * assembly coinTo 组装to
