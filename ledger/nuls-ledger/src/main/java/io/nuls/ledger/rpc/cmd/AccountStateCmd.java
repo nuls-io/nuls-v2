@@ -154,11 +154,11 @@ public class AccountStateCmd extends BaseCmd {
             resultList = freezeLockStates.subList(currIdx, currIdx + pageSize);
         }
         Map<String, Object> rtMap = new HashMap<>();
-        rtMap.put("totalCount", freezeLockStates.size());
-        rtMap.put("pageNumber", pageNumber);
-        rtMap.put("pageSize", pageSize);
-        rtMap.put("list", resultList);
-        return success();
+        rtMap.put("totalCount",freezeLockStates.size());
+        rtMap.put("pageNumber",pageNumber);
+        rtMap.put("pageSize",pageSize);
+        rtMap.put("list",resultList);
+        return success(rtMap);
     }
 
     /**
