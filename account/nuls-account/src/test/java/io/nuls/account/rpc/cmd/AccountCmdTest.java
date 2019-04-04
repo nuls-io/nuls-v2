@@ -91,14 +91,14 @@ public class AccountCmdTest {
 
     @Test
     public void createAccountTest() throws Exception {
-       int count = 3;
-        //test to create an account that is not empty.
-        List<String> accountList = CommonRpcOperation.createAccount(count);
-        //checking the number of accounts returned
-        assertEquals(accountList.size(), count);
-        for (String address : accountList) {
-            System.out.println(address);
-        }
+//       int count = 3;
+//        //test to create an account that is not empty.
+//        List<String> accountList = CommonRpcOperation.createAccount(count);
+//        //checking the number of accounts returned
+//        assertEquals(accountList.size(), count);
+//        for (String address : accountList) {
+//            System.out.println(address);
+//        }
 
         //Test to create an empty password account
         List<String> accountList2 = CommonRpcOperation.createAccount(chainId, 2, password);

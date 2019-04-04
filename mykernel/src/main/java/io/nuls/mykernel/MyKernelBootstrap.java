@@ -27,6 +27,7 @@ import io.nuls.rpc.netty.channel.manager.ConnectManager;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.core.annotation.Value;
 import io.nuls.tools.core.ioc.SpringLiteContext;
+import io.nuls.tools.log.Log;
 import io.nuls.tools.log.logback.LoggerBuilder;
 import io.nuls.tools.log.logback.NulsLogger;
 import io.nuls.tools.model.StringUtils;
@@ -58,7 +59,19 @@ import java.util.concurrent.TimeUnit;
 public class MyKernelBootstrap {
 
     @Value("logLevel")
-    private String logLevel;
+    private String logLevel = "INFO";
+
+    @Value("logPath")
+    private String logPath;
+
+    @Value("dataPath")
+    private String dataPath;
+
+    @Value("debug")
+    private int debug;
+
+    @Value("active.module")
+    private String config;
 
     private static List<String> MODULE_STOP_LIST_SCRIPT = new ArrayList<>();
 
@@ -160,17 +173,17 @@ public class MyKernelBootstrap {
             ThreadUtils.createAndRunThread("module-start", () -> {
                 Process process = null;
                 try {
-                    process = Runtime.getRuntime().exec(
-                            modules.getAbsolutePath() + File.separator + "start.sh "
-                                    + " --jre " + System.getProperty("java.home")
-                                    + " --managerurl " + "ws://"+ HostInfo.getLocalIP()+":8887/ws "
-                                    + (StringUtils.isNotBlank(System.getProperty("log.path")) ? " --logpath " + System.getProperty("log.path") : "")
-                                    + (StringUtils.isNotBlank(System.getProperty("DataPath")) ? " --datapath " + System.getProperty("DataPath") : "")
-                                    + (StringUtils.isNotBlank(logLevel) ? " --loglevel " + logLevel : "")
-                                    + (StringUtils.isNotBlank(System.getProperty("debug")) ? " --debug " : "")
-                                    + (args.length > 2 ? " --config " + args[2] : "")
-                                    + " -r "
-                    );
+                    String cmd = modules.getAbsolutePath() + File.separator + "start.sh "
+                            + " --jre " + System.getProperty("java.home")
+                            + " --managerurl " + "ws://"+ HostInfo.getLocalIP()+":8887/ws "
+                            + (StringUtils.isNotBlank(logPath) ? " --logpath " + logPath: "")
+                            + (StringUtils.isNotBlank(dataPath) ? " --datapath " + dataPath : "")
+                            + (StringUtils.isNotBlank(logLevel) ? " --loglevel " + logLevel : "")
+                            + " --debug " + debug
+                            + (StringUtils.isNotBlank(config) ? " --config " + config : "")
+                            + " -r ";
+                    Log.info("run script:{}",cmd);
+                    process = Runtime.getRuntime().exec(cmd);
                     synchronized (MODULE_STOP_LIST_SCRIPT){
                         MODULE_STOP_LIST_SCRIPT.add(modules.getAbsolutePath() + File.separator + "stop.sh ");
                     }

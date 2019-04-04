@@ -32,16 +32,12 @@ import io.nuls.api.model.po.db.TxRelationInfo;
 import io.nuls.api.model.rpc.RpcErrorCode;
 import io.nuls.api.model.rpc.RpcResult;
 import io.nuls.api.model.rpc.RpcResultError;
-import io.nuls.api.provider.Result;
 import io.nuls.api.provider.ServiceManager;
-import io.nuls.api.provider.account.facade.BackupAccountReq;
-import io.nuls.api.provider.account.facade.CreateAccountReq;
 import io.nuls.api.utils.VerifyUtils;
 import io.nuls.base.basic.AddressTool;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Controller;
 import io.nuls.tools.core.annotation.RpcMethod;
-import io.nuls.tools.model.FormatValidUtils;
 
 import java.util.List;
 
@@ -178,28 +174,20 @@ public class AccountController {
         return new RpcResult().setResult(pageInfo);
     }
 
-//    @RpcMethod("getAccountTokens")
-//    public RpcResult getAccountTokens(List<Object> params) {
-//        VerifyUtils.verifyParams(params, 4);
-//        int chainId = (int) params.get(0);
-//        int pageIndex = (int) params.get(1);
-//        int pageSize = (int) params.get(2);
-//        String address = (String) params.get(3);
-//
-//        if (!AddressTool.validAddress(chainId, address)) {
-//            throw new JsonRpcException(new RpcResultError(RpcErrorCode.PARAMS_ERROR, "[address] is inValid"));
-//        }
-//        if (pageIndex <= 0) {
-//            pageIndex = 1;
-//        }
-//        if (pageSize <= 0 || pageSize > 100) {
-//            pageSize = 10;
-//        }
-//        // todo
-//        //PageInfo<AccountTokenInfo> pageInfo = tokenService.getAccountTokens(address, pageIndex, pageSize);
-//        PageInfo<AccountTokenInfo> pageInfo = new PageInfo<>();
-//        RpcResult result = new RpcResult();
-//        result.setResult(pageInfo);
-//        return result;
-//    }
+    @RpcMethod("getAccountFreezes")
+    public RpcResult getAccountFreezes(List<Object> params) {
+        VerifyUtils.verifyParams(params, 4);
+        int chainId, pageIndex, pageSize;
+        String address;
+        try {
+            chainId = (int) params.get(0);
+            pageIndex = (int) params.get(1);
+            pageSize = (int) params.get(2);
+            address = (String) params.get(3);
+        } catch (Exception e) {
+            return RpcResult.paramError();
+        }
+        WalletRpcHandler.getFreezeList(chainId, pageIndex, pageSize, address);
+        return null;
+    }
 }

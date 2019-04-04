@@ -69,7 +69,7 @@ public class CreateProcessor extends AccountBaseProcessor implements CommandProc
             return true;
         }
         checkArgs(StringUtils.isNumeric(args[1]),"must enter a number");
-        checkArgs(Integer.parseInt(args[1]) > 1,"must be greater than zero");
+        checkArgs(Integer.parseInt(args[1]) > 0,"must be greater than zero");
         return true;
     }
 
