@@ -114,6 +114,20 @@ public class WalletRpcHandler {
         return null;
     }
 
+    public static Result getFreezeList(int chainId, int pageIndex, int pageSize, String address) {
+        Map<String, Object> params = new HashMap<>();
+        params.put(Constants.VERSION_KEY_STR, ApiContext.VERSION);
+        params.put("chainId", chainId);
+        params.put("pageNumber", pageIndex);
+        params.put("pageSize", pageSize);
+        params.put("address", address);
+        try {
+            Map map = (Map) RpcCall.request(ModuleE.LG.abbr, CommandConstant.GET_FREEZE, params);
+        } catch (Exception e) {
+            return Result.getFailed(ApiErrorCode.DATA_PARSE_ERROR);
+        }
+        return null;
+    }
 
     public static Result<TransactionInfo> getTx(int chainId, String hash) {
         Map<String, Object> params = new HashMap<>();
