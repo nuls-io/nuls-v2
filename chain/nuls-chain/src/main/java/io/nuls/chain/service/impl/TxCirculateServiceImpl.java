@@ -29,7 +29,6 @@ import io.nuls.base.data.CoinData;
 import io.nuls.base.data.CoinFrom;
 import io.nuls.base.data.CoinTo;
 import io.nuls.base.data.Transaction;
-import io.nuls.chain.info.CmConstants;
 import io.nuls.chain.info.CmRuntimeInfo;
 import io.nuls.chain.model.dto.ChainEventResult;
 import io.nuls.chain.model.dto.CoinDataAssets;
@@ -41,8 +40,8 @@ import io.nuls.chain.service.ChainService;
 import io.nuls.chain.service.TxCirculateService;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Service;
-import io.nuls.tools.model.BigIntegerUtils;
 import io.nuls.tools.exception.NulsException;
+import io.nuls.tools.model.BigIntegerUtils;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -114,7 +113,7 @@ public class TxCirculateServiceImpl implements TxCirculateService {
     }
 
     boolean isMainChain(int chainId) {
-        return Integer.valueOf(CmConstants.CHAIN_ASSET_MAP.get(CmConstants.NULS_CHAIN_ID)) == chainId;
+        return CmRuntimeInfo.getMainIntChainId() == chainId;
     }
 
     @Override
@@ -139,7 +138,7 @@ public class TxCirculateServiceImpl implements TxCirculateService {
                 //toChainId == nuls chain  需要进行跨外链的 手续费在coinBase里已经增加了。
                 //toChainId != nuls chain 收取剩余x%的手续费
                 //提取toChainId的 手续费资产，如果存将手续费放入外链给的回执，则这部分可以取消外链手续费的收取。
-                String mainAssetKey = CmRuntimeInfo.getMainAsset();
+                String mainAssetKey = CmRuntimeInfo.getMainAssetKey();
                 BigInteger allFromMainAmount = fromAssetMap.get(mainAssetKey);
                 BigInteger allToMainAmount = toAssetMap.get(mainAssetKey);
                 //40%的手续费归平台
@@ -157,8 +156,8 @@ public class TxCirculateServiceImpl implements TxCirculateService {
                 if (null == toChainAsset) {
                     //链下加资产，资产下增加链
                     BlockChain toChain = chainService.getChain(toChainId);
-                    Asset asset = assetService.getAsset(CmRuntimeInfo.getMainAsset());
-                    toChain.addCirculateAssetId(CmRuntimeInfo.getMainAsset());
+                    Asset asset = assetService.getAsset(CmRuntimeInfo.getMainAssetKey());
+                    toChain.addCirculateAssetId(CmRuntimeInfo.getMainAssetKey());
                     asset.addChainId(toChainId);
                     chainService.updateChain(toChain);
                     assetService.updateAsset(asset);

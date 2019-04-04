@@ -45,6 +45,17 @@ public class ConsensusConfig {
      * */
     private int mainChainCommissionRatio;
 
+    /**
+     * 出块节点密码
+     * */
+    private String password;
+
+    /**
+     * 种子节点
+     * Seed node
+     */
+    private String seedNodes;
+
 
     public ConfigBean getConfigBean() {
         return configBean;
@@ -117,5 +128,21 @@ public class ConsensusConfig {
 
     public void setMainChainCommissionRatio(int mainChainCommissionRatio) {
         this.mainChainCommissionRatio = mainChainCommissionRatio;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public String getSeedNodes() {
+        return seedNodes;
+    }
+
+    public void setSeedNodes(String seedNodes) {
+        this.seedNodes = seedNodes;
     }
 }

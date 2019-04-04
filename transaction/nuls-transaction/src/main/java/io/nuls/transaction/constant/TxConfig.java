@@ -32,8 +32,6 @@ public class TxConfig {
     private String language;
     /** 编码*/
     private String encoding;
-    /** 本地计算nonce值的hash缓存有效时间 30秒*/
-    private int hashTtl;
     /** 跨链交易打包确认后需要达到的最低阈值高度才生效*/
     private long ctxEffectThreshold;
     /** 跨链验证通过率百分比, 跨链通过率 */
@@ -109,14 +107,6 @@ public class TxConfig {
 
     public void setEncoding(String encoding) {
         this.encoding = encoding;
-    }
-
-    public int getHashTtl() {
-        return hashTtl;
-    }
-
-    public void setHashTtl(int hashTtl) {
-        this.hashTtl = hashTtl;
     }
 
     public long getCtxEffectThreshold() {

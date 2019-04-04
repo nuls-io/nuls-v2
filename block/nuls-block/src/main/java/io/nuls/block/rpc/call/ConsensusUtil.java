@@ -21,21 +21,22 @@
 package io.nuls.block.rpc.call;
 
 import io.nuls.base.data.Block;
+import io.nuls.base.data.BlockExtendsData;
 import io.nuls.base.data.BlockHeader;
 import io.nuls.block.manager.ContextManager;
 import io.nuls.block.model.ChainContext;
+import io.nuls.block.model.po.BlockHeaderPo;
 import io.nuls.block.service.BlockService;
 import io.nuls.block.utils.BlockUtil;
 import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.netty.processor.ResponseMessageProcessor;
 import io.nuls.rpc.util.RPCUtil;
-import io.nuls.tools.crypto.HexUtil;
+import io.nuls.tools.core.annotation.Autowired;
+import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.log.logback.NulsLogger;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.io.IOException;
+import java.util.*;
 
 /**
  * 调用共识模块接口的工具类
@@ -44,8 +45,10 @@ import java.util.Map;
  * @version 1.0
  * @date 18-11-9 上午10:43
  */
+@Component
 public class ConsensusUtil {
-
+    @Autowired
+    private static BlockService service;
     /**
      * 共识验证
      *
@@ -182,6 +185,67 @@ public class ConsensusUtil {
             params.put("blockHeader", RPCUtil.encode(blockHeader.serialize()));
 
             return ResponseMessageProcessor.requestAndResponse(ModuleE.CS.abbr, "cs_addBlock", params).isSuccess();
+        } catch (Exception e) {
+            e.printStackTrace();
+            commonLog.error(e);
+            return false;
+        }
+    }
+
+    /**
+     * 通知共识模块进入工作状态或者进入等待状态
+     *
+     * @param chainId 链Id/chain id
+     * @param rollBackAmount  回滚区块数量
+     * @return
+     */
+    public static boolean sendHeaderList(int chainId, int rollBackAmount) {
+        ChainContext context = ContextManager.getContext(chainId);
+        NulsLogger commonLog = context.getCommonLog();
+        try {
+            Block latestBlock = context.getLatestBlock();
+            long latestHeight = latestBlock.getHeader().getHeight();
+            byte[] extend = latestBlock.getHeader().getExtend();
+            BlockExtendsData data = new BlockExtendsData(extend);
+            long roundIndex = data.getRoundIndex();
+            List<String> hexList = new ArrayList<>();
+            int count = 0;
+            while (count < 110) {
+                latestHeight--;
+                if ((latestHeight < 0)) {
+                    break;
+                }
+                BlockHeaderPo blockHeader = service.getBlockHeader(chainId, latestHeight);
+                BlockExtendsData newData = new BlockExtendsData(blockHeader.getExtend());
+                long newRoundIndex = newData.getRoundIndex();
+                if (newRoundIndex != roundIndex) {
+                    count++;
+                    roundIndex = newRoundIndex;
+                }
+            }
+            long height = latestBlock.getHeader().getHeight();
+            List<BlockHeader> blockHeaders = service.getBlockHeader(chainId, height - rollBackAmount - 1, height - 1);
+            if (blockHeaders == null) {
+                return true;
+            }
+            blockHeaders.forEach(e -> {
+                try {
+                    hexList.add(RPCUtil.encode(e.serialize()));
+                } catch (IOException ex) {
+                    ex.printStackTrace();
+                }
+            });
+
+            Map<String, Object> params = new HashMap<>(2);
+//            params.put(Constants.VERSION_KEY_STR, "1.0");
+            params.put("chainId", chainId);
+            params.put("headerList", hexList);
+            boolean success = ResponseMessageProcessor.requestAndResponse(ModuleE.CS.abbr, "cs_receiveHeaderList", params).isSuccess();
+            while (!success) {
+                Thread.sleep(1000L);
+                success = ResponseMessageProcessor.requestAndResponse(ModuleE.CS.abbr, "cs_receiveHeaderList", params).isSuccess();
+            }
+            return success;
         } catch (Exception e) {
             e.printStackTrace();
             commonLog.error(e);

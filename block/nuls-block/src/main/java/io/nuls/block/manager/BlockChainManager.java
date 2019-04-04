@@ -95,6 +95,7 @@ public class BlockChainManager {
         Chain topForkChain = switchChainPath.peek();
         long forkHeight = topForkChain.getStartHeight();
         long masterChainEndHeight = masterChain.getEndHeight();
+        ConsensusUtil.sendHeaderList(chainId, (int) (masterChainEndHeight - forkHeight));
         commonLog.info("*calculate fork point complete, forkHeight=" + forkHeight);
 
         //2.回滚主链

@@ -105,6 +105,9 @@ public class BlockServiceImpl implements BlockService {
 
     @Override
     public List<BlockHeader> getBlockHeader(int chainId, long startHeight, long endHeight) {
+        if (startHeight < 0 || endHeight < 0) {
+            return null;
+        }
         NulsLogger commonLog = ContextManager.getContext(chainId).getCommonLog();
         try {
             int size = (int) (endHeight - startHeight + 1);

@@ -55,7 +55,7 @@ public class BlockHeightStorageImpl  extends  BaseStorage implements BlockHeight
 
     @Override
     public BlockHeight getBlockHeight(int chainId) {
-        LoggerUtil.Log.info("chainId = {} getBlockHeight", chainId);
+        LoggerUtil.logger().info("chainId = {} getBlockHeight", chainId);
         byte[] stream = RocksDBService.get(TBL, ByteUtils.intToBytes(chainId));
         if (stream == null) {
             return null;
@@ -65,14 +65,14 @@ public class BlockHeightStorageImpl  extends  BaseStorage implements BlockHeight
             blockHeight.parse(stream, 0);
             return blockHeight;
         } catch (Exception e) {
-            LoggerUtil.Log.error("getBlockHeight serialize error.", e);
+            LoggerUtil.logger().error("getBlockHeight serialize error.", e);
         }
         return null;
     }
 
     @Override
     public void saveOrUpdateBlockHeight(int chainId, BlockHeight blockHeight) throws Exception {
-        LoggerUtil.Log.info("chainId = {},blockHeight={} saveOrUpdateBlockHeight", chainId, blockHeight);
+        LoggerUtil.logger().info("chainId = {},blockHeight={} saveOrUpdateBlockHeight", chainId, blockHeight);
         RocksDBService.put(TBL, ByteUtils.intToBytes(chainId), blockHeight.serialize());
     }
 

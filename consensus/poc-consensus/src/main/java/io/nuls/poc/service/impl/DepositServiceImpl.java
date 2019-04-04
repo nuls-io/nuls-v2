@@ -92,11 +92,16 @@ public class DepositServiceImpl implements DepositService {
             //交易签名
             String priKey = (String) callResult.get("priKey");
             CallMethodUtils.transactionSignature(dto.getChainId(), dto.getAddress(), dto.getPassword(), priKey, tx);
-            boolean validResult = validatorManager.validateTx(chain, tx);
+            String txStr = RPCUtil.encode(tx.serialize());
+            boolean validResult = CallMethodUtils.transactionBasicValid(chain,txStr);
             if (!validResult) {
                 return Result.getFailed(ConsensusErrorCode.TX_DATA_VALIDATION_ERROR);
             }
-            CallMethodUtils.sendTx(chain, RPCUtil.encode(tx.serialize()));
+            validResult = validatorManager.validateTx(chain, tx);
+            if (!validResult) {
+                return Result.getFailed(ConsensusErrorCode.TX_DATA_VALIDATION_ERROR);
+            }
+            CallMethodUtils.sendTx(chain,txStr);
             Map<String, Object> result = new HashMap<>(ConsensusConstant.INIT_CAPACITY);
             result.put("txHash", tx.getHash().getDigestHex());
             return Result.getSuccess(ConsensusErrorCode.SUCCESS).setData(result);
@@ -200,11 +205,16 @@ public class DepositServiceImpl implements DepositService {
             //交易签名
             String priKey = (String) callResult.get("priKey");
             CallMethodUtils.transactionSignature(dto.getChainId(), dto.getAddress(), dto.getPassword(), priKey, cancelDepositTransaction);
-            boolean validResult = validatorManager.validateTx(chain, cancelDepositTransaction);
+            String txStr = RPCUtil.encode(cancelDepositTransaction.serialize());
+            boolean validResult = CallMethodUtils.transactionBasicValid(chain,txStr);
             if (!validResult) {
                 return Result.getFailed(ConsensusErrorCode.TX_DATA_VALIDATION_ERROR);
             }
-            CallMethodUtils.sendTx(chain, RPCUtil.encode(cancelDepositTransaction.serialize()));
+            validResult = validatorManager.validateTx(chain, cancelDepositTransaction);
+            if (!validResult) {
+                return Result.getFailed(ConsensusErrorCode.TX_DATA_VALIDATION_ERROR);
+            }
+            CallMethodUtils.sendTx(chain,txStr);
             Map<String, Object> result = new HashMap<>(ConsensusConstant.INIT_CAPACITY);
             result.put("txHash", cancelDepositTransaction.getHash().getDigestHex());
             return Result.getSuccess(ConsensusErrorCode.SUCCESS).setData(result);

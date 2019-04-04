@@ -82,7 +82,6 @@ public class TransactionCmd extends BaseCmd {
      */
     @CmdAnnotation(cmd = "ac_accountTxValidate", version = 1.0, description = "validate the transaction")
     public Response accountTxValidate(Map params) {
-        LoggerUtil.logger.debug("ac_accountTxValidate start,params size:{}", params == null ? 0 : params.size());
         int chainId = 0;
         List<String> txList;
         List<Transaction> lists = new ArrayList<>();
@@ -130,7 +129,6 @@ public class TransactionCmd extends BaseCmd {
      */
     @CmdAnnotation(cmd = "ac_commitTx", version = 1.0, description = "batch commit the transaction")
     public Response commitTx(Map params) {
-        LoggerUtil.logger.debug("ac_commitTx start,params size:{}", params == null ? 0 : params.size());
         boolean result = true;
         int chainId;
         List<String> txList;
@@ -205,7 +203,6 @@ public class TransactionCmd extends BaseCmd {
      */
     @CmdAnnotation(cmd = "ac_rollbackTx", version = 1.0, description = "batch rollback the transaction")
     public Response rollbackTx(Map params) {
-        LoggerUtil.logger.debug("ac_rollbackTx start,params size:{}", params == null ? 0 : params.size());
         //默认回滚成功
         boolean result = true;
         int chainId;
@@ -282,7 +279,7 @@ public class TransactionCmd extends BaseCmd {
     @Parameter(parameterName = RpcParameterNameConstant.CHAIN_ID, parameterType = "int")
     @Parameter(parameterName = RpcParameterNameConstant.TX, parameterType = "String")
     public Response transferTxValidate(Map<String, Object> params) {
-        Map<String, Boolean> resultMap = new HashMap<>();
+        Map<String, Boolean> resultMap = new HashMap<>(AccountConstant.INIT_CAPACITY_2);
         boolean result;
         try {
             if (params.get(RpcParameterNameConstant.CHAIN_ID) == null || params.get(RpcParameterNameConstant.TX) == null) {

@@ -27,8 +27,6 @@ package io.nuls.base.signture;
 
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.constant.BaseConstant;
-import io.nuls.base.data.Address;
-import io.nuls.base.data.NulsDigestData;
 import io.nuls.base.data.NulsSignData;
 import io.nuls.base.data.Transaction;
 import io.nuls.base.script.Script;
@@ -40,7 +38,6 @@ import io.nuls.tools.crypto.ECKey;
 import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.log.Log;
-import io.nuls.tools.parse.SerializeUtils;
 
 import java.io.IOException;
 import java.math.BigInteger;
@@ -426,7 +423,6 @@ public class SignatureUtil {
     public static NulsSignData signDigest(byte[] digest, ECKey ecKey) {
         byte[] signbytes = ecKey.sign(digest);
         NulsSignData nulsSignData = new NulsSignData();
-        nulsSignData.setSignAlgType(NulsSignData.SIGN_ALG_ECC);
         nulsSignData.setSignBytes(signbytes);
         return nulsSignData;
     }

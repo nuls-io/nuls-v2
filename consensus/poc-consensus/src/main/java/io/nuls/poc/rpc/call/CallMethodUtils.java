@@ -19,6 +19,7 @@ import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.model.message.Response;
 import io.nuls.rpc.netty.processor.ResponseMessageProcessor;
 import io.nuls.rpc.util.RPCUtil;
+import io.nuls.tools.constant.ErrorCode;
 import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.log.Log;
@@ -353,16 +354,24 @@ public class CallMethodUtils {
      * @param tx transaction hex
      */
     @SuppressWarnings("unchecked")
-    public static void sendTx(Chain chain, String tx) {
+    public static void sendTx(Chain chain, String tx) throws NulsException{
+        Map<String, Object> params = new HashMap(4);
+        params.put("chainId", chain.getConfig().getChainId());
+        params.put("tx", tx);
         try {
-            Map<String, Object> params = new HashMap(4);
-            params.put("chainId", chain.getConfig().getChainId());
-            params.put("tx", tx);
+            boolean ledgerValidResult = commitUnconfirmedTx(chain,tx);
+            if(!ledgerValidResult){
+                throw new NulsException(ConsensusErrorCode.FAILED);
+            }
             Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.TX.abbr, "tx_newTx", params);
             if (!cmdResp.isSuccess()) {
                 chain.getLoggerMap().get(ConsensusConstant.CONSENSUS_LOGGER_NAME).error("Transaction failed to send!");
+                rollBackUnconfirmTx(chain,tx);
+                throw new NulsException(ConsensusErrorCode.FAILED);
             }
-        } catch (Exception e) {
+        }catch (NulsException e){
+            throw e;
+        }catch (Exception e) {
             chain.getLoggerMap().get(ConsensusConstant.CONSENSUS_LOGGER_NAME).error(e);
         }
     }
@@ -477,7 +486,7 @@ public class CallMethodUtils {
                 blockHeaderHexs = (List<String>) resultMap.get("getLatestRoundBlockHeaders");
                 break;
             }
-            Log.info("---------------------------区块加载失败！");
+            Log.debug("---------------------------区块加载失败！");
             Thread.sleep(1000);
         }
         List<BlockHeader> blockHeaders = new ArrayList<>();
@@ -489,6 +498,94 @@ public class CallMethodUtils {
         Collections.sort(blockHeaders, new BlockHeaderComparator());
         chain.setBlockHeaderList(blockHeaders);
         chain.setNewestHeader(blockHeaders.get(blockHeaders.size() - 1));
-        Log.info("---------------------------区块加载成功！");
+        Log.debug("---------------------------区块加载成功！");
+    }
+
+    /**
+     * 验证交易CoinData
+     * Verifying transactions CoinData
+     *
+     * @param chain chain info
+     * @param tx transaction hex
+     */
+    @SuppressWarnings("unchecked")
+    public static boolean commitUnconfirmedTx(Chain chain, String tx){
+        Map<String, Object> params = new HashMap(4);
+        params.put("chainId", chain.getConfig().getChainId());
+        params.put("tx", tx);
+        try {
+            Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.LG.abbr, "commitUnconfirmedTx", params);
+            if (!cmdResp.isSuccess()) {
+                chain.getLoggerMap().get(ConsensusConstant.CONSENSUS_LOGGER_NAME).error("Ledger module verifies transaction failure!");
+                return false;
+            }
+            HashMap result = (HashMap) ((HashMap) cmdResp.getResponseData()).get("commitUnconfirmedTx");
+            int validateCode = (int)result.get("validateCode");
+            if(validateCode == 1){
+                return true;
+            }else{
+                chain.getLoggerMap().get(ConsensusConstant.CONSENSUS_LOGGER_NAME).info("Ledger module verifies transaction failure,error info:"+ result.get("validateDesc"));
+                return false;
+            }
+        }catch (Exception e){
+            chain.getLoggerMap().get(ConsensusConstant.CONSENSUS_LOGGER_NAME).error(e);
+            return false;
+        }
+    }
+
+    /**
+     * 回滚交易在账本模块的记录
+     * Rollback transactions recorded in the book module
+     *
+     * @param chain chain info
+     * @param tx transaction hex
+     */
+    @SuppressWarnings("unchecked")
+    public static boolean rollBackUnconfirmTx(Chain chain, String tx){
+        Map<String, Object> params = new HashMap(4);
+        params.put("chainId", chain.getConfig().getChainId());
+        params.put("tx", tx);
+        try {
+            Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.LG.abbr, "rollBackUnconfirmTx", params);
+            if (!cmdResp.isSuccess()) {
+                chain.getLoggerMap().get(ConsensusConstant.CONSENSUS_LOGGER_NAME).error("Ledger module rollBack transaction failure!");
+            }
+            HashMap result = (HashMap) ((HashMap) cmdResp.getResponseData()).get("rollBackUnconfirmTx");
+            int validateCode = (int)result.get("value");
+            if(validateCode == 1){
+                return true;
+            }else{
+                chain.getLoggerMap().get(ConsensusConstant.CONSENSUS_LOGGER_NAME).info("Ledger module rollBack transaction failure!");
+                return false;
+            }
+        }catch (Exception e){
+            chain.getLoggerMap().get(ConsensusConstant.CONSENSUS_LOGGER_NAME).error(e);
+            return false;
+        }
+    }
+
+    /**
+     * 交易基础验证
+     * Transaction Basis Verification
+     * @param chain chain info
+     * @param tx transaction hex
+     * */
+    @SuppressWarnings("unchecked")
+    public static boolean transactionBasicValid(Chain chain,String tx){
+        Map<String, Object> params = new HashMap(4);
+        params.put("chainId", chain.getConfig().getChainId());
+        params.put("tx", tx);
+        try {
+            Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.TX.abbr, "tx_baseValidateTx", params);
+            if (!cmdResp.isSuccess()) {
+                chain.getLoggerMap().get(ConsensusConstant.CONSENSUS_LOGGER_NAME).error("Failure of transaction basic validation!");
+                return false;
+            }
+            HashMap result = (HashMap) ((HashMap) cmdResp.getResponseData()).get("tx_baseValidateTx");
+            return (boolean)result.get("value");
+        }catch (Exception e){
+            chain.getLoggerMap().get(ConsensusConstant.CONSENSUS_LOGGER_NAME).error(e);
+            return false;
+        }
     }
 }

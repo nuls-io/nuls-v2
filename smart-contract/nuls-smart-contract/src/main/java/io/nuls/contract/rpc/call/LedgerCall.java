@@ -104,7 +104,7 @@ public class LedgerCall {
                 return LedgerUnConfirmedTxStatus.OTHER.status();
             }
             HashMap result = (HashMap) ((HashMap) callResp.getResponseData()).get("commitUnconfirmedTx");
-            return (int) result.get("value");
+            return (int) result.get("validateCode");
         } catch (Exception e) {
             throw new NulsException(e);
         }

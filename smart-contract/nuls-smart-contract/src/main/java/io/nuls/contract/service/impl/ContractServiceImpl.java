@@ -59,6 +59,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
 import static io.nuls.contract.constant.ContractConstant.*;
+import static io.nuls.contract.constant.ContractErrorCode.FAILED;
 import static io.nuls.contract.util.ContractUtil.getFailed;
 import static io.nuls.contract.util.ContractUtil.getSuccess;
 
@@ -178,7 +179,7 @@ public class ContractServiceImpl implements ContractService {
             return getFailed().setMsg(e.getMessage());
         } catch (NulsException e) {
             Log.error(e);
-            return Result.getFailed(e.getErrorCode());
+            return Result.getFailed(e.getErrorCode() == null ? FAILED : e.getErrorCode());
         }
     }
 
@@ -302,7 +303,7 @@ public class ContractServiceImpl implements ContractService {
             return getSuccess();
         } catch (NulsException e) {
             Log.error(e);
-            return Result.getFailed(e.getErrorCode());
+            return Result.getFailed(e.getErrorCode() == null ? FAILED : e.getErrorCode());
         } catch (Exception e) {
             Log.error(e);
             return getFailed().setMsg(e.getMessage());

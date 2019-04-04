@@ -155,7 +155,7 @@ public class BaseQuery {
     protected String contractAddress32 = "tNULSeBaNBJrxm4N2zKaZvkyKoDEf5EhB28zhD";
     protected String contractAddress33 = "tNULSeBaMy3w8zyTm7v6tLNxbQgmDW82tStq75";
     protected String contractAddress34 = "tNULSeBaN8HJH5395svtzWpnfUAQUzqSE5x4t2";
-    protected String contractAddress_nrc20   = "";
+    protected String contractAddress_nrc20   = "tNULSeBaMzGVvtSpgB7dcERu7NZWU6Cf8gtnnP";
     protected String contractAddress_nrc200  = "tNULSeBaMzCeoukqhMvWYpCZAbKCN2fE2JVzfK";
     protected String contractAddress_nrc201  = "tNULSeBaNBawLTvbi4yokiXsFLkiNe8x8XH7Ac";
     protected String contractAddress_nrc202  = "tNULSeBaNAnkAcECUu4KVjSWRUKiPaCytRh2dZ";
@@ -269,7 +269,7 @@ public class BaseQuery {
      */
     @Test
     public void contractResult() throws Exception {
-        Map params = this.makeContractResultParams("0020b807a23be5ed7969ab3bc30a56bf3c20ba37512c9de17a6f33700889dc46960c");
+        Map params = this.makeContractResultParams("0020c8db5968241ed6dfa11d89b19ebe65a987f958cef0efc03076804ed95d88af9c");
         Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, CONTRACT_RESULT, params);
         Map result = (HashMap) (((HashMap) cmdResp2.getResponseData()).get(CONTRACT_RESULT));
         Assert.assertTrue(null != result);
@@ -288,7 +288,7 @@ public class BaseQuery {
      */
     @Test
     public void contractTx() throws Exception {
-        Map params = this.makeContractTxParams("0020b807a23be5ed7969ab3bc30a56bf3c20ba37512c9de17a6f33700889dc46960c");
+        Map params = this.makeContractTxParams("0020c8db5968241ed6dfa11d89b19ebe65a987f958cef0efc03076804ed95d88af9c");
         Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, CONTRACT_TX, params);
         Map result = (HashMap) (((HashMap) cmdResp2.getResponseData()).get(CONTRACT_TX));
         Assert.assertTrue(null != result);

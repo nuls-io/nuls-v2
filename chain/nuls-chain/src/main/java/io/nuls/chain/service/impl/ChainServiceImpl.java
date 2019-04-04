@@ -1,8 +1,8 @@
 package io.nuls.chain.service.impl;
 
 import io.nuls.base.data.Transaction;
+import io.nuls.chain.config.NulsChainConfig;
 import io.nuls.chain.info.ChainTxConstants;
-import io.nuls.chain.info.CmConstants;
 import io.nuls.chain.info.CmRuntimeInfo;
 import io.nuls.chain.model.po.Asset;
 import io.nuls.chain.model.po.BlockChain;
@@ -27,6 +27,8 @@ import java.util.Map;
  */
 @Service
 public class ChainServiceImpl implements ChainService {
+    @Autowired
+    private NulsChainConfig nulsChainConfig;
 
     @Autowired
     private ChainStorage chainStorage;
@@ -44,13 +46,13 @@ public class ChainServiceImpl implements ChainService {
      */
     @Override
     public void initMainChain() throws Exception {
-        int chainId = Integer.valueOf(CmConstants.CHAIN_ASSET_MAP.get(CmConstants.NULS_CHAIN_ID));
+        int chainId = Integer.valueOf(nulsChainConfig.getNulsChainId());
         BlockChain chain = getChain(chainId);
         if (chain != null) {
             return;
         }
         chain = new BlockChain();
-        int assetId = Integer.parseInt(CmConstants.CHAIN_ASSET_MAP.get(CmConstants.NULS_ASSET_ID));
+        int assetId = Integer.parseInt(nulsChainConfig.getNulsAssetId());
         chain.setRegAssetId(assetId);
         chain.addCreateAssetId(CmRuntimeInfo.getAssetKey(chainId, assetId));
         chain.addCirculateAssetId(CmRuntimeInfo.getAssetKey(chainId, assetId));
@@ -58,8 +60,8 @@ public class ChainServiceImpl implements ChainService {
         Asset asset = new Asset();
         asset.setChainId(chainId);
         asset.setAssetId(assetId);
-        asset.setInitNumber(new BigInteger(CmConstants.CHAIN_ASSET_MAP.get(CmConstants.NULS_ASSET_MAX)));
-        asset.setSymbol(CmConstants.CHAIN_ASSET_MAP.get(CmConstants.NULS_ASSET_SYMBOL));
+        asset.setInitNumber(new BigInteger(nulsChainConfig.getNulsAssetInitNumberMax()));
+        asset.setSymbol(nulsChainConfig.getNulsAssetSymbol());
         asset.addChainId(chainId);
         assetService.createAsset(asset);
     }

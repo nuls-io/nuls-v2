@@ -670,7 +670,7 @@ public class TxServiceImpl implements TxService {
                 Transaction tx = packablePool.get(chain);
                 if (tx == null) {
                     try {
-                        //nulsLogger.debug("************* [获取交易等待]");
+                        nulsLogger.debug("************* [获取交易等待]");
                         Thread.sleep(100L);
                     } catch (InterruptedException e) {
                         nulsLogger.error("packaging error ", e);
@@ -729,11 +729,8 @@ public class TxServiceImpl implements TxService {
                         ContractCall.contractBatchBegin(chain, blockHeight, blockTime, packingAddress, preStateRoot);
                         contractNotify = true;
                     }
-                    if (!ContractCall.invokeContract(chain, txStr)) {
-                        clearInvalidTx(chain, tx);
-                        continue;
-                    }
-
+                    //执行职能合约，不管结果该交易都会保留
+                    ContractCall.invokeContract(chain, txStr);
                 }
                 packingTxList.add(txWrapper);
                 totalSize += txSize;

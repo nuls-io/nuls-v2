@@ -150,8 +150,8 @@ public class ContractNRC20TokenSendTxTest extends BaseQuery {
         Map params = this.makeCreateParams(toAddress0, contractCode, remark, name, symbol, amount, decimals);
         Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, CREATE, params);
         Map result = (HashMap) (((HashMap) cmdResp2.getResponseData()).get(CREATE));
+        Log.info("createContract-result:{}", JSONUtils.obj2PrettyJson(cmdResp2));
         Assert.assertTrue(null != result);
-        Log.info("createContract-result:{}", JSONUtils.obj2PrettyJson(result));
     }
 
     private Map makeCreateParams(String sender, byte[] contractCode, String remark, Object... args) {
@@ -167,6 +167,17 @@ public class ContractNRC20TokenSendTxTest extends BaseQuery {
         return params;
     }
 
+    @Test
+    public void loopCallContract() throws Exception {
+        long s = System.currentTimeMillis();
+        int times = 500;
+        for(int i=0;i<times;i++) {
+            callContract();
+        }
+        long e = System.currentTimeMillis();
+        Log.info("{} times cost time is {}", times, e - s);
+    }
+
     /**
      * 调用合约
      */
@@ -177,16 +188,19 @@ public class ContractNRC20TokenSendTxTest extends BaseQuery {
             methodName = "transfer";
         }
         if(StringUtils.isBlank(tokenReceiver)) {
-            tokenReceiver = toAddress0;
+            tokenReceiver = toAddress1;
         }
         String methodDesc = "";
         String remark = "call contract test - 空气币转账";
         String token = BigInteger.valueOf(800L).toString();
-        Map params = this.makeCallParams(sender, value, contractAddress_nrc20, methodName, methodDesc, remark, tokenReceiver, token);
+        Map params = this.makeCallParams(toAddress0, value, contractAddress_nrc20, methodName, methodDesc, remark, tokenReceiver, token);
         Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, CALL, params);
         Map result = (HashMap) (((HashMap) cmdResp2.getResponseData()).get(CALL));
+        if(result == null) {
+            Log.error("call-response:{}", JSONUtils.obj2PrettyJson(cmdResp2));
+        }
         Assert.assertTrue(null != result);
-        Log.info("call-result:{}", JSONUtils.obj2PrettyJson(cmdResp2));
+        Log.info("call-result:{}", JSONUtils.obj2PrettyJson(result));
     }
 
     private Map makeCallParams(String sender, BigInteger value, String contractAddress, String methodName, String methodDesc, String remark, Object... args) {

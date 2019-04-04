@@ -58,6 +58,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static io.nuls.contract.constant.ContractErrorCode.FAILED;
 import static io.nuls.contract.util.ContractUtil.getFailed;
 import static io.nuls.contract.util.ContractUtil.getSuccess;
 
@@ -104,7 +105,7 @@ public class ContractTxServiceImpl implements ContractTxService {
             return getSuccess().setData(resultMap);
         } catch (NulsException e) {
             Log.error(e);
-            return Result.getFailed(e.getErrorCode());
+            return Result.getFailed(e.getErrorCode() == null ? FAILED : e.getErrorCode());
         } catch (IOException e) {
             Log.error(e);
             Result result = Result.getFailed(ContractErrorCode.CONTRACT_TX_CREATE_ERROR);
@@ -263,7 +264,7 @@ public class ContractTxServiceImpl implements ContractTxService {
             return getSuccess().setData(map);
         } catch (NulsException e) {
             Log.error(e);
-            return Result.getFailed(e.getErrorCode());
+            return Result.getFailed(e.getErrorCode() == null ? FAILED : e.getErrorCode());
         }
     }
 

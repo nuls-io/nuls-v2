@@ -70,7 +70,7 @@ public class TransferServiceForRpc extends BaseRpcService implements TransferSer
 
     private Result<Transaction> tranderTransaction(Map<String,Object> data){
         try {
-            String hexString = (String) data.get("txHex");
+            String hexString = (String) data.get("tx");
             if(StringUtils.isNull(hexString)){
                 return fail(ERROR_CODE,"not found tx");
             }

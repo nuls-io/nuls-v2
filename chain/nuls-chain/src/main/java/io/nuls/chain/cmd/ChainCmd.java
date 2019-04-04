@@ -4,13 +4,14 @@ package io.nuls.chain.cmd;
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.CoinData;
 import io.nuls.base.data.Transaction;
-import io.nuls.chain.info.CmConstants;
+import io.nuls.chain.config.NulsChainConfig;
 import io.nuls.chain.model.dto.AccountBalance;
 import io.nuls.chain.model.po.Asset;
 import io.nuls.chain.model.po.BlockChain;
 import io.nuls.chain.model.tx.RegisterChainAndAssetTransaction;
 import io.nuls.chain.service.ChainService;
 import io.nuls.chain.service.RpcService;
+import io.nuls.chain.util.LoggerUtil;
 import io.nuls.rpc.model.CmdAnnotation;
 import io.nuls.rpc.model.Parameter;
 import io.nuls.rpc.model.message.Response;
@@ -21,8 +22,6 @@ import io.nuls.tools.parse.JSONUtils;
 import io.nuls.tools.thread.TimeService;
 
 import java.util.Map;
-
-import static io.nuls.chain.util.LoggerUtil.Log;
 
 /**
  * @author tangyi
@@ -37,6 +36,8 @@ public class ChainCmd extends BaseChainCmd {
 
     @Autowired
     private RpcService rpcService;
+    @Autowired
+    NulsChainConfig nulsChainConfig;
 
     @CmdAnnotation(cmd = "cm_chain", version = 1.0, description = "get chain detail")
     @Parameter(parameterName = "chainId", parameterType = "int", parameterValidRange = "[1,65535]")
@@ -49,7 +50,7 @@ public class ChainCmd extends BaseChainCmd {
             }
             return success(blockChain);
         } catch (Exception e) {
-            Log.error(e);
+            LoggerUtil.logger().error(e);
             return failed(e.getMessage());
         }
     }
@@ -85,7 +86,7 @@ public class ChainCmd extends BaseChainCmd {
             /* 取消int assetId = seqService.createAssetId(blockChain.getChainId());*/
             Asset asset = JSONUtils.map2pojo(params, Asset.class);
             asset.setChainId(blockChain.getChainId());
-            asset.setDepositNuls(Integer.valueOf(CmConstants.PARAM_MAP.get(CmConstants.ASSET_DEPOSIT_NULS)));
+            asset.setDepositNuls(Integer.valueOf(nulsChainConfig.getAssetDepositNuls()));
             asset.setAvailable(true);
             asset.setCreateTime(TimeService.currentTimeMillis());
             asset.setAddress(blockChain.getRegAddress());
@@ -96,7 +97,7 @@ public class ChainCmd extends BaseChainCmd {
             tx.setTime(TimeService.currentTimeMillis());
             AccountBalance accountBalance = rpcService.getCoinData(String.valueOf(params.get("address")));
             CoinData coinData = super.getRegCoinData(asset.getAddress(), asset.getChainId(),
-                    asset.getAssetId(), String.valueOf(asset.getDepositNuls()), tx.size(), accountBalance);
+                    asset.getAssetId(), String.valueOf(asset.getDepositNuls()), tx.size(), accountBalance,nulsChainConfig.getAssetDepositNulsLockRate());
             tx.setCoinData(coinData.serialize());
 
             /* 判断签名是否正确 (Determine if the signature is correct) */
@@ -105,7 +106,7 @@ public class ChainCmd extends BaseChainCmd {
             /* 发送到交易模块 (Send to transaction module) */
             return rpcService.newTx(tx) ? success(blockChain) : failed("Register chain failed");
         } catch (Exception e) {
-            Log.error(e);
+            LoggerUtil.logger().error(e);
             return failed(e.getMessage());
         }
     }

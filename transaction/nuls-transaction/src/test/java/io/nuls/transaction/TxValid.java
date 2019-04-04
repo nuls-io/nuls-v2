@@ -39,6 +39,7 @@ import io.nuls.transaction.model.bo.config.ConfigBean;
 import io.nuls.transaction.model.dto.CoinDTO;
 import io.nuls.transaction.model.dto.CrossTxTransferDTO;
 import io.nuls.transaction.rpc.call.LedgerCall;
+import io.nuls.transaction.tx.Transfer;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -94,34 +95,65 @@ public class TxValid {
 
     @Test
     public void transfer() throws Exception {
-        for (int i = 0; i < 1; i++) {
-            String hash = createTransfer(address28, address21);
-//            String hash = createCtxTransfer();
-            System.out.println("count:" + (i + 1));
-            System.out.println("");
-//            Thread.sleep(500L);
-            //getTx(hash);
-        }
-
-//        Transfer transfer1 = new Transfer(address25, address21);
-//        Thread thread1 = new Thread(transfer1);
-//        thread1.start();
-//        Transfer transfer2 = new Transfer(address26, address22);
-//        Thread thread2 = new Thread(transfer2);
-//        thread2.start();
-//        Transfer transfer3 = new Transfer(address27, address23);
-//        Thread thread3 = new Thread(transfer3);
-//        thread3.start();
-//        Transfer transfer4 = new Transfer(address28, address24);
-//        Thread thread4 = new Thread(transfer4);
-//        thread4.start();
-//        try {
-//            while (true) {
-//                Thread.sleep(1000000000L);
-//            }
-//        } catch (InterruptedException e) {
-//            e.printStackTrace();
+//        for (int i = 0; i < 1; i++) {
+//            String hash = createTransfer(address28, address21);
+//            //String hash = createCtxTransfer();
+//            System.out.println("count:" + (i + 1));
+//            System.out.println("");
+////            Thread.sleep(500L);
 //        }
+
+        Transfer transfer1 = new Transfer(address25, address21);
+        Thread thread1 = new Thread(transfer1);
+        thread1.start();
+        Transfer transfer2 = new Transfer(address26, address22);
+        Thread thread2 = new Thread(transfer2);
+        thread2.start();
+        Transfer transfer3 = new Transfer(address27, address23);
+        Thread thread3 = new Thread(transfer3);
+        thread3.start();
+        Transfer transfer4 = new Transfer(address28, address24);
+        Thread thread4 = new Thread(transfer4);
+        thread4.start();
+        try {
+            while (true) {
+                Thread.sleep(1000000000L);
+            }
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+
+
+    private List<String> createAddress() throws Exception{
+        List<String> addressList = new ArrayList<>();
+        for(int i = 0; i < 100; i++) {
+            List<String> list = createAccount(chainId, 100, password);
+            addressList.addAll(list);
+        }
+        return addressList;
+    }
+    /**多个地址转账*/
+    @Test
+    public void mAddressTransfer() throws Exception {
+        int count = 10000;
+        List<String> list = createAddress();
+        //给新生成账户转账
+        for(int i = 0; i < count; i++){
+            String address = list.get(i);
+            createTransfer(address28, address, new BigInteger("10000000000"));
+            System.out.println("count:" + (i + 1));
+        }
+        //睡30秒
+        Thread.sleep(30000L);
+        List<String> listTo = createAddress();
+        //新生成账户各执行一笔转账
+        for(int i = 0; i < count; i++){
+            String address = list.get(i);
+            String addressTo = listTo.get(i);
+            createTransfer(address, addressTo, new BigInteger("9000000000"));
+            System.out.println("count:" + (i + 1));
+        }
     }
 
     @Test
@@ -131,7 +163,7 @@ public class TxValid {
         String withdrawHash = null;
         String stopAgent = null;
         for (int i = 0; i < 20000; i++) {
-            String hash = createTransfer(address25, address21);
+            String hash = createTransfer(address25, address21, new BigInteger("10000000000"));
             switch (i){
                 case 0:
                     //创建节点
@@ -364,8 +396,8 @@ public class TxValid {
 //        removeAccount(address20, password);
     }
 
-    private String createTransfer(String addressFrom, String addressTo) throws Exception {
-        Map transferMap = this.createTransferTx(addressFrom, addressTo);
+    private String createTransfer(String addressFrom, String addressTo, BigInteger amount) throws Exception {
+        Map transferMap = this.createTransferTx(addressFrom, addressTo, amount);
         //调用接口
         Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_transfer", transferMap);
         if(!cmdResp.isSuccess()){
@@ -566,7 +598,7 @@ public class TxValid {
      *
      * @return
      */
-    private Map createTransferTx(String addressFrom, String addressTo) {
+    private Map createTransferTx(String addressFrom, String addressTo, BigInteger amount) {
         Map transferMap = new HashMap();
         transferMap.put("chainId", chainId);
         transferMap.put("remark", "transfer test");
@@ -577,7 +609,7 @@ public class TxValid {
         inputCoin1.setPassword(password);
         inputCoin1.setAssetsChainId(chainId);
         inputCoin1.setAssetsId(assetId);
-        inputCoin1.setAmount(new BigInteger("100100000"));
+        inputCoin1.setAmount(new BigInteger("100000000").add(amount));
         inputs.add(inputCoin1);
 
         CoinDTO outputCoin1 = new CoinDTO();
@@ -585,7 +617,7 @@ public class TxValid {
         outputCoin1.setPassword(password);
         outputCoin1.setAssetsChainId(chainId);
         outputCoin1.setAssetsId(assetId);
-        outputCoin1.setAmount(new BigInteger("100000000"));
+        outputCoin1.setAmount(amount);
         outputs.add(outputCoin1);
 
         transferMap.put("inputs", inputs);
@@ -608,19 +640,19 @@ public class TxValid {
         return params;
     }
 
-    /*
-    @Test
-    public void multiThreadCreateTx() {
-        for (int i = 0; i < 1; i++) {
-            Thread thread = new Thread(new CreateTxThread(), "MR" + i);
-            thread.start();
-        }
+    public static List<String> createAccount(int chainId, int count, String password) {
+        List<String> accountList = null;
         try {
-            while (true) {
-                Thread.sleep(1000000L);
-            }
-        } catch (InterruptedException e) {
+            Map<String, Object> params = new HashMap<>();
+            params.put(Constants.VERSION_KEY_STR, version);
+            params.put("chainId", chainId);
+            params.put("count", count);
+            params.put("password", password);
+            Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_createAccount", params);
+            accountList = (List<String>) ((HashMap) ((HashMap) cmdResp.getResponseData()).get("ac_createAccount")).get("list");
+        } catch (Exception e) {
             e.printStackTrace();
         }
-    }*/
+        return accountList;
+    }
 }

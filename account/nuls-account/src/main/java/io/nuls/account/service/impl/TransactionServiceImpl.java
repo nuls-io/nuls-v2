@@ -176,9 +176,6 @@ public class TransactionServiceImpl implements TransactionService {
         assemblyCoinData(transaction, chainId, List.of(from), List.of(to));
         //sign
         TransactionSignature transactionSignature = buildMultiSignTransactionSignature(transaction, multiSigAccount, account, password);
-        //缓存当前交易hash
-//        TxUtil.cacheTxHash(transaction);
-        //process transaction
         boolean isBroadcasted = txMutilProcessing(multiSigAccount, transaction, transactionSignature);
         MultiSignTransactionResultDto multiSignTransactionResultDto = new MultiSignTransactionResultDto();
         multiSignTransactionResultDto.setBroadcasted(isBroadcasted);
@@ -230,8 +227,6 @@ public class TransactionServiceImpl implements TransactionService {
         buildMultiSignTransactionCoinData(transaction, chainId, -1, multiSigAccount, toAddress, BigInteger.ONE);
         //sign
         TransactionSignature transactionSignature = buildMultiSignTransactionSignature(transaction, multiSigAccount, account, password);
-        //缓存当前交易hash
-//        TxUtil.cacheTxHash(transaction);
         //process transaction
         boolean isBroadcasted = txMutilProcessing(multiSigAccount, transaction, transactionSignature);
         MultiSignTransactionResultDto multiSignTransactionResultDto = new MultiSignTransactionResultDto();

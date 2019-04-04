@@ -133,19 +133,19 @@ public class TxCirculateCmd extends BaseChainCmd {
             /*end bak height*/
             try {
                 txCirculateService.circulateCommit(txList);
-                LoggerUtil.Log.debug("moduleTxsCommit end");
+                LoggerUtil.logger().debug("moduleTxsCommit end");
                 /*begin bak height*/
                 cacheDataService.endBakBlockHeight(chainId, commitHeight);
                 /*end bak height*/
             } catch (Exception e) {
-                LoggerUtil.Log.error(e);
+                LoggerUtil.logger().error(e);
                 //进行回滚
                 cacheDataService.rollBlockTxs(chainId, commitHeight);
                 return failed(e.getMessage());
             }
 
         } catch (Exception e) {
-            LoggerUtil.Log.error(e);
+            LoggerUtil.logger().error(e);
             return failed(e.getMessage());
         }
         Map<String, Boolean> resultMap = new HashMap<>();
@@ -179,10 +179,10 @@ public class TxCirculateCmd extends BaseChainCmd {
                 BlockHeight blockHeight = cacheDataService.getBlockHeight(chainId);
                 //这里存在该高度 可能在TxCirculateCmd中已经回滚过了
                 if (blockHeight.getLatestRollHeight() == commitHeight) {
-                    LoggerUtil.Log.debug("chain module height ={} bak datas is null,maybe had rolled", commitHeight);
+                    LoggerUtil.logger().debug("chain module height ={} bak datas is null,maybe had rolled", commitHeight);
                     return success();
                 } else {
-                    LoggerUtil.Log.error("chain module height ={} bak datas is null", commitHeight);
+                    LoggerUtil.logger().error("chain module height ={} bak datas is null", commitHeight);
                     return failed("chain module height = " + commitHeight + " bak datas is null");
                 }
             }

@@ -29,6 +29,7 @@ import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.basic.NulsOutputStreamBuffer;
 import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.crypto.Sha256Hash;
+import io.nuls.tools.exception.NulsRuntimeException;
 import io.nuls.tools.model.ByteUtils;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.log.Log;
@@ -43,48 +44,34 @@ import java.util.List;
  */
 public class NulsDigestData extends BaseNulsData {
 
-    public static final int HASH_LENGTH = 34;
-
-    protected byte digestAlgType = DIGEST_ALG_SHA256;
+    public static final int HASH_LENGTH = 32;
 
     protected byte[] digestBytes;
-
-    public static byte DIGEST_ALG_SHA256 = 0;
-    public static byte DIGEST_ALG_SHA160 = 1;
 
     public NulsDigestData() {
     }
 
-    public NulsDigestData(byte algType, byte[] bytes) {
+    public NulsDigestData(byte[] bytes) {
         this.digestBytes = bytes;
-        this.digestAlgType = algType;
+        if (bytes.length != HASH_LENGTH) {
+            throw new RuntimeException("the length is not eq 32 byte");
+        }
     }
 
     @Override
     public int size() {
-        return SerializeUtils.sizeOfBytes(digestBytes) + 1;
+        return HASH_LENGTH;
     }
 
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer buffer) throws IOException {
-        buffer.write(digestAlgType);
-        buffer.writeBytesWithLength(digestBytes);
+        buffer.write(digestBytes);
     }
 
     @Override
     public void parse(NulsByteBuffer byteBuffer) throws NulsException {
-        digestAlgType = byteBuffer.readByte();
-        this.digestBytes = byteBuffer.readByLengthByte();
+        this.digestBytes = byteBuffer.readBytes(HASH_LENGTH);
     }
-
-    public byte getDigestAlgType() {
-        return digestAlgType;
-    }
-
-    public void setDigestAlgType(byte digestAlgType) {
-        this.digestAlgType = digestAlgType;
-    }
-
 
     public String getDigestHex() {
         try {
@@ -112,12 +99,8 @@ public class NulsDigestData extends BaseNulsData {
     }
 
     public static NulsDigestData calcDigestData(BaseNulsData data) {
-        return calcDigestData(data, (byte) 0);
-    }
-
-    public static NulsDigestData calcDigestData(BaseNulsData data, byte digestAlgType) {
         try {
-            return calcDigestData(data.serialize(), digestAlgType);
+            return calcDigestData(data.serialize());
         } catch (Exception e) {
             Log.error(e);
             return null;
@@ -128,25 +111,12 @@ public class NulsDigestData extends BaseNulsData {
         return digestBytes;
     }
 
-    public static NulsDigestData calcDigestData(byte[] data) {
-        return calcDigestData(data, (byte) 0);
-    }
 
-    public static NulsDigestData calcDigestData(byte[] data, byte digestAlgType) {
+    public static NulsDigestData calcDigestData(byte[] data) {
         NulsDigestData digestData = new NulsDigestData();
-        digestData.setDigestAlgType(digestAlgType);
-        if ((byte) 0 == digestAlgType) {
-            byte[] content = Sha256Hash.hashTwice(data);
-            digestData.digestBytes = content;
-            return digestData;
-        }
-        //todo extend other algType
-        if ((byte) 1 == digestAlgType) {
-            byte[] content = SerializeUtils.sha256hash160(data);
-            digestData.digestBytes = content;
-            return digestData;
-        }
-        return null;
+        byte[] content = Sha256Hash.hashTwice(data);
+        digestData.digestBytes = content;
+        return digestData;
     }
 
     public static NulsDigestData calcMerkleDigestData(List<NulsDigestData> ddList) {
