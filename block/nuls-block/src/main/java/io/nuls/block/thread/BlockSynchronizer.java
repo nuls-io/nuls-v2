@@ -121,6 +121,7 @@ public class BlockSynchronizer implements Runnable {
                     if (latestHeight < testAutoRollbackAmount) {
                         testAutoRollbackAmount = (int) (latestHeight);
                     }
+                    ConsensusUtil.sendHeaderList(chainId, testAutoRollbackAmount);
                     for (int i = 0; i < testAutoRollbackAmount; i++) {
                         boolean b = blockService.rollbackBlock(chainId, latestHeight--, true);
                         if (!b || latestHeight == 0) {
@@ -393,7 +394,7 @@ public class BlockSynchronizer implements Runnable {
     }
 
     private LocalBlockStateEnum checkRollback(int rollbackCount, int chainId, BlockDownloaderParams params) {
-        //每次最多回滚1000个区块,等待下次同步,这样可以避免被恶意节点攻击,大量回滚正常区块.
+        //每次最多回滚maxRollback个区块,等待下次同步,这样可以避免被恶意节点攻击,大量回滚正常区块.
         ChainParameters parameters = ContextManager.getContext(chainId).getParameters();
         if (params.getLocalLatestHeight() == 0) {
             return CONFLICT;
