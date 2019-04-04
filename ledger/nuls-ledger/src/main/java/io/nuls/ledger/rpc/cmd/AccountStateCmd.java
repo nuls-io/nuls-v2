@@ -136,6 +136,7 @@ public class AccountStateCmd extends BaseCmd {
             freezeLockState.setLockedValue(freezeLockTimeState.getLockTime());
             freezeLockState.setTime(freezeLockTimeState.getCreateTime());
             freezeLockState.setTxHash(freezeLockTimeState.getTxHash());
+            freezeLockStates.add(freezeLockState);
         }
         for (FreezeHeightState freezeHeightState : accountState.getFreezeHeightStates()) {
             FreezeLockState freezeLockState = new FreezeLockState();
@@ -143,6 +144,7 @@ public class AccountStateCmd extends BaseCmd {
             freezeLockState.setLockedValue(freezeHeightState.getHeight());
             freezeLockState.setTime(freezeHeightState.getCreateTime());
             freezeLockState.setTxHash(freezeHeightState.getTxHash());
+            freezeLockStates.add(freezeLockState);
         }
         freezeLockStates.sort((x, y) -> Long.compare(y.getTime(), x.getTime()));
         //get by page
