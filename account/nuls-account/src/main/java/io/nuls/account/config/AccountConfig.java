@@ -30,8 +30,6 @@ public class AccountConfig {
      */
     private String keystoreFolder;
 
-    private String kernelUrl;
-
     private int mainChainId;
 
     private int mainAssetId;
@@ -66,14 +64,6 @@ public class AccountConfig {
 
     public void setKeystoreFolder(String keystoreFolder) {
         this.keystoreFolder = keystoreFolder;
-    }
-
-    public String getKernelUrl() {
-        return kernelUrl;
-    }
-
-    public void setKernelUrl(String kernelUrl) {
-        this.kernelUrl = kernelUrl;
     }
 
     public int getMainChainId() {

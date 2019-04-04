@@ -62,6 +62,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static io.nuls.contract.constant.ContractConstant.*;
+import static io.nuls.contract.constant.ContractErrorCode.FAILED;
 import static io.nuls.tools.model.StringUtils.isBlank;
 
 /**
@@ -499,7 +500,7 @@ public class ContractUtil {
     }
 
     public static Result getFailed() {
-        return Result.getFailed(ContractErrorCode.FAILED);
+        return Result.getFailed(FAILED);
     }
 
     public static String asString(byte[] bytes) {
@@ -546,9 +547,16 @@ public class ContractUtil {
     }
 
     public static Response wrapperFailed(Result result) {
-        ErrorCode errorCode = result.getErrorCode();
-        String msg = result.getMsg();
-        if (StringUtils.isBlank(msg)) {
+        String msg;
+        ErrorCode errorCode;
+        if(result != null) {
+            errorCode = result.getErrorCode();
+            msg = result.getMsg();
+            if (StringUtils.isBlank(msg)) {
+                msg = errorCode.getMsg();
+            }
+        } else {
+            errorCode = FAILED;
             msg = errorCode.getMsg();
         }
         Response response = MessageUtil.newResponse("", Constants.BOOLEAN_FALSE, msg);

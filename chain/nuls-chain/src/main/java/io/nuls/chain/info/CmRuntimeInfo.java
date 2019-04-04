@@ -10,33 +10,40 @@ import java.util.Map;
  * @description
  */
 public class CmRuntimeInfo {
+    /**
+     * 主网资产链id
+     */
+    public static String nulsChainId;
+    /**
+     * 主网资产id
+     */
+    public static String nulsAssetId;
 
-
-    public static String getAssetKey(int chainId, int assetId) {
-        return chainId + "-" + assetId;
+    public static String getMainAssetKey() {
+        return nulsChainId + "-" + nulsAssetId;
+    }
+    public static String getAssetKey(int assetChainId,int assetId) {
+        return assetChainId + "-" + assetId;
     }
 
-    public static String getMainAsset() {
-        String chainId = CmConstants.CHAIN_ASSET_MAP.get(CmConstants.NULS_CHAIN_ID);
-        String assetId = CmConstants.CHAIN_ASSET_MAP.get(CmConstants.NULS_ASSET_ID);
-        return CmRuntimeInfo.getAssetKey(Integer.valueOf(chainId), Integer.valueOf(assetId));
-    }
+
     public static String getMainChainId() {
-        String chainId = CmConstants.CHAIN_ASSET_MAP.get(CmConstants.NULS_CHAIN_ID);
-        return chainId;
+        return nulsChainId;
     }
+
     public static int getMainIntChainId() {
-        int chainId =Integer.valueOf(CmConstants.CHAIN_ASSET_MAP.get(CmConstants.NULS_CHAIN_ID));
-        return chainId;
+        return Integer.valueOf(nulsChainId);
+    }
+    public static int getMainIntAssetId() {
+        return Integer.valueOf(nulsAssetId);
     }
     public static String getMainChainAssetKey() {
-        String chainId = CmConstants.CHAIN_ASSET_MAP.get(CmConstants.NULS_CHAIN_ID);
-        String assetId = CmConstants.CHAIN_ASSET_MAP.get(CmConstants.NULS_ASSET_ID);
-        String assetKey = CmRuntimeInfo.getAssetKey(Integer.valueOf(chainId), Integer.valueOf(assetId));
-        return CmRuntimeInfo.getChainAssetKey(Integer.valueOf(chainId),assetKey);
+        String assetKey = CmRuntimeInfo.getAssetKey(Integer.valueOf(nulsChainId), Integer.valueOf(nulsAssetId));
+        return CmRuntimeInfo.getChainAssetKey(Integer.valueOf(nulsChainId), assetKey);
     }
-    public static String getChainAssetKey(int chainId, String assetKey) {
-        return chainId + "-" + assetKey;
+
+    public static String getChainAssetKey(int addressChainId, String assetKey) {
+        return addressChainId + "-" + assetKey;
     }
 
     public static Map<String, String> addError(Map<String, String> map, String code) {

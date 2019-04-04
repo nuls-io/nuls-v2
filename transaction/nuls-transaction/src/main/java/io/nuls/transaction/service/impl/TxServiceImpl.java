@@ -670,7 +670,7 @@ public class TxServiceImpl implements TxService {
                 Transaction tx = packablePool.get(chain);
                 if (tx == null) {
                     try {
-                        //nulsLogger.debug("************* [获取交易等待]");
+                        nulsLogger.debug("************* [获取交易等待]");
                         Thread.sleep(100L);
                     } catch (InterruptedException e) {
                         nulsLogger.error("packaging error ", e);

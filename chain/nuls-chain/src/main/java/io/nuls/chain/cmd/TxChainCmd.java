@@ -10,6 +10,7 @@ import io.nuls.chain.service.AssetService;
 import io.nuls.chain.service.ChainService;
 import io.nuls.chain.service.RpcService;
 import io.nuls.chain.service.ValidateService;
+import io.nuls.chain.util.LoggerUtil;
 import io.nuls.rpc.model.CmdAnnotation;
 import io.nuls.rpc.model.Parameter;
 import io.nuls.rpc.model.message.Response;
@@ -17,8 +18,6 @@ import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
 
 import java.util.Map;
-
-import static io.nuls.chain.util.LoggerUtil.Log;
 
 /**
  * 跨链创建与注销的单笔交易验证
@@ -54,7 +53,7 @@ public class TxChainCmd extends BaseChainCmd {
             }
 
         } catch (Exception e) {
-            Log.error(e);
+            LoggerUtil.logger().error(e);
             return failed(CmErrorCode.UNKOWN_ERROR, e.getMessage());
         }
     }
@@ -74,7 +73,7 @@ public class TxChainCmd extends BaseChainCmd {
                 return failed(chainEventResult.getErrorCode());
             }
         } catch (Exception e) {
-            Log.error(e);
+            LoggerUtil.logger().error(e);
             return failed(CmErrorCode.UNKOWN_ERROR, e.getMessage());
         }
     }

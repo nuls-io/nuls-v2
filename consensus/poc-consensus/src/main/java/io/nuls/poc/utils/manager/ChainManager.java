@@ -226,6 +226,8 @@ public class ChainManager {
             */
             if (configMap == null || configMap.size() == 0) {
                 ConfigBean configBean = config.getConfigBean();
+                configBean.setPassword(config.getPassword());
+                configBean.setSeedNodes(config.getSeedNodes());
                 configBean.setBlockReward(configBean.getInflationAmount().divide(ConsensusConstant.YEAR_MILLISECOND.divide(BigInteger.valueOf(configBean.getPackingInterval()))));
                 boolean saveSuccess = configService.save(configBean,configBean.getChainId());
                 if(saveSuccess){
