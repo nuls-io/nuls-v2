@@ -85,7 +85,7 @@ public class TextMessageHandler implements Runnable {
                     RequestMessageProcessor.unsubscribe(connectData, message);
                     break;
                 case Request:
-                    String messageId = message.getMessageId();
+                    String messageId = message.getMessageID();
                     /*
                     Request，根据是否需要定时推送放入不同队列，等待处理
                     Request, put in different queues according to the response mode. Wait for processing

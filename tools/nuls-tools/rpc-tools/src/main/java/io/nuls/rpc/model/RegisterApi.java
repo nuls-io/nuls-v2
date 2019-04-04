@@ -44,7 +44,7 @@ public class RegisterApi {
 
 
     @JsonProperty
-    private List<CmdDetail> ApiMethods;
+    private List<CmdDetail> Methods;
 
     /**
      * Key: Role
@@ -72,13 +72,13 @@ public class RegisterApi {
     private String ModuleName;
 
     @JsonIgnore
-    public List<CmdDetail> getApiMethods() {
-        return ApiMethods;
+    public List<CmdDetail> getMethods() {
+        return Methods;
     }
 
     @JsonIgnore
-    public void setApiMethods(List<CmdDetail> apiMethods) {
-        this.ApiMethods = apiMethods;
+    public void setMethods(List<CmdDetail> apiMethods) {
+        this.Methods = apiMethods;
     }
 
     @JsonIgnore

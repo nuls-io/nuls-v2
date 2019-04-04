@@ -43,7 +43,7 @@ public class RequestMessageProcessor {
      */
     public static void negotiateConnectionResponse(Channel channel, Message message) throws JsonProcessingException {
         NegotiateConnectionResponse negotiateConnectionResponse = new NegotiateConnectionResponse();
-        negotiateConnectionResponse.setRequestId(message.getMessageId());
+        negotiateConnectionResponse.setRequestId(message.getMessageID());
         negotiateConnectionResponse.setNegotiationStatus("1");
         negotiateConnectionResponse.setNegotiationComment("Connection true!");
 
@@ -124,11 +124,11 @@ public class RequestMessageProcessor {
              */
             switch (nextProcess) {
                 case Constants.EXECUTE_AND_KEEP:
-                    callCommandsWithPeriod(channelData.getChannel(), request.getRequestMethods(), message.getMessageId(), false);
+                    callCommandsWithPeriod(channelData.getChannel(), request.getRequestMethods(), message.getMessageID(), false);
                     channelData.getCmdInvokeTime().put(message, TimeService.currentTimeMillis());
                     return true;
                 case Constants.EXECUTE_AND_REMOVE:
-                    callCommandsWithPeriod(channelData.getChannel(), request.getRequestMethods(), message.getMessageId(), false);
+                    callCommandsWithPeriod(channelData.getChannel(), request.getRequestMethods(), message.getMessageID(), false);
                     channelData.getCmdInvokeTime().put(message, TimeService.currentTimeMillis());
                     return false;
                 case Constants.SKIP_AND_KEEP:

@@ -25,7 +25,7 @@ public class KernelModule {
         int port = 8887;
         NettyServer.startServer(port);
         // Start server instance
-        ConnectManager.LOCAL.setApiMethods(new ArrayList<>());
+        ConnectManager.LOCAL.setMethods(new ArrayList<>());
         ConnectManager.LOCAL.setModuleAbbreviation(ModuleE.KE.abbr);
         ConnectManager.LOCAL.setModuleName(ModuleE.KE.name);
         ConnectManager.LOCAL.setModuleDomain(ModuleE.KE.domain);

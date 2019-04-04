@@ -2,7 +2,6 @@ package io.nuls.rpc.netty.bootstrap;
 
 import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.info.HostInfo;
-import io.nuls.rpc.model.CmdDetail;
 import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.netty.channel.manager.ConnectManager;
 import io.nuls.rpc.netty.thread.StartServerProcessor;
@@ -50,7 +49,7 @@ public class NettyServer {
         connectionInformation.put(Constants.KEY_IP, HostInfo.getLocalIP());
         connectionInformation.put(Constants.KEY_PORT, String.valueOf(port));
         ConnectManager.LOCAL.setConnectionInformation(connectionInformation);
-        ConnectManager.LOCAL.setApiMethods(new ArrayList<>());
+        ConnectManager.LOCAL.setMethods(new ArrayList<>());
         ConnectManager.LOCAL.setDependencies(new HashMap<>(8));
         ConnectManager.LOCAL.setModuleRoles(new HashMap<>(1));
         return new NettyServer();

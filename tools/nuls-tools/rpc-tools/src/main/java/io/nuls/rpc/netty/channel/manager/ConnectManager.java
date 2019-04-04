@@ -146,7 +146,7 @@ public class ConnectManager {
     public static CmdDetail getLocalInvokeCmd(String cmd, double minVersion) {
 
         CmdDetail find = null;
-        for (CmdDetail cmdDetail : LOCAL.getApiMethods()) {
+        for (CmdDetail cmdDetail : LOCAL.getMethods()) {
             /*
             cmd不一致，跳过
             CMD inconsistency, skip
@@ -193,7 +193,7 @@ public class ConnectManager {
      */
     public static CmdDetail getLocalInvokeCmd(String cmd) {
         CmdDetail find = null;
-        for (CmdDetail cmdDetail : LOCAL.getApiMethods()) {
+        for (CmdDetail cmdDetail : LOCAL.getMethods()) {
             if (!cmdDetail.getMethodName().equals(cmd)) {
                 continue;
             }
@@ -241,14 +241,14 @@ public class ConnectManager {
                 Repeated interfaces are registered only once
                  */
                 if (!isRegister(cmdDetail)) {
-                    LOCAL.getApiMethods().add(cmdDetail);
+                    LOCAL.getMethods().add(cmdDetail);
                     RequestMessageProcessor.handlerMap.put(cmdDetail.getInvokeClass(), SpringLiteContext.getBeanByClass(cmdDetail.getInvokeClass()));
                 } else {
                     throw new Exception(Constants.CMD_DUPLICATE + ":" + cmdDetail.getMethodName() + "-" + cmdDetail.getVersion());
                 }
             }
         }
-        LOCAL.getApiMethods().sort(Comparator.comparingDouble(CmdDetail::getVersion));
+        LOCAL.getMethods().sort(Comparator.comparingDouble(CmdDetail::getVersion));
     }
 
     public static void addCmdDetail(Class<?> claszs) {
@@ -263,7 +263,7 @@ public class ConnectManager {
                 Repeated interfaces are registered only once
                  */
             if (!isRegister(cmdDetail)) {
-                LOCAL.getApiMethods().add(cmdDetail);
+                LOCAL.getMethods().add(cmdDetail);
                 RequestMessageProcessor.handlerMap.put(cmdDetail.getInvokeClass(), SpringLiteContext.getBeanByClass(cmdDetail.getInvokeClass()));
             }
             ;
@@ -341,7 +341,7 @@ public class ConnectManager {
      */
     private static boolean isRegister(CmdDetail sourceCmdDetail) {
         boolean exist = false;
-        for (CmdDetail cmdDetail : LOCAL.getApiMethods()) {
+        for (CmdDetail cmdDetail : LOCAL.getMethods()) {
             if (cmdDetail.getMethodName().equals(sourceCmdDetail.getMethodName()) && cmdDetail.getVersion() == sourceCmdDetail.getVersion()) {
                 exist = true;
                 break;
@@ -496,14 +496,14 @@ public class ConnectManager {
             int changeCount = addCmdChangeCount(cmd);
             for (Message message : messageList) {
                 ConnectData connectData = MESSAGE_TO_CHANNEL_MAP.get(message);
-                String key = getSubscribeKey(message.getMessageId(), cmd);
+                String key = getSubscribeKey(message.getMessageID(), cmd);
                 if (connectData.getSubscribeInitCount().containsKey(key)) {
                     int initCount = connectData.getSubscribeInitCount().get(key);
                     Request request = JSONUtils.map2pojo((Map) message.getMessageData(), Request.class);
                     long eventCount = Long.parseLong(request.getSubscriptionEventCounter());
                     if ((changeCount - initCount) % eventCount == 0) {
                         try {
-                            connectData.getRequestEventResponseQueue().put(getRealResponse(cmd, message.getMessageId(), response));
+                            connectData.getRequestEventResponseQueue().put(getRealResponse(cmd, message.getMessageID(), response));
                         } catch (InterruptedException e) {
                             Log.error(e);
                         }

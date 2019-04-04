@@ -43,7 +43,7 @@ public class Message {
      * 消息号 / Message ID
      */
     @JsonProperty
-    private String MessageId;
+    private String MessageID;
 
     /**
      * 消息发送时间 / Message sending time
@@ -55,7 +55,7 @@ public class Message {
      * 消息发送时区 / Message sending Timezone
      */
     @JsonProperty
-    private String Timezone;
+    private String TimeZone;
 
     /**
      * 消息类型，共9种 / Message type, 9 types
@@ -70,13 +70,13 @@ public class Message {
     private Object MessageData;
 
     @JsonIgnore
-    public String getMessageId() {
-        return MessageId;
+    public String getMessageID() {
+        return MessageID;
     }
 
     @JsonIgnore
-    public void setMessageId(String MessageId) {
-        this.MessageId = MessageId;
+    public void setMessageID(String MessageId) {
+        this.MessageID = MessageId;
     }
 
     @JsonIgnore
@@ -90,13 +90,13 @@ public class Message {
     }
 
     @JsonIgnore
-    public String getTimezone() {
-        return Timezone;
+    public String getTimeZone() {
+        return TimeZone;
     }
 
     @JsonIgnore
-    public void setTimezone(String Timezone) {
-        this.Timezone = Timezone;
+    public void setTimeZone(String Timezone) {
+        this.TimeZone = Timezone;
     }
 
     @JsonIgnore

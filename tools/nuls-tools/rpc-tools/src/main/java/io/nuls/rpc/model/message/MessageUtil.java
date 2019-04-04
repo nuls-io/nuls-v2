@@ -50,10 +50,10 @@ public class MessageUtil {
      */
     public static Message basicMessage(MessageType messageType) {
         Message message = new Message();
-        message.setMessageId(Constants.nextSequence());
+        message.setMessageID(Constants.nextSequence());
         message.setMessageType(messageType.name());
         message.setTimestamp(String.valueOf(TimeService.currentTimeMillis()));
-        message.setTimezone(DateUtils.TIME_ZONE_STRING);
+        message.setTimeZone(DateUtils.TIME_ZONE_STRING);
         return message;
     }
 
