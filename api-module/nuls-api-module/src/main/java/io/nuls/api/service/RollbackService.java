@@ -1,5 +1,6 @@
 package io.nuls.api.service;
 
+import io.nuls.api.cache.ApiCache;
 import io.nuls.api.constant.ApiConstant;
 import io.nuls.api.constant.ApiErrorCode;
 import io.nuls.api.db.*;
@@ -168,10 +169,16 @@ public class RollbackService {
             return;
         }
         Set<String> addressSet = new HashSet<>();
-
+        ApiCache apiCache = CacheManager.getCache(chainId);
+        AssetInfo assetInfo = apiCache.getChainInfo().getDefaultAsset();
         for (CoinToInfo output : tx.getCoinTos()) {
             addressSet.add(output.getAddress());
             calcBalance(chainId, output);
+            //奖励是本链主资产的时候，回滚奖励金额
+            if (assetInfo.getChainId() == output.getChainId() && assetInfo.getAssetId() == output.getAssetsId()) {
+                AccountInfo accountInfo = queryAccountInfo(chainId, output.getAddress());
+                accountInfo.setTotalReward(accountInfo.getTotalReward().subtract(output.getAmount()));
+            }
         }
 
         for (String address : addressSet) {
