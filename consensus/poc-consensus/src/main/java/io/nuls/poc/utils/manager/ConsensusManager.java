@@ -330,6 +330,7 @@ public class ConsensusManager {
         header.setTime(blockData.getTime());
         header.setPreHash(blockData.getPreHash());
         header.setTxCount(blockData.getTxList().size());
+        header.setPackingAddress(packingAddress);
         List<NulsDigestData> txHashList = new ArrayList<>();
         for (int i = 0; i < blockData.getTxList().size(); i++) {
             Transaction tx = blockData.getTxList().get(i);
