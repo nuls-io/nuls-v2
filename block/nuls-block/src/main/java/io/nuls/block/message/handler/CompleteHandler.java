@@ -21,7 +21,7 @@
 package io.nuls.block.message.handler;
 
 import io.nuls.base.basic.NulsByteBuffer;
-import io.nuls.block.cache.CacheHandler;
+import io.nuls.block.cache.BlockCacher;
 import io.nuls.block.constant.BlockErrorCode;
 import io.nuls.block.manager.ContextManager;
 import io.nuls.block.message.CompleteMessage;
@@ -64,7 +64,7 @@ public class CompleteHandler extends BaseCmd {
             return failed(BlockErrorCode.PARAMETER_ERROR);
         }
         messageLog.debug("recieve CompleteMessage from node-" + nodeId + ", chainId:" + chainId);
-        CacheHandler.batchComplete(chainId, message);
+        BlockCacher.batchComplete(chainId, message);
         return success();
     }
 

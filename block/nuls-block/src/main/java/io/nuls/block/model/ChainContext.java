@@ -23,7 +23,7 @@
 package io.nuls.block.model;
 
 import io.nuls.base.data.Block;
-import io.nuls.block.cache.CacheHandler;
+import io.nuls.block.cache.BlockCacher;
 import io.nuls.block.cache.SmallBlockCacher;
 import io.nuls.block.constant.RunningStatusEnum;
 import io.nuls.block.manager.BlockChainManager;
@@ -256,7 +256,7 @@ public class ChainContext {
         LoggerUtil.init(chainId, parameters.getLogLevel());
         //各类缓存初始化
         SmallBlockCacher.init(chainId);
-        CacheHandler.init(chainId);
+        BlockCacher.init(chainId);
         BlockChainManager.init(chainId);
         TxGroupRequestor.init(chainId);
     }

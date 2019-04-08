@@ -115,7 +115,7 @@ public class TestJyc {
     @Test
     public void importSeed() {
 //        importPriKey("b54db432bba7e13a6c4a28f65b925b18e63bcb79143f7b894fa735d5d3d09db5", password);//种子出块地址 tNULSeBaMkrt4z9FYEkkR9D6choPVvQr94oYZp
-//        importPriKey("188b255c5a6d58d1eed6f57272a22420447c3d922d5765ebb547bc6624787d9f", password);//种子出块地址 tNULSeBaMoGr2RkLZPfJeS5dFzZeNj1oXmaYNe
+        importPriKey("188b255c5a6d58d1eed6f57272a22420447c3d922d5765ebb547bc6624787d9f", password);//种子出块地址 tNULSeBaMoGr2RkLZPfJeS5dFzZeNj1oXmaYNe
         importPriKey("477059f40708313626cccd26f276646e4466032cabceccbf571a7c46f954eb75", password);//tNULSeBaMnrs6JKrCy6TQdzYJZkMZJDng7QAsD
     }
 
@@ -679,34 +679,26 @@ public class TestJyc {
             BigInteger balance = LedgerCall.getBalance(chain, AddressTool.getAddress(address23), chainId, assetId);
             Log.debug(address23 + "-----balance:{}", balance);
         }
-        int total = 1000_000;
-        int count = 200;
+        int total = 100_000_000;
+        int count = 50;
         List<String> accountList = new ArrayList<>();
         Log.debug("##################################################");
         {
             Log.debug("1.##########create " + count + " accounts##########");
-            for (int i = 0; i < count/100; i++) {
+            int loop = count/100 == 0 ? 1 : count/100;
+            for (int i = 0; i < loop; i++) {
                 Map<String, Object> params = new HashMap<>();
                 params.put(Constants.VERSION_KEY_STR, version);
                 params.put("chainId", chainId);
-                params.put("count", 100);
+                params.put("count", count<100?count:100);
                 params.put("password", password);
                 Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_createAccount", params);
                 assertTrue(response.isSuccess());
                 accountList.addAll((List<String>) ((HashMap) ((HashMap) response.getResponseData()).get("ac_createAccount")).get("list"));
-                assertEquals(100 * (i + 1), accountList.size());
             }
-        }
-        {
+            assertEquals(count, accountList.size());
             for (String account : accountList) {
-                Map<String, Object> params = new HashMap<>();
-                params.put(Constants.VERSION_KEY_STR, version);
-                params.put("chainId", chainId);
-                params.put("address", account);
-                Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_getAccountByAddress", params);
-
-                String address = JSONUtils.obj2json(((HashMap) cmdResp.getResponseData()).get("ac_getAccountByAddress"));
-                Log.debug("address-{}" + address);
+                Log.debug("address-{}", account);
             }
         }
         {

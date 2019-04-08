@@ -24,7 +24,7 @@ package io.nuls.block.thread;
 
 import io.nuls.base.data.Block;
 import io.nuls.base.data.NulsDigestData;
-import io.nuls.block.cache.CacheHandler;
+import io.nuls.block.cache.BlockCacher;
 import io.nuls.block.manager.ContextManager;
 import io.nuls.block.message.CompleteMessage;
 import io.nuls.block.message.HeightRangeMessage;
@@ -73,24 +73,24 @@ public class BlockWorker implements Callable<BlockDownLoadResult> {
         int maxLoop = context.getParameters().getMaxLoop();
         long duration = 0;
         try {
-            Future<CompleteMessage> future = CacheHandler.addBatchBlockRequest(chainId, messageHash);
+            Future<CompleteMessage> future = BlockCacher.addBatchBlockRequest(chainId, messageHash);
             //发送消息给目标节点
             long begin = System.currentTimeMillis();
             boolean result = NetworkUtil.sendToNode(chainId, message, node.getId(), GET_BLOCKS_BY_HEIGHT_MESSAGE);
             //发送失败清空数据
             if (!result) {
-                CacheHandler.removeRequest(chainId, messageHash);
+                BlockCacher.removeRequest(chainId, messageHash);
                 return new BlockDownLoadResult(messageHash, startHeight, size, node, false, 0);
             }
             CompleteMessage completeMessage = future.get(batchDownloadTimeount, TimeUnit.MILLISECONDS);
-            List<Block> blockList = CacheHandler.getBlockList(chainId, messageHash);
+            List<Block> blockList = BlockCacher.getBlockList(chainId, messageHash);
             int real = blockList.size();
             int interval = context.getParameters().getWaitInterval();
             int count = 0;
             while (real < size && count < maxLoop) {
                 commonLog.debug("#start-" + message.getStartHeight() + ",end-" + message.getEndHeight() + "#real-" + real + ",expect-" + size + ",count-" + count + ",node-" +node.getId());
                 Thread.sleep(interval * (size - real));
-                blockList = CacheHandler.getBlockList(chainId, messageHash);
+                blockList = BlockCacher.getBlockList(chainId, messageHash);
                 real = blockList.size();
                 count++;
             }
