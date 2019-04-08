@@ -123,7 +123,7 @@ public class MessageUtil {
      */
     public static Response newResponse(String requestId, String status, String comment) {
         Response response = new Response();
-        response.setRequestId(requestId);
+        response.setRequestID(requestId);
         response.setResponseStatus(status);
         response.setResponseComment(comment);
         response.setResponseMaxSize(Constants.ZERO);

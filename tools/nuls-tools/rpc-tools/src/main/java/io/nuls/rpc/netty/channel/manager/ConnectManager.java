@@ -521,7 +521,7 @@ public class ConnectManager {
      */
     public static Response getRealResponse(String cmd, String messageId, Response response) {
         Response realResponse = new Response();
-        realResponse.setRequestId(messageId);
+        realResponse.setRequestID(messageId);
         realResponse.setResponseStatus(response.getResponseStatus());
         realResponse.setResponseComment(response.getResponseComment());
         realResponse.setResponseMaxSize(response.getResponseMaxSize());

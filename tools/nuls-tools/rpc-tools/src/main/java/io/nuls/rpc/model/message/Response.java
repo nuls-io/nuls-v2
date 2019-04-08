@@ -42,7 +42,7 @@ public class Response {
      * This is the original request ID referred by a Request message
      */
     @JsonProperty
-    private String RequestId;
+    private String RequestID;
 
     /**
      * The time that the target service took to process the request in milliseconds.
@@ -85,13 +85,13 @@ public class Response {
     }
 
     @JsonIgnore
-    public String getRequestId() {
-        return RequestId;
+    public String getRequestID() {
+        return RequestID;
     }
 
     @JsonIgnore
-    public void setRequestId(String RequestId) {
-        this.RequestId = RequestId;
+    public void setRequestID(String RequestId) {
+        this.RequestID = RequestId;
     }
 
     @JsonIgnore

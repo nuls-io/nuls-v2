@@ -167,7 +167,7 @@ public class RequestMessageProcessor {
             Construct the returned message object
              */
             Response response = MessageUtil.newResponse(messageId, "", "");
-            response.setRequestId(messageId);
+            response.setRequestID(messageId);
             response.setResponseStatus(Constants.BOOLEAN_FALSE);
 
             try {
@@ -237,7 +237,7 @@ public class RequestMessageProcessor {
     private static Message execute(CmdDetail cmdDetail, Map params, String messageId) throws Exception {
         long startTimemillis = TimeService.currentTimeMillis();
         Response response = invoke(cmdDetail.getInvokeClass(), cmdDetail.getInvokeMethod(), params);
-        response.setRequestId(messageId);
+        response.setRequestID(messageId);
         Map<String, Object> responseData = new HashMap<>(1);
         responseData.put(cmdDetail.getMethodName(), response.getResponseData());
         response.setResponseData(responseData);

@@ -140,7 +140,7 @@ public class TextMessageHandler implements Runnable {
                     如果收到已请求超时的返回直接丢弃
                     Discard directly if you receive a return that has been requested for a timeout
                      */
-                    if (connectData.getTimeOutMessageList().contains(response.getRequestId())) {
+                    if (connectData.getTimeOutMessageList().contains(response.getRequestID())) {
                         break;
                     }
 
@@ -148,10 +148,10 @@ public class TextMessageHandler implements Runnable {
                     Response：还要判断是否需要自动处理
                     Response: Determines whether automatic processing is required
                      */
-                    if (ConnectManager.INVOKE_MAP.containsKey(response.getRequestId())) {
+                    if (ConnectManager.INVOKE_MAP.containsKey(response.getRequestID())) {
                         connectData.getResponseAutoQueue().offer(response);
                     } else {
-                        ResponseContainer responseContainer = RequestContainer.getResponseContainer(response.getRequestId());
+                        ResponseContainer responseContainer = RequestContainer.getResponseContainer(response.getRequestID());
                         if (responseContainer != null && responseContainer.getFuture() != null) {
                             responseContainer.getFuture().complete(response);
                         }
