@@ -24,6 +24,8 @@
 package io.nuls.contract.model.bo;
 
 import io.nuls.contract.model.tx.ContractTransferTransaction;
+import io.nuls.contract.util.ContractUtil;
+import io.nuls.contract.util.Log;
 
 import java.util.*;
 
@@ -49,6 +51,10 @@ public class CallableResult {
         this.reCallList = new ArrayList<>();
         this.failedMap = new HashMap<>();
         this.transferTransactions = new ArrayList<>();
+    }
+
+    public void putFailed(ContractResult contractResult) {
+        ContractUtil.putAll(failedMap, contractResult);
     }
 
     public String getContract() {

@@ -166,10 +166,6 @@ public class ContractServiceImpl implements ContractService {
             // 验证合约交易
             Result validResult = this.validContractTx(chainId, tx);
             if (validResult.isFailed()) {
-                ContractData contractData = wrapperTx.getContractData();
-                ContractResult contractResult = ContractResult.genFailed(contractData, "contract lock or not exist.");
-                makeContractResult(wrapperTx, contractResult);
-                putAll(container.getCallableResult().getFailedMap(), contractResult);
                 return validResult;
             }
 
