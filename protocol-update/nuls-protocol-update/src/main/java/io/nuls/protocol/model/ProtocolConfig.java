@@ -29,16 +29,10 @@ import io.nuls.protocol.constant.ConfigConstant;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.parse.SerializeUtils;
 import io.nuls.tools.parse.config.ConfigItem;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 
 import java.io.IOException;
 import java.util.Map;
 
-@Data
-@AllArgsConstructor
-@NoArgsConstructor
 public class ProtocolConfig extends BaseNulsData {
 
     /**
@@ -70,6 +64,62 @@ public class ProtocolConfig extends BaseNulsData {
      * 协议生效要满足的连续区间数
      */
     private short continuousIntervalCountMinimum;
+
+    public int getChainId() {
+        return chainId;
+    }
+
+    public void setChainId(int chainId) {
+        this.chainId = chainId;
+    }
+
+    public String getLogLevel() {
+        return logLevel;
+    }
+
+    public void setLogLevel(String logLevel) {
+        this.logLevel = logLevel;
+    }
+
+    public short getInterval() {
+        return interval;
+    }
+
+    public void setInterval(short interval) {
+        this.interval = interval;
+    }
+
+    public byte getEffectiveRatioMinimum() {
+        return effectiveRatioMinimum;
+    }
+
+    public void setEffectiveRatioMinimum(byte effectiveRatioMinimum) {
+        this.effectiveRatioMinimum = effectiveRatioMinimum;
+    }
+
+    public byte getEffectiveRatioMaximum() {
+        return effectiveRatioMaximum;
+    }
+
+    public void setEffectiveRatioMaximum(byte effectiveRatioMaximum) {
+        this.effectiveRatioMaximum = effectiveRatioMaximum;
+    }
+
+    public short getContinuousIntervalCountMaximum() {
+        return continuousIntervalCountMaximum;
+    }
+
+    public void setContinuousIntervalCountMaximum(short continuousIntervalCountMaximum) {
+        this.continuousIntervalCountMaximum = continuousIntervalCountMaximum;
+    }
+
+    public short getContinuousIntervalCountMinimum() {
+        return continuousIntervalCountMinimum;
+    }
+
+    public void setContinuousIntervalCountMinimum(short continuousIntervalCountMinimum) {
+        this.continuousIntervalCountMinimum = continuousIntervalCountMinimum;
+    }
 
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {

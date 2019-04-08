@@ -733,7 +733,6 @@ public class TxServiceImpl implements TxService {
                         clearInvalidTx(chain, tx);
                         continue;
                     }
-
                 }
                 packingTxList.add(txWrapper);
                 totalSize += txSize;

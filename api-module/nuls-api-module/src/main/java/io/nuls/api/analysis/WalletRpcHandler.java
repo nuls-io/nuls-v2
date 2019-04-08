@@ -6,6 +6,7 @@ import io.nuls.api.constant.ApiErrorCode;
 import io.nuls.api.constant.CommandConstant;
 import io.nuls.api.model.po.db.*;
 import io.nuls.api.model.rpc.BalanceInfo;
+import io.nuls.api.model.rpc.FreezeInfo;
 import io.nuls.api.rpc.RpcCall;
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.data.Block;
@@ -114,6 +115,43 @@ public class WalletRpcHandler {
         return null;
     }
 
+    public static Result<PageInfo<FreezeInfo>> getFreezeList(int chainId, int pageIndex, int pageSize, String address, int assetId) {
+        Map<String, Object> params = new HashMap<>();
+        params.put(Constants.VERSION_KEY_STR, ApiContext.VERSION);
+        params.put("chainId", chainId);
+        params.put("pageNumber", pageIndex);
+        params.put("pageSize", pageSize);
+        params.put("address", address);
+        params.put("assetId", assetId);
+        try {
+            Map map = (Map) RpcCall.request(ModuleE.LG.abbr, CommandConstant.GET_FREEZE, params);
+            PageInfo<FreezeInfo> pageInfo = new PageInfo(pageIndex, pageSize);
+            pageInfo.setTotalCount((int) map.get("totalCount"));
+            List<Map> maps = (List<Map>) map.get("list");
+            List<FreezeInfo> freezeInfos = new ArrayList<>();
+            for (Map map1 : maps) {
+                FreezeInfo freezeInfo = new FreezeInfo();
+                freezeInfo.setAmount((String) map1.get("amount"));
+                freezeInfo.setLockedValue(Long.parseLong(map1.get("lockedValue").toString()));
+                freezeInfo.setTime(Long.parseLong(map1.get("time").toString()));
+                freezeInfo.setTxHash((String) map1.get("txHash"));
+                if (freezeInfo.getLockedValue() == -1) {
+                    freezeInfo.setType(3);
+                } else if (freezeInfo.getLockedValue() < 10000000000L) {
+                    freezeInfo.setType(1);
+                } else {
+                    freezeInfo.setType(2);
+                }
+                freezeInfos.add(freezeInfo);
+            }
+            pageInfo.setList(freezeInfos);
+            return Result.getSuccess(null).setData(pageInfo);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return Result.getFailed(ApiErrorCode.DATA_PARSE_ERROR);
+        }
+
+    }
 
     public static Result<TransactionInfo> getTx(int chainId, String hash) {
         Map<String, Object> params = new HashMap<>();

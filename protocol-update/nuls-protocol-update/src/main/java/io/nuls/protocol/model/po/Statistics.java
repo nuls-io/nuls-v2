@@ -6,7 +6,6 @@ import io.nuls.base.data.BaseNulsData;
 import io.nuls.protocol.model.ProtocolVersion;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.parse.SerializeUtils;
-import lombok.Data;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -20,7 +19,6 @@ import java.util.Set;
  * @version 1.0
  * @date 18-12-10 下午3:50
  */
-@Data
 public class Statistics extends BaseNulsData {
 
     /**
@@ -45,6 +43,46 @@ public class Statistics extends BaseNulsData {
      * 统计区间内所有协议的占比
      */
     private Map<ProtocolVersion,Integer> protocolVersionMap;
+
+    public long getLastHeight() {
+        return lastHeight;
+    }
+
+    public void setLastHeight(long lastHeight) {
+        this.lastHeight = lastHeight;
+    }
+
+    public long getHeight() {
+        return height;
+    }
+
+    public void setHeight(long height) {
+        this.height = height;
+    }
+
+    public short getCount() {
+        return count;
+    }
+
+    public void setCount(short count) {
+        this.count = count;
+    }
+
+    public ProtocolVersion getProtocolVersion() {
+        return protocolVersion;
+    }
+
+    public void setProtocolVersion(ProtocolVersion protocolVersion) {
+        this.protocolVersion = protocolVersion;
+    }
+
+    public Map<ProtocolVersion, Integer> getProtocolVersionMap() {
+        return protocolVersionMap;
+    }
+
+    public void setProtocolVersionMap(Map<ProtocolVersion, Integer> protocolVersionMap) {
+        this.protocolVersionMap = protocolVersionMap;
+    }
 
     @Override
     public int size() {

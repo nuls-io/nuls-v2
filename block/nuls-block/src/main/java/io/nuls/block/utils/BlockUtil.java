@@ -21,7 +21,7 @@
 package io.nuls.block.utils;
 
 import io.nuls.base.data.*;
-import io.nuls.block.cache.CacheHandler;
+import io.nuls.block.cache.BlockCacher;
 import io.nuls.block.constant.BlockErrorCode;
 import io.nuls.block.constant.ChainTypeEnum;
 import io.nuls.block.manager.BlockChainManager;
@@ -410,11 +410,11 @@ public class BlockUtil {
         ChainContext context = ContextManager.getContext(chainId);
         int singleDownloadTimeount = context.getParameters().getSingleDownloadTimeount();
         NulsLogger commonLog = context.getCommonLog();
-        Future<Block> future = CacheHandler.addSingleBlockRequest(chainId, hash);
+        Future<Block> future = BlockCacher.addSingleBlockRequest(chainId, hash);
         commonLog.debug("get block-" + hash + " from " + nodeId + "begin");
         boolean result = NetworkUtil.sendToNode(chainId, message, nodeId, GET_BLOCK_MESSAGE);
         if (!result) {
-            CacheHandler.removeBlockByHashFuture(chainId, hash);
+            BlockCacher.removeBlockByHashFuture(chainId, hash);
             return null;
         }
         try {
@@ -426,7 +426,7 @@ public class BlockUtil {
             commonLog.error("get block-" + hash + " from " + nodeId + " fail!", e);
             return null;
         } finally {
-            CacheHandler.removeBlockByHashFuture(chainId, hash);
+            BlockCacher.removeBlockByHashFuture(chainId, hash);
         }
     }
 

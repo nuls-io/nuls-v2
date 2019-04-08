@@ -18,16 +18,13 @@
  * SOFTWARE.
  */
 
-package io.nuls.protocol.cache;
+package io.nuls.base.cache;
 
 import io.nuls.base.data.NulsDigestData;
-import lombok.NoArgsConstructor;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
-
-import static io.nuls.protocol.utils.LoggerUtil.commonLog;
 
 /**
  * 异步请求响应结果缓存类
@@ -36,12 +33,14 @@ import static io.nuls.protocol.utils.LoggerUtil.commonLog;
  * @version 1.0
  * @date 18-11-12 下午2:35
  */
-@NoArgsConstructor
 public class DataCacher<T> {
+
+    public DataCacher() {
+    }
 
     private Map<NulsDigestData, CompletableFuture<T>> cacher = new HashMap<>();
 
-    CompletableFuture<T> addFuture(NulsDigestData hash) {
+    public CompletableFuture<T> addFuture(NulsDigestData hash) {
         var future = new CompletableFuture<T>();
         cacher.put(hash, future);
         return future;
@@ -50,7 +49,6 @@ public class DataCacher<T> {
     public boolean complete(NulsDigestData hash, T t) {
         CompletableFuture<T> future = cacher.get(hash);
         if (future == null) {
-            commonLog.debug("DataCacher Time out:" + hash.getDigestHex());
             return false;
         }
         future.complete(t);
@@ -58,7 +56,7 @@ public class DataCacher<T> {
         return true;
     }
 
-    void removeFuture(NulsDigestData hash) {
+    public void removeFuture(NulsDigestData hash) {
         cacher.remove(hash);
     }
 }

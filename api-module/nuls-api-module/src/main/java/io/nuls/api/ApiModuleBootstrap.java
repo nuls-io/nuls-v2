@@ -65,7 +65,7 @@ public class ApiModuleBootstrap extends RpcModule {
         configurationLoader.load();
         Provider.ProviderType providerType = Provider.ProviderType.valueOf(configurationLoader.getValue("providerType"));
         int defaultChainId = Integer.parseInt(configurationLoader.getValue("defaultChainId"));
-        ServiceManager.init(defaultChainId,providerType);
+        ServiceManager.init(defaultChainId, providerType);
         NulsRpcModuleBootstrap.run("io.nuls", args);
     }
 
@@ -99,8 +99,8 @@ public class ApiModuleBootstrap extends RpcModule {
     @Override
     public Module[] getDependencies() {
         return new Module[]{
-                new Module(ModuleE.CS.abbr, "1.0"),
-                new Module(ModuleE.BL.abbr, "1.0")
+//                new Module(ModuleE.CS.abbr, "1.0"),
+//                new Module(ModuleE.BL.abbr, "1.0")
 //                new Module(ModuleE.SC.abbr, "1.0")
         };
     }

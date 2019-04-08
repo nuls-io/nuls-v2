@@ -110,7 +110,7 @@ public class SpringLiteContext {
         ConfigurationLoader configLoader = getBean(ConfigurationLoader.class);
         //加载配置项
         configLoader.load();
-        Map<String,ConfigurationLoader.ConfigItem> values = new HashMap<>();
+        Map<String, ConfigurationLoader.ConfigItem> values = new HashMap<>();
         BEAN_TEMP_MAP.forEach((key1, bean) -> {
             Class<?> cls = BEAN_TYPE_MAP.get(key1);
             Configuration configuration = cls.getAnnotation(Configuration.class);
@@ -126,39 +126,46 @@ public class SpringLiteContext {
                     boolean readPersist = persist != null;
                     ConfigurationLoader.ConfigItem configItem;
                     if (readPersist) {
-                        configItem = configLoader.getConfigItemForPersist(configuration.domain(),key);
+                        configItem = configLoader.getConfigItemForPersist(configuration.domain(), key);
                     } else {
-                        configItem = configLoader.getConfigItem(configuration.domain(),key);
+                        configItem = configLoader.getConfigItem(configuration.domain(), key);
                     }
-                    if(configItem == null){
-                        Log.warn("config item :{} not setting",key);
-                    }else{
+                    if (configItem == null) {
+                        Log.warn("config item :{} not setting", key);
+                    } else {
                         ConfigSetting.set(bean, field, configItem.getValue());
-                        values.put(cls.getSimpleName() + "." + field.getName(),configItem);
+                        values.put(cls.getSimpleName() + "." + field.getName(), configItem);
                     }
                 });
-            }
-            else {
+            } else {
                 Set<Field> fields = getFieldSet(cls);
                 fields.forEach(field -> {
                     Value annValue = field.getAnnotation(Value.class);
                     if (annValue != null) {
                         String key = annValue.value();
                         //检查key在指定了domain的配置项列表里面是否出现多次
-                        if(configLoader.getConfigData().entrySet().stream().filter(entry->!entry.getKey().equals(ConfigurationLoader.GLOBAL_DOMAIN) && entry.getValue().containsKey(key)).count() > 1){
-                            throw new IllegalArgumentException("io.nuls.tools.core.annotation.Value "+key+" config item Find more " );
+                        if (configLoader.getConfigData().entrySet().stream().filter(entry -> !entry.getKey().equals(ConfigurationLoader.GLOBAL_DOMAIN) && entry.getValue().containsKey(key)).count() > 1) {
+                            throw new IllegalArgumentException("io.nuls.tools.core.annotation.Value " + key + " config item Find more ");
                         }
                         ConfigurationLoader.ConfigItem configItem = configLoader.getConfigItem(key);
-                        if(configItem == null){
-                            throw new IllegalArgumentException("not found config item : " + key + " to " + cls);
+                        if (configItem == null) {
+                            Log.warn("not found config item : " + key + " to " + cls);
+                            try {
+                                field.setAccessible(true);
+                                values.put(cls.getSimpleName() + "." + field.getName(), new ConfigurationLoader.ConfigItem("DEFAULT", String.valueOf(field.get(bean))));
+                                field.setAccessible(false);
+                            } catch (IllegalAccessException e) {
+                                Log.error(e.getMessage());
+                            }
+                        } else {
+                            ConfigSetting.set(bean, field, configItem.getValue());
+                            values.put(cls.getSimpleName() + "." + field.getName(), configItem);
                         }
-                        ConfigSetting.set(bean, field, configItem.getValue());
-                        values.put(cls.getSimpleName() + "." + field.getName(),configItem);
                     }
                 });
             }
         });
-        int maxKeyLength = values.keySet().stream().max((d1,d2)->d1.length() > d2.length() ? 1 : -1).get().length();
+        int maxKeyLength = values.keySet().stream().max((d1, d2) -> d1.length() > d2.length() ? 1 : -1).get().length();
         Log.info("Configuration information:");
         values.forEach((key, value) -> {
             StringBuilder space = new StringBuilder();
@@ -185,7 +192,7 @@ public class SpringLiteContext {
                     //call afterPropertiesSet 代码迁移到 callAfterPropertiesSet方法执行
                 }
             } catch (Exception e) {
-                Log.error("spring lite autowire fields failed! ",e);
+                Log.error("spring lite autowire fields failed! ", e);
                 System.exit(0);
             }
         }
@@ -204,7 +211,7 @@ public class SpringLiteContext {
                         try {
                             ((InitializingBean) bean).afterPropertiesSet();
                         } catch (Exception e) {
-                            Log.error("spring lite callAfterPropertiesSet fail :  " + bean.getClass(),e);
+                            Log.error("spring lite callAfterPropertiesSet fail :  " + bean.getClass(), e);
                             System.exit(0);
                         }
                     }
@@ -356,7 +363,7 @@ public class SpringLiteContext {
 
         if (null == ann) {
             ann = getFromArray(anns, Configuration.class);
-            if(null != ann) {
+            if (null != ann) {
                 aopProxy = true;
             }
 //            if (null != ann) {
@@ -371,7 +378,7 @@ public class SpringLiteContext {
             try {
                 loadBean(beanName, clazz, aopProxy);
             } catch (NulsException e) {
-                Log.error("spring lite load bean fail :  "  + clazz,e);
+                Log.error("spring lite load bean fail :  " + clazz, e);
                 System.exit(0);
                 return;
             }
@@ -383,7 +390,7 @@ public class SpringLiteContext {
                 Constructor constructor = clazz.getDeclaredConstructor();
                 interceptor = (BeanMethodInterceptor) constructor.newInstance();
             } catch (Exception e) {
-                Log.error("spring lite instance bean fail :  " + clazz,e);
+                Log.error("spring lite instance bean fail :  " + clazz, e);
                 System.exit(0);
                 return;
             }
@@ -445,7 +452,7 @@ public class SpringLiteContext {
             try {
                 bean = clazz.getDeclaredConstructor().newInstance();
             } catch (InstantiationException | IllegalAccessException | NoSuchMethodException | InvocationTargetException e) {
-                Log.error(e.getMessage(),e);
+                Log.error(e.getMessage(), e);
                 throw new NulsException(e);
             }
         }

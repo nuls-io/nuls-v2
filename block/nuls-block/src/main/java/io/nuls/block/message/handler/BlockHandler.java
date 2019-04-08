@@ -22,7 +22,7 @@ package io.nuls.block.message.handler;
 
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.data.Block;
-import io.nuls.block.cache.CacheHandler;
+import io.nuls.block.cache.BlockCacher;
 import io.nuls.block.constant.BlockErrorCode;
 import io.nuls.block.manager.ContextManager;
 import io.nuls.block.message.BlockMessage;
@@ -33,7 +33,6 @@ import io.nuls.rpc.model.CmdAnnotation;
 import io.nuls.rpc.model.message.Response;
 import io.nuls.rpc.util.RPCUtil;
 import io.nuls.tools.core.annotation.Component;
-import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.model.StringUtils;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.log.logback.NulsLogger;
@@ -98,7 +97,7 @@ public class BlockHandler extends BaseCmd {
         } else {
             messageLog.debug("recieve BlockMessage from node-" + nodeId + ", chainId:" + chainId + ", hash:" + block.getHeader().getHash() + ", height-" + block.getHeader().getHeight());
         }
-        CacheHandler.receiveBlock(chainId, message);
+        BlockCacher.receiveBlock(chainId, message);
         return success();
     }
 

@@ -20,15 +20,15 @@
 
 package io.nuls.block.cache;
 
+import io.nuls.base.cache.DataCacher;
 import io.nuls.base.data.Block;
 import io.nuls.base.data.NulsDigestData;
-import io.nuls.block.manager.ContextManager;
 import io.nuls.block.message.BlockMessage;
 import io.nuls.block.message.CompleteMessage;
 import io.nuls.block.thread.BlockWorker;
-import io.nuls.tools.log.logback.NulsLogger;
 
-import java.util.*;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -41,7 +41,7 @@ import java.util.concurrent.Future;
  * @version 1.0
  * @date 18-11-14 下午5:35
  */
-public class CacheHandler {
+public class BlockCacher {
 
     /**
      * 批量下载区块请求-缓存下载完成消息

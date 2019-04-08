@@ -52,6 +52,11 @@ public class BlockConfig {
     private int networkResetMonitorInterval;
 
     /**
+     * 节点数量监控线程执行间隔
+     */
+    private int nodesMonitorInterval;
+
+    /**
      * TxGroup请求器线程执行间隔
      */
     private int txGroupRequestorInterval;
@@ -73,6 +78,14 @@ public class BlockConfig {
      * 默认链配置
      */
     private ChainParameters defaultChainParameter;
+
+    public int getNodesMonitorInterval() {
+        return nodesMonitorInterval;
+    }
+
+    public void setNodesMonitorInterval(int nodesMonitorInterval) {
+        this.nodesMonitorInterval = nodesMonitorInterval;
+    }
 
     public void setDataFolder(String dataFolder) {
         this.dataFolder = dataFolder;
