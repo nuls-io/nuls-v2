@@ -90,22 +90,6 @@ public class Request {
     @JsonProperty
     private Map<String, Object> RequestMethods;
 
-    /**
-     * module Abbreviation
-     */
-    @JsonProperty
-    private String Abbreviation;
-
-    @JsonIgnore
-    public String getAbbreviation() {
-        return Abbreviation;
-    }
-
-    @JsonIgnore
-    public void setAbbreviation(String abbreviation) {
-        Abbreviation = abbreviation;
-    }
-
     @JsonIgnore
     public String getRequestAck() {
         return RequestAck;
