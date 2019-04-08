@@ -105,11 +105,7 @@ public class ContractCmd extends BaseCmd {
             ContractTempTransaction tx = new ContractTempTransaction();
             tx.setTxHex(txData);
             tx.parse(RPCUtil.decode(txData), 0);
-            Result result = contractService.validContractTx(chainId, tx);
-            if (result.isFailed()) {
-                return failed(result.getErrorCode());
-            }
-            result = contractService.invokeContractOneByOne(chainId, tx);
+            Result result = contractService.invokeContractOneByOne(chainId, tx);
             if (result.isFailed()) {
                 return wrapperFailed(result);
             }

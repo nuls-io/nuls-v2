@@ -141,7 +141,7 @@ public class ContractResult {
     public static ContractResult genFailed(ContractData contractData) {
         ContractResult contractResult = new ContractResult();
         contractResult.setContractAddress(contractData.getContractAddress());
-        contractResult.setGasUsed(0L);
+        contractResult.setGasUsed(contractData.getGasLimit());
         contractResult.setPrice(contractData.getPrice());
         contractResult.setSender(contractData.getSender());
         contractResult.setError(true);

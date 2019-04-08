@@ -26,6 +26,7 @@
 package io.nuls.contract.validator;
 
 import io.nuls.base.basic.AddressTool;
+import io.nuls.base.basic.TransactionFeeCalculator;
 import io.nuls.base.signture.SignatureUtil;
 import io.nuls.contract.model.tx.CreateContractTransaction;
 import io.nuls.contract.model.txdata.CreateContractData;
@@ -34,11 +35,12 @@ import io.nuls.contract.util.Log;
 import io.nuls.tools.basic.Result;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.exception.NulsException;
+import io.nuls.tools.model.LongUtils;
 
+import java.math.BigInteger;
 import java.util.Set;
 
-import static io.nuls.contract.constant.ContractErrorCode.ILLEGAL_CONTRACT_ADDRESS;
-import static io.nuls.contract.constant.ContractErrorCode.TX_DATA_VALIDATION_ERROR;
+import static io.nuls.contract.constant.ContractErrorCode.*;
 import static io.nuls.contract.util.ContractUtil.getSuccess;
 
 /**
@@ -63,6 +65,13 @@ public class CreateContractTxValidator {
             return Result.getFailed(TX_DATA_VALIDATION_ERROR);
         }
 
-        return getSuccess();
+        BigInteger realFee = tx.getFee();
+        BigInteger fee = TransactionFeeCalculator.getNormalTxFee(tx.size()).add(BigInteger.valueOf(txData.getGasLimit()).multiply(BigInteger.valueOf(txData.getPrice())));
+        if (realFee.compareTo(fee) >= 0) {
+            return getSuccess();
+        } else {
+            Log.error("contract create error: The contract transaction fee is not right.");
+            return Result.getFailed(FEE_NOT_RIGHT);
+        }
     }
 }

@@ -23,13 +23,19 @@
  */
 package io.nuls.contract.tx.customizetx;
 
+import io.nuls.api.provider.transaction.facade.TransferReq;
+import io.nuls.base.data.CoinData;
+import io.nuls.base.data.CoinFrom;
 import io.nuls.contract.basetest.ContractTest;
 import io.nuls.contract.model.tx.CallContractTransaction;
 import io.nuls.contract.model.tx.CreateContractTransaction;
 import io.nuls.contract.model.tx.DeleteContractTransaction;
+import io.nuls.contract.model.txdata.CreateContractData;
 import io.nuls.contract.util.ContractUtil;
 import io.nuls.contract.util.Log;
+import io.nuls.contract.validator.CreateContractTxValidator;
 import io.nuls.tools.basic.Result;
+import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.model.StringUtils;
 import io.nuls.tools.parse.JSONUtils;
 import org.apache.commons.io.IOUtils;
@@ -51,7 +57,7 @@ public class ContractMakeAndBroadcastTxTest extends ContractMakeAndBroadcastBase
      * 创建合约的交易造假测试
      */
     @Test
-    public void makeAndBroadcastCreateTxTest() throws IOException {
+    public void makeAndBroadcastCreateTxTest() throws Exception {
         Log.info("wait create.");
         InputStream in = new FileInputStream(ContractTest.class.getResource("/nrc20").getFile());
         byte[] contractCode = IOUtils.toByteArray(in);
@@ -80,11 +86,73 @@ public class ContractMakeAndBroadcastTxTest extends ContractMakeAndBroadcastBase
         Log.info("createContract-result:{}", JSONUtils.obj2PrettyJson(result));
     }
 
-    private void createTxFake(CreateContractTransaction tx) {
+    private void createTxFake(CreateContractTransaction tx) throws Exception {
         /**
          * 此刻的tx则可以任意修改原数据，以此造假数据
          */
-        //TODO ....
+        // 减少coinData的from的花费金额 ---> 目的：不支付合约手续费，偷走区块中其他交易的手续费
+        //this.createTxFake1_1(tx);
+        // 减少coinData的from的花费金额 ---> 目的：不支付合约手续费
+        this.createTxFake1_2(tx);
+        //todo 增加coinData的to
+        //this.createTxFake2(tx);
+        //todo 更改sender
+        //this.createTxFake3(tx);
+        //todo 更改contractAddress
+        //this.createTxFake4(tx);
+        //todo 更改gasLimit
+        //this.createTxFake5(tx);
+        //todo 更改price
+        //this.createTxFake6(tx);
+    }
+
+    /**
+     * 减少coinData的from的花费金额 ---> 目的：不支付合约手续费
+     * 条件(二选一)：
+     *      1_1 配合发送一个转账交易, 手续费设置大于合约的Gas消耗费用
+     *          如果执行合约后，还有剩余的Gas，那么剩余的gas会按照Gas*price退还给用户(退还的手续费)，而伪造的交易没有真正花费Gas(修改coinFrom)
+     *          那么，这部分手续费就会从打包区块中的其他交易的手续费扣出来退还给用户
+     *          相当于，通过伪造这笔交易，偷走了区块中的一部分手续费，并且不支付执行合约的Gas手续费(前提：区块中有足够的的其他交易的手续费)
+     *
+     *      1_2 设置gaslimit刚好是执行合约的Gas数，没有合约退还金额，此时不需要再配合发送另外的交易来冲抵手续费
+     *          此时，正确打包后的合约交易，消耗的手续费仅仅只有交易Size的手续费
+     */
+    private void createTxFake1_1(CreateContractTransaction tx) throws NulsException {
+        // 配合发送转账交易
+        TransferReq.TransferReqBuilder builder = new TransferReq.TransferReqBuilder(chain.getChainId(), chain.getConfig().getAssetsId())
+                .addForm(toAddress0, password, BigInteger.valueOf(10001_0000_0000L))
+                .addTo(toAddress5,BigInteger.valueOf(10000_0000_0000L));
+        String transferHash = transferService.transfer(builder.build()).getData();
+        Log.info("transfer tx hash is {}", transferHash);
+
+        this.createTxFake1_base(tx);
+    }
+
+    //@Override
+    //protected Result validCreateTx(int chainId, CreateContractTransaction tx) {
+    //    try {
+    //        CreateContractTxValidator validator = new CreateContractTxValidator();
+    //        return validator.validate(chainId, tx);
+    //    } catch (NulsException e) {
+    //        Log.error(e);
+    //        return Result.getFailed(e.getErrorCode());
+    //    }
+    //}
+
+    private void createTxFake1_2(CreateContractTransaction tx) throws NulsException {
+        this.createTxFake1_base(tx);
+        tx.getTxDataObj().setGasLimit(15794L);
+    }
+
+    private void createTxFake1_base(CreateContractTransaction tx) throws NulsException {
+        CoinData coinDataObj = tx.getCoinDataObj();
+        CreateContractData contractData = tx.getTxDataObj();
+        long gasLimit = contractData.getGasLimit();
+        long price = contractData.getPrice();
+        CoinFrom coinFrom = coinDataObj.getFrom().get(0);
+        BigInteger amount = coinFrom.getAmount();
+        amount = amount.subtract(BigInteger.valueOf(gasLimit).multiply(BigInteger.valueOf(price)));
+        coinFrom.setAmount(amount);
     }
 
 
