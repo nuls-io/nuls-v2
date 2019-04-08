@@ -32,6 +32,11 @@ public class RegisterInvoke extends BaseInvoke {
     public void callBack(Response response) {
         Map responseData = (Map) response.getResponseData();
         if (response.isSuccess()) {
+            RpcModule module = SpringLiteContext.getBean(RpcModule.class);
+            if (module.getDependencies().length > 0) {
+                Log.info("RMB:module rpc is ready");
+                return;
+            }
             Map methodMap = (Map) responseData.get("RegisterAPI");
             Map dependMap = (Map) methodMap.get("Dependencies");
             StringBuilder logInfo = new StringBuilder("\n有模块信息改变，重新同步：\n");
@@ -46,23 +51,21 @@ public class RegisterInvoke extends BaseInvoke {
                 return;
             }
             Log.info("RMB:module rpc is ready");
-            RpcModule module = SpringLiteContext.getBean(RpcModule.class);
-            if(module.getDependencies().length > 0){
-                dependMap.entrySet().forEach(obj -> {
-                    Map.Entry<String, Map> entry = (Map.Entry<String, Map>) obj;
-                    if (dependenices.stream().anyMatch(d -> d.getName().equals(entry.getKey()))) {
-                        NotifySender notifySender = SpringLiteContext.getBean(NotifySender.class);
-                        notifySender.send(() -> {
-                            Response cmdResp = null;
-                            try {
-                                cmdResp = ResponseMessageProcessor.requestAndResponse(entry.getKey(), "registerModuleDependencies", MapUtils.beanToLinkedMap(module));
-                                Log.debug("result : {}", cmdResp);
-                                return cmdResp.isSuccess();
-                            } catch (Exception e) {
-                                Log.error("Calling remote interface failed. module:{} - interface:{} - message:{}", module, "registerModuleDependencies", e.getMessage());
-                                return false;
-                            }
-                        });
+            dependMap.entrySet().forEach(obj -> {
+                Map.Entry<String, Map> entry = (Map.Entry<String, Map>) obj;
+                if (dependenices.stream().anyMatch(d -> d.getName().equals(entry.getKey()))) {
+                    NotifySender notifySender = SpringLiteContext.getBean(NotifySender.class);
+                    notifySender.send(() -> {
+                        Response cmdResp = null;
+                        try {
+                            cmdResp = ResponseMessageProcessor.requestAndResponse(entry.getKey(), "registerModuleDependencies", MapUtils.beanToLinkedMap(module));
+                            Log.debug("result : {}", cmdResp);
+                            return cmdResp.isSuccess();
+                        } catch (Exception e) {
+                            Log.error("Calling remote interface failed. module:{} - interface:{} - message:{}", module, "registerModuleDependencies", e.getMessage());
+                            return false;
+                        }
+                    });
 
 //                    //是当前模块的依赖模块
 //                    Request request = MessageUtil.defaultRequest();
@@ -76,9 +79,8 @@ public class RegisterInvoke extends BaseInvoke {
 //                    } catch (Exception e) {
 //                        e.printStackTrace();
 //                    }
-                    }
-                });
-            }
+                }
+            });
 
         }
 
