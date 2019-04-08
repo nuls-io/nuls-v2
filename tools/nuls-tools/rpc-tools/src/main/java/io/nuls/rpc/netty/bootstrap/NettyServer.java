@@ -42,7 +42,7 @@ public class NettyServer {
     public static NettyServer getInstance(String abbr, String name, String domain) {
         int port = HostInfo.randomPort();
         startServer(port);
-        ConnectManager.LOCAL.setModuleAbbreviation(abbr);
+        ConnectManager.LOCAL.setAbbreviation(abbr);
         ConnectManager.LOCAL.setModuleName(name);
         ConnectManager.LOCAL.setModuleDomain(domain);
         Map<String, String> connectionInformation = new HashMap<>(2);
@@ -85,7 +85,7 @@ public class NettyServer {
      * @return WsServer
      */
     public NettyServer moduleRoles(String[] value) {
-        ConnectManager.LOCAL.getModuleRoles().put(ConnectManager.LOCAL.getModuleAbbreviation(), value);
+        ConnectManager.LOCAL.getModuleRoles().put(ConnectManager.LOCAL.getAbbreviation(), value);
         return this;
     }
 

@@ -728,8 +728,8 @@ public class ConnectManager {
      */
     public synchronized static Channel cacheConnect(String role, Channel channel, boolean isSender) {
         if (!ROLE_CHANNEL_MAP.containsKey(role)
-                || (isSender && role.compareTo(LOCAL.getModuleAbbreviation()) > 0)
-                || (!isSender && role.compareTo(LOCAL.getModuleAbbreviation()) < 0)) {
+                || (isSender && role.compareTo(LOCAL.getAbbreviation()) > 0)
+                || (!isSender && role.compareTo(LOCAL.getAbbreviation()) < 0)) {
             createConnectData(channel);
             ROLE_CHANNEL_MAP.put(role, channel);
             return channel;

@@ -32,7 +32,7 @@ public class NoUse {
         NettyServer.startServer(port);
         // Start server instance
         ConnectManager.LOCAL.setMethods(new ArrayList<>());
-        ConnectManager.LOCAL.setModuleAbbreviation(ModuleE.KE.abbr);
+        ConnectManager.LOCAL.setAbbreviation(ModuleE.KE.abbr);
         ConnectManager.LOCAL.setModuleName(ModuleE.KE.name);
         ConnectManager.LOCAL.setModuleDomain(ModuleE.KE.domain);
         Map<String, String> connectionInformation = new HashMap<>(2);

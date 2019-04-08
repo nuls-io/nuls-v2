@@ -66,7 +66,7 @@ public class MessageUtil {
      */
     public static NegotiateConnection defaultNegotiateConnection() {
         NegotiateConnection negotiateConnection = new NegotiateConnection();
-        negotiateConnection.setAbbreviation(ConnectManager.LOCAL.getModuleAbbreviation());
+        negotiateConnection.setAbbreviation(ConnectManager.LOCAL.getAbbreviation());
         negotiateConnection.setProtocolVersion("0.1");
         negotiateConnection.setCompressionAlgorithm("zlib");
         negotiateConnection.setCompressionRate("0");
@@ -82,7 +82,6 @@ public class MessageUtil {
     public static Request defaultRequest() {
         Request request = new Request();
         request.setRequestAck("0");
-        request.setAbbreviation(ConnectManager.LOCAL.getModuleAbbreviation());
         request.setSubscriptionEventCounter("0");
         request.setSubscriptionPeriod("0");
         request.setSubscriptionRange("0");

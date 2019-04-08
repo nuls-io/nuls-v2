@@ -66,7 +66,7 @@ public class RegisterApi {
     private String ModuleVersion;
 
     @JsonProperty
-    private String ModuleAbbreviation;
+    private String Abbreviation;
 
     @JsonProperty
     private String ModuleName;
@@ -132,13 +132,13 @@ public class RegisterApi {
     }
 
     @JsonIgnore
-    public String getModuleAbbreviation() {
-        return ModuleAbbreviation;
+    public String getAbbreviation() {
+        return Abbreviation;
     }
 
     @JsonIgnore
-    public void setModuleAbbreviation(String moduleAbbreviation) {
-        this.ModuleAbbreviation = moduleAbbreviation;
+    public void setAbbreviation(String moduleAbbreviation) {
+        this.Abbreviation = moduleAbbreviation;
     }
 
     @JsonIgnore

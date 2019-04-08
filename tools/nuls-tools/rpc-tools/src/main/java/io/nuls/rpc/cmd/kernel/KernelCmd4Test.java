@@ -56,7 +56,7 @@ public class KernelCmd4Test extends BaseCmd {
                 Map<String, Object> role = new HashMap<>(3);
                 role.put(Constants.KEY_IP, registerApi.getConnectionInformation().get(Constants.KEY_IP));
                 role.put(Constants.KEY_PORT, registerApi.getConnectionInformation().get(Constants.KEY_PORT));
-                ConnectManager.ROLE_MAP.put(registerApi.getModuleAbbreviation(), role);
+                ConnectManager.ROLE_MAP.put(registerApi.getAbbreviation(), role);
             }
             Map<String, Object> dependMap = new HashMap<>(1);
             dependMap.put("Dependencies", ConnectManager.ROLE_MAP);
