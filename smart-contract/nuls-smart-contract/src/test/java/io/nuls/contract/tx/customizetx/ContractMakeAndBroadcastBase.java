@@ -52,6 +52,7 @@ import java.math.BigInteger;
 import java.util.HashMap;
 import java.util.Map;
 
+import static io.nuls.contract.constant.ContractConstant.*;
 import static io.nuls.contract.constant.ContractErrorCode.FAILED;
 import static io.nuls.contract.util.ContractUtil.getFailed;
 import static io.nuls.contract.util.ContractUtil.getSuccess;
@@ -191,6 +192,10 @@ public class ContractMakeAndBroadcastBase extends BaseQuery {
             AccountCall.transactionSignature(chainId, sender, password, tx);
             String txData = RPCUtil.encode(tx.serialize());
 
+            Result validResult = this.validTx(chainId, tx);
+            if(validResult.isFailed()) {
+                return validResult;
+            }
             // 通知账本
             int commitStatus = LedgerCall.commitUnconfirmedTx(chainId, txData);
             if(commitStatus != LedgerUnConfirmedTxStatus.SUCCESS.status()) {
@@ -214,4 +219,38 @@ public class ContractMakeAndBroadcastBase extends BaseQuery {
             return result;
         }
     }
+
+    private Result validTx(int chainId, Transaction tx) {
+        try {
+            Result result;
+            switch (tx.getType()) {
+                case TX_TYPE_CREATE_CONTRACT:
+                    result = validCreateTx(chainId, (CreateContractTransaction) tx);
+                    break;
+                case TX_TYPE_CALL_CONTRACT:
+                    result = validCallTx(chainId, (CallContractTransaction) tx);
+                    break;
+                case TX_TYPE_DELETE_CONTRACT:
+                    result = validDeleteTx(chainId, (DeleteContractTransaction) tx);
+                    break;
+                default:
+                    result = getSuccess();
+                    break;
+            }
+            return result;
+        } catch (Exception e) {
+            return getFailed();
+        }
+    }
+
+    protected Result validCreateTx(int chainId, CreateContractTransaction tx) {
+        return getSuccess();
+    }
+    protected Result validCallTx(int chainId, CallContractTransaction tx) {
+        return getSuccess();
+    }
+    protected Result validDeleteTx(int chainId, DeleteContractTransaction tx) {
+        return getSuccess();
+    }
+
 }

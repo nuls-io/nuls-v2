@@ -25,16 +25,15 @@ import io.nuls.api.cache.ApiCache;
 import io.nuls.api.db.AccountService;
 import io.nuls.api.db.BlockService;
 import io.nuls.api.manager.CacheManager;
-import io.nuls.api.model.po.db.AccountInfo;
-import io.nuls.api.model.po.db.AssetInfo;
-import io.nuls.api.model.po.db.PageInfo;
-import io.nuls.api.model.po.db.TxRelationInfo;
+import io.nuls.api.model.po.db.*;
+import io.nuls.api.model.rpc.FreezeInfo;
 import io.nuls.api.model.rpc.RpcErrorCode;
 import io.nuls.api.model.rpc.RpcResult;
 import io.nuls.api.model.rpc.RpcResultError;
 import io.nuls.api.provider.ServiceManager;
 import io.nuls.api.utils.VerifyUtils;
 import io.nuls.base.basic.AddressTool;
+import io.nuls.tools.basic.Result;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Controller;
 import io.nuls.tools.core.annotation.RpcMethod;
@@ -177,7 +176,7 @@ public class AccountController {
     @RpcMethod("getAccountFreezes")
     public RpcResult getAccountFreezes(List<Object> params) {
         VerifyUtils.verifyParams(params, 4);
-        int chainId, pageIndex, pageSize;
+        int chainId, pageIndex, pageSize, assetId;
         String address;
         try {
             chainId = (int) params.get(0);
@@ -187,7 +186,19 @@ public class AccountController {
         } catch (Exception e) {
             return RpcResult.paramError();
         }
-        WalletRpcHandler.getFreezeList(chainId, pageIndex, pageSize, address);
-        return null;
+        PageInfo<FreezeInfo> pageInfo = null;
+        if (CacheManager.isChainExist(chainId)) {
+            ApiCache apiCache = CacheManager.getCache(chainId);
+            assetId = apiCache.getChainInfo().getDefaultAsset().getAssetId();
+            Result<PageInfo<FreezeInfo>> result = WalletRpcHandler.getFreezeList(chainId, pageIndex, pageSize, address, assetId);
+            if (result.isFailed()) {
+                return RpcResult.failed(result);
+            }
+            pageInfo = result.getData();
+            return RpcResult.success(pageInfo);
+        } else {
+            pageInfo = new PageInfo<>(pageIndex, pageSize);
+            return RpcResult.success(pageInfo);
+        }
     }
 }

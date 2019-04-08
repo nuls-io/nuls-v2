@@ -9,6 +9,7 @@ import io.nuls.api.model.po.db.AgentInfo;
 import io.nuls.api.model.po.db.AliasInfo;
 import io.nuls.api.model.po.db.PageInfo;
 import io.nuls.api.utils.DocumentTransferTool;
+import io.nuls.base.data.Page;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
 import org.bson.Document;
@@ -47,6 +48,26 @@ public class AgentService {
             CacheManager.getCache(chainID).addAgentInfo(agentInfo);
         }
         return agentInfo;
+    }
+
+    public PageInfo<AgentInfo> getAgentByHashList(int chainID, int pageNumber, int pageSize, List<String> hashList) {
+        PageInfo<AgentInfo> page = new PageInfo<>(pageNumber, pageSize);
+        page.setTotalCount(hashList.size());
+        int start = (pageNumber - 1) * pageSize;
+        if (hashList.size() < start) {
+            return page;
+        }
+        int end = pageNumber * pageSize;
+        if (end > hashList.size() - 1) {
+            end = hashList.size() - 1;
+        }
+        hashList = hashList.subList(start, end);
+        List<AgentInfo> agentInfoList = new ArrayList<>();
+        for (String agentHash : hashList) {
+            agentInfoList.add(getAgentByHash(chainID, agentHash));
+        }
+        page.setList(agentInfoList);
+        return page;
     }
 
     public AgentInfo getAgentByPackingAddress(int chainID, String packingAddress) {

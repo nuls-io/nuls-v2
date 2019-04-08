@@ -26,6 +26,7 @@
 package io.nuls.contract.validator;
 
 import io.nuls.base.basic.AddressTool;
+import io.nuls.base.basic.TransactionFeeCalculator;
 import io.nuls.base.data.CoinTo;
 import io.nuls.base.signture.SignatureUtil;
 import io.nuls.contract.model.tx.CallContractTransaction;
@@ -101,6 +102,14 @@ public class CallContractTxValidator {
             Log.error("contract call error: Insufficient amount to transfer to the contract address.");
             return Result.getFailed(INVALID_AMOUNT);
         }
-        return getSuccess();
+
+        BigInteger realFee = tx.getFee();
+        BigInteger fee = TransactionFeeCalculator.getNormalTxFee(tx.size()).add(BigInteger.valueOf(txData.getGasLimit()).multiply(BigInteger.valueOf(txData.getPrice())));
+        if (realFee.compareTo(fee) >= 0) {
+            return getSuccess();
+        } else {
+            Log.error("contract call error: The contract transaction fee is not right.");
+            return Result.getFailed(FEE_NOT_RIGHT);
+        }
     }
 }

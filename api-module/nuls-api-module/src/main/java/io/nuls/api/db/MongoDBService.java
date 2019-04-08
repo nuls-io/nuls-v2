@@ -264,6 +264,7 @@ public class MongoDBService implements InitializingBean {
         if (var1 == null) {
             return collection.countDocuments();
         }
+
         return collection.countDocuments(var1);
     }
 

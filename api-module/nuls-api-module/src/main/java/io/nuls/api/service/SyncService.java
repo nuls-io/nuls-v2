@@ -203,10 +203,18 @@ public class SyncService {
         }
         Set<String> addressSet = new HashSet<>();
 
+        ApiCache apiCache = CacheManager.getCache(chainId);
+        AssetInfo assetInfo = apiCache.getChainInfo().getDefaultAsset();
         for (CoinToInfo output : tx.getCoinTos()) {
             addressSet.add(output.getAddress());
             AccountLedgerInfo ledgerInfo = calcBalance(chainId, output);
             txRelationInfoSet.add(new TxRelationInfo(output.getAddress(), tx, output.getChainId(), output.getAssetsId(), output.getAmount(), ledgerInfo.getTotalBalance()));
+
+            //奖励是本链主资产的时候，累计奖励金额
+            if (assetInfo.getChainId() == output.getChainId() && assetInfo.getAssetId() == output.getAssetsId()) {
+                AccountInfo accountInfo = queryAccountInfo(chainId, output.getAddress());
+                accountInfo.setTotalReward(accountInfo.getTotalReward().add(output.getAmount()));
+            }
         }
 
         for (String address : addressSet) {
