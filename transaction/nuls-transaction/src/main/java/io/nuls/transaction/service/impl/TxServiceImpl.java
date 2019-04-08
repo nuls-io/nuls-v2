@@ -729,8 +729,10 @@ public class TxServiceImpl implements TxService {
                         ContractCall.contractBatchBegin(chain, blockHeight, blockTime, packingAddress, preStateRoot);
                         contractNotify = true;
                     }
-                    //执行职能合约，不管结果该交易都会保留
-                    ContractCall.invokeContract(chain, txStr);
+                    if (!ContractCall.invokeContract(chain, txStr)) {
+                        clearInvalidTx(chain, tx);
+                        continue;
+                    }
                 }
                 packingTxList.add(txWrapper);
                 totalSize += txSize;
