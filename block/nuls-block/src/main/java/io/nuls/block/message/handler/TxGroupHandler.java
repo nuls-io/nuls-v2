@@ -26,6 +26,7 @@ import io.nuls.block.cache.SmallBlockCacher;
 import io.nuls.block.constant.BlockErrorCode;
 import io.nuls.block.constant.BlockForwardEnum;
 import io.nuls.block.manager.ContextManager;
+import io.nuls.block.message.HashListMessage;
 import io.nuls.block.message.TxGroupMessage;
 import io.nuls.block.model.CachedSmallBlock;
 import io.nuls.block.service.BlockService;
@@ -36,12 +37,11 @@ import io.nuls.rpc.model.CmdAnnotation;
 import io.nuls.rpc.model.message.Response;
 import io.nuls.rpc.util.RPCUtil;
 import io.nuls.tools.core.annotation.Autowired;
-import io.nuls.tools.core.annotation.Component;
-import io.nuls.tools.crypto.HexUtil;
+import io.nuls.tools.core.annotation.Service;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.log.logback.NulsLogger;
+import io.nuls.tools.protocol.MessageHandler;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -55,13 +55,14 @@ import static io.nuls.block.constant.CommandConstant.TXGROUP_MESSAGE;
  * @version 1.0
  * @date 18-11-14 下午4:23
  */
-@Component
+@Service
 public class TxGroupHandler extends BaseCmd {
 
     @Autowired
     private BlockService blockService;
 
     @CmdAnnotation(cmd = TXGROUP_MESSAGE, version = 1.0, scope = Constants.PUBLIC, description = "")
+    @MessageHandler(message = TxGroupMessage.class)
     public Response process(Map map) {
         int chainId = Integer.parseInt(map.get("chainId").toString());
         String nodeId = map.get("nodeId").toString();

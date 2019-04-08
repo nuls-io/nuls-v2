@@ -10,8 +10,8 @@ import org.junit.Test;
 import java.util.List;
 import java.util.Map;
 
-import static io.nuls.block.constant.Constant.PROTOCOL_CONFIG_COMPARATOR;
-import static io.nuls.block.constant.Constant.PROTOCOL_CONFIG_FILE;
+import static io.nuls.base.constant.BaseConstant.PROTOCOL_CONFIG_COMPARATOR;
+import static io.nuls.base.constant.BaseConstant.PROTOCOL_CONFIG_FILE;
 import static org.junit.Assert.assertEquals;
 
 /**

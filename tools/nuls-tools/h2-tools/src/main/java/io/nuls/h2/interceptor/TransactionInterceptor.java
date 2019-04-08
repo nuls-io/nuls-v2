@@ -38,7 +38,7 @@ import java.lang.reflect.Method;
  * @date 2017/10/13
  */
 @Interceptor(Transaction.class)
-public class TransactionInterceptor implements BeanMethodInterceptor {
+public class TransactionInterceptor implements BeanMethodInterceptor<Transaction> {
 
     private static ThreadLocal<Boolean> FLAG_HOLDER = new ThreadLocal<Boolean>() {
         @Override
@@ -48,7 +48,7 @@ public class TransactionInterceptor implements BeanMethodInterceptor {
     };
 
     @Override
-    public Object intercept(Annotation annotation, Object object, Method method, Object[] params, BeanMethodInterceptorChain interceptorChain) throws Throwable {
+    public Object intercept(Transaction annotation, Object object, Method method, Object[] params, BeanMethodInterceptorChain interceptorChain) throws Throwable {
         boolean flag = FLAG_HOLDER.get();
         Object result;
 

@@ -34,5 +34,9 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.METHOD, ElementType.TYPE})
 public @interface MessageHandler {
-    
+    /**
+     * 消息处理类要处理的消息类型
+     * @return
+     */
+    Class message();
 }

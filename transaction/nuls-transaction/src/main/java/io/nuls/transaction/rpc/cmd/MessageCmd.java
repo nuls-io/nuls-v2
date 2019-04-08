@@ -10,8 +10,10 @@ import io.nuls.rpc.model.message.Response;
 import io.nuls.rpc.util.RPCUtil;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
+import io.nuls.tools.core.annotation.Service;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.model.ObjectUtils;
+import io.nuls.tools.protocol.MessageHandler;
 import io.nuls.transaction.cache.TxDuplicateRemoval;
 import io.nuls.transaction.constant.TxCmd;
 import io.nuls.transaction.constant.TxConfig;
@@ -43,7 +45,7 @@ import static io.nuls.transaction.utils.LoggerUtil.Log;
  * @author: qinyifeng
  * @date: 2018/12/26
  */
-@Component
+@Service
 public class MessageCmd extends BaseCmd {
     @Autowired
     private CtxService ctxService;
@@ -68,6 +70,7 @@ public class MessageCmd extends BaseCmd {
     @CmdAnnotation(cmd = TxCmd.NW_NEW_HASH, version = 1.0, description = "receive new transaction hash")
     @Parameter(parameterName = KEY_CHAIN_ID, parameterType = "int")
     @Parameter(parameterName = KEY_NODE_ID, parameterType = "String")
+    @MessageHandler(message = BroadcastTxMessage.class)
     public Response newHash(Map params) {
         Map<String, Boolean> map = new HashMap<>();
         boolean result;
@@ -121,6 +124,7 @@ public class MessageCmd extends BaseCmd {
     @CmdAnnotation(cmd = TxCmd.NW_ASK_TX, version = 1.0, description = "get complete transaction entity")
     @Parameter(parameterName = KEY_CHAIN_ID, parameterType = "int")
     @Parameter(parameterName = KEY_NODE_ID, parameterType = "String")
+    @MessageHandler(message = GetTxMessage.class)
     public Response askTx(Map params) {
         Map<String, Boolean> map = new HashMap<>();
         boolean result;
@@ -170,6 +174,7 @@ public class MessageCmd extends BaseCmd {
     @CmdAnnotation(cmd = TxCmd.NW_RECEIVE_TX, version = 1.0, description = "receive new transactions from other nodes")
     @Parameter(parameterName = KEY_CHAIN_ID, parameterType = "int")
     @Parameter(parameterName = KEY_NODE_ID, parameterType = "String")
+    @MessageHandler(message = TransactionMessage.class)
     public Response receiveTx(Map params) {
         Map<String, Boolean> map = new HashMap<>();
         boolean result;
@@ -220,6 +225,7 @@ public class MessageCmd extends BaseCmd {
     @CmdAnnotation(cmd = TxCmd.NW_NEW_CROSS_HASH, version = 1.0, description = "receive new cross transaction hash")
     @Parameter(parameterName = KEY_CHAIN_ID, parameterType = "int")
     @Parameter(parameterName = KEY_NODE_ID, parameterType = "String")
+    @MessageHandler(message = BroadcastTxMessage.class)
     public Response newCrossHash(Map params) {
         Map<String, Boolean> map = new HashMap<>();
         boolean result;
@@ -273,6 +279,7 @@ public class MessageCmd extends BaseCmd {
     @CmdAnnotation(cmd = TxCmd.NW_ASK_CROSS_TX_M_FC, version = 1.0, description = "The main network asks for complete cross-chain transactions from the Friends Chain")
     @Parameter(parameterName = KEY_CHAIN_ID, parameterType = "int")
     @Parameter(parameterName = KEY_NODE_ID, parameterType = "String")
+    @MessageHandler(message = GetTxMessage.class)
     public Response askCrossTxM2Fc(Map params) {
         Map<String, Boolean> map = new HashMap<>();
         boolean result;
@@ -331,6 +338,7 @@ public class MessageCmd extends BaseCmd {
     @CmdAnnotation(cmd = TxCmd.NW_ASK_CROSS_TX_M_M, version = 1.0, description = "Complete Cross-Chain Transaction Required by Nodes in the Main Network Chain")
     @Parameter(parameterName = KEY_CHAIN_ID, parameterType = "int")
     @Parameter(parameterName = KEY_NODE_ID, parameterType = "String")
+    @MessageHandler(message = GetTxMessage.class)
     public Response askCrossTxM2M(Map params) {
         Map<String, Boolean> map = new HashMap<>();
         boolean result;
@@ -394,6 +402,7 @@ public class MessageCmd extends BaseCmd {
     @CmdAnnotation(cmd = TxCmd.NW_ASK_CROSS_TX_FC_M, version = 1.0, description = "Friend Chain Requests Complete Cross-Chain Transactions from Main Network")
     @Parameter(parameterName = KEY_CHAIN_ID, parameterType = "int")
     @Parameter(parameterName = KEY_NODE_ID, parameterType = "String")
+    @MessageHandler(message = GetTxMessage.class)
     public Response askCrossTxFc2M(Map params) {
         Map<String, Boolean> map = new HashMap<>();
         boolean result;
@@ -453,6 +462,7 @@ public class MessageCmd extends BaseCmd {
     @CmdAnnotation(cmd = TxCmd.NW_NEW_MN_TX, version = 1.0, description = "receive new cross transactions from other nodes")
     @Parameter(parameterName = KEY_CHAIN_ID, parameterType = "int")
     @Parameter(parameterName = KEY_NODE_ID, parameterType = "String")
+    @MessageHandler(message = CrossTxMessage.class)
     public Response newMnTx(Map params) {
         Map<String, Boolean> map = new HashMap<>();
         boolean result;
@@ -504,6 +514,7 @@ public class MessageCmd extends BaseCmd {
     @CmdAnnotation(cmd = TxCmd.NW_VERIFY_FC, version = 1.0, description = "verification of cross-chain transactions from home network node to friend chain node")
     @Parameter(parameterName = KEY_CHAIN_ID, parameterType = "int")
     @Parameter(parameterName = KEY_NODE_ID, parameterType = "String")
+    @MessageHandler(message = VerifyCrossWithFCMessage.class)
     public Response verifyFc(Map params) {
         Map<String, Boolean> map = new HashMap<>();
         boolean result;
@@ -568,6 +579,7 @@ public class MessageCmd extends BaseCmd {
     @CmdAnnotation(cmd = TxCmd.NW_VERIFYR_ESULT, version = 1.0, description = "home network node receive cross-chain verify results sent by friend chain node")
     @Parameter(parameterName = KEY_CHAIN_ID, parameterType = "int")
     @Parameter(parameterName = KEY_NODE_ID, parameterType = "String")
+    @MessageHandler(message = VerifyCrossResultMessage.class)
     public Response verifyResult(Map params) {
         Map<String, Boolean> map = new HashMap<>();
         Chain chain = null;
@@ -609,6 +621,7 @@ public class MessageCmd extends BaseCmd {
     @CmdAnnotation(cmd = TxCmd.NW_VERIFY_MN, version = 1.0, description = "verification of cross-chain transactions from friend chain node to home network node")
     @Parameter(parameterName = KEY_CHAIN_ID, parameterType = "int")
     @Parameter(parameterName = KEY_NODE_ID, parameterType = "String")
+    @MessageHandler(message = VerifyCrossWithFCMessage.class)
     public Response verifyMn(Map params) {
         Map<String, Boolean> map = new HashMap<>();
         boolean result;
@@ -674,6 +687,7 @@ public class MessageCmd extends BaseCmd {
     @CmdAnnotation(cmd = TxCmd.NW_CROSS_NODE_RS, version = 1.0, description = "friend chain node receive cross-chain verify results sent by home network node")
     @Parameter(parameterName = KEY_CHAIN_ID, parameterType = "int")
     @Parameter(parameterName = KEY_NODE_ID, parameterType = "String")
+    @MessageHandler(message = BroadcastCrossNodeRsMessage.class)
     public Response crossNodeRs(Map params) {
         Map<String, Boolean> map = new HashMap<>();
         boolean result;

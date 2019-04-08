@@ -27,6 +27,7 @@ import io.nuls.block.cache.SmallBlockCacher;
 import io.nuls.block.constant.BlockErrorCode;
 import io.nuls.block.manager.ContextManager;
 import io.nuls.block.message.HashMessage;
+import io.nuls.block.message.HeightRangeMessage;
 import io.nuls.block.message.SmallBlockMessage;
 import io.nuls.block.rpc.call.NetworkUtil;
 import io.nuls.rpc.cmd.BaseCmd;
@@ -34,10 +35,10 @@ import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.model.CmdAnnotation;
 import io.nuls.rpc.model.message.Response;
 import io.nuls.rpc.util.RPCUtil;
-import io.nuls.tools.core.annotation.Component;
-import io.nuls.tools.crypto.HexUtil;
+import io.nuls.tools.core.annotation.Service;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.log.logback.NulsLogger;
+import io.nuls.tools.protocol.MessageHandler;
 
 import java.util.Map;
 
@@ -52,10 +53,11 @@ import static io.nuls.block.constant.CommandConstant.SMALL_BLOCK_MESSAGE;
  * @version 1.0
  * @date 18-11-14 下午4:23
  */
-@Component
+@Service
 public class GetSmallBlockHandler extends BaseCmd {
 
     @CmdAnnotation(cmd = GET_SMALL_BLOCK_MESSAGE, version = 1.0, scope = Constants.PUBLIC, description = "")
+    @MessageHandler(message = HashMessage.class)
     public Response process(Map map) {
         int chainId = Integer.parseInt(map.get("chainId").toString());
         String nodeId = map.get("nodeId").toString();

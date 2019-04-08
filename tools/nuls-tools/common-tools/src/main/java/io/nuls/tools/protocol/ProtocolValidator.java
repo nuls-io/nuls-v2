@@ -4,7 +4,7 @@ import java.util.List;
 
 public class ProtocolValidator {
 
-    public static String meaasgeValidateV1(Class messageClass, Class handlerClass, Protocol protocol) {
+    public static boolean meaasgeValidate(Class messageClass, Class handlerClass, Protocol protocol, String methodName) {
         List<MessageConfig> allowMsg = protocol.getAllowMsg();
         String messageClassName = messageClass.getName();
         String handlerClassName = handlerClass.getName();
@@ -14,14 +14,13 @@ public class ProtocolValidator {
                 for (ListItem handler : handlers) {
                     String name = handler.getName();
                     String[] strings = name.split("#");
-                    String ss = strings[0];
-                    if (ss.equals(handlerClassName)) {
-                        return strings[1];
+                    if (handlerClassName.equals(strings[0]) && methodName.equals(strings[1])) {
+                        return true;
                     }
                 }
             }
         }
-        return "";
+        return false;
     }
 
     public static boolean transactionValidate(int chainId, Class messageClass, Class handlerClass) {

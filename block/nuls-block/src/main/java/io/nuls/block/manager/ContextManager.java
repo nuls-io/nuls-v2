@@ -23,6 +23,7 @@ package io.nuls.block.manager;
 import io.nuls.block.model.ChainContext;
 import io.nuls.block.model.ChainParameters;
 import io.nuls.tools.protocol.Protocol;
+import io.nuls.tools.protocol.ProtocolContextManager;
 
 import java.util.List;
 import java.util.Map;
@@ -56,6 +57,7 @@ public class ContextManager {
         chainContext.setParameters(chainParameters);
         chainContext.setProtocolsMap(protocolMap);
         chainContext.init();
+        ProtocolContextManager.init(chainId, protocolMap, (short) 1);
         commonLog.info("new chainContext add! chainId-" + chainId);
     }
 

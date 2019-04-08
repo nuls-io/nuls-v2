@@ -27,29 +27,27 @@ import io.nuls.tools.core.annotation.Interceptor;
 import io.nuls.tools.core.inteceptor.base.BeanMethodInterceptor;
 import io.nuls.tools.core.inteceptor.base.BeanMethodInterceptorChain;
 
-import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
+import java.util.Map;
 
 /**
  * @author zhouwei
  * @date 2017/10/13
  */
 @Interceptor(MessageHandler.class)
-public class MessageHandlerInterceptor implements BeanMethodInterceptor {
+public class MessageHandlerInterceptor implements BeanMethodInterceptor<MessageHandler> {
 
     @Override
-    public Object intercept(Annotation annotation, Object object, Method method, Object[] params, BeanMethodInterceptorChain interceptorChain) throws Throwable {
-        Object result = null;
-        try {
-
-//            ProtocolValidator.meaasgeValidate()
-            result = interceptorChain.execute(annotation, object, method, params);
-
-        } catch (Exception e) {
-
-        } finally {
-
+    public Object intercept(MessageHandler annotation, Object object, Method method, Object[] params, BeanMethodInterceptorChain interceptorChain) throws Throwable {
+        Map map = (Map) params[0];
+        int chainId = (Integer) map.get("chainId");
+        ProtocolContext context = ProtocolContextManager.getContext(chainId);
+        short version = context.getVersion();
+        Protocol protocol = context.getProtocolsMap().get(version);
+        boolean validate = ProtocolValidator.meaasgeValidate(annotation.message(), object.getClass().getSuperclass(), protocol, method.getName());
+        if (!validate) {
+            throw new RuntimeException("The message or message handler is not available in the current version!");
         }
-        return result;
+        return interceptorChain.execute(annotation, object, method, params);
     }
 }

@@ -1,5 +1,9 @@
 package io.nuls.base.constant;
 
+import io.nuls.tools.protocol.ProtocolConfigJson;
+
+import java.util.Comparator;
+
 /**
  * @author tag
  */
@@ -65,4 +69,15 @@ public class BaseConstant {
      * unit:second
      */
     public static long BLOCK_TIME_INTERVAL_SECOND = 10;
+
+    /**
+     * 协议配置文件名称
+     * Protocol configuration file name.
+     */
+    public static String PROTOCOL_CONFIG_FILE = "protocol-config.json";
+
+    /**
+     * 协议配置信息排序器
+     */
+    public static Comparator<ProtocolConfigJson> PROTOCOL_CONFIG_COMPARATOR = Comparator.comparingInt(ProtocolConfigJson::getVersion);
 }

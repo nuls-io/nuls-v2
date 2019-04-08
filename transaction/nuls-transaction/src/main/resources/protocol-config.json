@@ -30,91 +30,97 @@
     ],
     "validMessages": [
       {
-        "name": "io.nuls.block.message.BlockMessage",
+        "name": "io.nuls.transaction.message.BroadcastCrossNodeRsMessage",
         "handlers": [
           {
-            "name": "io.nuls.block.message.handler.BlockHandler#process"
+            "name": "io.nuls.transaction.rpc.cmd.MessageCmd#crossNodeRs"
           }
         ]
       },
       {
-        "name": "io.nuls.block.message.CompleteMessage",
+        "name": "io.nuls.transaction.message.BroadcastCrossTxHashMessage",
         "handlers": [
           {
-            "name": "io.nuls.block.message.handler.CompleteHandler#process"
+            "name": "io.nuls.transaction.rpc.cmd.MessageCmd#process"
           }
         ]
       },
       {
-        "name": "io.nuls.block.message.HashListMessage",
+        "name": "io.nuls.transaction.message.BroadcastTxMessage",
         "handlers": [
           {
-            "name": "io.nuls.block.message.handler.GetTxGroupHandler#process"
-          }
-        ]
-      },
-      {
-        "name": "io.nuls.block.message.HashMessage",
-        "handlers": [
-          {
-            "name": "io.nuls.block.message.handler.ForwardSmallBlockHandler#process"
+            "name": "io.nuls.transaction.rpc.cmd.MessageCmd#newHash"
           },
           {
-            "name": "io.nuls.block.message.handler.GetBlockHandler#process"
+            "name": "io.nuls.transaction.rpc.cmd.MessageCmd#newCrossHash"
+          }
+        ]
+      },
+      {
+        "name": "io.nuls.transaction.message.CrossTxMessage",
+        "handlers": [
+          {
+            "name": "io.nuls.transaction.rpc.cmd.MessageCmd#newMnTx"
+          }
+        ]
+      },
+      {
+        "name": "io.nuls.transaction.message.GetTxMessage",
+        "handlers": [
+          {
+            "name": "io.nuls.transaction.rpc.cmd.MessageCmd#askTx"
           },
           {
-            "name": "io.nuls.block.message.handler.GetSmallBlockHandler#process"
-          }
-        ]
-      },
-      {
-        "name": "io.nuls.block.message.HeightRangeMessage",
-        "handlers": [
-          {
-            "name": "io.nuls.block.message.handler.GetBlocksHandler#process"
-          }
-        ]
-      },
-      {
-        "name": "io.nuls.block.message.SmallBlockMessage",
-        "handlers": [
-          {
-            "name": "io.nuls.block.message.handler.SmallBlockHandler#process"
-          }
-        ]
-      },
-      {
-        "name": "io.nuls.block.message.TxGroupMessage",
-        "handlers": [
-          {
-            "name": "io.nuls.block.message.handler.TxGroupHandler#process"
-          }
-        ]
-      },
-      {
-        "name": "io.nuls.block.test.TestMessage1",
-        "handlers": [
-          {
-            "name": "io.nuls.block.test.TestMessageHandler1#processV1"
-          }
-        ]
-      },
-      {
-        "name": "io.nuls.block.test.TestMessage2",
-        "handlers": [
-          {
-            "name": "io.nuls.block.test.TestMessageHandler2#processV1"
+            "name": "io.nuls.transaction.rpc.cmd.MessageCmd#askCrossTxM2Fc"
           },
           {
-            "name": "io.nuls.block.test.TestMessageHandler2#processV2"
+            "name": "io.nuls.transaction.rpc.cmd.MessageCmd#askCrossTxM2M"
+          },
+          {
+            "name": "io.nuls.transaction.rpc.cmd.MessageCmd#askCrossTxFc2M"
           }
         ]
       },
       {
-        "name": "io.nuls.block.test.TestMessage3",
+        "name": "io.nuls.transaction.message.ReceiveCrossTxMessage",
         "handlers": [
           {
-            "name": "io.nuls.block.test.TestMessageHandler3#processV1"
+            "name": "io.nuls.transaction.rpc.cmd.MessageCmd#newMnTx"
+          }
+        ]
+      },
+      {
+        "name": "io.nuls.transaction.message.TransactionMessage",
+        "handlers": [
+          {
+            "name": "io.nuls.transaction.rpc.cmd.MessageCmd#receiveTx"
+          }
+        ]
+      },
+      {
+        "name": "io.nuls.transaction.message.VerifyCrossResultMessage",
+        "handlers": [
+          {
+            "name": "io.nuls.transaction.rpc.cmd.MessageCmd#verifyResult"
+          }
+        ]
+      },
+      {
+        "name": "io.nuls.transaction.message.VerifyCrossWithFCMessage",
+        "handlers": [
+          {
+            "name": "io.nuls.transaction.rpc.cmd.MessageCmd#verifyFc"
+          },
+          {
+            "name": "io.nuls.transaction.rpc.cmd.MessageCmd#verifyMn"
+          }
+        ]
+      },
+      {
+        "name": "io.nuls.transaction.message.VerifyCrossWithMainMessage",
+        "handlers": [
+          {
+            "name": "io.nuls.transaction.rpc.cmd.MessageCmd#process"
           }
         ]
       }

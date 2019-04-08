@@ -37,12 +37,6 @@ import java.util.Comparator;
 public interface Constant {
 
     /**
-     * 协议配置文件名称
-     * Protocol configuration file name.
-     */
-    String PROTOCOL_CONFIG_FILE = "protocol-config.json";
-
-    /**
      * 存储每条链的配置信息
      */
     String CHAIN_PARAMETERS = "ChainParameters";
@@ -85,11 +79,6 @@ public interface Constant {
      * 区块头排序器
      */
     Comparator<BlockHeader> BLOCK_HEADER_COMPARATOR = Comparator.comparingLong(BlockHeader::getHeight);
-
-    /**
-     * 协议配置信息排序器
-     */
-    Comparator<ProtocolConfigJson> PROTOCOL_CONFIG_COMPARATOR = Comparator.comparingInt(ProtocolConfigJson::getVersion);
 
     /**
      * 节点比较器,默认按信用值排序
