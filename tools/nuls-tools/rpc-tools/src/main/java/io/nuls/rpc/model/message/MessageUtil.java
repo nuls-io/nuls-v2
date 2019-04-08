@@ -82,6 +82,7 @@ public class MessageUtil {
     public static Request defaultRequest() {
         Request request = new Request();
         request.setRequestAck("0");
+        request.setAbbreviation(ConnectManager.LOCAL.getModuleAbbreviation());
         request.setSubscriptionEventCounter("0");
         request.setSubscriptionPeriod("0");
         request.setSubscriptionRange("0");
