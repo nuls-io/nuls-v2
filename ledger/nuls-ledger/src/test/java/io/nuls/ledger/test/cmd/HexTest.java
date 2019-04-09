@@ -28,6 +28,7 @@ import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.*;
 import io.nuls.rpc.util.RPCUtil;
 import io.nuls.tools.crypto.HexUtil;
+import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.log.Log;
 import io.nuls.tools.model.ByteUtils;
 import org.apache.commons.codec.DecoderException;
@@ -96,8 +97,45 @@ public class HexTest {
         System.out.println(" ByteUtils.asString useTime=" + (time4 - time3) + "===StringLenght" + s.length());
 
     }
-
     @Test
+    public void testBatchHex() throws IOException, DecoderException {
+        TranList list = new TranList();
+        for (int i = 0; i < 10000; i++) {
+            Transaction tx = buildTransaction();
+            list.getTxs().add(tx);
+        }
+        byte[] bytes = list.serialize();
+
+        String hex0 = HexUtil.encode(bytes);
+        long time1 = System.currentTimeMillis();
+        byte[] bytes0 = HexUtil.decode(hex0);
+        TranList txList = new TranList();
+        try {
+            txList.parse(bytes0,0);
+        } catch (NulsException e) {
+            e.printStackTrace();
+        }
+        long time2 = System.currentTimeMillis();
+        Log.info("{} batch list time used - io.nuls.tools.crypto.HexUtil.decode", (time2 - time1));
+        List<String> list2= new ArrayList<>();
+        for (int i = 0; i < 10000; i++) {
+            Transaction tx = buildTransaction();
+            list2.add(HexUtil.encode(tx.serialize()));
+        }
+        long time3 = System.currentTimeMillis();
+        for (int i = 0; i < 10000; i++) {
+            Transaction tx =new Transaction();
+            try {
+                tx.parse(HexUtil.decode(list2.get(i)),0);
+            } catch (NulsException e) {
+                e.printStackTrace();
+            }
+        }
+        long time4 = System.currentTimeMillis();
+        Log.info("{} list<String> time used - io.nuls.tools.crypto.HexUtil.decode ", (time4 - time3));
+
+    }
+        @Test
     public void testHexs() throws IOException, DecoderException {
         TranList list = new TranList();
         for (int i = 0; i < 100000; i++) {

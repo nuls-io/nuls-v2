@@ -31,7 +31,10 @@ package io.nuls.ledger.storage;
  */
 public interface DataBaseArea {
     String TB_LEDGER_ACCOUNT = "account";
-
+    /**
+     *   存区块交易缓存数据
+     */
+    String TB_LEDGER_ACCOUNT_UNCONFIRMED = "accountUnconfirmed";
     /**
      *   按区块高度来进行上一个账号状态的
      */
