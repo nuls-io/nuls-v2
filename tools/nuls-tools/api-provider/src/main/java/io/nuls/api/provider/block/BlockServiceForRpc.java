@@ -7,6 +7,7 @@ import io.nuls.api.provider.block.facade.BlockHeaderData;
 import io.nuls.api.provider.block.facade.GetBlockHeaderByHashReq;
 import io.nuls.api.provider.block.facade.GetBlockHeaderByHeightReq;
 import io.nuls.api.provider.block.facade.GetBlockHeaderByLastHeightReq;
+import io.nuls.base.basic.AddressTool;
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.data.BlockExtendsData;
 import io.nuls.base.data.BlockHeader;
@@ -65,6 +66,8 @@ public class BlockServiceForRpc extends BaseRpcService implements BlockService {
             res.setMerkleHash(header.getMerkleHash().toString());
             res.setBlockSignature(header.getBlockSignature().getSignData().toString());
             res.setPreHash(header.getPreHash().toString());
+            int chainId = new GetBlockHeaderByLastHeightReq().getChainId();
+            res.setPackingAddress(AddressTool.getStringAddressByBytes(header.getPackingAddress(chainId)));
             res.setConsensusMemberCount(blockExtendsData.getConsensusMemberCount());
             res.setMainVersion(blockExtendsData.getMainVersion());
             res.setPackingIndexOfRound(blockExtendsData.getPackingIndexOfRound());
