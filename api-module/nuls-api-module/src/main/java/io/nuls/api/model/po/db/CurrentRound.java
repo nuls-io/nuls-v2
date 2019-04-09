@@ -72,6 +72,7 @@ public class CurrentRound extends PocRound {
     }
 
 
+    @Override
     public String toString() {
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append("index:" + this.getIndex());

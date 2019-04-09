@@ -180,6 +180,7 @@ public class CallContractData extends TransactionLogicData implements ContractDa
         this.price = price;
     }
 
+    @Override
     public String getMethodName() {
         return methodName;
     }
@@ -188,6 +189,7 @@ public class CallContractData extends TransactionLogicData implements ContractDa
         this.methodName = methodName;
     }
 
+    @Override
     public String getMethodDesc() {
         return methodDesc;
     }
@@ -204,6 +206,7 @@ public class CallContractData extends TransactionLogicData implements ContractDa
         this.argsCount = argsCount;
     }
 
+    @Override
     public String[][] getArgs() {
         return args;
     }

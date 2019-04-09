@@ -122,12 +122,18 @@ public class ContractResult {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof ContractResult)) return false;
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof ContractResult)) {
+            return false;
+        }
 
         ContractResult result = (ContractResult) o;
 
-        if (getHash() != null ? !getHash().equals(result.getHash()) : result.getHash() != null) return false;
+        if (getHash() != null ? !getHash().equals(result.getHash()) : result.getHash() != null) {
+            return false;
+        }
 
         return true;
     }

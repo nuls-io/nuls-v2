@@ -61,16 +61,6 @@ public class ChainContext {
     private int chainId;
 
     /**
-     * 当前协议版本
-     */
-    private short version;
-
-    /**
-     * 所有协议版本(包括消息、交易映射)
-     */
-    private Map<Short, Protocol> protocolsMap;
-
-    /**
      * 该链的系统交易类型
      */
     private List<Integer> systemTransactionType;
@@ -139,22 +129,6 @@ public class ChainContext {
 
     public void setChainId(int chainId) {
         this.chainId = chainId;
-    }
-
-    public short getVersion() {
-        return version;
-    }
-
-    public void setVersion(short version) {
-        this.version = version;
-    }
-
-    public Map<Short, Protocol> getProtocolsMap() {
-        return protocolsMap;
-    }
-
-    public void setProtocolsMap(Map<Short, Protocol> protocolsMap) {
-        this.protocolsMap = protocolsMap;
     }
 
     public List<Integer> getSystemTransactionType() {
@@ -250,7 +224,6 @@ public class ChainContext {
         packingAddressList = new CopyOnWriteArrayList<>();
         duplicateBlockMap = new HashMap<>();
         systemTransactionType = new ArrayList<>();
-        version = 1;
         doSyn = true;
         lock = new StampedLock();
         LoggerUtil.init(chainId, parameters.getLogLevel());

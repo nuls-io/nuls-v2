@@ -48,29 +48,60 @@ public class BlockHeaderData {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof BlockHeaderData)) return false;
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof BlockHeaderData)) {
+            return false;
+        }
 
         BlockHeaderData that = (BlockHeaderData) o;
 
-        if (height != that.height) return false;
-        if (txCount != that.txCount) return false;
-        if (size != that.size) return false;
-        if (roundIndex != that.roundIndex) return false;
-        if (consensusMemberCount != that.consensusMemberCount) return false;
-        if (packingIndexOfRound != that.packingIndexOfRound) return false;
-        if (mainVersion != that.mainVersion) return false;
-        if (blockVersion != that.blockVersion) return false;
-        if (hash != null ? !hash.equals(that.hash) : that.hash != null) return false;
-        if (preHash != null ? !preHash.equals(that.preHash) : that.preHash != null) return false;
-        if (merkleHash != null ? !merkleHash.equals(that.merkleHash) : that.merkleHash != null) return false;
-        if (time != null ? !time.equals(that.time) : that.time != null) return false;
-        if (blockSignature != null ? !blockSignature.equals(that.blockSignature) : that.blockSignature != null)
+        if (height != that.height) {
             return false;
-        if (packingAddress != null ? !packingAddress.equals(that.packingAddress) : that.packingAddress != null)
+        }
+        if (txCount != that.txCount) {
             return false;
-        if (roundStartTime != null ? !roundStartTime.equals(that.roundStartTime) : that.roundStartTime != null)
+        }
+        if (size != that.size) {
             return false;
+        }
+        if (roundIndex != that.roundIndex) {
+            return false;
+        }
+        if (consensusMemberCount != that.consensusMemberCount) {
+            return false;
+        }
+        if (packingIndexOfRound != that.packingIndexOfRound) {
+            return false;
+        }
+        if (mainVersion != that.mainVersion) {
+            return false;
+        }
+        if (blockVersion != that.blockVersion) {
+            return false;
+        }
+        if (hash != null ? !hash.equals(that.hash) : that.hash != null) {
+            return false;
+        }
+        if (preHash != null ? !preHash.equals(that.preHash) : that.preHash != null) {
+            return false;
+        }
+        if (merkleHash != null ? !merkleHash.equals(that.merkleHash) : that.merkleHash != null) {
+            return false;
+        }
+        if (time != null ? !time.equals(that.time) : that.time != null) {
+            return false;
+        }
+        if (blockSignature != null ? !blockSignature.equals(that.blockSignature) : that.blockSignature != null) {
+            return false;
+        }
+        if (packingAddress != null ? !packingAddress.equals(that.packingAddress) : that.packingAddress != null) {
+            return false;
+        }
+        if (roundStartTime != null ? !roundStartTime.equals(that.roundStartTime) : that.roundStartTime != null) {
+            return false;
+        }
         return stateRoot != null ? stateRoot.equals(that.stateRoot) : that.stateRoot == null;
     }
 

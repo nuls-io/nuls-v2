@@ -87,7 +87,9 @@ public class TransferServiceForRpc extends BaseRpcService implements TransferSer
     }
 
     private Result<TransactionData> tranderTransactionData(Result<Transaction>  data){
-        if(data.isFailed())return fail(ERROR_CODE,data.getMessage());
+        if(data.isFailed()) {
+            return fail(ERROR_CODE,data.getMessage());
+        }
         try {
             Transaction transaction = data.getData();
             TransactionData res = new TransactionData();

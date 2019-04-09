@@ -22,10 +22,10 @@ public class DocumentTransferTool {
         for (Field field : fields) {
             try {
                 field.setAccessible(true);
-                if (field.getName().equals("isNew")) {
+                if ("isNew".equals(field.getName())) {
                     continue;
                 }
-                if (field.getType().getName().equals("java.math.BigInteger")) {
+                if ("java.math.BigInteger".equals(field.getType().getName())) {
                     BigInteger value = (BigInteger) field.get(obj);
                     if (value == null) {
                         value = BigInteger.ZERO;
@@ -52,10 +52,10 @@ public class DocumentTransferTool {
         for (Field field : fields) {
             try {
                 field.setAccessible(true);
-                if (field.getName().equals("isNew")) {
+                if ("isNew".equals(field.getName())) {
                     continue;
                 }
-                if (field.getType().getName().equals("java.math.BigInteger")) {
+                if ("java.math.BigInteger".equals(field.getType().getName())) {
                     BigInteger value = (BigInteger) field.get(obj);
                     if (value == null) {
                         value = BigInteger.ZERO;
@@ -82,10 +82,10 @@ public class DocumentTransferTool {
             Field[] fields = clazz.getDeclaredFields();
             for (Field field : fields) {
                 field.setAccessible(true);
-                if (field.getName().equals("isNew")) {
+                if ("isNew".equals(field.getName())) {
                     continue;
                 }
-                if (field.getType().getName().equals("java.math.BigInteger")) {
+                if ("java.math.BigInteger".equals(field.getType().getName())) {
                     field.set(instance, new BigInteger(document.get(field.getName()).toString()));
                 } else {
                     field.set(instance, document.get(field.getName()));
@@ -108,10 +108,10 @@ public class DocumentTransferTool {
             Field[] fields = clazz.getDeclaredFields();
             for (Field field : fields) {
                 field.setAccessible(true);
-                if (field.getName().equals("isNew")) {
+                if ("isNew".equals(field.getName())) {
                     continue;
                 }
-                if (field.getType().getName().equals("java.math.BigInteger")) {
+                if ("java.math.BigInteger".equals(field.getType().getName())) {
                     field.set(instance, new BigInteger(document.get(field.getName()).toString()));
                 } else if (_id.equals(field.getName())) {
                     field.set(instance, document.get("_id"));
