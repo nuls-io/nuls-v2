@@ -13,7 +13,6 @@ import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.model.ObjectUtils;
 import io.nuls.tools.parse.JSONUtils;
-import io.nuls.transaction.cache.PackablePool;
 import io.nuls.transaction.constant.TxCmd;
 import io.nuls.transaction.constant.TxConstant;
 import io.nuls.transaction.constant.TxErrorCode;
@@ -30,7 +29,6 @@ import io.nuls.transaction.model.po.TransactionConfirmedPO;
 import io.nuls.transaction.service.ConfirmedTxService;
 import io.nuls.transaction.service.TxGenerateService;
 import io.nuls.transaction.service.TxService;
-import io.nuls.transaction.storage.rocksdb.UnconfirmedTxStorageService;
 import io.nuls.transaction.utils.TxUtil;
 
 import java.io.IOException;
@@ -56,10 +54,7 @@ public class TransactionCmd extends BaseCmd {
     private ConfirmedTxService confirmedTxService;
     @Autowired
     private ChainManager chainManager;
-    @Autowired
-    private PackablePool packablePool;
-    @Autowired
-    private UnconfirmedTxStorageService unconfirmedTxStorageService;
+
 
     /**
      * Register module transactions, validators, processors(commit, rollback), etc.
@@ -116,7 +111,7 @@ public class TransactionCmd extends BaseCmd {
 
         } catch (IOException e) {
             errorLogProcess(chain, e);
-            return failed(e.getMessage());
+            return failed(TxErrorCode.IO_ERROR);
         } catch (NulsException e) {
             errorLogProcess(chain, e);
             return failed(e.getErrorCode());
@@ -679,90 +674,6 @@ public class TransactionCmd extends BaseCmd {
         }
     }
 
-
-    /**
-     * 待打包队列交易个数
-     *
-     * @param params
-     * @return
-     */
-    @CmdAnnotation(cmd = "packageQueueSize", version = 1.0, description = "")
-    @Parameter(parameterName = "chainId", parameterType = "int")
-    public Response packageQueueSize(Map params) {
-        Chain chain = null;
-        try {
-            ObjectUtils.canNotEmpty(params.get("chainId"), TxErrorCode.PARAMETER_ERROR.getMsg());
-            chain = chainManager.getChain((int) params.get("chainId"));
-            if (null == chain) {
-                throw new NulsException(TxErrorCode.CHAIN_NOT_FOUND);
-            }
-            Map<String, Object> resultMap = new HashMap<>(TxConstant.INIT_CAPACITY_2);
-            resultMap.put("value", packablePool.getPoolSize(chain));
-            return success(resultMap);
-        } catch (NulsException e) {
-            errorLogProcess(chain, e);
-            return failed(e.getErrorCode());
-        } catch (Exception e) {
-            errorLogProcess(chain, e);
-            return failed(TxErrorCode.SYS_UNKOWN_EXCEPTION);
-        }
-    }
-
-    /**
-     * 未确认交易个数
-     *
-     * @param params
-     * @return
-     */
-    @CmdAnnotation(cmd = "unconfirmTxSize", version = 1.0, description = "")
-    @Parameter(parameterName = "chainId", parameterType = "int")
-    public Response unconfirmTxSize(Map params) {
-        Chain chain = null;
-        try {
-            ObjectUtils.canNotEmpty(params.get("chainId"), TxErrorCode.PARAMETER_ERROR.getMsg());
-            chain = chainManager.getChain((int) params.get("chainId"));
-            if (null == chain) {
-                throw new NulsException(TxErrorCode.CHAIN_NOT_FOUND);
-            }
-            Map<String, Object> resultMap = new HashMap<>(TxConstant.INIT_CAPACITY_2);
-            resultMap.put("value", unconfirmedTxStorageService.getAllTxPOList(chain.getChainId()));
-            return success(resultMap);
-        } catch (NulsException e) {
-            errorLogProcess(chain, e);
-            return failed(e.getErrorCode());
-        } catch (Exception e) {
-            errorLogProcess(chain, e);
-            return failed(TxErrorCode.SYS_UNKOWN_EXCEPTION);
-        }
-    }
-
-    /**
-     * 返回打包时验证为孤儿交易的集合
-     *
-     * @param params
-     * @return
-     */
-    @CmdAnnotation(cmd = "txPackageOrphanMap", version = 1.0, description = "")
-    @Parameter(parameterName = "chainId", parameterType = "int")
-    public Response getTxPackageOrphanMap(Map params) {
-        Chain chain = null;
-        try {
-            ObjectUtils.canNotEmpty(params.get("chainId"), TxErrorCode.PARAMETER_ERROR.getMsg());
-            chain = chainManager.getChain((int) params.get("chainId"));
-            if (null == chain) {
-                throw new NulsException(TxErrorCode.CHAIN_NOT_FOUND);
-            }
-            Map<String, Object> resultMap = new HashMap<>(TxConstant.INIT_CAPACITY_2);
-            resultMap.put("value", chain.getTxRegisterMap());
-            return success(resultMap);
-        } catch (NulsException e) {
-            errorLogProcess(chain, e);
-            return failed(e.getErrorCode());
-        } catch (Exception e) {
-            errorLogProcess(chain, e);
-            return failed(TxErrorCode.SYS_UNKOWN_EXCEPTION);
-        }
-    }
 
 
     private void errorLogProcess(Chain chain, Exception e) {
