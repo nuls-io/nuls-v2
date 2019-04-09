@@ -447,6 +447,13 @@ public class BlockServiceImpl implements BlockService {
             }
             long elapsedNanos = System.nanoTime() - startTime;
             commonLog.info("rollback block success, time-" + elapsedNanos + ", height-" + height + ", txCount-" + blockHeaderPo.getTxCount() + ", hash-" + blockHeaderPo.getHash());
+            Response response = MessageUtil.newResponse("", Constants.BOOLEAN_TRUE, "success");
+            Map<String, Long> responseData = new HashMap<>(2);
+            responseData.put("value", height - 1);
+            Map<String, Object> sss = new HashMap<>(2);
+            sss.put(LATEST_HEIGHT, responseData);
+            response.setResponseData(sss);
+            ConnectManager.eventTrigger(LATEST_HEIGHT, response);
             return true;
         } finally {
             if (needLock) {

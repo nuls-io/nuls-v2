@@ -24,6 +24,7 @@
  */
 package io.nuls.base.data;
 
+import com.google.common.base.Objects;
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.basic.NulsOutputStreamBuffer;
@@ -308,5 +309,10 @@ public class Transaction extends BaseNulsData implements Cloneable {
             return false;
         }
         return this.getHash().equals(((Transaction) obj).getHash());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(type, coinData, txData, time, transactionSignature, remark, hash, blockHeight, status, size, inBlockIndex);
     }
 }

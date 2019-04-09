@@ -235,6 +235,7 @@ public class StatisticalService {
             case 3:
                 calendar.add(Calendar.YEAR, -1);
                 break;
+            default:
         }
         return calendar.getTime().getTime();
     }

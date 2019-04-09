@@ -136,10 +136,6 @@ public class BlockBootstrap extends RpcModule {
     public RpcModuleState onDependenciesReady() {
         Log.info("block onDependenciesReady");
         NetworkUtil.register();
-        List<Integer> chainIds = ContextManager.chainIds;
-        for (Integer chainId : chainIds) {
-            ProtocolUtil.subscribe(chainId);
-        }
         //开启区块同步线程
         ThreadUtils.createAndRunThread("block-synchronizer", BlockSynchronizer.getInstance());
         //开启分叉链处理线程

@@ -25,6 +25,7 @@
 package io.nuls.rpc.model.message;
 
 
+import com.google.common.base.Objects;
 
 /**
  * 所有消息都应该用该对象进行传输
@@ -100,5 +101,26 @@ public class Message {
 
     public void setMessageData(Object MessageData) {
         this.MessageData = MessageData;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        Message message = (Message) o;
+        return Objects.equal(MessageId, message.MessageId) &&
+                Objects.equal(Timestamp, message.Timestamp) &&
+                Objects.equal(Timezone, message.Timezone) &&
+                Objects.equal(MessageType, message.MessageType) &&
+                Objects.equal(MessageData, message.MessageData);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(MessageId, Timestamp, Timezone, MessageType, MessageData);
     }
 }

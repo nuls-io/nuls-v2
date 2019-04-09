@@ -1,5 +1,7 @@
 package io.nuls.api.model.po.db;
 
+import com.google.common.base.Objects;
+
 import java.math.BigInteger;
 
 public class TxRelationInfo {
@@ -119,5 +121,31 @@ public class TxRelationInfo {
 
     public void setBalance(BigInteger balance) {
         this.balance = balance;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        TxRelationInfo that = (TxRelationInfo) o;
+        return type == that.type &&
+                createTime == that.createTime &&
+                height == that.height &&
+                chainId == that.chainId &&
+                assetId == that.assetId &&
+                Objects.equal(txHash, that.txHash) &&
+                Objects.equal(address, that.address) &&
+                Objects.equal(values, that.values) &&
+                Objects.equal(fee, that.fee) &&
+                Objects.equal(balance, that.balance);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(txHash, address, type, createTime, height, chainId, assetId, values, fee, balance);
     }
 }

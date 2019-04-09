@@ -55,7 +55,6 @@ public class ContextManager {
         ContextManager.contextMap.put(chainId, chainContext);
         chainContext.setChainId(chainId);
         chainContext.setParameters(chainParameters);
-        chainContext.setProtocolsMap(protocolMap);
         chainContext.init();
         ProtocolContextManager.init(chainId, protocolMap, (short) 1);
         commonLog.info("new chainContext add! chainId-" + chainId);

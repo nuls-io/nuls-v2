@@ -24,6 +24,7 @@
 
 package io.nuls.base.data;
 
+import com.google.common.base.Objects;
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.basic.NulsOutputStreamBuffer;
 import io.nuls.tools.crypto.HexUtil;
@@ -132,5 +133,26 @@ public class MultiSigAccount extends BaseNulsData {
 
     public String getAlias() {
         return alias;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        MultiSigAccount that = (MultiSigAccount) o;
+        return chainId == that.chainId &&
+                m == that.m &&
+                Objects.equal(address, that.address) &&
+                Objects.equal(pubKeyList, that.pubKeyList) &&
+                Objects.equal(alias, that.alias);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(chainId, address, m, pubKeyList, alias);
     }
 }
