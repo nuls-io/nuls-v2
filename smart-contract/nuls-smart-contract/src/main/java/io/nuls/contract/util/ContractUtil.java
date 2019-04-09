@@ -182,13 +182,6 @@ public class ContractUtil {
         return twoDimensionalArray(args, null);
     }
 
-    public static boolean isLegalContractAddress(int chainId, byte[] addressBytes) {
-        if (addressBytes == null) {
-            return false;
-        }
-        return AddressTool.validContractAddress(addressBytes, chainId);
-    }
-
     public static String valueOf(Object obj) {
         return (obj == null) ? null : obj.toString();
     }
@@ -394,11 +387,11 @@ public class ContractUtil {
         }
     }
 
-    public static boolean isLegalContractAddress(byte[] addressBytes) {
+    public static boolean isLegalContractAddress(int chainId, byte[] addressBytes) {
         if (addressBytes == null) {
             return false;
         }
-        return true;
+        return AddressTool.validContractAddress(addressBytes, chainId);
     }
 
     public static void put(Map<String, Set<ContractResult>> map, String contractAddress, ContractResult result) {
@@ -410,14 +403,14 @@ public class ContractUtil {
         resultSet.add(result);
     }
 
-    public static void putAll(Map<String, Set<ContractResult>> map, ContractResult contractResult) {
-        Set<String> addressSet = collectAddress(contractResult);
+    public static void putAll(int chainId, Map<String, Set<ContractResult>> map, ContractResult contractResult) {
+        Set<String> addressSet = collectAddress(chainId, contractResult);
         for (String address : addressSet) {
             put(map, address, contractResult);
         }
     }
 
-    public static Set<String> collectAddress(ContractResult result) {
+    public static Set<String> collectAddress(int chainId, ContractResult result) {
         Set<String> set = new HashSet<>();
         set.add(AddressTool.getStringAddressByBytes(result.getContractAddress()));
         Set<String> innerCallSet = result.getContractAddressInnerCallSet();
@@ -426,10 +419,10 @@ public class ContractUtil {
         }
 
         result.getTransfers().stream().forEach(transfer -> {
-            if (ContractUtil.isLegalContractAddress(transfer.getFrom())) {
+            if (ContractUtil.isLegalContractAddress(chainId, transfer.getFrom())) {
                 set.add(AddressTool.getStringAddressByBytes(transfer.getFrom()));
             }
-            if (ContractUtil.isLegalContractAddress(transfer.getTo())) {
+            if (ContractUtil.isLegalContractAddress(chainId, transfer.getTo())) {
                 set.add(AddressTool.getStringAddressByBytes(transfer.getTo()));
             }
         });
@@ -449,17 +442,17 @@ public class ContractUtil {
      * @param contractResultList
      * @return 收集合约执行中所有出现过的合约地址，包括内部调用合约，合约转账
      */
-    public static Map<String, Set<ContractResult>> collectAddressMap(List<ContractResult> contractResultList) {
+    public static Map<String, Set<ContractResult>> collectAddressMap(int chainId, List<ContractResult> contractResultList) {
         Map<String, Set<ContractResult>> map = new HashMap<>();
         for (ContractResult result : contractResultList) {
             put(map, AddressTool.getStringAddressByBytes(result.getContractAddress()), result);
             result.getContractAddressInnerCallSet().stream().forEach(inner -> put(map, inner, result));
 
             result.getTransfers().stream().forEach(transfer -> {
-                if (ContractUtil.isLegalContractAddress(transfer.getFrom())) {
+                if (ContractUtil.isLegalContractAddress(chainId, transfer.getFrom())) {
                     put(map, AddressTool.getStringAddressByBytes(transfer.getFrom()), result);
                 }
-                if (ContractUtil.isLegalContractAddress(transfer.getTo())) {
+                if (ContractUtil.isLegalContractAddress(chainId, transfer.getTo())) {
                     put(map, AddressTool.getStringAddressByBytes(transfer.getTo()), result);
                 }
             });

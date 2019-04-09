@@ -53,8 +53,8 @@ public class CallableResult {
         this.transferTransactions = new ArrayList<>();
     }
 
-    public void putFailed(ContractResult contractResult) {
-        ContractUtil.putAll(failedMap, contractResult);
+    public void putFailed(int chainId, ContractResult contractResult) {
+        ContractUtil.putAll(chainId, failedMap, contractResult);
     }
 
     public String getContract() {

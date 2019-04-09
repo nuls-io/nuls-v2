@@ -45,8 +45,6 @@ public interface ContractService {
 
     Result end(int chainId, long blockHeight);
 
-    Result validContractTx(int chainId, Transaction tx) throws NulsException;
-
     Result invokeContractOneByOne(int chainId, ContractTempTransaction tx);
 
     Result commitProcessor(int chainId, List<String> txDataList, String blockHeaderData);

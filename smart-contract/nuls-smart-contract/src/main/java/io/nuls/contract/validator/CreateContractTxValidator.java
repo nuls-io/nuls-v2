@@ -54,7 +54,7 @@ public class CreateContractTxValidator {
         CreateContractData txData = tx.getTxDataObj();
         byte[] sender = txData.getSender();
         byte[] contractAddress = txData.getContractAddress();
-        if (!ContractUtil.isLegalContractAddress(contractAddress)) {
+        if (!ContractUtil.isLegalContractAddress(chainId, contractAddress)) {
             Log.error("contract create error: Illegal contract address.");
             return Result.getFailed(ILLEGAL_CONTRACT_ADDRESS);
         }
