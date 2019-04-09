@@ -43,7 +43,7 @@ public class RequestMessageProcessor {
      */
     public static void negotiateConnectionResponse(Channel channel, Message message) throws JsonProcessingException {
         NegotiateConnectionResponse negotiateConnectionResponse = new NegotiateConnectionResponse();
-        negotiateConnectionResponse.setRequestId(message.getMessageID());
+        negotiateConnectionResponse.setRequestID(message.getMessageID());
         negotiateConnectionResponse.setNegotiationStatus("1");
         negotiateConnectionResponse.setNegotiationComment("Connection true!");
 

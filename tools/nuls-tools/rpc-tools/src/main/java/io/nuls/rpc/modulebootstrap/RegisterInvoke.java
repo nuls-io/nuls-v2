@@ -32,8 +32,8 @@ public class RegisterInvoke extends BaseInvoke {
     public void callBack(Response response) {
         Map responseData = (Map) response.getResponseData();
         if (response.isSuccess()) {
-            RpcModule module = SpringLiteContext.getBean(RpcModule.class);
-            if (module.getDependencies().length == 0) {
+            RpcModule rpcModule = SpringLiteContext.getBean(RpcModule.class);
+            if (rpcModule.getDependencies().length == 0) {
                 Log.info("RMB:module rpc is ready");
                 return;
             }

@@ -38,7 +38,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class NegotiateConnectionResponse {
     @JsonProperty
-    private String RequestId;
+    private String RequestID;
     /**
      * An unsigned small integer value, 0 if negotiation was a failure and 1 if it was successful
      */
@@ -52,13 +52,13 @@ public class NegotiateConnectionResponse {
     private String NegotiationComment;
 
     @JsonIgnore
-    public String getRequestId() {
-        return RequestId;
+    public String getRequestID() {
+        return RequestID;
     }
 
     @JsonIgnore
-    public void setRequestId(String RequestId) {
-        this.RequestId = RequestId;
+    public void setRequestID(String RequestId) {
+        this.RequestID = RequestId;
     }
 
     @JsonIgnore

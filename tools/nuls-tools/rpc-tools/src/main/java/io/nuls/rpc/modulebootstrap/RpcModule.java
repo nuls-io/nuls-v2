@@ -38,7 +38,7 @@ public abstract class RpcModule implements InitializingBean {
      */
     private String[] mainArgs;
 
-    private static final String ROLE = "1.0";
+    protected static final String ROLE = "1.0";
 
     /**
      * 模块运行状态
