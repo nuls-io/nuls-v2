@@ -89,7 +89,11 @@ public class RepositoryImpl implements Repository, InitDB, InitializingBean {
                 nowAccountState.getAddress(), nowAccountState.getAddressChainId(), nowAccountState.getAssetChainId(), nowAccountState.getAssetId(),
                 nowAccountState.getAvailableAmount(), nowAccountState.getFreezeTotal());
         RocksDBService.put(getLedgerAccountTableName(nowAccountState.getAddressChainId()), key, nowAccountState.serialize());
-
+    }
+    @Override
+    public void  batchUpdateAccountState(int addressChainId, Map<byte[],byte[]> accountStateMap) throws Exception {
+        //update account
+        RocksDBService.batchPut(getLedgerAccountTableName(addressChainId), accountStateMap);
     }
 
 
