@@ -43,6 +43,7 @@ import io.nuls.ledger.utils.LedgerUtil;
 import io.nuls.ledger.utils.LoggerUtil;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
+import io.nuls.tools.model.BigIntegerUtils;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -150,8 +151,7 @@ public class CoinDataValidator {
         Map<String, List<TempAccountState>> accountValidateTxMap = new HashMap<>();
         Map<String, AccountState> accountStateMap = new HashMap<>();
         for (Transaction tx : txs) {
-            LoggerUtil.logger(chainId).debug("peer blocksValidate chainId={},height={},txHash={}", chainId, height, tx.getHash().toString());
-            ValidateResult validateResult = blockTxsValidate(chainId, tx, batchValidateTxMap, accountValidateTxMap,accountStateMap);
+            ValidateResult validateResult = blockTxsValidate(chainId, tx, batchValidateTxMap, accountValidateTxMap, accountStateMap);
             if (ValidateEnum.SUCCESS_CODE.getValue() != validateResult.getValidateCode()) {
                 LoggerUtil.logger(chainId).error("code={},msg={}", validateResult.getValidateCode(), validateResult.getValidateCode());
                 return false;
@@ -283,7 +283,7 @@ public class CoinDataValidator {
         String address = AddressTool.getStringAddressByBytes(coinFrom.getAddress());
         String assetKey = LedgerUtil.getKeyStr(address, coinFrom.getAssetsChainId(), coinFrom.getAssetsId());
         //余额判断
-        if (accountState.getAvailableAmount().compareTo(coinFrom.getAmount()) == -1) {
+        if (BigIntegerUtils.isLessThan(accountState.getAvailableAmount(),coinFrom.getAmount())) {
             //余额不足
             logger(chainId).info("{}=={}=={}==balance is not enough", AddressTool.getStringAddressByBytes(coinFrom.getAddress()), coinFrom.getAssetsChainId(), coinFrom.getAssetsId());
             return ValidateResult.getResult(ValidateEnum.FAIL_CODE, new String[]{address, "--", "balance is not enough"});
@@ -347,7 +347,7 @@ public class CoinDataValidator {
         CoinData coinData = CoinDataUtil.parseCoinData(tx.getCoinData());
         if (null == coinData) {
             //例如黄牌交易，直接返回
-            batchValidateTxMap.put(tx.getHash().toString(), tx.getHash().toString());
+            batchValidateTxMap.put(txHash, txHash);
             return ValidateResult.getSuccess();
         }
         List<CoinFrom> coinFroms = coinData.getFrom();
@@ -362,13 +362,14 @@ public class CoinDataValidator {
             AccountState accountState = accountStateMap.get(assetKey);
             if (null == accountState) {
                 accountState = accountStateService.getAccountStateUnSyn(AddressTool.getStringAddressByBytes(coinFrom.getAddress()), chainId, coinFrom.getAssetsChainId(), coinFrom.getAssetsId());
-                accountStateMap.put(assetKey,accountState);
+                accountStateMap.put(assetKey, accountState);
             }
             //判断是否是解锁操作
             if (coinFrom.getLocked() == 0) {
                 String fromCoinNonce = LedgerUtil.getNonceEncode(coinFrom.getNonce());
                 //余额判断
-                if (accountState.getAvailableAmount().compareTo(coinFrom.getAmount()) == -1) {
+                accountState.getAvailableAmount();
+                if (BigIntegerUtils.isLessThan(accountState.getAvailableAmount(),coinFrom.getAmount())) {
                     //余额不足
                     logger(chainId).info("{}=={}=={}==balance is not enough", AddressTool.getStringAddressByBytes(coinFrom.getAddress()), coinFrom.getAssetsChainId(), coinFrom.getAssetsId());
                     return ValidateResult.getResult(ValidateEnum.FAIL_CODE, new String[]{address, "--", "balance is not enough"});
