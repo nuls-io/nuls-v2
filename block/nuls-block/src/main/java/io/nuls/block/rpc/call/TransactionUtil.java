@@ -65,7 +65,8 @@ public class TransactionUtil {
             Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.TX.abbr, "tx_getSystemTypes", params);
             if (response.isSuccess()) {
                 Map responseData = (Map) response.getResponseData();
-                return (List<Integer>) responseData.get("tx_getSystemTypes");
+                Map types = (Map) responseData.get("tx_getSystemTypes");
+                return (List<Integer>) types.get("list");
             } else {
                 return List.of();
             }
