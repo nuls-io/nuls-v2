@@ -59,7 +59,7 @@ public class BlockServiceForRpc extends BaseRpcService implements BlockService {
             blockExtendsData.parse(new NulsByteBuffer(header.getExtend()));
             res.setHash(header.getHash().toString());
             res.setHeight(header.getHeight());
-            res.setSize(header.getSize());
+            res.setSize(header.size());
             res.setTime(DateUtils.timeStamp2DateStr(header.getTime()));
             res.setTxCount(header.getTxCount());
             res.setMerkleHash(header.getMerkleHash().toString());
