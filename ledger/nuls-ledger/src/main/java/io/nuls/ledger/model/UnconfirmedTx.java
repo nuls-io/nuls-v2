@@ -24,6 +24,7 @@
  */
 package io.nuls.ledger.model;
 
+import io.nuls.ledger.constant.LedgerConstant;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 
@@ -42,21 +43,23 @@ public class UnconfirmedTx {
 
     private BigInteger spendAmount = BigInteger.ZERO;
 
-    private BigInteger  earnAmount = BigInteger.ZERO;
+    private BigInteger earnAmount = BigInteger.ZERO;
 
     private BigInteger fromUnLockedAmount = BigInteger.ZERO;
 
     private BigInteger toLockedAmount = BigInteger.ZERO;
 
-    private String  address = "";
+    private String address = "";
 
 
-    private int  assetChainId = 0;
+    private int assetChainId = 0;
 
 
-    private int  assetId = 0;
+    private int assetId = 0;
 
-    public UnconfirmedTx(String address,int assetChainId,int assetId){
+    private String fromNonce = LedgerConstant.INIT_NONCE;
+
+    public UnconfirmedTx(String address, int assetChainId, int assetId) {
         this.address = address;
         this.assetChainId = assetChainId;
         this.assetId = assetId;
@@ -124,5 +127,13 @@ public class UnconfirmedTx {
 
     public void setAssetId(int assetId) {
         this.assetId = assetId;
+    }
+
+    public String getFromNonce() {
+        return fromNonce;
+    }
+
+    public void setFromNonce(String fromNonce) {
+        this.fromNonce = fromNonce;
     }
 }

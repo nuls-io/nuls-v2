@@ -90,4 +90,8 @@ public class  ValidateResult {
     public void setValidateDesc(String validateDesc) {
         this.validateDesc = validateDesc;
     }
+
+    public  boolean isSuccess(){
+        return validateCode == ValidateEnum.SUCCESS_CODE.getValue();
+    }
 }

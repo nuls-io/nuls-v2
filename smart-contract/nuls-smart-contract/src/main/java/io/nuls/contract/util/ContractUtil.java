@@ -401,11 +401,6 @@ public class ContractUtil {
         return true;
     }
 
-    public static boolean isLegalContractAddress(String address) {
-        return true;
-    }
-
-
     public static void put(Map<String, Set<ContractResult>> map, String contractAddress, ContractResult result) {
         Set<ContractResult> resultSet = map.get(contractAddress);
         if (resultSet == null) {
@@ -415,23 +410,7 @@ public class ContractUtil {
         resultSet.add(result);
     }
 
-    public static void putAll(Map<String, Set<ContractResult>> map, Map<String, Set<ContractResult>> collectAddress) {
-        Set<Map.Entry<String, Set<ContractResult>>> entries = collectAddress.entrySet();
-        for (Map.Entry<String, Set<ContractResult>> entry : entries) {
-            String contractAddress = entry.getKey();
-            Set<ContractResult> contractResultSet = entry.getValue();
-
-            Set<ContractResult> resultSet = map.get(contractAddress);
-            if (resultSet == null) {
-                resultSet = new HashSet<>();
-                map.put(contractAddress, resultSet);
-            }
-            resultSet.addAll(contractResultSet);
-        }
-    }
-
     public static void putAll(Map<String, Set<ContractResult>> map, ContractResult contractResult) {
-        Log.error("Failed TxType [{}] Execute ContractResult is {}", contractResult.getTx().getType(), contractResult);
         Set<String> addressSet = collectAddress(contractResult);
         for (String address : addressSet) {
             put(map, address, contractResult);

@@ -63,15 +63,6 @@ public class AccountState extends BaseNulsData {
      */
     private long latestUnFreezeTime = 0;
     /**
-     * 未确认交易的nonce列表，有花费的余额的交易会更改这部分Nonce数据
-     */
-
-    private List<UnconfirmedNonce> unconfirmedNonces = new ArrayList<>();
-    /**
-     * 未确认交易，存储交易金额数据
-     */
-    private List<UnconfirmedAmount> unconfirmedAmounts = new ArrayList<>();
-    /**
      * 账户总金额出账
      * 对应coindata里的coinfrom 累加值
      */
@@ -104,79 +95,6 @@ public class AccountState extends BaseNulsData {
         this.assetChainId = assetChainId;
         this.assetId = assetId;
         this.nonce = nonce;
-    }
-
-    /**
-     * 获取最近的未提交交易nonce
-     *
-     * @return
-     */
-    public String getLatestUnconfirmedNonce() {
-        if (unconfirmedNonces.size() == 0) {
-            return null;
-        }
-        return unconfirmedNonces.get(unconfirmedNonces.size() - 1).getNonce();
-    }
-
-    /**
-     * 计算未确认交易的可用余额(不含已确认的账户余额)
-     *
-     * @return
-     */
-    public BigInteger getUnconfirmedAmount() {
-        BigInteger calUnconfirmedAmount = BigInteger.ZERO;
-        for (UnconfirmedAmount unconfirmedAmount : unconfirmedAmounts) {
-            calUnconfirmedAmount = calUnconfirmedAmount.add(unconfirmedAmount.getEarnAmount()).subtract(unconfirmedAmount.getSpendAmount());
-
-        }
-        return calUnconfirmedAmount;
-    }
-
-    /**
-     * 计算未确认交易的冻结部分
-     *
-     * @return
-     */
-    public BigInteger getUnconfirmedFreezeAmount() {
-        BigInteger calUnconfirmedFreeAmount = BigInteger.ZERO;
-        for (UnconfirmedAmount unconfirmedAmount : unconfirmedAmounts) {
-            //add 冻结 subtract 解锁的
-            calUnconfirmedFreeAmount = calUnconfirmedFreeAmount.add(unconfirmedAmount.getToLockedAmount()).subtract(unconfirmedAmount.getFromUnLockedAmount());
-        }
-        return calUnconfirmedFreeAmount;
-    }
-
-    public void addUnconfirmedNonce(UnconfirmedNonce unconfirmedNonce) {
-        unconfirmedNonces.add(unconfirmedNonce);
-    }
-
-    public String getUnconfirmedNoncesStrs() {
-        StringBuilder s = new StringBuilder();
-        for (UnconfirmedNonce unconfirmedNonce : unconfirmedNonces) {
-            s.append(unconfirmedNonce.getNonce() + ",");
-        }
-        return s.toString();
-    }
-
-    public void addUnconfirmedAmount(UnconfirmedAmount unconfirmedAmount) {
-        unconfirmedAmounts.add(unconfirmedAmount);
-    }
-
-
-    public boolean updateConfirmedAmount(String hash) {
-        if (unconfirmedAmounts.size() > 0) {
-            UnconfirmedAmount unconfirmedAmount = unconfirmedAmounts.get(0);
-            if (unconfirmedAmount.getTxHash().equalsIgnoreCase(hash)) {
-                //未确认的转为确认的，移除集合中的数据
-                unconfirmedAmounts.remove(0);
-            } else {
-                //分叉了，清空之前的未提交金额数据
-                unconfirmedAmounts.clear();
-            }
-            return true;
-        } else {
-            return false;
-        }
     }
 
     /**
@@ -216,16 +134,6 @@ public class AccountState extends BaseNulsData {
         stream.writeString(txHash);
         stream.writeUint32(height);
         stream.writeUint32(latestUnFreezeTime);
-        stream.writeUint16(unconfirmedNonces.size());
-        for (UnconfirmedNonce unconfirmedNonce : unconfirmedNonces) {
-            stream.writeNulsData(unconfirmedNonce);
-        }
-
-        stream.writeUint16(unconfirmedAmounts.size());
-        for (UnconfirmedAmount unconfirmedAmount : unconfirmedAmounts) {
-            stream.writeNulsData(unconfirmedAmount);
-        }
-
         stream.writeBigInteger(totalFromAmount);
         stream.writeBigInteger(totalToAmount);
         stream.writeUint16(freezeHeightStates.size());
@@ -248,28 +156,6 @@ public class AccountState extends BaseNulsData {
         this.txHash = byteBuffer.readString();
         this.height = byteBuffer.readUint32();
         this.latestUnFreezeTime = byteBuffer.readUint32();
-        int unconfirmNonceCount = byteBuffer.readUint16();
-        for (int i = 0; i < unconfirmNonceCount; i++) {
-            try {
-                UnconfirmedNonce unconfirmedNonce = new UnconfirmedNonce();
-                byteBuffer.readNulsData(unconfirmedNonce);
-                this.unconfirmedNonces.add(unconfirmedNonce);
-            } catch (Exception e) {
-                throw new NulsException(e);
-            }
-        }
-        int unconfirmAmountCount = byteBuffer.readUint16();
-        for (int i = 0; i < unconfirmAmountCount; i++) {
-            try {
-                UnconfirmedAmount unconfirmedAmount = new UnconfirmedAmount();
-                byteBuffer.readNulsData(unconfirmedAmount);
-                this.unconfirmedAmounts.add(unconfirmedAmount);
-            } catch (Exception e) {
-                throw new NulsException(e);
-            }
-        }
-
-
         this.totalFromAmount = byteBuffer.readBigInteger();
         this.totalToAmount = byteBuffer.readBigInteger();
         int freezeHeightCount = byteBuffer.readUint16();
@@ -310,16 +196,6 @@ public class AccountState extends BaseNulsData {
         size += SerializeUtils.sizeOfString(txHash);
         size += SerializeUtils.sizeOfUint32();
         size += SerializeUtils.sizeOfUint32();
-
-        size += SerializeUtils.sizeOfUint16();
-        for (UnconfirmedNonce unconfirmedNonce : unconfirmedNonces) {
-            size += SerializeUtils.sizeOfNulsData(unconfirmedNonce);
-        }
-
-        size += SerializeUtils.sizeOfUint16();
-        for (UnconfirmedAmount unconfirmedAmount : unconfirmedAmounts) {
-            size += SerializeUtils.sizeOfNulsData(unconfirmedAmount);
-        }
         //totalFromAmount
         size += SerializeUtils.sizeOfBigInteger();
         //totalToAmount
@@ -436,22 +312,6 @@ public class AccountState extends BaseNulsData {
 
     public void setLatestUnFreezeTime(long latestUnFreezeTime) {
         this.latestUnFreezeTime = latestUnFreezeTime;
-    }
-
-    public List<UnconfirmedNonce> getUnconfirmedNonces() {
-        return unconfirmedNonces;
-    }
-
-    public void setUnconfirmedNonces(List<UnconfirmedNonce> unconfirmedNonces) {
-        this.unconfirmedNonces = unconfirmedNonces;
-    }
-
-    public List<UnconfirmedAmount> getUnconfirmedAmounts() {
-        return unconfirmedAmounts;
-    }
-
-    public void setUnconfirmedAmounts(List<UnconfirmedAmount> unconfirmedAmounts) {
-        this.unconfirmedAmounts = unconfirmedAmounts;
     }
 
     public BigInteger getTotalFromAmount() {

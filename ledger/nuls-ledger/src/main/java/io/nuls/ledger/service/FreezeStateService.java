@@ -33,5 +33,6 @@ import io.nuls.ledger.model.po.AccountState;
 public interface FreezeStateService {
 
     boolean recalculateFreeze(AccountState accountState);
+    boolean hadUpdateAccountState(AccountState accountState);
 
 }

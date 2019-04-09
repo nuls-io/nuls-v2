@@ -65,8 +65,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import static io.nuls.contract.constant.ContractConstant.*;
 import static io.nuls.contract.constant.ContractErrorCode.ADDRESS_ERROR;
-import static io.nuls.contract.util.ContractUtil.getFailed;
-import static io.nuls.contract.util.ContractUtil.getSuccess;
+import static io.nuls.contract.util.ContractUtil.*;
 import static io.nuls.tools.model.FormatValidUtils.validTokenNameOrSymbol;
 
 @Component
@@ -650,5 +649,12 @@ public class ContractHelper {
     public ProgramStatus getContractStatus(int chainId, byte[] stateRoot, byte[] contractAddress) {
         ProgramExecutor track = getProgramExecutor(chainId).begin(stateRoot);
         return track.status(contractAddress);
+    }
+
+    public ContractResult makeFailedContractResult(ContractWrapperTransaction tx, CallableResult callableResult, String errorMsg) {
+        ContractResult contractResult = ContractResult.genFailed(tx.getContractData(), errorMsg);
+        makeContractResult(tx, contractResult);
+        callableResult.putFailed(contractResult);
+        return contractResult;
     }
 }
