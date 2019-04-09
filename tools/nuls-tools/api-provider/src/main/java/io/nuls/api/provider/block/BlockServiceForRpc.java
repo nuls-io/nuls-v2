@@ -66,8 +66,7 @@ public class BlockServiceForRpc extends BaseRpcService implements BlockService {
             res.setMerkleHash(header.getMerkleHash().toString());
             res.setBlockSignature(header.getBlockSignature().getSignData().toString());
             res.setPreHash(header.getPreHash().toString());
-            int chainId = new GetBlockHeaderByLastHeightReq().getChainId();
-            res.setPackingAddress(AddressTool.getStringAddressByBytes(header.getPackingAddress(chainId)));
+            res.setPackingAddress(AddressTool.getStringAddressByBytes(header.getPackingAddress(getChainId())));
             res.setConsensusMemberCount(blockExtendsData.getConsensusMemberCount());
             res.setMainVersion(blockExtendsData.getMainVersion());
             res.setPackingIndexOfRound(blockExtendsData.getPackingIndexOfRound());
