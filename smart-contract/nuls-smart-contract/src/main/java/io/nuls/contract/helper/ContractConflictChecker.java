@@ -51,11 +51,11 @@ public class ContractConflictChecker {
         contractSetList.add(element);
     }
 
-    public boolean checkConflict(Transaction tx, ContractResult contractResult, Set<String> commitSet) {
+    public boolean checkConflict(int chainId, Transaction tx, ContractResult contractResult, Set<String> commitSet) {
         lock.lock();
         try {
             boolean isConflict = false;
-            Set<String> collectAddress = collectAddress(contractResult);
+            Set<String> collectAddress = collectAddress(chainId, contractResult);
             for (String address : collectAddress) {
                 if (containAddress(address, commitSet)) {
                     isConflict = true;

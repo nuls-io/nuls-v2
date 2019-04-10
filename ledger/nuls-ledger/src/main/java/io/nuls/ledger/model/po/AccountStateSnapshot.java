@@ -34,6 +34,7 @@ import io.nuls.tools.parse.SerializeUtils;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 /**
  * @author lanjinsheng
@@ -42,14 +43,16 @@ import java.util.List;
 public class AccountStateSnapshot extends BaseNulsData {
     private AccountState accountState;
     private List<String> nonces = new ArrayList<>();
+    private List<String> txHashList = new ArrayList<>();
 
     public AccountStateSnapshot() {
         super();
     }
 
-    public AccountStateSnapshot(AccountState accountState, List nonces) {
+    public AccountStateSnapshot(AccountState accountState, List<String> nonces,Set<String> txHashs) {
         this.accountState = accountState;
         this.nonces = nonces;
+        this.txHashList.addAll(txHashs);
     }
 
     public AccountState getAccountState() {
@@ -75,7 +78,10 @@ public class AccountStateSnapshot extends BaseNulsData {
         for (String nonce : nonces) {
             stream.writeString(nonce);
         }
-
+        stream.writeUint16(txHashList.size());
+        for (String txHash : txHashList) {
+            stream.writeString(txHash);
+        }
     }
 
     @Override
@@ -84,6 +90,10 @@ public class AccountStateSnapshot extends BaseNulsData {
         int nonceCount = byteBuffer.readUint16();
         for (int i = 0; i < nonceCount; i++) {
             this.nonces.add(byteBuffer.readString());
+        }
+        int hashCount = byteBuffer.readUint16();
+        for (int i = 0; i < hashCount; i++) {
+            this.txHashList.add(byteBuffer.readString());
         }
     }
 
@@ -95,6 +105,18 @@ public class AccountStateSnapshot extends BaseNulsData {
         for (String nonce : nonces) {
             size += SerializeUtils.sizeOfString(nonce);
         }
+        size += SerializeUtils.sizeOfUint16();
+        for (String txHash : txHashList) {
+            size += SerializeUtils.sizeOfString(txHash);
+        }
         return size;
+    }
+
+    public List<String> getTxHashList() {
+        return txHashList;
+    }
+
+    public void setTxHashList(List<String> txHashList) {
+        this.txHashList = txHashList;
     }
 }

@@ -38,7 +38,6 @@ import io.nuls.contract.model.tx.CallContractTransaction;
 import io.nuls.contract.model.tx.CreateContractTransaction;
 import io.nuls.contract.model.tx.DeleteContractTransaction;
 import io.nuls.contract.model.txdata.CallContractData;
-import io.nuls.contract.model.txdata.ContractData;
 import io.nuls.contract.model.txdata.CreateContractData;
 import io.nuls.contract.model.txdata.DeleteContractData;
 import io.nuls.contract.service.*;
@@ -61,7 +60,8 @@ import java.util.concurrent.Future;
 
 import static io.nuls.contract.constant.ContractConstant.*;
 import static io.nuls.contract.constant.ContractErrorCode.FAILED;
-import static io.nuls.contract.util.ContractUtil.*;
+import static io.nuls.contract.util.ContractUtil.getFailed;
+import static io.nuls.contract.util.ContractUtil.getSuccess;
 
 /**
  * @author: PierreLuo
@@ -118,8 +118,7 @@ public class ContractServiceImpl implements ContractService {
         return getSuccess();
     }
 
-    @Override
-    public Result validContractTx(int chainId, Transaction tx) {
+    private Result validContractTx(int chainId, Transaction tx) {
         try {
             Result result;
             switch (tx.getType()) {
@@ -166,10 +165,6 @@ public class ContractServiceImpl implements ContractService {
             // 验证合约交易
             Result validResult = this.validContractTx(chainId, tx);
             if (validResult.isFailed()) {
-                ContractData contractData = wrapperTx.getContractData();
-                ContractResult contractResult = ContractResult.genFailed(contractData, "contract lock or not exist.");
-                makeContractResult(wrapperTx, contractResult);
-                putAll(container.getCallableResult().getFailedMap(), contractResult);
                 return validResult;
             }
 

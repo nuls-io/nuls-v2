@@ -210,6 +210,9 @@ public class MessageCmd extends BaseCmd {
         return success(map);
     }
 
+
+    //-----------------------------------------------------------------------------------------
+
     /**
      * (主网,友链都要处理)接收广播的新跨链交易hash
      * receive new cross transaction hash

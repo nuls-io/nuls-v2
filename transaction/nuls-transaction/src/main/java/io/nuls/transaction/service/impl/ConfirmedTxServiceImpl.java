@@ -22,7 +22,6 @@ import io.nuls.transaction.rpc.call.TransactionCall;
 import io.nuls.transaction.service.ConfirmedTxService;
 import io.nuls.transaction.service.CtxService;
 import io.nuls.transaction.service.TxService;
-import io.nuls.transaction.storage.h2.TransactionH2Service;
 import io.nuls.transaction.storage.rocksdb.ConfirmedTxStorageService;
 import io.nuls.transaction.storage.rocksdb.CtxStorageService;
 import io.nuls.transaction.storage.rocksdb.UnconfirmedTxStorageService;
@@ -61,9 +60,6 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
     private CtxService ctxService;
 
     @Autowired
-    private TransactionH2Service transactionH2Service;
-
-    @Autowired
     private TxService txService;
 
     @Autowired
@@ -86,17 +82,12 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
             chain.getLoggerMap().get(TxConstant.LOG_TX).debug("保存创世块交易失败");
             return false;
         }
-        int debugCount = 0;
-        for (Transaction tx : txList) {
-            //保存到h2数据库
-            debugCount += transactionH2Service.saveTxs(TxUtil.tx2PO(chain, tx));
-        }
         CoinData coinData = TxUtil.getCoinData(txList.get(0));
         for (Coin coin : coinData.getTo()) {
             chain.getLoggerMap().get(TxConstant.LOG_TX).debug("address:{}, to:{}", AddressTool.getStringAddressByBytes(coin.getAddress()), coin.getAmount());
         }
 
-        chain.getLoggerMap().get(TxConstant.LOG_TX).debug("保存创世块交易成功, H2数据库生成{}条交易记录", debugCount);
+        chain.getLoggerMap().get(TxConstant.LOG_TX).debug("保存创世块交易成功");
         return true;
     }
 

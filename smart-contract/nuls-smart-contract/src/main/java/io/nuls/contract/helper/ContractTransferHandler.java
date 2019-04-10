@@ -84,7 +84,7 @@ public class ContractTransferHandler {
         // 增加转入, 扣除转出
         List<ProgramTransfer> transfers = contractResult.getTransfers();
         if (transfers != null && transfers.size() > 0) {
-            LinkedHashMap<String, BigInteger>[] contracts = this.filterContractValue(transfers);
+            LinkedHashMap<String, BigInteger>[] contracts = this.filterContractValue(chainId, transfers);
             LinkedHashMap<String, BigInteger> contractFromValue = contracts[0];
             LinkedHashMap<String, BigInteger> contractToValue = contracts[1];
             byte[] contractBytes;
@@ -111,7 +111,7 @@ public class ContractTransferHandler {
             // 增加转出, 扣除转入
             List<ProgramTransfer> transfers = contractResult.getTransfers();
             if (transfers != null && transfers.size() > 0) {
-                LinkedHashMap<String, BigInteger>[] contracts = this.filterContractValue(transfers);
+                LinkedHashMap<String, BigInteger>[] contracts = this.filterContractValue(chainId, transfers);
                 LinkedHashMap<String, BigInteger> contractFromValue = contracts[0];
                 LinkedHashMap<String, BigInteger> contractToValue = contracts[1];
                 byte[] contractBytes;
@@ -136,7 +136,7 @@ public class ContractTransferHandler {
         }
     }
 
-    private LinkedHashMap<String, BigInteger>[] filterContractValue(List<ProgramTransfer> transfers) {
+    private LinkedHashMap<String, BigInteger>[] filterContractValue(int chainId, List<ProgramTransfer> transfers) {
         LinkedHashMap<String, BigInteger> contractFromValue = MapUtil.createLinkedHashMap(4);
         LinkedHashMap<String, BigInteger> contractToValue = MapUtil.createLinkedHashMap(4);
         LinkedHashMap<String, BigInteger>[] contracts = new LinkedHashMap[2];
@@ -149,7 +149,7 @@ public class ContractTransferHandler {
             from = transfer.getFrom();
             to = transfer.getTo();
             transferValue = transfer.getValue();
-            if (ContractUtil.isLegalContractAddress(from)) {
+            if (ContractUtil.isLegalContractAddress(chainId, from)) {
                 String contract = asString(from);
                 BigInteger na = contractFromValue.get(contract);
                 if (na == null) {
@@ -158,7 +158,7 @@ public class ContractTransferHandler {
                     contractFromValue.put(contract, na.add(transferValue));
                 }
             }
-            if (ContractUtil.isLegalContractAddress(to)) {
+            if (ContractUtil.isLegalContractAddress(chainId, to)) {
                 String contract = asString(to);
                 BigInteger na = contractToValue.get(contract);
                 if (na == null) {

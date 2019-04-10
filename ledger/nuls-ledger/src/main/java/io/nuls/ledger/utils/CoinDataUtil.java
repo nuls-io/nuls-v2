@@ -41,6 +41,7 @@ public class CoinDataUtil {
     public static void calTxFromAmount(Map<String, UnconfirmedTx> map, CoinFrom coinFrom, String txHash, String accountKey) {
         UnconfirmedTx unconfirmedTx = getUnconfirmedTx(map, coinFrom, txHash, accountKey);
         unconfirmedTx.setSpendAmount(unconfirmedTx.getSpendAmount().add(coinFrom.getAmount()));
+        unconfirmedTx.setFromNonce(LedgerUtil.getNonceEncode(coinFrom.getNonce()));
         map.put(accountKey, unconfirmedTx);
     }
 

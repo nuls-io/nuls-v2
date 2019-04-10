@@ -36,15 +36,15 @@ public interface TxConstant {
     /** 删除链上资产*/
     int TX_TYPE_REMOVE_ASSET_FROM_CHAIN = 14;
     /** 创建智能合约交易*/
-    int TX_TYPE_CREATE_CONTRACT = 100;
+    int TX_TYPE_CREATE_CONTRACT = 15;
     /** 调用智能合约交易*/
-    int TX_TYPE_CALL_CONTRACT = 101;
+    int TX_TYPE_CALL_CONTRACT = 16;
     /** 删除智能合约交易*/
-    int TX_TYPE_DELETE_CONTRACT = 102;
+    int TX_TYPE_DELETE_CONTRACT = 17;
     /** contract transfer tx */
-    int TX_TYPE_CONTRACT_TRANSFER = 103;
+    int TX_TYPE_CONTRACT_TRANSFER = 18;
     /** contract return gas tx */
-    int TX_TYPE_CONTRACT_RETURN_GAS = 104;
+    int TX_TYPE_CONTRACT_RETURN_GAS = 19;
 
     /** 获取网络时间间隔*/
     long GETTIME_INTERVAL = 30000L;
@@ -122,13 +122,6 @@ public interface TxConstant {
     int INIT_CAPACITY_8 = 8;
     int INIT_CAPACITY_4 = 4;
     int INIT_CAPACITY_2 = 2;
-
-    /** H2 数据库交易表名前缀 */
-    String H2_TX_TABLE_NAME_PREFIX = "transaction_";
-    /** H2 数据库交易表索引前缀 */
-    String H2_TX_TABLE_INDEX_NAME_PREFIX = "tx_index_";
-    /** H2 数据库交易表唯一键前缀(暂取消未使用) */
-    String H2_TX_TABLE_UNIQUE_NAME_PREFIX = "tx_unique_";
 
     /**
      * 跨链注册信息交易

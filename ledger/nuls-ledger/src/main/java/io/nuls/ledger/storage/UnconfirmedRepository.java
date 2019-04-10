@@ -10,10 +10,10 @@
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- * 
+ *
  * The above copyright notice and this permission notice shall be included in
  * all copies or substantial portions of the Software.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -25,34 +25,32 @@
  */
 package io.nuls.ledger.storage;
 
+import io.nuls.ledger.model.po.AccountStateUnconfirmed;
+
 /**
- * database table name constant
- * Created by wangkun23 on 2018/11/19.
+ * @author lanjinsheng
  */
-public interface DataBaseArea {
-    String TB_LEDGER_ACCOUNT = "account";
-    /**
-     *   存区块交易缓存数据
-     */
-    String TB_LEDGER_ACCOUNT_UNCONFIRMED = "accountUnconfirmed";
-    /**
-     *   按区块高度来进行上一个账号状态的
-     */
-
-    String TB_LEDGER_ACCOUNT_BLOCK_SNAPSHOT = "accountBlockSnapshot";
+public interface UnconfirmedRepository {
 
     /**
-     *   存区块当前确认的高度
+     * put accountState to rocksdb
+     *
+     * @param key
+     * @param accountStateUnconfirmed
      */
-    String TB_LEDGER_BLOCK_HEIGHT = "chainBlockHeight";
+    void createAccountStateUnconfirmed(byte[] key, AccountStateUnconfirmed accountStateUnconfirmed);
 
     /**
-     *   存区块交易缓存数据
+     * @param chainId
+     * @param key
+     * @return AccountStateUnconfirmed
      */
-    String TB_LEDGER_BLOCKS = "chainBlocks";
+    AccountStateUnconfirmed getAccountStateUnconfirmed(int chainId, byte[] key);
 
     /**
-     *   存区块交易缓存数据
+     * @param key
+     * @param nowAccountState
      */
-    String TB_LEDGER_NONCES = "ledgerNonces";
+    void updateAccountStateUnconfirmed(byte[] key, AccountStateUnconfirmed nowAccountState) throws Exception;
+
 }

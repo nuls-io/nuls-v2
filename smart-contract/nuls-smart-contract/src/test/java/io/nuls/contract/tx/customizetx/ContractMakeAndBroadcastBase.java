@@ -24,6 +24,7 @@
 package io.nuls.contract.tx.customizetx;
 
 import io.nuls.base.basic.AddressTool;
+import io.nuls.base.data.CoinData;
 import io.nuls.base.data.NulsDigestData;
 import io.nuls.base.data.Transaction;
 import io.nuls.contract.constant.ContractErrorCode;
@@ -104,10 +105,11 @@ public class ContractMakeAndBroadcastBase extends BaseQuery {
 
     protected Result broadcastCreateTx(CreateContractTransaction tx) {
         try {
+            CoinData coinDataObj = tx.getCoinDataObj();
+            byte[] txCreator = coinDataObj.getFrom().get(0).getAddress();
             ContractData contractData = tx.getTxDataObj();
             byte[] contractAddressBytes = contractData.getContractAddress();
-            byte[] senderBytes = contractData.getSender();
-            Result result = this.broadcastTx(chainId, AddressTool.getStringAddressByBytes(senderBytes), password, tx);
+            Result result = this.broadcastTx(chainId, AddressTool.getStringAddressByBytes(txCreator), password, tx);
             if(result.isFailed()) {
                 return result;
             }
@@ -141,9 +143,9 @@ public class ContractMakeAndBroadcastBase extends BaseQuery {
 
     protected Result broadcastCallTx(CallContractTransaction tx) {
         try {
-            ContractData contractData = tx.getTxDataObj();
-            byte[] senderBytes = contractData.getSender();
-            Result result = this.broadcastTx(chainId, AddressTool.getStringAddressByBytes(senderBytes), password, tx);
+            CoinData coinDataObj = tx.getCoinDataObj();
+            byte[] txCreator = coinDataObj.getFrom().get(0).getAddress();
+            Result result = this.broadcastTx(chainId, AddressTool.getStringAddressByBytes(txCreator), password, tx);
             if(result.isFailed()) {
                 return result;
             }
@@ -169,9 +171,9 @@ public class ContractMakeAndBroadcastBase extends BaseQuery {
 
     protected Result broadcastDeleteTx(DeleteContractTransaction tx) {
         try {
-            ContractData contractData = tx.getTxDataObj();
-            byte[] senderBytes = contractData.getSender();
-            Result result = this.broadcastTx(chainId, AddressTool.getStringAddressByBytes(senderBytes), password, tx);
+            CoinData coinDataObj = tx.getCoinDataObj();
+            byte[] txCreator = coinDataObj.getFrom().get(0).getAddress();
+            Result result = this.broadcastTx(chainId, AddressTool.getStringAddressByBytes(txCreator), password, tx);
             if(result.isFailed()) {
                 return result;
             }

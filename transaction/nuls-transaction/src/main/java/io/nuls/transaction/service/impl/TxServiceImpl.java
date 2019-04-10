@@ -48,12 +48,10 @@ import io.nuls.transaction.manager.TxManager;
 import io.nuls.transaction.model.TxWrapper;
 import io.nuls.transaction.model.bo.*;
 import io.nuls.transaction.model.po.TransactionConfirmedPO;
-import io.nuls.transaction.model.po.TransactionPO;
 import io.nuls.transaction.rpc.call.*;
 import io.nuls.transaction.service.ConfirmedTxService;
 import io.nuls.transaction.service.CtxService;
 import io.nuls.transaction.service.TxService;
-import io.nuls.transaction.storage.h2.TransactionH2Service;
 import io.nuls.transaction.storage.rocksdb.ConfirmedTxStorageService;
 import io.nuls.transaction.storage.rocksdb.CtxStorageService;
 import io.nuls.transaction.storage.rocksdb.UnconfirmedTxStorageService;
@@ -86,9 +84,6 @@ public class TxServiceImpl implements TxService {
 
     @Autowired
     private ConfirmedTxService confirmedTxService;
-
-    @Autowired
-    private TransactionH2Service transactionH2Service;
 
     @Autowired
     private CtxService ctxService;
@@ -125,8 +120,6 @@ public class TxServiceImpl implements TxService {
                 }
                 //保存到rocksdb
                 unconfirmedTxStorageService.putTx(chain.getChainId(), tx);
-                //保存到h2数据库
-                transactionH2Service.saveTxs(TxUtil.tx2PO(chain,tx));
                 //广播交易hash
                 NetworkCall.broadcastTxHash(chain.getChainId(),tx.getHash());
             }
@@ -1164,21 +1157,15 @@ public class TxServiceImpl implements TxService {
         if (rs) {
             long save = NetworkCall.getCurrentTimeMillis();//-----
             List<Transaction> unconfirmedTxSaveList = new ArrayList<>();
-            List<TransactionPO> h2SaveList = new ArrayList<>();
             for (Transaction tx : txList) {
                 //如果该交易不在交易管理待打包库中，则进行保存
                 if (!unconfirmedTxStorageService.isExists(chain.getChainId(), tx.getHash())) {
                     unconfirmedTxSaveList.add(tx);
-                    h2SaveList.addAll(TxUtil.tx2PO(chain, tx));
                 }
             }
             if (unconfirmedTxSaveList.size() > 0) {
                 unconfirmedTxStorageService.putTxList(chain.getChainId(), unconfirmedTxSaveList);
             }
-            if (h2SaveList.size() > 0) {
-                transactionH2Service.saveTxs(h2SaveList);
-            }
-            Log.debug("[验区块交易] 本地不存在的交易保存数据H2:{}条记录", h2SaveList.size());//----
             verifyTxResult.setCode(VerifyTxResult.SUCCESS);
             Log.debug("[验区块交易] 本地不存在的交易保存数据时间:{}", NetworkCall.getCurrentTimeMillis() - save);//----
             Log.debug("[验区块交易] 本地不存在的交易保存数据 -距方法开始的时间:{}", NetworkCall.getCurrentTimeMillis() - s1);//----
@@ -1196,7 +1183,7 @@ public class TxServiceImpl implements TxService {
     @Override
     public void clearInvalidTx(Chain chain, List<Transaction> txList) {
         if (txList.size() > 0) {// TODO: 2019/3/18 测试代码
-            chain.getLoggerMap().get(TxConstant.LOG_TX).info("打包集中清理统一验证过程中未通过交易..");
+            chain.getLoggerMap().get(TxConstant.LOG_TX).debug("打包集中清理统一验证过程中未通过交易..");
         }
         for (Transaction tx : txList) {
             clearInvalidTx(chain, tx);
@@ -1217,7 +1204,6 @@ public class TxServiceImpl implements TxService {
         }
         unconfirmedTxStorageService.removeTx(chain.getChainId(), tx.getHash());
         try {
-            transactionH2Service.deleteTx(chain, tx);
             if (cleanLedgerUfmTx) {
                 //如果是清理机制调用, 则调用账本未确认回滚
                 LedgerCall.rollBackUnconfirmTx(chain, RPCUtil.encode(tx.serialize()));

@@ -10,10 +10,10 @@
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- * 
+ *
  * The above copyright notice and this permission notice shall be included in
  * all copies or substantial portions of the Software.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -23,36 +23,29 @@
  * THE SOFTWARE.
  * ⁣⁣
  */
-package io.nuls.ledger.storage;
+package io.nuls.ledger.service;
+
+import io.nuls.ledger.model.po.AccountState;
+import io.nuls.ledger.model.po.AccountStateUnconfirmed;
+import io.nuls.ledger.model.po.UnconfirmedNonce;
+
+import java.util.List;
 
 /**
- * database table name constant
- * Created by wangkun23 on 2018/11/19.
+ * Created by lan on 2018/12/30
+ * @author lanjinsheng
  */
-public interface DataBaseArea {
-    String TB_LEDGER_ACCOUNT = "account";
-    /**
-     *   存区块交易缓存数据
-     */
-    String TB_LEDGER_ACCOUNT_UNCONFIRMED = "accountUnconfirmed";
-    /**
-     *   按区块高度来进行上一个账号状态的
-     */
+public interface UnconfirmedStateService {
 
-    String TB_LEDGER_ACCOUNT_BLOCK_SNAPSHOT = "accountBlockSnapshot";
+    boolean hadUpdateUnconfirmedState(AccountStateUnconfirmed accountStateUnconfirmed, String dbNonce,String dbHash);
 
-    /**
-     *   存区块当前确认的高度
-     */
-    String TB_LEDGER_BLOCK_HEIGHT = "chainBlockHeight";
+    AccountStateUnconfirmed getUnconfirmedInfoAndUpdate(AccountState accountState);
 
-    /**
-     *   存区块交易缓存数据
-     */
-    String TB_LEDGER_BLOCKS = "chainBlocks";
+    AccountStateUnconfirmed getUnconfirmedInfoReCal(AccountState accountState);
 
-    /**
-     *   存区块交易缓存数据
-     */
-    String TB_LEDGER_NONCES = "ledgerNonces";
+    void mergeUnconfirmedNonce(int addressChainId, String assetKey,List<UnconfirmedNonce> accountState, List<String> txHashList);
+
+    boolean rollUnconfirmTx(int addressChainId, String assetKey, String nonce, String txHash);
+
+    AccountStateUnconfirmed getUnconfirmedInfo(int addressChainId, String address, int assetChainId, int assetId);
 }

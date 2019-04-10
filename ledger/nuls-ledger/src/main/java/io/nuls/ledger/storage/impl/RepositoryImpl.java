@@ -83,13 +83,17 @@ public class RepositoryImpl implements Repository, InitDB, InitializingBean {
     @Override
     public void updateAccountState(byte[] key, AccountState nowAccountState) throws Exception {
         //update account
-        LoggerUtil.logger(nowAccountState.getAddressChainId()).debug("updateAccountState hash={},nonce={},UnconfirmedNoncesNum={}", nowAccountState.getTxHash(), nowAccountState.getNonce(), nowAccountState.getUnconfirmedNonces().size());
+        LoggerUtil.logger(nowAccountState.getAddressChainId()).debug("updateAccountState hash={},nonce={}", nowAccountState.getTxHash(), nowAccountState.getNonce());
         LoggerUtil.logger(nowAccountState.getAddressChainId()).debug("updateAccountState address={},addressChainId={},assetChainId={},assetId={},getAvailableAmount={}," +
-                        "getFreezeTotal={},getUnconfirmedAmount={},getUnconfirmedFreezeAmount={}",
+                        "getFreezeTotal={}",
                 nowAccountState.getAddress(), nowAccountState.getAddressChainId(), nowAccountState.getAssetChainId(), nowAccountState.getAssetId(),
-                nowAccountState.getAvailableAmount(), nowAccountState.getFreezeTotal(), nowAccountState.getUnconfirmedAmount(), nowAccountState.getUnconfirmedFreezeAmount());
+                nowAccountState.getAvailableAmount(), nowAccountState.getFreezeTotal());
         RocksDBService.put(getLedgerAccountTableName(nowAccountState.getAddressChainId()), key, nowAccountState.serialize());
-
+    }
+    @Override
+    public void  batchUpdateAccountState(int addressChainId, Map<byte[],byte[]> accountStateMap) throws Exception {
+        //update account
+        RocksDBService.batchPut(getLedgerAccountTableName(addressChainId), accountStateMap);
     }
 
 

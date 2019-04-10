@@ -28,6 +28,8 @@ import io.nuls.ledger.model.po.AccountState;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * @author lan
@@ -36,6 +38,7 @@ import java.util.List;
  **/
 public class AccountBalance {
     private List<String> nonces = new ArrayList<>();
+    Map<String,Integer> txHashMap = new ConcurrentHashMap<String,Integer>();
     private AccountState nowAccountState;
     private AccountState preAccountState;
 
@@ -66,5 +69,13 @@ public class AccountBalance {
     public AccountBalance(AccountState nowAccountState, AccountState preAccountState) {
         this.nowAccountState = nowAccountState;
         this.preAccountState = preAccountState;
+    }
+
+    public Map<String, Integer> getTxHashMap() {
+        return txHashMap;
+    }
+
+    public void setTxHashMap(Map<String, Integer> txHashMap) {
+        this.txHashMap = txHashMap;
     }
 }

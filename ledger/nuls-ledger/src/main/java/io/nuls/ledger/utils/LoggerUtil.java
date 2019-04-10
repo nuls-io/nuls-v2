@@ -37,6 +37,7 @@ import java.util.Map;
  * @date 2018/12/17
  **/
 public class LoggerUtil {
+   public static NulsLogger timeTest = LoggerBuilder.getLogger("./ld", "timeTest", Level.ALL);
     /**
      * 日志
      */

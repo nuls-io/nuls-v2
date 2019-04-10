@@ -13,7 +13,6 @@ import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.model.ObjectUtils;
 import io.nuls.tools.parse.JSONUtils;
-import io.nuls.transaction.cache.PackablePool;
 import io.nuls.transaction.constant.TxCmd;
 import io.nuls.transaction.constant.TxConstant;
 import io.nuls.transaction.constant.TxErrorCode;
@@ -23,14 +22,11 @@ import io.nuls.transaction.model.bo.Chain;
 import io.nuls.transaction.model.bo.TxPackage;
 import io.nuls.transaction.model.bo.TxRegister;
 import io.nuls.transaction.model.bo.VerifyTxResult;
-import io.nuls.transaction.model.dto.CrossTxTransferDTO;
 import io.nuls.transaction.model.dto.ModuleTxRegisterDTO;
 import io.nuls.transaction.model.dto.TxRegisterDTO;
 import io.nuls.transaction.model.po.TransactionConfirmedPO;
 import io.nuls.transaction.service.ConfirmedTxService;
-import io.nuls.transaction.service.TxGenerateService;
 import io.nuls.transaction.service.TxService;
-import io.nuls.transaction.storage.rocksdb.UnconfirmedTxStorageService;
 import io.nuls.transaction.utils.TxUtil;
 
 import java.io.IOException;
@@ -51,15 +47,10 @@ public class TransactionCmd extends BaseCmd {
     @Autowired
     private TxService txService;
     @Autowired
-    private TxGenerateService txGenerateService;
-    @Autowired
     private ConfirmedTxService confirmedTxService;
     @Autowired
     private ChainManager chainManager;
-    @Autowired
-    private PackablePool packablePool;
-    @Autowired
-    private UnconfirmedTxStorageService unconfirmedTxStorageService;
+
 
     /**
      * Register module transactions, validators, processors(commit, rollback), etc.
@@ -116,7 +107,7 @@ public class TransactionCmd extends BaseCmd {
 
         } catch (IOException e) {
             errorLogProcess(chain, e);
-            return failed(e.getMessage());
+            return failed(TxErrorCode.IO_ERROR);
         } catch (NulsException e) {
             errorLogProcess(chain, e);
             return failed(e.getErrorCode());
@@ -398,7 +389,9 @@ public class TransactionCmd extends BaseCmd {
                 throw new NulsException(TxErrorCode.CHAIN_NOT_FOUND);
             }
             List<Integer> list = TxManager.getSysTypes(chain);
-            return success(list);
+            Map<String, Object> resultMap = new HashMap<>(TxConstant.INIT_CAPACITY_2);
+            resultMap.put("list", list);
+            return success(resultMap);
         } catch (NulsException e) {
             errorLogProcess(chain, e);
             return failed(e.getErrorCode());
@@ -613,38 +606,6 @@ public class TransactionCmd extends BaseCmd {
         return success(resultMap);
     }
 
-    /**
-     * 创建跨链交易接口
-     *
-     * @param params
-     * @return
-     */
-    @CmdAnnotation(cmd = TxCmd.TX_CREATE_CROSS_TX, version = 1.0, description = "")
-    public Response createCtx(Map params) {
-        Chain chain = null;
-        try {
-            // check parameters
-            if (params == null) {
-                throw new NulsException(TxErrorCode.NULL_PARAMETER);
-            }
-            // parse params
-            JSONUtils.getInstance().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-            CrossTxTransferDTO crossTxTransferDTO = JSONUtils.json2pojo(JSONUtils.obj2json(params), CrossTxTransferDTO.class);
-            int chainId = crossTxTransferDTO.getChainId();
-            chain = chainManager.getChain(chainId);
-            String hash = txGenerateService.createCrossTransaction(chainManager.getChain(chainId),
-                    crossTxTransferDTO.getListFrom(), crossTxTransferDTO.getListTo(), crossTxTransferDTO.getRemark());
-            Map<String, Object> resultMap = new HashMap<>(TxConstant.INIT_CAPACITY_2);
-            resultMap.put("value", hash);
-            return success(resultMap);
-        } catch (NulsException e) {
-            errorLogProcess(chain, e);
-            return failed(e.getErrorCode());
-        } catch (Exception e) {
-            errorLogProcess(chain, e);
-            return failed(TxErrorCode.SYS_UNKOWN_EXCEPTION);
-        }
-    }
 
     /**
      * 节点是否正在打包(由共识调用), 决定了新交易是否放入交易模块的待打包队列
@@ -679,90 +640,6 @@ public class TransactionCmd extends BaseCmd {
         }
     }
 
-
-    /**
-     * 待打包队列交易个数
-     *
-     * @param params
-     * @return
-     */
-    @CmdAnnotation(cmd = "packageQueueSize", version = 1.0, description = "")
-    @Parameter(parameterName = "chainId", parameterType = "int")
-    public Response packageQueueSize(Map params) {
-        Chain chain = null;
-        try {
-            ObjectUtils.canNotEmpty(params.get("chainId"), TxErrorCode.PARAMETER_ERROR.getMsg());
-            chain = chainManager.getChain((int) params.get("chainId"));
-            if (null == chain) {
-                throw new NulsException(TxErrorCode.CHAIN_NOT_FOUND);
-            }
-            Map<String, Object> resultMap = new HashMap<>(TxConstant.INIT_CAPACITY_2);
-            resultMap.put("value", packablePool.getPoolSize(chain));
-            return success(resultMap);
-        } catch (NulsException e) {
-            errorLogProcess(chain, e);
-            return failed(e.getErrorCode());
-        } catch (Exception e) {
-            errorLogProcess(chain, e);
-            return failed(TxErrorCode.SYS_UNKOWN_EXCEPTION);
-        }
-    }
-
-    /**
-     * 未确认交易个数
-     *
-     * @param params
-     * @return
-     */
-    @CmdAnnotation(cmd = "unconfirmTxSize", version = 1.0, description = "")
-    @Parameter(parameterName = "chainId", parameterType = "int")
-    public Response unconfirmTxSize(Map params) {
-        Chain chain = null;
-        try {
-            ObjectUtils.canNotEmpty(params.get("chainId"), TxErrorCode.PARAMETER_ERROR.getMsg());
-            chain = chainManager.getChain((int) params.get("chainId"));
-            if (null == chain) {
-                throw new NulsException(TxErrorCode.CHAIN_NOT_FOUND);
-            }
-            Map<String, Object> resultMap = new HashMap<>(TxConstant.INIT_CAPACITY_2);
-            resultMap.put("value", unconfirmedTxStorageService.getAllTxPOList(chain.getChainId()));
-            return success(resultMap);
-        } catch (NulsException e) {
-            errorLogProcess(chain, e);
-            return failed(e.getErrorCode());
-        } catch (Exception e) {
-            errorLogProcess(chain, e);
-            return failed(TxErrorCode.SYS_UNKOWN_EXCEPTION);
-        }
-    }
-
-    /**
-     * 返回打包时验证为孤儿交易的集合
-     *
-     * @param params
-     * @return
-     */
-    @CmdAnnotation(cmd = "txPackageOrphanMap", version = 1.0, description = "")
-    @Parameter(parameterName = "chainId", parameterType = "int")
-    public Response getTxPackageOrphanMap(Map params) {
-        Chain chain = null;
-        try {
-            ObjectUtils.canNotEmpty(params.get("chainId"), TxErrorCode.PARAMETER_ERROR.getMsg());
-            chain = chainManager.getChain((int) params.get("chainId"));
-            if (null == chain) {
-                throw new NulsException(TxErrorCode.CHAIN_NOT_FOUND);
-            }
-            Map<String, Object> resultMap = new HashMap<>(TxConstant.INIT_CAPACITY_2);
-            resultMap.put("value", chain.getTxRegisterMap());
-            return success(resultMap);
-        } catch (NulsException e) {
-            errorLogProcess(chain, e);
-            return failed(e.getErrorCode());
-        } catch (Exception e) {
-            errorLogProcess(chain, e);
-            return failed(TxErrorCode.SYS_UNKOWN_EXCEPTION);
-        }
-    }
 
 
     private void errorLogProcess(Chain chain, Exception e) {

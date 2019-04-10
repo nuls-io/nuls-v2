@@ -26,9 +26,9 @@
 package io.nuls.ledger.service;
 
 import io.nuls.ledger.model.UnconfirmedTx;
+import io.nuls.ledger.model.ValidateResult;
 import io.nuls.ledger.model.po.AccountState;
 import io.nuls.ledger.model.po.AccountStateSnapshot;
-import io.nuls.ledger.model.po.BlockSnapshotAccounts;
 
 /**
  * Created by wangkun23 on 2018/11/29.
@@ -45,6 +45,15 @@ public interface AccountStateService {
      */
     AccountState getAccountStateUnSyn(String address,int addressChainId, int assetChainId, int assetId);
 
+    /**
+     * 判断是否有需要更新的信息，有则需要进行锁定并进行处理返回
+     * @param address
+     * @param addressChainId
+     * @param assetChainId
+     * @param assetId
+     * @return
+     */
+//    AccountState getAccountStateAndUpdate(String address, int addressChainId, int assetChainId, int assetId);
 
     /**
      *
@@ -53,16 +62,15 @@ public interface AccountStateService {
      * @param assetId
      * @return
      */
-    AccountState getAccountState(String address,int addressChainId, int assetChainId, int assetId);
+    AccountState getAccountStateReCal(String address,int addressChainId, int assetChainId, int assetId);
 
     /**
      * 存储新的账户信息
      * @param assetKey
-     * @param blockSnapshotAccounts
      * @param accountState
      * @throws Exception
      */
-    void updateAccountStateByTx(String assetKey, BlockSnapshotAccounts blockSnapshotAccounts, AccountState accountState) throws Exception;
+    void updateAccountStateByTx(String assetKey, AccountState accountState) throws Exception;
 
 
     /**
@@ -78,19 +86,11 @@ public interface AccountStateService {
     /**
      *
      * @param addressChainId
-     * @param assetKey
-     * @param nonce
-     * @param txHash
-     */
-    boolean rollUnconfirmTx(int addressChainId,String assetKey,String nonce,String txHash);
-
-    /**
-     *
-     * @param addressChainId
      * @param newNonce
      * @param unconfirmedTx
+     * @return boolean
      */
-    void setUnconfirmTx(int addressChainId, String newNonce, UnconfirmedTx unconfirmedTx);
+    ValidateResult updateUnconfirmTx(int addressChainId, String newNonce, UnconfirmedTx unconfirmedTx);
 
 
 
