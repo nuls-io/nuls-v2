@@ -68,28 +68,28 @@ public class CoinTo extends Coin {
         return size;
     }
 
-    @JsonIgnore
-    public byte[] getAddresses() {
-        byte[] address = new byte[Address.ADDRESS_LENGTH];
-        //如果owner不是存放的脚本则直接返回owner
-        if (address == null || address.length == Address.ADDRESS_LENGTH) {
-            return address;
-        } else {
-            Script scriptPubkey = new Script(address);
-            //如果为P2PKH类型交易则从第四位开始返回23个字节
-            if (scriptPubkey.isSentToAddress()) {
-                System.arraycopy(address, 3, address, 0, Address.ADDRESS_LENGTH);
-            }
-            //如果为P2SH或multi类型的UTXO则从第三位开始返回23个字节
-            else if (scriptPubkey.isPayToScriptHash()) {
-                scriptPubkey.isSentToMultiSig();
-                System.arraycopy(address, 2, address, 0, Address.ADDRESS_LENGTH);
-            }else{
-                throw new NulsRuntimeException(new Exception());
-            }
-        }
-        return address;
-    }
+    //@JsonIgnore
+    //public byte[] getAddresses() {
+    //    byte[] address = new byte[Address.ADDRESS_LENGTH];
+    //    //如果owner不是存放的脚本则直接返回owner
+    //    if (address == null || address.length == Address.ADDRESS_LENGTH) {
+    //        return address;
+    //    } else {
+    //        Script scriptPubkey = new Script(address);
+    //        //如果为P2PKH类型交易则从第四位开始返回23个字节
+    //        if (scriptPubkey.isSentToAddress()) {
+    //            System.arraycopy(address, 3, address, 0, Address.ADDRESS_LENGTH);
+    //        }
+    //        //如果为P2SH或multi类型的UTXO则从第三位开始返回23个字节
+    //        else if (scriptPubkey.isPayToScriptHash()) {
+    //            scriptPubkey.isSentToMultiSig();
+    //            System.arraycopy(address, 2, address, 0, Address.ADDRESS_LENGTH);
+    //        }else{
+    //            throw new NulsRuntimeException(new Exception());
+    //        }
+    //    }
+    //    return address;
+    //}
 
     public boolean usable(Long bestHeight) {
         if (lockTime < 0) {
