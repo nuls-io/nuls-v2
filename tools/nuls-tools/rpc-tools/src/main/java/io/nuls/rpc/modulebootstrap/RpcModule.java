@@ -175,7 +175,7 @@ public abstract class RpcModule implements InitializingBean {
             NettyServer server = NettyServer.getInstance(moduleInfo().getName(), moduleInfo().getName(), moduleInfo().getVersion())
                     .moduleRoles(new String[]{getRole()})
                     .moduleVersion(moduleInfo().getVersion())
-                    .scanPackage(StringUtils.isBlank(getRpcCmdPackage()) ? modulePackage : getRpcCmdPackage())
+                    .scanPackage((getRpcCmdPackage()==null) ? new String[]{modulePackage}:getRpcCmdPackage())
                     //注册管理模块状态的RPC接口
                     .addCmdDetail(ModuleStatusCmd.class);
             dependencies.keySet().stream().forEach(d -> server.dependencies(d.getName(), d.getVersion()));
@@ -281,11 +281,10 @@ public abstract class RpcModule implements InitializingBean {
      *
      * @return
      */
-    public String getRpcCmdPackage() {
+    public String[] getRpcCmdPackage() {
         return null;
     }
 
-    ;
 
     /**
      * 返回当前模块的描述

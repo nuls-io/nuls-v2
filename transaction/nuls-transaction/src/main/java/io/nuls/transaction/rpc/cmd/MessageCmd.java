@@ -27,7 +27,6 @@ import io.nuls.transaction.service.ConfirmedTxService;
 import io.nuls.transaction.service.CtxService;
 import io.nuls.transaction.service.TxService;
 import io.nuls.transaction.storage.rocksdb.CtxStorageService;
-import io.nuls.transaction.utils.TxUtil;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -190,7 +189,7 @@ public class MessageCmd extends BaseCmd {
             Transaction transaction = message.getTx();
             chain.getLoggerMap().get(TxConstant.LOG_TX_MESSAGE).debug(
                     "recieve [receiveTx] message from node-{}, chainId:{}, hash:{}", nodeId, chainId, transaction.getHash().getDigestHex());
-            TxUtil.txInformationDebugPrint(chain, transaction, chain.getLoggerMap().get(TxConstant.LOG_TX_MESSAGE));
+            //TxUtil.txInformationDebugPrint(chain, transaction, chain.getLoggerMap().get(TxConstant.LOG_TX_MESSAGE));
             //交易缓存中是否已存在该交易hash
             boolean consains = TxDuplicateRemoval.mightContain(transaction.getHash());
             if (!consains) {
@@ -476,7 +475,7 @@ public class MessageCmd extends BaseCmd {
             Transaction transaction = message.getTx();
             chain.getLoggerMap().get(TxConstant.LOG_TX_MESSAGE).debug(
                     "recieve [newMnTx] message from node-{}, chainId:{}, hash:{}", nodeId, chainId, transaction.getHash().getDigestHex());
-            TxUtil.txInformationDebugPrint(chain, transaction, chain.getLoggerMap().get(TxConstant.LOG_TX_MESSAGE));
+//            TxUtil.txInformationDebugPrint(chain, transaction, chain.getLoggerMap().get(TxConstant.LOG_TX_MESSAGE));
 
             //交易缓存中是否已存在该交易hash
             boolean consains = TxDuplicateRemoval.mightContain(transaction.getHash());

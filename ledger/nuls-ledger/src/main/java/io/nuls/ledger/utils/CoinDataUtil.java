@@ -17,6 +17,7 @@ import java.util.Map;
 
 /**
  * Created by ljs on 2018/12/30.
+ * @author lanjinsheng
  */
 public class CoinDataUtil {
     /**
