@@ -100,9 +100,24 @@ public class TransactionBootstrap extends RpcModule {
     }
 
     @Override
+    public void onDependenciesReady(Module module) {
+        try {
+            if (ModuleE.NW.abbr.equals(module.getName())) {
+                NetworkCall.registerProtocol();
+            }
+            if (ModuleE.BL.abbr.equals(module.getName())) {
+                subscriptionBlockHeight();
+            }
+        } catch (NulsException e) {
+            LoggerUtil.Log.error(e);
+        }
+    }
+
+    @Override
     public RpcModuleState onDependenciesReady() {
         Log.info("Transaction onDependenciesReady");
-        try {
+        return RpcModuleState.Running;
+       /* try {
             NetworkCall.registerProtocol();
             subscriptionBlockHeight();
             Log.info("Transaction Running...");
@@ -110,7 +125,7 @@ public class TransactionBootstrap extends RpcModule {
         } catch (Exception e) {
             LoggerUtil.Log.error(e);
             return RpcModuleState.Ready;
-        }
+        }*/
 
     }
 

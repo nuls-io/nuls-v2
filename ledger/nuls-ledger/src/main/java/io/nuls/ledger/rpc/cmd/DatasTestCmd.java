@@ -42,7 +42,6 @@ import io.nuls.rpc.util.RPCUtil;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -65,7 +64,6 @@ public class DatasTestCmd extends BaseCmd {
             description = "")
     @Parameter(parameterName = "chainId", parameterType = "int")
     public Response getBlockHeight(Map params) {
-        Map<String, Object> rtData = new HashMap<>();
         Integer chainId = (Integer) params.get("chainId");
         long height = repository.getBlockHeight(chainId);
         return success(height);
@@ -77,7 +75,6 @@ public class DatasTestCmd extends BaseCmd {
     @Parameter(parameterName = "chainId", parameterType = "int")
     @Parameter(parameterName = "blockHeight", parameterType = "long")
     public Response getSnapshot(Map params) {
-        Map<String, Object> rtData = new HashMap<>();
         Integer chainId = (Integer) params.get("chainId");
         long blockHeight = Long.valueOf(params.get("blockHeight").toString());
         BlockSnapshotAccounts blockSnapshotAccounts = repository.getBlockSnapshot(chainId, blockHeight);
@@ -90,7 +87,6 @@ public class DatasTestCmd extends BaseCmd {
     @Parameter(parameterName = "chainId", parameterType = "int")
     @Parameter(parameterName = "blockHeight", parameterType = "long")
     public Response getBlock(Map params) {
-        Map<String, Object> rtData = new HashMap<>();
         int i = 0;
         Integer chainId = (Integer) params.get("chainId");
         long blockHeight = Long.valueOf(params.get("blockHeight").toString());
@@ -126,7 +122,6 @@ public class DatasTestCmd extends BaseCmd {
     @Parameter(parameterName = "addressChainId", parameterType = "int")
     @Parameter(parameterName = "blockHeight", parameterType = "long")
     public Response goBatchCommitTest(Map params) {
-        Map<String, Object> rtData = new HashMap<>();
         Integer chainId = (Integer) params.get("chainId");
         Integer addressChainId = (Integer) params.get("addressChainId");
         long blockHeight = Long.valueOf(params.get("blockHeight").toString());

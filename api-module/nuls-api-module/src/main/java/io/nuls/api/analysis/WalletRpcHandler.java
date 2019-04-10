@@ -24,6 +24,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static io.nuls.api.constant.ApiConstant.*;
+
 public class WalletRpcHandler {
 
     public static Result<BlockInfo> getBlockInfo(int chainID, long height) {
@@ -136,11 +138,11 @@ public class WalletRpcHandler {
                 freezeInfo.setTime(Long.parseLong(map1.get("time").toString()));
                 freezeInfo.setTxHash((String) map1.get("txHash"));
                 if (freezeInfo.getLockedValue() == -1) {
-                    freezeInfo.setType(3);
-                } else if (freezeInfo.getLockedValue() < 10000000000L) {
-                    freezeInfo.setType(1);
+                    freezeInfo.setType(FREEZE_CONSENSUS_LOCK_TYPE);
+                } else if (freezeInfo.getLockedValue() < ApiConstant.BlOCKHEIGHT_TIME_DIVIDE) {
+                    freezeInfo.setType(FREEZE_HEIGHT_LOCK_TYPE);
                 } else {
-                    freezeInfo.setType(2);
+                    freezeInfo.setType(FREEZE_TIME_LOCK_TYPE);
                 }
                 freezeInfos.add(freezeInfo);
             }
@@ -160,13 +162,14 @@ public class WalletRpcHandler {
         params.put("txHash", hash);
         try {
             Map map = (Map) RpcCall.request(ModuleE.TX.abbr, CommandConstant.CLIENT_GETTX, params);
-            String txHex = (String) map.get("txHex");
+            String txHex = (String) map.get("tx");
             if (null == txHex) {
                 return null;
             }
             Transaction tx = Transaction.getInstance(txHex);
+            long height = Long.parseLong(map.get("height").toString());
+            tx.setBlockHeight(height);
             TransactionInfo txInfo = AnalysisHandler.toTransaction(chainId, tx);
-            txInfo.setHeight(Long.parseLong(map.get("height").toString()));
             return Result.getSuccess(null).setData(txInfo);
         } catch (NulsException e) {
             return Result.getFailed(e.getErrorCode());

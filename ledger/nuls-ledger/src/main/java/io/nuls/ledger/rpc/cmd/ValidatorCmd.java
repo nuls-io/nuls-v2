@@ -102,7 +102,7 @@ public class ValidatorCmd extends BaseLedgerCmd {
     @Parameter(parameterName = "chainId", parameterType = "int")
     @Parameter(parameterName = "tx", parameterType = "String")
     public Response rollbackTxValidateStatus(Map params) {
-        Map<String, Object> rtData = new HashMap<>();
+        Map<String, Object> rtData = new HashMap<>(1);
         int value = 0;
         Integer chainId = (Integer) params.get("chainId");
         try {
@@ -145,7 +145,7 @@ public class ValidatorCmd extends BaseLedgerCmd {
         Integer chainId = (Integer) params.get("chainId");
         LoggerUtil.logger(chainId).debug("chainId={} bathValidateBegin", chainId);
         coinDataValidator.beginBatchPerTxValidate(chainId);
-        Map<String, Object> rtData = new HashMap<>();
+        Map<String, Object> rtData = new HashMap<>(1);
         rtData.put("value", 1);
         LoggerUtil.logger(chainId).debug("return={}", success(rtData));
         return success(rtData);
@@ -180,7 +180,7 @@ public class ValidatorCmd extends BaseLedgerCmd {
             LoggerUtil.logger(chainId).debug("commitBlockTxs response={}", parseResponse);
             return parseResponse;
         }
-        Map<String, Object> rtData = new HashMap<>();
+        Map<String, Object> rtData = new HashMap<>(1);
         if (coinDataValidator.blockValidate(chainId, blockHeight, txList)) {
             rtData.put("value", 1);
         } else {

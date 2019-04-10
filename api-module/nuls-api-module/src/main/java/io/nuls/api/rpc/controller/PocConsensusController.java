@@ -22,6 +22,7 @@ package io.nuls.api.rpc.controller;
 
 import io.nuls.api.analysis.WalletRpcHandler;
 import io.nuls.api.cache.ApiCache;
+import io.nuls.api.constant.ApiConstant;
 import io.nuls.api.db.*;
 import io.nuls.api.manager.CacheManager;
 import io.nuls.api.model.po.db.*;
@@ -128,11 +129,14 @@ public class PocConsensusController {
         } catch (Exception e) {
             return RpcResult.paramError();
         }
+        if (type < 0 || type > 3) {
+            return RpcResult.paramError("[type] is invalid");
+        }
 
         if (pageIndex <= 0) {
             pageIndex = 1;
         }
-        if (pageSize <= 0 || pageSize > 200) {
+        if (pageSize <= 0 || pageSize > 1000) {
             pageSize = 10;
         }
 //        Map<String, Integer> map = new HashMap<>();
@@ -199,11 +203,13 @@ public class PocConsensusController {
                 }
             }
         }
-        if (null == roundItem) {
-            agentInfo.setStatus(0);
-        } else {
-            agentInfo.setRoundPackingTime(apiCache.getCurrentRound().getStartTime() + roundItem.getOrder() * 10000);
-            agentInfo.setStatus(1);
+        if(agentInfo.getStatus() != ApiConstant.STOP_AGENT) {
+            if (null == roundItem) {
+                agentInfo.setStatus(0);
+            } else {
+                agentInfo.setRoundPackingTime(apiCache.getCurrentRound().getStartTime() + roundItem.getOrder() * 10000);
+                agentInfo.setStatus(1);
+            }
         }
 
         Result<AgentInfo> result = WalletRpcHandler.getAgentInfo(chainId, agentHash);
@@ -220,7 +226,6 @@ public class PocConsensusController {
         }
         return RpcResult.success(agentInfo);
     }
-
 
     @RpcMethod("getAccountConsensusNode")
     public RpcResult getAccountConsensusNode(List<Object> params) {
@@ -242,6 +247,7 @@ public class PocConsensusController {
         }
 
         AgentInfo agentInfo = agentService.getAgentByAgentAddress(chainId, address);
+
         return RpcResult.success(agentInfo);
     }
 
@@ -254,6 +260,9 @@ public class PocConsensusController {
             type = (int) params.get(1);
         } catch (Exception e) {
             return RpcResult.paramError();
+        }
+        if(type < 0 || type > 4) {
+            return  RpcResult.paramError("[type] is invalid");
         }
 
         if (!CacheManager.isChainExist(chainId)) {
@@ -274,6 +283,9 @@ public class PocConsensusController {
         } catch (Exception e) {
             return RpcResult.paramError();
         }
+        if(type < 0 || type > 4) {
+            return  RpcResult.paramError("[type] is invalid");
+        }
         if (!CacheManager.isChainExist(chainId)) {
             return RpcResult.success(new ArrayList<>());
         }
@@ -290,6 +302,9 @@ public class PocConsensusController {
             type = (int) params.get(1);
         } catch (Exception e) {
             return RpcResult.paramError();
+        }
+        if(type < 0 || type > 4) {
+            return  RpcResult.paramError("[type] is invalid");
         }
         if (!CacheManager.isChainExist(chainId)) {
             return RpcResult.success(new ArrayList<>());
@@ -313,13 +328,16 @@ public class PocConsensusController {
         } catch (Exception e) {
             return RpcResult.paramError();
         }
+        if(type < 0 || type > 2) {
+            return  RpcResult.paramError("[type] is invalid");
+        }
         if (!AddressTool.validAddress(chainId, agentAddress)) {
             return RpcResult.paramError("[address] is inValid");
         }
         if (pageIndex <= 0) {
             pageIndex = 1;
         }
-        if (pageSize <= 0 || pageSize > 100) {
+        if (pageSize <= 0 || pageSize > 1000) {
             pageSize = 10;
         }
         PageInfo<PunishLogInfo> list;
@@ -344,16 +362,16 @@ public class PocConsensusController {
         } catch (Exception e) {
             return RpcResult.paramError();
         }
-
         if (StringUtils.isBlank(agentHash)) {
             return RpcResult.paramError("[agentHash] is inValid");
         }
         if (pageIndex <= 0) {
             pageIndex = 1;
         }
-        if (pageSize <= 0 || pageSize > 100) {
+        if (pageSize <= 0 || pageSize > 1000) {
             pageSize = 10;
         }
+
         PageInfo<DepositInfo> list;
         if (!CacheManager.isChainExist(chainId)) {
             list = new PageInfo<>(pageIndex, pageSize);
@@ -377,16 +395,19 @@ public class PocConsensusController {
         } catch (Exception e) {
             return RpcResult.paramError();
         }
-
+        if(type < 0 || type > 2) {
+            return  RpcResult.paramError("[type] is invalid");
+        }
         if (StringUtils.isBlank(agentHash)) {
             return RpcResult.paramError("[agentHash] is inValid");
         }
         if (pageIndex <= 0) {
             pageIndex = 1;
         }
-        if (pageSize <= 0 || pageSize > 100) {
+        if (pageSize <= 0 || pageSize > 1000) {
             pageSize = 10;
         }
+
         PageInfo<DepositInfo> list;
         if (!CacheManager.isChainExist(chainId)) {
             list = new PageInfo<>(pageIndex, pageSize);
@@ -413,6 +434,12 @@ public class PocConsensusController {
         if (!AddressTool.validAddress(chainId, address)) {
             return RpcResult.paramError("[address] is invalid");
         }
+        if (pageIndex <= 0) {
+            pageIndex = 1;
+        }
+        if (pageSize <= 0 || pageSize > 1000) {
+            pageSize = 10;
+        }
 
         PageInfo<AgentInfo> list;
         if (!CacheManager.isChainExist(chainId)) {
@@ -426,30 +453,34 @@ public class PocConsensusController {
 
     @RpcMethod("getAccountDeposit")
     public RpcResult getAccountDeposit(List<Object> params) {
-        VerifyUtils.verifyParams(params, 5);
-        int chainId, pageIndex, pageSize, type;
+        VerifyUtils.verifyParams(params, 4);
+        int chainId, pageIndex, pageSize;
         String address;
         try {
             chainId = (int) params.get(0);
             pageIndex = (int) params.get(1);
             pageSize = (int) params.get(2);
             address = (String) params.get(3);
-            type = (int) params.get(4);
         } catch (Exception e) {
             return RpcResult.paramError();
         }
         if (!AddressTool.validAddress(chainId, address)) {
             return RpcResult.paramError("[address] is invalid");
         }
+        if (pageIndex <= 0) {
+            pageIndex = 1;
+        }
+        if (pageSize <= 0 || pageSize > 1000) {
+            pageSize = 10;
+        }
 
         PageInfo<DepositInfo> list;
         if (!CacheManager.isChainExist(chainId)) {
             list = new PageInfo<>(pageIndex, pageSize);
         } else {
-            list = this.depositService.getAllDepositListByAddress(chainId, address, type, pageIndex, pageSize);
+            list = this.depositService.getDepositListByAddress(chainId, address, pageIndex, pageSize);
         }
         return new RpcResult().setResult(list);
-
     }
 
     @RpcMethod("getBestRoundInfo")
@@ -472,7 +503,7 @@ public class PocConsensusController {
         if (pageIndex <= 0) {
             pageIndex = 1;
         }
-        if (pageSize <= 0 || pageSize > 100) {
+        if (pageSize <= 0 || pageSize > 1000) {
             pageSize = 10;
         }
         if (!CacheManager.isChainExist(chainId)) {
