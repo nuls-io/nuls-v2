@@ -31,14 +31,6 @@ function get_fullpath()
 }
 
 
-APP_NAME="mykernel"
-#判断是否已经运行
-if [ ! -z "`ps -ef|grep -w "name=${APP_NAME} "|grep -v grep|awk '{print $2}'`" ]; then
-    pid=`ps -ef|grep -w "name=${APP_NAME} "|grep -v grep|awk '{print $2}'`
-    echo "$APP_NAME Already running pid=$pid";
-    exit 0;
-fi
-
 #参数处理
 #是否前端运行标志位
 RUNFRONT=
@@ -74,6 +66,14 @@ do
             ?)     exit 2;;
            esac
 done
+
+APP_NAME="mykernel"
+#判断是否已经运行
+if [ ! -z "`ps -ef|grep -w "name=${APP_NAME} "|grep -v grep|awk '{print $2}'`" ]; then
+    pid=`ps -ef|grep -w "name=${APP_NAME} "|grep -v grep|awk '{print $2}'`
+    echo "$APP_NAME Already running pid=$pid";
+    exit 0;
+fi
 
 #切换上下文到脚本目录
 cd `dirname $0`;

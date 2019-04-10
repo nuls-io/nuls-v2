@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 cd `dirname $0`;
 if [ -d ../Libraries/JAVA/11.0.2 ]; then
     export JAVA_HOME="$(cd $(dirname "../Libraries/JAVA/11.0.2"); pwd)/11.0.2"
@@ -14,7 +14,7 @@ if [ ! -n "$JAVA_EXIST" ]; then
     exit 0;
 fi
 echo "JAVA_HOME:${JAVA_HOME}"
-echo `${JAVA_HOME} -version`
+echo `${JAVA} -version`
 LOGLEVEL="ERROR"
 while getopts hl:c: name
 do
@@ -31,14 +31,14 @@ do
 done
 if [ ! -f "$CONFIG" ]; then
     BIN_PATH=`pwd`;
-    CONFIG="${BIN_PATH}/default-config.json"
+    CONFIG="${BIN_PATH}/nuls.ncf"
 fi
-if [ ! -d ../logs/test ]; then
-    mkidr ../logs/test
+if [ ! -d ./logs/test ]; then
+    mkidr ./logs/test
 fi
-STDOUT_FILE=`cd ../logs/test; pwd`
+STDOUT_FILE=`cd ./logs/test; pwd`
 STDOUT_FILE="${STDOUT_FILE}/test-case.log";
-cd ../Modules/Nuls/test/1.0.0
+cd ./Modules/Nuls/test/1.0.0
 APP_PID=`ps -ef|grep -w "name=test "|grep -v grep|awk '{print $2}'`
 APP=`ps -ef|grep -w "name=test "|grep -v grep|wc -l`
 if [ $APP -eq 1 ]; then
@@ -61,5 +61,5 @@ PUB_LIB="${PUB_LIB}:./test-1.0.0.jar"
 # Get standard environment variables
 JAVA_OPTS="-Xms128m -Xmx128m -DtestNodeType=master -Dapp.name=test -Dlog.level=${LOGLEVEL} -Dactive.module=$CONFIG "
 CLASSPATH=$CLASSPATH:$PUB_LIB:.
-echo "${JAVA} $JAVA_OPTS -classpath $CLASSPATH $MAIN_CLASS  > ${STDOUT_FILE}"
-${JAVA} $JAVA_OPTS -classpath $CLASSPATH $MAIN_CLASS  > ${STDOUT_FILE}
+echo "${JAVA} $JAVA_OPTS -classpath $CLASSPATH $MAIN_CLASS"
+${JAVA} $JAVA_OPTS -classpath $CLASSPATH $MAIN_CLASS
