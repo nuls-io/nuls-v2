@@ -28,10 +28,11 @@ package io.nuls.ledger.validator;
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.CoinData;
 import io.nuls.base.data.CoinFrom;
+import io.nuls.base.data.CoinTo;
 import io.nuls.base.data.Transaction;
 import io.nuls.ledger.constant.ValidateEnum;
 import io.nuls.ledger.model.AccountBalance;
-import io.nuls.ledger.model.TempAccountState;
+import io.nuls.ledger.model.TempAccountNonce;
 import io.nuls.ledger.model.ValidateResult;
 import io.nuls.ledger.model.po.*;
 import io.nuls.ledger.service.AccountStateService;
@@ -69,9 +70,16 @@ public class CoinDataValidator {
 
 
     /**
-     * key是账号资产 value是待确认支出列表
+     * key String:chainId
+     * value map :key是账号资产 value是待确认支出列表
      */
-    private Map<String, List<TempAccountState>> accountBalanceValidateTxMap = new ConcurrentHashMap<>();
+    private Map<String, Map<String, List<TempAccountNonce>>> chainsAccountNonceMap = new ConcurrentHashMap<String, Map<String, List<TempAccountNonce>>>();
+    /**
+     * key String:chainId
+     * value map :key是账号资产 value是待确认账户
+     */
+    private Map<String, Map<String, AccountState>> chainsAccountStateMap = new ConcurrentHashMap<String, Map<String, AccountState>>();
+
     @Autowired
     private AccountStateService accountStateService;
 
@@ -102,6 +110,14 @@ public class CoinDataValidator {
         return chainsBatchValidateTxMap.get(String.valueOf(addressChainId));
     }
 
+    public Map<String, List<TempAccountNonce>> getAccountBalanceValidateMap(int addressChainId) {
+        return chainsAccountNonceMap.get(String.valueOf(addressChainId));
+    }
+
+    public Map<String, AccountState> getAccountValidateMap(int addressChainId) {
+        return chainsAccountStateMap.get(String.valueOf(addressChainId));
+    }
+
     /**
      * 校验nonce的连续性
      *
@@ -130,30 +146,51 @@ public class CoinDataValidator {
      * 开始批量校验
      */
     public boolean beginBatchPerTxValidate(int chainId) {
-        Map<String, String> batchValidateTxMap = chainsBatchValidateTxMap.get(String.valueOf(chainId));
+        Map<String, String> batchValidateTxMap = getBatchValidateTxMap(chainId);
         if (null == batchValidateTxMap) {
             batchValidateTxMap = new ConcurrentHashMap<>();
             chainsBatchValidateTxMap.put(String.valueOf(chainId), batchValidateTxMap);
         }
+        Map<String, List<TempAccountNonce>> accountBalanceValidateTxMap = getAccountBalanceValidateMap(chainId);
+        if (null == accountBalanceValidateTxMap) {
+            accountBalanceValidateTxMap = new ConcurrentHashMap<>();
+            chainsAccountNonceMap.put(String.valueOf(chainId), accountBalanceValidateTxMap);
+        }
+        Map<String, AccountState> accountStateMap = getAccountValidateMap(chainId);
+        if (null == accountStateMap) {
+            accountStateMap = new ConcurrentHashMap<>();
+            chainsAccountStateMap.put(String.valueOf(chainId), accountStateMap);
+        }
+
         batchValidateTxMap.clear();
         accountBalanceValidateTxMap.clear();
+        accountStateMap.clear();
         return true;
 
     }
 
 
     /**
-     * 开始批量校验
+     * 开始批量校验,整个区块校验，场景：接收到的外部的区块包
      */
     public boolean blockValidate(int chainId, long height, List<Transaction> txs) {
         LoggerUtil.logger(chainId).debug("peer blocksValidate chainId={},height={},txsNumber={}", chainId, height, txs.size());
         Map<String, String> batchValidateTxMap = new HashMap();
-        Map<String, List<TempAccountState>> accountValidateTxMap = new HashMap<>();
+        Map<String, List<TempAccountNonce>> accountValidateTxMap = new HashMap<>();
         Map<String, AccountState> accountStateMap = new HashMap<>();
         for (Transaction tx : txs) {
             ValidateResult validateResult = blockTxsValidate(chainId, tx, batchValidateTxMap, accountValidateTxMap, accountStateMap);
             if (ValidateEnum.SUCCESS_CODE.getValue() != validateResult.getValidateCode()) {
                 LoggerUtil.logger(chainId).error("code={},msg={}", validateResult.getValidateCode(), validateResult.getValidateCode());
+                return false;
+            }
+        }
+        //遍历余额判断
+        for (Map.Entry<String, AccountState> entry : accountStateMap.entrySet()) {
+            //缓存数据
+            if (BigIntegerUtils.isLessThan(entry.getValue().getAvailableAmount(), BigInteger.ZERO)) {
+                //余额不足
+                logger(chainId).info("{}=={}=={}==balance is not enough", entry.getValue().getAddress(), entry.getValue().getAssetChainId(), entry.getValue().getAssetId());
                 return false;
             }
         }
@@ -177,37 +214,26 @@ public class CoinDataValidator {
      */
     public ValidateResult bathValidatePerTx(int chainId, Transaction tx) {
         Map<String, String> batchValidateTxMap = getBatchValidateTxMap(chainId);
-        return confirmedTxsValidate(chainId, tx, batchValidateTxMap, accountBalanceValidateTxMap);
+        Map<String, List<TempAccountNonce>> accountBalanceValidateTxMap = getAccountBalanceValidateMap(chainId);
+        return confirmedTxValidate(chainId, tx, batchValidateTxMap, accountBalanceValidateTxMap);
     }
 
-    /**
-     * @param chainId
-     * @param tx
-     * @param batchValidateTxMap
-     * @return
-     */
-    public ValidateResult confirmedTxsValidate(int chainId, Transaction tx, Map<String, String> batchValidateTxMap, Map<String, List<TempAccountState>> accountValidateTxMap) {
-        //先校验，再逐笔放入缓存
-        //交易的 hash值如果已存在，返回false，交易的from coin nonce 如果不连续，则存在双花。
-        String txHash = tx.getHash().toString();
-        if (null == batchValidateTxMap || null != batchValidateTxMap.get(txHash)) {
-            logger(chainId).error("{} tx exist!", txHash);
-            return ValidateResult.getResult(ValidateEnum.TX_EXIST_CODE, new String[]{"--", txHash});
-        }
-        CoinData coinData = CoinDataUtil.parseCoinData(tx.getCoinData());
-        if (null == coinData) {
-            //例如黄牌交易，直接返回
-            batchValidateTxMap.put(tx.getHash().toString(), tx.getHash().toString());
-            return ValidateResult.getSuccess();
-        }
-        List<CoinFrom> coinFroms = coinData.getFrom();
-        String nonce8BytesStr = LedgerUtil.getNonceEncodeByTx(tx);
+
+    private ValidateResult analysisFromCoinPerTx(int chainId, String txHash, String nonce8BytesStr, List<CoinFrom> coinFroms, Map<String, List<TempAccountNonce>> accountValidateTxMap, Map<String, AccountState> accountStateMap, Map<String, AccountState> balanceValidateMap) {
         for (CoinFrom coinFrom : coinFroms) {
             if (LedgerUtil.isNotLocalChainAccount(chainId, coinFrom.getAddress())) {
                 //非本地网络账户地址,不进行处理
                 continue;
             }
-            AccountState accountState = accountStateService.getAccountStateUnSyn(AddressTool.getStringAddressByBytes(coinFrom.getAddress()), chainId, coinFrom.getAssetsChainId(), coinFrom.getAssetsId());
+            String address = AddressTool.getStringAddressByBytes(coinFrom.getAddress());
+            String assetKey = LedgerUtil.getKeyStr(address, coinFrom.getAssetsChainId(), coinFrom.getAssetsId());
+            AccountState accountState = accountStateMap.get(assetKey);
+            if (null == accountState) {
+                accountState = accountStateService.getAccountStateUnSyn(AddressTool.getStringAddressByBytes(coinFrom.getAddress()), chainId, coinFrom.getAssetsChainId(), coinFrom.getAssetsId());
+                accountStateMap.put(assetKey, accountState);
+            }
+            accountState.addTotalFromAmount(coinFrom.getAmount());
+            balanceValidateMap.put(assetKey, accountState);
             //判断是否是解锁操作
             if (coinFrom.getLocked() == 0) {
                 //判断是否已经在打包或已完成的交易
@@ -231,7 +257,82 @@ public class CoinDataValidator {
                 }
             }
         }
-        batchValidateTxMap.put(tx.getHash().toString(), tx.getHash().toString());
+        return ValidateResult.getSuccess();
+    }
+
+    /**
+     * 只是对金额进行处理
+     *
+     * @param chainId
+     * @param coinTos
+     * @param accountStateMap
+     * @return
+     */
+    private ValidateResult analysisToCoinPerTx(int chainId, List<CoinTo> coinTos, Map<String, AccountState> accountStateMap) {
+        for (CoinTo coinTo : coinTos) {
+            if (LedgerUtil.isNotLocalChainAccount(chainId, coinTo.getAddress())) {
+                //非本地网络账户地址,不进行处理
+                continue;
+            }
+            //判断是否是解锁操作
+            if (coinTo.getLockTime() == 0) {
+                String address = AddressTool.getStringAddressByBytes(coinTo.getAddress());
+                String assetKey = LedgerUtil.getKeyStr(address, coinTo.getAssetsChainId(), coinTo.getAssetsId());
+                AccountState accountState = accountStateMap.get(assetKey);
+                if (null == accountState) {
+                    accountState = accountStateService.getAccountStateUnSyn(AddressTool.getStringAddressByBytes(coinTo.getAddress()), chainId, coinTo.getAssetsChainId(), coinTo.getAssetsId());
+                    accountStateMap.put(assetKey, accountState);
+                }
+                accountState.addTotalToAmount(coinTo.getAmount());
+            }
+        }
+        return ValidateResult.getSuccess();
+    }
+
+    /**
+     * @param chainId
+     * @param tx
+     * @param batchValidateTxMap
+     * @return
+     */
+    public ValidateResult confirmedTxValidate(int chainId, Transaction tx, Map<String, String> batchValidateTxMap, Map<String, List<TempAccountNonce>> accountValidateTxMap) {
+        Map<String, AccountState> accountStateMap = getAccountValidateMap(chainId);
+        Map<String, AccountState> balanceValidateMap = new HashMap<>(64);
+        //先校验，再逐笔放入缓存
+        //交易的 hash值如果已存在，返回false，交易的from coin nonce 如果不连续，则存在双花。
+        String txHash = tx.getHash().toString();
+        if (null == batchValidateTxMap || null != batchValidateTxMap.get(txHash)) {
+            logger(chainId).error("{} tx exist!", txHash);
+            return ValidateResult.getResult(ValidateEnum.TX_EXIST_CODE, new String[]{"--", txHash});
+        }
+        CoinData coinData = CoinDataUtil.parseCoinData(tx.getCoinData());
+        if (null == coinData) {
+            //例如黄牌交易，直接返回
+            batchValidateTxMap.put(tx.getHash().toString(), tx.getHash().toString());
+            return ValidateResult.getSuccess();
+        }
+        List<CoinFrom> coinFroms = coinData.getFrom();
+        List<CoinTo> coinTos = coinData.getTo();
+
+        String nonce8BytesStr = LedgerUtil.getNonceEncodeByTx(tx);
+        ValidateResult validateResult = analysisFromCoinPerTx(chainId, txHash, nonce8BytesStr, coinFroms, accountValidateTxMap, accountStateMap, balanceValidateMap);
+        if (!validateResult.isSuccess()) {
+            return validateResult;
+        }
+        ValidateResult toCoinValidateResult = analysisToCoinPerTx(chainId, coinTos, accountStateMap);
+        if (!toCoinValidateResult.isSuccess()) {
+            return validateResult;
+        }
+        //遍历余额判断
+        for (Map.Entry<String, AccountState> entry : balanceValidateMap.entrySet()) {
+            //缓存数据
+            if (BigIntegerUtils.isLessThan(entry.getValue().getAvailableAmount(), BigInteger.ZERO)) {
+                //余额不足
+                logger(chainId).info("{}=={}=={}==balance is not enough", entry.getValue().getAddress(), entry.getValue().getAssetChainId(), entry.getValue().getAssetId());
+                return ValidateResult.getResult(ValidateEnum.FAIL_CODE, new String[]{entry.getValue().getAddress(), "--", "balance is not enough"});
+            }
+        }
+        batchValidateTxMap.put(txHash, txHash);
         return ValidateResult.getSuccess();
     }
 
@@ -247,7 +348,7 @@ public class CoinDataValidator {
     private ValidateResult validateCommonCoinData(AccountState accountState, String address, BigInteger fromAmount, String fromNonce) {
         AccountStateUnconfirmed accountStateUnconfirmed = unconfirmedStateService.getUnconfirmedInfoAndUpdate(accountState);
         BigInteger totalAmount = accountState.getAvailableAmount().add(accountStateUnconfirmed.getUnconfirmedAmount());
-        if (totalAmount.compareTo(fromAmount) == -1) {
+        if (BigIntegerUtils.isLessThan(totalAmount, fromAmount)) {
             logger(accountState.getAddressChainId()).info("balance is not enough");
             return ValidateResult.getResult(ValidateEnum.FAIL_CODE, new String[]{address, fromNonce, "balance is not enough"});
         }
@@ -277,17 +378,12 @@ public class CoinDataValidator {
      * @param txNonce
      * @return
      */
-    private ValidateResult isValidateCommonTxBatch(AccountState accountState, CoinFrom coinFrom, String txNonce, Map<String, List<TempAccountState>> accountValidateTxMap) {
+    private ValidateResult isValidateCommonTxBatch(AccountState accountState, CoinFrom coinFrom, String txNonce,
+                                                   Map<String, List<TempAccountNonce>> accountValidateTxMap) {
         int chainId = accountState.getAddressChainId();
         String fromCoinNonce = LedgerUtil.getNonceEncode(coinFrom.getNonce());
         String address = AddressTool.getStringAddressByBytes(coinFrom.getAddress());
         String assetKey = LedgerUtil.getKeyStr(address, coinFrom.getAssetsChainId(), coinFrom.getAssetsId());
-        //余额判断
-        if (BigIntegerUtils.isLessThan(accountState.getAvailableAmount(),coinFrom.getAmount())) {
-            //余额不足
-            logger(chainId).info("{}=={}=={}==balance is not enough", AddressTool.getStringAddressByBytes(coinFrom.getAddress()), coinFrom.getAssetsChainId(), coinFrom.getAssetsId());
-            return ValidateResult.getResult(ValidateEnum.FAIL_CODE, new String[]{address, "--", "balance is not enough"});
-        }
         if (fromCoinNonce.equalsIgnoreCase(txNonce)) {
             //nonce 重复了
             logger(chainId).info("{}=={}=={}== nonce is repeat", AddressTool.getStringAddressByBytes(coinFrom.getAddress()), coinFrom.getAssetsChainId(), coinFrom.getAssetsId());
@@ -295,7 +391,7 @@ public class CoinDataValidator {
         }
         //不是解锁操作
         //从批量校验池中获取缓存交易
-        List<TempAccountState> list = accountValidateTxMap.get(assetKey);
+        List<TempAccountNonce> list = accountValidateTxMap.get(assetKey);
         if (null == list) {
             //从头开始处理
             if (!accountState.getNonce().equalsIgnoreCase(fromCoinNonce)) {
@@ -314,29 +410,78 @@ public class CoinDataValidator {
                 }
             }
             list = new ArrayList<>();
-            BigInteger balance = accountState.getAvailableAmount().subtract(coinFrom.getAmount());
-            list.add(new TempAccountState(assetKey, fromCoinNonce, txNonce, balance));
+            list.add(new TempAccountNonce(assetKey, fromCoinNonce, txNonce));
             accountValidateTxMap.put(assetKey, list);
         } else {
             //从已有的缓存数据中获取对象进行操作,nonce必须连贯
-            TempAccountState tempAccountState = list.get(list.size() - 1);
+            TempAccountNonce tempAccountState = list.get(list.size() - 1);
             if (!tempAccountState.getNextNonce().equalsIgnoreCase(fromCoinNonce)) {
                 logger(chainId).info("isValidateCommonTxBatch {}=={}=={}==nonce is error!tempNonce:{}!=fromNonce:{}", address, coinFrom.getAssetsChainId(), coinFrom.getAssetsId(), tempAccountState.getNextNonce(), fromCoinNonce);
                 return ValidateResult.getResult(ValidateEnum.FAIL_CODE, new String[]{address, fromCoinNonce, "last pool nonce=" + tempAccountState.getNextNonce()});
             }
-//            for (TempAccountState tempAccountState1 : list) {
-//                //交易池中账户存在一样的nonce
-//                if (tempAccountState1.getNonce().equalsIgnoreCase(fromCoinNonce)) {
-//                    logger(chainId).info("isValidateCommonTxBatch {}=={}=={}==nonce is double expenses! fromNonce ={}", address, coinFrom.getAssetsChainId(), coinFrom.getAssetsId(), fromCoinNonce);
-//                    return ValidateResult.getResult(ValidateEnum.DOUBLE_EXPENSES_CODE, new String[]{address, fromCoinNonce, "is double expenses"});
-//                }
-//            }
-            list.add(new TempAccountState(assetKey, fromCoinNonce, txNonce, tempAccountState.getBalance().subtract(coinFrom.getAmount())));
+            list.add(new TempAccountNonce(assetKey, fromCoinNonce, txNonce));
         }
         return ValidateResult.getSuccess();
     }
 
-    public ValidateResult blockTxsValidate(int chainId, Transaction tx, Map<String, String> batchValidateTxMap, Map<String, List<TempAccountState>> accountValidateTxMap, Map<String, AccountState> accountStateMap) {
+    private ValidateResult analysisFromCoinBlokTx(int chainId, String txHash, String txNonce, List<CoinFrom> coinFroms, Map<String, List<TempAccountNonce>> accountValidateTxMap, Map<String, AccountState> accountStateMap) {
+        for (CoinFrom coinFrom : coinFroms) {
+            if (LedgerUtil.isNotLocalChainAccount(chainId, coinFrom.getAddress())) {
+                //非本地网络账户地址,不进行处理
+                continue;
+            }
+            String address = AddressTool.getStringAddressByBytes(coinFrom.getAddress());
+            String assetKey = LedgerUtil.getKeyStr(address, coinFrom.getAssetsChainId(), coinFrom.getAssetsId());
+            AccountState accountState = accountStateMap.get(assetKey);
+            if (null == accountState) {
+                accountState = accountStateService.getAccountStateUnSyn(AddressTool.getStringAddressByBytes(coinFrom.getAddress()), chainId, coinFrom.getAssetsChainId(), coinFrom.getAssetsId());
+                accountStateMap.put(assetKey, accountState);
+            }
+
+            //判断是否是解锁操作
+            if (coinFrom.getLocked() == 0) {
+                //不是解锁操作
+                //从批量校验池中获取缓存交易
+                List<TempAccountNonce> list = accountValidateTxMap.get(assetKey);
+                String fromCoinNonce = LedgerUtil.getNonceEncode(coinFrom.getNonce());
+                //余额累计
+                accountState.addTotalFromAmount(coinFrom.getAmount());
+                if (fromCoinNonce.equalsIgnoreCase(txNonce)) {
+                    //nonce 重复了
+                    logger(chainId).info("{}=={}=={}== nonce is repeat", AddressTool.getStringAddressByBytes(coinFrom.getAddress()), coinFrom.getAssetsChainId(), coinFrom.getAssetsId());
+                    return ValidateResult.getResult(ValidateEnum.FAIL_CODE, new String[]{address, fromCoinNonce, "nonce repeat"});
+                }
+                if (null == list) {
+                    //从头开始处理
+                    if (!accountState.getNonce().equalsIgnoreCase(fromCoinNonce)) {
+                        logger(chainId).error("校验失败(isBlockValidateCommonTx failed)：{}=={}=={}==nonce is error!dbNonce:{}!=fromNonce:{}", address, coinFrom.getAssetsChainId(), coinFrom.getAssetsId(), accountState.getNonce(), fromCoinNonce);
+                        //判断是否fromNonce是否已经存储了,如果存储了，则这笔是异常交易双花
+                        return ValidateResult.getResult(ValidateEnum.FAIL_CODE, new String[]{address, fromCoinNonce, "dbNonce=" + accountState.getNonce()});
+                    }
+                    list = new ArrayList<>();
+                    list.add(new TempAccountNonce(assetKey, fromCoinNonce, txNonce));
+                    accountValidateTxMap.put(assetKey, list);
+                } else {
+                    //从已有的缓存数据中获取对象进行操作,nonce必须连贯
+                    TempAccountNonce tempAccountState = list.get(list.size() - 1);
+                    if (!tempAccountState.getNextNonce().equalsIgnoreCase(fromCoinNonce)) {
+                        logger(chainId).info("isValidateCommonTxBatch {}=={}=={}==nonce is error!tempNonce:{}!=fromNonce:{}", address, coinFrom.getAssetsChainId(), coinFrom.getAssetsId(), tempAccountState.getNextNonce(), fromCoinNonce);
+                        return ValidateResult.getResult(ValidateEnum.FAIL_CODE, new String[]{address, fromCoinNonce, "last pool nonce=" + tempAccountState.getNextNonce()});
+                    }
+                    list.add(new TempAccountNonce(assetKey, fromCoinNonce, txNonce));
+                }
+            } else {
+                //解锁交易，需要从from 里去获取需要的高度数据或时间数据，进行校验
+                //解锁交易只需要从已确认的数据中去获取数据进行校验
+                if (!isValidateFreezeTx(coinFrom.getLocked(), accountState, coinFrom.getAmount(), LedgerUtil.getNonceEncode(coinFrom.getNonce()))) {
+                    return ValidateResult.getResult(ValidateEnum.DOUBLE_EXPENSES_CODE, new String[]{accountState.getAddress(), LedgerUtil.getNonceEncode(coinFrom.getNonce()), "validate fail"});
+                }
+            }
+        }
+        return ValidateResult.getSuccess();
+    }
+
+    public ValidateResult blockTxsValidate(int chainId, Transaction tx, Map<String, String> batchValidateTxMap, Map<String, List<TempAccountNonce>> accountValidateTxMap, Map<String, AccountState> accountStateMap) {
         //先校验，再逐笔放入缓存
         //交易的 hash值如果已存在，返回false，交易的from coin nonce 如果不连续，则存在双花。
         String txHash = tx.getHash().toString();
@@ -351,64 +496,15 @@ public class CoinDataValidator {
             return ValidateResult.getSuccess();
         }
         List<CoinFrom> coinFroms = coinData.getFrom();
+        List<CoinTo> coinTos = coinData.getTo();
         String txNonce = LedgerUtil.getNonceEncodeByTx(tx);
-        for (CoinFrom coinFrom : coinFroms) {
-            if (LedgerUtil.isNotLocalChainAccount(chainId, coinFrom.getAddress())) {
-                //非本地网络账户地址,不进行处理
-                continue;
-            }
-            String address = AddressTool.getStringAddressByBytes(coinFrom.getAddress());
-            String assetKey = LedgerUtil.getKeyStr(address, coinFrom.getAssetsChainId(), coinFrom.getAssetsId());
-            AccountState accountState = accountStateMap.get(assetKey);
-            if (null == accountState) {
-                accountState = accountStateService.getAccountStateUnSyn(AddressTool.getStringAddressByBytes(coinFrom.getAddress()), chainId, coinFrom.getAssetsChainId(), coinFrom.getAssetsId());
-                accountStateMap.put(assetKey, accountState);
-            }
-            //判断是否是解锁操作
-            if (coinFrom.getLocked() == 0) {
-                String fromCoinNonce = LedgerUtil.getNonceEncode(coinFrom.getNonce());
-                //余额判断
-                accountState.getAvailableAmount();
-                if (BigIntegerUtils.isLessThan(accountState.getAvailableAmount(),coinFrom.getAmount())) {
-                    //余额不足
-                    logger(chainId).info("{}=={}=={}==balance is not enough", AddressTool.getStringAddressByBytes(coinFrom.getAddress()), coinFrom.getAssetsChainId(), coinFrom.getAssetsId());
-                    return ValidateResult.getResult(ValidateEnum.FAIL_CODE, new String[]{address, "--", "balance is not enough"});
-                }
-                if (fromCoinNonce.equalsIgnoreCase(txNonce)) {
-                    //nonce 重复了
-                    logger(chainId).info("{}=={}=={}== nonce is repeat", AddressTool.getStringAddressByBytes(coinFrom.getAddress()), coinFrom.getAssetsChainId(), coinFrom.getAssetsId());
-                    return ValidateResult.getResult(ValidateEnum.FAIL_CODE, new String[]{address, fromCoinNonce, "nonce repeat"});
-                }
-                //不是解锁操作
-                //从批量校验池中获取缓存交易
-                List<TempAccountState> list = accountValidateTxMap.get(assetKey);
-                if (null == list) {
-                    //从头开始处理
-                    if (!accountState.getNonce().equalsIgnoreCase(fromCoinNonce)) {
-                        logger(chainId).error("校验失败(isBlockValidateCommonTx failed)：{}=={}=={}==nonce is error!dbNonce:{}!=fromNonce:{}", address, coinFrom.getAssetsChainId(), coinFrom.getAssetsId(), accountState.getNonce(), fromCoinNonce);
-                        //判断是否fromNonce是否已经存储了,如果存储了，则这笔是异常交易双花
-                        return ValidateResult.getResult(ValidateEnum.FAIL_CODE, new String[]{address, fromCoinNonce, "dbNonce=" + accountState.getNonce()});
-                    }
-                    list = new ArrayList<>();
-                    BigInteger balance = accountState.getAvailableAmount().subtract(coinFrom.getAmount());
-                    list.add(new TempAccountState(assetKey, fromCoinNonce, txNonce, balance));
-                    accountValidateTxMap.put(assetKey, list);
-                } else {
-                    //从已有的缓存数据中获取对象进行操作,nonce必须连贯
-                    TempAccountState tempAccountState = list.get(list.size() - 1);
-                    if (!tempAccountState.getNextNonce().equalsIgnoreCase(fromCoinNonce)) {
-                        logger(chainId).info("isValidateCommonTxBatch {}=={}=={}==nonce is error!tempNonce:{}!=fromNonce:{}", address, coinFrom.getAssetsChainId(), coinFrom.getAssetsId(), tempAccountState.getNextNonce(), fromCoinNonce);
-                        return ValidateResult.getResult(ValidateEnum.FAIL_CODE, new String[]{address, fromCoinNonce, "last pool nonce=" + tempAccountState.getNextNonce()});
-                    }
-                    list.add(new TempAccountState(assetKey, fromCoinNonce, txNonce, tempAccountState.getBalance().subtract(coinFrom.getAmount())));
-                }
-            } else {
-                //解锁交易，需要从from 里去获取需要的高度数据或时间数据，进行校验
-                //解锁交易只需要从已确认的数据中去获取数据进行校验
-                if (!isValidateFreezeTx(coinFrom.getLocked(), accountState, coinFrom.getAmount(), LedgerUtil.getNonceEncode(coinFrom.getNonce()))) {
-                    return ValidateResult.getResult(ValidateEnum.DOUBLE_EXPENSES_CODE, new String[]{accountState.getAddress(), LedgerUtil.getNonceEncode(coinFrom.getNonce()), "validate fail"});
-                }
-            }
+        ValidateResult fromCoinsValidateResult = analysisFromCoinBlokTx(chainId, txHash, txNonce, coinFroms, accountValidateTxMap, accountStateMap);
+        if (!fromCoinsValidateResult.isSuccess()) {
+            return fromCoinsValidateResult;
+        }
+        ValidateResult toCoinValidateResult = analysisToCoinPerTx(chainId, coinTos, accountStateMap);
+        if (!toCoinValidateResult.isSuccess()) {
+            return toCoinValidateResult;
         }
         batchValidateTxMap.put(txHash, txHash);
         return ValidateResult.getSuccess();
@@ -535,6 +631,7 @@ public class CoinDataValidator {
      * 批量打包单笔交易回滚处理
      */
     public boolean rollbackTxValidateStatus(int chainId, Transaction tx) {
+        Map<String, List<TempAccountNonce>> accountBalanceValidateTxMap = getAccountBalanceValidateMap(chainId);
         String txHash = tx.getHash().toString();
         if (null == chainsBatchValidateTxMap.get(txHash)) {
             logger(chainId).info("{} tx not exist!", txHash);
@@ -557,11 +654,11 @@ public class CoinDataValidator {
             if (coinFrom.getLocked() == 0) {
                 String assetKey = LedgerUtil.getKeyStr(AddressTool.getStringAddressByBytes(coinFrom.getAddress()), coinFrom.getAssetsChainId(), coinFrom.getAssetsId());
                 //回滚accountBalanceValidateTxMap缓存数据
-                List<TempAccountState> list = accountBalanceValidateTxMap.get(assetKey);
+                List<TempAccountNonce> list = accountBalanceValidateTxMap.get(assetKey);
                 if (null == list) {
                     continue;
                 } else {
-                    TempAccountState tempAccountState = list.get(list.size() - 1);
+                    TempAccountNonce tempAccountState = list.get(list.size() - 1);
                     if (tempAccountState.getNextNonce().equalsIgnoreCase(nonce8BytesStr)) {
                         list.remove(list.size() - 1);
                     }

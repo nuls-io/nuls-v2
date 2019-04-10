@@ -83,7 +83,7 @@ public class AccountStateCmd extends BaseCmd {
         Integer assetId = (Integer) params.get("assetId");
         LoggerUtil.logger(chainId).debug("chainId={},assetChainId={},address={},assetId={}", chainId, assetChainId, address, assetId);
         AccountState accountState = accountStateService.getAccountStateReCal(address, chainId, assetChainId, assetId);
-        Map<String, Object> rtMap = new HashMap<>();
+        Map<String, Object> rtMap = new HashMap<>(5);
         rtMap.put("freeze", accountState.getFreezeTotal());
         rtMap.put("total", accountState.getTotalAmount());
         rtMap.put("available", accountState.getAvailableAmount());
@@ -157,7 +157,7 @@ public class AccountStateCmd extends BaseCmd {
         } else {
             resultList = freezeLockStates.subList(currIdx, currIdx + pageSize);
         }
-        Map<String, Object> rtMap = new HashMap<>();
+        Map<String, Object> rtMap = new HashMap<>(4);
         rtMap.put("totalCount",freezeLockStates.size());
         rtMap.put("pageNumber",pageNumber);
         rtMap.put("pageSize",pageSize);
@@ -184,7 +184,7 @@ public class AccountStateCmd extends BaseCmd {
         Integer assetChainId = (Integer) params.get("assetChainId");
         String address = (String) params.get("address");
         Integer assetId = (Integer) params.get("assetId");
-        Map<String, Object> rtMap = new HashMap<>();
+        Map<String, Object> rtMap = new HashMap<>(2);
         AccountState accountState = accountStateService.getAccountStateUnSyn(address, chainId, assetChainId, assetId);
         AccountStateUnconfirmed accountStateUnconfirmed = unconfirmedStateService.getUnconfirmedInfoReCal(accountState);
         rtMap.put("nonce", RPCUtil.encode(LedgerUtil.getNonceDecode(accountStateUnconfirmed.getLatestUnconfirmedNonce())));
@@ -211,7 +211,7 @@ public class AccountStateCmd extends BaseCmd {
         Integer assetId = (Integer) params.get("assetId");
         LoggerUtil.logger(chainId).debug("chainId={},assetChainId={},address={},assetId={}", chainId, assetChainId, address, assetId);
         AccountState accountState = accountStateService.getAccountStateReCal(address, chainId, assetChainId, assetId);
-        Map<String, Object> rtMap = new HashMap<>();
+        Map<String, Object> rtMap = new HashMap<>(4);
         AccountStateUnconfirmed accountStateUnconfirmed = unconfirmedStateService.getUnconfirmedInfoReCal(accountState);
         rtMap.put("nonce", RPCUtil.encode(LedgerUtil.getNonceDecode(accountStateUnconfirmed.getLatestUnconfirmedNonce())));
         if (accountStateUnconfirmed.getUnconfirmedNonces().size() > 0) {
