@@ -134,8 +134,8 @@ public class TransactionBootstrap extends RpcModule {
     }
 
     @Override
-    public String getRpcCmdPackage() {
-        return TxConstant.TX_CMD_PATH;
+    public String[] getRpcCmdPackage() {
+        return new String[]{TxConstant.TX_CMD_PATH};
     }
 
     /**
