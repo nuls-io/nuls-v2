@@ -80,11 +80,7 @@ public class ConfigSetting {
                 } else {
                     field.set(obj, JSONUtils.json2pojo(value, field.getType()));
                 }
-            } catch (IllegalAccessException e) {
-                throw new RuntimeException("inject config item error : " + obj.getClass() + "#" + field.getName(), e);
-            } catch (IOException e) {
-                throw new RuntimeException("inject config item error : " + obj.getClass() + "#" + field.getName(), e);
-            } catch (ClassNotFoundException e) {
+            } catch (IllegalAccessException | IOException | ClassNotFoundException e) {
                 throw new RuntimeException("inject config item error : " + obj.getClass() + "#" + field.getName(), e);
             }
         }

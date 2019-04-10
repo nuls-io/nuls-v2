@@ -33,9 +33,9 @@ import io.nuls.contract.rpc.call.BlockCall;
 import io.nuls.contract.vm.program.ProgramMethod;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
+import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.model.StringUtils;
-import org.spongycastle.util.encoders.Hex;
 
 import java.io.IOException;
 import java.math.BigInteger;
@@ -204,14 +204,14 @@ public class VMContext {
     public List<byte[]> getRandomSeedList(long endHeight, int seedCount) {
         //TODO pierre
         List<byte[]> list = new ArrayList<>();
-        list.add(Hex.decode(INITIAL_STATE_ROOT));
+        list.add(HexUtil.decode(INITIAL_STATE_ROOT));
         return list;
     }
 
     public List<byte[]> getRandomSeedList(long startHeight, long endHeight) {
         //TODO pierre
         List<byte[]> list = new ArrayList<>();
-        list.add(Hex.decode(INITIAL_STATE_ROOT));
+        list.add(HexUtil.decode(INITIAL_STATE_ROOT));
         return list;
     }
 

@@ -8,14 +8,15 @@ import io.nuls.poc.model.bo.Chain;
 import io.nuls.poc.model.bo.tx.txdata.*;
 import io.nuls.poc.model.po.AgentPo;
 import io.nuls.poc.model.po.DepositPo;
+import io.nuls.poc.rpc.call.CallMethodUtils;
 import io.nuls.poc.storage.AgentStorageService;
 import io.nuls.poc.storage.DepositStorageService;
-import io.nuls.poc.utils.CallMethodUtils;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.exception.NulsException;
 
+import java.io.IOException;
 import java.util.*;
 
 /**
@@ -32,6 +33,9 @@ public class BatchValidator {
 
     @Autowired
     private AgentStorageService agentStorageService;
+
+    @Autowired
+    private TxValidator txValidator;
 
     /**
      * 共识模块交易批量验证方法,返回验证未通过的交易
@@ -77,7 +81,7 @@ public class BatchValidator {
         }
 
         if(!redPunishAddressSet.isEmpty() && !createAgentTxs.isEmpty()){
-            createAgentValid(createAgentTxs,redPunishAddressSet);
+            createAgentValid(createAgentTxs,redPunishAddressSet,chain);
         }
 
         if(!stopAgentTxs.isEmpty()){
@@ -91,7 +95,7 @@ public class BatchValidator {
         }
 
         if(!invalidAgentHash.isEmpty() && !depositTxs.isEmpty()){
-            depositValid(depositTxs,invalidAgentHash);
+            depositValid(depositTxs,invalidAgentHash,chain);
         }
 
         if (!withdrawTxs.isEmpty()){
@@ -139,14 +143,26 @@ public class BatchValidator {
      * @param createTxs              create agent transaction list
      * @param redPunishAddressSet    red punish address list
      * */
-    private void createAgentValid(List<Transaction>createTxs,Set<String> redPunishAddressSet)throws NulsException{
+    private void createAgentValid(List<Transaction>createTxs,Set<String> redPunishAddressSet,Chain chain)throws NulsException{
         Iterator<Transaction> iterator = createTxs.iterator();
         Agent agent = new Agent();
         String agentAddressHex;
         String packAddressHex;
         Set<String> createAgentAddressSet = new HashSet<>();
+        boolean basicValidResult ;
         while (iterator.hasNext()){
-            agent.parse(iterator.next().getTxData(),0);
+            Transaction tx = iterator.next();
+            try {
+                basicValidResult = txValidator.validateTx(chain, tx);
+                if(!basicValidResult){
+                    iterator.remove();
+                    continue;
+                }
+            }catch (IOException e){
+                iterator.remove();
+                continue;
+            }
+            agent.parse(tx.getTxData(),0);
             agentAddressHex = HexUtil.encode(agent.getAgentAddress());
             packAddressHex = HexUtil.encode(agent.getPackingAddress());
             /*
@@ -179,8 +195,20 @@ public class BatchValidator {
         Iterator<Transaction> iterator = stopAgentTxs.iterator();
         StopAgent stopAgent = new StopAgent();
         Agent agent = new Agent();
+        boolean basicValidResult ;
         while (iterator.hasNext()){
-            stopAgent.parse(iterator.next().getTxData(),0);
+            Transaction tx = iterator.next();
+            try {
+                basicValidResult = txValidator.validateTx(chain, tx);
+                if(!basicValidResult){
+                    iterator.remove();
+                    continue;
+                }
+            }catch (IOException e){
+                iterator.remove();
+                continue;
+            }
+            stopAgent.parse(tx.getTxData(),0);
             if(!hashSet.add(stopAgent.getCreateTxHash())){
                 iterator.remove();
                 continue;
@@ -208,11 +236,23 @@ public class BatchValidator {
      *
      * @param depositTxs  deposit transaction list
      * */
-    private void depositValid(List<Transaction>depositTxs,Set<NulsDigestData> invalidAgentHash)throws NulsException{
+    private void depositValid(List<Transaction>depositTxs,Set<NulsDigestData> invalidAgentHash,Chain chain)throws NulsException{
         Deposit deposit = new Deposit();
         Iterator<Transaction>iterator = depositTxs.iterator();
+        boolean basicValidResult ;
         while (iterator.hasNext()){
-            deposit.parse(iterator.next().getTxData(),0);
+            Transaction tx = iterator.next();
+            try {
+                basicValidResult = txValidator.validateTx(chain, tx);
+                if(!basicValidResult){
+                    iterator.remove();
+                    continue;
+                }
+            }catch (IOException e){
+                iterator.remove();
+                continue;
+            }
+            deposit.parse(tx.getTxData(),0);
             if(invalidAgentHash.contains(deposit.getAgentHash())){
                 iterator.remove();
             }
@@ -231,8 +271,20 @@ public class BatchValidator {
         CancelDeposit cancelDeposit = new CancelDeposit();
         Set<NulsDigestData> hashSet = new HashSet<>();
         int chainId = chain.getConfig().getChainId();
+        boolean basicValidResult ;
         while(iterator.hasNext()){
-            cancelDeposit.parse(iterator.next().getTxData(),0);
+            Transaction tx = iterator.next();
+            try {
+                basicValidResult = txValidator.validateTx(chain, tx);
+                if(!basicValidResult){
+                    iterator.remove();
+                    continue;
+                }
+            }catch (IOException e){
+                iterator.remove();
+                continue;
+            }
+            cancelDeposit.parse(tx.getTxData(),0);
             /*
             * 重复退出节点
             * */
@@ -243,10 +295,11 @@ public class BatchValidator {
             DepositPo depositPo = depositStorageService.get(cancelDeposit.getJoinTxHash(),chainId);
             AgentPo agentPo = agentStorageService.get(depositPo.getAgentHash(),chainId);
             if (null == agentPo) {
-                throw new NulsException(ConsensusErrorCode.AGENT_NOT_EXIST);
+                iterator.remove();
+                continue;
             }
             if(invalidAgentHash.contains(agentPo.getHash())){
-                throw new NulsException(ConsensusErrorCode.AGENT_INVALID);
+                iterator.remove();
             }
         }
     }

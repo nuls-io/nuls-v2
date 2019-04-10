@@ -24,26 +24,17 @@
  */
 package io.nuls.network.task;
 
-import io.nuls.network.cfg.NetworkConfig;
 import io.nuls.network.manager.MessageFactory;
 import io.nuls.network.manager.MessageManager;
 import io.nuls.network.manager.NodeGroupManager;
-import io.nuls.network.manager.TimeManager;
-import io.nuls.network.manager.handler.MessageHandlerFactory;
 import io.nuls.network.model.NetworkEventResult;
-import io.nuls.network.model.Node;
 import io.nuls.network.model.NodeGroup;
 import io.nuls.network.model.dto.BestBlockInfo;
-import io.nuls.network.model.dto.ProtocolRoleHandler;
 import io.nuls.network.model.message.PeerInfoMessage;
-import io.nuls.network.netty.container.NodesContainer;
 import io.nuls.network.rpc.call.impl.BlockRpcServiceImpl;
-import io.nuls.network.utils.LoggerUtil;
 import io.nuls.tools.core.ioc.SpringLiteContext;
 
-import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Group event monitor
@@ -55,25 +46,21 @@ import java.util.Map;
 public class LocalInfosSendTask implements Runnable {
     @Override
     public void run() {
-        //test
-        LoggerUtil.Log.info("");
-        LoggerUtil.Log.info("BEGIN LocalInfosSendTask @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
         broadcastLocalInfos();
-        LoggerUtil.Log.info("END LocalInfosSendTask @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
     }
 
     private void broadcastLocalInfos() {
         NodeGroupManager nodeGroupManager = NodeGroupManager.getInstance();
         List<NodeGroup> nodeGroupList = nodeGroupManager.getNodeGroups();
         for (NodeGroup nodeGroup : nodeGroupList) {
-            if (NodeGroup.OK == nodeGroup.getLocalNetNodeContainer().getStatus()) {
                 //获取本地高度与hash
                 BlockRpcServiceImpl blockRpcServiceImpl = SpringLiteContext.getBean(BlockRpcServiceImpl.class);
                 BestBlockInfo bestBlockInfo = blockRpcServiceImpl.getBestBlockHeader(nodeGroup.getChainId());
+                if (bestBlockInfo.getBlockHeight() == 0) {
+                    continue;
+                }
                 PeerInfoMessage peerInfoMessage = MessageFactory.getInstance().buildPeerInfoMessage(nodeGroup.getMagicNumber(), bestBlockInfo);
                 NetworkEventResult result = MessageManager.getInstance().broadcastToAllNode(peerInfoMessage, null, false, true);
-                LoggerUtil.Log.info("broadcastLocalInfos result = {}",result.isSuccess());
-            }
         }
     }
 }

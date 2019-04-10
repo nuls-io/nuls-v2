@@ -3,6 +3,7 @@ package io.nuls.poc.constant;
 import java.math.BigInteger;
 
 /**
+ * 共识模块常量类
  * @author tag
  * 2018/11/6
  * */
@@ -157,16 +158,17 @@ public interface ConsensusConstant {
     int PAGE_SIZE_MAX_VALUE = 100;
     String PARAM_CHAIN_ID = "chainId";
     String PARAM_ADDRESS = "address";
-    String PARAM_TX = "txHex";
-    String PARAM_TX_HEX_LIST = "txHexList";
+    String PARAM_TX = "tx";
+    String PARAM_TX_HEX_LIST = "txList";
     String PARAM_HEIGHT = "height";
     String PARAM_BLOCK_HEADER ="blockHeader";
-    String PARAM_BLOCK_HEADER_HEX ="blockHeaderHex";
+    String PARAM_BLOCK_HEADER_HEX ="blockHeader";
     String PARAM_BLOCK="block";
     String PARAM_EVIDENCE_HEADER ="evidenceHeader";
     String VALID_RESULT ="valid";
     String PARAM_RESULT_VALUE ="value";
     String PARAM_STATUS = "status";
+    String HEADER_LIST = "headerList";
 
     /**
      * 共识模块日志管理

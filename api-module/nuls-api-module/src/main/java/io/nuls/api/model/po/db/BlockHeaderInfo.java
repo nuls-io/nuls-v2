@@ -26,12 +26,9 @@
  */
 package io.nuls.api.model.po.db;
 
-import lombok.Data;
-
 import java.math.BigInteger;
 import java.util.List;
 
-@Data
 public class BlockHeaderInfo {
 
     private String hash;
@@ -80,4 +77,163 @@ public class BlockHeaderInfo {
         this.agentAlias = agentInfo.getAgentAlias();
     }
 
+    public String getHash() {
+        return hash;
+    }
+
+    public void setHash(String hash) {
+        this.hash = hash;
+    }
+
+    public long getHeight() {
+        return height;
+    }
+
+    public void setHeight(long height) {
+        this.height = height;
+    }
+
+    public String getPreHash() {
+        return preHash;
+    }
+
+    public void setPreHash(String preHash) {
+        this.preHash = preHash;
+    }
+
+    public String getMerkleHash() {
+        return merkleHash;
+    }
+
+    public void setMerkleHash(String merkleHash) {
+        this.merkleHash = merkleHash;
+    }
+
+    public long getCreateTime() {
+        return createTime;
+    }
+
+    public void setCreateTime(long createTime) {
+        this.createTime = createTime;
+    }
+
+    public String getAgentHash() {
+        return agentHash;
+    }
+
+    public void setAgentHash(String agentHash) {
+        this.agentHash = agentHash;
+    }
+
+    public String getAgentId() {
+        return agentId;
+    }
+
+    public void setAgentId(String agentId) {
+        this.agentId = agentId;
+    }
+
+    public String getPackingAddress() {
+        return packingAddress;
+    }
+
+    public void setPackingAddress(String packingAddress) {
+        this.packingAddress = packingAddress;
+    }
+
+    public String getAgentAlias() {
+        return agentAlias;
+    }
+
+    public void setAgentAlias(String agentAlias) {
+        this.agentAlias = agentAlias;
+    }
+
+    public int getTxCount() {
+        return txCount;
+    }
+
+    public void setTxCount(int txCount) {
+        this.txCount = txCount;
+    }
+
+    public long getRoundIndex() {
+        return roundIndex;
+    }
+
+    public void setRoundIndex(long roundIndex) {
+        this.roundIndex = roundIndex;
+    }
+
+    public BigInteger getTotalFee() {
+        return totalFee;
+    }
+
+    public void setTotalFee(BigInteger totalFee) {
+        this.totalFee = totalFee;
+    }
+
+    public BigInteger getReward() {
+        return reward;
+    }
+
+    public void setReward(BigInteger reward) {
+        this.reward = reward;
+    }
+
+    public int getSize() {
+        return size;
+    }
+
+    public void setSize(int size) {
+        this.size = size;
+    }
+
+    public int getPackingIndexOfRound() {
+        return packingIndexOfRound;
+    }
+
+    public void setPackingIndexOfRound(int packingIndexOfRound) {
+        this.packingIndexOfRound = packingIndexOfRound;
+    }
+
+    public String getScriptSign() {
+        return scriptSign;
+    }
+
+    public void setScriptSign(String scriptSign) {
+        this.scriptSign = scriptSign;
+    }
+
+    public List<String> getTxHashList() {
+        return txHashList;
+    }
+
+    public void setTxHashList(List<String> txHashList) {
+        this.txHashList = txHashList;
+    }
+
+    public boolean isSeedPacked() {
+        return isSeedPacked;
+    }
+
+    public void setSeedPacked(boolean seedPacked) {
+        isSeedPacked = seedPacked;
+    }
+
+    public long getRoundStartTime() {
+        return roundStartTime;
+    }
+
+    public void setRoundStartTime(long roundStartTime) {
+        this.roundStartTime = roundStartTime;
+    }
+
+    public int getAgentVersion() {
+        return agentVersion;
+    }
+
+    public void setAgentVersion(int agentVersion) {
+        this.agentVersion = agentVersion;
+    }
 }

@@ -25,7 +25,7 @@
 package io.nuls.contract.vm.util;
 
 import io.nuls.tools.crypto.ECKey;
-import org.spongycastle.util.encoders.Hex;
+import io.nuls.tools.crypto.HexUtil;
 
 public class Utils {
 
@@ -41,9 +41,9 @@ public class Utils {
         if (data == null || signature == null || pub == null) {
             return false;
         }
-        byte[] dataBytes = Hex.decode(data);
-        byte[] signatureBytes = Hex.decode(signature);
-        byte[] pubBytes = Hex.decode(pub);
+        byte[] dataBytes = HexUtil.decode(data);
+        byte[] signatureBytes = HexUtil.decode(signature);
+        byte[] pubBytes = HexUtil.decode(pub);
         return ECKey.verify(dataBytes, signatureBytes, pubBytes);
     }
 

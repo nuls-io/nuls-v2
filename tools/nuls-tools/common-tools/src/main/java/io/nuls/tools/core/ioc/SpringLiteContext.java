@@ -41,6 +41,7 @@ import net.sf.cglib.proxy.MethodInterceptor;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -60,8 +61,6 @@ public class SpringLiteContext {
     private static final Map<Class, Set<String>> CLASS_NAME_SET_MAP = new ConcurrentHashMap<>();
 
     private static MethodInterceptor interceptor;
-
-    private static boolean success;
 
     /**
      * 使用默认的拦截器加载roc环境
@@ -89,20 +88,18 @@ public class SpringLiteContext {
             throw new IllegalArgumentException("spring lite init package can't be null");
         }
         SpringLiteContext.interceptor = interceptor;
-        Set<Class> classes = new HashSet<>();
         Log.info("spring lite scan package : " + Arrays.toString(packName));
-        classes.addAll(ScanUtil.scan("io.nuls.tools.core.config"));
+        Set<Class> classes = new HashSet<>(ScanUtil.scan("io.nuls.tools.core.config"));
         Arrays.stream(packName).forEach(pack -> {
             classes.addAll(ScanUtil.scan(pack));
         });
         classes.stream()
                 //通过Order注解控制类加载顺序
                 .sorted((b1, b2) -> getOrderByClass(b1) > getOrderByClass(b2) ? 1 : -1)
-                .forEach((Class clazz) -> checkBeanClass(clazz));
+                .forEach(SpringLiteContext::checkBeanClass);
         configurationInjectToBean();
         autowireFields();
         callAfterPropertiesSet();
-        success = true;
     }
 
     /**
@@ -113,36 +110,69 @@ public class SpringLiteContext {
         ConfigurationLoader configLoader = getBean(ConfigurationLoader.class);
         //加载配置项
         configLoader.load();
-        BEAN_TEMP_MAP.entrySet().forEach(entry -> {
-            Object bean = entry.getValue();
-            Class<?> cls = BEAN_TYPE_MAP.get(entry.getKey());
+        Map<String, ConfigurationLoader.ConfigItem> values = new HashMap<>();
+        BEAN_TEMP_MAP.forEach((key1, bean) -> {
+            Class<?> cls = BEAN_TYPE_MAP.get(key1);
             Configuration configuration = cls.getAnnotation(Configuration.class);
             if (configuration != null) {
                 Set<Field> fields = getFieldSet(cls);
-                fields.stream().forEach(field -> {
+                fields.forEach(field -> {
                     Value annValue = field.getAnnotation(Value.class);
                     String key = field.getName();
-                    if(annValue != null){
+                    if (annValue != null) {
                         key = annValue.value();
                     }
                     Persist persist = field.getAnnotation(Persist.class);
                     boolean readPersist = persist != null;
-                    if(readPersist){
-                        ConfigSetting.set(bean, field, configLoader.getValue(key,configuration.persistDomain()));
-                    }else{
-                        ConfigSetting.set(bean, field, configLoader.getValue(key));
+                    ConfigurationLoader.ConfigItem configItem;
+                    if (readPersist) {
+                        configItem = configLoader.getConfigItemForPersist(configuration.domain(), key);
+                    } else {
+                        configItem = configLoader.getConfigItem(configuration.domain(), key);
+                    }
+                    if (configItem == null) {
+                        Log.warn("config item :{} not setting", key);
+                    } else {
+                        ConfigSetting.set(bean, field, configItem.getValue());
+                        values.put(cls.getSimpleName() + "." + field.getName(), configItem);
                     }
                 });
-            }else{
+            } else {
                 Set<Field> fields = getFieldSet(cls);
-                fields.stream().forEach(field -> {
+                fields.forEach(field -> {
                     Value annValue = field.getAnnotation(Value.class);
                     if (annValue != null) {
                         String key = annValue.value();
-                        ConfigSetting.set(bean, field, configLoader.getValue(key));
+                        //检查key在指定了domain的配置项列表里面是否出现多次
+                        if (configLoader.getConfigData().entrySet().stream().filter(entry -> !entry.getKey().equals(ConfigurationLoader.GLOBAL_DOMAIN) && entry.getValue().containsKey(key)).count() > 1) {
+                            throw new IllegalArgumentException("io.nuls.tools.core.annotation.Value " + key + " config item Find more ");
+                        }
+                        ConfigurationLoader.ConfigItem configItem = configLoader.getConfigItem(key);
+                        if (configItem == null) {
+                            Log.warn("not found config item : " + key + " to " + cls);
+                            try {
+                                field.setAccessible(true);
+                                values.put(cls.getSimpleName() + "." + field.getName(), new ConfigurationLoader.ConfigItem("DEFAULT", String.valueOf(field.get(bean))));
+                                field.setAccessible(false);
+                            } catch (IllegalAccessException e) {
+                                Log.error(e.getMessage());
+                            }
+                        } else {
+                            ConfigSetting.set(bean, field, configItem.getValue());
+                            values.put(cls.getSimpleName() + "." + field.getName(), configItem);
+                        }
                     }
                 });
             }
+        });
+        int maxKeyLength = values.keySet().stream().max((d1, d2) -> d1.length() > d2.length() ? 1 : -1).get().length();
+        Log.info("Configuration information:");
+        values.forEach((key, value) -> {
+            StringBuilder space = new StringBuilder();
+            for (var i = 0; i < maxKeyLength - key.length(); i++) {
+                space.append(" ");
+            }
+            Log.info("{} : {} ==> {}", key + space, value.getValue(), value.getConfigFile());
         });
     }
 
@@ -162,7 +192,7 @@ public class SpringLiteContext {
                     //call afterPropertiesSet 代码迁移到 callAfterPropertiesSet方法执行
                 }
             } catch (Exception e) {
-                Log.error("spring lite autowire fields failed! ",e);
+                Log.error("spring lite autowire fields failed! ", e);
                 System.exit(0);
             }
         }
@@ -181,7 +211,7 @@ public class SpringLiteContext {
                         try {
                             ((InitializingBean) bean).afterPropertiesSet();
                         } catch (Exception e) {
-                            Log.error("spring lite callAfterPropertiesSet fail :  " + bean.getClass(),e);
+                            Log.error("spring lite callAfterPropertiesSet fail :  " + bean.getClass(), e);
                             System.exit(0);
                         }
                     }
@@ -217,9 +247,7 @@ public class SpringLiteContext {
     private static Set<Field> getFieldSet(Class objType) {
         Set<Field> set = new HashSet<>();
         Field[] fields = objType.getDeclaredFields();
-        for (Field field : fields) {
-            set.add(field);
-        }
+        Collections.addAll(set, fields);
         if (!objType.getSuperclass().equals(Object.class)) {
             set.addAll(getFieldSet(objType.getSuperclass()));
         }
@@ -244,8 +272,7 @@ public class SpringLiteContext {
             return true;
         }
         String name = ((Autowired) automired).value();
-        Object value = null;
-        if (null == name || name.trim().length() == 0) {
+        if (name.trim().length() == 0) {
             Set<String> nameSet = CLASS_NAME_SET_MAP.get(field.getType());
             if (nameSet == null || nameSet.isEmpty()) {
                 throw new Exception("Can't find the model,field:" + field.getName());
@@ -255,7 +282,7 @@ public class SpringLiteContext {
                 name = field.getName();
             }
         }
-        value = getBean(name);
+        Object value = getBean(name);
         if (null == value) {
             throw new Exception("Can't find the model named:" + name);
         }
@@ -336,7 +363,7 @@ public class SpringLiteContext {
 
         if (null == ann) {
             ann = getFromArray(anns, Configuration.class);
-            if(null != ann) {
+            if (null != ann) {
                 aopProxy = true;
             }
 //            if (null != ann) {
@@ -351,19 +378,19 @@ public class SpringLiteContext {
             try {
                 loadBean(beanName, clazz, aopProxy);
             } catch (NulsException e) {
-                Log.error("spring lite load bean fail :  "  + clazz,e);
+                Log.error("spring lite load bean fail :  " + clazz, e);
                 System.exit(0);
                 return;
             }
         }
         Annotation interceptorAnn = getFromArray(anns, Interceptor.class);
         if (null != interceptorAnn) {
-            BeanMethodInterceptor interceptor = null;
+            BeanMethodInterceptor interceptor;
             try {
                 Constructor constructor = clazz.getDeclaredConstructor();
                 interceptor = (BeanMethodInterceptor) constructor.newInstance();
             } catch (Exception e) {
-                Log.error("spring lite instance bean fail :  " + clazz,e);
+                Log.error("spring lite instance bean fail :  " + clazz, e);
                 System.exit(0);
                 return;
             }
@@ -411,33 +438,27 @@ public class SpringLiteContext {
      * @param clazz    对象类型
      * @param proxy    是否返回动态代理的对象
      */
-    private static Object loadBean(String beanName, Class clazz, boolean proxy) throws NulsException {
+    private static void loadBean(String beanName, Class clazz, boolean proxy) throws NulsException {
         if (BEAN_OK_MAP.containsKey(beanName)) {
             Log.error("model name repetition (" + beanName + "):" + clazz.getName());
-            return BEAN_OK_MAP.get(beanName);
         }
         if (BEAN_TEMP_MAP.containsKey(beanName)) {
             Log.error("model name repetition (" + beanName + "):" + clazz.getName());
-            return BEAN_TEMP_MAP.get(beanName);
         }
-        Object bean = null;
+        Object bean;
         if (proxy) {
             bean = createProxy(clazz, interceptor);
         } else {
             try {
-                bean = clazz.newInstance();
-            } catch (InstantiationException e) {
-                Log.error(e.getMessage(),e);
-                throw new NulsException(e);
-            } catch (IllegalAccessException e) {
-                Log.error(e.getMessage(),e);
+                bean = clazz.getDeclaredConstructor().newInstance();
+            } catch (InstantiationException | IllegalAccessException | NoSuchMethodException | InvocationTargetException e) {
+                Log.error(e.getMessage(), e);
                 throw new NulsException(e);
             }
         }
         BEAN_TEMP_MAP.put(beanName, bean);
         BEAN_TYPE_MAP.put(beanName, clazz);
         addClassNameMap(clazz, beanName);
-        return bean;
     }
 
     /**
@@ -448,7 +469,6 @@ public class SpringLiteContext {
         Enhancer enhancer = new Enhancer();
         enhancer.setSuperclass(clazz);
         enhancer.setCallback(interceptor);
-//        System.out.println(clazz);
         return enhancer.create();
     }
 
@@ -460,12 +480,8 @@ public class SpringLiteContext {
      * @param beanName 对象实例名称
      */
     private static void addClassNameMap(Class clazz, String beanName) {
-        Set<String> nameSet = CLASS_NAME_SET_MAP.get(clazz);
-        if (null == nameSet) {
-            nameSet = new HashSet<>();
-        }
+        Set<String> nameSet = CLASS_NAME_SET_MAP.computeIfAbsent(clazz, k -> new HashSet<>());
         nameSet.add(beanName);
-        CLASS_NAME_SET_MAP.put(clazz, nameSet);
         if (null != clazz.getSuperclass() && !clazz.getSuperclass().equals(Object.class)) {
             addClassNameMap(clazz.getSuperclass(), beanName);
         }
@@ -501,7 +517,7 @@ public class SpringLiteContext {
         if (!(clazz.getSuperclass() instanceof Object) && clazz.getSuperclass() != null) {
             List<Annotation> supperAnno = getAnnotationForBean(clazz.getSuperclass());
             supperAnno.forEach(sa -> {
-                if (!res.stream().anyMatch(a -> a.annotationType().equals(sa.annotationType()))) {
+                if (res.stream().noneMatch(a -> a.annotationType().equals(sa.annotationType()))) {
                     res.add(sa);
                 }
             });
@@ -612,10 +628,6 @@ public class SpringLiteContext {
             }
         }
         return tlist;
-    }
-
-    public static boolean isInitSuccess() {
-        return success;
     }
 
     public static Collection<Object> getAllBeanList() {

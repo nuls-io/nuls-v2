@@ -31,7 +31,7 @@ public class StartServerProcessor implements Runnable {
         /*
          * 用于处理客户端链接的线程组
          * */
-        EventLoopGroup bossGroup = new NioEventLoopGroup();
+        EventLoopGroup bossGroup = new NioEventLoopGroup(1);
         /*
          * 用来进行网络通讯读写的线程组
          * */

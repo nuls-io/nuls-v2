@@ -27,24 +27,17 @@ package io.nuls.cmd.client.processor.transaction;
 
 
 import io.nuls.api.provider.Result;
-import io.nuls.api.provider.ServiceManager;
-import io.nuls.api.provider.transaction.TransferService;
 import io.nuls.api.provider.transaction.facade.TransferReq;
 import io.nuls.cmd.client.CommandBuilder;
-import io.nuls.cmd.client.CommandHelper;
 import io.nuls.cmd.client.CommandResult;
 import io.nuls.cmd.client.Config;
 import io.nuls.cmd.client.processor.CommandProcessor;
 import io.nuls.cmd.client.utils.Na;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
-import io.nuls.tools.model.StringUtils;
 
-import static io.nuls.cmd.client.CommandHelper.*;
-
+import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * @author: zhoulijun
@@ -64,8 +57,8 @@ public class TransferProcessor extends TransactionBaseProcessor implements Comma
     public String getHelp() {
         CommandBuilder builder = new CommandBuilder();
         builder.newLine(getCommandDescription())
-                .newLine("\t<address> \t\tsource address - Required")
-                .newLine("\t<toaddress> \treceiving address - Required")
+                .newLine("\t<address> \t\tsource address or alias - Required")
+                .newLine("\t<toaddress> \treceiving address or alias - Required")
                 .newLine("\t<amount> \t\tamount, you can have up to 8 valid digits after the decimal point - Required")
                 .newLine("\t[remark] \t\tremark - ");
         return builder.toString();
@@ -73,41 +66,17 @@ public class TransferProcessor extends TransactionBaseProcessor implements Comma
 
     @Override
     public String getCommandDescription() {
-        return "transfer <address> <toAddress> <amount> [remark] --transfer";
+        return "transfer <address>|<alias> <toAddress>|<alias> <amount> [remark] --transfer";
     }
 
     @Override
     public boolean argsValidate(String[] args) {
-        boolean result;
-        do {
-            int length = args.length;
-            if (length != 4 && length != 5) {
-                result = false;
-                break;
-            }
-            if (!CommandHelper.checkArgsIsNull(args)) {
-                result = false;
-                break;
-            }
-
-            if (!StringUtils.isNuls(args[3])) {
-                result = false;
-                break;
-            }
-//            TransferForm form = getTransferForm(args);
-//            if(null == form){
-//                result = false;
-//                break;
-//            }
-//            paramsData.set(form);
-//            result = StringUtils.isNotBlank(form.getToAddress());
-//            if (!result) {
-//                break;
-//            }
-            BigInteger amount = new BigInteger(args[3]);
-            result = amount.compareTo(BigInteger.ZERO) > 0;
-        } while (false);
-        return result;
+        checkArgsNumber(args,3,4);
+        checkArgs(()->{
+            BigDecimal amount = new BigDecimal(args[3]);
+            return amount.compareTo(BigDecimal.valueOf(0.01D)) >= 0;
+        },"amount must be a numeric and greater than 0.01");
+        return true;
     }
 
     private TransferReq buildTransferReq(String[] args) {

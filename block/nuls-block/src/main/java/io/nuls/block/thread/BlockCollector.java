@@ -23,7 +23,7 @@
 package io.nuls.block.thread;
 
 import io.nuls.base.data.Block;
-import io.nuls.block.cache.CacheHandler;
+import io.nuls.block.cache.BlockCacher;
 import io.nuls.block.manager.ContextManager;
 import io.nuls.block.message.HeightRangeMessage;
 import io.nuls.block.model.ChainContext;
@@ -84,7 +84,7 @@ public class BlockCollector implements Runnable {
                     commonLog.info("get " + size + " blocks:" + startHeight + "->" + endHeight + " ,from:" + node.getId() + ", success");
                     node.adjustCredit(true, result.getDuration());
                     nodes.offer(node);
-                    List<Block> blockList = CacheHandler.getBlockList(chainId, result.getMessageHash());
+                    List<Block> blockList = BlockCacher.getBlockList(chainId, result.getMessageHash());
                     blockList.sort(BLOCK_COMPARATOR);
                     queue.addAll(blockList);
                 } else {
@@ -119,7 +119,7 @@ public class BlockCollector implements Runnable {
             Node node = result.getNode();
             long endHeight = startHeight + size - 1;
             commonLog.info("get " + size + " blocks:" + startHeight + "->" + endHeight + " ,from:" + node.getId() + ", success");
-            List<Block> blockList = CacheHandler.getBlockList(chainId, result.getMessageHash());
+            List<Block> blockList = BlockCacher.getBlockList(chainId, result.getMessageHash());
             blockList.sort(BLOCK_COMPARATOR);
             queue.addAll(blockList);
             return;

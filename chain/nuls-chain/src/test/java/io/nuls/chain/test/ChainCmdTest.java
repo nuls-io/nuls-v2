@@ -86,6 +86,6 @@ public class ChainCmdTest {
     }
     @Test
     public void logTest(){
-        LoggerUtil.Log.info("this chain log test");
+        LoggerUtil.logger().info("this chain log test");
     }
 }

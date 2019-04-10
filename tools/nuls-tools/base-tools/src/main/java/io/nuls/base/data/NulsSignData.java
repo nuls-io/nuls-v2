@@ -40,46 +40,28 @@ import java.math.BigInteger;
  */
 public class NulsSignData extends BaseNulsData {
 
-    public static byte SIGN_ALG_ECC = (short) 0;
-    public static byte SIGN_ALG_DEFAULT = NulsSignData.SIGN_ALG_ECC;
-    /**
-     * 算法类型
-     */
-    protected byte signAlgType;
-
     /**
      * 签名字节组
      */
     protected byte[] signBytes;
-
-    public byte getSignAlgType() {
-        return signAlgType;
-    }
-
-    public void setSignAlgType(byte signAlgType) {
-        this.signAlgType = signAlgType;
-    }
 
     public NulsSignData() {
     }
 
     @Override
     public int size() {
-        return SerializeUtils.sizeOfBytes(signBytes) + 1;
+        return SerializeUtils.sizeOfBytes(signBytes);
     }
 
     @Override
     public void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
-        stream.write(signAlgType);
         stream.writeBytesWithLength(signBytes);
     }
 
     @Override
     public void parse(NulsByteBuffer byteBuffer) throws NulsException {
-        this.signAlgType = byteBuffer.readByte();
         this.signBytes = byteBuffer.readByLengthByte();
     }
-
 
     public byte[] getSignBytes() {
         return signBytes;
@@ -89,29 +71,16 @@ public class NulsSignData extends BaseNulsData {
         this.signBytes = signBytes;
     }
 
-
-    public NulsSignData sign(NulsDigestData nulsDigestData, short signAlgType, BigInteger privkey) {
-        if (signAlgType == NulsSignData.SIGN_ALG_ECC) {
-            ECKey ecKey = ECKey.fromPrivate(privkey);
-            byte[] signBytes = ecKey.sign(nulsDigestData.getDigestBytes(), privkey);
-            NulsSignData signData = new NulsSignData();
-            try {
-                signData.parse(signBytes, 0);
-            } catch (NulsException e) {
-                Log.error(e);
-            }
-            return signData;
-        }
-        return null;
-    }
-
     public NulsSignData sign(NulsDigestData nulsDigestData, BigInteger privkey) {
-        short signAlgType = NulsSignData.SIGN_ALG_DEFAULT;
-        if (signAlgType == NulsSignData.SIGN_ALG_ECC) {
-            ECKey ecKey = ECKey.fromPrivate(privkey);
-            return sign(nulsDigestData, signAlgType, privkey);
+        ECKey ecKey = ECKey.fromPrivate(privkey);
+        byte[] signBytes = ecKey.sign(nulsDigestData.getDigestBytes(), privkey);
+        NulsSignData signData = new NulsSignData();
+        try {
+            signData.parse(signBytes, 0);
+        } catch (NulsException e) {
+            Log.error(e);
         }
-        return null;
+        return signData;
     }
 
     @Override

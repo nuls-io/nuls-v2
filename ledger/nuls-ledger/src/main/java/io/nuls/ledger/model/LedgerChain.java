@@ -1,12 +1,9 @@
 package io.nuls.ledger.model;
 
 import io.nuls.ledger.storage.impl.RepositoryImpl;
+import io.nuls.ledger.storage.impl.UnconfirmedRepositoryImpl;
 import io.nuls.ledger.utils.LoggerUtil;
 import io.nuls.tools.core.ioc.SpringLiteContext;
-import io.nuls.tools.log.logback.NulsLogger;
-
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * 链信息类
@@ -25,5 +22,6 @@ public class LedgerChain {
         LoggerUtil.createLogger(chainId);
         //建立数据库
         SpringLiteContext.getBean(RepositoryImpl.class).initChainDb(chainId);
+        SpringLiteContext.getBean(UnconfirmedRepositoryImpl.class).initChainDb(chainId);
     }
 }

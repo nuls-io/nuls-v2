@@ -26,9 +26,9 @@ package io.nuls.transaction.service.impl;
 
 import io.nuls.tools.basic.Result;
 import io.nuls.tools.core.annotation.Autowired;
-import io.nuls.tools.core.annotation.Service;
-import io.nuls.transaction.service.ChainService;
+import io.nuls.tools.core.annotation.Component;
 import io.nuls.transaction.manager.ChainManager;
+import io.nuls.transaction.service.ChainService;
 
 import java.util.Map;
 
@@ -38,7 +38,7 @@ import java.util.Map;
  * @author: qinyifeng
  * @date: 2018/12/13
  */
-@Service
+@Component
 public class ChainServiceImpl implements ChainService {
     @Autowired
     private ChainManager chainManager;

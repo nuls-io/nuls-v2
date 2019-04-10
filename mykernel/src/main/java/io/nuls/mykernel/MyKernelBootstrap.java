@@ -20,16 +20,21 @@
 
 package io.nuls.mykernel;
 
-import ch.qos.logback.classic.Level;
 import io.nuls.rpc.info.HostInfo;
 import io.nuls.rpc.info.NoUse;
 import io.nuls.rpc.modulebootstrap.NulsRpcModuleBootstrap;
+import io.nuls.rpc.netty.channel.manager.ConnectManager;
+import io.nuls.tools.core.annotation.Component;
+import io.nuls.tools.core.annotation.Value;
+import io.nuls.tools.core.ioc.SpringLiteContext;
+import io.nuls.tools.log.Log;
 import io.nuls.tools.log.logback.LoggerBuilder;
 import io.nuls.tools.log.logback.NulsLogger;
 import io.nuls.tools.model.StringUtils;
 import io.nuls.tools.parse.config.IniEntity;
 import io.nuls.tools.thread.ThreadUtils;
 import lombok.Cleanup;
+import lombok.Setter;
 import org.ini4j.Config;
 import org.ini4j.Ini;
 
@@ -49,22 +54,38 @@ import java.util.concurrent.TimeUnit;
  * @version 1.0
  * @date 18-11-8 上午10:20
  */
+@Component
+@Setter
 public class MyKernelBootstrap {
+
+    @Value("logLevel")
+    private String logLevel = "INFO";
+
+    @Value("logPath")
+    private String logPath;
+
+    @Value("dataPath")
+    private String dataPath;
+
+    @Value("debug")
+    private int debug;
+
+    @Value("active.module")
+    private String config;
 
     private static List<String> MODULE_STOP_LIST_SCRIPT = new ArrayList<>();
 
     static String[] args;
 
-    static NulsLogger log = LoggerBuilder.getLogger("kernel", Level.INFO);
+    static NulsLogger log = LoggerBuilder.getLogger("kernel");
 
     public static void main(String[] args) throws Exception {
         NulsRpcModuleBootstrap.printLogo("/logo");
         System.setProperty("io.netty.tryReflectionSetAccessible", "true");
-        //增加程序结束的钩子，监听到主线程停止时，调用./stop.sh停止所有的子模块
         MyKernelBootstrap.args = args;
-        startOtherModule(args);
-        int port = NoUse.mockKernel();
-        log.info("MYKERNEL STARTED. PORT:{}",port);
+        SpringLiteContext.init("io.nuls.mykernel","io.nuls.rpc.cmd.kernel");
+        MyKernelBootstrap bootstrap = SpringLiteContext.getBean(MyKernelBootstrap.class);
+        bootstrap.doStart();
     }
 
     /**
@@ -73,9 +94,10 @@ public class MyKernelBootstrap {
      * 找到模块后，调用./start.sh脚本启动子模块
      * @param args
      */
-    private static void startOtherModule(String[] args) {
+    private void startOtherModule(String[] args) {
         //启动时第一个参数值为"startModule"时启动所有子模块
         if (args.length > 0 && "startModule".equals(args[0])) {
+            //增加程序结束的钩子，监听到主线程停止时，调用./stop.sh停止所有的子模块
             Runtime.getRuntime().addShutdownHook(new Thread(()->{
                 log.info("jvm shutdown");
                 log.info("停止子模块");
@@ -93,9 +115,9 @@ public class MyKernelBootstrap {
             ThreadUtils.createAndRunThread("startModule",()->{
                 try {
                     //等待mykernel启动完毕
-//                    while (!ConnectManager.isReady()) {
+                    while (!ConnectManager.isReady()) {
                         TimeUnit.SECONDS.sleep(5);
-//                    }
+                    }
                     //获取Modules目录
                     File modules = new File(args[1]);
                     //遍历modules目录查找带有module.ncf文件的目录
@@ -117,7 +139,7 @@ public class MyKernelBootstrap {
      * @param modules
      * @throws Exception
      */
-    private static void findModule(File modules) throws Exception {
+    private void findModule(File modules) throws Exception {
         if (modules.isFile()) {
             return;
         }
@@ -139,7 +161,7 @@ public class MyKernelBootstrap {
      * @param modules
      * @throws Exception
      */
-    private static void startModule(File modules) throws Exception {
+    private void startModule(File modules) throws Exception {
         Config cfg = new Config();
         cfg.setMultiSection(true);
         Ini ini = new Ini();
@@ -151,21 +173,17 @@ public class MyKernelBootstrap {
             ThreadUtils.createAndRunThread("module-start", () -> {
                 Process process = null;
                 try {
-//                    try {
-//                        TimeUnit.SECONDS.sleep(new Random().nextInt(100) % 10);
-//                    } catch (InterruptedException e) {
-//                        e.printStackTrace();
-//                    }
-                    process = Runtime.getRuntime().exec(
-                            modules.getAbsolutePath() + File.separator + "start.sh "
-                                    + " --jre " + System.getProperty("java.home")
-                                    + " --managerurl " + "ws://"+ HostInfo.getLocalIP()+":8887/ws "
-                                    + (StringUtils.isNotBlank(System.getProperty("log.path")) ? " --logpath " + System.getProperty("log.path") : "")
-                                    + (StringUtils.isNotBlank(System.getProperty("DataPath")) ? " --datapath " + System.getProperty("DataPath") : "")
-                                    + (StringUtils.isNotBlank(System.getProperty("debug")) ? " --debug " : "")
-                                    + (args.length > 2 ? " --config " + args[2] : "")
-                                    + " -r "
-                    );
+                    String cmd = modules.getAbsolutePath() + File.separator + "start.sh "
+                            + " --jre " + System.getProperty("java.home")
+                            + " --managerurl " + "ws://"+ HostInfo.getLocalIP()+":8887/ws "
+                            + (StringUtils.isNotBlank(logPath) ? " --logpath " + logPath: "")
+                            + (StringUtils.isNotBlank(dataPath) ? " --datapath " + dataPath : "")
+                            + (StringUtils.isNotBlank(logLevel) ? " --loglevel " + logLevel : "")
+                            + " --debug " + debug
+                            + (StringUtils.isNotBlank(config) ? " --config " + config : "")
+                            + " -r ";
+                    Log.info("run script:{}",cmd);
+                    process = Runtime.getRuntime().exec(cmd);
                     synchronized (MODULE_STOP_LIST_SCRIPT){
                         MODULE_STOP_LIST_SCRIPT.add(modules.getAbsolutePath() + File.separator + "stop.sh ");
                     }
@@ -177,12 +195,24 @@ public class MyKernelBootstrap {
         }
     }
 
-    private static void printRuntimeConsole(Process process) throws IOException {
+    private void printRuntimeConsole(Process process) throws IOException {
         @Cleanup BufferedReader input = new BufferedReader(new InputStreamReader(process.getInputStream()));
         String line;
         while ((line = input.readLine()) != null) {
             log.info(line);
         }
+    }
+
+    public boolean doStart() {
+        startOtherModule(args);
+        int port = 0;
+        try {
+            port = NoUse.startKernel();
+        } catch (Exception e) {
+            log.error("mykernel start fail",e);
+        }
+        log.info("MYKERNEL STARTED. PORT:{}",port);
+        return false;
     }
 
 }

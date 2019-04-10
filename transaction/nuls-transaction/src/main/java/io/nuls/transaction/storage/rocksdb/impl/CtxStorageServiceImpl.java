@@ -2,13 +2,13 @@ package io.nuls.transaction.storage.rocksdb.impl;
 
 import io.nuls.base.data.NulsDigestData;
 import io.nuls.db.service.RocksDBService;
-import io.nuls.tools.core.annotation.Service;
+import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.exception.NulsRuntimeException;
 import io.nuls.transaction.constant.TxDBConstant;
 import io.nuls.transaction.constant.TxErrorCode;
-import io.nuls.transaction.storage.rocksdb.CtxStorageService;
 import io.nuls.transaction.model.bo.CrossTx;
+import io.nuls.transaction.storage.rocksdb.CtxStorageService;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -22,7 +22,7 @@ import static io.nuls.transaction.utils.LoggerUtil.Log;
  * @author: Charlie
  * @date: 2018/11/13
  */
-@Service
+@Component
 public class CtxStorageServiceImpl implements CtxStorageService {
 
     @Override

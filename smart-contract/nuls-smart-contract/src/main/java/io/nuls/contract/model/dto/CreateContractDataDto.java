@@ -26,17 +26,13 @@ package io.nuls.contract.model.dto;
 
 import io.nuls.base.basic.AddressTool;
 import io.nuls.contract.model.txdata.ContractData;
-import lombok.Getter;
-import lombok.Setter;
-import org.spongycastle.util.encoders.Hex;
+import io.nuls.tools.crypto.HexUtil;
 
 import static io.nuls.contract.util.ContractUtil.bigInteger2String;
 
 /**
  * @author: PierreLuo
  */
-@Getter
-@Setter
 public class CreateContractDataDto {
     private String sender;
     private String contractAddress;
@@ -50,10 +46,65 @@ public class CreateContractDataDto {
         this.sender = AddressTool.getStringAddressByBytes(create.getSender());
         this.contractAddress = AddressTool.getStringAddressByBytes(create.getContractAddress());
         this.value = bigInteger2String(create.getValue());
-        this.hexCode = Hex.toHexString(create.getCode());
+        this.hexCode = HexUtil.encode(create.getCode());
         this.gasLimit = create.getGasLimit();
         this.price = create.getPrice();
         this.args = create.getArgs();
     }
 
+    public String getSender() {
+        return sender;
+    }
+
+    public void setSender(String sender) {
+        this.sender = sender;
+    }
+
+    public String getContractAddress() {
+        return contractAddress;
+    }
+
+    public void setContractAddress(String contractAddress) {
+        this.contractAddress = contractAddress;
+    }
+
+    public String getValue() {
+        return value;
+    }
+
+    public void setValue(String value) {
+        this.value = value;
+    }
+
+    public String getHexCode() {
+        return hexCode;
+    }
+
+    public void setHexCode(String hexCode) {
+        this.hexCode = hexCode;
+    }
+
+    public long getGasLimit() {
+        return gasLimit;
+    }
+
+    public void setGasLimit(long gasLimit) {
+        this.gasLimit = gasLimit;
+    }
+
+    public long getPrice() {
+        return price;
+    }
+
+    public void setPrice(long price) {
+        this.price = price;
+    }
+
+    public String[][] getArgs() {
+        return args;
+    }
+
+    public void setArgs(String[][] args) {
+        this.args = args;
+    }
 }

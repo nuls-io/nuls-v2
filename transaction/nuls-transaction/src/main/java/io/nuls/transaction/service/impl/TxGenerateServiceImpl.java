@@ -32,11 +32,13 @@ import io.nuls.base.signture.MultiSignTxSignature;
 import io.nuls.base.signture.P2PHKSignature;
 import io.nuls.base.signture.SignatureUtil;
 import io.nuls.base.signture.TransactionSignature;
+import io.nuls.rpc.util.RPCUtil;
 import io.nuls.tools.core.annotation.Autowired;
-import io.nuls.tools.core.annotation.Service;
+import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.crypto.ECKey;
 import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.exception.NulsException;
+import io.nuls.tools.exception.NulsRuntimeException;
 import io.nuls.tools.log.Log;
 import io.nuls.tools.model.BigIntegerUtils;
 import io.nuls.tools.model.StringUtils;
@@ -45,11 +47,11 @@ import io.nuls.transaction.constant.TxConstant;
 import io.nuls.transaction.constant.TxErrorCode;
 import io.nuls.transaction.model.bo.Chain;
 import io.nuls.transaction.model.bo.CrossTxData;
+import io.nuls.transaction.model.bo.VerifyTxResult;
 import io.nuls.transaction.model.dto.AccountSignDTO;
 import io.nuls.transaction.model.dto.CoinDTO;
 import io.nuls.transaction.rpc.call.AccountCall;
 import io.nuls.transaction.rpc.call.LedgerCall;
-import io.nuls.transaction.rpc.call.NetworkCall;
 import io.nuls.transaction.service.TxGenerateService;
 import io.nuls.transaction.service.TxService;
 import io.nuls.transaction.utils.TxUtil;
@@ -62,7 +64,7 @@ import java.util.*;
  * @author: Charlie
  * @date: 2019/3/15
  */
-@Service
+@Component
 public class TxGenerateServiceImpl implements TxGenerateService {
 
     @Autowired
@@ -70,8 +72,6 @@ public class TxGenerateServiceImpl implements TxGenerateService {
 
     @Autowired
     private TxConfig txConfig;
-
-    private static final Map<String, NonceHashData> PRE_HASH_MAP = new HashMap<>(TxConstant.INIT_CAPACITY_16);
 
     @Override
     public Map<String, String> createCrossMultiTransaction(Chain chain, List<CoinDTO> listFrom, List<CoinDTO> listTo, String remark) throws NulsException {
@@ -102,7 +102,7 @@ public class TxGenerateServiceImpl implements TxGenerateService {
             if (null == accountSignDTO) {
                 //如果密码为空直接返回未签名的多签交易
                 Map<String, String> map = new HashMap<>(2);
-                map.put(TxConstant.MULTI_TX_HEX, HexUtil.encode(tx.serialize()));
+                map.put(TxConstant.MULTI_TX, RPCUtil.encode(tx.serialize()));
                 return map;
             } else {
                 //获多签交易发起者的eckey,进行第一个签名
@@ -163,14 +163,27 @@ public class TxGenerateServiceImpl implements TxGenerateService {
             TransactionSignature transactionSignature = new TransactionSignature();
             List<P2PHKSignature> p2PHKSignatures = new ArrayList<>();
             for (CoinDTO coinDTO : listFrom) {
-                String digestBytesStr = HexUtil.encode(tx.getHash().getDigestBytes());
-                P2PHKSignature p2PHKSignature = AccountCall.signDigest(coinDTO.getAddress(), coinDTO.getPassword(), digestBytesStr);
+                P2PHKSignature p2PHKSignature = AccountCall.signDigest(coinDTO.getAddress(), coinDTO.getPassword(), tx.getHash().getDigestBytes());
                 p2PHKSignatures.add(p2PHKSignature);
             }
             transactionSignature.setP2PHKSignatures(p2PHKSignatures);
             tx.setTransactionSignature(transactionSignature.serialize());
-            this.cacheTxHash(tx);
-            txService.newTx(chain, tx);
+
+            //调用交易验证器
+            if(!txService.verify(chain, tx)){
+                chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).error("new ctx validator failed...");
+                throw new NulsRuntimeException(TxErrorCode.TX_VERIFY_FAIL);
+            }
+            VerifyTxResult verifyTxResult = LedgerCall.commitUnconfirmedTx(chain, RPCUtil.encode(tx.serialize()));
+            if(!verifyTxResult.success()){
+                chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).error("new tx verifyCoinData failed...");
+                throw new NulsRuntimeException(TxErrorCode.COINDATA_VERIFY_FAIL);
+            }
+            //发起新交易
+            if(!txService.newTx(chain,tx)) {
+                //如果发给交易模块失败,
+                LedgerCall.rollBackUnconfirmTx(chain, RPCUtil.encode(tx.serialize()));
+            }
             return tx;
         } catch (IOException e) {
             Log.error(e);
@@ -207,7 +220,7 @@ public class TxGenerateServiceImpl implements TxGenerateService {
         if (!AccountCall.isEncrypted(address)) {
             throw new NulsException(TxErrorCode.ACCOUNT_NOT_ENCRYPTED);
         }
-        Transaction transaction = TxUtil.getTransaction(tx);
+        Transaction transaction = TxUtil.getInstanceRpcStr(tx, Transaction.class);
         String priKey = AccountCall.getPrikey(address, password);
         ECKey ecKey = ECKey.fromPrivate(new BigInteger(ECKey.SIGNUM, HexUtil.decode(priKey)));
         MultiSignTxSignature multiSignTxSignature = new MultiSignTxSignature();
@@ -260,13 +273,26 @@ public class TxGenerateServiceImpl implements TxGenerateService {
                 p2PHKSignatures.sort(P2PHKSignature.PUBKEY_COMPARATOR);
                 multiSignTxSignature.setP2PHKSignatures(p2PHKSignatures);
                 tx.setTransactionSignature(multiSignTxSignature.serialize());
-                this.cacheTxHash(tx);
-                txService.newTx(chain, tx);
+                //调用交易验证器
+                if(!txService.verify(chain, tx)){
+                    chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).error("new ctx validator failed...");
+                    throw new NulsRuntimeException(TxErrorCode.TX_VERIFY_FAIL);
+                }
+                VerifyTxResult verifyTxResult = LedgerCall.commitUnconfirmedTx(chain, RPCUtil.encode(tx.serialize()));
+                if(!verifyTxResult.success()){
+                    chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).error("new tx verifyCoinData failed...");
+                    throw new NulsRuntimeException(TxErrorCode.COINDATA_VERIFY_FAIL);
+                }
+                //发起新交易
+                if(!txService.newTx(chain,tx)) {
+                    //如果发给交易模块失败,
+                    LedgerCall.rollBackUnconfirmTx(chain, RPCUtil.encode(tx.serialize()));
+                }
                 map.put(TxConstant.MULTI_TX_HASH, tx.getHash().getDigestHex());
             } else {
                 multiSignTxSignature.setP2PHKSignatures(p2PHKSignatures);
                 tx.setTransactionSignature(multiSignTxSignature.serialize());
-                map.put(TxConstant.MULTI_TX_HEX, HexUtil.encode(tx.serialize()));
+                map.put(TxConstant.MULTI_TX, RPCUtil.encode(tx.serialize()));
             }
             return map;
         } catch (IOException e) {
@@ -359,9 +385,7 @@ public class TxGenerateServiceImpl implements TxGenerateService {
 
 
     /**
-     * 获取nonce
-     * 先获取上一个发出去的交易的hash,用来计算当前交易的nonce,如果没有缓存上一个交易hash则直接向账本获取nonce
-     *
+     * 向账本获取nonce
      * @param chain
      * @param address
      * @param assetChainId
@@ -370,29 +394,9 @@ public class TxGenerateServiceImpl implements TxGenerateService {
      * @throws NulsException
      */
     public byte[] getNonce(Chain chain, String address, int assetChainId, int assetId) throws NulsException {
-        String key = address + "_" + assetChainId + "_" + assetId;
-        NonceHashData nonceHashData = PRE_HASH_MAP.get(key);
-        if (null == nonceHashData || (NetworkCall.getCurrentTimeMillis() - nonceHashData.getCacheTimestamp() > txConfig.getHashTtl())) {
-            return LedgerCall.getNonce(chain, address, assetChainId, assetId);
-        } else {
-            return TxUtil.getNonceByPreHash(nonceHashData.getHash());
-        }
+        return LedgerCall.getNonce(chain, address, assetChainId, assetId);
     }
 
-    /**
-     * 缓存发出的交易hash
-     *
-     * @param tx
-     * @throws NulsException
-     */
-    private void cacheTxHash(Transaction tx) throws NulsException {
-        CoinData coinData = TxUtil.getCoinData(tx);
-        for (CoinFrom coinFrom : coinData.getFrom()) {
-            String address = AddressTool.getStringAddressByBytes(coinFrom.getAddress());
-            String key = address + "_" + coinFrom.getAssetsChainId() + "_" + coinFrom.getAssetsId();
-            PRE_HASH_MAP.put(key, new NonceHashData(tx.getHash(), NetworkCall.getCurrentTimeMillis()));
-        }
-    }
 
     /**
      * assembly coinTo 组装to

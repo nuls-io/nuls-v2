@@ -29,10 +29,12 @@ import io.nuls.account.constant.AccountConstant;
 import io.nuls.account.constant.AccountErrorCode;
 import io.nuls.account.model.bo.Account;
 import io.nuls.account.model.bo.Chain;
+import io.nuls.account.model.bo.VerifyTxResult;
 import io.nuls.account.model.bo.tx.AliasTransaction;
 import io.nuls.account.model.bo.tx.txdata.Alias;
 import io.nuls.account.model.po.AccountPo;
 import io.nuls.account.model.po.AliasPo;
+import io.nuls.account.rpc.call.LedgerCmdCall;
 import io.nuls.account.rpc.call.NetworkCall;
 import io.nuls.account.rpc.call.TransactionCmdCall;
 import io.nuls.account.service.AccountCacheService;
@@ -47,25 +49,20 @@ import io.nuls.base.basic.AddressTool;
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.basic.TransactionFeeCalculator;
 import io.nuls.base.constant.BaseConstant;
-import io.nuls.base.data.Coin;
-import io.nuls.base.data.CoinData;
-import io.nuls.base.data.CoinFrom;
-import io.nuls.base.data.CoinTo;
-import io.nuls.base.data.NulsDigestData;
-import io.nuls.base.data.Transaction;
+import io.nuls.base.data.*;
 import io.nuls.base.signture.P2PHKSignature;
 import io.nuls.base.signture.SignatureUtil;
 import io.nuls.base.signture.TransactionSignature;
+import io.nuls.rpc.util.RPCUtil;
 import io.nuls.tools.basic.InitializingBean;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Service;
 import io.nuls.tools.crypto.ECKey;
-import io.nuls.tools.crypto.HexUtil;
+import io.nuls.tools.exception.NulsException;
+import io.nuls.tools.exception.NulsRuntimeException;
 import io.nuls.tools.model.BigIntegerUtils;
 import io.nuls.tools.model.FormatValidUtils;
 import io.nuls.tools.model.StringUtils;
-import io.nuls.tools.exception.NulsException;
-import io.nuls.tools.exception.NulsRuntimeException;
 
 import java.io.IOException;
 import java.math.BigInteger;
@@ -136,8 +133,27 @@ public class AliasServiceImpl implements AliasService, InitializingBean {
         tx = createAliasTrasactionWithoutSign(account, aliasName);
         //签名别名交易
         signTransaction(tx, account, password);
-        //广播别名交易
-        TransactionCmdCall.newTx(account.getChainId(), HexUtil.encode(tx.serialize()));
+
+        String txStr = RPCUtil.encode(tx.serialize());
+        //调用交易验证器
+        if(!TransactionCmdCall.baseValidateTx(chainId, txStr)){
+            LoggerUtil.logger.error("new tx base validator failed...");
+            throw new NulsRuntimeException(AccountErrorCode.TX_DATA_VALIDATION_ERROR);
+        }
+        if(!this.aliasTxValidate(chainId, tx)){
+            LoggerUtil.logger.error("new tx validator failed...");
+            throw new NulsRuntimeException(AccountErrorCode.TX_DATA_VALIDATION_ERROR);
+        }
+        VerifyTxResult verifyTxResult = LedgerCmdCall.commitUnconfirmedTx(chainId, RPCUtil.encode(tx.serialize()));
+        if(!verifyTxResult.success()){
+            LoggerUtil.logger.error("new tx verifyCoinData failed...");
+            throw new NulsRuntimeException(AccountErrorCode.TX_DATA_VALIDATION_ERROR);
+        }
+        //发起新交易
+        if(!TransactionCmdCall.newTx(chainId, txStr)) {
+            //如果发给交易模块失败,
+            LedgerCmdCall.rollBackUnconfirmTx(chainId, txStr);
+        }
         return tx;
     }
 
@@ -340,8 +356,6 @@ public class AliasServiceImpl implements AliasService, InitializingBean {
         tx.setCoinData(coinData.serialize());
         //计算交易数据摘要哈希
         tx.setHash(NulsDigestData.calcDigestData(tx.serializeForHash()));
-        //缓存当前交易hash
-        TxUtil.cacheTxHash(tx);
         return tx;
     }
 

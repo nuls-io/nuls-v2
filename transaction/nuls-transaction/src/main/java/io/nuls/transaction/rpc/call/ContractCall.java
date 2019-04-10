@@ -71,15 +71,15 @@ public class ContractCall {
     /**
      * 调用智能合约, 合约执行成功与否,不影响交易的打包
      * @param chain
-     * @param txHex
+     * @param tx
      * @return
      * @throws NulsException
      */
-    public static boolean invokeContract(Chain chain, String txHex) {
+    public static boolean invokeContract(Chain chain, String tx) {
 
         Map<String, Object> params = new HashMap(TxConstant.INIT_CAPACITY_8);
         params.put("chainId", chain.getChainId());
-        params.put("txHex", txHex);
+        params.put("tx", tx);
         try {
             Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, "sc_invoke_contract", params);
             if(!response.isSuccess()){

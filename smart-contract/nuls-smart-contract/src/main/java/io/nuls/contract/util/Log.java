@@ -3,7 +3,6 @@ package io.nuls.contract.util;
 import ch.qos.logback.classic.Level;
 import com.alibaba.fastjson.JSONObject;
 import io.nuls.tools.io.IoUtils;
-import io.nuls.tools.log.logback.LoggerBuilder;
 import io.nuls.tools.log.logback.NulsLogger;
 import org.apache.commons.io.IOUtils;
 

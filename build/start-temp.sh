@@ -53,12 +53,15 @@ while [ ! -z $1 ] ; do
             LOGS_DIR="$2/$APP_NAME"
             logpath="-Dlog.path=$2/$APP_NAME";
             shift 2 ;;
+        "--loglevel")
+            logLevel="-Dlog.level=$2";
+            shift 2 ;;
         "--datapath")
             datapath="-DDataPath=$2";
             shift 2 ;;
         "--debug")
-            DEBUG="1";
-            shift 1 ;;
+            DEBUG="$2";
+            shift 2 ;;
         * ) shift
     esac
 done  
@@ -96,7 +99,7 @@ checkIsRunning(){
 # 检查java版本
 checkJavaVersion(){
     JAVA="$JAVA_HOME/bin/java"
-    if [[ ! -r "$JAVA" ]]; then
+    if [ ! -r "$JAVA" ]; then
         JAVA='java'
     fi
 
@@ -113,12 +116,12 @@ checkLogDir
 checkIsRunning
 CLASSPATH=" -classpath ../../libs/*:${JAR_FILE} "
 JAVA_OPTS=" -server -XX:+UseG1GC -XX:MaxGCPauseMillis=50 -Xms${JOPT_XMS}m -Xmx${JOPT_XMX}m -XX:MetaspaceSize=${JOPT_METASPACESIZE}m -XX:MaxMetaspaceSize=${JOPT_MAXMETASPACESIZE}m -XX:+ParallelRefProcEnabled -XX:+TieredCompilation -XX:+ExplicitGCInvokesConcurrent $JAVA_OPTS"
-JAVA_OPTS="${JAVA_OPTS} ${logpath} ${datapath} "
+JAVA_OPTS="${JAVA_OPTS} ${logpath} ${logLevel} ${datapath} "
 JAVA_OOM_DUMP="-XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=${LOGS_DIR}/oom-${START_DATE}.hprof"
 JAVA_OPTS="$JAVA_OPTS $JAVA_GC_LOG $JAVA_OOM_DUMP  -Dsys.name=$APP_NAME -Dactive.module=${config} "
 # echo "${JAVA} ${JAVA_OPTS} ${CLASSPATH} ${MAIN_CLASS} ${NulstarUrl}"
 CMD="${JAVA} ${JAVA_OPTS} ${CLASSPATH} ${MAIN_CLASS} ${NulstarUrl} "
-if [ -n "$DEBUG" ]; then
+if [ "$DEBUG" == "1" ]; then
     CMD="${CMD} > ${STDOUT_FILE}"
 fi
 CMD="$CMD 2>&1 & ";

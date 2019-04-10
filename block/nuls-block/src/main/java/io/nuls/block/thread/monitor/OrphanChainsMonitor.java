@@ -27,6 +27,7 @@ import io.nuls.block.manager.BlockChainManager;
 import io.nuls.block.manager.ContextManager;
 import io.nuls.block.model.Chain;
 import io.nuls.block.model.ChainContext;
+import io.nuls.tools.exception.NulsRuntimeException;
 import io.nuls.tools.log.logback.NulsLogger;
 
 import java.util.LinkedList;
@@ -137,7 +138,97 @@ public class OrphanChainsMonitor implements Runnable {
         }
     }
 
+    /**
+     * 孤儿链与其他链的关系可能是
+     *  相连
+     *  重复
+     *  分叉
+     *  无关
+     * 四种关系
+     *
+     * @param orphanChain
+     * @param masterChain
+     * @param forkChains
+     * @param orphanChains
+     */
+    private void mark(Chain orphanChain, Chain masterChain, SortedSet<Chain> forkChains, SortedSet<Chain> orphanChains) {
+        try {
+            //1.判断与主链是否相连
+            if (orphanChain.getParent() == null && tryAppend(masterChain, orphanChain)) {
+                orphanChain.setType(ChainTypeEnum.MASTER_APPEND);
+                return;
+            }
+            //2.判断是否与主链重复
+            if (orphanChain.getParent() == null && tryDuplicate(masterChain, orphanChain)) {
+                orphanChain.setType(ChainTypeEnum.MASTER_DUPLICATE);
+                return;
+            }
+            //3.判断是否从主链分叉
+            if (orphanChain.getParent() == null && tryFork(masterChain, orphanChain)) {
+                orphanChain.setType(ChainTypeEnum.MASTER_FORK);
+                return;
+            }
+            for (Chain forkChain : forkChains) {
+                //4.判断与分叉链是否相连
+                if (orphanChain.getParent() == null && tryAppend(forkChain, orphanChain)) {
+                    orphanChain.setType(ChainTypeEnum.FORK_APPEND);
+                    return;
+                }
+                //5.判断与分叉链是否重复
+                if (orphanChain.getParent() == null && tryDuplicate(forkChain, orphanChain)) {
+                    orphanChain.setType(ChainTypeEnum.FORK_DUPLICATE);
+                    return;
+                }
+                //6.判断是否从分叉链分叉
+                if (orphanChain.getParent() == null && tryFork(forkChain, orphanChain)) {
+                    orphanChain.setType(ChainTypeEnum.FORK_FORK);
+                    return;
+                }
+            }
+            for (Chain anotherOrphanChain : orphanChains) {
+                //排除自身
+                if (anotherOrphanChain.equals(orphanChain)) {
+                    continue;
+                }
+                //7.判断与孤儿链是否相连
+                if (anotherOrphanChain.getParent() == null && tryAppend(orphanChain, anotherOrphanChain)) {
+                    anotherOrphanChain.setType(ChainTypeEnum.ORPHAN_APPEND);
+                    return;
+                }
+                if (orphanChain.getParent() == null && tryAppend(anotherOrphanChain, orphanChain)) {
+                    orphanChain.setType(ChainTypeEnum.ORPHAN_APPEND);
+                    return;
+                }
+                //8.判断与孤儿链是否重复
+                if (anotherOrphanChain.getParent() == null && tryDuplicate(orphanChain, anotherOrphanChain)) {
+                    anotherOrphanChain.setType(ChainTypeEnum.ORPHAN_DUPLICATE);
+                    return;
+                }
+                if (orphanChain.getParent() == null && tryDuplicate(anotherOrphanChain, orphanChain)) {
+                    orphanChain.setType(ChainTypeEnum.ORPHAN_DUPLICATE);
+                    return;
+                }
+                //9.判断是否从孤儿链分叉
+                if (anotherOrphanChain.getParent() == null && tryFork(orphanChain, anotherOrphanChain)) {
+                    anotherOrphanChain.setType(ChainTypeEnum.ORPHAN_FORK);
+                    return;
+                }
+                if (orphanChain.getParent() == null && tryFork(anotherOrphanChain, orphanChain)) {
+                    orphanChain.setType(ChainTypeEnum.ORPHAN_FORK);
+                    return;
+                }
+            }
+        } catch (NulsRuntimeException e) {
+            orphanChain.setType(ChainTypeEnum.DATA_ERROR);
+        }
+    }
+
     private void copy(Integer chainId, SortedSet<Chain> maintainedOrphanChains, Chain orphanChain) {
+        //如果标记为数据错误,orphanChain不会复制到新的孤儿链集合,也不会进入分叉链集合,所有orphanChain的直接子链移除父链引用，标记为ChainTypeEnum.ORPHAN，就是断开与数据错误的链的关联关系
+        if (orphanChain.getType().equals(ChainTypeEnum.DATA_ERROR)) {
+            orphanChain.getSons().forEach(e -> {e.setType(ChainTypeEnum.ORPHAN);e.setParent(null);});
+            return;
+        }
         //如果标记为主链重复,orphanChain不会复制到新的孤儿链集合,也不会进入分叉链集合,所有orphanChain的直接子链标记为ChainTypeEnum.MASTER_FORK
         if (orphanChain.getType().equals(ChainTypeEnum.MASTER_DUPLICATE)) {
             orphanChain.getSons().forEach(e -> e.setType(ChainTypeEnum.MASTER_FORK));
@@ -187,87 +278,6 @@ public class OrphanChainsMonitor implements Runnable {
         //如果标记为孤儿链(未变化),或者从孤儿链分叉,复制到新的孤儿链集合
         if (orphanChain.getType().equals(ChainTypeEnum.ORPHAN)) {
             maintainedOrphanChains.add(orphanChain);
-        }
-    }
-
-    /**
-     * 孤儿链与其他链的关系可能是
-     *  相连
-     *  重复
-     *  分叉
-     *  无关
-     * 四种关系
-     *
-     * @param orphanChain
-     * @param masterChain
-     * @param forkChains
-     * @param orphanChains
-     */
-    private void mark(Chain orphanChain, Chain masterChain, SortedSet<Chain> forkChains, SortedSet<Chain> orphanChains) {
-        //1.判断与主链是否相连
-        if (orphanChain.getParent() == null && tryAppend(masterChain, orphanChain)) {
-            orphanChain.setType(ChainTypeEnum.MASTER_APPEND);
-            return;
-        }
-        //2.判断是否与主链重复
-        if (orphanChain.getParent() == null && tryDuplicate(masterChain, orphanChain)) {
-            orphanChain.setType(ChainTypeEnum.MASTER_DUPLICATE);
-            return;
-        }
-        //3.判断是否从主链分叉
-        if (orphanChain.getParent() == null && tryFork(masterChain, orphanChain)) {
-            orphanChain.setType(ChainTypeEnum.MASTER_FORK);
-            return;
-        }
-        for (Chain forkChain : forkChains) {
-            //4.判断与分叉链是否相连
-            if (orphanChain.getParent() == null && tryAppend(forkChain, orphanChain)) {
-                orphanChain.setType(ChainTypeEnum.FORK_APPEND);
-                return;
-            }
-            //5.判断与分叉链是否重复
-            if (orphanChain.getParent() == null && tryDuplicate(forkChain, orphanChain)) {
-                orphanChain.setType(ChainTypeEnum.FORK_DUPLICATE);
-                return;
-            }
-            //6.判断是否从分叉链分叉
-            if (orphanChain.getParent() == null && tryFork(forkChain, orphanChain)) {
-                orphanChain.setType(ChainTypeEnum.FORK_FORK);
-                return;
-            }
-        }
-        for (Chain anotherOrphanChain : orphanChains) {
-            //排除自身
-            if (anotherOrphanChain.equals(orphanChain)) {
-                continue;
-            }
-            //7.判断与孤儿链是否相连
-            if (anotherOrphanChain.getParent() == null && tryAppend(orphanChain, anotherOrphanChain)) {
-                anotherOrphanChain.setType(ChainTypeEnum.ORPHAN_APPEND);
-                return;
-            }
-            if (orphanChain.getParent() == null && tryAppend(anotherOrphanChain, orphanChain)) {
-                orphanChain.setType(ChainTypeEnum.ORPHAN_APPEND);
-                return;
-            }
-            //8.判断与孤儿链是否重复
-            if (anotherOrphanChain.getParent() == null && tryDuplicate(orphanChain, anotherOrphanChain)) {
-                anotherOrphanChain.setType(ChainTypeEnum.ORPHAN_DUPLICATE);
-                return;
-            }
-            if (orphanChain.getParent() == null && tryDuplicate(anotherOrphanChain, orphanChain)) {
-                orphanChain.setType(ChainTypeEnum.ORPHAN_DUPLICATE);
-                return;
-            }
-            //9.判断是否从孤儿链分叉
-            if (anotherOrphanChain.getParent() == null && tryFork(orphanChain, anotherOrphanChain)) {
-                anotherOrphanChain.setType(ChainTypeEnum.ORPHAN_FORK);
-                return;
-            }
-            if (orphanChain.getParent() == null && tryFork(anotherOrphanChain, orphanChain)) {
-                orphanChain.setType(ChainTypeEnum.ORPHAN_FORK);
-                return;
-            }
         }
     }
 

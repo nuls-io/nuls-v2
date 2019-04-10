@@ -24,6 +24,8 @@ import io.nuls.api.db.DBTableService;
 import io.nuls.api.manager.ScheduleManager;
 import io.nuls.api.model.po.config.ApiConfig;
 import io.nuls.api.model.po.db.ChainInfo;
+import io.nuls.api.provider.Provider;
+import io.nuls.api.provider.ServiceManager;
 import io.nuls.api.rpc.jsonRpc.JsonRpcServer;
 import io.nuls.rpc.info.HostInfo;
 import io.nuls.rpc.model.ModuleE;
@@ -33,6 +35,7 @@ import io.nuls.rpc.modulebootstrap.RpcModule;
 import io.nuls.rpc.modulebootstrap.RpcModuleState;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
+import io.nuls.tools.core.config.ConfigurationLoader;
 import io.nuls.tools.core.ioc.SpringLiteContext;
 import io.nuls.tools.log.Log;
 
@@ -57,6 +60,12 @@ public class ApiModuleBootstrap extends RpcModule {
             args = new String[]{"ws://" + HostInfo.getLocalIP() + ":8887/ws"};
         }
         Thread.currentThread().setName("api-module-main");
+
+        ConfigurationLoader configurationLoader = new ConfigurationLoader();
+        configurationLoader.load();
+        Provider.ProviderType providerType = Provider.ProviderType.valueOf(configurationLoader.getValue("providerType"));
+        int defaultChainId = Integer.parseInt(configurationLoader.getValue("defaultChainId"));
+        ServiceManager.init(defaultChainId, providerType);
         NulsRpcModuleBootstrap.run("io.nuls", args);
     }
 
@@ -90,9 +99,9 @@ public class ApiModuleBootstrap extends RpcModule {
     @Override
     public Module[] getDependencies() {
         return new Module[]{
-                new Module(ModuleE.CS.abbr, "1.0"),
-                new Module(ModuleE.BL.abbr, "1.0"),
-                new Module(ModuleE.SC.abbr, "1.0")
+//                new Module(ModuleE.CS.abbr, "1.0"),
+//                new Module(ModuleE.BL.abbr, "1.0")
+//                new Module(ModuleE.SC.abbr, "1.0")
         };
     }
 
@@ -128,7 +137,7 @@ public class ApiModuleBootstrap extends RpcModule {
             JsonRpcServer server = new JsonRpcServer();
             server.startServer(ApiContext.listenerIp, ApiContext.rpcPort);
         } catch (Exception e) {
-            Log.error("------------------------api module启动失败---------------------------");
+            Log.error("------------------------api-module running failed---------------------------");
             Log.error(e);
             System.exit(-1);
         }

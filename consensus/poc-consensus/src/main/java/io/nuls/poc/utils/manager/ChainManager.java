@@ -3,13 +3,13 @@ package io.nuls.poc.utils.manager;
 import ch.qos.logback.classic.Level;
 import io.nuls.db.constant.DBErrorCode;
 import io.nuls.db.service.RocksDBService;
-import io.nuls.poc.config.ConsensusConfig;
+import io.nuls.poc.constant.ConsensusConfig;
 import io.nuls.poc.constant.ConsensusConstant;
 import io.nuls.poc.model.bo.Chain;
 import io.nuls.poc.model.bo.config.ConfigBean;
 import io.nuls.poc.model.bo.tx.TxRegisterDetail;
 import io.nuls.poc.storage.ConfigService;
-import io.nuls.poc.utils.CallMethodUtils;
+import io.nuls.poc.rpc.call.CallMethodUtils;
 import io.nuls.poc.utils.annotation.ResisterTx;
 import io.nuls.poc.utils.enumeration.TxMethodType;
 import io.nuls.poc.utils.enumeration.TxProperty;
@@ -50,8 +50,6 @@ public class ChainManager {
     private RoundManager roundManager;
     @Autowired
     private SchedulerManager schedulerManager;
-    @Autowired
-    private BlockManager blockManager;
     @Autowired
     private ConsensusConfig config;
     private Map<Integer, Chain> chainMap = new ConcurrentHashMap<>();
@@ -227,13 +225,9 @@ public class ChainManager {
             and the main chain configuration information needs to be read from the configuration file at this time.
             */
             if (configMap == null || configMap.size() == 0) {
-                /*String configJson = IoUtils.read(ConsensusConstant.CONFIG_FILE_PATH);
-                List<ConfigItem> configItemList = JSONUtils.json2list(configJson, ConfigItem.class);
-                ConfigBean configBean = ConfigManager.initManager(configItemList);
-                if (configBean == null) {
-                    return null;
-                }*/
                 ConfigBean configBean = config.getConfigBean();
+                configBean.setPassword(config.getPassword());
+                configBean.setSeedNodes(config.getSeedNodes());
                 configBean.setBlockReward(configBean.getInflationAmount().divide(ConsensusConstant.YEAR_MILLISECOND.divide(BigInteger.valueOf(configBean.getPackingInterval()))));
                 boolean saveSuccess = configService.save(configBean,configBean.getChainId());
                 if(saveSuccess){
@@ -304,7 +298,7 @@ public class ChainManager {
      */
     private void initCache(Chain chain) {
         try {
-            blockManager.loadBlockHeader(chain);
+            CallMethodUtils.loadBlockHeader(chain);
             agentManager.loadAgents(chain);
             depositManager.loadDeposits(chain);
             punishManager.loadPunishes(chain);

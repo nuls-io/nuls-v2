@@ -28,6 +28,7 @@ package io.nuls.cmd.client.utils;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.nuls.cmd.client.processor.ErrorCodeConstants;
 import io.nuls.tools.exception.NulsRuntimeException;
+import io.nuls.tools.log.Log;
 import io.nuls.tools.model.LongUtils;
 
 import java.io.Serializable;
@@ -322,9 +323,17 @@ public final class Na implements Comparable<Na>, Serializable {
             return String.valueOf(object);
         } else if (object instanceof Float) {
             return String.valueOf(object);
+        } else if (object instanceof String) {
+            try {
+                return Na.valueOf(Long.parseLong(object.toString())).toText();
+            } catch (NumberFormatException e) {
+                Log.warn("Number Format error, error object is [{}]", object);
+                return "0";
+            }
         } else {
             return "0";
         }
         return (Na.valueOf(na)).toText();
     }
+
 }

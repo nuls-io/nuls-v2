@@ -1,6 +1,7 @@
 package io.nuls.transaction.task;
 
 import io.nuls.base.data.Transaction;
+import io.nuls.rpc.util.RPCUtil;
 import io.nuls.tools.core.ioc.SpringLiteContext;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.transaction.cache.PackablePool;
@@ -11,17 +12,16 @@ import io.nuls.transaction.model.po.TransactionConfirmedPO;
 import io.nuls.transaction.rpc.call.LedgerCall;
 import io.nuls.transaction.rpc.call.NetworkCall;
 import io.nuls.transaction.service.TxService;
-import io.nuls.transaction.storage.h2.TransactionH2Service;
 import io.nuls.transaction.storage.rocksdb.UnconfirmedTxStorageService;
 import io.nuls.transaction.storage.rocksdb.UnverifiedTxStorageService;
 import io.nuls.transaction.utils.TransactionTimeComparator;
-import io.nuls.transaction.utils.TxUtil;
 
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
 /**
+ * 处理由其他节点广播的交易
  * @author: Charlie
  * @date: 2018/11/28
  */
@@ -32,7 +32,6 @@ public class VerifyTxProcessTask implements Runnable {
     private UnverifiedTxStorageService unverifiedTxStorageService = SpringLiteContext.getBean(UnverifiedTxStorageService.class);
     private TxService txService = SpringLiteContext.getBean(TxService.class);
     private UnconfirmedTxStorageService unconfirmedTxStorageService = SpringLiteContext.getBean(UnconfirmedTxStorageService.class);
-    private TransactionH2Service transactionH2Service = SpringLiteContext.getBean(TransactionH2Service.class);
 
     private TransactionTimeComparator txComparator = SpringLiteContext.getBean(TransactionTimeComparator.class);
     private List<Transaction> orphanTxList = new ArrayList<>();
@@ -72,6 +71,7 @@ public class VerifyTxProcessTask implements Runnable {
             processTx(chain, tx, false);
             i++;
             chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("@@@@@@@@ 2 @@@@@@@@@@ one processTx:{}毫秒",System.currentTimeMillis()-start);
+            chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("");
         }
         if(i>0) {
             chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("@@@@@@@@ 3 @@@@@@@@@@ one Task:{}毫秒, count:{}笔交易",
@@ -81,6 +81,7 @@ public class VerifyTxProcessTask implements Runnable {
 
     private boolean processTx(Chain chain, Transaction tx, boolean isOrphanTx){
         try {
+            chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("新交易处理.....hash:{}", tx.getHash().getDigestHex());
             long s1 = System.currentTimeMillis();
             int chainId = chain.getChainId();
             boolean rs = txService.verify(chain, tx);
@@ -98,7 +99,7 @@ public class VerifyTxProcessTask implements Runnable {
             }
             chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("交易获取花费时间:{}", System.currentTimeMillis() - get);
             long timeCoinData = System.currentTimeMillis();
-            VerifyTxResult verifyTxResult = LedgerCall.verifyCoinData(chain, tx, false);
+            VerifyTxResult verifyTxResult = LedgerCall.commitUnconfirmedTx(chain, RPCUtil.encode(tx.serialize()));
             chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("验证CoinData花费时间:{}", System.currentTimeMillis() - timeCoinData);
             long s2 = System.currentTimeMillis();
             chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("交易验证阶段花费时间:{}", s2 - s1);
@@ -107,27 +108,15 @@ public class VerifyTxProcessTask implements Runnable {
                 if(chain.getPackaging().get()) {
                     //当节点是出块节点时, 才将交易放入待打包队列
                     packablePool.add(chain, tx);
-                    chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("交易加入待打包队列.....hash:{}", tx.getHash().getDigestHex());
-//                    TxUtil.txInformationDebugPrint(chain, tx, chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS));
+                    chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("交易[加入待打包队列].....");
                 }
                 //保存到rocksdb
                 unconfirmedTxStorageService.putTx(chainId, tx);
 
-                long timeH2 = System.currentTimeMillis();
-                //保存到h2数据库
-                transactionH2Service.saveTxs(TxUtil.tx2PO(chain,tx));
-                chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("保存H2数据库花费时间:{}", System.currentTimeMillis() - timeH2);
-
-                long timeCmtLed = System.currentTimeMillis();
-                //调账本记录未确认交易
-                LedgerCall.commitUnconfirmedTx(chain, tx.hex());
-                chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("提交未确认交易到账本花费时间:{}", System.currentTimeMillis() - timeCmtLed);
                 //广播交易hash
                 NetworkCall.broadcastTxHash(chain.getChainId(),tx.getHash());
                 long s3 = System.currentTimeMillis();
                 chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("交易保存阶段花费时间:{}", s3 - s2);
-                chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("");
-
                 return true;
             }
             chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug(
@@ -158,7 +147,6 @@ public class VerifyTxProcessTask implements Runnable {
             while (it.hasNext()) {
                 Transaction tx = it.next();
                 boolean success = processTx(chain, tx, true);
-//                TxUtil.txInformationDebugPrint(chain, tx, chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS));
                 if (success) {
                     it.remove();
                     chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("*** Debug *** [VerifyTxProcessTask - OrphanTx] " +

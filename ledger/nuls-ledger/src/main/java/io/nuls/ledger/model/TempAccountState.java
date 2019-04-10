@@ -24,9 +24,6 @@
  */
 package io.nuls.ledger.model;
 
-import lombok.Getter;
-import lombok.Setter;
-
 import java.math.BigInteger;
 
 /**
@@ -35,23 +32,51 @@ import java.math.BigInteger;
  * @date 2019/01/02
  **/
 public class TempAccountState {
-    @Setter
-    @Getter
+
     private String assetKey;
-    @Setter
-    @Getter
+
     private String nonce;
-    @Setter
-    @Getter
+
     private String nextNonce;
-    @Setter
-    @Getter
+
     private BigInteger balance;
 
     public TempAccountState(String assetKey,String nonce,String nextNonce,BigInteger balance){
         this.assetKey = assetKey;
         this.nonce = nonce;
         this.nextNonce = nextNonce;
+        this.balance = balance;
+    }
+
+    public String getAssetKey() {
+        return assetKey;
+    }
+
+    public void setAssetKey(String assetKey) {
+        this.assetKey = assetKey;
+    }
+
+    public String getNonce() {
+        return nonce;
+    }
+
+    public void setNonce(String nonce) {
+        this.nonce = nonce;
+    }
+
+    public String getNextNonce() {
+        return nextNonce;
+    }
+
+    public void setNextNonce(String nextNonce) {
+        this.nextNonce = nextNonce;
+    }
+
+    public BigInteger getBalance() {
+        return balance;
+    }
+
+    public void setBalance(BigInteger balance) {
         this.balance = balance;
     }
 }

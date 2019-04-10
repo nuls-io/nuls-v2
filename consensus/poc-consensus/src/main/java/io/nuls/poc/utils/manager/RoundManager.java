@@ -11,7 +11,7 @@ import io.nuls.poc.model.bo.round.MeetingRound;
 import io.nuls.poc.model.bo.tx.txdata.Agent;
 import io.nuls.poc.model.bo.tx.txdata.Deposit;
 import io.nuls.poc.model.po.PunishLogPo;
-import io.nuls.poc.utils.CallMethodUtils;
+import io.nuls.poc.rpc.call.CallMethodUtils;
 import io.nuls.poc.utils.enumeration.PunishType;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.exception.NulsException;
@@ -104,6 +104,8 @@ public class RoundManager {
             round = roundList.get(i);
             if (round.getIndex() == roundIndex) {
                 return round;
+            }else if(round.getIndex() < roundIndex){
+                break;
             }
         }
         return null;
@@ -306,9 +308,13 @@ public class RoundManager {
             startTime = bestRoundData.getRoundStartTime();
         } else {
             long diffTime = nowTime - bestRoundEndTime;
-            int diffRoundCount = (int) (diffTime / (bestRoundData.getConsensusMemberCount() * packingInterval));
+            int consensusMemberCount = bestRoundData.getConsensusMemberCount();
+            if(bestBlockHeader.getHeight() == 0){
+                consensusMemberCount = chain.getConfig().getSeedNodes().split(",").length;
+            }
+            int diffRoundCount = (int) (diffTime / (consensusMemberCount * packingInterval));
             index = bestRoundData.getRoundIndex() + diffRoundCount + 1;
-            startTime = bestRoundEndTime + diffRoundCount * bestRoundData.getConsensusMemberCount() * packingInterval;
+            startTime = bestRoundEndTime + diffRoundCount * consensusMemberCount * packingInterval;
         }
         return calculationRound(chain,startBlockHeader, index, startTime);
     }
@@ -373,7 +379,6 @@ public class RoundManager {
         if(!packingAddressList.isEmpty()){
             round.calcLocalPacker(packingAddressList,chain);
         }
-        //round.calcLocalPacker(chain);
         chain.getLoggerMap().get(ConsensusConstant.CONSENSUS_LOGGER_NAME).debug("当前轮次为："+round.getIndex()+";当前轮次开始打包时间："+ DateUtils.convertDate(new Date(startTime)));
         chain.getLoggerMap().get(ConsensusConstant.CONSENSUS_LOGGER_NAME).debug("\ncalculation||index:{},startTime:{},startHeight:{},hash:{}\n" + round.toString() + "\n\n", index, startTime, startBlockHeader.getHeight(), startBlockHeader.getHash());
         return round;

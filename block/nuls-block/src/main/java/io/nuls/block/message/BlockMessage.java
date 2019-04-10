@@ -27,10 +27,6 @@ import io.nuls.base.data.NulsDigestData;
 import io.nuls.block.message.base.BaseMessage;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.parse.SerializeUtils;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
 
 import java.io.IOException;
 
@@ -41,21 +37,39 @@ import java.io.IOException;
  * @version 1.0
  * @date 18-11-20 上午11:08
  */
-@NoArgsConstructor
-@AllArgsConstructor
 public class BlockMessage extends BaseMessage {
     /**
      * 用来区分批量获取区块请求和单个区块请求,也可以用来过滤非法消息
      */
-    @Getter
-    @Setter
     private NulsDigestData requestHash;
     /**
      * 区块数据
      */
-    @Getter
-    @Setter
     private Block block;
+
+    public NulsDigestData getRequestHash() {
+        return requestHash;
+    }
+
+    public void setRequestHash(NulsDigestData requestHash) {
+        this.requestHash = requestHash;
+    }
+
+    public Block getBlock() {
+        return block;
+    }
+
+    public void setBlock(Block block) {
+        this.block = block;
+    }
+
+    public BlockMessage() {
+    }
+
+    public BlockMessage(NulsDigestData requestHash, Block block) {
+        this.requestHash = requestHash;
+        this.block = block;
+    }
 
     @Override
     public void serializeToStream(NulsOutputStreamBuffer buffer) throws IOException {

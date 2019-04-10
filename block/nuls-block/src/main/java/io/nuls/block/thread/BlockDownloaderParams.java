@@ -22,7 +22,6 @@ package io.nuls.block.thread;
 
 import io.nuls.base.data.NulsDigestData;
 import io.nuls.block.model.Node;
-import lombok.Data;
 
 import java.util.List;
 import java.util.concurrent.PriorityBlockingQueue;
@@ -34,7 +33,6 @@ import java.util.concurrent.PriorityBlockingQueue;
  * @version 1.0
  * @date 18-11-9 上午10:58
  */
-@Data
 public class BlockDownloaderParams {
 
     /**
@@ -66,4 +64,59 @@ public class BlockDownloaderParams {
      */
     private int availableNodesCount;
 
+    public long getNetLatestHeight() {
+        return netLatestHeight;
+    }
+
+    public void setNetLatestHeight(long netLatestHeight) {
+        this.netLatestHeight = netLatestHeight;
+    }
+
+    public NulsDigestData getNetLatestHash() {
+        return netLatestHash;
+    }
+
+    public void setNetLatestHash(NulsDigestData netLatestHash) {
+        this.netLatestHash = netLatestHash;
+    }
+
+    public long getLocalLatestHeight() {
+        return localLatestHeight;
+    }
+
+    public void setLocalLatestHeight(long localLatestHeight) {
+        this.localLatestHeight = localLatestHeight;
+    }
+
+    public NulsDigestData getLocalLatestHash() {
+        return localLatestHash;
+    }
+
+    public void setLocalLatestHash(NulsDigestData localLatestHash) {
+        this.localLatestHash = localLatestHash;
+    }
+
+    public PriorityBlockingQueue<Node> getNodes() {
+        return nodes;
+    }
+
+    public void setNodes(PriorityBlockingQueue<Node> nodes) {
+        this.nodes = nodes;
+    }
+
+    public List<Node> getList() {
+        return list;
+    }
+
+    public void setList(List<Node> list) {
+        this.list = list;
+    }
+
+    public int getAvailableNodesCount() {
+        return availableNodesCount;
+    }
+
+    public void setAvailableNodesCount(int availableNodesCount) {
+        this.availableNodesCount = availableNodesCount;
+    }
 }

@@ -1,5 +1,6 @@
 package io.nuls.tools.model;
 
+import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -13,8 +14,8 @@ public class DateUtils {
     public final static long MINUTE_TIME = 1000 * 60;
     public final static long TIME_ZONE;
     public final static String TIME_ZONE_STRING;
-    private static SimpleDateFormat sdf_17 = new SimpleDateFormat(DEFAULT_TIMESTAMP_PATTERN);
-    private static SimpleDateFormat sdf_14 = new SimpleDateFormat(DEFAULT_PATTERN);
+    private static final ThreadLocal<DateFormat> DATE_FORMATTER_17 = ThreadLocal.withInitial(() -> new SimpleDateFormat(DEFAULT_TIMESTAMP_PATTERN));
+    private static final ThreadLocal<DateFormat> DATE_FORMATTER_14 = ThreadLocal.withInitial(() -> new SimpleDateFormat(DEFAULT_PATTERN));
 
     static {
         Calendar cal = Calendar.getInstance();
@@ -43,7 +44,7 @@ public class DateUtils {
         if (date == null) {
             return EMPTY_SRING;
         }
-        return sdf_14.format(date);
+        return DATE_FORMATTER_14.get().format(date);
     }
 
     /**
@@ -66,7 +67,7 @@ public class DateUtils {
      */
     public static Date convertStringToDate(String date) {
         try {
-            return sdf_14.parse(date);
+            return DATE_FORMATTER_14.get().parse(date);
         } catch (ParseException e) {
         }
         return new Date();
@@ -680,7 +681,7 @@ public class DateUtils {
      * @return     日期格式字符串
      */
     public static String timeStamp2DateStr(long time) {
-        return sdf_17.format(new Date(time));
+        return DATE_FORMATTER_17.get().format(new Date(time));
     }
 
 

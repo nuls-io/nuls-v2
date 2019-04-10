@@ -27,6 +27,7 @@ package io.nuls.cmd.client.processor.contract;
 
 import io.nuls.api.provider.Result;
 import io.nuls.api.provider.contract.facade.GetContractTxReq;
+import io.nuls.base.data.NulsDigestData;
 import io.nuls.cmd.client.CommandBuilder;
 import io.nuls.cmd.client.CommandHelper;
 import io.nuls.cmd.client.CommandResult;
@@ -68,10 +69,8 @@ public class GetContractTxProcessor extends ContractBaseProcessor {
 
     @Override
     public boolean argsValidate(String[] args) {
-        int length = args.length;
-        if (length != 2) {
-            return false;
-        }
+        checkArgsNumber(args,1);
+        checkArgs(NulsDigestData.validHash(args[1]),"hash format error");
         return true;
     }
 
@@ -121,7 +120,7 @@ public class GetContractTxProcessor extends ContractBaseProcessor {
             contractResultMap.put("refundFee", Na.naToNuls(contractResultMap.get("refundFee")));
             contractResultMap.put("value", Na.naToNuls(contractResultMap.get("value")));
             contractResultMap.put("price", Na.naToNuls(contractResultMap.get("price")));
-            contractResultMap.put("balance", Na.naToNuls(contractResultMap.get("balance")));
+            //contractResultMap.put("balance", Na.naToNuls(contractResultMap.get("balance")));
         }
 
 

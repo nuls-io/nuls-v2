@@ -29,6 +29,7 @@ import io.nuls.api.model.rpc.RpcResult;
 import io.nuls.api.utils.AgentComparator;
 import io.nuls.api.utils.VerifyUtils;
 import io.nuls.base.basic.AddressTool;
+import io.nuls.base.data.Page;
 import io.nuls.tools.basic.Result;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Controller;
@@ -68,7 +69,13 @@ public class PocConsensusController {
     @RpcMethod("getBestRoundItemList")
     public RpcResult getBestRoundItemList(List<Object> params) {
         VerifyUtils.verifyParams(params, 1);
-        int chainId = (int) params.get(0);
+        int chainId;
+        try {
+            chainId = (int) params.get(0);
+        } catch (Exception e) {
+            return RpcResult.paramError();
+        }
+
         if (!CacheManager.isChainExist(chainId)) {
             return RpcResult.dataNotFound();
         }
@@ -84,15 +91,23 @@ public class PocConsensusController {
     @RpcMethod("getConsensusNodeCount")
     public RpcResult getConsensusNodeCount(List<Object> params) {
         VerifyUtils.verifyParams(params, 1);
-        int chainId = (int) params.get(0);
-
+        int chainId;
+        try {
+            chainId = (int) params.get(0);
+        } catch (Exception e) {
+            return RpcResult.paramError();
+        }
         ApiCache apiCache = CacheManager.getCache(chainId);
         if (apiCache == null) {
             return RpcResult.dataNotFound();
         }
         Map<String, Long> resultMap = new HashMap<>();
         resultMap.put("seedsCount", (long) apiCache.getChainInfo().getSeeds().size());
-        resultMap.put("consensusCount", (long) (apiCache.getCurrentRound().getMemberCount() - apiCache.getChainInfo().getSeeds().size()));
+        int consensusCount = apiCache.getCurrentRound().getMemberCount() - apiCache.getChainInfo().getSeeds().size();
+        if (consensusCount < 0) {
+            consensusCount = 0;
+        }
+        resultMap.put("consensusCount", (long) consensusCount);
         long count = agentService.agentsCount(chainId, apiCache.getBestHeader().getHeight());
         resultMap.put("agentCount", count);
         resultMap.put("totalCount", count + apiCache.getChainInfo().getSeeds().size());
@@ -104,10 +119,15 @@ public class PocConsensusController {
     @RpcMethod("getConsensusNodes")
     public RpcResult getConsensusNodes(List<Object> params) {
         VerifyUtils.verifyParams(params, 4);
-        int chainId = (int) params.get(0);
-        int pageIndex = (int) params.get(1);
-        int pageSize = (int) params.get(2);
-        int type = (int) params.get(3);
+        int chainId, pageIndex, pageSize, type;
+        try {
+            chainId = (int) params.get(0);
+            pageIndex = (int) params.get(1);
+            pageSize = (int) params.get(2);
+            type = (int) params.get(3);
+        } catch (Exception e) {
+            return RpcResult.paramError();
+        }
 
         if (pageIndex <= 0) {
             pageIndex = 1;
@@ -123,9 +143,10 @@ public class PocConsensusController {
         PageInfo<AgentInfo> pageInfo;
         if (!CacheManager.isChainExist(chainId)) {
             pageInfo = new PageInfo<>(pageIndex, pageSize);
-        } else {
-            pageInfo = agentService.getAgentList(chainId, type, pageIndex, pageSize);
+            return new RpcResult().setResult(pageInfo);
         }
+
+        pageInfo = agentService.getAgentList(chainId, type, pageIndex, pageSize);
         for (AgentInfo agentInfo : pageInfo.getList()) {
             Result<AgentInfo> clientResult = WalletRpcHandler.getAgentInfo(chainId, agentInfo.getTxHash());
             if (clientResult.isSuccess()) {
@@ -147,11 +168,18 @@ public class PocConsensusController {
     @RpcMethod("getConsensusNode")
     public RpcResult getConsensusNode(List<Object> params) {
         VerifyUtils.verifyParams(params, 2);
-        int chainId = (int) params.get(0);
-        String agentHash = (String) params.get(1);
+        int chainId;
+        String agentHash;
+        try {
+            chainId = (int) params.get(0);
+            agentHash = (String) params.get(1);
+        } catch (Exception e) {
+            return RpcResult.paramError();
+        }
         if (!CacheManager.isChainExist(chainId)) {
             return RpcResult.dataNotFound();
         }
+
         AgentInfo agentInfo = agentService.getAgentByHash(chainId, agentHash);
         if (agentInfo == null) {
             return RpcResult.dataNotFound();
@@ -160,7 +188,6 @@ public class PocConsensusController {
         if (agentInfo.getTotalPackingCount() != 0) {
             agentInfo.setLostRate(DoubleUtils.div(count, count + agentInfo.getTotalPackingCount()));
         }
-
         ApiCache apiCache = CacheManager.getCache(chainId);
         List<PocRoundItem> itemList = apiCache.getCurrentRound().getItemList();
         PocRoundItem roundItem = null;
@@ -194,11 +221,41 @@ public class PocConsensusController {
         return RpcResult.success(agentInfo);
     }
 
+
+    @RpcMethod("getAccountConsensusNode")
+    public RpcResult getAccountConsensusNode(List<Object> params) {
+        VerifyUtils.verifyParams(params, 2);
+        int chainId;
+        String address;
+        try {
+            chainId = (int) params.get(0);
+            address = (String) params.get(1);
+        } catch (Exception e) {
+            return RpcResult.paramError();
+        }
+
+        if (!AddressTool.validAddress(chainId, address)) {
+            return RpcResult.paramError("[address] is invalid");
+        }
+        if (!CacheManager.isChainExist(chainId)) {
+            return RpcResult.dataNotFound();
+        }
+
+        AgentInfo agentInfo = agentService.getAgentByAgentAddress(chainId, address);
+        return RpcResult.success(agentInfo);
+    }
+
     @RpcMethod("getConsensusStatistical")
     public RpcResult getConsensusStatistical(List<Object> params) {
         VerifyUtils.verifyParams(params, 2);
-        int chainId = (int) params.get(0);
-        int type = (int) params.get(1);
+        int chainId, type;
+        try {
+            chainId = (int) params.get(0);
+            type = (int) params.get(1);
+        } catch (Exception e) {
+            return RpcResult.paramError();
+        }
+
         if (!CacheManager.isChainExist(chainId)) {
             return RpcResult.success(new ArrayList<>());
         }
@@ -206,11 +263,17 @@ public class PocConsensusController {
         return new RpcResult().setResult(list);
     }
 
+
     @RpcMethod("getConsensusNodeStatistical")
     public RpcResult getConsensusNodeStatistical(List<Object> params) {
         VerifyUtils.verifyParams(params, 2);
-        int chainId = (int) params.get(0);
-        int type = (int) params.get(1);
+        int chainId, type;
+        try {
+            chainId = (int) params.get(0);
+            type = (int) params.get(1);
+        } catch (Exception e) {
+            return RpcResult.paramError();
+        }
         if (!CacheManager.isChainExist(chainId)) {
             return RpcResult.success(new ArrayList<>());
         }
@@ -221,8 +284,13 @@ public class PocConsensusController {
     @RpcMethod("getAnnulizedRewardStatistical")
     public RpcResult getAnnulizedRewardStatistical(List<Object> params) {
         VerifyUtils.verifyParams(params, 2);
-        int chainId = (int) params.get(0);
-        int type = (int) params.get(1);
+        int chainId, type;
+        try {
+            chainId = (int) params.get(0);
+            type = (int) params.get(1);
+        } catch (Exception e) {
+            return RpcResult.paramError();
+        }
         if (!CacheManager.isChainExist(chainId)) {
             return RpcResult.success(new ArrayList<>());
         }
@@ -234,11 +302,17 @@ public class PocConsensusController {
     @RpcMethod("getPunishList")
     public RpcResult getPunishList(List<Object> params) {
         VerifyUtils.verifyParams(params, 5);
-        int chainId = (int) params.get(0);
-        int pageIndex = (int) params.get(1);
-        int pageSize = (int) params.get(2);
-        int type = (int) params.get(3);
-        String agentAddress = (String) params.get(4);
+        int chainId, pageIndex, pageSize, type;
+        String agentAddress;
+        try {
+            chainId = (int) params.get(0);
+            pageIndex = (int) params.get(1);
+            pageSize = (int) params.get(2);
+            type = (int) params.get(3);
+            agentAddress = (String) params.get(4);
+        } catch (Exception e) {
+            return RpcResult.paramError();
+        }
         if (!AddressTool.validAddress(chainId, agentAddress)) {
             return RpcResult.paramError("[address] is inValid");
         }
@@ -260,10 +334,16 @@ public class PocConsensusController {
     @RpcMethod("getConsensusDeposit")
     public RpcResult getConsensusDeposit(List<Object> params) {
         VerifyUtils.verifyParams(params, 4);
-        int chainId = (int) params.get(0);
-        int pageIndex = (int) params.get(1);
-        int pageSize = (int) params.get(2);
-        String agentHash = (String) params.get(3);
+        int chainId, pageIndex, pageSize;
+        String agentHash;
+        try {
+            chainId = (int) params.get(0);
+            pageIndex = (int) params.get(1);
+            pageSize = (int) params.get(2);
+            agentHash = (String) params.get(3);
+        } catch (Exception e) {
+            return RpcResult.paramError();
+        }
 
         if (StringUtils.isBlank(agentHash)) {
             return RpcResult.paramError("[agentHash] is inValid");
@@ -286,11 +366,17 @@ public class PocConsensusController {
     @RpcMethod("getAllConsensusDeposit")
     public RpcResult getAllConsensusDeposit(List<Object> params) {
         VerifyUtils.verifyParams(params, 5);
-        int chainId = (int) params.get(0);
-        int pageIndex = (int) params.get(1);
-        int pageSize = (int) params.get(2);
-        String agentHash = (String) params.get(3);
-        int type = (int) params.get(4);
+        int chainId, pageIndex, pageSize, type;
+        String agentHash;
+        try {
+            chainId = (int) params.get(0);
+            pageIndex = (int) params.get(1);
+            pageSize = (int) params.get(2);
+            agentHash = (String) params.get(3);
+            type = (int) params.get(4);
+        } catch (Exception e) {
+            return RpcResult.paramError();
+        }
 
         if (StringUtils.isBlank(agentHash)) {
             return RpcResult.paramError("[agentHash] is inValid");
@@ -308,6 +394,62 @@ public class PocConsensusController {
             list = this.depositService.getCancelDepositListByAgentHash(chainId, agentHash, type, pageIndex, pageSize);
         }
         return new RpcResult().setResult(list);
+    }
+
+
+    @RpcMethod("getAccountConsensus")
+    public RpcResult getAccountConsensus(List<Object> params) {
+        VerifyUtils.verifyParams(params, 4);
+        int chainId, pageIndex, pageSize;
+        String address;
+        try {
+            chainId = (int) params.get(0);
+            pageIndex = (int) params.get(1);
+            pageSize = (int) params.get(2);
+            address = (String) params.get(3);
+        } catch (Exception e) {
+            return RpcResult.paramError();
+        }
+        if (!AddressTool.validAddress(chainId, address)) {
+            return RpcResult.paramError("[address] is invalid");
+        }
+
+        PageInfo<AgentInfo> list;
+        if (!CacheManager.isChainExist(chainId)) {
+            list = new PageInfo(pageIndex, pageSize);
+            return RpcResult.success(list);
+        }
+        List<String> hashList = depositService.getAgentHashList(chainId, address);
+        list = agentService.getAgentByHashList(chainId, pageIndex, pageSize, hashList);
+        return RpcResult.success(list);
+    }
+
+    @RpcMethod("getAccountDeposit")
+    public RpcResult getAccountDeposit(List<Object> params) {
+        VerifyUtils.verifyParams(params, 5);
+        int chainId, pageIndex, pageSize, type;
+        String address;
+        try {
+            chainId = (int) params.get(0);
+            pageIndex = (int) params.get(1);
+            pageSize = (int) params.get(2);
+            address = (String) params.get(3);
+            type = (int) params.get(4);
+        } catch (Exception e) {
+            return RpcResult.paramError();
+        }
+        if (!AddressTool.validAddress(chainId, address)) {
+            return RpcResult.paramError("[address] is invalid");
+        }
+
+        PageInfo<DepositInfo> list;
+        if (!CacheManager.isChainExist(chainId)) {
+            list = new PageInfo<>(pageIndex, pageSize);
+        } else {
+            list = this.depositService.getAllDepositListByAddress(chainId, address, type, pageIndex, pageSize);
+        }
+        return new RpcResult().setResult(list);
+
     }
 
     @RpcMethod("getBestRoundInfo")

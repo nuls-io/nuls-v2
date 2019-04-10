@@ -29,10 +29,12 @@ import io.nuls.account.constant.AccountConstant;
 import io.nuls.account.constant.AccountErrorCode;
 import io.nuls.account.model.bo.Account;
 import io.nuls.account.model.bo.Chain;
+import io.nuls.account.model.bo.VerifyTxResult;
 import io.nuls.account.model.bo.tx.AliasTransaction;
 import io.nuls.account.model.bo.tx.txdata.Alias;
 import io.nuls.account.model.dto.CoinDto;
 import io.nuls.account.model.dto.MultiSignTransactionResultDto;
+import io.nuls.account.rpc.call.LedgerCmdCall;
 import io.nuls.account.rpc.call.NetworkCall;
 import io.nuls.account.rpc.call.TransactionCmdCall;
 import io.nuls.account.service.AccountService;
@@ -51,10 +53,10 @@ import io.nuls.base.signture.MultiSignTxSignature;
 import io.nuls.base.signture.P2PHKSignature;
 import io.nuls.base.signture.SignatureUtil;
 import io.nuls.base.signture.TransactionSignature;
+import io.nuls.rpc.util.RPCUtil;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Service;
 import io.nuls.tools.crypto.ECKey;
-import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.exception.NulsRuntimeException;
 import io.nuls.tools.model.BigIntegerUtils;
@@ -174,9 +176,6 @@ public class TransactionServiceImpl implements TransactionService {
         assemblyCoinData(transaction, chainId, List.of(from), List.of(to));
         //sign
         TransactionSignature transactionSignature = buildMultiSignTransactionSignature(transaction, multiSigAccount, account, password);
-        //缓存当前交易hash
-        TxUtil.cacheTxHash(transaction);
-        //process transaction
         boolean isBroadcasted = txMutilProcessing(multiSigAccount, transaction, transactionSignature);
         MultiSignTransactionResultDto multiSignTransactionResultDto = new MultiSignTransactionResultDto();
         multiSignTransactionResultDto.setBroadcasted(isBroadcasted);
@@ -185,11 +184,11 @@ public class TransactionServiceImpl implements TransactionService {
     }
 
     @Override
-    public MultiSignTransactionResultDto signMultiSignTransaction(int chainId, Account account, String password, String txHex)
+    public MultiSignTransactionResultDto signMultiSignTransaction(int chainId, Account account, String password, String txStr)
             throws NulsException, IOException {
         //create transaction
         Transaction transaction = new Transaction();
-        transaction.parse(new NulsByteBuffer(HexUtil.decode(txHex)));
+        transaction.parse(new NulsByteBuffer(RPCUtil.decode(txStr)));
 
         CoinData coinData = new CoinData();
         coinData.parse(new NulsByteBuffer(transaction.getCoinData()));
@@ -208,7 +207,6 @@ public class TransactionServiceImpl implements TransactionService {
         }
         TransactionSignature transactionSignature = buildMultiSignTransactionSignature(transaction, null, account, password);
         //process transaction
-        txMutilProcessing(multiSigAccount, transaction, transactionSignature);
         boolean isBroadcasted = txMutilProcessing(multiSigAccount, transaction, transactionSignature);
         MultiSignTransactionResultDto multiSignTransactionResultDto = new MultiSignTransactionResultDto();
         multiSignTransactionResultDto.setBroadcasted(isBroadcasted);
@@ -229,8 +227,6 @@ public class TransactionServiceImpl implements TransactionService {
         buildMultiSignTransactionCoinData(transaction, chainId, -1, multiSigAccount, toAddress, BigInteger.ONE);
         //sign
         TransactionSignature transactionSignature = buildMultiSignTransactionSignature(transaction, multiSigAccount, account, password);
-        //缓存当前交易hash
-        TxUtil.cacheTxHash(transaction);
         //process transaction
         boolean isBroadcasted = txMutilProcessing(multiSigAccount, transaction, transactionSignature);
         MultiSignTransactionResultDto multiSignTransactionResultDto = new MultiSignTransactionResultDto();
@@ -338,10 +334,30 @@ public class TransactionServiceImpl implements TransactionService {
             }
             //交易签名
             SignatureUtil.createTransactionSignture(tx, signEcKeys);
-            //缓存当前交易hash
-            TxUtil.cacheTxHash(tx);
+
+            //调用交易验证器
+            String txStr = RPCUtil.encode(tx.serialize());
+            //调用交易验证器
+            if(!TransactionCmdCall.baseValidateTx(chainId, txStr)){
+                LoggerUtil.logger.error("new tx base validator failed...");
+                throw new NulsRuntimeException(AccountErrorCode.TX_DATA_VALIDATION_ERROR);
+            }
+            if(!txValidator.validateTx(chainId, tx)){
+                LoggerUtil.logger.error("new tx validator failed...");
+                throw new NulsRuntimeException(AccountErrorCode.TX_DATA_VALIDATION_ERROR);
+            }
+            VerifyTxResult verifyTxResult = LedgerCmdCall.commitUnconfirmedTx(chainId, RPCUtil.encode(tx.serialize()));
+            if(!verifyTxResult.success()){
+                LoggerUtil.logger.error("new tx verifyCoinData failed...");
+                throw new NulsRuntimeException(AccountErrorCode.TX_DATA_VALIDATION_ERROR);
+            }
+
             //发起新交易
-            TransactionCmdCall.newTx(chainId, tx.hex());
+            if(!TransactionCmdCall.newTx(chainId, txStr)) {
+                //如果发给交易模块失败,
+                LedgerCmdCall.rollBackUnconfirmTx(chainId, txStr);
+            }
+
         } catch (NulsException e) {
             LoggerUtil.logger.error("assemblyTransaction exception.", e);
             throw new NulsException(e.getErrorCode());
@@ -691,7 +707,36 @@ public class TransactionServiceImpl implements TransactionService {
     public boolean txMutilProcessing(MultiSigAccount multiSigAccount, Transaction tx, TransactionSignature transactionSignature) throws IOException {
         //当已签名数等于M则自动广播该交易
         if (multiSigAccount.getM() == transactionSignature.getP2PHKSignatures().size()) {
-            TransactionCmdCall.newTx(multiSigAccount.getChainId(), HexUtil.encode(tx.serialize()));
+
+            try {
+                int chainId = multiSigAccount.getChainId();
+
+                //调用交易验证器
+                String txStr = RPCUtil.encode(tx.serialize());
+                //调用交易验证器
+                if(!TransactionCmdCall.baseValidateTx(chainId, txStr)){
+                    LoggerUtil.logger.error("new tx base validator failed...");
+                    throw new NulsRuntimeException(AccountErrorCode.TX_DATA_VALIDATION_ERROR);
+                }
+                //调用交易验证器
+                if(!txValidator.validateTx(chainId, tx)){
+                    LoggerUtil.logger.error("new tx validator failed...");
+                    throw new NulsRuntimeException(AccountErrorCode.TX_DATA_VALIDATION_ERROR);
+                }
+                VerifyTxResult verifyTxResult = LedgerCmdCall.commitUnconfirmedTx(chainId, RPCUtil.encode(tx.serialize()));
+                if(!verifyTxResult.success()){
+                    LoggerUtil.logger.error("new tx verifyCoinData failed...");
+                    throw new NulsRuntimeException(AccountErrorCode.TX_DATA_VALIDATION_ERROR);
+                }
+                //发起新交易
+                if(!TransactionCmdCall.newTx(chainId, txStr)) {
+                    //如果发给交易模块失败,
+                    LedgerCmdCall.rollBackUnconfirmTx(chainId, txStr);
+                }
+            } catch (NulsException e) {
+                e.printStackTrace();
+                return false;
+            }
             // Result saveResult = accountLedgerService.verifyAndSaveUnconfirmedTransaction(tx);
 //            if (saveResult.isFailed()) {
 //                if (KernelErrorCode.DATA_SIZE_ERROR.getCode().equals(saveResult.getErrorCode().getCode())) {

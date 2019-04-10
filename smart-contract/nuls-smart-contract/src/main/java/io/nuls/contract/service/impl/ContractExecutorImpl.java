@@ -34,9 +34,6 @@ import io.nuls.contract.vm.program.*;
 import io.nuls.tools.basic.Result;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
-import lombok.Getter;
-import lombok.Setter;
-import org.spongycastle.util.encoders.Hex;
 
 import java.math.BigInteger;
 import java.util.List;
@@ -47,8 +44,6 @@ import java.util.stream.Collectors;
  * @author: PierreLuo
  * @date: 2019/1/7
  */
-@Getter
-@Setter
 @Component
 public class ContractExecutorImpl implements ContractExecutor {
 
@@ -76,11 +71,11 @@ public class ContractExecutorImpl implements ContractExecutor {
 
         ContractResult contractResult = new ContractResult();
 
-        contractResult.setNonce(programResult.getNonce());
+        //contractResult.setNonce(programResult.getNonce());
         contractResult.setGasUsed(programResult.getGasUsed());
         contractResult.setPrice(price);
-        contractResult.setStateRoot(Hex.decode(preStateRoot));
-        contractResult.setBalance(programResult.getBalance());
+        //contractResult.setStateRoot(HexUtil.decode(preStateRoot));
+        //contractResult.setBalance(programResult.getBalance());
         contractResult.setContractAddress(contractAddress);
         contractResult.setSender(sender);
         contractResult.setRemark(ContractConstant.CREATE_REMARK);
@@ -125,11 +120,11 @@ public class ContractExecutorImpl implements ContractExecutor {
 
         ContractResult contractResult = new ContractResult();
 
-        contractResult.setNonce(programResult.getNonce());
+        //contractResult.setNonce(programResult.getNonce());
         contractResult.setGasUsed(programResult.getGasUsed());
         contractResult.setPrice(price);
-        contractResult.setStateRoot(Hex.decode(preStateRoot));
-        contractResult.setBalance(programResult.getBalance());
+        //contractResult.setStateRoot(HexUtil.decode(preStateRoot));
+        //contractResult.setBalance(programResult.getBalance());
         contractResult.setContractAddress(contractAddress);
         contractResult.setSender(sender);
         contractResult.setValue(programCall.getValue().longValue());
@@ -171,10 +166,10 @@ public class ContractExecutorImpl implements ContractExecutor {
 
         ContractResult contractResult = new ContractResult();
 
-        contractResult.setNonce(programResult.getNonce());
+        //contractResult.setNonce(programResult.getNonce());
         contractResult.setGasUsed(programResult.getGasUsed());
-        contractResult.setStateRoot(Hex.decode(preStateRoot));
-        contractResult.setBalance(programResult.getBalance());
+        //contractResult.setStateRoot(HexUtil.decode(preStateRoot));
+        //contractResult.setBalance(programResult.getBalance());
         contractResult.setContractAddress(contractAddress);
         contractResult.setSender(sender);
         contractResult.setRemark(ContractConstant.DELETE_REMARK);

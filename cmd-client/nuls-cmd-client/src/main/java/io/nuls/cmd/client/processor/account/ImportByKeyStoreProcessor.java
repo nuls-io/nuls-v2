@@ -35,6 +35,8 @@ import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.log.logback.NulsLogger;
 
+import java.io.File;
+
 /**
  * 根据keystore导出账户,
  * 密码用来验证(keystore), 如果keystore没有密码则可以不输
@@ -42,8 +44,6 @@ import io.nuls.tools.log.logback.NulsLogger;
  */
 @Component
 public class ImportByKeyStoreProcessor extends AccountBaseProcessor implements CommandProcessor {
-
-    static NulsLogger log = LoggerUtil.logger;
 
     @Override
     public String getCommand() {
@@ -65,13 +65,8 @@ public class ImportByKeyStoreProcessor extends AccountBaseProcessor implements C
 
     @Override
     public boolean argsValidate(String[] args) {
-        int length = args.length;
-        if (length != 2) {
-            return false;
-        }
-        if (!CommandHelper.checkArgsIsNull(args)) {
-            return false;
-        }
+        checkArgsNumber(args,1);
+        checkArgs(new File(args[1]).exists(),"keystore file not exists");
         return true;
     }
 
@@ -88,43 +83,4 @@ public class ImportByKeyStoreProcessor extends AccountBaseProcessor implements C
         return CommandResult.getSuccess(result.getData());
     }
 
-
-//    /**
-//     * 根据文件地址获取AccountKeystoreDto对象
-//     * Gets the AccountKeystoreDto object based on the file address
-//     * @param path
-//     * @return
-//     */
-//    public  String getAccountKeystoreDto(String path) {
-//        File file = null;
-//        try {
-//            file = new File(URLDecoder.decode(path, "UTF-8"));
-//        } catch (UnsupportedEncodingException e) {
-//            log.error("未找到文件", e);
-//        }
-//        if (null != file && file.isFile()) {
-//            StringBuilder ks = new StringBuilder();
-//            BufferedReader bufferedReader = null;
-//            String str;
-//            try {
-//                bufferedReader = new BufferedReader(new FileReader(file));
-//                while ((str = bufferedReader.readLine()) != null) {
-//                    if (!str.isEmpty()) {
-//                        ks.append(str);
-//                    }
-//                }
-//                return ks.toString();
-//            } catch (Exception e) {
-//            } finally {
-//                if (bufferedReader != null) {
-//                    try {
-//                        bufferedReader.close();
-//                    } catch (IOException e) {
-//                        log.error("system error", e);
-//                    }
-//                }
-//            }
-//        }
-//        return null;
-//    }
 }

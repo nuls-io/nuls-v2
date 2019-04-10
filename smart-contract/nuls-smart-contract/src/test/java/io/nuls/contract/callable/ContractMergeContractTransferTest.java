@@ -16,12 +16,12 @@ import io.nuls.contract.util.ContractUtil;
 import io.nuls.contract.util.Log;
 import io.nuls.contract.util.MapUtil;
 import io.nuls.contract.vm.program.ProgramTransfer;
+import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.model.ByteArrayWrapper;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.spongycastle.util.encoders.Hex;
 
 import java.io.IOException;
 import java.math.BigInteger;
@@ -85,10 +85,10 @@ public class ContractMergeContractTransferTest {
         Map<String, CoinTo> mergeCoinToMap = MapUtil.createHashMap(transfers.size());
         Map<String, ContractBalance> tempBalanceManager = MapUtil.createHashMap(8);
         ContractBalance balance = ContractBalance.newInstance();
-        balance.setNonce(Hex.toHexString(new byte[]{1, 2, 3, 1, 2, 3, 1, 2}));
+        balance.setNonce(HexUtil.encode(new byte[]{1, 2, 3, 1, 2, 3, 1, 2}));
         tempBalanceManager.put(asString(new byte[]{1, 2, 3, 1, 2, 3, 1, 2, 3, 1, 2, 3, 1, 2, 3, 1, 2, 3, 8, 8, 1, 2, 3}), balance);
         balance = ContractBalance.newInstance();
-        balance.setNonce(Hex.toHexString(new byte[]{8, 2, 3, 8, 2, 3, 8, 2}));
+        balance.setNonce(HexUtil.encode(new byte[]{8, 2, 3, 8, 2, 3, 8, 2}));
         tempBalanceManager.put(asString(new byte[]{1, 2, 3, 1, 2, 3, 1, 2, 3, 1, 2, 3, 1, 2, 3, 1, 2, 3, 8, 8, 3, 4, 5}), balance);
 
         for (ProgramTransfer transfer : transfers) {
@@ -101,14 +101,14 @@ public class ContractMergeContractTransferTest {
                 if (compareFrom == null) {
                     // 第一次遍历，获取新交易的coinFrom的nonce
                     contractBalance = tempBalanceManager.get(asString(from));
-                    nonceBytes = Hex.decode(contractBalance.getNonce());
+                    nonceBytes = HexUtil.decode(contractBalance.getNonce());
                 } else {
                     // 产生另一个合并交易，更新之前的合并交易的hash和账户的nonce
                     updatePreTxHashAndAccountNonce(contractTransferTx, contractBalance);
                     mergeCoinToMap.clear();
                     // 获取新交易的coinFrom的nonce
                     contractBalance = tempBalanceManager.get(asString(from));
-                    nonceBytes = Hex.decode(contractBalance.getNonce());
+                    nonceBytes = HexUtil.decode(contractBalance.getNonce());
                 }
                 compareFrom = wrapperFrom;
                 coinData = new CoinData();
@@ -137,7 +137,7 @@ public class ContractMergeContractTransferTest {
         byte[] serialize = contractTransferList.get(2).getHash().serialize();
         byte[] end8 = Arrays.copyOfRange(serialize, serialize.length - 8, serialize.length);
         String nonce = tempBalanceManager.get(asString(new byte[]{1, 2, 3, 1, 2, 3, 1, 2, 3, 1, 2, 3, 1, 2, 3, 1, 2, 3, 8, 8, 1, 2, 3})).getNonce();
-        byte[] compareNonceBytes = Hex.decode(nonce);
+        byte[] compareNonceBytes = HexUtil.decode(nonce);
         Assert.assertTrue(Arrays.equals(end8, compareNonceBytes));
     }
 
@@ -174,7 +174,7 @@ public class ContractMergeContractTransferTest {
         NulsDigestData hash = NulsDigestData.calcDigestData(tx.serializeForHash());
         byte[] hashBytes = hash.serialize();
         byte[] currentNonceBytes = Arrays.copyOfRange(hashBytes, hashBytes.length - 8, hashBytes.length);
-        balance.setNonce(Hex.toHexString(currentNonceBytes));
+        balance.setNonce(HexUtil.encode(currentNonceBytes));
         tx.setHash(hash);
     }
 

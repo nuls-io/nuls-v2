@@ -5,7 +5,6 @@ import io.nuls.base.basic.NulsOutputStreamBuffer;
 import io.nuls.base.basic.TransactionLogicData;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.parse.SerializeUtils;
-import lombok.*;
 
 import java.io.IOException;
 import java.math.BigInteger;
@@ -16,9 +15,6 @@ import java.util.Set;
  * @date 2018/11/7
  * @description
  */
-@EqualsAndHashCode(callSuper = true)
-@Data
-@ToString
 public class TxChain extends TransactionLogicData {
 
     private int chainId;
@@ -110,5 +106,117 @@ public class TxChain extends TransactionLogicData {
     @Override
     public Set<byte[]> getAddresses() {
         return null;
+    }
+
+    public int getChainId() {
+        return chainId;
+    }
+
+    public void setChainId(int chainId) {
+        this.chainId = chainId;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getAddressType() {
+        return addressType;
+    }
+
+    public void setAddressType(String addressType) {
+        this.addressType = addressType;
+    }
+
+    public long getMagicNumber() {
+        return magicNumber;
+    }
+
+    public void setMagicNumber(long magicNumber) {
+        this.magicNumber = magicNumber;
+    }
+
+    public boolean isSupportInflowAsset() {
+        return supportInflowAsset;
+    }
+
+    public void setSupportInflowAsset(boolean supportInflowAsset) {
+        this.supportInflowAsset = supportInflowAsset;
+    }
+
+    public int getMinAvailableNodeNum() {
+        return minAvailableNodeNum;
+    }
+
+    public void setMinAvailableNodeNum(int minAvailableNodeNum) {
+        this.minAvailableNodeNum = minAvailableNodeNum;
+    }
+
+    public int getSingleNodeMinConnectionNum() {
+        return singleNodeMinConnectionNum;
+    }
+
+    public void setSingleNodeMinConnectionNum(int singleNodeMinConnectionNum) {
+        this.singleNodeMinConnectionNum = singleNodeMinConnectionNum;
+    }
+
+    public byte[] getAddress() {
+        return address;
+    }
+
+    public void setAddress(byte[] address) {
+        this.address = address;
+    }
+
+    public int getAssetId() {
+        return assetId;
+    }
+
+    public void setAssetId(int assetId) {
+        this.assetId = assetId;
+    }
+
+    public String getSymbol() {
+        return symbol;
+    }
+
+    public void setSymbol(String symbol) {
+        this.symbol = symbol;
+    }
+
+    public String getAssetName() {
+        return assetName;
+    }
+
+    public void setAssetName(String assetName) {
+        this.assetName = assetName;
+    }
+
+    public int getDepositNuls() {
+        return depositNuls;
+    }
+
+    public void setDepositNuls(int depositNuls) {
+        this.depositNuls = depositNuls;
+    }
+
+    public BigInteger getInitNumber() {
+        return initNumber;
+    }
+
+    public void setInitNumber(BigInteger initNumber) {
+        this.initNumber = initNumber;
+    }
+
+    public short getDecimalPlaces() {
+        return decimalPlaces;
+    }
+
+    public void setDecimalPlaces(short decimalPlaces) {
+        this.decimalPlaces = decimalPlaces;
     }
 }

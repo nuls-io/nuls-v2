@@ -31,11 +31,11 @@ import io.nuls.contract.util.Log;
 import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.model.message.Response;
 import io.nuls.rpc.netty.processor.ResponseMessageProcessor;
+import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.parse.JSONUtils;
 import org.apache.commons.io.IOUtils;
 import org.junit.Assert;
 import org.junit.Test;
-import org.spongycastle.util.encoders.Hex;
 
 import java.io.FileInputStream;
 import java.io.InputStream;
@@ -70,7 +70,7 @@ public class ContractCallContractQueryTest extends BaseQuery {
         params.put("sender", sender);
         params.put("gasLimit", 200000L);
         params.put("price", 25);
-        params.put("contractCode", Hex.toHexString(contractCode));
+        params.put("contractCode", HexUtil.encode(contractCode));
         params.put("args", args);
         return params;
     }
@@ -93,7 +93,7 @@ public class ContractCallContractQueryTest extends BaseQuery {
         Map<String, Object> params = new HashMap<>();
         params.put("chainId", chainId);
         params.put("sender", sender);
-        params.put("contractCode", Hex.toHexString(contractCode));
+        params.put("contractCode", HexUtil.encode(contractCode));
         params.put("args", args);
         return params;
     }
@@ -119,7 +119,7 @@ public class ContractCallContractQueryTest extends BaseQuery {
         params.put("password", password);
         params.put("gasLimit", 200000L);
         params.put("price", 25);
-        params.put("contractCode", Hex.toHexString(contractCode));
+        params.put("contractCode", HexUtil.encode(contractCode));
         params.put("args", args);
         params.put("remark", remark);
         return params;
@@ -361,7 +361,7 @@ public class ContractCallContractQueryTest extends BaseQuery {
     private Map makeConstructorParams(byte[] contractCode) {
         Map<String, Object> params = new HashMap<>();
         params.put("chainId", chainId);
-        params.put("contractCode", Hex.toHexString(contractCode));
+        params.put("contractCode", HexUtil.encode(contractCode));
         return params;
     }
 

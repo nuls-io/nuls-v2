@@ -5,8 +5,9 @@ import io.nuls.base.data.NulsDigestData;
 import io.nuls.base.data.Transaction;
 import io.nuls.base.signture.P2PHKSignature;
 import io.nuls.base.signture.SignatureUtil;
+import io.nuls.rpc.util.RPCUtil;
 import io.nuls.tools.core.annotation.Autowired;
-import io.nuls.tools.core.annotation.Service;
+import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.model.StringUtils;
 import io.nuls.transaction.cache.PackablePool;
@@ -27,11 +28,9 @@ import io.nuls.transaction.rpc.call.ConsensusCall;
 import io.nuls.transaction.rpc.call.LedgerCall;
 import io.nuls.transaction.rpc.call.NetworkCall;
 import io.nuls.transaction.service.CtxService;
-import io.nuls.transaction.storage.h2.TransactionH2Service;
 import io.nuls.transaction.storage.rocksdb.CtxStorageService;
 import io.nuls.transaction.storage.rocksdb.UnconfirmedTxStorageService;
 import io.nuls.transaction.storage.rocksdb.UnverifiedCtxStorageService;
-import io.nuls.transaction.utils.TxUtil;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -44,7 +43,7 @@ import java.util.concurrent.locks.ReentrantLock;
  * @author: qinyifeng
  * @date: 2018/12/19
  */
-@Service
+@Component
 public class CtxServiceImpl implements CtxService {
 
     private final Lock CTX_LOCK = new ReentrantLock();
@@ -60,9 +59,6 @@ public class CtxServiceImpl implements CtxService {
 
     @Autowired
     private UnconfirmedTxStorageService unconfirmedTxStorageService;
-
-    @Autowired
-    private TransactionH2Service transactionH2Service;
 
     @Autowired
     private TxConfig txConfig;
@@ -189,11 +185,9 @@ public class CtxServiceImpl implements CtxService {
         }
         //保存到rocksdb
         unconfirmedTxStorageService.putTx(chain.getChainId(),tx);
-        //保存到h2数据库
-        transactionH2Service.saveTxs(TxUtil.tx2PO(chain, tx));
         //调账本记录未确认交易
         try {
-            LedgerCall.commitUnconfirmedTx(chain, tx.hex());
+            LedgerCall.commitUnconfirmedTx(chain, RPCUtil.encode(tx.serialize()));
         } catch (Exception e) {
             throw new NulsException(e);
         }
@@ -313,7 +307,8 @@ public class CtxServiceImpl implements CtxService {
             //超过全部链接节点51%的节点验证通过,则节点判定交易的验证通过
             if (rs.compareTo(agents.multiply(passRate)) >= 0) {
                 //使用该地址到账户模块对跨链交易atx_trans_hash签名
-                P2PHKSignature signature = AccountCall.signDigest(packingAddress, null, message.getRequestHash().getDigestHex());
+                //todo获取打包地址默认密码, 调共识模块接口?
+                P2PHKSignature signature = AccountCall.signDigest(packingAddress, null, message.getRequestHash().getDigestBytes());
                 BroadcastCrossNodeRsMessage rsMessage = new BroadcastCrossNodeRsMessage();
                 rsMessage.setCommand(TxCmd.NW_CROSS_NODE_RS);
                 rsMessage.setRequestHash(message.getRequestHash());

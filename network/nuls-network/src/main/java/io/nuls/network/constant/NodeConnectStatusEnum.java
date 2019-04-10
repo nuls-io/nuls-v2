@@ -25,10 +25,10 @@
 package io.nuls.network.constant;
 
 /**
- * 对等节点的连接状态
+ * 对等节点的连接状态，是连接的当前状态。
  * UNCONNECT  未连接
  * CONNECTING 连接中
- * CONNECTED 建立连接
+ * CONNECTED 建立连接，可连接
  * DISCONNECT 断开连接
  * FAIL  连接失败
  * AVAILABLE 握手成功

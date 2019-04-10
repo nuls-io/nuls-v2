@@ -25,8 +25,6 @@ package io.nuls.contract.helper;
 
 import io.nuls.base.data.Transaction;
 import io.nuls.contract.model.bo.ContractResult;
-import lombok.Getter;
-import lombok.Setter;
 
 import java.util.List;
 import java.util.Set;
@@ -39,11 +37,9 @@ import static io.nuls.contract.util.ContractUtil.collectAddress;
  * @author: PierreLuo
  * @date: 2019/1/11
  */
-@Getter
-@Setter
 public class ContractConflictChecker {
 
-    public final ReentrantLock lock = new ReentrantLock();
+    private final ReentrantLock lock = new ReentrantLock();
 
     public static ContractConflictChecker newInstance() {
         return new ContractConflictChecker();
@@ -55,11 +51,11 @@ public class ContractConflictChecker {
         contractSetList.add(element);
     }
 
-    public boolean checkConflict(Transaction tx, ContractResult contractResult, Set<String> commitSet) {
+    public boolean checkConflict(int chainId, Transaction tx, ContractResult contractResult, Set<String> commitSet) {
         lock.lock();
         try {
             boolean isConflict = false;
-            Set<String> collectAddress = collectAddress(contractResult);
+            Set<String> collectAddress = collectAddress(chainId, contractResult);
             for (String address : collectAddress) {
                 if (containAddress(address, commitSet)) {
                     isConflict = true;
@@ -92,4 +88,11 @@ public class ContractConflictChecker {
         return false;
     }
 
+    public List<Set<String>> getContractSetList() {
+        return contractSetList;
+    }
+
+    public void setContractSetList(List<Set<String>> contractSetList) {
+        this.contractSetList = contractSetList;
+    }
 }

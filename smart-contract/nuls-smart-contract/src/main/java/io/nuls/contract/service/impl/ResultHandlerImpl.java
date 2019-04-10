@@ -34,12 +34,12 @@ import io.nuls.contract.model.tx.ContractTransferTransaction;
 import io.nuls.contract.model.txdata.ContractTransferData;
 import io.nuls.contract.service.ContractCaller;
 import io.nuls.contract.service.ResultHanlder;
-import io.nuls.contract.util.CompareTxTimeAsc;
+import io.nuls.contract.util.CompareTxOrderAsc;
 import io.nuls.contract.util.Log;
 import io.nuls.contract.vm.program.ProgramExecutor;
+import io.nuls.rpc.util.RPCUtil;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
-import org.spongycastle.util.encoders.Hex;
 
 import java.io.IOException;
 import java.math.BigInteger;
@@ -75,8 +75,8 @@ public class ResultHandlerImpl implements ResultHanlder {
             finalResultList.addAll(analyzerResult.getSuccessList());
             finalResultList.addAll(analyzerResult.getFailedSet());
             finalResultList.addAll(reCallResultList);
-            // 按时间升序排序
-            return finalResultList.stream().sorted(CompareTxTimeAsc.getInstance()).collect(Collectors.toList());
+            // 按接收交易的顺序升序排序
+            return finalResultList.stream().sorted(CompareTxOrderAsc.getInstance()).collect(Collectors.toList());
         } catch (IOException e) {
             Log.error(e);
             return Collections.emptyList();
@@ -101,7 +101,8 @@ public class ResultHandlerImpl implements ResultHanlder {
 
                 CoinData coinData = new CoinData();
                 ContractBalance balance = tempBalanceManager.getBalance(contractAddress).getData();
-                byte[] nonceBytes = Hex.decode(balance.getNonce());
+                byte[] nonceBytes = RPCUtil.decode(balance.getNonce());
+
                 CoinFrom coinFrom = new CoinFrom(contractAddress, chainId, assetsId, BigInteger.valueOf(value), nonceBytes, (byte) 0);
                 coinData.getFrom().add(coinFrom);
                 CoinTo coinTo = new CoinTo(contractResult.getSender(), chainId, assetsId, BigInteger.valueOf(value), 0L);
@@ -118,7 +119,7 @@ public class ResultHandlerImpl implements ResultHanlder {
                 NulsDigestData hash = NulsDigestData.calcDigestData(tx.serializeForHash());
                 byte[] hashBytes = hash.serialize();
                 byte[] currentNonceBytes = Arrays.copyOfRange(hashBytes, hashBytes.length - 8, hashBytes.length);
-                balance.setNonce(Hex.toHexString(currentNonceBytes));
+                balance.setNonce(RPCUtil.encode(currentNonceBytes));
                 tx.setHash(hash);
                 contractResult.getContractTransferList().add(tx);
             }
@@ -128,8 +129,8 @@ public class ResultHandlerImpl implements ResultHanlder {
     private List<ContractResult> reCall(ProgramExecutor batchExecutor, AnalyzerResult analyzerResult, int chainId, String preStateRoot) {
         // 重新执行合约
         List<ContractResult> list = analyzerResult.getReCallTxList();
-        List<ContractWrapperTransaction> collect = list.stream().map(c -> c.getTx()).collect(Collectors.toList());
-        List<ContractResult> resultList = contractCaller.reCallTx(batchExecutor, collect, chainId, preStateRoot);
+        List<ContractWrapperTransaction> collectTxs = list.stream().sorted(CompareTxOrderAsc.getInstance()).map(c -> c.getTx()).collect(Collectors.toList());
+        List<ContractResult> resultList = contractCaller.reCallTx(batchExecutor, collectTxs, chainId, preStateRoot);
         return resultList;
     }
 }

@@ -25,10 +25,6 @@ package io.nuls.block.model;
 import io.nuls.base.data.NulsDigestData;
 import io.nuls.base.data.SmallBlock;
 import io.nuls.base.data.Transaction;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
 
 import java.util.List;
 import java.util.Map;
@@ -40,20 +36,41 @@ import java.util.Map;
  * @version 1.0
  * @date 18-12-13 下午3:01
  */
-@NoArgsConstructor
-@AllArgsConstructor
 public class CachedSmallBlock {
 
-    @Getter
-    @Setter
     private List<NulsDigestData> missingTransactions;
 
-    @Getter
-    @Setter
     private SmallBlock smallBlock;
 
-    @Getter
-    @Setter
     private Map<NulsDigestData, Transaction> txMap;
 
+    public CachedSmallBlock(List<NulsDigestData> missingTransactions, SmallBlock smallBlock, Map<NulsDigestData, Transaction> txMap) {
+        this.missingTransactions = missingTransactions;
+        this.smallBlock = smallBlock;
+        this.txMap = txMap;
+    }
+
+    public List<NulsDigestData> getMissingTransactions() {
+        return missingTransactions;
+    }
+
+    public void setMissingTransactions(List<NulsDigestData> missingTransactions) {
+        this.missingTransactions = missingTransactions;
+    }
+
+    public SmallBlock getSmallBlock() {
+        return smallBlock;
+    }
+
+    public void setSmallBlock(SmallBlock smallBlock) {
+        this.smallBlock = smallBlock;
+    }
+
+    public Map<NulsDigestData, Transaction> getTxMap() {
+        return txMap;
+    }
+
+    public void setTxMap(Map<NulsDigestData, Transaction> txMap) {
+        this.txMap = txMap;
+    }
 }

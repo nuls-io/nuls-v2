@@ -1,15 +1,12 @@
 package io.nuls.api.model.po.db;
 
 import io.nuls.base.data.Address;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 
-@Data
-@NoArgsConstructor
+
 public class AccountInfo {
 
     private String address;
@@ -32,10 +29,14 @@ public class AccountInfo {
 
     private BigInteger totalBalance;
 
+    private BigInteger totalReward;
+
     private List<String> tokens;
 
     //是否是根据最新区块的交易新创建的账户，只为业务使用，不存储该字段
     private boolean isNew;
+
+    public AccountInfo(){}
 
     public AccountInfo(String address) {
         this.address = address;
@@ -49,5 +50,110 @@ public class AccountInfo {
         this.timeLock = BigInteger.ZERO;
         this.balance = BigInteger.ZERO;
         this.totalBalance = BigInteger.ZERO;
+        this.totalReward = BigInteger.ZERO;
+    }
+
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
+    }
+
+    public String getAlias() {
+        return alias;
+    }
+
+    public void setAlias(String alias) {
+        this.alias = alias;
+    }
+
+    public int getType() {
+        return type;
+    }
+
+    public void setType(int type) {
+        this.type = type;
+    }
+
+    public int getTxCount() {
+        return txCount;
+    }
+
+    public void setTxCount(int txCount) {
+        this.txCount = txCount;
+    }
+
+    public BigInteger getTotalOut() {
+        return totalOut;
+    }
+
+    public void setTotalOut(BigInteger totalOut) {
+        this.totalOut = totalOut;
+    }
+
+    public BigInteger getTotalIn() {
+        return totalIn;
+    }
+
+    public void setTotalIn(BigInteger totalIn) {
+        this.totalIn = totalIn;
+    }
+
+    public BigInteger getConsensusLock() {
+        return consensusLock;
+    }
+
+    public void setConsensusLock(BigInteger consensusLock) {
+        this.consensusLock = consensusLock;
+    }
+
+    public BigInteger getTimeLock() {
+        return timeLock;
+    }
+
+    public void setTimeLock(BigInteger timeLock) {
+        this.timeLock = timeLock;
+    }
+
+    public BigInteger getBalance() {
+        return balance;
+    }
+
+    public void setBalance(BigInteger balance) {
+        this.balance = balance;
+    }
+
+    public BigInteger getTotalBalance() {
+        return totalBalance;
+    }
+
+    public void setTotalBalance(BigInteger totalBalance) {
+        this.totalBalance = totalBalance;
+    }
+
+    public List<String> getTokens() {
+        return tokens;
+    }
+
+    public void setTokens(List<String> tokens) {
+        this.tokens = tokens;
+    }
+
+    public boolean isNew() {
+        return isNew;
+    }
+
+    public void setNew(boolean aNew) {
+        isNew = aNew;
+    }
+
+    public BigInteger getTotalReward() {
+        return totalReward;
+    }
+
+    public void setTotalReward(BigInteger totalReward) {
+        this.totalReward = totalReward;
     }
 }

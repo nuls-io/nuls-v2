@@ -4,7 +4,7 @@
     "chainId":2,
     "assetId":1,
     "txMaxSize":1048576,
-    "moduleVerifyPercent":0.3,
+    "moduleVerifyPercent":0.1,
     "packageRpcReserveTime":20,
     "txUnverifiedQueueSize":10000000,
     "orphanTtl":3600000
@@ -15,11 +15,9 @@
   "language": "en",
   "encoding": "UTF-8",
   "txDataRoot": "tx",
-  "hashTtl":6000,
   "ctxEffectThreshold":30,
   "crossVerifyResultPassRate":"0.51",
   "chainNodesResultPassRate":"0.8",
   "recentPackagerThreshold":30,
-  "unconfirmedTxExpireMs":1800000,
-  "h2TxTableNumber":128
+  "unconfirmedTxExpireMs":1800000
 }

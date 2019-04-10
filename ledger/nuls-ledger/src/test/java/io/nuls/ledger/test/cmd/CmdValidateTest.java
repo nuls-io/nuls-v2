@@ -27,11 +27,13 @@ package io.nuls.ledger.test.cmd;
 
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.*;
+import io.nuls.ledger.test.constant.TestConfig;
+import io.nuls.ledger.utils.LoggerUtil;
 import io.nuls.rpc.info.NoUse;
 import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.model.message.Response;
 import io.nuls.rpc.netty.processor.ResponseMessageProcessor;
-import io.nuls.tools.crypto.HexUtil;
+import io.nuls.rpc.util.RPCUtil;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -40,8 +42,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import static io.nuls.ledger.utils.LoggerUtil.logger;
 
 /**
  * Created by ljs on 2019/01/06.
@@ -52,8 +52,8 @@ public class CmdValidateTest {
         NoUse.mockModule();
 //        CmdDispatcher.syncKernel("ws://127.0.0.1:8887");
     }
-
-
+    String address = "tNULSeBaMfi17CxRHVqFZbSFGYeyRLHWw2ctho";
+    String addressTo = "tNULSeBaMmp4U2k653V5FmmPf4HDECWK2ExYVr";
     @Test
     public void validateCoinData() throws Exception {
         double version = 1.0;
@@ -61,10 +61,7 @@ public class CmdValidateTest {
         // Build params map
         Map<String, Object> params = new HashMap<>();
         // Version information ("1.1" or 1.1 is both available)
-        int chainId = 8096;
-        int assetChainId = 445;
-        String address = "JgT2JCQvKGRKRjKqyfxRAj2zSCpGca01f";
-        int assetId = 222;
+
 //        Response response = CmdDispatcher.requestAndResponse(ModuleE.LG.abbr, "getNonce", params);
 //        String nonce =  ((Map)((Map)response.getResponseData()).get("getNonce")).get("nonce").toString();
         //封装交易执行
@@ -74,8 +71,8 @@ public class CmdValidateTest {
         CoinTo coinTo = new CoinTo();
         coinTo.setAddress(AddressTool.getAddress(address));
         coinTo.setAmount(BigInteger.valueOf(100));
-        coinTo.setAssetsChainId(assetChainId);
-        coinTo.setAssetsId(assetId);
+        coinTo.setAssetsChainId(TestConfig.assetChainId);
+        coinTo.setAssetsId(TestConfig.assetId);
         coinTo.setLockTime(0);
         List<CoinFrom> coinFroms =new ArrayList<>();
 //        coinFroms.add(coinFrom);
@@ -84,10 +81,10 @@ public class CmdValidateTest {
         coinData.setFrom(coinFroms);
         coinData.setTo(coinTos);
         tx.setCoinData(coinData.serialize());
-        params.put("chainId", chainId);
-        params.put("txHex",HexUtil.encode(tx.serialize()));
+        params.put("chainId", TestConfig.chainId);
+        params.put("tx",RPCUtil.encode(tx.serialize()));
         Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.LG.abbr, "validateCoinData", params);
-        logger.info("response {}", response);
+        LoggerUtil.logger().info("response {}", response);
     }
 
 
@@ -97,12 +94,12 @@ public class CmdValidateTest {
         // Build params map
         Map<String, Object> params = new HashMap<>();
         // Version information ("1.1" or 1.1 is both available)
-        int chainId = 8096;
+
 //        Response response = CmdDispatcher.requestAndResponse(ModuleE.LG.abbr, "getNonce", params);
 //        String nonce =  ((Map)((Map)response.getResponseData()).get("getNonce")).get("nonce").toString();
-        params.put("chainId", chainId);
+        params.put("chainId", TestConfig.chainId);
         Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.LG.abbr, "bathValidateBegin", params);
-        logger.info("response {}", response);
+        LoggerUtil.logger().info("response {}", response);
     }
 
     @Test
@@ -111,10 +108,6 @@ public class CmdValidateTest {
         // Build params map
         Map<String, Object> params = new HashMap<>();
         // Version information ("1.1" or 1.1 is both available)
-        int chainId = 8096;
-        int assetChainId = 445;
-        String address = "JgT2JCQvKGRKRjKqyfxRAj2zSCpGca01f";
-        int assetId = 222;
 //        Response response = CmdDispatcher.requestAndResponse(ModuleE.LG.abbr, "getNonce", params);
 //        String nonce =  ((Map)((Map)response.getResponseData()).get("getNonce")).get("nonce").toString();
         //封装交易执行
@@ -124,8 +117,8 @@ public class CmdValidateTest {
         CoinTo coinTo = new CoinTo();
         coinTo.setAddress(AddressTool.getAddress(address));
         coinTo.setAmount(BigInteger.valueOf(100));
-        coinTo.setAssetsChainId(assetChainId);
-        coinTo.setAssetsId(assetId);
+        coinTo.setAssetsChainId(TestConfig.assetChainId);
+        coinTo.setAssetsId(TestConfig.assetId);
         coinTo.setLockTime(-1);
         List<CoinFrom> coinFroms =new ArrayList<>();
 //        coinFroms.add(coinFrom);
@@ -136,11 +129,11 @@ public class CmdValidateTest {
         tx.setBlockHeight(1L);
         tx.setCoinData(coinData.serialize());
         tx.setHash(NulsDigestData.calcDigestData(tx.serializeForHash()));
-        params.put("chainId", chainId);
-        params.put("txHex",HexUtil.encode(tx.serialize()));
+        params.put("chainId", TestConfig.chainId);
+        params.put("tx",RPCUtil.encode(tx.serialize()));
         params.put("isBatchValidate",true);
         Response  response = ResponseMessageProcessor.requestAndResponse(ModuleE.LG.abbr, "validateCoinData", params);
-        logger.info("response {}", response);
+        LoggerUtil.logger().info("response {}", response);
     }
 
     @Test
@@ -149,15 +142,11 @@ public class CmdValidateTest {
         // Build params map
         Map<String, Object> params = new HashMap<>();
         // Version information ("1.1" or 1.1 is both available)
-        int chainId = 8096;
-        int assetChainId = 445;
-        String address = "JgT2JCQvKGRKRjKqyfxRAj2zSCpGca01f";
-        String addressTo = "LLbmaw1UNmKmd5PfuzP1Zm9dNuAnia01f";
-        int assetId = 222;
-        params.put("assetChainId", 445);
+
+        params.put("assetChainId", TestConfig.assetChainId);
         params.put("address", address);
-        params.put("assetId", 222);
-        params.put("chainId", chainId);
+        params.put("assetId", TestConfig.assetId);
+        params.put("chainId", TestConfig.chainId);
         Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.LG.abbr, "getNonce", params);
         String nonce =  ((Map)((Map)response.getResponseData()).get("getNonce")).get("nonce").toString();
         //封装交易执行
@@ -165,16 +154,16 @@ public class CmdValidateTest {
         CoinData coinData = new CoinData();
         CoinFrom coinFrom = new CoinFrom();
         coinFrom.setAddress(AddressTool.getAddress(address));
-        coinFrom.setNonce(HexUtil.decode(nonce));
-        coinFrom.setAssetsId(assetId);
-        coinFrom.setAssetsChainId(assetChainId);
+        coinFrom.setNonce(RPCUtil.decode(nonce));
+        coinFrom.setAssetsId(TestConfig.assetId);
+        coinFrom.setAssetsChainId(TestConfig.assetChainId);
         coinFrom.setAmount(BigInteger.valueOf(21));
         coinFrom.setLocked((byte)0);
         CoinTo coinTo = new CoinTo();
         coinTo.setAddress(AddressTool.getAddress(addressTo));
         coinTo.setAmount(BigInteger.valueOf(20));
-        coinTo.setAssetsChainId(assetChainId);
-        coinTo.setAssetsId(assetId);
+        coinTo.setAssetsChainId(TestConfig.assetChainId);
+        coinTo.setAssetsId(TestConfig.assetId);
         coinTo.setLockTime(0);
         List<CoinFrom> coinFroms =new ArrayList<>();
         coinFroms.add(coinFrom);
@@ -185,10 +174,10 @@ public class CmdValidateTest {
         tx.setBlockHeight(2L);
         tx.setCoinData(coinData.serialize());
         tx.setHash(NulsDigestData.calcDigestData(tx.serializeForHash()));
-        params.put("chainId", chainId);
-        params.put("txHex",HexUtil.encode(tx.serialize()));
+        params.put("chainId", TestConfig.chainId);
+        params.put("tx",RPCUtil.encode(tx.serialize()));
         params.put("isBatchValidate",true);
           response = ResponseMessageProcessor.requestAndResponse(ModuleE.LG.abbr, "validateCoinData", params);
-        logger.info("response {}", response);
+        LoggerUtil.logger().info("response {}", response);
     }
 }

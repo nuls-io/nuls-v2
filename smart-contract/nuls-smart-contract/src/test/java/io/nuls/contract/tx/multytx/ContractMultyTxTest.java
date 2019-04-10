@@ -45,60 +45,107 @@ public class ContractMultyTxTest extends BaseQuery {
         // TestAddress.createAccount 生成地址，得到 importPriKey 语句，放入 contractNRC20TokenSendTxTest.importPriKeyTest 中执行
     }
 
+    /**
+     * 依赖于contractNRC20TokenSendTxTest.transfer()
+     */
     @Test
     public void multyCreateNRC20() throws Exception {
         // 执行后，复制contract module日志的合约地址，赋值给成员变量contractAddress_nrc20X (X -> [0,34])
         for (int i = 0; i < 35; i++) {
-            contractNRC20TokenSendTxTest.setSender(sender("getToAddress", i));
+            contractNRC20TokenSendTxTest.setSender(address("getToAddress", i));
             contractNRC20TokenSendTxTest.createContract();
         }
     }
 
+    /**
+     * 依赖于contractNRC20TokenSendTxTest.transfer()
+     */
     @Test
     public void multyCreateContractCallContract() throws Exception {
         // 执行后，复制contract module日志的合约地址，赋值给成员变量contractAddressX (X -> [0,34])
         for (int i = 0; i < 35; i++) {
-            contractCallContractSendTxTest.setSender(sender("getToAddress", i));
+            contractCallContractSendTxTest.setSender(address("getToAddress", i));
             contractCallContractSendTxTest.createContract();
         }
     }
 
-    private String sender(String methodBaseName, int i) throws Exception {
+    private String address(String methodBaseName, int i) throws Exception {
         return this.getClass().getMethod(methodBaseName + i).invoke(this).toString();
     }
 
     @Test
-    public void loopCallInit() throws Exception {
-        // 创建NRC20合约, 调用ContractNRC20TokenSendTxTest.createContract, 得到合约地址，赋值给成员变量contractAddress_nrc20
-        // 创建ContractCallContract合约, 调用ContractCallContractSendTxTest.createContract, 得到合约地址，赋值给成员变量contractAddress
-        contractCallContractSendTxTest.tokenTransfer();
-        contractCallContractSendTxTest.setSender(sender("getToAddress", 0));
-        contractCallContractSendTxTest.transfer2Contract();
-    }
-
-    @Test
-    public void loopCall() throws Exception {
-        int times = 1;
+    public void multySenderCallOneContract() throws Exception {
+        // 35个sender 调用一个NRC20合约，比较时间
+        int times = 35;
+        contractNRC20TokenSendTxTest.setContractAddress_nrc20(address("getContractAddress_nrc20", 0));
+        contractNRC20TokenSendTxTest.setMethodName("approve");
         for (int i = 0; i < times; i++) {
-            contractCallContractSendTxTest.callContract_transferOut();
-            contractCallContractSendTxTest.setSender(sender("getToAddress", 0));
-            contractCallContractSendTxTest.callContract_contractCallContract();
-            contractCallContractSendTxTest.setSender(sender("getToAddress", 1));
-            contractCallContractSendTxTest.callContract_transferOut_contractCallContract();
-            contractCallContractSendTxTest.setSender(sender("getToAddress", 2));
-            contractCallContractSendTxTest.callContract_transferOut();
-            contractCallContractSendTxTest.setSender(sender("getToAddress", 3));
-            contractCallContractSendTxTest.callContract_contractCallContract();
-            contractCallContractSendTxTest.setSender(sender("getToAddress", 4));
-            contractCallContractSendTxTest.callContract_transferOut_contractCallContract();
+            contractNRC20TokenSendTxTest.setSender(address("getToAddress", i));
+            contractNRC20TokenSendTxTest.callContract();
         }
     }
 
-    //TODO pierre 35个sender 调用一个合约，比较时间
+    @Test
+    public void multySenderCallMultyContracts() throws Exception {
+        // 35个sender 调用35个NRC20合约，比较时间
+        int times = 35;
+        contractNRC20TokenSendTxTest.setMethodName("approve");
+        for (int i = 0; i < times; i++) {
+            contractNRC20TokenSendTxTest.setSender(address("getToAddress", i));
+            contractNRC20TokenSendTxTest.setContractAddress_nrc20(address("getContractAddress_nrc20", i));
+            contractNRC20TokenSendTxTest.callContract();
+        }
+    }
 
-    //TODO pierre 35个sender 调用35个合约，比较时间
+    @Test
+    public void multySenderTokenTransferToMultyContracts() throws Exception {
+        // 35个sender 调用35个NRC20合约，向`contractCallContract`合约转入token
+        int times = 35;
+        for (int i = 0; i < times; i++) {
+            contractNRC20TokenSendTxTest.setSender(address("getToAddress", i));
+            contractNRC20TokenSendTxTest.setContractAddress_nrc20(address("getContractAddress_nrc20", i));
+            contractNRC20TokenSendTxTest.setContractAddress(address("getContractAddress", i));
+            contractNRC20TokenSendTxTest.tokenTransfer();
+        }
+    }
 
-    //TODO pierre 35个sender 每7个调用一个合约（一共5个合约），比较时间
+    @Test
+    public void multySenderCallFiveContracts() throws Exception {
+        // 35个sender 每7个调用一个合约（一共5个合约），比较时间
+        int times = 35;
+        contractNRC20TokenSendTxTest.setMethodName("approve");
+        for (int i = 0; i < times; i++) {
+            contractNRC20TokenSendTxTest.setSender(address("getToAddress", i));
+            if(i % 7 == 0) {
+                contractNRC20TokenSendTxTest.setContractAddress_nrc20(address("getContractAddress_nrc20", i));
+            }
+            contractNRC20TokenSendTxTest.callContract();
+        }
+    }
 
-    //TODO pierre 35个sender 每5个调用一个合约（一共7个合约），方法为内部调用，内部调用的合约在外层7个合约当中，确保能够出现内部调用与外层调用冲突
+    @Test
+    public void multySenderCallSevenContracts() throws Exception {
+        // 35个sender 每5个调用一个合约（一共7个合约），方法为内部调用，内部调用的合约在外层7个合约当中，确保能够出现内部调用与外层调用冲突
+        int times = 35;
+        String sender;
+        contractNRC20TokenSendTxTest.setMethodName("approve");
+        for (int i = 0; i < times; i++) {
+            sender = address("getToAddress", i);
+            contractNRC20TokenSendTxTest.setSender(sender);
+            contractCallContractSendTxTest.setSender(sender);
+            if(i % 5 == 0) {
+                if((i/5 +1)%2 == 0) {
+                    contractCallContractSendTxTest.setContractAddress(address("getContractAddress", i));
+                } else {
+                    contractNRC20TokenSendTxTest.setContractAddress_nrc20(address("getContractAddress_nrc20", i));
+                }
+            }
+            if(i%10 < 5) {
+                contractCallContractSendTxTest.callContract_contractCallContract();
+            } else {
+                contractNRC20TokenSendTxTest.callContract();
+            }
+        }
+    }
+
 }

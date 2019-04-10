@@ -26,7 +26,6 @@ import io.nuls.base.data.BaseNulsData;
 import io.nuls.base.data.NulsDigestData;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.parse.SerializeUtils;
-import lombok.Data;
 
 import java.io.IOException;
 
@@ -36,7 +35,6 @@ import java.io.IOException;
  * @author qinyifeng
  * @date 2018/12/28
  */
-@Data
 public class Node extends BaseNulsData {
 
     /**
@@ -51,6 +49,30 @@ public class Node extends BaseNulsData {
      * 最新区块hash
      */
     private NulsDigestData hash;
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public long getHeight() {
+        return height;
+    }
+
+    public void setHeight(long height) {
+        this.height = height;
+    }
+
+    public NulsDigestData getHash() {
+        return hash;
+    }
+
+    public void setHash(NulsDigestData hash) {
+        this.hash = hash;
+    }
 
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {

@@ -51,7 +51,7 @@ public class VerifyCtxProcessTask implements Runnable {
 
     private CtxStorageService ctxStorageService = SpringLiteContext.getBean(CtxStorageService.class);
     private UnverifiedCtxStorageService unverifiedCtxStorageService = SpringLiteContext.getBean(UnverifiedCtxStorageService.class);
-    private TxService TxService = SpringLiteContext.getBean(TxService.class);
+    private TxService txService = SpringLiteContext.getBean(TxService.class);
     private Chain chain;
 
     public VerifyCtxProcessTask(Chain chain) {
@@ -82,7 +82,7 @@ public class VerifyCtxProcessTask implements Runnable {
             for (CrossTx ctx : unprocessedList) {
                 Transaction tx = ctx.getTx();
                 //交易验证
-                if(!TxService.verify(chain, tx)){
+                if(!txService.verify(chain, tx)){
                     break;
                 }
                 CrossTxData crossTxData = TxUtil.getInstance(tx.getTxData(), CrossTxData.class);

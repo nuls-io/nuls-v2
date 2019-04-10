@@ -1,7 +1,5 @@
 package io.nuls.tools.core.config;
 
-import io.nuls.tools.parse.ConfigLoader;
-import io.nuls.tools.parse.config.IniEntity;
 import org.ini4j.Config;
 import org.ini4j.Ini;
 
@@ -21,17 +19,17 @@ public class IniModuleConfigParser implements ModuleConfigParser {
     }
 
     @Override
-    public Map<String, ConfigurationLoader.ConfigItem> parse(String configFile,InputStream inputStream) throws Exception {
+    public Map<String, Map<String,ConfigurationLoader.ConfigItem>> parse(String configFile,InputStream inputStream) throws Exception {
         Config cfg = new Config();
         cfg.setMultiSection(true);
         Ini ini = new Ini();
         ini.setConfig(cfg);
         ini.load(inputStream);
-        Map<String,ConfigurationLoader.ConfigItem> res = new HashMap<>(ini.size());
-        ini.values().forEach(s->{
-            s.entrySet().forEach(item->{
-                res.put(item.getKey(),new ConfigurationLoader.ConfigItem(configFile,item.getValue()));
-            });
+        Map<String,Map<String,ConfigurationLoader.ConfigItem>> res = new HashMap<>(ini.size());
+        ini.values().forEach(s-> {
+            Map<String,ConfigurationLoader.ConfigItem> domainValues = new HashMap<>(s.size());
+            s.forEach((key, value) -> domainValues.put(key, new ConfigurationLoader.ConfigItem(configFile, value)));
+            res.put(s.getName(),domainValues);
         });
         return res;
     }

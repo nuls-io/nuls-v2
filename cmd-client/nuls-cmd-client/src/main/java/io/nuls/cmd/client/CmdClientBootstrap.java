@@ -18,7 +18,6 @@ public class CmdClientBootstrap {
 
     public static void main(String[] args) {
         NulsRpcModuleBootstrap.printLogo("/cli-logo");
-        Log.BASIC_LOGGER = LoggerBuilder.getLogger(Log.BASIC_NAME, Level.ERROR);
         if (args == null || args.length == 0) {
             args = new String[]{"ws://" + HostInfo.getLocalIP() + ":8887/ws","0"};
         }else{
@@ -29,7 +28,11 @@ public class CmdClientBootstrap {
         Provider.ProviderType providerType = Provider.ProviderType.valueOf(configurationLoader.getValue("providerType"));
         int defaultChainId = Integer.parseInt(configurationLoader.getValue("chainId"));
         ServiceManager.init(defaultChainId,providerType);
-        NulsRpcModuleBootstrap.run("io.nuls.cmd.client",args);
+        try {
+            NulsRpcModuleBootstrap.run("io.nuls.cmd.client",args);
+        }catch (Exception e){
+            Log.error("module start fail {}",e.getMessage());
+        }
     }
 
 }

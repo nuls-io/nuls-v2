@@ -183,7 +183,10 @@ public interface AccountConstant {
     /**
      * Map初始值
      */
-    int INIT_CAPACITY = 16;
+    int INIT_CAPACITY_16 = 16;
+    int INIT_CAPACITY_8 = 8;
+    int INIT_CAPACITY_4 = 4;
+    int INIT_CAPACITY_2 = 2;
 
     /**
      * account root path
@@ -212,12 +215,12 @@ public interface AccountConstant {
     /**
      * 交易相关
      */
-    int TX_REMARK_MAX_LEN = 100;
-    int TX_HASH_DIGEST_BYTE_MAX_LEN = 70;
-    int TX_MAX_BYTES = 300;
-    int TX_MAX_SIZE = TX_MAX_BYTES * 1024;
-    /**
-     * 本地计算nonce值的hash缓存有效时间 30秒
-     */
-    int HASH_TTL = 30000;
+//    int TX_REMARK_MAX_LEN = 100;
+//    int TX_HASH_DIGEST_BYTE_MAX_LEN = 70;
+//    int TX_MAX_BYTES = 300;
+//    int TX_MAX_SIZE = TX_MAX_BYTES * 1024;
+//    /**
+//     * 本地计算nonce值的hash缓存有效时间 30秒
+//     */
+//    int HASH_TTL = 30000;
 }

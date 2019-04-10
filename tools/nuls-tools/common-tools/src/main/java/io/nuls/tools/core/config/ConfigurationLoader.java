@@ -4,13 +4,14 @@ import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.core.config.persist.PersistManager;
 import io.nuls.tools.log.Log;
 import io.nuls.tools.model.StringUtils;
-import io.nuls.tools.parse.JSONUtils;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.net.URL;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * @Author: zhoulijun
@@ -35,24 +36,35 @@ public class ConfigurationLoader {
 
         String configFile;
 
-        public ConfigItem(String configFile,String value){
+        public ConfigItem(String configFile, String value) {
             this.configFile = configFile;
             this.value = value;
+        }
+
+        public String getValue() {
+            return value;
+        }
+
+        public String getConfigFile() {
+            return configFile;
         }
     }
 
     private static final String JVM_OPTION_ACTIVE_MODULE = "active.module";
 
+    public static final String GLOBAL_DOMAIN = "global";
+
     /**
      * 存储解析好的配置项
      */
-    Map<String, ConfigItem> configData = new HashMap<>();
+    Map<String, Map<String, ConfigItem>> configData = new HashMap<>();
 
-    Map<String,Map<String,String>> persistConfigData = new HashMap<>();
+    Map<String, Map<String, String>> persistConfigData = new HashMap<>();
 
     Map<String, ModuleConfigParser> parserMap = new HashMap<>();
 
     public ConfigurationLoader() {
+        configData.put(GLOBAL_DOMAIN, new HashMap<>());
         ModuleConfigParser json = new JsonModuleConfigParser();
         parserMap.put(json.fileSuffix(), json);
         ModuleConfigParser ini = new IniModuleConfigParser();
@@ -61,6 +73,7 @@ public class ConfigurationLoader {
         parserMap.put(ncf.fileSuffix(), ncf);
         ModuleConfigParser properties = new PropertiesModuleConfigParser();
         parserMap.put(properties.fileSuffix(), properties);
+
     }
 
 
@@ -70,29 +83,24 @@ public class ConfigurationLoader {
         loadJvmActiveModuleFile();
         loadJvmOptionConfigItem();
         loadForPersist();
-        if(configData.isEmpty()){
+        if (configData.isEmpty()) {
             Log.info("config item list is empty");
-            return ;
+            return;
         }
-        Log.info("config item list:");
-        int maxKeyLength = configData.keySet().stream().max((d1,d2)->d1.length() > d2.length() ? 1 : -1).get().length();
-        configData.entrySet().forEach(entry->{
-            StringBuilder space = new StringBuilder();
-            for(var i = 0;i<maxKeyLength - entry.getKey().length();i++){
-                space.append(" ");
-            }
-            Log.info("{} : {} ==> {}",entry.getKey() + space,entry.getValue().value,entry.getValue().configFile);
-        });
+//        Log.info("config item list:");
     }
 
     /**
      * 通过jvm option -DXXX=XXX 的方式设置配置项
      */
     private void loadJvmOptionConfigItem() {
-        configData.entrySet().forEach(entry->{
-            if(StringUtils.isNotBlank(System.getProperty(entry.getKey()))){
-                configData.put(entry.getKey(),new ConfigurationLoader.ConfigItem("-D" + entry.getKey(), System.getProperty(entry.getKey())));
-            }
+        configData.values().forEach(configItemList -> {
+            configItemList.entrySet().stream().forEach(entry -> {
+                if (StringUtils.isNotBlank(System.getProperty(entry.getKey()))) {
+                    configItemList.put(entry.getKey(), new ConfigItem("JAVA_OPTS:-D" + entry.getKey(), System.getProperty(entry.getKey())));
+                }
+            });
+
         });
     }
 
@@ -103,18 +111,16 @@ public class ConfigurationLoader {
     private void loadJvmActiveModuleFile() {
         String fileName = System.getProperty(JVM_OPTION_ACTIVE_MODULE);
         if (StringUtils.isNotBlank(fileName)) {
-            parserMap.entrySet().forEach(entry -> {
-                if (fileName.endsWith(entry.getKey())) {
-                    loadForFile(fileName, entry.getValue());
+            parserMap.forEach((key, value) -> {
+                if (fileName.endsWith(key)) {
+                    loadForFile(fileName, value);
                 }
             });
         }
     }
 
     private void loadJarPathModule() {
-        parserMap.entrySet().forEach(parserEntry -> {
-            loadForFile(parserEntry.getValue().getFileName(), parserEntry.getValue());
-        });
+        parserMap.forEach((key, value) -> loadForFile(value.getFileName(), value));
     }
 
     private void loadForFile(String fileName, ModuleConfigParser parser) {
@@ -123,12 +129,11 @@ public class ConfigurationLoader {
         if (file.exists() && file.isFile()) {
             try {
                 Log.info("found config file : {}", fileName);
-                configData.putAll(parser.parse(file.getAbsolutePath(),new FileInputStream(file)));
+                mergeConfigItem(parser.parse(file.getAbsolutePath(), new FileInputStream(file)));
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
         } else {
-
             StringBuilder newFileName = new StringBuilder();
             for (int i = 0; i < fileName.length(); i++) {
                 if (i == 0) {
@@ -141,7 +146,7 @@ public class ConfigurationLoader {
             if (file.exists() && file.isFile()) {
                 Log.info("found config file : {}", newFileName.toString());
                 try {
-                    configData.putAll(parser.parse(file.getAbsolutePath(),new FileInputStream(file)));
+                    mergeConfigItem(parser.parse(file.getAbsolutePath(), new FileInputStream(file)));
                 } catch (Exception e) {
                     throw new RuntimeException(e);
                 }
@@ -150,14 +155,14 @@ public class ConfigurationLoader {
     }
 
     private void loadResourceModule() {
-        parserMap.entrySet().forEach(parserEntry -> {
-            URL url = getClass().getClassLoader().getResource(parserEntry.getValue().getFileName());
+        parserMap.forEach((key, value) -> {
+            URL url = getClass().getClassLoader().getResource(value.getFileName());
             if (url == null) {
                 return;
             }
-            Log.info("found config file : {}", parserEntry.getValue().getFileName());
+            Log.info("found config file : {}", value.getFileName());
             try {
-                configData.putAll(parserEntry.getValue().parse(url.getPath(),url.openStream()));
+                mergeConfigItem(value.parse(url.getPath(), url.openStream()));
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -165,21 +170,65 @@ public class ConfigurationLoader {
         });
     }
 
-    public String getValue(String key) {
-        ConfigItem item = configData.get(key);
-        return item == null ? null : item.value;
+    public Map<String, Map<String, ConfigItem>> getConfigData() {
+        return configData;
     }
 
-    public String getValue(String key,String persistDomain) {
-        Map<String,String> persistConfig = persistConfigData.get(persistDomain);
-        if(persistConfig == null){
-            return getValue(key);
+    public String getValue(String domain, String key) {
+        return getConfigItem(domain, key).value;
+    }
+
+    public String getValue(String key) {
+        return getValue(GLOBAL_DOMAIN, key);
+    }
+
+    public ConfigItem getConfigItemForGolbal(String key) {
+        return configData.get(GLOBAL_DOMAIN).get(key);
+    }
+
+    public ConfigItem getConfigItem(String key) {
+        List<Map<String, ConfigItem>> dataList = configData.entrySet().stream().filter(entry -> !entry.getKey().equals(GLOBAL_DOMAIN)).map(e -> e.getValue()).collect(Collectors.toList());
+        for (Map<String, ConfigItem> items : dataList) {
+            if (items.containsKey(key)) {
+                return items.get(key);
+            }
+        }
+        return getConfigItemForGolbal(key);
+    }
+
+    public ConfigItem getConfigItem(String domain, String key) {
+        if (!configData.containsKey(domain)) {
+            ConfigItem res = getConfigItemForGolbal(key);
+            return res;
+        }
+        ConfigItem item = configData.get(domain).get(key);
+        if (item == null) {
+            ConfigItem res = getConfigItemForGolbal(key);
+            return res;
+        }
+        return item;
+    }
+
+    public ConfigItem getConfigItemForPersist(String persistDomain, String key) {
+        Map<String, String> persistConfig = persistConfigData.get(persistDomain);
+        if (persistConfig == null) {
+            return getConfigItem(persistDomain, key);
         }
         String persistConfigValue = persistConfig.get(key);
-        if(persistConfigValue != null){
-            return persistConfigValue;
+        if (persistConfigValue != null) {
+            return new ConfigItem("PERSIST", persistConfigValue);
         }
-        return getValue(key);
+        return getConfigItem(persistDomain, key);
+    }
+
+    private void mergeConfigItem(Map<String, Map<String, ConfigItem>> configItems) {
+        configItems.entrySet().stream().forEach(entry -> {
+            if (!configData.containsKey(entry.getKey())) {
+                configData.put(entry.getKey(), entry.getValue());
+            } else {
+                configData.get(entry.getKey()).putAll(entry.getValue());
+            }
+        });
     }
 
 }

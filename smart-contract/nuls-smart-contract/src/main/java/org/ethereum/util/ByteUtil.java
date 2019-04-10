@@ -17,6 +17,7 @@
  */
 package org.ethereum.util;
 
+import io.nuls.tools.crypto.HexUtil;
 import org.ethereum.db.ByteArrayWrapper;
 import org.spongycastle.util.encoders.Hex;
 
@@ -216,7 +217,7 @@ public class ByteUtil {
      * @see Hex#toHexString
      */
     public static String toHexString(byte[] data) {
-        return data == null ? "" : Hex.toHexString(data);
+        return data == null ? "" : HexUtil.encode(data);
     }
 
     /**
@@ -669,7 +670,7 @@ public class ByteUtil {
         if (data.length() % 2 == 1) {
             data = "0" + data;
         }
-        return Hex.decode(data);
+        return HexUtil.decode(data);
     }
 
     /**

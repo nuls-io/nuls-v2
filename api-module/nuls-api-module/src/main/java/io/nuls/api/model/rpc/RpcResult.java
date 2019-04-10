@@ -21,7 +21,6 @@
 package io.nuls.api.model.rpc;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import io.nuls.api.exception.NotFoundException;
 import io.nuls.tools.basic.Result;
 
 /**

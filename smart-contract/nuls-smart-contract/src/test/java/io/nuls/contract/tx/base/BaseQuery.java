@@ -41,15 +41,13 @@ import io.nuls.rpc.info.NoUse;
 import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.model.message.Response;
 import io.nuls.rpc.netty.processor.ResponseMessageProcessor;
+import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.parse.JSONUtils;
-import lombok.Data;
-import lombok.Getter;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.spongycastle.util.encoders.Hex;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -60,7 +58,6 @@ import static io.nuls.contract.constant.ContractCmdConstant.*;
  * @author: PierreLuo
  * @date: 2018/12/4
  */
-@Data
 public class BaseQuery {
 
     @BeforeClass
@@ -122,76 +119,81 @@ public class BaseQuery {
     protected String toAddress34 = "tNULSeBaMvQr8dVnk3f3DPvwCYX3ctTRtrTurD";
 
     protected String createHash = "002029ca32525f635a15c82c046114657c0d8a96a7163780ac6b425b2383b240bd56";
-    protected String contractAddress0   = "tNULSeBaNAxpCQbLKYhWhW84ZejejrMgkDbFh6";
-    protected String contractAddress1  = "tNULSeBaMzp6pDpTGzTaAftWrUTsuHNwvGnFau";
-    protected String contractAddress2  = "tNULSeBaN1xsrTTNtaUW26vXknL74RAfBD5zTX";
-    protected String contractAddress3  = "tNULSeBaMwwMhq9cY89cWGEEzdFwtMQcW8YtoM";
-    protected String contractAddress4  = "tNULSeBaN5PiQJpjUmzEhuzkCJB3o62DacJnhC";
-    protected String contractAddress5  = "tNULSeBaN8LkozPSf6sptqadje1qGUXhysTMJC";
-    protected String contractAddress6  = "tNULSeBaN4XqZAUiiT4Y2xExTXFT1sRV6vAssg";
-    protected String contractAddress7  = "tNULSeBaMy6zqoNHsHfVKRd4bpzAr7hRX3YNXM";
-    protected String contractAddress8  = "tNULSeBaNC1jzeVBWJNEqJZENefewHLvUsAg2K";
-    protected String contractAddress9  = "tNULSeBaMwRkT5JtraT3V4sab9pDsKzj2Vy7Gn";
-    protected String contractAddress10 = "tNULSeBaMyE6MwRMRKYeRV1vXkGZfJt8TcBEmd";
-    protected String contractAddress11 = "tNULSeBaN95ap1X6Avu1Dmn683993kfZdSu3Cm";
-    protected String contractAddress12 = "tNULSeBaN5YRGT2TUJoH3eMW8XeQS1qVDh3FAS";
-    protected String contractAddress13 = "tNULSeBaMwhuD6LAgY7NSmWfiZVKcSJPtjZCby";
-    protected String contractAddress14 = "tNULSeBaN5nDDutvFnxf7zHw9Xy3aLy6sEgSfj";
-    protected String contractAddress15 = "tNULSeBaMz9X3AZBKwU7YsRHmaMozE49CraLwb";
-    protected String contractAddress16 = "tNULSeBaN5tDGtGMJgi8DXsk4a5gMNVUGG5Kzi";
-    protected String contractAddress17 = "tNULSeBaN2iCndkqdCtofGe6FDXBm3TbWtVm5m";
-    protected String contractAddress18 = "tNULSeBaN3D9agMDswVj3Bo6oUXaYvGBo9ybka";
-    protected String contractAddress19 = "tNULSeBaN2Ffp1Kexmb3c6eYAVcyYsWGckb2t9";
-    protected String contractAddress20 = "tNULSeBaN7F7q7KXGb4gP4M91mk7MLd7wcZJe3";
-    protected String contractAddress21 = "tNULSeBaNA45UHFHoTtvXBfQaJ5MQPn2vwyRBG";
-    protected String contractAddress22 = "tNULSeBaMyFLqs8ZvJ4ARkw1nq6EBc8KXp8D7u";
-    protected String contractAddress23 = "tNULSeBaN2deALux2NrqJbcefsP4mzpt3QGeKL";
-    protected String contractAddress24 = "tNULSeBaMzuRxT6noT5yJuQ8quBG1JcfU4tbY9";
-    protected String contractAddress25 = "tNULSeBaMygEchBxTKjL6JiKZus6jSYy47wB4Z";
-    protected String contractAddress26 = "tNULSeBaN4iL7Y8NKFvuTfEXtfNJESJNeLrPdM";
-    protected String contractAddress27 = "tNULSeBaN2aHZQnWPDKRVKpKPpUoPLuv7SUgWP";
-    protected String contractAddress28 = "tNULSeBaMzviEFNwqX5JXDiwoBKpnmF9FduFyE";
-    protected String contractAddress29 = "tNULSeBaMwefTkoqd4m3cv4JNCx4arDZ4zjE8S";
-    protected String contractAddress30 = "tNULSeBaMy3i8v1RDz8kBeZv8BmABKSSvkhHbC";
-    protected String contractAddress31 = "tNULSeBaN9KM89Me6V2H7gCCdDyFPRMpTAwmN8";
-    protected String contractAddress32 = "tNULSeBaMxHP255JFCtuuCtVj1nZg1krgQnryK";
-    protected String contractAddress33 = "tNULSeBaN1oAoP3GMNNk6Y4bqHpdSHocpUyCoQ";
-    protected String contractAddress34 = "tNULSeBaN3mDa2KfSKw1vSd87NnnoZamE8o6Qt";
-    protected String contractAddress_nrc200   = "tNULSeBaN1o2SDwJnt9WM7HzTFh7eFPB3hiPfB";
-    protected String contractAddress_nrc201  = "tNULSeBaN4AZpjVFhCmW8VS8G6cyWKStex4S3V";
-    protected String contractAddress_nrc202  = "tNULSeBaN6GbG4WmSdt1LZhLgQkGA8vcZwk7vW";
-    protected String contractAddress_nrc203  = "tNULSeBaNBTXRM6hUp9tcVXaqwN1WuHc91RYoP";
-    protected String contractAddress_nrc204  = "tNULSeBaN1AikL5Udn6ZXGGXiM7rmcPtavAkiV";
-    protected String contractAddress_nrc205  = "tNULSeBaNBk14DV9L9VXL3MQXPkLUGbfh3tdho";
-    protected String contractAddress_nrc206  = "tNULSeBaMyieAbonkQKXU8D3GBoX5yGjMgXvnR";
-    protected String contractAddress_nrc207  = "tNULSeBaNCAr6EvNviGYkmGQaZrpX6wvXDTYJ4";
-    protected String contractAddress_nrc208  = "tNULSeBaN3WEJgmKBWZWXJPc6sghMzWFtp9CZp";
-    protected String contractAddress_nrc209  = "tNULSeBaMvokU3t6o2N8rkcErpLJVUhbRUSqMp";
-    protected String contractAddress_nrc2010 = "tNULSeBaN8wSwi3ocXzny1NH1ifnLpGqRJD7BA";
-    protected String contractAddress_nrc2011 = "tNULSeBaN1SAPL9FTgBV7ebejnvGyCvBpMtYcR";
-    protected String contractAddress_nrc2012 = "tNULSeBaN9NKoT2GW2LXD6iVrwLx3kXwmtAKTt";
-    protected String contractAddress_nrc2013 = "tNULSeBaMx59gu62cK6yFUZTpr5Qk3Do1TK8Vg";
-    protected String contractAddress_nrc2014 = "tNULSeBaMxddLdD4kfMJjUti7r3zGm4W5oJ1mF";
-    protected String contractAddress_nrc2015 = "tNULSeBaMzmUYVrhw7zC1Zw4rtjsEaHP5ZAXXc";
-    protected String contractAddress_nrc2016 = "tNULSeBaN8XqHxxThx5Wo1NRBxcMwbfuWoYNAM";
-    protected String contractAddress_nrc2017 = "tNULSeBaN2F1jSibDkFmESq5tbGCS3p7qpbZf9";
-    protected String contractAddress_nrc2018 = "tNULSeBaNAthCUAPucTVG6zUP5mEC3ZAUyJQ1f";
-    protected String contractAddress_nrc2019 = "tNULSeBaN7SPfaotM2Dts2yQdCjanNppgfpis8";
-    protected String contractAddress_nrc2020 = "tNULSeBaN6fH64dA4DGuDNA8627VjVCYonFVNw";
-    protected String contractAddress_nrc2021 = "tNULSeBaMyovqC9D1nDHgbFGM4SUUWQgLzmT9f";
-    protected String contractAddress_nrc2022 = "tNULSeBaN5JQbmVuLK49ncJqh2tqRBTfTphXSC";
-    protected String contractAddress_nrc2023 = "tNULSeBaMy1wPP2i31WvzaTmHAjq3xwAnhSMR8";
-    protected String contractAddress_nrc2024 = "tNULSeBaN3BrKF1SHLXP62gNfuSKTvzQSZwtdZ";
-    protected String contractAddress_nrc2025 = "tNULSeBaMzZzXKW4PAXSUcafwRxAxAsmAHD8A5";
-    protected String contractAddress_nrc2026 = "tNULSeBaN5P7fcAVQsYMGA9VGv5b1pcvgVJEvV";
-    protected String contractAddress_nrc2027 = "tNULSeBaN46FMvxbrHkZoSx7WzkH9iBeC4VDnZ";
-    protected String contractAddress_nrc2028 = "tNULSeBaN3A6yj4FTa6ig7GnBVt3Bq6kUcEuT4";
-    protected String contractAddress_nrc2029 = "tNULSeBaNA1ThaoMCQxwxE9HKqz6uvrdBqCiUf";
-    protected String contractAddress_nrc2030 = "tNULSeBaN2GLcdGUqStGM9DwqVdG17rWaSnfZX";
-    protected String contractAddress_nrc2031 = "tNULSeBaNAnQDMdyA8Pu1dbgNvLsaYAp3Vz3a9";
-    protected String contractAddress_nrc2032 = "tNULSeBaNBbdirjfcQqQ6G9wkUkm3AdsDXWg6e";
-    protected String contractAddress_nrc2033 = "tNULSeBaN8cnwCPXhrt1ew4nqFTnonArUY55YC";
-    protected String contractAddress_nrc2034 = "tNULSeBaNBrZZASqjGWkiH81gnu8HbeacnneFB";
+    protected String contractAddress   = "";
+    protected String contractAddress0  = "tNULSeBaN7ZnfydbGZSDbXKZAqJs1kjucaC6y3";
+    protected String contractAddress1  = "tNULSeBaN5nQ4piuib8NuCxwSuLHkQSBDsxoa2";
+    protected String contractAddress2  = "tNULSeBaN1em4GXgF91FMzPyJkY3nQPztTaj1N";
+    protected String contractAddress3  = "tNULSeBaMzRHxh3SBEdMZJx4wFqB55vKH36eUM";
+    protected String contractAddress4  = "tNULSeBaNCMDh4xmZMdv1FFhh6KrdifqbropNP";
+    protected String contractAddress5  = "tNULSeBaN5uZzSDxBTuyQ92T7pFk5Ny5FLMQhH";
+    protected String contractAddress6  = "tNULSeBaN3L1KHhJZLE2UQDZgvmyxo4w7XKajf";
+    protected String contractAddress7  = "tNULSeBaMyyf8VTJkHbvb2Kbd9g7f2og5G9x9h";
+    protected String contractAddress8  = "tNULSeBaN475NghSmrkiXDHJRjXB3fUHVGQguW";
+    protected String contractAddress9  = "tNULSeBaN12tr5THvn1MCv3ef55dtWNAZoAQvN";
+    protected String contractAddress10 = "tNULSeBaN7eMa9pEttNipRNYW9cHXBxAnTDZcS";
+    protected String contractAddress11 = "tNULSeBaN5oakfaSEXhKSeynWDrU1pvqvjoPxi";
+    protected String contractAddress12 = "tNULSeBaN1twECi8Lh4dem1CNMneobwNwze2Z5";
+    protected String contractAddress13 = "tNULSeBaNCPzREHnwEgWH3CRT6h1bbsr4wMJXj";
+    protected String contractAddress14 = "tNULSeBaNBZhLfAo1eg6vivQYA9kPDNUsLoA9q";
+    protected String contractAddress15 = "tNULSeBaN1FmRsnfcahgiX5tei6CFPHwvfHcvv";
+    protected String contractAddress16 = "tNULSeBaNAHVt4zwVtgX25ytv9q1AKG1PiFU93";
+    protected String contractAddress17 = "tNULSeBaN9d7PdM5h1BqwD1zQ8t4rN2ytX3XxN";
+    protected String contractAddress18 = "tNULSeBaMwjHbgz5kRQhTwxYfNtGUS6wGsj4W6";
+    protected String contractAddress19 = "tNULSeBaMxtwWsggGS3HQ1gKALtY9wVorWBfsa";
+    protected String contractAddress20 = "tNULSeBaN92rcvmNmjGNQvtbVMh1pm2xVurm3b";
+    protected String contractAddress21 = "tNULSeBaMymBqqmtsHVyi3G2nxhewWb2EBpAAe";
+    protected String contractAddress22 = "tNULSeBaNAkB6kbqxwzFJd5cpTmE31eqFx52Ec";
+    protected String contractAddress23 = "tNULSeBaMzL4keSqFNvHooNvEseS8gxuohEM89";
+    protected String contractAddress24 = "tNULSeBaMyLtcPns5xDfgGmmfjDMFwytsGFaMf";
+    protected String contractAddress25 = "tNULSeBaMzjwKD79eiLHHsif4wCe2kLwTvao55";
+    protected String contractAddress26 = "tNULSeBaN7f1EHZfRPGsuHKi5iLv1f9FKKo9hS";
+    protected String contractAddress27 = "tNULSeBaN1V7cqGjmHaAzcZURc8eptn24vAnAa";
+    protected String contractAddress28 = "tNULSeBaMwqcj82iBQnwZ8DZMCuq2hgVBTCi4P";
+    protected String contractAddress29 = "tNULSeBaN2u7DK5Feh9F6SzP1zg2TjreDWhT8j";
+    protected String contractAddress30 = "tNULSeBaN4Qp6F9jN69rSUoyymonHRadzaDACf";
+    protected String contractAddress31 = "tNULSeBaN9Z1ncJ9Kc3c6rppw5DwiSxRE5FGK6";
+    protected String contractAddress32 = "tNULSeBaNBJrxm4N2zKaZvkyKoDEf5EhB28zhD";
+    protected String contractAddress33 = "tNULSeBaMy3w8zyTm7v6tLNxbQgmDW82tStq75";
+    protected String contractAddress34 = "tNULSeBaN8HJH5395svtzWpnfUAQUzqSE5x4t2";
+    protected String contractAddress_nrc20   = "tNULSeBaMzGVvtSpgB7dcERu7NZWU6Cf8gtnnP";
+    protected String contractAddress_nrc200  = "tNULSeBaMzCeoukqhMvWYpCZAbKCN2fE2JVzfK";
+    protected String contractAddress_nrc201  = "tNULSeBaNBawLTvbi4yokiXsFLkiNe8x8XH7Ac";
+    protected String contractAddress_nrc202  = "tNULSeBaNAnkAcECUu4KVjSWRUKiPaCytRh2dZ";
+    protected String contractAddress_nrc203  = "tNULSeBaMxLwGsh7dT2V9nten8noBxN2i4bvpA";
+    protected String contractAddress_nrc204  = "tNULSeBaN8DZ1RonVCLJsAicpm32tRE5RRH4F8";
+    protected String contractAddress_nrc205  = "tNULSeBaNA2pJxdN8Ui5wuEnymFcF91NrxdL3v";
+    protected String contractAddress_nrc206  = "tNULSeBaMvtKgRAGsmEE3V91jSttxxsFtMNQ69";
+    protected String contractAddress_nrc207  = "tNULSeBaNBs7FmRVrf2925XvUZe6DJwMjYzJPo";
+    protected String contractAddress_nrc208  = "tNULSeBaN63UW3syqccMXY1cz4Utajr1pYLvDo";
+    protected String contractAddress_nrc209  = "tNULSeBaNBshfGi9eYvzQauMio7jvXK8havrzu";
+    protected String contractAddress_nrc2010 = "tNULSeBaN3TUmG6ZDB6hv9yhe1zDALozziTQYb";
+    protected String contractAddress_nrc2011 = "tNULSeBaN2KDRw8z4Muid4ayLjQSS3JA3g7dma";
+    protected String contractAddress_nrc2012 = "tNULSeBaN7nPwpUiDuMUv8s3KP1qvmrCfNcqeh";
+    protected String contractAddress_nrc2013 = "tNULSeBaN8xftpyYR41ukVejwQx1EXv5LrkU1j";
+    protected String contractAddress_nrc2014 = "tNULSeBaN5wu9iPmHmo7V8zQHMMFZyCdQVDuzP";
+    protected String contractAddress_nrc2015 = "tNULSeBaN7JyE4GmncaTtP7gZmab5yZm4E8xYb";
+    protected String contractAddress_nrc2016 = "tNULSeBaN1Y6guJY5dnr4PCbmqFTXNcTstVbhy";
+    protected String contractAddress_nrc2017 = "tNULSeBaNAFyLfA9BUh37PYcJoTKmPxoodGG1N";
+    protected String contractAddress_nrc2018 = "tNULSeBaMvmYCoPN5sEvjm9u6uQaxKddd3PH1a";
+    protected String contractAddress_nrc2019 = "tNULSeBaMwgpXDnh7YZgi7Bi3pHvsX2GRfJgSL";
+    protected String contractAddress_nrc2020 = "tNULSeBaN5CudjrrEMMskRF9JaLgzDpvZnN2Fq";
+    protected String contractAddress_nrc2021 = "tNULSeBaN6nU1fpF9Uc8NUAqRSdi36jMkL3Rxk";
+    protected String contractAddress_nrc2022 = "tNULSeBaN1jtT4pqHmr6wPYSyYnkAa842hKeqM";
+    protected String contractAddress_nrc2023 = "tNULSeBaN8mMezWfv8xwS8ywbE4kB13Bg1SHHy";
+    protected String contractAddress_nrc2024 = "tNULSeBaMy6gkMZQWFsQhaa4FQtsG2nSrnhFSg";
+    protected String contractAddress_nrc2025 = "tNULSeBaMzZomEiwH7pWdzJonekAfvEZFY4oae";
+    protected String contractAddress_nrc2026 = "tNULSeBaN71frdeMUeAWZgkitD56xv1omQhRvU";
+    protected String contractAddress_nrc2027 = "tNULSeBaN5zm2pVT1b5wxhyeLgWgNTQTgo6pPN";
+    protected String contractAddress_nrc2028 = "tNULSeBaMy6yzt6Z3hqPcNTEMa7JoHAeogrH7i";
+    protected String contractAddress_nrc2029 = "tNULSeBaMxvoBpyCkXKVWjoXYXeVZsrxUGjFDV";
+    protected String contractAddress_nrc2030 = "tNULSeBaN6umjKPhiefmXbbqMXB4BZByCpgmG1";
+    protected String contractAddress_nrc2031 = "tNULSeBaMx7jarG7Rntj6uQ6dipTTkrZUQLRxR";
+    protected String contractAddress_nrc2032 = "tNULSeBaNBWoEgy5NvaPQyXGRqJt6esWZoWD4s";
+    protected String contractAddress_nrc2033 = "tNULSeBaNB49KvHVo3NPXYqjQBPRc7evKgVvnV";
+    protected String contractAddress_nrc2034 = "tNULSeBaN5h2fjwyFRS8WJboYBSLtpRrymJLro";
+
+    protected String methodName = "";
+    protected String tokenReceiver = "";
 
     protected String callHash = "0020874dca08dbf4784540e26c0c31f728a2c2fd2e18bf71c896d8f88955d53e77b7";
     protected String deleteHash = "0020b2c159dbdf784c2860ec97072feb887466aa50fc147a5b50388886caab113f9a";
@@ -199,27 +201,13 @@ public class BaseQuery {
     @Test
     public void getBlockHeader() throws NulsException, JsonProcessingException {
         BlockHeader blockHeader = BlockCall.getBlockHeader(chainId, 20L);
-        Log.info("\nstateRoot is " + Hex.toHexString(ContractUtil.getStateRoot(blockHeader)) + ", " + blockHeader.toString());
+        Log.info("\nstateRoot is " + HexUtil.encode(ContractUtil.getStateRoot(blockHeader)) + ", " + blockHeader.toString());
     }
 
     @Test
     public void getBalance() throws Exception {
-        Map<String, Object> balance0 = LedgerCall.getBalanceAndNonce(chain, contractAddress0);
+        Map<String, Object> balance0 = LedgerCall.getBalance(chain, toAddress5);
         Log.info("balance:{}", JSONUtils.obj2PrettyJson(balance0));
-    }
-
-    @Test
-    public void getTxClient() throws Exception {
-        Map<String, Object> params = new HashMap<>();
-        params.put("chainId", chainId);
-        params.put("txHash", "00202c7282a29d99daad03be2211ae9d9b648eaa2092fabd077a06183fbf3a280463");
-        Response dpResp = ResponseMessageProcessor.requestAndResponse(ModuleE.TX.abbr, "tx_getTxClient", params);
-        Map record = (Map) dpResp.getResponseData();
-        Map resultMap = (Map) record.get("tx_getTxClient");
-        String txHex = (String) resultMap.get("txHex");
-        Transaction tx = Transaction.getInstance(txHex);
-        Log.info("tx is {}", JSONUtils.obj2PrettyJson(tx));
-
     }
 
     /**
@@ -248,7 +236,7 @@ public class BaseQuery {
      */
     @Test
     public void contractInfo() throws Exception {
-        Map params = this.makeContractInfoParams("tNULSeBaN7CuBiTfqnRk6DuUuUP6251ybd1YEk");
+        Map params = this.makeContractInfoParams("tNULSeBaN84zDybqFWimEYDpXu99qo8z1TjDPX");
         Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, CONTRACT_INFO, params);
         Map result = (HashMap) (((HashMap) cmdResp2.getResponseData()).get(CONTRACT_INFO));
         Assert.assertTrue(null != result);
@@ -267,7 +255,7 @@ public class BaseQuery {
      */
     @Test
     public void contractResult() throws Exception {
-        Map params = this.makeContractResultParams("0020a764748fcf517d5f3e2cda47de67994549d1c0c39036087ceb441ff4748fb22c");
+        Map params = this.makeContractResultParams("3e7faf0939b131ccb018ce5b96761fb9178cbd247d781a8c1315a4e47c08630f");
         Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, CONTRACT_RESULT, params);
         Map result = (HashMap) (((HashMap) cmdResp2.getResponseData()).get(CONTRACT_RESULT));
         Assert.assertTrue(null != result);
@@ -282,11 +270,11 @@ public class BaseQuery {
     }
 
     /**
-     * 获取合约交易详情
+     * 获取合约交易
      */
     @Test
     public void contractTx() throws Exception {
-        Map params = this.makeContractTxParams("0020c251fe9fd04e78c15dfdf660b5db477df684e6352191e02bd2d6f640774c0309");
+        Map params = this.makeContractTxParams("3e7faf0939b131ccb018ce5b96761fb9178cbd247d781a8c1315a4e47c08630f");
         Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, CONTRACT_TX, params);
         Map result = (HashMap) (((HashMap) cmdResp2.getResponseData()).get(CONTRACT_TX));
         Assert.assertTrue(null != result);
@@ -305,10 +293,25 @@ public class BaseQuery {
      * 查交易
      */
     @Test
+    public void getTxClient() throws Exception {
+        Map<String, Object> params = new HashMap<>();
+        params.put("chainId", chainId);
+        params.put("txHash", "3e7faf0939b131ccb018ce5b96761fb9178cbd247d781a8c1315a4e47c08630f");
+        Response dpResp = ResponseMessageProcessor.requestAndResponse(ModuleE.TX.abbr, "tx_getTxClient", params);
+        Map record = (Map) dpResp.getResponseData();
+        Map resultMap = (Map) record.get("tx_getTxClient");
+        String txHex = (String) resultMap.get("tx");
+        Assert.assertTrue(null != txHex);
+        Transaction tx = Transaction.getInstance(txHex);
+        Log.info("tx is {}", JSONUtils.obj2PrettyJson(tx));
+
+    }
+
+    @Test
     public void getTxRecord() throws Exception {
         Map<String, Object> params = new HashMap<>();
         params.put("chainId", chainId);
-        params.put("address", "tNULSeBaMqywZjfSrKNQKBfuQtVxAHBQ8rB2Zn");
+        params.put("address", sender);
         params.put("assetChainId", null);
         params.put("assetId", null);
         params.put("type", null);
@@ -319,4 +322,947 @@ public class BaseQuery {
         Log.info("Page<TransactionPO>:{}", JSONUtils.obj2PrettyJson(record));
     }
 
+    public TransferService getTransferService() {
+        return transferService;
+    }
+
+    public void setTransferService(TransferService transferService) {
+        this.transferService = transferService;
+    }
+
+    public Chain getChain() {
+        return chain;
+    }
+
+    public void setChain(Chain chain) {
+        this.chain = chain;
+    }
+
+    public static int getChainId() {
+        return chainId;
+    }
+
+    public static void setChainId(int chainId) {
+        BaseQuery.chainId = chainId;
+    }
+
+    public static int getAssetId() {
+        return assetId;
+    }
+
+    public static void setAssetId(int assetId) {
+        BaseQuery.assetId = assetId;
+    }
+
+    public static String getPassword() {
+        return password;
+    }
+
+    public static void setPassword(String password) {
+        BaseQuery.password = password;
+    }
+
+    public String getSender() {
+        return sender;
+    }
+
+    public void setSender(String sender) {
+        this.sender = sender;
+    }
+
+    public String getToAddress0() {
+        return toAddress0;
+    }
+
+    public void setToAddress0(String toAddress0) {
+        this.toAddress0 = toAddress0;
+    }
+
+    public String getToAddress1() {
+        return toAddress1;
+    }
+
+    public void setToAddress1(String toAddress1) {
+        this.toAddress1 = toAddress1;
+    }
+
+    public String getToAddress2() {
+        return toAddress2;
+    }
+
+    public void setToAddress2(String toAddress2) {
+        this.toAddress2 = toAddress2;
+    }
+
+    public String getToAddress3() {
+        return toAddress3;
+    }
+
+    public void setToAddress3(String toAddress3) {
+        this.toAddress3 = toAddress3;
+    }
+
+    public String getToAddress4() {
+        return toAddress4;
+    }
+
+    public void setToAddress4(String toAddress4) {
+        this.toAddress4 = toAddress4;
+    }
+
+    public String getToAddress5() {
+        return toAddress5;
+    }
+
+    public void setToAddress5(String toAddress5) {
+        this.toAddress5 = toAddress5;
+    }
+
+    public String getToAddress6() {
+        return toAddress6;
+    }
+
+    public void setToAddress6(String toAddress6) {
+        this.toAddress6 = toAddress6;
+    }
+
+    public String getToAddress7() {
+        return toAddress7;
+    }
+
+    public void setToAddress7(String toAddress7) {
+        this.toAddress7 = toAddress7;
+    }
+
+    public String getToAddress8() {
+        return toAddress8;
+    }
+
+    public void setToAddress8(String toAddress8) {
+        this.toAddress8 = toAddress8;
+    }
+
+    public String getToAddress9() {
+        return toAddress9;
+    }
+
+    public void setToAddress9(String toAddress9) {
+        this.toAddress9 = toAddress9;
+    }
+
+    public String getToAddress10() {
+        return toAddress10;
+    }
+
+    public void setToAddress10(String toAddress10) {
+        this.toAddress10 = toAddress10;
+    }
+
+    public String getToAddress11() {
+        return toAddress11;
+    }
+
+    public void setToAddress11(String toAddress11) {
+        this.toAddress11 = toAddress11;
+    }
+
+    public String getToAddress12() {
+        return toAddress12;
+    }
+
+    public void setToAddress12(String toAddress12) {
+        this.toAddress12 = toAddress12;
+    }
+
+    public String getToAddress13() {
+        return toAddress13;
+    }
+
+    public void setToAddress13(String toAddress13) {
+        this.toAddress13 = toAddress13;
+    }
+
+    public String getToAddress14() {
+        return toAddress14;
+    }
+
+    public void setToAddress14(String toAddress14) {
+        this.toAddress14 = toAddress14;
+    }
+
+    public String getToAddress15() {
+        return toAddress15;
+    }
+
+    public void setToAddress15(String toAddress15) {
+        this.toAddress15 = toAddress15;
+    }
+
+    public String getToAddress16() {
+        return toAddress16;
+    }
+
+    public void setToAddress16(String toAddress16) {
+        this.toAddress16 = toAddress16;
+    }
+
+    public String getToAddress17() {
+        return toAddress17;
+    }
+
+    public void setToAddress17(String toAddress17) {
+        this.toAddress17 = toAddress17;
+    }
+
+    public String getToAddress18() {
+        return toAddress18;
+    }
+
+    public void setToAddress18(String toAddress18) {
+        this.toAddress18 = toAddress18;
+    }
+
+    public String getToAddress19() {
+        return toAddress19;
+    }
+
+    public void setToAddress19(String toAddress19) {
+        this.toAddress19 = toAddress19;
+    }
+
+    public String getToAddress20() {
+        return toAddress20;
+    }
+
+    public void setToAddress20(String toAddress20) {
+        this.toAddress20 = toAddress20;
+    }
+
+    public String getToAddress21() {
+        return toAddress21;
+    }
+
+    public void setToAddress21(String toAddress21) {
+        this.toAddress21 = toAddress21;
+    }
+
+    public String getToAddress22() {
+        return toAddress22;
+    }
+
+    public void setToAddress22(String toAddress22) {
+        this.toAddress22 = toAddress22;
+    }
+
+    public String getToAddress23() {
+        return toAddress23;
+    }
+
+    public void setToAddress23(String toAddress23) {
+        this.toAddress23 = toAddress23;
+    }
+
+    public String getToAddress24() {
+        return toAddress24;
+    }
+
+    public void setToAddress24(String toAddress24) {
+        this.toAddress24 = toAddress24;
+    }
+
+    public String getToAddress25() {
+        return toAddress25;
+    }
+
+    public void setToAddress25(String toAddress25) {
+        this.toAddress25 = toAddress25;
+    }
+
+    public String getToAddress26() {
+        return toAddress26;
+    }
+
+    public void setToAddress26(String toAddress26) {
+        this.toAddress26 = toAddress26;
+    }
+
+    public String getToAddress27() {
+        return toAddress27;
+    }
+
+    public void setToAddress27(String toAddress27) {
+        this.toAddress27 = toAddress27;
+    }
+
+    public String getToAddress28() {
+        return toAddress28;
+    }
+
+    public void setToAddress28(String toAddress28) {
+        this.toAddress28 = toAddress28;
+    }
+
+    public String getToAddress29() {
+        return toAddress29;
+    }
+
+    public void setToAddress29(String toAddress29) {
+        this.toAddress29 = toAddress29;
+    }
+
+    public String getToAddress30() {
+        return toAddress30;
+    }
+
+    public void setToAddress30(String toAddress30) {
+        this.toAddress30 = toAddress30;
+    }
+
+    public String getToAddress31() {
+        return toAddress31;
+    }
+
+    public void setToAddress31(String toAddress31) {
+        this.toAddress31 = toAddress31;
+    }
+
+    public String getToAddress32() {
+        return toAddress32;
+    }
+
+    public void setToAddress32(String toAddress32) {
+        this.toAddress32 = toAddress32;
+    }
+
+    public String getToAddress33() {
+        return toAddress33;
+    }
+
+    public void setToAddress33(String toAddress33) {
+        this.toAddress33 = toAddress33;
+    }
+
+    public String getToAddress34() {
+        return toAddress34;
+    }
+
+    public void setToAddress34(String toAddress34) {
+        this.toAddress34 = toAddress34;
+    }
+
+    public String getCreateHash() {
+        return createHash;
+    }
+
+    public void setCreateHash(String createHash) {
+        this.createHash = createHash;
+    }
+
+    public String getContractAddress() {
+        return contractAddress;
+    }
+
+    public void setContractAddress(String contractAddress) {
+        this.contractAddress = contractAddress;
+    }
+
+    public String getContractAddress0() {
+        return contractAddress0;
+    }
+
+    public void setContractAddress0(String contractAddress0) {
+        this.contractAddress0 = contractAddress0;
+    }
+
+    public String getContractAddress1() {
+        return contractAddress1;
+    }
+
+    public void setContractAddress1(String contractAddress1) {
+        this.contractAddress1 = contractAddress1;
+    }
+
+    public String getContractAddress2() {
+        return contractAddress2;
+    }
+
+    public void setContractAddress2(String contractAddress2) {
+        this.contractAddress2 = contractAddress2;
+    }
+
+    public String getContractAddress3() {
+        return contractAddress3;
+    }
+
+    public void setContractAddress3(String contractAddress3) {
+        this.contractAddress3 = contractAddress3;
+    }
+
+    public String getContractAddress4() {
+        return contractAddress4;
+    }
+
+    public void setContractAddress4(String contractAddress4) {
+        this.contractAddress4 = contractAddress4;
+    }
+
+    public String getContractAddress5() {
+        return contractAddress5;
+    }
+
+    public void setContractAddress5(String contractAddress5) {
+        this.contractAddress5 = contractAddress5;
+    }
+
+    public String getContractAddress6() {
+        return contractAddress6;
+    }
+
+    public void setContractAddress6(String contractAddress6) {
+        this.contractAddress6 = contractAddress6;
+    }
+
+    public String getContractAddress7() {
+        return contractAddress7;
+    }
+
+    public void setContractAddress7(String contractAddress7) {
+        this.contractAddress7 = contractAddress7;
+    }
+
+    public String getContractAddress8() {
+        return contractAddress8;
+    }
+
+    public void setContractAddress8(String contractAddress8) {
+        this.contractAddress8 = contractAddress8;
+    }
+
+    public String getContractAddress9() {
+        return contractAddress9;
+    }
+
+    public void setContractAddress9(String contractAddress9) {
+        this.contractAddress9 = contractAddress9;
+    }
+
+    public String getContractAddress10() {
+        return contractAddress10;
+    }
+
+    public void setContractAddress10(String contractAddress10) {
+        this.contractAddress10 = contractAddress10;
+    }
+
+    public String getContractAddress11() {
+        return contractAddress11;
+    }
+
+    public void setContractAddress11(String contractAddress11) {
+        this.contractAddress11 = contractAddress11;
+    }
+
+    public String getContractAddress12() {
+        return contractAddress12;
+    }
+
+    public void setContractAddress12(String contractAddress12) {
+        this.contractAddress12 = contractAddress12;
+    }
+
+    public String getContractAddress13() {
+        return contractAddress13;
+    }
+
+    public void setContractAddress13(String contractAddress13) {
+        this.contractAddress13 = contractAddress13;
+    }
+
+    public String getContractAddress14() {
+        return contractAddress14;
+    }
+
+    public void setContractAddress14(String contractAddress14) {
+        this.contractAddress14 = contractAddress14;
+    }
+
+    public String getContractAddress15() {
+        return contractAddress15;
+    }
+
+    public void setContractAddress15(String contractAddress15) {
+        this.contractAddress15 = contractAddress15;
+    }
+
+    public String getContractAddress16() {
+        return contractAddress16;
+    }
+
+    public void setContractAddress16(String contractAddress16) {
+        this.contractAddress16 = contractAddress16;
+    }
+
+    public String getContractAddress17() {
+        return contractAddress17;
+    }
+
+    public void setContractAddress17(String contractAddress17) {
+        this.contractAddress17 = contractAddress17;
+    }
+
+    public String getContractAddress18() {
+        return contractAddress18;
+    }
+
+    public void setContractAddress18(String contractAddress18) {
+        this.contractAddress18 = contractAddress18;
+    }
+
+    public String getContractAddress19() {
+        return contractAddress19;
+    }
+
+    public void setContractAddress19(String contractAddress19) {
+        this.contractAddress19 = contractAddress19;
+    }
+
+    public String getContractAddress20() {
+        return contractAddress20;
+    }
+
+    public void setContractAddress20(String contractAddress20) {
+        this.contractAddress20 = contractAddress20;
+    }
+
+    public String getContractAddress21() {
+        return contractAddress21;
+    }
+
+    public void setContractAddress21(String contractAddress21) {
+        this.contractAddress21 = contractAddress21;
+    }
+
+    public String getContractAddress22() {
+        return contractAddress22;
+    }
+
+    public void setContractAddress22(String contractAddress22) {
+        this.contractAddress22 = contractAddress22;
+    }
+
+    public String getContractAddress23() {
+        return contractAddress23;
+    }
+
+    public void setContractAddress23(String contractAddress23) {
+        this.contractAddress23 = contractAddress23;
+    }
+
+    public String getContractAddress24() {
+        return contractAddress24;
+    }
+
+    public void setContractAddress24(String contractAddress24) {
+        this.contractAddress24 = contractAddress24;
+    }
+
+    public String getContractAddress25() {
+        return contractAddress25;
+    }
+
+    public void setContractAddress25(String contractAddress25) {
+        this.contractAddress25 = contractAddress25;
+    }
+
+    public String getContractAddress26() {
+        return contractAddress26;
+    }
+
+    public void setContractAddress26(String contractAddress26) {
+        this.contractAddress26 = contractAddress26;
+    }
+
+    public String getContractAddress27() {
+        return contractAddress27;
+    }
+
+    public void setContractAddress27(String contractAddress27) {
+        this.contractAddress27 = contractAddress27;
+    }
+
+    public String getContractAddress28() {
+        return contractAddress28;
+    }
+
+    public void setContractAddress28(String contractAddress28) {
+        this.contractAddress28 = contractAddress28;
+    }
+
+    public String getContractAddress29() {
+        return contractAddress29;
+    }
+
+    public void setContractAddress29(String contractAddress29) {
+        this.contractAddress29 = contractAddress29;
+    }
+
+    public String getContractAddress30() {
+        return contractAddress30;
+    }
+
+    public void setContractAddress30(String contractAddress30) {
+        this.contractAddress30 = contractAddress30;
+    }
+
+    public String getContractAddress31() {
+        return contractAddress31;
+    }
+
+    public void setContractAddress31(String contractAddress31) {
+        this.contractAddress31 = contractAddress31;
+    }
+
+    public String getContractAddress32() {
+        return contractAddress32;
+    }
+
+    public void setContractAddress32(String contractAddress32) {
+        this.contractAddress32 = contractAddress32;
+    }
+
+    public String getContractAddress33() {
+        return contractAddress33;
+    }
+
+    public void setContractAddress33(String contractAddress33) {
+        this.contractAddress33 = contractAddress33;
+    }
+
+    public String getContractAddress34() {
+        return contractAddress34;
+    }
+
+    public void setContractAddress34(String contractAddress34) {
+        this.contractAddress34 = contractAddress34;
+    }
+
+    public String getContractAddress_nrc20() {
+        return contractAddress_nrc20;
+    }
+
+    public void setContractAddress_nrc20(String contractAddress_nrc20) {
+        this.contractAddress_nrc20 = contractAddress_nrc20;
+    }
+
+    public String getContractAddress_nrc200() {
+        return contractAddress_nrc200;
+    }
+
+    public void setContractAddress_nrc200(String contractAddress_nrc200) {
+        this.contractAddress_nrc200 = contractAddress_nrc200;
+    }
+
+    public String getContractAddress_nrc201() {
+        return contractAddress_nrc201;
+    }
+
+    public void setContractAddress_nrc201(String contractAddress_nrc201) {
+        this.contractAddress_nrc201 = contractAddress_nrc201;
+    }
+
+    public String getContractAddress_nrc202() {
+        return contractAddress_nrc202;
+    }
+
+    public void setContractAddress_nrc202(String contractAddress_nrc202) {
+        this.contractAddress_nrc202 = contractAddress_nrc202;
+    }
+
+    public String getContractAddress_nrc203() {
+        return contractAddress_nrc203;
+    }
+
+    public void setContractAddress_nrc203(String contractAddress_nrc203) {
+        this.contractAddress_nrc203 = contractAddress_nrc203;
+    }
+
+    public String getContractAddress_nrc204() {
+        return contractAddress_nrc204;
+    }
+
+    public void setContractAddress_nrc204(String contractAddress_nrc204) {
+        this.contractAddress_nrc204 = contractAddress_nrc204;
+    }
+
+    public String getContractAddress_nrc205() {
+        return contractAddress_nrc205;
+    }
+
+    public void setContractAddress_nrc205(String contractAddress_nrc205) {
+        this.contractAddress_nrc205 = contractAddress_nrc205;
+    }
+
+    public String getContractAddress_nrc206() {
+        return contractAddress_nrc206;
+    }
+
+    public void setContractAddress_nrc206(String contractAddress_nrc206) {
+        this.contractAddress_nrc206 = contractAddress_nrc206;
+    }
+
+    public String getContractAddress_nrc207() {
+        return contractAddress_nrc207;
+    }
+
+    public void setContractAddress_nrc207(String contractAddress_nrc207) {
+        this.contractAddress_nrc207 = contractAddress_nrc207;
+    }
+
+    public String getContractAddress_nrc208() {
+        return contractAddress_nrc208;
+    }
+
+    public void setContractAddress_nrc208(String contractAddress_nrc208) {
+        this.contractAddress_nrc208 = contractAddress_nrc208;
+    }
+
+    public String getContractAddress_nrc209() {
+        return contractAddress_nrc209;
+    }
+
+    public void setContractAddress_nrc209(String contractAddress_nrc209) {
+        this.contractAddress_nrc209 = contractAddress_nrc209;
+    }
+
+    public String getContractAddress_nrc2010() {
+        return contractAddress_nrc2010;
+    }
+
+    public void setContractAddress_nrc2010(String contractAddress_nrc2010) {
+        this.contractAddress_nrc2010 = contractAddress_nrc2010;
+    }
+
+    public String getContractAddress_nrc2011() {
+        return contractAddress_nrc2011;
+    }
+
+    public void setContractAddress_nrc2011(String contractAddress_nrc2011) {
+        this.contractAddress_nrc2011 = contractAddress_nrc2011;
+    }
+
+    public String getContractAddress_nrc2012() {
+        return contractAddress_nrc2012;
+    }
+
+    public void setContractAddress_nrc2012(String contractAddress_nrc2012) {
+        this.contractAddress_nrc2012 = contractAddress_nrc2012;
+    }
+
+    public String getContractAddress_nrc2013() {
+        return contractAddress_nrc2013;
+    }
+
+    public void setContractAddress_nrc2013(String contractAddress_nrc2013) {
+        this.contractAddress_nrc2013 = contractAddress_nrc2013;
+    }
+
+    public String getContractAddress_nrc2014() {
+        return contractAddress_nrc2014;
+    }
+
+    public void setContractAddress_nrc2014(String contractAddress_nrc2014) {
+        this.contractAddress_nrc2014 = contractAddress_nrc2014;
+    }
+
+    public String getContractAddress_nrc2015() {
+        return contractAddress_nrc2015;
+    }
+
+    public void setContractAddress_nrc2015(String contractAddress_nrc2015) {
+        this.contractAddress_nrc2015 = contractAddress_nrc2015;
+    }
+
+    public String getContractAddress_nrc2016() {
+        return contractAddress_nrc2016;
+    }
+
+    public void setContractAddress_nrc2016(String contractAddress_nrc2016) {
+        this.contractAddress_nrc2016 = contractAddress_nrc2016;
+    }
+
+    public String getContractAddress_nrc2017() {
+        return contractAddress_nrc2017;
+    }
+
+    public void setContractAddress_nrc2017(String contractAddress_nrc2017) {
+        this.contractAddress_nrc2017 = contractAddress_nrc2017;
+    }
+
+    public String getContractAddress_nrc2018() {
+        return contractAddress_nrc2018;
+    }
+
+    public void setContractAddress_nrc2018(String contractAddress_nrc2018) {
+        this.contractAddress_nrc2018 = contractAddress_nrc2018;
+    }
+
+    public String getContractAddress_nrc2019() {
+        return contractAddress_nrc2019;
+    }
+
+    public void setContractAddress_nrc2019(String contractAddress_nrc2019) {
+        this.contractAddress_nrc2019 = contractAddress_nrc2019;
+    }
+
+    public String getContractAddress_nrc2020() {
+        return contractAddress_nrc2020;
+    }
+
+    public void setContractAddress_nrc2020(String contractAddress_nrc2020) {
+        this.contractAddress_nrc2020 = contractAddress_nrc2020;
+    }
+
+    public String getContractAddress_nrc2021() {
+        return contractAddress_nrc2021;
+    }
+
+    public void setContractAddress_nrc2021(String contractAddress_nrc2021) {
+        this.contractAddress_nrc2021 = contractAddress_nrc2021;
+    }
+
+    public String getContractAddress_nrc2022() {
+        return contractAddress_nrc2022;
+    }
+
+    public void setContractAddress_nrc2022(String contractAddress_nrc2022) {
+        this.contractAddress_nrc2022 = contractAddress_nrc2022;
+    }
+
+    public String getContractAddress_nrc2023() {
+        return contractAddress_nrc2023;
+    }
+
+    public void setContractAddress_nrc2023(String contractAddress_nrc2023) {
+        this.contractAddress_nrc2023 = contractAddress_nrc2023;
+    }
+
+    public String getContractAddress_nrc2024() {
+        return contractAddress_nrc2024;
+    }
+
+    public void setContractAddress_nrc2024(String contractAddress_nrc2024) {
+        this.contractAddress_nrc2024 = contractAddress_nrc2024;
+    }
+
+    public String getContractAddress_nrc2025() {
+        return contractAddress_nrc2025;
+    }
+
+    public void setContractAddress_nrc2025(String contractAddress_nrc2025) {
+        this.contractAddress_nrc2025 = contractAddress_nrc2025;
+    }
+
+    public String getContractAddress_nrc2026() {
+        return contractAddress_nrc2026;
+    }
+
+    public void setContractAddress_nrc2026(String contractAddress_nrc2026) {
+        this.contractAddress_nrc2026 = contractAddress_nrc2026;
+    }
+
+    public String getContractAddress_nrc2027() {
+        return contractAddress_nrc2027;
+    }
+
+    public void setContractAddress_nrc2027(String contractAddress_nrc2027) {
+        this.contractAddress_nrc2027 = contractAddress_nrc2027;
+    }
+
+    public String getContractAddress_nrc2028() {
+        return contractAddress_nrc2028;
+    }
+
+    public void setContractAddress_nrc2028(String contractAddress_nrc2028) {
+        this.contractAddress_nrc2028 = contractAddress_nrc2028;
+    }
+
+    public String getContractAddress_nrc2029() {
+        return contractAddress_nrc2029;
+    }
+
+    public void setContractAddress_nrc2029(String contractAddress_nrc2029) {
+        this.contractAddress_nrc2029 = contractAddress_nrc2029;
+    }
+
+    public String getContractAddress_nrc2030() {
+        return contractAddress_nrc2030;
+    }
+
+    public void setContractAddress_nrc2030(String contractAddress_nrc2030) {
+        this.contractAddress_nrc2030 = contractAddress_nrc2030;
+    }
+
+    public String getContractAddress_nrc2031() {
+        return contractAddress_nrc2031;
+    }
+
+    public void setContractAddress_nrc2031(String contractAddress_nrc2031) {
+        this.contractAddress_nrc2031 = contractAddress_nrc2031;
+    }
+
+    public String getContractAddress_nrc2032() {
+        return contractAddress_nrc2032;
+    }
+
+    public void setContractAddress_nrc2032(String contractAddress_nrc2032) {
+        this.contractAddress_nrc2032 = contractAddress_nrc2032;
+    }
+
+    public String getContractAddress_nrc2033() {
+        return contractAddress_nrc2033;
+    }
+
+    public void setContractAddress_nrc2033(String contractAddress_nrc2033) {
+        this.contractAddress_nrc2033 = contractAddress_nrc2033;
+    }
+
+    public String getContractAddress_nrc2034() {
+        return contractAddress_nrc2034;
+    }
+
+    public void setContractAddress_nrc2034(String contractAddress_nrc2034) {
+        this.contractAddress_nrc2034 = contractAddress_nrc2034;
+    }
+
+    public String getMethodName() {
+        return methodName;
+    }
+
+    public void setMethodName(String methodName) {
+        this.methodName = methodName;
+    }
+
+    public String getTokenReceiver() {
+        return tokenReceiver;
+    }
+
+    public void setTokenReceiver(String tokenReceiver) {
+        this.tokenReceiver = tokenReceiver;
+    }
+
+    public String getCallHash() {
+        return callHash;
+    }
+
+    public void setCallHash(String callHash) {
+        this.callHash = callHash;
+    }
+
+    public String getDeleteHash() {
+        return deleteHash;
+    }
+
+    public void setDeleteHash(String deleteHash) {
+        this.deleteHash = deleteHash;
+    }
 }

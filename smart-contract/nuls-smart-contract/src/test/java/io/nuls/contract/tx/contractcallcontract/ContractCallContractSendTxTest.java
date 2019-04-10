@@ -31,11 +31,12 @@ import io.nuls.contract.util.Log;
 import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.model.message.Response;
 import io.nuls.rpc.netty.processor.ResponseMessageProcessor;
+import io.nuls.tools.crypto.HexUtil;
+import io.nuls.tools.model.StringUtils;
 import io.nuls.tools.parse.JSONUtils;
 import org.apache.commons.io.IOUtils;
 import org.junit.Assert;
 import org.junit.Test;
-import org.spongycastle.util.encoders.Hex;
 
 import java.io.FileInputStream;
 import java.io.InputStream;
@@ -73,7 +74,7 @@ public class ContractCallContractSendTxTest extends BaseQuery {
         params.put("password", password);
         params.put("gasLimit", 200000L);
         params.put("price", 25);
-        params.put("contractCode", Hex.toHexString(contractCode));
+        params.put("contractCode", HexUtil.encode(contractCode));
         params.put("args", args);
         params.put("remark", remark);
         return params;
@@ -110,7 +111,9 @@ public class ContractCallContractSendTxTest extends BaseQuery {
     @Test
     public void callContract_transferOut() throws Exception {
         BigInteger value = BigInteger.ZERO;
-        String methodName = "multyForAddress";
+        if(StringUtils.isBlank(methodName)) {
+            methodName = "multyForAddress";
+        }
         String methodDesc = "";
         String remark = "call contract test - 合约内部转账";
         String address1 = toAddress3;
@@ -189,34 +192,6 @@ public class ContractCallContractSendTxTest extends BaseQuery {
         Map result = (HashMap) (((HashMap) cmdResp2.getResponseData()).get(CALL));
         Assert.assertTrue(null != result);
         Log.info("call-result:{}", JSONUtils.obj2PrettyJson(cmdResp2));
-    }
-
-
-    /**
-     * token转账
-     */
-    @Test
-    public void tokenTransfer() throws Exception {
-        BigInteger value = BigInteger.TEN.pow(8);
-        String toAddress = contractAddress0;
-        String remark = "token transfer to " + toAddress;
-        Map params = this.makeTokenTransferParams(sender, toAddress, contractAddress_nrc200, value, remark);
-        Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, TOKEN_TRANSFER, params);
-        Map result = (HashMap) (((HashMap) cmdResp2.getResponseData()).get(TOKEN_TRANSFER));
-        Assert.assertTrue(null != result);
-        Log.info("tokenTransfer-result:{}", JSONUtils.obj2PrettyJson(cmdResp2));
-    }
-
-    private Map makeTokenTransferParams(String address, String toAddress, String contractAddress0, BigInteger amount, String remark) {
-        Map<String, Object> params = new HashMap<>();
-        params.put("chainId", chainId);
-        params.put("address", address);
-        params.put("toAddress", toAddress);
-        params.put("contractAddress", contractAddress0);
-        params.put("password", password);
-        params.put("amount", amount);
-        params.put("remark", remark);
-        return params;
     }
 
 

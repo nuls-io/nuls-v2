@@ -11,10 +11,11 @@ import io.nuls.poc.model.bo.BlockData;
 import io.nuls.poc.model.bo.Chain;
 import io.nuls.poc.model.bo.round.MeetingMember;
 import io.nuls.poc.model.bo.round.MeetingRound;
-import io.nuls.poc.utils.CallMethodUtils;
+import io.nuls.poc.rpc.call.CallMethodUtils;
 import io.nuls.poc.utils.enumeration.ConsensusStatus;
 import io.nuls.poc.utils.manager.ConsensusManager;
 import io.nuls.poc.utils.manager.RoundManager;
+import io.nuls.rpc.util.RPCUtil;
 import io.nuls.tools.core.ioc.SpringLiteContext;
 import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.exception.NulsException;
@@ -66,16 +67,6 @@ public class ConsensusProcess {
         Check whether the module status is in operation
         */
         if (chain.getConsensusStatus().ordinal() <= ConsensusStatus.WAIT_RUNNING.ordinal()) {
-            return false;
-        }
-
-        /*
-        检查网络状态是否正常（调用网络模块接口获取当前链接节点数）
-        Check whether the network status is normal
-         */
-        int availableNodes = 5;
-
-        if(availableNodes < ConsensusConstant.ALIVE_MIN_NODE_COUNT){
             return false;
         }
 
@@ -165,11 +156,7 @@ public class ConsensusProcess {
             return;
         }
         try {
-            CallMethodUtils.receivePackingBlock(chain.getConfig().getChainId(), HexUtil.encode(block.serialize()),self.getPackEndTime() - CallMethodUtils.currentTime());
-            /*boolean receiveSuccess = CallMethodUtils.receivePackingBlock(chain.getConfig().getChainId(), HexUtil.encode(block.serialize()),self.getPackEndTime() - CallMethodUtils.currentTime());
-            if(!receiveSuccess){
-                consensusLogger.info("add block interface call failed!");
-            }*/
+            CallMethodUtils.receivePackingBlock(chain.getConfig().getChainId(), RPCUtil.encode(block.serialize()),self.getPackEndTime() - CallMethodUtils.currentTime());
         }catch (Exception e){
             consensusLogger.error(e);
         }
@@ -298,13 +285,13 @@ public class ConsensusProcess {
                 extendsData.setStateRoot(bestExtendsData.getStateRoot());
                 stateRootIsNull = true;
             }else{
-                extendsData.setStateRoot(HexUtil.decode(stateRoot));
+                extendsData.setStateRoot(RPCUtil.decode(stateRoot));
             }
             if(realPackageHeight >= txPackageHeight){
                 List<String> txHexList = (List) resultMap.get("list");
                 for (String txHex : txHexList) {
                     Transaction tx = new Transaction();
-                    tx.parse(HexUtil.decode(txHex), 0);
+                    tx.parse(RPCUtil.decode(txHex), 0);
                     packingTxList.add(tx);
                 }
             }

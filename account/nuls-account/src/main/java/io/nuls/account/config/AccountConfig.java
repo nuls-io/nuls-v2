@@ -4,7 +4,6 @@ import io.nuls.account.model.bo.config.ConfigBean;
 import io.nuls.tools.core.annotation.Configuration;
 import io.nuls.tools.core.annotation.Persist;
 import io.nuls.tools.core.annotation.Value;
-import lombok.Data;
 
 /**
  * @Author: zhoulijun
@@ -12,8 +11,7 @@ import lombok.Data;
  * @Description:
  * 配置文件
  */
-@Configuration(persistDomain = "account")
-@Data
+@Configuration(domain = "account")
 @Persist
 public class AccountConfig {
 
@@ -32,8 +30,6 @@ public class AccountConfig {
      */
     private String keystoreFolder;
 
-    private String kernelUrl;
-
     private int mainChainId;
 
     private int mainAssetId;
@@ -44,8 +40,61 @@ public class AccountConfig {
     @Value("DataPath")
     private String dataPath;
 
-
     private ConfigBean chainConfig;
 
+    public String getEncoding() {
+        return encoding;
+    }
 
+    public void setEncoding(String encoding) {
+        this.encoding = encoding;
+    }
+
+    public String getLanguage() {
+        return language;
+    }
+
+    public void setLanguage(String language) {
+        this.language = language;
+    }
+
+    public String getKeystoreFolder() {
+        return keystoreFolder;
+    }
+
+    public void setKeystoreFolder(String keystoreFolder) {
+        this.keystoreFolder = keystoreFolder;
+    }
+
+    public int getMainChainId() {
+        return mainChainId;
+    }
+
+    public void setMainChainId(int mainChainId) {
+        this.mainChainId = mainChainId;
+    }
+
+    public int getMainAssetId() {
+        return mainAssetId;
+    }
+
+    public void setMainAssetId(int mainAssetId) {
+        this.mainAssetId = mainAssetId;
+    }
+
+    public String getDataPath() {
+        return dataPath;
+    }
+
+    public void setDataPath(String dataPath) {
+        this.dataPath = dataPath;
+    }
+
+    public ConfigBean getChainConfig() {
+        return chainConfig;
+    }
+
+    public void setChainConfig(ConfigBean chainConfig) {
+        this.chainConfig = chainConfig;
+    }
 }

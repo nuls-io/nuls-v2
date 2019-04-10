@@ -19,6 +19,7 @@ import io.nuls.rpc.modulebootstrap.RpcModule;
 import io.nuls.rpc.modulebootstrap.RpcModuleState;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
+import io.nuls.tools.core.annotation.Value;
 import io.nuls.tools.core.ioc.SpringLiteContext;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.log.Log;
@@ -33,6 +34,9 @@ import java.util.Map;
  */
 @Component
 public class AccountBootstrap extends RpcModule {
+
+    @Value("DataPath")
+    String dataPath;
 
     @Autowired
     AccountConfig accountConfig;

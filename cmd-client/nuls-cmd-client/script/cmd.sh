@@ -23,30 +23,26 @@ done
 #if [ ! -d ${logdir} ]; then
 #  mkdir ${logdir}
 #fi
+JAVA_HOME=$1
 SERVER_HOME="../../"
 LIBS=$SERVER_HOME/libs
 PUB_LIB=""
 MAIN_CLASS=io.nuls.cmd.client.CmdClientBootstrap
 JAVA=${JAVA_HOME}/bin/java
 for jar in `find $LIBS -name "*.jar"`
-
 do
  PUB_LIB="$PUB_LIB:""$jar"
 done
 PUB_LIB="${PUB_LIB}:./cmdclient-1.0.0.jar"
 # Get standard environment variables
-JAVA_OPTS="-Xms128m -Xmx128m -Dapp.name=cmd-client --illegal-access=warn"
+logLevel=$2
+if [ -z "$logLevel" ]; then
+    logLevel="ERROR"
+fi
+JAVA_OPTS="-Xms128m -Xmx128m -Dapp.name=cmd-client --illegal-access=warn -Dlog.level=${logLevel} "
 
 CONF_PATH=$SERVER_HOME/conf
 CLASSPATH=$CLASSPATH:$CONF_PATH:$PUB_LIB:.
-#echo $CLASSPATH
-if  [ -x ${SERVER_HOME}/jre/bin/java ]; then
-  ${SERVER_HOME}/jre/bin/java $JAVA_OPTS -classpath $CLASSPATH $MAIN_CLASS
-  exit 0
-fi
-
-#JAVA_BIN=`which java`
-# try to use JAVA_HOME jre
 if [ -x ${JAVA} ]; then
   ${JAVA} $JAVA_OPTS -classpath $CLASSPATH $MAIN_CLASS
   exit 0

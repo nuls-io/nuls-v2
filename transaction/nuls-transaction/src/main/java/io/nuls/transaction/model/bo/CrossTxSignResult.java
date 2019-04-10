@@ -30,8 +30,6 @@ import io.nuls.base.data.BaseNulsData;
 import io.nuls.base.signture.P2PHKSignature;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.parse.SerializeUtils;
-import lombok.Getter;
-import lombok.Setter;
 
 import java.io.IOException;
 
@@ -46,23 +44,41 @@ public class CrossTxSignResult extends BaseNulsData {
     /**
      * 节点ID
      */
-    @Getter
-    @Setter
     private String nodeId;
 
     /**
      * 验证的节点对交易的签名
      */
-    @Getter
-    @Setter
     private P2PHKSignature signature;
 
     /**
      * 节点地址
      */
-    @Getter
-    @Setter
     private String packingAddress;
+
+    public String getNodeId() {
+        return nodeId;
+    }
+
+    public void setNodeId(String nodeId) {
+        this.nodeId = nodeId;
+    }
+
+    public P2PHKSignature getSignature() {
+        return signature;
+    }
+
+    public void setSignature(P2PHKSignature signature) {
+        this.signature = signature;
+    }
+
+    public String getPackingAddress() {
+        return packingAddress;
+    }
+
+    public void setPackingAddress(String packingAddress) {
+        this.packingAddress = packingAddress;
+    }
 
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {

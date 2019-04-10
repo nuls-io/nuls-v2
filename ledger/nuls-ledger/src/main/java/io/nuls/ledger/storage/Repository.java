@@ -55,7 +55,9 @@ public interface Repository {
      * @param key
      * @param nowAccountState
      */
-    void updateAccountState(byte[] key, AccountState nowAccountState) throws Exception;
+      void updateAccountState(byte[] key, AccountState nowAccountState) throws Exception;
+
+      void batchUpdateAccountState(int addressChainId, Map<byte[],byte[]> accountStateMap) throws Exception;
 
     /**
      * @param chainId

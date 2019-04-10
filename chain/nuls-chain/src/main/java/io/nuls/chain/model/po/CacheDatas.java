@@ -5,8 +5,6 @@ import io.nuls.base.basic.NulsOutputStreamBuffer;
 import io.nuls.base.data.BaseNulsData;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.parse.SerializeUtils;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -17,8 +15,6 @@ import java.util.List;
  * @date 2018/11/7
  * @description
  */
-@EqualsAndHashCode(callSuper = true)
-@Data
 public class CacheDatas extends BaseNulsData {
     private long preBlockHeight = 0;
     /**
@@ -119,4 +115,35 @@ public class CacheDatas extends BaseNulsData {
         super();
     }
 
+    public long getPreBlockHeight() {
+        return preBlockHeight;
+    }
+
+    public void setPreBlockHeight(long preBlockHeight) {
+        this.preBlockHeight = preBlockHeight;
+    }
+
+    public List<BlockChain> getBlockChains() {
+        return blockChains;
+    }
+
+    public void setBlockChains(List<BlockChain> blockChains) {
+        this.blockChains = blockChains;
+    }
+
+    public List<Asset> getAssets() {
+        return assets;
+    }
+
+    public void setAssets(List<Asset> assets) {
+        this.assets = assets;
+    }
+
+    public List<ChainAsset> getChainAssets() {
+        return chainAssets;
+    }
+
+    public void setChainAssets(List<ChainAsset> chainAssets) {
+        this.chainAssets = chainAssets;
+    }
 }

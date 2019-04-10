@@ -37,8 +37,6 @@ import java.net.InetAddress;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
-import static io.nuls.network.utils.LoggerUtil.Log;
-
 /**
  * 时间服务类：用于同步网络标准时间
  * Time service class:Used to synchronize network standard time.
@@ -191,8 +189,7 @@ public class TimeManager extends BaseManager {
         for (String anUrlList : urlList) {
             long begin = System.currentTimeMillis();
             long netTime = getWebTime(anUrlList);
-            LoggerUtil.Log.info(anUrlList + "netTime:===" + netTime);
-            LoggerUtil.Log.info("localtime:===" + System.currentTimeMillis());
+            LoggerUtil.logger().info("{} netTime:{}==localtime:{}", anUrlList, netTime, System.currentTimeMillis());
             if (netTime == 0) {
                 continue;
             }
@@ -216,8 +213,7 @@ public class TimeManager extends BaseManager {
         for (int i = 0; i < netTimeUrls.size(); i++) {
             long localBeforeTime = System.currentTimeMillis();
             long netTime = getWebTime(netTimeUrls.get(i).getUrl());
-            LoggerUtil.Log.info(urlList.get(i) + "netTime:===" + netTime);
-            LoggerUtil.Log.info("localtime:===" + System.currentTimeMillis());
+            LoggerUtil.logger().info("{} netTime:{}==localtime:{}", netTimeUrls.get(i).getUrl(), netTime, System.currentTimeMillis());
             if (netTime == 0) {
                 continue;
             }
@@ -259,7 +255,7 @@ public class TimeManager extends BaseManager {
             //Log.debug("done!");
             return timeInfo.getMessage().getTransmitTimeStamp().getTime();
         } catch (Exception e) {
-            LoggerUtil.Log.info("address={} getTime error",address);
+            LoggerUtil.logger().info("address={} getTime error", address);
             return 0L;
         }
     }

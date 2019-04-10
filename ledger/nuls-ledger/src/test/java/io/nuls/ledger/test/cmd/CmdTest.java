@@ -30,11 +30,14 @@ import io.nuls.base.data.CoinData;
 import io.nuls.base.data.CoinFrom;
 import io.nuls.base.data.CoinTo;
 import io.nuls.base.data.Transaction;
+import io.nuls.ledger.test.constant.TestConfig;
+import io.nuls.ledger.utils.LedgerUtil;
+import io.nuls.ledger.utils.LoggerUtil;
 import io.nuls.rpc.info.NoUse;
 import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.model.message.Response;
 import io.nuls.rpc.netty.processor.ResponseMessageProcessor;
-import io.nuls.tools.crypto.HexUtil;
+import io.nuls.rpc.util.RPCUtil;
 import io.nuls.tools.model.BigIntegerUtils;
 import org.junit.Before;
 import org.junit.Test;
@@ -44,8 +47,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import static io.nuls.ledger.utils.LoggerUtil.logger;
 
 /**
  * Created by ljs on 2019/01/06.
@@ -57,12 +58,12 @@ public class CmdTest {
         NoUse.mockModule();
 //        CmdDispatcher.syncKernel("ws://127.0.0.1:8887");
     }
-
+    String address = "tNULSeBaMfi17CxRHVqFZbSFGYeyRLHWw2ctho";
     @Test
     public void lg_getBalance() throws Exception {
        String nonce = "ffffffff";
-       System.out.println(HexUtil.decode(nonce));
-       System.out.println(HexUtil.encode(HexUtil.decode(nonce)));
+       System.out.println(LedgerUtil.getNonceDecode(nonce));
+       System.out.println(RPCUtil.encode(LedgerUtil.getNonceDecode(nonce)));
     }
     @Test
     public void getBalance() throws Exception {
@@ -70,12 +71,12 @@ public class CmdTest {
         // Build params map
         Map<String, Object> params = new HashMap<>();
         // Version information ("1.1" or 1.1 is both available)
-        params.put("chainId", 8096);
-        params.put("assetChainId", 445);
-        params.put("address", "JgT2JCQvKGRKRjKqyfxRAj2zSCpGca01f");
-        params.put("assetId", 222);
+        params.put("chainId", TestConfig.chainId);
+        params.put("assetChainId", TestConfig.assetChainId);
+        params.put("address", address);
+        params.put("assetId", TestConfig.assetId);
         Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.LG.abbr, "getBalance", params);
-        logger.info("response {}", response);
+        LoggerUtil.logger().info("response {}", response);
         BigInteger bigInteger= BigIntegerUtils.stringToBigInteger(((Map)((Map)(response.getResponseData())).get("getBalance")).get("total").toString());
         System.out.print(bigInteger.toString());
 
@@ -87,14 +88,14 @@ public class CmdTest {
         // Build params map
         Map<String, Object> params = new HashMap<>();
         // Version information ("1.1" or 1.1 is both available)
-        params.put("chainId", 8096);
-        params.put("assetChainId", 445);
-        params.put("address", "JgT2JCQvKGRKRjKqyfxRAj2zSCpGca01f");
+        params.put("chainId", TestConfig.chainId);
+        params.put("assetChainId", TestConfig.assetChainId);
+        params.put("address", address);
 //        params.put("address", "LLbmaw1UNmKmd5PfuzP1Zm9dNuAnia01f");
 
-        params.put("assetId", 222);
+        params.put("assetId", TestConfig.assetId);
         Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.LG.abbr, "getBalanceNonce", params);
-        logger.info("response {}", response);
+        LoggerUtil.logger().info("response {}", response);
     }
     @Test
     public void getBalanceNonce2() throws Exception {
@@ -103,14 +104,14 @@ public class CmdTest {
         // Build params map
         Map<String, Object> params = new HashMap<>();
         // Version information ("1.1" or 1.1 is both available)
-        params.put("chainId", 2);
-        params.put("assetChainId", 2);
-        params.put("address", "QMwz71wTKgp9sZ8g44A9WNgXk11u23930");
+        params.put("chainId", TestConfig.chainId);
+        params.put("assetChainId", TestConfig.assetChainId);
+        params.put("address", address);
 //        params.put("address", "LLbmaw1UNmKmd5PfuzP1Zm9dNuAnia01f");
 
-        params.put("assetId", 1);
+        params.put("assetId", TestConfig.assetId);
         Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.LG.abbr, "getBalanceNonce", params);
-        logger.info("response {}", response);
+        LoggerUtil.logger().info("response {}", response);
     }
     @Test
     public void getNonce() throws Exception {
@@ -118,12 +119,12 @@ public class CmdTest {
         // Build params map
         Map<String, Object> params = new HashMap<>();
         // Version information ("1.1" or 1.1 is both available)
-        params.put("chainId", 8096);
-        params.put("assetChainId", 445);
-        params.put("address", "JgT2JCQvKGRKRjKqyfxRAj2zSCpGca01f");
-        params.put("assetId", 222);
+        params.put("chainId", TestConfig.chainId);
+        params.put("assetChainId", TestConfig.assetChainId);
+        params.put("address", address);
+        params.put("assetId", TestConfig.assetId);
         Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.LG.abbr, "getNonce", params);
-        logger.info("response {}", response);
+        LoggerUtil.logger().info("response {}", response);
     }
     @Test
     public void validateCoinData() throws Exception {
@@ -131,10 +132,9 @@ public class CmdTest {
         // Build params map
         Map<String, Object> params = new HashMap<>();
         // Version information ("1.1" or 1.1 is both available)
-        int chainId = 8096;
-        int assetChainId = 445;
-        String address = "JgT2JCQvKGRKRjKqyfxRAj2zSCpGca01f";
-        int assetId = 222;
+        int chainId = TestConfig.chainId;
+        int assetChainId = TestConfig.assetChainId;
+        int assetId = TestConfig.assetId;
 //        Response response = CmdDispatcher.requestAndResponse(ModuleE.LG.abbr, "getNonce", params);
 //        String nonce =  ((Map)((Map)response.getResponseData()).get("getNonce")).get("nonce").toString();
         //封装交易执行
@@ -155,9 +155,9 @@ public class CmdTest {
         coinData.setTo(coinTos);
         tx.setCoinData(coinData.serialize());
         params.put("chainId", chainId);
-        params.put("txHex",HexUtil.encode(tx.serialize()));
+        params.put("tx",RPCUtil.encode(tx.serialize()));
         Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.LG.abbr, "validateCoinData", params);
-        logger.info("response {}", response);
+        LoggerUtil.logger().info("response {}", response);
     }
 
 }

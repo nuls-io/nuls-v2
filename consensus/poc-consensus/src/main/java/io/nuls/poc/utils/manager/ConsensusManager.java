@@ -2,7 +2,7 @@ package io.nuls.poc.utils.manager;
 
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.*;
-import io.nuls.poc.config.ConsensusConfig;
+import io.nuls.poc.constant.ConsensusConfig;
 import io.nuls.poc.constant.ConsensusConstant;
 import io.nuls.poc.model.bo.BlockData;
 import io.nuls.poc.model.bo.Chain;
@@ -10,7 +10,7 @@ import io.nuls.poc.model.bo.ChargeResultData;
 import io.nuls.poc.model.bo.round.MeetingMember;
 import io.nuls.poc.model.bo.round.MeetingRound;
 import io.nuls.poc.model.bo.tx.txdata.Deposit;
-import io.nuls.poc.utils.CallMethodUtils;
+import io.nuls.poc.rpc.call.CallMethodUtils;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.exception.NulsException;
@@ -172,7 +172,7 @@ public class ConsensusManager {
         本轮次总的出块奖励金(本轮次出块节点数*共识基础奖励 )
         Total reward in this round
         */
-        BigDecimal totalAll = DoubleUtils.mul(new BigDecimal(localRound.getMemberCount()), new BigDecimal(config.getConfigBean().getBlockReward()));
+        BigDecimal totalAll = DoubleUtils.mul(new BigDecimal(localRound.getMemberCount()), new BigDecimal(chain.getConfig().getBlockReward()));
         double commissionRate = DoubleUtils.div(self.getAgent().getCommissionRate(), 100, 2);
         BigInteger selfAllDeposit = self.getAgent().getDeposit().add(self.getAgent().getTotalDeposit());
         BigDecimal agentWeight = DoubleUtils.mul(new BigDecimal(selfAllDeposit), self.getAgent().getCreditVal());
@@ -330,6 +330,7 @@ public class ConsensusManager {
         header.setTime(blockData.getTime());
         header.setPreHash(blockData.getPreHash());
         header.setTxCount(blockData.getTxList().size());
+        header.setPackingAddress(packingAddress);
         List<NulsDigestData> txHashList = new ArrayList<>();
         for (int i = 0; i < blockData.getTxList().size(); i++) {
             Transaction tx = blockData.getTxList().get(i);

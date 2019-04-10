@@ -38,24 +38,22 @@ import io.nuls.chain.model.dto.AccountBalance;
 import io.nuls.chain.model.po.Asset;
 import io.nuls.chain.model.po.BlockChain;
 import io.nuls.chain.model.tx.txdata.TxChain;
+import io.nuls.chain.util.LoggerUtil;
 import io.nuls.rpc.cmd.BaseCmd;
 import io.nuls.rpc.model.message.Response;
 import io.nuls.rpc.netty.processor.ResponseMessageProcessor;
-import io.nuls.tools.crypto.HexUtil;
+import io.nuls.rpc.util.RPCUtil;
+import io.nuls.tools.exception.NulsException;
+import io.nuls.tools.exception.NulsRuntimeException;
 import io.nuls.tools.model.BigIntegerUtils;
 import io.nuls.tools.model.ByteUtils;
 import io.nuls.tools.model.StringUtils;
-import io.nuls.tools.exception.NulsException;
-import io.nuls.tools.exception.NulsRuntimeException;
-import io.nuls.tools.thread.TimeService;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import static io.nuls.chain.util.LoggerUtil.Log;
 
 /**
  * @author lan
@@ -65,35 +63,34 @@ public class BaseChainCmd extends BaseCmd {
 
 
     boolean isMainAsset(String assetKey) {
-        String chainId = CmConstants.CHAIN_ASSET_MAP.get(CmConstants.NULS_CHAIN_ID);
-        String assetId = CmConstants.CHAIN_ASSET_MAP.get(CmConstants.NULS_ASSET_ID);
-        return CmRuntimeInfo.getAssetKey(Integer.valueOf(chainId), Integer.valueOf(assetId)).equals(assetKey);
+        return CmRuntimeInfo.getMainAssetKey().equals(assetKey);
     }
+
     Response parseTxs(List<String> txHexList, List<Transaction> txList) {
         for (String txHex : txHexList) {
             if (StringUtils.isBlank(txHex)) {
                 return failed("txHex is blank");
             }
-            byte[] txStream = HexUtil.decode(txHex);
+            byte[] txStream = RPCUtil.decode(txHex);
             Transaction tx = new Transaction();
             try {
                 tx.parse(new NulsByteBuffer(txStream));
                 txList.add(tx);
             } catch (NulsException e) {
-                Log.error("transaction parse error", e);
+                LoggerUtil.logger().error("transaction parse error", e);
                 return failed("transaction parse error");
             }
         }
         return success();
     }
+
     /**
      * 注册链或资产封装coinData,x%资产进入黑洞，y%资产进入锁定
      */
     CoinData getRegCoinData(byte[] address, int chainId, int assetsId, String amount,
-                            int txSize, AccountBalance accountBalance) throws NulsRuntimeException {
+                            int txSize, AccountBalance accountBalance,String lockRate) throws NulsRuntimeException {
         txSize = txSize + P2PHKSignature.SERIALIZE_LENGTH;
         CoinData coinData = new CoinData();
-        String lockRate = CmConstants.PARAM_MAP.get(CmConstants.ASSET_DEPOSIT_NULS_lOCK);
         BigInteger lockAmount = new BigDecimal(amount).multiply(new BigDecimal(lockRate)).toBigInteger();
         BigInteger destroyAmount = new BigInteger(amount).subtract(lockAmount);
         CoinTo to1 = new CoinTo(address, chainId, assetsId, lockAmount, -1);
@@ -103,7 +100,7 @@ public class BaseChainCmd extends BaseCmd {
         coinData.addTo(to2);
         txSize += to2.size();
         //手续费
-        CoinFrom from = new CoinFrom(address, chainId, assetsId, new BigDecimal(amount).toBigInteger(), ByteUtils.copyOf(accountBalance.getNonce().getBytes(), 8), (byte) 0);
+        CoinFrom from = new CoinFrom(address, chainId, assetsId, new BigDecimal(amount).toBigInteger(), accountBalance.getNonce(), (byte) 0);
         txSize += from.size();
         BigInteger fee = TransactionFeeCalculator.getNormalTxFee(txSize);
         String fromAmount = BigIntegerUtils.addToString(amount, fee.toString());
@@ -119,10 +116,9 @@ public class BaseChainCmd extends BaseCmd {
      * 注销资产进行处理
      */
     CoinData getDisableCoinData(byte[] address, int chainId, int assetsId, String amount,
-                                int txSize, String txHash, AccountBalance accountBalance) throws NulsRuntimeException {
+                                int txSize, String txHash, AccountBalance accountBalance,String lockRate) throws NulsRuntimeException {
         txSize = txSize + P2PHKSignature.SERIALIZE_LENGTH;
 
-        String lockRate = CmConstants.PARAM_MAP.get(CmConstants.ASSET_DEPOSIT_NULS_lOCK);
         BigInteger lockAmount = new BigDecimal(amount).multiply(new BigDecimal(lockRate)).toBigInteger();
         CoinTo to = new CoinTo(address, chainId, assetsId, lockAmount, 0);
 
@@ -144,7 +140,7 @@ public class BaseChainCmd extends BaseCmd {
 
     BlockChain buildChainWithTxData(String txHex, Transaction tx, boolean isDelete) {
         try {
-            byte[] txBytes = HexUtil.hexToByte(txHex);
+            byte[] txBytes = RPCUtil.decode(txHex);
             tx.parse(txBytes, 0);
             TxChain txChain = new TxChain();
             txChain.parse(tx.getTxData(), 0);
@@ -160,14 +156,14 @@ public class BaseChainCmd extends BaseCmd {
             }
             return blockChain;
         } catch (Exception e) {
-            Log.error(e);
+            LoggerUtil.logger().error(e);
             return null;
         }
     }
 
     Asset buildAssetWithTxChain(String txHex, Transaction tx) {
         try {
-            byte[] txBytes = HexUtil.hexToByte(txHex);
+            byte[] txBytes = RPCUtil.decode(txHex);
             tx.parse(txBytes, 0);
             TxChain txChain = new TxChain();
             txChain.parse(tx.getTxData(), 0);
@@ -175,7 +171,7 @@ public class BaseChainCmd extends BaseCmd {
             asset.setTxHash(tx.getHash().toString());
             return asset;
         } catch (Exception e) {
-            Log.error(e);
+            LoggerUtil.logger().error(e);
             return null;
         }
     }
@@ -196,9 +192,7 @@ public class BaseChainCmd extends BaseCmd {
 //    }
 
     Asset setDefaultAssetValue(Asset asset) {
-        asset.setDepositNuls(Integer.valueOf(CmConstants.PARAM_MAP.get(CmConstants.ASSET_DEPOSIT_NULS)));
-        asset.setAvailable(true);
-        asset.setCreateTime(TimeService.currentTimeMillis());
+
         return asset;
     }
 
@@ -216,7 +210,7 @@ public class BaseChainCmd extends BaseCmd {
 
         Map responseData = (Map) response.getResponseData();
         String signatureHex = (String) responseData.get("signatureHex");
-        tx.setTransactionSignature(HexUtil.decode(signatureHex));
+        tx.setTransactionSignature(RPCUtil.decode(signatureHex));
 
         return tx;
     }

@@ -24,19 +24,28 @@
  */
 package io.nuls.ledger.model;
 
-import lombok.Getter;
-import lombok.Setter;
-
 /**
  * @author lan
  * @description
  * @date 2019/02/14
  **/
 public class ChainHeight {
-    @Setter
-    @Getter
     private int chainId;
-    @Setter
-    @Getter
     private long blockHeight;
+
+    public int getChainId() {
+        return chainId;
+    }
+
+    public void setChainId(int chainId) {
+        this.chainId = chainId;
+    }
+
+    public long getBlockHeight() {
+        return blockHeight;
+    }
+
+    public void setBlockHeight(long blockHeight) {
+        this.blockHeight = blockHeight;
+    }
 }

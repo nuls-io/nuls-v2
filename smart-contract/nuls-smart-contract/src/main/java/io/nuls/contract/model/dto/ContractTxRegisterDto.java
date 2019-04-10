@@ -23,17 +23,10 @@
  */
 package io.nuls.contract.model.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.Setter;
-
 /**
  * @author: PierreLuo
  * @date: 2019-03-11
  */
-@Getter
-@Setter
-@AllArgsConstructor
 public class ContractTxRegisterDto {
 
     private int txType;
@@ -41,4 +34,52 @@ public class ContractTxRegisterDto {
     private boolean systemTx;
     public boolean unlockTx;
     public boolean verifySignature;
+
+    public ContractTxRegisterDto(int txType, String validator, boolean systemTx, boolean unlockTx, boolean verifySignature) {
+        this.txType = txType;
+        this.validator = validator;
+        this.systemTx = systemTx;
+        this.unlockTx = unlockTx;
+        this.verifySignature = verifySignature;
+    }
+
+    public int getTxType() {
+        return txType;
+    }
+
+    public void setTxType(int txType) {
+        this.txType = txType;
+    }
+
+    public String getValidator() {
+        return validator;
+    }
+
+    public void setValidator(String validator) {
+        this.validator = validator;
+    }
+
+    public boolean isSystemTx() {
+        return systemTx;
+    }
+
+    public void setSystemTx(boolean systemTx) {
+        this.systemTx = systemTx;
+    }
+
+    public boolean isUnlockTx() {
+        return unlockTx;
+    }
+
+    public void setUnlockTx(boolean unlockTx) {
+        this.unlockTx = unlockTx;
+    }
+
+    public boolean isVerifySignature() {
+        return verifySignature;
+    }
+
+    public void setVerifySignature(boolean verifySignature) {
+        this.verifySignature = verifySignature;
+    }
 }

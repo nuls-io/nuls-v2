@@ -33,7 +33,6 @@ import java.nio.ByteOrder;
 import java.util.List;
 
 import static io.nuls.network.constant.NetworkConstant.MAX_FRAME_LENGTH;
-import static io.nuls.network.utils.LoggerUtil.Log;
 
 /**
  * @desription:
@@ -51,7 +50,7 @@ public class NulsMessageDecoder extends ByteToMessageDecoder {
                 out.add(decoded);
             }
         } else {
-            LoggerUtil.Log.error("readMagicNumber={} illegal message REC",readMagicNumber);
+            LoggerUtil.logger().error("readMagicNumber={} illegal message REC",readMagicNumber);
             in.clear();
             ctx.close();
 

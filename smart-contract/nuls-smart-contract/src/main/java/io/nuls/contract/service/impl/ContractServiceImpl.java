@@ -24,7 +24,9 @@
 package io.nuls.contract.service.impl;
 
 import io.nuls.base.basic.AddressTool;
-import io.nuls.base.data.*;
+import io.nuls.base.data.BlockHeader;
+import io.nuls.base.data.NulsDigestData;
+import io.nuls.base.data.Transaction;
 import io.nuls.contract.constant.ContractErrorCode;
 import io.nuls.contract.helper.ContractConflictChecker;
 import io.nuls.contract.helper.ContractHelper;
@@ -32,9 +34,10 @@ import io.nuls.contract.manager.ContractTxProcessorManager;
 import io.nuls.contract.manager.ContractTxValidatorManager;
 import io.nuls.contract.model.bo.*;
 import io.nuls.contract.model.dto.ContractPackageDto;
-import io.nuls.contract.model.tx.*;
+import io.nuls.contract.model.tx.CallContractTransaction;
+import io.nuls.contract.model.tx.CreateContractTransaction;
+import io.nuls.contract.model.tx.DeleteContractTransaction;
 import io.nuls.contract.model.txdata.CallContractData;
-import io.nuls.contract.model.txdata.ContractData;
 import io.nuls.contract.model.txdata.CreateContractData;
 import io.nuls.contract.model.txdata.DeleteContractData;
 import io.nuls.contract.service.*;
@@ -42,21 +45,21 @@ import io.nuls.contract.storage.ContractExecuteResultStorageService;
 import io.nuls.contract.util.ContractUtil;
 import io.nuls.contract.util.Log;
 import io.nuls.contract.vm.program.ProgramExecutor;
+import io.nuls.rpc.util.RPCUtil;
 import io.nuls.tools.basic.Result;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.exception.NulsException;
-import io.nuls.tools.model.ByteArrayWrapper;
-import io.nuls.tools.model.LongUtils;
-import org.spongycastle.util.encoders.Hex;
 
-import java.io.IOException;
-import java.math.BigInteger;
-import java.util.*;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
 import static io.nuls.contract.constant.ContractConstant.*;
+import static io.nuls.contract.constant.ContractErrorCode.FAILED;
 import static io.nuls.contract.util.ContractUtil.getFailed;
 import static io.nuls.contract.util.ContractUtil.getSuccess;
 
@@ -92,7 +95,7 @@ public class ContractServiceImpl implements ContractService {
 
     @Override
     public Result begin(int chainId, long blockHeight, long blockTime, String packingAddress, String preStateRoot) {
-        Log.info("Begin contract batch, packaging blockHeight is [{}], packaging address is [{}], preStateRoot is [{}]", blockHeight, packingAddress, preStateRoot);
+        Log.info("[Begin contract batch] packaging blockHeight is [{}], packaging address is [{}], preStateRoot is [{}]", blockHeight, packingAddress, preStateRoot);
         Chain chain = contractHelper.getChain(chainId);
         BatchInfo batchInfo = chain.getBatchInfo();
         // 清空上次批量的所有数据
@@ -105,18 +108,17 @@ public class ContractServiceImpl implements ContractService {
         // 准备临时余额和当前区块头
         contractHelper.createTempBalanceManagerAndCurrentBlockHeader(chainId, blockHeight, blockTime, AddressTool.getAddress(packingAddress));
         // 准备批量执行器
-        ProgramExecutor batchExecutor = contractExecutor.createBatchExecute(chainId, Hex.decode(preStateRoot));
+        ProgramExecutor batchExecutor = contractExecutor.createBatchExecute(chainId, RPCUtil.decode(preStateRoot));
         batchInfo.setBatchExecutor(batchExecutor);
         batchInfo.setPreStateRoot(preStateRoot);
         // 准备冲突检测器
         ContractConflictChecker checker = ContractConflictChecker.newInstance();
-        checker.setContractSetList(new ArrayList<>());
+        checker.setContractSetList(new CopyOnWriteArrayList<>());
         batchInfo.setChecker(checker);
         return getSuccess();
     }
 
-    @Override
-    public Result validContractTx(int chainId, Transaction tx) {
+    private Result validContractTx(int chainId, Transaction tx) {
         try {
             Result result;
             switch (tx.getType()) {
@@ -148,23 +150,30 @@ public class ContractServiceImpl implements ContractService {
     @Override
     public Result invokeContractOneByOne(int chainId, ContractTempTransaction tx) {
         try {
-            Log.info("Invoke contract TxType is [{}], hash is [{}]", tx.getType(), tx.getHash().toString());
+            Log.info("[Invoke Contract] TxType is [{}], hash is [{}]", tx.getType(), tx.getHash().toString());
             Chain chain = contractHelper.getChain(chainId);
             BatchInfo batchInfo = chain.getBatchInfo();
             if (!batchInfo.hasBegan()) {
                 return getFailed();
             }
+            byte[] contractAddressBytes = ContractUtil.extractContractAddressFromTxData(tx);
+            String contractAddress = AddressTool.getStringAddressByBytes(contractAddressBytes);
+            ContractContainer container = batchInfo.newAndGetContractContainer(contractAddress);
+            ContractWrapperTransaction wrapperTx = ContractUtil.parseContractTransaction(tx);
+            wrapperTx.setOrder(batchInfo.getAndIncreaseTxCounter());
+
+            // 验证合约交易
+            Result validResult = this.validContractTx(chainId, tx);
+            if (validResult.isFailed()) {
+                return validResult;
+            }
 
             String preStateRoot = batchInfo.getPreStateRoot();
             ProgramExecutor batchExecutor = batchInfo.getBatchExecutor();
 
-            byte[] contractAddressBytes = ContractUtil.extractContractAddressFromTxData(tx);
-            String contractAddress = AddressTool.getStringAddressByBytes(contractAddressBytes);
-            ContractContainer container = batchInfo.newAndGetContractContainer(contractAddress);
             // 等上次的执行完
             container.loadFutureList();
             // 多线程执行合约
-            ContractWrapperTransaction wrapperTx = ContractUtil.parseContractTransaction(tx);
             Result result = contractCaller.callTx(chainId, container, batchExecutor, wrapperTx, preStateRoot);
             return result;
         } catch (InterruptedException e) {
@@ -175,7 +184,7 @@ public class ContractServiceImpl implements ContractService {
             return getFailed().setMsg(e.getMessage());
         } catch (NulsException e) {
             Log.error(e);
-            return Result.getFailed(e.getErrorCode());
+            return Result.getFailed(e.getErrorCode() == null ? FAILED : e.getErrorCode());
         }
     }
 
@@ -222,22 +231,22 @@ public class ContractServiceImpl implements ContractService {
         }
     }
 
-    public Result commitProcessor(int chainId, List<String> txHexList, String blockHeaderHex) {
+    public Result commitProcessor(int chainId, List<String> txDataList, String blockHeaderHex) {
         try {
             ContractPackageDto contractPackageDto = contractHelper.getChain(chainId).getBatchInfo().getContractPackageDto();
             if (contractPackageDto != null) {
                 Map<String, ContractResult> contractResultMap = contractPackageDto.getContractResultMap();
                 /** pierre test code + */
-                Set<String> txHexSet = contractResultMap.keySet();
-                Log.info("contract execute txHexSize is {}", txHexSet.size());
+                Set<String> txDataSet = contractResultMap.keySet();
+                Log.info("contract execute txDataSize is {}", txDataSet.size());
                 /** pierre test code - */
                 ContractResult contractResult;
                 ContractWrapperTransaction wrapperTx;
-                Log.info("commit txHexSize is {}", txHexList.size());
-                for (String txHex : txHexList) {
-                    contractResult = contractResultMap.get(txHex);
+                Log.info("commit txDataSize is {}", txDataList.size());
+                for (String txData : txDataList) {
+                    contractResult = contractResultMap.get(txData);
                     if (contractResult == null) {
-                        Log.warn("empty contract result with txHex: {}", txHex);
+                        Log.warn("empty contract result with txData: {}", txData);
                         continue;
                     }
                     wrapperTx = contractResult.getTx();
@@ -269,12 +278,12 @@ public class ContractServiceImpl implements ContractService {
         }
     }
 
-    public Result rollbackProcessor(int chainId, List<String> txHexList, String blockHeaderHex) {
+    public Result rollbackProcessor(int chainId, List<String> txDataList, String blockHeaderHex) {
         try {
             Transaction tx;
-            for (String txHex : txHexList) {
+            for (String txData : txDataList) {
                 tx = new Transaction();
-                tx.parse(Hex.decode(txHex), 0);
+                tx.parse(RPCUtil.decode(txData), 0);
                 switch (tx.getType()) {
                     case TX_TYPE_CREATE_CONTRACT:
                         CreateContractData create = new CreateContractData();
@@ -299,7 +308,7 @@ public class ContractServiceImpl implements ContractService {
             return getSuccess();
         } catch (NulsException e) {
             Log.error(e);
-            return Result.getFailed(e.getErrorCode());
+            return Result.getFailed(e.getErrorCode() == null ? FAILED : e.getErrorCode());
         } catch (Exception e) {
             Log.error(e);
             return getFailed().setMsg(e.getMessage());

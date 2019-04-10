@@ -30,18 +30,22 @@ import io.nuls.block.message.HashListMessage;
 import io.nuls.block.message.HashMessage;
 import io.nuls.block.model.CachedSmallBlock;
 import io.nuls.block.rpc.call.NetworkUtil;
+import io.nuls.block.thread.TxGroupTask;
+import io.nuls.block.thread.monitor.TxGroupRequestor;
 import io.nuls.rpc.cmd.BaseCmd;
 import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.model.CmdAnnotation;
 import io.nuls.rpc.model.message.Response;
+import io.nuls.rpc.util.RPCUtil;
 import io.nuls.tools.core.annotation.Component;
-import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.log.logback.NulsLogger;
 
 import java.util.Map;
 
-import static io.nuls.block.constant.CommandConstant.*;
+import static io.nuls.block.BlockBootstrap.blockConfig;
+import static io.nuls.block.constant.CommandConstant.FORWARD_SMALL_BLOCK_MESSAGE;
+import static io.nuls.block.constant.CommandConstant.GET_SMALL_BLOCK_MESSAGE;
 
 /**
  * 处理收到的{@link HashMessage},用于区块的广播与转发
@@ -59,7 +63,7 @@ public class ForwardSmallBlockHandler extends BaseCmd {
         String nodeId = map.get("nodeId").toString();
         HashMessage message = new HashMessage();
         NulsLogger messageLog = ContextManager.getContext(chainId).getMessageLog();
-        byte[] decode = HexUtil.decode(map.get("messageBody").toString());
+        byte[] decode = RPCUtil.decode(map.get("messageBody").toString());
         try {
             message.parse(new NulsByteBuffer(decode));
         } catch (NulsException e) {
@@ -82,7 +86,12 @@ public class ForwardSmallBlockHandler extends BaseCmd {
             HashListMessage request = new HashListMessage();
             request.setBlockHash(blockHash);
             request.setTxHashList(block.getMissingTransactions());
-            NetworkUtil.sendToNode(chainId, request, nodeId, GET_TXGROUP_MESSAGE);
+            TxGroupTask task = new TxGroupTask();
+            task.setId(System.nanoTime());
+            task.setNodeId(nodeId);
+            task.setRequest(request);
+            task.setExcuteTime(blockConfig.getTxGroupTaskDelay());
+            TxGroupRequestor.addTask(chainId, blockHash.toString(), task);
             NetworkUtil.setHashAndHeight(chainId, blockHash, block.getSmallBlock().getHeader().getHeight(), nodeId);
             return success();
         }

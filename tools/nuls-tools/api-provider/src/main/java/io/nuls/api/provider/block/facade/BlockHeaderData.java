@@ -1,21 +1,24 @@
 package io.nuls.api.provider.block.facade;
 
-import lombok.Data;
-
 /**
  * @Author: zhoulijun
  * @Time: 2019-03-19 18:07
  * @Description: 功能描述
  */
-@Data
 public class BlockHeaderData {
 
     private String hash;
+
     private String preHash;
+
     private String merkleHash;
+
     private String time;
+
     private long height;
+
     private int txCount;
+
     private String blockSignature;
 
     private int size;
@@ -90,5 +93,133 @@ public class BlockHeaderData {
         result = 31 * result + (int) blockVersion;
         result = 31 * result + (stateRoot != null ? stateRoot.hashCode() : 0);
         return result;
+    }
+
+    public String getHash() {
+        return hash;
+    }
+
+    public void setHash(String hash) {
+        this.hash = hash;
+    }
+
+    public String getPreHash() {
+        return preHash;
+    }
+
+    public void setPreHash(String preHash) {
+        this.preHash = preHash;
+    }
+
+    public String getMerkleHash() {
+        return merkleHash;
+    }
+
+    public void setMerkleHash(String merkleHash) {
+        this.merkleHash = merkleHash;
+    }
+
+    public String getTime() {
+        return time;
+    }
+
+    public void setTime(String time) {
+        this.time = time;
+    }
+
+    public long getHeight() {
+        return height;
+    }
+
+    public void setHeight(long height) {
+        this.height = height;
+    }
+
+    public int getTxCount() {
+        return txCount;
+    }
+
+    public void setTxCount(int txCount) {
+        this.txCount = txCount;
+    }
+
+    public String getBlockSignature() {
+        return blockSignature;
+    }
+
+    public void setBlockSignature(String blockSignature) {
+        this.blockSignature = blockSignature;
+    }
+
+    public int getSize() {
+        return size;
+    }
+
+    public void setSize(int size) {
+        this.size = size;
+    }
+
+    public String getPackingAddress() {
+        return packingAddress;
+    }
+
+    public void setPackingAddress(String packingAddress) {
+        this.packingAddress = packingAddress;
+    }
+
+    public long getRoundIndex() {
+        return roundIndex;
+    }
+
+    public void setRoundIndex(long roundIndex) {
+        this.roundIndex = roundIndex;
+    }
+
+    public int getConsensusMemberCount() {
+        return consensusMemberCount;
+    }
+
+    public void setConsensusMemberCount(int consensusMemberCount) {
+        this.consensusMemberCount = consensusMemberCount;
+    }
+
+    public String getRoundStartTime() {
+        return roundStartTime;
+    }
+
+    public void setRoundStartTime(String roundStartTime) {
+        this.roundStartTime = roundStartTime;
+    }
+
+    public int getPackingIndexOfRound() {
+        return packingIndexOfRound;
+    }
+
+    public void setPackingIndexOfRound(int packingIndexOfRound) {
+        this.packingIndexOfRound = packingIndexOfRound;
+    }
+
+    public short getMainVersion() {
+        return mainVersion;
+    }
+
+    public void setMainVersion(short mainVersion) {
+        this.mainVersion = mainVersion;
+    }
+
+    public short getBlockVersion() {
+        return blockVersion;
+    }
+
+    public void setBlockVersion(short blockVersion) {
+        this.blockVersion = blockVersion;
+    }
+
+    public String getStateRoot() {
+        return stateRoot;
+    }
+
+    public void setStateRoot(String stateRoot) {
+        this.stateRoot = stateRoot;
     }
 }

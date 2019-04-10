@@ -24,7 +24,7 @@
  */
 package io.nuls.chain.service.impl;
 
-import io.nuls.chain.info.CmConstants;
+import io.nuls.chain.config.NulsChainConfig;
 import io.nuls.chain.info.CmErrorCode;
 import io.nuls.chain.info.CmRuntimeInfo;
 import io.nuls.chain.model.dto.ChainEventResult;
@@ -36,8 +36,8 @@ import io.nuls.chain.service.ChainService;
 import io.nuls.chain.service.ValidateService;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Service;
-import io.nuls.tools.model.ByteUtils;
 import io.nuls.tools.log.Log;
+import io.nuls.tools.model.ByteUtils;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -57,6 +57,8 @@ public class ValidateServiceImpl implements ValidateService {
     AssetService assetService;
     @Autowired
     ChainService chainService;
+    @Autowired
+    private NulsChainConfig nulsChainConfig;
     @Override
     public ChainEventResult assetDisableValidator(Asset asset) throws Exception {
         Asset dbAsset = assetService.getAsset(CmRuntimeInfo.getAssetKey(asset.getChainId(), asset.getAssetId()));
@@ -76,7 +78,7 @@ public class ValidateServiceImpl implements ValidateService {
         BigDecimal outAsset = new BigDecimal(chainAsset.getOutNumber());
         BigDecimal currentNumber = initAsset.add(inAsset).subtract(outAsset);
         double actual = currentNumber.divide(initAsset, 8, RoundingMode.HALF_DOWN).doubleValue();
-        double config = Double.parseDouble(CmConstants.PARAM_MAP.get(CmConstants.ASSET_RECOVERY_RATE));
+        double config = Double.parseDouble(nulsChainConfig.getAssetRecoveryRate());
         if (actual < config) {
             return ChainEventResult.getResultFail(CmErrorCode.ERROR_ASSET_RECOVERY_RATE);
         }

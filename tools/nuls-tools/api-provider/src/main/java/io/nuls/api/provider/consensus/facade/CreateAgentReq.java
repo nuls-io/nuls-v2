@@ -1,8 +1,6 @@
 package io.nuls.api.provider.consensus.facade;
 
 import io.nuls.api.provider.BaseReq;
-import lombok.AllArgsConstructor;
-import lombok.Data;
 
 import java.math.BigInteger;
 
@@ -13,8 +11,6 @@ import java.math.BigInteger;
  *  创建共识节点
  *  create consensus agent node
  */
-@Data
-@AllArgsConstructor
 public class CreateAgentReq extends BaseReq {
 
     private String agentAddress;
@@ -29,4 +25,60 @@ public class CreateAgentReq extends BaseReq {
 
     private String password;
 
+    public CreateAgentReq(String agentAddress, String packingAddress, String rewardAddress, Integer commissionRate, BigInteger deposit, String password) {
+        this.agentAddress = agentAddress;
+        this.packingAddress = packingAddress;
+        this.rewardAddress = rewardAddress;
+        this.commissionRate = commissionRate;
+        this.deposit = deposit;
+        this.password = password;
+    }
+
+    public String getAgentAddress() {
+        return agentAddress;
+    }
+
+    public void setAgentAddress(String agentAddress) {
+        this.agentAddress = agentAddress;
+    }
+
+    public String getPackingAddress() {
+        return packingAddress;
+    }
+
+    public void setPackingAddress(String packingAddress) {
+        this.packingAddress = packingAddress;
+    }
+
+    public String getRewardAddress() {
+        return rewardAddress;
+    }
+
+    public void setRewardAddress(String rewardAddress) {
+        this.rewardAddress = rewardAddress;
+    }
+
+    public Integer getCommissionRate() {
+        return commissionRate;
+    }
+
+    public void setCommissionRate(Integer commissionRate) {
+        this.commissionRate = commissionRate;
+    }
+
+    public BigInteger getDeposit() {
+        return deposit;
+    }
+
+    public void setDeposit(BigInteger deposit) {
+        this.deposit = deposit;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
 }

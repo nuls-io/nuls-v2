@@ -25,8 +25,6 @@ package io.nuls.contract.model.po;
 
 import io.nuls.contract.util.ContractUtil;
 import io.nuls.tools.exception.NulsException;
-import lombok.Getter;
-import lombok.Setter;
 
 import java.math.BigInteger;
 
@@ -34,8 +32,6 @@ import java.math.BigInteger;
  * @author: PierreLuo
  * @date: 2018/8/15
  */
-@Getter
-@Setter
 public class ContractAddressInfoPo {
 
     private byte[] contractAddress;
@@ -65,5 +61,93 @@ public class ContractAddressInfoPo {
             return 1;
         }
         return 0;
+    }
+
+    public byte[] getContractAddress() {
+        return contractAddress;
+    }
+
+    public void setContractAddress(byte[] contractAddress) {
+        this.contractAddress = contractAddress;
+    }
+
+    public byte[] getSender() {
+        return sender;
+    }
+
+    public void setSender(byte[] sender) {
+        this.sender = sender;
+    }
+
+    public byte[] getCreateTxHash() {
+        return createTxHash;
+    }
+
+    public void setCreateTxHash(byte[] createTxHash) {
+        this.createTxHash = createTxHash;
+    }
+
+    public long getCreateTime() {
+        return createTime;
+    }
+
+    public void setCreateTime(long createTime) {
+        this.createTime = createTime;
+    }
+
+    public long getBlockHeight() {
+        return blockHeight;
+    }
+
+    public void setBlockHeight(long blockHeight) {
+        this.blockHeight = blockHeight;
+    }
+
+    public boolean isAcceptDirectTransfer() {
+        return acceptDirectTransfer;
+    }
+
+    public void setAcceptDirectTransfer(boolean acceptDirectTransfer) {
+        this.acceptDirectTransfer = acceptDirectTransfer;
+    }
+
+    public boolean isNrc20() {
+        return isNrc20;
+    }
+
+    public void setNrc20(boolean nrc20) {
+        isNrc20 = nrc20;
+    }
+
+    public String getNrc20TokenName() {
+        return nrc20TokenName;
+    }
+
+    public void setNrc20TokenName(String nrc20TokenName) {
+        this.nrc20TokenName = nrc20TokenName;
+    }
+
+    public String getNrc20TokenSymbol() {
+        return nrc20TokenSymbol;
+    }
+
+    public void setNrc20TokenSymbol(String nrc20TokenSymbol) {
+        this.nrc20TokenSymbol = nrc20TokenSymbol;
+    }
+
+    public long getDecimals() {
+        return decimals;
+    }
+
+    public void setDecimals(long decimals) {
+        this.decimals = decimals;
+    }
+
+    public BigInteger getTotalSupply() {
+        return totalSupply;
+    }
+
+    public void setTotalSupply(BigInteger totalSupply) {
+        this.totalSupply = totalSupply;
     }
 }

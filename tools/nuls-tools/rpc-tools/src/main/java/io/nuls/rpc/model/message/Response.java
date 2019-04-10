@@ -26,8 +26,7 @@ package io.nuls.rpc.model.message;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.nuls.rpc.info.Constants;
-import lombok.Data;
-import lombok.ToString;
+
 
 /**
  * 远程调用的方法的结果
@@ -36,38 +35,37 @@ import lombok.ToString;
  * @author tangyi
  * @date 2018/11/15
  */
-@Data
-@ToString
+
 public class Response {
     /**
      * This is the original request ID referred by a Request message
      */
-    private String requestId;
+    private String RequestId;
 
     /**
      * The time that the target service took to process the request in milliseconds.
      */
-    private String responseProcessingTime;
+    private String ResponseProcessingTime;
 
     /**
      * The response status, 1 if successful, 0 otherwise.
      */
-    private String responseStatus;
+    private String ResponseStatus;
 
     /**
      * A string that could offer more clarification about the result of the process.
      */
-    private String responseComment;
+    private String ResponseComment;
 
     /**
      * The maximum number of objects that the response contains per request.
      */
-    private String responseMaxSize;
+    private String ResponseMaxSize;
 
     /**
      * An object array that contains the result of the method processed, one object per request
      */
-    private Object responseData;
+    private Object ResponseData;
 
     /**
      * 回复是否正确 / Whether the response is correct
@@ -76,6 +74,54 @@ public class Response {
      */
     @JsonIgnore
     public boolean isSuccess() {
-        return Constants.BOOLEAN_TRUE.equals(responseStatus);
+        return Constants.BOOLEAN_TRUE.equals(ResponseStatus);
+    }
+
+    public String getRequestId() {
+        return RequestId;
+    }
+
+    public void setRequestId(String RequestId) {
+        this.RequestId = RequestId;
+    }
+
+    public String getResponseProcessingTime() {
+        return ResponseProcessingTime;
+    }
+
+    public void setResponseProcessingTime(String ResponseProcessingTime) {
+        this.ResponseProcessingTime = ResponseProcessingTime;
+    }
+
+    public String getResponseStatus() {
+        return ResponseStatus;
+    }
+
+    public void setResponseStatus(String ResponseStatus) {
+        this.ResponseStatus = ResponseStatus;
+    }
+
+    public String getResponseComment() {
+        return ResponseComment;
+    }
+
+    public void setResponseComment(String ResponseComment) {
+        this.ResponseComment = ResponseComment;
+    }
+
+    public String getResponseMaxSize() {
+        return ResponseMaxSize;
+    }
+
+    public void setResponseMaxSize(String ResponseMaxSize) {
+        this.ResponseMaxSize = ResponseMaxSize;
+    }
+
+    public Object getResponseData() {
+        return ResponseData;
+    }
+
+    public void setResponseData(Object ResponseData) {
+        this.ResponseData = ResponseData;
     }
 }

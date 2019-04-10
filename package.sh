@@ -23,7 +23,7 @@ EOF
 #获取参数
 #输出目录
 
-MODULES_PATH="./NULS-Walltet-linux64-alpha1"
+MODULES_PATH="./NULS-Wallet-linux64-alpha1"
 #RELEASE_OUT_PATH="./NULS-Walltet-linux64-alpha1"
 #是否马上更新代码
 DOPULL=
@@ -61,7 +61,7 @@ log(){ #print date prefix and green
 # 检查java版本 must be 11
 checkJavaVersion(){
     JAVA="$JAVA_HOME/bin/java"
-    if [[ ! -r "$JAVA" ]]; then
+    if [ ! -r "$JAVA" ]; then
         JAVA='java'
     fi
 
@@ -88,7 +88,7 @@ doMvn(){
 	fi
 	installLog="${moduleLogDir}/log.log";
 	mvn clean $1 -Dmaven.test.skip=true > "${installLog}" 2>&1
-	mvnSuccess=$(grep "BUILD SUCCESS" ${installLog})
+	mvnSuccess=`grep "BUILD SUCCESS" ${installLog}`
 	if [ ! -n "$mvnSuccess" ]; then 
 		echoRed "$1 $2 FAIL"
 		echoRed "日志文件:${installLog}"
@@ -100,7 +100,8 @@ doMvn(){
 }
 
 #项目根目录
-PROJECT_PATH=$(cd $(dirname $0); pwd);
+cd `dirname $0`
+PROJECT_PATH=`pwd`;
 cd $PROJECT_PATH;
 log "working path is $PROJECT_PATH"; 
 #打包工作目录
@@ -112,23 +113,23 @@ fi
 if [ ! -d "${MODULES_PATH}" ]; then
 	mkdir "${MODULES_PATH}"
 fi
-MODULES_PATH=$(cd "$MODULES_PATH"; pwd)
+MODULES_PATH=`cd "$MODULES_PATH"; pwd`
 RELEASE_PATH=$MODULES_PATH
 echoYellow "Modules Path $MODULES_PATH"''
 log "==================BEGIN PACKAGE MODULES=============================="
 declare -a managedModules
-if [[ ! -d "$MODULES_PATH/bin" ]]; then
+if [ ! -d "$MODULES_PATH/bin" ]; then
 	mkdir $MODULES_PATH/bin
 fi
 #存放脚本目录
 MODULES_BIN_PATH=$MODULES_PATH/bin
-if [[ ! -d "$MODULES_PATH/Modules" ]]; then
+if [ ! -d "$MODULES_PATH/Modules" ]; then
 	#statements
 	mkdir $MODULES_PATH/Modules
 fi
 #默认日志目录
 MODULES_LOGS_PATH=${MODULES_PATH}/logs
-if [[ ! -d "$MODULES_LOGS_PATH" ]]; then
+if [ ! -d "$MODULES_LOGS_PATH" ]; then
 	#statements
 	mkdir $MODULES_LOGS_PATH
 fi
@@ -140,7 +141,7 @@ fi
 MODULES_PATH=$MODULES_PATH/Nuls
 #模块公共依赖jar存放目录
 COMMON_LIBS_PATH=$MODULES_PATH/libs
-if [[ -z "${IGNROEMVN}" ]]; then
+if [ -z "${IGNROEMVN}" ]; then
     if [ -d ${COMMON_LIBS_PATH} ]; then
         rm -r ${COMMON_LIBS_PATH}
     fi
@@ -160,7 +161,7 @@ if [ -n "${DOPULL}" ];then
 fi
 
 #1.install nuls-tools
-cd $(pwd)/tools/nuls-tools
+cd ./tools/nuls-tools
 if [ ! -n `ls |grep pom.xml` ]; then
 	echoRed "not found pom.xml"
 	exit 0
@@ -172,7 +173,7 @@ cd ../../
 
 #检查module.ncf指定配置项是否存在
 checkModuleItem(){
-	if [ ! -f "$(pwd)/module.ncf" ]; then
+	if [ ! -f "./module.ncf" ]; then
 		return 0
 	fi
 	if [ -z "$1" ]; then
@@ -181,7 +182,7 @@ checkModuleItem(){
 	fi
     while read line
 	do
-		pname=$(echo $line | awk -F '=' '{print $1}')
+		pname=`echo $line | awk -F '=' '{print $1}'`
 		if [ "${pname}" == "$1" ]; then
 			return 1;
 		fi
@@ -193,8 +194,8 @@ checkModuleItem(){
 getModuleItem(){
     while read line
 	do
-		pname=$(echo $line | awk -F '=' '{print $1}')
-		pvalue=$(awk -v a="$line" '
+		pname=`echo $line | awk -F '=' '{print $1}'`
+		pvalue=`awk -v a="$line" '
 						BEGIN{
 							len = split(a,ary,"=")
 							r=""
@@ -206,12 +207,12 @@ getModuleItem(){
 					 		}
 							print r
 						}
-					')
+					'`
 		if [ "${pname}" == $1 ]; then
 			echo ${pvalue};
 			return 1;
 		fi
-	done < "$(pwd)/module.ncf"
+	done < "./module.ncf"
 	return 0
 }
 
@@ -220,8 +221,8 @@ copyJarToModules(){
     if [ -z "$IGNROEMVN" ]; then
        doMvn "clean package" $1
     fi
-	moduleName=$(getModuleItem "APP_NAME");
-	version=$(getModuleItem "VERSION");
+	moduleName=`getModuleItem "APP_NAME"`;
+	version=`getModuleItem "VERSION"`;
 	if [ ! -d "${MODULES_PATH}/${moduleName}" ];then
 		mkdir ${MODULES_PATH}/${moduleName}
 	fi
@@ -230,7 +231,8 @@ copyJarToModules(){
 	fi	
 	mkdir "${MODULES_PATH}/${moduleName}/${version}"
 	jarName=`ls target |grep .jar`
-	echo "copy $(pwd)/target/${moduleName}-${version}.jar to ${MODULES_PATH}/${moduleName}/${version}/${moduleName}-${version}.jar"
+	nowPath=`pwd`
+	echo "copy ${nowPath}/target/${moduleName}-${version}.jar to ${MODULES_PATH}/${moduleName}/${version}/${moduleName}-${version}.jar"
 	cp ./target/${jarName} "${MODULES_PATH}/${moduleName}/${version}/${moduleName}-${version}.jar"
 	if [ -d ./target/libs ]; then
 		for jar in `ls ./target/libs`; do
@@ -242,10 +244,10 @@ copyJarToModules(){
 
 
 copyModuleNcfToModules(){
-	moduleName=$(getModuleItem "APP_NAME");
-	version=$(getModuleItem "VERSION");
-	mainClass=$(getModuleItem "MAIN_CLASS");
-	mainClassName=$(awk -v s="${mainClass}" 'BEGIN{ len = split(s,ary,"."); print ary[len]}')
+	moduleName=`getModuleItem "APP_NAME"`;
+	version=`getModuleItem "VERSION"`;
+	mainClass=`getModuleItem "MAIN_CLASS"`;
+	mainClassName=`awk -v s="${mainClass}" 'BEGIN{ len = split(s,ary,"."); print ary[len]}'`
 	moduleBuildPath="${BUILD_PATH}/tmp/$1"
 	if [ ! -d "${moduleBuildPath}" ]; then
 		mkdir "${moduleBuildPath}"
@@ -259,16 +261,16 @@ copyModuleNcfToModules(){
 	sedCommand="sed "
 	while read line
 	do
-		TEMP=$(echo $line|grep -Eo '\[.+\]')
+		TEMP=`echo $line|grep -Eo '\[.+\]'`
 		if [ -n "$TEMP" ]; then
 #		  echo "set cfg domain ${TEMP}"
 		  cfgDomain=$TEMP
 		fi
 		if [ "${cfgDomain}" == "[JAVA]" -a ! -n "$TEMP" ];
 		then
-			pname=$(echo $line | awk -F '=' '{print $1}')
+			pname=`echo $line | awk -F '=' '{print $1}'`
 			#pvalue=$(echo $line | awk -F '=' '{print $2}')
-			pvalue=$(awk -v a="$line" '
+			pvalue=`awk -v a="$line" '
 						BEGIN{
 							len = split(a,ary,"=")
 							r=""
@@ -280,43 +282,44 @@ copyModuleNcfToModules(){
 					 		}
 							print r
 						}
-					')
-            if [[ "${pname}" != "" ]]; then
+					'`
+            if [ "${pname}" != "" ]; then
 			    sedCommand+=" -e 's/%${pname}%/${pvalue}/g' "
 			fi
 			echo $line >> $moduleNcf
 		else
 
-			if [[ "${cfgDomain}" != "[JAVA]" ]]; then
+			if [ "${cfgDomain}" != "[JAVA]" ]; then
 				echo $line >> $moduleNcf
 			fi
 		fi
 	done < ./module.ncf
 #	 merge common module.ncf and private module.ncf to module.tmep.ncf
-	sh "${PROJECT_PATH}/build/merge-ncf.sh" "${BUILD_PATH}/module-prod.ncf" $moduleNcf
+	"${PROJECT_PATH}/build/merge-ncf.sh" "${BUILD_PATH}/module-prod.ncf" $moduleNcf
 #	rm $moduleNcf
 	sedCommand+=" -e 's/%MAIN_CLASS_NAME%/${mainClassName}/g' "
 #    echo $sedCommand
-	if [ -z $(echo "${sedCommand}" | grep -o "%JOPT_XMS%") ]; then
+	if [ -z `echo "${sedCommand}" | grep -o "%JOPT_XMS%"` ]; then
 		sedCommand="${sedCommand}  -e 's/%JOPT_XMS%/256/g' "
 	fi
-	if [ -z $(echo "${sedCommand}" | grep -o "%JAVA_OPTS%") ]; then
+	if [ -z `echo "${sedCommand}" | grep -o "%JAVA_OPTS%"` ]; then
 		sedCommand="${sedCommand}  -e 's/%JAVA_OPTS%//g' "
 	fi
-	if [ -z $(echo "${sedCommand}" | grep -o "%JOPT_XMX%") ]; then
+	if [ -z `echo "${sedCommand}" | grep -o "%JOPT_XMX%"` ]; then
 		sedCommand="${sedCommand}  -e 's/%JOPT_XMX%/256/g' "
 	fi
-	if [ -z $(echo "${sedCommand}" | grep -o "%JOPT_METASPACESIZE%") ]; then
+	if [ -z `echo "${sedCommand}" | grep -o "%JOPT_METASPACESIZE%"` ]; then
 		sedCommand="${sedCommand}  -e 's/%JOPT_METASPACESIZE%/128/g' "
 	fi
-	if [ -z $(echo "${sedCommand}" | grep -o "%JOPT_MAXMETASPACESIZE%") ]; then
+	if [ -z `echo "${sedCommand}" | grep -o "%JOPT_MAXMETASPACESIZE%"` ]; then
 		sedCommand="${sedCommand}  -e 's/%JOPT_MAXMETASPACESIZE%/256/g' "
 	fi
-    if [ -d "$(pwd)/script" ];
+    if [ -d "./script" ];
     then
-        for file in `ls $(pwd)/script`
+        for file in `ls ./script`
         do
-            eval "${sedCommand}  $(pwd)/script/${file} > ${moduleBuildPath}/${file}"
+            nowPath=`pwd`
+            eval "${sedCommand}  ${nowPath}/script/${file} > ${moduleBuildPath}/${file}"
             cp "${moduleBuildPath}/${file}" "${MODULES_PATH}/${moduleName}/${version}/${file}"
             chmod u+x "${MODULES_PATH}/${moduleName}/${version}/${file}"
             echo "copy ${moduleBuildPath}/${file} to ${MODULES_PATH}/${moduleName}/${version}/${file}"
@@ -354,21 +357,22 @@ copyModuleNcfToModules(){
 
 #2.遍历文件夹，检查第一个pom 发现pom文件后通过mvn进行打包，完成后把文件jar文件和module.ncf文件复制到Modules文件夹下
 packageModule() {
-	if [ ! -d $(pwd)/$1 ]; then
+	if [ ! -d ./$1 ]; then
 		return 0
 	fi
-	if [ $(pwd) == "${MODULES_PATH}" ]; then
+	if [ `pwd` == "${RELEASE_PATH}" ]; then
 		return 0;
 	fi
-	cd $(pwd)/$1
+	cd ./$1
+	nowPath=`pwd`
 	if [ -f "./module.ncf" ]; then
-		echoYellow "find module.ncf in $(pwd)"
+		echoYellow "find module.ncf in ${nowPath}"
 		if [ ! -f "./pom.xml" ]; then
-			echoRed "模块配置文件必须与pom.xml在同一个目录 : $(pwd)"
+			echoRed "模块配置文件必须与pom.xml在同一个目录 : ${nowPath}"
 			exit 0;
 		fi
-		managed=$(getModuleItem "Managed");
-		if [[ $managed != "-1" ]];
+		managed=`getModuleItem "Managed"`;
+		if [ "${managed}" != "-1" ];
 		then
             checkModuleItem "APP_NAME" "$1"
             checkModuleItem "VERSION" "$1"
@@ -376,8 +380,8 @@ packageModule() {
 		    log "build $1"
             copyJarToModules $1
             copyModuleNcfToModules $1
-            if [[ $managed == "1" ]]; then
-                moduleName=$(getModuleItem "APP_NAME");
+            if [ "${managed}" == "1" ]; then
+                moduleName=`getModuleItem "APP_NAME"`;
                 managedModules[${#managedModules[@]}]="$moduleName"
             fi
             log "build $1 done"
@@ -427,14 +431,12 @@ if [ -n "${DOMOCK}" ]; then
 	chmod u+x "${MODULES_BIN_PATH}/start.sh"
 	cp "${BUILD_PATH}/stop-mykernel.sh" "${MODULES_BIN_PATH}/stop.sh"
 	chmod u+x "${MODULES_BIN_PATH}/stop.sh"
-	cp "${BUILD_PATH}/default-config.json" "${MODULES_BIN_PATH}/"
-	chmod u+r "${MODULES_BIN_PATH}/default-config.json"
+	cp "${BUILD_PATH}/default-config.ncf" "${MODULES_BIN_PATH}/"
+	chmod u+r "${MODULES_BIN_PATH}/default-config.ncf"
 	cp "${BUILD_PATH}/cmd.sh" "${MODULES_BIN_PATH}/"
 	chmod u+x "${MODULES_BIN_PATH}/cmd.sh"
 	cp "${BUILD_PATH}/test.sh" "${MODULES_BIN_PATH}/"
 	chmod u+x "${MODULES_BIN_PATH}/test.sh"
-	cp "${BUILD_PATH}/check-jdk.sh" "${MODULES_BIN_PATH}/"
-	chmod u+x "${MODULES_BIN_PATH}/check-jdk.sh"
 
 	tempModuleList=
 	for m in ${managedModules[@]}

@@ -24,17 +24,16 @@ import io.nuls.api.analysis.WalletRpcHandler;
 import io.nuls.api.cache.ApiCache;
 import io.nuls.api.db.AccountService;
 import io.nuls.api.db.BlockService;
-import io.nuls.api.exception.JsonRpcException;
 import io.nuls.api.manager.CacheManager;
-import io.nuls.api.model.po.db.AccountInfo;
-import io.nuls.api.model.po.db.AssetInfo;
-import io.nuls.api.model.po.db.PageInfo;
-import io.nuls.api.model.po.db.TxRelationInfo;
+import io.nuls.api.model.po.db.*;
+import io.nuls.api.model.rpc.FreezeInfo;
 import io.nuls.api.model.rpc.RpcErrorCode;
 import io.nuls.api.model.rpc.RpcResult;
 import io.nuls.api.model.rpc.RpcResultError;
+import io.nuls.api.provider.ServiceManager;
 import io.nuls.api.utils.VerifyUtils;
 import io.nuls.base.basic.AddressTool;
+import io.nuls.tools.basic.Result;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Controller;
 import io.nuls.tools.core.annotation.RpcMethod;
@@ -51,6 +50,8 @@ public class AccountController {
     private AccountService accountService;
     @Autowired
     private BlockService blockHeaderService;
+
+    private io.nuls.api.provider.account.AccountService cmdAccountService = ServiceManager.get(io.nuls.api.provider.account.AccountService.class);
 
     @RpcMethod("getAccountList")
     public RpcResult getAccountList(List<Object> params) {
@@ -153,13 +154,13 @@ public class AccountController {
     @RpcMethod("getCoinRanking")
     public RpcResult getCoinRanking(List<Object> params) {
         VerifyUtils.verifyParams(params, 4);
-        int chainId,pageIndex,pageSize,sortType;
+        int chainId, pageIndex, pageSize, sortType;
         try {
             chainId = (int) params.get(0);
             pageIndex = (int) params.get(1);
             pageSize = (int) params.get(2);
             sortType = (int) params.get(3);
-        }catch (Exception e) {
+        } catch (Exception e) {
             return RpcResult.paramError();
         }
 
@@ -172,28 +173,32 @@ public class AccountController {
         return new RpcResult().setResult(pageInfo);
     }
 
-//    @RpcMethod("getAccountTokens")
-//    public RpcResult getAccountTokens(List<Object> params) {
-//        VerifyUtils.verifyParams(params, 4);
-//        int chainId = (int) params.get(0);
-//        int pageIndex = (int) params.get(1);
-//        int pageSize = (int) params.get(2);
-//        String address = (String) params.get(3);
-//
-//        if (!AddressTool.validAddress(chainId, address)) {
-//            throw new JsonRpcException(new RpcResultError(RpcErrorCode.PARAMS_ERROR, "[address] is inValid"));
-//        }
-//        if (pageIndex <= 0) {
-//            pageIndex = 1;
-//        }
-//        if (pageSize <= 0 || pageSize > 100) {
-//            pageSize = 10;
-//        }
-//        // todo
-//        //PageInfo<AccountTokenInfo> pageInfo = tokenService.getAccountTokens(address, pageIndex, pageSize);
-//        PageInfo<AccountTokenInfo> pageInfo = new PageInfo<>();
-//        RpcResult result = new RpcResult();
-//        result.setResult(pageInfo);
-//        return result;
-//    }
+    @RpcMethod("getAccountFreezes")
+    public RpcResult getAccountFreezes(List<Object> params) {
+        VerifyUtils.verifyParams(params, 4);
+        int chainId, pageIndex, pageSize, assetId;
+        String address;
+        try {
+            chainId = (int) params.get(0);
+            pageIndex = (int) params.get(1);
+            pageSize = (int) params.get(2);
+            address = (String) params.get(3);
+        } catch (Exception e) {
+            return RpcResult.paramError();
+        }
+        PageInfo<FreezeInfo> pageInfo = null;
+        if (CacheManager.isChainExist(chainId)) {
+            ApiCache apiCache = CacheManager.getCache(chainId);
+            assetId = apiCache.getChainInfo().getDefaultAsset().getAssetId();
+            Result<PageInfo<FreezeInfo>> result = WalletRpcHandler.getFreezeList(chainId, pageIndex, pageSize, address, assetId);
+            if (result.isFailed()) {
+                return RpcResult.failed(result);
+            }
+            pageInfo = result.getData();
+            return RpcResult.success(pageInfo);
+        } else {
+            pageInfo = new PageInfo<>(pageIndex, pageSize);
+            return RpcResult.success(pageInfo);
+        }
+    }
 }

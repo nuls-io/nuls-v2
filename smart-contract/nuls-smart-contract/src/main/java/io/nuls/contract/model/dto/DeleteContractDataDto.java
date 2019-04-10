@@ -26,14 +26,10 @@ package io.nuls.contract.model.dto;
 
 import io.nuls.base.basic.AddressTool;
 import io.nuls.contract.model.txdata.ContractData;
-import lombok.Getter;
-import lombok.Setter;
 
 /**
  * @author: PierreLuo
  */
-@Getter
-@Setter
 public class DeleteContractDataDto {
     private String sender;
     private String contractAddress;
@@ -43,4 +39,19 @@ public class DeleteContractDataDto {
         this.contractAddress = AddressTool.getStringAddressByBytes(delete.getContractAddress());
     }
 
+    public String getSender() {
+        return sender;
+    }
+
+    public void setSender(String sender) {
+        this.sender = sender;
+    }
+
+    public String getContractAddress() {
+        return contractAddress;
+    }
+
+    public void setContractAddress(String contractAddress) {
+        this.contractAddress = contractAddress;
+    }
 }

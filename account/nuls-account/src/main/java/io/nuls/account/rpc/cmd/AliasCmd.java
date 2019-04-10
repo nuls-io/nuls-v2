@@ -56,7 +56,6 @@ public class AliasCmd extends BaseCmd {
             @Parameter(parameterName = "alias",parameterType = "string",canNull = false)
     })
     public Response setAlias(Map params) {
-        LoggerUtil.logger.debug("ac_setAlias start,params size:{}", params == null ? 0 : params.size());
         int chainId;
         String address, password, alias, txHash = null;
         Object chainIdObj = params == null ? null : params.get(RpcParameterNameConstant.CHAIN_ID);
@@ -85,7 +84,6 @@ public class AliasCmd extends BaseCmd {
         }
         Map<String, String> result = new HashMap<>();
         result.put("txHash", txHash);
-        LoggerUtil.logger.debug("ac_getAliasByAddress end");
         return success(result);
     }
 
@@ -97,7 +95,6 @@ public class AliasCmd extends BaseCmd {
      */
     @CmdAnnotation(cmd = "ac_getAliasFee", version = 1.0, scope = "private", minEvent = 0, minPeriod = 0, description = "Gets to set the alias transaction fee")
     public Response getAliasFee(Map params) {
-        LoggerUtil.logger.debug("ac_getAliasFee start,params size:{}", params == null ? 0 : params.size());
         int chainId = 0;
         String address, alias;
         BigInteger fee;
@@ -123,7 +120,6 @@ public class AliasCmd extends BaseCmd {
         Map<String, String> result = new HashMap<>();
         result.put("fee", fee == null ? "" : fee.toString());
         //TODO is need to format?
-        LoggerUtil.logger.debug("ac_getAliasFee end");
         return success(result);
     }
 
@@ -138,7 +134,6 @@ public class AliasCmd extends BaseCmd {
      */
     @CmdAnnotation(cmd = "ac_getAliasByAddress", version = 1.0, scope = "private", minEvent = 0, minPeriod = 0, description = "get the alias by address")
     public Response getAliasByAddress(Map params) {
-        LoggerUtil.logger.debug("ac_getAliasByAddress start,params size:{}", params == null ? 0 : params.size());
         String alias;
         int chainId = 0;
         Object chainIdObj = params == null ? null : params.get(RpcParameterNameConstant.CHAIN_ID);
@@ -161,7 +156,6 @@ public class AliasCmd extends BaseCmd {
         }
         Map<String, String> result = new HashMap<>();
         result.put("alias", alias);
-        LoggerUtil.logger.debug("ac_getAliasByAddress end");
         return success(result);
     }
 
@@ -173,7 +167,6 @@ public class AliasCmd extends BaseCmd {
      */
     @CmdAnnotation(cmd = "ac_isAliasUsable", version = 1.0, scope = "private", minEvent = 0, minPeriod = 0, description = "check whether the account is usable")
     public Response isAliasUsable(Map params) {
-        LoggerUtil.logger.debug("ac_isAliasUsable start,params size:{}", params == null ? 0 : params.size());
         boolean isAliasUsable = false;
         int chainId;
         String alias;
@@ -196,7 +189,6 @@ public class AliasCmd extends BaseCmd {
         }
         Map<String, Boolean> result = new HashMap<>();
         result.put("value", isAliasUsable);
-        LoggerUtil.logger.debug("ac_isAliasUsable end");
         return success(result);
     }
 
@@ -209,20 +201,19 @@ public class AliasCmd extends BaseCmd {
     @CmdAnnotation(cmd = "ac_aliasTxValidate", version = 1.0, scope = "private", minEvent = 0, minPeriod = 0, description = "validate the transaction of alias")
     @ResisterTx(txType = AccountConstant.TX_TYPE_ACCOUNT_ALIAS, methodType = TxMethodType.VALID, methodName = "ac_aliasTxValidate")
     public Response aliasTxValidate(Map params) {
-        LoggerUtil.logger.debug("ac_aliasTxValidate start,params size:{}", params == null ? 0 : params.size());
         boolean result;
         int chainId;
-        String txHex;
+        String tx;
         Object chainIdObj = params == null ? null : params.get(RpcParameterNameConstant.CHAIN_ID);
-        Object txHexObj = params == null ? null : params.get(RpcParameterNameConstant.TX_HEX);
+        Object txObj = params == null ? null : params.get(RpcParameterNameConstant.TX);
         try {
             // check parameters
-            if (params == null || chainIdObj == null || txHexObj == null) {
+            if (params == null || chainIdObj == null || txObj == null) {
                 throw new NulsRuntimeException(AccountErrorCode.NULL_PARAMETER);
             }
             chainId = (Integer) chainIdObj;
-            txHex = (String) txHexObj;
-            Transaction transaction = Transaction.getInstance(txHex);
+            tx = (String) txObj;
+            Transaction transaction = Transaction.getInstance(tx);
             result = aliasService.aliasTxValidate(chainId, transaction);
         } catch (NulsRuntimeException e) {
             LoggerUtil.logger.info("", e);
@@ -233,7 +224,6 @@ public class AliasCmd extends BaseCmd {
         }
         Map<String, Boolean> resultMap = new HashMap<>();
         resultMap.put("value", result);
-        LoggerUtil.logger.debug("ac_aliasTxValidate end,result is:{}",result);
         return success(resultMap);
     }
 
@@ -241,24 +231,22 @@ public class AliasCmd extends BaseCmd {
      * commit the alias transaction
      */
     @CmdAnnotation(cmd = "ac_aliasTxCommit", version = 1.0, scope = "private", minEvent = 0, minPeriod = 0, description = "commit the alias transaction")
-    //@ResisterTx(txType = AccountConstant.TX_TYPE_ACCOUNT_ALIAS, methodType = TxMethodType.COMMIT, methodName = "ac_aliasTxCommit")
     public Response aliasTxCommit(Map params) throws NulsException {
-        LoggerUtil.logger.debug("ac_aliasTxCommit start,params size:{}", params == null ? 0 : params.size());
         boolean result = false;
         int chainId = 0;
-        String txHex;
-        //TODO is it need to verify secondaryDataHex?
+        String tx;
+        //TODO is it need to verify secondaryData?
         Object chainIdObj = params == null ? null : params.get(RpcParameterNameConstant.CHAIN_ID);
-        Object txHexObj = params == null ? null : params.get(RpcParameterNameConstant.TX_HEX);
+        Object txObj = params == null ? null : params.get(RpcParameterNameConstant.TX);
         Object blockHeaderDigest = params == null ? null : params.get(RpcParameterNameConstant.BLOCK_HEADER_DIGEST);
         try {
             // check parameters
-            if (params == null || chainIdObj == null || txHexObj == null) {
+            if (params == null || chainIdObj == null || txObj == null) {
                 throw new NulsRuntimeException(AccountErrorCode.NULL_PARAMETER);
             }
             chainId = (Integer) chainIdObj;
-            txHex = (String) txHexObj;
-            Transaction transaction = Transaction.getInstance(txHex);
+            tx = (String) txObj;
+            Transaction transaction = Transaction.getInstance(tx);
             Alias alias = new Alias();
             alias.parse(new NulsByteBuffer(transaction.getTxData()));
             result = aliasService.aliasTxCommit(chainId, alias);
@@ -271,7 +259,6 @@ public class AliasCmd extends BaseCmd {
         }
         Map<String, Boolean> resultMap = new HashMap<>();
         resultMap.put("value", result);
-        LoggerUtil.logger.debug("ac_aliasTxCommit end");
         return success(resultMap);
     }
 
@@ -282,24 +269,22 @@ public class AliasCmd extends BaseCmd {
      * @return
      */
     @CmdAnnotation(cmd = "ac_aliasTxRollback", version = 1.0, scope = "private", minEvent = 0, minPeriod = 0, description = "rollback the alias info which saved in the storage")
-    //@ResisterTx(txType = AccountConstant.TX_TYPE_ACCOUNT_ALIAS, methodType = TxMethodType.ROLLBACK, methodName = "ac_aliasTxRollback")
     public Response rollbackAlias(Map params) throws NulsException {
-        LoggerUtil.logger.debug("ac_aliasTxRollback start,params size:{}", params == null ? 0 : params.size());
         boolean result = false;
         int chainId = 0;
-        String txHex;
-        //TODO is it need to verify secondaryDataHex?
+        String tx;
+        //TODO is it need to verify secondaryData?
         Object chainIdObj = params == null ? null : params.get(RpcParameterNameConstant.CHAIN_ID);
-        Object txHexObj = params == null ? null : params.get(RpcParameterNameConstant.TX_HEX);
+        Object txObj = params == null ? null : params.get(RpcParameterNameConstant.TX);
         Object blockHeaderDigest = params == null ? null : params.get(RpcParameterNameConstant.BLOCK_HEADER_DIGEST);
         try {
             // check parameters
-            if (params == null || chainIdObj == null || txHexObj == null) {
+            if (params == null || chainIdObj == null || txObj == null) {
                 throw new NulsRuntimeException(AccountErrorCode.NULL_PARAMETER);
             }
             chainId = (Integer) chainIdObj;
-            txHex = (String) txHexObj;
-            Transaction transaction = Transaction.getInstance(txHex);
+            tx = (String) txObj;
+            Transaction transaction = Transaction.getInstance(tx);
             Alias alias = new Alias();
             alias.parse(new NulsByteBuffer(transaction.getTxData()));
             result = aliasService.rollbackAlias(chainId, alias);
@@ -312,7 +297,6 @@ public class AliasCmd extends BaseCmd {
         }
         Map<String, Boolean> resultMap = new HashMap<>();
         resultMap.put("value", result);
-        LoggerUtil.logger.debug("ac_aliasTxRollback end");
         return success(resultMap);
     }
 

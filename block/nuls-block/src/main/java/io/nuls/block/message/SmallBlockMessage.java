@@ -26,7 +26,6 @@ import io.nuls.base.data.SmallBlock;
 import io.nuls.block.message.base.BaseMessage;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.parse.SerializeUtils;
-import lombok.Data;
 
 import java.io.IOException;
 
@@ -38,7 +37,6 @@ import java.io.IOException;
  * @version 1.0
  * @date 18-11-9 下午2:37
  */
-@Data
 public class SmallBlockMessage extends BaseMessage {
 
     private SmallBlock smallBlock;
@@ -47,6 +45,14 @@ public class SmallBlockMessage extends BaseMessage {
     }
 
     public SmallBlockMessage(SmallBlock smallBlock) {
+        this.smallBlock = smallBlock;
+    }
+
+    public SmallBlock getSmallBlock() {
+        return smallBlock;
+    }
+
+    public void setSmallBlock(SmallBlock smallBlock) {
         this.smallBlock = smallBlock;
     }
 

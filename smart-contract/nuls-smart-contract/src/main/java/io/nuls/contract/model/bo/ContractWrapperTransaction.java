@@ -26,15 +26,11 @@ package io.nuls.contract.model.bo;
 import io.nuls.base.data.BlockHeader;
 import io.nuls.base.data.Transaction;
 import io.nuls.contract.model.txdata.ContractData;
-import lombok.Getter;
-import lombok.Setter;
 
 /**
  * @author: PierreLuo
  * @date: 2019-02-27
  */
-@Getter
-@Setter
 public class ContractWrapperTransaction extends Transaction {
 
     private String txHex;
@@ -44,9 +40,9 @@ public class ContractWrapperTransaction extends Transaction {
     private ContractData contractData;
 
     /**
-     * 合约内部转账交易的时间的偏移量，用于排序，区块逻辑没有用到时间排序，暂时放弃
+     * 接收到的交易顺序
      */
-    //private int order;
+    private int order;
 
     private BlockHeader blockHeader;
 
@@ -63,5 +59,45 @@ public class ContractWrapperTransaction extends Transaction {
         this.setTime(tx.getTime());
         this.setTransactionSignature(tx.getTransactionSignature());
         this.setRemark(tx.getRemark());
+    }
+
+    public String getTxHex() {
+        return txHex;
+    }
+
+    public void setTxHex(String txHex) {
+        this.txHex = txHex;
+    }
+
+    public ContractResult getContractResult() {
+        return contractResult;
+    }
+
+    public void setContractResult(ContractResult contractResult) {
+        this.contractResult = contractResult;
+    }
+
+    public ContractData getContractData() {
+        return contractData;
+    }
+
+    public void setContractData(ContractData contractData) {
+        this.contractData = contractData;
+    }
+
+    public int getOrder() {
+        return order;
+    }
+
+    public void setOrder(int order) {
+        this.order = order;
+    }
+
+    public BlockHeader getBlockHeader() {
+        return blockHeader;
+    }
+
+    public void setBlockHeader(BlockHeader blockHeader) {
+        this.blockHeader = blockHeader;
     }
 }

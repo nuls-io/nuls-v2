@@ -108,7 +108,7 @@ public class CommandHandler implements InitializingBean {
         //transfer
         register(getBean(TransferProcessor.class));
         //transfer by alias
-        register(getBean(TransferByAliasProcessor.class));
+//        register(getBean(TransferByAliasProcessor.class));
 
         //get last height block header
         register(getBean(GetBestBlockHeaderProcessor.class));
@@ -247,9 +247,14 @@ public class CommandHandler implements InitializingBean {
             return processor.getHelp();
         }
         try {
-            boolean result = processor.argsValidate(args);
-            if (!result) {
-                return "args incorrect:\n" + processor.getHelp();
+            try
+            {
+                boolean result = processor.argsValidate(args);
+                if (!result) {
+                    return "args incorrect:\n" + processor.getHelp();
+                }
+            }catch (ParameterException e){
+                return e.getMessage() + "\n" + "args incorrect:\n" + processor.getHelp();
             }
             return processor.execute(args).toString();
         } catch (Exception e) {

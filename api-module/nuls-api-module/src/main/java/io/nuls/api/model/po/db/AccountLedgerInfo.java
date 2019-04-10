@@ -1,12 +1,7 @@
 package io.nuls.api.model.po.db;
 
-import lombok.Data;
-import lombok.NoArgsConstructor;
-
 import java.math.BigInteger;
 
-@Data
-@NoArgsConstructor
 public class AccountLedgerInfo {
 
     private String key;
@@ -21,6 +16,8 @@ public class AccountLedgerInfo {
 
     private boolean isNew;
 
+    public AccountLedgerInfo(){}
+
     public AccountLedgerInfo(String address, int chainId, int assetId) {
         this.key = address + chainId + assetId;
         this.address = address;
@@ -30,4 +27,51 @@ public class AccountLedgerInfo {
         isNew = true;
     }
 
+    public String getKey() {
+        return key;
+    }
+
+    public void setKey(String key) {
+        this.key = key;
+    }
+
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
+    }
+
+    public int getChainId() {
+        return chainId;
+    }
+
+    public void setChainId(int chainId) {
+        this.chainId = chainId;
+    }
+
+    public int getAssetId() {
+        return assetId;
+    }
+
+    public void setAssetId(int assetId) {
+        this.assetId = assetId;
+    }
+
+    public BigInteger getTotalBalance() {
+        return totalBalance;
+    }
+
+    public void setTotalBalance(BigInteger totalBalance) {
+        this.totalBalance = totalBalance;
+    }
+
+    public boolean isNew() {
+        return isNew;
+    }
+
+    public void setNew(boolean aNew) {
+        isNew = aNew;
+    }
 }

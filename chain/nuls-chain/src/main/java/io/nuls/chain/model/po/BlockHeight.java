@@ -30,8 +30,6 @@ import io.nuls.base.basic.NulsOutputStreamBuffer;
 import io.nuls.base.data.BaseNulsData;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.parse.SerializeUtils;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -42,8 +40,6 @@ import java.util.List;
  * @description
  * @date 2019/02/21
  **/
-@EqualsAndHashCode(callSuper = true)
-@Data
 public class BlockHeight extends BaseNulsData {
     private long blockHeight = 0;
     private boolean isCommit = false;
@@ -86,4 +82,35 @@ public class BlockHeight extends BaseNulsData {
         return size;
     }
 
+    public long getBlockHeight() {
+        return blockHeight;
+    }
+
+    public void setBlockHeight(long blockHeight) {
+        this.blockHeight = blockHeight;
+    }
+
+    public boolean isCommit() {
+        return isCommit;
+    }
+
+    public void setCommit(boolean commit) {
+        isCommit = commit;
+    }
+
+    public long getLatestRollHeight() {
+        return latestRollHeight;
+    }
+
+    public void setLatestRollHeight(long latestRollHeight) {
+        this.latestRollHeight = latestRollHeight;
+    }
+
+    public List<Long> getBakHeighList() {
+        return bakHeighList;
+    }
+
+    public void setBakHeighList(List<Long> bakHeighList) {
+        this.bakHeighList = bakHeighList;
+    }
 }

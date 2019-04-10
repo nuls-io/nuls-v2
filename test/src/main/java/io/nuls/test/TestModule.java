@@ -22,6 +22,7 @@ import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.core.ioc.SpringLiteContext;
 import io.nuls.tools.log.logback.NulsLogger;
+import io.nuls.tools.model.DateUtils;
 
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -85,6 +86,8 @@ public class TestModule extends RpcModule {
             Utils.success("inCount:"+networkInfo.getData().getInCount());
             Utils.success("outCount:"+networkInfo.getData().getOutCount());
             Utils.success("nodes:" + networkProvider.getNodes().getList().toString());
+            Utils.success("Time:" + DateUtils.timeStamp2DateStr(System.currentTimeMillis(),"yyyy-MM-dd HH:mm:ss"));
+            Utils.success("packetMagic:"+config.getPacketMagic());
             Utils.success("=".repeat(100));
             if(networkProvider.getNodes().getList().isEmpty()){
                 log.error("网络节点数量为0，不能进行测试");

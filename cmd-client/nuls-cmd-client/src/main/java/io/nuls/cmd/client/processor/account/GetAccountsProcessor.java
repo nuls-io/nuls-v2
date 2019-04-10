@@ -64,6 +64,7 @@ public class GetAccountsProcessor extends AccountBaseProcessor implements Comman
 
     @Override
     public boolean argsValidate(String[] args) {
+        checkArgsNumber(args,0);
         return true;
     }
 
@@ -73,10 +74,6 @@ public class GetAccountsProcessor extends AccountBaseProcessor implements Comman
         if(result.isFailed()){
             return CommandResult.getFailed(result);
         }
-        try {
-            return CommandResult.getSuccess(JSONUtils.obj2PrettyJson(result.getList()));
-        } catch (JsonProcessingException e) {
-            return CommandResult.failed(ErrorCodeConstants.SYSTEM_ERR.getMsg());
-        }
+        return CommandResult.getSuccess(CommandResult.dataTransformList(result));
     }
 }

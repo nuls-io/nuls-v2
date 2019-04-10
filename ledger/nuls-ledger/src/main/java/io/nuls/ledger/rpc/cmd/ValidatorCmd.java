@@ -33,9 +33,9 @@ import io.nuls.ledger.validator.CoinDataValidator;
 import io.nuls.rpc.model.CmdAnnotation;
 import io.nuls.rpc.model.Parameter;
 import io.nuls.rpc.model.message.Response;
+import io.nuls.rpc.util.RPCUtil;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
-import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.exception.NulsException;
 
 import java.util.ArrayList;
@@ -63,36 +63,31 @@ public class ValidatorCmd extends BaseLedgerCmd {
     @CmdAnnotation(cmd = "validateCoinData",
             version = 1.0, scope = "private", minEvent = 0, minPeriod = 0, description = "")
     @Parameter(parameterName = "chainId", parameterType = "int")
-    @Parameter(parameterName = "txHex", parameterType = "String")
-    @Parameter(parameterName = "isBatchValidate", parameterType = "boolean")
+    @Parameter(parameterName = "tx", parameterType = "String")
     public Response validateCoinData(Map params) {
         Integer chainId = (Integer) params.get("chainId");
-        String txHex = (String) params.get("txHex");
-        boolean isBatchValidate = Boolean.valueOf(params.get("isBatchValidate").toString());
+        String txStr = (String) params.get("tx");
         Transaction tx = new Transaction();
         Response response = null;
         ValidateResult validateResult = null;
         try {
-            tx.parse(HexUtil.hexToByte(txHex), 0);
-            if (isBatchValidate) {
-                LoggerUtil.logger(chainId).debug("确认交易校验：chainId={},txHash={},isBatchValidate={}", chainId, tx.getHash().toString(), isBatchValidate);
-                validateResult = coinDataValidator.bathValidatePerTx(chainId, tx);
-//                if(CoinDataValidator.VALIDATE_SUCCESS_CODE != validateResult.getValidateCode()){
-//                      transactionService.rollBackUnconfirmTx(chainId,tx);
-//                }
-            } else {
-                LoggerUtil.logger(chainId).debug("未确认交易校验：chainId={},txHash={},isBatchValidate={}", chainId, tx.getHash().toString(), isBatchValidate);
-                validateResult = coinDataValidator.validateCoinData(chainId, tx);
-            }
+            tx.parse(RPCUtil.decode(txStr), 0);
+            LoggerUtil.logger(chainId).debug("确认交易校验：chainId={},txHash={}", chainId, tx.getHash().toString());
+            validateResult = coinDataValidator.bathValidatePerTx(chainId, tx);
             response = success(validateResult);
             LoggerUtil.logger(chainId).debug("validateCoinData returnCode={},returnMsg={}", validateResult.getValidateCode(), validateResult.getValidateDesc());
         } catch (NulsException e) {
             e.printStackTrace();
             response = failed(e.getErrorCode());
             LoggerUtil.logger(chainId).error("validateCoinData exception:{}", e.getMessage());
+        } catch (Exception e) {
+            e.printStackTrace();
+            response = failed("validateCoinData exception");
+            LoggerUtil.logger(chainId).error("validateCoinData exception:{}", e.getMessage());
         }
         return response;
     }
+
     /**
      * 回滚打包确认交易状态
      *
@@ -103,22 +98,22 @@ public class ValidatorCmd extends BaseLedgerCmd {
             version = 1.0, scope = "private", minEvent = 0, minPeriod = 0,
             description = "")
     @Parameter(parameterName = "chainId", parameterType = "int")
-    @Parameter(parameterName = "txHex", parameterType = "String")
+    @Parameter(parameterName = "tx", parameterType = "String")
     public Response rollbackTxValidateStatus(Map params) {
         Map<String, Object> rtData = new HashMap<>();
         int value = 0;
         Integer chainId = (Integer) params.get("chainId");
         try {
-            String txHex = params.get("txHex").toString();
+            String txStr = params.get("tx").toString();
             LoggerUtil.logger(chainId).debug("rollbackrTxValidateStatus chainId={}", chainId);
-            Transaction tx = parseTxs(txHex,chainId);
+            Transaction tx = parseTxs(txStr, chainId);
             if (null == tx) {
-                LoggerUtil.logger(chainId).debug("txHex is invalid chainId={},txHex={}", chainId,txHex);
+                LoggerUtil.logger(chainId).debug("txHex is invalid chainId={},txHex={}", chainId, txStr);
                 return failed("txHex is invalid");
             }
             LoggerUtil.txUnconfirmedRollBackLog(chainId).debug("rollbackrTxValidateStatus chainId={},txHash={}", chainId, tx.getHash().toString());
             //清理未确认回滚
-            transactionService.rollBackUnconfirmTx(chainId,tx);
+            transactionService.rollBackUnconfirmTx(chainId, tx);
             if (coinDataValidator.rollbackTxValidateStatus(chainId, tx)) {
                 value = 1;
             } else {
@@ -165,20 +160,20 @@ public class ValidatorCmd extends BaseLedgerCmd {
             version = 1.0, scope = "private", minEvent = 0, minPeriod = 0,
             description = "")
     @Parameter(parameterName = "chainId", parameterType = "int")
-    @Parameter(parameterName = "txHexList", parameterType = "List")
+    @Parameter(parameterName = "txList", parameterType = "List")
     @Parameter(parameterName = "blockHeight", parameterType = "long")
     public Response blockValidate(Map params) {
         Integer chainId = (Integer) params.get("chainId");
         long blockHeight = Long.valueOf(params.get("blockHeight").toString());
-        List<String> txHexList = (List) params.get("txHexList");
+        List<String> txStrList = (List) params.get("txList");
         LoggerUtil.logger(chainId).debug("chainId={} blockHeight={} blockValidate", chainId, blockHeight);
-        if (null == txHexList || 0 == txHexList.size()) {
-            LoggerUtil.logger(chainId).error("txHexList is blank");
-            return failed("txHexList is blank");
+        if (null == txStrList || 0 == txStrList.size()) {
+            LoggerUtil.logger(chainId).error("txStrList is blank");
+            return failed("txStrList is blank");
         }
-        LoggerUtil.logger(chainId).debug("commitBlockTxs txHexListSize={}", txHexList.size());
+        LoggerUtil.logger(chainId).debug("commitBlockTxs txHexListSize={}", txStrList.size());
         List<Transaction> txList = new ArrayList<>();
-        Response parseResponse = parseTxs(txHexList, txList,chainId);
+        Response parseResponse = parseTxs(txStrList, txList, chainId);
         if (!parseResponse.isSuccess()) {
             LoggerUtil.logger(chainId).debug("commitBlockTxs response={}", parseResponse);
             return parseResponse;

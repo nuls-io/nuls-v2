@@ -21,9 +21,12 @@
 package io.nuls.block.storage;
 
 import io.nuls.base.data.Block;
-import io.nuls.block.model.po.BlockHeaderPo;
+import io.nuls.base.data.po.BlockHeaderPo;
+import io.nuls.block.constant.RunningStatusEnum;
+import io.nuls.block.manager.ContextManager;
 import io.nuls.block.test.BlockGenerator;
 import io.nuls.block.utils.BlockUtil;
+import io.nuls.block.utils.ConfigLoader;
 import io.nuls.db.service.RocksDBService;
 import io.nuls.tools.core.ioc.SpringLiteContext;
 import org.junit.BeforeClass;
@@ -35,12 +38,15 @@ import static org.junit.Assert.assertNull;
 public class BlockStorageServiceImplTest {
 
     private static BlockHeaderPo header;
-    private static final int CHAIN_ID = 1;
+    private static final int CHAIN_ID = 2;
     private static BlockStorageService service;
 
     @BeforeClass
     public static void beforeClass() throws Exception {
-        SpringLiteContext.init("io.nuls.block");
+        SpringLiteContext.init("io.nuls.block", "io.nuls.rpc.modulebootstrap", "io.nuls.rpc.cmd");
+        RocksDBService.init("../../../../data/block");
+        ConfigLoader.load();
+        ContextManager.getContext(CHAIN_ID).setStatus(RunningStatusEnum.RUNNING);
         service = SpringLiteContext.getBean(BlockStorageService.class);
         RocksDBService.init("../../../../data/block");
         Block block = BlockGenerator.generate(null);

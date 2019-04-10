@@ -28,6 +28,7 @@ package io.nuls.cmd.client.processor.contract;
 
 import io.nuls.api.provider.Result;
 import io.nuls.api.provider.contract.facade.GetContractResultReq;
+import io.nuls.base.data.NulsDigestData;
 import io.nuls.cmd.client.CommandBuilder;
 import io.nuls.cmd.client.CommandHelper;
 import io.nuls.cmd.client.CommandResult;
@@ -67,10 +68,8 @@ public class GetContractResultProcessor extends ContractBaseProcessor {
 
     @Override
     public boolean argsValidate(String[] args) {
-        int length = args.length;
-        if (length != 2) {
-            return false;
-        }
+        checkArgsNumber(args,1);
+        checkArgs(NulsDigestData.validHash(args[1]),"hash format error");
         return true;
     }
 
@@ -93,7 +92,7 @@ public class GetContractResultProcessor extends ContractBaseProcessor {
             dataMap.put("refundFee", Na.naToNuls(dataMap.get("refundFee")));
             dataMap.put("value", Na.naToNuls(dataMap.get("value")));
             dataMap.put("price", Na.naToNuls(dataMap.get("price")));
-            dataMap.put("balance", Na.naToNuls(dataMap.get("balance")));
+            //dataMap.put("balance", Na.naToNuls(dataMap.get("balance")));
         }
 
         result.setData(dataMap);

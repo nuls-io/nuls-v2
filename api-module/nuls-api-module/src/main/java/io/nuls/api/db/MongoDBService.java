@@ -65,7 +65,7 @@ public class MongoDBService implements InitializingBean {
         try {
             MongoClient mongoClient = new MongoClient(ApiContext.mongoIp, ApiContext.mongoPort);
             MongoDatabase mongoDatabase = mongoClient.getDatabase("nuls-api");
-
+            mongoDatabase.getCollection("test").drop();
             this.client = mongoClient;
             this.db = mongoDatabase;
         }catch (Exception e) {
@@ -264,6 +264,7 @@ public class MongoDBService implements InitializingBean {
         if (var1 == null) {
             return collection.countDocuments();
         }
+
         return collection.countDocuments(var1);
     }
 

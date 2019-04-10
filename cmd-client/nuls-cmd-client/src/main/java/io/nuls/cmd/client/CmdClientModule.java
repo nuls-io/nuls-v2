@@ -1,14 +1,11 @@
 package io.nuls.cmd.client;
 
-import io.nuls.api.provider.Provider;
 import io.nuls.cmd.client.utils.LoggerUtil;
-import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.modulebootstrap.Module;
 import io.nuls.rpc.modulebootstrap.RpcModule;
 import io.nuls.rpc.modulebootstrap.RpcModuleState;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
-import io.nuls.tools.core.annotation.Value;
 import io.nuls.tools.log.logback.NulsLogger;
 import io.nuls.tools.parse.I18nUtils;
 import io.nuls.tools.thread.ThreadUtils;
@@ -23,25 +20,13 @@ public class CmdClientModule extends RpcModule {
 
     @Autowired Config config;
 
-//    ServerSocket serverSocket;
-//
-//    int port = 1122;
-
-    @Value("chain-id")
-    int defaultChainId;
-
-    @Value("provider-type")
-    Provider.ProviderType providerType;
-
     @Autowired CommandHandler commandHandler;
 
     static NulsLogger log = LoggerUtil.logger;
 
     @Override
     public Module[] getDependencies() {
-        return new Module[]{
-                new Module(ModuleE.AC.abbr,"1.0")
-        };
+        return new Module[0];
     }
 
     @Override

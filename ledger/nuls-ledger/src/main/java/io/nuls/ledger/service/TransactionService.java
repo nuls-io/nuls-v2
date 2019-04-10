@@ -27,6 +27,7 @@ package io.nuls.ledger.service;
 
 
 import io.nuls.base.data.Transaction;
+import io.nuls.ledger.model.ValidateResult;
 import io.nuls.ledger.model.po.AccountStateSnapshot;
 
 import java.util.List;
@@ -42,7 +43,7 @@ public interface TransactionService {
     /**
      * 未确认交易数据处理
      */
-    boolean unConfirmTxProcess(int addressChainId,Transaction transaction);
+    ValidateResult unConfirmTxProcess(int addressChainId, Transaction transaction) throws Exception;
 
 
     /**

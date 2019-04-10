@@ -20,12 +20,9 @@
 
 package io.nuls.api.model.po.db;
 
-import lombok.Data;
-
 /**
  * @author Niels
  */
-@Data
 public class PocRound {
 
     private long index;
@@ -47,4 +44,84 @@ public class PocRound {
     private long endHeight;
 
     private double lostRate;
+
+    public long getIndex() {
+        return index;
+    }
+
+    public void setIndex(long index) {
+        this.index = index;
+    }
+
+    public long getStartTime() {
+        return startTime;
+    }
+
+    public void setStartTime(long startTime) {
+        this.startTime = startTime;
+    }
+
+    public int getMemberCount() {
+        return memberCount;
+    }
+
+    public void setMemberCount(int memberCount) {
+        this.memberCount = memberCount;
+    }
+
+    public long getEndTime() {
+        return endTime;
+    }
+
+    public void setEndTime(long endTime) {
+        this.endTime = endTime;
+    }
+
+    public int getRedCardCount() {
+        return redCardCount;
+    }
+
+    public void setRedCardCount(int redCardCount) {
+        this.redCardCount = redCardCount;
+    }
+
+    public int getYellowCardCount() {
+        return yellowCardCount;
+    }
+
+    public void setYellowCardCount(int yellowCardCount) {
+        this.yellowCardCount = yellowCardCount;
+    }
+
+    public int getProducedBlockCount() {
+        return producedBlockCount;
+    }
+
+    public void setProducedBlockCount(int producedBlockCount) {
+        this.producedBlockCount = producedBlockCount;
+    }
+
+    public long getStartHeight() {
+        return startHeight;
+    }
+
+    public void setStartHeight(long startHeight) {
+        this.startHeight = startHeight;
+    }
+
+    public long getEndHeight() {
+        return endHeight;
+    }
+
+    public void setEndHeight(long endHeight) {
+        this.endHeight = endHeight;
+    }
+
+    public double getLostRate() {
+        return lostRate;
+    }
+
+    public void setLostRate(double lostRate) {
+        this.lostRate = lostRate;
+    }
 }

@@ -43,29 +43,45 @@ import java.util.Map;
  * @date 2018/12/17
  **/
 public class LoggerUtil {
-    public static final String LOGGER_KEY1 = "nw";
-    public static final String LOGGER_KEY2 = ModuleE.BL.abbr;
-    public static final String LOGGER_KEY3 = ModuleE.TX.abbr;
-    public static final String LOGGER_KEY4 = ModuleE.CS.abbr;
-    public static NulsLogger Log = LoggerBuilder.getLogger("nwLogs", "nw", Level.ALL);
-    public static NulsLogger NwInfosLog = LoggerBuilder.getLogger("nwLogs", "nwInfos", Level.ALL);
-    public static Map<String, NulsLogger> logMap = new HashMap<>();
+    private static final String LOGGER_KEY1 = "nw";
+    private static final String LOGGER_KEY2 = ModuleE.BL.abbr;
+    private static final String LOGGER_KEY3 = ModuleE.TX.abbr;
+    private static final String LOGGER_KEY4 = ModuleE.CS.abbr;
+    private static Map<String, NulsLogger> logMap = new HashMap<>();
+    private static NulsLogger logger = null;
+    private static NulsLogger nwInfosLog = null;
 
-    public static void createLogs(int chainId) {
+    public static void defaultLogInit(String logLevel) {
+        logger = LoggerBuilder.getLogger("nwLogs", "nw", Level.valueOf(logLevel));
+        nwInfosLog = LoggerBuilder.getLogger("nwLogs", "nwInfos", Level.valueOf(logLevel));
+    }
+
+    public static void createLogs(int chainId, String logLevel) {
         String folderName = "nwLogs/" + chainId;
         if (null == logMap.get(LOGGER_KEY1 + chainId)) {
-            logMap.put(LOGGER_KEY1 + chainId, LoggerBuilder.getLogger(folderName, LOGGER_KEY1, Level.ALL));
-            logMap.put(LOGGER_KEY2 + chainId, LoggerBuilder.getLogger(folderName, LOGGER_KEY2, Level.ALL));
-            logMap.put(LOGGER_KEY3 + chainId, LoggerBuilder.getLogger(folderName, LOGGER_KEY3, Level.ALL));
-            logMap.put(LOGGER_KEY4 + chainId, LoggerBuilder.getLogger(folderName, LOGGER_KEY4, Level.ALL));
+            logMap.put(LOGGER_KEY1 + chainId, LoggerBuilder.getLogger(folderName, LOGGER_KEY1, Level.valueOf(logLevel)));
+            logMap.put(LOGGER_KEY2 + chainId, LoggerBuilder.getLogger(folderName, LOGGER_KEY2, Level.valueOf(logLevel)));
+            logMap.put(LOGGER_KEY3 + chainId, LoggerBuilder.getLogger(folderName, LOGGER_KEY3, Level.valueOf(logLevel)));
+            logMap.put(LOGGER_KEY4 + chainId, LoggerBuilder.getLogger(folderName, LOGGER_KEY4, Level.valueOf(logLevel)));
         }
     }
 
     public static NulsLogger logger(int chainId) {
         if (null == logMap.get(LOGGER_KEY1 + chainId)) {
-            return Log;
+            return logger;
         }
         return logMap.get(LOGGER_KEY1 + chainId);
+    }
+
+    public static NulsLogger logger() {
+        if (null == logger) {
+            defaultLogInit("DEBUG");
+        }
+        return logger;
+    }
+
+    public static NulsLogger nwInfosLogger() {
+        return nwInfosLog;
     }
 
     /**

@@ -35,7 +35,16 @@ public interface TxService {
      * @return boolean
      * @throws NulsException NulsException
      */
-    void newTx(Chain chain, Transaction transaction) throws NulsException;
+    void newBroadcastTx(Chain chain, Transaction transaction) throws NulsException;
+
+
+    /**
+     * 由节点产生的新交易,该交易已通过验证器验证和账本验证,可放入待打包队列以及未确认存储
+     * @param chain
+     * @param transaction
+     * @throws NulsException
+     */
+    boolean newTx(Chain chain, Transaction transaction) throws NulsException;
 
 
     /**
@@ -54,6 +63,24 @@ public interface TxService {
      * @return
      */
     boolean verify(Chain chain, Transaction tx, boolean incloudBasic);
+
+    /**
+     * 交易基础验证
+     * 基础字段
+     * 交易size
+     * 交易类型
+     * 交易签名
+     * from的地址必须全部是发起链(本链or相同链）地址
+     * from里面的资产是否存在
+     * to里面的地址必须是相同链的地址
+     * 交易手续费
+     *
+     * @param chain
+     * @param tx
+     * @param txRegister
+     * @throws NulsException
+     */
+    void baseValidateTx(Chain chain, Transaction tx, TxRegister txRegister) throws NulsException;
 
     /**
      * Get a transaction, first check the database from the confirmation transaction,
@@ -82,15 +109,15 @@ public interface TxService {
     /**
      * 如果有txData相同的交易,则过滤掉后面一个
      * @param chain
-     * @param txHexList
-     * @return List<String> txHex
+     * @param txList
+     * @return List<String> tx
      * @throws NulsException
      */
-    List<String> transactionModuleValidator(Chain chain, List<String> txHexList) throws NulsException;
+    List<String> transactionModuleValidator(Chain chain, List<String> txList) throws NulsException;
 
-    boolean crossTransactionCommit(Chain chain, List<String> txHex, String blockHeaderHex) throws NulsException;
+    boolean crossTransactionCommit(Chain chain, List<String> tx, String blockHeader) throws NulsException;
 
-    boolean crossTransactionRollback(Chain chain, List<String> txHex, String blockHeaderHex) throws NulsException;
+    boolean crossTransactionRollback(Chain chain, List<String> tx, String blockHeader) throws NulsException;
 
 
     /**
@@ -147,4 +174,5 @@ public interface TxService {
      * @param cleanLedgerUfmTx 调用账本的未确认回滚
      */
     void clearInvalidTx(Chain chain, Transaction tx, boolean cleanLedgerUfmTx);
+
 }

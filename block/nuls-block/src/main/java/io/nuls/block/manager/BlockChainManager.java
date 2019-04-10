@@ -24,12 +24,11 @@ import io.nuls.base.data.Block;
 import io.nuls.base.data.NulsDigestData;
 import io.nuls.block.constant.BlockErrorCode;
 import io.nuls.block.constant.ChainTypeEnum;
-import io.nuls.block.exception.ChainRuntimeException;
 import io.nuls.block.model.Chain;
+import io.nuls.block.rpc.call.ConsensusUtil;
 import io.nuls.block.service.BlockService;
 import io.nuls.block.storage.ChainStorageService;
 import io.nuls.block.utils.BlockUtil;
-import io.nuls.block.rpc.call.ConsensusUtil;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.exception.NulsRuntimeException;
@@ -96,6 +95,7 @@ public class BlockChainManager {
         Chain topForkChain = switchChainPath.peek();
         long forkHeight = topForkChain.getStartHeight();
         long masterChainEndHeight = masterChain.getEndHeight();
+        ConsensusUtil.sendHeaderList(chainId, (int) (masterChainEndHeight - forkHeight));
         commonLog.info("*calculate fork point complete, forkHeight=" + forkHeight);
 
         //2.回滚主链
@@ -161,6 +161,7 @@ public class BlockChainManager {
                 commonLog.info("*switchChain0 fail masterChain-" + masterChain);
                 commonLog.info("*switchChain0 fail chain-" + chain);
                 commonLog.info("*switchChain0 fail subChain-" + subChain);
+                commonLog.info("*switchChain0 fail masterForkChain-" + masterForkChain);
                 removeForkChain(chainId, topForkChain);
                 append(masterChain, masterForkChain);
                 return false;
@@ -176,7 +177,7 @@ public class BlockChainManager {
         //主链回滚中途失败,把前面回滚的区块再加回主链
         for (Block block : blockList) {
             if (!blockService.saveBlock(chainId, block, false)) {
-                throw new ChainRuntimeException("*switch chain fail, auto saveBlockToMasterChain fail");
+                throw new NulsRuntimeException(BlockErrorCode.CHAIN_MERGE_ERROR);
             }
         }
     }
@@ -464,9 +465,15 @@ public class BlockChainManager {
         if (mainChain.isMaster()) {
             ConsensusUtil.notice(chainId, CONSENSUS_WAITING);
             List<Block> blockList = chainStorageService.query(subChain.getChainId(), subChain.getHashList());
+            List<Block> savedBlockList = new ArrayList<>();
             for (Block block : blockList) {
                 if (!blockService.saveBlock(chainId, block, false)) {
+                    for (int i = savedBlockList.size() - 1; i >= 0; i--) {
+                        blockService.rollbackBlock(chainId, savedBlockList.get(i).getHeader().getHeight(), false);
+                    }
                     throw new NulsRuntimeException(BlockErrorCode.CHAIN_MERGE_ERROR);
+                } else {
+                    savedBlockList.add(block);
                 }
             }
             ConsensusUtil.notice(chainId, CONSENSUS_WORKING);

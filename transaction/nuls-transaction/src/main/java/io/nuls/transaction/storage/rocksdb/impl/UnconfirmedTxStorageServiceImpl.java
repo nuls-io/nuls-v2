@@ -4,7 +4,7 @@ import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.data.NulsDigestData;
 import io.nuls.base.data.Transaction;
 import io.nuls.db.service.RocksDBService;
-import io.nuls.tools.core.annotation.Service;
+import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.exception.NulsRuntimeException;
@@ -29,7 +29,7 @@ import static io.nuls.transaction.utils.LoggerUtil.Log;
  * @author: Charlie
  * @date: 2018/11/13
  */
-@Service
+@Component
 public class UnconfirmedTxStorageServiceImpl implements UnconfirmedTxStorageService {
 
     @Override
@@ -64,8 +64,11 @@ public class UnconfirmedTxStorageServiceImpl implements UnconfirmedTxStorageServ
         Map<byte[], byte[]> txPoMap = new HashMap<>();
         try {
             for (Transaction tx : txList) {
+                TransactionsPO txPO = new TransactionsPO(tx);
+                //设置入库保存时间
+                txPO.setCreateTime(System.currentTimeMillis());
                 //序列化对象为byte数组存储
-                txPoMap.put(tx.getHash().serialize(), tx.serialize());
+                txPoMap.put(tx.getHash().serialize(), txPO.serialize());
             }
             return RocksDBService.batchPut(TxDBConstant.DB_TRANSACTION_CACHE + chainId, txPoMap);
         } catch (Exception e) {

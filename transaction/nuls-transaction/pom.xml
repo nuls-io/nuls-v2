@@ -14,7 +14,6 @@
         <maven.compiler.encoding>UTF-8</maven.compiler.encoding>
         <java.version>11</java.version>
         <tool.version>1.0.0-SNAPSHOT</tool.version>
-        <lombok.version>1.18.4</lombok.version>
     </properties>
 
     <dependencies>
@@ -47,14 +46,6 @@
             <groupId>io.nuls.nuls-tools</groupId>
             <artifactId>h2-tools</artifactId>
             <version>${tool.version}</version>
-        </dependency>
-
-        <!-- https://mvnrepository.com/artifact/org.projectlombok/lombok -->
-        <dependency>
-            <groupId>org.projectlombok</groupId>
-            <artifactId>lombok</artifactId>
-            <version>${lombok.version}</version>
-            <scope>provided</scope>
         </dependency>
 
     </dependencies>

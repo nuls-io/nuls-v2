@@ -24,8 +24,7 @@
  */
 package io.nuls.rpc.model.message;
 
-import lombok.Data;
-import lombok.ToString;
+
 
 import java.util.Map;
 
@@ -36,15 +35,14 @@ import java.util.Map;
  * @author tangyi
  * @date 2018/11/15
  */
-@Data
-@ToString
+
 public class Request {
     /**
      * (Default: 0): This is a boolean value.
      * 0: The Micro server that made the request expects only a Response message, if it subscribed to the function then it may expect many Response messages.
      * 1: The Micro server that made the request expects exactly one Ack message and also a Response message, if it subscribed to the function then it may expect many Response messages.
      */
-    private String requestAck;
+    private String RequestAck;
 
     /**
      * This is an unsigned integer that specifies how many events do the target methods need to process before sending back another Response request.
@@ -52,7 +50,7 @@ public class Request {
      * For example, if the requested method is GetHeight and this parameter is set to 5 then the service will send back responses only after 5 blocks have been processed.
      * 0 means the method should send a Response only once; this is the default value.
      */
-    private String subscriptionEventCounter;
+    private String SubscriptionEventCounter;
 
     /**
      * This is an unsigned integer that specifies how many seconds do the target methods need to wait before sending back another Response request.
@@ -60,7 +58,7 @@ public class Request {
      * For example, if the requested method is GetHeight and this parameter is set to 5 then the service will send back responses only after 5 seconds have passed.
      * 0 means the method should send a Response only once; this is the default value.
      */
-    private String subscriptionPeriod;
+    private String SubscriptionPeriod;
 
     /**
      * If the event defined in the target micro service returns a number, this is a string that represents the set of numbers that will trigger a Response. .
@@ -71,15 +69,63 @@ public class Request {
      * Example: Assume we only want to be notified only when the balance is equal or greater to 1000.
      * Then the getbalance request should be sent with "[1000, )" string as SubscriptionRange parameter.
      */
-    private String subscriptionRange;
+    private String SubscriptionRange;
 
     /**
      * An unsigned integer which specifies the maximum number of objects that the method should return, a value of zero (the default) means no limit
      */
-    private String responseMaxSize;
+    private String ResponseMaxSize;
 
     /**
      * An map that holds all methods being requested with their respective parameters
      */
-    private Map<String, Object> requestMethods;
+    private Map<String, Object> RequestMethods;
+
+    public String getRequestAck() {
+        return RequestAck;
+    }
+
+    public void setRequestAck(String RequestAck) {
+        this.RequestAck = RequestAck;
+    }
+
+    public String getSubscriptionEventCounter() {
+        return SubscriptionEventCounter;
+    }
+
+    public void setSubscriptionEventCounter(String SubscriptionEventCounter) {
+        this.SubscriptionEventCounter = SubscriptionEventCounter;
+    }
+
+    public String getSubscriptionPeriod() {
+        return SubscriptionPeriod;
+    }
+
+    public void setSubscriptionPeriod(String SubscriptionPeriod) {
+        this.SubscriptionPeriod = SubscriptionPeriod;
+    }
+
+    public String getSubscriptionRange() {
+        return SubscriptionRange;
+    }
+
+    public void setSubscriptionRange(String SubscriptionRange) {
+        this.SubscriptionRange = SubscriptionRange;
+    }
+
+    public String getResponseMaxSize() {
+        return ResponseMaxSize;
+    }
+
+    public void setResponseMaxSize(String ResponseMaxSize) {
+        this.ResponseMaxSize = ResponseMaxSize;
+    }
+
+    public Map<String, Object> getRequestMethods() {
+        return RequestMethods;
+    }
+
+    public void setRequestMethods(Map<String, Object> RequestMethods) {
+        this.RequestMethods = RequestMethods;
+    }
 }

@@ -218,17 +218,19 @@ public class ConnectManager {
      * @param packageName Package full path
      * @throws Exception Duplicate commands found
      */
-    public static void scanPackage(String packageName) throws Exception {
+    public static void scanPackage(String... packageName) throws Exception {
         /*
         路径为空，跳过
         The path is empty, skip
          */
-        if (StringUtils.isNull(packageName)) {
+        if (packageName == null){
             return;
         }
-
-        List<Class> classList = ScanUtil.scan(packageName);
-        for (Class clz : classList) {
+        Set<Class> classes = new HashSet<>();
+        Arrays.stream(packageName).forEach(pack -> {
+            classes.addAll(ScanUtil.scan(pack));
+        });
+        for (Class clz : classes) {
             Method[] methods = clz.getDeclaredMethods();
             for (Method method : methods) {
                 CmdDetail cmdDetail = annotation2CmdDetail(method);
@@ -638,7 +640,7 @@ public class ConnectManager {
 
         Channel channel = NettyClient.createConnect(url);
         long start = TimeService.currentTimeMillis();
-        while (!channel.isOpen()) {
+        while (channel==null || !channel.isOpen()) {
             if (TimeService.currentTimeMillis() - start > Constants.MILLIS_PER_SECOND * 5) {
                 throw new Exception("Failed to connect " + url);
             }

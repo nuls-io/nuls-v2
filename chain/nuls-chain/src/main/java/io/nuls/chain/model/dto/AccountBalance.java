@@ -24,20 +24,31 @@
  */
 package io.nuls.chain.model.dto;
 
-import lombok.Data;
-import lombok.ToString;
-
 /**
  * @author lan
  * @date  2018/11/29
  */
-@Data
-@ToString
-public class AccountBalance {
+ public class AccountBalance {
     private String available;
-    private String nonce;
+    private byte[] nonce;
 
-    public AccountBalance(String available,String nonce){
+    public String getAvailable() {
+        return available;
+    }
+
+    public void setAvailable(String available) {
+        this.available = available;
+    }
+
+    public byte[] getNonce() {
+        return nonce;
+    }
+
+    public void setNonce(byte[] nonce) {
+        this.nonce = nonce;
+    }
+
+    public AccountBalance(String available, byte[] nonce){
         this.available = available;
         this.nonce = nonce;
     }

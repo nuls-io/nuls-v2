@@ -24,7 +24,6 @@
  */
 package io.nuls.rpc.model.message;
 
-import lombok.*;
 
 import java.util.List;
 
@@ -35,21 +34,44 @@ import java.util.List;
  * @author tangyi
  * @date 2018/11/15
  */
-@Data
-@ToString
+
 public class RegisterCompoundMethod {
     /**
      * This is a string identifying the virtual method
      */
-    private String compoundMethodName;
+    private String CompoundMethodName;
 
     /**
      * A string describing the functionality of the method, the description will be available when querying the API for help
      */
-    private String compoundMethodDescription;
+    private String CompoundMethodDescription;
 
     /**
      * This is an array containing the methods with their respective parameter aliases that make up the virtual method
      */
-    private List<Object> compoundMethods;
+    private List<Object> CompoundMethods;
+
+    public String getCompoundMethodName() {
+        return CompoundMethodName;
+    }
+
+    public void setCompoundMethodName(String CompoundMethodName) {
+        this.CompoundMethodName = CompoundMethodName;
+    }
+
+    public String getCompoundMethodDescription() {
+        return CompoundMethodDescription;
+    }
+
+    public void setCompoundMethodDescription(String CompoundMethodDescription) {
+        this.CompoundMethodDescription = CompoundMethodDescription;
+    }
+
+    public List<Object> getCompoundMethods() {
+        return CompoundMethods;
+    }
+
+    public void setCompoundMethods(List<Object> CompoundMethods) {
+        this.CompoundMethods = CompoundMethods;
+    }
 }

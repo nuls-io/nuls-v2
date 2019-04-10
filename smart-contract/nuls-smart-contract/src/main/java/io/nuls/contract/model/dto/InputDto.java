@@ -28,9 +28,7 @@ package io.nuls.contract.model.dto;
 
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.CoinFrom;
-import lombok.Getter;
-import lombok.Setter;
-import org.spongycastle.util.encoders.Hex;
+import io.nuls.rpc.util.RPCUtil;
 
 import static io.nuls.contract.util.ContractUtil.bigInteger2String;
 
@@ -38,8 +36,6 @@ import static io.nuls.contract.util.ContractUtil.bigInteger2String;
  * @author: PierreLuo
  * @date: 2019-03-14
  */
-@Getter
-@Setter
 public class InputDto {
 
     private String address;
@@ -55,7 +51,55 @@ public class InputDto {
         this.assetsChainId = from.getAssetsChainId();
         this.assetsId = from.getAssetsId();
         this.amount = bigInteger2String(from.getAmount());
-        this.nonce = Hex.toHexString(from.getNonce());
+        this.nonce = RPCUtil.encode(from.getNonce());
         this.locked = from.getLocked();
+    }
+
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
+    }
+
+    public int getAssetsChainId() {
+        return assetsChainId;
+    }
+
+    public void setAssetsChainId(int assetsChainId) {
+        this.assetsChainId = assetsChainId;
+    }
+
+    public int getAssetsId() {
+        return assetsId;
+    }
+
+    public void setAssetsId(int assetsId) {
+        this.assetsId = assetsId;
+    }
+
+    public String getAmount() {
+        return amount;
+    }
+
+    public void setAmount(String amount) {
+        this.amount = amount;
+    }
+
+    public String getNonce() {
+        return nonce;
+    }
+
+    public void setNonce(String nonce) {
+        this.nonce = nonce;
+    }
+
+    public byte getLocked() {
+        return locked;
+    }
+
+    public void setLocked(byte locked) {
+        this.locked = locked;
     }
 }

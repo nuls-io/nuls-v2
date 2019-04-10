@@ -24,8 +24,7 @@
  */
 package io.nuls.rpc.model.message;
 
-import lombok.Data;
-import lombok.ToString;
+
 
 /**
  * 握手请求
@@ -34,28 +33,59 @@ import lombok.ToString;
  * @author tangyi
  * @date 2018/11/15
  */
-@Data
-@ToString
+
 public class NegotiateConnection {
     /**
-     * module abbreviation
+     * module Abbreviation
      */
-    private String abbreviation;
+    private String Abbreviation;
 
     /**
      * Protocol version
      */
-    private String protocolVersion;
+    private String ProtocolVersion;
 
     /**
      * A String that represents the algorithm that will be used to receive and send messages if CompressionRate is greater than 0.
      * The default is zlib which a library is available in most development languages.
      */
-    private String compressionAlgorithm;
+    private String CompressionAlgorithm;
 
     /**
      * An integer between 0 and 9 that establishes the compression level in which the messages should be sent and received for this connection.
      * 0 means no compression while 9 maximum compression
      */
-    private String compressionRate;
+    private String CompressionRate;
+
+    public String getAbbreviation() {
+        return Abbreviation;
+    }
+
+    public void setAbbreviation(String Abbreviation) {
+        this.Abbreviation = Abbreviation;
+    }
+
+    public String getProtocolVersion() {
+        return ProtocolVersion;
+    }
+
+    public void setProtocolVersion(String ProtocolVersion) {
+        this.ProtocolVersion = ProtocolVersion;
+    }
+
+    public String getCompressionAlgorithm() {
+        return CompressionAlgorithm;
+    }
+
+    public void setCompressionAlgorithm(String CompressionAlgorithm) {
+        this.CompressionAlgorithm = CompressionAlgorithm;
+    }
+
+    public String getCompressionRate() {
+        return CompressionRate;
+    }
+
+    public void setCompressionRate(String CompressionRate) {
+        this.CompressionRate = CompressionRate;
+    }
 }

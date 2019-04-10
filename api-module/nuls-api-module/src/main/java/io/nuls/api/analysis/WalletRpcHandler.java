@@ -6,14 +6,15 @@ import io.nuls.api.constant.ApiErrorCode;
 import io.nuls.api.constant.CommandConstant;
 import io.nuls.api.model.po.db.*;
 import io.nuls.api.model.rpc.BalanceInfo;
+import io.nuls.api.model.rpc.FreezeInfo;
 import io.nuls.api.rpc.RpcCall;
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.data.Block;
 import io.nuls.base.data.Transaction;
 import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.model.ModuleE;
+import io.nuls.rpc.util.RPCUtil;
 import io.nuls.tools.basic.Result;
-import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.log.Log;
 
@@ -35,9 +36,10 @@ public class WalletRpcHandler {
             if (null == blockHex) {
                 return Result.getSuccess(null);
             }
-            byte[] bytes = HexUtil.decode(blockHex);
+            byte[] bytes = RPCUtil.decode(blockHex);
             Block block = new Block();
             block.parse(new NulsByteBuffer(bytes));
+            block.getHeader().setSize(bytes.length);
             BlockInfo blockInfo = AnalysisHandler.toBlockInfo(block, chainID);
 
             return Result.getSuccess(null).setData(blockInfo);
@@ -57,9 +59,10 @@ public class WalletRpcHandler {
             if (null == blockHex) {
                 return Result.getSuccess(null);
             }
-            byte[] bytes = HexUtil.decode(blockHex);
+            byte[] bytes = RPCUtil.decode(blockHex);
             Block block = new Block();
             block.parse(new NulsByteBuffer(bytes));
+            block.getHeader().setSize(bytes.length);
             BlockInfo blockInfo = AnalysisHandler.toBlockInfo(block, chainID);
             return Result.getSuccess(null).setData(blockInfo);
         } catch (Exception e) {
@@ -112,6 +115,43 @@ public class WalletRpcHandler {
         return null;
     }
 
+    public static Result<PageInfo<FreezeInfo>> getFreezeList(int chainId, int pageIndex, int pageSize, String address, int assetId) {
+        Map<String, Object> params = new HashMap<>();
+        params.put(Constants.VERSION_KEY_STR, ApiContext.VERSION);
+        params.put("chainId", chainId);
+        params.put("pageNumber", pageIndex);
+        params.put("pageSize", pageSize);
+        params.put("address", address);
+        params.put("assetId", assetId);
+        try {
+            Map map = (Map) RpcCall.request(ModuleE.LG.abbr, CommandConstant.GET_FREEZE, params);
+            PageInfo<FreezeInfo> pageInfo = new PageInfo(pageIndex, pageSize);
+            pageInfo.setTotalCount((int) map.get("totalCount"));
+            List<Map> maps = (List<Map>) map.get("list");
+            List<FreezeInfo> freezeInfos = new ArrayList<>();
+            for (Map map1 : maps) {
+                FreezeInfo freezeInfo = new FreezeInfo();
+                freezeInfo.setAmount((String) map1.get("amount"));
+                freezeInfo.setLockedValue(Long.parseLong(map1.get("lockedValue").toString()));
+                freezeInfo.setTime(Long.parseLong(map1.get("time").toString()));
+                freezeInfo.setTxHash((String) map1.get("txHash"));
+                if (freezeInfo.getLockedValue() == -1) {
+                    freezeInfo.setType(3);
+                } else if (freezeInfo.getLockedValue() < 10000000000L) {
+                    freezeInfo.setType(1);
+                } else {
+                    freezeInfo.setType(2);
+                }
+                freezeInfos.add(freezeInfo);
+            }
+            pageInfo.setList(freezeInfos);
+            return Result.getSuccess(null).setData(pageInfo);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return Result.getFailed(ApiErrorCode.DATA_PARSE_ERROR);
+        }
+
+    }
 
     public static Result<TransactionInfo> getTx(int chainId, String hash) {
         Map<String, Object> params = new HashMap<>();
@@ -243,7 +283,7 @@ public class WalletRpcHandler {
         resultInfo.setActualContractFee((String) map.get("actualContractFee"));
         resultInfo.setRefundFee((String) map.get("refundFee"));
         resultInfo.setValue((String) map.get("value"));
-        resultInfo.setBalance((String) map.get("balance"));
+        //resultInfo.setBalance((String) map.get("balance"));
         resultInfo.setRemark((String) map.get("remark"));
 
         List<Map<String, Object>> transfers = (List<Map<String, Object>>) map.get("transfers");

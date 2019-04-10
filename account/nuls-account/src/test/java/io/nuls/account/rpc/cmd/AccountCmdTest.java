@@ -91,14 +91,14 @@ public class AccountCmdTest {
 
     @Test
     public void createAccountTest() throws Exception {
-       int count = 3;
-        //test to create an account that is not empty.
-        List<String> accountList = CommonRpcOperation.createAccount(count);
-        //checking the number of accounts returned
-        assertEquals(accountList.size(), count);
-        for (String address : accountList) {
-            System.out.println(address);
-        }
+//       int count = 3;
+//        //test to create an account that is not empty.
+//        List<String> accountList = CommonRpcOperation.createAccount(count);
+//        //checking the number of accounts returned
+//        assertEquals(accountList.size(), count);
+//        for (String address : accountList) {
+//            System.out.println(address);
+//        }
 
         //Test to create an empty password account
         List<String> accountList2 = CommonRpcOperation.createAccount(chainId, 2, password);
@@ -733,7 +733,7 @@ public class AccountCmdTest {
             params.put("dataHex", dataHex);
             Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_signDigest", params);
             HashMap result = (HashMap) (((HashMap) cmdResp.getResponseData()).get("ac_signDigest"));
-            String signatureHex = (String) result.get(RpcConstant.SIGNATURE_HEX);
+            String signatureHex = (String) result.get(RpcConstant.SIGNATURE);
             assertNotNull(signatureHex);
 
             //测试密码不正确

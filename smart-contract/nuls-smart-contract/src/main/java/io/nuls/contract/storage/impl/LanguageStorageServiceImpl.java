@@ -3,14 +3,14 @@ package io.nuls.contract.storage.impl;
 import io.nuls.contract.constant.ContractDBConstant;
 import io.nuls.contract.storage.LanguageStorageService;
 import io.nuls.db.service.RocksDBService;
-import io.nuls.tools.core.annotation.Service;
+import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.model.ByteUtils;
 
 /**
  * @author: PierreLuo
  * @date: 2019-02-26
  */
-@Service
+@Component
 public class LanguageStorageServiceImpl implements LanguageStorageService {
 
     @Override
