@@ -111,12 +111,12 @@ START_DATE=`date +%Y%m%d%H%M%S`
 STDOUT_FILE=$LOGS_DIR/stdout.log
 
 if [ -n "${config}" ]; then
-    cd `dirname ${config}`
     _dataPath=`getModuleItem ${config} "dataPath"`
-    datapath="-DDataPath=`get_fullpath ${_dataPath}`"
     _logPath=`getModuleItem ${config} "logPath"`
-    logpath="-Dlog.path=`get_fullpath ${_logPath}`/$APP_NAME";
     _logLevel=`getModuleItem ${config} "logLevel"`
+    cd `dirname ${config}`
+    datapath="-DDataPath=`get_fullpath ${_dataPath}`"
+    logpath="-Dlog.path=`get_fullpath ${_logPath}`/$APP_NAME";
     logLevel="-Dlog.level=$_logLevel";
     cd $MODULE_PATH
 fi
