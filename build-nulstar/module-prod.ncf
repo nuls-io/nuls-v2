@@ -26,4 +26,6 @@ StartScript=start
 StopScript=stop
 
 [global]
-DataPath=../../data
+logpath=../../../../logs
+debug=0
+datapath=../../../../data
