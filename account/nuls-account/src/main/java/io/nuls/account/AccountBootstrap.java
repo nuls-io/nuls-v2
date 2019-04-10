@@ -22,7 +22,6 @@ import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.core.annotation.Value;
 import io.nuls.tools.core.ioc.SpringLiteContext;
 import io.nuls.tools.exception.NulsException;
-import io.nuls.tools.log.Log;
 import io.nuls.tools.model.StringUtils;
 import io.nuls.tools.parse.I18nUtils;
 
@@ -101,12 +100,18 @@ public class AccountBootstrap extends RpcModule {
             while (!isDependencieReady(new Module(ModuleE.TX.abbr, "1.0"))) {
                 Thread.sleep(1000);
             }
-            //注册账户模块相关交易
-            registerTx();
         } catch (Exception e) {
             return false;
         }
         return true;
+    }
+
+    @Override
+    public void onDependenciesReady(Module module) {
+        if (ModuleE.TX.abbr.equals(module.getName())) {
+            //注册账户模块相关交易
+            registerTx();
+        }
     }
 
     /**
