@@ -41,6 +41,7 @@ import java.util.List;
 
 /**
  * Created by wangkun23 on 2018/12/4.
+ * @author lanjinsheng
  */
 @Service
 public class FreezeStateServiceImpl implements FreezeStateService {
@@ -113,45 +114,6 @@ public class FreezeStateServiceImpl implements FreezeStateService {
         accountState.addTotalToAmount(addTimeAmount);
         accountState.addTotalToAmount(addHeightAmount);
         return true;
-    }
-
-    /**
-     * 查看是否有解锁的信息，有就返回true
-     *
-     * @param accountState
-     * @return
-     */
-    @Override
-    public boolean hadUpdateAccountState(AccountState accountState) {
-        List<FreezeLockTimeState> timeList = accountState.getFreezeLockTimeStates();
-        List<FreezeHeightState> heightList = accountState.getFreezeHeightStates();
-        if (timeList.size() == 0 && heightList.size() == 0) {
-            return false;
-        }
-        long nowTime = TimeUtil.getCurrentTime();
-        //可移除的时间锁列表
-        for (FreezeLockTimeState freezeLockTimeState : timeList) {
-            if (freezeLockTimeState.getLockTime() <= nowTime) {
-                return true;
-            } else {
-                //因为正序排列，所以可以跳出
-                return false;
-            }
-        }
-        if (heightList.size() > 0) {
-            heightList.sort((x, y) -> Long.compare(x.getHeight(), y.getHeight()));
-            long nowHeight = repository.getBlockHeight(accountState.getAddressChainId());
-            for (FreezeHeightState freezeHeightState : heightList) {
-                if (freezeHeightState.getHeight() <= nowHeight) {
-                    //时间到期，进行解锁
-                    return true;
-                } else {
-                    //因为正序排列，所以可以跳出
-                    return false;
-                }
-            }
-        }
-        return false;
     }
 }
 

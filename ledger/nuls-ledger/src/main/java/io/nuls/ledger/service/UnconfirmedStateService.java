@@ -36,16 +36,55 @@ import java.util.List;
  * @author lanjinsheng
  */
 public interface UnconfirmedStateService {
-
+    /**
+     * 判断未确认账本信息是否需要重新刷新
+     * @param accountStateUnconfirmed
+     * @param dbNonce
+     * @param dbHash
+     * @return
+     */
     boolean hadUpdateUnconfirmedState(AccountStateUnconfirmed accountStateUnconfirmed, String dbNonce,String dbHash);
 
+    /**
+     * 获取未确认账本信息并且计算更新信息
+     * @param accountState
+     * @return
+     */
     AccountStateUnconfirmed getUnconfirmedInfoAndUpdate(AccountState accountState);
 
+    /**
+     * 重计算未确认账本信息
+     * @param accountState
+     * @return
+     */
     AccountStateUnconfirmed getUnconfirmedInfoReCal(AccountState accountState);
 
+    /**
+     * 回滚时候进行未确认账本信息的合并
+     * @param addressChainId
+     * @param assetKey
+     * @param accountState
+     * @param txHashList
+     */
     void mergeUnconfirmedNonce(int addressChainId, String assetKey,List<UnconfirmedNonce> accountState, List<String> txHashList);
 
+    /**
+     * 回滚未确认账本交易
+     * @param addressChainId
+     * @param assetKey
+     * @param nonce
+     * @param txHash
+     * @return
+     */
     boolean rollUnconfirmTx(int addressChainId, String assetKey, String nonce, String txHash);
 
+    /**
+     * 获取未确认账本信息
+     * @param addressChainId
+     * @param address
+     * @param assetChainId
+     * @param assetId
+     * @return
+     */
     AccountStateUnconfirmed getUnconfirmedInfo(int addressChainId, String address, int assetChainId, int assetId);
 }

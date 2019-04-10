@@ -45,6 +45,8 @@ import java.util.Map;
 
 /**
  * Created by wangkun23 on 2018/11/22.
+ * 校验rpc接口
+ * @author lanjinsheng
  */
 @Component
 public class ValidatorCmd extends BaseLedgerCmd {

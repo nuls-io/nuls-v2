@@ -27,6 +27,7 @@ package io.nuls.ledger.constant;
 
 /**
  * Created by ljs on 2018/11/19.
+ * @author lanjinsheng
  */
 public class LedgerConstant {
 

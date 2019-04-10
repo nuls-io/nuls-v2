@@ -31,7 +31,7 @@ package io.nuls.ledger.rpc.call;
  **/
 public interface TimeRpcService {
     /**
-     *
+     * 获取网络时间
      * @return
      */
     long getTime();

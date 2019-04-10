@@ -38,7 +38,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Created by wangkun23 on 2018/11/19.
+ * 用户地址资产账号对应的账本信息
+ * @author lanjinsheng
  */
 
 public class AccountState extends BaseNulsData {

@@ -51,7 +51,8 @@ import java.util.Map;
 
 /**
  * 用于获取账户余额及账户nonce值
- * Created by wangkun23 on 2018/11/19.
+ * Created by wangkun23 on 2018/11/19
+ * @author lanjinsheng .
  */
 @Component
 public class AccountStateCmd extends BaseCmd {

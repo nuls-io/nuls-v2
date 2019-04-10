@@ -95,6 +95,7 @@ public abstract class RpcModule implements InitializingBean {
                     }
                 }
             });
+            this.onDependenciesReady(module);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -291,6 +292,11 @@ public abstract class RpcModule implements InitializingBean {
      * @return
      */
     public abstract Module moduleInfo();
+
+
+    public void onDependenciesReady(Module module){
+        Log.debug("dependencies module {} ready",module);
+    }
 
 
     /**
