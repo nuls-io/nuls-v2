@@ -50,7 +50,6 @@ public class ProtocolUtil {
      * @return
      */
     public static boolean rollbackNotice(int chainId, BlockHeader blockHeader) {
-//        return true;
         ChainContext context = ContextManager.getContext(chainId);
         NulsLogger commonLog = context.getCommonLog();
         try {
@@ -60,8 +59,11 @@ public class ProtocolUtil {
             params.put("blockHeader", HexUtil.encode(blockHeader.serialize()));
             Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.PU.abbr, "rollbackBlock", params);
             if (response.isSuccess()) {
+                Map responseData = (Map) response.getResponseData();
+                Map saveBlock = (Map) responseData.get("rollbackBlock");
+                int version = (int) saveBlock.get("version");
                 ProtocolContext protocolContext = ProtocolContextManager.getContext(chainId);
-                protocolContext.setVersion((short) 1);
+                protocolContext.setVersion((short) version);
             }
             return response.isSuccess();
         } catch (Exception e) {
@@ -78,7 +80,6 @@ public class ProtocolUtil {
      * @return
      */
     public static boolean saveNotice(int chainId, BlockHeader blockHeader) {
-//        return true;
         ChainContext context = ContextManager.getContext(chainId);
         NulsLogger commonLog = context.getCommonLog();
         try {

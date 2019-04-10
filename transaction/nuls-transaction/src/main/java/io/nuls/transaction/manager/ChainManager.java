@@ -46,6 +46,7 @@ import io.nuls.transaction.model.bo.config.ConfigBean;
 import io.nuls.transaction.storage.rocksdb.ConfigStorageService;
 import io.nuls.transaction.utils.queue.entity.PersistentQueue;
 
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 

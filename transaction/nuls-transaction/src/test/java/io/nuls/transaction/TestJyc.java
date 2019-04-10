@@ -527,7 +527,7 @@ public class TestJyc {
             Log.debug(address23 + "-----balance:{}", balance);
         }
         int total = 1000_000;
-        int count = 1000;
+        int count = 2000;
         List<String> accountList = new ArrayList<>();
         Log.debug("##################################################");
         {
@@ -546,14 +546,7 @@ public class TestJyc {
         }
         {
             for (String account : accountList) {
-                Map<String, Object> params = new HashMap<>();
-                params.put(Constants.VERSION_KEY_STR, version);
-                params.put("chainId", chainId);
-                params.put("address", account);
-                Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_getAccountByAddress", params);
-
-                String address = JSONUtils.obj2json(((HashMap) cmdResp.getResponseData()).get("ac_getAccountByAddress"));
-                Log.debug("address-{}" + address);
+                Log.debug("address-{}", account);
             }
         }
         List<String> hashList = new ArrayList<>();
