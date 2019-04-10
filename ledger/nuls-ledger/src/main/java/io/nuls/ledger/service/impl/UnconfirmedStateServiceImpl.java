@@ -46,6 +46,8 @@ import java.util.List;
 
 /**
  * Created by wangkun23 on 2018/12/4.
+ * 未确认账本状态实现类
+ * @author lanjinsheng
  */
 @Service
 public class UnconfirmedStateServiceImpl implements UnconfirmedStateService {
@@ -118,7 +120,7 @@ public class UnconfirmedStateServiceImpl implements UnconfirmedStateService {
             return new AccountStateUnconfirmed(accountState.getAddress(), accountState.getAddressChainId(), accountState.getAssetChainId(), accountState.getAssetId(), accountState.getNonce());
         }
         if (hadUpdateUnconfirmedState(accountStateUnconfirmed, accountState.getNonce(),accountState.getTxHash())) {
-            accountStateUnconfirmed = getStateUnconfirmedReCal(accountState.getAddress(), accountState.getAddressChainId(), accountState.getAssetChainId(), accountState.getAssetId());
+            accountStateUnconfirmed = getStateUnconfirmedReCal(accountState);
         }
         return accountStateUnconfirmed;
     }
@@ -220,12 +222,10 @@ public class UnconfirmedStateServiceImpl implements UnconfirmedStateService {
         return hadRoll;
     }
 
-    private AccountStateUnconfirmed getStateUnconfirmedReCal(String address, int addressChainId, int assetChainId,
-                                                             int assetId) {
+    private AccountStateUnconfirmed getStateUnconfirmedReCal(AccountState accountState) {
         //账户处理锁
-        byte[] key = LedgerUtil.getKey(address, assetChainId, assetId);
-        AccountState accountState = repository.getAccountState(addressChainId, key);
-        AccountStateUnconfirmed accountStateUnconfirmed = dealAccountStateUnconfirmed(accountState, addressChainId, key);
+        byte[] key = LedgerUtil.getKey(accountState.getAddress(), accountState.getAssetChainId(), accountState.getAssetId());
+        AccountStateUnconfirmed accountStateUnconfirmed = dealAccountStateUnconfirmed(accountState, accountState.getAddressChainId(), key);
         return accountStateUnconfirmed;
     }
 

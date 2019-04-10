@@ -98,9 +98,9 @@ public class TransactionCmd extends BaseCmd {
                 txRegister.setValidator(txRegisterDto.getValidator());
                 txRegister.setCommit(moduleTxRegisterDto.getCommit());
                 txRegister.setRollback(moduleTxRegisterDto.getRollback());
-                txRegister.setSystemTx(txRegisterDto.isSystemTx());
-                txRegister.setUnlockTx(txRegisterDto.isUnlockTx());
-                txRegister.setVerifySignature(txRegisterDto.isVerifySignature());
+                txRegister.setSystemTx(txRegisterDto.getSystemTx());
+                txRegister.setUnlockTx(txRegisterDto.getUnlockTx());
+                txRegister.setVerifySignature(txRegisterDto.getVerifySignature());
 
                 result = txService.register(chain, txRegister);
             }

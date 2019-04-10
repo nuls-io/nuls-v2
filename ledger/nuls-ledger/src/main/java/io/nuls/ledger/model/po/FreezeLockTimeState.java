@@ -36,6 +36,7 @@ import java.math.BigInteger;
 
 /**
  * Created by wangkun23 on 2018/11/28.
+ * @author lanjinsheng
  */
 public class FreezeLockTimeState extends BaseNulsData {
     /**

@@ -34,7 +34,6 @@ import io.nuls.ledger.model.po.AccountState;
 import io.nuls.ledger.model.po.BlockSnapshotAccounts;
 import io.nuls.ledger.model.po.BlockTxs;
 import io.nuls.ledger.storage.DataBaseArea;
-import io.nuls.ledger.storage.InitDB;
 import io.nuls.ledger.storage.Repository;
 import io.nuls.ledger.utils.LoggerUtil;
 import io.nuls.tools.basic.InitializingBean;
@@ -51,9 +50,10 @@ import static io.nuls.ledger.utils.LoggerUtil.logger;
 
 /**
  * Created by wangkun23 on 2018/11/19.
+ * @author lanjinsheng
  */
 @Service
-public class RepositoryImpl implements Repository, InitDB, InitializingBean {
+public class RepositoryImpl implements Repository, InitializingBean {
 
     public RepositoryImpl() {
 
@@ -288,7 +288,7 @@ public class RepositoryImpl implements Repository, InitDB, InitializingBean {
         if (!RocksDBService.existTable(table)) {
             RocksDBService.createTable(table);
         }
-        Map<byte[], byte[]> saveMap = new HashMap<>();
+        Map<byte[], byte[]> saveMap = new HashMap<>(16);
         for (Map.Entry<String, Integer> m : noncesMap.entrySet()) {
             saveMap.put(ByteUtils.toBytes(m.getKey(), LedgerConstant.DEFAULT_ENCODING), ByteUtils.intToBytes(m.getValue()));
         }

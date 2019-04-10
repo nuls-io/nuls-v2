@@ -65,14 +65,22 @@ public class ChainController {
 
     @RpcMethod("search")
     public RpcResult search(List<Object> params) {
-        VerifyUtils.verifyParams(params, 1);
-        int chainId = (int) params.get(0);
+        VerifyUtils.verifyParams(params, 2);
+
+        int chainId;
+        String text;
+        try {
+            chainId = (int) params.get(0);
+            text = (String) params.get(1);
+            text = text.trim();
+        } catch (Exception e) {
+            return RpcResult.paramError();
+        }
+
         if (!CacheManager.isChainExist(chainId)) {
             return RpcResult.dataNotFound();
         }
 
-        String text = (String) params.get(1);
-        text = text.trim();
         int length = text.length();
         SearchResultDTO result = null;
         if (length < 20) {

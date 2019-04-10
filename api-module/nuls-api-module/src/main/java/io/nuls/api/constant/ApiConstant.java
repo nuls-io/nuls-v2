@@ -119,8 +119,16 @@ public interface ApiConstant {
     int CONTRACT_STATUS_DELETE = 3;
     //时间高度分界线
     long BlOCKHEIGHT_TIME_DIVIDE = 1000000000000L;
+
+    int FREEZE_HEIGHT_LOCK_TYPE = 1;
+
+    int FREEZE_TIME_LOCK_TYPE = 2;
+
+    int FREEZE_CONSENSUS_LOCK_TYPE = 3;
+
     //合约不存在错误码
     int CONTRACT_NOT_EXIST = 100002;
+
 
     int TX_TYPE_COINBASE = 1;
     int TX_TYPE_TRANSFER = 2;

@@ -95,6 +95,7 @@ public abstract class RpcModule implements InitializingBean {
                     }
                 }
             });
+            this.onDependenciesReady(module);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -174,7 +175,7 @@ public abstract class RpcModule implements InitializingBean {
             NettyServer server = NettyServer.getInstance(moduleInfo().getName(), moduleInfo().getName(), moduleInfo().getVersion())
                     .moduleRoles(new String[]{getRole()})
                     .moduleVersion(moduleInfo().getVersion())
-                    .scanPackage(StringUtils.isBlank(getRpcCmdPackage()) ? modulePackage : getRpcCmdPackage())
+                    .scanPackage((getRpcCmdPackage()==null) ? new String[]{modulePackage}:getRpcCmdPackage())
                     //注册管理模块状态的RPC接口
                     .addCmdDetail(ModuleStatusCmd.class);
             dependencies.keySet().stream().forEach(d -> server.dependencies(d.getName(), d.getVersion()));
@@ -261,6 +262,10 @@ public abstract class RpcModule implements InitializingBean {
         return dependencies.get(module);
     }
 
+    public boolean isDependencieReady(String moduleName){
+        return isDependencieReady(new Module(moduleName,ROLE));
+    }
+
     /**
      * 依赖模块都以进入Ready状态
      */
@@ -280,11 +285,10 @@ public abstract class RpcModule implements InitializingBean {
      *
      * @return
      */
-    public String getRpcCmdPackage() {
+    public String[] getRpcCmdPackage() {
         return null;
     }
 
-    ;
 
     /**
      * 返回当前模块的描述
@@ -292,6 +296,11 @@ public abstract class RpcModule implements InitializingBean {
      * @return
      */
     public abstract Module moduleInfo();
+
+
+    public void onDependenciesReady(Module module){
+        Log.debug("dependencies module {} ready",module);
+    }
 
 
     /**

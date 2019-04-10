@@ -10,9 +10,9 @@ import io.nuls.api.provider.block.facade.GetBlockHeaderByLastHeightReq;
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.data.BlockExtendsData;
-import io.nuls.base.data.BlockHeader;
+import io.nuls.base.data.po.BlockHeaderPo;
 import io.nuls.rpc.model.ModuleE;
-import io.nuls.tools.crypto.HexUtil;
+import io.nuls.rpc.util.RPCUtil;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.log.Log;
 import io.nuls.tools.model.DateUtils;
@@ -29,17 +29,17 @@ public class BlockServiceForRpc extends BaseRpcService implements BlockService {
 
     @Override
     public Result<BlockHeaderData> getBlockHeaderByHash(GetBlockHeaderByHashReq req) {
-        return _call("getBlockHeaderByHash",req,this::tranderBlockHeader);
+        return _call("getBlockHeaderPoByHash", req, this::tranderBlockHeader);
     }
 
     @Override
     public Result<BlockHeaderData> getBlockHeaderByHeight(GetBlockHeaderByHeightReq req) {
-        return _call("getBlockHeaderByHeight",req,this::tranderBlockHeader);
+        return _call("getBlockHeaderPoByHeight", req, this::tranderBlockHeader);
     }
 
     @Override
     public Result<BlockHeaderData> getBlockHeaderByLastHeight(GetBlockHeaderByLastHeightReq req) {
-        return _call("latestBlockHeader",req,this::tranderBlockHeader);
+        return _call("latestBlockHeaderPo", req, this::tranderBlockHeader);
     }
 
     @Override
@@ -53,14 +53,14 @@ public class BlockServiceForRpc extends BaseRpcService implements BlockService {
 
     private Result<BlockHeaderData> tranderBlockHeader(String hexString){
         try {
-            BlockHeader header = new BlockHeader();
-            header.parse(new NulsByteBuffer(HexUtil.decode(hexString)));
+            BlockHeaderPo header = new BlockHeaderPo();
+            header.parse(new NulsByteBuffer(RPCUtil.decode(hexString)));
             BlockHeaderData res = new BlockHeaderData();
             BlockExtendsData blockExtendsData = new BlockExtendsData();
             blockExtendsData.parse(new NulsByteBuffer(header.getExtend()));
             res.setHash(header.getHash().toString());
             res.setHeight(header.getHeight());
-            res.setSize(header.size());
+            res.setSize(header.getBlockSize());
             res.setTime(DateUtils.timeStamp2DateStr(header.getTime()));
             res.setTxCount(header.getTxCount());
             res.setMerkleHash(header.getMerkleHash().toString());
@@ -72,7 +72,7 @@ public class BlockServiceForRpc extends BaseRpcService implements BlockService {
             res.setPackingIndexOfRound(blockExtendsData.getPackingIndexOfRound());
             res.setRoundIndex(blockExtendsData.getRoundIndex());
             res.setRoundStartTime(DateUtils.timeStamp2DateStr(blockExtendsData.getRoundStartTime()));
-
+            res.setStateRoot(RPCUtil.encode(blockExtendsData.getStateRoot()));
             return success(res);
         } catch (NulsException e) {
             Log.error("反序列化block header发生异常",e);

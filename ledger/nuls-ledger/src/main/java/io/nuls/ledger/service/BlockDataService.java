@@ -34,6 +34,18 @@ import java.util.List;
  * @date 2019/02/14
  **/
 public interface BlockDataService {
+    /**
+     * 初始化区块的数据清理
+     * @throws Exception
+     */
     void initBlockDatas() throws Exception;
+
+    /**
+     * 保存最新整区块交易数据
+     * @param chainId
+     * @param height
+     * @param txList
+     * @throws Exception
+     */
     void saveLatestBlockDatas(int chainId,long height,List<Transaction> txList)  throws Exception;
 }

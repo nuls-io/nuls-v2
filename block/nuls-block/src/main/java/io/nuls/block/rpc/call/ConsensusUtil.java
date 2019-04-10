@@ -23,11 +23,10 @@ package io.nuls.block.rpc.call;
 import io.nuls.base.data.Block;
 import io.nuls.base.data.BlockExtendsData;
 import io.nuls.base.data.BlockHeader;
+import io.nuls.base.data.po.BlockHeaderPo;
 import io.nuls.block.manager.ContextManager;
 import io.nuls.block.model.ChainContext;
-import io.nuls.block.model.po.BlockHeaderPo;
 import io.nuls.block.service.BlockService;
-import io.nuls.block.utils.BlockUtil;
 import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.netty.processor.ResponseMessageProcessor;
 import io.nuls.rpc.util.RPCUtil;
@@ -114,7 +113,7 @@ public class ConsensusUtil {
         if (context.getLatestHeight() < forkHeaderHeight) {
             return true;
         }
-        BlockHeader masterHeader = BlockUtil.fromBlockHeaderPo(blockService.getBlockHeader(chainId, forkHeaderHeight));
+        BlockHeader masterHeader = blockService.getBlockHeader(chainId, forkHeaderHeight);
         if (masterHeader.getHash().equals(forkHeader.getHash())) {
             return true;
         }
@@ -215,7 +214,7 @@ public class ConsensusUtil {
                 if ((latestHeight < 0)) {
                     break;
                 }
-                BlockHeaderPo blockHeader = service.getBlockHeader(chainId, latestHeight);
+                BlockHeaderPo blockHeader = service.getBlockHeaderPo(chainId, latestHeight);
                 BlockExtendsData newData = new BlockExtendsData(blockHeader.getExtend());
                 long newRoundIndex = newData.getRoundIndex();
                 if (newRoundIndex != roundIndex) {
