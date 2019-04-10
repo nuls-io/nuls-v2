@@ -12,6 +12,7 @@ import io.nuls.account.service.AccountKeyStoreService;
 import io.nuls.account.service.AccountService;
 import io.nuls.account.service.TransactionService;
 import io.nuls.account.util.AccountTool;
+import io.nuls.account.util.Preconditions;
 import io.nuls.base.data.Address;
 import io.nuls.base.data.Page;
 import io.nuls.base.signture.BlockSignature;
@@ -733,11 +734,12 @@ public class AccountCmd extends BaseCmd {
         Map<String, String> map = new HashMap<>(1);
         try {
             // check parameters
-            Object chainIdObj = params == null ? null : params.get(RpcParameterNameConstant.CHAIN_ID);
-            Object addressObj = params == null ? null : params.get(RpcParameterNameConstant.ADDRESS);
-            Object priKeyObj = params == null ? null : params.get(RpcParameterNameConstant.PRIKEY);
-            Object passwordObj = params == null ? null : params.get(RpcParameterNameConstant.PASSWORD);
-            if (params == null || chainIdObj == null || addressObj == null || priKeyObj == null || passwordObj == null) {
+            Preconditions.checkNotNull(params, AccountErrorCode.NULL_PARAMETER);
+            Object chainIdObj = params.get(RpcParameterNameConstant.CHAIN_ID);
+            Object addressObj = params.get(RpcParameterNameConstant.ADDRESS);
+            Object priKeyObj = params.get(RpcParameterNameConstant.PRIKEY);
+            Object passwordObj = params.get(RpcParameterNameConstant.PASSWORD);
+            if (chainIdObj == null || addressObj == null || priKeyObj == null || passwordObj == null) {
                 throw new NulsRuntimeException(AccountErrorCode.NULL_PARAMETER);
             }
             // parse params
@@ -778,11 +780,12 @@ public class AccountCmd extends BaseCmd {
         boolean result;
         try {
             // check parameters
-            Object chainIdObj = params == null ? null : params.get(RpcParameterNameConstant.CHAIN_ID);
-            Object addressObj = params == null ? null : params.get(RpcParameterNameConstant.ADDRESS);
-            Object passwordObj = params == null ? null : params.get(RpcParameterNameConstant.PASSWORD);
-            Object newPasswordObj = params == null ? null : params.get(RpcParameterNameConstant.NEW_PASSWORD);
-            if (params == null || chainIdObj == null || addressObj == null || passwordObj == null || newPasswordObj == null) {
+            Preconditions.checkNotNull(params, AccountErrorCode.NULL_PARAMETER);
+            Object chainIdObj = params.get(RpcParameterNameConstant.CHAIN_ID);
+            Object addressObj = params.get(RpcParameterNameConstant.ADDRESS);
+            Object passwordObj = params.get(RpcParameterNameConstant.PASSWORD);
+            Object newPasswordObj = params.get(RpcParameterNameConstant.NEW_PASSWORD);
+            if (chainIdObj == null || addressObj == null || passwordObj == null || newPasswordObj == null) {
                 throw new NulsRuntimeException(AccountErrorCode.NULL_PARAMETER);
             }
             // parse params
@@ -816,12 +819,13 @@ public class AccountCmd extends BaseCmd {
         Map<String, String> map = new HashMap<>(1);
         try {
             // check parameters
-            Object chainIdObj = params == null ? null : params.get(RpcParameterNameConstant.CHAIN_ID);
-            Object addressObj = params == null ? null : params.get(RpcParameterNameConstant.ADDRESS);
-            Object priKeyObj = params == null ? null : params.get(RpcParameterNameConstant.PRIKEY);
-            Object passwordObj = params == null ? null : params.get(RpcParameterNameConstant.PASSWORD);
-            Object newPasswordObj = params == null ? null : params.get(RpcParameterNameConstant.NEW_PASSWORD);
-            if (params == null || chainIdObj == null || addressObj == null || priKeyObj == null || passwordObj == null || newPasswordObj == null) {
+            Preconditions.checkNotNull(params, AccountErrorCode.NULL_PARAMETER);
+            Object chainIdObj = params.get(RpcParameterNameConstant.CHAIN_ID);
+            Object addressObj = params.get(RpcParameterNameConstant.ADDRESS);
+            Object priKeyObj = params.get(RpcParameterNameConstant.PRIKEY);
+            Object passwordObj = params.get(RpcParameterNameConstant.PASSWORD);
+            Object newPasswordObj = params.get(RpcParameterNameConstant.NEW_PASSWORD);
+            if (chainIdObj == null || addressObj == null || priKeyObj == null || passwordObj == null || newPasswordObj == null) {
                 throw new NulsRuntimeException(AccountErrorCode.NULL_PARAMETER);
             }
             // parse params
@@ -857,9 +861,10 @@ public class AccountCmd extends BaseCmd {
         Map<String, Boolean> map = new HashMap<>(1);
         try {
             // check parameters
-            Object chainIdObj = params == null ? null : params.get(RpcParameterNameConstant.CHAIN_ID);
-            Object addressObj = params == null ? null : params.get(RpcParameterNameConstant.ADDRESS);
-            if (params == null || chainIdObj == null || addressObj == null) {
+            Preconditions.checkNotNull(params, AccountErrorCode.NULL_PARAMETER);
+            Object chainIdObj = params.get(RpcParameterNameConstant.CHAIN_ID);
+            Object addressObj = params.get(RpcParameterNameConstant.ADDRESS);
+            if (chainIdObj == null || addressObj == null) {
                 throw new NulsRuntimeException(AccountErrorCode.NULL_PARAMETER);
             }
             // parse params
@@ -888,10 +893,11 @@ public class AccountCmd extends BaseCmd {
         Map<String, Boolean> map = new HashMap<>(1);
         try {
             // check parameters
-            Object chainIdObj = params == null ? null : params.get(RpcParameterNameConstant.CHAIN_ID);
-            Object addressObj = params == null ? null : params.get(RpcParameterNameConstant.ADDRESS);
-            Object passwordObj = params == null ? null : params.get(RpcParameterNameConstant.PASSWORD);
-            if (params == null || chainIdObj == null || addressObj == null || passwordObj == null) {
+            Preconditions.checkNotNull(params, AccountErrorCode.NULL_PARAMETER);
+            Object chainIdObj = params.get(RpcParameterNameConstant.CHAIN_ID);
+            Object addressObj = params.get(RpcParameterNameConstant.ADDRESS);
+            Object passwordObj = params.get(RpcParameterNameConstant.PASSWORD);
+            if (chainIdObj == null || addressObj == null || passwordObj == null) {
                 throw new NulsRuntimeException(AccountErrorCode.NULL_PARAMETER);
             }
 
@@ -929,11 +935,12 @@ public class AccountCmd extends BaseCmd {
         Map<String, String> map = new HashMap<>(AccountConstant.INIT_CAPACITY_2);
         try {
             // check parameters
-            Object chainIdObj = params == null ? null : params.get(RpcParameterNameConstant.CHAIN_ID);
-            Object addressObj = params == null ? null : params.get(RpcParameterNameConstant.ADDRESS);
-            Object passwordObj = params == null ? null : params.get(RpcParameterNameConstant.PASSWORD);
-            Object dataObj = params == null ? null : params.get(RpcParameterNameConstant.DATA);
-            if (params == null || chainIdObj == null || addressObj == null || passwordObj == null || dataObj == null) {
+            Preconditions.checkNotNull(params, AccountErrorCode.NULL_PARAMETER);
+            Object chainIdObj = params.get(RpcParameterNameConstant.CHAIN_ID);
+            Object addressObj = params.get(RpcParameterNameConstant.ADDRESS);
+            Object passwordObj = params.get(RpcParameterNameConstant.PASSWORD);
+            Object dataObj = params.get(RpcParameterNameConstant.DATA);
+            if (chainIdObj == null || addressObj == null || passwordObj == null || dataObj == null) {
                 throw new NulsRuntimeException(AccountErrorCode.NULL_PARAMETER);
             }
 
@@ -978,11 +985,12 @@ public class AccountCmd extends BaseCmd {
         Map<String, String> map = new HashMap<>(1);
         try {
             // check parameters
-            Object chainIdObj = params == null ? null : params.get(RpcParameterNameConstant.CHAIN_ID);
-            Object addressObj = params == null ? null : params.get(RpcParameterNameConstant.ADDRESS);
-            Object passwordObj = params == null ? null : params.get(RpcParameterNameConstant.PASSWORD);
-            Object dataObj = params == null ? null : params.get(RpcParameterNameConstant.DATA);
-            if (params == null || chainIdObj == null || addressObj == null || passwordObj == null || dataObj == null) {
+            Preconditions.checkNotNull(params, AccountErrorCode.NULL_PARAMETER);
+            Object chainIdObj = params.get(RpcParameterNameConstant.CHAIN_ID);
+            Object addressObj = params.get(RpcParameterNameConstant.ADDRESS);
+            Object passwordObj = params.get(RpcParameterNameConstant.PASSWORD);
+            Object dataObj = params.get(RpcParameterNameConstant.DATA);
+            if (chainIdObj == null || addressObj == null || passwordObj == null || dataObj == null) {
                 throw new NulsRuntimeException(AccountErrorCode.NULL_PARAMETER);
             }
 
@@ -1027,14 +1035,12 @@ public class AccountCmd extends BaseCmd {
         Map<String, Boolean> map = new HashMap<>(1);
         try {
             // check parameters
-            if (params == null) {
-                throw new NulsRuntimeException(AccountErrorCode.NULL_PARAMETER);
-            }
-            Object addressObj = params == null ? null : params.get(RpcParameterNameConstant.ADDRESS);
-            Object pubKeyObj = params == null ? null : params.get(RpcParameterNameConstant.PUB_KEY);
-            Object sigObj = params == null ? null : params.get(RpcParameterNameConstant.SIG);
-            Object dataObj = params == null ? null : params.get(RpcParameterNameConstant.DATA);
-            if (params == null || addressObj == null || pubKeyObj == null || sigObj == null || dataObj == null) {
+            Preconditions.checkNotNull(params, AccountErrorCode.NULL_PARAMETER);
+            Object addressObj = params.get(RpcParameterNameConstant.ADDRESS);
+            Object pubKeyObj = params.get(RpcParameterNameConstant.PUB_KEY);
+            Object sigObj = params.get(RpcParameterNameConstant.SIG);
+            Object dataObj = params.get(RpcParameterNameConstant.DATA);
+            if (addressObj == null || pubKeyObj == null || sigObj == null || dataObj == null) {
                 throw new NulsRuntimeException(AccountErrorCode.NULL_PARAMETER);
             }
             String address = addressObj.toString();
