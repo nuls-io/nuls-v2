@@ -1,7 +1,9 @@
 package io.nuls.api.db;
 
+import com.mongodb.Block;
 import com.mongodb.DBCursor;
 import com.mongodb.client.DistinctIterable;
+import com.mongodb.client.MongoCursor;
 import com.mongodb.client.model.*;
 import io.nuls.api.constant.MongoTableConstant;
 import io.nuls.api.model.po.db.DepositInfo;
@@ -153,19 +155,16 @@ public class DepositService {
         Bson bson = Filters.eq("address", address);
         DistinctIterable<String> iterable = mongoDBService.getCollection(DEPOSIT_TABLE + chainId).distinct("agentHash", bson, String.class);
         List<String> list = new ArrayList<>();
-        iterable.forEach((Consumer<String>) s -> {
-            list.add(s);
-        });
+        MongoCursor<String> mongoCursor = iterable.iterator();
+        while (mongoCursor.hasNext()) {
+            list.add(mongoCursor.next());
+        }
+
         return list;
     }
 
-    public PageInfo<DepositInfo> getAllDepositListByAddress(int chainId, String address, int type, int pageIndex, int pageSize) {
-        Bson bson;
-        if (type != 2) {
-            bson = Filters.and(Filters.eq("address", address), Filters.eq("type", type));
-        } else {
-            bson = Filters.eq("address", address);
-        }
+    public PageInfo<DepositInfo> getDepositListByAddress(int chainId, String address, int pageIndex, int pageSize) {
+        Bson bson = Filters.and(Filters.eq("address", address), Filters.eq("type", 0), Filters.eq("deleteHeight", 0));
 
         long totalCount = mongoDBService.getCount(DEPOSIT_TABLE + chainId, bson);
         List<Document> documentList = mongoDBService.pageQuery(DEPOSIT_TABLE + chainId, bson, Sorts.descending("createTime"), pageIndex, pageSize);
