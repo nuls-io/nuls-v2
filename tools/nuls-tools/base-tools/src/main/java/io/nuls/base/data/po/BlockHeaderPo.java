@@ -20,8 +20,9 @@
  *
  */
 
-package io.nuls.block.model.po;
+package io.nuls.base.data.po;
 
+import io.nuls.base.basic.AddressTool;
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.basic.NulsOutputStreamBuffer;
 import io.nuls.base.data.BaseNulsData;
@@ -52,8 +53,9 @@ public class BlockHeaderPo extends BaseNulsData {
     private int txCount;
     private BlockSignature blockSignature;
     private byte[] extend;
-    private transient int size;
+    private int blockSize;
     private List<NulsDigestData> txHashList;
+    private transient byte[] packingAddress;
 
     public NulsDigestData getHash() {
         return hash;
@@ -127,12 +129,12 @@ public class BlockHeaderPo extends BaseNulsData {
         this.extend = extend;
     }
 
-    public int getSize() {
-        return size;
+    public int getBlockSize() {
+        return blockSize;
     }
 
-    public void setSize(int size) {
-        this.size = size;
+    public void setBlockSize(int blockSize) {
+        this.blockSize = blockSize;
     }
 
     public List<NulsDigestData> getTxHashList() {
@@ -143,6 +145,13 @@ public class BlockHeaderPo extends BaseNulsData {
         this.txHashList = txHashList;
     }
 
+    public byte[] getPackingAddress(int chainID) {
+        if (this.blockSignature != null && this.packingAddress == null) {
+            this.packingAddress = AddressTool.getAddress(blockSignature.getPublicKey(), chainID);
+        }
+        return packingAddress;
+    }
+
     @Override
     public int size() {
         int size = 0;
@@ -151,6 +160,7 @@ public class BlockHeaderPo extends BaseNulsData {
         size += SerializeUtils.sizeOfNulsData(preHash);
         size += SerializeUtils.sizeOfNulsData(merkleHash);
         size += SerializeUtils.sizeOfUint48();
+        size += SerializeUtils.sizeOfUint32();
         size += SerializeUtils.sizeOfUint32();
         size += SerializeUtils.sizeOfUint32();
         size += SerializeUtils.sizeOfBytes(extend);
@@ -170,6 +180,7 @@ public class BlockHeaderPo extends BaseNulsData {
         stream.writeUint48(time);
         stream.writeUint32(height);
         stream.writeUint32(txCount);
+        stream.writeUint32(blockSize);
         stream.writeBytesWithLength(extend);
         stream.writeNulsData(blockSignature);
         for (NulsDigestData hash : txHashList) {
@@ -186,6 +197,7 @@ public class BlockHeaderPo extends BaseNulsData {
         this.time = byteBuffer.readUint48();
         this.height = byteBuffer.readUint32();
         this.txCount = byteBuffer.readInt32();
+        this.blockSize = byteBuffer.readInt32();
         this.extend = byteBuffer.readByLengthByte();
         this.txHashList = new ArrayList<>();
         this.blockSignature = byteBuffer.readNulsData(new BlockSignature());

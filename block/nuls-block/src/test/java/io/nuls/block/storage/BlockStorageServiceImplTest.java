@@ -21,9 +21,9 @@
 package io.nuls.block.storage;
 
 import io.nuls.base.data.Block;
+import io.nuls.base.data.po.BlockHeaderPo;
 import io.nuls.block.constant.RunningStatusEnum;
 import io.nuls.block.manager.ContextManager;
-import io.nuls.block.model.po.BlockHeaderPo;
 import io.nuls.block.test.BlockGenerator;
 import io.nuls.block.utils.BlockUtil;
 import io.nuls.block.utils.ConfigLoader;
