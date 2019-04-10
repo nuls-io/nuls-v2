@@ -64,14 +64,14 @@ public class TxRegister {
      * 是否是解锁交易
      * If it's an unlocking transaction
      */
-    public boolean unlockTx;
+    private boolean unlockTx;
 
     /**
      * 该交易是否需要验证签名，所有系统产生的交易和一些特殊交易，不需要按照普通交易的方式验证签名，会提供额外的逻辑进行验证。
      * Whether the transaction requires verification of the signature, all system generated transactions and some special transactions,
      * does not need to verify the signature in the way of ordinary transactions, will provide additional logic for verification.
      */
-    public boolean verifySignature;
+    private boolean verifySignature;
 
     /**
      * module code
