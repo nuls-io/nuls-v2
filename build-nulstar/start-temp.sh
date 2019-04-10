@@ -95,7 +95,7 @@ while [ ! -z $1 ] ; do
             logLevel="-Dlog.level=$2";
             shift 2 ;;
         "--datapath")
-            datapath="-DDataPath=$2";
+            datapath="-DdataPath=$2";
             shift 2 ;;
         "--debug")
             DEBUG="$2";
@@ -115,7 +115,7 @@ if [ -n "${config}" ]; then
     _logPath=`getModuleItem ${config} "logPath"`
     _logLevel=`getModuleItem ${config} "logLevel"`
     cd `dirname ${config}`
-    datapath="-DDataPath=`get_fullpath ${_dataPath}`"
+    datapath="-DdataPath=`get_fullpath ${_dataPath}`"
     logpath="-Dlog.path=`get_fullpath ${_logPath}`/$APP_NAME";
     logLevel="-Dlog.level=$_logLevel";
     cd $MODULE_PATH
