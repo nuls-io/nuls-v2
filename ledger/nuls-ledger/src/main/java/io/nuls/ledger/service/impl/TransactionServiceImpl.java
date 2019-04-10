@@ -97,7 +97,7 @@ public class TransactionServiceImpl implements TransactionService {
             return validateResult;
         }
         String currentTxNonce = LedgerUtil.getNonceEncodeByTx(transaction);
-        Map<String, UnconfirmedTx> accountsMap = new ConcurrentHashMap<>();
+        Map<String, UnconfirmedTx> accountsMap = new ConcurrentHashMap<>(8);
         List<CoinFrom> froms = coinData.getFrom();
         List<CoinTo> tos = coinData.getTo();
         String txHash = transaction.getHash().toString();
@@ -227,7 +227,7 @@ public class TransactionServiceImpl implements TransactionService {
                 return false;
             }
             //批量交易按交易进行账户的金额处理，再按区块为原子性进行提交,updateAccounts用于账户缓存，最后统一处理
-            Map<String, AccountBalance> updateAccounts = new HashMap<>();
+            Map<String, AccountBalance> updateAccounts = new HashMap<>(1024);
             //整体区块备份
             BlockSnapshotAccounts blockSnapshotAccounts = new BlockSnapshotAccounts();
             if (!confirmBlockTxProcess(addressChainId, blockHeight, txList, updateAccounts)) {
@@ -237,7 +237,7 @@ public class TransactionServiceImpl implements TransactionService {
 
             //整体交易的处理
             //更新账本信息
-            Map<byte[], byte[]> accountStatesMap = new HashMap<>();
+            Map<byte[], byte[]> accountStatesMap = new HashMap<>(1024);
             try {
                 for (Map.Entry<String, AccountBalance> entry : updateAccounts.entrySet()) {
                     //缓存数据

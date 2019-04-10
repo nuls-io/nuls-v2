@@ -29,7 +29,6 @@ import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.db.service.RocksDBService;
 import io.nuls.ledger.model.po.AccountStateUnconfirmed;
 import io.nuls.ledger.storage.DataBaseArea;
-import io.nuls.ledger.storage.InitDB;
 import io.nuls.ledger.storage.UnconfirmedRepository;
 import io.nuls.tools.basic.InitializingBean;
 import io.nuls.tools.core.annotation.Service;
@@ -43,7 +42,7 @@ import static io.nuls.ledger.utils.LoggerUtil.logger;
  * @date 2018/11/19
  */
 @Service
-public class UnconfirmedRepositoryImpl implements UnconfirmedRepository, InitDB, InitializingBean {
+public class UnconfirmedRepositoryImpl implements UnconfirmedRepository, InitializingBean {
 
     public UnconfirmedRepositoryImpl() {
 
@@ -107,11 +106,6 @@ public class UnconfirmedRepositoryImpl implements UnconfirmedRepository, InitDB,
         } catch (Exception e) {
             logger(addressChainId).error(e);
         }
-    }
-
-    @Override
-    public void initTableName() throws NulsException {
-
     }
 
     @Override

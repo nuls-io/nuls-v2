@@ -66,7 +66,6 @@ public class TransactionCmd extends BaseLedgerCmd {
     @Parameter(parameterName = "chainId", parameterType = "int")
     @Parameter(parameterName = "tx", parameterType = "String")
     public Response commitUnconfirmedTx(Map params) {
-        Map<String, Object> rtData = new HashMap<>();
         Integer chainId = (Integer) params.get("chainId");
         Response response = null;
         try {
@@ -102,7 +101,7 @@ public class TransactionCmd extends BaseLedgerCmd {
     @Parameter(parameterName = "txList", parameterType = "List")
     @Parameter(parameterName = "blockHeight", parameterType = "long")
     public Response commitBlockTxs(Map params) {
-        Map<String, Object> rtData = new HashMap<>();
+        Map<String, Object> rtData = new HashMap<>(1);
         Integer chainId = (Integer) params.get("chainId");
         long blockHeight = Long.valueOf(params.get("blockHeight").toString());
         List<String> txStrList = (List) params.get("txList");
@@ -151,7 +150,7 @@ public class TransactionCmd extends BaseLedgerCmd {
     @Parameter(parameterName = "chainId", parameterType = "int")
     @Parameter(parameterName = "tx", parameterType = "String")
     public Response rollBackUnconfirmTx(Map params) {
-        Map<String, Object> rtData = new HashMap<>();
+        Map<String, Object> rtData = new HashMap<>(1);
         int value = 0;
         Integer chainId = (Integer) params.get("chainId");
         try {
@@ -192,7 +191,7 @@ public class TransactionCmd extends BaseLedgerCmd {
     @Parameter(parameterName = "blockHeight", parameterType = "long")
     @Parameter(parameterName = "txList", parameterType = "List")
     public Response rollBackBlockTxs(Map params) {
-        Map<String, Object> rtData = new HashMap<>();
+        Map<String, Object> rtData = new HashMap<>(1);
         int value = 0;
         Integer chainId = (Integer) params.get("chainId");
         try {
