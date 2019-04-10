@@ -5,6 +5,6 @@
   "testNodeType": "slave",
   "testNodeExclude": "192.168.1.145",
   "testNodeCount": 2,
-  "testNodeList": "192.168.1.115,118.31.33.156",
+  "testNodeList": "192.168.1.115",
   "testSeedAccountPriKey": "477059f40708313626cccd26f276646e4466032cabceccbf571a7c46f954eb75"
 }
