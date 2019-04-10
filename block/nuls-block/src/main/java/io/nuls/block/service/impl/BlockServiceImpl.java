@@ -22,6 +22,7 @@ package io.nuls.block.service.impl;
 
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.data.*;
+import io.nuls.base.data.po.BlockHeaderPo;
 import io.nuls.block.cache.SmallBlockCacher;
 import io.nuls.block.constant.BlockErrorCode;
 import io.nuls.block.constant.BlockForwardEnum;
@@ -33,7 +34,6 @@ import io.nuls.block.model.CachedSmallBlock;
 import io.nuls.block.model.Chain;
 import io.nuls.block.model.ChainContext;
 import io.nuls.block.model.GenesisBlock;
-import io.nuls.block.model.po.BlockHeaderPo;
 import io.nuls.block.rpc.call.ConsensusUtil;
 import io.nuls.block.rpc.call.NetworkUtil;
 import io.nuls.block.rpc.call.ProtocolUtil;
@@ -92,7 +92,18 @@ public class BlockServiceImpl implements BlockService {
     }
 
     @Override
-    public BlockHeaderPo getBlockHeader(int chainId, long height) {
+    public BlockHeaderPo getLatestBlockHeaderPo(int chainId) {
+        ChainContext context = ContextManager.getContext(chainId);
+        return getBlockHeaderPo(chainId, context.getLatestHeight());
+    }
+
+    @Override
+    public BlockHeader getBlockHeader(int chainId, long height) {
+        return BlockUtil.fromBlockHeaderPo(getBlockHeaderPo(chainId, height));
+    }
+
+    @Override
+    public BlockHeaderPo getBlockHeaderPo(int chainId, long height) {
         NulsLogger commonLog = ContextManager.getContext(chainId).getCommonLog();
         try {
             return blockStorageService.query(chainId, height);
@@ -130,8 +141,12 @@ public class BlockServiceImpl implements BlockService {
 
     @Override
     public BlockHeader getBlockHeader(int chainId, NulsDigestData hash) {
-        BlockHeaderPo blockHeaderPo = blockStorageService.query(chainId, hash);
-        return BlockUtil.fromBlockHeaderPo(blockHeaderPo);
+        return BlockUtil.fromBlockHeaderPo(getBlockHeaderPo(chainId, hash));
+    }
+
+    @Override
+    public BlockHeaderPo getBlockHeaderPo(int chainId, NulsDigestData hash) {
+        return blockStorageService.query(chainId, hash);
     }
 
     @Override
@@ -265,7 +280,7 @@ public class BlockServiceImpl implements BlockService {
                 if (!blockStorageService.setLatestHeight(chainId, height - 1)) {
                     throw new NulsRuntimeException(BlockErrorCode.CHAIN_MERGE_ERROR);
                 }
-                commonLog.error("headerSave-"+headerSave+", txsSave-"+txSave+", chainId-" + chainId + ",height-" + height);
+                commonLog.error("headerSave-" + headerSave + ", txsSave-" + txSave + ", chainId-" + chainId + ",height-" + height);
                 return false;
             }
             long elapsedNanos3 = System.nanoTime() - startTime3;
@@ -343,7 +358,7 @@ public class BlockServiceImpl implements BlockService {
 
     @Override
     public boolean rollbackBlock(int chainId, long height, boolean needLock) {
-        BlockHeaderPo blockHeaderPo = getBlockHeader(chainId, height);
+        BlockHeaderPo blockHeaderPo = getBlockHeaderPo(chainId, height);
         return rollbackBlock(chainId, blockHeaderPo, needLock);
     }
 
@@ -483,28 +498,28 @@ public class BlockServiceImpl implements BlockService {
         //1.验证一些基本信息如区块大小限制、字段非空验证
         boolean basicVerify = BlockUtil.basicVerify(chainId, block);
         if (localInit) {
-            commonLog.debug("basicVerify-"+basicVerify);
+            commonLog.debug("basicVerify-" + basicVerify);
             return basicVerify;
         }
 
         //分叉验证
         boolean forkVerify = BlockUtil.forkVerify(chainId, block);
         if (!forkVerify) {
-            commonLog.debug("forkVerify-"+forkVerify);
+            commonLog.debug("forkVerify-" + forkVerify);
             return false;
         }
         //共识验证
         boolean consensusVerify = ConsensusUtil.verify(chainId, block, download);
         if (!consensusVerify) {
-            commonLog.error("consensusVerify-"+consensusVerify);
+            commonLog.error("consensusVerify-" + consensusVerify);
             return false;
         }
         //交易验证
         BlockHeader header = block.getHeader();
-        BlockHeader lastBlockHeader = BlockUtil.fromBlockHeaderPo(getBlockHeader(chainId, header.getHeight() - 1));
+        BlockHeader lastBlockHeader = getBlockHeader(chainId, header.getHeight() - 1);
         boolean transactionVerify = TransactionUtil.verify(chainId, block.getTxs(), header, lastBlockHeader);
         if (!transactionVerify) {
-            commonLog.error("transactionVerify-"+transactionVerify);
+            commonLog.error("transactionVerify-" + transactionVerify);
             return false;
         }
         return true;

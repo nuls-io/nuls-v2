@@ -123,7 +123,7 @@ public class NettyServer {
      * @return WsServer
      * @throws Exception 找到重复命令(cmd) / Find duplicate commands (cmd)
      */
-    public NettyServer scanPackage(String scanPackage) throws Exception {
+    public NettyServer scanPackage(String... scanPackage) throws Exception {
         ConnectManager.scanPackage(scanPackage);
         return this;
     }
