@@ -103,10 +103,6 @@ public class ConsensusBootStrap extends RpcModule {
     public void onDependenciesReady(Module module){
         try {
             if(module.getName().equals(ModuleE.TX.abbr)){
-                while (!isDependencieReady(new Module(ModuleE.TX.abbr, "1.0"))){
-                    Log.debug("wait transaction module ready");
-                    Thread.sleep(2000L);
-                }
                 chainManager.registerTx();
             }
         }catch (Exception e){
