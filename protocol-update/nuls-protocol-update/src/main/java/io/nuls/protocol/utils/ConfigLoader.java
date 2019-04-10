@@ -23,7 +23,6 @@
 package io.nuls.protocol.utils;
 
 import io.nuls.protocol.constant.ConfigConstant;
-import io.nuls.protocol.manager.ConfigManager;
 import io.nuls.protocol.manager.ContextManager;
 import io.nuls.protocol.model.ProtocolConfig;
 import io.nuls.protocol.model.ProtocolVersion;
@@ -37,6 +36,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static io.nuls.protocol.ProtocolBootstrap.protocolConfig;
 import static io.nuls.protocol.constant.Constant.MODULES_CONFIG_FILE;
 import static io.nuls.protocol.constant.Constant.PROTOCOL_CONFIG_FILE;
 
@@ -73,18 +73,11 @@ public class ConfigLoader {
      * @throws Exception
      */
     private static void loadDefault() throws Exception {
-        String configJson = IoUtils.read(MODULES_CONFIG_FILE);
-        List<ConfigItem> configItems = JSONUtils.json2list(configJson, ConfigItem.class);
         String versionJson = IoUtils.read(PROTOCOL_CONFIG_FILE);
         List<ProtocolVersion> versions = JSONUtils.json2list(versionJson, ProtocolVersion.class);
-        Map<String, ConfigItem> map = new HashMap<>(configItems.size());
-        configItems.forEach(e -> map.put(e.getName(), e));
-        int chainId = Integer.parseInt(map.get(ConfigConstant.CHAIN_ID).getValue());
-        ConfigManager.add(chainId, map);
-        ProtocolConfig po = new ProtocolConfig();
-        po.init(map);
-        ContextManager.init(po, versions);
-        service.save(po, chainId);
+        int chainId = protocolConfig.getChainId();
+        ContextManager.init(protocolConfig, versions);
+        service.save(protocolConfig, chainId);
     }
 
 }

@@ -1,6 +1,7 @@
 package io.nuls.protocol;
 
 import io.nuls.db.service.RocksDBService;
+import io.nuls.protocol.model.ProtocolConfig;
 import io.nuls.protocol.thread.monitor.ProtocolMonitor;
 import io.nuls.protocol.utils.ConfigLoader;
 import io.nuls.rpc.info.HostInfo;
@@ -9,8 +10,11 @@ import io.nuls.rpc.modulebootstrap.Module;
 import io.nuls.rpc.modulebootstrap.NulsRpcModuleBootstrap;
 import io.nuls.rpc.modulebootstrap.RpcModule;
 import io.nuls.rpc.modulebootstrap.RpcModuleState;
+import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
+import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.log.Log;
+import io.nuls.tools.parse.I18nUtils;
 import io.nuls.tools.thread.ThreadUtils;
 import io.nuls.tools.thread.commom.NulsThreadFactory;
 
@@ -29,6 +33,9 @@ import static io.nuls.protocol.constant.Constant.PROTOCOL_CONFIG;
  */
 @Component
 public class ProtocolBootstrap extends RpcModule {
+
+    @Autowired
+    public static ProtocolConfig protocolConfig;
 
     public static void main(String[] args) {
         if (args == null || args.length == 0) {
@@ -62,10 +69,29 @@ public class ProtocolBootstrap extends RpcModule {
      */
     @Override
     public void init() {
-        super.init();
-        initCfg();
+        try {
+            super.init();
+            initDB();
+            initLanguage();
+        } catch (Exception e) {
+            Log.error("ProtocolBootstrap init error!");
+            throw new RuntimeException(e);
+        }
+    }
+
+    /**
+     * 初始化数据库
+     * Initialization database
+     */
+    private void initDB() throws Exception {
         //读取配置文件，数据存储根目录，初始化打开该目录下所有表连接并放入缓存
-        RocksDBService.init(DATA_PATH);
+        RocksDBService.init(protocolConfig.getDataFolder());
+        RocksDBService.createTable(PROTOCOL_CONFIG);
+    }
+
+    private void initLanguage() throws NulsException {
+        I18nUtils.loadLanguage(ProtocolBootstrap.class, "languages", protocolConfig.getLanguage());
+        I18nUtils.setLanguage(protocolConfig.getLanguage());
     }
 
     /**
