@@ -24,28 +24,33 @@
 package io.nuls.contract.tx.customizetx;
 
 import io.nuls.api.provider.transaction.facade.TransferReq;
+import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.CoinData;
 import io.nuls.base.data.CoinFrom;
+import io.nuls.base.data.CoinTo;
 import io.nuls.contract.basetest.ContractTest;
 import io.nuls.contract.model.tx.CallContractTransaction;
+import io.nuls.contract.model.tx.ContractBaseTransaction;
 import io.nuls.contract.model.tx.CreateContractTransaction;
 import io.nuls.contract.model.tx.DeleteContractTransaction;
 import io.nuls.contract.model.txdata.CreateContractData;
 import io.nuls.contract.util.ContractUtil;
 import io.nuls.contract.util.Log;
-import io.nuls.contract.validator.CreateContractTxValidator;
 import io.nuls.tools.basic.Result;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.model.StringUtils;
 import io.nuls.tools.parse.JSONUtils;
+import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.io.IOUtils;
 import org.junit.Test;
 
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.util.LinkedList;
 
 /**
  * @author: PierreLuo
@@ -53,11 +58,68 @@ import java.math.BigInteger;
  */
 public class ContractMakeAndBroadcastTxTest extends ContractMakeAndBroadcastBase {
 
+    private LinkedList params = new LinkedList();
     /**
-     * 创建合约的交易造假测试
+     * 减少coinData的from的花费金额 ---> 目的：不支付合约手续费，偷走区块中其他交易的手续费
      */
     @Test
-    public void makeAndBroadcastCreateTxTest() throws Exception {
+    public void fakeCreateTx_stealMoney() throws Exception {
+        this.makeAndBroadcastCreateTxTest("createTxFake1_1", params, ContractBaseTransaction.class);
+    }
+
+    /**
+     * 减少coinData的from的花费金额 ---> 目的：不支付合约手续费
+     */
+    @Test
+    public void fakeCreateTx_notPaying() throws Exception {
+        this.makeAndBroadcastCreateTxTest("createTxFake1_2", params, ContractBaseTransaction.class);
+    }
+
+    /**
+     * 增加coinData的to
+     */
+    @Test
+    public void fakeCreateTx_addCoinTo() throws Exception {
+        this.makeAndBroadcastCreateTxTest("txFakeAddCoinTo", params, ContractBaseTransaction.class);
+    }
+
+    /**
+     * 更改sender
+     */
+    @Test
+    public void fakeCreateTx_ContractSender() throws Exception {
+        params.add(toAddress6);
+        this.makeAndBroadcastCreateTxTest("txFakeContractSender", params, ContractBaseTransaction.class, String.class);
+    }
+
+    /**
+     * 更改contractAddress
+     */
+    @Test
+    public void fakeCreateTx_ContractAddress() throws Exception {
+        params.add(toAddress6);
+        this.makeAndBroadcastCreateTxTest("txFakeContractAddress", params, ContractBaseTransaction.class, String.class);
+    }
+
+    /**
+     * 更改gasLimit
+     */
+    @Test
+    public void fakeCreateTx_GasLimit() throws Exception {
+        params.add(200001L);
+        this.makeAndBroadcastCreateTxTest("txFakeGasLimit", params, ContractBaseTransaction.class, Long.class);
+    }
+
+    /**
+     * 更改price
+     */
+    @Test
+    public void fakeCreateTx_Price() throws Exception {
+        params.add(23L);
+        this.makeAndBroadcastCreateTxTest("txFakePrice", params, ContractBaseTransaction.class, Long.class);
+    }
+
+    private void makeAndBroadcastCreateTxTest(String fakeMethodName, LinkedList params, Class... parameterTypes) throws Exception {
         Log.info("wait create.");
         InputStream in = new FileInputStream(ContractTest.class.getResource("/nrc20").getFile());
         byte[] contractCode = IOUtils.toByteArray(in);
@@ -68,14 +130,17 @@ public class ContractMakeAndBroadcastTxTest extends ContractMakeAndBroadcastBase
         String decimals = "2";
         String[][] args = ContractUtil.twoDimensionalArray(new Object[]{name, symbol, amount, decimals});
 
-        Result result = this.makeCreateTx(chainId, sender, 200000L, 25L, contractCode, args, password, remark);
+        Result result = this.makeCreateTx(chainId, toAddress5, 200000L, 25L, contractCode, args, password, remark);
         do {
             if (result.isFailed()) {
                 break;
             }
             CreateContractTransaction tx = (CreateContractTransaction) result.getData();
             // 造假
-            this.createTxFake(tx);
+            params.addFirst(tx);
+            Method fakeMethod = this.getClass().getDeclaredMethod(fakeMethodName, parameterTypes);
+            fakeMethod.invoke(this, params);
+
             tx.setTxData(null);
             tx.setCoinData(null);
             tx.serializeData();
@@ -91,19 +156,53 @@ public class ContractMakeAndBroadcastTxTest extends ContractMakeAndBroadcastBase
          * 此刻的tx则可以任意修改原数据，以此造假数据
          */
         // 减少coinData的from的花费金额 ---> 目的：不支付合约手续费，偷走区块中其他交易的手续费
-        //this.createTxFake1_1(tx);
+        this.createTxFake1_1(tx);
+
         // 减少coinData的from的花费金额 ---> 目的：不支付合约手续费
         this.createTxFake1_2(tx);
-        //todo 增加coinData的to
-        //this.createTxFake2(tx);
-        //todo 更改sender
-        //this.createTxFake3(tx);
-        //todo 更改contractAddress
-        //this.createTxFake4(tx);
-        //todo 更改gasLimit
-        //this.createTxFake5(tx);
-        //todo 更改price
-        //this.createTxFake6(tx);
+
+        // 增加coinData的to
+        this.txFakeAddCoinTo(tx);
+
+        // 更改sender
+        this.txFakeContractSender(tx, toAddress6);
+
+        // 更改contractAddress
+        this.txFakeContractAddress(tx, toAddress6);
+
+        // 更改gasLimit
+        this.txFakeGasLimit(tx, 200001L);
+
+        // 更改price
+        this.txFakePrice(tx, 23L);
+    }
+
+    private void txFakePrice(ContractBaseTransaction tx, long price) throws Exception{
+        BeanUtils.setProperty(tx.getTxDataObj(), "price", price);
+    }
+
+    private void txFakeGasLimit(ContractBaseTransaction tx, long gasLimit) throws Exception {
+        BeanUtils.setProperty(tx.getTxDataObj(), "gasLimit", gasLimit);
+    }
+
+    private void txFakeContractAddress(ContractBaseTransaction tx, String contractAddress) throws Exception {
+        BeanUtils.setProperty(tx.getTxDataObj(), "contractAddress", AddressTool.getAddress(contractAddress));
+    }
+
+    private void txFakeContractSender(ContractBaseTransaction tx, String sender) throws Exception {
+        BeanUtils.setProperty(tx.getTxDataObj(), "sender", AddressTool.getAddress(sender));
+    }
+
+    private void txFakeContractValue(ContractBaseTransaction tx, long value) throws Exception {
+        BeanUtils.setProperty(tx.getTxDataObj(), "value", BigInteger.valueOf(value));
+    }
+
+    private void txFakeAddCoinTo(ContractBaseTransaction tx) throws Exception {
+        CoinData coinDataObj = tx.getCoinDataObj();
+        CoinTo coinTo = new CoinTo(AddressTool.getAddress(toAddress9), chainId, chain.getConfig().getAssetsId(),
+                BigInteger.valueOf(1_0000L), 0L);
+        coinDataObj.getTo().add(coinTo);
+
     }
 
     /**
@@ -160,7 +259,7 @@ public class ContractMakeAndBroadcastTxTest extends ContractMakeAndBroadcastBase
      * 调用合约的交易造假测试
      */
     @Test
-    public void makeAndBroadcastCallTxTest() throws IOException {
+    public void makeAndBroadcastCallTxTest() throws Exception {
         Log.info("wait call.");
         BigInteger value = BigInteger.ZERO;
         if(StringUtils.isBlank(methodName)) {
@@ -192,11 +291,27 @@ public class ContractMakeAndBroadcastTxTest extends ContractMakeAndBroadcastBase
         Log.info("callContract-result:{}", JSONUtils.obj2PrettyJson(result));
     }
 
-    private void callTxFake(CallContractTransaction tx) {
+    private void callTxFake(CallContractTransaction tx) throws Exception {
         /**
          * 此刻的tx则可以任意修改原数据，以此造假数据
          */
-        //TODO ....
+        // 增加coinData的to
+        this.txFakeAddCoinTo(tx);
+
+        // 更改sender
+        this.txFakeContractSender(tx, toAddress6);
+
+        // 更改转入合约的资金
+        this.txFakeContractValue(tx, 1_0000_0000L);
+
+        // 更改contractAddress
+        this.txFakeContractAddress(tx, toAddress6);
+
+        // 更改gasLimit
+        this.txFakeGasLimit(tx, 200001L);
+
+        // 更改price
+        this.txFakePrice(tx, 23L);
     }
 
 
