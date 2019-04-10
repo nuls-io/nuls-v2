@@ -651,10 +651,10 @@ public class ContractHelper {
         return track.status(contractAddress);
     }
 
-    public ContractResult makeFailedContractResult(ContractWrapperTransaction tx, CallableResult callableResult, String errorMsg) {
+    public ContractResult makeFailedContractResult(int chainId, ContractWrapperTransaction tx, CallableResult callableResult, String errorMsg) {
         ContractResult contractResult = ContractResult.genFailed(tx.getContractData(), errorMsg);
         makeContractResult(tx, contractResult);
-        callableResult.putFailed(contractResult);
+        callableResult.putFailed(chainId, contractResult);
         return contractResult;
     }
 }

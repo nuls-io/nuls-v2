@@ -27,6 +27,7 @@ package io.nuls.ledger.service.impl;
 
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.*;
+import io.nuls.ledger.constant.LedgerConstant;
 import io.nuls.ledger.model.AccountBalance;
 import io.nuls.ledger.model.UnconfirmedTx;
 import io.nuls.ledger.model.ValidateResult;
@@ -34,15 +35,13 @@ import io.nuls.ledger.model.po.AccountState;
 import io.nuls.ledger.model.po.AccountStateSnapshot;
 import io.nuls.ledger.model.po.BlockSnapshotAccounts;
 import io.nuls.ledger.service.AccountStateService;
+import io.nuls.ledger.service.FreezeStateService;
 import io.nuls.ledger.service.TransactionService;
 import io.nuls.ledger.service.UnconfirmedStateService;
 import io.nuls.ledger.service.processor.CommontTransactionProcessor;
 import io.nuls.ledger.service.processor.LockedTransactionProcessor;
 import io.nuls.ledger.storage.Repository;
-import io.nuls.ledger.utils.CoinDataUtil;
-import io.nuls.ledger.utils.LedgerUtil;
-import io.nuls.ledger.utils.LockerUtil;
-import io.nuls.ledger.utils.LoggerUtil;
+import io.nuls.ledger.utils.*;
 import io.nuls.ledger.validator.CoinDataValidator;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Service;
@@ -71,8 +70,10 @@ public class TransactionServiceImpl implements TransactionService {
     CommontTransactionProcessor commontTransactionProcessor;
     @Autowired
     Repository repository;
-    Map<String, Integer> ledgerNonce = new HashMap<String, Integer>();
+    @Autowired
+    FreezeStateService freezeStateService;
 
+    Map<String, Integer> ledgerNonce = new HashMap<String, Integer>();
     /**
      * 未确认交易数据处理
      *
@@ -171,7 +172,9 @@ public class TransactionServiceImpl implements TransactionService {
             //整体区块备份
             BlockSnapshotAccounts blockSnapshotAccounts = new BlockSnapshotAccounts();
             for (Transaction transaction : txList) {
-                LoggerUtil.txCommitLog(addressChainId).debug("start confirmBlockProcess addressChainId={},blockHeight={},hash={}", addressChainId, blockHeight, transaction.getHash().toString());
+                String nonce8BytesStr = LedgerUtil.getNonceEncodeByTx(transaction);
+                String txHash = transaction.getHash().toString();
+//                LoggerUtil.txCommitLog(addressChainId).debug("start confirmBlockProcess addressChainId={},blockHeight={},hash={}", addressChainId, blockHeight,txHash);
                 //从缓存校验交易
                 CoinData coinData = CoinDataUtil.parseCoinData(transaction.getCoinData());
                 if (null == coinData) {
@@ -179,9 +182,6 @@ public class TransactionServiceImpl implements TransactionService {
                     LoggerUtil.logger(addressChainId).debug("coinData is null continue.");
                     continue;
                 }
-                //更新账户状态
-                String nonce8BytesStr = LedgerUtil.getNonceEncodeByTx(transaction);
-                String txHash = transaction.getHash().toString();
                 List<CoinFrom> froms = coinData.getFrom();
                 for (CoinFrom from : froms) {
                     if (LedgerUtil.isNotLocalChainAccount(addressChainId, from.getAddress())) {
@@ -232,11 +232,16 @@ public class TransactionServiceImpl implements TransactionService {
             time2 = System.currentTimeMillis();
 
             //整体交易的处理
+            //更新账本信息
+            Map<byte[],byte[]> accountStatesMap = new HashMap<>();
             try {
                 for (Map.Entry<String, AccountBalance> entry : updateAccounts.entrySet()) {
                     //缓存数据
                     AccountStateSnapshot accountStateSnapshot = new AccountStateSnapshot(entry.getValue().getPreAccountState(), entry.getValue().getNonces(),  entry.getValue().getTxHashMap().keySet());
                     blockSnapshotAccounts.addAccountState(accountStateSnapshot);
+                    freezeStateService.recalculateFreeze(entry.getValue().getNowAccountState());
+                    entry.getValue().getNowAccountState().setLatestUnFreezeTime(TimeUtil.getCurrentTime());
+                    accountStatesMap.put(entry.getKey().getBytes(LedgerConstant.DEFAULT_ENCODING),entry.getValue().getNowAccountState().serialize());
                 }
             } catch (Exception e) {
                 e.printStackTrace();
@@ -249,10 +254,9 @@ public class TransactionServiceImpl implements TransactionService {
                 //备份历史
                 repository.saveBlockSnapshot(addressChainId, blockHeight, blockSnapshotAccounts);
                 time4 = System.currentTimeMillis();
-                //更新账本信息
-                for (Map.Entry<String, AccountBalance> entry : updateAccounts.entrySet()) {
-                    accountStateService.updateAccountStateByTx(entry.getKey(), entry.getValue().getNowAccountState());
-                    logger(addressChainId).debug("updateAccountStateByTx account={} Available  balance={}", entry.getKey(), entry.getValue().getNowAccountState().getAvailableAmount());
+
+                if(accountStatesMap.size()>0) {
+                    repository.batchUpdateAccountState(addressChainId, accountStatesMap);
                 }
                 time5 = System.currentTimeMillis();
                 repository.saveAccountNonces(addressChainId, ledgerNonce);
@@ -268,8 +272,8 @@ public class TransactionServiceImpl implements TransactionService {
             //完全提交,存储当前高度。
             repository.saveOrUpdateBlockHeight(addressChainId, blockHeight);
             time7 = System.currentTimeMillis();
-            LoggerUtil.timeTest.debug("####txs={}====time2-time1={},time3-time2={},time4-time3={},time5-time4={},time6-time5={},time7-time6={}",
-                    txList.size(),time2 - time1, time3 - time2, time4 - time3, time5 - time4, time6 - time5, time7 - time6);
+            LoggerUtil.timeTest.debug("####txs={}==accountSize={}====time2-time1={},time3-time2={},time4-time3={},time5-time4={},time6-time5={},time7-time6={}",
+                    txList.size(),updateAccounts.size(),time2 - time1, time3 - time2, time4 - time3, time5 - time4, time6 - time5, time7 - time6);
             return true;
         } catch (Exception e) {
             e.printStackTrace();
