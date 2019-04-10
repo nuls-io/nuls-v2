@@ -1,5 +1,5 @@
 #!/bin/bash
-
+. func.sh
 help()
 {
     cat <<- EOF
@@ -11,6 +11,12 @@ help()
 EOF
     exit 0
 }
+
+nulstarUrl=`getModuleItem "./nuls.ncf" "serviceManager"`
+if [ -z "${nulstarUrl}" ]; then
+    nulstarUrl="ws://127.0.0.1:7771"
+fi
+
 cd `dirname $0`;
 if [ -d ../Libraries/JAVA/11.0.2 ]; then
     JAVA_HOME=`dirname "../Libraries/JAVA/11.0.2/bin"`;
@@ -37,4 +43,4 @@ do
             ?)     exit 2;;
            esac
 done
-./cmd.sh ${JAVA_HOME} ${LOGLEVEL}
+./cmd.sh ${JAVA_HOME} ${LOGLEVEL} ${nulstarUrl}

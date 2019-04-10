@@ -2,6 +2,7 @@
 logPath=./logs
 logLevel=INFO
 dataPath=./data
+serviceManager=ws://127.0.0.1:7771
 #默认链id
 #chainId=2
 [network]

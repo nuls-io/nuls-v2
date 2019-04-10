@@ -427,7 +427,7 @@ log "============ COPY JRE TO libs done ============"
 fi
 if [ -n "${DOMOCK}" ]; then
 	log "============== BUILD start-mykernel script ====================="
-		cp "${BUILD_PATH}/start-mykernel.sh" "${MODULES_BIN_PATH}/start.sh"
+	cp "${BUILD_PATH}/start-mykernel.sh" "${MODULES_BIN_PATH}/start.sh"
 	chmod u+x "${MODULES_BIN_PATH}/start.sh"
 	cp "${BUILD_PATH}/stop-mykernel.sh" "${MODULES_BIN_PATH}/stop.sh"
 	chmod u+x "${MODULES_BIN_PATH}/stop.sh"
@@ -439,6 +439,8 @@ if [ -n "${DOMOCK}" ]; then
 	chmod u+x "${MODULES_BIN_PATH}/cmd.sh"
 	cp "${BUILD_PATH}/test.sh" "${MODULES_BIN_PATH}/"
 	chmod u+x "${MODULES_BIN_PATH}/test.sh"
+	cp "${BUILD_PATH}/func.sh" "${MODULES_BIN_PATH}/"
+	chmod u+x "${MODULES_BIN_PATH}/func.sh"
 	tempModuleList=
 	for m in ${managedModules[@]}
 	do

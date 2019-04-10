@@ -1,32 +1,9 @@
 #!/bin/bash
 modules=(%MODULES%)
 
-getModuleItem(){
-    while read line
-	do
-		pname=`echo $line | awk -F '=' '{print $1}'`
-		pvalue=`awk -v a="$line" '
-						BEGIN{
-							len = split(a,ary,"=")
-							r=""
-							for ( i = 2; i <= len; i++ ){
-								if(r != ""){
-									r = (r"=")
-								}
-								r=(r""ary[i])
-					 		}
-							print r
-						}
-					'`
-		if [ "${pname}" == $1 ]; then
-			echo ${pvalue};
-			return 1;
-		fi
-	done < "./nuls.ncf"
-	return 0
-}
+. func.sh
 
-logPath=`getModuleItem "logPath"`
+logPath=`getModuleItem "./nuls.ncf" "logPath"`
 
 #if [ ! -d "$1" ]; then
 #    echo "必须指定logs目录: ./check-status.sh <log path>"
