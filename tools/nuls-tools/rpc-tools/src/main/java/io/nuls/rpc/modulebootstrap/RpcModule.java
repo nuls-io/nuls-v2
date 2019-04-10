@@ -295,7 +295,7 @@ public abstract class RpcModule implements InitializingBean {
 
 
     public void onDependenciesReady(Module module){
-        Log.debug("dependencies module {} ready");
+        Log.debug("dependencies module {} ready",module);
     }
 
 
