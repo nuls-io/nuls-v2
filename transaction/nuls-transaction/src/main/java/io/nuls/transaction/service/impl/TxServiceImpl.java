@@ -216,7 +216,7 @@ public class TxServiceImpl implements TxService {
      */
     private void validateTxSignature(Transaction tx, TxRegister txRegister, Chain chain) throws NulsException {
         //只需要验证,需要验证签名的交易(一些系统交易不用签名)
-        if (txRegister.verifySignature) {
+        if (txRegister.getVerifySignature()) {
             Set<String> addressSet = SignatureUtil.getAddressFromTX(tx, chain.getChainId());
             CoinData coinData = TxUtil.getCoinData(tx);
             if (null == coinData || null == coinData.getFrom() || coinData.getFrom().size() <= 0) {
@@ -664,8 +664,8 @@ public class TxServiceImpl implements TxService {
                 Transaction tx = packablePool.get(chain);
                 if (tx == null) {
                     try {
-                        nulsLogger.debug("************* [获取交易等待], 打包结束时间与当前时间差值：{}, 循环获取交易阶段剩余时间：{}",
-                                endtimestamp - currentTimeMillis, endtimestamp - currentTimeMillis - batchValidReserve );
+//                        nulsLogger.debug("************* [获取交易等待], 打包结束时间与当前时间差值：{}, 循环获取交易阶段剩余时间：{}",
+//                                endtimestamp - currentTimeMillis, endtimestamp - currentTimeMillis - batchValidReserve );
                         Thread.sleep(30L);
                     } catch (InterruptedException e) {
                         nulsLogger.error("packaging error ", e);
