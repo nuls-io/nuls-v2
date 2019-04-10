@@ -32,5 +32,5 @@ for pid in $APP_PID
 do
    stop $pid
 done
-
+echo ""
 echo "shutdown success"
