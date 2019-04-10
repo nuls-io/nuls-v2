@@ -25,8 +25,6 @@
 package io.nuls.transaction;
 
 import io.nuls.db.service.RocksDBService;
-import io.nuls.db.util.DBUtils;
-import io.nuls.h2.utils.MybatisDbHelper;
 import io.nuls.rpc.info.HostInfo;
 import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.modulebootstrap.Module;
@@ -38,7 +36,6 @@ import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.core.ioc.SpringLiteContext;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.log.Log;
-import io.nuls.tools.parse.ConfigLoader;
 import io.nuls.tools.parse.I18nUtils;
 import io.nuls.transaction.constant.TxConfig;
 import io.nuls.transaction.constant.TxConstant;
@@ -50,14 +47,10 @@ import io.nuls.transaction.rpc.call.NetworkCall;
 import io.nuls.transaction.storage.rocksdb.LanguageStorageService;
 import io.nuls.transaction.utils.DBUtil;
 import io.nuls.transaction.utils.LoggerUtil;
-import org.apache.ibatis.io.Resources;
-import org.apache.ibatis.session.SqlSessionFactory;
-import org.apache.ibatis.session.SqlSessionFactoryBuilder;
 
 import java.lang.reflect.Field;
 import java.nio.charset.Charset;
 import java.util.Map;
-import java.util.Properties;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 
@@ -169,14 +162,6 @@ public class TransactionBootstrap extends RpcModule {
             //语言表
             DBUtil.createTable(TxDBConstant.DB_TX_LANGUAGE);
 
-            //todo 单个节点跑多链的时候 h2是否需要通过chain来区分数据库(如何分？)，待确认！！
-            String resource = "mybatis/mybatis-config.xml";
-            Properties prop = ConfigLoader.loadProperties(TxConstant.DB_CONFIG_NAME);
-            String currentPath = DBUtils.genAbsolutePath(txConfig.getTxDataRoot());
-            LoggerUtil.Log.debug("#########################:" + currentPath);
-            prop.setProperty("url", "jdbc:h2:file:" + currentPath + "/h2/nuls;LOG=2;DB_CLOSE_DELAY=-1;TRACE_LEVEL_SYSTEM_OUT=1;DATABASE_TO_UPPER=FALSE;MV_STORE=false;COMPRESS=true;MAX_COMPACT_TIME=5000");
-            SqlSessionFactory sqlSessionFactory = new SqlSessionFactoryBuilder().build(Resources.getResourceAsReader(resource), "druid", prop);
-            MybatisDbHelper.setSqlSessionFactory(sqlSessionFactory);
         } catch (Exception e) {
             LoggerUtil.Log.error(e);
         }
