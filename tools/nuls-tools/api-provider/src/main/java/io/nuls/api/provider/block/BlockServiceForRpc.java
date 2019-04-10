@@ -72,6 +72,7 @@ public class BlockServiceForRpc extends BaseRpcService implements BlockService {
             res.setPackingIndexOfRound(blockExtendsData.getPackingIndexOfRound());
             res.setRoundIndex(blockExtendsData.getRoundIndex());
             res.setRoundStartTime(DateUtils.timeStamp2DateStr(blockExtendsData.getRoundStartTime()));
+            res.setStateRoot(HexUtil.encode(blockExtendsData.getStateRoot()));
             return success(res);
         } catch (NulsException e) {
             Log.error("反序列化block header发生异常",e);
