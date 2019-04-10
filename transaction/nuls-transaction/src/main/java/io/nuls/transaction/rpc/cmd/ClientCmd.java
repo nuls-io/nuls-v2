@@ -26,7 +26,6 @@ package io.nuls.transaction.rpc.cmd;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import io.nuls.base.data.NulsDigestData;
-import io.nuls.base.data.Page;
 import io.nuls.rpc.cmd.BaseCmd;
 import io.nuls.rpc.model.CmdAnnotation;
 import io.nuls.rpc.model.Parameter;
@@ -46,11 +45,9 @@ import io.nuls.transaction.manager.ChainManager;
 import io.nuls.transaction.model.bo.Chain;
 import io.nuls.transaction.model.dto.CrossTxTransferDTO;
 import io.nuls.transaction.model.po.TransactionConfirmedPO;
-import io.nuls.transaction.model.po.TransactionPO;
 import io.nuls.transaction.service.ConfirmedTxService;
 import io.nuls.transaction.service.TxGenerateService;
 import io.nuls.transaction.service.TxService;
-import io.nuls.transaction.storage.h2.TransactionH2Service;
 import io.nuls.transaction.storage.rocksdb.UnconfirmedTxStorageService;
 import io.nuls.transaction.utils.LoggerUtil;
 
@@ -72,9 +69,6 @@ public class ClientCmd extends BaseCmd {
 
     @Autowired
     private ChainManager chainManager;
-
-    @Autowired
-    private TransactionH2Service transactionH2Service;
 
     @Autowired
     private UnconfirmedTxStorageService unconfirmedTxStorageService;
@@ -197,42 +191,6 @@ public class ClientCmd extends BaseCmd {
             Map<String, Object> resultMap = new HashMap<>(TxConstant.INIT_CAPACITY_2);
             resultMap.put("value", hash);
             return success(resultMap);
-        } catch (NulsException e) {
-            errorLogProcess(chain, e);
-            return failed(e.getErrorCode());
-        } catch (Exception e) {
-            errorLogProcess(chain, e);
-            return failed(TxErrorCode.SYS_UNKOWN_EXCEPTION);
-        }
-    }
-
-
-    /**
-     * 分页查询交易记录
-     * Query the transaction list based on conditions such as account, chain, asset, and paging information.
-     *
-     * @param params
-     * @return Response
-     */
-    @CmdAnnotation(cmd = TxCmd.TX_GETTXS, version = 1.0, description = "Get transaction record")
-    @Parameter(parameterName = "chainId", parameterType = "int")
-    public Response getTxs(Map params) {
-        Chain chain = null;
-        try {
-            ObjectUtils.canNotEmpty(params.get("chainId"), TxErrorCode.PARAMETER_ERROR.getMsg());
-            chain = chainManager.getChain((int) params.get("chainId"));
-            if (null == chain) {
-                throw new NulsException(TxErrorCode.CHAIN_NOT_FOUND);
-            }
-            Integer assetChainId = null == params.get("assetChainId") ? null : Integer.parseInt(params.get("assetChainId").toString());
-            Integer assetId = null == params.get("assetId") ? null : Integer.parseInt(params.get("assetId").toString());
-            Integer type = null == params.get("type") ? null : Integer.parseInt(params.get("type").toString());
-            Integer pageSize = null == params.get("pageSize") ? TxConstant.PAGESIZE : Integer.parseInt(params.get("pageSize").toString());
-            Integer pageNumber = null == params.get("pageNumber") ? TxConstant.PAGENUMBER : Integer.parseInt(params.get("pageNumber").toString());
-            String address = (String) params.get("address");
-
-            Page<TransactionPO> list = transactionH2Service.getTxs(address, assetChainId, assetId, type, pageNumber, pageSize);
-            return success(list);
         } catch (NulsException e) {
             errorLogProcess(chain, e);
             return failed(e.getErrorCode());

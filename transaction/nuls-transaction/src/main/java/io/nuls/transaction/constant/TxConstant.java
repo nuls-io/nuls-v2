@@ -123,13 +123,6 @@ public interface TxConstant {
     int INIT_CAPACITY_4 = 4;
     int INIT_CAPACITY_2 = 2;
 
-    /** H2 数据库交易表名前缀 */
-    String H2_TX_TABLE_NAME_PREFIX = "transaction_";
-    /** H2 数据库交易表索引前缀 */
-    String H2_TX_TABLE_INDEX_NAME_PREFIX = "tx_index_";
-    /** H2 数据库交易表唯一键前缀(暂取消未使用) */
-    String H2_TX_TABLE_UNIQUE_NAME_PREFIX = "tx_unique_";
-
     /**
      * 跨链注册信息交易
      */

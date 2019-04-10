@@ -42,8 +42,7 @@ public class TxConfig {
     private int recentPackagerThreshold;
     /** 未确认交易过期毫秒数-30分钟 */
     private long unconfirmedTxExpireMs;
-    /** h2数据库交易记录表分表数量*/
-    private int h2TxTableNumber;
+
 
     public ConfigBean getChainConfig() {
         return chainConfig;
@@ -149,12 +148,5 @@ public class TxConfig {
         this.unconfirmedTxExpireMs = unconfirmedTxExpireMs;
     }
 
-    public int getH2TxTableNumber() {
-        return h2TxTableNumber;
-    }
-
-    public void setH2TxTableNumber(int h2TxTableNumber) {
-        this.h2TxTableNumber = h2TxTableNumber;
-    }
 
 }

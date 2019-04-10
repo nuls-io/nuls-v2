@@ -47,7 +47,6 @@ import io.nuls.transaction.manager.ChainManager;
 import io.nuls.transaction.model.bo.Chain;
 import io.nuls.transaction.rpc.call.BlockCall;
 import io.nuls.transaction.rpc.call.NetworkCall;
-import io.nuls.transaction.storage.h2.TransactionH2Service;
 import io.nuls.transaction.storage.rocksdb.LanguageStorageService;
 import io.nuls.transaction.utils.DBUtil;
 import io.nuls.transaction.utils.LoggerUtil;
@@ -97,7 +96,6 @@ public class TransactionBootstrap extends RpcModule {
         //初始化国际资源文件语言
         try {
             initLanguage();
-            initH2Table();
             SpringLiteContext.getBean(ChainManager.class).runChain();
             Log.info("Transaction Ready...");
             return true;
@@ -200,17 +198,6 @@ public class TransactionBootstrap extends RpcModule {
         } catch (Exception e) {
             LoggerUtil.Log.error(e);
         }
-    }
-
-    /**
-     * 创建H2的表, 如果存在则不会创建
-     */
-    private void initH2Table() {
-        TransactionH2Service ts = SpringLiteContext.getBean(TransactionH2Service.class);
-        ts.createTxTablesIfNotExists(TxConstant.H2_TX_TABLE_NAME_PREFIX,
-                TxConstant.H2_TX_TABLE_INDEX_NAME_PREFIX,
-                TxConstant.H2_TX_TABLE_UNIQUE_NAME_PREFIX,
-                txConfig.getH2TxTableNumber());
     }
 
     /**
