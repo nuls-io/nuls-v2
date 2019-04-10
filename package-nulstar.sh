@@ -360,10 +360,13 @@ packageModule() {
 	if [ ! -d ./$1 ]; then
 		return 0
 	fi
+	cd ./$1
+#	echo `pwd`
+#	echo ${RELEASE_PATH}
 	if [ `pwd` == "${RELEASE_PATH}" ]; then
+	    cd ..
 		return 0;
 	fi
-	cd ./$1
 	nowPath=`pwd`
 	if [ -f "./module.ncf" ]; then
 		echoYellow "find module.ncf in ${nowPath}"
@@ -400,6 +403,7 @@ packageModule() {
 
 for fi in `ls`
 do
+    echo $fi
     if [ "$fi"x != "tools"x ]; then
     	packageModule $fi
     fi

@@ -12,10 +12,6 @@ EOF
     exit 0
 }
 
-nulstarUrl=`getModuleItem "./nuls.ncf" "serviceManager"`
-if [ -z "${nulstarUrl}" ]; then
-    nulstarUrl="ws://127.0.0.1:7771"
-fi
 
 cd `dirname $0`;
 if [ -d ../Libraries/JAVA/11.0.2 ]; then
@@ -33,14 +29,24 @@ if [ ! -n "$JAVA_EXIST" ]; then
 fi
 echo "JAVA_HOME:${JAVA_HOME}"
 echo `${JAVA} -version`
-cd ./Modules/Nuls/cmdclient/1.0.0
+
 LOGLEVEL="ERROR"
-while getopts hl: name
+while getopts hl:c: name
 do
             case $name in
             l)     LOGLEVEL="$OPTARG";;
+            c)     config="$OPTARG";;
             h)     help ;;
             ?)     exit 2;;
            esac
 done
+if [ -z "$config" ]; then
+    config="./nuls.ncf";
+fi
+nulstarUrl=`getModuleItem $config "serviceManager"`
+echo $nulstarUrl
+if [ -z "${nulstarUrl}" ]; then
+    nulstarUrl="ws://127.0.0.1:7771"
+fi
+cd ./Modules/Nuls/cmdclient/1.0.0
 ./cmd.sh ${JAVA_HOME} ${LOGLEVEL} ${nulstarUrl}

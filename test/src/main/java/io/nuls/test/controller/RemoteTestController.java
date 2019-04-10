@@ -77,8 +77,7 @@ public class RemoteTestController {
             return new RemoteResult(tc.check(param, 0));
         } catch (TestFailException e) {
             return new RemoteResult(false,e.getMessage());
-        } catch (IOException e) {
-            e.printStackTrace();
+        } catch (Throwable e){
             return new RemoteResult(false,"系统异常："+e.getMessage());
         }
     }
