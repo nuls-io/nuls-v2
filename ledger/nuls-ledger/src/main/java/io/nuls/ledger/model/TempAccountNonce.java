@@ -24,14 +24,12 @@
  */
 package io.nuls.ledger.model;
 
-import java.math.BigInteger;
-
 /**
  * @author lan
  * @description
  * @date 2019/01/02
  **/
-public class TempAccountState {
+public class TempAccountNonce {
 
     private String assetKey;
 
@@ -39,13 +37,11 @@ public class TempAccountState {
 
     private String nextNonce;
 
-    private BigInteger balance;
 
-    public TempAccountState(String assetKey,String nonce,String nextNonce,BigInteger balance){
+    public TempAccountNonce(String assetKey, String nonce, String nextNonce){
         this.assetKey = assetKey;
         this.nonce = nonce;
         this.nextNonce = nextNonce;
-        this.balance = balance;
     }
 
     public String getAssetKey() {
@@ -70,13 +66,5 @@ public class TempAccountState {
 
     public void setNextNonce(String nextNonce) {
         this.nextNonce = nextNonce;
-    }
-
-    public BigInteger getBalance() {
-        return balance;
-    }
-
-    public void setBalance(BigInteger balance) {
-        this.balance = balance;
     }
 }

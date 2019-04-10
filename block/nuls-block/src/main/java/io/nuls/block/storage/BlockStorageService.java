@@ -22,7 +22,7 @@ package io.nuls.block.storage;
 
 import io.nuls.base.data.BlockHeader;
 import io.nuls.base.data.NulsDigestData;
-import io.nuls.block.model.po.BlockHeaderPo;
+import io.nuls.base.data.po.BlockHeaderPo;
 
 import java.util.List;
 
