@@ -65,8 +65,8 @@ public class ConsensusBootStrap extends RpcModule {
      * @return
      */
     @Override
-    public String getRpcCmdPackage(){
-        return ConsensusConstant.RPC_PATH;
+    public String[] getRpcCmdPackage(){
+        return new String[]{ConsensusConstant.RPC_PATH};
     }
 
     @Override
