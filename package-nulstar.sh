@@ -403,7 +403,6 @@ packageModule() {
 
 for fi in `ls`
 do
-    echo $fi
     if [ "$fi"x != "tools"x ]; then
     	packageModule $fi
     fi
