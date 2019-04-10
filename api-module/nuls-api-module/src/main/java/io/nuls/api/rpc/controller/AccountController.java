@@ -70,7 +70,7 @@ public class AccountController {
         if (pageIndex <= 0) {
             pageIndex = 1;
         }
-        if (pageSize <= 0 || pageSize > 100) {
+        if (pageSize <= 0 || pageSize > 1000) {
             pageSize = 10;
         }
         RpcResult result = new RpcResult();
@@ -107,7 +107,7 @@ public class AccountController {
         if (pageIndex <= 0) {
             pageIndex = 1;
         }
-        if (pageSize <= 0 || pageSize > 100) {
+        if (pageSize <= 0 || pageSize > 1000) {
             pageSize = 10;
         }
         RpcResult result = new RpcResult();
@@ -166,6 +166,15 @@ public class AccountController {
         } catch (Exception e) {
             return RpcResult.paramError();
         }
+        if (sortType < 0 || sortType > 1) {
+            return RpcResult.paramError("[sortType] is invalid");
+        }
+        if (pageIndex <= 0) {
+            pageIndex = 1;
+        }
+        if (pageSize <= 0 || pageSize > 1000) {
+            pageSize = 10;
+        }
 
         PageInfo<AccountInfo> pageInfo;
         if (CacheManager.isChainExist(chainId)) {
@@ -189,6 +198,13 @@ public class AccountController {
         } catch (Exception e) {
             return RpcResult.paramError();
         }
+        if (pageIndex <= 0) {
+            pageIndex = 1;
+        }
+        if (pageSize <= 0 || pageSize > 1000) {
+            pageSize = 10;
+        }
+
         PageInfo<FreezeInfo> pageInfo;
         if (CacheManager.isChainExist(chainId)) {
             ApiCache apiCache = CacheManager.getCache(chainId);

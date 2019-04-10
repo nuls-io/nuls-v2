@@ -84,7 +84,7 @@ public class BlockController {
             return RpcResult.paramError();
         }
         if (height < 0) {
-            height = 0;
+            return RpcResult.paramError("[height] is invalid");
         }
         if (!CacheManager.isChainExist(chainId)) {
             return RpcResult.dataNotFound();
@@ -163,7 +163,7 @@ public class BlockController {
             return RpcResult.paramError();
         }
         if (height < 0) {
-            height = 0;
+            return RpcResult.paramError("[height] is invalid");
         }
         if (!CacheManager.isChainExist(chainId)) {
             return RpcResult.dataNotFound();
@@ -206,7 +206,7 @@ public class BlockController {
         if (pageIndex <= 0) {
             pageIndex = 1;
         }
-        if (pageSize <= 0 || pageSize > 100) {
+        if (pageSize <= 0 || pageSize > 1000) {
             pageSize = 10;
         }
 

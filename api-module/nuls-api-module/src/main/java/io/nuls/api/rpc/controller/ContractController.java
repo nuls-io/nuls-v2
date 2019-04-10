@@ -85,7 +85,7 @@ public class ContractController {
         if (pageIndex <= 0) {
             pageIndex = 1;
         }
-        if (pageSize <= 0 || pageSize > 100) {
+        if (pageSize <= 0 || pageSize > 1000) {
             pageSize = 10;
         }
         PageInfo<AccountTokenInfo> pageInfo;
@@ -119,7 +119,7 @@ public class ContractController {
         if (pageIndex <= 0) {
             pageIndex = 1;
         }
-        if (pageSize <= 0 || pageSize > 100) {
+        if (pageSize <= 0 || pageSize > 1000) {
             pageSize = 10;
         }
 
@@ -155,7 +155,7 @@ public class ContractController {
         if (pageIndex <= 0) {
             pageIndex = 1;
         }
-        if (pageSize <= 0 || pageSize > 100) {
+        if (pageSize <= 0 || pageSize > 1000) {
             pageSize = 10;
         }
 
@@ -191,7 +191,7 @@ public class ContractController {
         if (pageIndex <= 0) {
             pageIndex = 1;
         }
-        if (pageSize <= 0 || pageSize > 100) {
+        if (pageSize <= 0 || pageSize > 1000) {
             pageSize = 10;
         }
 
@@ -224,7 +224,7 @@ public class ContractController {
         if (pageIndex <= 0) {
             pageIndex = 1;
         }
-        if (pageSize <= 0 || pageSize > 100) {
+        if (pageSize <= 0 || pageSize > 1000) {
             pageSize = 10;
         }
 
