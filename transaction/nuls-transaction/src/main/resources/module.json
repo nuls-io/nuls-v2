@@ -19,6 +19,5 @@
   "crossVerifyResultPassRate":"0.51",
   "chainNodesResultPassRate":"0.8",
   "recentPackagerThreshold":30,
-  "unconfirmedTxExpireMs":1800000,
-  "h2TxTableNumber":128
+  "unconfirmedTxExpireMs":1800000
 }

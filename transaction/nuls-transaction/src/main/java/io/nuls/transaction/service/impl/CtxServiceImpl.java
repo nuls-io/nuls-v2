@@ -28,11 +28,9 @@ import io.nuls.transaction.rpc.call.ConsensusCall;
 import io.nuls.transaction.rpc.call.LedgerCall;
 import io.nuls.transaction.rpc.call.NetworkCall;
 import io.nuls.transaction.service.CtxService;
-import io.nuls.transaction.storage.h2.TransactionH2Service;
 import io.nuls.transaction.storage.rocksdb.CtxStorageService;
 import io.nuls.transaction.storage.rocksdb.UnconfirmedTxStorageService;
 import io.nuls.transaction.storage.rocksdb.UnverifiedCtxStorageService;
-import io.nuls.transaction.utils.TxUtil;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -61,9 +59,6 @@ public class CtxServiceImpl implements CtxService {
 
     @Autowired
     private UnconfirmedTxStorageService unconfirmedTxStorageService;
-
-    @Autowired
-    private TransactionH2Service transactionH2Service;
 
     @Autowired
     private TxConfig txConfig;
@@ -190,8 +185,6 @@ public class CtxServiceImpl implements CtxService {
         }
         //保存到rocksdb
         unconfirmedTxStorageService.putTx(chain.getChainId(),tx);
-        //保存到h2数据库
-        transactionH2Service.saveTxs(TxUtil.tx2PO(chain, tx));
         //调账本记录未确认交易
         try {
             LedgerCall.commitUnconfirmedTx(chain, RPCUtil.encode(tx.serialize()));

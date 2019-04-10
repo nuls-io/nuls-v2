@@ -24,8 +24,8 @@
 
 package io.nuls.transaction.rpc.cmd;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import io.nuls.base.data.NulsDigestData;
-import io.nuls.base.data.Page;
 import io.nuls.rpc.cmd.BaseCmd;
 import io.nuls.rpc.model.CmdAnnotation;
 import io.nuls.rpc.model.Parameter;
@@ -36,17 +36,18 @@ import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.log.Log;
 import io.nuls.tools.model.ObjectUtils;
+import io.nuls.tools.parse.JSONUtils;
 import io.nuls.transaction.cache.PackablePool;
 import io.nuls.transaction.constant.TxCmd;
 import io.nuls.transaction.constant.TxConstant;
 import io.nuls.transaction.constant.TxErrorCode;
 import io.nuls.transaction.manager.ChainManager;
 import io.nuls.transaction.model.bo.Chain;
+import io.nuls.transaction.model.dto.CrossTxTransferDTO;
 import io.nuls.transaction.model.po.TransactionConfirmedPO;
-import io.nuls.transaction.model.po.TransactionPO;
 import io.nuls.transaction.service.ConfirmedTxService;
+import io.nuls.transaction.service.TxGenerateService;
 import io.nuls.transaction.service.TxService;
-import io.nuls.transaction.storage.h2.TransactionH2Service;
 import io.nuls.transaction.storage.rocksdb.UnconfirmedTxStorageService;
 import io.nuls.transaction.utils.LoggerUtil;
 
@@ -70,13 +71,13 @@ public class ClientCmd extends BaseCmd {
     private ChainManager chainManager;
 
     @Autowired
-    private TransactionH2Service transactionH2Service;
-
-    @Autowired
     private UnconfirmedTxStorageService unconfirmedTxStorageService;
 
     @Autowired
     private PackablePool packablePool;
+
+    @Autowired
+    private TxGenerateService txGenerateService;
 
     /**
      * 根据hash获取交易, 先查未确认, 查不到再查已确认
@@ -166,33 +167,30 @@ public class ClientCmd extends BaseCmd {
         }
     }
 
-
     /**
-     * 分页查询交易记录
-     * Query the transaction list based on conditions such as account, chain, asset, and paging information.
+     * 创建跨链交易接口
      *
      * @param params
-     * @return Response
+     * @return
      */
-    @CmdAnnotation(cmd = TxCmd.TX_GETTXS, version = 1.0, description = "Get transaction record")
-    @Parameter(parameterName = "chainId", parameterType = "int")
-    public Response getTxs(Map params) {
+    @CmdAnnotation(cmd = TxCmd.TX_CREATE_CROSS_TX, version = 1.0, description = "")
+    public Response createCtx(Map params) {
         Chain chain = null;
         try {
-            ObjectUtils.canNotEmpty(params.get("chainId"), TxErrorCode.PARAMETER_ERROR.getMsg());
-            chain = chainManager.getChain((int) params.get("chainId"));
-            if (null == chain) {
-                throw new NulsException(TxErrorCode.CHAIN_NOT_FOUND);
+            // check parameters
+            if (params == null) {
+                throw new NulsException(TxErrorCode.NULL_PARAMETER);
             }
-            Integer assetChainId = null == params.get("assetChainId") ? null : Integer.parseInt(params.get("assetChainId").toString());
-            Integer assetId = null == params.get("assetId") ? null : Integer.parseInt(params.get("assetId").toString());
-            Integer type = null == params.get("type") ? null : Integer.parseInt(params.get("type").toString());
-            Integer pageSize = null == params.get("pageSize") ? TxConstant.PAGESIZE : Integer.parseInt(params.get("pageSize").toString());
-            Integer pageNumber = null == params.get("pageNumber") ? TxConstant.PAGENUMBER : Integer.parseInt(params.get("pageNumber").toString());
-            String address = (String) params.get("address");
-
-            Page<TransactionPO> list = transactionH2Service.getTxs(address, assetChainId, assetId, type, pageNumber, pageSize);
-            return success(list);
+            // parse params
+            JSONUtils.getInstance().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+            CrossTxTransferDTO crossTxTransferDTO = JSONUtils.json2pojo(JSONUtils.obj2json(params), CrossTxTransferDTO.class);
+            int chainId = crossTxTransferDTO.getChainId();
+            chain = chainManager.getChain(chainId);
+            String hash = txGenerateService.createCrossTransaction(chainManager.getChain(chainId),
+                    crossTxTransferDTO.getListFrom(), crossTxTransferDTO.getListTo(), crossTxTransferDTO.getRemark());
+            Map<String, Object> resultMap = new HashMap<>(TxConstant.INIT_CAPACITY_2);
+            resultMap.put("value", hash);
+            return success(resultMap);
         } catch (NulsException e) {
             errorLogProcess(chain, e);
             return failed(e.getErrorCode());

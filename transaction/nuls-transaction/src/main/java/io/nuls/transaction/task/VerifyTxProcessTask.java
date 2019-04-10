@@ -12,11 +12,9 @@ import io.nuls.transaction.model.po.TransactionConfirmedPO;
 import io.nuls.transaction.rpc.call.LedgerCall;
 import io.nuls.transaction.rpc.call.NetworkCall;
 import io.nuls.transaction.service.TxService;
-import io.nuls.transaction.storage.h2.TransactionH2Service;
 import io.nuls.transaction.storage.rocksdb.UnconfirmedTxStorageService;
 import io.nuls.transaction.storage.rocksdb.UnverifiedTxStorageService;
 import io.nuls.transaction.utils.TransactionTimeComparator;
-import io.nuls.transaction.utils.TxUtil;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -34,7 +32,6 @@ public class VerifyTxProcessTask implements Runnable {
     private UnverifiedTxStorageService unverifiedTxStorageService = SpringLiteContext.getBean(UnverifiedTxStorageService.class);
     private TxService txService = SpringLiteContext.getBean(TxService.class);
     private UnconfirmedTxStorageService unconfirmedTxStorageService = SpringLiteContext.getBean(UnconfirmedTxStorageService.class);
-    private TransactionH2Service transactionH2Service = SpringLiteContext.getBean(TransactionH2Service.class);
 
     private TransactionTimeComparator txComparator = SpringLiteContext.getBean(TransactionTimeComparator.class);
     private List<Transaction> orphanTxList = new ArrayList<>();
@@ -115,11 +112,6 @@ public class VerifyTxProcessTask implements Runnable {
                 }
                 //保存到rocksdb
                 unconfirmedTxStorageService.putTx(chainId, tx);
-
-                long timeH2 = System.currentTimeMillis();
-                //保存到h2数据库
-                transactionH2Service.saveTxs(TxUtil.tx2PO(chain,tx));
-                chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("保存H2数据库花费时间:{}", System.currentTimeMillis() - timeH2);
 
                 //广播交易hash
                 NetworkCall.broadcastTxHash(chain.getChainId(),tx.getHash());

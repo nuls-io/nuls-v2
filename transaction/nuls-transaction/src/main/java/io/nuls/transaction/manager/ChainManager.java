@@ -46,8 +46,6 @@ import io.nuls.transaction.model.bo.config.ConfigBean;
 import io.nuls.transaction.storage.rocksdb.ConfigStorageService;
 import io.nuls.transaction.utils.queue.entity.PersistentQueue;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -215,12 +213,8 @@ public class ChainManager {
          * 共识模块日志文件对象创建,如果一条链有多类日志文件，可在此添加
          * Creation of Log File Object in Consensus Module，If there are multiple log files in a chain, you can add them here
          * */
-        List<String> sqlPackageNames = new ArrayList<>();
-//        sqlPackageNames.add("org.apache.ibatis");
-//        sqlPackageNames.add("java.sql");
-//        sqlPackageNames.add("io.nuls.transaction.storage.h2.impl.mapper");
 
-        NulsLogger txLogger = LoggerBuilder.getLogger(String.valueOf(chain.getConfig().getChainId()), TxConstant.LOG_TX, sqlPackageNames, Level.DEBUG, Level.DEBUG);
+        NulsLogger txLogger = LoggerBuilder.getLogger(String.valueOf(chain.getConfig().getChainId()), TxConstant.LOG_TX, Level.DEBUG, Level.DEBUG);
         chain.getLoggerMap().put(TxConstant.LOG_TX, txLogger);
         NulsLogger txProcessLogger = LoggerBuilder.getLogger(String.valueOf(chain.getConfig().getChainId()), TxConstant.LOG_NEW_TX_PROCESS, Level.DEBUG, Level.DEBUG);
         chain.getLoggerMap().put(TxConstant.LOG_NEW_TX_PROCESS, txProcessLogger);

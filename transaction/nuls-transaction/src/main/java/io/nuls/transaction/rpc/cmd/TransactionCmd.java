@@ -22,12 +22,10 @@ import io.nuls.transaction.model.bo.Chain;
 import io.nuls.transaction.model.bo.TxPackage;
 import io.nuls.transaction.model.bo.TxRegister;
 import io.nuls.transaction.model.bo.VerifyTxResult;
-import io.nuls.transaction.model.dto.CrossTxTransferDTO;
 import io.nuls.transaction.model.dto.ModuleTxRegisterDTO;
 import io.nuls.transaction.model.dto.TxRegisterDTO;
 import io.nuls.transaction.model.po.TransactionConfirmedPO;
 import io.nuls.transaction.service.ConfirmedTxService;
-import io.nuls.transaction.service.TxGenerateService;
 import io.nuls.transaction.service.TxService;
 import io.nuls.transaction.utils.TxUtil;
 
@@ -48,8 +46,6 @@ public class TransactionCmd extends BaseCmd {
 
     @Autowired
     private TxService txService;
-    @Autowired
-    private TxGenerateService txGenerateService;
     @Autowired
     private ConfirmedTxService confirmedTxService;
     @Autowired
@@ -610,38 +606,6 @@ public class TransactionCmd extends BaseCmd {
         return success(resultMap);
     }
 
-    /**
-     * 创建跨链交易接口
-     *
-     * @param params
-     * @return
-     */
-    @CmdAnnotation(cmd = TxCmd.TX_CREATE_CROSS_TX, version = 1.0, description = "")
-    public Response createCtx(Map params) {
-        Chain chain = null;
-        try {
-            // check parameters
-            if (params == null) {
-                throw new NulsException(TxErrorCode.NULL_PARAMETER);
-            }
-            // parse params
-            JSONUtils.getInstance().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-            CrossTxTransferDTO crossTxTransferDTO = JSONUtils.json2pojo(JSONUtils.obj2json(params), CrossTxTransferDTO.class);
-            int chainId = crossTxTransferDTO.getChainId();
-            chain = chainManager.getChain(chainId);
-            String hash = txGenerateService.createCrossTransaction(chainManager.getChain(chainId),
-                    crossTxTransferDTO.getListFrom(), crossTxTransferDTO.getListTo(), crossTxTransferDTO.getRemark());
-            Map<String, Object> resultMap = new HashMap<>(TxConstant.INIT_CAPACITY_2);
-            resultMap.put("value", hash);
-            return success(resultMap);
-        } catch (NulsException e) {
-            errorLogProcess(chain, e);
-            return failed(e.getErrorCode());
-        } catch (Exception e) {
-            errorLogProcess(chain, e);
-            return failed(TxErrorCode.SYS_UNKOWN_EXCEPTION);
-        }
-    }
 
     /**
      * 节点是否正在打包(由共识调用), 决定了新交易是否放入交易模块的待打包队列
