@@ -51,7 +51,6 @@ public class RegisterInvoke extends BaseInvoke {
                 return;
             }
             Log.info("RMB:module rpc is ready");
-            RpcModule rpcModule = SpringLiteContext.getBean(RpcModule.class);
             dependMap.entrySet().forEach(obj -> {
                 Map.Entry<String, Map> entry = (Map.Entry<String, Map>) obj;
                 if (dependenices.stream().anyMatch(d -> d.getName().equals(entry.getKey()))) {
