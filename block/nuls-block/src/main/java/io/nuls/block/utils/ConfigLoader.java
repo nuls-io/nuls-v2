@@ -81,8 +81,8 @@ public class ConfigLoader {
         List<ProtocolConfigJson> protocolConfigs = JSONUtils.json2list(json, ProtocolConfigJson.class);
         protocolConfigs.sort(PROTOCOL_CONFIG_COMPARATOR);
         Map<Short, Protocol> protocolMap = ProtocolLoader.load(protocolConfigs);
-        int chainId = blockConfig.getDefaultChainParameter().getChainId();
         ChainParameters po = blockConfig.getDefaultChainParameter();
+        int chainId = po.getChainId();
         ContextManager.init(po, protocolMap);
         service.save(po, chainId);
         service.saveProtocolConfigJson(json, chainId);

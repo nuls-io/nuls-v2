@@ -4,11 +4,12 @@ import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.data.BlockExtendsData;
 import io.nuls.base.data.BlockHeader;
 import io.nuls.protocol.manager.ContextManager;
+import io.nuls.protocol.model.ChainParameters;
 import io.nuls.protocol.model.ProtocolConfig;
 import io.nuls.protocol.model.ProtocolContext;
 import io.nuls.protocol.model.ProtocolVersion;
 import io.nuls.protocol.model.po.Statistics;
-import io.nuls.protocol.service.StatisticsStorageService;
+import io.nuls.protocol.storage.StatisticsStorageService;
 import io.nuls.rpc.invoke.BaseInvoke;
 import io.nuls.rpc.model.message.Response;
 import io.nuls.tools.core.ioc.SpringLiteContext;
@@ -75,8 +76,8 @@ public class BlockHeaderInvoke extends BaseInvoke {
             proportionMap.merge(newProtocolVersion, 1, (a, b) -> a - b);
         }
         //缓存统计总数==0时，从数据库加载上一条统计记录
-        ProtocolConfig config = context.getConfig();
-        short interval = config.getInterval();
+        ChainParameters parameters = context.getParameters();
+        short interval = parameters.getInterval();
         //区块高度到达阈值，从数据库删除一条统计记录
         if (count < 0) {
             boolean b = service.delete(chainId, height);
@@ -121,8 +122,8 @@ public class BlockHeaderInvoke extends BaseInvoke {
             //重新计算统计信息
             proportionMap.merge(newProtocolVersion, 1, (a, b) -> a + b);
         }
-        ProtocolConfig config = context.getConfig();
-        short interval = config.getInterval();
+        ChainParameters parameters = context.getParameters();
+        short interval = parameters.getInterval();
         //每1000块进行一次统计
         if (count == interval) {
             int already = 0;
@@ -162,7 +163,7 @@ public class BlockHeaderInvoke extends BaseInvoke {
                     return;
                 }
                 //已经统计了1000个区块中的400个，但是还没有新协议生效，后面的就不需要统计了
-                if (already > interval - (interval * config.getEffectiveRatioMinimum() / 100)) {
+                if (already > interval - (interval * parameters.getEffectiveRatioMinimum() / 100)) {
                     break;
                 }
             }
@@ -197,19 +198,19 @@ public class BlockHeaderInvoke extends BaseInvoke {
         if (currentProtocolVersion.getVersion() > blockVersion) {
             return false;
         }
-        ProtocolConfig config = context.getConfig();
+        ChainParameters parameters = context.getParameters();
         byte effectiveRatio = data.getEffectiveRatio();
-        if (effectiveRatio > config.getEffectiveRatioMaximum()) {
+        if (effectiveRatio > parameters.getEffectiveRatioMaximum()) {
             return false;
         }
-        if (effectiveRatio < config.getEffectiveRatioMinimum()) {
+        if (effectiveRatio < parameters.getEffectiveRatioMinimum()) {
             return false;
         }
         short continuousIntervalCount = data.getContinuousIntervalCount();
-        if (continuousIntervalCount > config.getContinuousIntervalCountMaximum()) {
+        if (continuousIntervalCount > parameters.getContinuousIntervalCountMaximum()) {
             return false;
         }
-        if (continuousIntervalCount < config.getContinuousIntervalCountMinimum()) {
+        if (continuousIntervalCount < parameters.getContinuousIntervalCountMinimum()) {
             return false;
         }
         return true;

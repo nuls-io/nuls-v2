@@ -20,49 +20,49 @@
  *
  */
 
-package io.nuls.protocol.service;
+package io.nuls.protocol.storage;
 
-import io.nuls.protocol.model.po.Statistics;
+import io.nuls.protocol.model.ChainParameters;
 
 import java.util.List;
 
 /**
- * 版本统计信息存储管理类
+ * 配置信息存储管理类
  * Configuration Information Storage Management Class
  *
  * @author captain
  * @version 1.0
  * @date 19-1-25 下午3:02
  */
-public interface StatisticsStorageService {
+public interface ParametersStorageService {
     /**
-     * 保存指定链的版本统计信息
+     * 保存指定链的配置信息
      * Save configuration information for the specified chain
      *
-     * @param statistics 版本统计类/config bean
-     * @param chainId        链Id/chain id
+     * @param config 配置类/config bean
+     * @param chainID        链ID/chain id
      * @return 保存是否成功/Is preservation successful?
      * @throws
      */
-    boolean save(int chainId, Statistics statistics);
+    boolean save(ChainParameters config, int chainID);
 
     /**
-     * 查询某条链的版本统计信息
+     * 查询某条链的配置信息
      * Query the configuration information of a chain
      *
-     * @param chainId 链Id/chain id
-     * @return 版本统计信息类/config bean
+     * @param chainID 链ID/chain id
+     * @return 配置信息类/config bean
      */
-    Statistics get(int chainId, long height);
+    ChainParameters get(int chainID);
 
     /**
-     * 删除某条链的版本统计信息
+     * 删除某条链的配置信息
      * Delete configuration information for a chain
      *
-     * @param chainId 链Id/chain id
+     * @param chainID 链ID/chain id
      * @return 删除是否成功/Delete success
      */
-    boolean delete(int chainId, long height);
+    boolean delete(int chainID);
 
     /**
      * 获取当前节点所有的链信息
@@ -70,5 +70,5 @@ public interface StatisticsStorageService {
      *
      * @return 节点信息列表/Node information list
      */
-    List<Statistics> getList(int chainId);
+    List<ChainParameters> getList();
 }

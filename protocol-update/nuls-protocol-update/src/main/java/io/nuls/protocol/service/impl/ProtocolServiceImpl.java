@@ -26,12 +26,13 @@ import io.nuls.base.data.BlockHeader;
 import io.nuls.db.service.RocksDBService;
 import io.nuls.protocol.constant.Constant;
 import io.nuls.protocol.manager.ContextManager;
+import io.nuls.protocol.model.ChainParameters;
 import io.nuls.protocol.model.ProtocolConfig;
 import io.nuls.protocol.model.ProtocolContext;
 import io.nuls.protocol.model.ProtocolVersion;
 import io.nuls.protocol.model.po.Statistics;
 import io.nuls.protocol.service.ProtocolService;
-import io.nuls.protocol.service.StatisticsStorageService;
+import io.nuls.protocol.storage.StatisticsStorageService;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Service;
 import io.nuls.tools.exception.NulsException;
@@ -40,8 +41,6 @@ import io.nuls.tools.log.logback.NulsLogger;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Stack;
-
-import static io.nuls.protocol.utils.LoggerUtil.commonLog;
 
 /**
  * 区块服务实现类
@@ -117,8 +116,8 @@ public class ProtocolServiceImpl implements ProtocolService {
             //重新计算统计信息
             proportionMap.merge(newProtocolVersion, 1, (a, b) -> a + b);
         }
-        ProtocolConfig config = context.getConfig();
-        short interval = config.getInterval();
+        ChainParameters parameters = context.getParameters();
+        short interval = parameters.getInterval();
         //每1000块进行一次统计
         if (count == interval) {
             int already = 0;
@@ -158,7 +157,7 @@ public class ProtocolServiceImpl implements ProtocolService {
                     return context.getCurrentProtocolVersion().getVersion();
                 }
                 //已经统计了1000个区块中的400个，但是还没有新协议生效，后面的就不需要统计了
-                if (already > interval - (interval * config.getEffectiveRatioMinimum() / 100)) {
+                if (already > interval - (interval * parameters.getEffectiveRatioMinimum() / 100)) {
                     break;
                 }
             }
@@ -206,8 +205,8 @@ public class ProtocolServiceImpl implements ProtocolService {
             proportionMap.merge(newProtocolVersion, 1, (a, b) -> a - b);
         }
         //缓存统计总数==0时，从数据库加载上一条统计记录
-        ProtocolConfig config = context.getConfig();
-        short interval = config.getInterval();
+        ChainParameters parameters = context.getParameters();
+        short interval = parameters.getInterval();
         //区块高度到达阈值，从数据库删除一条统计记录
         if (count < 0) {
             boolean b = service.delete(chainId, height);
@@ -246,22 +245,19 @@ public class ProtocolServiceImpl implements ProtocolService {
         if (currentProtocolVersion.getVersion() > blockVersion) {
             return false;
         }
-        ProtocolConfig config = context.getConfig();
+        ChainParameters parameters = context.getParameters();
         byte effectiveRatio = data.getEffectiveRatio();
-        if (effectiveRatio > config.getEffectiveRatioMaximum()) {
+        if (effectiveRatio > parameters.getEffectiveRatioMaximum()) {
             return false;
         }
-        if (effectiveRatio < config.getEffectiveRatioMinimum()) {
+        if (effectiveRatio < parameters.getEffectiveRatioMinimum()) {
             return false;
         }
         short continuousIntervalCount = data.getContinuousIntervalCount();
-        if (continuousIntervalCount > config.getContinuousIntervalCountMaximum()) {
+        if (continuousIntervalCount > parameters.getContinuousIntervalCountMaximum()) {
             return false;
         }
-        if (continuousIntervalCount < config.getContinuousIntervalCountMinimum()) {
-            return false;
-        }
-        return true;
+        return continuousIntervalCount >= parameters.getContinuousIntervalCountMinimum();
     }
 
 }

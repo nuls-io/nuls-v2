@@ -20,13 +20,14 @@
  *
  */
 
-package io.nuls.protocol.service.impl;
+package io.nuls.protocol.storage.impl;
 
 import io.nuls.base.basic.NulsByteBuffer;
-import io.nuls.db.service.RocksDBService;
 import io.nuls.protocol.constant.Constant;
-import io.nuls.protocol.model.po.Statistics;
-import io.nuls.protocol.service.StatisticsStorageService;
+import io.nuls.protocol.model.ChainParameters;
+import io.nuls.protocol.model.ProtocolConfig;
+import io.nuls.protocol.storage.ParametersStorageService;
+import io.nuls.db.service.RocksDBService;
 import io.nuls.tools.core.annotation.Service;
 import io.nuls.tools.model.ByteUtils;
 
@@ -36,14 +37,13 @@ import java.util.List;
 import static io.nuls.protocol.utils.LoggerUtil.commonLog;
 
 @Service
-public class StatisticsStorageServiceImpl implements StatisticsStorageService {
-
+public class ParametersStorageServiceImpl implements ParametersStorageService {
     @Override
-    public boolean save(int chainId, Statistics statistics) {
+    public boolean save(ChainParameters parameters, int chainID) {
         byte[] bytes;
         try {
-            bytes = statistics.serialize();
-            return RocksDBService.put(Constant.STATISTICS+chainId, ByteUtils.longToBytes(statistics.getHeight()), bytes);
+            bytes = parameters.serialize();
+            return RocksDBService.put(Constant.PROTOCOL_CONFIG, ByteUtils.intToBytes(chainID), bytes);
         } catch (Exception e) {
             e.printStackTrace();
             commonLog.error(e);
@@ -52,12 +52,12 @@ public class StatisticsStorageServiceImpl implements StatisticsStorageService {
     }
 
     @Override
-    public Statistics get(int chainId, long height) {
+    public ChainParameters get(int chainID) {
         try {
-            Statistics po = new Statistics();
-            byte[] bytes = RocksDBService.get(Constant.STATISTICS+chainId, ByteUtils.longToBytes(height));
-            po.parse(new NulsByteBuffer(bytes));
-            return po;
+            ChainParameters parameters = new ChainParameters();
+            byte[] bytes = RocksDBService.get(Constant.PROTOCOL_CONFIG, ByteUtils.intToBytes(chainID));
+            parameters.parse(new NulsByteBuffer(bytes));
+            return parameters;
         } catch (Exception e) {
             e.printStackTrace();
             commonLog.error(e);
@@ -66,9 +66,9 @@ public class StatisticsStorageServiceImpl implements StatisticsStorageService {
     }
 
     @Override
-    public boolean delete(int chainId, long height) {
+    public boolean delete(int chainID) {
         try {
-            return RocksDBService.delete(Constant.STATISTICS+chainId, ByteUtils.longToBytes(height));
+            return RocksDBService.delete(Constant.PROTOCOL_CONFIG, ByteUtils.intToBytes(chainID));
         } catch (Exception e) {
             e.printStackTrace();
             commonLog.error(e);
@@ -77,14 +77,14 @@ public class StatisticsStorageServiceImpl implements StatisticsStorageService {
     }
 
     @Override
-    public List<Statistics> getList(int chainId) {
+    public List<ChainParameters> getList() {
         try {
-            var pos = new ArrayList<Statistics>();
-            List<byte[]> valueList = RocksDBService.valueList(Constant.STATISTICS+chainId);
+            var pos = new ArrayList<ChainParameters>();
+            List<byte[]> valueList = RocksDBService.valueList(Constant.PROTOCOL_CONFIG);
             for (byte[] bytes : valueList) {
-                var po = new Statistics();
-                po.parse(new NulsByteBuffer(bytes));
-                pos.add(po);
+                var parameters = new ChainParameters();
+                parameters.parse(new NulsByteBuffer(bytes));
+                pos.add(parameters);
             }
             return pos;
         } catch (Exception e) {

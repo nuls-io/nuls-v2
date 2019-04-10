@@ -20,13 +20,13 @@
  *
  */
 
-package io.nuls.protocol.service.impl;
+package io.nuls.protocol.storage.impl;
 
 import io.nuls.base.basic.NulsByteBuffer;
-import io.nuls.protocol.constant.Constant;
-import io.nuls.protocol.model.ProtocolConfig;
-import io.nuls.protocol.service.ConfigStorageService;
 import io.nuls.db.service.RocksDBService;
+import io.nuls.protocol.constant.Constant;
+import io.nuls.protocol.model.po.Statistics;
+import io.nuls.protocol.storage.StatisticsStorageService;
 import io.nuls.tools.core.annotation.Service;
 import io.nuls.tools.model.ByteUtils;
 
@@ -36,13 +36,14 @@ import java.util.List;
 import static io.nuls.protocol.utils.LoggerUtil.commonLog;
 
 @Service
-public class ConfigStorageServiceImpl implements ConfigStorageService {
+public class StatisticsStorageServiceImpl implements StatisticsStorageService {
+
     @Override
-    public boolean save(ProtocolConfig protocolConfig, int chainID) {
+    public boolean save(int chainId, Statistics statistics) {
         byte[] bytes;
         try {
-            bytes = protocolConfig.serialize();
-            return RocksDBService.put(Constant.PROTOCOL_CONFIG, ByteUtils.intToBytes(chainID), bytes);
+            bytes = statistics.serialize();
+            return RocksDBService.put(Constant.STATISTICS+chainId, ByteUtils.longToBytes(statistics.getHeight()), bytes);
         } catch (Exception e) {
             e.printStackTrace();
             commonLog.error(e);
@@ -51,10 +52,10 @@ public class ConfigStorageServiceImpl implements ConfigStorageService {
     }
 
     @Override
-    public ProtocolConfig get(int chainID) {
+    public Statistics get(int chainId, long height) {
         try {
-            ProtocolConfig po = new ProtocolConfig();
-            byte[] bytes = RocksDBService.get(Constant.PROTOCOL_CONFIG, ByteUtils.intToBytes(chainID));
+            Statistics po = new Statistics();
+            byte[] bytes = RocksDBService.get(Constant.STATISTICS+chainId, ByteUtils.longToBytes(height));
             po.parse(new NulsByteBuffer(bytes));
             return po;
         } catch (Exception e) {
@@ -65,9 +66,9 @@ public class ConfigStorageServiceImpl implements ConfigStorageService {
     }
 
     @Override
-    public boolean delete(int chainID) {
+    public boolean delete(int chainId, long height) {
         try {
-            return RocksDBService.delete(Constant.PROTOCOL_CONFIG, ByteUtils.intToBytes(chainID));
+            return RocksDBService.delete(Constant.STATISTICS+chainId, ByteUtils.longToBytes(height));
         } catch (Exception e) {
             e.printStackTrace();
             commonLog.error(e);
@@ -76,12 +77,12 @@ public class ConfigStorageServiceImpl implements ConfigStorageService {
     }
 
     @Override
-    public List<ProtocolConfig> getList() {
+    public List<Statistics> getList(int chainId) {
         try {
-            var pos = new ArrayList<ProtocolConfig>();
-            List<byte[]> valueList = RocksDBService.valueList(Constant.PROTOCOL_CONFIG);
+            var pos = new ArrayList<Statistics>();
+            List<byte[]> valueList = RocksDBService.valueList(Constant.STATISTICS+chainId);
             for (byte[] bytes : valueList) {
-                var po = new ProtocolConfig();
+                var po = new Statistics();
                 po.parse(new NulsByteBuffer(bytes));
                 pos.add(po);
             }

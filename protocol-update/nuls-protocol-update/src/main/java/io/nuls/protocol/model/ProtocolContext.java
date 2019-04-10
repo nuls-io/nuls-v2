@@ -96,7 +96,7 @@ public class ProtocolContext {
     /**
      * 链的运行时参数
      */
-    private ProtocolConfig config;
+    private ChainParameters parameters;
 
     /**
      * 锁对象
@@ -184,12 +184,12 @@ public class ProtocolContext {
         this.lastValidStatistics = lastValidStatistics;
     }
 
-    public ProtocolConfig getConfig() {
-        return config;
+    public ChainParameters getParameters() {
+        return parameters;
     }
 
-    public void setConfig(ProtocolConfig config) {
-        this.config = config;
+    public void setParameters(ChainParameters parameters) {
+        this.parameters = parameters;
     }
 
     public StampedLock getLock() {
@@ -221,7 +221,7 @@ public class ProtocolContext {
         lastValidStatistics.setProtocolVersion(currentProtocolVersion);
         protocolVersionHistory = new Stack<>();
         protocolVersionHistory.push(currentProtocolVersion);
-        LoggerUtil.init(chainId, config.getLogLevel());
+        LoggerUtil.init(chainId, parameters.getLogLevel());
         this.setStatus(RunningStatusEnum.READY);
         //服务初始化
         ProtocolService service = SpringLiteContext.getBean(ProtocolService.class);

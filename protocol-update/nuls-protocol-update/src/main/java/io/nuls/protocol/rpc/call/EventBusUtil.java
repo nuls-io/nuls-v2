@@ -18,7 +18,7 @@
  * SOFTWARE.
  */
 
-package io.nuls.protocol.utils.module;
+package io.nuls.protocol.rpc.call;
 
 /**
  * 调用事件总线模块接口的工具类

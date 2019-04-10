@@ -22,22 +22,17 @@
 
 package io.nuls.protocol.utils;
 
-import io.nuls.protocol.constant.ConfigConstant;
 import io.nuls.protocol.manager.ContextManager;
-import io.nuls.protocol.model.ProtocolConfig;
+import io.nuls.protocol.model.ChainParameters;
 import io.nuls.protocol.model.ProtocolVersion;
-import io.nuls.protocol.service.ConfigStorageService;
+import io.nuls.protocol.storage.ParametersStorageService;
 import io.nuls.tools.core.ioc.SpringLiteContext;
 import io.nuls.tools.io.IoUtils;
 import io.nuls.tools.parse.JSONUtils;
-import io.nuls.tools.parse.config.ConfigItem;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import static io.nuls.protocol.ProtocolBootstrap.protocolConfig;
-import static io.nuls.protocol.constant.Constant.MODULES_CONFIG_FILE;
 import static io.nuls.protocol.constant.Constant.PROTOCOL_CONFIG_FILE;
 
 /**
@@ -49,7 +44,7 @@ import static io.nuls.protocol.constant.Constant.PROTOCOL_CONFIG_FILE;
  */
 public class ConfigLoader {
 
-    private static ConfigStorageService service = SpringLiteContext.getBean(ConfigStorageService.class);
+    private static ParametersStorageService service = SpringLiteContext.getBean(ParametersStorageService.class);
 
     /**
      * 加载配置文件
@@ -57,7 +52,7 @@ public class ConfigLoader {
      * @throws Exception
      */
     public static void load() throws Exception {
-        List<ProtocolConfig> list = service.getList();
+        List<ChainParameters> list = service.getList();
         if (list == null || list.size() == 0) {
             loadDefault();
         } else {
@@ -75,9 +70,10 @@ public class ConfigLoader {
     private static void loadDefault() throws Exception {
         String versionJson = IoUtils.read(PROTOCOL_CONFIG_FILE);
         List<ProtocolVersion> versions = JSONUtils.json2list(versionJson, ProtocolVersion.class);
-        int chainId = protocolConfig.getChainId();
-        ContextManager.init(protocolConfig, versions);
-        service.save(protocolConfig, chainId);
+        ChainParameters parameter = protocolConfig.getDefaultChainParameter();
+        int chainId = parameter.getChainId();
+        ContextManager.init(parameter, versions);
+        service.save(parameter, chainId);
     }
 
 }

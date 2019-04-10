@@ -20,6 +20,7 @@
 
 package io.nuls.protocol.manager;
 
+import io.nuls.protocol.model.ChainParameters;
 import io.nuls.protocol.model.ProtocolConfig;
 import io.nuls.protocol.model.ProtocolContext;
 import io.nuls.protocol.model.ProtocolVersion;
@@ -47,13 +48,13 @@ public class ContextManager {
     private ContextManager() {
     }
 
-    public static void init(ProtocolConfig protocolConfig, List<ProtocolVersion> versions) {
+    public static void init(ChainParameters parameter, List<ProtocolVersion> versions) {
         ProtocolContext protocolContext = new ProtocolContext();
-        int chainId = protocolConfig.getChainId();
+        int chainId = parameter.getChainId();
         chainIds.add(chainId);
         ContextManager.contextMap.put(chainId, protocolContext);
         protocolContext.setChainId(chainId);
-        protocolContext.setConfig(protocolConfig);
+        protocolContext.setParameters(parameter);
         versions.sort(ProtocolVersion.COMPARATOR);
         protocolContext.setLocalVersionList(versions);
         protocolContext.setCurrentProtocolVersion(versions.get(0));

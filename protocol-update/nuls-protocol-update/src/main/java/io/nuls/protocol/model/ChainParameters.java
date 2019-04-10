@@ -69,6 +69,62 @@ public class ChainParameters extends BaseNulsData {
      */
     private short continuousIntervalCountMinimum;
 
+    public int getChainId() {
+        return chainId;
+    }
+
+    public void setChainId(int chainId) {
+        this.chainId = chainId;
+    }
+
+    public String getLogLevel() {
+        return logLevel;
+    }
+
+    public void setLogLevel(String logLevel) {
+        this.logLevel = logLevel;
+    }
+
+    public short getInterval() {
+        return interval;
+    }
+
+    public void setInterval(short interval) {
+        this.interval = interval;
+    }
+
+    public byte getEffectiveRatioMinimum() {
+        return effectiveRatioMinimum;
+    }
+
+    public void setEffectiveRatioMinimum(byte effectiveRatioMinimum) {
+        this.effectiveRatioMinimum = effectiveRatioMinimum;
+    }
+
+    public byte getEffectiveRatioMaximum() {
+        return effectiveRatioMaximum;
+    }
+
+    public void setEffectiveRatioMaximum(byte effectiveRatioMaximum) {
+        this.effectiveRatioMaximum = effectiveRatioMaximum;
+    }
+
+    public short getContinuousIntervalCountMaximum() {
+        return continuousIntervalCountMaximum;
+    }
+
+    public void setContinuousIntervalCountMaximum(short continuousIntervalCountMaximum) {
+        this.continuousIntervalCountMaximum = continuousIntervalCountMaximum;
+    }
+
+    public short getContinuousIntervalCountMinimum() {
+        return continuousIntervalCountMinimum;
+    }
+
+    public void setContinuousIntervalCountMinimum(short continuousIntervalCountMinimum) {
+        this.continuousIntervalCountMinimum = continuousIntervalCountMinimum;
+    }
+
     public ChainParameters() {
     }
 

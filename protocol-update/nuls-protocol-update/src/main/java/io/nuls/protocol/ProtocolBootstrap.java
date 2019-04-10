@@ -2,7 +2,6 @@ package io.nuls.protocol;
 
 import io.nuls.db.service.RocksDBService;
 import io.nuls.protocol.model.ProtocolConfig;
-import io.nuls.protocol.thread.monitor.ProtocolMonitor;
 import io.nuls.protocol.utils.ConfigLoader;
 import io.nuls.rpc.info.HostInfo;
 import io.nuls.rpc.model.ModuleE;
@@ -21,7 +20,6 @@ import io.nuls.tools.thread.commom.NulsThreadFactory;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
-import static io.nuls.protocol.constant.Constant.DATA_PATH;
 import static io.nuls.protocol.constant.Constant.PROTOCOL_CONFIG;
 
 /**
@@ -122,9 +120,6 @@ public class ProtocolBootstrap extends RpcModule {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        //开启一些监控线程
-        ScheduledThreadPoolExecutor executor = ThreadUtils.createScheduledThreadPool(1, new NulsThreadFactory("protocol-monitor"));
-        executor.scheduleWithFixedDelay(ProtocolMonitor.getInstance(), 0, 5, TimeUnit.SECONDS);
         return RpcModuleState.Running;
     }
 
@@ -136,10 +131,6 @@ public class ProtocolBootstrap extends RpcModule {
     @Override
     public RpcModuleState onDependenciesLoss(Module module) {
         return RpcModuleState.Ready;
-    }
-
-    public static void initCfg() {
-
     }
 
 }

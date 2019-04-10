@@ -17,51 +17,47 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+package io.nuls.protocol.rpc.call;
 
-package io.nuls.protocol.utils.module;
-
-import io.nuls.protocol.constant.RunningStatusEnum;
-import io.nuls.protocol.manager.ContextManager;
 import io.nuls.rpc.model.ModuleE;
+import io.nuls.rpc.model.message.Response;
 import io.nuls.rpc.netty.processor.ResponseMessageProcessor;
-import io.nuls.tools.log.logback.NulsLogger;
 
-import java.util.HashMap;
 import java.util.Map;
 
+import static io.nuls.protocol.utils.LoggerUtil.commonLog;
+
 /**
- * 调用核心模块接口的工具类
- * Utility class that invokes the kernel module interface
+ * 调用网络模块接口的工具
+ * Utility class that invokes the network module interface
  *
  * @author captain
  * @version 1.0
- * @date 19-1-25 上午11:45
+ * @date 19-1-25 上午11:28
  */
-public class KernelUtil {
+public class NetworkUtil {
 
     /**
-     * 更新本模块的运行时状态
+     * 获取时间戳
+     * Get timestamp
      *
-     * @param chainId
-     * @param moduleString
-     * @param status
      * @return
      */
-    public static boolean updateStatus(int chainId, String moduleString, RunningStatusEnum status) {
-        NulsLogger commonLog = ContextManager.getContext(chainId).getCommonLog();
+    public static long currentTimeMillis() {
         try {
-            Map<String, Object> params = new HashMap<>(5);
+//            Map<String, Object> params = new HashMap<>(1);
 //            params.put(Constants.VERSION_KEY_STR, "1.0");
-            params.put("chainId", chainId);
-            params.put("module", moduleString);
-            params.put("status", status.ordinal());
-
-            return ResponseMessageProcessor.requestAndResponse(ModuleE.KE.abbr, "updateStatus", params).isSuccess();
+            Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.NW.abbr, "nw_currentTimeMillis", null);
+            if (response.isSuccess()) {
+                Map responseData = (Map) response.getResponseData();
+                Map result = (Map) responseData.get("nw_currentTimeMillis");
+                return (Long) result.get("currentTimeMillis");
+            }
         } catch (Exception e) {
-            e.printStackTrace();
             commonLog.error(e);
-            return false;
         }
+        commonLog.error("get nw_currentTimeMillis fail, use System.currentTimeMillis");
+        return System.currentTimeMillis();
     }
 
 }

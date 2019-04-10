@@ -18,7 +18,7 @@
  * SOFTWARE.
  */
 
-package io.nuls.protocol.utils.module;
+package io.nuls.protocol.rpc.call;
 
 import io.nuls.protocol.manager.ContextManager;
 import io.nuls.protocol.rpc.callback.BlockHeaderInvoke;
