@@ -1,9 +1,7 @@
 package io.nuls.tools.log;
 
-import ch.qos.logback.classic.Level;
 import io.nuls.tools.log.logback.LoggerBuilder;
 import io.nuls.tools.log.logback.NulsLogger;
-import io.nuls.tools.model.StringUtils;
 
 /**
  * 公共日志类
