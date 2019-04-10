@@ -56,9 +56,13 @@ public class ConfigLoader {
         if (list == null || list.size() == 0) {
             loadDefault();
         } else {
-            String versionJson = IoUtils.read(PROTOCOL_CONFIG_FILE);
-            List<ProtocolVersion> versions = JSONUtils.json2list(versionJson, ProtocolVersion.class);
-            list.forEach(e -> ContextManager.init(e, versions));
+            for (ChainParameters chainParameters : list) {
+                int chainId = chainParameters.getChainId();
+                String versionJson = service.getVersionJson(chainId);
+                List<ProtocolVersion> versions = JSONUtils.json2list(versionJson, ProtocolVersion.class);
+                ContextManager.init(chainParameters, versions);
+            }
+
         }
     }
 
@@ -74,6 +78,7 @@ public class ConfigLoader {
         int chainId = parameter.getChainId();
         ContextManager.init(parameter, versions);
         service.save(parameter, chainId);
+        service.saveVersionJson(versionJson, chainId);
     }
 
 }

@@ -23,12 +23,11 @@
 package io.nuls.protocol.storage.impl;
 
 import io.nuls.base.basic.NulsByteBuffer;
+import io.nuls.db.service.RocksDBService;
 import io.nuls.protocol.constant.Constant;
 import io.nuls.protocol.model.ChainParameters;
-import io.nuls.protocol.model.ProtocolConfig;
 import io.nuls.protocol.storage.ParametersStorageService;
-import io.nuls.db.service.RocksDBService;
-import io.nuls.tools.core.annotation.Service;
+import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.model.ByteUtils;
 
 import java.util.ArrayList;
@@ -36,7 +35,7 @@ import java.util.List;
 
 import static io.nuls.protocol.utils.LoggerUtil.commonLog;
 
-@Service
+@Component
 public class ParametersStorageServiceImpl implements ParametersStorageService {
     @Override
     public boolean save(ChainParameters parameters, int chainID) {
@@ -85,6 +84,58 @@ public class ParametersStorageServiceImpl implements ParametersStorageService {
                 var parameters = new ChainParameters();
                 parameters.parse(new NulsByteBuffer(bytes));
                 pos.add(parameters);
+            }
+            return pos;
+        } catch (Exception e) {
+            e.printStackTrace();
+            commonLog.error(e);
+            return null;
+        }
+    }
+
+    @Override
+    public boolean saveVersionJson(String versionJson, int chainId) {
+        byte[] bytes;
+        try {
+            bytes = versionJson.getBytes();
+            return RocksDBService.put(Constant.VERSION, ByteUtils.intToBytes(chainId), bytes);
+        } catch (Exception e) {
+            e.printStackTrace();
+            commonLog.error(e);
+            return false;
+        }
+    }
+
+    @Override
+    public String getVersionJson(int chainId) {
+        try {
+            byte[] bytes = RocksDBService.get(Constant.VERSION, ByteUtils.intToBytes(chainId));
+            return new String(bytes);
+        } catch (Exception e) {
+            e.printStackTrace();
+            commonLog.error(e);
+            return null;
+        }
+    }
+
+    @Override
+    public boolean deleteVersionJson(int chainId) {
+        try {
+            return RocksDBService.delete(Constant.VERSION, ByteUtils.intToBytes(chainId));
+        } catch (Exception e) {
+            e.printStackTrace();
+            commonLog.error(e);
+            return false;
+        }
+    }
+
+    @Override
+    public List<String> getVersionJsonList(int chainId) {
+        try {
+            var pos = new ArrayList<String>();
+            List<byte[]> valueList = RocksDBService.valueList(Constant.VERSION);
+            for (byte[] bytes : valueList) {
+                pos.add(new String(bytes));
             }
             return pos;
         } catch (Exception e) {

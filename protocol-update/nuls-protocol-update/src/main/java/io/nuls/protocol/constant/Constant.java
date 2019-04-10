@@ -20,11 +20,6 @@
 
 package io.nuls.protocol.constant;
 
-import io.nuls.base.data.Block;
-import io.nuls.base.data.BlockHeader;
-
-import java.util.Comparator;
-
 /**
  * 常量
  *
@@ -50,7 +45,10 @@ public interface Constant {
      * db文件存放目录
      */
     String DATA_PATH = "./data/protocol";
-
+    /**
+     * 存储每条链的配置信息
+     */
+    String VERSION = "Version";
     /**
      * 存储每条链的配置信息
      */

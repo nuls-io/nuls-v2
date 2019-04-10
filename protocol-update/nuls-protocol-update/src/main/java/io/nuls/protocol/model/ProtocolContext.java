@@ -226,9 +226,6 @@ public class ProtocolContext {
         //服务初始化
         ProtocolService service = SpringLiteContext.getBean(ProtocolService.class);
         service.init(chainId);
-        //各类缓存初始化
-
-        //定时调度接口初始化
     }
 
     public void start() {

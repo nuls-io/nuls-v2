@@ -88,8 +88,11 @@ public class ProtocolUtil {
             params.put("blockHeader", HexUtil.encode(blockHeader.serialize()));
             Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.PU.abbr, "saveBlock", params);
             if (response.isSuccess()) {
+                Map responseData = (Map) response.getResponseData();
+                Map saveBlock = (Map) responseData.get("saveBlock");
+                int version = (int) saveBlock.get("version");
                 ProtocolContext protocolContext = ProtocolContextManager.getContext(chainId);
-                protocolContext.setVersion((short) 1);
+                protocolContext.setVersion((short) version);
             }
             return response.isSuccess();
         } catch (Exception e) {

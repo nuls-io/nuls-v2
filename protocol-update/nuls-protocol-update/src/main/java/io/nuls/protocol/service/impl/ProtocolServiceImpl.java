@@ -27,14 +27,13 @@ import io.nuls.db.service.RocksDBService;
 import io.nuls.protocol.constant.Constant;
 import io.nuls.protocol.manager.ContextManager;
 import io.nuls.protocol.model.ChainParameters;
-import io.nuls.protocol.model.ProtocolConfig;
 import io.nuls.protocol.model.ProtocolContext;
 import io.nuls.protocol.model.ProtocolVersion;
 import io.nuls.protocol.model.po.Statistics;
 import io.nuls.protocol.service.ProtocolService;
 import io.nuls.protocol.storage.StatisticsStorageService;
 import io.nuls.tools.core.annotation.Autowired;
-import io.nuls.tools.core.annotation.Service;
+import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.log.logback.NulsLogger;
 
@@ -49,7 +48,7 @@ import java.util.Stack;
  * @version 1.0
  * @date 18-11-20 上午11:09
  */
-@Service
+@Component
 public class ProtocolServiceImpl implements ProtocolService {
 
     @Autowired

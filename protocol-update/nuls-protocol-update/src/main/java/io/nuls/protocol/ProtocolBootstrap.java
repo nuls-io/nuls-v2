@@ -14,16 +14,12 @@ import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.log.Log;
 import io.nuls.tools.parse.I18nUtils;
-import io.nuls.tools.thread.ThreadUtils;
-import io.nuls.tools.thread.commom.NulsThreadFactory;
-
-import java.util.concurrent.ScheduledThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
 
 import static io.nuls.protocol.constant.Constant.PROTOCOL_CONFIG;
+import static io.nuls.protocol.constant.Constant.VERSION;
 
 /**
- * 区块模块启动类
+ * 协议升级模块启动类
  *
  * @author captain
  * @version 1.0
@@ -85,6 +81,7 @@ public class ProtocolBootstrap extends RpcModule {
         //读取配置文件，数据存储根目录，初始化打开该目录下所有表连接并放入缓存
         RocksDBService.init(protocolConfig.getDataFolder());
         RocksDBService.createTable(PROTOCOL_CONFIG);
+        RocksDBService.createTable(VERSION);
     }
 
     private void initLanguage() throws NulsException {
@@ -98,11 +95,6 @@ public class ProtocolBootstrap extends RpcModule {
      */
     @Override
     public boolean doStart() {
-        try {
-            RocksDBService.createTable(PROTOCOL_CONFIG);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
         Log.info("protocol module ready");
         return true;
     }

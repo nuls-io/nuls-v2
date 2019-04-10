@@ -5,7 +5,6 @@ import io.nuls.base.data.BlockExtendsData;
 import io.nuls.base.data.BlockHeader;
 import io.nuls.protocol.manager.ContextManager;
 import io.nuls.protocol.model.ChainParameters;
-import io.nuls.protocol.model.ProtocolConfig;
 import io.nuls.protocol.model.ProtocolContext;
 import io.nuls.protocol.model.ProtocolVersion;
 import io.nuls.protocol.model.po.Statistics;
@@ -120,7 +119,7 @@ public class BlockHeaderInvoke extends BaseInvoke {
             newProtocolVersion.setContinuousIntervalCount(data.getContinuousIntervalCount());
             commonLog.debug("chainId-" + chainId + ", save block, height-" + height + ", protocol-" + newProtocolVersion);
             //重新计算统计信息
-            proportionMap.merge(newProtocolVersion, 1, (a, b) -> a + b);
+            proportionMap.merge(newProtocolVersion, 1, Integer::sum);
         }
         ChainParameters parameters = context.getParameters();
         short interval = parameters.getInterval();
@@ -210,9 +209,6 @@ public class BlockHeaderInvoke extends BaseInvoke {
         if (continuousIntervalCount > parameters.getContinuousIntervalCountMaximum()) {
             return false;
         }
-        if (continuousIntervalCount < parameters.getContinuousIntervalCountMinimum()) {
-            return false;
-        }
-        return true;
+        return continuousIntervalCount >= parameters.getContinuousIntervalCountMinimum();
     }
 }
