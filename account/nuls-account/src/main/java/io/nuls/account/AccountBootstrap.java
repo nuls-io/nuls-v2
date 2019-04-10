@@ -35,9 +35,6 @@ import java.util.Map;
 @Component
 public class AccountBootstrap extends RpcModule {
 
-    @Value("DataPath")
-    String dataPath;
-
     @Autowired
     AccountConfig accountConfig;
 
