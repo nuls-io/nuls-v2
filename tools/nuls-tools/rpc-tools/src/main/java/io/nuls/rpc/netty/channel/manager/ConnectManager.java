@@ -597,7 +597,7 @@ public class ConnectManager {
         }
         String url = getRemoteUri(role);
         if (StringUtils.isBlank(url)) {
-            throw new Exception("Connection module not started");
+            throw new Exception("Connection module not started:"+role);
         }
         Channel channel = createConnect(url);
         channel = cacheConnect(role, channel, true);
