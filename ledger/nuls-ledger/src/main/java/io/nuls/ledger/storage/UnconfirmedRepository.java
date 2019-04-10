@@ -41,6 +41,8 @@ public interface UnconfirmedRepository {
     void createAccountStateUnconfirmed(byte[] key, AccountStateUnconfirmed accountStateUnconfirmed);
 
     /**
+     * 获取账号中未确认交易账本状态
+     *
      * @param chainId
      * @param key
      * @return AccountStateUnconfirmed
@@ -48,8 +50,11 @@ public interface UnconfirmedRepository {
     AccountStateUnconfirmed getAccountStateUnconfirmed(int chainId, byte[] key);
 
     /**
+     * 更新未确认交易账本状态
+     *
      * @param key
      * @param nowAccountState
+     * @throws Exception
      */
     void updateAccountStateUnconfirmed(byte[] key, AccountStateUnconfirmed nowAccountState) throws Exception;
 

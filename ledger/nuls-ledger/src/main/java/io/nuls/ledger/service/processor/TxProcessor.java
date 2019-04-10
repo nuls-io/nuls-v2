@@ -30,10 +30,28 @@ import io.nuls.base.data.CoinTo;
 import io.nuls.ledger.model.po.AccountState;
 
 /**
+ * 交易处理器
  * Created by ljs on 2018/12/29.
+ * @author lanjinsheng
  */
 public interface TxProcessor {
-
+      /**
+       * 交易对象中fromCoinData 处理
+       * @param coin
+       * @param nonce
+       * @param hash
+       * @param accountState
+       * @return
+       */
       boolean processFromCoinData(CoinFrom coin, String nonce, String hash, AccountState accountState);
+
+      /**
+       * 交易中toCoinData处理
+       * @param coin
+       * @param nonce
+       * @param hash
+       * @param accountState
+       * @return
+       */
       boolean processToCoinData(CoinTo coin,String nonce,String hash, AccountState accountState);
 }

@@ -10,10 +10,10 @@
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- * 
+ *
  * The above copyright notice and this permission notice shall be included in
  * all copies or substantial portions of the Software.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -33,41 +33,68 @@ import io.nuls.ledger.model.po.AccountStateSnapshot;
 import java.util.List;
 
 /**
- * Created by wangkun23 on 2018/11/28.
- * update by lanjinsheng on 2018/12/31
+ * 交易业务处理接口
+ * @author lanjinsheng
  */
 public interface TransactionService {
 
 
-
     /**
      * 未确认交易数据处理
+     *
+     * @param addressChainId
+     * @param transaction
+     * @return
+     * @throws Exception
      */
     ValidateResult unConfirmTxProcess(int addressChainId, Transaction transaction) throws Exception;
 
 
     /**
      * 已确认区块数据提交
+     *
+     * @param addressChainId
+     * @param txList
+     * @param blockHeight
+     * @return
      */
-    boolean confirmBlockProcess(int addressChainId,List<Transaction> txList,long blockHeight);
+    boolean confirmBlockProcess(int addressChainId, List<Transaction> txList, long blockHeight);
 
     /**
      * 确认交易回滚处理
+     *
+     * @param addressChainId
+     * @param preAccountStates
+     * @param blockHeight
+     * @return
      */
     boolean rollBackBlock(int addressChainId, List<AccountStateSnapshot> preAccountStates, long blockHeight);
+
     /**
      * 确认交易回滚处理
+     *
+     * @param addressChainId
+     * @param blockHeight
+     * @param txs
+     * @return
      */
-    boolean rollBackConfirmTxs(int addressChainId,long blockHeight,List<Transaction> txs);
+    boolean rollBackConfirmTxs(int addressChainId, long blockHeight, List<Transaction> txs);
 
     /**
      * 未确认交易回滚处理
+     * @param addressChainId
+     * @param transaction
+     * @return
      */
-    boolean rollBackUnconfirmTx(int addressChainId,Transaction transaction);
+    boolean rollBackUnconfirmTx(int addressChainId, Transaction transaction);
 
     /**
-     * 是否提交过
+     *  是否提交过
+     * @param addressChainId
+     * @param accountNonceKey
+     * @return
+     * @throws Exception
      */
-    boolean hadCommit(int addressChainId,String accountNonceKey) throws Exception;
+    boolean hadCommit(int addressChainId, String accountNonceKey) throws Exception;
 
 }

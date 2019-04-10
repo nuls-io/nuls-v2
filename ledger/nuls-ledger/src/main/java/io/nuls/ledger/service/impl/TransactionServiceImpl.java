@@ -52,8 +52,9 @@ import java.util.concurrent.ConcurrentHashMap;
 import static io.nuls.ledger.utils.LoggerUtil.logger;
 
 /**
- * Created by wangkun23 on 2018/11/28.
- * update by lanjinsheng on 2019/01/02
+ *
+ * 交易业务处理实现
+ * @author lanjinsheng
  */
 @Service
 public class TransactionServiceImpl implements TransactionService {

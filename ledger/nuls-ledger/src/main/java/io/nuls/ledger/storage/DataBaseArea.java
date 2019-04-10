@@ -28,6 +28,7 @@ package io.nuls.ledger.storage;
 /**
  * database table name constant
  * Created by wangkun23 on 2018/11/19.
+ * @author lanjinsheng
  */
 public interface DataBaseArea {
     String TB_LEDGER_ACCOUNT = "account";

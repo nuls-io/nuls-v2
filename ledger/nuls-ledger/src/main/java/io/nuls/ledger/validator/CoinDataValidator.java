@@ -59,6 +59,7 @@ import static io.nuls.ledger.utils.LoggerUtil.logger;
  * validate Coin Data
  * Created by wangkun23 on 2018/11/22.
  * updatge  by lanjinsheng on 2018/12/28.
+ * @author lanjinsheng
  */
 @Component
 public class CoinDataValidator {
