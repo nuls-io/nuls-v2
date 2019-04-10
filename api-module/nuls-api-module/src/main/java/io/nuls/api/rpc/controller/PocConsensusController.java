@@ -426,15 +426,14 @@ public class PocConsensusController {
 
     @RpcMethod("getAccountDeposit")
     public RpcResult getAccountDeposit(List<Object> params) {
-        VerifyUtils.verifyParams(params, 5);
-        int chainId, pageIndex, pageSize, type;
+        VerifyUtils.verifyParams(params, 4);
+        int chainId, pageIndex, pageSize;
         String address;
         try {
             chainId = (int) params.get(0);
             pageIndex = (int) params.get(1);
             pageSize = (int) params.get(2);
             address = (String) params.get(3);
-            type = (int) params.get(4);
         } catch (Exception e) {
             return RpcResult.paramError();
         }
@@ -446,10 +445,9 @@ public class PocConsensusController {
         if (!CacheManager.isChainExist(chainId)) {
             list = new PageInfo<>(pageIndex, pageSize);
         } else {
-            list = this.depositService.getAllDepositListByAddress(chainId, address, type, pageIndex, pageSize);
+            list = this.depositService.getDepositListByAddress(chainId, address, pageIndex, pageSize);
         }
         return new RpcResult().setResult(list);
-
     }
 
     @RpcMethod("getBestRoundInfo")

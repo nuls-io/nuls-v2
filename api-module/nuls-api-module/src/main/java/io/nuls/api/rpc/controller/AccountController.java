@@ -25,7 +25,10 @@ import io.nuls.api.cache.ApiCache;
 import io.nuls.api.db.AccountService;
 import io.nuls.api.db.BlockService;
 import io.nuls.api.manager.CacheManager;
-import io.nuls.api.model.po.db.*;
+import io.nuls.api.model.po.db.AccountInfo;
+import io.nuls.api.model.po.db.AssetInfo;
+import io.nuls.api.model.po.db.PageInfo;
+import io.nuls.api.model.po.db.TxRelationInfo;
 import io.nuls.api.model.rpc.FreezeInfo;
 import io.nuls.api.model.rpc.RpcErrorCode;
 import io.nuls.api.model.rpc.RpcResult;
@@ -186,7 +189,7 @@ public class AccountController {
         } catch (Exception e) {
             return RpcResult.paramError();
         }
-        PageInfo<FreezeInfo> pageInfo = null;
+        PageInfo<FreezeInfo> pageInfo;
         if (CacheManager.isChainExist(chainId)) {
             ApiCache apiCache = CacheManager.getCache(chainId);
             assetId = apiCache.getChainInfo().getDefaultAsset().getAssetId();

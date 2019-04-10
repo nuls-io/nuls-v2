@@ -54,7 +54,13 @@ public class BlockController {
     @RpcMethod("getBestBlockHeader")
     public RpcResult getBestInfo(List<Object> params) {
         VerifyUtils.verifyParams(params, 1);
-        int chainId = (int) params.get(0);
+        int chainId;
+        try {
+            chainId = (int) params.get(0);
+        } catch (Exception e) {
+            return RpcResult.paramError();
+        }
+
         if (!CacheManager.isChainExist(chainId)) {
             return RpcResult.dataNotFound();
         }
@@ -69,8 +75,14 @@ public class BlockController {
     @RpcMethod("getHeaderByHeight")
     public RpcResult getHeaderByHeight(List<Object> params) {
         VerifyUtils.verifyParams(params, 2);
-        int chainId = (int) params.get(0);
-        long height = Long.parseLong("" + params.get(1));
+        int chainId;
+        long height;
+        try {
+            chainId = (int) params.get(0);
+            height = Long.parseLong("" + params.get(1));
+        } catch (Exception e) {
+            return RpcResult.paramError();
+        }
         if (height < 0) {
             height = 0;
         }
@@ -87,8 +99,14 @@ public class BlockController {
     @RpcMethod("getHeaderByHash")
     public RpcResult getHeaderByHash(List<Object> params) {
         VerifyUtils.verifyParams(params, 2);
-        int chainId = (int) params.get(0);
-        String hash = (String) params.get(1);
+        int chainId;
+        String hash;
+        try {
+            chainId = (int) params.get(0);
+            hash = (String) params.get(1);
+        } catch (Exception e) {
+            return RpcResult.paramError();
+        }
         if (!CacheManager.isChainExist(chainId)) {
             return RpcResult.dataNotFound();
         }
@@ -106,8 +124,14 @@ public class BlockController {
     @RpcMethod("getBlockByHash")
     public RpcResult getBlockByHash(List<Object> params) {
         VerifyUtils.verifyParams(params, 2);
-        int chainId = (int) params.get(0);
-        String hash = (String) params.get(1);
+        int chainId;
+        String hash;
+        try {
+            chainId = (int) params.get(0);
+            hash = (String) params.get(1);
+        } catch (Exception e) {
+            return RpcResult.paramError();
+        }
         if (!CacheManager.isChainExist(chainId)) {
             return RpcResult.dataNotFound();
         }
@@ -130,10 +154,19 @@ public class BlockController {
     @RpcMethod("getBlockByHeight")
     public RpcResult getBlockByHeight(List<Object> params) {
         VerifyUtils.verifyParams(params, 2);
-        int chainId = (int) params.get(0);
-        long height = Long.parseLong("" + params.get(1));
+        int chainId;
+        long height;
+        try {
+            chainId = (int) params.get(0);
+            height = Long.parseLong("" + params.get(1));
+        } catch (Exception e) {
+            return RpcResult.paramError();
+        }
         if (height < 0) {
             height = 0;
+        }
+        if (!CacheManager.isChainExist(chainId)) {
+            return RpcResult.dataNotFound();
         }
         BlockHeaderInfo blockHeaderInfo = blockService.getBlockHeader(chainId, height);
         if (blockHeaderInfo == null) {
@@ -156,20 +189,25 @@ public class BlockController {
     @RpcMethod("getBlockHeaderList")
     public RpcResult getBlockHeaderList(List<Object> params) {
         VerifyUtils.verifyParams(params, 3);
-        int chainId = (int) params.get(0);
-        int pageIndex = (int) params.get(1);
-        int pageSize = (int) params.get(2);
+        int chainId, pageIndex, pageSize;
+        boolean filterEmptyBlocks;
+        String packingAddress = null;
+        try {
+            chainId = (int) params.get(0);
+            pageIndex = (int) params.get(1);
+            pageSize = (int) params.get(2);
+            filterEmptyBlocks = (boolean) params.get(3);
+            if (params.size() > 4) {
+                packingAddress = (String) params.get(4);
+            }
+        } catch (Exception e) {
+            return RpcResult.paramError();
+        }
         if (pageIndex <= 0) {
             pageIndex = 1;
         }
         if (pageSize <= 0 || pageSize > 100) {
             pageSize = 10;
-        }
-        // Whether to filter empty blocks
-        boolean filterEmptyBlocks = (boolean) params.get(3);
-        String packingAddress = null;
-        if (params.size() > 4) {
-            packingAddress = (String) params.get(4);
         }
 
         PageInfo<BlockHeaderInfo> pageInfo;
