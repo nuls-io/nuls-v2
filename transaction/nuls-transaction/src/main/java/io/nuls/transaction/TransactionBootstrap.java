@@ -96,6 +96,10 @@ public class TransactionBootstrap extends RpcModule {
         try {
             initLanguage();
             chainManager.runChain();
+            while (!isDependencieReady(ModuleE.NW.abbr)){
+                Log.debug("wait depend modules ready");
+                Thread.sleep(2000L);
+            }
             Log.info("Transaction Ready...");
             return true;
         } catch (Exception e) {
