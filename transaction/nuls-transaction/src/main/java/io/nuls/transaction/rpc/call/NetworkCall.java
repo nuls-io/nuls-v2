@@ -50,32 +50,32 @@ import static io.nuls.transaction.utils.LoggerUtil.Log;
  */
 public class NetworkCall {
 
-    static long latestGetTime = System.currentTimeMillis();
-    static long offset = 0;
-
-    /**
-     * 获取当前网络时间
-     * @return
-     * @throws NulsException
-     */
-    public static long getCurrentTimeMillis() throws NulsException  {
-        long now = System.currentTimeMillis();
-        if (now - latestGetTime > TxConstant.GETTIME_INTERVAL) {
-            Map<String, Object> params = new HashMap<>(TxConstant.INIT_CAPACITY_8);
-            params.put(Constants.VERSION_KEY_STR, TxConstant.RPC_VERSION);
-            try {
-                HashMap hashMap = (HashMap) TransactionCall.request(ModuleE.NW.abbr, "nw_currentTimeMillis", params, TxConstant.GETTIME_INTERFACE_TIMEOUT);
-                long time = Long.valueOf(hashMap.get("currentTimeMillis").toString());
-                offset = time - System.currentTimeMillis();
-            } catch (NulsException e) {
-                e.printStackTrace();
-            } catch (NumberFormatException e) {
-                e.printStackTrace();
-            }
-            latestGetTime = now;
-        }
-        return (System.currentTimeMillis() + offset);
-    }
+//    static long latestGetTime = System.currentTimeMillis();
+//    static long offset = 0;
+//
+//    /**
+//     * 获取当前网络时间
+//     * @return
+//     * @throws NulsException
+//     */
+//    public static long getCurrentTimeMillis() throws NulsException  {
+//        long now = System.currentTimeMillis();
+//        if (now - latestGetTime > TxConstant.GETTIME_INTERVAL) {
+//            Map<String, Object> params = new HashMap<>(TxConstant.INIT_CAPACITY_8);
+//            params.put(Constants.VERSION_KEY_STR, TxConstant.RPC_VERSION);
+//            try {
+//                HashMap hashMap = (HashMap) TransactionCall.request(ModuleE.NW.abbr, "nw_currentTimeMillis", params, TxConstant.GETTIME_INTERFACE_TIMEOUT);
+//                long time = Long.valueOf(hashMap.get("currentTimeMillis").toString());
+//                offset = time - System.currentTimeMillis();
+//            } catch (NulsException e) {
+//                e.printStackTrace();
+//            } catch (NumberFormatException e) {
+//                e.printStackTrace();
+//            }
+//            latestGetTime = now;
+//        }
+//        return (System.currentTimeMillis() + offset);
+//    }
 
 
     /**
