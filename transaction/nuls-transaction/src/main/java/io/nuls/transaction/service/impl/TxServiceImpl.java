@@ -104,6 +104,9 @@ public class TxServiceImpl implements TxService {
 
     private ExecutorService signExecutor = ThreadUtils.createThreadPool(Runtime.getRuntime().availableProcessors(), Integer.MAX_VALUE, new NulsThreadFactory(TxConstant.THREAD_VERIFIY_BLOCK_TXS));
 
+    public static void main(String[] args) {
+        System.out.println(Runtime.getRuntime().availableProcessors());
+    }
 
     @Override
     public boolean register(Chain chain, TxRegister txRegister) {
@@ -145,8 +148,7 @@ public class TxServiceImpl implements TxService {
                 //保存到rocksdb
                 unconfirmedTxStorageService.putTx(chain.getChainId(), tx);
                 //广播交易hash
-                // TODO: 2019/4/11 测试  临时注释
-                // NetworkCall.broadcastTxHash(chain.getChainId(),tx.getHash());
+                NetworkCall.broadcastTxHash(chain.getChainId(),tx.getHash());
             }
             return true;
         } catch (Exception e) {
