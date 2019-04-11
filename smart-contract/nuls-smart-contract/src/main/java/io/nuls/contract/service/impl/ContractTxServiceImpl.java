@@ -90,7 +90,7 @@ public class ContractTxServiceImpl implements ContractTxService {
 
             tx.setHash(NulsDigestData.calcDigestData(tx.serializeForHash()));
 
-            // 验证、签名、记账、广播交易
+            // 签名、发送交易到交易模块
             Result signAndBroadcastTxResult = contractTxHelper.signAndBroadcastTx(chainId, sender, password, tx);
             if(signAndBroadcastTxResult.isFailed()) {
                 return signAndBroadcastTxResult;
@@ -152,7 +152,7 @@ public class ContractTxServiceImpl implements ContractTxService {
 
             tx.setHash(NulsDigestData.calcDigestData(tx.serializeForHash()));
 
-            // 验证、签名、记账、广播交易
+            // 签名、发送交易到交易模块
             Result signAndBroadcastTxResult = contractTxHelper.signAndBroadcastTx(chainId, sender, password, tx);
             if(signAndBroadcastTxResult.isFailed()) {
                 return signAndBroadcastTxResult;
@@ -280,7 +280,7 @@ public class ContractTxServiceImpl implements ContractTxService {
             DeleteContractTransaction tx = result.getData();
             tx.setHash(NulsDigestData.calcDigestData(tx.serializeForHash()));
 
-            // 验证、签名、记账、广播交易
+            // 签名、发送交易到交易模块
             Result signAndBroadcastTxResult = contractTxHelper.signAndBroadcastTx(chainId, sender, password, tx);
             if(signAndBroadcastTxResult.isFailed()) {
                 return signAndBroadcastTxResult;
