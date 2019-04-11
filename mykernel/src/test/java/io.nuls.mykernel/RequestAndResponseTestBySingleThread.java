@@ -13,6 +13,7 @@ import io.nuls.tools.core.ioc.SpringLiteContext;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 public class RequestAndResponseTestBySingleThread {
 
@@ -33,7 +34,7 @@ public class RequestAndResponseTestBySingleThread {
             ConnectManager.LOCAL.setConnectionInformation(connectionInformation);
             ConnectManager.startService = true;
             SpringLiteContext.init("io.nuls.rpc.cmd.kernel");
-            ConnectManager.scanPackage("io.nuls.rpc.cmd.kernel");
+            ConnectManager.scanPackage(Set.of("io.nuls.rpc.cmd.kernel"));
             ConnectManager.ROLE_MAP.put(ModuleE.KE.abbr,connectionInformation);
             ConnectManager.updateStatus();
 
