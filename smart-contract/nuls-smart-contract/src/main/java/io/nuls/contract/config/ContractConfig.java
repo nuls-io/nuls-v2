@@ -62,8 +62,12 @@ public class ContractConfig {
      */
     private String dataPath;
 
+    private int chainId;
 
-    private ConfigBean chainConfig;
+    private int assetId;
+
+    private long maxViewGas;
+
 
     public String getEncoding() {
         return encoding;
@@ -146,10 +150,11 @@ public class ContractConfig {
     }
 
     public ConfigBean getChainConfig() {
-        return chainConfig;
+        ConfigBean configBean = new ConfigBean();
+        configBean.setAssetsId(assetId);
+        configBean.setChainId(chainId);
+        configBean.setMaxViewGas(maxViewGas);
+        return configBean;
     }
 
-    public void setChainConfig(ConfigBean chainConfig) {
-        this.chainConfig = chainConfig;
-    }
 }
