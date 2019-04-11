@@ -218,16 +218,16 @@ public class ConnectManager {
      * @param packageName Package full path
      * @throws Exception Duplicate commands found
      */
-    public static void scanPackage(String... packageName) throws Exception {
+    public static void scanPackage(Set<String> packageName) throws Exception {
         /*
         路径为空，跳过
         The path is empty, skip
          */
-        if (packageName == null){
+        if (packageName == null || packageName.size() == 0){
             return;
         }
         Set<Class> classes = new HashSet<>();
-        Arrays.stream(packageName).forEach(pack -> {
+        packageName.forEach(pack -> {
             classes.addAll(ScanUtil.scan(pack));
         });
         for (Class clz : classes) {

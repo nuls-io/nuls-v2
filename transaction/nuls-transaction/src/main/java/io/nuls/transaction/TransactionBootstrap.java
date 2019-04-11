@@ -51,6 +51,7 @@ import io.nuls.transaction.utils.LoggerUtil;
 import java.lang.reflect.Field;
 import java.nio.charset.Charset;
 import java.util.Map;
+import java.util.Set;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 
@@ -153,8 +154,8 @@ public class TransactionBootstrap extends RpcModule {
     }
 
     @Override
-    public String[] getRpcCmdPackage() {
-        return new String[]{TxConstant.TX_CMD_PATH};
+    public Set<String> getRpcCmdPackage() {
+        return Set.of(TxConstant.TX_CMD_PATH);
     }
 
     /**

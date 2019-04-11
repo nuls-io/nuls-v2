@@ -21,6 +21,7 @@ import io.nuls.tools.parse.I18nUtils;
 
 import java.lang.reflect.Field;
 import java.nio.charset.Charset;
+import java.util.Set;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 /**
@@ -67,8 +68,8 @@ public class ConsensusBootStrap extends RpcModule {
      * @return
      */
     @Override
-    public String[] getRpcCmdPackage(){
-        return new String[]{ConsensusConstant.RPC_PATH};
+    public Set<String> getRpcCmdPackage(){
+        return Set.of(ConsensusConstant.RPC_PATH);
     }
 
     @Override
