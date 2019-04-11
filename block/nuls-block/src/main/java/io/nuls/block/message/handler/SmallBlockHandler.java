@@ -44,9 +44,10 @@ import io.nuls.rpc.model.message.Response;
 import io.nuls.rpc.util.RPCUtil;
 import io.nuls.rpc.util.TimeUtils;
 import io.nuls.tools.core.annotation.Autowired;
-import io.nuls.tools.core.annotation.Component;
+import io.nuls.tools.core.annotation.Service;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.log.logback.NulsLogger;
+import io.nuls.tools.protocol.MessageHandler;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -65,13 +66,14 @@ import static io.nuls.block.constant.CommandConstant.SMALL_BLOCK_MESSAGE;
  * @version 1.0
  * @date 18-11-14 下午4:23
  */
-@Component
+@Service
 public class SmallBlockHandler extends BaseCmd {
 
     @Autowired
     private BlockService blockService;
 
     @CmdAnnotation(cmd = SMALL_BLOCK_MESSAGE, version = 1.0, scope = Constants.PUBLIC, description = "")
+    @MessageHandler(message = SmallBlockMessage.class)
     public Response process(Map map) {
         int chainId = Integer.parseInt(map.get("chainId").toString());
         ChainContext context = ContextManager.getContext(chainId);
