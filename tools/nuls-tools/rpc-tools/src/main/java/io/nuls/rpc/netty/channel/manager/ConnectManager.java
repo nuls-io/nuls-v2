@@ -15,12 +15,12 @@ import io.nuls.rpc.netty.processor.RequestMessageProcessor;
 import io.nuls.rpc.netty.thread.RequestByCountProcessor;
 import io.nuls.rpc.netty.thread.RequestByPeriodProcessor;
 import io.nuls.rpc.netty.thread.ResponseAutoProcessor;
+import io.nuls.rpc.util.TimeUtils;
 import io.nuls.tools.core.ioc.ScanUtil;
 import io.nuls.tools.core.ioc.SpringLiteContext;
 import io.nuls.tools.log.Log;
 import io.nuls.tools.model.StringUtils;
 import io.nuls.tools.parse.JSONUtils;
-import io.nuls.tools.thread.TimeService;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
@@ -639,9 +639,9 @@ public class ConnectManager {
          */
 
         Channel channel = NettyClient.createConnect(url);
-        long start = TimeService.currentTimeMillis();
+        long start =  TimeUtils.getCurrentTimeMillis();
         while (channel==null || !channel.isOpen()) {
-            if (TimeService.currentTimeMillis() - start > Constants.MILLIS_PER_SECOND * 5) {
+            if ( TimeUtils.getCurrentTimeMillis() - start > Constants.MILLIS_PER_SECOND * 5) {
                 throw new Exception("Failed to connect " + url);
             }
             Thread.sleep(Constants.INTERVAL_TIMEMILLIS);

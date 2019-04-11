@@ -5,7 +5,6 @@ import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.model.StringUtils;
 import io.nuls.tools.parse.JSONUtils;
-import io.nuls.tools.thread.TimeService;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -51,7 +50,7 @@ public class TransactionTest {
         coinTo.setAmount(new BigInteger("999"));
         coinTo.setAssetsChainId(1);
         coinTo.setAssetsId(2);
-        coinTo.setLockTime(TimeService.currentTimeMillis());
+        coinTo.setLockTime(System.currentTimeMillis());
         return coinTo;
     }
 
@@ -68,7 +67,7 @@ public class TransactionTest {
     public void serialization() throws Exception{
         Transaction tx = new Transaction();
         tx.setType(10);
-        tx.setTime(TimeService.currentTimeMillis());
+        tx.setTime(System.currentTimeMillis());
         tx.setBlockHeight(100);
         String remark = "试一试";
         tx.setRemark(StringUtils.bytes(remark));

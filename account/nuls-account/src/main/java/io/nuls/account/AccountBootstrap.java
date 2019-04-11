@@ -15,6 +15,7 @@ import io.nuls.rpc.modulebootstrap.Module;
 import io.nuls.rpc.modulebootstrap.NulsRpcModuleBootstrap;
 import io.nuls.rpc.modulebootstrap.RpcModule;
 import io.nuls.rpc.modulebootstrap.RpcModuleState;
+import io.nuls.rpc.util.TimeUtils;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.core.annotation.Value;
@@ -112,6 +113,7 @@ public class AccountBootstrap extends RpcModule {
      */
     @Override
     public RpcModuleState onDependenciesReady() {
+        TimeUtils.getInstance().start();
         LoggerUtil.logger.info("account onDependenciesReady");
         LoggerUtil.logger.debug("START-SUCCESS");
         return RpcModuleState.Running;

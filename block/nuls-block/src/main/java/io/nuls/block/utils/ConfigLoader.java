@@ -35,9 +35,9 @@ import io.nuls.tools.protocol.ProtocolLoader;
 import java.util.List;
 import java.util.Map;
 
-import static io.nuls.base.constant.BaseConstant.PROTOCOL_CONFIG_COMPARATOR;
-import static io.nuls.base.constant.BaseConstant.PROTOCOL_CONFIG_FILE;
 import static io.nuls.block.BlockBootstrap.blockConfig;
+import static io.nuls.block.constant.Constant.PROTOCOL_CONFIG_COMPARATOR;
+import static io.nuls.block.constant.Constant.PROTOCOL_CONFIG_FILE;
 
 /**
  * 配置加载器
@@ -81,10 +81,10 @@ public class ConfigLoader {
         List<ProtocolConfigJson> protocolConfigs = JSONUtils.json2list(json, ProtocolConfigJson.class);
         protocolConfigs.sort(PROTOCOL_CONFIG_COMPARATOR);
         Map<Short, Protocol> protocolMap = ProtocolLoader.load(protocolConfigs);
-        ChainParameters po = blockConfig.getDefaultChainParameter();
-        int chainId = po.getChainId();
-        ContextManager.init(po, protocolMap);
-        service.save(po, chainId);
+        ChainParameters parameter = blockConfig;
+        int chainId = parameter.getChainId();
+        ContextManager.init(parameter, protocolMap);
+        service.save(parameter, chainId);
         service.saveProtocolConfigJson(json, chainId);
     }
 

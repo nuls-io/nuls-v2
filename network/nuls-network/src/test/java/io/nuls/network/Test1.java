@@ -27,7 +27,6 @@ package io.nuls.network;
 import io.nuls.network.model.Node;
 import io.nuls.tools.model.ByteUtils;
 import io.nuls.tools.thread.ThreadUtils;
-import io.nuls.tools.thread.TimeService;
 import org.junit.Test;
 
 import java.net.InetAddress;
@@ -76,7 +75,7 @@ public class Test1 {
     }
     @Test
     public void test4(){
-        ThreadUtils.createAndRunThread("mytest",TimeService.getInstance());
+//        ThreadUtils.createAndRunThread("mytest",TI.getInstance());
 
     }
     @Test
