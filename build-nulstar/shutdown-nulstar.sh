@@ -35,10 +35,12 @@ done
 for module in ${modules[@]}
 do
     APP_PID=`ps -ef|grep -w ${module}|grep -v grep|awk '{print $2}'`
-    if [ -z "${APP_PID}" ]; then
+    if [ -z "${APP_PID}" ];
+    then
         echo "${module} not running"
+    else
+        stop $APP_PID
     fi
-    stop $APP_PID
 done
 echo ""
 echo "shutdown success"
