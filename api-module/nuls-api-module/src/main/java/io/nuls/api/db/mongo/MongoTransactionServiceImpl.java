@@ -97,12 +97,13 @@ public class MongoTransactionServiceImpl {
         if (blockInfo == null) {
             return null;
         }
+        long count = mongoDBService.getCount(TX_TABLE + chainId, filter);
         List<TransactionInfo> txList = new ArrayList<>();
         List<Document> docList = this.mongoDBService.pageQuery(TX_TABLE + chainId, filter, Sorts.descending("height", "time"), pageIndex, pageSize);
         for (Document document : docList) {
             txList.add(TransactionInfo.fromDocument(document));
         }
-        PageInfo<TransactionInfo> pageInfo = new PageInfo<>(pageIndex, pageSize, blockInfo.getTxHashList().size(), txList);
+        PageInfo<TransactionInfo> pageInfo = new PageInfo<>(pageIndex, pageSize, count, txList);
         return pageInfo;
     }
 

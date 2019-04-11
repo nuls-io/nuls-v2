@@ -44,8 +44,6 @@ public class SyncBlockTask implements Runnable {
                 running = false;
             }
         }
-        System.out.println("--------------" + TimeUtils.getCurrentTimeMillis());
-        System.out.println("---------------" + TimeUtils.getOffset());
     }
 
     /**
