@@ -19,6 +19,7 @@ import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.model.message.Response;
 import io.nuls.rpc.netty.processor.ResponseMessageProcessor;
 import io.nuls.rpc.util.RPCUtil;
+import io.nuls.rpc.util.TimeUtils;
 import io.nuls.tools.constant.ErrorCode;
 import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.exception.NulsException;
@@ -288,7 +289,7 @@ public class CallMethodUtils {
         try {
             Map<String, Object> params = new HashMap(4);
             params.put("chainId", chain.getConfig().getChainId());
-            long currentTime = currentTime();
+            long currentTime = TimeUtils.getCurrentTimeMillis();
             long surplusTime = blockTime - currentTime;
             if(surplusTime <= MIN_PACK_SURPLUS_TIME){
                 return null;
