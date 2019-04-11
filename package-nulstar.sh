@@ -19,10 +19,10 @@ EOF
     exit 0
 }
 
-
+#NULSTAR download url
+NULSTAR_URL="http://pub-readingpal.oss-cn-hangzhou.aliyuncs.com/nulstar.tar.gz"
 #获取参数
 #输出目录
-
 MODULES_PATH="./NULS-Wallet-linux64-alpha1"
 #RELEASE_OUT_PATH="./NULS-Walltet-linux64-alpha1"
 #是否马上更新代码
@@ -31,7 +31,7 @@ DOPULL=
 DOMOCK=0
 #更新代码的 git 分支
 GIT_BRANCH=
-while getopts phb:o:j:iJ:zm name
+while getopts phb:o:j:iJ:zmN name
 do
             case $name in
             p)	   DOPULL=1
@@ -46,6 +46,7 @@ do
 			i)     IGNROEMVN="1";;
 			J)     JRE_HOME="$OPTARG";;
 			z)     BUILDTAR="1";;
+			N)     BUILD_NULSTAR="1";;
             ?)     exit 2;;
            esac
 done
@@ -158,6 +159,18 @@ fi
 if [ -n "${DOPULL}" ];then
 	log "git pull origin $GIT_BRANCH"
 	git pull origin "$GIT_BRANCH"
+fi
+
+#0.download Nulstar
+if [ -n  "${BUILD_NULSTAR}" ]; then
+    log "download Nulstar"
+    wget $NULSTAR_URL
+    if [ -f "./nulstar.tar.gz" ]; then
+        tar -xvf "./nulstar.tar.gz" -C "${BUILD_PATH}/tmp"
+        /bin/cp -Rf "${BUILD_PATH}/tmp/nulstar/" ${RELEASE_PATH}
+        rm "./nulstar.tar.gz"
+    fi
+    log "build Nulstar done"
 fi
 
 #1.install nuls-tools
@@ -357,8 +370,11 @@ copyModuleNcfToModules(){
 
 #2.遍历文件夹，检查第一个pom 发现pom文件后通过mvn进行打包，完成后把文件jar文件和module.ncf文件复制到Modules文件夹下
 packageModule() {
-	if [ ! -d ./$1 ]; then
+	if [ ! -d "./$1" ]; then
 		return 0
+	fi
+	if [ "$1" == "tmp" ]; then
+	    return 0
 	fi
 	cd ./$1
 #	echo `pwd`
