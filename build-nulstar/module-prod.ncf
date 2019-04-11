@@ -29,4 +29,3 @@ StopScript=stop
 logPath=../../../../logs
 debug=0
 dataPath=../../../../data
-config=../../../../nuls.ncf
