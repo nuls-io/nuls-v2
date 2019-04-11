@@ -18,7 +18,7 @@
  * SOFTWARE.
  */
 
-package io.nuls.api.db;
+package io.nuls.api.db.mongo;
 
 import com.mongodb.MongoClient;
 import com.mongodb.bulk.BulkWriteResult;
@@ -60,7 +60,7 @@ public class MongoDBService implements InitializingBean {
     @Override
     public void afterPropertiesSet() {
         try {
-            MongoClient mongoClient = new MongoClient(ApiContext.mongoIp, ApiContext.mongoPort);
+            MongoClient mongoClient = new MongoClient(ApiContext.databaseUrl, ApiContext.databasePort);
             MongoDatabase mongoDatabase = mongoClient.getDatabase("nuls-api");
             mongoDatabase.getCollection("test").drop();
             this.client = mongoClient;

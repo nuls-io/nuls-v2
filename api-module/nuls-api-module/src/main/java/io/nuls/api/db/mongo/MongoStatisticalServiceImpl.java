@@ -18,7 +18,7 @@
  * SOFTWARE.
  */
 
-package io.nuls.api.db;
+package io.nuls.api.db.mongo;
 
 import com.mongodb.client.model.Filters;
 import com.mongodb.client.model.Sorts;
@@ -32,7 +32,6 @@ import org.bson.Document;
 
 import java.math.BigInteger;
 import java.util.*;
-import java.util.zip.ZipEntry;
 
 import static com.mongodb.client.model.Filters.*;
 import static io.nuls.api.constant.MongoTableConstant.*;
@@ -41,7 +40,7 @@ import static io.nuls.api.constant.MongoTableConstant.*;
  * @author Niels
  */
 @Component
-public class StatisticalService {
+public class MongoStatisticalServiceImpl {
     @Autowired
     private MongoDBService mongoDBService;
 

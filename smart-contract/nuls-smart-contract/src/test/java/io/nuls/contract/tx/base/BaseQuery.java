@@ -206,7 +206,7 @@ public class BaseQuery {
 
     @Test
     public void getBalance() throws Exception {
-        Map<String, Object> balance0 = LedgerCall.getBalance(chain, toAddress5);
+        Map<String, Object> balance0 = LedgerCall.getBalance(chain, "tNULSeBaN155SwgcURmRwBMzmjKAH3PwK55tSe");
         Log.info("balance:{}", JSONUtils.obj2PrettyJson(balance0));
     }
 
@@ -236,7 +236,7 @@ public class BaseQuery {
      */
     @Test
     public void contractInfo() throws Exception {
-        Map params = this.makeContractInfoParams("tNULSeBaN84zDybqFWimEYDpXu99qo8z1TjDPX");
+        Map params = this.makeContractInfoParams("tNULSeBaN155SwgcURmRwBMzmjKAH3PwK55tSe");
         Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, CONTRACT_INFO, params);
         Map result = (HashMap) (((HashMap) cmdResp2.getResponseData()).get(CONTRACT_INFO));
         Assert.assertTrue(null != result);
@@ -255,7 +255,7 @@ public class BaseQuery {
      */
     @Test
     public void contractResult() throws Exception {
-        Map params = this.makeContractResultParams("3e7faf0939b131ccb018ce5b96761fb9178cbd247d781a8c1315a4e47c08630f");
+        Map params = this.makeContractResultParams("bbf53c9f844bd3da22c37e93de65ea56d07097ca895b5227e9a42270bf086920");
         Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, CONTRACT_RESULT, params);
         Map result = (HashMap) (((HashMap) cmdResp2.getResponseData()).get(CONTRACT_RESULT));
         Assert.assertTrue(null != result);
@@ -274,7 +274,7 @@ public class BaseQuery {
      */
     @Test
     public void contractTx() throws Exception {
-        Map params = this.makeContractTxParams("3e7faf0939b131ccb018ce5b96761fb9178cbd247d781a8c1315a4e47c08630f");
+        Map params = this.makeContractTxParams("8a35aa28d617e00895d0cd2d26fbb03a3b53dfec7223cb8dd7150d5135a6f4c1");
         Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, CONTRACT_TX, params);
         Map result = (HashMap) (((HashMap) cmdResp2.getResponseData()).get(CONTRACT_TX));
         Assert.assertTrue(null != result);

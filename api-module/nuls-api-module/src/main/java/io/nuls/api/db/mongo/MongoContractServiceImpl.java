@@ -1,7 +1,6 @@
-package io.nuls.api.db;
+package io.nuls.api.db.mongo;
 
 import com.mongodb.client.model.*;
-import io.nuls.api.constant.MongoTableConstant;
 import io.nuls.api.model.po.db.ContractInfo;
 import io.nuls.api.model.po.db.ContractResultInfo;
 import io.nuls.api.model.po.db.ContractTxInfo;
@@ -9,7 +8,6 @@ import io.nuls.api.model.po.db.PageInfo;
 import io.nuls.api.utils.DocumentTransferTool;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
-import io.nuls.tools.parse.JSONUtils;
 import org.bson.Document;
 import org.bson.conversions.Bson;
 
@@ -20,12 +18,12 @@ import java.util.Map;
 import static io.nuls.api.constant.MongoTableConstant.*;
 
 @Component
-public class ContractService {
+public class MongoContractServiceImpl {
 
     @Autowired
     private MongoDBService mongoDBService;
     @Autowired
-    private AccountService accountService;
+    private MongoAccountServiceImpl mongoAccountServiceImpl;
 
     public ContractInfo getContractInfo(int chainId, String contractAddress) {
         Document document = mongoDBService.findOne(CONTRACT_TABLE + chainId, Filters.eq("_id", contractAddress));

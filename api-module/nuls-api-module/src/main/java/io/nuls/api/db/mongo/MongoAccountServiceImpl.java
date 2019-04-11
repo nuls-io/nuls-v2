@@ -1,11 +1,7 @@
-package io.nuls.api.db;
+package io.nuls.api.db.mongo;
 
-import com.mongodb.client.AggregateIterable;
-import com.mongodb.client.MongoCollection;
-import com.mongodb.client.MongoCursor;
 import com.mongodb.client.model.*;
 import io.nuls.api.cache.ApiCache;
-import io.nuls.api.constant.MongoTableConstant;
 import io.nuls.api.manager.CacheManager;
 import io.nuls.api.model.po.db.AccountInfo;
 import io.nuls.api.model.po.db.PageInfo;
@@ -19,7 +15,6 @@ import org.bson.conversions.Bson;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -27,7 +22,7 @@ import static io.nuls.api.constant.MongoTableConstant.ACCOUNT_TABLE;
 import static io.nuls.api.constant.MongoTableConstant.TX_RELATION_TABLE;
 
 @Component
-public class AccountService {
+public class MongoAccountServiceImpl {
 
     @Autowired
     private MongoDBService mongoDBService;

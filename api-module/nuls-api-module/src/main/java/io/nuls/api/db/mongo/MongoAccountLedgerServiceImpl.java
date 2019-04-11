@@ -1,4 +1,4 @@
-package io.nuls.api.db;
+package io.nuls.api.db.mongo;
 
 import com.mongodb.client.model.Filters;
 import com.mongodb.client.model.InsertOneModel;
@@ -18,7 +18,7 @@ import java.util.List;
 import java.util.Map;
 
 @Component
-public class AccountLedgerService {
+public class MongoAccountLedgerServiceImpl {
 
     @Autowired
     private MongoDBService mongoDBService;
