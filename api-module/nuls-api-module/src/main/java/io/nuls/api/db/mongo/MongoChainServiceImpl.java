@@ -1,15 +1,13 @@
-package io.nuls.api.db;
+package io.nuls.api.db.mongo;
 
 
 import com.mongodb.client.model.Filters;
-import io.nuls.api.constant.MongoTableConstant;
 import io.nuls.api.manager.CacheManager;
 import io.nuls.api.model.po.db.ChainInfo;
 import io.nuls.api.model.po.db.SyncInfo;
 import io.nuls.api.utils.DocumentTransferTool;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
-import org.apache.tools.ant.taskdefs.Sync;
 import org.bson.Document;
 import org.bson.conversions.Bson;
 
@@ -20,7 +18,7 @@ import static io.nuls.api.constant.MongoTableConstant.CHAIN_INFO_TABLE;
 import static io.nuls.api.constant.MongoTableConstant.SYNC_INFO_TABLE;
 
 @Component
-public class ChainService {
+public class MongoChainServiceImpl {
 
     @Autowired
     private MongoDBService mongoDBService;

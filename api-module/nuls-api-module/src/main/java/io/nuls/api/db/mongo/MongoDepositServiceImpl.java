@@ -1,11 +1,8 @@
-package io.nuls.api.db;
+package io.nuls.api.db.mongo;
 
-import com.mongodb.Block;
-import com.mongodb.DBCursor;
 import com.mongodb.client.DistinctIterable;
 import com.mongodb.client.MongoCursor;
 import com.mongodb.client.model.*;
-import io.nuls.api.constant.MongoTableConstant;
 import io.nuls.api.model.po.db.DepositInfo;
 import io.nuls.api.model.po.db.PageInfo;
 import io.nuls.api.utils.DocumentTransferTool;
@@ -16,13 +13,11 @@ import org.bson.conversions.Bson;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
-import java.util.function.Consumer;
 
 import static io.nuls.api.constant.MongoTableConstant.DEPOSIT_TABLE;
 
 @Component
-public class DepositService {
+public class MongoDepositServiceImpl {
 
     @Autowired
     private MongoDBService mongoDBService;
