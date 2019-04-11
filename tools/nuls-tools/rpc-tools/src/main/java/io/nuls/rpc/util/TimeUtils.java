@@ -56,7 +56,7 @@ public class TimeUtils implements Runnable {
      * Resynchronize the interval.
      * 1 minutes;
      */
-    private static final long NET_REFRESH_TIME = 60 * 1000L;
+    private long NET_REFRESH_TIME = 60 * 1000L;
 
     private static long offset;
 
@@ -66,6 +66,13 @@ public class TimeUtils implements Runnable {
      * Start the time synchronization thread.
      */
     public void start() {
+        start(0);
+    }
+
+    public void start(long refreshTime) {
+        if (refreshTime > 0) {
+            NET_REFRESH_TIME = refreshTime;
+        }
         Log.debug("----------- TimeUtils start -------------");
         ThreadUtils.createAndRunThread("TimeUtils", this, true);
     }

@@ -138,6 +138,7 @@ public class ApiModuleBootstrap extends RpcModule {
             JsonRpcServer server = new JsonRpcServer();
             server.startServer(ApiContext.listenerIp, ApiContext.rpcPort);
             TimeUtils.getInstance().start();
+         //   TimeUtils.getInstance().start(10 * 60 * 1000L);
         } catch (Exception e) {
             Log.error("------------------------api-module running failed---------------------------");
             Log.error(e);
