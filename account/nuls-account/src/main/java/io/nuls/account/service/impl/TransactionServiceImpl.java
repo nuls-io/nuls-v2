@@ -35,7 +35,6 @@ import io.nuls.account.model.bo.tx.txdata.Alias;
 import io.nuls.account.model.dto.CoinDto;
 import io.nuls.account.model.dto.MultiSignTransactionResultDto;
 import io.nuls.account.rpc.call.LedgerCmdCall;
-import io.nuls.account.rpc.call.NetworkCall;
 import io.nuls.account.rpc.call.TransactionCmdCall;
 import io.nuls.account.service.AccountService;
 import io.nuls.account.service.AliasService;
@@ -54,6 +53,7 @@ import io.nuls.base.signture.P2PHKSignature;
 import io.nuls.base.signture.SignatureUtil;
 import io.nuls.base.signture.TransactionSignature;
 import io.nuls.rpc.util.RPCUtil;
+import io.nuls.rpc.util.TimeUtils;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Service;
 import io.nuls.tools.crypto.ECKey;
@@ -167,7 +167,7 @@ public class TransactionServiceImpl implements TransactionService {
             throws NulsException, IOException {
         //create transaction
         Transaction transaction = new Transaction(AccountConstant.TX_TYPE_TRANSFER);
-        transaction.setTime(NetworkCall.getCurrentTimeMillis());
+        transaction.setTime(TimeUtils.getCurrentTimeMillis());
         transaction.setRemark(StringUtils.bytes(remark));
         //build coin data
         //buildMultiSignTransactionCoinData(transaction, chainId,assetsId, multiSigAccount, toAddress, amount);
@@ -219,7 +219,7 @@ public class TransactionServiceImpl implements TransactionService {
             throws NulsException, IOException {
         //create transaction
         AliasTransaction transaction = new AliasTransaction();
-        transaction.setTime(NetworkCall.getCurrentTimeMillis());
+        transaction.setTime(TimeUtils.getCurrentTimeMillis());
         transaction.setRemark(StringUtils.bytes(remark));
         Alias alias = new Alias(multiSigAccount.getAddress().getAddressBytes(), aliasName);
         transaction.setTxData(alias.serialize());
@@ -315,6 +315,7 @@ public class TransactionServiceImpl implements TransactionService {
 
     private Transaction assemblyTransaction(int chainId, List<CoinDto> fromList, List<CoinDto> toList, String remark) throws NulsException{
         Transaction tx = new Transaction(AccountConstant.TX_TYPE_TRANSFER);
+        tx.setTime(TimeUtils.getCurrentTimeMillis());
         tx.setRemark(StringUtils.bytes(remark));
         try {
             //组装CoinData中的coinFrom、coinTo数据
