@@ -169,6 +169,7 @@ public class ContractUtil {
                 contractData = delete;
                 break;
             default:
+                Log.warn("Non-contract tx detected. Tx hash is {}, type is {}", tx.getHash().toString(), tx.getType());
                 isContractTx = false;
                 break;
         }
