@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonGenerationException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import net.sf.cglib.beans.BeanMap;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 
 /**
@@ -91,14 +92,14 @@ public class MapUtils {
      * @throws InstantiationException
      * @throws IllegalAccessException
      */
-    public static <T> List<T> mapsToObjects(List<Map<String, Object>> maps, Class<T> clazz) throws InstantiationException, IllegalAccessException {
+    public static <T> List<T> mapsToObjects(List<Map<String, Object>> maps, Class<T> clazz) throws InstantiationException, IllegalAccessException, NoSuchMethodException, InvocationTargetException {
         List<T> list = new ArrayList<>();
         if (maps != null && maps.size() > 0) {
             Map<String, Object> map = null;
             T bean = null;
             for (int i = 0, size = maps.size(); i < size; i++) {
                 map = maps.get(i);
-                bean = clazz.newInstance();
+                bean = clazz.getDeclaredConstructor().newInstance();
                 mapToBean(map, bean);
                 list.add(bean);
             }

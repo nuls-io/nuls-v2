@@ -32,11 +32,8 @@ import io.nuls.cmd.client.CommandHelper;
 import io.nuls.cmd.client.CommandResult;
 import io.nuls.cmd.client.utils.Na;
 import io.nuls.tools.core.annotation.Component;
-import io.nuls.tools.model.StringUtils;
 
 import java.math.BigDecimal;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * @desription:
@@ -110,9 +107,9 @@ public class CallContractProcessor extends ContractBaseProcessor {
 
             if(args.length == 9) {
                 String argType = args[7].trim();
-                if(argType.equals("-d")) {
+                if ("-d".equals(argType)) {
                     call.setMethodDesc(args[8].trim());
-                } else if(argType.equals("-r")) {
+                } else if ("-r".equals(argType)) {
                     call.setRemark(args[8].trim());
                 } else {
                     return null;
@@ -120,10 +117,10 @@ public class CallContractProcessor extends ContractBaseProcessor {
             }else if(args.length == 11) {
                 String argType0 = args[7].trim();
                 String argType1 = args[9].trim();
-                boolean isType0D = argType0.equals("-d");
-                boolean isType1D = argType1.equals("-d");
-                boolean isType0R = argType0.equals("-r");
-                boolean isType1R = argType1.equals("-r");
+                boolean isType0D = "-d".equals(argType0);
+                boolean isType1D = "-d".equals(argType1);
+                boolean isType0R = "-r".equals(argType0);
+                boolean isType1R = "-r".equals(argType1);
                 if((isType0D && isType1D) || (isType0R && isType1R)) {
                     // 不能同时为-d或-r
                     return null;

@@ -4,7 +4,6 @@ import ch.qos.logback.classic.Level;
 import com.alibaba.fastjson.JSONObject;
 import io.nuls.tools.io.IoUtils;
 import io.nuls.tools.log.logback.NulsLogger;
-import org.apache.commons.io.IOUtils;
 
 import java.io.InputStream;
 
@@ -166,17 +165,13 @@ public class Log {
     
     private static NulsLogger getBasicLogger() {
         if(BASIC_LOGGER == null) {
-            InputStream configInput = null;
-            try {
-                configInput = Log.class.getClassLoader().getResourceAsStream(MODULE_CONFIG_FILE);
+            try (InputStream configInput = Log.class.getClassLoader().getResourceAsStream(MODULE_CONFIG_FILE)) {
                 String str = IoUtils.readBytesToString(configInput);
                 JSONObject json = JSONObject.parseObject(str);
                 ContractUtil.configLog(json.getString("logFilePath"), json.getString("logFileName"),
                         Level.toLevel(json.getString("logFileLevel")), Level.toLevel(json.getString("logConsoleLevel")));
             } catch (Exception e) {
                 ContractUtil.configLog("./contract", "contract", Level.INFO, Level.INFO);
-            } finally {
-                IOUtils.closeQuietly(configInput);
             }
         }
         return BASIC_LOGGER;
