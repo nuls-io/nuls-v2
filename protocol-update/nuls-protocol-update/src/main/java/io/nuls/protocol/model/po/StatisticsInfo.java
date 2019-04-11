@@ -19,7 +19,7 @@ import java.util.Set;
  * @version 1.0
  * @date 18-12-10 下午3:50
  */
-public class Statistics extends BaseNulsData {
+public class StatisticsInfo extends BaseNulsData {
 
     /**
      * 上一个统计信息生效高度

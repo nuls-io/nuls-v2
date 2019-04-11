@@ -22,19 +22,10 @@
 
 package io.nuls.protocol.model;
 
-import io.nuls.base.basic.NulsByteBuffer;
-import io.nuls.base.basic.NulsOutputStreamBuffer;
-import io.nuls.base.data.BaseNulsData;
-import io.nuls.protocol.constant.ConfigConstant;
 import io.nuls.tools.core.annotation.Configuration;
 import io.nuls.tools.core.annotation.Value;
-import io.nuls.tools.exception.NulsException;
-import io.nuls.tools.parse.SerializeUtils;
-import io.nuls.tools.parse.config.ConfigItem;
 
 import java.io.File;
-import java.io.IOException;
-import java.util.Map;
 
 @Configuration(domain = "protocol")
 public class ProtocolConfig {

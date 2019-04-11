@@ -98,9 +98,6 @@ public class ProtocolBootstrap extends RpcModule {
     @Override
     public boolean doStart() {
         try {
-            while (!isDependencieReady(new Module(ModuleE.TX.abbr, "1.0"))) {
-                Thread.sleep(1000);
-            }
             //启动链
             SpringLiteContext.getBean(ChainManager.class).runChain();
         } catch (Exception e) {
@@ -134,7 +131,7 @@ public class ProtocolBootstrap extends RpcModule {
      */
     @Override
     public RpcModuleState onDependenciesLoss(Module module) {
-        return RpcModuleState.Ready;
+        return RpcModuleState.Running;
     }
 
 }

@@ -23,7 +23,7 @@
 package io.nuls.protocol.model;
 
 import io.nuls.protocol.constant.RunningStatusEnum;
-import io.nuls.protocol.model.po.Statistics;
+import io.nuls.protocol.model.po.StatisticsInfo;
 import io.nuls.protocol.utils.LoggerUtil;
 import io.nuls.tools.log.logback.NulsLogger;
 
@@ -88,7 +88,7 @@ public class ProtocolContext {
     /**
      * 上一条缓存的统计信息
      */
-    private Statistics lastValidStatistics;
+    private StatisticsInfo lastValidStatisticsInfo;
 
     /**
      * 链的运行时参数
@@ -168,12 +168,12 @@ public class ProtocolContext {
         this.count = count;
     }
 
-    public Statistics getLastValidStatistics() {
-        return lastValidStatistics;
+    public StatisticsInfo getLastValidStatisticsInfo() {
+        return lastValidStatisticsInfo;
     }
 
-    public void setLastValidStatistics(Statistics lastValidStatistics) {
-        this.lastValidStatistics = lastValidStatistics;
+    public void setLastValidStatisticsInfo(StatisticsInfo lastValidStatisticsInfo) {
+        this.lastValidStatisticsInfo = lastValidStatisticsInfo;
     }
 
     public ChainParameters getParameters() {
@@ -198,10 +198,10 @@ public class ProtocolContext {
 
     public void init() {
         proportionMap = new HashMap<>();
-        lastValidStatistics = new Statistics();
-        lastValidStatistics.setCount((short) 0);
-        lastValidStatistics.setHeight(0);
-        lastValidStatistics.setProtocolVersion(currentProtocolVersion);
+        lastValidStatisticsInfo = new StatisticsInfo();
+        lastValidStatisticsInfo.setCount((short) 0);
+        lastValidStatisticsInfo.setHeight(0);
+        lastValidStatisticsInfo.setProtocolVersion(currentProtocolVersion);
         protocolVersionHistory = new Stack<>();
         protocolVersionHistory.push(currentProtocolVersion);
         LoggerUtil.init(chainId, parameters.getLogLevel());

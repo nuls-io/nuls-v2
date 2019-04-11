@@ -22,7 +22,7 @@
 
 package io.nuls.protocol.storage;
 
-import io.nuls.protocol.model.po.Statistics;
+import io.nuls.protocol.model.po.StatisticsInfo;
 
 import java.util.List;
 
@@ -39,12 +39,12 @@ public interface StatisticsStorageService {
      * 保存指定链的版本统计信息
      * Save configuration information for the specified chain
      *
-     * @param statistics 版本统计类/config bean
+     * @param statisticsInfo 版本统计类/config bean
      * @param chainId        链Id/chain id
      * @return 保存是否成功/Is preservation successful?
      * @throws
      */
-    boolean save(int chainId, Statistics statistics);
+    boolean save(int chainId, StatisticsInfo statisticsInfo);
 
     /**
      * 查询某条链的版本统计信息
@@ -53,7 +53,7 @@ public interface StatisticsStorageService {
      * @param chainId 链Id/chain id
      * @return 版本统计信息类/config bean
      */
-    Statistics get(int chainId, long height);
+    StatisticsInfo get(int chainId, long height);
 
     /**
      * 删除某条链的版本统计信息
@@ -70,5 +70,5 @@ public interface StatisticsStorageService {
      *
      * @return 节点信息列表/Node information list
      */
-    List<Statistics> getList(int chainId);
+    List<StatisticsInfo> getList(int chainId);
 }

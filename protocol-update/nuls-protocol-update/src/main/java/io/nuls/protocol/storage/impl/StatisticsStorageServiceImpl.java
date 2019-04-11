@@ -25,7 +25,7 @@ package io.nuls.protocol.storage.impl;
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.db.service.RocksDBService;
 import io.nuls.protocol.constant.Constant;
-import io.nuls.protocol.model.po.Statistics;
+import io.nuls.protocol.model.po.StatisticsInfo;
 import io.nuls.protocol.storage.StatisticsStorageService;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.model.ByteUtils;
@@ -39,11 +39,11 @@ import static io.nuls.protocol.utils.LoggerUtil.commonLog;
 public class StatisticsStorageServiceImpl implements StatisticsStorageService {
 
     @Override
-    public boolean save(int chainId, Statistics statistics) {
+    public boolean save(int chainId, StatisticsInfo statisticsInfo) {
         byte[] bytes;
         try {
-            bytes = statistics.serialize();
-            return RocksDBService.put(Constant.STATISTICS+chainId, ByteUtils.longToBytes(statistics.getHeight()), bytes);
+            bytes = statisticsInfo.serialize();
+            return RocksDBService.put(Constant.STATISTICS + chainId, ByteUtils.longToBytes(statisticsInfo.getHeight()), bytes);
         } catch (Exception e) {
             e.printStackTrace();
             commonLog.error(e);
@@ -52,9 +52,9 @@ public class StatisticsStorageServiceImpl implements StatisticsStorageService {
     }
 
     @Override
-    public Statistics get(int chainId, long height) {
+    public StatisticsInfo get(int chainId, long height) {
         try {
-            Statistics po = new Statistics();
+            StatisticsInfo po = new StatisticsInfo();
             byte[] bytes = RocksDBService.get(Constant.STATISTICS+chainId, ByteUtils.longToBytes(height));
             po.parse(new NulsByteBuffer(bytes));
             return po;
@@ -77,12 +77,12 @@ public class StatisticsStorageServiceImpl implements StatisticsStorageService {
     }
 
     @Override
-    public List<Statistics> getList(int chainId) {
+    public List<StatisticsInfo> getList(int chainId) {
         try {
-            var pos = new ArrayList<Statistics>();
+            var pos = new ArrayList<StatisticsInfo>();
             List<byte[]> valueList = RocksDBService.valueList(Constant.STATISTICS+chainId);
             for (byte[] bytes : valueList) {
-                var po = new Statistics();
+                var po = new StatisticsInfo();
                 po.parse(new NulsByteBuffer(bytes));
                 pos.add(po);
             }
