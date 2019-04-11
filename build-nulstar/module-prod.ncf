@@ -26,6 +26,7 @@ StartScript=start
 StopScript=stop
 
 [global]
-logpath=../../../../logs
+logPath=../../../../logs
 debug=0
-datapath=../../../../data
+dataPath=../../../../data
+config=../../../../nuls.ncf
