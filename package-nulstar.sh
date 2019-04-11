@@ -449,9 +449,9 @@ fi
 if [ -n "${DOMOCK}" ]; then
 	log "============== BUILD start-mykernel script ====================="
 	cp "${BUILD_PATH}/start-mykernel.sh" "${MODULES_BIN_PATH}/"
-	chmod u+x "${MODULES_BIN_PATH}/start.sh"
+	chmod u+x "${MODULES_BIN_PATH}/start-mykernel.sh"
 	cp "${BUILD_PATH}/stop-mykernel.sh" "${MODULES_BIN_PATH}/"
-	chmod u+x "${MODULES_BIN_PATH}/stop.sh"
+	chmod u+x "${MODULES_BIN_PATH}/stop-mykernel.sh"
 	cp "${BUILD_PATH}/default-config.ncf" "${MODULES_BIN_PATH}/nuls.ncf"
 	chmod u+r "${MODULES_BIN_PATH}/nuls.ncf"
 	cp "${BUILD_PATH}/cmd.sh" "${MODULES_BIN_PATH}/"
