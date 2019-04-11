@@ -1092,7 +1092,7 @@ public class TxServiceImpl implements TxService {
                             //只验证单个交易的基础内容(TX模块本地验证)
                             TxRegister txRegister = TxManager.getTxRegister(chain, tx.getType());
                             baseValidateTx(chain, tx, txRegister);
-                            Log.debug("验签名");
+                            Log.debug("验签名 type:{}, -hash:{}",tx.getType(), tx.getHash().getDigestHex());
                         } catch (Exception e) {
                             chain.getLoggerMap().get(TxConstant.LOG_TX).debug("batchVerify failed, single tx verify failed. hash:{}, -type:{}", tx.getHash().getDigestHex(), tx.getType());
                             chain.getLoggerMap().get(TxConstant.LOG_TX).error(e);
