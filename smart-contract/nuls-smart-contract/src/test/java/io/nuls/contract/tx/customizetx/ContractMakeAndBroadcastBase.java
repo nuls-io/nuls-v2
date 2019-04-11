@@ -34,6 +34,7 @@ import io.nuls.contract.enums.LedgerUnConfirmedTxStatus;
 import io.nuls.contract.helper.ContractHelper;
 import io.nuls.contract.helper.ContractTxHelper;
 import io.nuls.contract.manager.ChainManager;
+import io.nuls.contract.model.po.ContractAddressInfoPo;
 import io.nuls.contract.model.tx.CallContractTransaction;
 import io.nuls.contract.model.tx.ContractBaseTransaction;
 import io.nuls.contract.model.tx.CreateContractTransaction;
@@ -42,10 +43,17 @@ import io.nuls.contract.model.txdata.ContractData;
 import io.nuls.contract.rpc.call.AccountCall;
 import io.nuls.contract.rpc.call.LedgerCall;
 import io.nuls.contract.rpc.call.TransactionCall;
+import io.nuls.contract.storage.ContractAddressStorageService;
 import io.nuls.contract.tx.base.BaseQuery;
 import io.nuls.contract.util.ContractUtil;
 import io.nuls.contract.util.Log;
 import io.nuls.contract.util.MapUtil;
+import io.nuls.contract.validator.CallContractTxValidator;
+import io.nuls.contract.validator.CreateContractTxValidator;
+import io.nuls.contract.validator.DeleteContractTxValidator;
+import io.nuls.rpc.model.ModuleE;
+import io.nuls.rpc.model.message.Response;
+import io.nuls.rpc.netty.processor.ResponseMessageProcessor;
 import io.nuls.rpc.util.RPCUtil;
 import io.nuls.tools.basic.Result;
 import io.nuls.tools.exception.NulsException;
@@ -59,11 +67,10 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Field;
-import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.HashMap;
-import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 
 import static io.nuls.contract.constant.ContractConstant.*;
@@ -78,15 +85,56 @@ import static io.nuls.contract.util.ContractUtil.getSuccess;
 public class ContractMakeAndBroadcastBase extends BaseQuery {
 
     private ContractTxHelper contractTxHelper;
+    private ContractHelper contractHelper;
+    private ContractAddressStorageService contractAddressStorageService;
+
+    class ContractAddressStorageServiceFake implements ContractAddressStorageService {
+
+        @Override
+        public Result<ContractAddressInfoPo> getContractAddressInfo(int chainId, byte[] contractAddressBytes) {
+            Map<String, Object> params = new HashMap(4);
+            params.put("chainId", chainId);
+            params.put("contractAddress", AddressTool.getStringAddressByBytes(contractAddressBytes));
+            try {
+                Response callResp = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, "sc_contract_info", params);
+                if (!callResp.isSuccess()) {
+                    return getFailed();
+                }
+                HashMap contractInfo = (HashMap) ((HashMap) callResp.getResponseData()).get("sc_contract_info");
+                ContractAddressInfoPo po = new ContractAddressInfoPo();
+                po.setSender(AddressTool.getAddress(contractInfo.get("creater").toString()));
+                return getSuccess().setData(po);
+            } catch (Exception e) {
+                Log.error(e);
+                return getFailed();
+            }
+        }
+
+        @Override
+        public Result saveContractAddress(int chainId, byte[] contractAddressBytes, ContractAddressInfoPo info) { return null; }
+        @Override
+        public Result deleteContractAddress(int chainId, byte[] contractAddressBytes) throws Exception { return null; }
+        @Override
+        public boolean isExistContractAddress(int chainId, byte[] contractAddressBytes) { return false; }
+        @Override
+        public Result<List<ContractAddressInfoPo>> getContractInfoList(int chainId, byte[] creater) { return null; }
+        @Override
+        public Result<List<ContractAddressInfoPo>> getAllContractInfoList(int chainId) { return null; }
+    }
 
     @Before
-    public void init() throws NoSuchFieldException, IllegalAccessException {
-        ContractHelper contractHelper = new ContractHelper();
+    public void init() throws Exception {
+        contractHelper = new ContractHelper();
         ChainManager chainManager = new ChainManager();
         chainManager.getChainMap().put(chainId, chain);
         Field field1 = ContractHelper.class.getDeclaredField("chainManager");
         field1.setAccessible(true);
         field1.set(contractHelper, chainManager);
+
+        contractAddressStorageService = new ContractAddressStorageServiceFake();
+        Field field2 = ContractHelper.class.getDeclaredField("contractAddressStorageService");
+        field2.setAccessible(true);
+        field2.set(contractHelper, contractAddressStorageService);
 
         contractTxHelper = new ContractTxHelper();
         Field field = ContractTxHelper.class.getDeclaredField("contractHelper");
@@ -118,11 +166,9 @@ public class ContractMakeAndBroadcastBase extends BaseQuery {
 
     protected Result broadcastCreateTx(CreateContractTransaction tx) {
         try {
-            CoinData coinDataObj = tx.getCoinDataObj();
-            byte[] txCreator = coinDataObj.getFrom().get(0).getAddress();
             ContractData contractData = tx.getTxDataObj();
             byte[] contractAddressBytes = contractData.getContractAddress();
-            Result result = this.broadcastTx(chainId, AddressTool.getStringAddressByBytes(txCreator), password, tx);
+            Result result = this.broadcastTx(tx);
             if(result.isFailed()) {
                 return result;
             }
@@ -155,20 +201,13 @@ public class ContractMakeAndBroadcastBase extends BaseQuery {
     }
 
     protected Result broadcastCallTx(CallContractTransaction tx) {
-        try {
-            CoinData coinDataObj = tx.getCoinDataObj();
-            byte[] txCreator = coinDataObj.getFrom().get(0).getAddress();
-            Result result = this.broadcastTx(chainId, AddressTool.getStringAddressByBytes(txCreator), password, tx);
-            if(result.isFailed()) {
-                return result;
-            }
-            Map<String, Object> resultMap = new HashMap<>(2);
-            resultMap.put("txHash", tx.getHash().getDigestHex());
-            return getSuccess().setData(resultMap);
-        } catch (NulsException e) {
-            Log.error(e);
-            return Result.getFailed(e.getErrorCode() == null ? FAILED : e.getErrorCode());
+        Result result = this.broadcastTx(tx);
+        if(result.isFailed()) {
+            return result;
         }
+        Map<String, Object> resultMap = new HashMap<>(2);
+        resultMap.put("txHash", tx.getHash().getDigestHex());
+        return getSuccess().setData(resultMap);
     }
 
 
@@ -183,28 +222,26 @@ public class ContractMakeAndBroadcastBase extends BaseQuery {
     }
 
     protected Result broadcastDeleteTx(DeleteContractTransaction tx) {
-        try {
-            CoinData coinDataObj = tx.getCoinDataObj();
-            byte[] txCreator = coinDataObj.getFrom().get(0).getAddress();
-            Result result = this.broadcastTx(chainId, AddressTool.getStringAddressByBytes(txCreator), password, tx);
-            if(result.isFailed()) {
-                return result;
-            }
-            Map<String, Object> resultMap = new HashMap<>(2);
-            resultMap.put("txHash", tx.getHash().getDigestHex());
-            return getSuccess().setData(resultMap);
-        } catch (NulsException e) {
-            Log.error(e);
-            return Result.getFailed(e.getErrorCode() == null ? FAILED : e.getErrorCode());
+        Result result = this.broadcastTx(tx);
+        if(result.isFailed()) {
+            return result;
         }
+        Map<String, Object> resultMap = new HashMap<>(2);
+        resultMap.put("txHash", tx.getHash().getDigestHex());
+        return getSuccess().setData(resultMap);
     }
 
-    private Result broadcastTx(int chainId, String sender, String password, Transaction tx) {
+    private void signContractTx(ContractBaseTransaction tx) throws IOException, NulsException {
+        CoinData coinDataObj = tx.getCoinDataObj();
+        byte[] txCreator = coinDataObj.getFrom().get(0).getAddress();
+        // 生成交易hash
+        tx.setHash(NulsDigestData.calcDigestData(tx.serializeForHash()));
+        // 生成签名
+        AccountCall.transactionSignature(chainId, AddressTool.getStringAddressByBytes(txCreator), password, tx);
+    }
+
+    private Result broadcastTx(Transaction tx) {
         try {
-            // 生成交易hash
-            tx.setHash(NulsDigestData.calcDigestData(tx.serializeForHash()));
-            // 生成签名
-            AccountCall.transactionSignature(chainId, sender, password, tx);
             String txData = RPCUtil.encode(tx.serialize());
 
             Result validResult = this.validTx(chainId, tx);
@@ -259,13 +296,34 @@ public class ContractMakeAndBroadcastBase extends BaseQuery {
     }
 
     protected Result validCreateTx(int chainId, CreateContractTransaction tx) {
-        return getSuccess();
+        try {
+            CreateContractTxValidator validator = new CreateContractTxValidator();
+            return validator.validate(chainId, tx);
+        } catch (NulsException e) {
+            Log.error(e);
+            return Result.getFailed(e.getErrorCode());
+        }
     }
     protected Result validCallTx(int chainId, CallContractTransaction tx) {
-        return getSuccess();
+        try {
+            CallContractTxValidator validator = new CallContractTxValidator();
+            return validator.validate(chainId, tx);
+        } catch (NulsException e) {
+            Log.error(e);
+            return Result.getFailed(e.getErrorCode());
+        }
     }
     protected Result validDeleteTx(int chainId, DeleteContractTransaction tx) {
-        return getSuccess();
+        try {
+            DeleteContractTxValidator validator = new DeleteContractTxValidator();
+            Field field = DeleteContractTxValidator.class.getDeclaredField("contractHelper");
+            field.setAccessible(true);
+            field.set(validator, contractHelper);
+            return validator.validate(chainId, tx);
+        } catch (Exception e) {
+            Log.error(e);
+            return getFailed();
+        }
     }
 
     protected void txFakePrice(ContractBaseTransaction tx, long price) throws Exception{
@@ -302,10 +360,6 @@ public class ContractMakeAndBroadcastBase extends BaseQuery {
         coinTo.setAmount(BigInteger.valueOf(amount));
     }
 
-    protected void makeAndBroadcastCreateTxTest(String fakeMethodName, LinkedList params, Class... parameterTypes) throws Exception {
-        new MakeAndBroadcastCreateTxTest().make().invokeFake(fakeMethodName, params, parameterTypes).broadcast();
-    }
-
     class MakeAndBroadcastCreateTxTest {
 
         CreateContractTransaction tx;
@@ -329,16 +383,25 @@ public class ContractMakeAndBroadcastBase extends BaseQuery {
             return this;
         }
 
-        MakeAndBroadcastCreateTxTest invokeFake(String fakeMethodName, LinkedList params, Class... parameterTypes) throws Exception {
-            // 造假
-            params.addFirst(tx);
-            Method fakeMethod;
-            try {
-                fakeMethod = ContractMakeAndBroadcastBase.this.getClass().getDeclaredMethod(fakeMethodName, parameterTypes);
-            } catch (NoSuchMethodException e) {
-                fakeMethod = ContractMakeAndBroadcastBase.this.getClass().getSuperclass().getDeclaredMethod(fakeMethodName, parameterTypes);
+        MakeAndBroadcastCreateTxTest fake(ExecuteFake fake) throws Exception {
+            fake.execute(tx);
+            return this;
+        }
+
+        MakeAndBroadcastCreateTxTest sign() throws Exception {
+            if(tx != null) {
+                signContractTx(tx);
+            } else {
+                throw new NullPointerException("tx is null");
             }
-            fakeMethod.invoke(ContractMakeAndBroadcastBase.this, params.toArray());
+            return this;
+        }
+
+        MakeAndBroadcastCreateTxTest validate() {
+            Result result = validCreateTx(chainId, tx);
+            if(result.isFailed()) {
+                throw new RuntimeException(result.getMsg());
+            }
             return this;
         }
 
@@ -350,24 +413,27 @@ public class ContractMakeAndBroadcastBase extends BaseQuery {
                 // 签名、广播交易
                 Result result = broadcastCreateTx(tx);
                 Log.info("createContract-result:{}", JSONUtils.obj2PrettyJson(result));
+            } else {
+                throw new NullPointerException("tx is null");
+            }
+        }
+
+        void signAndBroadcast() throws Exception {
+            if(tx != null) {
+                // 签名
+                sign();
+                tx.setTxData(null);
+                tx.setCoinData(null);
+                tx.serializeData();
+                // 广播交易
+                Result result = broadcastCreateTx(tx);
+                Log.info("createContract-result:{}", JSONUtils.obj2PrettyJson(result));
+            } else {
+                throw new NullPointerException("tx is null");
             }
         }
     }
 
-
-    protected void makeAndBroadcastCallTxTest(String fakeMethodName, LinkedList params, Class... parameterTypes) throws Exception {
-        //this.makeAndBroadcastCallTxTest(null, null, fakeMethodName, params, parameterTypes);
-        new MakeAndBroadcastCallTxTest(null, null).make().invokeFake(fakeMethodName, params, parameterTypes).broadcast();
-    }
-
-    protected void makeAndBroadcastCallTxTest(Long longValue, String fakeMethodName, LinkedList params, Class... parameterTypes) throws Exception {
-        //this.makeAndBroadcastCallTxTest(longValue, null, fakeMethodName, params, parameterTypes);
-        new MakeAndBroadcastCallTxTest(longValue, null).make().invokeFake(fakeMethodName, params, parameterTypes).broadcast();
-    }
-
-    protected void makeAndBroadcastCallTxTest(Long longValue, Object[] objArgs, String fakeMethodName, LinkedList params, Class... parameterTypes) throws Exception {
-        new MakeAndBroadcastCallTxTest(longValue, objArgs).make().invokeFake(fakeMethodName, params, parameterTypes).broadcast();
-    }
 
     class MakeAndBroadcastCallTxTest {
         Long longValue;
@@ -377,6 +443,18 @@ public class ContractMakeAndBroadcastBase extends BaseQuery {
         MakeAndBroadcastCallTxTest(Long longValue, Object[] objArgs) {
             this.longValue = longValue;
             this.objArgs = objArgs;
+        }
+
+        MakeAndBroadcastCallTxTest() {}
+
+        public MakeAndBroadcastCallTxTest setLongValue(Long longValue) {
+            this.longValue = longValue;
+            return this;
+        }
+
+        public MakeAndBroadcastCallTxTest setObjArgs(Object[] objArgs) {
+            this.objArgs = objArgs;
+            return this;
         }
 
         MakeAndBroadcastCallTxTest make() throws Exception {
@@ -417,16 +495,25 @@ public class ContractMakeAndBroadcastBase extends BaseQuery {
             return this;
         }
 
-        MakeAndBroadcastCallTxTest invokeFake(String fakeMethodName, LinkedList params, Class... parameterTypes) throws Exception {
-            // 造假
-            params.addFirst(tx);
-            Method fakeMethod;
-            try {
-                fakeMethod = ContractMakeAndBroadcastBase.this.getClass().getDeclaredMethod(fakeMethodName, parameterTypes);
-            } catch (NoSuchMethodException e) {
-                fakeMethod = ContractMakeAndBroadcastBase.this.getClass().getSuperclass().getDeclaredMethod(fakeMethodName, parameterTypes);
+        MakeAndBroadcastCallTxTest fake(ExecuteFake fake) throws Exception {
+            fake.execute(tx);
+            return this;
+        }
+
+        MakeAndBroadcastCallTxTest sign() throws Exception {
+            if(tx != null) {
+                signContractTx(tx);
+            } else {
+                throw new NullPointerException("tx is null");
             }
-            fakeMethod.invoke(ContractMakeAndBroadcastBase.this, params.toArray());
+            return this;
+        }
+
+        MakeAndBroadcastCallTxTest validate() {
+            Result result = validCallTx(chainId, tx);
+            if(result.isFailed()) {
+                throw new RuntimeException(result.getMsg());
+            }
             return this;
         }
 
@@ -438,9 +525,95 @@ public class ContractMakeAndBroadcastBase extends BaseQuery {
                 // 签名、广播交易
                 Result result = broadcastCallTx(tx);
                 Log.info("callContract-result:{}", JSONUtils.obj2PrettyJson(result));
+            } else {
+                throw new NullPointerException("tx is null");
             }
         }
 
+        void signAndBroadcast() throws Exception {
+            if(tx != null) {
+                // 签名
+                sign();
+                tx.setTxData(null);
+                tx.setCoinData(null);
+                tx.serializeData();
+                // 广播交易
+                Result result = broadcastCallTx(tx);
+                Log.info("callContract-result:{}", JSONUtils.obj2PrettyJson(result));
+            } else {
+                throw new NullPointerException("tx is null");
+            }
+        }
+
+    }
+
+    class MakeAndBroadcastDeleteTxTest {
+        DeleteContractTransaction tx;
+
+        MakeAndBroadcastDeleteTxTest make() {
+            Log.info("wait delete.");
+            String remark = "delete contract";
+            Result result = makeDeleteTx(chainId, sender, contractAddress, password, remark);
+            if (result.isFailed()) {
+                throw new RuntimeException(result.getMsg());
+            }
+            this.tx = (DeleteContractTransaction) result.getData();
+            return this;
+        }
+
+        MakeAndBroadcastDeleteTxTest fake(ExecuteFake fake) throws Exception {
+            fake.execute(tx);
+            return this;
+        }
+
+        MakeAndBroadcastDeleteTxTest sign() throws Exception {
+            if(tx != null) {
+                signContractTx(tx);
+            } else {
+                throw new NullPointerException("tx is null");
+            }
+            return this;
+        }
+
+        MakeAndBroadcastDeleteTxTest validate() {
+            Result result = validDeleteTx(chainId, tx);
+            if(result.isFailed()) {
+                throw new RuntimeException(result.getMsg());
+            }
+            return this;
+        }
+
+        void broadcast() throws IOException {
+            if(tx != null) {
+                tx.setTxData(null);
+                tx.setCoinData(null);
+                tx.serializeData();
+                // 签名、广播交易
+                Result result = broadcastDeleteTx(tx);
+                Log.info("deleteContract-result:{}", JSONUtils.obj2PrettyJson(result));
+            } else {
+                throw new NullPointerException("tx is null");
+            }
+        }
+
+        void signAndBroadcast() throws Exception {
+            if(tx != null) {
+                // 签名
+                sign();
+                tx.setTxData(null);
+                tx.setCoinData(null);
+                tx.serializeData();
+                // 广播交易
+                Result result = broadcastDeleteTx(tx);
+                Log.info("deleteContract-result:{}", JSONUtils.obj2PrettyJson(result));
+            } else {
+                throw new NullPointerException("tx is null");
+            }
+        }
+    }
+
+    interface ExecuteFake {
+        void execute(ContractBaseTransaction tx) throws Exception;
     }
 
 }
