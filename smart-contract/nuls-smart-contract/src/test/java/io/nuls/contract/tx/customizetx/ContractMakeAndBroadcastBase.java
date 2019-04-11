@@ -25,14 +25,17 @@ package io.nuls.contract.tx.customizetx;
 
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.CoinData;
+import io.nuls.base.data.CoinTo;
 import io.nuls.base.data.NulsDigestData;
 import io.nuls.base.data.Transaction;
+import io.nuls.contract.basetest.ContractTest;
 import io.nuls.contract.constant.ContractErrorCode;
 import io.nuls.contract.enums.LedgerUnConfirmedTxStatus;
 import io.nuls.contract.helper.ContractHelper;
 import io.nuls.contract.helper.ContractTxHelper;
 import io.nuls.contract.manager.ChainManager;
 import io.nuls.contract.model.tx.CallContractTransaction;
+import io.nuls.contract.model.tx.ContractBaseTransaction;
 import io.nuls.contract.model.tx.CreateContractTransaction;
 import io.nuls.contract.model.tx.DeleteContractTransaction;
 import io.nuls.contract.model.txdata.ContractData;
@@ -40,17 +43,27 @@ import io.nuls.contract.rpc.call.AccountCall;
 import io.nuls.contract.rpc.call.LedgerCall;
 import io.nuls.contract.rpc.call.TransactionCall;
 import io.nuls.contract.tx.base.BaseQuery;
+import io.nuls.contract.util.ContractUtil;
 import io.nuls.contract.util.Log;
 import io.nuls.contract.util.MapUtil;
 import io.nuls.rpc.util.RPCUtil;
 import io.nuls.tools.basic.Result;
 import io.nuls.tools.exception.NulsException;
+import io.nuls.tools.model.StringUtils;
+import io.nuls.tools.parse.JSONUtils;
+import org.apache.commons.beanutils.BeanUtils;
+import org.apache.commons.io.IOUtils;
 import org.junit.Before;
 
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.Map;
 
 import static io.nuls.contract.constant.ContractConstant.*;
@@ -253,6 +266,181 @@ public class ContractMakeAndBroadcastBase extends BaseQuery {
     }
     protected Result validDeleteTx(int chainId, DeleteContractTransaction tx) {
         return getSuccess();
+    }
+
+    protected void txFakePrice(ContractBaseTransaction tx, long price) throws Exception{
+        BeanUtils.setProperty(tx.getTxDataObj(), "price", price);
+    }
+
+    public void txFakeGasLimit(ContractBaseTransaction tx, long gasLimit) throws Exception {
+        BeanUtils.setProperty(tx.getTxDataObj(), "gasLimit", gasLimit);
+    }
+
+    protected void txFakeContractAddress(ContractBaseTransaction tx, String contractAddress) throws Exception {
+        BeanUtils.setProperty(tx.getTxDataObj(), "contractAddress", AddressTool.getAddress(contractAddress));
+    }
+
+    protected void txFakeContractSender(ContractBaseTransaction tx, String sender) throws Exception {
+        BeanUtils.setProperty(tx.getTxDataObj(), "sender", AddressTool.getAddress(sender));
+    }
+
+    protected void txFakeContractValue(ContractBaseTransaction tx, long value) throws Exception {
+        BeanUtils.setProperty(tx.getTxDataObj(), "value", BigInteger.valueOf(value));
+    }
+
+    protected void txFakeAddCoinTo(ContractBaseTransaction tx, String address, long amount) throws Exception {
+        CoinData coinDataObj = tx.getCoinDataObj();
+        CoinTo coinTo = new CoinTo(AddressTool.getAddress(address), chainId, chain.getConfig().getAssetsId(),
+                BigInteger.valueOf(amount), 0L);
+        coinDataObj.getTo().add(coinTo);
+    }
+
+    protected void txFakeModifyCoinTo(ContractBaseTransaction tx, String address, long amount) throws Exception {
+        CoinData coinDataObj = tx.getCoinDataObj();
+        CoinTo coinTo = coinDataObj.getTo().get(0);
+        coinTo.setAddress(AddressTool.getAddress(address));
+        coinTo.setAmount(BigInteger.valueOf(amount));
+    }
+
+    protected void makeAndBroadcastCreateTxTest(String fakeMethodName, LinkedList params, Class... parameterTypes) throws Exception {
+        new MakeAndBroadcastCreateTxTest().make().invokeFake(fakeMethodName, params, parameterTypes).broadcast();
+    }
+
+    class MakeAndBroadcastCreateTxTest {
+
+        CreateContractTransaction tx;
+
+        MakeAndBroadcastCreateTxTest make() throws Exception {
+            Log.info("wait create.");
+            InputStream in = new FileInputStream(ContractTest.class.getResource("/nrc20").getFile());
+            byte[] contractCode = IOUtils.toByteArray(in);
+            String remark = "create contract test - 空气币";
+            String name = "KQB";
+            String symbol = "KongQiBi";
+            String amount = BigDecimal.TEN.pow(10).toPlainString();
+            String decimals = "2";
+            String[][] args = ContractUtil.twoDimensionalArray(new Object[]{name, symbol, amount, decimals});
+
+            Result result = ContractMakeAndBroadcastBase.this.makeCreateTx(chainId, sender, 200000L, 25L, contractCode, args, password, remark);
+            if (result.isFailed()) {
+                throw new RuntimeException(result.getMsg());
+            }
+            this.tx = (CreateContractTransaction) result.getData();
+            return this;
+        }
+
+        MakeAndBroadcastCreateTxTest invokeFake(String fakeMethodName, LinkedList params, Class... parameterTypes) throws Exception {
+            // 造假
+            params.addFirst(tx);
+            Method fakeMethod;
+            try {
+                fakeMethod = ContractMakeAndBroadcastBase.this.getClass().getDeclaredMethod(fakeMethodName, parameterTypes);
+            } catch (NoSuchMethodException e) {
+                fakeMethod = ContractMakeAndBroadcastBase.this.getClass().getSuperclass().getDeclaredMethod(fakeMethodName, parameterTypes);
+            }
+            fakeMethod.invoke(ContractMakeAndBroadcastBase.this, params.toArray());
+            return this;
+        }
+
+        void broadcast() throws IOException {
+            if(tx != null) {
+                tx.setTxData(null);
+                tx.setCoinData(null);
+                tx.serializeData();
+                // 签名、广播交易
+                Result result = broadcastCreateTx(tx);
+                Log.info("createContract-result:{}", JSONUtils.obj2PrettyJson(result));
+            }
+        }
+    }
+
+
+    protected void makeAndBroadcastCallTxTest(String fakeMethodName, LinkedList params, Class... parameterTypes) throws Exception {
+        //this.makeAndBroadcastCallTxTest(null, null, fakeMethodName, params, parameterTypes);
+        new MakeAndBroadcastCallTxTest(null, null).make().invokeFake(fakeMethodName, params, parameterTypes).broadcast();
+    }
+
+    protected void makeAndBroadcastCallTxTest(Long longValue, String fakeMethodName, LinkedList params, Class... parameterTypes) throws Exception {
+        //this.makeAndBroadcastCallTxTest(longValue, null, fakeMethodName, params, parameterTypes);
+        new MakeAndBroadcastCallTxTest(longValue, null).make().invokeFake(fakeMethodName, params, parameterTypes).broadcast();
+    }
+
+    protected void makeAndBroadcastCallTxTest(Long longValue, Object[] objArgs, String fakeMethodName, LinkedList params, Class... parameterTypes) throws Exception {
+        new MakeAndBroadcastCallTxTest(longValue, objArgs).make().invokeFake(fakeMethodName, params, parameterTypes).broadcast();
+    }
+
+    class MakeAndBroadcastCallTxTest {
+        Long longValue;
+        Object[] objArgs;
+        CallContractTransaction tx;
+
+        MakeAndBroadcastCallTxTest(Long longValue, Object[] objArgs) {
+            this.longValue = longValue;
+            this.objArgs = objArgs;
+        }
+
+        MakeAndBroadcastCallTxTest make() throws Exception {
+            Log.info("wait call.");
+            BigInteger value;
+            if(longValue == null) {
+                value = BigInteger.ZERO;
+            } else {
+                value = BigInteger.valueOf(longValue);
+            }
+
+            if(StringUtils.isBlank(methodName)) {
+                methodName = "transfer";
+            }
+            if(StringUtils.isBlank(tokenReceiver)) {
+                tokenReceiver = toAddress1;
+            }
+            if(StringUtils.isBlank(contractAddress)) {
+                contractAddress = contractAddress_nrc20;
+            }
+            String methodDesc = "";
+            String remark = String.format("call contract test - methodName is %s", methodName);
+            String token = BigInteger.valueOf(800L).toString();
+            String[][] args;
+            if(objArgs == null) {
+                args = ContractUtil.twoDimensionalArray(new Object[]{tokenReceiver, token});
+            } else {
+                args = ContractUtil.twoDimensionalArray(objArgs);
+            }
+
+            Result result = makeCallTx(chainId, sender, value, 20000L, 50L, contractAddress,
+                    methodName, methodDesc, args, password, remark);
+            if (result.isFailed()) {
+                throw new RuntimeException(result.getMsg());
+            }
+            this.tx = (CallContractTransaction) result.getData();
+
+            return this;
+        }
+
+        MakeAndBroadcastCallTxTest invokeFake(String fakeMethodName, LinkedList params, Class... parameterTypes) throws Exception {
+            // 造假
+            params.addFirst(tx);
+            Method fakeMethod;
+            try {
+                fakeMethod = ContractMakeAndBroadcastBase.this.getClass().getDeclaredMethod(fakeMethodName, parameterTypes);
+            } catch (NoSuchMethodException e) {
+                fakeMethod = ContractMakeAndBroadcastBase.this.getClass().getSuperclass().getDeclaredMethod(fakeMethodName, parameterTypes);
+            }
+            fakeMethod.invoke(ContractMakeAndBroadcastBase.this, params.toArray());
+            return this;
+        }
+
+        void broadcast() throws IOException {
+            if(tx != null) {
+                tx.setTxData(null);
+                tx.setCoinData(null);
+                tx.serializeData();
+                // 签名、广播交易
+                Result result = broadcastCallTx(tx);
+                Log.info("callContract-result:{}", JSONUtils.obj2PrettyJson(result));
+            }
+        }
+
     }
 
 }

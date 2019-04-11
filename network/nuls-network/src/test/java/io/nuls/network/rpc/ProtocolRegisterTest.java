@@ -31,10 +31,7 @@ import io.nuls.rpc.netty.channel.manager.ConnectManager;
 import io.nuls.rpc.netty.processor.ResponseMessageProcessor;
 import org.junit.Test;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @author lan
@@ -50,7 +47,7 @@ public class ProtocolRegisterTest {
                 .moduleRoles(ModuleE.NW.abbr, new String[]{"1.1", "1.2"})
                 .moduleVersion("1.1")
                 .dependencies(ModuleE.KE.abbr, "1.1")
-                .scanPackage(packageC);
+                .scanPackage(Set.of(packageC));
         String kernelUrl = "ws://" + HostInfo.getLocalIP() + ":8887/ws";
         /*
          * 链接到指定地址

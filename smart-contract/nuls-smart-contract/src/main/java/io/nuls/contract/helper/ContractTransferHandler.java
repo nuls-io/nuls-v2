@@ -24,10 +24,7 @@
 package io.nuls.contract.helper;
 
 import io.nuls.base.basic.AddressTool;
-import io.nuls.base.data.CoinData;
-import io.nuls.base.data.CoinFrom;
-import io.nuls.base.data.CoinTo;
-import io.nuls.base.data.NulsDigestData;
+import io.nuls.base.data.*;
 import io.nuls.contract.constant.ContractConstant;
 import io.nuls.contract.manager.ContractTempBalanceManager;
 import io.nuls.contract.model.bo.*;
@@ -300,7 +297,7 @@ public class ContractTransferHandler {
         }
     }
 
-    private List<ContractMergedTransfer> contractTransfer2mergedTransfer(ContractWrapperTransaction tx, List<ContractTransferTransaction> transferList) throws NulsException {
+    public List<ContractMergedTransfer> contractTransfer2mergedTransfer(Transaction tx, List<ContractTransferTransaction> transferList) throws NulsException {
         List<ContractMergedTransfer> resultList = new ArrayList<>();
         for (ContractTransferTransaction transfer : transferList) {
             resultList.add(this.transformMergedTransfer(tx.getHash(), transfer));

@@ -72,17 +72,12 @@ public class CallContractTxValidator {
         BigInteger contractReceivedValue = BigInteger.ZERO;
         for (CoinTo coin : tx.getCoinDataObj().getTo()) {
             byte[] owner = coin.getAddress();
-            if (owner.length > 23) {
-                owner = coin.getAddress();
-            }
-            // Keep the change maybe a very small coin
             if (addressSet.contains(AddressTool.getStringAddressByBytes(owner))) {
-                // When the receiver sign this tx,Allow it transfer small coin
                 continue;
             }
 
             if (coin.getLockTime() != 0) {
-                Log.error("contract call error: The amount of the transfer cannot be locked(UTXO status error).");
+                Log.error("contract call error: Transfer amount cannot be locked.");
                 return Result.getFailed(UTXO_STATUS_CHANGE);
             }
 
