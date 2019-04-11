@@ -1056,16 +1056,16 @@ public class TxServiceImpl implements TxService {
         List<Future<Boolean>> futures = new ArrayList<>();
         for (String txStr : txStrList) {
             Transaction tx = TxUtil.getInstanceRpcStr(txStr, Transaction.class);
-
+            //如果不是系统智能合约就继续单个验证
+            if (!TxManager.isSystemSmartContract(chain, tx.getType())) {
+                continue;
+            }
             //多线程处理单个交易
             Future<Boolean> res = signExecutor.submit(new Callable<Boolean>() {
                 @Override
                 public Boolean call() throws Exception {
                     txList.add(tx);
-                    //如果不是系统智能合约就继续单个验证
-                    if (!TxManager.isSystemSmartContract(chain, tx.getType())) {
-                        return true;
-                    }
+
                     TransactionConfirmedPO txConfirmed = confirmedTxService.getConfirmedTransaction(chain, tx.getHash());
                     if (null != txConfirmed) {
                         //交易已存在于已确认块中
@@ -1085,13 +1085,14 @@ public class TxServiceImpl implements TxService {
                             return false;
                         }
                     }
+                    Log.debug("是否在未确认中:{}",unconfirmedTxStorageService.isExists(chain.getChainId(), tx.getHash()));
                     if (!unconfirmedTxStorageService.isExists(chain.getChainId(), tx.getHash())) {
                         //不在未确认中就进行基础验证
                         try {
                             //只验证单个交易的基础内容(TX模块本地验证)
                             TxRegister txRegister = TxManager.getTxRegister(chain, tx.getType());
                             baseValidateTx(chain, tx, txRegister);
-                            chain.getLoggerMap().get(TxConstant.LOG_TX).debug("验签名");
+                            Log.debug("验签名");
                         } catch (Exception e) {
                             chain.getLoggerMap().get(TxConstant.LOG_TX).debug("batchVerify failed, single tx verify failed. hash:{}, -type:{}", tx.getHash().getDigestHex(), tx.getType());
                             chain.getLoggerMap().get(TxConstant.LOG_TX).error(e);
