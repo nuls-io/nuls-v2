@@ -43,7 +43,7 @@ public class RequestMessageProcessor {
      */
     public static void negotiateConnectionResponse(Channel channel, Message message) throws JsonProcessingException {
         NegotiateConnectionResponse negotiateConnectionResponse = new NegotiateConnectionResponse();
-        negotiateConnectionResponse.setRequestId(message.getMessageId());
+        negotiateConnectionResponse.setRequestID(message.getMessageID());
         negotiateConnectionResponse.setNegotiationStatus("1");
         negotiateConnectionResponse.setNegotiationComment("Connection true!");
 
@@ -124,11 +124,11 @@ public class RequestMessageProcessor {
              */
             switch (nextProcess) {
                 case Constants.EXECUTE_AND_KEEP:
-                    callCommandsWithPeriod(channelData.getChannel(), request.getRequestMethods(), message.getMessageId(), false);
+                    callCommandsWithPeriod(channelData.getChannel(), request.getRequestMethods(), message.getMessageID(), false);
                     channelData.getCmdInvokeTime().put(message, TimeUtils.getCurrentTimeMillis());
                     return true;
                 case Constants.EXECUTE_AND_REMOVE:
-                    callCommandsWithPeriod(channelData.getChannel(), request.getRequestMethods(), message.getMessageId(), false);
+                    callCommandsWithPeriod(channelData.getChannel(), request.getRequestMethods(), message.getMessageID(), false);
                     channelData.getCmdInvokeTime().put(message, TimeUtils.getCurrentTimeMillis());
                     return false;
                 case Constants.SKIP_AND_KEEP:
@@ -167,7 +167,7 @@ public class RequestMessageProcessor {
             Construct the returned message object
              */
             Response response = MessageUtil.newResponse(messageId, "", "");
-            response.setRequestId(messageId);
+            response.setRequestID(messageId);
             response.setResponseStatus(Constants.BOOLEAN_FALSE);
 
             try {
@@ -237,7 +237,7 @@ public class RequestMessageProcessor {
     private static Message execute(CmdDetail cmdDetail, Map params, String messageId) throws Exception {
         long startTimemillis = TimeUtils.getCurrentTimeMillis();
         Response response = invoke(cmdDetail.getInvokeClass(), cmdDetail.getInvokeMethod(), params);
-        response.setRequestId(messageId);
+        response.setRequestID(messageId);
         Map<String, Object> responseData = new HashMap<>(1);
         responseData.put(cmdDetail.getMethodName(), response.getResponseData());
         response.setResponseData(responseData);
