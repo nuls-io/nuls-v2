@@ -163,6 +163,34 @@ public interface Repository {
      */
     boolean existAccountNonce(int chainId,String accountNonceKey) throws Exception;
 
+
+
+
+    /**
+     *保存账本使用过的hash
+     * @param chainId
+     * @param hashMap
+     * @throws Exception
+     */
+    void saveAccountHash(int chainId, Map<String ,Integer> hashMap) throws Exception;
+
+    /**
+     *删除账本存储的hash
+     * @param chainId
+     * @param hash
+     * @throws Exception
+     */
+    void deleteAccountHash(int chainId,String hash) throws Exception;
+
+    /**
+     *判断账号的hash是否已被使用
+     * @param chainId
+     * @param hash
+     * @return
+     * @throws Exception
+     */
+    boolean existAccountHash(int chainId,String hash) throws Exception;
+
     /**
      * 初始化数据表
      * @throws NulsException

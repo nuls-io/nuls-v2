@@ -10,6 +10,7 @@ import io.nuls.rpc.netty.thread.StartServerProcessor;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * netty服务器端实现类
@@ -123,7 +124,7 @@ public class NettyServer {
      * @return WsServer
      * @throws Exception 找到重复命令(cmd) / Find duplicate commands (cmd)
      */
-    public NettyServer scanPackage(String... scanPackage) throws Exception {
+    public NettyServer scanPackage(Set<String>scanPackage) throws Exception {
         ConnectManager.scanPackage(scanPackage);
         return this;
     }

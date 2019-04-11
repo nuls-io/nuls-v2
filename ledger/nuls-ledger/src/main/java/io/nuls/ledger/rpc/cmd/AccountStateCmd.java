@@ -187,7 +187,7 @@ public class AccountStateCmd extends BaseCmd {
         Integer assetId = (Integer) params.get("assetId");
         Map<String, Object> rtMap = new HashMap<>(2);
         AccountState accountState = accountStateService.getAccountStateUnSyn(address, chainId, assetChainId, assetId);
-        AccountStateUnconfirmed accountStateUnconfirmed = unconfirmedStateService.getUnconfirmedInfoReCal(accountState);
+        AccountStateUnconfirmed accountStateUnconfirmed = unconfirmedStateService.getUnconfirmedNonceReCal(accountState);
         rtMap.put("nonce", RPCUtil.encode(LedgerUtil.getNonceDecode(accountStateUnconfirmed.getLatestUnconfirmedNonce())));
         if (accountStateUnconfirmed.getUnconfirmedNonces().size() > 0) {
             rtMap.put("nonceType", LedgerConstant.CONFIRMED_NONCE);
