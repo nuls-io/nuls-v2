@@ -1,4 +1,4 @@
-package io.nuls.api.db;
+package io.nuls.api.db.mongo;
 
 import com.mongodb.client.model.Filters;
 import com.mongodb.client.model.Sorts;
@@ -20,17 +20,17 @@ import java.util.List;
 import static io.nuls.api.constant.MongoTableConstant.BLOCK_HEADER_TABLE;
 
 @Component
-public class BlockService {
+public class MongoBlockServiceImpl {
 
     @Autowired
     private MongoDBService mongoDBService;
     @Autowired
-    private ChainService chainService;
+    private MongoChainServiceImpl mongoChainServiceImpl;
 
     public BlockHeaderInfo getBestBlockHeader(int chainId) {
         ApiCache apiCache = CacheManager.getCache(chainId);
         if (apiCache.getBestHeader() == null) {
-            SyncInfo syncInfo = chainService.getSyncInfo(chainId);
+            SyncInfo syncInfo = mongoChainServiceImpl.getSyncInfo(chainId);
             if (syncInfo == null) {
                 return null;
             }

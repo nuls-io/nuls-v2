@@ -14,7 +14,7 @@ import java.io.File;
  * @date 18-11-20 上午11:01
  */
 @Configuration(domain = "block")
-public class BlockConfig {
+public class BlockConfig extends ChainParameters {
 
     /**
      * db文件存放目录
@@ -72,11 +72,6 @@ public class BlockConfig {
      * 启动后自动回滚多少个区块
      */
     private int testAutoRollbackAmount;
-
-    /**
-     * 默认链配置
-     */
-    private ChainParameters defaultChainParameter;
 
     public int getNodesMonitorInterval() {
         return nodesMonitorInterval;
@@ -168,14 +163,6 @@ public class BlockConfig {
 
     public void setTestAutoRollbackAmount(int testAutoRollbackAmount) {
         this.testAutoRollbackAmount = testAutoRollbackAmount;
-    }
-
-    public ChainParameters getDefaultChainParameter() {
-        return defaultChainParameter;
-    }
-
-    public void setDefaultChainParameter(ChainParameters defaultChainParameter) {
-        this.defaultChainParameter = defaultChainParameter;
     }
 
     public String getDataFolder() {

@@ -31,6 +31,7 @@ import io.nuls.rpc.modulebootstrap.Module;
 import io.nuls.rpc.modulebootstrap.NulsRpcModuleBootstrap;
 import io.nuls.rpc.modulebootstrap.RpcModule;
 import io.nuls.rpc.modulebootstrap.RpcModuleState;
+import io.nuls.rpc.util.TimeUtils;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.core.ioc.SpringLiteContext;
@@ -63,7 +64,10 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 public class TransactionBootstrap extends RpcModule {
 
     @Autowired
-    TxConfig txConfig;
+    private TxConfig txConfig;
+
+    @Autowired
+    private ChainManager chainManager;
 
     public static void main(String[] args) {
         if (args == null || args.length == 0) {
@@ -79,6 +83,7 @@ public class TransactionBootstrap extends RpcModule {
             initSys();
             //初始化数据库配置文件
             initDB();
+            chainManager.initChain();
         } catch (Exception e) {
             Log.error("Transaction init error!");
             Log.error(e);
@@ -90,7 +95,11 @@ public class TransactionBootstrap extends RpcModule {
         //初始化国际资源文件语言
         try {
             initLanguage();
-            SpringLiteContext.getBean(ChainManager.class).runChain();
+            chainManager.runChain();
+            while (!isDependencieReady(ModuleE.NW.abbr)){
+                Log.debug("wait depend modules ready");
+                Thread.sleep(2000L);
+            }
             Log.info("Transaction Ready...");
             return true;
         } catch (Exception e) {
@@ -117,6 +126,7 @@ public class TransactionBootstrap extends RpcModule {
     @Override
     public RpcModuleState onDependenciesReady() {
         Log.info("Transaction onDependenciesReady");
+        TimeUtils.getInstance().start();
         return RpcModuleState.Running;
        /* try {
             NetworkCall.registerProtocol();

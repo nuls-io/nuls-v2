@@ -19,17 +19,6 @@
  */
 package io.nuls.account.rpc.call;
 
-import io.nuls.account.constant.AccountErrorCode;
-import io.nuls.rpc.info.Constants;
-import io.nuls.rpc.model.ModuleE;
-import io.nuls.rpc.model.message.Response;
-import io.nuls.rpc.netty.processor.ResponseMessageProcessor;
-import io.nuls.tools.exception.NulsException;
-import io.nuls.tools.log.Log;
-
-import java.util.HashMap;
-import java.util.Map;
-
 /**
  * 调用网络模块接口的工具
  *
@@ -38,27 +27,27 @@ import java.util.Map;
  */
 public class NetworkCall {
 
-    /**
-     * 获取当前网络时间
-     *
-     * @return
-     * @throws NulsException
-     */
-    public static long getCurrentTimeMillis() throws NulsException {
-        try {
-            Map<String, Object> params = new HashMap<>();
-            params.put(Constants.VERSION_KEY_STR, "1.0");
-            Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.NW.abbr, "nw_currentTimeMillis", params);
-            if (!cmdResp.isSuccess()) {
-                Log.error("Calling remote interface failed. module:{} - interface:{} - ResponseComment:{}", ModuleE.NW.abbr, "nw_currentTimeMillis", cmdResp.getResponseComment());
-                throw new NulsException(AccountErrorCode.FAILED);
-            }
-            HashMap result = (HashMap) ((HashMap) cmdResp.getResponseData()).get("nw_currentTimeMillis");
-            return (long) result.get("currentTimeMillis");
-        } catch (Exception e) {
-            Log.error("Calling remote interface failed. module:{} - interface:{}", ModuleE.NW.abbr, "nw_currentTimeMillis");
-            throw new NulsException(e);
-        }
-    }
+//    /**
+//     * 获取当前网络时间
+//     *
+//     * @return
+//     * @throws NulsException
+//     */
+//    public static long getCurrentTimeMillis() throws NulsException {
+//        try {
+//            Map<String, Object> params = new HashMap<>();
+//            params.put(Constants.VERSION_KEY_STR, "1.0");
+//            Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.NW.abbr, "nw_currentTimeMillis", params);
+//            if (!cmdResp.isSuccess()) {
+//                Log.error("Calling remote interface failed. module:{} - interface:{} - ResponseComment:{}", ModuleE.NW.abbr, "nw_currentTimeMillis", cmdResp.getResponseComment());
+//                throw new NulsException(AccountErrorCode.FAILED);
+//            }
+//            HashMap result = (HashMap) ((HashMap) cmdResp.getResponseData()).get("nw_currentTimeMillis");
+//            return (long) result.get("currentTimeMillis");
+//        } catch (Exception e) {
+//            Log.error("Calling remote interface failed. module:{} - interface:{}", ModuleE.NW.abbr, "nw_currentTimeMillis");
+//            throw new NulsException(e);
+//        }
+//    }
 
 }

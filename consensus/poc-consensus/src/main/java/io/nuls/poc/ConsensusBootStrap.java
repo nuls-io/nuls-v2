@@ -13,6 +13,7 @@ import io.nuls.rpc.modulebootstrap.Module;
 import io.nuls.rpc.modulebootstrap.NulsRpcModuleBootstrap;
 import io.nuls.rpc.modulebootstrap.RpcModule;
 import io.nuls.rpc.modulebootstrap.RpcModuleState;
+import io.nuls.rpc.util.TimeUtils;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.core.ioc.SpringLiteContext;
@@ -92,7 +93,7 @@ public class ConsensusBootStrap extends RpcModule {
                 Log.debug("wait depend modules ready");
                 Thread.sleep(2000L);
             }
-            SpringLiteContext.getBean(ChainManager.class).runChain();
+            chainManager.runChain();
             return true;
         }catch (Exception e){
             Log.error(e);
@@ -117,6 +118,7 @@ public class ConsensusBootStrap extends RpcModule {
             chain.setConsensusStatus(ConsensusStatus.RUNNING);
         }
         Log.debug("cs onDependenciesReady");
+        TimeUtils.getInstance().start();
         return RpcModuleState.Running;
     }
 

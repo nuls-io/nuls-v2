@@ -19,11 +19,11 @@ import io.nuls.chain.util.LoggerUtil;
 import io.nuls.rpc.model.CmdAnnotation;
 import io.nuls.rpc.model.Parameter;
 import io.nuls.rpc.model.message.Response;
+import io.nuls.rpc.util.TimeUtils;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.model.ByteUtils;
 import io.nuls.tools.parse.JSONUtils;
-import io.nuls.tools.thread.TimeService;
 
 import java.io.IOException;
 import java.util.Map;
@@ -79,7 +79,7 @@ public class AssetCmd extends BaseChainCmd {
             asset.setAddress(AddressTool.getAddress(String.valueOf(params.get("address"))));
             asset.setDepositNuls(Integer.valueOf(nulsChainConfig.getAssetDepositNuls()));
             asset.setAvailable(true);
-            asset.setCreateTime(TimeService.currentTimeMillis());
+            asset.setCreateTime(TimeUtils.getCurrentTimeMillis());
             if (assetService.assetExist(asset)) {
                 return failed(CmErrorCode.ERROR_ASSET_ID_EXIST);
             }

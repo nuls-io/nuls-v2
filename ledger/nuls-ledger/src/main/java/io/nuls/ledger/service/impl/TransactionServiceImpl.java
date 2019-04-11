@@ -52,8 +52,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import static io.nuls.ledger.utils.LoggerUtil.logger;
 
 /**
- *
  * 交易业务处理实现
+ *
  * @author lanjinsheng
  */
 @Service
@@ -73,8 +73,14 @@ public class TransactionServiceImpl implements TransactionService {
     Repository repository;
     @Autowired
     FreezeStateService freezeStateService;
-
-    Map<String, Integer> ledgerNonce = new HashMap<String, Integer>();
+    /**
+     * 缓存一个区块的nonce值
+     */
+    private Map<String, Integer> ledgerNonce = new HashMap<String, Integer>(1024);
+    /**
+     * 缓存一个区块的hash值
+     */
+    private Map<String, Integer> ledgerHash = new HashMap<String, Integer>(1024);
 
     /**
      * 未确认交易数据处理
@@ -148,6 +154,7 @@ public class TransactionServiceImpl implements TransactionService {
         for (Transaction transaction : txList) {
             String nonce8BytesStr = LedgerUtil.getNonceEncodeByTx(transaction);
             String txHash = transaction.getHash().toString();
+            ledgerHash.put(txHash, 1);
             LoggerUtil.txCommitLog(addressChainId).debug("start confirmBlockProcess addressChainId={},blockHeight={},hash={}", addressChainId, blockHeight, txHash);
             //从缓存校验交易
             CoinData coinData = CoinDataUtil.parseCoinData(transaction.getCoinData());
@@ -215,11 +222,13 @@ public class TransactionServiceImpl implements TransactionService {
      */
     @Override
     public boolean confirmBlockProcess(int addressChainId, List<Transaction> txList, long blockHeight) {
-        long time1, time2, time3, time4, time5, time6, time7 = 0;
+        long time1,time11, time2, time3, time4, time5, time6, time7 = 0;
         time1 = System.currentTimeMillis();
         try {
             ledgerNonce.clear();
+            ledgerHash.clear();
             LockerUtil.BLOCK_SYNC_LOCKER.lock();
+            time11 = System.currentTimeMillis();
             long currentDbHeight = repository.getBlockHeight(addressChainId);
             if ((blockHeight - currentDbHeight) != 1) {
                 //高度不一致，数据出问题了
@@ -264,6 +273,7 @@ public class TransactionServiceImpl implements TransactionService {
                 }
                 time5 = System.currentTimeMillis();
                 repository.saveAccountNonces(addressChainId, ledgerNonce);
+                repository.saveAccountHash(addressChainId, ledgerHash);
                 time6 = System.currentTimeMillis();
             } catch (Exception e) {
                 e.printStackTrace();
@@ -276,8 +286,8 @@ public class TransactionServiceImpl implements TransactionService {
             //完全提交,存储当前高度。
             repository.saveOrUpdateBlockHeight(addressChainId, blockHeight);
             time7 = System.currentTimeMillis();
-            LoggerUtil.timeTest.debug("####txs={}==accountSize={}====time2-time1={},time3-time2={},time4-time3={},time5-time4={},time6-time5={},time7-time6={}",
-                    txList.size(), updateAccounts.size(), time2 - time1, time3 - time2, time4 - time3, time5 - time4, time6 - time5, time7 - time6);
+            LoggerUtil.timeTest.debug("####txs={}==accountSize={}====time2-time1={},time2-time11={},time3-time2={},time4-time3={},time5-time4={},time6-time5={},time7-time6={}",
+                    txList.size(), updateAccounts.size(), time2 - time1,time2-time11,time3 - time2, time4 - time3, time5 - time4, time6 - time5, time7 - time6);
             return true;
         } catch (Exception e) {
             e.printStackTrace();
@@ -286,6 +296,7 @@ public class TransactionServiceImpl implements TransactionService {
         } finally {
             LockerUtil.BLOCK_SYNC_LOCKER.unlock();
             ledgerNonce.clear();
+            ledgerHash.clear();
         }
 
     }
@@ -382,6 +393,9 @@ public class TransactionServiceImpl implements TransactionService {
                             try {
                                 //删除备份的花费nonce值。
                                 repository.deleteAccountNonces(addressChainId, LedgerUtil.getAccountNoncesStrKey(AddressTool.getStringAddressByBytes(from.getAddress()), from.getAssetsChainId(), from.getAssetsId(), nonce8BytesStr));
+                                //删除备份的hash
+                                repository.deleteAccountNonces(addressChainId, tx.getHash().toString());
+
                             } catch (Exception e) {
                                 e.printStackTrace();
                             }
@@ -435,5 +449,13 @@ public class TransactionServiceImpl implements TransactionService {
             return true;
         }
         return (repository.existAccountNonce(addressChainId, accountNonceKey));
+    }
+
+    @Override
+    public boolean hadTxExist(int addressChainId, String hash) throws Exception {
+        if (null != ledgerHash.get(hash)) {
+            return true;
+        }
+        return (repository.existAccountHash(addressChainId, hash));
     }
 }

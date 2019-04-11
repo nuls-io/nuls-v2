@@ -9,6 +9,7 @@ import io.nuls.rpc.modulebootstrap.Module;
 import io.nuls.rpc.modulebootstrap.NulsRpcModuleBootstrap;
 import io.nuls.rpc.modulebootstrap.RpcModule;
 import io.nuls.rpc.modulebootstrap.RpcModuleState;
+import io.nuls.rpc.util.TimeUtils;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.log.Log;
 import io.nuls.tools.thread.ThreadUtils;
@@ -99,6 +100,7 @@ public class ProtocolBootstrap extends RpcModule {
         //开启一些监控线程
         ScheduledThreadPoolExecutor executor = ThreadUtils.createScheduledThreadPool(1, new NulsThreadFactory("protocol-monitor"));
         executor.scheduleWithFixedDelay(ProtocolMonitor.getInstance(), 0, 5, TimeUnit.SECONDS);
+        TimeUtils.getInstance().start();
         return RpcModuleState.Running;
     }
 

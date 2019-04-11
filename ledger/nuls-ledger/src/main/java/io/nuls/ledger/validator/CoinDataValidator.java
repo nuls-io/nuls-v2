@@ -237,15 +237,6 @@ public class CoinDataValidator {
             balanceValidateMap.put(assetKey, accountState);
             //判断是否是解锁操作
             if (coinFrom.getLocked() == 0) {
-                //判断是否已经在打包或已完成的交易
-                try {
-                    if (transactionService.hadCommit(chainId, LedgerUtil.getAccountNoncesStrKey(accountState.getAddress(), accountState.getAssetChainId(), accountState.getAssetId(), nonce8BytesStr))) {
-                        return ValidateResult.getResult(ValidateEnum.TX_EXIST_CODE, new String[]{accountState.getAddress(), txHash});
-                    }
-                } catch (Exception e) {
-                    LoggerUtil.logger(chainId).error(e);
-                    return ValidateResult.getResult(ValidateEnum.FAIL_CODE, new String[]{accountState.getAddress(), LedgerUtil.getNonceEncode(coinFrom.getNonce()), "unknown error"});
-                }
                 ValidateResult validateResult = isValidateCommonTxBatch(accountState, coinFrom, nonce8BytesStr, accountValidateTxMap);
                 if (ValidateEnum.SUCCESS_CODE.getValue() != validateResult.getValidateCode()) {
                     return validateResult;
@@ -306,6 +297,15 @@ public class CoinDataValidator {
             logger(chainId).error("{} tx exist!", txHash);
             return ValidateResult.getResult(ValidateEnum.TX_EXIST_CODE, new String[]{"--", txHash});
         }
+        //判断是否已经在打包或已完成的交易
+        try {
+            if (transactionService.hadTxExist(chainId, txHash)) {
+                return ValidateResult.getResult(ValidateEnum.TX_EXIST_CODE, new String[]{"--", txHash});
+            }
+        } catch (Exception e) {
+            LoggerUtil.logger(chainId).error(e);
+            return ValidateResult.getResult(ValidateEnum.FAIL_CODE, new String[]{"--",txHash, "unknown error"});
+        }
         CoinData coinData = CoinDataUtil.parseCoinData(tx.getCoinData());
         if (null == coinData) {
             //例如黄牌交易，直接返回
@@ -347,7 +347,7 @@ public class CoinDataValidator {
      * @return
      */
     private ValidateResult validateCommonCoinData(AccountState accountState, String address, BigInteger fromAmount, String fromNonce) {
-        AccountStateUnconfirmed accountStateUnconfirmed = unconfirmedStateService.getUnconfirmedInfoAndUpdate(accountState);
+        AccountStateUnconfirmed accountStateUnconfirmed = unconfirmedStateService.getUnconfirmedInfoReCal(accountState);
         BigInteger totalAmount = accountState.getAvailableAmount().add(accountStateUnconfirmed.getUnconfirmedAmount());
         if (BigIntegerUtils.isLessThan(totalAmount, fromAmount)) {
             logger(accountState.getAddressChainId()).info("balance is not enough");
@@ -490,6 +490,14 @@ public class CoinDataValidator {
             logger(chainId).error("{} tx exist!", txHash);
             return ValidateResult.getResult(ValidateEnum.TX_EXIST_CODE, new String[]{"--", txHash});
         }
+        try {
+            if(transactionService.hadTxExist(chainId,txHash)){
+                logger(chainId).error("{} tx exist!", txHash);
+                return ValidateResult.getResult(ValidateEnum.TX_EXIST_CODE, new String[]{"--", txHash});
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         CoinData coinData = CoinDataUtil.parseCoinData(tx.getCoinData());
         if (null == coinData) {
             //例如黄牌交易，直接返回
@@ -564,7 +572,7 @@ public class CoinDataValidator {
      */
     private boolean isExsitUnconfirmedFreezeTx(AccountState accountState, BigInteger fromAmount, String fromNonce) {
         boolean isValidate = false;
-        List<UnconfirmedAmount> list = unconfirmedStateService.getUnconfirmedInfoAndUpdate(accountState).getUnconfirmedAmounts();
+        List<UnconfirmedAmount> list = unconfirmedStateService.getUnconfirmedInfoReCal(accountState).getUnconfirmedAmounts();
         for (UnconfirmedAmount unconfirmedAmount : list) {
             if (LedgerUtil.getNonceEncodeByTxHash(unconfirmedAmount.getTxHash()).equalsIgnoreCase(fromNonce) && unconfirmedAmount.getToLockedAmount().compareTo(fromAmount) == 0) {
                 //找到交易
@@ -588,6 +596,9 @@ public class CoinDataValidator {
      * @return
      */
     public ValidateResult validateCoinData(int addressChainId, Transaction tx) throws Exception {
+        if (transactionService.hadCommit(addressChainId,tx.getHash().toString())) {
+            return ValidateResult.getResult(ValidateEnum.TX_EXIST_CODE, new String[]{"--", tx.getHash().toString()});
+        }
         CoinData coinData = CoinDataUtil.parseCoinData(tx.getCoinData());
         if (null == coinData) {
             //例如黄牌交易，直接返回
@@ -606,10 +617,6 @@ public class CoinDataValidator {
 
             String address = AddressTool.getStringAddressByBytes(coinFrom.getAddress());
             String nonce = LedgerUtil.getNonceEncode(coinFrom.getNonce());
-
-            if (transactionService.hadCommit(addressChainId, LedgerUtil.getAccountNoncesStrKey(address, coinFrom.getAssetsChainId(), coinFrom.getAssetsId(), txNonce))) {
-                return ValidateResult.getResult(ValidateEnum.TX_EXIST_CODE, new String[]{address, tx.getHash().toString()});
-            }
             AccountState accountState = accountStateService.getAccountStateUnSyn(address, addressChainId, coinFrom.getAssetsChainId(), coinFrom.getAssetsId());
             //初始花费交易,nonce为 fffffff;已兼容处理。
             //普通交易

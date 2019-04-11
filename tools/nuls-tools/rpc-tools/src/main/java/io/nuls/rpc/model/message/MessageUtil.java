@@ -26,8 +26,8 @@ package io.nuls.rpc.model.message;
 
 import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.netty.channel.manager.ConnectManager;
+import io.nuls.rpc.util.TimeUtils;
 import io.nuls.tools.model.DateUtils;
-import io.nuls.tools.thread.TimeService;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -50,10 +50,10 @@ public class MessageUtil {
      */
     public static Message basicMessage(MessageType messageType) {
         Message message = new Message();
-        message.setMessageID(Constants.nextSequence());
+        message.setMessageId(Constants.nextSequence());
         message.setMessageType(messageType.name());
-        message.setTimestamp(String.valueOf(TimeService.currentTimeMillis()));
-        message.setTimeZone(DateUtils.TIME_ZONE_STRING);
+        message.setTimestamp(String.valueOf( TimeUtils.getCurrentTimeMillis()));
+        message.setTimezone(DateUtils.TIME_ZONE_STRING);
         return message;
     }
 
@@ -66,8 +66,8 @@ public class MessageUtil {
      */
     public static NegotiateConnection defaultNegotiateConnection() {
         NegotiateConnection negotiateConnection = new NegotiateConnection();
-        negotiateConnection.setAbbreviation(ConnectManager.LOCAL.getAbbreviation());
-        negotiateConnection.setProtocolVersion("0.1");
+        negotiateConnection.setAbbreviation(ConnectManager.LOCAL.getModuleAbbreviation());
+        negotiateConnection.setProtocolVersion("1.0");
         negotiateConnection.setCompressionAlgorithm("zlib");
         negotiateConnection.setCompressionRate("0");
         return negotiateConnection;
@@ -123,7 +123,7 @@ public class MessageUtil {
      */
     public static Response newResponse(String requestId, String status, String comment) {
         Response response = new Response();
-        response.setRequestID(requestId);
+        response.setRequestId(requestId);
         response.setResponseStatus(status);
         response.setResponseComment(comment);
         response.setResponseMaxSize(Constants.ZERO);

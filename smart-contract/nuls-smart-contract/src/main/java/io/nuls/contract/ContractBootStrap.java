@@ -18,6 +18,7 @@ import io.nuls.rpc.modulebootstrap.Module;
 import io.nuls.rpc.modulebootstrap.NulsRpcModuleBootstrap;
 import io.nuls.rpc.modulebootstrap.RpcModule;
 import io.nuls.rpc.modulebootstrap.RpcModuleState;
+import io.nuls.rpc.util.TimeUtils;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.core.ioc.SpringLiteContext;
@@ -155,7 +156,8 @@ public class ContractBootStrap extends RpcModule {
         return new Module[]{new Module(ModuleE.TX.abbr, "1.0"),
                 new Module(ModuleE.LG.abbr, "1.0"),
                 new Module(ModuleE.BL.abbr, "1.0"),
-                new Module(ModuleE.AC.abbr, "1.0")};
+                new Module(ModuleE.AC.abbr, "1.0"),
+                new Module(ModuleE.NW.abbr, "1.0")};
     }
 
     /**
@@ -192,6 +194,7 @@ public class ContractBootStrap extends RpcModule {
      */
     @Override
     public RpcModuleState onDependenciesReady() {
+        TimeUtils.getInstance().start();
         return RpcModuleState.Running;
     }
 

@@ -82,6 +82,7 @@ public class CrossChainBootStrap extends RpcModule {
 
     @Override
     public RpcModuleState onDependenciesReady() {
+        TimeUtils.getInstance().start();
         return RpcModuleState.Running;
     }
 

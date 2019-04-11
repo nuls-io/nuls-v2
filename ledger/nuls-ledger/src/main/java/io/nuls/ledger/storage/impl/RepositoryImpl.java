@@ -206,7 +206,9 @@ public class RepositoryImpl implements Repository, InitializingBean {
     String getLedgerNonceTableName(int chainId) {
         return DataBaseArea.TB_LEDGER_NONCES + chainId;
     }
-
+    String getLedgerHashTableName(int chainId) {
+        return DataBaseArea.TB_LEDGER_HASH + chainId;
+    }
     /**
      * 初始化数据库
      */
@@ -288,7 +290,7 @@ public class RepositoryImpl implements Repository, InitializingBean {
         if (!RocksDBService.existTable(table)) {
             RocksDBService.createTable(table);
         }
-        Map<byte[], byte[]> saveMap = new HashMap<>(16);
+        Map<byte[], byte[]> saveMap = new HashMap<>(1024);
         for (Map.Entry<String, Integer> m : noncesMap.entrySet()) {
             saveMap.put(ByteUtils.toBytes(m.getKey(), LedgerConstant.DEFAULT_ENCODING), ByteUtils.intToBytes(m.getValue()));
         }
@@ -305,5 +307,31 @@ public class RepositoryImpl implements Repository, InitializingBean {
     @Override
     public boolean existAccountNonce(int chainId, String accountNonceKey) throws Exception {
         return (null != RocksDBService.get(getLedgerNonceTableName(chainId), ByteUtils.toBytes(accountNonceKey, LedgerConstant.DEFAULT_ENCODING)));
+    }
+
+
+    @Override
+    public void saveAccountHash(int chainId, Map<String, Integer> hashMap) throws Exception {
+        String table = getLedgerHashTableName(chainId);
+        if (!RocksDBService.existTable(table)) {
+            RocksDBService.createTable(table);
+        }
+        Map<byte[], byte[]> saveMap = new HashMap<>(1024);
+        for (Map.Entry<String, Integer> m : hashMap.entrySet()) {
+            saveMap.put(ByteUtils.toBytes(m.getKey(), LedgerConstant.DEFAULT_ENCODING), ByteUtils.intToBytes(m.getValue()));
+        }
+        if (saveMap.size() > 0) {
+            RocksDBService.batchPut(table, saveMap);
+        }
+    }
+
+    @Override
+    public void deleteAccountHash(int chainId, String hash) throws Exception {
+        RocksDBService.delete(getLedgerHashTableName(chainId), ByteUtils.toBytes(hash, LedgerConstant.DEFAULT_ENCODING));
+    }
+
+    @Override
+    public boolean existAccountHash(int chainId, String hash) throws Exception {
+        return (null != RocksDBService.get(getLedgerHashTableName(chainId), ByteUtils.toBytes(hash, LedgerConstant.DEFAULT_ENCODING)));
     }
 }

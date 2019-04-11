@@ -1,15 +1,11 @@
-package io.nuls.api.db;
+package io.nuls.api.db.mongo;
 
 import com.mongodb.client.model.DeleteManyModel;
 import com.mongodb.client.model.DeleteOneModel;
 import com.mongodb.client.model.Filters;
 import com.mongodb.client.model.Sorts;
-import io.nuls.api.cache.ApiCache;
-import io.nuls.api.constant.MongoTableConstant;
-import io.nuls.api.manager.CacheManager;
 import io.nuls.api.model.po.db.*;
 import io.nuls.api.utils.DocumentTransferTool;
-import io.nuls.base.data.BlockHeader;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
 import org.bson.Document;
@@ -24,13 +20,13 @@ import static io.nuls.api.constant.MongoTableConstant.*;
 
 
 @Component
-public class TransactionService {
+public class MongoTransactionServiceImpl {
 
     @Autowired
     private MongoDBService mongoDBService;
 
     @Autowired
-    private BlockService blockService;
+    private MongoBlockServiceImpl mongoBlockServiceImpl;
 
     public void initSelect(int chainId) {
 
@@ -97,16 +93,17 @@ public class TransactionService {
         } else {
             filter = and(eq("type", type), eq("height", blockHeight));
         }
-        BlockHeaderInfo blockInfo = blockService.getBlockHeader(chainId, blockHeight);
+        BlockHeaderInfo blockInfo = mongoBlockServiceImpl.getBlockHeader(chainId, blockHeight);
         if (blockInfo == null) {
             return null;
         }
+        long count = mongoDBService.getCount(TX_TABLE + chainId, filter);
         List<TransactionInfo> txList = new ArrayList<>();
         List<Document> docList = this.mongoDBService.pageQuery(TX_TABLE + chainId, filter, Sorts.descending("height", "time"), pageIndex, pageSize);
         for (Document document : docList) {
             txList.add(TransactionInfo.fromDocument(document));
         }
-        PageInfo<TransactionInfo> pageInfo = new PageInfo<>(pageIndex, pageSize, blockInfo.getTxHashList().size(), txList);
+        PageInfo<TransactionInfo> pageInfo = new PageInfo<>(pageIndex, pageSize, count, txList);
         return pageInfo;
     }
 

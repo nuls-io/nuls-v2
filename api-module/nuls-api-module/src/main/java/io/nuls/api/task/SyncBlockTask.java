@@ -6,6 +6,7 @@ import io.nuls.api.model.po.db.BlockInfo;
 import io.nuls.api.model.po.db.SyncInfo;
 import io.nuls.api.service.RollbackService;
 import io.nuls.api.service.SyncService;
+import io.nuls.rpc.util.TimeUtils;
 import io.nuls.tools.basic.Result;
 import io.nuls.tools.core.ioc.SpringLiteContext;
 import io.nuls.tools.log.Log;
@@ -31,11 +32,10 @@ public class SyncBlockTask implements Runnable {
         //If the latest block entity is not completely processed in one transaction, you need to roll back the block entity.
         SyncInfo syncInfo = syncService.getSyncInfo(chainId);
         if (syncInfo != null && !syncInfo.isFinish()) {
-            //rollback();
+//            rollback();
         }
 
         boolean running = true;
-        long time1 = System.currentTimeMillis();
         while (running) {
             try {
                 running = syncBlock();
@@ -44,9 +44,6 @@ public class SyncBlockTask implements Runnable {
                 running = false;
             }
         }
-        long time2 = System.currentTimeMillis();
-
-        System.out.println((time2 - time1) + "-------------------");
     }
 
     /**
