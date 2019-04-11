@@ -78,6 +78,7 @@ public class ConsensusBootStrap extends RpcModule {
         return new Module[]{
                 new Module(ModuleE.BL.abbr, "1.0"),
                 new Module(ModuleE.AC.abbr, "1.0"),
+                new Module(ModuleE.NW.abbr, "1.0"),
                 new Module(ModuleE.TX.abbr, "1.0")};
     }
 
@@ -89,7 +90,7 @@ public class ConsensusBootStrap extends RpcModule {
     @Override
     public boolean doStart() {
         try {
-            while (!isDependencieReady()){
+            while (!isDependencieReady(new Module(ModuleE.TX.abbr, "1.0")) || !isDependencieReady(new Module(ModuleE.BL.abbr, "1.0"))){
                 Log.debug("wait depend modules ready");
                 Thread.sleep(2000L);
             }
