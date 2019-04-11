@@ -109,17 +109,18 @@ if [ ! -d $LOGS_DIR ]; then
 fi
 START_DATE=`date +%Y%m%d%H%M%S`
 STDOUT_FILE=$LOGS_DIR/stdout.log
-
-if [ -n "${config}" ]; then
-    _dataPath=`getModuleItem ${config} "dataPath"`
-    _logPath=`getModuleItem ${config} "logPath"`
-    _logLevel=`getModuleItem ${config} "logLevel"`
-    cd `dirname ${config}`
-    datapath="-DdataPath=`get_fullpath ${_dataPath}`"
-    logpath="-Dlog.path=`get_fullpath ${_logPath}`/$APP_NAME";
-    logLevel="-Dlog.level=$_logLevel";
-    cd $MODULE_PATH
+if [ -z "${config}" ]; then
+    config="../../../../nuls.ncf"
 fi
+
+_dataPath=`getModuleItem ${config} "dataPath"`
+_logPath=`getModuleItem ${config} "logPath"`
+_logLevel=`getModuleItem ${config} "logLevel"`
+cd `dirname ${config}`
+datapath="-DdataPath=`get_fullpath ${_dataPath}`"
+logpath="-Dlog.path=`get_fullpath ${_logPath}`/$APP_NAME";
+logLevel="-Dlog.level=$_logLevel";
+cd $MODULE_PATH
 
 checkLogDir(){
     if [ ! -d ${LOGS_DIR} ]; then
