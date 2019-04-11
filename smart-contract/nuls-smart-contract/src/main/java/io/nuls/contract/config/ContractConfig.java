@@ -68,6 +68,29 @@ public class ContractConfig {
 
     private long maxViewGas;
 
+    public int getChainId() {
+        return chainId;
+    }
+
+    public void setChainId(int chainId) {
+        this.chainId = chainId;
+    }
+
+    public int getAssetId() {
+        return assetId;
+    }
+
+    public void setAssetId(int assetId) {
+        this.assetId = assetId;
+    }
+
+    public long getMaxViewGas() {
+        return maxViewGas;
+    }
+
+    public void setMaxViewGas(long maxViewGas) {
+        this.maxViewGas = maxViewGas;
+    }
 
     public String getEncoding() {
         return encoding;
