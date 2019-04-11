@@ -33,7 +33,11 @@ public class Log {
         try {
             List<String> objStrs = new ArrayList<>();
             for (Object obj: objs) {
-                objStrs.add(JSONUtils.obj2json(obj));
+                if(obj instanceof String){
+                    objStrs.add((String)obj);
+                }else{
+                    objStrs.add(JSONUtils.obj2json(obj));
+                }
             }
             BASIC_LOGGER.debug(msg, objStrs.toArray());
         }catch (Exception e){
@@ -64,7 +68,11 @@ public class Log {
         try {
             List<String> objStrs = new ArrayList<>();
             for (Object obj: objs) {
-                objStrs.add(JSONUtils.obj2json(obj));
+                if(obj instanceof String){
+                    objStrs.add((String)obj);
+                }else{
+                    objStrs.add(JSONUtils.obj2json(obj));
+                }
             }
             BASIC_LOGGER.info(msg, objStrs.toArray());
         }catch (Exception e){
@@ -95,7 +103,11 @@ public class Log {
         try {
             List<String> objStrs = new ArrayList<>();
             for (Object obj: objs) {
-                objStrs.add(JSONUtils.obj2json(obj));
+                if(obj instanceof String){
+                    objStrs.add((String)obj);
+                }else{
+                    objStrs.add(JSONUtils.obj2json(obj));
+                }
             }
             BASIC_LOGGER.warn(msg, objStrs.toArray());
         }catch (Exception e){
@@ -127,7 +139,11 @@ public class Log {
         try {
             List<String> objStrs = new ArrayList<>();
             for (Object obj: objs) {
-                objStrs.add(JSONUtils.obj2json(obj));
+                if(obj instanceof String){
+                    objStrs.add((String)obj);
+                }else{
+                    objStrs.add(JSONUtils.obj2json(obj));
+                }
             }
             BASIC_LOGGER.error(msg, objStrs.toArray());
         }catch (Exception e){
