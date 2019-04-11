@@ -2,6 +2,7 @@ package io.nuls.transaction.task;
 
 import io.nuls.base.data.Transaction;
 import io.nuls.rpc.util.RPCUtil;
+import io.nuls.rpc.util.TimeUtils;
 import io.nuls.tools.core.ioc.SpringLiteContext;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.transaction.cache.PackablePool;
@@ -125,7 +126,7 @@ public class VerifyTxProcessTask implements Runnable {
             if(verifyTxResult.getCode() == VerifyTxResult.ORPHAN && !isOrphanTx){
                 processOrphanTx(tx);
             }else if(isOrphanTx){
-                long currentTimeMillis = NetworkCall.getCurrentTimeMillis();
+                long currentTimeMillis = TimeUtils.getCurrentTimeMillis();
                 return tx.getTime() < (currentTimeMillis - chain.getConfig().getOrphanTtl());
             }
         } catch (Exception e) {

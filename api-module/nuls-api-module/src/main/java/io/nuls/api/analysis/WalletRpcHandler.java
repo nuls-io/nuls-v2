@@ -133,7 +133,7 @@ public class WalletRpcHandler {
             List<FreezeInfo> freezeInfos = new ArrayList<>();
             for (Map map1 : maps) {
                 FreezeInfo freezeInfo = new FreezeInfo();
-                freezeInfo.setAmount((String) map1.get("amount"));
+                freezeInfo.setAmount(map1.get("amount").toString());
                 freezeInfo.setLockedValue(Long.parseLong(map1.get("lockedValue").toString()));
                 freezeInfo.setTime(Long.parseLong(map1.get("time").toString()));
                 freezeInfo.setTxHash((String) map1.get("txHash"));
