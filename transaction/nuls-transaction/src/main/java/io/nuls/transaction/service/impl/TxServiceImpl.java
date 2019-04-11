@@ -101,6 +101,10 @@ public class TxServiceImpl implements TxService {
     @Autowired
     private TxConfig txConfig;
 
+
+    private ExecutorService signExecutor = ThreadUtils.createThreadPool(Runtime.getRuntime().availableProcessors(), Integer.MAX_VALUE, new NulsThreadFactory(TxConstant.THREAD_VERIFIY_BLOCK_TXS));
+
+
     @Override
     public boolean register(Chain chain, TxRegister txRegister) {
         return TxManager.register(chain, txRegister);
@@ -1036,8 +1040,6 @@ public class TxServiceImpl implements TxService {
         }
     }
 
-    private ExecutorService signExecutor = ThreadUtils.createThreadPool(Runtime.getRuntime().availableProcessors(), Integer.MAX_VALUE, new NulsThreadFactory(TxConstant.THREAD_VERIFIY_BLOCK_TXS));
-
     @Override
     public VerifyTxResult batchVerify(Chain chain, List<String> txStrList, long blockHeight, long blockTime, String packingAddress, String stateRoot, String preStateRoot) throws NulsException {
         chain.getLoggerMap().get(TxConstant.LOG_TX).debug("");
@@ -1051,15 +1053,6 @@ public class TxServiceImpl implements TxService {
         //组装统一验证参数数据,key为各模块统一验证器cmd
         Map<TxRegister, List<String>> moduleVerifyMap = new HashMap<>(TxConstant.INIT_CAPACITY_8);
 
-        long coinDataV = TimeUtils.getCurrentTimeMillis();//-----
-        if (!LedgerCall.verifyBlockTxsCoinData(chain, txStrList, blockHeight)) {
-            chain.getLoggerMap().get(TxConstant.LOG_TX).debug("batch verifyCoinData failed.");
-            return verifyTxResult;
-        }
-        Log.debug("[验区块交易] coinData验证时间:{}", TimeUtils.getCurrentTimeMillis() - coinDataV);//----
-        Log.debug("[验区块交易] coinData -距方法开始的时间:{}", TimeUtils.getCurrentTimeMillis() - s1);//----
-        Log.debug("");//----
-
         /**
          * 智能合约通知标识
          * 当本次打包过程中,出现的第一个智能合约交易并且调用验证器通过时,
@@ -1070,11 +1063,11 @@ public class TxServiceImpl implements TxService {
         List<Future<Boolean>> futures = new ArrayList<>();
         for (String txStr : txStrList) {
             Transaction tx = TxUtil.getInstanceRpcStr(txStr, Transaction.class);
+            txList.add(tx);
             //如果不是系统智能合约就继续单个验证
             if (TxManager.isSystemSmartContract(chain, tx.getType())) {
                 continue;
             }
-            txList.add(tx);
             //多线程处理单个交易
             Future<Boolean> res = signExecutor.submit(new Callable<Boolean>() {
                 @Override
@@ -1138,6 +1131,15 @@ public class TxServiceImpl implements TxService {
                 return verifyTxResult;
             }
         }
+
+        long coinDataV = TimeUtils.getCurrentTimeMillis();//-----
+        if (!LedgerCall.verifyBlockTxsCoinData(chain, txStrList, blockHeight)) {
+            chain.getLoggerMap().get(TxConstant.LOG_TX).debug("batch verifyCoinData failed.");
+            return verifyTxResult;
+        }
+        Log.debug("[验区块交易] coinData验证时间:{}", TimeUtils.getCurrentTimeMillis() - coinDataV);//----
+        Log.debug("[验区块交易] coinData -距方法开始的时间:{}", TimeUtils.getCurrentTimeMillis() - s1);//----
+        Log.debug("");//----
 
         //统一验证
         long moduleV = TimeUtils.getCurrentTimeMillis();//-----
