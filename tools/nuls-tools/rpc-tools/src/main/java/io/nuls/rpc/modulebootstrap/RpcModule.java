@@ -262,6 +262,10 @@ public abstract class RpcModule implements InitializingBean {
         return dependencies.get(module);
     }
 
+    public boolean isDependencieReady(String moduleName){
+        return isDependencieReady(new Module(moduleName,ROLE));
+    }
+
     /**
      * 依赖模块都以进入Ready状态
      */

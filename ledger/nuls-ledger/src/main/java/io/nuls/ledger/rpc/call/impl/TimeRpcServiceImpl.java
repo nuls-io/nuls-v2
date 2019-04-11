@@ -46,7 +46,7 @@ public class TimeRpcServiceImpl implements TimeRpcService {
     @Override
     public long getTime() {
         long time = 0;
-        Map<String, Object> map = new HashMap<>();
+        Map<String, Object> map = new HashMap<>(1);
         try {
             Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.NW.abbr, CmdConstant.CMD_NW_GET_TIME_CALL, map, 100);
             if (null != response && response.isSuccess()) {

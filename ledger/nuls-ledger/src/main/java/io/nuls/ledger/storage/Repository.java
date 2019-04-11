@@ -29,6 +29,7 @@ import io.nuls.ledger.model.ChainHeight;
 import io.nuls.ledger.model.po.AccountState;
 import io.nuls.ledger.model.po.BlockSnapshotAccounts;
 import io.nuls.ledger.model.po.BlockTxs;
+import io.nuls.tools.exception.NulsException;
 
 import java.util.List;
 import java.util.Map;
@@ -162,4 +163,9 @@ public interface Repository {
      */
     boolean existAccountNonce(int chainId,String accountNonceKey) throws Exception;
 
+    /**
+     * 初始化数据表
+     * @throws NulsException
+     */
+    void initTableName() throws NulsException ;
 }

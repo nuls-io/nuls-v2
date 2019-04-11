@@ -149,17 +149,17 @@ public class CoinDataValidator {
     public boolean beginBatchPerTxValidate(int chainId) {
         Map<String, String> batchValidateTxMap = getBatchValidateTxMap(chainId);
         if (null == batchValidateTxMap) {
-            batchValidateTxMap = new ConcurrentHashMap<>();
+            batchValidateTxMap = new ConcurrentHashMap<>(1024);
             chainsBatchValidateTxMap.put(String.valueOf(chainId), batchValidateTxMap);
         }
         Map<String, List<TempAccountNonce>> accountBalanceValidateTxMap = getAccountBalanceValidateMap(chainId);
         if (null == accountBalanceValidateTxMap) {
-            accountBalanceValidateTxMap = new ConcurrentHashMap<>();
+            accountBalanceValidateTxMap = new ConcurrentHashMap<>(1024);
             chainsAccountNonceMap.put(String.valueOf(chainId), accountBalanceValidateTxMap);
         }
         Map<String, AccountState> accountStateMap = getAccountValidateMap(chainId);
         if (null == accountStateMap) {
-            accountStateMap = new ConcurrentHashMap<>();
+            accountStateMap = new ConcurrentHashMap<>(1024);
             chainsAccountStateMap.put(String.valueOf(chainId), accountStateMap);
         }
 
@@ -176,9 +176,9 @@ public class CoinDataValidator {
      */
     public boolean blockValidate(int chainId, long height, List<Transaction> txs) {
         LoggerUtil.logger(chainId).debug("peer blocksValidate chainId={},height={},txsNumber={}", chainId, height, txs.size());
-        Map<String, String> batchValidateTxMap = new HashMap();
-        Map<String, List<TempAccountNonce>> accountValidateTxMap = new HashMap<>();
-        Map<String, AccountState> accountStateMap = new HashMap<>();
+        Map<String, String> batchValidateTxMap = new HashMap(1024);
+        Map<String, List<TempAccountNonce>> accountValidateTxMap = new HashMap<>(1024);
+        Map<String, AccountState> accountStateMap = new HashMap<>(1024);
         for (Transaction tx : txs) {
             ValidateResult validateResult = blockTxsValidate(chainId, tx, batchValidateTxMap, accountValidateTxMap, accountStateMap);
             if (ValidateEnum.SUCCESS_CODE.getValue() != validateResult.getValidateCode()) {
