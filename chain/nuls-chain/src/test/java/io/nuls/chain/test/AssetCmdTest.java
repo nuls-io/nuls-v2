@@ -1,7 +1,6 @@
 package io.nuls.chain.test;
 
 import io.nuls.chain.model.po.Asset;
-import io.nuls.tools.thread.TimeService;
 import org.junit.Test;
 
 import java.math.BigDecimal;

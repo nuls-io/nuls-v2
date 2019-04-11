@@ -20,8 +20,6 @@
 
 package io.nuls.api.model.po.db;
 
-import io.nuls.tools.thread.TimeService;
-
 import java.math.BigInteger;
 
 /**
