@@ -222,12 +222,13 @@ public class TransactionServiceImpl implements TransactionService {
      */
     @Override
     public boolean confirmBlockProcess(int addressChainId, List<Transaction> txList, long blockHeight) {
-        long time1, time2, time3, time4, time5, time6, time7 = 0;
+        long time1,time11, time2, time3, time4, time5, time6, time7 = 0;
         time1 = System.currentTimeMillis();
         try {
             ledgerNonce.clear();
             ledgerHash.clear();
             LockerUtil.BLOCK_SYNC_LOCKER.lock();
+            time11 = System.currentTimeMillis();
             long currentDbHeight = repository.getBlockHeight(addressChainId);
             if ((blockHeight - currentDbHeight) != 1) {
                 //高度不一致，数据出问题了
@@ -285,8 +286,8 @@ public class TransactionServiceImpl implements TransactionService {
             //完全提交,存储当前高度。
             repository.saveOrUpdateBlockHeight(addressChainId, blockHeight);
             time7 = System.currentTimeMillis();
-            LoggerUtil.timeTest.debug("####txs={}==accountSize={}====time2-time1={},time3-time2={},time4-time3={},time5-time4={},time6-time5={},time7-time6={}",
-                    txList.size(), updateAccounts.size(), time2 - time1, time3 - time2, time4 - time3, time5 - time4, time6 - time5, time7 - time6);
+            LoggerUtil.timeTest.debug("####txs={}==accountSize={}====time2-time1={},time2-time11={},time3-time2={},time4-time3={},time5-time4={},time6-time5={},time7-time6={}",
+                    txList.size(), updateAccounts.size(), time2 - time1,time2-time11,time3 - time2, time4 - time3, time5 - time4, time6 - time5, time7 - time6);
             return true;
         } catch (Exception e) {
             e.printStackTrace();
