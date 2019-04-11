@@ -92,7 +92,7 @@ public class ConsensusBootStrap extends RpcModule {
                 Log.debug("wait depend modules ready");
                 Thread.sleep(2000L);
             }
-            SpringLiteContext.getBean(ChainManager.class).runChain();
+            chainManager.runChain();
             return true;
         }catch (Exception e){
             Log.error(e);
