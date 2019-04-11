@@ -97,4 +97,12 @@ public interface TransactionService {
      */
     boolean hadCommit(int addressChainId, String accountNonceKey) throws Exception;
 
+    /**
+     *是否已存在hash
+     * @param addressChainId
+     * @param hash
+     * @return
+     * @throws Exception
+     */
+    boolean hadTxExist(int addressChainId, String hash) throws Exception;
 }

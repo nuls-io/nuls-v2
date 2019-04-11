@@ -248,10 +248,10 @@ public class AccountStateUnconfirmed extends BaseNulsData {
     public void updateUnconfirmeAmounts() {
         int index = 0;
         for (UnconfirmedAmount unconfirmedAmount : unconfirmedAmounts) {
-            index++;
-            if (TimeUtil.getCurrentTime() - unconfirmedAmount.getTime() < LedgerConstant.UNCONFIRM_NONCE_EXPIRED_TIME) {
+            if ((TimeUtil.getCurrentTime() - unconfirmedAmount.getTime()) < LedgerConstant.UNCONFIRM_NONCE_EXPIRED_TIME) {
                 break;
             }
+            index++;
         }
         if (index > 0) {
             List<UnconfirmedAmount> list = new ArrayList<UnconfirmedAmount>();
