@@ -73,7 +73,7 @@ public class ChainCmdTest {
         seed2.setPort(3344);
         seedList.add(seed2);
         blockChain.setDelete(false);
-        blockChain.setCreateTime(TimeService.currentTimeMillis());
+        blockChain.setCreateTime(System.currentTimeMillis());
 //        System.out.println(CmdDispatcher.call("chainRegCommit", new Object[]{chain}, 1.0));
     }
 

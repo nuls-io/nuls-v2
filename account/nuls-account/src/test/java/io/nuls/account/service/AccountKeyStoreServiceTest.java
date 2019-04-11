@@ -35,7 +35,7 @@ public class AccountKeyStoreServiceTest {
         //读取配置文件，数据存储根目录，初始化打开该目录下所有表连接并放入缓存
         RocksDBService.init(NulsConfig.DATA_PATH);
         //启动时间同步线程
-        TimeService.getInstance().start();
+//        TimeService.getInstance().start();
         accountService = SpringLiteContext.getBean(AccountService.class);
         accountKeyStoreService = SpringLiteContext.getBean(AccountKeyStoreService.class);
     }
