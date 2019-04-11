@@ -1053,8 +1053,6 @@ public class TxServiceImpl implements TxService {
          * 打包时没有智能合约交易则不通知, 有则只第一次时通知.
          */
         boolean contractNotify = false;
-        long singleStart = NetworkCall.getCurrentTimeMillis();//-----
-
         List<Future<Boolean>> futures = new ArrayList<>();
         for (String txStr : txStrList) {
             Transaction tx = TxUtil.getInstanceRpcStr(txStr, Transaction.class);
@@ -1093,6 +1091,7 @@ public class TxServiceImpl implements TxService {
                             //只验证单个交易的基础内容(TX模块本地验证)
                             TxRegister txRegister = TxManager.getTxRegister(chain, tx.getType());
                             baseValidateTx(chain, tx, txRegister);
+                            chain.getLoggerMap().get(TxConstant.LOG_TX).debug("验签名");
                         } catch (Exception e) {
                             chain.getLoggerMap().get(TxConstant.LOG_TX).debug("batchVerify failed, single tx verify failed. hash:{}, -type:{}", tx.getHash().getDigestHex(), tx.getType());
                             chain.getLoggerMap().get(TxConstant.LOG_TX).error(e);
@@ -1119,8 +1118,6 @@ public class TxServiceImpl implements TxService {
             //根据模块的统一验证器名，对所有交易进行分组，准备进行各模块的统一验证
             TxUtil.moduleGroups(chain, moduleVerifyMap, tx);
         }
-        Log.debug("[验区块交易] 单个 -(距方法开始的)时间:{}", NetworkCall.getCurrentTimeMillis() - singleStart);//----
-        Log.debug("");//----
 
         if (contractNotify) {
             if (!ContractCall.contractBatchBefore(chain, blockHeight)) {
