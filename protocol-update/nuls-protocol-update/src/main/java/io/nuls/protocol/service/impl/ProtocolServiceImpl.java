@@ -23,8 +23,6 @@ package io.nuls.protocol.service.impl;
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.data.BlockExtendsData;
 import io.nuls.base.data.BlockHeader;
-import io.nuls.db.service.RocksDBService;
-import io.nuls.protocol.constant.Constant;
 import io.nuls.protocol.manager.ContextManager;
 import io.nuls.protocol.model.ChainParameters;
 import io.nuls.protocol.model.ProtocolContext;
@@ -69,7 +67,6 @@ public class ProtocolServiceImpl implements ProtocolService {
         ProtocolContext context = ContextManager.getContext(chainId);
         NulsLogger commonLog = context.getCommonLog();
         try {
-            RocksDBService.createTable(Constant.STATISTICS + chainId);
             //初始化一条新协议统计信息，与区块高度绑定，并存到数据库
             Statistics statistics = new Statistics();
             statistics.setHeight(0);

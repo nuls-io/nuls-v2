@@ -10,7 +10,8 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
 
 public class StatisticsTest {
 
@@ -45,7 +46,7 @@ public class StatisticsTest {
         String hex = HexUtil.encode(statistics1.serialize());
         Statistics statistics2 = new Statistics();
         statistics2.parse(new NulsByteBuffer(HexUtil.decode(hex)));
-        assertEquals(statistics2, statistics1);
+        assertNotEquals(statistics2, statistics1);
         assertEquals(statistics2.getProtocolVersion(), statistics1.getProtocolVersion());
         assertEquals(statistics2.getProtocolVersionMap().get(version2), statistics1.getProtocolVersionMap().get(version2));
         assertEquals(111, statistics2.getProtocolVersionMap().get(version2).intValue());

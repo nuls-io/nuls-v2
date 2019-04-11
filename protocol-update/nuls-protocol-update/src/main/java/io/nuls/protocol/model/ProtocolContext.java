@@ -24,16 +24,13 @@ package io.nuls.protocol.model;
 
 import io.nuls.protocol.constant.RunningStatusEnum;
 import io.nuls.protocol.model.po.Statistics;
-import io.nuls.protocol.service.ProtocolService;
 import io.nuls.protocol.utils.LoggerUtil;
-import io.nuls.tools.core.ioc.SpringLiteContext;
 import io.nuls.tools.log.logback.NulsLogger;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Stack;
-import java.util.concurrent.locks.StampedLock;
 
 /**
  * 每个链ID对应一个{@link ProtocolContext},维护一些链运行期间的信息,并负责链的初始化、启动、停止、销毁操作
@@ -97,11 +94,6 @@ public class ProtocolContext {
      * 链的运行时参数
      */
     private ChainParameters parameters;
-
-    /**
-     * 锁对象
-     */
-    private StampedLock lock;
 
     /**
      * 记录通用日志
@@ -192,14 +184,6 @@ public class ProtocolContext {
         this.parameters = parameters;
     }
 
-    public StampedLock getLock() {
-        return lock;
-    }
-
-    public void setLock(StampedLock lock) {
-        this.lock = lock;
-    }
-
     public NulsLogger getCommonLog() {
         return commonLog;
     }
@@ -213,7 +197,6 @@ public class ProtocolContext {
     }
 
     public void init() {
-        lock = new StampedLock();
         proportionMap = new HashMap<>();
         lastValidStatistics = new Statistics();
         lastValidStatistics.setCount((short) 0);
@@ -223,9 +206,6 @@ public class ProtocolContext {
         protocolVersionHistory.push(currentProtocolVersion);
         LoggerUtil.init(chainId, parameters.getLogLevel());
         this.setStatus(RunningStatusEnum.READY);
-        //服务初始化
-        ProtocolService service = SpringLiteContext.getBean(ProtocolService.class);
-        service.init(chainId);
     }
 
     public void start() {

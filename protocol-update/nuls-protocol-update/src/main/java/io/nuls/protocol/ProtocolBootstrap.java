@@ -1,6 +1,7 @@
 package io.nuls.protocol;
 
 import io.nuls.db.service.RocksDBService;
+import io.nuls.protocol.manager.ChainManager;
 import io.nuls.protocol.model.ProtocolConfig;
 import io.nuls.protocol.utils.ConfigLoader;
 import io.nuls.rpc.info.HostInfo;
@@ -11,6 +12,7 @@ import io.nuls.rpc.modulebootstrap.RpcModule;
 import io.nuls.rpc.modulebootstrap.RpcModuleState;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
+import io.nuls.tools.core.ioc.SpringLiteContext;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.log.Log;
 import io.nuls.tools.parse.I18nUtils;
@@ -95,6 +97,16 @@ public class ProtocolBootstrap extends RpcModule {
      */
     @Override
     public boolean doStart() {
+        try {
+            while (!isDependencieReady(new Module(ModuleE.TX.abbr, "1.0"))) {
+                Thread.sleep(1000);
+            }
+            //启动链
+            SpringLiteContext.getBean(ChainManager.class).runChain();
+        } catch (Exception e) {
+            Log.error("protocol module doStart error!");
+            return false;
+        }
         Log.info("protocol module ready");
         return true;
     }

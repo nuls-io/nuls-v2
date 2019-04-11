@@ -2,7 +2,7 @@ package io.nuls.tools.protocol;
 
 import java.util.Map;
 
-public class ProtocolContext {
+public class ProtocolGroup {
 
     /**
      * 当前协议版本

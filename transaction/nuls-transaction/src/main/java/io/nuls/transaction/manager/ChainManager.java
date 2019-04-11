@@ -35,7 +35,7 @@ import io.nuls.tools.log.logback.NulsLogger;
 import io.nuls.tools.parse.JSONUtils;
 import io.nuls.tools.protocol.Protocol;
 import io.nuls.tools.protocol.ProtocolConfigJson;
-import io.nuls.tools.protocol.ProtocolContextManager;
+import io.nuls.tools.protocol.ProtocolGroupManager;
 import io.nuls.tools.protocol.ProtocolLoader;
 import io.nuls.transaction.constant.TxConfig;
 import io.nuls.transaction.constant.TxConstant;
@@ -108,7 +108,7 @@ public class ChainManager {
             List<ProtocolConfigJson> protocolConfigs = JSONUtils.json2list(json, ProtocolConfigJson.class);
             protocolConfigs.sort(PROTOCOL_CONFIG_COMPARATOR);
             Map<Short, Protocol> protocolMap = ProtocolLoader.load(protocolConfigs);
-            ProtocolContextManager.init(chainId, protocolMap, (short) 1);
+            ProtocolGroupManager.init(chainId, protocolMap, (short) 1);
         }
     }
 
