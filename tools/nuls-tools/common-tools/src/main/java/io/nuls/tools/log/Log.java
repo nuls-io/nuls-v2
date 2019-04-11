@@ -2,6 +2,10 @@ package io.nuls.tools.log;
 
 import io.nuls.tools.log.logback.LoggerBuilder;
 import io.nuls.tools.log.logback.NulsLogger;
+import io.nuls.tools.parse.JSONUtils;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * 公共日志类
@@ -26,7 +30,15 @@ public class Log {
     }
 
     public static void debug(String msg, Object... objs) {
-            BASIC_LOGGER.debug(msg, objs);
+        try {
+            List<String> objStrs = new ArrayList<>();
+            for (Object obj: objs) {
+                objStrs.add(JSONUtils.obj2json(obj));
+            }
+            BASIC_LOGGER.debug(msg, objStrs.toArray());
+        }catch (Exception e){
+            Log.error(e);
+        }
     }
 
     /**
@@ -49,7 +61,15 @@ public class Log {
     }
 
     public static void info(String msg, Object... objs) {
-        BASIC_LOGGER.info(msg, objs);
+        try {
+            List<String> objStrs = new ArrayList<>();
+            for (Object obj: objs) {
+                objStrs.add(JSONUtils.obj2json(obj));
+            }
+            BASIC_LOGGER.info(msg, objStrs.toArray());
+        }catch (Exception e){
+            Log.error(e);
+        }
     }
 
     /**
@@ -72,7 +92,15 @@ public class Log {
     }
 
     public static void warn(String msg, Object... objs) {
-        BASIC_LOGGER.warn(msg, objs);
+        try {
+            List<String> objStrs = new ArrayList<>();
+            for (Object obj: objs) {
+                objStrs.add(JSONUtils.obj2json(obj));
+            }
+            BASIC_LOGGER.warn(msg, objStrs.toArray());
+        }catch (Exception e){
+            Log.error(e);
+        }
     }
 
     /**
@@ -96,7 +124,15 @@ public class Log {
 
 
     public static void error(String msg, Object... objs) {
-        BASIC_LOGGER.error(msg, objs);
+        try {
+            List<String> objStrs = new ArrayList<>();
+            for (Object obj: objs) {
+                objStrs.add(JSONUtils.obj2json(obj));
+            }
+            BASIC_LOGGER.error(msg, objStrs.toArray());
+        }catch (Exception e){
+            Log.error(e);
+        }
     }
 
     /**
