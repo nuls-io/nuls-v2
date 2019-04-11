@@ -434,8 +434,6 @@ if [ -n "${DOMOCK}" ]; then
 	chmod u+x "${MODULES_BIN_PATH}/start.sh"
 	cp "${BUILD_PATH}/stop-mykernel.sh" "${MODULES_BIN_PATH}/stop.sh"
 	chmod u+x "${MODULES_BIN_PATH}/stop.sh"
-	cp "${BUILD_PATH}/shutdown-nulstar.sh" "${MODULES_BIN_PATH}/shutdown.sh"
-	chmod u+x "${MODULES_BIN_PATH}/shutdown.sh"
 	cp "${BUILD_PATH}/default-config.ncf" "${MODULES_BIN_PATH}/nuls.ncf"
 	chmod u+r "${MODULES_BIN_PATH}/nuls.ncf"
 	cp "${BUILD_PATH}/cmd.sh" "${MODULES_BIN_PATH}/"
@@ -450,6 +448,9 @@ if [ -n "${DOMOCK}" ]; then
 	    tempModuleList+=" \"${m}\""
 	done
 	eval "sed -e 's/%MODULES%/${tempModuleList}/g' ${BUILD_PATH}/check-status.sh > ${BUILD_PATH}/tmp/check-status-temp.sh"
+	eval "sed -e 's/%MODULES%/${tempModuleList}/g' ${BUILD_PATH}/shutdown-nulstar.sh > ${BUILD_PATH}/tmp/shutdown-nulstar.sh"
+    cp "${BUILD_PATH}/tmp/shutdown-nulstar.sh" "${MODULES_BIN_PATH}/shutdown.sh"
+	chmod u+x "${MODULES_BIN_PATH}/shutdown.sh"
 	cp "${BUILD_PATH}/tmp/check-status-temp.sh" "${MODULES_BIN_PATH}/check-status.sh"
 	chmod u+x "${MODULES_BIN_PATH}/check-status.sh"
 	log "============== BUILD start-mykernel script done ================"

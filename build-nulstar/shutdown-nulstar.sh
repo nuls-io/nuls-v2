@@ -1,7 +1,7 @@
 #!/bin/bash
 cd `dirname $0`
 KILL_WAIT_COUNT=120
-
+modules=(%MODULES%)
 stop(){
     pid=$1;
     kill $pid > /dev/null 2>&1
@@ -31,6 +31,14 @@ echo "stoping"
 for pid in $APP_PID
 do
    stop $pid
+done
+for module in ${module[@]}
+do
+    APP_PID=`ps -ef|grep -w ${module}|grep -v grep|awk '{print $2}'`
+    if [ -z "${APP_PID}" ]; then
+        echo "${module} not running"
+    fi
+    stop $APP_PID
 done
 echo ""
 echo "shutdown success"
