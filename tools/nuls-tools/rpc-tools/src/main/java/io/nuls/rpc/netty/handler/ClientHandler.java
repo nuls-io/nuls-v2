@@ -95,7 +95,6 @@ public class ClientHandler extends SimpleChannelInboundHandler<Object> {
                 ch.close();
             } else if (msg instanceof TextWebSocketFrame) {
                 TextWebSocketFrame txMsg = (TextWebSocketFrame) msg;
-                Log.debug("Received message:{}",txMsg.text());
                 Message message = JSONUtils.json2pojo(txMsg.text(), Message.class);
                 MessageType messageType = MessageType.valueOf(message.getMessageType());
                 TextMessageHandler messageHandler = new TextMessageHandler((SocketChannel) ctx.channel(), message);
