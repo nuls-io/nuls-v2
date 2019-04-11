@@ -119,8 +119,21 @@ public class TxServiceImpl implements TxService {
     public boolean newTx(Chain chain, Transaction tx) {
         try {
             TransactionConfirmedPO existTx = getTransaction(chain, tx.getHash());
-            if(null == existTx){
-                if(chain.getPackaging().get()) {
+            if (null == existTx) {
+                //验证交易，包括 基础验证、验证器
+                if (!verify(chain, tx)) {
+                    chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("verify failed: type:{} - txhash:{}", tx.getType(), tx.getHash().getDigestHex());
+                    return false;
+                }
+                //验证并提交未确认账本
+                VerifyTxResult verifyTxResult = LedgerCall.commitUnconfirmedTx(chain, RPCUtil.encode(tx.serialize()));
+                if (!verifyTxResult.success()) {
+                    chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug(
+                            "coinData not success - code: {}, - reason:{}, type:{} - txhash:{}",
+                            verifyTxResult.getCode(), verifyTxResult.getDesc(), tx.getType(), tx.getHash().getDigestHex());
+                    return false;
+                }
+                if (chain.getPackaging().get()) {
                     //当节点是出块节点时, 才将交易放入待打包队列
                     packablePool.add(chain, tx);
                     chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("交易[加入待打包队列].....hash:{}", tx.getHash().getDigestHex());
@@ -847,7 +860,7 @@ public class TxServiceImpl implements TxService {
             //可打包交易,孤儿交易,全加回去
             putBackPackablePool(chain, packingTxList, orphanTxSet);
             return new TxPackage(new ArrayList<>(), preStateRoot, chain.getBestBlockHeight() + 1);
-        }finally {
+        } finally {
             chain.getPackageLock().unlock();
         }
     }
@@ -956,8 +969,8 @@ public class TxServiceImpl implements TxService {
             Map.Entry<TxRegister, List<String>> entry = its.next();
             try {
                 chain.getLoggerMap().get(TxConstant.LOG_TX).debug("key:{}", JSONUtils.obj2json(entry.getKey()));
-                for (String str : entry.getValue()){
-                chain.getLoggerMap().get(TxConstant.LOG_TX).debug("value:{}", str);
+                for (String str : entry.getValue()) {
+                    chain.getLoggerMap().get(TxConstant.LOG_TX).debug("value:{}", str);
                 }
             } catch (JsonProcessingException e) {
                 e.printStackTrace();
@@ -1092,7 +1105,7 @@ public class TxServiceImpl implements TxService {
                             //只验证单个交易的基础内容(TX模块本地验证)
                             TxRegister txRegister = TxManager.getTxRegister(chain, tx.getType());
                             baseValidateTx(chain, tx, txRegister);
-                            Log.debug("验签名 type:{}, -hash:{}",tx.getType(), tx.getHash().getDigestHex());
+                            Log.debug("验签名 type:{}, -hash:{}", tx.getType(), tx.getHash().getDigestHex());
                         } catch (Exception e) {
                             chain.getLoggerMap().get(TxConstant.LOG_TX).debug("batchVerify failed, single tx verify failed. hash:{}, -type:{}", tx.getHash().getDigestHex(), tx.getType());
                             chain.getLoggerMap().get(TxConstant.LOG_TX).error(e);
