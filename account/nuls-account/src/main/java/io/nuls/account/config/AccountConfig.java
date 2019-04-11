@@ -34,12 +34,30 @@ public class AccountConfig {
 
     private int mainAssetId;
 
+    private int chainId;
+
+    private int assetId;
+
+    public int getChainId() {
+        return chainId;
+    }
+
+    public void setChainId(int chainId) {
+        this.chainId = chainId;
+    }
+
+    public int getAssetId() {
+        return assetId;
+    }
+
+    public void setAssetId(int assetId) {
+        this.assetId = assetId;
+    }
+
     /**
      * ROCK DB 数据库文件存储路径
      */
     private String dataPath;
-
-    private ConfigBean chainConfig;
 
     public String getEncoding() {
         return encoding;
@@ -90,10 +108,9 @@ public class AccountConfig {
     }
 
     public ConfigBean getChainConfig() {
-        return chainConfig;
-    }
-
-    public void setChainConfig(ConfigBean chainConfig) {
-        this.chainConfig = chainConfig;
+        ConfigBean configBean = new ConfigBean();
+        configBean.setAssetsId(assetId);
+        configBean.setChainId(chainId);
+        return configBean;
     }
 }
