@@ -1057,14 +1057,14 @@ public class TxServiceImpl implements TxService {
         for (String txStr : txStrList) {
             Transaction tx = TxUtil.getInstanceRpcStr(txStr, Transaction.class);
             //如果不是系统智能合约就继续单个验证
-            if (!TxManager.isSystemSmartContract(chain, tx.getType())) {
+            if (TxManager.isSystemSmartContract(chain, tx.getType())) {
                 continue;
             }
+            txList.add(tx);
             //多线程处理单个交易
             Future<Boolean> res = signExecutor.submit(new Callable<Boolean>() {
                 @Override
                 public Boolean call() throws Exception {
-                    txList.add(tx);
 
                     TransactionConfirmedPO txConfirmed = confirmedTxService.getConfirmedTransaction(chain, tx.getHash());
                     if (null != txConfirmed) {
@@ -1085,7 +1085,6 @@ public class TxServiceImpl implements TxService {
                             return false;
                         }
                     }
-                    Log.debug("是否在未确认中:{}",unconfirmedTxStorageService.isExists(chain.getChainId(), tx.getHash()));
                     if (!unconfirmedTxStorageService.isExists(chain.getChainId(), tx.getHash())) {
                         //不在未确认中就进行基础验证
                         try {
