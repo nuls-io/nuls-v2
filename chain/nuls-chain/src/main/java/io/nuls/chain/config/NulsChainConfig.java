@@ -15,7 +15,6 @@ public class NulsChainConfig {
     /**
      * ROCK DB 数据库文件存储路径
      */
-    @Value("DataPath")
     private String dataPath;
     /**
      * 初始配置参数

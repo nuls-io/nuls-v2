@@ -15,11 +15,11 @@ import io.nuls.chain.util.LoggerUtil;
 import io.nuls.rpc.model.CmdAnnotation;
 import io.nuls.rpc.model.Parameter;
 import io.nuls.rpc.model.message.Response;
+import io.nuls.rpc.util.TimeUtils;
 import io.nuls.tools.constant.ErrorCode;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.parse.JSONUtils;
-import io.nuls.tools.thread.TimeService;
 
 import java.util.Map;
 
@@ -80,7 +80,7 @@ public class ChainCmd extends BaseChainCmd {
             /* 组装BlockChain (BlockChain object) */
             BlockChain blockChain = JSONUtils.map2pojo(params, BlockChain.class);
             blockChain.setRegAddress(AddressTool.getAddress(String.valueOf(params.get("address"))));
-            blockChain.setCreateTime(TimeService.currentTimeMillis());
+            blockChain.setCreateTime(TimeUtils.getCurrentTimeMillis());
 
             /* 组装Asset (Asset object) */
             /* 取消int assetId = seqService.createAssetId(blockChain.getChainId());*/
@@ -88,13 +88,13 @@ public class ChainCmd extends BaseChainCmd {
             asset.setChainId(blockChain.getChainId());
             asset.setDepositNuls(Integer.valueOf(nulsChainConfig.getAssetDepositNuls()));
             asset.setAvailable(true);
-            asset.setCreateTime(TimeService.currentTimeMillis());
+            asset.setCreateTime(TimeUtils.getCurrentTimeMillis());
             asset.setAddress(blockChain.getRegAddress());
 
             /* 组装交易发送 (Send transaction) */
             Transaction tx = new RegisterChainAndAssetTransaction();
             tx.setTxData(blockChain.parseToTransaction(asset));
-            tx.setTime(TimeService.currentTimeMillis());
+            tx.setTime(TimeUtils.getCurrentTimeMillis());
             AccountBalance accountBalance = rpcService.getCoinData(String.valueOf(params.get("address")));
             CoinData coinData = super.getRegCoinData(asset.getAddress(), asset.getChainId(),
                     asset.getAssetId(), String.valueOf(asset.getDepositNuls()), tx.size(), accountBalance,nulsChainConfig.getAssetDepositNulsLockRate());

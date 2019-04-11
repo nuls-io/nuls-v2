@@ -22,7 +22,7 @@
  * SOFTWARE.
  */
 
-package io.nuls.contract.tx;
+package io.nuls.contract.tx.nrc20;
 
 
 import io.nuls.contract.basetest.ContractTest;

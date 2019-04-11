@@ -10,7 +10,6 @@ import io.nuls.chain.util.LoggerUtil;
 import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.netty.processor.ResponseMessageProcessor;
 import io.nuls.tools.parse.JSONUtils;
-import io.nuls.tools.thread.TimeService;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -74,7 +73,7 @@ public class ChainCmdTest {
         seed2.setPort(3344);
         seedList.add(seed2);
         blockChain.setDelete(false);
-        blockChain.setCreateTime(TimeService.currentTimeMillis());
+        blockChain.setCreateTime(System.currentTimeMillis());
 //        System.out.println(CmdDispatcher.call("chainRegCommit", new Object[]{chain}, 1.0));
     }
 

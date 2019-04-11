@@ -1,0 +1,151 @@
+#!/bin/bash
+
+help()
+{
+    cat <<- EOF
+    Desc: 启动NULS 2.0钱包，
+    Usage: ./start.sh
+    		-c <module.json> 使用指定配置文件 如果不配置将使用./default-config.json
+    		-f 前台运行
+    		-l <logs path> 输出的日志目录
+    		-d <data path> 数据存储目录
+    		-j JAVA_HOME
+    		-D debug模式，在logs目录下输出名为stdut.log的全日志文件
+    		-h help
+    Author: zlj
+EOF
+    exit 0
+}
+
+
+#获取绝对路径
+function get_fullpath()
+{
+    if [ -f "$1" ];
+    then
+        tempDir=`dirname $1`;
+        echo `cd $tempDir; pwd`;
+    else
+        echo `cd $1; pwd`;
+    fi
+}
+
+
+#参数处理
+#是否前端运行标志位
+RUNFRONT=
+DEBUG=0
+while getopts fj:c:l:d:Dh name
+do
+            case $name in
+            f)     RUNFRONT="1";;
+            j)     _JAVA_HOME="`get_fullpath $OPTARG`";;
+            c)
+                    CONFIG="`get_fullpath $OPTARG`/${OPTARG##*/}"
+                    ;;
+            l)
+                   if [ ! -d "$OPTARG" ]; then
+                       mkdir $OPTARG
+                       if [ ! -d "$OPTARG" ]; then
+                          echo "$OPTARG not a folder"
+                       exit 0 ;
+                       fi
+                   fi
+                   LOGPATH="`get_fullpath $OPTARG`";;
+            d)
+                   if [ ! -d "$OPTARG" ]; then
+                       mkdir $OPTARG
+                       if [ ! -d "$OPTARG" ]; then
+                          echo "$OPTARG not a folder"
+                       exit 0 ;
+                       fi
+                   fi
+                   DATAPATH="`get_fullpath $OPTARG`";;
+            D)     DEBUG="1";;
+            h)     help ;;
+            ?)     exit 2;;
+           esac
+done
+
+APP_NAME="mykernel"
+#判断是否已经运行
+if [ ! -z "`ps -ef|grep -w "name=${APP_NAME} "|grep -v grep|awk '{print $2}'`" ]; then
+    pid=`ps -ef|grep -w "name=${APP_NAME} "|grep -v grep|awk '{print $2}'`
+    echo "$APP_NAME Already running pid=$pid";
+    exit 0;
+fi
+
+#切换上下文到脚本目录
+cd `dirname $0`;
+#验证jdk版本
+BIN_PATH=`pwd`
+if [ -n "${_JAVA_HOME}" ];
+then
+    JAVA="${_JAVA_HOME}/bin/java"
+    if [ ! -x "$JAVA" ]; then
+        echo "${_JAVA_HOME} is not java_home"
+        exit 0;
+    fi
+    JAVA_HOME=${_JAVA_HOME}
+else
+    if [ -d ../Libraries/JAVA/11.0.2 ]; then
+        JAVA_HOME=`dirname "../Libraries/JAVA/11.0.2/bin"`;
+        JAVA_HOME=`cd $JAVA_HOME; pwd`
+        JAVA="${JAVA_HOME}/bin/java"
+    else
+        JAVA='java'
+    fi
+fi
+
+JAVA_EXIST=`${JAVA} -version 2>&1 |grep 11`
+if [ ! -n "$JAVA_EXIST" ]; then
+    echo "JDK version is not 11"
+    ${JAVA} -version
+    exit 0;
+fi
+
+#如果没有指定配置文件，使用default-config.ncf作为默认配置文件
+if [ ! -f "$CONFIG" ]; then
+    CONFIG="${BIN_PATH}/nuls.ncf"
+fi
+#判断用户是否指定日志目录
+if [ -z "$LOGPATH" ];
+then
+    if [ ! -d ./logs ]; then
+        mkdir ./logs
+    fi
+    LOGPATH="`get_fullpath ./logs`"
+fi
+if [ ! -d "$LOGPATH" ]; then
+   mkdir $LOGPATH
+fi
+
+if [ -n "$DATAPATH" ];
+then
+    DATAPATH="${DATAPATH}"
+else
+    if [ ! -d ./data ]; then
+        mkdir ./data
+    fi
+    DATAPATH=`get_fullpath ./data`
+fi
+echo "LOG PATH    : ${LOGPATH}"
+echo "DATA PATH   : ${DATAPATH}"
+echo "CONFIG FILE : ${CONFIG}"
+echo "DEBUG       : ${DEBUG}"
+echo "JAVA_HOME   : ${JAVA_HOME}"
+echo `${JAVA} -version`
+#切换上下文到nuls模块目录
+cd ./Modules/Nuls
+MODULE_PATH=`pwd`
+echo "===================="
+echo "NULS-WALLET STARING"
+echo "===================="
+if [ -n "${RUNFRONT}" ];
+then
+    ${JAVA} -server -Ddebug="${DEBUG}" -Dapp.name=mykernel -DlogPath="${LOGPATH}" -DdataPath=${DATAPATH} -Dactive.module="$CONFIG" -classpath ./libs/*:./mykernel/1.0.0/mykernel-1.0.0.jar io.nuls.mykernel.MyKernelBootstrap startModule $MODULE_PATH
+else
+    nohup ${JAVA} -server -Ddebug="${DEBUG}" -Dapp.name=mykernel -DlogPath="${LOGPATH}" -DdataPath=${DATAPATH}  -Dactive.module="$CONFIG"  -classpath ./libs/*:./mykernel/1.0.0/mykernel-1.0.0.jar io.nuls.mykernel.MyKernelBootstrap startModule $MODULE_PATH > "${LOGPATH}/stdut.log" 2>&1 &
+fi
+
+

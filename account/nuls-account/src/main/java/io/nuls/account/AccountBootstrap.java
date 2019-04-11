@@ -15,6 +15,7 @@ import io.nuls.rpc.modulebootstrap.Module;
 import io.nuls.rpc.modulebootstrap.NulsRpcModuleBootstrap;
 import io.nuls.rpc.modulebootstrap.RpcModule;
 import io.nuls.rpc.modulebootstrap.RpcModuleState;
+import io.nuls.rpc.util.TimeUtils;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.core.annotation.Value;
@@ -28,9 +29,6 @@ import io.nuls.tools.parse.I18nUtils;
  */
 @Component
 public class AccountBootstrap extends RpcModule {
-
-    @Value("DataPath")
-    private String dataPath;
 
     @Autowired
     private AccountConfig accountConfig;
@@ -53,7 +51,9 @@ public class AccountBootstrap extends RpcModule {
      */
     @Override
     public Module[] getDependencies() {
-        return new Module[]{new Module(ModuleE.LG.abbr, "1.0"),
+        return new Module[]{
+                new Module(ModuleE.NW.abbr, ROLE),
+                new Module(ModuleE.LG.abbr, "1.0"),
                 new Module(ModuleE.TX.abbr, "1.0")};
     }
 
@@ -112,6 +112,7 @@ public class AccountBootstrap extends RpcModule {
      */
     @Override
     public RpcModuleState onDependenciesReady() {
+        TimeUtils.getInstance().start();
         LoggerUtil.logger.info("account onDependenciesReady");
         LoggerUtil.logger.debug("START-SUCCESS");
         return RpcModuleState.Running;

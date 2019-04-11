@@ -25,6 +25,8 @@
 package io.nuls.rpc.model.message;
 
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
  * 通知
@@ -40,51 +42,63 @@ public class Notification {
      * 0: The Micro server that made the notification does not expect any kind of message in return.
      * 1: The Micro server that made the notification expects exactly one Ack message.
      */
+    @JsonProperty
     private String NotificationAck;
 
     /**
      * The category of the notification, each service may define its own types so it is not required that the target service processes this field.
      */
+    @JsonProperty
     private String NotificationType;
 
     /**
      * A string comment that provides more information about the reason of the notification
      */
+    @JsonProperty
     private String NotificationComment;
 
     /**
      * Data relevant to the notification, it is not required the target service to process this field
      */
+    @JsonProperty
     private String NotificationData;
 
+    @JsonIgnore
     public String getNotificationAck() {
         return NotificationAck;
     }
 
+    @JsonIgnore
     public void setNotificationAck(String NotificationAck) {
         this.NotificationAck = NotificationAck;
     }
 
+    @JsonIgnore
     public String getNotificationType() {
         return NotificationType;
     }
 
+    @JsonIgnore
     public void setNotificationType(String NotificationType) {
         this.NotificationType = NotificationType;
     }
 
+    @JsonIgnore
     public String getNotificationComment() {
         return NotificationComment;
     }
 
+    @JsonIgnore
     public void setNotificationComment(String NotificationComment) {
         this.NotificationComment = NotificationComment;
     }
 
+    @JsonIgnore
     public String getNotificationData() {
         return NotificationData;
     }
 
+    @JsonIgnore
     public void setNotificationData(String NotificationData) {
         this.NotificationData = NotificationData;
     }

@@ -22,7 +22,6 @@ import io.nuls.rpc.netty.processor.ResponseMessageProcessor;
 import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.exception.NulsRuntimeException;
 import io.nuls.tools.parse.JSONUtils;
-import io.nuls.tools.thread.TimeService;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -703,7 +702,7 @@ public class AccountCmdTest {
 
             //创建一笔设置别名的交易
             AliasTransaction tx = new AliasTransaction();
-            tx.setTime(TimeService.currentTimeMillis());
+            tx.setTime(System.currentTimeMillis());
             Alias alias = new Alias(addressBytes, "别名");
             tx.setTxData(alias.serialize());
 

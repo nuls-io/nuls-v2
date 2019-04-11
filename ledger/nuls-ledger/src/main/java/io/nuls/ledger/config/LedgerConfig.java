@@ -18,7 +18,6 @@ public class LedgerConfig {
     /**
      * ROCK DB 数据库文件存储路径
      */
-    @Value("DataPath")
     private String dataPath;
 
     public String getLanguage() {
