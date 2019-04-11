@@ -75,11 +75,13 @@ public class ChainManager {
 
     private Map<Integer, Chain> chainMap = new ConcurrentHashMap<>();
 
+
+
     /**
      * 初始化并启动链
      * Initialize and start the chain
      */
-    public void runChain() throws Exception {
+    public void initChain() throws Exception {
         Map<Integer, ConfigBean> configMap = configChain();
         if (configMap == null || configMap.size() == 0) {
             return;
@@ -107,6 +109,21 @@ public class ChainManager {
             protocolConfigs.sort(PROTOCOL_CONFIG_COMPARATOR);
             Map<Short, Protocol> protocolMap = ProtocolLoader.load(protocolConfigs);
             ProtocolContextManager.init(chainId, protocolMap, (short) 1);
+        }
+    }
+
+    /**
+     * 初始化并启动链
+     * Initialize and start the chain
+     */
+    public void runChain() throws Exception {
+
+        for (Chain chain: chainMap.values()) {
+            initCache(chain);
+            //TODO 跨链交易不再此注册了
+            initTx(chain);
+            schedulerManager.createTransactionScheduler(chain);
+            chainMap.put(chain.getChainId(), chain);
         }
     }
 

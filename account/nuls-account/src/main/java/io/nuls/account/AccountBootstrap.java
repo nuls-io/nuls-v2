@@ -5,8 +5,6 @@ import io.nuls.account.config.NulsConfig;
 import io.nuls.account.constant.AccountConstant;
 import io.nuls.account.constant.AccountErrorCode;
 import io.nuls.account.constant.AccountStorageConstant;
-import io.nuls.account.model.bo.Chain;
-import io.nuls.account.rpc.call.TransactionCmdCall;
 import io.nuls.account.util.LoggerUtil;
 import io.nuls.account.util.manager.ChainManager;
 import io.nuls.db.constant.DBErrorCode;
@@ -20,13 +18,9 @@ import io.nuls.rpc.modulebootstrap.RpcModuleState;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.core.annotation.Value;
-import io.nuls.tools.core.ioc.SpringLiteContext;
 import io.nuls.tools.exception.NulsException;
-import io.nuls.tools.log.Log;
 import io.nuls.tools.model.StringUtils;
 import io.nuls.tools.parse.I18nUtils;
-
-import java.util.Map;
 
 /**
  * @author: qinyifeng
@@ -36,10 +30,13 @@ import java.util.Map;
 public class AccountBootstrap extends RpcModule {
 
     @Value("DataPath")
-    String dataPath;
+    private String dataPath;
 
     @Autowired
-    AccountConfig accountConfig;
+    private AccountConfig accountConfig;
+
+    @Autowired
+    private ChainManager chainManager;
 
     public static void main(String[] args) {
         if (args == null || args.length == 0) {
@@ -82,6 +79,7 @@ public class AccountBootstrap extends RpcModule {
             initCfg();
             //初始化数据库
             initDB();
+            chainManager.initChain();
         } catch (Exception e) {
             LoggerUtil.logger.error("AccountBootsrap init error!");
             throw new RuntimeException(e);
@@ -95,18 +93,16 @@ public class AccountBootstrap extends RpcModule {
      */
     @Override
     public boolean doStart() {
-        try {
-            //启动链
-            SpringLiteContext.getBean(ChainManager.class).runChain();
-            while (!isDependencieReady(new Module(ModuleE.TX.abbr, "1.0"))) {
-                Thread.sleep(1000);
-            }
-            //注册账户模块相关交易
-            registerTx();
-        } catch (Exception e) {
-            return false;
-        }
         return true;
+    }
+
+    @Override
+    public void onDependenciesReady(Module module) {
+        if (ModuleE.TX.abbr.equals(module.getName())) {
+            //注册账户模块相关交易
+            chainManager.registerTx();
+            LoggerUtil.logger.info("register tx ...");
+        }
     }
 
     /**
@@ -194,25 +190,4 @@ public class AccountBootstrap extends RpcModule {
         }
     }
 
-    /**
-     * 注册交易
-     */
-    private static void registerTx() {
-        try {
-            ChainManager chainManager = SpringLiteContext.getBean(ChainManager.class);
-            for (Map.Entry<Integer, Chain> entry : chainManager.getChainMap().entrySet()) {
-                Chain chain = entry.getValue();
-                //注册账户相关交易
-                while (true) {
-                    if (TransactionCmdCall.registerTx(chain.getConfig().getChainId())) {
-                        break;
-                    }
-                    Thread.sleep(3000L);
-                }
-            }
-        } catch (Exception e) {
-            LoggerUtil.logger.error("Transaction registerTx error!");
-            throw new RuntimeException(e);
-        }
-    }
 }

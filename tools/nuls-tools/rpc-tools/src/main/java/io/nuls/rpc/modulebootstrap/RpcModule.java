@@ -18,6 +18,7 @@ import io.nuls.tools.parse.MapUtils;
 
 import java.util.Arrays;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
@@ -95,6 +96,7 @@ public abstract class RpcModule implements InitializingBean {
                     }
                 }
             });
+            this.onDependenciesReady(module);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -174,7 +176,7 @@ public abstract class RpcModule implements InitializingBean {
             NettyServer server = NettyServer.getInstance(moduleInfo().getName(), moduleInfo().getName(), moduleInfo().getVersion())
                     .moduleRoles(new String[]{getRole()})
                     .moduleVersion(moduleInfo().getVersion())
-                    .scanPackage((getRpcCmdPackage()==null) ? new String[]{modulePackage}:getRpcCmdPackage())
+                    .scanPackage((getRpcCmdPackage()==null) ? Set.of(modulePackage):getRpcCmdPackage())
                     //注册管理模块状态的RPC接口
                     .addCmdDetail(ModuleStatusCmd.class);
             dependencies.keySet().stream().forEach(d -> server.dependencies(d.getName(), d.getVersion()));
@@ -216,7 +218,7 @@ public abstract class RpcModule implements InitializingBean {
                     Log.error("onDependenciesReady return null state", new NullPointerException("onDependenciesReady return null state"));
                     System.exit(0);
                 }
-                Log.info("RMB:module state : {}", state);
+                Log.info("RMB:module state : " + state);
             }
         } else {
             Log.info("RMB:dependencie state");
@@ -261,6 +263,10 @@ public abstract class RpcModule implements InitializingBean {
         return dependencies.get(module);
     }
 
+    public boolean isDependencieReady(String moduleName){
+        return isDependencieReady(new Module(moduleName,ROLE));
+    }
+
     /**
      * 依赖模块都以进入Ready状态
      */
@@ -280,7 +286,7 @@ public abstract class RpcModule implements InitializingBean {
      *
      * @return
      */
-    public String[] getRpcCmdPackage() {
+    public Set<String> getRpcCmdPackage() {
         return null;
     }
 
@@ -291,6 +297,11 @@ public abstract class RpcModule implements InitializingBean {
      * @return
      */
     public abstract Module moduleInfo();
+
+
+    public void onDependenciesReady(Module module){
+        Log.debug("dependencies module {} ready",module);
+    }
 
 
     /**

@@ -30,6 +30,8 @@ import io.nuls.rpc.netty.bootstrap.NettyServer;
 import io.nuls.rpc.netty.channel.manager.ConnectManager;
 import io.nuls.rpc.netty.processor.ResponseMessageProcessor;
 
+import java.util.Set;
+
 /**
  * @author lan
  * @description Rpc init
@@ -54,7 +56,7 @@ public class RpcManager extends BaseManager {
                     .moduleRoles(ModuleE.NW.abbr, new String[]{"1.1", "1.2"})
                     .moduleVersion("1.1")
                     .dependencies(ModuleE.KE.abbr, "1.1")
-                    .scanPackage(packageC);
+                    .scanPackage(Set.of(packageC));
             String kernelUrl = "ws://" + HostInfo.getLocalIP() + ":8887/ws";
             /*
              * 链接到指定地址

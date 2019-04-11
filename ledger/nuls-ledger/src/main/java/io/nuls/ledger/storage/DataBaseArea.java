@@ -28,6 +28,7 @@ package io.nuls.ledger.storage;
 /**
  * database table name constant
  * Created by wangkun23 on 2018/11/19.
+ * @author lanjinsheng
  */
 public interface DataBaseArea {
     String TB_LEDGER_ACCOUNT = "account";
@@ -55,4 +56,9 @@ public interface DataBaseArea {
      *   存区块交易缓存数据
      */
     String TB_LEDGER_NONCES = "ledgerNonces";
+
+    /**
+     *   存区块交易缓存数据
+     */
+    String TB_LEDGER_HASH = "ledgerHashs";
 }

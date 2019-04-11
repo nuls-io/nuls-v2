@@ -51,6 +51,7 @@ import io.nuls.transaction.utils.LoggerUtil;
 import java.lang.reflect.Field;
 import java.nio.charset.Charset;
 import java.util.Map;
+import java.util.Set;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 
@@ -62,7 +63,10 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 public class TransactionBootstrap extends RpcModule {
 
     @Autowired
-    TxConfig txConfig;
+    private TxConfig txConfig;
+
+    @Autowired
+    private ChainManager chainManager;
 
     public static void main(String[] args) {
         if (args == null || args.length == 0) {
@@ -78,6 +82,7 @@ public class TransactionBootstrap extends RpcModule {
             initSys();
             //初始化数据库配置文件
             initDB();
+            chainManager.initChain();
         } catch (Exception e) {
             Log.error("Transaction init error!");
             Log.error(e);
@@ -89,7 +94,7 @@ public class TransactionBootstrap extends RpcModule {
         //初始化国际资源文件语言
         try {
             initLanguage();
-            SpringLiteContext.getBean(ChainManager.class).runChain();
+            chainManager.runChain();
             Log.info("Transaction Ready...");
             return true;
         } catch (Exception e) {
@@ -100,9 +105,24 @@ public class TransactionBootstrap extends RpcModule {
     }
 
     @Override
+    public void onDependenciesReady(Module module) {
+        try {
+            if (ModuleE.NW.abbr.equals(module.getName())) {
+                NetworkCall.registerProtocol();
+            }
+            if (ModuleE.BL.abbr.equals(module.getName())) {
+                subscriptionBlockHeight();
+            }
+        } catch (NulsException e) {
+            LoggerUtil.Log.error(e);
+        }
+    }
+
+    @Override
     public RpcModuleState onDependenciesReady() {
         Log.info("Transaction onDependenciesReady");
-        try {
+        return RpcModuleState.Running;
+       /* try {
             NetworkCall.registerProtocol();
             subscriptionBlockHeight();
             Log.info("Transaction Running...");
@@ -110,7 +130,7 @@ public class TransactionBootstrap extends RpcModule {
         } catch (Exception e) {
             LoggerUtil.Log.error(e);
             return RpcModuleState.Ready;
-        }
+        }*/
 
     }
 
@@ -134,8 +154,8 @@ public class TransactionBootstrap extends RpcModule {
     }
 
     @Override
-    public String[] getRpcCmdPackage() {
-        return new String[]{TxConstant.TX_CMD_PATH};
+    public Set<String> getRpcCmdPackage() {
+        return Set.of(TxConstant.TX_CMD_PATH);
     }
 
     /**

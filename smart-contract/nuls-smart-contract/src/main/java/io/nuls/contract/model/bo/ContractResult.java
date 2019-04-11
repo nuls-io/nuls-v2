@@ -150,6 +150,7 @@ public class ContractResult {
         contractResult.setGasUsed(contractData.getGasLimit());
         contractResult.setPrice(contractData.getPrice());
         contractResult.setSender(contractData.getSender());
+        contractResult.setValue(contractData.getValue().longValue());
         contractResult.setError(true);
         contractResult.setRevert(true);
         return contractResult;

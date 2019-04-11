@@ -25,12 +25,11 @@ package io.nuls.contract.service.impl;
 
 import io.nuls.base.data.*;
 import io.nuls.contract.helper.ContractHelper;
+import io.nuls.contract.helper.ContractTransferHandler;
 import io.nuls.contract.manager.ContractTempBalanceManager;
-import io.nuls.contract.model.bo.AnalyzerResult;
-import io.nuls.contract.model.bo.ContractBalance;
-import io.nuls.contract.model.bo.ContractResult;
-import io.nuls.contract.model.bo.ContractWrapperTransaction;
+import io.nuls.contract.model.bo.*;
 import io.nuls.contract.model.tx.ContractTransferTransaction;
+import io.nuls.contract.model.txdata.ContractData;
 import io.nuls.contract.model.txdata.ContractTransferData;
 import io.nuls.contract.service.ContractCaller;
 import io.nuls.contract.service.ResultHanlder;
@@ -40,6 +39,7 @@ import io.nuls.contract.vm.program.ProgramExecutor;
 import io.nuls.rpc.util.RPCUtil;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
+import io.nuls.tools.exception.NulsException;
 
 import java.io.IOException;
 import java.math.BigInteger;
@@ -57,9 +57,10 @@ public class ResultHandlerImpl implements ResultHanlder {
 
     @Autowired
     private ContractCaller contractCaller;
-
     @Autowired
     private ContractHelper contractHelper;
+    @Autowired
+    private ContractTransferHandler contractTransferHandler;
 
     @Override
     public List<ContractResult> handleAnalyzerResult(int chainId, ProgramExecutor batchExecutor, AnalyzerResult analyzerResult, String preStateRoot) {
@@ -80,32 +81,36 @@ public class ResultHandlerImpl implements ResultHanlder {
         } catch (IOException e) {
             Log.error(e);
             return Collections.emptyList();
+        } catch (NulsException e) {
+            Log.error(e);
+            return Collections.emptyList();
         }
     }
 
-    private void handleFailedContract(int chainId, AnalyzerResult analyzerResult, long blockTime) throws IOException {
+    private void handleFailedContract(int chainId, AnalyzerResult analyzerResult, long blockTime) throws IOException, NulsException {
         ContractTempBalanceManager tempBalanceManager = contractHelper.getBatchInfoTempBalanceManager(chainId);
         int assetsId = contractHelper.getChain(chainId).getConfig().getAssetsId();
 
         Set<ContractResult> failedSet = analyzerResult.getFailedSet();
         for (ContractResult contractResult : failedSet) {
-            long value = contractResult.getValue();
-            if (value > 0) {
-                ContractWrapperTransaction orginTx = contractResult.getTx();
-                if (orginTx.getType() != TX_TYPE_CALL_CONTRACT) {
-                    continue;
-                }
+            ContractWrapperTransaction orginTx = contractResult.getTx();
+            if (orginTx.getType() != TX_TYPE_CALL_CONTRACT) {
+                continue;
+            }
+            ContractData contractData = orginTx.getContractData();
+            BigInteger value = contractData.getValue();
+            if (value.compareTo(BigInteger.ZERO) > 0) {
 
-                byte[] contractAddress = contractResult.getContractAddress();
+                byte[] contractAddress = contractData.getContractAddress();
                 ContractTransferData txData = new ContractTransferData(orginTx.getHash(), contractAddress);
 
                 CoinData coinData = new CoinData();
                 ContractBalance balance = tempBalanceManager.getBalance(contractAddress).getData();
                 byte[] nonceBytes = RPCUtil.decode(balance.getNonce());
 
-                CoinFrom coinFrom = new CoinFrom(contractAddress, chainId, assetsId, BigInteger.valueOf(value), nonceBytes, (byte) 0);
+                CoinFrom coinFrom = new CoinFrom(contractAddress, chainId, assetsId, value, nonceBytes, (byte) 0);
                 coinData.getFrom().add(coinFrom);
-                CoinTo coinTo = new CoinTo(contractResult.getSender(), chainId, assetsId, BigInteger.valueOf(value), 0L);
+                CoinTo coinTo = new CoinTo(contractData.getSender(), chainId, assetsId, value, 0L);
                 coinData.getTo().add(coinTo);
 
                 ContractTransferTransaction tx = new ContractTransferTransaction();
@@ -122,6 +127,7 @@ public class ResultHandlerImpl implements ResultHanlder {
                 balance.setNonce(RPCUtil.encode(currentNonceBytes));
                 tx.setHash(hash);
                 contractResult.getContractTransferList().add(tx);
+                contractResult.setMergedTransferList(contractTransferHandler.contractTransfer2mergedTransfer(orginTx, contractResult.getContractTransferList()));
             }
         }
     }

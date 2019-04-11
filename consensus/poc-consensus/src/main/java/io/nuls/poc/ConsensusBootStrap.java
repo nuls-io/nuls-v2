@@ -3,7 +3,9 @@ package io.nuls.poc;
 import io.nuls.db.service.RocksDBService;
 import io.nuls.poc.constant.ConsensusConfig;
 import io.nuls.poc.constant.ConsensusConstant;
+import io.nuls.poc.model.bo.Chain;
 import io.nuls.poc.storage.LanguageService;
+import io.nuls.poc.utils.enumeration.ConsensusStatus;
 import io.nuls.poc.utils.manager.ChainManager;
 import io.nuls.rpc.info.HostInfo;
 import io.nuls.rpc.model.ModuleE;
@@ -19,6 +21,7 @@ import io.nuls.tools.parse.I18nUtils;
 
 import java.lang.reflect.Field;
 import java.nio.charset.Charset;
+import java.util.Set;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 /**
@@ -65,8 +68,8 @@ public class ConsensusBootStrap extends RpcModule {
      * @return
      */
     @Override
-    public String[] getRpcCmdPackage(){
-        return new String[]{ConsensusConstant.RPC_PATH};
+    public Set<String> getRpcCmdPackage(){
+        return Set.of(ConsensusConstant.RPC_PATH);
     }
 
     @Override
@@ -85,21 +88,11 @@ public class ConsensusBootStrap extends RpcModule {
     @Override
     public boolean doStart() {
         try {
-            while (!isDependencieReady(new Module(ModuleE.TX.abbr, "1.0"))){
-                Log.debug("wait transaction module ready");
-                Thread.sleep(2000L);
-            }
-            chainManager.registerTx();
-            /*
-            * 交易模块启动成功之后则向交易模块注册交易
-            * After the transaction module starts successfully, register the transaction with the transaction module.
-            * */
-
             while (!isDependencieReady()){
                 Log.debug("wait depend modules ready");
                 Thread.sleep(2000L);
             }
-            SpringLiteContext.getBean(ChainManager.class).runChain();
+            chainManager.runChain();
             return true;
         }catch (Exception e){
             Log.error(e);
@@ -108,13 +101,32 @@ public class ConsensusBootStrap extends RpcModule {
     }
 
     @Override
+    public void onDependenciesReady(Module module){
+        try {
+            if(module.getName().equals(ModuleE.TX.abbr)){
+                chainManager.registerTx();
+            }
+        }catch (Exception e){
+            Log.error(e);
+        }
+    }
+
+    @Override
     public RpcModuleState onDependenciesReady() {
+        for (Chain chain:chainManager.getChainMap().values()) {
+            chain.setConsensusStatus(ConsensusStatus.RUNNING);
+        }
         Log.debug("cs onDependenciesReady");
         return RpcModuleState.Running;
     }
 
     @Override
     public RpcModuleState onDependenciesLoss(Module dependenciesModule) {
+        if(dependenciesModule.getName().equals(ModuleE.TX.abbr) || dependenciesModule.getName().equals(ModuleE.BL.abbr)){
+            for (Chain chain:chainManager.getChainMap().values()) {
+                chain.setConsensusStatus(ConsensusStatus.WAIT_RUNNING);
+            }
+        }
         return RpcModuleState.Ready;
     }
 
