@@ -1072,11 +1072,13 @@ public class TxServiceImpl implements TxService {
                     return verifyTxResult;
                 }
             }
-            //只验证单个交易的基础内容(TX模块本地验证)
-            TxRegister txRegister = TxManager.getTxRegister(chain, tx.getType());
+
+            long s2 = NetworkCall.getCurrentTimeMillis();
             if (!unconfirmedTxStorageService.isExists(chain.getChainId(), tx.getHash())) {
                 //不在未确认中就进行基础验证
                 try {
+                    //只验证单个交易的基础内容(TX模块本地验证)
+                    TxRegister txRegister = TxManager.getTxRegister(chain, tx.getType());
                     this.baseValidateTx(chain, tx, txRegister);
                 } catch (Exception e) {
                     chain.getLoggerMap().get(TxConstant.LOG_TX).debug("batchVerify failed, single tx verify failed. hash:{}, -type:{}", tx.getHash().getDigestHex(), tx.getType());
@@ -1084,6 +1086,7 @@ public class TxServiceImpl implements TxService {
                     return verifyTxResult;
                 }
             }
+            Log.debug("[验区块交易] 验证签名时间:{}", NetworkCall.getCurrentTimeMillis() - s2);//----
 
             /** 智能合约*/
             if (TxManager.isSmartContract(chain, tx.getType())) {
