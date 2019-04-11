@@ -116,6 +116,7 @@ fi
 _dataPath=`getModuleItem ${config} "dataPath"`
 _logPath=`getModuleItem ${config} "logPath"`
 _logLevel=`getModuleItem ${config} "logLevel"`
+DEBUG=`getModuleItem ${config} "debug"`
 cd `dirname ${config}`
 if [ ! -d ${_dataPath} ]; then
     mkdir ${_dataPath}
