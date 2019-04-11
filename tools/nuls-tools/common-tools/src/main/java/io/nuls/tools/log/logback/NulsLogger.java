@@ -44,7 +44,11 @@ public class NulsLogger {
             try {
                 List<String> objStrs = new ArrayList<>();
                 for (Object obj: objs) {
-                    objStrs.add(JSONUtils.obj2json(obj));
+                    if(obj instanceof String){
+                        objStrs.add((String)obj);
+                    }else{
+                        objStrs.add(JSONUtils.obj2json(obj));
+                    }
                 }
                 logger.debug(logContent, objStrs.toArray());
             }catch (Exception e){
@@ -81,7 +85,11 @@ public class NulsLogger {
         try {
             List<String> objStrs = new ArrayList<>();
             for (Object obj: objs) {
-                objStrs.add(JSONUtils.obj2json(obj));
+                if(obj instanceof String){
+                    objStrs.add((String)obj);
+                }else{
+                    objStrs.add(JSONUtils.obj2json(obj));
+                }
             }
             logger.info(logContent, objStrs.toArray());
         }catch (Exception e){
@@ -115,7 +123,11 @@ public class NulsLogger {
         try {
             List<String> objStrs = new ArrayList<>();
             for (Object obj: objs) {
-                objStrs.add(JSONUtils.obj2json(obj));
+                if(obj instanceof String){
+                    objStrs.add((String)obj);
+                }else{
+                    objStrs.add(JSONUtils.obj2json(obj));
+                }
             }
             logger.warn(logContent, objStrs.toArray());
         }catch (Exception e){
@@ -150,7 +162,11 @@ public class NulsLogger {
         try {
             List<String> objStrs = new ArrayList<>();
             for (Object obj: objs) {
-                objStrs.add(JSONUtils.obj2json(obj));
+                if(obj instanceof String){
+                    objStrs.add((String)obj);
+                }else{
+                    objStrs.add(JSONUtils.obj2json(obj));
+                }
             }
             logger.error(logContent, objStrs.toArray());
         }catch (Exception e){

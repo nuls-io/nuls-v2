@@ -2,8 +2,8 @@ package io.nuls.api.rpc.controller;
 
 import io.nuls.api.analysis.WalletRpcHandler;
 import io.nuls.api.cache.ApiCache;
-import io.nuls.api.db.ContractService;
-import io.nuls.api.db.TokenService;
+import io.nuls.api.db.mongo.MongoContractServiceImpl;
+import io.nuls.api.db.mongo.MongoTokenServiceImpl;
 import io.nuls.api.exception.JsonRpcException;
 import io.nuls.api.manager.CacheManager;
 import io.nuls.api.model.po.db.*;
@@ -25,9 +25,9 @@ import java.util.List;
 public class ContractController {
 
     @Autowired
-    private ContractService contractService;
+    private MongoContractServiceImpl mongoContractServiceImpl;
     @Autowired
-    private TokenService tokenService;
+    private MongoTokenServiceImpl mongoTokenServiceImpl;
 
     @RpcMethod("getContract")
     public RpcResult getContract(List<Object> params) {
@@ -49,7 +49,7 @@ public class ContractController {
 
         RpcResult rpcResult = new RpcResult();
         try {
-            ContractInfo contractInfo = contractService.getContractInfo(chainId, contractAddress);
+            ContractInfo contractInfo = mongoContractServiceImpl.getContractInfo(chainId, contractAddress);
             if (contractInfo == null) {
                 rpcResult.setError(new RpcResultError(RpcErrorCode.DATA_NOT_EXISTS));
             } else {
@@ -92,7 +92,7 @@ public class ContractController {
         if (!CacheManager.isChainExist(chainId)) {
             pageInfo = new PageInfo<>(pageIndex, pageSize);
         } else {
-            pageInfo = tokenService.getAccountTokens(chainId, address, pageIndex, pageSize);
+            pageInfo = mongoTokenServiceImpl.getAccountTokens(chainId, address, pageIndex, pageSize);
         }
 
         RpcResult result = new RpcResult();
@@ -127,7 +127,7 @@ public class ContractController {
         if (!CacheManager.isChainExist(chainId)) {
             pageInfo = new PageInfo<>(pageIndex, pageSize);
         } else {
-            pageInfo = tokenService.getContractTokens(chainId, contractAddress, pageIndex, pageSize);
+            pageInfo = mongoTokenServiceImpl.getContractTokens(chainId, contractAddress, pageIndex, pageSize);
         }
         RpcResult result = new RpcResult();
         result.setResult(pageInfo);
@@ -163,7 +163,7 @@ public class ContractController {
         if (!CacheManager.isChainExist(chainId)) {
             pageInfo = new PageInfo<>(pageIndex, pageSize);
         } else {
-            pageInfo = tokenService.getTokenTransfers(chainId, address, contractAddress, pageIndex, pageSize);
+            pageInfo = mongoTokenServiceImpl.getTokenTransfers(chainId, address, contractAddress, pageIndex, pageSize);
         }
         RpcResult result = new RpcResult();
         result.setResult(pageInfo);
@@ -199,7 +199,7 @@ public class ContractController {
         if (!CacheManager.isChainExist(chainId)) {
             pageInfo = new PageInfo<>(pageIndex, pageSize);
         } else {
-            pageInfo = contractService.getContractTxList(chainId, contractAddress, type, pageIndex, pageSize);
+            pageInfo = mongoContractServiceImpl.getContractTxList(chainId, contractAddress, type, pageIndex, pageSize);
         }
         RpcResult result = new RpcResult();
         result.setResult(pageInfo);
@@ -232,7 +232,7 @@ public class ContractController {
         if (!CacheManager.isChainExist(chainId)) {
             pageInfo = new PageInfo<>(pageIndex, pageSize);
         } else {
-            pageInfo = contractService.getContractList(chainId, pageIndex, pageSize, onlyNrc20, isHidden);
+            pageInfo = mongoContractServiceImpl.getContractList(chainId, pageIndex, pageSize, onlyNrc20, isHidden);
         }
         RpcResult result = new RpcResult();
         result.setResult(pageInfo);

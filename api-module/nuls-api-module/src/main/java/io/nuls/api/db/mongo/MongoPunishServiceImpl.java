@@ -1,8 +1,7 @@
-package io.nuls.api.db;
+package io.nuls.api.db.mongo;
 
 import com.mongodb.client.model.Filters;
 import com.mongodb.client.model.Sorts;
-import io.nuls.api.constant.MongoTableConstant;
 import io.nuls.api.model.po.db.PageInfo;
 import io.nuls.api.model.po.db.PunishLogInfo;
 import io.nuls.api.model.po.db.TxDataInfo;
@@ -20,7 +19,7 @@ import static com.mongodb.client.model.Filters.eq;
 import static io.nuls.api.constant.MongoTableConstant.PUNISH_TABLE;
 
 @Component
-public class PunishService {
+public class MongoPunishServiceImpl {
 
     @Autowired
     private MongoDBService mongoDBService;

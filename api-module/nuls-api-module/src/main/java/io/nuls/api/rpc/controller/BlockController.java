@@ -21,8 +21,8 @@
 package io.nuls.api.rpc.controller;
 
 import io.nuls.api.analysis.WalletRpcHandler;
-import io.nuls.api.db.BlockService;
-import io.nuls.api.db.MongoDBService;
+import io.nuls.api.db.mongo.MongoBlockServiceImpl;
+import io.nuls.api.db.mongo.MongoDBService;
 import io.nuls.api.manager.CacheManager;
 import io.nuls.api.model.po.db.BlockHeaderInfo;
 import io.nuls.api.model.po.db.BlockInfo;
@@ -47,7 +47,7 @@ public class BlockController {
     @Autowired
     private MongoDBService dbService;
     @Autowired
-    private BlockService blockService;
+    private MongoBlockServiceImpl mongoBlockServiceImpl;
     @Autowired
     private RollbackService rollbackBlock;
 
@@ -65,7 +65,7 @@ public class BlockController {
             return RpcResult.dataNotFound();
         }
 
-        BlockHeaderInfo localBestBlockHeader = blockService.getBestBlockHeader(chainId);
+        BlockHeaderInfo localBestBlockHeader = mongoBlockServiceImpl.getBestBlockHeader(chainId);
         if (localBestBlockHeader == null) {
             return RpcResult.dataNotFound();
         }
@@ -89,7 +89,7 @@ public class BlockController {
         if (!CacheManager.isChainExist(chainId)) {
             return RpcResult.dataNotFound();
         }
-        BlockHeaderInfo header = blockService.getBlockHeader(chainId, height);
+        BlockHeaderInfo header = mongoBlockServiceImpl.getBlockHeader(chainId, height);
         if (header == null) {
             return RpcResult.dataNotFound();
         }
@@ -114,7 +114,7 @@ public class BlockController {
             return RpcResult.paramError("[hash] is required");
         }
 
-        BlockHeaderInfo header = blockService.getBlockHeaderByHash(chainId, hash);
+        BlockHeaderInfo header = mongoBlockServiceImpl.getBlockHeaderByHash(chainId, hash);
         if (header == null) {
             return RpcResult.dataNotFound();
         }
@@ -168,7 +168,7 @@ public class BlockController {
         if (!CacheManager.isChainExist(chainId)) {
             return RpcResult.dataNotFound();
         }
-        BlockHeaderInfo blockHeaderInfo = blockService.getBlockHeader(chainId, height);
+        BlockHeaderInfo blockHeaderInfo = mongoBlockServiceImpl.getBlockHeader(chainId, height);
         if (blockHeaderInfo == null) {
             return RpcResult.dataNotFound();
         }
@@ -214,7 +214,7 @@ public class BlockController {
         if (!CacheManager.isChainExist(chainId)) {
             pageInfo = new PageInfo<>(pageIndex, pageSize);
         } else {
-            pageInfo = blockService.pageQuery(chainId, pageIndex, pageSize, packingAddress, filterEmptyBlocks);
+            pageInfo = mongoBlockServiceImpl.pageQuery(chainId, pageIndex, pageSize, packingAddress, filterEmptyBlocks);
         }
         RpcResult result = new RpcResult();
         result.setResult(pageInfo);

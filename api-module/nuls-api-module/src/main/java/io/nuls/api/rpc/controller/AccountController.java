@@ -22,8 +22,8 @@ package io.nuls.api.rpc.controller;
 
 import io.nuls.api.analysis.WalletRpcHandler;
 import io.nuls.api.cache.ApiCache;
-import io.nuls.api.db.AccountService;
-import io.nuls.api.db.BlockService;
+import io.nuls.api.db.mongo.MongoAccountServiceImpl;
+import io.nuls.api.db.mongo.MongoBlockServiceImpl;
 import io.nuls.api.manager.CacheManager;
 import io.nuls.api.model.po.db.AccountInfo;
 import io.nuls.api.model.po.db.AssetInfo;
@@ -50,9 +50,9 @@ import java.util.List;
 public class AccountController {
 
     @Autowired
-    private AccountService accountService;
+    private MongoAccountServiceImpl mongoAccountServiceImpl;
     @Autowired
-    private BlockService blockHeaderService;
+    private MongoBlockServiceImpl blockHeaderService;
 
     private io.nuls.api.provider.account.AccountService cmdAccountService = ServiceManager.get(io.nuls.api.provider.account.AccountService.class);
 
@@ -76,7 +76,7 @@ public class AccountController {
         RpcResult result = new RpcResult();
         PageInfo<AccountInfo> pageInfo;
         if (CacheManager.isChainExist(chainId)) {
-            pageInfo = accountService.pageQuery(chainId, pageIndex, pageSize);
+            pageInfo = mongoAccountServiceImpl.pageQuery(chainId, pageIndex, pageSize);
         } else {
             pageInfo = new PageInfo<>(pageIndex, pageSize);
         }
@@ -113,7 +113,7 @@ public class AccountController {
         RpcResult result = new RpcResult();
         PageInfo<TxRelationInfo> pageInfo;
         if (CacheManager.isChainExist(chainId)) {
-            pageInfo = accountService.getAccountTxs(chainId, address, pageIndex, pageSize, type, isMark);
+            pageInfo = mongoAccountServiceImpl.getAccountTxs(chainId, address, pageIndex, pageSize, type, isMark);
         } else {
             pageInfo = new PageInfo<>(pageIndex, pageSize);
         }
@@ -142,7 +142,7 @@ public class AccountController {
             return result.setError(new RpcResultError(RpcErrorCode.DATA_NOT_EXISTS));
         }
 
-        AccountInfo accountInfo = accountService.getAccountInfo(chainId, address);
+        AccountInfo accountInfo = mongoAccountServiceImpl.getAccountInfo(chainId, address);
         if (accountInfo == null) {
             return result.setError(new RpcResultError(RpcErrorCode.DATA_NOT_EXISTS));
         }
@@ -178,7 +178,7 @@ public class AccountController {
 
         PageInfo<AccountInfo> pageInfo;
         if (CacheManager.isChainExist(chainId)) {
-            pageInfo = accountService.getCoinRanking(pageIndex, pageSize, sortType, chainId);
+            pageInfo = mongoAccountServiceImpl.getCoinRanking(pageIndex, pageSize, sortType, chainId);
         } else {
             pageInfo = new PageInfo<>(pageIndex, pageSize);
         }
