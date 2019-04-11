@@ -95,7 +95,7 @@ public class ConnectionManager extends BaseManager {
         node.setConnectStatus(NodeConnectStatusEnum.FAIL);
 
         node.setFailCount(node.getFailCount() + 1);
-        node.setLastProbeTime(TimeService.currentTimeMillis());
+        node.setLastProbeTime(TimeManager.currentTimeMillis());
     }
 
     private StorageManager storageManager = StorageManager.getInstance();
