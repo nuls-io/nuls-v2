@@ -29,18 +29,13 @@ import io.nuls.base.data.CoinFrom;
 import io.nuls.contract.constant.ContractConstant;
 import io.nuls.contract.model.tx.ContractBaseTransaction;
 import io.nuls.contract.model.tx.CreateContractTransaction;
-import io.nuls.contract.model.tx.DeleteContractTransaction;
 import io.nuls.contract.model.txdata.CreateContractData;
 import io.nuls.contract.util.Log;
-import io.nuls.tools.basic.Result;
 import io.nuls.tools.exception.NulsException;
-import io.nuls.tools.parse.JSONUtils;
-import org.junit.Before;
 import org.junit.Test;
 
-import java.io.IOException;
 import java.math.BigInteger;
-import java.util.LinkedList;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author: PierreLuo
@@ -48,7 +43,6 @@ import java.util.LinkedList;
  */
 public class ContractMakeAndBroadcastTxTest extends ContractMakeAndBroadcastBase {
 
-    private LinkedList params = new LinkedList();
     /**
      * 创建合约的交易造假测试
      */
@@ -58,7 +52,15 @@ public class ContractMakeAndBroadcastTxTest extends ContractMakeAndBroadcastBase
      */
     @Test
     public void fakeCreateTx_stealMoney() throws Exception {
-        this.makeAndBroadcastCreateTxTest("createTxFake1_1", params, CreateContractTransaction.class);
+        new MakeAndBroadcastCreateTxTest()
+                .make()
+                .fake(new ExecuteFake() {
+                    @Override
+                    public void execute(ContractBaseTransaction tx) throws Exception {
+                        createTxFake1_1((CreateContractTransaction) tx);
+                    }
+                })
+                .signAndBroadcast();
     }
 
     /**
@@ -66,7 +68,15 @@ public class ContractMakeAndBroadcastTxTest extends ContractMakeAndBroadcastBase
      */
     @Test
     public void fakeCreateTx_notPaying() throws Exception {
-        this.makeAndBroadcastCreateTxTest("createTxFake1_2", params, CreateContractTransaction.class);
+        new MakeAndBroadcastCreateTxTest()
+                .make()
+                .fake(new ExecuteFake() {
+                    @Override
+                    public void execute(ContractBaseTransaction tx) throws Exception {
+                        createTxFake1_2((CreateContractTransaction) tx);
+                    }
+                })
+                .signAndBroadcast();
     }
 
     /**
@@ -74,9 +84,15 @@ public class ContractMakeAndBroadcastTxTest extends ContractMakeAndBroadcastBase
      */
     @Test
     public void fakeCreateTx_addCoinTo() throws Exception {
-        params.add(toAddress9);
-        params.add(1_0000L);
-        this.makeAndBroadcastCreateTxTest("txFakeAddCoinTo", params, ContractBaseTransaction.class, String.class, long.class);
+        new MakeAndBroadcastCreateTxTest()
+                .make()
+                .fake(new ExecuteFake() {
+                    @Override
+                    public void execute(ContractBaseTransaction tx) throws Exception {
+                        txFakeAddCoinTo(tx, toAddress9, 1_0000L);
+                    }
+                })
+                .signAndBroadcast();
     }
 
     /**
@@ -84,8 +100,15 @@ public class ContractMakeAndBroadcastTxTest extends ContractMakeAndBroadcastBase
      */
     @Test
     public void fakeCreateTx_ContractSender() throws Exception {
-        params.add(toAddress6);
-        this.makeAndBroadcastCreateTxTest("txFakeContractSender", params, ContractBaseTransaction.class, String.class);
+        new MakeAndBroadcastCreateTxTest()
+                .make()
+                .fake(new ExecuteFake() {
+                    @Override
+                    public void execute(ContractBaseTransaction tx) throws Exception {
+                        txFakeContractSender(tx, toAddress6);
+                    }
+                })
+                .signAndBroadcast();
     }
 
     /**
@@ -93,8 +116,15 @@ public class ContractMakeAndBroadcastTxTest extends ContractMakeAndBroadcastBase
      */
     @Test
     public void fakeCreateTx_ContractAddress() throws Exception {
-        params.add(toAddress6);
-        this.makeAndBroadcastCreateTxTest("txFakeContractAddress", params, ContractBaseTransaction.class, String.class);
+        new MakeAndBroadcastCreateTxTest()
+                .make()
+                .fake(new ExecuteFake() {
+                    @Override
+                    public void execute(ContractBaseTransaction tx) throws Exception {
+                        txFakeContractAddress(tx, toAddress6);
+                    }
+                })
+                .signAndBroadcast();
     }
 
     /**
@@ -102,8 +132,15 @@ public class ContractMakeAndBroadcastTxTest extends ContractMakeAndBroadcastBase
      */
     @Test
     public void fakeCreateTx_GasLimit() throws Exception {
-        params.add(200001L);
-        this.makeAndBroadcastCreateTxTest("txFakeGasLimit", params, ContractBaseTransaction.class, long.class);
+        new MakeAndBroadcastCreateTxTest()
+                .make()
+                .fake(new ExecuteFake() {
+                    @Override
+                    public void execute(ContractBaseTransaction tx) throws Exception {
+                        txFakeGasLimit(tx, 200001L);
+                    }
+                })
+                .signAndBroadcast();
     }
 
     /**
@@ -111,13 +148,28 @@ public class ContractMakeAndBroadcastTxTest extends ContractMakeAndBroadcastBase
      */
     @Test
     public void fakeCreateTx_Price() throws Exception {
-        params.add(23L);
-        this.makeAndBroadcastCreateTxTest("txFakePrice", params, ContractBaseTransaction.class, long.class);
+        new MakeAndBroadcastCreateTxTest()
+                .make()
+                .fake(new ExecuteFake() {
+                    @Override
+                    public void execute(ContractBaseTransaction tx) throws Exception {
+                        txFakePrice(tx, 23L);
+                    }
+                })
+                .signAndBroadcast();
     }
 
     /**
-     * 此刻的tx则可以任意修改原数据，以此造假数据
+     * 正常创建合约
      */
+    @Test
+    public void fakeCreateTx_normal() throws Exception {
+        new MakeAndBroadcastCreateTxTest()
+                .make()
+                .sign()
+                .validate()
+                .broadcast();
+    }
 
     /**
      * 减少coinData的from的花费金额 ---> 目的：不支付合约手续费
@@ -162,19 +214,21 @@ public class ContractMakeAndBroadcastTxTest extends ContractMakeAndBroadcastBase
      * 调用合约的交易造假测试
      */
 
-    @Before
-    public void callBefore() {
-        contractAddress = "tNULSeBaN155SwgcURmRwBMzmjKAH3PwK55tSe";
-    }
-
     /**
      * 增加coinData的to
      */
     @Test
     public void fakeCallTx_addCoinTo() throws Exception {
-        params.add(contractAddress);
-        params.add(1_00_0000L);
-        this.makeAndBroadcastCallTxTest("txFakeAddCoinTo", params, ContractBaseTransaction.class, String.class, long.class);
+        contractAddress = "tNULSeBaN155SwgcURmRwBMzmjKAH3PwK55tSe";
+        new MakeAndBroadcastCallTxTest()
+                .make()
+                .fake(new ExecuteFake() {
+                    @Override
+                    public void execute(ContractBaseTransaction tx) throws Exception {
+                        txFakeAddCoinTo(tx, contractAddress, 1_0000_0000L);
+                    }
+                })
+                .signAndBroadcast();
     }
 
     /**
@@ -182,10 +236,17 @@ public class ContractMakeAndBroadcastTxTest extends ContractMakeAndBroadcastBase
      */
     @Test
     public void fakeCallTx_modifyCoinTo() throws Exception {
-        contractAddress = "tNULSeBaMwfzgrVkRCqREUxSju77wQvsruEJ5d";
-        params.add(contractAddress);
-        params.add(1_0000_0000L);
-        this.makeAndBroadcastCallTxTest(2_0000_0000L, "txFakeModifyCoinTo", params, ContractBaseTransaction.class, String.class, long.class);
+        contractAddress = "tNULSeBaN155SwgcURmRwBMzmjKAH3PwK55tSe";
+        new MakeAndBroadcastCallTxTest()
+                .setLongValue(2_0000_0000L)
+                .make()
+                .fake(new ExecuteFake() {
+                    @Override
+                    public void execute(ContractBaseTransaction tx) throws Exception {
+                        txFakeModifyCoinTo(tx, contractAddress, 1_0000_0000L);
+                    }
+                })
+                .signAndBroadcast();
     }
 
     /**
@@ -193,8 +254,16 @@ public class ContractMakeAndBroadcastTxTest extends ContractMakeAndBroadcastBase
      */
     @Test
     public void fakeCallTx_ContractSender() throws Exception {
-        params.add(toAddress6);
-        this.makeAndBroadcastCallTxTest("txFakeContractSender", params, ContractBaseTransaction.class, String.class);
+        contractAddress = "tNULSeBaN155SwgcURmRwBMzmjKAH3PwK55tSe";
+        new MakeAndBroadcastCallTxTest()
+                .make()
+                .fake(new ExecuteFake() {
+                    @Override
+                    public void execute(ContractBaseTransaction tx) throws Exception {
+                        txFakeContractSender(tx, toAddress6);
+                    }
+                })
+                .signAndBroadcast();
     }
 
     /**
@@ -202,8 +271,16 @@ public class ContractMakeAndBroadcastTxTest extends ContractMakeAndBroadcastBase
      */
     @Test
     public void fakeCallTx_ContractAddress() throws Exception {
-        params.add(toAddress6);
-        this.makeAndBroadcastCallTxTest("txFakeContractAddress", params, ContractBaseTransaction.class, String.class);
+        contractAddress = "tNULSeBaN155SwgcURmRwBMzmjKAH3PwK55tSe";
+        new MakeAndBroadcastCallTxTest()
+                .make()
+                .fake(new ExecuteFake() {
+                    @Override
+                    public void execute(ContractBaseTransaction tx) throws Exception {
+                        txFakeContractAddress(tx, toAddress6);
+                    }
+                })
+                .signAndBroadcast();
     }
 
     /**
@@ -211,8 +288,16 @@ public class ContractMakeAndBroadcastTxTest extends ContractMakeAndBroadcastBase
      */
     @Test
     public void fakeCallTx_GasLimit() throws Exception {
-        params.add(20001L);
-        this.makeAndBroadcastCallTxTest("txFakeGasLimit", params, ContractBaseTransaction.class, long.class);
+        contractAddress = "tNULSeBaN155SwgcURmRwBMzmjKAH3PwK55tSe";
+        new MakeAndBroadcastCallTxTest()
+                .make()
+                .fake(new ExecuteFake() {
+                    @Override
+                    public void execute(ContractBaseTransaction tx) throws Exception {
+                        txFakeGasLimit(tx, 20001L);
+                    }
+                })
+                .signAndBroadcast();
     }
 
     /**
@@ -220,9 +305,17 @@ public class ContractMakeAndBroadcastTxTest extends ContractMakeAndBroadcastBase
      */
     @Test
     public void fakeCallTx_Price() throws Exception {
-        params.add(23L);
+        contractAddress = "tNULSeBaN155SwgcURmRwBMzmjKAH3PwK55tSe";
         methodName = ContractConstant.BALANCE_TRIGGER_METHOD_NAME;
-        this.makeAndBroadcastCallTxTest(2_0000_0000L, new Object[0], "txFakePrice", params, ContractBaseTransaction.class, long.class);
+        new MakeAndBroadcastCallTxTest(2_0000_0000L, new Object[0])
+                .make()
+                .fake(new ExecuteFake() {
+                    @Override
+                    public void execute(ContractBaseTransaction tx) throws Exception {
+                        txFakePrice(tx, 23L);
+                    }
+                })
+                .signAndBroadcast();
     }
 
     /**
@@ -230,16 +323,18 @@ public class ContractMakeAndBroadcastTxTest extends ContractMakeAndBroadcastBase
      */
     @Test
     public void fakeCallTx_PriceAndGasLimit() throws Exception {
-        LinkedList priceParam = new LinkedList();
-        priceParam.add(25L);
-        LinkedList gasLimitParam = new LinkedList();
-        gasLimitParam.add(20000L);
+        contractAddress = "tNULSeBaN155SwgcURmRwBMzmjKAH3PwK55tSe";
         methodName = ContractConstant.BALANCE_TRIGGER_METHOD_NAME;
         new MakeAndBroadcastCallTxTest(2_0000_0000L, new Object[0])
                 .make()
-                .invokeFake("txFakePrice", priceParam, ContractBaseTransaction.class, long.class)
-                .invokeFake("txFakeGasLimit", gasLimitParam, ContractBaseTransaction.class, long.class)
-                .broadcast();
+                .fake(new ExecuteFake() {
+                    @Override
+                    public void execute(ContractBaseTransaction tx) throws Exception {
+                        txFakeGasLimit(tx, 20001L);
+                        txFakePrice(tx, 25L);
+                    }
+                })
+                .signAndBroadcast();
     }
 
     /**
@@ -248,42 +343,119 @@ public class ContractMakeAndBroadcastTxTest extends ContractMakeAndBroadcastBase
     @Test
     public void fakeCallTx_Value() throws Exception {
         contractAddress = "tNULSeBaN155SwgcURmRwBMzmjKAH3PwK55tSe";
-        params.add(3_0000_0001L);
         sender = toAddress0;
         methodName = ContractConstant.BALANCE_TRIGGER_METHOD_NAME;
-        this.makeAndBroadcastCallTxTest(2_0000_0000L, new Object[0], "txFakeContractValue", params, ContractBaseTransaction.class, long.class);
+        new MakeAndBroadcastCallTxTest(2_0000_0000L, new Object[0])
+                .make()
+                .fake(new ExecuteFake() {
+                    @Override
+                    public void execute(ContractBaseTransaction tx) throws Exception {
+                        txFakeContractValue(tx, 3_0000_0001L);
+                    }
+                })
+                .signAndBroadcast();
     }
+
+    /**
+     * 正常调用合约
+     */
+    @Test
+    public void fakeCallTx_normal() throws Exception {
+        contractAddress = "tNULSeBaN155SwgcURmRwBMzmjKAH3PwK55tSe";
+        sender = toAddress0;
+        methodName = ContractConstant.BALANCE_TRIGGER_METHOD_NAME;
+        new MakeAndBroadcastCallTxTest(2_0000_0000L, new Object[0])
+                .make()
+                .sign()
+                .validate()
+                .broadcast();
+    }
+
 
     /**
      * 删除合约的交易造假测试
      */
+
+    /**
+     * 更改sender
+     */
     @Test
-    public void makeAndBroadcastDeleteTxTest() throws IOException {
-        Log.info("wait delete.");
-        String remark = "delete contract";
-        Result result = this.makeDeleteTx(chainId, sender, contractAddress, password, remark);
-        do {
-            if (result.isFailed()) {
-                break;
-            }
-            DeleteContractTransaction tx = (DeleteContractTransaction) result.getData();
-            // 造假
-            this.deleteTxFake(tx);
-            tx.setTxData(null);
-            tx.setCoinData(null);
-            tx.serializeData();
-            // 签名、广播交易
-            result = this.broadcastDeleteTx(tx);
-        } while (false);
-
-        Log.info("callContract-result:{}", JSONUtils.obj2PrettyJson(result));
+    public void fakeDeleteTx_ContractSender() throws Exception {
+        contractAddress = "tNULSeBaN155SwgcURmRwBMzmjKAH3PwK55tSe";
+        new MakeAndBroadcastDeleteTxTest()
+                .make()
+                .fake(new ExecuteFake() {
+                    @Override
+                    public void execute(ContractBaseTransaction tx) throws Exception {
+                        txFakeContractSender(tx, toAddress6);
+                    }
+                })
+                .signAndBroadcast();
     }
 
-    private void deleteTxFake(DeleteContractTransaction tx) {
-        /**
-         * 此刻的tx则可以任意修改原数据，以此造假数据
-         */
-        //TODO ....
+    /**
+     * 更改contractAddress
+     */
+    @Test
+    public void fakeDeleteTx_ContractAddress() throws Exception {
+        contractAddress = "tNULSeBaN155SwgcURmRwBMzmjKAH3PwK55tSe";
+        new MakeAndBroadcastDeleteTxTest()
+                .make()
+                .fake(new ExecuteFake() {
+                    @Override
+                    public void execute(ContractBaseTransaction tx) throws Exception {
+                        txFakeContractAddress(tx, toAddress6);
+                    }
+                })
+                .signAndBroadcast();
     }
 
+    /**
+     * 非合约创建者不能删除合约
+     */
+    @Test
+    public void fakeDeleteTx_NonCreatorCannotDeleteContract() throws Exception {
+        contractAddress = "tNULSeBaN6PJuwwJcUx2zhLJ778YZzTdduD1yF";
+        sender = toAddress7;
+        new MakeAndBroadcastDeleteTxTest()
+                .make()
+                .signAndBroadcast();
+    }
+
+    /**
+     * 余额不为0
+     */
+    @Test
+    public void fakeDeleteTx_BalanceRemaining() throws Exception {
+        contractAddress = "tNULSeBaN155SwgcURmRwBMzmjKAH3PwK55tSe";
+        String orginSender = sender;
+        methodName = ContractConstant.BALANCE_TRIGGER_METHOD_NAME;
+        sender = toAddress0;
+        new MakeAndBroadcastCallTxTest(2_0000_0000L, new Object[0])
+                .make()
+                .signAndBroadcast();
+
+        TimeUnit.SECONDS.sleep(1);
+
+        sender = orginSender;
+        new MakeAndBroadcastDeleteTxTest()
+                .make()
+                .signAndBroadcast();
+    }
+
+    /**
+     * 正常删除合约
+     */
+    @Test
+    public void fakeDeleteTx_normal() throws Exception {
+        contractAddress = "tNULSeBaN8jxiSjzhBBAcnRuM9dEmaiYMYiKMA";
+        String orginSender = sender;
+
+        sender = orginSender;
+        new MakeAndBroadcastDeleteTxTest()
+                .make()
+                .sign()
+                .validate()
+                .broadcast();
+    }
 }

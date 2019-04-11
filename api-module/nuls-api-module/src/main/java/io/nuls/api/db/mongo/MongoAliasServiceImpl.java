@@ -1,8 +1,7 @@
-package io.nuls.api.db;
+package io.nuls.api.db.mongo;
 
 import com.mongodb.client.model.Filters;
 import io.nuls.api.cache.ApiCache;
-import io.nuls.api.constant.MongoTableConstant;
 import io.nuls.api.manager.CacheManager;
 import io.nuls.api.model.po.db.AliasInfo;
 import io.nuls.api.utils.DocumentTransferTool;
@@ -17,7 +16,7 @@ import static io.nuls.api.constant.MongoTableConstant.ALIAS_TABLE;
 
 
 @Component
-public class AliasService {
+public class MongoAliasServiceImpl {
 
     @Autowired
     private MongoDBService mongoDBService;

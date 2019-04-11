@@ -44,7 +44,7 @@ public interface TxService {
      * @param transaction
      * @throws NulsException
      */
-    boolean newTx(Chain chain, Transaction transaction) throws NulsException;
+    boolean newTx(Chain chain, Transaction transaction);
 
 
     /**

@@ -1,15 +1,13 @@
-package io.nuls.api.db;
+package io.nuls.api.db.mongo;
 
 import com.mongodb.client.model.*;
 import io.nuls.api.ApiContext;
 import io.nuls.api.cache.ApiCache;
-import io.nuls.api.constant.MongoTableConstant;
 import io.nuls.api.manager.CacheManager;
 import io.nuls.api.model.po.db.AgentInfo;
 import io.nuls.api.model.po.db.AliasInfo;
 import io.nuls.api.model.po.db.PageInfo;
 import io.nuls.api.utils.DocumentTransferTool;
-import io.nuls.base.data.Page;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
 import org.bson.Document;
@@ -23,12 +21,12 @@ import java.util.List;
 import static io.nuls.api.constant.MongoTableConstant.AGENT_TABLE;
 
 @Component
-public class AgentService {
+public class MongoAgentServiceImpl {
 
     @Autowired
     private MongoDBService mongoDBService;
     @Autowired
-    private AliasService aliasService;
+    private MongoAliasServiceImpl mongoAliasServiceImpl;
 
     public void initCache() {
         for (ApiCache apiCache : CacheManager.getApiCaches().values()) {
@@ -158,7 +156,7 @@ public class AgentService {
 
 //        for (Document document : list) {
 //            AgentInfo agentInfo = DocumentTransferTool.toInfo(document, "txHash", AgentInfo.class);
-//            AliasInfo alias = aliasService.getAliasByAddress(agentInfo.getAgentAddress());
+//            AliasInfo alias = mongoAliasServiceImpl.getAliasByAddress(agentInfo.getAgentAddress());
 //            if (alias != null) {
 //                agentInfo.setAgentAlias(alias.getAlias());
 //            }
@@ -187,7 +185,7 @@ public class AgentService {
         List<AgentInfo> agentInfoList = new ArrayList<>();
         for (Document document : docsList) {
             AgentInfo agentInfo = DocumentTransferTool.toInfo(document, "txHash", AgentInfo.class);
-            AliasInfo alias = aliasService.getAliasByAddress(chainId, agentInfo.getAgentAddress());
+            AliasInfo alias = mongoAliasServiceImpl.getAliasByAddress(chainId, agentInfo.getAgentAddress());
             if (alias != null) {
                 agentInfo.setAgentAlias(alias.getAlias());
             }
