@@ -66,7 +66,6 @@ public class BlockConfig extends ChainParameters {
      */
     private int txGroupTaskDelay;
 
-    @Value("DataPath")
     private String dataPath;
 
     /**

@@ -100,9 +100,6 @@ public class ChainManager {
             Initialize linked database tables
             */
             initTable(chain);
-            initCache(chain);
-            initTx(chain);
-            schedulerManager.createTransactionScheduler(chain);
             chainMap.put(chainId, chain);
             String json = IoUtils.read(PROTOCOL_CONFIG_FILE);
             List<ProtocolConfigJson> protocolConfigs = JSONUtils.json2list(json, ProtocolConfigJson.class);
@@ -121,7 +118,7 @@ public class ChainManager {
         for (Chain chain: chainMap.values()) {
             initCache(chain);
             //TODO 跨链交易不再此注册了
-            initTx(chain);
+//            initTx(chain);
             schedulerManager.createTransactionScheduler(chain);
             chainMap.put(chain.getChainId(), chain);
         }

@@ -1,9 +1,7 @@
 {
-  "chainConfig": {
-    "chainId": 2,
-    "assetsId": 1,
-    "maxViewGas": 100000000
-  },
+  "chainId": 2,
+  "assetsId": 1,
+  "maxViewGas": 100000000,
   "mainChainId": 2,
   "mainAssetId": 1,
   "language": "en",

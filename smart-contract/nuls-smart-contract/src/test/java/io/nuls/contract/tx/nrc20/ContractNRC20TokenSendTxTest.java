@@ -22,7 +22,7 @@
  * SOFTWARE.
  */
 
-package io.nuls.contract.tx;
+package io.nuls.contract.tx.nrc20;
 
 
 import io.nuls.api.provider.transaction.facade.TransferReq;
@@ -147,7 +147,7 @@ public class ContractNRC20TokenSendTxTest extends BaseQuery {
         String symbol = "KongQiBi";
         String amount = BigDecimal.TEN.pow(10).toPlainString();
         String decimals = "2";
-        Map params = this.makeCreateParams(toAddress0, contractCode, remark, name, symbol, amount, decimals);
+        Map params = this.makeCreateParams(sender, contractCode, remark, name, symbol, amount, decimals);
         Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, CREATE, params);
         Map result = (HashMap) (((HashMap) cmdResp2.getResponseData()).get(CREATE));
         Log.info("createContract-result:{}", JSONUtils.obj2PrettyJson(cmdResp2));
@@ -167,17 +167,6 @@ public class ContractNRC20TokenSendTxTest extends BaseQuery {
         return params;
     }
 
-    @Test
-    public void loopCallContract() throws Exception {
-        long s = System.currentTimeMillis();
-        int times = 500;
-        for(int i=0;i<times;i++) {
-            callContract();
-        }
-        long e = System.currentTimeMillis();
-        Log.info("{} times cost time is {}", times, e - s);
-    }
-
     /**
      * 调用合约
      */
@@ -193,7 +182,7 @@ public class ContractNRC20TokenSendTxTest extends BaseQuery {
         String methodDesc = "";
         String remark = "call contract test - 空气币转账";
         String token = BigInteger.valueOf(800L).toString();
-        Map params = this.makeCallParams(toAddress0, value, contractAddress_nrc20, methodName, methodDesc, remark, tokenReceiver, token);
+        Map params = this.makeCallParams(sender, value, contractAddress_nrc20, methodName, methodDesc, remark, tokenReceiver, token);
         Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, CALL, params);
         Map result = (HashMap) (((HashMap) cmdResp2.getResponseData()).get(CALL));
         if(result == null) {

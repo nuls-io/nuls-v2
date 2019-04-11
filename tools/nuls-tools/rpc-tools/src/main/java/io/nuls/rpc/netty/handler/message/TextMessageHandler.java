@@ -85,7 +85,7 @@ public class TextMessageHandler implements Runnable {
                     RequestMessageProcessor.unsubscribe(connectData, message);
                     break;
                 case Request:
-                    String messageId = message.getMessageId();
+                    String messageId = message.getMessageID();
                     /*
                     Request，根据是否需要定时推送放入不同队列，等待处理
                     Request, put in different queues according to the response mode. Wait for processing
@@ -127,7 +127,7 @@ public class TextMessageHandler implements Runnable {
                     break;
                 case NegotiateConnectionResponse:
                 case Ack:
-                    ResponseContainer resContainer = RequestContainer.getResponseContainer(((Map<String, String>) message.getMessageData()).get("requestId"));
+                    ResponseContainer resContainer = RequestContainer.getResponseContainer(((Map<String, String>) message.getMessageData()).get("RequestID"));
                     if (resContainer != null && resContainer.getFuture() != null) {
                         resContainer.getFuture().complete(new Response());
                     }
@@ -140,7 +140,7 @@ public class TextMessageHandler implements Runnable {
                     如果收到已请求超时的返回直接丢弃
                     Discard directly if you receive a return that has been requested for a timeout
                      */
-                    if (connectData.getTimeOutMessageList().contains(response.getRequestId())) {
+                    if (connectData.getTimeOutMessageList().contains(response.getRequestID())) {
                         break;
                     }
 
@@ -148,10 +148,10 @@ public class TextMessageHandler implements Runnable {
                     Response：还要判断是否需要自动处理
                     Response: Determines whether automatic processing is required
                      */
-                    if (ConnectManager.INVOKE_MAP.containsKey(response.getRequestId())) {
+                    if (ConnectManager.INVOKE_MAP.containsKey(response.getRequestID())) {
                         connectData.getResponseAutoQueue().offer(response);
                     } else {
-                        ResponseContainer responseContainer = RequestContainer.getResponseContainer(response.getRequestId());
+                        ResponseContainer responseContainer = RequestContainer.getResponseContainer(response.getRequestID());
                         if (responseContainer != null && responseContainer.getFuture() != null) {
                             responseContainer.getFuture().complete(response);
                         }

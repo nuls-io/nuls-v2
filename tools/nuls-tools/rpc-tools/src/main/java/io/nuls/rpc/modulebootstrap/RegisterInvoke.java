@@ -31,10 +31,15 @@ public class RegisterInvoke extends BaseInvoke {
     @Override
     public void callBack(Response response) {
         Map responseData = (Map) response.getResponseData();
-        Map methodMap = (Map) responseData.get("registerAPI");
-        Map dependMap = (Map) methodMap.get("Dependencies");
-        StringBuilder logInfo = new StringBuilder("\n有模块信息改变，重新同步：\n");
         if (response.isSuccess()) {
+            RpcModule rpcModule = SpringLiteContext.getBean(RpcModule.class);
+            if (rpcModule.getDependencies().length == 0) {
+                Log.info("RMB:module rpc is ready");
+                return;
+            }
+            Map methodMap = (Map) responseData.get("RegisterAPI");
+            Map dependMap = (Map) methodMap.get("Dependencies");
+            StringBuilder logInfo = new StringBuilder("\n有模块信息改变，重新同步：\n");
             for (Object object : dependMap.entrySet()) {
                 Map.Entry<String, Map> entry = (Map.Entry<String, Map>) object;
                 logInfo.append("注入：[key=").append(entry.getKey()).append(",value=").append(entry.getValue()).append("]\n");
@@ -46,7 +51,6 @@ public class RegisterInvoke extends BaseInvoke {
                 return;
             }
             Log.info("RMB:module rpc is ready");
-            RpcModule rpcModule = SpringLiteContext.getBean(RpcModule.class);
             dependMap.entrySet().forEach(obj -> {
                 Map.Entry<String, Map> entry = (Map.Entry<String, Map>) obj;
                 if (dependenices.stream().anyMatch(d -> d.getName().equals(entry.getKey()))) {
@@ -80,6 +84,7 @@ public class RegisterInvoke extends BaseInvoke {
 //                    }
                 }
             });
+
         }
 
     }

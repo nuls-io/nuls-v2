@@ -30,9 +30,6 @@ import io.nuls.tools.parse.I18nUtils;
 @Component
 public class AccountBootstrap extends RpcModule {
 
-    @Value("DataPath")
-    private String dataPath;
-
     @Autowired
     private AccountConfig accountConfig;
 
@@ -54,7 +51,9 @@ public class AccountBootstrap extends RpcModule {
      */
     @Override
     public Module[] getDependencies() {
-        return new Module[]{new Module(ModuleE.LG.abbr, "1.0"),
+        return new Module[]{
+                new Module(ModuleE.NW.abbr, ROLE),
+                new Module(ModuleE.LG.abbr, "1.0"),
                 new Module(ModuleE.TX.abbr, "1.0")};
     }
 

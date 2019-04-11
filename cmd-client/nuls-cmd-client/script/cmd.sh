@@ -1,15 +1,15 @@
-#!/bin/sh
-PRG="$0"
-
-while [ -h "$PRG" ]; do
-  ls=`ls -ld "$PRG"`
-  link=`expr "$ls" : '.*-> \(.*\)$'`
-  if expr "$link" : '.*/.*' > /dev/null; then
-    PRG="$link"
-  else
-    PRG=`dirname "$PRG"`/"$link"
-  fi
-done
+#!/bin/bash
+#PRG="$0"
+#
+#while [ -h "$PRG" ]; do
+#  ls=`ls -ld "$PRG"`
+#  link=`expr "$ls" : '.*-> \(.*\)$'`
+#  if expr "$link" : '.*/.*' > /dev/null; then
+#    PRG="$link"
+#  else
+#    PRG=`dirname "$PRG"`/"$link"
+#  fi
+#done
 
 #SOURCE="$0"
 #while [ -h "$SOURCE"  ]; do # resolve $SOURCE until the file is no longer a symlink
@@ -24,6 +24,11 @@ done
 #  mkdir ${logdir}
 #fi
 JAVA_HOME=$1
+logLevel=$2
+if [ -z "$logLevel" ]; then
+    logLevel="ERROR"
+fi
+NULSTAR_URL=$3
 SERVER_HOME="../../"
 LIBS=$SERVER_HOME/libs
 PUB_LIB=""
@@ -35,16 +40,13 @@ do
 done
 PUB_LIB="${PUB_LIB}:./cmdclient-1.0.0.jar"
 # Get standard environment variables
-logLevel=$2
-if [ -z "$logLevel" ]; then
-    logLevel="ERROR"
-fi
+
 JAVA_OPTS="-Xms128m -Xmx128m -Dapp.name=cmd-client --illegal-access=warn -Dlog.level=${logLevel} "
 
 CONF_PATH=$SERVER_HOME/conf
 CLASSPATH=$CLASSPATH:$CONF_PATH:$PUB_LIB:.
 if [ -x ${JAVA} ]; then
-  ${JAVA} $JAVA_OPTS -classpath $CLASSPATH $MAIN_CLASS
+  ${JAVA} $JAVA_OPTS -classpath $CLASSPATH $MAIN_CLASS $NULSTAR_URL
   exit 0
 fi
 

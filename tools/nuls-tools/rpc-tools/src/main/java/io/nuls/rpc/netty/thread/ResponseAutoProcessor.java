@@ -58,14 +58,14 @@ public class ResponseAutoProcessor implements Runnable {
                 Get the first item of the queue
                  */
                 Response response = connectData.getResponseAutoQueue().take();
-                if (response.getRequestId() == null) {
+                if (response.getRequestID() == null) {
                     continue;
                 }
                 /*
                 获取Response对象，这里得到的对象一定是需要自动调用本地方法
                 Get Response object, The object you get here must automatically call the local method
                  */
-                String messageId = response.getRequestId();
+                String messageId = response.getRequestID();
 
                 /*
                 自动调用本地方法

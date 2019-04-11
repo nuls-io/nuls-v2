@@ -46,17 +46,17 @@ import java.util.Map;
 public class KernelCmd4Test extends BaseCmd {
 
 
-    @CmdAnnotation(cmd = "registerAPI", version = 1.0, minEvent = 1,
+    @CmdAnnotation(cmd = "RegisterAPI", version = 1.0, minEvent = 1,
             description = "Register API")
     public Response registerAPI(Map<String, Object> map) {
         try {
             RegisterApi registerApi = JSONUtils.map2pojo(map, RegisterApi.class);
-//            Log.debug("注册的方法：" + JSONUtils.obj2json(registerApi));
+            Log.info("注册的方法：" + JSONUtils.obj2json(registerApi));
             if (registerApi != null) {
                 Map<String, Object> role = new HashMap<>(3);
                 role.put(Constants.KEY_IP, registerApi.getConnectionInformation().get(Constants.KEY_IP));
                 role.put(Constants.KEY_PORT, registerApi.getConnectionInformation().get(Constants.KEY_PORT));
-                ConnectManager.ROLE_MAP.put(registerApi.getModuleAbbreviation(), role);
+                ConnectManager.ROLE_MAP.put(registerApi.getAbbreviation(), role);
             }
             Map<String, Object> dependMap = new HashMap<>(1);
             dependMap.put("Dependencies", ConnectManager.ROLE_MAP);
