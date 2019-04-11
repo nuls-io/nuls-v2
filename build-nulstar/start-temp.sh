@@ -117,7 +117,13 @@ _dataPath=`getModuleItem ${config} "dataPath"`
 _logPath=`getModuleItem ${config} "logPath"`
 _logLevel=`getModuleItem ${config} "logLevel"`
 cd `dirname ${config}`
+if [ ! -d ${_dataPath} ]; then
+    mkdir ${_dataPath}
+fi
 datapath="-DdataPath=`get_fullpath ${_dataPath}`"
+if [ ! -d ${_logPath} ]; then
+    mkdir ${_logPath}
+fi
 logpath="-Dlog.path=`get_fullpath ${_logPath}`/$APP_NAME";
 logLevel="-Dlog.level=$_logLevel";
 cd $MODULE_PATH

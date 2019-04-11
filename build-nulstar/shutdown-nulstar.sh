@@ -24,7 +24,7 @@ stop(){
 
 APP_PID=`ps -ef|grep -w "Nulstar"|grep -v grep|awk '{print $2}'`
 if [ -z "${APP_PID}" ]; then
- echo "not running"
+ echo "Nuls wallet not running"
         exit 0
 fi
 echo "stoping"
@@ -32,7 +32,7 @@ for pid in $APP_PID
 do
    stop $pid
 done
-for module in ${module[@]}
+for module in ${modules[@]}
 do
     APP_PID=`ps -ef|grep -w ${module}|grep -v grep|awk '{print $2}'`
     if [ -z "${APP_PID}" ]; then
