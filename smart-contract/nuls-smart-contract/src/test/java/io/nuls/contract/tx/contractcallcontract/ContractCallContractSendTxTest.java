@@ -110,6 +110,7 @@ public class ContractCallContractSendTxTest extends BaseQuery {
      */
     @Test
     public void callContract_transferOut() throws Exception {
+        contractAddress = "tNULSeBaN155SwgcURmRwBMzmjKAH3PwK55tSe";
         BigInteger value = BigInteger.ZERO;
         if(StringUtils.isBlank(methodName)) {
             methodName = "multyForAddress";
@@ -118,9 +119,9 @@ public class ContractCallContractSendTxTest extends BaseQuery {
         String remark = "call contract test - 合约内部转账";
         String address1 = toAddress3;
         String address2 = toAddress4;
-        String value1 = BigInteger.valueOf(11888811).toString();
-        String value2 = BigInteger.valueOf(22888822).toString();
-        Map params = this.makeCallParams(sender, value, contractAddress0, methodName, methodDesc, remark,
+        String value1 = BigInteger.valueOf(1_0000_0000L).toString();
+        String value2 = BigInteger.valueOf(1_0000_0000L).toString();
+        Map params = this.makeCallParams(sender, value, contractAddress, methodName, methodDesc, remark,
                 address1, value1, address2, value2);
         Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, CALL, params);
         Map result = (HashMap) (((HashMap) cmdResp2.getResponseData()).get(CALL));
@@ -200,8 +201,9 @@ public class ContractCallContractSendTxTest extends BaseQuery {
      */
     @Test
     public void delete() throws Exception {
+        contractAddress = "tNULSeBaN155SwgcURmRwBMzmjKAH3PwK55tSe";
         String remark = "delete contract";
-        Map params = this.makeDeleteParams(sender, contractAddress0, remark);
+        Map params = this.makeDeleteParams(sender, contractAddress, remark);
         Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, DELETE, params);
         Map result = (HashMap) (((HashMap) cmdResp2.getResponseData()).get(DELETE));
         Assert.assertTrue(null != result);
