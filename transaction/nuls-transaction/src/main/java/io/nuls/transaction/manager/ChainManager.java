@@ -91,9 +91,6 @@ public class ChainManager {
             Initialize linked database tables
             */
             initTable(chain);
-            initCache(chain);
-            initTx(chain);
-            schedulerManager.createTransactionScheduler(chain);
             chainMap.put(chainId, chain);
         }
     }
@@ -107,7 +104,7 @@ public class ChainManager {
         for (Chain chain: chainMap.values()) {
             initCache(chain);
             //TODO 跨链交易不再此注册了
-            initTx(chain);
+//            initTx(chain);
             schedulerManager.createTransactionScheduler(chain);
             chainMap.put(chain.getChainId(), chain);
         }
