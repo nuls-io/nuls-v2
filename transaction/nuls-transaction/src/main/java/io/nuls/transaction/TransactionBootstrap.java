@@ -62,7 +62,10 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 public class TransactionBootstrap extends RpcModule {
 
     @Autowired
-    TxConfig txConfig;
+    private TxConfig txConfig;
+
+    @Autowired
+    private ChainManager chainManager;
 
     public static void main(String[] args) {
         if (args == null || args.length == 0) {
@@ -78,6 +81,7 @@ public class TransactionBootstrap extends RpcModule {
             initSys();
             //初始化数据库配置文件
             initDB();
+            chainManager.initChain();
         } catch (Exception e) {
             Log.error("Transaction init error!");
             Log.error(e);
@@ -89,7 +93,7 @@ public class TransactionBootstrap extends RpcModule {
         //初始化国际资源文件语言
         try {
             initLanguage();
-            SpringLiteContext.getBean(ChainManager.class).runChain();
+            chainManager.runChain();
             Log.info("Transaction Ready...");
             return true;
         } catch (Exception e) {

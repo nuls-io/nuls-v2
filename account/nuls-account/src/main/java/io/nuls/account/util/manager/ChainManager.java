@@ -25,12 +25,11 @@
 package io.nuls.account.util.manager;
 
 import io.nuls.account.config.AccountConfig;
-import io.nuls.account.config.NulsConfig;
 import io.nuls.account.constant.AccountErrorCode;
 import io.nuls.account.constant.AccountStorageConstant;
 import io.nuls.account.model.bo.Chain;
 import io.nuls.account.model.bo.config.ConfigBean;
-import io.nuls.account.model.bo.config.ConfigItem;
+import io.nuls.account.rpc.call.TransactionCmdCall;
 import io.nuls.account.storage.ConfigService;
 import io.nuls.account.util.LoggerUtil;
 import io.nuls.db.constant.DBErrorCode;
@@ -38,10 +37,7 @@ import io.nuls.db.service.RocksDBService;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.exception.NulsRuntimeException;
-import io.nuls.tools.io.IoUtils;
-import io.nuls.tools.parse.JSONUtils;
 
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -63,17 +59,17 @@ public class ChainManager {
 
     private Map<Integer, Chain> chainMap = new ConcurrentHashMap<>();
 
+
     /**
-     * 初始化并启动链
+     * 初始化链
      * Initialize and start the chain
      */
-    public void runChain() {
+    public void initChain() {
         Map<Integer, ConfigBean> configMap = configChain();
         if (configMap == null || configMap.size() == 0) {
             return;
         }
-        /*
-        根据配置信息创建初始化链
+       /* 根据配置信息创建初始化链
         Initialize chains based on configuration information
         */
         for (Map.Entry<Integer, ConfigBean> entry : configMap.entrySet()) {
@@ -87,6 +83,15 @@ public class ChainManager {
             initTable(chainId);
             chainMap.put(chainId, chain);
         }
+    }
+
+
+    /**
+     * 加载链的数据
+     * Initialize and start the chain
+     */
+    public void runChain() {
+
     }
 
     /**
@@ -117,18 +122,11 @@ public class ChainManager {
             and the main chain configuration information needs to be read from the configuration file at this time.
             */
             if (configMap == null || configMap.size() == 0) {
-//                String configJson = IoUtils.read(NulsConfig.CONFIG_FILE_PATH);
-//                List<ConfigItem> configItemList = JSONUtils.json2list(configJson, ConfigItem.class);
-//                ConfigBean configBean = ConfigManager.initManager(configItemList);
                 ConfigBean configBean = accountConfig.getChainConfig();
                 if (configBean == null) {
                     return null;
                 }
                 configMap.put(configBean.getChainId(), configBean);
-//                //设置当前链ID
-//                NulsConfig.CURRENT_CHAIN_ID = configBean.getChainId();
-//                //设置当前链主资产ID
-//                NulsConfig.CURRENT_MAIN_ASSETS_ID = configBean.getAssetsId();
             }
             return configMap;
         } catch (Exception e) {
@@ -162,6 +160,26 @@ public class ChainManager {
             } else {
                 LoggerUtil.logger.info(e.getMessage());
             }
+        }
+    }
+
+    /**
+     * 注册交易
+     */
+    public void registerTx() {
+        try {
+            for (Chain chain : chainMap.values()) {
+                //注册账户相关交易
+                while (true) {
+                    if (TransactionCmdCall.registerTx(chain.getConfig().getChainId())) {
+                        break;
+                    }
+                    Thread.sleep(3000L);
+                }
+            }
+        } catch (Exception e) {
+            LoggerUtil.logger.error("Transaction registerTx error!");
+            throw new RuntimeException(e);
         }
     }
 
