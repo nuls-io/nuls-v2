@@ -14,6 +14,7 @@ import io.nuls.rpc.modulebootstrap.Module;
 import io.nuls.rpc.modulebootstrap.NulsRpcModuleBootstrap;
 import io.nuls.rpc.modulebootstrap.RpcModule;
 import io.nuls.rpc.modulebootstrap.RpcModuleState;
+import io.nuls.rpc.util.TimeUtils;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.core.ioc.SpringLiteContext;
@@ -191,5 +192,6 @@ public class BlockBootstrap extends RpcModule {
         if (ModuleE.NW.abbr.equals(module.getName())) {
             NetworkUtil.register();
         }
+        TimeUtils.getInstance().start();
     }
 }
