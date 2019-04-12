@@ -93,6 +93,10 @@ public class DepositServiceImpl implements DepositService {
             String priKey = (String) callResult.get("priKey");
             CallMethodUtils.transactionSignature(dto.getChainId(), dto.getAddress(), dto.getPassword(), priKey, tx);
             String txStr = RPCUtil.encode(tx.serialize());
+            boolean validResult = validatorManager.validateTx(chain, tx);
+            if (!validResult) {
+                return Result.getFailed(ConsensusErrorCode.TX_DATA_VALIDATION_ERROR);
+            }
             /*boolean validResult = CallMethodUtils.transactionBasicValid(chain,txStr);
             if (!validResult) {
                 return Result.getFailed(ConsensusErrorCode.TX_DATA_VALIDATION_ERROR);
@@ -206,6 +210,10 @@ public class DepositServiceImpl implements DepositService {
             String priKey = (String) callResult.get("priKey");
             CallMethodUtils.transactionSignature(dto.getChainId(), dto.getAddress(), dto.getPassword(), priKey, cancelDepositTransaction);
             String txStr = RPCUtil.encode(cancelDepositTransaction.serialize());
+            boolean validResult = validatorManager.validateTx(chain, cancelDepositTransaction);
+            if (!validResult) {
+                return Result.getFailed(ConsensusErrorCode.TX_DATA_VALIDATION_ERROR);
+            }
            /* boolean validResult = CallMethodUtils.transactionBasicValid(chain,txStr);
             if (!validResult) {
                 return Result.getFailed(ConsensusErrorCode.TX_DATA_VALIDATION_ERROR);
