@@ -13,6 +13,7 @@ import io.nuls.poc.model.bo.tx.txdata.Deposit;
 import io.nuls.poc.model.po.PunishLogPo;
 import io.nuls.poc.rpc.call.CallMethodUtils;
 import io.nuls.poc.utils.enumeration.PunishType;
+import io.nuls.rpc.util.TimeUtils;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.log.Log;
@@ -211,7 +212,7 @@ public class RoundManager {
                 If the local latest round is empty or the local latest round is packaged less than the current time,
                 the next round of information needs to be calculated.
                 */
-                if (round == null || round.getEndTime() < CallMethodUtils.currentTime()) {
+                if (round == null || round.getEndTime() < TimeUtils.getCurrentTimeMillis()) {
                     MeetingRound nextRound = getRound(chain,null, true);
                     nextRound.setPreRound(round);
                     addRound(chain,nextRound);
@@ -290,12 +291,12 @@ public class RoundManager {
             本地最新区块所在轮次已经打包结束，则轮次下标需要加1,则需找到本地最新区块轮次中出的第一个块来计算下一轮的轮次信息
             If the latest block in this area has been packaged, the subscription of the round will need to be added 1.
             */
-            if (bestRoundData.getConsensusMemberCount() == bestRoundData.getPackingIndexOfRound() || CallMethodUtils.currentTime() >= bestRoundEndTime) {
+            if (bestRoundData.getConsensusMemberCount() == bestRoundData.getPackingIndexOfRound() || TimeUtils.getCurrentTimeMillis() >= bestRoundEndTime) {
                 roundIndex += 1;
             }
             startBlockHeader = getFirstBlockOfPreRound(chain,roundIndex);
         }
-        long nowTime = CallMethodUtils.currentTime();
+        long nowTime = TimeUtils.getCurrentTimeMillis();
         long index;
         long startTime;
         long packingInterval = chain.getConfig().getPackingInterval();
