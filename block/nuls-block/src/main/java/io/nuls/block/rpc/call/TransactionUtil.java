@@ -393,4 +393,32 @@ public class TransactionUtil {
             return false;
         }
     }
+
+    /**
+     * 批量保存交易
+     *
+     * @param chainId       链Id/chain id
+     * @param height
+     * @return
+     */
+    public static boolean heightNotice(int chainId, long height) {
+        NulsLogger commonLog = ContextManager.getContext(chainId).getCommonLog();
+        try {
+            Map<String, Object> params = new HashMap<>(2);
+//            params.put(Constants.VERSION_KEY_STR, "1.0");
+            params.put("chainId", chainId);
+            params.put("height", height);
+            Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.TX.abbr, "tx_blockHeight", params);
+            if (response.isSuccess()) {
+                Map responseData = (Map) response.getResponseData();
+                Map data = (Map) responseData.get("tx_blockHeight");
+                return (Boolean) data.get("value");
+            }
+            return false;
+        } catch (Exception e) {
+            e.printStackTrace();
+            commonLog.error(e);
+            return false;
+        }
+    }
 }
