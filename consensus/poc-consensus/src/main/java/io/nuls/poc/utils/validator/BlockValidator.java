@@ -18,6 +18,7 @@ import io.nuls.poc.utils.manager.CoinDataManager;
 import io.nuls.poc.utils.manager.ConsensusManager;
 import io.nuls.poc.utils.manager.PunishManager;
 import io.nuls.poc.utils.manager.RoundManager;
+import io.nuls.rpc.util.TimeUtils;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.exception.NulsException;
@@ -127,11 +128,11 @@ public class BlockValidator {
             chain.getLoggerMap().get(ConsensusConstant.BASIC_LOGGER_NAME).error("block height " + blockHeader.getHeight() + " round index and start time not match! hash :" + blockHeader.getHash());
             throw new NulsException(ConsensusErrorCode.BLOCK_ROUND_VALIDATE_ERROR);
          }
-         if(extendsData.getRoundStartTime() > CallMethodUtils.currentTime() + chain.getConfig().getPackingInterval()){
+         if(extendsData.getRoundStartTime() > TimeUtils.getCurrentTimeMillis() + chain.getConfig().getPackingInterval()){
             chain.getLoggerMap().get(ConsensusConstant.BASIC_LOGGER_NAME).error("block height " + blockHeader.getHeight() + " round startTime is error, greater than current time! hash :" + blockHeader.getHash());
             throw new NulsException(ConsensusErrorCode.BLOCK_ROUND_VALIDATE_ERROR);
          }
-         if(extendsData.getRoundStartTime() + (extendsData.getPackingIndexOfRound() - 1) * chain.getConfig().getPackingInterval() > CallMethodUtils.currentTime() + chain.getConfig().getPackingInterval()){
+         if(extendsData.getRoundStartTime() + (extendsData.getPackingIndexOfRound() - 1) * chain.getConfig().getPackingInterval() > TimeUtils.getCurrentTimeMillis() + chain.getConfig().getPackingInterval()){
             chain.getLoggerMap().get(ConsensusConstant.BASIC_LOGGER_NAME).error("block height " + blockHeader.getHeight() + " is the block of the future and received in advance! hash :" + blockHeader.getHash());
             throw new NulsException(ConsensusErrorCode.BLOCK_ROUND_VALIDATE_ERROR);
          }
