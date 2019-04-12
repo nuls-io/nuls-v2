@@ -22,6 +22,7 @@ import io.nuls.poc.utils.compare.PunishLogComparator;
 import io.nuls.poc.utils.enumeration.PunishReasonEnum;
 import io.nuls.poc.utils.enumeration.PunishType;
 import io.nuls.tools.basic.VarInt;
+import io.nuls.tools.constant.TxType;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.crypto.HexUtil;
@@ -178,7 +179,7 @@ public class PunishManager {
             组装双花红牌交易
             Assembled Double Flower Red Card Trading
             */
-            Transaction redPunishTransaction = new Transaction(ConsensusConstant.TX_TYPE_RED_PUNISH);
+            Transaction redPunishTransaction = new Transaction(TxType.RED_PUNISH);
             RedPunishData redPunishData = new RedPunishData();
             redPunishData.setAddress(agent.getAgentAddress());
             SmallBlock smallBlock = new SmallBlock();
@@ -274,7 +275,7 @@ public class PunishManager {
      * @param agent
      * */
     private void createRedPunishTransaction(Chain chain, Agent agent)throws NulsException{
-        Transaction redPunishTransaction = new Transaction(ConsensusConstant.TX_TYPE_RED_PUNISH);
+        Transaction redPunishTransaction = new Transaction(TxType.RED_PUNISH);
         RedPunishData redPunishData = new RedPunishData();
         redPunishData.setAddress(agent.getAgentAddress());
         long txTime = 0;
@@ -357,7 +358,7 @@ public class PunishManager {
                 if (member.getAgent().getDelHeight() > 0L) {
                     continue;
                 }
-                Transaction redPunishTransaction = new Transaction(ConsensusConstant.TX_TYPE_RED_PUNISH);
+                Transaction redPunishTransaction = new Transaction(TxType.RED_PUNISH);
                 RedPunishData redPunishData = new RedPunishData();
                 redPunishData.setAddress(address);
                 redPunishData.setReasonCode(PunishReasonEnum.TOO_MUCH_YELLOW_PUNISH.getCode());
@@ -470,7 +471,7 @@ public class PunishManager {
         if (addressList.isEmpty()) {
             return null;
         }
-        Transaction punishTx = new Transaction(ConsensusConstant.TX_TYPE_YELLOW_PUNISH);
+        Transaction punishTx = new Transaction(TxType.YELLOW_PUNISH);
         YellowPunishData data = new YellowPunishData();
         data.setAddressList(addressList);
         punishTx.setTxData(data.serialize());
@@ -503,7 +504,7 @@ public class PunishManager {
         while (iterator.hasNext()) {
             tx = iterator.next();
             switch (tx.getType()){
-                case ConsensusConstant.TX_TYPE_REGISTER_AGENT:
+                case TxType.REGISTER_AGENT:
                     Agent agent = new Agent();
                     agent.parse(tx.getTxData(),0);
                     if(redPunishAddressSet.contains(HexUtil.encode(agent.getPackingAddress())) || redPunishAddressSet.contains(HexUtil.encode(agent.getAgentAddress()))){
@@ -511,14 +512,14 @@ public class PunishManager {
                         iterator.remove();
                     }
                     break;
-                case ConsensusConstant.TX_TYPE_STOP_AGENT:
+                case TxType.STOP_AGENT:
                     StopAgent stopAgent = new StopAgent();
                     stopAgent.parse(tx.getTxData(),0);
                     if(invalidAgentTxHash.contains(stopAgent.getCreateTxHash())){
                         iterator.remove();
                     }
                     break;
-                case ConsensusConstant.TX_TYPE_JOIN_CONSENSUS:
+                case TxType.DEPOSIT:
                     Deposit deposit = new Deposit();
                     deposit.parse(tx.getTxData(),0);
                     if(invalidAgentTxHash.contains(deposit.getAgentHash())){
@@ -526,7 +527,7 @@ public class PunishManager {
                         iterator.remove();
                     }
                     break;
-                case ConsensusConstant.TX_TYPE_CANCEL_DEPOSIT:
+                case TxType.CANCEL_DEPOSIT:
                     CancelDeposit cancelDeposit = new CancelDeposit();
                     cancelDeposit.parse(tx.getTxData(),0);
                     if(invalidDepositTxHash.contains(cancelDeposit.getJoinTxHash())){

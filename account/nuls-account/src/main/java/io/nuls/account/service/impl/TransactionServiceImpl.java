@@ -53,6 +53,7 @@ import io.nuls.base.signture.SignatureUtil;
 import io.nuls.base.signture.TransactionSignature;
 import io.nuls.rpc.util.RPCUtil;
 import io.nuls.rpc.util.TimeUtils;
+import io.nuls.tools.constant.TxType;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Service;
 import io.nuls.tools.crypto.ECKey;
@@ -93,7 +94,7 @@ public class TransactionServiceImpl implements TransactionService {
         Map<String, Transaction> accountAddressMap = new HashMap<>();
         try {
             for (Transaction transaction : txList) {
-                if (transaction.getType() == AccountConstant.TX_TYPE_ACCOUNT_ALIAS) {
+                if (transaction.getType() == TxType.ACCOUNT_ALIAS) {
                     try {
                         if(!aliasService.aliasTxValidate(chainId, transaction)){
                             result.add(transaction);
@@ -127,7 +128,7 @@ public class TransactionServiceImpl implements TransactionService {
                         accountAddressMap.put(address, transaction);
                     }
                 }
-                if (transaction.getType() == AccountConstant.TX_TYPE_TRANSFER) {
+                if (transaction.getType() == TxType.TRANSFER) {
                     try {
                         if(!txValidator.validateTx(chainId, transaction)){
                             result.add(transaction);
@@ -166,7 +167,7 @@ public class TransactionServiceImpl implements TransactionService {
     public MultiSignTransactionResultDto createMultiSignTransfer(int chainId, int assetsId, Account account, String password, MultiSigAccount multiSigAccount, String toAddress, BigInteger amount, String remark)
             throws NulsException, IOException {
         //create transaction
-        Transaction transaction = new Transaction(AccountConstant.TX_TYPE_TRANSFER);
+        Transaction transaction = new Transaction(TxType.TRANSFER);
         transaction.setTime(TimeUtils.getCurrentTimeMillis());
         transaction.setRemark(StringUtils.bytes(remark));
         //build coin data
@@ -315,7 +316,7 @@ public class TransactionServiceImpl implements TransactionService {
     }
 
     private Transaction assemblyTransaction(int chainId, List<CoinDto> fromList, List<CoinDto> toList, String remark) throws NulsException{
-        Transaction tx = new Transaction(AccountConstant.TX_TYPE_TRANSFER);
+        Transaction tx = new Transaction(TxType.TRANSFER);
         tx.setTime(TimeUtils.getCurrentTimeMillis());
         tx.setRemark(StringUtils.bytes(remark));
         try {
