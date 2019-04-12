@@ -126,7 +126,7 @@ public class ConsensusProcess {
             } catch (Exception e) {
                 consensusLogger.error(e);
             }
-            while (member.getPackEndTime() > CallMethodUtils.currentTime()) {
+            while (member.getPackEndTime() > TimeUtils.getCurrentTimeMillis()) {
                 try {
                     Thread.sleep(500L);
                 } catch (InterruptedException e) {
@@ -157,7 +157,7 @@ public class ConsensusProcess {
             return;
         }
         try {
-            CallMethodUtils.receivePackingBlock(chain.getConfig().getChainId(), RPCUtil.encode(block.serialize()),self.getPackEndTime() - CallMethodUtils.currentTime());
+            CallMethodUtils.receivePackingBlock(chain.getConfig().getChainId(), RPCUtil.encode(block.serialize()),self.getPackEndTime() - TimeUtils.getCurrentTimeMillis());
         }catch (Exception e){
             consensusLogger.error(e);
         }
@@ -172,7 +172,7 @@ public class ConsensusProcess {
         long timeout = chain.getConfig().getPackingInterval()/5;
         long endTime = self.getPackStartTime() + timeout;
         boolean hasReceiveNewestBlock;
-        if(CallMethodUtils.currentTime() >= endTime+20){
+        if(TimeUtils.getCurrentTimeMillis() >= endTime+20){
             return;
         }
         try {
@@ -186,7 +186,7 @@ public class ConsensusProcess {
                     break;
                 }
                 Thread.sleep(100L);
-                if (CallMethodUtils.currentTime() >= endTime) {
+                if (TimeUtils.getCurrentTimeMillis() >= endTime) {
                     break;
                 }
             }
