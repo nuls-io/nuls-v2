@@ -67,7 +67,7 @@ public interface TransactionService {
      * @return transfer transaction hash
      * @throws NulsException
      */
-    String transfer(int currentChainId, List<CoinDto> fromList, List<CoinDto> toList, String remark) throws NulsException;
+    Transaction transfer(int currentChainId, List<CoinDto> fromList, List<CoinDto> toList, String remark) throws NulsException;
 
     /**
      * 别名转账

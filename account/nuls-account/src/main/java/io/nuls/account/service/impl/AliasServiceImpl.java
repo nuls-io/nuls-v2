@@ -27,6 +27,7 @@ package io.nuls.account.service.impl;
 
 import io.nuls.account.constant.AccountConstant;
 import io.nuls.account.constant.AccountErrorCode;
+import io.nuls.account.model.NonceBalance;
 import io.nuls.account.model.bo.Account;
 import io.nuls.account.model.bo.Chain;
 import io.nuls.account.model.bo.tx.AliasTransaction;
@@ -315,7 +316,8 @@ public class AliasServiceImpl implements AliasService, InitializingBean {
         Chain chain = chainManager.getChainMap().get(account.getChainId());
         int assetsId = chain.getConfig().getAssetsId();
         //查询账本获取nonce值
-        byte[] nonce = TxUtil.getNonce(account.getChainId(), account.getChainId(), assetsId, account.getAddress().getAddressBytes());
+        NonceBalance nonceBalance = TxUtil.getBalanceNonce(account.getChainId(), account.getChainId(), assetsId, account.getAddress().getAddressBytes());
+        byte[] nonce = nonceBalance.getNonce();
         CoinFrom coinFrom = new CoinFrom(account.getAddress().getAddressBytes(), account.getChainId(), assetsId, AccountConstant.ALIAS_FEE, nonce, AccountConstant.NORMAL_TX_LOCKED);
         coinFrom.setAddress(account.getAddress().getAddressBytes());
         CoinTo coinTo = new CoinTo(AccountConstant.BLACK_HOLE_ADDRESS, account.getChainId(), assetsId, AccountConstant.ALIAS_FEE);
@@ -326,7 +328,7 @@ public class AliasServiceImpl implements AliasService, InitializingBean {
         BigInteger totalAmount = AccountConstant.ALIAS_FEE.add(fee);
         coinFrom.setAmount(totalAmount);
         //检查余额是否充足
-        BigInteger mainAsset = TxUtil.getBalance(account.getChainId(), account.getChainId(), assetsId, coinFrom.getAddress());
+        BigInteger mainAsset = nonceBalance.getAvailable();
         //余额不足
         if (BigIntegerUtils.isLessThan(mainAsset, totalAmount)) {
             throw new NulsRuntimeException(AccountErrorCode.INSUFFICIENT_FEE);
