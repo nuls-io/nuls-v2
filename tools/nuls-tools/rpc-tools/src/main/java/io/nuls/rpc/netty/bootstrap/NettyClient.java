@@ -30,11 +30,18 @@ import java.util.concurrent.TimeUnit;
  * 2019/2/21
  */
 public class NettyClient {
+
+
+
     /**
      * 连接服务器，返回连接通道
      * Connect to the server and return to the connection channel
      */
     public static Channel createConnect(String uri) {
+        return createConnect(uri,0);
+    }
+
+    public static Channel createConnect(String uri,int tryCount) {
         try {
             URI webSocketURI = null;
             try {
@@ -67,8 +74,19 @@ public class NettyClient {
             Log.info("创建ws连接:{}",ch.isOpen());
             return ch;
         } catch (Exception e) {
-            e.printStackTrace();
-            return null;
+            if(tryCount < 6){
+                try {
+                    TimeUnit.SECONDS.sleep(5);
+                } catch (InterruptedException e1) {
+                    Log.error("重试ws连接时，休眠进程发生异常");
+                }
+                Log.info("创建ws失败，第{}重试",tryCount + 1);
+                return createConnect(uri,tryCount + 1);
+            }else{
+                Log.error("创建ws连接失败：{}",uri,e);
+                return null;
+            }
+
         }
     }
 }
