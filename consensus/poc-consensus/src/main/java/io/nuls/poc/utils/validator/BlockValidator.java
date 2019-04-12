@@ -18,6 +18,8 @@ import io.nuls.poc.utils.manager.CoinDataManager;
 import io.nuls.poc.utils.manager.ConsensusManager;
 import io.nuls.poc.utils.manager.PunishManager;
 import io.nuls.poc.utils.manager.RoundManager;
+import io.nuls.rpc.util.TimeUtils;
+import io.nuls.tools.constant.TxType;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.exception.NulsException;
@@ -127,11 +129,11 @@ public class BlockValidator {
             chain.getLoggerMap().get(ConsensusConstant.BASIC_LOGGER_NAME).error("block height " + blockHeader.getHeight() + " round index and start time not match! hash :" + blockHeader.getHash());
             throw new NulsException(ConsensusErrorCode.BLOCK_ROUND_VALIDATE_ERROR);
          }
-         if(extendsData.getRoundStartTime() > CallMethodUtils.currentTime() + chain.getConfig().getPackingInterval()){
+         if(extendsData.getRoundStartTime() > TimeUtils.getCurrentTimeMillis() + chain.getConfig().getPackingInterval()){
             chain.getLoggerMap().get(ConsensusConstant.BASIC_LOGGER_NAME).error("block height " + blockHeader.getHeight() + " round startTime is error, greater than current time! hash :" + blockHeader.getHash());
             throw new NulsException(ConsensusErrorCode.BLOCK_ROUND_VALIDATE_ERROR);
          }
-         if(extendsData.getRoundStartTime() + (extendsData.getPackingIndexOfRound() - 1) * chain.getConfig().getPackingInterval() > CallMethodUtils.currentTime() + chain.getConfig().getPackingInterval()){
+         if(extendsData.getRoundStartTime() + (extendsData.getPackingIndexOfRound() - 1) * chain.getConfig().getPackingInterval() > TimeUtils.getCurrentTimeMillis() + chain.getConfig().getPackingInterval()){
             chain.getLoggerMap().get(ConsensusConstant.BASIC_LOGGER_NAME).error("block height " + blockHeader.getHeight() + " is the block of the future and received in advance! hash :" + blockHeader.getHash());
             throw new NulsException(ConsensusErrorCode.BLOCK_ROUND_VALIDATE_ERROR);
          }
@@ -188,18 +190,18 @@ public class BlockValidator {
       */
       for(int index = 1;index < txs.size(); index++){
          tx = txs.get(index);
-         if(tx.getType() == ConsensusConstant.TX_TYPE_COINBASE){
+          if (tx.getType() == TxType.COIN_BASE) {
             chain.getLoggerMap().get(ConsensusConstant.BASIC_LOGGER_NAME).debug("Coinbase transaction more than one! height: " + block.getHeader().getHeight() + " , hash : " + block.getHeader().getHash());
             return false;
          }
-         if(tx.getType() == ConsensusConstant.TX_TYPE_YELLOW_PUNISH){
+          if (tx.getType() == TxType.YELLOW_PUNISH) {
             if(yellowPunishTx == null){
                yellowPunishTx = tx;
             }else{
                chain.getLoggerMap().get(ConsensusConstant.BASIC_LOGGER_NAME).debug("Yellow punish transaction more than one! height: " + block.getHeader().getHeight() + " , hash : " + block.getHeader().getHash());
                return false;
             }
-         }else if(tx.getType() == ConsensusConstant.TX_TYPE_RED_PUNISH){
+          } else if (tx.getType() == TxType.RED_PUNISH) {
             redPunishTxList.add(tx);
          }
       }
@@ -353,7 +355,7 @@ public class BlockValidator {
     * */
    private boolean coinBaseValidate(Block block, MeetingRound currentRound, MeetingMember member,Chain chain)throws NulsException, IOException {
       Transaction tx = block.getTxs().get(0);
-      if (tx.getType() != ConsensusConstant.TX_TYPE_COINBASE) {
+       if (tx.getType() != TxType.COIN_BASE) {
          chain.getLoggerMap().get(ConsensusConstant.BASIC_LOGGER_NAME).debug("CoinBase transaction order wrong! height: " + block.getHeader().getHeight() + " , hash : " + block.getHeader().getHash());
          return false;
       }

@@ -7,18 +7,19 @@ import io.nuls.poc.constant.ConsensusConfig;
 import io.nuls.poc.constant.ConsensusConstant;
 import io.nuls.poc.model.bo.Chain;
 import io.nuls.poc.model.bo.config.ConfigBean;
-import io.nuls.poc.model.bo.tx.TxRegisterDetail;
-import io.nuls.poc.storage.ConfigService;
 import io.nuls.poc.rpc.call.CallMethodUtils;
-import io.nuls.poc.utils.annotation.ResisterTx;
-import io.nuls.poc.utils.enumeration.TxMethodType;
-import io.nuls.poc.utils.enumeration.TxProperty;
+import io.nuls.poc.storage.ConfigService;
+import io.nuls.tools.constant.TxType;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.core.ioc.ScanUtil;
 import io.nuls.tools.log.Log;
 import io.nuls.tools.log.logback.LoggerBuilder;
 import io.nuls.tools.log.logback.NulsLogger;
+import io.nuls.tools.protocol.ResisterTx;
+import io.nuls.tools.protocol.TxMethodType;
+import io.nuls.tools.protocol.TxProperty;
+import io.nuls.tools.protocol.TxRegisterDetail;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
@@ -342,9 +343,9 @@ public class ChainManager {
                 }
             }
         }
-        registerDetailMap.put(ConsensusConstant.TX_TYPE_COINBASE, new TxRegisterDetail(TxProperty.COIN_BASE));
-        registerDetailMap.put(ConsensusConstant.TX_TYPE_RED_PUNISH, new TxRegisterDetail(TxProperty.RED_PUNISH));
-        registerDetailMap.put(ConsensusConstant.TX_TYPE_YELLOW_PUNISH, new TxRegisterDetail(TxProperty.YELLOW_PUNISH));
+        registerDetailMap.put(TxType.COIN_BASE, new TxRegisterDetail(TxProperty.COIN_BASE));
+        registerDetailMap.put(TxType.RED_PUNISH, new TxRegisterDetail(TxProperty.RED_PUNISH));
+        registerDetailMap.put(TxType.YELLOW_PUNISH, new TxRegisterDetail(TxProperty.YELLOW_PUNISH));
         return new ArrayList<>(registerDetailMap.values());
     }
 

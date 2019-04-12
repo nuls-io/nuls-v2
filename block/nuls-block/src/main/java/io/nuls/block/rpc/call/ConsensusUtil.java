@@ -192,7 +192,7 @@ public class ConsensusUtil {
     }
 
     /**
-     * 通知共识模块进入工作状态或者进入等待状态
+     * 回滚区块之前，先把共识模块的缓存区块头更新了
      *
      * @param chainId 链Id/chain id
      * @param rollBackAmount  回滚区块数量
@@ -211,8 +211,9 @@ public class ConsensusUtil {
             int count = 0;
             while (count < 110) {
                 latestHeight--;
-                if ((latestHeight < 0)) {
-                    break;
+                if ((latestHeight <= 0)) {
+                    //110轮已经回退到创世块了，不需要再给共识模块新区块
+                    return true;
                 }
                 BlockHeaderPo blockHeader = service.getBlockHeaderPo(chainId, latestHeight);
                 BlockExtendsData newData = new BlockExtendsData(blockHeader.getExtend());
@@ -222,8 +223,8 @@ public class ConsensusUtil {
                     roundIndex = newRoundIndex;
                 }
             }
-            long height = latestBlock.getHeader().getHeight();
-            List<BlockHeader> blockHeaders = service.getBlockHeader(chainId, height - rollBackAmount - 1, height - 1);
+            long start = latestHeight <= rollBackAmount ? 0 : latestHeight - rollBackAmount;
+            List<BlockHeader> blockHeaders = service.getBlockHeader(chainId, start, latestHeight);
             if (blockHeaders == null) {
                 return true;
             }

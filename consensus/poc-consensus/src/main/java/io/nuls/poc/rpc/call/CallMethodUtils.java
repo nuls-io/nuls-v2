@@ -3,7 +3,6 @@ package io.nuls.poc.rpc.call;
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.BlockExtendsData;
 import io.nuls.base.data.BlockHeader;
-import io.nuls.base.data.NulsDigestData;
 import io.nuls.base.data.Transaction;
 import io.nuls.base.signture.BlockSignature;
 import io.nuls.base.signture.P2PHKSignature;
@@ -12,7 +11,6 @@ import io.nuls.base.signture.TransactionSignature;
 import io.nuls.poc.constant.ConsensusConstant;
 import io.nuls.poc.constant.ConsensusErrorCode;
 import io.nuls.poc.model.bo.Chain;
-import io.nuls.poc.model.bo.tx.TxRegisterDetail;
 import io.nuls.poc.utils.compare.BlockHeaderComparator;
 import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.model.ModuleE;
@@ -20,12 +18,10 @@ import io.nuls.rpc.model.message.Response;
 import io.nuls.rpc.netty.processor.ResponseMessageProcessor;
 import io.nuls.rpc.util.RPCUtil;
 import io.nuls.rpc.util.TimeUtils;
-import io.nuls.tools.constant.ErrorCode;
-import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.log.Log;
-import io.nuls.tools.log.logback.NulsLogger;
 import io.nuls.tools.model.StringUtils;
+import io.nuls.tools.protocol.TxRegisterDetail;
 
 import java.util.*;
 
@@ -367,7 +363,7 @@ public class CallMethodUtils {
             Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.TX.abbr, "tx_newTx", params);
             if (!cmdResp.isSuccess()) {
                 chain.getLoggerMap().get(ConsensusConstant.CONSENSUS_LOGGER_NAME).error("Transaction failed to send!");
-                rollBackUnconfirmTx(chain,tx);
+                //rollBackUnconfirmTx(chain,tx);
                 throw new NulsException(ConsensusErrorCode.FAILED);
             }
         }catch (NulsException e){

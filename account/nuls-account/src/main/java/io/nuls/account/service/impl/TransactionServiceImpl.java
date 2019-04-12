@@ -29,12 +29,10 @@ import io.nuls.account.constant.AccountConstant;
 import io.nuls.account.constant.AccountErrorCode;
 import io.nuls.account.model.bo.Account;
 import io.nuls.account.model.bo.Chain;
-import io.nuls.account.model.bo.VerifyTxResult;
 import io.nuls.account.model.bo.tx.AliasTransaction;
 import io.nuls.account.model.bo.tx.txdata.Alias;
 import io.nuls.account.model.dto.CoinDto;
 import io.nuls.account.model.dto.MultiSignTransactionResultDto;
-import io.nuls.account.rpc.call.LedgerCmdCall;
 import io.nuls.account.rpc.call.TransactionCmdCall;
 import io.nuls.account.service.AccountService;
 import io.nuls.account.service.AliasService;
@@ -54,6 +52,7 @@ import io.nuls.base.signture.SignatureUtil;
 import io.nuls.base.signture.TransactionSignature;
 import io.nuls.rpc.util.RPCUtil;
 import io.nuls.rpc.util.TimeUtils;
+import io.nuls.tools.constant.TxType;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Service;
 import io.nuls.tools.crypto.ECKey;
@@ -94,7 +93,7 @@ public class TransactionServiceImpl implements TransactionService {
         Map<String, Transaction> accountAddressMap = new HashMap<>();
         try {
             for (Transaction transaction : txList) {
-                if (transaction.getType() == AccountConstant.TX_TYPE_ACCOUNT_ALIAS) {
+                if (transaction.getType() == TxType.ACCOUNT_ALIAS) {
                     try {
                         if(!aliasService.aliasTxValidate(chainId, transaction)){
                             result.add(transaction);
@@ -128,7 +127,7 @@ public class TransactionServiceImpl implements TransactionService {
                         accountAddressMap.put(address, transaction);
                     }
                 }
-                if (transaction.getType() == AccountConstant.TX_TYPE_TRANSFER) {
+                if (transaction.getType() == TxType.TRANSFER) {
                     try {
                         if(!txValidator.validateTx(chainId, transaction)){
                             result.add(transaction);
@@ -166,7 +165,7 @@ public class TransactionServiceImpl implements TransactionService {
     public MultiSignTransactionResultDto createMultiSignTransfer(int chainId, int assetsId, Account account, String password, MultiSigAccount multiSigAccount, String toAddress, BigInteger amount, String remark)
             throws NulsException, IOException {
         //create transaction
-        Transaction transaction = new Transaction(AccountConstant.TX_TYPE_TRANSFER);
+        Transaction transaction = new Transaction(TxType.TRANSFER);
         transaction.setTime(TimeUtils.getCurrentTimeMillis());
         transaction.setRemark(StringUtils.bytes(remark));
         //build coin data
@@ -314,7 +313,7 @@ public class TransactionServiceImpl implements TransactionService {
     }
 
     private Transaction assemblyTransaction(int chainId, List<CoinDto> fromList, List<CoinDto> toList, String remark) throws NulsException{
-        Transaction tx = new Transaction(AccountConstant.TX_TYPE_TRANSFER);
+        Transaction tx = new Transaction(TxType.TRANSFER);
         tx.setTime(TimeUtils.getCurrentTimeMillis());
         tx.setRemark(StringUtils.bytes(remark));
         try {
@@ -336,29 +335,9 @@ public class TransactionServiceImpl implements TransactionService {
             //交易签名
             SignatureUtil.createTransactionSignture(tx, signEcKeys);
 
-            //调用交易验证器
-            String txStr = RPCUtil.encode(tx.serialize());
-            //调用交易验证器
-            if(!TransactionCmdCall.baseValidateTx(chainId, txStr)){
-                LoggerUtil.logger.error("new tx base validator failed...");
-                throw new NulsRuntimeException(AccountErrorCode.TX_DATA_VALIDATION_ERROR);
+            if(!TransactionCmdCall.newTx(chainId, RPCUtil.encode(tx.serialize()))){
+                throw new  NulsRuntimeException(AccountErrorCode.FAILED);
             }
-            if(!txValidator.validateTx(chainId, tx)){
-                LoggerUtil.logger.error("new tx validator failed...");
-                throw new NulsRuntimeException(AccountErrorCode.TX_DATA_VALIDATION_ERROR);
-            }
-            VerifyTxResult verifyTxResult = LedgerCmdCall.commitUnconfirmedTx(chainId, RPCUtil.encode(tx.serialize()));
-            if(!verifyTxResult.success()){
-                LoggerUtil.logger.error("new tx verifyCoinData failed...");
-                throw new NulsRuntimeException(AccountErrorCode.TX_DATA_VALIDATION_ERROR);
-            }
-
-            //发起新交易
-            if(!TransactionCmdCall.newTx(chainId, txStr)) {
-                //如果发给交易模块失败,
-                LedgerCmdCall.rollBackUnconfirmTx(chainId, txStr);
-            }
-
         } catch (NulsException e) {
             LoggerUtil.logger.error("assemblyTransaction exception.", e);
             throw new NulsException(e.getErrorCode());
@@ -708,36 +687,12 @@ public class TransactionServiceImpl implements TransactionService {
     public boolean txMutilProcessing(MultiSigAccount multiSigAccount, Transaction tx, TransactionSignature transactionSignature) throws IOException {
         //当已签名数等于M则自动广播该交易
         if (multiSigAccount.getM() == transactionSignature.getP2PHKSignatures().size()) {
-
-            try {
-                int chainId = multiSigAccount.getChainId();
-
-                //调用交易验证器
-                String txStr = RPCUtil.encode(tx.serialize());
-                //调用交易验证器
-                if(!TransactionCmdCall.baseValidateTx(chainId, txStr)){
-                    LoggerUtil.logger.error("new tx base validator failed...");
-                    throw new NulsRuntimeException(AccountErrorCode.TX_DATA_VALIDATION_ERROR);
-                }
-                //调用交易验证器
-                if(!txValidator.validateTx(chainId, tx)){
-                    LoggerUtil.logger.error("new tx validator failed...");
-                    throw new NulsRuntimeException(AccountErrorCode.TX_DATA_VALIDATION_ERROR);
-                }
-                VerifyTxResult verifyTxResult = LedgerCmdCall.commitUnconfirmedTx(chainId, RPCUtil.encode(tx.serialize()));
-                if(!verifyTxResult.success()){
-                    LoggerUtil.logger.error("new tx verifyCoinData failed...");
-                    throw new NulsRuntimeException(AccountErrorCode.TX_DATA_VALIDATION_ERROR);
-                }
-                //发起新交易
-                if(!TransactionCmdCall.newTx(chainId, txStr)) {
-                    //如果发给交易模块失败,
-                    LedgerCmdCall.rollBackUnconfirmTx(chainId, txStr);
-                }
-            } catch (NulsException e) {
-                e.printStackTrace();
+            int chainId = multiSigAccount.getChainId();
+            if(!TransactionCmdCall.newTx(chainId, RPCUtil.encode(tx.serialize()))){
+                LoggerUtil.logger.error("Tx verify failed..");
                 return false;
             }
+
             // Result saveResult = accountLedgerService.verifyAndSaveUnconfirmedTransaction(tx);
 //            if (saveResult.isFailed()) {
 //                if (KernelErrorCode.DATA_SIZE_ERROR.getCode().equals(saveResult.getErrorCode().getCode())) {

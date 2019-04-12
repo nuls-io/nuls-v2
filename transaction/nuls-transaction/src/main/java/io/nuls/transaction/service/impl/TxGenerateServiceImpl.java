@@ -38,7 +38,6 @@ import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.crypto.ECKey;
 import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.exception.NulsException;
-import io.nuls.tools.exception.NulsRuntimeException;
 import io.nuls.tools.log.Log;
 import io.nuls.tools.model.BigIntegerUtils;
 import io.nuls.tools.model.StringUtils;
@@ -47,7 +46,6 @@ import io.nuls.transaction.constant.TxConstant;
 import io.nuls.transaction.constant.TxErrorCode;
 import io.nuls.transaction.model.bo.Chain;
 import io.nuls.transaction.model.bo.CrossTxData;
-import io.nuls.transaction.model.bo.VerifyTxResult;
 import io.nuls.transaction.model.dto.AccountSignDTO;
 import io.nuls.transaction.model.dto.CoinDTO;
 import io.nuls.transaction.rpc.call.AccountCall;
@@ -168,21 +166,8 @@ public class TxGenerateServiceImpl implements TxGenerateService {
             }
             transactionSignature.setP2PHKSignatures(p2PHKSignatures);
             tx.setTransactionSignature(transactionSignature.serialize());
-
-            //调用交易验证器
-            if(!txService.verify(chain, tx)){
-                chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).error("new ctx validator failed...");
-                throw new NulsRuntimeException(TxErrorCode.TX_VERIFY_FAIL);
-            }
-            VerifyTxResult verifyTxResult = LedgerCall.commitUnconfirmedTx(chain, RPCUtil.encode(tx.serialize()));
-            if(!verifyTxResult.success()){
-                chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).error("new tx verifyCoinData failed...");
-                throw new NulsRuntimeException(TxErrorCode.COINDATA_VERIFY_FAIL);
-            }
-            //发起新交易
-            if(!txService.newTx(chain,tx)) {
-                //如果发给交易模块失败,
-                LedgerCall.rollBackUnconfirmTx(chain, RPCUtil.encode(tx.serialize()));
+            if(!txService.newTx(chain,tx)){
+                throw new NulsException(TxErrorCode.TX_VERIFY_FAIL);
             }
             return tx;
         } catch (IOException e) {
@@ -273,20 +258,8 @@ public class TxGenerateServiceImpl implements TxGenerateService {
                 p2PHKSignatures.sort(P2PHKSignature.PUBKEY_COMPARATOR);
                 multiSignTxSignature.setP2PHKSignatures(p2PHKSignatures);
                 tx.setTransactionSignature(multiSignTxSignature.serialize());
-                //调用交易验证器
-                if(!txService.verify(chain, tx)){
-                    chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).error("new ctx validator failed...");
-                    throw new NulsRuntimeException(TxErrorCode.TX_VERIFY_FAIL);
-                }
-                VerifyTxResult verifyTxResult = LedgerCall.commitUnconfirmedTx(chain, RPCUtil.encode(tx.serialize()));
-                if(!verifyTxResult.success()){
-                    chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).error("new tx verifyCoinData failed...");
-                    throw new NulsRuntimeException(TxErrorCode.COINDATA_VERIFY_FAIL);
-                }
-                //发起新交易
-                if(!txService.newTx(chain,tx)) {
-                    //如果发给交易模块失败,
-                    LedgerCall.rollBackUnconfirmTx(chain, RPCUtil.encode(tx.serialize()));
+                if(!txService.newTx(chain,tx)){
+                    throw new NulsException(TxErrorCode.TX_VERIFY_FAIL);
                 }
                 map.put(TxConstant.MULTI_TX_HASH, tx.getHash().getDigestHex());
             } else {
