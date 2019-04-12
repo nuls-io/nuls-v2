@@ -36,7 +36,6 @@ public class NettyClient {
      */
     public static Channel createConnect(String uri) {
         try {
-            TimeUnit.SECONDS.sleep(10L);
             URI webSocketURI = null;
             try {
                 webSocketURI = new URI(uri);
