@@ -661,7 +661,9 @@ public class TransactionCmd extends BaseCmd {
             chain.setBestBlockHeight(height);
             //todo
             //confirmedTxService.processEffectCrossTx(chain, height);
-            return success();
+            Map<String, Object> resultMap = new HashMap<>(TxConstant.INIT_CAPACITY_2);
+            resultMap.put("value", true);
+            return success(resultMap);
         } catch (NulsException e) {
             errorLogProcess(chain, e);
             return failed(e.getErrorCode());
