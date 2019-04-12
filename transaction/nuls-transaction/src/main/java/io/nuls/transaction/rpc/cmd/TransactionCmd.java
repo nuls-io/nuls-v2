@@ -659,8 +659,7 @@ public class TransactionCmd extends BaseCmd {
             }
             Long height = Long.valueOf(params.get("height").toString());
             chain.setBestBlockHeight(height);
-            //todo
-            //confirmedTxService.processEffectCrossTx(chain, height);
+            chain.getLoggerMap().get(TxConstant.LOG_TX).debug("最新区块高度更新为: {}", height);
             Map<String, Object> resultMap = new HashMap<>(TxConstant.INIT_CAPACITY_2);
             resultMap.put("value", true);
             return success(resultMap);
