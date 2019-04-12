@@ -25,9 +25,9 @@
 package io.nuls.rpc.model.message;
 
 
-import com.google.common.base.Objects;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.google.common.base.Objects;
 
 /**
  * 所有消息都应该用该对象进行传输
@@ -129,15 +129,15 @@ public class Message {
             return false;
         }
         Message message = (Message) o;
-        return Objects.equal(MessageId, message.MessageId) &&
+        return Objects.equal(MessageID, message.MessageID) &&
                 Objects.equal(Timestamp, message.Timestamp) &&
-                Objects.equal(Timezone, message.Timezone) &&
+                Objects.equal(TimeZone, message.TimeZone) &&
                 Objects.equal(MessageType, message.MessageType) &&
                 Objects.equal(MessageData, message.MessageData);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(MessageId, Timestamp, Timezone, MessageType, MessageData);
+        return Objects.hashCode(MessageID, Timestamp, TimeZone, MessageType, MessageData);
     }
 }

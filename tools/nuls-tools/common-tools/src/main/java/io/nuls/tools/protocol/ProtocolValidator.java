@@ -23,7 +23,32 @@ public class ProtocolValidator {
         return false;
     }
 
-    public static boolean transactionValidate(int chainId, Class messageClass, Class handlerClass) {
+    public static boolean transactionValidate(int txType, Class handlerClass, Protocol protocol, String methodName, TxMethodType type) {
+        List<TransactionConfig> allowTx = protocol.getAllowTx();
+        String handlerClassName = handlerClass.getName();
+        for (TransactionConfig config : allowTx) {
+            if (config.getType() == txType && config.getHandler().equals(handlerClassName)) {
+                switch (type) {
+                    case VALID:
+                        if (methodName.equals(config.getValidate())) {
+                            return true;
+                        }
+                        break;
+                    case COMMIT:
+                        if (methodName.equals(config.getCommit())) {
+                            return true;
+                        }
+                        break;
+                    case ROLLBACK:
+                        if (methodName.equals(config.getRollback())) {
+                            return true;
+                        }
+                        break;
+                    default:
+                        return false;
+                }
+            }
+        }
         return false;
     }
 

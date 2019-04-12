@@ -433,10 +433,10 @@ public class TestJyc {
                     HashMap result = (HashMap) ((HashMap) cmdResp.getResponseData()).get("ac_getPriKeyByAddress");
                     String priKey = (String) result.get("priKey");
                     removeAccount(packingAddress, password);
-                    Thread.sleep(600000);
+                    Thread.sleep(60000);
                     Log.debug("9.##########导入节点账户，重新加入共识##########");
                     importPriKey(priKey, password);
-                    Thread.sleep(600000);
+                    Thread.sleep(60000);
                 }
 
                 {

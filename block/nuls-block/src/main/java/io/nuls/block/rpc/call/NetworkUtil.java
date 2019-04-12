@@ -19,10 +19,10 @@
  */
 package io.nuls.block.rpc.call;
 
+import io.nuls.base.data.BaseBusinessMessage;
 import io.nuls.base.data.NulsDigestData;
 import io.nuls.block.manager.ContextManager;
 import io.nuls.block.message.CompleteMessage;
-import io.nuls.block.message.base.BaseMessage;
 import io.nuls.block.model.Node;
 import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.model.ModuleE;
@@ -119,7 +119,7 @@ public class NetworkUtil {
      * @param excludeNodes 排除的节点
      * @return
      */
-    public static boolean broadcast(int chainId, BaseMessage message, String excludeNodes, String command) {
+    public static boolean broadcast(int chainId, BaseBusinessMessage message, String excludeNodes, String command) {
         NulsLogger messageLog = ContextManager.getContext(chainId).getMessageLog();
         try {
             Map<String, Object> params = new HashMap<>(5);
@@ -147,7 +147,7 @@ public class NetworkUtil {
      * @param nodeId
      * @return
      */
-    public static boolean sendToNode(int chainId, BaseMessage message, String nodeId, String command) {
+    public static boolean sendToNode(int chainId, BaseBusinessMessage message, String nodeId, String command) {
         NulsLogger messageLog = ContextManager.getContext(chainId).getMessageLog();
         try {
             Map<String, Object> params = new HashMap<>(5);
@@ -173,7 +173,7 @@ public class NetworkUtil {
      * @param message
      * @return
      */
-    public static boolean broadcast(int chainId, BaseMessage message, String command) {
+    public static boolean broadcast(int chainId, BaseBusinessMessage message, String command) {
         return broadcast(chainId, message, null, command);
     }
 

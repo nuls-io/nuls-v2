@@ -18,18 +18,16 @@
  * SOFTWARE.
  */
 
-package io.nuls.block.message.base;
+package io.nuls.base.data;
 
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.basic.NulsOutputStreamBuffer;
-import io.nuls.base.data.BaseNulsData;
-import io.nuls.base.data.NulsDigestData;
+import io.nuls.tools.constant.ErrorCode;
 import io.nuls.tools.constant.ToolsConstant;
 import io.nuls.tools.exception.NulsException;
+import io.nuls.tools.exception.NulsRuntimeException;
 
 import java.io.IOException;
-
-import static io.nuls.block.utils.LoggerUtil.commonLog;
 
 /**
  * 通用消息体
@@ -38,7 +36,7 @@ import static io.nuls.block.utils.LoggerUtil.commonLog;
  * @version 1.0
  * @date 18-11-20 上午10:44
  */
-public abstract class BaseMessage extends BaseNulsData {
+public abstract class BaseBusinessMessage extends BaseNulsData {
 
     private transient NulsDigestData hash;
 
@@ -63,8 +61,7 @@ public abstract class BaseMessage extends BaseNulsData {
             try {
                 this.hash = NulsDigestData.calcDigestData(this.serialize());
             } catch (IOException e) {
-                e.printStackTrace();
-                commonLog.error(e);
+                throw new NulsRuntimeException(ErrorCode.init("10003"));
             }
         }
         return hash;

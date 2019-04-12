@@ -35,9 +35,9 @@ import io.nuls.tools.protocol.ProtocolLoader;
 import java.util.List;
 import java.util.Map;
 
+import static io.nuls.base.constant.BaseConstant.PROTOCOL_CONFIG_COMPARATOR;
+import static io.nuls.base.constant.BaseConstant.PROTOCOL_CONFIG_FILE;
 import static io.nuls.block.BlockBootstrap.blockConfig;
-import static io.nuls.block.constant.Constant.PROTOCOL_CONFIG_COMPARATOR;
-import static io.nuls.block.constant.Constant.PROTOCOL_CONFIG_FILE;
 
 /**
  * 配置加载器

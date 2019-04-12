@@ -2,7 +2,6 @@ package io.nuls.account.rpc.cmd;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import io.nuls.account.config.NulsConfig;
-import io.nuls.account.constant.AccountConstant;
 import io.nuls.account.constant.AccountErrorCode;
 import io.nuls.account.constant.RpcParameterNameConstant;
 import io.nuls.account.model.bo.Account;
@@ -19,7 +18,6 @@ import io.nuls.account.service.TransactionService;
 import io.nuls.account.storage.AliasStorageService;
 import io.nuls.account.util.LoggerUtil;
 import io.nuls.account.util.Preconditions;
-import io.nuls.account.util.TxUtil;
 import io.nuls.account.util.manager.ChainManager;
 import io.nuls.account.util.validator.TxValidator;
 import io.nuls.base.basic.AddressTool;
@@ -28,7 +26,6 @@ import io.nuls.base.data.MultiSigAccount;
 import io.nuls.base.data.Transaction;
 import io.nuls.rpc.cmd.BaseCmd;
 import io.nuls.rpc.model.CmdAnnotation;
-import io.nuls.rpc.model.Parameter;
 import io.nuls.rpc.model.message.Response;
 import io.nuls.rpc.util.RPCUtil;
 import io.nuls.tools.constant.TxType;
@@ -39,9 +36,6 @@ import io.nuls.tools.exception.NulsRuntimeException;
 import io.nuls.tools.model.BigIntegerUtils;
 import io.nuls.tools.model.StringUtils;
 import io.nuls.tools.parse.JSONUtils;
-import io.nuls.tools.protocol.ResisterTx;
-import io.nuls.tools.protocol.TxMethodType;
-import io.nuls.tools.protocol.TxProperty;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -268,41 +262,6 @@ public class TransactionCmd extends BaseCmd {
         }
 
         Map<String, Boolean> resultMap = new HashMap<>();
-        resultMap.put("value", result);
-        return success(resultMap);
-    }
-
-
-    /**
-     * 转账交易验证
-     */
-    @CmdAnnotation(cmd = "ac_transferTxValidate", version = 1.0, description = "create transfer transaction validate 1.0")
-    @ResisterTx(txType = TxProperty.TRANSFER, methodType = TxMethodType.VALID, methodName = "ac_transferTxValidate")
-    @Parameter(parameterName = RpcParameterNameConstant.CHAIN_ID, parameterType = "int")
-    @Parameter(parameterName = RpcParameterNameConstant.TX, parameterType = "String")
-    public Response transferTxValidate(Map<String, Object> params) {
-        Map<String, Boolean> resultMap = new HashMap<>(AccountConstant.INIT_CAPACITY_2);
-        boolean result;
-        try {
-            if (params.get(RpcParameterNameConstant.CHAIN_ID) == null || params.get(RpcParameterNameConstant.TX) == null) {
-                LoggerUtil.logger.warn("ac_transferTxValidate params is null");
-                throw new NulsException(AccountErrorCode.PARAMETER_ERROR);
-            }
-            int chainId = (Integer) params.get(RpcParameterNameConstant.CHAIN_ID);
-            String tx = (String) params.get(RpcParameterNameConstant.TX);
-            if (chainId <= 0) {
-                throw new NulsException(AccountErrorCode.PARAMETER_ERROR);
-            }
-            Transaction transaction = TxUtil.getInstanceRpcStr(tx, Transaction.class);
-            result = txValidator.validateTx(chainId, transaction);
-        } catch (NulsException e) {
-            LoggerUtil.logger.warn("", e);
-            result = false;
-        } catch (Exception e) {
-            LoggerUtil.logger.error("", e);
-            result = false;
-        }
-
         resultMap.put("value", result);
         return success(resultMap);
     }

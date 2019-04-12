@@ -37,9 +37,19 @@ import io.nuls.db.service.RocksDBService;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.exception.NulsRuntimeException;
+import io.nuls.tools.io.IoUtils;
+import io.nuls.tools.parse.JSONUtils;
+import io.nuls.tools.protocol.Protocol;
+import io.nuls.tools.protocol.ProtocolConfigJson;
+import io.nuls.tools.protocol.ProtocolGroupManager;
+import io.nuls.tools.protocol.ProtocolLoader;
 
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+
+import static io.nuls.base.constant.BaseConstant.PROTOCOL_CONFIG_COMPARATOR;
+import static io.nuls.base.constant.BaseConstant.PROTOCOL_CONFIG_FILE;
 
 /**
  * 链管理类,负责各条链的初始化,运行,启动,参数维护等
@@ -64,7 +74,7 @@ public class ChainManager {
      * 初始化链
      * Initialize and start the chain
      */
-    public void initChain() {
+    public void initChain() throws Exception {
         Map<Integer, ConfigBean> configMap = configChain();
         if (configMap == null || configMap.size() == 0) {
             return;
@@ -82,6 +92,11 @@ public class ChainManager {
             */
             initTable(chainId);
             chainMap.put(chainId, chain);
+            String json = IoUtils.read(PROTOCOL_CONFIG_FILE);
+            List<ProtocolConfigJson> protocolConfigs = JSONUtils.json2list(json, ProtocolConfigJson.class);
+            protocolConfigs.sort(PROTOCOL_CONFIG_COMPARATOR);
+            Map<Short, Protocol> protocolMap = ProtocolLoader.load(protocolConfigs);
+            ProtocolGroupManager.init(chainId, protocolMap, (short) 1);
         }
     }
 
