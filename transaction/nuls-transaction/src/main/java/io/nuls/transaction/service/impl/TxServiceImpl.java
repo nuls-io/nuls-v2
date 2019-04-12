@@ -102,7 +102,8 @@ public class TxServiceImpl implements TxService {
     private TxConfig txConfig;
 
 
-    private ExecutorService signExecutor = ThreadUtils.createThreadPool(Runtime.getRuntime().availableProcessors(), Integer.MAX_VALUE, new NulsThreadFactory(TxConstant.THREAD_VERIFIY_BLOCK_TXS));
+    private ExecutorService verifySignExecutor = ThreadUtils.createThreadPool(Runtime.getRuntime().availableProcessors(), Integer.MAX_VALUE, new NulsThreadFactory(TxConstant.THREAD_VERIFIY_BLOCK_TXS));
+    private ExecutorService clearTxExecutor = ThreadUtils.createThreadPool(1, Integer.MAX_VALUE, new NulsThreadFactory(TxConstant.THREAD_VERIFIY_BLOCK_TXS));
 
     public static void main(String[] args) {
         System.out.println(Runtime.getRuntime().availableProcessors());
@@ -143,7 +144,7 @@ public class TxServiceImpl implements TxService {
                 if (chain.getPackaging().get()) {
                     //当节点是出块节点时, 才将交易放入待打包队列
                     packablePool.add(chain, tx);
-                    chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("交易[加入待打包队列].....hash:{}", tx.getHash().getDigestHex());
+//                    chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("交易[加入待打包队列].....hash:{}", tx.getHash().getDigestHex());
                 }
                 //保存到rocksdb
                 unconfirmedTxStorageService.putTx(chain.getChainId(), tx);
@@ -671,7 +672,6 @@ public class TxServiceImpl implements TxService {
             }
             nulsLogger.info("获取打包交易开始,当前待打包队列交易数: {} , height:{}", packablePool.getPoolSize(chain), blockHeight);
             nulsLogger.debug("--------------while-----------");
-
             for (int index = 0; ; index++) {
                 long currentTimeMillis = TimeUtils.getCurrentTimeMillis();
 
@@ -687,7 +687,6 @@ public class TxServiceImpl implements TxService {
                     putBackPackablePool(chain, packingTxList, orphanTxSet);
                     return getPackableTxs(chain, endtimestamp, maxTxDataSize, chain.getBestBlockHeight() + 1, blockTime, packingAddress, preStateRoot);
                 }
-
                 Transaction tx = packablePool.get(chain);
                 if (tx == null) {
                     try {
@@ -705,9 +704,7 @@ public class TxServiceImpl implements TxService {
                     nulsLogger.debug("丢弃已确认过交易,txHash:{}, - type:{}, - time:{}", tx.getHash().getDigestHex(), tx.getType(), tx.getTime());
                     continue;
                 }
-
                 TxWrapper txWrapper = new TxWrapper(tx, index);
-
                 long txSize = tx.size();
                 if ((totalSize + txSize) > maxTxDataSize) {
                     packablePool.addInFirst(chain, tx);
@@ -727,11 +724,9 @@ public class TxServiceImpl implements TxService {
                 //批量验证coinData, 单个发送
                 VerifyTxResult verifyTxResult = LedgerCall.verifyCoinData(chain, txStr);
                 if (!verifyTxResult.success()) {
-                    if (verifyTxResult.getCode() != 5) {
-                        String nonce = HexUtil.encode(TxUtil.getCoinData(tx).getFrom().get(0).getNonce());
-                        nulsLogger.error("coinData打包批量验证未通过 coinData not success - code: {}, - reason:{}, - type:{}, - first coinFrom nonce:{} - txhash:{}",
-                                verifyTxResult.getCode(), verifyTxResult.getDesc(), tx.getType(), nonce, tx.getHash().getDigestHex());
-                    }
+                    String nonce = HexUtil.encode(TxUtil.getCoinData(tx).getFrom().get(0).getNonce());
+                    nulsLogger.error("coinData打包批量验证未通过 coinData not success - code: {}, - reason:{}, - type:{}, - first coinFrom nonce:{} - txhash:{}",
+                            verifyTxResult.getCode(), verifyTxResult.getDesc(), tx.getType(), nonce, tx.getHash().getDigestHex());
                     if (verifyTxResult.getCode() == VerifyTxResult.ORPHAN) {
                         addOrphanTxSet(chain, orphanTxSet, txWrapper);
                     }
@@ -1043,7 +1038,7 @@ public class TxServiceImpl implements TxService {
     }
 
     @Override
-    public VerifyTxResult batchVerify(Chain chain, List<String> txStrList, long blockHeight, long blockTime, String packingAddress, String stateRoot, String preStateRoot) throws NulsException {
+    public VerifyTxResult batchVerify(Chain chain, List<String> txStrList, long blockHeight, long blockTime, String packingAddress, String stateRoot, String preStateRoot) throws Exception {
         chain.getLoggerMap().get(TxConstant.LOG_TX).debug("");
         chain.getLoggerMap().get(TxConstant.LOG_TX).debug("开始区块交易批量验证......");
         long s1 = TimeUtils.getCurrentTimeMillis();
@@ -1071,7 +1066,7 @@ public class TxServiceImpl implements TxService {
                 continue;
             }
             //多线程处理单个交易
-            Future<Boolean> res = signExecutor.submit(new Callable<Boolean>() {
+            Future<Boolean> res = verifySignExecutor.submit(new Callable<Boolean>() {
                 @Override
                 public Boolean call() throws Exception {
 
@@ -1111,15 +1106,17 @@ public class TxServiceImpl implements TxService {
                 }
             });
             futures.add(res);
+        }
 
+        for (Transaction tx : txList) {
             /** 智能合约*/
-            if (TxManager.isSmartContract(chain, tx.getType())) {
+            if (TxManager.isUnSystemSmartContract(chain, tx.getType())) {
                 /** 出现智能合约,且通知标识为false,则先调用通知 */
                 if (!contractNotify) {
                     ContractCall.contractBatchBegin(chain, blockHeight, blockTime, packingAddress, preStateRoot);
                     contractNotify = true;
                 }
-                if (!ContractCall.invokeContract(chain, txStr)) {
+                if (!ContractCall.invokeContract(chain, RPCUtil.encode(tx.serialize()))) {
                     return verifyTxResult;
                 }
             }
@@ -1237,7 +1234,7 @@ public class TxServiceImpl implements TxService {
 
     @Override
     public void clearInvalidTx(Chain chain, List<Transaction> txList) {
-        if (txList.size() > 0) {// TODO: 2019/3/18 测试代码
+        if (txList.size() > 0) {
             chain.getLoggerMap().get(TxConstant.LOG_TX).debug("打包集中清理统一验证过程中未通过交易..");
         }
         for (Transaction tx : txList) {
@@ -1252,24 +1249,32 @@ public class TxServiceImpl implements TxService {
 
     @Override
     public void clearInvalidTx(Chain chain, Transaction tx, boolean cleanLedgerUfmTx) {
-        //判断如果交易已被确认就不用清理了!!
-        TransactionConfirmedPO txConfirmed = confirmedTxService.getConfirmedTransaction(chain, tx.getHash());
-        if (txConfirmed != null) {
-            return;
-        }
-        unconfirmedTxStorageService.removeTx(chain.getChainId(), tx.getHash());
-        try {
-            if (cleanLedgerUfmTx) {
-                //如果是清理机制调用, 则调用账本未确认回滚
-                LedgerCall.rollBackUnconfirmTx(chain, RPCUtil.encode(tx.serialize()));
-            } else {
-                //通知账本状态变更
-                LedgerCall.rollbackTxValidateStatus(chain, RPCUtil.encode(tx.serialize()));
+        verifySignExecutor.submit(new Callable<Boolean>() {
+            @Override
+            public Boolean call() throws Exception {
+                //判断如果交易已被确认就不用清理了!!
+                TransactionConfirmedPO txConfirmed = confirmedTxService.getConfirmedTransaction(chain, tx.getHash());
+                if (txConfirmed != null) {
+                    return true;
+                }
+                unconfirmedTxStorageService.removeTx(chain.getChainId(), tx.getHash());
+                try {
+                    //如果是清理机制调用, 则调用账本未确认回滚
+                    LedgerCall.rollBackUnconfirmTx(chain, RPCUtil.encode(tx.serialize()));
+                    if (!cleanLedgerUfmTx) {
+                        //通知账本状态变更
+                        LedgerCall.rollbackTxValidateStatus(chain, RPCUtil.encode(tx.serialize()));
+                    }
+                    return true;
+                } catch (NulsException e) {
+                    e.printStackTrace();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                return false;
             }
-        } catch (NulsException e) {
-            e.printStackTrace();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        });
+
+
     }
 }

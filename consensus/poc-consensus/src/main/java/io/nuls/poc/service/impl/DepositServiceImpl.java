@@ -13,13 +13,14 @@ import io.nuls.poc.model.dto.input.CreateDepositDTO;
 import io.nuls.poc.model.dto.input.SearchDepositDTO;
 import io.nuls.poc.model.dto.input.WithdrawDTO;
 import io.nuls.poc.model.dto.output.DepositDTO;
-import io.nuls.poc.service.DepositService;
 import io.nuls.poc.rpc.call.CallMethodUtils;
+import io.nuls.poc.service.DepositService;
 import io.nuls.poc.utils.manager.ChainManager;
 import io.nuls.poc.utils.manager.CoinDataManager;
 import io.nuls.poc.utils.validator.TxValidator;
 import io.nuls.rpc.util.RPCUtil;
 import io.nuls.tools.basic.Result;
+import io.nuls.tools.constant.TxType;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Service;
 import io.nuls.tools.exception.NulsException;
@@ -81,7 +82,7 @@ public class DepositServiceImpl implements DepositService {
             }
             //账户验证
             HashMap callResult = CallMethodUtils.accountValid(dto.getChainId(), dto.getAddress(), dto.getPassword());
-            Transaction tx = new Transaction(ConsensusConstant.TX_TYPE_JOIN_CONSENSUS);
+            Transaction tx = new Transaction(TxType.DEPOSIT);
             Deposit deposit = new Deposit();
             deposit.setAddress(AddressTool.getAddress(dto.getAddress()));
             deposit.setAgentHash(NulsDigestData.fromDigestHex(dto.getAgentHash()));
@@ -137,7 +138,7 @@ public class DepositServiceImpl implements DepositService {
         }
         try {
             String txHex = (String) params.get(ConsensusConstant.PARAM_TX);
-            Transaction transaction = new Transaction(ConsensusConstant.TX_TYPE_JOIN_CONSENSUS);
+            Transaction transaction = new Transaction(TxType.DEPOSIT);
             transaction.parse(RPCUtil.decode(txHex), 0);
             boolean result = validatorManager.validateTx(chain, transaction);
             if (!result) {
@@ -198,7 +199,7 @@ public class DepositServiceImpl implements DepositService {
             if (!flag) {
                 return Result.getFailed(ConsensusErrorCode.DATA_ERROR);
             }
-            Transaction cancelDepositTransaction = new Transaction(ConsensusConstant.TX_TYPE_CANCEL_DEPOSIT);
+            Transaction cancelDepositTransaction = new Transaction(TxType.CANCEL_DEPOSIT);
             CancelDeposit cancelDeposit = new CancelDeposit();
             cancelDeposit.setAddress(AddressTool.getAddress(dto.getAddress()));
             cancelDeposit.setJoinTxHash(hash);
@@ -254,7 +255,7 @@ public class DepositServiceImpl implements DepositService {
         }
         try {
             String txHex = (String) params.get(ConsensusConstant.PARAM_TX);
-            Transaction transaction = new Transaction(ConsensusConstant.TX_TYPE_CANCEL_DEPOSIT);
+            Transaction transaction = new Transaction(TxType.CANCEL_DEPOSIT);
             transaction.parse(RPCUtil.decode(txHex), 0);
             boolean result = validatorManager.validateTx(chain, transaction);
             if (!result) {

@@ -25,6 +25,11 @@
 package io.nuls.transaction;
 
 import io.nuls.base.basic.AddressTool;
+import io.nuls.base.basic.NulsByteBuffer;
+import io.nuls.base.data.*;
+import io.nuls.base.signture.P2PHKSignature;
+import io.nuls.base.signture.SignatureUtil;
+import io.nuls.base.signture.TransactionSignature;
 import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.info.HostInfo;
 import io.nuls.rpc.info.NoUse;
@@ -32,13 +37,25 @@ import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.model.message.Response;
 import io.nuls.rpc.netty.processor.ResponseMessageProcessor;
 import io.nuls.rpc.util.RPCUtil;
+import io.nuls.rpc.util.TimeUtils;
+import io.nuls.tools.crypto.HexUtil;
+import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.log.Log;
+import io.nuls.tools.model.BigIntegerUtils;
+import io.nuls.tools.model.StringUtils;
 import io.nuls.tools.parse.JSONUtils;
+import io.nuls.tools.thread.ThreadUtils;
+import io.nuls.tools.thread.commom.NulsThreadFactory;
+import io.nuls.transaction.constant.TxConstant;
+import io.nuls.transaction.constant.TxErrorCode;
 import io.nuls.transaction.model.bo.Chain;
+import io.nuls.transaction.model.bo.TxRegister;
 import io.nuls.transaction.model.bo.config.ConfigBean;
 import io.nuls.transaction.model.dto.CoinDTO;
 import io.nuls.transaction.model.dto.CrossTxTransferDTO;
+import io.nuls.transaction.rpc.call.AccountCall;
 import io.nuls.transaction.rpc.call.LedgerCall;
+import io.nuls.transaction.rpc.call.TransactionCall;
 import io.nuls.transaction.tx.Transfer;
 import org.junit.Assert;
 import org.junit.Before;
@@ -46,10 +63,11 @@ import org.junit.Test;
 
 import java.io.*;
 import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Future;
 
 import static org.junit.Assert.assertNotNull;
 
@@ -83,8 +101,6 @@ public class TxValid {
     static String password = "nuls123456";//"nuls123456";
 
 
-
-
     @Before
     public void before() throws Exception {
         NoUse.mockModule();
@@ -93,19 +109,152 @@ public class TxValid {
         chain.setConfig(new ConfigBean(chainId, assetId, 1024 * 1024, 1000, 20, 20000L, 60000L));
     }
 
+    private ExecutorService signExecutor = ThreadUtils.createThreadPool(Runtime.getRuntime().availableProcessors(), Integer.MAX_VALUE, new NulsThreadFactory(TxConstant.THREAD_VERIFIY_BLOCK_TXS));
+
+
+    @Test
+    public void importPriKeyTest() {
+        importPriKey("b54db432bba7e13a6c4a28f65b925b18e63bcb79143f7b894fa735d5d3d09db5", password);//种子出块地址 tNULSeBaMkrt4z9FYEkkR9D6choPVvQr94oYZp
+//        importPriKey("188b255c5a6d58d1eed6f57272a22420447c3d922d5765ebb547bc6624787d9f", password);//种子出块地址 tNULSeBaMoGr2RkLZPfJeS5dFzZeNj1oXmaYNe
+//        importPriKey("9ce21dad67e0f0af2599b41b515a7f7018059418bab892a7b68f283d489abc4b", password);//20 tNULSeBaMvEtDfvZuukDf2mVyfGo3DdiN8KLRG
+//        importPriKey("477059f40708313626cccd26f276646e4466032cabceccbf571a7c46f954eb75", password);//21 tNULSeBaMnrs6JKrCy6TQdzYJZkMZJDng7QAsD
+//        importPriKey("8212e7ba23c8b52790c45b0514490356cd819db15d364cbe08659b5888339e78", password);//22 tNULSeBaMrbMRiFAUeeAt6swb4xVBNyi81YL24
+//        importPriKey("4100e2f88c3dba08e5000ed3e8da1ae4f1e0041b856c09d35a26fb399550f530", password);//23 tNULSeBaMu38g1vnJsSZUCwTDU9GsE5TVNUtpD
+//        importPriKey("bec819ef7d5beeb1593790254583e077e00f481982bce1a43ea2830a2dc4fdf7", password);//24 tNULSeBaMp9wC9PcWEcfesY7YmWrPfeQzkN1xL
+        importPriKey("ddddb7cb859a467fbe05d5034735de9e62ad06db6557b64d7c139b6db856b200", password);//25 tNULSeBaMshNPEnuqiDhMdSA4iNs6LMgjY6tcL
+        importPriKey("4efb6c23991f56626bc77cdb341d64e891e0412b03cbcb948aba6d4defb4e60a", password);//26 tNULSeBaMoodYW7AqyJrgYdWiJ6nfwfVHHHyXm
+        importPriKey("3dadac00b523736f38f8c57deb81aa7ec612b68448995856038bd26addd80ec1", password);//27 tNULSeBaMmTNYqywL5ZSHbyAQ662uE3wibrgD1
+        importPriKey("27dbdcd1f2d6166001e5a722afbbb86a845ef590433ab4fcd13b9a433af6e66e", password);//28 tNULSeBaMoNnKitV28JeuUdBaPSR6n1xHfKLj2
+        importPriKey("76b7beaa98db863fb680def099af872978209ed9422b7acab8ab57ad95ab218b", password);//29 tNULSeBaMqywZjfSrKNQKBfuQtVxAHBQ8rB2Zn
+//        importPriKey("00a6eef7b91c645525bb8410f2a79e1299a69d0d7ef980068434b6aca90ab6d9", password);
+
+    }
+
+    private List<Transaction> createTx() throws Exception {
+        List<Transaction> list  = new ArrayList<>();
+        NulsDigestData hash = null;
+        System.out.println("satring......");
+        for (int i = 0; i < 6000; i++) {
+            Map transferMap = this.createTransferTx(address28, address21,new BigInteger("1000000000"));
+
+            Transaction tx =  assemblyTransaction((int)transferMap.get("chainId"), (List<CoinDTO>)transferMap.get("inputs"),
+                    (List<CoinDTO>)transferMap.get("outputs"), (String)transferMap.get("remark"), hash);
+            //String hash = createCtxTransfer();
+            hash = tx.getHash();
+            list.add(tx);
+
+        }
+        System.out.println(list.size());
+        return list;
+    }
+
+    @Test
+    public void testSign() throws Exception {
+        List<Transaction> list  = createTx();
+        sign(list);
+        signMThread(list);
+
+        sign(list);
+        signMThread(list);
+
+        sign(list);
+        signMThread(list);
+
+        sign(list);
+        signMThread(list);
+
+        sign(list);
+        signMThread(list);
+    }
+    /**多线程**/
+    private void signMThread(List<Transaction> list) throws Exception {
+        //tx_baseValidateTx
+        long s1 = System.currentTimeMillis();
+        List<Future<Boolean>> futures = new ArrayList<>();
+        for(Transaction tx :list){
+            Future<Boolean> res = signExecutor.submit(new Callable<Boolean>() {
+                @Override
+                public Boolean call() throws Exception {
+                    //不在未确认中就进行基础验证
+                    try {
+                         /*validateTxSignature(tx,null,chain);
+                         return true;*/
+                        //只验证单个交易的基础内容(TX模块本地验证)
+                        Map<String, Object> params = new HashMap<>();
+                        params.put(Constants.VERSION_KEY_STR, "1.0");
+                        params.put("chainId", chainId);
+                        params.put("tx", RPCUtil.encode(tx.serialize()));
+                        Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.TX.abbr, "tx_baseValidateTx", params);
+                        HashMap result = (HashMap) ((HashMap) cmdResp.getResponseData()).get("tx_baseValidateTx");
+                        boolean rs = (boolean) result.get("value");
+                        return rs;
+                    } catch (Exception e) {
+                        return false;
+                    }
+                }
+            });
+            futures.add(res);
+        }
+
+        try {
+            //多线程处理结果
+            for (Future<Boolean> future : futures) {
+                if (!future.get()) {
+                    Log.debug("failed, single tx verify failed");
+//                   break;
+                }
+            }
+        } catch (InterruptedException e) {
+            Log.debug("batchVerify failed, single tx verify failed");
+            Log.error(e);
+        } catch (ExecutionException e) {
+            Log.debug("batchVerify failed, single tx verify failed");
+            Log.error(e);
+        }
+        Log.debug("{}笔交易多线程执行时间:{}", list.size(), System.currentTimeMillis() - s1);
+    }
+
+    /**单线程**/
+    private void sign(List<Transaction> list) throws Exception {
+        long s1 = System.currentTimeMillis();
+        for(Transaction tx :list){
+            //不在未确认中就进行基础验证
+            try {
+                /*validateTxSignature(tx,null,chain);*/
+                //只验证单个交易的基础内容(TX模块本地验证)
+                Map<String, Object> params = new HashMap<>();
+                params.put(Constants.VERSION_KEY_STR, "1.0");
+                params.put("chainId", chainId);
+                params.put("tx", RPCUtil.encode(tx.serialize()));
+                Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.TX.abbr, "tx_baseValidateTx", params);
+                HashMap result = (HashMap) ((HashMap) cmdResp.getResponseData()).get("tx_baseValidateTx");
+                boolean rs = (boolean) result.get("value");
+                if(!rs){
+                    Log.debug("验签名 failed type:{}, -hash:{}", tx.getType(), tx.getHash().getDigestHex());
+                    break;
+                }
+            } catch (Exception e) {
+                Log.debug("验签名 failed type:{}, -hash:{}", tx.getType(), tx.getHash().getDigestHex());
+            }
+        }
+        Log.debug("{}笔交易单线程执行时间:{}", list.size(), System.currentTimeMillis() - s1);
+    }
+
+
+
     @Test
     public void transfer() throws Exception {
-        for (int i = 0; i < 10; i++) {
+        for (int i = 0; i < 1000; i++) {
             String hash = createTransfer(address28, address21,new BigInteger("1000000000"));
             //String hash = createCtxTransfer();
             System.out.println("count:" + (i + 1));
             System.out.println("");
-//            Thread.sleep(500L);
+            Thread.sleep(5000L);
         }
     }
+
     @Test
     public void multiThreadingTransfer() throws Exception {
-
 
         Transfer transfer1 = new Transfer(address25, address21);
         Thread thread1 = new Thread(transfer1);
@@ -113,12 +262,12 @@ public class TxValid {
         Transfer transfer2 = new Transfer(address26, address22);
         Thread thread2 = new Thread(transfer2);
         thread2.start();
-        Transfer transfer3 = new Transfer(address27, address23);
-        Thread thread3 = new Thread(transfer3);
-        thread3.start();
-        Transfer transfer4 = new Transfer(address28, address24);
-        Thread thread4 = new Thread(transfer4);
-        thread4.start();
+//        Transfer transfer3 = new Transfer(address27, address23);
+//        Thread thread3 = new Thread(transfer3);
+//        thread3.start();
+//        Transfer transfer4 = new Transfer(address28, address24);
+//        Thread thread4 = new Thread(transfer4);
+//        thread4.start();
         try {
             while (true) {
                 Thread.sleep(1000000000L);
@@ -152,12 +301,15 @@ public class TxValid {
         Thread.sleep(30000L);
         List<String> listTo = createAddress();
         //新生成账户各执行一笔转账
-        for(int i = 0; i < count; i++){
-            String address = list.get(i);
-            String addressTo = listTo.get(i);
-            createTransfer(address, addressTo, new BigInteger("9000000000"));
-            System.out.println("count:" + (i + 1));
+        for(int x = 0; x < 10; x++) {
+            for (int i = 0; i < count; i++) {
+                String address = list.get(i);
+                String addressTo = listTo.get(i);
+                createTransfer(address, addressTo, new BigInteger("100000000"));
+                System.out.println("count:" + (i + 1));
+            }
         }
+
     }
 
     @Test
@@ -214,23 +366,7 @@ public class TxValid {
     }
 
 
-    @Test
-    public void importPriKeyTest() {
-        importPriKey("b54db432bba7e13a6c4a28f65b925b18e63bcb79143f7b894fa735d5d3d09db5", password);//种子出块地址 tNULSeBaMkrt4z9FYEkkR9D6choPVvQr94oYZp
-//        importPriKey("188b255c5a6d58d1eed6f57272a22420447c3d922d5765ebb547bc6624787d9f", password);//种子出块地址 tNULSeBaMoGr2RkLZPfJeS5dFzZeNj1oXmaYNe
-//        importPriKey("9ce21dad67e0f0af2599b41b515a7f7018059418bab892a7b68f283d489abc4b", password);//20 tNULSeBaMvEtDfvZuukDf2mVyfGo3DdiN8KLRG
-//        importPriKey("477059f40708313626cccd26f276646e4466032cabceccbf571a7c46f954eb75", password);//21 tNULSeBaMnrs6JKrCy6TQdzYJZkMZJDng7QAsD
-//        importPriKey("8212e7ba23c8b52790c45b0514490356cd819db15d364cbe08659b5888339e78", password);//22 tNULSeBaMrbMRiFAUeeAt6swb4xVBNyi81YL24
-//        importPriKey("4100e2f88c3dba08e5000ed3e8da1ae4f1e0041b856c09d35a26fb399550f530", password);//23 tNULSeBaMu38g1vnJsSZUCwTDU9GsE5TVNUtpD
-//        importPriKey("bec819ef7d5beeb1593790254583e077e00f481982bce1a43ea2830a2dc4fdf7", password);//24 tNULSeBaMp9wC9PcWEcfesY7YmWrPfeQzkN1xL
-        importPriKey("ddddb7cb859a467fbe05d5034735de9e62ad06db6557b64d7c139b6db856b200", password);//25 tNULSeBaMshNPEnuqiDhMdSA4iNs6LMgjY6tcL
-        importPriKey("4efb6c23991f56626bc77cdb341d64e891e0412b03cbcb948aba6d4defb4e60a", password);//26 tNULSeBaMoodYW7AqyJrgYdWiJ6nfwfVHHHyXm
-        importPriKey("3dadac00b523736f38f8c57deb81aa7ec612b68448995856038bd26addd80ec1", password);//27 tNULSeBaMmTNYqywL5ZSHbyAQ662uE3wibrgD1
-        importPriKey("27dbdcd1f2d6166001e5a722afbbb86a845ef590433ab4fcd13b9a433af6e66e", password);//28 tNULSeBaMoNnKitV28JeuUdBaPSR6n1xHfKLj2
-        importPriKey("76b7beaa98db863fb680def099af872978209ed9422b7acab8ab57ad95ab218b", password);//29 tNULSeBaMqywZjfSrKNQKBfuQtVxAHBQ8rB2Zn
-//        importPriKey("00a6eef7b91c645525bb8410f2a79e1299a69d0d7ef980068434b6aca90ab6d9", password);
 
-    }
 
     @Test
     public void createAgentTx() throws Exception {
@@ -415,6 +551,21 @@ public class TxValid {
         return hash;
     }
 
+    private Transaction getCreateTransferTx(String addressFrom, String addressTo, BigInteger amount) throws Exception {
+        Map transferMap = this.createTransferTx(addressFrom, addressTo, amount);
+        //调用接口
+        Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_transfer_tx", transferMap);
+        if(!cmdResp.isSuccess()){
+            return null;
+        }
+        HashMap result = (HashMap) (((HashMap) cmdResp.getResponseData()).get("ac_transfer_tx"));
+        Assert.assertTrue(null != result);
+        String str = (String) result.get("value");
+        Transaction tx = new Transaction();
+        tx.parse(new NulsByteBuffer(RPCUtil.decode(str)));
+        return tx;
+    }
+
     private String createCtxTransfer() throws Exception {
         CrossTxTransferDTO ctxTransfer = new CrossTxTransferDTO(chain.getChainId(),
                 createFromCoinDTOList(), createToCoinDTOList(), "this is cross-chain transaction");
@@ -579,6 +730,7 @@ public class TxValid {
         return listFrom;
     }
 
+
     private List<CoinDTO> createToCoinDTOList() {
         CoinDTO coinDTO = new CoinDTO();
         coinDTO.setAssetsId(assetId);
@@ -597,6 +749,206 @@ public class TxValid {
         return listTO;
     }
 
+
+
+    /** 组装交易*/
+    private Transaction assemblyTransaction(int chainId, List<CoinDTO> fromList, List<CoinDTO> toList, String remark, NulsDigestData hash) throws NulsException {
+        Transaction tx = new Transaction(2);
+        tx.setTime(TimeUtils.getCurrentTimeMillis());
+        tx.setRemark(StringUtils.bytes(remark));
+        try {
+            //组装CoinData中的coinFrom、coinTo数据
+            assemblyCoinData(tx, chainId, fromList, toList, hash);
+            //计算交易数据摘要哈希
+            tx.setHash(NulsDigestData.calcDigestData(tx.serializeForHash()));
+            //创建ECKey用于签名
+//            List<ECKey> signEcKeys = new ArrayList<>();
+            TransactionSignature transactionSignature = new TransactionSignature();
+            List<P2PHKSignature> p2PHKSignatures = new ArrayList<>();
+            for (CoinDTO from : fromList) {
+//                P2PHKSignature p2PHKSignature = AccountCall.signDigest(from.getAddress(), from.getPassword(), tx.getHash().getDigestBytes());
+
+                Map<String, Object> params = new HashMap<>(TxConstant.INIT_CAPACITY_8);
+                params.put(Constants.VERSION_KEY_STR, TxConstant.RPC_VERSION);
+                params.put("chainId", chainId);
+                params.put("address", from.getAddress());
+                params.put("password", password);
+                params.put("data", RPCUtil.encode(tx.getHash().getDigestBytes()));
+                HashMap result = (HashMap) TransactionCall.request(ModuleE.AC.abbr, "ac_signDigest", params);
+                String signatureStr = (String)result.get("signature");
+
+                P2PHKSignature signature = new P2PHKSignature(); // TxUtil.getInstanceRpcStr(signatureStr, P2PHKSignature.class);
+                signature.parse(new NulsByteBuffer(RPCUtil.decode(signatureStr)));
+
+                p2PHKSignatures.add(signature);
+            }
+            //交易签名
+            transactionSignature.setP2PHKSignatures(p2PHKSignatures);
+            tx.setTransactionSignature(transactionSignature.serialize());
+            return tx;
+
+        } catch (Exception e) {
+        }
+        return tx;
+    }
+
+    private Transaction assemblyCoinData(Transaction tx, int chainId, List<CoinDTO> fromList, List<CoinDTO> toList, NulsDigestData hash) throws NulsException{
+        try {
+            //组装coinFrom、coinTo数据
+            List<CoinFrom> coinFromList = assemblyCoinFrom(chainId, fromList, hash);
+            List<CoinTo> coinToList = assemblyCoinTo(chainId, toList);
+            //来源地址或转出地址为空
+            if (coinFromList.size() == 0 || coinToList.size() == 0) {
+                return null;
+            }
+            //交易总大小=交易数据大小+签名数据大小
+            int txSize = tx.size() + getSignatureSize(coinFromList);
+            //组装coinData数据
+            CoinData coinData = getCoinData(chainId, coinFromList, coinToList, txSize);
+            tx.setCoinData(coinData.serialize());
+        } catch (Exception e) {
+        }
+        return tx;
+    }
+
+    private CoinData getCoinData(int chainId, List<CoinFrom> listFrom, List<CoinTo> listTo, int txSize) throws NulsException {
+        CoinData coinData = new CoinData();
+        coinData.setFrom(listFrom);
+        coinData.setTo(listTo);
+        return coinData;
+    }
+
+    /**
+     * 通过coinfrom计算签名数据的size
+     * 如果coinfrom有重复地址则只计算一次；如果有多签地址，只计算m个地址的size
+     *
+     * @param coinFroms
+     * @return
+     */
+    private int getSignatureSize(List<CoinFrom> coinFroms) {
+        int size = 0;
+        Set<String> commonAddress = new HashSet<>();
+        for (CoinFrom coinFrom : coinFroms) {
+            String address = AddressTool.getStringAddressByBytes(coinFrom.getAddress());
+            commonAddress.add(address);
+        }
+        size += commonAddress.size() * P2PHKSignature.SERIALIZE_LENGTH;
+        return size;
+    }
+
+    /**
+     * 组装coinFrom数据
+     * assembly coinFrom data
+     *
+     * @param listFrom Initiator set coinFrom
+     * @return List<CoinFrom>
+     * @throws NulsException
+     */
+    private List<CoinFrom> assemblyCoinFrom(int chainId, List<CoinDTO> listFrom, NulsDigestData hash) throws NulsException {
+        List<CoinFrom> coinFroms = new ArrayList<>();
+        for (CoinDTO coinDto : listFrom) {
+            String address = coinDto.getAddress();
+            byte[] addressByte = AddressTool.getAddress(address);
+            //转账交易转出地址必须是本链地址
+            if (!AddressTool.validAddress(chainId, address)) {
+
+            }
+            //检查该链是否有该资产
+            int assetChainId = coinDto.getAssetsChainId();
+            int assetId = coinDto.getAssetsId();
+
+            //检查对应资产余额是否足够
+            BigInteger amount = coinDto.getAmount();
+            //查询账本获取nonce值
+            byte[] nonce = getNonceByPreHash(hash);
+            CoinFrom coinFrom = new CoinFrom(addressByte, assetChainId, assetId, amount, nonce, (byte)0);
+            coinFroms.add(coinFrom);
+        }
+        return coinFroms;
+    }
+
+    public static byte[] getNonceByPreHash(NulsDigestData hash) {
+        if(hash == null){
+            return HexUtil.decode("ffffffff");
+        }
+        byte[] out = new byte[8];
+        byte[] in = hash.getDigestBytes();
+        int copyEnd = in.length;
+        System.arraycopy(in, (copyEnd - 8), out, 0, 8);
+        String nonce8BytesStr = HexUtil.encode(out);
+        return HexUtil.decode(nonce8BytesStr);
+    }
+
+
+    private void validateTxSignature(Transaction tx, TxRegister txRegister, Chain chain) throws NulsException {
+        //只需要验证,需要验证签名的交易(一些系统交易不用签名)
+//        if (txRegister.getVerifySignature()) {
+            Set<String> addressSet = SignatureUtil.getAddressFromTX(tx, chain.getChainId());
+            CoinData coinData = new CoinData(); //TxUtil.getCoinData(tx);
+            coinData.parse(new NulsByteBuffer(tx.getCoinData()));
+
+            if (null == coinData || null == coinData.getFrom() || coinData.getFrom().size() <= 0) {
+                throw new NulsException(TxErrorCode.TX_DATA_VALIDATION_ERROR);
+            }
+            //判断from中地址和签名的地址是否匹配
+            for (CoinFrom coinFrom : coinData.getFrom()) {
+                if (tx.isMultiSignTx()) {
+                    MultiSigAccount multiSigAccount = AccountCall.getMultiSigAccount(coinFrom.getAddress());
+                    if (null == multiSigAccount) {
+                        throw new NulsException(TxErrorCode.ACCOUNT_NOT_EXIST);
+                    }
+                    for (byte[] bytes : multiSigAccount.getPubKeyList()) {
+                        String addr = AddressTool.getStringAddressByBytes(AddressTool.getAddress(bytes, chain.getChainId()));
+                        if (!addressSet.contains(addr)) {
+                            throw new NulsException(TxErrorCode.SIGN_ADDRESS_NOT_MATCH_COINFROM);
+                        }
+                    }
+                } else if (!addressSet.contains(AddressTool.getStringAddressByBytes(coinFrom.getAddress()))
+                        && tx.getType() != TxConstant.TX_TYPE_STOP_AGENT) {
+                    throw new NulsException(TxErrorCode.SIGN_ADDRESS_NOT_MATCH_COINFROM);
+                }
+            }
+            if (!SignatureUtil.validateTransactionSignture(tx)) {
+                throw new NulsException(TxErrorCode.SIGNATURE_ERROR);
+            }
+//        }
+    }
+
+    /**
+     * 组装coinTo数据
+     * assembly coinTo data
+     * 条件：to中所有地址必须是同一条链的地址
+     *
+     * @param listTo Initiator set coinTo
+     * @return List<CoinTo>
+     * @throws NulsException
+     */
+    private List<CoinTo> assemblyCoinTo(int chainId, List<CoinDTO> listTo) throws NulsException {
+        List<CoinTo> coinTos = new ArrayList<>();
+        for (CoinDTO coinDto : listTo) {
+            String address = coinDto.getAddress();
+            byte[] addressByte = AddressTool.getAddress(address);
+            //转账交易转出地址必须是本链地址
+            if (!AddressTool.validAddress(chainId, address)) {
+                Log.debug("failed");
+            }
+            //检查该链是否有该资产
+            int assetsChainId = coinDto.getAssetsChainId();
+            int assetId = coinDto.getAssetsId();
+            //检查金额是否小于0
+            BigInteger amount = coinDto.getAmount();
+            if (BigIntegerUtils.isLessThan(amount, BigInteger.ZERO)) {
+                Log.debug("failed");
+            }
+            CoinTo coinTo = new CoinTo();
+            coinTo.setAddress(addressByte);
+            coinTo.setAssetsChainId(assetsChainId);
+            coinTo.setAssetsId(assetId);
+            coinTo.setAmount(coinDto.getAmount());
+            coinTos.add(coinTo);
+        }
+        return coinTos;
+    }
 
     /**
      * 创建普通转账交易

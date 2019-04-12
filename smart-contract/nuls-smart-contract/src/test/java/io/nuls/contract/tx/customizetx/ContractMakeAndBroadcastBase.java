@@ -244,20 +244,16 @@ public class ContractMakeAndBroadcastBase extends BaseQuery {
         try {
             String txData = RPCUtil.encode(tx.serialize());
 
-            Result validResult = this.validTx(chainId, tx);
-            if(validResult.isFailed()) {
-                return validResult;
-            }
-            // 通知账本
-            int commitStatus = LedgerCall.commitUnconfirmedTx(chainId, txData);
-            if(commitStatus != LedgerUnConfirmedTxStatus.SUCCESS.status()) {
-                return getFailed().setMsg(LedgerUnConfirmedTxStatus.getStatus(commitStatus).name());
-            }
+            //// 通知账本
+            //int commitStatus = LedgerCall.commitUnconfirmedTx(chainId, txData);
+            //if(commitStatus != LedgerUnConfirmedTxStatus.SUCCESS.status()) {
+            //    return getFailed().setMsg(LedgerUnConfirmedTxStatus.getStatus(commitStatus).name());
+            //}
             // 广播交易
             boolean broadcast = TransactionCall.newTx(chainId, txData);
             if (!broadcast) {
                 // 广播失败，回滚账本的未确认交易
-                LedgerCall.rollBackUnconfirmTx(chainId, txData);
+                //LedgerCall.rollBackUnconfirmTx(chainId, txData);
                 return getFailed();
             }
             return getSuccess();
@@ -269,29 +265,6 @@ public class ContractMakeAndBroadcastBase extends BaseQuery {
             Result result = Result.getFailed(ContractErrorCode.CONTRACT_TX_CREATE_ERROR);
             result.setMsg(e.getMessage());
             return result;
-        }
-    }
-
-    private Result validTx(int chainId, Transaction tx) {
-        try {
-            Result result;
-            switch (tx.getType()) {
-                case TX_TYPE_CREATE_CONTRACT:
-                    result = validCreateTx(chainId, (CreateContractTransaction) tx);
-                    break;
-                case TX_TYPE_CALL_CONTRACT:
-                    result = validCallTx(chainId, (CallContractTransaction) tx);
-                    break;
-                case TX_TYPE_DELETE_CONTRACT:
-                    result = validDeleteTx(chainId, (DeleteContractTransaction) tx);
-                    break;
-                default:
-                    result = getSuccess();
-                    break;
-            }
-            return result;
-        } catch (Exception e) {
-            return getFailed();
         }
     }
 

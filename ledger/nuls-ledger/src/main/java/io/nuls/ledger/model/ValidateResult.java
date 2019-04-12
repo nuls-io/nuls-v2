@@ -36,7 +36,7 @@ import java.util.Map;
  **/
 public class  ValidateResult {
     public static final String VALIDATE_SUCCESS_DESC = "success";
-    public static final String VALIDATE_ORPHAN_DESC = "address {%s},nonce {%s} is orphan transaction";
+    public static final String VALIDATE_ORPHAN_DESC = "address {%s},nonce {%s}!={%s} is orphan transaction";
     public static final String VALIDATE_DOUBLE_EXPENSES_DESC = "address {%s},nonce {%s} is double expenses";
     public static final String VALIDATE_FAIL_DESC = "address {%s},nonce {%s} validate fail:{%s}";
     public static final String VALIDATE_TX_EXIST_DESC = "address={%s},hash={%s} in packing";

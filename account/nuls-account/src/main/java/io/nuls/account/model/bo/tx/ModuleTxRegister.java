@@ -25,6 +25,8 @@
 
 package io.nuls.account.model.bo.tx;
 
+import io.nuls.tools.protocol.TxRegisterDetail;
+
 import java.util.List;
 
 /**

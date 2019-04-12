@@ -66,6 +66,26 @@ public class NetworkBootstrap extends RpcModule {
         NulsRpcModuleBootstrap.run("io.nuls", args);
     }
 
+    private boolean validatCfg() {
+        if (networkConfig.getPacketMagic() > NetworkConstant.MAX_NUMBER_4_BYTE) {
+            LoggerUtil.logger().error("Network cfg error.packageMagic:{}>{}", networkConfig.getPacketMagic(), NetworkConstant.MAX_NUMBER_4_BYTE);
+            return false;
+        }
+        if (networkConfig.getChainId() > NetworkConstant.MAX_NUMBER_2_BYTE) {
+            LoggerUtil.logger().error("Network cfg error.chainId:{}>{}", networkConfig.getChainId(), NetworkConstant.MAX_NUMBER_2_BYTE);
+            return false;
+        }
+        if (networkConfig.getPort() > NetworkConstant.MAX_NUMBER_2_BYTE) {
+            LoggerUtil.logger().error("Network cfg error.port:{}>{}", networkConfig.getPort(), NetworkConstant.MAX_NUMBER_2_BYTE);
+            return false;
+        }
+        if (networkConfig.getCrossPort() > NetworkConstant.MAX_NUMBER_2_BYTE) {
+            LoggerUtil.logger().error("Network cfg error.crossPort:{}>{}", networkConfig.getCrossPort(), NetworkConstant.MAX_NUMBER_2_BYTE);
+            return false;
+        }
+        return true;
+    }
+
     /**
      * 配置信息初始化
      * Configuration information initialization
@@ -120,6 +140,9 @@ public class NetworkBootstrap extends RpcModule {
             super.init();
             System.setProperty("io.netty.tryReflectionSetAccessible", "true");
             LoggerUtil.defaultLogInit(networkConfig.getLogLevel());
+            if(!validatCfg()){
+                System.exit(-1);
+            }
             jsonCfgInit();
             dbInit();
             managerInit();

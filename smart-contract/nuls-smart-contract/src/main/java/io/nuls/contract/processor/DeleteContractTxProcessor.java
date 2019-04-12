@@ -29,6 +29,7 @@ import io.nuls.contract.helper.ContractHelper;
 import io.nuls.contract.model.bo.ContractResult;
 import io.nuls.contract.model.bo.ContractWrapperTransaction;
 import io.nuls.contract.service.ContractService;
+import io.nuls.contract.util.Log;
 import io.nuls.tools.basic.Result;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
@@ -60,6 +61,7 @@ public class DeleteContractTxProcessor {
     }
 
     public Result onRollback(int chainId, ContractWrapperTransaction tx) {
+        Log.info("rollback delete tx, hash is {}", tx.getHash().toString());
         contractService.deleteContractExecuteResult(chainId, tx.getHash());
         return getSuccess();
     }
