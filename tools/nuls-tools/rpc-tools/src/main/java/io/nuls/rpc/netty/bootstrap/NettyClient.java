@@ -16,9 +16,11 @@ import io.netty.handler.codec.http.websocketx.WebSocketVersion;
 import io.netty.handler.codec.http.websocketx.extensions.compression.WebSocketClientCompressionHandler;
 import io.nuls.rpc.netty.handler.ClientHandler;
 import io.nuls.rpc.netty.processor.ResponseMessageProcessor;
+import io.nuls.tools.log.Log;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.concurrent.TimeUnit;
 
 /**
  * netty客服端启动实现类
@@ -34,6 +36,7 @@ public class NettyClient {
      */
     public static Channel createConnect(String uri) {
         try {
+            TimeUnit.SECONDS.sleep(10L);
             URI webSocketURI = null;
             try {
                 webSocketURI = new URI(uri);
@@ -62,6 +65,7 @@ public class NettyClient {
             Channel ch = b.connect(webSocketURI.getHost(), webSocketURI.getPort()).sync().channel();
             handler.handshakeFuture().sync();
             ResponseMessageProcessor.handshake(ch);
+            Log.info("创建ws连接:{}",ch.isOpen());
             return ch;
         } catch (Exception e) {
             e.printStackTrace();

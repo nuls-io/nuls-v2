@@ -133,6 +133,10 @@ public class AgentServiceImpl implements AgentService {
             String priKey = (String) callResult.get("priKey");
             CallMethodUtils.transactionSignature(dto.getChainId(), dto.getAgentAddress(), dto.getPassword(), priKey, tx);
             String txStr = RPCUtil.encode(tx.serialize());
+            boolean validResult = validatorManager.validateTx(chain, tx);
+            if (!validResult) {
+                return Result.getFailed(ConsensusErrorCode.TX_DATA_VALIDATION_ERROR);
+            }
             /*boolean validResult = CallMethodUtils.transactionBasicValid(chain,txStr);
             if (!validResult) {
                 return Result.getFailed(ConsensusErrorCode.TX_DATA_VALIDATION_ERROR);
@@ -247,6 +251,10 @@ public class AgentServiceImpl implements AgentService {
             String priKey = (String) callResult.get("priKey");
             CallMethodUtils.transactionSignature(dto.getChainId(), dto.getAddress(), dto.getPassword(), priKey, tx);
             String txStr = RPCUtil.encode(tx.serialize());
+            boolean validResult = validatorManager.validateTx(chain, tx);
+            if (!validResult) {
+                return Result.getFailed(ConsensusErrorCode.TX_DATA_VALIDATION_ERROR);
+            }
             /*boolean validResult = CallMethodUtils.transactionBasicValid(chain,txStr);
             if (!validResult) {
                 return Result.getFailed(ConsensusErrorCode.TX_DATA_VALIDATION_ERROR);
