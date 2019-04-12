@@ -244,12 +244,12 @@ public class TxValid {
 
     @Test
     public void transfer() throws Exception {
-        for (int i = 0; i < 1000; i++) {
-            String hash = createTransfer(address28, address21,new BigInteger("1000000000"));
+        for (int i = 0; i < 3000; i++) {
+            String hash = createTransfer(address27, address21,new BigInteger("1000000000"));
             //String hash = createCtxTransfer();
             System.out.println("count:" + (i + 1));
             System.out.println("");
-            Thread.sleep(5000L);
+//            Thread.sleep(5000L);
         }
     }
 
