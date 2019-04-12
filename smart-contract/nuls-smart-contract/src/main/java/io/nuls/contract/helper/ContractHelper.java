@@ -610,17 +610,17 @@ public class ContractHelper {
             byte[] from = po.getFrom();
             byte[] to = po.getTo();
             BigInteger token = po.getValue();
-            String fromStr = null;
-            String toStr = null;
+            String fromStr;
+            String toStr;
+            ContractTokenBalanceManager contractTokenBalanceManager = getChain(chainId).getContractTokenBalanceManager();
             if (from != null) {
                 fromStr = AddressTool.getStringAddressByBytes(from);
+                contractTokenBalanceManager.addContractToken(fromStr, contractAddressStr, token);
             }
             if (to != null) {
                 toStr = AddressTool.getStringAddressByBytes(to);
+                contractTokenBalanceManager.subtractContractToken(toStr, contractAddressStr, token);
             }
-            ContractTokenBalanceManager contractTokenBalanceManager = getChain(chainId).getContractTokenBalanceManager();
-            contractTokenBalanceManager.addContractToken(fromStr, contractAddressStr, token);
-            contractTokenBalanceManager.subtractContractToken(toStr, contractAddressStr, token);
         } catch (Exception e) {
             // skip it
             Log.error(e);

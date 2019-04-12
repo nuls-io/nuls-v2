@@ -367,7 +367,7 @@ public class CoinDataValidator {
             e.printStackTrace();
         }
         //孤儿交易了，这笔交易不清楚状况，是孤儿
-        return ValidateResult.getResult(ValidateEnum.ORPHAN_CODE, new String[]{address, fromNonce});
+        return ValidateResult.getResult(ValidateEnum.ORPHAN_CODE, new String[]{address, fromNonce,accountStateUnconfirmed.getLatestUnconfirmedNonce()});
     }
 
     /**
@@ -402,7 +402,7 @@ public class CoinDataValidator {
                     if (transactionService.hadCommit(chainId, LedgerUtil.getAccountNoncesStrKey(address, accountState.getAssetChainId(), accountState.getAssetId(), fromCoinNonce))) {
                         return ValidateResult.getResult(ValidateEnum.DOUBLE_EXPENSES_CODE, new String[]{address, fromCoinNonce});
                     } else {
-                        return ValidateResult.getResult(ValidateEnum.ORPHAN_CODE, new String[]{address, fromCoinNonce});
+                        return ValidateResult.getResult(ValidateEnum.ORPHAN_CODE, new String[]{address, fromCoinNonce,accountState.getNonce()});
                     }
                 } catch (Exception e) {
                     e.printStackTrace();

@@ -351,8 +351,8 @@ public class TransactionCmd extends BaseCmd {
             if (!validTxRemark(transferDto.getRemark())) {
                 throw new NulsException(AccountErrorCode.PARAMETER_ERROR);
             }
-            String hash = transactionService.transfer(transferDto.getChainId(), inputList, outputList, transferDto.getRemark());
-            map.put("value", hash);
+            Transaction tx = transactionService.transfer(transferDto.getChainId(), inputList, outputList, transferDto.getRemark());
+            map.put("value", tx.getHash().getDigestHex());
         } catch (NulsException e) {
             return failed(e.getErrorCode());
         } catch (NulsRuntimeException e) {

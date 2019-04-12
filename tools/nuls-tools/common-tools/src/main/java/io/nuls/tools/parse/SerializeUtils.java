@@ -596,7 +596,7 @@ public class SerializeUtils {
      * @return int
      */
     public static int sizeOfBigInteger() {
-        return 16;
+        return 32;
     }
 
     /**

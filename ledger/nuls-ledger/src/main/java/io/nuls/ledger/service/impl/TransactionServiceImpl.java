@@ -381,6 +381,12 @@ public class TransactionServiceImpl implements TransactionService {
             txs.forEach(tx -> {
                 //从缓存校验交易
                 CoinData coinData = CoinDataUtil.parseCoinData(tx.getCoinData());
+                //删除备份的hash
+                try {
+                    repository.deleteAccountHash(addressChainId, tx.getHash().toString());
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
                 if (null != coinData) {
                     //更新账户状态
                     String nonce8BytesStr = LedgerUtil.getNonceEncodeByTx(tx);
@@ -393,9 +399,6 @@ public class TransactionServiceImpl implements TransactionService {
                             try {
                                 //删除备份的花费nonce值。
                                 repository.deleteAccountNonces(addressChainId, LedgerUtil.getAccountNoncesStrKey(AddressTool.getStringAddressByBytes(from.getAddress()), from.getAssetsChainId(), from.getAssetsId(), nonce8BytesStr));
-                                //删除备份的hash
-                                repository.deleteAccountNonces(addressChainId, tx.getHash().toString());
-
                             } catch (Exception e) {
                                 e.printStackTrace();
                             }

@@ -27,6 +27,7 @@ package io.nuls.account.service.impl;
 
 import io.nuls.account.constant.AccountConstant;
 import io.nuls.account.constant.AccountErrorCode;
+import io.nuls.account.model.NonceBalance;
 import io.nuls.account.model.bo.Account;
 import io.nuls.account.model.bo.Chain;
 import io.nuls.account.model.bo.tx.AliasTransaction;
@@ -148,10 +149,11 @@ public class TransactionServiceImpl implements TransactionService {
     }
 
     @Override
-    public String transfer(int chainId, List<CoinDto> fromList, List<CoinDto> toList, String remark) throws NulsException{
+    public Transaction transfer(int chainId, List<CoinDto> fromList, List<CoinDto> toList, String remark) throws NulsException{
         Transaction tx = this.assemblyTransaction(chainId, fromList, toList, remark);
-        return tx.getHash().getDigestHex();
+        return tx;
     }
+
 
     @Override
     public Transaction transferByAlias(int chainId, CoinDto from, CoinDto to, String remark) throws NulsException{
@@ -240,7 +242,8 @@ public class TransactionServiceImpl implements TransactionService {
             assetsId = chain.getConfig().getAssetsId();
         }
         //查询账本获取nonce值
-        byte[] nonce = TxUtil.getNonce(chainId, chainId, assetsId, multiSigAccount.getAddress().getAddressBytes());
+        NonceBalance nonceBalance = TxUtil.getBalanceNonce(chainId, chainId, assetsId, multiSigAccount.getAddress().getAddressBytes());
+        byte[] nonce = nonceBalance.getNonce();
         CoinFrom coinFrom = new CoinFrom(multiSigAccount.getAddress().getAddressBytes(), chainId, assetsId, amount, nonce, AccountConstant.NORMAL_TX_LOCKED);
         CoinTo coinTo = new CoinTo(AddressTool.getAddress(toAddress), chainId, assetsId, amount);
         int txSize = transaction.size() + coinFrom.size() + coinTo.size() + ((int) multiSigAccount.getM()) * P2PHKSignature.SERIALIZE_LENGTH;
@@ -250,7 +253,7 @@ public class TransactionServiceImpl implements TransactionService {
         BigInteger totalAmount = amount.add(fee);
         coinFrom.setAmount(totalAmount);
         //检查余额是否充足
-        BigInteger mainAsset = TxUtil.getBalance(chainId, chainId, assetsId, coinFrom.getAddress());
+        BigInteger mainAsset = nonceBalance.getAvailable();
         //余额不足
         if (BigIntegerUtils.isLessThan(mainAsset, totalAmount)) {
             throw new NulsRuntimeException(AccountErrorCode.INSUFFICIENT_FEE);
@@ -420,13 +423,14 @@ public class TransactionServiceImpl implements TransactionService {
                 LoggerUtil.logger.warn("assemblyCoinFrom amount too small");
                 throw new NulsException(AccountErrorCode.AMOUNT_TOO_SMALL);
             }
-            BigInteger balance = TxUtil.getBalance(chainId, assetChainId, assetId, addressByte);
+            NonceBalance nonceBalance = TxUtil.getBalanceNonce(chainId, assetChainId, assetId, addressByte);
+            BigInteger balance = nonceBalance.getAvailable();
             if (BigIntegerUtils.isLessThan(balance, amount)) {
                 LoggerUtil.logger.warn("assemblyCoinFrom insufficient amount");
                 throw new NulsException(AccountErrorCode.INSUFFICIENT_BALANCE);
             }
             //查询账本获取nonce值
-            byte[] nonce = TxUtil.getNonce(chainId, assetChainId, assetId, addressByte);
+            byte[] nonce = nonceBalance.getNonce();
             CoinFrom coinFrom = new CoinFrom(addressByte, assetChainId, assetId, amount, nonce, AccountConstant.NORMAL_TX_LOCKED);
             coinFroms.add(coinFrom);
         }
@@ -562,7 +566,8 @@ public class TransactionServiceImpl implements TransactionService {
         for (CoinFrom coinFrom : listFrom) {
             //必须为当前链主资产
             if (TxUtil.isChainAssetExist(chain, coinFrom)) {
-                BigInteger mainAsset = TxUtil.getBalance(chainId, chainId, assetsId, coinFrom.getAddress());
+                NonceBalance nonceBalance = TxUtil.getBalanceNonce(chainId, chainId, assetsId, coinFrom.getAddress());
+                BigInteger mainAsset = nonceBalance.getAvailable();
                 //可用余额=当前余额减去本次转出
                 mainAsset = mainAsset.subtract(coinFrom.getAmount());
                 //当前还差的手续费
@@ -602,7 +607,8 @@ public class TransactionServiceImpl implements TransactionService {
             //如果不为当前链主资产
             if (!TxUtil.isChainAssetExist(chain, coinFrom)) {
                 //查询该地址在当前链的主资产余额
-                BigInteger mainAsset = TxUtil.getBalance(chainId, chainId, assetsId, coinFrom.getAddress());
+                NonceBalance nonceBalance = TxUtil.getBalanceNonce(chainId, chainId, assetsId, coinFrom.getAddress());
+                BigInteger mainAsset = nonceBalance.getAvailable();
                 if (BigIntegerUtils.isEqualOrLessThan(mainAsset, BigInteger.ZERO)) {
                     continue;
                 }
@@ -610,7 +616,7 @@ public class TransactionServiceImpl implements TransactionService {
                 CoinFrom feeCoinFrom = new CoinFrom();
                 byte[] address = coinFrom.getAddress();
                 feeCoinFrom.setAddress(address);
-                feeCoinFrom.setNonce(TxUtil.getNonce(chainId, chainId, assetsId, address));
+                feeCoinFrom.setNonce(nonceBalance.getNonce());
                 txSize += feeCoinFrom.size();
                 //由于新增CoinFrom，需要重新计算本交易预计收取的手续费
                 targetFee = TransactionFeeCalculator.getNormalTxFee(txSize);
