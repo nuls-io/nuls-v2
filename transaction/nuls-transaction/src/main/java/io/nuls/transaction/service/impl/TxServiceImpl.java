@@ -1038,7 +1038,7 @@ public class TxServiceImpl implements TxService {
     }
 
     @Override
-    public VerifyTxResult batchVerify(Chain chain, List<String> txStrList, long blockHeight, long blockTime, String packingAddress, String stateRoot, String preStateRoot) throws NulsException {
+    public VerifyTxResult batchVerify(Chain chain, List<String> txStrList, long blockHeight, long blockTime, String packingAddress, String stateRoot, String preStateRoot) throws Exception {
         chain.getLoggerMap().get(TxConstant.LOG_TX).debug("");
         chain.getLoggerMap().get(TxConstant.LOG_TX).debug("开始区块交易批量验证......");
         long s1 = TimeUtils.getCurrentTimeMillis();
@@ -1106,15 +1106,17 @@ public class TxServiceImpl implements TxService {
                 }
             });
             futures.add(res);
+        }
 
+        for (Transaction tx : txList) {
             /** 智能合约*/
-            if (TxManager.isSmartContract(chain, tx.getType())) {
+            if (TxManager.isUnSystemSmartContract(chain, tx.getType())) {
                 /** 出现智能合约,且通知标识为false,则先调用通知 */
                 if (!contractNotify) {
                     ContractCall.contractBatchBegin(chain, blockHeight, blockTime, packingAddress, preStateRoot);
                     contractNotify = true;
                 }
-                if (!ContractCall.invokeContract(chain, txStr)) {
+                if (!ContractCall.invokeContract(chain, RPCUtil.encode(tx.serialize()))) {
                     return verifyTxResult;
                 }
             }
