@@ -30,7 +30,7 @@ fi
 echo "stoping"
 for pid in $APP_PID
 do
-   stop $pid ""Modules/Nulstar"
+   stop $pid "Modules/Nulstar"
 done
 for module in ${modules[@]}
 do
