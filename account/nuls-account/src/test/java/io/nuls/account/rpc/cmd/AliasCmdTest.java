@@ -11,6 +11,7 @@ import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.model.message.Response;
 import io.nuls.rpc.netty.processor.ResponseMessageProcessor;
 import io.nuls.rpc.util.RPCUtil;
+import io.nuls.tools.constant.TxType;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -78,7 +79,7 @@ public class AliasCmdTest {
     public Transaction createTransaction() throws Exception {
         String address = createAnAccount();
         Transaction transaction = new Transaction();
-        transaction.setType(AccountConstant.TX_TYPE_ACCOUNT_ALIAS);
+        transaction.setType(TxType.ACCOUNT_ALIAS);
         Alias alias = new Alias();
         alias.setAddress(AddressTool.getAddress(address));
         alias.setAlias("alias_" + System.currentTimeMillis());

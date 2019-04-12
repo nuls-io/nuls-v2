@@ -2,7 +2,6 @@ package io.nuls.poc.utils.validator;
 
 import io.nuls.base.data.NulsDigestData;
 import io.nuls.base.data.Transaction;
-import io.nuls.poc.constant.ConsensusConstant;
 import io.nuls.poc.constant.ConsensusErrorCode;
 import io.nuls.poc.model.bo.Chain;
 import io.nuls.poc.model.bo.tx.txdata.*;
@@ -11,6 +10,7 @@ import io.nuls.poc.model.po.DepositPo;
 import io.nuls.poc.rpc.call.CallMethodUtils;
 import io.nuls.poc.storage.AgentStorageService;
 import io.nuls.poc.storage.DepositStorageService;
+import io.nuls.tools.constant.TxType;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.crypto.HexUtil;
@@ -57,19 +57,26 @@ public class BatchValidator {
         List<Transaction> withdrawTxs = new ArrayList<>();
         for (Transaction tx : txList) {
             switch (tx.getType()){
-                case ConsensusConstant.TX_TYPE_RED_PUNISH : redPunishTxs.add(tx);
+                case TxType.RED_PUNISH:
+                    redPunishTxs.add(tx);
                     break;
-                case ConsensusConstant.TX_TYPE_REGISTER_AGENT : createAgentTxs.add(tx);
+                case TxType.REGISTER_AGENT:
+                    createAgentTxs.add(tx);
                     break;
-                case ConsensusConstant.TX_TYPE_STOP_AGENT : stopAgentTxs.add(tx);
+                case TxType.STOP_AGENT:
+                    stopAgentTxs.add(tx);
                     break;
-                case ConsensusConstant.TX_TYPE_JOIN_CONSENSUS : depositTxs.add(tx);
+                case TxType.DEPOSIT:
+                    depositTxs.add(tx);
                     break;
-                case ConsensusConstant.TX_TYPE_CANCEL_DEPOSIT : withdrawTxs.add(tx);
+                case TxType.CANCEL_DEPOSIT:
+                    withdrawTxs.add(tx);
                     break;
-                case ConsensusConstant.TX_TYPE_YELLOW_PUNISH : yellowPunishTxs.add(tx);
+                case TxType.YELLOW_PUNISH:
+                    yellowPunishTxs.add(tx);
                     break;
-                case ConsensusConstant.TX_TYPE_COINBASE : coinBasePunishTxs.add(tx);
+                case TxType.COIN_BASE:
+                    coinBasePunishTxs.add(tx);
                     break;
                 default:break;
             }

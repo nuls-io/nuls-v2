@@ -1,6 +1,4 @@
-package io.nuls.poc.model.bo.tx;
-
-import io.nuls.poc.utils.enumeration.TxProperty;
+package io.nuls.tools.protocol;
 
 /**
  * 交易注册类
@@ -8,44 +6,70 @@ import io.nuls.poc.utils.enumeration.TxProperty;
  *
  * @author tag
  * 2018/11/30
- * */
+ */
 public class TxRegisterDetail {
     /**
-    * 交易类型
-    * Transaction type
-    * */
+     * 交易类型
+     * Transaction type
+     */
     private int txType;
     /**
-    * 交易验证方法
-    * Transaction verification method
-    * */
+     * 交易验证方法
+     * Transaction verification method
+     */
     private String validator;
+    /**
+     * 交易提交方法
+     * Transaction submission method
+     */
+    private String commit;
+    /**
+     * 交易回滚方法
+     * Transaction rollback method
+     */
+    private String rollback;
     /**
      * 是否是系统交易
      * Is it a system transaction
-     * */
+     */
     private boolean systemTx;
     /**
      * 是否是解锁交易
      * Is it a system transaction
-     * */
+     */
     private boolean unlockTx;
     /**
      * 交易是否需要签名
      * Is it a system transaction
-     * */
+     */
     private boolean verifySignature;
 
-    public TxRegisterDetail(int txType){
+    public TxRegisterDetail(int txType) {
         this.txType = txType;
     }
 
-    public TxRegisterDetail(TxProperty txProperty){
+    public TxRegisterDetail(TxProperty txProperty) {
         this.txType = txProperty.txType;
         this.systemTx = txProperty.systemTx;
         this.unlockTx = txProperty.unlockTx;
         this.verifySignature = txProperty.verifySignature;
         this.validator = "";
+    }
+
+    public String getCommit() {
+        return commit;
+    }
+
+    public void setCommit(String commit) {
+        this.commit = commit;
+    }
+
+    public String getRollback() {
+        return rollback;
+    }
+
+    public void setRollback(String rollback) {
+        this.rollback = rollback;
     }
 
     public int getTxType() {

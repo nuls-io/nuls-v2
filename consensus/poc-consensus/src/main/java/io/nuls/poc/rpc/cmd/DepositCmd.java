@@ -1,9 +1,6 @@
 package io.nuls.poc.rpc.cmd;
 
 import io.nuls.poc.service.DepositService;
-import io.nuls.poc.utils.annotation.ResisterTx;
-import io.nuls.poc.utils.enumeration.TxMethodType;
-import io.nuls.poc.utils.enumeration.TxProperty;
 import io.nuls.rpc.cmd.BaseCmd;
 import io.nuls.rpc.model.CmdAnnotation;
 import io.nuls.rpc.model.Parameter;
@@ -11,6 +8,9 @@ import io.nuls.rpc.model.message.Response;
 import io.nuls.tools.basic.Result;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
+import io.nuls.tools.protocol.ResisterTx;
+import io.nuls.tools.protocol.TxMethodType;
+import io.nuls.tools.protocol.TxProperty;
 
 import java.util.Map;
 
@@ -45,7 +45,7 @@ public class DepositCmd extends BaseCmd {
      * 委托共识交易验证
      * */
     @CmdAnnotation(cmd = "cs_depositValid", version = 1.0, description = "deposit agent transaction validate 1.0")
-    @ResisterTx(txType = TxProperty.JOIN_DEPOSIT,methodType = TxMethodType.VALID,methodName = "cs_depositValid")
+    @ResisterTx(txType = TxProperty.DEPOSIT, methodType = TxMethodType.VALID, methodName = "cs_depositValid")
     @Parameter(parameterName = "chainId", parameterType = "int")
     @Parameter(parameterName = "tx", parameterType = "String")
     public Response depositValid(Map<String,Object> params){

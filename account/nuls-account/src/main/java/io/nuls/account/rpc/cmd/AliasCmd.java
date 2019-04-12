@@ -1,6 +1,5 @@
 package io.nuls.account.rpc.cmd;
 
-import io.nuls.account.constant.AccountConstant;
 import io.nuls.account.constant.AccountErrorCode;
 import io.nuls.account.constant.RpcParameterNameConstant;
 import io.nuls.account.model.bo.tx.txdata.Alias;
@@ -8,8 +7,6 @@ import io.nuls.account.service.AccountKeyStoreService;
 import io.nuls.account.service.AccountService;
 import io.nuls.account.service.AliasService;
 import io.nuls.account.util.LoggerUtil;
-import io.nuls.account.util.annotation.ResisterTx;
-import io.nuls.account.util.annotation.TxMethodType;
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.data.Transaction;
 import io.nuls.rpc.cmd.BaseCmd;
@@ -21,6 +18,9 @@ import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.exception.NulsRuntimeException;
+import io.nuls.tools.protocol.ResisterTx;
+import io.nuls.tools.protocol.TxMethodType;
+import io.nuls.tools.protocol.TxProperty;
 
 import java.math.BigInteger;
 import java.util.HashMap;
@@ -199,7 +199,7 @@ public class AliasCmd extends BaseCmd {
      * @return
      */
     @CmdAnnotation(cmd = "ac_aliasTxValidate", version = 1.0, scope = "private", minEvent = 0, minPeriod = 0, description = "validate the transaction of alias")
-    @ResisterTx(txType = AccountConstant.TX_TYPE_ACCOUNT_ALIAS, methodType = TxMethodType.VALID, methodName = "ac_aliasTxValidate")
+    @ResisterTx(txType = TxProperty.ACCOUNT_ALIAS, methodType = TxMethodType.VALID, methodName = "ac_aliasTxValidate")
     public Response aliasTxValidate(Map params) {
         boolean result;
         int chainId;
