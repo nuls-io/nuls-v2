@@ -149,7 +149,7 @@ public class TxServiceImpl implements TxService {
                 //保存到rocksdb
                 unconfirmedTxStorageService.putTx(chain.getChainId(), tx);
                 //广播交易hash
-                NetworkCall.broadcastTxHash(chain.getChainId(),tx.getHash());
+//                NetworkCall.broadcastTxHash(chain.getChainId(),tx.getHash());
             }
             return true;
         } catch (Exception e) {
