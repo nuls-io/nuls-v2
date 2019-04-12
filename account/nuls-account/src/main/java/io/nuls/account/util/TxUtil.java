@@ -26,6 +26,7 @@ package io.nuls.account.util;
 
 import io.nuls.account.config.NulsConfig;
 import io.nuls.account.constant.AccountErrorCode;
+import io.nuls.account.model.NonceBalance;
 import io.nuls.account.model.bo.Chain;
 import io.nuls.account.rpc.call.LedgerCmdCall;
 import io.nuls.base.basic.AddressTool;
@@ -115,6 +116,26 @@ public class TxUtil {
             return BigIntegerUtils.stringToBigInteger(String.valueOf(available));
         }
         return new BigInteger("0");
+    }
+
+    /**
+     * 查询账户余额（未确认）
+     *
+     * @param chainId
+     * @param assetChainId
+     * @param assetId
+     * @param addressByte
+     * @return
+     */
+    public static NonceBalance getBalanceNonce(int chainId, int assetChainId, int assetId, byte[] addressByte) {
+        String address = AddressTool.getStringAddressByBytes(addressByte);
+        HashMap balanceNonce = LedgerCmdCall.getBalanceNonce(chainId, assetChainId, assetId, address);
+        if (balanceNonce != null) {
+            Object available = balanceNonce.get("available");
+            String strNonce = (String)balanceNonce.get("nonce");
+            return new NonceBalance(RPCUtil.decode(strNonce), BigIntegerUtils.stringToBigInteger(String.valueOf(available)));
+        }
+        return new NonceBalance(null, new BigInteger("0"));
     }
 
     /**

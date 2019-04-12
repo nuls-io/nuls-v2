@@ -36,6 +36,7 @@ import io.nuls.contract.service.ContractService;
 import io.nuls.contract.service.ContractTxService;
 import io.nuls.contract.storage.ContractAddressStorageService;
 import io.nuls.contract.storage.ContractTokenAddressStorageService;
+import io.nuls.contract.util.Log;
 import io.nuls.tools.basic.Result;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
@@ -123,6 +124,7 @@ public class CreateContractTxProcessor {
     }
 
     public Result onRollback(int chainId, ContractWrapperTransaction tx) throws Exception {
+        Log.info("rollback create tx, hash is {}", tx.getHash().toString());
         ContractData txData = tx.getContractData();
         byte[] contractAddress = txData.getContractAddress();
 

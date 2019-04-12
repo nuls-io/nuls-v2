@@ -97,6 +97,9 @@ public class ChainManager {
              * */
             while (true) {
                 if (CallMethodUtils.registerTx(chain, txRegisterDetailList)) {
+                    if(chain.isPacker()){
+                        CallMethodUtils.sendState(chain,true);
+                    }
                     break;
                 }
                 try {

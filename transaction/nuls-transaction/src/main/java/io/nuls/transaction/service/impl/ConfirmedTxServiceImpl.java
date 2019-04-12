@@ -351,8 +351,10 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
         //倒序放入未确认库, 和待打包队列
         for (int i = txList.size() - 1; i >= 0; i--) {
             Transaction tx = txList.get(i);
-            unconfirmedTxStorageService.putTx(chain.getChainId(), tx);
-            savePackable(chain, tx);
+            if(!TxManager.isSystemTx(chain, tx)) {
+                unconfirmedTxStorageService.putTx(chain.getChainId(), tx);
+                savePackable(chain, tx);
+            }
         }
         return true;
     }
@@ -366,7 +368,7 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
      */
     private boolean savePackable(Chain chain, Transaction tx) {
         //不是系统交易 并且节点是打包节点则重新放回待打包队列的最前端
-        if (!TxManager.isSystemTx(chain, tx) && chain.getPackaging().get()) {
+        if (chain.getPackaging().get()) {
             packablePool.addInFirst(chain, tx);
         }
         return true;
