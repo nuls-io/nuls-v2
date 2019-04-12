@@ -64,10 +64,33 @@ public class ContractConfig {
 
     private int chainId;
 
-    private int assetId;
+    private int assetsId;
 
     private long maxViewGas;
 
+    public int getChainId() {
+        return chainId;
+    }
+
+    public void setChainId(int chainId) {
+        this.chainId = chainId;
+    }
+
+    public int getAssetsId() {
+        return assetsId;
+    }
+
+    public void setAssetsId(int assetsId) {
+        this.assetsId = assetsId;
+    }
+
+    public long getMaxViewGas() {
+        return maxViewGas;
+    }
+
+    public void setMaxViewGas(long maxViewGas) {
+        this.maxViewGas = maxViewGas;
+    }
 
     public String getEncoding() {
         return encoding;
@@ -151,7 +174,7 @@ public class ContractConfig {
 
     public ConfigBean getChainConfig() {
         ConfigBean configBean = new ConfigBean();
-        configBean.setAssetsId(assetId);
+        configBean.setAssetsId(assetsId);
         configBean.setChainId(chainId);
         configBean.setMaxViewGas(maxViewGas);
         return configBean;

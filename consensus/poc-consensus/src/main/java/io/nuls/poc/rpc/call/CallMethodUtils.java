@@ -367,7 +367,7 @@ public class CallMethodUtils {
             Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.TX.abbr, "tx_newTx", params);
             if (!cmdResp.isSuccess()) {
                 chain.getLoggerMap().get(ConsensusConstant.CONSENSUS_LOGGER_NAME).error("Transaction failed to send!");
-                rollBackUnconfirmTx(chain,tx);
+                //rollBackUnconfirmTx(chain,tx);
                 throw new NulsException(ConsensusErrorCode.FAILED);
             }
         }catch (NulsException e){

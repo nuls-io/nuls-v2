@@ -88,7 +88,6 @@ public class VerifyTxProcessTask implements Runnable {
             boolean rs = txService.verify(chain, tx);
             chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("验证器花费时间:{}", System.currentTimeMillis() - s1);
             //todo 跨链交易单独处理, 是否需要进行跨链验证？
-            //只会有本地创建的跨链交易才会进入这里, 其他链广播到跨链交易, 由其他逻辑处理
             if (!rs) {
                 return false;
             }
