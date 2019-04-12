@@ -583,7 +583,7 @@ public class TestJyc {
                 String hash = result.get("value").toString();
                 hashList.add(hash);
                 Log.debug(i + "---transfer from {} to {}, hash:{}", address23, account, hash);
-                Thread.sleep(100);
+                Thread.sleep(1);
             }
         }
         Thread.sleep(60000);
@@ -673,7 +673,7 @@ public class TestJyc {
             Log.debug(address23 + "-----balance:{}", balance);
         }
         int total = 100_000_000;
-        int count = 500;
+        int count = 10;
         List<String> accountList = new ArrayList<>();
         Log.debug("##################################################");
         {

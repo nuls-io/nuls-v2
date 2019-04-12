@@ -4,7 +4,7 @@
     "extend": "",
     "validTransactions": [
       {
-        "type": "1",
+        "type": "2",
         "name": "tranfer",
         "handler": "io.nuls.account.rpc.cmd.TransactionHandler",
         "validate": "transferTxValidate",
