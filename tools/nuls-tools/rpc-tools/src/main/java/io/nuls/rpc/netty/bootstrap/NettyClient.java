@@ -43,7 +43,6 @@ public class NettyClient {
 
     public static Channel createConnect(String uri,int tryCount) {
         try {
-            TimeUnit.SECONDS.sleep(3);
             URI webSocketURI = null;
             try {
                 webSocketURI = new URI(uri);
@@ -71,7 +70,6 @@ public class NettyClient {
                     });
             Channel ch = b.connect(webSocketURI.getHost(), webSocketURI.getPort()).sync().channel();
             handler.handshakeFuture().sync();
-            Log.info("创建ws连接:{}",ch.isOpen());
             ResponseMessageProcessor.handshake(ch);
             return ch;
         } catch (Exception e) {
