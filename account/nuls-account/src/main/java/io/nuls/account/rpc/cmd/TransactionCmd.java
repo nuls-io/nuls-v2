@@ -101,7 +101,7 @@ public class TransactionCmd extends BaseCmd {
                     try {
                         lists.add(Transaction.getInstance(tx));
                     } catch (NulsException e) {
-                        LoggerUtil.logger.error("ac_accountTxValidate tx format error",e);
+                        LoggerUtil.logger.error("ac_accountTxValidate tx format error", e);
                     }
                 });
                 result = transactionService.accountTxValidate(chainId, lists);
@@ -345,11 +345,11 @@ public class TransactionCmd extends BaseCmd {
             // parse params
             JSONUtils.getInstance().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
             TransferDto transferDto = JSONUtils.json2pojo(JSONUtils.obj2json(params), TransferDto.class);
-            Function<CoinDto,CoinDto> checkAddress = cd->{
+            Function<CoinDto, CoinDto> checkAddress = cd -> {
                 //如果address 不是地址就当别名处理
-                if(!AddressTool.validAddress(transferDto.getChainId(),cd.getAddress())){
+                if (!AddressTool.validAddress(transferDto.getChainId(), cd.getAddress())) {
                     AliasPo aliasPo = aliasStorageService.getAlias(transferDto.getChainId(), cd.getAddress());
-                    Preconditions.checkNotNull(aliasPo,AccountErrorCode.ALIAS_NOT_EXIST);
+                    Preconditions.checkNotNull(aliasPo, AccountErrorCode.ALIAS_NOT_EXIST);
                     cd.setAddress(AddressTool.getStringAddressByBytes(aliasPo.getAddress()));
                 }
                 return cd;
@@ -417,7 +417,7 @@ public class TransactionCmd extends BaseCmd {
     public Response transferByAlias(Map params) {
         Map<String, String> map = new HashMap<>(1);
         try {
-            Preconditions.checkNotNull(params,AccountErrorCode.NULL_PARAMETER);
+            Preconditions.checkNotNull(params, AccountErrorCode.NULL_PARAMETER);
             Object chainIdObj = params.get(RpcParameterNameConstant.CHAIN_ID);
             Object addressObj = params.get(RpcParameterNameConstant.ADDRESS);
             Object passwordObj = params.get(RpcParameterNameConstant.PASSWORD);
@@ -425,7 +425,7 @@ public class TransactionCmd extends BaseCmd {
             Object amountObj = params.get(RpcParameterNameConstant.AMOUNT);
             Object remarkObj = params.get(RpcParameterNameConstant.REMARK);
             // check parameters
-            Preconditions.checkNotNull(new Object[]{chainIdObj,addressObj,passwordObj,aliasObj,amountObj},AccountErrorCode.NULL_PARAMETER);
+            Preconditions.checkNotNull(new Object[]{chainIdObj, addressObj, passwordObj, aliasObj, amountObj}, AccountErrorCode.NULL_PARAMETER);
             int chainId = (int) chainIdObj;
             String address = (String) addressObj;
             String password = (String) passwordObj;
@@ -441,14 +441,14 @@ public class TransactionCmd extends BaseCmd {
             }
             //根据别名查询出地址
             AliasPo toAddressAliasPo = aliasStorageService.getAlias(chainId, alias);
-            Preconditions.checkNotNull(toAddressAliasPo,AccountErrorCode.ALIAS_NOT_EXIST);
+            Preconditions.checkNotNull(toAddressAliasPo, AccountErrorCode.ALIAS_NOT_EXIST);
             AliasPo formAddressAliasPo = aliasStorageService.getAlias(chainId, alias);
-            Preconditions.checkNotNull(formAddressAliasPo,AccountErrorCode.ALIAS_NOT_EXIST);
+            Preconditions.checkNotNull(formAddressAliasPo, AccountErrorCode.ALIAS_NOT_EXIST);
             Chain chain = chainManager.getChainMap().get(chainId);
-            Preconditions.checkNotNull(chain,AccountErrorCode.CHAIN_NOT_EXIST);
+            Preconditions.checkNotNull(chain, AccountErrorCode.CHAIN_NOT_EXIST);
             int assetId = chain.getConfig().getAssetsId();
             CoinDto fromCoinDto = new CoinDto(AddressTool.getStringAddressByBytes(formAddressAliasPo.getAddress()), chainId, assetId, amount, password);
-            CoinDto toCoinDto = new CoinDto(AddressTool.getStringAddressByBytes(toAddressAliasPo.getAddress()),chainId,assetId,amount,null);
+            CoinDto toCoinDto = new CoinDto(AddressTool.getStringAddressByBytes(toAddressAliasPo.getAddress()), chainId, assetId, amount, null);
             Transaction tx = transactionService.transferByAlias(chainId, fromCoinDto, toCoinDto, remark);
             map.put("txHash", tx.getHash().getDigestHex());
         } catch (NulsException e) {
@@ -474,9 +474,9 @@ public class TransactionCmd extends BaseCmd {
         Map<String, String> map = new HashMap<>(1);
         MultiSigAccount multiSigAccount = null;
         try {
-            Preconditions.checkNotNull(params,AccountErrorCode.NULL_PARAMETER);
+            Preconditions.checkNotNull(params, AccountErrorCode.NULL_PARAMETER);
             Object chainIdObj = params.get(RpcParameterNameConstant.CHAIN_ID);
-            Object assetsIdObj = params.get(RpcParameterNameConstant.ASSETS_Id);
+            Object assetsIdObj = params.get(RpcParameterNameConstant.ASSETS_ID);
             Object addressObj = params.get(RpcParameterNameConstant.ADDRESS);
             Object passwordObj = params.get(RpcParameterNameConstant.PASSWORD);
             Object signAddressObj = params.get(RpcParameterNameConstant.SIGN_ADDREESS);
@@ -486,11 +486,11 @@ public class TransactionCmd extends BaseCmd {
             Object amountObj = params.get(RpcParameterNameConstant.AMOUNT);
             Object remarkObj = params.get(RpcParameterNameConstant.REMARK);
             // check parameters
-            Preconditions.checkNotNull(new Object[]{chainIdObj,addressObj,signAddressObj,amountObj},AccountErrorCode.NULL_PARAMETER);
+            Preconditions.checkNotNull(new Object[]{chainIdObj, addressObj, signAddressObj, amountObj}, AccountErrorCode.NULL_PARAMETER);
             int chainId = (int) chainIdObj;
             int assetsId;
             Chain chain = chainManager.getChainMap().get(chainId);
-            Preconditions.checkNotNull(chain,AccountErrorCode.CHAIN_NOT_EXIST);
+            Preconditions.checkNotNull(chain, AccountErrorCode.CHAIN_NOT_EXIST);
             // if the assetsId is null,the default assetsId is the chain's main assets
             if (assetsIdObj == null) {
                 assetsId = chain.getConfig().getAssetsId();
@@ -504,17 +504,17 @@ public class TransactionCmd extends BaseCmd {
             String alias = (String) aliasObj;
             String toAddress = (String) toAddressObj;
             if (type == 1) {
-                Preconditions.checkNotNull(toAddress,AccountErrorCode.PARAMETER_ERROR);
+                Preconditions.checkNotNull(toAddress, AccountErrorCode.PARAMETER_ERROR);
             } else if (type == 2) {
-                Preconditions.checkNotNull(alias,AccountErrorCode.PARAMETER_ERROR);
+                Preconditions.checkNotNull(alias, AccountErrorCode.PARAMETER_ERROR);
                 AliasPo aliasPo = aliasStorageService.getAlias(chainId, alias);
-                Preconditions.checkNotNull(aliasPo,AccountErrorCode.ACCOUNT_NOT_EXIST);
+                Preconditions.checkNotNull(aliasPo, AccountErrorCode.ACCOUNT_NOT_EXIST);
                 toAddress = AddressTool.getStringAddressByBytes(aliasPo.getAddress());
             } else {
                 throw new NulsRuntimeException(AccountErrorCode.PARAMETER_ERROR);
             }
             multiSigAccount = multiSignAccountService.getMultiSigAccountByAddress(chainId, address);
-            Preconditions.checkNotNull(multiSigAccount,AccountErrorCode.ACCOUNT_NOT_EXIST);
+            Preconditions.checkNotNull(multiSigAccount, AccountErrorCode.ACCOUNT_NOT_EXIST);
             BigInteger amount = new BigInteger((String) amountObj);
             String remark = (String) remarkObj;
             if (BigIntegerUtils.isLessThan(amount, BigInteger.ZERO)) {
@@ -526,7 +526,7 @@ public class TransactionCmd extends BaseCmd {
             }
             //查询出账户
             Account account = accountService.getAccount(chainId, signAddress);
-            Preconditions.checkNotNull(account,AccountErrorCode.ACCOUNT_NOT_EXIST);
+            Preconditions.checkNotNull(account, AccountErrorCode.ACCOUNT_NOT_EXIST);
 
             //验证签名账户是否属于多签账户的签名账户,如果不是多签账户下的地址则提示错误
             if (!AddressTool.validSignAddress(multiSigAccount.getPubKeyList(), account.getPubKey())) {
