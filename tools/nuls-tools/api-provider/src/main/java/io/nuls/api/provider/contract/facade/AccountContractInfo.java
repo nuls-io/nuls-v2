@@ -23,6 +23,59 @@ public class AccountContractInfo {
 
     private String msg;
 
+    @Override
+    public String toString() {
+        return new StringBuilder("{")
+                .append("\"contractAddress\":\"")
+                .append(contractAddress).append('\"')
+                .append(",\"isCreate\":")
+                .append(isCreate)
+                .append(",\"createTime\":\"")
+                .append(createTime).append('\"')
+                .append(",\"height\":")
+                .append(height)
+                .append(",\"confirmCount\":")
+                .append(confirmCount)
+                .append(",\"remarkName\":\"")
+                .append(remarkName).append('\"')
+                .append(",\"status\":")
+                .append(status)
+                .append(",\"msg\":\"")
+                .append(msg).append('\"')
+                .append('}').toString();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof AccountContractInfo)) return false;
+
+        AccountContractInfo that = (AccountContractInfo) o;
+
+        if (isCreate != that.isCreate) return false;
+        if (height != that.height) return false;
+        if (confirmCount != that.confirmCount) return false;
+        if (status != that.status) return false;
+        if (contractAddress != null ? !contractAddress.equals(that.contractAddress) : that.contractAddress != null)
+            return false;
+        if (createTime != null ? !createTime.equals(that.createTime) : that.createTime != null) return false;
+        if (remarkName != null ? !remarkName.equals(that.remarkName) : that.remarkName != null) return false;
+        return msg != null ? msg.equals(that.msg) : that.msg == null;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = contractAddress != null ? contractAddress.hashCode() : 0;
+        result = 31 * result + (isCreate ? 1 : 0);
+        result = 31 * result + (createTime != null ? createTime.hashCode() : 0);
+        result = 31 * result + (int) (height ^ (height >>> 32));
+        result = 31 * result + (int) (confirmCount ^ (confirmCount >>> 32));
+        result = 31 * result + (remarkName != null ? remarkName.hashCode() : 0);
+        result = 31 * result + status;
+        result = 31 * result + (msg != null ? msg.hashCode() : 0);
+        return result;
+    }
+
     public String getContractAddress() {
         return contractAddress;
     }

@@ -67,5 +67,5 @@ if [ -z "${nulstarUrl}" ]; then
     nulstarUrl="ws://127.0.0.1:7771"
 fi
 echo "Service Manager URL:$nulstarUrl"
-echo "${JAVA} $JAVA_OPTS -classpath $CLASSPATH $MAIN_CLASS $nulstarUrl"
+#echo "${JAVA} $JAVA_OPTS -classpath $CLASSPATH $MAIN_CLASS $nulstarUrl"
 ${JAVA} $JAVA_OPTS -classpath $CLASSPATH $MAIN_CLASS $nulstarUrl

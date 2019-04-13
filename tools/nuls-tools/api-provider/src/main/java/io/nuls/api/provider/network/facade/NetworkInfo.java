@@ -32,6 +32,46 @@ public class NetworkInfo {
      */
     int outCount;
 
+    @Override
+    public String toString() {
+        return new StringBuilder("{")
+                .append("\"localBestHeight\":")
+                .append(localBestHeight)
+                .append(",\"netBestHeight\":")
+                .append(netBestHeight)
+                .append(",\"timeOffset\":")
+                .append(timeOffset)
+                .append(",\"inCount\":")
+                .append(inCount)
+                .append(",\"outCount\":")
+                .append(outCount)
+                .append('}').toString();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof NetworkInfo)) return false;
+
+        NetworkInfo that = (NetworkInfo) o;
+
+        if (localBestHeight != that.localBestHeight) return false;
+        if (netBestHeight != that.netBestHeight) return false;
+        if (timeOffset != that.timeOffset) return false;
+        if (inCount != that.inCount) return false;
+        return outCount == that.outCount;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = (int) (localBestHeight ^ (localBestHeight >>> 32));
+        result = 31 * result + (int) (netBestHeight ^ (netBestHeight >>> 32));
+        result = 31 * result + (int) (timeOffset ^ (timeOffset >>> 32));
+        result = 31 * result + inCount;
+        result = 31 * result + outCount;
+        return result;
+    }
+
     public long getLocalBestHeight() {
         return localBestHeight;
     }

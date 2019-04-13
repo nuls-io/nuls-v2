@@ -23,7 +23,7 @@ public class ReadyBalanceToAddressAdapter extends TestCaseChain {
     public Class<? extends TestCaseIntf>[] testChain() {
         return new Class[]{
                 TransferToAddressCase.class,
-                SleepAdapter.$15SEC.class,
+                SleepAdapter.$30SEC.class,
                 SyncTxInfoCase.class,
                 GetTranscationToAddressAdapter.class
         };
