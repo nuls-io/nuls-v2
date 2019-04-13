@@ -62,7 +62,7 @@ PUB_LIB="${PUB_LIB}:./test-1.0.0.jar"
 # Get standard environment variables
 JAVA_OPTS="-Xms128m -Xmx128m -DtestNodeType=master -Dapp.name=test -Dlog.level=${LOGLEVEL} -Dactive.module=$CONFIG "
 CLASSPATH=$CLASSPATH:$PUB_LIB:.
-nulstarUrl=`getModuleItem $config "serviceManager"`
+nulstarUrl=`getModuleItem $CONFIG "serviceManager"`
 if [ -z "${nulstarUrl}" ]; then
     nulstarUrl="ws://127.0.0.1:7771"
 fi

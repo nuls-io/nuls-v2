@@ -30,7 +30,7 @@ public class TransferCase extends TestCaseChain {
         return new Class[]{
                 CreateAccountCase.class,
                 TransferToAddressCase.class,
-                SleepAdapter.$15SEC.class,
+                SleepAdapter.$30SEC.class,
                 SyncTxInfoCase.class,
                 GetTranscationToAddressAdapter.class,
                 SyncAccountBalance.class
