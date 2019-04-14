@@ -53,6 +53,7 @@ import java.util.List;
 public class AccountTool {
 
     public static final int CREATE_MAX_SIZE = 100;
+    public static final int CREATE_MULTI_SIGACCOUNT_MIN_SIZE = 2;
 
     public static Address newAddress(int chainId, String prikey) {
         ECKey key;
@@ -131,7 +132,7 @@ public class AccountTool {
 
     public static byte[] createMultiSigAccountOriginBytes(int chainId, int n, List<String> pubKeys) throws NulsException {
         byte[] result = null;
-        if (n < 2 || (pubKeys == null ? 0 : pubKeys.size()) < n) {
+        if (n < CREATE_MULTI_SIGACCOUNT_MIN_SIZE || (pubKeys == null ? 0 : pubKeys.size()) < n) {
             throw new NulsRuntimeException(AccountErrorCode.FAILED);
         }
         HashSet<String> hashSet = new HashSet(pubKeys);

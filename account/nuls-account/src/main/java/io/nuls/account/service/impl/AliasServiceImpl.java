@@ -136,21 +136,21 @@ public class AliasServiceImpl implements AliasService, InitializingBean {
 
         String txStr = RPCUtil.encode(tx.serialize());
         //调用交易验证器
-        if(!TransactionCmdCall.baseValidateTx(chainId, txStr)){
+        if (!TransactionCmdCall.baseValidateTx(chainId, txStr)) {
             LoggerUtil.logger.error("new tx base validator failed...");
             throw new NulsRuntimeException(AccountErrorCode.TX_DATA_VALIDATION_ERROR);
         }
-        if(!this.aliasTxValidate(chainId, tx)){
+        if (!this.aliasTxValidate(chainId, tx)) {
             LoggerUtil.logger.error("new tx validator failed...");
             throw new NulsRuntimeException(AccountErrorCode.TX_DATA_VALIDATION_ERROR);
         }
         VerifyTxResult verifyTxResult = LedgerCmdCall.commitUnconfirmedTx(chainId, RPCUtil.encode(tx.serialize()));
-        if(!verifyTxResult.success()){
+        if (!verifyTxResult.success()) {
             LoggerUtil.logger.error("new tx verifyCoinData failed...");
             throw new NulsRuntimeException(AccountErrorCode.TX_DATA_VALIDATION_ERROR);
         }
         //发起新交易
-        if(!TransactionCmdCall.newTx(chainId, txStr)) {
+        if (!TransactionCmdCall.newTx(chainId, txStr)) {
             //如果发给交易模块失败,
             LedgerCmdCall.rollBackUnconfirmTx(chainId, txStr);
         }
@@ -218,7 +218,7 @@ public class AliasServiceImpl implements AliasService, InitializingBean {
         Alias alias = new Alias();
         alias.parse(new NulsByteBuffer(transaction.getTxData()));
         String address = AddressTool.getStringAddressByBytes(alias.getAddress());
-        if (BaseConstant.CONTRACT_ADDRESS_TYPE == alias.getAddress()[2]) {
+        if (AddressTool.validContractAddress(alias.getAddress(), chainId)) {
             throw new NulsRuntimeException(AccountErrorCode.ADDRESS_ERROR);
         }
         if (!FormatValidUtils.validAlias(alias.getAlias())) {

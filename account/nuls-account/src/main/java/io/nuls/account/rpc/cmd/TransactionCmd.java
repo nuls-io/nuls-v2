@@ -505,7 +505,7 @@ public class TransactionCmd extends BaseCmd {
             String toAddress = (String) toAddressObj;
             if (type == 1) {
                 Preconditions.checkNotNull(toAddress, AccountErrorCode.PARAMETER_ERROR);
-            } else if (type == 2) {
+            } else if (type == AccountConstant.TX_TYPE_TRANSFER) {
                 Preconditions.checkNotNull(alias, AccountErrorCode.PARAMETER_ERROR);
                 AliasPo aliasPo = aliasStorageService.getAlias(chainId, alias);
                 Preconditions.checkNotNull(aliasPo, AccountErrorCode.ACCOUNT_NOT_EXIST);
@@ -609,7 +609,7 @@ public class TransactionCmd extends BaseCmd {
         }
         try {
             byte[] bytes = remark.getBytes(NulsConfig.DEFAULT_ENCODING);
-            if (bytes.length > 100) {
+            if (bytes.length > AccountConstant.TX_REMARK_MAX_LEN) {
                 return false;
             }
             return true;
