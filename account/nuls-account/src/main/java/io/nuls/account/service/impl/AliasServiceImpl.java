@@ -52,6 +52,7 @@ import io.nuls.base.signture.P2PHKSignature;
 import io.nuls.base.signture.SignatureUtil;
 import io.nuls.base.signture.TransactionSignature;
 import io.nuls.rpc.util.RPCUtil;
+import io.nuls.rpc.util.TimeUtils;
 import io.nuls.tools.basic.InitializingBean;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Service;
@@ -327,7 +328,8 @@ public class AliasServiceImpl implements AliasService, InitializingBean {
         Chain chain = chainManager.getChainMap().get(account.getChainId());
         int assetsId = chain.getConfig().getAssetsId();
         //查询账本获取nonce值
-        byte[] nonce = TxUtil.getNonce(account.getChainId(), account.getChainId(), assetsId, account.getAddress().getAddressBytes());
+        NonceBalance nonceBalance = TxUtil.getBalanceNonce(account.getChainId(), account.getChainId(), assetsId, account.getAddress().getAddressBytes());
+        byte[] nonce = nonceBalance.getNonce();
         CoinFrom coinFrom = new CoinFrom(account.getAddress().getAddressBytes(), account.getChainId(), assetsId, AccountConstant.ALIAS_FEE, nonce, AccountConstant.NORMAL_TX_LOCKED);
         coinFrom.setAddress(account.getAddress().getAddressBytes());
         CoinTo coinTo = new CoinTo(AccountConstant.BLACK_HOLE_ADDRESS, account.getChainId(), assetsId, AccountConstant.ALIAS_FEE);
