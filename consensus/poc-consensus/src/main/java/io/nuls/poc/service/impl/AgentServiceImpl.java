@@ -22,9 +22,9 @@ import io.nuls.poc.model.dto.input.SearchAllAgentDTO;
 import io.nuls.poc.model.dto.input.StopAgentDTO;
 import io.nuls.poc.model.dto.output.AgentDTO;
 import io.nuls.poc.model.po.AgentPo;
+import io.nuls.poc.rpc.call.CallMethodUtils;
 import io.nuls.poc.service.AgentService;
 import io.nuls.poc.storage.AgentStorageService;
-import io.nuls.poc.rpc.call.CallMethodUtils;
 import io.nuls.poc.utils.enumeration.ConsensusStatus;
 import io.nuls.poc.utils.manager.AgentManager;
 import io.nuls.poc.utils.manager.ChainManager;
@@ -35,7 +35,9 @@ import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.model.message.Response;
 import io.nuls.rpc.netty.processor.ResponseMessageProcessor;
 import io.nuls.rpc.util.RPCUtil;
+import io.nuls.rpc.util.TimeUtils;
 import io.nuls.tools.basic.Result;
+import io.nuls.tools.constant.TxType;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Service;
 import io.nuls.tools.exception.NulsException;
@@ -111,8 +113,8 @@ public class AgentServiceImpl implements AgentService {
             //2.账户验证
             HashMap callResult = CallMethodUtils.accountValid(dto.getChainId(), dto.getAgentAddress(), dto.getPassword());
             //3.组装创建节点交易
-            Transaction tx = new Transaction(ConsensusConstant.TX_TYPE_REGISTER_AGENT);
-            tx.setTime(CallMethodUtils.currentTime());
+            Transaction tx = new Transaction(TxType.REGISTER_AGENT);
+            tx.setTime(TimeUtils.getCurrentTimeMillis());
             //3.1.组装共识节点信息
             Agent agent = new Agent();
             agent.setAgentAddress(AddressTool.getAddress(dto.getAgentAddress()));
@@ -132,14 +134,18 @@ public class AgentServiceImpl implements AgentService {
             String priKey = (String) callResult.get("priKey");
             CallMethodUtils.transactionSignature(dto.getChainId(), dto.getAgentAddress(), dto.getPassword(), priKey, tx);
             String txStr = RPCUtil.encode(tx.serialize());
-            boolean validResult = CallMethodUtils.transactionBasicValid(chain,txStr);
+            boolean validResult = validatorManager.validateTx(chain, tx);
+            if (!validResult) {
+                return Result.getFailed(ConsensusErrorCode.TX_DATA_VALIDATION_ERROR);
+            }
+            /*boolean validResult = CallMethodUtils.transactionBasicValid(chain,txStr);
             if (!validResult) {
                 return Result.getFailed(ConsensusErrorCode.TX_DATA_VALIDATION_ERROR);
             }
             validResult = validatorManager.validateTx(chain, tx);
             if (!validResult) {
                 return Result.getFailed(ConsensusErrorCode.TX_DATA_VALIDATION_ERROR);
-            }
+            }*/
             CallMethodUtils.sendTx(chain,txStr);
             Map<String, Object> result = new HashMap<>(2);
             result.put("txHash", tx.getHash().getDigestHex());
@@ -175,7 +181,7 @@ public class AgentServiceImpl implements AgentService {
             return Result.getFailed(ConsensusErrorCode.CHAIN_NOT_EXIST);
         }
         try {
-            Transaction transaction = new Transaction(ConsensusConstant.TX_TYPE_REGISTER_AGENT);
+            Transaction transaction = new Transaction(TxType.REGISTER_AGENT);
             transaction.parse(RPCUtil.decode(txHex), 0);
             boolean result = validatorManager.validateTx(chain, transaction);
             if (!result) {
@@ -219,7 +225,7 @@ public class AgentServiceImpl implements AgentService {
         }
         try {
             HashMap callResult = CallMethodUtils.accountValid(dto.getChainId(), dto.getAddress(), dto.getPassword());
-            Transaction tx = new Transaction(ConsensusConstant.TX_TYPE_STOP_AGENT);
+            Transaction tx = new Transaction(TxType.STOP_AGENT);
             StopAgent stopAgent = new StopAgent();
             stopAgent.setAddress(AddressTool.getAddress(dto.getAddress()));
             List<Agent> agentList = chain.getAgentList();
@@ -238,7 +244,7 @@ public class AgentServiceImpl implements AgentService {
             }
             stopAgent.setCreateTxHash(agent.getTxHash());
             tx.setTxData(stopAgent.serialize());
-            CoinData coinData = coinDataManager.getStopAgentCoinData(chain, agent, CallMethodUtils.currentTime() + chain.getConfig().getStopAgentLockTime());
+            CoinData coinData = coinDataManager.getStopAgentCoinData(chain, agent, TimeUtils.getCurrentTimeMillis() + chain.getConfig().getStopAgentLockTime());
             BigInteger fee = TransactionFeeCalculator.getNormalTxFee(tx.size()+ P2PHKSignature.SERIALIZE_LENGTH+coinData.serialize().length);
             coinData.getTo().get(0).setAmount(coinData.getTo().get(0).getAmount().subtract(fee));
             tx.setCoinData(coinData.serialize());
@@ -246,14 +252,18 @@ public class AgentServiceImpl implements AgentService {
             String priKey = (String) callResult.get("priKey");
             CallMethodUtils.transactionSignature(dto.getChainId(), dto.getAddress(), dto.getPassword(), priKey, tx);
             String txStr = RPCUtil.encode(tx.serialize());
-            boolean validResult = CallMethodUtils.transactionBasicValid(chain,txStr);
+            boolean validResult = validatorManager.validateTx(chain, tx);
+            if (!validResult) {
+                return Result.getFailed(ConsensusErrorCode.TX_DATA_VALIDATION_ERROR);
+            }
+            /*boolean validResult = CallMethodUtils.transactionBasicValid(chain,txStr);
             if (!validResult) {
                 return Result.getFailed(ConsensusErrorCode.TX_DATA_VALIDATION_ERROR);
             }
             validResult = validatorManager.validateTx(chain, tx);
             if (!validResult) {
                 return Result.getFailed(ConsensusErrorCode.TX_DATA_VALIDATION_ERROR);
-            }
+            }*/
             CallMethodUtils.sendTx(chain,txStr);
             Map<String, Object> result = new HashMap<>(ConsensusConstant.INIT_CAPACITY);
             result.put("txHash", tx.getHash().getDigestHex());
@@ -287,7 +297,7 @@ public class AgentServiceImpl implements AgentService {
         }
         try {
             String txHex = (String) params.get(ConsensusConstant.PARAM_TX);
-            Transaction transaction = new Transaction(ConsensusConstant.TX_TYPE_STOP_AGENT);
+            Transaction transaction = new Transaction(TxType.STOP_AGENT);
             transaction.parse(RPCUtil.decode(txHex), 0);
             boolean result = validatorManager.validateTx(chain, transaction);
             if (!result) {

@@ -1,15 +1,11 @@
 package io.nuls.base.data;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.basic.NulsOutputStreamBuffer;
 import io.nuls.base.constant.BaseConstant;
-import io.nuls.base.script.Script;
 import io.nuls.tools.exception.NulsException;
-import io.nuls.tools.exception.NulsRuntimeException;
 import io.nuls.tools.parse.SerializeUtils;
-import io.nuls.tools.thread.TimeService;
 
 import java.io.IOException;
 import java.math.BigInteger;
@@ -68,53 +64,6 @@ public class CoinTo extends Coin {
         return size;
     }
 
-    @JsonIgnore
-    public byte[] getAddresses() {
-        byte[] address = new byte[Address.ADDRESS_LENGTH];
-        //如果owner不是存放的脚本则直接返回owner
-        if (address == null || address.length == Address.ADDRESS_LENGTH) {
-            return address;
-        } else {
-            Script scriptPubkey = new Script(address);
-            //如果为P2PKH类型交易则从第四位开始返回23个字节
-            if (scriptPubkey.isSentToAddress()) {
-                System.arraycopy(address, 3, address, 0, Address.ADDRESS_LENGTH);
-            }
-            //如果为P2SH或multi类型的UTXO则从第三位开始返回23个字节
-            else if (scriptPubkey.isPayToScriptHash()) {
-                scriptPubkey.isSentToMultiSig();
-                System.arraycopy(address, 2, address, 0, Address.ADDRESS_LENGTH);
-            }else{
-                throw new NulsRuntimeException(new Exception());
-            }
-        }
-        return address;
-    }
-
-    public boolean usable(Long bestHeight) {
-        if (lockTime < 0) {
-            return false;
-        }
-        if (lockTime == 0) {
-            return true;
-        }
-
-        long currentTime = TimeService.currentTimeMillis();
-
-        if (lockTime > BaseConstant.BlOCKHEIGHT_TIME_DIVIDE) {
-            if (lockTime <= currentTime) {
-                return true;
-            } else {
-                return false;
-            }
-        } else {
-            if (lockTime <= bestHeight) {
-                return true;
-            } else {
-                return false;
-            }
-        }
-    }
 
     @Override
     public String toString() {

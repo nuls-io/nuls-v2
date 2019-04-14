@@ -25,6 +25,8 @@
 package io.nuls.rpc.model.message;
 
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
  * 消息确认对象，表示已经收到
@@ -39,12 +41,15 @@ public class Ack {
      * 请求的消息号
      * This is the original request ID referred by a Request message
      */
+    @JsonProperty
     private String RequestId;
 
+    @JsonIgnore
     public String getRequestId() {
         return RequestId;
     }
 
+    @JsonIgnore
     public void setRequestId(String RequestId) {
         this.RequestId = RequestId;
     }

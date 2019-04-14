@@ -9,6 +9,7 @@ import io.nuls.tools.core.ioc.SpringLiteContext;
 import io.nuls.tools.log.logback.NulsLogger;
 import io.nuls.tools.parse.JSONUtils;
 
+import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
@@ -54,6 +55,13 @@ public class RemoteTestController {
 
     }
 
+    @Path("/test")
+    @Produces(MediaType.APPLICATION_JSON)
+    @GET
+    public String doDemo() {
+        return "conneted";
+    }
+
     @Path("/call")
     @Produces(MediaType.APPLICATION_JSON)
     @POST
@@ -77,10 +85,11 @@ public class RemoteTestController {
             return new RemoteResult(tc.check(param, 0));
         } catch (TestFailException e) {
             return new RemoteResult(false,e.getMessage());
-        } catch (IOException e) {
-            e.printStackTrace();
+        } catch (Throwable e){
             return new RemoteResult(false,"系统异常："+e.getMessage());
         }
     }
+
+
 
 }

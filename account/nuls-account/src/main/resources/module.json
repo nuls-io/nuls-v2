@@ -1,8 +1,6 @@
 {
-  "chainConfig": {
-    "chainId": 2,
-    "assetsId": 1
-  },
+  "chainId": 2,
+  "assetId": 1,
   "mainChainId": 2,
   "mainAssetId": 1,
   "language": "en",

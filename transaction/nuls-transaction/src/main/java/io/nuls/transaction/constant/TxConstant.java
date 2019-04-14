@@ -131,4 +131,6 @@ public interface TxConstant {
     String CROSS_TRANSFER_COMMIT = "crossTxCommit";
     String CROSS_TRANSFER_ROLLBACK = "crossTxRollback";
 
+    String THREAD_VERIFIY_BLOCK_TXS = "verifiyBlockTxs";
+    String THREAD_CLEAR_TXS = "clearTxs";
 }

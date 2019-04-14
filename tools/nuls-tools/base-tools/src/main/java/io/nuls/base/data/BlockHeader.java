@@ -104,7 +104,6 @@ public class BlockHeader extends BaseNulsData {
             Log.error(e);
         }
         this.blockSignature = byteBuffer.readNulsData(new BlockSignature());
-//        }
     }
 
     private NulsDigestData forceCalcHash() {

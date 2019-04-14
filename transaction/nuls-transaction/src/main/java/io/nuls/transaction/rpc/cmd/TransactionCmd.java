@@ -98,9 +98,9 @@ public class TransactionCmd extends BaseCmd {
                 txRegister.setValidator(txRegisterDto.getValidator());
                 txRegister.setCommit(moduleTxRegisterDto.getCommit());
                 txRegister.setRollback(moduleTxRegisterDto.getRollback());
-                txRegister.setSystemTx(txRegisterDto.isSystemTx());
-                txRegister.setUnlockTx(txRegisterDto.isUnlockTx());
-                txRegister.setVerifySignature(txRegisterDto.isVerifySignature());
+                txRegister.setSystemTx(txRegisterDto.getSystemTx());
+                txRegister.setUnlockTx(txRegisterDto.getUnlockTx());
+                txRegister.setVerifySignature(txRegisterDto.getVerifySignature());
 
                 result = txService.register(chain, txRegister);
             }
@@ -631,6 +631,38 @@ public class TransactionCmd extends BaseCmd {
             chain.getPackaging().set(packaging);
             chain.getLoggerMap().get(TxConstant.LOG_TX).debug("Task-Packaging 节点是否是打包节点,状态变更为: {}", chain.getPackaging().get());
             return success();
+        } catch (NulsException e) {
+            errorLogProcess(chain, e);
+            return failed(e.getErrorCode());
+        } catch (Exception e) {
+            errorLogProcess(chain, e);
+            return failed(TxErrorCode.SYS_UNKOWN_EXCEPTION);
+        }
+    }
+
+
+    /**
+     * 最新区块高度
+     * @param params
+     * @return
+     */
+    @CmdAnnotation(cmd = TxCmd.TX_BLOCK_HEIGHT, version = 1.0, description = "")
+    @Parameter(parameterName = "chainId", parameterType = "int")
+    @Parameter(parameterName = "height", parameterType = "long")
+    public Response height(Map params) {
+        Chain chain = null;
+        try {
+            ObjectUtils.canNotEmpty(params.get("chainId"), TxErrorCode.PARAMETER_ERROR.getMsg());
+            chain = chainManager.getChain((int) params.get("chainId"));
+            if (null == chain) {
+                throw new NulsException(TxErrorCode.CHAIN_NOT_FOUND);
+            }
+            Long height = Long.valueOf(params.get("height").toString());
+            chain.setBestBlockHeight(height);
+            chain.getLoggerMap().get(TxConstant.LOG_TX).debug("最新区块高度更新为: {}", height);
+            Map<String, Object> resultMap = new HashMap<>(TxConstant.INIT_CAPACITY_2);
+            resultMap.put("value", true);
+            return success(resultMap);
         } catch (NulsException e) {
             errorLogProcess(chain, e);
             return failed(e.getErrorCode());

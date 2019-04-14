@@ -1,10 +1,10 @@
 package io.nuls.block;
 
 import io.nuls.block.constant.BlockConfig;
+import io.nuls.block.constant.RunningStatusEnum;
 import io.nuls.block.manager.ChainManager;
 import io.nuls.block.manager.ContextManager;
 import io.nuls.block.rpc.call.NetworkUtil;
-import io.nuls.block.rpc.call.ProtocolUtil;
 import io.nuls.block.thread.BlockSynchronizer;
 import io.nuls.block.thread.monitor.*;
 import io.nuls.db.service.RocksDBService;
@@ -14,6 +14,7 @@ import io.nuls.rpc.modulebootstrap.Module;
 import io.nuls.rpc.modulebootstrap.NulsRpcModuleBootstrap;
 import io.nuls.rpc.modulebootstrap.RpcModule;
 import io.nuls.rpc.modulebootstrap.RpcModuleState;
+import io.nuls.rpc.util.TimeUtils;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.core.ioc.SpringLiteContext;
@@ -41,6 +42,8 @@ public class BlockBootstrap extends RpcModule {
 
     @Autowired
     public static BlockConfig blockConfig;
+
+    public static boolean started = false;
 
     public static void main(String[] args) {
         if (args == null || args.length == 0) {
@@ -135,34 +138,37 @@ public class BlockBootstrap extends RpcModule {
     @Override
     public RpcModuleState onDependenciesReady() {
         Log.info("block onDependenciesReady");
-        NetworkUtil.register();
-        List<Integer> chainIds = ContextManager.chainIds;
-        for (Integer chainId : chainIds) {
-            ProtocolUtil.subscribe(chainId);
+        if (started) {
+            List<Integer> chainIds = ContextManager.chainIds;
+            for (Integer chainId : chainIds) {
+                ContextManager.getContext(chainId).setStatus(RunningStatusEnum.RUNNING);
+            }
+        } else {
+            //开启区块同步线程
+            ThreadUtils.createAndRunThread("block-synchronizer", BlockSynchronizer.getInstance());
+            //开启分叉链处理线程
+            ScheduledThreadPoolExecutor forkExecutor = ThreadUtils.createScheduledThreadPool(1, new NulsThreadFactory("fork-chains-monitor"));
+            forkExecutor.scheduleWithFixedDelay(ForkChainsMonitor.getInstance(), 0, blockConfig.getForkChainsMonitorInterval(), TimeUnit.MILLISECONDS);
+            //开启孤儿链处理线程
+            ScheduledThreadPoolExecutor orphanExecutor = ThreadUtils.createScheduledThreadPool(1, new NulsThreadFactory("orphan-chains-monitor"));
+            orphanExecutor.scheduleWithFixedDelay(OrphanChainsMonitor.getInstance(), 0, blockConfig.getOrphanChainsMonitorInterval(), TimeUnit.MILLISECONDS);
+            //开启孤儿链维护线程
+            ScheduledThreadPoolExecutor maintainExecutor = ThreadUtils.createScheduledThreadPool(1, new NulsThreadFactory("orphan-chains-maintainer"));
+            maintainExecutor.scheduleWithFixedDelay(OrphanChainsMaintainer.getInstance(), 0, blockConfig.getOrphanChainsMaintainerInterval(), TimeUnit.MILLISECONDS);
+            //开启数据库大小监控线程
+            ScheduledThreadPoolExecutor dbSizeExecutor = ThreadUtils.createScheduledThreadPool(1, new NulsThreadFactory("storage-size-monitor"));
+            dbSizeExecutor.scheduleWithFixedDelay(StorageSizeMonitor.getInstance(), 0, blockConfig.getStorageSizeMonitorInterval(), TimeUnit.MILLISECONDS);
+            //开启区块监控线程
+            ScheduledThreadPoolExecutor monitorExecutor = ThreadUtils.createScheduledThreadPool(1, new NulsThreadFactory("network-monitor"));
+            monitorExecutor.scheduleWithFixedDelay(NetworkResetMonitor.getInstance(), 0, blockConfig.getNetworkResetMonitorInterval(), TimeUnit.MILLISECONDS);
+            //开启交易组获取线程
+            ScheduledThreadPoolExecutor txGroupExecutor = ThreadUtils.createScheduledThreadPool(1, new NulsThreadFactory("txGroup-requestor"));
+            txGroupExecutor.scheduleWithFixedDelay(TxGroupRequestor.getInstance(), 0, blockConfig.getNetworkResetMonitorInterval(), TimeUnit.MILLISECONDS);
+            //开启节点数量监控线程
+            ScheduledThreadPoolExecutor nodesExecutor = ThreadUtils.createScheduledThreadPool(1, new NulsThreadFactory("nodes-monitor"));
+            nodesExecutor.scheduleWithFixedDelay(NodesMonitor.getInstance(), 0, blockConfig.getNodesMonitorInterval(), TimeUnit.MILLISECONDS);
+            started = true;
         }
-        //开启区块同步线程
-        ThreadUtils.createAndRunThread("block-synchronizer", BlockSynchronizer.getInstance());
-        //开启分叉链处理线程
-        ScheduledThreadPoolExecutor forkExecutor = ThreadUtils.createScheduledThreadPool(1, new NulsThreadFactory("fork-chains-monitor"));
-        forkExecutor.scheduleWithFixedDelay(ForkChainsMonitor.getInstance(), 0, blockConfig.getForkChainsMonitorInterval(), TimeUnit.MILLISECONDS);
-        //开启孤儿链处理线程
-        ScheduledThreadPoolExecutor orphanExecutor = ThreadUtils.createScheduledThreadPool(1, new NulsThreadFactory("orphan-chains-monitor"));
-        orphanExecutor.scheduleWithFixedDelay(OrphanChainsMonitor.getInstance(), 0, blockConfig.getOrphanChainsMonitorInterval(), TimeUnit.MILLISECONDS);
-        //开启孤儿链维护线程
-        ScheduledThreadPoolExecutor maintainExecutor = ThreadUtils.createScheduledThreadPool(1, new NulsThreadFactory("orphan-chains-maintainer"));
-        maintainExecutor.scheduleWithFixedDelay(OrphanChainsMaintainer.getInstance(), 0, blockConfig.getOrphanChainsMaintainerInterval(), TimeUnit.MILLISECONDS);
-        //开启数据库大小监控线程
-        ScheduledThreadPoolExecutor dbSizeExecutor = ThreadUtils.createScheduledThreadPool(1, new NulsThreadFactory("storage-size-monitor"));
-        dbSizeExecutor.scheduleWithFixedDelay(StorageSizeMonitor.getInstance(), 0, blockConfig.getStorageSizeMonitorInterval(), TimeUnit.MILLISECONDS);
-        //开启区块监控线程
-        ScheduledThreadPoolExecutor monitorExecutor = ThreadUtils.createScheduledThreadPool(1, new NulsThreadFactory("network-monitor"));
-        monitorExecutor.scheduleWithFixedDelay(NetworkResetMonitor.getInstance(), 0, blockConfig.getNetworkResetMonitorInterval(), TimeUnit.MILLISECONDS);
-        //开启交易组获取线程
-        ScheduledThreadPoolExecutor txGroupExecutor = ThreadUtils.createScheduledThreadPool(1, new NulsThreadFactory("txGroup-requestor"));
-        txGroupExecutor.scheduleWithFixedDelay(TxGroupRequestor.getInstance(), 0, blockConfig.getNetworkResetMonitorInterval(), TimeUnit.MILLISECONDS);
-        //开启节点数量监控线程
-        ScheduledThreadPoolExecutor nodesExecutor = ThreadUtils.createScheduledThreadPool(1, new NulsThreadFactory("nodes-monitor"));
-        nodesExecutor.scheduleWithFixedDelay(NodesMonitor.getInstance(), 0, blockConfig.getNodesMonitorInterval(), TimeUnit.MILLISECONDS);
         return RpcModuleState.Running;
     }
 
@@ -173,7 +179,19 @@ public class BlockBootstrap extends RpcModule {
      */
     @Override
     public RpcModuleState onDependenciesLoss(Module module) {
+        List<Integer> chainIds = ContextManager.chainIds;
+        for (Integer chainId : chainIds) {
+            ContextManager.getContext(chainId).setStatus(RunningStatusEnum.INITIALIZING);
+        }
         return RpcModuleState.Ready;
     }
 
+    @Override
+    public void onDependenciesReady(Module module) {
+        super.onDependenciesReady(module);
+        if (ModuleE.NW.abbr.equals(module.getName())) {
+            NetworkUtil.register();
+        }
+        TimeUtils.getInstance().start();
+    }
 }

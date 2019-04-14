@@ -53,14 +53,14 @@ public class TxRegisterDTO {
      * 是否是解锁交易
      * If it's an unlocking transaction
      */
-    public boolean unlockTx;
+    private boolean unlockTx;
 
     /**
      * 该交易是否需要在账本中验证签名，所有系统产生的交易和一些特殊交易，不需要安装普通交易的方式验证签名，会提供额外的逻辑进行验证。
      * If the deal need to verify the signature in the book, all transactions system and some special deal,
      * no need to install the ordinary transaction way to verify the signature, will provide additional validation logic.
      */
-    public boolean verifySignature;
+    private boolean verifySignature;
 
     public TxRegisterDTO() {
 
@@ -82,7 +82,7 @@ public class TxRegisterDTO {
         this.validator = validator;
     }
 
-    public boolean isSystemTx() {
+    public boolean getSystemTx() {
         return systemTx;
     }
 
@@ -90,7 +90,7 @@ public class TxRegisterDTO {
         this.systemTx = systemTx;
     }
 
-    public boolean isUnlockTx() {
+    public boolean getUnlockTx() {
         return unlockTx;
     }
 
@@ -98,7 +98,7 @@ public class TxRegisterDTO {
         this.unlockTx = unlockTx;
     }
 
-    public boolean isVerifySignature() {
+    public boolean getVerifySignature() {
         return verifySignature;
     }
 

@@ -9,10 +9,10 @@ import io.nuls.rpc.model.CmdParameter;
 import io.nuls.rpc.model.message.*;
 import io.nuls.rpc.netty.channel.ConnectData;
 import io.nuls.rpc.netty.channel.manager.ConnectManager;
+import io.nuls.rpc.util.TimeUtils;
 import io.nuls.tools.log.Log;
 import io.nuls.tools.model.StringUtils;
 import io.nuls.tools.parse.JSONUtils;
-import io.nuls.tools.thread.TimeService;
 
 import java.lang.reflect.Method;
 import java.math.BigDecimal;
@@ -43,7 +43,7 @@ public class RequestMessageProcessor {
      */
     public static void negotiateConnectionResponse(Channel channel, Message message) throws JsonProcessingException {
         NegotiateConnectionResponse negotiateConnectionResponse = new NegotiateConnectionResponse();
-        negotiateConnectionResponse.setRequestId(message.getMessageId());
+        negotiateConnectionResponse.setRequestID(message.getMessageID());
         negotiateConnectionResponse.setNegotiationStatus("1");
         negotiateConnectionResponse.setNegotiationComment("Connection true!");
 
@@ -124,12 +124,12 @@ public class RequestMessageProcessor {
              */
             switch (nextProcess) {
                 case Constants.EXECUTE_AND_KEEP:
-                    callCommandsWithPeriod(channelData.getChannel(), request.getRequestMethods(), message.getMessageId(), false);
-                    channelData.getCmdInvokeTime().put(message, TimeService.currentTimeMillis());
+                    callCommandsWithPeriod(channelData.getChannel(), request.getRequestMethods(), message.getMessageID(), false);
+                    channelData.getCmdInvokeTime().put(message, TimeUtils.getCurrentTimeMillis());
                     return true;
                 case Constants.EXECUTE_AND_REMOVE:
-                    callCommandsWithPeriod(channelData.getChannel(), request.getRequestMethods(), message.getMessageId(), false);
-                    channelData.getCmdInvokeTime().put(message, TimeService.currentTimeMillis());
+                    callCommandsWithPeriod(channelData.getChannel(), request.getRequestMethods(), message.getMessageID(), false);
+                    channelData.getCmdInvokeTime().put(message, TimeUtils.getCurrentTimeMillis());
                     return false;
                 case Constants.SKIP_AND_KEEP:
                     return true;
@@ -167,7 +167,7 @@ public class RequestMessageProcessor {
             Construct the returned message object
              */
             Response response = MessageUtil.newResponse(messageId, "", "");
-            response.setRequestId(messageId);
+            response.setRequestID(messageId);
             response.setResponseStatus(Constants.BOOLEAN_FALSE);
 
             try {
@@ -235,13 +235,13 @@ public class RequestMessageProcessor {
      * @throws Exception 调用的方法返回的任何异常 / Any exception returned by the invoked method
      */
     private static Message execute(CmdDetail cmdDetail, Map params, String messageId) throws Exception {
-        long startTimemillis = TimeService.currentTimeMillis();
+        long startTimemillis = TimeUtils.getCurrentTimeMillis();
         Response response = invoke(cmdDetail.getInvokeClass(), cmdDetail.getInvokeMethod(), params);
-        response.setRequestId(messageId);
+        response.setRequestID(messageId);
         Map<String, Object> responseData = new HashMap<>(1);
         responseData.put(cmdDetail.getMethodName(), response.getResponseData());
         response.setResponseData(responseData);
-        response.setResponseProcessingTime((TimeService.currentTimeMillis() - startTimemillis) + "");
+        response.setResponseProcessingTime((TimeUtils.getCurrentTimeMillis() - startTimemillis) + "");
         Message rspMessage = MessageUtil.basicMessage(MessageType.Response);
         rspMessage.setMessageData(response);
         return rspMessage;
@@ -294,7 +294,7 @@ public class RequestMessageProcessor {
 //            return Constants.EXECUTE_AND_KEEP;
         }
 
-        if (TimeService.currentTimeMillis() - channelData.getCmdInvokeTime().get(message) < subscriptionPeriod * Constants.MILLIS_PER_SECOND) {
+        if (TimeUtils.getCurrentTimeMillis() - channelData.getCmdInvokeTime().get(message) < subscriptionPeriod * Constants.MILLIS_PER_SECOND) {
             /*
             没有达到执行条件，返回SKIP_AND_KEEP（不执行，然后保留）
             If the execution condition is not met, return SKIP_AND_KEEP (not executed, then keep)

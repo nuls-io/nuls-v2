@@ -21,6 +21,7 @@
 package io.nuls.block.utils;
 
 import io.nuls.base.data.*;
+import io.nuls.base.data.po.BlockHeaderPo;
 import io.nuls.block.cache.BlockCacher;
 import io.nuls.block.constant.BlockErrorCode;
 import io.nuls.block.constant.ChainTypeEnum;
@@ -30,12 +31,11 @@ import io.nuls.block.message.HashMessage;
 import io.nuls.block.model.Chain;
 import io.nuls.block.model.ChainContext;
 import io.nuls.block.model.ChainParameters;
-import io.nuls.block.model.po.BlockHeaderPo;
-import io.nuls.block.service.BlockService;
-import io.nuls.block.storage.ChainStorageService;
 import io.nuls.block.rpc.call.ConsensusUtil;
 import io.nuls.block.rpc.call.NetworkUtil;
 import io.nuls.block.rpc.call.TransactionUtil;
+import io.nuls.block.service.BlockService;
+import io.nuls.block.storage.ChainStorageService;
 import io.nuls.tools.basic.Result;
 import io.nuls.tools.constant.ErrorCode;
 import io.nuls.tools.core.annotation.Autowired;
@@ -198,7 +198,7 @@ public class BlockUtil {
 
         if (blockHeight <= masterChainEndHeight) {
             //3.收到的区块是主链上的重复区块,丢弃
-            BlockHeaderPo blockHeader = blockService.getBlockHeader(chainId, blockHeight);
+            BlockHeaderPo blockHeader = blockService.getBlockHeaderPo(chainId, blockHeight);
             if (blockHash.equals(blockHeader.getHash())) {
                 commonLog.debug("chainId:" + chainId + ", received duplicate block of masterChain, height:" + blockHeight + ", hash:" + blockHash);
                 return Result.getFailed(BlockErrorCode.DUPLICATE_MAIN_BLOCK);
@@ -390,6 +390,7 @@ public class BlockUtil {
         po.setExtend(blockHeader.getExtend());
         po.setTxHashList(block.getTxHashList());
         po.setComplete(false);
+        po.setBlockSize(block.size());
         return po;
     }
 

@@ -46,6 +46,7 @@ import io.nuls.contract.util.ContractUtil;
 import io.nuls.contract.util.Log;
 import io.nuls.contract.vm.program.*;
 import io.nuls.rpc.util.RPCUtil;
+import io.nuls.rpc.util.TimeUtils;
 import io.nuls.tools.basic.NulsData;
 import io.nuls.tools.basic.Result;
 import io.nuls.tools.basic.VarInt;
@@ -55,7 +56,6 @@ import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.model.ArraysTool;
 import io.nuls.tools.model.LongUtils;
 import io.nuls.tools.model.StringUtils;
-import io.nuls.tools.thread.TimeService;
 
 import java.io.IOException;
 import java.math.BigInteger;
@@ -113,7 +113,7 @@ public class ContractTxHelper {
             if (StringUtils.isNotBlank(remark)) {
                 tx.setRemark(remark.getBytes(StandardCharsets.UTF_8));
             }
-            tx.setTime(TimeService.currentTimeMillis());
+            tx.setTime(TimeUtils.getCurrentTimeMillis());
 
             // 组装txData
             CreateContractData createContractData = this.getCreateContractData(senderBytes, contractAddressBytes, value, gasLimit, price, contractCode, args);
@@ -292,7 +292,7 @@ public class ContractTxHelper {
             if (StringUtils.isNotBlank(remark)) {
                 tx.setRemark(remark.getBytes(StandardCharsets.UTF_8));
             }
-            tx.setTime(TimeService.currentTimeMillis());
+            tx.setTime(TimeUtils.getCurrentTimeMillis());
 
             // 组装txData
             CallContractData callContractData = this.getCallContractData(senderBytes, contractAddressBytes, value, gasLimit, price, methodName, methodDesc, args);
@@ -440,7 +440,7 @@ public class ContractTxHelper {
             if (StringUtils.isNotBlank(remark)) {
                 tx.setRemark(remark.getBytes(StandardCharsets.UTF_8));
             }
-            tx.setTime(TimeService.currentTimeMillis());
+            tx.setTime(TimeUtils.getCurrentTimeMillis());
 
             // 组装txData
             DeleteContractData deleteContractData = this.getDeleteContractData(contractAddressBytes, senderBytes);
@@ -524,42 +524,44 @@ public class ContractTxHelper {
             // 生成签名
             AccountCall.transactionSignature(chainId, sender, password, tx);
             String txData = RPCUtil.encode(tx.serialize());
-            // 验证交易
-            //  交易基础验证
-            boolean baseValidateSuccess = TransactionCall.baseValidateTx(chainId, txData);
-            if(!baseValidateSuccess) {
-                return getFailed();
-            }
-            //  本模块交易业务验证
-            Result validator;
-            switch (tx.getType()) {
-                case TX_TYPE_CREATE_CONTRACT:
-                    validator = contractTxValidatorManager.createValidator(chainId, (CreateContractTransaction) tx);
-                    break;
-                case TX_TYPE_CALL_CONTRACT:
-                    validator = contractTxValidatorManager.callValidator(chainId, (CallContractTransaction) tx);
-                    break;
-                case TX_TYPE_DELETE_CONTRACT:
-                    validator = contractTxValidatorManager.deleteValidator(chainId, (DeleteContractTransaction) tx);
-                    break;
-                default:
-                    validator = getFailed();
-                    break;
-            }
-            if(validator.isFailed()) {
-                return validator;
-            }
 
-            // 通知账本
-            int commitStatus = LedgerCall.commitUnconfirmedTx(chainId, txData);
-            if(commitStatus != LedgerUnConfirmedTxStatus.SUCCESS.status()) {
-                return getFailed().setMsg(LedgerUnConfirmedTxStatus.getStatus(commitStatus).name());
-            }
-            // 广播交易
+            //// 验证交易
+            ////  交易基础验证
+            //boolean baseValidateSuccess = TransactionCall.baseValidateTx(chainId, txData);
+            //if(!baseValidateSuccess) {
+            //    return getFailed();
+            //}
+            ////  本模块交易业务验证
+            //Result validator;
+            //switch (tx.getType()) {
+            //    case TX_TYPE_CREATE_CONTRACT:
+            //        validator = contractTxValidatorManager.createValidator(chainId, (CreateContractTransaction) tx);
+            //        break;
+            //    case TX_TYPE_CALL_CONTRACT:
+            //        validator = contractTxValidatorManager.callValidator(chainId, (CallContractTransaction) tx);
+            //        break;
+            //    case TX_TYPE_DELETE_CONTRACT:
+            //        validator = contractTxValidatorManager.deleteValidator(chainId, (DeleteContractTransaction) tx);
+            //        break;
+            //    default:
+            //        validator = getFailed();
+            //        break;
+            //}
+            //if(validator.isFailed()) {
+            //    return validator;
+            //}
+            //
+            //// 通知账本
+            //int commitStatus = LedgerCall.commitUnconfirmedTx(chainId, txData);
+            //if(commitStatus != LedgerUnConfirmedTxStatus.SUCCESS.status()) {
+            //    return getFailed().setMsg(LedgerUnConfirmedTxStatus.getStatus(commitStatus).name());
+            //}
+
+            // 发送交易到交易模块
             boolean broadcast = TransactionCall.newTx(chainId, txData);
             if (!broadcast) {
-                // 广播失败，回滚账本的未确认交易
-                LedgerCall.rollBackUnconfirmTx(chainId, txData);
+                // 发送交易到交易模块失败，回滚账本的未确认交易
+                //LedgerCall.rollBackUnconfirmTx(chainId, txData);
                 return getFailed();
             }
             return getSuccess();

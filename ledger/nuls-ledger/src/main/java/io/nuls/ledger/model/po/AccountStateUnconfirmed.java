@@ -122,23 +122,6 @@ public class AccountStateUnconfirmed extends BaseNulsData {
         unconfirmedAmounts.add(unconfirmedAmount);
     }
 
-
-//    public boolean updateConfirmedAmount(String hash) {
-//        if (unconfirmedAmounts.size() > 0) {
-//            UnconfirmedAmount unconfirmedAmount = unconfirmedAmounts.get(0);
-//            if (unconfirmedAmount.getTxHash().equalsIgnoreCase(hash)) {
-//                //未确认的转为确认的，移除集合中的数据
-//                unconfirmedAmounts.remove(0);
-//            } else {
-//                //分叉了，清空之前的未提交金额数据
-//                unconfirmedAmounts.clear();
-//            }
-//            return true;
-//        } else {
-//            return false;
-//        }
-//    }
-
     /**
      * 计算未确认交易的冻结部分
      *
@@ -265,10 +248,10 @@ public class AccountStateUnconfirmed extends BaseNulsData {
     public void updateUnconfirmeAmounts() {
         int index = 0;
         for (UnconfirmedAmount unconfirmedAmount : unconfirmedAmounts) {
-            index++;
-            if (TimeUtil.getCurrentTime() - unconfirmedAmount.getTime() < LedgerConstant.UNCONFIRM_NONCE_EXPIRED_TIME) {
+            if ((TimeUtil.getCurrentTime() - unconfirmedAmount.getTime()) < LedgerConstant.UNCONFIRM_NONCE_EXPIRED_TIME) {
                 break;
             }
+            index++;
         }
         if (index > 0) {
             List<UnconfirmedAmount> list = new ArrayList<UnconfirmedAmount>();

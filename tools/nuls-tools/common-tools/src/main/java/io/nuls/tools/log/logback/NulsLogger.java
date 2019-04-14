@@ -1,8 +1,12 @@
 package io.nuls.tools.log.logback;
 
 import ch.qos.logback.classic.Logger;
+import io.nuls.tools.log.Log;
+import io.nuls.tools.parse.JSONUtils;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -37,7 +41,19 @@ public class NulsLogger {
     public void debug(String msg, Object... objs) {
         if(logger.isDebugEnabled()){
             String logContent = getLogTrace() + ":" + msg;
-            logger.debug(logContent, objs);
+            try {
+                List<String> objStrs = new ArrayList<>();
+                for (Object obj: objs) {
+                    if(obj instanceof String){
+                        objStrs.add((String)obj);
+                    }else{
+                        objStrs.add(JSONUtils.obj2json(obj));
+                    }
+                }
+                logger.debug(logContent, objStrs.toArray());
+            }catch (Exception e){
+                Log.error(e);
+            }
         }
     }
 
@@ -66,7 +82,19 @@ public class NulsLogger {
 
     public void info(String msg, Object... objs) {
         String logContent = getLogTrace() + ":" + msg;
-        logger.info(logContent, objs);
+        try {
+            List<String> objStrs = new ArrayList<>();
+            for (Object obj: objs) {
+                if(obj instanceof String){
+                    objStrs.add((String)obj);
+                }else{
+                    objStrs.add(JSONUtils.obj2json(obj));
+                }
+            }
+            logger.info(logContent, objStrs.toArray());
+        }catch (Exception e){
+            Log.error(e);
+        }
     }
 
     /**
@@ -92,7 +120,19 @@ public class NulsLogger {
 
     public void warn(String msg, Object... objs) {
         String logContent = getLogTrace() + ":" + msg;
-        logger.warn(logContent, objs);
+        try {
+            List<String> objStrs = new ArrayList<>();
+            for (Object obj: objs) {
+                if(obj instanceof String){
+                    objStrs.add((String)obj);
+                }else{
+                    objStrs.add(JSONUtils.obj2json(obj));
+                }
+            }
+            logger.warn(logContent, objStrs.toArray());
+        }catch (Exception e){
+            Log.error(e);
+        }
     }
 
     /**
@@ -119,7 +159,19 @@ public class NulsLogger {
 
     public void error(String msg, Object... objs) {
         String logContent = getLogTrace() + ":" + msg;
-        logger.error(logContent, objs);
+        try {
+            List<String> objStrs = new ArrayList<>();
+            for (Object obj: objs) {
+                if(obj instanceof String){
+                    objStrs.add((String)obj);
+                }else{
+                    objStrs.add(JSONUtils.obj2json(obj));
+                }
+            }
+            logger.error(logContent, objStrs.toArray());
+        }catch (Exception e){
+            Log.error(e);
+        }
     }
 
     /**

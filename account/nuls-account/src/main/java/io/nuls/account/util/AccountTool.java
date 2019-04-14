@@ -28,16 +28,16 @@ package io.nuls.account.util;
 import io.nuls.account.constant.AccountConstant;
 import io.nuls.account.constant.AccountErrorCode;
 import io.nuls.account.model.bo.Account;
-import io.nuls.account.rpc.call.NetworkCall;
-import io.nuls.tools.log.Log;
 import io.nuls.base.constant.BaseConstant;
 import io.nuls.base.data.Address;
+import io.nuls.rpc.util.TimeUtils;
 import io.nuls.tools.crypto.ECKey;
 import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.crypto.Sha256Hash;
-import io.nuls.tools.model.StringUtils;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.exception.NulsRuntimeException;
+import io.nuls.tools.log.Log;
+import io.nuls.tools.model.StringUtils;
 import io.nuls.tools.parse.SerializeUtils;
 
 import java.io.ByteArrayOutputStream;
@@ -91,7 +91,7 @@ public class AccountTool {
         account.setPubKey(key.getPubKey());
         account.setPriKey(key.getPrivKeyBytes());
         account.setEncryptedPriKey(new byte[0]);
-        account.setCreateTime(NetworkCall.getCurrentTimeMillis());
+        account.setCreateTime(TimeUtils.getCurrentTimeMillis());
         account.setEcKey(key);
         return account;
     }

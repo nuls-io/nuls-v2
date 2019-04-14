@@ -9,7 +9,6 @@ import io.nuls.base.basic.AddressTool;
 import io.nuls.db.service.RocksDBService;
 import io.nuls.tools.core.inteceptor.ModularServiceMethodInterceptor;
 import io.nuls.tools.core.ioc.SpringLiteContext;
-import io.nuls.tools.thread.TimeService;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -38,7 +37,7 @@ public class AliasServiceTest {
         accountBootstrap.initCfg();        //读取配置文件，数据存储根目录，初始化打开该目录下所有表连接并放入缓存
         RocksDBService.init(NulsConfig.DATA_PATH);
         //启动时间同步线程
-        TimeService.getInstance().start();
+//        TimeService.getInstance().start();
         accountService = SpringLiteContext.getBean(AccountService.class);
         aliasService = SpringLiteContext.getBean(AliasService.class);
     }

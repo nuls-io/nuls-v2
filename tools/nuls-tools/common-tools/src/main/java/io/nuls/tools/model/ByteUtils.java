@@ -215,32 +215,6 @@ public class ByteUtils {
     }
 
     /**
-     * 将BigInteger类型数据转为byte[]
-     * @param n  需要转换的数据
-     * @return
-     * */
-    public static byte[] bigIntegerToBytes(BigInteger n) {
-        byte[] temp;
-        if (n == null) {
-            return null;
-        }
-        int length = 32;
-        if (n.toByteArray().length == length+1) {
-            temp = new byte[length];
-            System.arraycopy(n.toByteArray(), 1, temp, 0, 32);
-        } else if (n.toByteArray().length == length) {
-            temp = n.toByteArray();
-        } else {
-            temp = new byte[length];
-            for (int i = 0; i < length - n.toByteArray().length; i++) {
-                temp[i] = 0;
-            }
-            System.arraycopy(n.toByteArray(), 0, temp, length - n.toByteArray().length, n.toByteArray().length);
-        }
-        return temp;
-    }
-
-    /**
      * 截取字节数组
      * @param input       源字节数组
      * @param startIndex  开始截取的下标

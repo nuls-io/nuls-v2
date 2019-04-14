@@ -20,7 +20,7 @@ public class ConsensusConfig {
     @Value("consensusConfig")
     private ConfigBean configBean;
 
-    private String DataPath;
+    private String dataPath;
 
     private String dataFolder;
 
@@ -67,15 +67,15 @@ public class ConsensusConfig {
 
 
     public String getDataFolder() {
-        return DataPath + File.separator + dataFolder;
+        return dataPath + File.separator + dataFolder;
     }
 
     public String getDataPath() {
-        return DataPath;
+        return dataPath;
     }
 
     public void setDataPath(String dataPath) {
-        DataPath = dataPath;
+        dataPath = dataPath;
     }
 
     public void setDataFolder(String dataFolder) {

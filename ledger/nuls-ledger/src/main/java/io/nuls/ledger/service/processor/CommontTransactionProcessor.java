@@ -35,6 +35,7 @@ import io.nuls.tools.core.annotation.Component;
 /**
  * 普通交易处理
  * Created by lanjinsheng on 2018/12/29.
+ * @author lanjinsheng
  */
 @Component
 public class CommontTransactionProcessor implements TxProcessor {

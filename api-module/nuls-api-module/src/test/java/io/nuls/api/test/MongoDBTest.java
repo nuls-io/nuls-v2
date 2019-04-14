@@ -2,15 +2,14 @@ package io.nuls.api.test;
 
 import com.mongodb.MongoClient;
 import com.mongodb.client.MongoDatabase;
-import io.nuls.api.db.BlockService;
-import io.nuls.api.db.ContractService;
-import io.nuls.api.db.MongoDBService;
+import io.nuls.api.db.mongo.MongoBlockServiceImpl;
+import io.nuls.api.db.mongo.MongoContractServiceImpl;
+import io.nuls.api.db.mongo.MongoDBService;
 import io.nuls.api.model.po.db.BlockHeaderInfo;
 import io.nuls.api.model.po.db.ContractInfo;
 import io.nuls.api.utils.DocumentTransferTool;
 import io.nuls.tools.core.ioc.SpringLiteContext;
 import org.bson.Document;
-import org.checkerframework.dataflow.qual.TerminatesExecution;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -37,22 +36,22 @@ public class MongoDBTest {
         headerInfo.setHeight(0L);
         headerInfo.setTotalFee(new BigInteger("1000000000000000000000000000000000000001"));
 
-        BlockService blockService = SpringLiteContext.getBean(BlockService.class);
-        blockService.saveBLockHeaderInfo(2, headerInfo);
+        MongoBlockServiceImpl mongoBlockServiceImpl = SpringLiteContext.getBean(MongoBlockServiceImpl.class);
+        mongoBlockServiceImpl.saveBLockHeaderInfo(2, headerInfo);
 
     }
 
     @Test
     public void testDBGet() {
-        BlockService blockService = SpringLiteContext.getBean(BlockService.class);
-        BlockHeaderInfo headerInfo = blockService.getBlockHeader(2, 0L);
+        MongoBlockServiceImpl mongoBlockServiceImpl = SpringLiteContext.getBean(MongoBlockServiceImpl.class);
+        BlockHeaderInfo headerInfo = mongoBlockServiceImpl.getBlockHeader(2, 0L);
         System.out.println();
     }
 
     @Test
     public void testGetContract() {
-        ContractService contractService = SpringLiteContext.getBean(ContractService.class);
-        ContractInfo contractInfo = contractService.getContractInfo(2, "tNULSeBaN32a2hucBYT9o4BnNoHQcM8WDmpPgq");
+        MongoContractServiceImpl mongoContractServiceImpl = SpringLiteContext.getBean(MongoContractServiceImpl.class);
+        ContractInfo contractInfo = mongoContractServiceImpl.getContractInfo(2, "tNULSeBaN32a2hucBYT9o4BnNoHQcM8WDmpPgq");
     }
 
     @Test

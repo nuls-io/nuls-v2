@@ -10,20 +10,6 @@ import java.math.BigInteger;
 public interface ConsensusConstant {
 
     /**
-     * consensus transaction types
-     * */
-    int TX_TYPE_REGISTER_AGENT = 4;
-    int TX_TYPE_JOIN_CONSENSUS = 5;
-    int TX_TYPE_CANCEL_DEPOSIT = 6;
-    int TX_TYPE_YELLOW_PUNISH = 7;
-    int TX_TYPE_RED_PUNISH = 8;
-    int TX_TYPE_STOP_AGENT = 9;
-    int TX_TYPE_COINBASE = 1;
-    int TX_TYPE_CROSS_CHAIN = 10;
-    int TX_TYPE_CONTRACT_TRANSFER = 103;
-    int TX_TYPE_CONTRACT_RETURN_GAS = 104;
-
-    /**
      * Consensus module related table name/共识模块相关表名
      * */
     String DB_NAME_CONSENSUS_AGENT = "consensus_agent";

@@ -18,7 +18,6 @@ public class TxConfig {
     /**
      * ROCK DB 数据库文件存储路径
      */
-    @Value("DataPath")
     private String dataPath;
     /** 交易模块数据根目录*/
     private String txDataRoot;

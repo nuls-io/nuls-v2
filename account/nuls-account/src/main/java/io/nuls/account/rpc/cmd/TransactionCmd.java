@@ -20,8 +20,6 @@ import io.nuls.account.storage.AliasStorageService;
 import io.nuls.account.util.LoggerUtil;
 import io.nuls.account.util.Preconditions;
 import io.nuls.account.util.TxUtil;
-import io.nuls.account.util.annotation.ResisterTx;
-import io.nuls.account.util.annotation.TxMethodType;
 import io.nuls.account.util.manager.ChainManager;
 import io.nuls.account.util.validator.TxValidator;
 import io.nuls.base.basic.AddressTool;
@@ -33,6 +31,7 @@ import io.nuls.rpc.model.CmdAnnotation;
 import io.nuls.rpc.model.Parameter;
 import io.nuls.rpc.model.message.Response;
 import io.nuls.rpc.util.RPCUtil;
+import io.nuls.tools.constant.TxType;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.exception.NulsException;
@@ -40,6 +39,9 @@ import io.nuls.tools.exception.NulsRuntimeException;
 import io.nuls.tools.model.BigIntegerUtils;
 import io.nuls.tools.model.StringUtils;
 import io.nuls.tools.parse.JSONUtils;
+import io.nuls.tools.protocol.ResisterTx;
+import io.nuls.tools.protocol.TxMethodType;
+import io.nuls.tools.protocol.TxProperty;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -148,7 +150,7 @@ public class TransactionCmd extends BaseCmd {
             for (String txStr : txList) {
                 Transaction tx = Transaction.getInstance(txStr);
                 //别名交易
-                if (AccountConstant.TX_TYPE_ACCOUNT_ALIAS == tx.getType()) {
+                if (TxType.ACCOUNT_ALIAS == tx.getType()) {
                     Alias alias = new Alias();
                     alias.parse(new NulsByteBuffer(tx.getTxData()));
                     result = aliasService.aliasTxCommit(chainId, alias);
@@ -223,7 +225,7 @@ public class TransactionCmd extends BaseCmd {
             for (String txStr : txList) {
                 Transaction tx = Transaction.getInstance(txStr);
                 //别名交易
-                if (AccountConstant.TX_TYPE_ACCOUNT_ALIAS == tx.getType()) {
+                if (TxType.ACCOUNT_ALIAS == tx.getType()) {
                     Alias alias = new Alias();
                     alias.parse(new NulsByteBuffer(tx.getTxData()));
                     result = aliasService.rollbackAlias(chainId, alias);
@@ -275,7 +277,7 @@ public class TransactionCmd extends BaseCmd {
      * 转账交易验证
      */
     @CmdAnnotation(cmd = "ac_transferTxValidate", version = 1.0, description = "create transfer transaction validate 1.0")
-    @ResisterTx(txType = AccountConstant.TX_TYPE_TRANSFER, methodType = TxMethodType.VALID, methodName = "ac_transferTxValidate")
+    @ResisterTx(txType = TxProperty.TRANSFER, methodType = TxMethodType.VALID, methodName = "ac_transferTxValidate")
     @Parameter(parameterName = RpcParameterNameConstant.CHAIN_ID, parameterType = "int")
     @Parameter(parameterName = RpcParameterNameConstant.TX, parameterType = "String")
     public Response transferTxValidate(Map<String, Object> params) {
@@ -390,8 +392,8 @@ public class TransactionCmd extends BaseCmd {
             if (!validTxRemark(transferDto.getRemark())) {
                 throw new NulsException(AccountErrorCode.PARAMETER_ERROR);
             }
-            String hash = transactionService.transfer(transferDto.getChainId(), inputList, outputList, transferDto.getRemark());
-            map.put("value", hash);
+            Transaction tx = transactionService.transfer(transferDto.getChainId(), inputList, outputList, transferDto.getRemark());
+            map.put("value", tx.getHash().getDigestHex());
         } catch (NulsException e) {
             return failed(e.getErrorCode());
         } catch (NulsRuntimeException e) {

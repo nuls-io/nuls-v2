@@ -109,18 +109,6 @@ public interface AccountConstant {
     BigInteger ALIAS_FEE = BigInteger.valueOf(100000000);
 
     /**
-     * 转账交易的类型
-     * the type of the transfer transaction
-     */
-    int TX_TYPE_TRANSFER = 2;
-
-    /**
-     * 设置账户别名的交易类型
-     * Set the transaction type of account alias.
-     */
-    int TX_TYPE_ACCOUNT_ALIAS = 3;
-
-    /**
      * 导出accountkeystore文件的后缀名
      * The suffix of the accountkeystore file
      */
