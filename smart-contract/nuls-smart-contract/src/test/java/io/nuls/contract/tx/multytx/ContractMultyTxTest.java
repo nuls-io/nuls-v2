@@ -30,6 +30,8 @@ import io.nuls.contract.util.Log;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.util.concurrent.TimeUnit;
+
 /**
  * @author: PierreLuo
  * @date: 2019-03-26
@@ -48,9 +50,9 @@ public class ContractMultyTxTest extends BaseQuery {
 
     @Test
     public void loopCallContract() throws Exception {
-        contractAddress_nrc20 = "";
+        contractNRC20TokenSendTxTest.setContractAddress_nrc20("tNULSeBaMxPE2ESCiEAZ9CxXMyzBkySBKKSUQ4");
         long s = System.currentTimeMillis();
-        int times = 500;
+        int times = 2000;
         for(int i=0;i<times;i++) {
             contractNRC20TokenSendTxTest.callContract();
         }
@@ -58,8 +60,25 @@ public class ContractMultyTxTest extends BaseQuery {
         Log.info("{} times cost time is {}", times, e - s);
     }
 
+    @Test
+    public void createNRC20AndInnerCallContractTest() throws Exception {
+        contractNRC20TokenSendTxTest.createContract();
+        contractCallContractSendTxTest.createContract();
+    }
+
+    @Test
+    public void callAndDeleteTest() throws Exception {
+        contractNRC20TokenSendTxTest.setContractAddress_nrc20("tNULSeBaMyem4GGzAWKeqmAo7dNBBfoCHKqgRP");
+        contractNRC20TokenSendTxTest.callContract();
+
+        TimeUnit.SECONDS.sleep(1);
+
+        contractCallContractSendTxTest.setContractAddress("tNULSeBaNAisgq1DjBeXptZvkjqsGzMX8peiU7");
+        contractCallContractSendTxTest.delete();
+    }
+
     /**
-     * 依赖于contractNRC20TokenSendTxTest.transfer()\
+     * 依赖于contractNRC20TokenSendTxTest.transfer()
      * 35个sender 创建35个NRC20的合约
      */
     @Test
@@ -94,7 +113,8 @@ public class ContractMultyTxTest extends BaseQuery {
     @Test
     public void multySenderCallOneContract() throws Exception {
         int times = 35;
-        contractNRC20TokenSendTxTest.setContractAddress_nrc20(address("getContractAddress_nrc20", 0));
+        //contractNRC20TokenSendTxTest.setContractAddress_nrc20(address("getContractAddress_nrc20", 0));
+        contractNRC20TokenSendTxTest.setContractAddress_nrc20("tNULSeBaNBzjoXUsRbsqTZy73cWTKyxVgw3FDp");
         contractNRC20TokenSendTxTest.setMethodName("approve");
         for (int i = 0; i < times; i++) {
             contractNRC20TokenSendTxTest.setSender(address("getToAddress", i));

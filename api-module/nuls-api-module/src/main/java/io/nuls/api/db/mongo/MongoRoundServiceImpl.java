@@ -1,6 +1,7 @@
 package io.nuls.api.db.mongo;
 
 import com.mongodb.client.model.Sorts;
+import io.nuls.api.db.RoundService;
 import io.nuls.api.model.po.db.PocRound;
 import io.nuls.api.model.po.db.PocRoundItem;
 import io.nuls.api.utils.DocumentTransferTool;
@@ -17,7 +18,7 @@ import static io.nuls.api.constant.MongoTableConstant.ROUND_ITEM_TABLE;
 import static io.nuls.api.constant.MongoTableConstant.ROUND_TABLE;
 
 @Component
-public class MongoRoundServiceImpl {
+public class MongoRoundServiceImpl implements RoundService {
 
     @Autowired
     private MongoDBService mongoDBService;

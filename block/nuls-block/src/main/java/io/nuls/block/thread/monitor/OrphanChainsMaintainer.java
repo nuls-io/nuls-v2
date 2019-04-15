@@ -22,16 +22,14 @@ package io.nuls.block.thread.monitor;
 
 import io.nuls.base.data.Block;
 import io.nuls.base.data.NulsDigestData;
-import io.nuls.block.constant.RunningStatusEnum;
 import io.nuls.block.manager.BlockChainManager;
-import io.nuls.block.manager.ContextManager;
 import io.nuls.block.model.Chain;
 import io.nuls.block.model.ChainContext;
 import io.nuls.block.model.ChainParameters;
 import io.nuls.block.model.Node;
+import io.nuls.block.rpc.call.NetworkUtil;
 import io.nuls.block.storage.ChainStorageService;
 import io.nuls.block.utils.BlockUtil;
-import io.nuls.block.rpc.call.NetworkUtil;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.ioc.SpringLiteContext;
 import io.nuls.tools.log.logback.NulsLogger;
@@ -55,7 +53,7 @@ import static io.nuls.block.constant.RunningStatusEnum.UPDATE_ORPHAN_CHAINS;
  * @version 1.0
  * @date 18-11-14 下午3:54
  */
-public class OrphanChainsMaintainer implements Runnable {
+public class OrphanChainsMaintainer extends BaseMonitor {
 
     @Autowired
     private static ChainStorageService chainStorageService;
@@ -63,6 +61,7 @@ public class OrphanChainsMaintainer implements Runnable {
     private static final OrphanChainsMaintainer INSTANCE = new OrphanChainsMaintainer();
 
     private OrphanChainsMaintainer() {
+        super();
         chainStorageService = SpringLiteContext.getBean(ChainStorageService.class);
     }
 
@@ -71,59 +70,42 @@ public class OrphanChainsMaintainer implements Runnable {
     }
 
     @Override
-    public void run() {
+    protected void process(int chainId, ChainContext context, NulsLogger commonLog) {
+        ChainParameters parameters = context.getParameters();
+        int orphanChainMaxAge = parameters.getOrphanChainMaxAge();
 
-        for (Integer chainId : ContextManager.chainIds) {
-            ChainContext context = ContextManager.getContext(chainId);
-            NulsLogger commonLog = context.getCommonLog();
-            try {
-                //判断该链的运行状态,只有正常运行时才会有孤儿链的处理
-                RunningStatusEnum status = context.getStatus();
-                if (!status.equals(RUNNING)) {
-                    commonLog.debug("skip process, status is " + status + ", chainId-" + chainId);
-                    return;
+        StampedLock lock = context.getLock();
+        long stamp = lock.tryOptimisticRead();
+        try {
+            for (; ; stamp = lock.writeLock()) {
+                if (stamp == 0L) {
+                    continue;
                 }
-                ChainParameters parameters = ContextManager.getContext(chainId).getParameters();
-                int orphanChainMaxAge = parameters.getOrphanChainMaxAge();
-
-                StampedLock lock = context.getLock();
-                long stamp = lock.tryOptimisticRead();
-                try {
-                    for (; ; stamp = lock.writeLock()) {
-                        if (stamp == 0L) {
-                            continue;
-                        }
-                        // possibly racy reads
-                        SortedSet<Chain> orphanChains = BlockChainManager.getOrphanChains(chainId);
-                        if (!lock.validate(stamp)) {
-                            continue;
-                        }
-                        if (orphanChains.size() < 1) {
-                            break;
-                        }
-                        stamp = lock.tryConvertToWriteLock(stamp);
-                        if (stamp == 0L) {
-                            continue;
-                        }
-                        // exclusive access
-                        List<Node> availableNodes = NetworkUtil.getAvailableNodes(chainId);
-                        //维护现有孤儿链,尝试在链首增加区块
-                        context.setStatus(UPDATE_ORPHAN_CHAINS);
-                        for (Chain orphanChain : orphanChains) {
-                            maintainOrphanChain(chainId, orphanChain, availableNodes, orphanChainMaxAge);
-                        }
-                        break;
-                    }
-                } finally {
-                    context.setStatus(RUNNING);
-                    if (StampedLock.isWriteLockStamp(stamp)) {
-                        lock.unlockWrite(stamp);
-                    }
+                // possibly racy reads
+                SortedSet<Chain> orphanChains = BlockChainManager.getOrphanChains(chainId);
+                if (!lock.validate(stamp)) {
+                    continue;
                 }
-            } catch (Exception e) {
-                e.printStackTrace();
-                context.setStatus(RUNNING);
-                commonLog.error("chainId-" + chainId + ",maintain OrphanChains fail!error msg is:" + e.getMessage());
+                if (orphanChains.size() < 1) {
+                    break;
+                }
+                stamp = lock.tryConvertToWriteLock(stamp);
+                if (stamp == 0L) {
+                    continue;
+                }
+                // exclusive access
+                List<Node> availableNodes = NetworkUtil.getAvailableNodes(chainId);
+                //维护现有孤儿链,尝试在链首增加区块
+                context.setStatus(UPDATE_ORPHAN_CHAINS);
+                for (Chain orphanChain : orphanChains) {
+                    maintainOrphanChain(chainId, orphanChain, availableNodes, orphanChainMaxAge);
+                }
+                break;
+            }
+        } finally {
+            context.setStatus(RUNNING);
+            if (StampedLock.isWriteLockStamp(stamp)) {
+                lock.unlockWrite(stamp);
             }
         }
     }

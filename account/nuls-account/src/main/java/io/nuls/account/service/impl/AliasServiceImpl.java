@@ -200,7 +200,7 @@ public class AliasServiceImpl implements AliasService, InitializingBean {
         Alias alias = new Alias();
         alias.parse(new NulsByteBuffer(transaction.getTxData()));
         String address = AddressTool.getStringAddressByBytes(alias.getAddress());
-        if (BaseConstant.CONTRACT_ADDRESS_TYPE == alias.getAddress()[2]) {
+        if (AddressTool.validContractAddress(alias.getAddress(), chainId)) {
             throw new NulsRuntimeException(AccountErrorCode.ADDRESS_ERROR);
         }
         if (!FormatValidUtils.validAlias(alias.getAlias())) {
@@ -220,6 +220,19 @@ public class AliasServiceImpl implements AliasService, InitializingBean {
         if (null == coinData) {
             throw new NulsRuntimeException(AccountErrorCode.TX_COINDATA_NOT_EXIST);
         }
+        if (null != coinData.getFrom()){
+            byte[] addr = null;
+            for(CoinFrom coinFrom : coinData.getFrom()){
+                if(addr == null){
+                    addr = coinFrom.getAddress();
+                }
+                if(!Arrays.equals(coinFrom.getAddress(), addr)){
+                    LoggerUtil.logger.error("alias coin contains multiple different addresses, txhash:{}", transaction.getHash().getDigestHex());
+                    throw new NulsRuntimeException(AccountErrorCode.TX_DATA_VALIDATION_ERROR);
+                }
+
+            }
+        }
         if (null != coinData.getTo()) {
             boolean burned = false;
             for (Coin coin : coinData.getTo()) {
@@ -232,7 +245,6 @@ public class AliasServiceImpl implements AliasService, InitializingBean {
                 throw new NulsRuntimeException(AccountErrorCode.MUST_BURN_A_NULS);
             }
         }
-        //验证签名
         TransactionSignature sig = new TransactionSignature();
         try {
             sig.parse(transaction.getTransactionSignature(), 0);

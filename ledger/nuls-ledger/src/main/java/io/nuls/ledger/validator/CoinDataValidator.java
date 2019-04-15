@@ -604,7 +604,6 @@ public class CoinDataValidator {
             //例如黄牌交易，直接返回
             return ValidateResult.getSuccess();
         }
-        String txNonce = LedgerUtil.getNonceEncodeByTx(tx);
         /*
          * 先校验nonce值是否正常
          */
@@ -625,10 +624,7 @@ public class CoinDataValidator {
             } else {
                 if (!isValidateFreezeTx(coinFrom.getLocked(), accountState, coinFrom.getAmount(), nonce)) {
                     //确认交易未找到冻结的交易
-                    if (!isExsitUnconfirmedFreezeTx(accountState, coinFrom.getAmount(), nonce)) {
-                        //未确认交易中也未找到冻结的交易
                         return ValidateResult.getResult(ValidateEnum.FAIL_CODE, new String[]{address, nonce, "freeze tx is not exist"});
-                    }
                 }
             }
         }

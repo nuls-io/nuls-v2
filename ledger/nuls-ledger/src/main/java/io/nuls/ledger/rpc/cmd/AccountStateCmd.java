@@ -90,7 +90,6 @@ public class AccountStateCmd extends BaseCmd {
         rtMap.put("available", accountState.getAvailableAmount());
         BigInteger permanentLocked = BigInteger.ZERO;
         BigInteger timeHeightLocked = BigInteger.ZERO;
-        ;
         for (FreezeLockTimeState freezeLockTimeState : accountState.getFreezeLockTimeStates()) {
             if (LedgerConstant.PERMANENT_LOCK == freezeLockTimeState.getLockTime()) {
                 permanentLocked = permanentLocked.add(freezeLockTimeState.getAmount());
@@ -199,8 +198,7 @@ public class AccountStateCmd extends BaseCmd {
     }
 
     @CmdAnnotation(cmd = "getBalanceNonce",
-            version = 1.0, scope = "private", minEvent = 0, minPeriod = 0,
-            description = "")
+            version = 1.0, description = "")
     @Parameter(parameterName = "chainId", parameterType = "int")
     @Parameter(parameterName = "assetChainId", parameterType = "int")
     @Parameter(parameterName = "address", parameterType = "String")
@@ -212,7 +210,7 @@ public class AccountStateCmd extends BaseCmd {
         Integer assetId = (Integer) params.get("assetId");
         LoggerUtil.logger(chainId).debug("chainId={},assetChainId={},address={},assetId={}", chainId, assetChainId, address, assetId);
         AccountState accountState = accountStateService.getAccountStateReCal(address, chainId, assetChainId, assetId);
-        Map<String, Object> rtMap = new HashMap<>(4);
+        Map<String, Object> rtMap = new HashMap<>(6);
         AccountStateUnconfirmed accountStateUnconfirmed = unconfirmedStateService.getUnconfirmedInfoReCal(accountState);
         rtMap.put("nonce", RPCUtil.encode(LedgerUtil.getNonceDecode(accountStateUnconfirmed.getLatestUnconfirmedNonce())));
         if (accountStateUnconfirmed.getUnconfirmedNonces().size() > 0) {
@@ -223,15 +221,25 @@ public class AccountStateCmd extends BaseCmd {
         if (null != accountStateUnconfirmed && null != accountStateUnconfirmed.getUnconfirmedNonces() && accountStateUnconfirmed.getUnconfirmedNonces().size() > 0) {
             rtMap.put("available", accountState.getAvailableAmount().add(accountStateUnconfirmed.getUnconfirmedAmount()));
             rtMap.put("freeze", accountState.getFreezeTotal().add(accountStateUnconfirmed.getUnconfirmedFreezeAmount()));
-            LoggerUtil.logger(chainId).debug("UnconfirmedAmounts=true");
-
         } else {
             rtMap.put("available", accountState.getAvailableAmount());
             rtMap.put("freeze", accountState.getFreezeTotal());
         }
-
+        BigInteger permanentLocked = BigInteger.ZERO;
+        BigInteger timeHeightLocked = BigInteger.ZERO;
+        for (FreezeLockTimeState freezeLockTimeState : accountState.getFreezeLockTimeStates()) {
+            if (LedgerConstant.PERMANENT_LOCK == freezeLockTimeState.getLockTime()) {
+                permanentLocked = permanentLocked.add(freezeLockTimeState.getAmount());
+            } else {
+                timeHeightLocked = timeHeightLocked.add(freezeLockTimeState.getAmount());
+            }
+        }
+        for (FreezeHeightState freezeHeightState : accountState.getFreezeHeightStates()) {
+            timeHeightLocked = timeHeightLocked.add(freezeHeightState.getAmount());
+        }
+        rtMap.put("permanentLocked", permanentLocked);
+        rtMap.put("timeHeightLocked", timeHeightLocked);
         Response response =  success(rtMap);
-        LoggerUtil.logger(chainId).debug("response={}", response);
         return response;
     }
 

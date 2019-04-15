@@ -34,7 +34,7 @@ public interface CommandConstant {
     //根据区块hash获取区块
     String GET_BLOCK_BY_HASH = "downloadBlockByHash";
     //获取账户余额
-    String GET_BALANCE = "getBalance";
+    String GET_BALANCE = "getBalanceNonce";
     //获取账户锁定列表
     String GET_FREEZE = "getFreezeList";
 
