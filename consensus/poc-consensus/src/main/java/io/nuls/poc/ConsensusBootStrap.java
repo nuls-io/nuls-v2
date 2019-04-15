@@ -79,6 +79,7 @@ public class ConsensusBootStrap extends RpcModule {
                 new Module(ModuleE.BL.abbr, "1.0"),
                 new Module(ModuleE.AC.abbr, "1.0"),
                 new Module(ModuleE.NW.abbr, "1.0"),
+                new Module(ModuleE.LG.abbr, "1.0"),
                 new Module(ModuleE.TX.abbr, "1.0")};
     }
 
