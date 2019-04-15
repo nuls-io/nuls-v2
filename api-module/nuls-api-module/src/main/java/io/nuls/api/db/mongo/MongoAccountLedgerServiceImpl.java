@@ -6,6 +6,7 @@ import com.mongodb.client.model.ReplaceOneModel;
 import com.mongodb.client.model.WriteModel;
 import io.nuls.api.cache.ApiCache;
 import io.nuls.api.constant.MongoTableConstant;
+import io.nuls.api.db.AccountLedgerService;
 import io.nuls.api.manager.CacheManager;
 import io.nuls.api.model.po.db.AccountLedgerInfo;
 import io.nuls.api.utils.DocumentTransferTool;
@@ -18,7 +19,7 @@ import java.util.List;
 import java.util.Map;
 
 @Component
-public class MongoAccountLedgerServiceImpl {
+public class MongoAccountLedgerServiceImpl implements AccountLedgerService {
 
     @Autowired
     private MongoDBService mongoDBService;

@@ -67,7 +67,7 @@ public class MessageUtil {
     public static NegotiateConnection defaultNegotiateConnection() {
         NegotiateConnection negotiateConnection = new NegotiateConnection();
         negotiateConnection.setAbbreviation(ConnectManager.LOCAL.getAbbreviation());
-        negotiateConnection.setProtocolVersion("1.0");
+        negotiateConnection.setProtocolVersion("0.1");
         negotiateConnection.setCompressionAlgorithm("zlib");
         negotiateConnection.setCompressionRate("0");
         return negotiateConnection;

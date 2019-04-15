@@ -4,6 +4,7 @@ import com.mongodb.client.model.DeleteManyModel;
 import com.mongodb.client.model.DeleteOneModel;
 import com.mongodb.client.model.Filters;
 import com.mongodb.client.model.Sorts;
+import io.nuls.api.db.TransactionService;
 import io.nuls.api.model.po.db.*;
 import io.nuls.api.utils.DocumentTransferTool;
 import io.nuls.tools.core.annotation.Autowired;
@@ -20,17 +21,13 @@ import static io.nuls.api.constant.MongoTableConstant.*;
 
 
 @Component
-public class MongoTransactionServiceImpl {
+public class MongoTransactionServiceImpl implements TransactionService {
 
     @Autowired
     private MongoDBService mongoDBService;
 
     @Autowired
     private MongoBlockServiceImpl mongoBlockServiceImpl;
-
-    public void initSelect(int chainId) {
-
-    }
 
     public void saveTxList(int chainId, List<TransactionInfo> txList) {
         if (txList.isEmpty()) {

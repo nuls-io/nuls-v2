@@ -3,6 +3,7 @@ package io.nuls.api.db.mongo;
 import com.mongodb.client.model.*;
 import io.nuls.api.ApiContext;
 import io.nuls.api.cache.ApiCache;
+import io.nuls.api.db.AgentService;
 import io.nuls.api.manager.CacheManager;
 import io.nuls.api.model.po.db.AgentInfo;
 import io.nuls.api.model.po.db.AliasInfo;
@@ -21,7 +22,7 @@ import java.util.List;
 import static io.nuls.api.constant.MongoTableConstant.AGENT_TABLE;
 
 @Component
-public class MongoAgentServiceImpl {
+public class MongoAgentServiceImpl implements AgentService {
 
     @Autowired
     private MongoDBService mongoDBService;

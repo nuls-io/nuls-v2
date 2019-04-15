@@ -23,6 +23,7 @@ package io.nuls.api.rpc.controller;
 import io.nuls.api.analysis.WalletRpcHandler;
 import io.nuls.api.cache.ApiCache;
 import io.nuls.api.constant.ApiConstant;
+import io.nuls.api.db.RoundManager;
 import io.nuls.api.db.mongo.*;
 import io.nuls.api.manager.CacheManager;
 import io.nuls.api.model.po.db.*;
@@ -48,7 +49,7 @@ import static io.nuls.api.constant.MongoTableConstant.CONSENSUS_LOCKED;
 public class PocConsensusController {
 
     @Autowired
-    private MongoRoundManagerImpl mongoRoundManagerImpl;
+    private RoundManager roundManager;
     @Autowired
     private MongoAgentServiceImpl mongoAgentServiceImpl;
     @Autowired
@@ -139,7 +140,7 @@ public class PocConsensusController {
             pageSize = 10;
         }
 //        Map<String, Integer> map = new HashMap<>();
-//        List<PocRoundItem> itemList = mongoRoundManagerImpl.getCurrentRound().getItemList();
+//        List<PocRoundItem> itemList = roundManager.getCurrentRound().getItemList();
 //        for (PocRoundItem item : itemList) {
 //            map.put(item.getPackingAddress(), 1);
 //        }

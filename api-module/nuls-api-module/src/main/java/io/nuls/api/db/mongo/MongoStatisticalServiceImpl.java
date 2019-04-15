@@ -22,6 +22,7 @@ package io.nuls.api.db.mongo;
 
 import com.mongodb.client.model.Filters;
 import com.mongodb.client.model.Sorts;
+import io.nuls.api.db.StatisticalService;
 import io.nuls.api.model.po.db.KeyValue;
 import io.nuls.api.model.po.db.StatisticalInfo;
 import io.nuls.api.utils.DocumentTransferTool;
@@ -40,7 +41,7 @@ import static io.nuls.api.constant.MongoTableConstant.*;
  * @author Niels
  */
 @Component
-public class MongoStatisticalServiceImpl {
+public class MongoStatisticalServiceImpl implements StatisticalService {
     @Autowired
     private MongoDBService mongoDBService;
 
@@ -103,7 +104,7 @@ public class MongoStatisticalServiceImpl {
             } else if (ANNUALIZE_REWARD.equals(field)) {
                 avgDouble(list, documentList, field);
             } else if (CONSENSUS_LOCKED.equals(field)) {
-                avgBigIngter(list, documentList, field);
+                avgBigInteger(list, documentList, field);
             } else {
                 avgLong(list, documentList, field);
             }
@@ -133,7 +134,7 @@ public class MongoStatisticalServiceImpl {
         }
     }
 
-    private void avgBigIngter(List<KeyValue> list, List<Document> documentList, String field) {
+    private void avgBigInteger(List<KeyValue> list, List<Document> documentList, String field) {
         List<String> keyList = new ArrayList<>();
         Map<String, List<BigInteger>> map = new HashMap<>();
         for (Document document : documentList) {

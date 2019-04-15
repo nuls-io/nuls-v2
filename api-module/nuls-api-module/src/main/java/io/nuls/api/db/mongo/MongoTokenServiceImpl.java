@@ -1,6 +1,7 @@
 package io.nuls.api.db.mongo;
 
 import com.mongodb.client.model.*;
+import io.nuls.api.db.TokenService;
 import io.nuls.api.model.po.db.AccountTokenInfo;
 import io.nuls.api.model.po.db.PageInfo;
 import io.nuls.api.model.po.db.TokenTransfer;
@@ -19,7 +20,7 @@ import static io.nuls.api.constant.MongoTableConstant.ACCOUNT_TOKEN_TABLE;
 import static io.nuls.api.constant.MongoTableConstant.TOKEN_TRANSFER_TABLE;
 
 @Component
-public class MongoTokenServiceImpl {
+public class MongoTokenServiceImpl implements TokenService {
 
     @Autowired
     private MongoDBService mongoDBService;

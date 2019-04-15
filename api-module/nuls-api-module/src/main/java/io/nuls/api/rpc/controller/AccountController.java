@@ -33,7 +33,6 @@ import io.nuls.api.model.rpc.FreezeInfo;
 import io.nuls.api.model.rpc.RpcErrorCode;
 import io.nuls.api.model.rpc.RpcResult;
 import io.nuls.api.model.rpc.RpcResultError;
-import io.nuls.api.provider.ServiceManager;
 import io.nuls.api.utils.VerifyUtils;
 import io.nuls.base.basic.AddressTool;
 import io.nuls.tools.basic.Result;
@@ -53,8 +52,6 @@ public class AccountController {
     private MongoAccountServiceImpl mongoAccountServiceImpl;
     @Autowired
     private MongoBlockServiceImpl blockHeaderService;
-
-    private io.nuls.api.provider.account.AccountService cmdAccountService = ServiceManager.get(io.nuls.api.provider.account.AccountService.class);
 
     @RpcMethod("getAccountList")
     public RpcResult getAccountList(List<Object> params) {
