@@ -3,6 +3,7 @@ package io.nuls.api.db.mongo;
 import com.mongodb.client.DistinctIterable;
 import com.mongodb.client.MongoCursor;
 import com.mongodb.client.model.*;
+import io.nuls.api.db.DepositService;
 import io.nuls.api.model.po.db.DepositInfo;
 import io.nuls.api.model.po.db.PageInfo;
 import io.nuls.api.utils.DocumentTransferTool;
@@ -17,7 +18,7 @@ import java.util.List;
 import static io.nuls.api.constant.MongoTableConstant.DEPOSIT_TABLE;
 
 @Component
-public class MongoDepositServiceImpl {
+public class MongoDepositServiceImpl implements DepositService {
 
     @Autowired
     private MongoDBService mongoDBService;
@@ -80,7 +81,7 @@ public class MongoDepositServiceImpl {
         return depositInfos;
     }
 
-    public void rollbackDepoist(int chainId, List<DepositInfo> depositInfoList) {
+    public void rollbackDeposit(int chainId, List<DepositInfo> depositInfoList) {
         if (depositInfoList.isEmpty()) {
             return;
         }

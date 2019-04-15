@@ -22,6 +22,7 @@ package io.nuls.api.rpc.controller;
 
 import io.nuls.api.analysis.WalletRpcHandler;
 import io.nuls.api.cache.ApiCache;
+import io.nuls.api.db.ChainService;
 import io.nuls.api.db.mongo.MongoAccountServiceImpl;
 import io.nuls.api.db.mongo.MongoBlockServiceImpl;
 import io.nuls.api.db.mongo.MongoChainServiceImpl;

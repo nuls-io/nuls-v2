@@ -136,7 +136,7 @@ public class SignatureUtil {
     }
 
     /**
-     * 获取交易地址
+     * 获取交易签名地址
      *
      * @param tx 交易
      */

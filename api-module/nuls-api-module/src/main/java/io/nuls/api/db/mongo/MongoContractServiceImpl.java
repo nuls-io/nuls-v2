@@ -1,6 +1,7 @@
 package io.nuls.api.db.mongo;
 
 import com.mongodb.client.model.*;
+import io.nuls.api.db.ContractService;
 import io.nuls.api.model.po.db.ContractInfo;
 import io.nuls.api.model.po.db.ContractResultInfo;
 import io.nuls.api.model.po.db.ContractTxInfo;
@@ -18,7 +19,7 @@ import java.util.Map;
 import static io.nuls.api.constant.MongoTableConstant.*;
 
 @Component
-public class MongoContractServiceImpl {
+public class MongoContractServiceImpl implements ContractService {
 
     @Autowired
     private MongoDBService mongoDBService;

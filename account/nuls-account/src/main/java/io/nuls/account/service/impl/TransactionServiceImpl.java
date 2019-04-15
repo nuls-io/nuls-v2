@@ -326,7 +326,12 @@ public class TransactionServiceImpl implements TransactionService {
             tx.setHash(NulsDigestData.calcDigestData(tx.serializeForHash()));
             //创建ECKey用于签名
             List<ECKey> signEcKeys = new ArrayList<>();
+            Set<String> addrs = new HashSet<>();
             for (CoinDto from : fromList) {
+                if(!addrs.add(from.getAddress())){
+                    //同一个地址只需要签一次名
+                    break;
+                }
                 //检查账户是否存在
                 Account account = accountService.getAccount(from.getAssetsChainId(), from.getAddress());
                 if (null == account) {

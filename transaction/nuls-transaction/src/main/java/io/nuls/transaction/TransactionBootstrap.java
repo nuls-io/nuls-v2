@@ -42,8 +42,6 @@ import io.nuls.transaction.constant.TxConfig;
 import io.nuls.transaction.constant.TxConstant;
 import io.nuls.transaction.constant.TxDBConstant;
 import io.nuls.transaction.manager.ChainManager;
-import io.nuls.transaction.model.bo.Chain;
-import io.nuls.transaction.rpc.call.BlockCall;
 import io.nuls.transaction.rpc.call.NetworkCall;
 import io.nuls.transaction.storage.rocksdb.LanguageStorageService;
 import io.nuls.transaction.utils.DBUtil;
@@ -51,7 +49,6 @@ import io.nuls.transaction.utils.LoggerUtil;
 
 import java.lang.reflect.Field;
 import java.nio.charset.Charset;
-import java.util.Map;
 import java.util.Set;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
@@ -114,9 +111,6 @@ public class TransactionBootstrap extends RpcModule {
         try {
             if (ModuleE.NW.abbr.equals(module.getName())) {
                 NetworkCall.registerProtocol();
-            }
-            if (ModuleE.BL.abbr.equals(module.getName())) {
-                subscriptionBlockHeight();
             }
         } catch (NulsException e) {
             LoggerUtil.Log.error(e);
@@ -211,19 +205,4 @@ public class TransactionBootstrap extends RpcModule {
         }
     }
 
-    /**
-     * 订阅最新区块高度
-     */
-    private void subscriptionBlockHeight() {
-        try {
-            ChainManager chainManager = SpringLiteContext.getBean(ChainManager.class);
-            for (Map.Entry<Integer, Chain> entry : chainManager.getChainMap().entrySet()) {
-                Chain chain = entry.getValue();
-                //订阅Block模块接口
-                BlockCall.subscriptionNewBlockHeight(chain);
-            }
-        } catch (NulsException e) {
-            throw new RuntimeException(e);
-        }
-    }
 }

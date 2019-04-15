@@ -2,6 +2,7 @@ package io.nuls.api.db.mongo;
 
 import com.mongodb.client.model.*;
 import io.nuls.api.cache.ApiCache;
+import io.nuls.api.db.AccountService;
 import io.nuls.api.manager.CacheManager;
 import io.nuls.api.model.po.db.AccountInfo;
 import io.nuls.api.model.po.db.PageInfo;
@@ -22,7 +23,7 @@ import static io.nuls.api.constant.MongoTableConstant.ACCOUNT_TABLE;
 import static io.nuls.api.constant.MongoTableConstant.TX_RELATION_TABLE;
 
 @Component
-public class MongoAccountServiceImpl {
+public class MongoAccountServiceImpl implements AccountService {
 
     @Autowired
     private MongoDBService mongoDBService;

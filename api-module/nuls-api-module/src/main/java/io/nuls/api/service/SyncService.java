@@ -4,6 +4,7 @@ package io.nuls.api.service;
 import io.nuls.api.cache.ApiCache;
 import io.nuls.api.constant.ApiConstant;
 import io.nuls.api.constant.ApiErrorCode;
+import io.nuls.api.db.RoundManager;
 import io.nuls.api.db.mongo.*;
 import io.nuls.api.manager.CacheManager;
 import io.nuls.api.model.po.db.*;
@@ -37,7 +38,7 @@ public class SyncService {
     @Autowired
     private MongoPunishServiceImpl mongoPunishServiceImpl;
     @Autowired
-    private MongoRoundManagerImpl mongoRoundManagerImpl;
+    private RoundManager roundManager;
     @Autowired
     private MongoContractServiceImpl mongoContractServiceImpl;
     @Autowired
@@ -85,7 +86,7 @@ public class SyncService {
         //处理交易
         processTxs(chainId, blockInfo.getTxList());
         //处理交易
-        mongoRoundManagerImpl.process(chainId, blockInfo);
+        roundManager.process(chainId, blockInfo);
         //保存数据
         save(chainId, blockInfo);
 
