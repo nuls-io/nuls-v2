@@ -442,7 +442,10 @@ log "============ COPY JRE TO libs ==================="
         if [ ! -d "${LIBS_PATH}/JAVA" ]; then
             mkdir "${LIBS_PATH}/JAVA"
         fi
-        cp -r ${JRE_HOME} "${LIBS_PATH}/JAVA/11.0.2"
+        if [ ! -d "${LIBS_PATH}/JAVA/JRE" ]; then
+            mkdir "${LIBS_PATH}/JAVA/JRE"
+        fi
+        cp -r ${JRE_HOME} "${LIBS_PATH}/JAVA/JRE/11.0.2"
     fi
 log "============ COPY JRE TO libs done ============"
 fi
