@@ -2,6 +2,7 @@ package io.nuls.test.cases.transcation;
 
 import io.nuls.test.Config;
 import io.nuls.test.cases.SleepAdapter;
+import io.nuls.test.cases.TestCase;
 import io.nuls.test.cases.TestCaseChain;
 import io.nuls.test.cases.TestCaseIntf;
 import io.nuls.test.cases.account.CreateAccountCase;
@@ -30,7 +31,7 @@ public class TransferCase extends TestCaseChain {
         return new Class[]{
                 CreateAccountCase.class,
                 TransferToAddressCase.class,
-                SleepAdapter.$15SEC.class,
+                SleepAdapter.$30SEC.class,
                 SyncTxInfoCase.class,
                 GetTranscationToAddressAdapter.class,
                 SyncAccountBalance.class

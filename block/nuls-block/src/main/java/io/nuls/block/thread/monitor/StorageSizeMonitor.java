@@ -32,8 +32,6 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.concurrent.locks.StampedLock;
 
-import static io.nuls.block.constant.RunningStatusEnum.RUNNING;
-
 /**
  * 分叉链、孤儿链数据库定时清理器
  * 因为使用了rocksDb,清理记录后,数据文件大小不能实时变化,所以不能按数据库文件大小来做判断标准,每次按区块的百分比清理
@@ -43,46 +41,26 @@ import static io.nuls.block.constant.RunningStatusEnum.RUNNING;
  * @version 1.0
  * @date 18-11-14 下午3:54
  */
-public class StorageSizeMonitor implements Runnable {
+public class StorageSizeMonitor extends BaseMonitor {
 
     private static final StorageSizeMonitor INSTANCE = new StorageSizeMonitor();
-
-    private StorageSizeMonitor() {
-
-    }
 
     public static StorageSizeMonitor getInstance() {
         return INSTANCE;
     }
 
     @Override
-    public void run() {
-        for (Integer chainId : ContextManager.chainIds) {
-            ChainContext context = ContextManager.getContext(chainId);
-            NulsLogger commonLog = context.getCommonLog();
-            try {
-                //判断该链的运行状态,只有正常运行时才会有数据库的处理
-                RunningStatusEnum status = context.getStatus();
-                if (!status.equals(RUNNING)) {
-                    commonLog.debug("skip process, status is " + status + ", chainId-" + chainId);
-                    continue;
-                }
-                //获取配置项
-                ChainParameters parameters = ContextManager.getContext(chainId).getParameters();
-                int heightRange = parameters.getHeightRange();
-                int orphanChainMaxAge = parameters.getOrphanChainMaxAge();
-                context.setStatus(RunningStatusEnum.DATABASE_CLEANING);
-                forkChainsCleaner(chainId, heightRange, context);
-                orphanChainsCleaner(chainId, heightRange, context, orphanChainMaxAge);
-                int cacheSize = parameters.getCacheSize();
-                dbSizeCleaner(chainId, context, cacheSize);
-                context.setStatus(RunningStatusEnum.RUNNING);
-            } catch (Exception e) {
-                context.setStatus(RunningStatusEnum.RUNNING);
-                e.printStackTrace();
-                commonLog.error(e);
-            }
-        }
+    protected void process(int chainId, ChainContext context, NulsLogger commonLog) {
+        //获取配置项
+        ChainParameters parameters = ContextManager.getContext(chainId).getParameters();
+        int heightRange = parameters.getHeightRange();
+        int orphanChainMaxAge = parameters.getOrphanChainMaxAge();
+        context.setStatus(RunningStatusEnum.DATABASE_CLEANING);
+        forkChainsCleaner(chainId, heightRange, context);
+        orphanChainsCleaner(chainId, heightRange, context, orphanChainMaxAge);
+        int cacheSize = parameters.getCacheSize();
+        dbSizeCleaner(chainId, context, cacheSize);
+        context.setStatus(RunningStatusEnum.RUNNING);
     }
 
     private void dbSizeCleaner(Integer chainId, ChainContext context, int cacheSize) {

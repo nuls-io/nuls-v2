@@ -38,4 +38,36 @@ public class AccountBalanceInfo {
     public void setAvailable(BigInteger available) {
         this.available = available;
     }
+
+    @Override
+    public String toString() {
+        return new StringBuilder("{")
+                .append("\"freeze\":")
+                .append(freeze)
+                .append(",\"total\":")
+                .append(total)
+                .append(",\"available\":")
+                .append(available)
+                .append('}').toString();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof AccountBalanceInfo)) return false;
+
+        AccountBalanceInfo that = (AccountBalanceInfo) o;
+
+        if (freeze != null ? !freeze.equals(that.freeze) : that.freeze != null) return false;
+        if (total != null ? !total.equals(that.total) : that.total != null) return false;
+        return available != null ? available.equals(that.available) : that.available == null;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = freeze != null ? freeze.hashCode() : 0;
+        result = 31 * result + (total != null ? total.hashCode() : 0);
+        result = 31 * result + (available != null ? available.hashCode() : 0);
+        return result;
+    }
 }

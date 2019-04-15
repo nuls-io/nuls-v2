@@ -20,8 +20,6 @@
 
 package io.nuls.block.thread.monitor;
 
-import io.nuls.block.constant.RunningStatusEnum;
-import io.nuls.block.manager.ContextManager;
 import io.nuls.block.model.ChainContext;
 import io.nuls.block.model.ChainParameters;
 import io.nuls.block.rpc.call.ConsensusUtil;
@@ -42,48 +40,29 @@ import static io.nuls.block.constant.Constant.CONSENSUS_WAITING;
  * @version 1.0
  * @date 18-11-14 下午3:53
  */
-public class NetworkResetMonitor implements Runnable {
+public class NetworkResetMonitor extends BaseMonitor {
 
     private static final NetworkResetMonitor INSTANCE = new NetworkResetMonitor();
-
-    private NetworkResetMonitor() {
-    }
 
     public static NetworkResetMonitor getInstance() {
         return INSTANCE;
     }
 
     @Override
-    public void run() {
-        for (Integer chainId : ContextManager.chainIds) {
-            ChainContext context = ContextManager.getContext(chainId);
-            NulsLogger commonLog = context.getCommonLog();
-            try {
-                //判断该链的运行状态,只有正常运行时才会有区块高度监控
-                RunningStatusEnum status = context.getStatus();
-                if (!status.equals(RunningStatusEnum.RUNNING)) {
-                    commonLog.debug("skip process, status is " + status + ", chainId-" + chainId);
-                    return;
-                }
-                ChainParameters parameters = context.getParameters();
-                int reset = parameters.getResetTime();
-                long time = context.getLatestBlock().getHeader().getTime();
-                //如果(当前时间戳-最新区块时间戳)>重置网络阈值,通知网络模块重置可用节点
-                long currentTime = TimeUtils.getCurrentTimeMillis();
-                commonLog.debug("chainId-" + chainId + ",currentTime-" + currentTime + ",blockTime-" + time + ",diffrence-" + (currentTime - time));
-                if (currentTime - time > reset && !RunningStatusEnum.SYNCHRONIZING.equals(context.getStatus())) {
-                    commonLog.info("chainId-" + chainId + ",NetworkReset!");
-                    NetworkUtil.resetNetwork(chainId);
-                    //重新开启区块同步线程
-                    ConsensusUtil.notice(chainId, CONSENSUS_WAITING);
-                    ThreadUtils.createAndRunThread("block-synchronizer", BlockSynchronizer.getInstance());
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
-                commonLog.error("chainId-" + chainId + ",NetworkReset error!");
-            }
+    protected void process(int chainId, ChainContext context, NulsLogger commonLog) {
+        ChainParameters parameters = context.getParameters();
+        int reset = parameters.getResetTime();
+        long time = context.getLatestBlock().getHeader().getTime();
+        //如果(当前时间戳-最新区块时间戳)>重置网络阈值,通知网络模块重置可用节点
+        long currentTime = TimeUtils.getCurrentTimeMillis();
+        commonLog.debug("chainId-" + chainId + ",currentTime-" + currentTime + ",blockTime-" + time + ",diffrence-" + (currentTime - time));
+        if (currentTime - time > reset) {
+            commonLog.info("chainId-" + chainId + ",NetworkReset!");
+            NetworkUtil.resetNetwork(chainId);
+            //重新开启区块同步线程
+            ConsensusUtil.notice(chainId, CONSENSUS_WAITING);
+            ThreadUtils.createAndRunThread("block-synchronizer", BlockSynchronizer.getInstance());
         }
-
     }
 
 }

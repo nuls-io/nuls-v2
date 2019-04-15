@@ -88,6 +88,7 @@ public class DepositServiceImpl implements DepositService {
             deposit.setAddress(AddressTool.getAddress(dto.getAddress()));
             deposit.setAgentHash(NulsDigestData.fromDigestHex(dto.getAgentHash()));
             deposit.setDeposit(BigIntegerUtils.stringToBigInteger(dto.getDeposit()));
+            tx.setTime(TimeUtils.getCurrentTimeMillis());
             tx.setTxData(deposit.serialize());
             tx.setTime(TimeUtils.getCurrentTimeMillis());
             CoinData coinData = coinDataManager.getCoinData(deposit.getAddress(), chain, new BigInteger(dto.getDeposit()), ConsensusConstant.CONSENSUS_LOCK_TIME, tx.size() + P2PHKSignature.SERIALIZE_LENGTH);
@@ -205,6 +206,7 @@ public class DepositServiceImpl implements DepositService {
             CancelDeposit cancelDeposit = new CancelDeposit();
             cancelDeposit.setAddress(AddressTool.getAddress(dto.getAddress()));
             cancelDeposit.setJoinTxHash(hash);
+            cancelDepositTransaction.setTime(TimeUtils.getCurrentTimeMillis());
             cancelDepositTransaction.setTxData(cancelDeposit.serialize());
             CoinData coinData = coinDataManager.getUnlockCoinData(cancelDeposit.getAddress(), chain, deposit.getDeposit(), 0, cancelDepositTransaction.size() + P2PHKSignature.SERIALIZE_LENGTH);
             coinData.getFrom().get(0).setNonce(CallMethodUtils.getNonce(hash.getDigestBytes()));

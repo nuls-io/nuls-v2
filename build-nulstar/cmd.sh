@@ -44,9 +44,9 @@ if [ -z "$config" ]; then
     config="./nuls.ncf";
 fi
 nulstarUrl=`getModuleItem $config "serviceManager"`
-echo $nulstarUrl
 if [ -z "${nulstarUrl}" ]; then
     nulstarUrl="ws://127.0.0.1:7771"
 fi
+echo "Service Manager URL: $nulstarUrl"
 cd ./Modules/Nuls/cmdclient/1.0.0
 ./cmd.sh ${JAVA_HOME} ${LOGLEVEL} ${nulstarUrl}
