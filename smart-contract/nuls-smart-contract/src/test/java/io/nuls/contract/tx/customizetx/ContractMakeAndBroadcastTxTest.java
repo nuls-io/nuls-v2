@@ -214,12 +214,20 @@ public class ContractMakeAndBroadcastTxTest extends ContractMakeAndBroadcastBase
      * 调用合约的交易造假测试
      */
 
+
+    private String tokenContractAddress() {
+        return "tNULSeBaMxPE2ESCiEAZ9CxXMyzBkySBKKSUQ4";
+    }
+    private String contractCallContractAddress() {
+        return "tNULSeBaMw6wNJmGPqei16Lj6V9XpAGCguvGaH";
+    }
+
     /**
      * 增加coinData的to
      */
     @Test
     public void fakeCallTx_addCoinTo() throws Exception {
-        contractAddress = "tNULSeBaN155SwgcURmRwBMzmjKAH3PwK55tSe";
+        contractAddress = tokenContractAddress();
         new MakeAndBroadcastCallTxTest()
                 .make()
                 .fake(new ExecuteFake() {
@@ -236,7 +244,7 @@ public class ContractMakeAndBroadcastTxTest extends ContractMakeAndBroadcastBase
      */
     @Test
     public void fakeCallTx_modifyCoinTo() throws Exception {
-        contractAddress = "tNULSeBaN155SwgcURmRwBMzmjKAH3PwK55tSe";
+        contractAddress = tokenContractAddress();
         new MakeAndBroadcastCallTxTest()
                 .setLongValue(2_0000_0000L)
                 .make()
@@ -254,7 +262,7 @@ public class ContractMakeAndBroadcastTxTest extends ContractMakeAndBroadcastBase
      */
     @Test
     public void fakeCallTx_ContractSender() throws Exception {
-        contractAddress = "tNULSeBaN155SwgcURmRwBMzmjKAH3PwK55tSe";
+        contractAddress = tokenContractAddress();
         new MakeAndBroadcastCallTxTest()
                 .make()
                 .fake(new ExecuteFake() {
@@ -271,7 +279,7 @@ public class ContractMakeAndBroadcastTxTest extends ContractMakeAndBroadcastBase
      */
     @Test
     public void fakeCallTx_ContractAddress() throws Exception {
-        contractAddress = "tNULSeBaN155SwgcURmRwBMzmjKAH3PwK55tSe";
+        contractAddress = tokenContractAddress();
         new MakeAndBroadcastCallTxTest()
                 .make()
                 .fake(new ExecuteFake() {
@@ -288,7 +296,7 @@ public class ContractMakeAndBroadcastTxTest extends ContractMakeAndBroadcastBase
      */
     @Test
     public void fakeCallTx_GasLimit() throws Exception {
-        contractAddress = "tNULSeBaN155SwgcURmRwBMzmjKAH3PwK55tSe";
+        contractAddress = tokenContractAddress();
         new MakeAndBroadcastCallTxTest()
                 .make()
                 .fake(new ExecuteFake() {
@@ -305,7 +313,7 @@ public class ContractMakeAndBroadcastTxTest extends ContractMakeAndBroadcastBase
      */
     @Test
     public void fakeCallTx_Price() throws Exception {
-        contractAddress = "tNULSeBaN155SwgcURmRwBMzmjKAH3PwK55tSe";
+        contractAddress = tokenContractAddress();
         methodName = ContractConstant.BALANCE_TRIGGER_METHOD_NAME;
         new MakeAndBroadcastCallTxTest(2_0000_0000L, new Object[0])
                 .make()
@@ -323,7 +331,7 @@ public class ContractMakeAndBroadcastTxTest extends ContractMakeAndBroadcastBase
      */
     @Test
     public void fakeCallTx_PriceAndGasLimit() throws Exception {
-        contractAddress = "tNULSeBaN155SwgcURmRwBMzmjKAH3PwK55tSe";
+        contractAddress = contractCallContractAddress();
         methodName = ContractConstant.BALANCE_TRIGGER_METHOD_NAME;
         new MakeAndBroadcastCallTxTest(2_0000_0000L, new Object[0])
                 .make()
@@ -342,7 +350,7 @@ public class ContractMakeAndBroadcastTxTest extends ContractMakeAndBroadcastBase
      */
     @Test
     public void fakeCallTx_Value() throws Exception {
-        contractAddress = "tNULSeBaN155SwgcURmRwBMzmjKAH3PwK55tSe";
+        contractAddress = contractCallContractAddress();
         sender = toAddress0;
         methodName = ContractConstant.BALANCE_TRIGGER_METHOD_NAME;
         new MakeAndBroadcastCallTxTest(2_0000_0000L, new Object[0])
@@ -361,7 +369,7 @@ public class ContractMakeAndBroadcastTxTest extends ContractMakeAndBroadcastBase
      */
     @Test
     public void fakeCallTx_normal() throws Exception {
-        contractAddress = "tNULSeBaN155SwgcURmRwBMzmjKAH3PwK55tSe";
+        contractAddress = contractCallContractAddress();
         sender = toAddress0;
         methodName = ContractConstant.BALANCE_TRIGGER_METHOD_NAME;
         new MakeAndBroadcastCallTxTest(2_0000_0000L, new Object[0])
@@ -381,7 +389,7 @@ public class ContractMakeAndBroadcastTxTest extends ContractMakeAndBroadcastBase
      */
     @Test
     public void fakeDeleteTx_ContractSender() throws Exception {
-        contractAddress = "tNULSeBaN155SwgcURmRwBMzmjKAH3PwK55tSe";
+        contractAddress = tokenContractAddress();
         new MakeAndBroadcastDeleteTxTest()
                 .make()
                 .fake(new ExecuteFake() {
@@ -398,7 +406,7 @@ public class ContractMakeAndBroadcastTxTest extends ContractMakeAndBroadcastBase
      */
     @Test
     public void fakeDeleteTx_ContractAddress() throws Exception {
-        contractAddress = "tNULSeBaN155SwgcURmRwBMzmjKAH3PwK55tSe";
+        contractAddress = tokenContractAddress();
         new MakeAndBroadcastDeleteTxTest()
                 .make()
                 .fake(new ExecuteFake() {
@@ -415,7 +423,7 @@ public class ContractMakeAndBroadcastTxTest extends ContractMakeAndBroadcastBase
      */
     @Test
     public void fakeDeleteTx_NonCreatorCannotDeleteContract() throws Exception {
-        contractAddress = "tNULSeBaN6PJuwwJcUx2zhLJ778YZzTdduD1yF";
+        contractAddress = tokenContractAddress();
         sender = toAddress7;
         new MakeAndBroadcastDeleteTxTest()
                 .make()
@@ -427,7 +435,7 @@ public class ContractMakeAndBroadcastTxTest extends ContractMakeAndBroadcastBase
      */
     @Test
     public void fakeDeleteTx_BalanceRemaining() throws Exception {
-        contractAddress = "tNULSeBaN155SwgcURmRwBMzmjKAH3PwK55tSe";
+        contractAddress = contractCallContractAddress();
         String orginSender = sender;
         methodName = ContractConstant.BALANCE_TRIGGER_METHOD_NAME;
         sender = toAddress0;
@@ -448,7 +456,7 @@ public class ContractMakeAndBroadcastTxTest extends ContractMakeAndBroadcastBase
      */
     @Test
     public void fakeDeleteTx_normal() throws Exception {
-        contractAddress = "tNULSeBaN8jxiSjzhBBAcnRuM9dEmaiYMYiKMA";
+        contractAddress = tokenContractAddress();
         String orginSender = sender;
 
         sender = orginSender;

@@ -40,7 +40,7 @@ public interface ProgramExecutor {
 
     ProgramResult call(ProgramCall programCall);
 
-    ProgramResult stop(byte[] address, byte[] sender);
+    ProgramResult stop(long blockNumber, byte[] address, byte[] sender);
 
     List<ProgramMethod> method(byte[] address);
 

@@ -162,7 +162,7 @@ public class ContractExecutorImpl implements ContractExecutor {
 
         ProgramExecutor track = executor.startTracking();
 
-        ProgramResult programResult = track.stop(contractAddress, sender);
+        ProgramResult programResult = track.stop(number, contractAddress, sender);
 
         ContractResult contractResult = new ContractResult();
 

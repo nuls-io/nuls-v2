@@ -37,14 +37,6 @@ import java.util.List;
 public interface AliasStorageService {
 
     /**
-     * @auther EdwardChan
-     * @date Nov.9th 2018
-     */
-    @Deprecated
-    List<AliasPo> getAliasList(int chainId);
-
-
-    /**
      * get alias,contain the account alias and multi sign account alias
      *
      * @param chainId
