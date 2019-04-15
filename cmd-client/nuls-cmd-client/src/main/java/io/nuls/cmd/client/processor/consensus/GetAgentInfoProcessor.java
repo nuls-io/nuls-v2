@@ -43,7 +43,7 @@ public class GetAgentInfoProcessor extends ConsensusBaseProcessor {
     @Override
     public boolean argsValidate(String[] args) {
         checkArgsNumber(args,1);
-        checkArgs(NulsDigestData.validHash(args[2]),"agentHash format error");
+        checkArgs(NulsDigestData.validHash(args[1]),"agentHash format error");
         return true;
     }
 
