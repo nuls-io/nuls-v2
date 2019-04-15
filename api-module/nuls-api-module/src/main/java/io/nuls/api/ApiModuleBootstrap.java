@@ -101,7 +101,7 @@ public class ApiModuleBootstrap extends RpcModule {
     public Module[] getDependencies() {
         return new Module[]{
 //                new Module(ModuleE.CS.abbr, "1.0"),
-//                new Module(ModuleE.BL.abbr, "1.0")
+                new Module(ModuleE.BL.abbr, "1.0")
 //                new Module(ModuleE.SC.abbr, "1.0")
         };
     }

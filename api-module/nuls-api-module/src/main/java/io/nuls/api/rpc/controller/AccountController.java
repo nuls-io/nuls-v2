@@ -22,17 +22,13 @@ package io.nuls.api.rpc.controller;
 
 import io.nuls.api.analysis.WalletRpcHandler;
 import io.nuls.api.cache.ApiCache;
+import io.nuls.api.db.ChainService;
 import io.nuls.api.db.mongo.MongoAccountServiceImpl;
 import io.nuls.api.db.mongo.MongoBlockServiceImpl;
+import io.nuls.api.db.mongo.MongoChainServiceImpl;
 import io.nuls.api.manager.CacheManager;
-import io.nuls.api.model.po.db.AccountInfo;
-import io.nuls.api.model.po.db.AssetInfo;
-import io.nuls.api.model.po.db.PageInfo;
-import io.nuls.api.model.po.db.TxRelationInfo;
-import io.nuls.api.model.rpc.FreezeInfo;
-import io.nuls.api.model.rpc.RpcErrorCode;
-import io.nuls.api.model.rpc.RpcResult;
-import io.nuls.api.model.rpc.RpcResultError;
+import io.nuls.api.model.po.db.*;
+import io.nuls.api.model.rpc.*;
 import io.nuls.api.utils.VerifyUtils;
 import io.nuls.base.basic.AddressTool;
 import io.nuls.tools.basic.Result;
@@ -52,6 +48,8 @@ public class AccountController {
     private MongoAccountServiceImpl mongoAccountServiceImpl;
     @Autowired
     private MongoBlockServiceImpl blockHeaderService;
+    @Autowired
+    private MongoChainServiceImpl chainService;
 
     @RpcMethod("getAccountList")
     public RpcResult getAccountList(List<Object> params) {
@@ -144,10 +142,10 @@ public class AccountController {
             return result.setError(new RpcResultError(RpcErrorCode.DATA_NOT_EXISTS));
         }
         AssetInfo defaultAsset = apiCache.getChainInfo().getDefaultAsset();
-        AccountInfo account = WalletRpcHandler.getAccountBalance(chainId, address, defaultAsset.getChainId(), defaultAsset.getAssetId());
-        accountInfo.setBalance(account.getBalance());
-        accountInfo.setConsensusLock(account.getConsensusLock());
-        accountInfo.setTimeLock(account.getTimeLock());
+        BalanceInfo balanceInfo = WalletRpcHandler.getAccountBalance(chainId, address, defaultAsset.getChainId(), defaultAsset.getAssetId());
+        accountInfo.setBalance(balanceInfo.getBalance());
+        accountInfo.setConsensusLock(balanceInfo.getConsensusLock());
+        accountInfo.setTimeLock(balanceInfo.getTimeLock());
         return result.setResult(accountInfo);
     }
 
@@ -217,4 +215,29 @@ public class AccountController {
             return RpcResult.success(pageInfo);
         }
     }
+
+    @RpcMethod("getAccountBalance")
+    public RpcResult getAccountBalance(List<Object> params) {
+        VerifyUtils.verifyParams(params, 3);
+        int chainId, assetId;
+        String address;
+        try {
+            chainId = (int) params.get(0);
+            assetId = (int) params.get(1);
+            address = (String) params.get(2);
+        } catch (Exception e) {
+            return RpcResult.paramError();
+        }
+        ApiCache apiCache = CacheManager.getCache(chainId);
+        if (apiCache == null) {
+            return RpcResult.dataNotFound();
+        }
+        if (assetId <= 0) {
+            AssetInfo defaultAsset = apiCache.getChainInfo().getDefaultAsset();
+            assetId = defaultAsset.getAssetId();
+        }
+        BalanceInfo balanceInfo = WalletRpcHandler.getAccountBalance(chainId, address, chainId, assetId);
+        return RpcResult.success(balanceInfo);
+    }
+
 }
