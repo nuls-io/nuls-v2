@@ -33,7 +33,6 @@ import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.crypto.UnsafeByteArrayOutputStream;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.parse.SerializeUtils;
-import io.nuls.tools.thread.TimeService;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -75,7 +74,6 @@ public class Transaction extends BaseNulsData implements Cloneable {
     }
 
     public Transaction(int type) {
-        this.time = TimeService.currentTimeMillis();
         this.type = type;
     }
 

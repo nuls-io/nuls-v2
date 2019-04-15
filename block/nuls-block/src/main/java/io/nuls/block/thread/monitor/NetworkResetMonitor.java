@@ -27,6 +27,7 @@ import io.nuls.block.model.ChainParameters;
 import io.nuls.block.rpc.call.ConsensusUtil;
 import io.nuls.block.rpc.call.NetworkUtil;
 import io.nuls.block.thread.BlockSynchronizer;
+import io.nuls.rpc.util.TimeUtils;
 import io.nuls.tools.log.logback.NulsLogger;
 import io.nuls.tools.thread.ThreadUtils;
 
@@ -68,7 +69,7 @@ public class NetworkResetMonitor implements Runnable {
                 int reset = parameters.getResetTime();
                 long time = context.getLatestBlock().getHeader().getTime();
                 //如果(当前时间戳-最新区块时间戳)>重置网络阈值,通知网络模块重置可用节点
-                long currentTime = NetworkUtil.currentTime();
+                long currentTime = TimeUtils.getCurrentTimeMillis();
                 commonLog.debug("chainId-" + chainId + ",currentTime-" + currentTime + ",blockTime-" + time + ",diffrence-" + (currentTime - time));
                 if (currentTime - time > reset && !RunningStatusEnum.SYNCHRONIZING.equals(context.getStatus())) {
                     commonLog.info("chainId-" + chainId + ",NetworkReset!");

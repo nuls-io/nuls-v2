@@ -27,15 +27,13 @@ package io.nuls.account.service.impl;
 
 import io.nuls.account.constant.AccountConstant;
 import io.nuls.account.constant.AccountErrorCode;
+import io.nuls.account.model.NonceBalance;
 import io.nuls.account.model.bo.Account;
 import io.nuls.account.model.bo.Chain;
-import io.nuls.account.model.bo.VerifyTxResult;
 import io.nuls.account.model.bo.tx.AliasTransaction;
 import io.nuls.account.model.bo.tx.txdata.Alias;
 import io.nuls.account.model.po.AccountPo;
 import io.nuls.account.model.po.AliasPo;
-import io.nuls.account.rpc.call.LedgerCmdCall;
-import io.nuls.account.rpc.call.NetworkCall;
 import io.nuls.account.rpc.call.TransactionCmdCall;
 import io.nuls.account.service.AccountCacheService;
 import io.nuls.account.service.AccountService;
@@ -54,6 +52,7 @@ import io.nuls.base.signture.P2PHKSignature;
 import io.nuls.base.signture.SignatureUtil;
 import io.nuls.base.signture.TransactionSignature;
 import io.nuls.rpc.util.RPCUtil;
+import io.nuls.rpc.util.TimeUtils;
 import io.nuls.tools.basic.InitializingBean;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Service;
@@ -134,25 +133,8 @@ public class AliasServiceImpl implements AliasService, InitializingBean {
         //签名别名交易
         signTransaction(tx, account, password);
 
-        String txStr = RPCUtil.encode(tx.serialize());
-        //调用交易验证器
-        if(!TransactionCmdCall.baseValidateTx(chainId, txStr)){
-            LoggerUtil.logger.error("new tx base validator failed...");
-            throw new NulsRuntimeException(AccountErrorCode.TX_DATA_VALIDATION_ERROR);
-        }
-        if(!this.aliasTxValidate(chainId, tx)){
-            LoggerUtil.logger.error("new tx validator failed...");
-            throw new NulsRuntimeException(AccountErrorCode.TX_DATA_VALIDATION_ERROR);
-        }
-        VerifyTxResult verifyTxResult = LedgerCmdCall.commitUnconfirmedTx(chainId, RPCUtil.encode(tx.serialize()));
-        if(!verifyTxResult.success()){
-            LoggerUtil.logger.error("new tx verifyCoinData failed...");
-            throw new NulsRuntimeException(AccountErrorCode.TX_DATA_VALIDATION_ERROR);
-        }
-        //发起新交易
-        if(!TransactionCmdCall.newTx(chainId, txStr)) {
-            //如果发给交易模块失败,
-            LedgerCmdCall.rollBackUnconfirmTx(chainId, txStr);
+        if(!TransactionCmdCall.newTx(chainId, RPCUtil.encode(tx.serialize()))){
+            throw new  NulsRuntimeException(AccountErrorCode.FAILED);
         }
         return tx;
     }
@@ -218,7 +200,7 @@ public class AliasServiceImpl implements AliasService, InitializingBean {
         Alias alias = new Alias();
         alias.parse(new NulsByteBuffer(transaction.getTxData()));
         String address = AddressTool.getStringAddressByBytes(alias.getAddress());
-        if (BaseConstant.CONTRACT_ADDRESS_TYPE == alias.getAddress()[2]) {
+        if (AddressTool.validContractAddress(alias.getAddress(), chainId)) {
             throw new NulsRuntimeException(AccountErrorCode.ADDRESS_ERROR);
         }
         if (!FormatValidUtils.validAlias(alias.getAlias())) {
@@ -238,6 +220,19 @@ public class AliasServiceImpl implements AliasService, InitializingBean {
         if (null == coinData) {
             throw new NulsRuntimeException(AccountErrorCode.TX_COINDATA_NOT_EXIST);
         }
+        if (null != coinData.getFrom()){
+            byte[] addr = null;
+            for(CoinFrom coinFrom : coinData.getFrom()){
+                if(addr == null){
+                    addr = coinFrom.getAddress();
+                }
+                if(!Arrays.equals(coinFrom.getAddress(), addr)){
+                    LoggerUtil.logger.error("alias coin contains multiple different addresses, txhash:{}", transaction.getHash().getDigestHex());
+                    throw new NulsRuntimeException(AccountErrorCode.TX_DATA_VALIDATION_ERROR);
+                }
+
+            }
+        }
         if (null != coinData.getTo()) {
             boolean burned = false;
             for (Coin coin : coinData.getTo()) {
@@ -250,7 +245,6 @@ public class AliasServiceImpl implements AliasService, InitializingBean {
                 throw new NulsRuntimeException(AccountErrorCode.MUST_BURN_A_NULS);
             }
         }
-        //验证签名
         TransactionSignature sig = new TransactionSignature();
         try {
             sig.parse(transaction.getTransactionSignature(), 0);
@@ -325,7 +319,7 @@ public class AliasServiceImpl implements AliasService, InitializingBean {
         Transaction tx = null;
         //Second:build the transaction
         tx = new AliasTransaction();
-        tx.setTime(NetworkCall.getCurrentTimeMillis());
+        tx.setTime(TimeUtils.getCurrentTimeMillis());
         Alias alias = new Alias();
         alias.setAlias(aliasName);
         alias.setAddress(account.getAddress().getAddressBytes());
@@ -334,7 +328,8 @@ public class AliasServiceImpl implements AliasService, InitializingBean {
         Chain chain = chainManager.getChainMap().get(account.getChainId());
         int assetsId = chain.getConfig().getAssetsId();
         //查询账本获取nonce值
-        byte[] nonce = TxUtil.getNonce(account.getChainId(), account.getChainId(), assetsId, account.getAddress().getAddressBytes());
+        NonceBalance nonceBalance = TxUtil.getBalanceNonce(account.getChainId(), account.getChainId(), assetsId, account.getAddress().getAddressBytes());
+        byte[] nonce = nonceBalance.getNonce();
         CoinFrom coinFrom = new CoinFrom(account.getAddress().getAddressBytes(), account.getChainId(), assetsId, AccountConstant.ALIAS_FEE, nonce, AccountConstant.NORMAL_TX_LOCKED);
         coinFrom.setAddress(account.getAddress().getAddressBytes());
         CoinTo coinTo = new CoinTo(AccountConstant.BLACK_HOLE_ADDRESS, account.getChainId(), assetsId, AccountConstant.ALIAS_FEE);
@@ -345,7 +340,7 @@ public class AliasServiceImpl implements AliasService, InitializingBean {
         BigInteger totalAmount = AccountConstant.ALIAS_FEE.add(fee);
         coinFrom.setAmount(totalAmount);
         //检查余额是否充足
-        BigInteger mainAsset = TxUtil.getBalance(account.getChainId(), account.getChainId(), assetsId, coinFrom.getAddress());
+        BigInteger mainAsset = nonceBalance.getAvailable();
         //余额不足
         if (BigIntegerUtils.isLessThan(mainAsset, totalAmount)) {
             throw new NulsRuntimeException(AccountErrorCode.INSUFFICIENT_FEE);

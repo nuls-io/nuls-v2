@@ -25,11 +25,8 @@
 
 package io.nuls.account.model.bo.tx;
 
-import io.nuls.account.constant.AccountConstant;
-import io.nuls.account.model.bo.tx.txdata.Alias;
-import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.data.Transaction;
-import io.nuls.tools.exception.NulsException;
+import io.nuls.tools.constant.TxType;
 
 /**
  * @author: qinyifeng
@@ -37,6 +34,6 @@ import io.nuls.tools.exception.NulsException;
 public class AliasTransaction extends Transaction {
 
     public AliasTransaction() {
-        super(AccountConstant.TX_TYPE_ACCOUNT_ALIAS);
+        super(TxType.ACCOUNT_ALIAS);
     }
 }

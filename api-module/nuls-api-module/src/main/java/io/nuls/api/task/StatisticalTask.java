@@ -20,12 +20,11 @@
 
 package io.nuls.api.task;
 
-import io.nuls.api.ApiContext;
 import io.nuls.api.cache.ApiCache;
-import io.nuls.api.db.AgentService;
-import io.nuls.api.db.BlockService;
-import io.nuls.api.db.DepositService;
-import io.nuls.api.db.StatisticalService;
+import io.nuls.api.db.mongo.MongoAgentServiceImpl;
+import io.nuls.api.db.mongo.MongoBlockServiceImpl;
+import io.nuls.api.db.mongo.MongoDepositServiceImpl;
+import io.nuls.api.db.mongo.MongoStatisticalServiceImpl;
 import io.nuls.api.manager.CacheManager;
 import io.nuls.api.model.po.db.AgentInfo;
 import io.nuls.api.model.po.db.BlockHeaderInfo;
@@ -46,20 +45,20 @@ public class StatisticalTask implements Runnable {
 
     private int chainId;
 
-    private StatisticalService statisticalService;
+    private MongoStatisticalServiceImpl mongoStatisticalServiceImpl;
 
-    private BlockService blockHeaderService;
+    private MongoBlockServiceImpl blockHeaderService;
 
-    private DepositService depositService;
+    private MongoDepositServiceImpl mongoDepositServiceImpl;
 
-    private AgentService agentService;
+    private MongoAgentServiceImpl mongoAgentServiceImpl;
 
     public StatisticalTask(int chainId) {
         this.chainId = chainId;
-        statisticalService = SpringLiteContext.getBean(StatisticalService.class);
-        blockHeaderService = SpringLiteContext.getBean(BlockService.class);
-        depositService = SpringLiteContext.getBean(DepositService.class);
-        agentService = SpringLiteContext.getBean(AgentService.class);
+        mongoStatisticalServiceImpl = SpringLiteContext.getBean(MongoStatisticalServiceImpl.class);
+        blockHeaderService = SpringLiteContext.getBean(MongoBlockServiceImpl.class);
+        mongoDepositServiceImpl = SpringLiteContext.getBean(MongoDepositServiceImpl.class);
+        mongoAgentServiceImpl = SpringLiteContext.getBean(MongoAgentServiceImpl.class);
     }
 
     @Override
@@ -73,7 +72,7 @@ public class StatisticalTask implements Runnable {
 
 
     private void doCalc() {
-        long bestId = statisticalService.getBestId(chainId);
+        long bestId = mongoStatisticalServiceImpl.getBestId(chainId);
         BlockHeaderInfo header = blockHeaderService.getBestBlockHeader(chainId);
         if (null == header) {
             return;
@@ -85,7 +84,7 @@ public class StatisticalTask implements Runnable {
             BlockHeaderInfo header0 = blockHeaderService.getBlockHeader(chainId, 0);
             start = header0.getCreateTime();
             end = start + day;
-            this.statisticalService.saveBestId(chainId, start);
+            this.mongoStatisticalServiceImpl.saveBestId(chainId, start);
         } else {
             end = start + day - 1;
         }
@@ -104,11 +103,11 @@ public class StatisticalTask implements Runnable {
     }
 
     private void statistical(long start, long end) {
-        long txCount = statisticalService.calcTxCount(chainId, start, end);
+        long txCount = mongoStatisticalServiceImpl.calcTxCount(chainId, start, end);
         BigInteger consensusLocked = BigInteger.ZERO;
         long height = blockHeaderService.getMaxHeight(chainId, end);
-        List<AgentInfo> agentList = agentService.getAgentList(chainId, height);
-        List<DepositInfo> depositList = depositService.getDepositList(chainId, height);
+        List<AgentInfo> agentList = mongoAgentServiceImpl.getAgentList(chainId, height);
+        List<DepositInfo> depositList = mongoDepositServiceImpl.getDepositList(chainId, height);
         int nodeCount = agentList.size();
         for (AgentInfo agent : agentList) {
             consensusLocked = consensusLocked.add(agent.getDeposit());
@@ -134,11 +133,11 @@ public class StatisticalTask implements Runnable {
         info.setMonth(calendar.get(Calendar.MONTH) + 1);
         info.setYear(calendar.get(Calendar.YEAR));
         try {
-            this.statisticalService.insert(chainId, info);
+            this.mongoStatisticalServiceImpl.insert(chainId, info);
         } catch (Exception e) {
             Log.error(e);
         }
-        this.statisticalService.updateBestId(chainId, info.getTime());
+        this.mongoStatisticalServiceImpl.updateBestId(chainId, info.getTime());
     }
 
 }

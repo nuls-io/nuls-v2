@@ -28,16 +28,16 @@ package io.nuls.account.util;
 import io.nuls.account.constant.AccountConstant;
 import io.nuls.account.constant.AccountErrorCode;
 import io.nuls.account.model.bo.Account;
-import io.nuls.account.rpc.call.NetworkCall;
-import io.nuls.tools.log.Log;
 import io.nuls.base.constant.BaseConstant;
 import io.nuls.base.data.Address;
+import io.nuls.rpc.util.TimeUtils;
 import io.nuls.tools.crypto.ECKey;
 import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.crypto.Sha256Hash;
-import io.nuls.tools.model.StringUtils;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.exception.NulsRuntimeException;
+import io.nuls.tools.log.Log;
+import io.nuls.tools.model.StringUtils;
 import io.nuls.tools.parse.SerializeUtils;
 
 import java.io.ByteArrayOutputStream;
@@ -53,6 +53,7 @@ import java.util.List;
 public class AccountTool {
 
     public static final int CREATE_MAX_SIZE = 100;
+    public static final int CREATE_MULTI_SIGACCOUNT_MIN_SIZE = 2;
 
     public static Address newAddress(int chainId, String prikey) {
         ECKey key;
@@ -90,7 +91,7 @@ public class AccountTool {
         account.setPubKey(key.getPubKey());
         account.setPriKey(key.getPrivKeyBytes());
         account.setEncryptedPriKey(new byte[0]);
-        account.setCreateTime(NetworkCall.getCurrentTimeMillis());
+        account.setCreateTime(TimeUtils.getCurrentTimeMillis());
         account.setEcKey(key);
         return account;
     }
@@ -131,7 +132,7 @@ public class AccountTool {
 
     public static byte[] createMultiSigAccountOriginBytes(int chainId, int n, List<String> pubKeys) throws NulsException {
         byte[] result = null;
-        if (n < 2 || (pubKeys == null ? 0 : pubKeys.size()) < n) {
+        if (n < CREATE_MULTI_SIGACCOUNT_MIN_SIZE || (pubKeys == null ? 0 : pubKeys.size()) < n) {
             throw new NulsRuntimeException(AccountErrorCode.FAILED);
         }
         HashSet<String> hashSet = new HashSet(pubKeys);

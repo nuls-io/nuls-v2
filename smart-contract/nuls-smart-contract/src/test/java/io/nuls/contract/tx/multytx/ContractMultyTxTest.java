@@ -23,9 +23,10 @@
  */
 package io.nuls.contract.tx.multytx;
 
-import io.nuls.contract.tx.ContractNRC20TokenSendTxTest;
+import io.nuls.contract.tx.nrc20.ContractNRC20TokenSendTxTest;
 import io.nuls.contract.tx.base.BaseQuery;
 import io.nuls.contract.tx.contractcallcontract.ContractCallContractSendTxTest;
+import io.nuls.contract.util.Log;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -45,20 +46,34 @@ public class ContractMultyTxTest extends BaseQuery {
         // TestAddress.createAccount 生成地址，得到 importPriKey 语句，放入 contractNRC20TokenSendTxTest.importPriKeyTest 中执行
     }
 
+    @Test
+    public void loopCallContract() throws Exception {
+        contractAddress_nrc20 = "";
+        long s = System.currentTimeMillis();
+        int times = 500;
+        for(int i=0;i<times;i++) {
+            contractNRC20TokenSendTxTest.callContract();
+        }
+        long e = System.currentTimeMillis();
+        Log.info("{} times cost time is {}", times, e - s);
+    }
+
     /**
-     * 依赖于contractNRC20TokenSendTxTest.transfer()
+     * 依赖于contractNRC20TokenSendTxTest.transfer()\
+     * 35个sender 创建35个NRC20的合约
      */
     @Test
     public void multyCreateNRC20() throws Exception {
-        // 执行后，复制contract module日志的合约地址，赋值给成员变量contractAddress_nrc20X (X -> [0,34])
         for (int i = 0; i < 35; i++) {
             contractNRC20TokenSendTxTest.setSender(address("getToAddress", i));
             contractNRC20TokenSendTxTest.createContract();
         }
+        // 执行后，复制contract module日志的合约地址，赋值给成员变量contractAddress_nrc20X (X -> [0,34])
     }
 
     /**
      * 依赖于contractNRC20TokenSendTxTest.transfer()
+     * 35个sender 创建35个可内部调用的合约
      */
     @Test
     public void multyCreateContractCallContract() throws Exception {
@@ -73,9 +88,11 @@ public class ContractMultyTxTest extends BaseQuery {
         return this.getClass().getMethod(methodBaseName + i).invoke(this).toString();
     }
 
+    /**
+     * 35个sender 调用一个NRC20合约，比较时间
+     */
     @Test
     public void multySenderCallOneContract() throws Exception {
-        // 35个sender 调用一个NRC20合约，比较时间
         int times = 35;
         contractNRC20TokenSendTxTest.setContractAddress_nrc20(address("getContractAddress_nrc20", 0));
         contractNRC20TokenSendTxTest.setMethodName("approve");
@@ -85,9 +102,11 @@ public class ContractMultyTxTest extends BaseQuery {
         }
     }
 
+    /**
+     * 35个sender 调用35个NRC20合约，比较时间
+     */
     @Test
     public void multySenderCallMultyContracts() throws Exception {
-        // 35个sender 调用35个NRC20合约，比较时间
         int times = 35;
         contractNRC20TokenSendTxTest.setMethodName("approve");
         for (int i = 0; i < times; i++) {
@@ -97,9 +116,11 @@ public class ContractMultyTxTest extends BaseQuery {
         }
     }
 
+    /**
+     * 35个sender 调用35个NRC20合约，向`contractCallContract`合约转入token
+     */
     @Test
     public void multySenderTokenTransferToMultyContracts() throws Exception {
-        // 35个sender 调用35个NRC20合约，向`contractCallContract`合约转入token
         int times = 35;
         for (int i = 0; i < times; i++) {
             contractNRC20TokenSendTxTest.setSender(address("getToAddress", i));
@@ -109,9 +130,11 @@ public class ContractMultyTxTest extends BaseQuery {
         }
     }
 
+    /**
+     * 35个sender 每7个调用一个合约（一共5个合约），比较时间
+     */
     @Test
     public void multySenderCallFiveContracts() throws Exception {
-        // 35个sender 每7个调用一个合约（一共5个合约），比较时间
         int times = 35;
         contractNRC20TokenSendTxTest.setMethodName("approve");
         for (int i = 0; i < times; i++) {
@@ -123,9 +146,11 @@ public class ContractMultyTxTest extends BaseQuery {
         }
     }
 
+    /**
+     * 35个sender 每5个调用一个合约（一共7个合约），方法为内部调用，内部调用的合约在外层7个合约当中，确保能够出现内部调用与外层调用冲突
+     */
     @Test
     public void multySenderCallSevenContracts() throws Exception {
-        // 35个sender 每5个调用一个合约（一共7个合约），方法为内部调用，内部调用的合约在外层7个合约当中，确保能够出现内部调用与外层调用冲突
         int times = 35;
         String sender;
         contractNRC20TokenSendTxTest.setMethodName("approve");

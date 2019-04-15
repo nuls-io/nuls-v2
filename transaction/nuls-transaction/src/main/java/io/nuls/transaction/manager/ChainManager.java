@@ -66,11 +66,13 @@ public class ChainManager {
 
     private Map<Integer, Chain> chainMap = new ConcurrentHashMap<>();
 
+
+
     /**
      * 初始化并启动链
      * Initialize and start the chain
      */
-    public void runChain() throws Exception {
+    public void initChain() throws Exception {
         Map<Integer, ConfigBean> configMap = configChain();
         if (configMap == null || configMap.size() == 0) {
             return;
@@ -89,10 +91,22 @@ public class ChainManager {
             Initialize linked database tables
             */
             initTable(chain);
-            initCache(chain);
-            initTx(chain);
-            schedulerManager.createTransactionScheduler(chain);
             chainMap.put(chainId, chain);
+        }
+    }
+
+    /**
+     * 初始化并启动链
+     * Initialize and start the chain
+     */
+    public void runChain() throws Exception {
+
+        for (Chain chain: chainMap.values()) {
+            initCache(chain);
+            //TODO 跨链交易不再此注册了
+//            initTx(chain);
+            schedulerManager.createTransactionScheduler(chain);
+            chainMap.put(chain.getChainId(), chain);
         }
     }
 
@@ -129,7 +143,10 @@ public class ChainManager {
                 if (configBean == null) {
                     return null;
                 }
-                configMap.put(configBean.getChainId(), configBean);
+                boolean saveSuccess = configService.save(configBean,configBean.getChainId());
+                if(saveSuccess){
+                    configMap.put(configBean.getChainId(), configBean);
+                }
             }
             return configMap;
         } catch (Exception e) {
@@ -171,11 +188,6 @@ public class ChainManager {
             Verified transaction
             */
             RocksDBService.createTable(TxDBConstant.DB_TRANSACTION_CACHE + chainId);
-           /* String area = TxDBConstant.DB_TRANSACTION_CACHE + chainId;
-            if(RocksDBService.existTable(area)){
-                RocksDBService.destroyTable(area);
-            }
-            RocksDBService.createTable(area);*/
         } catch (Exception e) {
             if (!DBErrorCode.DB_TABLE_EXIST.equals(e.getMessage())) {
                 logger.error(e.getMessage());

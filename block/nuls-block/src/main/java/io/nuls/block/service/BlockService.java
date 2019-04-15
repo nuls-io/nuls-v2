@@ -23,7 +23,7 @@ package io.nuls.block.service;
 import io.nuls.base.data.Block;
 import io.nuls.base.data.BlockHeader;
 import io.nuls.base.data.NulsDigestData;
-import io.nuls.block.model.po.BlockHeaderPo;
+import io.nuls.base.data.po.BlockHeaderPo;
 
 import java.util.List;
 
@@ -53,6 +53,14 @@ public interface BlockService {
     BlockHeader getLatestBlockHeader(int chainId);
 
     /**
+     * 获取最新的区块头PO
+     *
+     * @param chainId 链Id/chain id
+     * @return
+     */
+    BlockHeaderPo getLatestBlockHeaderPo(int chainId);
+
+    /**
      * 获取最新的区块
      *
      * @param chainId 链Id/chain id
@@ -67,7 +75,16 @@ public interface BlockService {
      * @param height  区块高度
      * @return
      */
-    BlockHeaderPo getBlockHeader(int chainId, long height);
+    BlockHeader getBlockHeader(int chainId, long height);
+
+    /**
+     * 根据区块高度获取区块头
+     *
+     * @param chainId 链Id/chain id
+     * @param height  区块高度
+     * @return
+     */
+    BlockHeaderPo getBlockHeaderPo(int chainId, long height);
 
     /**
      * 根据区块高度获取区块
@@ -96,6 +113,15 @@ public interface BlockService {
      * @return
      */
     BlockHeader getBlockHeader(int chainId, NulsDigestData hash);
+
+    /**
+     * 根据区块hash获取区块头PO
+     *
+     * @param chainId 链Id/chain id
+     * @param hash    区块hash
+     * @return
+     */
+    BlockHeaderPo getBlockHeaderPo(int chainId, NulsDigestData hash);
 
     /**
      * 根据区块hash获取区块

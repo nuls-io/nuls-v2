@@ -9,6 +9,7 @@ import io.nuls.tools.core.ioc.SpringLiteContext;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * 用于测试
@@ -31,8 +32,8 @@ public class NoUse {
         int port = 8887;
         NettyServer.startServer(port);
         // Start server instance
-        ConnectManager.LOCAL.setApiMethods(new ArrayList<>());
-        ConnectManager.LOCAL.setModuleAbbreviation(ModuleE.KE.abbr);
+        ConnectManager.LOCAL.setMethods(new ArrayList<>());
+        ConnectManager.LOCAL.setAbbreviation(ModuleE.KE.abbr);
         ConnectManager.LOCAL.setModuleName(ModuleE.KE.name);
         ConnectManager.LOCAL.setModuleDomain(ModuleE.KE.domain);
         Map<String, String> connectionInformation = new HashMap<>(2);
@@ -40,7 +41,7 @@ public class NoUse {
         connectionInformation.put(Constants.KEY_PORT, port + "");
         ConnectManager.LOCAL.setConnectionInformation(connectionInformation);
         ConnectManager.startService = true;
-        ConnectManager.scanPackage("io.nuls.rpc.cmd.kernel");
+        ConnectManager.scanPackage(Set.of("io.nuls.rpc.cmd.kernel"));
         ConnectManager.ROLE_MAP.put(ModuleE.KE.abbr, connectionInformation);
         ConnectManager.updateStatus();
         return port;

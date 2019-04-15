@@ -25,6 +25,7 @@
 package io.nuls.rpc.model.message;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import io.nuls.rpc.info.Constants;
 
 
@@ -40,31 +41,37 @@ public class Response {
     /**
      * This is the original request ID referred by a Request message
      */
-    private String RequestId;
+    @JsonProperty
+    private String RequestID;
 
     /**
      * The time that the target service took to process the request in milliseconds.
      */
+    @JsonProperty
     private String ResponseProcessingTime;
 
     /**
      * The response status, 1 if successful, 0 otherwise.
      */
+    @JsonProperty
     private String ResponseStatus;
 
     /**
      * A string that could offer more clarification about the result of the process.
      */
+    @JsonProperty
     private String ResponseComment;
 
     /**
      * The maximum number of objects that the response contains per request.
      */
+    @JsonProperty
     private String ResponseMaxSize;
 
     /**
      * An object array that contains the result of the method processed, one object per request
      */
+    @JsonProperty
     private Object ResponseData;
 
     /**
@@ -77,50 +84,62 @@ public class Response {
         return Constants.BOOLEAN_TRUE.equals(ResponseStatus);
     }
 
-    public String getRequestId() {
-        return RequestId;
+    @JsonIgnore
+    public String getRequestID() {
+        return RequestID;
     }
 
-    public void setRequestId(String RequestId) {
-        this.RequestId = RequestId;
+    @JsonIgnore
+    public void setRequestID(String RequestId) {
+        this.RequestID = RequestId;
     }
 
+    @JsonIgnore
     public String getResponseProcessingTime() {
         return ResponseProcessingTime;
     }
 
+    @JsonIgnore
     public void setResponseProcessingTime(String ResponseProcessingTime) {
         this.ResponseProcessingTime = ResponseProcessingTime;
     }
 
+    @JsonIgnore
     public String getResponseStatus() {
         return ResponseStatus;
     }
 
+    @JsonIgnore
     public void setResponseStatus(String ResponseStatus) {
         this.ResponseStatus = ResponseStatus;
     }
 
+    @JsonIgnore
     public String getResponseComment() {
         return ResponseComment;
     }
 
+    @JsonIgnore
     public void setResponseComment(String ResponseComment) {
         this.ResponseComment = ResponseComment;
     }
 
+    @JsonIgnore
     public String getResponseMaxSize() {
         return ResponseMaxSize;
     }
 
+    @JsonIgnore
     public void setResponseMaxSize(String ResponseMaxSize) {
         this.ResponseMaxSize = ResponseMaxSize;
     }
 
+    @JsonIgnore
     public Object getResponseData() {
         return ResponseData;
     }
 
+    @JsonIgnore
     public void setResponseData(Object ResponseData) {
         this.ResponseData = ResponseData;
     }

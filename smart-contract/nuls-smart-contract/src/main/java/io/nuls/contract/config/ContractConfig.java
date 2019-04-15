@@ -60,11 +60,37 @@ public class ContractConfig {
     /**
      * ROCK DB 数据库文件存储路径
      */
-    @Value("DataPath")
     private String dataPath;
 
+    private int chainId;
 
-    private ConfigBean chainConfig;
+    private int assetsId;
+
+    private long maxViewGas;
+
+    public int getChainId() {
+        return chainId;
+    }
+
+    public void setChainId(int chainId) {
+        this.chainId = chainId;
+    }
+
+    public int getAssetsId() {
+        return assetsId;
+    }
+
+    public void setAssetsId(int assetsId) {
+        this.assetsId = assetsId;
+    }
+
+    public long getMaxViewGas() {
+        return maxViewGas;
+    }
+
+    public void setMaxViewGas(long maxViewGas) {
+        this.maxViewGas = maxViewGas;
+    }
 
     public String getEncoding() {
         return encoding;
@@ -147,10 +173,11 @@ public class ContractConfig {
     }
 
     public ConfigBean getChainConfig() {
-        return chainConfig;
+        ConfigBean configBean = new ConfigBean();
+        configBean.setAssetsId(assetsId);
+        configBean.setChainId(chainId);
+        configBean.setMaxViewGas(maxViewGas);
+        return configBean;
     }
 
-    public void setChainConfig(ConfigBean chainConfig) {
-        this.chainConfig = chainConfig;
-    }
 }

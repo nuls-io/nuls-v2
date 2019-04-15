@@ -167,6 +167,7 @@ public class AccountStateServiceImpl implements AccountStateService {
             unconfirmedAmount.setTxHash(unconfirmedTx.getTxHash());
             accountStateUnconfirmed.addUnconfirmedAmount(unconfirmedAmount);
             try {
+                LoggerUtil.logger().debug("####updateUnconfirmTx == unconfirmedAmount ={}",accountStateUnconfirmed.getUnconfirmedAmounts().size());
                 unconfirmedRepository.updateAccountStateUnconfirmed(key, accountStateUnconfirmed);
             } catch (Exception e) {
                 e.printStackTrace();

@@ -29,7 +29,7 @@ import io.nuls.ledger.config.LedgerConfig;
 import io.nuls.ledger.constant.LedgerConstant;
 import io.nuls.ledger.model.LedgerChain;
 import io.nuls.ledger.service.BlockDataService;
-import io.nuls.ledger.storage.InitDB;
+import io.nuls.ledger.storage.Repository;
 import io.nuls.ledger.storage.impl.RepositoryImpl;
 import io.nuls.ledger.utils.LoggerUtil;
 import io.nuls.tools.core.annotation.Autowired;
@@ -101,7 +101,7 @@ public class LedgerChainManager {
     private void initRocksDb() {
         try {
             RocksDBService.init(ledgerConfig.getDataPath() + LedgerConstant.MODULE_DB_PATH);
-            InitDB initDB = SpringLiteContext.getBean(RepositoryImpl.class);
+            Repository initDB = SpringLiteContext.getBean(RepositoryImpl.class);
             initDB.initTableName();
         } catch (Exception e) {
             LoggerUtil.logger().error(e);

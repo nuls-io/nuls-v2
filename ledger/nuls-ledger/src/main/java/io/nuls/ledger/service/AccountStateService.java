@@ -31,33 +31,30 @@ import io.nuls.ledger.model.po.AccountState;
 import io.nuls.ledger.model.po.AccountStateSnapshot;
 
 /**
+ * 账本信息业务功能处理
  * Created by wangkun23 on 2018/11/29.
+ *
+ * @author lanjinsheng
  */
 public interface AccountStateService {
 
     /**
      *
      * 不用同步锁获取账户信息
-     * @param address
-     * @param assetChainId
-     * @param assetId
-     * @return
+     *
+     * @param address address
+     * @param addressChainId addressChainId
+     * @param assetChainId assetChainId
+     * @param  assetId assetId
+     * @return AccountState
      */
     AccountState getAccountStateUnSyn(String address,int addressChainId, int assetChainId, int assetId);
 
-    /**
-     * 判断是否有需要更新的信息，有则需要进行锁定并进行处理返回
-     * @param address
-     * @param addressChainId
-     * @param assetChainId
-     * @param assetId
-     * @return
-     */
-//    AccountState getAccountStateAndUpdate(String address, int addressChainId, int assetChainId, int assetId);
 
     /**
-     *
+     *  获取账本信息，并重新计算冻结的金额的信息
      * @param address
+     * @param addressChainId
      * @param assetChainId
      * @param assetId
      * @return
@@ -85,6 +82,7 @@ public interface AccountStateService {
 
     /**
      *
+     * 更新未确认交易
      * @param addressChainId
      * @param newNonce
      * @param unconfirmedTx

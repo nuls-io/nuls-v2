@@ -299,7 +299,10 @@ public class ContractCmd extends BaseCmd {
             if (result.isFailed()) {
                 return wrapperFailed(result);
             }
-            return success();
+
+            Map<String, Object> resultMap = new HashMap<>(2);
+            resultMap.put("value", true);
+            return success(resultMap);
         } catch (Exception e) {
             Log.error(e);
             return failed(e.getMessage());

@@ -135,7 +135,7 @@ public class ConnectData {
      */
     public void subscribeByEvent(Message message, Request request) {
         ConnectManager.subscribeByEvent(this, message, request);
-        idToEventMessageMap.put(message.getMessageId(), message);
+        idToEventMessageMap.put(message.getMessageID(), message);
         addSubscribeInitCount(message);
         requestEventCountLoopList.add(message);
     }
@@ -167,7 +167,7 @@ public class ConnectData {
         Request request = JSONUtils.map2pojo((Map) message.getMessageData(), Request.class);
         for (Object method : request.getRequestMethods().keySet()) {
             String cmd = (String) method;
-            String key = ConnectManager.getSubscribeKey(message.getMessageId(), cmd);
+            String key = ConnectManager.getSubscribeKey(message.getMessageID(), cmd);
             if (!subscribeInitCount.containsKey(key)) {
                 subscribeInitCount.put(key, ConnectManager.getCmdChangeCount(cmd));
             }
@@ -182,7 +182,7 @@ public class ConnectData {
         Request request = JSONUtils.map2pojo((Map) message.getMessageData(), Request.class);
         for (Object method : request.getRequestMethods().keySet()) {
             String cmd = (String) method;
-            String key = ConnectManager.getSubscribeKey(message.getMessageId(), cmd);
+            String key = ConnectManager.getSubscribeKey(message.getMessageID(), cmd);
             if (subscribeInitCount.containsKey(key)) {
                 subscribeInitCount.remove(key);
             }
