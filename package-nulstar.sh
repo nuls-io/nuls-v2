@@ -130,7 +130,7 @@ if [ ! -d "$MODULES_PATH/Modules" ]; then
 	mkdir $MODULES_PATH/Modules
 fi
 #默认日志目录
-MODULES_LOGS_PATH=${MODULES_PATH}/Logs
+MODULES_LOGS_PATH=${MODULES_PATH}/logs
 if [ ! -d "$MODULES_LOGS_PATH" ]; then
 	#statements
 	mkdir $MODULES_LOGS_PATH
