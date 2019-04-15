@@ -481,6 +481,6 @@ fi
 if [ -n "${BUILDTAR}" ]; then
     log "============ BUILD ${RELEASE_PATH}.tar.gz ==================="
     tar -zcPf "${NULS_WALLET_TAR_NAME}.tar.gz" ${RELEASE_PATH}
-    log "============ BUILD ${RELEASE_PATH}.tar.gz FINISH==================="
+    log "============ BUILD ${NULS_WALLET_TAR_NAME}.tar.gz FINISH==================="
 fi
 log "============ ${RELEASE_PATH} PACKAGE FINISH 🍺🍺🍺🎉🎉🎉 ==============="
