@@ -128,12 +128,10 @@ public class TxServiceImpl implements TxService {
         try {
             TransactionConfirmedPO existTx = getTransaction(chain, tx.getHash());
             if (null == existTx) {
-                //验证交易，包括 基础验证、验证器
                 if (!verify(chain, tx)) {
                     chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("verify failed: type:{} - txhash:{}", tx.getType(), tx.getHash().getDigestHex());
                     return false;
                 }
-                //验证并提交未确认账本
                 VerifyTxResult verifyTxResult = LedgerCall.commitUnconfirmedTx(chain, RPCUtil.encode(tx.serialize()));
                 if (!verifyTxResult.success()) {
                     chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug(
@@ -142,13 +140,9 @@ public class TxServiceImpl implements TxService {
                     return false;
                 }
                 if (chain.getPackaging().get()) {
-                    //当节点是出块节点时, 才将交易放入待打包队列
                     packablePool.add(chain, tx);
-//                    chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("交易[加入待打包队列].....hash:{}", tx.getHash().getDigestHex());
                 }
-                //保存到rocksdb
                 unconfirmedTxStorageService.putTx(chain.getChainId(), tx);
-                //广播交易hash
                 NetworkCall.broadcastTxHash(chain.getChainId(),tx.getHash());
             }
             return true;
@@ -1010,7 +1004,6 @@ public class TxServiceImpl implements TxService {
             Future<Boolean> res = verifySignExecutor.submit(new Callable<Boolean>() {
                 @Override
                 public Boolean call() throws Exception {
-                    long m1 = TimeUtils.getCurrentTimeMillis();
                     NulsDigestData hash = tx.getHash();
                     String hashStr = hash.getDigestHex();
                     int type = tx.getType();
@@ -1039,39 +1032,17 @@ public class TxServiceImpl implements TxService {
                             //只验证单个交易的基础内容(TX模块本地验证)
                             TxRegister txRegister = TxManager.getTxRegister(chain, type);
                             baseValidateTx(chain, tx, txRegister);
-//                            Log.debug("验签名 type:{}, -hash:{}", type, hashStr);
                         } catch (Exception e) {
                             chain.getLoggerMap().get(TxConstant.LOG_TX).debug("batchVerify failed, single tx verify failed. hash:{}, -type:{}", hashStr, type);
                             chain.getLoggerMap().get(TxConstant.LOG_TX).error(e);
                             return false;
                         }
                     }
-                    Log.debug("[验区块交易] 线程验证签名单个:{}", TimeUtils.getCurrentTimeMillis() - m1);
                     return true;
                 }
             });
             futures.add(res);
         }
-
-        try {
-            //多线程处理结果
-            for (Future<Boolean> future : futures) {
-                if (!future.get()) {
-                    return verifyTxResult;
-                }
-            }
-        } catch (InterruptedException e) {
-            chain.getLoggerMap().get(TxConstant.LOG_TX).debug("batchVerify failed, single tx verify failed");
-            chain.getLoggerMap().get(TxConstant.LOG_TX).error(e);
-            return verifyTxResult;
-        } catch (ExecutionException e) {
-            chain.getLoggerMap().get(TxConstant.LOG_TX).debug("batchVerify failed, single tx verify failed");
-            chain.getLoggerMap().get(TxConstant.LOG_TX).error(e);
-            return verifyTxResult;
-        }
-        Log.debug("[验区块交易] 多线程验证签名合计:{}", TimeUtils.getCurrentTimeMillis() - s1);
-        Log.debug("");
-
 
         //组装统一验证参数数据,key为各模块统一验证器cmd
         Map<TxRegister, List<String>> moduleVerifyMap = new HashMap<>(TxConstant.INIT_CAPACITY_8);
@@ -1157,6 +1128,23 @@ public class TxServiceImpl implements TxService {
                     return verifyTxResult;
                 }
             }
+        }
+
+        try {
+            //多线程处理结果
+            for (Future<Boolean> future : futures) {
+                if (!future.get()) {
+                    return verifyTxResult;
+                }
+            }
+        } catch (InterruptedException e) {
+            chain.getLoggerMap().get(TxConstant.LOG_TX).debug("batchVerify failed, single tx verify failed");
+            chain.getLoggerMap().get(TxConstant.LOG_TX).error(e);
+            return verifyTxResult;
+        } catch (ExecutionException e) {
+            chain.getLoggerMap().get(TxConstant.LOG_TX).debug("batchVerify failed, single tx verify failed");
+            chain.getLoggerMap().get(TxConstant.LOG_TX).error(e);
+            return verifyTxResult;
         }
 
         if (rs) {
