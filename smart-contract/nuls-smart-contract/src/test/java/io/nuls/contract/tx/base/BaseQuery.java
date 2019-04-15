@@ -208,7 +208,7 @@ public class BaseQuery {
 
     @Test
     public void getBalance() throws Exception {
-        Map<String, Object> balance0 = LedgerCall.getBalanceAndNonce(chain, toAddress5);
+        Map<String, Object> balance0 = LedgerCall.getBalanceAndNonce(chain, "tNULSeBaMvQr8dVnk3f3DPvwCYX3ctTRtrTurD");
         Log.info("balance:{}", JSONUtils.obj2PrettyJson(balance0));
     }
 
@@ -238,7 +238,7 @@ public class BaseQuery {
      */
     @Test
     public void contractInfo() throws Exception {
-        Map params = this.makeContractInfoParams("tNULSeBaMyem4GGzAWKeqmAo7dNBBfoCHKqgRP");
+        Map params = this.makeContractInfoParams("tNULSeBaMw3hzTgXW9jHVYK9FprgxZYhqC6pGJ");
         Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, CONTRACT_INFO, params);
         Map result = (HashMap) (((HashMap) cmdResp2.getResponseData()).get(CONTRACT_INFO));
         Assert.assertTrue(null != result);

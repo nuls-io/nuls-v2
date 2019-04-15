@@ -537,7 +537,7 @@ public class ContractUtil {
         return response;
     }
 
-    public static void configLog(String filePath, String fileName, Level fileLevel, Level consoleLevel) {
+    public static void configLog(String filePath, String fileName, Level fileLevel, Level consoleLevel, List<Map> packageLogLevel) {
         int rootLevelInt = Math.min(fileLevel.toInt(), consoleLevel.toInt());
 
         LoggerContext context = (LoggerContext) LoggerFactory.getILoggerFactory();
@@ -547,5 +547,22 @@ public class ContractUtil {
 
         Log.BASIC_LOGGER = LoggerBuilder.getLogger(filePath, fileName, fileLevel, consoleLevel);
         Log.BASIC_LOGGER.addBasicPath(Log.class.getName());
+
+        if(packageLogLevel != null) {
+            String packagePath;
+            String logLevel;
+            Logger packageLogger;
+            for(Map map : packageLogLevel) {
+                packagePath = (String) map.get("package");
+                logLevel = (String) map.get("level");
+                packageLogger = context.getLogger(packagePath);
+                packageLogger.setAdditive(false);
+                packageLogger.setLevel(Level.toLevel(logLevel));
+            }
+        }
+    }
+
+    public static void configLog(String filePath, String fileName, Level fileLevel, Level consoleLevel) {
+        configLog(filePath, fileName, fileLevel, consoleLevel, null);
     }
 }
