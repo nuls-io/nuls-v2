@@ -19,6 +19,7 @@ import io.nuls.poc.utils.manager.ChainManager;
 import io.nuls.poc.utils.manager.CoinDataManager;
 import io.nuls.poc.utils.validator.TxValidator;
 import io.nuls.rpc.util.RPCUtil;
+import io.nuls.rpc.util.TimeUtils;
 import io.nuls.tools.basic.Result;
 import io.nuls.tools.constant.TxType;
 import io.nuls.tools.core.annotation.Autowired;
@@ -88,6 +89,7 @@ public class DepositServiceImpl implements DepositService {
             deposit.setAgentHash(NulsDigestData.fromDigestHex(dto.getAgentHash()));
             deposit.setDeposit(BigIntegerUtils.stringToBigInteger(dto.getDeposit()));
             tx.setTxData(deposit.serialize());
+            tx.setTime(TimeUtils.getCurrentTimeMillis());
             CoinData coinData = coinDataManager.getCoinData(deposit.getAddress(), chain, new BigInteger(dto.getDeposit()), ConsensusConstant.CONSENSUS_LOCK_TIME, tx.size() + P2PHKSignature.SERIALIZE_LENGTH);
             tx.setCoinData(coinData.serialize());
             //交易签名
@@ -207,6 +209,7 @@ public class DepositServiceImpl implements DepositService {
             CoinData coinData = coinDataManager.getUnlockCoinData(cancelDeposit.getAddress(), chain, deposit.getDeposit(), 0, cancelDepositTransaction.size() + P2PHKSignature.SERIALIZE_LENGTH);
             coinData.getFrom().get(0).setNonce(CallMethodUtils.getNonce(hash.getDigestBytes()));
             cancelDepositTransaction.setCoinData(coinData.serialize());
+            cancelDepositTransaction.setTime(TimeUtils.getCurrentTimeMillis());
             //交易签名
             String priKey = (String) callResult.get("priKey");
             CallMethodUtils.transactionSignature(dto.getChainId(), dto.getAddress(), dto.getPassword(), priKey, cancelDepositTransaction);
