@@ -1,7 +1,11 @@
-package io.nuls.api.db.mongo;
+package io.nuls.api.db;
 
 import io.nuls.api.cache.ApiCache;
 import io.nuls.api.constant.ApiConstant;
+import io.nuls.api.db.mongo.MongoAgentServiceImpl;
+import io.nuls.api.db.mongo.MongoBlockServiceImpl;
+import io.nuls.api.db.mongo.MongoDepositServiceImpl;
+import io.nuls.api.db.mongo.MongoRoundServiceImpl;
 import io.nuls.api.manager.CacheManager;
 import io.nuls.api.model.po.db.*;
 import io.nuls.api.utils.AgentSorter;
@@ -18,7 +22,7 @@ import java.math.BigInteger;
 import java.util.*;
 
 @Component
-public class MongoRoundManagerImpl {
+public class RoundManager {
 
     @Autowired
     private MongoAgentServiceImpl mongoAgentServiceImpl;

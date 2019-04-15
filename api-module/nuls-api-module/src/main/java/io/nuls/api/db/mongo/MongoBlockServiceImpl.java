@@ -3,6 +3,7 @@ package io.nuls.api.db.mongo;
 import com.mongodb.client.model.Filters;
 import com.mongodb.client.model.Sorts;
 import io.nuls.api.cache.ApiCache;
+import io.nuls.api.db.BlockService;
 import io.nuls.api.manager.CacheManager;
 import io.nuls.api.model.po.db.BlockHeaderInfo;
 import io.nuls.api.model.po.db.PageInfo;
@@ -20,7 +21,7 @@ import java.util.List;
 import static io.nuls.api.constant.MongoTableConstant.BLOCK_HEADER_TABLE;
 
 @Component
-public class MongoBlockServiceImpl {
+public class MongoBlockServiceImpl implements BlockService {
 
     @Autowired
     private MongoDBService mongoDBService;

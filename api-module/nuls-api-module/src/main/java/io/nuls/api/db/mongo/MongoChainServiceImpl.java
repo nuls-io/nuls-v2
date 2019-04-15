@@ -2,6 +2,7 @@ package io.nuls.api.db.mongo;
 
 
 import com.mongodb.client.model.Filters;
+import io.nuls.api.db.ChainService;
 import io.nuls.api.manager.CacheManager;
 import io.nuls.api.model.po.db.ChainInfo;
 import io.nuls.api.model.po.db.SyncInfo;
@@ -18,7 +19,7 @@ import static io.nuls.api.constant.MongoTableConstant.CHAIN_INFO_TABLE;
 import static io.nuls.api.constant.MongoTableConstant.SYNC_INFO_TABLE;
 
 @Component
-public class MongoChainServiceImpl {
+public class MongoChainServiceImpl implements ChainService {
 
     @Autowired
     private MongoDBService mongoDBService;

@@ -3,6 +3,7 @@ package io.nuls.api.service;
 import io.nuls.api.cache.ApiCache;
 import io.nuls.api.constant.ApiConstant;
 import io.nuls.api.constant.ApiErrorCode;
+import io.nuls.api.db.RoundManager;
 import io.nuls.api.db.mongo.*;
 import io.nuls.api.manager.CacheManager;
 import io.nuls.api.model.po.db.*;
@@ -32,7 +33,7 @@ public class RollbackService {
     @Autowired
     private MongoPunishServiceImpl mongoPunishServiceImpl;
     @Autowired
-    private MongoRoundManagerImpl mongoRoundManagerImpl;
+    private RoundManager roundManager;
     @Autowired
     private MongoContractServiceImpl mongoContractServiceImpl;
     @Autowired
@@ -77,7 +78,7 @@ public class RollbackService {
 
         processTxs(chainId, blockInfo.getTxList());
 
-        mongoRoundManagerImpl.rollback(chainId, blockInfo);
+        roundManager.rollback(chainId, blockInfo);
 
         save(chainId, blockInfo);
 
@@ -538,7 +539,7 @@ public class RollbackService {
         //回滾智能合約交易
         mongoContractServiceImpl.rollbackContractTxInfos(chainId, contractTxHashList);
         mongoContractServiceImpl.rollbackContractResults(chainId, contractTxHashList);
-        mongoDepositServiceImpl.rollbackDepoist(chainId, depositInfoList);
+        mongoDepositServiceImpl.rollbackDeposit(chainId, depositInfoList);
         mongoPunishServiceImpl.rollbackPunishLog(chainId, punishTxHashList, blockInfo.getHeader().getHeight());
         mongoAliasServiceImpl.rollbackAliasList(chainId, aliasInfoList);
         mongoTransactionServiceImpl.rollbackTxRelationList(chainId, blockInfo.getHeader().getTxHashList());
