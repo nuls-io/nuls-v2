@@ -201,7 +201,6 @@ public class ContractCallContractSendTxTest extends BaseQuery {
      */
     @Test
     public void delete() throws Exception {
-        contractAddress = "tNULSeBaN155SwgcURmRwBMzmjKAH3PwK55tSe";
         String remark = "delete contract";
         Map params = this.makeDeleteParams(sender, contractAddress, remark);
         Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, DELETE, params);
