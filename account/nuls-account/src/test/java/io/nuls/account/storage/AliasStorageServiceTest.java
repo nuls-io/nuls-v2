@@ -92,8 +92,6 @@ public class AliasStorageServiceTest {
         Alias alias2 = createAlias();
         result = aliasStorageService.saveAlias(chainId,alias2);
         assertTrue(result);
-        List<AliasPo> aliasPoList = aliasStorageService.getAliasList(chainId);
-        assertTrue(aliasPoList != null && aliasPoList.size() >= 2);
     }
 
     /**

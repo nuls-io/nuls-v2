@@ -41,8 +41,8 @@ import io.nuls.db.util.DBUtils;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Service;
 import io.nuls.tools.crypto.HexUtil;
-import io.nuls.tools.model.StringUtils;
 import io.nuls.tools.exception.NulsRuntimeException;
+import io.nuls.tools.model.StringUtils;
 import io.nuls.tools.parse.JSONUtils;
 
 import java.io.File;
@@ -78,6 +78,7 @@ public class AccountKeyStoreServiceImpl implements AccountKeyStoreService {
 
     /**
      * 账户转为keystore
+     *
      * @param chainId
      * @param address
      * @param password
@@ -173,11 +174,11 @@ public class AccountKeyStoreServiceImpl implements AccountKeyStoreService {
             }
         }
         //If it is a windows system path, remove the first /
-        if (System.getProperties().getProperty("os.name").toUpperCase().indexOf("WINDOWS") != -1) {
-            if (path.startsWith("/")) {
+        if (System.getProperties().getProperty(AccountConstant.OS_NAME).toUpperCase().indexOf(AccountConstant.OS_WINDOWS) != -1) {
+            if (path.startsWith(AccountConstant.SLASH)) {
                 path = path.substring(1);
             }
-            path = path.replace("/", "\\");
+            path = path.replace(AccountConstant.SLASH, "\\");
         }
         String backupFileName = path + File.separator + fileName;
         return backupFileName;

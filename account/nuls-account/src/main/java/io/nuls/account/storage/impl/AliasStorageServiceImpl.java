@@ -73,34 +73,6 @@ public class AliasStorageServiceImpl implements AliasStorageService, Initializin
     }
 
     /**
-     * get the list of aliaspo
-     *
-     * @param chainId
-     *
-     * @return the aliaspo list
-     */
-    @Override
-    @Deprecated
-    public List<AliasPo> getAliasList(int chainId) {
-        List<AliasPo> aliasPoList = new ArrayList<>();
-        try {
-            List<byte[]> list = RocksDBService.valueList(AccountStorageConstant.DB_NAME_ACCOUNT_ALIAS_KEY_ALIAS + chainId);
-            if (list != null) {
-                for (byte[] value : list) {
-                    AliasPo aliasPo = new AliasPo();
-                    //将byte数组反序列化为AccountPo返回
-                    aliasPo.parse(value, 0);
-                    aliasPoList.add(aliasPo);
-                }
-            }
-        } catch (Exception e) {
-            LoggerUtil.logger.error("",e);
-            throw new NulsRuntimeException(AccountErrorCode.DB_QUERY_ERROR);
-        }
-        return aliasPoList;
-    }
-
-    /**
      * get AliasPo by chainId and alias
      * @param chainId
      * @param alias the alias
