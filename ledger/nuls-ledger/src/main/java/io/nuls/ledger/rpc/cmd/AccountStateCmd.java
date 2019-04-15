@@ -173,7 +173,7 @@ public class AccountStateCmd extends BaseCmd {
      * @return
      */
     @CmdAnnotation(cmd = "getNonce",
-            version = 1.0, scope = "private", minEvent = 0, minPeriod = 0,
+            version = 1.0,  minEvent = 0, minPeriod = 0,
             description = "")
     @Parameter(parameterName = "chainId", parameterType = "int")
     @Parameter(parameterName = "assetChainId", parameterType = "int")
