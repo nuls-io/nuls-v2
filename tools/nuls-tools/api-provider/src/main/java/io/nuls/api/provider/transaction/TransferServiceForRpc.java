@@ -54,7 +54,7 @@ public class TransferServiceForRpc extends BaseRpcService implements TransferSer
 
     @Override
     public Result<TransactionData> getSimpleTxDataByHash(GetConfirmedTxByHashReq req) {
-        return callRpc(ModuleE.TX.abbr,"tx_getConfirmedTxClient",req,
+        return callRpc(ModuleE.TX.abbr,"tx_getTxClient",req,
                 (Function<Map,Result>)res->tranderTransactionData(tranderTransaction(res))
         );
     }
