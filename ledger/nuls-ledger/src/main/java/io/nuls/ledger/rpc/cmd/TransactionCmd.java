@@ -61,7 +61,7 @@ public class TransactionCmd extends BaseLedgerCmd {
      * @return
      */
     @CmdAnnotation(cmd = "commitUnconfirmedTx",
-            version = 1.0, scope = "private", minEvent = 0, minPeriod = 0,
+            version = 1.0,  minEvent = 0, minPeriod = 0,
             description = "")
     @Parameter(parameterName = "chainId", parameterType = "int")
     @Parameter(parameterName = "tx", parameterType = "String")
@@ -94,7 +94,7 @@ public class TransactionCmd extends BaseLedgerCmd {
      * @return
      */
     @CmdAnnotation(cmd = "commitBlockTxs",
-            version = 1.0, scope = "private", minEvent = 0, minPeriod = 0,
+            version = 1.0, minEvent = 0, minPeriod = 0,
             description = "")
     @Parameter(parameterName = "chainId", parameterType = "int")
     @Parameter(parameterName = "txList", parameterType = "List")
@@ -144,7 +144,7 @@ public class TransactionCmd extends BaseLedgerCmd {
      * @return
      */
     @CmdAnnotation(cmd = "rollBackUnconfirmTx",
-            version = 1.0, scope = "private", minEvent = 0, minPeriod = 0,
+            version = 1.0, minEvent = 0, minPeriod = 0,
             description = "")
     @Parameter(parameterName = "chainId", parameterType = "int")
     @Parameter(parameterName = "tx", parameterType = "String")
@@ -184,7 +184,7 @@ public class TransactionCmd extends BaseLedgerCmd {
      * @return
      */
     @CmdAnnotation(cmd = "rollBackBlockTxs",
-            version = 1.0, scope = "private", minEvent = 0, minPeriod = 0,
+            version = 1.0, minEvent = 0, minPeriod = 0,
             description = "")
     @Parameter(parameterName = "chainId", parameterType = "int")
     @Parameter(parameterName = "blockHeight", parameterType = "long")
