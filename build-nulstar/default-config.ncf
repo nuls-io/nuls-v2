@@ -1,7 +1,7 @@
 [global]
 encoding=UTF-8
 language=en
-logPath=./logs
+logPath=./Logs
 logLevel=INFO
 dataPath=./data
 serviceManager=ws://127.0.0.1:7771
