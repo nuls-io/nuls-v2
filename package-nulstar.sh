@@ -479,7 +479,7 @@ fi
 
 if [ -n "${BUILDTAR}" ]; then
     log "============ BUILD ${RELEASE_PATH}.tar.gz ==================="
-    tar -zcPf "${RELEASE_PATH}.tar.gz" ${RELEASE_PATH}
+    tar -zcPf "${RELEASE_PATH##*}.tar.gz" ${RELEASE_PATH}
     log "============ BUILD ${RELEASE_PATH}.tar.gz FINISH==================="
 fi
 log "============ ${RELEASE_PATH} PACKAGE FINISH 🍺🍺🍺🎉🎉🎉 ==============="
