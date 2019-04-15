@@ -39,6 +39,7 @@ import io.nuls.ledger.storage.UnconfirmedRepository;
 import io.nuls.ledger.utils.*;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Service;
+import io.nuls.tools.model.BigIntegerUtils;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -153,26 +154,25 @@ public class AccountStateServiceImpl implements AccountStateService {
         synchronized (LockerUtil.getUnconfirmedAccountLocker(unconfirmedTx.getAddress(), unconfirmedTx.getAssetChainId(), unconfirmedTx.getAssetId())) {
             AccountState accountState = getAccountStateUnSyn(unconfirmedTx.getAddress(), addressChainId, unconfirmedTx.getAssetChainId(), unconfirmedTx.getAssetId());
             AccountStateUnconfirmed accountStateUnconfirmed = unconfirmedStateService.getUnconfirmedInfoReCal(accountState);
-            if (unconfirmedTx.getSpendAmount().compareTo(BigInteger.ZERO) != 0) {
+            if (BigIntegerUtils.isGreaterThan(unconfirmedTx.getSpendAmount(),BigInteger.ZERO)) {
                 if (!unconfirmedTx.getFromNonce().equals(accountStateUnconfirmed.getLatestUnconfirmedNonce())) {
                     return ValidateResult.getResult(ValidateEnum.FAIL_CODE, new String[]{unconfirmedTx.getAddress(), unconfirmedTx.getFromNonce(), "account lastNonce=" + accountStateUnconfirmed.getLatestUnconfirmedNonce()});
                 }
-                LoggerUtil.logger(addressChainId).debug("非确认交易nonce提交：txHash={},key={},addNonce={}", unconfirmedTx.getTxHash(), unconfirmedTx.getAddress() + "-" + unconfirmedTx.getAssetChainId() + "-" + unconfirmedTx.getAssetId(), newNonce);
                 UnconfirmedNonce unconfirmedNonce = new UnconfirmedNonce(newNonce);
                 accountStateUnconfirmed.addUnconfirmedNonce(unconfirmedNonce);
                 LoggerUtil.logger(addressChainId).debug("非确认交易nonce提交后：txHash={},dbNonce={},nonces={}", unconfirmedTx.getTxHash(), accountStateUnconfirmed.getDbNonce(), accountStateUnconfirmed.getUnconfirmedNoncesStrs());
+                UnconfirmedAmount unconfirmedAmount = new UnconfirmedAmount(unconfirmedTx.getEarnAmount(), unconfirmedTx.getSpendAmount(),
+                        unconfirmedTx.getFromUnLockedAmount(), unconfirmedTx.getToLockedAmount());
+                unconfirmedAmount.setTxHash(unconfirmedTx.getTxHash());
+                accountStateUnconfirmed.addUnconfirmedAmount(unconfirmedAmount);
+                try {
+                    unconfirmedRepository.updateAccountStateUnconfirmed(key, accountStateUnconfirmed);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    return ValidateResult.getResult(ValidateEnum.FAIL_CODE, new String[]{unconfirmedTx.getAddress(), unconfirmedTx.getFromNonce(), "updateUnconfirmTx exception"});
+                }
             }
-            UnconfirmedAmount unconfirmedAmount = new UnconfirmedAmount(unconfirmedTx.getEarnAmount(), unconfirmedTx.getSpendAmount(),
-                    unconfirmedTx.getFromUnLockedAmount(), unconfirmedTx.getToLockedAmount());
-            unconfirmedAmount.setTxHash(unconfirmedTx.getTxHash());
-            accountStateUnconfirmed.addUnconfirmedAmount(unconfirmedAmount);
-            try {
-                LoggerUtil.logger().debug("####updateUnconfirmTx == unconfirmedAmount ={}",accountStateUnconfirmed.getUnconfirmedAmounts().size());
-                unconfirmedRepository.updateAccountStateUnconfirmed(key, accountStateUnconfirmed);
-            } catch (Exception e) {
-                e.printStackTrace();
-                return ValidateResult.getResult(ValidateEnum.FAIL_CODE, new String[]{unconfirmedTx.getAddress(), unconfirmedTx.getFromNonce(), "updateUnconfirmTx exception"});
-            }
+
             return ValidateResult.getSuccess();
         }
     }
