@@ -51,7 +51,7 @@ public class CmdClientModule extends RpcModule {
 
     @Override
     public RpcModuleState onDependenciesReady() {
-        System.out.println("nuls-wallet basic module ready");
+        System.out.println("nuls-wallet base module ready");
         ThreadUtils.createAndRunThread("cmd",()->commandHandler.start());
         return RpcModuleState.Running;
     }
