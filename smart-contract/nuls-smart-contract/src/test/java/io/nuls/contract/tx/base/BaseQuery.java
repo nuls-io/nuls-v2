@@ -28,6 +28,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import io.nuls.api.provider.Provider;
 import io.nuls.api.provider.ServiceManager;
 import io.nuls.api.provider.transaction.TransferService;
+import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.data.BlockHeader;
 import io.nuls.base.data.Transaction;
 import io.nuls.contract.model.bo.Chain;
@@ -41,6 +42,7 @@ import io.nuls.rpc.info.NoUse;
 import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.model.message.Response;
 import io.nuls.rpc.netty.processor.ResponseMessageProcessor;
+import io.nuls.rpc.util.RPCUtil;
 import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.parse.JSONUtils;
@@ -302,7 +304,8 @@ public class BaseQuery {
         Map resultMap = (Map) record.get("tx_getTxClient");
         String txHex = (String) resultMap.get("tx");
         Assert.assertTrue(null != txHex);
-        Transaction tx = Transaction.getInstance(txHex);
+        Transaction tx = new Transaction();
+        tx.parse(new NulsByteBuffer(RPCUtil.decode(txHex)));
         Log.info("tx is {}", JSONUtils.obj2PrettyJson(tx));
 
     }
