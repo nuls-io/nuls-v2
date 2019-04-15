@@ -150,7 +150,7 @@ public class ContractServiceImpl implements ContractService {
     @Override
     public Result invokeContractOneByOne(int chainId, ContractTempTransaction tx) {
         try {
-            Log.info("[Invoke Contract] TxType is [{}], hash is [{}]", tx.getType(), tx.getHash().toString());
+            Log.debug("[Invoke Contract] TxType is [{}], hash is [{}]", tx.getType(), tx.getHash().toString());
             Chain chain = contractHelper.getChain(chainId);
             BatchInfo batchInfo = chain.getBatchInfo();
             if (!batchInfo.hasBegan()) {

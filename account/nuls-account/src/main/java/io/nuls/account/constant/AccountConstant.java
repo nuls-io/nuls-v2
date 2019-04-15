@@ -199,11 +199,23 @@ public interface AccountConstant {
             return COMPARATOR.compare(HexUtil.decode(k1), HexUtil.decode(k2));
         }
     };
+    /**
+     * 操作系统名称
+     */
+    String OS_NAME = "os.name";
+    /**
+     * WINDOWS系统
+     */
+    String OS_WINDOWS = "WINDOWS";
+    /**
+     * 路径斜杠
+     */
+    String SLASH = "/";
 
     /**
      * 交易相关
      */
-//    int TX_REMARK_MAX_LEN = 100;
+    int TX_REMARK_MAX_LEN = 100;
 //    int TX_HASH_DIGEST_BYTE_MAX_LEN = 70;
 //    int TX_MAX_BYTES = 300;
 //    int TX_MAX_SIZE = TX_MAX_BYTES * 1024;

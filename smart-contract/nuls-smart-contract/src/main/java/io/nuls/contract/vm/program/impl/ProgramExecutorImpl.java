@@ -161,7 +161,7 @@ public class ProgramExecutorImpl implements ProgramExecutor {
                     parent.blockNumber = blockNumber;
                 }
                 if (parent.blockNumber != blockNumber) {
-                    throw new RuntimeException("must use the same block number");
+                    throw new RuntimeException(String.format("must use the same block number, parent blockNumber is [%s], this blockNumber is [%s]", parent.blockNumber, blockNumber));
                 }
             } else {
                 if (vmContext != null) {
@@ -456,7 +456,7 @@ public class ProgramExecutorImpl implements ProgramExecutor {
     }
 
     @Override
-    public ProgramResult stop(byte[] address, byte[] sender) {
+    public ProgramResult stop(long blockNumber, byte[] address, byte[] sender) {
         checkThread();
         AccountState accountState = repository.getAccountState(address);
         if (accountState == null) {
@@ -473,6 +473,7 @@ public class ProgramExecutorImpl implements ProgramExecutor {
             return revert("contract has stopped");
         }
 
+        this.blockNumber = blockNumber;
         repository.setNonce(address, BigInteger.ZERO);
 
         ProgramResult programResult = new ProgramResult();
