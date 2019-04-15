@@ -356,10 +356,10 @@ public class CallMethodUtils {
         params.put("chainId", chain.getConfig().getChainId());
         params.put("tx", tx);
         try {
-            boolean ledgerValidResult = commitUnconfirmedTx(chain,tx);
+            /*boolean ledgerValidResult = commitUnconfirmedTx(chain,tx);
             if(!ledgerValidResult){
                 throw new NulsException(ConsensusErrorCode.FAILED);
-            }
+            }*/
             Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.TX.abbr, "tx_newTx", params);
             if (!cmdResp.isSuccess()) {
                 chain.getLoggerMap().get(ConsensusConstant.CONSENSUS_LOGGER_NAME).error("Transaction failed to send!");
