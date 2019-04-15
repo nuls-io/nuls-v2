@@ -243,6 +243,7 @@ public class AgentServiceImpl implements AgentService {
                 return Result.getFailed(ConsensusErrorCode.AGENT_NOT_EXIST);
             }
             stopAgent.setCreateTxHash(agent.getTxHash());
+            tx.setTime(TimeUtils.getCurrentTimeMillis());
             tx.setTxData(stopAgent.serialize());
             CoinData coinData = coinDataManager.getStopAgentCoinData(chain, agent, TimeUtils.getCurrentTimeMillis() + chain.getConfig().getStopAgentLockTime());
             BigInteger fee = TransactionFeeCalculator.getNormalTxFee(tx.size()+ P2PHKSignature.SERIALIZE_LENGTH+coinData.serialize().length);
