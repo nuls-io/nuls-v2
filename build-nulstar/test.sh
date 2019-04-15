@@ -1,4 +1,5 @@
 #!/bin/bash
+. func.sh
 cd `dirname $0`;
 if [ -d ../Libraries/JAVA/11.0.2 ]; then
     export JAVA_HOME="$(cd $(dirname "../Libraries/JAVA/11.0.2"); pwd)/11.0.2"
@@ -61,5 +62,10 @@ PUB_LIB="${PUB_LIB}:./test-1.0.0.jar"
 # Get standard environment variables
 JAVA_OPTS="-Xms128m -Xmx128m -DtestNodeType=master -Dapp.name=test -Dlog.level=${LOGLEVEL} -Dactive.module=$CONFIG "
 CLASSPATH=$CLASSPATH:$PUB_LIB:.
-echo "${JAVA} $JAVA_OPTS -classpath $CLASSPATH $MAIN_CLASS"
-${JAVA} $JAVA_OPTS -classpath $CLASSPATH $MAIN_CLASS
+nulstarUrl=`getModuleItem $CONFIG "serviceManager"`
+if [ -z "${nulstarUrl}" ]; then
+    nulstarUrl="ws://127.0.0.1:7771"
+fi
+echo "Service Manager URL:$nulstarUrl"
+#echo "${JAVA} $JAVA_OPTS -classpath $CLASSPATH $MAIN_CLASS $nulstarUrl"
+${JAVA} $JAVA_OPTS -classpath $CLASSPATH $MAIN_CLASS $nulstarUrl

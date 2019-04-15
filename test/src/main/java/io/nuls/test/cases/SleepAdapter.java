@@ -66,4 +66,22 @@ public abstract class SleepAdapter implements TestCaseIntf<Object,Object> {
         }
     }
 
+    @Component
+    public static class $30SEC extends SleepAdapter {
+
+        @Override
+        public int sleepSec() {
+            return 30;
+        }
+    }
+
+    @Component
+    public static class $60SEC extends SleepAdapter {
+
+        @Override
+        public int sleepSec() {
+            return 60;
+        }
+    }
+
 }

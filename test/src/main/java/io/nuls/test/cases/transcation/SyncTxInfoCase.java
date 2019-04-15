@@ -1,5 +1,6 @@
 package io.nuls.test.cases.transcation;
 
+import io.nuls.api.provider.block.facade.BlockHeaderData;
 import io.nuls.api.provider.transaction.facade.TransactionData;
 import io.nuls.base.constant.TxStatusEnum;
 import io.nuls.base.data.Transaction;
@@ -27,13 +28,22 @@ public class SyncTxInfoCase extends BaseTranscationCase<TransactionData,String> 
     @Override
     public TransactionData doTest(String hash, int depth) throws TestFailException {
         TransactionData transaction = getTxInfoCase.check(hash,depth);
-        new SyncRemoteTestCase<TransactionData>(){
+        if(!new SyncRemoteTestCase<TransactionData>(){
+
+            @Override
+            public boolean equals(TransactionData source, TransactionData remote){
+                source.setTime(null);
+                remote.setTime(null);
+                return source.equals(remote);
+            }
 
             @Override
             public String title() {
                 return "远程交易状态一致性";
             }
-        }.check(new RemoteTestParam<>(GetTxInfoCase.class,transaction,hash),depth);
+        }.check(new RemoteTestParam<>(GetTxInfoCase.class,transaction,hash),depth)){
+            throw new TestFailException("远程交易状态本地不一致");
+        }
         return transaction;
     }
 }

@@ -105,7 +105,7 @@ public class TransactionServiceImpl implements TransactionService {
         String currentTxNonce = LedgerUtil.getNonceEncodeByTx(transaction);
         Map<String, UnconfirmedTx> accountsMap = new ConcurrentHashMap<>(8);
         List<CoinFrom> froms = coinData.getFrom();
-        List<CoinTo> tos = coinData.getTo();
+
         String txHash = transaction.getHash().toString();
         for (CoinFrom from : froms) {
             if (LedgerUtil.isNotLocalChainAccount(addressChainId, from.getAddress())) {
@@ -125,18 +125,20 @@ public class TransactionServiceImpl implements TransactionService {
                 logger(addressChainId).debug("unConfirmTxProcess account = {} unlocked tx.txHash = {}", accountKey, txHash);
             }
         }
-        for (CoinTo to : tos) {
-            String address = AddressTool.getStringAddressByBytes(to.getAddress());
-            int assetChainId = to.getAssetsChainId();
-            int assetId = to.getAssetsId();
-            String accountKey = LedgerUtil.getKeyStr(address, assetChainId, assetId);
-            if (to.getLockTime() == 0) {
-                //普通交易
-                CoinDataUtil.calTxToAmount(accountsMap, to, txHash, accountKey);
-            } else {
-                CoinDataUtil.calTxToLockedAmount(accountsMap, to, txHash, accountKey);
-            }
-        }
+        //取消对未确认交易to的处理
+        //        List<CoinTo> tos = coinData.getTo();
+//        for (CoinTo to : tos) {
+//            String address = AddressTool.getStringAddressByBytes(to.getAddress());
+//            int assetChainId = to.getAssetsChainId();
+//            int assetId = to.getAssetsId();
+//            String accountKey = LedgerUtil.getKeyStr(address, assetChainId, assetId);
+//            if (to.getLockTime() == 0) {
+//                //普通交易
+//                CoinDataUtil.calTxToAmount(accountsMap, to, txHash, accountKey);
+//            } else {
+//                CoinDataUtil.calTxToLockedAmount(accountsMap, to, txHash, accountKey);
+//            }
+//        }
         Set keys = accountsMap.keySet();
         Iterator<String> it = keys.iterator();
         while (it.hasNext()) {
@@ -149,18 +151,16 @@ public class TransactionServiceImpl implements TransactionService {
         return ValidateResult.getSuccess();
     }
 
-
     private boolean confirmBlockTxProcess(int addressChainId, long blockHeight, List<Transaction> txList, Map<String, AccountBalance> updateAccounts) {
         for (Transaction transaction : txList) {
             String nonce8BytesStr = LedgerUtil.getNonceEncodeByTx(transaction);
             String txHash = transaction.getHash().toString();
             ledgerHash.put(txHash, 1);
-            LoggerUtil.txCommitLog(addressChainId).debug("start confirmBlockProcess addressChainId={},blockHeight={},hash={}", addressChainId, blockHeight, txHash);
             //从缓存校验交易
             CoinData coinData = CoinDataUtil.parseCoinData(transaction.getCoinData());
             if (null == coinData) {
                 //例如黄牌交易，直接返回
-                LoggerUtil.logger(addressChainId).debug("coinData is null continue.");
+                LoggerUtil.logger(addressChainId).info("txHash = {},coinData is null continue.", txHash);
                 continue;
             }
             List<CoinFrom> froms = coinData.getFrom();
@@ -189,7 +189,6 @@ public class TransactionServiceImpl implements TransactionService {
                     return false;
                 }
             }
-
             List<CoinTo> tos = coinData.getTo();
             for (CoinTo to : tos) {
                 if (LedgerUtil.isNotLocalChainAccount(addressChainId, to.getAddress())) {
@@ -222,13 +221,13 @@ public class TransactionServiceImpl implements TransactionService {
      */
     @Override
     public boolean confirmBlockProcess(int addressChainId, List<Transaction> txList, long blockHeight) {
-        long time1,time11, time2, time3, time4, time5, time6, time7 = 0;
+        long time1, time2, time7 = 0;
+
         time1 = System.currentTimeMillis();
         try {
             ledgerNonce.clear();
             ledgerHash.clear();
             LockerUtil.BLOCK_SYNC_LOCKER.lock();
-            time11 = System.currentTimeMillis();
             long currentDbHeight = repository.getBlockHeight(addressChainId);
             if ((blockHeight - currentDbHeight) != 1) {
                 //高度不一致，数据出问题了
@@ -261,20 +260,16 @@ public class TransactionServiceImpl implements TransactionService {
                 logger(addressChainId).error("confirmBlockProcess blockSnapshotAccounts addAccountState error!");
                 return false;
             }
-            time3 = System.currentTimeMillis();
             //提交整体数据
             try {
                 //备份历史
                 repository.saveBlockSnapshot(addressChainId, blockHeight, blockSnapshotAccounts);
-                time4 = System.currentTimeMillis();
 
                 if (accountStatesMap.size() > 0) {
                     repository.batchUpdateAccountState(addressChainId, accountStatesMap);
                 }
-                time5 = System.currentTimeMillis();
                 repository.saveAccountNonces(addressChainId, ledgerNonce);
                 repository.saveAccountHash(addressChainId, ledgerHash);
-                time6 = System.currentTimeMillis();
             } catch (Exception e) {
                 e.printStackTrace();
                 //需要回滚数据
@@ -286,8 +281,8 @@ public class TransactionServiceImpl implements TransactionService {
             //完全提交,存储当前高度。
             repository.saveOrUpdateBlockHeight(addressChainId, blockHeight);
             time7 = System.currentTimeMillis();
-            LoggerUtil.timeTest.debug("####txs={}==accountSize={}====time2-time1={},time2-time11={},time3-time2={},time4-time3={},time5-time4={},time6-time5={},time7-time6={}",
-                    txList.size(), updateAccounts.size(), time2 - time1,time2-time11,time3 - time2, time4 - time3, time5 - time4, time6 - time5, time7 - time6);
+            LoggerUtil.timeTest.debug("####txs={}==accountSize={}====总时间:{},结构校验解析时间={}",
+                    txList.size(), updateAccounts.size(), time7 - time1, time2 - time1);
             return true;
         } catch (Exception e) {
             e.printStackTrace();

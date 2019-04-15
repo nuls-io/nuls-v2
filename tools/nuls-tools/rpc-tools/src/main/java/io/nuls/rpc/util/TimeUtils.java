@@ -60,6 +60,8 @@ public class TimeUtils implements Runnable {
 
     private static long offset;
 
+    private boolean running;
+
 
     /**
      * 启动时间同步线程
@@ -70,6 +72,10 @@ public class TimeUtils implements Runnable {
     }
 
     public void start(long refreshTime) {
+        if (running) {
+            return;
+        }
+        running = true;
         if (refreshTime > 0) {
             NET_REFRESH_TIME = refreshTime;
         }

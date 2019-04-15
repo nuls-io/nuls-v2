@@ -9,9 +9,11 @@ logPath=`getModuleItem "./nuls.ncf" "logPath"`
 #    echo "必须指定logs目录: ./check-status.sh <log path>"
 #    exit 0;
 #fi
-
+clear
 echoRed() { echo $'\e[0;31m'$1$'\e[0m'; }
 echoGreen() { echo $'\e[0;32m'$1$'\e[0m'; }
+while [ 1 == 1 ]
+do
 echo "==================RPC REDAY MODULE=================="
 for module in ${modules[@]}
 do
@@ -48,14 +50,29 @@ do
 done
 
 echo "==================RUNNING MODULE=================="
+isReady=1
 for module in ${modules[@]}
 do
 	if [ -n "`grep -n 'RMB:module state : Running' $logPath/${module}/stdout.log`" ];
 	then
 		echoGreen "${module} STATE IS RUNNING"
 		else
+		isReady=0
 		echoRed "${module} STATE NOT RUNNING"	
 	fi
+done
+echo "==================NULS WALLET STATE=================="
+if [ $isReady == 1 ];
+then
+    echoGreen "=========================="
+    echoGreen "NULS WALLET IS RUNNING"
+    echoGreen "=========================="
+    exit 0;
+else
+    echoRed "NULS WALLET NOT RUNNING"
+    sleep 2
+    clear;
+fi
 done
 
 

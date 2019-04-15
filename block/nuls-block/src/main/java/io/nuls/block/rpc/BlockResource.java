@@ -446,7 +446,7 @@ public class BlockResource extends BaseCmd {
         NulsLogger commonLog = context.getCommonLog();
         try {
             Block block = new Block();
-            block.parse(new NulsByteBuffer(HexUtil.decode((String) map.get("block"))));
+            block.parse(new NulsByteBuffer(RPCUtil.decode((String) map.get("block"))));
             commonLog.info("recieve block from local node, chainId:" + chainId + ", height:" + block.getHeader().getHeight() + ", hash:" + block.getHeader().getHash());
             if (service.saveBlock(chainId, block, 1, true, true, false)) {
                 return success();

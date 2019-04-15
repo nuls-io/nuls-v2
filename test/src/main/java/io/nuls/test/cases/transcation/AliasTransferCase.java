@@ -1,6 +1,7 @@
 package io.nuls.test.cases.transcation;
 
 import io.nuls.test.cases.SleepAdapter;
+import io.nuls.test.cases.TestCase;
 import io.nuls.test.cases.TestCaseChain;
 import io.nuls.test.cases.TestCaseIntf;
 import io.nuls.test.cases.account.SyncAccountInfo;
@@ -25,14 +26,14 @@ public class AliasTransferCase extends TestCaseChain {
     public Class<? extends TestCaseIntf>[] testChain() {
         return new Class[]{
                 SetAliasCase.class,
-                SleepAdapter.$15SEC.class,
+                SleepAdapter.$30SEC.class,
                 SyncTxInfoCase.class,
                 GetTranscationFormAddressAdapter.class,
                 CheckAliasCase.class,
                 SyncAccountInfo.class,
                 ReadyBalanceToAddressAdapter.class,
                 TransferByAliasCase.class,
-                SleepAdapter.$15SEC.class,
+                SleepAdapter.$30SEC.class,
                 SyncTxInfoCase.class,
                 GetTranscationToAddressAdapter.class,
                 SyncAccountBalance.class
