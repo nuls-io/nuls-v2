@@ -63,7 +63,7 @@ public class ValidatorCmd extends BaseLedgerCmd {
      * @return
      */
     @CmdAnnotation(cmd = "validateCoinData",
-            version = 1.0, scope = "private", minEvent = 0, minPeriod = 0, description = "")
+            version = 1.0, minEvent = 0, minPeriod = 0, description = "")
     @Parameter(parameterName = "chainId", parameterType = "int")
     @Parameter(parameterName = "tx", parameterType = "String")
     public Response validateCoinData(Map params) {
@@ -97,7 +97,7 @@ public class ValidatorCmd extends BaseLedgerCmd {
      * @return
      */
     @CmdAnnotation(cmd = "rollbackTxValidateStatus",
-            version = 1.0, scope = "private", minEvent = 0, minPeriod = 0,
+            version = 1.0, minEvent = 0, minPeriod = 0,
             description = "")
     @Parameter(parameterName = "chainId", parameterType = "int")
     @Parameter(parameterName = "tx", parameterType = "String")
@@ -138,7 +138,7 @@ public class ValidatorCmd extends BaseLedgerCmd {
      * @return
      */
     @CmdAnnotation(cmd = "bathValidateBegin",
-            version = 1.0, scope = "private", minEvent = 0, minPeriod = 0,
+            version = 1.0,  minEvent = 0, minPeriod = 0,
             description = "")
     @Parameter(parameterName = "chainId", parameterType = "int")
     public Response bathValidateBegin(Map params) {
@@ -159,7 +159,7 @@ public class ValidatorCmd extends BaseLedgerCmd {
      */
 
     @CmdAnnotation(cmd = "blockValidate",
-            version = 1.0, scope = "private", minEvent = 0, minPeriod = 0,
+            version = 1.0,  minEvent = 0, minPeriod = 0,
             description = "")
     @Parameter(parameterName = "chainId", parameterType = "int")
     @Parameter(parameterName = "txList", parameterType = "List")
