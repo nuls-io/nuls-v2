@@ -23,7 +23,8 @@ EOF
 NULSTAR_URL="http://pub-readingpal.oss-cn-hangzhou.aliyuncs.com/nulstar.tar.gz"
 #获取参数
 #输出目录
-MODULES_PATH="./NULS-Wallet-linux64-alpha2"
+NULS_WALLET_TAR_NAME="NULS-Wallet-linux64-alpha2"
+MODULES_PATH="./${NULS_WALLET_TAR_NAME}"
 #RELEASE_OUT_PATH="./NULS-Walltet-linux64-alpha1"
 #是否马上更新代码
 DOPULL=
@@ -479,7 +480,7 @@ fi
 
 if [ -n "${BUILDTAR}" ]; then
     log "============ BUILD ${RELEASE_PATH}.tar.gz ==================="
-    tar -zcPf "${RELEASE_PATH##*}.tar.gz" ${RELEASE_PATH}
+    tar -zcPf "${NULS_WALLET_TAR_NAME}.tar.gz" ${RELEASE_PATH}
     log "============ BUILD ${RELEASE_PATH}.tar.gz FINISH==================="
 fi
 log "============ ${RELEASE_PATH} PACKAGE FINISH 🍺🍺🍺🎉🎉🎉 ==============="
