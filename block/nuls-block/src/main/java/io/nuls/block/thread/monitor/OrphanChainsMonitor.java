@@ -22,9 +22,7 @@ package io.nuls.block.thread.monitor;
 
 import io.nuls.base.data.NulsDigestData;
 import io.nuls.block.constant.ChainTypeEnum;
-import io.nuls.block.constant.RunningStatusEnum;
 import io.nuls.block.manager.BlockChainManager;
-import io.nuls.block.manager.ContextManager;
 import io.nuls.block.model.Chain;
 import io.nuls.block.model.ChainContext;
 import io.nuls.tools.exception.NulsRuntimeException;
@@ -50,90 +48,69 @@ import static io.nuls.block.constant.RunningStatusEnum.RUNNING;
  * @version 1.0
  * @date 18-11-14 下午3:54
  */
-public class OrphanChainsMonitor implements Runnable {
+public class OrphanChainsMonitor extends BaseMonitor {
 
     private static final OrphanChainsMonitor INSTANCE = new OrphanChainsMonitor();
-
-    private OrphanChainsMonitor() {
-
-    }
 
     public static OrphanChainsMonitor getInstance() {
         return INSTANCE;
     }
 
     @Override
-    public void run() {
-
-        for (Integer chainId : ContextManager.chainIds) {
-            ChainContext context = ContextManager.getContext(chainId);
-            NulsLogger commonLog = context.getCommonLog();
-            try {
-                //判断该链的运行状态,只有正常运行时才会有孤儿链的处理
-                RunningStatusEnum status = context.getStatus();
-                if (!status.equals(RUNNING)) {
-                    commonLog.debug("skip process, status is " + status + ", chainId-" + chainId);
+    protected void process(int chainId, ChainContext context, NulsLogger commonLog) {
+        StampedLock lock = context.getLock();
+        long stamp = lock.tryOptimisticRead();
+        try {
+            for (; ; stamp = lock.writeLock()) {
+                if (stamp == 0L) {
                     continue;
                 }
-                StampedLock lock = context.getLock();
-                long stamp = lock.tryOptimisticRead();
-                try {
-                    for (; ; stamp = lock.writeLock()) {
-                        if (stamp == 0L) {
-                            continue;
-                        }
-                        // possibly racy reads
-                        SortedSet<Chain> orphanChains = BlockChainManager.getOrphanChains(chainId);
-                        if (!lock.validate(stamp)) {
-                            continue;
-                        }
-                        if (orphanChains.size() < 1) {
-                            break;
-                        }
-                        stamp = lock.tryConvertToWriteLock(stamp);
-                        if (stamp == 0L) {
-                            continue;
-                        }
-                        // exclusive access
-                        commonLog.info("####################################orphan chains######################################");
-                        for (Chain orphanChain : orphanChains) {
-                            commonLog.info("#" + orphanChain);
-                        }
-                        context.setStatus(MAINTAIN_ORPHAN_CHAINS);
-                        Chain masterChain = BlockChainManager.getMasterChain(chainId);
-                        SortedSet<Chain> forkChains = BlockChainManager.getForkChains(chainId);
-                        //标记、变更链属性阶段
-                        for (Chain orphanChain : orphanChains) {
-                            commonLog.debug("OrphanChainsMonitor-mark-begin");
-                            mark(orphanChain, masterChain, forkChains, orphanChains);
-                            commonLog.debug("OrphanChainsMonitor-mark-end");
-                        }
-                        //打印标记后孤儿链的类型
-                        for (Chain orphanChain : orphanChains) {
-                            commonLog.debug(orphanChain.toString());
-                        }
-                        //复制、清除阶段
-                        SortedSet<Chain> maintainedOrphanChains = new TreeSet<>(Chain.COMPARATOR);
-                        for (Chain orphanChain : orphanChains) {
-                            commonLog.debug("OrphanChainsMonitor-copy-begin");
-                            copy(chainId, maintainedOrphanChains, orphanChain);
-                            commonLog.debug("OrphanChainsMonitor-copy-end");
-                        }
-                        BlockChainManager.setOrphanChains(chainId, maintainedOrphanChains);
-                        forkChains.forEach(e -> e.setType(ChainTypeEnum.FORK));
-                        maintainedOrphanChains.forEach(e -> e.setType(ChainTypeEnum.ORPHAN));
-                        break;
-                    }
-                } finally {
-                    context.setStatus(RUNNING);
-                    if (StampedLock.isWriteLockStamp(stamp)) {
-                        lock.unlockWrite(stamp);
-                    }
+                // possibly racy reads
+                SortedSet<Chain> orphanChains = BlockChainManager.getOrphanChains(chainId);
+                if (!lock.validate(stamp)) {
+                    continue;
                 }
-            } catch (Exception e) {
-                e.printStackTrace();
-                context.setStatus(RUNNING);
-                commonLog.error("chainId-" + chainId + ",maintain OrphanChains fail!error msg is:" + e.getMessage());
+                if (orphanChains.size() < 1) {
+                    break;
+                }
+                stamp = lock.tryConvertToWriteLock(stamp);
+                if (stamp == 0L) {
+                    continue;
+                }
+                // exclusive access
+                commonLog.info("####################################orphan chains######################################");
+                for (Chain orphanChain : orphanChains) {
+                    commonLog.info("#" + orphanChain);
+                }
+                context.setStatus(MAINTAIN_ORPHAN_CHAINS);
+                Chain masterChain = BlockChainManager.getMasterChain(chainId);
+                SortedSet<Chain> forkChains = BlockChainManager.getForkChains(chainId);
+                //标记、变更链属性阶段
+                for (Chain orphanChain : orphanChains) {
+                    commonLog.debug("OrphanChainsMonitor-mark-begin");
+                    mark(orphanChain, masterChain, forkChains, orphanChains);
+                    commonLog.debug("OrphanChainsMonitor-mark-end");
+                }
+                //打印标记后孤儿链的类型
+                for (Chain orphanChain : orphanChains) {
+                    commonLog.debug(orphanChain.toString());
+                }
+                //复制、清除阶段
+                SortedSet<Chain> maintainedOrphanChains = new TreeSet<>(Chain.COMPARATOR);
+                for (Chain orphanChain : orphanChains) {
+                    commonLog.debug("OrphanChainsMonitor-copy-begin");
+                    copy(chainId, maintainedOrphanChains, orphanChain);
+                    commonLog.debug("OrphanChainsMonitor-copy-end");
+                }
+                BlockChainManager.setOrphanChains(chainId, maintainedOrphanChains);
+                forkChains.forEach(e -> e.setType(ChainTypeEnum.FORK));
+                maintainedOrphanChains.forEach(e -> e.setType(ChainTypeEnum.ORPHAN));
+                break;
+            }
+        } finally {
+            context.setStatus(RUNNING);
+            if (StampedLock.isWriteLockStamp(stamp)) {
+                lock.unlockWrite(stamp);
             }
         }
     }
