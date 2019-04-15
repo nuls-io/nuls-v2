@@ -992,6 +992,7 @@ public class TxServiceImpl implements TxService {
          * 打包时没有智能合约交易则不通知, 有则只第一次时通知.
          */
         boolean contractNotify = false;
+        int unSystemSmartContractCount = 0;//非系统智能合约交易的总数 计划beta版删除 todo
         List<Future<Boolean>> futures = new ArrayList<>();
         for (String txStr : txStrList) {
             Transaction tx = TxUtil.getInstanceRpcStr(txStr, Transaction.class);
@@ -1000,6 +1001,7 @@ public class TxServiceImpl implements TxService {
             if (TxManager.isSystemSmartContract(chain, tx.getType())) {
                 continue;
             }
+            unSystemSmartContractCount++;//非系统智能合约交易计数 计划beta版删除 todo
             //多线程处理单个交易
             Future<Boolean> res = verifySignExecutor.submit(new Callable<Boolean>() {
                 @Override
@@ -1124,7 +1126,11 @@ public class TxServiceImpl implements TxService {
             for (int i = 0; i < size; i++) {
                 int j = txStrList.size() - size + i;
                 if (!txStrList.get(j).equals(scNewList.get(i))) {
-                    chain.getLoggerMap().get(TxConstant.LOG_TX).warn("contract new tx hex error.");
+                    chain.getLoggerMap().get(TxConstant.LOG_TX).error("contract error.");
+                    chain.getLoggerMap().get(TxConstant.LOG_TX).error("收到区块交易总数 size:{}, - tx hex：{}",txStrList.size(), txStrList.get(j));
+                    //计划beta版删除 todo
+                    chain.getLoggerMap().get(TxConstant.LOG_TX).error("收到除生成的系统智能合约以外的交易总数 + 生成智能合约交易数 size:{}, tx hex：{}",
+                            unSystemSmartContractCount + scNewList.size(), scNewList.get(i));
                     return verifyTxResult;
                 }
             }
