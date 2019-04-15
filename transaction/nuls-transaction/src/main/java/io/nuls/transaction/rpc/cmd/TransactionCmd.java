@@ -641,6 +641,38 @@ public class TransactionCmd extends BaseCmd {
     }
 
 
+    /**
+     * 最新区块高度
+     * @param params
+     * @return
+     */
+    @CmdAnnotation(cmd = TxCmd.TX_BLOCK_HEIGHT, version = 1.0, description = "")
+    @Parameter(parameterName = "chainId", parameterType = "int")
+    @Parameter(parameterName = "height", parameterType = "long")
+    public Response height(Map params) {
+        Chain chain = null;
+        try {
+            ObjectUtils.canNotEmpty(params.get("chainId"), TxErrorCode.PARAMETER_ERROR.getMsg());
+            chain = chainManager.getChain((int) params.get("chainId"));
+            if (null == chain) {
+                throw new NulsException(TxErrorCode.CHAIN_NOT_FOUND);
+            }
+            Long height = Long.valueOf(params.get("height").toString());
+            chain.setBestBlockHeight(height);
+            chain.getLoggerMap().get(TxConstant.LOG_TX).debug("最新区块高度更新为: {}", height);
+            Map<String, Object> resultMap = new HashMap<>(TxConstant.INIT_CAPACITY_2);
+            resultMap.put("value", true);
+            return success(resultMap);
+        } catch (NulsException e) {
+            errorLogProcess(chain, e);
+            return failed(e.getErrorCode());
+        } catch (Exception e) {
+            errorLogProcess(chain, e);
+            return failed(TxErrorCode.SYS_UNKOWN_EXCEPTION);
+        }
+    }
+
+
 
     private void errorLogProcess(Chain chain, Exception e) {
         if (chain == null) {

@@ -48,6 +48,8 @@ public interface TxCmd {
     String CLIENT_GETTX = "tx_getTxClient";
     String CLIENT_GETTX_CONFIRMED = "tx_getConfirmedTxClient";
 
+    String TX_BLOCK_HEIGHT = "tx_blockHeight";
+
     /**
      * 修改节点共识状态
      */

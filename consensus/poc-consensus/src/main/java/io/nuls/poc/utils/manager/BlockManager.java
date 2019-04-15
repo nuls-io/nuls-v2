@@ -37,16 +37,18 @@ public class BlockManager {
         BlockExtendsData newestExtendsData = new BlockExtendsData(newestHeader.getExtend());
         BlockExtendsData receiveExtendsData = new BlockExtendsData(blockHeader.getExtend());
         long receiveRoundIndex = receiveExtendsData.getRoundIndex();
-        BlockExtendsData lastExtendsData = new BlockExtendsData(chain.getBlockHeaderList().get(0).getExtend());
-        long lastRoundIndex = lastExtendsData.getRoundIndex();
-        if (receiveRoundIndex > newestExtendsData.getRoundIndex() && (receiveRoundIndex - ConsensusConstant.INIT_BLOCK_HEADER_COUNT > lastRoundIndex)) {
-            Iterator<BlockHeader> iterator = chain.getBlockHeaderList().iterator();
-            while (iterator.hasNext()) {
-                lastExtendsData = new BlockExtendsData(iterator.next().getExtend());
-                if (lastExtendsData.getRoundIndex() == lastRoundIndex) {
-                    iterator.remove();
-                } else if (lastExtendsData.getRoundIndex() > lastRoundIndex) {
-                    break;
+        if(chain.getBlockHeaderList().size() >0){
+            BlockExtendsData lastExtendsData = new BlockExtendsData(chain.getBlockHeaderList().get(0).getExtend());
+            long lastRoundIndex = lastExtendsData.getRoundIndex();
+            if (receiveRoundIndex > newestExtendsData.getRoundIndex() && (receiveRoundIndex - ConsensusConstant.INIT_BLOCK_HEADER_COUNT > lastRoundIndex)) {
+                Iterator<BlockHeader> iterator = chain.getBlockHeaderList().iterator();
+                while (iterator.hasNext()) {
+                    lastExtendsData = new BlockExtendsData(iterator.next().getExtend());
+                    if (lastExtendsData.getRoundIndex() == lastRoundIndex) {
+                        iterator.remove();
+                    } else if (lastExtendsData.getRoundIndex() > lastRoundIndex) {
+                        break;
+                    }
                 }
             }
         }

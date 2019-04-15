@@ -292,7 +292,7 @@ public class BlockServiceImpl implements BlockService {
             //5.通知协议升级模块,完全保存,更新标记
             long startTime5 = System.nanoTime();
             blockHeaderPo.setComplete(true);
-            if (!ProtocolUtil.saveNotice(chainId, header) || !blockStorageService.save(chainId, blockHeaderPo)) {
+            if (!ProtocolUtil.saveNotice(chainId, header) || !blockStorageService.save(chainId, blockHeaderPo) || !TransactionUtil.heightNotice(chainId, height)) {
                 if (!ConsensusUtil.rollbackNotice(chainId, height)) {
                     throw new NulsRuntimeException(BlockErrorCode.CHAIN_MERGE_ERROR);
                 }
@@ -384,7 +384,7 @@ public class BlockServiceImpl implements BlockService {
             BlockHeader blockHeader = BlockUtil.fromBlockHeaderPo(blockHeaderPo);
             long startTime1 = System.nanoTime();
             blockHeaderPo.setComplete(false);
-            if (!blockStorageService.save(chainId, blockHeaderPo) || !ProtocolUtil.rollbackNotice(chainId, blockHeader)) {
+            if (!TransactionUtil.heightNotice(chainId, height - 1) || !blockStorageService.save(chainId, blockHeaderPo) || !ProtocolUtil.rollbackNotice(chainId, blockHeader)) {
                 commonLog.error("ProtocolUtil rollbackNotice fail!chainId-" + chainId + ",height-" + height);
                 return false;
             }

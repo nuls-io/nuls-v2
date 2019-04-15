@@ -18,7 +18,7 @@ mainAssetId=1
 #魔法参数
 packetMagic=20190415
 #种子节点
-selfSeedIps=47.91.22.9:8080
+selfSeedIps=47.91.22.9:8080,192.168.1.115:8080
 
 [account]
 keystoreFolder=keystore/backup

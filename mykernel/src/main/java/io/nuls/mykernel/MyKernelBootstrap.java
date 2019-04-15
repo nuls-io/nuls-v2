@@ -143,7 +143,7 @@ public class MyKernelBootstrap {
         if (modules.isFile()) {
             return;
         }
-        if (Arrays.stream(modules.listFiles()).anyMatch(f -> "Module.ncf".equals(f.getName()))) {
+        if (Arrays.stream(modules.listFiles()).anyMatch(f -> "Module.ncf".equals(f.getName())) && Arrays.stream(modules.listFiles()).anyMatch(f -> f.getName().endsWith("jar"))) {
             startModule(modules);
             return;
         }

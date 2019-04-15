@@ -11,6 +11,7 @@ import io.nuls.poc.model.bo.round.MeetingMember;
 import io.nuls.poc.model.bo.round.MeetingRound;
 import io.nuls.poc.model.bo.tx.txdata.Deposit;
 import io.nuls.poc.rpc.call.CallMethodUtils;
+import io.nuls.tools.constant.TxType;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.exception.NulsException;
@@ -67,7 +68,7 @@ public class ConsensusManager {
      * @return Transaction
      */
     public Transaction createCoinBaseTx(Chain chain,MeetingMember member, List<Transaction> txList, MeetingRound localRound, long unlockHeight) throws IOException,NulsException {
-        Transaction tx = new Transaction(ConsensusConstant.TX_TYPE_COINBASE);
+        Transaction tx = new Transaction(TxType.COIN_BASE);
         CoinData coinData = new CoinData();
         /*
         计算共识奖励
@@ -116,9 +117,9 @@ public class ConsensusManager {
         BigInteger returnGas = BigInteger.ZERO;
         for (Transaction tx : txList) {
             int txType = tx.getType();
-            if(txType != ConsensusConstant.TX_TYPE_COINBASE
-                    && txType != ConsensusConstant.TX_TYPE_CONTRACT_TRANSFER
-                    && txType != ConsensusConstant.TX_TYPE_CONTRACT_RETURN_GAS){
+            if (txType != TxType.COIN_BASE
+                    && txType != TxType.CONTRACT_TRANSFER
+                    && txType != TxType.CONTRACT_RETURN_GAS) {
                 CoinData coinData = new CoinData();
                 coinData.parse(tx.getCoinData(), 0);
                 ChargeResultData resultData = getFee(tx,chain);
@@ -128,7 +129,7 @@ public class ConsensusManager {
                     crossFee = crossFee.add(resultData.getFee());
                 }
             }
-            if(txType == ConsensusConstant.TX_TYPE_CONTRACT_RETURN_GAS){
+            if (txType == TxType.CONTRACT_RETURN_GAS) {
                 CoinData coinData = new CoinData();
                 coinData.parse(tx.getCoinData(),0);
                 for (CoinTo to:coinData.getTo()) {
@@ -364,7 +365,7 @@ public class ConsensusManager {
         跨链交易计算手续费
         Cross-Chain Transactions Calculate Processing Fees
         */
-        if(tx.getType() == ConsensusConstant.TX_TYPE_CROSS_CHAIN){
+        if (tx.getType() == TxType.CROSS_CHAIN) {
             BigInteger fromAmount = BigInteger.ZERO;
             BigInteger toAmount = BigInteger.ZERO;
             /*

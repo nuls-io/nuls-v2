@@ -37,6 +37,7 @@ import io.nuls.base.data.*;
 import io.nuls.base.signture.MultiSignTxSignature;
 import io.nuls.base.signture.SignatureUtil;
 import io.nuls.tools.basic.Result;
+import io.nuls.tools.constant.TxType;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.crypto.HexUtil;
@@ -73,7 +74,7 @@ public class TxValidator {
      */
     public boolean validateTx(int chainId, Transaction tx) throws NulsException, IOException {
         switch (tx.getType()) {
-            case (AccountConstant.TX_TYPE_TRANSFER):
+            case (TxType.TRANSFER):
                 return transferTxValidate(chainId, tx);
             default:
                 return false;

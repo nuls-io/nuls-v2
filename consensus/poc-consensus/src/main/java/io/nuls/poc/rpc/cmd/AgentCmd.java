@@ -1,9 +1,6 @@
 package io.nuls.poc.rpc.cmd;
 
 import io.nuls.poc.service.AgentService;
-import io.nuls.poc.utils.annotation.ResisterTx;
-import io.nuls.poc.utils.enumeration.TxMethodType;
-import io.nuls.poc.utils.enumeration.TxProperty;
 import io.nuls.rpc.cmd.BaseCmd;
 import io.nuls.rpc.model.CmdAnnotation;
 import io.nuls.rpc.model.Parameter;
@@ -11,6 +8,9 @@ import io.nuls.rpc.model.message.Response;
 import io.nuls.tools.basic.Result;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
+import io.nuls.tools.protocol.ResisterTx;
+import io.nuls.tools.protocol.TxMethodType;
+import io.nuls.tools.protocol.TxProperty;
 
 import java.util.Map;
 

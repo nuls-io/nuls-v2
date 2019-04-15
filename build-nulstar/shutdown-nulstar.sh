@@ -10,7 +10,7 @@ stop(){
         echo -e ".\c"
         sleep 1
         let COUNT=$COUNT+1
-        PID_EXIST=`ps -f -p $pid | grep java`
+        PID_EXIST=`ps -f -p $pid | grep -w $2`
         if [ -z "$PID_EXIST" ]; then
 #            echo -e "\n"
 #            echo "stop ${pid} success."
@@ -22,7 +22,7 @@ stop(){
     kill -9 $pid > /dev/null 2>&1
 }
 
-APP_PID=`ps -ef|grep -w "Nulstar"|grep -v grep|awk '{print $2}'`
+APP_PID=`ps -ef|grep -w "Modules/Nulstar"|grep -v grep|awk '{print $2}'`
 if [ -z "${APP_PID}" ]; then
  echo "Nuls wallet not running"
         exit 0
@@ -30,7 +30,7 @@ fi
 echo "stoping"
 for pid in $APP_PID
 do
-   stop $pid
+   stop $pid "Modules/Nulstar"
 done
 for module in ${modules[@]}
 do
@@ -39,7 +39,7 @@ do
     then
         echo "${module} not running"
     else
-        stop $APP_PID
+        stop $APP_PID "Dapp.name=${module}"
     fi
 done
 echo ""

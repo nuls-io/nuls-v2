@@ -137,6 +137,7 @@ public class CallContractTxProcessor {
     }
 
     public Result onRollback(int chainId, ContractWrapperTransaction tx) {
+        Log.info("rollback call tx, hash is {}", tx.getHash().toString());
         try {
             // 回滚代币转账交易
             ContractResult contractResult = tx.getContractResult();
