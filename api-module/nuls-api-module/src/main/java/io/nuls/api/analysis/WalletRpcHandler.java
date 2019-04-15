@@ -73,7 +73,7 @@ public class WalletRpcHandler {
         return Result.getFailed(ApiErrorCode.DATA_PARSE_ERROR);
     }
 
-    public static AccountInfo getAccountBalance(int chainId, String address, int assetChainId, int assetId) {
+    public static BalanceInfo getAccountBalance(int chainId, String address, int assetChainId, int assetId) {
         Map<String, Object> params = new HashMap<>(ApiConstant.INIT_CAPACITY_8);
         params.put(Constants.VERSION_KEY_STR, ApiContext.VERSION);
         params.put("chainId", chainId);
@@ -82,13 +82,15 @@ public class WalletRpcHandler {
         params.put("assetId", assetId);
         try {
             Map map = (Map) RpcCall.request(ModuleE.LG.abbr, CommandConstant.GET_BALANCE, params);
-            AccountInfo accountInfo = new AccountInfo();
-            accountInfo.setTotalBalance(new BigInteger(map.get("total").toString()));
-            accountInfo.setBalance(new BigInteger(map.get("available").toString()));
-            accountInfo.setTimeLock(new BigInteger(map.get("timeHeightLocked").toString()));
-            accountInfo.setConsensusLock(new BigInteger(map.get("permanentLocked").toString()));
-
-            return accountInfo;
+            BalanceInfo balanceInfo = new BalanceInfo();
+            balanceInfo.setBalance(new BigInteger(map.get("available").toString()));
+            balanceInfo.setTimeLock(new BigInteger(map.get("timeHeightLocked").toString()));
+            balanceInfo.setConsensusLock(new BigInteger(map.get("permanentLocked").toString()));
+            balanceInfo.setFreeze(new BigInteger(map.get("freeze").toString()));
+            balanceInfo.setNonce((String) map.get("nonce"));
+            balanceInfo.setTotalBalance(balanceInfo.getBalance().add(balanceInfo.getConsensusLock()).add(balanceInfo.getTimeLock()));
+            balanceInfo.setNonceType((Integer) map.get("nonceType"));
+            return balanceInfo;
         } catch (Exception e) {
             Log.error(e);
         }
