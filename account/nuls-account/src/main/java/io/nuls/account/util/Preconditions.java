@@ -45,8 +45,9 @@ public class Preconditions {
      * @param message if dissatisfy the condition,it will throw the Exception which contain the message
      */
     public static void checkNotEmpty(Object object, @Nullable ErrorCode message) {
-        if (object == null)
+        if (object == null) {
             throw new NulsRuntimeException(message);
+        }
         if (object instanceof String && ((String) object).trim().length() == 0) {
             throw new NulsRuntimeException(message);
         }

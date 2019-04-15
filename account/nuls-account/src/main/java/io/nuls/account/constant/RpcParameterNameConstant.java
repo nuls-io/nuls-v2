@@ -163,7 +163,7 @@ public interface RpcParameterNameConstant {
     /**
      * the ASSETS_Id
      */
-    String ASSETS_Id = "assetsId";
+    String ASSETS_ID = "assetsId";
 
 
 }

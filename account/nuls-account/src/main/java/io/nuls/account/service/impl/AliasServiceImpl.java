@@ -200,7 +200,7 @@ public class AliasServiceImpl implements AliasService, InitializingBean {
         Alias alias = new Alias();
         alias.parse(new NulsByteBuffer(transaction.getTxData()));
         String address = AddressTool.getStringAddressByBytes(alias.getAddress());
-        if (BaseConstant.CONTRACT_ADDRESS_TYPE == alias.getAddress()[2]) {
+        if (AddressTool.validContractAddress(alias.getAddress(), chainId)) {
             throw new NulsRuntimeException(AccountErrorCode.ADDRESS_ERROR);
         }
         if (!FormatValidUtils.validAlias(alias.getAlias())) {
