@@ -168,7 +168,8 @@ public class WalletRpcHandler {
             if (null == txHex) {
                 return null;
             }
-            Transaction tx = Transaction.getInstance(txHex);
+            Transaction tx = new Transaction();
+            tx.parse(new NulsByteBuffer(RPCUtil.decode(txHex)));
             long height = Long.parseLong(map.get("height").toString());
             tx.setBlockHeight(height);
             TransactionInfo txInfo = AnalysisHandler.toTransaction(chainId, tx);
