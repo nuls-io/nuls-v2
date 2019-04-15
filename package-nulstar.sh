@@ -23,7 +23,7 @@ EOF
 NULSTAR_URL="http://pub-readingpal.oss-cn-hangzhou.aliyuncs.com/nulstar.tar.gz"
 #获取参数
 #输出目录
-MODULES_PATH="./NULS-Wallet-linux64-alpha1"
+MODULES_PATH="./NULS-Wallet-linux64-alpha2"
 #RELEASE_OUT_PATH="./NULS-Walltet-linux64-alpha1"
 #是否马上更新代码
 DOPULL=
