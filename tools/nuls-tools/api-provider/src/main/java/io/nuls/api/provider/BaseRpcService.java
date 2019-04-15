@@ -4,6 +4,7 @@ import io.nuls.rpc.model.message.Response;
 import io.nuls.rpc.netty.processor.ResponseMessageProcessor;
 import io.nuls.tools.constant.ErrorCode;
 import io.nuls.tools.log.Log;
+import io.nuls.tools.model.StringUtils;
 import io.nuls.tools.parse.MapUtils;
 
 import java.util.HashMap;
@@ -42,11 +43,15 @@ public abstract class BaseRpcService extends BaseService {
         }
         if (!cmdResp.isSuccess()) {
             Log.warn("Calling remote interface failed. module:{} - interface:{} - ResponseComment:{}", module, method, cmdResp.getResponseComment());
+            String responseComment = cmdResp.getResponseComment();
+            if(StringUtils.isNotBlank(responseComment)) {
+                return fail(RPC_ERROR_CODE, responseComment);
+            }
             Map<String,String> error = (Map)((Map) cmdResp.getResponseData()).get(method);
             if(error != null){
-                return fail(RPC_ERROR_CODE,error.get("msg"));
+                return fail(RPC_ERROR_CODE, error.get("msg"));
             }else{
-                return fail(RPC_ERROR_CODE,cmdResp.getResponseComment());
+                return fail(RPC_ERROR_CODE, "unknown error");
             }
         }
         return callback.apply((R) ((HashMap) cmdResp.getResponseData()).get(method));

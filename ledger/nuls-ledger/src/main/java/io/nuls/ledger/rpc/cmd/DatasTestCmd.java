@@ -60,7 +60,7 @@ public class DatasTestCmd extends BaseCmd {
     TransactionService transactionService;
 
     @CmdAnnotation(cmd = "getBlockHeight",
-            version = 1.0, scope = "private", minEvent = 0, minPeriod = 0,
+            version = 1.0, minEvent = 0, minPeriod = 0,
             description = "")
     @Parameter(parameterName = "chainId", parameterType = "int")
     public Response getBlockHeight(Map params) {
@@ -70,7 +70,7 @@ public class DatasTestCmd extends BaseCmd {
     }
 
     @CmdAnnotation(cmd = "getSnapshot",
-            version = 1.0, scope = "private", minEvent = 0, minPeriod = 0,
+            version = 1.0, minEvent = 0, minPeriod = 0,
             description = "")
     @Parameter(parameterName = "chainId", parameterType = "int")
     @Parameter(parameterName = "blockHeight", parameterType = "long")
@@ -82,7 +82,7 @@ public class DatasTestCmd extends BaseCmd {
     }
 
     @CmdAnnotation(cmd = "getBlock",
-            version = 1.0, scope = "private", minEvent = 0, minPeriod = 0,
+            version = 1.0, minEvent = 0, minPeriod = 0,
             description = "")
     @Parameter(parameterName = "chainId", parameterType = "int")
     @Parameter(parameterName = "blockHeight", parameterType = "long")
