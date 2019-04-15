@@ -78,7 +78,8 @@ public class TransactionTest {
             //String hex = HexUtil.encode(tx.serialize());
             String hex = HexUtil.encode(tx.serialize());
             System.out.println(hex);
-            Transaction transaction = Transaction.getInstance(hex);
+            Transaction transaction = new Transaction();
+            transaction.parse(new NulsByteBuffer(HexUtil.decode(hex)));
             Assert.assertTrue(Arrays.equals(tx.getCoinData(), transaction.getCoinData()));
 
            /* CoinData cd = new CoinData();
