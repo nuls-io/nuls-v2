@@ -28,7 +28,7 @@ MODULES_PATH="./NULS-Wallet-linux64-alpha2"
 #是否马上更新代码
 DOPULL=
 #是否生成mykernel模块
-DOMOCK=0
+DOMOCK=
 #更新代码的 git 分支
 GIT_BRANCH=
 while getopts phb:o:j:iJ:zmN name
