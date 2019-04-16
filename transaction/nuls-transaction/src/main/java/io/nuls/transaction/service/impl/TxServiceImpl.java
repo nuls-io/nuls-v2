@@ -1191,7 +1191,7 @@ public class TxServiceImpl implements TxService {
 
     @Override
     public void clearInvalidTx(Chain chain, Transaction tx, boolean cleanLedgerUfmTx) {
-        verifySignExecutor.submit(new Callable<Boolean>() {
+        clearTxExecutor.submit(new Callable<Boolean>() {
             @Override
             public Boolean call() throws Exception {
                 //判断如果交易已被确认就不用清理了!!
