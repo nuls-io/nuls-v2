@@ -59,8 +59,12 @@ public class UnverifiedTxStorageServiceImpl implements UnverifiedTxStorageServic
 
     @Override
     public Transaction pollTx(Chain chain) {
+        byte[] bytes = chain.getUnverifiedQueue().poll();
+        if (null == bytes) {
+            return null;
+        }
         try {
-            return TxUtil.getTransaction(chain.getUnverifiedQueue().poll());
+            return TxUtil.getTransaction(bytes);
         } catch (NulsException e) {
             Log.error(e);
         }
