@@ -9,20 +9,8 @@
   "kernelUrl": "ws://127.0.0.1:8887/ws",
   "logFilePath": "./contract",
   "logFileName": "contract",
-  "logFileLevel": "INFO",
+  "logFileLevel": "DEBUG",
   "logConsoleLevel": "DEBUG",
-  "packageLogLevel": [
-    {
-      "package": "io.nuls.contract.vm.program.impl.ProgramExecutorImpl",
-      "level": "INFO"
-    },
-    {
-      "package": "db",
-      "level": "INFO"
-    },
-    {
-      "package": "rlp",
-      "level": "INFO"
-    }
-  ]
+  "packageLogPackages": "io.nuls.contract.vm.program.impl.ProgramExecutorImpl,db,rlp",
+  "packageLogLevels": "INFO,INFO,INFO"
 }
