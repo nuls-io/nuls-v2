@@ -1,5 +1,7 @@
 package io.nuls.api.model.po.db;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import java.math.BigInteger;
 
 public class AccountLedgerInfo {
@@ -13,7 +15,7 @@ public class AccountLedgerInfo {
     private int assetId;
 
     private BigInteger totalBalance;
-
+    @JsonIgnore
     private boolean isNew;
 
     public AccountLedgerInfo(){}

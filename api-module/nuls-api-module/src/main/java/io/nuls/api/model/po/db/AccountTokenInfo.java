@@ -1,5 +1,7 @@
 package io.nuls.api.model.po.db;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import java.math.BigInteger;
 
 public class AccountTokenInfo {
@@ -17,7 +19,7 @@ public class AccountTokenInfo {
     private BigInteger balance;
 
     private int decimals;
-
+    @JsonIgnore
     private boolean isNew;
 
     public AccountTokenInfo() {
