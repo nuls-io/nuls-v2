@@ -38,7 +38,6 @@ import io.nuls.tools.parse.JSONUtils;
 import io.nuls.transaction.model.bo.Chain;
 import io.nuls.transaction.model.bo.config.ConfigBean;
 import io.nuls.transaction.model.dto.CoinDTO;
-import io.nuls.transaction.model.dto.CrossTxTransferDTO;
 import io.nuls.transaction.rpc.call.LedgerCall;
 import org.junit.Assert;
 import org.junit.Before;
@@ -571,20 +570,6 @@ public class TestTx {
         HashMap result = (HashMap) (((HashMap) cmdResp.getResponseData()).get("ac_transfer"));
         Assert.assertTrue(null != result);
         Log.debug("{}", result.get("value"));
-    }
-
-
-    private void createCtxTransfer() throws Exception {
-        CrossTxTransferDTO ctxTransfer = new CrossTxTransferDTO(chain.getChainId(),
-                createFromCoinDTOList(), createToCoinDTOList(), "this is cross-chain transaction");
-        //调接口
-        String json = JSONUtils.obj2json(ctxTransfer);
-        Map<String, Object> params = JSONUtils.json2map(json);
-        Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.TX.abbr, "tx_createCtx", params);
-        Assert.assertTrue(null != response.getResponseData());
-        Map map = (HashMap) ((HashMap) response.getResponseData()).get("tx_createCtx");
-        Assert.assertTrue(null != map);
-        Log.debug("{}", map.get("value"));
     }
 
     public static String importAccountByKeystoreFile(String filePath) {

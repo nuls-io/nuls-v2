@@ -27,12 +27,10 @@ import io.nuls.rpc.model.message.Response;
 import io.nuls.rpc.netty.processor.ResponseMessageProcessor;
 import io.nuls.rpc.util.RPCUtil;
 import io.nuls.tools.exception.NulsException;
-import io.nuls.tools.model.StringUtils;
 import io.nuls.transaction.constant.TxConstant;
 import io.nuls.transaction.message.BroadcastTxMessage;
 import io.nuls.transaction.message.TransactionMessage;
 import io.nuls.transaction.message.base.BaseMessage;
-import io.nuls.transaction.model.bo.Node;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -43,73 +41,11 @@ import static io.nuls.transaction.constant.TxCmd.*;
 import static io.nuls.transaction.utils.LoggerUtil.Log;
 
 /**
- * 调用网络模块接口的工具
- *
- * @author qinyifeng
- * @date 2018/12/25
+ * 网络消息发送
+ * @author: Charlie
+ * @date: 2019/04/16
  */
 public class NetworkCall {
-
-//    static long latestGetTime = System.currentTimeMillis();
-//    static long offset = 0;
-//
-//    /**
-//     * 获取当前网络时间
-//     * @return
-//     * @throws NulsException
-//     */
-//    public static long getCurrentTimeMillis() throws NulsException  {
-//        long now = System.currentTimeMillis();
-//        if (now - latestGetTime > TxConstant.GETTIME_INTERVAL) {
-//            Map<String, Object> params = new HashMap<>(TxConstant.INIT_CAPACITY_8);
-//            params.put(Constants.VERSION_KEY_STR, TxConstant.RPC_VERSION);
-//            try {
-//                HashMap hashMap = (HashMap) TransactionCall.request(ModuleE.NW.abbr, "nw_currentTimeMillis", params, TxConstant.GETTIME_INTERFACE_TIMEOUT);
-//                long time = Long.valueOf(hashMap.get("currentTimeMillis").toString());
-//                offset = time - System.currentTimeMillis();
-//            } catch (NulsException e) {
-//                e.printStackTrace();
-//            } catch (NumberFormatException e) {
-//                e.printStackTrace();
-//            }
-//            latestGetTime = now;
-//        }
-//        return (System.currentTimeMillis() + offset);
-//    }
-
-
-    /**
-     * 根据链ID获取可用节点
-     *
-     * @param chainId
-     * @param isCross 是否跨链
-     * @return
-     */
-    public static List<Node> getAvailableNodes(int chainId, int isCross, String excludeNodes) throws NulsException{
-        Map<String, Object> params = new HashMap<>(TxConstant.INIT_CAPACITY_8);
-        params.put(Constants.VERSION_KEY_STR, TxConstant.RPC_VERSION);
-        params.put("chainId", chainId);
-        params.put("state", 1);
-        params.put("isCross", isCross);
-        params.put("startPage", 0);
-        params.put("pageSize", 0);
-        HashMap hashMap = (HashMap)TransactionCall.request(ModuleE.NW.abbr, "nw_getNodes", params);
-        List list = (List) hashMap.get("nw_getNodes");
-        List nodes = new ArrayList();
-        for (Object o : list) {
-            Map map = (Map) o;
-            Node node = new Node();
-            node.setId((String) map.get("nodeId"));
-            node.setHeight(Long.parseLong(map.get("blockHeight").toString()));
-            node.setHash(NulsDigestData.fromDigestHex((String) map.get("blockHash")));
-            //排除指定节点
-            if (StringUtils.isBlank(excludeNodes) || !node.getId().equals(excludeNodes)) {
-                nodes.add(node);
-            }
-        }
-        return nodes;
-
-    }
 
     /**
      * 给网络上节点广播消息
@@ -191,7 +127,7 @@ public class NetworkCall {
             List<Map<String, String>> cmds = new ArrayList<>();
             map.put("role", ModuleE.TX.abbr);
             //模块启动时向网络模块注册网络协议处理器
-            List<String> list = List.of(NW_NEW_HASH, NW_ASK_TX, NW_RECEIVE_TX, NW_NEW_CROSS_HASH, NW_ASK_CROSS_TX_M_FC, NW_ASK_CROSS_TX_M_M, NW_ASK_CROSS_TX_FC_M, NW_NEW_MN_TX, NW_VERIFY_FC, NW_VERIFY_MN, NW_VERIFYR_ESULT, NW_CROSS_NODE_RS);
+            List<String> list = List.of(NW_NEW_HASH, NW_ASK_TX, NW_RECEIVE_TX);
             for (String s : list) {
                 Map<String, String> cmd = new HashMap<>();
                 cmd.put("protocolCmd", s);

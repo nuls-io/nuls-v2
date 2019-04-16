@@ -1,4 +1,4 @@
-package io.nuls.transaction.storage.rocksdb;
+package io.nuls.transaction.storage;
 
 import io.nuls.base.data.NulsDigestData;
 import io.nuls.base.data.Transaction;

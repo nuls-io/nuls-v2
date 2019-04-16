@@ -21,11 +21,9 @@ import io.nuls.transaction.rpc.call.LedgerCall;
 import io.nuls.transaction.rpc.call.NetworkCall;
 import io.nuls.transaction.rpc.call.TransactionCall;
 import io.nuls.transaction.service.ConfirmedTxService;
-import io.nuls.transaction.service.CtxService;
 import io.nuls.transaction.service.TxService;
-import io.nuls.transaction.storage.rocksdb.ConfirmedTxStorageService;
-import io.nuls.transaction.storage.rocksdb.CtxStorageService;
-import io.nuls.transaction.storage.rocksdb.UnconfirmedTxStorageService;
+import io.nuls.transaction.storage.ConfirmedTxStorageService;
+import io.nuls.transaction.storage.UnconfirmedTxStorageService;
 import io.nuls.transaction.utils.TxUtil;
 
 import java.util.ArrayList;
@@ -52,13 +50,7 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
     private ChainManager chainManager;
 
     @Autowired
-    private CtxStorageService ctxStorageService;
-
-    @Autowired
     private PackablePool packablePool;
-
-    @Autowired
-    private CtxService ctxService;
 
     @Autowired
     private TxService txService;
@@ -206,18 +198,8 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
         Map<TxRegister, List<String>> successed = new HashMap<>(TxConstant.INIT_CAPACITY_8);
         boolean result = true;
         for (Map.Entry<TxRegister, List<String>> entry : moduleVerifyMap.entrySet()) {
-            boolean rs;
-            if (entry.getKey().getModuleCode().equals(txConfig.getModuleCode())) {
-                try {
-                    rs = txService.crossTransactionCommit(chain, entry.getValue(), blockHeader);
-                } catch (NulsException e) {
-                    chain.getLoggerMap().get(TxConstant.LOG_TX).error(e);
-                    rs = false;
-                }
-            } else {
-                rs = TransactionCall.txProcess(chain, entry.getKey().getCommit(),
-                        entry.getKey().getModuleCode(), entry.getValue(), blockHeader);
-            }
+            boolean rs = TransactionCall.txProcess(chain, entry.getKey().getCommit(),
+                    entry.getKey().getModuleCode(), entry.getValue(), blockHeader);
             if (!rs) {
                 result = false;
                 chain.getLoggerMap().get(TxConstant.LOG_TX).debug("save tx failed! commitTxs");
@@ -263,18 +245,8 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
         Map<TxRegister, List<String>> successed = new HashMap<>(TxConstant.INIT_CAPACITY_8);
         boolean result = true;
         for (Map.Entry<TxRegister, List<String>> entry : moduleVerifyMap.entrySet()) {
-            boolean rs;
-            if (entry.getKey().getModuleCode().equals(txConfig.getModuleCode())) {
-                try {
-                    rs = txService.crossTransactionRollback(chain, entry.getValue(), blockHeader);
-                } catch (NulsException e) {
-                    chain.getLoggerMap().get(TxConstant.LOG_TX).error(e);
-                    rs = false;
-                }
-            } else {
-                rs = TransactionCall.txProcess(chain, entry.getKey().getRollback(),
-                        entry.getKey().getModuleCode(), entry.getValue(), blockHeader);
-            }
+            boolean rs = TransactionCall.txProcess(chain, entry.getKey().getRollback(),
+                    entry.getKey().getModuleCode(), entry.getValue(), blockHeader);
             if (!rs) {
                 result = false;
                 chain.getLoggerMap().get(TxConstant.LOG_TX).debug("failed! rollbackcommitTxs ");

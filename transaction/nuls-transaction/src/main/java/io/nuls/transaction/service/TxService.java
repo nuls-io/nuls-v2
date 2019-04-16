@@ -91,32 +91,6 @@ public interface TxService {
      */
     TransactionConfirmedPO getTransaction(Chain chain, NulsDigestData hash);
 
-
-
-    /**
-     * 单个跨链交易本地验证器
-     *
-     * @param chain       链id
-     * @param transaction 跨链交易
-     * @return boolean
-     * @throws NulsException
-     */
-    boolean crossTransactionValidator(Chain chain, Transaction transaction) throws NulsException;
-
-    /**
-     * 如果有txData相同的交易,则过滤掉后面一个
-     * @param chain
-     * @param txList
-     * @return List<String> tx
-     * @throws NulsException
-     */
-    List<String> transactionModuleValidator(Chain chain, List<String> txList) throws NulsException;
-
-    boolean crossTransactionCommit(Chain chain, List<String> tx, String blockHeader) throws NulsException;
-
-    boolean crossTransactionRollback(Chain chain, List<String> tx, String blockHeader) throws NulsException;
-
-
     /**
      *  共识打包获取打包所需交易
      * @param chain
@@ -153,7 +127,7 @@ public interface TxService {
      * @param txList
      * @return
      */
-    void clearInvalidTx(Chain chain, List<Transaction> txList);
+//    void clearInvalidTx(Chain chain, List<Transaction> txList);
 
     /**
      * 从已验证未打包交易中删除单个无效的交易

@@ -43,7 +43,7 @@ import io.nuls.transaction.constant.TxConstant;
 import io.nuls.transaction.constant.TxDBConstant;
 import io.nuls.transaction.manager.ChainManager;
 import io.nuls.transaction.rpc.call.NetworkCall;
-import io.nuls.transaction.storage.rocksdb.LanguageStorageService;
+import io.nuls.transaction.storage.LanguageStorageService;
 import io.nuls.transaction.utils.DBUtil;
 import io.nuls.transaction.utils.LoggerUtil;
 
@@ -122,16 +122,6 @@ public class TransactionBootstrap extends RpcModule {
         Log.info("Transaction onDependenciesReady");
         TimeUtils.getInstance().start();
         return RpcModuleState.Running;
-       /* try {
-            NetworkCall.registerProtocol();
-            subscriptionBlockHeight();
-            Log.info("Transaction Running...");
-            return RpcModuleState.Running;
-        } catch (Exception e) {
-            LoggerUtil.Log.error(e);
-            return RpcModuleState.Ready;
-        }*/
-
     }
 
     @Override
