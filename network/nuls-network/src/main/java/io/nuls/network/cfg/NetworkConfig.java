@@ -48,7 +48,6 @@ public class NetworkConfig {
     /**
      * ROCK DB 数据库文件存储路径
      */
-    @Value("DataPath")
     private String dataPath;
 
     public List<String> getLocalIps() {

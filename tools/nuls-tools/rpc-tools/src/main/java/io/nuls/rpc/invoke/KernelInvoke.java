@@ -46,7 +46,7 @@ public class KernelInvoke extends BaseInvoke {
     @Override
     public void callBack(Response response) {
         Map responseData = (Map) response.getResponseData();
-        Map methodMap = (Map) responseData.get("registerAPI");
+        Map methodMap = (Map) responseData.get("RegisterAPI");
         Map dependMap = (Map) methodMap.get("Dependencies");
         StringBuilder logInfo = new StringBuilder("\n有模块信息改变，重新同步：\n");
         for (Object object : dependMap.entrySet()) {

@@ -2,7 +2,6 @@ package io.nuls.rpc.netty.bootstrap;
 
 import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.info.HostInfo;
-import io.nuls.rpc.model.CmdDetail;
 import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.netty.channel.manager.ConnectManager;
 import io.nuls.rpc.netty.thread.StartServerProcessor;
@@ -10,6 +9,7 @@ import io.nuls.rpc.netty.thread.StartServerProcessor;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * netty服务器端实现类
@@ -43,14 +43,14 @@ public class NettyServer {
     public static NettyServer getInstance(String abbr, String name, String domain) {
         int port = HostInfo.randomPort();
         startServer(port);
-        ConnectManager.LOCAL.setModuleAbbreviation(abbr);
+        ConnectManager.LOCAL.setAbbreviation(abbr);
         ConnectManager.LOCAL.setModuleName(name);
         ConnectManager.LOCAL.setModuleDomain(domain);
         Map<String, String> connectionInformation = new HashMap<>(2);
         connectionInformation.put(Constants.KEY_IP, HostInfo.getLocalIP());
         connectionInformation.put(Constants.KEY_PORT, String.valueOf(port));
         ConnectManager.LOCAL.setConnectionInformation(connectionInformation);
-        ConnectManager.LOCAL.setApiMethods(new ArrayList<>());
+        ConnectManager.LOCAL.setMethods(new ArrayList<>());
         ConnectManager.LOCAL.setDependencies(new HashMap<>(8));
         ConnectManager.LOCAL.setModuleRoles(new HashMap<>(1));
         return new NettyServer();
@@ -86,7 +86,7 @@ public class NettyServer {
      * @return WsServer
      */
     public NettyServer moduleRoles(String[] value) {
-        ConnectManager.LOCAL.getModuleRoles().put(ConnectManager.LOCAL.getModuleAbbreviation(), value);
+        ConnectManager.LOCAL.getModuleRoles().put(ConnectManager.LOCAL.getAbbreviation(), value);
         return this;
     }
 
@@ -123,7 +123,7 @@ public class NettyServer {
      * @return WsServer
      * @throws Exception 找到重复命令(cmd) / Find duplicate commands (cmd)
      */
-    public NettyServer scanPackage(String... scanPackage) throws Exception {
+    public NettyServer scanPackage(Set<String>scanPackage) throws Exception {
         ConnectManager.scanPackage(scanPackage);
         return this;
     }

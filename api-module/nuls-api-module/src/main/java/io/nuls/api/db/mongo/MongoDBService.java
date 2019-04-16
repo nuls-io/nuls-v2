@@ -18,7 +18,7 @@
  * SOFTWARE.
  */
 
-package io.nuls.api.db;
+package io.nuls.api.db.mongo;
 
 import com.mongodb.MongoClient;
 import com.mongodb.bulk.BulkWriteResult;
@@ -27,12 +27,9 @@ import com.mongodb.client.model.IndexModel;
 import com.mongodb.client.model.Sorts;
 import com.mongodb.client.model.WriteModel;
 import io.nuls.api.ApiContext;
-import io.nuls.api.model.po.config.ApiConfig;
 import io.nuls.tools.basic.InitializingBean;
-import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.core.annotation.Order;
-import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.log.Log;
 import org.bson.Document;
 import org.bson.conversions.Bson;
@@ -63,7 +60,7 @@ public class MongoDBService implements InitializingBean {
     @Override
     public void afterPropertiesSet() {
         try {
-            MongoClient mongoClient = new MongoClient(ApiContext.mongoIp, ApiContext.mongoPort);
+            MongoClient mongoClient = new MongoClient(ApiContext.databaseUrl, ApiContext.databasePort);
             MongoDatabase mongoDatabase = mongoClient.getDatabase("nuls-api");
             mongoDatabase.getCollection("test").drop();
             this.client = mongoClient;

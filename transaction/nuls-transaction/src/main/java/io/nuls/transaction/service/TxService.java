@@ -44,7 +44,7 @@ public interface TxService {
      * @param transaction
      * @throws NulsException
      */
-    boolean newTx(Chain chain, Transaction transaction) throws NulsException;
+    boolean newTx(Chain chain, Transaction transaction);
 
 
     /**
@@ -146,7 +146,7 @@ public interface TxService {
      * @return
      * @throws NulsException
      */
-    VerifyTxResult batchVerify(Chain chain, List<String> list, long blockHeight, long blockTime, String packingAddress, String stateRoot, String preStateRoot) throws NulsException;
+    VerifyTxResult batchVerify(Chain chain, List<String> list, long blockHeight, long blockTime, String packingAddress, String stateRoot, String preStateRoot) throws Exception;
 
 
     /**

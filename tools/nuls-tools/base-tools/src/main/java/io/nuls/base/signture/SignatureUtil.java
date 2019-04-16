@@ -136,13 +136,13 @@ public class SignatureUtil {
     }
 
     /**
-     * 获取交易地址
+     * 获取交易签名地址
      *
      * @param tx 交易
      */
     public static Set<String> getAddressFromTX(Transaction tx, int chainId) throws NulsException {
         Set<String> addressSet = new HashSet<>();
-        if (tx.getTransactionSignature() == null && tx.getTransactionSignature().length == 0) {
+        if (tx.getTransactionSignature() == null || tx.getTransactionSignature().length == 0) {
             return null;
         }
         try {

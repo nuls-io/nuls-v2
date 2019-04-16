@@ -37,15 +37,38 @@ import java.util.List;
  */
 public interface UnconfirmedStateService {
 
-    boolean hadUpdateUnconfirmedState(AccountStateUnconfirmed accountStateUnconfirmed, String dbNonce,String dbHash);
-
-    AccountStateUnconfirmed getUnconfirmedInfoAndUpdate(AccountState accountState);
-
+    /**
+     * 重计算未确认账本信息
+     * @param accountState
+     * @return
+     */
     AccountStateUnconfirmed getUnconfirmedInfoReCal(AccountState accountState);
 
+    /**
+     * 刷新未确认账本的nonce值
+     * @param accountState
+     * @return
+     */
+    AccountStateUnconfirmed getUnconfirmedNonceReCal(AccountState accountState);
+
+
+    /**
+     * 回滚时候进行未确认账本信息的合并
+     * @param addressChainId
+     * @param assetKey
+     * @param accountState
+     * @param txHashList
+     */
     void mergeUnconfirmedNonce(int addressChainId, String assetKey,List<UnconfirmedNonce> accountState, List<String> txHashList);
 
+    /**
+     * 回滚未确认账本交易
+     * @param addressChainId
+     * @param assetKey
+     * @param nonce
+     * @param txHash
+     * @return
+     */
     boolean rollUnconfirmTx(int addressChainId, String assetKey, String nonce, String txHash);
 
-    AccountStateUnconfirmed getUnconfirmedInfo(int addressChainId, String address, int assetChainId, int assetId);
 }

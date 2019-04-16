@@ -22,38 +22,39 @@
  * SOFTWARE.
  */
 
-package io.nuls.transaction.rpc.call;
+package io.nuls.account.model;
 
-import io.nuls.rpc.info.Constants;
-import io.nuls.rpc.model.ModuleE;
-import io.nuls.rpc.netty.processor.ResponseMessageProcessor;
-import io.nuls.tools.exception.NulsException;
-import io.nuls.transaction.constant.TxConstant;
-import io.nuls.transaction.model.bo.Chain;
-import io.nuls.transaction.rpc.call.callback.EventNewBlockHeightInvoke;
-
-import java.util.HashMap;
-import java.util.Map;
+import java.math.BigInteger;
 
 /**
  * @author: Charlie
- * @date: 2019-01-02
+ * @date: 2019/4/12
  */
-public class BlockCall {
+public class NonceBalance {
+    private byte[] nonce;
+    private BigInteger available;
 
-    public static boolean subscriptionNewBlockHeight(Chain chain) throws NulsException {
-        try {
-            Map<String, Object> params = new HashMap<>(TxConstant.INIT_CAPACITY_8);
-            params.put(Constants.VERSION_KEY_STR, TxConstant.RPC_VERSION);
-            params.put("chainId", chain.getChainId());
-            String messageId = ResponseMessageProcessor.requestAndInvoke(ModuleE.BL.abbr, "latestHeight",
-                    params, "0", "1", new EventNewBlockHeightInvoke(chain));
-            if(null != messageId){
-                return true;
-            }
-            return false;
-        } catch (Exception e) {
-            throw new NulsException(e);
-        }
+    public NonceBalance() {
+    }
+
+    public NonceBalance(byte[] nonce, BigInteger available) {
+        this.nonce = nonce;
+        this.available = available;
+    }
+
+    public byte[] getNonce() {
+        return nonce;
+    }
+
+    public void setNonce(byte[] nonce) {
+        this.nonce = nonce;
+    }
+
+    public BigInteger getAvailable() {
+        return available;
+    }
+
+    public void setAvailable(BigInteger available) {
+        this.available = available;
     }
 }

@@ -28,7 +28,7 @@ public class RequestByCountProcessor implements Runnable {
         while (connectData.isConnected()) {
             try {
                 Response response = connectData.getRequestEventResponseQueue().take();
-                if (response.getRequestId() == null) {
+                if (response.getRequestID() == null) {
                     continue;
                 }
                 RequestMessageProcessor.responseWithEventCount(connectData.getChannel(), response);

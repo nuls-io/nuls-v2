@@ -35,6 +35,7 @@ import io.nuls.rpc.modulebootstrap.Module;
 import io.nuls.rpc.modulebootstrap.NulsRpcModuleBootstrap;
 import io.nuls.rpc.modulebootstrap.RpcModule;
 import io.nuls.rpc.modulebootstrap.RpcModuleState;
+import io.nuls.rpc.util.TimeUtils;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.core.ioc.SpringLiteContext;
@@ -59,7 +60,10 @@ public class LedgerBootstrap extends RpcModule {
 
     @Override
     public Module[] getDependencies() {
-        return new Module[]{};
+
+        return new Module[]{
+                new Module(ModuleE.NW.abbr, "1.0")};
+
     }
 
     @Override
@@ -99,6 +103,7 @@ public class LedgerBootstrap extends RpcModule {
     @Override
     public RpcModuleState onDependenciesReady() {
         LoggerUtil.logger().info("Ledger onDependenciesReady");
+        TimeUtils.getInstance().start();
         return RpcModuleState.Running;
     }
 

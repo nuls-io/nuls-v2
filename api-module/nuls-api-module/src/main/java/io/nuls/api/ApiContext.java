@@ -32,9 +32,9 @@ public class ApiContext {
 
     public static int defaultAssetId;
 
-    public static String mongoIp;
+    public static String databaseUrl;
 
-    public static int mongoPort;
+    public static int databasePort;
 
     public static String listenerIp;
 

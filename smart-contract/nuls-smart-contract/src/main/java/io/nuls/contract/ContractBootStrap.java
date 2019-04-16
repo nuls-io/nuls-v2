@@ -6,6 +6,7 @@ import io.nuls.contract.config.NulsConfig;
 import io.nuls.contract.constant.ContractConstant;
 import io.nuls.contract.constant.ContractDBConstant;
 import io.nuls.contract.manager.ChainManager;
+import io.nuls.contract.model.bo.Chain;
 import io.nuls.contract.util.ContractUtil;
 import io.nuls.contract.util.Log;
 import io.nuls.contract.util.VMContext;
@@ -17,6 +18,7 @@ import io.nuls.rpc.modulebootstrap.Module;
 import io.nuls.rpc.modulebootstrap.NulsRpcModuleBootstrap;
 import io.nuls.rpc.modulebootstrap.RpcModule;
 import io.nuls.rpc.modulebootstrap.RpcModuleState;
+import io.nuls.rpc.util.TimeUtils;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.core.ioc.SpringLiteContext;
@@ -46,6 +48,8 @@ public class ContractBootStrap extends RpcModule {
 
     @Autowired
     private ContractConfig contractConfig;
+    @Autowired
+    private ChainManager chainManager;
 
     public static void main(String[] args) throws Exception {
         systemConfig();
@@ -149,7 +153,11 @@ public class ContractBootStrap extends RpcModule {
      */
     @Override
     public Module[] getDependencies() {
-        return new Module[]{new Module(ModuleE.TX.abbr, "1.0")};
+        return new Module[]{new Module(ModuleE.TX.abbr, "1.0"),
+                new Module(ModuleE.LG.abbr, "1.0"),
+                new Module(ModuleE.BL.abbr, "1.0"),
+                new Module(ModuleE.AC.abbr, "1.0"),
+                new Module(ModuleE.NW.abbr, "1.0")};
     }
 
     /**
@@ -171,9 +179,6 @@ public class ContractBootStrap extends RpcModule {
     public boolean doStart() {
         Log.info("module ready");
         try {
-            while (!isDependencieReady(new Module(ModuleE.TX.abbr, "1.0"))) {
-                Thread.sleep(1000);
-            }
             //启动链
             SpringLiteContext.getBean(ChainManager.class).runChain();
         } catch (Exception e) {
@@ -189,8 +194,28 @@ public class ContractBootStrap extends RpcModule {
      */
     @Override
     public RpcModuleState onDependenciesReady() {
-        Log.info("running");
+        TimeUtils.getInstance().start();
         return RpcModuleState.Running;
+    }
+
+    @Override
+    public void onDependenciesReady(Module module) {
+        Log.info("dependencies [{}] ready", module.getName());
+        if(module.getName().equals(ModuleE.TX.abbr)) {
+            /*
+             * 注册交易到交易管理模块
+             */
+            Log.info("register tx type to tx module");
+            Map<Integer, Chain> chainMap = chainManager.getChainMap();
+            for(Chain chain : chainMap.values()) {
+                try {
+                    ChainManager.registerTx(chain);
+                } catch (NulsException e) {
+                    Log.error(e);
+                    throw new RuntimeException(e);
+                }
+            }
+        }
     }
 
     /**
