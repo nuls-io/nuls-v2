@@ -14,6 +14,7 @@ help()
     		-J 输出的jvm虚拟机目录，脚本将会把这个目录复制到程序依赖中
     		-i 跳过mvn打包
     		-z 生成压缩包
+    		-N d打包时加入Nulstar模块
     Author: zlj
 EOF
     exit 0
