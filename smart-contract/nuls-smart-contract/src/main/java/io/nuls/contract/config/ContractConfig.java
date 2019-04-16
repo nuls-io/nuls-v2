@@ -70,7 +70,9 @@ public class ContractConfig {
 
     private long maxViewGas;
 
-    private List<Map> packageLogLevel;
+    private String packageLogPackages;
+
+    private String packageLogLevels;
 
     public int getChainId() {
         return chainId;
@@ -176,12 +178,20 @@ public class ContractConfig {
         this.dataPath = dataPath;
     }
 
-    public List<Map> getPackageLogLevel() {
-        return packageLogLevel;
+    public String getPackageLogPackages() {
+        return packageLogPackages;
     }
 
-    public void setPackageLogLevel(List<Map> packageLogLevel) {
-        this.packageLogLevel = packageLogLevel;
+    public void setPackageLogPackages(String packageLogPackages) {
+        this.packageLogPackages = packageLogPackages;
+    }
+
+    public String getPackageLogLevels() {
+        return packageLogLevels;
+    }
+
+    public void setPackageLogLevels(String packageLogLevels) {
+        this.packageLogLevels = packageLogLevels;
     }
 
     public ConfigBean getChainConfig() {
