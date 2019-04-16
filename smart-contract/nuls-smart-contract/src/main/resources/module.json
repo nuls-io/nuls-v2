@@ -10,5 +10,19 @@
   "logFilePath": "./contract",
   "logFileName": "contract",
   "logFileLevel": "INFO",
-  "logConsoleLevel": "INFO"
+  "logConsoleLevel": "DEBUG",
+  "packageLogLevel": [
+    {
+      "package": "io.nuls.contract.vm.program.impl.ProgramExecutorImpl",
+      "level": "INFO"
+    },
+    {
+      "package": "db",
+      "level": "INFO"
+    },
+    {
+      "package": "rlp",
+      "level": "INFO"
+    }
+  ]
 }
