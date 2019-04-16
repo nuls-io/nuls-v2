@@ -209,7 +209,8 @@ public class ContractBootStrap extends RpcModule {
             Map<Integer, Chain> chainMap = chainManager.getChainMap();
             for(Chain chain : chainMap.values()) {
                 try {
-                    ChainManager.registerTx(chain);
+                    boolean isSuccess = ChainManager.registerTx(chain);
+                    Log.info("register tx result is {}", isSuccess);
                 } catch (NulsException e) {
                     Log.error(e);
                     throw new RuntimeException(e);
