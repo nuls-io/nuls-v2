@@ -30,7 +30,6 @@ import io.nuls.block.manager.BlockChainManager;
 import io.nuls.block.thread.monitor.TxGroupRequestor;
 import io.nuls.block.utils.LoggerUtil;
 import io.nuls.tools.log.logback.NulsLogger;
-import io.nuls.tools.protocol.Protocol;
 
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -211,9 +210,14 @@ public class ChainContext {
         this.packingAddressList = packingAddressList;
     }
 
-    public synchronized void setStatus(RunningStatusEnum status) {
-        commonLog.info("status changed:" + this.status + "->" + status);
-        this.status = status;
+    public void setStatus(RunningStatusEnum status) {
+        if (status.equals(getStatus())) {
+            return;
+        }
+        synchronized (this) {
+            commonLog.debug("status changed:" + this.status + "->" + status);
+            this.status = status;
+        }
     }
 
     public long getLatestHeight() {

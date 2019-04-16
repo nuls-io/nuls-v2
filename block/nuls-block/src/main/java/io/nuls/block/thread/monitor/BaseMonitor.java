@@ -7,9 +7,9 @@ import io.nuls.tools.log.logback.NulsLogger;
 
 public abstract class BaseMonitor implements Runnable {
 
-    protected String symbol;
+    private String symbol;
 
-    public BaseMonitor() {
+    BaseMonitor() {
         this.symbol = this.getClass().getName();
     }
 

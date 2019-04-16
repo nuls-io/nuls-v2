@@ -8,7 +8,8 @@ import io.nuls.poc.utils.compare.BlockHeaderComparator;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
 
-import java.util.*;
+import java.util.Iterator;
+import java.util.List;
 
 /**
  * 链区块管理类
@@ -67,7 +68,7 @@ public class BlockManager {
     public void chainRollBack(Chain chain, int height) {
         chain.getLoggerMap().get(ConsensusConstant.BASIC_LOGGER_NAME).info("区块开始回滚，回滚到的高度：" + height);
         List<BlockHeader> headerList = chain.getBlockHeaderList();
-        Collections.sort(headerList, new BlockHeaderComparator());
+        headerList.sort(new BlockHeaderComparator());
         for (int index = headerList.size() - 1; index >= 0; index--) {
             if (headerList.get(index).getHeight() >= height) {
                 headerList.remove(index);

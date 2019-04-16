@@ -8,13 +8,9 @@ import io.nuls.rpc.netty.processor.ResponseMessageProcessor;
 import io.nuls.tools.basic.InitializingBean;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Order;
-
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.log.Log;
-
-import io.nuls.tools.model.StringUtils;
 import io.nuls.tools.parse.MapUtils;
-
 
 import java.util.Arrays;
 import java.util.Map;
@@ -160,7 +156,7 @@ public abstract class RpcModule implements InitializingBean {
      * 通知所有follower当前模块已经进入ready状态
      */
     private void notifyFollowerReady() {
-        followerList.keySet().stream().forEach((module) -> this.notifyFollowerReady(module));
+        followerList.keySet().forEach(this::notifyFollowerReady);
     }
 
     /**
@@ -179,7 +175,7 @@ public abstract class RpcModule implements InitializingBean {
                     .scanPackage((getRpcCmdPackage()==null) ? Set.of(modulePackage):getRpcCmdPackage())
                     //注册管理模块状态的RPC接口
                     .addCmdDetail(ModuleStatusCmd.class);
-            dependencies.keySet().stream().forEach(d -> server.dependencies(d.getName(), d.getVersion()));
+            dependencies.keySet().forEach(d -> server.dependencies(d.getName(), d.getVersion()));
             // Get information from kernel
             ConnectManager.getConnectByUrl(serviceManagerUrl);
             Log.info("RMB:开始连接service manager");
@@ -206,9 +202,9 @@ public abstract class RpcModule implements InitializingBean {
         if (!isReady()) {
             return;
         }
-        Boolean dependencieReady = dependencies.isEmpty();
+        boolean dependencieReady = dependencies.isEmpty();
         if (!dependencieReady) {
-            dependencieReady = dependencies.entrySet().stream().allMatch(d -> d.getValue());
+            dependencieReady = dependencies.entrySet().stream().allMatch(Map.Entry::getValue);
         }
         if (dependencieReady) {
             if (!isRunning()) {
@@ -222,7 +218,7 @@ public abstract class RpcModule implements InitializingBean {
             }
         } else {
             Log.info("RMB:dependencie state");
-            dependencies.entrySet().forEach(entry -> Log.debug("{}:{}", entry.getKey().getName(), entry.getValue()));
+            dependencies.forEach((key, value) -> Log.debug("{}:{}", key.getName(), value));
         }
     }
 
