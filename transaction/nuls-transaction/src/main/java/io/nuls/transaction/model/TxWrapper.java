@@ -27,18 +27,15 @@ package io.nuls.transaction.model;
 import io.nuls.base.data.Transaction;
 
 /**
+ * 交易模块打包区块交易时对交易临时封装
  * @author: Charlie
  * @date: 2019/3/26
  */
-
 public class TxWrapper{
 
     private Transaction tx;
 
     private int index;
-
-    public TxWrapper() {
-    }
 
     public TxWrapper(Transaction tx, int index) {
         this.tx = tx;

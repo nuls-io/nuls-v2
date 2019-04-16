@@ -22,63 +22,45 @@
  * SOFTWARE.
  */
 
-package io.nuls.transaction.model.dto;
+package io.nuls.transaction.model.bo;
 
-import java.util.List;
+import io.nuls.tools.constant.ErrorCode;
+import io.nuls.transaction.constant.TxErrorCode;
 
 /**
  * @author: Charlie
- * @date: 2019-01-15
+ * @date: 2019/4/16
  */
-public class CrossTxTransferDTO {
+public class VerifyResult {
+    private boolean result;
+    private ErrorCode errorCode;
 
-    private Integer chainId;
-
-    private List<CoinDTO> listFrom;
-
-    private List<CoinDTO> listTo;
-
-    private String remark;
-
-    public CrossTxTransferDTO() {
+    public VerifyResult(boolean result, ErrorCode errorCode) {
+        this.result = result;
+        this.errorCode = errorCode;
     }
 
-    public CrossTxTransferDTO(Integer chainId, List<CoinDTO> listFrom, List<CoinDTO> listTo, String remark) {
-        this.chainId = chainId;
-        this.listFrom = listFrom;
-        this.listTo = listTo;
-        this.remark = remark;
+    public static VerifyResult success(){
+        return new VerifyResult(true, TxErrorCode.SUCCESS);
     }
 
-    public Integer getChainId() {
-        return chainId;
+    public static VerifyResult fail(ErrorCode errorCode){
+        return new VerifyResult(false, errorCode);
     }
 
-    public void setChainId(Integer chainId) {
-        this.chainId = chainId;
+    public boolean getResult() {
+        return result;
     }
 
-    public List<CoinDTO> getListFrom() {
-        return listFrom;
+    public void setResult(boolean result) {
+        this.result = result;
     }
 
-    public void setListFrom(List<CoinDTO> listFrom) {
-        this.listFrom = listFrom;
+    public ErrorCode getErrorCode() {
+        return errorCode;
     }
 
-    public List<CoinDTO> getListTo() {
-        return listTo;
-    }
-
-    public void setListTo(List<CoinDTO> listTo) {
-        this.listTo = listTo;
-    }
-
-    public String getRemark() {
-        return remark;
-    }
-
-    public void setRemark(String remark) {
-        this.remark = remark;
+    public void setErrorCode(ErrorCode errorCode) {
+        this.errorCode = errorCode;
     }
 }

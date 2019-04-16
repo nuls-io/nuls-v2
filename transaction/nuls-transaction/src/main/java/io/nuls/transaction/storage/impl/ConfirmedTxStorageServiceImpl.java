@@ -1,4 +1,4 @@
-package io.nuls.transaction.storage.rocksdb.impl;
+package io.nuls.transaction.storage.impl;
 
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.basic.NulsOutputStreamBuffer;
@@ -16,7 +16,7 @@ import io.nuls.tools.parse.SerializeUtils;
 import io.nuls.transaction.constant.TxDBConstant;
 import io.nuls.transaction.constant.TxErrorCode;
 import io.nuls.transaction.model.po.TransactionConfirmedPO;
-import io.nuls.transaction.storage.rocksdb.ConfirmedTxStorageService;
+import io.nuls.transaction.storage.ConfirmedTxStorageService;
 import io.nuls.transaction.utils.TxUtil;
 
 import java.io.IOException;

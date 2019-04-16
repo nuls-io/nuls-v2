@@ -2,6 +2,7 @@ package io.nuls.api.test;
 
 import com.mongodb.MongoClient;
 import com.mongodb.client.MongoDatabase;
+import io.nuls.api.ApiContext;
 import io.nuls.api.db.mongo.MongoBlockServiceImpl;
 import io.nuls.api.db.mongo.MongoContractServiceImpl;
 import io.nuls.api.db.mongo.MongoDBService;
@@ -22,22 +23,45 @@ public class MongoDBTest {
 
     @Before
     public void before() {
-        String dbName = "nuls-api";
-        MongoClient mongoClient = new MongoClient("127.0.0.1", 27017);
-        MongoDatabase mongoDatabase = mongoClient.getDatabase(dbName);
-        MongoDBService mongoDBService = new MongoDBService(mongoClient, mongoDatabase);
-        SpringLiteContext.putBean("dbService", mongoDBService);
-        SpringLiteContext.init(DEFAULT_SCAN_PACKAGE);
+
+//        String dbName = "nuls-api";
+//        MongoClient mongoClient = new MongoClient("127.0.0.1", 27017);
+//        MongoDatabase mongoDatabase = mongoClient.getDatabase(dbName);
+//        MongoDBService mongoDBService = new MongoDBService(mongoClient, mongoDatabase);
+//        SpringLiteContext.putBean("dbService", mongoDBService);
+
+        ApiContext.databaseUrl = "127.0.0.1";
+        ApiContext.databasePort = 27017;
+        SpringLiteContext.init("io.nuls.api");
     }
 
     @Test
     public void testDBSave() {
-        BlockHeaderInfo headerInfo = new BlockHeaderInfo();
-        headerInfo.setHeight(0L);
-        headerInfo.setTotalFee(new BigInteger("1000000000000000000000000000000000000001"));
-
+//        BlockHeaderInfo headerInfo = new BlockHeaderInfo();
+//        headerInfo.setHeight(0L);
+//        headerInfo.setTotalFee(new BigInteger("1000000000000000000000000000000000000001"));
+//
+//        MongoBlockServiceImpl mongoBlockServiceImpl = SpringLiteContext.getBean(MongoBlockServiceImpl.class);
+//        mongoBlockServiceImpl.saveBLockHeaderInfo(2, headerInfo);
         MongoBlockServiceImpl mongoBlockServiceImpl = SpringLiteContext.getBean(MongoBlockServiceImpl.class);
-        mongoBlockServiceImpl.saveBLockHeaderInfo(2, headerInfo);
+        long time1, time2;
+        time1 = System.currentTimeMillis();
+
+        for (int i = 1; i < 10000000; i++) {
+            BlockHeaderInfo headerInfo = new BlockHeaderInfo();
+            headerInfo.setHeight(i);
+            mongoBlockServiceImpl.saveBLockHeaderInfo(2, headerInfo);
+            if (i % 100000 == 0) {
+                time2 = System.currentTimeMillis();
+
+                System.out.println("i:" + i + ",--------------------time:" + (time2 - time1));
+                time1 = time2;
+            }
+        }
+
+
+        BlockHeaderInfo headerInfo = mongoBlockServiceImpl.getBlockHeader(2, 0);
+        System.out.println(headerInfo.getHeight());
 
     }
 

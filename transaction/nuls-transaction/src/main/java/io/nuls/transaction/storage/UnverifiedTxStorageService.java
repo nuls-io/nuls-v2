@@ -1,18 +1,18 @@
-/**
+/*
  * MIT License
- * <p>
+ *
  * Copyright (c) 2017-2018 nuls.io
- * <p>
+ *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- * <p>
+ *
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- * <p>
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -20,49 +20,34 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
+ *
  */
+package io.nuls.transaction.storage;
 
-package io.nuls.transaction.model.dto;
+import io.nuls.base.data.Transaction;
+import io.nuls.transaction.model.bo.Chain;
 
 /**
- * @author: Charlie
- * @date: 2018-12-13
+ * 本链内发起的所有未验证的交易，包括普通交易和跨链交易
+ *
+ * @author: qinyifeng
+ * @date: 2018/11/29
  */
-public class AccountSignDTO {
+public interface UnverifiedTxStorageService {
 
-    private String address;
+    /**
+     * 保存未验证交易数据到FS队列中
+     * @param chain
+     * @param tx
+     * @return
+     */
+    boolean putTx(Chain chain, Transaction tx);
 
-    private String password;
+    /**
+     * 从FS队列中获取未验证交易数据
+     * @return
+     */
+    Transaction pollTx(Chain chain);
 
-    public AccountSignDTO() {
-    }
-
-    public AccountSignDTO(String address, String password) {
-        this.address = address;
-        this.password = password;
-    }
-
-    public String getAddress() {
-        return address;
-    }
-
-    public void setAddress(String address) {
-        this.address = address;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
-    }
-
-    @Override
-    public String toString() {
-        return "AccountSignDTO{" +
-                "address='" + address + '\'' +
-                ", password='" + password + '\'' +
-                '}';
-    }
+    long size(Chain chain);
 }

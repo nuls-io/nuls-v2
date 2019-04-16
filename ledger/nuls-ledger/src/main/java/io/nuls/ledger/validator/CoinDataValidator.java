@@ -33,6 +33,7 @@ import io.nuls.base.data.Transaction;
 import io.nuls.ledger.constant.ValidateEnum;
 import io.nuls.ledger.model.AccountBalance;
 import io.nuls.ledger.model.TempAccountNonce;
+import io.nuls.ledger.model.UnconfirmedTx;
 import io.nuls.ledger.model.ValidateResult;
 import io.nuls.ledger.model.po.*;
 import io.nuls.ledger.service.AccountStateService;
@@ -47,10 +48,7 @@ import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.model.BigIntegerUtils;
 
 import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 import static io.nuls.ledger.utils.LoggerUtil.logger;
@@ -219,7 +217,27 @@ public class CoinDataValidator {
         return confirmedTxValidate(chainId, tx, batchValidateTxMap, accountBalanceValidateTxMap);
     }
 
+    /**
+     * 未确认交易数据处理
+     *
+     * @param transaction
+     */
 
+    public ValidateResult verifyCoinData(int addressChainId, Transaction transaction) throws Exception {
+        //直接更新未确认交易
+        CoinData coinData = CoinDataUtil.parseCoinData(transaction.getCoinData());
+        if (null == coinData) {
+            //例如黄牌交易，直接返回
+            return ValidateResult.getSuccess();
+        }
+        /*未确认交易的校验*/
+        ValidateResult validateResult = validateCoinData(addressChainId, transaction);
+        if (!validateResult.isSuccess()) {
+            LoggerUtil.logger(addressChainId).error("validateResult = {}={}", validateResult.getValidateCode(), validateResult.getValidateDesc());
+            return validateResult;
+        }
+        return ValidateResult.getSuccess();
+    }
     private ValidateResult analysisFromCoinPerTx(int chainId, String txHash, String nonce8BytesStr, List<CoinFrom> coinFroms, Map<String, List<TempAccountNonce>> accountValidateTxMap, Map<String, AccountState> accountStateMap, Map<String, AccountState> balanceValidateMap) {
         for (CoinFrom coinFrom : coinFroms) {
             if (LedgerUtil.isNotLocalChainAccount(chainId, coinFrom.getAddress())) {

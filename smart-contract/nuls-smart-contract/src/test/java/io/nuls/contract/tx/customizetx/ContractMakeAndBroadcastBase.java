@@ -30,7 +30,6 @@ import io.nuls.base.data.NulsDigestData;
 import io.nuls.base.data.Transaction;
 import io.nuls.contract.basetest.ContractTest;
 import io.nuls.contract.constant.ContractErrorCode;
-import io.nuls.contract.enums.LedgerUnConfirmedTxStatus;
 import io.nuls.contract.helper.ContractHelper;
 import io.nuls.contract.helper.ContractTxHelper;
 import io.nuls.contract.manager.ChainManager;
@@ -41,7 +40,6 @@ import io.nuls.contract.model.tx.CreateContractTransaction;
 import io.nuls.contract.model.tx.DeleteContractTransaction;
 import io.nuls.contract.model.txdata.ContractData;
 import io.nuls.contract.rpc.call.AccountCall;
-import io.nuls.contract.rpc.call.LedgerCall;
 import io.nuls.contract.rpc.call.TransactionCall;
 import io.nuls.contract.storage.ContractAddressStorageService;
 import io.nuls.contract.tx.base.BaseQuery;
@@ -74,7 +72,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static io.nuls.contract.constant.ContractConstant.*;
 import static io.nuls.contract.constant.ContractErrorCode.FAILED;
 import static io.nuls.contract.util.ContractUtil.getFailed;
 import static io.nuls.contract.util.ContractUtil.getSuccess;
@@ -526,11 +523,12 @@ public class ContractMakeAndBroadcastBase extends BaseQuery {
     class MakeAndBroadcastDeleteTxTest {
         DeleteContractTransaction tx;
 
-        MakeAndBroadcastDeleteTxTest make() {
+        MakeAndBroadcastDeleteTxTest make() throws Exception {
             Log.info("wait delete.");
             String remark = "delete contract";
             Result result = makeDeleteTx(chainId, sender, contractAddress, password, remark);
             if (result.isFailed()) {
+                Log.error("delete make error:{}", JSONUtils.obj2PrettyJson(result));
                 throw new RuntimeException(result.getMsg());
             }
             this.tx = (DeleteContractTransaction) result.getData();

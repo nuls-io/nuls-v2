@@ -78,13 +78,6 @@ public class TxUtil {
         }
     }
 
-    public static Transaction getTransaction(String hex) throws NulsException {
-        if (StringUtils.isBlank(hex)) {
-            throw new NulsException(TxErrorCode.DATA_NOT_FOUND);
-        }
-        return getTransaction(HexUtil.decode(hex));
-    }
-
     public static <T> T getInstance(byte[] bytes, Class<? extends BaseNulsData> clazz) throws NulsException {
         if (null == bytes || bytes.length == 0) {
             throw new NulsException(TxErrorCode.DATA_NOT_FOUND);

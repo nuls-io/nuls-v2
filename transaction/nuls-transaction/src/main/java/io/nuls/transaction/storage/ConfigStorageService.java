@@ -22,7 +22,7 @@
  * SOFTWARE.
  *
  */
-package io.nuls.transaction.storage.rocksdb;
+package io.nuls.transaction.storage;
 
 import io.nuls.transaction.model.bo.config.ConfigBean;
 

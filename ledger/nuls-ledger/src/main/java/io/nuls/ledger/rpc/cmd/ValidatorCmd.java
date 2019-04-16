@@ -62,11 +62,11 @@ public class ValidatorCmd extends BaseLedgerCmd {
      * @param params
      * @return
      */
-    @CmdAnnotation(cmd = "validateCoinData",
+    @CmdAnnotation(cmd = "verifyCoinDataPackaged",
             version = 1.0, minEvent = 0, minPeriod = 0, description = "")
     @Parameter(parameterName = "chainId", parameterType = "int")
     @Parameter(parameterName = "tx", parameterType = "String")
-    public Response validateCoinData(Map params) {
+    public Response verifyCoinDataPackaged(Map params) {
         Integer chainId = (Integer) params.get("chainId");
         String txStr = (String) params.get("tx");
         Transaction tx = new Transaction();
@@ -76,6 +76,42 @@ public class ValidatorCmd extends BaseLedgerCmd {
             tx.parse(RPCUtil.decode(txStr), 0);
             LoggerUtil.logger(chainId).debug("确认交易校验：chainId={},txHash={}", chainId, tx.getHash().toString());
             validateResult = coinDataValidator.bathValidatePerTx(chainId, tx);
+            response = success(validateResult);
+            LoggerUtil.logger(chainId).debug("validateCoinData returnCode={},returnMsg={}", validateResult.getValidateCode(), validateResult.getValidateDesc());
+        } catch (NulsException e) {
+            e.printStackTrace();
+            response = failed(e.getErrorCode());
+            LoggerUtil.logger(chainId).error("validateCoinData exception:{}", e.getMessage());
+        } catch (Exception e) {
+            e.printStackTrace();
+            response = failed("validateCoinData exception");
+            LoggerUtil.logger(chainId).error("validateCoinData exception:{}", e.getMessage());
+        }
+        return response;
+    }
+
+    /**
+     * validate coin entity
+     * 进行nonce-hash校验，进行单笔交易的未确认校验
+     * 用于第三方打包交易校验
+     *
+     * @param params
+     * @return
+     */
+    @CmdAnnotation(cmd = "verifyCoinData",
+            version = 1.0, minEvent = 0, minPeriod = 0, description = "")
+    @Parameter(parameterName = "chainId", parameterType = "int")
+    @Parameter(parameterName = "tx", parameterType = "String")
+    public Response verifyCoinData(Map params) {
+        Integer chainId = (Integer) params.get("chainId");
+        String txStr = (String) params.get("tx");
+        Transaction tx = new Transaction();
+        Response response = null;
+        ValidateResult validateResult = null;
+        try {
+            tx.parse(RPCUtil.decode(txStr), 0);
+            LoggerUtil.logger(chainId).debug("交易coinData校验：chainId={},txHash={}", chainId, tx.getHash().toString());
+            validateResult = coinDataValidator.verifyCoinData(chainId, tx);
             response = success(validateResult);
             LoggerUtil.logger(chainId).debug("validateCoinData returnCode={},returnMsg={}", validateResult.getValidateCode(), validateResult.getValidateDesc());
         } catch (NulsException e) {

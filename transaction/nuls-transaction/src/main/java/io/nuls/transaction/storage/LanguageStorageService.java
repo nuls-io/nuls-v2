@@ -1,4 +1,4 @@
-package io.nuls.transaction.storage.rocksdb;
+package io.nuls.transaction.storage;
 
 /**
  * 系统语言设置数据存储服务接口

@@ -522,7 +522,7 @@ public class ContractUtil {
     public static Response wrapperFailed(Result result) {
         String msg;
         ErrorCode errorCode;
-        if(result != null) {
+        if (result != null) {
             errorCode = result.getErrorCode();
             msg = result.getMsg();
             if (StringUtils.isBlank(msg)) {
@@ -537,7 +537,7 @@ public class ContractUtil {
         return response;
     }
 
-    public static void configLog(String filePath, String fileName, Level fileLevel, Level consoleLevel, List<Map> packageLogLevel) {
+    public static void configLog(String filePath, String fileName, Level fileLevel, Level consoleLevel, String packageLogPackages, String packageLogLevels) {
         int rootLevelInt = Math.min(fileLevel.toInt(), consoleLevel.toInt());
 
         LoggerContext context = (LoggerContext) LoggerFactory.getILoggerFactory();
@@ -548,13 +548,20 @@ public class ContractUtil {
         Log.BASIC_LOGGER = LoggerBuilder.getLogger(filePath, fileName, fileLevel, consoleLevel);
         Log.BASIC_LOGGER.addBasicPath(Log.class.getName());
 
-        if(packageLogLevel != null) {
+        if (StringUtils.isNotBlank(packageLogPackages) && StringUtils.isNotBlank(packageLogLevels)) {
+            String[] packages = packageLogPackages.split(",");
+            String[] levels = packageLogLevels.split(",");
+            int levelsLength = levels.length;
             String packagePath;
             String logLevel;
             Logger packageLogger;
-            for(Map map : packageLogLevel) {
-                packagePath = (String) map.get("package");
-                logLevel = (String) map.get("level");
+            for (int i = 0, length = packages.length; i < length; i++) {
+                packagePath = packages[i];
+                if(i >= levelsLength) {
+                    logLevel = "INFO";
+                } else {
+                    logLevel = levels[i];
+                }
                 packageLogger = context.getLogger(packagePath);
                 packageLogger.setAdditive(false);
                 packageLogger.setLevel(Level.toLevel(logLevel));
@@ -563,6 +570,6 @@ public class ContractUtil {
     }
 
     public static void configLog(String filePath, String fileName, Level fileLevel, Level consoleLevel) {
-        configLog(filePath, fileName, fileLevel, consoleLevel, null);
+        configLog(filePath, fileName, fileLevel, consoleLevel, null, null);
     }
 }

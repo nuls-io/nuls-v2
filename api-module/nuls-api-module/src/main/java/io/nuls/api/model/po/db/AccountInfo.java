@@ -1,5 +1,6 @@
 package io.nuls.api.model.po.db;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.nuls.base.data.Address;
 
 import java.math.BigInteger;
@@ -34,6 +35,7 @@ public class AccountInfo {
     private List<String> tokens;
 
     //是否是根据最新区块的交易新创建的账户，只为业务使用，不存储该字段
+    @JsonIgnore
     private boolean isNew;
 
     public AccountInfo(){}

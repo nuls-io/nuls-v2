@@ -64,7 +64,7 @@ public class ContractCallContractSendTxTest extends BaseQuery {
         Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, CREATE, params);
         Map result = (HashMap) (((HashMap) cmdResp2.getResponseData()).get(CREATE));
         Assert.assertTrue(null != result);
-        Log.info("createContract-result:{}", JSONUtils.obj2PrettyJson(result));
+        Log.info("Create-InnerCall-Contract-result:{}", JSONUtils.obj2PrettyJson(result));
     }
 
     private Map makeCreateParams(String sender, byte[] contractCode, String remark, Object... args) {
