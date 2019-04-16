@@ -95,7 +95,7 @@ public class TransactionCmd extends BaseCmd {
             if (txList != null) {
                 txList.forEach(tx -> {
                     try {
-                        lists.add(Transaction.getInstance(tx));
+                        lists.add(TxUtil.getInstanceRpcStr(tx, Transaction.class));
                     } catch (NulsException e) {
                         LoggerUtil.logger.error("ac_accountTxValidate tx format error", e);
                     }
@@ -142,7 +142,7 @@ public class TransactionCmd extends BaseCmd {
         //交易提交
         try {
             for (String txStr : txList) {
-                Transaction tx = Transaction.getInstance(txStr);
+                Transaction tx = TxUtil.getInstanceRpcStr(txStr, Transaction.class);
                 //别名交易
                 if (TxType.ACCOUNT_ALIAS == tx.getType()) {
                     Alias alias = new Alias();
@@ -217,7 +217,7 @@ public class TransactionCmd extends BaseCmd {
         //交易回滚
         try {
             for (String txStr : txList) {
-                Transaction tx = Transaction.getInstance(txStr);
+                Transaction tx = TxUtil.getInstanceRpcStr(txStr, Transaction.class);
                 //别名交易
                 if (TxType.ACCOUNT_ALIAS == tx.getType()) {
                     Alias alias = new Alias();

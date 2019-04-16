@@ -30,7 +30,6 @@ import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.basic.NulsOutputStreamBuffer;
 import io.nuls.base.constant.TxStatusEnum;
 import io.nuls.tools.constant.ToolsConstant;
-import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.crypto.UnsafeByteArrayOutputStream;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.parse.SerializeUtils;
@@ -241,10 +240,6 @@ public class Transaction extends BaseNulsData implements Cloneable {
 
     public void setSize(int size) {
         this.size = size;
-    }
-
-    public static Transaction getInstance(String hex) throws NulsException {
-        return getInstance(HexUtil.decode(hex));
     }
 
     public static Transaction getInstance(byte[] txBytes) throws NulsException {

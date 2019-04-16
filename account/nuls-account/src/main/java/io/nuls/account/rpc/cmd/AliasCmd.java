@@ -7,6 +7,7 @@ import io.nuls.account.service.AccountKeyStoreService;
 import io.nuls.account.service.AccountService;
 import io.nuls.account.service.AliasService;
 import io.nuls.account.util.LoggerUtil;
+import io.nuls.account.util.TxUtil;
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.data.Transaction;
 import io.nuls.rpc.cmd.BaseCmd;
@@ -213,7 +214,7 @@ public class AliasCmd extends BaseCmd {
             }
             chainId = (Integer) chainIdObj;
             tx = (String) txObj;
-            Transaction transaction = Transaction.getInstance(tx);
+            Transaction transaction = TxUtil.getInstanceRpcStr(tx, Transaction.class);
             result = aliasService.aliasTxValidate(chainId, transaction);
         } catch (NulsRuntimeException e) {
             LoggerUtil.logger.info("", e);
@@ -246,7 +247,7 @@ public class AliasCmd extends BaseCmd {
             }
             chainId = (Integer) chainIdObj;
             tx = (String) txObj;
-            Transaction transaction = Transaction.getInstance(tx);
+            Transaction transaction = TxUtil.getInstanceRpcStr(tx, Transaction.class);
             Alias alias = new Alias();
             alias.parse(new NulsByteBuffer(transaction.getTxData()));
             result = aliasService.aliasTxCommit(chainId, alias);
@@ -284,7 +285,7 @@ public class AliasCmd extends BaseCmd {
             }
             chainId = (Integer) chainIdObj;
             tx = (String) txObj;
-            Transaction transaction = Transaction.getInstance(tx);
+            Transaction transaction = TxUtil.getInstanceRpcStr(tx, Transaction.class);
             Alias alias = new Alias();
             alias.parse(new NulsByteBuffer(transaction.getTxData()));
             result = aliasService.rollbackAlias(chainId, alias);
