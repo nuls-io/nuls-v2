@@ -151,7 +151,7 @@ public class ContractNRC20TokenSendTxTest extends BaseQuery {
         Map params = this.makeCreateParams(sender, contractCode, remark, name, symbol, amount, decimals);
         Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, CREATE, params);
         Map result = (HashMap) (((HashMap) cmdResp2.getResponseData()).get(CREATE));
-        Log.info("createContract-result:{}", JSONUtils.obj2PrettyJson(cmdResp2));
+        Log.info("Create-NRC20-Contract-result:{}", JSONUtils.obj2PrettyJson(cmdResp2));
         Assert.assertTrue(null != result);
     }
 

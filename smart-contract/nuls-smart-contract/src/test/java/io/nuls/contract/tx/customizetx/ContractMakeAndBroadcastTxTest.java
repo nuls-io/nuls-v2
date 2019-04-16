@@ -216,10 +216,10 @@ public class ContractMakeAndBroadcastTxTest extends ContractMakeAndBroadcastBase
 
 
     private String tokenContractAddress() {
-        return "tNULSeBaMxPE2ESCiEAZ9CxXMyzBkySBKKSUQ4";
+        return "tNULSeBaN4BSA6qo2J6eEfCx2rNyyY2TRwhhe8";
     }
     private String contractCallContractAddress() {
-        return "tNULSeBaMw6wNJmGPqei16Lj6V9XpAGCguvGaH";
+        return "tNULSeBaN9GKPn7e2ZVDtnYHAaL8bRpvKk66xK";
     }
 
     /**
