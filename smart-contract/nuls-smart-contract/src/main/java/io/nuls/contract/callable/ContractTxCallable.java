@@ -132,7 +132,7 @@ public class ContractTxCallable implements Callable<ContractResult> {
             }
         } while (false);
         if(!contractResult.isSuccess()) {
-            Log.error("Failed TxType [{}] Execute ContractResult is {}", tx.getType(), contractResult);
+            Log.error("Failed TxType [{}] Execute ContractResult is {}", tx.getType(), contractResult.toString());
         }
         return contractResult;
     }
@@ -142,7 +142,7 @@ public class ContractTxCallable implements Callable<ContractResult> {
         if (contractResult.isSuccess()) {
             Result checkResult = contractHelper.validateNrc20Contract(chainId, (ProgramExecutor) contractResult.getTxTrack(), tx, contractResult);
             if(checkResult.isFailed()) {
-                Log.error("check validateNrc20Contract Result is {}", checkResult);
+                Log.error("check validateNrc20Contract Result is {}", checkResult.toString());
             }
             if (checkResult.isSuccess()) {
                 container.getCommitSet().add(contract);
@@ -163,7 +163,7 @@ public class ContractTxCallable implements Callable<ContractResult> {
         if (isConflict) {
             // 冲突后，添加到重新执行的集合中，但是gas消耗完的不再重复执行
             if (!isNotEnoughGasError(contractResult)) {
-                Log.error("Conflict TxType [{}] Execute ContractResult is {}", tx.getType(), contractResult);
+                Log.error("Conflict TxType [{}] Execute ContractResult is {}", tx.getType(), contractResult.toString());
                 reCallList.add(contractResult);
             } else {
                 // 执行失败，添加到执行失败的集合中
