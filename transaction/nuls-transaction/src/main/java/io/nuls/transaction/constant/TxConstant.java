@@ -118,6 +118,7 @@ public interface TxConstant {
     /**
      * Map初始值
      */
+    int INIT_CAPACITY_32 = 32;
     int INIT_CAPACITY_16 = 16;
     int INIT_CAPACITY_8 = 8;
     int INIT_CAPACITY_4 = 4;
