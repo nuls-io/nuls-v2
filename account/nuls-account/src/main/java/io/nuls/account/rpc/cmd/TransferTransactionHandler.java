@@ -24,7 +24,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Service
-public class TransactionHandler extends BaseCmd {
+public class TransferTransactionHandler extends BaseCmd {
 
     @Autowired
     private TxValidator txValidator;
@@ -62,5 +62,25 @@ public class TransactionHandler extends BaseCmd {
         resultMap.put("value", result);
         return success(resultMap);
     }
+
+//    /**
+//     * 转账交易提交
+//     */
+//    @CmdAnnotation(cmd = "ac_transferTxCommit", version = 1.0, description = "create transfer transaction commit 1.0")
+//    public Response transferTxCommit(Map<String, Object> params) {
+//        Map<String, Boolean> resultMap = new HashMap<>();
+//        resultMap.put("value", true);
+//        return success(resultMap);
+//    }
+//
+//    /**
+//     * 转账交易回滚
+//     */
+//    @CmdAnnotation(cmd = "ac_transferTxRollback", version = 1.0, description = "create transfer transaction rollback 1.0")
+//    public Response transferTxRollback(Map<String, Object> params) {
+//        Map<String, Boolean> resultMap = new HashMap<>();
+//        resultMap.put("value", true);
+//        return success(resultMap);
+//    }
 
 }

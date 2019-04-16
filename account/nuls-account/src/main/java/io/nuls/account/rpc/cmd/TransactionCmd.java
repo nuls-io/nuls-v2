@@ -2,6 +2,7 @@ package io.nuls.account.rpc.cmd;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import io.nuls.account.config.NulsConfig;
+import io.nuls.account.constant.AccountConstant;
 import io.nuls.account.constant.AccountErrorCode;
 import io.nuls.account.constant.RpcParameterNameConstant;
 import io.nuls.account.model.bo.Account;
@@ -18,6 +19,7 @@ import io.nuls.account.service.TransactionService;
 import io.nuls.account.storage.AliasStorageService;
 import io.nuls.account.util.LoggerUtil;
 import io.nuls.account.util.Preconditions;
+import io.nuls.account.util.TxUtil;
 import io.nuls.account.util.manager.ChainManager;
 import io.nuls.account.util.validator.TxValidator;
 import io.nuls.base.basic.AddressTool;
@@ -37,7 +39,6 @@ import io.nuls.tools.model.BigIntegerUtils;
 import io.nuls.tools.model.StringUtils;
 import io.nuls.tools.parse.JSONUtils;
 
-import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -267,26 +268,6 @@ public class TransactionCmd extends BaseCmd {
     }
 
     /**
-     * 转账交易提交
-     */
-    @CmdAnnotation(cmd = "ac_transferTxCommit", version = 1.0, description = "create transfer transaction commit 1.0")
-    public Response transferTxCommit(Map<String, Object> params) {
-        Map<String, Boolean> resultMap = new HashMap<>();
-        resultMap.put("value", true);
-        return success(resultMap);
-    }
-
-    /**
-     * 转账交易回滚
-     */
-    @CmdAnnotation(cmd = "ac_transferTxRollback", version = 1.0, description = "create transfer transaction rollback 1.0")
-    public Response transferTxRollback(Map<String, Object> params) {
-        Map<String, Boolean> resultMap = new HashMap<>();
-        resultMap.put("value", true);
-        return success(resultMap);
-    }
-
-    /**
      * 创建多账户转账交易
      * create a multi-account transfer transaction
      *
@@ -357,8 +338,6 @@ public class TransactionCmd extends BaseCmd {
             return failed(e.getErrorCode());
         } catch (NulsRuntimeException e) {
             return failed(e.getErrorCode());
-        } catch (IOException e) {
-            return failed(e.getMessage());
         } catch (Exception e) {
             return failed(e.getMessage());
         }
@@ -570,10 +549,7 @@ public class TransactionCmd extends BaseCmd {
         }
         try {
             byte[] bytes = remark.getBytes(NulsConfig.DEFAULT_ENCODING);
-            if (bytes.length > AccountConstant.TX_REMARK_MAX_LEN) {
-                return false;
-            }
-            return true;
+            return bytes.length <= AccountConstant.TX_REMARK_MAX_LEN;
         } catch (UnsupportedEncodingException e) {
             return false;
         }
