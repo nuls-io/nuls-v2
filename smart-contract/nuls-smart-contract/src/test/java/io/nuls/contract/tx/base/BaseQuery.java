@@ -28,6 +28,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import io.nuls.api.provider.Provider;
 import io.nuls.api.provider.ServiceManager;
 import io.nuls.api.provider.transaction.TransferService;
+import io.nuls.base.basic.AddressTool;
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.data.BlockHeader;
 import io.nuls.base.data.Transaction;
@@ -51,6 +52,7 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -122,77 +124,77 @@ public class BaseQuery {
 
     protected String createHash = "002029ca32525f635a15c82c046114657c0d8a96a7163780ac6b425b2383b240bd56";
     protected String contractAddress   = "";
-    protected String contractAddress0  = "tNULSeBaN7ZnfydbGZSDbXKZAqJs1kjucaC6y3";
-    protected String contractAddress1  = "tNULSeBaN5nQ4piuib8NuCxwSuLHkQSBDsxoa2";
-    protected String contractAddress2  = "tNULSeBaN1em4GXgF91FMzPyJkY3nQPztTaj1N";
-    protected String contractAddress3  = "tNULSeBaMzRHxh3SBEdMZJx4wFqB55vKH36eUM";
-    protected String contractAddress4  = "tNULSeBaNCMDh4xmZMdv1FFhh6KrdifqbropNP";
-    protected String contractAddress5  = "tNULSeBaN5uZzSDxBTuyQ92T7pFk5Ny5FLMQhH";
-    protected String contractAddress6  = "tNULSeBaN3L1KHhJZLE2UQDZgvmyxo4w7XKajf";
-    protected String contractAddress7  = "tNULSeBaMyyf8VTJkHbvb2Kbd9g7f2og5G9x9h";
-    protected String contractAddress8  = "tNULSeBaN475NghSmrkiXDHJRjXB3fUHVGQguW";
-    protected String contractAddress9  = "tNULSeBaN12tr5THvn1MCv3ef55dtWNAZoAQvN";
-    protected String contractAddress10 = "tNULSeBaN7eMa9pEttNipRNYW9cHXBxAnTDZcS";
-    protected String contractAddress11 = "tNULSeBaN5oakfaSEXhKSeynWDrU1pvqvjoPxi";
-    protected String contractAddress12 = "tNULSeBaN1twECi8Lh4dem1CNMneobwNwze2Z5";
-    protected String contractAddress13 = "tNULSeBaNCPzREHnwEgWH3CRT6h1bbsr4wMJXj";
-    protected String contractAddress14 = "tNULSeBaNBZhLfAo1eg6vivQYA9kPDNUsLoA9q";
-    protected String contractAddress15 = "tNULSeBaN1FmRsnfcahgiX5tei6CFPHwvfHcvv";
-    protected String contractAddress16 = "tNULSeBaNAHVt4zwVtgX25ytv9q1AKG1PiFU93";
-    protected String contractAddress17 = "tNULSeBaN9d7PdM5h1BqwD1zQ8t4rN2ytX3XxN";
-    protected String contractAddress18 = "tNULSeBaMwjHbgz5kRQhTwxYfNtGUS6wGsj4W6";
-    protected String contractAddress19 = "tNULSeBaMxtwWsggGS3HQ1gKALtY9wVorWBfsa";
-    protected String contractAddress20 = "tNULSeBaN92rcvmNmjGNQvtbVMh1pm2xVurm3b";
-    protected String contractAddress21 = "tNULSeBaMymBqqmtsHVyi3G2nxhewWb2EBpAAe";
-    protected String contractAddress22 = "tNULSeBaNAkB6kbqxwzFJd5cpTmE31eqFx52Ec";
-    protected String contractAddress23 = "tNULSeBaMzL4keSqFNvHooNvEseS8gxuohEM89";
-    protected String contractAddress24 = "tNULSeBaMyLtcPns5xDfgGmmfjDMFwytsGFaMf";
-    protected String contractAddress25 = "tNULSeBaMzjwKD79eiLHHsif4wCe2kLwTvao55";
-    protected String contractAddress26 = "tNULSeBaN7f1EHZfRPGsuHKi5iLv1f9FKKo9hS";
-    protected String contractAddress27 = "tNULSeBaN1V7cqGjmHaAzcZURc8eptn24vAnAa";
-    protected String contractAddress28 = "tNULSeBaMwqcj82iBQnwZ8DZMCuq2hgVBTCi4P";
-    protected String contractAddress29 = "tNULSeBaN2u7DK5Feh9F6SzP1zg2TjreDWhT8j";
-    protected String contractAddress30 = "tNULSeBaN4Qp6F9jN69rSUoyymonHRadzaDACf";
-    protected String contractAddress31 = "tNULSeBaN9Z1ncJ9Kc3c6rppw5DwiSxRE5FGK6";
-    protected String contractAddress32 = "tNULSeBaNBJrxm4N2zKaZvkyKoDEf5EhB28zhD";
-    protected String contractAddress33 = "tNULSeBaMy3w8zyTm7v6tLNxbQgmDW82tStq75";
-    protected String contractAddress34 = "tNULSeBaN8HJH5395svtzWpnfUAQUzqSE5x4t2";
+    protected String contractAddress0  = "tNULSeBaN7vAqBANTtVxsiFsam4NcRUbqrCpzK";
+    protected String contractAddress1  = "tNULSeBaNBhqzwK2yN9FuXmNWago7vLt64xggp";
+    protected String contractAddress2  = "tNULSeBaN4ahTXVo5RH1DSnUV9tXpYm3JyBqXc";
+    protected String contractAddress3  = "tNULSeBaNCCaTxg3KyWw6xsVpGVicJ2SSRAgEF";
+    protected String contractAddress4  = "tNULSeBaMyXYWMvjmddsaLTa3dUwJKJ6Umo7eu";
+    protected String contractAddress5  = "tNULSeBaN8YvMDC8bFk7ReHDGMDvnRfhCgYHcM";
+    protected String contractAddress6  = "tNULSeBaN54ra3FjKDkMvWKSjEVEAh9UkyvCAC";
+    protected String contractAddress7  = "tNULSeBaN7ib5inHZPiSiPf2RFUTAnm7v3zAyy";
+    protected String contractAddress8  = "tNULSeBaNAKahVoAFixwdBWJXeA3S913uzha2p";
+    protected String contractAddress9  = "tNULSeBaMyR8CTTQiJBawsTsH3xYFDuRktVwEo";
+    protected String contractAddress10 = "tNULSeBaNAp4J76TzzpLshj9djAKYrc2aTC6MW";
+    protected String contractAddress11 = "tNULSeBaN9Gws3c6ia3EvotK37QnayUQh9KVNV";
+    protected String contractAddress12 = "tNULSeBaMwYp39ArJhm85KdDCS8KBVSRdFwCHt";
+    protected String contractAddress13 = "tNULSeBaN96u4cGLa9cBjdjWm8Th8U1S4fe52f";
+    protected String contractAddress14 = "tNULSeBaN3vgW4VSCbJe3ycApfWFDAdmfPEkob";
+    protected String contractAddress15 = "tNULSeBaN4hV2aJ4PtrH4bHQ4uKxwLLbgY9ueV";
+    protected String contractAddress16 = "tNULSeBaN7oj8ZsFeENwHvTt229X6SQL1Z5aGz";
+    protected String contractAddress17 = "tNULSeBaNASJJ6zswjRkXtLYcuzm6SRT1V8B2p";
+    protected String contractAddress18 = "tNULSeBaN14G6bHBfmeqPf1E2hnp3QjxJZpuVT";
+    protected String contractAddress19 = "tNULSeBaMzeEEdBVLWg7kTaiKt3DtzfhNs7Lg5";
+    protected String contractAddress20 = "tNULSeBaN5tTxQkc6CFs53VgGC5JHUf7VKteMy";
+    protected String contractAddress21 = "tNULSeBaMwYCjrkCQxcKaaDRjmQ524HVYNnqAB";
+    protected String contractAddress22 = "tNULSeBaN45K8896xgjspzeJWJQg2QrYtHrw4T";
+    protected String contractAddress23 = "tNULSeBaNCCrUDnFAykgYM2NLFQow3y9bgg7k2";
+    protected String contractAddress24 = "tNULSeBaN3Rx4PkFCwZQRCuSuST8DoHzb9cnH9";
+    protected String contractAddress25 = "tNULSeBaMyDmJhSLhTUe9sgbyaeLjJP1gm5jKr";
+    protected String contractAddress26 = "tNULSeBaNB27e5ooevy3GHsFmPY87WGJanjJcb";
+    protected String contractAddress27 = "tNULSeBaN7XPP7iw6V6GVXXUCiNjYgthUPokgS";
+    protected String contractAddress28 = "tNULSeBaMwX4j5T2xGKktm9SFEPDStwM8mUVYe";
+    protected String contractAddress29 = "tNULSeBaN5pghSZfZESFuDTkJJc1MYPvvWYw22";
+    protected String contractAddress30 = "tNULSeBaMyYNWdn3mbdsSmwN5sxk37JTEqtgRM";
+    protected String contractAddress31 = "tNULSeBaMw4LDaSQ2NWiHEPPPdnXVeKHhZV4hz";
+    protected String contractAddress32 = "tNULSeBaMx5VtE2EJTHtHueWQ1yA37EP1AGuia";
+    protected String contractAddress33 = "tNULSeBaN7gkAGGdnj9hDkKgFDXDf6LnnbWpSG";
+    protected String contractAddress34 = "tNULSeBaN4kWaxmgYq2oFMvQ9hq8UEdivvA7i7";
     protected String contractAddress_nrc20   = "tNULSeBaMzGVvtSpgB7dcERu7NZWU6Cf8gtnnP";
-    protected String contractAddress_nrc200  = "tNULSeBaMzCeoukqhMvWYpCZAbKCN2fE2JVzfK";
-    protected String contractAddress_nrc201  = "tNULSeBaNBawLTvbi4yokiXsFLkiNe8x8XH7Ac";
-    protected String contractAddress_nrc202  = "tNULSeBaNAnkAcECUu4KVjSWRUKiPaCytRh2dZ";
-    protected String contractAddress_nrc203  = "tNULSeBaMxLwGsh7dT2V9nten8noBxN2i4bvpA";
-    protected String contractAddress_nrc204  = "tNULSeBaN8DZ1RonVCLJsAicpm32tRE5RRH4F8";
-    protected String contractAddress_nrc205  = "tNULSeBaNA2pJxdN8Ui5wuEnymFcF91NrxdL3v";
-    protected String contractAddress_nrc206  = "tNULSeBaMvtKgRAGsmEE3V91jSttxxsFtMNQ69";
-    protected String contractAddress_nrc207  = "tNULSeBaNBs7FmRVrf2925XvUZe6DJwMjYzJPo";
-    protected String contractAddress_nrc208  = "tNULSeBaN63UW3syqccMXY1cz4Utajr1pYLvDo";
-    protected String contractAddress_nrc209  = "tNULSeBaNBshfGi9eYvzQauMio7jvXK8havrzu";
-    protected String contractAddress_nrc2010 = "tNULSeBaN3TUmG6ZDB6hv9yhe1zDALozziTQYb";
-    protected String contractAddress_nrc2011 = "tNULSeBaN2KDRw8z4Muid4ayLjQSS3JA3g7dma";
-    protected String contractAddress_nrc2012 = "tNULSeBaN7nPwpUiDuMUv8s3KP1qvmrCfNcqeh";
-    protected String contractAddress_nrc2013 = "tNULSeBaN8xftpyYR41ukVejwQx1EXv5LrkU1j";
-    protected String contractAddress_nrc2014 = "tNULSeBaN5wu9iPmHmo7V8zQHMMFZyCdQVDuzP";
-    protected String contractAddress_nrc2015 = "tNULSeBaN7JyE4GmncaTtP7gZmab5yZm4E8xYb";
-    protected String contractAddress_nrc2016 = "tNULSeBaN1Y6guJY5dnr4PCbmqFTXNcTstVbhy";
-    protected String contractAddress_nrc2017 = "tNULSeBaNAFyLfA9BUh37PYcJoTKmPxoodGG1N";
-    protected String contractAddress_nrc2018 = "tNULSeBaMvmYCoPN5sEvjm9u6uQaxKddd3PH1a";
-    protected String contractAddress_nrc2019 = "tNULSeBaMwgpXDnh7YZgi7Bi3pHvsX2GRfJgSL";
-    protected String contractAddress_nrc2020 = "tNULSeBaN5CudjrrEMMskRF9JaLgzDpvZnN2Fq";
-    protected String contractAddress_nrc2021 = "tNULSeBaN6nU1fpF9Uc8NUAqRSdi36jMkL3Rxk";
-    protected String contractAddress_nrc2022 = "tNULSeBaN1jtT4pqHmr6wPYSyYnkAa842hKeqM";
-    protected String contractAddress_nrc2023 = "tNULSeBaN8mMezWfv8xwS8ywbE4kB13Bg1SHHy";
-    protected String contractAddress_nrc2024 = "tNULSeBaMy6gkMZQWFsQhaa4FQtsG2nSrnhFSg";
-    protected String contractAddress_nrc2025 = "tNULSeBaMzZomEiwH7pWdzJonekAfvEZFY4oae";
-    protected String contractAddress_nrc2026 = "tNULSeBaN71frdeMUeAWZgkitD56xv1omQhRvU";
-    protected String contractAddress_nrc2027 = "tNULSeBaN5zm2pVT1b5wxhyeLgWgNTQTgo6pPN";
-    protected String contractAddress_nrc2028 = "tNULSeBaMy6yzt6Z3hqPcNTEMa7JoHAeogrH7i";
-    protected String contractAddress_nrc2029 = "tNULSeBaMxvoBpyCkXKVWjoXYXeVZsrxUGjFDV";
-    protected String contractAddress_nrc2030 = "tNULSeBaN6umjKPhiefmXbbqMXB4BZByCpgmG1";
-    protected String contractAddress_nrc2031 = "tNULSeBaMx7jarG7Rntj6uQ6dipTTkrZUQLRxR";
-    protected String contractAddress_nrc2032 = "tNULSeBaNBWoEgy5NvaPQyXGRqJt6esWZoWD4s";
-    protected String contractAddress_nrc2033 = "tNULSeBaNB49KvHVo3NPXYqjQBPRc7evKgVvnV";
-    protected String contractAddress_nrc2034 = "tNULSeBaN5h2fjwyFRS8WJboYBSLtpRrymJLro";
+    protected String contractAddress_nrc200  = "tNULSeBaMzThBLi2gwarkgcEdKAT8twK4KF1Uf";
+    protected String contractAddress_nrc201  = "tNULSeBaN8LYBqbDhfF7cW11iu9bk1QyjNNVK6";
+    protected String contractAddress_nrc202  = "tNULSeBaN9TgWh4hteRMiWKNeEumnKPJCUTh53";
+    protected String contractAddress_nrc203  = "tNULSeBaN5qn8B3UB2kyV6Rtv6cqbXnJZm9jAK";
+    protected String contractAddress_nrc204  = "tNULSeBaN37SzKyZoERd4KyEMQCKT2sRazUC94";
+    protected String contractAddress_nrc205  = "tNULSeBaN6pRoodbstDUem26sR3DcGmNomRmNp";
+    protected String contractAddress_nrc206  = "tNULSeBaMzNhv7ekFeX6SS1fxEVZrBynMuFVeR";
+    protected String contractAddress_nrc207  = "tNULSeBaMyXor2aJZ4TXjRjhJkw1T4DYxtzH4b";
+    protected String contractAddress_nrc208  = "tNULSeBaN2Us7FG6UU2vwjn8winJc7aSvHRQWM";
+    protected String contractAddress_nrc209  = "tNULSeBaMw31oFyEyKDUeHFdL7c45HMB5oZyka";
+    protected String contractAddress_nrc2010 = "tNULSeBaMzChFy1Q6Ao5oF83oa8cSMEG3ZKfUd";
+    protected String contractAddress_nrc2011 = "tNULSeBaN7xxv8xRAqr4QtYZkrHeoLzYTCLmRu";
+    protected String contractAddress_nrc2012 = "tNULSeBaNCLwPhph7q4dj1acTgbyxGJd2FPYVT";
+    protected String contractAddress_nrc2013 = "tNULSeBaN5SowmpaevWqTscBDAWpRCWPF6ZxGy";
+    protected String contractAddress_nrc2014 = "tNULSeBaMy1ETawqkgLG7u1BfSuf5Go3Pc7uk7";
+    protected String contractAddress_nrc2015 = "tNULSeBaN5U1GPWmPc8LJ2gpf15KXS5A2VkFaW";
+    protected String contractAddress_nrc2016 = "tNULSeBaN8YgGzmJ9qeQFKsMb15HLE1gD2oBxy";
+    protected String contractAddress_nrc2017 = "tNULSeBaMw9NQDXCymSjkuybC2haE5gygCLtRR";
+    protected String contractAddress_nrc2018 = "tNULSeBaN2wu88LKfVmkoGUTuKXXrttG7QDowe";
+    protected String contractAddress_nrc2019 = "tNULSeBaN8NUaHyUGDXQUUenb1iThYRzAqDJwK";
+    protected String contractAddress_nrc2020 = "tNULSeBaMwj95C4P8FAoEM4fc5VsCHCKQ3rtZP";
+    protected String contractAddress_nrc2021 = "tNULSeBaN1qbx2x15duGVAo5Qni7HScF9etXxQ";
+    protected String contractAddress_nrc2022 = "tNULSeBaMzwQ2nhTEEfc2dh3H6JReb22h3HC4v";
+    protected String contractAddress_nrc2023 = "tNULSeBaN2QK3vN8vAXynEaPewwztuwzH2NSUC";
+    protected String contractAddress_nrc2024 = "tNULSeBaMvpgepaBn7cYRMFEmSdWVjp5ARBXh3";
+    protected String contractAddress_nrc2025 = "tNULSeBaN3Y789JGTDTFQmAtyUHSGcZRwPADYD";
+    protected String contractAddress_nrc2026 = "tNULSeBaN23MYckd68RvKGW2TazUryPnyYwkHg";
+    protected String contractAddress_nrc2027 = "tNULSeBaN4W4U7XFbEyArJAJfNbjNwV8WP8eqo";
+    protected String contractAddress_nrc2028 = "tNULSeBaN3Xck3iQ2NvC4nJCyrMQAmRrdeAxJb";
+    protected String contractAddress_nrc2029 = "tNULSeBaMxHeQHAZhFi9PWvPLkVqXjDumfAdzJ";
+    protected String contractAddress_nrc2030 = "tNULSeBaN4LgXZJ5DmLGGLdh7s14aPfREjs3wA";
+    protected String contractAddress_nrc2031 = "tNULSeBaNAByj1ed6ZZas2huKc4pjfy931o7Sd";
+    protected String contractAddress_nrc2032 = "tNULSeBaMz314AeVfETvL1ei9EqGPpeoc942W4";
+    protected String contractAddress_nrc2033 = "tNULSeBaN3JCvpzFvPBBGA2vVfYWnEgG73AFfZ";
+    protected String contractAddress_nrc2034 = "tNULSeBaN99Y5r2nVsguatRF9yuNJdpTvtwajW";
 
     protected String methodName = "";
     protected String tokenReceiver = "";
@@ -210,6 +212,14 @@ public class BaseQuery {
     public void getBalance() throws Exception {
         Map<String, Object> balance0 = LedgerCall.getBalanceAndNonce(chain, toAddress7);
         Log.info("balance:{}", JSONUtils.obj2PrettyJson(balance0));
+    }
+
+    @Test
+    public void base64ToBase58() {
+        String base64Str = "AgACPJCMF36z+LvlLbuxYRwT48hQmgA=";
+        byte[] bytes = Base64.getDecoder().decode(base64Str);
+        Log.info("address is {}", AddressTool.getStringAddressByBytes(bytes));
+
     }
 
     /**
@@ -238,7 +248,7 @@ public class BaseQuery {
      */
     @Test
     public void contractInfo() throws Exception {
-        Map params = this.makeContractInfoParams("tNULSeBaN4BSA6qo2J6eEfCx2rNyyY2TRwhhe8");
+        Map params = this.makeContractInfoParams("tNULSeBaNAsyKtqQRFPVQkxtiEch4hw4X6iYdZ");
         Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, CONTRACT_INFO, params);
         Map result = (HashMap) (((HashMap) cmdResp2.getResponseData()).get(CONTRACT_INFO));
         Assert.assertTrue(null != result);
@@ -257,7 +267,7 @@ public class BaseQuery {
      */
     @Test
     public void contractResult() throws Exception {
-        Map params = this.makeContractResultParams("facbc349fd16a3ad69526cedc07e00659c3953a27089480681c1cfc34511784d");
+        Map params = this.makeContractResultParams("48a41b8c4c1ac220126a281fcf8f5037539db5248c789b56821129e6e7e20410");
         Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, CONTRACT_RESULT, params);
         Map result = (HashMap) (((HashMap) cmdResp2.getResponseData()).get(CONTRACT_RESULT));
         Assert.assertTrue(null != result);
