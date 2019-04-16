@@ -23,8 +23,8 @@ EOF
 NULSTAR_URL="http://pub-readingpal.oss-cn-hangzhou.aliyuncs.com/nulstar.tar.gz"
 #获取参数
 #输出目录
-NULS_WALLET_TAR_NAME="NULS-Wallet-linux64-alpha2"
-MODULES_PATH="./${NULS_WALLET_TAR_NAME}"
+NULS_WALLET_TAR_NAME="./NULS-Wallet-linux64-alpha2"
+MODULES_PATH="${NULS_WALLET_TAR_NAME}"
 #RELEASE_OUT_PATH="./NULS-Walltet-linux64-alpha1"
 #是否马上更新代码
 DOPULL=
@@ -40,7 +40,7 @@ do
             b)     DOPULL=1
 				   GIT_BRANCH="$OPTARG"	 
 					;;
-            m)     DOMOCK=1;;
+            m)     DOMOCK="1";;
 			o)	   MODULES_PATH="$OPTARG";;
 			h)     help ;;
 			j)     JAVA_HOME="$OPTARG";;
@@ -130,7 +130,7 @@ if [ ! -d "$MODULES_PATH/Modules" ]; then
 	mkdir $MODULES_PATH/Modules
 fi
 #默认日志目录
-MODULES_LOGS_PATH=${MODULES_PATH}/logs
+MODULES_LOGS_PATH=${MODULES_PATH}/Logs
 if [ ! -d "$MODULES_LOGS_PATH" ]; then
 	#statements
 	mkdir $MODULES_LOGS_PATH
@@ -446,16 +446,13 @@ log "============ COPY JRE TO libs ==================="
         if [ ! -d "${LIBS_PATH}/JAVA/JRE" ]; then
             mkdir "${LIBS_PATH}/JAVA/JRE"
         fi
+        rm -Rf "${LIBS_PATH}/JAVA/JRE/11.0.2"
         cp -r ${JRE_HOME} "${LIBS_PATH}/JAVA/JRE/11.0.2"
     fi
 log "============ COPY JRE TO libs done ============"
 fi
-if [ -n "${DOMOCK}" ]; then
-	log "============== BUILD start-mykernel script ====================="
-	cp "${BUILD_PATH}/start-mykernel.sh" "${MODULES_BIN_PATH}/"
-	chmod u+x "${MODULES_BIN_PATH}/start-mykernel.sh"
-	cp "${BUILD_PATH}/stop-mykernel.sh" "${MODULES_BIN_PATH}/"
-	chmod u+x "${MODULES_BIN_PATH}/stop-mykernel.sh"
+
+log "================ COPY SCRIPT ==============="
 	cp "${BUILD_PATH}/default-config.ncf" "${MODULES_BIN_PATH}/nuls.ncf"
 	chmod u+r "${MODULES_BIN_PATH}/nuls.ncf"
 	cp "${BUILD_PATH}/cmd.sh" "${MODULES_BIN_PATH}/"
@@ -475,12 +472,20 @@ if [ -n "${DOMOCK}" ]; then
 	chmod u+x "${MODULES_BIN_PATH}/shutdown.sh"
 	cp "${BUILD_PATH}/tmp/check-status-temp.sh" "${MODULES_BIN_PATH}/check-status.sh"
 	chmod u+x "${MODULES_BIN_PATH}/check-status.sh"
+log "===============  COPY SCRIPT DONE ==========="
+
+if [ -n "${DOMOCK}" ]; then
+	log "============== BUILD start-mykernel script ====================="
+	cp "${BUILD_PATH}/start-mykernel.sh" "${MODULES_BIN_PATH}/"
+	chmod u+x "${MODULES_BIN_PATH}/start-mykernel.sh"
+	cp "${BUILD_PATH}/stop-mykernel.sh" "${MODULES_BIN_PATH}/"
+	chmod u+x "${MODULES_BIN_PATH}/stop-mykernel.sh"
 	log "============== BUILD start-mykernel script done ================"
 fi
 
 if [ -n "${BUILDTAR}" ]; then
     log "============ BUILD ${RELEASE_PATH}.tar.gz ==================="
-    tar -zcPf "${NULS_WALLET_TAR_NAME}.tar.gz" ${RELEASE_PATH}
+    tar -zcPf "${NULS_WALLET_TAR_NAME}.tar.gz" ${NULS_WALLET_TAR_NAME}
     log "============ BUILD ${NULS_WALLET_TAR_NAME}.tar.gz FINISH==================="
 fi
 log "============ ${RELEASE_PATH} PACKAGE FINISH 🍺🍺🍺🎉🎉🎉 ==============="

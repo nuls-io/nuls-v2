@@ -111,8 +111,8 @@ fi
 #判断用户是否指定日志目录
 if [ -z "$LOGPATH" ];
 then
-    if [ ! -d ./logs ]; then
-        mkdir ./logs
+    if [ ! -d ./Logs ]; then
+        mkdir ./Logs
     fi
     LOGPATH="`get_fullpath ./logs`"
 fi
