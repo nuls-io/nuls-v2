@@ -26,6 +26,7 @@ package io.nuls.transaction.rpc.cmd;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import io.nuls.base.data.NulsDigestData;
+import io.nuls.base.data.Transaction;
 import io.nuls.rpc.cmd.BaseCmd;
 import io.nuls.rpc.model.CmdAnnotation;
 import io.nuls.rpc.model.Parameter;
@@ -43,13 +44,17 @@ import io.nuls.transaction.constant.TxConstant;
 import io.nuls.transaction.constant.TxErrorCode;
 import io.nuls.transaction.manager.ChainManager;
 import io.nuls.transaction.model.bo.Chain;
+import io.nuls.transaction.model.bo.VerifyLedgerResult;
+import io.nuls.transaction.model.bo.VerifyResult;
 import io.nuls.transaction.model.dto.CrossTxTransferDTO;
 import io.nuls.transaction.model.po.TransactionConfirmedPO;
+import io.nuls.transaction.rpc.call.LedgerCall;
 import io.nuls.transaction.service.ConfirmedTxService;
 import io.nuls.transaction.service.TxGenerateService;
 import io.nuls.transaction.service.TxService;
 import io.nuls.transaction.storage.rocksdb.UnconfirmedTxStorageService;
 import io.nuls.transaction.utils.LoggerUtil;
+import io.nuls.transaction.utils.TxUtil;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -199,6 +204,54 @@ public class ClientCmd extends BaseCmd {
             return failed(TxErrorCode.SYS_UNKOWN_EXCEPTION);
         }
     }
+
+    /**
+     * 验证交易接口
+     * 只做验证，包括含基础验证、验证器、账本验证。
+     *
+     * @param params
+     * @return
+     */
+    @CmdAnnotation(cmd = TxCmd.TX_VERIFYTX, version = 1.0, description = "")
+    @Parameter(parameterName = "chainId", parameterType = "int")
+    @Parameter(parameterName = "tx", parameterType = "String")
+    public Response verifyTx(Map params) {
+        Chain chain = null;
+        try {
+            ObjectUtils.canNotEmpty(params.get("chainId"), TxErrorCode.PARAMETER_ERROR.getMsg());
+            ObjectUtils.canNotEmpty(params.get("tx"), TxErrorCode.PARAMETER_ERROR.getMsg());
+            chain = chainManager.getChain((int) params.get("chainId"));
+            if (null == chain) {
+                throw new NulsException(TxErrorCode.CHAIN_NOT_FOUND);
+            }
+            String txStr = (String) params.get("tx");
+            //将txStr转换为Transaction对象
+            Transaction tx = TxUtil.getInstanceRpcStr(txStr, Transaction.class);
+
+            VerifyResult verifyResult = txService.verify(chain, tx, true);
+            if(!verifyResult.getResult()){
+                return failed(verifyResult.getErrorCode());
+            }
+            VerifyLedgerResult verifyLedgerResult = LedgerCall.verifyCoinData(chain, RPCUtil.encode(tx.serialize()));
+            if(verifyLedgerResult.getCode() != VerifyLedgerResult.SUCCESS
+                    && verifyLedgerResult.getCode() != VerifyLedgerResult.ORPHAN ){
+                return failed(verifyLedgerResult.getErrorCode());
+            }
+            Map<String, Object> resultMap = new HashMap<>(TxConstant.INIT_CAPACITY_2);
+            resultMap.put("value", tx.getHash().getDigestHex());
+            return success(resultMap);
+        } catch (NulsException e) {
+            errorLogProcess(chain, e);
+            return failed(e.getErrorCode());
+        } catch (Exception e) {
+            errorLogProcess(chain, e);
+            return failed(TxErrorCode.SYS_UNKOWN_EXCEPTION);
+        }
+    }
+
+
+
+
 
 
     /**

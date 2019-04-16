@@ -8,7 +8,7 @@ import io.nuls.tools.exception.NulsException;
 import io.nuls.transaction.cache.PackablePool;
 import io.nuls.transaction.constant.TxConstant;
 import io.nuls.transaction.model.bo.Chain;
-import io.nuls.transaction.model.bo.VerifyTxResult;
+import io.nuls.transaction.model.bo.VerifyLedgerResult;
 import io.nuls.transaction.model.po.TransactionConfirmedPO;
 import io.nuls.transaction.rpc.call.LedgerCall;
 import io.nuls.transaction.rpc.call.NetworkCall;
@@ -85,12 +85,12 @@ public class VerifyTxProcessTask implements Runnable {
             chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("新交易处理.....hash:{}", tx.getHash().getDigestHex());
             long s1 = System.currentTimeMillis();
             int chainId = chain.getChainId();
-            boolean rs = txService.verify(chain, tx);
-            chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("验证器花费时间:{}", System.currentTimeMillis() - s1);
             //todo 跨链交易单独处理, 是否需要进行跨链验证？
-            if (!rs) {
+            if (!txService.verify(chain, tx).getResult()) {
                 return false;
             }
+            chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("验证器花费时间:{}", System.currentTimeMillis() - s1);
+
             long get = System.currentTimeMillis();
             //获取一笔交易
             TransactionConfirmedPO existTx = txService.getTransaction(chain, tx.getHash());
@@ -99,12 +99,12 @@ public class VerifyTxProcessTask implements Runnable {
             }
             chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("交易获取花费时间:{}", System.currentTimeMillis() - get);
             long timeCoinData = System.currentTimeMillis();
-            VerifyTxResult verifyTxResult = LedgerCall.commitUnconfirmedTx(chain, RPCUtil.encode(tx.serialize()));
+            VerifyLedgerResult verifyLedgerResult = LedgerCall.commitUnconfirmedTx(chain, RPCUtil.encode(tx.serialize()));
             chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("验证CoinData花费时间:{}", System.currentTimeMillis() - timeCoinData);
             long s2 = System.currentTimeMillis();
             chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("交易验证阶段花费时间:{}", s2 - s1);
             chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("- - - - - -");
-            if(verifyTxResult.success()){
+            if(verifyLedgerResult.success()){
                 if(chain.getPackaging().get()) {
                     //当节点是出块节点时, 才将交易放入待打包队列
                     packablePool.add(chain, tx);
@@ -121,8 +121,8 @@ public class VerifyTxProcessTask implements Runnable {
             }
             chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug(
                     "coinData not success - code: {}, - reason:{}, type:{} - txhash:{}",
-                    verifyTxResult.getCode(),  verifyTxResult.getDesc(), tx.getType(), tx.getHash().getDigestHex());
-            if(verifyTxResult.getCode() == VerifyTxResult.ORPHAN && !isOrphanTx){
+                    verifyLedgerResult.getCode(),  verifyLedgerResult.getDesc(), tx.getType(), tx.getHash().getDigestHex());
+            if(verifyLedgerResult.getCode() == VerifyLedgerResult.ORPHAN && !isOrphanTx){
                 processOrphanTx(tx);
             }else if(isOrphanTx){
                 long currentTimeMillis = TimeUtils.getCurrentTimeMillis();

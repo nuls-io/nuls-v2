@@ -24,17 +24,22 @@
 
 package io.nuls.transaction.model.bo;
 
+import io.nuls.tools.constant.ErrorCode;
+import io.nuls.transaction.constant.TxErrorCode;
+
 /**
  * 验证交易结果组合封装 返回结果
  * @author: Charlie
  * @date: 2019-01-11
  */
-public class VerifyTxResult {
+public class VerifyLedgerResult {
 
     /** 1校验通过，2孤儿交易 3双花 4 其他异常 5重复交易(已确认过)*/
     private int code;
     /** 校验返回描述*/
     private String desc;
+
+    private ErrorCode errorCode;
 
     public static final int SUCCESS = 1;
     public static final int ORPHAN = 2;
@@ -42,11 +47,27 @@ public class VerifyTxResult {
     public static final int OTHER_EXCEPTION = 4;
     public static final int CONFIRMED = 5;
 
-    public VerifyTxResult(int code, String desc) {
+    public VerifyLedgerResult(int code, String desc) {
         this.code = code;
         this.desc = desc;
+        switch (code){
+            case 1:
+                errorCode = TxErrorCode.SUCCESS;
+                break;
+            case 2:
+                errorCode = TxErrorCode.ORPHAN_TX;
+                break;
+            case 3:
+                errorCode = TxErrorCode.TX_REPEATED;
+                break;
+            case 5:
+                errorCode = TxErrorCode.TX_ALREADY_EXISTS;
+                break;
+            default:
+                errorCode = TxErrorCode.TX_LEDGER_VERIFY_FAIL;
+        }
     }
-    public VerifyTxResult(int code) {
+    public VerifyLedgerResult(int code) {
         this.code = code;
     }
 
@@ -60,6 +81,14 @@ public class VerifyTxResult {
 
     public void setCode(int code) {
         this.code = code;
+    }
+
+    public ErrorCode getErrorCode() {
+        return errorCode;
+    }
+
+    public void setErrorCode(ErrorCode errorCode) {
+        this.errorCode = errorCode;
     }
 
     public String getDesc() {

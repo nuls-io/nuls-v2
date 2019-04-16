@@ -82,7 +82,7 @@ public class VerifyCtxProcessTask implements Runnable {
             for (CrossTx ctx : unprocessedList) {
                 Transaction tx = ctx.getTx();
                 //交易验证
-                if(!txService.verify(chain, tx)){
+                if(!txService.verify(chain, tx).getResult()){
                     break;
                 }
                 CrossTxData crossTxData = TxUtil.getInstance(tx.getTxData(), CrossTxData.class);

@@ -21,7 +21,7 @@ import io.nuls.transaction.manager.TxManager;
 import io.nuls.transaction.model.bo.Chain;
 import io.nuls.transaction.model.bo.TxPackage;
 import io.nuls.transaction.model.bo.TxRegister;
-import io.nuls.transaction.model.bo.VerifyTxResult;
+import io.nuls.transaction.model.bo.VerifyLedgerResult;
 import io.nuls.transaction.model.dto.ModuleTxRegisterDTO;
 import io.nuls.transaction.model.dto.TxRegisterDTO;
 import io.nuls.transaction.model.po.TransactionConfirmedPO;
@@ -570,7 +570,7 @@ public class TransactionCmd extends BaseCmd {
     @Parameter(parameterName = "stateRoot", parameterType = "String")
     @Parameter(parameterName = "preStateRoot", parameterType = "String")
     public Response batchVerify(Map params) {
-        VerifyTxResult verifyTxResult = null;
+        VerifyLedgerResult verifyLedgerResult = null;
         Chain chain = null;
         try {
             ObjectUtils.canNotEmpty(params.get("chainId"), TxErrorCode.PARAMETER_ERROR.getMsg());
@@ -592,7 +592,7 @@ public class TransactionCmd extends BaseCmd {
             String stateRoot = (String) params.get("stateRoot");
             String preStateRoot = (String) params.get("preStateRoot");
 
-            verifyTxResult = txService.batchVerify(chain, txList, height, blockTime, packingAddress, stateRoot, preStateRoot);
+            verifyLedgerResult = txService.batchVerify(chain, txList, height, blockTime, packingAddress, stateRoot, preStateRoot);
         } catch (NulsException e) {
             errorLogProcess(chain, e);
             return failed(e.getErrorCode());
@@ -601,7 +601,7 @@ public class TransactionCmd extends BaseCmd {
             return failed(TxErrorCode.SYS_UNKOWN_EXCEPTION);
         }
         Map<String, Object> resultMap = new HashMap<>(TxConstant.INIT_CAPACITY_2);
-        boolean result = verifyTxResult.success();
+        boolean result = verifyLedgerResult.success();
         resultMap.put("value", result);
         return success(resultMap);
     }

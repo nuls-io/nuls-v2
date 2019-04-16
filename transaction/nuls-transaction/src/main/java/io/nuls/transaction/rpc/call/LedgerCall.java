@@ -8,7 +8,7 @@ import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.model.BigIntegerUtils;
 import io.nuls.transaction.constant.TxConstant;
 import io.nuls.transaction.model.bo.Chain;
-import io.nuls.transaction.model.bo.VerifyTxResult;
+import io.nuls.transaction.model.bo.VerifyLedgerResult;
 
 import java.math.BigInteger;
 import java.util.HashMap;
@@ -23,23 +23,47 @@ import java.util.Map;
  */
 public class LedgerCall {
 
+
+    /**
+     * 验证单个交易的CoinData
+     *
+     * @param chain
+     * @param tx
+     * @return
+     */
+    public static VerifyLedgerResult verifyCoinData(Chain chain, String tx) {
+        try {
+            Map<String, Object> params = new HashMap<>(TxConstant.INIT_CAPACITY_8);
+            params.put(Constants.VERSION_KEY_STR, TxConstant.RPC_VERSION);
+            params.put("chainId", chain.getChainId());
+            params.put("tx", tx);
+            HashMap result = (HashMap) TransactionCall.request(ModuleE.LG.abbr,"verifyCoinData", params);
+            return new VerifyLedgerResult((int)result.get("validateCode"), (String)result.get("validateDesc"));
+        } catch (Exception e) {
+            chain.getLoggerMap().get(TxConstant.LOG_TX).error(e);
+            return new VerifyLedgerResult(VerifyLedgerResult.OTHER_EXCEPTION, "Call verifyCoinData failed!");
+        }
+    }
+
+
+
     /**
      * 批量验证CoinData时的单个发送(不用于单个交易的独立验证)
      * @param chain
      * @param tx
      * @return
      */
-    public static VerifyTxResult verifyCoinData(Chain chain, String tx) {
+    public static VerifyLedgerResult verifyCoinDataPackaged(Chain chain, String tx) {
         try {
             Map<String, Object> params = new HashMap<>(TxConstant.INIT_CAPACITY_8);
             params.put(Constants.VERSION_KEY_STR, TxConstant.RPC_VERSION);
             params.put("chainId", chain.getChainId());
             params.put("tx", tx);
-            HashMap result = (HashMap) TransactionCall.request(ModuleE.LG.abbr,"validateCoinData", params);
-            return new VerifyTxResult((int)result.get("validateCode"), (String)result.get("validateDesc"));
+            HashMap result = (HashMap) TransactionCall.request(ModuleE.LG.abbr,"verifyCoinDataPackaged", params);
+            return new VerifyLedgerResult((int)result.get("validateCode"), (String)result.get("validateDesc"));
         } catch (Exception e) {
             chain.getLoggerMap().get(TxConstant.LOG_TX).error(e);
-            return new VerifyTxResult(VerifyTxResult.OTHER_EXCEPTION, "Call validateCoinData failed!");
+            return new VerifyLedgerResult(VerifyLedgerResult.OTHER_EXCEPTION, "Call verifyCoinDataPackaged failed!");
         }
     }
 
@@ -159,17 +183,17 @@ public class LedgerCall {
      * @param chain
      * @param txStr
      */
-    public static VerifyTxResult commitUnconfirmedTx(Chain chain, String txStr) throws NulsException {
+    public static VerifyLedgerResult commitUnconfirmedTx(Chain chain, String txStr) throws NulsException {
         try {
             Map<String, Object> params = new HashMap<>(TxConstant.INIT_CAPACITY_8);
             params.put(Constants.VERSION_KEY_STR, TxConstant.RPC_VERSION);
             params.put("chainId", chain.getChainId());
             params.put("tx", txStr);
             HashMap result = (HashMap)TransactionCall.request(ModuleE.LG.abbr, "commitUnconfirmedTx", params);
-            return new VerifyTxResult((int)result.get("validateCode"), (String)result.get("validateDesc"));
+            return new VerifyLedgerResult((int)result.get("validateCode"), (String)result.get("validateDesc"));
         } catch (Exception e) {
             chain.getLoggerMap().get(TxConstant.LOG_TX).error(e);
-            return new VerifyTxResult(VerifyTxResult.OTHER_EXCEPTION, "Call validateCoinData failed!");
+            return new VerifyLedgerResult(VerifyLedgerResult.OTHER_EXCEPTION, "Call validateCoinData failed!");
         }
     }
 

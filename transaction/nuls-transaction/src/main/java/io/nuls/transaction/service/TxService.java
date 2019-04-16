@@ -3,10 +3,7 @@ package io.nuls.transaction.service;
 import io.nuls.base.data.NulsDigestData;
 import io.nuls.base.data.Transaction;
 import io.nuls.tools.exception.NulsException;
-import io.nuls.transaction.model.bo.Chain;
-import io.nuls.transaction.model.bo.TxPackage;
-import io.nuls.transaction.model.bo.TxRegister;
-import io.nuls.transaction.model.bo.VerifyTxResult;
+import io.nuls.transaction.model.bo.*;
 import io.nuls.transaction.model.po.TransactionConfirmedPO;
 
 import java.util.List;
@@ -53,7 +50,7 @@ public interface TxService {
      * @param tx
      * @return
      */
-    boolean verify(Chain chain, Transaction tx);
+    VerifyResult verify(Chain chain, Transaction tx);
 
     /**
      * 验证交易,不执行基础的校验
@@ -62,7 +59,7 @@ public interface TxService {
      * @param incloudBasic
      * @return
      */
-    boolean verify(Chain chain, Transaction tx, boolean incloudBasic);
+    VerifyResult verify(Chain chain, Transaction tx, boolean incloudBasic);
 
     /**
      * 交易基础验证
@@ -146,7 +143,7 @@ public interface TxService {
      * @return
      * @throws NulsException
      */
-    VerifyTxResult batchVerify(Chain chain, List<String> list, long blockHeight, long blockTime, String packingAddress, String stateRoot, String preStateRoot) throws Exception;
+    VerifyLedgerResult batchVerify(Chain chain, List<String> list, long blockHeight, long blockTime, String packingAddress, String stateRoot, String preStateRoot) throws Exception;
 
 
     /**

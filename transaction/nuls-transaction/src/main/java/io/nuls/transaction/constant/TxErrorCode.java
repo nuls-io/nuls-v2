@@ -55,7 +55,7 @@ public interface TxErrorCode {
     ErrorCode CROSS_TX_PAYEE_CHAINID_NOT_SAME = ErrorCode.init("10044");
     ErrorCode COINDATA_IS_INCOMPLETE = ErrorCode.init("10045");
     ErrorCode PAYEE_AND_PAYER_IS_THE_SAME_CHAIN = ErrorCode.init("10046");
-    ErrorCode TRANSACTION_ALREADY_EXISTS = ErrorCode.init("10047");
+    ErrorCode TX_ALREADY_EXISTS = ErrorCode.init("10047");
     ErrorCode ADDRESS_NOT_BELONG_TO_MULTI_SIGN_ACCOUNT = ErrorCode.init("10048");
     ErrorCode DESERIALIZE_TX_ERROR = ErrorCode.init("10049");
     ErrorCode DESERIALIZE_COINDATA_ERROR = ErrorCode.init("10050");
@@ -72,6 +72,7 @@ public interface TxErrorCode {
     ErrorCode SIGN_ADDRESS_NOT_MATCH_COINFROM = ErrorCode.init("10061");
     ErrorCode ACCOUNT_NOT_ENCRYPTED = ErrorCode.init("10062");
     ErrorCode HEIGHT_UPDATE_UNABLE_TO_REPACKAGE  = ErrorCode.init("10063");
+    ErrorCode TX_LEDGER_VERIFY_FAIL = ErrorCode.init("10064");
 
 
 
@@ -94,7 +95,7 @@ public interface TxErrorCode {
     ErrorCode TX_DATA_VALIDATION_ERROR = ErrorCode.init("31008");
     ErrorCode FEE_NOT_RIGHT = ErrorCode.init("31009");
     ErrorCode ROLLBACK_TRANSACTION_FAILED = ErrorCode.init("31010");
-    ErrorCode TRANSACTION_REPEATED = ErrorCode.init("31011");
+    ErrorCode TX_REPEATED = ErrorCode.init("31011");
     ErrorCode TOO_SMALL_AMOUNT = ErrorCode.init("31012");
     ErrorCode TX_SIZE_TOO_LARGE = ErrorCode.init("31013");
     ErrorCode SAVE_TX_ERROR = ErrorCode.init("31014");
