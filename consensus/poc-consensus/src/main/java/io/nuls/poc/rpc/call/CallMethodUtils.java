@@ -61,7 +61,9 @@ public class CallMethodUtils {
                 throw new NulsException(ConsensusErrorCode.ACCOUNT_VALID_ERROR);
             }
             return callResult;
-        } catch (Exception e) {
+        } catch (NulsException e) {
+            throw e;
+        }catch (Exception e) {
             throw new NulsException(e);
         }
     }
