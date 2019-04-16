@@ -1,13 +1,11 @@
-package io.nuls.transaction.storage.rocksdb;
+package io.nuls.transaction.storage;
 
-import io.nuls.base.data.NulsDigestData;
 import io.nuls.base.data.Transaction;
 import io.nuls.tools.core.ioc.SpringLiteContext;
 import io.nuls.tools.model.StringUtils;
 import io.nuls.transaction.TestConstant;
 import io.nuls.transaction.TransactionBootstrap;
 import io.nuls.transaction.manager.ChainManager;
-import io.nuls.transaction.model.bo.CrossTx;
 import io.nuls.transaction.model.po.TransactionConfirmedPO;
 import org.junit.Assert;
 import org.junit.BeforeClass;
@@ -69,43 +67,6 @@ public class ConfirmedTxStorageServiceTest {
             hashList.add(tx.getHash().getDigestHex());
         }
         confirmedTxStorageService.saveTxList(chainId, list);
-
-       /* //test getTxList
-        List<Transaction> txList = confirmedTxStorageService.getTxList(chainId, hashList);
-        Assert.assertEquals(hashList.size(), txList.size());
-
-        NulsDigestData hash = list.get(0).getTx().getHash();
-        //test getTx
-        TransactionConfirmedPO tx = confirmedTxStorageService.getTx(chainId, hash);
-        Assert.assertEquals(hash, tx.getTx().getHash());
-        //test removeTxList
-        List<byte[]> removeList = List.of(hashList.get(0));
-        confirmedTxStorageService.removeTxList(chainId, removeList);
-        tx = confirmedTxStorageService.getTx(chainId, hash);
-        Assert.assertNull(tx);*/
     }
 
-    @Test
-    public void saveCrossTxEffectList() throws Exception {
-        //test saveCrossTxEffectList
-        List<CrossTx> list = new ArrayList<>();
-        List<NulsDigestData> hashList = new ArrayList<>();
-        List<byte[]> removeList = new ArrayList<>();
-        for (int i = 0; i < 5; i++) {
-            CrossTx ctx = TestConstant.createCrossChainTx();
-            list.add(ctx);
-            hashList.add(ctx.getTx().getHash());
-            removeList.add(ctx.getTx().getHash().serialize());
-        }
-        boolean result = confirmedTxStorageService.saveCrossTxEffectList(chainId, height, hashList);
-        Assert.assertTrue(result);
-
-        //test getCrossTxEffectList
-        List<NulsDigestData> txList = confirmedTxStorageService.getCrossTxEffectList(chainId, height);
-        Assert.assertEquals(hashList.size(), txList.size());
-
-        //test removeTxList
-        result = confirmedTxStorageService.removeCrossTxEffectList(chainId, height);
-        Assert.assertTrue(result);
-    }
 }

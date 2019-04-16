@@ -24,7 +24,6 @@
 
 package io.nuls.transaction.utils;
 
-import ch.qos.logback.classic.Level;
 import io.nuls.tools.log.logback.LoggerBuilder;
 import io.nuls.tools.log.logback.NulsLogger;
 

@@ -52,7 +52,6 @@ import io.nuls.transaction.model.bo.Chain;
 import io.nuls.transaction.model.bo.TxRegister;
 import io.nuls.transaction.model.bo.config.ConfigBean;
 import io.nuls.transaction.model.dto.CoinDTO;
-import io.nuls.transaction.model.dto.CrossTxTransferDTO;
 import io.nuls.transaction.rpc.call.AccountCall;
 import io.nuls.transaction.rpc.call.LedgerCall;
 import io.nuls.transaction.rpc.call.TransactionCall;
@@ -565,22 +564,6 @@ public class TxValid {
         tx.parse(new NulsByteBuffer(RPCUtil.decode(str)));
         return tx;
     }
-
-    private String createCtxTransfer() throws Exception {
-        CrossTxTransferDTO ctxTransfer = new CrossTxTransferDTO(chain.getChainId(),
-                createFromCoinDTOList(), createToCoinDTOList(), "this is cross-chain transaction");
-        //调接口
-        String json = JSONUtils.obj2json(ctxTransfer);
-        Map<String, Object> params = JSONUtils.json2map(json);
-        Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.TX.abbr, "tx_createCtx", params);
-        Assert.assertTrue(null != response.getResponseData());
-        Map map = (HashMap) ((HashMap) response.getResponseData()).get("tx_createCtx");
-        Assert.assertTrue(null != map);
-        String hash = (String) map.get("value");
-        Log.debug("{}", hash);
-        return hash;
-    }
-
 
     private String getPriKeyByAddress(String address) throws Exception {
         Map<String, Object> params = new HashMap<>();

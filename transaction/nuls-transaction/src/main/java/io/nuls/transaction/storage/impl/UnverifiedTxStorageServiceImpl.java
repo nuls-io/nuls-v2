@@ -22,40 +22,53 @@
  * SOFTWARE.
  *
  */
-package io.nuls.transaction.service.impl;
 
-import io.nuls.tools.basic.Result;
-import io.nuls.tools.core.annotation.Autowired;
+package io.nuls.transaction.storage.impl;
+
+
+import io.nuls.base.data.Transaction;
 import io.nuls.tools.core.annotation.Component;
-import io.nuls.transaction.manager.ChainManager;
-import io.nuls.transaction.service.ChainService;
+import io.nuls.tools.exception.NulsException;
+import io.nuls.transaction.model.bo.Chain;
+import io.nuls.transaction.storage.UnverifiedTxStorageService;
+import io.nuls.transaction.utils.TxUtil;
 
-import java.util.Map;
+import java.io.IOException;
+
+import static io.nuls.transaction.utils.LoggerUtil.Log;
 
 /**
- * 管理链的运行和停止接口实现
- * Management chain run and stop interface implementation
+ * 未验证交易存储
+ *
  * @author: qinyifeng
- * @date: 2018/12/13
+ * @date: 2018/11/29
  */
 @Component
-public class ChainServiceImpl implements ChainService {
-    @Autowired
-    private ChainManager chainManager;
+public class UnverifiedTxStorageServiceImpl implements UnverifiedTxStorageService {
 
     @Override
-    public Result stopChain(Map<String, Object> params) {
+    public boolean putTx(Chain chain, Transaction tx) {
+        try {
+            chain.getUnverifiedQueue().offer(tx.serialize());
+            return true;
+        } catch (IOException e) {
+            Log.error(e);
+        }
+        return false;
+    }
+
+    @Override
+    public Transaction pollTx(Chain chain) {
+        try {
+            return TxUtil.getTransaction(chain.getUnverifiedQueue().poll());
+        } catch (NulsException e) {
+            Log.error(e);
+        }
         return null;
     }
 
     @Override
-    public Result runChain(Map<String, Object> params) {
-        return null;
+    public long size(Chain chain) {
+        return chain.getUnverifiedQueue().size();
     }
-
-    @Override
-    public Result runMainChain(Map<String, Object> params) {
-        return null;
-    }
-
 }

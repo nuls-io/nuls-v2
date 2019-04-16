@@ -30,7 +30,6 @@ import io.nuls.base.basic.TransactionFeeCalculator;
 import io.nuls.base.constant.TxStatusEnum;
 import io.nuls.base.data.*;
 import io.nuls.base.signture.SignatureUtil;
-import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.util.RPCUtil;
 import io.nuls.rpc.util.TimeUtils;
 import io.nuls.tools.basic.Result;
@@ -53,12 +52,10 @@ import io.nuls.transaction.model.bo.*;
 import io.nuls.transaction.model.po.TransactionConfirmedPO;
 import io.nuls.transaction.rpc.call.*;
 import io.nuls.transaction.service.ConfirmedTxService;
-import io.nuls.transaction.service.CtxService;
 import io.nuls.transaction.service.TxService;
-import io.nuls.transaction.storage.rocksdb.ConfirmedTxStorageService;
-import io.nuls.transaction.storage.rocksdb.CtxStorageService;
-import io.nuls.transaction.storage.rocksdb.UnconfirmedTxStorageService;
-import io.nuls.transaction.storage.rocksdb.UnverifiedTxStorageService;
+import io.nuls.transaction.storage.ConfirmedTxStorageService;
+import io.nuls.transaction.storage.UnconfirmedTxStorageService;
+import io.nuls.transaction.storage.UnverifiedTxStorageService;
 import io.nuls.transaction.utils.TxUtil;
 
 import java.io.IOException;
@@ -88,13 +85,7 @@ public class TxServiceImpl implements TxService {
     private UnconfirmedTxStorageService unconfirmedTxStorageService;
 
     @Autowired
-    private CtxStorageService ctxStorageService;
-
-    @Autowired
     private ConfirmedTxService confirmedTxService;
-
-    @Autowired
-    private CtxService ctxService;
 
     @Autowired
     private ConfirmedTxStorageService confirmedTxStorageService;
@@ -186,10 +177,6 @@ public class TxServiceImpl implements TxService {
             if (incloudBasic) {
                 baseValidateTx(chain, tx, txRegister);
             }
-            // TODO  由于跨链交易直接调模块内部验证器接口，可不通过RPC接口
-          /**  if (tx.getType() == TxConstant.TX_TYPE_CROSS_CHAIN_TRANSFER) {
-                return this.crossTransactionValidator(chain, tx);
-            }*/
             if(TransactionCall.txValidatorProcess(chain, txRegister, RPCUtil.encode(tx.serialize()))){
               return VerifyResult.success();
             }else{
@@ -293,17 +280,24 @@ public class TxServiceImpl implements TxService {
             throw new NulsException(TxErrorCode.COINFROM_NOT_FOUND);
         }
         int chainId = chain.getConfig().getChainId();
+        //验证支付方是不是属于同一条链
+        Integer fromChainId = null;
         for (CoinFrom coinFrom : listFrom) {
             byte[] addrBytes = coinFrom.getAddress();
             int addrChainId = AddressTool.getChainIdByAddress(addrBytes);
             int assetsId = coinFrom.getAssetsId();
 
+            //所有from是否是同一条链的地址
+            if (null == fromChainId) {
+                fromChainId = addrChainId;
+            } else if (fromChainId != addrChainId) {
+                throw new NulsException(TxErrorCode.COINFROM_NOT_SAME_CHAINID);
+            }
             //如果不是跨链交易，from中地址对应的链id必须发起链id，跨链交易在验证器中验证
             if (type != TxConstant.TX_TYPE_CROSS_CHAIN_TRANSFER) {
                 if (chainId != addrChainId) {
                     throw new NulsException(TxErrorCode.CHAINID_ERROR);
                 }
-
             }
             //当交易不是转账以及跨链转账时，from的资产必须是该链主资产。(转账以及跨链交易，在验证器中验证资产)
             if (type != TxConstant.TX_TYPE_TRANSFER && type != TxConstant.TX_TYPE_CROSS_CHAIN_TRANSFER) {
@@ -311,16 +305,6 @@ public class TxServiceImpl implements TxService {
                     throw new NulsException(TxErrorCode.ASSETID_ERROR);
                 }
             }
-            if (chainId == txConfig.getMainChainId()) {
-                //如果chainId是主网则通过连管理验证资产是否存在
-                //todo
-               /* if (!ChainCall.verifyAssetExist(assetsChainId, assetsId)) {
-                    throw new NulsException(TxErrorCode.ASSET_NOT_EXIST);
-                }*/
-            }
-            /* 1.没有进行链内转账交易的资产合法性验证(因为可能出现链外资产)，
-               2.跨链交易(非主网发起)from地址与发起链匹配的验证，需各验证器进行验证
-             */
         }
     }
 
@@ -344,7 +328,7 @@ public class TxServiceImpl implements TxService {
             if (null == addressChainId) {
                 addressChainId = chainId;
             } else if (addressChainId != chainId) {
-                throw new NulsException(TxErrorCode.CROSS_TX_PAYER_CHAINID_MISMATCH);
+                throw new NulsException(TxErrorCode.COINTO_NOT_SAME_CHAINID);
             }
             if (TxUtil.isLegalContractAddress(coinTo.getAddress(), chain)) {
                 if (type != TxConstant.TX_TYPE_COINBASE && type != TxConstant.TX_TYPE_CALL_CONTRACT) {
@@ -371,7 +355,6 @@ public class TxServiceImpl implements TxService {
             //系统交易没有手续费
             return;
         }
-        //int chainId = chain.getConfig().getChainId();
         BigInteger feeFrom = BigInteger.ZERO;
         for (CoinFrom coinFrom : coinData.getFrom()) {
             feeFrom = feeFrom.add(accrueFee(type, chain, coinFrom));
@@ -423,83 +406,6 @@ public class TxServiceImpl implements TxService {
 
 
     /**
-     * 跨链交易验证器
-     * 交易类型为跨链交易
-     * 地址和签名一一对应
-     * from里面的资产是否存在，是否可以进行跨链交易
-     * 必须包含NULS资产的from
-     * 验证txData发起链id和from地址链id是否一致
-     *
-     * @param chain
-     * @param tx
-     * @return Result
-     */
-    @Override
-    public boolean crossTransactionValidator(Chain chain, Transaction tx) throws NulsException {
-        if (null == tx.getCoinData() || tx.getCoinData().length == 0) {
-            throw new NulsException(TxErrorCode.COINDATA_NOT_FOUND);
-        }
-        CoinData coinData = TxUtil.getCoinData(tx);
-        if (!validateCoinFrom(coinData.getFrom())) {
-            return false;
-        }
-        if (!validateCoinTo(coinData.getTo())) {
-            return false;
-        }
-        //验证txData发起链id和from地址链id是否一致
-        int fromChainId = TxUtil.getCrossTxFromsOriginChainId(tx);
-        CrossTxData crossTxData = TxUtil.getInstance(tx.getTxData(), CrossTxData.class);
-        if (fromChainId != crossTxData.getChainId()) {
-            throw new NulsException(TxErrorCode.CROSS_TX_PAYER_CHAINID_MISMATCH);
-        }
-        //验证跨链交易coinData,链的账目等
-        // TODO: 2019/3/22 有效代码 暂时没有启动chain模块
-        /** try {
-         if (!ChainCall.verifyCtxAsset(chain, tx.hex())) {
-         return false;
-         }
-         } catch (Exception e) {
-         chain.getLoggerMap().get(TxConstant.LOG_TX).error(e);
-         return false;
-         }*/
-        return true;
-    }
-
-    @Override
-    public List<String> transactionModuleValidator(Chain chain, List<String> txList) throws NulsException {
-
-        //验证不同的交易是否含有相同的CrossTxData(原始交易hash),如果有则不通过
-        Map<String, CrossTxData> map = new HashMap<>(TxConstant.INIT_CAPACITY_8);
-        List<String> list = new ArrayList<>();
-        //todo 有测试代码
-        /*int test = 0;*///测试代码 主动制造不通过的情况, 会造成不通过交易之后含有相同地址资产的交易不通过
-        for (String txStr : txList) {
-            Transaction tx = TxUtil.getInstanceRpcStr(txStr, Transaction.class);
-            try {
-                //模块统一验证器,包含单个验证器内容
-                if (!crossTransactionValidator(chain, tx)) {
-                    list.add(txStr);
-                    continue;
-                }
-            } catch (NulsException e) {
-                chain.getLoggerMap().get(TxConstant.LOG_TX).error("transactionModuleValidator single error");
-                chain.getLoggerMap().get(TxConstant.LOG_TX).error(e);
-                list.add(txStr);
-                continue;
-            }
-            CrossTxData crossTxData = TxUtil.getInstance(tx.getTxData(), CrossTxData.class);
-            if (map.containsValue(crossTxData)) {
-                list.add(tx.getHash().getDigestHex());
-            }
-          /*  if(test == 2){
-                list.add(tx.getHash().getDigestHex());
-            }
-            test++;*/
-        }
-        return list;
-    }
-
-    /**
      * 验证跨链交易的付款方数据
      *
      * @param listFrom
@@ -548,32 +454,6 @@ public class TxServiceImpl implements TxService {
         return true;
     }
 
-
-    @Override
-    public boolean crossTransactionCommit(Chain chain, List<String> txList, String blockHeaderStr) throws NulsException {
-        if (ChainCall.ctxAssetCirculateCommit(chain, txList, blockHeaderStr)) {
-            List<NulsDigestData> txHash = new ArrayList<>();
-            for (String txStr : txList) {
-                Transaction tx = TxUtil.getInstanceRpcStr(txStr, Transaction.class);
-                txHash.add(tx.getHash());
-            }
-            //保存生效高度
-            BlockHeader blockHeader = TxUtil.getInstanceRpcStr(blockHeaderStr, BlockHeader.class);
-            long effectHeight = blockHeader.getHeight() + txConfig.getMainAssetId();
-            return confirmedTxStorageService.saveCrossTxEffectList(chain.getChainId(), effectHeight, txHash);
-        }
-        return false;
-    }
-
-    @Override
-    public boolean crossTransactionRollback(Chain chain, List<String> txList, String blockHeaderStr) throws NulsException {
-        if (ChainCall.ctxAssetCirculateRollback(chain, txList, blockHeaderStr)) {
-            BlockHeader blockHeader = TxUtil.getInstanceRpcStr(blockHeaderStr, BlockHeader.class);
-            long effectHeight = blockHeader.getHeight() + txConfig.getMainAssetId();
-            return confirmedTxStorageService.removeCrossTxEffectList(chain.getChainId(), effectHeight);
-        }
-        return false;
-    }
 
     /**
      * 1.按时间取出交易执行时间为endtimestamp-500，预留500毫秒给统一验证，
@@ -630,7 +510,7 @@ public class TxServiceImpl implements TxService {
                     putBackPackablePool(chain, packingTxList, orphanTxSet);
                     return getPackableTxs(chain, endtimestamp, maxTxDataSize, chain.getBestBlockHeight() + 1, blockTime, packingAddress, preStateRoot);
                 }
-                Transaction tx = packablePool.get(chain);
+                Transaction tx = packablePool.poll(chain);
                 if (tx == null) {
                     try {
 //                        nulsLogger.debug("************* [获取交易等待], 打包结束时间与当前时间差值：{}, 循环获取交易阶段剩余时间：{}",
@@ -878,16 +758,10 @@ public class TxServiceImpl implements TxService {
                 it.remove();
                 continue;
             }
-            List<String> txHashList = null;
             TxRegister txRegister = entry.getKey();
-            if (txRegister.getModuleCode().equals(ModuleE.TX.abbr)) {
-                //模块统一验证,交易模块,不用调RPC接口
-                txHashList = transactionModuleValidator(chain, moduleList);
-            } else {
-                txHashList = TransactionCall.txModuleValidator(chain, txRegister.getModuleValidator(), txRegister.getModuleCode(), moduleList);
-                chain.getLoggerMap().get(TxConstant.LOG_TX).debug("[调用模块统一验证器] module:{}, module-code:{}, count:{} , return count:{}",
-                        txRegister.getModuleValidator(), txRegister.getModuleCode(), moduleList.size(), txHashList.size());
-            }
+            List<String> txHashList = TransactionCall.txModuleValidator(chain, txRegister.getModuleValidator(), txRegister.getModuleCode(), moduleList);
+            chain.getLoggerMap().get(TxConstant.LOG_TX).debug("[调用模块统一验证器] module:{}, module-code:{}, count:{} , return count:{}",
+                    txRegister.getModuleValidator(), txRegister.getModuleCode(), moduleList.size(), txHashList.size());
             if (null == txHashList || txHashList.size() == 0) {
                 //模块统一验证没有冲突的，从map中干掉
                 it.remove();
@@ -1021,19 +895,6 @@ public class TxServiceImpl implements TxService {
                         chain.getLoggerMap().get(TxConstant.LOG_TX).debug("batchVerify failed, tx is existed. hash:{}, -type:{}", hashStr, type);
                         return false;
                     }
-                    if (type == TxConstant.TX_TYPE_CROSS_CHAIN_TRANSFER) {
-                        CrossTxData crossTxData = TxUtil.getInstance(tx.getTxData(), CrossTxData.class);
-                        if (crossTxData.getChainId() != chain.getChainId()) {
-                            //如果是跨链交易，发起链不是当前链，则核对(跨链验证的结果)
-                            CrossTx crossTx = ctxStorageService.getTx(crossTxData.getChainId(), hash);
-                            //todo
-                            /**
-                             * 核对(跨链验证的结果)
-                             */
-                            chain.getLoggerMap().get(TxConstant.LOG_TX).debug("batchVerify failed, ctx. hash:{}, -type:{}", hashStr, type);
-                            return false;
-                        }
-                    }
                     if (!unconfirmedTxStorageService.isExists(chain.getChainId(), hash)) {
                         //不在未确认中就进行基础验证
                         try {
@@ -1093,13 +954,7 @@ public class TxServiceImpl implements TxService {
         boolean rs = true;
         while (it.hasNext()) {
             Map.Entry<TxRegister, List<String>> entry = it.next();
-            List<String> txHashList = null;
-            if (entry.getKey().getModuleCode().equals(ModuleE.TX.abbr)) {
-                //模块统一验证,交易模块,不用调RPC接口
-                txHashList = transactionModuleValidator(chain, entry.getValue());
-            } else {
-                txHashList = TransactionCall.txModuleValidator(chain, entry.getKey().getModuleValidator(), entry.getKey().getModuleCode(), entry.getValue());
-            }
+            List<String> txHashList = TransactionCall.txModuleValidator(chain, entry.getKey().getModuleValidator(), entry.getKey().getModuleCode(), entry.getValue());
             if (txHashList != null && txHashList.size() > 0) {
                 rs = false;
                 break;
@@ -1187,23 +1042,13 @@ public class TxServiceImpl implements TxService {
     }
 
     @Override
-    public void clearInvalidTx(Chain chain, List<Transaction> txList) {
-        if (txList.size() > 0) {
-            chain.getLoggerMap().get(TxConstant.LOG_TX).debug("打包集中清理统一验证过程中未通过交易..");
-        }
-        for (Transaction tx : txList) {
-            clearInvalidTx(chain, tx);
-        }
-    }
-
-    @Override
     public void clearInvalidTx(Chain chain, Transaction tx) {
         clearInvalidTx(chain, tx, false);
     }
 
     @Override
     public void clearInvalidTx(Chain chain, Transaction tx, boolean cleanLedgerUfmTx) {
-        verifySignExecutor.submit(new Callable<Boolean>() {
+        clearTxExecutor.submit(new Callable<Boolean>() {
             @Override
             public Boolean call() throws Exception {
                 //判断如果交易已被确认就不用清理了!!

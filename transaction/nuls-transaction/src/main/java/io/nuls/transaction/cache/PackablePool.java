@@ -32,7 +32,7 @@ public class PackablePool {
      *
      * @return TxContainer
      */
-    public Transaction get(Chain chain) {
+    public Transaction poll(Chain chain) {
         return chain.getTxQueue().poll();
     }
 

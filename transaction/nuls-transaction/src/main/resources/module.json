@@ -15,9 +15,5 @@
   "language": "en",
   "encoding": "UTF-8",
   "txDataRoot": "tx",
-  "ctxEffectThreshold":30,
-  "crossVerifyResultPassRate":"0.51",
-  "chainNodesResultPassRate":"0.8",
-  "recentPackagerThreshold":30,
   "unconfirmedTxExpireMs":1800000
 }

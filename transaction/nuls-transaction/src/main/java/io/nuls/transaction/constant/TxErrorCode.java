@@ -74,6 +74,9 @@ public interface TxErrorCode {
     ErrorCode HEIGHT_UPDATE_UNABLE_TO_REPACKAGE  = ErrorCode.init("10063");
     ErrorCode TX_LEDGER_VERIFY_FAIL = ErrorCode.init("10064");
 
+    ErrorCode COINFROM_NOT_SAME_CHAINID = ErrorCode.init("10065");
+    ErrorCode COINTO_NOT_SAME_CHAINID = ErrorCode.init("10066");
+
 
 
 

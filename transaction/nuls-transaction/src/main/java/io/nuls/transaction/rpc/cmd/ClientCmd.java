@@ -24,7 +24,6 @@
 
 package io.nuls.transaction.rpc.cmd;
 
-import com.fasterxml.jackson.databind.DeserializationFeature;
 import io.nuls.base.data.NulsDigestData;
 import io.nuls.base.data.Transaction;
 import io.nuls.rpc.cmd.BaseCmd;
@@ -37,7 +36,6 @@ import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.log.Log;
 import io.nuls.tools.model.ObjectUtils;
-import io.nuls.tools.parse.JSONUtils;
 import io.nuls.transaction.cache.PackablePool;
 import io.nuls.transaction.constant.TxCmd;
 import io.nuls.transaction.constant.TxConstant;
@@ -46,13 +44,11 @@ import io.nuls.transaction.manager.ChainManager;
 import io.nuls.transaction.model.bo.Chain;
 import io.nuls.transaction.model.bo.VerifyLedgerResult;
 import io.nuls.transaction.model.bo.VerifyResult;
-import io.nuls.transaction.model.dto.CrossTxTransferDTO;
 import io.nuls.transaction.model.po.TransactionConfirmedPO;
 import io.nuls.transaction.rpc.call.LedgerCall;
 import io.nuls.transaction.service.ConfirmedTxService;
-import io.nuls.transaction.service.TxGenerateService;
 import io.nuls.transaction.service.TxService;
-import io.nuls.transaction.storage.rocksdb.UnconfirmedTxStorageService;
+import io.nuls.transaction.storage.UnconfirmedTxStorageService;
 import io.nuls.transaction.utils.LoggerUtil;
 import io.nuls.transaction.utils.TxUtil;
 
@@ -80,9 +76,6 @@ public class ClientCmd extends BaseCmd {
 
     @Autowired
     private PackablePool packablePool;
-
-    @Autowired
-    private TxGenerateService txGenerateService;
 
     /**
      * 根据hash获取交易, 先查未确认, 查不到再查已确认
@@ -162,39 +155,6 @@ public class ClientCmd extends BaseCmd {
                 resultMap.put("height", tx.getBlockHeight());
                 resultMap.put("status", tx.getStatus());
             }
-            return success(resultMap);
-        } catch (NulsException e) {
-            errorLogProcess(chain, e);
-            return failed(e.getErrorCode());
-        } catch (Exception e) {
-            errorLogProcess(chain, e);
-            return failed(TxErrorCode.SYS_UNKOWN_EXCEPTION);
-        }
-    }
-
-    /**
-     * 创建跨链交易接口
-     *
-     * @param params
-     * @return
-     */
-    @CmdAnnotation(cmd = TxCmd.TX_CREATE_CROSS_TX, version = 1.0, description = "")
-    public Response createCtx(Map params) {
-        Chain chain = null;
-        try {
-            // check parameters
-            if (params == null) {
-                throw new NulsException(TxErrorCode.NULL_PARAMETER);
-            }
-            // parse params
-            JSONUtils.getInstance().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-            CrossTxTransferDTO crossTxTransferDTO = JSONUtils.json2pojo(JSONUtils.obj2json(params), CrossTxTransferDTO.class);
-            int chainId = crossTxTransferDTO.getChainId();
-            chain = chainManager.getChain(chainId);
-            String hash = txGenerateService.createCrossTransaction(chainManager.getChain(chainId),
-                    crossTxTransferDTO.getListFrom(), crossTxTransferDTO.getListTo(), crossTxTransferDTO.getRemark());
-            Map<String, Object> resultMap = new HashMap<>(TxConstant.INIT_CAPACITY_2);
-            resultMap.put("value", hash);
             return success(resultMap);
         } catch (NulsException e) {
             errorLogProcess(chain, e);
