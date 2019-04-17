@@ -94,7 +94,7 @@ public interface ApiConstant {
     //黄牌惩罚
     int PUBLISH_YELLOW = 1;
     //红牌惩罚
-    int PUTLISH_RED = 2;
+    int PUBLISH_RED = 2;
     //尝试分叉
     int TRY_FORK = 1;
     //打包双花交易
@@ -129,6 +129,9 @@ public interface ApiConstant {
     //合约不存在错误码
     int CONTRACT_NOT_EXIST = 100002;
 
+    int TRANSFER_FROM_TYPE = -1;
+    int TRANSFER_NO_TYPE = 0;
+    int TRANSFER_TO_TYPE = 1;
 
     int TX_TYPE_COINBASE = 1;
     int TX_TYPE_TRANSFER = 2;

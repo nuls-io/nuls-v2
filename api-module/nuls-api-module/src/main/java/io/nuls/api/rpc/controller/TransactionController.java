@@ -163,7 +163,20 @@ public class TransactionController {
         return new RpcResult().setResult(list);
     }
 
+    @RpcMethod("validateTx")
+    public RpcResult validateTx(List<Object> params) {
+        VerifyUtils.verifyParams(params, 2);
+        int chainId;
+        String txHex;
+        try {
+            chainId = (int) params.get(0);
+            txHex = (String) params.get(1);
+        }catch (Exception e) {
+            return RpcResult.paramError();
+        }
 
-//    public RpcResult
+        return null;
+
+    }
 
 }

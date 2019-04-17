@@ -163,7 +163,7 @@ public class WalletRpcHandler {
         params.put("chainId", chainId);
         params.put("txHash", hash);
         try {
-            Map map = (Map) RpcCall.request(ModuleE.TX.abbr, CommandConstant.CLIENT_GETTX, params);
+            Map map = (Map) RpcCall.request(ModuleE.TX.abbr, CommandConstant.GET_CONFIRM_TX, params);
             String txHex = (String) map.get("tx");
             if (null == txHex) {
                 return null;
@@ -319,6 +319,24 @@ public class WalletRpcHandler {
         }
         resultInfo.setTokenTransfers(tokenTransferList);
         return Result.getSuccess(null).setData(resultInfo);
+    }
+
+    public static Result validateTx(int chainId, String txHex) {
+        Map<String, Object> params = new HashMap<>();
+        params.put("chainId", chainId);
+        params.put("tx", txHex);
+
+        try {
+            Map map = (Map) RpcCall.request(ModuleE.TX.abbr, CommandConstant.GET_AGENT, params);
+            AgentInfo agentInfo = new AgentInfo();
+            agentInfo.setCreditValue(Double.parseDouble(map.get("creditVal").toString()));
+            agentInfo.setDepositCount((Integer) map.get("memberCount"));
+            agentInfo.setStatus((Integer) map.get("status"));
+
+            return Result.getSuccess(null).setData(agentInfo);
+        } catch (NulsException e) {
+            return Result.getFailed(e.getErrorCode());
+        }
     }
 
 }
