@@ -43,12 +43,12 @@ public class ContractController {
         if (!AddressTool.validAddress(chainId, contractAddress)) {
             throw new JsonRpcException(new RpcResultError(RpcErrorCode.PARAMS_ERROR, "[contractAddress] is inValid"));
         }
-        if (!CacheManager.isChainExist(chainId)) {
-            return RpcResult.dataNotFound();
-        }
 
-        RpcResult rpcResult = new RpcResult();
         try {
+            if (!CacheManager.isChainExist(chainId)) {
+                return RpcResult.dataNotFound();
+            }
+            RpcResult rpcResult = new RpcResult();
             ContractInfo contractInfo = mongoContractServiceImpl.getContractInfo(chainId, contractAddress);
             if (contractInfo == null) {
                 rpcResult.setError(new RpcResultError(RpcErrorCode.DATA_NOT_EXISTS));
@@ -59,11 +59,11 @@ public class ContractController {
                 contractInfo.setBalance(balanceInfo.getTotalBalance());
                 rpcResult.setResult(contractInfo);
             }
+            return rpcResult;
         } catch (Exception e) {
             Log.error(e);
-            rpcResult.setError(new RpcResultError(RpcErrorCode.SYS_UNKNOWN_EXCEPTION));
+            return RpcResult.failed(RpcErrorCode.SYS_UNKNOWN_EXCEPTION);
         }
-        return rpcResult;
     }
 
     @RpcMethod("getAccountTokens")
@@ -88,16 +88,22 @@ public class ContractController {
         if (pageSize <= 0 || pageSize > 1000) {
             pageSize = 10;
         }
-        PageInfo<AccountTokenInfo> pageInfo;
-        if (!CacheManager.isChainExist(chainId)) {
-            pageInfo = new PageInfo<>(pageIndex, pageSize);
-        } else {
-            pageInfo = mongoTokenServiceImpl.getAccountTokens(chainId, address, pageIndex, pageSize);
-        }
 
-        RpcResult result = new RpcResult();
-        result.setResult(pageInfo);
-        return result;
+        try {
+            PageInfo<AccountTokenInfo> pageInfo;
+            if (!CacheManager.isChainExist(chainId)) {
+                pageInfo = new PageInfo<>(pageIndex, pageSize);
+            } else {
+                pageInfo = mongoTokenServiceImpl.getAccountTokens(chainId, address, pageIndex, pageSize);
+            }
+
+            RpcResult result = new RpcResult();
+            result.setResult(pageInfo);
+            return result;
+        } catch (Exception e) {
+            Log.error(e);
+            return RpcResult.failed(RpcErrorCode.SYS_UNKNOWN_EXCEPTION);
+        }
     }
 
     @RpcMethod("getContractTokens")
@@ -123,15 +129,20 @@ public class ContractController {
             pageSize = 10;
         }
 
-        PageInfo<AccountTokenInfo> pageInfo;
-        if (!CacheManager.isChainExist(chainId)) {
-            pageInfo = new PageInfo<>(pageIndex, pageSize);
-        } else {
-            pageInfo = mongoTokenServiceImpl.getContractTokens(chainId, contractAddress, pageIndex, pageSize);
+        try {
+            PageInfo<AccountTokenInfo> pageInfo;
+            if (!CacheManager.isChainExist(chainId)) {
+                pageInfo = new PageInfo<>(pageIndex, pageSize);
+            } else {
+                pageInfo = mongoTokenServiceImpl.getContractTokens(chainId, contractAddress, pageIndex, pageSize);
+            }
+            RpcResult result = new RpcResult();
+            result.setResult(pageInfo);
+            return result;
+        } catch (Exception e) {
+            Log.error(e);
+            return RpcResult.failed(RpcErrorCode.SYS_UNKNOWN_EXCEPTION);
         }
-        RpcResult result = new RpcResult();
-        result.setResult(pageInfo);
-        return result;
     }
 
     @RpcMethod("getTokenTransfers")
@@ -148,7 +159,6 @@ public class ContractController {
         } catch (Exception e) {
             return RpcResult.paramError();
         }
-
         if (StringUtils.isBlank(address) && StringUtils.isBlank(contractAddress)) {
             throw new JsonRpcException(new RpcResultError(RpcErrorCode.PARAMS_ERROR, "[address] or [contractAddress] is inValid"));
         }
@@ -159,15 +169,20 @@ public class ContractController {
             pageSize = 10;
         }
 
-        PageInfo<TokenTransfer> pageInfo;
-        if (!CacheManager.isChainExist(chainId)) {
-            pageInfo = new PageInfo<>(pageIndex, pageSize);
-        } else {
-            pageInfo = mongoTokenServiceImpl.getTokenTransfers(chainId, address, contractAddress, pageIndex, pageSize);
+        try {
+            PageInfo<TokenTransfer> pageInfo;
+            if (!CacheManager.isChainExist(chainId)) {
+                pageInfo = new PageInfo<>(pageIndex, pageSize);
+            } else {
+                pageInfo = mongoTokenServiceImpl.getTokenTransfers(chainId, address, contractAddress, pageIndex, pageSize);
+            }
+            RpcResult result = new RpcResult();
+            result.setResult(pageInfo);
+            return result;
+        } catch (Exception e) {
+            Log.error(e);
+            return RpcResult.failed(RpcErrorCode.SYS_UNKNOWN_EXCEPTION);
         }
-        RpcResult result = new RpcResult();
-        result.setResult(pageInfo);
-        return result;
     }
 
     @RpcMethod("getContractTxList")
@@ -184,7 +199,6 @@ public class ContractController {
         } catch (Exception e) {
             return RpcResult.paramError();
         }
-
         if (!AddressTool.validAddress(chainId, contractAddress)) {
             throw new JsonRpcException(new RpcResultError(RpcErrorCode.PARAMS_ERROR, "[contractAddress] is inValid"));
         }
@@ -195,15 +209,20 @@ public class ContractController {
             pageSize = 10;
         }
 
-        PageInfo<ContractTxInfo> pageInfo;
-        if (!CacheManager.isChainExist(chainId)) {
-            pageInfo = new PageInfo<>(pageIndex, pageSize);
-        } else {
-            pageInfo = mongoContractServiceImpl.getContractTxList(chainId, contractAddress, type, pageIndex, pageSize);
+        try {
+            PageInfo<ContractTxInfo> pageInfo;
+            if (!CacheManager.isChainExist(chainId)) {
+                pageInfo = new PageInfo<>(pageIndex, pageSize);
+            } else {
+                pageInfo = mongoContractServiceImpl.getContractTxList(chainId, contractAddress, type, pageIndex, pageSize);
+            }
+            RpcResult result = new RpcResult();
+            result.setResult(pageInfo);
+            return result;
+        } catch (Exception e) {
+            Log.error(e);
+            return RpcResult.failed(RpcErrorCode.SYS_UNKNOWN_EXCEPTION);
         }
-        RpcResult result = new RpcResult();
-        result.setResult(pageInfo);
-        return result;
     }
 
     @RpcMethod("getContractList")
@@ -220,7 +239,6 @@ public class ContractController {
         } catch (Exception e) {
             return RpcResult.paramError();
         }
-
         if (pageIndex <= 0) {
             pageIndex = 1;
         }
@@ -228,15 +246,20 @@ public class ContractController {
             pageSize = 10;
         }
 
-        PageInfo<ContractInfo> pageInfo;
-        if (!CacheManager.isChainExist(chainId)) {
-            pageInfo = new PageInfo<>(pageIndex, pageSize);
-        } else {
-            pageInfo = mongoContractServiceImpl.getContractList(chainId, pageIndex, pageSize, onlyNrc20, isHidden);
+        try {
+            PageInfo<ContractInfo> pageInfo;
+            if (!CacheManager.isChainExist(chainId)) {
+                pageInfo = new PageInfo<>(pageIndex, pageSize);
+            } else {
+                pageInfo = mongoContractServiceImpl.getContractList(chainId, pageIndex, pageSize, onlyNrc20, isHidden);
+            }
+            RpcResult result = new RpcResult();
+            result.setResult(pageInfo);
+            return result;
+        } catch (Exception e) {
+            Log.error(e);
+            return RpcResult.failed(RpcErrorCode.SYS_UNKNOWN_EXCEPTION);
         }
-        RpcResult result = new RpcResult();
-        result.setResult(pageInfo);
-        return result;
     }
 
 }
