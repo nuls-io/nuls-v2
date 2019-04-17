@@ -2,7 +2,7 @@ package io.nuls.transaction.message;
 
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.basic.NulsOutputStreamBuffer;
-import io.nuls.base.data.NulsDigestData;
+import io.nuls.base.data.Transaction;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.parse.SerializeUtils;
 import io.nuls.transaction.message.base.BaseMessage;
@@ -10,39 +10,37 @@ import io.nuls.transaction.message.base.BaseMessage;
 import java.io.IOException;
 
 /**
- * 本节点创建的交易完成本地验证后广播hash给其他节点
- *
- * @author: qinyifeng
- * @date: 2018/12/18
+ * 广播交易(完整交易)
  */
 public class BroadcastTxMessage extends BaseMessage {
-    /**
-     * 交易hash
-     */
-    private NulsDigestData requestHash;
 
-    public NulsDigestData getRequestHash() {
-        return requestHash;
+    /**
+     * 交易
+     */
+    private Transaction tx;
+
+    public Transaction getTx() {
+        return tx;
     }
 
-    public void setRequestHash(NulsDigestData requestHash) {
-        this.requestHash = requestHash;
+    public void setTx(Transaction tx) {
+        this.tx = tx;
     }
 
     @Override
     public int size() {
         int size = 0;
-        size += SerializeUtils.sizeOfNulsData(requestHash);
+        size += SerializeUtils.sizeOfNulsData(tx);
         return size;
     }
 
     @Override
     public void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
-        stream.writeNulsData(requestHash);
+        stream.writeNulsData(tx);
     }
 
     @Override
     public void parse(NulsByteBuffer byteBuffer) throws NulsException {
-        this.requestHash = byteBuffer.readHash();
+        this.tx = byteBuffer.readNulsData(new Transaction());
     }
 }
