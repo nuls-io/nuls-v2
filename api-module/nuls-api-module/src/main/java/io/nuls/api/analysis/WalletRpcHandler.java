@@ -327,11 +327,24 @@ public class WalletRpcHandler {
         params.put("tx", txHex);
 
         try {
-            Map map = (Map) RpcCall.request(ModuleE.TX.abbr, CommandConstant.TX_NEWTX, params);
+            Map map = (Map) RpcCall.request(ModuleE.TX.abbr, CommandConstant.TX_VALIEDATE, params);
             return Result.getSuccess(null).setData(map);
         } catch (NulsException e) {
             return Result.getFailed(e.getErrorCode());
         }
     }
 
+
+    public static Result broadcastTx(int chainId, String txHex) {
+        Map<String, Object> params = new HashMap<>();
+        params.put("chainId", chainId);
+        params.put("tx", txHex);
+
+        try {
+            Map map = (Map) RpcCall.request(ModuleE.TX.abbr, CommandConstant.TX_NEWTX, params);
+            return Result.getSuccess(null).setData(map);
+        } catch (NulsException e) {
+            return Result.getFailed(e.getErrorCode());
+        }
+    }
 }
