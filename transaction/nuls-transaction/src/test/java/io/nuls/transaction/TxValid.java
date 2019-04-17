@@ -151,29 +151,29 @@ public class TxValid {
         return list;
     }
 
-
-    @Test
-    public void accountToken() throws Exception {
-//        List<AccountTemp> list = TestJSONObj.getAccountTempList();
-//        createTransfer(address20, address29,new BigInteger("999999900000000"));
-//        createTransfer(address21, address29,new BigInteger("999999900000000"));
-//        createTransfer(address22, address29,new BigInteger("999999900000000"));
-//        createTransfer(address23, address29,new BigInteger("999999900000000"));
-//        createTransfer(address24, address29,new BigInteger("999999900000000"));
-//        createTransfer(address25, address29,new BigInteger("999999900000000"));
-//        createTransfer(address26, address29,new BigInteger("999999900000000"));
-//        createTransfer(address27, address29,new BigInteger("999999900000000"));
-//        createTransfer(address28, address29,new BigInteger("999999900000000"));
-//        Thread.sleep(20000L);
-//        for(AccountTemp ac : list){
-//            String hash = createTransfer(address29, ac.Address,new BigInteger(ac.getTotalBalance()));
-//            System.out.println(ac.Address + " : " + ac.getTotalBalance() + " : " + hash);
-//        }
-//        Thread.sleep(20000L);
-//        BigInteger balance = LedgerCall.getBalance(chain, AddressTool.getAddress("tNULSeBaMsLENwW4s1WsofHGYmziu5amSxu7eG"), assetChainId, assetId);
-//        System.out.println(balance);
-//        createTransfer(address29, "tNULSeBaMfwpGBmn8xuKABPWUbdtsM2cMoinnn", balance.subtract(new BigInteger("2000000000")));
-    }
+//
+//    @Test
+//    public void accountToken() throws Exception {
+////        List<AccountTemp> list = TestJSONObj.getAccountTempList();
+////        createTransfer(address20, address29,new BigInteger("999999900000000"));
+////        createTransfer(address21, address29,new BigInteger("999999900000000"));
+////        createTransfer(address22, address29,new BigInteger("999999900000000"));
+////        createTransfer(address23, address29,new BigInteger("999999900000000"));
+////        createTransfer(address24, address29,new BigInteger("999999900000000"));
+////        createTransfer(address25, address29,new BigInteger("999999900000000"));
+////        createTransfer(address26, address29,new BigInteger("999999900000000"));
+////        createTransfer(address27, address29,new BigInteger("999999900000000"));
+////        createTransfer(address28, address29,new BigInteger("999999900000000"));
+////        Thread.sleep(20000L);
+////        for(AccountTemp ac : list){
+////            String hash = createTransfer(address29, ac.Address,new BigInteger(ac.getTotalBalance()));
+////            System.out.println(ac.Address + " : " + ac.getTotalBalance() + " : " + hash);
+////        }
+////        Thread.sleep(20000L);
+////        BigInteger balance = LedgerCall.getBalance(chain, AddressTool.getAddress("tNULSeBaMsLENwW4s1WsofHGYmziu5amSxu7eG"), assetChainId, assetId);
+////        System.out.println(balance);
+////        createTransfer(address29, "tNULSeBaMfwpGBmn8xuKABPWUbdtsM2cMoinnn", balance.subtract(new BigInteger("2000000000")));
+//    }
 
     @Test
     public void getBalance() throws Exception {
