@@ -89,7 +89,7 @@ then
     JAVA_HOME=${_JAVA_HOME}
 else
     if [ -d ../Libraries/JAVA/11.0.2 ]; then
-        JAVA_HOME=`dirname "../Libraries/JAVA/11.0.2/bin"`;
+        JAVA_HOME=`dirname "../Libraries/JAVA/JRE/11.0.2/bin"`;
         JAVA_HOME=`cd $JAVA_HOME; pwd`
         JAVA="${JAVA_HOME}/bin/java"
     else
@@ -111,8 +111,8 @@ fi
 #判断用户是否指定日志目录
 if [ -z "$LOGPATH" ];
 then
-    if [ ! -d ./logs ]; then
-        mkdir ./logs
+    if [ ! -d ./Logs ]; then
+        mkdir ./Logs
     fi
     LOGPATH="`get_fullpath ./logs`"
 fi

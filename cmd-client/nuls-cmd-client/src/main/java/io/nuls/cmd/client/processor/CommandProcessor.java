@@ -36,6 +36,7 @@ import io.nuls.tools.parse.JSONUtils;
 import jline.console.ConsoleReader;
 
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.function.Supplier;
@@ -48,6 +49,8 @@ import java.util.regex.Pattern;
 public interface CommandProcessor {
 
     Pattern IS_NUMBERIC = Pattern.compile("[0-9]+");
+
+    Pattern IS_AMOUNT = Pattern.compile("^[0-9]+([.]{1}[0-9]+){0,1}$");
 
     default void checkArgsNumber(String[] args, int... numbers) throws ParameterException {
         if (!Arrays.stream(numbers).anyMatch(number -> args.length - 1 == number)) {
@@ -71,6 +74,17 @@ public interface CommandProcessor {
         Matcher matcher = IS_NUMBERIC.matcher(arg);
         if (!matcher.matches()) {
             ParameterException.throwParameterException(name + " must be a numeric");
+        }
+    }
+
+    default void checkIsAmount(String arg,String name) {
+        Matcher matcher = IS_AMOUNT.matcher(arg);
+        if(!matcher.find()){
+            ParameterException.throwParameterException(name + " must be a numeric");
+        }
+        BigDecimal amount = new BigDecimal(arg);
+        if (amount.compareTo(BigDecimal.valueOf(0.01D)) < 0) {
+            ParameterException.throwParameterException(name + " must be a numeric and greater than 0.01");
         }
     }
 

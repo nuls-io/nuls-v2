@@ -70,7 +70,7 @@ public class TransferToContractProcessor extends ContractBaseProcessor {
     public boolean argsValidate(String[] args) {
         checkArgsNumber(args,3,4);
         checkAddress(config.getChainId(),args[1],args[2]);
-        checkIsNumeric(args[3],"amount");
+        checkIsAmount(args[3],"amount");
         return true;
     }
 
