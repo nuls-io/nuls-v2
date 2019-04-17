@@ -45,6 +45,7 @@ import org.junit.Test;
 
 import java.math.BigInteger;
 import java.util.*;
+import java.util.concurrent.CountDownLatch;
 
 import static io.nuls.transaction.utils.LoggerUtil.Log;
 import static org.junit.Assert.assertEquals;
@@ -528,11 +529,61 @@ public class TestJyc {
         }
         int total = 1000_000;
         int count = 2000;
+        testRunning(total, count);
+    }
+
+    /**
+     * 压力测试，发起大量普通转账
+     *
+     * @throws Exception
+     */
+    @Test
+    public void pressureTestMultiThread() throws Exception {
+        {
+            Map<String, Object> params = new HashMap<>();
+            params.put(Constants.VERSION_KEY_STR, version);
+            params.put("chainId", chainId);
+            params.put("address", address23);
+            Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_getAccountByAddress", params);
+
+            String address = JSONUtils.obj2json(((HashMap) cmdResp.getResponseData()).get("ac_getAccountByAddress"));
+            Log.debug("address-{}" + address);
+            BigInteger balance = LedgerCall.getBalance(chain, AddressTool.getAddress(address23), chainId, assetId);
+            Log.debug(address23 + "-----balance:{}", balance);
+        }
+        int total = 1000_000;
+        int count = 500;
+        int threadCount = 10;
+        CountDownLatch latch = new CountDownLatch(threadCount);
+        class worker implements Runnable {
+            private CountDownLatch latch;
+
+            public worker(CountDownLatch latch) {
+                this.latch = latch;
+            }
+
+            @Override
+            public void run() {
+                try {
+                    testRunning(total, count);
+                    latch.countDown();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        for (int i = 0; i < threadCount; i++) {
+            new Thread(new worker(latch)).start();
+        }
+        latch.await();
+    }
+
+    private void testRunning(int total, int count) throws Exception {
         List<String> accountList = new ArrayList<>();
         Log.debug("##################################################");
         {
             Log.debug("1.##########create " + count + " accounts##########");
-            for (int i = 0; i < count/100; i++) {
+            for (int i = 0; i < count / 100; i++) {
                 Map<String, Object> params = new HashMap<>();
                 params.put(Constants.VERSION_KEY_STR, version);
                 params.put("chainId", chainId);
@@ -544,11 +595,11 @@ public class TestJyc {
                 assertEquals(100 * (i + 1), accountList.size());
             }
         }
-        {
-            for (String account : accountList) {
-                Log.debug("address-{}", account);
-            }
-        }
+//        {
+//            for (String account : accountList) {
+//                Log.debug("address-{}", account);
+//            }
+//        }
         List<String> hashList = new ArrayList<>();
         {
             Log.debug("2.##########transfer from seed address to " + count + " accounts##########");
@@ -564,7 +615,7 @@ public class TestJyc {
                 inputCoin1.setPassword(password);
                 inputCoin1.setAssetsChainId(chainId);
                 inputCoin1.setAssetsId(assetId);
-                inputCoin1.setAmount(new BigInteger("100000000000"));
+                inputCoin1.setAmount(new BigInteger("50000000000"));
                 inputs.add(inputCoin1);
 
                 CoinDTO outputCoin1 = new CoinDTO();
@@ -572,7 +623,7 @@ public class TestJyc {
                 outputCoin1.setPassword(password);
                 outputCoin1.setAssetsChainId(chainId);
                 outputCoin1.setAssetsId(assetId);
-                outputCoin1.setAmount(new BigInteger("100000000000"));
+                outputCoin1.setAmount(new BigInteger("50000000000"));
                 outputs.add(outputCoin1);
                 transferMap.put("inputs", inputs);
                 transferMap.put("outputs", outputs);
@@ -582,7 +633,7 @@ public class TestJyc {
                 HashMap result = (HashMap) (((HashMap) response.getResponseData()).get("ac_transfer"));
                 String hash = result.get("value").toString();
                 hashList.add(hash);
-                Log.debug(i + "---transfer from {} to {}, hash:{}", address23, account, hash);
+//                Log.debug(i + "---transfer from {} to {}, hash:{}", address23, account, hash);
                 Thread.sleep(1);
             }
         }
@@ -597,7 +648,7 @@ public class TestJyc {
         {
             Log.debug("3.##########" + count + " accounts Transfer to each other##########");
             //100个地址之间互相转账
-            for (int j = 0; j < total/count; j++) {
+            for (int j = 0; j < total / count; j++) {
                 for (int i = 0; i < count; i++) {
                     String from = accountList.get(i % count);
                     String to = accountList.get((i + 1) % count);
@@ -654,6 +705,7 @@ public class TestJyc {
             Log.debug("all txs exist");
         }
     }
+
 
     /**
      * 稳定性测试
