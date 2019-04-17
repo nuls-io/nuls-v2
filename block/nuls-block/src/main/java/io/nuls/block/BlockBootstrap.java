@@ -58,7 +58,7 @@ public class BlockBootstrap extends RpcModule {
      * @return
      */
     @Override
-    public Module[] getDependencies() {
+    public Module[] declareDependent() {
         return new Module[]{
                 new Module(ModuleE.TX.abbr, "1.0"),
                 new Module(ModuleE.NW.abbr, "1.0"),

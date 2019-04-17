@@ -50,7 +50,7 @@ public class AccountBootstrap extends RpcModule {
      * @return
      */
     @Override
-    public Module[] getDependencies() {
+    public Module[] declareDependent() {
         return new Module[]{
                 new Module(ModuleE.NW.abbr, ROLE),
                 new Module(ModuleE.LG.abbr, "1.0"),

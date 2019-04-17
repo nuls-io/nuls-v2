@@ -44,7 +44,7 @@ public class ProtocolBootstrap extends RpcModule {
      * @return
      */
     @Override
-    public Module[] getDependencies() {
+    public Module[] declareDependent() {
         return new Module[]{};
     }
 

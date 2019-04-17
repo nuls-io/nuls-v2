@@ -97,7 +97,7 @@ public class ChainBootstrap extends RpcModule {
         }
     }
     @Override
-    public Module[] getDependencies() {
+    public Module[] declareDependent() {
         return new Module[]{new Module(ModuleE.NW.abbr, "1.0"),
                 new Module(ModuleE.TX.abbr, "1.0")};
     }

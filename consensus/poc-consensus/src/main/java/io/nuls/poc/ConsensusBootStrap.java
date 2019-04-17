@@ -74,7 +74,7 @@ public class ConsensusBootStrap extends RpcModule {
     }
 
     @Override
-    public Module[] getDependencies() {
+    public Module[] declareDependent() {
         return new Module[]{
                 new Module(ModuleE.BL.abbr, "1.0"),
                 new Module(ModuleE.AC.abbr, "1.0"),

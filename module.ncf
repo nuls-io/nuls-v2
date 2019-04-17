@@ -1,2 +1,5 @@
 [global]
 dataPath=../../../../data
+
+[test]
+dependent=nw:1.0,ac:1.0

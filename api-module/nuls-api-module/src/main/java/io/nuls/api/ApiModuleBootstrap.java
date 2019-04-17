@@ -98,7 +98,7 @@ public class ApiModuleBootstrap extends RpcModule {
     }
 
     @Override
-    public Module[] getDependencies() {
+    public Module[] declareDependent() {
         return new Module[]{
                 new Module(ModuleE.CS.abbr, "1.0"),
                 new Module(ModuleE.BL.abbr, "1.0"),

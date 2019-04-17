@@ -3,13 +3,9 @@ package io.nuls.rpc.modulebootstrap;
 import io.nuls.tools.core.ioc.SpringLiteContext;
 import io.nuls.tools.exception.NulsRuntimeException;
 import io.nuls.tools.log.Log;
-import io.nuls.tools.parse.config.IniEntity;
 import io.nuls.tools.thread.ThreadUtils;
-import org.ini4j.Config;
-import org.ini4j.Ini;
 
 import java.io.*;
-import java.net.URL;
 import java.util.Arrays;
 
 /**
@@ -61,7 +57,7 @@ public class NulsRpcModuleBootstrap {
                                 break;
                             case "d":
                                 System.out.println("依赖的模块列表");
-                                Arrays.stream(module.getDependencies()).forEach(d -> {
+                                module.getDependentces().forEach(d -> {
                                     System.out.println(d.name + " is ready : " + module.isDependencieReady(d));
                                 });
                                 break;
@@ -81,7 +77,7 @@ public class NulsRpcModuleBootstrap {
 
 //        System.out.println("MODULE INFO : {}:{}", module.moduleInfo().name, module.moduleInfo().version);
 //        Log.info("MODULE DEPENDENCIES:");
-//        Arrays.stream(module.getDependencies()).forEach(d -> Log.info("====>{}:{}", d.name, d.version));
+//        Arrays.stream(module.declareDependent()).forEach(d -> Log.info("====>{}:{}", d.name, d.version));
         Log.info("main param list：");
         Arrays.stream(args).forEach(Log::info);
         module.run(scanPackage, args[0]);

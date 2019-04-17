@@ -152,7 +152,7 @@ public class ContractBootStrap extends RpcModule {
      * @return
      */
     @Override
-    public Module[] getDependencies() {
+    public Module[] declareDependent() {
         return new Module[]{new Module(ModuleE.TX.abbr, "1.0"),
                 new Module(ModuleE.LG.abbr, "1.0"),
                 new Module(ModuleE.BL.abbr, "1.0"),

@@ -26,7 +26,7 @@ public class CmdClientModule extends RpcModule {
     static NulsLogger log = LoggerUtil.logger;
 
     @Override
-    public Module[] getDependencies() {
+    public Module[] declareDependent() {
         return new Module[]{
                 new Module(ModuleE.NW.abbr,ROLE),
                 new Module(ModuleE.AC.abbr,ROLE),

@@ -162,13 +162,13 @@ public class ResponseMessageProcessor {
         判断所有依赖的模块是否已经启动（发送握手信息）
         Determine whether all dependent modules have been started (send handshake information)
          */
-        /*if (ConnectManager.LOCAL.getDependencies() == null) {
+        /*if (ConnectManager.LOCAL.declareDependent() == null) {
             ConnectManager.startService = true;
             Log.debug("Start service!");
             return;
         }
 
-        for (String role : ConnectManager.LOCAL.getDependencies().keySet()) {
+        for (String role : ConnectManager.LOCAL.declareDependent().keySet()) {
             String url = ConnectManager.getRemoteUri(role);
             if(StringUtils.isBlank(url)){
                 Log.error("Dependent modules cannot be connected: " + role);

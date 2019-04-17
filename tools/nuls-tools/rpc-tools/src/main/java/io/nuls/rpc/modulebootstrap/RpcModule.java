@@ -9,16 +9,14 @@ import io.nuls.tools.basic.InitializingBean;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Order;
 
+import io.nuls.tools.core.annotation.Value;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.log.Log;
 
-import io.nuls.tools.model.StringUtils;
 import io.nuls.tools.parse.MapUtils;
 
 
-import java.util.Arrays;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
@@ -33,6 +31,11 @@ import java.util.concurrent.TimeUnit;
  */
 @Order(Integer.MIN_VALUE)
 public abstract class RpcModule implements InitializingBean {
+
+    @Value("dependent")
+    private String dependentList;
+
+    private Set<Module> dependentces;
 
     /**
      * 启动参数
@@ -54,7 +57,7 @@ public abstract class RpcModule implements InitializingBean {
     /**
      * 当前模块依赖的其他模块的运行状态（是否接收到模块推送的ready通知）
      */
-    private Map<Module, Boolean> dependencies = new ConcurrentHashMap<>();
+    private Map<Module, Boolean> dependentReadyState = new ConcurrentHashMap<>();
 
     @Autowired
     NotifySender notifySender;
@@ -62,6 +65,23 @@ public abstract class RpcModule implements InitializingBean {
     @Override
     public final void afterPropertiesSet() throws NulsException {
         try {
+            dependentces = new HashSet<>();
+            Module[] depend = declareDependent();
+            if(depend != null){
+                dependentces.addAll(Arrays.asList(depend));
+            }
+            if(dependentList != null){
+                String[] temp = dependentList.split(",");
+                Arrays.stream(temp).forEach(ds->{
+                    String[] t2 = ds.split(":");
+                    if(t2.length != 2){
+                        Log.error("config item dependent error, e.g. moduleName1:verson,moduleName2:version....");
+                        System.exit(0);
+                    }
+
+                    dependentces.add(new Module(t2[0],t2[1]));
+                });
+            }
             init();
         } catch (Exception e) {
             Log.error("rpc module init fail", e);
@@ -76,8 +96,8 @@ public abstract class RpcModule implements InitializingBean {
      */
     void listenerDependenciesReady(Module module) {
         try {
-            if (dependencies.containsKey(module)) {
-                dependencies.put(module, Boolean.TRUE);
+            if (dependentReadyState.containsKey(module)) {
+                dependentReadyState.put(module, Boolean.TRUE);
             }
             Log.info("RMB:ModuleReadyListener :{}", module);
             tryRunModule();
@@ -85,7 +105,7 @@ public abstract class RpcModule implements InitializingBean {
             connectData.addCloseEvent(() -> {
                 if (!ConnectManager.ROLE_CHANNEL_MAP.containsKey(module.getName())) {
                     Log.warn("RMB:dependencie:{}模块触发连接断开事件", module);
-                    dependencies.put(module, Boolean.FALSE);
+                    dependentReadyState.put(module, Boolean.FALSE);
                     if (isRunning()) {
                         state = this.onDependenciesLoss(module);
                         if (state == null) {
@@ -170,7 +190,7 @@ public abstract class RpcModule implements InitializingBean {
      */
     void run(String modulePackage, String serviceManagerUrl) {
         //初始化依赖模块的ready状态
-        Arrays.stream(this.getDependencies()).forEach(d -> dependencies.put(d, Boolean.FALSE));
+        this.getDependentces().forEach(d -> dependentReadyState.put(d, Boolean.FALSE));
         try {
             // Start server instance
             NettyServer server = NettyServer.getInstance(moduleInfo().getName(), moduleInfo().getName(), moduleInfo().getVersion())
@@ -179,11 +199,11 @@ public abstract class RpcModule implements InitializingBean {
                     .scanPackage((getRpcCmdPackage()==null) ? Set.of(modulePackage):getRpcCmdPackage())
                     //注册管理模块状态的RPC接口
                     .addCmdDetail(ModuleStatusCmd.class);
-            dependencies.keySet().stream().forEach(d -> server.dependencies(d.getName(), d.getVersion()));
+            dependentReadyState.keySet().stream().forEach(d -> server.dependencies(d.getName(), d.getVersion()));
             // Get information from kernel
             ConnectManager.getConnectByUrl(serviceManagerUrl);
             Log.info("RMB:开始连接service manager");
-            ResponseMessageProcessor.syncKernel(serviceManagerUrl, new RegisterInvoke(moduleInfo(), dependencies.keySet()));
+            ResponseMessageProcessor.syncKernel(serviceManagerUrl, new RegisterInvoke(moduleInfo(), dependentReadyState.keySet()));
             //模块进入ready状态的准备工作，如果条件未达到，等待10秒重新尝试
             while (!doStart()) {
                 TimeUnit.SECONDS.sleep(10L);
@@ -206,9 +226,9 @@ public abstract class RpcModule implements InitializingBean {
         if (!isReady()) {
             return;
         }
-        Boolean dependencieReady = dependencies.isEmpty();
+        Boolean dependencieReady = dependentReadyState.isEmpty();
         if (!dependencieReady) {
-            dependencieReady = dependencies.entrySet().stream().allMatch(d -> d.getValue());
+            dependencieReady = dependentReadyState.entrySet().stream().allMatch(d -> d.getValue());
         }
         if (dependencieReady) {
             if (!isRunning()) {
@@ -222,7 +242,7 @@ public abstract class RpcModule implements InitializingBean {
             }
         } else {
             Log.info("RMB:dependencie state");
-            dependencies.entrySet().forEach(entry -> Log.debug("{}:{}", entry.getKey().getName(), entry.getValue()));
+            dependentReadyState.entrySet().forEach(entry -> Log.debug("{}:{}", entry.getKey().getName(), entry.getValue()));
         }
     }
 
@@ -257,10 +277,10 @@ public abstract class RpcModule implements InitializingBean {
      * @return true 已准备好
      */
     public boolean isDependencieReady(Module module) {
-        if (!dependencies.containsKey(module)) {
+        if (!dependentReadyState.containsKey(module)) {
             throw new IllegalArgumentException("can not found " + module.getName());
         }
-        return dependencies.get(module);
+        return dependentReadyState.get(module);
     }
 
     public boolean isDependencieReady(String moduleName){
@@ -271,15 +291,19 @@ public abstract class RpcModule implements InitializingBean {
      * 依赖模块都以进入Ready状态
      */
     protected boolean isDependencieReady() {
-        return dependencies.entrySet().stream().allMatch(d -> d.getValue());
+        return dependentReadyState.entrySet().stream().allMatch(d -> d.getValue());
+    }
+
+    public Set<Module> getDependentces(){
+        return dependentces;
     }
 
     /**
-     * 返回此模块的依赖模块
+     * 申明此模块的依赖模块
      *
      * @return
      */
-    public abstract Module[] getDependencies();
+    public abstract Module[] declareDependent();
 
     /**
      * 指定RpcCmd的包名
@@ -300,7 +324,7 @@ public abstract class RpcModule implements InitializingBean {
 
 
     public void onDependenciesReady(Module module){
-        Log.debug("dependencies module {} ready",module);
+        Log.debug("dependentReadyState module {} ready",module);
     }
 
 
@@ -368,8 +392,8 @@ public abstract class RpcModule implements InitializingBean {
         this.followerList = followerList;
     }
 
-    public void setDependencies(Map<Module, Boolean> dependencies) {
-        this.dependencies = dependencies;
+    public void setDependentReadyState(Map<Module, Boolean> dependentReadyState) {
+        this.dependentReadyState = dependentReadyState;
     }
 
     public NotifySender getNotifySender() {
