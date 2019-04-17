@@ -30,7 +30,6 @@ import io.nuls.transaction.model.bo.Chain;
 import io.nuls.transaction.model.bo.TxRegister;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -50,42 +49,6 @@ public class TxManager {
         return null;
     }
 
-//    /**
-//     * 注册交易
-//     *
-//     * @param txRegister 注册交易请求数据封装
-//     * @return boolean
-//     */
-//    public static boolean register(Chain chain, TxRegister txRegister) {
-//        boolean rs = false;
-//        if (!chain.getTxRegisterMap().containsKey(txRegister.getTxType())) {
-//            chain.getTxRegisterMap().put(txRegister.getTxType(), txRegister);
-//            try {
-//                chain.getLoggerMap().get(TxConstant.LOG_TX).info("new tx register: {}", JSONUtils.obj2json(txRegister));
-//            } catch (JsonProcessingException e) {
-//                e.printStackTrace();
-//            }
-//            rs = true;
-//        }
-//        return rs;
-//    }
-
-    /**
-     * 取消模块注册的交易
-     *
-     * @param moduleCode 要取消注册的模块
-     * @return boolean
-     */
-    public static void unregister(Chain chain, String moduleCode) {
-        Iterator<Map.Entry<Integer, TxRegister>> it = chain.getTxRegisterMap().entrySet().iterator();
-        while (it.hasNext()){
-            Map.Entry<Integer, TxRegister> entry = it.next();
-            if(moduleCode.equals(entry.getValue().getModuleCode())){
-                it.remove();
-            }
-        }
-    }
-
     /**
      * 获取交易的注册对象
      *
@@ -102,7 +65,7 @@ public class TxManager {
      * @param type
      * @return
      */
-    public static boolean contain(Chain chain, int type) {
+    public static boolean contains(Chain chain, int type) {
         return chain.getTxRegisterMap().containsKey(type);
     }
 
