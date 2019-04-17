@@ -11,6 +11,7 @@
   "logFileName": "contract",
   "logFileLevel": "DEBUG",
   "logConsoleLevel": "DEBUG",
-  "packageLogPackages": "io.nuls.contract.vm.program.impl.ProgramExecutorImpl,db,rlp",
-  "packageLogLevels": "INFO,INFO,INFO"
+  "systemLogLevel": "DEBUG",
+  "packageLogPackages": "io.nuls.contract.vm.program.impl.ProgramExecutorImpl,db,rlp,general",
+  "packageLogLevels": "INFO,INFO,INFO,INFO"
 }
