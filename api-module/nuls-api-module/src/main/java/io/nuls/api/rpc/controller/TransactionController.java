@@ -37,8 +37,15 @@ public class TransactionController {
     @RpcMethod("getTx")
     public RpcResult getTx(List<Object> params) {
         VerifyUtils.verifyParams(params, 2);
-        int chainId = (int) params.get(0);
-        String hash = "" + params.get(1);
+        int chainId;
+        String hash;
+        try {
+            chainId = (int) params.get(0);
+            hash = "" + params.get(1);
+        } catch (Exception e) {
+            return RpcResult.paramError();
+        }
+
         if (!CacheManager.isChainExist(chainId)) {
             return RpcResult.dataNotFound();
         }
@@ -102,65 +109,98 @@ public class TransactionController {
     @RpcMethod("getTxList")
     public RpcResult getTxList(List<Object> params) {
         VerifyUtils.verifyParams(params, 5);
-        int chainId = (int) params.get(0);
-        int pageIndex = (int) params.get(1);
-        int pageSize = (int) params.get(2);
-        int type = (int) params.get(3);
-        boolean isHidden = (boolean) params.get(4);
+        int chainId, pageIndex, pageSize, type;
+        boolean isHidden;
+        try {
+            chainId = (int) params.get(0);
+            pageIndex = (int) params.get(1);
+            pageSize = (int) params.get(2);
+            type = (int) params.get(3);
+            isHidden = (boolean) params.get(4);
+        } catch (Exception e) {
+            return RpcResult.paramError();
+        }
         if (pageIndex <= 0) {
             pageIndex = 1;
         }
-        if (pageSize <= 0 || pageSize > 100) {
+        if (pageSize <= 0 || pageSize > 1000) {
             pageSize = 10;
         }
 
-        PageInfo<TransactionInfo> pageInfo;
-        if (!CacheManager.isChainExist(chainId)) {
-            pageInfo = new PageInfo<>(pageIndex, pageSize);
-        } else {
-            pageInfo = txService.getTxList(chainId, pageIndex, pageSize, type, isHidden);
+        try {
+            PageInfo<TransactionInfo> pageInfo;
+            if (!CacheManager.isChainExist(chainId)) {
+                pageInfo = new PageInfo<>(pageIndex, pageSize);
+            } else {
+                pageInfo = txService.getTxList(chainId, pageIndex, pageSize, type, isHidden);
+            }
+            RpcResult rpcResult = new RpcResult();
+            rpcResult.setResult(pageInfo);
+            return rpcResult;
+        } catch (Exception e) {
+            Log.error(e);
+            return RpcResult.failed(RpcErrorCode.SYS_UNKNOWN_EXCEPTION);
         }
-        RpcResult rpcResult = new RpcResult();
-        rpcResult.setResult(pageInfo);
-        return rpcResult;
     }
 
     @RpcMethod("getBlockTxList")
     public RpcResult getBlockTxList(List<Object> params) {
         VerifyUtils.verifyParams(params, 4);
-        int chainId = (int) params.get(0);
-        int pageIndex = (int) params.get(1);
-        int pageSize = (int) params.get(2);
-        long height = Long.valueOf(params.get(3).toString());
-        int type = Integer.parseInt("" + params.get(4));
+        int chainId, pageIndex, pageSize, type;
+        long height;
+        try {
+            chainId = (int) params.get(0);
+            pageIndex = (int) params.get(1);
+            pageSize = (int) params.get(2);
+            height = Long.valueOf(params.get(3).toString());
+            type = Integer.parseInt("" + params.get(4));
+        } catch (Exception e) {
+            return RpcResult.paramError();
+        }
         if (pageIndex <= 0) {
             pageIndex = 1;
         }
-        if (pageSize <= 0 || pageSize > 100) {
+        if (pageSize <= 0 || pageSize > 1000) {
             pageSize = 10;
         }
-        PageInfo<TransactionInfo> pageInfo;
-        if (!CacheManager.isChainExist(chainId)) {
-            pageInfo = new PageInfo<>(pageIndex, pageSize);
-        } else {
-            pageInfo = txService.getBlockTxList(chainId, pageIndex, pageSize, height, type);
-        }
 
-        RpcResult rpcResult = new RpcResult();
-        rpcResult.setResult(pageInfo);
-        return rpcResult;
+        try {
+            PageInfo<TransactionInfo> pageInfo;
+            if (!CacheManager.isChainExist(chainId)) {
+                pageInfo = new PageInfo<>(pageIndex, pageSize);
+            } else {
+                pageInfo = txService.getBlockTxList(chainId, pageIndex, pageSize, height, type);
+            }
+            RpcResult rpcResult = new RpcResult();
+            rpcResult.setResult(pageInfo);
+            return rpcResult;
+        } catch (Exception e) {
+            Log.error(e);
+            return RpcResult.failed(RpcErrorCode.SYS_UNKNOWN_EXCEPTION);
+        }
     }
 
     @RpcMethod("getTxStatistical")
     public RpcResult getTxStatistical(List<Object> params) {
         VerifyUtils.verifyParams(params, 2);
-        int chainId = (int) params.get(0);
-        int type = (int) params.get(1);
-        if (!CacheManager.isChainExist(chainId)) {
-            return RpcResult.success(new ArrayList<>());
+        int chainId, type;
+        try {
+            chainId = (int) params.get(0);
+            type = (int) params.get(1);
+        } catch (Exception e) {
+            return RpcResult.paramError();
         }
-        List list = this.mongoStatisticalServiceImpl.getStatisticalList(chainId, type, TX_COUNT);
-        return new RpcResult().setResult(list);
+
+        try {
+            if (!CacheManager.isChainExist(chainId)) {
+                return RpcResult.success(new ArrayList<>());
+            }
+            List list = this.mongoStatisticalServiceImpl.getStatisticalList(chainId, type, TX_COUNT);
+            return new RpcResult().setResult(list);
+        } catch (Exception e) {
+            Log.error(e);
+            return RpcResult.failed(RpcErrorCode.SYS_UNKNOWN_EXCEPTION);
+        }
     }
 
     @RpcMethod("validateTx")
@@ -174,17 +214,22 @@ public class TransactionController {
         } catch (Exception e) {
             return RpcResult.paramError();
         }
-        if (!CacheManager.isChainExist(chainId)) {
-            return RpcResult.dataNotFound();
-        }
-        Result result = WalletRpcHandler.validateTx(chainId, txHex);
-        if (result.isSuccess()) {
-            return RpcResult.success(result.getData());
-        } else {
-            return RpcResult.failed(result);
+
+        try {
+            if (!CacheManager.isChainExist(chainId)) {
+                return RpcResult.dataNotFound();
+            }
+            Result result = WalletRpcHandler.validateTx(chainId, txHex);
+            if (result.isSuccess()) {
+                return RpcResult.success(result.getData());
+            } else {
+                return RpcResult.failed(result);
+            }
+        } catch (Exception e) {
+            Log.error(e);
+            return RpcResult.failed(RpcErrorCode.SYS_UNKNOWN_EXCEPTION);
         }
     }
-
 
     @RpcMethod("broadcastTx")
     public RpcResult broadcastTx(List<Object> params) {
@@ -197,15 +242,20 @@ public class TransactionController {
         } catch (Exception e) {
             return RpcResult.paramError();
         }
-        if (!CacheManager.isChainExist(chainId)) {
-            return RpcResult.dataNotFound();
-        }
-        Result result = WalletRpcHandler.broadcastTx(chainId, txHex);
-        if (result.isSuccess()) {
-            return RpcResult.success(result.getData());
-        } else {
-            return RpcResult.failed(result);
+
+        try {
+            if (!CacheManager.isChainExist(chainId)) {
+                return RpcResult.dataNotFound();
+            }
+            Result result = WalletRpcHandler.broadcastTx(chainId, txHex);
+            if (result.isSuccess()) {
+                return RpcResult.success(result.getData());
+            } else {
+                return RpcResult.failed(result);
+            }
+        } catch (Exception e) {
+            Log.error(e);
+            return RpcResult.failed(RpcErrorCode.SYS_UNKNOWN_EXCEPTION);
         }
     }
-
 }

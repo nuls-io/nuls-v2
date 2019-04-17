@@ -45,22 +45,31 @@ public class ChainController {
 
     @RpcMethod("getChains")
     public RpcResult getChains(List<Object> params) {
-        Map<String, Object> map = new HashMap<>();
-        map.put("default", ApiContext.defaultChainId);
-        map.put("list", CacheManager.getApiCaches().keySet());
-
-        return RpcResult.success(map);
+        try {
+            Map<String, Object> map = new HashMap<>();
+            map.put("default", ApiContext.defaultChainId);
+            map.put("list", CacheManager.getApiCaches().keySet());
+            return RpcResult.success(map);
+        } catch (Exception e) {
+            Log.error(e);
+            return RpcResult.failed(RpcErrorCode.SYS_UNKNOWN_EXCEPTION);
+        }
     }
 
     @RpcMethod("getCoinInfo")
     public RpcResult getCoinInfo(List<Object> params) {
         VerifyUtils.verifyParams(params, 1);
-        int chainId = (int) params.get(0);
-        if (!CacheManager.isChainExist(chainId)) {
-            return RpcResult.dataNotFound();
+        try {
+            int chainId = (int) params.get(0);
+            if (!CacheManager.isChainExist(chainId)) {
+                return RpcResult.dataNotFound();
+            }
+            ApiCache apiCache = CacheManager.getCache(chainId);
+            return RpcResult.success(apiCache.getContextInfo());
+        } catch (Exception e) {
+            Log.error(e);
+            return RpcResult.failed(RpcErrorCode.SYS_UNKNOWN_EXCEPTION);
         }
-        ApiCache apiCache = CacheManager.getCache(chainId);
-        return RpcResult.success(apiCache.getContextInfo());
     }
 
     @RpcMethod("search")
@@ -77,31 +86,36 @@ public class ChainController {
             return RpcResult.paramError();
         }
 
-        if (!CacheManager.isChainExist(chainId)) {
-            return RpcResult.dataNotFound();
-        }
-
-        int length = text.length();
-        SearchResultDTO result = null;
-        if (length < 20) {
-            result = getBlockByHeight(chainId, text);
-        } else if (length < 40) {
-            boolean isAddress = AddressTool.validAddress(chainId, text);
-            if (isAddress) {
-                byte[] address = AddressTool.getAddress(text);
-                if (address[2] == AddressType.CONTRACT_ADDRESS_TYPE) {
-                    result = getContractByAddress(chainId, text);
-                } else {
-                    result = getAccountByAddress(chainId, text);
-                }
+        try {
+            if (!CacheManager.isChainExist(chainId)) {
+                return RpcResult.dataNotFound();
             }
-        } else {
-            result = getResultByHash(chainId, text);
+
+            int length = text.length();
+            SearchResultDTO result = null;
+            if (length < 20) {
+                result = getBlockByHeight(chainId, text);
+            } else if (length < 40) {
+                boolean isAddress = AddressTool.validAddress(chainId, text);
+                if (isAddress) {
+                    byte[] address = AddressTool.getAddress(text);
+                    if (address[2] == AddressType.CONTRACT_ADDRESS_TYPE) {
+                        result = getContractByAddress(chainId, text);
+                    } else {
+                        result = getAccountByAddress(chainId, text);
+                    }
+                }
+            } else {
+                result = getResultByHash(chainId, text);
+            }
+            if (null == result) {
+                return RpcResult.dataNotFound();
+            }
+            return new RpcResult().setResult(result);
+        } catch (Exception e) {
+            Log.error(e);
+            return RpcResult.failed(RpcErrorCode.SYS_UNKNOWN_EXCEPTION);
         }
-        if (null == result) {
-            return RpcResult.dataNotFound();
-        }
-        return new RpcResult().setResult(result);
     }
 
     private SearchResultDTO getContractByAddress(int chainId, String text) {

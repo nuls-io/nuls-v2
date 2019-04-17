@@ -4,6 +4,7 @@ import io.nuls.base.data.NulsDigestData;
 import io.nuls.base.data.Transaction;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.transaction.model.bo.*;
+import io.nuls.transaction.model.dto.ModuleTxRegisterDTO;
 import io.nuls.transaction.model.po.TransactionConfirmedPO;
 
 import java.util.List;
@@ -19,10 +20,18 @@ public interface TxService {
      * Register transaction
      *
      * @param chain
-     * @param txRegister
+     * @param moduleTxRegisterDto
      * @return boolean
      */
-    boolean register(Chain chain, TxRegister txRegister);
+    boolean register(Chain chain, ModuleTxRegisterDTO moduleTxRegisterDto);
+
+    /**
+     * 取消模块注册的交易
+     *
+     * @param moduleCode 要取消注册的模块
+     * @return boolean
+     */
+    boolean unregister(Chain chain, String moduleCode);
 
     /**
      * 收到一个新的交易
