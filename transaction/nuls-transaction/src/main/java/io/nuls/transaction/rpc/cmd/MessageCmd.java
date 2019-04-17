@@ -79,11 +79,11 @@ public class MessageCmd extends BaseCmd {
             BroadcastTxMessage message = new BroadcastTxMessage();
             byte[] decode = RPCUtil.decode(params.get(KEY_MESSAGE_BODY).toString());
             message.parse(new NulsByteBuffer(decode));
-            if (message == null) {
-                chain.getLoggerMap().get(TxConstant.LOG_TX_MESSAGE).debug(
-                        "recieve [newHash], message is null from node-{}, chainId:{}", nodeId, chainId);
-                return failed(TxErrorCode.PARAMETER_ERROR);
-            }
+//            if (message == null) {
+//                chain.getLoggerMap().get(TxConstant.LOG_TX_MESSAGE).debug(
+//                        "recieve [newHash], message is null from node-{}, chainId:{}", nodeId, chainId);
+//                return failed(TxErrorCode.PARAMETER_ERROR);
+//            }
             NulsDigestData hash = message.getRequestHash();
             chain.getLoggerMap().get(TxConstant.LOG_TX_MESSAGE).debug(
                     "recieve [newHash] message from node-{}, chainId:{}, hash:{}", nodeId, chainId, hash.getDigestHex());
@@ -131,11 +131,11 @@ public class MessageCmd extends BaseCmd {
             GetTxMessage message = new GetTxMessage();
             byte[] decode = RPCUtil.decode(params.get(KEY_MESSAGE_BODY).toString());
             message.parse(new NulsByteBuffer(decode));
-            if (message == null) {
-                chain.getLoggerMap().get(TxConstant.LOG_TX_MESSAGE).debug(
-                        "recieve [askTx], message is null from node-{}, chainId:{}", nodeId, chainId);
-                return failed(TxErrorCode.PARAMETER_ERROR);
-            }
+//            if (message == null) {
+//                chain.getLoggerMap().get(TxConstant.LOG_TX_MESSAGE).debug(
+//                        "recieve [askTx], message is null from node-{}, chainId:{}", nodeId, chainId);
+//                return failed(TxErrorCode.PARAMETER_ERROR);
+//            }
             chain = chainManager.getChain(chainId);
             if (null == chain) {
                 throw new NulsException(TxErrorCode.CHAIN_NOT_FOUND);
@@ -181,11 +181,11 @@ public class MessageCmd extends BaseCmd {
             TransactionMessage message = new TransactionMessage();
             byte[] decode = RPCUtil.decode(params.get(KEY_MESSAGE_BODY).toString());
             message.parse(new NulsByteBuffer(decode));
-            if (message == null) {
-                chain.getLoggerMap().get(TxConstant.LOG_TX_MESSAGE).debug(
-                        "recieve [receiveTx], message is null from node-{}, chainId:{}", nodeId, chainId);
-                return failed(TxErrorCode.PARAMETER_ERROR);
-            }
+//            if (message == null) {
+//                chain.getLoggerMap().get(TxConstant.LOG_TX_MESSAGE).debug(
+//                        "recieve [receiveTx], message is null from node-{}, chainId:{}", nodeId, chainId);
+//                return failed(TxErrorCode.PARAMETER_ERROR);
+//            }
             Transaction transaction = message.getTx();
             chain.getLoggerMap().get(TxConstant.LOG_TX_MESSAGE).debug(
                     "recieve [receiveTx] message from node-{}, chainId:{}, hash:{}", nodeId, chainId, transaction.getHash().getDigestHex());
@@ -234,11 +234,11 @@ public class MessageCmd extends BaseCmd {
             BroadcastTxMessage message = new BroadcastTxMessage();
             byte[] decode = RPCUtil.decode(params.get(KEY_MESSAGE_BODY).toString());
             message.parse(new NulsByteBuffer(decode));
-            if (message == null) {
-                chain.getLoggerMap().get(TxConstant.LOG_TX_MESSAGE).debug(
-                        "recieve [newCrossHash], message is null from node-{}, chainId:{}", nodeId, chainId);
-                return failed(TxErrorCode.PARAMETER_ERROR);
-            }
+//            if (message == null) {
+//                chain.getLoggerMap().get(TxConstant.LOG_TX_MESSAGE).debug(
+//                        "recieve [newCrossHash], message is null from node-{}, chainId:{}", nodeId, chainId);
+//                return failed(TxErrorCode.PARAMETER_ERROR);
+//            }
             NulsDigestData hash = message.getRequestHash();
             chain.getLoggerMap().get(TxConstant.LOG_TX_MESSAGE).debug(
                     "recieve [newCrossHash] message from node-{}, chainId:{}, hash:{}", nodeId, chainId, hash.getDigestHex());
@@ -286,9 +286,9 @@ public class MessageCmd extends BaseCmd {
             GetTxMessage message = new GetTxMessage();
             byte[] decode = RPCUtil.decode(params.get(KEY_MESSAGE_BODY).toString());
             message.parse(new NulsByteBuffer(decode));
-            if (message == null) {
-                return failed(TxErrorCode.PARAMETER_ERROR);
-            }
+//            if (message == null) {
+//                return failed(TxErrorCode.PARAMETER_ERROR);
+//            }
             chain = chainManager.getChain(chainId);
             if (null == chain) {
                 chain.getLoggerMap().get(TxConstant.LOG_TX_MESSAGE).debug(
@@ -344,9 +344,9 @@ public class MessageCmd extends BaseCmd {
             GetTxMessage message = new GetTxMessage();
             byte[] decode = RPCUtil.decode(params.get(KEY_MESSAGE_BODY).toString());
             message.parse(new NulsByteBuffer(decode));
-            if (message == null) {
-                return failed(TxErrorCode.PARAMETER_ERROR);
-            }
+//            if (message == null) {
+//                return failed(TxErrorCode.PARAMETER_ERROR);
+//            }
             chain = chainManager.getChain(chainId);
             if (null == chain) {
                 chain.getLoggerMap().get(TxConstant.LOG_TX_MESSAGE).debug(
@@ -407,11 +407,11 @@ public class MessageCmd extends BaseCmd {
             GetTxMessage message = new GetTxMessage();
             byte[] decode = RPCUtil.decode(params.get(KEY_MESSAGE_BODY).toString());
             message.parse(new NulsByteBuffer(decode));
-            if (message == null) {
-                chain.getLoggerMap().get(TxConstant.LOG_TX_MESSAGE).debug(
-                        "recieve [askCrossTxFc2M], message is null from node-{}, chainId:{}", nodeId, chainId);
-                return failed(TxErrorCode.PARAMETER_ERROR);
-            }
+//            if (message == null) {
+//                chain.getLoggerMap().get(TxConstant.LOG_TX_MESSAGE).debug(
+//                        "recieve [askCrossTxFc2M], message is null from node-{}, chainId:{}", nodeId, chainId);
+//                return failed(TxErrorCode.PARAMETER_ERROR);
+//            }
             chain = chainManager.getChain(chainId);
             if (null == chain) {
                 throw new NulsException(TxErrorCode.CHAIN_NOT_FOUND);
@@ -467,11 +467,11 @@ public class MessageCmd extends BaseCmd {
             CrossTxMessage message = new CrossTxMessage();
             byte[] decode = RPCUtil.decode(params.get(KEY_MESSAGE_BODY).toString());
             message.parse(new NulsByteBuffer(decode));
-            if (message == null) {
-                chain.getLoggerMap().get(TxConstant.LOG_TX_MESSAGE).debug(
-                        "recieve [newMnTx], message is null from node-{}, chainId:{}", nodeId, chainId);
-                return failed(TxErrorCode.PARAMETER_ERROR);
-            }
+//            if (message == null) {
+//                chain.getLoggerMap().get(TxConstant.LOG_TX_MESSAGE).debug(
+//                        "recieve [newMnTx], message is null from node-{}, chainId:{}", nodeId, chainId);
+//                return failed(TxErrorCode.PARAMETER_ERROR);
+//            }
             Transaction transaction = message.getTx();
             chain.getLoggerMap().get(TxConstant.LOG_TX_MESSAGE).debug(
                     "recieve [newMnTx] message from node-{}, chainId:{}, hash:{}", nodeId, chainId, transaction.getHash().getDigestHex());
@@ -517,9 +517,9 @@ public class MessageCmd extends BaseCmd {
             VerifyCrossWithFCMessage message = new VerifyCrossWithFCMessage();
             byte[] decode = RPCUtil.decode(params.get(KEY_MESSAGE_BODY).toString());
             message.parse(new NulsByteBuffer(decode));
-            if (message == null) {
-                return failed(TxErrorCode.PARAMETER_ERROR);
-            }
+//            if (message == null) {
+//                return failed(TxErrorCode.PARAMETER_ERROR);
+//            }
             chain = chainManager.getChain(chainId);
             if (null == chain) {
                 chain.getLoggerMap().get(TxConstant.LOG_TX_MESSAGE).debug(
@@ -581,11 +581,11 @@ public class MessageCmd extends BaseCmd {
             VerifyCrossResultMessage message = new VerifyCrossResultMessage();
             byte[] decode = RPCUtil.decode(params.get(KEY_MESSAGE_BODY).toString());
             message.parse(new NulsByteBuffer(decode));
-            if (message == null) {
-                chain.getLoggerMap().get(TxConstant.LOG_TX_MESSAGE).debug(
-                        "recieve [verifyResult], message is null from node-{}, chainId:{}", nodeId, chainId);
-                return failed(TxErrorCode.PARAMETER_ERROR);
-            }
+//            if (message == null) {
+//                chain.getLoggerMap().get(TxConstant.LOG_TX_MESSAGE).debug(
+//                        "recieve [verifyResult], message is null from node-{}, chainId:{}", nodeId, chainId);
+//                return failed(TxErrorCode.PARAMETER_ERROR);
+//            }
             chain.getLoggerMap().get(TxConstant.LOG_TX_MESSAGE).debug(
                     "recieve [verifyResult] message from node-{}, chainId:{}, txHash:{}", nodeId, chainId, message.getRequestHash().getDigestHex());
             //处理跨链节点验证结果
@@ -622,11 +622,11 @@ public class MessageCmd extends BaseCmd {
             VerifyCrossWithFCMessage message = new VerifyCrossWithFCMessage();
             byte[] decode = RPCUtil.decode(params.get(KEY_MESSAGE_BODY).toString());
             message.parse(new NulsByteBuffer(decode));
-            if (message == null) {
-                chain.getLoggerMap().get(TxConstant.LOG_TX_MESSAGE).debug(
-                        "recieve [verifyMn], message is null from node-{}, chainId:{}", nodeId, chainId);
-                return failed(TxErrorCode.PARAMETER_ERROR);
-            }
+//            if (message == null) {
+//                chain.getLoggerMap().get(TxConstant.LOG_TX_MESSAGE).debug(
+//                        "recieve [verifyMn], message is null from node-{}, chainId:{}", nodeId, chainId);
+//                return failed(TxErrorCode.PARAMETER_ERROR);
+//            }
             chain = chainManager.getChain(chainId);
             if (null == chain) {
                 throw new NulsException(TxErrorCode.CHAIN_NOT_FOUND);
