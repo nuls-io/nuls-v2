@@ -1,11 +1,11 @@
 [global]
 encoding=UTF-8
 language=en
-logPath=./logs
+logPath=./Logs
 logLevel=INFO
 dataPath=./data
 serviceManager=ws://127.0.0.1:7771
-debug=1
+debug=0
 #默认链ID
 chainId=2
 #默认资产ID
@@ -15,13 +15,14 @@ chainName=nuls2
 mainChainId=2
 mainAssetId=1
 [network]
+port=18001
 #魔法参数
-packetMagic=20190415
+packetMagic=20190002
 #种子节点
-selfSeedIps=47.91.22.9:8080,192.168.1.115:8080
+selfSeedIps=39.98.226.51:18001,47.244.186.65:18001,47.252.86.42:18001,122.114.0.96:18001
 
 [account]
-keystoreFolder=keystore/backup
+keystoreFolder=/keystore/backup
 
 [block]
 #区块运行时参数

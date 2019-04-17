@@ -171,11 +171,15 @@ public class TransactionController {
         try {
             chainId = (int) params.get(0);
             txHex = (String) params.get(1);
-        }catch (Exception e) {
+        } catch (Exception e) {
             return RpcResult.paramError();
         }
+        if (!CacheManager.isChainExist(chainId)) {
+            return RpcResult.dataNotFound();
+        }
+        Result result = WalletRpcHandler.validateTx(chainId, txHex);
 
-        return null;
+        return RpcResult.success(result.getData());
 
     }
 

@@ -327,13 +327,8 @@ public class WalletRpcHandler {
         params.put("tx", txHex);
 
         try {
-            Map map = (Map) RpcCall.request(ModuleE.TX.abbr, CommandConstant.GET_AGENT, params);
-            AgentInfo agentInfo = new AgentInfo();
-            agentInfo.setCreditValue(Double.parseDouble(map.get("creditVal").toString()));
-            agentInfo.setDepositCount((Integer) map.get("memberCount"));
-            agentInfo.setStatus((Integer) map.get("status"));
-
-            return Result.getSuccess(null).setData(agentInfo);
+            Map map = (Map) RpcCall.request(ModuleE.TX.abbr, CommandConstant.TX_NEWTX, params);
+            return Result.getSuccess(null).setData(map);
         } catch (NulsException e) {
             return Result.getFailed(e.getErrorCode());
         }

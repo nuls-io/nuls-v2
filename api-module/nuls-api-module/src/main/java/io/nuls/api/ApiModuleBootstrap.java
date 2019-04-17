@@ -100,9 +100,12 @@ public class ApiModuleBootstrap extends RpcModule {
     @Override
     public Module[] getDependencies() {
         return new Module[]{
-//                new Module(ModuleE.CS.abbr, "1.0"),
-                new Module(ModuleE.BL.abbr, "1.0")
-//                new Module(ModuleE.SC.abbr, "1.0")
+                new Module(ModuleE.CS.abbr, "1.0"),
+                new Module(ModuleE.BL.abbr, "1.0"),
+                new Module(ModuleE.AC.abbr, "1.0"),
+                new Module(ModuleE.TX.abbr, "1.0"),
+                new Module(ModuleE.LG.abbr, "1.0"),
+                new Module(ModuleE.SC.abbr, "1.0")
         };
     }
 
@@ -138,7 +141,7 @@ public class ApiModuleBootstrap extends RpcModule {
             JsonRpcServer server = new JsonRpcServer();
             server.startServer(ApiContext.listenerIp, ApiContext.rpcPort);
             TimeUtils.getInstance().start();
-         //   TimeUtils.getInstance().start(10 * 60 * 1000L);
+            //   TimeUtils.getInstance().start(10 * 60 * 1000L);
         } catch (Exception e) {
             Log.error("------------------------api-module running failed---------------------------");
             Log.error(e);
