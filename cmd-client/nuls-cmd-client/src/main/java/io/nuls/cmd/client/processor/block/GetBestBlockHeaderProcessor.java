@@ -47,7 +47,7 @@ public class GetBestBlockHeaderProcessor implements CommandProcessor {
 
     @Override
     public String getCommand() {
-        return "getbestblockheader";
+        return "getlatestblockheader";
     }
 
     @Override
@@ -64,7 +64,7 @@ public class GetBestBlockHeaderProcessor implements CommandProcessor {
 
     @Override
     public String getCommandDescription() {
-        return "getbestblockheader --get the best block header";
+        return "getlatestblockheader --get the best block header";
     }
 
     @Override

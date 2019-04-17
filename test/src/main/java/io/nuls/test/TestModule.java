@@ -46,12 +46,10 @@ public class TestModule extends RpcModule {
     NetworkProvider networkProvider = ServiceManager.get(NetworkProvider.class);
 
     @Override
-    public Module[] getDependencies() {
+    public Module[] declareDependent() {
         return new Module[]{
-                new Module(ModuleE.NW.abbr,"1.0"),
                 new Module(ModuleE.BL.abbr,"1.0"),
                 new Module(ModuleE.SC.abbr,"1.0"),
-                new Module(ModuleE.AC.abbr,"1.0"),
                 new Module(ModuleE.TX.abbr,"1.0"),
                 new Module(ModuleE.LG.abbr,"1.0"),
                 new Module(ModuleE.CS.abbr,"1.0")

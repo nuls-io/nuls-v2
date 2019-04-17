@@ -18,7 +18,6 @@ import io.nuls.transaction.model.bo.Chain;
 import io.nuls.transaction.model.bo.TxRegister;
 import io.nuls.transaction.model.po.TransactionConfirmedPO;
 import io.nuls.transaction.rpc.call.LedgerCall;
-import io.nuls.transaction.rpc.call.NetworkCall;
 import io.nuls.transaction.rpc.call.TransactionCall;
 import io.nuls.transaction.service.ConfirmedTxService;
 import io.nuls.transaction.service.TxService;
@@ -344,47 +343,6 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
             packablePool.addInFirst(chain, tx);
         }
         return true;
-    }
-
-
-    @Override
-    public void processEffectCrossTx(Chain chain, long blockHeight) throws NulsException {
-        int chainId = chain.getChainId();
-        List<NulsDigestData> hashList = confirmedTxStorageService.getCrossTxEffectList(chainId, blockHeight);
-        for (NulsDigestData hash : hashList) {
-            TransactionConfirmedPO txPO = confirmedTxStorageService.getTx(chainId, hash);
-            Transaction tx = txPO.getTx();
-            if (null == tx) {
-                chain.getLoggerMap().get(TxConstant.LOG_TX).error(TxErrorCode.TX_NOT_EXIST.getMsg() + ": " + hash.toString());
-                continue;
-            }
-            if (tx.getType() != TxConstant.TX_TYPE_CROSS_CHAIN_TRANSFER) {
-                chain.getLoggerMap().get(TxConstant.LOG_TX).error(TxErrorCode.TX_TYPE_ERROR.getMsg() + ": " + hash.toString());
-                continue;
-            }
-            //跨链转账交易接收者链id
-            int toChainId = TxUtil.getCrossTxTosOriginChainId(tx);
-
-            /*
-                如果当前链是主网
-                    1.需要对接收者链进行账目金额增加
-                    2a.如果是交易收款方,则需要向发起链发送回执? todo
-                    2b.如果不是交易收款方广播给收款方链
-                如果当前链是交易发起链
-                    1.广播给主网
-             */
-            if (chainId == txConfig.getMainChainId()) {
-                if (toChainId == chainId) {
-                    //todo 已到达目标链发送回执
-                } else {
-                    //广播给 toChainId 链的节点
-                    NetworkCall.broadcastTxHash(toChainId, tx.getHash());
-                }
-            } else {
-                //广播给 主网 链的节点
-                NetworkCall.broadcastTxHash(txConfig.getMainChainId(), tx.getHash());
-            }
-        }
     }
 
     @Override

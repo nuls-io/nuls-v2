@@ -26,11 +26,14 @@ public class TxRelationInfo {
 
     private BigInteger balance;
 
+    // -1 : from , 1: to
+    private int transferType;
+
     public TxRelationInfo() {
 
     }
 
-    public TxRelationInfo(String address, TransactionInfo info, int chainId, int assetId, BigInteger values, BigInteger balance) {
+    public TxRelationInfo(String address, TransactionInfo info, int chainId, int assetId, BigInteger values, int transferType, BigInteger balance) {
         this.address = address;
         this.txHash = info.getHash();
         this.type = info.getType();
@@ -41,6 +44,7 @@ public class TxRelationInfo {
         this.fee = info.getFee();
         this.values = values;
         this.balance = balance;
+        this.transferType = transferType;
     }
 
     public String getTxHash() {

@@ -77,10 +77,10 @@ public class CallContractProcessor extends ContractBaseProcessor {
         checkAddress(config.getChainId(),args[1],args[4]);
         checkIsNumeric(args[2],"gasLimit");
         checkIsNumeric(args[3],"price");
-        checkArgs(()->{
-            BigDecimal amount = new BigDecimal(args[6]);
-            return amount.compareTo(BigDecimal.valueOf(0.01D)) >= 0;
-        },"value must be a numeric and greater than 0.01");
+//        checkArgs(()->{
+//            BigDecimal amount = new BigDecimal(args[6]);
+//            return amount.compareTo(BigDecimal.valueOf(0.01D)) >= 0;
+//        },"value must be a numeric and greater than 0.01");
         CallContractReq form = getContractCall(args);
         if(null == form){
             return false;

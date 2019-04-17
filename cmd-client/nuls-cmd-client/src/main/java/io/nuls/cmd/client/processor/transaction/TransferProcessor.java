@@ -72,10 +72,7 @@ public class TransferProcessor extends TransactionBaseProcessor implements Comma
     @Override
     public boolean argsValidate(String[] args) {
         checkArgsNumber(args,3,4);
-        checkArgs(()->{
-            BigDecimal amount = new BigDecimal(args[3]);
-            return amount.compareTo(BigDecimal.valueOf(0.01D)) >= 0;
-        },"amount must be a numeric and greater than 0.01");
+        checkIsAmount(args[3],"amount");
         return true;
     }
 

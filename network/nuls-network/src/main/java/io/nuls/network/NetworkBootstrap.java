@@ -154,7 +154,7 @@ public class NetworkBootstrap extends RpcModule {
     }
 
     @Override
-    public Module[] getDependencies() {
+    public Module[] declareDependent() {
         return new Module[]{new Module(ModuleE.BL.abbr, "1.0")};
     }
 

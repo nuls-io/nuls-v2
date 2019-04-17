@@ -40,11 +40,15 @@ public interface CommandConstant {
 
     //查询交易详情
     String GET_TX = "tx_getTx";
-    String CLIENT_GETTX = "tx_getConfirmedTxClient";
-
+    //查询已确认交易详情
+    String GET_CONFIRM_TX = "tx_getConfirmedTxClient";
+    //交易验证
+    String TX_VALIEDATE = "tx_verifyTx";
+    //新交易确认并广播
+    String TX_NEWTX = "tx_newTx";
     //查询节点详情
     String GET_AGENT = "cs_getAgentInfo";
-
+    //获取共识种子节点配置
     String GET_CONSENSUS_CONFIG = "cs_getSeedNodeList";
     //查询智能合约详情
     String CONTRACT_INFO = "sc_contract_info";

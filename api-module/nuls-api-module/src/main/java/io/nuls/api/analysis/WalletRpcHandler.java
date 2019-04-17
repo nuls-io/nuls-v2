@@ -163,7 +163,7 @@ public class WalletRpcHandler {
         params.put("chainId", chainId);
         params.put("txHash", hash);
         try {
-            Map map = (Map) RpcCall.request(ModuleE.TX.abbr, CommandConstant.CLIENT_GETTX, params);
+            Map map = (Map) RpcCall.request(ModuleE.TX.abbr, CommandConstant.GET_CONFIRM_TX, params);
             String txHex = (String) map.get("tx");
             if (null == txHex) {
                 return null;
@@ -321,4 +321,30 @@ public class WalletRpcHandler {
         return Result.getSuccess(null).setData(resultInfo);
     }
 
+    public static Result validateTx(int chainId, String txHex) {
+        Map<String, Object> params = new HashMap<>();
+        params.put("chainId", chainId);
+        params.put("tx", txHex);
+
+        try {
+            Map map = (Map) RpcCall.request(ModuleE.TX.abbr, CommandConstant.TX_VALIEDATE, params);
+            return Result.getSuccess(null).setData(map);
+        } catch (NulsException e) {
+            return Result.getFailed(e.getErrorCode());
+        }
+    }
+
+
+    public static Result broadcastTx(int chainId, String txHex) {
+        Map<String, Object> params = new HashMap<>();
+        params.put("chainId", chainId);
+        params.put("tx", txHex);
+
+        try {
+            Map map = (Map) RpcCall.request(ModuleE.TX.abbr, CommandConstant.TX_NEWTX, params);
+            return Result.getSuccess(null).setData(map);
+        } catch (NulsException e) {
+            return Result.getFailed(e.getErrorCode());
+        }
+    }
 }

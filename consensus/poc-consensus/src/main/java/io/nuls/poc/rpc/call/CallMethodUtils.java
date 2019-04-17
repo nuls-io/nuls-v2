@@ -54,14 +54,15 @@ public class CallMethodUtils {
             callParams.put("password", password);
             Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_getPriKeyByAddress", callParams);
             if (!cmdResp.isSuccess()) {
-                throw new NulsException(ConsensusErrorCode.ACCOUNT_NOT_EXIST);
+                throw new NulsException(ConsensusErrorCode.ACCOUNT_VALID_ERROR);
             }
             HashMap callResult = (HashMap) ((HashMap) cmdResp.getResponseData()).get("ac_getPriKeyByAddress");
             if (callResult == null || callResult.size() == 0 || !(boolean) callResult.get(ConsensusConstant.VALID_RESULT)) {
                 throw new NulsException(ConsensusErrorCode.ACCOUNT_VALID_ERROR);
             }
             return callResult;
-        } catch (NulsException e){
+
+        } catch (NulsException e) {
             throw e;
         }catch (Exception e) {
             throw new NulsException(e);

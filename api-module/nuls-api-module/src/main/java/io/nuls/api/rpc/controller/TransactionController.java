@@ -163,7 +163,49 @@ public class TransactionController {
         return new RpcResult().setResult(list);
     }
 
+    @RpcMethod("validateTx")
+    public RpcResult validateTx(List<Object> params) {
+        VerifyUtils.verifyParams(params, 2);
+        int chainId;
+        String txHex;
+        try {
+            chainId = (int) params.get(0);
+            txHex = (String) params.get(1);
+        } catch (Exception e) {
+            return RpcResult.paramError();
+        }
+        if (!CacheManager.isChainExist(chainId)) {
+            return RpcResult.dataNotFound();
+        }
+        Result result = WalletRpcHandler.validateTx(chainId, txHex);
+        if (result.isSuccess()) {
+            return RpcResult.success(result.getData());
+        } else {
+            return RpcResult.failed(result);
+        }
+    }
 
-//    public RpcResult
+
+    @RpcMethod("broadcastTx")
+    public RpcResult broadcastTx(List<Object> params) {
+        VerifyUtils.verifyParams(params, 2);
+        int chainId;
+        String txHex;
+        try {
+            chainId = (int) params.get(0);
+            txHex = (String) params.get(1);
+        } catch (Exception e) {
+            return RpcResult.paramError();
+        }
+        if (!CacheManager.isChainExist(chainId)) {
+            return RpcResult.dataNotFound();
+        }
+        Result result = WalletRpcHandler.broadcastTx(chainId, txHex);
+        if (result.isSuccess()) {
+            return RpcResult.success(result.getData());
+        } else {
+            return RpcResult.failed(result);
+        }
+    }
 
 }

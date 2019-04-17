@@ -108,7 +108,7 @@ public class ContractBootStrap extends RpcModule {
     private void initContractLog() {
         Level fileLevel = Level.toLevel(contractConfig.getLogFileLevel());
         Level consoleLevel = Level.toLevel(contractConfig.getLogConsoleLevel());
-        ContractUtil.configLog(contractConfig.getLogFilePath(), contractConfig.getLogFileName(), fileLevel, consoleLevel, contractConfig.getPackageLogPackages(), contractConfig.getPackageLogLevels());
+        ContractUtil.configLog(contractConfig.getLogFilePath(), contractConfig.getLogFileName(), fileLevel, consoleLevel, contractConfig.getSystemLogLevel(), contractConfig.getPackageLogPackages(), contractConfig.getPackageLogLevels());
     }
 
     /**
@@ -152,7 +152,7 @@ public class ContractBootStrap extends RpcModule {
      * @return
      */
     @Override
-    public Module[] getDependencies() {
+    public Module[] declareDependent() {
         return new Module[]{new Module(ModuleE.TX.abbr, "1.0"),
                 new Module(ModuleE.LG.abbr, "1.0"),
                 new Module(ModuleE.BL.abbr, "1.0"),

@@ -137,7 +137,8 @@ public class TxServiceImpl implements TxService {
                     packablePool.add(chain, tx);
                 }
                 unconfirmedTxStorageService.putTx(chain.getChainId(), tx);
-                NetworkCall.broadcastTxHash(chain.getChainId(),tx.getHash());
+                //广播完整交易
+                NetworkCall.broadcastTx(chain.getChainId(),tx);
             }
             return true;
         } catch (Exception e) {

@@ -55,14 +55,6 @@ public interface ConfirmedTxService {
      */
     boolean rollbackTxList(Chain chain, List<NulsDigestData> txHashList, String blockHeader) throws NulsException;
 
-    /**
-     * 根据最新区块高度扫描是否有需要处理的跨链交易,如果有则进行跨链发送
-     * @param chain 链
-     * @param blockHeight 最新区块高度
-     * @throws NulsException
-     */
-    void processEffectCrossTx(Chain chain, long blockHeight) throws NulsException;
-
 
     /**
      * 获取区块的完整交易 只从已确认的交易中查询
