@@ -49,6 +49,8 @@ import io.nuls.transaction.constant.TxErrorCode;
 import io.nuls.transaction.manager.TxManager;
 import io.nuls.transaction.model.TxWrapper;
 import io.nuls.transaction.model.bo.*;
+import io.nuls.transaction.model.dto.ModuleTxRegisterDTO;
+import io.nuls.transaction.model.dto.TxRegisterDTO;
 import io.nuls.transaction.model.po.TransactionConfirmedPO;
 import io.nuls.transaction.rpc.call.*;
 import io.nuls.transaction.service.ConfirmedTxService;
@@ -102,8 +104,43 @@ public class TxServiceImpl implements TxService {
     }
 
     @Override
-    public boolean register(Chain chain, TxRegister txRegister) {
-        return TxManager.register(chain, txRegister);
+    public boolean register(Chain chain, ModuleTxRegisterDTO moduleTxRegisterDto) {
+        try {
+            for (TxRegisterDTO txRegisterDto : moduleTxRegisterDto.getList()) {
+                TxRegister txRegister = new TxRegister();
+                txRegister.setModuleCode(moduleTxRegisterDto.getModuleCode());
+                txRegister.setModuleValidator(moduleTxRegisterDto.getModuleValidator());
+                txRegister.setTxType(txRegisterDto.getTxType());
+                txRegister.setValidator(txRegisterDto.getValidator());
+                txRegister.setCommit(moduleTxRegisterDto.getCommit());
+                txRegister.setRollback(moduleTxRegisterDto.getRollback());
+                txRegister.setSystemTx(txRegisterDto.getSystemTx());
+                txRegister.setUnlockTx(txRegisterDto.getUnlockTx());
+                txRegister.setVerifySignature(txRegisterDto.getVerifySignature());
+                chain.getTxRegisterMap().put(txRegister.getTxType(), txRegister);
+                return true;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    @Override
+    public boolean unregister(Chain chain, String moduleCode) {
+        try {
+            Iterator<Map.Entry<Integer, TxRegister>> it = chain.getTxRegisterMap().entrySet().iterator();
+            while (it.hasNext()){
+                Map.Entry<Integer, TxRegister> entry = it.next();
+                if(moduleCode.equals(entry.getValue().getModuleCode())){
+                    it.remove();
+                }
+            }
+            return true;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
     }
 
     @Override
