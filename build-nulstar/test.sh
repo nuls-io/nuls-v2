@@ -1,8 +1,8 @@
 #!/bin/bash
 . func.sh
 cd `dirname $0`;
-if [ -d ../Libraries/JAVA/11.0.2 ]; then
-    export JAVA_HOME="$(cd $(dirname "../Libraries/JAVA/11.0.2"); pwd)/11.0.2"
+if [ -d ./Libraries/JAVA/JRE/11.0.2 ]; then
+    export JAVA_HOME="$(cd $(dirname "./Libraries/JAVA/JRE/11.0.2"); pwd)/11.0.2"
     export PATH=${PATH}:${JAVA_HOME}/bin
     JAVA="${JAVA_HOME}/bin/java"
 else
@@ -34,10 +34,10 @@ if [ ! -f "$CONFIG" ]; then
     BIN_PATH=`pwd`;
     CONFIG="${BIN_PATH}/nuls.ncf"
 fi
-if [ ! -d ./logs/test ]; then
-    mkidr ./logs/test
+if [ ! -d ./Logs/test ]; then
+    mkidr ./Logs/test
 fi
-STDOUT_FILE=`cd ./logs/test; pwd`
+STDOUT_FILE=`cd ./Logs/test; pwd`
 STDOUT_FILE="${STDOUT_FILE}/test-case.log";
 cd ./Modules/Nuls/test/1.0.0
 APP_PID=`ps -ef|grep -w "name=test "|grep -v grep|awk '{print $2}'`

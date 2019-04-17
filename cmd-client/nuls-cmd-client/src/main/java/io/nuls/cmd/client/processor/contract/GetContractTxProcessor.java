@@ -99,7 +99,7 @@ public class GetContractTxProcessor extends ContractBaseProcessor {
         List<Map<String, Object>> outputs = (List<Map<String, Object>>)map.get("outputs");
         for(Map<String, Object> output : outputs){
             output.put("value", Na.naToNuls(output.get("value")));
-            output.put("status", statusExplainForOutPut((Integer) output.get("status")));
+//            output.put("status", statusExplainForOutPut((Integer) output.get("status")));
         }
         map.put("outputs", outputs);
 
@@ -144,6 +144,10 @@ public class GetContractTxProcessor extends ContractBaseProcessor {
      * @return
      */
     private String statusExplainForOutPut(Integer status){
+        if(status == null){
+            return "unknown";
+        }
+
         if(status == 0){
             return "usable";
         }

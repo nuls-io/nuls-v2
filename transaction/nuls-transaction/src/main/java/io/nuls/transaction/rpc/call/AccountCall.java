@@ -2,10 +2,8 @@ package io.nuls.transaction.rpc.call;
 
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.MultiSigAccount;
-import io.nuls.base.signture.P2PHKSignature;
 import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.model.ModuleE;
-import io.nuls.rpc.util.RPCUtil;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.transaction.constant.TxConstant;
 import io.nuls.transaction.utils.TxUtil;
@@ -20,42 +18,6 @@ import java.util.Map;
  * @date: 2018/12/20
  */
 public class AccountCall {
-
-    /**
-     * 查询地址私钥
-     * Query address private key
-     */
-    public static String getPrikey(String address, String password) throws NulsException {
-        try {
-            int chainId = AddressTool.getChainIdByAddress(address);
-            Map<String, Object> params = new HashMap<>(TxConstant.INIT_CAPACITY_8);
-            params.put(Constants.VERSION_KEY_STR, TxConstant.RPC_VERSION);
-            params.put("chainId", chainId);
-            params.put("address", address);
-            params.put("password", password);
-            HashMap result = (HashMap) TransactionCall.request(ModuleE.AC.abbr, "ac_getPriKeyByAddress", params);
-            return (String) result.get("priKey");
-        } catch (Exception e) {
-            throw new NulsException(e);
-        }
-    }
-    /**
-     * 查询地址是否加密
-     * Is address Encrypted
-     */
-    public static boolean isEncrypted(String address) throws NulsException {
-        try {
-            int chainId = AddressTool.getChainIdByAddress(address);
-            Map<String, Object> params = new HashMap<>(TxConstant.INIT_CAPACITY_8);
-            params.put(Constants.VERSION_KEY_STR, TxConstant.RPC_VERSION);
-            params.put("chainId", chainId);
-            params.put("address", address);
-            HashMap result = (HashMap) TransactionCall.request(ModuleE.AC.abbr, "ac_isEncrypted", params);
-            return (boolean) result.get("value");
-        } catch (Exception e) {
-            throw new NulsException(e);
-        }
-    }
 
     /**
      * 查询多签账户
@@ -75,32 +37,6 @@ public class AccountCall {
             HashMap result = (HashMap) TransactionCall.request(ModuleE.AC.abbr, "ac_getMultiSigAccount", params);
             String mAccountStr = (String) result.get("value");
             return null == mAccountStr ? null : TxUtil.getInstanceRpcStr(mAccountStr, MultiSigAccount.class);
-        } catch (Exception e) {
-            throw new NulsException(e);
-        }
-    }
-
-    /**
-     * 通过账户模块对数据进行签名
-     * @param address
-     * @param password
-     * @param data 待签名的数据
-     * @return P2PHKSignature
-     * @throws NulsException
-     */
-    public static P2PHKSignature signDigest(String address, String password, byte[] data) throws NulsException {
-        try {
-            int chainId = AddressTool.getChainIdByAddress(address);
-            Map<String, Object> params = new HashMap<>(TxConstant.INIT_CAPACITY_8);
-            params.put(Constants.VERSION_KEY_STR, TxConstant.RPC_VERSION);
-            params.put("chainId", chainId);
-            params.put("address", address);
-            params.put("password", password);
-            params.put("data", RPCUtil.encode(data));
-            HashMap result = (HashMap) TransactionCall.request(ModuleE.AC.abbr, "ac_signDigest", params);
-            String signatureStr = (String)result.get("signature");
-            P2PHKSignature signature = TxUtil.getInstanceRpcStr(signatureStr, P2PHKSignature.class);
-            return signature;
         } catch (Exception e) {
             throw new NulsException(e);
         }

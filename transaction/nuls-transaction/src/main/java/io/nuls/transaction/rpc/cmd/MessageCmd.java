@@ -17,9 +17,9 @@ import io.nuls.transaction.constant.TxConfig;
 import io.nuls.transaction.constant.TxConstant;
 import io.nuls.transaction.constant.TxErrorCode;
 import io.nuls.transaction.manager.ChainManager;
-import io.nuls.transaction.message.BroadcastTxMessage;
+import io.nuls.transaction.message.ForwardTxMessage;
 import io.nuls.transaction.message.GetTxMessage;
-import io.nuls.transaction.message.TransactionMessage;
+import io.nuls.transaction.message.BroadcastTxMessage;
 import io.nuls.transaction.model.bo.Chain;
 import io.nuls.transaction.model.po.TransactionConfirmedPO;
 import io.nuls.transaction.rpc.call.NetworkCall;
@@ -67,7 +67,7 @@ public class MessageCmd extends BaseCmd {
             chain = chainManager.getChain(chainId);
             String nodeId = params.get(KEY_NODE_ID).toString();
             //解析广播交易hash消息
-            BroadcastTxMessage message = new BroadcastTxMessage();
+            ForwardTxMessage message = new ForwardTxMessage();
             byte[] decode = RPCUtil.decode(params.get(KEY_MESSAGE_BODY).toString());
             message.parse(new NulsByteBuffer(decode));
             if (message == null) {
@@ -75,7 +75,7 @@ public class MessageCmd extends BaseCmd {
                         "recieve [newHash], message is null from node-{}, chainId:{}", nodeId, chainId);
                 return failed(TxErrorCode.PARAMETER_ERROR);
             }
-            NulsDigestData hash = message.getRequestHash();
+            NulsDigestData hash = message.getHash();
             chain.getLoggerMap().get(TxConstant.LOG_TX_MESSAGE).debug(
                     "recieve [newHash] message from node-{}, chainId:{}, hash:{}", nodeId, chainId, hash.getDigestHex());
             //交易缓存中是否已存在该交易hash
@@ -169,7 +169,7 @@ public class MessageCmd extends BaseCmd {
             String nodeId = params.get(KEY_NODE_ID).toString();
             chain = chainManager.getChain(chainId);
             //解析新的交易消息
-            TransactionMessage message = new TransactionMessage();
+            BroadcastTxMessage message = new BroadcastTxMessage();
             byte[] decode = RPCUtil.decode(params.get(KEY_MESSAGE_BODY).toString());
             message.parse(new NulsByteBuffer(decode));
             if (message == null) {
@@ -180,7 +180,6 @@ public class MessageCmd extends BaseCmd {
             Transaction transaction = message.getTx();
             chain.getLoggerMap().get(TxConstant.LOG_TX_MESSAGE).debug(
                     "recieve [receiveTx] message from node-{}, chainId:{}, hash:{}", nodeId, chainId, transaction.getHash().getDigestHex());
-            //TxUtil.txInformationDebugPrint(chain, transaction, chain.getLoggerMap().get(TxConstant.LOG_TX_MESSAGE));
             //交易缓存中是否已存在该交易hash
             boolean consains = TxDuplicateRemoval.mightContain(transaction.getHash());
             if (!consains) {

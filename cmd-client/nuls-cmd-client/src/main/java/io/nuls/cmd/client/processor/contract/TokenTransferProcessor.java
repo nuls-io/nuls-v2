@@ -77,7 +77,7 @@ public class TokenTransferProcessor extends ContractBaseProcessor {
     public boolean argsValidate(String[] args) {
         checkArgsNumber(args,4,5);
         checkAddress(config.getChainId(),args[1],args[2],args[3]);
-        checkIsNumeric(args[4],args[4]);
+        checkIsAmount(args[4],"amount");
         TokenTransferReq form = getTokenTransferForm(args);
         if(null == form){
             return false;

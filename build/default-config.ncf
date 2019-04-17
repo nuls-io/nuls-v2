@@ -1,8 +1,0 @@
-[global]
-#默认链id
-#chainId=2
-[network]
-#魔法参数
-#packetMagic=
-#种子节点
-#selfSeedIps=
