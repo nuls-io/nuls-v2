@@ -41,6 +41,7 @@ import java.util.List;
 
 /**
  * Created by wangkun23 on 2018/12/4.
+ * @author lanjinsheng
  */
 @Service
 public class FreezeStateServiceImpl implements FreezeStateService {
@@ -73,7 +74,7 @@ public class FreezeStateServiceImpl implements FreezeStateService {
     }
 
     private BigInteger unFreezeLockHeightState(List<FreezeHeightState> heightList, AccountState accountState) {
-        //TODO:此处高度可以做个时间缓存
+        //此处高度可以做个时间缓存
         long nowHeight = repository.getBlockHeight(accountState.getAddressChainId());
         //可移除的高度锁列表
         List<FreezeHeightState> heightRemove = new ArrayList<>();

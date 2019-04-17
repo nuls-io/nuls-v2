@@ -48,7 +48,6 @@ import io.nuls.rpc.netty.channel.manager.ConnectManager;
 import io.nuls.tools.core.ioc.SpringLiteContext;
 import io.nuls.tools.log.Log;
 import io.nuls.tools.thread.ThreadUtils;
-import io.nuls.tools.thread.TimeService;
 
 import java.util.Collection;
 import java.util.List;
@@ -96,7 +95,7 @@ public class ConnectionManager extends BaseManager {
         node.setConnectStatus(NodeConnectStatusEnum.FAIL);
 
         node.setFailCount(node.getFailCount() + 1);
-        node.setLastProbeTime(TimeService.currentTimeMillis());
+        node.setLastProbeTime(TimeManager.currentTimeMillis());
     }
 
     private StorageManager storageManager = StorageManager.getInstance();
@@ -168,7 +167,7 @@ public class ConnectionManager extends BaseManager {
         if (channel.localAddress().getPort() == networkConfig.getCrossPort()) {
             isCross = true;
         }
-        LoggerUtil.Log.debug("peer = {}:{} connectIn", ip, port);
+        LoggerUtil.logger().debug("peer = {}:{} connectIn", ip, port);
         //此时无法判定业务所属的网络id，所以无法归属哪个group,只有在version消息处理时才能知道
         Node node = new Node(0L, ip, port, Node.IN, isCross);
         node.setConnectStatus(NodeConnectStatusEnum.CONNECTED);
@@ -212,7 +211,7 @@ public class ConnectionManager extends BaseManager {
      */
     private void nettyBoot() {
         serverStart();
-        LoggerUtil.Log.info("==========================NettyBoot");
+        LoggerUtil.logger().info("==========================NettyServerBoot");
     }
 
     /**
@@ -228,7 +227,7 @@ public class ConnectionManager extends BaseManager {
                 server.start();
             } catch (InterruptedException e) {
                 e.printStackTrace();
-                LoggerUtil.Log.error(e.getMessage());
+                LoggerUtil.logger().error(e.getMessage());
             }
         }, false);
         ThreadUtils.createAndRunThread("node crossServer start", () -> {
@@ -236,7 +235,7 @@ public class ConnectionManager extends BaseManager {
                 serverCross.start();
             } catch (InterruptedException e) {
                 e.printStackTrace();
-                LoggerUtil.Log.error(e.getMessage());
+                LoggerUtil.logger().error(e.getMessage());
             }
         }, false);
 

@@ -30,10 +30,6 @@ import io.nuls.base.data.BaseNulsData;
 import io.nuls.ledger.utils.TimeUtil;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.parse.SerializeUtils;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
 
 import java.io.IOException;
 import java.math.BigInteger;
@@ -43,43 +39,32 @@ import java.math.BigInteger;
  * @description
  * @date 2019/01/10
  **/
-@ToString
-@NoArgsConstructor
 public class UnconfirmedAmount extends BaseNulsData {
-    @Setter
-    @Getter
     private long time;
-    @Setter
-    @Getter
     private String txHash;
     /**
      * locked == 0 时的 fromCoin花费金额
      */
-    @Setter
-    @Getter
     private BigInteger spendAmount = BigInteger.ZERO;
     /**
      * lockedTime == 0 时的 toCoin收入金额
      */
-    @Setter
-    @Getter
     private BigInteger earnAmount = BigInteger.ZERO;
     /**
      * locked != 0 时的 fromCoin 解锁花费金额
      */
-    @Setter
-    @Getter
     private BigInteger fromUnLockedAmount = BigInteger.ZERO;
 
     /**
      * lockedTime != 0 时的 toCoin 锁定收入金额
      */
-    @Setter
-    @Getter
     private BigInteger toLockedAmount = BigInteger.ZERO;
 
+    public UnconfirmedAmount() {
+        super();
+    }
 
-    public UnconfirmedAmount(BigInteger earn, BigInteger spend,BigInteger unLockedAmount,BigInteger lockedAmount) {
+    public UnconfirmedAmount(BigInteger earn, BigInteger spend, BigInteger unLockedAmount, BigInteger lockedAmount) {
         spendAmount = spendAmount.add(spend);
         earnAmount = earnAmount.add(earn);
         fromUnLockedAmount = fromUnLockedAmount.add(unLockedAmount);
@@ -120,5 +105,53 @@ public class UnconfirmedAmount extends BaseNulsData {
         size += SerializeUtils.sizeOfBigInteger();
         size += SerializeUtils.sizeOfBigInteger();
         return size;
+    }
+
+    public long getTime() {
+        return time;
+    }
+
+    public void setTime(long time) {
+        this.time = time;
+    }
+
+    public String getTxHash() {
+        return txHash;
+    }
+
+    public void setTxHash(String txHash) {
+        this.txHash = txHash;
+    }
+
+    public BigInteger getSpendAmount() {
+        return spendAmount;
+    }
+
+    public void setSpendAmount(BigInteger spendAmount) {
+        this.spendAmount = spendAmount;
+    }
+
+    public BigInteger getEarnAmount() {
+        return earnAmount;
+    }
+
+    public void setEarnAmount(BigInteger earnAmount) {
+        this.earnAmount = earnAmount;
+    }
+
+    public BigInteger getFromUnLockedAmount() {
+        return fromUnLockedAmount;
+    }
+
+    public void setFromUnLockedAmount(BigInteger fromUnLockedAmount) {
+        this.fromUnLockedAmount = fromUnLockedAmount;
+    }
+
+    public BigInteger getToLockedAmount() {
+        return toLockedAmount;
+    }
+
+    public void setToLockedAmount(BigInteger toLockedAmount) {
+        this.toLockedAmount = toLockedAmount;
     }
 }

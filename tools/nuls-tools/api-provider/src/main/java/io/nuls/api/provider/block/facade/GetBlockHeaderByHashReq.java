@@ -1,8 +1,6 @@
 package io.nuls.api.provider.block.facade;
 
 import io.nuls.api.provider.BaseReq;
-import lombok.AllArgsConstructor;
-import lombok.Data;
 
 /**
  * @Author: zhoulijun
@@ -11,10 +9,19 @@ import lombok.Data;
  * 通过hash获取区块头
  * get block header by hash
  */
-@Data
-@AllArgsConstructor
 public class GetBlockHeaderByHashReq extends BaseReq {
 
     private String hash;
 
+    public GetBlockHeaderByHashReq(String hash) {
+        this.hash = hash;
+    }
+
+    public String getHash() {
+        return hash;
+    }
+
+    public void setHash(String hash) {
+        this.hash = hash;
+    }
 }

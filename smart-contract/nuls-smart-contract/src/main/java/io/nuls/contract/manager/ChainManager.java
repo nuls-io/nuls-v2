@@ -103,14 +103,7 @@ public class ChainManager {
              * 初始化智能合约创建合约未确认交易管理器
              */
             initContractTxCreateUnconfirmedManager(chain);
-            /*
-             * 注册交易到交易管理模块
-             */
-            registerTx(chain);
             chainMap.put(chainId, chain);
-            //订阅Block模块接口
-            //BlockCall.subscriptionNewBlockHeight(chain);
-
         }
     }
 
@@ -129,14 +122,14 @@ public class ChainManager {
         chain.setProgramExecutor(programExecutor);
     }
 
-    private void registerTx(Chain chain) throws NulsException {
+    public static boolean registerTx(Chain chain) throws NulsException {
         List<ContractTxRegisterDto> list = new ArrayList();
         list.add(new ContractTxRegisterDto(TX_TYPE_CREATE_CONTRACT, CREATE_VALIDATOR, false, false, true));
         list.add(new ContractTxRegisterDto(TX_TYPE_CALL_CONTRACT, CALL_VALIDATOR, false, false, true));
         list.add(new ContractTxRegisterDto(TX_TYPE_DELETE_CONTRACT, DELETE_VALIDATOR, false, false, true));
         list.add(new ContractTxRegisterDto(TX_TYPE_CONTRACT_TRANSFER, null, true, false, false));
         list.add(new ContractTxRegisterDto(TX_TYPE_CONTRACT_RETURN_GAS, null, true, false, false));
-        TransactionCall.registerTx(chain.getChainId(), ModuleE.SC.abbr, INTEGRATE_VALIDATOR, COMMIT, ROLLBACK, list);
+        return TransactionCall.registerTx(chain.getChainId(), ModuleE.SC.abbr, INTEGRATE_VALIDATOR, COMMIT, ROLLBACK, list);
     }
 
 

@@ -36,15 +36,13 @@ import io.nuls.network.storage.InitDB;
 import io.nuls.network.utils.LoggerUtil;
 import io.nuls.tools.basic.InitializingBean;
 import io.nuls.tools.core.annotation.Service;
-import io.nuls.tools.model.ByteUtils;
 import io.nuls.tools.exception.NulsException;
+import io.nuls.tools.model.ByteUtils;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import static io.nuls.network.utils.LoggerUtil.Log;
 
 /**
  * DbServiceImpl
@@ -69,7 +67,7 @@ public class DbServiceImpl implements DbService,InitDB,InitializingBean {
                 }
             }
         } catch (Exception e) {
-            Log.error(e.getMessage());
+            LoggerUtil.logger().error(e.getMessage());
             throw new NulsException(e);
         }
         return list;
@@ -85,7 +83,7 @@ public class DbServiceImpl implements DbService,InitDB,InitializingBean {
             groupNodesPo.setSelfNodeContainer(nodeGroup.getLocalNetNodeContainer().parseToNodesContainerPo());
             RocksDBService.put(NetworkConstant.DB_NAME_NETWORK_GROUP_NODES,
                     ByteUtils.intToBytes(chainId), groupNodesPo.serialize());
-            LoggerUtil.Log.info("save group={} nodes",nodeGroup.getChainId());
+//            LoggerUtil.Log.info("save group={} nodes",nodeGroup.getChainId());
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -143,7 +141,7 @@ public class DbServiceImpl implements DbService,InitDB,InitializingBean {
             }
         } catch (Exception e) {
             e.printStackTrace();
-            Log.error(e.getMessage());
+            LoggerUtil.logger().error(e.getMessage());
         }
         return roleProtocolPos;
     }
@@ -180,7 +178,7 @@ public class DbServiceImpl implements DbService,InitDB,InitializingBean {
                 RocksDBService.createTable(NetworkConstant.DB_NAME_NETWORK_PROTOCOL_REGISTER);
             }
         } catch (Exception e) {
-            Log.error(e.getMessage());
+            LoggerUtil.logger().error(e.getMessage());
             throw new NulsException(e);
         }
     }

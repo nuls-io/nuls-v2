@@ -26,11 +26,11 @@ package io.nuls.ledger.test.cmd;
 
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.*;
-import io.nuls.rpc.info.NoUse;
+import io.nuls.ledger.test.constant.TestConfig;
 import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.model.message.Response;
 import io.nuls.rpc.netty.processor.ResponseMessageProcessor;
-import io.nuls.tools.crypto.HexUtil;
+import io.nuls.rpc.util.RPCUtil;
 import org.junit.Before;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -49,13 +49,11 @@ import java.util.Map;
  * @date 2019/01/14
  **/
 public class CmdGenesisAsset {
-    public int chainId = 2;
-    int assetChainId = 2;
-//    String address = "JgT2JCQvKGRKRjKqyfxRAj2zSCpGca01f";
+    //    String address = "JgT2JCQvKGRKRjKqyfxRAj2zSCpGca01f";
     String address = "tNULSeBaMvEtDfvZuukDf2mVyfGo3DdiN8KLRG";
-    int assetId = 1;
     //入账金额
     BigInteger amount = BigInteger.valueOf(100000000000000L);
+
     Transaction buildTransaction() throws IOException {
         //封装交易执行
         Transaction tx = new Transaction();
@@ -63,12 +61,12 @@ public class CmdGenesisAsset {
         CoinTo coinTo = new CoinTo();
         coinTo.setAddress(AddressTool.getAddress(address));
         coinTo.setAmount(amount);
-        coinTo.setAssetsChainId(assetChainId);
-        coinTo.setAssetsId(assetId);
+        coinTo.setAssetsChainId(TestConfig.assetChainId);
+        coinTo.setAssetsId(TestConfig.assetId);
         coinTo.setLockTime(0);
-        List<CoinFrom> coinFroms =new ArrayList<>();
+        List<CoinFrom> coinFroms = new ArrayList<>();
 //        coinFroms.add(coinFrom);
-        List<CoinTo> coinTos =new ArrayList<>();
+        List<CoinTo> coinTos = new ArrayList<>();
         coinTos.add(coinTo);
         coinData.setFrom(coinFroms);
         coinData.setTo(coinTos);
@@ -82,9 +80,10 @@ public class CmdGenesisAsset {
 
 
     final Logger logger = LoggerFactory.getLogger(getClass());
+
     @Before
     public void before() throws Exception {
-        NoUse.mockModule();
+//        NoUse.mockModule();
     }
 
 
@@ -92,30 +91,31 @@ public class CmdGenesisAsset {
     public void addGenesisAsset() throws Exception {
         // Build params map
         Map<String, Object> params = new HashMap<>();
-        params.put("chainId", chainId);
+        params.put("chainId", TestConfig.chainId);
         Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.LG.abbr, "bathValidateBegin", params);
         logger.info("response {}", response);
         params.put("isBatchValidate", true);
         Transaction transaction = buildTransaction();
-        List<String> txHexList = new ArrayList<>();
-        txHexList.add(HexUtil.encode(transaction.serialize()));
-        params.put("txHex",HexUtil.encode(transaction.serialize()));
-         response = ResponseMessageProcessor.requestAndResponse(ModuleE.LG.abbr, "validateCoinData", params);
+        List<String> txList = new ArrayList<>();
+        txList.add(RPCUtil.encode(transaction.serialize()));
+        params.put("tx", RPCUtil.encode(transaction.serialize()));
+        response = ResponseMessageProcessor.requestAndResponse(ModuleE.LG.abbr, "validateCoinData", params);
         logger.info("response {}", response);
-        params.put("txHexList",txHexList);
-        params.put("blockHeight",0);
-        params.put("isConfirmTx",true);
+        params.put("txList", txList);
+        params.put("blockHeight", 0);
+        params.put("isConfirmTx", true);
         response = ResponseMessageProcessor.requestAndResponse(ModuleE.LG.abbr, "commitTx", params);
         logger.info("response {}", response);
     }
+
     @Test
     public void getBalanceNonce() throws Exception {
         // Build params map
         Map<String, Object> params = new HashMap<>();
         // Version information ("1.1" or 1.1 is both available)
-        params.put("chainId", 2);
-        params.put("assetChainId", 2);
-        params.put("assetId", 1);
+        params.put("chainId", TestConfig.chainId);
+        params.put("assetChainId", TestConfig.assetChainId);
+        params.put("assetId", TestConfig.assetId);
         params.put("address", address);
 //        params.put("address", "LLbmaw1UNmKmd5PfuzP1Zm9dNuAnia01f");
 

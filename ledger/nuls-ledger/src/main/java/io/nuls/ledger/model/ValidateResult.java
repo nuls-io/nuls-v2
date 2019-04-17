@@ -24,30 +24,74 @@
  */
 package io.nuls.ledger.model;
 
-import lombok.Getter;
-import lombok.Setter;
+import io.nuls.ledger.constant.ValidateEnum;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
- * @description
  * @author lan
+ * @description
  * @date 2019/01/02
  **/
-public class ValidateResult {
-   public ValidateResult(int validateCode,String validateDesc){
-       this.validateCode = validateCode;
-       this.validateDesc = validateDesc;
-   }
+public class  ValidateResult {
+    public static final String VALIDATE_SUCCESS_DESC = "success";
+    public static final String VALIDATE_ORPHAN_DESC = "address {%s},nonce {%s}!={%s} is orphan transaction";
+    public static final String VALIDATE_DOUBLE_EXPENSES_DESC = "address {%s},nonce {%s} is double expenses";
+    public static final String VALIDATE_FAIL_DESC = "address {%s},nonce {%s} validate fail:{%s}";
+    public static final String VALIDATE_TX_EXIST_DESC = "address={%s},hash={%s} in packing";
+    public static Map<ValidateEnum, ValidateResult> validateResultMap = new HashMap<>(5);
+
+    static {
+        validateResultMap.put(ValidateEnum.SUCCESS_CODE, ValidateResult.getValidateResult(ValidateEnum.SUCCESS_CODE.getValue(), VALIDATE_SUCCESS_DESC));
+        validateResultMap.put(ValidateEnum.ORPHAN_CODE, ValidateResult.getValidateResult(ValidateEnum.ORPHAN_CODE.getValue(), VALIDATE_ORPHAN_DESC));
+        validateResultMap.put(ValidateEnum.DOUBLE_EXPENSES_CODE, ValidateResult.getValidateResult(ValidateEnum.DOUBLE_EXPENSES_CODE.getValue(), VALIDATE_DOUBLE_EXPENSES_DESC));
+        validateResultMap.put(ValidateEnum.FAIL_CODE, ValidateResult.getValidateResult(ValidateEnum.FAIL_CODE.getValue(), VALIDATE_FAIL_DESC));
+        validateResultMap.put(ValidateEnum.TX_EXIST_CODE, ValidateResult.getValidateResult(ValidateEnum.TX_EXIST_CODE.getValue(), VALIDATE_TX_EXIST_DESC));
+    }
+
+    public ValidateResult(int validateCode, String validateDesc) {
+        this.validateCode = validateCode;
+        this.validateDesc = validateDesc;
+    }
+
+    public static ValidateResult getValidateResult(int validateCode, String validateDesc) {
+        return new ValidateResult(validateCode, validateDesc);
+    }
+
+    public static ValidateResult getResult(ValidateEnum type, String[] args) {
+        return new ValidateResult(type.getValue(), String.format(validateResultMap.get(type).validateDesc, args));
+    }
+    public static ValidateResult getSuccess(){
+        return validateResultMap.get(ValidateEnum.SUCCESS_CODE);
+    }
+
     /**
      * 校验返回编码
      */
-    @Setter
-    @Getter
-   private int validateCode;
+    private int validateCode;
     /**
      * 校验返回描述
      */
-    @Setter
-    @Getter
-   private String validateDesc;
+    private String validateDesc;
 
+    public int getValidateCode() {
+        return validateCode;
+    }
+
+    public void setValidateCode(int validateCode) {
+        this.validateCode = validateCode;
+    }
+
+    public String getValidateDesc() {
+        return validateDesc;
+    }
+
+    public void setValidateDesc(String validateDesc) {
+        this.validateDesc = validateDesc;
+    }
+
+    public  boolean isSuccess(){
+        return validateCode == ValidateEnum.SUCCESS_CODE.getValue();
+    }
 }

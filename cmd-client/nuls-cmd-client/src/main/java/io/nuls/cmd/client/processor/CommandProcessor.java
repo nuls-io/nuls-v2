@@ -39,36 +39,48 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.function.Supplier;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * 命令行处理接口，其他模块的RPC实现须实现该接口
  */
 public interface CommandProcessor {
 
+    Pattern IS_NUMBERIC = Pattern.compile("[0-9]+");
 
-    default void checkArgsNumber(String[] args,int...numbers) throws ParameterException {
-        if(!Arrays.stream(numbers).anyMatch(number->args.length-1 == number)){
+    default void checkArgsNumber(String[] args, int... numbers) throws ParameterException {
+        if (!Arrays.stream(numbers).anyMatch(number -> args.length - 1 == number)) {
             ParameterException.throwParameterException();
         }
     }
 
-    default void checkArgs(boolean condition,String message) throws ParameterException{
-        if(!condition){
+    default void checkArgs(boolean condition, String message) throws ParameterException {
+        if (!condition) {
             ParameterException.throwParameterException(message);
         }
     }
 
-    default void checkAddress(int chainId,String address) throws ParameterException{
-        checkArgs(AddressTool.validAddress(chainId, address),"address format error");
+    default void checkAddress(int chainId, String... addressList) throws ParameterException {
+        for (String address : addressList) {
+            checkArgs(AddressTool.validAddress(chainId, address), "address format error");
+        }
     }
 
-    default void checkArgs(Supplier<Boolean> check, String message) throws ParameterException{
-        if(!check.get()){
+    default void checkIsNumeric(String arg,String name) {
+        Matcher matcher = IS_NUMBERIC.matcher(arg);
+        if (!matcher.matches()) {
+            ParameterException.throwParameterException(name + " must be a numeric");
+        }
+    }
+
+    default void checkArgs(Supplier<Boolean> check, String message) throws ParameterException {
+        if (!check.get()) {
             ParameterException.throwParameterException(message);
         }
     }
 
-    default String getPwd(){
+    default String getPwd() {
         return getPwd(null);
     }
 
@@ -119,15 +131,15 @@ public interface CommandProcessor {
             //message += ":";
         } else {
             try {
-                if(rpcResult.getData() != null){
+                if (rpcResult.getData() != null) {
                     message += JSONUtils.obj2PrettyJson(rpcResult.getData());
-                } else if(rpcResult.getList() != null){
+                } else if (rpcResult.getList() != null) {
                     message += JSONUtils.obj2PrettyJson(rpcResult.getList());
                 } else {
                     message += "success";
                 }
             } catch (Exception e) {
-                Log.error("return data format exception :",e);
+                Log.error("return data format exception :", e);
             }
         }
         result.setMessage(message);

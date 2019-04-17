@@ -34,7 +34,6 @@ import io.nuls.ledger.model.po.AccountState;
 import io.nuls.ledger.model.po.BlockSnapshotAccounts;
 import io.nuls.ledger.model.po.BlockTxs;
 import io.nuls.ledger.storage.DataBaseArea;
-import io.nuls.ledger.storage.InitDB;
 import io.nuls.ledger.storage.Repository;
 import io.nuls.ledger.utils.LoggerUtil;
 import io.nuls.tools.basic.InitializingBean;
@@ -51,9 +50,10 @@ import static io.nuls.ledger.utils.LoggerUtil.logger;
 
 /**
  * Created by wangkun23 on 2018/11/19.
+ * @author lanjinsheng
  */
 @Service
-public class RepositoryImpl implements Repository, InitDB, InitializingBean {
+public class RepositoryImpl implements Repository, InitializingBean {
 
     public RepositoryImpl() {
 
@@ -83,13 +83,17 @@ public class RepositoryImpl implements Repository, InitDB, InitializingBean {
     @Override
     public void updateAccountState(byte[] key, AccountState nowAccountState) throws Exception {
         //update account
-        LoggerUtil.logger(nowAccountState.getAddressChainId()).debug("updateAccountState hash={},nonce={},UnconfirmedNoncesNum={}", nowAccountState.getTxHash(), nowAccountState.getNonce(), nowAccountState.getUnconfirmedNonces().size());
+        LoggerUtil.logger(nowAccountState.getAddressChainId()).debug("updateAccountState hash={},nonce={}", nowAccountState.getTxHash(), nowAccountState.getNonce());
         LoggerUtil.logger(nowAccountState.getAddressChainId()).debug("updateAccountState address={},addressChainId={},assetChainId={},assetId={},getAvailableAmount={}," +
-                        "getFreezeTotal={},getUnconfirmedAmount={},getUnconfirmedFreezeAmount={}",
+                        "getFreezeTotal={}",
                 nowAccountState.getAddress(), nowAccountState.getAddressChainId(), nowAccountState.getAssetChainId(), nowAccountState.getAssetId(),
-                nowAccountState.getAvailableAmount(), nowAccountState.getFreezeTotal(), nowAccountState.getUnconfirmedAmount(), nowAccountState.getUnconfirmedFreezeAmount());
+                nowAccountState.getAvailableAmount(), nowAccountState.getFreezeTotal());
         RocksDBService.put(getLedgerAccountTableName(nowAccountState.getAddressChainId()), key, nowAccountState.serialize());
-
+    }
+    @Override
+    public void  batchUpdateAccountState(int addressChainId, Map<byte[],byte[]> accountStateMap) throws Exception {
+        //update account
+        RocksDBService.batchPut(getLedgerAccountTableName(addressChainId), accountStateMap);
     }
 
 
@@ -202,7 +206,9 @@ public class RepositoryImpl implements Repository, InitDB, InitializingBean {
     String getLedgerNonceTableName(int chainId) {
         return DataBaseArea.TB_LEDGER_NONCES + chainId;
     }
-
+    String getLedgerHashTableName(int chainId) {
+        return DataBaseArea.TB_LEDGER_HASH + chainId;
+    }
     /**
      * 初始化数据库
      */
@@ -270,7 +276,7 @@ public class RepositoryImpl implements Repository, InitDB, InitializingBean {
             if (!RocksDBService.existTable(getChainsHeightTableName())) {
                 RocksDBService.createTable(getChainsHeightTableName());
             } else {
-                LoggerUtil.logger.info("table {} exist.", getChainsHeightTableName());
+                LoggerUtil.logger().info("table {} exist.", getChainsHeightTableName());
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -284,7 +290,7 @@ public class RepositoryImpl implements Repository, InitDB, InitializingBean {
         if (!RocksDBService.existTable(table)) {
             RocksDBService.createTable(table);
         }
-        Map<byte[], byte[]> saveMap = new HashMap<>();
+        Map<byte[], byte[]> saveMap = new HashMap<>(1024);
         for (Map.Entry<String, Integer> m : noncesMap.entrySet()) {
             saveMap.put(ByteUtils.toBytes(m.getKey(), LedgerConstant.DEFAULT_ENCODING), ByteUtils.intToBytes(m.getValue()));
         }
@@ -301,5 +307,31 @@ public class RepositoryImpl implements Repository, InitDB, InitializingBean {
     @Override
     public boolean existAccountNonce(int chainId, String accountNonceKey) throws Exception {
         return (null != RocksDBService.get(getLedgerNonceTableName(chainId), ByteUtils.toBytes(accountNonceKey, LedgerConstant.DEFAULT_ENCODING)));
+    }
+
+
+    @Override
+    public void saveAccountHash(int chainId, Map<String, Integer> hashMap) throws Exception {
+        String table = getLedgerHashTableName(chainId);
+        if (!RocksDBService.existTable(table)) {
+            RocksDBService.createTable(table);
+        }
+        Map<byte[], byte[]> saveMap = new HashMap<>(1024);
+        for (Map.Entry<String, Integer> m : hashMap.entrySet()) {
+            saveMap.put(ByteUtils.toBytes(m.getKey(), LedgerConstant.DEFAULT_ENCODING), ByteUtils.intToBytes(m.getValue()));
+        }
+        if (saveMap.size() > 0) {
+            RocksDBService.batchPut(table, saveMap);
+        }
+    }
+
+    @Override
+    public void deleteAccountHash(int chainId, String hash) throws Exception {
+        RocksDBService.delete(getLedgerHashTableName(chainId), ByteUtils.toBytes(hash, LedgerConstant.DEFAULT_ENCODING));
+    }
+
+    @Override
+    public boolean existAccountHash(int chainId, String hash) throws Exception {
+        return (null != RocksDBService.get(getLedgerHashTableName(chainId), ByteUtils.toBytes(hash, LedgerConstant.DEFAULT_ENCODING)));
     }
 }

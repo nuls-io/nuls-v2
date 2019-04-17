@@ -45,13 +45,11 @@ public interface ContractService {
 
     Result end(int chainId, long blockHeight);
 
-    Result validContractTx(int chainId, Transaction tx) throws NulsException;
-
     Result invokeContractOneByOne(int chainId, ContractTempTransaction tx);
 
-    Result commitProcessor(int chainId, List<String> txHexList, String blockHeaderHex);
+    Result commitProcessor(int chainId, List<String> txDataList, String blockHeaderData);
 
-    Result rollbackProcessor(int chainId, List<String> txHexList, String blockHeaderHex);
+    Result rollbackProcessor(int chainId, List<String> txDataList, String blockHeaderData);
 
     Result saveContractExecuteResult(int chainId, NulsDigestData hash, ContractResult contractResult);
 

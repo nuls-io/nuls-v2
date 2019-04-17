@@ -31,8 +31,6 @@ import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static io.nuls.network.utils.LoggerUtil.Log;
-
 /**
  * @author vivi
  */
@@ -112,7 +110,7 @@ public class IpUtil {
             }
         } catch (SocketException e) {
             // skip
-            Log.error("Get local IP error: " + e.getMessage());
+            LoggerUtil.logger().error("Get local IP error: " + e.getMessage());
         }
 
         return iplist;

@@ -35,10 +35,8 @@ import io.nuls.contract.model.txdata.ContractData;
 import io.nuls.contract.model.txdata.ContractTransferData;
 import io.nuls.contract.rpc.call.BlockCall;
 import io.nuls.contract.util.MapUtil;
+import io.nuls.rpc.util.RPCUtil;
 import io.nuls.tools.exception.NulsException;
-import lombok.Getter;
-import lombok.Setter;
-import org.spongycastle.util.encoders.Hex;
 
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -53,8 +51,6 @@ import static org.apache.commons.lang3.StringUtils.EMPTY;
 /**
  * @author: PierreLuo
  */
-@Getter
-@Setter
 public class ContractTransactionDto {
 
 
@@ -126,7 +122,7 @@ public class ContractTransactionDto {
             this.setRemark(new String(tx.getRemark(), StandardCharsets.UTF_8));
         }
         if (tx.getTransactionSignature() != null) {
-            this.setScriptSig(Hex.toHexString(tx.getTransactionSignature()));
+            this.setScriptSig(RPCUtil.encode(tx.getTransactionSignature()));
         }
 
         CoinData coinData = tx.getCoinDataObj();
@@ -163,4 +159,123 @@ public class ContractTransactionDto {
         return result;
     }
 
+    public String getHash() {
+        return hash;
+    }
+
+    public void setHash(String hash) {
+        this.hash = hash;
+    }
+
+    public Integer getType() {
+        return type;
+    }
+
+    public void setType(Integer type) {
+        this.type = type;
+    }
+
+    public Long getTime() {
+        return time;
+    }
+
+    public void setTime(Long time) {
+        this.time = time;
+    }
+
+    public Long getBlockHeight() {
+        return blockHeight;
+    }
+
+    public void setBlockHeight(Long blockHeight) {
+        this.blockHeight = blockHeight;
+    }
+
+    public String getFee() {
+        return fee;
+    }
+
+    public void setFee(String fee) {
+        this.fee = fee;
+    }
+
+    public String getValue() {
+        return value;
+    }
+
+    public void setValue(String value) {
+        this.value = value;
+    }
+
+    public String getRemark() {
+        return remark;
+    }
+
+    public void setRemark(String remark) {
+        this.remark = remark;
+    }
+
+    public String getScriptSig() {
+        return scriptSig;
+    }
+
+    public void setScriptSig(String scriptSig) {
+        this.scriptSig = scriptSig;
+    }
+
+    public Integer getStatus() {
+        return status;
+    }
+
+    public void setStatus(Integer status) {
+        this.status = status;
+    }
+
+    public Long getConfirmCount() {
+        return confirmCount;
+    }
+
+    public void setConfirmCount(Long confirmCount) {
+        this.confirmCount = confirmCount;
+    }
+
+    public int getSize() {
+        return size;
+    }
+
+    public void setSize(int size) {
+        this.size = size;
+    }
+
+    public List<InputDto> getInputs() {
+        return inputs;
+    }
+
+    public void setInputs(List<InputDto> inputs) {
+        this.inputs = inputs;
+    }
+
+    public List<OutputDto> getOutputs() {
+        return outputs;
+    }
+
+    public void setOutputs(List<OutputDto> outputs) {
+        this.outputs = outputs;
+    }
+
+    public Map<String, Object> getTxData() {
+        return txData;
+    }
+
+    public void setTxData(Map<String, Object> txData) {
+        this.txData = txData;
+    }
+
+    public ContractResultDto getContractResult() {
+        return contractResult;
+    }
+
+    public void setContractResult(ContractResultDto contractResult) {
+        this.contractResult = contractResult;
+    }
 }

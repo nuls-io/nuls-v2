@@ -20,7 +20,6 @@
 
 package io.nuls.block.thread.monitor;
 
-import io.nuls.block.constant.RunningStatusEnum;
 import io.nuls.block.manager.ContextManager;
 import io.nuls.block.model.ChainContext;
 import io.nuls.block.rpc.call.NetworkUtil;
@@ -41,15 +40,11 @@ import static io.nuls.block.constant.CommandConstant.GET_TXGROUP_MESSAGE;
  * @version 1.0
  * @date 19-3-28 下午3:54
  */
-public class TxGroupRequestor implements Runnable {
+public class TxGroupRequestor extends BaseMonitor {
 
     private static Map<Integer, Map<String, DelayQueue<TxGroupTask>>> map = new HashMap<>();
 
     private static final TxGroupRequestor INSTANCE = new TxGroupRequestor();
-
-    private TxGroupRequestor() {
-
-    }
 
     public static TxGroupRequestor getInstance() {
         return INSTANCE;
@@ -78,29 +73,15 @@ public class TxGroupRequestor implements Runnable {
     }
 
     @Override
-    public void run() {
-        for (int chainId : ContextManager.chainIds) {
-            ChainContext context = ContextManager.getContext(chainId);
-            NulsLogger commonLog = context.getCommonLog();
-            try {
-                RunningStatusEnum status = context.getStatus();
-                if (!status.equals(RunningStatusEnum.RUNNING)) {
-                    commonLog.debug("skip process, status is " + status + ", chainId-" + chainId);
-                    return;
-                }
-                Map<String, DelayQueue<TxGroupTask>> delayQueueMap = map.get(chainId);
-                delayQueueMap.values().forEach(e -> {
-                    TxGroupTask task = e.poll();
-                    if (task != null) {
-                        boolean b = NetworkUtil.sendToNode(chainId, task.getRequest(), task.getNodeId(), GET_TXGROUP_MESSAGE);
-                        commonLog.debug("TxGroupRequestor send getTxgroupMessage to " + task.getNodeId() + ", result-" + b + ", chianId-" + chainId);
-                    }
-                });
-            } catch (Exception e) {
-                e.printStackTrace();
-                commonLog.error("chainId-" + chainId + ",TxGroupRequestor error!");
+    protected void process(int chainId, ChainContext context, NulsLogger commonLog) {
+        Map<String, DelayQueue<TxGroupTask>> delayQueueMap = map.get(chainId);
+        delayQueueMap.values().forEach(e -> {
+            TxGroupTask task = e.poll();
+            if (task != null) {
+                boolean b = NetworkUtil.sendToNode(chainId, task.getRequest(), task.getNodeId(), GET_TXGROUP_MESSAGE);
+                commonLog.debug("TxGroupRequestor send getTxgroupMessage to " + task.getNodeId() + ", result-" + b + ", chianId-" + chainId);
             }
-        }
+        });
     }
 
 }

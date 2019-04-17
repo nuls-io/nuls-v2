@@ -38,11 +38,10 @@ import io.nuls.rpc.cmd.BaseCmd;
 import io.nuls.rpc.model.CmdAnnotation;
 import io.nuls.rpc.model.Parameter;
 import io.nuls.rpc.model.message.Response;
+import io.nuls.rpc.util.RPCUtil;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
-import io.nuls.tools.crypto.HexUtil;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -61,23 +60,21 @@ public class DatasTestCmd extends BaseCmd {
     TransactionService transactionService;
 
     @CmdAnnotation(cmd = "getBlockHeight",
-            version = 1.0, scope = "private", minEvent = 0, minPeriod = 0,
+            version = 1.0, minEvent = 0, minPeriod = 0,
             description = "")
     @Parameter(parameterName = "chainId", parameterType = "int")
     public Response getBlockHeight(Map params) {
-        Map<String, Object> rtData = new HashMap<>();
         Integer chainId = (Integer) params.get("chainId");
         long height = repository.getBlockHeight(chainId);
         return success(height);
     }
 
     @CmdAnnotation(cmd = "getSnapshot",
-            version = 1.0, scope = "private", minEvent = 0, minPeriod = 0,
+            version = 1.0, minEvent = 0, minPeriod = 0,
             description = "")
     @Parameter(parameterName = "chainId", parameterType = "int")
     @Parameter(parameterName = "blockHeight", parameterType = "long")
     public Response getSnapshot(Map params) {
-        Map<String, Object> rtData = new HashMap<>();
         Integer chainId = (Integer) params.get("chainId");
         long blockHeight = Long.valueOf(params.get("blockHeight").toString());
         BlockSnapshotAccounts blockSnapshotAccounts = repository.getBlockSnapshot(chainId, blockHeight);
@@ -85,12 +82,11 @@ public class DatasTestCmd extends BaseCmd {
     }
 
     @CmdAnnotation(cmd = "getBlock",
-            version = 1.0, scope = "private", minEvent = 0, minPeriod = 0,
+            version = 1.0, minEvent = 0, minPeriod = 0,
             description = "")
     @Parameter(parameterName = "chainId", parameterType = "int")
     @Parameter(parameterName = "blockHeight", parameterType = "long")
     public Response getBlock(Map params) {
-        Map<String, Object> rtData = new HashMap<>();
         int i = 0;
         Integer chainId = (Integer) params.get("chainId");
         long blockHeight = Long.valueOf(params.get("blockHeight").toString());
@@ -109,7 +105,7 @@ public class DatasTestCmd extends BaseCmd {
         }
         List<CoinFrom> froms = coinData.getFrom();
         for (CoinFrom from : froms) {
-            logger(chainId).info("address={},amount = {} nonce = {} locked =  .", AddressTool.getStringAddressByBytes(from.getAddress()), from.getAmount(), HexUtil.encode(from.getNonce()), from.getLocked());
+            logger(chainId).info("address={},amount = {} nonce = {} locked =  .", AddressTool.getStringAddressByBytes(from.getAddress()), from.getAmount(), RPCUtil.encode(from.getNonce()), from.getLocked());
 
         }
         List<CoinTo> tos = coinData.getTo();
@@ -126,7 +122,6 @@ public class DatasTestCmd extends BaseCmd {
     @Parameter(parameterName = "addressChainId", parameterType = "int")
     @Parameter(parameterName = "blockHeight", parameterType = "long")
     public Response goBatchCommitTest(Map params) {
-        Map<String, Object> rtData = new HashMap<>();
         Integer chainId = (Integer) params.get("chainId");
         Integer addressChainId = (Integer) params.get("addressChainId");
         long blockHeight = Long.valueOf(params.get("blockHeight").toString());

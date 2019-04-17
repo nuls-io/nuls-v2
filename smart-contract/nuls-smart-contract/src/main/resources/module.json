@@ -1,9 +1,7 @@
 {
-  "chainConfig": {
-    "chainId": 2,
-    "assetsId": 1,
-    "maxViewGas": 100000000
-  },
+  "chainId": 2,
+  "assetsId": 1,
+  "maxViewGas": 100000000,
   "mainChainId": 2,
   "mainAssetId": 1,
   "language": "en",
@@ -11,6 +9,8 @@
   "kernelUrl": "ws://127.0.0.1:8887/ws",
   "logFilePath": "./contract",
   "logFileName": "contract",
-  "logFileLevel": "INFO",
-  "logConsoleLevel": "INFO"
+  "logFileLevel": "DEBUG",
+  "logConsoleLevel": "DEBUG",
+  "packageLogPackages": "io.nuls.contract.vm.program.impl.ProgramExecutorImpl,db,rlp",
+  "packageLogLevels": "INFO,INFO,INFO"
 }

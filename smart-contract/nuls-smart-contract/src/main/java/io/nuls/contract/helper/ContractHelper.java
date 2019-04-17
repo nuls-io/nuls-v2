@@ -65,8 +65,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import static io.nuls.contract.constant.ContractConstant.*;
 import static io.nuls.contract.constant.ContractErrorCode.ADDRESS_ERROR;
-import static io.nuls.contract.util.ContractUtil.getFailed;
-import static io.nuls.contract.util.ContractUtil.getSuccess;
+import static io.nuls.contract.util.ContractUtil.*;
 import static io.nuls.tools.model.FormatValidUtils.validTokenNameOrSymbol;
 
 @Component
@@ -611,17 +610,17 @@ public class ContractHelper {
             byte[] from = po.getFrom();
             byte[] to = po.getTo();
             BigInteger token = po.getValue();
-            String fromStr = null;
-            String toStr = null;
+            String fromStr;
+            String toStr;
+            ContractTokenBalanceManager contractTokenBalanceManager = getChain(chainId).getContractTokenBalanceManager();
             if (from != null) {
                 fromStr = AddressTool.getStringAddressByBytes(from);
+                contractTokenBalanceManager.addContractToken(fromStr, contractAddressStr, token);
             }
             if (to != null) {
                 toStr = AddressTool.getStringAddressByBytes(to);
+                contractTokenBalanceManager.subtractContractToken(toStr, contractAddressStr, token);
             }
-            ContractTokenBalanceManager contractTokenBalanceManager = getChain(chainId).getContractTokenBalanceManager();
-            contractTokenBalanceManager.addContractToken(fromStr, contractAddressStr, token);
-            contractTokenBalanceManager.subtractContractToken(toStr, contractAddressStr, token);
         } catch (Exception e) {
             // skip it
             Log.error(e);
@@ -650,5 +649,12 @@ public class ContractHelper {
     public ProgramStatus getContractStatus(int chainId, byte[] stateRoot, byte[] contractAddress) {
         ProgramExecutor track = getProgramExecutor(chainId).begin(stateRoot);
         return track.status(contractAddress);
+    }
+
+    public ContractResult makeFailedContractResult(int chainId, ContractWrapperTransaction tx, CallableResult callableResult, String errorMsg) {
+        ContractResult contractResult = ContractResult.genFailed(tx.getContractData(), errorMsg);
+        makeContractResult(tx, contractResult);
+        callableResult.putFailed(chainId, contractResult);
+        return contractResult;
     }
 }

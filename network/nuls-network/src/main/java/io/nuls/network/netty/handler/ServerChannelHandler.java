@@ -38,10 +38,9 @@ import io.nuls.network.manager.TimeManager;
 import io.nuls.network.manager.handler.base.BaseChannelHandler;
 import io.nuls.network.model.Node;
 import io.nuls.network.utils.IpUtil;
+import io.nuls.network.utils.LoggerUtil;
 
 import java.io.IOException;
-
-import static io.nuls.network.utils.LoggerUtil.Log;
 
 /**
  * Server channel handler
@@ -74,20 +73,20 @@ public class ServerChannelHandler extends BaseChannelHandler {
         super.channelInactive(ctx);
         SocketChannel channel = (SocketChannel) ctx.channel();
         String nodeId = IpUtil.getNodeId(channel.remoteAddress());
-        Log.info("Server Node is Inactive:{}" ,nodeId);
+        LoggerUtil.logger().info("Server Node is Inactive:{}" ,nodeId);
     }
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
         SocketChannel channel = (SocketChannel) ctx.channel();
         String remoteIP = channel.remoteAddress().getHostString();
-        Log.error("Server Node is exceptionCaught:{}:{}", remoteIP, channel.remoteAddress().getPort());
-        Log.error(cause.getMessage());
+        LoggerUtil.logger().error("Server Node is exceptionCaught:{}:{}", remoteIP, channel.remoteAddress().getPort());
+        LoggerUtil.logger().error(cause.getMessage());
         if (!(cause instanceof IOException)) {
             String nodeId = IpUtil.getNodeId(channel.remoteAddress());
             //通常发生IOException是因为连接的节点断开了
-            Log.error("-----------exceptionCaught-----nodeId:{}", nodeId);
-            Log.error(cause);
+            LoggerUtil.logger().error("-----------exceptionCaught-----nodeId:{}", nodeId);
+            LoggerUtil.logger().error(cause);
         }
         ctx.close();
     }
@@ -98,7 +97,7 @@ public class ServerChannelHandler extends BaseChannelHandler {
         ByteBuf buf = (ByteBuf) msg;
         String remoteIP = channel.remoteAddress().getHostString();
         int port = channel.remoteAddress().getPort();
-        Log.info("{}-----------------server channelRead-----------------{}:{}", TimeManager.currentTimeMillis(), remoteIP, port);
+        LoggerUtil.logger().info("{}-----------------server channelRead-----------------{}:{}", TimeManager.currentTimeMillis(), remoteIP, port);
         NulsByteBuffer byteBuffer = null;
         Node node = null;
         try {
@@ -110,7 +109,7 @@ public class ServerChannelHandler extends BaseChannelHandler {
                 buf.readBytes(bytes);
                 byteBuffer = new NulsByteBuffer(bytes);
             } else {
-                Log.error("-----------------Server channelRead  node is null -----------------" + remoteIP + ":" + channel.remoteAddress().getPort());
+                LoggerUtil.logger().error("-----------------Server channelRead  node is null -----------------" + remoteIP + ":" + channel.remoteAddress().getPort());
                 ctx.channel().close();
             }
         } catch (Exception e) {
@@ -133,7 +132,7 @@ public class ServerChannelHandler extends BaseChannelHandler {
         if (node != null && node.getDisconnectListener() != null) {
             node.getDisconnectListener().action();
         }
-        Log.info("Server Node is channelUnregistered:{}:{}", channel.remoteAddress().getHostString(), channel.remoteAddress().getPort());
+        LoggerUtil.logger().info("Server Node is channelUnregistered:{}:{}", channel.remoteAddress().getHostString(), channel.remoteAddress().getPort());
     }
 
 }

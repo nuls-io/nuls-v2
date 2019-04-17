@@ -23,18 +23,29 @@
  */
 package io.nuls.contract.model.bo;
 
-import lombok.Getter;
-import lombok.Setter;
-
 import java.math.BigInteger;
 
 /**
  * @author: PierreLuo
  * @date: 2019-03-06
  */
-@Getter
-@Setter
 public class Output {
     private byte[] to;
     private BigInteger value;
+
+    public byte[] getTo() {
+        return to;
+    }
+
+    public void setTo(byte[] to) {
+        this.to = to;
+    }
+
+    public BigInteger getValue() {
+        return value;
+    }
+
+    public void setValue(BigInteger value) {
+        this.value = value;
+    }
 }

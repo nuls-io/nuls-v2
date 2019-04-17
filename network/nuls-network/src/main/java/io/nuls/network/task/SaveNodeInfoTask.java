@@ -28,10 +28,9 @@ import io.nuls.network.manager.NodeGroupManager;
 import io.nuls.network.manager.StorageManager;
 import io.nuls.network.model.NodeGroup;
 import io.nuls.network.storage.DbService;
+import io.nuls.network.utils.LoggerUtil;
 
 import java.util.List;
-
-import static io.nuls.network.utils.LoggerUtil.Log;
 
 /**
  * 维护节点高度的定时任务
@@ -56,7 +55,7 @@ public class SaveNodeInfoTask implements Runnable {
         try {
             doCommit();
         } catch (Exception e) {
-            Log.error(e);
+            LoggerUtil.logger().error(e);
         }
     }
 

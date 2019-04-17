@@ -27,6 +27,7 @@ public class PageInfo<T> {
     public PageInfo(int pageNumber, int pageSize) {
         this.pageNumber = pageNumber;
         this.pageSize = pageSize;
+
         this.list = new ArrayList<>();
     }
 

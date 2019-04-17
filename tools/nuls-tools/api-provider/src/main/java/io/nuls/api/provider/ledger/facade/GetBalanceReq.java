@@ -1,10 +1,6 @@
 package io.nuls.api.provider.ledger.facade;
 
 import io.nuls.api.provider.BaseReq;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-
-import java.math.BigInteger;
 
 /**
  * @Author: zhoulijun
@@ -13,8 +9,7 @@ import java.math.BigInteger;
  * 获取指定账户余额
  * get account balance
  */
-@Data
-@AllArgsConstructor
+
 public class GetBalanceReq extends BaseReq {
 
     Integer assetId;
@@ -23,4 +18,33 @@ public class GetBalanceReq extends BaseReq {
 
     String address;
 
+    public GetBalanceReq(Integer assetId, Integer assetChainId, String address) {
+        this.assetId = assetId;
+        this.assetChainId = assetChainId;
+        this.address = address;
+    }
+
+    public Integer getAssetId() {
+        return assetId;
+    }
+
+    public void setAssetId(Integer assetId) {
+        this.assetId = assetId;
+    }
+
+    public Integer getAssetChainId() {
+        return assetChainId;
+    }
+
+    public void setAssetChainId(Integer assetChainId) {
+        this.assetChainId = assetChainId;
+    }
+
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
+    }
 }

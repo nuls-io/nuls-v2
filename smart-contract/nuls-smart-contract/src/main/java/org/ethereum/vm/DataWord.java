@@ -19,10 +19,10 @@ package org.ethereum.vm;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
+import io.nuls.tools.crypto.HexUtil;
 import org.ethereum.db.ByteArrayWrapper;
 import org.ethereum.util.ByteUtil;
 import org.ethereum.util.FastByteComparisons;
-import org.spongycastle.util.encoders.Hex;
 
 import java.math.BigInteger;
 import java.util.Arrays;
@@ -108,8 +108,8 @@ public final class DataWord implements Comparable<DataWord> {
     }
 
     @JsonCreator
-    public static DataWord of(String data) {
-        return of(Hex.decode(data));
+    public static DataWord of(String data)  {
+        return of(HexUtil.decode(data));
     }
 
     public static DataWord of(byte num) {
@@ -447,14 +447,14 @@ public final class DataWord implements Comparable<DataWord> {
         }
 
         if (pref.length < 7) {
-            return Hex.toHexString(pref);
+            return HexUtil.encode(pref);
         }
 
-        return Hex.toHexString(pref).substring(0, 6);
+        return HexUtil.encode(pref).substring(0, 6);
     }
 
     public String shortHex() {
-        String hexValue = Hex.toHexString(getNoLeadZeroesData()).toUpperCase();
+        String hexValue = HexUtil.encode(getNoLeadZeroesData()).toUpperCase();
         return "0x" + hexValue.replaceFirst("^0+(?!$)", "");
     }
 
@@ -510,7 +510,7 @@ public final class DataWord implements Comparable<DataWord> {
     }
 
     public boolean isHex(String hex) {
-        return Hex.toHexString(data).equals(hex);
+        return HexUtil.encode(data).equals(hex);
     }
 
     public String asString() {

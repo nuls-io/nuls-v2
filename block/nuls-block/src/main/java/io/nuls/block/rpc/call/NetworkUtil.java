@@ -28,7 +28,7 @@ import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.model.message.Response;
 import io.nuls.rpc.netty.processor.ResponseMessageProcessor;
-import io.nuls.tools.crypto.HexUtil;
+import io.nuls.rpc.util.RPCUtil;
 import io.nuls.tools.log.logback.NulsLogger;
 
 import java.util.ArrayList;
@@ -37,7 +37,6 @@ import java.util.List;
 import java.util.Map;
 
 import static io.nuls.block.constant.CommandConstant.*;
-import static io.nuls.block.constant.Constant.GETTIME_INTERVAL;
 import static io.nuls.block.utils.LoggerUtil.commonLog;
 
 
@@ -127,7 +126,7 @@ public class NetworkUtil {
             params.put(Constants.VERSION_KEY_STR, "1.0");
             params.put("chainId", chainId);
             params.put("excludeNodes", excludeNodes);
-            params.put("messageBody", HexUtil.encode(message.serialize()));
+            params.put("messageBody", RPCUtil.encode(message.serialize()));
             params.put("command", command);
             boolean success = ResponseMessageProcessor.requestAndResponse(ModuleE.NW.abbr, "nw_broadcast", params).isSuccess();
 
@@ -155,7 +154,7 @@ public class NetworkUtil {
             params.put(Constants.VERSION_KEY_STR, "1.0");
             params.put("chainId", chainId);
             params.put("nodes", nodeId);
-            params.put("messageBody", HexUtil.encode(message.serialize()));
+            params.put("messageBody", RPCUtil.encode(message.serialize()));
             params.put("command", command);
             boolean success = ResponseMessageProcessor.requestAndResponse(ModuleE.NW.abbr, "nw_sendPeersMsg", params).isSuccess();
             messageLog.debug("send " + message.getClass().getName() + " to node-" + nodeId + ", chainId:" + chainId + ", success:" + success);
@@ -231,31 +230,6 @@ public class NetworkUtil {
             e.printStackTrace();
             commonLog.error(e);
         }
-    }
-
-    /**
-     * 获取时间戳
-     *
-     * @return
-     */
-    public static long currentTime() {
-        long now = System.currentTimeMillis();
-        if (now - latestGetTime > GETTIME_INTERVAL) {
-            try {
-                Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.NW.abbr, "nw_currentTimeMillis", null);
-                if (response.isSuccess()) {
-                    Map responseData = (Map) response.getResponseData();
-                    Map result = (Map) responseData.get("nw_currentTimeMillis");
-                    long time = Long.valueOf(result.get("currentTimeMillis").toString());
-                    offset = time - System.currentTimeMillis();
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
-                commonLog.error("get nw_currentTimeMillis fail");
-            }
-            latestGetTime = now;
-        }
-        return (System.currentTimeMillis() + offset);
     }
 
     /**

@@ -14,6 +14,9 @@ import static io.nuls.block.constant.Constant.PROTOCOL_CONFIG_COMPARATOR;
 import static io.nuls.block.constant.Constant.PROTOCOL_CONFIG_FILE;
 import static org.junit.Assert.assertEquals;
 
+/**
+ * todo 测试未通过
+ */
 public class ConfigLoaderTest {
 
 

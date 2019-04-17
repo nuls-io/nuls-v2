@@ -1,5 +1,6 @@
 package io.nuls.api.model.po.db;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.nuls.api.utils.DocumentTransferTool;
 import org.bson.Document;
 
@@ -52,9 +53,9 @@ public class ContractInfo extends TxDataInfo {
 
     private List<String> owners;
 
-    private boolean isNew;
-
     private ContractResultInfo resultInfo;
+    @JsonIgnore
+    private boolean isNew;
 
 
     public Document toDocument() {

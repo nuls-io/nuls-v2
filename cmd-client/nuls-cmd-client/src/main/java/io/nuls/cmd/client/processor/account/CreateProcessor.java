@@ -44,32 +44,6 @@ import java.io.IOException;
 @Component
 public class CreateProcessor extends AccountBaseProcessor implements CommandProcessor {
 
-    public static String getNewPwd() {
-        System.out.print("Please enter the new password(8-20 characters, the combination of letters and numbers).\nEnter your new password:");
-        ConsoleReader reader = null;
-        try {
-            reader = new ConsoleReader();
-            String pwd = null;
-            do {
-                pwd = reader.readLine('*');
-                if (!CommandHelper.validPassword(pwd)) {
-                    System.out.print("The password is invalid, (8-20 characters, the combination of letters and numbers) .\nReenter the new password: ");
-                }
-            } while (!CommandHelper.validPassword(pwd));
-            return pwd;
-        } catch (IOException e) {
-            return null;
-        } finally {
-            try {
-                if (!reader.delete()) {
-                    reader.close();
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-    }
-
     @Override
     public String getCommand() {
         return "create";
@@ -95,7 +69,7 @@ public class CreateProcessor extends AccountBaseProcessor implements CommandProc
             return true;
         }
         checkArgs(StringUtils.isNumeric(args[1]),"must enter a number");
-        checkArgs(Integer.parseInt(args[1]) > 1,"must be greater than zero");
+        checkArgs(Integer.parseInt(args[1]) > 0,"must be greater than zero");
         return true;
     }
 

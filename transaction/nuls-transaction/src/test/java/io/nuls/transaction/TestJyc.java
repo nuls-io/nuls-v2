@@ -33,7 +33,7 @@ import io.nuls.rpc.info.NoUse;
 import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.model.message.Response;
 import io.nuls.rpc.netty.processor.ResponseMessageProcessor;
-import io.nuls.tools.crypto.HexUtil;
+import io.nuls.rpc.util.RPCUtil;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.parse.JSONUtils;
 import io.nuls.transaction.model.bo.Chain;
@@ -55,15 +55,15 @@ import static org.junit.Assert.assertTrue;
  * @date: 2019-01-15
  */
 public class TestJyc {
-    static String address23 = "tNULSeBaMnrs6JKrCy6TQdzYJZkMZJDng7QAsD";
+    private static String address23 = "tNULSeBaMnrs6JKrCy6TQdzYJZkMZJDng7QAsD";
 
     private static Chain chain;
-    static int chainId = 2;
-    static int assetChainId = 2;
-    static int assetId = 1;
-    static String version = "1.0";
+    private static int chainId = 2;
+    private static int assetChainId = 2;
+    private static int assetId = 1;
+    private static String version = "1.0";
 
-    static String password = "nuls123456";
+    private static String password = "nuls123456";
 
     /**
      * 模拟测试 module
@@ -78,20 +78,34 @@ public class TestJyc {
         chain.setConfig(new ConfigBean(chainId, assetId, 1024*1024,1000,20,20000L,60000L));
     }
 
+    /**
+     * 查交易
+     */
+    public void getTxRecord(String address) throws Exception{
+        {
+            Map<String, Object> params = new HashMap<>();
+            params.put("chainId", chainId);
+            params.put("address", address);
+            params.put("assetChainId", assetChainId);
+            params.put("assetId", assetId);
+            params.put("type", null);
+            params.put("pageSize", null);
+            params.put("pageNumber", null);
+            Response dpResp = ResponseMessageProcessor.requestAndResponse(ModuleE.TX.abbr, "tx_getTxs", params);
+            Map record = (Map) dpResp.getResponseData();
+            Log.debug("Page<TransactionPO>:{}", JSONUtils.obj2PrettyJson(record));
+        }
+    }
+
+    private void balance(String address) throws Exception {
+        BigInteger balance = LedgerCall.getBalance(chain, AddressTool.getAddress(address), chainId, assetId);
+        Log.debug(address + "-----balance:{}", balance);
+    }
+
     @Test
     public void name() throws Exception {
         {
-            Log.debug("10.##########删除节点##########");
-            //停止节点
-            Map<String, Object> txMap = new HashMap();
-            txMap.put("chainId", chainId);
-            txMap.put("address", "tNULSeBaMkzTffKDZLy9v5SWbooFFhefwM4dff");
-            txMap.put("password", password);
-            Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.CS.abbr, "cs_stopAgent", txMap);
-            assertTrue(response.isSuccess());
-            Map result = (HashMap) (((HashMap) response.getResponseData()).get("cs_stopAgent"));
-            String txHash = (String) result.get("txHash");
-            Log.debug("stopAgent-txHash:{}", txHash);
+            queryTx("002090b123ab10078da5f4c4cbf428491181a66ceda58b26a7d7673f3771fcd6dc2b", false);
         }
     }
 
@@ -101,7 +115,7 @@ public class TestJyc {
     @Test
     public void importSeed() {
 //        importPriKey("b54db432bba7e13a6c4a28f65b925b18e63bcb79143f7b894fa735d5d3d09db5", password);//种子出块地址 tNULSeBaMkrt4z9FYEkkR9D6choPVvQr94oYZp
-//        importPriKey("188b255c5a6d58d1eed6f57272a22420447c3d922d5765ebb547bc6624787d9f", password);//种子出块地址 tNULSeBaMoGr2RkLZPfJeS5dFzZeNj1oXmaYNe
+        importPriKey("188b255c5a6d58d1eed6f57272a22420447c3d922d5765ebb547bc6624787d9f", password);//种子出块地址 tNULSeBaMoGr2RkLZPfJeS5dFzZeNj1oXmaYNe
         importPriKey("477059f40708313626cccd26f276646e4466032cabceccbf571a7c46f954eb75", password);//tNULSeBaMnrs6JKrCy6TQdzYJZkMZJDng7QAsD
     }
 
@@ -110,6 +124,122 @@ public class TestJyc {
         Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_getAccountList", null);
         Object o = ((HashMap) ((HashMap) cmdResp.getResponseData()).get("ac_getAccountList")).get("list");
         Log.debug("list:{}", o);
+    }
+
+    /**
+     * 加入共识
+     *  普通转账
+     *  创建节点
+     *  委托
+     *
+     * @throws NulsException
+     */
+    @Test
+    public void joinConsensus() throws NulsException {
+        BigInteger balance = LedgerCall.getBalance(chain, AddressTool.getAddress(address23), chainId, assetId);
+        Log.debug(address23 + "-----balance:{}", balance);
+        List<String> accountList;
+        try {
+            while (true) {
+                Log.debug("##################################################");
+                String agentAddress = "";
+                String packingAddress = "";
+                String agentHash = "";
+                String depositHash = "";
+                {
+                    Log.debug("1.##########新建两个地址，一个作为节点地址，一个作为打包地址##########");
+                    //新建两个地址
+                    Map<String, Object> params = new HashMap<>();
+                    params.put(Constants.VERSION_KEY_STR, version);
+                    params.put("chainId", chainId);
+                    params.put("count", 2);
+                    params.put("password", password);
+                    Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_createAccount", params);
+                    assertTrue(response.isSuccess());
+                    accountList = (List<String>) ((HashMap) ((HashMap) response.getResponseData()).get("ac_createAccount")).get("list");
+                    agentAddress = accountList.get(0);
+                    packingAddress = accountList.get(1);
+                    Log.debug("agentAddress-{{}}", agentAddress);
+                    Log.debug("packingAddress-{{}}", packingAddress);
+                }
+                {
+                    Log.debug("2.##########从创世块地址转账给新创建的地址##########");
+                    Map transferMap = new HashMap();
+                    transferMap.put("chainId", chainId);
+                    transferMap.put("remark", "transfer test");
+                    List<CoinDTO> inputs = new ArrayList<>();
+                    List<CoinDTO> outputs = new ArrayList<>();
+                    CoinDTO inputCoin1 = new CoinDTO();
+                    inputCoin1.setAddress(address23);
+                    inputCoin1.setPassword(password);
+                    inputCoin1.setAssetsChainId(chainId);
+                    inputCoin1.setAssetsId(assetId);
+                    inputCoin1.setAmount(new BigInteger("25000700000000"));
+                    inputs.add(inputCoin1);
+
+                    CoinDTO outputCoin1 = new CoinDTO();
+                    outputCoin1.setAddress(agentAddress);
+                    outputCoin1.setPassword(password);
+                    outputCoin1.setAssetsChainId(chainId);
+                    outputCoin1.setAssetsId(assetId);
+                    outputCoin1.setAmount(new BigInteger("25000100000000"));
+                    outputs.add(outputCoin1);
+
+                    CoinDTO outputCoin2 = new CoinDTO();
+                    outputCoin2.setAddress(packingAddress);
+                    outputCoin2.setPassword(password);
+                    outputCoin2.setAssetsChainId(chainId);
+                    outputCoin2.setAssetsId(assetId);
+                    outputCoin2.setAmount(new BigInteger("500000000"));
+                    outputs.add(outputCoin2);
+                    transferMap.put("inputs", inputs);
+                    transferMap.put("outputs", outputs);
+
+                    Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_transfer", transferMap);
+                    assertTrue(response.isSuccess());
+                    HashMap result = (HashMap) (((HashMap) response.getResponseData()).get("ac_transfer"));
+                    Log.debug("transfer hash:{}", result.get("value"));
+                    Log.debug("transfer from {} to {}", address23, agentAddress);
+                    Log.debug("transfer from {} to {}", address23, packingAddress);
+                }
+
+                Thread.sleep(15000);
+                {
+                    Log.debug("3.##########创建节点##########");
+                    BigInteger agentBalance = LedgerCall.getBalance(chain, AddressTool.getAddress(agentAddress), chainId, assetId);
+                    Log.debug(agentAddress + "-----balance:{}", agentBalance);
+                    assertEquals(new BigInteger("25000100000000"), agentBalance);
+                    BigInteger packingBalance = LedgerCall.getBalance(chain, AddressTool.getAddress(packingAddress), chainId, assetId);
+                    Log.debug(packingAddress + "-----balance:{}", packingBalance);
+                    assertEquals(new BigInteger("500000000"), packingBalance);
+                    //创建节点
+                    Map agentTxMap = this.createAgentTx(agentAddress, packingAddress);
+                    Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.CS.abbr, "cs_createAgent", agentTxMap);
+                    assertTrue(response.isSuccess());
+                    Map map = (HashMap) (((HashMap) response.getResponseData()).get("cs_createAgent"));
+                    agentHash = (String) map.get("txHash");
+                    Log.debug("createAgent-txHash:{}", agentHash);
+                }
+
+                Thread.sleep(12000);
+                {
+                    Log.debug("4.##########进行委托##########");
+                    Map<String, Object> dpParams = new HashMap<>();
+                    dpParams.put("chainId", chainId);
+                    dpParams.put("address", agentAddress);
+                    dpParams.put("password", password);
+                    dpParams.put("agentHash", agentHash);
+                    dpParams.put("deposit", 200000 * 100000000L);
+                    Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.CS.abbr, "cs_depositToAgent", dpParams);
+                    assertTrue(response.isSuccess());
+                    HashMap dpResult = (HashMap) ((HashMap) response.getResponseData()).get("cs_depositToAgent");
+                    depositHash = (String) dpResult.get("txHash");
+                    Log.debug("deposit-txHash:{}", depositHash);
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     /**
@@ -396,8 +526,8 @@ public class TestJyc {
             BigInteger balance = LedgerCall.getBalance(chain, AddressTool.getAddress(address23), chainId, assetId);
             Log.debug(address23 + "-----balance:{}", balance);
         }
-        int total = 100_000;
-        int count = 1_000;
+        int total = 1000_000;
+        int count = 1000;
         List<String> accountList = new ArrayList<>();
         Log.debug("##################################################");
         {
@@ -510,14 +640,25 @@ public class TestJyc {
                     Log.debug("transfer from {} to {}, hash:{}", from, to, hash);
                 }
                 Log.debug("##########" + j + " round end##########");
-                Thread.sleep(100);
+                Thread.sleep(1000);
             }
         }
-        Thread.sleep(600000);
+        Thread.sleep(120000);
         {
-            boolean b = queryTxs(hashList);
-            Log.debug("all tx exist-{}" + b);
-            assertTrue(b);
+            while (true) {
+                for (Iterator<String> iterator = hashList.iterator(); iterator.hasNext(); ) {
+                    String hash = iterator.next();
+                    if (queryTx(hash, true)) {
+                        iterator.remove();
+                    }
+                }
+                if (hashList.size() == 0) {
+                    break;
+                }
+                Log.debug("remain " + hashList.size() + " hash not verify");
+                Thread.sleep(10000);
+            }
+            Log.debug("all txs exist");
         }
     }
 
@@ -539,31 +680,25 @@ public class TestJyc {
             Log.debug(address23 + "-----balance:{}", balance);
         }
         int total = 100_000_000;
-        int count = 3;
-        List<String> accountList;
+        int count = 50;
+        List<String> accountList = new ArrayList<>();
         Log.debug("##################################################");
         {
             Log.debug("1.##########create " + count + " accounts##########");
-            Map<String, Object> params = new HashMap<>();
-            params.put(Constants.VERSION_KEY_STR, version);
-            params.put("chainId", chainId);
-            params.put("count", count);
-            params.put("password", password);
-            Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_createAccount", params);
-            assertTrue(response.isSuccess());
-            accountList = (List<String>) ((HashMap) ((HashMap) response.getResponseData()).get("ac_createAccount")).get("list");
-            assertEquals(count, accountList.size());
-        }
-        {
-            for (String account : accountList) {
+            int loop = count/100 == 0 ? 1 : count/100;
+            for (int i = 0; i < loop; i++) {
                 Map<String, Object> params = new HashMap<>();
                 params.put(Constants.VERSION_KEY_STR, version);
                 params.put("chainId", chainId);
-                params.put("address", account);
-                Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_getAccountByAddress", params);
-
-                String address = JSONUtils.obj2json(((HashMap) cmdResp.getResponseData()).get("ac_getAccountByAddress"));
-                Log.debug("address-{}" + address);
+                params.put("count", count<100?count:100);
+                params.put("password", password);
+                Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_createAccount", params);
+                assertTrue(response.isSuccess());
+                accountList.addAll((List<String>) ((HashMap) ((HashMap) response.getResponseData()).get("ac_createAccount")).get("list"));
+            }
+            assertEquals(count, accountList.size());
+            for (String account : accountList) {
+                Log.debug("address-{}", account);
             }
         }
         {
@@ -578,7 +713,7 @@ public class TestJyc {
                 CoinDTO inputCoin1 = new CoinDTO();
                 inputCoin1.setAddress(address23);
                 inputCoin1.setPassword(password);
-                inputCoin1.setAssetsChainId(chainId);
+                inputCoin1.setAssetsChainId(assetChainId);
                 inputCoin1.setAssetsId(assetId);
                 inputCoin1.setAmount(new BigInteger("100000000000"));
                 inputs.add(inputCoin1);
@@ -586,7 +721,7 @@ public class TestJyc {
                 CoinDTO outputCoin1 = new CoinDTO();
                 outputCoin1.setAddress(account);
                 outputCoin1.setPassword(password);
-                outputCoin1.setAssetsChainId(chainId);
+                outputCoin1.setAssetsChainId(assetChainId);
                 outputCoin1.setAssetsId(assetId);
                 outputCoin1.setAmount(new BigInteger("100000000000"));
                 outputs.add(outputCoin1);
@@ -602,7 +737,7 @@ public class TestJyc {
         }
         Thread.sleep(60000);
         List<String> hashList = new ArrayList<>();
-        int intervel = 200;
+        int intervel = 100;
         {
             Log.debug("3.##########" + count + " accounts Transfer to each other##########");
             //100个地址之间互相转账
@@ -644,7 +779,7 @@ public class TestJyc {
                 Log.debug("##########" + j + " round end##########");
                 Thread.sleep(intervel * 100);
                 intervel--;
-                intervel = intervel < 1 ? 200 : intervel;
+                intervel = intervel < 1 ? 100 : intervel;
             }
         }
         Thread.sleep(100000);
@@ -652,7 +787,7 @@ public class TestJyc {
             while (true) {
                 for (Iterator<String> iterator = hashList.iterator(); iterator.hasNext(); ) {
                     String hash = iterator.next();
-                    if (queryTx(hash)) {
+                    if (queryTx(hash, true)) {
                         iterator.remove();
                     }
                 }
@@ -717,9 +852,9 @@ public class TestJyc {
             assertTrue(response.isSuccess());
             Map map = (Map) response.getResponseData();
             Map tx = (Map) map.get("tx_getConfirmedTx");
-            String txHex = tx.get("txHex").toString();
+            String txStr = tx.get("tx").toString();
             Transaction transaction = new Transaction();
-            transaction.parse(new NulsByteBuffer(HexUtil.decode(txHex)));
+            transaction.parse(new NulsByteBuffer(RPCUtil.decode(txStr)));
             if (!hash.equals(transaction.getHash().getDigestHex())) {
                 Log.debug("hash-{} not exist", hash);
                 result = false;
@@ -728,18 +863,29 @@ public class TestJyc {
         return result;
     }
 
-    private boolean queryTx(String hash) throws Exception {
+    private boolean queryTx(String hash, boolean confirmed) throws Exception {
         boolean result = true;
         Map<String, Object> params = new HashMap<>();
         params.put("chainId", chainId);
         params.put("txHash", hash);
-        Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.TX.abbr, "tx_getConfirmedTx", params);
+        String cmd;
+        if (confirmed) {
+            cmd = "tx_getConfirmedTx";
+        } else {
+            cmd = "tx_getTx";
+        }
+        Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.TX.abbr, cmd, params);
         assertTrue(response.isSuccess());
         Map map = (Map) response.getResponseData();
-        Map tx = (Map) map.get("tx_getConfirmedTx");
-        String txHex = tx.get("txHex").toString();
+        Map tx = (Map) map.get(cmd);
+        Object tx1 = tx.get("tx");
+        if (tx1 == null) {
+            Log.debug("hash-{} not exist", hash);
+            return false;
+        }
+        String txStr = tx1.toString();
         Transaction transaction = new Transaction();
-        transaction.parse(new NulsByteBuffer(HexUtil.decode(txHex)));
+        transaction.parse(new NulsByteBuffer(RPCUtil.decode(txStr)));
         if (!hash.equals(transaction.getHash().getDigestHex())) {
             Log.debug("hash-{} not exist", hash);
             result = false;

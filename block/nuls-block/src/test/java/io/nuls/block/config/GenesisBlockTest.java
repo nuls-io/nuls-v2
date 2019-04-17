@@ -21,16 +21,24 @@
 package io.nuls.block.config;
 
 import io.nuls.block.model.GenesisBlock;
+import io.nuls.rpc.info.Constants;
+import io.nuls.rpc.model.ModuleE;
+import io.nuls.rpc.model.message.Response;
+import io.nuls.rpc.netty.processor.ResponseMessageProcessor;
+import org.junit.Assert;
 import org.junit.Test;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class GenesisBlockTest {
 
     @Test
     public void getInstance() throws Exception {
-        GenesisBlock genesisBlock = GenesisBlock.getInstance();
-        System.out.println(genesisBlock.getHeader().getHeight());
-        System.out.println(genesisBlock.getHeader().getHash());
-        System.out.println(genesisBlock.getHeader().getPreHash());
-        System.out.println(genesisBlock.getHeader().getTxCount());
+        GenesisBlock genesisBlock = GenesisBlock.getInstance(0, 0);
+        //创世区块高度为0
+        Assert.assertEquals(0, genesisBlock.getHeader().getHeight());
+        //创世区块只有一个交易
+        Assert.assertEquals(1, genesisBlock.getHeader().getTxCount());
     }
 }

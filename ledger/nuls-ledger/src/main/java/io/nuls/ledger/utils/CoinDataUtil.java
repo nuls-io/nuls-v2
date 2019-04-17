@@ -10,15 +10,16 @@ import io.nuls.ledger.model.UnconfirmedTx;
 import io.nuls.ledger.model.po.UnconfirmedAmount;
 import io.nuls.ledger.model.po.UnconfirmedNonce;
 import io.nuls.tools.exception.NulsException;
+import io.nuls.tools.model.StringUtils;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import static io.nuls.ledger.utils.LoggerUtil.logger;
-
 /**
  * Created by ljs on 2018/12/30.
+ *
+ * @author lanjinsheng
  */
 public class CoinDataUtil {
     /**
@@ -35,7 +36,7 @@ public class CoinDataUtil {
         try {
             coinData.parse(new NulsByteBuffer(stream));
         } catch (NulsException e) {
-            logger.error("coinData parse error", e);
+            LoggerUtil.logger().error("coinData parse error", e);
         }
         return coinData;
     }
@@ -43,6 +44,7 @@ public class CoinDataUtil {
     public static void calTxFromAmount(Map<String, UnconfirmedTx> map, CoinFrom coinFrom, String txHash, String accountKey) {
         UnconfirmedTx unconfirmedTx = getUnconfirmedTx(map, coinFrom, txHash, accountKey);
         unconfirmedTx.setSpendAmount(unconfirmedTx.getSpendAmount().add(coinFrom.getAmount()));
+        unconfirmedTx.setFromNonce(LedgerUtil.getNonceEncode(coinFrom.getNonce()));
         map.put(accountKey, unconfirmedTx);
     }
 
@@ -66,6 +68,7 @@ public class CoinDataUtil {
         unconfirmedTx.setFromUnLockedAmount(unconfirmedTx.getFromUnLockedAmount().add(coinFrom.getAmount()));
         map.put(accountKey, unconfirmedTx);
     }
+
     public static void calTxToLockedAmount(Map<String, UnconfirmedTx> map, CoinTo coinTo, String txHash, String accountKey) {
         UnconfirmedTx unconfirmedTx = getUnconfirmedTx(map, coinTo, txHash, accountKey);
         unconfirmedTx.setToLockedAmount(unconfirmedTx.getToLockedAmount().add(coinTo.getAmount()));
@@ -84,7 +87,7 @@ public class CoinDataUtil {
         return unconfirmedTx;
     }
 
-   public static List<UnconfirmedNonce> getUnconfirmedNonces(String nonce, List<UnconfirmedNonce> unconfirmedNonces) {
+    public static List<UnconfirmedNonce> getUnconfirmedNonces(String nonce, List<UnconfirmedNonce> unconfirmedNonces) {
         if (unconfirmedNonces.size() > 0) {
             int clearIndex = 0;
             boolean hadClear = false;
@@ -98,12 +101,12 @@ public class CoinDataUtil {
             int size = unconfirmedNonces.size();
             //从第list的index=i-1起进行清空
             if (hadClear) {
-                LoggerUtil.logger.debug("remove clearIndex = {}", clearIndex);
+                LoggerUtil.logger().debug("remove clearIndex = {}", clearIndex);
                 List<UnconfirmedNonce> leftUnconfirmedNonces = unconfirmedNonces.subList(clearIndex, size);
                 return leftUnconfirmedNonces;
             } else {
                 //分叉了，清空之前的未提交nonce
-                LoggerUtil.logger.debug("remove all");
+                LoggerUtil.logger().debug("remove all");
                 return new ArrayList<>();
             }
 
@@ -113,6 +116,9 @@ public class CoinDataUtil {
     }
 
     public static List<UnconfirmedAmount> getUnconfirmedAmounts(String txHash, List<UnconfirmedAmount> unconfirmedAmounts) {
+        if (StringUtils.isBlank(txHash)) {
+            return unconfirmedAmounts;
+        }
         if (unconfirmedAmounts.size() > 0) {
             int clearIndex = 0;
             boolean hadClear = false;
@@ -126,26 +132,15 @@ public class CoinDataUtil {
             int size = unconfirmedAmounts.size();
             //从第list的index=i-1起进行清空
             if (hadClear) {
-                LoggerUtil.logger.debug("remove UnconfirmedAmount clearIndex = {}", clearIndex);
+                LoggerUtil.logger().debug("remove UnconfirmedAmount clearIndex = {}", clearIndex);
                 List<UnconfirmedAmount> leftUnconfirmedAmounts = unconfirmedAmounts.subList(clearIndex, size);
                 return leftUnconfirmedAmounts;
             } else {
-                //分叉了，清空之前的未提交nonce
-                LoggerUtil.logger.debug("remove all");
-                return new ArrayList<>();
+
             }
 
-        } else {
-            return unconfirmedAmounts;
         }
+        return unconfirmedAmounts;
     }
-    public static void main(String []args){
-        List<String> a = new ArrayList();
-        a.add("1");
-        a.add("2");
-        a.add("3");
-        a.add("4");
-        List<String> leftUnconfirmedNonces = a.subList(1, 4);
-        leftUnconfirmedNonces.forEach(e->System.out.println(e));
-    }
+
 }

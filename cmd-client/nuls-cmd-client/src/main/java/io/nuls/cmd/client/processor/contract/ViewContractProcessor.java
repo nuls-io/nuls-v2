@@ -69,27 +69,14 @@ public class ViewContractProcessor extends ContractBaseProcessor {
 
     @Override
     public boolean argsValidate(String[] args) {
-        boolean result;
-        do {
-            int length = args.length;
-            if (length != 3 && length != 5) {
-                result = false;
-                break;
-            }
-            if (!CommandHelper.checkArgsIsNull(args)) {
-                result = false;
-            break;
-            }
-            ViewContractReq form = getContractViewCall(args);
-            if(null == form){
-                result = false;
-                break;
-            }
-            paramsData.set(form);
-
-            result = true;
-        } while (false);
-        return result;
+        checkArgsNumber(args,2,3);
+        checkAddress(config.getChainId(),args[1]);
+        ViewContractReq form = getContractViewCall(args);
+        if(null == form){
+            return false;
+        }
+        paramsData.set(form);
+        return true;
     }
 
     private ViewContractReq getContractViewCall(String[] args) {

@@ -1,6 +1,8 @@
 package io.nuls.api.model.po.db;
 
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import java.math.BigInteger;
 
 public class DepositInfo extends TxDataInfo {
@@ -25,6 +27,7 @@ public class DepositInfo extends TxDataInfo {
 
     private BigInteger fee;
 
+    @JsonIgnore
     private boolean isNew;
     // 0 加入共识，1 退出共识
     private int type;

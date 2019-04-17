@@ -24,10 +24,7 @@
 package io.nuls.contract.helper;
 
 import io.nuls.base.basic.AddressTool;
-import io.nuls.base.data.CoinData;
-import io.nuls.base.data.CoinFrom;
-import io.nuls.base.data.CoinTo;
-import io.nuls.base.data.NulsDigestData;
+import io.nuls.base.data.*;
 import io.nuls.contract.constant.ContractConstant;
 import io.nuls.contract.manager.ContractTempBalanceManager;
 import io.nuls.contract.model.bo.*;
@@ -39,12 +36,12 @@ import io.nuls.contract.util.Log;
 import io.nuls.contract.util.MapUtil;
 import io.nuls.contract.util.VMContext;
 import io.nuls.contract.vm.program.ProgramTransfer;
+import io.nuls.rpc.util.RPCUtil;
 import io.nuls.tools.basic.Result;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.model.ByteArrayWrapper;
-import org.spongycastle.util.encoders.Hex;
 
 import java.io.IOException;
 import java.math.BigInteger;
@@ -84,7 +81,7 @@ public class ContractTransferHandler {
         // 增加转入, 扣除转出
         List<ProgramTransfer> transfers = contractResult.getTransfers();
         if (transfers != null && transfers.size() > 0) {
-            LinkedHashMap<String, BigInteger>[] contracts = this.filterContractValue(transfers);
+            LinkedHashMap<String, BigInteger>[] contracts = this.filterContractValue(chainId, transfers);
             LinkedHashMap<String, BigInteger> contractFromValue = contracts[0];
             LinkedHashMap<String, BigInteger> contractToValue = contracts[1];
             byte[] contractBytes;
@@ -111,7 +108,7 @@ public class ContractTransferHandler {
             // 增加转出, 扣除转入
             List<ProgramTransfer> transfers = contractResult.getTransfers();
             if (transfers != null && transfers.size() > 0) {
-                LinkedHashMap<String, BigInteger>[] contracts = this.filterContractValue(transfers);
+                LinkedHashMap<String, BigInteger>[] contracts = this.filterContractValue(chainId, transfers);
                 LinkedHashMap<String, BigInteger> contractFromValue = contracts[0];
                 LinkedHashMap<String, BigInteger> contractToValue = contracts[1];
                 byte[] contractBytes;
@@ -136,7 +133,7 @@ public class ContractTransferHandler {
         }
     }
 
-    private LinkedHashMap<String, BigInteger>[] filterContractValue(List<ProgramTransfer> transfers) {
+    private LinkedHashMap<String, BigInteger>[] filterContractValue(int chainId, List<ProgramTransfer> transfers) {
         LinkedHashMap<String, BigInteger> contractFromValue = MapUtil.createLinkedHashMap(4);
         LinkedHashMap<String, BigInteger> contractToValue = MapUtil.createLinkedHashMap(4);
         LinkedHashMap<String, BigInteger>[] contracts = new LinkedHashMap[2];
@@ -149,7 +146,7 @@ public class ContractTransferHandler {
             from = transfer.getFrom();
             to = transfer.getTo();
             transferValue = transfer.getValue();
-            if (ContractUtil.isLegalContractAddress(from)) {
+            if (ContractUtil.isLegalContractAddress(chainId, from)) {
                 String contract = asString(from);
                 BigInteger na = contractFromValue.get(contract);
                 if (na == null) {
@@ -158,7 +155,7 @@ public class ContractTransferHandler {
                     contractFromValue.put(contract, na.add(transferValue));
                 }
             }
-            if (ContractUtil.isLegalContractAddress(to)) {
+            if (ContractUtil.isLegalContractAddress(chainId, to)) {
                 String contract = asString(to);
                 BigInteger na = contractToValue.get(contract);
                 if (na == null) {
@@ -253,14 +250,14 @@ public class ContractTransferHandler {
                 if (compareFrom == null) {
                     // 第一次遍历，获取新交易的coinFrom的nonce
                     contractBalance = tempBalanceManager.getBalance(from).getData();
-                    nonceBytes = Hex.decode(contractBalance.getNonce());
+                    nonceBytes = RPCUtil.decode(contractBalance.getNonce());
                 } else {
                     // 产生另一个合并交易，更新之前的合并交易的hash和账户的nonce
                     this.updatePreTxHashAndAccountNonce(contractTransferTx, contractBalance);
                     mergeCoinToMap.clear();
                     // 获取新交易的coinFrom的nonce
                     contractBalance = tempBalanceManager.getBalance(from).getData();
-                    nonceBytes = Hex.decode(contractBalance.getNonce());
+                    nonceBytes = RPCUtil.decode(contractBalance.getNonce());
                 }
                 Log.info("From is {}, nonce is {}", AddressTool.getStringAddressByBytes(from), contractBalance.getNonce());
                 compareFrom = wrapperFrom;
@@ -300,7 +297,7 @@ public class ContractTransferHandler {
         }
     }
 
-    private List<ContractMergedTransfer> contractTransfer2mergedTransfer(ContractWrapperTransaction tx, List<ContractTransferTransaction> transferList) throws NulsException {
+    public List<ContractMergedTransfer> contractTransfer2mergedTransfer(Transaction tx, List<ContractTransferTransaction> transferList) throws NulsException {
         List<ContractMergedTransfer> resultList = new ArrayList<>();
         for (ContractTransferTransaction transfer : transferList) {
             resultList.add(this.transformMergedTransfer(tx.getHash(), transfer));
@@ -333,9 +330,9 @@ public class ContractTransferHandler {
         NulsDigestData hash = NulsDigestData.calcDigestData(tx.serializeForHash());
         byte[] hashBytes = hash.serialize();
         byte[] currentNonceBytes = Arrays.copyOfRange(hashBytes, hashBytes.length - 8, hashBytes.length);
-        balance.setNonce(Hex.toHexString(currentNonceBytes));
+        balance.setNonce(RPCUtil.encode(currentNonceBytes));
         tx.setHash(hash);
-        Log.info("TxType is {}, hash is {}, nextNonce is {}", tx.getType(), hash.toString(), Hex.toHexString(currentNonceBytes));
+        Log.info("TxType is {}, hash is {}, nextNonce is {}", tx.getType(), hash.toString(), RPCUtil.encode(currentNonceBytes));
     }
 
     private ContractTransferTransaction createContractTransferTx(CoinData coinData, ContractTransferData txData, long blockTime, long timeOffset) {

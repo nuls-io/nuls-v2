@@ -13,6 +13,7 @@ import java.io.UnsupportedEncodingException;
 
 /**
  * Created by lanjinsheng on 2019/01/02
+ * @author lanjinsheng
  */
 public class LedgerUtil {
     /**
@@ -87,8 +88,13 @@ public class LedgerUtil {
         return assetKey+ "-"+height;
     }
 
-
-    public static String getNonceStrByTxHash(Transaction tx){
+    public static byte[] getNonceDecode(String nonceStr){
+        return HexUtil.decode(nonceStr);
+    }
+    public static String getNonceEncode(byte []nonce){
+        return HexUtil.encode(nonce);
+    }
+    public static String getNonceEncodeByTx(Transaction tx){
         byte[] out = new byte[8];
         byte [] in = tx.getHash().getDigestBytes();
         int copyEnd = in.length;
@@ -96,7 +102,7 @@ public class LedgerUtil {
         String nonce8BytesStr = HexUtil.encode(out);
         return nonce8BytesStr;
     }
-    public static String getNonceStrByTxHash(String txHash){
+    public static String getNonceEncodeByTxHash(String txHash){
         byte[] out = new byte[8];
         byte [] in = HexUtil.decode(txHash);
         int copyEnd = in.length;

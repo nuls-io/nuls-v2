@@ -9,25 +9,16 @@ import io.nuls.protocol.model.ProtocolContext;
 import io.nuls.protocol.model.ProtocolVersion;
 import io.nuls.protocol.model.po.Statistics;
 import io.nuls.protocol.service.StatisticsStorageService;
-import io.nuls.protocol.utils.module.BlockUtil;
 import io.nuls.rpc.invoke.BaseInvoke;
 import io.nuls.rpc.model.message.Response;
-import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.core.ioc.SpringLiteContext;
 import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.log.logback.NulsLogger;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
 
-import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Stack;
 
-@Data
-@EqualsAndHashCode(callSuper=false)
 public class BlockHeaderInvoke extends BaseInvoke {
 
     private int chainId;

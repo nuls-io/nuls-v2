@@ -24,8 +24,9 @@
  */
 package io.nuls.rpc.model.message;
 
-import lombok.Data;
-import lombok.ToString;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
  * 握手请求
@@ -34,28 +35,71 @@ import lombok.ToString;
  * @author tangyi
  * @date 2018/11/15
  */
-@Data
-@ToString
+
 public class NegotiateConnection {
     /**
-     * module abbreviation
+     * module Abbreviation
      */
-    private String abbreviation;
+    @JsonProperty
+    private String Abbreviation;
 
     /**
      * Protocol version
      */
-    private String protocolVersion;
+    @JsonProperty
+    private String ProtocolVersion;
 
     /**
      * A String that represents the algorithm that will be used to receive and send messages if CompressionRate is greater than 0.
      * The default is zlib which a library is available in most development languages.
      */
-    private String compressionAlgorithm;
+    @JsonProperty
+    private String CompressionAlgorithm;
 
     /**
      * An integer between 0 and 9 that establishes the compression level in which the messages should be sent and received for this connection.
      * 0 means no compression while 9 maximum compression
      */
-    private String compressionRate;
+    @JsonProperty
+    private String CompressionRate;
+
+    @JsonIgnore
+    public String getAbbreviation() {
+        return Abbreviation;
+    }
+
+    @JsonIgnore
+    public void setAbbreviation(String Abbreviation) {
+        this.Abbreviation = Abbreviation;
+    }
+
+    @JsonIgnore
+    public String getProtocolVersion() {
+        return ProtocolVersion;
+    }
+
+    @JsonIgnore
+    public void setProtocolVersion(String ProtocolVersion) {
+        this.ProtocolVersion = ProtocolVersion;
+    }
+
+    @JsonIgnore
+    public String getCompressionAlgorithm() {
+        return CompressionAlgorithm;
+    }
+
+    @JsonIgnore
+    public void setCompressionAlgorithm(String CompressionAlgorithm) {
+        this.CompressionAlgorithm = CompressionAlgorithm;
+    }
+
+    @JsonIgnore
+    public String getCompressionRate() {
+        return CompressionRate;
+    }
+
+    @JsonIgnore
+    public void setCompressionRate(String CompressionRate) {
+        this.CompressionRate = CompressionRate;
+    }
 }

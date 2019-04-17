@@ -32,13 +32,12 @@ import io.nuls.rpc.info.NoUse;
 import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.model.message.Response;
 import io.nuls.rpc.netty.processor.ResponseMessageProcessor;
-import io.nuls.tools.crypto.HexUtil;
+import io.nuls.rpc.util.RPCUtil;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.parse.JSONUtils;
 import io.nuls.transaction.model.bo.Chain;
 import io.nuls.transaction.model.bo.config.ConfigBean;
 import io.nuls.transaction.model.dto.CoinDTO;
-import io.nuls.transaction.model.dto.CrossTxTransferDTO;
 import io.nuls.transaction.rpc.call.LedgerCall;
 import org.junit.Assert;
 import org.junit.Before;
@@ -573,20 +572,6 @@ public class TestTx {
         Log.debug("{}", result.get("value"));
     }
 
-
-    private void createCtxTransfer() throws Exception {
-        CrossTxTransferDTO ctxTransfer = new CrossTxTransferDTO(chain.getChainId(),
-                createFromCoinDTOList(), createToCoinDTOList(), "this is cross-chain transaction");
-        //调接口
-        String json = JSONUtils.obj2json(ctxTransfer);
-        Map<String, Object> params = JSONUtils.json2map(json);
-        Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.TX.abbr, "tx_createCtx", params);
-        Assert.assertTrue(null != response.getResponseData());
-        Map map = (HashMap) ((HashMap) response.getResponseData()).get("tx_createCtx");
-        Assert.assertTrue(null != map);
-        Log.debug("{}", map.get("value"));
-    }
-
     public static String importAccountByKeystoreFile(String filePath) {
         String address = null;
         try {
@@ -594,12 +579,12 @@ public class TestTx {
             byte[] bytes = copyToByteArray(file);
             String keyStoreStr = new String(bytes,"UTF-8");
 
-            //AccountKeyStoreDto accountKeyStoreDto = JSONUtils.json2pojo(new String(HexUtil.decode(keyStoreHexStr)), AccountKeyStoreDto.class);
+            //AccountKeyStoreDto accountKeyStoreDto = JSONUtils.json2pojo(new String(RPCUtil.decode(keyStoreHexStr)), AccountKeyStoreDto.class);
 
             Map<String, Object> params = new HashMap<>();
             params.put(Constants.VERSION_KEY_STR, version);
             params.put("chainId", chainId);
-            params.put("keyStore", HexUtil.encode(bytes));
+            params.put("keyStore", RPCUtil.encode(bytes));
             params.put("password", password);
             params.put("overwrite", true);
             Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_importAccountByKeystore", params);

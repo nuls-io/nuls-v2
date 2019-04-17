@@ -28,21 +28,21 @@ public interface ConfirmedTxService {
     /**
      * 保存创世块的交易
      * @param chain
-     * @param txhexList
-     * @param blockHeaderHex
+     * @param txList
+     * @param blockHeader
      * @return
      * @throws NulsException
      */
-    boolean saveGengsisTxList(Chain chain, List<Transaction> txhexList, String blockHeaderHex) throws NulsException;
+    boolean saveGengsisTxList(Chain chain, List<Transaction> txList, String blockHeader) throws NulsException;
 
     /**
      * 保存区块中已确认交易
      * @param chain
      * @param txHashList
-     * @param blockHeaderHex
+     * @param blockHeader
      * @return
      */
-    boolean saveTxList(Chain chain, List<NulsDigestData> txHashList, String blockHeaderHex) throws NulsException;
+    boolean saveTxList(Chain chain, List<NulsDigestData> txHashList, String blockHeader) throws NulsException;
 
 
 
@@ -50,10 +50,10 @@ public interface ConfirmedTxService {
      * 批量回滚已确认交易
      * @param chain
      * @param txHashList
-     * @param blockHeaderHex
+     * @param blockHeader
      * @return
      */
-    boolean rollbackTxList(Chain chain, List<NulsDigestData> txHashList, String blockHeaderHex) throws NulsException;
+    boolean rollbackTxList(Chain chain, List<NulsDigestData> txHashList, String blockHeader) throws NulsException;
 
     /**
      * 根据最新区块高度扫描是否有需要处理的跨链交易,如果有则进行跨链发送
@@ -69,7 +69,7 @@ public interface ConfirmedTxService {
      * 如果没有查询到,或者查询到的不是区块完整的交易数据 则返回空list
      * @param chain
      * @param hashList
-     * @return List<String> txHex list
+     * @return List<String> tx list
      */
     List<String> getTxList(Chain chain, List<String> hashList);
 
@@ -78,7 +78,7 @@ public interface ConfirmedTxService {
      * 如果没有查询到,或者查询到的不是区块完整的交易数据 则返回空list
      * @param chain
      * @param hashList
-     * @return List<String> txHex list
+     * @return List<String> tx list
      */
     List<String> getTxListExtend(Chain chain, List<String> hashList, boolean allHits);
 }

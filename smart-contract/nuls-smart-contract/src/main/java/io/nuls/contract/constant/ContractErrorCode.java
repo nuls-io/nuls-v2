@@ -54,6 +54,7 @@ public interface ContractErrorCode {
     ErrorCode UTXO_STATUS_CHANGE = ErrorCode.init("31002");
     ErrorCode INVALID_AMOUNT = ErrorCode.init("31005");
     ErrorCode TX_DATA_VALIDATION_ERROR = ErrorCode.init("31008");
+    ErrorCode FEE_NOT_RIGHT = ErrorCode.init("31009");
     ErrorCode TOO_SMALL_AMOUNT = ErrorCode.init("31012");
     ErrorCode TX_NOT_EXIST = ErrorCode.init("31015");
 

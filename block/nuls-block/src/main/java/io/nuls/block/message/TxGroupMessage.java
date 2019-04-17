@@ -28,7 +28,6 @@ import io.nuls.block.message.base.BaseMessage;
 import io.nuls.tools.basic.VarInt;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.parse.SerializeUtils;
-import lombok.Data;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -42,7 +41,6 @@ import java.util.List;
  * @version 1.0
  * @date 18-11-9 下午2:37
  */
-@Data
 public class TxGroupMessage extends BaseMessage {
 
     private NulsDigestData blockHash;
@@ -53,6 +51,22 @@ public class TxGroupMessage extends BaseMessage {
 
     public TxGroupMessage(NulsDigestData blockHash, List<Transaction> transactions) {
         this.blockHash = blockHash;
+        this.transactions = transactions;
+    }
+
+    public NulsDigestData getBlockHash() {
+        return blockHash;
+    }
+
+    public void setBlockHash(NulsDigestData blockHash) {
+        this.blockHash = blockHash;
+    }
+
+    public List<Transaction> getTransactions() {
+        return transactions;
+    }
+
+    public void setTransactions(List<Transaction> transactions) {
         this.transactions = transactions;
     }
 

@@ -20,7 +20,7 @@
 
 package io.nuls.api;
 
-import io.nuls.api.db.DBTableService;
+import io.nuls.api.db.mongo.MongoDBTableServiceImpl;
 import io.nuls.api.manager.ScheduleManager;
 import io.nuls.api.model.po.config.ApiConfig;
 import io.nuls.api.model.po.db.ChainInfo;
@@ -33,6 +33,7 @@ import io.nuls.rpc.modulebootstrap.Module;
 import io.nuls.rpc.modulebootstrap.NulsRpcModuleBootstrap;
 import io.nuls.rpc.modulebootstrap.RpcModule;
 import io.nuls.rpc.modulebootstrap.RpcModuleState;
+import io.nuls.rpc.util.TimeUtils;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.core.config.ConfigurationLoader;
@@ -65,7 +66,7 @@ public class ApiModuleBootstrap extends RpcModule {
         configurationLoader.load();
         Provider.ProviderType providerType = Provider.ProviderType.valueOf(configurationLoader.getValue("providerType"));
         int defaultChainId = Integer.parseInt(configurationLoader.getValue("defaultChainId"));
-        ServiceManager.init(defaultChainId,providerType);
+        ServiceManager.init(defaultChainId, providerType);
         NulsRpcModuleBootstrap.run("io.nuls", args);
     }
 
@@ -74,8 +75,8 @@ public class ApiModuleBootstrap extends RpcModule {
      * 有关mongoDB的连接初始化见：MongoDBService.afterPropertiesSet();
      */
     private void initCfg() {
-        ApiContext.mongoIp = apiConfig.getMongoIp();
-        ApiContext.mongoPort = apiConfig.getMongoPort();
+        ApiContext.databaseUrl = apiConfig.getDatabaseUrl();
+        ApiContext.databasePort = apiConfig.getDatabasePort();
         ApiContext.defaultChainId = apiConfig.getDefaultChainId();
         ApiContext.defaultAssetId = apiConfig.getDefaultAssetId();
         ApiContext.listenerIp = apiConfig.getListenerIp();
@@ -87,7 +88,7 @@ public class ApiModuleBootstrap extends RpcModule {
      * 初始化数据库连接
      */
     private void initDB() {
-        DBTableService tableService = SpringLiteContext.getBean(DBTableService.class);
+        MongoDBTableServiceImpl tableService = SpringLiteContext.getBean(MongoDBTableServiceImpl.class);
         List<ChainInfo> chainList = tableService.getChainList();
         if (chainList == null) {
             tableService.addDefaultChain();
@@ -99,9 +100,9 @@ public class ApiModuleBootstrap extends RpcModule {
     @Override
     public Module[] getDependencies() {
         return new Module[]{
-                new Module(ModuleE.CS.abbr, "1.0"),
-                new Module(ModuleE.BL.abbr, "1.0"),
-                new Module(ModuleE.SC.abbr, "1.0")
+//                new Module(ModuleE.CS.abbr, "1.0"),
+                new Module(ModuleE.BL.abbr, "1.0")
+//                new Module(ModuleE.SC.abbr, "1.0")
         };
     }
 
@@ -136,6 +137,8 @@ public class ApiModuleBootstrap extends RpcModule {
             Thread.sleep(3000);
             JsonRpcServer server = new JsonRpcServer();
             server.startServer(ApiContext.listenerIp, ApiContext.rpcPort);
+            TimeUtils.getInstance().start();
+         //   TimeUtils.getInstance().start(10 * 60 * 1000L);
         } catch (Exception e) {
             Log.error("------------------------api-module running failed---------------------------");
             Log.error(e);

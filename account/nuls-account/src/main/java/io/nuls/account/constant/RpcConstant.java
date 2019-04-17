@@ -116,10 +116,12 @@ public interface RpcConstant {
      * 发起新交易接口
      */
     String TX_NEW_CMD = "tx_newTx";
+
+    String TX_BASE_VALIDATE = "tx_baseValidateTx";
     /**
      * 交易数据HEX编码
      */
-    String TX_DATA_HEX = "txHex";
+    String TX_DATA = "tx";
     /**
      * 交易所属链ID
      */
@@ -148,9 +150,9 @@ public interface RpcConstant {
      */
     String PATH = "path";
     /**
-     * 签名数据HEX编码
+     * 签名数据
      */
-    String SIGNATURE_HEX = "signatureHex";
+    String SIGNATURE = "signature";
 
     /**
      * --------[RPC Module role constants] -------

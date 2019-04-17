@@ -18,6 +18,7 @@
 package org.ethereum.trie;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
+import io.nuls.tools.crypto.HexUtil;
 import org.apache.commons.lang3.text.StrBuilder;
 import org.ethereum.crypto.HashUtil;
 import org.ethereum.datasource.Source;
@@ -26,7 +27,6 @@ import org.ethereum.util.FastByteComparisons;
 import org.ethereum.util.RLP;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.spongycastle.util.encoders.Hex;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -373,10 +373,10 @@ public class TrieImpl implements Trie<byte[]> {
 
         public String dumpStruct(String indent, String prefix) {
             String ret = indent + prefix + getType() + (dirty ? " *" : "") +
-                    (hash == null ? "" : "(hash: " + Hex.toHexString(hash).substring(0, 6) + ")");
+                    (hash == null ? "" : "(hash: " + HexUtil.encode(hash).substring(0, 6) + ")");
             if (getType() == NodeType.BranchNode) {
                 byte[] value = branchNodeGetValue();
-                ret += (value == null ? "" : " [T] = " + Hex.toHexString(value)) + "\n";
+                ret += (value == null ? "" : " [T] = " + HexUtil.encode(value)) + "\n";
                 for (int i = 0; i < 16; i++) {
                     Node child = branchNodeGetChild(i);
                     if (child != null) {
@@ -388,7 +388,7 @@ public class TrieImpl implements Trie<byte[]> {
                 ret += " [" + kvNodeGetKey() + "]\n";
                 ret += kvNodeGetChildNode().dumpStruct(indent + "  ", "");
             } else {
-                ret += " [" + kvNodeGetKey() + "] = " + Hex.toHexString(kvNodeGetValue()) + "\n";
+                ret += " [" + kvNodeGetKey() + "] = " + HexUtil.encode(kvNodeGetValue()) + "\n";
             }
             return ret;
         }
@@ -774,12 +774,12 @@ public class TrieImpl implements Trie<byte[]> {
 
 
     private static String hash2str(byte[] hash, boolean shortHash) {
-        String ret = Hex.toHexString(hash);
+        String ret = HexUtil.encode(hash);
         return "0x" + (shortHash ? ret.substring(0, 8) : ret);
     }
 
     private static String val2str(byte[] val, boolean shortHash) {
-        String ret = Hex.toHexString(val);
+        String ret = HexUtil.encode(val);
         if (val.length > 16) {
             ret = ret.substring(0, 10) + "... len " + val.length;
         }

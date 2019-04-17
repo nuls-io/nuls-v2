@@ -29,11 +29,9 @@ import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.basic.NulsOutputStreamBuffer;
 import io.nuls.base.constant.TxStatusEnum;
 import io.nuls.tools.constant.ToolsConstant;
-import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.crypto.UnsafeByteArrayOutputStream;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.parse.SerializeUtils;
-import io.nuls.tools.thread.TimeService;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -75,7 +73,6 @@ public class Transaction extends BaseNulsData implements Cloneable {
     }
 
     public Transaction(int type) {
-        this.time = TimeService.currentTimeMillis();
         this.type = type;
     }
 
@@ -244,19 +241,11 @@ public class Transaction extends BaseNulsData implements Cloneable {
         this.size = size;
     }
 
-    public static Transaction getInstance(String hex) throws NulsException {
-        return getInstance(HexUtil.decode(hex));
-    }
-
     public static Transaction getInstance(byte[] txBytes) throws NulsException {
         NulsByteBuffer nulsByteBuffer = new NulsByteBuffer(txBytes);
         Transaction transaction = new Transaction();
         transaction.parse(nulsByteBuffer);
         return transaction;
-    }
-
-    public String hex() throws Exception {
-        return HexUtil.encode(this.serialize());
     }
 
     /**

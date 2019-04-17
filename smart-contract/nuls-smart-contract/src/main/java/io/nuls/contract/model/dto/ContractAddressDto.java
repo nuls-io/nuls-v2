@@ -29,13 +29,11 @@ import io.nuls.base.basic.AddressTool;
 import io.nuls.contract.enums.ContractStatus;
 import io.nuls.contract.model.po.ContractAddressInfoPo;
 import io.nuls.tools.exception.NulsException;
-import lombok.Data;
 
 /**
  * @author: PierreLuo
  * @date: 2018/8/15
  */
-@Data
 public class ContractAddressDto {
 
     private String contractAddress;
@@ -69,4 +67,67 @@ public class ContractAddressDto {
         }
     }
 
+    public String getContractAddress() {
+        return contractAddress;
+    }
+
+    public void setContractAddress(String contractAddress) {
+        this.contractAddress = contractAddress;
+    }
+
+    public boolean isCreate() {
+        return isCreate;
+    }
+
+    public void setCreate(boolean create) {
+        isCreate = create;
+    }
+
+    public long getCreateTime() {
+        return createTime;
+    }
+
+    public void setCreateTime(long createTime) {
+        this.createTime = createTime;
+    }
+
+    public long getHeight() {
+        return height;
+    }
+
+    public void setHeight(long height) {
+        this.height = height;
+    }
+
+    public long getConfirmCount() {
+        return confirmCount;
+    }
+
+    public void setConfirmCount(long confirmCount) {
+        this.confirmCount = confirmCount;
+    }
+
+    public String getRemarkName() {
+        return remarkName;
+    }
+
+    public void setRemarkName(String remarkName) {
+        this.remarkName = remarkName;
+    }
+
+    public int getStatus() {
+        return status;
+    }
+
+    public void setStatus(int status) {
+        this.status = status;
+    }
+
+    public String getMsg() {
+        return msg;
+    }
+
+    public void setMsg(String msg) {
+        this.msg = msg;
+    }
 }

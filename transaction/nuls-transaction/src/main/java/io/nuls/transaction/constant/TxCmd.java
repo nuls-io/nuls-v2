@@ -41,32 +41,26 @@ public interface TxCmd {
     String TX_ROLLBACK = "tx_rollback";
     String TX_GET_CONFIRMED_TX = "tx_getConfirmedTx";
     String TX_GETTX = "tx_getTx";
-    String TX_GETTXS = "tx_getTxs";
     String TX_GET_BLOCK_TXS = "tx_getBlockTxs";
     String TX_GET_BLOCK_TXS_EXTEND = "tx_getBlockTxsExtend";
     String TX_BATCHVERIFY = "tx_batchVerify";
     String TX_CREATE_CROSS_TX = "tx_createCtx";
-
-
     String CLIENT_GETTX = "tx_getTxClient";
     String CLIENT_GETTX_CONFIRMED = "tx_getConfirmedTxClient";
+
+    String TX_BLOCK_HEIGHT = "tx_blockHeight";
+    String TX_VERIFYTX = "tx_verifyTx";
 
     /**
      * 修改节点共识状态
      */
     String TX_CS_STATE = "tx_cs_state";
 
-    String TX_REPACKAGE = "tx_repackage";
-
 
     String TX_NEWTX = "tx_newTx";
-    /**
-     * 接收本地新的主网协议的跨链交易 ??????
-     * todo
-     */
-    String TX_NEW_CROSS_TX = "tx_newCrossTx";
 
-    //网络消息对应的RPC命令
+    String TX_BASE_VALIDATE = "tx_baseValidateTx";
+
     /**
      * 接收广播的新交易hash
      */
@@ -79,42 +73,5 @@ public interface TxCmd {
      * 索取完整交易
      */
     String NW_ASK_TX = "askTx";
-
-    /**
-     * 接收新的跨链交易hash
-     */
-    String NW_NEW_CROSS_HASH = "newCrossHash";
-    /**
-     * 主网向友链索取完整跨链交易
-     */
-    String NW_ASK_CROSS_TX_M_FC = "askCrossTxM2Fc";
-    /**
-     * 主网链内节点索取完整跨链交易
-     */
-    String NW_ASK_CROSS_TX_M_M = "askCrossTxM2M";
-    /**
-     * 友链向主网索取完整跨链交易
-     */
-    String NW_ASK_CROSS_TX_FC_M = "askCrossTxFc2M";
-    /**
-     * 接收主网新的完整跨链交易
-     */
-    String NW_NEW_MN_TX = "newMnTx";
-    /**
-     * 根据原始交易和跨链交易hash向友链节点验证该交易是否被确认
-     */
-    String NW_VERIFY_FC = "verifyFc";
-    /**
-     * 根据跨链交易hash向主网验证该交易是否被确认
-     */
-    String NW_VERIFY_MN = "verifyMn";
-    /**
-     * 接收跨链验证结果
-     */
-    String NW_VERIFYR_ESULT = "verifyResult";
-    /**
-     * 接收链内其他节点广播的跨链验证结果
-     */
-    String NW_CROSS_NODE_RS = "crossNodeRs";
 
 }

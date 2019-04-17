@@ -27,6 +27,7 @@ package io.nuls.transaction.utils;
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.data.*;
+import io.nuls.rpc.util.RPCUtil;
 import io.nuls.tools.core.ioc.SpringLiteContext;
 import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.exception.NulsException;
@@ -34,14 +35,11 @@ import io.nuls.tools.log.logback.NulsLogger;
 import io.nuls.tools.model.DateUtils;
 import io.nuls.tools.model.StringUtils;
 import io.nuls.transaction.constant.TxConfig;
-import io.nuls.transaction.constant.TxConstant;
 import io.nuls.transaction.constant.TxErrorCode;
 import io.nuls.transaction.manager.TxManager;
 import io.nuls.transaction.model.bo.Chain;
 import io.nuls.transaction.model.bo.TxRegister;
-import io.nuls.transaction.model.po.TransactionPO;
 
-import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -80,13 +78,6 @@ public class TxUtil {
         }
     }
 
-    public static Transaction getTransaction(String hex) throws NulsException {
-        if (StringUtils.isBlank(hex)) {
-            throw new NulsException(TxErrorCode.DATA_NOT_FOUND);
-        }
-        return getTransaction(HexUtil.decode(hex));
-    }
-
     public static <T> T getInstance(byte[] bytes, Class<? extends BaseNulsData> clazz) throws NulsException {
         if (null == bytes || bytes.length == 0) {
             throw new NulsException(TxErrorCode.DATA_NOT_FOUND);
@@ -104,6 +95,30 @@ public class TxUtil {
         }
     }
 
+    /**
+     * RPCUtil 反序列化
+     * @param data
+     * @param clazz
+     * @param <T>
+     * @return
+     * @throws NulsException
+     */
+    public static <T> T getInstanceRpcStr(String data, Class<? extends BaseNulsData> clazz) throws NulsException {
+        if (StringUtils.isBlank(data)) {
+            throw new NulsException(TxErrorCode.DATA_NOT_FOUND);
+        }
+        return getInstance(RPCUtil.decode(data), clazz);
+    }
+
+
+    /**
+     * HEX反序列化
+     * @param hex
+     * @param clazz
+     * @param <T>
+     * @return
+     * @throws NulsException
+     */
     public static <T> T getInstance(String hex, Class<? extends BaseNulsData> clazz) throws NulsException {
         if (StringUtils.isBlank(hex)) {
             throw new NulsException(TxErrorCode.DATA_NOT_FOUND);
@@ -131,122 +146,6 @@ public class TxUtil {
             return true;
         }
         return false;
-    }
-
-    public static List<TransactionPO> tx2PO(Chain chain, Transaction tx) throws NulsException {
-        List<TransactionPO> list = new ArrayList<>();
-        if (tx.getType() == TxConstant.TX_TYPE_YELLOW_PUNISH) {
-            YellowPunishData punishData = new YellowPunishData();
-            punishData.parse(tx.getTxData(), 0);
-            for (byte[] address : punishData.getAddressList()) {
-                TransactionPO transactionPO = new TransactionPO();
-                transactionPO.setAddress(AddressTool.getStringAddressByBytes(address));
-                transactionPO.setAssetChainId(chain.getConfig().getChainId());
-                transactionPO.setAssetId(chain.getConfig().getAssetId());
-                transactionPO.setAmount(BigInteger.ZERO);
-                transactionPO.setHash(tx.getHash().getDigestHex());
-                transactionPO.setType(tx.getType());
-                transactionPO.setState(5);
-                transactionPO.setTime(tx.getTime());
-                list.add(transactionPO);
-            }
-            return list;
-        }
-        if (null == tx.getCoinData()) {
-            return list;
-        }
-        CoinData coinData = tx.getCoinDataInstance();
-        if (tx.getType() == TxConstant.TX_TYPE_RED_PUNISH) {
-            RedPunishData punishData = new RedPunishData();
-            punishData.parse(tx.getTxData(), 0);
-            TransactionPO transactionPO = new TransactionPO();
-            transactionPO.setAddress(AddressTool.getStringAddressByBytes(punishData.getAddress()));
-            transactionPO.setAssetChainId(chain.getConfig().getChainId());
-            transactionPO.setAssetId(chain.getConfig().getAssetId());
-            transactionPO.setAmount(BigInteger.ZERO);
-            transactionPO.setHash(tx.getHash().getDigestHex());
-            transactionPO.setType(tx.getType());
-            transactionPO.setState(2);
-            transactionPO.setTime(tx.getTime());
-            list.add(transactionPO);
-        } else {
-            if (coinData.getFrom() != null
-                    && tx.getType() != TxConstant.TX_TYPE_COINBASE
-                    && tx.getType() != TxConstant.TX_TYPE_REGISTER_AGENT
-                    && tx.getType() != TxConstant.TX_TYPE_JOIN_CONSENSUS
-                    && tx.getType() != TxConstant.TX_TYPE_CANCEL_DEPOSIT
-                    && tx.getType() != TxConstant.TX_TYPE_STOP_AGENT) {
-                TransactionPO transactionPO = null;
-                for (CoinFrom coinFrom : coinData.getFrom()) {
-                    transactionPO = new TransactionPO();
-                    transactionPO.setAddress(AddressTool.getStringAddressByBytes(coinFrom.getAddress()));
-                    transactionPO.setHash(tx.getHash().getDigestHex());
-                    transactionPO.setType(tx.getType());
-                    transactionPO.setAssetChainId(coinFrom.getAssetsChainId());
-                    transactionPO.setAssetId(coinFrom.getAssetsId());
-                    transactionPO.setAmount(coinFrom.getAmount());
-                    // 0普通交易，(-1:按时间解锁, 1:按高度解锁)解锁金额交易（退出共识，退出委托）
-                    byte locked = coinFrom.getLocked();
-                    int state = 0;
-                    if (locked == -1 || locked == 1) {
-                        //解锁金额交易
-                        break;
-                    }
-                    transactionPO.setState(state);
-                    transactionPO.setTime(tx.getTime());
-                    list.add(transactionPO);
-                }
-            }
-        }
-        //红牌交易也会记录to的解锁
-        if (coinData.getTo() != null) {
-            TransactionPO transactionPO = null;
-            for (CoinTo coinTo : coinData.getTo()) {
-                transactionPO = new TransactionPO();
-                transactionPO.setAddress(AddressTool.getStringAddressByBytes(coinTo.getAddress()));
-                transactionPO.setAssetChainId(coinTo.getAssetsChainId());
-                transactionPO.setAssetId(coinTo.getAssetsId());
-                transactionPO.setAmount(coinTo.getAmount());
-                transactionPO.setHash(tx.getHash().getDigestHex());
-                transactionPO.setType(tx.getType());
-                // 解锁高度或解锁时间，-1为永久锁定
-
-                Long lockTime = coinTo.getLockTime();
-                int state = 1;
-                if (lockTime == -1) {
-                    //锁定
-                    state = 2;
-                } else if (lockTime == 0) {
-                    //普通转入
-                    state = 1;
-                } else {
-                    //解锁
-                    state = 3;
-                }
-                transactionPO.setState(state);
-                transactionPO.setTime(tx.getTime());
-                list.add(transactionPO);
-            }
-        }
-        if (TxManager.isUnSystemSmartContract(chain, tx.getType())) {
-            do {
-                // 调用合约交易，如果有coinTo，那么它是合约地址，此处地址与交易的关系不重复存储
-                if (tx.getType() == TxConstant.TX_TYPE_CALL_CONTRACT && coinData.getTo().size() > 0) {
-                    break;
-                }
-                TransactionPO transactionPO = new TransactionPO();
-                transactionPO.setAddress(extractContractAddress(tx.getTxData()));
-                transactionPO.setAssetChainId(chain.getConfig().getChainId());
-                transactionPO.setAssetId(chain.getConfig().getAssetId());
-                transactionPO.setAmount(BigInteger.ZERO);
-                transactionPO.setHash(tx.getHash().getDigestHex());
-                transactionPO.setType(tx.getType());
-                transactionPO.setState(4);
-                transactionPO.setTime(tx.getTime());
-                list.add(transactionPO);
-            } while (false);
-        }
-        return list;
     }
 
     /**
@@ -305,21 +204,6 @@ public class TxUtil {
         return AddressTool.validContractAddress(addressBytes, chain.getChainId());
     }
 
-    /**
-     * 根据上一个交易hash获取下一个合法的nonce
-     *
-     * @param hash
-     * @return
-     */
-    public static byte[] getNonceByPreHash(NulsDigestData hash) {
-        byte[] out = new byte[8];
-        byte[] in = hash.getDigestBytes();
-        int copyEnd = in.length;
-        System.arraycopy(in, (copyEnd - 8), out, 0, 8);
-        String nonce8BytesStr = HexUtil.encode(out);
-        return HexUtil.decode(nonce8BytesStr);
-    }
-
     public static void txInformationDebugPrint(Chain chain, Transaction tx, NulsLogger nulsLogger) {
         if (tx.getType() == 1) {
             return;
@@ -333,7 +217,7 @@ public class TxUtil {
         nulsLogger.debug("size: {}B,  -{}KB, -{}MB",
                 String.valueOf(tx.getSize()), String.valueOf(tx.getSize() / 1024), String.valueOf(tx.getSize() / 1024 / 1024));
         byte[] remark = tx.getRemark();
-        nulsLogger.debug("remark: {}", remark == null ? "" : HexUtil.encode(tx.getRemark()));
+        nulsLogger.debug("remark: {}", remark == null ? "" : tx.getRemark().toString());
         CoinData coinData = null;
         try {
             if (tx.getCoinData() != null) {
@@ -402,18 +286,18 @@ public class TxUtil {
     public static void moduleGroups(Chain chain, Map<TxRegister, List<String>> moduleVerifyMap, Transaction tx) throws NulsException {
         //根据模块的统一验证器名，对所有交易进行分组，准备进行各模块的统一验证
         TxRegister txRegister = TxManager.getTxRegister(chain, tx.getType());
-        String txHex;
+        String txStr;
         try {
-            txHex = tx.hex();
+            txStr = RPCUtil.encode(tx.serialize());
         } catch (Exception e) {
             throw new NulsException(e);
         }
         if (moduleVerifyMap.containsKey(txRegister)) {
-            moduleVerifyMap.get(txRegister).add(txHex);
+            moduleVerifyMap.get(txRegister).add(txStr);
         } else {
-            List<String> txHexs = new ArrayList<>();
-            txHexs.add(txHex);
-            moduleVerifyMap.put(txRegister, txHexs);
+            List<String> txStrList = new ArrayList<>();
+            txStrList.add(txStr);
+            moduleVerifyMap.put(txRegister, txStrList);
         }
     }
 }

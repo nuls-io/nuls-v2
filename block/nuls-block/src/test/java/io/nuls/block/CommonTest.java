@@ -25,7 +25,6 @@ import io.nuls.base.data.NulsDigestData;
 import io.nuls.block.constant.ChainTypeEnum;
 import io.nuls.block.model.Chain;
 import io.nuls.block.model.Node;
-import io.nuls.tools.cache.LimitHashMap;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.model.CollectionUtils;
 import org.junit.Assert;
@@ -64,18 +63,6 @@ public class CommonTest {
             String m1 = NulsDigestData.calcMerkleDigestData(list).toString();
             System.out.println(m1);
         }
-    }
-
-    @Test
-    public void test() {
-        LimitHashMap map = new LimitHashMap(100);
-        long start = System.currentTimeMillis();
-        for (int i = 0; i < 20000000; i++) {
-            map.put(i, "hello" + i);
-        }
-        long end = System.currentTimeMillis();
-        System.out.println(end - start);
-        System.out.println(map.size());
     }
 
     @Test
@@ -136,21 +123,6 @@ public class CommonTest {
     }
 
     @Test
-    public void testLock() {
-        for (int i = 0; i < 10; i++) {
-            try {
-                if (true) {
-                    System.out.println("22222222222222");
-                    throw new RuntimeException();
-                }
-                System.out.println("888888888");
-            } finally {
-                System.out.println("1111111111111");
-            }
-        }
-    }
-
-    @Test
     public void testLock1() {
         StampedLock lock = new StampedLock();
         long lock1 = lock.writeLock();
@@ -187,42 +159,5 @@ public class CommonTest {
         clone.pop();
         Assert.assertEquals(1, clone.size());
         Assert.assertEquals(4, list.size());
-    }
-
-    @Test
-    public void test4() {
-        TreeSet<Chain> chains = new TreeSet<>(Chain.COMPARATOR);
-        chains.forEach(e -> e.setType(ChainTypeEnum.FORK));
-        SortedSet<Chain> ss = Collections.emptySortedSet();
-        ss.forEach(e -> e.setType(ChainTypeEnum.FORK));
-    }
-
-    @Test
-    public void test5() {
-        {
-            SortedSet<Node> nodes = new TreeSet<>(NODE_COMPARATOR);
-            Random random = new Random();
-            long l = System.currentTimeMillis();
-            for (int i = 0; i < 10000000; i++) {
-                nodes.add(getNode(random.nextInt()));
-            }
-            System.out.println("SortedSet-"+(System.currentTimeMillis() - l));
-        }
-        {
-            List<Node> nodes = new ArrayList<>();
-            Random random = new Random();
-            long l = System.currentTimeMillis();
-            for (int i = 0; i < 10000000; i++) {
-                nodes.add(getNode(random.nextInt()));
-            }
-            nodes.sort(NODE_COMPARATOR);
-            System.out.println("List-"+(System.currentTimeMillis() - l));
-        }
-    }
-
-    private Node getNode(int credit){
-        Node node = new Node();
-        node.setCredit(credit);
-        return node;
     }
 }

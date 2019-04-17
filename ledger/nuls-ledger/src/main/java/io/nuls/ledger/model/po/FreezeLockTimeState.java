@@ -30,49 +30,35 @@ import io.nuls.base.basic.NulsOutputStreamBuffer;
 import io.nuls.base.data.BaseNulsData;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.parse.SerializeUtils;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
 
 import java.io.IOException;
 import java.math.BigInteger;
 
 /**
  * Created by wangkun23 on 2018/11/28.
+ * @author lanjinsheng
  */
-@ToString
-@NoArgsConstructor
 public class FreezeLockTimeState extends BaseNulsData {
     /**
      * 交易的hash值
      */
-    @Setter
-    @Getter
     private String txHash;
     /**
      * 交易的nonce值
      */
-    @Setter
-    @Getter
     private String nonce;
 
     /**
      * 锁定金额
      */
-    @Setter
-    @Getter
     private BigInteger amount;
 
     /**
      * 锁定时间
      */
-    @Setter
-    @Getter
     private long lockTime;
 
-    @Setter
-    @Getter
+
     private long createTime;
 
     @Override
@@ -102,5 +88,45 @@ public class FreezeLockTimeState extends BaseNulsData {
         size += SerializeUtils.sizeOfUint48();
         size += SerializeUtils.sizeOfUint48();
         return size;
+    }
+
+    public String getTxHash() {
+        return txHash;
+    }
+
+    public void setTxHash(String txHash) {
+        this.txHash = txHash;
+    }
+
+    public String getNonce() {
+        return nonce;
+    }
+
+    public void setNonce(String nonce) {
+        this.nonce = nonce;
+    }
+
+    public BigInteger getAmount() {
+        return amount;
+    }
+
+    public void setAmount(BigInteger amount) {
+        this.amount = amount;
+    }
+
+    public long getLockTime() {
+        return lockTime;
+    }
+
+    public void setLockTime(long lockTime) {
+        this.lockTime = lockTime;
+    }
+
+    public long getCreateTime() {
+        return createTime;
+    }
+
+    public void setCreateTime(long createTime) {
+        this.createTime = createTime;
     }
 }

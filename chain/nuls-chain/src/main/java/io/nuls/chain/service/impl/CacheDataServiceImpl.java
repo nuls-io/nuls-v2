@@ -177,7 +177,7 @@ public class CacheDataServiceImpl implements CacheDataService {
                 chainAssets.put(CmRuntimeInfo.getChainAssetKey(toChainId, assetKey), 1);
                 assets.put(assetKey, 1);
             }
-            assets.put(CmRuntimeInfo.getMainAsset(), 1);
+            assets.put(CmRuntimeInfo.getMainAssetKey(), 1);
             chainAssets.put(CmRuntimeInfo.getMainChainAssetKey(), 1);
             blockChains.put(CmRuntimeInfo.getMainChainId(), 1);
         }
@@ -275,13 +275,13 @@ public class CacheDataServiceImpl implements CacheDataService {
             saveBlockHeight = new BlockHeight();
         } else {
             if (saveBlockHeight.getBlockHeight() > blockHeight) {
-                LoggerUtil.Log.error("Data conflict,dbHeight{},toBkHeigh={}", saveBlockHeight.getBlockHeight(), blockHeight);
+                LoggerUtil.logger().error("Data conflict,dbHeight{},toBkHeigh={}", saveBlockHeight.getBlockHeight(), blockHeight);
                 throw new Exception("Data conflict,Block height error.");
             }
         }
 
         if (!saveBlockHeight.isCommit()) {
-            LoggerUtil.Log.error("Data conflict,Block is unCommit error.chainId={},blockHeight={}", chainId, blockHeight);
+            LoggerUtil.logger().error("Data conflict,Block is unCommit error.chainId={},blockHeight={}", chainId, blockHeight);
             throw new Exception("Data conflict,Block is unCommit error.");
         }
 

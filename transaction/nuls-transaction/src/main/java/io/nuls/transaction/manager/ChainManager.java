@@ -28,20 +28,17 @@ import ch.qos.logback.classic.Level;
 import io.nuls.db.constant.DBErrorCode;
 import io.nuls.db.service.RocksDBService;
 import io.nuls.tools.core.annotation.Autowired;
-import io.nuls.tools.core.annotation.Service;
+import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.log.logback.LoggerBuilder;
 import io.nuls.tools.log.logback.NulsLogger;
 import io.nuls.transaction.constant.TxConfig;
 import io.nuls.transaction.constant.TxConstant;
 import io.nuls.transaction.constant.TxDBConstant;
 import io.nuls.transaction.model.bo.Chain;
-import io.nuls.transaction.model.bo.TxRegister;
 import io.nuls.transaction.model.bo.config.ConfigBean;
-import io.nuls.transaction.storage.rocksdb.ConfigStorageService;
+import io.nuls.transaction.storage.ConfigStorageService;
 import io.nuls.transaction.utils.queue.entity.PersistentQueue;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -54,7 +51,7 @@ import static io.nuls.transaction.utils.LoggerUtil.Log;
  * @author qinyifeng
  * @date 2018/12/11
  */
-@Service
+@Component
 public class ChainManager {
 
     @Autowired
@@ -68,33 +65,37 @@ public class ChainManager {
 
     private Map<Integer, Chain> chainMap = new ConcurrentHashMap<>();
 
+
+
     /**
      * 初始化并启动链
      * Initialize and start the chain
      */
-    public void runChain() throws Exception {
+    public void initChain() throws Exception {
         Map<Integer, ConfigBean> configMap = configChain();
         if (configMap == null || configMap.size() == 0) {
             return;
         }
-        /*
-        根据配置信息创建初始化链
-        Initialize chains based on configuration information
-        */
         for (Map.Entry<Integer, ConfigBean> entry : configMap.entrySet()) {
             Chain chain = new Chain();
             int chainId = entry.getKey();
             chain.setConfig(entry.getValue());
             initLogger(chain);
-            /*
-            初始化链数据库表
-            Initialize linked database tables
-            */
             initTable(chain);
-            initCache(chain);
-            initTx(chain);
-            schedulerManager.createTransactionScheduler(chain);
             chainMap.put(chainId, chain);
+        }
+    }
+
+    /**
+     * 初始化并启动链
+     * Initialize and start the chain
+     */
+    public void runChain() throws Exception {
+
+        for (Chain chain: chainMap.values()) {
+            initCache(chain);
+            schedulerManager.createTransactionScheduler(chain);
+            chainMap.put(chain.getChainId(), chain);
         }
     }
 
@@ -131,7 +132,10 @@ public class ChainManager {
                 if (configBean == null) {
                     return null;
                 }
-                configMap.put(configBean.getChainId(), configBean);
+                boolean saveSuccess = configService.save(configBean,configBean.getChainId());
+                if(saveSuccess){
+                    configMap.put(configBean.getChainId(), configBean);
+                }
             }
             return configMap;
         } catch (Exception e) {
@@ -173,11 +177,6 @@ public class ChainManager {
             Verified transaction
             */
             RocksDBService.createTable(TxDBConstant.DB_TRANSACTION_CACHE + chainId);
-           /* String area = TxDBConstant.DB_TRANSACTION_CACHE + chainId;
-            if(RocksDBService.existTable(area)){
-                RocksDBService.destroyTable(area);
-            }
-            RocksDBService.createTable(area);*/
         } catch (Exception e) {
             if (!DBErrorCode.DB_TABLE_EXIST.equals(e.getMessage())) {
                 logger.error(e.getMessage());
@@ -194,41 +193,16 @@ public class ChainManager {
     private void initCache(Chain chain) throws Exception {
         chain.setUnverifiedQueue(new PersistentQueue(TxConstant.TX_UNVERIFIED_QUEUE_PREFIX + chain.getChainId(),
                 chain.getConfig().getTxUnverifiedQueueSize()));
-//        chain.setOrphanContainer(new LimitHashMap(chain.getConfig().getOrphanContainerSize()));
     }
 
     private void initLogger(Chain chain) {
-        /*
-         * 共识模块日志文件对象创建,如果一条链有多类日志文件，可在此添加
-         * Creation of Log File Object in Consensus Module，If there are multiple log files in a chain, you can add them here
-         * */
-        List<String> sqlPackageNames = new ArrayList<>();
-//        sqlPackageNames.add("org.apache.ibatis");
-//        sqlPackageNames.add("java.sql");
-//        sqlPackageNames.add("io.nuls.transaction.storage.h2.impl.mapper");
-
-        NulsLogger txLogger = LoggerBuilder.getLogger(String.valueOf(chain.getConfig().getChainId()), TxConstant.LOG_TX, sqlPackageNames, Level.DEBUG, Level.DEBUG);
+        NulsLogger txLogger = LoggerBuilder.getLogger(String.valueOf(chain.getConfig().getChainId()), TxConstant.LOG_TX, Level.DEBUG, Level.DEBUG);
         chain.getLoggerMap().put(TxConstant.LOG_TX, txLogger);
         NulsLogger txProcessLogger = LoggerBuilder.getLogger(String.valueOf(chain.getConfig().getChainId()), TxConstant.LOG_NEW_TX_PROCESS, Level.DEBUG, Level.DEBUG);
         chain.getLoggerMap().put(TxConstant.LOG_NEW_TX_PROCESS, txProcessLogger);
         NulsLogger txMessageLogger = LoggerBuilder.getLogger(String.valueOf(chain.getConfig().getChainId()), TxConstant.LOG_TX_MESSAGE, Level.DEBUG, Level.DEBUG);
         chain.getLoggerMap().put(TxConstant.LOG_TX_MESSAGE, txMessageLogger);
 
-    }
-
-    private void initTx(Chain chain) {
-        //todo 需要处理: 作为友链时,不会有此交易,友链有自己的跨链交易和协议转换机制
-        TxRegister txRegister = new TxRegister();
-        txRegister.setModuleCode(txConfig.getModuleCode());
-        txRegister.setTxType(TxConstant.TX_TYPE_CROSS_CHAIN_TRANSFER);
-        txRegister.setModuleValidator(TxConstant.TX_MODULE_VALIDATOR);
-        txRegister.setValidator(TxConstant.CROSS_TRANSFER_VALIDATOR);
-        txRegister.setCommit(TxConstant.CROSS_TRANSFER_COMMIT);
-        txRegister.setRollback(TxConstant.CROSS_TRANSFER_ROLLBACK);
-        txRegister.setSystemTx(false);
-        txRegister.setUnlockTx(false);
-        txRegister.setVerifySignature(true);
-        TxManager.register(chain, txRegister);
     }
 
     public Map<Integer, Chain> getChainMap() {

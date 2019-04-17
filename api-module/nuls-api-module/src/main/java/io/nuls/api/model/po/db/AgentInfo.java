@@ -1,5 +1,7 @@
 package io.nuls.api.model.po.db;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import java.math.BigInteger;
 
 public class AgentInfo extends TxDataInfo {
@@ -48,13 +50,14 @@ public class AgentInfo extends TxDataInfo {
 
     private BigInteger agentReward;
 
-    private boolean isNew;
-
     private long roundPackingTime;
 
     private int version;
 
     private int type;
+
+    @JsonIgnore
+    private boolean isNew;
 
     public AgentInfo() {
 

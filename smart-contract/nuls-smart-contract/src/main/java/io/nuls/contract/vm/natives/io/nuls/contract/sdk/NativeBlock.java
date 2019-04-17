@@ -33,7 +33,7 @@ import io.nuls.contract.vm.Result;
 import io.nuls.contract.vm.code.MethodCode;
 import io.nuls.contract.vm.code.VariableType;
 import io.nuls.contract.vm.natives.NativeMethod;
-import org.spongycastle.util.encoders.Hex;
+import io.nuls.tools.crypto.HexUtil;
 
 import static io.nuls.contract.vm.natives.NativeMethod.NOT_SUPPORT_NATIVE;
 import static io.nuls.contract.vm.natives.NativeMethod.SUPPORT_NATIVE;
@@ -137,7 +137,7 @@ public class NativeBlock {
             frame.heap.putField(objectRef, "packingAddress", packingAddress);
             String stateRoot = null;
             if (blockHeaderDto.getStateRoot() != null) {
-                stateRoot = Hex.toHexString(blockHeaderDto.getStateRoot());
+                stateRoot = HexUtil.encode(blockHeaderDto.getStateRoot());
             }
             frame.heap.putField(objectRef, "stateRoot", frame.heap.newString(stateRoot));
             frame.heap.putStatic(VariableType.BLOCK_HEADER_TYPE.getType(), fieldName, objectRef);

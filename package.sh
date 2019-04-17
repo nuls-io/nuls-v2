@@ -360,7 +360,7 @@ packageModule() {
 	if [ ! -d ./$1 ]; then
 		return 0
 	fi
-	if [ `pwd` == "${MODULES_PATH}" ]; then
+	if [ `pwd` == "${RELEASE_PATH}" ]; then
 		return 0;
 	fi
 	cd ./$1
@@ -372,7 +372,7 @@ packageModule() {
 			exit 0;
 		fi
 		managed=`getModuleItem "Managed"`;
-		if [ $managed != "-1" ];
+		if [ "${managed}" != "-1" ];
 		then
             checkModuleItem "APP_NAME" "$1"
             checkModuleItem "VERSION" "$1"
@@ -380,7 +380,7 @@ packageModule() {
 		    log "build $1"
             copyJarToModules $1
             copyModuleNcfToModules $1
-            if [ $managed == "1" ]; then
+            if [ "${managed}" == "1" ]; then
                 moduleName=`getModuleItem "APP_NAME"`;
                 managedModules[${#managedModules[@]}]="$moduleName"
             fi
@@ -431,8 +431,8 @@ if [ -n "${DOMOCK}" ]; then
 	chmod u+x "${MODULES_BIN_PATH}/start.sh"
 	cp "${BUILD_PATH}/stop-mykernel.sh" "${MODULES_BIN_PATH}/stop.sh"
 	chmod u+x "${MODULES_BIN_PATH}/stop.sh"
-	cp "${BUILD_PATH}/default-config.json" "${MODULES_BIN_PATH}/"
-	chmod u+r "${MODULES_BIN_PATH}/default-config.json"
+	cp "${BUILD_PATH}/default-config.ncf" "${MODULES_BIN_PATH}/"
+	chmod u+r "${MODULES_BIN_PATH}/default-config.ncf"
 	cp "${BUILD_PATH}/cmd.sh" "${MODULES_BIN_PATH}/"
 	chmod u+x "${MODULES_BIN_PATH}/cmd.sh"
 	cp "${BUILD_PATH}/test.sh" "${MODULES_BIN_PATH}/"

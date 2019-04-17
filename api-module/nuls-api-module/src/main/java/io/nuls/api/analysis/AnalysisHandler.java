@@ -269,7 +269,7 @@ public class AnalysisHandler {
 
         PunishLogInfo punishLog = new PunishLogInfo();
         punishLog.setTxHash(tx.getHash().getDigestHex());
-        punishLog.setType(ApiConstant.PUTLISH_RED);
+        punishLog.setType(ApiConstant.PUBLISH_RED);
         punishLog.setAddress(AddressTool.getStringAddressByBytes(data.getAddress()));
         if (data.getReasonCode() == ApiConstant.TRY_FORK) {
             punishLog.setReason("Trying to bifurcate many times");

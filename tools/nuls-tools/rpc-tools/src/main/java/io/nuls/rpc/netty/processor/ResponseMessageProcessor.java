@@ -44,7 +44,7 @@ public class ResponseMessageProcessor {
         Message message = MessageUtil.basicMessage(MessageType.NegotiateConnection);
         message.setMessageData(MessageUtil.defaultNegotiateConnection());
 
-        ResponseContainer responseContainer = RequestContainer.putRequest(message.getMessageId());
+        ResponseContainer responseContainer = RequestContainer.putRequest(message.getMessageID());
 
         ConnectManager.sendMessage(channel, JSONUtils.obj2json(message));
 
@@ -54,7 +54,7 @@ public class ResponseMessageProcessor {
             //Timeout Error
             return false;
         } finally {
-            RequestContainer.removeResponseContainer(message.getMessageId());
+            RequestContainer.removeResponseContainer(message.getMessageID());
         }
     }
 
@@ -74,7 +74,7 @@ public class ResponseMessageProcessor {
         Message message = MessageUtil.basicMessage(MessageType.NegotiateConnection);
         message.setMessageData(MessageUtil.defaultNegotiateConnection());
 
-        ResponseContainer responseContainer = RequestContainer.putRequest(message.getMessageId());
+        ResponseContainer responseContainer = RequestContainer.putRequest(message.getMessageID());
 
         ConnectManager.sendMessage(channel, JSONUtils.obj2json(message));
 
@@ -84,7 +84,7 @@ public class ResponseMessageProcessor {
             //Timeout Error
             return false;
         } finally {
-            RequestContainer.removeResponseContainer(message.getMessageId());
+            RequestContainer.removeResponseContainer(message.getMessageID());
         }
     }
 
@@ -109,7 +109,7 @@ public class ResponseMessageProcessor {
         Create Request for Synchronization
          */
         Request request = MessageUtil.defaultRequest();
-        request.getRequestMethods().put("registerAPI", ConnectManager.LOCAL);
+        request.getRequestMethods().put("RegisterAPI", ConnectManager.LOCAL);
         Message message = MessageUtil.basicMessage(MessageType.Request);
         message.setMessageData(request);
 
@@ -122,7 +122,7 @@ public class ResponseMessageProcessor {
             throw new Exception("Kernel not available");
         }
 
-        ResponseContainer responseContainer = RequestContainer.putRequest(message.getMessageId());
+        ResponseContainer responseContainer = RequestContainer.putRequest(message.getMessageID());
 
         /*
         发送请求
@@ -141,7 +141,7 @@ public class ResponseMessageProcessor {
         int tryCount = 0;
         while (!response.isSuccess() && tryCount < Constants.TRY_COUNT) {
             Log.info("向核心注册消息发送失败第" + (tryCount + 1) + "次");
-            responseContainer = RequestContainer.putRequest(message.getMessageId());
+            responseContainer = RequestContainer.putRequest(message.getMessageID());
             ConnectManager.sendMessage(channel, JSONUtils.obj2json(message));
             response = receiveResponse(responseContainer, Constants.TIMEOUT_TIMEMILLIS);
             tryCount++;
@@ -155,7 +155,7 @@ public class ResponseMessageProcessor {
         /*
         当有新模块注册到Kernel(Manager)时，需要同步连接信息
          */
-        requestAndInvoke(ModuleE.KE.abbr, "registerAPI", JSONUtils.json2map(JSONUtils.obj2json(ConnectManager.LOCAL)), "0", "1", callbackInvoke);
+        requestAndInvoke(ModuleE.KE.abbr, "RegisterAPI", JSONUtils.json2map(JSONUtils.obj2json(ConnectManager.LOCAL)), "0", "1", callbackInvoke);
         Log.debug("Sync manager success. " + JSONUtils.obj2json(ConnectManager.ROLE_MAP));
 
         /*
@@ -285,6 +285,22 @@ public class ResponseMessageProcessor {
         }
     }
 
+    /**
+     * 发送Request，不接收返回
+     * Send Request and wait for Response
+     *
+     * @param role       远程方法所属的角色，The role of remote method
+     * @param request    远程方法的命令，Command of the remote method
+     * @return 远程方法的返回结果，Response of the remote method
+     * @throws Exception 请求超时（1分钟），timeout (1 minute)
+     */
+    public static String requestOnly(String role, Request request)throws Exception{
+        Message message = MessageUtil.basicMessage(MessageType.Request);
+        message.setMessageData(request);
+        Channel channel = ConnectManager.getConnectByRole(role);
+        ConnectManager.sendMessage(channel, JSONUtils.obj2json(message));
+        return message.getMessageID();
+    }
 
     /**
      * 发送Request，返回该Request的messageId
@@ -295,14 +311,14 @@ public class ResponseMessageProcessor {
      * @return messageId，用以取消订阅 / messageId, used to unsubscribe
      * @throws Exception JSON格式转换错误、连接失败 / JSON format conversion error, connection failure
      */
-    public static ResponseContainer sendRequest(String role, Request request) throws Exception {
+    private static ResponseContainer sendRequest(String role, Request request) throws Exception {
 
         Message message = MessageUtil.basicMessage(MessageType.Request);
         message.setMessageData(request);
 
         Channel channel = ConnectManager.getConnectByRole(role);
 
-        ResponseContainer responseContainer = RequestContainer.putRequest(message.getMessageId());
+        ResponseContainer responseContainer = RequestContainer.putRequest(message.getMessageID());
 
         ConnectManager.sendMessage(channel, JSONUtils.obj2json(message));
         if (ConnectManager.isPureDigital(request.getSubscriptionPeriod())
@@ -311,7 +327,7 @@ public class ResponseMessageProcessor {
             如果是需要重复发送的消息（订阅消息），记录messageId与客户端的对应关系，用于取消订阅
             If it is a message (subscription message) that needs to be sent repeatedly, record the relationship between the messageId and the WsClient
              */
-            ConnectManager.MSG_ID_KEY_CHANNEL_MAP.put(message.getMessageId(), channel);
+            ConnectManager.MSG_ID_KEY_CHANNEL_MAP.put(message.getMessageID(), channel);
         }
 
         return responseContainer;

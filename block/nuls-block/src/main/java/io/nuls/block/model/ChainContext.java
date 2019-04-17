@@ -23,7 +23,7 @@
 package io.nuls.block.model;
 
 import io.nuls.base.data.Block;
-import io.nuls.block.cache.CacheHandler;
+import io.nuls.block.cache.BlockCacher;
 import io.nuls.block.cache.SmallBlockCacher;
 import io.nuls.block.constant.RunningStatusEnum;
 import io.nuls.block.manager.BlockChainManager;
@@ -31,9 +31,6 @@ import io.nuls.block.thread.monitor.TxGroupRequestor;
 import io.nuls.block.utils.LoggerUtil;
 import io.nuls.tools.log.logback.NulsLogger;
 import io.nuls.tools.protocol.Protocol;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
 
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -47,111 +44,201 @@ import java.util.concurrent.locks.StampedLock;
  * @version 1.0
  * @date 18-11-20 上午10:46
  */
-@NoArgsConstructor
 public class ChainContext {
     /**
      * 代表该链的运行状态
      */
-    @Getter
     private RunningStatusEnum status;
 
     /**
      * 是否继续本次下载，中途发生异常置为false
      */
-    @Getter
-    @Setter
     private boolean doSyn;
 
     /**
      * 链ID
      */
-    @Getter
-    @Setter
     private int chainId;
 
     /**
      * 当前协议版本
      */
-    @Getter
-    @Setter
     private short version;
 
     /**
      * 所有协议版本(包括消息、交易映射)
      */
-    @Getter
-    @Setter
     private Map<Short, Protocol> protocolsMap;
 
     /**
      * 该链的系统交易类型
      */
-    @Getter
-    @Setter
     private List<Integer> systemTransactionType;
 
     /**
      * 最新区块
      */
-    @Getter
-    @Setter
     private Block latestBlock;
 
     /**
      * 创世区块
      */
-    @Getter
-    @Setter
     private Block genesisBlock;
 
     /**
      * 主链
      */
-    @Getter
-    @Setter
     private Chain masterChain;
 
     /**
      * 链的运行时参数
      */
-    @Getter
-    @Setter
     private ChainParameters parameters;
 
     /**
      * 获取锁对象
      * 清理数据库,区块同步,分叉链维护,孤儿链维护获取该锁
      */
-    @Getter
     private StampedLock lock;
 
     /**
      * 记录通用日志
      */
-    @Getter
-    @Setter
     private NulsLogger commonLog;
 
     /**
      * 记录消息收发日志
      */
-    @Getter
-    @Setter
     private NulsLogger messageLog;
 
     /**
      * 分叉链、孤儿链中重复hash计数器
      */
-    @Getter
     private Map<String, AtomicInteger> duplicateBlockMap;
 
     /**
      * 记录某个打包地址是否已经进行过分叉通知，每个地址只通知一次
      */
-    @Getter
     private List<byte []> packingAddressList;
 
+    public RunningStatusEnum getStatus() {
+        return status;
+    }
+
+    public boolean isDoSyn() {
+        return doSyn;
+    }
+
+    public void setDoSyn(boolean doSyn) {
+        this.doSyn = doSyn;
+    }
+
+    public int getChainId() {
+        return chainId;
+    }
+
+    public void setChainId(int chainId) {
+        this.chainId = chainId;
+    }
+
+    public short getVersion() {
+        return version;
+    }
+
+    public void setVersion(short version) {
+        this.version = version;
+    }
+
+    public Map<Short, Protocol> getProtocolsMap() {
+        return protocolsMap;
+    }
+
+    public void setProtocolsMap(Map<Short, Protocol> protocolsMap) {
+        this.protocolsMap = protocolsMap;
+    }
+
+    public List<Integer> getSystemTransactionType() {
+        return systemTransactionType;
+    }
+
+    public void setSystemTransactionType(List<Integer> systemTransactionType) {
+        this.systemTransactionType = systemTransactionType;
+    }
+
+    public Block getLatestBlock() {
+        return latestBlock;
+    }
+
+    public void setLatestBlock(Block latestBlock) {
+        this.latestBlock = latestBlock;
+    }
+
+    public Block getGenesisBlock() {
+        return genesisBlock;
+    }
+
+    public void setGenesisBlock(Block genesisBlock) {
+        this.genesisBlock = genesisBlock;
+    }
+
+    public Chain getMasterChain() {
+        return masterChain;
+    }
+
+    public void setMasterChain(Chain masterChain) {
+        this.masterChain = masterChain;
+    }
+
+    public ChainParameters getParameters() {
+        return parameters;
+    }
+
+    public void setParameters(ChainParameters parameters) {
+        this.parameters = parameters;
+    }
+
+    public StampedLock getLock() {
+        return lock;
+    }
+
+    public void setLock(StampedLock lock) {
+        this.lock = lock;
+    }
+
+    public NulsLogger getCommonLog() {
+        return commonLog;
+    }
+
+    public void setCommonLog(NulsLogger commonLog) {
+        this.commonLog = commonLog;
+    }
+
+    public NulsLogger getMessageLog() {
+        return messageLog;
+    }
+
+    public void setMessageLog(NulsLogger messageLog) {
+        this.messageLog = messageLog;
+    }
+
+    public Map<String, AtomicInteger> getDuplicateBlockMap() {
+        return duplicateBlockMap;
+    }
+
+    public void setDuplicateBlockMap(Map<String, AtomicInteger> duplicateBlockMap) {
+        this.duplicateBlockMap = duplicateBlockMap;
+    }
+
+    public List<byte[]> getPackingAddressList() {
+        return packingAddressList;
+    }
+
+    public void setPackingAddressList(List<byte[]> packingAddressList) {
+        this.packingAddressList = packingAddressList;
+    }
+
     public synchronized void setStatus(RunningStatusEnum status) {
+        commonLog.info("status changed:" + this.status + "->" + status);
         this.status = status;
     }
 
@@ -160,6 +247,7 @@ public class ChainContext {
     }
 
     public void init() {
+        LoggerUtil.init(chainId, parameters.getLogLevel());
         this.setStatus(RunningStatusEnum.INITIALIZING);
         packingAddressList = new CopyOnWriteArrayList<>();
         duplicateBlockMap = new HashMap<>();
@@ -167,10 +255,9 @@ public class ChainContext {
         version = 1;
         doSyn = true;
         lock = new StampedLock();
-        LoggerUtil.init(chainId, parameters.getLogLevel());
         //各类缓存初始化
         SmallBlockCacher.init(chainId);
-        CacheHandler.init(chainId);
+        BlockCacher.init(chainId);
         BlockChainManager.init(chainId);
         TxGroupRequestor.init(chainId);
     }

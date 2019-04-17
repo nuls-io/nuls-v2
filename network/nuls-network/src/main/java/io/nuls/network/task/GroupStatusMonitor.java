@@ -28,10 +28,9 @@ import io.nuls.network.constant.NetworkConstant;
 import io.nuls.network.manager.NodeGroupManager;
 import io.nuls.network.model.NodeGroup;
 import io.nuls.network.netty.container.NodesContainer;
+import io.nuls.network.utils.LoggerUtil;
 
 import java.util.List;
-
-import static io.nuls.network.utils.LoggerUtil.Log;
 
 /**
  * @author lan
@@ -65,9 +64,9 @@ public class GroupStatusMonitor implements Runnable {
                 //TODO:
                 //发布网络状态事件
                 nodesContainer.setStatus(NodeGroup.WAIT2);
-                Log.info("ChainId={} NET STATUS UPDATE TO OK", nodeGroup.getChainId());
+                LoggerUtil.logger().info("ChainId={} NET STATUS UPDATE TO OK", nodeGroup.getChainId());
             } else {
-                Log.info("ChainId={} NET IS IN INIT", nodeGroup.getChainId());
+                LoggerUtil.logger().info("ChainId={} NET IS IN INIT", nodeGroup.getChainId());
             }
         } else if (NodeGroup.WAIT2 == nodesContainer.getStatus()) {
             if (nodeGroup.isActive(false)) {
@@ -77,7 +76,7 @@ public class GroupStatusMonitor implements Runnable {
             if (!nodeGroup.isActive(false)) {
                 //发布网络状态事件
                 nodesContainer.setStatus(NodeGroup.WAIT2);
-                Log.info("ChainId={} NET STATUS UPDATE TO WAITING", nodeGroup.getChainId());
+                LoggerUtil.logger().info("ChainId={} NET STATUS UPDATE TO WAITING", nodeGroup.getChainId());
             }
         }
     }

@@ -37,9 +37,9 @@ import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.util.AttributeKey;
 import io.nuls.network.model.Node;
 import io.nuls.network.netty.handler.ClientChannelHandler;
+import io.nuls.network.utils.LoggerUtil;
 
 import static io.nuls.network.constant.NetworkConstant.CONNETCI_TIME_OUT;
-import static io.nuls.network.utils.LoggerUtil.Log;
 
 /**
  * NettyClient
@@ -91,7 +91,7 @@ public class NettyClient {
             future.await();
             return future.isSuccess();
         } catch (Exception e) {
-            Log.error("{}", e);
+            LoggerUtil.logger().error("{}", e);
             if (node.getChannel() != null) {
                 node.getChannel().close();
             }

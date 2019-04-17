@@ -77,6 +77,10 @@ public interface CommandConstant {
      */
     String LATEST_BLOCK_HEADER = "latestBlockHeader";
     /**
+     * 获取最新区块头PO
+     */
+    String LATEST_BLOCK_HEADER_PO = "latestBlockHeaderPo";
+    /**
      * 获取最新区块
      */
     String LATEST_BLOCK = "latestBlock";
@@ -85,6 +89,10 @@ public interface CommandConstant {
      */
     String GET_BLOCK_HEADER_BY_HEIGHT = "getBlockHeaderByHeight";
     /**
+     * 根据区块高度获取区块头PO
+     */
+    String GET_BLOCK_HEADER_PO_BY_HEIGHT = "getBlockHeaderPoByHeight";
+    /**
      * 根据区块高度获取区块
      */
     String GET_BLOCK_BY_HEIGHT = "getBlockByHeight";
@@ -92,6 +100,10 @@ public interface CommandConstant {
      * 根据区块HASH获取区块头
      */
     String GET_BLOCK_HEADER_BY_HASH = "getBlockHeaderByHash";
+    /**
+     * 根据区块HASH获取区块头PO
+     */
+    String GET_BLOCK_HEADER_PO_BY_HASH = "getBlockHeaderPoByHash";
     /**
      * 根据区块HASH获取区块
      */

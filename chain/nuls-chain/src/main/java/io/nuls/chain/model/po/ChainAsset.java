@@ -5,7 +5,6 @@ import io.nuls.base.basic.NulsOutputStreamBuffer;
 import io.nuls.base.data.BaseNulsData;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.parse.SerializeUtils;
-import lombok.*;
 
 import java.io.IOException;
 import java.math.BigInteger;
@@ -15,9 +14,6 @@ import java.math.BigInteger;
  * @date 2018/11/12
  * @description
  */
-@EqualsAndHashCode(callSuper = true)
-@Data
-@ToString
 public class ChainAsset extends BaseNulsData {
     /**
      *资产所在链
@@ -76,5 +72,53 @@ public class ChainAsset extends BaseNulsData {
         size += SerializeUtils.sizeOfBigInteger();
 
         return size;
+    }
+
+    public int getAddressChainId() {
+        return addressChainId;
+    }
+
+    public void setAddressChainId(int addressChainId) {
+        this.addressChainId = addressChainId;
+    }
+
+    public int getAssetChainId() {
+        return assetChainId;
+    }
+
+    public void setAssetChainId(int assetChainId) {
+        this.assetChainId = assetChainId;
+    }
+
+    public int getAssetId() {
+        return assetId;
+    }
+
+    public void setAssetId(int assetId) {
+        this.assetId = assetId;
+    }
+
+    public BigInteger getInitNumber() {
+        return initNumber;
+    }
+
+    public void setInitNumber(BigInteger initNumber) {
+        this.initNumber = initNumber;
+    }
+
+    public BigInteger getInNumber() {
+        return inNumber;
+    }
+
+    public void setInNumber(BigInteger inNumber) {
+        this.inNumber = inNumber;
+    }
+
+    public BigInteger getOutNumber() {
+        return outNumber;
+    }
+
+    public void setOutNumber(BigInteger outNumber) {
+        this.outNumber = outNumber;
     }
 }

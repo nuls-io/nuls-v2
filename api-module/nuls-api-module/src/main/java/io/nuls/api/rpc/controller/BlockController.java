@@ -21,8 +21,8 @@
 package io.nuls.api.rpc.controller;
 
 import io.nuls.api.analysis.WalletRpcHandler;
-import io.nuls.api.db.BlockService;
-import io.nuls.api.db.MongoDBService;
+import io.nuls.api.db.mongo.MongoBlockServiceImpl;
+import io.nuls.api.db.mongo.MongoDBService;
 import io.nuls.api.manager.CacheManager;
 import io.nuls.api.model.po.db.BlockHeaderInfo;
 import io.nuls.api.model.po.db.BlockInfo;
@@ -47,19 +47,25 @@ public class BlockController {
     @Autowired
     private MongoDBService dbService;
     @Autowired
-    private BlockService blockService;
+    private MongoBlockServiceImpl mongoBlockServiceImpl;
     @Autowired
     private RollbackService rollbackBlock;
 
     @RpcMethod("getBestBlockHeader")
     public RpcResult getBestInfo(List<Object> params) {
         VerifyUtils.verifyParams(params, 1);
-        int chainId = (int) params.get(0);
+        int chainId;
+        try {
+            chainId = (int) params.get(0);
+        } catch (Exception e) {
+            return RpcResult.paramError();
+        }
+
         if (!CacheManager.isChainExist(chainId)) {
             return RpcResult.dataNotFound();
         }
 
-        BlockHeaderInfo localBestBlockHeader = blockService.getBestBlockHeader(chainId);
+        BlockHeaderInfo localBestBlockHeader = mongoBlockServiceImpl.getBestBlockHeader(chainId);
         if (localBestBlockHeader == null) {
             return RpcResult.dataNotFound();
         }
@@ -69,15 +75,21 @@ public class BlockController {
     @RpcMethod("getHeaderByHeight")
     public RpcResult getHeaderByHeight(List<Object> params) {
         VerifyUtils.verifyParams(params, 2);
-        int chainId = (int) params.get(0);
-        long height = Long.parseLong("" + params.get(1));
+        int chainId;
+        long height;
+        try {
+            chainId = (int) params.get(0);
+            height = Long.parseLong("" + params.get(1));
+        } catch (Exception e) {
+            return RpcResult.paramError();
+        }
         if (height < 0) {
-            height = 0;
+            return RpcResult.paramError("[height] is invalid");
         }
         if (!CacheManager.isChainExist(chainId)) {
             return RpcResult.dataNotFound();
         }
-        BlockHeaderInfo header = blockService.getBlockHeader(chainId, height);
+        BlockHeaderInfo header = mongoBlockServiceImpl.getBlockHeader(chainId, height);
         if (header == null) {
             return RpcResult.dataNotFound();
         }
@@ -87,8 +99,14 @@ public class BlockController {
     @RpcMethod("getHeaderByHash")
     public RpcResult getHeaderByHash(List<Object> params) {
         VerifyUtils.verifyParams(params, 2);
-        int chainId = (int) params.get(0);
-        String hash = (String) params.get(1);
+        int chainId;
+        String hash;
+        try {
+            chainId = (int) params.get(0);
+            hash = (String) params.get(1);
+        } catch (Exception e) {
+            return RpcResult.paramError();
+        }
         if (!CacheManager.isChainExist(chainId)) {
             return RpcResult.dataNotFound();
         }
@@ -96,7 +114,7 @@ public class BlockController {
             return RpcResult.paramError("[hash] is required");
         }
 
-        BlockHeaderInfo header = blockService.getBlockHeaderByHash(chainId, hash);
+        BlockHeaderInfo header = mongoBlockServiceImpl.getBlockHeaderByHash(chainId, hash);
         if (header == null) {
             return RpcResult.dataNotFound();
         }
@@ -106,8 +124,14 @@ public class BlockController {
     @RpcMethod("getBlockByHash")
     public RpcResult getBlockByHash(List<Object> params) {
         VerifyUtils.verifyParams(params, 2);
-        int chainId = (int) params.get(0);
-        String hash = (String) params.get(1);
+        int chainId;
+        String hash;
+        try {
+            chainId = (int) params.get(0);
+            hash = (String) params.get(1);
+        } catch (Exception e) {
+            return RpcResult.paramError();
+        }
         if (!CacheManager.isChainExist(chainId)) {
             return RpcResult.dataNotFound();
         }
@@ -130,12 +154,21 @@ public class BlockController {
     @RpcMethod("getBlockByHeight")
     public RpcResult getBlockByHeight(List<Object> params) {
         VerifyUtils.verifyParams(params, 2);
-        int chainId = (int) params.get(0);
-        long height = Long.parseLong("" + params.get(1));
-        if (height < 0) {
-            height = 0;
+        int chainId;
+        long height;
+        try {
+            chainId = (int) params.get(0);
+            height = Long.parseLong("" + params.get(1));
+        } catch (Exception e) {
+            return RpcResult.paramError();
         }
-        BlockHeaderInfo blockHeaderInfo = blockService.getBlockHeader(chainId, height);
+        if (height < 0) {
+            return RpcResult.paramError("[height] is invalid");
+        }
+        if (!CacheManager.isChainExist(chainId)) {
+            return RpcResult.dataNotFound();
+        }
+        BlockHeaderInfo blockHeaderInfo = mongoBlockServiceImpl.getBlockHeader(chainId, height);
         if (blockHeaderInfo == null) {
             return RpcResult.dataNotFound();
         }
@@ -156,27 +189,32 @@ public class BlockController {
     @RpcMethod("getBlockHeaderList")
     public RpcResult getBlockHeaderList(List<Object> params) {
         VerifyUtils.verifyParams(params, 3);
-        int chainId = (int) params.get(0);
-        int pageIndex = (int) params.get(1);
-        int pageSize = (int) params.get(2);
+        int chainId, pageIndex, pageSize;
+        boolean filterEmptyBlocks;
+        String packingAddress = null;
+        try {
+            chainId = (int) params.get(0);
+            pageIndex = (int) params.get(1);
+            pageSize = (int) params.get(2);
+            filterEmptyBlocks = (boolean) params.get(3);
+            if (params.size() > 4) {
+                packingAddress = (String) params.get(4);
+            }
+        } catch (Exception e) {
+            return RpcResult.paramError();
+        }
         if (pageIndex <= 0) {
             pageIndex = 1;
         }
-        if (pageSize <= 0 || pageSize > 100) {
+        if (pageSize <= 0 || pageSize > 1000) {
             pageSize = 10;
-        }
-        // Whether to filter empty blocks
-        boolean filterEmptyBlocks = (boolean) params.get(3);
-        String packingAddress = null;
-        if (params.size() > 4) {
-            packingAddress = (String) params.get(4);
         }
 
         PageInfo<BlockHeaderInfo> pageInfo;
         if (!CacheManager.isChainExist(chainId)) {
             pageInfo = new PageInfo<>(pageIndex, pageSize);
         } else {
-            pageInfo = blockService.pageQuery(chainId, pageIndex, pageSize, packingAddress, filterEmptyBlocks);
+            pageInfo = mongoBlockServiceImpl.pageQuery(chainId, pageIndex, pageSize, packingAddress, filterEmptyBlocks);
         }
         RpcResult result = new RpcResult();
         result.setResult(pageInfo);

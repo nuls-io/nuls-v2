@@ -24,7 +24,9 @@
  */
 package io.nuls.rpc.model.message;
 
-import lombok.*;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
  * 取消订阅
@@ -33,18 +35,19 @@ import lombok.*;
  * @author tangyi
  * @date 2018/11/15
  */
-@ToString
+
 public class Unsubscribe {
     /**
      * An array that holds all methods that the caller wants to unsubscribe
      */
-    private String[] unsubscribeMethods;
-
+    @JsonProperty
+    private String[] UnsubscribeMethods;
+    @JsonIgnore
     public String[] getUnsubscribeMethods() {
-        return unsubscribeMethods.clone();
+        return UnsubscribeMethods.clone();
     }
-
-    public void setUnsubscribeMethods(String[] unsubscribeMethods) {
-        this.unsubscribeMethods = unsubscribeMethods.clone();
+    @JsonIgnore
+    public void setUnsubscribeMethods(String[] UnsubscribeMethods) {
+        this.UnsubscribeMethods = UnsubscribeMethods.clone();
     }
 }

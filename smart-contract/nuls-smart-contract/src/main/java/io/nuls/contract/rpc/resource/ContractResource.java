@@ -63,10 +63,10 @@ import io.nuls.tools.basic.Result;
 import io.nuls.tools.basic.VarInt;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
+import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.model.ArraysTool;
 import io.nuls.tools.model.StringUtils;
-import org.spongycastle.util.encoders.Hex;
 
 import java.io.IOException;
 import java.math.BigInteger;
@@ -129,7 +129,7 @@ public class ContractResource extends BaseCmd {
                 return failed(ContractErrorCode.NULL_PARAMETER);
             }
 
-            byte[] contractCodeBytes = Hex.decode(contractCode);
+            byte[] contractCodeBytes = HexUtil.decode(contractCode);
 
             ProgramMethod method = contractHelper.getMethodInfoByCode(chainId, ContractConstant.CONTRACT_CONSTRUCTOR, null, contractCodeBytes);
             String[][] convertArgs = null;
@@ -183,7 +183,7 @@ public class ContractResource extends BaseCmd {
                 return failed(ContractErrorCode.NULL_PARAMETER);
             }
 
-            byte[] contractCodeBytes = Hex.decode(contractCode);
+            byte[] contractCodeBytes = HexUtil.decode(contractCode);
 
             ProgramMethod method = contractHelper.getMethodInfoByCode(chainId, ContractConstant.CONTRACT_CONSTRUCTOR, null, contractCodeBytes);
             String[][] convertArgs = null;
@@ -228,7 +228,7 @@ public class ContractResource extends BaseCmd {
                     break;
                 }
                 byte[] senderBytes = AddressTool.getAddress(sender);
-                byte[] contractCodeBytes = Hex.decode(contractCode);
+                byte[] contractCodeBytes = HexUtil.decode(contractCode);
                 ProgramMethod method = contractHelper.getMethodInfoByCode(chainId, ContractConstant.CONTRACT_CONSTRUCTOR, null, contractCodeBytes);
                 String[][] convertArgs = null;
                 if (method != null) {
@@ -285,7 +285,7 @@ public class ContractResource extends BaseCmd {
                 return failed(ContractErrorCode.NULL_PARAMETER);
             }
 
-            byte[] contractCodeBytes = Hex.decode(contractCode);
+            byte[] contractCodeBytes = HexUtil.decode(contractCode);
 
             ProgramMethod method = contractHelper.getMethodInfoByCode(chainId, ContractConstant.CONTRACT_CONSTRUCTOR, null, contractCodeBytes);
             String[][] convertArgs = null;
@@ -888,7 +888,7 @@ public class ContractResource extends BaseCmd {
             if (StringUtils.isBlank(contractCode)) {
                 return failed(NULL_PARAMETER);
             }
-            byte[] contractCodeBytes = Hex.decode(contractCode);
+            byte[] contractCodeBytes = HexUtil.decode(contractCode);
             ContractInfoDto contractInfoDto = contractHelper.getConstructor(chainId, contractCodeBytes);
             if (contractInfoDto == null || contractInfoDto.getConstructor() == null) {
                 return failed(ContractErrorCode.ILLEGAL_CONTRACT);
@@ -1024,6 +1024,9 @@ public class ContractResource extends BaseCmd {
                 List<ContractTokenTransferDto> realTokenTransfers = this.filterRealTokenTransfers(chainId, tokenTransfers);
                 contractResultDto.setTokenTransfers(realTokenTransfers);
                 resultMap.put("data", contractResultDto);
+            }
+            if(!flag) {
+                return failed(msg);
             }
             return success(resultMap);
         } catch (Exception e) {
@@ -1427,7 +1430,7 @@ public class ContractResource extends BaseCmd {
             Map<String, Object> resultMap = MapUtil.createLinkedHashMap(3);
             resultMap.put("constructor", contractInfoDto.getConstructor());
             resultMap.put("isNrc20", contractInfoDto.isNrc20());
-            resultMap.put("code", Hex.encode(contractCode));
+            resultMap.put("code", HexUtil.encode(contractCode));
 
             return success();
         } catch (Exception e) {

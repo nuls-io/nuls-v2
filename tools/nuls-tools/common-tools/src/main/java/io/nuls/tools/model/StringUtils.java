@@ -99,10 +99,7 @@ public class StringUtils {
             return false;
         }
         Matcher isNum = NUMBER_PATTERN.matcher(str);
-        if (!isNum.matches()) {
-            return false;
-        }
-        return true;
+        return isNum.matches();
     }
 
     private static final Pattern GT_ZERO_NUMBER_PATTERN = Pattern.compile("([1-9][0-9]*(\\.\\d+)?)|(0\\.\\d*[1-9]+0*)");
@@ -118,10 +115,7 @@ public class StringUtils {
             return false;
         }
         Matcher isNum = GT_ZERO_NUMBER_PATTERN.matcher(str);
-        if (!isNum.matches()) {
-            return false;
-        }
-        return true;
+        return isNum.matches();
     }
 
     /**
@@ -153,10 +147,7 @@ public class StringUtils {
         }
         str = subZeroAndDot(str);
         Matcher isNum = NULS_PATTERN.matcher(str);
-        if (!isNum.matches()) {
-            return false;
-        }
-        return true;
+        return isNum.matches();
     }
 
     private static final Pattern GT_ZERO_NUMBER_LIMIT_2_PATTERN = Pattern.compile("([1-9]\\d*(\\.\\d{1,2})?)|(0\\.\\d{1,2})");
@@ -173,10 +164,7 @@ public class StringUtils {
         }
         str = subZeroAndDot(str);
         Matcher isNum = GT_ZERO_NUMBER_LIMIT_2_PATTERN.matcher(str);
-        if (!isNum.matches()) {
-            return false;
-        }
-        return true;
+        return isNum.matches();
     }
 
 

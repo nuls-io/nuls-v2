@@ -1,8 +1,6 @@
 package io.nuls.api.provider.account.facade;
 
 import io.nuls.api.provider.BaseReq;
-import lombok.AllArgsConstructor;
-import lombok.Data;
 
 /**
  * @Author: zhoulijun
@@ -11,8 +9,6 @@ import lombok.Data;
  *  通过私钥导入账户
  *  import account by private key
  */
-@Data
-@AllArgsConstructor
 public class ImportAccountByPrivateKeyReq extends BaseReq {
 
     private String password;
@@ -21,4 +17,33 @@ public class ImportAccountByPrivateKeyReq extends BaseReq {
 
     private boolean overwrite;
 
+    public ImportAccountByPrivateKeyReq(String password, String priKey, boolean overwrite) {
+        this.password = password;
+        this.priKey = priKey;
+        this.overwrite = overwrite;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public String getPriKey() {
+        return priKey;
+    }
+
+    public void setPriKey(String priKey) {
+        this.priKey = priKey;
+    }
+
+    public boolean isOverwrite() {
+        return overwrite;
+    }
+
+    public void setOverwrite(boolean overwrite) {
+        this.overwrite = overwrite;
+    }
 }

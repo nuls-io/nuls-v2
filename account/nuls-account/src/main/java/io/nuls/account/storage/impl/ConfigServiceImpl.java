@@ -88,7 +88,7 @@ public class ConfigServiceImpl implements ConfigService, InitializingBean {
     public Map<Integer, ConfigBean> getList() {
         try {
             List<Entry<byte[], byte[]>> list = RocksDBService.entryList(AccountStorageConstant.DB_NAME_ACCOUNT_CONGIF);
-            Map<Integer, ConfigBean> configBeanMap = new HashMap<>(AccountConstant.INIT_CAPACITY);
+            Map<Integer, ConfigBean> configBeanMap = new HashMap<>(AccountConstant.INIT_CAPACITY_16);
             if (list != null) {
                 for (Entry<byte[], byte[]> entry : list) {
                     int key = ByteUtils.bytesToInt(entry.getKey());

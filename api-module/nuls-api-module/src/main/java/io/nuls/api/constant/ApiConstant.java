@@ -94,7 +94,7 @@ public interface ApiConstant {
     //黄牌惩罚
     int PUBLISH_YELLOW = 1;
     //红牌惩罚
-    int PUTLISH_RED = 2;
+    int PUBLISH_RED = 2;
     //尝试分叉
     int TRY_FORK = 1;
     //打包双花交易
@@ -119,8 +119,19 @@ public interface ApiConstant {
     int CONTRACT_STATUS_DELETE = 3;
     //时间高度分界线
     long BlOCKHEIGHT_TIME_DIVIDE = 1000000000000L;
+
+    int FREEZE_HEIGHT_LOCK_TYPE = 1;
+
+    int FREEZE_TIME_LOCK_TYPE = 2;
+
+    int FREEZE_CONSENSUS_LOCK_TYPE = 3;
+
     //合约不存在错误码
     int CONTRACT_NOT_EXIST = 100002;
+
+    int TRANSFER_FROM_TYPE = -1;
+    int TRANSFER_NO_TYPE = 0;
+    int TRANSFER_TO_TYPE = 1;
 
     int TX_TYPE_COINBASE = 1;
     int TX_TYPE_TRANSFER = 2;
@@ -132,11 +143,11 @@ public interface ApiConstant {
     int TX_TYPE_RED_PUNISH = 8;
     int TX_TYPE_STOP_AGENT = 9;
     int TX_TYPE_DATA = 10;
-    int TX_TYPE_CREATE_CONTRACT = 100;
-    int TX_TYPE_CALL_CONTRACT = 101;
-    int TX_TYPE_DELETE_CONTRACT = 102;
-    int TX_TYPE_CONTRACT_TRANSFER = 103;
-    int TX_TYPE_CONTRACT_RETURN_GAS = 104;
+    int TX_TYPE_CREATE_CONTRACT = 15;
+    int TX_TYPE_CALL_CONTRACT = 16;
+    int TX_TYPE_DELETE_CONTRACT = 17;
+    int TX_TYPE_CONTRACT_TRANSFER = 18;
+    int TX_TYPE_CONTRACT_RETURN_GAS = 19;
     BigInteger ALIAS_AMOUNT = BigInteger.valueOf(100000000L);
     BigInteger MIN_DEPOSIT = BigInteger.valueOf(20000000000000L);
 }

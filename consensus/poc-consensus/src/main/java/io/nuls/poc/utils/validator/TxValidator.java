@@ -24,12 +24,13 @@ import io.nuls.poc.storage.DepositStorageService;
 import io.nuls.poc.utils.manager.AgentManager;
 import io.nuls.poc.utils.manager.ChainManager;
 import io.nuls.poc.utils.manager.CoinDataManager;
+import io.nuls.tools.constant.TxType;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.crypto.HexUtil;
+import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.model.BigIntegerUtils;
 import io.nuls.tools.model.StringUtils;
-import io.nuls.tools.exception.NulsException;
 
 import java.io.IOException;
 import java.math.BigInteger;
@@ -64,10 +65,14 @@ public class TxValidator {
      * */
     public boolean validateTx(Chain chain, Transaction tx) throws  NulsException,IOException{
         switch (tx.getType()){
-            case(ConsensusConstant.TX_TYPE_REGISTER_AGENT) : return validateCreateAgent(chain,tx);
-            case(ConsensusConstant.TX_TYPE_STOP_AGENT): return validateStopAgent(chain,tx);
-            case(ConsensusConstant.TX_TYPE_JOIN_CONSENSUS): return validateDeposit(chain,tx);
-            case(ConsensusConstant.TX_TYPE_CANCEL_DEPOSIT): return validateWithdraw(chain,tx);
+            case (TxType.REGISTER_AGENT):
+                return validateCreateAgent(chain, tx);
+            case (TxType.STOP_AGENT):
+                return validateStopAgent(chain, tx);
+            case (TxType.DEPOSIT):
+                return validateDeposit(chain, tx);
+            case (TxType.CANCEL_DEPOSIT):
+                return validateWithdraw(chain, tx);
             default: return false;
         }
     }
@@ -336,13 +341,13 @@ public class TxValidator {
         if(total.compareTo(chain.getConfig().getEntrusterDepositMin())<0){
             throw new NulsException(ConsensusErrorCode.DEPOSIT_NOT_ENOUGH);
         }
-        if(total.compareTo(chain.getConfig().getDepositMax())>0){
+        if(total.compareTo(chain.getConfig().getCommissionMax())>0){
             throw new NulsException(ConsensusErrorCode.DEPOSIT_OVER_AMOUNT);
         }
         for (DepositPo cd : poList) {
             total = total.add(cd.getDeposit());
         }
-        if(total.compareTo(chain.getConfig().getDepositMax())>0){
+        if(total.compareTo(chain.getConfig().getCommissionMax())>0){
             throw new NulsException(ConsensusErrorCode.DEPOSIT_OVER_AMOUNT);
         }
         return true;

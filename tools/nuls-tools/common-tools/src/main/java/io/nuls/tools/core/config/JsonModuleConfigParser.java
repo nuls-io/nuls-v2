@@ -20,23 +20,23 @@ public class JsonModuleConfigParser implements ModuleConfigParser {
     }
 
     @Override
-    public Map<String, ConfigurationLoader.ConfigItem> parse(String configFile,InputStream inputStream) {
+    public Map<String,Map<String, ConfigurationLoader.ConfigItem>> parse(String configFile,InputStream inputStream) {
         try {
             String configJson = IoUtils.readRealPath(inputStream);
             Map<String,Object> data = JSONUtils.json2map(configJson);
             Map<String,ConfigurationLoader.ConfigItem> res = new HashMap<>(data.size());
-            data.entrySet().forEach(entry->{
+            data.forEach((key, value) -> {
                 try {
-                    if(ConfigSetting.isPrimitive(entry.getValue().getClass())){
-                        res.put(entry.getKey(),new ConfigurationLoader.ConfigItem(configFile,String.valueOf(entry.getValue())));
-                    }else{
-                        res.put(entry.getKey(),new ConfigurationLoader.ConfigItem(configFile,JSONUtils.obj2json(entry.getValue())));
+                    if (ConfigSetting.isPrimitive(value.getClass())) {
+                        res.put(key, new ConfigurationLoader.ConfigItem(configFile, String.valueOf(value)));
+                    } else {
+                        res.put(key, new ConfigurationLoader.ConfigItem(configFile, JSONUtils.obj2json(value)));
                     }
                 } catch (JsonProcessingException e) {
-                    throw new RuntimeException("json配置文件解析错误："+entry.getKey());
+                    throw new RuntimeException("json配置文件解析错误：" + key);
                 }
             });
-            return res;
+            return Map.of(ConfigurationLoader.GLOBAL_DOMAIN,res);
         } catch (Exception e) {
             throw new RuntimeException("json配置文件解析错误");
         }

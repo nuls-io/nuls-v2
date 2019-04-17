@@ -5,13 +5,8 @@ import io.nuls.base.data.BlockHeader;
 import io.nuls.poc.constant.ConsensusConstant;
 import io.nuls.poc.model.bo.Chain;
 import io.nuls.poc.utils.compare.BlockHeaderComparator;
-import io.nuls.rpc.model.ModuleE;
-import io.nuls.rpc.model.message.Response;
-import io.nuls.rpc.netty.processor.ResponseMessageProcessor;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
-import io.nuls.tools.crypto.HexUtil;
-import io.nuls.tools.log.Log;
 
 import java.util.*;
 
@@ -28,46 +23,6 @@ public class BlockManager {
     private RoundManager roundManager;
 
     /**
-     * 初始化链区块头数据，缓存指定数量的区块头
-     * Initialize chain block header entity to cache a specified number of block headers
-     *
-     * @param chain chain info
-     */
-    @SuppressWarnings("unchecked")
-    public void loadBlockHeader(Chain chain) throws Exception {
-        Map params = new HashMap(ConsensusConstant.INIT_CAPACITY);
-        params.put("chainId", chain.getConfig().getChainId());
-        params.put("round", ConsensusConstant.INIT_BLOCK_HEADER_COUNT);
-        Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.BL.abbr, "getLatestRoundBlockHeaders", params);
-        Map<String, Object> resultMap;
-        List<String> blockHeaderHexs = new ArrayList<>();
-        if (cmdResp.isSuccess()) {
-            resultMap = (Map<String, Object>) cmdResp.getResponseData();
-            blockHeaderHexs = (List<String>) resultMap.get("getLatestRoundBlockHeaders");
-        }
-        while (!cmdResp.isSuccess() && blockHeaderHexs.size() == 0) {
-            cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.BL.abbr, "getLatestRoundBlockHeaders", params);
-            if (cmdResp.isSuccess()) {
-                resultMap = (Map<String, Object>) cmdResp.getResponseData();
-                blockHeaderHexs = (List<String>) resultMap.get("getLatestRoundBlockHeaders");
-                break;
-            }
-            Log.info("---------------------------区块加载失败！");
-            Thread.sleep(1000);
-        }
-        List<BlockHeader> blockHeaders = new ArrayList<>();
-        for (String blockHeaderHex : blockHeaderHexs) {
-            BlockHeader blockHeader = new BlockHeader();
-            blockHeader.parse(HexUtil.decode(blockHeaderHex), 0);
-            blockHeaders.add(blockHeader);
-        }
-        Collections.sort(blockHeaders, new BlockHeaderComparator());
-        chain.setBlockHeaderList(blockHeaders);
-        chain.setNewestHeader(blockHeaders.get(blockHeaders.size() - 1));
-        Log.info("---------------------------区块加载成功！");
-    }
-
-    /**
      * 收到最新区块头，更新链区块缓存数据
      * Receive the latest block header, update the chain block cache entity
      *
@@ -82,16 +37,18 @@ public class BlockManager {
         BlockExtendsData newestExtendsData = new BlockExtendsData(newestHeader.getExtend());
         BlockExtendsData receiveExtendsData = new BlockExtendsData(blockHeader.getExtend());
         long receiveRoundIndex = receiveExtendsData.getRoundIndex();
-        BlockExtendsData lastExtendsData = new BlockExtendsData(chain.getBlockHeaderList().get(0).getExtend());
-        long lastRoundIndex = lastExtendsData.getRoundIndex();
-        if (receiveRoundIndex > newestExtendsData.getRoundIndex() && (receiveRoundIndex - ConsensusConstant.INIT_BLOCK_HEADER_COUNT > lastRoundIndex)) {
-            Iterator<BlockHeader> iterator = chain.getBlockHeaderList().iterator();
-            while (iterator.hasNext()) {
-                lastExtendsData = new BlockExtendsData(iterator.next().getExtend());
-                if (lastExtendsData.getRoundIndex() == lastRoundIndex) {
-                    iterator.remove();
-                } else if (lastExtendsData.getRoundIndex() > lastRoundIndex) {
-                    break;
+        if(chain.getBlockHeaderList().size() >0){
+            BlockExtendsData lastExtendsData = new BlockExtendsData(chain.getBlockHeaderList().get(0).getExtend());
+            long lastRoundIndex = lastExtendsData.getRoundIndex();
+            if (receiveRoundIndex > newestExtendsData.getRoundIndex() && (receiveRoundIndex - ConsensusConstant.INIT_BLOCK_HEADER_COUNT > lastRoundIndex)) {
+                Iterator<BlockHeader> iterator = chain.getBlockHeaderList().iterator();
+                while (iterator.hasNext()) {
+                    lastExtendsData = new BlockExtendsData(iterator.next().getExtend());
+                    if (lastExtendsData.getRoundIndex() == lastRoundIndex) {
+                        iterator.remove();
+                    } else if (lastExtendsData.getRoundIndex() > lastRoundIndex) {
+                        break;
+                    }
                 }
             }
         }

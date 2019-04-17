@@ -9,7 +9,7 @@ import java.util.Iterator;
 import java.util.List;
 
 /**
- * 交易已完成交易管理模块的校验(打包的时候从这里取), 包括孤儿交易
+ * 交易已完成交易管理模块的校验(打包的时候从这里取)
  *
  * @author: Charlie
  * @date: 2018/11/13
@@ -32,7 +32,7 @@ public class PackablePool {
      *
      * @return TxContainer
      */
-    public Transaction get(Chain chain) {
+    public Transaction poll(Chain chain) {
         return chain.getTxQueue().poll();
     }
 

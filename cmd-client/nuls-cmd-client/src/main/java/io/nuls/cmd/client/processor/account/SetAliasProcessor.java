@@ -74,20 +74,9 @@ public class SetAliasProcessor extends AccountBaseProcessor implements CommandPr
 
     @Override
     public boolean argsValidate(String[] args) {
-        int length = args.length;
-        if (length != 3) {
-            return false;
-        }
-        if (!CommandHelper.checkArgsIsNull(args)) {
-            return false;
-        }
-        if (!AddressTool.validAddress(config.getChainId(),args[1])) {
-            return false;
-        }
-        if (!FormatValidUtils.validAlias(args[2])) {
-            return false;
-        }
-
+        checkArgsNumber(args,2);
+        checkAddress(config.getChainId(),args[1]);
+        checkArgs(FormatValidUtils.validAlias(args[2]),"alias format error");
         return true;
     }
 
@@ -95,7 +84,7 @@ public class SetAliasProcessor extends AccountBaseProcessor implements CommandPr
     public CommandResult execute(String[] args) {
         String address = args[1];
         String alias = args[2];
-        String password = getPwd("Enter your account password");
+        String password = getPwd();
         Result<String> result = accountService.setAccountAlias(new SetAccountAliasReq(password,address,alias));
         if(result.isFailed()){
             return CommandResult.getFailed(result);

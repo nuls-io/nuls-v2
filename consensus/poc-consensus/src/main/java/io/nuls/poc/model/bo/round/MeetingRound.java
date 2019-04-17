@@ -29,7 +29,8 @@ import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.Address;
 import io.nuls.poc.constant.ConsensusErrorCode;
 import io.nuls.poc.model.bo.Chain;
-import io.nuls.poc.utils.CallMethodUtils;
+import io.nuls.poc.rpc.call.CallMethodUtils;
+import io.nuls.rpc.util.TimeUtils;
 import io.nuls.tools.exception.NulsRuntimeException;
 import io.nuls.tools.log.Log;
 import io.nuls.tools.model.DoubleUtils;
@@ -253,10 +254,10 @@ public class MeetingRound {
         }
         if (null == this.getPreRound()) {
             return ("round:index:" + this.getIndex() + " , start:" + new Date(this.getStartTime())
-                    + ", netTime:(" + new Date(CallMethodUtils.currentTime()).toString() + ") , totalWeight : " + totalWeight + " ,members:\n :" + str);
+                    + ", netTime:(" + new Date(TimeUtils.getCurrentTimeMillis()).toString() + ") , totalWeight : " + totalWeight + " ,members:\n :" + str);
         } else {
             return ("round:index:" + this.getIndex() + " ,preIndex:" + this.getPreRound().getIndex() + " , start:" + new Date(this.getStartTime())
-                    + ", netTime:(" + new Date(CallMethodUtils.currentTime()).toString() + ") , totalWeight : " + totalWeight + "  , members:\n :" + str);
+                    + ", netTime:(" + new Date(TimeUtils.getCurrentTimeMillis()).toString() + ") , totalWeight : " + totalWeight + "  , members:\n :" + str);
         }
     }
 }

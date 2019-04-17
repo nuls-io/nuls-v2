@@ -11,6 +11,7 @@ import io.nuls.base.constant.TxStatusEnum;
 import io.nuls.base.data.Coin;
 import io.nuls.base.data.Transaction;
 import io.nuls.rpc.model.ModuleE;
+import io.nuls.rpc.util.RPCUtil;
 import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.log.Log;
@@ -53,7 +54,7 @@ public class TransferServiceForRpc extends BaseRpcService implements TransferSer
 
     @Override
     public Result<TransactionData> getSimpleTxDataByHash(GetConfirmedTxByHashReq req) {
-        return callRpc(ModuleE.TX.abbr,"tx_getConfirmedTxClient",req,
+        return callRpc(ModuleE.TX.abbr,"tx_getTxClient",req,
                 (Function<Map,Result>)res->tranderTransactionData(tranderTransaction(res))
         );
     }
@@ -69,12 +70,12 @@ public class TransferServiceForRpc extends BaseRpcService implements TransferSer
 
     private Result<Transaction> tranderTransaction(Map<String,Object> data){
         try {
-            String hexString = (String) data.get("txHex");
+            String hexString = (String) data.get("tx");
             if(StringUtils.isNull(hexString)){
                 return fail(ERROR_CODE,"not found tx");
             }
             Transaction transaction = new Transaction();
-            transaction.parse(new NulsByteBuffer(HexUtil.decode(hexString)));
+            transaction.parse(new NulsByteBuffer(RPCUtil.decode(hexString)));
             transaction.setBlockHeight(Long.parseLong(String.valueOf(data.get("height"))));
             Integer state = (Integer) data.get("status");
             transaction.setStatus(state == TxStatusEnum.UNCONFIRM.getStatus() ? TxStatusEnum.UNCONFIRM : TxStatusEnum.CONFIRMED);
@@ -97,7 +98,7 @@ public class TransferServiceForRpc extends BaseRpcService implements TransferSer
             res.setInBlockIndex(transaction.getInBlockIndex());
             res.setSize(transaction.getSize());
             res.setTime(DateUtils.timeStamp2DateStr(transaction.getTime()));
-            res.setTransactionSignature(HexUtil.encode(transaction.getTransactionSignature()));
+            res.setTransactionSignature(RPCUtil.encode(transaction.getTransactionSignature()));
             res.setType(transaction.getType());
             res.setForm(transaction.getCoinDataInstance().getFrom().stream().map(coinData->{
                 TransactionCoinData tcd = buildTransactionCoinData(coinData);

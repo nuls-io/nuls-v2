@@ -48,8 +48,6 @@ import java.util.regex.Pattern;
 @Component
 public class GetBlockHeaderProcessor implements CommandProcessor {
 
-    Pattern IS_NUMBERIC = Pattern.compile("[0-9]+");
-
 
     BlockService blockService = ServiceManager.get(BlockService.class);
 
@@ -78,13 +76,7 @@ public class GetBlockHeaderProcessor implements CommandProcessor {
 
     @Override
     public boolean argsValidate(String[] args) {
-        int length = args.length;
-        if (length != 2) {
-            return false;
-        }
-        if (!CommandHelper.checkArgsIsNull(args)) {
-            return false;
-        }
+        checkArgsNumber(args,1);
         return true;
     }
 

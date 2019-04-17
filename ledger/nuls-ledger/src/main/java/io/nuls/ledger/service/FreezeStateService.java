@@ -29,9 +29,15 @@ import io.nuls.ledger.model.po.AccountState;
 
 /**
  * Created by lan on 2018/12/30
+ * @author lanjinsheng
  */
 public interface FreezeStateService {
-
+    /**
+     * 重新结算冻结金额
+     * @param accountState
+     * @return
+     */
     boolean recalculateFreeze(AccountState accountState);
+
 
 }

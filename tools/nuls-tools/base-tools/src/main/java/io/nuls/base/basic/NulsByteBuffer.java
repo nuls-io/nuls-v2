@@ -122,7 +122,7 @@ public class NulsByteBuffer {
 
     public BigInteger readBigInteger() throws NulsException {
         try {
-            byte[] bytes = Arrays.copyOfRange(payload, cursor, cursor += 16);
+            byte[] bytes = Arrays.copyOfRange(payload, cursor, cursor += 32);
             BigInteger u = SerializeUtils.bigIntegerFromBytes(bytes);
             if(u.compareTo(BigInteger.ZERO) < 0){
                 throw new NulsException(new UnsupportedOperationException());

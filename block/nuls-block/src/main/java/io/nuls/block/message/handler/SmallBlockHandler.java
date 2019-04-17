@@ -31,23 +31,27 @@ import io.nuls.block.message.SmallBlockMessage;
 import io.nuls.block.model.CachedSmallBlock;
 import io.nuls.block.model.ChainContext;
 import io.nuls.block.model.ChainParameters;
+import io.nuls.block.rpc.call.NetworkUtil;
+import io.nuls.block.rpc.call.TransactionUtil;
 import io.nuls.block.service.BlockService;
 import io.nuls.block.thread.TxGroupTask;
 import io.nuls.block.thread.monitor.TxGroupRequestor;
 import io.nuls.block.utils.BlockUtil;
-import io.nuls.block.rpc.call.NetworkUtil;
-import io.nuls.block.rpc.call.TransactionUtil;
 import io.nuls.rpc.cmd.BaseCmd;
 import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.model.CmdAnnotation;
 import io.nuls.rpc.model.message.Response;
+import io.nuls.rpc.util.RPCUtil;
+import io.nuls.rpc.util.TimeUtils;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
-import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.log.logback.NulsLogger;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import static io.nuls.block.BlockBootstrap.blockConfig;
 import static io.nuls.block.constant.CommandConstant.GET_TXGROUP_MESSAGE;
@@ -74,7 +78,7 @@ public class SmallBlockHandler extends BaseCmd {
         String nodeId = map.get("nodeId").toString();
         SmallBlockMessage message = new SmallBlockMessage();
         NulsLogger messageLog = ContextManager.getContext(chainId).getMessageLog();
-        byte[] decode = HexUtil.decode(map.get("messageBody").toString());
+        byte[] decode = RPCUtil.decode(map.get("messageBody").toString());
         try {
             message.parse(new NulsByteBuffer(decode));
         } catch (NulsException e) {
@@ -94,7 +98,7 @@ public class SmallBlockHandler extends BaseCmd {
         //阻止恶意节点提前出块,拒绝接收未来一定时间外的区块
         ChainParameters parameters = context.getParameters();
         int validBlockInterval = parameters.getValidBlockInterval();
-        long currentTime = NetworkUtil.currentTime();
+        long currentTime = TimeUtils.getCurrentTimeMillis();
         if (header.getTime() > (currentTime + validBlockInterval)) {
             messageLog.error("header.getTime()-" + header.getTime());
             messageLog.error("currentTime-" + currentTime);
@@ -163,7 +167,6 @@ public class SmallBlockHandler extends BaseCmd {
             //获取没有的交易
             if (!missTxHashList.isEmpty()) {
                 messageLog.info("block height:" + header.getHeight() + ", total tx count:" + header.getTxCount() + " , get group tx of " + missTxHashList.size());
-                messageLog.debug("needHashList:" + missTxHashList + ", from:" + nodeId);
                 //这里的smallBlock的subTxList中包含一些非系统交易,用于跟TxGroup组合成完整区块
                 CachedSmallBlock cachedSmallBlock = new CachedSmallBlock(missTxHashList, smallBlock, txMap);
                 SmallBlockCacher.cacheSmallBlock(chainId, cachedSmallBlock);

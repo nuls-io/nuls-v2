@@ -40,8 +40,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
-import static io.nuls.network.utils.LoggerUtil.Log;
-
 /**
  * 节点发现任务
  *
@@ -80,7 +78,7 @@ public class NodeDiscoverTask implements Runnable {
             }
 
         } catch (Exception e) {
-            Log.error(e);
+            LoggerUtil.logger().error(e);
         }
     }
 
@@ -110,7 +108,7 @@ public class NodeDiscoverTask implements Runnable {
             }
 
         } catch (Exception e) {
-            Log.error(e);
+            LoggerUtil.logger().error(e);
         }
     }
 
@@ -125,11 +123,11 @@ public class NodeDiscoverTask implements Runnable {
                 Thread.sleep(3000L);
             }
         } catch (Exception e) {
-            Log.error(e);
+            LoggerUtil.logger().error(e);
             try {
                 Thread.sleep(3000L);
             } catch (InterruptedException e1) {
-                Log.error(e1);
+                LoggerUtil.logger().error(e1);
             }
         }
     }
@@ -185,8 +183,9 @@ public class NodeDiscoverTask implements Runnable {
 
         long probeInterval;
         int failCount = node.getFailCount();
-
-        if (failCount <= 10) {
+        if (failCount == 0) {
+            probeInterval = 0;
+        } else if (failCount <= 10) {
             probeInterval = 60 * 1000L;
         } else if (failCount <= 20) {
             probeInterval = 300 * 1000L;
@@ -217,6 +216,7 @@ public class NodeDiscoverTask implements Runnable {
         CompletableFuture<Integer> future = new CompletableFuture<>();
 
         node.setConnectedListener(() -> {
+            //探测可连接后，断开连接
             node.setConnectStatus(NodeConnectStatusEnum.CONNECTED);
             node.getChannel().close();
         });
@@ -230,8 +230,11 @@ public class NodeDiscoverTask implements Runnable {
                 availableNodesCount = node.getNodeGroup().getLocalNetNodeContainer().getConnectedNodes().size();
             }
             if (node.getConnectStatus() == NodeConnectStatusEnum.CONNECTED) {
+                //探测可连接
+                node.setConnectStatus(NodeConnectStatusEnum.DISCONNECT);
                 future.complete(PROBE_STATUS_SUCCESS);
             } else if (availableNodesCount == 0) {
+                //可能网络不通
                 future.complete(PROBE_STATUS_IGNORE);
             } else {
                 future.complete(PROBE_STATUS_FAIL);
@@ -244,7 +247,7 @@ public class NodeDiscoverTask implements Runnable {
         try {
             return future.get();
         } catch (Exception e) {
-            Log.error(e);
+            LoggerUtil.logger().error(e);
             return PROBE_STATUS_IGNORE;
         }
     }

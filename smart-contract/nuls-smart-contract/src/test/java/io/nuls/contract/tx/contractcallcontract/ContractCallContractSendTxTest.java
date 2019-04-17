@@ -31,12 +31,12 @@ import io.nuls.contract.util.Log;
 import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.model.message.Response;
 import io.nuls.rpc.netty.processor.ResponseMessageProcessor;
+import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.model.StringUtils;
 import io.nuls.tools.parse.JSONUtils;
 import org.apache.commons.io.IOUtils;
 import org.junit.Assert;
 import org.junit.Test;
-import org.spongycastle.util.encoders.Hex;
 
 import java.io.FileInputStream;
 import java.io.InputStream;
@@ -64,7 +64,7 @@ public class ContractCallContractSendTxTest extends BaseQuery {
         Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, CREATE, params);
         Map result = (HashMap) (((HashMap) cmdResp2.getResponseData()).get(CREATE));
         Assert.assertTrue(null != result);
-        Log.info("createContract-result:{}", JSONUtils.obj2PrettyJson(result));
+        Log.info("Create-InnerCall-Contract-result:{}", JSONUtils.obj2PrettyJson(result));
     }
 
     private Map makeCreateParams(String sender, byte[] contractCode, String remark, Object... args) {
@@ -74,7 +74,7 @@ public class ContractCallContractSendTxTest extends BaseQuery {
         params.put("password", password);
         params.put("gasLimit", 200000L);
         params.put("price", 25);
-        params.put("contractCode", Hex.toHexString(contractCode));
+        params.put("contractCode", HexUtil.encode(contractCode));
         params.put("args", args);
         params.put("remark", remark);
         return params;
@@ -110,6 +110,7 @@ public class ContractCallContractSendTxTest extends BaseQuery {
      */
     @Test
     public void callContract_transferOut() throws Exception {
+        contractAddress = "tNULSeBaN155SwgcURmRwBMzmjKAH3PwK55tSe";
         BigInteger value = BigInteger.ZERO;
         if(StringUtils.isBlank(methodName)) {
             methodName = "multyForAddress";
@@ -118,9 +119,9 @@ public class ContractCallContractSendTxTest extends BaseQuery {
         String remark = "call contract test - 合约内部转账";
         String address1 = toAddress3;
         String address2 = toAddress4;
-        String value1 = BigInteger.valueOf(11888811).toString();
-        String value2 = BigInteger.valueOf(22888822).toString();
-        Map params = this.makeCallParams(sender, value, contractAddress0, methodName, methodDesc, remark,
+        String value1 = BigInteger.valueOf(1_0000_0000L).toString();
+        String value2 = BigInteger.valueOf(1_0000_0000L).toString();
+        Map params = this.makeCallParams(sender, value, contractAddress, methodName, methodDesc, remark,
                 address1, value1, address2, value2);
         Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, CALL, params);
         Map result = (HashMap) (((HashMap) cmdResp2.getResponseData()).get(CALL));
@@ -201,7 +202,7 @@ public class ContractCallContractSendTxTest extends BaseQuery {
     @Test
     public void delete() throws Exception {
         String remark = "delete contract";
-        Map params = this.makeDeleteParams(sender, contractAddress0, remark);
+        Map params = this.makeDeleteParams(sender, contractAddress, remark);
         Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, DELETE, params);
         Map result = (HashMap) (((HashMap) cmdResp2.getResponseData()).get(DELETE));
         Assert.assertTrue(null != result);

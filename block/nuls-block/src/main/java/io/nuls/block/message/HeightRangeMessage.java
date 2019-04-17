@@ -24,7 +24,6 @@ import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.basic.NulsOutputStreamBuffer;
 import io.nuls.block.message.base.BaseMessage;
 import io.nuls.tools.parse.SerializeUtils;
-import lombok.Data;
 
 import java.io.IOException;
 
@@ -37,7 +36,6 @@ import static io.nuls.block.utils.LoggerUtil.commonLog;
  * @version 1.0
  * @date 18-11-9 下午2:37
  */
-@Data
 public class HeightRangeMessage extends BaseMessage {
 
     private long startHeight;
@@ -48,6 +46,22 @@ public class HeightRangeMessage extends BaseMessage {
 
     public HeightRangeMessage(long startHeight, long endHeight) {
         this.startHeight = startHeight;
+        this.endHeight = endHeight;
+    }
+
+    public long getStartHeight() {
+        return startHeight;
+    }
+
+    public void setStartHeight(long startHeight) {
+        this.startHeight = startHeight;
+    }
+
+    public long getEndHeight() {
+        return endHeight;
+    }
+
+    public void setEndHeight(long endHeight) {
         this.endHeight = endHeight;
     }
 

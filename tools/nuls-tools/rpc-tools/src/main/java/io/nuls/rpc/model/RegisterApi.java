@@ -24,7 +24,10 @@
  */
 package io.nuls.rpc.model;
 
-import lombok.*;
+
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.util.List;
 import java.util.Map;
@@ -36,28 +39,115 @@ import java.util.Map;
  * @author tangyi
  * @date 2018/11/19
  */
-@Data
-@ToString
+
 public class RegisterApi {
 
 
-    private List<CmdDetail> apiMethods;
+    @JsonProperty
+    private List<CmdDetail> Methods;
 
     /**
      * Key: Role
      * Value: Version
      */
-    private Map<String, String> dependencies;
+    @JsonProperty
+    private Map<String, String> Dependencies;
 
-    private Map<String, String> connectionInformation;
+    @JsonProperty
+    private Map<String, String> ConnectionInformation;
 
-    private String moduleDomain;
+    @JsonProperty
+    private String ModuleDomain;
 
-    private Map<String, String[]> moduleRoles;
+    @JsonProperty
+    private Map<String, String[]> ModuleRoles;
 
-    private String moduleVersion;
+    @JsonProperty
+    private String ModuleVersion;
 
-    private String moduleAbbreviation;
+    @JsonProperty
+    private String Abbreviation;
 
-    private String moduleName;
+    @JsonProperty
+    private String ModuleName;
+
+    @JsonIgnore
+    public List<CmdDetail> getMethods() {
+        return Methods;
+    }
+
+    @JsonIgnore
+    public void setMethods(List<CmdDetail> apiMethods) {
+        this.Methods = apiMethods;
+    }
+
+    @JsonIgnore
+    public Map<String, String> getDependencies() {
+        return Dependencies;
+    }
+
+    @JsonIgnore
+    public void setDependencies(Map<String, String> dependencies) {
+        this.Dependencies = dependencies;
+    }
+
+    @JsonIgnore
+    public Map<String, String> getConnectionInformation() {
+        return ConnectionInformation;
+    }
+
+    @JsonIgnore
+    public void setConnectionInformation(Map<String, String> connectionInformation) {
+        this.ConnectionInformation = connectionInformation;
+    }
+
+    @JsonIgnore
+    public String getModuleDomain() {
+        return ModuleDomain;
+    }
+
+    @JsonIgnore
+    public void setModuleDomain(String moduleDomain) {
+        this.ModuleDomain = moduleDomain;
+    }
+
+    @JsonIgnore
+    public Map<String, String[]> getModuleRoles() {
+        return ModuleRoles;
+    }
+
+    @JsonIgnore
+    public void setModuleRoles(Map<String, String[]> moduleRoles) {
+        this.ModuleRoles = moduleRoles;
+    }
+
+    @JsonIgnore
+    public String getModuleVersion() {
+        return ModuleVersion;
+    }
+
+    @JsonIgnore
+    public void setModuleVersion(String moduleVersion) {
+        this.ModuleVersion = moduleVersion;
+    }
+
+    @JsonIgnore
+    public String getAbbreviation() {
+        return Abbreviation;
+    }
+
+    @JsonIgnore
+    public void setAbbreviation(String moduleAbbreviation) {
+        this.Abbreviation = moduleAbbreviation;
+    }
+
+    @JsonIgnore
+    public String getModuleName() {
+        return ModuleName;
+    }
+
+    @JsonIgnore
+    public void setModuleName(String moduleName) {
+        this.ModuleName = moduleName;
+    }
 }

@@ -1,2 +1,2 @@
-[Module]
-DataPath=../../../../data
+[global]
+dataPath=../../../../data

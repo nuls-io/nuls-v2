@@ -17,8 +17,8 @@
  */
 package org.ethereum.util;
 
+import io.nuls.tools.crypto.HexUtil;
 import org.ethereum.crypto.HashUtil;
-import org.spongycastle.util.encoders.Hex;
 
 import java.math.BigInteger;
 import java.util.Arrays;
@@ -134,7 +134,7 @@ public class Value {
     }
 
     public String getHex() {
-        return Hex.toHexString(this.encode());
+        return HexUtil.encode(this.encode());
     }
 
     public byte[] getData() {

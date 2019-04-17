@@ -205,7 +205,7 @@ public class Constants {
      * Get the next messageId
      */
     public static String nextSequence() {
-        return SEQUENCE.incrementAndGet() + "";
+        return System.currentTimeMillis()+""+SEQUENCE.incrementAndGet();
     }
 
     public static final int TRY_COUNT = 3;

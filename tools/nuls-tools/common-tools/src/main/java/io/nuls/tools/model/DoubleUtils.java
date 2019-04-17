@@ -70,12 +70,12 @@ public class DoubleUtils {
         if (null == value) {
             return "";
         }
-        String suffix = "";
+        StringBuilder suffix = new StringBuilder();
         for (int i = 0; i < scale; i++) {
             if (i == 0) {
-                suffix += ".";
+                suffix.append(".");
             }
-            suffix += "0";
+            suffix.append("0");
         }
 
         if (hasThousands) {

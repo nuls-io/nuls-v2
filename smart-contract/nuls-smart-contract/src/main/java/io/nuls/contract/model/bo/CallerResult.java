@@ -23,9 +23,6 @@
  */
 package io.nuls.contract.model.bo;
 
-import lombok.Getter;
-import lombok.Setter;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -33,13 +30,19 @@ import java.util.List;
  * @author: PierreLuo
  * @date: 2019-01-17
  */
-@Getter
-@Setter
 public class CallerResult {
 
     private List<CallableResult> callableResultList;
 
     public CallerResult() {
         this.callableResultList = new ArrayList<>();
+    }
+
+    public List<CallableResult> getCallableResultList() {
+        return callableResultList;
+    }
+
+    public void setCallableResultList(List<CallableResult> callableResultList) {
+        this.callableResultList = callableResultList;
     }
 }

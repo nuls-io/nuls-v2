@@ -19,7 +19,7 @@ public @interface Configuration {
      * 存储名称
      * @return
      */
-    String persistDomain();
+    String domain();
 
 
 }

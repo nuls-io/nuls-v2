@@ -70,16 +70,10 @@ public class HelpProcessor implements CommandProcessor {
 
     @Override
     public boolean argsValidate(String[] args) {
-        int length = args.length;
-        if(length > 2) {
-            return false;
-        }
-        if(length == 2 && !(
+        checkArgsNumber(args,1);
+        checkArgs(
                 CommandConstant.NEED_ALL.equals(args[1]) || Arrays.stream(CommandGroup.values()).anyMatch(g->g.getTitle().equals(args[1]))
-                ||  CommandHandler.PROCESSOR_MAP.values().stream().anyMatch(p->p.getCommand().equals(args[1]))
-        )) {
-            return false;
-        }
+                        ||  CommandHandler.PROCESSOR_MAP.values().stream().anyMatch(p->p.getCommand().equals(args[1])),getCommandDescription());
         return true;
     }
 

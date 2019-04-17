@@ -23,8 +23,6 @@
  */
 package io.nuls.contract.model.bo;
 
-import lombok.Data;
-
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
@@ -34,7 +32,6 @@ import java.util.concurrent.Future;
  * @author: PierreLuo
  * @date: 2019-03-16
  */
-@Data
 public class ContractContainer {
     private String contractAddress;
     private boolean hasCreate = false;
@@ -55,5 +52,53 @@ public class ContractContainer {
         for (Future<ContractResult> future : futureList) {
             future.get();
         }
+    }
+
+    public String getContractAddress() {
+        return contractAddress;
+    }
+
+    public void setContractAddress(String contractAddress) {
+        this.contractAddress = contractAddress;
+    }
+
+    public boolean isHasCreate() {
+        return hasCreate;
+    }
+
+    public void setHasCreate(boolean hasCreate) {
+        this.hasCreate = hasCreate;
+    }
+
+    public boolean isDelete() {
+        return isDelete;
+    }
+
+    public void setDelete(boolean delete) {
+        isDelete = delete;
+    }
+
+    public CallableResult getCallableResult() {
+        return callableResult;
+    }
+
+    public void setCallableResult(CallableResult callableResult) {
+        this.callableResult = callableResult;
+    }
+
+    public Set<String> getCommitSet() {
+        return commitSet;
+    }
+
+    public void setCommitSet(Set<String> commitSet) {
+        this.commitSet = commitSet;
+    }
+
+    public List<Future<ContractResult>> getFutureList() {
+        return futureList;
+    }
+
+    public void setFutureList(List<Future<ContractResult>> futureList) {
+        this.futureList = futureList;
     }
 }

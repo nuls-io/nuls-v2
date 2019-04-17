@@ -41,15 +41,12 @@ import io.nuls.rpc.modulebootstrap.RpcModule;
 import io.nuls.rpc.modulebootstrap.RpcModuleState;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
-import io.nuls.tools.core.annotation.Configuration;
 import io.nuls.tools.core.ioc.SpringLiteContext;
 import io.nuls.tools.parse.I18nUtils;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-
-import static io.nuls.network.utils.LoggerUtil.Log;
 
 /**
  * boot strap
@@ -67,6 +64,26 @@ public class NetworkBootstrap extends RpcModule {
             args = new String[]{"ws://" + HostInfo.getLocalIP() + ":8887/ws"};
         }
         NulsRpcModuleBootstrap.run("io.nuls", args);
+    }
+
+    private boolean validatCfg() {
+        if (networkConfig.getPacketMagic() > NetworkConstant.MAX_NUMBER_4_BYTE) {
+            LoggerUtil.logger().error("Network cfg error.packageMagic:{}>{}", networkConfig.getPacketMagic(), NetworkConstant.MAX_NUMBER_4_BYTE);
+            return false;
+        }
+        if (networkConfig.getChainId() > NetworkConstant.MAX_NUMBER_2_BYTE) {
+            LoggerUtil.logger().error("Network cfg error.chainId:{}>{}", networkConfig.getChainId(), NetworkConstant.MAX_NUMBER_2_BYTE);
+            return false;
+        }
+        if (networkConfig.getPort() > NetworkConstant.MAX_NUMBER_2_BYTE) {
+            LoggerUtil.logger().error("Network cfg error.port:{}>{}", networkConfig.getPort(), NetworkConstant.MAX_NUMBER_2_BYTE);
+            return false;
+        }
+        if (networkConfig.getCrossPort() > NetworkConstant.MAX_NUMBER_2_BYTE) {
+            LoggerUtil.logger().error("Network cfg error.crossPort:{}>{}", networkConfig.getCrossPort(), NetworkConstant.MAX_NUMBER_2_BYTE);
+            return false;
+        }
+        return true;
     }
 
     /**
@@ -89,13 +106,13 @@ public class NetworkBootstrap extends RpcModule {
             networkConfig.getLocalIps().addAll(IpUtil.getIps());
         } catch (Exception e) {
             e.printStackTrace();
-            Log.error("Network NetworkBootstrap cfgInit failed", e);
+            LoggerUtil.logger().error("Network NetworkBootstrap cfgInit failed", e);
             throw new RuntimeException("Network NetworkBootstrap cfgInit failed");
         }
     }
 
     private void dbInit() throws Exception {
-        RocksDBService.init(networkConfig.getDataPath()+NetworkConstant.MODULE_DB_PATH);
+        RocksDBService.init(networkConfig.getDataPath() + NetworkConstant.MODULE_DB_PATH);
         InitDB dbService = SpringLiteContext.getBean(DbServiceImpl.class);
         dbService.initTableName();
     }
@@ -122,8 +139,10 @@ public class NetworkBootstrap extends RpcModule {
         try {
             super.init();
             System.setProperty("io.netty.tryReflectionSetAccessible", "true");
-//            --add-exports java.base/jdk.internal.misc=ALL-UNNAMED
-//            --add-exports java.base/jdk.internal.ref=ALL-UNNAMED --add-exports java.base/sun.nio.ch=ALL-UNNAMED
+            LoggerUtil.defaultLogInit(networkConfig.getLogLevel());
+            if(!validatCfg()){
+                System.exit(-1);
+            }
             jsonCfgInit();
             dbInit();
             managerInit();
@@ -146,8 +165,7 @@ public class NetworkBootstrap extends RpcModule {
 
     @Override
     public boolean doStart() {
-        Log.debug("doStart begin=========");
-        LoggerUtil.Log.info("NW doStart 1");
+        LoggerUtil.logger().debug("doStart begin=========");
         try {
             NodeGroupManager.getInstance().start();
 //            RpcManager.getInstance().start();
@@ -155,14 +173,13 @@ public class NetworkBootstrap extends RpcModule {
             e.printStackTrace();
             System.exit(-1);
         }
-        Log.debug("doStart end=========");
-        LoggerUtil.Log.info("NW doStart 2");
+        LoggerUtil.logger().debug("doStart end=========");
         return true;
     }
 
     @Override
     public RpcModuleState onDependenciesReady() {
-        LoggerUtil.Log.info("network onDependenciesReady");
+        LoggerUtil.logger().info("network onDependenciesReady");
         try {
             ConnectionManager.getInstance().start();
             TaskManager.getInstance().start();
@@ -170,7 +187,7 @@ public class NetworkBootstrap extends RpcModule {
             e.printStackTrace();
             System.exit(-1);
         }
-        LoggerUtil.Log.info("NW RUNNING");
+        LoggerUtil.logger().info("NW RUNNING");
         return RpcModuleState.Running;
     }
 

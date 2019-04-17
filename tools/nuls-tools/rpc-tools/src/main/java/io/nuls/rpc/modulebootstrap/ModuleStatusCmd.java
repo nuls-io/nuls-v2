@@ -40,7 +40,7 @@ public class ModuleStatusCmd extends BaseCmd {
     @CmdAnnotation(cmd = "connectReady", version = 1.0, minEvent = 1,
             description = "check module rpc is ready")
     public Response connectReady(Map<String, Object> param) {
-        return success(Boolean.valueOf(ConnectManager.isReady()));
+        return success(Boolean.valueOf(rpcModule.isReady()));
     }
 
 }

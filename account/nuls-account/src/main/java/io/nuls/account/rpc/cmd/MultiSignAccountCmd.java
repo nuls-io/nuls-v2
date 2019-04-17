@@ -1,5 +1,6 @@
 package io.nuls.account.rpc.cmd;
 
+import io.nuls.account.constant.AccountConstant;
 import io.nuls.account.constant.AccountErrorCode;
 import io.nuls.account.constant.RpcParameterNameConstant;
 import io.nuls.account.model.dto.MultiSignTransactionResultDto;
@@ -11,12 +12,12 @@ import io.nuls.base.data.MultiSigAccount;
 import io.nuls.rpc.cmd.BaseCmd;
 import io.nuls.rpc.model.CmdAnnotation;
 import io.nuls.rpc.model.message.Response;
+import io.nuls.rpc.util.RPCUtil;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
-import io.nuls.tools.crypto.HexUtil;
+import io.nuls.tools.exception.NulsRuntimeException;
 import io.nuls.tools.model.FormatValidUtils;
 import io.nuls.tools.model.StringUtils;
-import io.nuls.tools.exception.NulsRuntimeException;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -47,7 +48,6 @@ public class MultiSignAccountCmd extends BaseCmd {
      */
     @CmdAnnotation(cmd = "ac_createMultiSigAccount", version = 1.0, scope = "private", minEvent = 0, minPeriod = 0, description = "create a multi sign account")
     public Response createMultiSigAccount(Map params) {
-        LoggerUtil.logger.debug("ac_createMultiSigAccount start");
         Map<String, Object> map = new HashMap<>();
         try {
             // check parameters
@@ -69,7 +69,7 @@ public class MultiSignAccountCmd extends BaseCmd {
             List<Map<String,String>> pubKeys = new ArrayList<>();
             for (byte[] pubKeyBytes : multiSigAccount.getPubKeyList()) {
                 Map<String,String> tmpMap = new HashMap<>();
-                tmpMap.put("pubKey", HexUtil.encode(pubKeyBytes));
+                tmpMap.put("pubKey", RPCUtil.encode(pubKeyBytes));
                 tmpMap.put("address",AddressTool.getStringAddressByBytes(AddressTool.getAddress(pubKeyBytes,chainId)));
                 pubKeys.add(tmpMap);
             }
@@ -79,7 +79,6 @@ public class MultiSignAccountCmd extends BaseCmd {
         } catch (NulsRuntimeException e) {
             return failed(e.getErrorCode());
         }
-        LoggerUtil.logger.debug("ac_createMultiSigAccount end");
         return success(map);
     }
 
@@ -93,7 +92,6 @@ public class MultiSignAccountCmd extends BaseCmd {
      */
     @CmdAnnotation(cmd = "ac_importMultiSigAccount", version = 1.0, scope = "private", minEvent = 0, minPeriod = 0, description = "inport a multi sign account")
     public Response importMultiSigAccount(Map params) {
-        LoggerUtil.logger.debug("ac_importMultiSigAccount start");
         Map<String, Object> map = new HashMap<>();
         try {
             // check parameters
@@ -120,7 +118,6 @@ public class MultiSignAccountCmd extends BaseCmd {
         } catch (NulsRuntimeException e) {
             return failed(e.getErrorCode());
         }
-        LoggerUtil.logger.debug("ac_createMultiSigAccount end");
         return success(map);
     }
 
@@ -134,7 +131,6 @@ public class MultiSignAccountCmd extends BaseCmd {
      */
     @CmdAnnotation(cmd = "ac_removeMultiSigAccount", version = 1.0, scope = "private", minEvent = 0, minPeriod = 0, description = "remove the multi sign account")
     public Response removeMultiSigAccount(Map params) {
-        LoggerUtil.logger.debug("ac_removeMultiSigAccount start");
         Map<String, Object> map = new HashMap<>();
         try {
             // check parameters
@@ -152,7 +148,6 @@ public class MultiSignAccountCmd extends BaseCmd {
         } catch (NulsRuntimeException e) {
             return failed(e.getErrorCode());
         }
-        LoggerUtil.logger.debug("ac_removeMultiSigAccount end");
         return success(map);
     }
 
@@ -164,7 +159,6 @@ public class MultiSignAccountCmd extends BaseCmd {
      */
     @CmdAnnotation(cmd = "ac_setMultiSigAlias", version = 1.0, scope = "private", minEvent = 0, minPeriod = 0, description = "set the alias of multi sign account")
     public Object setMultiAlias(Map params) {
-        LoggerUtil.logger.debug("ac_setMultiSigAlias start,params size:{}", params == null ? 0 : params.size());
         Map<String, String> map = new HashMap<>();
         int chainId;
         String address, password, alias, signAddress, txHash = null;
@@ -202,7 +196,7 @@ public class MultiSignAccountCmd extends BaseCmd {
             if (multiSignTransactionResultDto.isBroadcasted()) {
                 map.put("txHash", multiSignTransactionResultDto.getTransaction().getHash().getDigestHex());
             } else {
-                map.put("txHex", HexUtil.encode(multiSignTransactionResultDto.getTransaction().serialize()));
+                map.put("tx", RPCUtil.encode(multiSignTransactionResultDto.getTransaction().serialize()));
             }
         } catch (NulsRuntimeException e) {
             LoggerUtil.logger.info("", e);
@@ -211,7 +205,6 @@ public class MultiSignAccountCmd extends BaseCmd {
             LoggerUtil.logger.error("", e);
             return failed(AccountErrorCode.SYS_UNKOWN_EXCEPTION);
         }
-        LoggerUtil.logger.debug("ac_setMultiSigAlias end");
         return success(map);
     }
 
@@ -223,7 +216,6 @@ public class MultiSignAccountCmd extends BaseCmd {
      */
     @CmdAnnotation(cmd = "ac_getMultiSigAccount", version = 1.0, description = "Search for multi-signature accounts by address")
     public Object getMultiSigAccount(Map params) {
-        LoggerUtil.logger.debug("ac_getMultiSigAccount start,params size:{}", params == null ? 0 : params.size());
         int chainId;
         String address;
         MultiSigAccount multiSigAccount;
@@ -240,6 +232,10 @@ public class MultiSignAccountCmd extends BaseCmd {
                 throw new NulsRuntimeException(AccountErrorCode.ADDRESS_ERROR);
             }
             multiSigAccount = multiSignAccountService.getMultiSigAccountByAddress(chainId, address);
+            String data = null == multiSigAccount ? null : RPCUtil.encode(multiSigAccount.serialize());
+            Map<String, String> map = new HashMap<>(AccountConstant.INIT_CAPACITY_2);
+            map.put("value", data);
+            return success(map);
         } catch (NulsRuntimeException e) {
             LoggerUtil.logger.info("", e);
             return failed(e.getErrorCode());
@@ -247,8 +243,6 @@ public class MultiSignAccountCmd extends BaseCmd {
             LoggerUtil.logger.error("", e);
             return failed(AccountErrorCode.SYS_UNKOWN_EXCEPTION);
         }
-        LoggerUtil.logger.debug("ac_getMultiSigAccount end");
-        return success(multiSigAccount);
     }
 
 }

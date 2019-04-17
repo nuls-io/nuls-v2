@@ -9,10 +9,10 @@ import io.nuls.chain.service.AssetService;
 import io.nuls.chain.service.ChainService;
 import io.nuls.chain.storage.AssetStorage;
 import io.nuls.chain.storage.ChainAssetStorage;
+import io.nuls.rpc.util.TimeUtils;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.model.ByteUtils;
-import io.nuls.tools.thread.TimeService;
 
 import java.util.List;
 import java.util.Map;
@@ -116,7 +116,7 @@ public class AssetServiceImpl implements AssetService {
             throw new Exception("assetKey not exist: " + assetKey);
         }
         asset.setAvailable(available);
-        asset.setLastUpdateTime(TimeService.currentTimeMillis());
+        asset.setLastUpdateTime(TimeUtils.getCurrentTimeMillis());
         assetStorage.save(assetKey, asset);
     }
 

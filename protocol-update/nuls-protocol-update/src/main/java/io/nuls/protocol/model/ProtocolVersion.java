@@ -4,8 +4,6 @@ import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.basic.NulsOutputStreamBuffer;
 import io.nuls.base.data.BaseNulsData;
 import io.nuls.tools.exception.NulsException;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
 
 import java.io.IOException;
 import java.util.Comparator;
@@ -17,8 +15,6 @@ import java.util.Comparator;
  * @version 1.0
  * @date 19-1-30 下午3:23
  */
-@Data
-@EqualsAndHashCode(callSuper=false)
 public class ProtocolVersion extends BaseNulsData {
 
     public static final Comparator<ProtocolVersion> COMPARATOR = Comparator.comparingInt(ProtocolVersion::getVersion);
@@ -37,6 +33,34 @@ public class ProtocolVersion extends BaseNulsData {
      * 协议生效要满足的连续区间数(50-1000)
      */
     private short continuousIntervalCount;
+
+    public static Comparator<ProtocolVersion> getCOMPARATOR() {
+        return COMPARATOR;
+    }
+
+    public short getVersion() {
+        return version;
+    }
+
+    public void setVersion(short version) {
+        this.version = version;
+    }
+
+    public byte getEffectiveRatio() {
+        return effectiveRatio;
+    }
+
+    public void setEffectiveRatio(byte effectiveRatio) {
+        this.effectiveRatio = effectiveRatio;
+    }
+
+    public short getContinuousIntervalCount() {
+        return continuousIntervalCount;
+    }
+
+    public void setContinuousIntervalCount(short continuousIntervalCount) {
+        this.continuousIntervalCount = continuousIntervalCount;
+    }
 
     @Override
     public int size() {

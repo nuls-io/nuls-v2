@@ -15,12 +15,12 @@ import io.nuls.rpc.netty.processor.RequestMessageProcessor;
 import io.nuls.rpc.netty.thread.RequestByCountProcessor;
 import io.nuls.rpc.netty.thread.RequestByPeriodProcessor;
 import io.nuls.rpc.netty.thread.ResponseAutoProcessor;
+import io.nuls.rpc.util.TimeUtils;
 import io.nuls.tools.core.ioc.ScanUtil;
 import io.nuls.tools.core.ioc.SpringLiteContext;
 import io.nuls.tools.log.Log;
 import io.nuls.tools.model.StringUtils;
 import io.nuls.tools.parse.JSONUtils;
-import io.nuls.tools.thread.TimeService;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
@@ -146,7 +146,7 @@ public class ConnectManager {
     public static CmdDetail getLocalInvokeCmd(String cmd, double minVersion) {
 
         CmdDetail find = null;
-        for (CmdDetail cmdDetail : LOCAL.getApiMethods()) {
+        for (CmdDetail cmdDetail : LOCAL.getMethods()) {
             /*
             cmd不一致，跳过
             CMD inconsistency, skip
@@ -193,7 +193,7 @@ public class ConnectManager {
      */
     public static CmdDetail getLocalInvokeCmd(String cmd) {
         CmdDetail find = null;
-        for (CmdDetail cmdDetail : LOCAL.getApiMethods()) {
+        for (CmdDetail cmdDetail : LOCAL.getMethods()) {
             if (!cmdDetail.getMethodName().equals(cmd)) {
                 continue;
             }
@@ -218,17 +218,19 @@ public class ConnectManager {
      * @param packageName Package full path
      * @throws Exception Duplicate commands found
      */
-    public static void scanPackage(String packageName) throws Exception {
+    public static void scanPackage(Set<String> packageName) throws Exception {
         /*
         路径为空，跳过
         The path is empty, skip
          */
-        if (StringUtils.isNull(packageName)) {
+        if (packageName == null || packageName.size() == 0){
             return;
         }
-
-        List<Class> classList = ScanUtil.scan(packageName);
-        for (Class clz : classList) {
+        Set<Class> classes = new HashSet<>();
+        packageName.forEach(pack -> {
+            classes.addAll(ScanUtil.scan(pack));
+        });
+        for (Class clz : classes) {
             Method[] methods = clz.getDeclaredMethods();
             for (Method method : methods) {
                 CmdDetail cmdDetail = annotation2CmdDetail(method);
@@ -241,14 +243,14 @@ public class ConnectManager {
                 Repeated interfaces are registered only once
                  */
                 if (!isRegister(cmdDetail)) {
-                    LOCAL.getApiMethods().add(cmdDetail);
+                    LOCAL.getMethods().add(cmdDetail);
                     RequestMessageProcessor.handlerMap.put(cmdDetail.getInvokeClass(), SpringLiteContext.getBeanByClass(cmdDetail.getInvokeClass()));
                 } else {
                     throw new Exception(Constants.CMD_DUPLICATE + ":" + cmdDetail.getMethodName() + "-" + cmdDetail.getVersion());
                 }
             }
         }
-        LOCAL.getApiMethods().sort(Comparator.comparingDouble(CmdDetail::getVersion));
+        LOCAL.getMethods().sort(Comparator.comparingDouble(CmdDetail::getVersion));
     }
 
     public static void addCmdDetail(Class<?> claszs) {
@@ -263,7 +265,7 @@ public class ConnectManager {
                 Repeated interfaces are registered only once
                  */
             if (!isRegister(cmdDetail)) {
-                LOCAL.getApiMethods().add(cmdDetail);
+                LOCAL.getMethods().add(cmdDetail);
                 RequestMessageProcessor.handlerMap.put(cmdDetail.getInvokeClass(), SpringLiteContext.getBeanByClass(cmdDetail.getInvokeClass()));
             }
             ;
@@ -341,7 +343,7 @@ public class ConnectManager {
      */
     private static boolean isRegister(CmdDetail sourceCmdDetail) {
         boolean exist = false;
-        for (CmdDetail cmdDetail : LOCAL.getApiMethods()) {
+        for (CmdDetail cmdDetail : LOCAL.getMethods()) {
             if (cmdDetail.getMethodName().equals(sourceCmdDetail.getMethodName()) && cmdDetail.getVersion() == sourceCmdDetail.getVersion()) {
                 exist = true;
                 break;
@@ -496,14 +498,14 @@ public class ConnectManager {
             int changeCount = addCmdChangeCount(cmd);
             for (Message message : messageList) {
                 ConnectData connectData = MESSAGE_TO_CHANNEL_MAP.get(message);
-                String key = getSubscribeKey(message.getMessageId(), cmd);
+                String key = getSubscribeKey(message.getMessageID(), cmd);
                 if (connectData.getSubscribeInitCount().containsKey(key)) {
                     int initCount = connectData.getSubscribeInitCount().get(key);
                     Request request = JSONUtils.map2pojo((Map) message.getMessageData(), Request.class);
                     long eventCount = Long.parseLong(request.getSubscriptionEventCounter());
                     if ((changeCount - initCount) % eventCount == 0) {
                         try {
-                            connectData.getRequestEventResponseQueue().put(getRealResponse(cmd, message.getMessageId(), response));
+                            connectData.getRequestEventResponseQueue().put(getRealResponse(cmd, message.getMessageID(), response));
                         } catch (InterruptedException e) {
                             Log.error(e);
                         }
@@ -521,7 +523,7 @@ public class ConnectManager {
      */
     public static Response getRealResponse(String cmd, String messageId, Response response) {
         Response realResponse = new Response();
-        realResponse.setRequestId(messageId);
+        realResponse.setRequestID(messageId);
         realResponse.setResponseStatus(response.getResponseStatus());
         realResponse.setResponseComment(response.getResponseComment());
         realResponse.setResponseMaxSize(response.getResponseMaxSize());
@@ -597,7 +599,7 @@ public class ConnectManager {
         }
         String url = getRemoteUri(role);
         if (StringUtils.isBlank(url)) {
-            throw new Exception("Connection module not started");
+            throw new Exception("Connection module not started:"+role);
         }
         Channel channel = createConnect(url);
         channel = cacheConnect(role, channel, true);
@@ -637,9 +639,9 @@ public class ConnectManager {
          */
 
         Channel channel = NettyClient.createConnect(url);
-        long start = TimeService.currentTimeMillis();
-        while (!channel.isOpen()) {
-            if (TimeService.currentTimeMillis() - start > Constants.MILLIS_PER_SECOND * 5) {
+        long start =  TimeUtils.getCurrentTimeMillis();
+        while (channel==null || !channel.isOpen()) {
+            if ( TimeUtils.getCurrentTimeMillis() - start > Constants.MILLIS_PER_SECOND * 5) {
                 throw new Exception("Failed to connect " + url);
             }
             Thread.sleep(Constants.INTERVAL_TIMEMILLIS);
@@ -710,7 +712,6 @@ public class ConnectManager {
     public static void sendMessage(Channel channel, String message) {
         try {
             channel.eventLoop().execute(() -> {
-//                Log.debug("send message:{}",message);
                 channel.writeAndFlush(new TextWebSocketFrame(message));
             });
         } catch (Exception e) {
@@ -728,8 +729,8 @@ public class ConnectManager {
      */
     public synchronized static Channel cacheConnect(String role, Channel channel, boolean isSender) {
         if (!ROLE_CHANNEL_MAP.containsKey(role)
-                || (isSender && role.compareTo(LOCAL.getModuleAbbreviation()) > 0)
-                || (!isSender && role.compareTo(LOCAL.getModuleAbbreviation()) < 0)) {
+                || (isSender && role.compareTo(LOCAL.getAbbreviation()) > 0)
+                || (!isSender && role.compareTo(LOCAL.getAbbreviation()) < 0)) {
             createConnectData(channel);
             ROLE_CHANNEL_MAP.put(role, channel);
             return channel;

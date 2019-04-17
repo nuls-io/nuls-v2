@@ -91,7 +91,7 @@ public interface RpcParameterNameConstant {
     /**
      * dataHex
      */
-    String DATA_HEX = "dataHex";
+    String DATA = "data";
 
     /**
      * pageNumber
@@ -106,12 +106,8 @@ public interface RpcParameterNameConstant {
     /**
      * the hex of transaction
      */
-    String TX_HEX = "txHex";
+    String TX = "tx";
 
-    /**
-     * secondaryDataHex
-     */
-    String SECONDARY_DATA_HEX = "secondaryDataHex";
 
     /**
      * blockHeaderDigest
@@ -121,7 +117,7 @@ public interface RpcParameterNameConstant {
     /**
      * the hex of transaction list
      */
-    String TX_HEX_LIST = "txHexList";
+    String TX_LIST = "txList";
 
     /**
      * pubKeys
@@ -142,12 +138,12 @@ public interface RpcParameterNameConstant {
     /**
      * the public key hex string
      */
-    String PUB_KEY_HEX = "pubKeyHex";
+    String PUB_KEY = "pubKey";
 
     /**
      * the sig hex
      */
-    String SIG_HEX = "sigHex";
+    String SIG = "sig";
 
     /**
      * the to Address hex
@@ -167,7 +163,7 @@ public interface RpcParameterNameConstant {
     /**
      * the ASSETS_Id
      */
-    String ASSETS_Id = "assetsId";
+    String ASSETS_ID = "assetsId";
 
 
 }

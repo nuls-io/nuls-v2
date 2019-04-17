@@ -115,7 +115,8 @@ public class NodeGroupManager extends BaseManager {
     public void addNodeGroup(int chainId, NodeGroup nodeGroup) {
         nodeGroupMap.put(String.valueOf(chainId), nodeGroup);
         mgicNumChainIdMap.put(String.valueOf(nodeGroup.getMagicNumber()), String.valueOf(chainId));
-        LoggerUtil.createLogs(chainId);
+        String logLevel = SpringLiteContext.getBean(NetworkConfig.class).getLogLevel();
+        LoggerUtil.createLogs(chainId,logLevel);
     }
 
     public void removeNodeGroup(int chainId) {

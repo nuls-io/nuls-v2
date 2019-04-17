@@ -30,6 +30,7 @@ package io.nuls.ledger.constant;
  *
  * @seelink https://github.com/nuls-io/nuls_2.0_docs/blob/master/nulstar/%E4%BA%A4%E6%98%93%E7%B1%BB%E5%9E%8B%E5%AD%97%E5%85%B8.md
  * Created by wangkun23 on 2018/12/3.
+ * @author lanjinsheng
  */
 public enum TransactionType {
 
@@ -64,10 +65,11 @@ public enum TransactionType {
     /**
      * 智能合约交易
      */
-    TX_TYPE_CREATE_CONTRACT(100),
-    TX_TYPE_CALL_CONTRACT(101),
-    TX_TYPE_DELETE_CONTRACT(102),
-    TX_TYPE_CONTRACT_TRANSFER(103),
+    TX_TYPE_CREATE_CONTRACT(15),
+    TX_TYPE_CALL_CONTRACT(16),
+    TX_TYPE_DELETE_CONTRACT(17),
+    TX_TYPE_CONTRACT_TRANSFER(18),
+    TX_TYPE_CONTRACT_RETURN_GAS(19),
 
     /**
      * default

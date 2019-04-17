@@ -249,12 +249,12 @@ public class SerializeUtils {
      * @return int
      */
     public static long readUint48(byte[] bytes, int offset) {
-        return  (bytes[offset] & 0xffL) |
+        return (bytes[offset] & 0xffL) |
                 ((bytes[offset + 1] & 0xffL) << 8) |
                 ((bytes[offset + 2] & 0xffL) << 16) |
                 ((bytes[offset + 3] & 0xffL) << 24) |
                 ((bytes[offset + 4] & 0xffL) << 32) |
-                ((bytes[offset + 5] & 0xffL) << 40) ;
+                ((bytes[offset + 5] & 0xffL) << 40);
     }
 
     /**
@@ -264,7 +264,7 @@ public class SerializeUtils {
      * @param offset 偏移量（数组下标）
      */
     public static long readInt64LE(byte[] bytes, int offset) {
-        return  (bytes[offset] & 0xffL) |
+        return (bytes[offset] & 0xffL) |
                 ((bytes[offset + 1] & 0xffL) << 8) |
                 ((bytes[offset + 2] & 0xffL) << 16) |
                 ((bytes[offset + 3] & 0xffL) << 24) |
@@ -596,7 +596,7 @@ public class SerializeUtils {
      * @return int
      */
     public static int sizeOfBigInteger() {
-        return 16;
+        return 32;
     }
 
     /**
@@ -669,7 +669,7 @@ public class SerializeUtils {
      *
      * @return int
      */
-    public static int sizeOfNonce(){
+    public static int sizeOfNonce() {
         return 8;
     }
 
@@ -718,9 +718,12 @@ public class SerializeUtils {
      * @return 字节数组
      */
     public static byte[] bigInteger2Bytes(BigInteger value) {
-        byte[] bytes = new byte[16];
+        byte[] bytes = new byte[32];
         byte[] oBytes = value.toByteArray();
         oBytes = arrayReverse(oBytes);
+        if (oBytes.length > 32) {
+            throw new RuntimeException("The number is too large!");
+        }
         System.arraycopy(oBytes, 0, bytes, 0, oBytes.length);
         return bytes;
     }

@@ -25,11 +25,11 @@
 package io.nuls.ledger.model;
 
 import io.nuls.ledger.model.po.AccountState;
-import lombok.Getter;
-import lombok.Setter;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * @author lan
@@ -37,18 +37,45 @@ import java.util.List;
  * @date 2019/01/07
  **/
 public class AccountBalance {
-    @Setter
-    @Getter
     private List<String> nonces = new ArrayList<>();
-    @Setter
-    @Getter
+    Map<String,Integer> txHashMap = new ConcurrentHashMap<String,Integer>();
     private AccountState nowAccountState;
-    @Setter
-    @Getter
     private AccountState preAccountState;
+
+    public List<String> getNonces() {
+        return nonces;
+    }
+
+    public void setNonces(List<String> nonces) {
+        this.nonces = nonces;
+    }
+
+    public AccountState getNowAccountState() {
+        return nowAccountState;
+    }
+
+    public void setNowAccountState(AccountState nowAccountState) {
+        this.nowAccountState = nowAccountState;
+    }
+
+    public AccountState getPreAccountState() {
+        return preAccountState;
+    }
+
+    public void setPreAccountState(AccountState preAccountState) {
+        this.preAccountState = preAccountState;
+    }
 
     public AccountBalance(AccountState nowAccountState, AccountState preAccountState) {
         this.nowAccountState = nowAccountState;
         this.preAccountState = preAccountState;
+    }
+
+    public Map<String, Integer> getTxHashMap() {
+        return txHashMap;
+    }
+
+    public void setTxHashMap(Map<String, Integer> txHashMap) {
+        this.txHashMap = txHashMap;
     }
 }

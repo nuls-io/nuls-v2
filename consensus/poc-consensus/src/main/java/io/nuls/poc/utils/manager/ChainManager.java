@@ -3,22 +3,23 @@ package io.nuls.poc.utils.manager;
 import ch.qos.logback.classic.Level;
 import io.nuls.db.constant.DBErrorCode;
 import io.nuls.db.service.RocksDBService;
-import io.nuls.poc.config.ConsensusConfig;
+import io.nuls.poc.constant.ConsensusConfig;
 import io.nuls.poc.constant.ConsensusConstant;
 import io.nuls.poc.model.bo.Chain;
 import io.nuls.poc.model.bo.config.ConfigBean;
-import io.nuls.poc.model.bo.tx.TxRegisterDetail;
+import io.nuls.poc.rpc.call.CallMethodUtils;
 import io.nuls.poc.storage.ConfigService;
-import io.nuls.poc.utils.CallMethodUtils;
-import io.nuls.poc.utils.annotation.ResisterTx;
-import io.nuls.poc.utils.enumeration.TxMethodType;
-import io.nuls.poc.utils.enumeration.TxProperty;
+import io.nuls.tools.constant.TxType;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.core.ioc.ScanUtil;
 import io.nuls.tools.log.Log;
 import io.nuls.tools.log.logback.LoggerBuilder;
 import io.nuls.tools.log.logback.NulsLogger;
+import io.nuls.tools.protocol.ResisterTx;
+import io.nuls.tools.protocol.TxMethodType;
+import io.nuls.tools.protocol.TxProperty;
+import io.nuls.tools.protocol.TxRegisterDetail;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
@@ -50,8 +51,6 @@ public class ChainManager {
     private RoundManager roundManager;
     @Autowired
     private SchedulerManager schedulerManager;
-    @Autowired
-    private BlockManager blockManager;
     @Autowired
     private ConsensusConfig config;
     private Map<Integer, Chain> chainMap = new ConcurrentHashMap<>();
@@ -98,6 +97,9 @@ public class ChainManager {
              * */
             while (true) {
                 if (CallMethodUtils.registerTx(chain, txRegisterDetailList)) {
+                    if(chain.isPacker()){
+                        CallMethodUtils.sendState(chain,true);
+                    }
                     break;
                 }
                 try {
@@ -228,6 +230,8 @@ public class ChainManager {
             */
             if (configMap == null || configMap.size() == 0) {
                 ConfigBean configBean = config.getConfigBean();
+                configBean.setPassword(config.getPassword());
+                configBean.setSeedNodes(config.getSeedNodes());
                 configBean.setBlockReward(configBean.getInflationAmount().divide(ConsensusConstant.YEAR_MILLISECOND.divide(BigInteger.valueOf(configBean.getPackingInterval()))));
                 boolean saveSuccess = configService.save(configBean,configBean.getChainId());
                 if(saveSuccess){
@@ -298,7 +302,7 @@ public class ChainManager {
      */
     private void initCache(Chain chain) {
         try {
-            blockManager.loadBlockHeader(chain);
+            CallMethodUtils.loadBlockHeader(chain);
             agentManager.loadAgents(chain);
             depositManager.loadDeposits(chain);
             punishManager.loadPunishes(chain);
@@ -342,9 +346,9 @@ public class ChainManager {
                 }
             }
         }
-        registerDetailMap.put(ConsensusConstant.TX_TYPE_COINBASE, new TxRegisterDetail(TxProperty.COIN_BASE));
-        registerDetailMap.put(ConsensusConstant.TX_TYPE_RED_PUNISH, new TxRegisterDetail(TxProperty.RED_PUNISH));
-        registerDetailMap.put(ConsensusConstant.TX_TYPE_YELLOW_PUNISH, new TxRegisterDetail(TxProperty.YELLOW_PUNISH));
+        registerDetailMap.put(TxType.COIN_BASE, new TxRegisterDetail(TxProperty.COIN_BASE));
+        registerDetailMap.put(TxType.RED_PUNISH, new TxRegisterDetail(TxProperty.RED_PUNISH));
+        registerDetailMap.put(TxType.YELLOW_PUNISH, new TxRegisterDetail(TxProperty.YELLOW_PUNISH));
         return new ArrayList<>(registerDetailMap.values());
     }
 

@@ -29,7 +29,7 @@ import io.nuls.base.data.Transaction;
 import io.nuls.chain.model.po.Asset;
 import io.nuls.chain.model.po.BlockChain;
 import io.nuls.chain.model.tx.txdata.TxChain;
-import io.nuls.tools.crypto.HexUtil;
+import io.nuls.rpc.util.RPCUtil;
 import io.nuls.tools.model.StringUtils;
 import io.nuls.tools.log.Log;
 
@@ -68,7 +68,7 @@ public class TxUtil {
             }
             return blockChain;
         } catch (Exception e) {
-            LoggerUtil.Log.error(e);
+            LoggerUtil.logger().error(e);
             return null;
         }
     }
@@ -78,13 +78,13 @@ public class TxUtil {
             if (StringUtils.isBlank(txHex)) {
                 return null;
             }
-            byte[] txStream = HexUtil.decode(txHex);
+            byte[] txStream = RPCUtil.decode(txHex);
             Transaction tx = new Transaction();
             tx.parse(new NulsByteBuffer(txStream));
 
         } catch (Exception e) {
             e.printStackTrace();
-            LoggerUtil.Log.error("transaction parse error", e);
+            LoggerUtil.logger().error("transaction parse error", e);
             return null;
         }
         return null;

@@ -8,6 +8,7 @@ import io.nuls.rpc.info.NoUse;
 import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.model.message.Response;
 import io.nuls.rpc.netty.processor.ResponseMessageProcessor;
+import io.nuls.rpc.util.RPCUtil;
 import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.parse.SerializeUtils;
 import org.junit.BeforeClass;
@@ -151,7 +152,7 @@ public class ConsensusTest {
             caTxCommit.put("chainId",2);
             BlockHeader blockHeader = new BlockHeader();
             blockHeader.setHeight(0);
-            caTxCommit.put("blockHeader", HexUtil.encode(blockHeader.serialize()));
+            caTxCommit.put("blockHeader", RPCUtil.encode(blockHeader.serialize()));
             caTxCommit.put("tx",caTxHex);
             Response caCommitResp = ResponseMessageProcessor.requestAndResponse(ModuleE.CS.abbr, "cs_createAgentCommit", caTxCommit);
             HashMap caCommitResult = (HashMap)((HashMap) caCommitResp.getResponseData()).get("cs_createAgentCommit");
@@ -176,7 +177,7 @@ public class ConsensusTest {
             dpTxCommitParams.put("chainId",2);
             BlockHeader blockHeader1 = new BlockHeader();
             blockHeader.setHeight(0);
-            dpTxCommitParams.put("blockHeader", HexUtil.encode(blockHeader1.serialize()));
+            dpTxCommitParams.put("blockHeader", RPCUtil.encode(blockHeader1.serialize()));
             dpTxCommitParams.put("tx",dpTxHex);
             Response dpCommitResp = ResponseMessageProcessor.requestAndResponse(ModuleE.CS.abbr, "cs_depositCommit", dpTxCommitParams);
             System.out.println("deposit transaction commit:"+dpCommitResp.getResponseData());
@@ -191,6 +192,6 @@ public class ConsensusTest {
         roundData.setPackingIndexOfRound(1);
         roundData.setRoundIndex(1);
         roundData.setRoundStartTime(1L);
-        System.out.println(HexUtil.encode(roundData.serialize()));
+        System.out.println(RPCUtil.encode(roundData.serialize()));
     }
 }

@@ -16,9 +16,11 @@ import io.netty.handler.codec.http.websocketx.WebSocketVersion;
 import io.netty.handler.codec.http.websocketx.extensions.compression.WebSocketClientCompressionHandler;
 import io.nuls.rpc.netty.handler.ClientHandler;
 import io.nuls.rpc.netty.processor.ResponseMessageProcessor;
+import io.nuls.tools.log.Log;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.concurrent.TimeUnit;
 
 /**
  * netty客服端启动实现类
@@ -28,11 +30,18 @@ import java.net.URISyntaxException;
  * 2019/2/21
  */
 public class NettyClient {
+
+
+
     /**
      * 连接服务器，返回连接通道
      * Connect to the server and return to the connection channel
      */
     public static Channel createConnect(String uri) {
+        return createConnect(uri,0);
+    }
+
+    public static Channel createConnect(String uri,int tryCount) {
         try {
             URI webSocketURI = null;
             try {
@@ -43,7 +52,7 @@ public class NettyClient {
             final ClientHandler handler =
                     new ClientHandler(
                             WebSocketClientHandshakerFactory.newHandshaker(
-                                    webSocketURI, WebSocketVersion.V13, null, true, new DefaultHttpHeaders(), 65536 * 10));
+                                    webSocketURI, WebSocketVersion.V13, null, true, new DefaultHttpHeaders(), 10 * 1024 * 1024));
             EventLoopGroup group = new NioEventLoopGroup();
             Bootstrap b = new Bootstrap();
             b.group(group)
@@ -54,7 +63,7 @@ public class NettyClient {
                             ChannelPipeline p = ch.pipeline();
                             p.addLast(
                                     new HttpClientCodec(),
-                                    new HttpObjectAggregator(1024 * 1024 * 10),
+                                    new HttpObjectAggregator(10 * 1024 * 1024),
                                     WebSocketClientCompressionHandler.INSTANCE,
                                     handler);
                         }
@@ -64,8 +73,19 @@ public class NettyClient {
             ResponseMessageProcessor.handshake(ch);
             return ch;
         } catch (Exception e) {
-            e.printStackTrace();
-            return null;
+            if(tryCount < 6){
+                try {
+                    TimeUnit.SECONDS.sleep(5);
+                } catch (InterruptedException e1) {
+                    Log.error("重试ws连接时，休眠进程发生异常");
+                }
+                Log.info("创建ws失败，第{}重试",tryCount + 1);
+                return createConnect(uri,tryCount + 1);
+            }else{
+                Log.error("创建ws连接失败：{}",uri,e);
+                return null;
+            }
+
         }
     }
 }

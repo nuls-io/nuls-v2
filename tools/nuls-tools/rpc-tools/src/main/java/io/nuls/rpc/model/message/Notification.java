@@ -24,8 +24,9 @@
  */
 package io.nuls.rpc.model.message;
 
-import lombok.Data;
-import lombok.ToString;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
  * 通知
@@ -34,28 +35,71 @@ import lombok.ToString;
  * @author tangyi
  * @date 2018/11/15
  */
-@Data
-@ToString
+
 public class Notification {
     /**
      * (Default: 0): This is a boolean value.
      * 0: The Micro server that made the notification does not expect any kind of message in return.
      * 1: The Micro server that made the notification expects exactly one Ack message.
      */
-    private String notificationAck;
+    @JsonProperty
+    private String NotificationAck;
 
     /**
      * The category of the notification, each service may define its own types so it is not required that the target service processes this field.
      */
-    private String notificationType;
+    @JsonProperty
+    private String NotificationType;
 
     /**
      * A string comment that provides more information about the reason of the notification
      */
-    private String notificationComment;
+    @JsonProperty
+    private String NotificationComment;
 
     /**
      * Data relevant to the notification, it is not required the target service to process this field
      */
-    private String notificationData;
+    @JsonProperty
+    private String NotificationData;
+
+    @JsonIgnore
+    public String getNotificationAck() {
+        return NotificationAck;
+    }
+
+    @JsonIgnore
+    public void setNotificationAck(String NotificationAck) {
+        this.NotificationAck = NotificationAck;
+    }
+
+    @JsonIgnore
+    public String getNotificationType() {
+        return NotificationType;
+    }
+
+    @JsonIgnore
+    public void setNotificationType(String NotificationType) {
+        this.NotificationType = NotificationType;
+    }
+
+    @JsonIgnore
+    public String getNotificationComment() {
+        return NotificationComment;
+    }
+
+    @JsonIgnore
+    public void setNotificationComment(String NotificationComment) {
+        this.NotificationComment = NotificationComment;
+    }
+
+    @JsonIgnore
+    public String getNotificationData() {
+        return NotificationData;
+    }
+
+    @JsonIgnore
+    public void setNotificationData(String NotificationData) {
+        this.NotificationData = NotificationData;
+    }
 }

@@ -112,7 +112,7 @@ public class ChainGenerator {
         NulsDigestData hash = header.getHash();
         NulsDigestData preHash = header.getPreHash();
         Chain chain = new Chain();
-        LinkedList<NulsDigestData> hashs = new LinkedList();
+        LinkedList<NulsDigestData> hashs = new LinkedList<>();
         hashs.add(hash);
         chain.setChainId(chainId);
         chain.setStartHeight(height);
@@ -147,7 +147,7 @@ public class ChainGenerator {
         chain.setParent(null);
         chain.setPreviousHash(header.getPreHash());
         chain.setStartHashCode(header.getHash().hashCode());
-        LinkedList<NulsDigestData> hashs = new LinkedList();
+        LinkedList<NulsDigestData> hashs = new LinkedList<>();
         ChainParameters parameters = ContextManager.getContext(chainId).getParameters();
         int heightRange = parameters.getHeightRange();
         long start = height - heightRange + 1;

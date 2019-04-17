@@ -2,8 +2,8 @@ package io.nuls.api.rpc.controller;
 
 import io.nuls.api.analysis.WalletRpcHandler;
 import io.nuls.api.cache.ApiCache;
-import io.nuls.api.db.ContractService;
-import io.nuls.api.db.TokenService;
+import io.nuls.api.db.mongo.MongoContractServiceImpl;
+import io.nuls.api.db.mongo.MongoTokenServiceImpl;
 import io.nuls.api.exception.JsonRpcException;
 import io.nuls.api.manager.CacheManager;
 import io.nuls.api.model.po.db.*;
@@ -19,28 +19,37 @@ import io.nuls.tools.core.annotation.RpcMethod;
 import io.nuls.tools.log.Log;
 import io.nuls.tools.model.StringUtils;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Controller
 public class ContractController {
 
     @Autowired
-    private ContractService contractService;
+    private MongoContractServiceImpl mongoContractServiceImpl;
     @Autowired
-    private TokenService tokenService;
+    private MongoTokenServiceImpl mongoTokenServiceImpl;
 
     @RpcMethod("getContract")
     public RpcResult getContract(List<Object> params) {
         VerifyUtils.verifyParams(params, 2);
-        int chainId = (int) params.get(0);
-        String contractAddress = (String) params.get(1);
+        int chainId;
+        String contractAddress;
+        try {
+            chainId = (int) params.get(0);
+            contractAddress = (String) params.get(1);
+        } catch (Exception e) {
+            return RpcResult.paramError();
+        }
         if (!AddressTool.validAddress(chainId, contractAddress)) {
             throw new JsonRpcException(new RpcResultError(RpcErrorCode.PARAMS_ERROR, "[contractAddress] is inValid"));
         }
+        if (!CacheManager.isChainExist(chainId)) {
+            return RpcResult.dataNotFound();
+        }
+
         RpcResult rpcResult = new RpcResult();
         try {
-            ContractInfo contractInfo = contractService.getContractInfo(chainId, contractAddress);
+            ContractInfo contractInfo = mongoContractServiceImpl.getContractInfo(chainId, contractAddress);
             if (contractInfo == null) {
                 rpcResult.setError(new RpcResultError(RpcErrorCode.DATA_NOT_EXISTS));
             } else {
@@ -60,20 +69,32 @@ public class ContractController {
     @RpcMethod("getAccountTokens")
     public RpcResult getAccountTokens(List<Object> params) {
         VerifyUtils.verifyParams(params, 4);
-        int chainId = (int) params.get(0);
-        int pageIndex = (int) params.get(1);
-        int pageSize = (int) params.get(2);
-        String address = (String) params.get(3);
+        int chainId, pageIndex, pageSize;
+        String address;
+        try {
+            chainId = (int) params.get(0);
+            pageIndex = (int) params.get(1);
+            pageSize = (int) params.get(2);
+            address = (String) params.get(3);
+        } catch (Exception e) {
+            return RpcResult.paramError();
+        }
         if (!AddressTool.validAddress(chainId, address)) {
             throw new JsonRpcException(new RpcResultError(RpcErrorCode.PARAMS_ERROR, "[address] is inValid"));
         }
         if (pageIndex <= 0) {
             pageIndex = 1;
         }
-        if (pageSize <= 0 || pageSize > 100) {
+        if (pageSize <= 0 || pageSize > 1000) {
             pageSize = 10;
         }
-        PageInfo<AccountTokenInfo> pageInfo = tokenService.getAccountTokens(chainId, address, pageIndex, pageSize);
+        PageInfo<AccountTokenInfo> pageInfo;
+        if (!CacheManager.isChainExist(chainId)) {
+            pageInfo = new PageInfo<>(pageIndex, pageSize);
+        } else {
+            pageInfo = mongoTokenServiceImpl.getAccountTokens(chainId, address, pageIndex, pageSize);
+        }
+
         RpcResult result = new RpcResult();
         result.setResult(pageInfo);
         return result;
@@ -82,20 +103,32 @@ public class ContractController {
     @RpcMethod("getContractTokens")
     public RpcResult getContractTokens(List<Object> params) {
         VerifyUtils.verifyParams(params, 4);
-        int chainId = (int) params.get(0);
-        int pageIndex = (int) params.get(1);
-        int pageSize = (int) params.get(2);
-        String contractAddress = (String) params.get(3);
+        int chainId, pageIndex, pageSize;
+        String contractAddress;
+        try {
+            chainId = (int) params.get(0);
+            pageIndex = (int) params.get(1);
+            pageSize = (int) params.get(2);
+            contractAddress = (String) params.get(3);
+        } catch (Exception e) {
+            return RpcResult.paramError();
+        }
         if (!AddressTool.validAddress(chainId, contractAddress)) {
             throw new JsonRpcException(new RpcResultError(RpcErrorCode.PARAMS_ERROR, "[contractAddress] is inValid"));
         }
         if (pageIndex <= 0) {
             pageIndex = 1;
         }
-        if (pageSize <= 0 || pageSize > 100) {
+        if (pageSize <= 0 || pageSize > 1000) {
             pageSize = 10;
         }
-        PageInfo<AccountTokenInfo> pageInfo = tokenService.getContractTokens(chainId, contractAddress, pageIndex, pageSize);
+
+        PageInfo<AccountTokenInfo> pageInfo;
+        if (!CacheManager.isChainExist(chainId)) {
+            pageInfo = new PageInfo<>(pageIndex, pageSize);
+        } else {
+            pageInfo = mongoTokenServiceImpl.getContractTokens(chainId, contractAddress, pageIndex, pageSize);
+        }
         RpcResult result = new RpcResult();
         result.setResult(pageInfo);
         return result;
@@ -104,11 +137,17 @@ public class ContractController {
     @RpcMethod("getTokenTransfers")
     public RpcResult getTokenTransfers(List<Object> params) {
         VerifyUtils.verifyParams(params, 5);
-        int chainId = (int) params.get(0);
-        int pageIndex = (int) params.get(1);
-        int pageSize = (int) params.get(2);
-        String address = (String) params.get(3);
-        String contractAddress = (String) params.get(4);
+        int chainId, pageIndex, pageSize;
+        String address, contractAddress;
+        try {
+            chainId = (int) params.get(0);
+            pageIndex = (int) params.get(1);
+            pageSize = (int) params.get(2);
+            address = (String) params.get(3);
+            contractAddress = (String) params.get(4);
+        } catch (Exception e) {
+            return RpcResult.paramError();
+        }
 
         if (StringUtils.isBlank(address) && StringUtils.isBlank(contractAddress)) {
             throw new JsonRpcException(new RpcResultError(RpcErrorCode.PARAMS_ERROR, "[address] or [contractAddress] is inValid"));
@@ -116,10 +155,16 @@ public class ContractController {
         if (pageIndex <= 0) {
             pageIndex = 1;
         }
-        if (pageSize <= 0 || pageSize > 100) {
+        if (pageSize <= 0 || pageSize > 1000) {
             pageSize = 10;
         }
-        PageInfo<TokenTransfer> pageInfo = tokenService.getTokenTransfers(chainId, address, contractAddress, pageIndex, pageSize);
+
+        PageInfo<TokenTransfer> pageInfo;
+        if (!CacheManager.isChainExist(chainId)) {
+            pageInfo = new PageInfo<>(pageIndex, pageSize);
+        } else {
+            pageInfo = mongoTokenServiceImpl.getTokenTransfers(chainId, address, contractAddress, pageIndex, pageSize);
+        }
         RpcResult result = new RpcResult();
         result.setResult(pageInfo);
         return result;
@@ -128,11 +173,17 @@ public class ContractController {
     @RpcMethod("getContractTxList")
     public RpcResult getContractTxList(List<Object> params) {
         VerifyUtils.verifyParams(params, 5);
-        int chainId = (int) params.get(0);
-        int pageIndex = (int) params.get(1);
-        int pageSize = (int) params.get(2);
-        int type = (int) params.get(3);
-        String contractAddress = (String) params.get(4);
+        int chainId, pageIndex, pageSize, type;
+        String contractAddress;
+        try {
+            chainId = (int) params.get(0);
+            pageIndex = (int) params.get(1);
+            pageSize = (int) params.get(2);
+            type = (int) params.get(3);
+            contractAddress = (String) params.get(4);
+        } catch (Exception e) {
+            return RpcResult.paramError();
+        }
 
         if (!AddressTool.validAddress(chainId, contractAddress)) {
             throw new JsonRpcException(new RpcResultError(RpcErrorCode.PARAMS_ERROR, "[contractAddress] is inValid"));
@@ -140,10 +191,16 @@ public class ContractController {
         if (pageIndex <= 0) {
             pageIndex = 1;
         }
-        if (pageSize <= 0 || pageSize > 100) {
+        if (pageSize <= 0 || pageSize > 1000) {
             pageSize = 10;
         }
-        PageInfo<ContractTxInfo> pageInfo = contractService.getContractTxList(chainId, contractAddress, type, pageIndex, pageSize);
+
+        PageInfo<ContractTxInfo> pageInfo;
+        if (!CacheManager.isChainExist(chainId)) {
+            pageInfo = new PageInfo<>(pageIndex, pageSize);
+        } else {
+            pageInfo = mongoContractServiceImpl.getContractTxList(chainId, contractAddress, type, pageIndex, pageSize);
+        }
         RpcResult result = new RpcResult();
         result.setResult(pageInfo);
         return result;
@@ -152,18 +209,31 @@ public class ContractController {
     @RpcMethod("getContractList")
     public RpcResult getContractList(List<Object> params) {
         VerifyUtils.verifyParams(params, 5);
-        int chainId = (int) params.get(0);
-        int pageIndex = (int) params.get(1);
-        int pageSize = (int) params.get(2);
-        boolean onlyNrc20 = (boolean) params.get(3);
-        boolean isHidden = (boolean) params.get(4);
+        int chainId, pageIndex, pageSize;
+        boolean onlyNrc20, isHidden;
+        try {
+            chainId = (int) params.get(0);
+            pageIndex = (int) params.get(1);
+            pageSize = (int) params.get(2);
+            onlyNrc20 = (boolean) params.get(3);
+            isHidden = (boolean) params.get(4);
+        } catch (Exception e) {
+            return RpcResult.paramError();
+        }
+
         if (pageIndex <= 0) {
             pageIndex = 1;
         }
-        if (pageSize <= 0 || pageSize > 100) {
+        if (pageSize <= 0 || pageSize > 1000) {
             pageSize = 10;
         }
-        PageInfo<ContractInfo> pageInfo = contractService.getContractList(chainId, pageIndex, pageSize, onlyNrc20, isHidden);
+
+        PageInfo<ContractInfo> pageInfo;
+        if (!CacheManager.isChainExist(chainId)) {
+            pageInfo = new PageInfo<>(pageIndex, pageSize);
+        } else {
+            pageInfo = mongoContractServiceImpl.getContractList(chainId, pageIndex, pageSize, onlyNrc20, isHidden);
+        }
         RpcResult result = new RpcResult();
         result.setResult(pageInfo);
         return result;

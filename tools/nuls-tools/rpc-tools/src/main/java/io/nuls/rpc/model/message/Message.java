@@ -24,8 +24,9 @@
  */
 package io.nuls.rpc.model.message;
 
-import lombok.Data;
-import lombok.ToString;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
  * 所有消息都应该用该对象进行传输
@@ -35,32 +36,86 @@ import lombok.ToString;
  * @date 2018/11/15
  * @description
  */
-@Data
-@ToString
+
 public class Message {
 
     /**
      * 消息号 / Message ID
      */
-    private String messageId;
+    @JsonProperty
+    private String MessageID;
 
     /**
      * 消息发送时间 / Message sending time
      */
-    private String timestamp;
+    @JsonProperty
+    private String Timestamp;
 
     /**
-     * 消息发送时区 / Message sending timezone
+     * 消息发送时区 / Message sending Timezone
      */
-    private String timezone;
+    @JsonProperty
+    private String TimeZone;
 
     /**
      * 消息类型，共9种 / Message type, 9 types
      */
-    private String messageType;
+    @JsonProperty
+    private String MessageType;
 
     /**
-     * 消息体，根据messageType有不同的结构
+     * 消息体，根据MessageType有不同的结构
      */
-    private Object messageData;
+    @JsonProperty
+    private Object MessageData;
+
+    @JsonIgnore
+    public String getMessageID() {
+        return MessageID;
+    }
+
+    @JsonIgnore
+    public void setMessageID(String MessageId) {
+        this.MessageID = MessageId;
+    }
+
+    @JsonIgnore
+    public String getTimestamp() {
+        return Timestamp;
+    }
+
+    @JsonIgnore
+    public void setTimestamp(String Timestamp) {
+        this.Timestamp = Timestamp;
+    }
+
+    @JsonIgnore
+    public String getTimeZone() {
+        return TimeZone;
+    }
+
+    @JsonIgnore
+    public void setTimeZone(String Timezone) {
+        this.TimeZone = Timezone;
+    }
+
+    @JsonIgnore
+    public String getMessageType() {
+        return MessageType;
+    }
+
+    @JsonIgnore
+    public void setMessageType(String MessageType) {
+        this.MessageType = MessageType;
+    }
+
+    @JsonIgnore
+    public Object getMessageData() {
+        return MessageData;
+    }
+
+    @JsonIgnore
+    public void setMessageData(Object MessageData) {
+        this.MessageData = MessageData;
+    }
 }

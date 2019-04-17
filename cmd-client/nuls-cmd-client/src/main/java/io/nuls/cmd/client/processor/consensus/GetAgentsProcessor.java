@@ -85,6 +85,9 @@ public class GetAgentsProcessor extends ConsensusBaseProcessor {
         if (!StringUtils.isNumeric(args[1]) || !StringUtils.isNumeric(args[2])) {
             return false;
         }
+        checkArgsNumber(args,2,3);
+        checkIsNumeric(args[1],"pageNumber");
+        checkIsNumeric(args[2],"pageSize");
         return true;
     }
 

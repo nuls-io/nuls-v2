@@ -32,20 +32,19 @@ import io.nuls.chain.info.RpcConstants;
 import io.nuls.chain.model.dto.AccountBalance;
 import io.nuls.chain.model.po.BlockChain;
 import io.nuls.chain.service.RpcService;
+import io.nuls.chain.util.LoggerUtil;
 import io.nuls.chain.util.ResponseUtil;
 import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.model.message.Response;
 import io.nuls.rpc.netty.processor.ResponseMessageProcessor;
+import io.nuls.rpc.util.RPCUtil;
 import io.nuls.tools.core.annotation.Service;
-import io.nuls.tools.crypto.HexUtil;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import static io.nuls.chain.util.LoggerUtil.Log;
 
 /**
  * @program: nuls2.0
@@ -119,10 +118,10 @@ public class RpcServiceImpl  implements RpcService {
             params.put("list", txRegisterDetailList);
 
             Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.TX.abbr, RpcConstants.TX_REGISTER_CMD, params);
-            Log.debug("response={}",cmdResp);
+            LoggerUtil.logger().debug("response={}",cmdResp);
             return cmdResp.isSuccess();
         } catch (Exception e) {
-            Log.error("tx_register fail,wait for reg again");
+            LoggerUtil.logger().error("tx_register fail,wait for reg again");
             e.printStackTrace();
             return false;
         }
@@ -132,10 +131,10 @@ public class RpcServiceImpl  implements RpcService {
     public boolean newTx(Transaction tx) {
         try {
             Map<String, Object> params = new HashMap<>();
-            params.put(RpcConstants.TX_CHAIN_ID,  CmConstants.CHAIN_ASSET_MAP.get(CmConstants.NULS_CHAIN_ID));
-            params.put(RpcConstants.TX_DATA_HEX,HexUtil.encode(tx.serialize()));
+            params.put(RpcConstants.TX_CHAIN_ID,  CmRuntimeInfo.getMainIntChainId());
+            params.put(RpcConstants.TX_DATA_HEX,RPCUtil.encode(tx.serialize()));
             Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.TX.abbr, RpcConstants.CMD_TX_NEW, params);
-            Log.debug("response={}",cmdResp);
+            LoggerUtil.logger().debug("response={}",cmdResp);
             return cmdResp.isSuccess();
         } catch (Exception e) {
             e.printStackTrace();
@@ -180,14 +179,14 @@ public class RpcServiceImpl  implements RpcService {
     public AccountBalance getCoinData(String address) {
         try {
             Map<String,Object> map = new HashMap<>();
-            map.put("chainId",CmConstants.CHAIN_ASSET_MAP.get(CmConstants.NULS_CHAIN_ID));
-            map.put("assetChainId",CmConstants.CHAIN_ASSET_MAP.get(CmConstants.NULS_CHAIN_ID));
-            map.put("assetId",CmConstants.CHAIN_ASSET_MAP.get(CmConstants.NULS_ASSET_ID));
-            Response response =  ResponseMessageProcessor.requestAndResponse(CmConstants.MODULE_ROLE, RpcConstants.CMD_NW_CREATE_NODEGROUP,map );
-            Map resultMap =  ResponseUtil.getResultMap(response,RpcConstants.CMD_NW_CREATE_NODEGROUP);
+            map.put("chainId",CmRuntimeInfo.getMainIntChainId());
+            map.put("assetChainId",CmRuntimeInfo.getMainIntChainId());
+            map.put("assetId",CmRuntimeInfo.getMainIntAssetId());
+            Response response =  ResponseMessageProcessor.requestAndResponse(CmConstants.MODULE_ROLE, RpcConstants.CMD_LG_GET_COINDATA,map );
+            Map resultMap =  ResponseUtil.getResultMap(response,RpcConstants.CMD_LG_GET_COINDATA);
             if(null != resultMap){
                String available = resultMap.get("available").toString();
-               String nonce = resultMap.get("nonce").toString();
+               byte [] nonce = RPCUtil.decode(resultMap.get("nonce").toString());
                return new AccountBalance(available,nonce);
             }
         } catch (Exception e) {

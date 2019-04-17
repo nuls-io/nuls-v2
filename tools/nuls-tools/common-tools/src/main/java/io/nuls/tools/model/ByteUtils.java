@@ -90,7 +90,7 @@ public class ByteUtils {
     public static int bytesToInt(byte[] bytes) {
         int num = 0;
         int temp;
-        temp = (0x000000ff & (bytes[0])) << 0;
+        temp = (0x000000ff & (bytes[0]));
         num = num | temp;
         temp = (0x000000ff & (bytes[1])) << 8;
         num = num | temp;
@@ -167,7 +167,7 @@ public class ByteUtils {
      */
     public static byte[] shortToBytes(short num) {
         byte[] bytes = new byte[2];
-        bytes[0] = (byte) (0xff & (num >> 0));
+        bytes[0] = (byte) (0xff & (num));
         bytes[1] = (byte) (0xff & (num >> 8));
         return bytes;
     }
@@ -179,7 +179,7 @@ public class ByteUtils {
      * */
     public static byte[] intToBytes(int num) {
         byte[] bytes = new byte[4];
-        bytes[0] = (byte) (0xff & (num >> 0));
+        bytes[0] = (byte) (0xff & (num));
         bytes[1] = (byte) (0xff & (num >> 8));
         bytes[2] = (byte) (0xff & (num >> 16));
         bytes[3] = (byte) (0xff & (num >> 24));
@@ -215,32 +215,6 @@ public class ByteUtils {
     }
 
     /**
-     * 将BigInteger类型数据转为byte[]
-     * @param n  需要转换的数据
-     * @return
-     * */
-    public static byte[] bigIntegerToBytes(BigInteger n) {
-        byte[] temp;
-        if (n == null) {
-            return null;
-        }
-        int length = 32;
-        if (n.toByteArray().length == length+1) {
-            temp = new byte[length];
-            System.arraycopy(n.toByteArray(), 1, temp, 0, 32);
-        } else if (n.toByteArray().length == length) {
-            temp = n.toByteArray();
-        } else {
-            temp = new byte[length];
-            for (int i = 0; i < length - n.toByteArray().length; i++) {
-                temp[i] = 0;
-            }
-            System.arraycopy(n.toByteArray(), 0, temp, length - n.toByteArray().length, n.toByteArray().length);
-        }
-        return temp;
-    }
-
-    /**
      * 截取字节数组
      * @param input       源字节数组
      * @param startIndex  开始截取的下标
@@ -249,9 +223,7 @@ public class ByteUtils {
      * */
     public static byte[] subBytes(byte[] input, int startIndex, int length) {
         byte[] bt = new byte[length];
-        for (int i = 0; i < length; i++) {
-            bt[i] = input[i + startIndex];
-        }
+        System.arraycopy(input, startIndex, bt, 0, length);
         return bt;
     }
 

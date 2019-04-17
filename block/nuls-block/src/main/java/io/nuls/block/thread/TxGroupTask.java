@@ -1,31 +1,61 @@
 package io.nuls.block.thread;
 
 import io.nuls.block.message.HashListMessage;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
 
 import java.util.StringJoiner;
 import java.util.concurrent.Delayed;
 import java.util.concurrent.TimeUnit;
 
-@NoArgsConstructor
+/**
+ * TxGroup请求线程
+ *
+ * @author captain
+ * @version 1.0
+ * @date 18-12-4 下午8:29
+ */
 public class TxGroupTask implements Delayed {
-    @Getter
-    @Setter
     private long id;
-    @Getter
-    @Setter
     private HashListMessage request;
-    @Getter
-    @Setter
     private String nodeId;
     /**
      * 延迟时长，这个是必须的属性因为要按照这个判断延时时长。
      */
-    @Getter
-    @Setter
     private long excuteTime;
+
+    public long getId() {
+        return id;
+    }
+
+    public void setId(long id) {
+        this.id = id;
+    }
+
+    public HashListMessage getRequest() {
+        return request;
+    }
+
+    public void setRequest(HashListMessage request) {
+        this.request = request;
+    }
+
+    public String getNodeId() {
+        return nodeId;
+    }
+
+    public void setNodeId(String nodeId) {
+        this.nodeId = nodeId;
+    }
+
+    public long getExcuteTime() {
+        return excuteTime;
+    }
+
+    public void setExcuteTime(long excuteTime) {
+        this.excuteTime = excuteTime;
+    }
+
+    public TxGroupTask() {
+    }
 
     public TxGroupTask(long id, HashListMessage request, long delayTime) {
         this.id = id;

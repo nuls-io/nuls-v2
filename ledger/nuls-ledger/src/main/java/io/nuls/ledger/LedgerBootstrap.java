@@ -35,6 +35,7 @@ import io.nuls.rpc.modulebootstrap.Module;
 import io.nuls.rpc.modulebootstrap.NulsRpcModuleBootstrap;
 import io.nuls.rpc.modulebootstrap.RpcModule;
 import io.nuls.rpc.modulebootstrap.RpcModuleState;
+import io.nuls.rpc.util.TimeUtils;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.core.ioc.SpringLiteContext;
@@ -59,7 +60,10 @@ public class LedgerBootstrap extends RpcModule {
 
     @Override
     public Module[] getDependencies() {
-        return new Module[]{};
+
+        return new Module[]{
+                new Module(ModuleE.NW.abbr, "1.0")};
+
     }
 
     @Override
@@ -74,6 +78,7 @@ public class LedgerBootstrap extends RpcModule {
     public void init() {
         try {
             super.init();
+            LoggerUtil.logLevel = ledgerConfig.getLogLevel();
             LedgerConstant.UNCONFIRM_NONCE_EXPIRED_TIME = ledgerConfig.getUnconfirmedTxExpired();
             LedgerConstant.DEFAULT_ENCODING = ledgerConfig.getEncoding();
             //改为通过配置文件注入
@@ -91,13 +96,14 @@ public class LedgerBootstrap extends RpcModule {
     @Override
     public boolean doStart() {
         //springLite容器初始化AppInitializing
-        LoggerUtil.logger.info("Ledger READY");
+        LoggerUtil.logger().info("Ledger READY");
         return true;
     }
 
     @Override
     public RpcModuleState onDependenciesReady() {
-        LoggerUtil.logger.info("Ledger onDependenciesReady");
+        LoggerUtil.logger().info("Ledger onDependenciesReady");
+        TimeUtils.getInstance().start();
         return RpcModuleState.Running;
     }
 

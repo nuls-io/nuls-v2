@@ -26,9 +26,9 @@ package io.nuls.contract.rpc.call;
 import io.nuls.base.data.Transaction;
 import io.nuls.contract.rpc.CallHelper;
 import io.nuls.rpc.model.ModuleE;
+import io.nuls.rpc.util.RPCUtil;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.model.StringUtils;
-import org.spongycastle.util.encoders.Hex;
 
 import java.util.HashMap;
 import java.util.List;
@@ -56,10 +56,10 @@ public class TransactionCall {
         }
     }
 
-    public static boolean newTx(int chainId, String txHex) throws NulsException {
+    public static boolean newTx(int chainId, String txData) throws NulsException {
         Map<String, Object> params = new HashMap(4);
         params.put("chainId", chainId);
-        params.put("txHex", txHex);
+        params.put("tx", txData);
         try {
             Map<String, Boolean> registerResult = (Map<String, Boolean>) CallHelper.request(ModuleE.TX.abbr, "tx_newTx", params);
             return registerResult.get("value");
@@ -67,20 +67,31 @@ public class TransactionCall {
             throw new NulsException(e);
         }
     }
-
     public static Transaction getConfirmedTx(int chainId, String txHash) throws NulsException {
         Map<String, Object> params = new HashMap(4);
         params.put("chainId", chainId);
         params.put("txHash", txHash);
         try {
             Map result = (Map) CallHelper.request(ModuleE.TX.abbr, "tx_getConfirmedTx", params);
-            String txHex = (String) result.get("txHex");
-            if (StringUtils.isBlank(txHex)) {
+            String txData = (String) result.get("tx");
+            if (StringUtils.isBlank(txData)) {
                 return null;
             }
             Transaction tx = new Transaction();
-            tx.parse(Hex.decode(txHex), 0);
+            tx.parse(RPCUtil.decode(txData), 0);
             return tx;
+        } catch (Exception e) {
+            throw new NulsException(e);
+        }
+    }
+
+    public static boolean baseValidateTx(int chainId, String txData) throws NulsException {
+        Map<String, Object> params = new HashMap(4);
+        params.put("chainId", chainId);
+        params.put("tx", txData);
+        try {
+            Map<String, Boolean> baseValidateResult = (Map<String, Boolean>) CallHelper.request(ModuleE.TX.abbr, "tx_baseValidateTx", params);
+            return baseValidateResult.get("value");
         } catch (Exception e) {
             throw new NulsException(e);
         }

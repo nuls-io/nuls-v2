@@ -2,7 +2,7 @@ package io.nuls.api.rpc.controller;
 
 import io.nuls.api.analysis.WalletRpcHandler;
 import io.nuls.api.constant.ApiConstant;
-import io.nuls.api.db.*;
+import io.nuls.api.db.mongo.*;
 import io.nuls.api.exception.JsonRpcException;
 import io.nuls.api.manager.CacheManager;
 import io.nuls.api.model.po.db.*;
@@ -24,15 +24,15 @@ import static io.nuls.api.constant.MongoTableConstant.TX_COUNT;
 @Controller
 public class TransactionController {
     @Autowired
-    private TransactionService txService;
+    private MongoTransactionServiceImpl txService;
     @Autowired
-    private AgentService agentService;
+    private MongoAgentServiceImpl mongoAgentServiceImpl;
     @Autowired
-    private DepositService depositService;
+    private MongoDepositServiceImpl mongoDepositServiceImpl;
     @Autowired
-    private PunishService punishService;
+    private MongoPunishServiceImpl mongoPunishServiceImpl;
     @Autowired
-    private StatisticalService statisticalService;
+    private MongoStatisticalServiceImpl mongoStatisticalServiceImpl;
 
     @RpcMethod("getTx")
     public RpcResult getTx(List<Object> params) {
@@ -57,22 +57,22 @@ public class TransactionController {
             RpcResult rpcResult = new RpcResult();
             if (tx.getType() == ApiConstant.TX_TYPE_JOIN_CONSENSUS) {
                 DepositInfo depositInfo = (DepositInfo) tx.getTxData();
-                AgentInfo agentInfo = agentService.getAgentByHash(chainId, depositInfo.getAgentHash());
+                AgentInfo agentInfo = mongoAgentServiceImpl.getAgentByHash(chainId, depositInfo.getAgentHash());
                 tx.setTxData(agentInfo);
             } else if (tx.getType() == ApiConstant.TX_TYPE_CANCEL_DEPOSIT) {
                 DepositInfo depositInfo = (DepositInfo) tx.getTxData();
-                depositInfo = depositService.getDepositInfoByHash(chainId, depositInfo.getTxHash());
-                AgentInfo agentInfo = agentService.getAgentByHash(chainId, depositInfo.getAgentHash());
+                depositInfo = mongoDepositServiceImpl.getDepositInfoByHash(chainId, depositInfo.getTxHash());
+                AgentInfo agentInfo = mongoAgentServiceImpl.getAgentByHash(chainId, depositInfo.getAgentHash());
                 tx.setTxData(agentInfo);
             } else if (tx.getType() == ApiConstant.TX_TYPE_STOP_AGENT) {
                 AgentInfo agentInfo = (AgentInfo) tx.getTxData();
-                agentInfo = agentService.getAgentByHash(chainId, agentInfo.getTxHash());
+                agentInfo = mongoAgentServiceImpl.getAgentByHash(chainId, agentInfo.getTxHash());
                 tx.setTxData(agentInfo);
             } else if (tx.getType() == ApiConstant.TX_TYPE_YELLOW_PUNISH) {
-                List<TxDataInfo> punishLogs = punishService.getYellowPunishLog(chainId, tx.getHash());
+                List<TxDataInfo> punishLogs = mongoPunishServiceImpl.getYellowPunishLog(chainId, tx.getHash());
                 tx.setTxDataList(punishLogs);
             } else if (tx.getType() == ApiConstant.TX_TYPE_RED_PUNISH) {
-                PunishLogInfo punishLog = punishService.getRedPunishLog(chainId, tx.getHash());
+                PunishLogInfo punishLog = mongoPunishServiceImpl.getRedPunishLog(chainId, tx.getHash());
                 tx.setTxData(punishLog);
             } else if (tx.getType() == ApiConstant.TX_TYPE_CREATE_CONTRACT) {
 //                try {
@@ -159,8 +159,28 @@ public class TransactionController {
         if (!CacheManager.isChainExist(chainId)) {
             return RpcResult.success(new ArrayList<>());
         }
-        List list = this.statisticalService.getStatisticalList(chainId, type, TX_COUNT);
+        List list = this.mongoStatisticalServiceImpl.getStatisticalList(chainId, type, TX_COUNT);
         return new RpcResult().setResult(list);
+    }
+
+    @RpcMethod("validateTx")
+    public RpcResult validateTx(List<Object> params) {
+        VerifyUtils.verifyParams(params, 2);
+        int chainId;
+        String txHex;
+        try {
+            chainId = (int) params.get(0);
+            txHex = (String) params.get(1);
+        } catch (Exception e) {
+            return RpcResult.paramError();
+        }
+        if (!CacheManager.isChainExist(chainId)) {
+            return RpcResult.dataNotFound();
+        }
+        Result result = WalletRpcHandler.validateTx(chainId, txHex);
+
+        return RpcResult.success(result.getData());
+
     }
 
 }

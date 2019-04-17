@@ -1,8 +1,10 @@
 package io.nuls.api.service;
 
+import io.nuls.api.cache.ApiCache;
 import io.nuls.api.constant.ApiConstant;
 import io.nuls.api.constant.ApiErrorCode;
-import io.nuls.api.db.*;
+import io.nuls.api.db.RoundManager;
+import io.nuls.api.db.mongo.*;
 import io.nuls.api.manager.CacheManager;
 import io.nuls.api.model.po.db.*;
 import io.nuls.tools.core.annotation.Autowired;
@@ -17,29 +19,29 @@ public class RollbackService {
     @Autowired
     private MongoDBService mongoDBService;
     @Autowired
-    private AgentService agentService;
+    private MongoAgentServiceImpl mongoAgentServiceImpl;
     @Autowired
-    private AccountService accountService;
+    private MongoAccountServiceImpl mongoAccountServiceImpl;
     @Autowired
-    private AliasService aliasService;
+    private MongoAliasServiceImpl mongoAliasServiceImpl;
     @Autowired
-    private DepositService depositService;
+    private MongoDepositServiceImpl mongoDepositServiceImpl;
     @Autowired
-    private BlockService blockService;
+    private MongoBlockServiceImpl mongoBlockServiceImpl;
     @Autowired
-    private TransactionService transactionService;
+    private MongoTransactionServiceImpl mongoTransactionServiceImpl;
     @Autowired
-    private PunishService punishService;
+    private MongoPunishServiceImpl mongoPunishServiceImpl;
     @Autowired
     private RoundManager roundManager;
     @Autowired
-    private ContractService contractService;
+    private MongoContractServiceImpl mongoContractServiceImpl;
     @Autowired
-    private TokenService tokenService;
+    private MongoTokenServiceImpl mongoTokenServiceImpl;
     @Autowired
-    private ChainService chainService;
+    private MongoChainServiceImpl mongoChainServiceImpl;
     @Autowired
-    private AccountLedgerService ledgerService;
+    private MongoAccountLedgerServiceImpl ledgerService;
 
     //记录每个区块打包交易涉及到的账户的余额变动
     private Map<String, AccountInfo> accountInfoMap = new HashMap<>();
@@ -168,10 +170,16 @@ public class RollbackService {
             return;
         }
         Set<String> addressSet = new HashSet<>();
-
+        ApiCache apiCache = CacheManager.getCache(chainId);
+        AssetInfo assetInfo = apiCache.getChainInfo().getDefaultAsset();
         for (CoinToInfo output : tx.getCoinTos()) {
             addressSet.add(output.getAddress());
             calcBalance(chainId, output);
+            //奖励是本链主资产的时候，回滚奖励金额
+            if (assetInfo.getChainId() == output.getChainId() && assetInfo.getAssetId() == output.getAssetsId()) {
+                AccountInfo accountInfo = queryAccountInfo(chainId, output.getAddress());
+                accountInfo.setTotalReward(accountInfo.getTotalReward().subtract(output.getAmount()));
+            }
         }
 
         for (String address : addressSet) {
@@ -221,7 +229,7 @@ public class RollbackService {
             accountInfo.setTxCount(accountInfo.getTxCount() - 1);
         }
 
-        AliasInfo aliasInfo = aliasService.getAliasByAddress(chainId, tx.getCoinFroms().get(0).getAddress());
+        AliasInfo aliasInfo = mongoAliasServiceImpl.getAliasByAddress(chainId, tx.getCoinFroms().get(0).getAddress());
         if (aliasInfo != null) {
             AccountInfo accountInfo = queryAccountInfo(chainId, aliasInfo.getAddress());
             accountInfo.setAlias(null);
@@ -248,7 +256,7 @@ public class RollbackService {
         calcBalance(chainId, accountInfo, tx.getFee(), input);
 
         //查找到委托记录，设置isNew = true，最后做存储的时候删除
-        DepositInfo depositInfo = depositService.getDepositInfoByKey(chainId, tx.getHash() + accountInfo.getAddress());
+        DepositInfo depositInfo = mongoDepositServiceImpl.getDepositInfoByKey(chainId, tx.getHash() + accountInfo.getAddress());
         depositInfo.setNew(true);
         depositInfoList.add(depositInfo);
         AgentInfo agentInfo = queryAgentInfo(chainId, depositInfo.getAgentHash(), 1);
@@ -268,8 +276,8 @@ public class RollbackService {
         accountInfo.setTotalBalance(accountInfo.getTotalBalance().add(tx.getFee()));
 
         //查询取消委托记录，再根据deleteHash反向查到委托记录
-        DepositInfo cancelInfo = depositService.getDepositInfoByHash(chainId, tx.getHash());
-        DepositInfo depositInfo = depositService.getDepositInfoByKey(chainId, cancelInfo.getDeleteKey());
+        DepositInfo cancelInfo = mongoDepositServiceImpl.getDepositInfoByHash(chainId, tx.getHash());
+        DepositInfo depositInfo = mongoDepositServiceImpl.getDepositInfoByKey(chainId, cancelInfo.getDeleteKey());
         depositInfo.setDeleteKey(null);
         depositInfo.setDeleteHeight(0);
         cancelInfo.setNew(true);
@@ -297,13 +305,13 @@ public class RollbackService {
         agentInfo.setStatus(1);
         agentInfo.setNew(false);
         //根据交易hash查询所有取消委托的记录
-        List<DepositInfo> depositInfos = depositService.getDepositListByHash(chainId, tx.getHash());
+        List<DepositInfo> depositInfos = mongoDepositServiceImpl.getDepositListByHash(chainId, tx.getHash());
         if (!depositInfos.isEmpty()) {
             for (DepositInfo cancelDeposit : depositInfos) {
                 //需要删除的数据
                 cancelDeposit.setNew(true);
 
-                DepositInfo depositInfo = depositService.getDepositInfoByKey(chainId, cancelDeposit.getDeleteKey());
+                DepositInfo depositInfo = mongoDepositServiceImpl.getDepositInfoByKey(chainId, cancelDeposit.getDeleteKey());
                 depositInfo.setDeleteHeight(0);
                 depositInfo.setDeleteKey(null);
 
@@ -316,7 +324,7 @@ public class RollbackService {
     }
 
     private void processYellowPunishTx(int chainId, TransactionInfo tx) {
-        List<TxDataInfo> logList = punishService.getYellowPunishLog(chainId, tx.getHash());
+        List<TxDataInfo> logList = mongoPunishServiceImpl.getYellowPunishLog(chainId, tx.getHash());
         Set<String> addressSet = new HashSet<>();
         for (TxDataInfo txData : logList) {
             PunishLogInfo punishLog = (PunishLogInfo) txData;
@@ -337,7 +345,7 @@ public class RollbackService {
             AccountInfo accountInfo = queryAccountInfo(chainId, output.getAddress());
             accountInfo.setTxCount(accountInfo.getTxCount() - 1);
         }
-        PunishLogInfo redPunish = punishService.getRedPunishLog(chainId, tx.getHash());
+        PunishLogInfo redPunish = mongoPunishServiceImpl.getRedPunishLog(chainId, tx.getHash());
         //根据红牌找到被惩罚的节点
         AgentInfo agentInfo = queryAgentInfo(chainId, redPunish.getAddress(), 2);
         agentInfo.setDeleteHash(null);
@@ -345,12 +353,12 @@ public class RollbackService {
         agentInfo.setStatus(1);
         agentInfo.setNew(false);
         //根据交易hash查询所有取消委托的记录
-        List<DepositInfo> depositInfos = depositService.getDepositListByHash(chainId, tx.getHash());
+        List<DepositInfo> depositInfos = mongoDepositServiceImpl.getDepositListByHash(chainId, tx.getHash());
         if (!depositInfos.isEmpty()) {
             for (DepositInfo cancelDeposit : depositInfos) {
                 cancelDeposit.setNew(true);
 
-                DepositInfo depositInfo = depositService.getDepositInfoByKey(chainId, cancelDeposit.getDeleteKey());
+                DepositInfo depositInfo = mongoDepositServiceImpl.getDepositInfoByKey(chainId, cancelDeposit.getDeleteKey());
                 depositInfo.setDeleteHeight(0);
                 depositInfo.setDeleteKey(null);
 
@@ -369,11 +377,11 @@ public class RollbackService {
         accountInfo.setTotalOut(accountInfo.getTotalOut().subtract(tx.getFee()));
         accountInfo.setTotalBalance(accountInfo.getTotalBalance().add(tx.getFee()));
 
-        ContractInfo contractInfo = contractService.getContractInfoByHash(chainId, tx.getHash());
+        ContractInfo contractInfo = mongoContractServiceImpl.getContractInfoByHash(chainId, tx.getHash());
         contractInfo = queryContractInfo(chainId, contractInfo.getContractAddress());
         contractInfo.setNew(false);
         contractTxHashList.add(tx.getHash());
-        ContractResultInfo resultInfo = contractService.getContractResultInfo(chainId, tx.getHash());
+        ContractResultInfo resultInfo = mongoContractServiceImpl.getContractResultInfo(chainId, tx.getHash());
         if (resultInfo.isSuccess()) {
             processTokenTransfers(chainId, resultInfo.getTokenTransfers(), tx);
         }
@@ -382,7 +390,7 @@ public class RollbackService {
     private void processCallContract(int chainId, TransactionInfo tx) {
         processTransferTx(chainId, tx);
         contractTxHashList.add(tx.getHash());
-        ContractResultInfo resultInfo = contractService.getContractResultInfo(chainId, tx.getHash());
+        ContractResultInfo resultInfo = mongoContractServiceImpl.getContractResultInfo(chainId, tx.getHash());
         ContractInfo contractInfo = queryContractInfo(chainId, resultInfo.getContractAddress());
         contractInfo.setTxCount(contractInfo.getTxCount() - 1);
 
@@ -399,7 +407,7 @@ public class RollbackService {
         accountInfo.setTotalBalance(accountInfo.getTotalBalance().add(tx.getFee()));
 
         //首先查询合约交易执行结果
-        ContractResultInfo resultInfo = contractService.getContractResultInfo(chainId, tx.getHash());
+        ContractResultInfo resultInfo = mongoContractServiceImpl.getContractResultInfo(chainId, tx.getHash());
         //再查询智能合约
         ContractInfo contractInfo = queryContractInfo(chainId, resultInfo.getContractAddress());
         contractInfo.setTxCount(contractInfo.getTxCount() - 1);
@@ -492,59 +500,59 @@ public class RollbackService {
     }
 
     private void save(int chainId, BlockInfo blockInfo) {
-        SyncInfo syncInfo = chainService.getSyncInfo(chainId);
+        SyncInfo syncInfo = mongoChainServiceImpl.getSyncInfo(chainId);
         if (blockInfo.getHeader().getHeight() != syncInfo.getBestHeight()) {
             throw new NulsRuntimeException(ApiErrorCode.DATA_ERROR);
         }
         if (syncInfo.isFinish()) {
-            accountService.saveAccounts(chainId, accountInfoMap);
+            mongoAccountServiceImpl.saveAccounts(chainId, accountInfoMap);
             syncInfo.setStep(50);
-            chainService.updateStep(syncInfo);
+            mongoChainServiceImpl.updateStep(syncInfo);
         }
 
         if (syncInfo.getStep() == 50) {
-            tokenService.saveAccountTokens(chainId, accountTokenMap);
+            mongoTokenServiceImpl.saveAccountTokens(chainId, accountTokenMap);
             syncInfo.setStep(40);
-            chainService.updateStep(syncInfo);
+            mongoChainServiceImpl.updateStep(syncInfo);
         }
 
         if (syncInfo.getStep() == 40) {
-            contractService.rollbackContractInfos(chainId, contractInfoMap);
+            mongoContractServiceImpl.rollbackContractInfos(chainId, contractInfoMap);
             syncInfo.setStep(30);
-            chainService.updateStep(syncInfo);
+            mongoChainServiceImpl.updateStep(syncInfo);
         }
 
         if (syncInfo.getStep() == 30) {
             ledgerService.saveLedgerList(chainId, accountLedgerInfoMap);
             syncInfo.setStep(20);
-            chainService.updateStep(syncInfo);
+            mongoChainServiceImpl.updateStep(syncInfo);
         }
 
         if (syncInfo.getStep() == 20) {
-            agentService.rollbackAgentList(chainId, agentInfoList);
+            mongoAgentServiceImpl.rollbackAgentList(chainId, agentInfoList);
             syncInfo.setStep(10);
-            chainService.updateStep(syncInfo);
+            mongoChainServiceImpl.updateStep(syncInfo);
         }
 
         //回滾token转账信息
-        tokenService.rollbackTokenTransfers(chainId, tokenTransferHashList, blockInfo.getHeader().getHeight());
+        mongoTokenServiceImpl.rollbackTokenTransfers(chainId, tokenTransferHashList, blockInfo.getHeader().getHeight());
         //回滾智能合約交易
-        contractService.rollbackContractTxInfos(chainId, contractTxHashList);
-        contractService.rollbackContractResults(chainId, contractTxHashList);
-        depositService.rollbackDepoist(chainId, depositInfoList);
-        punishService.rollbackPunishLog(chainId, punishTxHashList, blockInfo.getHeader().getHeight());
-        aliasService.rollbackAliasList(chainId, aliasInfoList);
-        transactionService.rollbackTxRelationList(chainId, blockInfo.getHeader().getTxHashList());
-        transactionService.rollbackTx(chainId, blockInfo.getHeader().getTxHashList());
-        blockService.deleteBlockHeader(chainId, blockInfo.getHeader().getHeight());
+        mongoContractServiceImpl.rollbackContractTxInfos(chainId, contractTxHashList);
+        mongoContractServiceImpl.rollbackContractResults(chainId, contractTxHashList);
+        mongoDepositServiceImpl.rollbackDeposit(chainId, depositInfoList);
+        mongoPunishServiceImpl.rollbackPunishLog(chainId, punishTxHashList, blockInfo.getHeader().getHeight());
+        mongoAliasServiceImpl.rollbackAliasList(chainId, aliasInfoList);
+        mongoTransactionServiceImpl.rollbackTxRelationList(chainId, blockInfo.getHeader().getTxHashList());
+        mongoTransactionServiceImpl.rollbackTx(chainId, blockInfo.getHeader().getTxHashList());
+        mongoBlockServiceImpl.deleteBlockHeader(chainId, blockInfo.getHeader().getHeight());
 
         syncInfo.setStep(100);
         syncInfo.setBestHeight(blockInfo.getHeader().getHeight() - 1);
-        chainService.updateStep(syncInfo);
+        mongoChainServiceImpl.updateStep(syncInfo);
     }
 
     private BlockInfo queryBlock(int chainId, long blockHeight) {
-        BlockHeaderInfo headerInfo = blockService.getBlockHeader(chainId, blockHeight);
+        BlockHeaderInfo headerInfo = mongoBlockServiceImpl.getBlockHeader(chainId, blockHeight);
         if (headerInfo == null) {
             return null;
         }
@@ -552,7 +560,7 @@ public class RollbackService {
         blockInfo.setHeader(headerInfo);
         List<TransactionInfo> txList = new ArrayList<>();
         for (int i = 0; i < headerInfo.getTxHashList().size(); i++) {
-            TransactionInfo tx = transactionService.getTx(chainId, headerInfo.getTxHashList().get(i));
+            TransactionInfo tx = mongoTransactionServiceImpl.getTx(chainId, headerInfo.getTxHashList().get(i));
             if (tx != null) {
                 txList.add(tx);
             }
@@ -564,7 +572,7 @@ public class RollbackService {
     private AccountInfo queryAccountInfo(int chainId, String address) {
         AccountInfo accountInfo = accountInfoMap.get(address);
         if (accountInfo == null) {
-            accountInfo = accountService.getAccountInfo(chainId, address);
+            accountInfo = mongoAccountServiceImpl.getAccountInfo(chainId, address);
             if (accountInfo == null) {
                 accountInfo = new AccountInfo(address);
             }
@@ -600,11 +608,11 @@ public class RollbackService {
             }
         }
         if (type == 1) {
-            agentInfo = agentService.getAgentByHash(chainId, key);
+            agentInfo = mongoAgentServiceImpl.getAgentByHash(chainId, key);
         } else if (type == 2) {
-            agentInfo = agentService.getAgentByAgentAddress(chainId, key);
+            agentInfo = mongoAgentServiceImpl.getAgentByAgentAddress(chainId, key);
         } else {
-            agentInfo = agentService.getAgentByPackingAddress(chainId, key);
+            agentInfo = mongoAgentServiceImpl.getAgentByPackingAddress(chainId, key);
         }
         if (agentInfo != null) {
             agentInfoList.add(agentInfo);
@@ -615,7 +623,7 @@ public class RollbackService {
     private ContractInfo queryContractInfo(int chainId, String contractAddress) {
         ContractInfo contractInfo = contractInfoMap.get(contractAddress);
         if (contractInfo == null) {
-            contractInfo = contractService.getContractInfo(chainId, contractAddress);
+            contractInfo = mongoContractServiceImpl.getContractInfo(chainId, contractAddress);
             contractInfoMap.put(contractInfo.getContractAddress(), contractInfo);
         }
         return contractInfo;
@@ -624,7 +632,7 @@ public class RollbackService {
     private AccountTokenInfo queryAccountTokenInfo(int chainId, String key) {
         AccountTokenInfo accountTokenInfo = accountTokenMap.get(key);
         if (accountTokenInfo == null) {
-            accountTokenInfo = tokenService.getAccountTokenInfo(chainId, key);
+            accountTokenInfo = mongoTokenServiceImpl.getAccountTokenInfo(chainId, key);
         }
         return accountTokenInfo;
     }

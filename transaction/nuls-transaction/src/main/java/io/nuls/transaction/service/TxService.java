@@ -3,10 +3,7 @@ package io.nuls.transaction.service;
 import io.nuls.base.data.NulsDigestData;
 import io.nuls.base.data.Transaction;
 import io.nuls.tools.exception.NulsException;
-import io.nuls.transaction.model.bo.Chain;
-import io.nuls.transaction.model.bo.TxPackage;
-import io.nuls.transaction.model.bo.TxRegister;
-import io.nuls.transaction.model.bo.VerifyTxResult;
+import io.nuls.transaction.model.bo.*;
 import io.nuls.transaction.model.po.TransactionConfirmedPO;
 
 import java.util.List;
@@ -35,7 +32,16 @@ public interface TxService {
      * @return boolean
      * @throws NulsException NulsException
      */
-    void newTx(Chain chain, Transaction transaction) throws NulsException;
+    void newBroadcastTx(Chain chain, Transaction transaction) throws NulsException;
+
+
+    /**
+     * 由节点产生的新交易,该交易已通过验证器验证和账本验证,可放入待打包队列以及未确认存储
+     * @param chain
+     * @param transaction
+     * @throws NulsException
+     */
+    boolean newTx(Chain chain, Transaction transaction);
 
 
     /**
@@ -44,7 +50,7 @@ public interface TxService {
      * @param tx
      * @return
      */
-    boolean verify(Chain chain, Transaction tx);
+    VerifyResult verify(Chain chain, Transaction tx);
 
     /**
      * 验证交易,不执行基础的校验
@@ -53,7 +59,25 @@ public interface TxService {
      * @param incloudBasic
      * @return
      */
-    boolean verify(Chain chain, Transaction tx, boolean incloudBasic);
+    VerifyResult verify(Chain chain, Transaction tx, boolean incloudBasic);
+
+    /**
+     * 交易基础验证
+     * 基础字段
+     * 交易size
+     * 交易类型
+     * 交易签名
+     * from的地址必须全部是发起链(本链or相同链）地址
+     * from里面的资产是否存在
+     * to里面的地址必须是相同链的地址
+     * 交易手续费
+     *
+     * @param chain
+     * @param tx
+     * @param txRegister
+     * @throws NulsException
+     */
+    void baseValidateTx(Chain chain, Transaction tx, TxRegister txRegister) throws NulsException;
 
     /**
      * Get a transaction, first check the database from the confirmation transaction,
@@ -66,32 +90,6 @@ public interface TxService {
      * @return Transaction 如果没有找到则返回null
      */
     TransactionConfirmedPO getTransaction(Chain chain, NulsDigestData hash);
-
-
-
-    /**
-     * 单个跨链交易本地验证器
-     *
-     * @param chain       链id
-     * @param transaction 跨链交易
-     * @return boolean
-     * @throws NulsException
-     */
-    boolean crossTransactionValidator(Chain chain, Transaction transaction) throws NulsException;
-
-    /**
-     * 如果有txData相同的交易,则过滤掉后面一个
-     * @param chain
-     * @param txHexList
-     * @return List<String> txHex
-     * @throws NulsException
-     */
-    List<String> transactionModuleValidator(Chain chain, List<String> txHexList) throws NulsException;
-
-    boolean crossTransactionCommit(Chain chain, List<String> txHex, String blockHeaderHex) throws NulsException;
-
-    boolean crossTransactionRollback(Chain chain, List<String> txHex, String blockHeaderHex) throws NulsException;
-
 
     /**
      *  共识打包获取打包所需交易
@@ -119,7 +117,7 @@ public interface TxService {
      * @return
      * @throws NulsException
      */
-    VerifyTxResult batchVerify(Chain chain, List<String> list, long blockHeight, long blockTime, String packingAddress, String stateRoot, String preStateRoot) throws NulsException;
+    VerifyLedgerResult batchVerify(Chain chain, List<String> list, long blockHeight, long blockTime, String packingAddress, String stateRoot, String preStateRoot) throws Exception;
 
 
     /**
@@ -129,7 +127,7 @@ public interface TxService {
      * @param txList
      * @return
      */
-    void clearInvalidTx(Chain chain, List<Transaction> txList);
+//    void clearInvalidTx(Chain chain, List<Transaction> txList);
 
     /**
      * 从已验证未打包交易中删除单个无效的交易
@@ -147,4 +145,5 @@ public interface TxService {
      * @param cleanLedgerUfmTx 调用账本的未确认回滚
      */
     void clearInvalidTx(Chain chain, Transaction tx, boolean cleanLedgerUfmTx);
+
 }

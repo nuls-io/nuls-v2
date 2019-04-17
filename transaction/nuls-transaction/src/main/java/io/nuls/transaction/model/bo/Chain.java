@@ -1,25 +1,29 @@
 package io.nuls.transaction.model.bo;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import io.nuls.base.data.NulsDigestData;
 import io.nuls.base.data.Transaction;
 import io.nuls.tools.log.logback.NulsLogger;
+import io.nuls.transaction.constant.TxConstant;
 import io.nuls.transaction.model.bo.config.ConfigBean;
 import io.nuls.transaction.utils.queue.entity.PersistentQueue;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.BlockingDeque;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
- * 链信息类
+ * 链的基础数据和运行状态数据
  * Chain information class
- *
- * @author qinyifeng
- * @date 2018/12/11
- **/
+ * @author: Charlie
+ * @date: 2019/04/16
+ */
 public class Chain {
 
     /**
@@ -44,12 +48,6 @@ public class Chain {
     private Map<String, NulsLogger> loggerMap;
 
     /**
-     * 管理接收的其他链创建的跨链交易(如果有), 暂存验证中的跨链交易.
-     * //TODO 初始化时需查数据库
-     */
-//    private Map<NulsDigestData, CrossTx> crossTxVerifyingMap;
-
-    /**
      * 交易注册信息
      */
     private Map<Integer, TxRegister> txRegisterMap;
@@ -58,11 +56,6 @@ public class Chain {
      * 交易已完成交易管理模块的校验(打包的时候从这里取)
      */
     private BlockingDeque<Transaction> txQueue;
-
-    /**
-     * 孤儿交易
-     */
-//    private LimitHashMap<NulsDigestData, Transaction> orphanContainer;
 
     /**
      * 未进行验证的交易队列
@@ -82,14 +75,29 @@ public class Chain {
     @JsonIgnore
     private ScheduledThreadPoolExecutor scheduledThreadPoolExecutor;
 
-    public Chain() throws Exception {
-        this.packaging =  new AtomicBoolean(false);
+
+    /**
+     * 是否有智能合约交易在打包时,
+     * 模块统一验证的二次验证时验证不通过.
+     * (这样在当次打包时就不需要获取智能合约的执行结果)
+     */
+    private boolean contractTxFail;
+
+    /**
+     * 打包时处理孤儿交易的map
+     */
+    private Map<NulsDigestData, Integer> txPackageOrphanMap;
+
+    private final Lock packageLock = new ReentrantLock();
+
+    public Chain() {
+        this.packaging = new AtomicBoolean(false);
         this.rePackage = new AtomicBoolean(true);
-        this.txRegisterMap = new HashMap<>();
+        this.txRegisterMap = new ConcurrentHashMap<>(TxConstant.INIT_CAPACITY_32);
         this.txQueue = new LinkedBlockingDeque<>();
-//        this.orphanContainer = new LimitHashMap(TxConstant.ORPHAN_CONTAINER_MAX_SIZE);
-//        this.unverifiedQueue = new PersistentQueue(TxConstant.TX_UNVERIFIED_QUEUE, TxConstant.TX_UNVERIFIED_QUEUE_MAXSIZE);
         this.loggerMap = new HashMap<>();
+        contractTxFail = false;
+        txPackageOrphanMap = new HashMap<>();
     }
 
     public int getChainId(){
@@ -136,14 +144,6 @@ public class Chain {
         this.txQueue = txQueue;
     }
 
-//    public LimitHashMap<NulsDigestData, Transaction> getOrphanContainer() {
-//        return orphanContainer;
-//    }
-//
-//    public void setOrphanContainer(LimitHashMap<NulsDigestData, Transaction> orphanContainer) {
-//        this.orphanContainer = orphanContainer;
-//    }
-
     public PersistentQueue getUnverifiedQueue() {
         return unverifiedQueue;
     }
@@ -174,5 +174,27 @@ public class Chain {
 
     public void setRePackage(AtomicBoolean rePackage) {
         this.rePackage = rePackage;
+    }
+
+    public boolean getContractTxFail() {
+        return contractTxFail;
+    }
+
+    public void setContractTxFail(boolean contractTxFail) {
+        this.contractTxFail = contractTxFail;
+    }
+
+    public Map<NulsDigestData, Integer> getTxPackageOrphanMap() {
+        return txPackageOrphanMap;
+    }
+
+    public Lock getPackageLock() {
+        return packageLock;
+    }
+
+    public void setTxPackageOrphanMap(Map<NulsDigestData, Integer> txPackageOrphanMap) {
+        this.txPackageOrphanMap = txPackageOrphanMap;
+
+
     }
 }

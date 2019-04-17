@@ -28,8 +28,6 @@ import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.NulsDigestData;
 import io.nuls.contract.model.bo.ContractMergedTransfer;
 import io.nuls.contract.model.bo.Output;
-import lombok.Getter;
-import lombok.Setter;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -39,8 +37,6 @@ import static io.nuls.contract.util.ContractUtil.bigInteger2String;
 /**
  * @author: PierreLuo
  */
-@Getter
-@Setter
 public class ContractMergedTransferDto {
 
     private String txHash;
@@ -68,4 +64,43 @@ public class ContractMergedTransferDto {
         }
     }
 
+    public String getTxHash() {
+        return txHash;
+    }
+
+    public void setTxHash(String txHash) {
+        this.txHash = txHash;
+    }
+
+    public String getFrom() {
+        return from;
+    }
+
+    public void setFrom(String from) {
+        this.from = from;
+    }
+
+    public String getValue() {
+        return value;
+    }
+
+    public void setValue(String value) {
+        this.value = value;
+    }
+
+    public List<ContractOutputDto> getOutputs() {
+        return outputs;
+    }
+
+    public void setOutputs(List<ContractOutputDto> outputs) {
+        this.outputs = outputs;
+    }
+
+    public String getOrginTxHash() {
+        return orginTxHash;
+    }
+
+    public void setOrginTxHash(String orginTxHash) {
+        this.orginTxHash = orginTxHash;
+    }
 }

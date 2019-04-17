@@ -22,7 +22,9 @@ package io.nuls.api.rpc.controller;
 
 import io.nuls.api.analysis.WalletRpcHandler;
 import io.nuls.api.cache.ApiCache;
-import io.nuls.api.db.*;
+import io.nuls.api.constant.ApiConstant;
+import io.nuls.api.db.RoundManager;
+import io.nuls.api.db.mongo.*;
 import io.nuls.api.manager.CacheManager;
 import io.nuls.api.model.po.db.*;
 import io.nuls.api.model.rpc.RpcResult;
@@ -49,26 +51,32 @@ public class PocConsensusController {
     @Autowired
     private RoundManager roundManager;
     @Autowired
-    private AgentService agentService;
+    private MongoAgentServiceImpl mongoAgentServiceImpl;
     @Autowired
-    private PunishService punishService;
+    private MongoPunishServiceImpl mongoPunishServiceImpl;
     @Autowired
-    private DepositService depositService;
+    private MongoDepositServiceImpl mongoDepositServiceImpl;
     @Autowired
-    private RoundService roundService;
+    private MongoRoundServiceImpl mongoRoundServiceImpl;
     @Autowired
-    private StatisticalService statisticalService;
+    private MongoStatisticalServiceImpl mongoStatisticalServiceImpl;
 
     @Autowired
-    private BlockService headerService;
+    private MongoBlockServiceImpl headerService;
 
     @Autowired
-    private AliasService aliasService;
+    private MongoAliasServiceImpl mongoAliasServiceImpl;
 
     @RpcMethod("getBestRoundItemList")
     public RpcResult getBestRoundItemList(List<Object> params) {
         VerifyUtils.verifyParams(params, 1);
-        int chainId = (int) params.get(0);
+        int chainId;
+        try {
+            chainId = (int) params.get(0);
+        } catch (Exception e) {
+            return RpcResult.paramError();
+        }
+
         if (!CacheManager.isChainExist(chainId)) {
             return RpcResult.dataNotFound();
         }
@@ -84,8 +92,12 @@ public class PocConsensusController {
     @RpcMethod("getConsensusNodeCount")
     public RpcResult getConsensusNodeCount(List<Object> params) {
         VerifyUtils.verifyParams(params, 1);
-        int chainId = (int) params.get(0);
-
+        int chainId;
+        try {
+            chainId = (int) params.get(0);
+        } catch (Exception e) {
+            return RpcResult.paramError();
+        }
         ApiCache apiCache = CacheManager.getCache(chainId);
         if (apiCache == null) {
             return RpcResult.dataNotFound();
@@ -97,7 +109,7 @@ public class PocConsensusController {
             consensusCount = 0;
         }
         resultMap.put("consensusCount", (long) consensusCount);
-        long count = agentService.agentsCount(chainId, apiCache.getBestHeader().getHeight());
+        long count = mongoAgentServiceImpl.agentsCount(chainId, apiCache.getBestHeader().getHeight());
         resultMap.put("agentCount", count);
         resultMap.put("totalCount", count + apiCache.getChainInfo().getSeeds().size());
         RpcResult result = new RpcResult();
@@ -108,15 +120,23 @@ public class PocConsensusController {
     @RpcMethod("getConsensusNodes")
     public RpcResult getConsensusNodes(List<Object> params) {
         VerifyUtils.verifyParams(params, 4);
-        int chainId = (int) params.get(0);
-        int pageIndex = (int) params.get(1);
-        int pageSize = (int) params.get(2);
-        int type = (int) params.get(3);
+        int chainId, pageIndex, pageSize, type;
+        try {
+            chainId = (int) params.get(0);
+            pageIndex = (int) params.get(1);
+            pageSize = (int) params.get(2);
+            type = (int) params.get(3);
+        } catch (Exception e) {
+            return RpcResult.paramError();
+        }
+        if (type < 0 || type > 3) {
+            return RpcResult.paramError("[type] is invalid");
+        }
 
         if (pageIndex <= 0) {
             pageIndex = 1;
         }
-        if (pageSize <= 0 || pageSize > 200) {
+        if (pageSize <= 0 || pageSize > 1000) {
             pageSize = 10;
         }
 //        Map<String, Integer> map = new HashMap<>();
@@ -127,9 +147,10 @@ public class PocConsensusController {
         PageInfo<AgentInfo> pageInfo;
         if (!CacheManager.isChainExist(chainId)) {
             pageInfo = new PageInfo<>(pageIndex, pageSize);
-        } else {
-            pageInfo = agentService.getAgentList(chainId, type, pageIndex, pageSize);
+            return new RpcResult().setResult(pageInfo);
         }
+
+        pageInfo = mongoAgentServiceImpl.getAgentList(chainId, type, pageIndex, pageSize);
         for (AgentInfo agentInfo : pageInfo.getList()) {
             Result<AgentInfo> clientResult = WalletRpcHandler.getAgentInfo(chainId, agentInfo.getTxHash());
             if (clientResult.isSuccess()) {
@@ -137,7 +158,7 @@ public class PocConsensusController {
                 agentInfo.setDepositCount(clientResult.getData().getDepositCount());
                 agentInfo.setStatus(clientResult.getData().getStatus());
                 if (agentInfo.getAgentAlias() == null) {
-                    AliasInfo info = aliasService.getAliasByAddress(chainId, agentInfo.getAgentAddress());
+                    AliasInfo info = mongoAliasServiceImpl.getAliasByAddress(chainId, agentInfo.getAgentAddress());
                     if (null != info) {
                         agentInfo.setAgentAlias(info.getAlias());
                     }
@@ -151,20 +172,26 @@ public class PocConsensusController {
     @RpcMethod("getConsensusNode")
     public RpcResult getConsensusNode(List<Object> params) {
         VerifyUtils.verifyParams(params, 2);
-        int chainId = (int) params.get(0);
-        String agentHash = (String) params.get(1);
+        int chainId;
+        String agentHash;
+        try {
+            chainId = (int) params.get(0);
+            agentHash = (String) params.get(1);
+        } catch (Exception e) {
+            return RpcResult.paramError();
+        }
         if (!CacheManager.isChainExist(chainId)) {
             return RpcResult.dataNotFound();
         }
-        AgentInfo agentInfo = agentService.getAgentByHash(chainId, agentHash);
+
+        AgentInfo agentInfo = mongoAgentServiceImpl.getAgentByHash(chainId, agentHash);
         if (agentInfo == null) {
             return RpcResult.dataNotFound();
         }
-        long count = punishService.getYellowCount(chainId, agentInfo.getAgentAddress());
+        long count = mongoPunishServiceImpl.getYellowCount(chainId, agentInfo.getAgentAddress());
         if (agentInfo.getTotalPackingCount() != 0) {
             agentInfo.setLostRate(DoubleUtils.div(count, count + agentInfo.getTotalPackingCount()));
         }
-
         ApiCache apiCache = CacheManager.getCache(chainId);
         List<PocRoundItem> itemList = apiCache.getCurrentRound().getItemList();
         PocRoundItem roundItem = null;
@@ -176,11 +203,13 @@ public class PocConsensusController {
                 }
             }
         }
-        if (null == roundItem) {
-            agentInfo.setStatus(0);
-        } else {
-            agentInfo.setRoundPackingTime(apiCache.getCurrentRound().getStartTime() + roundItem.getOrder() * 10000);
-            agentInfo.setStatus(1);
+        if(agentInfo.getStatus() != ApiConstant.STOP_AGENT) {
+            if (null == roundItem) {
+                agentInfo.setStatus(0);
+            } else {
+                agentInfo.setRoundPackingTime(apiCache.getCurrentRound().getStartTime() + roundItem.getOrder() * 10000);
+                agentInfo.setStatus(1);
+            }
         }
 
         Result<AgentInfo> result = WalletRpcHandler.getAgentInfo(chainId, agentHash);
@@ -189,7 +218,7 @@ public class PocConsensusController {
             agentInfo.setCreditValue(agent.getCreditValue());
             agentInfo.setDepositCount(agent.getDepositCount());
             if (agentInfo.getAgentAlias() == null) {
-                AliasInfo info = aliasService.getAliasByAddress(chainId, agentInfo.getAgentAddress());
+                AliasInfo info = mongoAliasServiceImpl.getAliasByAddress(chainId, agentInfo.getAgentAddress());
                 if (null != info) {
                     agentInfo.setAgentAlias(info.getAlias());
                 }
@@ -198,39 +227,89 @@ public class PocConsensusController {
         return RpcResult.success(agentInfo);
     }
 
+    @RpcMethod("getAccountConsensusNode")
+    public RpcResult getAccountConsensusNode(List<Object> params) {
+        VerifyUtils.verifyParams(params, 2);
+        int chainId;
+        String address;
+        try {
+            chainId = (int) params.get(0);
+            address = (String) params.get(1);
+        } catch (Exception e) {
+            return RpcResult.paramError();
+        }
+
+        if (!AddressTool.validAddress(chainId, address)) {
+            return RpcResult.paramError("[address] is invalid");
+        }
+        if (!CacheManager.isChainExist(chainId)) {
+            return RpcResult.dataNotFound();
+        }
+
+        AgentInfo agentInfo = mongoAgentServiceImpl.getAgentByAgentAddress(chainId, address);
+
+        return RpcResult.success(agentInfo);
+    }
+
     @RpcMethod("getConsensusStatistical")
     public RpcResult getConsensusStatistical(List<Object> params) {
         VerifyUtils.verifyParams(params, 2);
-        int chainId = (int) params.get(0);
-        int type = (int) params.get(1);
+        int chainId, type;
+        try {
+            chainId = (int) params.get(0);
+            type = (int) params.get(1);
+        } catch (Exception e) {
+            return RpcResult.paramError();
+        }
+        if(type < 0 || type > 4) {
+            return  RpcResult.paramError("[type] is invalid");
+        }
+
         if (!CacheManager.isChainExist(chainId)) {
             return RpcResult.success(new ArrayList<>());
         }
-        List list = this.statisticalService.getStatisticalList(chainId, type, CONSENSUS_LOCKED);
+        List list = this.mongoStatisticalServiceImpl.getStatisticalList(chainId, type, CONSENSUS_LOCKED);
         return new RpcResult().setResult(list);
     }
+
 
     @RpcMethod("getConsensusNodeStatistical")
     public RpcResult getConsensusNodeStatistical(List<Object> params) {
         VerifyUtils.verifyParams(params, 2);
-        int chainId = (int) params.get(0);
-        int type = (int) params.get(1);
+        int chainId, type;
+        try {
+            chainId = (int) params.get(0);
+            type = (int) params.get(1);
+        } catch (Exception e) {
+            return RpcResult.paramError();
+        }
+        if(type < 0 || type > 4) {
+            return  RpcResult.paramError("[type] is invalid");
+        }
         if (!CacheManager.isChainExist(chainId)) {
             return RpcResult.success(new ArrayList<>());
         }
-        List list = this.statisticalService.getStatisticalList(chainId, type, "nodeCount");
+        List list = this.mongoStatisticalServiceImpl.getStatisticalList(chainId, type, "nodeCount");
         return new RpcResult().setResult(list);
     }
 
     @RpcMethod("getAnnulizedRewardStatistical")
     public RpcResult getAnnulizedRewardStatistical(List<Object> params) {
         VerifyUtils.verifyParams(params, 2);
-        int chainId = (int) params.get(0);
-        int type = (int) params.get(1);
+        int chainId, type;
+        try {
+            chainId = (int) params.get(0);
+            type = (int) params.get(1);
+        } catch (Exception e) {
+            return RpcResult.paramError();
+        }
+        if(type < 0 || type > 4) {
+            return  RpcResult.paramError("[type] is invalid");
+        }
         if (!CacheManager.isChainExist(chainId)) {
             return RpcResult.success(new ArrayList<>());
         }
-        List list = this.statisticalService.getStatisticalList(chainId, type, "annualizedReward");
+        List list = this.mongoStatisticalServiceImpl.getStatisticalList(chainId, type, "annualizedReward");
         return new RpcResult().setResult(list);
     }
 
@@ -238,25 +317,34 @@ public class PocConsensusController {
     @RpcMethod("getPunishList")
     public RpcResult getPunishList(List<Object> params) {
         VerifyUtils.verifyParams(params, 5);
-        int chainId = (int) params.get(0);
-        int pageIndex = (int) params.get(1);
-        int pageSize = (int) params.get(2);
-        int type = (int) params.get(3);
-        String agentAddress = (String) params.get(4);
+        int chainId, pageIndex, pageSize, type;
+        String agentAddress;
+        try {
+            chainId = (int) params.get(0);
+            pageIndex = (int) params.get(1);
+            pageSize = (int) params.get(2);
+            type = (int) params.get(3);
+            agentAddress = (String) params.get(4);
+        } catch (Exception e) {
+            return RpcResult.paramError();
+        }
+        if(type < 0 || type > 2) {
+            return  RpcResult.paramError("[type] is invalid");
+        }
         if (!AddressTool.validAddress(chainId, agentAddress)) {
             return RpcResult.paramError("[address] is inValid");
         }
         if (pageIndex <= 0) {
             pageIndex = 1;
         }
-        if (pageSize <= 0 || pageSize > 100) {
+        if (pageSize <= 0 || pageSize > 1000) {
             pageSize = 10;
         }
         PageInfo<PunishLogInfo> list;
         if (!CacheManager.isChainExist(chainId)) {
             list = new PageInfo<>(pageIndex, pageSize);
         } else {
-            list = punishService.getPunishLogList(chainId, type, agentAddress, pageIndex, pageSize);
+            list = mongoPunishServiceImpl.getPunishLogList(chainId, type, agentAddress, pageIndex, pageSize);
         }
         return new RpcResult().setResult(list);
     }
@@ -264,25 +352,31 @@ public class PocConsensusController {
     @RpcMethod("getConsensusDeposit")
     public RpcResult getConsensusDeposit(List<Object> params) {
         VerifyUtils.verifyParams(params, 4);
-        int chainId = (int) params.get(0);
-        int pageIndex = (int) params.get(1);
-        int pageSize = (int) params.get(2);
-        String agentHash = (String) params.get(3);
-
+        int chainId, pageIndex, pageSize;
+        String agentHash;
+        try {
+            chainId = (int) params.get(0);
+            pageIndex = (int) params.get(1);
+            pageSize = (int) params.get(2);
+            agentHash = (String) params.get(3);
+        } catch (Exception e) {
+            return RpcResult.paramError();
+        }
         if (StringUtils.isBlank(agentHash)) {
             return RpcResult.paramError("[agentHash] is inValid");
         }
         if (pageIndex <= 0) {
             pageIndex = 1;
         }
-        if (pageSize <= 0 || pageSize > 100) {
+        if (pageSize <= 0 || pageSize > 1000) {
             pageSize = 10;
         }
+
         PageInfo<DepositInfo> list;
         if (!CacheManager.isChainExist(chainId)) {
             list = new PageInfo<>(pageIndex, pageSize);
         } else {
-            list = this.depositService.getDepositListByAgentHash(chainId, agentHash, pageIndex, pageSize);
+            list = this.mongoDepositServiceImpl.getDepositListByAgentHash(chainId, agentHash, pageIndex, pageSize);
         }
         return new RpcResult().setResult(list);
     }
@@ -290,26 +384,101 @@ public class PocConsensusController {
     @RpcMethod("getAllConsensusDeposit")
     public RpcResult getAllConsensusDeposit(List<Object> params) {
         VerifyUtils.verifyParams(params, 5);
-        int chainId = (int) params.get(0);
-        int pageIndex = (int) params.get(1);
-        int pageSize = (int) params.get(2);
-        String agentHash = (String) params.get(3);
-        int type = (int) params.get(4);
-
+        int chainId, pageIndex, pageSize, type;
+        String agentHash;
+        try {
+            chainId = (int) params.get(0);
+            pageIndex = (int) params.get(1);
+            pageSize = (int) params.get(2);
+            agentHash = (String) params.get(3);
+            type = (int) params.get(4);
+        } catch (Exception e) {
+            return RpcResult.paramError();
+        }
+        if(type < 0 || type > 2) {
+            return  RpcResult.paramError("[type] is invalid");
+        }
         if (StringUtils.isBlank(agentHash)) {
             return RpcResult.paramError("[agentHash] is inValid");
         }
         if (pageIndex <= 0) {
             pageIndex = 1;
         }
-        if (pageSize <= 0 || pageSize > 100) {
+        if (pageSize <= 0 || pageSize > 1000) {
             pageSize = 10;
         }
+
         PageInfo<DepositInfo> list;
         if (!CacheManager.isChainExist(chainId)) {
             list = new PageInfo<>(pageIndex, pageSize);
         } else {
-            list = this.depositService.getCancelDepositListByAgentHash(chainId, agentHash, type, pageIndex, pageSize);
+            list = this.mongoDepositServiceImpl.getCancelDepositListByAgentHash(chainId, agentHash, type, pageIndex, pageSize);
+        }
+        return new RpcResult().setResult(list);
+    }
+
+
+    @RpcMethod("getAccountConsensus")
+    public RpcResult getAccountConsensus(List<Object> params) {
+        VerifyUtils.verifyParams(params, 4);
+        int chainId, pageIndex, pageSize;
+        String address;
+        try {
+            chainId = (int) params.get(0);
+            pageIndex = (int) params.get(1);
+            pageSize = (int) params.get(2);
+            address = (String) params.get(3);
+        } catch (Exception e) {
+            return RpcResult.paramError();
+        }
+        if (!AddressTool.validAddress(chainId, address)) {
+            return RpcResult.paramError("[address] is invalid");
+        }
+        if (pageIndex <= 0) {
+            pageIndex = 1;
+        }
+        if (pageSize <= 0 || pageSize > 1000) {
+            pageSize = 10;
+        }
+
+        PageInfo<AgentInfo> list;
+        if (!CacheManager.isChainExist(chainId)) {
+            list = new PageInfo(pageIndex, pageSize);
+            return RpcResult.success(list);
+        }
+        List<String> hashList = mongoDepositServiceImpl.getAgentHashList(chainId, address);
+        list = mongoAgentServiceImpl.getAgentByHashList(chainId, pageIndex, pageSize, hashList);
+        return RpcResult.success(list);
+    }
+
+    @RpcMethod("getAccountDeposit")
+    public RpcResult getAccountDeposit(List<Object> params) {
+        VerifyUtils.verifyParams(params, 4);
+        int chainId, pageIndex, pageSize;
+        String address;
+        try {
+            chainId = (int) params.get(0);
+            pageIndex = (int) params.get(1);
+            pageSize = (int) params.get(2);
+            address = (String) params.get(3);
+        } catch (Exception e) {
+            return RpcResult.paramError();
+        }
+        if (!AddressTool.validAddress(chainId, address)) {
+            return RpcResult.paramError("[address] is invalid");
+        }
+        if (pageIndex <= 0) {
+            pageIndex = 1;
+        }
+        if (pageSize <= 0 || pageSize > 1000) {
+            pageSize = 10;
+        }
+
+        PageInfo<DepositInfo> list;
+        if (!CacheManager.isChainExist(chainId)) {
+            list = new PageInfo<>(pageIndex, pageSize);
+        } else {
+            list = this.mongoDepositServiceImpl.getDepositListByAddress(chainId, address, pageIndex, pageSize);
         }
         return new RpcResult().setResult(list);
     }
@@ -334,14 +503,14 @@ public class PocConsensusController {
         if (pageIndex <= 0) {
             pageIndex = 1;
         }
-        if (pageSize <= 0 || pageSize > 100) {
+        if (pageSize <= 0 || pageSize > 1000) {
             pageSize = 10;
         }
         if (!CacheManager.isChainExist(chainId)) {
             return RpcResult.success(new PageInfo<>(pageIndex, pageSize));
         }
-        long count = roundService.getTotalCount(chainId);
-        List<PocRound> roundList = roundService.getRoundList(chainId, pageIndex, pageSize);
+        long count = mongoRoundServiceImpl.getTotalCount(chainId);
+        List<PocRound> roundList = mongoRoundServiceImpl.getRoundList(chainId, pageIndex, pageSize);
         PageInfo<PocRound> pageInfo = new PageInfo<>();
         pageInfo.setPageNumber(pageIndex);
         pageInfo.setPageSize(pageSize);
@@ -363,11 +532,11 @@ public class PocConsensusController {
         }
 
         CurrentRound round = new CurrentRound();
-        PocRound pocRound = roundService.getRound(chainId, roundIndex);
+        PocRound pocRound = mongoRoundServiceImpl.getRound(chainId, roundIndex);
         if (pocRound == null) {
             return RpcResult.dataNotFound();
         }
-        List<PocRoundItem> itemList = roundService.getRoundItemList(chainId, roundIndex);
+        List<PocRoundItem> itemList = mongoRoundServiceImpl.getRoundItemList(chainId, roundIndex);
         round.setItemList(itemList);
         round.initByPocRound(pocRound);
         return new RpcResult().setResult(round);

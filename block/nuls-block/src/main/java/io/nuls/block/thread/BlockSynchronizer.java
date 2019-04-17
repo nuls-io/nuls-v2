@@ -24,22 +24,21 @@ import com.google.common.collect.Lists;
 import io.nuls.base.data.Block;
 import io.nuls.base.data.BlockHeader;
 import io.nuls.base.data.NulsDigestData;
+import io.nuls.base.data.po.BlockHeaderPo;
 import io.nuls.block.constant.LocalBlockStateEnum;
 import io.nuls.block.constant.RunningStatusEnum;
-import io.nuls.block.exception.ChainRuntimeException;
 import io.nuls.block.manager.BlockChainManager;
 import io.nuls.block.manager.ContextManager;
 import io.nuls.block.model.ChainContext;
 import io.nuls.block.model.ChainParameters;
 import io.nuls.block.model.Node;
-import io.nuls.block.model.po.BlockHeaderPo;
+import io.nuls.block.rpc.call.ConsensusUtil;
+import io.nuls.block.rpc.call.NetworkUtil;
+import io.nuls.block.rpc.call.TransactionUtil;
 import io.nuls.block.service.BlockService;
 import io.nuls.block.storage.BlockStorageService;
 import io.nuls.block.utils.BlockUtil;
 import io.nuls.block.utils.ChainGenerator;
-import io.nuls.block.rpc.call.ConsensusUtil;
-import io.nuls.block.rpc.call.NetworkUtil;
-import io.nuls.block.rpc.call.TransactionUtil;
 import io.nuls.tools.core.ioc.SpringLiteContext;
 import io.nuls.tools.log.logback.NulsLogger;
 import io.nuls.tools.model.DoubleUtils;
@@ -53,7 +52,8 @@ import java.util.concurrent.*;
 import java.util.concurrent.locks.StampedLock;
 
 import static io.nuls.block.BlockBootstrap.blockConfig;
-import static io.nuls.block.constant.Constant.*;
+import static io.nuls.block.constant.Constant.CONSENSUS_WORKING;
+import static io.nuls.block.constant.Constant.NODE_COMPARATOR;
 import static io.nuls.block.constant.LocalBlockStateEnum.*;
 
 /**
@@ -117,8 +117,9 @@ public class BlockSynchronizer implements Runnable {
                     firstStart = false;
                     int testAutoRollbackAmount = blockConfig.getTestAutoRollbackAmount();
                     if (latestHeight < testAutoRollbackAmount) {
-                        testAutoRollbackAmount = (int) (latestHeight - 0);
+                        testAutoRollbackAmount = (int) (latestHeight);
                     }
+                    ConsensusUtil.sendHeaderList(chainId, testAutoRollbackAmount);
                     for (int i = 0; i < testAutoRollbackAmount; i++) {
                         boolean b = blockService.rollbackBlock(chainId, latestHeight--, true);
                         if (!b || latestHeight == 0) {
@@ -178,7 +179,7 @@ public class BlockSynchronizer implements Runnable {
         ChainContext context = ContextManager.getContext(chainId);
         ChainParameters parameters = context.getParameters();
         int minNodeAmount = parameters.getMinNodeAmount();
-        if (minNodeAmount == 0) {
+        if (minNodeAmount == 0 && availableNodes.size() == 0) {
             commonLog.info("skip block syn, because minNodeAmount is set to 0, minNodeAmount should't set to 0 otherwise you want run local node without connect with network");
             context.setStatus(RunningStatusEnum.RUNNING);
             ConsensusUtil.notice(chainId, CONSENSUS_WORKING);
@@ -216,7 +217,7 @@ public class BlockSynchronizer implements Runnable {
             }
             if (stateEnum.equals(CONFLICT)) {
                 commonLog.error("chain-" + chainId + ", The local GenesisBlock differ from network");
-                throw new ChainRuntimeException("The local GenesisBlock differ from network");
+                System.exit(1);
             }
             PriorityBlockingQueue<Node> nodes = params.getNodes();
             int nodeCount = nodes.size();
@@ -391,7 +392,7 @@ public class BlockSynchronizer implements Runnable {
     }
 
     private LocalBlockStateEnum checkRollback(int rollbackCount, int chainId, BlockDownloaderParams params) {
-        //每次最多回滚1000个区块,等待下次同步,这样可以避免被恶意节点攻击,大量回滚正常区块.
+        //每次最多回滚maxRollback个区块,等待下次同步,这样可以避免被恶意节点攻击,大量回滚正常区块.
         ChainParameters parameters = ContextManager.getContext(chainId).getParameters();
         if (params.getLocalLatestHeight() == 0) {
             return CONFLICT;

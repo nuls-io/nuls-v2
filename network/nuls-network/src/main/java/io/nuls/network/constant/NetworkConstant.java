@@ -104,4 +104,8 @@ public interface NetworkConstant {
     String COMMA = ",";
     String COLON = ":";
     String DOWN_LINE = "_";
+
+
+    public long MAX_NUMBER_4_BYTE = 4294967295L;
+    public int  MAX_NUMBER_2_BYTE = 65535;
 }

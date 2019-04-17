@@ -29,16 +29,15 @@ import io.nuls.ledger.config.LedgerConfig;
 import io.nuls.ledger.constant.LedgerConstant;
 import io.nuls.ledger.model.LedgerChain;
 import io.nuls.ledger.service.BlockDataService;
-import io.nuls.ledger.storage.InitDB;
+import io.nuls.ledger.storage.Repository;
 import io.nuls.ledger.storage.impl.RepositoryImpl;
+import io.nuls.ledger.utils.LoggerUtil;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Service;
 import io.nuls.tools.core.ioc.SpringLiteContext;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-
-import static io.nuls.ledger.utils.LoggerUtil.logger;
 
 /**
  * 链管理类,负责各条链的初始化,运行,启动,参数维护等
@@ -102,10 +101,10 @@ public class LedgerChainManager {
     private void initRocksDb() {
         try {
             RocksDBService.init(ledgerConfig.getDataPath() + LedgerConstant.MODULE_DB_PATH);
-            InitDB initDB = SpringLiteContext.getBean(RepositoryImpl.class);
+            Repository initDB = SpringLiteContext.getBean(RepositoryImpl.class);
             initDB.initTableName();
         } catch (Exception e) {
-            logger.error(e);
+            LoggerUtil.logger().error(e);
         }
     }
 

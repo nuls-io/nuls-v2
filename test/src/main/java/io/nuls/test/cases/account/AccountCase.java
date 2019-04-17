@@ -22,7 +22,7 @@ import io.nuls.tools.core.annotation.Component;
  * 8.查询账户列表，验证列表中是否有次账户
  * 9.删除此账户，删除【2】中的keystore
  */
-//@TestCase("account")
+@TestCase("account")
 @Component
 public class AccountCase extends TestCaseChain {
 

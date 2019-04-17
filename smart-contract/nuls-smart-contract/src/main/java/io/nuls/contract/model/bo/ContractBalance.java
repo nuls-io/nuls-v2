@@ -24,9 +24,6 @@
 package io.nuls.contract.model.bo;
 
 
-import lombok.Getter;
-import lombok.Setter;
-
 import java.io.Serializable;
 import java.math.BigInteger;
 
@@ -36,8 +33,6 @@ import static io.nuls.contract.util.ContractUtil.minus;
  * @author: PierreLuo
  * @date: 2018/6/7
  */
-@Getter
-@Setter
 public class ContractBalance implements Serializable {
 
     private BigInteger balance;
@@ -65,5 +60,37 @@ public class ContractBalance implements Serializable {
 
     public void addTemp(BigInteger amount) {
         this.balance = balance.add(amount);
+    }
+
+    public BigInteger getBalance() {
+        return balance;
+    }
+
+    public void setBalance(BigInteger balance) {
+        this.balance = balance;
+    }
+
+    public BigInteger getFreeze() {
+        return freeze;
+    }
+
+    public void setFreeze(BigInteger freeze) {
+        this.freeze = freeze;
+    }
+
+    public String getNonce() {
+        return nonce;
+    }
+
+    public void setNonce(String nonce) {
+        this.nonce = nonce;
+    }
+
+    public String getPreNonce() {
+        return preNonce;
+    }
+
+    public void setPreNonce(String preNonce) {
+        this.preNonce = preNonce;
     }
 }
