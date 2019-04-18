@@ -98,7 +98,6 @@ public class AccountBootstrap extends RpcModule {
     @Override
     public boolean doStart() {
         Map<String, Properties> lan = I18nUtils.getAll();
-        Log.info("languages :{}",lan);
         lan.entrySet().forEach(entry->{
             entry.getValue().forEach((key,value)->{
                 Log.info("{}:{}",key,value);
