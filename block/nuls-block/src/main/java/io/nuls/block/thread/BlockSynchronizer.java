@@ -116,18 +116,20 @@ public class BlockSynchronizer implements Runnable {
                 if (firstStart) {
                     firstStart = false;
                     int testAutoRollbackAmount = blockConfig.getTestAutoRollbackAmount();
-                    if (latestHeight < testAutoRollbackAmount) {
-                        testAutoRollbackAmount = (int) (latestHeight);
-                    }
-                    ConsensusUtil.sendHeaderList(chainId, testAutoRollbackAmount);
-                    for (int i = 0; i < testAutoRollbackAmount; i++) {
-                        boolean b = blockService.rollbackBlock(chainId, latestHeight--, true);
-                        if (!b || latestHeight == 0) {
-                            break;
+                    if (testAutoRollbackAmount > 0) {
+                        if (latestHeight < testAutoRollbackAmount) {
+                            testAutoRollbackAmount = (int) (latestHeight);
+                        }
+                        ConsensusUtil.sendHeaderList(chainId, testAutoRollbackAmount);
+                        for (int i = 0; i < testAutoRollbackAmount; i++) {
+                            boolean b = blockService.rollbackBlock(chainId, latestHeight--, true);
+                            if (!b || latestHeight == 0) {
+                                break;
+                            }
                         }
                     }
                 }
-                waitUntilNetworkStable(chainId);
+//                waitUntilNetworkStable(chainId);
                 while (!synchronize(chainId)) {
                     Thread.sleep(synSleepInterval);
                 }
