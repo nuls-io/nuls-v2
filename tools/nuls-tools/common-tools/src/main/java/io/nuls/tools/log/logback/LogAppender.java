@@ -67,10 +67,10 @@ public class LogAppender {
         //设置文件名模式
         policy.setFileNamePattern(fp);
         //设置最大历史记录为15条
-        policy.setMaxHistory(7);
+        policy.setMaxHistory(3);
         //总大小限制
         policy.setContext(context);
-        policy.setTotalSizeCap(FileSize.valueOf("2GB"));
+        policy.setTotalSizeCap(FileSize.valueOf("1GB"));
         //设置父节点是appender
         policy.setParent(appender);
         //设置上下文，每个logger都关联到logger上下文，默认上下文名称为default。
