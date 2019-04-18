@@ -27,6 +27,8 @@ package io.nuls.transaction.model.dto;
 
 import java.math.BigInteger;
 
+import static io.nuls.transaction.utils.LoggerUtil.Log;
+
 /**
  * @author: Charlie
  * @date: 2018-12-04
@@ -117,7 +119,7 @@ public class CoinDTO implements Cloneable {
         try {
             coinDTO = (CoinDTO)super.clone();
         } catch (CloneNotSupportedException e) {
-            e.printStackTrace();
+            Log.error(e);
         }
 
         return coinDTO;

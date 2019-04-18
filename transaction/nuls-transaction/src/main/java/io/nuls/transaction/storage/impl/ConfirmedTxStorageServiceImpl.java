@@ -139,7 +139,7 @@ public class ConfirmedTxStorageServiceImpl implements ConfirmedTxStorageService 
             }
             return removeTxListByHashBytes(chainId, hashList);
         } catch (IOException e) {
-            e.printStackTrace();
+            Log.error(e);
             return false;
         }
     }

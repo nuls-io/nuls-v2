@@ -27,6 +27,7 @@ package io.nuls.transaction.utils.queue.entity;
 
 import io.nuls.db.util.DBUtils;
 import io.nuls.tools.core.ioc.SpringLiteContext;
+import static io.nuls.transaction.utils.LoggerUtil.Log;
 import io.nuls.transaction.constant.TxConfig;
 import io.nuls.transaction.utils.queue.fqueue.entity.FQueue;
 
@@ -141,17 +142,27 @@ public class PersistentQueue {
     }
 
     private void deleteFile(File file) {
-        if (null != file && file.exists()) {//判断文件是否存在
-            if (file.isFile()) {//判断是否是文件
-                boolean b = file.delete();//删除文件
-//                Log.debug("删除文件:" + file.getPath() + "，结果：" + b);
-            } else if (file.isDirectory()) {//否则如果它是一个目录
-                File[] files = file.listFiles();//声明目录下所有的文件 files[];
-                for (File f : files) {//遍历目录下所有的文件
-                    this.deleteFile(f);//把每个文件用这个方法进行迭代
+        //判断文件是否存在
+        if (null != file && file.exists()) {
+            //判断是否是文件
+            if (file.isFile()) {
+                //删除文件
+                if(!file.delete()){
+                    Log.debug("删除文件失败:" + file.getPath());
                 }
-                boolean b = file.delete();//删除文件夹
-//                Log.debug("删除文件:" + file.getPath() + "，结果：" + b);
+                //否则如果它是一个目录
+            } else if (file.isDirectory()) {
+                //声明目录下所有的文件 files[];
+                File[] files = file.listFiles();
+                //遍历目录下所有的文件
+                for (File f : files) {
+                    //把每个文件用这个方法进行迭代
+                    this.deleteFile(f);
+                }
+                //删除文件夹
+                if(!file.delete()){
+                    Log.debug("删除文件夹失败:" + file.getPath());
+                };
             }
         }
     }

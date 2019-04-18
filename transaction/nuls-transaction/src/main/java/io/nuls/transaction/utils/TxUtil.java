@@ -222,7 +222,7 @@ public class TxUtil {
             String remarkStr =  remark == null ? "" : new String(tx.getRemark(),"UTF-8");
             nulsLogger.debug("remark: {}", remarkStr);
         } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
+            Log.error(e);
         }
 
         CoinData coinData = null;
@@ -231,7 +231,7 @@ public class TxUtil {
                 coinData = tx.getCoinDataInstance();
             }
         } catch (NulsException e) {
-            e.printStackTrace();
+            Log.error(e);
         }
         if (coinData != null) {
             nulsLogger.debug("coinData:");
