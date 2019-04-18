@@ -1,8 +1,10 @@
-package io.nuls.api.model.po.db;
+package io.nuls.api.model.rpc;
+
+import io.nuls.api.model.po.db.TxRelationInfo;
 
 import java.math.BigInteger;
 
-public class TxRelationInfo {
+public class AccountTxInfo {
 
     private String txHash;
 
@@ -27,22 +29,28 @@ public class TxRelationInfo {
     // -1 : from , 1: to
     private int transferType;
 
-    public TxRelationInfo() {
+    private int status;
+
+    private String symbol;
+
+    public AccountTxInfo() {
 
     }
 
-    public TxRelationInfo(String address, TransactionInfo info, int chainId, int assetId, BigInteger values, int transferType, BigInteger balance) {
-        this.address = address;
-        this.txHash = info.getHash();
-        this.type = info.getType();
-        this.createTime = info.getCreateTime();
-        this.height = info.getHeight();
-        this.chainId = chainId;
-        this.assetId = assetId;
-        this.fee = info.getFee();
-        this.values = values;
-        this.balance = balance;
-        this.transferType = transferType;
+    public AccountTxInfo(TxRelationInfo relationInfo, int status, String symbol) {
+        this.txHash = relationInfo.getTxHash();
+        this.address = relationInfo.getAddress();
+        this.type = relationInfo.getType();
+        this.createTime = relationInfo.getCreateTime();
+        this.height = relationInfo.getHeight();
+        this.chainId = relationInfo.getChainId();
+        this.assetId = relationInfo.getAssetId();
+        this.fee = relationInfo.getFee();
+        this.values = relationInfo.getValues();
+        this.balance = relationInfo.getBalance();
+        this.transferType = relationInfo.getTransferType();
+        this.status = status;
+        this.symbol = symbol;
     }
 
     public String getTxHash() {
@@ -131,5 +139,21 @@ public class TxRelationInfo {
 
     public void setTransferType(int transferType) {
         this.transferType = transferType;
+    }
+
+    public int getStatus() {
+        return status;
+    }
+
+    public void setStatus(int status) {
+        this.status = status;
+    }
+
+    public String getSymbol() {
+        return symbol;
+    }
+
+    public void setSymbol(String symbol) {
+        this.symbol = symbol;
     }
 }

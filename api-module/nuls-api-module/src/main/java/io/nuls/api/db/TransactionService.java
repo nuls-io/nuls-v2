@@ -25,4 +25,6 @@ public interface TransactionService {
     void rollbackTxRelationList(int chainId, List<String> txHashList);
 
     void rollbackTx(int chainId, List<String> txHashList);
+
+    void saveUnConfirmTx(int chainId, TransactionInfo tx);
 }
