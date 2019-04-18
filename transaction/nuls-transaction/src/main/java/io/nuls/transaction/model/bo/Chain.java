@@ -10,6 +10,7 @@ import io.nuls.transaction.utils.queue.entity.PersistentQueue;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.BlockingDeque;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -95,7 +96,7 @@ public class Chain {
     public Chain() {
         this.packaging =  new AtomicBoolean(false);
         this.rePackage = new AtomicBoolean(true);
-        this.txRegisterMap = new HashMap<>();
+        this.txRegisterMap = new ConcurrentHashMap<>();
         this.txQueue = new LinkedBlockingDeque<>();
         this.loggerMap = new HashMap<>();
         contractTxFail = false;
