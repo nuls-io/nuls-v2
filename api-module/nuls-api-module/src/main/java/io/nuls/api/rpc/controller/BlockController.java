@@ -21,6 +21,7 @@
 package io.nuls.api.rpc.controller;
 
 import io.nuls.api.analysis.WalletRpcHandler;
+import io.nuls.api.db.BlockService;
 import io.nuls.api.db.mongo.MongoBlockServiceImpl;
 import io.nuls.api.db.mongo.MongoDBService;
 import io.nuls.api.manager.CacheManager;
@@ -47,11 +48,7 @@ import java.util.List;
 public class BlockController {
 
     @Autowired
-    private MongoDBService dbService;
-    @Autowired
-    private MongoBlockServiceImpl mongoBlockServiceImpl;
-    @Autowired
-    private RollbackService rollbackBlock;
+    private BlockService blockService;
 
     @RpcMethod("getBestBlockHeader")
     public RpcResult getBestInfo(List<Object> params) {
@@ -67,7 +64,7 @@ public class BlockController {
             if (!CacheManager.isChainExist(chainId)) {
                 return RpcResult.dataNotFound();
             }
-            BlockHeaderInfo localBestBlockHeader = mongoBlockServiceImpl.getBestBlockHeader(chainId);
+            BlockHeaderInfo localBestBlockHeader = blockService.getBestBlockHeader(chainId);
             if (localBestBlockHeader == null) {
                 return RpcResult.dataNotFound();
             }
@@ -97,7 +94,7 @@ public class BlockController {
             if (!CacheManager.isChainExist(chainId)) {
                 return RpcResult.dataNotFound();
             }
-            BlockHeaderInfo header = mongoBlockServiceImpl.getBlockHeader(chainId, height);
+            BlockHeaderInfo header = blockService.getBlockHeader(chainId, height);
             if (header == null) {
                 return RpcResult.dataNotFound();
             }
@@ -127,7 +124,7 @@ public class BlockController {
             if (!CacheManager.isChainExist(chainId)) {
                 return RpcResult.dataNotFound();
             }
-            BlockHeaderInfo header = mongoBlockServiceImpl.getBlockHeaderByHash(chainId, hash);
+            BlockHeaderInfo header = blockService.getBlockHeaderByHash(chainId, hash);
             if (header == null) {
                 return RpcResult.dataNotFound();
             }
@@ -192,7 +189,7 @@ public class BlockController {
             if (!CacheManager.isChainExist(chainId)) {
                 return RpcResult.dataNotFound();
             }
-            BlockHeaderInfo blockHeaderInfo = mongoBlockServiceImpl.getBlockHeader(chainId, height);
+            BlockHeaderInfo blockHeaderInfo = blockService.getBlockHeader(chainId, height);
             if (blockHeaderInfo == null) {
                 return RpcResult.dataNotFound();
             }
@@ -243,7 +240,7 @@ public class BlockController {
             if (!CacheManager.isChainExist(chainId)) {
                 pageInfo = new PageInfo<>(pageIndex, pageSize);
             } else {
-                pageInfo = mongoBlockServiceImpl.pageQuery(chainId, pageIndex, pageSize, packingAddress, filterEmptyBlocks);
+                pageInfo = blockService.pageQuery(chainId, pageIndex, pageSize, packingAddress, filterEmptyBlocks);
             }
             RpcResult result = new RpcResult();
             result.setResult(pageInfo);

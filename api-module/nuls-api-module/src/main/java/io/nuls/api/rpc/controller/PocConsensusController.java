@@ -23,7 +23,7 @@ package io.nuls.api.rpc.controller;
 import io.nuls.api.analysis.WalletRpcHandler;
 import io.nuls.api.cache.ApiCache;
 import io.nuls.api.constant.ApiConstant;
-import io.nuls.api.db.RoundManager;
+import io.nuls.api.db.*;
 import io.nuls.api.db.mongo.*;
 import io.nuls.api.manager.CacheManager;
 import io.nuls.api.model.po.db.*;
@@ -53,21 +53,21 @@ public class PocConsensusController {
     @Autowired
     private RoundManager roundManager;
     @Autowired
-    private MongoAgentServiceImpl mongoAgentServiceImpl;
+    private AgentService agentService;
     @Autowired
-    private MongoPunishServiceImpl mongoPunishServiceImpl;
+    private PunishService punishService;
     @Autowired
-    private MongoDepositServiceImpl mongoDepositServiceImpl;
+    private DepositService depositService;
     @Autowired
-    private MongoRoundServiceImpl mongoRoundServiceImpl;
+    private RoundService roundService;
     @Autowired
-    private MongoStatisticalServiceImpl mongoStatisticalServiceImpl;
+    private StatisticalService statisticalService;
 
     @Autowired
-    private MongoBlockServiceImpl headerService;
+    private BlockService headerService;
 
     @Autowired
-    private MongoAliasServiceImpl mongoAliasServiceImpl;
+    private AliasService aliasService;
 
     @RpcMethod("getBestRoundItemList")
     public RpcResult getBestRoundItemList(List<Object> params) {
@@ -117,7 +117,7 @@ public class PocConsensusController {
                 consensusCount = 0;
             }
             resultMap.put("consensusCount", (long) consensusCount);
-            long count = mongoAgentServiceImpl.agentsCount(chainId, apiCache.getBestHeader().getHeight());
+            long count = agentService.agentsCount(chainId, apiCache.getBestHeader().getHeight());
             resultMap.put("agentCount", count);
             resultMap.put("totalCount", count + apiCache.getChainInfo().getSeeds().size());
             RpcResult result = new RpcResult();
@@ -158,7 +158,7 @@ public class PocConsensusController {
                 return new RpcResult().setResult(pageInfo);
             }
 
-            pageInfo = mongoAgentServiceImpl.getAgentList(chainId, type, pageIndex, pageSize);
+            pageInfo = agentService.getAgentList(chainId, type, pageIndex, pageSize);
             for (AgentInfo agentInfo : pageInfo.getList()) {
                 Result<AgentInfo> clientResult = WalletRpcHandler.getAgentInfo(chainId, agentInfo.getTxHash());
                 if (clientResult.isSuccess()) {
@@ -166,7 +166,7 @@ public class PocConsensusController {
                     agentInfo.setDepositCount(clientResult.getData().getDepositCount());
                     agentInfo.setStatus(clientResult.getData().getStatus());
                     if (agentInfo.getAgentAlias() == null) {
-                        AliasInfo info = mongoAliasServiceImpl.getAliasByAddress(chainId, agentInfo.getAgentAddress());
+                        AliasInfo info = aliasService.getAliasByAddress(chainId, agentInfo.getAgentAddress());
                         if (null != info) {
                             agentInfo.setAgentAlias(info.getAlias());
                         }
@@ -197,11 +197,11 @@ public class PocConsensusController {
             if (!CacheManager.isChainExist(chainId)) {
                 return RpcResult.dataNotFound();
             }
-            AgentInfo agentInfo = mongoAgentServiceImpl.getAgentByHash(chainId, agentHash);
+            AgentInfo agentInfo = agentService.getAgentByHash(chainId, agentHash);
             if (agentInfo == null) {
                 return RpcResult.dataNotFound();
             }
-            long count = mongoPunishServiceImpl.getYellowCount(chainId, agentInfo.getAgentAddress());
+            long count = punishService.getYellowCount(chainId, agentInfo.getAgentAddress());
             if (agentInfo.getTotalPackingCount() != 0) {
                 agentInfo.setLostRate(DoubleUtils.div(count, count + agentInfo.getTotalPackingCount()));
             }
@@ -231,7 +231,7 @@ public class PocConsensusController {
                 agentInfo.setCreditValue(agent.getCreditValue());
                 agentInfo.setDepositCount(agent.getDepositCount());
                 if (agentInfo.getAgentAlias() == null) {
-                    AliasInfo info = mongoAliasServiceImpl.getAliasByAddress(chainId, agentInfo.getAgentAddress());
+                    AliasInfo info = aliasService.getAliasByAddress(chainId, agentInfo.getAgentAddress());
                     if (null != info) {
                         agentInfo.setAgentAlias(info.getAlias());
                     }
@@ -264,7 +264,7 @@ public class PocConsensusController {
             if (!CacheManager.isChainExist(chainId)) {
                 return RpcResult.dataNotFound();
             }
-            AgentInfo agentInfo = mongoAgentServiceImpl.getAgentByAgentAddress(chainId, address);
+            AgentInfo agentInfo = agentService.getAgentByAgentAddress(chainId, address);
             return RpcResult.success(agentInfo);
         } catch (Exception e) {
             Log.error(e);
@@ -290,7 +290,7 @@ public class PocConsensusController {
             if (!CacheManager.isChainExist(chainId)) {
                 return RpcResult.success(new ArrayList<>());
             }
-            List list = this.mongoStatisticalServiceImpl.getStatisticalList(chainId, type, CONSENSUS_LOCKED);
+            List list = this.statisticalService.getStatisticalList(chainId, type, CONSENSUS_LOCKED);
             return new RpcResult().setResult(list);
         } catch (Exception e) {
             Log.error(e);
@@ -316,7 +316,7 @@ public class PocConsensusController {
             if (!CacheManager.isChainExist(chainId)) {
                 return RpcResult.success(new ArrayList<>());
             }
-            List list = this.mongoStatisticalServiceImpl.getStatisticalList(chainId, type, "nodeCount");
+            List list = this.statisticalService.getStatisticalList(chainId, type, "nodeCount");
             return new RpcResult().setResult(list);
         } catch (Exception e) {
             Log.error(e);
@@ -342,7 +342,7 @@ public class PocConsensusController {
             if (!CacheManager.isChainExist(chainId)) {
                 return RpcResult.success(new ArrayList<>());
             }
-            List list = this.mongoStatisticalServiceImpl.getStatisticalList(chainId, type, "annualizedReward");
+            List list = this.statisticalService.getStatisticalList(chainId, type, "annualizedReward");
             return new RpcResult().setResult(list);
         } catch (Exception e) {
             Log.error(e);
@@ -383,7 +383,7 @@ public class PocConsensusController {
             if (!CacheManager.isChainExist(chainId)) {
                 list = new PageInfo<>(pageIndex, pageSize);
             } else {
-                list = mongoPunishServiceImpl.getPunishLogList(chainId, type, agentAddress, pageIndex, pageSize);
+                list = punishService.getPunishLogList(chainId, type, agentAddress, pageIndex, pageSize);
             }
             return new RpcResult().setResult(list);
         } catch (Exception e) {
@@ -420,7 +420,7 @@ public class PocConsensusController {
             if (!CacheManager.isChainExist(chainId)) {
                 list = new PageInfo<>(pageIndex, pageSize);
             } else {
-                list = this.mongoDepositServiceImpl.getDepositListByAgentHash(chainId, agentHash, pageIndex, pageSize);
+                list = this.depositService.getDepositListByAgentHash(chainId, agentHash, pageIndex, pageSize);
             }
             return new RpcResult().setResult(list);
         } catch (Exception e) {
@@ -461,7 +461,7 @@ public class PocConsensusController {
             if (!CacheManager.isChainExist(chainId)) {
                 list = new PageInfo<>(pageIndex, pageSize);
             } else {
-                list = this.mongoDepositServiceImpl.getCancelDepositListByAgentHash(chainId, agentHash, type, pageIndex, pageSize);
+                list = this.depositService.getCancelDepositListByAgentHash(chainId, agentHash, type, pageIndex, pageSize);
             }
             return new RpcResult().setResult(list);
         } catch (Exception e) {
@@ -500,8 +500,8 @@ public class PocConsensusController {
                 list = new PageInfo(pageIndex, pageSize);
                 return RpcResult.success(list);
             }
-            List<String> hashList = mongoDepositServiceImpl.getAgentHashList(chainId, address);
-            list = mongoAgentServiceImpl.getAgentByHashList(chainId, pageIndex, pageSize, hashList);
+            List<String> hashList = depositService.getAgentHashList(chainId, address);
+            list = agentService.getAgentByHashList(chainId, pageIndex, pageSize, hashList);
             return RpcResult.success(list);
         } catch (Exception e) {
             Log.error(e);
@@ -537,7 +537,7 @@ public class PocConsensusController {
             if (!CacheManager.isChainExist(chainId)) {
                 list = new PageInfo<>(pageIndex, pageSize);
             } else {
-                list = this.mongoDepositServiceImpl.getDepositListByAddress(chainId, address, pageIndex, pageSize);
+                list = this.depositService.getDepositListByAddress(chainId, address, pageIndex, pageSize);
             }
             return new RpcResult().setResult(list);
         } catch (Exception e) {
@@ -579,8 +579,8 @@ public class PocConsensusController {
             if (!CacheManager.isChainExist(chainId)) {
                 return RpcResult.success(new PageInfo<>(pageIndex, pageSize));
             }
-            long count = mongoRoundServiceImpl.getTotalCount(chainId);
-            List<PocRound> roundList = mongoRoundServiceImpl.getRoundList(chainId, pageIndex, pageSize);
+            long count = roundService.getTotalCount(chainId);
+            List<PocRound> roundList = roundService.getRoundList(chainId, pageIndex, pageSize);
             PageInfo<PocRound> pageInfo = new PageInfo<>();
             pageInfo.setPageNumber(pageIndex);
             pageInfo.setPageSize(pageSize);
@@ -607,11 +607,11 @@ public class PocConsensusController {
                 return getFirstRound(chainId);
             }
             CurrentRound round = new CurrentRound();
-            PocRound pocRound = mongoRoundServiceImpl.getRound(chainId, roundIndex);
+            PocRound pocRound = roundService.getRound(chainId, roundIndex);
             if (pocRound == null) {
                 return RpcResult.dataNotFound();
             }
-            List<PocRoundItem> itemList = mongoRoundServiceImpl.getRoundItemList(chainId, roundIndex);
+            List<PocRoundItem> itemList = roundService.getRoundItemList(chainId, roundIndex);
             round.setItemList(itemList);
             round.initByPocRound(pocRound);
             return new RpcResult().setResult(round);
