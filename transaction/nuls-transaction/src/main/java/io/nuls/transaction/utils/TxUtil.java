@@ -40,6 +40,7 @@ import io.nuls.transaction.manager.TxManager;
 import io.nuls.transaction.model.bo.Chain;
 import io.nuls.transaction.model.bo.TxRegister;
 
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -217,7 +218,13 @@ public class TxUtil {
         nulsLogger.debug("size: {}B,  -{}KB, -{}MB",
                 String.valueOf(tx.getSize()), String.valueOf(tx.getSize() / 1024), String.valueOf(tx.getSize() / 1024 / 1024));
         byte[] remark = tx.getRemark();
-        nulsLogger.debug("remark: {}", remark == null ? "" : tx.getRemark().toString());
+        try {
+            String remarkStr =  remark == null ? "" : new String(tx.getRemark(),"UTF-8");
+            nulsLogger.debug("remark: {}", remarkStr);
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+
         CoinData coinData = null;
         try {
             if (tx.getCoinData() != null) {

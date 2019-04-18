@@ -65,7 +65,7 @@ public class FSQueue {
     }
 
     public FSQueue(File dir) throws Exception {
-        this(dir, 1024 * 1024 * 2);
+        this(dir, 1024 * 1024 * 2L);
     }
 
     /**
