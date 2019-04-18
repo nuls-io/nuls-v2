@@ -184,4 +184,17 @@ public class AgentCmd extends BaseCmd {
         }
         return success(result.getData());
     }
+
+    /**
+     * 获取当前节点的出块账户信息
+     * */
+    @CmdAnnotation(cmd = "cs_getPackerInfo", version = 1.0, description = "modifying the Packing State of Nodes 1.0")
+    @Parameter(parameterName = "chainId", parameterType = "int")
+    public Response getPackerInfo(Map<String,Object> params){
+        Result result = service.getPackerInfo(params);
+        if(result.isFailed()){
+            return failed(result.getErrorCode());
+        }
+        return success(result.getData());
+    }
 }
