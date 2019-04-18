@@ -11,6 +11,8 @@ public interface ChainService {
 
     List<ChainInfo> getChainInfoList();
 
+    SyncInfo getSyncInfo(int chainId);
+
     void addChainInfo(ChainInfo chainInfo);
 
     ChainInfo getChainInfo(int chainId);

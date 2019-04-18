@@ -24,7 +24,6 @@
  */
 package io.nuls.transaction.manager;
 
-import ch.qos.logback.classic.Level;
 import io.nuls.db.constant.DBErrorCode;
 import io.nuls.db.service.RocksDBService;
 import io.nuls.tools.core.annotation.Autowired;
@@ -210,11 +209,11 @@ public class ChainManager {
     }
 
     private void initLogger(Chain chain) {
-        NulsLogger txLogger = LoggerBuilder.getLogger(String.valueOf(chain.getConfig().getChainId()), TxConstant.LOG_TX, Level.DEBUG, Level.DEBUG);
+        NulsLogger txLogger = LoggerBuilder.getLogger(String.valueOf(chain.getConfig().getChainId()), TxConstant.LOG_TX);
         chain.getLoggerMap().put(TxConstant.LOG_TX, txLogger);
-        NulsLogger txProcessLogger = LoggerBuilder.getLogger(String.valueOf(chain.getConfig().getChainId()), TxConstant.LOG_NEW_TX_PROCESS, Level.DEBUG, Level.DEBUG);
+        NulsLogger txProcessLogger = LoggerBuilder.getLogger(String.valueOf(chain.getConfig().getChainId()), TxConstant.LOG_NEW_TX_PROCESS);
         chain.getLoggerMap().put(TxConstant.LOG_NEW_TX_PROCESS, txProcessLogger);
-        NulsLogger txMessageLogger = LoggerBuilder.getLogger(String.valueOf(chain.getConfig().getChainId()), TxConstant.LOG_TX_MESSAGE, Level.DEBUG, Level.DEBUG);
+        NulsLogger txMessageLogger = LoggerBuilder.getLogger(String.valueOf(chain.getConfig().getChainId()), TxConstant.LOG_TX_MESSAGE);
         chain.getLoggerMap().put(TxConstant.LOG_TX_MESSAGE, txMessageLogger);
 
     }

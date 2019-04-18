@@ -118,8 +118,9 @@ public class TxServiceImpl implements TxService {
                 txRegister.setUnlockTx(txRegisterDto.getUnlockTx());
                 txRegister.setVerifySignature(txRegisterDto.getVerifySignature());
                 chain.getTxRegisterMap().put(txRegister.getTxType(), txRegister);
-                return true;
+                chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("register:{}",JSONUtils.obj2json(txRegister));
             }
+            return true;
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -236,7 +237,7 @@ public class TxServiceImpl implements TxService {
         if (tx.getHash() == null || tx.getHash().size() == 0 || tx.getHash().size() > TxConstant.TX_HASH_DIGEST_BYTE_MAX_LEN) {
             throw new NulsException(TxErrorCode.TX_DATA_VALIDATION_ERROR);
         }
-        if (!TxManager.contain(chain, tx.getType())) {
+        if (!TxManager.contains(chain, tx.getType())) {
             throw new NulsException(TxErrorCode.TX_NOT_EFFECTIVE);
         }
         if (tx.getTime() == 0L) {

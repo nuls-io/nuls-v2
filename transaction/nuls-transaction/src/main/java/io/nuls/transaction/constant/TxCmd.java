@@ -28,51 +28,51 @@ package io.nuls.transaction.constant;
  * @author: Charlie
  * @date: 2018-12-25
  */
-public interface TxCmd {
+public final class TxCmd {
 
     /**
      * 模块接口
      */
-    String TX_GET_SYSTEM_TYPES = "tx_getSystemTypes";
-    String TX_REGISTER = "tx_register";
-    String TX_UNREGISTER = "tx_unregister";
-    String TX_PACKABLETXS = "tx_packableTxs";
-    String TX_SAVE = "tx_save";
-    String TX_GENGSIS_SAVE = "tx_gengsisSave";
-    String TX_ROLLBACK = "tx_rollback";
-    String TX_GET_CONFIRMED_TX = "tx_getConfirmedTx";
-    String TX_GETTX = "tx_getTx";
-    String TX_GET_BLOCK_TXS = "tx_getBlockTxs";
-    String TX_GET_BLOCK_TXS_EXTEND = "tx_getBlockTxsExtend";
-    String TX_BATCHVERIFY = "tx_batchVerify";
-    String TX_CREATE_CROSS_TX = "tx_createCtx";
-    String CLIENT_GETTX = "tx_getTxClient";
-    String CLIENT_GETTX_CONFIRMED = "tx_getConfirmedTxClient";
+    public static final String TX_GET_SYSTEM_TYPES = "tx_getSystemTypes";
+    public static final String TX_REGISTER = "tx_register";
+    public static final String TX_UNREGISTER = "tx_unregister";
+    public static final String TX_PACKABLETXS = "tx_packableTxs";
+    public static final String TX_SAVE = "tx_save";
+    public static final String TX_GENGSIS_SAVE = "tx_gengsisSave";
+    public static final String TX_ROLLBACK = "tx_rollback";
+    public static final String TX_GET_CONFIRMED_TX = "tx_getConfirmedTx";
+    public static final String TX_GETTX = "tx_getTx";
+    public static final String TX_GET_BLOCK_TXS = "tx_getBlockTxs";
+    public static final String TX_GET_BLOCK_TXS_EXTEND = "tx_getBlockTxsExtend";
+    public static final String TX_BATCHVERIFY = "tx_batchVerify";
+    public static final String TX_CREATE_CROSS_TX = "tx_createCtx";
+    public static final String CLIENT_GETTX = "tx_getTxClient";
+    public static final String CLIENT_GETTX_CONFIRMED = "tx_getConfirmedTxClient";
 
-    String TX_BLOCK_HEIGHT = "tx_blockHeight";
-    String TX_VERIFYTX = "tx_verifyTx";
+    public static final String TX_BLOCK_HEIGHT = "tx_blockHeight";
+    public static final String TX_VERIFYTX = "tx_verifyTx";
 
     /**
      * 修改节点共识状态
      */
-    String TX_CS_STATE = "tx_cs_state";
+    public static final String TX_CS_STATE = "tx_cs_state";
 
 
-    String TX_NEWTX = "tx_newTx";
+    public static final String TX_NEWTX = "tx_newTx";
 
-    String TX_BASE_VALIDATE = "tx_baseValidateTx";
+    public static final String TX_BASE_VALIDATE = "tx_baseValidateTx";
 
     /**
      * 接收广播的新交易hash
      */
-    String NW_NEW_HASH = "newHash";
+    public static final String NW_NEW_HASH = "newHash";
     /**
      * 接收其他节点发送的完整交易
      */
-    String NW_RECEIVE_TX = "receiveTx";
+    public static final String NW_RECEIVE_TX = "receiveTx";
     /**
      * 索取完整交易
      */
-    String NW_ASK_TX = "askTx";
+    public static final String NW_ASK_TX = "askTx";
 
 }

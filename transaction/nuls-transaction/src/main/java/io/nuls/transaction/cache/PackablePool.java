@@ -2,6 +2,7 @@ package io.nuls.transaction.cache;
 
 import io.nuls.base.data.Transaction;
 import io.nuls.tools.core.annotation.Component;
+import io.nuls.transaction.constant.TxConstant;
 import io.nuls.transaction.model.bo.Chain;
 
 import java.util.ArrayList;
@@ -21,8 +22,8 @@ public class PackablePool {
         chain.getTxQueue().addFirst(tx);
     }
 
-    public void add(Chain chain, Transaction tx) {
-        chain.getTxQueue().offer(tx);
+    public boolean add(Chain chain, Transaction tx) {
+        return chain.getTxQueue().offer(tx);
     }
 
     /**
@@ -37,7 +38,7 @@ public class PackablePool {
     }
 
     public List<Transaction> getAll(Chain chain) {
-        List<Transaction> txs = new ArrayList<>();
+        List<Transaction> txs = new ArrayList<>(TxConstant.INIT_CAPACITY_4);
         Iterator<Transaction> it = chain.getTxQueue().iterator();
         while (it.hasNext()) {
             txs.add(it.next());

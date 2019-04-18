@@ -47,8 +47,6 @@ import io.nuls.transaction.storage.LanguageStorageService;
 import io.nuls.transaction.utils.DBUtil;
 import io.nuls.transaction.utils.LoggerUtil;
 
-import java.lang.reflect.Field;
-import java.nio.charset.Charset;
 import java.util.Set;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
@@ -106,6 +104,7 @@ public class TransactionBootstrap extends RpcModule {
         }
     }
 
+
     @Override
     public void onDependenciesReady(Module module) {
         try {
@@ -156,9 +155,6 @@ public class TransactionBootstrap extends RpcModule {
         try {
             System.setProperty(TxConstant.SYS_ALLOW_NULL_ARRAY_ELEMENT, "true");
             System.setProperty(TxConstant.SYS_FILE_ENCODING, UTF_8.name());
-            Field charset = Charset.class.getDeclaredField("defaultCharset");
-            charset.setAccessible(true);
-            charset.set(null, UTF_8);
         } catch (Exception e) {
             LoggerUtil.Log.error(e);
         }

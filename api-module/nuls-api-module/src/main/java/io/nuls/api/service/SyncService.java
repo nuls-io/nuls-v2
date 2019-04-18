@@ -4,7 +4,7 @@ package io.nuls.api.service;
 import io.nuls.api.cache.ApiCache;
 import io.nuls.api.constant.ApiConstant;
 import io.nuls.api.constant.ApiErrorCode;
-import io.nuls.api.db.RoundManager;
+import io.nuls.api.db.*;
 import io.nuls.api.db.mongo.*;
 import io.nuls.api.manager.CacheManager;
 import io.nuls.api.model.po.db.*;
@@ -22,29 +22,29 @@ import static io.nuls.api.constant.ApiConstant.*;
 public class SyncService {
 
     @Autowired
-    private MongoChainServiceImpl mongoChainServiceImpl;
+    private ChainService chainService;
     @Autowired
-    private MongoBlockServiceImpl mongoBlockServiceImpl;
+    private BlockService blockService;
     @Autowired
-    private MongoAccountServiceImpl mongoAccountServiceImpl;
+    private AccountService accountService;
     @Autowired
-    private MongoAccountLedgerServiceImpl ledgerService;
+    private AccountLedgerService ledgerService;
     @Autowired
-    private MongoTransactionServiceImpl txService;
+    private TransactionService txService;
     @Autowired
-    private MongoAgentServiceImpl mongoAgentServiceImpl;
+    private AgentService agentService;
     @Autowired
-    private MongoAliasServiceImpl mongoAliasServiceImpl;
+    private AliasService aliasService;
     @Autowired
-    private MongoDepositServiceImpl mongoDepositServiceImpl;
+    private DepositService depositService;
     @Autowired
-    private MongoPunishServiceImpl mongoPunishServiceImpl;
+    private PunishService punishService;
     @Autowired
     private RoundManager roundManager;
     @Autowired
-    private MongoContractServiceImpl mongoContractServiceImpl;
+    private ContractService contractService;
     @Autowired
-    private MongoTokenServiceImpl mongoTokenServiceImpl;
+    private TokenService tokenService;
 
     //记录每个区块打包交易涉及到的账户的余额变动
     private Map<String, AccountInfo> accountInfoMap = new HashMap<>();
@@ -75,11 +75,11 @@ public class SyncService {
 
 
     public SyncInfo getSyncInfo(int chainId) {
-        return mongoChainServiceImpl.getSyncInfo(chainId);
+        return chainService.getSyncInfo(chainId);
     }
 
     public BlockHeaderInfo getBestBlockHeader(int chainId) {
-        return mongoBlockServiceImpl.getBestBlockHeader(chainId);
+        return blockService.getBestBlockHeader(chainId);
     }
 
     public boolean syncNewBlock(int chainId, BlockInfo blockInfo) {
@@ -288,7 +288,7 @@ public class SyncService {
         AgentInfo agentInfo = (AgentInfo) tx.getTxData();
         agentInfo.setNew(true);
         //查询agent节点是否设置过别名
-        AliasInfo aliasInfo = mongoAliasServiceImpl.getAliasByAddress(chainId, agentInfo.getAgentAddress());
+        AliasInfo aliasInfo = aliasService.getAliasByAddress(chainId, agentInfo.getAgentAddress());
         if (aliasInfo != null) {
             agentInfo.setAgentAlias(aliasInfo.getAlias());
         }
@@ -322,7 +322,7 @@ public class SyncService {
 
         //查询委托记录，生成对应的取消委托信息
         DepositInfo cancelInfo = (DepositInfo) tx.getTxData();
-        DepositInfo depositInfo = mongoDepositServiceImpl.getDepositInfoByKey(chainId, cancelInfo.getTxHash() + accountInfo.getAddress());
+        DepositInfo depositInfo = depositService.getDepositInfoByKey(chainId, cancelInfo.getTxHash() + accountInfo.getAddress());
 
         cancelInfo.copyInfoWithDeposit(depositInfo);
         cancelInfo.setTxHash(tx.getHash());
@@ -381,7 +381,7 @@ public class SyncService {
         }
 
         //查询所有当前节点下的委托，生成取消委托记录
-        List<DepositInfo> depositInfos = mongoDepositServiceImpl.getDepositListByAgentHash(chainId, agentInfo.getTxHash());
+        List<DepositInfo> depositInfos = depositService.getDepositListByAgentHash(chainId, agentInfo.getTxHash());
         for (DepositInfo depositInfo : depositInfos) {
             DepositInfo cancelDeposit = new DepositInfo();
             cancelDeposit.setNew(true);
@@ -413,7 +413,7 @@ public class SyncService {
             addressSet.add(punishLog.getAddress());
         }
 
-        ChainInfo chainInfo = mongoChainServiceImpl.getChainInfo(chainId);
+        ChainInfo chainInfo = chainService.getChainInfo(chainId);
         for (String address : addressSet) {
             AccountInfo accountInfo = queryAccountInfo(chainId, address);
             accountInfo.setTxCount(accountInfo.getTxCount() + 1);
@@ -454,7 +454,7 @@ public class SyncService {
         agentInfo.setNew(false);
 
         //根据节点找到委托列表
-        List<DepositInfo> depositInfos = mongoDepositServiceImpl.getDepositListByAgentHash(chainId, agentInfo.getTxHash());
+        List<DepositInfo> depositInfos = depositService.getDepositListByAgentHash(chainId, agentInfo.getTxHash());
         if (!depositInfos.isEmpty()) {
             for (DepositInfo depositInfo : depositInfos) {
                 DepositInfo cancelDeposit = new DepositInfo();
@@ -654,9 +654,9 @@ public class SyncService {
      */
     public void save(int chainId, BlockInfo blockInfo) {
         long height = blockInfo.getHeader().getHeight();
-        SyncInfo syncInfo = mongoChainServiceImpl.saveNewSyncInfo(chainId, height);
+        SyncInfo syncInfo = chainService.saveNewSyncInfo(chainId, height);
         //存储区块头信息
-        mongoBlockServiceImpl.saveBLockHeaderInfo(chainId, blockInfo.getHeader());
+        blockService.saveBLockHeaderInfo(chainId, blockInfo.getHeader());
         //存储交易记录
         txService.saveTxList(chainId, blockInfo.getTxList());
 
@@ -664,55 +664,55 @@ public class SyncService {
         //存储交易和地址关系记录
         txService.saveTxRelationList(chainId, txRelationInfoSet);
         //存储别名记录
-        mongoAliasServiceImpl.saveAliasList(chainId, aliasInfoList);
+        aliasService.saveAliasList(chainId, aliasInfoList);
         //存储红黄牌惩罚记录
-        mongoPunishServiceImpl.savePunishList(chainId, punishLogList);
+        punishService.savePunishList(chainId, punishLogList);
         //存储委托/取消委托记录
-        mongoDepositServiceImpl.saveDepositList(chainId, depositInfoList);
+        depositService.saveDepositList(chainId, depositInfoList);
         //存储智能合约交易关系记录
-        mongoContractServiceImpl.saveContractTxInfos(chainId, contractTxInfoList);
+        contractService.saveContractTxInfos(chainId, contractTxInfoList);
         //存入智能合约执行结果记录
-        mongoContractServiceImpl.saveContractResults(chainId, contractResultList);
+        contractService.saveContractResults(chainId, contractResultList);
         //存储token转账信息
-        mongoTokenServiceImpl.saveTokenTransfers(chainId, tokenTransferList);
+        tokenService.saveTokenTransfers(chainId, tokenTransferList);
 
         /*
             涉及到统计类的表放在最后来存储，便于回滚
          */
         //存储共识节点列表
         syncInfo.setStep(10);
-        mongoChainServiceImpl.updateStep(syncInfo);
-        mongoAgentServiceImpl.saveAgentList(chainId, agentInfoList);
+        chainService.updateStep(syncInfo);
+        agentService.saveAgentList(chainId, agentInfoList);
 
         //存储账户资产信息
         syncInfo.setStep(20);
-        mongoChainServiceImpl.updateStep(syncInfo);
+        chainService.updateStep(syncInfo);
         ledgerService.saveLedgerList(chainId, accountLedgerInfoMap);
 
         //存储智能合约信息表
         syncInfo.setStep(30);
-        mongoChainServiceImpl.updateStep(syncInfo);
-        mongoContractServiceImpl.saveContractInfos(chainId, contractInfoMap);
+        chainService.updateStep(syncInfo);
+        contractService.saveContractInfos(chainId, contractInfoMap);
 
         //存储账户token信息
         syncInfo.setStep(40);
-        mongoChainServiceImpl.updateStep(syncInfo);
-        mongoTokenServiceImpl.saveAccountTokens(chainId, accountTokenMap);
+        chainService.updateStep(syncInfo);
+        tokenService.saveAccountTokens(chainId, accountTokenMap);
 
         //存储账户信息表
         syncInfo.setStep(50);
-        mongoChainServiceImpl.updateStep(syncInfo);
-        mongoAccountServiceImpl.saveAccounts(chainId, accountInfoMap);
+        chainService.updateStep(syncInfo);
+        accountService.saveAccounts(chainId, accountInfoMap);
 
         //完成解析
         syncInfo.setStep(100);
-        mongoChainServiceImpl.updateStep(syncInfo);
+        chainService.updateStep(syncInfo);
     }
 
     private AccountInfo queryAccountInfo(int chainId, String address) {
         AccountInfo accountInfo = accountInfoMap.get(address);
         if (accountInfo == null) {
-            accountInfo = mongoAccountServiceImpl.getAccountInfo(chainId, address);
+            accountInfo = accountService.getAccountInfo(chainId, address);
             if (accountInfo == null) {
                 accountInfo = new AccountInfo(address);
             }
@@ -748,11 +748,11 @@ public class SyncService {
             }
         }
         if (type == 1) {
-            agentInfo = mongoAgentServiceImpl.getAgentByHash(chainId, key);
+            agentInfo = agentService.getAgentByHash(chainId, key);
         } else if (type == 2) {
-            agentInfo = mongoAgentServiceImpl.getAgentByAgentAddress(chainId, key);
+            agentInfo = agentService.getAgentByAgentAddress(chainId, key);
         } else {
-            agentInfo = mongoAgentServiceImpl.getAgentByPackingAddress(chainId, key);
+            agentInfo = agentService.getAgentByPackingAddress(chainId, key);
         }
         if (agentInfo != null) {
             agentInfoList.add(agentInfo);
@@ -763,7 +763,7 @@ public class SyncService {
     private ContractInfo queryContractInfo(int chainId, String contractAddress) {
         ContractInfo contractInfo = contractInfoMap.get(contractAddress);
         if (contractInfo == null) {
-            contractInfo = mongoContractServiceImpl.getContractInfo(chainId, contractAddress);
+            contractInfo = contractService.getContractInfo(chainId, contractAddress);
             contractInfoMap.put(contractInfo.getContractAddress(), contractInfo);
         }
         return contractInfo;
@@ -772,7 +772,7 @@ public class SyncService {
     private AccountTokenInfo queryAccountTokenInfo(int chainId, String key) {
         AccountTokenInfo accountTokenInfo = accountTokenMap.get(key);
         if (accountTokenInfo == null) {
-            accountTokenInfo = mongoTokenServiceImpl.getAccountTokenInfo(chainId, key);
+            accountTokenInfo = tokenService.getAccountTokenInfo(chainId, key);
         }
         return accountTokenInfo;
     }

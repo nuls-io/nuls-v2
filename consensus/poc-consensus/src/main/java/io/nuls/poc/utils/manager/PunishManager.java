@@ -684,7 +684,9 @@ public class PunishManager {
         List<DepositPo> depositPoList = depositStorageService.getList(chainId);
         List<DepositPo> updatedList = new ArrayList<>();
         for (DepositPo po : depositPoList) {
-            po.setDelHeight(-1);
+            if(po.getDelHeight() == blockHeight){
+                po.setDelHeight(-1);
+            }
             boolean success = this.depositStorageService.save(po,chainId);
             if (!success) {
                 for (DepositPo po2 : updatedList) {

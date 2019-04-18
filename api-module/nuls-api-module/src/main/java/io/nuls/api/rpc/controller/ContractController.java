@@ -2,6 +2,8 @@ package io.nuls.api.rpc.controller;
 
 import io.nuls.api.analysis.WalletRpcHandler;
 import io.nuls.api.cache.ApiCache;
+import io.nuls.api.db.ContractService;
+import io.nuls.api.db.TokenService;
 import io.nuls.api.db.mongo.MongoContractServiceImpl;
 import io.nuls.api.db.mongo.MongoTokenServiceImpl;
 import io.nuls.api.exception.JsonRpcException;
@@ -25,9 +27,9 @@ import java.util.List;
 public class ContractController {
 
     @Autowired
-    private MongoContractServiceImpl mongoContractServiceImpl;
+    private ContractService contractService;
     @Autowired
-    private MongoTokenServiceImpl mongoTokenServiceImpl;
+    private TokenService tokenService;
 
     @RpcMethod("getContract")
     public RpcResult getContract(List<Object> params) {
@@ -49,13 +51,13 @@ public class ContractController {
                 return RpcResult.dataNotFound();
             }
             RpcResult rpcResult = new RpcResult();
-            ContractInfo contractInfo = mongoContractServiceImpl.getContractInfo(chainId, contractAddress);
+            ContractInfo contractInfo = contractService.getContractInfo(chainId, contractAddress);
             if (contractInfo == null) {
                 rpcResult.setError(new RpcResultError(RpcErrorCode.DATA_NOT_EXISTS));
             } else {
                 ApiCache apiCache = CacheManager.getCache(chainId);
                 AssetInfo defaultAsset = apiCache.getChainInfo().getDefaultAsset();
-                BalanceInfo balanceInfo = WalletRpcHandler.getBalance(chainId, contractAddress, defaultAsset.getChainId(), defaultAsset.getAssetId());
+                BalanceInfo balanceInfo = WalletRpcHandler.getAccountBalance(chainId, contractAddress, defaultAsset.getChainId(), defaultAsset.getAssetId());
                 contractInfo.setBalance(balanceInfo.getTotalBalance());
                 rpcResult.setResult(contractInfo);
             }
@@ -94,7 +96,7 @@ public class ContractController {
             if (!CacheManager.isChainExist(chainId)) {
                 pageInfo = new PageInfo<>(pageIndex, pageSize);
             } else {
-                pageInfo = mongoTokenServiceImpl.getAccountTokens(chainId, address, pageIndex, pageSize);
+                pageInfo = tokenService.getAccountTokens(chainId, address, pageIndex, pageSize);
             }
 
             RpcResult result = new RpcResult();
@@ -134,7 +136,7 @@ public class ContractController {
             if (!CacheManager.isChainExist(chainId)) {
                 pageInfo = new PageInfo<>(pageIndex, pageSize);
             } else {
-                pageInfo = mongoTokenServiceImpl.getContractTokens(chainId, contractAddress, pageIndex, pageSize);
+                pageInfo = tokenService.getContractTokens(chainId, contractAddress, pageIndex, pageSize);
             }
             RpcResult result = new RpcResult();
             result.setResult(pageInfo);
@@ -174,7 +176,7 @@ public class ContractController {
             if (!CacheManager.isChainExist(chainId)) {
                 pageInfo = new PageInfo<>(pageIndex, pageSize);
             } else {
-                pageInfo = mongoTokenServiceImpl.getTokenTransfers(chainId, address, contractAddress, pageIndex, pageSize);
+                pageInfo = tokenService.getTokenTransfers(chainId, address, contractAddress, pageIndex, pageSize);
             }
             RpcResult result = new RpcResult();
             result.setResult(pageInfo);
@@ -214,7 +216,7 @@ public class ContractController {
             if (!CacheManager.isChainExist(chainId)) {
                 pageInfo = new PageInfo<>(pageIndex, pageSize);
             } else {
-                pageInfo = mongoContractServiceImpl.getContractTxList(chainId, contractAddress, type, pageIndex, pageSize);
+                pageInfo = contractService.getContractTxList(chainId, contractAddress, type, pageIndex, pageSize);
             }
             RpcResult result = new RpcResult();
             result.setResult(pageInfo);
@@ -251,7 +253,7 @@ public class ContractController {
             if (!CacheManager.isChainExist(chainId)) {
                 pageInfo = new PageInfo<>(pageIndex, pageSize);
             } else {
-                pageInfo = mongoContractServiceImpl.getContractList(chainId, pageIndex, pageSize, onlyNrc20, isHidden);
+                pageInfo = contractService.getContractList(chainId, pageIndex, pageSize, onlyNrc20, isHidden);
             }
             RpcResult result = new RpcResult();
             result.setResult(pageInfo);

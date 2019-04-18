@@ -4,6 +4,10 @@ import io.nuls.api.ApiContext;
 import io.nuls.api.analysis.WalletRpcHandler;
 import io.nuls.api.cache.ApiCache;
 import io.nuls.api.constant.AddressType;
+import io.nuls.api.db.AccountService;
+import io.nuls.api.db.BlockService;
+import io.nuls.api.db.ContractService;
+import io.nuls.api.db.TransactionService;
 import io.nuls.api.db.mongo.MongoAccountServiceImpl;
 import io.nuls.api.db.mongo.MongoBlockServiceImpl;
 import io.nuls.api.db.mongo.MongoContractServiceImpl;
@@ -32,16 +36,16 @@ import java.util.Map;
 public class ChainController {
 
     @Autowired
-    private MongoBlockServiceImpl mongoBlockServiceImpl;
+    private BlockService blockService;
 
     @Autowired
-    private MongoTransactionServiceImpl mongoTransactionServiceImpl;
+    private TransactionService transactionService;
 
     @Autowired
-    private MongoAccountServiceImpl mongoAccountServiceImpl;
+    private AccountService accountService;
 
     @Autowired
-    private MongoContractServiceImpl mongoContractServiceImpl;
+    private ContractService contractService;
 
     @RpcMethod("getChains")
     public RpcResult getChains(List<Object> params) {
@@ -121,7 +125,7 @@ public class ChainController {
     private SearchResultDTO getContractByAddress(int chainId, String text) {
         ContractInfo contractInfo = null;
         try {
-            contractInfo = mongoContractServiceImpl.getContractInfo(chainId, text);
+            contractInfo = contractService.getContractInfo(chainId, text);
         } catch (Exception e) {
             Log.error(e);
             throw new JsonRpcException();
@@ -134,7 +138,7 @@ public class ChainController {
 
     private SearchResultDTO getResultByHash(int chainId, String hash) {
 
-        BlockHeaderInfo blockHeaderInfo = mongoBlockServiceImpl.getBlockHeaderByHash(chainId, hash);
+        BlockHeaderInfo blockHeaderInfo = blockService.getBlockHeaderByHash(chainId, hash);
         if (blockHeaderInfo != null) {
             return getBlockInfo(chainId, blockHeaderInfo);
         }
@@ -155,7 +159,7 @@ public class ChainController {
             throw new JsonRpcException(new RpcResultError(RpcErrorCode.PARAMS_ERROR, "[address] is inValid"));
         }
 
-        AccountInfo accountInfo = mongoAccountServiceImpl.getAccountInfo(chainId, address);
+        AccountInfo accountInfo = accountService.getAccountInfo(chainId, address);
         if (accountInfo == null) {
             throw new NotFoundException();
         }
@@ -172,7 +176,7 @@ public class ChainController {
         } catch (Exception e) {
             return null;
         }
-        BlockHeaderInfo blockHeaderInfo = mongoBlockServiceImpl.getBlockHeader(chainId, height);
+        BlockHeaderInfo blockHeaderInfo = blockService.getBlockHeader(chainId, height);
         if (blockHeaderInfo == null) {
             return null;
         }

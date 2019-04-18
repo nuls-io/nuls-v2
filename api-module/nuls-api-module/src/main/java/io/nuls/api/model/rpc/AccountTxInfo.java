@@ -1,10 +1,10 @@
-package io.nuls.api.model.po.db;
+package io.nuls.api.model.rpc;
 
-import com.google.common.base.Objects;
+import io.nuls.api.model.po.db.TxRelationInfo;
 
 import java.math.BigInteger;
 
-public class TxRelationInfo {
+public class AccountTxInfo {
 
     private String txHash;
 
@@ -29,22 +29,28 @@ public class TxRelationInfo {
     // -1 : from , 1: to
     private int transferType;
 
-    public TxRelationInfo() {
+    private int status;
+
+    private String symbol;
+
+    public AccountTxInfo() {
 
     }
 
-    public TxRelationInfo(String address, TransactionInfo info, int chainId, int assetId, BigInteger values, int transferType, BigInteger balance) {
-        this.address = address;
-        this.txHash = info.getHash();
-        this.type = info.getType();
-        this.createTime = info.getCreateTime();
-        this.height = info.getHeight();
-        this.chainId = chainId;
-        this.assetId = assetId;
-        this.fee = info.getFee();
-        this.values = values;
-        this.balance = balance;
-        this.transferType = transferType;
+    public AccountTxInfo(TxRelationInfo relationInfo, int status, String symbol) {
+        this.txHash = relationInfo.getTxHash();
+        this.address = relationInfo.getAddress();
+        this.type = relationInfo.getType();
+        this.createTime = relationInfo.getCreateTime();
+        this.height = relationInfo.getHeight();
+        this.chainId = relationInfo.getChainId();
+        this.assetId = relationInfo.getAssetId();
+        this.fee = relationInfo.getFee();
+        this.values = relationInfo.getValues();
+        this.balance = relationInfo.getBalance();
+        this.transferType = relationInfo.getTransferType();
+        this.status = status;
+        this.symbol = symbol;
     }
 
     public String getTxHash() {
@@ -135,29 +141,19 @@ public class TxRelationInfo {
         this.transferType = transferType;
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
-        TxRelationInfo that = (TxRelationInfo) o;
-        return type == that.type &&
-                createTime == that.createTime &&
-                height == that.height &&
-                chainId == that.chainId &&
-                assetId == that.assetId &&
-                Objects.equal(txHash, that.txHash) &&
-                Objects.equal(address, that.address) &&
-                Objects.equal(values, that.values) &&
-                Objects.equal(fee, that.fee) &&
-                Objects.equal(balance, that.balance);
+    public int getStatus() {
+        return status;
     }
 
-    @Override
-    public int hashCode() {
-        return Objects.hashCode(txHash, address, type, createTime, height, chainId, assetId, values, fee, balance);
+    public void setStatus(int status) {
+        this.status = status;
+    }
+
+    public String getSymbol() {
+        return symbol;
+    }
+
+    public void setSymbol(String symbol) {
+        this.symbol = symbol;
     }
 }

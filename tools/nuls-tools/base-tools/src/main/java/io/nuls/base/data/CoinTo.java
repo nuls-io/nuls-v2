@@ -3,7 +3,6 @@ package io.nuls.base.data;
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.basic.NulsOutputStreamBuffer;
-import io.nuls.base.constant.BaseConstant;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.parse.SerializeUtils;
 
@@ -17,7 +16,7 @@ import java.math.BigInteger;
 public class CoinTo extends Coin {
 
     /**
-     * uint32,解锁高度或解锁时间，-1为永久锁定
+     * int64,解锁高度或解锁时间，-1为永久锁定
      */
     private long lockTime;
 
@@ -30,7 +29,7 @@ public class CoinTo extends Coin {
         this.amount = amount;
     }
 
-    public CoinTo(byte[] address,int assetsChainId,int assetsId, BigInteger amount,long lockTime){
+    public CoinTo(byte[] address,int assetsChainId,int assetsId, BigInteger amount, long lockTime){
        this(address,assetsChainId,assetsId,amount);
        this.lockTime = lockTime;
     }
@@ -41,7 +40,7 @@ public class CoinTo extends Coin {
         stream.writeUint16(assetsChainId);
         stream.writeUint16(assetsId);
         stream.writeBigInteger(amount);
-        stream.writeVarInt(lockTime);
+        stream.writeInt64(lockTime);
     }
 
     @Override
@@ -50,7 +49,7 @@ public class CoinTo extends Coin {
         this.assetsChainId = byteBuffer.readUint16();
         this.assetsId = byteBuffer.readUint16();
         this.amount = byteBuffer.readBigInteger();
-        this.lockTime = byteBuffer.readVarInt();
+        this.lockTime = byteBuffer.readInt64();
     }
 
     @Override
@@ -60,7 +59,7 @@ public class CoinTo extends Coin {
         size += SerializeUtils.sizeOfUint16();
         size += SerializeUtils.sizeOfUint16();
         size += SerializeUtils.sizeOfBigInteger();
-        size += SerializeUtils.sizeOfVarInt(lockTime);
+        size += SerializeUtils.sizeOfInt64();
         return size;
     }
 

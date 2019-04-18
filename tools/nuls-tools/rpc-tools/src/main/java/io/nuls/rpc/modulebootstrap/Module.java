@@ -69,4 +69,14 @@ public class Module {
     public void setVersion(String version) {
         this.version = version;
     }
+
+    @Override
+    public String toString() {
+        return new StringBuilder("{")
+                .append("\"name\":\"")
+                .append(name).append('\"')
+                .append(",\"version\":\"")
+                .append(version).append('\"')
+                .append('}').toString();
+    }
 }

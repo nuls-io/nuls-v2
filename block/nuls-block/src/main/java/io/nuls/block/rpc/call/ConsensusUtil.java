@@ -209,7 +209,7 @@ public class ConsensusUtil {
             long roundIndex = data.getRoundIndex();
             List<String> hexList = new ArrayList<>();
             int count = 0;
-            while (count < 110) {
+            while (count < 110 - 1) {
                 latestHeight--;
                 if ((latestHeight <= 0)) {
                     //110轮已经回退到创世块了，不需要再给共识模块新区块

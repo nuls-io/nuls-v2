@@ -27,10 +27,12 @@ package io.nuls.ledger.test.cmd;
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.*;
 import io.nuls.ledger.test.constant.TestConfig;
+import io.nuls.rpc.info.NoUse;
 import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.model.message.Response;
 import io.nuls.rpc.netty.processor.ResponseMessageProcessor;
 import io.nuls.rpc.util.RPCUtil;
+import io.nuls.tools.parse.JSONUtils;
 import org.junit.Before;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -83,7 +85,7 @@ public class CmdGenesisAsset {
 
     @Before
     public void before() throws Exception {
-//        NoUse.mockModule();
+        NoUse.mockModule();
     }
 
 
@@ -116,10 +118,10 @@ public class CmdGenesisAsset {
         params.put("chainId", TestConfig.chainId);
         params.put("assetChainId", TestConfig.assetChainId);
         params.put("assetId", TestConfig.assetId);
-        params.put("address", address);
-//        params.put("address", "LLbmaw1UNmKmd5PfuzP1Zm9dNuAnia01f");
+//        params.put("address", address);
+        params.put("address", "tNULSeBaMrucKmBUxXVSeyQhdCwGHQHSus7yWg");
 
-        Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.LG.abbr, "getBalanceNonce", params);
-        logger.info("response {}", response);
+        Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.LG.abbr, "getBalance", params);
+        logger.info("response {}", JSONUtils.obj2json(response));
     }
 }

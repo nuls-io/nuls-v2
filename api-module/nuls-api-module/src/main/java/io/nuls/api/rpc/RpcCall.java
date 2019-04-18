@@ -48,6 +48,8 @@ public class RpcCall {
                 return null;
             }*/
             return resData.get(cmd);
+        } catch (NulsException e) {
+            throw e;
         } catch (Exception e) {
             Log.debug("cmd: {}", cmd);
             throw new NulsException(e);
