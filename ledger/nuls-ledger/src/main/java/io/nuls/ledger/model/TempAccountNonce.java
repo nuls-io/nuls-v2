@@ -33,12 +33,12 @@ public class TempAccountNonce {
 
     private String assetKey;
 
-    private String nonce;
+    private byte[] nonce;
 
-    private String nextNonce;
+    private byte[] nextNonce;
 
 
-    public TempAccountNonce(String assetKey, String nonce, String nextNonce){
+    public TempAccountNonce(String assetKey, byte[] nonce, byte[] nextNonce){
         this.assetKey = assetKey;
         this.nonce = nonce;
         this.nextNonce = nextNonce;
@@ -52,19 +52,19 @@ public class TempAccountNonce {
         this.assetKey = assetKey;
     }
 
-    public String getNonce() {
+    public byte[] getNonce() {
         return nonce;
     }
 
-    public void setNonce(String nonce) {
+    public void setNonce(byte[] nonce) {
         this.nonce = nonce;
     }
 
-    public String getNextNonce() {
+    public byte[] getNextNonce() {
         return nextNonce;
     }
 
-    public void setNextNonce(String nextNonce) {
+    public void setNextNonce(byte[] nextNonce) {
         this.nextNonce = nextNonce;
     }
 }

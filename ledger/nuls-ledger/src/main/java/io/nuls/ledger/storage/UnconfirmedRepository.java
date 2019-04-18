@@ -25,7 +25,12 @@
  */
 package io.nuls.ledger.storage;
 
+import io.nuls.ledger.model.po.AccountStateUncfd2Cfd;
 import io.nuls.ledger.model.po.AccountStateUnconfirmed;
+import io.nuls.ledger.model.po.TxUnconfirmed;
+
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author lanjinsheng
@@ -57,5 +62,90 @@ public interface UnconfirmedRepository {
      * @throws Exception
      */
     void updateAccountStateUnconfirmed(byte[] key, AccountStateUnconfirmed nowAccountState) throws Exception;
+
+    /**
+     * delete unconfirmed state
+     *
+     * @param chainId
+     * @param key
+     * @throws Exception
+     */
+    void deleteAccountStateUnconfirmed(int chainId, byte[] key) throws Exception;
+
+    /**
+     * save unconfirmed tx
+     *
+     * @param chainId
+     * @param key
+     * @param txUnconfirmed
+     * @throws Exception
+     */
+    void saveTxUnconfirmed(int chainId, byte[] key, TxUnconfirmed txUnconfirmed) throws Exception;
+
+    /**
+     * batch Delete unconfirmed tx
+     *
+     * @param chainId
+     * @param keys
+     * @throws Exception
+     */
+    void batchDeleteTxsUnconfirmed(int chainId, List<byte[]> keys) throws Exception;
+
+    /**
+     * batch save unconfirmed tx
+     *
+     * @param chainId
+     * @param map
+     * @throws Exception
+     */
+    void batchSaveTxsUnconfirmed(int chainId, Map<byte[], byte[]> map) throws Exception;
+
+    /**
+     * get unconfirmed tx by key
+     *
+     * @param chainId
+     * @param key
+     * @return
+     * @throws Exception
+     */
+    TxUnconfirmed getTxUnconfirmed(int chainId, byte[] key) throws Exception;
+
+    /**
+     * delete unconfirmed tx
+     *
+     * @param chainId
+     * @param key
+     * @throws Exception
+     */
+    void deleteTxUnconfirmed(int chainId, byte[] key) throws Exception;
+
+    /**
+     * save unconfirmed to confirmed tx amount  object
+     *
+     * @param chainId
+     * @param key
+     * @param accountStateUncfd2Cfd
+     * @throws Exception
+     */
+    void saveAccountStateUncfd2Cfd(int chainId, byte[] key, AccountStateUncfd2Cfd accountStateUncfd2Cfd) throws Exception;
+
+    /**
+     * delete unconfirmed to confirmed amount object
+     *
+     * @param chainId
+     * @param key
+     * @throws Exception
+     */
+    void deleteAccountStateUncfd2Cfd(int chainId, byte[] key) throws Exception;
+
+    /**
+     * get unconfirmed to confirmed amount object
+     *
+     * @param chainId
+     * @param key
+     * @return
+     * @throws Exception
+     */
+    AccountStateUncfd2Cfd getAccountStateUncfd2Cfd(int chainId, byte[] key) throws Exception;
 
 }

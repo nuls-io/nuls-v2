@@ -34,7 +34,6 @@ import io.nuls.tools.parse.SerializeUtils;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 /**
  * @author lanjinsheng
@@ -42,17 +41,15 @@ import java.util.Set;
  */
 public class AccountStateSnapshot extends BaseNulsData {
     private AccountState accountState;
-    private List<String> nonces = new ArrayList<>();
-    private List<String> txHashList = new ArrayList<>();
+    private List<AmountNonce> nonces = new ArrayList<>();
 
     public AccountStateSnapshot() {
         super();
     }
 
-    public AccountStateSnapshot(AccountState accountState, List<String> nonces,Set<String> txHashs) {
+    public AccountStateSnapshot(AccountState accountState, List<AmountNonce> nonces) {
         this.accountState = accountState;
         this.nonces = nonces;
-        this.txHashList.addAll(txHashs);
     }
 
     public AccountState getAccountState() {
@@ -63,24 +60,13 @@ public class AccountStateSnapshot extends BaseNulsData {
         this.accountState = accountState;
     }
 
-    public List<String> getNonces() {
-        return nonces;
-    }
-
-    public void setNonces(List<String> nonces) {
-        this.nonces = nonces;
-    }
 
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
         stream.writeNulsData(accountState);
         stream.writeUint16(nonces.size());
-        for (String nonce : nonces) {
-            stream.writeString(nonce);
-        }
-        stream.writeUint16(txHashList.size());
-        for (String txHash : txHashList) {
-            stream.writeString(txHash);
+        for (AmountNonce nonce : nonces) {
+            stream.writeNulsData(nonce);
         }
     }
 
@@ -89,11 +75,9 @@ public class AccountStateSnapshot extends BaseNulsData {
         this.accountState = byteBuffer.readNulsData(new AccountState());
         int nonceCount = byteBuffer.readUint16();
         for (int i = 0; i < nonceCount; i++) {
-            this.nonces.add(byteBuffer.readString());
-        }
-        int hashCount = byteBuffer.readUint16();
-        for (int i = 0; i < hashCount; i++) {
-            this.txHashList.add(byteBuffer.readString());
+            AmountNonce amountNonce = new AmountNonce();
+            byteBuffer.readNulsData(amountNonce);
+            this.nonces.add(amountNonce);
         }
     }
 
@@ -102,21 +86,17 @@ public class AccountStateSnapshot extends BaseNulsData {
         int size = 0;
         size += SerializeUtils.sizeOfNulsData(accountState);
         size += SerializeUtils.sizeOfUint16();
-        for (String nonce : nonces) {
-            size += SerializeUtils.sizeOfString(nonce);
-        }
-        size += SerializeUtils.sizeOfUint16();
-        for (String txHash : txHashList) {
-            size += SerializeUtils.sizeOfString(txHash);
+        for (AmountNonce nonce : nonces) {
+            size += SerializeUtils.sizeOfNulsData(nonce);
         }
         return size;
     }
 
-    public List<String> getTxHashList() {
-        return txHashList;
+    public List<AmountNonce> getNonces() {
+        return nonces;
     }
 
-    public void setTxHashList(List<String> txHashList) {
-        this.txHashList = txHashList;
+    public void setNonces(List<AmountNonce> nonces) {
+        this.nonces = nonces;
     }
 }

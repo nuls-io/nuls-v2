@@ -28,6 +28,7 @@ package io.nuls.ledger.model.po;
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.basic.NulsOutputStreamBuffer;
 import io.nuls.base.data.BaseNulsData;
+import io.nuls.ledger.constant.LedgerConstant;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.parse.SerializeUtils;
 
@@ -37,8 +38,8 @@ import java.math.BigInteger;
 /**
  * account balance lock
  * Created by wangkun23 on 2018/11/21.
- * @author lanjinsheng
  *
+ * @author lanjinsheng
  */
 public class FreezeHeightState extends BaseNulsData {
 
@@ -49,23 +50,23 @@ public class FreezeHeightState extends BaseNulsData {
     /**
      * 交易的nonce值
      */
-    private String nonce;
+    private byte[] nonce = LedgerConstant.INIT_NONCE_BYTE;
     /**
      * 锁定金额
      */
-    private BigInteger amount;
+    private BigInteger amount = BigInteger.ZERO;
 
     /**
      * 锁定高度
      */
-    private long height;
+    private long height = 0;
 
-    private long createTime;
+    private long createTime = 0;
 
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
         stream.writeString(txHash);
-        stream.writeString(nonce);
+        stream.write(nonce);
         stream.writeBigInteger(amount);
         stream.writeUint32(height);
         stream.writeUint48(createTime);
@@ -74,7 +75,7 @@ public class FreezeHeightState extends BaseNulsData {
     @Override
     public void parse(NulsByteBuffer byteBuffer) throws NulsException {
         this.txHash = byteBuffer.readString();
-        this.nonce = byteBuffer.readString();
+        this.nonce = byteBuffer.readBytes(8);
         this.amount = byteBuffer.readBigInteger();
         this.height = byteBuffer.readUint32();
         this.createTime = byteBuffer.readUint48();
@@ -84,7 +85,7 @@ public class FreezeHeightState extends BaseNulsData {
     public int size() {
         int size = 0;
         size += SerializeUtils.sizeOfString(txHash);
-        size += SerializeUtils.sizeOfString(nonce);
+        size += nonce.length;
         size += SerializeUtils.sizeOfBigInteger();
         size += SerializeUtils.sizeOfUint32();
         size += SerializeUtils.sizeOfUint48();
@@ -99,11 +100,11 @@ public class FreezeHeightState extends BaseNulsData {
         this.txHash = txHash;
     }
 
-    public String getNonce() {
+    public byte[] getNonce() {
         return nonce;
     }
 
-    public void setNonce(String nonce) {
+    public void setNonce(byte[] nonce) {
         this.nonce = nonce;
     }
 

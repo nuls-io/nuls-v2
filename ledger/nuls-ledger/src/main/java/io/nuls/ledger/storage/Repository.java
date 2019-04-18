@@ -28,7 +28,6 @@ package io.nuls.ledger.storage;
 import io.nuls.ledger.model.ChainHeight;
 import io.nuls.ledger.model.po.AccountState;
 import io.nuls.ledger.model.po.BlockSnapshotAccounts;
-import io.nuls.ledger.model.po.BlockTxs;
 import io.nuls.tools.exception.NulsException;
 
 import java.util.List;
@@ -36,6 +35,7 @@ import java.util.Map;
 
 /**
  * 数据存储接口
+ *
  * @author lanjinsheng
  */
 public interface Repository {
@@ -52,6 +52,7 @@ public interface Repository {
     /**
      * 获取账号账本信息
      * Getting Account Book Information
+     *
      * @param chainId
      * @param key
      * @return AccountState
@@ -61,23 +62,26 @@ public interface Repository {
     /**
      * 更新账号账本信息
      * update Account ledger Information
+     *
      * @param key
      * @param nowAccountState
      * @throws Exception
      */
-      void updateAccountState(byte[] key, AccountState nowAccountState) throws Exception;
+    void updateAccountState(byte[] key, AccountState nowAccountState) throws Exception;
 
     /**
      * 批量更新账号账本信息
      * batch update Account ledger Information
+     *
      * @param addressChainId
      * @param accountStateMap
      * @throws Exception
      */
-      void batchUpdateAccountState(int addressChainId, Map<byte[],byte[]> accountStateMap) throws Exception;
+    void batchUpdateAccountState(int addressChainId, Map<byte[], byte[]> accountStateMap) throws Exception;
 
     /**
      * 删除区块快照
+     *
      * @param chainId
      * @param height
      * @throws Exception
@@ -86,6 +90,7 @@ public interface Repository {
 
     /**
      * 存储区块快照
+     *
      * @param chainId
      * @param height
      * @param blockSnapshotAccounts
@@ -95,6 +100,7 @@ public interface Repository {
 
     /**
      * 获取区块快照
+     *
      * @param chainId
      * @param height
      * @return BlockSnapshotAccounts
@@ -104,6 +110,7 @@ public interface Repository {
 
     /**
      * 获取区块高度
+     *
      * @param chainId
      * @return
      */
@@ -111,6 +118,7 @@ public interface Repository {
 
     /**
      * 保存或更新区块高度
+     *
      * @param chainId
      * @param height
      */
@@ -118,82 +126,73 @@ public interface Repository {
 
     /**
      * 获取区块高度对象
+     *
      * @return
      */
     List<ChainHeight> getChainsBlockHeight();
 
-    /**
-     * 保存区块交易
-     * @param chainId
-     * @param height
-     * @param blockTxs
-     */
-    void saveBlock(int chainId, long height, BlockTxs blockTxs);
 
     /**
-     * 获取区块交易
-     * @param chainId
-     * @param height
-     * @return
-     */
-    BlockTxs getBlock(int chainId, long height);
-
-    /**
-     *保存账本使用过的nonce
+     * 保存账本使用过的nonce
+     *
      * @param chainId
      * @param noncesMap
      * @throws Exception
      */
-    void saveAccountNonces(int chainId, Map<String ,Integer> noncesMap) throws Exception;
+    void saveAccountNonces(int chainId, Map<String, Integer> noncesMap) throws Exception;
 
     /**
-     *删除账本存储的nonce
+     * 删除账本存储的nonce
+     *
      * @param chainId
      * @param accountNonceKey
      * @throws Exception
      */
-    void deleteAccountNonces(int chainId,String accountNonceKey) throws Exception;
+    void deleteAccountNonces(int chainId, String accountNonceKey) throws Exception;
 
     /**
-     *判断账号的nonce是否已被使用
+     * 判断账号的nonce是否已被使用
+     *
      * @param chainId
      * @param accountNonceKey
      * @return
      * @throws Exception
      */
-    boolean existAccountNonce(int chainId,String accountNonceKey) throws Exception;
-
-
+    boolean existAccountNonce(int chainId, String accountNonceKey) throws Exception;
 
 
     /**
-     *保存账本使用过的hash
+     * 保存账本使用过的hash
+     *
      * @param chainId
      * @param hashMap
      * @throws Exception
      */
-    void saveAccountHash(int chainId, Map<String ,Integer> hashMap) throws Exception;
+    void saveAccountHash(int chainId, Map<String, Integer> hashMap) throws Exception;
 
     /**
-     *删除账本存储的hash
+     * 删除账本存储的hash
+     *
      * @param chainId
      * @param hash
      * @throws Exception
      */
-    void deleteAccountHash(int chainId,String hash) throws Exception;
+    void deleteAccountHash(int chainId, String hash) throws Exception;
 
     /**
-     *判断账号的hash是否已被使用
+     * 判断账号的hash是否已被使用
+     *
      * @param chainId
      * @param hash
      * @return
      * @throws Exception
      */
-    boolean existAccountHash(int chainId,String hash) throws Exception;
+    boolean existAccountHash(int chainId, String hash) throws Exception;
 
     /**
      * 初始化数据表
+     *
      * @throws NulsException
      */
-    void initTableName() throws NulsException ;
+    void initTableName() throws NulsException;
 }

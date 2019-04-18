@@ -32,7 +32,6 @@ import io.nuls.ledger.constant.LedgerConstant;
 import io.nuls.ledger.model.ChainHeight;
 import io.nuls.ledger.model.po.AccountState;
 import io.nuls.ledger.model.po.BlockSnapshotAccounts;
-import io.nuls.ledger.model.po.BlockTxs;
 import io.nuls.ledger.storage.DataBaseArea;
 import io.nuls.ledger.storage.Repository;
 import io.nuls.ledger.utils.LoggerUtil;
@@ -230,40 +229,6 @@ public class RepositoryImpl implements Repository, InitializingBean {
             logger(addressChainId).error(e);
         }
     }
-
-
-    @Override
-    public void saveBlock(int chainId, long height, BlockTxs blockTxs) {
-        try {
-            String table = getBlockTableName(chainId);
-            if (!RocksDBService.existTable(table)) {
-                RocksDBService.createTable(table);
-            }
-            RocksDBService.put(table, ByteUtils.longToBytes(height), blockTxs.serialize());
-            RocksDBService.delete(table, ByteUtils.longToBytes(height - LedgerConstant.CACHE_ACCOUNT_BLOCK));
-        } catch (Exception e) {
-            logger(chainId).error("saveBlock serialize error.", e);
-        }
-
-    }
-
-    @Override
-    public BlockTxs getBlock(int chainId, long height) {
-        try {
-
-            byte[] stream = RocksDBService.get(getBlockTableName(chainId), ByteUtils.longToBytes(height));
-            if (stream == null) {
-                return null;
-            }
-            BlockTxs blockTxs = new BlockTxs();
-            blockTxs.parse(new NulsByteBuffer(stream));
-            return blockTxs;
-        } catch (Exception e) {
-            logger(chainId).error("getBlock serialize error.", e);
-        }
-        return null;
-    }
-
 
     @Override
     public void afterPropertiesSet() throws NulsException {

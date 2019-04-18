@@ -23,44 +23,35 @@
  * THE SOFTWARE.
  * ⁣⁣
  */
-package io.nuls.ledger.storage;
+package io.nuls.ledger.service.processor;
+
+import io.nuls.base.data.CoinFrom;
+import io.nuls.base.data.CoinTo;
+import io.nuls.ledger.model.po.AccountState;
 
 /**
- * database table name constant
- * Created by wangkun23 on 2018/11/19.
+ * 交易处理器
+ * Created by ljs on 2018/12/29.
  * @author lanjinsheng
  */
-public interface DataBaseArea {
-    String TB_LEDGER_ACCOUNT = "account";
+public interface TxLockedProcessor {
     /**
-     *   存区块交易缓存数据
+     * 交易对象中fromCoinData 处理
+       * @param coin
+     * @param nonce
+     * @param txHash
+     * @param accountState
+     * @return
      */
-    String TB_LEDGER_ACCOUNT_UNCONFIRMED = "accountUnconfirmed";
-    String TB_LEDGER_TX_UNCONFIRMED = "txUnconfirmed";
-    String TB_LEDGER_ACCOUNT_UNCFMD2CFMD = "uncfmd2cfmd";
-    /**
-     *   按区块高度来进行上一个账号状态的
-     */
-
-    String TB_LEDGER_ACCOUNT_BLOCK_SNAPSHOT = "accountBlockSnapshot";
+      boolean processFromCoinData(CoinFrom coin, byte[] nonce, String txHash, AccountState accountState);
 
     /**
-     *   存区块当前确认的高度
+     * 交易中toCoinData处理
+       * @param coin
+     * @param nonce
+     * @param txHash
+     * @param accountState
+     * @return
      */
-    String TB_LEDGER_BLOCK_HEIGHT = "chainBlockHeight";
-
-    /**
-     *   存区块交易缓存数据
-     */
-    String TB_LEDGER_BLOCKS = "chainBlocks";
-
-    /**
-     *   存区块交易缓存数据
-     */
-    String TB_LEDGER_NONCES = "ledgerNonces";
-
-    /**
-     *   存区块交易缓存数据
-     */
-    String TB_LEDGER_HASH = "ledgerHashs";
+      boolean processToCoinData(CoinTo coin, byte[] nonce, String txHash, AccountState accountState,long txTime);
 }

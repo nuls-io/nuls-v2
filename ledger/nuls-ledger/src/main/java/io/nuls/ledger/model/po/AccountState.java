@@ -39,6 +39,7 @@ import java.util.List;
 
 /**
  * 用户地址资产账号对应的账本信息
+ *
  * @author lanjinsheng
  */
 
@@ -53,7 +54,7 @@ public class AccountState extends BaseNulsData {
     private int assetId;
 
 
-    private String nonce = LedgerConstant.INIT_NONCE;
+    private byte[] nonce = LedgerConstant.INIT_NONCE_BYTE;
 
 
     private String txHash;
@@ -90,7 +91,7 @@ public class AccountState extends BaseNulsData {
         super();
     }
 
-    public AccountState(String address, int addressChainId, int assetChainId, int assetId, String nonce) {
+    public AccountState(String address, int addressChainId, int assetChainId, int assetId, byte[] nonce) {
         this.address = address;
         this.addressChainId = addressChainId;
         this.assetChainId = assetChainId;
@@ -131,7 +132,7 @@ public class AccountState extends BaseNulsData {
         stream.writeUint16(addressChainId);
         stream.writeUint16(assetChainId);
         stream.writeUint16(assetId);
-        stream.writeString(nonce);
+        stream.write(nonce);
         stream.writeString(txHash);
         stream.writeUint32(height);
         stream.writeUint32(latestUnFreezeTime);
@@ -153,7 +154,7 @@ public class AccountState extends BaseNulsData {
         this.addressChainId = byteBuffer.readUint16();
         this.assetChainId = byteBuffer.readUint16();
         this.assetId = byteBuffer.readUint16();
-        this.nonce = byteBuffer.readString();
+        this.nonce = byteBuffer.readBytes(8);
         this.txHash = byteBuffer.readString();
         this.height = byteBuffer.readUint32();
         this.latestUnFreezeTime = byteBuffer.readUint32();
@@ -193,7 +194,7 @@ public class AccountState extends BaseNulsData {
         size += SerializeUtils.sizeOfInt16();
         //assetId
         size += SerializeUtils.sizeOfInt16();
-        size += SerializeUtils.sizeOfString(nonce);
+        size += nonce.length;
         size += SerializeUtils.sizeOfString(txHash);
         size += SerializeUtils.sizeOfUint32();
         size += SerializeUtils.sizeOfUint32();
@@ -283,11 +284,11 @@ public class AccountState extends BaseNulsData {
         this.assetId = assetId;
     }
 
-    public String getNonce() {
+    public byte[] getNonce() {
         return nonce;
     }
 
-    public void setNonce(String nonce) {
+    public void setNonce(byte[] nonce) {
         this.nonce = nonce;
     }
 
