@@ -112,7 +112,17 @@ public interface BlockService {
      * @param round   轮次
      * @return
      */
-    List<BlockHeader> getBlockHeader(int chainId, int round);
+    List<BlockHeader> getBlockHeaderByRound(int chainId, long round);
+
+    /**
+     * 获取某轮的前若干轮区块头(POC共识专用)
+     *
+     * @param chainId 链Id/chain id
+     * @param limit   限制
+     * @param round   轮次
+     * @return
+     */
+    List<BlockHeader> getBlockHeaderByRound(int chainId, long limit, long round);
 
     /**
      * 获取两个高度之间的轮次差(POC共识专用)

@@ -35,6 +35,8 @@ import io.nuls.tools.log.logback.NulsLogger;
 import java.io.IOException;
 import java.util.*;
 
+import static io.nuls.block.constant.Constant.CACHED_ROUND_COUNT;
+
 /**
  * 调用共识模块接口的工具类
  *
@@ -203,11 +205,8 @@ public class ConsensusUtil {
         long latestHeight = context.getLatestHeight();
         try {
             int round = service.getRoundCount(chainId, latestHeight - rollBackAmount + 1, latestHeight);
-            if (round == 0) {
-                return true;
-            }
             List<String> hexList = new ArrayList<>();
-            List<BlockHeader> blockHeaders = service.getBlockHeader(chainId, round);
+            List<BlockHeader> blockHeaders = service.getBlockHeaderByRound(chainId, CACHED_ROUND_COUNT, round);
             if (blockHeaders == null) {
                 return true;
             }
