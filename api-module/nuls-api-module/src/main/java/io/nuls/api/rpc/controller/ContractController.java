@@ -55,7 +55,7 @@ public class ContractController {
             } else {
                 ApiCache apiCache = CacheManager.getCache(chainId);
                 AssetInfo defaultAsset = apiCache.getChainInfo().getDefaultAsset();
-                BalanceInfo balanceInfo = WalletRpcHandler.getBalance(chainId, contractAddress, defaultAsset.getChainId(), defaultAsset.getAssetId());
+                BalanceInfo balanceInfo = WalletRpcHandler.getAccountBalance(chainId, contractAddress, defaultAsset.getChainId(), defaultAsset.getAssetId());
                 contractInfo.setBalance(balanceInfo.getTotalBalance());
                 rpcResult.setResult(contractInfo);
             }
