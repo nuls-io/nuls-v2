@@ -20,8 +20,12 @@ import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.core.annotation.Value;
 import io.nuls.tools.exception.NulsException;
+import io.nuls.tools.log.Log;
 import io.nuls.tools.model.StringUtils;
 import io.nuls.tools.parse.I18nUtils;
+
+import java.util.Map;
+import java.util.Properties;
 
 /**
  * @author: qinyifeng
@@ -93,6 +97,13 @@ public class AccountBootstrap extends RpcModule {
      */
     @Override
     public boolean doStart() {
+        Map<String, Properties> lan = I18nUtils.getAll();
+        Log.info("languages :{}",lan);
+        lan.entrySet().forEach(entry->{
+            entry.getValue().forEach((key,value)->{
+                Log.info("{}:{}",key,value);
+            });
+        });
         return true;
     }
 
