@@ -264,7 +264,8 @@ public class BlockResource extends BaseCmd {
             if (latestBlockHeader.isComplete()) {
                 hexList.add(RPCUtil.encode(latestBlock.getHeader().serialize()));
             }
-            while (count < round) {
+            while (true) {
+                latestHeight--;
                 if ((latestHeight < 0)) {
                     break;
                 }
@@ -274,9 +275,11 @@ public class BlockResource extends BaseCmd {
                 if (newRoundIndex != roundIndex) {
                     count++;
                     roundIndex = newRoundIndex;
+                    if (count >= round - 1) {
+                        break;
+                    }
                 }
                 hexList.add(RPCUtil.encode(blockHeader.serialize()));
-                latestHeight--;
             }
             return success(hexList);
         } catch (Exception e) {
