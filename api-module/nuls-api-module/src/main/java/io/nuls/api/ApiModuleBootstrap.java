@@ -70,33 +70,6 @@ public class ApiModuleBootstrap extends RpcModule {
         NulsRpcModuleBootstrap.run("io.nuls", args);
     }
 
-    /**
-     * 初始化模块相关配置
-     * 有关mongoDB的连接初始化见：MongoDBService.afterPropertiesSet();
-     */
-    private void initCfg() {
-        ApiContext.databaseUrl = apiConfig.getDatabaseUrl();
-        ApiContext.databasePort = apiConfig.getDatabasePort();
-        ApiContext.defaultChainId = apiConfig.getDefaultChainId();
-        ApiContext.defaultAssetId = apiConfig.getDefaultAssetId();
-        ApiContext.listenerIp = apiConfig.getListenerIp();
-        ApiContext.rpcPort = apiConfig.getRpcPort();
-    }
-
-    /**
-     * Initialize the database connection
-     * 初始化数据库连接
-     */
-    private void initDB() {
-        MongoDBTableServiceImpl tableService = SpringLiteContext.getBean(MongoDBTableServiceImpl.class);
-        List<ChainInfo> chainList = tableService.getChainList();
-        if (chainList == null) {
-            tableService.addDefaultChain();
-        } else {
-            tableService.initCache();
-        }
-    }
-
     @Override
     public Module[] declareDependent() {
         return new Module[]{
@@ -120,10 +93,23 @@ public class ApiModuleBootstrap extends RpcModule {
             super.init();
             //初始化配置项
             initCfg();
-
         } catch (Exception e) {
             Log.error(e);
         }
+    }
+
+
+    /**
+     * 初始化模块相关配置
+     * 有关mongoDB的连接初始化见：MongoDBService.afterPropertiesSet();
+     */
+    private void initCfg() {
+        ApiContext.databaseUrl = apiConfig.getDatabaseUrl();
+        ApiContext.databasePort = apiConfig.getDatabasePort();
+        ApiContext.defaultChainId = apiConfig.getDefaultChainId();
+        ApiContext.defaultAssetId = apiConfig.getDefaultAssetId();
+        ApiContext.listenerIp = apiConfig.getListenerIp();
+        ApiContext.rpcPort = apiConfig.getRpcPort();
     }
 
     @Override
@@ -148,6 +134,20 @@ public class ApiModuleBootstrap extends RpcModule {
             System.exit(-1);
         }
         return RpcModuleState.Running;
+    }
+
+    /**
+     * Initialize the database connection
+     * 初始化数据库连接
+     */
+    private void initDB() {
+        MongoDBTableServiceImpl tableService = SpringLiteContext.getBean(MongoDBTableServiceImpl.class);
+        List<ChainInfo> chainList = tableService.getChainList();
+        if (chainList == null) {
+            tableService.addDefaultChain();
+        } else {
+            tableService.initCache();
+        }
     }
 
     @Override

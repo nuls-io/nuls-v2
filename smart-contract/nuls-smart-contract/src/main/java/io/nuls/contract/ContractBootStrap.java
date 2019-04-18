@@ -32,6 +32,7 @@ import java.io.IOException;
 import java.lang.reflect.Field;
 import java.nio.charset.Charset;
 import java.util.Map;
+import java.util.concurrent.CountDownLatch;
 
 import static io.nuls.contract.constant.ContractConstant.NRC20_STANDARD_FILE;
 import static java.nio.charset.StandardCharsets.UTF_8;
@@ -50,6 +51,8 @@ public class ContractBootStrap extends RpcModule {
     private ContractConfig contractConfig;
     @Autowired
     private ChainManager chainManager;
+
+    private CountDownLatch chainInitialWaiting = new CountDownLatch(1);
 
     public static void main(String[] args) throws Exception {
         systemConfig();
@@ -177,12 +180,15 @@ public class ContractBootStrap extends RpcModule {
      */
     @Override
     public boolean doStart() {
-        Log.info("module ready");
+        Log.info("module chain do start");
         try {
             //启动链
             SpringLiteContext.getBean(ChainManager.class).runChain();
         } catch (Exception e) {
             return false;
+        } finally {
+            chainInitialWaiting.countDown();
+            Log.info("module chain startup completed");
         }
         return true;
     }
@@ -194,6 +200,7 @@ public class ContractBootStrap extends RpcModule {
      */
     @Override
     public RpcModuleState onDependenciesReady() {
+        Log.info("all dependency module ready");
         TimeUtils.getInstance().start();
         return RpcModuleState.Running;
     }
@@ -203,14 +210,22 @@ public class ContractBootStrap extends RpcModule {
         Log.info("dependencies [{}] ready", module.getName());
         if(module.getName().equals(ModuleE.TX.abbr)) {
             /*
+             * 等待链启动完成
+             */
+            try {
+                chainInitialWaiting.await();
+            } catch (InterruptedException e) {
+                Log.error(e);
+                throw new RuntimeException(e);
+            }
+            /*
              * 注册交易到交易管理模块
              */
-            Log.info("register tx type to tx module");
             Map<Integer, Chain> chainMap = chainManager.getChainMap();
             for(Chain chain : chainMap.values()) {
                 try {
                     boolean isSuccess = ChainManager.registerTx(chain);
-                    Log.info("register tx result is {}", isSuccess);
+                    Log.info("register tx type to tx module, chain id is {}, result is {}", chain.getChainId(), isSuccess);
                 } catch (NulsException e) {
                     Log.error(e);
                     throw new RuntimeException(e);
