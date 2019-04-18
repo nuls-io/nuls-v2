@@ -272,7 +272,7 @@ public class CoinDataValidator {
                 String assetKey = LedgerUtil.getKeyStr(address, coinTo.getAssetsChainId(), coinTo.getAssetsId());
                 AccountState accountState = accountStateMap.get(assetKey);
                 if (null == accountState) {
-                    accountState = accountStateService.getAccountStateUnSyn(AddressTool.getStringAddressByBytes(coinTo.getAddress()), chainId, coinTo.getAssetsChainId(), coinTo.getAssetsId());
+                    accountState = accountStateService.getAccountStateReCal(AddressTool.getStringAddressByBytes(coinTo.getAddress()), chainId, coinTo.getAssetsChainId(), coinTo.getAssetsId());
                     accountStateMap.put(assetKey, accountState);
                 }
                 accountState.addTotalToAmount(coinTo.getAmount());
@@ -616,7 +616,7 @@ public class CoinDataValidator {
 
             String address = AddressTool.getStringAddressByBytes(coinFrom.getAddress());
             String nonce = LedgerUtil.getNonceEncode(coinFrom.getNonce());
-            AccountState accountState = accountStateService.getAccountStateUnSyn(address, addressChainId, coinFrom.getAssetsChainId(), coinFrom.getAssetsId());
+            AccountState accountState = accountStateService.getAccountStateReCal(address, addressChainId, coinFrom.getAssetsChainId(), coinFrom.getAssetsId());
             //初始花费交易,nonce为 fffffff;已兼容处理。
             //普通交易
             if (coinFrom.getLocked() == 0) {
@@ -624,7 +624,7 @@ public class CoinDataValidator {
             } else {
                 if (!isValidateFreezeTx(coinFrom.getLocked(), accountState, coinFrom.getAmount(), nonce)) {
                     //确认交易未找到冻结的交易
-                        return ValidateResult.getResult(ValidateEnum.FAIL_CODE, new String[]{address, nonce, "freeze tx is not exist"});
+                     return ValidateResult.getResult(ValidateEnum.FAIL_CODE, new String[]{address, nonce, "freeze tx is not exist"});
                 }
             }
         }
