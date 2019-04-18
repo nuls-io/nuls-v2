@@ -233,7 +233,7 @@ public abstract class RpcModule implements InitializingBean {
         if (dependencieReady) {
             if (!isRunning()) {
                 Log.info("RMB:dependencie state");
-                dependencies.entrySet().forEach(entry -> Log.debug("{}:{}", entry.getKey().getName(), entry.getValue()));
+                dependentReadyState.entrySet().forEach(entry -> Log.debug("{}:{}", entry.getKey().getName(), entry.getValue()));
                 Log.info("RMB:module try running");
                 state = onDependenciesReady();
                 if (state == null) {
