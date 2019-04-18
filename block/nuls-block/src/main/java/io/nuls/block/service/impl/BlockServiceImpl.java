@@ -188,7 +188,8 @@ public class BlockServiceImpl implements BlockService {
         BlockExtendsData startData = new BlockExtendsData(extend);
         //起始轮次
         long startRoundIndex = startData.getRoundIndex();
-        int count = 0;
+        //默认高度为begin和高度为end的区块是一个轮次
+        int count = 1;
         while (latestHeight > end) {
             latestHeight++;
             if ((latestHeight <= 0)) {

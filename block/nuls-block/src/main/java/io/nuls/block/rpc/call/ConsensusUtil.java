@@ -203,6 +203,9 @@ public class ConsensusUtil {
         long latestHeight = context.getLatestHeight();
         try {
             int round = service.getRoundCount(chainId, latestHeight - rollBackAmount + 1, latestHeight);
+            if (round == 0) {
+                return true;
+            }
             List<String> hexList = new ArrayList<>();
             List<BlockHeader> blockHeaders = service.getBlockHeader(chainId, round);
             if (blockHeaders == null) {
