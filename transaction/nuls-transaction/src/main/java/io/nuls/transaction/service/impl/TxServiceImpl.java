@@ -118,8 +118,9 @@ public class TxServiceImpl implements TxService {
                 txRegister.setUnlockTx(txRegisterDto.getUnlockTx());
                 txRegister.setVerifySignature(txRegisterDto.getVerifySignature());
                 chain.getTxRegisterMap().put(txRegister.getTxType(), txRegister);
-                return true;
+                chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("register:{}",JSONUtils.obj2json(txRegister));
             }
+            return true;
         } catch (Exception e) {
             e.printStackTrace();
         }

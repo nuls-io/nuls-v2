@@ -344,7 +344,7 @@ public class TransactionServiceImpl implements TransactionService {
             SignatureUtil.createTransactionSignture(tx, signEcKeys);
 
             if(!TransactionCmdCall.newTx(chainId, RPCUtil.encode(tx.serialize()))){
-                throw new  NulsRuntimeException(AccountErrorCode.FAILED);
+                throw new NulsRuntimeException(AccountErrorCode.FAILED);
             }
         } catch (NulsException e) {
             LoggerUtil.logger.error("assemblyTransaction exception.", e);
