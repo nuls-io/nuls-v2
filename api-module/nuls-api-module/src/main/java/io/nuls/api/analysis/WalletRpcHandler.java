@@ -97,27 +97,27 @@ public class WalletRpcHandler {
         return null;
     }
 
-    public static BalanceInfo getBalance(int chainId, String address, int assetChainId, int assetId) {
-        Map<String, Object> params = new HashMap<>(ApiConstant.INIT_CAPACITY_8);
-        params.put(Constants.VERSION_KEY_STR, ApiContext.VERSION);
-        params.put("chainId", chainId);
-        params.put("address", address);
-        params.put("assetChainId", assetChainId);
-        params.put("assetId", assetId);
-        try {
-            Map map = (Map) RpcCall.request(ModuleE.LG.abbr, CommandConstant.GET_BALANCE, params);
-            BalanceInfo balanceInfo = new BalanceInfo();
-            balanceInfo.setTotalBalance(new BigInteger(map.get("total").toString()));
-            balanceInfo.setBalance(new BigInteger(map.get("available").toString()));
-            balanceInfo.setTimeLock(new BigInteger(map.get("timeHeightLocked").toString()));
-            balanceInfo.setConsensusLock(new BigInteger(map.get("permanentLocked").toString()));
-
-            return balanceInfo;
-        } catch (Exception e) {
-            Log.error(e);
-        }
-        return null;
-    }
+//    public static BalanceInfo getBalance(int chainId, String address, int assetChainId, int assetId) {
+//        Map<String, Object> params = new HashMap<>(ApiConstant.INIT_CAPACITY_8);
+//        params.put(Constants.VERSION_KEY_STR, ApiContext.VERSION);
+//        params.put("chainId", chainId);
+//        params.put("address", address);
+//        params.put("assetChainId", assetChainId);
+//        params.put("assetId", assetId);
+//        try {
+//            Map map = (Map) RpcCall.request(ModuleE.LG.abbr, CommandConstant.GET_BALANCE, params);
+//            BalanceInfo balanceInfo = new BalanceInfo();
+//            balanceInfo.setTotalBalance(new BigInteger(map.get("total").toString()));
+//            balanceInfo.setBalance(new BigInteger(map.get("available").toString()));
+//            balanceInfo.setTimeLock(new BigInteger(map.get("timeHeightLocked").toString()));
+//            balanceInfo.setConsensusLock(new BigInteger(map.get("permanentLocked").toString()));
+//
+//            return balanceInfo;
+//        } catch (Exception e) {
+//            Log.error(e);
+//        }
+//        return null;
+//    }
 
     public static Result<PageInfo<FreezeInfo>> getFreezeList(int chainId, int pageIndex, int pageSize, String address, int assetId) {
         Map<String, Object> params = new HashMap<>();
