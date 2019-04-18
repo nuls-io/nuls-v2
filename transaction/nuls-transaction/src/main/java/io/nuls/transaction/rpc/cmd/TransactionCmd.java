@@ -29,7 +29,6 @@ import io.nuls.transaction.service.ConfirmedTxService;
 import io.nuls.transaction.service.TxService;
 import io.nuls.transaction.utils.TxUtil;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -79,7 +78,9 @@ public class TransactionCmd extends BaseCmd {
             ObjectUtils.canNotEmpty(params.get("list"), TxErrorCode.PARAMETER_ERROR.getMsg());
 
             JSONUtils.getInstance().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-            ModuleTxRegisterDTO moduleTxRegisterDto = JSONUtils.json2pojo(JSONUtils.obj2json(params), ModuleTxRegisterDTO.class);
+
+            ModuleTxRegisterDTO moduleTxRegisterDto = JSONUtils.map2pojo(params,ModuleTxRegisterDTO.class);
+            //ModuleTxRegisterDTO moduleTxRegisterDto = JSONUtils.json2pojo(JSONUtils.obj2json(params), ModuleTxRegisterDTO.class);
 
             chain = chainManager.getChain(moduleTxRegisterDto.getChainId());
             if (null == chain) {
@@ -87,27 +88,9 @@ public class TransactionCmd extends BaseCmd {
             }
             List<TxRegisterDTO> txRegisterList = moduleTxRegisterDto.getList();
             if (moduleTxRegisterDto == null || txRegisterList == null) {
-                throw new NulsException(TxErrorCode.NULL_PARAMETER);
+                throw new NulsException(TxErrorCode.TX_NOT_EXIST);
             }
-            //循环注册多种交易
-            for (TxRegisterDTO txRegisterDto : txRegisterList) {
-                TxRegister txRegister = new TxRegister();
-                txRegister.setModuleCode(moduleTxRegisterDto.getModuleCode());
-                txRegister.setModuleValidator(moduleTxRegisterDto.getModuleValidator());
-                txRegister.setTxType(txRegisterDto.getTxType());
-                txRegister.setValidator(txRegisterDto.getValidator());
-                txRegister.setCommit(moduleTxRegisterDto.getCommit());
-                txRegister.setRollback(moduleTxRegisterDto.getRollback());
-                txRegister.setSystemTx(txRegisterDto.getSystemTx());
-                txRegister.setUnlockTx(txRegisterDto.getUnlockTx());
-                txRegister.setVerifySignature(txRegisterDto.getVerifySignature());
-
-                result = txService.register(chain, txRegister);
-            }
-
-        } catch (IOException e) {
-            errorLogProcess(chain, e);
-            return failed(TxErrorCode.IO_ERROR);
+            result = txService.register(chain, moduleTxRegisterDto);
         } catch (NulsException e) {
             errorLogProcess(chain, e);
             return failed(e.getErrorCode());
@@ -118,6 +101,42 @@ public class TransactionCmd extends BaseCmd {
 
         map.put("value", result);
         return success(map);
+    }
+
+    /**
+     * Unregister module transactions.
+     * 取消注册模块的交易
+     *
+     * @param params
+     * @return Response
+     */
+    @CmdAnnotation(cmd = TxCmd.TX_UNREGISTER, version = 1.0, description = "module transaction unregister")
+    @Parameter(parameterName = "chainId", parameterType = "int")
+    @Parameter(parameterName = "moduleCode", parameterType = "String")
+    public Response unregister(Map params) {
+
+        Chain chain = null;
+        try {
+            ObjectUtils.canNotEmpty(params.get("chainId"), TxErrorCode.PARAMETER_ERROR.getMsg());
+            ObjectUtils.canNotEmpty(params.get("moduleCode"), TxErrorCode.PARAMETER_ERROR.getMsg());
+
+            chain = chainManager.getChain((int) params.get("chainId"));
+            if (null == chain) {
+                throw new NulsException(TxErrorCode.CHAIN_NOT_FOUND);
+            }
+            String moduleCode = (String) params.get("moduleCode");
+            boolean result = txService.unregister(chain, moduleCode);
+            Map<String, Boolean> map = new HashMap<>(TxConstant.INIT_CAPACITY_2);
+            map.put("value", result);
+            return success(map);
+        } catch (NulsException e) {
+            errorLogProcess(chain, e);
+            return failed(e.getErrorCode());
+        } catch (Exception e) {
+            errorLogProcess(chain, e);
+            return failed(TxErrorCode.SYS_UNKOWN_EXCEPTION);
+        }
+
     }
 
     /**
