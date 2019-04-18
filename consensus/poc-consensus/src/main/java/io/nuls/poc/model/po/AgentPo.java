@@ -56,7 +56,7 @@ public class AgentPo extends BaseNulsData {
 
     private BigInteger deposit;
 
-    private double commissionRate;
+    private int commissionRate;
 
     private long time;
 
@@ -74,7 +74,7 @@ public class AgentPo extends BaseNulsData {
         stream.write(packingAddress);
         stream.write(rewardAddress);
         stream.writeBigInteger(deposit);
-        stream.writeDouble(commissionRate);
+        stream.writeUint16(commissionRate);
         stream.writeUint48(time);
         stream.writeVarInt(blockHeight);
         stream.writeVarInt(delHeight);
@@ -87,7 +87,7 @@ public class AgentPo extends BaseNulsData {
         this.packingAddress = byteBuffer.readBytes(Address.ADDRESS_LENGTH);
         this.rewardAddress = byteBuffer.readBytes(Address.ADDRESS_LENGTH);
         this.deposit = byteBuffer.readBigInteger();
-        this.commissionRate = byteBuffer.readDouble();
+        this.commissionRate = byteBuffer.readUint16();
         this.time = byteBuffer.readUint48();
         this.blockHeight = byteBuffer.readVarInt();
         this.delHeight = byteBuffer.readVarInt();
@@ -98,7 +98,7 @@ public class AgentPo extends BaseNulsData {
         int size = SerializeUtils.sizeOfNulsData(hash);
         size += Address.ADDRESS_LENGTH * 3;
         size += SerializeUtils.sizeOfBigInteger();
-        size += SerializeUtils.sizeOfDouble(commissionRate);
+        size += SerializeUtils.sizeOfUint16();
         size += SerializeUtils.sizeOfUint48();
         size += SerializeUtils.sizeOfVarInt(blockHeight);
         size += SerializeUtils.sizeOfVarInt(delHeight);
@@ -145,11 +145,11 @@ public class AgentPo extends BaseNulsData {
         this.deposit = deposit;
     }
 
-    public double getCommissionRate() {
+    public int getCommissionRate() {
         return commissionRate;
     }
 
-    public void setCommissionRate(double commissionRate) {
+    public void setCommissionRate(int commissionRate) {
         this.commissionRate = commissionRate;
     }
 
