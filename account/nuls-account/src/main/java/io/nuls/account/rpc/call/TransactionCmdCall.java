@@ -73,7 +73,7 @@ public class TransactionCmdCall {
                 return false;
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            Log.error("", e);
         }
         return true;
     }
@@ -106,7 +106,7 @@ public class TransactionCmdCall {
             Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.TX.abbr, RpcConstant.TX_NEW_CMD, params);
             return cmdResp.isSuccess();
         } catch (Exception e) {
-            e.printStackTrace();
+            Log.error("", e);
             return false;
         }
     }
@@ -127,7 +127,7 @@ public class TransactionCmdCall {
             HashMap hashMap = (HashMap)((HashMap) cmdResp.getResponseData()).get("tx_baseValidateTx");
             return (boolean) hashMap.get("value");
         } catch (Exception e) {
-            e.printStackTrace();
+            Log.error("", e);
             return false;
         }
     }
