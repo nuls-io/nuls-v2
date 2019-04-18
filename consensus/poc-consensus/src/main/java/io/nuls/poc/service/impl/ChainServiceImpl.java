@@ -122,7 +122,7 @@ public class ChainServiceImpl implements ChainService {
                 if(transactionCommit(tx,chain,blockHeader)){
                     commitSuccessList.add(tx);
                 }else{
-                    transactionBatchRollBack(commitSuccessList,chain,blockHeader);
+                    //transactionBatchRollBack(commitSuccessList,chain,blockHeader);
                     result.put(ConsensusConstant.PARAM_RESULT_VALUE ,false);
                     return Result.getFailed(ConsensusErrorCode.SAVE_FAILED).setData(result);
                 }
@@ -131,11 +131,12 @@ public class ChainServiceImpl implements ChainService {
             return Result.getSuccess(ConsensusErrorCode.SUCCESS).setData(result);
         }catch (NulsException e){
             chain.getLoggerMap().get(ConsensusConstant.BASIC_LOGGER_NAME).error(e);
-            try{
+            /*try{
                 transactionBatchRollBack(commitSuccessList,chain,blockHeader);
             }catch (NulsException re){
                 chain.getLoggerMap().get(ConsensusConstant.BASIC_LOGGER_NAME).error(re);
-            }
+            }*/
+            result.put(ConsensusConstant.PARAM_RESULT_VALUE ,false);
             return Result.getFailed(e.getErrorCode()).setData(result);
         }
     }
