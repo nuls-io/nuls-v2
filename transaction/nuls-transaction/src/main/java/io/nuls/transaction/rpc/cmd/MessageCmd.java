@@ -17,9 +17,9 @@ import io.nuls.transaction.constant.TxConfig;
 import io.nuls.transaction.constant.TxConstant;
 import io.nuls.transaction.constant.TxErrorCode;
 import io.nuls.transaction.manager.ChainManager;
+import io.nuls.transaction.message.BroadcastTxMessage;
 import io.nuls.transaction.message.ForwardTxMessage;
 import io.nuls.transaction.message.GetTxMessage;
-import io.nuls.transaction.message.BroadcastTxMessage;
 import io.nuls.transaction.model.bo.Chain;
 import io.nuls.transaction.model.po.TransactionConfirmedPO;
 import io.nuls.transaction.rpc.call.NetworkCall;
@@ -183,8 +183,6 @@ public class MessageCmd extends BaseCmd {
         map.put("value", true);
         return success(map);
     }
-
-
 
     private void errorLogProcess(Chain chain, Exception e) {
         if (chain == null) {
