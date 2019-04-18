@@ -36,8 +36,11 @@ import io.nuls.tools.parse.SerializeUtils;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
+import static io.nuls.transaction.utils.LoggerUtil.Log;
+
 /**
  * 未确认交易的保存, 封装是为了记录交易进入[未确认保存]时的时间,以便作为未确认交易清理机制清理的依据
+ *
  * @author: qinyifeng
  * @date: 2019/01/24
  */
@@ -68,12 +71,12 @@ public class TransactionsPO extends BaseNulsData implements Cloneable {
     }
 
     public TransactionsPO(Transaction tx) {
-        this.type=tx.getType();
-        this.time=tx.getTime();
-        this.remark=tx.getRemark();
-        this.txData=tx.getTxData();
-        this.coinData=tx.getCoinData();
-        this.transactionSignature=tx.getTransactionSignature();
+        this.type = tx.getType();
+        this.time = tx.getTime();
+        this.remark = tx.getRemark();
+        this.txData = tx.getTxData();
+        this.coinData = tx.getCoinData();
+        this.transactionSignature = tx.getTransactionSignature();
 
     }
 
@@ -118,7 +121,7 @@ public class TransactionsPO extends BaseNulsData implements Cloneable {
     public byte[] serializeForHash() throws IOException {
         ByteArrayOutputStream bos = null;
         try {
-            int size = size() - SerializeUtils.sizeOfBytes(transactionSignature)-SerializeUtils.sizeOfUint48();
+            int size = size() - SerializeUtils.sizeOfBytes(transactionSignature) - SerializeUtils.sizeOfUint48();
             bos = new UnsafeByteArrayOutputStream(size);
             NulsOutputStreamBuffer buffer = new NulsOutputStreamBuffer(bos);
             if (size == 0) {
@@ -136,7 +139,7 @@ public class TransactionsPO extends BaseNulsData implements Cloneable {
                 try {
                     bos.close();
                 } catch (IOException e) {
-                    e.printStackTrace();
+                    Log.error(e);
                 }
             }
         }
@@ -158,7 +161,7 @@ public class TransactionsPO extends BaseNulsData implements Cloneable {
             try {
                 hash = NulsDigestData.calcDigestData(serializeForHash());
             } catch (IOException e) {
-                e.printStackTrace();
+                Log.error(e);
             }
         }
         return hash;

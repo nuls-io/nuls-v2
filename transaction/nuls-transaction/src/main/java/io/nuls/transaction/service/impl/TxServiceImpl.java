@@ -117,7 +117,7 @@ public class TxServiceImpl implements TxService {
             }
             return true;
         } catch (Exception e) {
-            e.printStackTrace();
+            chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).error(e);
         }
         return false;
     }
@@ -134,7 +134,7 @@ public class TxServiceImpl implements TxService {
             }
             return true;
         } catch (Exception e) {
-            e.printStackTrace();
+            chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).error(e);
             return false;
         }
     }
@@ -819,7 +819,7 @@ public class TxServiceImpl implements TxService {
                     chain.getLoggerMap().get(TxConstant.LOG_TX).debug("value:{}", str);
                 }
             } catch (JsonProcessingException e) {
-                e.printStackTrace();
+                chain.getLoggerMap().get(TxConstant.LOG_TX).error(e);
             }
         }
 
@@ -1090,9 +1090,9 @@ public class TxServiceImpl implements TxService {
                     }
                     return true;
                 } catch (NulsException e) {
-                    e.printStackTrace();
+                    chain.getLoggerMap().get(TxConstant.LOG_TX).error(e);
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    chain.getLoggerMap().get(TxConstant.LOG_TX).error(e);
                 }
                 return false;
             }

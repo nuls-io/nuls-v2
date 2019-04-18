@@ -130,7 +130,6 @@ public class VerifyTxProcessTask implements Runnable {
             }
         } catch (Exception e) {
             chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).error(e);
-            e.printStackTrace();
         }
         return false;
     }
