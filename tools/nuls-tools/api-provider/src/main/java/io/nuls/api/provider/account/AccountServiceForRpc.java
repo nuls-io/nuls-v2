@@ -6,6 +6,7 @@ import io.nuls.api.provider.Provider;
 import io.nuls.api.provider.Result;
 import io.nuls.api.provider.account.facade.*;
 import io.nuls.rpc.model.ModuleE;
+import io.nuls.tools.constant.CommonCodeConstanst;
 import io.nuls.tools.log.Log;
 import io.nuls.tools.parse.MapUtils;
 
@@ -71,10 +72,10 @@ public class AccountServiceForRpc extends BaseRpcService implements AccountServi
                 return success(list);
             } catch (InstantiationException e) {
                 Log.error("getAccountList fail",e);
-                return fail(ERROR_CODE);
+                return fail(CommonCodeConstanst.FAILED);
             } catch (IllegalAccessException e) {
                 Log.error("getAccountList fail",e);
-                return fail(ERROR_CODE);
+                return fail(CommonCodeConstanst.FAILED);
             }
         });
     }

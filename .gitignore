@@ -119,6 +119,7 @@ data/
 !tools/nuls-tools/base-tools/src/main/java/io/nuls/base/data
 keystore/
 Modules/
+gen_languages
 NULS-Wallet-linux64-alpha1/
 NULS-Wallet-linux64-alpha2/
 config_tmp/

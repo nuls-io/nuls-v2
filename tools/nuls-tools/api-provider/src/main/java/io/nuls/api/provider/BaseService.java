@@ -12,8 +12,6 @@ import java.util.List;
  */
 public abstract class BaseService {
 
-    public static final ErrorCode ERROR_CODE = ErrorCode.init("10001");
-
     /**
      * 默认chainId
      * 从配置文件中注入
@@ -33,11 +31,11 @@ public abstract class BaseService {
     }
 
     public static Result fail(String errorCode) {
-        return fail(ErrorCode.init(errorCode), null);
+        return fail(ErrorCode.init(errorCode));
     }
 
     public static Result fail(ErrorCode errorCode) {
-        return fail(errorCode, null);
+        return fail(errorCode, errorCode.getMsg());
     }
 
     public int getChainId() {

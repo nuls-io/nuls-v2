@@ -11,6 +11,9 @@ import io.nuls.tools.log.logback.NulsLogger;
 import io.nuls.tools.parse.I18nUtils;
 import io.nuls.tools.thread.ThreadUtils;
 
+import java.util.Map;
+import java.util.Properties;
+
 /**
  * @Author: zhoulijun
  * @Time: 2019-03-05 15:18
@@ -45,6 +48,13 @@ public class CmdClientModule extends RpcModule {
 
     @Override
     public boolean doStart() {
+        Map<String, Properties> lan = I18nUtils.getAll();
+        lan.entrySet().forEach(e->{
+            log.debug("{}",e.getKey());
+            e.getValue().forEach((key,value)->{
+                log.debug("{}:{}",key,value);
+            });
+        });
         System.out.println("waiting nuls-wallet base module ready");
         return true;
     }
@@ -69,7 +79,7 @@ public class CmdClientModule extends RpcModule {
             I18nUtils.loadLanguage(this.getClass(), "languages", language);
             I18nUtils.setLanguage(language);
         } catch (Exception e) {
-            log.error("module init I18nUtils fail");
+            log.error("module init I18nUtils fail",e);
             System.exit(0);
         }
 
