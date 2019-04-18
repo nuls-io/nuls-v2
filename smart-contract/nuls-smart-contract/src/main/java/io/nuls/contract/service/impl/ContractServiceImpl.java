@@ -231,6 +231,7 @@ public class ContractServiceImpl implements ContractService {
         }
     }
 
+    @Override
     public Result commitProcessor(int chainId, List<String> txDataList, String blockHeaderHex) {
         try {
             ContractPackageDto contractPackageDto = contractHelper.getChain(chainId).getBatchInfo().getContractPackageDto();
@@ -278,6 +279,7 @@ public class ContractServiceImpl implements ContractService {
         }
     }
 
+    @Override
     public Result rollbackProcessor(int chainId, List<String> txDataList, String blockHeaderHex) {
         try {
             Transaction tx;
