@@ -136,7 +136,7 @@ public abstract class RpcModule implements InitializingBean {
      * @param module
      */
     private void notifyFollowerReady(Module module) {
-        notifySender.send(() -> {
+        notifySender.send("notifyFollowerReady_"+module.toString(),10,() -> {
             if (followerList.get(module)) {
                 return true;
             }
@@ -212,6 +212,8 @@ public abstract class RpcModule implements InitializingBean {
         }
         if (dependencieReady) {
             if (!isRunning()) {
+                Log.info("RMB:dependencie state");
+                dependencies.entrySet().forEach(entry -> Log.debug("{}:{}", entry.getKey().getName(), entry.getValue()));
                 Log.info("RMB:module try running");
                 state = onDependenciesReady();
                 if (state == null) {
@@ -221,6 +223,7 @@ public abstract class RpcModule implements InitializingBean {
                 Log.info("RMB:module state : " + state);
             }
         } else {
+            Log.info("RMB:dependencie is not all ready");
             Log.info("RMB:dependencie state");
             dependencies.entrySet().forEach(entry -> Log.debug("{}:{}", entry.getKey().getName(), entry.getValue()));
         }

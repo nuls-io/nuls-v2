@@ -23,23 +23,73 @@ import java.util.concurrent.TimeUnit;
 @Component
 public class NotifySender implements Runnable, InitializingBean {
 
+    private class Sender {
+
+        String key;
+
+        int retry;
+
+        int retryTotal;
+
+        Callable<Boolean> caller;
+
+        void retry(){
+            this.retry++;
+        }
+
+        boolean canRetry(){
+            return retry < retryTotal;
+        }
+
+        public Sender(String key,int retryTotal,Callable<Boolean> caller){
+            this.retry = 0;
+            this.retryTotal = retryTotal;
+            this.key = key;
+            this.caller = caller;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) {
+                return true;
+            }
+            if (!(o instanceof Sender)) {
+                return false;
+            }
+
+            Sender sender = (Sender) o;
+
+            return key != null ? key.equals(sender.key) : sender.key == null;
+        }
+
+        @Override
+        public int hashCode() {
+            return key != null ? key.hashCode() : 0;
+        }
+    }
+
     ScheduledThreadPoolExecutor executor = ThreadUtils.createScheduledThreadPool(1, new NulsThreadFactory("notify-sender"));
 
-    Queue<Callable<Boolean>> notifyQueue = new ConcurrentLinkedQueue<>();
+    Queue<Sender> notifyQueue = new ConcurrentLinkedQueue<>();
 
     @Override
     public void run() {
         while (true) {
+            Queue<Sender> temp = new ConcurrentLinkedQueue<>();
             while (!notifyQueue.isEmpty()) {
-                Callable<Boolean> caller = notifyQueue.poll();
+                Sender sender = notifyQueue.poll();
+                Callable<Boolean> caller = sender.caller;
                 try {
                     Boolean success = caller.call();
                     if (!success) {
-                        notifyQueue.offer(caller);
+                        retry(temp,sender);
                     }
                 } catch (Exception e) {
-                    notifyQueue.offer(caller);
+                    retry(temp,sender);
                 }
+            }
+            while(!temp.isEmpty()){
+                notifyQueue.offer(temp.poll());
             }
             try {
                 TimeUnit.SECONDS.sleep(1L);
@@ -49,12 +99,24 @@ public class NotifySender implements Runnable, InitializingBean {
         }
     }
 
-    public void send(Callable<Boolean> caller) {
-        this.notifyQueue.offer(caller);
+    private void retry(Queue<Sender>temp,Sender sender){
+        if(sender.canRetry()){
+            Log.warn("notify fail, retry {}",sender.retry);
+            sender.retry();
+            temp.offer(sender);
+        }else{
+            Log.error("rpc module notify fail ：{}",sender.key);
+        }
+    }
+
+    public void send(String  key,int retryTotal,Callable<Boolean> caller) {
+        this.notifyQueue.offer(new Sender(key,retryTotal,caller));
     }
 
     @Override
     public void afterPropertiesSet() throws NulsException {
         executor.execute(this);
     }
+
+
 }
