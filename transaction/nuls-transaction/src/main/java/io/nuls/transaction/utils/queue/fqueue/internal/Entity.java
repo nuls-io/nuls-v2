@@ -271,6 +271,7 @@ public class Entity {
                 try {
                     Thread.sleep(10);
                 } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
                     break;
                 }
             }

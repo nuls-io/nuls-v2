@@ -136,7 +136,7 @@ public class TransactionsPO extends BaseNulsData implements Cloneable {
                 try {
                     bos.close();
                 } catch (IOException e) {
-                    throw e;
+                    e.printStackTrace();
                 }
             }
         }
