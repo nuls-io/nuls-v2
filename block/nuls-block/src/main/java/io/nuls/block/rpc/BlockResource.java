@@ -22,7 +22,6 @@ package io.nuls.block.rpc;
 
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.data.Block;
-import io.nuls.base.data.BlockExtendsData;
 import io.nuls.base.data.BlockHeader;
 import io.nuls.base.data.NulsDigestData;
 import io.nuls.base.data.po.BlockHeaderPo;
@@ -253,33 +252,10 @@ public class BlockResource extends BaseCmd {
                 return success(null);
             }
             int round = Integer.parseInt(map.get("round").toString());
-            int count = 0;
-            Block latestBlock = ContextManager.getContext(chainId).getLatestBlock();
-            long latestHeight = latestBlock.getHeader().getHeight();
-            byte[] extend = latestBlock.getHeader().getExtend();
-            BlockExtendsData data = new BlockExtendsData(extend);
-            long roundIndex = data.getRoundIndex();
+            List<BlockHeader> blockHeaders = service.getBlockHeader(chainId, round);
             List<String> hexList = new ArrayList<>();
-            BlockHeaderPo latestBlockHeader = service.getBlockHeaderPo(chainId, latestHeight);
-            if (latestBlockHeader.isComplete()) {
-                hexList.add(RPCUtil.encode(latestBlock.getHeader().serialize()));
-            }
-            while (true) {
-                latestHeight--;
-                if ((latestHeight < 0)) {
-                    break;
-                }
-                BlockHeader blockHeader = service.getBlockHeader(chainId, latestHeight);
-                BlockExtendsData newData = new BlockExtendsData(blockHeader.getExtend());
-                long newRoundIndex = newData.getRoundIndex();
-                if (newRoundIndex != roundIndex) {
-                    count++;
-                    roundIndex = newRoundIndex;
-                    if (count >= round - 1) {
-                        break;
-                    }
-                }
-                hexList.add(RPCUtil.encode(blockHeader.serialize()));
+            for (BlockHeader e : blockHeaders) {
+                hexList.add(RPCUtil.encode(e.serialize()));
             }
             return success(hexList);
         } catch (Exception e) {

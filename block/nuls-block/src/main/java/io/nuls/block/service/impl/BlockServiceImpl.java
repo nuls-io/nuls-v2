@@ -140,6 +140,73 @@ public class BlockServiceImpl implements BlockService {
     }
 
     @Override
+    public List<BlockHeader> getBlockHeader(int chainId, int round) {
+        ChainContext context = ContextManager.getContext(chainId);
+        NulsLogger commonLog = context.getCommonLog();
+        try {
+            int count = 0;
+            Block latestBlock = context.getLatestBlock();
+            long latestHeight = latestBlock.getHeader().getHeight();
+            byte[] extend = latestBlock.getHeader().getExtend();
+            BlockExtendsData data = new BlockExtendsData(extend);
+            long roundIndex = data.getRoundIndex();
+            List<BlockHeader> blockHeaders = new ArrayList<>();
+            BlockHeaderPo latestBlockHeader = getBlockHeaderPo(chainId, latestHeight);
+            if (latestBlockHeader.isComplete()) {
+                blockHeaders.add(latestBlock.getHeader());
+            }
+            while (true) {
+                latestHeight--;
+                if ((latestHeight < 0)) {
+                    break;
+                }
+                BlockHeader blockHeader = getBlockHeader(chainId, latestHeight);
+                BlockExtendsData newData = new BlockExtendsData(blockHeader.getExtend());
+                long newRoundIndex = newData.getRoundIndex();
+                if (newRoundIndex != roundIndex) {
+                    count++;
+                    roundIndex = newRoundIndex;
+                    if (count >= round - 1) {
+                        break;
+                    }
+                }
+                blockHeaders.add(blockHeader);
+            }
+            return blockHeaders;
+        } catch (Exception e) {
+            e.printStackTrace();
+            commonLog.error(e);
+            return null;
+        }
+    }
+
+    @Override
+    public int getRoundCount(int chainId, long begin, long end) {
+        BlockHeaderPo startBlock = getBlockHeaderPo(chainId, begin);
+        long latestHeight = startBlock.getHeight();
+        byte[] extend = startBlock.getExtend();
+        BlockExtendsData startData = new BlockExtendsData(extend);
+        //起始轮次
+        long startRoundIndex = startData.getRoundIndex();
+        int count = 0;
+        while (latestHeight > end) {
+            latestHeight++;
+            if ((latestHeight <= 0)) {
+                //110轮已经回退到创世块了，不需要再给共识模块新区块
+                return 0;
+            }
+            BlockHeaderPo blockHeader = getBlockHeaderPo(chainId, latestHeight);
+            BlockExtendsData newData = new BlockExtendsData(blockHeader.getExtend());
+            long newRoundIndex = newData.getRoundIndex();
+            if (newRoundIndex != startRoundIndex) {
+                count++;
+                startRoundIndex = newRoundIndex;
+            }
+        }
+        return count;
+    }
+
+    @Override
     public BlockHeader getBlockHeader(int chainId, NulsDigestData hash) {
         return BlockUtil.fromBlockHeaderPo(getBlockHeaderPo(chainId, hash));
     }

@@ -21,9 +21,7 @@
 package io.nuls.block.rpc.call;
 
 import io.nuls.base.data.Block;
-import io.nuls.base.data.BlockExtendsData;
 import io.nuls.base.data.BlockHeader;
-import io.nuls.base.data.po.BlockHeaderPo;
 import io.nuls.block.manager.ContextManager;
 import io.nuls.block.model.ChainContext;
 import io.nuls.block.service.BlockService;
@@ -199,32 +197,14 @@ public class ConsensusUtil {
      * @return
      */
     public static boolean sendHeaderList(int chainId, int rollBackAmount) {
+        //计算回滚rollBackAmount个区块是回滚了多少轮
         ChainContext context = ContextManager.getContext(chainId);
         NulsLogger commonLog = context.getCommonLog();
+        long latestHeight = context.getLatestHeight();
         try {
-            Block latestBlock = context.getLatestBlock();
-            long latestHeight = latestBlock.getHeader().getHeight();
-            byte[] extend = latestBlock.getHeader().getExtend();
-            BlockExtendsData data = new BlockExtendsData(extend);
-            long roundIndex = data.getRoundIndex();
+            int round = service.getRoundCount(chainId, latestHeight - rollBackAmount + 1, latestHeight);
             List<String> hexList = new ArrayList<>();
-            int count = 0;
-            while (count < 110 - 1) {
-                latestHeight--;
-                if ((latestHeight <= 0)) {
-                    //110轮已经回退到创世块了，不需要再给共识模块新区块
-                    return true;
-                }
-                BlockHeaderPo blockHeader = service.getBlockHeaderPo(chainId, latestHeight);
-                BlockExtendsData newData = new BlockExtendsData(blockHeader.getExtend());
-                long newRoundIndex = newData.getRoundIndex();
-                if (newRoundIndex != roundIndex) {
-                    count++;
-                    roundIndex = newRoundIndex;
-                }
-            }
-            long start = latestHeight <= rollBackAmount ? 0 : latestHeight - rollBackAmount;
-            List<BlockHeader> blockHeaders = service.getBlockHeader(chainId, start, latestHeight);
+            List<BlockHeader> blockHeaders = service.getBlockHeader(chainId, round);
             if (blockHeaders == null) {
                 return true;
             }
@@ -235,7 +215,6 @@ public class ConsensusUtil {
                     ex.printStackTrace();
                 }
             });
-
             Map<String, Object> params = new HashMap<>(2);
 //            params.put(Constants.VERSION_KEY_STR, "1.0");
             params.put("chainId", chainId);
@@ -245,6 +224,10 @@ public class ConsensusUtil {
                 Thread.sleep(1000L);
                 success = ResponseMessageProcessor.requestAndResponse(ModuleE.CS.abbr, "cs_receiveHeaderList", params).isSuccess();
             }
+            commonLog.info("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$");
+            commonLog.info("rollBackAmount-" + rollBackAmount);
+            commonLog.info("round-" + round);
+            commonLog.info("hexList.size-" + hexList.size());
             return success;
         } catch (Exception e) {
             e.printStackTrace();

@@ -22,8 +22,8 @@ package io.nuls.block.constant;
 
 import io.nuls.base.data.Block;
 import io.nuls.base.data.BlockHeader;
-import io.nuls.tools.protocol.ProtocolConfigJson;
 import io.nuls.block.model.Node;
+import io.nuls.tools.protocol.ProtocolConfigJson;
 
 import java.util.Comparator;
 
@@ -75,6 +75,10 @@ public interface Constant {
      * 共识等待状态
      */
     int CONSENSUS_WAITING = 0;
+    /**
+     * 共识模块缓存的区块头轮次数
+     */
+    int CACHED_ROUND_COUNT = 110;
 
     /**
      * 区块排序器
