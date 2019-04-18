@@ -8,6 +8,7 @@ import io.nuls.base.data.NulsDigestData;
 import io.nuls.base.data.Page;
 import io.nuls.base.data.Transaction;
 import io.nuls.base.signture.P2PHKSignature;
+import io.nuls.poc.constant.ConsensusConfig;
 import io.nuls.poc.constant.ConsensusConstant;
 import io.nuls.poc.constant.ConsensusErrorCode;
 import io.nuls.poc.model.bo.Chain;
@@ -79,6 +80,7 @@ public class AgentServiceImpl implements AgentService {
 
     @Autowired
     private RoundManager roundManager;
+
     /**
      * 创建节点
      */
@@ -579,6 +581,40 @@ public class AgentServiceImpl implements AgentService {
         return Result.getSuccess(ConsensusErrorCode.SUCCESS).setData(resultMap);
     }
 
+    /**
+     * 获取当前节点的出块账户信息
+     *
+     * @param params
+     * @return Result
+     */
+    @Override
+    @SuppressWarnings("unchecked")
+    public Result getPackerInfo(Map<String, Object> params) {
+        if (params == null || params.get(ConsensusConstant.PARAM_CHAIN_ID) == null) {
+            return Result.getFailed(ConsensusErrorCode.PARAM_ERROR);
+        }
+        int chainId = (Integer) params.get(ConsensusConstant.PARAM_CHAIN_ID);
+        if (chainId <= ConsensusConstant.MIN_VALUE) {
+            return Result.getFailed(ConsensusErrorCode.PARAM_ERROR);
+        }
+        Chain chain = chainManager.getChainMap().get(chainId);
+        if (chain == null) {
+            return Result.getFailed(ConsensusErrorCode.CHAIN_NOT_EXIST);
+        }
+        try {
+            MeetingRound round = roundManager.resetRound(chain, true);
+            MeetingMember member = round.getMyMember();
+            Map<String, Object> resultMap = new HashMap<>(2);
+            if(member != null){
+                resultMap.put("address", AddressTool.getStringAddressByBytes(member.getAgent().getPackingAddress()));
+                resultMap.put("password", chain.getConfig().getPassword());
+            }
+            return Result.getSuccess(ConsensusErrorCode.SUCCESS).setData(resultMap);
+        }catch (Exception e){
+            chain.getLoggerMap().get(ConsensusConstant.BASIC_LOGGER_NAME).error(e);
+            return Result.getFailed(ConsensusErrorCode.DATA_ERROR);
+        }
+    }
 
     private void fillAgentList(Chain chain, List<Agent> agentList, List<Deposit> depositList) {
         MeetingRound round = roundManager.getCurrentRound(chain);
