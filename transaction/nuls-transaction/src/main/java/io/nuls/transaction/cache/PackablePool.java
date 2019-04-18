@@ -22,8 +22,8 @@ public class PackablePool {
         chain.getTxQueue().addFirst(tx);
     }
 
-    public void add(Chain chain, Transaction tx) {
-        chain.getTxQueue().offer(tx);
+    public boolean add(Chain chain, Transaction tx) {
+        return chain.getTxQueue().offer(tx);
     }
 
     /**

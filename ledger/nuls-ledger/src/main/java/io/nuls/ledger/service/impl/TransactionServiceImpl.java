@@ -196,7 +196,7 @@ public class TransactionServiceImpl implements TransactionService {
                     logger(addressChainId).info("address={} not localChainAccount", AddressTool.getStringAddressByBytes(to.getAddress()));
                     continue;
                 }
-                AccountBalance accountBalance = getAccountBalance(addressChainId, to, txHash, transaction.getBlockHeight(), updateAccounts);
+                AccountBalance accountBalance = getAccountBalance(addressChainId, to, txHash, blockHeight, updateAccounts);
                 accountBalance.getTxHashMap().put(txHash, 1);
                 if (to.getLockTime() == 0) {
                     //非锁定交易处理

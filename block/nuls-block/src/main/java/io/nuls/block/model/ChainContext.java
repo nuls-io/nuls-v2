@@ -237,9 +237,14 @@ public class ChainContext {
         this.packingAddressList = packingAddressList;
     }
 
-    public synchronized void setStatus(RunningStatusEnum status) {
-        commonLog.info("status changed:" + this.status + "->" + status);
-        this.status = status;
+    public void setStatus(RunningStatusEnum status) {
+        if (status.equals(getStatus())) {
+            return;
+        }
+        synchronized (this) {
+            commonLog.debug("status changed:" + this.status + "->" + status);
+            this.status = status;
+        }
     }
 
     public long getLatestHeight() {
