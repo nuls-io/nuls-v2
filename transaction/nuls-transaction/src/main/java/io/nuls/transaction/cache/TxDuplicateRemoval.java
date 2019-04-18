@@ -36,13 +36,15 @@ import io.nuls.transaction.utils.InventoryFilter;
  */
 public class TxDuplicateRemoval {
 
-    private static InventoryFilter FILTER = new InventoryFilter( 1000000);
+    private TxDuplicateRemoval(){}
+
+    private static InventoryFilter filter = new InventoryFilter( 1000000);
 
     public static boolean mightContain(NulsDigestData hash) {
-        return FILTER.contains(hash.getDigestBytes());
+        return filter.contains(hash.getDigestBytes());
     }
 
     public static void insert(NulsDigestData hash) {
-        FILTER.insert(hash.getDigestBytes());
+        filter.insert(hash.getDigestBytes());
     }
 }
