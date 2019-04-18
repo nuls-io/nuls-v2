@@ -129,7 +129,7 @@ public class BlockSynchronizer implements Runnable {
                         }
                     }
                 }
-//                waitUntilNetworkStable(chainId);
+                waitUntilNetworkStable(chainId);
                 while (!synchronize(chainId)) {
                     Thread.sleep(synSleepInterval);
                 }
