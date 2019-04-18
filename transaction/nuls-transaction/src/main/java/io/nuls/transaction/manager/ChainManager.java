@@ -24,7 +24,6 @@
  */
 package io.nuls.transaction.manager;
 
-import ch.qos.logback.classic.Level;
 import io.nuls.db.constant.DBErrorCode;
 import io.nuls.db.service.RocksDBService;
 import io.nuls.tools.core.annotation.Autowired;

@@ -35,6 +35,7 @@ public interface TxCmd {
      */
     String TX_GET_SYSTEM_TYPES = "tx_getSystemTypes";
     String TX_REGISTER = "tx_register";
+    String TX_UNREGISTER = "tx_unregister";
     String TX_PACKABLETXS = "tx_packableTxs";
     String TX_SAVE = "tx_save";
     String TX_GENGSIS_SAVE = "tx_gengsisSave";

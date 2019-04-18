@@ -77,7 +77,7 @@ public class Agent extends TransactionLogicData {
     * 佣金比例
     * commission rate
     * */
-    private double commissionRate;
+    private int commissionRate;
 
     /**
     * 创建时间
@@ -138,7 +138,7 @@ public class Agent extends TransactionLogicData {
         size += this.agentAddress.length;
         size += this.rewardAddress.length;
         size += this.packingAddress.length;
-        size += SerializeUtils.sizeOfDouble(this.commissionRate);
+        size += SerializeUtils.sizeOfUint16();
         return size;
     }
 
@@ -148,7 +148,7 @@ public class Agent extends TransactionLogicData {
         stream.write(agentAddress);
         stream.write(packingAddress);
         stream.write(rewardAddress);
-        stream.writeDouble(this.commissionRate);
+        stream.writeUint16(this.commissionRate);
     }
 
     @Override
@@ -157,7 +157,7 @@ public class Agent extends TransactionLogicData {
         this.agentAddress = byteBuffer.readBytes(Address.ADDRESS_LENGTH);
         this.packingAddress = byteBuffer.readBytes(Address.ADDRESS_LENGTH);
         this.rewardAddress = byteBuffer.readBytes(Address.ADDRESS_LENGTH);
-        this.commissionRate = byteBuffer.readDouble();
+        this.commissionRate = byteBuffer.readUint16();
     }
 
 
@@ -177,11 +177,11 @@ public class Agent extends TransactionLogicData {
         this.status = status;
     }
 
-    public double getCommissionRate() {
+    public int getCommissionRate() {
         return commissionRate;
     }
 
-    public void setCommissionRate(double commissionRate) {
+    public void setCommissionRate(int commissionRate) {
         this.commissionRate = commissionRate;
     }
 

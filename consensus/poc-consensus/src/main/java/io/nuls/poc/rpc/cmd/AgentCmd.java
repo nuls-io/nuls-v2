@@ -32,7 +32,7 @@ public class AgentCmd extends BaseCmd {
     @Parameter(parameterName = "agentAddress", parameterType = "String")
     @Parameter(parameterName = "packingAddress", parameterType = "String")
     @Parameter(parameterName = "rewardAddress", parameterType = "String")
-    @Parameter(parameterName = "commissionRate", parameterType = "double")
+    @Parameter(parameterName = "commissionRate", parameterType = "int")
     @Parameter(parameterName = "deposit", parameterType = "String")
     @Parameter(parameterName = "password", parameterType = "String")
     public Response createAgent(Map<String,Object> params){

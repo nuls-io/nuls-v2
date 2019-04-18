@@ -70,6 +70,8 @@ public class ContractConfig {
 
     private long maxViewGas;
 
+    private String systemLogLevel;
+
     private String packageLogPackages;
 
     private String packageLogLevels;
@@ -176,6 +178,14 @@ public class ContractConfig {
 
     public void setDataPath(String dataPath) {
         this.dataPath = dataPath;
+    }
+
+    public String getSystemLogLevel() {
+        return systemLogLevel;
+    }
+
+    public void setSystemLogLevel(String systemLogLevel) {
+        this.systemLogLevel = systemLogLevel;
     }
 
     public String getPackageLogPackages() {

@@ -24,11 +24,8 @@
  */
 package io.nuls.transaction.manager;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import io.nuls.base.data.Transaction;
 import io.nuls.rpc.model.ModuleE;
-import io.nuls.tools.parse.JSONUtils;
-import io.nuls.transaction.constant.TxConstant;
 import io.nuls.transaction.model.bo.Chain;
 import io.nuls.transaction.model.bo.TxRegister;
 
@@ -53,26 +50,6 @@ public class TxManager {
     }
 
     /**
-     * 注册交易
-     *
-     * @param txRegister 注册交易请求数据封装
-     * @return boolean
-     */
-    public static boolean register(Chain chain, TxRegister txRegister) {
-        boolean rs = false;
-        if (!chain.getTxRegisterMap().containsKey(txRegister.getTxType())) {
-            chain.getTxRegisterMap().put(txRegister.getTxType(), txRegister);
-            try {
-                chain.getLoggerMap().get(TxConstant.LOG_TX).info("new tx register: {}", JSONUtils.obj2json(txRegister));
-            } catch (JsonProcessingException e) {
-                e.printStackTrace();
-            }
-            rs = true;
-        }
-        return rs;
-    }
-
-    /**
      * 获取交易的注册对象
      *
      * @param type
@@ -88,7 +65,7 @@ public class TxManager {
      * @param type
      * @return
      */
-    public static boolean contain(Chain chain, int type) {
+    public static boolean contains(Chain chain, int type) {
         return chain.getTxRegisterMap().containsKey(type);
     }
 

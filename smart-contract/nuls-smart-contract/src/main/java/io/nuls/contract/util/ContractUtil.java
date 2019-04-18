@@ -537,7 +537,7 @@ public class ContractUtil {
         return response;
     }
 
-    public static void configLog(String filePath, String fileName, Level fileLevel, Level consoleLevel, String packageLogPackages, String packageLogLevels) {
+    public static void configLog(String filePath, String fileName, Level fileLevel, Level consoleLevel, String systemLogLevel, String packageLogPackages, String packageLogLevels) {
         int rootLevelInt = Math.min(fileLevel.toInt(), consoleLevel.toInt());
 
         LoggerContext context = (LoggerContext) LoggerFactory.getILoggerFactory();
@@ -548,6 +548,12 @@ public class ContractUtil {
         Log.BASIC_LOGGER = LoggerBuilder.getLogger(filePath, fileName, fileLevel, consoleLevel);
         Log.BASIC_LOGGER.addBasicPath(Log.class.getName());
 
+        if (StringUtils.isNotBlank(systemLogLevel)) {
+            String systemLogName = io.nuls.tools.log.Log.BASIC_LOGGER.getLogger().getName();
+            Logger systemLogger = context.getLogger(systemLogName);
+            systemLogger.setAdditive(false);
+            systemLogger.setLevel(Level.toLevel(systemLogLevel));
+        }
         if (StringUtils.isNotBlank(packageLogPackages) && StringUtils.isNotBlank(packageLogLevels)) {
             String[] packages = packageLogPackages.split(",");
             String[] levels = packageLogLevels.split(",");
@@ -570,6 +576,6 @@ public class ContractUtil {
     }
 
     public static void configLog(String filePath, String fileName, Level fileLevel, Level consoleLevel) {
-        configLog(filePath, fileName, fileLevel, consoleLevel, null, null);
+        configLog(filePath, fileName, fileLevel, consoleLevel, null, null, null);
     }
 }
