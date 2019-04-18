@@ -19,7 +19,7 @@
   "cacheSize": 1000,
   "heightRange": 1000,
   "waitInterval": 50,
-  "maxRollback": 100,
+  "maxRollback": 1000,
   "consistencyNodePercent": 60,
   "minNodeAmount": 1,
   "downloadNumber": 20,
