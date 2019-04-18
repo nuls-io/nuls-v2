@@ -58,7 +58,7 @@ public class RegisterInvoke extends BaseInvoke {
                         return ;
                     }
                     NotifySender notifySender = SpringLiteContext.getBean(NotifySender.class);
-                    notifySender.send(() -> {
+                    notifySender.send("registerModuleDependent_" + entry.getKey(),10,() -> {
                         Response cmdResp = null;
                         try {
                             cmdResp = ResponseMessageProcessor.requestAndResponse(entry.getKey(), "registerModuleDependencies", MapUtils.beanToLinkedMap(module));
