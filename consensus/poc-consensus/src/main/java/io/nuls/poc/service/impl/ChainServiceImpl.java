@@ -136,6 +136,7 @@ public class ChainServiceImpl implements ChainService {
             }catch (NulsException re){
                 chain.getLoggerMap().get(ConsensusConstant.BASIC_LOGGER_NAME).error(re);
             }*/
+            result.put(ConsensusConstant.PARAM_RESULT_VALUE ,false);
             return Result.getFailed(e.getErrorCode()).setData(result);
         }
     }
