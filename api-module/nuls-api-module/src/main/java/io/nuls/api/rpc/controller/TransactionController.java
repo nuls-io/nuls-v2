@@ -250,6 +250,7 @@ public class TransactionController {
             }
             Result result = WalletRpcHandler.broadcastTx(chainId, txHex);
             if (result.isSuccess()) {
+
                 return RpcResult.success(result.getData());
             } else {
                 return RpcResult.failed(result);
