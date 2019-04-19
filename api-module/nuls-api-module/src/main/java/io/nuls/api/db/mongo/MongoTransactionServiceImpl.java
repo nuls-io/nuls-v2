@@ -5,8 +5,10 @@ import com.mongodb.client.model.DeleteOneModel;
 import com.mongodb.client.model.Filters;
 import com.mongodb.client.model.Sorts;
 import io.nuls.api.analysis.WalletRpcHandler;
+import io.nuls.api.cache.ApiCache;
 import io.nuls.api.constant.ApiConstant;
 import io.nuls.api.db.TransactionService;
+import io.nuls.api.manager.CacheManager;
 import io.nuls.api.model.po.db.*;
 import io.nuls.api.model.rpc.BalanceInfo;
 import io.nuls.api.utils.DocumentTransferTool;
@@ -15,10 +17,8 @@ import io.nuls.tools.core.annotation.Component;
 import org.bson.Document;
 import org.bson.conversions.Bson;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.math.BigInteger;
+import java.util.*;
 
 import static com.mongodb.client.model.Filters.*;
 import static io.nuls.api.constant.ApiConstant.*;
@@ -149,36 +149,32 @@ public class MongoTransactionServiceImpl implements TransactionService {
 
     @Override
     public void saveUnConfirmTx(int chainId, TransactionInfo tx) {
-//        Set<TxRelationInfo> txRelationInfoSet = new HashSet<>();
-//        if (tx.getType() == ApiConstant.TX_TYPE_COINBASE) {
-//            processCoinBaseTx(chainId, tx, txRelationInfoSet);
-//        } else if (tx.getType() == ApiConstant.TX_TYPE_TRANSFER) {
-//            processTransferTx(chainId, tx);
-//        } else if (tx.getType() == ApiConstant.TX_TYPE_ALIAS) {
-//            processAliasTx(chainId, tx);
-//        } else if (tx.getType() == ApiConstant.TX_TYPE_REGISTER_AGENT) {
-//            processCreateAgentTx(chainId, tx);
-//        } else if (tx.getType() == ApiConstant.TX_TYPE_JOIN_CONSENSUS) {
-//            processDepositTx(chainId, tx);
-//        } else if (tx.getType() == ApiConstant.TX_TYPE_CANCEL_DEPOSIT) {
-//            processCancelDepositTx(chainId, tx);
-//        } else if (tx.getType() == ApiConstant.TX_TYPE_STOP_AGENT) {
-//            processStopAgentTx(chainId, tx);
-//        } else if (tx.getType() == ApiConstant.TX_TYPE_YELLOW_PUNISH) {
-//            processYellowPunishTx(chainId, tx);
-//        } else if (tx.getType() == ApiConstant.TX_TYPE_RED_PUNISH) {
-//            processRedPunishTx(chainId, tx);
-//        } else if (tx.getType() == ApiConstant.TX_TYPE_CREATE_CONTRACT) {
-//            processCreateContract(chainId, tx);
-//        } else if (tx.getType() == ApiConstant.TX_TYPE_CALL_CONTRACT) {
-//            processCallContract(chainId, tx);
-//        } else if (tx.getType() == ApiConstant.TX_TYPE_DELETE_CONTRACT) {
-//            processDeleteContract(chainId, tx);
-//        } else if (tx.getType() == ApiConstant.TX_TYPE_CONTRACT_TRANSFER) {
-//            processTransferTx(chainId, tx);
-//        } else if (tx.getType() == ApiConstant.TX_TYPE_CONTRACT_RETURN_GAS) {
-//            processCoinBaseTx(chainId, tx);
-//        }
+        Set<TxRelationInfo> txRelationInfoSet = new HashSet<>();
+        if (tx.getType() == ApiConstant.TX_TYPE_COINBASE) {
+            processCoinBaseTx(chainId, tx, txRelationInfoSet);
+        } else if (tx.getType() == ApiConstant.TX_TYPE_TRANSFER) {
+            processTransferTx(chainId, tx, txRelationInfoSet);
+        } else if (tx.getType() == ApiConstant.TX_TYPE_ALIAS) {
+            processAliasTx(chainId, tx, txRelationInfoSet);
+        } else if (tx.getType() == ApiConstant.TX_TYPE_REGISTER_AGENT) {
+            processCreateAgentTx(chainId, tx, txRelationInfoSet);
+        } else if (tx.getType() == ApiConstant.TX_TYPE_JOIN_CONSENSUS) {
+            processDepositTx(chainId, tx, txRelationInfoSet);
+        } else if (tx.getType() == ApiConstant.TX_TYPE_CANCEL_DEPOSIT) {
+            processCancelDepositTx(chainId, tx, txRelationInfoSet);
+        } else if (tx.getType() == ApiConstant.TX_TYPE_STOP_AGENT) {
+            processStopAgentTx(chainId, tx, txRelationInfoSet);
+        } else if (tx.getType() == ApiConstant.TX_TYPE_CREATE_CONTRACT) {
+            processCreateContract(chainId, tx, txRelationInfoSet);
+        } else if (tx.getType() == ApiConstant.TX_TYPE_CALL_CONTRACT) {
+            processCallContract(chainId, tx, txRelationInfoSet);
+        } else if (tx.getType() == ApiConstant.TX_TYPE_DELETE_CONTRACT) {
+            processDeleteContract(chainId, tx, txRelationInfoSet);
+        } else if (tx.getType() == ApiConstant.TX_TYPE_CONTRACT_TRANSFER) {
+            processTransferTx(chainId, tx, txRelationInfoSet);
+        } else if (tx.getType() == ApiConstant.TX_TYPE_CONTRACT_RETURN_GAS) {
+            processCoinBaseTx(chainId, tx, txRelationInfoSet);
+        }
     }
 
     private void processCoinBaseTx(int chainId, TransactionInfo tx, Set<TxRelationInfo> txRelationInfoSet) {
@@ -235,7 +231,44 @@ public class MongoTransactionServiceImpl implements TransactionService {
     }
 
     private void processCancelDepositTx(int chainId, TransactionInfo tx, Set<TxRelationInfo> txRelationInfoSet) {
+        CoinFromInfo input = tx.getCoinFroms().get(0);
+        BalanceInfo balanceInfo = WalletRpcHandler.getAccountBalance(chainId, input.getAddress(), input.getChainId(), input.getAssetsId());
+        txRelationInfoSet.add(new TxRelationInfo(input.getAddress(), tx, input.getChainId(), input.getAssetsId(), input.getAmount(), TRANSFER_NO_TYPE, balanceInfo.getTotalBalance()));
+    }
 
+    private void processStopAgentTx(int chainId, TransactionInfo tx, Set<TxRelationInfo> txRelationInfoSet) {
+        Map<String, BigInteger> maps = new HashMap<>();
+        for (int i = 0; i < tx.getCoinTos().size(); i++) {
+            CoinToInfo output = tx.getCoinTos().get(i);
+            BigInteger values = maps.get(output.getAddress());
+            if (values == null) {
+                values = BigInteger.ZERO;
+            }
+            values = values.add(output.getAmount());
+            maps.put(output.getAddress(), values);
+        }
+        ApiCache apiCache = CacheManager.getCache(chainId);
+        AssetInfo defaultAsset = apiCache.getChainInfo().getDefaultAsset();
+        for (Map.Entry<String, BigInteger> entry : maps.entrySet()) {
+            BalanceInfo balanceInfo = WalletRpcHandler.getAccountBalance(chainId, entry.getKey(), defaultAsset.getChainId(), defaultAsset.getAssetId());
+            txRelationInfoSet.add(new TxRelationInfo(entry.getKey(), tx, defaultAsset.getChainId(), defaultAsset.getAssetId(), entry.getValue(), TRANSFER_NO_TYPE, balanceInfo.getTotalBalance()));
+        }
+    }
+
+    private void processCreateContract(int chainId, TransactionInfo tx, Set<TxRelationInfo> txRelationInfoSet) {
+        CoinFromInfo input = tx.getCoinFroms().get(0);
+        BalanceInfo balanceInfo = WalletRpcHandler.getAccountBalance(chainId, input.getAddress(), input.getChainId(), input.getAssetsId());
+        txRelationInfoSet.add(new TxRelationInfo(input.getAddress(), tx, input.getChainId(), input.getAssetsId(), BigInteger.ZERO, TRANSFER_NO_TYPE, balanceInfo.getTotalBalance()));
+    }
+
+    private void processCallContract(int chainId, TransactionInfo tx, Set<TxRelationInfo> txRelationInfoSet) {
+        processTransferTx(chainId, tx, txRelationInfoSet);
+    }
+
+    private void processDeleteContract(int chainId, TransactionInfo tx, Set<TxRelationInfo> txRelationInfoSet) {
+        CoinFromInfo input = tx.getCoinFroms().get(0);
+        BalanceInfo balanceInfo = WalletRpcHandler.getAccountBalance(chainId, input.getAddress(), input.getChainId(), input.getAssetsId());
+        txRelationInfoSet.add(new TxRelationInfo(input.getAddress(), tx, input.getChainId(), input.getAssetsId(), BigInteger.ZERO, TRANSFER_NO_TYPE, balanceInfo.getTotalBalance()));
     }
 
 }

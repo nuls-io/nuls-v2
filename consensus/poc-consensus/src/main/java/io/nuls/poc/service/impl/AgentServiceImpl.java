@@ -609,6 +609,7 @@ public class AgentServiceImpl implements AgentService {
                 resultMap.put("address", AddressTool.getStringAddressByBytes(member.getAgent().getPackingAddress()));
                 resultMap.put("password", chain.getConfig().getPassword());
             }
+            resultMap.put("agentCount", round.getMemberCount());
             return Result.getSuccess(ConsensusErrorCode.SUCCESS).setData(resultMap);
         }catch (Exception e){
             chain.getLoggerMap().get(ConsensusConstant.BASIC_LOGGER_NAME).error(e);

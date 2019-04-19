@@ -43,57 +43,52 @@ import java.util.List;
  * @date 2018/11/19
  */
 
-public class AccountStateUnconfirmed extends BaseNulsData {
+public class TxUnconfirmed extends BaseNulsData {
 
     private String address;
 
-    private int addressChainId;
 
     private int assetChainId;
 
     private int assetId;
+
     private byte[] fromNonce = LedgerConstant.INIT_NONCE_BYTE;
     private byte[] nonce = LedgerConstant.INIT_NONCE_BYTE;
     private BigInteger amount = BigInteger.ZERO;
-    private long createTime = 0;
-    public AccountStateUnconfirmed() {
+
+
+    public TxUnconfirmed() {
         super();
     }
 
-    public AccountStateUnconfirmed(String address, int addressChainId, int assetChainId, int assetId, byte[] fromNonce,byte[] nonce,BigInteger amount) {
+    public TxUnconfirmed(String address, int assetChainId, int assetId, byte[] fromNonce,byte[] nonce,BigInteger amount) {
         this.address = address;
-        this.addressChainId = addressChainId;
         this.assetChainId = assetChainId;
         this.assetId = assetId;
         this.fromNonce = fromNonce;
         this.nonce = nonce;
         this.amount = amount;
-        this.createTime = TimeUtil.getCurrentTime();
     }
 
 
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
         stream.writeString(address);
-        stream.writeUint16(addressChainId);
         stream.writeUint16(assetChainId);
         stream.writeUint16(assetId);
         stream.write(fromNonce);
         stream.write(nonce);
         stream.writeBigInteger(amount);
-        stream.writeUint48(createTime);
     }
 
     @Override
     public void parse(NulsByteBuffer byteBuffer) throws NulsException {
         this.address = byteBuffer.readString();
-        this.addressChainId = byteBuffer.readUint16();
         this.assetChainId = byteBuffer.readUint16();
         this.assetId = byteBuffer.readUint16();
         this.fromNonce = byteBuffer.readBytes(8);
         this.nonce = byteBuffer.readBytes(8);
         this.amount = byteBuffer.readBigInteger();
-        this.createTime=byteBuffer.readUint48();
     }
 
     @Override
@@ -101,8 +96,6 @@ public class AccountStateUnconfirmed extends BaseNulsData {
         int size = 0;
         //address
         size += SerializeUtils.sizeOfString(address);
-        //chainId
-        size += SerializeUtils.sizeOfInt16();
         //asset chainId
         size += SerializeUtils.sizeOfInt16();
         //assetId
@@ -110,7 +103,6 @@ public class AccountStateUnconfirmed extends BaseNulsData {
         size += fromNonce.length;
         size += nonce.length;
         size += SerializeUtils.sizeOfBigInteger();
-        size += SerializeUtils.sizeOfUint48();
         return size;
     }
 
@@ -121,15 +113,6 @@ public class AccountStateUnconfirmed extends BaseNulsData {
     public void setAddress(String address) {
         this.address = address;
     }
-
-    public int getAddressChainId() {
-        return addressChainId;
-    }
-
-    public void setAddressChainId(int addressChainId) {
-        this.addressChainId = addressChainId;
-    }
-
     public int getAssetChainId() {
         return assetChainId;
     }
@@ -168,17 +151,5 @@ public class AccountStateUnconfirmed extends BaseNulsData {
 
     public void setAmount(BigInteger amount) {
         this.amount = amount;
-    }
-
-    public long getCreateTime() {
-        return createTime;
-    }
-
-    public void setCreateTime(long createTime) {
-        this.createTime = createTime;
-    }
-
-    public  boolean isOverTime(){
-        return (TimeUtil.getCurrentTime()-createTime)>LedgerConstant.UNCONFIRM_NONCE_EXPIRED_TIME;
     }
 }

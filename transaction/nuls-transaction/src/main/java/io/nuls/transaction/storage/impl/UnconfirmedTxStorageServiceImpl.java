@@ -11,7 +11,7 @@ import io.nuls.tools.exception.NulsRuntimeException;
 import io.nuls.tools.model.StringUtils;
 import io.nuls.transaction.constant.TxDBConstant;
 import io.nuls.transaction.constant.TxErrorCode;
-import io.nuls.transaction.model.po.TransactionsPO;
+import io.nuls.transaction.model.po.TransactionUnconfirmedPO;
 import io.nuls.transaction.storage.UnconfirmedTxStorageService;
 
 import java.io.IOException;
@@ -37,9 +37,7 @@ public class UnconfirmedTxStorageServiceImpl implements UnconfirmedTxStorageServ
         if (tx == null) {
             return false;
         }
-        TransactionsPO txPO = new TransactionsPO(tx);
-        //设置入库保存时间
-        txPO.setCreateTime(System.currentTimeMillis());
+        TransactionUnconfirmedPO txPO = new TransactionUnconfirmedPO(tx);
         byte[] txHashBytes;
         try {
             txHashBytes = tx.getHash().serialize();
@@ -64,9 +62,7 @@ public class UnconfirmedTxStorageServiceImpl implements UnconfirmedTxStorageServ
         Map<byte[], byte[]> txPoMap = new HashMap<>();
         try {
             for (Transaction tx : txList) {
-                TransactionsPO txPO = new TransactionsPO(tx);
-                //设置入库保存时间
-                txPO.setCreateTime(System.currentTimeMillis());
+                TransactionUnconfirmedPO txPO = new TransactionUnconfirmedPO(tx);
                 //序列化对象为byte数组存储
                 txPoMap.put(tx.getHash().serialize(), txPO.serialize());
             }
@@ -118,9 +114,9 @@ public class UnconfirmedTxStorageServiceImpl implements UnconfirmedTxStorageServ
         Transaction tx = null;
         if (null != txBytes) {
             try {
-                TransactionsPO txPO = new TransactionsPO();
+                TransactionUnconfirmedPO txPO = new TransactionUnconfirmedPO();
                 txPO.parse(new NulsByteBuffer(txBytes, 0));
-                tx = txPO.toTransaction();
+                tx = txPO.getTx();
             } catch (Exception e) {
                 Log.error(e);
                 return null;
@@ -157,9 +153,9 @@ public class UnconfirmedTxStorageServiceImpl implements UnconfirmedTxStorageServ
             for (byte[] txBytes : list) {
                 Transaction tx = new Transaction();
                 try {
-                    TransactionsPO txPO = new TransactionsPO();
+                    TransactionUnconfirmedPO txPO = new TransactionUnconfirmedPO();
                     txPO.parse(txBytes, 0);
-                    tx = txPO.toTransaction();
+                    tx = txPO.getTx();
                 } catch (NulsException e) {
                     Log.error(e);
                 }
@@ -186,13 +182,13 @@ public class UnconfirmedTxStorageServiceImpl implements UnconfirmedTxStorageServ
     }
 
     @Override
-    public List<TransactionsPO> getAllTxPOList(int chainId) {
-        List<TransactionsPO> txList = new ArrayList<>();
+    public List<TransactionUnconfirmedPO> getAllTxPOList(int chainId) {
+        List<TransactionUnconfirmedPO> txList = new ArrayList<>();
         //根据交易hash批量查询交易数据
         List<byte[]> list = RocksDBService.valueList(TxDBConstant.DB_TRANSACTION_CACHE + chainId);
         if (list != null) {
             for (byte[] txBytes : list) {
-                TransactionsPO txPO = new TransactionsPO();
+                TransactionUnconfirmedPO txPO = new TransactionUnconfirmedPO();
                 try {
                     txPO.parse(txBytes, 0);
                 } catch (NulsException e) {

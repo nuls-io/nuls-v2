@@ -146,12 +146,9 @@ public class TxValid {
             System.out.println("txHex:" + RPCUtil.encode(tx.serialize()));
         }
 
-
         System.out.println(list.size());
         return list;
     }
-
-
 
     @Test
     public void getBalance() throws Exception {
@@ -159,14 +156,6 @@ public class TxValid {
         BigInteger balance = LedgerCall.getBalance(chain, AddressTool.getAddress(address29), assetChainId, assetId);
         System.out.println(JSONUtils.obj2PrettyJson(balance));
 
-     /*   BigInteger balance2 = LedgerCall.getBalance(chain, AddressTool.getAddress(address21), assetChainId, assetId);
-        System.out.println(JSONUtils.obj2PrettyJson(balance2));
-        BigInteger balance3 = LedgerCall.getBalance(chain, AddressTool.getAddress(address22), assetChainId, assetId);
-        System.out.println(JSONUtils.obj2PrettyJson(balance3));
-        BigInteger balance4 = LedgerCall.getBalance(chain, AddressTool.getAddress(address24), assetChainId, assetId);
-        System.out.println(JSONUtils.obj2PrettyJson(balance4));
-        BigInteger balance5 = LedgerCall.getBalance(chain, AddressTool.getAddress(address25), assetChainId, assetId);
-        System.out.println(JSONUtils.obj2PrettyJson(balance5));*/
     }
 
     @Test
@@ -269,12 +258,12 @@ public class TxValid {
 
     @Test
     public void transfer() throws Exception {
-        for (int i = 0; i < 5; i++) {
+        for (int i = 0; i < 500; i++) {
             String hash = createTransfer(address27, address21, new BigInteger("1000000000"));
             //String hash = createCtxTransfer();
             System.out.println("count:" + (i + 1));
             System.out.println("");
-//            Thread.sleep(5000L);
+            Thread.sleep(500L);
         }
     }
 

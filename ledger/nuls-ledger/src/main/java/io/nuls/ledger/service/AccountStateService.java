@@ -25,10 +25,11 @@
  */
 package io.nuls.ledger.service;
 
-import io.nuls.ledger.model.UnconfirmedTx;
 import io.nuls.ledger.model.ValidateResult;
 import io.nuls.ledger.model.po.AccountState;
 import io.nuls.ledger.model.po.AccountStateSnapshot;
+import io.nuls.ledger.model.po.AccountStateUnconfirmed;
+import io.nuls.ledger.model.po.TxUnconfirmed;
 
 /**
  * 账本信息业务功能处理
@@ -48,7 +49,7 @@ public interface AccountStateService {
      * @param  assetId assetId
      * @return AccountState
      */
-    AccountState getAccountStateUnSyn(String address,int addressChainId, int assetChainId, int assetId);
+    AccountState getAccountState(String address,int addressChainId, int assetChainId, int assetId);
 
 
     /**
@@ -62,34 +63,11 @@ public interface AccountStateService {
     AccountState getAccountStateReCal(String address,int addressChainId, int assetChainId, int assetId);
 
     /**
-     * 存储新的账户信息
-     * @param assetKey
-     * @param accountState
-     * @throws Exception
-     */
-    void updateAccountStateByTx(String assetKey, AccountState accountState) throws Exception;
-
-
-    /**
      * 回滚账户信息
      * @param assetKey
      * @param accountStateSnapshot
      * @throws Exception
      */
     void rollAccountState(String assetKey, AccountStateSnapshot accountStateSnapshot) throws Exception;
-
-
-
-    /**
-     *
-     * 更新未确认交易
-     * @param addressChainId
-     * @param newNonce
-     * @param unconfirmedTx
-     * @return boolean
-     */
-    ValidateResult updateUnconfirmTx(int addressChainId, String newNonce, UnconfirmedTx unconfirmedTx);
-
-
 
 }

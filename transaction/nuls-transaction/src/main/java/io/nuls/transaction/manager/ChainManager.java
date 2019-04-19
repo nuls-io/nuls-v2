@@ -28,7 +28,6 @@ import io.nuls.db.constant.DBErrorCode;
 import io.nuls.db.service.RocksDBService;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
-import io.nuls.tools.log.logback.LoggerBuilder;
 import io.nuls.tools.log.logback.NulsLogger;
 import io.nuls.transaction.constant.TxConfig;
 import io.nuls.transaction.constant.TxConstant;
@@ -36,8 +35,10 @@ import io.nuls.transaction.constant.TxDBConstant;
 import io.nuls.transaction.model.bo.Chain;
 import io.nuls.transaction.model.bo.config.ConfigBean;
 import io.nuls.transaction.storage.ConfigStorageService;
+import io.nuls.transaction.utils.LoggerUtil;
 import io.nuls.transaction.utils.queue.entity.PersistentQueue;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -120,13 +121,14 @@ public class ChainManager {
             读取数据库链信息配置
             Read database chain information configuration
              */
-            Map<Integer, ConfigBean> configMap = configService.getList();
+            Map<Integer, ConfigBean> configMap = null == configService.getList() ?
+                    new HashMap<>(TxConstant.INIT_CAPACITY_8) : configService.getList();
             /*
             如果系统是第一次运行，则本地数据库没有存储链信息，此时需要从配置文件读取主链配置信息
             If the system is running for the first time, the local database does not have chain information,
             and the main chain configuration information needs to be read from the configuration file at this time.
             */
-            if (configMap == null || configMap.size() == 0) {
+            if (configMap.isEmpty()) {
                 ConfigBean configBean = txConfig.getChainConfig();
                 if (configBean == null) {
                     return null;
@@ -195,13 +197,13 @@ public class ChainManager {
     }
 
     private void initLogger(Chain chain) {
-        NulsLogger txLogger = LoggerBuilder.getLogger(String.valueOf(chain.getConfig().getChainId()), TxConstant.LOG_TX);
+        LoggerUtil.init(chain);
+        /*NulsLogger txLogger = LoggerBuilder.getLogger(String.valueOf(chain.getConfig().getChainId()), TxConstant.LOG_TX);
         chain.getLoggerMap().put(TxConstant.LOG_TX, txLogger);
         NulsLogger txProcessLogger = LoggerBuilder.getLogger(String.valueOf(chain.getConfig().getChainId()), TxConstant.LOG_NEW_TX_PROCESS);
         chain.getLoggerMap().put(TxConstant.LOG_NEW_TX_PROCESS, txProcessLogger);
         NulsLogger txMessageLogger = LoggerBuilder.getLogger(String.valueOf(chain.getConfig().getChainId()), TxConstant.LOG_TX_MESSAGE);
-        chain.getLoggerMap().put(TxConstant.LOG_TX_MESSAGE, txMessageLogger);
-
+        chain.getLoggerMap().put(TxConstant.LOG_TX_MESSAGE, txMessageLogger);*/
     }
 
     public Map<Integer, Chain> getChainMap() {

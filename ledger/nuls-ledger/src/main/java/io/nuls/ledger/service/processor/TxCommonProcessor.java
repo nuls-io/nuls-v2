@@ -34,24 +34,22 @@ import io.nuls.ledger.model.po.AccountState;
  * Created by ljs on 2018/12/29.
  * @author lanjinsheng
  */
-public interface TxProcessor {
-      /**
-       * 交易对象中fromCoinData 处理
+public interface TxCommonProcessor {
+    /**
+     * 交易对象中fromCoinData 处理
        * @param coin
-       * @param nonce
-       * @param hash
-       * @param accountState
-       * @return
-       */
-      boolean processFromCoinData(CoinFrom coin, String nonce, String hash, AccountState accountState);
+     * @param nonce
+     * @param txHash
+     * @param accountState
+     * @return
+     */
+      boolean processFromCoinData(CoinFrom coin, byte[] nonce,AccountState accountState);
 
-      /**
-       * 交易中toCoinData处理
-       * @param coin
-       * @param nonce
-       * @param hash
-       * @param accountState
-       * @return
-       */
-      boolean processToCoinData(CoinTo coin,String nonce,String hash, AccountState accountState);
+    /**
+     * 交易中toCoinData处理
+     * @param coin
+     * @param accountState
+     * @return
+     */
+      boolean processToCoinData(CoinTo coin,AccountState accountState);
 }

@@ -64,7 +64,6 @@ import java.io.IOException;
 import java.math.BigInteger;
 import java.util.*;
 import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 
@@ -99,10 +98,6 @@ public class TxServiceImpl implements TxService {
     private ExecutorService verifySignExecutor = ThreadUtils.createThreadPool(Runtime.getRuntime().availableProcessors(), Integer.MAX_VALUE, new NulsThreadFactory(TxConstant.THREAD_VERIFIY_BLOCK_TXS));
     private ExecutorService clearTxExecutor = ThreadUtils.createThreadPool(1, Integer.MAX_VALUE, new NulsThreadFactory(TxConstant.THREAD_VERIFIY_BLOCK_TXS));
 
-    public static void main(String[] args) {
-        System.out.println(Runtime.getRuntime().availableProcessors());
-    }
-
     @Override
     public boolean register(Chain chain, ModuleTxRegisterDTO moduleTxRegisterDto) {
         try {
@@ -122,7 +117,7 @@ public class TxServiceImpl implements TxService {
             }
             return true;
         } catch (Exception e) {
-            e.printStackTrace();
+            chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).error(e);
         }
         return false;
     }
@@ -139,7 +134,7 @@ public class TxServiceImpl implements TxService {
             }
             return true;
         } catch (Exception e) {
-            e.printStackTrace();
+            chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).error(e);
             return false;
         }
     }
@@ -493,7 +488,6 @@ public class TxServiceImpl implements TxService {
         return true;
     }
 
-
     /**
      * 1.按时间取出交易执行时间为endtimestamp-500，预留500毫秒给统一验证，
      * 2.取交易同时执行交易验证，然后coinData的验证(先发送开始验证的标识)
@@ -525,8 +519,9 @@ public class TxServiceImpl implements TxService {
         boolean contractNotify = false;
         try {
             long startTime = TimeUtils.getCurrentTimeMillis();
+            //通过配置的百分比，计算从总的打包时间中预留给批量验证的时间
             float batchValidReserveTemp = chain.getConfig().getModuleVerifyPercent() * (endtimestamp - startTime);
-            long batchValidReserve = Float.valueOf(batchValidReserveTemp).longValue();
+            long batchValidReserve = (long) batchValidReserveTemp;
 
             if (!LedgerCall.coinDataBatchNotify(chain)) {
                 nulsLogger.error("Call ledger bathValidateBegin interface failed");
@@ -551,13 +546,7 @@ public class TxServiceImpl implements TxService {
                 }
                 Transaction tx = packablePool.poll(chain);
                 if (tx == null) {
-                    try {
-//                        nulsLogger.debug("************* [获取交易等待], 打包结束时间与当前时间差值：{}, 循环获取交易阶段剩余时间：{}",
-//                                endtimestamp - currentTimeMillis, endtimestamp - currentTimeMillis - batchValidReserve );
-                        Thread.sleep(30L);
-                    } catch (InterruptedException e) {
-                        nulsLogger.error("packaging error ", e);
-                    }
+                    Thread.sleep(30L);
                     continue;
                 }
                 //从已确认的交易中进行重复交易判断
@@ -830,7 +819,7 @@ public class TxServiceImpl implements TxService {
                     chain.getLoggerMap().get(TxConstant.LOG_TX).debug("value:{}", str);
                 }
             } catch (JsonProcessingException e) {
-                e.printStackTrace();
+                chain.getLoggerMap().get(TxConstant.LOG_TX).error(e);
             }
         }
 
@@ -1043,11 +1032,7 @@ public class TxServiceImpl implements TxService {
                     return verifyLedgerResult;
                 }
             }
-        } catch (InterruptedException e) {
-            chain.getLoggerMap().get(TxConstant.LOG_TX).debug("batchVerify failed, single tx verify failed");
-            chain.getLoggerMap().get(TxConstant.LOG_TX).error(e);
-            return verifyLedgerResult;
-        } catch (ExecutionException e) {
+        } catch (Exception e) {
             chain.getLoggerMap().get(TxConstant.LOG_TX).debug("batchVerify failed, single tx verify failed");
             chain.getLoggerMap().get(TxConstant.LOG_TX).error(e);
             return verifyLedgerResult;
@@ -1105,9 +1090,9 @@ public class TxServiceImpl implements TxService {
                     }
                     return true;
                 } catch (NulsException e) {
-                    e.printStackTrace();
+                    chain.getLoggerMap().get(TxConstant.LOG_TX).error(e);
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    chain.getLoggerMap().get(TxConstant.LOG_TX).error(e);
                 }
                 return false;
             }
