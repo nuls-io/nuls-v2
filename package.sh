@@ -108,7 +108,7 @@ PROJECT_PATH=`pwd`;
 cd $PROJECT_PATH;
 log "working path is $PROJECT_PATH"; 
 #打包工作目录
-BUILD_PATH="${PROJECT_PATH}/build-nulstar";
+BUILD_PATH="${PROJECT_PATH}/build";
 if [ ! -d "${BUILD_PATH}/tmp" ]; then 
 	mkdir "${BUILD_PATH}/tmp"
 fi

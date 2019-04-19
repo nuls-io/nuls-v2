@@ -14,7 +14,7 @@ public class GenerateErrCodeConstantsProperties {
     static Map<String, TreeMap<String, String>> data = new HashMap<>();
 
     public static void main(String[] args) {
-        File out = new File(System.getProperty("user.dir") + File.separator + "gen_languages");
+        File out = new File(System.getProperty("user.dir") + File.separator + "/build/gen_languages");
         if (!out.exists()) {
             out.mkdir();
         }

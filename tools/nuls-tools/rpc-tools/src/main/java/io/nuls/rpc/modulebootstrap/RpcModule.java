@@ -13,6 +13,7 @@ import io.nuls.tools.core.annotation.Value;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.log.Log;
 
+import io.nuls.tools.parse.I18nUtils;
 import io.nuls.tools.parse.MapUtils;
 
 
@@ -31,6 +32,8 @@ import java.util.concurrent.TimeUnit;
  */
 @Order(Integer.MIN_VALUE)
 public abstract class RpcModule implements InitializingBean {
+
+    private static final String LANGUAGE = "en";
 
     @Value("dependent")
     private String dependentList;
@@ -82,6 +85,7 @@ public abstract class RpcModule implements InitializingBean {
                     dependentces.add(new Module(t2[0],t2[1]));
                 });
             }
+            I18nUtils.loadLanguage(RpcModule.class, "languages",LANGUAGE);
             init();
         } catch (Exception e) {
             Log.error("rpc module init fail", e);

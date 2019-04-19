@@ -83,11 +83,13 @@ public class I18nUtils {
     }
 
     public static void loadCommonLanguage(String defaultLanguage) {
+        ALL_MAPPING.clear();
         load(I18nUtils.class, "common-languages", defaultLanguage);
     }
 
-    public static void loadLanguage(Class c, String folder, String defaultLanguage) {
+    public static void loadLanguage(Class c,String folder, String defaultLanguage) {
         load(I18nUtils.class, "common-languages", defaultLanguage);
+        ALL_MAPPING.clear();
         load(c, folder, defaultLanguage);
     }
 
@@ -96,7 +98,7 @@ public class I18nUtils {
      * @param folder
      * @param defaultLanguage
      */
-    public static void load(Class c, String folder, String defaultLanguage) {
+    private static void load(Class c, String folder, String defaultLanguage) {
         try {
             if (StringUtils.isBlank(folder)) {
                 folder = FOLDER;
