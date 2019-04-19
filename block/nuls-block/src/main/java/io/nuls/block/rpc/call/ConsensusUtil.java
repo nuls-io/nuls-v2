@@ -87,12 +87,7 @@ public class ConsensusUtil {
 //            params.put(Constants.VERSION_KEY_STR, "1.0");
             params.put("chainId", chainId);
             params.put("status", status);
-            boolean success = ResponseMessageProcessor.requestAndResponse(ModuleE.CS.abbr, "cs_updateAgentStatus", params).isSuccess();
-            while (!success) {
-                Thread.sleep(1000L);
-                success = ResponseMessageProcessor.requestAndResponse(ModuleE.CS.abbr, "cs_updateAgentStatus", params).isSuccess();
-            }
-            return success;
+            return ResponseMessageProcessor.requestAndResponse(ModuleE.CS.abbr, "cs_updateAgentStatus", params).isSuccess();
         } catch (Exception e) {
             e.printStackTrace();
             commonLog.error(e);
@@ -198,7 +193,7 @@ public class ConsensusUtil {
      * @param rollBackAmount  回滚区块数量
      * @return
      */
-    public static boolean sendHeaderList(int chainId, int rollBackAmount) {
+    public static void sendHeaderList(int chainId, int rollBackAmount) {
         ChainContext context = ContextManager.getContext(chainId);
         NulsLogger commonLog = context.getCommonLog();
         try {
@@ -213,7 +208,7 @@ public class ConsensusUtil {
                 latestHeight--;
                 if ((latestHeight <= 0)) {
                     //110轮已经回退到创世块了，不需要再给共识模块新区块
-                    return true;
+                    return;
                 }
                 BlockHeaderPo blockHeader = service.getBlockHeaderPo(chainId, latestHeight);
                 BlockExtendsData newData = new BlockExtendsData(blockHeader.getExtend());
@@ -226,7 +221,7 @@ public class ConsensusUtil {
             long start = latestHeight <= rollBackAmount ? 0 : latestHeight - rollBackAmount;
             List<BlockHeader> blockHeaders = service.getBlockHeader(chainId, start, latestHeight);
             if (blockHeaders == null) {
-                return true;
+                return;
             }
             blockHeaders.forEach(e -> {
                 try {
@@ -240,16 +235,10 @@ public class ConsensusUtil {
 //            params.put(Constants.VERSION_KEY_STR, "1.0");
             params.put("chainId", chainId);
             params.put("headerList", hexList);
-            boolean success = ResponseMessageProcessor.requestAndResponse(ModuleE.CS.abbr, "cs_receiveHeaderList", params).isSuccess();
-            while (!success) {
-                Thread.sleep(1000L);
-                success = ResponseMessageProcessor.requestAndResponse(ModuleE.CS.abbr, "cs_receiveHeaderList", params).isSuccess();
-            }
-            return success;
+            ResponseMessageProcessor.requestAndResponse(ModuleE.CS.abbr, "cs_receiveHeaderList", params);
         } catch (Exception e) {
             e.printStackTrace();
             commonLog.error(e);
-            return false;
         }
     }
 

@@ -241,7 +241,6 @@ public class BlockServiceImpl implements BlockService {
             long elapsedNanos1 = System.nanoTime() - startTime1;
             commonLog.debug("1. verifyBlock time-" + elapsedNanos1);
             //2.设置最新高度,如果失败则恢复上一个高度
-            long startTime2 = System.nanoTime();
             boolean setHeight = blockStorageService.setLatestHeight(chainId, height);
             if (!setHeight) {
                 if (!blockStorageService.setLatestHeight(chainId, height - 1)) {
@@ -250,8 +249,6 @@ public class BlockServiceImpl implements BlockService {
                 commonLog.error("setHeight false, chainId-" + chainId + ",height-" + height);
                 return false;
             }
-            long elapsedNanos2 = System.nanoTime() - startTime2;
-            commonLog.debug("2. updateLatestHeight time-" + elapsedNanos2);
 
             //3.保存区块头, 保存交易
             long startTime3 = System.nanoTime();
@@ -268,10 +265,9 @@ public class BlockServiceImpl implements BlockService {
                 return false;
             }
             long elapsedNanos3 = System.nanoTime() - startTime3;
-            commonLog.debug("3. headerSave and txsSave time-" + elapsedNanos3);
+            commonLog.debug("2. headerSave and txsSave time-" + elapsedNanos3);
 
             //4.通知共识模块
-            long startTime4 = System.nanoTime();
             boolean csNotice = ConsensusUtil.saveNotice(chainId, header, localInit);
             if (!csNotice) {
                 if (!TransactionUtil.rollback(chainId, blockHeaderPo)) {
@@ -286,11 +282,8 @@ public class BlockServiceImpl implements BlockService {
                 commonLog.error("csNotice false!chainId-" + chainId + ",height-" + height);
                 return false;
             }
-            long elapsedNanos4 = System.nanoTime() - startTime4;
-            commonLog.debug("4. ConsensusNotice time-" + elapsedNanos4);
 
             //5.通知协议升级模块,完全保存,更新标记
-            long startTime5 = System.nanoTime();
             blockHeaderPo.setComplete(true);
             if (!ProtocolUtil.saveNotice(chainId, header) || !blockStorageService.save(chainId, blockHeaderPo) || !TransactionUtil.heightNotice(chainId, height)) {
                 if (!ConsensusUtil.rollbackNotice(chainId, height)) {
@@ -308,10 +301,7 @@ public class BlockServiceImpl implements BlockService {
                 commonLog.error("ProtocolUtil saveNotice fail!chainId-" + chainId + ",height-" + height);
                 return false;
             }
-            long elapsedNanos5 = System.nanoTime() - startTime5;
-            commonLog.debug("5. ProtocolNotice and updateFlag time-" + elapsedNanos5);
 
-            long startTime6 = System.nanoTime();
             //6.如果不是第一次启动,则更新主链属性
             if (!localInit) {
                 context.setLatestBlock(block);
@@ -347,8 +337,6 @@ public class BlockServiceImpl implements BlockService {
             sss.put(LATEST_HEIGHT, responseData);
             response.setResponseData(sss);
             ConnectManager.eventTrigger(LATEST_HEIGHT, response);
-            long elapsedNanos6 = System.nanoTime() - startTime6;
-            commonLog.debug("6. otherWork time-" + elapsedNanos6);
             long elapsedNanos = System.nanoTime() - startTime;
             commonLog.info("save block success, time-" + elapsedNanos + ", height-" + height + ", txCount-" + blockHeaderPo.getTxCount() + ", hash-" + hash);
             return true;
