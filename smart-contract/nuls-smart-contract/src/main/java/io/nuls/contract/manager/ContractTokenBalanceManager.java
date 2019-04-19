@@ -182,7 +182,7 @@ public class ContractTokenBalanceManager {
                     return getSuccess();
                 } else {
                     if (currentToken.compareTo(token) < 0) {
-                        return Result.getFailed(ContractErrorCode.INSUFFICIENT_BALANCE);
+                        return Result.getFailed(ContractErrorCode.INSUFFICIENT_TOKEN_BALANCE);
                     }
                     currentToken = currentToken.subtract(token);
                     tokens.put(contract, info.setAmount(currentToken));

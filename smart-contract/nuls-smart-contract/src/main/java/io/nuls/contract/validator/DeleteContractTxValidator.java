@@ -43,8 +43,7 @@ import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.Set;
 
-import static io.nuls.contract.constant.ContractErrorCode.CONTRACT_DELETE_BALANCE;
-import static io.nuls.contract.constant.ContractErrorCode.TX_DATA_VALIDATION_ERROR;
+import static io.nuls.contract.constant.ContractErrorCode.*;
 import static io.nuls.contract.util.ContractUtil.getSuccess;
 
 /**
@@ -66,7 +65,7 @@ public class DeleteContractTxValidator {
 
         if (!addressSet.contains(AddressTool.getStringAddressByBytes(sender))) {
             Log.error("contract delete error: The contract deleter is not the transaction creator.");
-            return Result.getFailed(TX_DATA_VALIDATION_ERROR);
+            return Result.getFailed(CONTRACT_DELETER_ERROR);
         }
 
         Result<ContractAddressInfoPo> contractAddressInfoPoResult = contractHelper.getContractAddressInfo(chainId, contractAddressBytes);
@@ -80,13 +79,13 @@ public class DeleteContractTxValidator {
         }
         if (!Arrays.equals(sender, contractAddressInfoPo.getSender())) {
             Log.error("contract delete error: The contract deleter is not the contract creator.");
-            return Result.getFailed(TX_DATA_VALIDATION_ERROR);
+            return Result.getFailed(CONTRACT_OWNER_ERROR);
         }
 
         ContractBalance balance = contractHelper.getRealBalance(chainId, AddressTool.getStringAddressByBytes(contractAddressBytes));
         if (balance == null) {
             Log.error("contract delete error: That balance of the contract is abnormal.");
-            return Result.getFailed(TX_DATA_VALIDATION_ERROR);
+            return Result.getFailed(CONTRACT_BALANCE_ERROR);
         }
 
         BigInteger totalBalance = balance.getTotal();

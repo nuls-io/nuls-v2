@@ -61,8 +61,8 @@ public class CreateContractTxValidator {
         Set<String> addressSet = SignatureUtil.getAddressFromTX(tx, chainId);
 
         if (!addressSet.contains(AddressTool.getStringAddressByBytes(sender))) {
-            Log.error("contract create error: The contract creater is not the transaction creator.");
-            return Result.getFailed(TX_DATA_VALIDATION_ERROR);
+            Log.error("contract create error: The contract creator is not the transaction creator.");
+            return Result.getFailed(CONTRACT_CREATOR_ERROR);
         }
 
         BigInteger realFee = tx.getFee();

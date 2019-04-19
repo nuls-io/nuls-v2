@@ -66,7 +66,7 @@ public class CallContractTxValidator {
 
         if (!addressSet.contains(AddressTool.getStringAddressByBytes(sender))) {
             Log.error("contract call error: The contract caller is not the transaction creator.");
-            return Result.getFailed(TX_DATA_VALIDATION_ERROR);
+            return Result.getFailed(CONTRACT_CALLER_ERROR);
         }
 
         BigInteger contractReceivedValue = BigInteger.ZERO;
@@ -78,12 +78,12 @@ public class CallContractTxValidator {
 
             if (coin.getLockTime() != 0) {
                 Log.error("contract call error: Transfer amount cannot be locked.");
-                return Result.getFailed(UTXO_STATUS_CHANGE);
+                return Result.getFailed(AMOUNT_LOCK_ERROR);
             }
 
             if (!Arrays.equals(owner, contractAddress)) {
                 Log.error("contract call error: The receiver is not the contract address.");
-                return Result.getFailed(TX_DATA_VALIDATION_ERROR);
+                return Result.getFailed(CONTRACT_RECEIVER_ERROR);
             } else {
                 contractReceivedValue = contractReceivedValue.add(coin.getAmount());
             }
@@ -94,8 +94,8 @@ public class CallContractTxValidator {
             }
         }
         if (contractReceivedValue.compareTo(transferValue) < 0) {
-            Log.error("contract call error: Insufficient amount to transfer to the contract address.");
-            return Result.getFailed(INVALID_AMOUNT);
+            Log.error("contract call error: Insufficient balance to transfer to the contract address.");
+            return Result.getFailed(INSUFFICIENT_BALANCE_TO_CONTRACT);
         }
 
         BigInteger realFee = tx.getFee();
