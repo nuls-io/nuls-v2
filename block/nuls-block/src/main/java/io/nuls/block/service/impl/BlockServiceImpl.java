@@ -141,91 +141,43 @@ public class BlockServiceImpl implements BlockService {
     }
 
     @Override
-    public List<BlockHeader> getBlockHeaderByRound(int chainId, long round) {
-        return getBlockHeaderByRound(chainId, 0, round, true);
-    }
-
-    @Override
-    public List<BlockHeader> getBlockHeaderByRound(int chainId, long height, long round) {
-        return getBlockHeaderByRound(chainId, height, round, false);
-    }
-
-    private List<BlockHeader> getBlockHeaderByRound(int chainId, long limit, long round, boolean mustReturnSth) {
+    public List<BlockHeader> getBlockHeaderByRound(int chainId, long height, int round) {
         ChainContext context = ContextManager.getContext(chainId);
         NulsLogger commonLog = context.getCommonLog();
         try {
             int count = 0;
-            Block latestBlock = context.getLatestBlock();
-            long latestHeight = latestBlock.getHeader().getHeight();
-            byte[] extend = latestBlock.getHeader().getExtend();
+            BlockHeaderPo startHeaderPo = getBlockHeaderPo(chainId, height);
+            byte[] extend = startHeaderPo.getExtend();
             BlockExtendsData data = new BlockExtendsData(extend);
             long roundIndex = data.getRoundIndex();
             List<BlockHeader> blockHeaders = new ArrayList<>();
-            BlockHeaderPo latestBlockHeader = getBlockHeaderPo(chainId, latestHeight);
-            if (latestBlockHeader.isComplete() && mustReturnSth) {
-                blockHeaders.add(latestBlock.getHeader());
+            if (startHeaderPo.isComplete()) {
+                blockHeaders.add(BlockUtil.fromBlockHeaderPo(startHeaderPo));
             }
             while (true) {
-                latestHeight--;
-                if ((latestHeight < 0)) {
-                    if (!mustReturnSth) {
-                        blockHeaders = null;
-                    }
+                height--;
+                if ((height < 0)) {
                     break;
                 }
-                BlockHeader blockHeader = getBlockHeader(chainId, latestHeight);
+                BlockHeader blockHeader = getBlockHeader(chainId, height);
                 BlockExtendsData newData = new BlockExtendsData(blockHeader.getExtend());
                 long newRoundIndex = newData.getRoundIndex();
                 if (newRoundIndex != roundIndex) {
                     count++;
                     roundIndex = newRoundIndex;
                 }
-                if (count >= limit + round) {
+                if (count >= round) {
                     break;
                 }
-                if (count >= limit) {
-                    blockHeaders.add(blockHeader);
-                }
+                blockHeaders.add(blockHeader);
             }
-            commonLog.info("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$");
-            commonLog.info("limit-" + limit);
-            commonLog.info("mustReturnSth-" + mustReturnSth);
-            commonLog.info("round-" + round);
-            if (blockHeaders != null) {
-                blockHeaders.sort(BLOCK_HEADER_COMPARATOR);
-                commonLog.info("size-" + blockHeaders.size());
-                commonLog.info("begin-" + blockHeaders.get(0).getHeight());
-                commonLog.info("end-" + blockHeaders.get(blockHeaders.size() - 1).getHeight());
-            }
+            blockHeaders.sort(BLOCK_HEADER_COMPARATOR);
             return blockHeaders;
         } catch (Exception e) {
             e.printStackTrace();
             commonLog.error(e);
             return null;
         }
-    }
-
-    @Override
-    public int getRoundCount(int chainId, long begin, long end) {
-        begin = begin < 0 ? 0 : begin;
-        BlockHeaderPo startBlock = getBlockHeaderPo(chainId, begin);
-        byte[] extend = startBlock.getExtend();
-        BlockExtendsData startData = new BlockExtendsData(extend);
-        //起始轮次
-        long startRoundIndex = startData.getRoundIndex();
-        //默认高度为begin和高度为end的区块是一个轮次
-        int count = 1;
-        while (begin < end) {
-            begin++;
-            BlockHeaderPo blockHeader = getBlockHeaderPo(chainId, begin);
-            BlockExtendsData newData = new BlockExtendsData(blockHeader.getExtend());
-            long newRoundIndex = newData.getRoundIndex();
-            if (newRoundIndex != startRoundIndex) {
-                count++;
-                startRoundIndex = newRoundIndex;
-            }
-        }
-        return count;
     }
 
     @Override

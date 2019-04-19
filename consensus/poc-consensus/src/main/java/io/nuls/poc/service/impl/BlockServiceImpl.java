@@ -120,12 +120,6 @@ public class BlockServiceImpl implements BlockService {
                 blockHeaderList.add(blockHeader);
             }
             List<BlockHeader> localBlockHeaders = chain.getBlockHeaderList();
-            System.out.println("$$$$$$$$$$$$$$$$$$$$$$$$$$$$");
-            System.out.println("headerList.size" + headerList.size());
-            System.out.println("rev headerList.begin" + blockHeaderList.get(0).getHeight());
-            System.out.println("rev headerList.end" + blockHeaderList.get(blockHeaderList.size() - 1).getHeight());
-            System.out.println("local.begin" + localBlockHeaders.get(0).getHeight());
-            System.out.println("local.end" + localBlockHeaders.get(localBlockHeaders.size() - 1).getHeight());
             localBlockHeaders.addAll(0, blockHeaderList);
             Map<String, Object> validResult = new HashMap<>(2);
             validResult.put("value", true);

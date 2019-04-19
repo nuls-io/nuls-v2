@@ -244,7 +244,7 @@ public class BlockResource extends BaseCmd {
     @CmdAnnotation(cmd = GET_ROUND_BLOCK_HEADERS, version = 1.0, scope = Constants.PUBLIC, description = "")
     @Parameter(parameterName = "chainId", parameterType = "int")
     @Parameter(parameterName = "height", parameterType = "long")
-    @Parameter(parameterName = "round", parameterType = "long")
+    @Parameter(parameterName = "round", parameterType = "int")
     public Response getRoundBlockHeaders(Map map) {
         try {
             int chainId = Integer.parseInt(map.get("chainId").toString());
@@ -252,8 +252,9 @@ public class BlockResource extends BaseCmd {
             if (context == null) {
                 return success(null);
             }
+            long height = Long.parseLong(map.get("height").toString());
             int round = Integer.parseInt(map.get("round").toString());
-            List<BlockHeader> blockHeaders = service.getBlockHeaderByRound(chainId, round);
+            List<BlockHeader> blockHeaders = service.getBlockHeaderByRound(chainId, height, round);
             List<String> hexList = new ArrayList<>();
             for (BlockHeader e : blockHeaders) {
                 hexList.add(RPCUtil.encode(e.serialize()));
@@ -274,7 +275,7 @@ public class BlockResource extends BaseCmd {
      */
     @CmdAnnotation(cmd = GET_LATEST_ROUND_BLOCK_HEADERS, version = 1.0, scope = Constants.PUBLIC, description = "")
     @Parameter(parameterName = "chainId", parameterType = "int")
-    @Parameter(parameterName = "round", parameterType = "long")
+    @Parameter(parameterName = "round", parameterType = "int")
     public Response getLatestRoundBlockHeaders(Map map) {
         try {
             int chainId = Integer.parseInt(map.get("chainId").toString());
@@ -282,8 +283,8 @@ public class BlockResource extends BaseCmd {
             if (context == null) {
                 return success(null);
             }
-            long round = Long.parseLong(map.get("round").toString());
-            List<BlockHeader> blockHeaders = service.getBlockHeaderByRound(chainId, round);
+            int round = Integer.parseInt(map.get("round").toString());
+            List<BlockHeader> blockHeaders = service.getBlockHeaderByRound(chainId, context.getLatestHeight(), round);
             List<String> hexList = new ArrayList<>();
             for (BlockHeader e : blockHeaders) {
                 hexList.add(RPCUtil.encode(e.serialize()));

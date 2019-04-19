@@ -32,10 +32,10 @@ import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.log.logback.NulsLogger;
 
-import java.io.IOException;
-import java.util.*;
-
-import static io.nuls.block.constant.Constant.CACHED_ROUND_COUNT;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * 调用共识模块接口的工具类
@@ -184,49 +184,6 @@ public class ConsensusUtil {
             params.put("blockHeader", RPCUtil.encode(blockHeader.serialize()));
 
             return ResponseMessageProcessor.requestAndResponse(ModuleE.CS.abbr, "cs_addBlock", params).isSuccess();
-        } catch (Exception e) {
-            e.printStackTrace();
-            commonLog.error(e);
-            return false;
-        }
-    }
-
-    /**
-     * 回滚区块之前，先把共识模块的缓存区块头更新了
-     *
-     * @param chainId 链Id/chain id
-     * @param rollBackAmount  回滚区块数量
-     * @return
-     */
-    public static boolean sendHeaderList(int chainId, int rollBackAmount) {
-        //计算回滚rollBackAmount个区块是回滚了多少轮
-        ChainContext context = ContextManager.getContext(chainId);
-        NulsLogger commonLog = context.getCommonLog();
-        long latestHeight = context.getLatestHeight();
-        try {
-            int round = service.getRoundCount(chainId, latestHeight - rollBackAmount + 1, latestHeight);
-            List<String> hexList = new ArrayList<>();
-            List<BlockHeader> blockHeaders = service.getBlockHeaderByRound(chainId, CACHED_ROUND_COUNT, round);
-            if (blockHeaders == null) {
-                return true;
-            }
-            blockHeaders.forEach(e -> {
-                try {
-                    hexList.add(RPCUtil.encode(e.serialize()));
-                } catch (IOException ex) {
-                    ex.printStackTrace();
-                }
-            });
-            Map<String, Object> params = new HashMap<>(2);
-//            params.put(Constants.VERSION_KEY_STR, "1.0");
-            params.put("chainId", chainId);
-            params.put("headerList", hexList);
-            boolean success = ResponseMessageProcessor.requestAndResponse(ModuleE.CS.abbr, "cs_receiveHeaderList", params).isSuccess();
-            while (!success) {
-                Thread.sleep(1000L);
-                success = ResponseMessageProcessor.requestAndResponse(ModuleE.CS.abbr, "cs_receiveHeaderList", params).isSuccess();
-            }
-            return success;
         } catch (Exception e) {
             e.printStackTrace();
             commonLog.error(e);

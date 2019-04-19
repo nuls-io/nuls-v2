@@ -120,7 +120,6 @@ public class BlockSynchronizer implements Runnable {
                         if (latestHeight < testAutoRollbackAmount) {
                             testAutoRollbackAmount = (int) (latestHeight);
                         }
-                        ConsensusUtil.sendHeaderList(chainId, testAutoRollbackAmount);
                         for (int i = 0; i < testAutoRollbackAmount; i++) {
                             boolean b = blockService.rollbackBlock(chainId, latestHeight--, true);
                             if (!b || latestHeight == 0) {
@@ -387,7 +386,6 @@ public class BlockSynchronizer implements Runnable {
             if (params.getNodes().size() >= parameters.getMinNodeAmount()
                     && params.getAvailableNodesCount() >= params.getNodes().size() * parameters.getConsistencyNodePercent() / 100
             ) {
-                ConsensusUtil.sendHeaderList(chainId, parameters.getMaxRollback());
                 return checkRollback(0, chainId, params);
             }
         }
