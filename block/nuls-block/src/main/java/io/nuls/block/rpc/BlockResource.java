@@ -241,10 +241,11 @@ public class BlockResource extends BaseCmd {
      * @param map
      * @return
      */
-    @CmdAnnotation(cmd = GET_LATEST_ROUND_BLOCK_HEADERS, version = 1.0, scope = Constants.PUBLIC, description = "")
+    @CmdAnnotation(cmd = GET_ROUND_BLOCK_HEADERS, version = 1.0, scope = Constants.PUBLIC, description = "")
     @Parameter(parameterName = "chainId", parameterType = "int")
-    @Parameter(parameterName = "round", parameterType = "int")
-    public Response getLatestRoundBlockHeaders(Map map) {
+    @Parameter(parameterName = "height", parameterType = "long")
+    @Parameter(parameterName = "round", parameterType = "long")
+    public Response getRoundBlockHeaders(Map map) {
         try {
             int chainId = Integer.parseInt(map.get("chainId").toString());
             ChainContext context = ContextManager.getContext(chainId);
@@ -252,6 +253,36 @@ public class BlockResource extends BaseCmd {
                 return success(null);
             }
             int round = Integer.parseInt(map.get("round").toString());
+            List<BlockHeader> blockHeaders = service.getBlockHeaderByRound(chainId, round);
+            List<String> hexList = new ArrayList<>();
+            for (BlockHeader e : blockHeaders) {
+                hexList.add(RPCUtil.encode(e.serialize()));
+            }
+            return success(hexList);
+        } catch (Exception e) {
+            e.printStackTrace();
+            commonLog.error(e);
+            return failed(e.getMessage());
+        }
+    }
+
+    /**
+     * 获取最新若干轮区块头，提供给POC共识模块使用
+     *
+     * @param map
+     * @return
+     */
+    @CmdAnnotation(cmd = GET_LATEST_ROUND_BLOCK_HEADERS, version = 1.0, scope = Constants.PUBLIC, description = "")
+    @Parameter(parameterName = "chainId", parameterType = "int")
+    @Parameter(parameterName = "round", parameterType = "long")
+    public Response getLatestRoundBlockHeaders(Map map) {
+        try {
+            int chainId = Integer.parseInt(map.get("chainId").toString());
+            ChainContext context = ContextManager.getContext(chainId);
+            if (context == null) {
+                return success(null);
+            }
+            long round = Long.parseLong(map.get("round").toString());
             List<BlockHeader> blockHeaders = service.getBlockHeaderByRound(chainId, round);
             List<String> hexList = new ArrayList<>();
             for (BlockHeader e : blockHeaders) {

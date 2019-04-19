@@ -59,6 +59,7 @@ import java.util.*;
 import java.util.concurrent.locks.StampedLock;
 
 import static io.nuls.block.constant.CommandConstant.*;
+import static io.nuls.block.constant.Constant.BLOCK_HEADER_COMPARATOR;
 import static io.nuls.block.constant.Constant.BLOCK_HEADER_INDEX;
 
 /**
@@ -141,6 +142,15 @@ public class BlockServiceImpl implements BlockService {
 
     @Override
     public List<BlockHeader> getBlockHeaderByRound(int chainId, long round) {
+        return getBlockHeaderByRound(chainId, 0, round, true);
+    }
+
+    @Override
+    public List<BlockHeader> getBlockHeaderByRound(int chainId, long height, long round) {
+        return getBlockHeaderByRound(chainId, height, round, false);
+    }
+
+    private List<BlockHeader> getBlockHeaderByRound(int chainId, long limit, long round, boolean mustReturnSth) {
         ChainContext context = ContextManager.getContext(chainId);
         NulsLogger commonLog = context.getCommonLog();
         try {
@@ -152,49 +162,15 @@ public class BlockServiceImpl implements BlockService {
             long roundIndex = data.getRoundIndex();
             List<BlockHeader> blockHeaders = new ArrayList<>();
             BlockHeaderPo latestBlockHeader = getBlockHeaderPo(chainId, latestHeight);
-            if (latestBlockHeader.isComplete()) {
+            if (latestBlockHeader.isComplete() && mustReturnSth) {
                 blockHeaders.add(latestBlock.getHeader());
             }
             while (true) {
                 latestHeight--;
                 if ((latestHeight < 0)) {
-                    break;
-                }
-                BlockHeader blockHeader = getBlockHeader(chainId, latestHeight);
-                BlockExtendsData newData = new BlockExtendsData(blockHeader.getExtend());
-                long newRoundIndex = newData.getRoundIndex();
-                if (newRoundIndex != roundIndex) {
-                    count++;
-                    roundIndex = newRoundIndex;
-                    if (count >= round - 1) {
-                        break;
+                    if (!mustReturnSth) {
+                        blockHeaders = null;
                     }
-                }
-                blockHeaders.add(blockHeader);
-            }
-            return blockHeaders;
-        } catch (Exception e) {
-            e.printStackTrace();
-            commonLog.error(e);
-            return null;
-        }
-    }
-
-    @Override
-    public List<BlockHeader> getBlockHeaderByRound(int chainId, long limit, long round) {
-        ChainContext context = ContextManager.getContext(chainId);
-        NulsLogger commonLog = context.getCommonLog();
-        try {
-            int count = 0;
-            Block latestBlock = context.getLatestBlock();
-            long latestHeight = latestBlock.getHeader().getHeight();
-            byte[] extend = latestBlock.getHeader().getExtend();
-            BlockExtendsData data = new BlockExtendsData(extend);
-            long roundIndex = data.getRoundIndex();
-            List<BlockHeader> blockHeaders = new ArrayList<>();
-            while (true) {
-                latestHeight--;
-                if ((latestHeight < 0)) {
                     break;
                 }
                 BlockHeader blockHeader = getBlockHeader(chainId, latestHeight);
@@ -203,10 +179,23 @@ public class BlockServiceImpl implements BlockService {
                 if (newRoundIndex != roundIndex) {
                     count++;
                     roundIndex = newRoundIndex;
+                }
+                if (count >= limit + round) {
+                    break;
                 }
                 if (count >= limit) {
                     blockHeaders.add(blockHeader);
                 }
+            }
+            commonLog.info("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$");
+            commonLog.info("limit-" + limit);
+            commonLog.info("mustReturnSth-" + mustReturnSth);
+            commonLog.info("round-" + round);
+            if (blockHeaders != null) {
+                blockHeaders.sort(BLOCK_HEADER_COMPARATOR);
+                commonLog.info("size-" + blockHeaders.size());
+                commonLog.info("begin-" + blockHeaders.get(0).getHeight());
+                commonLog.info("end-" + blockHeaders.get(blockHeaders.size() - 1).getHeight());
             }
             return blockHeaders;
         } catch (Exception e) {
@@ -226,7 +215,7 @@ public class BlockServiceImpl implements BlockService {
         long startRoundIndex = startData.getRoundIndex();
         //默认高度为begin和高度为end的区块是一个轮次
         int count = 1;
-        while (begin > end) {
+        while (begin < end) {
             begin++;
             BlockHeaderPo blockHeader = getBlockHeaderPo(chainId, begin);
             BlockExtendsData newData = new BlockExtendsData(blockHeader.getExtend());

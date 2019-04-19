@@ -226,10 +226,6 @@ public class ConsensusUtil {
                 Thread.sleep(1000L);
                 success = ResponseMessageProcessor.requestAndResponse(ModuleE.CS.abbr, "cs_receiveHeaderList", params).isSuccess();
             }
-            commonLog.info("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$");
-            commonLog.info("rollBackAmount-" + rollBackAmount);
-            commonLog.info("round-" + round);
-            commonLog.info("hexList.size-" + hexList.size());
             return success;
         } catch (Exception e) {
             e.printStackTrace();
