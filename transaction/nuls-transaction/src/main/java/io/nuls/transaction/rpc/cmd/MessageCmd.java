@@ -17,9 +17,9 @@ import io.nuls.transaction.constant.TxConfig;
 import io.nuls.transaction.constant.TxConstant;
 import io.nuls.transaction.constant.TxErrorCode;
 import io.nuls.transaction.manager.ChainManager;
+import io.nuls.transaction.message.BroadcastTxMessage;
 import io.nuls.transaction.message.ForwardTxMessage;
 import io.nuls.transaction.message.GetTxMessage;
-import io.nuls.transaction.message.BroadcastTxMessage;
 import io.nuls.transaction.model.bo.Chain;
 import io.nuls.transaction.model.po.TransactionConfirmedPO;
 import io.nuls.transaction.rpc.call.NetworkCall;
@@ -70,11 +70,6 @@ public class MessageCmd extends BaseCmd {
             ForwardTxMessage message = new ForwardTxMessage();
             byte[] decode = RPCUtil.decode(params.get(KEY_MESSAGE_BODY).toString());
             message.parse(new NulsByteBuffer(decode));
-            if (message == null) {
-                chain.getLoggerMap().get(TxConstant.LOG_TX_MESSAGE).debug(
-                        "recieve [newHash], message is null from node-{}, chainId:{}", nodeId, chainId);
-                return failed(TxErrorCode.PARAMETER_ERROR);
-            }
             NulsDigestData hash = message.getHash();
             chain.getLoggerMap().get(TxConstant.LOG_TX_MESSAGE).debug(
                     "recieve [newHash] message from node-{}, chainId:{}, hash:{}", nodeId, chainId, hash.getDigestHex());
@@ -122,11 +117,6 @@ public class MessageCmd extends BaseCmd {
             GetTxMessage message = new GetTxMessage();
             byte[] decode = RPCUtil.decode(params.get(KEY_MESSAGE_BODY).toString());
             message.parse(new NulsByteBuffer(decode));
-            if (message == null) {
-                chain.getLoggerMap().get(TxConstant.LOG_TX_MESSAGE).debug(
-                        "recieve [askTx], message is null from node-{}, chainId:{}", nodeId, chainId);
-                return failed(TxErrorCode.PARAMETER_ERROR);
-            }
             chain = chainManager.getChain(chainId);
             if (null == chain) {
                 throw new NulsException(TxErrorCode.CHAIN_NOT_FOUND);
@@ -172,11 +162,6 @@ public class MessageCmd extends BaseCmd {
             BroadcastTxMessage message = new BroadcastTxMessage();
             byte[] decode = RPCUtil.decode(params.get(KEY_MESSAGE_BODY).toString());
             message.parse(new NulsByteBuffer(decode));
-            if (message == null) {
-                chain.getLoggerMap().get(TxConstant.LOG_TX_MESSAGE).debug(
-                        "recieve [receiveTx], message is null from node-{}, chainId:{}", nodeId, chainId);
-                return failed(TxErrorCode.PARAMETER_ERROR);
-            }
             Transaction transaction = message.getTx();
             chain.getLoggerMap().get(TxConstant.LOG_TX_MESSAGE).debug(
                     "recieve [receiveTx] message from node-{}, chainId:{}, hash:{}", nodeId, chainId, transaction.getHash().getDigestHex());
@@ -198,8 +183,6 @@ public class MessageCmd extends BaseCmd {
         map.put("value", true);
         return success(map);
     }
-
-
 
     private void errorLogProcess(Chain chain, Exception e) {
         if (chain == null) {
