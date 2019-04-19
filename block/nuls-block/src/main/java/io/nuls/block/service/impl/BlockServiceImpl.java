@@ -192,10 +192,6 @@ public class BlockServiceImpl implements BlockService {
             BlockExtendsData data = new BlockExtendsData(extend);
             long roundIndex = data.getRoundIndex();
             List<BlockHeader> blockHeaders = new ArrayList<>();
-            BlockHeaderPo latestBlockHeader = getBlockHeaderPo(chainId, latestHeight);
-            if (latestBlockHeader.isComplete()) {
-                blockHeaders.add(latestBlock.getHeader());
-            }
             while (true) {
                 latestHeight--;
                 if ((latestHeight < 0)) {
@@ -207,9 +203,6 @@ public class BlockServiceImpl implements BlockService {
                 if (newRoundIndex != roundIndex) {
                     count++;
                     roundIndex = newRoundIndex;
-                    if (count >= round - 1) {
-                        break;
-                    }
                 }
                 if (count >= limit) {
                     blockHeaders.add(blockHeader);
