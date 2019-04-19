@@ -146,7 +146,6 @@ public class ConsensusBootStrap extends RpcModule {
      */
     private void initDB() throws Exception {
         RocksDBService.init(consensusConfig.getDataFolder());
-        RocksDBService.createTable(ConsensusConstant.DB_NAME_CONSUME_LANGUAGE);
         RocksDBService.createTable(ConsensusConstant.DB_NAME_CONSUME_CONGIF);
     }
 }
