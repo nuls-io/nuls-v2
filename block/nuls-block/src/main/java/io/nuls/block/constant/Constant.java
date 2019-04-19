@@ -22,8 +22,8 @@ package io.nuls.block.constant;
 
 import io.nuls.base.data.Block;
 import io.nuls.base.data.BlockHeader;
-import io.nuls.tools.protocol.ProtocolConfigJson;
 import io.nuls.block.model.Node;
+import io.nuls.tools.protocol.ProtocolConfigJson;
 
 import java.util.Comparator;
 
@@ -45,27 +45,27 @@ public interface Constant {
     /**
      * 存储每条链的配置信息
      */
-    String CHAIN_PARAMETERS = "ChainParameters";
+    String CHAIN_PARAMETERS = "chain_parameters";
     /**
      * 存储每条链的协议配置信息
      */
-    String PROTOCOL_CONFIG = "ProtocolConfig";
+    String PROTOCOL_CONFIG = "protocol_config";
     /**
      * 存储每条链的最新高度
      */
-    String CHAIN_LATEST_HEIGHT = "ChainLatestHeight";
+    String CHAIN_LATEST_HEIGHT = "chain_latest_height";
     /**
      * 存储区块头数据
      */
-    String BLOCK_HEADER = "BlockHeader";
+    String BLOCK_HEADER = "block_header_";
     /**
      * 存储区块头高度与hash的键值对
      */
-    String BLOCK_HEADER_INDEX = "BlockHeaderIndex";
+    String BLOCK_HEADER_INDEX = "block_header_index_";
     /**
      * 分叉链、孤儿链区块数据库前缀
      */
-    String CACHED_BLOCK = "CachedBlock";
+    String CACHED_BLOCK = "cached_block_";
 
     /**
      * 共识工作状态
@@ -95,9 +95,4 @@ public interface Constant {
      * 节点比较器,默认按信用值排序
      */
     Comparator<Node> NODE_COMPARATOR = Comparator.comparingInt(Node::getCredit).reversed();
-
-    /**
-     * 获取网络时间间隔
-     */
-    long GETTIME_INTERVAL = 30000L;
 }

@@ -42,8 +42,8 @@ public class LoggerUtil {
 
     public static void init(int chainId, String levelString) {
         Level level = Level.valueOf(levelString);
-        NulsLogger commonLog = LoggerBuilder.getLogger("chain-"+chainId+"/","common", level);
-        NulsLogger messageLog = LoggerBuilder.getLogger("chain-"+chainId+"/","message", level);
+        NulsLogger commonLog = LoggerBuilder.getLogger("chain-" + chainId + "/block/", "common", level);
+        NulsLogger messageLog = LoggerBuilder.getLogger("chain-" + chainId + "/block/", "message", level);
         ChainContext context = ContextManager.getContext(chainId);
         context.setCommonLog(commonLog);
         context.setMessageLog(messageLog);
