@@ -94,7 +94,7 @@ public class LoggerUtil {
     }
 
     public static void createLogger(int chainId) {
-        String folderName = "./ld/" + chainId;
+        String folderName = "./ld/chain-" + chainId;
         loggerMap.put(LOGGER_KEY1 + chainId, LoggerBuilder.getLogger(folderName, "ld", Level.valueOf(logLevel)));
         loggerMap.put(LOGGER_KEY2 + chainId, LoggerBuilder.getLogger(folderName, "tx", Level.valueOf(logLevel)));
         loggerMap.put(LOGGER_KEY3 + chainId, LoggerBuilder.getLogger(folderName, "txRb", Level.valueOf(logLevel)));

@@ -53,15 +53,15 @@ public class UnconfirmedRepositoryImpl implements UnconfirmedRepository, Initial
     }
 
     String getLedgerUnconfirmedTableName(int chainId) {
-        return DataBaseArea.TB_LEDGER_ACCOUNT_UNCONFIRMED + chainId;
+        return DataBaseArea.TB_LEDGER_ACCOUNT_UNCONFIRMED +"_"+chainId;
     }
 
     String getLedgerTXUnconfirmedTableName(int chainId) {
-        return DataBaseArea.TB_LEDGER_TX_UNCONFIRMED + chainId;
+        return DataBaseArea.TB_LEDGER_TX_UNCONFIRMED +"_"+ chainId;
     }
 
     String getLedgerUncfmd2CfmdTableName(int chainId) {
-        return DataBaseArea.TB_LEDGER_ACCOUNT_UNCFMD2CFMD + chainId;
+        return DataBaseArea.TB_LEDGER_ACCOUNT_UNCFMD2CFMD +"_"+ chainId;
     }
 
     /**

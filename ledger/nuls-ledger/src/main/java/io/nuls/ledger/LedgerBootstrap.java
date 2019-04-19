@@ -81,9 +81,6 @@ public class LedgerBootstrap extends RpcModule {
             LoggerUtil.logLevel = ledgerConfig.getLogLevel();
             LedgerConstant.UNCONFIRM_NONCE_EXPIRED_TIME = ledgerConfig.getUnconfirmedTxExpired();
             LedgerConstant.DEFAULT_ENCODING = ledgerConfig.getEncoding();
-            //改为通过配置文件注入
-            I18nUtils.loadLanguage(LedgerBootstrap.class, "languages", ledgerConfig.getLanguage());
-            I18nUtils.setLanguage(ledgerConfig.getLanguage());
             LedgerChainManager ledgerChainManager = SpringLiteContext.getBean(LedgerChainManager.class);
             ledgerChainManager.initChains();
         } catch (Exception e) {
