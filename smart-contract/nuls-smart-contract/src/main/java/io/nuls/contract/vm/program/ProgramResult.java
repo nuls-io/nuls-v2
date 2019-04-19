@@ -52,6 +52,11 @@ public class ProgramResult {
 
     private List<String> events = new ArrayList<>();
 
+    private ProgramRegisterAgent programRegisterAgent;
+    private ProgramStopAgent programStopAgent;
+    private ProgramJoinAgent programJoinAgent;
+    private ProgramCancelDepositAgent programCancelDepositAgent;
+
     public ProgramResult revert(String errorMessage) {
         this.revert = true;
         this.errorMessage = errorMessage;
@@ -168,6 +173,38 @@ public class ProgramResult {
 
     public void setEvents(List<String> events) {
         this.events = events;
+    }
+
+    public ProgramRegisterAgent getProgramRegisterAgent() {
+        return programRegisterAgent;
+    }
+
+    public void setProgramRegisterAgent(ProgramRegisterAgent programRegisterAgent) {
+        this.programRegisterAgent = programRegisterAgent;
+    }
+
+    public ProgramStopAgent getProgramStopAgent() {
+        return programStopAgent;
+    }
+
+    public void setProgramStopAgent(ProgramStopAgent programStopAgent) {
+        this.programStopAgent = programStopAgent;
+    }
+
+    public ProgramJoinAgent getProgramJoinAgent() {
+        return programJoinAgent;
+    }
+
+    public void setProgramJoinAgent(ProgramJoinAgent programJoinAgent) {
+        this.programJoinAgent = programJoinAgent;
+    }
+
+    public ProgramCancelDepositAgent getProgramCancelDepositAgent() {
+        return programCancelDepositAgent;
+    }
+
+    public void setProgramCancelDepositAgent(ProgramCancelDepositAgent programCancelDepositAgent) {
+        this.programCancelDepositAgent = programCancelDepositAgent;
     }
 
     @Override

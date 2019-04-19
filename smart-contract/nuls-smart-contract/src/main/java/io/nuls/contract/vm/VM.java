@@ -47,9 +47,7 @@ import io.nuls.contract.vm.instructions.stack.Pop;
 import io.nuls.contract.vm.instructions.stack.Swap;
 import io.nuls.contract.vm.instructions.stores.*;
 import io.nuls.contract.vm.natives.io.nuls.contract.sdk.NativeAddress;
-import io.nuls.contract.vm.program.ProgramInternalCall;
-import io.nuls.contract.vm.program.ProgramMethodArg;
-import io.nuls.contract.vm.program.ProgramTransfer;
+import io.nuls.contract.vm.program.*;
 import io.nuls.contract.vm.program.impl.ProgramContext;
 import io.nuls.contract.vm.program.impl.ProgramExecutorImpl;
 import io.nuls.contract.vm.program.impl.ProgramInvoke;
@@ -111,6 +109,11 @@ public class VM {
     private List<ProgramInternalCall> internalCalls = new ArrayList<>();
 
     private List<String> events = new ArrayList<>();
+
+    private ProgramRegisterAgent programRegisterAgent;
+    private ProgramStopAgent programStopAgent;
+    private ProgramJoinAgent programJoinAgent;
+    private ProgramCancelDepositAgent programCancelDepositAgent;
 
     public VM() {
         this.vmStack = new VMStack(VM_STACK_MAX_SIZE);
@@ -1163,16 +1166,6 @@ public class VM {
         }
     }
 
-//    public BlockHeaderDto getBlockHeader(long number) {
-//        BlockHeaderDto blockHeaderDto = new BlockHeaderDto();
-//        blockHeaderDto.setHash("hash" + number);
-//        blockHeaderDto.setHeight(number);
-//        blockHeaderDto.setTxCount(100);
-//        blockHeaderDto.setPackingAddress(AddressTool.getAddress("NsduCQ8hywspGwAXjPu7iBeuQUKWDsU2"));
-//        blockHeaderDto.setTime(1535012808001L);
-//        return blockHeaderDto;
-//    }
-
     public Result getResult() {
         return result;
     }
@@ -1279,4 +1272,35 @@ public class VM {
         this.gas = gas;
     }
 
+    public ProgramRegisterAgent getProgramRegisterAgent() {
+        return programRegisterAgent;
+    }
+
+    public void setProgramRegisterAgent(ProgramRegisterAgent programRegisterAgent) {
+        this.programRegisterAgent = programRegisterAgent;
+    }
+
+    public ProgramStopAgent getProgramStopAgent() {
+        return programStopAgent;
+    }
+
+    public void setProgramStopAgent(ProgramStopAgent programStopAgent) {
+        this.programStopAgent = programStopAgent;
+    }
+
+    public ProgramJoinAgent getProgramJoinAgent() {
+        return programJoinAgent;
+    }
+
+    public void setProgramJoinAgent(ProgramJoinAgent programJoinAgent) {
+        this.programJoinAgent = programJoinAgent;
+    }
+
+    public ProgramCancelDepositAgent getProgramCancelDepositAgent() {
+        return programCancelDepositAgent;
+    }
+
+    public void setProgramCancelDepositAgent(ProgramCancelDepositAgent programCancelDepositAgent) {
+        this.programCancelDepositAgent = programCancelDepositAgent;
+    }
 }
