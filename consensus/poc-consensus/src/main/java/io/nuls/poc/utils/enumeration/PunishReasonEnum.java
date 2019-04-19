@@ -37,19 +37,19 @@ public enum PunishReasonEnum {
     连续分叉
     Bifurcate block chain
     */
-    BIFURCATION((byte) 1, "69980"),
+    BIFURCATION((byte) 1, "cc_0036"),
 
     /*
     双花
     double spend
     */
-    DOUBLE_SPEND((byte) 2, "69981"),
+    DOUBLE_SPEND((byte) 2, "cc_0037"),
 
     /*
     连续x轮黄牌
     Continuous x round yellow card.
     */
-    TOO_MUCH_YELLOW_PUNISH((byte) 3, "69982"),;
+    TOO_MUCH_YELLOW_PUNISH((byte) 3, "cc_0038"),;
     private final byte code;
     private final String msgCode;
 
