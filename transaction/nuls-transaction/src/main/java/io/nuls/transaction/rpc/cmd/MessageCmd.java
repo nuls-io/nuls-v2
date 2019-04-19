@@ -30,7 +30,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static io.nuls.transaction.constant.TxConstant.*;
-import static io.nuls.transaction.utils.LoggerUtil.Log;
+import static io.nuls.transaction.utils.LoggerUtil.LOG;
 
 /**
  * 网络消息处理
@@ -186,7 +186,7 @@ public class MessageCmd extends BaseCmd {
 
     private void errorLogProcess(Chain chain, Exception e) {
         if (chain == null) {
-            Log.error(e);
+            LOG.error(e);
         } else {
             chain.getLoggerMap().get(TxConstant.LOG_TX_MESSAGE).error(e);
         }

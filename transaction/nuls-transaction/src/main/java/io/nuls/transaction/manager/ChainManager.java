@@ -42,7 +42,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import static io.nuls.transaction.utils.LoggerUtil.Log;
+import static io.nuls.transaction.utils.LoggerUtil.LOG;
 
 /**
  * 链管理类,负责各条链的初始化,运行,启动,参数维护等
@@ -140,7 +140,7 @@ public class ChainManager {
             }
             return configMap;
         } catch (Exception e) {
-            Log.error(e);
+            LOG.error(e);
             return null;
         }
     }
@@ -159,25 +159,13 @@ public class ChainManager {
             创建已确认交易表
             Create confirmed transaction table
             */
-            RocksDBService.createTable(TxDBConstant.DB_TRANSACTION_CONFIRMED + chainId);
-
-            /*
-            创建未处理的跨链交易表
-            Create cross chain transaction able
-            */
-            RocksDBService.createTable(TxDBConstant.DB_UNPROCESSED_CROSSCHAIN + chainId);
-
-            /*
-            创建处理中跨链交易表
-             cross chain transaction progress
-            */
-            RocksDBService.createTable(TxDBConstant.DB_PROGRESS_CROSSCHAIN + chainId);
+            RocksDBService.createTable(TxDBConstant.DB_TRANSACTION_CONFIRMED_PREFIX + chainId);
 
             /*
             已验证未打包交易
             Verified transaction
             */
-            RocksDBService.createTable(TxDBConstant.DB_TRANSACTION_CACHE + chainId);
+            RocksDBService.createTable(TxDBConstant.DB_TRANSACTION_UNCONFIRMED_PREFIX + chainId);
         } catch (Exception e) {
             if (!DBErrorCode.DB_TABLE_EXIST.equals(e.getMessage())) {
                 logger.error(e.getMessage());
@@ -192,7 +180,7 @@ public class ChainManager {
      * @param chain chain info
      */
     private void initCache(Chain chain) throws Exception {
-        chain.setUnverifiedQueue(new PersistentQueue(TxConstant.TX_UNVERIFIED_QUEUE_PREFIX + chain.getChainId(),
+        chain.setUnverifiedQueue(new PersistentQueue(TxDBConstant.TX_UNVERIFIED_QUEUE_PREFIX + chain.getChainId(),
                 chain.getConfig().getTxUnverifiedQueueSize()));
     }
 

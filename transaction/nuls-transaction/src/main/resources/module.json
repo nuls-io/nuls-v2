@@ -12,7 +12,6 @@
   "moduleCode":"tx",
   "mainChainId": 2,
   "mainAssetId": 1,
-  "language": "en",
   "encoding": "UTF-8",
   "txDataRoot": "tx",
   "unconfirmedTxExpireMs":1800000

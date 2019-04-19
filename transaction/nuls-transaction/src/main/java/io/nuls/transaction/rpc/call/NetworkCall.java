@@ -38,7 +38,7 @@ import java.util.List;
 import java.util.Map;
 
 import static io.nuls.transaction.constant.TxCmd.*;
-import static io.nuls.transaction.utils.LoggerUtil.Log;
+import static io.nuls.transaction.utils.LoggerUtil.LOG;
 
 /**
  * 网络消息发送
@@ -76,12 +76,12 @@ public class NetworkCall {
             params.put("command", message.getCommand());
             Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.NW.abbr, "nw_broadcast", params);
             if(!response.isSuccess()){
-                Log.error("Calling nw_broadcast failed response:{}", response);
+                LOG.error("Calling nw_broadcast failed response:{}", response);
                 return false;
             }
             return true;
         } catch (Exception e) {
-            Log.error("Calling remote interface failed. module:{} - interface:{}", ModuleE.NW.abbr, "nw_broadcast");
+            LOG.error("Calling remote interface failed. module:{} - interface:{}", ModuleE.NW.abbr, "nw_broadcast");
             throw new NulsException(e);
         }
     }
@@ -105,12 +105,12 @@ public class NetworkCall {
 
             Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.NW.abbr, "nw_sendPeersMsg", params);
             if(!response.isSuccess()){
-                Log.error("Calling nw_sendPeersMsg failed response:{}", response);
+                LOG.error("Calling nw_sendPeersMsg failed response:{}", response);
                 return false;
             }
             return true;
         } catch (Exception e) {
-            Log.error("Calling remote interface failed. module:{} - interface:{}", ModuleE.NW.abbr, "nw_sendPeersMsg");
+            LOG.error("Calling remote interface failed. module:{} - interface:{}", ModuleE.NW.abbr, "nw_sendPeersMsg");
             throw new NulsException(e);
         }
     }
@@ -138,11 +138,11 @@ public class NetworkCall {
             Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.NW.abbr, "nw_protocolRegister", map);
             if(!cmdResp.isSuccess())
             {
-                Log.error("Calling remote interface failed. module:{} - interface:{} -reason:{}", ModuleE.NW.abbr, "nw_protocolRegister",cmdResp.getResponseComment());
+                LOG.error("Calling remote interface failed. module:{} - interface:{} -reason:{}", ModuleE.NW.abbr, "nw_protocolRegister",cmdResp.getResponseComment());
             }
             return cmdResp.isSuccess();
         } catch (Exception e) {
-            Log.error("Calling remote interface failed. module:{} - interface:{}", ModuleE.NW.abbr, "nw_protocolRegister");
+            LOG.error("Calling remote interface failed. module:{} - interface:{}", ModuleE.NW.abbr, "nw_protocolRegister");
             throw new NulsException(e);
         }
     }

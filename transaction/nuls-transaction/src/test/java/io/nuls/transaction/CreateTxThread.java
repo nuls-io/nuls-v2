@@ -38,7 +38,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static io.nuls.transaction.utils.LoggerUtil.Log;
+import static io.nuls.transaction.utils.LoggerUtil.LOG;
 
 /**
  * @author: Charlie
@@ -94,7 +94,7 @@ public class CreateTxThread implements Runnable {
         Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_transfer", transferMap);
         HashMap result = (HashMap) (((HashMap) cmdResp.getResponseData()).get("ac_transfer"));
         Assert.assertTrue(null != result);
-        Log.debug("{}", result.get("value"));
+        LOG.debug("{}", result.get("value"));
     }
 
     /**

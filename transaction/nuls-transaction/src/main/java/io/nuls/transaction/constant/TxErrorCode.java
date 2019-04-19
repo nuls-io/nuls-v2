@@ -1,12 +1,16 @@
 package io.nuls.transaction.constant;
 
+import io.nuls.tools.constant.CommonCodeConstanst;
 import io.nuls.tools.constant.ErrorCode;
 
 /**
  * @author: Charlie
  * @date: 2018/11/12
  */
-public interface TxErrorCode {
+public interface TxErrorCode extends CommonCodeConstanst {
+
+
+//    ErrorCode PARAMETER_ERROR = ErrorCode.init(ModuleE.TX.abbr + "_0001");
 
     ErrorCode SUCCESS = ErrorCode.init("10000");
     ErrorCode FAILED = ErrorCode.init("10001");

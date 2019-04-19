@@ -35,7 +35,7 @@ import io.nuls.transaction.utils.TxUtil;
 
 import java.io.IOException;
 
-import static io.nuls.transaction.utils.LoggerUtil.Log;
+import static io.nuls.transaction.utils.LoggerUtil.LOG;
 
 /**
  * 未验证交易存储
@@ -52,7 +52,7 @@ public class UnverifiedTxStorageServiceImpl implements UnverifiedTxStorageServic
             chain.getUnverifiedQueue().offer(tx.serialize());
             return true;
         } catch (IOException e) {
-            Log.error(e);
+            LOG.error(e);
         }
         return false;
     }
@@ -66,7 +66,7 @@ public class UnverifiedTxStorageServiceImpl implements UnverifiedTxStorageServic
         try {
             return TxUtil.getTransaction(bytes);
         } catch (NulsException e) {
-            Log.error(e);
+            LOG.error(e);
         }
         return null;
     }

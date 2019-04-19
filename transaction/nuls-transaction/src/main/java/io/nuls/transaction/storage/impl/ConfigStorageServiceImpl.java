@@ -38,7 +38,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static io.nuls.transaction.utils.LoggerUtil.Log;
+import static io.nuls.transaction.utils.LoggerUtil.LOG;
 
 /**
  * 配置信息存储管理类
@@ -64,7 +64,7 @@ public class ConfigStorageServiceImpl implements ConfigStorageService {
             byte[] value = RocksDBService.get(TxDBConstant.DB_MODULE_CONGIF,ByteUtils.intToBytes(chainID));
             return ObjectUtils.bytesToObject(value);
         }catch (Exception e){
-            Log.error(e);
+            LOG.error(e);
             return null;
         }
     }
@@ -74,7 +74,7 @@ public class ConfigStorageServiceImpl implements ConfigStorageService {
         try {
             return RocksDBService.delete(TxDBConstant.DB_MODULE_CONGIF,ByteUtils.intToBytes(chainID));
         }catch (Exception e){
-            Log.error(e);
+            LOG.error(e);
             return  false;
         }
     }
@@ -91,7 +91,7 @@ public class ConfigStorageServiceImpl implements ConfigStorageService {
             }
             return configBeanMap;
         }catch (Exception e){
-            Log.error(e);
+            LOG.error(e);
             return null;
         }
     }

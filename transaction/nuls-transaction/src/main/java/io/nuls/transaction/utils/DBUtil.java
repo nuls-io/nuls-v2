@@ -2,7 +2,7 @@ package io.nuls.transaction.utils;
 
 import io.nuls.db.service.RocksDBService;
 import io.nuls.tools.exception.NulsRuntimeException;
-import static io.nuls.transaction.utils.LoggerUtil.Log;
+import static io.nuls.transaction.utils.LoggerUtil.LOG;
 import io.nuls.transaction.constant.TxErrorCode;
 
 /**
@@ -16,7 +16,7 @@ public class DBUtil {
             try {
                 RocksDBService.createTable(name);
             } catch (Exception e) {
-                Log.error(e);
+                LOG.error(e);
                 throw new NulsRuntimeException(TxErrorCode.DB_TABLE_CREATE_ERROR);
             }
         }

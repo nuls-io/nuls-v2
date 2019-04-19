@@ -35,14 +35,16 @@ import io.nuls.transaction.model.bo.Chain;
  */
 public class LoggerUtil {
 
-    public static final NulsLogger Log = LoggerBuilder.getLogger( "tx");
+    public static final NulsLogger LOG = LoggerBuilder.getLogger( "tx");
+
+    private static final String FOLDER_PREFIX = "chain-";
 
     public static void init(Chain chain){
-        NulsLogger txLogger = LoggerBuilder.getLogger(String.valueOf(chain.getConfig().getChainId()), TxConstant.LOG_TX);
+        NulsLogger txLogger = LoggerBuilder.getLogger(FOLDER_PREFIX + String.valueOf(chain.getConfig().getChainId()), TxConstant.LOG_TX);
         chain.getLoggerMap().put(TxConstant.LOG_TX, txLogger);
-        NulsLogger txProcessLogger = LoggerBuilder.getLogger(String.valueOf(chain.getConfig().getChainId()), TxConstant.LOG_NEW_TX_PROCESS);
+        NulsLogger txProcessLogger = LoggerBuilder.getLogger(FOLDER_PREFIX + String.valueOf(chain.getConfig().getChainId()), TxConstant.LOG_NEW_TX_PROCESS);
         chain.getLoggerMap().put(TxConstant.LOG_NEW_TX_PROCESS, txProcessLogger);
-        NulsLogger txMessageLogger = LoggerBuilder.getLogger(String.valueOf(chain.getConfig().getChainId()), TxConstant.LOG_TX_MESSAGE);
+        NulsLogger txMessageLogger = LoggerBuilder.getLogger(FOLDER_PREFIX + String.valueOf(chain.getConfig().getChainId()), TxConstant.LOG_TX_MESSAGE);
         chain.getLoggerMap().put(TxConstant.LOG_TX_MESSAGE, txMessageLogger);
     }
 }

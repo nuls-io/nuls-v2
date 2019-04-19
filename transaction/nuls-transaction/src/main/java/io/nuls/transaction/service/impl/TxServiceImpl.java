@@ -67,7 +67,7 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 
-import static io.nuls.transaction.utils.LoggerUtil.Log;
+import static io.nuls.transaction.utils.LoggerUtil.LOG;
 
 /**
  * @author: Charlie
@@ -887,9 +887,9 @@ public class TxServiceImpl implements TxService {
         chain.getLoggerMap().get(TxConstant.LOG_TX).debug("");
         chain.getLoggerMap().get(TxConstant.LOG_TX).debug("开始区块交易批量验证......高度:{} ----------区块交易数:{}", blockHeight, txStrList.size());
         long s1 = TimeUtils.getCurrentTimeMillis();
-        Log.debug("[验区块交易] -开始-------------高度:{} ----------区块交易数:{} -------------", blockHeight, txStrList.size());
-        Log.debug("[验区块交易] -开始时间:{}", s1);
-        Log.debug("");
+        LOG.debug("[验区块交易] -开始-------------高度:{} ----------区块交易数:{} -------------", blockHeight, txStrList.size());
+        LOG.debug("[验区块交易] -开始时间:{}", s1);
+        LOG.debug("");
         VerifyLedgerResult verifyLedgerResult = new VerifyLedgerResult(VerifyLedgerResult.OTHER_EXCEPTION);
         List<Transaction> txList = new ArrayList<>();
 
@@ -972,9 +972,9 @@ public class TxServiceImpl implements TxService {
             chain.getLoggerMap().get(TxConstant.LOG_TX).debug("batch verifyCoinData failed.");
             return verifyLedgerResult;
         }
-        Log.debug("[验区块交易] coinData验证时间:{}", TimeUtils.getCurrentTimeMillis() - coinDataV);//----
-        Log.debug("[验区块交易] coinData -距方法开始的时间:{}", TimeUtils.getCurrentTimeMillis() - s1);//----
-        Log.debug("");//----
+        LOG.debug("[验区块交易] coinData验证时间:{}", TimeUtils.getCurrentTimeMillis() - coinDataV);//----
+        LOG.debug("[验区块交易] coinData -距方法开始的时间:{}", TimeUtils.getCurrentTimeMillis() - s1);//----
+        LOG.debug("");//----
 
         //统一验证
         long moduleV = TimeUtils.getCurrentTimeMillis();//-----
@@ -988,9 +988,9 @@ public class TxServiceImpl implements TxService {
                 break;
             }
         }
-        Log.debug("[验区块交易] 模块统一验证时间:{}", TimeUtils.getCurrentTimeMillis() - moduleV);//----
-        Log.debug("[验区块交易] 模块统一验证 -距方法开始的时间:{}", TimeUtils.getCurrentTimeMillis() - s1);//----
-        Log.debug("");//----
+        LOG.debug("[验区块交易] 模块统一验证时间:{}", TimeUtils.getCurrentTimeMillis() - moduleV);//----
+        LOG.debug("[验区块交易] 模块统一验证 -距方法开始的时间:{}", TimeUtils.getCurrentTimeMillis() - s1);//----
+        LOG.debug("");//----
 
         /** 智能合约 当通知标识为true, 则表明有智能合约被调用执行*/
         if (contractNotify) {
@@ -1051,16 +1051,16 @@ public class TxServiceImpl implements TxService {
                 unconfirmedTxStorageService.putTxList(chain.getChainId(), unconfirmedTxSaveList);
             }
             verifyLedgerResult.setCode(VerifyLedgerResult.SUCCESS);
-            Log.debug("[验区块交易] 本地不存在的交易保存数据时间:{}", TimeUtils.getCurrentTimeMillis() - save);//----
-            Log.debug("[验区块交易] 本地不存在的交易保存数据 -距方法开始的时间:{}", TimeUtils.getCurrentTimeMillis() - s1);//----
-            Log.debug("");//----
+            LOG.debug("[验区块交易] 本地不存在的交易保存数据时间:{}", TimeUtils.getCurrentTimeMillis() - save);//----
+            LOG.debug("[验区块交易] 本地不存在的交易保存数据 -距方法开始的时间:{}", TimeUtils.getCurrentTimeMillis() - s1);//----
+            LOG.debug("");//----
         }
         if (verifyLedgerResult.success()) {
-            Log.debug("[验区块交易] 通过 ---------------总计执行时间:{}", TimeUtils.getCurrentTimeMillis() - s1);//----
+            LOG.debug("[验区块交易] 通过 ---------------总计执行时间:{}", TimeUtils.getCurrentTimeMillis() - s1);//----
         } else {
-            Log.debug("[验区块交易] 未通过 ---------------总计执行时间:{}", TimeUtils.getCurrentTimeMillis() - s1);//----
+            LOG.debug("[验区块交易] 未通过 ---------------总计执行时间:{}", TimeUtils.getCurrentTimeMillis() - s1);//----
         }
-        Log.debug("");//----
+        LOG.debug("");//----
         chain.getLoggerMap().get(TxConstant.LOG_TX).debug("batchVerify success.");
         return verifyLedgerResult;
     }

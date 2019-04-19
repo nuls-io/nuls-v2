@@ -31,38 +31,25 @@ package io.nuls.transaction.constant;
  * @author: qinyifeng
  */
 public interface TxDBConstant {
-
-    /**
-     * 系统语言表名 一个节点共用，不区分chain
-     * system language table name
-     */
-    String DB_TX_LANGUAGE = "language";
     /**
      * 配置信息表名
      * chain configuration table name
      */
     String DB_MODULE_CONGIF = "config";
-    /**
-     * 接收到其他链发送的未处理的跨链交易，接收后直接储存
-     * Cross-chain transaction in verification table name
-     */
-    String DB_UNPROCESSED_CROSSCHAIN = "transaction_unprocessed_crosschain";
-
-    /**
-     * 接收到其他链发送的跨链交易，已经在验证过程中，储存表名
-     * Cross-chain transaction in verification table name
-     */
-    String DB_PROGRESS_CROSSCHAIN = "transaction_progress_crosschain";
 
     /**
      * 已确认交易表名
      * Confirmed transaction table name
      */
-    String DB_TRANSACTION_CONFIRMED = "transaction_confirmed";
+    String DB_TRANSACTION_CONFIRMED_PREFIX = "tx_table_confirmed_";
 
     /**
      * 验证通过但未打包的交易
      */
-     String DB_TRANSACTION_CACHE = "transactions_cache";
+     String DB_TRANSACTION_UNCONFIRMED_PREFIX = "tx_table_unconfirmed_";
+
+
+    /** 接收新交易的文件队列名**/
+    String TX_UNVERIFIED_QUEUE_PREFIX = "tx_queue_unverified_";
 
 }

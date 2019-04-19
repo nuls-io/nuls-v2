@@ -93,9 +93,6 @@ public interface TxConstant {
     String MULTI_TX_HASH = "txHash";
     String MULTI_TX = "tx";
 
-    /** 接收新交易的文件队列名**/
-    String TX_UNVERIFIED_QUEUE_PREFIX = "tx_unverified_queue_";
-
     int PAGESIZE = 20;
 
     int PAGENUMBER = 1;

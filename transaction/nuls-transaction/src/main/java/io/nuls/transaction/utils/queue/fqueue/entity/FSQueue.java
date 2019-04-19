@@ -26,7 +26,7 @@ package io.nuls.transaction.utils.queue.fqueue.entity;
 
 import io.nuls.kernel.utils.queue.fqueue.exception.FileEOFException;
 import io.nuls.tools.exception.NulsRuntimeException;
-import static io.nuls.transaction.utils.LoggerUtil.Log;
+import static io.nuls.transaction.utils.LoggerUtil.LOG;
 import io.nuls.transaction.utils.queue.fqueue.internal.Entity;
 import io.nuls.transaction.utils.queue.fqueue.internal.Index;
 
@@ -136,7 +136,7 @@ public class FSQueue {
             File deleteFile = readerHandle.getFile();
             readerHandle.close();
             if(!deleteFile.delete()){
-                Log.error("{}删除失败", deleteFile.getName());
+                LOG.error("{}删除失败", deleteFile.getName());
             }
             // 更新下一次读取的位置和索引
             idx.putReaderPosition(Entity.MESSAGE_START_POSITION);

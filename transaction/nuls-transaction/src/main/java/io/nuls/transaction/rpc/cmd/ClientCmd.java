@@ -34,7 +34,7 @@ import io.nuls.rpc.util.RPCUtil;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.exception.NulsException;
-import static io.nuls.transaction.utils.LoggerUtil.Log;
+import static io.nuls.transaction.utils.LoggerUtil.LOG;
 import io.nuls.tools.model.ObjectUtils;
 import io.nuls.transaction.cache.PackablePool;
 import io.nuls.transaction.constant.TxCmd;
@@ -103,10 +103,10 @@ public class ClientCmd extends BaseCmd {
             TransactionConfirmedPO tx = txService.getTransaction(chain, NulsDigestData.fromDigestHex(txHash));
             Map<String, Object> resultMap = new HashMap<>(TxConstant.INIT_CAPACITY_4);
             if (tx == null) {
-                Log.debug("getTx - from all, fail! tx is null, txHash:{}", txHash);
+                LOG.debug("getTx - from all, fail! tx is null, txHash:{}", txHash);
                 resultMap.put("tx", null);
             } else {
-                Log.debug("getTx - from all, success txHash : " + tx.getTx().getHash().getDigestHex());
+                LOG.debug("getTx - from all, success txHash : " + tx.getTx().getHash().getDigestHex());
                 resultMap.put("tx", RPCUtil.encode(tx.getTx().serialize()));
                 resultMap.put("height", tx.getBlockHeight());
                 resultMap.put("status", tx.getStatus());
@@ -147,10 +147,10 @@ public class ClientCmd extends BaseCmd {
             TransactionConfirmedPO tx = confirmedTxService.getConfirmedTransaction(chain, NulsDigestData.fromDigestHex(txHash));
             Map<String, Object> resultMap = new HashMap<>(TxConstant.INIT_CAPACITY_4);
             if (tx == null) {
-                Log.debug("getConfirmedTransaction fail, tx is null. txHash:{}", txHash);
+                LOG.debug("getConfirmedTransaction fail, tx is null. txHash:{}", txHash);
                 resultMap.put("tx", null);
             } else {
-                Log.debug("getConfirmedTransaction success. txHash:{}", txHash);
+                LOG.debug("getConfirmedTransaction success. txHash:{}", txHash);
                 resultMap.put("tx", RPCUtil.encode(tx.getTx().serialize()));
                 resultMap.put("height", tx.getBlockHeight());
                 resultMap.put("status", tx.getStatus());
@@ -301,7 +301,7 @@ public class ClientCmd extends BaseCmd {
 
     private void errorLogProcess(Chain chain, Exception e) {
         if (chain == null) {
-            LoggerUtil.Log.error(e);
+            LoggerUtil.LOG.error(e);
         } else {
             chain.getLoggerMap().get(TxConstant.LOG_TX).error(e);
         }

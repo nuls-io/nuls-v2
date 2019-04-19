@@ -34,7 +34,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static io.nuls.transaction.utils.LoggerUtil.Log;
+import static io.nuls.transaction.utils.LoggerUtil.LOG;
 
 /**
  * @author: Charlie
@@ -446,10 +446,10 @@ public class TransactionCmd extends BaseCmd {
             TransactionConfirmedPO tx = txService.getTransaction(chain, NulsDigestData.fromDigestHex(txHash));
             Map<String, String> resultMap = new HashMap<>(TxConstant.INIT_CAPACITY_2);
             if (tx == null) {
-                Log.debug("getTx - from all, fail! tx is null, txHash:{}", txHash);
+                LOG.debug("getTx - from all, fail! tx is null, txHash:{}", txHash);
                 resultMap.put("tx", null);
             } else {
-                Log.debug("getTx - from all, success txHash : " + tx.getTx().getHash().getDigestHex());
+                LOG.debug("getTx - from all, success txHash : " + tx.getTx().getHash().getDigestHex());
                 resultMap.put("tx", RPCUtil.encode(tx.getTx().serialize()));
             }
             return success(resultMap);
@@ -488,10 +488,10 @@ public class TransactionCmd extends BaseCmd {
             TransactionConfirmedPO tx = confirmedTxService.getConfirmedTransaction(chain, NulsDigestData.fromDigestHex(txHash));
             Map<String, String> resultMap = new HashMap<>(TxConstant.INIT_CAPACITY_2);
             if (tx == null) {
-                Log.debug("getConfirmedTransaction fail, tx is null. txHash:{}", txHash);
+                LOG.debug("getConfirmedTransaction fail, tx is null. txHash:{}", txHash);
                 resultMap.put("tx", null);
             } else {
-                Log.debug("getConfirmedTransaction success. txHash:{}", txHash);
+                LOG.debug("getConfirmedTransaction success. txHash:{}", txHash);
                 resultMap.put("tx", RPCUtil.encode(tx.getTx().serialize()));
             }
             return success(resultMap);
@@ -695,7 +695,7 @@ public class TransactionCmd extends BaseCmd {
 
     private void errorLogProcess(Chain chain, Exception e) {
         if (chain == null) {
-            Log.error(e);
+            LOG.error(e);
         } else {
             chain.getLoggerMap().get(TxConstant.LOG_TX).error(e);
         }
