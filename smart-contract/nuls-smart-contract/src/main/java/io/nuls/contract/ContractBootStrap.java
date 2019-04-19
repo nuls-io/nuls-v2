@@ -73,7 +73,6 @@ public class ContractBootStrap extends RpcModule {
             initContractLog();
             initNulsConfig();
             initDB();
-            initLanguage();
             initNRC20Standard();
         } catch (Exception e) {
             Log.error("AccountBootsrap init error!");
@@ -86,11 +85,6 @@ public class ContractBootStrap extends RpcModule {
         NulsConfig.DATA_PATH = contractConfig.getDataPath() + File.separator + "contract";
         NulsConfig.MAIN_ASSETS_ID = contractConfig.getMainAssetId();
         NulsConfig.MAIN_CHAIN_ID = contractConfig.getMainChainId();
-    }
-
-    private void initLanguage() throws NulsException {
-        I18nUtils.loadLanguage(ContractBootStrap.class, "languages", contractConfig.getLanguage());
-        I18nUtils.setLanguage(contractConfig.getLanguage());
     }
 
     /**
@@ -145,7 +139,6 @@ public class ContractBootStrap extends RpcModule {
     private void initDB() throws IOException {
         RocksDBService.init(NulsConfig.DATA_PATH);
         ContractUtil.createTable(ContractDBConstant.DB_NAME_CONGIF);
-        ContractUtil.createTable(ContractDBConstant.DB_NAME_LANGUAGE);
     }
 
     /**

@@ -40,11 +40,6 @@ public class ContractConfig {
      */
     private String encoding;
 
-    /**
-     * 语言
-     */
-    private String language;
-
     private String kernelUrl;
 
     /**
@@ -106,14 +101,6 @@ public class ContractConfig {
 
     public void setEncoding(String encoding) {
         this.encoding = encoding;
-    }
-
-    public String getLanguage() {
-        return language;
-    }
-
-    public void setLanguage(String language) {
-        this.language = language;
     }
 
     public String getKernelUrl() {
