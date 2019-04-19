@@ -5,6 +5,7 @@ import io.nuls.api.provider.Provider;
 import io.nuls.api.provider.Result;
 import io.nuls.api.provider.consensus.facade.*;
 import io.nuls.rpc.model.ModuleE;
+import io.nuls.tools.constant.CommonCodeConstanst;
 import io.nuls.tools.log.Log;
 import io.nuls.tools.parse.MapUtils;
 
@@ -65,10 +66,10 @@ public class ConsensusProviderForRpc extends BaseRpcService implements Consensus
                 return success(list);
             } catch (InstantiationException e) {
                 Log.error("cs_getAgentList fail",e);
-                return fail(ERROR_CODE);
+                return fail(CommonCodeConstanst.FAILED);
             } catch (IllegalAccessException e) {
                 Log.error("cs_getAgentList fail",e);
-                return fail(ERROR_CODE);
+                return fail(CommonCodeConstanst.FAILED);
             }
         });
     }

@@ -13,6 +13,7 @@ import io.nuls.base.data.BlockExtendsData;
 import io.nuls.base.data.po.BlockHeaderPo;
 import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.util.RPCUtil;
+import io.nuls.tools.constant.CommonCodeConstanst;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.log.Log;
 import io.nuls.tools.model.DateUtils;
@@ -76,7 +77,7 @@ public class BlockServiceForRpc extends BaseRpcService implements BlockService {
             return success(res);
         } catch (NulsException e) {
             Log.error("反序列化block header发生异常",e);
-            return fail(ERROR_CODE);
+            return fail(CommonCodeConstanst.DESERIALIZE_ERROR);
         }
     }
 }

@@ -128,13 +128,13 @@ public class I18nUtils {
                             Enumeration<JarEntry> entrys = jarFile.entries();
                             while (entrys.hasMoreElements()) {
                                 JarEntry jar = entrys.nextElement();
-                                if (jar.getName().indexOf("common-languages/") == 0 && jar.getName().length() > "common-languages/".length()) {
+                                if (jar.getName().indexOf(folder + "/") == 0 && jar.getName().length() > (folder + "/").length()) {
                                     Log.info(jar.getName());
                                     InputStream in = I18nUtils.class.getClassLoader().getResourceAsStream(jar.getName());
                                     Properties prop = new Properties();
                                     prop.load(in);
                                     String key = jar.getName().replace(".properties", "");
-                                    key = key.replace("common-languages/", "");
+                                    key = key.replace(folder + "/", "");
                                     Log.info("key={}", key);
                                     if (ALL_MAPPING.containsKey(key)) {
                                         ALL_MAPPING.get(key).putAll(prop);
