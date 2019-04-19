@@ -165,4 +165,6 @@ public interface ConsensusConstant {
 
 
     int ROUND_CACHE_COUNT = 10;
+
+    int RPC_CALL_TRY_COUNT = 5;
  }
