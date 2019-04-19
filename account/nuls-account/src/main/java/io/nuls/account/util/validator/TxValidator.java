@@ -122,10 +122,11 @@ public class TxValidator {
         if (!validateCoinToBase(chain, coinData.getTo())) {
             return false;
         }
+         /*交易模块基础校验已验证
         if (!validateFee(chain, tx.size(), coinData)) {
             return false;
         }
-       /*交易模块基础校验已验证
+
         if (!validateSign(chain, tx, coinData)) {
             return false;
         }*/
