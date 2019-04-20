@@ -156,7 +156,6 @@ public class TransactionCmd extends BaseLedgerCmd {
         Integer chainId = (Integer) params.get("chainId");
         try {
             String txStr = params.get("tx").toString();
-            LoggerUtil.logger(chainId).debug("rollBackUnconfirmTx chainId={}", chainId);
             Transaction tx = parseTxs(txStr, chainId);
             if (null == tx) {
                 LoggerUtil.logger(chainId).debug("tx is invalid chainId={},txHex={}", chainId, txStr);

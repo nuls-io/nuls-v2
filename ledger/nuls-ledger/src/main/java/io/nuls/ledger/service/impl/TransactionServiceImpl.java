@@ -119,8 +119,7 @@ public class TransactionServiceImpl implements TransactionService {
     }
 
     private boolean confirmBlockTxProcess(int addressChainId, long blockHeight, List<Transaction> txList,
-                                          Map<String, AccountBalance> updateAccounts, List<byte[]> delUncfd2CfdKeys, Map<String, Integer> clearUncfs,
-                                          Map<String, BigInteger> uncfd2CfdAmounts) throws Exception {
+                                          Map<String, AccountBalance> updateAccounts, List<byte[]> delUncfd2CfdKeys, Map<String, Integer> clearUncfs) throws Exception {
         for (Transaction transaction : txList) {
             byte[] nonce8Bytes = LedgerUtil.getNonceByTx(transaction);
             String txHash = transaction.getHash().toString();
@@ -151,12 +150,6 @@ public class TransactionServiceImpl implements TransactionService {
                     String accountkeyStr = LedgerUtil.getAccountAssetStrKey(from);
                     if (unconfirmedStateService.existTxUnconfirmedTx(addressChainId, accounNoncekey)) {
                         delUncfd2CfdKeys.add(accounNoncekey);
-                        if (null == uncfd2CfdAmounts.get(accountkeyStr)) {
-                            uncfd2CfdAmounts.put(accountkeyStr, from.getAmount());
-                        } else {
-                            uncfd2CfdAmounts.put(accountkeyStr, from.getAmount().add(uncfd2CfdAmounts.get(accountkeyStr)));
-                        }
-
                     } else {
                         clearUncfs.put(accountkeyStr, 1);
                     }
@@ -221,9 +214,8 @@ public class TransactionServiceImpl implements TransactionService {
             Map<byte[], byte[]> accountStatesMap = new HashMap<>(1024);
             List<byte[]> delUncfd2CfdKeys = new ArrayList<>();
             Map<String, Integer> clearUncfs = new HashMap<>(16);
-            Map<String, BigInteger> uncfd2CfdAmounts = new HashMap<>(128);
             try {
-                if (!confirmBlockTxProcess(addressChainId, blockHeight, txList, updateAccounts, delUncfd2CfdKeys, clearUncfs, uncfd2CfdAmounts)) {
+                if (!confirmBlockTxProcess(addressChainId, blockHeight, txList, updateAccounts, delUncfd2CfdKeys, clearUncfs)) {
                     return false;
                 }
                 time2 = System.currentTimeMillis();
@@ -253,15 +245,10 @@ public class TransactionServiceImpl implements TransactionService {
                 repository.saveAccountNonces(addressChainId, ledgerNonce);
                 repository.saveAccountHash(addressChainId, ledgerHash);
                 for (Map.Entry<String, Integer> entry : clearUncfs.entrySet()) {
-                    //先去除需要清空的集合
-                    uncfd2CfdAmounts.remove(entry.getKey());
                     //进行清空处理
                     unconfirmedStateService.clearAccountUnconfirmed(addressChainId, entry.getKey());
                 }
-                for (Map.Entry<String, BigInteger> entry : uncfd2CfdAmounts.entrySet()) {
-                    //进行未确认跃迁处理
-                    unconfirmedStateService.updateAccountAmountUncfd2Cfd(addressChainId, entry.getKey().getBytes(LedgerConstant.DEFAULT_ENCODING), entry.getValue());
-                }
+                //删除跃迁的未确认交易
                 unconfirmedStateService.batchDeleteUnconfirmedTx(addressChainId, delUncfd2CfdKeys);
             } catch (Exception e) {
                 e.printStackTrace();

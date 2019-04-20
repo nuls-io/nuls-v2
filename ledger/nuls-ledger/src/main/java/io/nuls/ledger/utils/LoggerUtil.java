@@ -37,23 +37,23 @@ import java.util.Map;
  * @date 2018/12/17
  **/
 public class LoggerUtil {
-   public static NulsLogger timeTest = LoggerBuilder.getLogger("./ld", "timeTest", Level.ALL);
+   public static NulsLogger timeTest = LoggerBuilder.getLogger("./lg", "timeTest", Level.ALL);
     /**
      * 日志
      */
     private static Map<String, NulsLogger> loggerMap = new HashMap<>();
     public static String logLevel = "DEBUG";
-    private static final String LOGGER_KEY1 = "ld";
-    private static final String LOGGER_KEY2 = "ld_tx";
-    private static final String LOGGER_KEY3 = "ld_txRb";
-    private static final String LOGGER_KEY4 = "ld_txUncfRb";
-    private static final String LOGGER_KEY5 = "ld_txAmount";
+    private static final String LOGGER_KEY1 = "lg";
+    private static final String LOGGER_KEY2 = "lg_tx";
+    private static final String LOGGER_KEY3 = "lg_txRb";
+    private static final String LOGGER_KEY4 = "lg_txUncfRb";
+    private static final String LOGGER_KEY5 = "lg_txAmount";
 
     private static NulsLogger defaultLogger = null;
 
     public static NulsLogger logger() {
         if (null == defaultLogger) {
-            defaultLogger = LoggerBuilder.getLogger("./ld", "ld", Level.valueOf(logLevel));
+            defaultLogger = LoggerBuilder.getLogger("./lg", "lg", Level.valueOf(logLevel));
         }
         return defaultLogger;
     }
@@ -94,8 +94,8 @@ public class LoggerUtil {
     }
 
     public static void createLogger(int chainId) {
-        String folderName = "./ld/chain-" + chainId;
-        loggerMap.put(LOGGER_KEY1 + chainId, LoggerBuilder.getLogger(folderName, "ld", Level.valueOf(logLevel)));
+        String folderName = "./lg/chain-" + chainId;
+        loggerMap.put(LOGGER_KEY1 + chainId, LoggerBuilder.getLogger(folderName, "lg", Level.valueOf(logLevel)));
         loggerMap.put(LOGGER_KEY2 + chainId, LoggerBuilder.getLogger(folderName, "tx", Level.valueOf(logLevel)));
         loggerMap.put(LOGGER_KEY3 + chainId, LoggerBuilder.getLogger(folderName, "txRb", Level.valueOf(logLevel)));
         loggerMap.put(LOGGER_KEY4 + chainId, LoggerBuilder.getLogger(folderName, "txUncfRb", Level.valueOf(logLevel)));

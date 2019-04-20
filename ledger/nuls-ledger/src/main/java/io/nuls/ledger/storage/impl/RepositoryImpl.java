@@ -83,11 +83,6 @@ public class RepositoryImpl implements Repository, InitializingBean {
     @Override
     public void updateAccountState(byte[] key, AccountState nowAccountState) throws Exception {
         //update account
-        LoggerUtil.logger(nowAccountState.getAddressChainId()).debug("updateAccountState hash={},nonce={}", nowAccountState.getTxHash(), nowAccountState.getNonce());
-        LoggerUtil.logger(nowAccountState.getAddressChainId()).debug("updateAccountState address={},addressChainId={},assetChainId={},assetId={},getAvailableAmount={}," +
-                        "getFreezeTotal={}",
-                nowAccountState.getAddress(), nowAccountState.getAddressChainId(), nowAccountState.getAssetChainId(), nowAccountState.getAssetId(),
-                nowAccountState.getAvailableAmount(), nowAccountState.getFreezeTotal());
         RocksDBService.put(getLedgerAccountTableName(nowAccountState.getAddressChainId()), key, nowAccountState.serialize());
     }
 

@@ -54,6 +54,7 @@ public class TxUnconfirmed extends BaseNulsData {
 
     private byte[] fromNonce = LedgerConstant.INIT_NONCE_BYTE;
     private byte[] nonce = LedgerConstant.INIT_NONCE_BYTE;
+    private byte[] nextNonce = LedgerConstant.INIT_NONCE_BYTE;
     private BigInteger amount = BigInteger.ZERO;
 
 
@@ -78,6 +79,7 @@ public class TxUnconfirmed extends BaseNulsData {
         stream.writeUint16(assetId);
         stream.write(fromNonce);
         stream.write(nonce);
+        stream.write(nextNonce);
         stream.writeBigInteger(amount);
     }
 
@@ -88,6 +90,7 @@ public class TxUnconfirmed extends BaseNulsData {
         this.assetId = byteBuffer.readUint16();
         this.fromNonce = byteBuffer.readBytes(8);
         this.nonce = byteBuffer.readBytes(8);
+        this.nextNonce = byteBuffer.readBytes(8);
         this.amount = byteBuffer.readBigInteger();
     }
 
@@ -102,6 +105,7 @@ public class TxUnconfirmed extends BaseNulsData {
         size += SerializeUtils.sizeOfInt16();
         size += fromNonce.length;
         size += nonce.length;
+        size += nextNonce.length;
         size += SerializeUtils.sizeOfBigInteger();
         return size;
     }
@@ -143,6 +147,14 @@ public class TxUnconfirmed extends BaseNulsData {
 
     public void setNonce(byte[] nonce) {
         this.nonce = nonce;
+    }
+
+    public byte[] getNextNonce() {
+        return nextNonce;
+    }
+
+    public void setNextNonce(byte[] nextNonce) {
+        this.nextNonce = nextNonce;
     }
 
     public BigInteger getAmount() {
