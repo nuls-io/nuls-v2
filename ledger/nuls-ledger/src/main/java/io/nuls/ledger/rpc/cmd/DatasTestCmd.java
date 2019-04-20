@@ -28,12 +28,9 @@ import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.CoinData;
 import io.nuls.base.data.CoinFrom;
 import io.nuls.base.data.CoinTo;
-import io.nuls.base.data.Transaction;
 import io.nuls.ledger.model.po.BlockSnapshotAccounts;
-import io.nuls.ledger.model.po.BlockTxs;
 import io.nuls.ledger.service.TransactionService;
 import io.nuls.ledger.storage.Repository;
-import io.nuls.ledger.utils.CoinDataUtil;
 import io.nuls.rpc.cmd.BaseCmd;
 import io.nuls.rpc.model.CmdAnnotation;
 import io.nuls.rpc.model.Parameter;
@@ -60,7 +57,7 @@ public class DatasTestCmd extends BaseCmd {
     TransactionService transactionService;
 
     @CmdAnnotation(cmd = "getBlockHeight",
-            version = 1.0, scope = "private", minEvent = 0, minPeriod = 0,
+            version = 1.0, minEvent = 0, minPeriod = 0,
             description = "")
     @Parameter(parameterName = "chainId", parameterType = "int")
     public Response getBlockHeight(Map params) {
@@ -70,7 +67,7 @@ public class DatasTestCmd extends BaseCmd {
     }
 
     @CmdAnnotation(cmd = "getSnapshot",
-            version = 1.0, scope = "private", minEvent = 0, minPeriod = 0,
+            version = 1.0, minEvent = 0, minPeriod = 0,
             description = "")
     @Parameter(parameterName = "chainId", parameterType = "int")
     @Parameter(parameterName = "blockHeight", parameterType = "long")
@@ -81,25 +78,8 @@ public class DatasTestCmd extends BaseCmd {
         return success(blockSnapshotAccounts);
     }
 
-    @CmdAnnotation(cmd = "getBlock",
-            version = 1.0, scope = "private", minEvent = 0, minPeriod = 0,
-            description = "")
-    @Parameter(parameterName = "chainId", parameterType = "int")
-    @Parameter(parameterName = "blockHeight", parameterType = "long")
-    public Response getBlock(Map params) {
-        int i = 0;
-        Integer chainId = (Integer) params.get("chainId");
-        long blockHeight = Long.valueOf(params.get("blockHeight").toString());
-        BlockTxs blockTxs = repository.getBlock(chainId, blockHeight);
-        for (Transaction transaction : blockTxs.getTransactions()) {
-            CoinData coinData = CoinDataUtil.parseCoinData(transaction.getCoinData());
-            dealCoinDatas(coinData,chainId);
 
-        }
-        return success(blockTxs);
-    }
-
-    public void dealCoinDatas(CoinData coinData,int chainId) {
+    public void dealCoinDatas(CoinData coinData, int chainId) {
         if (coinData == null) {
             return;
         }
@@ -113,20 +93,5 @@ public class DatasTestCmd extends BaseCmd {
             logger(chainId).info("address={},amount = {} lock = {}.", AddressTool.getStringAddressByBytes(to.getAddress()), to.getAmount(), to.getLockTime());
         }
 
-    }
-
-    @CmdAnnotation(cmd = "goBatchCommitTest",
-            version = 1.0, scope = "private", minEvent = 0, minPeriod = 0,
-            description = "")
-    @Parameter(parameterName = "chainId", parameterType = "int")
-    @Parameter(parameterName = "addressChainId", parameterType = "int")
-    @Parameter(parameterName = "blockHeight", parameterType = "long")
-    public Response goBatchCommitTest(Map params) {
-        Integer chainId = (Integer) params.get("chainId");
-        Integer addressChainId = (Integer) params.get("addressChainId");
-        long blockHeight = Long.valueOf(params.get("blockHeight").toString());
-        BlockTxs blockTxs = repository.getBlock(chainId, blockHeight);
-        transactionService.confirmBlockProcess(addressChainId, blockTxs.getTransactions(), blockHeight);
-        return success();
     }
 }

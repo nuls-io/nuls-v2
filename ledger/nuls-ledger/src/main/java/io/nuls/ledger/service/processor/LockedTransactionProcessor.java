@@ -47,7 +47,7 @@ import java.util.List;
  * @author lanjinsheng
  */
 @Component
-public class LockedTransactionProcessor implements TxProcessor {
+public class LockedTransactionProcessor implements TxLockedProcessor {
     @Autowired
     AccountStateService accountStateService;
     @Autowired
@@ -55,24 +55,25 @@ public class LockedTransactionProcessor implements TxProcessor {
 
     /**
      * 交易中按 时间或高度的解锁操作
-     *
      * @param coin
      * @param nonce
-     * @param hash
+     * @param txHash
+     * @param accountState
+     * @return
      */
     @Override
-    public boolean processFromCoinData(CoinFrom coin, String nonce, String hash, AccountState accountState) {
+    public boolean processFromCoinData(CoinFrom coin, byte[] nonce, String txHash, AccountState accountState) {
 
         if (coin.getLocked() == -1) {
             //按时间移除锁定
             List<FreezeLockTimeState> list = accountState.getFreezeLockTimeStates();
             for (FreezeLockTimeState freezeLockTimeState : list) {
-                LoggerUtil.logger().debug("processFromCoinData remove TimeUnlocked address={},amount={}={},nonce={}={},hash={} ", AddressTool.getStringAddressByBytes(coin.getAddress()), coin.getAmount(), freezeLockTimeState.getAmount(), LedgerUtil.getNonceEncode(coin.getNonce()), freezeLockTimeState.getNonce(), hash);
-                if (freezeLockTimeState.getNonce().equalsIgnoreCase(LedgerUtil.getNonceEncode(coin.getNonce()))) {
+                LoggerUtil.logger().debug("processFromCoinData remove TimeUnlocked address={},amount={}={},nonce={}={},hash={} ", AddressTool.getStringAddressByBytes(coin.getAddress()), coin.getAmount(), freezeLockTimeState.getAmount(), LedgerUtil.getNonceEncode(coin.getNonce()), freezeLockTimeState.getNonce(), txHash);
+                if (LedgerUtil.equalsNonces(freezeLockTimeState.getNonce(),coin.getNonce())) {
                     if (0 == freezeLockTimeState.getAmount().compareTo(coin.getAmount())) {
                         //金额一致，移除
                         list.remove(freezeLockTimeState);
-                        LoggerUtil.logger().debug("TimeUnlocked remove ok,hash={} ", hash);
+                        LoggerUtil.logger().debug("TimeUnlocked remove ok,hash={} ", txHash);
                         return true;
                     }
                 }
@@ -82,12 +83,12 @@ public class LockedTransactionProcessor implements TxProcessor {
             //按高度移除锁定
             List<FreezeHeightState> list = accountState.getFreezeHeightStates();
             for (FreezeHeightState freezeHeightState : list) {
-                LoggerUtil.logger().debug("processFromCoinData remove HeightUnlocked address={},amount={}={},nonce={}={},hash={} ", AddressTool.getStringAddressByBytes(coin.getAddress()), coin.getAmount(), freezeHeightState.getAmount(), LedgerUtil.getNonceEncode(coin.getNonce()), freezeHeightState.getNonce(), hash);
-                if (freezeHeightState.getNonce().equalsIgnoreCase(LedgerUtil.getNonceEncode(coin.getNonce()))) {
+                LoggerUtil.logger().debug("processFromCoinData remove HeightUnlocked address={},amount={}={},nonce={}={},hash={} ", AddressTool.getStringAddressByBytes(coin.getAddress()), coin.getAmount(), freezeHeightState.getAmount(), LedgerUtil.getNonceEncode(coin.getNonce()), freezeHeightState.getNonce(), txHash);
+                if (LedgerUtil.equalsNonces(freezeHeightState.getNonce(),coin.getNonce())) {
                     if (0 == freezeHeightState.getAmount().compareTo(coin.getAmount())) {
                         //金额一致，移除
                         list.remove(freezeHeightState);
-                        LoggerUtil.logger().debug("HeightUnlocked remove ok,hash={} ", hash);
+                        LoggerUtil.logger().debug("HeightUnlocked remove ok,hash={} ", txHash);
                         return true;
                     }
                 }
@@ -104,12 +105,12 @@ public class LockedTransactionProcessor implements TxProcessor {
      * @param hash
      */
     @Override
-    public boolean processToCoinData(CoinTo coin, String nonce, String hash, AccountState accountState) {
+    public boolean processToCoinData(CoinTo coin, byte[] nonce, String hash, AccountState accountState,long txTime) {
         if (coin.getLockTime() < LedgerConstant.MAX_HEIGHT_VALUE && coin.getLockTime() != -1) {
             //按高度锁定
             FreezeHeightState freezeHeightState = new FreezeHeightState();
             freezeHeightState.setAmount(coin.getAmount());
-            freezeHeightState.setCreateTime(System.currentTimeMillis());
+            freezeHeightState.setCreateTime(txTime);
             freezeHeightState.setHeight(coin.getLockTime());
             freezeHeightState.setNonce(nonce);
             freezeHeightState.setTxHash(hash);
@@ -119,7 +120,7 @@ public class LockedTransactionProcessor implements TxProcessor {
             //按时间锁定
             FreezeLockTimeState freezeLockTimeState = new FreezeLockTimeState();
             freezeLockTimeState.setAmount(coin.getAmount());
-            freezeLockTimeState.setCreateTime(System.currentTimeMillis());
+            freezeLockTimeState.setCreateTime(txTime);
             freezeLockTimeState.setLockTime(coin.getLockTime());
             freezeLockTimeState.setNonce(nonce);
             freezeLockTimeState.setTxHash(hash);

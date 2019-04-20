@@ -192,7 +192,7 @@ public class ContractTest {
         byte[] sender = NativeAddress.toBytes(SENDER);
 
         ProgramExecutor track = programExecutor.begin(prevStateRoot);
-        ProgramResult programResult = track.stop(address, sender);
+        ProgramResult programResult = track.stop(1, address, sender);
         track.commit();
 
         System.out.println(programResult);

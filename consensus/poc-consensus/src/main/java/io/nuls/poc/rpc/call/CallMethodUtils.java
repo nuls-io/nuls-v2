@@ -54,14 +54,17 @@ public class CallMethodUtils {
             callParams.put("password", password);
             Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_getPriKeyByAddress", callParams);
             if (!cmdResp.isSuccess()) {
-                throw new NulsException(ConsensusErrorCode.ACCOUNT_NOT_EXIST);
+                throw new NulsException(ConsensusErrorCode.ACCOUNT_VALID_ERROR);
             }
             HashMap callResult = (HashMap) ((HashMap) cmdResp.getResponseData()).get("ac_getPriKeyByAddress");
             if (callResult == null || callResult.size() == 0 || !(boolean) callResult.get(ConsensusConstant.VALID_RESULT)) {
                 throw new NulsException(ConsensusErrorCode.ACCOUNT_VALID_ERROR);
             }
             return callResult;
-        } catch (Exception e) {
+
+        } catch (NulsException e) {
+            throw e;
+        }catch (Exception e) {
             throw new NulsException(e);
         }
     }
@@ -356,10 +359,10 @@ public class CallMethodUtils {
         params.put("chainId", chain.getConfig().getChainId());
         params.put("tx", tx);
         try {
-            boolean ledgerValidResult = commitUnconfirmedTx(chain,tx);
+            /*boolean ledgerValidResult = commitUnconfirmedTx(chain,tx);
             if(!ledgerValidResult){
                 throw new NulsException(ConsensusErrorCode.FAILED);
-            }
+            }*/
             Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.TX.abbr, "tx_newTx", params);
             if (!cmdResp.isSuccess()) {
                 chain.getLoggerMap().get(ConsensusConstant.CONSENSUS_LOGGER_NAME).error("Transaction failed to send!");

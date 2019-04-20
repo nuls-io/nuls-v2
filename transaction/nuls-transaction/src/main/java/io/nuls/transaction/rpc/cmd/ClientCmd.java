@@ -24,8 +24,8 @@
 
 package io.nuls.transaction.rpc.cmd;
 
-import com.fasterxml.jackson.databind.DeserializationFeature;
 import io.nuls.base.data.NulsDigestData;
+import io.nuls.base.data.Transaction;
 import io.nuls.rpc.cmd.BaseCmd;
 import io.nuls.rpc.model.CmdAnnotation;
 import io.nuls.rpc.model.Parameter;
@@ -34,22 +34,23 @@ import io.nuls.rpc.util.RPCUtil;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.exception.NulsException;
-import io.nuls.tools.log.Log;
+import static io.nuls.transaction.utils.LoggerUtil.LOG;
 import io.nuls.tools.model.ObjectUtils;
-import io.nuls.tools.parse.JSONUtils;
 import io.nuls.transaction.cache.PackablePool;
 import io.nuls.transaction.constant.TxCmd;
 import io.nuls.transaction.constant.TxConstant;
 import io.nuls.transaction.constant.TxErrorCode;
 import io.nuls.transaction.manager.ChainManager;
 import io.nuls.transaction.model.bo.Chain;
-import io.nuls.transaction.model.dto.CrossTxTransferDTO;
+import io.nuls.transaction.model.bo.VerifyLedgerResult;
+import io.nuls.transaction.model.bo.VerifyResult;
 import io.nuls.transaction.model.po.TransactionConfirmedPO;
+import io.nuls.transaction.rpc.call.LedgerCall;
 import io.nuls.transaction.service.ConfirmedTxService;
-import io.nuls.transaction.service.TxGenerateService;
 import io.nuls.transaction.service.TxService;
-import io.nuls.transaction.storage.rocksdb.UnconfirmedTxStorageService;
+import io.nuls.transaction.storage.UnconfirmedTxStorageService;
 import io.nuls.transaction.utils.LoggerUtil;
+import io.nuls.transaction.utils.TxUtil;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -75,9 +76,6 @@ public class ClientCmd extends BaseCmd {
 
     @Autowired
     private PackablePool packablePool;
-
-    @Autowired
-    private TxGenerateService txGenerateService;
 
     /**
      * 根据hash获取交易, 先查未确认, 查不到再查已确认
@@ -105,10 +103,10 @@ public class ClientCmd extends BaseCmd {
             TransactionConfirmedPO tx = txService.getTransaction(chain, NulsDigestData.fromDigestHex(txHash));
             Map<String, Object> resultMap = new HashMap<>(TxConstant.INIT_CAPACITY_4);
             if (tx == null) {
-                Log.debug("getTx - from all, fail! tx is null, txHash:{}", txHash);
+                LOG.debug("getTx - from all, fail! tx is null, txHash:{}", txHash);
                 resultMap.put("tx", null);
             } else {
-                Log.debug("getTx - from all, success txHash : " + tx.getTx().getHash().getDigestHex());
+                LOG.debug("getTx - from all, success txHash : " + tx.getTx().getHash().getDigestHex());
                 resultMap.put("tx", RPCUtil.encode(tx.getTx().serialize()));
                 resultMap.put("height", tx.getBlockHeight());
                 resultMap.put("status", tx.getStatus());
@@ -149,10 +147,10 @@ public class ClientCmd extends BaseCmd {
             TransactionConfirmedPO tx = confirmedTxService.getConfirmedTransaction(chain, NulsDigestData.fromDigestHex(txHash));
             Map<String, Object> resultMap = new HashMap<>(TxConstant.INIT_CAPACITY_4);
             if (tx == null) {
-                Log.debug("getConfirmedTransaction fail, tx is null. txHash:{}", txHash);
+                LOG.debug("getConfirmedTransaction fail, tx is null. txHash:{}", txHash);
                 resultMap.put("tx", null);
             } else {
-                Log.debug("getConfirmedTransaction success. txHash:{}", txHash);
+                LOG.debug("getConfirmedTransaction success. txHash:{}", txHash);
                 resultMap.put("tx", RPCUtil.encode(tx.getTx().serialize()));
                 resultMap.put("height", tx.getBlockHeight());
                 resultMap.put("status", tx.getStatus());
@@ -168,28 +166,39 @@ public class ClientCmd extends BaseCmd {
     }
 
     /**
-     * 创建跨链交易接口
+     * 验证交易接口
+     * 只做验证，包括含基础验证、验证器、账本验证。
      *
      * @param params
      * @return
      */
-    @CmdAnnotation(cmd = TxCmd.TX_CREATE_CROSS_TX, version = 1.0, description = "")
-    public Response createCtx(Map params) {
+    @CmdAnnotation(cmd = TxCmd.TX_VERIFYTX, version = 1.0, description = "")
+    @Parameter(parameterName = "chainId", parameterType = "int")
+    @Parameter(parameterName = "tx", parameterType = "String")
+    public Response verifyTx(Map params) {
         Chain chain = null;
         try {
-            // check parameters
-            if (params == null) {
-                throw new NulsException(TxErrorCode.NULL_PARAMETER);
+            ObjectUtils.canNotEmpty(params.get("chainId"), TxErrorCode.PARAMETER_ERROR.getMsg());
+            ObjectUtils.canNotEmpty(params.get("tx"), TxErrorCode.PARAMETER_ERROR.getMsg());
+            chain = chainManager.getChain((int) params.get("chainId"));
+            if (null == chain) {
+                throw new NulsException(TxErrorCode.CHAIN_NOT_FOUND);
             }
-            // parse params
-            JSONUtils.getInstance().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-            CrossTxTransferDTO crossTxTransferDTO = JSONUtils.json2pojo(JSONUtils.obj2json(params), CrossTxTransferDTO.class);
-            int chainId = crossTxTransferDTO.getChainId();
-            chain = chainManager.getChain(chainId);
-            String hash = txGenerateService.createCrossTransaction(chainManager.getChain(chainId),
-                    crossTxTransferDTO.getListFrom(), crossTxTransferDTO.getListTo(), crossTxTransferDTO.getRemark());
+            String txStr = (String) params.get("tx");
+            //将txStr转换为Transaction对象
+            Transaction tx = TxUtil.getInstanceRpcStr(txStr, Transaction.class);
+
+            VerifyResult verifyResult = txService.verify(chain, tx, true);
+            if(!verifyResult.getResult()){
+                return failed(verifyResult.getErrorCode());
+            }
+            VerifyLedgerResult verifyLedgerResult = LedgerCall.verifyCoinData(chain, RPCUtil.encode(tx.serialize()));
+            if(verifyLedgerResult.getCode() != VerifyLedgerResult.SUCCESS
+                    && verifyLedgerResult.getCode() != VerifyLedgerResult.ORPHAN ){
+                return failed(verifyLedgerResult.getErrorCode());
+            }
             Map<String, Object> resultMap = new HashMap<>(TxConstant.INIT_CAPACITY_2);
-            resultMap.put("value", hash);
+            resultMap.put("value", tx.getHash().getDigestHex());
             return success(resultMap);
         } catch (NulsException e) {
             errorLogProcess(chain, e);
@@ -199,6 +208,10 @@ public class ClientCmd extends BaseCmd {
             return failed(TxErrorCode.SYS_UNKOWN_EXCEPTION);
         }
     }
+
+
+
+
 
 
     /**
@@ -288,7 +301,7 @@ public class ClientCmd extends BaseCmd {
 
     private void errorLogProcess(Chain chain, Exception e) {
         if (chain == null) {
-            LoggerUtil.Log.error(e);
+            LoggerUtil.LOG.error(e);
         } else {
             chain.getLoggerMap().get(TxConstant.LOG_TX).error(e);
         }

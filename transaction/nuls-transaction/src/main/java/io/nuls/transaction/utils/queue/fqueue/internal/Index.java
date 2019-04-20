@@ -24,6 +24,7 @@
  */
 package io.nuls.transaction.utils.queue.fqueue.internal;
 
+import static io.nuls.transaction.utils.LoggerUtil.LOG;
 import io.nuls.transaction.utils.MappedBufferCleanUtil;
 
 import java.io.File;
@@ -64,7 +65,9 @@ public class Index {
 
         // 文件不存在，创建文件
         if (dbFile.exists() == false) {
-            dbFile.createNewFile();
+            if (dbFile.createNewFile()) {
+                LOG.error("create new file fail");
+            }
             dbRandFile = new RandomAccessFile(dbFile, "rwd");
             initIdxFile();
         } else {

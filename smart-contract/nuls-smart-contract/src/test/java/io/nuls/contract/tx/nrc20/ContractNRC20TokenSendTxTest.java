@@ -140,6 +140,7 @@ public class ContractNRC20TokenSendTxTest extends BaseQuery {
      */
     @Test
     public void createContract() throws Exception {
+        //sender = toAddress32;
         InputStream in = new FileInputStream(ContractTest.class.getResource("/nrc20").getFile());
         byte[] contractCode = IOUtils.toByteArray(in);
         String remark = "create contract test - 空气币";
@@ -150,7 +151,7 @@ public class ContractNRC20TokenSendTxTest extends BaseQuery {
         Map params = this.makeCreateParams(sender, contractCode, remark, name, symbol, amount, decimals);
         Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, CREATE, params);
         Map result = (HashMap) (((HashMap) cmdResp2.getResponseData()).get(CREATE));
-        Log.info("createContract-result:{}", JSONUtils.obj2PrettyJson(cmdResp2));
+        Log.info("Create-NRC20-Contract-result:{}", JSONUtils.obj2PrettyJson(cmdResp2));
         Assert.assertTrue(null != result);
     }
 
@@ -240,8 +241,9 @@ public class ContractNRC20TokenSendTxTest extends BaseQuery {
      */
     @Test
     public void delete() throws Exception {
+        contractAddress_nrc20 = "tNULSeBaNBfqo6FC8jJJiXFE1gcSQU2D3UwQ1b";
         String remark = "delete contract";
-        Map params = this.makeDeleteParams(sender, contractAddress_nrc200, remark);
+        Map params = this.makeDeleteParams(sender, contractAddress_nrc20, remark);
         Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, DELETE, params);
         Map result = (HashMap) (((HashMap) cmdResp2.getResponseData()).get(DELETE));
         Assert.assertTrue(null != result);

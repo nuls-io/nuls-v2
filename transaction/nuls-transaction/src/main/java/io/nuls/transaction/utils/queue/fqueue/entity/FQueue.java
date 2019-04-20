@@ -25,7 +25,7 @@
 package io.nuls.transaction.utils.queue.fqueue.entity;
 
 
-import static io.nuls.transaction.utils.LoggerUtil.Log;
+import static io.nuls.transaction.utils.LoggerUtil.LOG;
 
 import java.io.File;
 import java.io.IOException;
@@ -50,7 +50,7 @@ public class FQueue extends AbstractQueue<byte[]> implements Serializable {
         try {
             fsQueue = new FSQueue(path);
         } catch (Exception e) {
-            Log.error(e);
+            LOG.error(e);
         }
     }
 

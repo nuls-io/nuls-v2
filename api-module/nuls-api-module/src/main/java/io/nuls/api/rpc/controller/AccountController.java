@@ -22,23 +22,23 @@ package io.nuls.api.rpc.controller;
 
 import io.nuls.api.analysis.WalletRpcHandler;
 import io.nuls.api.cache.ApiCache;
+import io.nuls.api.db.AccountService;
+import io.nuls.api.db.BlockService;
+import io.nuls.api.db.ChainService;
 import io.nuls.api.db.mongo.MongoAccountServiceImpl;
 import io.nuls.api.db.mongo.MongoBlockServiceImpl;
+import io.nuls.api.db.mongo.MongoChainServiceImpl;
 import io.nuls.api.manager.CacheManager;
-import io.nuls.api.model.po.db.AccountInfo;
-import io.nuls.api.model.po.db.AssetInfo;
-import io.nuls.api.model.po.db.PageInfo;
-import io.nuls.api.model.po.db.TxRelationInfo;
-import io.nuls.api.model.rpc.FreezeInfo;
-import io.nuls.api.model.rpc.RpcErrorCode;
-import io.nuls.api.model.rpc.RpcResult;
-import io.nuls.api.model.rpc.RpcResultError;
+import io.nuls.api.model.po.db.*;
+import io.nuls.api.model.rpc.*;
 import io.nuls.api.utils.VerifyUtils;
 import io.nuls.base.basic.AddressTool;
 import io.nuls.tools.basic.Result;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Controller;
 import io.nuls.tools.core.annotation.RpcMethod;
+import io.nuls.tools.crypto.ECKey;
+import io.nuls.tools.log.Log;
 
 import java.util.List;
 
@@ -49,9 +49,11 @@ import java.util.List;
 public class AccountController {
 
     @Autowired
-    private MongoAccountServiceImpl mongoAccountServiceImpl;
+    private AccountService accountService;
     @Autowired
-    private MongoBlockServiceImpl blockHeaderService;
+    private BlockService blockHeaderService;
+    @Autowired
+    private ChainService chainService;
 
     @RpcMethod("getAccountList")
     public RpcResult getAccountList(List<Object> params) {
@@ -70,15 +72,20 @@ public class AccountController {
         if (pageSize <= 0 || pageSize > 1000) {
             pageSize = 10;
         }
-        RpcResult result = new RpcResult();
-        PageInfo<AccountInfo> pageInfo;
-        if (CacheManager.isChainExist(chainId)) {
-            pageInfo = mongoAccountServiceImpl.pageQuery(chainId, pageIndex, pageSize);
-        } else {
-            pageInfo = new PageInfo<>(pageIndex, pageSize);
+        try {
+            RpcResult result = new RpcResult();
+            PageInfo<AccountInfo> pageInfo;
+            if (CacheManager.isChainExist(chainId)) {
+                pageInfo = accountService.pageQuery(chainId, pageIndex, pageSize);
+            } else {
+                pageInfo = new PageInfo<>(pageIndex, pageSize);
+            }
+            result.setResult(pageInfo);
+            return result;
+        } catch (Exception e) {
+            Log.error(e);
+            return RpcResult.failed(RpcErrorCode.SYS_UNKNOWN_EXCEPTION);
         }
-        result.setResult(pageInfo);
-        return result;
     }
 
     @RpcMethod("getAccountTxs")
@@ -97,7 +104,6 @@ public class AccountController {
         } catch (Exception e) {
             return RpcResult.paramError();
         }
-
         if (!AddressTool.validAddress(chainId, address)) {
             return RpcResult.paramError("[address] is inValid");
         }
@@ -107,15 +113,22 @@ public class AccountController {
         if (pageSize <= 0 || pageSize > 1000) {
             pageSize = 10;
         }
-        RpcResult result = new RpcResult();
-        PageInfo<TxRelationInfo> pageInfo;
-        if (CacheManager.isChainExist(chainId)) {
-            pageInfo = mongoAccountServiceImpl.getAccountTxs(chainId, address, pageIndex, pageSize, type, isMark);
-        } else {
-            pageInfo = new PageInfo<>(pageIndex, pageSize);
+
+        try {
+            RpcResult result = new RpcResult();
+            PageInfo<TxRelationInfo> pageInfo;
+            if (CacheManager.isChainExist(chainId)) {
+                pageInfo = accountService.getAccountTxs(chainId, address, pageIndex, pageSize, type, isMark);
+            } else {
+                pageInfo = new PageInfo<>(pageIndex, pageSize);
+            }
+            result.setResult(pageInfo);
+            return result;
+        } catch (Exception e) {
+            Log.error(e);
+            return RpcResult.failed(RpcErrorCode.SYS_UNKNOWN_EXCEPTION);
         }
-        result.setResult(pageInfo);
-        return result;
+
     }
 
     @RpcMethod("getAccount")
@@ -129,26 +142,30 @@ public class AccountController {
         } catch (Exception e) {
             return RpcResult.paramError();
         }
-
         if (!AddressTool.validAddress(chainId, address)) {
             return RpcResult.paramError("[address] is inValid");
         }
-        RpcResult result = new RpcResult();
-        ApiCache apiCache = CacheManager.getCache(chainId);
-        if (apiCache == null) {
-            return result.setError(new RpcResultError(RpcErrorCode.DATA_NOT_EXISTS));
-        }
 
-        AccountInfo accountInfo = mongoAccountServiceImpl.getAccountInfo(chainId, address);
-        if (accountInfo == null) {
-            return result.setError(new RpcResultError(RpcErrorCode.DATA_NOT_EXISTS));
+        try {
+            RpcResult result = new RpcResult();
+            ApiCache apiCache = CacheManager.getCache(chainId);
+            if (apiCache == null) {
+                return result.setError(new RpcResultError(RpcErrorCode.DATA_NOT_EXISTS));
+            }
+            AccountInfo accountInfo = accountService.getAccountInfo(chainId, address);
+            if (accountInfo == null) {
+                return result.setError(new RpcResultError(RpcErrorCode.DATA_NOT_EXISTS));
+            }
+            AssetInfo defaultAsset = apiCache.getChainInfo().getDefaultAsset();
+            BalanceInfo balanceInfo = WalletRpcHandler.getAccountBalance(chainId, address, defaultAsset.getChainId(), defaultAsset.getAssetId());
+            accountInfo.setBalance(balanceInfo.getBalance());
+            accountInfo.setConsensusLock(balanceInfo.getConsensusLock());
+            accountInfo.setTimeLock(balanceInfo.getTimeLock());
+            return result.setResult(accountInfo);
+        } catch (Exception e) {
+            Log.error(e);
+            return RpcResult.failed(RpcErrorCode.SYS_UNKNOWN_EXCEPTION);
         }
-        AssetInfo defaultAsset = apiCache.getChainInfo().getDefaultAsset();
-        AccountInfo account = WalletRpcHandler.getAccountBalance(chainId, address, defaultAsset.getChainId(), defaultAsset.getAssetId());
-        accountInfo.setBalance(account.getBalance());
-        accountInfo.setConsensusLock(account.getConsensusLock());
-        accountInfo.setTimeLock(account.getTimeLock());
-        return result.setResult(accountInfo);
     }
 
     @RpcMethod("getCoinRanking")
@@ -173,13 +190,18 @@ public class AccountController {
             pageSize = 10;
         }
 
-        PageInfo<AccountInfo> pageInfo;
-        if (CacheManager.isChainExist(chainId)) {
-            pageInfo = mongoAccountServiceImpl.getCoinRanking(pageIndex, pageSize, sortType, chainId);
-        } else {
-            pageInfo = new PageInfo<>(pageIndex, pageSize);
+        try {
+            PageInfo<AccountInfo> pageInfo;
+            if (CacheManager.isChainExist(chainId)) {
+                pageInfo = accountService.getCoinRanking(pageIndex, pageSize, sortType, chainId);
+            } else {
+                pageInfo = new PageInfo<>(pageIndex, pageSize);
+            }
+            return new RpcResult().setResult(pageInfo);
+        } catch (Exception e) {
+            Log.error(e);
+            return RpcResult.failed(RpcErrorCode.SYS_UNKNOWN_EXCEPTION);
         }
-        return new RpcResult().setResult(pageInfo);
     }
 
     @RpcMethod("getAccountFreezes")
@@ -202,19 +224,55 @@ public class AccountController {
             pageSize = 10;
         }
 
-        PageInfo<FreezeInfo> pageInfo;
-        if (CacheManager.isChainExist(chainId)) {
-            ApiCache apiCache = CacheManager.getCache(chainId);
-            assetId = apiCache.getChainInfo().getDefaultAsset().getAssetId();
-            Result<PageInfo<FreezeInfo>> result = WalletRpcHandler.getFreezeList(chainId, pageIndex, pageSize, address, assetId);
-            if (result.isFailed()) {
-                return RpcResult.failed(result);
+        try {
+            PageInfo<FreezeInfo> pageInfo;
+            if (CacheManager.isChainExist(chainId)) {
+                ApiCache apiCache = CacheManager.getCache(chainId);
+                assetId = apiCache.getChainInfo().getDefaultAsset().getAssetId();
+                Result<PageInfo<FreezeInfo>> result = WalletRpcHandler.getFreezeList(chainId, pageIndex, pageSize, address, assetId);
+                if (result.isFailed()) {
+                    return RpcResult.failed(result);
+                }
+                pageInfo = result.getData();
+                return RpcResult.success(pageInfo);
+            } else {
+                pageInfo = new PageInfo<>(pageIndex, pageSize);
+                return RpcResult.success(pageInfo);
             }
-            pageInfo = result.getData();
-            return RpcResult.success(pageInfo);
-        } else {
-            pageInfo = new PageInfo<>(pageIndex, pageSize);
-            return RpcResult.success(pageInfo);
+        } catch (Exception e) {
+            Log.error(e);
+            return RpcResult.failed(RpcErrorCode.SYS_UNKNOWN_EXCEPTION);
         }
     }
+
+    @RpcMethod("getAccountBalance")
+    public RpcResult getAccountBalance(List<Object> params) {
+        VerifyUtils.verifyParams(params, 3);
+        int chainId, assetId;
+        String address;
+        try {
+            chainId = (int) params.get(0);
+            assetId = (int) params.get(1);
+            address = (String) params.get(2);
+        } catch (Exception e) {
+            return RpcResult.paramError();
+        }
+
+        try {
+            ApiCache apiCache = CacheManager.getCache(chainId);
+            if (apiCache == null) {
+                return RpcResult.dataNotFound();
+            }
+            if (assetId <= 0) {
+                AssetInfo defaultAsset = apiCache.getChainInfo().getDefaultAsset();
+                assetId = defaultAsset.getAssetId();
+            }
+            BalanceInfo balanceInfo = WalletRpcHandler.getAccountBalance(chainId, address, chainId, assetId);
+            return RpcResult.success(balanceInfo);
+        } catch (Exception e) {
+            Log.error(e);
+            return RpcResult.failed(RpcErrorCode.SYS_UNKNOWN_EXCEPTION);
+        }
+    }
+
 }

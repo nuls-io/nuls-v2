@@ -31,9 +31,9 @@ import io.nuls.transaction.cache.PackablePool;
 import io.nuls.transaction.constant.TxConfig;
 import io.nuls.transaction.constant.TxConstant;
 import io.nuls.transaction.model.bo.Chain;
-import io.nuls.transaction.model.po.TransactionsPO;
+import io.nuls.transaction.model.po.TransactionUnconfirmedPO;
 import io.nuls.transaction.service.TxService;
-import io.nuls.transaction.storage.rocksdb.UnconfirmedTxStorageService;
+import io.nuls.transaction.storage.UnconfirmedTxStorageService;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -67,7 +67,7 @@ public class UnconfirmedTxProcessTask implements Runnable {
     }
 
     private void doTask(Chain chain) {
-        List<TransactionsPO> txPOList = unconfirmedTxStorageService.getAllTxPOList(chain.getChainId());
+        List<TransactionUnconfirmedPO> txPOList = unconfirmedTxStorageService.getAllTxPOList(chain.getChainId());
         chain.getLoggerMap().get(TxConstant.LOG_TX).debug("%%%%% Clean %%%%% [UnconfirmedTxProcessTask] unconfirmed list size: {}", txPOList.size());
         if (txPOList == null || txPOList.size() == 0) {
             return;
@@ -101,12 +101,12 @@ public class UnconfirmedTxProcessTask implements Runnable {
      * @param txPOList
      * @return expireTxList
      */
-    private List<Transaction> getExpireTxList(List<TransactionsPO> txPOList) {
+    private List<Transaction> getExpireTxList(List<TransactionUnconfirmedPO> txPOList) {
         List<Transaction> expireTxList = new ArrayList<>();
         long currentTime = TimeUtils.getCurrentTimeMillis();
         //过滤指定时间内过期的交易
-        List<TransactionsPO> expireTxPOList = txPOList.stream().filter(txPo -> currentTime - txConfig.getUnconfirmedTxExpireMs() > txPo.getCreateTime()).collect(Collectors.toList());
-        expireTxPOList.forEach(txPo -> expireTxList.add(txPo.toTransaction()));
+        List<TransactionUnconfirmedPO> expireTxPOList = txPOList.stream().filter(txPo -> currentTime - txConfig.getUnconfirmedTxExpireMs() > txPo.getCreateTime()).collect(Collectors.toList());
+        expireTxPOList.forEach(txPo -> expireTxList.add(txPo.getTx()));
         return expireTxList;
     }
 

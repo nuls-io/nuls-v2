@@ -28,93 +28,51 @@ package io.nuls.transaction.constant;
  * @author: Charlie
  * @date: 2018-12-25
  */
-public interface TxCmd {
+public final class TxCmd {
 
     /**
      * 模块接口
      */
-    String TX_GET_SYSTEM_TYPES = "tx_getSystemTypes";
-    String TX_REGISTER = "tx_register";
-    String TX_PACKABLETXS = "tx_packableTxs";
-    String TX_SAVE = "tx_save";
-    String TX_GENGSIS_SAVE = "tx_gengsisSave";
-    String TX_ROLLBACK = "tx_rollback";
-    String TX_GET_CONFIRMED_TX = "tx_getConfirmedTx";
-    String TX_GETTX = "tx_getTx";
-    String TX_GET_BLOCK_TXS = "tx_getBlockTxs";
-    String TX_GET_BLOCK_TXS_EXTEND = "tx_getBlockTxsExtend";
-    String TX_BATCHVERIFY = "tx_batchVerify";
-    String TX_CREATE_CROSS_TX = "tx_createCtx";
-    String CLIENT_GETTX = "tx_getTxClient";
-    String CLIENT_GETTX_CONFIRMED = "tx_getConfirmedTxClient";
+    public static final String TX_GET_SYSTEM_TYPES = "tx_getSystemTypes";
+    public static final String TX_REGISTER = "tx_register";
+    public static final String TX_UNREGISTER = "tx_unregister";
+    public static final String TX_PACKABLETXS = "tx_packableTxs";
+    public static final String TX_SAVE = "tx_save";
+    public static final String TX_GENGSIS_SAVE = "tx_gengsisSave";
+    public static final String TX_ROLLBACK = "tx_rollback";
+    public static final String TX_GET_CONFIRMED_TX = "tx_getConfirmedTx";
+    public static final String TX_GETTX = "tx_getTx";
+    public static final String TX_GET_BLOCK_TXS = "tx_getBlockTxs";
+    public static final String TX_GET_BLOCK_TXS_EXTEND = "tx_getBlockTxsExtend";
+    public static final String TX_BATCHVERIFY = "tx_batchVerify";
+    public static final String TX_CREATE_CROSS_TX = "tx_createCtx";
+    public static final String CLIENT_GETTX = "tx_getTxClient";
+    public static final String CLIENT_GETTX_CONFIRMED = "tx_getConfirmedTxClient";
 
-    String TX_BLOCK_HEIGHT = "tx_blockHeight";
+    public static final String TX_BLOCK_HEIGHT = "tx_blockHeight";
+    public static final String TX_VERIFYTX = "tx_verifyTx";
 
     /**
      * 修改节点共识状态
      */
-    String TX_CS_STATE = "tx_cs_state";
-
-    String TX_REPACKAGE = "tx_repackage";
+    public static final String TX_CS_STATE = "tx_cs_state";
 
 
-    String TX_NEWTX = "tx_newTx";
-    String TX_BASE_VALIDATE = "tx_baseValidateTx";
-    /**
-     * 接收本地新的主网协议的跨链交易 ??????
-     * todo
-     */
-    String TX_NEW_CROSS_TX = "tx_newCrossTx";
+    public static final String TX_NEWTX = "tx_newTx";
 
-    //网络消息对应的RPC命令
+    public static final String TX_BASE_VALIDATE = "tx_baseValidateTx";
+
     /**
      * 接收广播的新交易hash
      */
-    String NW_NEW_HASH = "newHash";
+    public static final String NW_NEW_HASH = "newHash";
     /**
      * 接收其他节点发送的完整交易
      */
-    String NW_RECEIVE_TX = "receiveTx";
+    public static final String NW_RECEIVE_TX = "receiveTx";
     /**
      * 索取完整交易
      */
-    String NW_ASK_TX = "askTx";
-
-    /**
-     * 接收新的跨链交易hash
-     */
-    String NW_NEW_CROSS_HASH = "newCrossHash";
-    /**
-     * 主网向友链索取完整跨链交易
-     */
-    String NW_ASK_CROSS_TX_M_FC = "askCrossTxM2Fc";
-    /**
-     * 主网链内节点索取完整跨链交易
-     */
-    String NW_ASK_CROSS_TX_M_M = "askCrossTxM2M";
-    /**
-     * 友链向主网索取完整跨链交易
-     */
-    String NW_ASK_CROSS_TX_FC_M = "askCrossTxFc2M";
-    /**
-     * 接收主网新的完整跨链交易
-     */
-    String NW_NEW_MN_TX = "newMnTx";
-    /**
-     * 根据原始交易和跨链交易hash向友链节点验证该交易是否被确认
-     */
-    String NW_VERIFY_FC = "verifyFc";
-    /**
-     * 根据跨链交易hash向主网验证该交易是否被确认
-     */
-    String NW_VERIFY_MN = "verifyMn";
-    /**
-     * 接收跨链验证结果
-     */
-    String NW_VERIFYR_ESULT = "verifyResult";
-    /**
-     * 接收链内其他节点广播的跨链验证结果
-     */
-    String NW_CROSS_NODE_RS = "crossNodeRs";
+    public static final String NW_ASK_TX = "askTx";
 
 }

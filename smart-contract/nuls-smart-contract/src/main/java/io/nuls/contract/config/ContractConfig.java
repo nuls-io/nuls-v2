@@ -25,7 +25,9 @@ package io.nuls.contract.config;
 
 import io.nuls.contract.model.bo.config.ConfigBean;
 import io.nuls.tools.core.annotation.Configuration;
-import io.nuls.tools.core.annotation.Value;
+
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author: PierreLuo
@@ -67,6 +69,12 @@ public class ContractConfig {
     private int assetsId;
 
     private long maxViewGas;
+
+    private String systemLogLevel;
+
+    private String packageLogPackages;
+
+    private String packageLogLevels;
 
     public int getChainId() {
         return chainId;
@@ -170,6 +178,30 @@ public class ContractConfig {
 
     public void setDataPath(String dataPath) {
         this.dataPath = dataPath;
+    }
+
+    public String getSystemLogLevel() {
+        return systemLogLevel;
+    }
+
+    public void setSystemLogLevel(String systemLogLevel) {
+        this.systemLogLevel = systemLogLevel;
+    }
+
+    public String getPackageLogPackages() {
+        return packageLogPackages;
+    }
+
+    public void setPackageLogPackages(String packageLogPackages) {
+        this.packageLogPackages = packageLogPackages;
+    }
+
+    public String getPackageLogLevels() {
+        return packageLogLevels;
+    }
+
+    public void setPackageLogLevels(String packageLogLevels) {
+        this.packageLogLevels = packageLogLevels;
     }
 
     public ConfigBean getChainConfig() {

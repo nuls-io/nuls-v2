@@ -18,14 +18,11 @@ import io.nuls.transaction.model.bo.Chain;
 import io.nuls.transaction.model.bo.TxRegister;
 import io.nuls.transaction.model.po.TransactionConfirmedPO;
 import io.nuls.transaction.rpc.call.LedgerCall;
-import io.nuls.transaction.rpc.call.NetworkCall;
 import io.nuls.transaction.rpc.call.TransactionCall;
 import io.nuls.transaction.service.ConfirmedTxService;
-import io.nuls.transaction.service.CtxService;
 import io.nuls.transaction.service.TxService;
-import io.nuls.transaction.storage.rocksdb.ConfirmedTxStorageService;
-import io.nuls.transaction.storage.rocksdb.CtxStorageService;
-import io.nuls.transaction.storage.rocksdb.UnconfirmedTxStorageService;
+import io.nuls.transaction.storage.ConfirmedTxStorageService;
+import io.nuls.transaction.storage.UnconfirmedTxStorageService;
 import io.nuls.transaction.utils.TxUtil;
 
 import java.util.ArrayList;
@@ -33,7 +30,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static io.nuls.transaction.utils.LoggerUtil.Log;
+import static io.nuls.transaction.utils.LoggerUtil.LOG;
 
 /**
  * @author: Charlie
@@ -52,13 +49,7 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
     private ChainManager chainManager;
 
     @Autowired
-    private CtxStorageService ctxStorageService;
-
-    @Autowired
     private PackablePool packablePool;
-
-    @Autowired
-    private CtxService ctxService;
 
     @Autowired
     private TxService txService;
@@ -128,7 +119,7 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
         BlockHeader blockHeader = null;
         try {
             blockHeader = TxUtil.getInstanceRpcStr(blockHeaderStr, BlockHeader.class);
-            Log.debug("[保存区块] ==========开始==========高度:{}==========数量:{}", blockHeader.getHeight(), txList.size());//----
+            LOG.debug("[保存区块] ==========开始==========高度:{}==========数量:{}", blockHeader.getHeight(), txList.size());//----
             chain.getLoggerMap().get(TxConstant.LOG_TX).debug("saveBlockTxList block height:{}", blockHeader.getHeight());
             for (Transaction tx : txList) {
                 tx.setBlockHeight(blockHeader.getHeight());
@@ -144,23 +135,23 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
             chain.getLoggerMap().get(TxConstant.LOG_TX).error(e);
             return false;
         }
-        Log.debug("[保存区块] 组装数据 执行时间:{}", TimeUtils.getCurrentTimeMillis() - start);//----
-        Log.debug("");//----
+        LOG.debug("[保存区块] 组装数据 执行时间:{}", TimeUtils.getCurrentTimeMillis() - start);//----
+        LOG.debug("");//----
 
         long dbStart = TimeUtils.getCurrentTimeMillis();//-----
         if (!saveTxs(chain, txList, blockHeader.getHeight(), true)) {
             return false;
         }
-        Log.debug("[保存区块] 存已确认交易DB 执行时间:{}", TimeUtils.getCurrentTimeMillis()- dbStart);//----
-        Log.debug("");//----
+        LOG.debug("[保存区块] 存已确认交易DB 执行时间:{}", TimeUtils.getCurrentTimeMillis()- dbStart);//----
+        LOG.debug("");//----
 
         long commitStart = TimeUtils.getCurrentTimeMillis();//-----
         if (!gengsis && !commitTxs(chain, moduleVerifyMap, blockHeaderStr, true)) {
             removeTxs(chain, txList, blockHeader.getHeight(), false);
             return false;
         }
-        Log.debug("[保存区块] 交易业务提交 执行时间:{}", TimeUtils.getCurrentTimeMillis() - commitStart);//----
-        Log.debug("");//----
+        LOG.debug("[保存区块] 交易业务提交 执行时间:{}", TimeUtils.getCurrentTimeMillis() - commitStart);//----
+        LOG.debug("");//----
 
         long ledgerStart = TimeUtils.getCurrentTimeMillis();//-----
         if (!commitLedger(chain, txStrList, blockHeader.getHeight())) {
@@ -170,12 +161,12 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
             removeTxs(chain, txList, blockHeader.getHeight(), false);
             return false;
         }
-        Log.debug("[保存区块] 账本模块提交 执行时间:{}", TimeUtils.getCurrentTimeMillis() - ledgerStart);//----
-        Log.debug("");//----
+        LOG.debug("[保存区块] 账本模块提交 执行时间:{}", TimeUtils.getCurrentTimeMillis() - ledgerStart);//----
+        LOG.debug("");//----
         //如果确认交易成功，则从未打包交易库中删除交易
         unconfirmedTxStorageService.removeTxList(chainId, txHashs);
-        Log.debug("[保存区块] ======/========/结束======/========/合计执行时间:{}", TimeUtils.getCurrentTimeMillis() - start);//----
-        Log.debug("");//----
+        LOG.debug("[保存区块] ======/========/结束======/========/合计执行时间:{}", TimeUtils.getCurrentTimeMillis() - start);//----
+        LOG.debug("");//----
         chain.getLoggerMap().get(TxConstant.LOG_TX).debug("save block Txs success! height:{}, txSize:{}", blockHeader.getHeight(), txList.size());
         return true;
     }
@@ -206,18 +197,8 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
         Map<TxRegister, List<String>> successed = new HashMap<>(TxConstant.INIT_CAPACITY_8);
         boolean result = true;
         for (Map.Entry<TxRegister, List<String>> entry : moduleVerifyMap.entrySet()) {
-            boolean rs;
-            if (entry.getKey().getModuleCode().equals(txConfig.getModuleCode())) {
-                try {
-                    rs = txService.crossTransactionCommit(chain, entry.getValue(), blockHeader);
-                } catch (NulsException e) {
-                    chain.getLoggerMap().get(TxConstant.LOG_TX).error(e);
-                    rs = false;
-                }
-            } else {
-                rs = TransactionCall.txProcess(chain, entry.getKey().getCommit(),
-                        entry.getKey().getModuleCode(), entry.getValue(), blockHeader);
-            }
+            boolean rs = TransactionCall.txProcess(chain, entry.getKey().getCommit(),
+                    entry.getKey().getModuleCode(), entry.getValue(), blockHeader);
             if (!rs) {
                 result = false;
                 chain.getLoggerMap().get(TxConstant.LOG_TX).debug("save tx failed! commitTxs");
@@ -263,18 +244,8 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
         Map<TxRegister, List<String>> successed = new HashMap<>(TxConstant.INIT_CAPACITY_8);
         boolean result = true;
         for (Map.Entry<TxRegister, List<String>> entry : moduleVerifyMap.entrySet()) {
-            boolean rs;
-            if (entry.getKey().getModuleCode().equals(txConfig.getModuleCode())) {
-                try {
-                    rs = txService.crossTransactionRollback(chain, entry.getValue(), blockHeader);
-                } catch (NulsException e) {
-                    chain.getLoggerMap().get(TxConstant.LOG_TX).error(e);
-                    rs = false;
-                }
-            } else {
-                rs = TransactionCall.txProcess(chain, entry.getKey().getRollback(),
-                        entry.getKey().getModuleCode(), entry.getValue(), blockHeader);
-            }
+            boolean rs = TransactionCall.txProcess(chain, entry.getKey().getRollback(),
+                    entry.getKey().getModuleCode(), entry.getValue(), blockHeader);
             if (!rs) {
                 result = false;
                 chain.getLoggerMap().get(TxConstant.LOG_TX).debug("failed! rollbackcommitTxs ");
@@ -372,47 +343,6 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
             packablePool.addInFirst(chain, tx);
         }
         return true;
-    }
-
-
-    @Override
-    public void processEffectCrossTx(Chain chain, long blockHeight) throws NulsException {
-        int chainId = chain.getChainId();
-        List<NulsDigestData> hashList = confirmedTxStorageService.getCrossTxEffectList(chainId, blockHeight);
-        for (NulsDigestData hash : hashList) {
-            TransactionConfirmedPO txPO = confirmedTxStorageService.getTx(chainId, hash);
-            Transaction tx = txPO.getTx();
-            if (null == tx) {
-                chain.getLoggerMap().get(TxConstant.LOG_TX).error(TxErrorCode.TX_NOT_EXIST.getMsg() + ": " + hash.toString());
-                continue;
-            }
-            if (tx.getType() != TxConstant.TX_TYPE_CROSS_CHAIN_TRANSFER) {
-                chain.getLoggerMap().get(TxConstant.LOG_TX).error(TxErrorCode.TX_TYPE_ERROR.getMsg() + ": " + hash.toString());
-                continue;
-            }
-            //跨链转账交易接收者链id
-            int toChainId = TxUtil.getCrossTxTosOriginChainId(tx);
-
-            /*
-                如果当前链是主网
-                    1.需要对接收者链进行账目金额增加
-                    2a.如果是交易收款方,则需要向发起链发送回执? todo
-                    2b.如果不是交易收款方广播给收款方链
-                如果当前链是交易发起链
-                    1.广播给主网
-             */
-            if (chainId == txConfig.getMainChainId()) {
-                if (toChainId == chainId) {
-                    //todo 已到达目标链发送回执
-                } else {
-                    //广播给 toChainId 链的节点
-                    NetworkCall.broadcastTxHash(toChainId, tx.getHash());
-                }
-            } else {
-                //广播给 主网 链的节点
-                NetworkCall.broadcastTxHash(txConfig.getMainChainId(), tx.getHash());
-            }
-        }
     }
 
     @Override

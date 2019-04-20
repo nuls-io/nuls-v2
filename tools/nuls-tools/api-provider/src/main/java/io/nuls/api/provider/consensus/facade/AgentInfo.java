@@ -41,6 +41,103 @@ public class AgentInfo {
 
     private String version;
 
+
+    @Override
+    public String toString() {
+        return new StringBuilder("{")
+                .append("\"agentHash\":\"")
+                .append(agentHash).append('\"')
+                .append(",\"agentAddress\":\"")
+                .append(agentAddress).append('\"')
+                .append(",\"packingAddress\":\"")
+                .append(packingAddress).append('\"')
+                .append(",\"rewardAddress\":\"")
+                .append(rewardAddress).append('\"')
+                .append(",\"deposit\":\"")
+                .append(deposit).append('\"')
+                .append(",\"commissionRate\":")
+                .append(commissionRate)
+                .append(",\"agentName\":\"")
+                .append(agentName).append('\"')
+                .append(",\"agentId\":\"")
+                .append(agentId).append('\"')
+                .append(",\"time\":")
+                .append(time)
+                .append(",\"blockHeight\":")
+                .append(blockHeight)
+                .append(",\"delHeight\":")
+                .append(delHeight)
+                .append(",\"status\":")
+                .append(status)
+                .append(",\"creditVal\":")
+                .append(creditVal)
+                .append(",\"totalDeposit\":\"")
+                .append(totalDeposit).append('\"')
+                .append(",\"txHash\":\"")
+                .append(txHash).append('\"')
+                .append(",\"memberCount\":")
+                .append(memberCount)
+                .append(",\"version\":\"")
+                .append(version).append('\"')
+                .append('}').toString();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof AgentInfo)) return false;
+
+        AgentInfo agentInfo = (AgentInfo) o;
+
+        if (Double.compare(agentInfo.commissionRate, commissionRate) != 0) return false;
+        if (time != agentInfo.time) return false;
+        if (blockHeight != agentInfo.blockHeight) return false;
+        if (delHeight != agentInfo.delHeight) return false;
+        if (status != agentInfo.status) return false;
+        if (Double.compare(agentInfo.creditVal, creditVal) != 0) return false;
+        if (memberCount != agentInfo.memberCount) return false;
+        if (agentHash != null ? !agentHash.equals(agentInfo.agentHash) : agentInfo.agentHash != null) return false;
+        if (agentAddress != null ? !agentAddress.equals(agentInfo.agentAddress) : agentInfo.agentAddress != null)
+            return false;
+        if (packingAddress != null ? !packingAddress.equals(agentInfo.packingAddress) : agentInfo.packingAddress != null)
+            return false;
+        if (rewardAddress != null ? !rewardAddress.equals(agentInfo.rewardAddress) : agentInfo.rewardAddress != null)
+            return false;
+        if (deposit != null ? !deposit.equals(agentInfo.deposit) : agentInfo.deposit != null) return false;
+        if (agentName != null ? !agentName.equals(agentInfo.agentName) : agentInfo.agentName != null) return false;
+        if (agentId != null ? !agentId.equals(agentInfo.agentId) : agentInfo.agentId != null) return false;
+        if (totalDeposit != null ? !totalDeposit.equals(agentInfo.totalDeposit) : agentInfo.totalDeposit != null)
+            return false;
+        if (txHash != null ? !txHash.equals(agentInfo.txHash) : agentInfo.txHash != null) return false;
+        return version != null ? version.equals(agentInfo.version) : agentInfo.version == null;
+    }
+
+    @Override
+    public int hashCode() {
+        int result;
+        long temp;
+        result = agentHash != null ? agentHash.hashCode() : 0;
+        result = 31 * result + (agentAddress != null ? agentAddress.hashCode() : 0);
+        result = 31 * result + (packingAddress != null ? packingAddress.hashCode() : 0);
+        result = 31 * result + (rewardAddress != null ? rewardAddress.hashCode() : 0);
+        result = 31 * result + (deposit != null ? deposit.hashCode() : 0);
+        temp = Double.doubleToLongBits(commissionRate);
+        result = 31 * result + (int) (temp ^ (temp >>> 32));
+        result = 31 * result + (agentName != null ? agentName.hashCode() : 0);
+        result = 31 * result + (agentId != null ? agentId.hashCode() : 0);
+        result = 31 * result + (int) (time ^ (time >>> 32));
+        result = 31 * result + (int) (blockHeight ^ (blockHeight >>> 32));
+        result = 31 * result + (int) (delHeight ^ (delHeight >>> 32));
+        result = 31 * result + status;
+        temp = Double.doubleToLongBits(creditVal);
+        result = 31 * result + (int) (temp ^ (temp >>> 32));
+        result = 31 * result + (totalDeposit != null ? totalDeposit.hashCode() : 0);
+        result = 31 * result + (txHash != null ? txHash.hashCode() : 0);
+        result = 31 * result + memberCount;
+        result = 31 * result + (version != null ? version.hashCode() : 0);
+        return result;
+    }
+
     public String getAgentHash() {
         return agentHash;
     }

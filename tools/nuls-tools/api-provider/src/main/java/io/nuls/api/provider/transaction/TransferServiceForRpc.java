@@ -12,6 +12,8 @@ import io.nuls.base.data.Coin;
 import io.nuls.base.data.Transaction;
 import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.util.RPCUtil;
+import io.nuls.tools.constant.CommonCodeConstanst;
+import io.nuls.tools.constant.ErrorCode;
 import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.log.Log;
@@ -54,7 +56,7 @@ public class TransferServiceForRpc extends BaseRpcService implements TransferSer
 
     @Override
     public Result<TransactionData> getSimpleTxDataByHash(GetConfirmedTxByHashReq req) {
-        return callRpc(ModuleE.TX.abbr,"tx_getConfirmedTxClient",req,
+        return callRpc(ModuleE.TX.abbr,"tx_getTxClient",req,
                 (Function<Map,Result>)res->tranderTransactionData(tranderTransaction(res))
         );
     }
@@ -72,7 +74,7 @@ public class TransferServiceForRpc extends BaseRpcService implements TransferSer
         try {
             String hexString = (String) data.get("tx");
             if(StringUtils.isNull(hexString)){
-                return fail(ERROR_CODE,"not found tx");
+                return fail(CommonCodeConstanst.DATA_NOT_FOUND,"not found tx");
             }
             Transaction transaction = new Transaction();
             transaction.parse(new NulsByteBuffer(RPCUtil.decode(hexString)));
@@ -82,12 +84,12 @@ public class TransferServiceForRpc extends BaseRpcService implements TransferSer
             return success(transaction);
         } catch (NulsException e) {
             Log.error("反序列化transaction发生异常",e);
-            return fail(ERROR_CODE);
+            return fail(CommonCodeConstanst.DESERIALIZE_ERROR);
         }
     }
 
     private Result<TransactionData> tranderTransactionData(Result<Transaction>  data){
-        if(data.isFailed())return fail(ERROR_CODE,data.getMessage());
+        if(data.isFailed())return fail(ErrorCode.init(data.getStatus()),data.getMessage());
         try {
             Transaction transaction = data.getData();
             TransactionData res = new TransactionData();
@@ -109,7 +111,7 @@ public class TransferServiceForRpc extends BaseRpcService implements TransferSer
             return success(res);
         } catch (NulsException e) {
             Log.error("反序列化transaction发生异常",e);
-            return fail(ERROR_CODE);
+            return fail(CommonCodeConstanst.DESERIALIZE_ERROR);
         }
     }
 

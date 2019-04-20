@@ -69,7 +69,7 @@ public class I18nUtils {
      * 默认语言包存放文件夹名称
      * default properties file folder
      */
-    private static final String FOLDER = "languages";
+    private static final String FOLDER = "common-languages";
 
     public static boolean isSystemWin() {
         String pathSeparator = System.getProperty("path.separator");
@@ -82,12 +82,23 @@ public class I18nUtils {
 
     }
 
+    public static void loadCommonLanguage(String defaultLanguage) {
+        ALL_MAPPING.clear();
+        load(I18nUtils.class, "common-languages", defaultLanguage);
+    }
+
+    public static void loadLanguage(Class c,String folder, String defaultLanguage) {
+        load(I18nUtils.class, "common-languages", defaultLanguage);
+        ALL_MAPPING.clear();
+        load(c, folder, defaultLanguage);
+    }
+
     /**
      * @param c
      * @param folder
      * @param defaultLanguage
      */
-    public static void loadLanguage(Class c, String folder, String defaultLanguage) {
+    private static void load(Class c, String folder, String defaultLanguage) {
         try {
             if (StringUtils.isBlank(folder)) {
                 folder = FOLDER;
@@ -105,7 +116,11 @@ public class I18nUtils {
                         Properties prop = new Properties();
                         prop.load(new InputStreamReader(is, ToolsConstant.DEFAULT_ENCODING));
                         String key = file.getName().replace(".properties", "");
-                        ALL_MAPPING.put(key, prop);
+                        if (ALL_MAPPING.containsKey(key)) {
+                            ALL_MAPPING.get(key).putAll(prop);
+                        } else {
+                            ALL_MAPPING.put(key, prop);
+                        }
                     }
                 } else {
                     URL url = c.getProtectionDomain().getCodeSource().getLocation();
@@ -115,15 +130,19 @@ public class I18nUtils {
                             Enumeration<JarEntry> entrys = jarFile.entries();
                             while (entrys.hasMoreElements()) {
                                 JarEntry jar = entrys.nextElement();
-                                if (jar.getName().indexOf("languages/") == 0 && jar.getName().length() > "languages/".length()) {
+                                if (jar.getName().indexOf(folder + "/") == 0 && jar.getName().length() > (folder + "/").length()) {
                                     Log.info(jar.getName());
                                     InputStream in = I18nUtils.class.getClassLoader().getResourceAsStream(jar.getName());
                                     Properties prop = new Properties();
                                     prop.load(in);
                                     String key = jar.getName().replace(".properties", "");
-                                    key = key.replace("languages/", "");
+                                    key = key.replace(folder + "/", "");
                                     Log.info("key={}", key);
-                                    ALL_MAPPING.put(key, prop);
+                                    if (ALL_MAPPING.containsKey(key)) {
+                                        ALL_MAPPING.get(key).putAll(prop);
+                                    } else {
+                                        ALL_MAPPING.put(key, prop);
+                                    }
                                 }
 
                             }
@@ -138,6 +157,7 @@ public class I18nUtils {
         } catch (IOException e) {
             Log.error(e.getMessage());
         }
+
     }
 
 
@@ -188,6 +208,10 @@ public class I18nUtils {
      */
     public static String getLanguage() {
         return key;
+    }
+
+    public static Map<String, Properties> getAll() {
+        return ALL_MAPPING;
     }
 
 }

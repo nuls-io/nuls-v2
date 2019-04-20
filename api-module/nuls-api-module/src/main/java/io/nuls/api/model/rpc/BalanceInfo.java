@@ -12,6 +12,12 @@ public class BalanceInfo {
 
     private BigInteger consensusLock;
 
+    private BigInteger freeze;
+
+    private String nonce;
+
+    private int nonceType;
+
     public BigInteger getTotalBalance() {
         return totalBalance;
     }
@@ -42,5 +48,29 @@ public class BalanceInfo {
 
     public void setConsensusLock(BigInteger consensusLock) {
         this.consensusLock = consensusLock;
+    }
+
+    public BigInteger getFreeze() {
+        return freeze;
+    }
+
+    public void setFreeze(BigInteger freeze) {
+        this.freeze = freeze;
+    }
+
+    public String getNonce() {
+        return nonce;
+    }
+
+    public void setNonce(String nonce) {
+        this.nonce = nonce;
+    }
+
+    public int getNonceType() {
+        return nonceType;
+    }
+
+    public void setNonceType(int nonceType) {
+        this.nonceType = nonceType;
     }
 }

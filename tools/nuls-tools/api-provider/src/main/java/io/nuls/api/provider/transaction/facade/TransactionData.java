@@ -33,8 +33,8 @@ public class TransactionData {
     private int inBlockIndex;
 
     private List<TransactionCoinData> form;
+   private List<TransactionCoinData> to;
 
-    private List<TransactionCoinData> to;
 
 
     public int getType() {
@@ -124,4 +124,72 @@ public class TransactionData {
     public void setTo(List<TransactionCoinData> to) {
         this.to = to;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof TransactionData)) return false;
+
+        TransactionData that = (TransactionData) o;
+
+        if (type != that.type) return false;
+        if (blockHeight != that.blockHeight) return false;
+        if (size != that.size) return false;
+        if (inBlockIndex != that.inBlockIndex) return false;
+        if (time != null ? !time.equals(that.time) : that.time != null) return false;
+        if (transactionSignature != null ? !transactionSignature.equals(that.transactionSignature) : that.transactionSignature != null)
+            return false;
+        if (remark != null ? !remark.equals(that.remark) : that.remark != null) return false;
+        if (hash != null ? !hash.equals(that.hash) : that.hash != null) return false;
+        if (status != that.status) return false;
+        if (form != null ? !form.equals(that.form) : that.form != null) return false;
+        return to != null ? to.equals(that.to) : that.to == null;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = type;
+        result = 31 * result + (time != null ? time.hashCode() : 0);
+        result = 31 * result + (transactionSignature != null ? transactionSignature.hashCode() : 0);
+        result = 31 * result + (remark != null ? remark.hashCode() : 0);
+        result = 31 * result + (hash != null ? hash.hashCode() : 0);
+        result = 31 * result + (int) (blockHeight ^ (blockHeight >>> 32));
+        result = 31 * result + (status != null ? status.hashCode() : 0);
+        result = 31 * result + size;
+        result = 31 * result + inBlockIndex;
+        result = 31 * result + (form != null ? form.hashCode() : 0);
+        result = 31 * result + (to != null ? to.hashCode() : 0);
+        return result;
+    }
+
+
+    @Override
+    public String toString() {
+        return new StringBuilder("{")
+                .append("\"type\":")
+                .append(type)
+                .append(",\"time\":\"")
+                .append(time).append('\"')
+                .append(",\"transactionSignature\":\"")
+                .append(transactionSignature).append('\"')
+                .append(",\"remark\":\"")
+                .append(remark).append('\"')
+                .append(",\"hash\":\"")
+                .append(hash).append('\"')
+                .append(",\"blockHeight\":")
+                .append(blockHeight)
+                .append(",\"status\":")
+                .append(status)
+                .append(",\"size\":")
+                .append(size)
+                .append(",\"inBlockIndex\":")
+                .append(inBlockIndex)
+                .append(",\"form\":")
+                .append(form)
+                .append(",\"to\":")
+                .append(to)
+                .append('}').toString();
+    }
+
+
 }

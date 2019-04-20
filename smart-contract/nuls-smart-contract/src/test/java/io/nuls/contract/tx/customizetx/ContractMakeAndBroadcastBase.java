@@ -30,7 +30,6 @@ import io.nuls.base.data.NulsDigestData;
 import io.nuls.base.data.Transaction;
 import io.nuls.contract.basetest.ContractTest;
 import io.nuls.contract.constant.ContractErrorCode;
-import io.nuls.contract.enums.LedgerUnConfirmedTxStatus;
 import io.nuls.contract.helper.ContractHelper;
 import io.nuls.contract.helper.ContractTxHelper;
 import io.nuls.contract.manager.ChainManager;
@@ -41,10 +40,10 @@ import io.nuls.contract.model.tx.CreateContractTransaction;
 import io.nuls.contract.model.tx.DeleteContractTransaction;
 import io.nuls.contract.model.txdata.ContractData;
 import io.nuls.contract.rpc.call.AccountCall;
-import io.nuls.contract.rpc.call.LedgerCall;
 import io.nuls.contract.rpc.call.TransactionCall;
 import io.nuls.contract.storage.ContractAddressStorageService;
 import io.nuls.contract.tx.base.BaseQuery;
+import io.nuls.contract.util.ContractLedgerUtil;
 import io.nuls.contract.util.ContractUtil;
 import io.nuls.contract.util.Log;
 import io.nuls.contract.util.MapUtil;
@@ -73,7 +72,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static io.nuls.contract.constant.ContractConstant.*;
 import static io.nuls.contract.constant.ContractErrorCode.FAILED;
 import static io.nuls.contract.util.ContractUtil.getFailed;
 import static io.nuls.contract.util.ContractUtil.getSuccess;
@@ -115,7 +113,9 @@ public class ContractMakeAndBroadcastBase extends BaseQuery {
         @Override
         public Result deleteContractAddress(int chainId, byte[] contractAddressBytes) throws Exception { return null; }
         @Override
-        public boolean isExistContractAddress(int chainId, byte[] contractAddressBytes) { return false; }
+        public boolean isExistContractAddress(int chainId, byte[] contractAddressBytes) {
+            return this.getContractAddressInfo(chainId, contractAddressBytes).isSuccess();
+        }
         @Override
         public Result<List<ContractAddressInfoPo>> getContractInfoList(int chainId, byte[] creater) { return null; }
         @Override
@@ -135,6 +135,10 @@ public class ContractMakeAndBroadcastBase extends BaseQuery {
         Field field2 = ContractHelper.class.getDeclaredField("contractAddressStorageService");
         field2.setAccessible(true);
         field2.set(contractHelper, contractAddressStorageService);
+
+        Field field3 = ContractLedgerUtil.class.getDeclaredField("contractAddressStorageService");
+        field3.setAccessible(true);
+        field3.set(ContractLedgerUtil.class, contractAddressStorageService);
 
         contractTxHelper = new ContractTxHelper();
         Field field = ContractTxHelper.class.getDeclaredField("contractHelper");
@@ -363,6 +367,9 @@ public class ContractMakeAndBroadcastBase extends BaseQuery {
 
         MakeAndBroadcastCreateTxTest sign() throws Exception {
             if(tx != null) {
+                tx.setTxData(null);
+                tx.setCoinData(null);
+                tx.serializeData();
                 signContractTx(tx);
             } else {
                 throw new NullPointerException("tx is null");
@@ -380,10 +387,7 @@ public class ContractMakeAndBroadcastBase extends BaseQuery {
 
         void broadcast() throws IOException {
             if(tx != null) {
-                tx.setTxData(null);
-                tx.setCoinData(null);
-                tx.serializeData();
-                // 签名、广播交易
+                // 广播交易
                 Result result = broadcastCreateTx(tx);
                 Log.info("createContract-result:{}", JSONUtils.obj2PrettyJson(result));
             } else {
@@ -394,10 +398,8 @@ public class ContractMakeAndBroadcastBase extends BaseQuery {
         void signAndBroadcast() throws Exception {
             if(tx != null) {
                 // 签名
-                sign();
-                tx.setTxData(null);
-                tx.setCoinData(null);
-                tx.serializeData();
+                this.sign();
+
                 // 广播交易
                 Result result = broadcastCreateTx(tx);
                 Log.info("createContract-result:{}", JSONUtils.obj2PrettyJson(result));
@@ -475,6 +477,9 @@ public class ContractMakeAndBroadcastBase extends BaseQuery {
 
         MakeAndBroadcastCallTxTest sign() throws Exception {
             if(tx != null) {
+                tx.setTxData(null);
+                tx.setCoinData(null);
+                tx.serializeData();
                 signContractTx(tx);
             } else {
                 throw new NullPointerException("tx is null");
@@ -492,10 +497,7 @@ public class ContractMakeAndBroadcastBase extends BaseQuery {
 
         void broadcast() throws IOException {
             if(tx != null) {
-                tx.setTxData(null);
-                tx.setCoinData(null);
-                tx.serializeData();
-                // 签名、广播交易
+                // 广播交易
                 Result result = broadcastCallTx(tx);
                 Log.info("callContract-result:{}", JSONUtils.obj2PrettyJson(result));
             } else {
@@ -506,10 +508,8 @@ public class ContractMakeAndBroadcastBase extends BaseQuery {
         void signAndBroadcast() throws Exception {
             if(tx != null) {
                 // 签名
-                sign();
-                tx.setTxData(null);
-                tx.setCoinData(null);
-                tx.serializeData();
+                this.sign();
+
                 // 广播交易
                 Result result = broadcastCallTx(tx);
                 Log.info("callContract-result:{}", JSONUtils.obj2PrettyJson(result));
@@ -523,11 +523,12 @@ public class ContractMakeAndBroadcastBase extends BaseQuery {
     class MakeAndBroadcastDeleteTxTest {
         DeleteContractTransaction tx;
 
-        MakeAndBroadcastDeleteTxTest make() {
+        MakeAndBroadcastDeleteTxTest make() throws Exception {
             Log.info("wait delete.");
             String remark = "delete contract";
             Result result = makeDeleteTx(chainId, sender, contractAddress, password, remark);
             if (result.isFailed()) {
+                Log.error("delete make error:{}", JSONUtils.obj2PrettyJson(result));
                 throw new RuntimeException(result.getMsg());
             }
             this.tx = (DeleteContractTransaction) result.getData();
@@ -541,6 +542,9 @@ public class ContractMakeAndBroadcastBase extends BaseQuery {
 
         MakeAndBroadcastDeleteTxTest sign() throws Exception {
             if(tx != null) {
+                tx.setTxData(null);
+                tx.setCoinData(null);
+                tx.serializeData();
                 signContractTx(tx);
             } else {
                 throw new NullPointerException("tx is null");
@@ -558,10 +562,7 @@ public class ContractMakeAndBroadcastBase extends BaseQuery {
 
         void broadcast() throws IOException {
             if(tx != null) {
-                tx.setTxData(null);
-                tx.setCoinData(null);
-                tx.serializeData();
-                // 签名、广播交易
+                // 广播交易
                 Result result = broadcastDeleteTx(tx);
                 Log.info("deleteContract-result:{}", JSONUtils.obj2PrettyJson(result));
             } else {
@@ -572,10 +573,8 @@ public class ContractMakeAndBroadcastBase extends BaseQuery {
         void signAndBroadcast() throws Exception {
             if(tx != null) {
                 // 签名
-                sign();
-                tx.setTxData(null);
-                tx.setCoinData(null);
-                tx.serializeData();
+                this.sign();
+
                 // 广播交易
                 Result result = broadcastDeleteTx(tx);
                 Log.info("deleteContract-result:{}", JSONUtils.obj2PrettyJson(result));

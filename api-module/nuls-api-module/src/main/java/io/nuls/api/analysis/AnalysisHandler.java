@@ -8,6 +8,7 @@ import io.nuls.api.model.po.db.*;
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.data.*;
+import io.nuls.rpc.util.RPCUtil;
 import io.nuls.tools.basic.Result;
 import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.exception.NulsException;
@@ -16,9 +17,7 @@ import java.io.IOException;
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 public class AnalysisHandler {
 
@@ -95,7 +94,7 @@ public class AnalysisHandler {
         info.setCreateTime(tx.getTime());
 
         if (tx.getTxData() != null) {
-            info.setTxDataHex(HexUtil.encode(tx.getTxData()));
+            info.setTxDataHex(RPCUtil.encode(tx.getTxData()));
         }
         if (tx.getRemark() != null) {
             info.setRemark(new String(tx.getRemark(), StandardCharsets.UTF_8));
@@ -269,7 +268,7 @@ public class AnalysisHandler {
 
         PunishLogInfo punishLog = new PunishLogInfo();
         punishLog.setTxHash(tx.getHash().getDigestHex());
-        punishLog.setType(ApiConstant.PUTLISH_RED);
+        punishLog.setType(ApiConstant.PUBLISH_RED);
         punishLog.setAddress(AddressTool.getStringAddressByBytes(data.getAddress()));
         if (data.getReasonCode() == ApiConstant.TRY_FORK) {
             punishLog.setReason("Trying to bifurcate many times");

@@ -14,24 +14,26 @@ help()
     		-J 输出的jvm虚拟机目录，脚本将会把这个目录复制到程序依赖中
     		-i 跳过mvn打包
     		-z 生成压缩包
+    		-N d打包时加入Nulstar模块
     Author: zlj
 EOF
     exit 0
 }
 
-
+#NULSTAR download url
+NULSTAR_URL="http://pub-readingpal.oss-cn-hangzhou.aliyuncs.com/nulstar.tar.gz"
 #获取参数
 #输出目录
-
-MODULES_PATH="./NULS-Wallet-linux64-alpha1"
+NULS_WALLET_TAR_NAME="./NULS-Wallet-linux64-alpha2"
+MODULES_PATH="${NULS_WALLET_TAR_NAME}"
 #RELEASE_OUT_PATH="./NULS-Walltet-linux64-alpha1"
 #是否马上更新代码
 DOPULL=
 #是否生成mykernel模块
-DOMOCK=1
+DOMOCK=
 #更新代码的 git 分支
 GIT_BRANCH=
-while getopts phb:o:j:iJ:z name
+while getopts phb:o:j:iJ:zmN name
 do
             case $name in
             p)	   DOPULL=1
@@ -39,13 +41,14 @@ do
             b)     DOPULL=1
 				   GIT_BRANCH="$OPTARG"	 
 					;;
-#            m)     DOMOCK=1;;
+            m)     DOMOCK="1";;
 			o)	   MODULES_PATH="$OPTARG";;
 			h)     help ;;
 			j)     JAVA_HOME="$OPTARG";;
 			i)     IGNROEMVN="1";;
 			J)     JRE_HOME="$OPTARG";;
 			z)     BUILDTAR="1";;
+			N)     BUILD_NULSTAR="1";;
             ?)     exit 2;;
            esac
 done
@@ -81,7 +84,7 @@ doMvn(){
         log "skip mvn package";
         return ;
     fi
-	log "$1 $2"
+	log "mvn $1 $2"
 	moduleLogDir="${BUILD_PATH}/tmp/$2";
 	if [ ! -d ${moduleLogDir} ]; then
 		mkdir ${moduleLogDir}
@@ -105,7 +108,7 @@ PROJECT_PATH=`pwd`;
 cd $PROJECT_PATH;
 log "working path is $PROJECT_PATH"; 
 #打包工作目录
-BUILD_PATH="${PROJECT_PATH}/build"; 
+BUILD_PATH="${PROJECT_PATH}/build";
 if [ ! -d "${BUILD_PATH}/tmp" ]; then 
 	mkdir "${BUILD_PATH}/tmp"
 fi
@@ -118,17 +121,17 @@ RELEASE_PATH=$MODULES_PATH
 echoYellow "Modules Path $MODULES_PATH"''
 log "==================BEGIN PACKAGE MODULES=============================="
 declare -a managedModules
-if [ ! -d "$MODULES_PATH/bin" ]; then
-	mkdir $MODULES_PATH/bin
-fi
+#if [ ! -d "$MODULES_PATH/bin" ]; then
+#	mkdir $MODULES_PATH/bin
+#fi
 #存放脚本目录
-MODULES_BIN_PATH=$MODULES_PATH/bin
+MODULES_BIN_PATH=$MODULES_PATH
 if [ ! -d "$MODULES_PATH/Modules" ]; then
 	#statements
 	mkdir $MODULES_PATH/Modules
 fi
 #默认日志目录
-MODULES_LOGS_PATH=${MODULES_PATH}/logs
+MODULES_LOGS_PATH=${MODULES_PATH}/Logs
 if [ ! -d "$MODULES_LOGS_PATH" ]; then
 	#statements
 	mkdir $MODULES_LOGS_PATH
@@ -158,6 +161,20 @@ fi
 if [ -n "${DOPULL}" ];then
 	log "git pull origin $GIT_BRANCH"
 	git pull origin "$GIT_BRANCH"
+fi
+
+#0.download Nulstar
+if [ -n  "${BUILD_NULSTAR}" ]; then
+    log "download Nulstar"
+    wget $NULSTAR_URL
+    if [ -f "./nulstar.tar.gz" ]; then
+        tar -xvf "./nulstar.tar.gz" -C "${BUILD_PATH}/tmp"
+        cp -Rf "${BUILD_PATH}/tmp/nulstar/Modules" ${RELEASE_PATH}
+        cp -Rf "${BUILD_PATH}/tmp/nulstar/Libraries" ${RELEASE_PATH}
+        cp -f "${BUILD_PATH}/tmp/nulstar/Nulstar.sh" "${RELEASE_PATH}/start.sh"
+        rm "./nulstar.tar.gz"
+    fi
+    log "build Nulstar done"
 fi
 
 #1.install nuls-tools
@@ -357,13 +374,19 @@ copyModuleNcfToModules(){
 
 #2.遍历文件夹，检查第一个pom 发现pom文件后通过mvn进行打包，完成后把文件jar文件和module.ncf文件复制到Modules文件夹下
 packageModule() {
-	if [ ! -d ./$1 ]; then
+	if [ ! -d "./$1" ]; then
 		return 0
 	fi
-	if [ `pwd` == "${RELEASE_PATH}" ]; then
-		return 0;
+	if [ "$1" == "tmp" ]; then
+	    return 0
 	fi
 	cd ./$1
+#	echo `pwd`
+#	echo ${RELEASE_PATH}
+	if [ `pwd` == "${RELEASE_PATH}" ]; then
+	    cd ..
+		return 0;
+	fi
 	nowPath=`pwd`
 	if [ -f "./module.ncf" ]; then
 		echoYellow "find module.ncf in ${nowPath}"
@@ -421,39 +444,49 @@ log "============ COPY JRE TO libs ==================="
         if [ ! -d "${LIBS_PATH}/JAVA" ]; then
             mkdir "${LIBS_PATH}/JAVA"
         fi
-        cp -r ${JRE_HOME} "${LIBS_PATH}/JAVA/11.0.2"
+        if [ ! -d "${LIBS_PATH}/JAVA/JRE" ]; then
+            mkdir "${LIBS_PATH}/JAVA/JRE"
+        fi
+        rm -Rf "${LIBS_PATH}/JAVA/JRE/11.0.2"
+        cp -r ${JRE_HOME} "${LIBS_PATH}/JAVA/JRE/11.0.2"
     fi
 log "============ COPY JRE TO libs done ============"
 fi
-if [ -n "${DOMOCK}" ]; then
-	log "============== BUILD start-mykernel script ====================="
-	cp "${BUILD_PATH}/start-mykernel.sh" "${MODULES_BIN_PATH}/start.sh"
-	chmod u+x "${MODULES_BIN_PATH}/start.sh"
-	cp "${BUILD_PATH}/stop-mykernel.sh" "${MODULES_BIN_PATH}/stop.sh"
-	chmod u+x "${MODULES_BIN_PATH}/stop.sh"
-	cp "${BUILD_PATH}/default-config.ncf" "${MODULES_BIN_PATH}/"
-	chmod u+r "${MODULES_BIN_PATH}/default-config.ncf"
+
+log "================ COPY SCRIPT ==============="
+	cp "${BUILD_PATH}/default-config.ncf" "${MODULES_BIN_PATH}/nuls.ncf"
+	chmod u+r "${MODULES_BIN_PATH}/nuls.ncf"
 	cp "${BUILD_PATH}/cmd.sh" "${MODULES_BIN_PATH}/"
 	chmod u+x "${MODULES_BIN_PATH}/cmd.sh"
 	cp "${BUILD_PATH}/test.sh" "${MODULES_BIN_PATH}/"
 	chmod u+x "${MODULES_BIN_PATH}/test.sh"
-
+	cp "${BUILD_PATH}/func.sh" "${MODULES_BIN_PATH}/"
+	chmod u+x "${MODULES_BIN_PATH}/func.sh"
 	tempModuleList=
 	for m in ${managedModules[@]}
 	do
 	    tempModuleList+=" \"${m}\""
 	done
 	eval "sed -e 's/%MODULES%/${tempModuleList}/g' ${BUILD_PATH}/check-status.sh > ${BUILD_PATH}/tmp/check-status-temp.sh"
+	eval "sed -e 's/%MODULES%/${tempModuleList}/g' ${BUILD_PATH}/shutdown-nulstar.sh > ${BUILD_PATH}/tmp/shutdown-nulstar.sh"
+    cp "${BUILD_PATH}/tmp/shutdown-nulstar.sh" "${MODULES_BIN_PATH}/shutdown.sh"
+	chmod u+x "${MODULES_BIN_PATH}/shutdown.sh"
 	cp "${BUILD_PATH}/tmp/check-status-temp.sh" "${MODULES_BIN_PATH}/check-status.sh"
 	chmod u+x "${MODULES_BIN_PATH}/check-status.sh"
+log "===============  COPY SCRIPT DONE ==========="
 
+if [ -n "${DOMOCK}" ]; then
+	log "============== BUILD start-mykernel script ====================="
+	cp "${BUILD_PATH}/start-mykernel.sh" "${MODULES_BIN_PATH}/"
+	chmod u+x "${MODULES_BIN_PATH}/start-mykernel.sh"
+	cp "${BUILD_PATH}/stop-mykernel.sh" "${MODULES_BIN_PATH}/"
+	chmod u+x "${MODULES_BIN_PATH}/stop-mykernel.sh"
 	log "============== BUILD start-mykernel script done ================"
 fi
 
-
 if [ -n "${BUILDTAR}" ]; then
     log "============ BUILD ${RELEASE_PATH}.tar.gz ==================="
-    tar -zcPf "${RELEASE_PATH}.tar.gz" ${RELEASE_PATH}
-    log "============ BUILD ${RELEASE_PATH}.tar.gz FINISH==================="
+    tar -zcPf "${NULS_WALLET_TAR_NAME}.tar.gz" ${NULS_WALLET_TAR_NAME}
+    log "============ BUILD ${NULS_WALLET_TAR_NAME}.tar.gz FINISH==================="
 fi
 log "============ ${RELEASE_PATH} PACKAGE FINISH 🍺🍺🍺🎉🎉🎉 ==============="

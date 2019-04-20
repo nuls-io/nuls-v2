@@ -27,12 +27,10 @@ import io.nuls.rpc.model.message.Response;
 import io.nuls.rpc.netty.processor.ResponseMessageProcessor;
 import io.nuls.rpc.util.RPCUtil;
 import io.nuls.tools.exception.NulsException;
-import io.nuls.tools.model.StringUtils;
 import io.nuls.transaction.constant.TxConstant;
+import io.nuls.transaction.message.ForwardTxMessage;
 import io.nuls.transaction.message.BroadcastTxMessage;
-import io.nuls.transaction.message.TransactionMessage;
 import io.nuls.transaction.message.base.BaseMessage;
-import io.nuls.transaction.model.bo.Node;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -40,76 +38,14 @@ import java.util.List;
 import java.util.Map;
 
 import static io.nuls.transaction.constant.TxCmd.*;
-import static io.nuls.transaction.utils.LoggerUtil.Log;
+import static io.nuls.transaction.utils.LoggerUtil.LOG;
 
 /**
- * 调用网络模块接口的工具
- *
- * @author qinyifeng
- * @date 2018/12/25
+ * 网络消息发送
+ * @author: Charlie
+ * @date: 2019/04/16
  */
 public class NetworkCall {
-
-//    static long latestGetTime = System.currentTimeMillis();
-//    static long offset = 0;
-//
-//    /**
-//     * 获取当前网络时间
-//     * @return
-//     * @throws NulsException
-//     */
-//    public static long getCurrentTimeMillis() throws NulsException  {
-//        long now = System.currentTimeMillis();
-//        if (now - latestGetTime > TxConstant.GETTIME_INTERVAL) {
-//            Map<String, Object> params = new HashMap<>(TxConstant.INIT_CAPACITY_8);
-//            params.put(Constants.VERSION_KEY_STR, TxConstant.RPC_VERSION);
-//            try {
-//                HashMap hashMap = (HashMap) TransactionCall.request(ModuleE.NW.abbr, "nw_currentTimeMillis", params, TxConstant.GETTIME_INTERFACE_TIMEOUT);
-//                long time = Long.valueOf(hashMap.get("currentTimeMillis").toString());
-//                offset = time - System.currentTimeMillis();
-//            } catch (NulsException e) {
-//                e.printStackTrace();
-//            } catch (NumberFormatException e) {
-//                e.printStackTrace();
-//            }
-//            latestGetTime = now;
-//        }
-//        return (System.currentTimeMillis() + offset);
-//    }
-
-
-    /**
-     * 根据链ID获取可用节点
-     *
-     * @param chainId
-     * @param isCross 是否跨链
-     * @return
-     */
-    public static List<Node> getAvailableNodes(int chainId, int isCross, String excludeNodes) throws NulsException{
-        Map<String, Object> params = new HashMap<>(TxConstant.INIT_CAPACITY_8);
-        params.put(Constants.VERSION_KEY_STR, TxConstant.RPC_VERSION);
-        params.put("chainId", chainId);
-        params.put("state", 1);
-        params.put("isCross", isCross);
-        params.put("startPage", 0);
-        params.put("pageSize", 0);
-        HashMap hashMap = (HashMap)TransactionCall.request(ModuleE.NW.abbr, "nw_getNodes", params);
-        List list = (List) hashMap.get("nw_getNodes");
-        List nodes = new ArrayList();
-        for (Object o : list) {
-            Map map = (Map) o;
-            Node node = new Node();
-            node.setId((String) map.get("nodeId"));
-            node.setHeight(Long.parseLong(map.get("blockHeight").toString()));
-            node.setHash(NulsDigestData.fromDigestHex((String) map.get("blockHash")));
-            //排除指定节点
-            if (StringUtils.isBlank(excludeNodes) || !node.getId().equals(excludeNodes)) {
-                nodes.add(node);
-            }
-        }
-        return nodes;
-
-    }
 
     /**
      * 给网络上节点广播消息
@@ -140,12 +76,12 @@ public class NetworkCall {
             params.put("command", message.getCommand());
             Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.NW.abbr, "nw_broadcast", params);
             if(!response.isSuccess()){
-                Log.error("Calling nw_broadcast failed response:{}", response);
+                LOG.error("Calling nw_broadcast failed response:{}", response);
                 return false;
             }
             return true;
         } catch (Exception e) {
-            Log.error("Calling remote interface failed. module:{} - interface:{}", ModuleE.NW.abbr, "nw_broadcast");
+            LOG.error("Calling remote interface failed. module:{} - interface:{}", ModuleE.NW.abbr, "nw_broadcast");
             throw new NulsException(e);
         }
     }
@@ -169,12 +105,12 @@ public class NetworkCall {
 
             Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.NW.abbr, "nw_sendPeersMsg", params);
             if(!response.isSuccess()){
-                Log.error("Calling nw_sendPeersMsg failed response:{}", response);
+                LOG.error("Calling nw_sendPeersMsg failed response:{}", response);
                 return false;
             }
             return true;
         } catch (Exception e) {
-            Log.error("Calling remote interface failed. module:{} - interface:{}", ModuleE.NW.abbr, "nw_sendPeersMsg");
+            LOG.error("Calling remote interface failed. module:{} - interface:{}", ModuleE.NW.abbr, "nw_sendPeersMsg");
             throw new NulsException(e);
         }
     }
@@ -191,7 +127,7 @@ public class NetworkCall {
             List<Map<String, String>> cmds = new ArrayList<>();
             map.put("role", ModuleE.TX.abbr);
             //模块启动时向网络模块注册网络协议处理器
-            List<String> list = List.of(NW_NEW_HASH, NW_ASK_TX, NW_RECEIVE_TX, NW_NEW_CROSS_HASH, NW_ASK_CROSS_TX_M_FC, NW_ASK_CROSS_TX_M_M, NW_ASK_CROSS_TX_FC_M, NW_NEW_MN_TX, NW_VERIFY_FC, NW_VERIFY_MN, NW_VERIFYR_ESULT, NW_CROSS_NODE_RS);
+            List<String> list = List.of(NW_NEW_HASH, NW_ASK_TX, NW_RECEIVE_TX);
             for (String s : list) {
                 Map<String, String> cmd = new HashMap<>();
                 cmd.put("protocolCmd", s);
@@ -202,29 +138,46 @@ public class NetworkCall {
             Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.NW.abbr, "nw_protocolRegister", map);
             if(!cmdResp.isSuccess())
             {
-                Log.error("Calling remote interface failed. module:{} - interface:{} -reason:{}", ModuleE.NW.abbr, "nw_protocolRegister",cmdResp.getResponseComment());
+                LOG.error("Calling remote interface failed. module:{} - interface:{} -reason:{}", ModuleE.NW.abbr, "nw_protocolRegister",cmdResp.getResponseComment());
             }
             return cmdResp.isSuccess();
         } catch (Exception e) {
-            Log.error("Calling remote interface failed. module:{} - interface:{}", ModuleE.NW.abbr, "nw_protocolRegister");
+            LOG.error("Calling remote interface failed. module:{} - interface:{}", ModuleE.NW.abbr, "nw_protocolRegister");
             throw new NulsException(e);
         }
     }
 
     /**
-     * 广播交易hash到其他节点
-     * Broadcast transaction hash to other peer nodes
+     * 转发交易
+     * 发送hash到其他节点
+     * Forward transaction hash to other peer nodes
      *
      * @param chainId
      * @param hash
      * @return
      */
-    public static boolean broadcastTxHash(int chainId, NulsDigestData hash) throws NulsException {
-        BroadcastTxMessage message = new BroadcastTxMessage();
+    public static boolean forwardTxHash(int chainId, NulsDigestData hash) throws NulsException {
+        ForwardTxMessage message = new ForwardTxMessage();
         message.setCommand(NW_NEW_HASH);
-        message.setRequestHash(hash);
+        message.setHash(hash);
         return NetworkCall.broadcast(chainId, message);
     }
+
+    /**
+     * 广播完整交易到网络中
+     * Send the complete transaction to the specified node
+     *
+     * @param chainId
+     * @param tx
+     * @return
+     */
+    public static boolean broadcastTx(int chainId, Transaction tx) throws NulsException {
+        BroadcastTxMessage message = new BroadcastTxMessage();
+        message.setCommand(NW_RECEIVE_TX);
+        message.setTx(tx);
+        return NetworkCall.broadcast(chainId, message);
+    }
+
 
     /**
      * 发送完整交易到指定节点
@@ -236,7 +189,7 @@ public class NetworkCall {
      * @return
      */
     public static boolean sendTxToNode(int chainId, String nodeId, Transaction tx) throws NulsException {
-        TransactionMessage message = new TransactionMessage();
+        BroadcastTxMessage message = new BroadcastTxMessage();
         message.setCommand(NW_RECEIVE_TX);
         message.setTx(tx);
         return NetworkCall.sendToNode(chainId, message, nodeId);

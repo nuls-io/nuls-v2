@@ -27,11 +27,9 @@ package io.nuls.transaction;
 import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.model.message.Response;
 import io.nuls.rpc.netty.processor.ResponseMessageProcessor;
-import io.nuls.tools.parse.JSONUtils;
 import io.nuls.transaction.model.bo.Chain;
 import io.nuls.transaction.model.bo.config.ConfigBean;
 import io.nuls.transaction.model.dto.CoinDTO;
-import io.nuls.transaction.model.dto.CrossTxTransferDTO;
 import org.junit.Assert;
 
 import java.math.BigInteger;
@@ -40,7 +38,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static io.nuls.transaction.utils.LoggerUtil.Log;
+import static io.nuls.transaction.utils.LoggerUtil.LOG;
 
 /**
  * @author: Charlie
@@ -96,20 +94,7 @@ public class CreateTxThread implements Runnable {
         Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_transfer", transferMap);
         HashMap result = (HashMap) (((HashMap) cmdResp.getResponseData()).get("ac_transfer"));
         Assert.assertTrue(null != result);
-        Log.debug("{}", result.get("value"));
-    }
-
-    private void createCtxTransfer() throws Exception {
-            CrossTxTransferDTO ctxTransfer = new CrossTxTransferDTO(chain.getChainId(),
-                    createFromCoinDTOList(), createToCoinDTOList(), "this is cross-chain transaction");
-            //调接口
-            String json = JSONUtils.obj2json(ctxTransfer);
-            Map<String, Object> params = JSONUtils.json2map(json);
-            Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.TX.abbr, "tx_createCtx", params);
-            Assert.assertTrue(null != response.getResponseData());
-            Map map = (HashMap) ((HashMap) response.getResponseData()).get("tx_createCtx");
-            Assert.assertTrue(null != map);
-            Log.debug("{}", map.get("value"));
+        LOG.debug("{}", result.get("value"));
     }
 
     /**

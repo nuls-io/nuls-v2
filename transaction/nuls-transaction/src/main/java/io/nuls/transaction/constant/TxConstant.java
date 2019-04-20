@@ -65,7 +65,7 @@ public interface TxConstant {
 
     String RPC_VERSION = "1.0";
 
-    /** 新本地交易task,初始延迟值(秒) */
+    /** 新本地交易task, 初始延迟值(秒) */
     int TX_TASK_INITIALDELAY = 5;
     /** 新本地交易task, 运行周期间隔(秒) */
     int TX_TASK_PERIOD = 3;
@@ -93,9 +93,6 @@ public interface TxConstant {
     String MULTI_TX_HASH = "txHash";
     String MULTI_TX = "tx";
 
-    /** 接收新交易的文件队列名**/
-    String TX_UNVERIFIED_QUEUE_PREFIX = "tx_unverified_queue_";
-
     int PAGESIZE = 20;
 
     int PAGENUMBER = 1;
@@ -118,6 +115,7 @@ public interface TxConstant {
     /**
      * Map初始值
      */
+    int INIT_CAPACITY_32 = 32;
     int INIT_CAPACITY_16 = 16;
     int INIT_CAPACITY_8 = 8;
     int INIT_CAPACITY_4 = 4;

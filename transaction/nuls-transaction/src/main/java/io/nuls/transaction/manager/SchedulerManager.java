@@ -32,7 +32,6 @@ import io.nuls.transaction.constant.TxConfig;
 import io.nuls.transaction.constant.TxConstant;
 import io.nuls.transaction.model.bo.Chain;
 import io.nuls.transaction.task.UnconfirmedTxProcessTask;
-import io.nuls.transaction.task.VerifyCtxProcessTask;
 import io.nuls.transaction.task.VerifyTxProcessTask;
 
 import java.util.concurrent.ScheduledThreadPoolExecutor;
@@ -57,10 +56,6 @@ public class SchedulerManager {
 
         ScheduledThreadPoolExecutor crossTxExecutor = ThreadUtils.createScheduledThreadPool(1,
                 new NulsThreadFactory(txConfig.getModuleCode()));
-        //固定延迟时间
-        crossTxExecutor.scheduleWithFixedDelay(new VerifyCtxProcessTask(chain),
-                TxConstant.CTX_TASK_INITIALDELAY, TxConstant.CTX_TASK_PERIOD, TimeUnit.SECONDS);
-        chain.setScheduledThreadPoolExecutor(crossTxExecutor);
 
         ScheduledThreadPoolExecutor unconfirmedTxExecutor = ThreadUtils.createScheduledThreadPool(1,
                 new NulsThreadFactory(txConfig.getModuleCode()));

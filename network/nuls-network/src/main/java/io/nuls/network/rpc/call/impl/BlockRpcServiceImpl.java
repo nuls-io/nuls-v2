@@ -36,6 +36,7 @@ import io.nuls.rpc.model.message.Response;
 import io.nuls.rpc.netty.processor.ResponseMessageProcessor;
 import io.nuls.rpc.util.RPCUtil;
 import io.nuls.tools.core.annotation.Service;
+import io.nuls.tools.parse.JSONUtils;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -70,7 +71,8 @@ public class BlockRpcServiceImpl implements BlockRpcService {
                 header.parse(new NulsByteBuffer(RPCUtil.decode(hex)));
                 bestBlockInfo.setHash(header.getHash().getDigestHex());
                 bestBlockInfo.setBlockHeight(header.getHeight());
-
+            }else{
+                LoggerUtil.logger().error("getBestBlockHeader fail.response={}",JSONUtils.obj2json(response));
             }
         } catch (Exception e) {
             LoggerUtil.logger().error("getBestBlockHeader error,chainId={}.exception={}", chainId, e.getMessage());

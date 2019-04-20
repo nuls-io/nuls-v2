@@ -38,7 +38,6 @@ import io.nuls.rpc.model.message.Response;
 import io.nuls.rpc.util.RPCUtil;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
-import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.log.logback.NulsLogger;
 
 import java.util.ArrayList;
@@ -265,7 +264,7 @@ public class BlockResource extends BaseCmd {
             if (latestBlockHeader.isComplete()) {
                 hexList.add(RPCUtil.encode(latestBlock.getHeader().serialize()));
             }
-            while (count < round) {
+            while (true) {
                 latestHeight--;
                 if ((latestHeight < 0)) {
                     break;
@@ -276,6 +275,9 @@ public class BlockResource extends BaseCmd {
                 if (newRoundIndex != roundIndex) {
                     count++;
                     roundIndex = newRoundIndex;
+                    if (count >= round - 1) {
+                        break;
+                    }
                 }
                 hexList.add(RPCUtil.encode(blockHeader.serialize()));
             }
@@ -446,7 +448,7 @@ public class BlockResource extends BaseCmd {
         NulsLogger commonLog = context.getCommonLog();
         try {
             Block block = new Block();
-            block.parse(new NulsByteBuffer(HexUtil.decode((String) map.get("block"))));
+            block.parse(new NulsByteBuffer(RPCUtil.decode((String) map.get("block"))));
             commonLog.info("recieve block from local node, chainId:" + chainId + ", height:" + block.getHeader().getHeight() + ", hash:" + block.getHeader().getHash());
             if (service.saveBlock(chainId, block, 1, true, true, false)) {
                 return success();

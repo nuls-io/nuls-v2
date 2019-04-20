@@ -25,7 +25,6 @@ import io.nuls.base.data.Block;
 import io.nuls.base.data.BlockHeader;
 import io.nuls.base.data.NulsDigestData;
 import io.nuls.base.data.po.BlockHeaderPo;
-import io.nuls.block.constant.BlockErrorCode;
 import io.nuls.block.constant.LocalBlockStateEnum;
 import io.nuls.block.constant.RunningStatusEnum;
 import io.nuls.block.manager.BlockChainManager;
@@ -41,7 +40,6 @@ import io.nuls.block.storage.BlockStorageService;
 import io.nuls.block.utils.BlockUtil;
 import io.nuls.block.utils.ChainGenerator;
 import io.nuls.tools.core.ioc.SpringLiteContext;
-import io.nuls.tools.exception.NulsRuntimeException;
 import io.nuls.tools.log.logback.NulsLogger;
 import io.nuls.tools.model.DoubleUtils;
 import io.nuls.tools.thread.ThreadUtils;
@@ -118,14 +116,16 @@ public class BlockSynchronizer implements Runnable {
                 if (firstStart) {
                     firstStart = false;
                     int testAutoRollbackAmount = blockConfig.getTestAutoRollbackAmount();
-                    if (latestHeight < testAutoRollbackAmount) {
-                        testAutoRollbackAmount = (int) (latestHeight);
-                    }
-                    ConsensusUtil.sendHeaderList(chainId, testAutoRollbackAmount);
-                    for (int i = 0; i < testAutoRollbackAmount; i++) {
-                        boolean b = blockService.rollbackBlock(chainId, latestHeight--, true);
-                        if (!b || latestHeight == 0) {
-                            break;
+                    if (testAutoRollbackAmount > 0) {
+                        if (latestHeight < testAutoRollbackAmount) {
+                            testAutoRollbackAmount = (int) (latestHeight);
+                        }
+                        ConsensusUtil.sendHeaderList(chainId, testAutoRollbackAmount);
+                        for (int i = 0; i < testAutoRollbackAmount; i++) {
+                            boolean b = blockService.rollbackBlock(chainId, latestHeight--, true);
+                            if (!b || latestHeight == 0) {
+                                break;
+                            }
                         }
                     }
                 }
@@ -181,7 +181,7 @@ public class BlockSynchronizer implements Runnable {
         ChainContext context = ContextManager.getContext(chainId);
         ChainParameters parameters = context.getParameters();
         int minNodeAmount = parameters.getMinNodeAmount();
-        if (minNodeAmount == 0) {
+        if (minNodeAmount == 0 && availableNodes.size() == 0) {
             commonLog.info("skip block syn, because minNodeAmount is set to 0, minNodeAmount should't set to 0 otherwise you want run local node without connect with network");
             context.setStatus(RunningStatusEnum.RUNNING);
             ConsensusUtil.notice(chainId, CONSENSUS_WORKING);
@@ -219,7 +219,7 @@ public class BlockSynchronizer implements Runnable {
             }
             if (stateEnum.equals(CONFLICT)) {
                 commonLog.error("chain-" + chainId + ", The local GenesisBlock differ from network");
-                throw new NulsRuntimeException(BlockErrorCode.CHAIN_MERGE_ERROR);
+                System.exit(1);
             }
             PriorityBlockingQueue<Node> nodes = params.getNodes();
             int nodeCount = nodes.size();

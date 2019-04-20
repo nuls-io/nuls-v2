@@ -31,10 +31,6 @@ import io.nuls.base.signture.P2PHKSignature;
 import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.model.StringUtils;
-import io.nuls.transaction.model.bo.CrossTx;
-import io.nuls.transaction.model.bo.CrossTxSignResult;
-import io.nuls.transaction.model.bo.CrossTxVerifyResult;
-import io.nuls.transaction.model.bo.Node;
 
 import java.io.IOException;
 import java.math.BigInteger;
@@ -191,25 +187,6 @@ public class TestConstant {
         return tx;
     }
 
-    public static CrossTx createCrossChainTx() throws Exception {
-        CrossTx obj = new CrossTx();
-        obj.setSenderChainId(324);
-        obj.setSenderNodeId("23");
-        obj.setVerifyNodeList(Arrays.asList(
-                TestConstant.getNode1(),
-                TestConstant.getNode2()
-        ));
-        obj.setCtxVerifyResultList(Arrays.asList(
-                TestConstant.getCrossTxVerifyResult1(),
-                TestConstant.getCrossTxVerifyResult1()
-        ));
-        obj.setSignRsList(Arrays.asList(
-                TestConstant.getCrossTxSignResult1(),
-                TestConstant.getCrossTxSignResult2()
-        ));
-        obj.setTx(TestConstant.getTransaction1());
-        return obj;
-    }
 
     public static P2PHKSignature getP2PHKSignature() {
         String P2PHKSignatureObjectHex = "21032da10909c0c5ae8221941b23e3e1cdafccc68a1116471d83417188164c7adb9a00463044022043ea6fd68d10b627b73b88c670caa05275085f25d965bd166f9e0bf4d276b12902204c88c4744b4ec684022e6f932335ee0d1b913d63afb9e7affe69364ee1ffa74a";
@@ -223,55 +200,6 @@ public class TestConstant {
         return p2PHKSignature;
     }
 
-
-    public static Node getNode1() {
-        Node obj = new Node();
-        obj.setId("192.168.1.110:8090");
-        obj.setHeight(34567890);
-        obj.setHash(TestConstant.getHashA());
-        return obj;
-    }
-
-    public static Node getNode2() {
-        Node obj = new Node();
-        obj.setId("192.168.23.210:2");
-        obj.setHeight(0);
-        obj.setHash(TestConstant.getHashB());
-        return obj;
-    }
-
-    public static CrossTxVerifyResult getCrossTxVerifyResult1() {
-        CrossTxVerifyResult obj = new CrossTxVerifyResult();
-        obj.setChainId(2);
-        obj.setHeight(34);
-        obj.setNodeId("1");
-        return obj;
-    }
-
-    public static CrossTxVerifyResult getCrossTxVerifyResult2() {
-        CrossTxVerifyResult obj = new CrossTxVerifyResult();
-        obj.setChainId(2);
-        obj.setHeight(34);
-        obj.setNodeId("23");
-        return obj;
-    }
-
-
-    public static CrossTxSignResult getCrossTxSignResult1() {
-        CrossTxSignResult obj = new CrossTxSignResult();
-        obj.setPackingAddress(TestConstant.address1);
-        obj.setSignature(TestConstant.getP2PHKSignature());
-        obj.setNodeId("1");
-        return obj;
-    }
-
-    public static CrossTxSignResult getCrossTxSignResult2() {
-        CrossTxSignResult obj = new CrossTxSignResult();
-        obj.setPackingAddress(TestConstant.address2);
-        obj.setSignature(TestConstant.getP2PHKSignature());
-        obj.setNodeId("23");
-        return obj;
-    }
 
     /**
      * 判断两个list中元素的序列化数据是否相等

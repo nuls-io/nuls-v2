@@ -4,6 +4,10 @@ import io.nuls.api.ApiContext;
 import io.nuls.api.analysis.WalletRpcHandler;
 import io.nuls.api.cache.ApiCache;
 import io.nuls.api.constant.AddressType;
+import io.nuls.api.db.AccountService;
+import io.nuls.api.db.BlockService;
+import io.nuls.api.db.ContractService;
+import io.nuls.api.db.TransactionService;
 import io.nuls.api.db.mongo.MongoAccountServiceImpl;
 import io.nuls.api.db.mongo.MongoBlockServiceImpl;
 import io.nuls.api.db.mongo.MongoContractServiceImpl;
@@ -32,35 +36,44 @@ import java.util.Map;
 public class ChainController {
 
     @Autowired
-    private MongoBlockServiceImpl mongoBlockServiceImpl;
+    private BlockService blockService;
 
     @Autowired
-    private MongoTransactionServiceImpl mongoTransactionServiceImpl;
+    private TransactionService transactionService;
 
     @Autowired
-    private MongoAccountServiceImpl mongoAccountServiceImpl;
+    private AccountService accountService;
 
     @Autowired
-    private MongoContractServiceImpl mongoContractServiceImpl;
+    private ContractService contractService;
 
     @RpcMethod("getChains")
     public RpcResult getChains(List<Object> params) {
-        Map<String, Object> map = new HashMap<>();
-        map.put("default", ApiContext.defaultChainId);
-        map.put("list", CacheManager.getApiCaches().keySet());
-
-        return RpcResult.success(map);
+        try {
+            Map<String, Object> map = new HashMap<>();
+            map.put("default", ApiContext.defaultChainId);
+            map.put("list", CacheManager.getApiCaches().keySet());
+            return RpcResult.success(map);
+        } catch (Exception e) {
+            Log.error(e);
+            return RpcResult.failed(RpcErrorCode.SYS_UNKNOWN_EXCEPTION);
+        }
     }
 
     @RpcMethod("getCoinInfo")
     public RpcResult getCoinInfo(List<Object> params) {
         VerifyUtils.verifyParams(params, 1);
-        int chainId = (int) params.get(0);
-        if (!CacheManager.isChainExist(chainId)) {
-            return RpcResult.dataNotFound();
+        try {
+            int chainId = (int) params.get(0);
+            if (!CacheManager.isChainExist(chainId)) {
+                return RpcResult.dataNotFound();
+            }
+            ApiCache apiCache = CacheManager.getCache(chainId);
+            return RpcResult.success(apiCache.getContextInfo());
+        } catch (Exception e) {
+            Log.error(e);
+            return RpcResult.failed(RpcErrorCode.SYS_UNKNOWN_EXCEPTION);
         }
-        ApiCache apiCache = CacheManager.getCache(chainId);
-        return RpcResult.success(apiCache.getContextInfo());
     }
 
     @RpcMethod("search")
@@ -77,37 +90,42 @@ public class ChainController {
             return RpcResult.paramError();
         }
 
-        if (!CacheManager.isChainExist(chainId)) {
-            return RpcResult.dataNotFound();
-        }
-
-        int length = text.length();
-        SearchResultDTO result = null;
-        if (length < 20) {
-            result = getBlockByHeight(chainId, text);
-        } else if (length < 40) {
-            boolean isAddress = AddressTool.validAddress(chainId, text);
-            if (isAddress) {
-                byte[] address = AddressTool.getAddress(text);
-                if (address[2] == AddressType.CONTRACT_ADDRESS_TYPE) {
-                    result = getContractByAddress(chainId, text);
-                } else {
-                    result = getAccountByAddress(chainId, text);
-                }
+        try {
+            if (!CacheManager.isChainExist(chainId)) {
+                return RpcResult.dataNotFound();
             }
-        } else {
-            result = getResultByHash(chainId, text);
+
+            int length = text.length();
+            SearchResultDTO result = null;
+            if (length < 20) {
+                result = getBlockByHeight(chainId, text);
+            } else if (length < 40) {
+                boolean isAddress = AddressTool.validAddress(chainId, text);
+                if (isAddress) {
+                    byte[] address = AddressTool.getAddress(text);
+                    if (address[2] == AddressType.CONTRACT_ADDRESS_TYPE) {
+                        result = getContractByAddress(chainId, text);
+                    } else {
+                        result = getAccountByAddress(chainId, text);
+                    }
+                }
+            } else {
+                result = getResultByHash(chainId, text);
+            }
+            if (null == result) {
+                return RpcResult.dataNotFound();
+            }
+            return new RpcResult().setResult(result);
+        } catch (Exception e) {
+            Log.error(e);
+            return RpcResult.failed(RpcErrorCode.SYS_UNKNOWN_EXCEPTION);
         }
-        if (null == result) {
-            return RpcResult.dataNotFound();
-        }
-        return new RpcResult().setResult(result);
     }
 
     private SearchResultDTO getContractByAddress(int chainId, String text) {
         ContractInfo contractInfo = null;
         try {
-            contractInfo = mongoContractServiceImpl.getContractInfo(chainId, text);
+            contractInfo = contractService.getContractInfo(chainId, text);
         } catch (Exception e) {
             Log.error(e);
             throw new JsonRpcException();
@@ -120,7 +138,7 @@ public class ChainController {
 
     private SearchResultDTO getResultByHash(int chainId, String hash) {
 
-        BlockHeaderInfo blockHeaderInfo = mongoBlockServiceImpl.getBlockHeaderByHash(chainId, hash);
+        BlockHeaderInfo blockHeaderInfo = blockService.getBlockHeaderByHash(chainId, hash);
         if (blockHeaderInfo != null) {
             return getBlockInfo(chainId, blockHeaderInfo);
         }
@@ -141,7 +159,7 @@ public class ChainController {
             throw new JsonRpcException(new RpcResultError(RpcErrorCode.PARAMS_ERROR, "[address] is inValid"));
         }
 
-        AccountInfo accountInfo = mongoAccountServiceImpl.getAccountInfo(chainId, address);
+        AccountInfo accountInfo = accountService.getAccountInfo(chainId, address);
         if (accountInfo == null) {
             throw new NotFoundException();
         }
@@ -158,7 +176,7 @@ public class ChainController {
         } catch (Exception e) {
             return null;
         }
-        BlockHeaderInfo blockHeaderInfo = mongoBlockServiceImpl.getBlockHeader(chainId, height);
+        BlockHeaderInfo blockHeaderInfo = blockService.getBlockHeader(chainId, height);
         if (blockHeaderInfo == null) {
             return null;
         }

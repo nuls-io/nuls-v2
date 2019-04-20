@@ -33,7 +33,7 @@ public class RegisterInvoke extends BaseInvoke {
         Map responseData = (Map) response.getResponseData();
         if (response.isSuccess()) {
             RpcModule rpcModule = SpringLiteContext.getBean(RpcModule.class);
-            if (rpcModule.getDependencies().length == 0) {
+            if (rpcModule.getDependentces().isEmpty()) {
                 Log.info("RMB:module rpc is ready");
                 return;
             }
@@ -58,7 +58,7 @@ public class RegisterInvoke extends BaseInvoke {
                         return ;
                     }
                     NotifySender notifySender = SpringLiteContext.getBean(NotifySender.class);
-                    notifySender.send(() -> {
+                    notifySender.send("registerModuleDependent_" + entry.getKey(),10,() -> {
                         Response cmdResp = null;
                         try {
                             cmdResp = ResponseMessageProcessor.requestAndResponse(entry.getKey(), "registerModuleDependencies", MapUtils.beanToLinkedMap(module));

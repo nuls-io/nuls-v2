@@ -30,6 +30,8 @@ import io.nuls.contract.util.Log;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.util.concurrent.TimeUnit;
+
 /**
  * @author: PierreLuo
  * @date: 2019-03-26
@@ -48,9 +50,9 @@ public class ContractMultyTxTest extends BaseQuery {
 
     @Test
     public void loopCallContract() throws Exception {
-        contractAddress_nrc20 = "";
+        contractNRC20TokenSendTxTest.setContractAddress_nrc20("tNULSeBaMxPE2ESCiEAZ9CxXMyzBkySBKKSUQ4");
         long s = System.currentTimeMillis();
-        int times = 500;
+        int times = 2000;
         for(int i=0;i<times;i++) {
             contractNRC20TokenSendTxTest.callContract();
         }
@@ -58,8 +60,26 @@ public class ContractMultyTxTest extends BaseQuery {
         Log.info("{} times cost time is {}", times, e - s);
     }
 
+    @Test
+    public void createNRC20AndInnerCallContractTest() throws Exception {
+        contractNRC20TokenSendTxTest.createContract();
+        contractCallContractSendTxTest.createContract();
+    }
+
+    @Test
+    public void callAndDeleteTest() throws Exception {
+        contractNRC20TokenSendTxTest.setContractAddress_nrc20("tNULSeBaNAsyKtqQRFPVQkxtiEch4hw4X6iYdZ");
+        contractNRC20TokenSendTxTest.callContract();
+
+        TimeUnit.MILLISECONDS.sleep(500);
+
+        // tNULSeBaN6AqEa9HL9mXdHEcUqQMaJ8KkH5X43
+        contractCallContractSendTxTest.setContractAddress("tNULSeBaN3Yy2cJdJ62atRja7r8WMGBgwHmQS6");
+        contractCallContractSendTxTest.delete();
+    }
+
     /**
-     * 依赖于contractNRC20TokenSendTxTest.transfer()\
+     * 依赖于contractNRC20TokenSendTxTest.transfer()
      * 35个sender 创建35个NRC20的合约
      */
     @Test

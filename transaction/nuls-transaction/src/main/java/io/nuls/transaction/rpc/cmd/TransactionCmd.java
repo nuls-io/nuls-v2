@@ -21,7 +21,7 @@ import io.nuls.transaction.manager.TxManager;
 import io.nuls.transaction.model.bo.Chain;
 import io.nuls.transaction.model.bo.TxPackage;
 import io.nuls.transaction.model.bo.TxRegister;
-import io.nuls.transaction.model.bo.VerifyTxResult;
+import io.nuls.transaction.model.bo.VerifyLedgerResult;
 import io.nuls.transaction.model.dto.ModuleTxRegisterDTO;
 import io.nuls.transaction.model.dto.TxRegisterDTO;
 import io.nuls.transaction.model.po.TransactionConfirmedPO;
@@ -29,13 +29,12 @@ import io.nuls.transaction.service.ConfirmedTxService;
 import io.nuls.transaction.service.TxService;
 import io.nuls.transaction.utils.TxUtil;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static io.nuls.transaction.utils.LoggerUtil.Log;
+import static io.nuls.transaction.utils.LoggerUtil.LOG;
 
 /**
  * @author: Charlie
@@ -79,7 +78,9 @@ public class TransactionCmd extends BaseCmd {
             ObjectUtils.canNotEmpty(params.get("list"), TxErrorCode.PARAMETER_ERROR.getMsg());
 
             JSONUtils.getInstance().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-            ModuleTxRegisterDTO moduleTxRegisterDto = JSONUtils.json2pojo(JSONUtils.obj2json(params), ModuleTxRegisterDTO.class);
+
+            ModuleTxRegisterDTO moduleTxRegisterDto = JSONUtils.map2pojo(params,ModuleTxRegisterDTO.class);
+            //ModuleTxRegisterDTO moduleTxRegisterDto = JSONUtils.json2pojo(JSONUtils.obj2json(params), ModuleTxRegisterDTO.class);
 
             chain = chainManager.getChain(moduleTxRegisterDto.getChainId());
             if (null == chain) {
@@ -87,27 +88,9 @@ public class TransactionCmd extends BaseCmd {
             }
             List<TxRegisterDTO> txRegisterList = moduleTxRegisterDto.getList();
             if (moduleTxRegisterDto == null || txRegisterList == null) {
-                throw new NulsException(TxErrorCode.NULL_PARAMETER);
+                throw new NulsException(TxErrorCode.TX_NOT_EXIST);
             }
-            //循环注册多种交易
-            for (TxRegisterDTO txRegisterDto : txRegisterList) {
-                TxRegister txRegister = new TxRegister();
-                txRegister.setModuleCode(moduleTxRegisterDto.getModuleCode());
-                txRegister.setModuleValidator(moduleTxRegisterDto.getModuleValidator());
-                txRegister.setTxType(txRegisterDto.getTxType());
-                txRegister.setValidator(txRegisterDto.getValidator());
-                txRegister.setCommit(moduleTxRegisterDto.getCommit());
-                txRegister.setRollback(moduleTxRegisterDto.getRollback());
-                txRegister.setSystemTx(txRegisterDto.getSystemTx());
-                txRegister.setUnlockTx(txRegisterDto.getUnlockTx());
-                txRegister.setVerifySignature(txRegisterDto.getVerifySignature());
-
-                result = txService.register(chain, txRegister);
-            }
-
-        } catch (IOException e) {
-            errorLogProcess(chain, e);
-            return failed(TxErrorCode.IO_ERROR);
+            result = txService.register(chain, moduleTxRegisterDto);
         } catch (NulsException e) {
             errorLogProcess(chain, e);
             return failed(e.getErrorCode());
@@ -118,6 +101,42 @@ public class TransactionCmd extends BaseCmd {
 
         map.put("value", result);
         return success(map);
+    }
+
+    /**
+     * Unregister module transactions.
+     * 取消注册模块的交易
+     *
+     * @param params
+     * @return Response
+     */
+    @CmdAnnotation(cmd = TxCmd.TX_UNREGISTER, version = 1.0, description = "module transaction unregister")
+    @Parameter(parameterName = "chainId", parameterType = "int")
+    @Parameter(parameterName = "moduleCode", parameterType = "String")
+    public Response unregister(Map params) {
+
+        Chain chain = null;
+        try {
+            ObjectUtils.canNotEmpty(params.get("chainId"), TxErrorCode.PARAMETER_ERROR.getMsg());
+            ObjectUtils.canNotEmpty(params.get("moduleCode"), TxErrorCode.PARAMETER_ERROR.getMsg());
+
+            chain = chainManager.getChain((int) params.get("chainId"));
+            if (null == chain) {
+                throw new NulsException(TxErrorCode.CHAIN_NOT_FOUND);
+            }
+            String moduleCode = (String) params.get("moduleCode");
+            boolean result = txService.unregister(chain, moduleCode);
+            Map<String, Boolean> map = new HashMap<>(TxConstant.INIT_CAPACITY_2);
+            map.put("value", result);
+            return success(map);
+        } catch (NulsException e) {
+            errorLogProcess(chain, e);
+            return failed(e.getErrorCode());
+        } catch (Exception e) {
+            errorLogProcess(chain, e);
+            return failed(TxErrorCode.SYS_UNKOWN_EXCEPTION);
+        }
+
     }
 
     /**
@@ -427,10 +446,10 @@ public class TransactionCmd extends BaseCmd {
             TransactionConfirmedPO tx = txService.getTransaction(chain, NulsDigestData.fromDigestHex(txHash));
             Map<String, String> resultMap = new HashMap<>(TxConstant.INIT_CAPACITY_2);
             if (tx == null) {
-                Log.debug("getTx - from all, fail! tx is null, txHash:{}", txHash);
+                LOG.debug("getTx - from all, fail! tx is null, txHash:{}", txHash);
                 resultMap.put("tx", null);
             } else {
-                Log.debug("getTx - from all, success txHash : " + tx.getTx().getHash().getDigestHex());
+                LOG.debug("getTx - from all, success txHash : " + tx.getTx().getHash().getDigestHex());
                 resultMap.put("tx", RPCUtil.encode(tx.getTx().serialize()));
             }
             return success(resultMap);
@@ -469,10 +488,10 @@ public class TransactionCmd extends BaseCmd {
             TransactionConfirmedPO tx = confirmedTxService.getConfirmedTransaction(chain, NulsDigestData.fromDigestHex(txHash));
             Map<String, String> resultMap = new HashMap<>(TxConstant.INIT_CAPACITY_2);
             if (tx == null) {
-                Log.debug("getConfirmedTransaction fail, tx is null. txHash:{}", txHash);
+                LOG.debug("getConfirmedTransaction fail, tx is null. txHash:{}", txHash);
                 resultMap.put("tx", null);
             } else {
-                Log.debug("getConfirmedTransaction success. txHash:{}", txHash);
+                LOG.debug("getConfirmedTransaction success. txHash:{}", txHash);
                 resultMap.put("tx", RPCUtil.encode(tx.getTx().serialize()));
             }
             return success(resultMap);
@@ -570,7 +589,7 @@ public class TransactionCmd extends BaseCmd {
     @Parameter(parameterName = "stateRoot", parameterType = "String")
     @Parameter(parameterName = "preStateRoot", parameterType = "String")
     public Response batchVerify(Map params) {
-        VerifyTxResult verifyTxResult = null;
+        VerifyLedgerResult verifyLedgerResult = null;
         Chain chain = null;
         try {
             ObjectUtils.canNotEmpty(params.get("chainId"), TxErrorCode.PARAMETER_ERROR.getMsg());
@@ -592,7 +611,7 @@ public class TransactionCmd extends BaseCmd {
             String stateRoot = (String) params.get("stateRoot");
             String preStateRoot = (String) params.get("preStateRoot");
 
-            verifyTxResult = txService.batchVerify(chain, txList, height, blockTime, packingAddress, stateRoot, preStateRoot);
+            verifyLedgerResult = txService.batchVerify(chain, txList, height, blockTime, packingAddress, stateRoot, preStateRoot);
         } catch (NulsException e) {
             errorLogProcess(chain, e);
             return failed(e.getErrorCode());
@@ -601,7 +620,7 @@ public class TransactionCmd extends BaseCmd {
             return failed(TxErrorCode.SYS_UNKOWN_EXCEPTION);
         }
         Map<String, Object> resultMap = new HashMap<>(TxConstant.INIT_CAPACITY_2);
-        boolean result = verifyTxResult.success();
+        boolean result = verifyLedgerResult.success();
         resultMap.put("value", result);
         return success(resultMap);
     }
@@ -676,7 +695,7 @@ public class TransactionCmd extends BaseCmd {
 
     private void errorLogProcess(Chain chain, Exception e) {
         if (chain == null) {
-            Log.error(e);
+            LOG.error(e);
         } else {
             chain.getLoggerMap().get(TxConstant.LOG_TX).error(e);
         }

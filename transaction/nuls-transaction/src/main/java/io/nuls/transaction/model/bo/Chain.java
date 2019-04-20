@@ -4,12 +4,14 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.nuls.base.data.NulsDigestData;
 import io.nuls.base.data.Transaction;
 import io.nuls.tools.log.logback.NulsLogger;
+import io.nuls.transaction.constant.TxConstant;
 import io.nuls.transaction.model.bo.config.ConfigBean;
 import io.nuls.transaction.utils.queue.entity.PersistentQueue;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.BlockingDeque;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -17,12 +19,11 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 /**
- * 链信息类
+ * 链的基础数据和运行状态数据
  * Chain information class
- *
- * @author qinyifeng
- * @date 2018/12/11
- **/
+ * @author: Charlie
+ * @date: 2019/04/16
+ */
 public class Chain {
 
     /**
@@ -45,12 +46,6 @@ public class Chain {
      * 日志
      */
     private Map<String, NulsLogger> loggerMap;
-
-    /**
-     * 管理接收的其他链创建的跨链交易(如果有), 暂存验证中的跨链交易.
-     * //TODO 初始化时需查数据库
-     */
-//    private Map<NulsDigestData, CrossTx> crossTxVerifyingMap;
 
     /**
      * 交易注册信息
@@ -88,14 +83,17 @@ public class Chain {
      */
     private boolean contractTxFail;
 
+    /**
+     * 打包时处理孤儿交易的map
+     */
     private Map<NulsDigestData, Integer> txPackageOrphanMap;
 
     private final Lock packageLock = new ReentrantLock();
 
     public Chain() {
-        this.packaging =  new AtomicBoolean(false);
+        this.packaging = new AtomicBoolean(false);
         this.rePackage = new AtomicBoolean(true);
-        this.txRegisterMap = new HashMap<>();
+        this.txRegisterMap = new ConcurrentHashMap<>(TxConstant.INIT_CAPACITY_32);
         this.txQueue = new LinkedBlockingDeque<>();
         this.loggerMap = new HashMap<>();
         contractTxFail = false;

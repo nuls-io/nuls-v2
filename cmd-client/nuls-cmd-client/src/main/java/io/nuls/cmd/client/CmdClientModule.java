@@ -7,9 +7,15 @@ import io.nuls.rpc.modulebootstrap.RpcModule;
 import io.nuls.rpc.modulebootstrap.RpcModuleState;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
+import io.nuls.tools.log.Log;
 import io.nuls.tools.log.logback.NulsLogger;
 import io.nuls.tools.parse.I18nUtils;
 import io.nuls.tools.thread.ThreadUtils;
+
+import java.util.Map;
+import java.util.Properties;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @Author: zhoulijun
@@ -19,6 +25,8 @@ import io.nuls.tools.thread.ThreadUtils;
 @Component
 public class CmdClientModule extends RpcModule {
 
+    int waiting = 1;
+
     @Autowired Config config;
 
     @Autowired CommandHandler commandHandler;
@@ -26,7 +34,7 @@ public class CmdClientModule extends RpcModule {
     static NulsLogger log = LoggerUtil.logger;
 
     @Override
-    public Module[] getDependencies() {
+    public Module[] declareDependent() {
         return new Module[]{
                 new Module(ModuleE.NW.abbr,ROLE),
                 new Module(ModuleE.AC.abbr,ROLE),
@@ -46,12 +54,30 @@ public class CmdClientModule extends RpcModule {
     @Override
     public boolean doStart() {
         System.out.println("waiting nuls-wallet base module ready");
+        ThreadUtils.createAndRunThread("",()->{
+            if(this.isDependencieReady()){
+                return ;
+            }
+            while(true){
+                waiting++;
+                System.out.print(" " + waiting);
+                try {
+                    TimeUnit.SECONDS.sleep(1L);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                if(waiting > 59){
+                    Log.error("waiting nuls-wallet base module ready timeout ");
+                    System.exit(0);
+                }
+            }
+        });
         return true;
     }
 
     @Override
     public RpcModuleState onDependenciesReady() {
-        System.out.println("nuls-wallet basic module ready");
+        System.out.println("nuls-wallet base module ready");
         ThreadUtils.createAndRunThread("cmd",()->commandHandler.start());
         return RpcModuleState.Running;
     }
@@ -69,7 +95,7 @@ public class CmdClientModule extends RpcModule {
             I18nUtils.loadLanguage(this.getClass(), "languages", language);
             I18nUtils.setLanguage(language);
         } catch (Exception e) {
-            log.error("module init I18nUtils fail");
+            log.error("module init I18nUtils fail",e);
             System.exit(0);
         }
 

@@ -36,6 +36,8 @@ public interface DataBaseArea {
      *   存区块交易缓存数据
      */
     String TB_LEDGER_ACCOUNT_UNCONFIRMED = "accountUnconfirmed";
+    String TB_LEDGER_TX_UNCONFIRMED = "txUnconfirmed";
+    String TB_LEDGER_ACCOUNT_UNCFMD2CFMD = "uncfmd2cfmd";
     /**
      *   按区块高度来进行上一个账号状态的
      */

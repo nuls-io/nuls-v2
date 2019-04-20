@@ -211,7 +211,7 @@ public class MyKernelBootstrap {
         } catch (Exception e) {
             log.error("mykernel start fail",e);
         }
-        log.info("MYKERNEL STARTED. PORT:{}",port);
+        log.info("MYKERNEL STARTED. URL: ws://{}/ws",HostInfo.getLocalIP() + ":" + port );
         return false;
     }
 

@@ -29,7 +29,6 @@ import io.nuls.ledger.manager.LedgerChainManager;
 import io.nuls.ledger.model.ChainHeight;
 import io.nuls.ledger.model.po.AccountStateSnapshot;
 import io.nuls.ledger.model.po.BlockSnapshotAccounts;
-import io.nuls.ledger.model.po.BlockTxs;
 import io.nuls.ledger.service.AccountStateService;
 import io.nuls.ledger.service.BlockDataService;
 import io.nuls.ledger.storage.Repository;
@@ -73,13 +72,5 @@ public class BlockDataServiceImpl implements BlockDataService {
                 }
             }
         }
-    }
-
-    @Override
-    public void saveLatestBlockDatas(int chainId,long height,List<Transaction> txList) throws Exception {
-        BlockTxs blockTxs = new BlockTxs();
-        blockTxs.setTransactions(txList);
-        repository.saveBlock(chainId,height,blockTxs);
-
     }
 }

@@ -33,19 +33,6 @@ public class BlockHeaderData {
 
     protected int packingIndexOfRound;
 
-    /**
-     * 主网当前生效的版本
-     */
-    private short mainVersion;
-
-    /**
-     * 区块的版本，可以理解为本地钱包的版本
-     */
-    private short blockVersion;
-
-
-    private String stateRoot;
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -94,6 +81,19 @@ public class BlockHeaderData {
         result = 31 * result + (stateRoot != null ? stateRoot.hashCode() : 0);
         return result;
     }
+
+    /**
+     * 主网当前生效的版本
+     */
+    private short mainVersion;
+
+    /**
+     * 区块的版本，可以理解为本地钱包的版本
+     */
+    private short blockVersion;
+
+
+    private String stateRoot;
 
     public String getHash() {
         return hash;
@@ -221,5 +221,43 @@ public class BlockHeaderData {
 
     public void setStateRoot(String stateRoot) {
         this.stateRoot = stateRoot;
+    }
+
+    @Override
+    public String toString() {
+        return new StringBuilder("{")
+                .append("\"hash\":\"")
+                .append(hash).append('\"')
+                .append(",\"preHash\":\"")
+                .append(preHash).append('\"')
+                .append(",\"merkleHash\":\"")
+                .append(merkleHash).append('\"')
+                .append(",\"time\":\"")
+                .append(time).append('\"')
+                .append(",\"height\":")
+                .append(height)
+                .append(",\"txCount\":")
+                .append(txCount)
+                .append(",\"blockSignature\":\"")
+                .append(blockSignature).append('\"')
+                .append(",\"size\":")
+                .append(size)
+                .append(",\"packingAddress\":\"")
+                .append(packingAddress).append('\"')
+                .append(",\"roundIndex\":")
+                .append(roundIndex)
+                .append(",\"consensusMemberCount\":")
+                .append(consensusMemberCount)
+                .append(",\"roundStartTime\":\"")
+                .append(roundStartTime).append('\"')
+                .append(",\"packingIndexOfRound\":")
+                .append(packingIndexOfRound)
+                .append(",\"mainVersion\":")
+                .append(mainVersion)
+                .append(",\"blockVersion\":")
+                .append(blockVersion)
+                .append(",\"stateRoot\":\"")
+                .append(stateRoot).append('\"')
+                .append('}').toString();
     }
 }

@@ -52,89 +52,25 @@ public class AccountStateUnconfirmed extends BaseNulsData {
     private int assetChainId;
 
     private int assetId;
-
-    private String dbNonce = LedgerConstant.INIT_NONCE;
-    private String dbHash = "";
-
-    /**
-     * 未确认交易的nonce列表，有花费的余额的交易会更改这部分Nonce数据
-     */
-
-    private List<UnconfirmedNonce> unconfirmedNonces = new ArrayList<>();
-    /**
-     * 未确认交易，存储交易金额数据
-     */
-    private List<UnconfirmedAmount> unconfirmedAmounts = new ArrayList<>();
-
-
+    private byte[] fromNonce = LedgerConstant.INIT_NONCE_BYTE;
+    private byte[] nonce = LedgerConstant.INIT_NONCE_BYTE;
+    private BigInteger amount = BigInteger.ZERO;
+    private long createTime = 0;
     public AccountStateUnconfirmed() {
         super();
     }
 
-    public AccountStateUnconfirmed(String address, int addressChainId, int assetChainId, int assetId, String dbNonce) {
+    public AccountStateUnconfirmed(String address, int addressChainId, int assetChainId, int assetId, byte[] fromNonce,byte[] nonce,BigInteger amount) {
         this.address = address;
         this.addressChainId = addressChainId;
         this.assetChainId = assetChainId;
         this.assetId = assetId;
-        this.dbNonce = dbNonce;
+        this.fromNonce = fromNonce;
+        this.nonce = nonce;
+        this.amount = amount;
+        this.createTime = TimeUtil.getCurrentTime();
     }
 
-    /**
-     * 获取最近的未提交交易nonce
-     *
-     * @return
-     */
-    public String getLatestUnconfirmedNonce() {
-        if (unconfirmedNonces.size() == 0) {
-            return dbNonce;
-        }
-        return unconfirmedNonces.get(unconfirmedNonces.size() - 1).getNonce();
-    }
-
-    /**
-     * 计算未确认交易的可用余额(不含已确认的账户余额)
-     *
-     * @return
-     */
-    public BigInteger getUnconfirmedAmount() {
-        BigInteger calUnconfirmedAmount = BigInteger.ZERO;
-        for (UnconfirmedAmount unconfirmedAmount : unconfirmedAmounts) {
-            calUnconfirmedAmount = calUnconfirmedAmount.add(unconfirmedAmount.getEarnAmount()).subtract(unconfirmedAmount.getSpendAmount());
-
-        }
-        return calUnconfirmedAmount;
-    }
-
-
-    public void addUnconfirmedNonce(UnconfirmedNonce unconfirmedNonce) {
-        unconfirmedNonces.add(unconfirmedNonce);
-    }
-
-    public String getUnconfirmedNoncesStrs() {
-        StringBuilder s = new StringBuilder();
-        for (UnconfirmedNonce unconfirmedNonce : unconfirmedNonces) {
-            s.append(unconfirmedNonce.getNonce() + ",");
-        }
-        return s.toString();
-    }
-
-    public void addUnconfirmedAmount(UnconfirmedAmount unconfirmedAmount) {
-        unconfirmedAmounts.add(unconfirmedAmount);
-    }
-
-    /**
-     * 计算未确认交易的冻结部分
-     *
-     * @return
-     */
-    public BigInteger getUnconfirmedFreezeAmount() {
-        BigInteger calUnconfirmedFreeAmount = BigInteger.ZERO;
-        for (UnconfirmedAmount unconfirmedAmount : unconfirmedAmounts) {
-            //add 冻结 subtract 解锁的
-            calUnconfirmedFreeAmount = calUnconfirmedFreeAmount.add(unconfirmedAmount.getToLockedAmount()).subtract(unconfirmedAmount.getFromUnLockedAmount());
-        }
-        return calUnconfirmedFreeAmount;
-    }
 
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
@@ -142,18 +78,10 @@ public class AccountStateUnconfirmed extends BaseNulsData {
         stream.writeUint16(addressChainId);
         stream.writeUint16(assetChainId);
         stream.writeUint16(assetId);
-        stream.writeString(dbNonce);
-
-        stream.writeUint16(unconfirmedNonces.size());
-        for (UnconfirmedNonce unconfirmedNonce : unconfirmedNonces) {
-            stream.writeNulsData(unconfirmedNonce);
-        }
-
-        stream.writeUint16(unconfirmedAmounts.size());
-        for (UnconfirmedAmount unconfirmedAmount : unconfirmedAmounts) {
-            stream.writeNulsData(unconfirmedAmount);
-        }
-
+        stream.write(fromNonce);
+        stream.write(nonce);
+        stream.writeBigInteger(amount);
+        stream.writeUint48(createTime);
     }
 
     @Override
@@ -162,27 +90,10 @@ public class AccountStateUnconfirmed extends BaseNulsData {
         this.addressChainId = byteBuffer.readUint16();
         this.assetChainId = byteBuffer.readUint16();
         this.assetId = byteBuffer.readUint16();
-        this.dbNonce = byteBuffer.readString();
-        int unconfirmNonceCount = byteBuffer.readUint16();
-        for (int i = 0; i < unconfirmNonceCount; i++) {
-            try {
-                UnconfirmedNonce unconfirmedNonce = new UnconfirmedNonce();
-                byteBuffer.readNulsData(unconfirmedNonce);
-                this.unconfirmedNonces.add(unconfirmedNonce);
-            } catch (Exception e) {
-                throw new NulsException(e);
-            }
-        }
-        int unconfirmAmountCount = byteBuffer.readUint16();
-        for (int i = 0; i < unconfirmAmountCount; i++) {
-            try {
-                UnconfirmedAmount unconfirmedAmount = new UnconfirmedAmount();
-                byteBuffer.readNulsData(unconfirmedAmount);
-                this.unconfirmedAmounts.add(unconfirmedAmount);
-            } catch (Exception e) {
-                throw new NulsException(e);
-            }
-        }
+        this.fromNonce = byteBuffer.readBytes(8);
+        this.nonce = byteBuffer.readBytes(8);
+        this.amount = byteBuffer.readBigInteger();
+        this.createTime=byteBuffer.readUint48();
     }
 
     @Override
@@ -196,15 +107,10 @@ public class AccountStateUnconfirmed extends BaseNulsData {
         size += SerializeUtils.sizeOfInt16();
         //assetId
         size += SerializeUtils.sizeOfInt16();
-        size += SerializeUtils.sizeOfString(dbNonce);
-        size += SerializeUtils.sizeOfUint16();
-        for (UnconfirmedNonce unconfirmedNonce : unconfirmedNonces) {
-            size += SerializeUtils.sizeOfNulsData(unconfirmedNonce);
-        }
-        size += SerializeUtils.sizeOfUint16();
-        for (UnconfirmedAmount unconfirmedAmount : unconfirmedAmounts) {
-            size += SerializeUtils.sizeOfNulsData(unconfirmedAmount);
-        }
+        size += fromNonce.length;
+        size += nonce.length;
+        size += SerializeUtils.sizeOfBigInteger();
+        size += SerializeUtils.sizeOfUint48();
         return size;
     }
 
@@ -240,51 +146,39 @@ public class AccountStateUnconfirmed extends BaseNulsData {
         this.assetId = assetId;
     }
 
-
-    public List<UnconfirmedNonce> getUnconfirmedNonces() {
-        return unconfirmedNonces;
+    public byte[] getFromNonce() {
+        return fromNonce;
     }
 
-    public void updateUnconfirmeAmounts() {
-        int index = 0;
-        for (UnconfirmedAmount unconfirmedAmount : unconfirmedAmounts) {
-            if ((TimeUtil.getCurrentTime() - unconfirmedAmount.getTime()) < LedgerConstant.UNCONFIRM_NONCE_EXPIRED_TIME) {
-                break;
-            }
-            index++;
-        }
-        if (index > 0) {
-            List<UnconfirmedAmount> list = new ArrayList<UnconfirmedAmount>();
-            list.addAll(unconfirmedAmounts.subList(index, unconfirmedAmounts.size()));
-            unconfirmedAmounts = list;
-        }
+    public void setFromNonce(byte[] fromNonce) {
+        this.fromNonce = fromNonce;
     }
 
-    public void setUnconfirmedNonces(List<UnconfirmedNonce> unconfirmedNonces) {
-        this.unconfirmedNonces = unconfirmedNonces;
+    public byte[] getNonce() {
+        return nonce;
     }
 
-    public List<UnconfirmedAmount> getUnconfirmedAmounts() {
-        return unconfirmedAmounts;
+    public void setNonce(byte[] nonce) {
+        this.nonce = nonce;
     }
 
-    public void setUnconfirmedAmounts(List<UnconfirmedAmount> unconfirmedAmounts) {
-        this.unconfirmedAmounts = unconfirmedAmounts;
+    public BigInteger getAmount() {
+        return amount;
     }
 
-    public String getDbNonce() {
-        return dbNonce;
+    public void setAmount(BigInteger amount) {
+        this.amount = amount;
     }
 
-    public void setDbNonce(String dbNonce) {
-        this.dbNonce = dbNonce;
+    public long getCreateTime() {
+        return createTime;
     }
 
-    public String getDbHash() {
-        return dbHash;
+    public void setCreateTime(long createTime) {
+        this.createTime = createTime;
     }
 
-    public void setDbHash(String dbHash) {
-        this.dbHash = dbHash;
+    public  boolean isOverTime(){
+        return (TimeUtil.getCurrentTime()-createTime)>LedgerConstant.UNCONFIRM_NONCE_EXPIRED_TIME;
     }
 }

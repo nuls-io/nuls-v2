@@ -1,8 +1,11 @@
 package io.nuls.api.rpc;
 
+import io.nuls.api.constant.ApiConstant;
+import io.nuls.api.constant.ApiErrorCode;
 import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.model.message.Response;
 import io.nuls.rpc.netty.processor.ResponseMessageProcessor;
+import io.nuls.tools.constant.ErrorCode;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.log.Log;
 import io.nuls.tools.parse.JSONUtils;
@@ -38,13 +41,15 @@ public class RpcCall {
                     }
                 }
                 if (null != errorMsg) {
-                    throw new Exception(errorMsg);
+                    throw new NulsException(ApiErrorCode.SERIALIZE_ERROR);
                 }
             }
             /*if (null == resData) {
                 return null;
             }*/
             return resData.get(cmd);
+        } catch (NulsException e) {
+            throw e;
         } catch (Exception e) {
             Log.debug("cmd: {}", cmd);
             throw new NulsException(e);

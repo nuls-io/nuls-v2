@@ -46,7 +46,7 @@ public class AgentDTO {
     private String packingAddress;
     private String rewardAddress;
     private String deposit;
-    private double commissionRate;
+    private byte commissionRate;
     private String agentName;
     private String agentId;
     @JsonIgnore
@@ -102,12 +102,11 @@ public class AgentDTO {
         this.rewardAddress = rewardAddress;
     }
 
-
-    public double getCommissionRate() {
+    public byte getCommissionRate() {
         return commissionRate;
     }
 
-    public void setCommissionRate(double commissionRate) {
+    public void setCommissionRate(byte commissionRate) {
         this.commissionRate = commissionRate;
     }
 

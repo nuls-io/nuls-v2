@@ -90,6 +90,10 @@ public class ContractTxCallable implements Callable<ContractResult> {
 
     @Override
     public ContractResult call() throws Exception {
+        long start = 0L;
+        if (Log.isDebugEnabled()) {
+            start = System.currentTimeMillis();
+        }
         CallableResult callableResult = container.getCallableResult();
         ContractData contractData;
         ContractResult contractResult = null;
@@ -131,8 +135,11 @@ public class ContractTxCallable implements Callable<ContractResult> {
                     break;
             }
         } while (false);
-        if(!contractResult.isSuccess()) {
-            Log.error("Failed TxType [{}] Execute ContractResult is {}", tx.getType(), contractResult);
+        if (!contractResult.isSuccess()) {
+            Log.error("Failed TxType [{}] Execute ContractResult is {}", tx.getType(), contractResult.toString());
+        }
+        if (Log.isDebugEnabled()) {
+            Log.debug("[Per Contract Execution Cost Time] TxType is {}, TxHash is {}, Cost Time is {}", tx.getType(), tx.getHash().toString(), System.currentTimeMillis() - start);
         }
         return contractResult;
     }
@@ -141,8 +148,8 @@ public class ContractTxCallable implements Callable<ContractResult> {
         makeContractResult(tx, contractResult);
         if (contractResult.isSuccess()) {
             Result checkResult = contractHelper.validateNrc20Contract(chainId, (ProgramExecutor) contractResult.getTxTrack(), tx, contractResult);
-            if(checkResult.isFailed()) {
-                Log.error("check validateNrc20Contract Result is {}", checkResult);
+            if (checkResult.isFailed()) {
+                Log.error("check validateNrc20Contract Result is {}", checkResult.toString());
             }
             if (checkResult.isSuccess()) {
                 container.getCommitSet().add(contract);
@@ -163,7 +170,7 @@ public class ContractTxCallable implements Callable<ContractResult> {
         if (isConflict) {
             // 冲突后，添加到重新执行的集合中，但是gas消耗完的不再重复执行
             if (!isNotEnoughGasError(contractResult)) {
-                Log.error("Conflict TxType [{}] Execute ContractResult is {}", tx.getType(), contractResult);
+                Log.error("Conflict TxType [{}] Execute ContractResult is {}", tx.getType(), contractResult.toString());
                 reCallList.add(contractResult);
             } else {
                 // 执行失败，添加到执行失败的集合中
@@ -206,7 +213,7 @@ public class ContractTxCallable implements Callable<ContractResult> {
         if (txTrackObj != null && txTrackObj instanceof ProgramExecutor) {
             ProgramExecutor txTrack = (ProgramExecutor) txTrackObj;
             txTrack.commit();
-            Log.info("One of Batch contract[{}] commit", AddressTool.getStringAddressByBytes(contractResult.getContractAddress()));
+            Log.debug("One of Batch contract[{}] commit", AddressTool.getStringAddressByBytes(contractResult.getContractAddress()));
         }
     }
 

@@ -8,6 +8,7 @@ import io.nuls.base.data.NulsDigestData;
 import io.nuls.base.data.Page;
 import io.nuls.base.data.Transaction;
 import io.nuls.base.signture.P2PHKSignature;
+import io.nuls.poc.constant.ConsensusConfig;
 import io.nuls.poc.constant.ConsensusConstant;
 import io.nuls.poc.constant.ConsensusErrorCode;
 import io.nuls.poc.model.bo.Chain;
@@ -79,6 +80,7 @@ public class AgentServiceImpl implements AgentService {
 
     @Autowired
     private RoundManager roundManager;
+
     /**
      * 创建节点
      */
@@ -243,7 +245,9 @@ public class AgentServiceImpl implements AgentService {
                 return Result.getFailed(ConsensusErrorCode.AGENT_NOT_EXIST);
             }
             stopAgent.setCreateTxHash(agent.getTxHash());
+            tx.setTime(TimeUtils.getCurrentTimeMillis());
             tx.setTxData(stopAgent.serialize());
+            tx.setTime(TimeUtils.getCurrentTimeMillis());
             CoinData coinData = coinDataManager.getStopAgentCoinData(chain, agent, TimeUtils.getCurrentTimeMillis() + chain.getConfig().getStopAgentLockTime());
             BigInteger fee = TransactionFeeCalculator.getNormalTxFee(tx.size()+ P2PHKSignature.SERIALIZE_LENGTH+coinData.serialize().length);
             coinData.getTo().get(0).setAmount(coinData.getTo().get(0).getAmount().subtract(fee));
@@ -577,6 +581,41 @@ public class AgentServiceImpl implements AgentService {
         return Result.getSuccess(ConsensusErrorCode.SUCCESS).setData(resultMap);
     }
 
+    /**
+     * 获取当前节点的出块账户信息
+     *
+     * @param params
+     * @return Result
+     */
+    @Override
+    @SuppressWarnings("unchecked")
+    public Result getPackerInfo(Map<String, Object> params) {
+        if (params == null || params.get(ConsensusConstant.PARAM_CHAIN_ID) == null) {
+            return Result.getFailed(ConsensusErrorCode.PARAM_ERROR);
+        }
+        int chainId = (Integer) params.get(ConsensusConstant.PARAM_CHAIN_ID);
+        if (chainId <= ConsensusConstant.MIN_VALUE) {
+            return Result.getFailed(ConsensusErrorCode.PARAM_ERROR);
+        }
+        Chain chain = chainManager.getChainMap().get(chainId);
+        if (chain == null) {
+            return Result.getFailed(ConsensusErrorCode.CHAIN_NOT_EXIST);
+        }
+        try {
+            MeetingRound round = roundManager.resetRound(chain, true);
+            MeetingMember member = round.getMyMember();
+            Map<String, Object> resultMap = new HashMap<>(2);
+            if(member != null){
+                resultMap.put("address", AddressTool.getStringAddressByBytes(member.getAgent().getPackingAddress()));
+                resultMap.put("password", chain.getConfig().getPassword());
+            }
+            resultMap.put("agentCount", round.getMemberCount());
+            return Result.getSuccess(ConsensusErrorCode.SUCCESS).setData(resultMap);
+        }catch (Exception e){
+            chain.getLoggerMap().get(ConsensusConstant.BASIC_LOGGER_NAME).error(e);
+            return Result.getFailed(ConsensusErrorCode.DATA_ERROR);
+        }
+    }
 
     private void fillAgentList(Chain chain, List<Agent> agentList, List<Deposit> depositList) {
         MeetingRound round = roundManager.getCurrentRound(chain);

@@ -34,23 +34,18 @@ import io.nuls.rpc.modulebootstrap.RpcModuleState;
 import io.nuls.rpc.util.TimeUtils;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
-import io.nuls.tools.core.ioc.SpringLiteContext;
 import io.nuls.tools.exception.NulsException;
-import io.nuls.tools.log.Log;
-import io.nuls.tools.parse.I18nUtils;
 import io.nuls.transaction.constant.TxConfig;
 import io.nuls.transaction.constant.TxConstant;
 import io.nuls.transaction.constant.TxDBConstant;
 import io.nuls.transaction.manager.ChainManager;
 import io.nuls.transaction.rpc.call.NetworkCall;
-import io.nuls.transaction.storage.rocksdb.LanguageStorageService;
 import io.nuls.transaction.utils.DBUtil;
 import io.nuls.transaction.utils.LoggerUtil;
 
-import java.lang.reflect.Field;
-import java.nio.charset.Charset;
 import java.util.Set;
 
+import static io.nuls.transaction.utils.LoggerUtil.LOG;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 /**
@@ -82,29 +77,28 @@ public class TransactionBootstrap extends RpcModule {
             initDB();
             chainManager.initChain();
         } catch (Exception e) {
-            Log.error("Transaction init error!");
-            Log.error(e);
+            LOG.error("Transaction init error!");
+            LOG.error(e);
         }
     }
 
     @Override
     public boolean doStart() {
-        //初始化国际资源文件语言
         try {
-            initLanguage();
             chainManager.runChain();
             while (!isDependencieReady(ModuleE.NW.abbr)){
-                Log.debug("wait depend modules ready");
+                LOG.debug("wait depend modules ready");
                 Thread.sleep(2000L);
             }
-            Log.info("Transaction Ready...");
+            LOG.info("Transaction Ready...");
             return true;
         } catch (Exception e) {
-            Log.error("Transaction init error!");
-            Log.error(e);
+            LOG.error("Transaction init error!");
+            LOG.error(e);
             return false;
         }
     }
+
 
     @Override
     public void onDependenciesReady(Module module) {
@@ -113,25 +107,15 @@ public class TransactionBootstrap extends RpcModule {
                 NetworkCall.registerProtocol();
             }
         } catch (NulsException e) {
-            LoggerUtil.Log.error(e);
+            LoggerUtil.LOG.error(e);
         }
     }
 
     @Override
     public RpcModuleState onDependenciesReady() {
-        Log.info("Transaction onDependenciesReady");
+        LOG.info("Transaction onDependenciesReady");
         TimeUtils.getInstance().start();
         return RpcModuleState.Running;
-       /* try {
-            NetworkCall.registerProtocol();
-            subscriptionBlockHeight();
-            Log.info("Transaction Running...");
-            return RpcModuleState.Running;
-        } catch (Exception e) {
-            LoggerUtil.Log.error(e);
-            return RpcModuleState.Ready;
-        }*/
-
     }
 
     @Override
@@ -140,11 +124,12 @@ public class TransactionBootstrap extends RpcModule {
     }
 
     @Override
-    public Module[] getDependencies() {
+    public Module[] declareDependent() {
         return new Module[]{
                 new Module(ModuleE.NW.abbr, TxConstant.RPC_VERSION),
                 new Module(ModuleE.LG.abbr, TxConstant.RPC_VERSION),
-                new Module(ModuleE.BL.abbr, TxConstant.RPC_VERSION)
+                new Module(ModuleE.BL.abbr, TxConstant.RPC_VERSION),
+                new Module(ModuleE.AC.abbr, TxConstant.RPC_VERSION)
         };
     }
 
@@ -165,11 +150,8 @@ public class TransactionBootstrap extends RpcModule {
         try {
             System.setProperty(TxConstant.SYS_ALLOW_NULL_ARRAY_ELEMENT, "true");
             System.setProperty(TxConstant.SYS_FILE_ENCODING, UTF_8.name());
-            Field charset = Charset.class.getDeclaredField("defaultCharset");
-            charset.setAccessible(true);
-            charset.set(null, UTF_8);
         } catch (Exception e) {
-            LoggerUtil.Log.error(e);
+            LOG.error(e);
         }
     }
 
@@ -179,30 +161,10 @@ public class TransactionBootstrap extends RpcModule {
             RocksDBService.init(txConfig.getTxDataRoot());
             //模块配置表
             DBUtil.createTable(TxDBConstant.DB_MODULE_CONGIF);
-            //语言表
-            DBUtil.createTable(TxDBConstant.DB_TX_LANGUAGE);
-
         } catch (Exception e) {
-            LoggerUtil.Log.error(e);
+            LOG.error(e);
         }
     }
 
-    /**
-     * 初始化国际化资源文件语言
-     */
-    public void initLanguage() {
-        try {
-            LanguageStorageService languageService = SpringLiteContext.getBean(LanguageStorageService.class);
-            String languageDB = languageService.getLanguage();
-            I18nUtils.loadLanguage(TransactionBootstrap.class, "languages", txConfig.getLanguage());
-            String language = null == languageDB ? I18nUtils.getLanguage() : languageDB;
-            I18nUtils.setLanguage(language);
-            if (null == languageDB) {
-                languageService.saveLanguage(language);
-            }
-        } catch (Exception e) {
-            LoggerUtil.Log.error(e);
-        }
-    }
 
 }

@@ -1,5 +1,6 @@
 package io.nuls.api.provider;
 
+import io.nuls.tools.constant.CommonCodeConstanst;
 import io.nuls.tools.constant.ErrorCode;
 import io.nuls.tools.log.Log;
 import net.sf.cglib.proxy.MethodInterceptor;
@@ -35,7 +36,7 @@ public class ServiceProxy implements MethodInterceptor {
             return methodProxy.invokeSuper(o, objects);
         }catch(Exception e){
             Log.error("Calling provider interface failed. service:{} - method:{}",o.getClass(),method.getName(),e);
-            return BaseService.fail(BaseService.ERROR_CODE, ErrorCode.init("10001").getMsg());
+            return BaseService.fail(CommonCodeConstanst.FAILED);
         }
     }
 

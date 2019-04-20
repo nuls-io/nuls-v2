@@ -150,7 +150,7 @@ public class ContractServiceImpl implements ContractService {
     @Override
     public Result invokeContractOneByOne(int chainId, ContractTempTransaction tx) {
         try {
-            Log.info("[Invoke Contract] TxType is [{}], hash is [{}]", tx.getType(), tx.getHash().toString());
+            Log.debug("[Invoke Contract] TxType is [{}], hash is [{}]", tx.getType(), tx.getHash().toString());
             Chain chain = contractHelper.getChain(chainId);
             BatchInfo batchInfo = chain.getBatchInfo();
             if (!batchInfo.hasBegan()) {
@@ -231,6 +231,7 @@ public class ContractServiceImpl implements ContractService {
         }
     }
 
+    @Override
     public Result commitProcessor(int chainId, List<String> txDataList, String blockHeaderHex) {
         try {
             ContractPackageDto contractPackageDto = contractHelper.getChain(chainId).getBatchInfo().getContractPackageDto();
@@ -278,6 +279,7 @@ public class ContractServiceImpl implements ContractService {
         }
     }
 
+    @Override
     public Result rollbackProcessor(int chainId, List<String> txDataList, String blockHeaderHex) {
         try {
             Transaction tx;

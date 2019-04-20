@@ -73,29 +73,7 @@ public class WalletRpcHandler {
         return Result.getFailed(ApiErrorCode.DATA_PARSE_ERROR);
     }
 
-    public static AccountInfo getAccountBalance(int chainId, String address, int assetChainId, int assetId) {
-        Map<String, Object> params = new HashMap<>(ApiConstant.INIT_CAPACITY_8);
-        params.put(Constants.VERSION_KEY_STR, ApiContext.VERSION);
-        params.put("chainId", chainId);
-        params.put("address", address);
-        params.put("assetChainId", assetChainId);
-        params.put("assetId", assetId);
-        try {
-            Map map = (Map) RpcCall.request(ModuleE.LG.abbr, CommandConstant.GET_BALANCE, params);
-            AccountInfo accountInfo = new AccountInfo();
-            accountInfo.setTotalBalance(new BigInteger(map.get("total").toString()));
-            accountInfo.setBalance(new BigInteger(map.get("available").toString()));
-            accountInfo.setTimeLock(new BigInteger(map.get("timeHeightLocked").toString()));
-            accountInfo.setConsensusLock(new BigInteger(map.get("permanentLocked").toString()));
-
-            return accountInfo;
-        } catch (Exception e) {
-            Log.error(e);
-        }
-        return null;
-    }
-
-    public static BalanceInfo getBalance(int chainId, String address, int assetChainId, int assetId) {
+    public static BalanceInfo getAccountBalance(int chainId, String address, int assetChainId, int assetId) {
         Map<String, Object> params = new HashMap<>(ApiConstant.INIT_CAPACITY_8);
         params.put(Constants.VERSION_KEY_STR, ApiContext.VERSION);
         params.put("chainId", chainId);
@@ -105,17 +83,41 @@ public class WalletRpcHandler {
         try {
             Map map = (Map) RpcCall.request(ModuleE.LG.abbr, CommandConstant.GET_BALANCE, params);
             BalanceInfo balanceInfo = new BalanceInfo();
-            balanceInfo.setTotalBalance(new BigInteger(map.get("total").toString()));
             balanceInfo.setBalance(new BigInteger(map.get("available").toString()));
             balanceInfo.setTimeLock(new BigInteger(map.get("timeHeightLocked").toString()));
             balanceInfo.setConsensusLock(new BigInteger(map.get("permanentLocked").toString()));
-
+            balanceInfo.setFreeze(new BigInteger(map.get("freeze").toString()));
+            balanceInfo.setNonce((String) map.get("nonce"));
+            balanceInfo.setTotalBalance(balanceInfo.getBalance().add(balanceInfo.getConsensusLock()).add(balanceInfo.getTimeLock()));
+            balanceInfo.setNonceType((Integer) map.get("nonceType"));
             return balanceInfo;
         } catch (Exception e) {
             Log.error(e);
         }
         return null;
     }
+
+//    public static BalanceInfo getBalance(int chainId, String address, int assetChainId, int assetId) {
+//        Map<String, Object> params = new HashMap<>(ApiConstant.INIT_CAPACITY_8);
+//        params.put(Constants.VERSION_KEY_STR, ApiContext.VERSION);
+//        params.put("chainId", chainId);
+//        params.put("address", address);
+//        params.put("assetChainId", assetChainId);
+//        params.put("assetId", assetId);
+//        try {
+//            Map map = (Map) RpcCall.request(ModuleE.LG.abbr, CommandConstant.GET_BALANCE, params);
+//            BalanceInfo balanceInfo = new BalanceInfo();
+//            balanceInfo.setTotalBalance(new BigInteger(map.get("total").toString()));
+//            balanceInfo.setBalance(new BigInteger(map.get("available").toString()));
+//            balanceInfo.setTimeLock(new BigInteger(map.get("timeHeightLocked").toString()));
+//            balanceInfo.setConsensusLock(new BigInteger(map.get("permanentLocked").toString()));
+//
+//            return balanceInfo;
+//        } catch (Exception e) {
+//            Log.error(e);
+//        }
+//        return null;
+//    }
 
     public static Result<PageInfo<FreezeInfo>> getFreezeList(int chainId, int pageIndex, int pageSize, String address, int assetId) {
         Map<String, Object> params = new HashMap<>();
@@ -161,12 +163,13 @@ public class WalletRpcHandler {
         params.put("chainId", chainId);
         params.put("txHash", hash);
         try {
-            Map map = (Map) RpcCall.request(ModuleE.TX.abbr, CommandConstant.CLIENT_GETTX, params);
+            Map map = (Map) RpcCall.request(ModuleE.TX.abbr, CommandConstant.GET_CONFIRM_TX, params);
             String txHex = (String) map.get("tx");
             if (null == txHex) {
                 return null;
             }
-            Transaction tx = Transaction.getInstance(txHex);
+            Transaction tx = new Transaction();
+            tx.parse(new NulsByteBuffer(RPCUtil.decode(txHex)));
             long height = Long.parseLong(map.get("height").toString());
             tx.setBlockHeight(height);
             TransactionInfo txInfo = AnalysisHandler.toTransaction(chainId, tx);
@@ -318,4 +321,30 @@ public class WalletRpcHandler {
         return Result.getSuccess(null).setData(resultInfo);
     }
 
+    public static Result validateTx(int chainId, String txHex) {
+        Map<String, Object> params = new HashMap<>();
+        params.put("chainId", chainId);
+        params.put("tx", txHex);
+
+        try {
+            Map map = (Map) RpcCall.request(ModuleE.TX.abbr, CommandConstant.TX_VALIEDATE, params);
+            return Result.getSuccess(null).setData(map);
+        } catch (NulsException e) {
+            return Result.getFailed(e.getErrorCode());
+        }
+    }
+
+
+    public static Result broadcastTx(int chainId, String txHex) {
+        Map<String, Object> params = new HashMap<>();
+        params.put("chainId", chainId);
+        params.put("tx", txHex);
+
+        try {
+            Map map = (Map) RpcCall.request(ModuleE.TX.abbr, CommandConstant.TX_NEWTX, params);
+            return Result.getSuccess(null).setData(map);
+        } catch (NulsException e) {
+            return Result.getFailed(e.getErrorCode());
+        }
+    }
 }

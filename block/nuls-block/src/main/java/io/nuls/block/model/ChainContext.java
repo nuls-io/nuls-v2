@@ -237,8 +237,14 @@ public class ChainContext {
         this.packingAddressList = packingAddressList;
     }
 
-    public synchronized void setStatus(RunningStatusEnum status) {
-        this.status = status;
+    public void setStatus(RunningStatusEnum status) {
+        if (status.equals(getStatus())) {
+            return;
+        }
+        synchronized (this) {
+            commonLog.debug("status changed:" + this.status + "->" + status);
+            this.status = status;
+        }
     }
 
     public long getLatestHeight() {
@@ -246,6 +252,7 @@ public class ChainContext {
     }
 
     public void init() {
+        LoggerUtil.init(chainId, parameters.getLogLevel());
         this.setStatus(RunningStatusEnum.INITIALIZING);
         packingAddressList = new CopyOnWriteArrayList<>();
         duplicateBlockMap = new HashMap<>();
@@ -253,7 +260,6 @@ public class ChainContext {
         version = 1;
         doSyn = true;
         lock = new StampedLock();
-        LoggerUtil.init(chainId, parameters.getLogLevel());
         //各类缓存初始化
         SmallBlockCacher.init(chainId);
         BlockCacher.init(chainId);

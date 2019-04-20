@@ -84,4 +84,11 @@ public interface AgentService {
      * @return Result
      * */
     Result getAgentAddressList(Map<String,Object> params);
+
+    /**
+     * 获取当前节点的出块账户信息
+     * @param params
+     * @return Result
+     * */
+    Result getPackerInfo(Map<String,Object> params);
 }

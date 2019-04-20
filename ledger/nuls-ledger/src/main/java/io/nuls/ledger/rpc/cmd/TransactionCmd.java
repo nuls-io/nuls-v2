@@ -61,11 +61,12 @@ public class TransactionCmd extends BaseLedgerCmd {
      * @return
      */
     @CmdAnnotation(cmd = "commitUnconfirmedTx",
-            version = 1.0, scope = "private", minEvent = 0, minPeriod = 0,
+            version = 1.0,  minEvent = 0, minPeriod = 0,
             description = "")
     @Parameter(parameterName = "chainId", parameterType = "int")
     @Parameter(parameterName = "tx", parameterType = "String")
     public Response commitUnconfirmedTx(Map params) {
+        long time1 = System.currentTimeMillis();
         Integer chainId = (Integer) params.get("chainId");
         Response response = null;
         try {
@@ -75,7 +76,6 @@ public class TransactionCmd extends BaseLedgerCmd {
                 LoggerUtil.logger(chainId).error("txStr is invalid chainId={},txHex={}", chainId, txStr);
                 return failed("txStr is invalid");
             }
-            LoggerUtil.logger(chainId).debug("commitUnconfirmedTx chainId={},txHash={}", chainId, tx.getHash().toString());
             ValidateResult validateResult = transactionService.unConfirmTxProcess(chainId, tx);
             response = success(validateResult);
             LoggerUtil.logger(chainId).debug("####commitUnconfirmedTx chainId={},txHash={},value={}=={}", chainId, tx.getHash().toString(), validateResult.getValidateCode(),validateResult.getValidateDesc());
@@ -84,7 +84,6 @@ public class TransactionCmd extends BaseLedgerCmd {
             LoggerUtil.logger(chainId).error("commitUnconfirmedTx exception ={}", e.getMessage());
             return failed(e.getMessage());
         }
-
         return response;
     }
 
@@ -95,7 +94,7 @@ public class TransactionCmd extends BaseLedgerCmd {
      * @return
      */
     @CmdAnnotation(cmd = "commitBlockTxs",
-            version = 1.0, scope = "private", minEvent = 0, minPeriod = 0,
+            version = 1.0,  minEvent = 0, minPeriod = 0,
             description = "")
     @Parameter(parameterName = "chainId", parameterType = "int")
     @Parameter(parameterName = "txList", parameterType = "List")
@@ -145,7 +144,7 @@ public class TransactionCmd extends BaseLedgerCmd {
      * @return
      */
     @CmdAnnotation(cmd = "rollBackUnconfirmTx",
-            version = 1.0, scope = "private", minEvent = 0, minPeriod = 0,
+            version = 1.0, minEvent = 0, minPeriod = 0,
             description = "")
     @Parameter(parameterName = "chainId", parameterType = "int")
     @Parameter(parameterName = "tx", parameterType = "String")
@@ -185,7 +184,7 @@ public class TransactionCmd extends BaseLedgerCmd {
      * @return
      */
     @CmdAnnotation(cmd = "rollBackBlockTxs",
-            version = 1.0, scope = "private", minEvent = 0, minPeriod = 0,
+            version = 1.0,  minEvent = 0, minPeriod = 0,
             description = "")
     @Parameter(parameterName = "chainId", parameterType = "int")
     @Parameter(parameterName = "blockHeight", parameterType = "long")
