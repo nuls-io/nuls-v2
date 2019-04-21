@@ -55,10 +55,10 @@ public class CmdClientModule extends RpcModule {
     public boolean doStart() {
         System.out.println("waiting nuls-wallet base module ready");
         ThreadUtils.createAndRunThread("",()->{
-            if(this.isDependencieReady()){
-                return ;
-            }
             while(true){
+                if(this.isDependencieReady()){
+                    return ;
+                }
                 waiting++;
                 System.out.print(" " + waiting);
                 try {
