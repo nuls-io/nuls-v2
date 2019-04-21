@@ -29,7 +29,7 @@ import io.nuls.base.data.CoinFrom;
 import io.nuls.base.data.Transaction;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.exception.NulsException;
-import static io.nuls.transaction.utils.LoggerUtil.Log;
+import static io.nuls.transaction.utils.LoggerUtil.LOG;
 
 import java.util.Arrays;
 import java.util.Comparator;
@@ -83,7 +83,7 @@ public class TransactionTimeComparator implements Comparator<Transaction> {
                     }
                 }
             } catch (NulsException e) {
-                Log.error(e);
+                LOG.error(e);
             }
             return 0;
         }

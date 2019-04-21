@@ -186,19 +186,19 @@ public class ChainManager {
         int chainId = chain.getConfig().getChainId();
         try {
             // 合约地址表
-            RocksDBService.createTable(ContractDBConstant.DB_NAME_CONTRACT_ADDRESS + chainId);
+            RocksDBService.createTable(ContractDBConstant.DB_NAME_CONTRACT_ADDRESS + "_" + chainId);
             // 合约地址与交易关联表
-            RocksDBService.createTable(ContractDBConstant.DB_NAME_CONTRACT_LEDGER_TX_INDEX + chainId);
+            RocksDBService.createTable(ContractDBConstant.DB_NAME_CONTRACT_LEDGER_TX_INDEX + "_" + chainId);
             // 合约内部转账表
-            RocksDBService.createTable(ContractDBConstant.DB_NAME_CONTRACT_TRANSFER_TX + chainId);
+            RocksDBService.createTable(ContractDBConstant.DB_NAME_CONTRACT_TRANSFER_TX + "_" + chainId);
             // 执行结果表
-            RocksDBService.createTable(ContractDBConstant.DB_NAME_CONTRACT_EXECUTE_RESULT + chainId);
+            RocksDBService.createTable(ContractDBConstant.DB_NAME_CONTRACT_EXECUTE_RESULT + "_" + chainId);
             // 收藏地址表
-            RocksDBService.createTable(ContractDBConstant.DB_NAME_CONTRACT_COLLECTION + chainId);
+            RocksDBService.createTable(ContractDBConstant.DB_NAME_CONTRACT_COLLECTION + "_" + chainId);
             // nrc20-token地址表
-            RocksDBService.createTable(ContractDBConstant.DB_NAME_CONTRACT_NRC20_TOKEN_ADDRESS + chainId);
+            RocksDBService.createTable(ContractDBConstant.DB_NAME_CONTRACT_NRC20_TOKEN_ADDRESS + "_" + chainId);
             // nrc20-token转账表
-            RocksDBService.createTable(ContractDBConstant.DB_NAME_CONTRACT_NRC20_TOKEN_TRANSFER + chainId);
+            RocksDBService.createTable(ContractDBConstant.DB_NAME_CONTRACT_NRC20_TOKEN_TRANSFER + "_" + chainId);
 
         } catch (Exception e) {
             if (!DBErrorCode.DB_TABLE_EXIST.equals(e.getMessage())) {

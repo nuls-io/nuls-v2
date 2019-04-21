@@ -25,7 +25,6 @@
  */
 package io.nuls.ledger.storage;
 
-import io.nuls.ledger.model.po.AccountStateUncfd2Cfd;
 import io.nuls.ledger.model.po.AccountStateUnconfirmed;
 import io.nuls.ledger.model.po.TxUnconfirmed;
 
@@ -118,34 +117,5 @@ public interface UnconfirmedRepository {
      * @throws Exception
      */
     void deleteTxUnconfirmed(int chainId, byte[] key) throws Exception;
-
-    /**
-     * save unconfirmed to confirmed tx amount  object
-     *
-     * @param chainId
-     * @param key
-     * @param accountStateUncfd2Cfd
-     * @throws Exception
-     */
-    void saveAccountStateUncfd2Cfd(int chainId, byte[] key, AccountStateUncfd2Cfd accountStateUncfd2Cfd) throws Exception;
-
-    /**
-     * delete unconfirmed to confirmed amount object
-     *
-     * @param chainId
-     * @param key
-     * @throws Exception
-     */
-    void deleteAccountStateUncfd2Cfd(int chainId, byte[] key) throws Exception;
-
-    /**
-     * get unconfirmed to confirmed amount object
-     *
-     * @param chainId
-     * @param key
-     * @return
-     * @throws Exception
-     */
-    AccountStateUncfd2Cfd getAccountStateUncfd2Cfd(int chainId, byte[] key) throws Exception;
 
 }

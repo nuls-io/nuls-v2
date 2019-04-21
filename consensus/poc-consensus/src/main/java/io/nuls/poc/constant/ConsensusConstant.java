@@ -161,8 +161,9 @@ public interface ConsensusConstant {
      * Consensus module log management
      * */
     String CONSENSUS_LOGGER_NAME = "consensus/consensus";
-    String BASIC_LOGGER_NAME = "rpc/rpc";
+    String BASIC_LOGGER_NAME = "consensus/rpc";
 
+    String CHAIN ="chain";
 
     int ROUND_CACHE_COUNT = 10;
  }

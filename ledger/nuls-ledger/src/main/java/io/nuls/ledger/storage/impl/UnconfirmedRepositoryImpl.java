@@ -27,7 +27,6 @@ package io.nuls.ledger.storage.impl;
 
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.db.service.RocksDBService;
-import io.nuls.ledger.model.po.AccountStateUncfd2Cfd;
 import io.nuls.ledger.model.po.AccountStateUnconfirmed;
 import io.nuls.ledger.model.po.TxUnconfirmed;
 import io.nuls.ledger.storage.DataBaseArea;
@@ -53,15 +52,15 @@ public class UnconfirmedRepositoryImpl implements UnconfirmedRepository, Initial
     }
 
     String getLedgerUnconfirmedTableName(int chainId) {
-        return DataBaseArea.TB_LEDGER_ACCOUNT_UNCONFIRMED + chainId;
+        return DataBaseArea.TB_LEDGER_ACCOUNT_UNCONFIRMED +"_"+chainId;
     }
 
     String getLedgerTXUnconfirmedTableName(int chainId) {
-        return DataBaseArea.TB_LEDGER_TX_UNCONFIRMED + chainId;
+        return DataBaseArea.TB_LEDGER_TX_UNCONFIRMED +"_"+ chainId;
     }
 
     String getLedgerUncfmd2CfmdTableName(int chainId) {
-        return DataBaseArea.TB_LEDGER_ACCOUNT_UNCFMD2CFMD + chainId;
+        return DataBaseArea.TB_LEDGER_ACCOUNT_UNCFMD2CFMD +"_"+ chainId;
     }
 
     /**
@@ -129,31 +128,6 @@ public class UnconfirmedRepositoryImpl implements UnconfirmedRepository, Initial
     @Override
     public void deleteTxUnconfirmed(int chainId, byte[] key) throws Exception {
         RocksDBService.delete(getLedgerTXUnconfirmedTableName(chainId), key);
-    }
-
-    @Override
-    public void saveAccountStateUncfd2Cfd(int chainId, byte[] key, AccountStateUncfd2Cfd accountStateUncfd2Cfd) throws Exception {
-        RocksDBService.put(getLedgerUncfmd2CfmdTableName(chainId), key, accountStateUncfd2Cfd.serialize());
-    }
-
-    @Override
-    public void deleteAccountStateUncfd2Cfd(int chainId, byte[] key) throws Exception {
-        RocksDBService.delete(getLedgerUncfmd2CfmdTableName(chainId), key);
-    }
-
-    @Override
-    public AccountStateUncfd2Cfd getAccountStateUncfd2Cfd(int chainId, byte[] key) throws Exception {
-        byte[] stream = RocksDBService.get(getLedgerUncfmd2CfmdTableName(chainId), key);
-        if (stream == null) {
-            return null;
-        }
-        AccountStateUncfd2Cfd accountStateUncfd2Cfd = new AccountStateUncfd2Cfd();
-        try {
-            accountStateUncfd2Cfd.parse(new NulsByteBuffer(stream));
-        } catch (NulsException e) {
-            logger(chainId).error("getAccountStateUncfd2Cfd serialize error.", e);
-        }
-        return accountStateUncfd2Cfd;
     }
 
     @Override

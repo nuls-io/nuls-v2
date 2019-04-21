@@ -14,7 +14,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static io.nuls.transaction.utils.LoggerUtil.Log;
+import static io.nuls.transaction.utils.LoggerUtil.LOG;
 
 /**
  * 调用其他模块跟交易相关的接口
@@ -44,7 +44,7 @@ public class TransactionCall {
             }
             Map resData = (Map)cmdResp.getResponseData();
             if (!cmdResp.isSuccess()) {
-                Log.error("response error info is {}", cmdResp);
+                LOG.error("response error info is {}", cmdResp);
                 String errorMsg = null;
                 if(null == resData){
                     errorMsg = String.format("Remote call fail. ResponseComment: %s ", cmdResp.getResponseComment());
@@ -57,7 +57,7 @@ public class TransactionCall {
             }
             return resData.get(cmd);
         } catch (Exception e) {
-            Log.debug("cmd: {}", cmd);
+            LOG.debug("cmd: {}", cmd);
             throw new NulsException(e);
         }
     }

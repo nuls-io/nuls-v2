@@ -25,6 +25,7 @@
 package io.nuls.network.rpc.cmd;
 
 import io.nuls.network.cfg.NetworkConfig;
+import io.nuls.network.constant.CmdConstant;
 import io.nuls.network.constant.NetworkConstant;
 import io.nuls.network.constant.NetworkErrorCode;
 import io.nuls.network.manager.NodeGroupManager;
@@ -40,6 +41,7 @@ import io.nuls.rpc.model.CmdAnnotation;
 import io.nuls.rpc.model.Parameter;
 import io.nuls.rpc.model.message.Response;
 import io.nuls.tools.core.annotation.Autowired;
+import io.nuls.tools.core.annotation.Cmd;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.model.StringUtils;
 
@@ -58,7 +60,7 @@ public class NodeGroupRpc extends BaseCmd {
      * nw_createNodeGroup
      * 主网创建跨链网络或者链工厂创建链
      */
-    @CmdAnnotation(cmd = "nw_createNodeGroup", version = 1.0,
+    @CmdAnnotation(cmd = CmdConstant.CMD_NW_CREATE_NODEGROUP, version = 1.0,
             description = "createNodeGroup")
     @Parameter(parameterName = "chainId", parameterType = "int", parameterValidRange = "[1,65535]")
     @Parameter(parameterName = "magicNumber", parameterType = "String")
@@ -110,7 +112,7 @@ public class NodeGroupRpc extends BaseCmd {
      * nw_activeCross
      * 友链激活跨链
      */
-    @CmdAnnotation(cmd = "nw_activeCross", version = 1.0,
+    @CmdAnnotation(cmd = CmdConstant.CMD_NW_ACTIVE_CROSS, version = 1.0,
             description = "activeCross")
     @Parameter(parameterName = "chainId", parameterType = "int", parameterValidRange = "[1,65535]")
     @Parameter(parameterName = "maxOut", parameterType = "int", parameterValidRange = "[1,65535]")
@@ -164,7 +166,7 @@ public class NodeGroupRpc extends BaseCmd {
      * nw_getGroupByChainId
      * 查看指定网络组信息
      */
-    @CmdAnnotation(cmd = "nw_getGroupByChainId", version = 1.0,
+    @CmdAnnotation(cmd = CmdConstant.CMD_NW_GET_GROUP_BY_CHAINID, version = 1.0,
             description = "getGroupByChainId")
     @Parameter(parameterName = "chainId", parameterType = "int", parameterValidRange = "[1,65535]")
     public Response getGroupByChainId(Map params) {
@@ -213,7 +215,7 @@ public class NodeGroupRpc extends BaseCmd {
      * nw_getChainConnectAmount
      * 查看指定网络组信息
      */
-    @CmdAnnotation(cmd = "nw_getChainConnectAmount", version = 1.0,
+    @CmdAnnotation(cmd = CmdConstant.CMD_NW_GET_CHAIN_CONNECT_AMOUNT, version = 1.0,
             description = "nw_getChainConnectAmount")
     @Parameter(parameterName = "chainId", parameterType = "int", parameterValidRange = "[1,65535]")
     @Parameter(parameterName = "isCross", parameterType = "boolean")
@@ -236,7 +238,7 @@ public class NodeGroupRpc extends BaseCmd {
      * nw_delNodeGroup
      * 注销指定网络组信息
      */
-    @CmdAnnotation(cmd = "nw_delNodeGroup", version = 1.0,
+    @CmdAnnotation(cmd = CmdConstant.CMD_NW_GET_DELETE_NODEGROUP, version = 1.0,
             description = "delGroupByChainId")
     @Parameter(parameterName = "chainId", parameterType = "int", parameterValidRange = "[1,65535]")
     public Response delGroupByChainId(Map params) {
@@ -252,7 +254,7 @@ public class NodeGroupRpc extends BaseCmd {
      * nw_getSeeds
      * 查询跨链种子节点
      */
-    @CmdAnnotation(cmd = "nw_getSeeds", version = 1.0,
+    @CmdAnnotation(cmd = CmdConstant.CMD_NW_GET_SEEDS, version = 1.0,
             description = "delGroupByChainId")
     @Parameter(parameterName = "chainId", parameterType = "int", parameterValidRange = "[1,65535]")
     public Response getCrossSeeds(List params) {
@@ -277,7 +279,7 @@ public class NodeGroupRpc extends BaseCmd {
      * nw_reconnect
      * 重连网络
      */
-    @CmdAnnotation(cmd = "nw_reconnect", version = 1.0,
+    @CmdAnnotation(cmd = CmdConstant.CMD_NW_RECONNECT, version = 1.0,
             description = "reconnect")
     @Parameter(parameterName = "chainId", parameterType = "int", parameterValidRange = "[1,65535]")
     public Response reconnect(Map params) {
@@ -291,7 +293,7 @@ public class NodeGroupRpc extends BaseCmd {
      * nw_getGroups
      * 获取链组信息
      */
-    @CmdAnnotation(cmd = "nw_getGroups", version = 1.0,
+    @CmdAnnotation(cmd = CmdConstant.CMD_NW_GET_GROUPS, version = 1.0,
             description = "getGroups")
     @Parameter(parameterName = "startPage", parameterType = "int", parameterValidRange = "[0,65535]")
     @Parameter(parameterName = "pageSize", parameterType = "int", parameterValidRange = "[0,65535]")

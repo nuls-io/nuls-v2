@@ -27,7 +27,7 @@ package io.nuls.transaction.utils.queue.entity;
 
 import io.nuls.db.util.DBUtils;
 import io.nuls.tools.core.ioc.SpringLiteContext;
-import static io.nuls.transaction.utils.LoggerUtil.Log;
+import static io.nuls.transaction.utils.LoggerUtil.LOG;
 import io.nuls.transaction.constant.TxConfig;
 import io.nuls.transaction.utils.queue.fqueue.entity.FQueue;
 
@@ -148,7 +148,7 @@ public class PersistentQueue {
             if (file.isFile()) {
                 //删除文件
                 if(!file.delete()){
-                    Log.debug("删除文件失败:" + file.getPath());
+                    LOG.debug("删除文件失败:" + file.getPath());
                 }
                 //否则如果它是一个目录
             } else if (file.isDirectory()) {
@@ -161,7 +161,7 @@ public class PersistentQueue {
                 }
                 //删除文件夹
                 if(!file.delete()){
-                    Log.debug("删除文件夹失败:" + file.getPath());
+                    LOG.debug("删除文件夹失败:" + file.getPath());
                 };
             }
         }

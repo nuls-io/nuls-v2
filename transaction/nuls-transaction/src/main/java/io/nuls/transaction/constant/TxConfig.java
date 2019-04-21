@@ -26,8 +26,6 @@ public class TxConfig {
     private int mainChainId;
     /** 主链主资产ID*/
     private int mainAssetId;
-    /** 语言*/
-    private String language;
     /** 编码*/
     private String encoding;
     /** 未确认交易过期毫秒数-30分钟 */
@@ -80,14 +78,6 @@ public class TxConfig {
 
     public void setMainAssetId(int mainAssetId) {
         this.mainAssetId = mainAssetId;
-    }
-
-    public String getLanguage() {
-        return language;
-    }
-
-    public void setLanguage(String language) {
-        this.language = language;
     }
 
     public String getEncoding() {

@@ -381,8 +381,13 @@ public class CoinDataValidator {
      * @param fromNonce
      * @return
      */
-    private ValidateResult validateCommonCoinData(AccountState accountState, String address, BigInteger fromAmount, byte[] fromNonce) {
-        AccountStateUnconfirmed accountStateUnconfirmed = unconfirmedStateService.getUnconfirmedInfo(accountState);
+    private ValidateResult validateCommonCoinData(AccountState accountState, String address, BigInteger fromAmount, byte[] fromNonce, boolean containUncomfirmedAmount) {
+        AccountStateUnconfirmed accountStateUnconfirmed = null;
+        if (containUncomfirmedAmount) {
+            accountStateUnconfirmed = unconfirmedStateService.getUnconfirmedInfo(accountState);
+        } else {
+            accountStateUnconfirmed = unconfirmedStateService.getUnconfirmedJustNonce(accountState);
+        }
         byte[] preNonce = null;
         BigInteger amount = BigInteger.ZERO;
         if (null == accountStateUnconfirmed) {
@@ -393,7 +398,6 @@ public class CoinDataValidator {
             preNonce = accountStateUnconfirmed.getNonce();
             amount = accountState.getTotalAmount().add(accountStateUnconfirmed.getAmount());
         }
-
         String fromNonceStr = LedgerUtil.getNonceEncode(fromNonce);
         if (BigIntegerUtils.isLessThan(amount, fromAmount)) {
             logger(accountState.getAddressChainId()).info("balance is not enough");
@@ -407,6 +411,7 @@ public class CoinDataValidator {
         try {
             //上面没连接上，但是fromNonce又存储过，则双花了
             if (transactionService.hadCommit(accountState.getAddressChainId(), LedgerUtil.getAccountNoncesStrKey(address, accountState.getAssetChainId(), accountState.getAssetId(), fromNonceStr))) {
+                logger(accountState.getAddressChainId()).info("DOUBLE_EXPENSES_CODE address={},fromNonceStr={}", address, fromNonceStr);
                 return ValidateResult.getResult(ValidateEnum.DOUBLE_EXPENSES_CODE, new String[]{address, fromNonceStr});
             }
         } catch (Exception e) {
@@ -612,7 +617,6 @@ public class CoinDataValidator {
     /**
      * 进行coinData值的校验,在本地交易产生时候进行的校验
      * 即只有未确认交易的校验使用到
-     * 未进行全文的nonce检索,所以不排除历史区块中的双花被当成孤儿交易返回。
      *
      * @param addressChainId
      * @param tx
@@ -640,7 +644,7 @@ public class CoinDataValidator {
             AccountState accountState = accountStateService.getAccountStateReCal(address, addressChainId, coinFrom.getAssetsChainId(), coinFrom.getAssetsId());
             //普通交易
             if (coinFrom.getLocked() == 0) {
-                return validateCommonCoinData(accountState, address, coinFrom.getAmount(), coinFrom.getNonce());
+                return validateCommonCoinData(accountState, address, coinFrom.getAmount(), coinFrom.getNonce(),true);
             } else {
                 if (!isValidateFreezeTx(coinFrom.getLocked(), accountState, coinFrom.getAmount(), coinFrom.getNonce())) {
                     //确认交易未找到冻结的交易
@@ -677,7 +681,7 @@ public class CoinDataValidator {
             AccountState accountState = accountStateService.getAccountStateReCal(address, addressChainId, coinFrom.getAssetsChainId(), coinFrom.getAssetsId());
             //普通交易
             if (coinFrom.getLocked() == 0) {
-                ValidateResult validateResult = validateCommonCoinData(accountState, address, coinFrom.getAmount(), coinFrom.getNonce());
+                ValidateResult validateResult = validateCommonCoinData(accountState, address, coinFrom.getAmount(), coinFrom.getNonce(),false);
                 if (validateResult.isSuccess()) {
                     CoinDataUtil.calTxFromAmount(addressChainId, accountsMap, coinFrom, txNonce, accountKey);
                 } else {

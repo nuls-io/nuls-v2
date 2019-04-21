@@ -26,6 +26,8 @@
 package io.nuls.network.constant;
 
 
+import io.nuls.rpc.model.ModuleE;
+import io.nuls.tools.constant.CommonCodeConstanst;
 import io.nuls.tools.constant.ErrorCode;
 
 /**
@@ -34,23 +36,11 @@ import io.nuls.tools.constant.ErrorCode;
  *
  * @author Lan
  */
-public interface NetworkErrorCode {
-    ErrorCode SUCCESS = ErrorCode.init("10000");
-
-    ErrorCode FAIL = ErrorCode.init("10001");
-
-    ErrorCode DATA_ERROR = ErrorCode.init("10014");
-    ErrorCode PARAMETER_ERROR = ErrorCode.init("10012");
-
-
-    ErrorCode NET_MESSAGE_ERROR = ErrorCode.init("40002");
-    ErrorCode NET_MESSAGE_SEND_FAIL = ErrorCode.init("40003");
-    ErrorCode NET_MESSAGE_SEND_EXCEPTION = ErrorCode.init("40004");
-
-
-    ErrorCode NET_BROADCAST_FAIL = ErrorCode.init("40011");
-    ErrorCode NET_NODE_DEAD = ErrorCode.init("40012");
-    ErrorCode NET_NODE_MISS_CHANNEL = ErrorCode.init("40013");
-
-
+public interface NetworkErrorCode extends CommonCodeConstanst {
+    ErrorCode NET_MESSAGE_ERROR = ErrorCode.init(ModuleE.NW.abbr + "_0001");
+    ErrorCode NET_MESSAGE_SEND_FAIL = ErrorCode.init(ModuleE.NW.abbr + "_0002");
+    ErrorCode NET_MESSAGE_SEND_EXCEPTION = ErrorCode.init(ModuleE.NW.abbr + "_0003");
+    ErrorCode NET_BROADCAST_FAIL = ErrorCode.init(ModuleE.NW.abbr + "_0004");
+    ErrorCode NET_NODE_DEAD = ErrorCode.init(ModuleE.NW.abbr + "_0005");
+    ErrorCode NET_NODE_MISS_CHANNEL = ErrorCode.init(ModuleE.NW.abbr + "_0006");
 }

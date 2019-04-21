@@ -30,7 +30,6 @@ import io.nuls.ledger.model.po.AccountState;
 import io.nuls.ledger.model.po.AccountStateUnconfirmed;
 import io.nuls.ledger.model.po.TxUnconfirmed;
 
-import java.math.BigInteger;
 import java.util.List;
 import java.util.Map;
 
@@ -51,13 +50,22 @@ public interface UnconfirmedStateService {
 
 
     /**
+     * 获取账本nonce信息
+     *
+     * @param accountState
+     * @return
+     */
+    AccountStateUnconfirmed getUnconfirmedJustNonce(AccountState accountState);
+
+    /**
      * 回滚信息
+     *
      * @param accountState
      * @param assetKey
      * @param txsUnconfirmed
      * @param accountStateUnconfirmed
      */
-    void mergeUnconfirmedNonce(AccountState accountState, String assetKey, Map<byte[],byte[]> txsUnconfirmed, AccountStateUnconfirmed accountStateUnconfirmed);
+    void mergeUnconfirmedNonce(AccountState accountState, String assetKey, Map<byte[], byte[]> txsUnconfirmed, AccountStateUnconfirmed accountStateUnconfirmed);
 
     /**
      * 回滚未确认账本交易
@@ -71,6 +79,7 @@ public interface UnconfirmedStateService {
 
     /**
      * unconfirmed tx exist
+     *
      * @param addressChainId
      * @param assetNonceKey
      * @return
@@ -80,6 +89,7 @@ public interface UnconfirmedStateService {
 
     /**
      * delete unconfirmed state
+     *
      * @param addressChainId
      * @param accountKey
      * @throws Exception
@@ -87,24 +97,26 @@ public interface UnconfirmedStateService {
     void clearAccountUnconfirmed(int addressChainId, String accountKey) throws Exception;
 
     /**
-     * update account unconfirmed2confirmed amount
+     * delete unconfirmed chain
      * @param addressChainId
      * @param assetKey
-     * @param amount
+     * @param beginTxUnconfirmed
      * @throws Exception
      */
-    void updateAccountAmountUncfd2Cfd(int addressChainId, byte[] assetKey, BigInteger amount) throws Exception;
+    void deleteTxUnconfirmedList(int addressChainId, String assetKey,TxUnconfirmed beginTxUnconfirmed) throws Exception;
 
     /**
      * batch delete unconfirmed tx
+     *
      * @param addressChainId
      * @param keys
      * @throws Exception
      */
-    void batchDeleteUnconfirmedTx(int addressChainId, List<byte []> keys) throws Exception;
+    void batchDeleteUnconfirmedTx(int addressChainId, List<byte[]> keys) throws Exception;
 
     /**
      * update unconfirmed tx
+     *
      * @param addressChainId
      * @param txNonce
      * @param txUnconfirmed

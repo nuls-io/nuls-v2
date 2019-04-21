@@ -70,7 +70,7 @@ public abstract class BaseMessage extends BaseNulsData {
             try {
                 this.hash = NulsDigestData.calcDigestData(this.serialize());
             } catch (IOException e) {
-                //Log.error(e);
+                //LOG.error(e);
             }
         }
         return hash;

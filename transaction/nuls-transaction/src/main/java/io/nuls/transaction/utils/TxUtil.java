@@ -45,7 +45,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import static io.nuls.transaction.utils.LoggerUtil.Log;
+import static io.nuls.transaction.utils.LoggerUtil.LOG;
 
 /**
  * @author: Charlie
@@ -62,7 +62,7 @@ public class TxUtil {
         try {
             return tx.getCoinDataInstance();
         } catch (NulsException e) {
-            Log.error(e);
+            LOG.error(e);
             throw new NulsException(TxErrorCode.DESERIALIZE_COINDATA_ERROR);
         }
     }
@@ -74,7 +74,7 @@ public class TxUtil {
         try {
             return Transaction.getInstance(txBytes);
         } catch (NulsException e) {
-            Log.error(e);
+            LOG.error(e);
             throw new NulsException(TxErrorCode.DESERIALIZE_TX_ERROR);
         }
     }
@@ -88,10 +88,10 @@ public class TxUtil {
             baseNulsData.parse(new NulsByteBuffer(bytes));
             return (T) baseNulsData;
         } catch (NulsException e) {
-            Log.error(e);
+            LOG.error(e);
             throw new NulsException(TxErrorCode.DESERIALIZE_ERROR);
         } catch (Exception e) {
-            Log.error(e);
+            LOG.error(e);
             throw new NulsException(TxErrorCode.DESERIALIZE_ERROR);
         }
     }
@@ -222,7 +222,7 @@ public class TxUtil {
             String remarkStr =  remark == null ? "" : new String(tx.getRemark(),"UTF-8");
             nulsLogger.debug("remark: {}", remarkStr);
         } catch (UnsupportedEncodingException e) {
-            Log.error(e);
+            LOG.error(e);
         }
 
         CoinData coinData = null;
@@ -231,7 +231,7 @@ public class TxUtil {
                 coinData = tx.getCoinDataInstance();
             }
         } catch (NulsException e) {
-            Log.error(e);
+            LOG.error(e);
         }
         if (coinData != null) {
             nulsLogger.debug("coinData:");

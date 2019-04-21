@@ -33,7 +33,7 @@ import io.nuls.ledger.utils.LedgerUtil;
  */
 public class LedgerConstant {
 
-    public static final String MODULE_DB_PATH = "/ld";
+    public static final String MODULE_DB_PATH = "/lg";
 
     public static int UNCONFIRMED_NONCE = 0;
     public static int CONFIRMED_NONCE = 1;

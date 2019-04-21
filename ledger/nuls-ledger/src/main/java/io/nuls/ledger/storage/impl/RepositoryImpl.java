@@ -49,6 +49,7 @@ import static io.nuls.ledger.utils.LoggerUtil.logger;
 
 /**
  * Created by wangkun23 on 2018/11/19.
+ *
  * @author lanjinsheng
  */
 @Service
@@ -82,15 +83,11 @@ public class RepositoryImpl implements Repository, InitializingBean {
     @Override
     public void updateAccountState(byte[] key, AccountState nowAccountState) throws Exception {
         //update account
-        LoggerUtil.logger(nowAccountState.getAddressChainId()).debug("updateAccountState hash={},nonce={}", nowAccountState.getTxHash(), nowAccountState.getNonce());
-        LoggerUtil.logger(nowAccountState.getAddressChainId()).debug("updateAccountState address={},addressChainId={},assetChainId={},assetId={},getAvailableAmount={}," +
-                        "getFreezeTotal={}",
-                nowAccountState.getAddress(), nowAccountState.getAddressChainId(), nowAccountState.getAssetChainId(), nowAccountState.getAssetId(),
-                nowAccountState.getAvailableAmount(), nowAccountState.getFreezeTotal());
         RocksDBService.put(getLedgerAccountTableName(nowAccountState.getAddressChainId()), key, nowAccountState.serialize());
     }
+
     @Override
-    public void  batchUpdateAccountState(int addressChainId, Map<byte[],byte[]> accountStateMap) throws Exception {
+    public void batchUpdateAccountState(int addressChainId, Map<byte[], byte[]> accountStateMap) throws Exception {
         //update account
         RocksDBService.batchPut(getLedgerAccountTableName(addressChainId), accountStateMap);
     }
@@ -185,29 +182,30 @@ public class RepositoryImpl implements Repository, InitializingBean {
         return rtList;
     }
 
+    String getChainTableName(String tableName, int chainId) {
+        return tableName + "_" + chainId;
+    }
 
     String getLedgerAccountTableName(int chainId) {
-        return DataBaseArea.TB_LEDGER_ACCOUNT + chainId;
+        return getChainTableName(DataBaseArea.TB_LEDGER_ACCOUNT, chainId);
     }
 
     String getBlockSnapshotTableName(int chainId) {
-        return DataBaseArea.TB_LEDGER_ACCOUNT_BLOCK_SNAPSHOT + chainId;
+        return getChainTableName(DataBaseArea.TB_LEDGER_ACCOUNT_BLOCK_SNAPSHOT, chainId);
     }
 
     public String getChainsHeightTableName() {
         return DataBaseArea.TB_LEDGER_BLOCK_HEIGHT;
     }
 
-    String getBlockTableName(int chainId) {
-        return DataBaseArea.TB_LEDGER_BLOCKS + chainId;
+    String getLedgerNonceTableName(int chainId) {
+        return getChainTableName(DataBaseArea.TB_LEDGER_NONCES, chainId);
     }
 
-    String getLedgerNonceTableName(int chainId) {
-        return DataBaseArea.TB_LEDGER_NONCES + chainId;
-    }
     String getLedgerHashTableName(int chainId) {
-        return DataBaseArea.TB_LEDGER_HASH + chainId;
+        return getChainTableName(DataBaseArea.TB_LEDGER_HASH, chainId);
     }
+
     /**
      * 初始化数据库
      */
@@ -218,9 +216,6 @@ public class RepositoryImpl implements Repository, InitializingBean {
             }
             if (!RocksDBService.existTable(getBlockSnapshotTableName(addressChainId))) {
                 RocksDBService.createTable(getBlockSnapshotTableName(addressChainId));
-            }
-            if (!RocksDBService.existTable(getBlockTableName(addressChainId))) {
-                RocksDBService.createTable(getBlockTableName(addressChainId));
             }
             if (!RocksDBService.existTable(getLedgerNonceTableName(addressChainId))) {
                 RocksDBService.createTable(getLedgerNonceTableName(addressChainId));

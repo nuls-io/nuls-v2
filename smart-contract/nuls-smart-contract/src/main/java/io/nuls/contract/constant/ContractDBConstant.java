@@ -34,11 +34,6 @@ package io.nuls.contract.constant;
 public interface ContractDBConstant {
 
     /**
-     * 系统语言表名 一个节点共用，不区分chain
-     * system language table name
-     */
-    String DB_NAME_LANGUAGE = "contract_language";
-    /**
      * 配置信息表名
      * chain configuration table name
      */

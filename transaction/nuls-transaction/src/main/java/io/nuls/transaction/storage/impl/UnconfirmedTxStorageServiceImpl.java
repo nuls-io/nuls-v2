@@ -20,7 +20,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static io.nuls.transaction.utils.LoggerUtil.Log;
+import static io.nuls.transaction.utils.LoggerUtil.LOG;
 
 /**
  * 验证通过但未打包的交易
@@ -42,14 +42,14 @@ public class UnconfirmedTxStorageServiceImpl implements UnconfirmedTxStorageServ
         try {
             txHashBytes = tx.getHash().serialize();
         } catch (IOException e) {
-            Log.error(e);
+            LOG.error(e);
             return false;
         }
         boolean result = false;
         try {
-            result = RocksDBService.put(TxDBConstant.DB_TRANSACTION_CACHE + chainId, txHashBytes, txPO.serialize());
+            result = RocksDBService.put(TxDBConstant.DB_TRANSACTION_UNCONFIRMED_PREFIX + chainId, txHashBytes, txPO.serialize());
         } catch (Exception e) {
-            Log.error(e);
+            LOG.error(e);
         }
         return result;
     }
@@ -66,9 +66,9 @@ public class UnconfirmedTxStorageServiceImpl implements UnconfirmedTxStorageServ
                 //序列化对象为byte数组存储
                 txPoMap.put(tx.getHash().serialize(), txPO.serialize());
             }
-            return RocksDBService.batchPut(TxDBConstant.DB_TRANSACTION_CACHE + chainId, txPoMap);
+            return RocksDBService.batchPut(TxDBConstant.DB_TRANSACTION_UNCONFIRMED_PREFIX + chainId, txPoMap);
         } catch (Exception e) {
-            Log.error(e.getMessage());
+            LOG.error(e.getMessage());
             throw new NulsRuntimeException(TxErrorCode.DB_SAVE_BATCH_ERROR);
         }
     }
@@ -82,7 +82,7 @@ public class UnconfirmedTxStorageServiceImpl implements UnconfirmedTxStorageServ
         try {
             return getTx(chainId, hash.serialize());
         } catch (IOException e) {
-            Log.error(e);
+            LOG.error(e);
             throw new NulsRuntimeException(e);
         }
     }
@@ -90,13 +90,13 @@ public class UnconfirmedTxStorageServiceImpl implements UnconfirmedTxStorageServ
     @Override
     public boolean isExists(int chainId, NulsDigestData hash) {
         try {
-            byte[] txBytes = RocksDBService.get(TxDBConstant.DB_TRANSACTION_CACHE + chainId, hash.serialize());
+            byte[] txBytes = RocksDBService.get(TxDBConstant.DB_TRANSACTION_UNCONFIRMED_PREFIX + chainId, hash.serialize());
             if (null != txBytes && txBytes.length > 0) {
                 return true;
             }
             return false;
         } catch (IOException e) {
-            Log.error(e);
+            LOG.error(e);
             throw new NulsRuntimeException(e);
         }
     }
@@ -110,7 +110,7 @@ public class UnconfirmedTxStorageServiceImpl implements UnconfirmedTxStorageServ
     }
 
     private Transaction getTx(int chainId, byte[] hashSerialize) {
-        byte[] txBytes = RocksDBService.get(TxDBConstant.DB_TRANSACTION_CACHE + chainId, hashSerialize);
+        byte[] txBytes = RocksDBService.get(TxDBConstant.DB_TRANSACTION_UNCONFIRMED_PREFIX + chainId, hashSerialize);
         Transaction tx = null;
         if (null != txBytes) {
             try {
@@ -118,7 +118,7 @@ public class UnconfirmedTxStorageServiceImpl implements UnconfirmedTxStorageServ
                 txPO.parse(new NulsByteBuffer(txBytes, 0));
                 tx = txPO.getTx();
             } catch (Exception e) {
-                Log.error(e);
+                LOG.error(e);
                 return null;
             }
         }
@@ -133,9 +133,9 @@ public class UnconfirmedTxStorageServiceImpl implements UnconfirmedTxStorageServ
         }
         boolean result = false;
         try {
-            result = RocksDBService.delete(TxDBConstant.DB_TRANSACTION_CACHE + chainId, hash.serialize());
+            result = RocksDBService.delete(TxDBConstant.DB_TRANSACTION_UNCONFIRMED_PREFIX + chainId, hash.serialize());
         } catch (Exception e) {
-            Log.error(e);
+            LOG.error(e);
         }
         return result;
     }
@@ -148,7 +148,7 @@ public class UnconfirmedTxStorageServiceImpl implements UnconfirmedTxStorageServ
         }
         List<Transaction> txList = new ArrayList<>();
         //根据交易hash批量查询交易数据
-        List<byte[]> list = RocksDBService.multiGetValueList(TxDBConstant.DB_TRANSACTION_CACHE + chainId, hashList);
+        List<byte[]> list = RocksDBService.multiGetValueList(TxDBConstant.DB_TRANSACTION_UNCONFIRMED_PREFIX + chainId, hashList);
         if (list != null) {
             for (byte[] txBytes : list) {
                 Transaction tx = new Transaction();
@@ -157,7 +157,7 @@ public class UnconfirmedTxStorageServiceImpl implements UnconfirmedTxStorageServ
                     txPO.parse(txBytes, 0);
                     tx = txPO.getTx();
                 } catch (NulsException e) {
-                    Log.error(e);
+                    LOG.error(e);
                 }
                 txList.add(tx);
             }
@@ -174,9 +174,9 @@ public class UnconfirmedTxStorageServiceImpl implements UnconfirmedTxStorageServ
 
         try {
             //delete transaction
-            return RocksDBService.deleteKeys(TxDBConstant.DB_TRANSACTION_CACHE + chainId, hashList);
+            return RocksDBService.deleteKeys(TxDBConstant.DB_TRANSACTION_UNCONFIRMED_PREFIX + chainId, hashList);
         } catch (Exception e) {
-            Log.error(e);
+            LOG.error(e);
         }
         return false;
     }
@@ -185,14 +185,14 @@ public class UnconfirmedTxStorageServiceImpl implements UnconfirmedTxStorageServ
     public List<TransactionUnconfirmedPO> getAllTxPOList(int chainId) {
         List<TransactionUnconfirmedPO> txList = new ArrayList<>();
         //根据交易hash批量查询交易数据
-        List<byte[]> list = RocksDBService.valueList(TxDBConstant.DB_TRANSACTION_CACHE + chainId);
+        List<byte[]> list = RocksDBService.valueList(TxDBConstant.DB_TRANSACTION_UNCONFIRMED_PREFIX + chainId);
         if (list != null) {
             for (byte[] txBytes : list) {
                 TransactionUnconfirmedPO txPO = new TransactionUnconfirmedPO();
                 try {
                     txPO.parse(txBytes, 0);
                 } catch (NulsException e) {
-                    Log.error(e);
+                    LOG.error(e);
                 }
                 txList.add(txPO);
             }
