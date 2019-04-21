@@ -73,6 +73,11 @@ public class UnconfirmedStateServiceImpl implements UnconfirmedStateService {
         byte[] key = LedgerUtil.getKey(accountState.getAddress(), accountState.getAssetChainId(), accountState.getAssetId());
         AccountStateUnconfirmed accountStateUnconfirmed = unconfirmedRepository.getAccountStateUnconfirmed(accountState.getAddressChainId(), key);
         if (null != accountStateUnconfirmed && !accountStateUnconfirmed.isOverTime()) {
+            //未确认与已确认状态一样，则未确认是最后的缓存信息
+            if(LedgerUtil.equalsNonces(accountState.getNonce(),accountStateUnconfirmed.getNonce())){
+                return null;
+            }
+            //计算未确认的金额
             accountStateUnconfirmed.setAmount(getUnconfirmedAmount(accountState.getAddressChainId(), LedgerUtil.getKeyStr(accountState.getAddress(), accountState.getAssetChainId(), accountState.getAssetId()), accountStateUnconfirmed));
         } else {
             return null;
@@ -80,11 +85,23 @@ public class UnconfirmedStateServiceImpl implements UnconfirmedStateService {
         return accountStateUnconfirmed;
     }
 
+
+
+    /**
+     * 获取账本nonce信息
+     *
+     * @param accountState
+     * @return
+     */
     @Override
     public AccountStateUnconfirmed getUnconfirmedJustNonce(AccountState accountState) {
         byte[] key = LedgerUtil.getKey(accountState.getAddress(), accountState.getAssetChainId(), accountState.getAssetId());
         AccountStateUnconfirmed accountStateUnconfirmed = unconfirmedRepository.getAccountStateUnconfirmed(accountState.getAddressChainId(), key);
         if (null != accountStateUnconfirmed && !accountStateUnconfirmed.isOverTime()) {
+            //未确认与已确认状态一样，则未确认是最后的缓存信息
+            if(LedgerUtil.equalsNonces(accountState.getNonce(),accountStateUnconfirmed.getNonce())){
+                return null;
+            }
             return accountStateUnconfirmed;
         } else {
             return null;
