@@ -90,4 +90,11 @@ public class HashMessage extends BaseBusinessMessage {
     public int hashCode() {
         return requestHash != null ? requestHash.hashCode() : 0;
     }
+
+    @Override
+    public String toString() {
+        return "HashMessage{" +
+                "requestHash=" + requestHash +
+                '}';
+    }
 }

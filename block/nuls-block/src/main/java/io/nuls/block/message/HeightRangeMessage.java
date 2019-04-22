@@ -90,4 +90,11 @@ public class HeightRangeMessage extends BaseBusinessMessage {
         }
     }
 
+    @Override
+    public String toString() {
+        return "HeightRangeMessage{" +
+                "startHeight=" + startHeight +
+                ", endHeight=" + endHeight +
+                '}';
+    }
 }

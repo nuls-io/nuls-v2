@@ -47,22 +47,22 @@ public class LoggerUtil {
     private static final String LOGGER_KEY2 = ModuleE.BL.abbr;
     private static final String LOGGER_KEY3 = ModuleE.TX.abbr;
     private static final String LOGGER_KEY4 = ModuleE.CS.abbr;
+    private static final String LOGGER_KEY5 = "nwInfos";
     private static Map<String, NulsLogger> logMap = new HashMap<>();
     private static NulsLogger logger = null;
-    private static NulsLogger nwInfosLog = null;
 
     public static void defaultLogInit(String logLevel) {
-        logger = LoggerBuilder.getLogger("nwLogs", "nw", Level.valueOf(logLevel));
-        nwInfosLog = LoggerBuilder.getLogger("nwLogs", "nwInfos", Level.valueOf(logLevel));
+        logger = LoggerBuilder.getLogger( "nw", Level.valueOf(logLevel));
     }
 
     public static void createLogs(int chainId, String logLevel) {
-        String folderName = "nwLogs/" + chainId;
+        String folderName = "chain-" + chainId+"/network";
         if (null == logMap.get(LOGGER_KEY1 + chainId)) {
             logMap.put(LOGGER_KEY1 + chainId, LoggerBuilder.getLogger(folderName, LOGGER_KEY1, Level.valueOf(logLevel)));
             logMap.put(LOGGER_KEY2 + chainId, LoggerBuilder.getLogger(folderName, LOGGER_KEY2, Level.valueOf(logLevel)));
             logMap.put(LOGGER_KEY3 + chainId, LoggerBuilder.getLogger(folderName, LOGGER_KEY3, Level.valueOf(logLevel)));
             logMap.put(LOGGER_KEY4 + chainId, LoggerBuilder.getLogger(folderName, LOGGER_KEY4, Level.valueOf(logLevel)));
+            logMap.put(LOGGER_KEY5 + chainId, LoggerBuilder.getLogger(folderName, LOGGER_KEY5, Level.valueOf(logLevel)));
         }
     }
 
@@ -72,7 +72,12 @@ public class LoggerUtil {
         }
         return logMap.get(LOGGER_KEY1 + chainId);
     }
-
+    public static NulsLogger nwInfosLogger(int chainId) {
+        if (null == logMap.get(LOGGER_KEY5 + chainId)) {
+            return logger;
+        }
+        return logMap.get(LOGGER_KEY5 + chainId);
+    }
     public static NulsLogger logger() {
         if (null == logger) {
             defaultLogInit("DEBUG");
@@ -80,9 +85,6 @@ public class LoggerUtil {
         return logger;
     }
 
-    public static NulsLogger nwInfosLogger() {
-        return nwInfosLog;
-    }
 
     /**
      * 调试代码

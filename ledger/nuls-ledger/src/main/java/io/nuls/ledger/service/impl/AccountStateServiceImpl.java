@@ -26,24 +26,22 @@
 package io.nuls.ledger.service.impl;
 
 import io.nuls.ledger.constant.LedgerConstant;
-import io.nuls.ledger.constant.ValidateEnum;
 import io.nuls.ledger.manager.LedgerChainManager;
-import io.nuls.ledger.model.UnconfirmedTx;
-import io.nuls.ledger.model.ValidateResult;
 import io.nuls.ledger.model.po.*;
 import io.nuls.ledger.service.AccountStateService;
 import io.nuls.ledger.service.FreezeStateService;
 import io.nuls.ledger.service.UnconfirmedStateService;
 import io.nuls.ledger.storage.Repository;
 import io.nuls.ledger.storage.UnconfirmedRepository;
-import io.nuls.ledger.utils.*;
+import io.nuls.ledger.utils.LedgerUtil;
+import io.nuls.ledger.utils.TimeUtil;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Service;
-import io.nuls.tools.model.BigIntegerUtils;
 
 import java.math.BigInteger;
-import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author lanjinsheng
@@ -63,29 +61,31 @@ public class AccountStateServiceImpl implements AccountStateService {
     @Autowired
     LedgerChainManager ledgerChainManager;
 
-
-    @Override
-    public void updateAccountStateByTx(String assetKey, AccountState accountState) throws Exception {
-        //解冻时间高度锁
-        freezeStateService.recalculateFreeze(accountState);
-        accountState.setLatestUnFreezeTime(TimeUtil.getCurrentTime());
-        repository.updateAccountState(assetKey.getBytes(LedgerConstant.DEFAULT_ENCODING), accountState);
-    }
-
     @Override
     public void rollAccountState(String assetKey, AccountStateSnapshot accountStateSnapshot) throws Exception {
         //获取当前数据库值
-        List<UnconfirmedNonce> unconfirmedNonces = new ArrayList<>();
-        accountStateSnapshot.getNonces().forEach(nonce -> {
-            UnconfirmedNonce unconfirmedNonce = new UnconfirmedNonce();
-            unconfirmedNonce.setNonce(nonce);
-            unconfirmedNonce.setTime(TimeUtil.getCurrentTime());
-            unconfirmedNonces.add(unconfirmedNonce);
-        });
-        repository.updateAccountState(assetKey.getBytes(LedgerConstant.DEFAULT_ENCODING), accountStateSnapshot.getAccountState());
+        Map<byte[], byte[]> unconfirmedNonces = new HashMap<>(64);
+        AccountState accountState = accountStateSnapshot.getAccountState();
+        AccountStateUnconfirmed accountStateUnconfirmed = new AccountStateUnconfirmed();
+        List<AmountNonce> list = accountStateSnapshot.getNonces();
+        for (AmountNonce amountNonce : list) {
+            TxUnconfirmed txUnconfirmed = new TxUnconfirmed(accountState.getAddress(), accountState.getAssetChainId(), accountState.getAssetId(),
+                    amountNonce.getFromNonce(), amountNonce.getNonce(), amountNonce.getAmount());
+            unconfirmedNonces.put(LedgerUtil.getAccountNoncesByteKey(assetKey, LedgerUtil.getNonceEncode(amountNonce.getNonce())), txUnconfirmed.serialize());
+        }
+
+        repository.updateAccountState(assetKey.getBytes(LedgerConstant.DEFAULT_ENCODING), accountState);
         //进行nonce的回退合并处理
         if (unconfirmedNonces.size() > 0) {
-            unconfirmedStateService.mergeUnconfirmedNonce(accountStateSnapshot.getAccountState().getAddressChainId(), assetKey, unconfirmedNonces, accountStateSnapshot.getTxHashList());
+            accountStateUnconfirmed.setAddress(accountState.getAddress());
+            accountStateUnconfirmed.setAddressChainId(accountState.getAddressChainId());
+            accountStateUnconfirmed.setAssetChainId(accountState.getAssetChainId());
+            accountStateUnconfirmed.setAssetId(accountState.getAssetId());
+            accountStateUnconfirmed.setNonce(list.get(list.size() - 1).getNonce());
+            accountStateUnconfirmed.setFromNonce(list.get(list.size() - 1).getFromNonce());
+            accountStateUnconfirmed.setAmount(list.get(list.size() - 1).getAmount());
+            accountStateUnconfirmed.setCreateTime(TimeUtil.getCurrentTime());
+            unconfirmedStateService.mergeUnconfirmedNonce(accountStateSnapshot.getAccountState(), assetKey, unconfirmedNonces, accountStateUnconfirmed);
         }
     }
 
@@ -100,7 +100,7 @@ public class AccountStateServiceImpl implements AccountStateService {
      * @return
      */
     @Override
-    public AccountState getAccountStateUnSyn(String address, int addressChainId, int assetChainId, int assetId) {
+    public AccountState getAccountState(String address, int addressChainId, int assetChainId, int assetId) {
         try {
             ledgerChainManager.addChain(addressChainId);
         } catch (Exception e) {
@@ -109,7 +109,7 @@ public class AccountStateServiceImpl implements AccountStateService {
         byte[] key = LedgerUtil.getKey(address, assetChainId, assetId);
         AccountState accountState = repository.getAccountState(addressChainId, key);
         if (null == accountState) {
-            accountState = new AccountState(address, addressChainId, assetChainId, assetId, LedgerConstant.INIT_NONCE);
+            accountState = new AccountState(address, addressChainId, assetChainId, assetId, LedgerConstant.INIT_NONCE_BYTE);
         }
         return accountState;
     }
@@ -132,7 +132,7 @@ public class AccountStateServiceImpl implements AccountStateService {
         byte[] key = LedgerUtil.getKey(address, assetChainId, assetId);
         AccountState accountState = repository.getAccountState(addressChainId, key);
         if (null == accountState) {
-            accountState = new AccountState(address, addressChainId, assetChainId, assetId, LedgerConstant.INIT_NONCE);
+            accountState = new AccountState(address, addressChainId, assetChainId, assetId, LedgerConstant.INIT_NONCE_BYTE);
         } else {
             //解冻时间高度锁
             freezeStateService.recalculateFreeze(accountState);
@@ -142,38 +142,4 @@ public class AccountStateServiceImpl implements AccountStateService {
     }
 
 
-    /**
-     * @param addressChainId
-     * @param newNonce
-     * @param unconfirmedTx
-     */
-    @Override
-    public ValidateResult updateUnconfirmTx(int addressChainId, String newNonce, UnconfirmedTx unconfirmedTx) {
-        //账户同步锁
-        byte[] key = LedgerUtil.getKey(unconfirmedTx.getAddress(), unconfirmedTx.getAssetChainId(), unconfirmedTx.getAssetId());
-        synchronized (LockerUtil.getUnconfirmedAccountLocker(unconfirmedTx.getAddress(), unconfirmedTx.getAssetChainId(), unconfirmedTx.getAssetId())) {
-            AccountState accountState = getAccountStateUnSyn(unconfirmedTx.getAddress(), addressChainId, unconfirmedTx.getAssetChainId(), unconfirmedTx.getAssetId());
-            AccountStateUnconfirmed accountStateUnconfirmed = unconfirmedStateService.getUnconfirmedInfoReCal(accountState);
-            if (BigIntegerUtils.isGreaterThan(unconfirmedTx.getSpendAmount(),BigInteger.ZERO)) {
-                if (!unconfirmedTx.getFromNonce().equals(accountStateUnconfirmed.getLatestUnconfirmedNonce())) {
-                    return ValidateResult.getResult(ValidateEnum.FAIL_CODE, new String[]{unconfirmedTx.getAddress(), unconfirmedTx.getFromNonce(), "account lastNonce=" + accountStateUnconfirmed.getLatestUnconfirmedNonce()});
-                }
-                UnconfirmedNonce unconfirmedNonce = new UnconfirmedNonce(newNonce);
-                accountStateUnconfirmed.addUnconfirmedNonce(unconfirmedNonce);
-                LoggerUtil.logger(addressChainId).debug("非确认交易nonce提交后：txHash={},dbNonce={},nonces={}", unconfirmedTx.getTxHash(), accountStateUnconfirmed.getDbNonce(), accountStateUnconfirmed.getUnconfirmedNoncesStrs());
-                UnconfirmedAmount unconfirmedAmount = new UnconfirmedAmount(unconfirmedTx.getEarnAmount(), unconfirmedTx.getSpendAmount(),
-                        unconfirmedTx.getFromUnLockedAmount(), unconfirmedTx.getToLockedAmount());
-                unconfirmedAmount.setTxHash(unconfirmedTx.getTxHash());
-                accountStateUnconfirmed.addUnconfirmedAmount(unconfirmedAmount);
-                try {
-                    unconfirmedRepository.updateAccountStateUnconfirmed(key, accountStateUnconfirmed);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    return ValidateResult.getResult(ValidateEnum.FAIL_CODE, new String[]{unconfirmedTx.getAddress(), unconfirmedTx.getFromNonce(), "updateUnconfirmTx exception"});
-                }
-            }
-
-            return ValidateResult.getSuccess();
-        }
-    }
 }

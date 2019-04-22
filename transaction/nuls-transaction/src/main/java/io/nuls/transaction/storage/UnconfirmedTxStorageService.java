@@ -2,7 +2,7 @@ package io.nuls.transaction.storage;
 
 import io.nuls.base.data.NulsDigestData;
 import io.nuls.base.data.Transaction;
-import io.nuls.transaction.model.po.TransactionsPO;
+import io.nuls.transaction.model.po.TransactionUnconfirmedPO;
 
 import java.util.List;
 
@@ -92,5 +92,5 @@ public interface UnconfirmedTxStorageService {
      * @param chainId
      * @return
      */
-    List<TransactionsPO> getAllTxPOList(int chainId);
+    List<TransactionUnconfirmedPO> getAllTxPOList(int chainId);
 }

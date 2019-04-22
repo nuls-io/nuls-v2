@@ -49,9 +49,6 @@ import static io.nuls.block.utils.LoggerUtil.commonLog;
  */
 public class NetworkUtil {
 
-    private static long latestGetTime = System.currentTimeMillis();
-    private static long offset = 0;
-
     /**
      * 根据链ID获取可用节点
      *
@@ -75,7 +72,7 @@ public class NetworkUtil {
             }
             Map responseData = (Map) response.getResponseData();
             List list = (List) responseData.get("nw_getNodes");
-            List nodes = new ArrayList();
+            List<Node> nodes = new ArrayList<>();
             for (Object o : list) {
                 Map map = (Map) o;
                 Node node = new Node();
@@ -129,7 +126,6 @@ public class NetworkUtil {
             params.put("messageBody", RPCUtil.encode(message.serialize()));
             params.put("command", command);
             boolean success = ResponseMessageProcessor.requestAndResponse(ModuleE.NW.abbr, "nw_broadcast", params).isSuccess();
-
             messageLog.debug("broadcast " + message.getClass().getName() +", chainId:" + chainId + ", success:" + success);
             return success;
         } catch (Exception e) {
@@ -224,7 +220,6 @@ public class NetworkUtil {
             params.put("nodeId", nodeId);
             params.put("blockHeight", height);
             params.put("blockHash", hash.toString());
-
             ResponseMessageProcessor.requestAndResponse(ModuleE.NW.abbr, "nw_updateNodeInfo", params);
         } catch (Exception e) {
             e.printStackTrace();
@@ -237,7 +232,7 @@ public class NetworkUtil {
      *
      * @return
      */
-    public static boolean register() {
+    public static void register() {
         try {
             Map<String, Object> map = new HashMap<>(2);
             List<Map<String, String>> cmds = new ArrayList<>();
@@ -250,18 +245,11 @@ public class NetworkUtil {
                 cmds.add(cmd);
             }
             map.put("protocolCmds", cmds);
-            boolean success = ResponseMessageProcessor.requestAndResponse(ModuleE.NW.abbr, "nw_protocolRegister", map).isSuccess();
-            while (!success) {
-                commonLog.debug("get nw_protocolRegister " + success);
-                Thread.sleep(1000L);
-                success = ResponseMessageProcessor.requestAndResponse(ModuleE.NW.abbr, "nw_protocolRegister", map).isSuccess();
-            }
-            return success;
+            ResponseMessageProcessor.requestAndResponse(ModuleE.NW.abbr, "nw_protocolRegister", map);
         } catch (Exception e) {
             e.printStackTrace();
             commonLog.error("get nw_protocolRegister fail");
         }
-        return false;
     }
 
 }

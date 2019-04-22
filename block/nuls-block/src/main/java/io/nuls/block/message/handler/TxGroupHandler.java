@@ -90,7 +90,7 @@ public class TxGroupHandler extends BaseCmd {
         }
         //2.已收到部分区块,还缺失交易信息,收到的应该就是缺失的交易信息
         if (BlockForwardEnum.INCOMPLETE.equals(status)) {
-            CachedSmallBlock cachedSmallBlock = SmallBlockCacher.getSmallBlock(chainId, blockHash);
+            CachedSmallBlock cachedSmallBlock = SmallBlockCacher.getCachedSmallBlock(chainId, blockHash);
             SmallBlock smallBlock = cachedSmallBlock.getSmallBlock();
             if (null == smallBlock) {
                 return failed(BlockErrorCode.PARAMETER_ERROR);

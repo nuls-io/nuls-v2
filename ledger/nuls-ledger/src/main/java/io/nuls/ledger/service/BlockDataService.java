@@ -40,12 +40,4 @@ public interface BlockDataService {
      */
     void initBlockDatas() throws Exception;
 
-    /**
-     * 保存最新整区块交易数据
-     * @param chainId
-     * @param height
-     * @param txList
-     * @throws Exception
-     */
-    void saveLatestBlockDatas(int chainId,long height,List<Transaction> txList)  throws Exception;
 }

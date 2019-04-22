@@ -25,6 +25,7 @@
 package io.nuls.network.rpc.cmd;
 
 import io.nuls.network.cfg.NetworkConfig;
+import io.nuls.network.constant.CmdConstant;
 import io.nuls.network.constant.NetworkErrorCode;
 import io.nuls.network.constant.NodeConnectStatusEnum;
 import io.nuls.network.manager.NodeGroupManager;
@@ -65,7 +66,7 @@ public class NodeRpc extends BaseCmd {
      * nw_addNodes
      * 增加节点
      */
-    @CmdAnnotation(cmd = "nw_addNodes", version = 1.0,
+    @CmdAnnotation(cmd = CmdConstant.CMD_NW_ADD_NODES, version = 1.0,
             description = "addNodes")
     @Parameter(parameterName = "chainId", parameterType = "int", parameterValidRange = "[1,65535]")
     @Parameter(parameterName = "isCross", parameterType = "int", parameterValidRange = "[0,1]")
@@ -102,7 +103,7 @@ public class NodeRpc extends BaseCmd {
      * nw_delNodes
      * 删除节点
      */
-    @CmdAnnotation(cmd = "nw_delNodes", version = 1.0, description = "delNodes")
+    @CmdAnnotation(cmd = CmdConstant.CMD_NW_DEL_NODES, version = 1.0, description = "delNodes")
     @Parameter(parameterName = "chainId", parameterType = "int", parameterValidRange = "[1,65535]")
     @Parameter(parameterName = "nodes", parameterType = "String")
     public Response delNodes(Map params) {
@@ -139,7 +140,7 @@ public class NodeRpc extends BaseCmd {
         return success();
     }
 
-    @CmdAnnotation(cmd = "nw_getNodes", version = 1.0, description = "getNodes")
+    @CmdAnnotation(cmd = CmdConstant.CMD_NW_GET_NODES, version = 1.0, description = "getNodes")
     @Parameter(parameterName = "chainId", parameterType = "int", parameterValidRange = "[1,65535]")
     @Parameter(parameterName = "state", parameterType = "int", parameterValidRange = "[0,2]")
     @Parameter(parameterName = "isCross", parameterType = "int", parameterValidRange = "[0,1]")
@@ -217,7 +218,7 @@ public class NodeRpc extends BaseCmd {
      * nw_updateNodeInfo
      * 更新区块高度与hash
      */
-    @CmdAnnotation(cmd = "nw_updateNodeInfo", version = 1.0, description = "updateNodeInfo")
+    @CmdAnnotation(cmd = CmdConstant.CMD_NW_UPDATE_NODE_INFO, version = 1.0, description = "updateNodeInfo")
     @Parameter(parameterName = "chainId", parameterType = "int", parameterValidRange = "[1,65535]")
     @Parameter(parameterName = "nodeId", parameterType = "String")
     @Parameter(parameterName = "blockHeight", parameterType = "long")

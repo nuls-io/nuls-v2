@@ -19,6 +19,8 @@ public interface MongoTableConstant {
     String DEPOSIT_TABLE = "deposit_table_";
     //交易关系记录表
     String TX_RELATION_TABLE = "tx_relation_table_";
+    //交易关系记录表
+    String TX_UNCONFIRM_RELATION_TABLE = "tx_unconfirm_relation_table_";
     //交易表
     String TX_TABLE = "tx_table_";
     //coinData记录

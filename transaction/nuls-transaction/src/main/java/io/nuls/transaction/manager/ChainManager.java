@@ -42,15 +42,18 @@ import io.nuls.transaction.constant.TxDBConstant;
 import io.nuls.transaction.model.bo.Chain;
 import io.nuls.transaction.model.bo.config.ConfigBean;
 import io.nuls.transaction.storage.ConfigStorageService;
+import io.nuls.transaction.utils.LoggerUtil;
 import io.nuls.transaction.utils.queue.entity.PersistentQueue;
 
 import java.util.List;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import static io.nuls.base.constant.BaseConstant.PROTOCOL_CONFIG_COMPARATOR;
 import static io.nuls.base.constant.BaseConstant.PROTOCOL_CONFIG_FILE;
 import static io.nuls.transaction.utils.LoggerUtil.Log;
+import static io.nuls.transaction.utils.LoggerUtil.LOG;
 
 /**
  * 链管理类,负责各条链的初始化,运行,启动,参数维护等
@@ -91,6 +94,7 @@ public class ChainManager {
             initLogger(chain);
             initTable(chain);
             chainMap.put(chainId, chain);
+            chain.getLoggerMap().get(TxConstant.LOG_TX).debug("Chain:{} init success..", chainId);
             String json = IoUtils.read(PROTOCOL_CONFIG_FILE);
             List<ProtocolConfigJson> protocolConfigs = JSONUtils.json2list(json, ProtocolConfigJson.class);
             protocolConfigs.sort(PROTOCOL_CONFIG_COMPARATOR);
@@ -109,6 +113,7 @@ public class ChainManager {
             initCache(chain);
             schedulerManager.createTransactionScheduler(chain);
             chainMap.put(chain.getChainId(), chain);
+            chain.getLoggerMap().get(TxConstant.LOG_TX).debug("Chain:{} runChain success..", chain.getChainId());
         }
     }
 
@@ -134,13 +139,14 @@ public class ChainManager {
             读取数据库链信息配置
             Read database chain information configuration
              */
-            Map<Integer, ConfigBean> configMap = configService.getList();
+            Map<Integer, ConfigBean> configMap = null == configService.getList() ?
+                    new HashMap<>(TxConstant.INIT_CAPACITY_8) : configService.getList();
             /*
             如果系统是第一次运行，则本地数据库没有存储链信息，此时需要从配置文件读取主链配置信息
             If the system is running for the first time, the local database does not have chain information,
             and the main chain configuration information needs to be read from the configuration file at this time.
             */
-            if (configMap == null || configMap.size() == 0) {
+            if (configMap.isEmpty()) {
                 ConfigBean configBean = txConfig.getChainConfig();
                 if (configBean == null) {
                     return null;
@@ -152,7 +158,7 @@ public class ChainManager {
             }
             return configMap;
         } catch (Exception e) {
-            Log.error(e);
+            LOG.error(e);
             return null;
         }
     }
@@ -171,25 +177,13 @@ public class ChainManager {
             创建已确认交易表
             Create confirmed transaction table
             */
-            RocksDBService.createTable(TxDBConstant.DB_TRANSACTION_CONFIRMED + chainId);
-
-            /*
-            创建未处理的跨链交易表
-            Create cross chain transaction able
-            */
-            RocksDBService.createTable(TxDBConstant.DB_UNPROCESSED_CROSSCHAIN + chainId);
-
-            /*
-            创建处理中跨链交易表
-             cross chain transaction progress
-            */
-            RocksDBService.createTable(TxDBConstant.DB_PROGRESS_CROSSCHAIN + chainId);
+            RocksDBService.createTable(TxDBConstant.DB_TRANSACTION_CONFIRMED_PREFIX + chainId);
 
             /*
             已验证未打包交易
             Verified transaction
             */
-            RocksDBService.createTable(TxDBConstant.DB_TRANSACTION_CACHE + chainId);
+            RocksDBService.createTable(TxDBConstant.DB_TRANSACTION_UNCONFIRMED_PREFIX + chainId);
         } catch (Exception e) {
             if (!DBErrorCode.DB_TABLE_EXIST.equals(e.getMessage())) {
                 logger.error(e.getMessage());
@@ -204,18 +198,18 @@ public class ChainManager {
      * @param chain chain info
      */
     private void initCache(Chain chain) throws Exception {
-        chain.setUnverifiedQueue(new PersistentQueue(TxConstant.TX_UNVERIFIED_QUEUE_PREFIX + chain.getChainId(),
+        chain.setUnverifiedQueue(new PersistentQueue(TxDBConstant.TX_UNVERIFIED_QUEUE_PREFIX + chain.getChainId(),
                 chain.getConfig().getTxUnverifiedQueueSize()));
     }
 
     private void initLogger(Chain chain) {
-        NulsLogger txLogger = LoggerBuilder.getLogger(String.valueOf(chain.getConfig().getChainId()), TxConstant.LOG_TX);
+        LoggerUtil.init(chain);
+        /*NulsLogger txLogger = LoggerBuilder.getLogger(String.valueOf(chain.getConfig().getChainId()), TxConstant.LOG_TX);
         chain.getLoggerMap().put(TxConstant.LOG_TX, txLogger);
         NulsLogger txProcessLogger = LoggerBuilder.getLogger(String.valueOf(chain.getConfig().getChainId()), TxConstant.LOG_NEW_TX_PROCESS);
         chain.getLoggerMap().put(TxConstant.LOG_NEW_TX_PROCESS, txProcessLogger);
         NulsLogger txMessageLogger = LoggerBuilder.getLogger(String.valueOf(chain.getConfig().getChainId()), TxConstant.LOG_TX_MESSAGE);
-        chain.getLoggerMap().put(TxConstant.LOG_TX_MESSAGE, txMessageLogger);
-
+        chain.getLoggerMap().put(TxConstant.LOG_TX_MESSAGE, txMessageLogger);*/
     }
 
     public Map<Integer, Chain> getChainMap() {

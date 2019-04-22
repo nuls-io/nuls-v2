@@ -20,8 +20,12 @@ import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.core.annotation.Value;
 import io.nuls.tools.exception.NulsException;
+import io.nuls.tools.log.Log;
 import io.nuls.tools.model.StringUtils;
 import io.nuls.tools.parse.I18nUtils;
+
+import java.util.Map;
+import java.util.Properties;
 
 /**
  * @author: qinyifeng
@@ -93,6 +97,12 @@ public class AccountBootstrap extends RpcModule {
      */
     @Override
     public boolean doStart() {
+        Map<String, Properties> lan = I18nUtils.getAll();
+        lan.entrySet().forEach(entry->{
+            entry.getValue().forEach((key,value)->{
+                Log.info("{}:{}",key,value);
+            });
+        });
         return true;
     }
 
@@ -131,28 +141,11 @@ public class AccountBootstrap extends RpcModule {
 
     public void initCfg() {
         try {
-//            String configJson = IoUtils.read(NulsConfig.MODULES_CONFIG_FILE);
-//            List<ConfigItem> configItems = JSONUtils.json2list(configJson, ConfigItem.class);
-//            Map<String, ConfigItem> configMap = new HashMap<>();
-//            configItems.forEach(e -> configMap.put(e.getName(), e));
-            //set data save path
-//            NulsConfig.DATA_PATH = configMap.get(AccountConstant.DB_DATA_PATH).getValue();
-            //改为通过配置文件注入
             NulsConfig.DATA_PATH = accountConfig.getDataPath();
             LoggerUtil.logger.info("dataPath:{}",NulsConfig.DATA_PATH);
-            //set system encoding
-//            NulsConfig.DEFAULT_ENCODING = configMap.get(AccountConstant.CFG_SYSTEM_DEFAULT_ENCODING).getValue();
-            //改为通过配置文件注入
             NulsConfig.DEFAULT_ENCODING = accountConfig.getEncoding();
-            //set system language
-//            String language = configMap.get(AccountConstant.CFG_SYSTEM_LANGUAGE).getValue();
-            //改为通过配置文件注入
-            I18nUtils.loadLanguage(AccountBootstrap.class, "languages", accountConfig.getLanguage());
-            I18nUtils.setLanguage(accountConfig.getLanguage());
             NulsConfig.MAIN_ASSETS_ID = accountConfig.getMainAssetId();
             NulsConfig.MAIN_CHAIN_ID = accountConfig.getMainChainId();
-            //set keystore dir
-//            String keystoreFolder = configMap.get(AccountConstant.CFG_SYSTEM_TKEYSTORE_FOLDER).getValue();
             if (StringUtils.isNotBlank(accountConfig.getKeystoreFolder())) {
                 NulsConfig.ACCOUNTKEYSTORE_FOLDER_NAME = accountConfig.getDataPath() + accountConfig.getKeystoreFolder();
             }

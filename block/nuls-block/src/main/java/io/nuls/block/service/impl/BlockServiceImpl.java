@@ -23,14 +23,11 @@ package io.nuls.block.service.impl;
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.data.*;
 import io.nuls.base.data.po.BlockHeaderPo;
-import io.nuls.block.cache.SmallBlockCacher;
 import io.nuls.block.constant.BlockErrorCode;
-import io.nuls.block.constant.BlockForwardEnum;
 import io.nuls.block.manager.BlockChainManager;
 import io.nuls.block.manager.ContextManager;
 import io.nuls.block.message.HashMessage;
 import io.nuls.block.message.SmallBlockMessage;
-import io.nuls.block.model.CachedSmallBlock;
 import io.nuls.block.model.Chain;
 import io.nuls.block.model.ChainContext;
 import io.nuls.block.model.GenesisBlock;
@@ -41,7 +38,6 @@ import io.nuls.block.rpc.call.TransactionUtil;
 import io.nuls.block.service.BlockService;
 import io.nuls.block.storage.BlockStorageService;
 import io.nuls.block.storage.ChainStorageService;
-import io.nuls.block.thread.monitor.TxGroupRequestor;
 import io.nuls.block.utils.BlockUtil;
 import io.nuls.block.utils.ChainGenerator;
 import io.nuls.db.service.RocksDBService;
@@ -59,6 +55,7 @@ import java.util.*;
 import java.util.concurrent.locks.StampedLock;
 
 import static io.nuls.block.constant.CommandConstant.*;
+import static io.nuls.block.constant.Constant.BLOCK_HEADER_COMPARATOR;
 import static io.nuls.block.constant.Constant.BLOCK_HEADER_INDEX;
 
 /**
@@ -132,6 +129,46 @@ public class BlockServiceImpl implements BlockService {
                 list.add(blockHeader);
             }
             return list;
+        } catch (Exception e) {
+            e.printStackTrace();
+            commonLog.error(e);
+            return null;
+        }
+    }
+
+    @Override
+    public List<BlockHeader> getBlockHeaderByRound(int chainId, long height, int round) {
+        ChainContext context = ContextManager.getContext(chainId);
+        NulsLogger commonLog = context.getCommonLog();
+        try {
+            int count = 0;
+            BlockHeaderPo startHeaderPo = getBlockHeaderPo(chainId, height);
+            byte[] extend = startHeaderPo.getExtend();
+            BlockExtendsData data = new BlockExtendsData(extend);
+            long roundIndex = data.getRoundIndex();
+            List<BlockHeader> blockHeaders = new ArrayList<>();
+            if (startHeaderPo.isComplete()) {
+                blockHeaders.add(BlockUtil.fromBlockHeaderPo(startHeaderPo));
+            }
+            while (true) {
+                height--;
+                if ((height < 0)) {
+                    break;
+                }
+                BlockHeader blockHeader = getBlockHeader(chainId, height);
+                BlockExtendsData newData = new BlockExtendsData(blockHeader.getExtend());
+                long newRoundIndex = newData.getRoundIndex();
+                if (newRoundIndex != roundIndex) {
+                    count++;
+                    roundIndex = newRoundIndex;
+                }
+                if (count >= round) {
+                    break;
+                }
+                blockHeaders.add(blockHeader);
+            }
+            blockHeaders.sort(BLOCK_HEADER_COMPARATOR);
+            return blockHeaders;
         } catch (Exception e) {
             e.printStackTrace();
             commonLog.error(e);
@@ -241,7 +278,6 @@ public class BlockServiceImpl implements BlockService {
             long elapsedNanos1 = System.nanoTime() - startTime1;
             commonLog.debug("1. verifyBlock time-" + elapsedNanos1);
             //2.设置最新高度,如果失败则恢复上一个高度
-            long startTime2 = System.nanoTime();
             boolean setHeight = blockStorageService.setLatestHeight(chainId, height);
             if (!setHeight) {
                 if (!blockStorageService.setLatestHeight(chainId, height - 1)) {
@@ -250,8 +286,6 @@ public class BlockServiceImpl implements BlockService {
                 commonLog.error("setHeight false, chainId-" + chainId + ",height-" + height);
                 return false;
             }
-            long elapsedNanos2 = System.nanoTime() - startTime2;
-            commonLog.debug("2. updateLatestHeight time-" + elapsedNanos2);
 
             //3.保存区块头, 保存交易
             long startTime3 = System.nanoTime();
@@ -268,10 +302,9 @@ public class BlockServiceImpl implements BlockService {
                 return false;
             }
             long elapsedNanos3 = System.nanoTime() - startTime3;
-            commonLog.debug("3. headerSave and txsSave time-" + elapsedNanos3);
+            commonLog.debug("2. headerSave and txsSave time-" + elapsedNanos3);
 
             //4.通知共识模块
-            long startTime4 = System.nanoTime();
             boolean csNotice = ConsensusUtil.saveNotice(chainId, header, localInit);
             if (!csNotice) {
                 if (!TransactionUtil.rollback(chainId, blockHeaderPo)) {
@@ -286,11 +319,8 @@ public class BlockServiceImpl implements BlockService {
                 commonLog.error("csNotice false!chainId-" + chainId + ",height-" + height);
                 return false;
             }
-            long elapsedNanos4 = System.nanoTime() - startTime4;
-            commonLog.debug("4. ConsensusNotice time-" + elapsedNanos4);
 
             //5.通知协议升级模块,完全保存,更新标记
-            long startTime5 = System.nanoTime();
             blockHeaderPo.setComplete(true);
             if (!ProtocolUtil.saveNotice(chainId, header) || !blockStorageService.save(chainId, blockHeaderPo) || !TransactionUtil.heightNotice(chainId, height)) {
                 if (!ConsensusUtil.rollbackNotice(chainId, height)) {
@@ -308,10 +338,7 @@ public class BlockServiceImpl implements BlockService {
                 commonLog.error("ProtocolUtil saveNotice fail!chainId-" + chainId + ",height-" + height);
                 return false;
             }
-            long elapsedNanos5 = System.nanoTime() - startTime5;
-            commonLog.debug("5. ProtocolNotice and updateFlag time-" + elapsedNanos5);
 
-            long startTime6 = System.nanoTime();
             //6.如果不是第一次启动,则更新主链属性
             if (!localInit) {
                 context.setLatestBlock(block);
@@ -326,13 +353,6 @@ public class BlockServiceImpl implements BlockService {
             }
             //同步\链切换\孤儿链对接过程中不进行区块广播
             if (download == 1) {
-                SmallBlock smallBlock = BlockUtil.getSmallBlock(chainId, block);
-                Map<NulsDigestData, Transaction> txMap = new HashMap<>(header.getTxCount());
-                block.getTxs().forEach(e -> txMap.put(e.getHash(), e));
-                CachedSmallBlock cachedSmallBlock = new CachedSmallBlock(null, smallBlock, txMap);
-                SmallBlockCacher.cacheSmallBlock(chainId, cachedSmallBlock);
-                SmallBlockCacher.setStatus(chainId, hash, BlockForwardEnum.COMPLETE);
-                TxGroupRequestor.removeTask(chainId, hash.toString());
                 if (broadcast) {
                     broadcastBlock(chainId, block);
                 }
@@ -347,8 +367,6 @@ public class BlockServiceImpl implements BlockService {
             sss.put(LATEST_HEIGHT, responseData);
             response.setResponseData(sss);
             ConnectManager.eventTrigger(LATEST_HEIGHT, response);
-            long elapsedNanos6 = System.nanoTime() - startTime6;
-            commonLog.debug("6. otherWork time-" + elapsedNanos6);
             long elapsedNanos = System.nanoTime() - startTime;
             commonLog.info("save block success, time-" + elapsedNanos + ", height-" + height + ", txCount-" + blockHeaderPo.getTxCount() + ", hash-" + hash);
             return true;

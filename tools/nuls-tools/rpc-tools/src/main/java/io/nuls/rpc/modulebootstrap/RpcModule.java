@@ -13,6 +13,7 @@ import io.nuls.tools.core.annotation.Value;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.log.Log;
 
+import io.nuls.tools.parse.I18nUtils;
 import io.nuls.tools.parse.MapUtils;
 
 
@@ -31,6 +32,10 @@ import java.util.concurrent.TimeUnit;
  */
 @Order(Integer.MIN_VALUE)
 public abstract class RpcModule implements InitializingBean {
+
+    private static final String LANGUAGE = "en";
+    private static final String LANGUAGE_PATH =  "languages";
+
 
     @Value("dependent")
     private String dependentList;
@@ -78,10 +83,10 @@ public abstract class RpcModule implements InitializingBean {
                         Log.error("config item dependent error, e.g. moduleName1:verson,moduleName2:version....");
                         System.exit(0);
                     }
-
                     dependentces.add(new Module(t2[0],t2[1]));
                 });
             }
+            I18nUtils.loadLanguage(this.getClass(), getLanguagePath(),LANGUAGE);
             init();
         } catch (Exception e) {
             Log.error("rpc module init fail", e);
@@ -366,6 +371,10 @@ public abstract class RpcModule implements InitializingBean {
      * @return
      */
     public abstract RpcModuleState onDependenciesLoss(Module dependenciesModule);
+
+    protected String getLanguagePath(){
+        return LANGUAGE_PATH;
+    }
 
     public String[] getMainArgs() {
         return mainArgs;

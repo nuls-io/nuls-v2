@@ -276,7 +276,7 @@ public class TransactionCmd extends BaseCmd {
      */
     @CmdAnnotation(cmd = "ac_transfer", version = 1.0, description = "create a multi-account transfer transaction")
     public Response transfer(Map params) {
-        Map<String, String> map = new HashMap<>(1);
+        Map<String, String> map = new HashMap<>(AccountConstant.INIT_CAPACITY_2);
         try {
             // check parameters
             if (params == null) {
@@ -286,7 +286,8 @@ public class TransactionCmd extends BaseCmd {
 
             // parse params
             JSONUtils.getInstance().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-            TransferDto transferDto = JSONUtils.json2pojo(JSONUtils.obj2json(params), TransferDto.class);
+            TransferDto transferDto = JSONUtils.map2pojo(params, TransferDto.class);
+
             Function<CoinDto, CoinDto> checkAddress = cd -> {
                 //如果address 不是地址就当别名处理
                 if (!AddressTool.validAddress(transferDto.getChainId(), cd.getAddress())) {
@@ -298,37 +299,19 @@ public class TransactionCmd extends BaseCmd {
             };
             List<CoinDto> inputList = transferDto.getInputs().stream().map(checkAddress).collect(Collectors.toList());
             List<CoinDto> outputList = transferDto.getOutputs().stream().map(checkAddress).collect(Collectors.toList());
+
             if (inputList == null || outputList == null) {
                 LoggerUtil.logger.warn("ac_transfer params input or output is null");
                 throw new NulsRuntimeException(AccountErrorCode.NULL_PARAMETER);
             }
 
-            // check address validity
-            BigInteger fromTotal = BigInteger.ZERO;
             for (CoinDto from : inputList) {
-                //校验地址格式
-                if (!AddressTool.validAddress(from.getAssetsChainId(), from.getAddress())) {
-                    throw new NulsException(AccountErrorCode.ADDRESS_ERROR);
-                }
                 //from中不能有多签地址
                 if (AddressTool.isMultiSignAddress(from.getAddress())) {
                     throw new NulsException(AccountErrorCode.IS_MULTI_SIGNATURE_ADDRESS);
                 }
-                fromTotal = fromTotal.add(from.getAmount());
-            }
-            BigInteger toTotal = BigInteger.ZERO;
-            for (CoinDto to : outputList) {
-                if (!AddressTool.validAddress(to.getAssetsChainId(), to.getAddress())) {
-                    throw new NulsException(AccountErrorCode.ADDRESS_ERROR);
-                }
-                toTotal = toTotal.add(to.getAmount());
             }
 
-            // check transfer amount
-            if (BigIntegerUtils.isLessThan(fromTotal, BigInteger.ZERO) || BigIntegerUtils.isLessThan(toTotal, BigInteger.ZERO)) {
-                throw new NulsException(AccountErrorCode.PARAMETER_ERROR);
-            }
-            // check transaction remark
             if (!validTxRemark(transferDto.getRemark())) {
                 throw new NulsException(AccountErrorCode.PARAMETER_ERROR);
             }
@@ -343,6 +326,7 @@ public class TransactionCmd extends BaseCmd {
         }
         return success(map);
     }
+
 
     /**
      * 创建别名转账交易,仅仅针对非多签账户

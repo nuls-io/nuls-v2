@@ -31,7 +31,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static io.nuls.transaction.constant.TxConstant.*;
-import static io.nuls.transaction.utils.LoggerUtil.Log;
+import static io.nuls.transaction.utils.LoggerUtil.LOG;
 
 /**
  * 网络消息处理
@@ -72,11 +72,6 @@ public class MessageCmd extends BaseCmd {
             ForwardTxMessage message = new ForwardTxMessage();
             byte[] decode = RPCUtil.decode(params.get(KEY_MESSAGE_BODY).toString());
             message.parse(new NulsByteBuffer(decode));
-            if (message == null) {
-                chain.getLoggerMap().get(TxConstant.LOG_TX_MESSAGE).debug(
-                        "recieve [newHash], message is null from node-{}, chainId:{}", nodeId, chainId);
-                return failed(TxErrorCode.PARAMETER_ERROR);
-            }
             NulsDigestData hash = message.getHash();
             chain.getLoggerMap().get(TxConstant.LOG_TX_MESSAGE).debug(
                     "recieve [newHash] message from node-{}, chainId:{}, hash:{}", nodeId, chainId, hash.getDigestHex());
@@ -125,11 +120,6 @@ public class MessageCmd extends BaseCmd {
             GetTxMessage message = new GetTxMessage();
             byte[] decode = RPCUtil.decode(params.get(KEY_MESSAGE_BODY).toString());
             message.parse(new NulsByteBuffer(decode));
-            if (message == null) {
-                chain.getLoggerMap().get(TxConstant.LOG_TX_MESSAGE).debug(
-                        "recieve [askTx], message is null from node-{}, chainId:{}", nodeId, chainId);
-                return failed(TxErrorCode.PARAMETER_ERROR);
-            }
             chain = chainManager.getChain(chainId);
             if (null == chain) {
                 throw new NulsException(TxErrorCode.CHAIN_NOT_FOUND);
@@ -176,11 +166,6 @@ public class MessageCmd extends BaseCmd {
             BroadcastTxMessage message = new BroadcastTxMessage();
             byte[] decode = RPCUtil.decode(params.get(KEY_MESSAGE_BODY).toString());
             message.parse(new NulsByteBuffer(decode));
-            if (message == null) {
-                chain.getLoggerMap().get(TxConstant.LOG_TX_MESSAGE).debug(
-                        "recieve [receiveTx], message is null from node-{}, chainId:{}", nodeId, chainId);
-                return failed(TxErrorCode.PARAMETER_ERROR);
-            }
             Transaction transaction = message.getTx();
             chain.getLoggerMap().get(TxConstant.LOG_TX_MESSAGE).debug(
                     "recieve [receiveTx] message from node-{}, chainId:{}, hash:{}", nodeId, chainId, transaction.getHash().getDigestHex());
@@ -203,11 +188,9 @@ public class MessageCmd extends BaseCmd {
         return success(map);
     }
 
-
-
     private void errorLogProcess(Chain chain, Exception e) {
         if (chain == null) {
-            Log.error(e);
+            LOG.error(e);
         } else {
             chain.getLoggerMap().get(TxConstant.LOG_TX_MESSAGE).error(e);
         }

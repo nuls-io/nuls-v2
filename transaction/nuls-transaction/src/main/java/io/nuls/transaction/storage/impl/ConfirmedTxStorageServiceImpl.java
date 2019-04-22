@@ -25,7 +25,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static io.nuls.transaction.utils.LoggerUtil.Log;
+import static io.nuls.transaction.utils.LoggerUtil.LOG;
 
 /**
  * @author: Charlie
@@ -43,14 +43,14 @@ public class ConfirmedTxStorageServiceImpl implements ConfirmedTxStorageService 
         try {
             txHashBytes = tx.getTx().getHash().serialize();
         } catch (IOException e) {
-            Log.error(e);
+            LOG.error(e);
             return false;
         }
         boolean result = false;
         try {
-            result = RocksDBService.put(TxDBConstant.DB_TRANSACTION_CONFIRMED + chainId, txHashBytes, tx.serialize());
+            result = RocksDBService.put(TxDBConstant.DB_TRANSACTION_CONFIRMED_PREFIX + chainId, txHashBytes, tx.serialize());
         } catch (Exception e) {
-            Log.error(e);
+            LOG.error(e);
         }
         return result;
     }
@@ -66,9 +66,9 @@ public class ConfirmedTxStorageServiceImpl implements ConfirmedTxStorageService 
                 //序列化对象为byte数组存储
                 txPoMap.put(tx.getTx().getHash().serialize(), tx.serialize());
             }
-            return RocksDBService.batchPut(TxDBConstant.DB_TRANSACTION_CONFIRMED + chainId, txPoMap);
+            return RocksDBService.batchPut(TxDBConstant.DB_TRANSACTION_CONFIRMED_PREFIX + chainId, txPoMap);
         } catch (Exception e) {
-            Log.error(e.getMessage());
+            LOG.error(e.getMessage());
             throw new NulsRuntimeException(TxErrorCode.DB_SAVE_BATCH_ERROR);
         }
     }
@@ -81,7 +81,7 @@ public class ConfirmedTxStorageServiceImpl implements ConfirmedTxStorageService 
         try {
             return getTx(chainId, hash.serialize());
         } catch (IOException e) {
-            Log.error(e);
+            LOG.error(e);
             throw new NulsRuntimeException(e);
         }
     }
@@ -95,13 +95,13 @@ public class ConfirmedTxStorageServiceImpl implements ConfirmedTxStorageService 
     }
 
     private TransactionConfirmedPO getTx(int chainId, byte[] hashSerialize){
-        byte[] txBytes = RocksDBService.get(TxDBConstant.DB_TRANSACTION_CONFIRMED + chainId, hashSerialize);
+        byte[] txBytes = RocksDBService.get(TxDBConstant.DB_TRANSACTION_CONFIRMED_PREFIX + chainId, hashSerialize);
         TransactionConfirmedPO tx = null;
         if (null != txBytes) {
             try {
                 tx = TxUtil.getInstance(txBytes, TransactionConfirmedPO.class);
             } catch (Exception e) {
-                Log.error(e);
+                LOG.error(e);
                 return null;
             }
         }
@@ -112,9 +112,9 @@ public class ConfirmedTxStorageServiceImpl implements ConfirmedTxStorageService 
     public boolean removeTx(int chainId, String hash) {
         boolean result = false;
         try {
-            result = RocksDBService.delete(TxDBConstant.DB_TRANSACTION_CONFIRMED + chainId, HexUtil.decode(hash));
+            result = RocksDBService.delete(TxDBConstant.DB_TRANSACTION_CONFIRMED_PREFIX + chainId, HexUtil.decode(hash));
         } catch (Exception e) {
-            Log.error(e);
+            LOG.error(e);
         }
         return result;
     }
@@ -123,9 +123,9 @@ public class ConfirmedTxStorageServiceImpl implements ConfirmedTxStorageService 
     public boolean removeTx(int chainId, NulsDigestData hash) {
         boolean result = false;
         try {
-            result = RocksDBService.delete(TxDBConstant.DB_TRANSACTION_CONFIRMED + chainId, hash.serialize());
+            result = RocksDBService.delete(TxDBConstant.DB_TRANSACTION_CONFIRMED_PREFIX + chainId, hash.serialize());
         } catch (Exception e) {
-            Log.error(e);
+            LOG.error(e);
         }
         return result;
     }
@@ -139,7 +139,7 @@ public class ConfirmedTxStorageServiceImpl implements ConfirmedTxStorageService 
             }
             return removeTxListByHashBytes(chainId, hashList);
         } catch (IOException e) {
-            e.printStackTrace();
+            LOG.error(e);
             return false;
         }
     }
@@ -152,9 +152,9 @@ public class ConfirmedTxStorageServiceImpl implements ConfirmedTxStorageService 
         }
         try {
             //delete transaction
-            return RocksDBService.deleteKeys(TxDBConstant.DB_TRANSACTION_CONFIRMED + chainId, hashList);
+            return RocksDBService.deleteKeys(TxDBConstant.DB_TRANSACTION_CONFIRMED_PREFIX + chainId, hashList);
         } catch (Exception e) {
-            Log.error(e);
+            LOG.error(e);
         }
         return false;
     }
@@ -209,10 +209,10 @@ public class ConfirmedTxStorageServiceImpl implements ConfirmedTxStorageService 
         crossTxEffectList.hashList = hashList;
         boolean result = false;
         try {
-            result = RocksDBService.put(TxDBConstant.DB_TRANSACTION_CONFIRMED + chainId,
+            result = RocksDBService.put(TxDBConstant.DB_TRANSACTION_CONFIRMED_PREFIX + chainId,
                     new VarInt(height).encode(), crossTxEffectList.serialize());
         } catch (Exception e) {
-            Log.error(e);
+            LOG.error(e);
         }
        return result;
 
@@ -225,7 +225,7 @@ public class ConfirmedTxStorageServiceImpl implements ConfirmedTxStorageService 
             return hashList;
         }
         try {
-            byte[] bytes = RocksDBService.get(TxDBConstant.DB_TRANSACTION_CONFIRMED + chainId, new VarInt(height).encode());
+            byte[] bytes = RocksDBService.get(TxDBConstant.DB_TRANSACTION_CONFIRMED_PREFIX + chainId, new VarInt(height).encode());
             if(null == bytes){
                 return hashList;
             }
@@ -233,7 +233,7 @@ public class ConfirmedTxStorageServiceImpl implements ConfirmedTxStorageService 
             crossTxEffectList.parse(new NulsByteBuffer(bytes));
             hashList = crossTxEffectList.hashList;
         } catch (Exception e) {
-            Log.error(e);
+            LOG.error(e);
         }
         return hashList;
 
@@ -246,9 +246,9 @@ public class ConfirmedTxStorageServiceImpl implements ConfirmedTxStorageService 
         }
         try {
             //delete transaction
-            return RocksDBService.delete(TxDBConstant.DB_TRANSACTION_CONFIRMED + chainId, new VarInt(height).encode());
+            return RocksDBService.delete(TxDBConstant.DB_TRANSACTION_CONFIRMED_PREFIX + chainId, new VarInt(height).encode());
         } catch (Exception e) {
-            Log.error(e);
+            LOG.error(e);
         }
         return false;
     }

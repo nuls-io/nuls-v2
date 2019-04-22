@@ -22,32 +22,17 @@
  * SOFTWARE.
  *
  */
-package io.nuls.poc.storage;
+
+package io.nuls.ledger.constant;
+
+import io.nuls.rpc.model.ModuleE;
+import io.nuls.tools.constant.CommonCodeConstanst;
+import io.nuls.tools.constant.ErrorCode;
 
 /**
- * 系统语言信息存储管理
- * System Language Information Storage Management
- *
- * @author tag
- * 2018/11/6
- */
-public interface LanguageService {
+ * @author: LanJS
+        */
+public interface LedgerErrorCode extends CommonCodeConstanst {
 
-    /**
-     * 保存当前系统语言环境
-     * Save the current system language environment
-     *
-     * @param language 语言/language
-     * @return boolean
-     * @exception
-     * */
-    boolean saveLanguage(String language)throws  Exception;
-
-    /**
-     * 获取当前系统语言环境
-     * Getting the current system language environment
-     *
-     * @return String
-     * */
-    String getLanguage();
+    ErrorCode TX_IS_WRONG = ErrorCode.init(ModuleE.LG.abbr + "_0001");
 }

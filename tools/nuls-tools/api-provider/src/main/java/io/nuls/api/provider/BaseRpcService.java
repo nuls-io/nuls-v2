@@ -31,7 +31,6 @@ public abstract class BaseRpcService extends BaseService {
      */
     protected <T,R> Result<T> callRpc(String module,String method,Object req,Function<R,Result> callback) {
         Map<String, Object> params = MapUtils.beanToLinkedMap(req);
-//        params.put(Constants.VERSION_KEY_STR, "1.0");
         Log.debug("call {} rpc , method : {},param : {}",module,method,params);
         Response cmdResp = null;
         try {
@@ -39,18 +38,19 @@ public abstract class BaseRpcService extends BaseService {
             Log.debug("result : {}",cmdResp);
         } catch (Exception e) {
             Log.warn("Calling remote interface failed. module:{} - interface:{} - message:{}", module, method, e.getMessage());
-            return fail(BaseService.ERROR_CODE,e.getMessage());
+            return fail(RPC_ERROR_CODE,e.getMessage());
         }
         if (!cmdResp.isSuccess()) {
             Log.warn("Calling remote interface failed. module:{} - interface:{} - ResponseComment:{}", module, method, cmdResp.getResponseComment());
             String responseComment = cmdResp.getResponseComment();
-            if(StringUtils.isNotBlank(responseComment)) {
-                return fail(RPC_ERROR_CODE, responseComment);
-            }
             Map<String,String> error = (Map)((Map) cmdResp.getResponseData()).get(method);
             if(error != null){
-                return fail(RPC_ERROR_CODE, error.get("msg"));
+                ErrorCode errorCode = ErrorCode.init(error.get("code"));
+                return fail(errorCode);
             }else{
+                if(StringUtils.isNotBlank(responseComment)) {
+                    return fail(RPC_ERROR_CODE, responseComment);
+                }
                 return fail(RPC_ERROR_CODE, "unknown error");
             }
         }

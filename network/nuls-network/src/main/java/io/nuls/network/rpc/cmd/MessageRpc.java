@@ -24,6 +24,7 @@
  */
 package io.nuls.network.rpc.cmd;
 
+import io.nuls.network.constant.CmdConstant;
 import io.nuls.network.constant.NetworkConstant;
 import io.nuls.network.constant.NetworkErrorCode;
 import io.nuls.network.manager.MessageManager;
@@ -63,7 +64,7 @@ public class MessageRpc extends BaseCmd {
     private MessageHandlerFactory messageHandlerFactory = MessageHandlerFactory.getInstance();
 
 
-    @CmdAnnotation(cmd = "nw_protocolRegister", version = 1.0,
+    @CmdAnnotation(cmd = CmdConstant.CMD_NW_PROTOCOL_REGISTER, version = 1.0,
             description = "protocol cmd register")
     @Parameter(parameterName = "role", parameterType = "string")
     @Parameter(parameterName = "protocolCmds", parameterType = "arrays")
@@ -103,7 +104,7 @@ public class MessageRpc extends BaseCmd {
      * nw_broadcast
      * 外部广播接收
      */
-    @CmdAnnotation(cmd = "nw_broadcast", version = 1.0,
+    @CmdAnnotation(cmd = CmdConstant.CMD_NW_BROADCAST, version = 1.0,
             description = "broadcast message")
     @Parameter(parameterName = "chainId", parameterType = "int", parameterValidRange = "[1-65535]")
     @Parameter(parameterName = "excludeNodes", parameterType = "string")
@@ -157,7 +158,7 @@ public class MessageRpc extends BaseCmd {
     /**
      * nw_sendPeersMsg
      */
-    @CmdAnnotation(cmd = "nw_sendPeersMsg", version = 1.0,
+    @CmdAnnotation(cmd = CmdConstant.CMD_NW_SEND_PEERS_MSG, version = 1.0,
             description = "send peer message")
     @Parameter(parameterName = "chainId", parameterType = "int", parameterValidRange = "[1-65535]")
     @Parameter(parameterName = "nodes", parameterType = "string")
@@ -189,7 +190,7 @@ public class MessageRpc extends BaseCmd {
                     /*end test code*/
                     nodesList.add(availableNode);
                 }else{
-                    LoggerUtil.logger(chainId).error("node = {} is not available!");
+                    LoggerUtil.logger(chainId).error("node = {} is not available!", nodeId);
                 }
             }
             NetworkEventResult networkEventResult = messageManager.broadcastToNodes(message, nodesList, true);

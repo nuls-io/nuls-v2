@@ -25,6 +25,7 @@
  */
 package io.nuls.ledger.rpc.cmd;
 
+import io.nuls.ledger.constant.CmdConstant;
 import io.nuls.ledger.constant.LedgerConstant;
 import io.nuls.ledger.model.FreezeLockState;
 import io.nuls.ledger.model.po.AccountState;
@@ -33,7 +34,6 @@ import io.nuls.ledger.model.po.FreezeHeightState;
 import io.nuls.ledger.model.po.FreezeLockTimeState;
 import io.nuls.ledger.service.AccountStateService;
 import io.nuls.ledger.service.UnconfirmedStateService;
-import io.nuls.ledger.utils.LedgerUtil;
 import io.nuls.ledger.utils.LoggerUtil;
 import io.nuls.rpc.cmd.BaseCmd;
 import io.nuls.rpc.model.CmdAnnotation;
@@ -52,6 +52,7 @@ import java.util.Map;
 /**
  * 用于获取账户余额及账户nonce值
  * Created by wangkun23 on 2018/11/19
+ *
  * @author lanjinsheng .
  */
 @Component
@@ -70,7 +71,7 @@ public class AccountStateCmd extends BaseCmd {
      * @param params
      * @return
      */
-    @CmdAnnotation(cmd = "getBalance",
+    @CmdAnnotation(cmd = CmdConstant.CMD_GET_BALANCE,
             version = 1.0,
             description = "")
     @Parameter(parameterName = "chainId", parameterType = "int")
@@ -114,7 +115,7 @@ public class AccountStateCmd extends BaseCmd {
      * @param params
      * @return
      */
-    @CmdAnnotation(cmd = "getFreezeList",
+    @CmdAnnotation(cmd = CmdConstant.CMD_GET_FREEZE_LIST,
             version = 1.0,
             description = "")
     @Parameter(parameterName = "chainId", parameterType = "int")
@@ -158,10 +159,10 @@ public class AccountStateCmd extends BaseCmd {
             resultList = freezeLockStates.subList(currIdx, currIdx + pageSize);
         }
         Map<String, Object> rtMap = new HashMap<>(4);
-        rtMap.put("totalCount",freezeLockStates.size());
-        rtMap.put("pageNumber",pageNumber);
-        rtMap.put("pageSize",pageSize);
-        rtMap.put("list",resultList);
+        rtMap.put("totalCount", freezeLockStates.size());
+        rtMap.put("pageNumber", pageNumber);
+        rtMap.put("pageSize", pageSize);
+        rtMap.put("list", resultList);
         return success(rtMap);
     }
 
@@ -172,8 +173,8 @@ public class AccountStateCmd extends BaseCmd {
      * @param params
      * @return
      */
-    @CmdAnnotation(cmd = "getNonce",
-            version = 1.0,  minEvent = 0, minPeriod = 0,
+    @CmdAnnotation(cmd = CmdConstant.CMD_GET_NONCE,
+            version = 1.0,
             description = "")
     @Parameter(parameterName = "chainId", parameterType = "int")
     @Parameter(parameterName = "assetChainId", parameterType = "int")
@@ -185,19 +186,20 @@ public class AccountStateCmd extends BaseCmd {
         String address = (String) params.get("address");
         Integer assetId = (Integer) params.get("assetId");
         Map<String, Object> rtMap = new HashMap<>(2);
-        AccountState accountState = accountStateService.getAccountStateUnSyn(address, chainId, assetChainId, assetId);
-        AccountStateUnconfirmed accountStateUnconfirmed = unconfirmedStateService.getUnconfirmedNonceReCal(accountState);
-        rtMap.put("nonce", RPCUtil.encode(LedgerUtil.getNonceDecode(accountStateUnconfirmed.getLatestUnconfirmedNonce())));
-        if (accountStateUnconfirmed.getUnconfirmedNonces().size() > 0) {
+        AccountState accountState = accountStateService.getAccountState(address, chainId, assetChainId, assetId);
+        AccountStateUnconfirmed accountStateUnconfirmed = unconfirmedStateService.getUnconfirmedInfo(accountState);
+        if (null == accountStateUnconfirmed) {
+            rtMap.put("nonce", RPCUtil.encode(accountState.getNonce()));
             rtMap.put("nonceType", LedgerConstant.CONFIRMED_NONCE);
         } else {
+            rtMap.put("nonce", RPCUtil.encode(accountStateUnconfirmed.getNonce()));
             rtMap.put("nonceType", LedgerConstant.UNCONFIRMED_NONCE);
         }
-        LoggerUtil.logger(chainId).debug("####address={}.getNonce={}",address,rtMap.get("nonce").toString());
+        LoggerUtil.logger(chainId).debug("####address={}.getNonce={}", address, rtMap.get("nonce").toString());
         return success(rtMap);
     }
 
-    @CmdAnnotation(cmd = "getBalanceNonce",
+    @CmdAnnotation(cmd = CmdConstant.CMD_GET_BALANCE_NONCE,
             version = 1.0, description = "")
     @Parameter(parameterName = "chainId", parameterType = "int")
     @Parameter(parameterName = "assetChainId", parameterType = "int")
@@ -211,20 +213,17 @@ public class AccountStateCmd extends BaseCmd {
         LoggerUtil.logger(chainId).debug("chainId={},assetChainId={},address={},assetId={}", chainId, assetChainId, address, assetId);
         AccountState accountState = accountStateService.getAccountStateReCal(address, chainId, assetChainId, assetId);
         Map<String, Object> rtMap = new HashMap<>(6);
-        AccountStateUnconfirmed accountStateUnconfirmed = unconfirmedStateService.getUnconfirmedInfoReCal(accountState);
-        rtMap.put("nonce", RPCUtil.encode(LedgerUtil.getNonceDecode(accountStateUnconfirmed.getLatestUnconfirmedNonce())));
-        if (accountStateUnconfirmed.getUnconfirmedNonces().size() > 0) {
+        AccountStateUnconfirmed accountStateUnconfirmed = unconfirmedStateService.getUnconfirmedInfo(accountState);
+        if (null == accountStateUnconfirmed) {
+            rtMap.put("nonce", RPCUtil.encode(accountState.getNonce()));
             rtMap.put("nonceType", LedgerConstant.CONFIRMED_NONCE);
+            rtMap.put("available", accountState.getAvailableAmount());
         } else {
+            rtMap.put("available", accountState.getAvailableAmount().subtract(accountStateUnconfirmed.getAmount()));
+            rtMap.put("nonce", RPCUtil.encode(accountStateUnconfirmed.getNonce()));
             rtMap.put("nonceType", LedgerConstant.UNCONFIRMED_NONCE);
         }
-        if (null != accountStateUnconfirmed && null != accountStateUnconfirmed.getUnconfirmedNonces() && accountStateUnconfirmed.getUnconfirmedNonces().size() > 0) {
-            rtMap.put("available", accountState.getAvailableAmount().add(accountStateUnconfirmed.getUnconfirmedAmount()));
-            rtMap.put("freeze", accountState.getFreezeTotal().add(accountStateUnconfirmed.getUnconfirmedFreezeAmount()));
-        } else {
-            rtMap.put("available", accountState.getAvailableAmount());
-            rtMap.put("freeze", accountState.getFreezeTotal());
-        }
+        rtMap.put("freeze", accountState.getFreezeTotal());
         BigInteger permanentLocked = BigInteger.ZERO;
         BigInteger timeHeightLocked = BigInteger.ZERO;
         for (FreezeLockTimeState freezeLockTimeState : accountState.getFreezeLockTimeStates()) {
@@ -239,7 +238,7 @@ public class AccountStateCmd extends BaseCmd {
         }
         rtMap.put("permanentLocked", permanentLocked);
         rtMap.put("timeHeightLocked", timeHeightLocked);
-        Response response =  success(rtMap);
+        Response response = success(rtMap);
         return response;
     }
 

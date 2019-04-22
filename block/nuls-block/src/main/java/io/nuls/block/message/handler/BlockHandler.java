@@ -31,6 +31,7 @@ import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.model.CmdAnnotation;
 import io.nuls.rpc.model.message.Response;
 import io.nuls.rpc.util.RPCUtil;
+import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.core.annotation.Service;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.log.logback.NulsLogger;
@@ -75,5 +76,4 @@ public class BlockHandler extends BaseCmd {
         BlockCacher.receiveBlock(chainId, message);
         return success();
     }
-
 }

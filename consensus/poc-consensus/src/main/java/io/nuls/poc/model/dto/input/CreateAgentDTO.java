@@ -11,7 +11,7 @@ public class CreateAgentDTO {
     private String agentAddress;
     private String packingAddress;
     private String rewardAddress;
-    private int commissionRate;
+    private byte commissionRate;
     private String deposit;
     private String password;
 
@@ -47,11 +47,11 @@ public class CreateAgentDTO {
         this.rewardAddress = rewardAddress;
     }
 
-    public int getCommissionRate() {
+    public byte getCommissionRate() {
         return commissionRate;
     }
 
-    public void setCommissionRate(int commissionRate) {
+    public void setCommissionRate(byte commissionRate) {
         this.commissionRate = commissionRate;
     }
 

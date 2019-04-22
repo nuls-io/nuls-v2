@@ -9,6 +9,7 @@ import io.nuls.api.model.po.db.PageInfo;
 import io.nuls.api.utils.DocumentTransferTool;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
+import io.nuls.tools.model.StringUtils;
 import org.bson.Document;
 import org.bson.conversions.Bson;
 
@@ -159,9 +160,13 @@ public class MongoDepositServiceImpl implements DepositService {
         return list;
     }
 
-    public PageInfo<DepositInfo> getDepositListByAddress(int chainId, String address, int pageIndex, int pageSize) {
-        Bson bson = Filters.and(Filters.eq("address", address), Filters.eq("type", 0), Filters.eq("deleteHeight", 0));
-
+    public PageInfo<DepositInfo> getDepositListByAddress(int chainId, String agentHash, String address, int pageIndex, int pageSize) {
+        Bson bson;
+        if (StringUtils.isBlank(agentHash)) {
+            bson = Filters.and(Filters.eq("address", address), Filters.eq("type", 0), Filters.eq("deleteHeight", 0));
+        } else {
+            bson = Filters.and(Filters.eq("address", address), Filters.eq("agentHash", agentHash), Filters.eq("type", 0), Filters.eq("deleteHeight", 0));
+        }
         long totalCount = mongoDBService.getCount(DEPOSIT_TABLE + chainId, bson);
         List<Document> documentList = mongoDBService.pageQuery(DEPOSIT_TABLE + chainId, bson, Sorts.descending("createTime"), pageIndex, pageSize);
         List<DepositInfo> depositInfos = new ArrayList<>();

@@ -173,12 +173,6 @@ public class CommandHandler implements InitializingBean {
             System.setProperty("jline.WindowsTerminal.directConsole", "false");
         }
         try {
-            I18nUtils.setLanguage("en");
-        } catch (NulsException e) {
-            e.printStackTrace();
-        }
-
-        try {
 //            OutputStream os = socket.getOutputStream();//字节输出流
 //            PrintWriter pw = new PrintWriter(os);//将输出流包装为打印流
 //            CONSOLE_READER = new ConsoleReader(socket.getInputStream(),socket.getOutputStream());

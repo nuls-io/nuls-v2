@@ -38,6 +38,9 @@ import java.util.Map;
  */
 public class CachedSmallBlock {
 
+    /**
+     * 缺失的交易
+     */
     private List<NulsDigestData> missingTransactions;
 
     private SmallBlock smallBlock;

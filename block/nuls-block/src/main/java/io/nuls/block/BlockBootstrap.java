@@ -18,9 +18,7 @@ import io.nuls.rpc.util.TimeUtils;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.core.ioc.SpringLiteContext;
-import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.log.Log;
-import io.nuls.tools.parse.I18nUtils;
 import io.nuls.tools.thread.ThreadUtils;
 import io.nuls.tools.thread.commom.NulsThreadFactory;
 
@@ -87,7 +85,6 @@ public class BlockBootstrap extends RpcModule {
         try {
             super.init();
             initDB();
-            initLanguage();
         } catch (Exception e) {
             Log.error("BlockBootstrap init error!");
             throw new RuntimeException(e);
@@ -104,11 +101,6 @@ public class BlockBootstrap extends RpcModule {
         RocksDBService.createTable(CHAIN_LATEST_HEIGHT);
         RocksDBService.createTable(CHAIN_PARAMETERS);
         RocksDBService.createTable(PROTOCOL_CONFIG);
-    }
-
-    private void initLanguage() throws NulsException {
-        I18nUtils.loadLanguage(BlockBootstrap.class, "languages", blockConfig.getLanguage());
-        I18nUtils.setLanguage(blockConfig.getLanguage());
     }
 
     /**

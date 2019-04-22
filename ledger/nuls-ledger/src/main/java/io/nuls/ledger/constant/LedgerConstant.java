@@ -25,13 +25,15 @@
  */
 package io.nuls.ledger.constant;
 
+import io.nuls.ledger.utils.LedgerUtil;
+
 /**
  * Created by ljs on 2018/11/19.
  * @author lanjinsheng
  */
 public class LedgerConstant {
 
-    public static final String MODULE_DB_PATH = "/ld";
+    public static final String MODULE_DB_PATH = "/lg";
 
     public static int UNCONFIRMED_NONCE = 0;
     public static int CONFIRMED_NONCE = 1;
@@ -56,7 +58,7 @@ public class LedgerConstant {
     /**
      * 缓存的账户初始化nonce
      */
-    public static final String INIT_NONCE = "ffffffff";
+    public static final byte []INIT_NONCE_BYTE = LedgerUtil.getNonceDecode("ffffffffffffffff");
     public static String DEFAULT_ENCODING = "UTF-8";
     public static int UNCONFIRM_NONCE_EXPIRED_TIME = 100000;
 }

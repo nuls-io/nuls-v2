@@ -25,50 +25,102 @@
  */
 package io.nuls.ledger.service;
 
+import io.nuls.ledger.model.ValidateResult;
 import io.nuls.ledger.model.po.AccountState;
 import io.nuls.ledger.model.po.AccountStateUnconfirmed;
-import io.nuls.ledger.model.po.UnconfirmedNonce;
+import io.nuls.ledger.model.po.TxUnconfirmed;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by lan on 2018/12/30
+ *
  * @author lanjinsheng
  */
 public interface UnconfirmedStateService {
 
     /**
      * 重计算未确认账本信息
+     *
      * @param accountState
      * @return
      */
-    AccountStateUnconfirmed getUnconfirmedInfoReCal(AccountState accountState);
+    AccountStateUnconfirmed getUnconfirmedInfo(AccountState accountState);
+
 
     /**
-     * 刷新未确认账本的nonce值
+     * 获取账本nonce信息
+     *
      * @param accountState
      * @return
      */
-    AccountStateUnconfirmed getUnconfirmedNonceReCal(AccountState accountState);
-
+    AccountStateUnconfirmed getUnconfirmedJustNonce(AccountState accountState);
 
     /**
-     * 回滚时候进行未确认账本信息的合并
-     * @param addressChainId
+     * 回滚信息
+     *
+     * @param accountState
      * @param assetKey
-     * @param accountState
-     * @param txHashList
+     * @param txsUnconfirmed
+     * @param accountStateUnconfirmed
      */
-    void mergeUnconfirmedNonce(int addressChainId, String assetKey,List<UnconfirmedNonce> accountState, List<String> txHashList);
+    void mergeUnconfirmedNonce(AccountState accountState, String assetKey, Map<byte[], byte[]> txsUnconfirmed, AccountStateUnconfirmed accountStateUnconfirmed);
 
     /**
      * 回滚未确认账本交易
+     *
      * @param addressChainId
      * @param assetKey
-     * @param nonce
      * @param txHash
      * @return
      */
-    boolean rollUnconfirmTx(int addressChainId, String assetKey, String nonce, String txHash);
+    boolean rollUnconfirmedTx(int addressChainId, String assetKey, String txHash);
 
+    /**
+     * unconfirmed tx exist
+     *
+     * @param addressChainId
+     * @param assetNonceKey
+     * @return
+     * @throws Exception
+     */
+    boolean existTxUnconfirmedTx(int addressChainId, byte[] assetNonceKey) throws Exception;
+
+    /**
+     * delete unconfirmed state
+     *
+     * @param addressChainId
+     * @param accountKey
+     * @throws Exception
+     */
+    void clearAccountUnconfirmed(int addressChainId, String accountKey) throws Exception;
+
+    /**
+     * delete unconfirmed chain
+     * @param addressChainId
+     * @param assetKey
+     * @param beginTxUnconfirmed
+     * @throws Exception
+     */
+    void deleteTxUnconfirmedList(int addressChainId, String assetKey,TxUnconfirmed beginTxUnconfirmed) throws Exception;
+
+    /**
+     * batch delete unconfirmed tx
+     *
+     * @param addressChainId
+     * @param keys
+     * @throws Exception
+     */
+    void batchDeleteUnconfirmedTx(int addressChainId, List<byte[]> keys) throws Exception;
+
+    /**
+     * update unconfirmed tx
+     *
+     * @param addressChainId
+     * @param txNonce
+     * @param txUnconfirmed
+     * @return
+     */
+    ValidateResult updateUnconfirmedTx(int addressChainId, byte[] txNonce, TxUnconfirmed txUnconfirmed);
 }

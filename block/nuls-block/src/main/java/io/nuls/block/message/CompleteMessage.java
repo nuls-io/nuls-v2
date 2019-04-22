@@ -86,4 +86,11 @@ public class CompleteMessage extends BaseBusinessMessage {
         this.success = byteBuffer.readBoolean();
     }
 
+    @Override
+    public String toString() {
+        return "CompleteMessage{" +
+                "requestHash=" + requestHash +
+                ", success=" + success +
+                '}';
+    }
 }

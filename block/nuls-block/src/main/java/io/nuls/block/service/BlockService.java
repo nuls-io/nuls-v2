@@ -106,6 +106,16 @@ public interface BlockService {
     List<BlockHeader> getBlockHeader(int chainId, long startHeight, long endHeight);
 
     /**
+     * 获取若干轮区块头(POC共识专用)
+     *
+     * @param chainId 链Id/chain id
+     * @param height  从这个高度向前获取
+     * @param round   轮次
+     * @return
+     */
+    List<BlockHeader> getBlockHeaderByRound(int chainId, long height, int round);
+
+    /**
      * 根据区块hash获取区块头
      *
      * @param chainId 链Id/chain id

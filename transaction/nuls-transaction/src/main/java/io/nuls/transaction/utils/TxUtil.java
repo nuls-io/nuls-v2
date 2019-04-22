@@ -40,19 +40,18 @@ import io.nuls.transaction.manager.TxManager;
 import io.nuls.transaction.model.bo.Chain;
 import io.nuls.transaction.model.bo.TxRegister;
 
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import static io.nuls.transaction.utils.LoggerUtil.Log;
+import static io.nuls.transaction.utils.LoggerUtil.LOG;
 
 /**
  * @author: Charlie
  * @date: 2018-12-05
  */
 public class TxUtil {
-
-    private static TxConfig txConfig = SpringLiteContext.getBean(TxConfig.class);
 
     public static CoinData getCoinData(Transaction tx) throws NulsException {
         if (null == tx) {
@@ -61,7 +60,7 @@ public class TxUtil {
         try {
             return tx.getCoinDataInstance();
         } catch (NulsException e) {
-            Log.error(e);
+            LOG.error(e);
             throw new NulsException(TxErrorCode.DESERIALIZE_COINDATA_ERROR);
         }
     }
@@ -73,7 +72,7 @@ public class TxUtil {
         try {
             return Transaction.getInstance(txBytes);
         } catch (NulsException e) {
-            Log.error(e);
+            LOG.error(e);
             throw new NulsException(TxErrorCode.DESERIALIZE_TX_ERROR);
         }
     }
@@ -87,10 +86,10 @@ public class TxUtil {
             baseNulsData.parse(new NulsByteBuffer(bytes));
             return (T) baseNulsData;
         } catch (NulsException e) {
-            Log.error(e);
+            LOG.error(e);
             throw new NulsException(TxErrorCode.DESERIALIZE_ERROR);
         } catch (Exception e) {
-            Log.error(e);
+            LOG.error(e);
             throw new NulsException(TxErrorCode.DESERIALIZE_ERROR);
         }
     }
@@ -132,7 +131,7 @@ public class TxUtil {
     }
 
     public static boolean isNulsAsset(int chainId, int assetId) {
-
+        TxConfig txConfig = SpringLiteContext.getBean(TxConfig.class);
         if (chainId == txConfig.getMainChainId()
                 && assetId == txConfig.getMainAssetId()) {
             return true;
@@ -217,14 +216,20 @@ public class TxUtil {
         nulsLogger.debug("size: {}B,  -{}KB, -{}MB",
                 String.valueOf(tx.getSize()), String.valueOf(tx.getSize() / 1024), String.valueOf(tx.getSize() / 1024 / 1024));
         byte[] remark = tx.getRemark();
-        nulsLogger.debug("remark: {}", remark == null ? "" : tx.getRemark().toString());
+        try {
+            String remarkStr =  remark == null ? "" : new String(tx.getRemark(),"UTF-8");
+            nulsLogger.debug("remark: {}", remarkStr);
+        } catch (UnsupportedEncodingException e) {
+            LOG.error(e);
+        }
+
         CoinData coinData = null;
         try {
             if (tx.getCoinData() != null) {
                 coinData = tx.getCoinDataInstance();
             }
         } catch (NulsException e) {
-            e.printStackTrace();
+            LOG.error(e);
         }
         if (coinData != null) {
             nulsLogger.debug("coinData:");

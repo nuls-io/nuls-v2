@@ -26,6 +26,7 @@
 package io.nuls.ledger.rpc.cmd;
 
 import io.nuls.base.data.Transaction;
+import io.nuls.ledger.constant.CmdConstant;
 import io.nuls.ledger.model.ValidateResult;
 import io.nuls.ledger.service.TransactionService;
 import io.nuls.ledger.utils.LoggerUtil;
@@ -46,6 +47,7 @@ import java.util.Map;
 /**
  * Created by wangkun23 on 2018/11/22.
  * 校验rpc接口
+ *
  * @author lanjinsheng
  */
 @Component
@@ -62,8 +64,8 @@ public class ValidatorCmd extends BaseLedgerCmd {
      * @param params
      * @return
      */
-    @CmdAnnotation(cmd = "verifyCoinDataPackaged",
-            version = 1.0, minEvent = 0, minPeriod = 0, description = "")
+    @CmdAnnotation(cmd = CmdConstant.CMD_VERIFY_COINDATA_PACKAGED,
+            version = 1.0, description = "")
     @Parameter(parameterName = "chainId", parameterType = "int")
     @Parameter(parameterName = "tx", parameterType = "String")
     public Response verifyCoinDataPackaged(Map params) {
@@ -98,8 +100,8 @@ public class ValidatorCmd extends BaseLedgerCmd {
      * @param params
      * @return
      */
-    @CmdAnnotation(cmd = "verifyCoinData",
-            version = 1.0, minEvent = 0, minPeriod = 0, description = "")
+    @CmdAnnotation(cmd = CmdConstant.CMD_VERIFY_COINDATA,
+            version = 1.0, description = "")
     @Parameter(parameterName = "chainId", parameterType = "int")
     @Parameter(parameterName = "tx", parameterType = "String")
     public Response verifyCoinData(Map params) {
@@ -132,8 +134,8 @@ public class ValidatorCmd extends BaseLedgerCmd {
      * @param params
      * @return
      */
-    @CmdAnnotation(cmd = "rollbackTxValidateStatus",
-            version = 1.0, minEvent = 0, minPeriod = 0,
+    @CmdAnnotation(cmd = CmdConstant.CMD_ROLLBACKTX_VALIDATE_STATUS,
+            version = 1.0,
             description = "")
     @Parameter(parameterName = "chainId", parameterType = "int")
     @Parameter(parameterName = "tx", parameterType = "String")
@@ -173,8 +175,8 @@ public class ValidatorCmd extends BaseLedgerCmd {
      * @param params
      * @return
      */
-    @CmdAnnotation(cmd = "bathValidateBegin",
-            version = 1.0,  minEvent = 0, minPeriod = 0,
+    @CmdAnnotation(cmd = CmdConstant.CMD_BATCH_VALIDATE_BEGIN,
+            version = 1.0,
             description = "")
     @Parameter(parameterName = "chainId", parameterType = "int")
     public Response bathValidateBegin(Map params) {
@@ -194,8 +196,8 @@ public class ValidatorCmd extends BaseLedgerCmd {
      * @return
      */
 
-    @CmdAnnotation(cmd = "blockValidate",
-            version = 1.0,  minEvent = 0, minPeriod = 0,
+    @CmdAnnotation(cmd = CmdConstant.CMD_BLOCK_VALIDATE,
+            version = 1.0,
             description = "")
     @Parameter(parameterName = "chainId", parameterType = "int")
     @Parameter(parameterName = "txList", parameterType = "List")

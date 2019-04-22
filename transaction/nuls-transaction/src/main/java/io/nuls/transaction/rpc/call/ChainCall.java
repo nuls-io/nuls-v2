@@ -44,7 +44,7 @@ public class ChainCall {
 //            HashMap result = (HashMap) TransactionCall.request(ModuleE.CM.abbr,"cm_assetCirculateCommit", params);
 //            return (boolean) result.get("value") == true;
 //        } catch (Exception e) {
-//            Log.error(e);
+//            LOG.error(e);
 //            return false;
 //        }
 //    }

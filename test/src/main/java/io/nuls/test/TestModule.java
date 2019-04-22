@@ -21,10 +21,14 @@ import io.nuls.test.utils.Utils;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.core.ioc.SpringLiteContext;
+import io.nuls.tools.log.Log;
 import io.nuls.tools.log.logback.NulsLogger;
 import io.nuls.tools.model.DateUtils;
+import io.nuls.tools.parse.I18nUtils;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Properties;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 
@@ -130,6 +134,8 @@ public class TestModule extends RpcModule {
     @Override
     public void init() {
         super.init();
+        I18nUtils.loadLanguage(this.getClass(), "languages", "en");
+//        I18nUtils.setLanguage("en");
         RestFulUtils.getInstance().setServerUri("http://127.0.0.1:9999/api/");
     }
 }

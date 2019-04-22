@@ -38,21 +38,21 @@ import io.nuls.tools.core.annotation.Component;
  * @author lanjinsheng
  */
 @Component
-public class CommontTransactionProcessor implements TxProcessor {
+public class CommontTransactionProcessor implements TxCommonProcessor {
 
     @Autowired
     AccountStateService accountStateService;
 
 
     @Override
-    public boolean processFromCoinData(CoinFrom coin, String nonce, String hash, AccountState accountState) {
+    public boolean processFromCoinData(CoinFrom coin, byte[] nonce,AccountState accountState) {
         accountState.addTotalFromAmount(coin.getAmount());
         accountState.setNonce(nonce);
         return true;
     }
 
     @Override
-    public boolean processToCoinData(CoinTo coin, String nonce, String hash, AccountState accountState) {
+    public boolean processToCoinData(CoinTo coin,AccountState accountState) {
         accountState.addTotalToAmount(coin.getAmount());
         return true;
     }

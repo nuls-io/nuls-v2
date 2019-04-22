@@ -47,8 +47,8 @@ public class WalletRpcHandler {
             return Result.getSuccess(null).setData(blockInfo);
         } catch (Exception e) {
             Log.error(e);
+            return Result.getFailed(ApiErrorCode.DATA_PARSE_ERROR);
         }
-        return Result.getFailed(ApiErrorCode.DATA_PARSE_ERROR);
     }
 
     public static Result<BlockInfo> getBlockInfo(int chainID, String hash) {
@@ -163,7 +163,7 @@ public class WalletRpcHandler {
         params.put("chainId", chainId);
         params.put("txHash", hash);
         try {
-            Map map = (Map) RpcCall.request(ModuleE.TX.abbr, CommandConstant.GET_CONFIRM_TX, params);
+            Map map = (Map) RpcCall.request(ModuleE.TX.abbr, CommandConstant.GET_TX, params);
             String txHex = (String) map.get("tx");
             if (null == txHex) {
                 return null;

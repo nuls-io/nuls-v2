@@ -13,6 +13,7 @@ import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.model.ObjectUtils;
 import io.nuls.tools.parse.JSONUtils;
+import io.nuls.transaction.cache.PackablePool;
 import io.nuls.transaction.constant.TxCmd;
 import io.nuls.transaction.constant.TxConstant;
 import io.nuls.transaction.constant.TxErrorCode;
@@ -25,8 +26,11 @@ import io.nuls.transaction.model.bo.VerifyLedgerResult;
 import io.nuls.transaction.model.dto.ModuleTxRegisterDTO;
 import io.nuls.transaction.model.dto.TxRegisterDTO;
 import io.nuls.transaction.model.po.TransactionConfirmedPO;
+import io.nuls.transaction.rpc.call.LedgerCall;
+import io.nuls.transaction.rpc.call.NetworkCall;
 import io.nuls.transaction.service.ConfirmedTxService;
 import io.nuls.transaction.service.TxService;
+import io.nuls.transaction.storage.UnconfirmedTxStorageService;
 import io.nuls.transaction.utils.TxUtil;
 
 import java.util.ArrayList;
@@ -34,7 +38,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static io.nuls.transaction.utils.LoggerUtil.Log;
+import static io.nuls.transaction.utils.LoggerUtil.LOG;
 
 /**
  * @author: Charlie
@@ -177,6 +181,65 @@ public class TransactionCmd extends BaseCmd {
             return failed(TxErrorCode.SYS_UNKOWN_EXCEPTION);
         }
     }
+
+
+    //----------------------------------------- test cmd ---------------------------------------------
+    /**
+     * 性能测试，新交易简要执行
+     *
+     * 测试 测试 测试 ！！
+     *
+     * @param params
+     * @return Response
+     */
+    @Autowired
+    private PackablePool packablePool;
+
+    @Autowired
+    private UnconfirmedTxStorageService unconfirmedTxStorageService;
+    @CmdAnnotation(cmd = "tx_newTx_test", version = 1.0, description = "receive a new transaction")
+    @Parameter(parameterName = "chainId", parameterType = "int")
+    @Parameter(parameterName = "tx", parameterType = "String")
+    public Response newTxTest(Map params) {
+
+        Chain chain = null;
+        try {
+            ObjectUtils.canNotEmpty(params.get("chainId"), TxErrorCode.PARAMETER_ERROR.getMsg());
+            ObjectUtils.canNotEmpty(params.get("tx"), TxErrorCode.PARAMETER_ERROR.getMsg());
+            chain = chainManager.getChain((int) params.get("chainId"));
+            if (null == chain) {
+                throw new NulsException(TxErrorCode.CHAIN_NOT_FOUND);
+            }
+            String txStr = (String) params.get("tx");
+            //将txStr转换为Transaction对象
+            Transaction tx = TxUtil.getInstanceRpcStr(txStr, Transaction.class);
+            //将交易放入待验证本地交易队列中
+            VerifyLedgerResult verifyLedgerResult = LedgerCall.commitUnconfirmedTx(chain, RPCUtil.encode(tx.serialize()));
+            Map<String, Boolean> map = new HashMap<>(TxConstant.INIT_CAPACITY_2);
+            if (!verifyLedgerResult.success()) {
+                chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug(
+                        "coinData not success - code: {}, - reason:{}, type:{} - txhash:{}",
+                        verifyLedgerResult.getCode(), verifyLedgerResult.getDesc(), tx.getType(), tx.getHash().getDigestHex());
+                map.put("value", false);
+            }
+            if (chain.getPackaging().get()) {
+                packablePool.add(chain, tx);
+            }
+            unconfirmedTxStorageService.putTx(chain.getChainId(), tx);
+            //广播完整交易
+            NetworkCall.broadcastTx(chain.getChainId(),tx);
+            map.put("value", true);
+            return success(map);
+        } catch (NulsException e) {
+            errorLogProcess(chain, e);
+            return failed(e.getErrorCode());
+        } catch (Exception e) {
+            errorLogProcess(chain, e);
+            return failed(TxErrorCode.SYS_UNKOWN_EXCEPTION);
+        }
+    }
+    //----------------------------------------- test cmd ---------------------------------------------
+
 
     /**
      * 新交易基础验证
@@ -446,10 +509,10 @@ public class TransactionCmd extends BaseCmd {
             TransactionConfirmedPO tx = txService.getTransaction(chain, NulsDigestData.fromDigestHex(txHash));
             Map<String, String> resultMap = new HashMap<>(TxConstant.INIT_CAPACITY_2);
             if (tx == null) {
-                Log.debug("getTx - from all, fail! tx is null, txHash:{}", txHash);
+                LOG.debug("getTx - from all, fail! tx is null, txHash:{}", txHash);
                 resultMap.put("tx", null);
             } else {
-                Log.debug("getTx - from all, success txHash : " + tx.getTx().getHash().getDigestHex());
+                LOG.debug("getTx - from all, success txHash : " + tx.getTx().getHash().getDigestHex());
                 resultMap.put("tx", RPCUtil.encode(tx.getTx().serialize()));
             }
             return success(resultMap);
@@ -488,10 +551,10 @@ public class TransactionCmd extends BaseCmd {
             TransactionConfirmedPO tx = confirmedTxService.getConfirmedTransaction(chain, NulsDigestData.fromDigestHex(txHash));
             Map<String, String> resultMap = new HashMap<>(TxConstant.INIT_CAPACITY_2);
             if (tx == null) {
-                Log.debug("getConfirmedTransaction fail, tx is null. txHash:{}", txHash);
+                LOG.debug("getConfirmedTransaction fail, tx is null. txHash:{}", txHash);
                 resultMap.put("tx", null);
             } else {
-                Log.debug("getConfirmedTransaction success. txHash:{}", txHash);
+                LOG.debug("getConfirmedTransaction success. txHash:{}", txHash);
                 resultMap.put("tx", RPCUtil.encode(tx.getTx().serialize()));
             }
             return success(resultMap);
@@ -695,7 +758,7 @@ public class TransactionCmd extends BaseCmd {
 
     private void errorLogProcess(Chain chain, Exception e) {
         if (chain == null) {
-            Log.error(e);
+            LOG.error(e);
         } else {
             chain.getLoggerMap().get(TxConstant.LOG_TX).error(e);
         }
