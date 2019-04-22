@@ -53,8 +53,6 @@ import static io.nuls.transaction.utils.LoggerUtil.LOG;
  */
 public class TxUtil {
 
-    private static TxConfig txConfig = SpringLiteContext.getBean(TxConfig.class);
-
     public static CoinData getCoinData(Transaction tx) throws NulsException {
         if (null == tx) {
             throw new NulsException(TxErrorCode.TX_NOT_EXIST);
@@ -133,7 +131,7 @@ public class TxUtil {
     }
 
     public static boolean isNulsAsset(int chainId, int assetId) {
-
+        TxConfig txConfig = SpringLiteContext.getBean(TxConfig.class);
         if (chainId == txConfig.getMainChainId()
                 && assetId == txConfig.getMainAssetId()) {
             return true;
