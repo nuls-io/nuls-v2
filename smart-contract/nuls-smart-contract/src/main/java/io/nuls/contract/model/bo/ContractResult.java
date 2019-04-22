@@ -29,7 +29,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.nuls.base.basic.AddressTool;
 import io.nuls.contract.model.tx.ContractTransferTransaction;
 import io.nuls.contract.model.txdata.ContractData;
-import io.nuls.contract.vm.program.ProgramTransfer;
+import io.nuls.contract.vm.program.*;
 import io.nuls.tools.crypto.HexUtil;
 
 import java.math.BigInteger;
@@ -103,6 +103,11 @@ public class ContractResult {
      */
     private List<String> events = new ArrayList<>();
 
+    private ProgramRegisterAgent programRegisterAgent;
+    private ProgramStopAgent programStopAgent;
+    private ProgramJoinAgent programJoinAgent;
+    private ProgramCancelDepositAgent programCancelDepositAgent;
+
     private String remark;
 
 
@@ -122,12 +127,12 @@ public class ContractResult {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof ContractResult)) return false;
+        if (this == o) { return true;}
+        if (!(o instanceof ContractResult)) { return false;}
 
         ContractResult result = (ContractResult) o;
 
-        if (getHash() != null ? !getHash().equals(result.getHash()) : result.getHash() != null) return false;
+        if (getHash() != null ? !getHash().equals(result.getHash()) : result.getHash() != null) { return false;}
 
         return true;
     }
@@ -423,5 +428,37 @@ public class ContractResult {
 
     public void setTxTrack(Object txTrack) {
         this.txTrack = txTrack;
+    }
+
+    public ProgramRegisterAgent getProgramRegisterAgent() {
+        return programRegisterAgent;
+    }
+
+    public void setProgramRegisterAgent(ProgramRegisterAgent programRegisterAgent) {
+        this.programRegisterAgent = programRegisterAgent;
+    }
+
+    public ProgramStopAgent getProgramStopAgent() {
+        return programStopAgent;
+    }
+
+    public void setProgramStopAgent(ProgramStopAgent programStopAgent) {
+        this.programStopAgent = programStopAgent;
+    }
+
+    public ProgramJoinAgent getProgramJoinAgent() {
+        return programJoinAgent;
+    }
+
+    public void setProgramJoinAgent(ProgramJoinAgent programJoinAgent) {
+        this.programJoinAgent = programJoinAgent;
+    }
+
+    public ProgramCancelDepositAgent getProgramCancelDepositAgent() {
+        return programCancelDepositAgent;
+    }
+
+    public void setProgramCancelDepositAgent(ProgramCancelDepositAgent programCancelDepositAgent) {
+        this.programCancelDepositAgent = programCancelDepositAgent;
     }
 }

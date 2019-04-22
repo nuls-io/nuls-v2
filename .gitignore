@@ -123,3 +123,6 @@ NULS-Wallet-linux64-alpha1/
 NULS-Wallet-linux64-alpha2/
 config_tmp/
 NULS-Wallet-linux64-alpha1.tar.gz
+module_dev.json
+module_dev.ncf
+module_testnet.ncf
