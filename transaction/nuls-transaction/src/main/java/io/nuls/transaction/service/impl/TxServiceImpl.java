@@ -418,7 +418,7 @@ public class TxServiceImpl implements TxService {
         }
         BigInteger feeTo = BigInteger.ZERO;
         for (CoinTo coinTo : coinData.getTo()) {
-            feeFrom = feeFrom.add(accrueFee(type, chain, coinTo));
+            feeTo = feeTo.add(accrueFee(type, chain, coinTo));
         }
         //交易中实际的手续费
         BigInteger fee = feeFrom.subtract(feeTo);

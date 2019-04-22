@@ -83,6 +83,7 @@ public class ChainManager {
             initLogger(chain);
             initTable(chain);
             chainMap.put(chainId, chain);
+            chain.getLoggerMap().get(TxConstant.LOG_TX).debug("Chain:{} init success..", chainId);
         }
     }
 
@@ -96,6 +97,7 @@ public class ChainManager {
             initCache(chain);
             schedulerManager.createTransactionScheduler(chain);
             chainMap.put(chain.getChainId(), chain);
+            chain.getLoggerMap().get(TxConstant.LOG_TX).debug("Chain:{} runChain success..", chain.getChainId());
         }
     }
 

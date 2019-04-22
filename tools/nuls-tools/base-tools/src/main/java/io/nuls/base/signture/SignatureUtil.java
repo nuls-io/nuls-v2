@@ -181,12 +181,14 @@ public class SignatureUtil {
      * @param signEckeys 需要生成普通签名的秘钥
      */
     public static void createTransactionSignture(Transaction tx, List<ECKey> signEckeys) throws IOException {
+        if (signEckeys == null || signEckeys.size() == 0) {
+            Log.error("TransactionSignature signEckeys is null!");
+            throw new NullPointerException();
+        }
         TransactionSignature transactionSignature = new TransactionSignature();
         List<P2PHKSignature> p2PHKSignatures = null;
         try {
-            if (signEckeys != null && signEckeys.size() > 0) {
-                p2PHKSignatures = createSignaturesByEckey(tx, signEckeys);
-            }
+            p2PHKSignatures = createSignaturesByEckey(tx, signEckeys);
             transactionSignature.setP2PHKSignatures(p2PHKSignatures);
             tx.setTransactionSignature(transactionSignature.serialize());
         } catch (IOException e) {

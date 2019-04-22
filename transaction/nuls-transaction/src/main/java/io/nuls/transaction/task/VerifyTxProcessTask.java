@@ -63,20 +63,10 @@ public class VerifyTxProcessTask implements Runnable {
         if (packablePool.getPoolSize(chain) >= chain.getConfig().getTxUnverifiedQueueSize()) {
             return;
         }
-
         Transaction tx = null;
-        long startTask = System.currentTimeMillis();
-        int i = 0;
         while ((tx = unverifiedTxStorageService.pollTx(chain)) != null) {
             long start = System.currentTimeMillis();
             processTx(chain, tx, false);
-            i++;
-            chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("@@@@@@@@ 2 @@@@@@@@@@ one processTx:{}毫秒",System.currentTimeMillis()-start);
-            chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("");
-        }
-        if(i>0) {
-            chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("@@@@@@@@ 3 @@@@@@@@@@ one Task:{}毫秒, count:{}笔交易",
-                    (System.currentTimeMillis() - startTask), i);
         }
     }
 
@@ -85,14 +75,11 @@ public class VerifyTxProcessTask implements Runnable {
             chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("新交易处理.....hash:{}", tx.getHash().getDigestHex());
             long s1 = System.currentTimeMillis();
             int chainId = chain.getChainId();
-            //todo 跨链交易单独处理, 是否需要进行跨链验证？
             if (!txService.verify(chain, tx).getResult()) {
                 return false;
             }
             chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("验证器花费时间:{}", System.currentTimeMillis() - s1);
-
             long get = System.currentTimeMillis();
-            //获取一笔交易
             TransactionConfirmedPO existTx = txService.getTransaction(chain, tx.getHash());
             if(null != existTx){
                 return isOrphanTx;
@@ -112,7 +99,6 @@ public class VerifyTxProcessTask implements Runnable {
                 }
                 //保存到rocksdb
                 unconfirmedTxStorageService.putTx(chainId, tx);
-
                 //广播交易hash
                 NetworkCall.forwardTxHash(chain.getChainId(),tx.getHash());
                 long s3 = System.currentTimeMillis();
