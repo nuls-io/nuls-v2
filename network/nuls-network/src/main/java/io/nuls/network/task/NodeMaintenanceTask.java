@@ -105,7 +105,7 @@ public class NodeMaintenanceTask implements Runnable {
         List<Node> nodeList = new ArrayList<>(canConnectNodes);
 
         nodeList.removeAll(connectedNodes);
-
+       //最大需要连接的数量 大于 可用连接数的时候，直接返回可用连接数，否则进行选择性返回
         int maxCount = networkConfig.getMaxOutCount() - connectedNodes.size();
         if (nodeList.size() < maxCount) {
             return nodeList;
