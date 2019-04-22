@@ -27,7 +27,7 @@ public interface DepositService {
 
     List<String> getAgentHashList(int chainId, String address);
 
-    PageInfo<DepositInfo> getDepositListByAddress(int chainId, String address, int pageIndex, int pageSize);
+    PageInfo<DepositInfo> getDepositListByAddress(int chainId,String agentHash, String address, int pageIndex, int pageSize);
 
 
 }

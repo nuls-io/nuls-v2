@@ -46,9 +46,9 @@ import java.util.List;
  * api-module模块启动类
  * nuls's api module startup class
  *
- * @author captain
+ * @author vivi
  * @version 1.0
- * @date 19-1-25 上午10:48
+ * @date 19-2-25 上午10:48
  */
 @Component
 public class ApiModuleBootstrap extends RpcModule {
@@ -98,7 +98,6 @@ public class ApiModuleBootstrap extends RpcModule {
         }
     }
 
-
     /**
      * 初始化模块相关配置
      * 有关mongoDB的连接初始化见：MongoDBService.afterPropertiesSet();
@@ -123,11 +122,10 @@ public class ApiModuleBootstrap extends RpcModule {
             initDB();
             ScheduleManager scheduleManager = SpringLiteContext.getBean(ScheduleManager.class);
             scheduleManager.start();
-            Thread.sleep(3000);
+            Thread.sleep(5000);
             JsonRpcServer server = new JsonRpcServer();
             server.startServer(ApiContext.listenerIp, ApiContext.rpcPort);
             TimeUtils.getInstance().start();
-            //   TimeUtils.getInstance().start(10 * 60 * 1000L);
         } catch (Exception e) {
             Log.error("------------------------api-module running failed---------------------------");
             Log.error(e);
