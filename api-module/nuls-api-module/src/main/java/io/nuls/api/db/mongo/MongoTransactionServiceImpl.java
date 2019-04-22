@@ -175,6 +175,14 @@ public class MongoTransactionServiceImpl implements TransactionService {
         } else if (tx.getType() == ApiConstant.TX_TYPE_CONTRACT_RETURN_GAS) {
             processCoinBaseTx(chainId, tx, txRelationInfoSet);
         }
+
+        List<Document> documentList = new ArrayList<>();
+        for (TxRelationInfo relationInfo : txRelationInfoSet) {
+            Document document = DocumentTransferTool.toDocument(relationInfo);
+            documentList.add(document);
+        }
+
+        mongoDBService.insertMany(TX_UNCONFIRM_RELATION_TABLE + chainId, documentList);
     }
 
     private void processCoinBaseTx(int chainId, TransactionInfo tx, Set<TxRelationInfo> txRelationInfoSet) {

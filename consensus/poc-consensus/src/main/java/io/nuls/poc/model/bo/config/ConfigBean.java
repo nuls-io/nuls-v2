@@ -30,12 +30,12 @@ public class ConfigBean implements Serializable {
      * 佣金比例的最小值
      * Minimum commission ratio
      */
-    private double commissionRateMin;
+    private byte commissionRateMin;
     /**
      * 佣金比例的最大值
      * Maximum commission ratio
      */
-    private double commissionRateMax;
+    private byte commissionRateMax;
     /**
      * 创建节点的保证金最小值
      * Minimum margin for creating nodes
@@ -127,19 +127,19 @@ public class ConfigBean implements Serializable {
         this.stopAgentLockTime = stopAgentLockTime;
     }
 
-    public double getCommissionRateMin() {
+    public byte getCommissionRateMin() {
         return commissionRateMin;
     }
 
-    public void setCommissionRateMin(double commissionRateMin) {
+    public void setCommissionRateMin(byte commissionRateMin) {
         this.commissionRateMin = commissionRateMin;
     }
 
-    public double getCommissionRateMax() {
+    public byte getCommissionRateMax() {
         return commissionRateMax;
     }
 
-    public void setCommissionRateMax(double commissionRateMax) {
+    public void setCommissionRateMax(byte commissionRateMax) {
         this.commissionRateMax = commissionRateMax;
     }
 

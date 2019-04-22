@@ -39,9 +39,7 @@ public interface CommandConstant {
     String GET_FREEZE = "getFreezeList";
 
     //查询交易详情
-    String GET_TX = "tx_getTx";
-    //查询已确认交易详情
-    String GET_CONFIRM_TX = "tx_getConfirmedTxClient";
+    String GET_TX = "tx_getTxClient";
     //交易验证
     String TX_VALIEDATE = "tx_verifyTx";
     //新交易确认并广播
