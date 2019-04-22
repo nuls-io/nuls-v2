@@ -273,7 +273,7 @@ public class TxValidator {
             }
         }
         //节点地址及出块地址不能重复
-        List<Agent> agentList = chain.getWorkAgentList(chain.getNewestHeader().getHeight());
+        List<Agent> agentList = chain.getNewOrWorkAgentList(chain.getNewestHeader().getHeight());
         if(agentList != null && agentList.size()>0){
             Set<String> set = new HashSet<>();
             for (Agent agentTemp:agentList) {
