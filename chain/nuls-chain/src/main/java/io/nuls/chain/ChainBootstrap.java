@@ -55,6 +55,7 @@ public class ChainBootstrap extends RpcModule {
 //        I18nUtils.setLanguage(nulsChainConfig.getLanguage());
         CmRuntimeInfo.nulsAssetId = nulsChainConfig.getMainAssetId();
         CmRuntimeInfo.nulsChainId = nulsChainConfig.getMainChainId();
+        LoggerUtil.defaultLogInit(nulsChainConfig.getLogLevel());
     }
     /**
      * 如果数据库中有相同的配置，则以数据库为准
