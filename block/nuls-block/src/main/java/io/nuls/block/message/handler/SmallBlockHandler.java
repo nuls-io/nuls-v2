@@ -116,7 +116,7 @@ public class SmallBlockHandler extends BaseCmd {
 
         //2.已收到部分区块,还缺失交易信息,发送HashListMessage到源节点
         if (BlockForwardEnum.INCOMPLETE.equals(status)) {
-            CachedSmallBlock block = SmallBlockCacher.getSmallBlock(chainId, blockHash);
+            CachedSmallBlock block = SmallBlockCacher.getCachedSmallBlock(chainId, blockHash);
             HashListMessage request = new HashListMessage();
             request.setBlockHash(blockHash);
             request.setTxHashList(block.getMissingTransactions());
