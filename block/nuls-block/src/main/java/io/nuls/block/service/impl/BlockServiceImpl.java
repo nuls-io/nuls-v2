@@ -23,14 +23,11 @@ package io.nuls.block.service.impl;
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.data.*;
 import io.nuls.base.data.po.BlockHeaderPo;
-import io.nuls.block.cache.SmallBlockCacher;
 import io.nuls.block.constant.BlockErrorCode;
-import io.nuls.block.constant.BlockForwardEnum;
 import io.nuls.block.manager.BlockChainManager;
 import io.nuls.block.manager.ContextManager;
 import io.nuls.block.message.HashMessage;
 import io.nuls.block.message.SmallBlockMessage;
-import io.nuls.block.model.CachedSmallBlock;
 import io.nuls.block.model.Chain;
 import io.nuls.block.model.ChainContext;
 import io.nuls.block.model.GenesisBlock;
@@ -41,7 +38,6 @@ import io.nuls.block.rpc.call.TransactionUtil;
 import io.nuls.block.service.BlockService;
 import io.nuls.block.storage.BlockStorageService;
 import io.nuls.block.storage.ChainStorageService;
-import io.nuls.block.thread.monitor.TxGroupRequestor;
 import io.nuls.block.utils.BlockUtil;
 import io.nuls.block.utils.ChainGenerator;
 import io.nuls.db.service.RocksDBService;
@@ -367,13 +363,6 @@ public class BlockServiceImpl implements BlockService {
             }
             //同步\链切换\孤儿链对接过程中不进行区块广播
             if (download == 1) {
-                SmallBlock smallBlock = BlockUtil.getSmallBlock(chainId, block);
-                Map<NulsDigestData, Transaction> txMap = new HashMap<>(header.getTxCount());
-                block.getTxs().forEach(e -> txMap.put(e.getHash(), e));
-                CachedSmallBlock cachedSmallBlock = new CachedSmallBlock(null, smallBlock, txMap);
-                SmallBlockCacher.cacheSmallBlock(chainId, cachedSmallBlock);
-                SmallBlockCacher.setStatus(chainId, hash, BlockForwardEnum.COMPLETE);
-                TxGroupRequestor.removeTask(chainId, hash.toString());
                 if (broadcast) {
                     broadcastBlock(chainId, block);
                 }
