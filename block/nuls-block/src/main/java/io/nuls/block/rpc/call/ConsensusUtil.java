@@ -21,9 +21,7 @@
 package io.nuls.block.rpc.call;
 
 import io.nuls.base.data.Block;
-import io.nuls.base.data.BlockExtendsData;
 import io.nuls.base.data.BlockHeader;
-import io.nuls.base.data.po.BlockHeaderPo;
 import io.nuls.block.manager.ContextManager;
 import io.nuls.block.model.ChainContext;
 import io.nuls.block.service.BlockService;
@@ -34,8 +32,10 @@ import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.log.logback.NulsLogger;
 
-import java.io.IOException;
-import java.util.*;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * 调用共识模块接口的工具类
@@ -183,62 +183,6 @@ public class ConsensusUtil {
             e.printStackTrace();
             commonLog.error(e);
             return false;
-        }
-    }
-
-    /**
-     * 回滚区块之前，先把共识模块的缓存区块头更新了
-     *
-     * @param chainId 链Id/chain id
-     * @param rollBackAmount  回滚区块数量
-     * @return
-     */
-    public static void sendHeaderList(int chainId, int rollBackAmount) {
-        ChainContext context = ContextManager.getContext(chainId);
-        NulsLogger commonLog = context.getCommonLog();
-        try {
-            Block latestBlock = context.getLatestBlock();
-            long latestHeight = latestBlock.getHeader().getHeight();
-            byte[] extend = latestBlock.getHeader().getExtend();
-            BlockExtendsData data = new BlockExtendsData(extend);
-            long roundIndex = data.getRoundIndex();
-            List<String> hexList = new ArrayList<>();
-            int count = 0;
-            while (count < 110 - 1) {
-                latestHeight--;
-                if ((latestHeight <= 0)) {
-                    //110轮已经回退到创世块了，不需要再给共识模块新区块
-                    return;
-                }
-                BlockHeaderPo blockHeader = service.getBlockHeaderPo(chainId, latestHeight);
-                BlockExtendsData newData = new BlockExtendsData(blockHeader.getExtend());
-                long newRoundIndex = newData.getRoundIndex();
-                if (newRoundIndex != roundIndex) {
-                    count++;
-                    roundIndex = newRoundIndex;
-                }
-            }
-            long start = latestHeight <= rollBackAmount ? 0 : latestHeight - rollBackAmount;
-            List<BlockHeader> blockHeaders = service.getBlockHeader(chainId, start, latestHeight);
-            if (blockHeaders == null) {
-                return;
-            }
-            blockHeaders.forEach(e -> {
-                try {
-                    hexList.add(RPCUtil.encode(e.serialize()));
-                } catch (IOException ex) {
-                    ex.printStackTrace();
-                }
-            });
-
-            Map<String, Object> params = new HashMap<>(2);
-//            params.put(Constants.VERSION_KEY_STR, "1.0");
-            params.put("chainId", chainId);
-            params.put("headerList", hexList);
-            ResponseMessageProcessor.requestAndResponse(ModuleE.CS.abbr, "cs_receiveHeaderList", params);
-        } catch (Exception e) {
-            e.printStackTrace();
-            commonLog.error(e);
         }
     }
 

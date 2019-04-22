@@ -166,4 +166,6 @@ public interface ConsensusConstant {
     String CHAIN ="chain";
 
     int ROUND_CACHE_COUNT = 10;
+
+    int RPC_CALL_TRY_COUNT = 5;
  }
