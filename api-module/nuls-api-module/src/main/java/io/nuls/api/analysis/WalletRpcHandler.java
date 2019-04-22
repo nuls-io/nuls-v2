@@ -47,8 +47,8 @@ public class WalletRpcHandler {
             return Result.getSuccess(null).setData(blockInfo);
         } catch (Exception e) {
             Log.error(e);
+            return Result.getFailed(ApiErrorCode.DATA_PARSE_ERROR);
         }
-        return Result.getFailed(ApiErrorCode.DATA_PARSE_ERROR);
     }
 
     public static Result<BlockInfo> getBlockInfo(int chainID, String hash) {

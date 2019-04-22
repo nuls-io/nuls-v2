@@ -85,6 +85,9 @@ public class DocumentTransferTool {
                 if (field.getName().equals("isNew")) {
                     continue;
                 }
+                if (!document.containsKey(field.getName())) {
+                    continue;
+                }
                 if (field.getType().getName().equals("java.math.BigInteger")) {
                     field.set(instance, new BigInteger(document.get(field.getName()).toString()));
                 } else {
@@ -109,6 +112,9 @@ public class DocumentTransferTool {
             for (Field field : fields) {
                 field.setAccessible(true);
                 if (field.getName().equals("isNew")) {
+                    continue;
+                }
+                if (!document.containsKey(field.getName())) {
                     continue;
                 }
                 if (field.getType().getName().equals("java.math.BigInteger")) {
