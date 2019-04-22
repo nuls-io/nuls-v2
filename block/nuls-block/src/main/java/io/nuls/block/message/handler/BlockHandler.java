@@ -66,9 +66,9 @@ public class BlockHandler extends BaseCmd {
         }
         Block block = message.getBlock();
         if (block == null) {
-            messageLog.info("recieve null BlockMessage from node-" + nodeId + ", chainId:" + chainId + ", msghash:" + message.getRequestHash());
+            messageLog.debug("recieve null BlockMessage from node-" + nodeId + ", chainId:" + chainId + ", msghash:" + message.getRequestHash());
         } else {
-            messageLog.info("recieve BlockMessage from node-" + nodeId + ", chainId:" + chainId + ", hash:" + block.getHeader().getHash() + ", height-" + block.getHeader().getHeight());
+            messageLog.debug("recieve BlockMessage from node-" + nodeId + ", chainId:" + chainId + ", hash:" + block.getHeader().getHash() + ", height-" + block.getHeader().getHeight());
         }
         BlockCacher.receiveBlock(chainId, message);
         return success();
