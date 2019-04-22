@@ -217,7 +217,7 @@ public class TxValidator {
         if (tx.getTime() <= 0) {
             throw new NulsException(ConsensusErrorCode.DATA_ERROR);
         }
-        double commissionRate = agent.getCommissionRate();
+        byte commissionRate = agent.getCommissionRate();
         if (commissionRate < chain.getConfig().getCommissionRateMin() || commissionRate > chain.getConfig().getCommissionRateMax()) {
             throw new NulsException(ConsensusErrorCode.COMMISSION_RATE_OUT_OF_RANGE);
         }
