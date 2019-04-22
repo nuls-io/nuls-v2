@@ -19,8 +19,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import static io.nuls.api.constant.MongoTableConstant.ACCOUNT_TABLE;
-import static io.nuls.api.constant.MongoTableConstant.TX_RELATION_TABLE;
+import static io.nuls.api.constant.MongoTableConstant.*;
 
 @Component
 public class MongoAccountServiceImpl implements AccountService {
@@ -84,12 +83,12 @@ public class MongoAccountServiceImpl implements AccountService {
         } else {
             filter = addressFilter;
         }
-//        long start = System.currentTimeMillis();
+
+//        long totalCount = mongoDBService.getCount(TX_UNCONFIRM_RELATION_TABLE + chainId, addressFilter);
+
+
         long totalCount = mongoDBService.getCount(TX_RELATION_TABLE + chainId, filter);
-//        Log.info("count use:{}ms",System.currentTimeMillis()-start);
-//        start = System.currentTimeMillis();
         List<Document> docsList = this.mongoDBService.pageQuery(TX_RELATION_TABLE + chainId, filter, Sorts.descending("height", "createTime"), pageIndex, pageSize);
-//        Log.info("query use:{}ms",System.currentTimeMillis()-start);
         List<TxRelationInfo> txRelationInfoList = new ArrayList<>();
         for (Document document : docsList) {
             txRelationInfoList.add(DocumentTransferTool.toInfo(document, TxRelationInfo.class));

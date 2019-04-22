@@ -163,7 +163,7 @@ public class WalletRpcHandler {
         params.put("chainId", chainId);
         params.put("txHash", hash);
         try {
-            Map map = (Map) RpcCall.request(ModuleE.TX.abbr, CommandConstant.GET_CONFIRM_TX, params);
+            Map map = (Map) RpcCall.request(ModuleE.TX.abbr, CommandConstant.GET_TX, params);
             String txHex = (String) map.get("tx");
             if (null == txHex) {
                 return null;
