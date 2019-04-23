@@ -9,9 +9,9 @@ public class DateUtils {
     public final static String EMPTY_SRING = "";
     public final static String DEFAULT_PATTERN = "yyyy-MM-dd HH:mm:ss";
     public final static String DEFAULT_TIMESTAMP_PATTERN = "yyyy-MM-dd HH:mm:ss.sss";
-    public final static long DATE_TIME = 1000 * 24 * 60 * 60;
-    public final static long HOUR_TIME = 1000 * 60 * 60;
-    public final static long MINUTE_TIME = 1000 * 60;
+    public final static long DATE_TIME = 1000L * 24 * 60 * 60;
+    public final static long HOUR_TIME = 1000L * 60 * 60;
+    public final static long MINUTE_TIME = 1000L * 60;
     public final static long TIME_ZONE;
     public final static String TIME_ZONE_STRING;
     private static final ThreadLocal<DateFormat> DATE_FORMATTER_17 = ThreadLocal.withInitial(() -> new SimpleDateFormat(DEFAULT_TIMESTAMP_PATTERN));
