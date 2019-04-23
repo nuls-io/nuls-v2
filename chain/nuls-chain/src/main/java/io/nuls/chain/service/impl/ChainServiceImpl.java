@@ -46,13 +46,13 @@ public class ChainServiceImpl implements ChainService {
      */
     @Override
     public void initMainChain() throws Exception {
-        int chainId = Integer.valueOf(nulsChainConfig.getNulsChainId());
+        int chainId = Integer.valueOf(nulsChainConfig.getMainAssetId());
         BlockChain chain = getChain(chainId);
         if (chain != null) {
             return;
         }
         chain = new BlockChain();
-        int assetId = Integer.parseInt(nulsChainConfig.getNulsAssetId());
+        int assetId = Integer.parseInt(nulsChainConfig.getMainAssetId());
         chain.setRegAssetId(assetId);
         chain.addCreateAssetId(CmRuntimeInfo.getAssetKey(chainId, assetId));
         chain.addCirculateAssetId(CmRuntimeInfo.getAssetKey(chainId, assetId));

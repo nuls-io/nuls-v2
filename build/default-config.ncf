@@ -57,7 +57,7 @@ heightRange=1000
 #批量下载区块时,如果收到CompleteMessage时,区块还没有保存完,每一个区块预留多长等待时间
 waitInterval=50
 #本地区块与网络区块不一致时,本地最大回滚数
-maxRollback=100
+maxRollback=1000
 #统计网络上的节点最新区块高度、hash一致的百分比阈值
 consistencyNodePercent=60
 #最小链接节点数,当链接到的网络节点低于此参数时,会持续等待

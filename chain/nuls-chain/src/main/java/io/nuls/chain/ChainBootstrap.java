@@ -1,6 +1,7 @@
 package io.nuls.chain;
 
 import io.nuls.chain.config.NulsChainConfig;
+import io.nuls.chain.info.CmRuntimeInfo;
 import io.nuls.chain.service.CacheDataService;
 import io.nuls.chain.service.ChainService;
 import io.nuls.chain.service.RpcService;
@@ -50,8 +51,11 @@ public class ChainBootstrap extends RpcModule {
      */
     private void initCfg() throws Exception {
         /* 设置系统语言 (Set system language) */
-        I18nUtils.loadLanguage(ChainBootstrap.class, "languages", nulsChainConfig.getLanguage());
-        I18nUtils.setLanguage(nulsChainConfig.getLanguage());
+//        I18nUtils.loadLanguage(ChainBootstrap.class, "languages", nulsChainConfig.getLanguage());
+//        I18nUtils.setLanguage(nulsChainConfig.getLanguage());
+        CmRuntimeInfo.nulsAssetId = nulsChainConfig.getMainAssetId();
+        CmRuntimeInfo.nulsChainId = nulsChainConfig.getMainChainId();
+        LoggerUtil.defaultLogInit(nulsChainConfig.getLogLevel());
     }
     /**
      * 如果数据库中有相同的配置，则以数据库为准
@@ -61,7 +65,7 @@ public class ChainBootstrap extends RpcModule {
      */
     private void initWithDatabase() throws Exception {
         /* 打开数据库连接 (Open database connection) */
-        RocksDBService.init(ConfigManager.getValue(nulsChainConfig.getDataPath()));
+        RocksDBService.init(nulsChainConfig.getDataPath());
         InitDB assetStorage = SpringLiteContext.getBean(AssetStorageImpl.class);
         assetStorage.initTableName();
         InitDB blockHeightStorage = SpringLiteContext.getBean(BlockHeightStorageImpl.class);

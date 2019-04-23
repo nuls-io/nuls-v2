@@ -213,7 +213,7 @@ public class NodeGroup implements Dto {
     }
 
     /**
-     * 1.在可用连接充足情况下，保留一个种子连接，其他的连接需要断开
+     * 1.在可用连接充足情况下，保留一个种子连接，其他的种子连接需要断开
      * 2.在可用连接不够取代种子情况下，按可用连接数来断开种子连接
      *
      * @param isCross
@@ -230,6 +230,7 @@ public class NodeGroup implements Dto {
                 nodes = localNetNodeContainer.getConnectedSeedNodes();
                 canConnectNodesNum = localNetNodeContainer.getCanConnectNodes().size();
             }
+            //连接的种子数量大于1，并且可用连接数量大于0
             if (nodes.size() > 1 && canConnectNodesNum > 0) {
                 Collections.shuffle(nodes);
                 nodes.remove(0);

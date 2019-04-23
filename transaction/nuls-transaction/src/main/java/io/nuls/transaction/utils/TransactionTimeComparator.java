@@ -29,20 +29,24 @@ import io.nuls.base.data.CoinFrom;
 import io.nuls.base.data.Transaction;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.exception.NulsException;
-import static io.nuls.transaction.utils.LoggerUtil.LOG;
+import io.nuls.transaction.model.po.TransactionNetPO;
 
 import java.util.Arrays;
 import java.util.Comparator;
+
+import static io.nuls.transaction.utils.LoggerUtil.LOG;
 
 /**
  * @author: Charlie
  * @date: 2018-12-11
  */
 @Component
-public class TransactionTimeComparator implements Comparator<Transaction> {
+public class TransactionTimeComparator implements Comparator<TransactionNetPO> {
 
     @Override
-    public int compare(Transaction o1, Transaction o2) {
+    public int compare(TransactionNetPO txNeto1, TransactionNetPO txNeto2) {
+        Transaction o1 = txNeto1.getTx();
+        Transaction o2 = txNeto2.getTx();
         if (o1.getHash().equals(o2.getHash())) {
             return 0;
         }

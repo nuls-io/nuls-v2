@@ -20,12 +20,17 @@
 
 package io.nuls.block.cache;
 
+import io.nuls.base.data.Block;
 import io.nuls.base.data.NulsDigestData;
 import io.nuls.base.data.SmallBlock;
 import io.nuls.block.constant.BlockForwardEnum;
 import io.nuls.block.manager.ContextManager;
 import io.nuls.block.model.CachedSmallBlock;
 import io.nuls.block.model.ChainParameters;
+import io.nuls.block.service.BlockService;
+import io.nuls.block.utils.BlockUtil;
+import io.nuls.tools.core.annotation.Autowired;
+import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.model.CollectionUtils;
 
 import java.util.Map;
@@ -40,7 +45,11 @@ import java.util.concurrent.ConcurrentHashMap;
  * @version 1.0
  * @date 18-12-6 上午10:49
  */
+@Component
 public class SmallBlockCacher {
+
+    @Autowired
+    private static BlockService service;
 
     /**
      * 缓存区块转发、广播过程中收到的{@link SmallBlock},可以用来排除重复消息,
@@ -71,8 +80,26 @@ public class SmallBlockCacher {
      * @param blockHash
      * @return
      */
-    public static CachedSmallBlock getSmallBlock(int chainId, NulsDigestData blockHash) {
-        return smallBlockCacheMap.get(chainId).get(blockHash);
+    public static CachedSmallBlock getCachedSmallBlock(int chainId, NulsDigestData blockHash) {
+        CachedSmallBlock cachedSmallBlock = smallBlockCacheMap.get(chainId).get(blockHash);
+        if (cachedSmallBlock == null) {
+            Block block = service.getBlock(chainId, blockHash);
+            SmallBlock smallBlock = BlockUtil.getSmallBlock(chainId, block);
+            cachedSmallBlock = new CachedSmallBlock(null, smallBlock, null);
+        }
+        return cachedSmallBlock;
+    }
+
+    /**
+     * 根据hash获取缓存的{@link SmallBlock}
+     * TODO  注释完整性
+     *
+     * @param chainId   链Id/chain id
+     * @param blockHash
+     * @return
+     */
+    public static SmallBlock getSmallBlock(int chainId, NulsDigestData blockHash) {
+        return getCachedSmallBlock(chainId, blockHash).getSmallBlock();
     }
 
     /**
