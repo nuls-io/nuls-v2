@@ -286,7 +286,7 @@ public class ChainManager {
          * 共识模块日志文件对象创建,如果一条链有多类日志文件，可在此添加
          * Creation of Log File Object in Consensus Module，If there are multiple log files in a chain, you can add them here
          * */
-        String bootFolder = ConsensusConstant.CHAIN + "_" + String.valueOf(chain.getConfig().getChainId());
+        String bootFolder = ConsensusConstant.CHAIN + "-" + String.valueOf(chain.getConfig().getChainId());
         NulsLogger consensusLogger = LoggerBuilder.getLogger(bootFolder, ConsensusConstant.CONSENSUS_LOGGER_NAME, Level.DEBUG);
         NulsLogger rpcLogger = LoggerBuilder.getLogger(bootFolder, ConsensusConstant.BASIC_LOGGER_NAME, Level.DEBUG);
         chain.getLoggerMap().put(ConsensusConstant.CONSENSUS_LOGGER_NAME, consensusLogger);

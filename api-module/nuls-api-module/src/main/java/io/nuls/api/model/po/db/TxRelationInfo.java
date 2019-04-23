@@ -27,6 +27,8 @@ public class TxRelationInfo {
     // -1 : from , 1: to
     private int transferType;
 
+    private int status;
+
     public TxRelationInfo() {
 
     }
@@ -131,5 +133,13 @@ public class TxRelationInfo {
 
     public void setTransferType(int transferType) {
         this.transferType = transferType;
+    }
+
+    public int getStatus() {
+        return status;
+    }
+
+    public void setStatus(int status) {
+        this.status = status;
     }
 }

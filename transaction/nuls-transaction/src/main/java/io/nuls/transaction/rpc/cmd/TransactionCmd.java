@@ -224,6 +224,7 @@ public class TransactionCmd extends BaseCmd {
             }
             if (chain.getPackaging().get()) {
                 packablePool.add(chain, tx);
+                System.out.println("********* " + packablePool.getPoolSize(chain));
             }
             unconfirmedTxStorageService.putTx(chain.getChainId(), tx);
             //广播完整交易
