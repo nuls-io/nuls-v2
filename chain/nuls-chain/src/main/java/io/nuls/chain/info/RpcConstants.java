@@ -126,4 +126,12 @@ public interface RpcConstants {
      */
     public static final String CMD_LG_GET_COINDATA = "getCoinData";
 
+    /**
+     * 账户信息校验部分
+     */
+    public static final String CMD_AC_GET_PRI_KEY = "ac_getPriKeyByAddress";
+    public static final String VALID_RESULT ="valid";
+
+    public static final String CMD_AC_SIGN_DIGEST = "ac_signDigest";
+
 }

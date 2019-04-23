@@ -22,11 +22,12 @@
  * SOFTWARE.
  *
  */
-package io.nuls.chain.service;
+package io.nuls.chain.rpc.call;
 
 import io.nuls.base.data.Transaction;
 import io.nuls.chain.model.dto.AccountBalance;
 import io.nuls.chain.model.po.BlockChain;
+import io.nuls.tools.exception.NulsException;
 
 /**
  * 调用外部接口
@@ -58,6 +59,16 @@ public interface RpcService {
      * @return
      */
     AccountBalance getCoinData(String address);
+    /**
+     * 交易签名
+     * transaction signature
+     *
+     * @param chainId
+     * @param address
+     * @param password
+     * @param tx
+     */
+    void transactionSignature(int chainId, String address, String password, Transaction tx) throws NulsException ;
 
-}
+    }
 
