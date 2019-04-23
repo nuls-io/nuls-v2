@@ -38,6 +38,7 @@ import io.nuls.rpc.model.message.Response;
 import io.nuls.rpc.netty.processor.ResponseMessageProcessor;
 import io.nuls.rpc.util.RPCUtil;
 import io.nuls.rpc.util.TimeUtils;
+import io.nuls.tools.constant.TxType;
 import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.log.Log;
@@ -251,8 +252,8 @@ public class TxValid {
 
     @Test
     public void transfer() throws Exception {
-        for (int i = 0; i < 1000; i++) {
-            String hash = createTransfer(address27, address21, new BigInteger("1000000000"));
+        for (int i = 0; i < 1; i++) {
+            String hash = createTransfer(address23, address20, new BigInteger("1000000000"));
             //String hash = createCtxTransfer();
             System.out.println("hash:" + hash);
             System.out.println("count:" + (i + 1));
@@ -911,7 +912,7 @@ public class TxValid {
                     }
                 }
             } else if (!addressSet.contains(AddressTool.getStringAddressByBytes(coinFrom.getAddress()))
-                    && tx.getType() != TxConstant.TX_TYPE_STOP_AGENT) {
+                    && tx.getType() != TxType.STOP_AGENT) {
                 throw new NulsException(TxErrorCode.SIGN_ADDRESS_NOT_MATCH_COINFROM);
             }
         }
