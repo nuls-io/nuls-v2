@@ -22,7 +22,7 @@
  * SOFTWARE.
  *
  */
-package io.nuls.chain.cmd;
+package io.nuls.chain.rpc.cmd;
 
 import io.nuls.base.data.BlockHeaderDigest;
 import io.nuls.base.data.Transaction;
@@ -73,11 +73,11 @@ public class TxCirculateCmd extends BaseChainCmd {
      */
     @CmdAnnotation(cmd = "cm_assetCirculateValidator", version = 1.0, description = "assetCirculateValidator")
     @Parameter(parameterName = "chainId", parameterType = "int", parameterValidRange = "[1,65535]")
-    @Parameter(parameterName = "txHex", parameterType = "String")
+    @Parameter(parameterName = "tx", parameterType = "String")
     public Response assetCirculateValidator(Map params) {
         //提取 从哪条链 转 哪条链，是否是跨链，链 手续费共多少？
         try {
-            String txHex = String.valueOf(params.get("txHex"));
+            String txHex = String.valueOf(params.get("tx"));
             Transaction tx = TxUtil.buildTxData(txHex);
             if (null == tx) {
                 return failed(CmErrorCode.ERROR_TX_HEX);
@@ -100,7 +100,7 @@ public class TxCirculateCmd extends BaseChainCmd {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        return failed(CmErrorCode.UNKOWN_ERROR);
+        return failed(CmErrorCode.SYS_UNKOWN_EXCEPTION);
     }
 
     /**
@@ -108,7 +108,7 @@ public class TxCirculateCmd extends BaseChainCmd {
      */
     @CmdAnnotation(cmd = "cm_assetCirculateCommit", version = 1.0, description = "assetCirculateCommit")
     @Parameter(parameterName = "chainId", parameterType = "int", parameterValidRange = "[1,65535]")
-    @Parameter(parameterName = "txHexList", parameterType = "array")
+    @Parameter(parameterName = "txList", parameterType = "array")
     @Parameter(parameterName = "blockHeaderDigest", parameterType = "array")
     public Response assetCirculateCommit(Map params) {
         //A链转B链资产X，数量N ;A链X资产减少N, B链 X资产 增加N。
@@ -116,7 +116,7 @@ public class TxCirculateCmd extends BaseChainCmd {
             ObjectUtils.canNotEmpty(params.get("chainId"));
             ObjectUtils.canNotEmpty(params.get("blockHeaderDigest"));
             Integer chainId = (Integer) params.get("chainId");
-            List<String> txHexList = (List) params.get("txHexList");
+            List<String> txHexList = (List) params.get("txList");
             BlockHeaderDigest blockHeaderDigest = (BlockHeaderDigest) params.get("blockHeaderDigest");
             long commitHeight = blockHeaderDigest.getHeight();
             List<Transaction> txList = new ArrayList<>();
@@ -158,14 +158,14 @@ public class TxCirculateCmd extends BaseChainCmd {
      */
     @CmdAnnotation(cmd = "cm_assetCirculateRollBack", version = 1.0, description = "assetCirculateRollBack")
     @Parameter(parameterName = "chainId", parameterType = "int", parameterValidRange = "[1,65535]")
-    @Parameter(parameterName = "txHexList", parameterType = "array")
+    @Parameter(parameterName = "txList", parameterType = "array")
     @Parameter(parameterName = "blockHeaderDigest", parameterType = "array")
     public Response assetCirculateRollBack(Map params) {
         try {
             ObjectUtils.canNotEmpty(params.get("chainId"));
             ObjectUtils.canNotEmpty(params.get("blockHeaderDigest"));
             Integer chainId = (Integer) params.get("chainId");
-            List<String> txHexList = (List) params.get("txHexList");
+            List<String> txHexList = (List) params.get("txList");
             BlockHeaderDigest blockHeaderDigest = (BlockHeaderDigest) params.get("blockHeaderDigest");
             long commitHeight = blockHeaderDigest.getHeight();
             List<Transaction> txList = new ArrayList<>();

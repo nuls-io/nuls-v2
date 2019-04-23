@@ -8,7 +8,7 @@ import io.nuls.chain.model.po.Asset;
 import io.nuls.chain.model.po.BlockChain;
 import io.nuls.chain.service.AssetService;
 import io.nuls.chain.service.ChainService;
-import io.nuls.chain.service.RpcService;
+import io.nuls.chain.rpc.call.RpcService;
 import io.nuls.chain.storage.ChainStorage;
 import io.nuls.chain.util.TxUtil;
 import io.nuls.tools.core.annotation.Autowired;

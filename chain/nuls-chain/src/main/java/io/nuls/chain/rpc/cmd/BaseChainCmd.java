@@ -22,7 +22,7 @@
  * SOFTWARE.
  *
  */
-package io.nuls.chain.cmd;
+package io.nuls.chain.rpc.cmd;
 
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.basic.TransactionFeeCalculator;
@@ -194,24 +194,5 @@ public class BaseChainCmd extends BaseCmd {
     Asset setDefaultAssetValue(Asset asset) {
 
         return asset;
-    }
-
-    Transaction signDigest(int chainId, String address, String password, Transaction tx) throws Exception {
-        Map<String, Object> signDigestParam = new HashMap<>(4);
-        signDigestParam.put("chainId", chainId);
-        signDigestParam.put("address", address);
-        signDigestParam.put("password", password);
-        signDigestParam.put("dataHex", tx);
-
-        Response response = ResponseMessageProcessor.requestAndResponse("ac", "ac_signDigest", signDigestParam);
-        if (!response.isSuccess()) {
-            throw new Exception("ac_signDigest error.");
-        }
-
-        Map responseData = (Map) response.getResponseData();
-        String signatureHex = (String) responseData.get("signatureHex");
-        tx.setTransactionSignature(RPCUtil.decode(signatureHex));
-
-        return tx;
     }
 }

@@ -24,6 +24,7 @@
  */
 package io.nuls.contract.manager;
 
+import ch.qos.logback.classic.Level;
 import io.nuls.contract.config.ContractConfig;
 import io.nuls.contract.constant.ContractDBConstant;
 import io.nuls.contract.model.bo.Chain;
@@ -31,6 +32,7 @@ import io.nuls.contract.model.bo.config.ConfigBean;
 import io.nuls.contract.model.dto.ContractTxRegisterDto;
 import io.nuls.contract.rpc.call.TransactionCall;
 import io.nuls.contract.storage.ConfigStorageService;
+import io.nuls.contract.util.ContractUtil;
 import io.nuls.contract.util.Log;
 import io.nuls.contract.util.VMContext;
 import io.nuls.contract.vm.program.ProgramExecutor;
@@ -103,6 +105,10 @@ public class ChainManager {
              * 初始化智能合约创建合约未确认交易管理器
              */
             initContractTxCreateUnconfirmedManager(chain);
+            /*
+             * 初始化链日志
+             */
+            initContractChainLog(chainId);
             chainMap.put(chainId, chain);
         }
     }
@@ -120,6 +126,15 @@ public class ChainManager {
     private void initContractExecutor(Chain chain) {
         ProgramExecutor programExecutor = new ProgramExecutorImpl(vmContext, chain);
         chain.setProgramExecutor(programExecutor);
+    }
+
+    /**
+     * 初始化链日志
+     */
+    private void initContractChainLog(int chainId) {
+        Level fileLevel = Level.toLevel(contractConfig.getLogFileLevel());
+        Level consoleLevel = Level.toLevel(contractConfig.getLogConsoleLevel());
+        ContractUtil.configChainLog(chainId, contractConfig.getLogFilePath(), contractConfig.getLogFileName(), fileLevel, consoleLevel);
     }
 
     public static boolean registerTx(Chain chain) throws NulsException {
@@ -205,6 +220,11 @@ public class ChainManager {
                 Log.error(e.getMessage());
             }
         }
+    }
+
+    public static void chainHandle(int chainId) {
+        // 设置日志分链打印
+        Log.currentThreadChainId(chainId);
     }
 
 

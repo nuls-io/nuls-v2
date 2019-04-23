@@ -43,7 +43,6 @@ import io.nuls.contract.model.txdata.CreateContractData;
 import io.nuls.contract.model.txdata.DeleteContractData;
 import io.nuls.contract.rpc.call.BlockCall;
 import io.nuls.db.service.RocksDBService;
-import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.model.message.MessageUtil;
 import io.nuls.rpc.model.message.Response;
 import io.nuls.tools.basic.Result;
@@ -56,6 +55,7 @@ import io.nuls.tools.model.StringUtils;
 import io.nuls.tools.parse.JSONUtils;
 import org.slf4j.LoggerFactory;
 
+import java.io.File;
 import java.lang.reflect.Array;
 import java.math.BigInteger;
 import java.util.*;
@@ -528,13 +528,12 @@ public class ContractUtil {
             if (StringUtils.isBlank(msg)) {
                 msg = errorCode.getMsg();
             }
+            Response res = MessageUtil.newFailResponse("",msg);
+            res.setResponseErrorCode(errorCode.getCode());
+            return res;
         } else {
-            errorCode = FAILED;
-            msg = errorCode.getMsg();
+            return MessageUtil.newFailResponse("", FAILED);
         }
-        Response response = MessageUtil.newResponse("", Constants.BOOLEAN_FALSE, msg);
-        response.setResponseData(errorCode);
-        return response;
     }
 
     public static void configLog(String filePath, String fileName, Level fileLevel, Level consoleLevel, String systemLogLevel, String packageLogPackages, String packageLogLevels) {
@@ -545,8 +544,8 @@ public class ContractUtil {
         logger.setAdditive(false);
         logger.setLevel(Level.toLevel(rootLevelInt));
 
-        Log.BASIC_LOGGER = LoggerBuilder.getLogger(filePath, fileName, fileLevel, consoleLevel);
-        Log.BASIC_LOGGER.addBasicPath(Log.class.getName());
+        Log.DEFAULT_BASIC_LOGGER = LoggerBuilder.getLogger(filePath, fileName, fileLevel, consoleLevel);
+        Log.DEFAULT_BASIC_LOGGER.addBasicPath(Log.class.getName());
 
         if (StringUtils.isNotBlank(systemLogLevel)) {
             String systemLogName = io.nuls.tools.log.Log.BASIC_LOGGER.getLogger().getName();
@@ -573,6 +572,12 @@ public class ContractUtil {
                 packageLogger.setLevel(Level.toLevel(logLevel));
             }
         }
+    }
+
+    public static void configChainLog(Integer chainId, String filePath, String fileName, Level fileLevel, Level consoleLevel) {
+        filePath = "." + File.separator + "chain-" + chainId + File.separator + filePath;
+        Log.DEFAULT_BASIC_LOGGER = LoggerBuilder.getLogger(filePath, fileName, fileLevel, consoleLevel);
+        Log.DEFAULT_BASIC_LOGGER.addBasicPath(Log.class.getName());
     }
 
     public static void configLog(String filePath, String fileName, Level fileLevel, Level consoleLevel) {

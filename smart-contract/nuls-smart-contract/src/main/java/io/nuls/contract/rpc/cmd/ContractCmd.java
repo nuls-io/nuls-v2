@@ -26,6 +26,7 @@ package io.nuls.contract.rpc.cmd;
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.Transaction;
 import io.nuls.contract.helper.ContractHelper;
+import io.nuls.contract.manager.ChainManager;
 import io.nuls.contract.manager.ContractTokenBalanceManager;
 import io.nuls.contract.manager.ContractTxProcessorManager;
 import io.nuls.contract.manager.ContractTxValidatorManager;
@@ -82,6 +83,7 @@ public class ContractCmd extends BaseCmd {
     public Response batchBegin(Map<String, Object> params) {
         try {
             Integer chainId = (Integer) params.get("chainId");
+            ChainManager.chainHandle(chainId);
             Long blockHeight = Long.parseLong(params.get("blockHeight").toString());
             Long blockTime = Long.parseLong(params.get("blockTime").toString());
             String packingAddress = (String) params.get("packingAddress");
@@ -101,6 +103,7 @@ public class ContractCmd extends BaseCmd {
     public Response invokeContractOneByOne(Map<String, Object> params) {
         try {
             Integer chainId = (Integer) params.get("chainId");
+            ChainManager.chainHandle(chainId);
             String txData = (String) params.get("tx");
             ContractTempTransaction tx = new ContractTempTransaction();
             tx.setTxHex(txData);
@@ -122,6 +125,7 @@ public class ContractCmd extends BaseCmd {
     public Response batchBeforeEnd(Map<String, Object> params) {
         try {
             Integer chainId = (Integer) params.get("chainId");
+            ChainManager.chainHandle(chainId);
             Long blockHeight = Long.parseLong(params.get("blockHeight").toString());
             Result result = contractService.beforeEnd(chainId, blockHeight);
             Log.info("[Before End Result] contract batch, result is {}", result.toString());
@@ -141,6 +145,7 @@ public class ContractCmd extends BaseCmd {
     public Response batchEnd(Map<String, Object> params) {
         try {
             Integer chainId = (Integer) params.get("chainId");
+            ChainManager.chainHandle(chainId);
             Long blockHeight = Long.parseLong(params.get("blockHeight").toString());
 
             Result result = contractService.end(chainId, blockHeight);
@@ -173,6 +178,7 @@ public class ContractCmd extends BaseCmd {
     public Response createValidator(Map<String, Object> params) {
         try {
             Integer chainId = (Integer) params.get("chainId");
+            ChainManager.chainHandle(chainId);
             String txData = (String) params.get("tx");
             CreateContractTransaction tx = new CreateContractTransaction();
             tx.parse(RPCUtil.decode(txData), 0);
@@ -198,6 +204,7 @@ public class ContractCmd extends BaseCmd {
     public Response callValidator(Map<String, Object> params) {
         try {
             Integer chainId = (Integer) params.get("chainId");
+            ChainManager.chainHandle(chainId);
             String txData = (String) params.get("tx");
             CallContractTransaction tx = new CallContractTransaction();
             tx.parse(RPCUtil.decode(txData), 0);
@@ -223,6 +230,7 @@ public class ContractCmd extends BaseCmd {
     public Response deleteValidator(Map<String, Object> params) {
         try {
             Integer chainId = (Integer) params.get("chainId");
+            ChainManager.chainHandle(chainId);
             String txData = (String) params.get("tx");
             DeleteContractTransaction tx = new DeleteContractTransaction();
             tx.parse(RPCUtil.decode(txData), 0);
@@ -247,7 +255,8 @@ public class ContractCmd extends BaseCmd {
     @Parameter(parameterName = "txList", parameterType = "String")
     public Response integrateValidator(Map<String, Object> params) {
         try {
-            //Integer chainId = (Integer) params.get("chainId");
+            Integer chainId = (Integer) params.get("chainId");
+            ChainManager.chainHandle(chainId);
             //List<String> txHexList = (List<String>) params.get("txHexList");
             /**
              *  暂无统一验证器
@@ -268,6 +277,7 @@ public class ContractCmd extends BaseCmd {
     public Response commit(Map<String, Object> params) {
         try {
             Integer chainId = (Integer) params.get("chainId");
+            ChainManager.chainHandle(chainId);
             List<String> txDataList = (List<String>) params.get("txList");
             String blockHeaderData = (String) params.get("blockHeader");
 
@@ -292,6 +302,7 @@ public class ContractCmd extends BaseCmd {
     public Response rollback(Map<String, Object> params) {
         try {
             Integer chainId = (Integer) params.get("chainId");
+            ChainManager.chainHandle(chainId);
             List<String> txDataList = (List<String>) params.get("txList");
             String blockHeaderData = (String) params.get("blockHeader");
 
@@ -315,6 +326,7 @@ public class ContractCmd extends BaseCmd {
     public Response initialAccountToken(Map<String, Object> params) {
         try {
             Integer chainId = (Integer) params.get("chainId");
+            ChainManager.chainHandle(chainId);
             String address = (String) params.get("address");
             if (!AddressTool.validAddress(chainId, address)) {
                 return failed(ADDRESS_ERROR);

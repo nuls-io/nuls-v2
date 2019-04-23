@@ -38,6 +38,7 @@ import io.nuls.rpc.model.message.Response;
 import io.nuls.rpc.netty.processor.ResponseMessageProcessor;
 import io.nuls.rpc.util.RPCUtil;
 import io.nuls.rpc.util.TimeUtils;
+import io.nuls.tools.constant.TxType;
 import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.log.Log;
@@ -251,8 +252,8 @@ public class TxValid {
 
     @Test
     public void transfer() throws Exception {
-        for (int i = 0; i < 1000; i++) {
-            String hash = createTransfer(address27, address21, new BigInteger("1000000000"));
+        for (int i = 0; i < 20; i++) {
+            String hash = createTransfer(address23, address20, new BigInteger("1000000000"));
             //String hash = createCtxTransfer();
             System.out.println("hash:" + hash);
             System.out.println("count:" + (i + 1));
@@ -358,8 +359,8 @@ public class TxValid {
 
     @Test
     public void getTx() throws Exception {
-        getTxCfmClient("0020e87c15cc8509a46cf5c802641864dc609f87b4e1d6120a3de3d3d31e6075173a");
-        getTxCfmClient("00209a152f8a93c05463c970a12b875cb23effb59b0dd177b47ec1e56fca0d3c80e8");//最后一条
+        getTxCfmClient("31f65fb2cc5e468b203f692291ea94f8559dca30878f9e1648c11601bf0cf7e1");
+        getTxCfmClient("61b27fd200ab93bbf24fee25bcca82e46dbd62c7fa406ccd74d1b594d134e397");//最后一条
     }
 
     private void getTx(String hash) throws Exception {
@@ -911,7 +912,7 @@ public class TxValid {
                     }
                 }
             } else if (!addressSet.contains(AddressTool.getStringAddressByBytes(coinFrom.getAddress()))
-                    && tx.getType() != TxConstant.TX_TYPE_STOP_AGENT) {
+                    && tx.getType() != TxType.STOP_AGENT) {
                 throw new NulsException(TxErrorCode.SIGN_ADDRESS_NOT_MATCH_COINFROM);
             }
         }

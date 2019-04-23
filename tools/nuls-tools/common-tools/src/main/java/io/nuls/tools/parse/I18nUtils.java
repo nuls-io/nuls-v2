@@ -173,6 +173,9 @@ public class I18nUtils {
         }
         key = lang;
         nowMapping = ALL_MAPPING.get(lang);
+        if(nowMapping == null){
+            throw new IllegalArgumentException("config error, can't found language package : " + lang);
+        }
     }
 
     /**

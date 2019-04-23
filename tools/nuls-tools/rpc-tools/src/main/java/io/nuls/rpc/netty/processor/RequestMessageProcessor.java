@@ -81,7 +81,7 @@ public class RequestMessageProcessor {
      * @param messageId 请求ID
      */
     public static void serviceNotStarted(Channel channel, String messageId) throws JsonProcessingException {
-        Response response = MessageUtil.newResponse(messageId, Constants.BOOLEAN_FALSE, "Service not started!");
+        Response response = MessageUtil.newFailResponse(messageId, "Service not started!");
         Message rspMsg = MessageUtil.basicMessage(MessageType.Response);
         rspMsg.setMessageData(response);
         ConnectManager.sendMessage(channel, JSONUtils.obj2json(rspMsg));
@@ -166,10 +166,9 @@ public class RequestMessageProcessor {
             构造返回的消息对象
             Construct the returned message object
              */
-            Response response = MessageUtil.newResponse(messageId, "", "");
-            response.setRequestID(messageId);
-            response.setResponseStatus(Constants.BOOLEAN_FALSE);
-
+            Response response = MessageUtil.newResponse(messageId, Response.FAIL, "");
+//            response.setRequestID(messageId);
+//            response.setResponseStatus(Constants.BOOLEAN_FALSE);
             try {
                  /*
                 从本地注册的cmd中得到对应的方法
@@ -465,7 +464,7 @@ public class RequestMessageProcessor {
         Method method = clz.getDeclaredMethod(invokeMethod, Map.class);
         BaseCmd cmd = (BaseCmd) handlerMap.get(invokeClass);
         if (cmd == null) {
-            return MessageUtil.newResponse("", Constants.BOOLEAN_FALSE, CMD_NOT_FOUND);
+            return MessageUtil.newFailResponse("",  CMD_NOT_FOUND);
         }
         return (Response) method.invoke(cmd, params);
     }

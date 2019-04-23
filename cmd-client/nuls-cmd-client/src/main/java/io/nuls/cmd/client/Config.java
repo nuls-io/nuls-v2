@@ -4,8 +4,6 @@ import io.nuls.api.provider.Provider;
 import io.nuls.tools.core.annotation.Configuration;
 import io.nuls.tools.core.annotation.Persist;
 import io.nuls.tools.core.annotation.Value;
-import lombok.Getter;
-import lombok.Setter;
 
 /**
  * @Author: zhoulijun
@@ -13,8 +11,6 @@ import lombok.Setter;
  * @Description:
  */
 @Configuration(domain = "cmd_client")
-@Getter
-@Setter
 public class Config {
 
     @Persist
@@ -27,4 +23,38 @@ public class Config {
     @Value.NotNull
     private Provider.ProviderType providerType;
 
+
+    private String language;
+
+    public Integer getChainId() {
+        return chainId;
+    }
+
+    public void setChainId(Integer chainId) {
+        this.chainId = chainId;
+    }
+
+    public Integer getAssetsId() {
+        return assetsId;
+    }
+
+    public void setAssetsId(Integer assetsId) {
+        this.assetsId = assetsId;
+    }
+
+    public Provider.ProviderType getProviderType() {
+        return providerType;
+    }
+
+    public void setProviderType(Provider.ProviderType providerType) {
+        this.providerType = providerType;
+    }
+
+    public String getLanguage() {
+        return language;
+    }
+
+    public void setLanguage(String language) {
+        this.language = language;
+    }
 }

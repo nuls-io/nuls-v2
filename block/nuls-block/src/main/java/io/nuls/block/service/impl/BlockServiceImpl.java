@@ -360,7 +360,7 @@ public class BlockServiceImpl implements BlockService {
                     forwardBlock(chainId, hash, null);
                 }
             }
-            Response response = MessageUtil.newResponse("", Constants.BOOLEAN_TRUE, "success");
+            Response response = MessageUtil.newSuccessResponse("");
             Map<String, Long> responseData = new HashMap<>(2);
             responseData.put("value", height);
             Map<String, Object> sss = new HashMap<>(2);
@@ -482,7 +482,7 @@ public class BlockServiceImpl implements BlockService {
             }
             long elapsedNanos = System.nanoTime() - startTime;
             commonLog.info("rollback block success, time-" + elapsedNanos + ", height-" + height + ", txCount-" + blockHeaderPo.getTxCount() + ", hash-" + blockHeaderPo.getHash());
-            Response response = MessageUtil.newResponse("", Constants.BOOLEAN_TRUE, "success");
+            Response response = MessageUtil.newSuccessResponse("");
             Map<String, Long> responseData = new HashMap<>(2);
             responseData.put("value", height - 1);
             Map<String, Object> sss = new HashMap<>(2);

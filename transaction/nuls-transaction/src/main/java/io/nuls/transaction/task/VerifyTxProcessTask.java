@@ -66,7 +66,6 @@ public class VerifyTxProcessTask implements Runnable {
         }
         TransactionNetPO tx = null;
         while ((tx = unverifiedTxStorageService.pollTx(chain)) != null) {
-            long start = System.currentTimeMillis();
             processTx(chain, tx, false);
         }
     }
@@ -102,8 +101,7 @@ public class VerifyTxProcessTask implements Runnable {
                 //保存到rocksdb
                 unconfirmedTxStorageService.putTx(chainId, tx);
                 //转发交易hash
-                NetworkCall.forwardTxHash(chain.getChainId(),tx.getHash());
-                //NetworkCall.forwardTxHash(chain.getChainId(),tx.getHash(), txNet.getExcludeNode());
+                NetworkCall.forwardTxHash(chain.getChainId(),tx.getHash(), txNet.getExcludeNode());
                 long s3 = System.currentTimeMillis();
                 chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("交易保存阶段花费时间:{}", s3 - s2);
                 return true;

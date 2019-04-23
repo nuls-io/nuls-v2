@@ -8,7 +8,6 @@ import io.nuls.contract.constant.ContractDBConstant;
 import io.nuls.contract.manager.ChainManager;
 import io.nuls.contract.model.bo.Chain;
 import io.nuls.contract.util.ContractUtil;
-import io.nuls.contract.util.Log;
 import io.nuls.contract.util.VMContext;
 import io.nuls.contract.vm.program.ProgramMethod;
 import io.nuls.db.service.RocksDBService;
@@ -24,7 +23,7 @@ import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.core.ioc.SpringLiteContext;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.io.IoUtils;
-import io.nuls.tools.parse.I18nUtils;
+import io.nuls.tools.log.Log;
 import io.nuls.tools.parse.JSONUtils;
 
 import java.io.File;
