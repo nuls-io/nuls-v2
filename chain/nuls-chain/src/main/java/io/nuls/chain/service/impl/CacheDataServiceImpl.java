@@ -278,13 +278,11 @@ public class CacheDataServiceImpl implements CacheDataService {
                 LoggerUtil.logger().error("Data conflict,dbHeight{},toBkHeigh={}", saveBlockHeight.getBlockHeight(), blockHeight);
                 throw new Exception("Data conflict,Block height error.");
             }
+            if (!saveBlockHeight.isCommit()) {
+                LoggerUtil.logger().error("Data conflict,Block is unCommit error.chainId={},blockHeight={}", chainId, blockHeight);
+                throw new Exception("Data conflict,Block is unCommit error.");
+            }
         }
-
-        if (!saveBlockHeight.isCommit()) {
-            LoggerUtil.logger().error("Data conflict,Block is unCommit error.chainId={},blockHeight={}", chainId, blockHeight);
-            throw new Exception("Data conflict,Block is unCommit error.");
-        }
-
         if (saveBlockHeight.getBakHeighList().size() == 0 || saveBlockHeight.getBakHeighList().get(saveBlockHeight.getBakHeighList().size() - 1) < blockHeight) {
             //高度未备份过，进行备份
             saveBlockHeight.addBakHeight(blockHeight);
