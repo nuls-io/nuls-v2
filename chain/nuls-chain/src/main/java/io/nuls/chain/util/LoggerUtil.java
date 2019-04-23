@@ -24,6 +24,7 @@
  */
 package io.nuls.chain.util;
 
+import ch.qos.logback.classic.Level;
 import io.nuls.tools.log.logback.LoggerBuilder;
 import io.nuls.tools.log.logback.NulsLogger;
 
@@ -33,8 +34,13 @@ import io.nuls.tools.log.logback.NulsLogger;
  * @date 2018/12/17
  **/
 public class LoggerUtil {
-   private static NulsLogger Log = LoggerBuilder.getLogger("chainManager");
-   public static NulsLogger logger(){
-      return Log;
-   }
+    private static NulsLogger logger = null;
+
+    public static void defaultLogInit(String logLevel) {
+        logger = LoggerBuilder.getLogger("nuls-chain", Level.valueOf(logLevel));
+    }
+
+    public static NulsLogger logger() {
+        return logger;
+    }
 }

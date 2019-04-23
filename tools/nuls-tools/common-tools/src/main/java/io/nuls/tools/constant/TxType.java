@@ -45,13 +45,43 @@ public class TxType {
      * 跨链
      */
     public final static int CROSS_CHAIN = 10;
+
     /**
-     * 合约转账
+     * 注册链交易
      */
-    public final static int CONTRACT_TRANSFER = 103;
+    public final static int REGISTER_CHAIN_AND_ASSET = 11;
     /**
-     * 合约费用返还
+     * 销毁链
      */
-    public final static int CONTRACT_RETURN_GAS = 104;
+    public final static int DESTROY_CHAIN_AND_ASSET = 12;
+    /**
+     * 为链新增一种资产
+     */
+    public final static int ADD_ASSET_TO_CHAIN = 13;
+    /**
+     * 删除链上资产
+     */
+    public final static int REMOVE_ASSET_FROM_CHAIN = 14;
+    /**
+     * 创建智能合约交易
+     */
+    public final static int CREATE_CONTRACT = 15;
+    /**
+     * 调用智能合约交易
+     */
+    public final static int CONTRACT_CALL = 16;
+    /**
+     * 删除智能合约交易
+     */
+    public final static int CONTRACT_DELETE = 17;
+    /**
+     * contract transfer tx
+     */
+    public final static int CONTRACT_TRANSFER = 18;
+    /**
+     * contract return gas tx
+     */
+    public final static int CONTRACT_RETURN_GAS = 19;
+
 
 }

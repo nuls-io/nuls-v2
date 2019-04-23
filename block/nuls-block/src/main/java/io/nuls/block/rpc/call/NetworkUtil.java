@@ -49,9 +49,6 @@ import static io.nuls.block.utils.LoggerUtil.commonLog;
  */
 public class NetworkUtil {
 
-    private static long latestGetTime = System.currentTimeMillis();
-    private static long offset = 0;
-
     /**
      * 根据链ID获取可用节点
      *

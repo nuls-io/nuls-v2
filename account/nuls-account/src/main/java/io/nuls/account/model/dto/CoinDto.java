@@ -24,9 +24,6 @@
  */
 
 package io.nuls.account.model.dto;
-
-import com.fasterxml.jackson.annotation.JsonIgnore;
-
 import java.math.BigInteger;
 
 /**

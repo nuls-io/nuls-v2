@@ -157,11 +157,27 @@ public class NetworkCall {
      * @return
      */
     public static boolean forwardTxHash(int chainId, NulsDigestData hash) throws NulsException {
+        return forwardTxHash(chainId, hash, null);
+    }
+
+
+    /**
+     * 转发交易
+     * 发送hash到其他节点
+     * Forward transaction hash to other peer nodes
+     *
+     * @param chainId
+     * @param hash
+     * @return
+     */
+    public static boolean forwardTxHash(int chainId, NulsDigestData hash, String excludeNodes) throws NulsException {
         ForwardTxMessage message = new ForwardTxMessage();
         message.setCommand(NW_NEW_HASH);
         message.setHash(hash);
-        return NetworkCall.broadcast(chainId, message);
+        return NetworkCall.broadcast(chainId, message, excludeNodes);
     }
+
+
 
     /**
      * 广播完整交易到网络中

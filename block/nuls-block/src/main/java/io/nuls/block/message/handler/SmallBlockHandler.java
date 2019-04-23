@@ -111,14 +111,12 @@ public class SmallBlockHandler extends BaseCmd {
         NetworkUtil.setHashAndHeight(chainId, blockHash, header.getHeight(), nodeId);
         //1.已收到完整区块,丢弃
         if (BlockForwardEnum.COMPLETE.equals(status)) {
-            messageLog.debug("BlockForwardEnum.COMPLETE recieve smallBlockMessage from node-" + nodeId + ", chainId:" + chainId + ", height:" + header.getHeight() + ", hash:" + header.getHash());
             return success();
         }
 
         //2.已收到部分区块,还缺失交易信息,发送HashListMessage到源节点
         if (BlockForwardEnum.INCOMPLETE.equals(status)) {
-            messageLog.debug("BlockForwardEnum.INCOMPLETE recieve smallBlockMessage from node-" + nodeId + ", chainId:" + chainId + ", height:" + header.getHeight() + ", hash:" + header.getHash());
-            CachedSmallBlock block = SmallBlockCacher.getSmallBlock(chainId, blockHash);
+            CachedSmallBlock block = SmallBlockCacher.getCachedSmallBlock(chainId, blockHash);
             HashListMessage request = new HashListMessage();
             request.setBlockHash(blockHash);
             request.setTxHashList(block.getMissingTransactions());
@@ -133,7 +131,6 @@ public class SmallBlockHandler extends BaseCmd {
 
         //3.未收到区块
         if (BlockForwardEnum.EMPTY.equals(status)) {
-            messageLog.debug("BlockForwardEnum.EMPTY recieve smallBlockMessage from node-" + nodeId + ", chainId:" + chainId + ", height:" + header.getHeight() + ", hash:" + header.getHash());
             if (!BlockUtil.headerVerify(chainId, header)) {
                 messageLog.info("recieve error SmallBlockMessage from " + nodeId);
                 return success();
@@ -178,6 +175,10 @@ public class SmallBlockHandler extends BaseCmd {
                 return success();
             }
 
+            CachedSmallBlock cachedSmallBlock = new CachedSmallBlock(null, smallBlock, txMap);
+            SmallBlockCacher.cacheSmallBlock(chainId, cachedSmallBlock);
+            SmallBlockCacher.setStatus(chainId, blockHash, BlockForwardEnum.COMPLETE);
+            TxGroupRequestor.removeTask(chainId, blockHash.toString());
             Block block = BlockUtil.assemblyBlock(header, txMap, txHashList);
             blockService.saveBlock(chainId, block, 1, true, false, true);
         }

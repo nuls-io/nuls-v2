@@ -37,11 +37,9 @@ import io.nuls.rpc.model.message.Response;
 import io.nuls.rpc.util.RPCUtil;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
-import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.log.logback.NulsLogger;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -89,7 +87,7 @@ public class TxGroupHandler extends BaseCmd {
         }
         //2.已收到部分区块,还缺失交易信息,收到的应该就是缺失的交易信息
         if (BlockForwardEnum.INCOMPLETE.equals(status)) {
-            CachedSmallBlock cachedSmallBlock = SmallBlockCacher.getSmallBlock(chainId, blockHash);
+            CachedSmallBlock cachedSmallBlock = SmallBlockCacher.getCachedSmallBlock(chainId, blockHash);
             SmallBlock smallBlock = cachedSmallBlock.getSmallBlock();
             if (null == smallBlock) {
                 return failed(BlockErrorCode.PARAMETER_ERROR);

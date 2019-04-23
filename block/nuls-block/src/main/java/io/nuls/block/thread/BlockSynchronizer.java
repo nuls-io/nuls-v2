@@ -120,7 +120,6 @@ public class BlockSynchronizer implements Runnable {
                         if (latestHeight < testAutoRollbackAmount) {
                             testAutoRollbackAmount = (int) (latestHeight);
                         }
-                        ConsensusUtil.sendHeaderList(chainId, testAutoRollbackAmount);
                         for (int i = 0; i < testAutoRollbackAmount; i++) {
                             boolean b = blockService.rollbackBlock(chainId, latestHeight--, true);
                             if (!b || latestHeight == 0) {
@@ -142,34 +141,33 @@ public class BlockSynchronizer implements Runnable {
 
     /**
      * 等待网络稳定
-     * 每隔5秒请求一次getAvailableNodes，连续5次节点数一致就认为网络稳定
+     * 每隔5秒请求一次getAvailableNodes，连续5次节点数大于minNodeAmount就认为网络稳定
      *
      * @param chainId
      * @return
      */
     private void waitUntilNetworkStable(int chainId) throws InterruptedException {
         ChainContext context = ContextManager.getContext(chainId);
-        int waitNetworkInterval = context.getParameters().getWaitNetworkInterval();
+        ChainParameters parameters = context.getParameters();
+        int waitNetworkInterval = parameters.getWaitNetworkInterval();
+        int minNodeAmount = parameters.getMinNodeAmount();
         NulsLogger commonLog = context.getCommonLog();
-        List<Node> availableNodesFirst = NetworkUtil.getAvailableNodes(chainId);
-        List<Node> availableNodesSecond;
-        int sizeFirst = availableNodesFirst.size();
-        int sizeSecond;
+        List<Node> availableNodes;
+        int nodeAmount;
         int count = 0;
         while (true) {
-            Thread.sleep(waitNetworkInterval);
-            availableNodesSecond = NetworkUtil.getAvailableNodes(chainId);
-            sizeSecond = availableNodesSecond.size();
-            commonLog.info("last nodes amount=" + sizeFirst + ", current nodes amount=" + sizeSecond + ", wait Until Network Stable..........");
-            if (sizeSecond == sizeFirst) {
+            availableNodes = NetworkUtil.getAvailableNodes(chainId);
+            nodeAmount = availableNodes.size();
+            if (nodeAmount >= minNodeAmount) {
                 count++;
             } else {
                 count = 0;
             }
-            if (count >= 5) {
+            commonLog.info("minNodeAmount = " + minNodeAmount + ", current nodes amount=" + nodeAmount + ", count = " + count + ", wait Until Network Stable......");
+            if (count >= 6) {
                 return;
             }
-            sizeFirst = sizeSecond;
+            Thread.sleep(waitNetworkInterval);
         }
     }
 

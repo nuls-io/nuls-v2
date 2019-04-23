@@ -47,25 +47,12 @@ import java.util.Map;
 public class NwInfosPrintTask implements Runnable {
     @Override
     public void run() {
-        LoggerUtil.nwInfosLogger().info("");
-        LoggerUtil.nwInfosLogger().info("");
-        LoggerUtil.nwInfosLogger().info("BEGIN @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
-        printlnNwTime();
-        LoggerUtil.nwInfosLogger().info("");
         printlnPeer();
-        LoggerUtil.nwInfosLogger().info("");
-        printlnMem();
-        LoggerUtil.nwInfosLogger().info("");
-        printlnProtocolMap();
-        LoggerUtil.nwInfosLogger().info("");
-        LoggerUtil.nwInfosLogger().info("END @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
     }
-    private void printlnNwTime() {
-        LoggerUtil.nwInfosLogger().info("网络时间time = {},offset={}",TimeManager.currentTimeMillis(),TimeManager.netTimeOffset);
-    }
+
     private void printlnProtocolMap() {
         Collection<Map<String, ProtocolRoleHandler>> values = MessageHandlerFactory.getInstance().getProtocolRoleHandlerMap().values();
-        LoggerUtil.nwInfosLogger().info("protocolRoleHandler ==================");
+        LoggerUtil.logger().debug("protocolRoleHandler ==================");
         StringBuilder stringBuilder = new StringBuilder();
         for (Map<String, ProtocolRoleHandler> map : values) {
             Collection<ProtocolRoleHandler> list = map.values();
@@ -74,16 +61,8 @@ public class NwInfosPrintTask implements Runnable {
 
             }
         }
-        LoggerUtil.nwInfosLogger().info("protocolRoleHandler={}", stringBuilder.toString());
+        LoggerUtil.logger().debug("protocolRoleHandler={}", stringBuilder.toString());
 
-    }
-
-    private void printlnMem() {
-//       byte[] bys = new byte[1024*1024];//申请1M内存
-        LoggerUtil.nwInfosLogger().info("=================内存情况=============");
-        LoggerUtil.nwInfosLogger().info("Java进程可以向操作系统申请到的最大内存:"+(Runtime.getRuntime().maxMemory())/(1024*1024)+"M");
-        LoggerUtil.nwInfosLogger().info("Java进程空闲内存:"+(Runtime.getRuntime().freeMemory())/(1024*1024)+"M");
-        LoggerUtil.nwInfosLogger().info("Java进程现在从操作系统那里已经申请了内存:"+(Runtime.getRuntime().totalMemory())/(1024*1024)+"M");
     }
 
     private void printlnPeer() {
@@ -92,37 +71,40 @@ public class NwInfosPrintTask implements Runnable {
         for (NodeGroup nodeGroup : nodeGroupList) {
             NodesContainer localNodesContainer = nodeGroup.getLocalNetNodeContainer();
             NodesContainer crossNodesContainer = nodeGroup.getCrossNodeContainer();
-            LoggerUtil.nwInfosLogger().info("######################################################################");
-            LoggerUtil.nwInfosLogger().info("@@@@@@@@@@@ chainId={},magicNumber={},localNetStatus(本地网络)={},crossNetStatus(跨链)={}",
-                    nodeGroup.getChainId(), nodeGroup.getMagicNumber(),nodeGroup.getLocalStatus(),nodeGroup.getCrossStatus());
+            LoggerUtil.nwInfosLogger(nodeGroup.getChainId()).info("");
+            LoggerUtil.nwInfosLogger(nodeGroup.getChainId()).info("BEGIN @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
+            LoggerUtil.nwInfosLogger(nodeGroup.getChainId()).info("网络时间time = {},offset={}", TimeManager.currentTimeMillis(), TimeManager.netTimeOffset);
+            LoggerUtil.nwInfosLogger(nodeGroup.getChainId()).info("######################################################################");
+            LoggerUtil.nwInfosLogger(nodeGroup.getChainId()).info("@@@@@@@@@@@ chainId={},magicNumber={},localNetStatus(本地网络)={},crossNetStatus(跨链)={}",
+                    nodeGroup.getChainId(), nodeGroup.getMagicNumber(), nodeGroup.getLocalStatus(), nodeGroup.getCrossStatus());
 
             Collection<Node> c1 = localNodesContainer.getConnectedNodes().values();
             Collection<Node> c2 = localNodesContainer.getCanConnectNodes().values();
             Collection<Node> c3 = localNodesContainer.getDisconnectNodes().values();
             Collection<Node> c4 = localNodesContainer.getUncheckNodes().values();
             Collection<Node> c5 = localNodesContainer.getFailNodes().values();
-            LoggerUtil.nwInfosLogger().info("=================(自有网络)begin printlnPeer :SelfConnectNodes=============");
-            LoggerUtil.nwInfosLogger().info("*****(connected)已连接信息**********");
+            LoggerUtil.nwInfosLogger(nodeGroup.getChainId()).info("=================(自有网络)begin printlnPeer :SelfConnectNodes=============");
+            LoggerUtil.nwInfosLogger(nodeGroup.getChainId()).info("*****(connected)已连接信息**********");
             for (Node n : c1) {
-                LoggerUtil.nwInfosLogger().info("**connected:{},info:blockHash={},blockHeight={},version={},connStatus={}", n.getId(), n.getBlockHash(), n.getBlockHeight(), n.getVersion(),n.getConnectStatus());
+                LoggerUtil.nwInfosLogger(nodeGroup.getChainId()).info("**connected:{},info:blockHash={},blockHeight={},version={},connStatus={}", n.getId(), n.getBlockHash(), n.getBlockHeight(), n.getVersion(), n.getConnectStatus());
             }
-            LoggerUtil.nwInfosLogger().info("*****(canConnect)可连接信息**********");
+            LoggerUtil.nwInfosLogger(nodeGroup.getChainId()).info("*****(canConnect)可连接信息**********");
             for (Node n : c2) {
-                LoggerUtil.nwInfosLogger().info("**:{},info:blockHash={},blockHeight={},version={}", n.getId(), n.getBlockHash(), n.getBlockHeight(), n.getVersion());
+                LoggerUtil.nwInfosLogger(nodeGroup.getChainId()).info("**:{},info:blockHash={},blockHeight={},version={}", n.getId(), n.getBlockHash(), n.getBlockHeight(), n.getVersion());
             }
-            LoggerUtil.nwInfosLogger().info("*****(disConnect)断开连接信息**********");
+            LoggerUtil.nwInfosLogger(nodeGroup.getChainId()).info("*****(disConnect)断开连接信息**********");
             for (Node n : c3) {
-                LoggerUtil.nwInfosLogger().info("**{},info:blockHash={},blockHeight={},version={}", n.getId(), n.getBlockHash(), n.getBlockHeight(), n.getVersion());
+                LoggerUtil.nwInfosLogger(nodeGroup.getChainId()).info("**{},info:blockHash={},blockHeight={},version={}", n.getId(), n.getBlockHash(), n.getBlockHeight(), n.getVersion());
             }
-            LoggerUtil.nwInfosLogger().info("*****(uncheck)待检测连接信息**********");
+            LoggerUtil.nwInfosLogger(nodeGroup.getChainId()).info("*****(uncheck)待检测连接信息**********");
             for (Node n : c4) {
-                LoggerUtil.nwInfosLogger().info("**{},info:blockHash={},blockHeight={},version={}", n.getId(), n.getBlockHash(), n.getBlockHeight(), n.getVersion());
+                LoggerUtil.nwInfosLogger(nodeGroup.getChainId()).info("**{},info:blockHash={},blockHeight={},version={}", n.getId(), n.getBlockHash(), n.getBlockHeight(), n.getVersion());
             }
-            LoggerUtil.nwInfosLogger().info("*****(failed)失败连接信息**********");
+            LoggerUtil.nwInfosLogger(nodeGroup.getChainId()).info("*****(failed)失败连接信息**********");
             for (Node n : c5) {
-                LoggerUtil.nwInfosLogger().info("**{},FailCount = {},info:blockHash={},blockHeight={},version={}", n.getId(), n.getFailCount(), n.getBlockHash(), n.getBlockHeight(), n.getVersion());
+                LoggerUtil.nwInfosLogger(nodeGroup.getChainId()).info("**{},FailCount = {},info:blockHash={},blockHeight={},version={}", n.getId(), n.getFailCount(), n.getBlockHash(), n.getBlockHeight(), n.getVersion());
             }
-            LoggerUtil.nwInfosLogger().info("======================================================================");
+            LoggerUtil.nwInfosLogger(nodeGroup.getChainId()).info("======================================================================");
 
 
             Collection<Node> d1 = crossNodesContainer.getConnectedNodes().values();
@@ -130,30 +112,30 @@ public class NwInfosPrintTask implements Runnable {
             Collection<Node> d3 = crossNodesContainer.getDisconnectNodes().values();
             Collection<Node> d4 = crossNodesContainer.getUncheckNodes().values();
             Collection<Node> d5 = crossNodesContainer.getFailNodes().values();
-            LoggerUtil.nwInfosLogger().info("=================(跨链网络)begin printlnPeer :CrossConnectNodes=============");
-            LoggerUtil.nwInfosLogger().info("*****(connected)已连接信息**********");
+            LoggerUtil.nwInfosLogger(nodeGroup.getChainId()).info("=================(跨链网络)begin printlnPeer :CrossConnectNodes=============");
+            LoggerUtil.nwInfosLogger(nodeGroup.getChainId()).info("*****(connected)已连接信息**********");
             for (Node n : d1) {
-                LoggerUtil.nwInfosLogger().info("**connected:{},info:blockHash={},blockHeight={},version={}", n.getId(), n.getBlockHash(), n.getBlockHeight(), n.getVersion());
+                LoggerUtil.nwInfosLogger(nodeGroup.getChainId()).info("**connected:{},info:blockHash={},blockHeight={},version={}", n.getId(), n.getBlockHash(), n.getBlockHeight(), n.getVersion());
             }
-            LoggerUtil.nwInfosLogger().info("*****(canConnect)可连接信息**********");
+            LoggerUtil.nwInfosLogger(nodeGroup.getChainId()).info("*****(canConnect)可连接信息**********");
             for (Node n : d2) {
-                LoggerUtil.nwInfosLogger().info("*****canConnect:{},info:blockHash={},blockHeight={},version={}", n.getId(), n.getBlockHash(), n.getBlockHeight(), n.getVersion());
+                LoggerUtil.nwInfosLogger(nodeGroup.getChainId()).info("*****canConnect:{},info:blockHash={},blockHeight={},version={}", n.getId(), n.getBlockHash(), n.getBlockHeight(), n.getVersion());
             }
-            LoggerUtil.nwInfosLogger().info("*****(disConnect)断开连接信息**********");
+            LoggerUtil.nwInfosLogger(nodeGroup.getChainId()).info("*****(disConnect)断开连接信息**********");
             for (Node n : d3) {
-                LoggerUtil.nwInfosLogger().info("*****disConnect:{},info:blockHash={},blockHeight={},version={}", n.getId(), n.getBlockHash(), n.getBlockHeight(), n.getVersion());
+                LoggerUtil.nwInfosLogger(nodeGroup.getChainId()).info("*****disConnect:{},info:blockHash={},blockHeight={},version={}", n.getId(), n.getBlockHash(), n.getBlockHeight(), n.getVersion());
             }
-            LoggerUtil.nwInfosLogger().info("*****(uncheck)待检测连接信息**********");
+            LoggerUtil.nwInfosLogger(nodeGroup.getChainId()).info("*****(uncheck)待检测连接信息**********");
             for (Node n : d4) {
-                LoggerUtil.nwInfosLogger().info("*****uncheck:{},info:blockHash={},blockHeight={},version={}", n.getId(), n.getBlockHash(), n.getBlockHeight(), n.getVersion());
+                LoggerUtil.nwInfosLogger(nodeGroup.getChainId()).info("*****uncheck:{},info:blockHash={},blockHeight={},version={}", n.getId(), n.getBlockHash(), n.getBlockHeight(), n.getVersion());
             }
-            LoggerUtil.nwInfosLogger().info("*****(failed)失败连接信息**********");
+            LoggerUtil.nwInfosLogger(nodeGroup.getChainId()).info("*****(failed)失败连接信息**********");
             for (Node n : d5) {
-                LoggerUtil.nwInfosLogger().info("*****failed:{},FailCount = {},info:blockHash={},blockHeight={},version={}", n.getId(), n.getFailCount(), n.getBlockHash(), n.getBlockHeight(), n.getVersion());
+                LoggerUtil.nwInfosLogger(nodeGroup.getChainId()).info("*****failed:{},FailCount = {},info:blockHash={},blockHeight={},version={}", n.getId(), n.getFailCount(), n.getBlockHash(), n.getBlockHeight(), n.getVersion());
             }
-            LoggerUtil.nwInfosLogger().info("@@@@@@@@@@@ @@@@@@@@@@@ @@@@@@@@@@@ @@@@@@@@@@@ end==============");
-            LoggerUtil.nwInfosLogger().info("#####################################################################");
-            LoggerUtil.nwInfosLogger().info("");
+            LoggerUtil.nwInfosLogger(nodeGroup.getChainId()).info("@@@@@@@@@@@ @@@@@@@@@@@ @@@@@@@@@@@ @@@@@@@@@@@ end==============");
+            LoggerUtil.nwInfosLogger(nodeGroup.getChainId()).info("#####################################################################");
+            LoggerUtil.nwInfosLogger(nodeGroup.getChainId()).info("");
         }
     }
 }
