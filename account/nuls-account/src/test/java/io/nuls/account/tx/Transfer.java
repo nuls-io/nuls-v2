@@ -86,7 +86,7 @@ public class Transfer implements Runnable {
     public void run() {
         try {
             NulsDigestData hash = null;
-            for (int i = 0; i < 100000; i++) {
+            for (int i = 0; i < 1000000; i++) {
                 hash = transfer(hash);
                 System.out.println("count:" + (i + 1));
             }

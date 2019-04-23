@@ -6,6 +6,7 @@ import io.nuls.tools.exception.NulsException;
 import io.nuls.transaction.model.bo.*;
 import io.nuls.transaction.model.dto.ModuleTxRegisterDTO;
 import io.nuls.transaction.model.po.TransactionConfirmedPO;
+import io.nuls.transaction.model.po.TransactionNetPO;
 
 import java.util.List;
 
@@ -37,11 +38,11 @@ public interface TxService {
      * 收到一个新的交易
      * Received a new transaction
      *
-     * @param transaction
+     * @param tx
      * @return boolean
      * @throws NulsException NulsException
      */
-    void newBroadcastTx(Chain chain, Transaction transaction) throws NulsException;
+    void newBroadcastTx(Chain chain, TransactionNetPO tx) throws NulsException;
 
 
     /**

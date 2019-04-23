@@ -52,6 +52,7 @@ import io.nuls.transaction.model.bo.*;
 import io.nuls.transaction.model.dto.ModuleTxRegisterDTO;
 import io.nuls.transaction.model.dto.TxRegisterDTO;
 import io.nuls.transaction.model.po.TransactionConfirmedPO;
+import io.nuls.transaction.model.po.TransactionNetPO;
 import io.nuls.transaction.rpc.call.*;
 import io.nuls.transaction.service.ConfirmedTxService;
 import io.nuls.transaction.service.TxService;
@@ -140,8 +141,8 @@ public class TxServiceImpl implements TxService {
     }
 
     @Override
-    public void newBroadcastTx(Chain chain, Transaction tx) throws NulsException {
-        TransactionConfirmedPO txExist = getTransaction(chain, tx.getHash());
+    public void newBroadcastTx(Chain chain, TransactionNetPO tx) throws NulsException {
+        TransactionConfirmedPO txExist = getTransaction(chain, tx.getTx().getHash());
         if (null == txExist) {
             unverifiedTxStorageService.putTx(chain, tx);
         }

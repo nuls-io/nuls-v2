@@ -22,6 +22,7 @@ import io.nuls.transaction.message.ForwardTxMessage;
 import io.nuls.transaction.message.GetTxMessage;
 import io.nuls.transaction.model.bo.Chain;
 import io.nuls.transaction.model.po.TransactionConfirmedPO;
+import io.nuls.transaction.model.po.TransactionNetPO;
 import io.nuls.transaction.rpc.call.NetworkCall;
 import io.nuls.transaction.service.ConfirmedTxService;
 import io.nuls.transaction.service.TxService;
@@ -172,7 +173,7 @@ public class MessageCmd extends BaseCmd {
                 TxDuplicateRemoval.insert(transaction.getHash());
             }
             //将交易放入待验证本地交易队列中
-            txService.newBroadcastTx(chainManager.getChain(chainId), transaction);
+            txService.newBroadcastTx(chainManager.getChain(chainId), new TransactionNetPO(transaction, nodeId));
         } catch (NulsException e) {
             errorLogProcess(chain, e);
             return failed(e.getErrorCode());
