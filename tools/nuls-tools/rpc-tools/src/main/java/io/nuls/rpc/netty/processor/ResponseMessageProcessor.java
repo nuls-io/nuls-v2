@@ -377,7 +377,7 @@ public class ResponseMessageProcessor {
             return responseContainer.getFuture().get(timeOut, TimeUnit.MILLISECONDS);
         } catch (Exception e) {
             //Timeout Error
-            return MessageUtil.newResponse(responseContainer.getMessageId(), Constants.BOOLEAN_FALSE, Constants.RESPONSE_TIMEOUT);
+            return MessageUtil.newFailResponse(responseContainer.getMessageId(), Constants.RESPONSE_TIMEOUT);
         } finally {
             RequestContainer.removeResponseContainer(responseContainer.getMessageId());
         }

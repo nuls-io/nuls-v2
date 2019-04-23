@@ -27,10 +27,12 @@ package io.nuls.rpc.model.message;
 import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.netty.channel.manager.ConnectManager;
 import io.nuls.rpc.util.TimeUtils;
+import io.nuls.tools.constant.ErrorCode;
 import io.nuls.tools.model.DateUtils;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * 消息工具类，用于构造常用的基本消息体
@@ -121,7 +123,7 @@ public class MessageUtil {
      * @param comment   User defined string
      * @return Response
      */
-    public static Response newResponse(String requestId, String status, String comment) {
+    public static Response newResponse(String requestId, int status, String comment) {
         Response response = new Response();
         response.setRequestID(requestId);
         response.setResponseStatus(status);
@@ -129,4 +131,55 @@ public class MessageUtil {
         response.setResponseMaxSize(Constants.ZERO);
         return response;
     }
+
+    /**
+     * 构造一个执行成功的Response对象
+     * Constructing a new Response object
+     *
+     * @param requestId Message ID of request
+     * @return Response
+     */
+    public static Response newSuccessResponse(String requestId) {
+        return newResponse(requestId, Response.SUCCESS, Response.SUCCESS_MSG);
+    }
+
+    /**
+     * 构造一个执行成功的Response对象
+     * Constructing a new Response object
+     *
+     * @param requestId Message ID of request
+     * @return Response
+     */
+    public static Response newSuccessResponse(String requestId,String msg) {
+        return newResponse(requestId, Response.SUCCESS, msg);
+    }
+
+    /**
+     * 构造一个执行失败的Response对象
+     * Constructing a new Response object
+     *
+     * @param requestId Message ID of request
+     * @return Response
+     */
+    public static Response newFailResponse(String requestId,String msg) {
+        return newResponse(requestId, Response.FAIL, msg);
+    }
+
+    /**
+     * 构造一个执行失败的Response对象
+     * Constructing a new Response object
+     *
+     * @param requestId Message ID of request
+     * @param errorCode error object
+     * @return Response
+     */
+    public static Response newFailResponse(String requestId, ErrorCode errorCode){
+        Objects.requireNonNull(errorCode,"errorCode can't be null");
+        Response response = newFailResponse(requestId,errorCode.getMsg());
+        response.setResponseErrorCode(errorCode.getCode());
+        return response;
+    }
+
+
+
 }

@@ -33,6 +33,7 @@ import io.nuls.contract.constant.ContractConstant;
 import io.nuls.contract.constant.ContractErrorCode;
 import io.nuls.contract.enums.ContractStatus;
 import io.nuls.contract.helper.ContractHelper;
+import io.nuls.contract.manager.ChainManager;
 import io.nuls.contract.manager.ContractTokenBalanceManager;
 import io.nuls.contract.model.bo.ContractResult;
 import io.nuls.contract.model.bo.ContractTokenInfo;
@@ -108,6 +109,7 @@ public class ContractResource extends BaseCmd {
     public Response create(Map<String, Object> params) {
         try {
             Integer chainId = (Integer) params.get("chainId");
+            ChainManager.chainHandle(chainId);
             String sender = (String) params.get("sender");
             String password = (String) params.get("password");
             Long gasLimit = Long.parseLong(params.get("gasLimit").toString());
@@ -162,6 +164,7 @@ public class ContractResource extends BaseCmd {
     public Response preCreate(Map<String, Object> params) {
         try {
             Integer chainId = (Integer) params.get("chainId");
+            ChainManager.chainHandle(chainId);
             String sender = (String) params.get("sender");
             String password = (String) params.get("password");
             Long gasLimit = Long.parseLong(params.get("gasLimit").toString());
@@ -217,6 +220,7 @@ public class ContractResource extends BaseCmd {
             Result result = null;
             do {
                 Integer chainId = (Integer) params.get("chainId");
+                ChainManager.chainHandle(chainId);
                 String sender = (String) params.get("sender");
                 String contractCode = (String) params.get("contractCode");
                 List argsList = (List) params.get("args");
@@ -266,6 +270,7 @@ public class ContractResource extends BaseCmd {
     public Response validateCreate(Map<String, Object> params) {
         try {
             Integer chainId = (Integer) params.get("chainId");
+            ChainManager.chainHandle(chainId);
             String sender = (String) params.get("sender");
             Long gasLimit = Long.parseLong(params.get("gasLimit").toString());
             Long price = Long.parseLong(params.get("price").toString());
@@ -321,6 +326,7 @@ public class ContractResource extends BaseCmd {
     public Response call(Map<String, Object> params) {
         try {
             Integer chainId = (Integer) params.get("chainId");
+            ChainManager.chainHandle(chainId);
             String sender = (String) params.get("sender");
             BigInteger value = new BigInteger(params.get("value").toString());
             Long gasLimit = Long.parseLong(params.get("gasLimit").toString());
@@ -389,6 +395,7 @@ public class ContractResource extends BaseCmd {
     public Response validateCall(Map<String, Object> params) {
         try {
             Integer chainId = (Integer) params.get("chainId");
+            ChainManager.chainHandle(chainId);
             String sender = (String) params.get("sender");
             BigInteger value = new BigInteger(params.get("value").toString());
             Long gasLimit = Long.parseLong(params.get("gasLimit").toString());
@@ -459,6 +466,7 @@ public class ContractResource extends BaseCmd {
             Result result = null;
             do {
                 Integer chainId = (Integer) params.get("chainId");
+                ChainManager.chainHandle(chainId);
                 String sender = (String) params.get("sender");
                 BigInteger value = new BigInteger(params.get("value").toString());
                 String contractAddress = (String) params.get("contractAddress");
@@ -524,6 +532,7 @@ public class ContractResource extends BaseCmd {
     public Response delete(Map<String, Object> params) {
         try {
             Integer chainId = (Integer) params.get("chainId");
+            ChainManager.chainHandle(chainId);
             String sender = (String) params.get("sender");
             String contractAddress = (String) params.get("contractAddress");
             String password = (String) params.get("password");
@@ -552,6 +561,7 @@ public class ContractResource extends BaseCmd {
     public Response validateDelete(Map<String, Object> params) {
         try {
             Integer chainId = (Integer) params.get("chainId");
+            ChainManager.chainHandle(chainId);
             String sender = (String) params.get("sender");
             String contractAddress = (String) params.get("contractAddress");
             if (!AddressTool.validAddress(chainId, sender)) {
@@ -582,6 +592,7 @@ public class ContractResource extends BaseCmd {
     public Response transfer(Map<String, Object> params) {
         try {
             Integer chainId = (Integer) params.get("chainId");
+            ChainManager.chainHandle(chainId);
             String sender = (String) params.get("address");
             String contractAddress = (String) params.get("toAddress");
             String password = (String) params.get("password");
@@ -649,6 +660,7 @@ public class ContractResource extends BaseCmd {
     public Response transferFee(Map<String, Object> params) {
         try {
             Integer chainId = (Integer) params.get("chainId");
+            ChainManager.chainHandle(chainId);
             String sender = (String) params.get("address");
             String contractAddress = (String) params.get("toAddress");
             BigInteger value = new BigInteger(params.get("amount").toString());
@@ -717,6 +729,7 @@ public class ContractResource extends BaseCmd {
     public Response tokenTransfer(Map<String, Object> params) {
         try {
             Integer chainId = (Integer) params.get("chainId");
+            ChainManager.chainHandle(chainId);
             String from = (String) params.get("address");
             String to = (String) params.get("toAddress");
             String contractAddress = (String) params.get("contractAddress");
@@ -789,6 +802,7 @@ public class ContractResource extends BaseCmd {
     public Response tokenBalance(Map<String, Object> params) {
         try {
             Integer chainId = (Integer) params.get("chainId");
+            ChainManager.chainHandle(chainId);
             String contractAddress = (String) params.get("contractAddress");
             String address = (String) params.get("address");
 
@@ -821,6 +835,7 @@ public class ContractResource extends BaseCmd {
     public Response invokeView(Map<String, Object> params) {
         try {
             Integer chainId = (Integer) params.get("chainId");
+            ChainManager.chainHandle(chainId);
             String contractAddress = (String) params.get("contractAddress");
             String methodName = (String) params.get("methodName");
             String methodDesc = (String) params.get("methodDesc");
@@ -883,6 +898,7 @@ public class ContractResource extends BaseCmd {
     public Response constructor(Map<String, Object> params) {
         try {
             Integer chainId = (Integer) params.get("chainId");
+            ChainManager.chainHandle(chainId);
             String contractCode = (String) params.get("contractCode");
 
             if (StringUtils.isBlank(contractCode)) {
@@ -909,6 +925,7 @@ public class ContractResource extends BaseCmd {
     public Response contractInfo(Map<String, Object> params) {
         try {
             Integer chainId = (Integer) params.get("chainId");
+            ChainManager.chainHandle(chainId);
             String contractAddress = (String) params.get("contractAddress");
 
             if (!AddressTool.validAddress(chainId, contractAddress)) {
@@ -980,6 +997,7 @@ public class ContractResource extends BaseCmd {
     public Response contractResult(Map<String, Object> params) {
         try {
             Integer chainId = (Integer) params.get("chainId");
+            ChainManager.chainHandle(chainId);
             String hash = (String) params.get("hash");
 
             if (StringUtils.isBlank(hash)) {
@@ -1100,6 +1118,7 @@ public class ContractResource extends BaseCmd {
     public Response contractTx(Map<String, Object> params) {
         try {
             Integer chainId = (Integer) params.get("chainId");
+            ChainManager.chainHandle(chainId);
             String hash = (String) params.get("hash");
 
             if (StringUtils.isBlank(hash)) {
@@ -1167,6 +1186,7 @@ public class ContractResource extends BaseCmd {
     public Response tokenAssetsList(Map<String, Object> params) {
         try {
             Integer chainId = (Integer) params.get("chainId");
+            ChainManager.chainHandle(chainId);
             String address = (String) params.get("address");
             Integer pageNumber = (Integer) params.get("pageNumber");
             Integer pageSize = (Integer) params.get("pageSize");
@@ -1236,6 +1256,7 @@ public class ContractResource extends BaseCmd {
     public Response tokenTransferList(Map<String, Object> params) {
         try {
             Integer chainId = (Integer) params.get("chainId");
+            ChainManager.chainHandle(chainId);
             String address = (String) params.get("address");
             Integer pageNumber = (Integer) params.get("pageNumber");
             Integer pageSize = (Integer) params.get("pageSize");
@@ -1309,6 +1330,7 @@ public class ContractResource extends BaseCmd {
     public Response accountContracts(Map<String, Object> params) {
         try {
             Integer chainId = (Integer) params.get("chainId");
+            ChainManager.chainHandle(chainId);
             String address = (String) params.get("address");
             Integer pageNumber = (Integer) params.get("pageNumber");
             Integer pageSize = (Integer) params.get("pageSize");
@@ -1412,6 +1434,7 @@ public class ContractResource extends BaseCmd {
     public Response upload(Map<String, Object> params) {
         try {
             Integer chainId = (Integer) params.get("chainId");
+            ChainManager.chainHandle(chainId);
             String jarFileData = (String) params.get("jarFileData");
             if (StringUtils.isBlank(jarFileData)) {
                 return failed(NULL_PARAMETER);

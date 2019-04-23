@@ -144,6 +144,9 @@ public class ChainController {
         }
 
         Result<TransactionInfo> result = WalletRpcHandler.getTx(chainId, hash);
+        if(result == null) {
+            throw new JsonRpcException(new RpcResultError(RpcErrorCode.DATA_NOT_EXISTS));
+        }
         if (result.isFailed()) {
             throw new JsonRpcException(result.getErrorCode());
         }

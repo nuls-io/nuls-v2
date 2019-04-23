@@ -60,7 +60,7 @@ public class AliasCmdTest {
             params.put("count", 1);
             params.put("password", password);
             Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_createAccount", params);
-            if (!AccountConstant.SUCCESS_CODE.equals(cmdResp.getResponseStatus())) {
+            if (!cmdResp.isSuccess()) {
                 return null;
             }
             accountList = (List<String>) ((HashMap) ((HashMap) cmdResp.getResponseData()).get("ac_createAccount")).get("list");
