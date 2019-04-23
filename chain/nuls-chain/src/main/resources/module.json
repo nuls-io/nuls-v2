@@ -12,9 +12,9 @@
   "assetDecimalPlacesMin": "4",
   "assetDecimalPlacesMax": "8",
   "assetRecoveryRate": "0.9",
-  "nulsChainId": "2",
-  "nulsChainName": "NULS-CHAIN",
-  "nulsAssetId": "1",
+  "mainChainId": "2",
+  "chainName": "NULS-CHAIN",
+  "mainAssetId": "1",
   "nulsAssetInitNumberMax": "100000000",
   "nulsAssetSymbol": "NULS"
 }
