@@ -4,7 +4,6 @@ import io.nuls.db.service.RocksDBService;
 import io.nuls.poc.constant.ConsensusConfig;
 import io.nuls.poc.constant.ConsensusConstant;
 import io.nuls.poc.model.bo.Chain;
-import io.nuls.poc.storage.LanguageService;
 import io.nuls.poc.utils.enumeration.ConsensusStatus;
 import io.nuls.poc.utils.manager.ChainManager;
 import io.nuls.rpc.info.HostInfo;
@@ -16,10 +15,7 @@ import io.nuls.rpc.modulebootstrap.RpcModuleState;
 import io.nuls.rpc.util.TimeUtils;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
-import io.nuls.tools.core.ioc.SpringLiteContext;
 import io.nuls.tools.log.Log;
-import io.nuls.tools.parse.I18nUtils;
-
 import java.lang.reflect.Field;
 import java.nio.charset.Charset;
 import java.util.Set;
@@ -56,7 +52,6 @@ public class ConsensusBootStrap extends RpcModule {
         try {
             initSys();
             initDB();
-            initLanguage();
             chainManager.initChain();
         }catch (Exception e){
             Log.error(e);
@@ -151,22 +146,6 @@ public class ConsensusBootStrap extends RpcModule {
      */
     private void initDB() throws Exception {
         RocksDBService.init(consensusConfig.getDataFolder());
-        RocksDBService.createTable(ConsensusConstant.DB_NAME_CONSUME_LANGUAGE);
         RocksDBService.createTable(ConsensusConstant.DB_NAME_CONSUME_CONGIF);
-    }
-
-    /**
-     * 初始化国际化资源文件语言
-     * Initialization of International Resource File Language
-     */
-    private void initLanguage() throws Exception {
-        LanguageService languageService = SpringLiteContext.getBean(LanguageService.class);
-        String languageDB = languageService.getLanguage();
-        I18nUtils.loadLanguage(ConsensusBootStrap.class,"", consensusConfig.getLanguage());
-        String language = null == languageDB ? I18nUtils.getLanguage() : languageDB;
-        I18nUtils.setLanguage(language);
-        if (null == languageDB) {
-            languageService.saveLanguage(language);
-        }
     }
 }

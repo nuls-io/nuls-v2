@@ -125,6 +125,14 @@ public class LedgerUtil {
         return nonce8BytesStr;
     }
 
+    public static byte[] getNonceDecodeByTxHash(String txHash) {
+        byte[] out = new byte[8];
+        byte[] in = HexUtil.decode(txHash);
+        int copyEnd = in.length;
+        System.arraycopy(in, (copyEnd - 8), out, 0, 8);
+        return out;
+    }
+
     public static boolean equalsNonces(byte[] nonce1, byte[] nonce2) {
         return Arrays.equals(nonce1, nonce2);
     }
@@ -162,6 +170,7 @@ public class LedgerUtil {
         }
         return null;
     }
+
     public static byte[] getAccountNoncesByteKey(String assetKey, String nonce) {
         String key = assetKey + "-" + nonce;
         try {
@@ -171,8 +180,9 @@ public class LedgerUtil {
         }
         return null;
     }
+
     public static byte[] getAccountNoncesByteKey(CoinFrom from, byte[] nonce) {
-        String key = AddressTool.getStringAddressByBytes(from.getAddress()) +  "-" + from.getAssetsChainId() + "-" + from.getAssetsId() + "-" + getNonceEncode(nonce);
+        String key = AddressTool.getStringAddressByBytes(from.getAddress()) + "-" + from.getAssetsChainId() + "-" + from.getAssetsId() + "-" + getNonceEncode(nonce);
         try {
             return (key.getBytes(LedgerConstant.DEFAULT_ENCODING));
         } catch (UnsupportedEncodingException e) {
@@ -180,11 +190,13 @@ public class LedgerUtil {
         }
         return null;
     }
+
     public static String getAccountNoncesStringKey(CoinFrom from, byte[] nonce) {
-        return  AddressTool.getStringAddressByBytes(from.getAddress()) +  "-" + from.getAssetsChainId() + "-" + from.getAssetsId() + "-" + getNonceEncode(nonce);
+        return AddressTool.getStringAddressByBytes(from.getAddress()) + "-" + from.getAssetsChainId() + "-" + from.getAssetsId() + "-" + getNonceEncode(nonce);
     }
+
     public static byte[] getAccountAssetByteKey(CoinFrom from) {
-        String key = AddressTool.getStringAddressByBytes(from.getAddress())  + from.getAssetsChainId() + "-" + from.getAssetsId();
+        String key = AddressTool.getStringAddressByBytes(from.getAddress()) + from.getAssetsChainId() + "-" + from.getAssetsId();
         try {
             return (key.getBytes(LedgerConstant.DEFAULT_ENCODING));
         } catch (UnsupportedEncodingException e) {
@@ -192,9 +204,11 @@ public class LedgerUtil {
         }
         return null;
     }
+
     public static String getAccountAssetStrKey(CoinFrom from) {
         return AddressTool.getStringAddressByBytes(from.getAddress()) + from.getAssetsChainId() + "-" + from.getAssetsId();
     }
+
     /**
      * rockdb key
      *

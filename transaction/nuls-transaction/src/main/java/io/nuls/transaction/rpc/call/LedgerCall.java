@@ -31,6 +31,8 @@ public class LedgerCall {
      * @param tx
      * @return
      */
+    
+    // TODO 需要调整返回值
     public static VerifyLedgerResult verifyCoinData(Chain chain, String tx) {
         try {
             Map<String, Object> params = new HashMap<>(TxConstant.INIT_CAPACITY_8);
@@ -164,18 +166,17 @@ public class LedgerCall {
      * @return
      * @throws NulsException
      */
-    public static boolean coinDataBatchNotify(Chain chain) {
+    public static boolean coinDataBatchNotify(Chain chain) throws NulsException {
         try {
             Map<String, Object> params = new HashMap<>(TxConstant.INIT_CAPACITY_8);
             params.put(Constants.VERSION_KEY_STR, TxConstant.RPC_VERSION);
             params.put("chainId", chain.getChainId());
-            HashMap result = (HashMap)TransactionCall.request(ModuleE.LG.abbr, "bathValidateBegin", params);
+            HashMap result = (HashMap)TransactionCall.request(ModuleE.LG.abbr, "batchValidateBegin", params);
             return (int) result.get("value") == 1;
         } catch (Exception e) {
             chain.getLoggerMap().get(TxConstant.LOG_TX).error(e);
-            return false;
+            throw new NulsException(e);
         }
-
     }
 
     /**

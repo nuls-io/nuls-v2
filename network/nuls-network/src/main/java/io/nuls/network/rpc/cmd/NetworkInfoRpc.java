@@ -1,5 +1,6 @@
 package io.nuls.network.rpc.cmd;
 
+import io.nuls.network.constant.CmdConstant;
 import io.nuls.network.manager.NodeGroupManager;
 import io.nuls.network.manager.TimeManager;
 import io.nuls.network.model.Node;
@@ -27,7 +28,7 @@ import java.util.Map;
 @Component
 public class NetworkInfoRpc extends BaseCmd {
 
-    @CmdAnnotation(cmd = "nw_info", version = 1.0, description = "get network info")
+    @CmdAnnotation(cmd = CmdConstant.CMD_NW_INFO, version = 1.0, description = "get network info")
     @Parameters({
             @Parameter(parameterName = "chainId", parameterType = "short", canNull = false)
     })
@@ -68,7 +69,7 @@ public class NetworkInfoRpc extends BaseCmd {
         return success(res);
     }
 
-    @CmdAnnotation(cmd = "nw_nodes", version = 1.0, description = "get nodes")
+    @CmdAnnotation(cmd = CmdConstant.CMD_NW_NODES, version = 1.0, description = "get nodes")
     @Parameters({
             @Parameter(parameterName = "chainId", parameterType = "short", canNull = false)
     })

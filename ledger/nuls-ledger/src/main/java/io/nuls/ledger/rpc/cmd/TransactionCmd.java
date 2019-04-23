@@ -26,6 +26,8 @@
 package io.nuls.ledger.rpc.cmd;
 
 import io.nuls.base.data.Transaction;
+import io.nuls.ledger.constant.CmdConstant;
+import io.nuls.ledger.constant.LedgerErrorCode;
 import io.nuls.ledger.manager.LedgerChainManager;
 import io.nuls.ledger.model.ValidateResult;
 import io.nuls.ledger.service.TransactionService;
@@ -60,8 +62,8 @@ public class TransactionCmd extends BaseLedgerCmd {
      * @param params
      * @return
      */
-    @CmdAnnotation(cmd = "commitUnconfirmedTx",
-            version = 1.0,  minEvent = 0, minPeriod = 0,
+    @CmdAnnotation(cmd = CmdConstant.CMD_COMMIT_UNCONFIRMED_TX,
+            version = 1.0,
             description = "")
     @Parameter(parameterName = "chainId", parameterType = "int")
     @Parameter(parameterName = "tx", parameterType = "String")
@@ -74,11 +76,11 @@ public class TransactionCmd extends BaseLedgerCmd {
             Transaction tx = parseTxs(txStr, chainId);
             if (null == tx) {
                 LoggerUtil.logger(chainId).error("txStr is invalid chainId={},txHex={}", chainId, txStr);
-                return failed("txStr is invalid");
+                return failed(LedgerErrorCode.TX_IS_WRONG);
             }
             ValidateResult validateResult = transactionService.unConfirmTxProcess(chainId, tx);
             response = success(validateResult);
-            LoggerUtil.logger(chainId).debug("####commitUnconfirmedTx chainId={},txHash={},value={}=={}", chainId, tx.getHash().toString(), validateResult.getValidateCode(),validateResult.getValidateDesc());
+            LoggerUtil.logger(chainId).debug("####commitUnconfirmedTx chainId={},txHash={},value={}=={}", chainId, tx.getHash().toString(), validateResult.getValidateCode(), validateResult.getValidateDesc());
         } catch (Exception e) {
             e.printStackTrace();
             LoggerUtil.logger(chainId).error("commitUnconfirmedTx exception ={}", e.getMessage());
@@ -93,8 +95,8 @@ public class TransactionCmd extends BaseLedgerCmd {
      * @param params
      * @return
      */
-    @CmdAnnotation(cmd = "commitBlockTxs",
-            version = 1.0,  minEvent = 0, minPeriod = 0,
+    @CmdAnnotation(cmd = CmdConstant.CMD_COMMIT_BLOCK_TXS,
+            version = 1.0,
             description = "")
     @Parameter(parameterName = "chainId", parameterType = "int")
     @Parameter(parameterName = "txList", parameterType = "List")
@@ -143,8 +145,8 @@ public class TransactionCmd extends BaseLedgerCmd {
      * @param params
      * @return
      */
-    @CmdAnnotation(cmd = "rollBackUnconfirmTx",
-            version = 1.0, minEvent = 0, minPeriod = 0,
+    @CmdAnnotation(cmd = CmdConstant.CMD_ROLLBACK_UNCONFIRMED_TX,
+            version = 1.0,
             description = "")
     @Parameter(parameterName = "chainId", parameterType = "int")
     @Parameter(parameterName = "tx", parameterType = "String")
@@ -154,7 +156,6 @@ public class TransactionCmd extends BaseLedgerCmd {
         Integer chainId = (Integer) params.get("chainId");
         try {
             String txStr = params.get("tx").toString();
-            LoggerUtil.logger(chainId).debug("rollBackUnconfirmTx chainId={}", chainId);
             Transaction tx = parseTxs(txStr, chainId);
             if (null == tx) {
                 LoggerUtil.logger(chainId).debug("tx is invalid chainId={},txHex={}", chainId, txStr);
@@ -183,8 +184,8 @@ public class TransactionCmd extends BaseLedgerCmd {
      * @param params
      * @return
      */
-    @CmdAnnotation(cmd = "rollBackBlockTxs",
-            version = 1.0,  minEvent = 0, minPeriod = 0,
+    @CmdAnnotation(cmd = CmdConstant.CMD_ROLLBACK_BLOCK_TXS,
+            version = 1.0,
             description = "")
     @Parameter(parameterName = "chainId", parameterType = "int")
     @Parameter(parameterName = "blockHeight", parameterType = "long")

@@ -50,7 +50,7 @@ public class MongoDBTableServiceImpl implements DBTableService {
     public void addChain(int chainId, int defaultAssetId, String symbol) {
         Result<Map> result = WalletRpcHandler.getConsensusConfig(chainId);
         if (result.isFailed()) {
-            throw new RuntimeException("add chain error");
+            throw new RuntimeException("find consensus config error");
         }
         Map map = result.getData();
         List<String> seedNodeList = (List<String>) map.get("seedNodeList");

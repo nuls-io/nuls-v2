@@ -92,7 +92,6 @@ public class NetworkBootstrap extends RpcModule {
      */
     private void jsonCfgInit() throws Exception {
         try {
-            I18nUtils.loadLanguage(NetworkBootstrap.class, "languages", networkConfig.getLanguage());
             String seedIp = networkConfig.getSelfSeedIps();
             List<String> ipList = new ArrayList<>();
             Collections.addAll(ipList, seedIp.split(NetworkConstant.COMMA));

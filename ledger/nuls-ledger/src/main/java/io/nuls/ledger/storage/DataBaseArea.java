@@ -33,34 +33,29 @@ package io.nuls.ledger.storage;
 public interface DataBaseArea {
     String TB_LEDGER_ACCOUNT = "account";
     /**
-     *   存区块交易缓存数据
+     *   存未确认交易数据及状态
      */
-    String TB_LEDGER_ACCOUNT_UNCONFIRMED = "accountUnconfirmed";
-    String TB_LEDGER_TX_UNCONFIRMED = "txUnconfirmed";
-    String TB_LEDGER_ACCOUNT_UNCFMD2CFMD = "uncfmd2cfmd";
+    String TB_LEDGER_ACCOUNT_UNCONFIRMED = "account_unconfirmed";
+    String TB_LEDGER_TX_UNCONFIRMED = "tx_unconfirmed";
+    String TB_LEDGER_ACCOUNT_UNCFMD2CFMD = "account_uncfmd2cfmd";
     /**
      *   按区块高度来进行上一个账号状态的
      */
 
-    String TB_LEDGER_ACCOUNT_BLOCK_SNAPSHOT = "accountBlockSnapshot";
+    String TB_LEDGER_ACCOUNT_BLOCK_SNAPSHOT = "account_block_snapshot";
 
     /**
      *   存区块当前确认的高度
      */
-    String TB_LEDGER_BLOCK_HEIGHT = "chainBlockHeight";
+    String TB_LEDGER_BLOCK_HEIGHT = "chain_block_height";
 
     /**
-     *   存区块交易缓存数据
+     *   存打包的区块交易nonce值
      */
-    String TB_LEDGER_BLOCKS = "chainBlocks";
+    String TB_LEDGER_NONCES = "ledger_nonces";
 
     /**
-     *   存区块交易缓存数据
+     *   存区块所有交易的hash值
      */
-    String TB_LEDGER_NONCES = "ledgerNonces";
-
-    /**
-     *   存区块交易缓存数据
-     */
-    String TB_LEDGER_HASH = "ledgerHashs";
+    String TB_LEDGER_HASH = "ledger_tx_hashs";
 }

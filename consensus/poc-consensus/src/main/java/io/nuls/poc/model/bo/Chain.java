@@ -133,6 +133,27 @@ public class Chain {
     }
 
     /**
+     * 获取新建或达到出块要求的节点列表
+     * Get a list of nodes that meet block requirements
+     *
+     * @param height
+     * @return List<agent>
+     **/
+    public List<Agent> getNewOrWorkAgentList(long height) {
+        List<Agent> workAgentList = new ArrayList<>();
+        for (Agent agent : agentList) {
+            if (agent.getDelHeight() != -1L && agent.getDelHeight() <= height) {
+                continue;
+            }
+            if (agent.getBlockHeight() > height || agent.getBlockHeight() < 0L) {
+                continue;
+            }
+            workAgentList.add(agent);
+        }
+        return workAgentList;
+    }
+
+    /**
      * 获取达到出块要求的节点列表
      * Get a list of nodes that meet block requirements
      *

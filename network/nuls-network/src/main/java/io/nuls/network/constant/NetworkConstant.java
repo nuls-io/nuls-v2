@@ -94,10 +94,10 @@ public interface NetworkConstant {
     /**
      * --------[DB tables] -------
      */
-    String DB_NAME_NETWORK_NODEGROUPS = "nwNodeGroups";
+    String DB_NAME_NETWORK_NODEGROUPS = "nw_groups";
     //    String DB_NAME_NETWORK_NODES="nwNodes";
-    String DB_NAME_NETWORK_GROUP_NODES = "nwGroupNodes";
-    String DB_NAME_NETWORK_PROTOCOL_REGISTER = "nwProtocolRegister";
+    String DB_NAME_NETWORK_GROUP_NODES = "nw_group_nodes";
+    String DB_NAME_NETWORK_PROTOCOL_REGISTER = "nw_protocol_register";
     /**
      * --------[Special Splitter] -------
      */

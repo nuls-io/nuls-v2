@@ -88,8 +88,8 @@ public class I18nUtils {
     }
 
     public static void loadLanguage(Class c,String folder, String defaultLanguage) {
-        load(I18nUtils.class, "common-languages", defaultLanguage);
         ALL_MAPPING.clear();
+        load(I18nUtils.class, "common-languages", defaultLanguage);
         load(c, folder, defaultLanguage);
     }
 

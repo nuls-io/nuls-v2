@@ -57,7 +57,7 @@ public class LoggerUtil {
     }
 
     public static void createLogs(int chainId, String logLevel) {
-        String folderName = "nwLogs/" + chainId;
+        String folderName = "nwLogs/chain-" + chainId;
         if (null == logMap.get(LOGGER_KEY1 + chainId)) {
             logMap.put(LOGGER_KEY1 + chainId, LoggerBuilder.getLogger(folderName, LOGGER_KEY1, Level.valueOf(logLevel)));
             logMap.put(LOGGER_KEY2 + chainId, LoggerBuilder.getLogger(folderName, LOGGER_KEY2, Level.valueOf(logLevel)));
