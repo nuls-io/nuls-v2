@@ -21,6 +21,10 @@
 package io.nuls.api.task;
 
 import io.nuls.api.cache.ApiCache;
+import io.nuls.api.db.AgentService;
+import io.nuls.api.db.BlockService;
+import io.nuls.api.db.DepositService;
+import io.nuls.api.db.StatisticalService;
 import io.nuls.api.db.mongo.MongoAgentServiceImpl;
 import io.nuls.api.db.mongo.MongoBlockServiceImpl;
 import io.nuls.api.db.mongo.MongoDepositServiceImpl;
@@ -45,20 +49,20 @@ public class StatisticalTask implements Runnable {
 
     private int chainId;
 
-    private MongoStatisticalServiceImpl mongoStatisticalServiceImpl;
+    private StatisticalService statisticalService;
 
-    private MongoBlockServiceImpl blockHeaderService;
+    private BlockService blockService;
 
-    private MongoDepositServiceImpl mongoDepositServiceImpl;
+    private DepositService depositService;
 
-    private MongoAgentServiceImpl mongoAgentServiceImpl;
+    private AgentService agentService;
 
     public StatisticalTask(int chainId) {
         this.chainId = chainId;
-        mongoStatisticalServiceImpl = SpringLiteContext.getBean(MongoStatisticalServiceImpl.class);
-        blockHeaderService = SpringLiteContext.getBean(MongoBlockServiceImpl.class);
-        mongoDepositServiceImpl = SpringLiteContext.getBean(MongoDepositServiceImpl.class);
-        mongoAgentServiceImpl = SpringLiteContext.getBean(MongoAgentServiceImpl.class);
+        statisticalService = SpringLiteContext.getBean(MongoStatisticalServiceImpl.class);
+        blockService = SpringLiteContext.getBean(MongoBlockServiceImpl.class);
+        depositService = SpringLiteContext.getBean(MongoDepositServiceImpl.class);
+        agentService = SpringLiteContext.getBean(MongoAgentServiceImpl.class);
     }
 
     @Override
@@ -70,10 +74,9 @@ public class StatisticalTask implements Runnable {
         }
     }
 
-
     private void doCalc() {
-        long bestId = mongoStatisticalServiceImpl.getBestId(chainId);
-        BlockHeaderInfo header = blockHeaderService.getBestBlockHeader(chainId);
+        long bestId = statisticalService.getBestId(chainId);
+        BlockHeaderInfo header = blockService.getBestBlockHeader(chainId);
         if (null == header) {
             return;
         }
@@ -81,10 +84,10 @@ public class StatisticalTask implements Runnable {
         long start = bestId + 1;
         long end = 0;
         if (bestId == -1) {
-            BlockHeaderInfo header0 = blockHeaderService.getBlockHeader(chainId, 0);
+            BlockHeaderInfo header0 = blockService.getBlockHeader(chainId, 0);
             start = header0.getCreateTime();
             end = start + day;
-            this.mongoStatisticalServiceImpl.saveBestId(chainId, start);
+            this.statisticalService.saveBestId(chainId, start);
         } else {
             end = start + day - 1;
         }
@@ -95,7 +98,7 @@ public class StatisticalTask implements Runnable {
             statistical(start, end);
             start = end + 1;
             end = end + day;
-            BlockHeaderInfo newBlockHeader = blockHeaderService.getBestBlockHeader(chainId);
+            BlockHeaderInfo newBlockHeader = blockService.getBestBlockHeader(chainId);
             if (null != newBlockHeader) {
                 header = newBlockHeader;
             }
@@ -103,11 +106,11 @@ public class StatisticalTask implements Runnable {
     }
 
     private void statistical(long start, long end) {
-        long txCount = mongoStatisticalServiceImpl.calcTxCount(chainId, start, end);
+        long txCount = statisticalService.calcTxCount(chainId, start, end);
         BigInteger consensusLocked = BigInteger.ZERO;
-        long height = blockHeaderService.getMaxHeight(chainId, end);
-        List<AgentInfo> agentList = mongoAgentServiceImpl.getAgentList(chainId, height);
-        List<DepositInfo> depositList = mongoDepositServiceImpl.getDepositList(chainId, height);
+        long height = blockService.getMaxHeight(chainId, end);
+        List<AgentInfo> agentList = agentService.getAgentList(chainId, height);
+        List<DepositInfo> depositList = depositService.getDepositList(chainId, height);
         int nodeCount = agentList.size();
         for (AgentInfo agent : agentList) {
             consensusLocked = consensusLocked.add(agent.getDeposit());
@@ -133,11 +136,11 @@ public class StatisticalTask implements Runnable {
         info.setMonth(calendar.get(Calendar.MONTH) + 1);
         info.setYear(calendar.get(Calendar.YEAR));
         try {
-            this.mongoStatisticalServiceImpl.insert(chainId, info);
+            this.statisticalService.insert(chainId, info);
         } catch (Exception e) {
             Log.error(e);
         }
-        this.mongoStatisticalServiceImpl.updateBestId(chainId, info.getTime());
+        this.statisticalService.updateBestId(chainId, info.getTime());
     }
 
 }

@@ -1,9 +1,6 @@
 package io.nuls.api.db;
 
-import io.nuls.api.model.po.db.CoinDataInfo;
-import io.nuls.api.model.po.db.PageInfo;
-import io.nuls.api.model.po.db.TransactionInfo;
-import io.nuls.api.model.po.db.TxRelationInfo;
+import io.nuls.api.model.po.db.*;
 
 import java.util.List;
 import java.util.Set;
@@ -18,6 +15,8 @@ public interface TransactionService {
 
     PageInfo<TransactionInfo> getTxList(int chainId, int pageIndex, int pageSize, int type, boolean isHidden);
 
+    List<TxHexInfo> getUnConfirmList(int chainId);
+
     PageInfo<TransactionInfo> getBlockTxList(int chainId, int pageIndex, int pageSize, long blockHeight, int type);
 
     TransactionInfo getTx(int chainId, String txHash);
@@ -26,5 +25,7 @@ public interface TransactionService {
 
     void rollbackTx(int chainId, List<String> txHashList);
 
-    void saveUnConfirmTx(int chainId, TransactionInfo tx);
+    void saveUnConfirmTx(int chainId, TransactionInfo tx, String txHex);
+
+    void deleteUnConfirmTx(int chainId, String txHash);
 }

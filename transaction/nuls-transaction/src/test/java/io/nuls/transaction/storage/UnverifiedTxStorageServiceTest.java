@@ -6,6 +6,7 @@ import io.nuls.transaction.TestConstant;
 import io.nuls.transaction.TransactionBootstrap;
 import io.nuls.transaction.manager.ChainManager;
 import io.nuls.transaction.model.bo.Chain;
+import io.nuls.transaction.model.po.TransactionNetPO;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -32,14 +33,14 @@ public class UnverifiedTxStorageServiceTest {
     public void putTx() throws Exception {
         Transaction tx = TestConstant.getTransaction2();
         Chain chain = chainManager.getChain(chainId);
-        boolean result = unverifiedTxStorageService.putTx(chain, tx);
+        boolean result = unverifiedTxStorageService.putTx(chain, new TransactionNetPO(tx, "1"));
         Assert.assertTrue(result);
     }
 
     @Test
     public void pollTx() {
         Chain chain = chainManager.getChain(chainId);
-        Transaction tx = unverifiedTxStorageService.pollTx(chain);
+        TransactionNetPO tx = unverifiedTxStorageService.pollTx(chain);
         Assert.assertNotNull(tx);
     }
 }

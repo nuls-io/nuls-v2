@@ -21,11 +21,12 @@ public class ScheduleManager {
 //        }
 
         int corePoolSize = CacheManager.getApiCaches().size();
-        ScheduledExecutorService executorService = Executors.newScheduledThreadPool(corePoolSize);
+        ScheduledExecutorService executorService = Executors.newScheduledThreadPool(corePoolSize * 4);
         for (ApiCache apiCache : CacheManager.getApiCaches().values()) {
             executorService.scheduleAtFixedRate(new SyncBlockTask(apiCache.getChainInfo().getChainId()), 1, 10, TimeUnit.SECONDS);
             executorService.scheduleAtFixedRate(new StatisticalNulsTask(apiCache.getChainInfo().getChainId()), 1, 20, TimeUnit.MINUTES);
             executorService.scheduleAtFixedRate(new StatisticalTask(apiCache.getChainInfo().getChainId()), 1, 60, TimeUnit.MINUTES);
+            executorService.scheduleAtFixedRate(new StatisticalTask(apiCache.getChainInfo().getChainId()), 1, 10, TimeUnit.MINUTES);
         }
     }
 }

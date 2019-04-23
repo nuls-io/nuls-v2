@@ -22,7 +22,7 @@
  * SOFTWARE.
  *
  */
-package io.nuls.chain.cmd;
+package io.nuls.chain.rpc.cmd;
 
 import io.nuls.base.data.BlockHeaderDigest;
 import io.nuls.base.data.Transaction;
@@ -73,14 +73,14 @@ public class TxModuleCmd extends BaseChainCmd {
     @CmdAnnotation(cmd = RpcConstants.TX_MODULE_VALIDATE_CMD_VALUE, version = 1.0,
             description = "chainModuleTxValidate")
     @Parameter(parameterName = "chainId", parameterType = "int", parameterValidRange = "[1,65535]")
-    @Parameter(parameterName = "txHexs", parameterType = "array")
+    @Parameter(parameterName = "txList", parameterType = "array")
     public Response chainModuleTxValidate(Map params) {
         try {
             ObjectUtils.canNotEmpty(params.get("chainId"));
             ObjectUtils.canNotEmpty(params.get("txHexList"));
             ObjectUtils.canNotEmpty(params.get("blockHeaderDigest"));
             Integer chainId = (Integer) params.get("chainId");
-            List<String> txHexList = (List) params.get("txHexList");
+            List<String> txHexList = (List) params.get("txList");
             List<Transaction> txList = new ArrayList<>();
             Response parseResponse = parseTxs(txHexList, txList);
             if (!parseResponse.isSuccess()) {
@@ -104,9 +104,9 @@ public class TxModuleCmd extends BaseChainCmd {
                         assetMap.put(assetKey, 1);
                         chainEventResult = validateService.batchChainRegValidator(blockChain, asset, chainMap, assetMap);
                         if (chainEventResult.isSuccess()) {
-                            LoggerUtil.logger().info("txHash = {},chainId={} reg batchValidate success!", tx.getHash().toString(), blockChain.getChainId());
+                            LoggerUtil.logger().debug("txHash = {},chainId={} reg batchValidate success!", tx.getHash().toString(), blockChain.getChainId());
                         } else {
-                            LoggerUtil.logger().info("txHash = {},chainId={} reg batchValidate fail!", tx.getHash().toString(), blockChain.getChainId());
+                            LoggerUtil.logger().error("txHash = {},chainId={} reg batchValidate fail!", tx.getHash().toString(), blockChain.getChainId());
                             return failed(chainEventResult.getErrorCode());
                         }
                         break;
@@ -114,9 +114,9 @@ public class TxModuleCmd extends BaseChainCmd {
                         blockChain = TxUtil.buildChainWithTxData(tx, true);
                         chainEventResult = validateService.chainDisableValidator(blockChain);
                         if (chainEventResult.isSuccess()) {
-                            LoggerUtil.logger().info("txHash = {},chainId={} destroy batchValidate success!", tx.getHash().toString(), blockChain.getChainId());
+                            LoggerUtil.logger().debug("txHash = {},chainId={} destroy batchValidate success!", tx.getHash().toString(), blockChain.getChainId());
                         } else {
-                            LoggerUtil.logger().info("txHash = {},chainId={} destroy batchValidate fail!", tx.getHash().toString(), blockChain.getChainId());
+                            LoggerUtil.logger().error("txHash = {},chainId={} destroy batchValidate fail!", tx.getHash().toString(), blockChain.getChainId());
                             return failed(chainEventResult.getErrorCode());
                         }
                         break;
@@ -127,9 +127,9 @@ public class TxModuleCmd extends BaseChainCmd {
                         assetMap.put(assetKey2, 1);
                         chainEventResult = validateService.batchAssetRegValidator(asset, assetMap);
                         if (chainEventResult.isSuccess()) {
-                            LoggerUtil.logger().info("txHash = {},assetKey={} reg batchValidate success!", tx.getHash().toString(), assetKey2);
+                            LoggerUtil.logger().debug("txHash = {},assetKey={} reg batchValidate success!", tx.getHash().toString(), assetKey2);
                         } else {
-                            LoggerUtil.logger().info("txHash = {},assetKey={} reg batchValidate fail!", tx.getHash().toString(), assetKey2);
+                            LoggerUtil.logger().error("txHash = {},assetKey={} reg batchValidate fail!", tx.getHash().toString(), assetKey2);
                             return failed(chainEventResult.getErrorCode());
                         }
                         break;
@@ -137,9 +137,9 @@ public class TxModuleCmd extends BaseChainCmd {
                         asset = TxUtil.buildAssetWithTxChain(tx);
                         chainEventResult = validateService.assetDisableValidator(asset);
                         if (chainEventResult.isSuccess()) {
-                            LoggerUtil.logger().info("txHash = {},assetKey={} disable batchValidate success!", tx.getHash().toString(), CmRuntimeInfo.getAssetKey(asset.getChainId(), asset.getAssetId()));
+                            LoggerUtil.logger().debug("txHash = {},assetKey={} disable batchValidate success!", tx.getHash().toString(), CmRuntimeInfo.getAssetKey(asset.getChainId(), asset.getAssetId()));
                         } else {
-                            LoggerUtil.logger().info("txHash = {},assetKey={} disable batchValidate fail!", tx.getHash().toString(), CmRuntimeInfo.getAssetKey(asset.getChainId(), asset.getAssetId()));
+                            LoggerUtil.logger().error("txHash = {},assetKey={} disable batchValidate fail!", tx.getHash().toString(), CmRuntimeInfo.getAssetKey(asset.getChainId(), asset.getAssetId()));
                             return failed(chainEventResult.getErrorCode());
                         }
                         break;
@@ -161,14 +161,14 @@ public class TxModuleCmd extends BaseChainCmd {
     @CmdAnnotation(cmd = RpcConstants.TX_ROLLBACK_CMD_VALUE, version = 1.0,
             description = "moduleTxsRollBack")
     @Parameter(parameterName = "chainId", parameterType = "int", parameterValidRange = "[1,65535]")
-    @Parameter(parameterName = "txHexList", parameterType = "array")
+    @Parameter(parameterName = "txList", parameterType = "array")
     @Parameter(parameterName = "blockHeaderDigest", parameterType = "array")
     public Response moduleTxsRollBack(Map params) {
         try {
             ObjectUtils.canNotEmpty(params.get("chainId"));
             ObjectUtils.canNotEmpty(params.get("blockHeaderDigest"));
             Integer chainId = (Integer) params.get("chainId");
-            List<String> txHexList = (List) params.get("txHexList");
+            List<String> txHexList = (List) params.get("txList");
             BlockHeaderDigest blockHeaderDigest = (BlockHeaderDigest) params.get("blockHeaderDigest");
             long commitHeight = blockHeaderDigest.getHeight();
             List<Transaction> txList = new ArrayList<>();
@@ -209,7 +209,7 @@ public class TxModuleCmd extends BaseChainCmd {
     @CmdAnnotation(cmd = RpcConstants.TX_COMMIT_CMD_VALUE, version = 1.0,
             description = "moduleTxsCommit")
     @Parameter(parameterName = "chainId", parameterType = "int", parameterValidRange = "[1,65535]")
-    @Parameter(parameterName = "txHexList", parameterType = "array")
+    @Parameter(parameterName = "txList", parameterType = "array")
     @Parameter(parameterName = "blockHeaderDigest", parameterType = "array")
     public Response moduleTxsCommit(Map params) {
         try {
@@ -217,7 +217,7 @@ public class TxModuleCmd extends BaseChainCmd {
             ObjectUtils.canNotEmpty(params.get("txHexList"));
             ObjectUtils.canNotEmpty(params.get("blockHeaderDigest"));
             Integer chainId = (Integer) params.get("chainId");
-            List<String> txHexList = (List) params.get("txHexList");
+            List<String> txHexList = (List) params.get("txList");
             BlockHeaderDigest blockHeaderDigest = (BlockHeaderDigest) params.get("blockHeaderDigest");
             long commitHeight = blockHeaderDigest.getHeight();
             List<Transaction> txList = new ArrayList<>();
@@ -280,6 +280,4 @@ public class TxModuleCmd extends BaseChainCmd {
         resultMap.put("value", true);
         return success(resultMap);
     }
-
-
 }

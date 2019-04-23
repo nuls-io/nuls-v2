@@ -23,8 +23,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.*;
 
 /**
  * @author: EdwardChan
@@ -64,7 +63,7 @@ public class CommonRpcOperation {
             params.put("count", count);
             params.put("password", password);
             Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_createAccount", params);
-            if (!AccountConstant.SUCCESS_CODE.equals(cmdResp.getResponseStatus())) {
+            if (!cmdResp.isSuccess()) {
                 return null;
             }
             accountList = (List<String>) ((HashMap) ((HashMap) cmdResp.getResponseData()).get("ac_createAccount")).get("list");
@@ -83,7 +82,7 @@ public class CommonRpcOperation {
             params.put("address", address);
 
             Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_getAccountByAddress", params);
-            if (!AccountConstant.SUCCESS_CODE.equals(cmdResp.getResponseStatus())) {
+            if (!cmdResp.isSuccess()) {
                 return null;
             }
             accountMap = ((HashMap) ((HashMap) cmdResp.getResponseData()).get("ac_getAccountByAddress"));
@@ -242,7 +241,7 @@ public class CommonRpcOperation {
         params.put("password", password);
         params.put("overwrite", true);
         Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_importAccountByPriKey", params);
-        assertEquals(AccountConstant.SUCCESS_CODE, cmdResp.getResponseStatus());
+        assertTrue(cmdResp.isSuccess());
         HashMap result = (HashMap) ((HashMap) cmdResp.getResponseData()).get("ac_importAccountByPriKey");
         String returnAddress = (String) result.get("address");
         assertNotNull(returnAddress);

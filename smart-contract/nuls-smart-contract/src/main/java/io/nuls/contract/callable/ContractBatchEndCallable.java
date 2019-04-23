@@ -26,6 +26,7 @@ package io.nuls.contract.callable;
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.*;
 import io.nuls.contract.helper.ContractHelper;
+import io.nuls.contract.manager.ChainManager;
 import io.nuls.contract.model.bo.*;
 import io.nuls.contract.model.dto.ContractPackageDto;
 import io.nuls.contract.model.tx.ContractReturnGasTransaction;
@@ -70,6 +71,7 @@ public class ContractBatchEndCallable implements Callable<ContractPackageDto> {
     @Override
     public ContractPackageDto call() {
         try {
+            ChainManager.chainHandle(chainId);
             BatchInfo batchInfo = contractHelper.getChain(chainId).getBatchInfo();
             BlockHeader currentBlockHeader = batchInfo.getCurrentBlockHeader();
             long blockTime = currentBlockHeader.getTime();

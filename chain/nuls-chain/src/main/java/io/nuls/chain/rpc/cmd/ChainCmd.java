@@ -1,4 +1,4 @@
-package io.nuls.chain.cmd;
+package io.nuls.chain.rpc.cmd;
 
 
 import io.nuls.base.basic.AddressTool;
@@ -10,7 +10,7 @@ import io.nuls.chain.model.po.Asset;
 import io.nuls.chain.model.po.BlockChain;
 import io.nuls.chain.model.tx.RegisterChainAndAssetTransaction;
 import io.nuls.chain.service.ChainService;
-import io.nuls.chain.service.RpcService;
+import io.nuls.chain.rpc.call.RpcService;
 import io.nuls.chain.util.LoggerUtil;
 import io.nuls.rpc.model.CmdAnnotation;
 import io.nuls.rpc.model.Parameter;
@@ -101,7 +101,7 @@ public class ChainCmd extends BaseChainCmd {
             tx.setCoinData(coinData.serialize());
 
             /* 判断签名是否正确 (Determine if the signature is correct) */
-            tx = signDigest(asset.getChainId(), (String) params.get("address"), (String) params.get("password"), tx);
+            rpcService.transactionSignature(asset.getChainId(), (String) params.get("address"), (String) params.get("password"), tx);
 
             /* 发送到交易模块 (Send to transaction module) */
             return rpcService.newTx(tx) ? success(blockChain) : failed("Register chain failed");

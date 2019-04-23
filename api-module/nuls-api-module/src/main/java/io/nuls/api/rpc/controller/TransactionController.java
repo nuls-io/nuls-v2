@@ -58,6 +58,9 @@ public class TransactionController {
             return RpcResult.paramError("[hash] is required");
         }
         Result<TransactionInfo> result = WalletRpcHandler.getTx(chainId, hash);
+        if (result == null) {
+
+        }
         if (result.isFailed()) {
             throw new JsonRpcException(result.getErrorCode());
         }
@@ -258,7 +261,7 @@ public class TransactionController {
                 Transaction tx = new Transaction();
                 tx.parse(new NulsByteBuffer(RPCUtil.decode(txHex)));
                 TransactionInfo txInfo = AnalysisHandler.toTransaction(chainId, tx);
-                txService.saveUnConfirmTx(chainId, txInfo);
+                txService.saveUnConfirmTx(chainId, txInfo, txHex);
                 return RpcResult.success(result.getData());
             } else {
                 return RpcResult.failed(result);

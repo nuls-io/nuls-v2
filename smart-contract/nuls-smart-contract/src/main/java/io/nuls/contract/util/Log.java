@@ -4,8 +4,11 @@ import ch.qos.logback.classic.Level;
 import com.alibaba.fastjson.JSONObject;
 import io.nuls.tools.io.IoUtils;
 import io.nuls.tools.log.logback.NulsLogger;
+import org.apache.commons.io.IOUtils;
 
 import java.io.InputStream;
+import java.util.HashMap;
+import java.util.Map;
 
 import static io.nuls.contract.constant.ContractConstant.MODULE_CONFIG_FILE;
 
@@ -15,7 +18,11 @@ import static io.nuls.contract.constant.ContractConstant.MODULE_CONFIG_FILE;
  */
 public class Log {
 
-    public static NulsLogger BASIC_LOGGER;
+    public static NulsLogger DEFAULT_BASIC_LOGGER;
+
+    private static ThreadLocal<Integer> currentThreadChainId = new ThreadLocal<>();
+
+    public static Map<Integer, NulsLogger> BASIC_LOGGER_MAP = new HashMap<>(4);
 
     /**
      * 不允许实例化该类
@@ -162,10 +169,29 @@ public class Log {
     private static String wrapperLogContent(String msg) {
         return msg;
     }
-    
+
+    public static void currentThreadChainId(Integer chainId) {
+        currentThreadChainId.set(chainId);
+    }
+
     private static NulsLogger getBasicLogger() {
-        if(BASIC_LOGGER == null) {
-            try (InputStream configInput = Log.class.getClassLoader().getResourceAsStream(MODULE_CONFIG_FILE)) {
+        Integer chainId = currentThreadChainId.get();
+        if(chainId != null) {
+            NulsLogger nulsLogger = BASIC_LOGGER_MAP.get(chainId);
+            if(nulsLogger != null) {
+                return nulsLogger;
+            }
+            return getDefaultBasicLogger();
+        } else {
+            return getDefaultBasicLogger();
+        }
+    }
+
+    private static NulsLogger getDefaultBasicLogger() {
+        if(DEFAULT_BASIC_LOGGER == null) {
+            InputStream configInput = null;
+            try {
+                configInput = Log.class.getClassLoader().getResourceAsStream(MODULE_CONFIG_FILE);
                 String str = IoUtils.readBytesToString(configInput);
                 JSONObject json = JSONObject.parseObject(str);
                 ContractUtil.configLog(json.getString("logFilePath"), json.getString("logFileName"),
@@ -173,9 +199,12 @@ public class Log {
                         json.getString("systemLogLevel"), json.getString("packageLogPackages"), json.getString("packageLogLevels"));
             } catch (Exception e) {
                 ContractUtil.configLog("./contract", "contract", Level.INFO, Level.INFO);
+            } finally {
+                IOUtils.closeQuietly(configInput);
             }
         }
-        return BASIC_LOGGER;
+
+        return DEFAULT_BASIC_LOGGER;
     }
 
 }

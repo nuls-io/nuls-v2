@@ -12,6 +12,7 @@ import io.nuls.api.manager.CacheManager;
 import io.nuls.api.model.po.db.*;
 import io.nuls.api.model.rpc.BalanceInfo;
 import io.nuls.api.utils.DocumentTransferTool;
+import io.nuls.rpc.util.TimeUtils;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
 import org.bson.Document;
@@ -88,6 +89,17 @@ public class MongoTransactionServiceImpl implements TransactionService {
         return pageInfo;
     }
 
+    @Override
+    public List<TxHexInfo> getUnConfirmList(int chainId) {
+        List<Document> docList = mongoDBService.query(TX_UNCONFIRM_TABLE + chainId);
+        List<TxHexInfo> txHexInfoList = new ArrayList<>();
+        for (Document document : docList) {
+            TxHexInfo txHexInfo = DocumentTransferTool.toInfo(document, "hash", TxHexInfo.class);
+            txHexInfoList.add(txHexInfo);
+        }
+        return txHexInfoList;
+    }
+
     public PageInfo<TransactionInfo> getBlockTxList(int chainId, int pageIndex, int pageSize, long blockHeight, int type) {
         Bson filter = null;
         if (type == 0) {
@@ -148,7 +160,7 @@ public class MongoTransactionServiceImpl implements TransactionService {
     }
 
     @Override
-    public void saveUnConfirmTx(int chainId, TransactionInfo tx) {
+    public void saveUnConfirmTx(int chainId, TransactionInfo tx, String txHex) {
         Set<TxRelationInfo> txRelationInfoSet = new HashSet<>();
         if (tx.getType() == ApiConstant.TX_TYPE_COINBASE) {
             processCoinBaseTx(chainId, tx, txRelationInfoSet);
@@ -181,15 +193,27 @@ public class MongoTransactionServiceImpl implements TransactionService {
             Document document = DocumentTransferTool.toDocument(relationInfo);
             documentList.add(document);
         }
-
         mongoDBService.insertMany(TX_UNCONFIRM_RELATION_TABLE + chainId, documentList);
+        TxHexInfo hexInfo = new TxHexInfo();
+        hexInfo.setTxHash(tx.getHash());
+        hexInfo.setTxHex(txHex);
+        hexInfo.setTime(TimeUtils.getCurrentTimeMillis());
+
+        Document document = DocumentTransferTool.toDocument(hexInfo, "txHash");
+        mongoDBService.insertOne(TX_UNCONFIRM_TABLE + chainId, document);
+    }
+
+    @Override
+    public void deleteUnConfirmTx(int chainId, String txHash) {
+        Bson filter = Filters.eq("txHash", txHash);
+        mongoDBService.delete(TX_UNCONFIRM_TABLE + chainId, filter);
+        mongoDBService.delete(TX_UNCONFIRM_RELATION_TABLE + chainId, filter);
     }
 
     private void processCoinBaseTx(int chainId, TransactionInfo tx, Set<TxRelationInfo> txRelationInfoSet) {
         if (tx.getCoinTos() == null || tx.getCoinTos().isEmpty()) {
             return;
         }
-
         for (CoinToInfo output : tx.getCoinTos()) {
             BalanceInfo balanceInfo = WalletRpcHandler.getAccountBalance(chainId, output.getAddress(), output.getChainId(), output.getAssetsId());
             txRelationInfoSet.add(new TxRelationInfo(output.getAddress(), tx, output.getChainId(), output.getAssetsId(), output.getAmount(), TRANSFER_TO_TYPE, balanceInfo.getTotalBalance()));
@@ -278,5 +302,6 @@ public class MongoTransactionServiceImpl implements TransactionService {
         BalanceInfo balanceInfo = WalletRpcHandler.getAccountBalance(chainId, input.getAddress(), input.getChainId(), input.getAssetsId());
         txRelationInfoSet.add(new TxRelationInfo(input.getAddress(), tx, input.getChainId(), input.getAssetsId(), BigInteger.ZERO, TRANSFER_NO_TYPE, balanceInfo.getTotalBalance()));
     }
+
 
 }

@@ -832,7 +832,7 @@ package io.nuls.protocol.rpc.callback;
 //    }
 //
 //    private Response response(Object responseData) {
-//        Response response = MessageUtil.newResponse("", Constants.BOOLEAN_TRUE, "Congratulations! Processing completed！");
+//Response response = MessageUtil.newSuccessResponse("",  "Congratulations! Processing completed！");
 //        response.setResponseData(responseData);
 //        return response;
 //    }
