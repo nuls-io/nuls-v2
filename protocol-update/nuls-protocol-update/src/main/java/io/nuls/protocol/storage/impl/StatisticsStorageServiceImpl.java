@@ -35,6 +35,13 @@ import java.util.List;
 
 import static io.nuls.protocol.utils.LoggerUtil.commonLog;
 
+/**
+ * 统计信息持久化类实现
+ *
+ * @author captain
+ * @version 1.0
+ * @date 2019/4/23 11:03
+ */
 @Component
 public class StatisticsStorageServiceImpl implements StatisticsStorageService {
 

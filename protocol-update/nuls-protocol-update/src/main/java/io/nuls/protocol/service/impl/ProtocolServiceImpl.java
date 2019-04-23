@@ -28,6 +28,7 @@ import io.nuls.protocol.model.ChainParameters;
 import io.nuls.protocol.model.ProtocolContext;
 import io.nuls.protocol.model.ProtocolVersion;
 import io.nuls.protocol.model.po.StatisticsInfo;
+import io.nuls.protocol.rpc.call.VersionChangeNotifier;
 import io.nuls.protocol.service.ProtocolService;
 import io.nuls.protocol.storage.StatisticsStorageService;
 import io.nuls.tools.core.annotation.Autowired;
@@ -144,6 +145,7 @@ public class ProtocolServiceImpl implements ProtocolService {
                         context.setCurrentProtocolVersion(version);
                         context.setCurrentProtocolVersionCount(statisticsInfo.getCount());
                         context.getProtocolVersionHistory().push(version);
+                        boolean notify = VersionChangeNotifier.notify(chainId, version.getVersion());
                         commonLog.info("chainId-" + chainId + ", height-"+ height + ", new protocol version available-" + version);
                     }
                     context.setCount(0);

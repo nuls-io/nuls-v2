@@ -28,13 +28,7 @@ import io.nuls.db.constant.DBErrorCode;
 import io.nuls.db.service.RocksDBService;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
-import io.nuls.tools.io.IoUtils;
-import io.nuls.tools.log.logback.LoggerBuilder;
 import io.nuls.tools.log.logback.NulsLogger;
-import io.nuls.tools.parse.JSONUtils;
-import io.nuls.tools.protocol.Protocol;
-import io.nuls.tools.protocol.ProtocolConfigJson;
-import io.nuls.tools.protocol.ProtocolGroupManager;
 import io.nuls.tools.protocol.ProtocolLoader;
 import io.nuls.transaction.constant.TxConfig;
 import io.nuls.transaction.constant.TxConstant;
@@ -45,14 +39,10 @@ import io.nuls.transaction.storage.ConfigStorageService;
 import io.nuls.transaction.utils.LoggerUtil;
 import io.nuls.transaction.utils.queue.entity.PersistentQueue;
 
-import java.util.List;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import static io.nuls.base.constant.BaseConstant.PROTOCOL_CONFIG_COMPARATOR;
-import static io.nuls.base.constant.BaseConstant.PROTOCOL_CONFIG_FILE;
-import static io.nuls.transaction.utils.LoggerUtil.Log;
 import static io.nuls.transaction.utils.LoggerUtil.LOG;
 
 /**
@@ -95,11 +85,7 @@ public class ChainManager {
             initTable(chain);
             chainMap.put(chainId, chain);
             chain.getLoggerMap().get(TxConstant.LOG_TX).debug("Chain:{} init success..", chainId);
-            String json = IoUtils.read(PROTOCOL_CONFIG_FILE);
-            List<ProtocolConfigJson> protocolConfigs = JSONUtils.json2list(json, ProtocolConfigJson.class);
-            protocolConfigs.sort(PROTOCOL_CONFIG_COMPARATOR);
-            Map<Short, Protocol> protocolMap = ProtocolLoader.load(protocolConfigs);
-            ProtocolGroupManager.init(chainId, protocolMap, (short) 1);
+            ProtocolLoader.load(chainId);
         }
     }
 

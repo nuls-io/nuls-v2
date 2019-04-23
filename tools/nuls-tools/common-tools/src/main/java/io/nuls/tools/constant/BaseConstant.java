@@ -1,4 +1,4 @@
-package io.nuls.base.constant;
+package io.nuls.tools.constant;
 
 import io.nuls.tools.protocol.ProtocolConfigJson;
 

@@ -24,4 +24,9 @@ public class ProtocolGroupManager {
     public static ProtocolGroup getProtocol(int chainId) {
         return protocolGroupMap.get(chainId);
     }
+
+    public static void updateProtocol(int chainId, short protocolVersion) {
+        ProtocolGroup protocolGroup = protocolGroupMap.get(chainId);
+        protocolGroup.setVersion(protocolVersion);
+    }
 }

@@ -31,6 +31,7 @@ import io.nuls.db.service.RocksDBService;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.core.ioc.SpringLiteContext;
 import io.nuls.tools.log.logback.NulsLogger;
+import io.nuls.tools.protocol.ProtocolLoader;
 
 import java.util.List;
 
@@ -64,6 +65,7 @@ public class ChainManager {
             initTable(chainId);
             //服务初始化
             service.init(chainId);
+            ProtocolLoader.load(chainId);
         }
     }
 

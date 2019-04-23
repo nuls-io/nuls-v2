@@ -25,7 +25,6 @@
 package io.nuls.contract.model.dto;
 
 
-import io.nuls.base.constant.TxStatusEnum;
 import io.nuls.base.data.CoinData;
 import io.nuls.base.data.CoinFrom;
 import io.nuls.base.data.CoinTo;
@@ -36,6 +35,7 @@ import io.nuls.contract.model.txdata.ContractTransferData;
 import io.nuls.contract.rpc.call.BlockCall;
 import io.nuls.contract.util.MapUtil;
 import io.nuls.rpc.util.RPCUtil;
+import io.nuls.tools.constant.TxStatusEnum;
 import io.nuls.tools.exception.NulsException;
 
 import java.nio.charset.StandardCharsets;

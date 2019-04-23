@@ -69,7 +69,7 @@ public class BlockManager {
     public void chainRollBack(Chain chain, int height) {
         chain.getLoggerMap().get(ConsensusConstant.BASIC_LOGGER_NAME).info("区块开始回滚，回滚到的高度：" + height);
         List<BlockHeader> headerList = chain.getBlockHeaderList();
-        Collections.sort(headerList, new BlockHeaderComparator());
+        headerList.sort(new BlockHeaderComparator());
         BlockHeader originalBlocHeader = chain.getNewestHeader();
         BlockExtendsData originalExtendsData = new BlockExtendsData(originalBlocHeader.getExtend());
         long originalRound = originalExtendsData.getRoundIndex();

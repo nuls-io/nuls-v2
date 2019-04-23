@@ -35,6 +35,13 @@ import java.util.List;
 
 import static io.nuls.protocol.utils.LoggerUtil.commonLog;
 
+/**
+ * 参数持久化类实现
+ *
+ * @author captain
+ * @version 1.0
+ * @date 2019/4/23 11:02
+ */
 @Component
 public class ParametersStorageServiceImpl implements ParametersStorageService {
     @Override

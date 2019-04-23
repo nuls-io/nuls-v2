@@ -51,6 +51,7 @@ public interface StatisticsStorageService {
      * Query the configuration information of a chain
      *
      * @param chainId 链Id/chain id
+     * @param height 区块高度
      * @return 版本统计信息类/config bean
      */
     StatisticsInfo get(int chainId, long height);
@@ -60,6 +61,7 @@ public interface StatisticsStorageService {
      * Delete configuration information for a chain
      *
      * @param chainId 链Id/chain id
+     * @param height 区块高度
      * @return 删除是否成功/Delete success
      */
     boolean delete(int chainId, long height);
@@ -68,6 +70,7 @@ public interface StatisticsStorageService {
      * 获取当前节点所有的链信息
      * Get all the chain information of the current node
      *
+     * @param chainId 链Id/chain id
      * @return 节点信息列表/Node information list
      */
     List<StatisticsInfo> getList(int chainId);

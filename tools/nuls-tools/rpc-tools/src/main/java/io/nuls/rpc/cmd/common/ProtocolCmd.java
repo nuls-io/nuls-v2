@@ -20,7 +20,7 @@
  *
  */
 
-package io.nuls.rpc.cmd.kernel;
+package io.nuls.rpc.cmd.common;
 
 import io.nuls.rpc.cmd.BaseCmd;
 import io.nuls.rpc.info.Constants;
@@ -28,31 +28,30 @@ import io.nuls.rpc.model.CmdAnnotation;
 import io.nuls.rpc.model.Parameter;
 import io.nuls.rpc.model.message.Response;
 import io.nuls.tools.core.annotation.Component;
+import io.nuls.tools.log.Log;
+import io.nuls.tools.protocol.ProtocolGroupManager;
 
 import java.util.Map;
 
 /**
- * 测试接口，测试rpc服务稳定性
+ * 协议版本变更统一通知接口
  *
  * @author captain
  * @version 1.0
  * @date 18-11-14 下午4:23
  */
 @Component
-public class Summary extends BaseCmd {
+public class ProtocolCmd extends BaseCmd {
 
-    @CmdAnnotation(cmd = "sum", version = 1.0, scope = Constants.PUBLIC, description = "")
-    @Parameter(parameterName = "count", parameterType = "int")
+    @CmdAnnotation(cmd = "protocolVersionChange", version = 1.0, scope = Constants.PUBLIC, description = "")
+    @Parameter(parameterName = "chainId", parameterType = "int")
+    @Parameter(parameterName = "protocolVersion", parameterType = "short")
     public Response process(Map map) {
-
-        int count = Integer.parseInt(map.get("count").toString());
-        int sum = 0;
-        for (int i = 0; i < count; i++) {
-            sum += i;
-        }
-
-        Response response = success(sum);
-        return response;
+        int chainId = Integer.parseInt(map.get("chainId").toString());
+        short protocolVersion = Short.parseShort(map.get("protocolVersion").toString());
+        ProtocolGroupManager.updateProtocol(chainId, protocolVersion);
+        Log.info("protocolVersion change-" + protocolVersion);
+        return success();
     }
 
 }

@@ -38,6 +38,9 @@ import io.nuls.tools.log.logback.NulsLogger;
 public class LoggerUtil {
 
     //update by zlj:  common.log->block.log
+    /**
+     * 公共日志
+     */
     public static NulsLogger commonLog = LoggerBuilder.getLogger("block");
 
     public static void init(int chainId, String levelString) {

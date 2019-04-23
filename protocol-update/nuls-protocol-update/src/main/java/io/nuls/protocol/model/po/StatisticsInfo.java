@@ -122,4 +122,14 @@ public class StatisticsInfo extends BaseNulsData {
         }
     }
 
+    @Override
+    public String toString() {
+        return "StatisticsInfo{" +
+                "lastHeight=" + lastHeight +
+                ", height=" + height +
+                ", count=" + count +
+                ", protocolVersion=" + protocolVersion +
+                ", protocolVersionMap=" + protocolVersionMap +
+                '}';
+    }
 }

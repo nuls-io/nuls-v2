@@ -22,7 +22,7 @@
  * SOFTWARE.
  *
  */
-package io.nuls.base.constant;
+package io.nuls.tools.constant;
 
 /**
  * 交易状态枚举

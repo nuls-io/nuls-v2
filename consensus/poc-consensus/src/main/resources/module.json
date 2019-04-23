@@ -24,6 +24,6 @@
   "maxAgentCountOfAddress":"1",
   "encoding": "UTF-8",
   "mainChainCommissionRatio":60,
-  "seedNodes": "tNULSeBaMoGr2RkLZPfJeS5dFzZeNj1oXmaYNe",
+  "seedNodes": "tNULSeBaMkrt4z9FYEkkR9D6choPVvQr94oYZp,tNULSeBaMoGr2RkLZPfJeS5dFzZeNj1oXmaYNe",
   "password":"nuls123456"
 }

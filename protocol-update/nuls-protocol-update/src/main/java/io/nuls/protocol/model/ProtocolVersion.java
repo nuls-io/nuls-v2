@@ -101,4 +101,12 @@ public class ProtocolVersion extends BaseNulsData {
         this.continuousIntervalCount = byteBuffer.readShort();
     }
 
+    @Override
+    public String toString() {
+        return "ProtocolVersion{" +
+                "version=" + version +
+                ", effectiveRatio=" + effectiveRatio +
+                ", continuousIntervalCount=" + continuousIntervalCount +
+                '}';
+    }
 }

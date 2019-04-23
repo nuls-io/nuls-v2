@@ -1,6 +1,6 @@
 package io.nuls.api.provider.transaction.facade;
 
-import io.nuls.base.constant.TxStatusEnum;
+import io.nuls.tools.constant.TxStatusEnum;
 
 import java.util.List;
 

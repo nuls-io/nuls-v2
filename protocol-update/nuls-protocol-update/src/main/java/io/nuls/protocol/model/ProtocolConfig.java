@@ -27,6 +27,13 @@ import io.nuls.tools.core.annotation.Value;
 
 import java.io.File;
 
+/**
+ * 协议升级文件配置类
+ *
+ * @author captain
+ * @version 1.0
+ * @date 2019/4/23 11:01
+ */
 @Configuration(domain = "protocol")
 public class ProtocolConfig {
 
