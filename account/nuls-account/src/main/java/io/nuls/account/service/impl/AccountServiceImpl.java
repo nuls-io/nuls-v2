@@ -122,7 +122,7 @@ public class AccountServiceImpl implements AccountService, InitializingBean {
             if (result) {
                 //If saved successfully, put the account in local cache.
                 for (Account account : accounts) {
-                    accountCacheService.localAccountMaps.put(account.getAddress().getBase58(), account);
+                    accountCacheService.getLocalAccountMaps().put(account.getAddress().getBase58(), account);
                     //backup account to keystore
                     keyStoreService.backupAccountToKeyStore(null, chainId, account.getAddress().getBase58(), password);
                     //build event data
@@ -157,8 +157,8 @@ public class AccountServiceImpl implements AccountService, InitializingBean {
     public List<Account> getAccountList() {
         List<Account> list = new ArrayList<>();
         //If local account data is loaded into the cache
-        if (accountCacheService.localAccountMaps.size() > 0) {
-            Collection<Account> values = accountCacheService.localAccountMaps.values();
+        if (accountCacheService.getLocalAccountMaps().size() > 0) {
+            Collection<Account> values = accountCacheService.getLocalAccountMaps().values();
             Iterator<Account> iterator = values.iterator();
             while (iterator.hasNext()) {
                 list.add(iterator.next());
@@ -175,7 +175,7 @@ public class AccountServiceImpl implements AccountService, InitializingBean {
             }
             //put the account in local cache.
             for (Account account : list) {
-                accountCacheService.localAccountMaps.put(account.getAddress().getBase58(), account);
+                accountCacheService.getLocalAccountMaps().put(account.getAddress().getBase58(), account);
             }
         }
         //sort by createTime desc
@@ -203,11 +203,11 @@ public class AccountServiceImpl implements AccountService, InitializingBean {
             return null;
         }
         // If the account is not yet cached, all local accounts are queried and cached
-        if (accountCacheService.localAccountMaps == null || accountCacheService.localAccountMaps.size() == 0) {
+        if (accountCacheService.getLocalAccountMaps() == null || accountCacheService.getLocalAccountMaps().size() == 0) {
             getAccountList();
         }
-        if (accountCacheService.localAccountMaps != null) {
-            return accountCacheService.localAccountMaps.get(address);
+        if (accountCacheService.getLocalAccountMaps() != null) {
+            return accountCacheService.getLocalAccountMaps().get(address);
         }
         return null;
     }
@@ -299,7 +299,7 @@ public class AccountServiceImpl implements AccountService, InitializingBean {
             //save the account to the database
             boolean result = accountStorageService.updateAccount(po);
             //save the account to the cache
-            accountCacheService.localAccountMaps.put(account.getAddress().getBase58(), account);
+            accountCacheService.getLocalAccountMaps().put(account.getAddress().getBase58(), account);
             //backup account to keystore
             keyStoreService.backupAccountToKeyStore(null, chainId, account.getAddress().getBase58(), newPassword);
             //build event data
@@ -429,7 +429,7 @@ public class AccountServiceImpl implements AccountService, InitializingBean {
             //Delete the account from the database
             result = accountStorageService.removeAccount(account.getAddress());
             //Delete the account from the cache
-            accountCacheService.localAccountMaps.remove(account.getAddress().getBase58());
+            accountCacheService.getLocalAccountMaps().remove(account.getAddress().getBase58());
 
             //build event data
             HashMap<String, Object> eventData = new HashMap<>();
@@ -461,7 +461,7 @@ public class AccountServiceImpl implements AccountService, InitializingBean {
         account.setRemark(remark);
         boolean result = accountStorageService.updateAccount(new AccountPo(account));
         //save the account to the cache
-        accountCacheService.localAccountMaps.put(account.getAddress().getBase58(), account);
+        accountCacheService.getLocalAccountMaps().put(account.getAddress().getBase58(), account);
         return result;
     }
 
@@ -572,7 +572,7 @@ public class AccountServiceImpl implements AccountService, InitializingBean {
         //save account to storage
         accountStorageService.saveAccount(new AccountPo(account));
         //put the account in local cache
-        accountCacheService.localAccountMaps.put(account.getAddress().getBase58(), account);
+        accountCacheService.getLocalAccountMaps().put(account.getAddress().getBase58(), account);
         //backup account to keystore
         keyStoreService.backupAccountToKeyStore(null, chainId, account.getAddress().getBase58(), password);
         if(!ContractCall.invokeAccountContract(chainId, account.getAddress().getBase58())){
@@ -648,7 +648,7 @@ public class AccountServiceImpl implements AccountService, InitializingBean {
         //save account to storage
         accountStorageService.saveAccount(new AccountPo(account));
         //put the account in local cache
-        accountCacheService.localAccountMaps.put(account.getAddress().getBase58(), account);
+        accountCacheService.getLocalAccountMaps().put(account.getAddress().getBase58(), account);
         //backup account to keystore
         keyStoreService.backupAccountToKeyStore(null, chainId, account.getAddress().getBase58(), password);
 

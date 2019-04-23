@@ -26,6 +26,7 @@
 package io.nuls.account.model.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import io.nuls.account.util.LoggerUtil;
 
 import java.math.BigInteger;
 
@@ -120,9 +121,8 @@ public class CoinDto implements Cloneable {
         try {
             coinDto = (CoinDto)super.clone();
         } catch (CloneNotSupportedException e) {
-            e.printStackTrace();
+            LoggerUtil.logger.error("", e);
         }
-
         return coinDto;
     }
 }

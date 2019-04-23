@@ -129,7 +129,7 @@ public class AccountKeyStoreServiceImpl implements AccountKeyStoreService {
             try {
                 path = URLDecoder.decode(path, "UTF-8");
             } catch (UnsupportedEncodingException e) {
-                e.printStackTrace();
+                LoggerUtil.logger.error(e);
             }
         }
         File backupFile = DBUtils.loadDataPath(path);
