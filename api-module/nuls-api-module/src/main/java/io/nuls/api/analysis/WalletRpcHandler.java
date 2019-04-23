@@ -177,6 +177,7 @@ public class WalletRpcHandler {
         } catch (NulsException e) {
             return Result.getFailed(e.getErrorCode());
         } catch (Exception e) {
+            Log.error(e);
             return Result.getFailed(ApiErrorCode.DATA_PARSE_ERROR);
         }
     }

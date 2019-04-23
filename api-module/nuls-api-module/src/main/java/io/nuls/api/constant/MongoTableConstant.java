@@ -23,6 +23,8 @@ public interface MongoTableConstant {
     String TX_UNCONFIRM_RELATION_TABLE = "tx_unconfirm_relation_table_";
     //交易表
     String TX_TABLE = "tx_table_";
+    //交易表
+    String TX_UNCONFIRM_TABLE = "tx_UNCONFIRM_table_";
     //coinData记录
     String COINDATA_TABLE = "coin_data_table_";
     //红黄牌记录表
