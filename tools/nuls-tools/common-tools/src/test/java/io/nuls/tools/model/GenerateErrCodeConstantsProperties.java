@@ -7,7 +7,7 @@ import java.util.*;
 /**
  * @Author: zhoulijun
  * @Time: 2019-04-18 18:18
- * @Description: 功能描述
+ * @Description: 生成语言包文件列表
  */
 public class GenerateErrCodeConstantsProperties {
 

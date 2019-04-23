@@ -528,13 +528,12 @@ public class ContractUtil {
             if (StringUtils.isBlank(msg)) {
                 msg = errorCode.getMsg();
             }
+            Response res = MessageUtil.newFailResponse("",msg);
+            res.setResponseErrorCode(errorCode.getCode());
+            return res;
         } else {
-            errorCode = FAILED;
-            msg = errorCode.getMsg();
+            return MessageUtil.newFailResponse("",FAILED);
         }
-        Response response = MessageUtil.newResponse("", Constants.BOOLEAN_FALSE, msg);
-        response.setResponseData(errorCode);
-        return response;
     }
 
     public static void configLog(String filePath, String fileName, Level fileLevel, Level consoleLevel, String systemLogLevel, String packageLogPackages, String packageLogLevels) {
