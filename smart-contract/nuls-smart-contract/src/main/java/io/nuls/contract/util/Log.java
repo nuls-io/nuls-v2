@@ -2,6 +2,7 @@ package io.nuls.contract.util;
 
 import ch.qos.logback.classic.Level;
 import com.alibaba.fastjson.JSONObject;
+import io.nuls.contract.constant.ContractConstant;
 import io.nuls.tools.io.IoUtils;
 import io.nuls.tools.log.logback.NulsLogger;
 import org.apache.commons.io.IOUtils;
@@ -194,11 +195,11 @@ public class Log {
                 configInput = Log.class.getClassLoader().getResourceAsStream(MODULE_CONFIG_FILE);
                 String str = IoUtils.readBytesToString(configInput);
                 JSONObject json = JSONObject.parseObject(str);
-                ContractUtil.configLog(json.getString("logFilePath"), json.getString("logFileName"),
+                ContractUtil.configDefaultLog(ContractConstant.LOG_FILE_FOLDER, ContractConstant.LOG_FILE_NAME,
                         Level.toLevel(json.getString("logFileLevel")), Level.toLevel(json.getString("logConsoleLevel")),
                         json.getString("systemLogLevel"), json.getString("packageLogPackages"), json.getString("packageLogLevels"));
             } catch (Exception e) {
-                ContractUtil.configLog("./contract", "contract", Level.INFO, Level.INFO);
+                ContractUtil.configDefaultLog("./contract", "contract", Level.INFO, Level.INFO);
             } finally {
                 IOUtils.closeQuietly(configInput);
             }

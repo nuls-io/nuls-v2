@@ -536,7 +536,7 @@ public class ContractUtil {
         }
     }
 
-    public static void configLog(String filePath, String fileName, Level fileLevel, Level consoleLevel, String systemLogLevel, String packageLogPackages, String packageLogLevels) {
+    public static void configDefaultLog(String folderName, String fileName, Level fileLevel, Level consoleLevel, String systemLogLevel, String packageLogPackages, String packageLogLevels) {
         int rootLevelInt = Math.min(fileLevel.toInt(), consoleLevel.toInt());
 
         LoggerContext context = (LoggerContext) LoggerFactory.getILoggerFactory();
@@ -544,7 +544,7 @@ public class ContractUtil {
         logger.setAdditive(false);
         logger.setLevel(Level.toLevel(rootLevelInt));
 
-        Log.DEFAULT_BASIC_LOGGER = LoggerBuilder.getLogger(filePath, fileName, fileLevel, consoleLevel);
+        Log.DEFAULT_BASIC_LOGGER = LoggerBuilder.getLogger(folderName, fileName, fileLevel, consoleLevel);
         Log.DEFAULT_BASIC_LOGGER.addBasicPath(Log.class.getName());
 
         if (StringUtils.isNotBlank(systemLogLevel)) {
@@ -574,13 +574,12 @@ public class ContractUtil {
         }
     }
 
-    public static void configChainLog(Integer chainId, String filePath, String fileName, Level fileLevel, Level consoleLevel) {
-        filePath = "." + File.separator + "chain-" + chainId + File.separator + filePath;
-        Log.DEFAULT_BASIC_LOGGER = LoggerBuilder.getLogger(filePath, fileName, fileLevel, consoleLevel);
-        Log.DEFAULT_BASIC_LOGGER.addBasicPath(Log.class.getName());
+    public static void configChainLog(Integer chainId, String folderName, String fileName, Level fileLevel, Level consoleLevel) {
+        folderName = "chain-" + chainId + File.separator + folderName;
+        Log.BASIC_LOGGER_MAP.put(chainId, LoggerBuilder.getLogger(folderName, fileName, fileLevel, consoleLevel));
     }
 
-    public static void configLog(String filePath, String fileName, Level fileLevel, Level consoleLevel) {
-        configLog(filePath, fileName, fileLevel, consoleLevel, null, null, null);
+    public static void configDefaultLog(String folderName, String fileName, Level fileLevel, Level consoleLevel) {
+        configDefaultLog(folderName, fileName, fileLevel, consoleLevel, null, null, null);
     }
 }

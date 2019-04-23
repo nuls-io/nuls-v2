@@ -26,6 +26,7 @@ package io.nuls.contract.manager;
 
 import ch.qos.logback.classic.Level;
 import io.nuls.contract.config.ContractConfig;
+import io.nuls.contract.constant.ContractConstant;
 import io.nuls.contract.constant.ContractDBConstant;
 import io.nuls.contract.model.bo.Chain;
 import io.nuls.contract.model.bo.config.ConfigBean;
@@ -134,7 +135,7 @@ public class ChainManager {
     private void initContractChainLog(int chainId) {
         Level fileLevel = Level.toLevel(contractConfig.getLogFileLevel());
         Level consoleLevel = Level.toLevel(contractConfig.getLogConsoleLevel());
-        ContractUtil.configChainLog(chainId, contractConfig.getLogFilePath(), contractConfig.getLogFileName(), fileLevel, consoleLevel);
+        ContractUtil.configChainLog(chainId, ContractConstant.LOG_FILE_FOLDER, ContractConstant.LOG_FILE_NAME, fileLevel, consoleLevel);
     }
 
     public static boolean registerTx(Chain chain) throws NulsException {

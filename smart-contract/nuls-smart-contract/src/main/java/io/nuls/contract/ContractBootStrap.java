@@ -69,7 +69,7 @@ public class ContractBootStrap extends RpcModule {
     public void init() {
         try {
             super.init();
-            initContractLog();
+            initContractDefaultLog();
             initNulsConfig();
             initDB();
             initNRC20Standard();
@@ -101,10 +101,11 @@ public class ContractBootStrap extends RpcModule {
     /**
      * 初始化模块日志
      */
-    private void initContractLog() {
+    private void initContractDefaultLog() {
         Level fileLevel = Level.toLevel(contractConfig.getLogFileLevel());
         Level consoleLevel = Level.toLevel(contractConfig.getLogConsoleLevel());
-        ContractUtil.configLog(contractConfig.getLogFilePath(), contractConfig.getLogFileName(), fileLevel, consoleLevel, contractConfig.getSystemLogLevel(), contractConfig.getPackageLogPackages(), contractConfig.getPackageLogLevels());
+        ContractUtil.configDefaultLog(ContractConstant.LOG_FILE_FOLDER, ContractConstant.LOG_FILE_NAME, fileLevel, consoleLevel, contractConfig.getSystemLogLevel(), contractConfig.getPackageLogPackages(), contractConfig.getPackageLogLevels());
+
     }
 
     /**
