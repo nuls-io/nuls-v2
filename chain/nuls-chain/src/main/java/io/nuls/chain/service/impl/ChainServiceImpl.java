@@ -62,7 +62,6 @@ public class ChainServiceImpl implements ChainService {
         asset.setAssetId(assetId);
         asset.setInitNumber(new BigInteger(nulsChainConfig.getNulsAssetInitNumberMax()));
         asset.setSymbol(nulsChainConfig.getNulsAssetSymbol());
-        asset.addChainId(chainId);
         assetService.createAsset(asset);
     }
 
@@ -141,7 +140,6 @@ public class ChainServiceImpl implements ChainService {
         1. 插入资产表
         2. 插入资产流通表
          */
-        asset.addChainId(asset.getChainId());
         assetService.createAsset(asset);
 
         /*

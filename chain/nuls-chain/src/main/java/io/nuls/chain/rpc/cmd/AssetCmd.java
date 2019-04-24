@@ -16,6 +16,7 @@ import io.nuls.chain.service.AssetService;
 import io.nuls.chain.service.ChainService;
 import io.nuls.chain.rpc.call.RpcService;
 import io.nuls.chain.util.LoggerUtil;
+import io.nuls.chain.util.TimeUtil;
 import io.nuls.rpc.model.CmdAnnotation;
 import io.nuls.rpc.model.Parameter;
 import io.nuls.rpc.model.message.Response;
@@ -84,15 +85,15 @@ public class AssetCmd extends BaseChainCmd {
             }
             /* 组装交易发送 (Send transaction) */
             Transaction tx = new AddAssetToChainTransaction();
-
             tx.setTxData(asset.parseToTransaction());
+            tx.setTime(TimeUtil.getCurrentTime());
             AccountBalance accountBalance = rpcService.getCoinData(String.valueOf(params.get("address")));
             CoinData coinData = this.getRegCoinData(asset.getAddress(), CmRuntimeInfo.getMainIntChainId(),
                     CmRuntimeInfo.getMainIntAssetId(), String.valueOf(asset.getDepositNuls()), tx.size(), accountBalance, nulsChainConfig.getAssetDepositNulsLockRate());
             tx.setCoinData(coinData.serialize());
 
             /* 判断签名是否正确 (Determine if the signature is correct) */
-            rpcService.transactionSignature(asset.getChainId(), (String) params.get("address"), (String) params.get("password"), tx);
+            rpcService.transactionSignature( CmRuntimeInfo.getMainIntChainId(), (String) params.get("address"), (String) params.get("password"), tx);
             /* 发送到交易模块 (Send to transaction module) */
             return rpcService.newTx(tx) ? success("Sent asset transaction success") : failed("Sent asset transaction failed");
         } catch (Exception e) {

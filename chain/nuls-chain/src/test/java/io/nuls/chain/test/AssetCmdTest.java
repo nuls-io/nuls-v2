@@ -1,10 +1,18 @@
 package io.nuls.chain.test;
 
 import io.nuls.chain.model.po.Asset;
+import io.nuls.rpc.info.NoUse;
+import io.nuls.rpc.model.ModuleE;
+import io.nuls.rpc.model.message.Response;
+import io.nuls.rpc.netty.processor.ResponseMessageProcessor;
+import io.nuls.tools.parse.JSONUtils;
+import org.junit.Before;
 import org.junit.Test;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * @author tangyi
@@ -12,7 +20,10 @@ import java.math.BigInteger;
  * @description
  */
 public class AssetCmdTest {
-
+    @Before
+    public void init() throws Exception {
+        NoUse.mockModule();
+    }
     @Test
     public void a() throws Exception{
         BigInteger a=new BigInteger("1000");
@@ -22,17 +33,27 @@ public class AssetCmdTest {
     }
 
     @Test
-    public void asset() throws Exception {
-//        System.out.println(CmdDispatcher.call("asset", new Object[]{1542092573248L}));
-//        System.out.println(CmdDispatcher.call("asset", new Object[]{1542092632850L}));
+    public void getAsset() throws Exception {
+        Map<String,Object> parameters = new HashMap<>();
+        parameters.put("chainId",100);
+        parameters.put("assetId",2);
+        Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.CM.abbr, "cm_asset", parameters);
+        System.out.println(JSONUtils.obj2json(response));
     }
 
     @Test
     public void assetReg() throws Exception {
-//        System.out.println(
-//                CmdDispatcher.call(
-//                        "assetReg",
-//                        new Object[]{(short) 867, "G", "Gold", 200000, 21000000, 8, true}));
+        Map<String,Object> parameters = new HashMap<>();
+        parameters.put("chainId",100);
+        parameters.put("address","tNULSeBaMoodYW7AqyJrgYdWiJ6nfwfVHHHyXm");
+        parameters.put("assetId",2);
+        parameters.put("symbol","ns2");
+        parameters.put("assetName","nulson2");
+        parameters.put("initNumber",2000000000);
+        parameters.put("decimalPlaces",8);
+        parameters.put("password","nuls123456");
+        Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.CM.abbr, "cm_assetReg", parameters);
+        System.out.println(JSONUtils.obj2json(response));
     }
 
     @Test
