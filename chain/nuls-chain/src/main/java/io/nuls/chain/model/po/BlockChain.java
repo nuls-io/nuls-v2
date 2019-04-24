@@ -1,15 +1,19 @@
 package io.nuls.chain.model.po;
 
+import io.nuls.base.basic.AddressTool;
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.basic.NulsOutputStreamBuffer;
 import io.nuls.base.data.BaseNulsData;
 import io.nuls.chain.model.tx.txdata.TxChain;
+import io.nuls.chain.util.TimeUtil;
+import io.nuls.rpc.util.TimeUtils;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.parse.SerializeUtils;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author tangyi
@@ -438,5 +442,17 @@ public class BlockChain extends BaseNulsData {
 
     public void setTotalAssetKeyList(List<String> totalAssetKeyList) {
         this.totalAssetKeyList = totalAssetKeyList;
+    }
+
+    public void map2pojo(Map<String,Object> map){
+        this.setAddressType(String.valueOf(map.get("addressType")));
+        this.setChainId(Integer.valueOf(map.get("chainId").toString()));
+        this.setChainName(String.valueOf(map.get("chainName")));
+        this.setMagicNumber(Long.valueOf(map.get("magicNumber").toString()));
+        this.setMinAvailableNodeNum(Integer.valueOf(map.get("minAvailableNodeNum").toString()));
+        this.setSingleNodeMinConnectionNum(Integer.valueOf(map.get("singleNodeMinConnectionNum").toString()));
+        this.setTxConfirmedBlockNum(Integer.valueOf(map.get("txConfirmedBlockNum").toString()));
+        this.setRegAddress(AddressTool.getAddress(map.get("address").toString()));
+        this.setCreateTime(TimeUtil.getCurrentTime());
     }
 }

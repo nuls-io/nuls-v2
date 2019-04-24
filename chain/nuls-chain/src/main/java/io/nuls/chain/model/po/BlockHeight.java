@@ -78,7 +78,7 @@ public class BlockHeight extends BaseNulsData {
         size += SerializeUtils.sizeOfBoolean();
         size += SerializeUtils.sizeOfUint32();
         size += SerializeUtils.sizeOfUint16();
-        size += (size * SerializeUtils.sizeOfUint32());
+        size += (bakHeighList.size() * SerializeUtils.sizeOfUint32());
         return size;
     }
 

@@ -30,6 +30,10 @@ package io.nuls.chain.info;
  * @date 2019/01/19
  **/
 public interface RpcConstants {
+
+
+    /*CALL cmd 获取网络时间*/
+    String CMD_NW_GET_TIME_CALL = "nw_currentTimeMillis";
     /**
      * --------[call Transaction module RPC constants] -------
      */
@@ -103,7 +107,7 @@ public interface RpcConstants {
     /**
      * 交易数据HEX编码
      */
-    String TX_DATA_HEX = "txHex";
+    String TX_DATA_HEX = "tx";
     /**
      * 交易所属链ID
      */
@@ -124,7 +128,7 @@ public interface RpcConstants {
     /**
      * 账本获取数据
      */
-    public static final String CMD_LG_GET_COINDATA = "getCoinData";
+    public static final String CMD_LG_GET_COINDATA = "getBalanceNonce";
 
     /**
      * 账户信息校验部分

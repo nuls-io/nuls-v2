@@ -182,7 +182,8 @@ public class RpcServiceImpl implements RpcService {
             map.put("chainId", CmRuntimeInfo.getMainIntChainId());
             map.put("assetChainId", CmRuntimeInfo.getMainIntChainId());
             map.put("assetId", CmRuntimeInfo.getMainIntAssetId());
-            Response response = ResponseMessageProcessor.requestAndResponse(CmConstants.MODULE_ROLE, RpcConstants.CMD_LG_GET_COINDATA, map);
+            map.put("address",address);
+            Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.LG.abbr, RpcConstants.CMD_LG_GET_COINDATA, map);
             Map resultMap = ResponseUtil.getResultMap(response, RpcConstants.CMD_LG_GET_COINDATA);
             if (null != resultMap) {
                 String available = resultMap.get("available").toString();
@@ -264,5 +265,24 @@ public class RpcServiceImpl implements RpcService {
         } catch (Exception e) {
             throw new NulsException(e);
         }
+    }
+    @Override
+    public long getTime() {
+        long time = 0;
+        Map<String, Object> map = new HashMap<>(1);
+        try {
+            Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.NW.abbr, RpcConstants.CMD_NW_GET_TIME_CALL, map, 100);
+            if (null != response && response.isSuccess()) {
+                Map responseData = (Map) response.getResponseData();
+                time = Long.valueOf(((Map) responseData.get(RpcConstants.CMD_NW_GET_TIME_CALL)).get("currentTimeMillis").toString());
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            if (time == 0) {
+                time = System.currentTimeMillis();
+            }
+        }
+        return time;
     }
 }

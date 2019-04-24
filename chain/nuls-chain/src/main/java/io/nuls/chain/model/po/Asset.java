@@ -1,10 +1,12 @@
 package io.nuls.chain.model.po;
 
+import io.nuls.base.basic.AddressTool;
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.basic.NulsOutputStreamBuffer;
 import io.nuls.base.data.BaseNulsData;
 import io.nuls.chain.model.tx.txdata.TxAsset;
 import io.nuls.chain.model.tx.txdata.TxChain;
+import io.nuls.chain.util.TimeUtil;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.parse.SerializeUtils;
 
@@ -12,6 +14,7 @@ import java.io.IOException;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author tangyi
@@ -269,5 +272,16 @@ public class Asset extends BaseNulsData {
 
     public void setChainIds(List<Integer> chainIds) {
         this.chainIds = chainIds;
+    }
+
+    public void map2pojo(Map<String,Object> map){
+        this.setChainId(Integer.valueOf(map.get("chainId").toString()));
+        this.setAssetId(Integer.valueOf(map.get("assetId").toString()));
+        this.setSymbol(String.valueOf(map.get("symbol")));
+        this.setAssetName(String.valueOf(map.get("assetName")));
+        this.setInitNumber(new BigInteger(String.valueOf(map.get("initNumber"))));
+        this.setDecimalPlaces(Short.valueOf(map.get("decimalPlaces").toString()));
+        this.setCreateTime(TimeUtil.getCurrentTime());
+        this.setAddress(AddressTool.getAddress(map.get("address").toString()));
     }
 }
