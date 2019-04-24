@@ -23,9 +23,6 @@
  */
 package io.nuls.contract.util;
 
-import ch.qos.logback.classic.Level;
-import ch.qos.logback.classic.Logger;
-import ch.qos.logback.classic.LoggerContext;
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.Address;
 import io.nuls.base.data.BlockHeader;
@@ -43,7 +40,6 @@ import io.nuls.contract.model.txdata.CreateContractData;
 import io.nuls.contract.model.txdata.DeleteContractData;
 import io.nuls.contract.rpc.call.BlockCall;
 import io.nuls.db.service.RocksDBService;
-import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.model.message.MessageUtil;
 import io.nuls.rpc.model.message.Response;
 import io.nuls.tools.basic.Result;
@@ -51,10 +47,8 @@ import io.nuls.tools.basic.VarInt;
 import io.nuls.tools.constant.ErrorCode;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.exception.NulsRuntimeException;
-import io.nuls.tools.log.logback.LoggerBuilder;
 import io.nuls.tools.model.StringUtils;
 import io.nuls.tools.parse.JSONUtils;
-import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Array;
 import java.math.BigInteger;
@@ -532,49 +526,8 @@ public class ContractUtil {
             res.setResponseErrorCode(errorCode.getCode());
             return res;
         } else {
-            return MessageUtil.newFailResponse("",FAILED);
+            return MessageUtil.newFailResponse("", FAILED);
         }
     }
 
-    public static void configLog(String filePath, String fileName, Level fileLevel, Level consoleLevel, String systemLogLevel, String packageLogPackages, String packageLogLevels) {
-        int rootLevelInt = Math.min(fileLevel.toInt(), consoleLevel.toInt());
-
-        LoggerContext context = (LoggerContext) LoggerFactory.getILoggerFactory();
-        Logger logger = context.getLogger(Logger.ROOT_LOGGER_NAME);
-        logger.setAdditive(false);
-        logger.setLevel(Level.toLevel(rootLevelInt));
-
-        Log.BASIC_LOGGER = LoggerBuilder.getLogger(filePath, fileName, fileLevel, consoleLevel);
-        Log.BASIC_LOGGER.addBasicPath(Log.class.getName());
-
-        if (StringUtils.isNotBlank(systemLogLevel)) {
-            String systemLogName = io.nuls.tools.log.Log.BASIC_LOGGER.getLogger().getName();
-            Logger systemLogger = context.getLogger(systemLogName);
-            systemLogger.setAdditive(false);
-            systemLogger.setLevel(Level.toLevel(systemLogLevel));
-        }
-        if (StringUtils.isNotBlank(packageLogPackages) && StringUtils.isNotBlank(packageLogLevels)) {
-            String[] packages = packageLogPackages.split(",");
-            String[] levels = packageLogLevels.split(",");
-            int levelsLength = levels.length;
-            String packagePath;
-            String logLevel;
-            Logger packageLogger;
-            for (int i = 0, length = packages.length; i < length; i++) {
-                packagePath = packages[i];
-                if(i >= levelsLength) {
-                    logLevel = "INFO";
-                } else {
-                    logLevel = levels[i];
-                }
-                packageLogger = context.getLogger(packagePath);
-                packageLogger.setAdditive(false);
-                packageLogger.setLevel(Level.toLevel(logLevel));
-            }
-        }
-    }
-
-    public static void configLog(String filePath, String fileName, Level fileLevel, Level consoleLevel) {
-        configLog(filePath, fileName, fileLevel, consoleLevel, null, null, null);
-    }
 }

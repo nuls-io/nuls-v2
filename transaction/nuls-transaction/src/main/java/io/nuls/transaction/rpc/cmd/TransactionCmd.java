@@ -26,7 +26,6 @@ import io.nuls.transaction.model.bo.VerifyLedgerResult;
 import io.nuls.transaction.model.dto.ModuleTxRegisterDTO;
 import io.nuls.transaction.model.dto.TxRegisterDTO;
 import io.nuls.transaction.model.po.TransactionConfirmedPO;
-import io.nuls.transaction.rpc.call.LedgerCall;
 import io.nuls.transaction.rpc.call.NetworkCall;
 import io.nuls.transaction.service.ConfirmedTxService;
 import io.nuls.transaction.service.TxService;
@@ -213,15 +212,7 @@ public class TransactionCmd extends BaseCmd {
             String txStr = (String) params.get("tx");
             //将txStr转换为Transaction对象
             Transaction tx = TxUtil.getInstanceRpcStr(txStr, Transaction.class);
-            //将交易放入待验证本地交易队列中
-            VerifyLedgerResult verifyLedgerResult = LedgerCall.commitUnconfirmedTx(chain, RPCUtil.encode(tx.serialize()));
             Map<String, Boolean> map = new HashMap<>(TxConstant.INIT_CAPACITY_2);
-            if (!verifyLedgerResult.success()) {
-                chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug(
-                        "coinData not success - code: {}, - reason:{}, type:{} - txhash:{}",
-                        verifyLedgerResult.getCode(), verifyLedgerResult.getDesc(), tx.getType(), tx.getHash().getDigestHex());
-                map.put("value", false);
-            }
             if (chain.getPackaging().get()) {
                 packablePool.add(chain, tx);
                 System.out.println("********* " + packablePool.getPoolSize(chain));

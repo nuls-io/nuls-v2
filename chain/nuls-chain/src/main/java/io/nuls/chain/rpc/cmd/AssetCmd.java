@@ -67,7 +67,7 @@ public class AssetCmd extends BaseChainCmd {
     @Parameter(parameterName = "chainId", parameterType = "int", parameterValidRange = "[1,65535]")
     @Parameter(parameterName = "assetId", parameterType = "int", parameterValidRange = "[1,65535]")
     @Parameter(parameterName = "symbol", parameterType = "array")
-    @Parameter(parameterName = "name", parameterType = "String")
+    @Parameter(parameterName = "assetName", parameterType = "String")
     @Parameter(parameterName = "initNumber", parameterType = "String")
     @Parameter(parameterName = "decimalPlaces", parameterType = "short", parameterValidRange = "[1,128]")
     @Parameter(parameterName = "address", parameterType = "String")
@@ -75,11 +75,10 @@ public class AssetCmd extends BaseChainCmd {
     public Response assetReg(Map params) {
         try {
             /* 组装Asset (Asset object) */
-            Asset asset = JSONUtils.map2pojo(params, Asset.class);
-            asset.setAddress(AddressTool.getAddress(String.valueOf(params.get("address"))));
+            Asset asset = new Asset();
+            asset.map2pojo(params);
             asset.setDepositNuls(Integer.valueOf(nulsChainConfig.getAssetDepositNuls()));
             asset.setAvailable(true);
-            asset.setCreateTime(TimeUtils.getCurrentTimeMillis());
             if (assetService.assetExist(asset)) {
                 return failed(CmErrorCode.ERROR_ASSET_ID_EXIST);
             }
@@ -88,8 +87,8 @@ public class AssetCmd extends BaseChainCmd {
 
             tx.setTxData(asset.parseToTransaction());
             AccountBalance accountBalance = rpcService.getCoinData(String.valueOf(params.get("address")));
-            CoinData coinData = this.getRegCoinData(asset.getAddress(), asset.getChainId(),
-                    asset.getAssetId(), String.valueOf(asset.getDepositNuls()), tx.size(), accountBalance, nulsChainConfig.getAssetDepositNulsLockRate());
+            CoinData coinData = this.getRegCoinData(asset.getAddress(), CmRuntimeInfo.getMainIntChainId(),
+                    CmRuntimeInfo.getMainIntAssetId(), String.valueOf(asset.getDepositNuls()), tx.size(), accountBalance, nulsChainConfig.getAssetDepositNulsLockRate());
             tx.setCoinData(coinData.serialize());
 
             /* 判断签名是否正确 (Determine if the signature is correct) */

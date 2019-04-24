@@ -45,8 +45,6 @@ public class ContractConfig {
     /**
      * 模块日志配置信息
      */
-    private String logFilePath;
-    private String logFileName;
     private String logFileLevel;
     private String logConsoleLevel;
 
@@ -109,22 +107,6 @@ public class ContractConfig {
 
     public void setKernelUrl(String kernelUrl) {
         this.kernelUrl = kernelUrl;
-    }
-
-    public String getLogFilePath() {
-        return logFilePath;
-    }
-
-    public void setLogFilePath(String logFilePath) {
-        this.logFilePath = logFilePath;
-    }
-
-    public String getLogFileName() {
-        return logFileName;
-    }
-
-    public void setLogFileName(String logFileName) {
-        this.logFileName = logFileName;
     }
 
     public String getLogFileLevel() {

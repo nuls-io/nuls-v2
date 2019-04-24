@@ -769,7 +769,7 @@ public class TxServiceImpl implements TxService {
                 continue;
             }
 
-            /**冲突检测有不通过的, 执行清除和未确认回滚 从packingTxList删除, 放弃分组?*/
+            /**冲突检测有不通过的, 执行清除和未确认回滚 从packingTxList删除*/
             for (int i = 0; i < txHashList.size(); i++) {
                 String hash = txHashList.get(i);
                 Iterator<TxWrapper> its = packingTxList.iterator();

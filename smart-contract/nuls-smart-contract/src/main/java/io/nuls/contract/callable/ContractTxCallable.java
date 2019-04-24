@@ -27,6 +27,7 @@ import io.nuls.base.basic.AddressTool;
 import io.nuls.contract.helper.ContractConflictChecker;
 import io.nuls.contract.helper.ContractHelper;
 import io.nuls.contract.helper.ContractTransferHandler;
+import io.nuls.contract.manager.ChainManager;
 import io.nuls.contract.manager.ContractTempBalanceManager;
 import io.nuls.contract.model.bo.CallableResult;
 import io.nuls.contract.model.bo.ContractContainer;
@@ -90,6 +91,7 @@ public class ContractTxCallable implements Callable<ContractResult> {
 
     @Override
     public ContractResult call() throws Exception {
+        ChainManager.chainHandle(chainId);
         long start = 0L;
         if (Log.isDebugEnabled()) {
             start = System.currentTimeMillis();

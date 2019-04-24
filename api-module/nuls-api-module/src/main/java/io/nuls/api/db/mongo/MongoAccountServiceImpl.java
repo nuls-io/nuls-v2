@@ -73,7 +73,7 @@ public class MongoAccountServiceImpl implements AccountService {
     }
 
     public PageInfo<TxRelationInfo> getAccountTxs(int chainId, String address, int pageIndex, int pageSize, int type, boolean isMark) {
-        Bson filter = null;
+        Bson filter;
         Bson addressFilter = Filters.eq("address", address);
 
         if (type == 0 && isMark) {
