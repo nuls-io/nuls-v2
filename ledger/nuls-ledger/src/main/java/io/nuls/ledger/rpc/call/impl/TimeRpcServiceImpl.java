@@ -48,7 +48,7 @@ public class TimeRpcServiceImpl implements TimeRpcService {
         long time = 0;
         Map<String, Object> map = new HashMap<>(1);
         try {
-            Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.NW.abbr, CmdConstant.CMD_NW_GET_TIME_CALL, map, 100);
+            Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.NW.abbr, CmdConstant.CMD_NW_GET_TIME_CALL, map, 50);
             if (null != response && response.isSuccess()) {
                 Map responseData = (Map) response.getResponseData();
                 time = Long.valueOf(((Map) responseData.get(CmdConstant.CMD_NW_GET_TIME_CALL)).get("currentTimeMillis").toString());

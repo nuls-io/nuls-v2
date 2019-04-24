@@ -49,7 +49,7 @@ import java.util.Map;
  */
 @Service
 public class AccountStateServiceImpl implements AccountStateService {
-    
+
     @Autowired
     private Repository repository;
     @Autowired
@@ -64,7 +64,7 @@ public class AccountStateServiceImpl implements AccountStateService {
     @Override
     public void rollAccountState(String assetKey, AccountStateSnapshot accountStateSnapshot) throws Exception {
         //获取当前数据库值
-        Map<String,TxUnconfirmed> unconfirmedNonces = new HashMap<>(64);
+        Map<String, TxUnconfirmed> unconfirmedNonces = new HashMap<>(64);
         AccountState accountState = accountStateSnapshot.getAccountState();
         AccountStateUnconfirmed accountStateUnconfirmed = new AccountStateUnconfirmed();
         List<AmountNonce> list = accountStateSnapshot.getNonces();
@@ -137,8 +137,10 @@ public class AccountStateServiceImpl implements AccountStateService {
             accountState = new AccountState(address, addressChainId, assetChainId, assetId, LedgerConstant.INIT_NONCE_BYTE);
         } else {
             //解冻时间高度锁
-            freezeStateService.recalculateFreeze(accountState);
-            accountState.setLatestUnFreezeTime(TimeUtil.getCurrentTime());
+            if (accountState.timeAllow()) {
+                freezeStateService.recalculateFreeze(accountState);
+                accountState.setLatestUnFreezeTime(TimeUtil.getCurrentTime());
+            }
         }
         return accountState;
     }
