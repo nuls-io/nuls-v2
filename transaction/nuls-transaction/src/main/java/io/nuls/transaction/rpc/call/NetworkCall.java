@@ -23,15 +23,15 @@ import io.nuls.base.data.NulsDigestData;
 import io.nuls.base.data.Transaction;
 import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.model.ModuleE;
-import io.nuls.rpc.model.message.Response;
-import io.nuls.rpc.netty.processor.ResponseMessageProcessor;
 import io.nuls.rpc.util.RPCUtil;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.transaction.constant.TxConstant;
-import io.nuls.transaction.message.ForwardTxMessage;
+import io.nuls.transaction.constant.TxErrorCode;
 import io.nuls.transaction.message.BroadcastTxMessage;
+import io.nuls.transaction.message.ForwardTxMessage;
 import io.nuls.transaction.message.base.BaseMessage;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -74,15 +74,14 @@ public class NetworkCall {
             params.put("excludeNodes", excludeNodes);
             params.put("messageBody", RPCUtil.encode(message.serialize()));
             params.put("command", message.getCommand());
-            Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.NW.abbr, "nw_broadcast", params);
-            if(!response.isSuccess()){
-                LOG.error("Calling nw_broadcast failed response:{}", response);
-                return false;
-            }
+            TransactionCall.request(ModuleE.NW.abbr, "nw_broadcast", params);
             return true;
-        } catch (Exception e) {
-            LOG.error("Calling remote interface failed. module:{} - interface:{}", ModuleE.NW.abbr, "nw_broadcast");
-            throw new NulsException(e);
+        } catch (IOException e) {
+            LOG.error(e);
+            throw new NulsException(TxErrorCode.SERIALIZE_ERROR);
+        } catch (RuntimeException e) {
+            LOG.error(e);
+            throw new NulsException(TxErrorCode.SYS_UNKOWN_EXCEPTION);
         }
     }
 
@@ -102,16 +101,14 @@ public class NetworkCall {
             params.put("nodes", nodeId);
             params.put("messageBody", RPCUtil.encode(message.serialize()));
             params.put("command", message.getCommand());
-
-            Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.NW.abbr, "nw_sendPeersMsg", params);
-            if(!response.isSuccess()){
-                LOG.error("Calling nw_sendPeersMsg failed response:{}", response);
-                return false;
-            }
+            TransactionCall.request(ModuleE.NW.abbr, "nw_sendPeersMsg", params);
             return true;
-        } catch (Exception e) {
-            LOG.error("Calling remote interface failed. module:{} - interface:{}", ModuleE.NW.abbr, "nw_sendPeersMsg");
-            throw new NulsException(e);
+        } catch (IOException e) {
+            LOG.error(e);
+            throw new NulsException(TxErrorCode.SERIALIZE_ERROR);
+        } catch (RuntimeException e){
+            LOG.error(e);
+            throw new NulsException(TxErrorCode.SYS_UNKOWN_EXCEPTION);
         }
     }
 
@@ -123,27 +120,24 @@ public class NetworkCall {
      */
     public static boolean registerProtocol() throws NulsException {
         try {
-            Map<String, Object> map = new HashMap<>(TxConstant.INIT_CAPACITY_8);
+            Map<String, Object> params = new HashMap<>(TxConstant.INIT_CAPACITY_4);
             List<Map<String, String>> cmds = new ArrayList<>();
-            map.put("role", ModuleE.TX.abbr);
+            params.put("role", ModuleE.TX.abbr);
             //模块启动时向网络模块注册网络协议处理器
             List<String> list = List.of(NW_NEW_HASH, NW_ASK_TX, NW_RECEIVE_TX);
             for (String s : list) {
-                Map<String, String> cmd = new HashMap<>();
+                Map<String, String> cmd = new HashMap<>(TxConstant.INIT_CAPACITY_4);
                 cmd.put("protocolCmd", s);
                 cmd.put("handler", s);
                 cmds.add(cmd);
             }
-            map.put("protocolCmds", cmds);
-            Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.NW.abbr, "nw_protocolRegister", map);
-            if(!cmdResp.isSuccess())
-            {
-                LOG.error("Calling remote interface failed. module:{} - interface:{} -reason:{}", ModuleE.NW.abbr, "nw_protocolRegister",cmdResp.getResponseComment());
-            }
-            return cmdResp.isSuccess();
-        } catch (Exception e) {
-            LOG.error("Calling remote interface failed. module:{} - interface:{}", ModuleE.NW.abbr, "nw_protocolRegister");
-            throw new NulsException(e);
+            params.put("protocolCmds", cmds);
+
+            TransactionCall.request(ModuleE.NW.abbr, "nw_protocolRegister", params);
+            return true;
+        } catch (RuntimeException e){
+            LOG.error(e);
+            throw new NulsException(TxErrorCode.SYS_UNKOWN_EXCEPTION);
         }
     }
 

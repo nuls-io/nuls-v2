@@ -202,7 +202,7 @@ public class TxServiceImpl implements TxService {
      * @return
      */
     @Override
-    public VerifyResult verify(Chain chain, Transaction tx) {
+    public VerifyResult verify(Chain chain, Transaction tx){
         return verify(chain, tx, true);
     }
 
@@ -218,11 +218,13 @@ public class TxServiceImpl implements TxService {
             }else{
               return VerifyResult.fail(TxErrorCode.SYS_UNKOWN_EXCEPTION);
             }
+        } catch (IOException e) {
+            return VerifyResult.fail(TxErrorCode.SERIALIZE_ERROR);
         } catch (NulsException e) {
             chain.getLoggerMap().get(TxConstant.LOG_TX).error("tx type: " + tx.getType(), e);
             return VerifyResult.fail(e.getErrorCode());
-        } catch (IOException e) {
-            return VerifyResult.fail(TxErrorCode.SERIALIZE_ERROR);
+        } catch (Exception e) {
+            return VerifyResult.fail(TxErrorCode.SYS_UNKOWN_EXCEPTION);
         }
     }
 
