@@ -59,7 +59,7 @@ public class TransactionController {
         }
         Result<TransactionInfo> result = WalletRpcHandler.getTx(chainId, hash);
         if (result == null) {
-
+            return RpcResult.dataNotFound();
         }
         if (result.isFailed()) {
             throw new JsonRpcException(result.getErrorCode());
