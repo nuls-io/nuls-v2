@@ -5,7 +5,9 @@ import io.nuls.base.data.MultiSigAccount;
 import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.model.ModuleE;
 import io.nuls.tools.exception.NulsException;
+import io.nuls.tools.log.Log;
 import io.nuls.transaction.constant.TxConstant;
+import io.nuls.transaction.constant.TxErrorCode;
 import io.nuls.transaction.utils.TxUtil;
 
 import java.util.HashMap;
@@ -37,8 +39,9 @@ public class AccountCall {
             HashMap result = (HashMap) TransactionCall.request(ModuleE.AC.abbr, "ac_getMultiSigAccount", params);
             String mAccountStr = (String) result.get("value");
             return null == mAccountStr ? null : TxUtil.getInstanceRpcStr(mAccountStr, MultiSigAccount.class);
-        } catch (Exception e) {
-            throw new NulsException(e);
+        } catch (RuntimeException e){
+            Log.error(e);
+            throw new NulsException(TxErrorCode.SYS_UNKOWN_EXCEPTION);
         }
     }
 
