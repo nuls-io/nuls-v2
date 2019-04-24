@@ -42,8 +42,10 @@ public class MongoTransactionServiceImpl implements TransactionService {
         List<Document> documentList = new ArrayList<>();
         for (TransactionInfo transactionInfo : txList) {
             documentList.add(transactionInfo.toDocument());
+            deleteUnConfirmTx(chainId, transactionInfo.getHash());
         }
         mongoDBService.insertMany(TX_TABLE + chainId, documentList);
+
     }
 
     public void saveCoinDataList(int chainId, List<CoinDataInfo> coinDataList) {
