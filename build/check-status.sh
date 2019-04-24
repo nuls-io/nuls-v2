@@ -5,6 +5,12 @@ modules=(%MODULES%)
 
 logPath=`getModuleItem "./nuls.ncf" "logPath"`
 
+check(){
+    echo `awk 'BEGIN{ s=0 } {
+        if($0 ~ /'"$3"'$/){s=1}
+        if($0 ~ /RUN MODULE:'"$2"'$/){s=0}
+    } END{ print s }' $1`
+}
 #if [ ! -d "$1" ]; then
 #    echo "必须指定logs目录: ./check-status.sh <log path>"
 #    exit 0;
@@ -19,7 +25,8 @@ for module in ${modules[@]}
 do
 	#echo ${module}
 	#grep -n 'RMB:module rpc is ready' Modules/Nuls/${module}/1.0.0/log/stdout.log
-	if [ -n "`grep -n 'RMB:module rpc is ready' $logPath/${module}/stdout.log`" ];
+#	if [ -n "`grep -n 'RMB:module rpc is ready' $logPath/${module}/stdout.log`" ];
+	if [ "1" == `check $logPath/${module}/common.log $module 'RMB:module rpc is ready'` ];
 	then
 		echoGreen "${module} RPC READY"
 		else
@@ -30,7 +37,7 @@ done
 echo "==================REDAY MODULE=================="
 for module in ${modules[@]}
 do
-	if [ -n "`grep -n 'RMB:module is READY' $logPath/${module}/stdout.log`" ];
+	if [ "1" == `check $logPath/${module}/common.log $module 'RMB:module is READY'` ];
 	then
 		echoGreen "${module} STATE IS READY"
 		else
@@ -41,7 +48,7 @@ done
 echo "==================TRY RUNNING MODULE=================="
 for module in ${modules[@]}
 do
-	if [ -n "`grep -n 'RMB:module try running' $logPath/${module}/stdout.log`" ];
+	if [ "1" == `check $logPath/${module}/common.log $module 'RMB:module try running'` ];
 	then
 		echoGreen "${module} TRY RUNNING"
 		else
@@ -53,7 +60,7 @@ echo "==================RUNNING MODULE=================="
 isReady=1
 for module in ${modules[@]}
 do
-	if [ -n "`grep -n 'RMB:module state : Running' $logPath/${module}/stdout.log`" ];
+	if [ "1" == `check $logPath/${module}/common.log $module 'RMB:module state : Running'` ];
 	then
 		echoGreen "${module} STATE IS RUNNING"
 		else

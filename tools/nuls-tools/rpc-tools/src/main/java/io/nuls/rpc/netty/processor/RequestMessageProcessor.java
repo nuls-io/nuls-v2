@@ -10,6 +10,7 @@ import io.nuls.rpc.model.message.*;
 import io.nuls.rpc.netty.channel.ConnectData;
 import io.nuls.rpc.netty.channel.manager.ConnectManager;
 import io.nuls.rpc.util.TimeUtils;
+import io.nuls.tools.constant.CommonCodeConstanst;
 import io.nuls.tools.log.Log;
 import io.nuls.tools.model.StringUtils;
 import io.nuls.tools.parse.JSONUtils;
@@ -184,6 +185,7 @@ public class RequestMessageProcessor {
                 */
                 if (cmdDetail == null) {
                     response.setResponseComment(Constants.CMD_NOT_FOUND + ":" + method + "," + (params != null ? params.get(Constants.VERSION_KEY_STR) : ""));
+                    response.setResponseErrorCode(CommonCodeConstanst.CMD_NOTFOUND.getCode());
                     Message rspMessage = MessageUtil.basicMessage(MessageType.Response);
                     rspMessage.setMessageData(response);
                     ConnectManager.sendMessage(channel, JSONUtils.obj2json(rspMessage));
@@ -197,6 +199,7 @@ public class RequestMessageProcessor {
                 String validationString = paramsValidation(cmdDetail, params);
                 if (validationString != null) {
                     response.setResponseComment(validationString);
+                    response.setResponseErrorCode(CommonCodeConstanst.PARAMETER_ERROR.getCode());
                     Message rspMessage = MessageUtil.basicMessage(MessageType.Response);
                     rspMessage.setMessageData(response);
                     ConnectManager.sendMessage(channel, JSONUtils.obj2json(rspMessage));
@@ -216,6 +219,7 @@ public class RequestMessageProcessor {
             } catch (Exception e) {
                 Log.error(e);
                 response.setResponseComment("Server-side processing failed!");
+                response.setResponseErrorCode(CommonCodeConstanst.SYS_UNKOWN_EXCEPTION.getCode());
                 Message rspMessage = MessageUtil.basicMessage(MessageType.Response);
                 rspMessage.setMessageData(response);
                 ConnectManager.sendMessage(channel, JSONUtils.obj2json(rspMessage));

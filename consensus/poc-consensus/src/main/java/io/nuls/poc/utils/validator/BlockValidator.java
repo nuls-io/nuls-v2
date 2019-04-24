@@ -60,6 +60,11 @@ public class BlockValidator {
       if (!blockHeader.getMerkleHash().equals(NulsDigestData.calcMerkleDigestData(block.getTxHashList()))) {
          throw new NulsException(ConsensusErrorCode.MERKEL_HASH_ERROR);
       }
+      //区块头签名验证
+      if(blockHeader.getBlockSignature().verifySignature(blockHeader.getHash()).isFailed()){
+         chain.getLoggerMap().get(ConsensusConstant.BASIC_LOGGER_NAME).error("Block Header Verification Error!");
+         throw new NulsException(ConsensusErrorCode.SIGNATURE_ERROR);
+      }
       RoundValidResult roundValidResult;
       try {
          roundValidResult = roundValidate(isDownload,chain,blockHeader);
@@ -362,7 +367,7 @@ public class BlockValidator {
 
       Transaction coinBaseTransaction = consensusManager.createCoinBaseTx(chain ,member, block.getTxs(), currentRound, 0);
       if (null == coinBaseTransaction || !tx.getHash().equals(coinBaseTransaction.getHash())) {
-         BlockExtendsData extendsData = new BlockExtendsData(block.getHeader().getExtend());
+//         BlockExtendsData extendsData = new BlockExtendsData(block.getHeader().getExtend());
          chain.getLoggerMap().get(ConsensusConstant.BASIC_LOGGER_NAME).error("the coin base tx is wrong! height: " + block.getHeader().getHeight() + " , hash : " + block.getHeader().getHash());
          return false;
       }

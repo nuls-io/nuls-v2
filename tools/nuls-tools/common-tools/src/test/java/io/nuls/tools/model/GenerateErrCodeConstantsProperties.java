@@ -11,6 +11,8 @@ import java.util.*;
  */
 public class GenerateErrCodeConstantsProperties {
 
+    static String[] LANGS = new String[]{"zh-CHS"};
+
     static Map<String, TreeMap<String, String>> data = new HashMap<>();
 
     public static void main(String[] args) {
@@ -24,7 +26,7 @@ public class GenerateErrCodeConstantsProperties {
         File file = new File(System.getProperty("user.dir"));
         readLanguages(file, out);
         data.entrySet().forEach(entry -> {
-            System.out.println(entry.getKey());
+            System.out.println("创建语言包文件：" + out.getAbsolutePath() + File.separator + entry.getKey());
             File outFile = new File(out.getAbsolutePath() + File.separator + entry.getKey());
             if (outFile.exists()) {
                 outFile.delete();
@@ -36,13 +38,29 @@ public class GenerateErrCodeConstantsProperties {
             }
             try (BufferedWriter writer = new BufferedWriter(new FileWriter(outFile, true))) {
                 for (Map.Entry<String, String> d : entry.getValue().entrySet()) {
-                    System.out.println("=========" + d.getKey() + "=" + d.getValue());
+                    System.out.println(d.getKey() + "=" + d.getValue());
                     writer.newLine();
                     writer.write(d.getKey() + "=" + d.getValue());
                 }
             } catch (Exception e1) {
                 e1.printStackTrace();
             }
+            Arrays.stream(LANGS).forEach(lang->{
+                File langFile = new File(out.getAbsolutePath() + File.separator + lang + ".properties");
+                System.out.println("创建语言包文件：" + out.getAbsolutePath() + File.separator + lang + ".properties");
+                if(langFile.exists()){
+                    langFile.delete();
+                }
+                try {
+                    langFile.createNewFile();
+                    try(OutputStream outFile1 = new FileOutputStream(langFile);
+                        InputStream inFile1 = new FileInputStream(outFile)){
+                        inFile1.transferTo(outFile1);
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            });
         });
     }
 
@@ -65,6 +83,7 @@ public class GenerateErrCodeConstantsProperties {
     private static void warite(File f, File outDir) {
         Arrays.stream(f.listFiles()).forEach(file -> {
             try {
+                if(!file.getName().startsWith("en"))return ;
                 File outFile = new File(outDir.getAbsolutePath() + File.separator + file.getName());
                 if (file.getAbsolutePath().equals(outFile.getAbsolutePath())) return;
                 System.out.println("找到语言文件：" + file.getAbsolutePath());
