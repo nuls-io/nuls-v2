@@ -24,6 +24,7 @@ import io.nuls.tools.core.ioc.SpringLiteContext;
 import io.nuls.tools.log.Log;
 import io.nuls.tools.log.logback.NulsLogger;
 import io.nuls.tools.model.DateUtils;
+import io.nuls.tools.model.StringUtils;
 import io.nuls.tools.parse.I18nUtils;
 
 import java.util.List;
@@ -91,8 +92,8 @@ public class TestModule extends RpcModule {
             Utils.success("Time:" + DateUtils.timeStamp2DateStr(System.currentTimeMillis(),"yyyy-MM-dd HH:mm:ss"));
             Utils.success("packetMagic:"+config.getPacketMagic());
             Utils.success("=".repeat(100));
-            if(networkProvider.getNodes().getList().isEmpty()){
-                log.error("网络节点数量为0，不能进行测试");
+            if(networkProvider.getNodes().getList().size()<config.getTestNodeCount()){
+                log.error("网络节点数量小于要求测试的节点数，不能进行测试，要求测试的节点数:{}",config.getTestNodeCount());
                 System.exit(0);
             }
             System.out.println();
@@ -104,6 +105,12 @@ public class TestModule extends RpcModule {
                     TestCase testCase = tester.getClass().getAnnotation(TestCase.class);
                     if(testCase == null){
                         return ;
+                    }
+                    if(StringUtils.isNotBlank(System.getProperty("test.case"))){
+                        String testCaseName = System.getProperty("test.case");
+                        if(!testCase.value().equals(testCaseName)){
+                            return ;
+                        }
                     }
                     try {
                         Utils.successDoubleLine("开始测试"+tester.title() + "   " + tester.getClass());
