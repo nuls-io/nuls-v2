@@ -8,6 +8,7 @@ import io.nuls.contract.constant.ContractDBConstant;
 import io.nuls.contract.manager.ChainManager;
 import io.nuls.contract.model.bo.Chain;
 import io.nuls.contract.util.ContractUtil;
+import io.nuls.contract.util.LogUtil;
 import io.nuls.contract.util.VMContext;
 import io.nuls.contract.vm.program.ProgramMethod;
 import io.nuls.db.service.RocksDBService;
@@ -104,7 +105,7 @@ public class ContractBootStrap extends RpcModule {
     private void initContractDefaultLog() {
         Level fileLevel = Level.toLevel(contractConfig.getLogFileLevel());
         Level consoleLevel = Level.toLevel(contractConfig.getLogConsoleLevel());
-        ContractUtil.configDefaultLog(ContractConstant.LOG_FILE_FOLDER, ContractConstant.LOG_FILE_NAME, fileLevel, consoleLevel, contractConfig.getSystemLogLevel(), contractConfig.getPackageLogPackages(), contractConfig.getPackageLogLevels());
+        LogUtil.configDefaultLog(ContractConstant.LOG_FILE_FOLDER, ContractConstant.LOG_FILE_NAME, fileLevel, consoleLevel, contractConfig.getSystemLogLevel(), contractConfig.getPackageLogPackages(), contractConfig.getPackageLogLevels());
 
     }
 

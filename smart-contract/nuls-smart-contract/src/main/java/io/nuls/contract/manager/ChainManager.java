@@ -33,8 +33,8 @@ import io.nuls.contract.model.bo.config.ConfigBean;
 import io.nuls.contract.model.dto.ContractTxRegisterDto;
 import io.nuls.contract.rpc.call.TransactionCall;
 import io.nuls.contract.storage.ConfigStorageService;
-import io.nuls.contract.util.ContractUtil;
 import io.nuls.contract.util.Log;
+import io.nuls.contract.util.LogUtil;
 import io.nuls.contract.util.VMContext;
 import io.nuls.contract.vm.program.ProgramExecutor;
 import io.nuls.contract.vm.program.impl.ProgramExecutorImpl;
@@ -135,7 +135,7 @@ public class ChainManager {
     private void initContractChainLog(int chainId) {
         Level fileLevel = Level.toLevel(contractConfig.getLogFileLevel());
         Level consoleLevel = Level.toLevel(contractConfig.getLogConsoleLevel());
-        ContractUtil.configChainLog(chainId, ContractConstant.LOG_FILE_FOLDER, ContractConstant.LOG_FILE_NAME, fileLevel, consoleLevel);
+        LogUtil.configChainLog(chainId, ContractConstant.LOG_FILE_FOLDER, ContractConstant.LOG_FILE_NAME, fileLevel, consoleLevel);
     }
 
     public static boolean registerTx(Chain chain) throws NulsException {

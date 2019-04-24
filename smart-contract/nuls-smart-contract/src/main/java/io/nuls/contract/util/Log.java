@@ -195,11 +195,11 @@ public class Log {
                 configInput = Log.class.getClassLoader().getResourceAsStream(MODULE_CONFIG_FILE);
                 String str = IoUtils.readBytesToString(configInput);
                 JSONObject json = JSONObject.parseObject(str);
-                ContractUtil.configDefaultLog(ContractConstant.LOG_FILE_FOLDER, ContractConstant.LOG_FILE_NAME,
+                LogUtil.configDefaultLog(ContractConstant.LOG_FILE_FOLDER, ContractConstant.LOG_FILE_NAME,
                         Level.toLevel(json.getString("logFileLevel")), Level.toLevel(json.getString("logConsoleLevel")),
                         json.getString("systemLogLevel"), json.getString("packageLogPackages"), json.getString("packageLogLevels"));
             } catch (Exception e) {
-                ContractUtil.configDefaultLog("./contract", "contract", Level.INFO, Level.INFO);
+                LogUtil.configDefaultLog("./contract", "contract", Level.INFO, Level.INFO);
             } finally {
                 IOUtils.closeQuietly(configInput);
             }
