@@ -81,7 +81,7 @@ public class ServerChannelHandler extends BaseChannelHandler {
         SocketChannel channel = (SocketChannel) ctx.channel();
         String remoteIP = channel.remoteAddress().getHostString();
         LoggerUtil.logger().error("Server Node is exceptionCaught:{}:{}", remoteIP, channel.remoteAddress().getPort());
-        LoggerUtil.logger().error(cause.getMessage());
+        LoggerUtil.logger().error(cause);
         if (!(cause instanceof IOException)) {
             String nodeId = IpUtil.getNodeId(channel.remoteAddress());
             //通常发生IOException是因为连接的节点断开了

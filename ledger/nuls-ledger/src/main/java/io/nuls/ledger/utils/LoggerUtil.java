@@ -50,7 +50,7 @@ public class LoggerUtil {
 
     public static NulsLogger logger() {
         if (null == defaultLogger) {
-            defaultLogger = LoggerBuilder.getLogger("./lg", "lg", Level.valueOf(logLevel));
+            defaultLogger = LoggerBuilder.getLogger("lg", Level.valueOf(logLevel));
         }
         return defaultLogger;
     }

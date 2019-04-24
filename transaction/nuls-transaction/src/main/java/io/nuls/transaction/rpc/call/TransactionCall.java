@@ -146,10 +146,9 @@ public class TransactionCall {
             params.put("txList", txList);
             Map result = (Map) TransactionCall.request(moduleCode, moduleValidator, params);
             return (List<String>) result.get("list");
-        } catch (NulsException e) {
+        } catch (Exception e) {
             return txList;
         }
-
     }
 
 }
