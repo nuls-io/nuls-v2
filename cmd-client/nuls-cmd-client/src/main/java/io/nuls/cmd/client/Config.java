@@ -64,9 +64,9 @@ public class Config implements InitializingBean {
 
     @Override
     public void afterPropertiesSet() throws NulsException {
-        if(!I18nUtils.hasLanguage(language)){
-            LoggerUtil.logger.error("can't found language package : {}",language);
-            System.exit(0);
-        }
+//        if(!I18nUtils.hasLanguage(language)){
+//            LoggerUtil.logger.error("can't found language package : {}",language);
+//            System.exit(0);
+//        }
     }
 }
