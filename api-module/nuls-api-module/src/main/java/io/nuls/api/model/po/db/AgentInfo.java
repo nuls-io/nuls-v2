@@ -52,6 +52,8 @@ public class AgentInfo extends TxDataInfo {
 
     private long roundPackingTime;
 
+    private int yellowCardCount;
+
     private int version;
 
     private int type;
@@ -276,5 +278,13 @@ public class AgentInfo extends TxDataInfo {
 
     public void setType(int type) {
         this.type = type;
+    }
+
+    public int getYellowCardCount() {
+        return yellowCardCount;
+    }
+
+    public void setYellowCardCount(int yellowCardCount) {
+        this.yellowCardCount = yellowCardCount;
     }
 }
