@@ -30,6 +30,7 @@ import io.nuls.base.data.CoinData;
 import io.nuls.base.data.CoinFrom;
 import io.nuls.base.data.CoinTo;
 import io.nuls.base.data.Transaction;
+import io.nuls.ledger.constant.LedgerConstant;
 import io.nuls.ledger.constant.ValidateEnum;
 import io.nuls.ledger.model.AccountBalance;
 import io.nuls.ledger.model.TempAccountNonce;
@@ -409,6 +410,11 @@ public class CoinDataValidator {
         }
 
         try {
+            //数据库已经不为初始值了，则这笔交易可以认为双花
+            if(LedgerUtil.equalsNonces(fromNonce,LedgerConstant.INIT_NONCE_BYTE)){
+                logger(accountState.getAddressChainId()).info("DOUBLE_EXPENSES_CODE address={},fromNonceStr={}", address, fromNonceStr);
+                return ValidateResult.getResult(ValidateEnum.DOUBLE_EXPENSES_CODE, new String[]{address, fromNonceStr});
+            }
             //上面没连接上，但是fromNonce又存储过，则双花了
             if (transactionService.hadCommit(accountState.getAddressChainId(), LedgerUtil.getAccountNoncesStrKey(address, accountState.getAssetChainId(), accountState.getAssetId(), fromNonceStr))) {
                 logger(accountState.getAddressChainId()).info("DOUBLE_EXPENSES_CODE address={},fromNonceStr={}", address, fromNonceStr);
@@ -453,6 +459,9 @@ public class CoinDataValidator {
                     if (transactionService.hadCommit(chainId, LedgerUtil.getAccountNoncesStringKey(coinFrom, coinFrom.getNonce()))) {
                         return ValidateResult.getResult(ValidateEnum.DOUBLE_EXPENSES_CODE, new String[]{address, LedgerUtil.getNonceEncode(coinFrom.getNonce())});
                     } else {
+                        if(LedgerUtil.equalsNonces(coinFrom.getNonce(),LedgerConstant.INIT_NONCE_BYTE)){
+                            return ValidateResult.getResult(ValidateEnum.DOUBLE_EXPENSES_CODE, new String[]{address, LedgerUtil.getNonceEncode(coinFrom.getNonce())});
+                        }
                         return ValidateResult.getResult(ValidateEnum.ORPHAN_CODE, new String[]{address, fromCoinNonceStr, LedgerUtil.getNonceEncode(accountState.getNonce())});
                     }
                 } catch (Exception e) {
