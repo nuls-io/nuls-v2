@@ -114,7 +114,7 @@ then
     if [ ! -d ./Logs ]; then
         mkdir ./Logs
     fi
-    LOGPATH="`get_fullpath ./logs`"
+    LOGPATH="`get_fullpath ./Logs`"
 fi
 if [ ! -d "$LOGPATH" ]; then
    mkdir $LOGPATH

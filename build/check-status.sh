@@ -3,7 +3,12 @@ modules=(%MODULES%)
 
 . func.sh
 
-logPath=`getModuleItem "./nuls.ncf" "logPath"`
+configPath="./nuls.ncf"
+if [ -n "$1" ]; then
+    configPath=$1;
+fi
+
+logPath=`getModuleItem "$configPath" "logPath"`
 
 check(){
     echo `awk 'BEGIN{ s=0 } {

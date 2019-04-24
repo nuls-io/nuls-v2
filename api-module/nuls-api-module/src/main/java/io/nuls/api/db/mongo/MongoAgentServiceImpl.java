@@ -57,8 +57,8 @@ public class MongoAgentServiceImpl implements AgentService {
             return page;
         }
         int end = pageNumber * pageSize;
-        if (end > hashList.size() - 1) {
-            end = hashList.size() - 1;
+        if (end > hashList.size()) {
+            end = hashList.size();
         }
         hashList = hashList.subList(start, end);
         List<AgentInfo> agentInfoList = new ArrayList<>();

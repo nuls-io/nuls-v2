@@ -22,6 +22,5 @@ public class LedgerChain {
         LoggerUtil.createLogger(chainId);
         //建立数据库
         SpringLiteContext.getBean(RepositoryImpl.class).initChainDb(chainId);
-        SpringLiteContext.getBean(UnconfirmedRepositoryImpl.class).initChainDb(chainId);
     }
 }

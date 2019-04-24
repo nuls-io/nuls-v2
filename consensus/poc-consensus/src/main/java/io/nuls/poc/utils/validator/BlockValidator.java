@@ -60,6 +60,11 @@ public class BlockValidator {
       if (!blockHeader.getMerkleHash().equals(NulsDigestData.calcMerkleDigestData(block.getTxHashList()))) {
          throw new NulsException(ConsensusErrorCode.MERKEL_HASH_ERROR);
       }
+      //区块头签名验证
+      if(blockHeader.getBlockSignature().verifySignature(blockHeader.getHash()).isFailed()){
+         chain.getLoggerMap().get(ConsensusConstant.BASIC_LOGGER_NAME).error("Block Header Verification Error!");
+         throw new NulsException(ConsensusErrorCode.SIGNATURE_ERROR);
+      }
       RoundValidResult roundValidResult;
       try {
          roundValidResult = roundValidate(isDownload,chain,blockHeader);

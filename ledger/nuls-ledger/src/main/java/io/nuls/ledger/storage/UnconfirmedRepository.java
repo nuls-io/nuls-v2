@@ -28,6 +28,7 @@ package io.nuls.ledger.storage;
 import io.nuls.ledger.model.po.AccountStateUnconfirmed;
 import io.nuls.ledger.model.po.TxUnconfirmed;
 
+import java.math.BigInteger;
 import java.util.List;
 import java.util.Map;
 
@@ -36,86 +37,25 @@ import java.util.Map;
  */
 public interface UnconfirmedRepository {
 
-    /**
-     * put accountState to rocksdb
-     *
-     * @param key
-     * @param accountStateUnconfirmed
-     */
-    void createAccountStateUnconfirmed(byte[] key, AccountStateUnconfirmed accountStateUnconfirmed);
+    AccountStateUnconfirmed getMemAccountStateUnconfirmed(int chainId, String accountKey);
 
-    /**
-     * 获取账号中未确认交易账本状态
-     *
-     * @param chainId
-     * @param key
-     * @return AccountStateUnconfirmed
-     */
-    AccountStateUnconfirmed getAccountStateUnconfirmed(int chainId, byte[] key);
+    void delMemAccountStateUnconfirmed(int chainId, String accountKey);
 
-    /**
-     * 更新未确认交易账本状态
-     *
-     * @param key
-     * @param nowAccountState
-     * @throws Exception
-     */
-    void updateAccountStateUnconfirmed(byte[] key, AccountStateUnconfirmed nowAccountState) throws Exception;
+    void saveMemAccountStateUnconfirmed(int chainId, String accountKey, AccountStateUnconfirmed accountStateUnconfirmed);
 
-    /**
-     * delete unconfirmed state
-     *
-     * @param chainId
-     * @param key
-     * @throws Exception
-     */
-    void deleteAccountStateUnconfirmed(int chainId, byte[] key) throws Exception;
+    Map<String, Map<String, TxUnconfirmed>> getMemAccountUnconfirmedTxs(int chainId);
 
-    /**
-     * save unconfirmed tx
-     *
-     * @param chainId
-     * @param key
-     * @param txUnconfirmed
-     * @throws Exception
-     */
-    void saveTxUnconfirmed(int chainId, byte[] key, TxUnconfirmed txUnconfirmed) throws Exception;
+    Map<String, TxUnconfirmed> getMemUnconfirmedTxs(int chainId, String accountKey);
 
-    /**
-     * batch Delete unconfirmed tx
-     *
-     * @param chainId
-     * @param keys
-     * @throws Exception
-     */
-    void batchDeleteTxsUnconfirmed(int chainId, List<byte[]> keys) throws Exception;
+    TxUnconfirmed getMemUnconfirmedTx(int chainId, String accountKey, String nonceKey);
+    void delMemUnconfirmedTx(int chainId, String accountKey, String nonceKey);
 
-    /**
-     * batch save unconfirmed tx
-     *
-     * @param chainId
-     * @param map
-     * @throws Exception
-     */
-    void batchSaveTxsUnconfirmed(int chainId, Map<byte[], byte[]> map) throws Exception;
+    void saveMemUnconfirmedTxs(int chainId, String accountKey, Map<String, TxUnconfirmed> map);
 
-    /**
-     * get unconfirmed tx by key
-     *
-     * @param chainId
-     * @param key
-     * @return
-     * @throws Exception
-     */
-    TxUnconfirmed getTxUnconfirmed(int chainId, byte[] key) throws Exception;
+    void saveMemUnconfirmedTx(int chainId, String accountKey, String nonce, TxUnconfirmed txUnconfirmed);
 
-    /**
-     * delete unconfirmed tx
-     *
-     * @param chainId
-     * @param key
-     * @throws Exception
-     */
-    void deleteTxUnconfirmed(int chainId, byte[] key) throws Exception;
+    void addUncfd2Cfd(int chainId, String accountKey, BigInteger addAmount);
+
+    void clearMemUnconfirmedTxs(int chainId, String accountKey, TxUnconfirmed txUnconfirmed);
 
 }
