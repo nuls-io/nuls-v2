@@ -1,13 +1,11 @@
 package io.nuls.cmd.client;
 
 import io.nuls.api.provider.Provider;
-import io.nuls.cmd.client.utils.LoggerUtil;
 import io.nuls.tools.basic.InitializingBean;
 import io.nuls.tools.core.annotation.Configuration;
 import io.nuls.tools.core.annotation.Persist;
 import io.nuls.tools.core.annotation.Value;
 import io.nuls.tools.exception.NulsException;
-import io.nuls.tools.parse.I18nUtils;
 
 /**
  * @Author: zhoulijun
@@ -64,9 +62,5 @@ public class Config implements InitializingBean {
 
     @Override
     public void afterPropertiesSet() throws NulsException {
-//        if(!I18nUtils.hasLanguage(language)){
-//            LoggerUtil.logger.error("can't found language package : {}",language);
-//            System.exit(0);
-//        }
     }
 }

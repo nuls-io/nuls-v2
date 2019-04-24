@@ -18,6 +18,9 @@ public interface TestCaseIntf<T,P> {
     }
 
     default T check(P param,int depth) throws TestFailException{
+        if(param == null){
+            param = initParam();
+        }
         if(this.caseType() == CaseType.Test){
             Utils.success(depthSpace(depth)+"开始测试【"+title()+"】");
             T res = doTest(param,depth+1);
@@ -51,4 +54,5 @@ public interface TestCaseIntf<T,P> {
 
     CaseType caseType();
 
+    P initParam();
 }
