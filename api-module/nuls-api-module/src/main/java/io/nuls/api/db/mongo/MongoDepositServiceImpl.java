@@ -1,6 +1,8 @@
 package io.nuls.api.db.mongo;
 
+import com.mongodb.client.AggregateIterable;
 import com.mongodb.client.DistinctIterable;
+import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
 import com.mongodb.client.model.*;
 import io.nuls.api.db.DepositService;
@@ -14,6 +16,7 @@ import org.bson.Document;
 import org.bson.conversions.Bson;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import static io.nuls.api.constant.MongoTableConstant.DEPOSIT_TABLE;
@@ -127,6 +130,26 @@ public class MongoDepositServiceImpl implements DepositService {
         }
 
         return resultList;
+    }
+
+    @Override
+    public long getDepositAmount(int chainId, String address, String agentHash) {
+        Bson bson;
+        if (StringUtils.isBlank(agentHash)) {
+            bson = Filters.eq("address", address);
+        } else {
+            bson = Filters.and(Filters.eq("address", address), Filters.eq("agentHash", agentHash));
+        }
+        MongoCollection<Document> collection = mongoDBService.getCollection(DEPOSIT_TABLE + chainId);
+        AggregateIterable<Document> ai = collection.aggregate(Arrays.asList(
+                Aggregates.group(null, Accumulators.sum("total", "$amount"))
+        ));
+        MongoCursor<Document> cursor = ai.iterator();
+        long total = 0;
+        while (cursor.hasNext()) {
+            total = cursor.next().getLong("total");
+        }
+        return total;
     }
 
     public PageInfo<DepositInfo> getCancelDepositListByAgentHash(int chainId, String hash, int type, int pageIndex, int pageSize) {

@@ -411,6 +411,7 @@ public class SyncService {
             PunishLogInfo punishLog = (PunishLogInfo) txData;
             punishLogList.add(punishLog);
             addressSet.add(punishLog.getAddress());
+//            AgentInfo agentInfo = queryAgentInfo(chainId, punishLog.getAddress(), 2);
         }
 
         ChainInfo chainInfo = chainService.getChainInfo(chainId);

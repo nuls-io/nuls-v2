@@ -294,8 +294,6 @@ public class MongoDBService implements InitializingBean {
     }
 
     public Long getMax(String collName, String field, Bson filter) {
-
-
         MongoCollection<Document> collection = getCollection(collName);
         MongoCursor<Document> documentMongoCursor = collection.find(filter).sort(Sorts.descending(field)).limit(1).iterator();
         if (documentMongoCursor.hasNext()) {

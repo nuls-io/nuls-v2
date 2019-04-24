@@ -23,6 +23,8 @@ public interface DepositService {
 
     List<DepositInfo> getDepositList(int chainId, long startHeight);
 
+    long getDepositAmount(int chainId, String address, String agentHash);
+
     PageInfo<DepositInfo> getCancelDepositListByAgentHash(int chainId, String hash, int type, int pageIndex, int pageSize);
 
     List<String> getAgentHashList(int chainId, String address);
