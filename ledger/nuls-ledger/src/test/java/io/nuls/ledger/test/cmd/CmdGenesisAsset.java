@@ -119,7 +119,7 @@ public class CmdGenesisAsset {
         params.put("assetChainId", TestConfig.assetChainId);
         params.put("assetId", TestConfig.assetId);
 //        params.put("address", address);
-        params.put("address", "tNULSeBaMrucKmBUxXVSeyQhdCwGHQHSus7yWg");
+        params.put("address", "tNULSeBaMoodYW7AqyJrgYdWiJ6nfwfVHHHyXm");
 
         Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.LG.abbr, "getBalance", params);
         logger.info("response {}", JSONUtils.obj2json(response));

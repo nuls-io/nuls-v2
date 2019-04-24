@@ -31,10 +31,13 @@ import io.nuls.ledger.model.po.AccountStateUnconfirmed;
 import io.nuls.ledger.model.po.TxUnconfirmed;
 import io.nuls.ledger.storage.DataBaseArea;
 import io.nuls.ledger.storage.UnconfirmedRepository;
+import io.nuls.ledger.utils.LedgerUtil;
 import io.nuls.tools.basic.InitializingBean;
 import io.nuls.tools.core.annotation.Service;
 import io.nuls.tools.exception.NulsException;
 
+import java.math.BigInteger;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -46,122 +49,136 @@ import static io.nuls.ledger.utils.LoggerUtil.logger;
  */
 @Service
 public class UnconfirmedRepositoryImpl implements UnconfirmedRepository, InitializingBean {
-
     public UnconfirmedRepositoryImpl() {
 
     }
 
-    String getLedgerUnconfirmedTableName(int chainId) {
-        return DataBaseArea.TB_LEDGER_ACCOUNT_UNCONFIRMED +"_"+chainId;
-    }
+    Map<String, Map<String, Map<String, TxUnconfirmed>>> chainAccountUnconfirmedTxs = new HashMap<>(1024);
+    Map<String, Map<String, AccountStateUnconfirmed>> chainAccountUnconfirmed = new HashMap<>(1024);
 
-    String getLedgerTXUnconfirmedTableName(int chainId) {
-        return DataBaseArea.TB_LEDGER_TX_UNCONFIRMED +"_"+ chainId;
-    }
 
-    String getLedgerUncfmd2CfmdTableName(int chainId) {
-        return DataBaseArea.TB_LEDGER_ACCOUNT_UNCFMD2CFMD +"_"+ chainId;
-    }
-
-    /**
-     * create AccountStateUnconfirmed to rocksdb
-     *
-     * @param key
-     * @param accountStateUnconfirmed
-     */
     @Override
-    public void createAccountStateUnconfirmed(byte[] key, AccountStateUnconfirmed accountStateUnconfirmed) {
-        try {
-            RocksDBService.put(getLedgerUnconfirmedTableName(accountStateUnconfirmed.getAddressChainId()), key, accountStateUnconfirmed.serialize());
-        } catch (Exception e) {
-            logger(accountStateUnconfirmed.getAddressChainId()).error("createAccountStateUnconfirmed serialize error.", e);
+    public AccountStateUnconfirmed getMemAccountStateUnconfirmed(int chainId, String accountKey) {
+        Map<String, AccountStateUnconfirmed> map = chainAccountUnconfirmed.get(String.valueOf(chainId));
+        if (null != map) {
+            return map.get(accountKey);
+        }
+        return null;
+    }
+
+    @Override
+    public void delMemAccountStateUnconfirmed(int chainId, String accountKey) {
+        Map<String, AccountStateUnconfirmed> map = chainAccountUnconfirmed.get(String.valueOf(chainId));
+        if (null != map) {
+            map.remove(accountKey);
         }
     }
 
-    /**
-     * update AccountStateUnconfirmed to rocksdb
-     *
-     * @param key
-     * @param nowAccountState
-     */
     @Override
-    public void updateAccountStateUnconfirmed(byte[] key, AccountStateUnconfirmed nowAccountState) throws Exception {
-        //update account
-        RocksDBService.put(getLedgerUnconfirmedTableName(nowAccountState.getAddressChainId()), key, nowAccountState.serialize());
-    }
-
-    @Override
-    public void deleteAccountStateUnconfirmed(int chainId, byte[] key) throws Exception {
-        RocksDBService.delete(getLedgerUnconfirmedTableName(chainId), key);
-    }
-
-    @Override
-    public void saveTxUnconfirmed(int chainId, byte[] key, TxUnconfirmed txUnconfirmed) throws Exception {
-        RocksDBService.put(getLedgerTXUnconfirmedTableName(chainId), key, txUnconfirmed.serialize());
-    }
-
-    @Override
-    public void batchDeleteTxsUnconfirmed(int chainId, List<byte[]> keys) throws Exception {
-        RocksDBService.deleteKeys(getLedgerTXUnconfirmedTableName(chainId), keys);
-    }
-
-    @Override
-    public void batchSaveTxsUnconfirmed(int chainId, Map<byte[], byte[]> map) throws Exception {
-        RocksDBService.batchPut(getLedgerTXUnconfirmedTableName(chainId), map);
-    }
-
-    @Override
-    public TxUnconfirmed getTxUnconfirmed(int chainId, byte[] key) throws Exception {
-        byte[] stream = RocksDBService.get(getLedgerTXUnconfirmedTableName(chainId), key);
-        if (stream == null) {
-            return null;
+    public void saveMemAccountStateUnconfirmed(int chainId, String accountKey, AccountStateUnconfirmed accountStateUnconfirmed) {
+        Map<String, AccountStateUnconfirmed> map = chainAccountUnconfirmed.get(String.valueOf(chainId));
+        if (null == map) {
+            map = new HashMap<>(1024);
+            chainAccountUnconfirmed.put(String.valueOf(chainId), map);
         }
-        TxUnconfirmed txUnconfirmed = new TxUnconfirmed();
-        try {
-            txUnconfirmed.parse(new NulsByteBuffer(stream));
-        } catch (NulsException e) {
-            logger(chainId).error("getTxUnconfirmed serialize error.", e);
-        }
-        return txUnconfirmed;
+        map.put(accountKey, accountStateUnconfirmed);
     }
 
     @Override
-    public void deleteTxUnconfirmed(int chainId, byte[] key) throws Exception {
-        RocksDBService.delete(getLedgerTXUnconfirmedTableName(chainId), key);
+    public Map<String, Map<String, TxUnconfirmed>> getMemAccountUnconfirmedTxs(int chainId) {
+        return chainAccountUnconfirmedTxs.get(String.valueOf(chainId));
     }
 
     @Override
-    public AccountStateUnconfirmed getAccountStateUnconfirmed(int chainId, byte[] key) {
-        byte[] stream = RocksDBService.get(getLedgerUnconfirmedTableName(chainId), key);
-        if (stream == null) {
-            return null;
+    public Map<String, TxUnconfirmed> getMemUnconfirmedTxs(int chainId, String accountKey) {
+        Map<String, Map<String, TxUnconfirmed>> accountUnconfirmedTxs = getMemAccountUnconfirmedTxs(chainId);
+        if (null != accountUnconfirmedTxs) {
+            Map<String, TxUnconfirmed> unconfirmedMap = accountUnconfirmedTxs.get(accountKey);
+            return unconfirmedMap;
         }
-        AccountStateUnconfirmed accountState = new AccountStateUnconfirmed();
-        try {
-            accountState.parse(new NulsByteBuffer(stream));
-        } catch (NulsException e) {
-            logger(chainId).error("getAccountStateUnconfirmed serialize error.", e);
-        }
-        return accountState;
+        return null;
     }
 
-
-    /**
-     * 初始化数据库
-     */
-    public void initChainDb(int addressChainId) {
-        try {
-            if (!RocksDBService.existTable(getLedgerUnconfirmedTableName(addressChainId))) {
-                RocksDBService.createTable(getLedgerUnconfirmedTableName(addressChainId));
+    @Override
+    public TxUnconfirmed getMemUnconfirmedTx(int chainId, String accountKey, String nonceKey) {
+        Map<String, Map<String, TxUnconfirmed>> accountUnconfirmedTxs = getMemAccountUnconfirmedTxs(chainId);
+        if (null != accountUnconfirmedTxs) {
+            Map<String, TxUnconfirmed> unconfirmedMap = accountUnconfirmedTxs.get(accountKey);
+            if (null != unconfirmedMap) {
+                return unconfirmedMap.get(nonceKey);
             }
-            if (!RocksDBService.existTable(getLedgerTXUnconfirmedTableName(addressChainId))) {
-                RocksDBService.createTable(getLedgerTXUnconfirmedTableName(addressChainId));
+        }
+        return null;
+    }
+
+    @Override
+    public  void delMemUnconfirmedTx(int chainId, String accountKey, String nonceKey) {
+        Map<String, Map<String, TxUnconfirmed>> accountUnconfirmedTxs = getMemAccountUnconfirmedTxs(chainId);
+        if(null != accountUnconfirmedTxs){
+            Map<String, TxUnconfirmed>  unconfirmedTxs = accountUnconfirmedTxs.get(accountKey);
+            if(null!= unconfirmedTxs){
+                unconfirmedTxs.remove(nonceKey);
             }
-            if (!RocksDBService.existTable(getLedgerUncfmd2CfmdTableName(addressChainId))) {
-                RocksDBService.createTable(getLedgerUncfmd2CfmdTableName(addressChainId));
+        }
+    }
+
+    @Override
+    public void saveMemUnconfirmedTxs(int chainId, String accountKey, Map<String, TxUnconfirmed> map) {
+        Map<String, Map<String, TxUnconfirmed>> accountUnconfirmedTxs = getMemAccountUnconfirmedTxs(chainId);
+        if (null == accountUnconfirmedTxs) {
+            accountUnconfirmedTxs = new HashMap<>(1024);
+            chainAccountUnconfirmedTxs.put(String.valueOf(chainId), accountUnconfirmedTxs);
+        }
+        Map<String, TxUnconfirmed> unconfirmedTxMap = accountUnconfirmedTxs.get(accountKey);
+        if (null == unconfirmedTxMap) {
+            unconfirmedTxMap = new HashMap<>(128);
+            accountUnconfirmedTxs.put(accountKey, unconfirmedTxMap);
+        }
+        unconfirmedTxMap.putAll(map);
+    }
+
+    @Override
+    public void saveMemUnconfirmedTx(int chainId, String accountKey, String nonce, TxUnconfirmed txUnconfirmed) {
+        Map<String, Map<String, TxUnconfirmed>> accountUnconfirmedTxs = getMemAccountUnconfirmedTxs(chainId);
+        if (null == accountUnconfirmedTxs) {
+            accountUnconfirmedTxs = new HashMap<>(1024);
+            chainAccountUnconfirmedTxs.put(String.valueOf(chainId), accountUnconfirmedTxs);
+        }
+        Map<String, TxUnconfirmed> unconfirmedTxMap = accountUnconfirmedTxs.get(accountKey);
+        if (null == unconfirmedTxMap) {
+            unconfirmedTxMap = new HashMap<>(128);
+            accountUnconfirmedTxs.put(accountKey, unconfirmedTxMap);
+        }
+        unconfirmedTxMap.put(nonce, txUnconfirmed);
+    }
+
+    @Override
+    public void addUncfd2Cfd(int chainId, String accountKey, BigInteger addAmount) {
+        Map<String, AccountStateUnconfirmed> accountStateUnconfirmedMap = chainAccountUnconfirmed.get(String.valueOf(chainId));
+        if (null == accountStateUnconfirmedMap) {
+            return;
+        }
+        AccountStateUnconfirmed accountStateUnconfirmed = accountStateUnconfirmedMap.get(accountKey);
+        if (null == accountStateUnconfirmed) {
+            return;
+        } else {
+            accountStateUnconfirmed.setToConfirmedAmount(accountStateUnconfirmed.getToConfirmedAmount().add(addAmount));
+        }
+    }
+
+    @Override
+    public void clearMemUnconfirmedTxs(int chainId, String accountKey, TxUnconfirmed txUnconfirmed) {
+        Map<String, Map<String, TxUnconfirmed>> accountUnconfirmedTxs = getMemAccountUnconfirmedTxs(chainId);
+        if (null != accountUnconfirmedTxs) {
+            Map<String, TxUnconfirmed> unconfirmedMap = accountUnconfirmedTxs.get(accountKey);
+            if (null != unconfirmedMap) {
+                while (null != txUnconfirmed) {
+                    String key = LedgerUtil.getNonceEncode(txUnconfirmed.getNonce());
+                    unconfirmedMap.remove(key);
+                    String keyNext = LedgerUtil.getNonceEncode(txUnconfirmed.getNextNonce());
+                    txUnconfirmed = unconfirmedMap.get(keyNext);
+                }
             }
-        } catch (Exception e) {
-            logger(addressChainId).error(e);
         }
     }
 

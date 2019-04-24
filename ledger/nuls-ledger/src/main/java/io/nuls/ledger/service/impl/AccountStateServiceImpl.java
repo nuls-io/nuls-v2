@@ -49,7 +49,7 @@ import java.util.Map;
  */
 @Service
 public class AccountStateServiceImpl implements AccountStateService {
-
+    
     @Autowired
     private Repository repository;
     @Autowired
@@ -64,14 +64,16 @@ public class AccountStateServiceImpl implements AccountStateService {
     @Override
     public void rollAccountState(String assetKey, AccountStateSnapshot accountStateSnapshot) throws Exception {
         //获取当前数据库值
-        Map<byte[], byte[]> unconfirmedNonces = new HashMap<>(64);
+        Map<String,TxUnconfirmed> unconfirmedNonces = new HashMap<>(64);
         AccountState accountState = accountStateSnapshot.getAccountState();
         AccountStateUnconfirmed accountStateUnconfirmed = new AccountStateUnconfirmed();
         List<AmountNonce> list = accountStateSnapshot.getNonces();
+        BigInteger amount = BigInteger.ZERO;
         for (AmountNonce amountNonce : list) {
             TxUnconfirmed txUnconfirmed = new TxUnconfirmed(accountState.getAddress(), accountState.getAssetChainId(), accountState.getAssetId(),
                     amountNonce.getFromNonce(), amountNonce.getNonce(), amountNonce.getAmount());
-            unconfirmedNonces.put(LedgerUtil.getAccountNoncesByteKey(assetKey, LedgerUtil.getNonceEncode(amountNonce.getNonce())), txUnconfirmed.serialize());
+            unconfirmedNonces.put(LedgerUtil.getNonceEncode(amountNonce.getNonce()), txUnconfirmed);
+            amount.add(amountNonce.getAmount());
         }
 
         repository.updateAccountState(assetKey.getBytes(LedgerConstant.DEFAULT_ENCODING), accountState);
@@ -83,7 +85,7 @@ public class AccountStateServiceImpl implements AccountStateService {
             accountStateUnconfirmed.setAssetId(accountState.getAssetId());
             accountStateUnconfirmed.setNonce(list.get(list.size() - 1).getNonce());
             accountStateUnconfirmed.setFromNonce(list.get(list.size() - 1).getFromNonce());
-            accountStateUnconfirmed.setAmount(list.get(list.size() - 1).getAmount());
+            accountStateUnconfirmed.setUnconfirmedAmount(amount);
             accountStateUnconfirmed.setCreateTime(TimeUtil.getCurrentTime());
             unconfirmedStateService.mergeUnconfirmedNonce(accountStateSnapshot.getAccountState(), assetKey, unconfirmedNonces, accountStateUnconfirmed);
         }
