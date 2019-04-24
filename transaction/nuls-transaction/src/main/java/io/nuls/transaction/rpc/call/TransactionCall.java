@@ -1,5 +1,6 @@
 package io.nuls.transaction.rpc.call;
 
+import io.nuls.base.data.Transaction;
 import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.model.message.Response;
 import io.nuls.rpc.netty.processor.ResponseMessageProcessor;
@@ -9,7 +10,9 @@ import io.nuls.tools.parse.JSONUtils;
 import io.nuls.transaction.constant.TxConstant;
 import io.nuls.transaction.model.bo.Chain;
 import io.nuls.transaction.model.bo.TxRegister;
+import io.nuls.transaction.utils.TxUtil;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -137,8 +140,7 @@ public class TransactionCall {
      * @param txList
      * @return 返回未通过验证的交易hash, 如果出现异常那么交易全部返回(不通过) / return unverified transaction hash
      */
-    public static List<String> txModuleValidator(Chain chain, String moduleValidator, String moduleCode, List<String> txList) {
-
+    public static List<String> txModuleValidator(Chain chain, String moduleValidator, String moduleCode, List<String> txList) throws NulsException {
         try {
             //调用交易模块统一验证器
             Map<String, Object> params = new HashMap(TxConstant.INIT_CAPACITY_8);
@@ -147,7 +149,19 @@ public class TransactionCall {
             Map result = (Map) TransactionCall.request(moduleCode, moduleValidator, params);
             return (List<String>) result.get("list");
         } catch (Exception e) {
-            return txList;
+            chain.getLoggerMap().get(TxConstant.LOG_TX).error("txModuleValidator Exception..");
+            chain.getLoggerMap().get(TxConstant.LOG_TX).error(e);
+            try {
+                List<String> hashList = new ArrayList<>(txList.size());
+                for(String txStr : txList){
+                    Transaction tx = TxUtil.getInstanceRpcStr(txStr, Transaction.class);
+                    hashList.add(tx.getHash().getDigestHex());
+                }
+                return hashList;
+            } catch (NulsException ne) {
+                chain.getLoggerMap().get(TxConstant.LOG_TX).error(ne);
+                throw new NulsException(ne);
+            }
         }
     }
 
