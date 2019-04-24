@@ -3,6 +3,7 @@ package io.nuls.api.db;
 import io.nuls.api.model.po.db.DepositInfo;
 import io.nuls.api.model.po.db.PageInfo;
 
+import java.math.BigInteger;
 import java.util.List;
 
 public interface DepositService {
@@ -23,7 +24,7 @@ public interface DepositService {
 
     List<DepositInfo> getDepositList(int chainId, long startHeight);
 
-    long getDepositAmount(int chainId, String address, String agentHash);
+    BigInteger getDepositAmount(int chainId, String address, String agentHash);
 
     PageInfo<DepositInfo> getCancelDepositListByAgentHash(int chainId, String hash, int type, int pageIndex, int pageSize);
 

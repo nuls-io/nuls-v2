@@ -41,6 +41,7 @@ import io.nuls.tools.log.Log;
 import io.nuls.tools.model.DoubleUtils;
 import io.nuls.tools.model.StringUtils;
 
+import java.math.BigInteger;
 import java.util.*;
 
 import static io.nuls.api.constant.MongoTableConstant.CONSENSUS_LOCKED;
@@ -562,7 +563,7 @@ public class PocConsensusController {
         }
 
         try {
-            long value = depositService.getDepositAmount(chainId, address, agentHash);
+            BigInteger value = depositService.getDepositAmount(chainId, address, agentHash);
             return new RpcResult().setResult(value);
         } catch (Exception e) {
             Log.error(e);
