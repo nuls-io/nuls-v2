@@ -44,9 +44,7 @@ import io.nuls.rpc.model.message.Response;
 import io.nuls.rpc.util.RPCUtil;
 import io.nuls.rpc.util.TimeUtils;
 import io.nuls.tools.core.annotation.Autowired;
-import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.core.annotation.Service;
-import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.log.logback.NulsLogger;
 import io.nuls.tools.protocol.MessageHandler;
@@ -81,7 +79,7 @@ public class SmallBlockHandler extends BaseCmd {
         ChainContext context = ContextManager.getContext(chainId);
         String nodeId = map.get("nodeId").toString();
         SmallBlockMessage message = new SmallBlockMessage();
-        NulsLogger messageLog = ContextManager.getContext(chainId).getMessageLog();
+        NulsLogger messageLog = context.getMessageLog();
         byte[] decode = RPCUtil.decode(map.get("messageBody").toString());
         try {
             message.parse(new NulsByteBuffer(decode));

@@ -29,4 +29,8 @@ public class ProtocolGroup {
     public void setProtocolsMap(Map<Short, Protocol> protocolsMap) {
         this.protocolsMap = protocolsMap;
     }
+
+    public Protocol getProtocol() {
+        return protocolsMap.get(version);
+    }
 }

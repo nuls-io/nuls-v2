@@ -109,8 +109,8 @@ public class TxServiceImpl implements TxService {
                 txRegister.setModuleValidator(moduleTxRegisterDto.getModuleValidator());
                 txRegister.setTxType(txRegisterDto.getTxType());
                 txRegister.setValidator(txRegisterDto.getValidator());
-                txRegister.setCommit(moduleTxRegisterDto.getCommit());
-                txRegister.setRollback(moduleTxRegisterDto.getRollback());
+                txRegister.setCommit(moduleTxRegisterDto.getModuleCommit());
+                txRegister.setRollback(moduleTxRegisterDto.getModuleRollback());
                 txRegister.setSystemTx(txRegisterDto.getSystemTx());
                 txRegister.setUnlockTx(txRegisterDto.getUnlockTx());
                 txRegister.setVerifySignature(txRegisterDto.getVerifySignature());

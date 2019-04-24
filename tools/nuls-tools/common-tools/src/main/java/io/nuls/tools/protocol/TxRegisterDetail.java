@@ -44,8 +44,7 @@ public class TxRegisterDetail {
      */
     private boolean verifySignature;
 
-    public TxRegisterDetail(int txType) {
-        this.txType = txType;
+    public TxRegisterDetail() {
     }
 
     public TxRegisterDetail(TxProperty txProperty) {

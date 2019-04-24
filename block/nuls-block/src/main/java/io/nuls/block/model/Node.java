@@ -107,6 +107,8 @@ public class Node {
             //下载失败，信用值减半，下限为0
             credit /= 2;
         }
-        LoggerUtil.commonLog.debug("id-" + id + ",oldCredit-" + oldCredit + ",newCredit-" + credit + ",success-" + success);
+        if (!success) {
+            LoggerUtil.commonLog.error("download fail! node-" + id + ",oldCredit-" + oldCredit + ",newCredit-" + credit);
+        }
     }
 }

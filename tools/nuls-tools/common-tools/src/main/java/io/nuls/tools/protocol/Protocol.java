@@ -5,6 +5,9 @@ import java.util.List;
 public class Protocol {
 
     private short version;
+    private String moduleValidator;
+    private String moduleCommit;
+    private String moduleRollback;
     private List<TransactionConfig> allowTx;
     private List<MessageConfig> allowMsg;
 
@@ -30,6 +33,30 @@ public class Protocol {
 
     public void setAllowMsg(List<MessageConfig> allowMsg) {
         this.allowMsg = allowMsg;
+    }
+
+    public String getModuleValidator() {
+        return moduleValidator;
+    }
+
+    public void setModuleValidator(String moduleValidator) {
+        this.moduleValidator = moduleValidator;
+    }
+
+    public String getModuleCommit() {
+        return moduleCommit;
+    }
+
+    public void setModuleCommit(String moduleCommit) {
+        this.moduleCommit = moduleCommit;
+    }
+
+    public String getModuleRollback() {
+        return moduleRollback;
+    }
+
+    public void setModuleRollback(String moduleRollback) {
+        this.moduleRollback = moduleRollback;
     }
 
     public Protocol() {

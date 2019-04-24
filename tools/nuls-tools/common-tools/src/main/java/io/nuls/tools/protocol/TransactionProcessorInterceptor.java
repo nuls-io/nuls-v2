@@ -41,9 +41,7 @@ public class TransactionProcessorInterceptor implements BeanMethodInterceptor<Tr
     public Object intercept(TransactionProcessor annotation, Object object, Method method, Object[] params, BeanMethodInterceptorChain interceptorChain) throws Throwable {
         Map map = (Map) params[0];
         int chainId = (Integer) map.get("chainId");
-        ProtocolGroup context = ProtocolGroupManager.getProtocol(chainId);
-        short version = context.getVersion();
-        Protocol protocol = context.getProtocolsMap().get(version);
+        Protocol protocol = ProtocolGroupManager.getProtocol(chainId);
         boolean validate = ProtocolValidator.transactionValidate(annotation.txType(), object.getClass().getSuperclass(), protocol, method.getName(), annotation.methodType());
         if (!validate) {
             throw new RuntimeException("The transaction or transaction processor is not available in the current version!");

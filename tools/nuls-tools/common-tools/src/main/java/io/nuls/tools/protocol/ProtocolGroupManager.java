@@ -21,8 +21,12 @@ public class ProtocolGroupManager {
         protocolGroup.setVersion(version);
     }
 
-    public static ProtocolGroup getProtocol(int chainId) {
-        return protocolGroupMap.get(chainId);
+    public static Protocol getProtocol(int chainId) {
+        return protocolGroupMap.get(chainId).getProtocol();
+    }
+
+    public static short getVersion(int chainId) {
+        return protocolGroupMap.get(chainId).getVersion();
     }
 
     public static void updateProtocol(int chainId, short protocolVersion) {

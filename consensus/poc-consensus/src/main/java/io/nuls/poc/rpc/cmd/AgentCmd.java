@@ -8,9 +8,6 @@ import io.nuls.rpc.model.message.Response;
 import io.nuls.tools.basic.Result;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
-import io.nuls.tools.protocol.ResisterTx;
-import io.nuls.tools.protocol.TxMethodType;
-import io.nuls.tools.protocol.TxProperty;
 
 import java.util.Map;
 
@@ -44,21 +41,6 @@ public class AgentCmd extends BaseCmd {
     }
 
     /**
-     * 节点验证
-     * */
-    @CmdAnnotation(cmd = "cs_createAgentValid", version = 1.0, description = "create agent transaction validate 1.0")
-    @ResisterTx(txType = TxProperty.CREATE_AGENT,methodType = TxMethodType.VALID,methodName = "cs_createAgentValid")
-    @Parameter(parameterName = "chainId", parameterType = "int")
-    @Parameter(parameterName = "tx", parameterType = "String")
-    public Response createAgentValid(Map<String,Object> params){
-        Result result = service.createAgentValid(params);
-        if(result.isFailed()){
-            return failed(result.getErrorCode());
-        }
-        return success(result.getData());
-    }
-
-    /**
      * 注销节点
      * */
     @CmdAnnotation(cmd = "cs_stopAgent", version = 1.0, description = "stop agent 1.0")
@@ -70,23 +52,6 @@ public class AgentCmd extends BaseCmd {
         }
         return success(result.getData());
     }
-
-    /**
-     * 注销节点交易验证
-     * */
-    @CmdAnnotation(cmd = "cs_stopAgentValid", version = 1.0, description = "stop agent transaction validate 1.0")
-    @ResisterTx(txType = TxProperty.STOP_AGENT,methodType = TxMethodType.VALID,methodName = "cs_stopAgentValid")
-    @Parameter(parameterName = "chainId", parameterType = "int")
-    @Parameter(parameterName = "tx", parameterType = "String")
-    public Response stopAgentValid(Map<String,Object> params){
-        Result result = service.stopAgentValid(params);
-        if(result.isFailed()){
-            return failed(result.getErrorCode());
-        }
-        return success(result.getData());
-    }
-
-
 
     /**
      * 查询共识节点列表

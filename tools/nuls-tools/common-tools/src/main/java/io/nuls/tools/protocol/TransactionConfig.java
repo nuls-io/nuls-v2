@@ -3,6 +3,9 @@ package io.nuls.tools.protocol;
 public class TransactionConfig {
     private short type;
     private String name;
+    private boolean systemTx;
+    private boolean unlockTx;
+    private boolean verifySignature;
     private String handler;
     private String validate;
     private String commit;
@@ -54,6 +57,30 @@ public class TransactionConfig {
 
     public void setRollback(String rollback) {
         this.rollback = rollback;
+    }
+
+    public boolean isSystemTx() {
+        return systemTx;
+    }
+
+    public void setSystemTx(boolean systemTx) {
+        this.systemTx = systemTx;
+    }
+
+    public boolean isUnlockTx() {
+        return unlockTx;
+    }
+
+    public void setUnlockTx(boolean unlockTx) {
+        this.unlockTx = unlockTx;
+    }
+
+    public boolean isVerifySignature() {
+        return verifySignature;
+    }
+
+    public void setVerifySignature(boolean verifySignature) {
+        this.verifySignature = verifySignature;
     }
 
     public TransactionConfig() {

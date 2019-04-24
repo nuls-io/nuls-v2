@@ -28,8 +28,6 @@ import io.nuls.rpc.model.message.Response;
 import io.nuls.rpc.netty.processor.ResponseMessageProcessor;
 import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.log.logback.NulsLogger;
-import io.nuls.tools.protocol.ProtocolGroup;
-import io.nuls.tools.protocol.ProtocolGroupManager;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -58,13 +56,6 @@ public class ProtocolUtil {
             params.put("chainId", chainId);
             params.put("blockHeader", HexUtil.encode(blockHeader.serialize()));
             Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.PU.abbr, "rollbackBlock", params);
-            if (response.isSuccess()) {
-                Map responseData = (Map) response.getResponseData();
-                Map saveBlock = (Map) responseData.get("rollbackBlock");
-                int version = (int) saveBlock.get("version");
-                ProtocolGroup protocolGroup = ProtocolGroupManager.getProtocol(chainId);
-                protocolGroup.setVersion((short) version);
-            }
             return response.isSuccess();
         } catch (Exception e) {
             e.printStackTrace();
@@ -88,13 +79,6 @@ public class ProtocolUtil {
             params.put("chainId", chainId);
             params.put("blockHeader", HexUtil.encode(blockHeader.serialize()));
             Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.PU.abbr, "saveBlock", params);
-            if (response.isSuccess()) {
-                Map responseData = (Map) response.getResponseData();
-                Map saveBlock = (Map) responseData.get("saveBlock");
-                int version = (int) saveBlock.get("version");
-                ProtocolGroup protocolGroup = ProtocolGroupManager.getProtocol(chainId);
-                protocolGroup.setVersion((short) version);
-            }
             return response.isSuccess();
         } catch (Exception e) {
             e.printStackTrace();

@@ -18,14 +18,14 @@ public class ProtocolLoader {
         List<ProtocolConfigJson> protocolConfigs = JSONUtils.json2list(protocolConfigJson, ProtocolConfigJson.class);
         protocolConfigs.sort(PROTOCOL_CONFIG_COMPARATOR);
         Map<Short, Protocol> protocolsMap = new HashMap<>(protocolConfigs.size());
-        for (ProtocolConfigJson config : protocolConfigs) {
+        for (ProtocolConfigJson configJson : protocolConfigs) {
             Protocol protocol = new Protocol();
-            protocol.setVersion(config.getVersion());
-            short extend = config.getExtend();
+            protocol.setVersion(configJson.getVersion());
+            short extend = configJson.getExtend();
             List<MessageConfig> msgList = new ArrayList<>();
             List<TransactionConfig> txList = new ArrayList<>();
-            List<MessageConfig> validMessages = config.getValidMessages();
-            List<TransactionConfig> validTransactions = config.getValidTransactions();
+            List<MessageConfig> validMessages = configJson.getValidMessages();
+            List<TransactionConfig> validTransactions = configJson.getValidTransactions();
             if (extend > 0) {
                 Protocol parent = protocolsMap.get(extend);
                 List<MessageConfig> parentAllowMsg = parent.getAllowMsg();
@@ -38,13 +38,16 @@ public class ProtocolLoader {
                 txList.removeIf(e -> tx.contains(e.getName()));
             }
             msgList.addAll(validMessages);
-            List<String> discardMsg = config.getInvalidMessages().stream().map(ListItem::getName).collect(Collectors.toList());
+            List<String> discardMsg = configJson.getInvalidMessages().stream().map(ListItem::getName).collect(Collectors.toList());
             msgList.removeIf(e -> discardMsg.contains(e.getName()));
             txList.addAll(validTransactions);
-            List<String> discardTx = config.getInvalidTransactions().stream().map(ListItem::getName).collect(Collectors.toList());
+            List<String> discardTx = configJson.getInvalidTransactions().stream().map(ListItem::getName).collect(Collectors.toList());
             txList.removeIf(e -> discardTx.contains(e.getName()));
             protocol.setAllowMsg(msgList);
             protocol.setAllowTx(txList);
+            protocol.setModuleValidator(configJson.getModuleValidator());
+            protocol.setModuleCommit(configJson.getModuleCommit());
+            protocol.setModuleRollback(configJson.getModuleRollback());
             protocolsMap.put(protocol.getVersion(), protocol);
         }
         ProtocolGroupManager.init(chainId, protocolsMap, (short) 1);

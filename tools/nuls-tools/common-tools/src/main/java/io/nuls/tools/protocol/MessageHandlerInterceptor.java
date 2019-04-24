@@ -41,9 +41,7 @@ public class MessageHandlerInterceptor implements BeanMethodInterceptor<MessageH
     public Object intercept(MessageHandler annotation, Object object, Method method, Object[] params, BeanMethodInterceptorChain interceptorChain) throws Throwable {
         Map map = (Map) params[0];
         int chainId = (Integer) map.get("chainId");
-        ProtocolGroup context = ProtocolGroupManager.getProtocol(chainId);
-        short version = context.getVersion();
-        Protocol protocol = context.getProtocolsMap().get(version);
+        Protocol protocol = ProtocolGroupManager.getProtocol(chainId);
         boolean validate = ProtocolValidator.meaasgeValidate(annotation.message(), object.getClass().getSuperclass(), protocol, method.getName());
         if (!validate) {
             throw new RuntimeException("The message or message handler is not available in the current version!");

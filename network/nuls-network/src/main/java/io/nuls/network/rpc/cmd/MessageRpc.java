@@ -171,7 +171,7 @@ public class MessageRpc extends BaseCmd {
             byte[] messageBody = RPCUtil.decode(String.valueOf(params.get("messageBody")));
             String cmd = String.valueOf(params.get("command"));
             if (cmd.equalsIgnoreCase("getBlocks")) {
-                LoggerUtil.logger(chainId).debug("sendPeersMsg, nodes-", nodes);
+                LoggerUtil.logger(chainId).debug("sendPeersMsg, nodes-{}", nodes);
             }
             MessageManager messageManager = MessageManager.getInstance();
             NodeGroupManager nodeGroupManager = NodeGroupManager.getInstance();

@@ -28,7 +28,7 @@
   "blockCache": 1000,
   "smallBlockCache": 10,
   "orphanChainMaxAge": 10,
-  "logLevel": "INFO",
+  "logLevel": "DEBUG",
   "singleDownloadTimeount": 10000,
   "batchDownloadTimeount": 30000,
   "maxLoop": 10,

@@ -72,7 +72,6 @@ public class ConfigLoader {
         String json = IoUtils.read(PROTOCOL_CONFIG_FILE);
         ChainParameters parameter = blockConfig;
         int chainId = parameter.getChainId();
-        ProtocolLoader.load(chainId);
         ContextManager.init(parameter);
         service.save(parameter, chainId);
         service.saveProtocolConfigJson(json, chainId);
