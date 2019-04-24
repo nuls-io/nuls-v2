@@ -32,6 +32,8 @@ package io.nuls.ledger.storage;
  */
 public interface DataBaseArea {
     String TB_LEDGER_ACCOUNT = "account";
+
+    String TB_LEDGER_LOCK_TX = "locked_ledger";
     /**
      *   存未确认交易数据及状态
      */

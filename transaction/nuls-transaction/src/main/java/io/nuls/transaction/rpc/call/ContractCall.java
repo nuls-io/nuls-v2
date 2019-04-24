@@ -41,7 +41,6 @@ import java.util.Map;
  */
 public class ContractCall {
 
-
     /**
      * 打包智能合约通知
      * @param chain
@@ -62,7 +61,7 @@ public class ContractCall {
         try {
             TransactionCall.request(ModuleE.SC.abbr, "sc_batch_begin", params);
             return true;
-        } catch (NulsException e) {
+        } catch (Exception e) {
             chain.getLoggerMap().get(TxConstant.LOG_TX).error(e);
             return false;
         }

@@ -394,10 +394,10 @@ public class CoinDataValidator {
         if (null == accountStateUnconfirmed) {
             //新建
             preNonce = accountState.getNonce();
-            amount = accountState.getTotalAmount();
+            amount = accountState.getAvailableAmount();
         } else {
             preNonce = accountStateUnconfirmed.getNonce();
-            amount = accountState.getTotalAmount().add(accountStateUnconfirmed.getAmount());
+            amount = accountState.getAvailableAmount().subtract(accountStateUnconfirmed.getAmount());
         }
         String fromNonceStr = LedgerUtil.getNonceEncode(fromNonce);
         if (BigIntegerUtils.isLessThan(amount, fromAmount)) {

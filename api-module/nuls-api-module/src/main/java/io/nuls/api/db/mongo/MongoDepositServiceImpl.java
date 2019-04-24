@@ -1,6 +1,10 @@
 package io.nuls.api.db.mongo;
 
+import com.mongodb.BasicDBObject;
+import com.mongodb.QueryOperators;
+import com.mongodb.client.AggregateIterable;
 import com.mongodb.client.DistinctIterable;
+import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
 import com.mongodb.client.model.*;
 import io.nuls.api.db.DepositService;
@@ -13,8 +17,11 @@ import io.nuls.tools.model.StringUtils;
 import org.bson.Document;
 import org.bson.conversions.Bson;
 
+import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.function.Consumer;
 
 import static io.nuls.api.constant.MongoTableConstant.DEPOSIT_TABLE;
 
@@ -127,6 +134,28 @@ public class MongoDepositServiceImpl implements DepositService {
         }
 
         return resultList;
+    }
+
+    @Override
+    public BigInteger getDepositAmount(int chainId, String address, String agentHash) {
+        Bson filter;
+        if (StringUtils.isBlank(agentHash)) {
+            filter = Filters.eq("address", address);
+        } else {
+            filter = Filters.and(Filters.eq("address", address), Filters.eq("agentHash", agentHash));
+        }
+        final BigInteger[] total = {BigInteger.ZERO};
+        Consumer<Document> listBlocker = new Consumer<>() {
+            @Override
+            public void accept(final Document document) {
+                BigInteger value = new BigInteger(document.getString("amount"));
+                total[0] = total[0].add(value);
+            }
+        };
+        MongoCollection<Document> collection = mongoDBService.getCollection(DEPOSIT_TABLE + chainId);
+        collection.find(filter).projection(new BasicDBObject().append("amount", 1)).forEach(listBlocker);
+
+        return total[0];
     }
 
     public PageInfo<DepositInfo> getCancelDepositListByAgentHash(int chainId, String hash, int type, int pageIndex, int pageSize) {

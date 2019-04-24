@@ -362,4 +362,34 @@ public class CmdTxTest {
             e.printStackTrace();
         }
     }
+    @Test
+    public void testFreezeCommit(){
+
+        try {
+            for(int i=0;i<1000000;i++) {
+                Map<String, Object> params = new HashMap<>();
+                Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.LG.abbr, "batchAccountStatesTest", params);
+                LoggerUtil.logger().info("response {}", response);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+    @Test
+    public void testFreezeCommit2(){
+
+        try {
+            for(int i=0;i<1000000;i++) {
+                Map<String, Object> params = new HashMap<>();
+                Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.LG.abbr, "batchAccountStatesTest2", params);
+                LoggerUtil.logger().info("response {}", response);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 }
