@@ -81,10 +81,13 @@ public class NodeMaintenanceTask implements Runnable {
 
         node.setRegisterListener(() -> LoggerUtil.logger().debug("new node {} try connecting!", node.getId()));
 
-        node.setConnectedListener(() -> connectionManager.nodeClientConnectSuccess(node));
+        node.setConnectedListener(() -> {
+            LoggerUtil.logger().debug("主动连接成功:{}", node.getId());
+            connectionManager.nodeClientConnectSuccess(node);
+        });
 
         node.setDisconnectListener(() -> {
-            LoggerUtil.logger().debug("-----------out node disconnect:" + node.getId());
+            LoggerUtil.logger().debug("主动连接断开:{}", node.getId());
             connectionManager.nodeConnectDisconnect(node);
         });
         return connectionManager.connection(node);
@@ -105,7 +108,7 @@ public class NodeMaintenanceTask implements Runnable {
         List<Node> nodeList = new ArrayList<>(canConnectNodes);
 
         nodeList.removeAll(connectedNodes);
-       //最大需要连接的数量 大于 可用连接数的时候，直接返回可用连接数，否则进行选择性返回
+        //最大需要连接的数量 大于 可用连接数的时候，直接返回可用连接数，否则进行选择性返回
         int maxCount = networkConfig.getMaxOutCount() - connectedNodes.size();
         if (nodeList.size() < maxCount) {
             return nodeList;
@@ -115,4 +118,5 @@ public class NodeMaintenanceTask implements Runnable {
 
         return nodeList.subList(0, maxCount);
     }
+
 }

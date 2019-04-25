@@ -25,7 +25,7 @@ public class RunAfterNetStableTask implements Runnable {
             count += crossNetAddrShare();
             if (count == 0) {
                 try {
-                    //让子线程执行一会儿
+                    //休眠10s
                     Thread.sleep(10000L);
                 } catch (InterruptedException e) {
                     LoggerUtil.logger().error(e);
@@ -46,13 +46,15 @@ public class RunAfterNetStableTask implements Runnable {
                 //执行分享地址线程
                 TaskManager.getInstance().createShareAddressTask(nodeGroup, false);
                 nodesContainer.setHadShareAddr(true);
+                try {
+                    //让子线程执行一会儿
+                    Thread.sleep(1000L);
+                } catch (InterruptedException e) {
+                    LoggerUtil.logger().error(e);
+                }
+
             }
-            try {
-                //让子线程执行一会儿
-                Thread.sleep(1000L);
-            } catch (InterruptedException e) {
-                LoggerUtil.logger().error(e);
-            }
+
         }
         return count;
     }
@@ -68,12 +70,12 @@ public class RunAfterNetStableTask implements Runnable {
                 //执行分享地址线程
                 TaskManager.getInstance().createShareAddressTask(nodeGroup, true);
                 nodesContainer.setHadShareAddr(true);
-            }
-            try {
-                //让子线程执行一会儿
-                Thread.sleep(1000L);
-            } catch (InterruptedException e) {
-                LoggerUtil.logger().error(e);
+                try {
+                    //让子线程执行一会儿
+                    Thread.sleep(1000L);
+                } catch (InterruptedException e) {
+                    LoggerUtil.logger().error(e);
+                }
             }
         }
         return count;

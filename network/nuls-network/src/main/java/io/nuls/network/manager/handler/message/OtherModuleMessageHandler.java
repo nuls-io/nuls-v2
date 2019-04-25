@@ -88,7 +88,6 @@ public class OtherModuleMessageHandler extends BaseMessageHandler {
         Map<String, Object> paramMap = new HashMap<>();
         paramMap.put("chainId", chainId);
         paramMap.put("nodeId", node.getId());
-        long time1 = System.currentTimeMillis();
         paramMap.put("messageBody", RPCUtil.encode(payLoadBody));
         Collection<ProtocolRoleHandler> protocolRoleHandlers = MessageHandlerFactory.getInstance().getProtocolRoleHandlerMap(header.getCommandStr());
         if (null == protocolRoleHandlers) {
