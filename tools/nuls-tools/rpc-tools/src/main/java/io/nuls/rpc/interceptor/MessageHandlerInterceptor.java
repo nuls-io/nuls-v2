@@ -21,11 +21,16 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package io.nuls.tools.protocol;
+package io.nuls.rpc.interceptor;
 
+import io.nuls.rpc.util.ModuleHelper;
 import io.nuls.tools.core.annotation.Interceptor;
 import io.nuls.tools.core.inteceptor.base.BeanMethodInterceptor;
 import io.nuls.tools.core.inteceptor.base.BeanMethodInterceptorChain;
+import io.nuls.tools.protocol.MessageHandler;
+import io.nuls.tools.protocol.Protocol;
+import io.nuls.tools.protocol.ProtocolGroupManager;
+import io.nuls.tools.protocol.ProtocolValidator;
 
 import java.lang.reflect.Method;
 import java.util.Map;
@@ -39,12 +44,14 @@ public class MessageHandlerInterceptor implements BeanMethodInterceptor<MessageH
 
     @Override
     public Object intercept(MessageHandler annotation, Object object, Method method, Object[] params, BeanMethodInterceptorChain interceptorChain) throws Throwable {
-        Map map = (Map) params[0];
-        int chainId = (Integer) map.get("chainId");
-        Protocol protocol = ProtocolGroupManager.getProtocol(chainId);
-        boolean validate = ProtocolValidator.meaasgeValidate(annotation.message(), object.getClass().getSuperclass(), protocol, method.getName());
-        if (!validate) {
-            throw new RuntimeException("The message or message handler is not available in the current version!");
+        if (ModuleHelper.isSupportProtocolUpdate()) {
+            Map map = (Map) params[0];
+            int chainId = (Integer) map.get("chainId");
+            Protocol protocol = ProtocolGroupManager.getProtocol(chainId);
+            boolean validate = ProtocolValidator.meaasgeValidate(annotation.message(), object.getClass().getSuperclass(), protocol, method.getName());
+            if (!validate) {
+                throw new RuntimeException("The message or message handler is not available in the current version!");
+            }
         }
         return interceptorChain.execute(annotation, object, method, params);
     }

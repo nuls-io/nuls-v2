@@ -15,10 +15,8 @@ import io.nuls.tools.constant.TxType;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Service;
 import io.nuls.tools.exception.NulsException;
-import io.nuls.tools.protocol.ResisterTx;
 import io.nuls.tools.protocol.TransactionProcessor;
 import io.nuls.tools.protocol.TxMethodType;
-import io.nuls.tools.protocol.TxProperty;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -32,8 +30,7 @@ public class TransferTransactionHandler extends BaseCmd {
     /**
      * 转账交易验证
      */
-    @CmdAnnotation(cmd = "ac_transferTxValidate", version = 1.0, description = "create transfer transaction validate 1.0")
-    @ResisterTx(txType = TxProperty.TRANSFER, methodType = TxMethodType.VALID, methodName = "ac_transferTxValidate")
+    @CmdAnnotation(cmd = "transferTxValidate", version = 1.0, description = "create transfer transaction validate 1.0")
     @Parameter(parameterName = RpcParameterNameConstant.CHAIN_ID, parameterType = "int")
     @Parameter(parameterName = RpcParameterNameConstant.TX, parameterType = "String")
     @TransactionProcessor(txType = TxType.TRANSFER, methodType = TxMethodType.VALID)

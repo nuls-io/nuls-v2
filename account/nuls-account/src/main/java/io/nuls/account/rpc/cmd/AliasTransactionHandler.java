@@ -15,10 +15,8 @@ import io.nuls.tools.constant.TxType;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Service;
 import io.nuls.tools.exception.NulsRuntimeException;
-import io.nuls.tools.protocol.ResisterTx;
 import io.nuls.tools.protocol.TransactionProcessor;
 import io.nuls.tools.protocol.TxMethodType;
-import io.nuls.tools.protocol.TxProperty;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -36,7 +34,6 @@ public class AliasTransactionHandler extends BaseCmd {
      * @return
      */
     @CmdAnnotation(cmd = "ac_aliasTxValidate", version = 1.0, scope = "private", minEvent = 0, minPeriod = 0, description = "validate the transaction of alias")
-    @ResisterTx(txType = TxProperty.ACCOUNT_ALIAS, methodType = TxMethodType.VALID, methodName = "ac_aliasTxValidate")
     @TransactionProcessor(txType = TxType.ACCOUNT_ALIAS, methodType = TxMethodType.VALID)
     public Response aliasTxValidate(Map params) {
         boolean result;

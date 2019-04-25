@@ -111,4 +111,15 @@ public class Node {
             LoggerUtil.commonLog.error("download fail! node-" + id + ",oldCredit-" + oldCredit + ",newCredit-" + credit);
         }
     }
+
+    @Override
+    public String toString() {
+        return "Node{" +
+                "id='" + id + '\'' +
+                ", height=" + height +
+                ", hash=" + hash +
+                ", credit=" + credit +
+                ", duration=" + duration +
+                '}';
+    }
 }

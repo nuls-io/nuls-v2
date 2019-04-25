@@ -24,9 +24,9 @@
         "unlockTx": false,
         "verifySignature": true,
         "handler": "io.nuls.account.rpc.cmd.AliasTransactionHandler",
-        "validate": "aliasTxValidate",
-        "commit": "aliasTxCommit",
-        "rollback": "aliasTxRollback"
+        "validate": "ac_aliasTxValidate",
+        "commit": "ac_aliasTxCommit",
+        "rollback": "ac_aliasTxRollback"
       }
     ],
     "validMessages": [],

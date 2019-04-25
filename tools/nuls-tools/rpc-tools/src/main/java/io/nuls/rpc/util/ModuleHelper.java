@@ -15,8 +15,17 @@ import java.util.Set;
  */
 public class ModuleHelper {
 
+    /**
+     * 是否支持协议升级功能
+     */
     private static boolean supportProtocolUpdate;
+    /**
+     * 是否支持智能合约功能
+     */
     private static boolean supportSmartContract;
+    /**
+     * 是否支持跨链功能
+     */
     private static boolean supportCrossChain;
 
     public static boolean isSupportProtocolUpdate() {
@@ -37,36 +46,18 @@ public class ModuleHelper {
         supportCrossChain = enableCrossChain(module);
     }
 
-    /**
-     * 是否支持协议升级功能
-     *
-     * @param module
-     * @return
-     */
     private static boolean enableProtocolUpdate(RpcModule module) {
         Module m = new Module(ModuleE.PU.abbr, "1.0");
         Set<Module> dependencies = module.getDependencies();
         return module.moduleInfo().equals(m) || dependencies.contains(m);
     }
 
-    /**
-     * 是否支持智能合约功能
-     *
-     * @param module
-     * @return
-     */
     private static boolean enableSmartContract(RpcModule module) {
         Module m = new Module(ModuleE.SC.abbr, "1.0");
         Set<Module> dependencies = module.getDependencies();
         return module.moduleInfo().equals(m) || dependencies.contains(m);
     }
 
-    /**
-     * 是否支持跨链功能
-     *
-     * @param module
-     * @return
-     */
     private static boolean enableCrossChain(RpcModule module) {
         Module m = new Module(ModuleE.CC.abbr, "1.0");
         Set<Module> dependencies = module.getDependencies();
