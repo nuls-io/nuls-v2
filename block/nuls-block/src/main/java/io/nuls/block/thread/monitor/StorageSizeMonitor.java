@@ -55,7 +55,7 @@ public class StorageSizeMonitor extends BaseMonitor {
         ChainParameters parameters = ContextManager.getContext(chainId).getParameters();
         int heightRange = parameters.getHeightRange();
         int orphanChainMaxAge = parameters.getOrphanChainMaxAge();
-        context.setStatus(RunningStatusEnum.DATABASE_CLEANING);
+        context.setStatus(RunningStatusEnum.STORAGE_CLEANING);
         forkChainsCleaner(chainId, heightRange, context);
         orphanChainsCleaner(chainId, heightRange, context, orphanChainMaxAge);
         int cacheSize = parameters.getCacheSize();

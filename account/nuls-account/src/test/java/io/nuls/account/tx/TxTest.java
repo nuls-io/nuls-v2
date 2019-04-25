@@ -31,6 +31,7 @@ import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.model.message.Response;
 import io.nuls.rpc.netty.processor.ResponseMessageProcessor;
 import io.nuls.tools.log.Log;
+import io.nuls.tools.parse.JSONUtils;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -97,6 +98,15 @@ public class TxTest {
 //        importPriKey("00a6eef7b91c645525bb8410f2a79e1299a69d0d7ef980068434b6aca90ab6d9", password);
     }
 
+    /**
+     * 删除账户
+     */
+    @Test
+    public void removeAccountTest() throws Exception {
+        removeAccount("tNULSeBaMkrt4z9FYEkkR9D6choPVvQr94oYZp", password);
+//        removeAccount(address20, password);
+    }
+
     public void importPriKey(String priKey, String pwd) {
         try {
             //账户已存在则覆盖 If the account exists, it covers.
@@ -114,5 +124,15 @@ public class TxTest {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    public void removeAccount(String address, String password) throws Exception {
+        Map<String, Object> params = new HashMap<>();
+        params.put(Constants.VERSION_KEY_STR, "1.0");
+        params.put("chainId", chainId);
+        params.put("address", address);
+        params.put("password", password);
+        Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_removeAccount", params);
+        Log.debug("{}", JSONUtils.obj2json(cmdResp.getResponseData()));
     }
 }
