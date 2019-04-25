@@ -44,6 +44,8 @@ public class BatchReadyNodeAccountCase extends CallRemoteTestCase<Void,Integer> 
     TransferToAddressCase transferToAddressCase;
 
     @Autowired
+    SleepAdapter.$30SEC sleep30;
+    @Autowired
     SleepAdapter.$15SEC sleep15;
 
     @Override
@@ -58,7 +60,7 @@ public class BatchReadyNodeAccountCase extends CallRemoteTestCase<Void,Integer> 
         List<BatchParam> params = new ArrayList<>();
         //给每个节点创建一个中转账户，用于把资产转账到若干出金地址中
         Result<String> accounts = accountService.createAccount(new CreateAccountReq(nodes.size(), Constants.PASSWORD));
-        BigInteger amount = TRANSFER_AMOUNT.multiply(BigInteger.valueOf(itemCount));
+        BigInteger amount = TRANSFER_AMOUNT.multiply(BigInteger.valueOf(itemCount)).multiply(BigInteger.TWO);
         for (int i = 0;i<accounts.getList().size();i++){
             String address = accounts.getList().get(i);
             String formAddress = config.getSeedAddress();
@@ -74,17 +76,17 @@ public class BatchReadyNodeAccountCase extends CallRemoteTestCase<Void,Integer> 
             bp.setFormAddressPriKey(accountService.getAccountPrivateKey(new GetAccountPrivateKeyByAddressReq(Constants.PASSWORD,address)).getData());
             params.add(bp);
         }
-        sleep15.check(null,depth);
+        sleep30.check(null,depth);
         for (int i = 0;i<nodes.size();i++){
             String node = nodes.get(i);
             Integer res = doRemoteTest(node,BatchCreateAccountCase.class,params.get(i));
-            Log.info("res:{}",res);
+            Log.info("成功创建测试账户{}个",res);
         }
         sleep15.check(null,depth);
         for (int i = 0;i<accounts.getList().size();i++) {
             String node = nodes.get(i);
             Boolean res = doRemoteTest(node, BatchCreateTransferCase.class, itemCount);
-            Log.info("res:{}", res);
+            Log.info("成功发起交易:{}", res);
         }
         return null;
     }
