@@ -16,8 +16,8 @@ import java.math.BigInteger;
 public abstract class BaseTranscationCase<T,P> extends BaseTestCase<T,P> {
 
 
-    TransferService transferService = ServiceManager.get(TransferService.class);
+    protected TransferService transferService = ServiceManager.get(TransferService.class);
 
-    @Autowired Config config;
+    @Autowired protected Config config;
 
 }

@@ -27,6 +27,7 @@ import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.model.CmdAnnotation;
 import io.nuls.rpc.model.RegisterApi;
 import io.nuls.rpc.model.message.Response;
+import io.nuls.rpc.netty.channel.ConnectData;
 import io.nuls.rpc.netty.channel.manager.ConnectManager;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.log.Log;
@@ -57,6 +58,15 @@ public class KernelCmd4Test extends BaseCmd {
                 role.put(Constants.KEY_IP, registerApi.getConnectionInformation().get(Constants.KEY_IP));
                 role.put(Constants.KEY_PORT, registerApi.getConnectionInformation().get(Constants.KEY_PORT));
                 ConnectManager.ROLE_MAP.put(registerApi.getAbbreviation(), role);
+                ConnectData connectData = ConnectManager.getConnectDataByRole(registerApi.getAbbreviation());
+                if(connectData != null){
+                    connectData.addCloseEvent(() -> {
+                        if (!ConnectManager.ROLE_CHANNEL_MAP.containsKey(registerApi.getAbbreviation())) {
+                            Log.warn("RMB:{}模块触发连接断开事件", registerApi.getAbbreviation());
+                            ConnectManager.ROLE_MAP.remove(registerApi.getAbbreviation());
+                        }
+                    });
+                }
             }
             Map<String, Object> dependMap = new HashMap<>(1);
             dependMap.put("Dependencies", ConnectManager.ROLE_MAP);
