@@ -108,7 +108,7 @@ public class NodeMaintenanceTask implements Runnable {
         List<Node> nodeList = new ArrayList<>(canConnectNodes);
         nodeList.removeAll(connectedNodes);
         for (Node node : nodeList) {
-            if (IpUtil.isSelf(node.getId())) {
+            if (IpUtil.isSelf(node.getIp())) {
                 nodeList.remove(node);
                 if (isCross) {
                     nodeGroup.getCrossNodeContainer().getCanConnectNodes().remove(node.getId());
