@@ -183,6 +183,11 @@ public class TransactionCmd extends BaseCmd {
 
 
     //----------------------------------------- test cmd ---------------------------------------------
+    //----------------------------------------- test cmd ---------------------------------------------
+    //----------------------------------------- test cmd ---------------------------------------------
+    //----------------------------------------- test cmd ---------------------------------------------
+    //----------------------------------------- test cmd ---------------------------------------------
+    //----------------------------------------- test cmd ---------------------------------------------
     /**
      * 性能测试，新交易简要执行
      *
@@ -213,10 +218,10 @@ public class TransactionCmd extends BaseCmd {
             //将txStr转换为Transaction对象
             Transaction tx = TxUtil.getInstanceRpcStr(txStr, Transaction.class);
             Map<String, Boolean> map = new HashMap<>(TxConstant.INIT_CAPACITY_2);
-            if (chain.getPackaging().get()) {
+            //if (chain.getPackaging().get()) {
                 packablePool.add(chain, tx);
                 System.out.println("********* " + packablePool.getPoolSize(chain));
-            }
+            //}
             unconfirmedTxStorageService.putTx(chain.getChainId(), tx);
             //广播完整交易
             NetworkCall.broadcastTx(chain.getChainId(),tx);
@@ -230,6 +235,10 @@ public class TransactionCmd extends BaseCmd {
             return failed(TxErrorCode.SYS_UNKOWN_EXCEPTION);
         }
     }
+    //----------------------------------------- test cmd ---------------------------------------------
+    //----------------------------------------- test cmd ---------------------------------------------
+    //----------------------------------------- test cmd ---------------------------------------------
+    //----------------------------------------- test cmd ---------------------------------------------
     //----------------------------------------- test cmd ---------------------------------------------
 
 

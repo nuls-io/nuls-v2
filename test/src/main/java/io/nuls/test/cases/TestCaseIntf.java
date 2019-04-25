@@ -34,7 +34,7 @@ public interface TestCaseIntf<T,P> {
 
     default void checkResultStatus(Result result) throws TestFailException {
         if(!result.isSuccess()){
-            throw new TestFailException(result.getMessage());
+            throw new TestFailException(result.getStatus() + " : " + result.getMessage());
         }
         if(result.getList() == null && result.getData() == null){
             throw new TestFailException(title() + "测试返回值不符合预期，返回数据为空");
