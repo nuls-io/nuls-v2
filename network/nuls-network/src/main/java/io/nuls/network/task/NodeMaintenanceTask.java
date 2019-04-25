@@ -30,6 +30,7 @@ import io.nuls.network.manager.ConnectionManager;
 import io.nuls.network.manager.NodeGroupManager;
 import io.nuls.network.model.Node;
 import io.nuls.network.model.NodeGroup;
+import io.nuls.network.utils.IpUtil;
 import io.nuls.network.utils.LoggerUtil;
 import io.nuls.tools.core.ioc.SpringLiteContext;
 
@@ -104,18 +105,26 @@ public class NodeMaintenanceTask implements Runnable {
         if (canConnectNodes.size() == 0) {
             return null;
         }
-
         List<Node> nodeList = new ArrayList<>(canConnectNodes);
-
         nodeList.removeAll(connectedNodes);
+        for (Node node : nodeList) {
+            if (IpUtil.isSelf(node.getId())) {
+                nodeList.remove(node);
+                if (isCross) {
+                    nodeGroup.getCrossNodeContainer().getCanConnectNodes().remove(node.getId());
+                    break;
+                } else {
+                    nodeGroup.getLocalNetNodeContainer().getCanConnectNodes().remove(node.getId());
+                    break;
+                }
+            }
+        }
         //最大需要连接的数量 大于 可用连接数的时候，直接返回可用连接数，否则进行选择性返回
         int maxCount = networkConfig.getMaxOutCount() - connectedNodes.size();
         if (nodeList.size() < maxCount) {
             return nodeList;
         }
-
         Collections.shuffle(nodeList);
-
         return nodeList.subList(0, maxCount);
     }
 
