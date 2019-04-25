@@ -1,6 +1,7 @@
 {
   "dataFolder": "block",
   "language": "en",
+  "dependent": "tx:1.0,ac:1.0,lg:1.0,cs:1.0,nw:1.0,pu:1.0",
   "forkChainsMonitorInterval": 10000,
   "orphanChainsMonitorInterval": 10000,
   "orphanChainsMaintainerInterval": 5000,
@@ -21,7 +22,7 @@
   "waitInterval": 50,
   "maxRollback": 1000,
   "consistencyNodePercent": 60,
-  "minNodeAmount": 4,
+  "minNodeAmount": 0,
   "downloadNumber": 10,
   "extendMaxSize": 1024,
   "validBlockInterval": 60000,

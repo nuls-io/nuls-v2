@@ -5,7 +5,9 @@ import io.nuls.tools.exception.NulsRuntimeException;
 import io.nuls.tools.log.Log;
 import io.nuls.tools.thread.ThreadUtils;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.Arrays;
 
 /**
@@ -60,7 +62,7 @@ public class NulsRpcModuleBootstrap {
                                 break;
                             case "d":
                                 System.out.println("依赖的模块列表");
-                                module.getDependentces().forEach(d -> {
+                                module.getDependencies().forEach(d -> {
                                     System.out.println(d.name + " is ready : " + module.isDependencieReady(d));
                                 });
                                 break;

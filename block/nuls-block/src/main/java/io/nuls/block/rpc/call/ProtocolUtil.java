@@ -26,6 +26,7 @@ import io.nuls.block.model.ChainContext;
 import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.model.message.Response;
 import io.nuls.rpc.netty.processor.ResponseMessageProcessor;
+import io.nuls.rpc.util.ModuleHelper;
 import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.log.logback.NulsLogger;
 
@@ -48,6 +49,9 @@ public class ProtocolUtil {
      * @return
      */
     public static boolean rollbackNotice(int chainId, BlockHeader blockHeader) {
+        if (!ModuleHelper.isSupportProtocolUpdate()) {
+            return true;
+        }
         ChainContext context = ContextManager.getContext(chainId);
         NulsLogger commonLog = context.getCommonLog();
         try {
@@ -71,6 +75,9 @@ public class ProtocolUtil {
      * @return
      */
     public static boolean saveNotice(int chainId, BlockHeader blockHeader) {
+        if (!ModuleHelper.isSupportProtocolUpdate()) {
+            return true;
+        }
         ChainContext context = ContextManager.getContext(chainId);
         NulsLogger commonLog = context.getCommonLog();
         try {

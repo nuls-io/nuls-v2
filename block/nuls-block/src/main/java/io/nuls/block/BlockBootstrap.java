@@ -14,6 +14,7 @@ import io.nuls.rpc.modulebootstrap.Module;
 import io.nuls.rpc.modulebootstrap.NulsRpcModuleBootstrap;
 import io.nuls.rpc.modulebootstrap.RpcModule;
 import io.nuls.rpc.modulebootstrap.RpcModuleState;
+import io.nuls.rpc.util.ModuleHelper;
 import io.nuls.rpc.util.TimeUtils;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
@@ -52,21 +53,9 @@ public class BlockBootstrap extends RpcModule {
         NulsRpcModuleBootstrap.run("io.nuls", args);
     }
 
-    /**
-     * 返回此模块的依赖模块
-     *
-     * @return
-     */
     @Override
     public Module[] declareDependent() {
-        return new Module[]{
-                new Module(ModuleE.TX.abbr, "1.0"),
-                new Module(ModuleE.NW.abbr, "1.0"),
-                new Module(ModuleE.PU.abbr, "1.0"),
-                new Module(ModuleE.CS.abbr, "1.0"),
-                new Module(ModuleE.LG.abbr, "1.0"),
-                new Module(ModuleE.AC.abbr, "1.0")
-        };
+        return new Module[0];
     }
 
     /**
@@ -163,6 +152,7 @@ public class BlockBootstrap extends RpcModule {
             nodesExecutor.scheduleWithFixedDelay(NodesMonitor.getInstance(), 0, blockConfig.getNodesMonitorInterval(), TimeUnit.MILLISECONDS);
             started = true;
         }
+        ModuleHelper.init(this);
         return RpcModuleState.Running;
     }
 

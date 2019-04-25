@@ -40,7 +40,7 @@ public abstract class RpcModule implements InitializingBean {
     @Value("dependent")
     private String dependentList;
 
-    private Set<Module> dependentces;
+    private Set<Module> dependencies;
 
     /**
      * 启动参数
@@ -70,10 +70,10 @@ public abstract class RpcModule implements InitializingBean {
     @Override
     public final void afterPropertiesSet() throws NulsException {
         try {
-            dependentces = new HashSet<>();
+            dependencies = new HashSet<>();
             Module[] depend = declareDependent();
             if(depend != null){
-                dependentces.addAll(Arrays.asList(depend));
+                dependencies.addAll(Arrays.asList(depend));
             }
             if(dependentList != null){
                 String[] temp = dependentList.split(",");
@@ -83,7 +83,7 @@ public abstract class RpcModule implements InitializingBean {
                         Log.error("config item dependent error, e.g. moduleName1:verson,moduleName2:version....");
                         System.exit(0);
                     }
-                    dependentces.add(new Module(t2[0],t2[1]));
+                    dependencies.add(new Module(t2[0], t2[1]));
                 });
             }
             I18nUtils.loadLanguage(this.getClass(), getLanguagePath(),LANGUAGE);
@@ -195,7 +195,7 @@ public abstract class RpcModule implements InitializingBean {
      */
     void run(String modulePackage, String serviceManagerUrl) {
         //初始化依赖模块的ready状态
-        this.getDependentces().forEach(d -> dependentReadyState.put(d, Boolean.FALSE));
+        this.getDependencies().forEach(d -> dependentReadyState.put(d, Boolean.FALSE));
         try {
             // Start server instance
             NettyServer server = NettyServer.getInstance(moduleInfo().getName(), moduleInfo().getName(), moduleInfo().getVersion())
@@ -302,8 +302,8 @@ public abstract class RpcModule implements InitializingBean {
         return dependentReadyState.entrySet().stream().allMatch(d -> d.getValue());
     }
 
-    public Set<Module> getDependentces(){
-        return dependentces;
+    public Set<Module> getDependencies() {
+        return dependencies;
     }
 
     /**
