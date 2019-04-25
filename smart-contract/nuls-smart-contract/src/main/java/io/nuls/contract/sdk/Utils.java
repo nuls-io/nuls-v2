@@ -2,6 +2,7 @@ package io.nuls.contract.sdk;
 
 import java.math.BigInteger;
 import java.util.List;
+import java.util.Map;
 
 public class Utils {
 
@@ -156,4 +157,6 @@ public class Utils {
      * @return 返回原始种子的集合，元素是字节数组转化的BigInteger(new BigInteger(byte[] bytes))
      */
     public static native List<BigInteger> getRandomSeedList(long startHeight, long endHeight);
+
+    public static native Object invokeExternalCmd(String cmdName, String[] args);
 }

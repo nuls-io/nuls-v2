@@ -24,6 +24,9 @@
  */
 package io.nuls.contract.vm.natives.io.nuls.contract.sdk;
 
+import io.nuls.contract.enums.CmdRegisterType;
+import io.nuls.contract.manager.CmdRegisterManager;
+import io.nuls.contract.model.bo.CmdRegister;
 import io.nuls.contract.sdk.Event;
 import io.nuls.contract.vm.*;
 import io.nuls.contract.vm.code.ClassCode;
@@ -32,12 +35,17 @@ import io.nuls.contract.vm.code.MethodCode;
 import io.nuls.contract.vm.code.VariableType;
 import io.nuls.contract.vm.exception.ErrorException;
 import io.nuls.contract.vm.natives.NativeMethod;
+import io.nuls.contract.vm.program.ProgramInvokeRegisterCmd;
 import io.nuls.contract.vm.util.Constants;
 import io.nuls.contract.vm.util.JsonUtils;
 import io.nuls.contract.vm.util.Utils;
+import io.nuls.rpc.model.message.Response;
+import io.nuls.rpc.netty.processor.ResponseMessageProcessor;
+import io.nuls.tools.core.ioc.SpringLiteContext;
 import io.nuls.tools.crypto.Sha3Hash;
 import org.apache.commons.lang3.StringUtils;
 
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -402,6 +410,74 @@ public class NativeUtils {
         }
 
         ObjectRef objectRef = newBigIntegerArrayList(frame, seeds);
+
+        Result result = NativeMethod.result(methodCode, objectRef, frame);
+        frame.setAddGas(true);
+        return result;
+    }
+
+    public static final String invokeExternalCmd = TYPE + "." + "invokeExternalCmd" + "(Ljava/lang/String;[Ljava/lang/String;)Ljava/lang/Object;";
+
+    private static Result invokeExternalCmd(MethodCode methodCode, MethodArgs methodArgs, Frame frame) {
+        frame.setAddGas(false);
+        frame.vm.addGasUsed(GasCost.INVOKE_EXTERNAL_METHOD);
+        ObjectRef cmdNameRef = (ObjectRef) methodArgs.invokeArgs[0];
+        ObjectRef argsRef = (ObjectRef) methodArgs.invokeArgs[1];
+        String cmdName = frame.heap.runToString(cmdNameRef);
+        String[] args = (String[]) frame.heap.getObject(argsRef);
+
+        // 检查是否注册
+        CmdRegisterManager cmdRegisterManager = SpringLiteContext.getBean(CmdRegisterManager.class);
+        int currentChainId = frame.vm.getProgramExecutor().getCurrentChainId();
+        CmdRegister cmdRegister = cmdRegisterManager.getCmdRegisterByCmdName(currentChainId, cmdName);
+        if(cmdRegister == null) {
+            throw new ErrorException(
+                    String.format("Invoke external cmd failed. There is no registration information. chainId: [%s] cmdName: [%s]",
+                            currentChainId, cmdName), frame.vm.getGasUsed(), null);
+        }
+        String moduleCode = cmdRegister.getModuleCode();
+        List<String> argNames = cmdRegister.getArgNames();
+        int argsSize = args.length;
+        int argNamesSize = argNames.size();
+        if(argsSize != argNamesSize) {
+            throw new ErrorException(
+                    String.format("Invoke external cmd failed. Inconsistent number of arguments. register size: [%s] your size: [%s]",
+                            argNamesSize, argsSize), frame.vm.getGasUsed(), null);
+        }
+        Map argsMap = new HashMap(8);
+        for(int i=0;i<argsSize;i++) {
+            argsMap.put(argNames.get(i), args[i]);
+        }
+
+        CmdRegisterType cmdRegisterType = cmdRegister.getCmdRegisterType();
+        String returnType = cmdRegister.getReturnType();
+        //TODO pierre 调用外部接口
+        Response cmdResp;
+        try {
+            cmdResp = ResponseMessageProcessor.requestAndResponse(moduleCode, cmdName, argsMap);
+        } catch (Exception e) {
+            throw new ErrorException(
+                    String.format("Invoke external cmd failed. error: %s",
+                            e.getMessage()), frame.vm.getGasUsed(), e.toString());
+        }
+        if(!cmdResp.isSuccess()) {
+            String errorCode = cmdResp.getResponseErrorCode();
+            String errorMsg = cmdResp.getResponseComment();
+            throw new ErrorException(
+                    String.format("Invoke external cmd failed. error code: %s, error message: ",
+                            errorCode, errorMsg), frame.vm.getGasUsed(), null);
+        }
+        Map resData = (Map) cmdResp.getResponseData();
+        ProgramInvokeRegisterCmd invokeRegisterCmd = new ProgramInvokeRegisterCmd(cmdName, argsMap, cmdRegisterType);
+        //TODO pierre 注册模块需要定义返回值的key
+        Object cmdResult = resData.get("result");
+
+        //TODO pierre 处理返回值
+        if (cmdRegisterType.equals(CmdRegisterType.NEW_TX)) {
+            invokeRegisterCmd.setNewTxHex((String) cmdResult);
+        }
+        //TODO pierre 写返回值类型枚举
+        ObjectRef objectRef = frame.heap.runNewObject(null, "");
 
         Result result = NativeMethod.result(methodCode, objectRef, frame);
         frame.setAddGas(true);

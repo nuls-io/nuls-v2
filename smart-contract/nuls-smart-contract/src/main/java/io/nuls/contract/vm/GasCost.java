@@ -49,4 +49,9 @@ public class GasCost {
     public static final int RANDOM_COUNT_SEED = 5000;//根据高度和原始种子个数生成一个随机种子
     public static final int RANDOM_HEIGHT_SEED = 5000;//根据高度区间生成一个随机种子
 
+    /**
+     * 调用虚拟机外部方法(其他模块注册的方法)
+     */
+    public static final int INVOKE_EXTERNAL_METHOD = 5000;
+
 }
