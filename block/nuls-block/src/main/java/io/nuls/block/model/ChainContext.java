@@ -25,7 +25,7 @@ package io.nuls.block.model;
 import io.nuls.base.data.Block;
 import io.nuls.block.cache.BlockCacher;
 import io.nuls.block.cache.SmallBlockCacher;
-import io.nuls.block.constant.RunningStatusEnum;
+import io.nuls.block.constant.StatusEnum;
 import io.nuls.block.manager.BlockChainManager;
 import io.nuls.block.thread.monitor.TxGroupRequestor;
 import io.nuls.block.utils.LoggerUtil;
@@ -47,7 +47,7 @@ public class ChainContext {
     /**
      * 代表该链的运行状态
      */
-    private RunningStatusEnum status;
+    private StatusEnum status;
 
     /**
      * 是否继续本次下载，中途发生异常置为false
@@ -110,7 +110,7 @@ public class ChainContext {
      */
     private List<byte []> packingAddressList;
 
-    public RunningStatusEnum getStatus() {
+    public StatusEnum getStatus() {
         return status;
     }
 
@@ -210,7 +210,7 @@ public class ChainContext {
         this.packingAddressList = packingAddressList;
     }
 
-    public void setStatus(RunningStatusEnum status) {
+    public void setStatus(StatusEnum status) {
         if (status.equals(getStatus())) {
             return;
         }
@@ -226,7 +226,7 @@ public class ChainContext {
 
     public void init() {
         LoggerUtil.init(chainId, parameters.getLogLevel());
-        this.setStatus(RunningStatusEnum.INITIALIZING);
+        this.setStatus(StatusEnum.INITIALIZING);
         packingAddressList = new CopyOnWriteArrayList<>();
         duplicateBlockMap = new HashMap<>();
         systemTransactionType = new ArrayList<>();

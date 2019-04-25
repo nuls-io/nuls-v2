@@ -20,7 +20,7 @@
 
 package io.nuls.block.thread.monitor;
 
-import io.nuls.block.constant.RunningStatusEnum;
+import io.nuls.block.constant.StatusEnum;
 import io.nuls.block.model.ChainContext;
 import io.nuls.block.model.ChainParameters;
 import io.nuls.block.rpc.call.ConsensusUtil;
@@ -29,8 +29,11 @@ import io.nuls.block.thread.BlockSynchronizer;
 import io.nuls.tools.log.logback.NulsLogger;
 import io.nuls.tools.thread.ThreadUtils;
 
+import java.util.List;
+
 import static io.nuls.block.constant.Constant.CONSENSUS_WAITING;
 import static io.nuls.block.constant.Constant.CONSENSUS_WORKING;
+import static io.nuls.block.constant.StatusEnum.INITIALIZING;
 
 /**
  * 网络节点数量监控线程
@@ -47,20 +50,23 @@ public class NodesMonitor extends BaseMonitor {
         return INSTANCE;
     }
 
+    private NodesMonitor() {
+        super(List.of(INITIALIZING));
+    }
+
     @Override
     protected void process(int chainId, ChainContext context, NulsLogger commonLog) {
         ChainParameters parameters = context.getParameters();
         int minNodeAmount = parameters.getMinNodeAmount();
         int size = NetworkUtil.getAvailableNodes(chainId).size();
-        if (size < minNodeAmount && RunningStatusEnum.RUNNING.equals(context.getStatus())) {
+        if (size < minNodeAmount && StatusEnum.RUNNING.equals(context.getStatus())) {
             commonLog.info("chainId-" + chainId + ", AvailableNodes not enough!");
             ConsensusUtil.notice(chainId, CONSENSUS_WAITING);
-            context.setStatus(RunningStatusEnum.INITIALIZING);
+            context.setStatus(INITIALIZING);
         }
-        if (size >= minNodeAmount && !RunningStatusEnum.RUNNING.equals(context.getStatus())) {
+        if (size >= minNodeAmount && !StatusEnum.RUNNING.equals(context.getStatus())) {
             commonLog.info("chainId-" + chainId + ", AvailableNodes enough!");
             //重新开启区块同步线程
-            ConsensusUtil.notice(chainId, CONSENSUS_WORKING);
             ThreadUtils.createAndRunThread("block-synchronizer", BlockSynchronizer.getInstance());
         }
     }

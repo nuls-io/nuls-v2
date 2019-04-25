@@ -26,7 +26,7 @@ import io.nuls.base.data.BlockHeader;
 import io.nuls.base.data.NulsDigestData;
 import io.nuls.base.data.po.BlockHeaderPo;
 import io.nuls.block.constant.LocalBlockStateEnum;
-import io.nuls.block.constant.RunningStatusEnum;
+import io.nuls.block.constant.StatusEnum;
 import io.nuls.block.manager.BlockChainManager;
 import io.nuls.block.manager.ContextManager;
 import io.nuls.block.model.ChainContext;
@@ -83,7 +83,7 @@ public class BlockSynchronizer implements Runnable {
     public void run() {
         for (Integer chainId : ContextManager.chainIds) {
             ChainContext context = ContextManager.getContext(chainId);
-            context.setStatus(RunningStatusEnum.SYNCHRONIZING);
+            context.setStatus(StatusEnum.SYNCHRONIZING);
             int synSleepInterval = context.getParameters().getSynSleepInterval();
             NulsLogger commonLog = context.getCommonLog();
             try {
@@ -181,7 +181,7 @@ public class BlockSynchronizer implements Runnable {
         int minNodeAmount = parameters.getMinNodeAmount();
         if (minNodeAmount == 0 && availableNodes.size() == 0) {
             commonLog.info("skip block syn, because minNodeAmount is set to 0, minNodeAmount should't set to 0 otherwise you want run local node without connect with network");
-            context.setStatus(RunningStatusEnum.RUNNING);
+            context.setStatus(StatusEnum.RUNNING);
             ConsensusUtil.notice(chainId, CONSENSUS_WORKING);
             return true;
         }
@@ -197,7 +197,7 @@ public class BlockSynchronizer implements Runnable {
             //网络上所有节点高度都是0,说明是该链第一次运行
             if (params.getNetLatestHeight() == 0 && size == availableNodes.size()) {
                 commonLog.info("chain-" + chainId + ", first start");
-                context.setStatus(RunningStatusEnum.RUNNING);
+                context.setStatus(StatusEnum.RUNNING);
                 ConsensusUtil.notice(chainId, CONSENSUS_WORKING);
                 return true;
             }
@@ -205,7 +205,7 @@ public class BlockSynchronizer implements Runnable {
             LocalBlockStateEnum stateEnum = checkLocalBlock(chainId, params);
             if (stateEnum.equals(CONSISTENT)) {
                 commonLog.info("chain-" + chainId + ", local blocks is newest");
-                context.setStatus(RunningStatusEnum.RUNNING);
+                context.setStatus(StatusEnum.RUNNING);
                 ConsensusUtil.notice(chainId, CONSENSUS_WORKING);
                 return true;
             }
@@ -248,7 +248,7 @@ public class BlockSynchronizer implements Runnable {
                     //要测试分叉链切换或者孤儿链，放开下面语句，概率会加大
 //                if (true) {
                     commonLog.info("block syn complete successfully, current height-" + params.getNetLatestHeight());
-                    context.setStatus(RunningStatusEnum.RUNNING);
+                    context.setStatus(StatusEnum.RUNNING);
                     ConsensusUtil.notice(chainId, CONSENSUS_WORKING);
                     return true;
                 } else {

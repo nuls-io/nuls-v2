@@ -1,6 +1,6 @@
 package io.nuls.block.thread.monitor;
 
-import io.nuls.block.constant.RunningStatusEnum;
+import io.nuls.block.constant.StatusEnum;
 import io.nuls.block.manager.ContextManager;
 import io.nuls.block.model.ChainContext;
 import io.nuls.tools.log.logback.NulsLogger;
@@ -12,15 +12,29 @@ import io.nuls.tools.log.logback.NulsLogger;
  * @version 1.0
  * @date 2019/4/23 10:58
  */
+import java.util.ArrayList;
+import java.util.List;
+
 public abstract class BaseMonitor implements Runnable {
 
     /**
-     * 标志
+     * 可执行业务逻辑的状态列表(默认只包含{@link StatusEnum#RUNNING})
      */
-    private String symbol;
+    protected List<StatusEnum> runningStatusEnumList = new ArrayList<>();
+
+    /**
+     * 线程标志
+     */
+    protected String symbol;
 
     BaseMonitor() {
         this.symbol = this.getClass().getName();
+        this.runningStatusEnumList.add(StatusEnum.RUNNING);
+    }
+
+    public BaseMonitor(List<StatusEnum> runningStatusEnumList) {
+        this();
+        this.runningStatusEnumList.addAll(runningStatusEnumList);
     }
 
     @Override
@@ -28,10 +42,10 @@ public abstract class BaseMonitor implements Runnable {
         for (Integer chainId : ContextManager.chainIds) {
             ChainContext context = ContextManager.getContext(chainId);
             NulsLogger commonLog = context.getCommonLog();
-            RunningStatusEnum status = context.getStatus();
+            StatusEnum status = context.getStatus();
             try {
                 //判断该链的运行状态,只有正常运行时才运行定时监控线程
-                if (status.equals(RunningStatusEnum.RUNNING)) {
+                if (runningStatusEnumList.contains(status)) {
                     process(chainId, context, commonLog);
                 } else {
                     commonLog.debug("skip process, status is " + status + ", chainId-" + chainId);
