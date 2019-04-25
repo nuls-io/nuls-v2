@@ -157,15 +157,16 @@ public class TxServiceImpl implements TxService {
             if (null == existTx) {
                 VerifyResult verifyResult = verify(chain, tx);
                 if (!verifyResult.getResult()) {
-                    chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("verify failed: type:{} - txhash:{}, msg:{}",
+                    chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).error("verify failed: type:{} - txhash:{}, msg:{}",
                             tx.getType(), tx.getHash().getDigestHex(), verifyResult.getErrorCode().getMsg());
                     return false;
                 }
                 VerifyLedgerResult verifyLedgerResult = LedgerCall.commitUnconfirmedTx(chain, RPCUtil.encode(tx.serialize()));
-                if (!verifyLedgerResult.success()) {
-                    chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug(
-                            "coinData not success - code: {}, - reason:{}, type:{} - txhash:{}",
-                            verifyLedgerResult.getCode(), verifyLedgerResult.getDesc(), tx.getType(), tx.getHash().getDigestHex());
+                if (!verifyLedgerResult.businessSuccess()) {
+                    chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).error(
+                            "coinData verify fail - orphan: {}, - code:{}, type:{} - txhash:{}",verifyLedgerResult.getOrphan(),
+                            verifyLedgerResult.getErrorCode() == null ? "" : verifyLedgerResult.getErrorCode().getCode(),
+                            tx.getType(), tx.getHash().getDigestHex());
                     return false;
                 }
                 if (chain.getPackaging().get()) {
@@ -549,11 +550,12 @@ public class TxServiceImpl implements TxService {
                 }
                 //批量验证coinData, 单个发送
                 VerifyLedgerResult verifyLedgerResult = LedgerCall.verifyCoinDataPackaged(chain, txStr);
-                if (!verifyLedgerResult.success()) {
+                if (!verifyLedgerResult.businessSuccess()) {
                     String nonce = HexUtil.encode(TxUtil.getCoinData(tx).getFrom().get(0).getNonce());
-                    nulsLogger.error("coinData打包批量验证未通过 coinData not success - code: {}, - reason:{}, - type:{}, - first coinFrom nonce:{} - txhash:{}",
-                            verifyLedgerResult.getCode(), verifyLedgerResult.getDesc(), tx.getType(), nonce, tx.getHash().getDigestHex());
-                    if (verifyLedgerResult.getCode() == VerifyLedgerResult.ORPHAN) {
+                    nulsLogger.error("coinData 打包批量验证未通过 verify fail - orphan: {}, - code:{}, type:{}, - first coinFrom nonce:{}  - txhash:{}",verifyLedgerResult.getOrphan(),
+                            verifyLedgerResult.getErrorCode() == null ? "" : verifyLedgerResult.getErrorCode().getCode(),
+                            nonce, tx.getType(), tx.getHash().getDigestHex());
+                    if (verifyLedgerResult.getOrphan()) {
                         addOrphanTxSet(chain, orphanTxSet, txWrapper);
                     }
                     continue;
@@ -827,15 +829,15 @@ public class TxServiceImpl implements TxService {
                 throw new NulsException(e);
             }
             VerifyLedgerResult verifyLedgerResult = LedgerCall.verifyCoinDataPackaged(chain, txStr);
-            if (!verifyLedgerResult.success()) {
-                chain.getLoggerMap().get(TxConstant.LOG_TX).debug("[verifyAgain] " +
-                                "coinData not success - code: {}, - reason:{}, type:{} - txhash:{}",
-                        verifyLedgerResult.getCode(), verifyLedgerResult.getDesc(), tx.getType(), tx.getHash().getDigestHex());
+            if (!verifyLedgerResult.businessSuccess()) {
+                chain.getLoggerMap().get(TxConstant.LOG_TX).error("coinData 打包批量验证未通过 verify fail - orphan: {}, - code:{}, type:{}, - txhash:{}",verifyLedgerResult.getOrphan(),
+                        verifyLedgerResult.getErrorCode() == null ? "" : verifyLedgerResult.getErrorCode().getCode(),
+                        tx.getType(), tx.getHash().getDigestHex());
                 if (TxManager.isUnSystemSmartContract(chain, tx.getType())) {
                     //如果是智能合约的非系统交易,未验证通过,则放回待打包队列.
                     packablePool.addInFirst(chain, tx);
                     chain.setContractTxFail(true);
-                } else if (verifyLedgerResult.getCode() == VerifyLedgerResult.ORPHAN) {
+                } else if (verifyLedgerResult.getOrphan()) {
                     addOrphanTxSet(chain, orphanTxSet, txWrapper);
                 } else {
                     clearInvalidTx(chain, tx);
@@ -855,14 +857,14 @@ public class TxServiceImpl implements TxService {
     }
 
     @Override
-    public VerifyLedgerResult batchVerify(Chain chain, List<String> txStrList, long blockHeight, long blockTime, String packingAddress, String stateRoot, String preStateRoot) throws Exception {
+    public boolean batchVerify(Chain chain, List<String> txStrList, long blockHeight, long blockTime, String packingAddress, String stateRoot, String preStateRoot) throws NulsException{
         chain.getLoggerMap().get(TxConstant.LOG_TX).debug("");
         chain.getLoggerMap().get(TxConstant.LOG_TX).debug("开始区块交易批量验证......高度:{} ----------区块交易数:{}", blockHeight, txStrList.size());
         long s1 = TimeUtils.getCurrentTimeMillis();
         LOG.debug("[验区块交易] -开始-------------高度:{} ----------区块交易数:{} -------------", blockHeight, txStrList.size());
         LOG.debug("[验区块交易] -开始时间:{}", s1);
         LOG.debug("");
-        VerifyLedgerResult verifyLedgerResult = new VerifyLedgerResult(VerifyLedgerResult.OTHER_EXCEPTION);
+        //VerifyLedgerResult verifyLedgerResult = new VerifyLedgerResult(VerifyLedgerResult.OTHER_EXCEPTION);
         List<Transaction> txList = new ArrayList<>();
 
         /**
@@ -924,8 +926,12 @@ public class TxServiceImpl implements TxService {
                     ContractCall.contractBatchBegin(chain, blockHeight, blockTime, packingAddress, preStateRoot);
                     contractNotify = true;
                 }
-                if (!ContractCall.invokeContract(chain, RPCUtil.encode(tx.serialize()))) {
-                    return verifyLedgerResult;
+                try {
+                    if (!ContractCall.invokeContract(chain, RPCUtil.encode(tx.serialize()))) {
+                        return false;
+                    }
+                } catch (IOException e) {
+                    throw new NulsException(TxErrorCode.SERIALIZE_ERROR);
                 }
             }
 
@@ -935,14 +941,14 @@ public class TxServiceImpl implements TxService {
 
         if (contractNotify) {
             if (!ContractCall.contractBatchBefore(chain, blockHeight)) {
-                return verifyLedgerResult;
+                return false;
             }
         }
 
         long coinDataV = TimeUtils.getCurrentTimeMillis();//-----
         if (!LedgerCall.verifyBlockTxsCoinData(chain, txStrList, blockHeight)) {
             chain.getLoggerMap().get(TxConstant.LOG_TX).debug("batch verifyCoinData failed.");
-            return verifyLedgerResult;
+            return false;
         }
         LOG.debug("[验区块交易] coinData验证时间:{}", TimeUtils.getCurrentTimeMillis() - coinDataV);//----
         LOG.debug("[验区块交易] coinData -距方法开始的时间:{}", TimeUtils.getCurrentTimeMillis() - s1);//----
@@ -971,16 +977,16 @@ public class TxServiceImpl implements TxService {
                 map = ContractCall.contractBatchEnd(chain, blockHeight);
             } catch (NulsException e) {
                 chain.getLoggerMap().get(TxConstant.LOG_TX).error(e);
-                return verifyLedgerResult;
+                return false;
             }
             String sr = (String) map.get("stateRoot");
             if (!stateRoot.equals(sr)) {
                 chain.getLoggerMap().get(TxConstant.LOG_TX).warn("contract stateRoot error.");
-                return verifyLedgerResult;
+                return false;
             }
             List<String> scNewList = (List<String>) map.get("txList");
             if (null == scNewList) {
-                return verifyLedgerResult;
+                return false;
             }
             //验证智能合约执行返回的交易hex 是否正确.打包时返回的交易是加入到区块交易的队尾
             int size = scNewList.size();
@@ -992,7 +998,7 @@ public class TxServiceImpl implements TxService {
                     //计划beta版删除 todo
                     chain.getLoggerMap().get(TxConstant.LOG_TX).error("收到除生成的系统智能合约以外的交易总数 + 生成智能合约交易数 size:{}, tx hex：{}",
                             unSystemSmartContractCount + scNewList.size(), scNewList.get(i));
-                    return verifyLedgerResult;
+                    return false;
                 }
             }
         }
@@ -1001,13 +1007,13 @@ public class TxServiceImpl implements TxService {
             //多线程处理结果
             for (Future<Boolean> future : futures) {
                 if (!future.get()) {
-                    return verifyLedgerResult;
+                    return false;
                 }
             }
         } catch (Exception e) {
             chain.getLoggerMap().get(TxConstant.LOG_TX).debug("batchVerify failed, single tx verify failed");
             chain.getLoggerMap().get(TxConstant.LOG_TX).error(e);
-            return verifyLedgerResult;
+            return false;
         }
 
         if (rs) {
@@ -1022,19 +1028,17 @@ public class TxServiceImpl implements TxService {
             if (unconfirmedTxSaveList.size() > 0) {
                 unconfirmedTxStorageService.putTxList(chain.getChainId(), unconfirmedTxSaveList);
             }
-            verifyLedgerResult.setCode(VerifyLedgerResult.SUCCESS);
             LOG.debug("[验区块交易] 本地不存在的交易保存数据时间:{}", TimeUtils.getCurrentTimeMillis() - save);//----
             LOG.debug("[验区块交易] 本地不存在的交易保存数据 -距方法开始的时间:{}", TimeUtils.getCurrentTimeMillis() - s1);//----
             LOG.debug("");//----
-        }
-        if (verifyLedgerResult.success()) {
             LOG.debug("[验区块交易] 通过 ---------------总计执行时间:{}", TimeUtils.getCurrentTimeMillis() - s1);//----
-        } else {
-            LOG.debug("[验区块交易] 未通过 ---------------总计执行时间:{}", TimeUtils.getCurrentTimeMillis() - s1);//----
+            chain.getLoggerMap().get(TxConstant.LOG_TX).debug("batchVerify success.");
+        }else{
+            LOG.debug("[验区块交易] 失败 ---------------总计执行时间:{}", TimeUtils.getCurrentTimeMillis() - s1);//----
+            chain.getLoggerMap().get(TxConstant.LOG_TX).debug("batchVerify fail.");
         }
         LOG.debug("");//----
-        chain.getLoggerMap().get(TxConstant.LOG_TX).debug("batchVerify success.");
-        return verifyLedgerResult;
+        return rs;
     }
 
     @Override
@@ -1070,5 +1074,4 @@ public class TxServiceImpl implements TxService {
             }
         });
     }
-
 }
