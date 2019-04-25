@@ -67,7 +67,7 @@ public class ConfigManager {
             param_modify.put(item.getKey(), item.isReadOnly());
             field = beanClass.getDeclaredField(item.getKey());
             field.setAccessible(true);
-            if ("java.math.BigInteger".equals(field.getType().getName())) {
+            if (field.getType().isAssignableFrom(BigInteger.class)) {
                 field.set(bean, new BigInteger((String) item.getValue()));
             } else {
                 field.set(bean, item.getValue());

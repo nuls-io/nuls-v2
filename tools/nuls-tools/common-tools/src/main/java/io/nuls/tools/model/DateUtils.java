@@ -12,7 +12,6 @@ public class DateUtils {
     public final static long DATE_TIME = 1000 * 24 * 60 * 60;
     public final static long HOUR_TIME = 1000 * 60 * 60;
     public final static long MINUTE_TIME = 1000 * 60;
-    public final static long TEN_MINUTE_TIME = 1000 * 10 * 60;
     public final static long TIME_ZONE;
     public final static String TIME_ZONE_STRING;
     private static final ThreadLocal<DateFormat> DATE_FORMATTER_17 = ThreadLocal.withInitial(() -> new SimpleDateFormat(DEFAULT_TIMESTAMP_PATTERN));
