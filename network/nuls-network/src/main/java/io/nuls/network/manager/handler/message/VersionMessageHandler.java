@@ -80,10 +80,11 @@ public class VersionMessageHandler extends BaseMessageHandler {
      * @param port
      * @return boolean
      */
-    private boolean canConnectIn(NodesContainer nodesContainer, int maxInCount, int sameIpMaxCount, String ip, int port) {
+    private boolean canConnectIn(int chainId,NodesContainer nodesContainer, int maxInCount, int sameIpMaxCount, String ip, int port) {
 
         int size = nodesContainer.getConnectedCount(Node.IN);
         if (size >= maxInCount) {
+            LoggerUtil.logger(chainId).debug("11111===size={},maxInCount={}",size,maxInCount);
             return false;
         }
 
@@ -95,12 +96,14 @@ public class VersionMessageHandler extends BaseMessageHandler {
             //if(ip.equals(node.getIp()) && (node.getPort().intValue() == port || node.getType() == Node.OUT)) {
             if (ip.equals(node.getIp()) && node.getType() == Node.OUT) {
                 //这里需要一个机制来判定相互连接时候保留哪个?
+                LoggerUtil.logger(chainId).debug("22222===ip={},node.getIp()={}, node.getType={}",ip,node.getIp(),node.getType());
                 return false;
             }
             if (ip.equals(node.getIp())) {
                 sameIpCount++;
             }
             if (sameIpCount >= sameIpMaxCount) {
+                LoggerUtil.logger(chainId).debug("333333===sameIpCount={},sameIpMaxCount={}, node.getType={}",ip,node.getIp(),node.getType());
                 return false;
             }
         }
@@ -134,7 +137,7 @@ public class VersionMessageHandler extends BaseMessageHandler {
             nodesContainer = nodeGroup.getLocalNetNodeContainer();
         }
 
-        if (!canConnectIn(nodesContainer, maxIn, sameIpMaxCount, node.getIp(), node.getRemotePort())) {
+        if (!canConnectIn(nodeGroup.getChainId(),nodesContainer, maxIn, sameIpMaxCount, node.getIp(), node.getRemotePort())) {
             LoggerUtil.logger(nodeGroup.getChainId()).error("node={} version canConnectIn fail...cross={}",node.getId(),node.isCrossConnect());
             node.getChannel().close();
             return;

@@ -89,11 +89,11 @@ public class NodeGroupRpc extends BaseCmd {
             maxIn = Integer.valueOf(String.valueOf(params.get("maxIn")));
             ;
         }
-        if (maxOut == 0) {
+        if (maxIn == 0) {
             if (networkConfig.isMoonNode()) {
-                maxOut = networkConfig.getCrossMaxInCount();
+                maxIn = networkConfig.getCrossMaxInCount();
             } else {
-                maxOut = networkConfig.getMaxInCount();
+                maxIn = networkConfig.getMaxInCount();
             }
         }
         int minAvailableCount = Integer.valueOf(String.valueOf(params.get("minAvailableCount")));

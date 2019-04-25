@@ -88,7 +88,10 @@ public class AddrMessageHandler extends BaseMessageHandler {
             if (!IpUtil.isboolIp(ipAddress.getIp().getHostAddress())) {
                 continue;
             }
-            LoggerUtil.logger(chainId).info("add check node addr ={}:{}",ipAddress.getIp(),ipAddress.getPort());
+            if (IpUtil.isSelf(ipAddress.getIp().getHostAddress())) {
+                continue;
+            }
+            LoggerUtil.logger(chainId).info("add check node addr ={}:{}", ipAddress.getIp(), ipAddress.getPort());
             nodeGroup.addNeedCheckNode(ipAddress, node.isCrossConnect());
         }
         return NetworkEventResult.getResultSuccess();
