@@ -42,7 +42,7 @@ public interface TxService {
      * @return boolean
      * @throws NulsException NulsException
      */
-    void newBroadcastTx(Chain chain, TransactionNetPO tx) throws NulsException;
+    void newBroadcastTx(Chain chain, TransactionNetPO tx);
 
 
     /**
