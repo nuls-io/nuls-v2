@@ -75,7 +75,7 @@ public class ConsensusConfig {
     }
 
     public void setDataPath(String dataPath) {
-        dataPath = dataPath;
+        this.dataPath = dataPath;
     }
 
     public void setDataFolder(String dataFolder) {

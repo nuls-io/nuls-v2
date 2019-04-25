@@ -1,6 +1,7 @@
 package io.nuls.account.rpc.call;
 
 import io.nuls.account.constant.RpcConstant;
+import io.nuls.account.util.LoggerUtil;
 import io.nuls.rpc.info.Constants;
 
 import java.util.HashMap;
@@ -27,7 +28,7 @@ public class EventCmdCall {
             params.put(RpcConstant.EVENT_SEND_DATA, data);
             //Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.EB.abbr, RpcConstant.EVENT_SEND_CMD, params);
         } catch (Exception e) {
-            e.printStackTrace();
+            LoggerUtil.logger.error("", e);
         }
     }
 

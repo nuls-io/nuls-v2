@@ -3,6 +3,7 @@ package io.nuls.account.rpc.call;
 import io.nuls.account.constant.AccountConstant;
 import io.nuls.account.constant.AccountErrorCode;
 import io.nuls.account.model.bo.VerifyTxResult;
+import io.nuls.account.util.LoggerUtil;
 import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.model.message.Response;
@@ -92,7 +93,7 @@ public class LedgerCmdCall {
             return result;
         } catch (Exception e) {
             Log.error("Calling remote interface failed. module:{} - interface:{}", ModuleE.LG.abbr, "getBalanceNonce");
-            e.printStackTrace();
+            Log.error("", e);
         }
         return null;
     }
@@ -118,7 +119,7 @@ public class LedgerCmdCall {
             return BigIntegerUtils.stringToBigInteger(String.valueOf(available));
         } catch (Exception e) {
             Log.error("Calling remote interface failed. module:{} - interface:{}", ModuleE.LG.abbr, "getBalance");
-            e.printStackTrace();
+            Log.error("", e);
         }
         return new BigInteger("0");
     }
@@ -145,7 +146,7 @@ public class LedgerCmdCall {
                 return RPCUtil.decode(nonce);
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            Log.error("", e);
         }
         return null;
     }

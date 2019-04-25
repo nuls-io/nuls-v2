@@ -117,9 +117,8 @@ public class CoinDto implements Cloneable {
         try {
             coinDto = (CoinDto)super.clone();
         } catch (CloneNotSupportedException e) {
-            e.printStackTrace();
+            LoggerUtil.logger.error("", e);
         }
-
         return coinDto;
     }
 }
