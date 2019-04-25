@@ -135,6 +135,7 @@ public class VersionMessageHandler extends BaseMessageHandler {
         }
 
         if (!canConnectIn(nodesContainer, maxIn, sameIpMaxCount, node.getIp(), node.getRemotePort())) {
+            LoggerUtil.logger(nodeGroup.getChainId()).error("node={} version canConnectIn fail...cross={}",node.getId(),node.isCrossConnect());
             node.getChannel().close();
             return;
         }
@@ -157,6 +158,7 @@ public class VersionMessageHandler extends BaseMessageHandler {
         node.setRemoteCrossPort(versionBody.getPortMeCross());
         //回复version
         VersionMessage versionMessage = MessageFactory.getInstance().buildVersionMessage(node, message.getHeader().getMagicNumber());
+        LoggerUtil.logger(nodeGroup.getChainId()).debug("node={} version success.go response versionMessage..cross={}",node.getId(),node.isCrossConnect());
         send(versionMessage, node, true);
     }
 
@@ -200,7 +202,8 @@ public class VersionMessageHandler extends BaseMessageHandler {
      */
     @Override
     public NetworkEventResult recieve(BaseMessage message, Node node) {
-        LoggerUtil.logger().debug("VersionMessageHandler recieve:" + (node.isServer() ? "Server" : "Client") + ":" + node.getIp() + ":" + node.getRemotePort() + "==CMD=" + message.getHeader().getCommandStr());
+        int chainId = NodeGroupManager.getInstance().getChainIdByMagicNum(message.getHeader().getMagicNumber());
+        LoggerUtil.logger(chainId).debug("VersionMessageHandler recieve:" + (node.isServer() ? "Server" : "Client") + ":" + node.getIp() + ":" + node.getRemotePort() + "==CMD=" + message.getHeader().getCommandStr());
         if (Node.IN == node.getType()) {
             serverRecieveHandler(message, node);
         } else {
@@ -211,9 +214,9 @@ public class VersionMessageHandler extends BaseMessageHandler {
 
     @Override
     public NetworkEventResult send(BaseMessage message, Node node, boolean asyn) {
-        LoggerUtil.logger().debug("VersionMessageHandler send:" + (node.isServer() ? "Server" : "Client") + ":" + node.getIp() + ":" + node.getRemotePort() + "==CMD=" + message.getHeader().getCommandStr());
-        BlockRpcService blockRpcService = SpringLiteContext.getBean(BlockRpcServiceImpl.class);
         int chainId = NodeGroupManager.getInstance().getChainIdByMagicNum(message.getHeader().getMagicNumber());
+        LoggerUtil.logger(chainId).debug("VersionMessageHandler send:" + (node.isServer() ? "Server" : "Client") + ":" + node.getIp() + ":" + node.getRemotePort() + "==CMD=" + message.getHeader().getCommandStr());
+        BlockRpcService blockRpcService = SpringLiteContext.getBean(BlockRpcServiceImpl.class);
         BestBlockInfo bestBlockInfo = blockRpcService.getBestBlockHeader(chainId);
         VersionMessage versionMessage = (VersionMessage) message;
         versionMessage.getMsgBody().setBlockHash(bestBlockInfo.getHash());
