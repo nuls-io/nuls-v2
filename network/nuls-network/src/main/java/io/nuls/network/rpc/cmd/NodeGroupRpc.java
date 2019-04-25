@@ -55,6 +55,7 @@ import java.util.*;
 public class NodeGroupRpc extends BaseCmd {
     @Autowired
     NetworkConfig networkConfig;
+
     /**
      * nw_createNodeGroup
      * 主网创建跨链网络或者链工厂创建链
@@ -72,18 +73,28 @@ public class NodeGroupRpc extends BaseCmd {
         List<GroupPo> nodeGroupPos = new ArrayList<>();
         int chainId = Integer.valueOf(String.valueOf(params.get("chainId")));
         long magicNumber = Long.valueOf(String.valueOf(params.get("magicNumber")));
-        int maxOut;
+        int maxOut = 0;
         if (StringUtils.isNotBlank(String.valueOf(params.get("maxOut")))) {
             maxOut = Integer.valueOf(String.valueOf(params.get("maxOut")));
-        } else {
-            maxOut = networkConfig.getMaxOutCount();
         }
-
-        int maxIn;
+        if (maxOut == 0) {
+            if (networkConfig.isMoonNode()) {
+                maxOut = networkConfig.getCrossMaxOutCount();
+            } else {
+                maxOut = networkConfig.getMaxOutCount();
+            }
+        }
+        int maxIn = 0;
         if (StringUtils.isNotBlank(String.valueOf(params.get("maxIn")))) {
             maxIn = Integer.valueOf(String.valueOf(params.get("maxIn")));
-        } else {
-            maxIn = networkConfig.getMaxInCount();
+            ;
+        }
+        if (maxOut == 0) {
+            if (networkConfig.isMoonNode()) {
+                maxOut = networkConfig.getCrossMaxInCount();
+            } else {
+                maxOut = networkConfig.getMaxInCount();
+            }
         }
         int minAvailableCount = Integer.valueOf(String.valueOf(params.get("minAvailableCount")));
         int isMoonNode = Integer.valueOf(String.valueOf(params.get("isMoonNode")));

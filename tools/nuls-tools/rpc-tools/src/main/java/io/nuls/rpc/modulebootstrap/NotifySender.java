@@ -101,7 +101,7 @@ public class NotifySender implements Runnable, InitializingBean {
 
     private void retry(Queue<Sender>temp,Sender sender){
         if(sender.canRetry()){
-            Log.warn("notify fail, retry {}",sender.retry);
+            Log.warn("notify {} fail, retry {}",sender.key,sender.retry);
             sender.retry();
             temp.offer(sender);
         }else{

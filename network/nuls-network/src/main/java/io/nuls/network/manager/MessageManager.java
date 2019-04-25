@@ -186,7 +186,7 @@ public class MessageManager extends BaseManager {
      * @param asyn      boolean
      */
     public boolean sendGetAddrMessage(NodeGroup nodeGroup, boolean isCross, boolean asyn) {
-
+        LoggerUtil.logger().debug("sendGetAddrMessage isCross=",isCross);
         if (isCross) {
             //get Cross nodes
             Collection<Node> nodes = nodeGroup.getCrossNodeContainer().getConnectedNodes().values();
