@@ -28,8 +28,8 @@ import io.nuls.db.service.RocksDBService;
 import io.nuls.protocol.constant.Constant;
 import io.nuls.protocol.service.ProtocolService;
 import io.nuls.protocol.utils.ConfigLoader;
+import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
-import io.nuls.tools.core.ioc.SpringLiteContext;
 import io.nuls.tools.log.logback.NulsLogger;
 
 import java.util.List;
@@ -44,6 +44,9 @@ import java.util.List;
 @Component
 public class ChainManager {
 
+    @Autowired
+    private ProtocolService protocolService;
+
     /**
      * 初始化并启动链
      * Initialize and start the chain
@@ -52,11 +55,10 @@ public class ChainManager {
         //加载配置
         ConfigLoader.load();
         List<Integer> chainIds = ContextManager.chainIds;
-        ProtocolService service = SpringLiteContext.getBean(ProtocolService.class);
         for (Integer chainId : chainIds) {
             initTable(chainId);
             //服务初始化
-            service.init(chainId);
+            protocolService.init(chainId);
         }
     }
 

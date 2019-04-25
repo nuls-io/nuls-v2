@@ -9,7 +9,7 @@
   "nodesMonitorInterval": 5000,
   "txGroupRequestorInterval": 1000,
   "txGroupTaskDelay": 3000,
-  "testAutoRollbackAmount": 999,
+  "testAutoRollbackAmount": 0,
   "chainName": "nuls2.0",
   "chainId": 2,
   "assetId": 1,

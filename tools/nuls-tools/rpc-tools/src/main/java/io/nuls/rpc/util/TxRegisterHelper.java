@@ -42,9 +42,9 @@ public class TxRegisterHelper {
             params.put(Constants.VERSION_KEY_STR, "1.0");
             params.put("chainId", chainId);
             params.put("moduleCode", ConnectManager.LOCAL.getAbbreviation());
-            params.put("moduleValidator", "ac_accountTxValidate");
-            params.put("moduleCommit", "ac_commitTx");
-            params.put("moduleRollback", "ac_rollbackTx");
+            params.put("moduleValidator", protocol.getModuleValidator());
+            params.put("moduleCommit", protocol.getModuleCommit());
+            params.put("moduleRollback", protocol.getModuleRollback());
             params.put("list", txRegisterDetailList);
             Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.TX.abbr, "tx_register", params);
             if (!cmdResp.isSuccess()) {

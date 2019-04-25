@@ -17,7 +17,6 @@ import io.nuls.rpc.modulebootstrap.RpcModuleState;
 import io.nuls.rpc.util.TimeUtils;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
-import io.nuls.tools.core.ioc.SpringLiteContext;
 import io.nuls.tools.log.Log;
 import io.nuls.tools.thread.ThreadUtils;
 import io.nuls.tools.thread.commom.NulsThreadFactory;
@@ -40,6 +39,9 @@ public class BlockBootstrap extends RpcModule {
 
     @Autowired
     public static BlockConfig blockConfig;
+
+    @Autowired
+    private ChainManager chainManager;
 
     public static boolean started = false;
 
@@ -114,7 +116,7 @@ public class BlockBootstrap extends RpcModule {
                 Thread.sleep(1000);
             }
             //启动链
-            SpringLiteContext.getBean(ChainManager.class).runChain();
+            chainManager.runChain();
         } catch (Exception e) {
             Log.error("block module doStart error!");
             return false;

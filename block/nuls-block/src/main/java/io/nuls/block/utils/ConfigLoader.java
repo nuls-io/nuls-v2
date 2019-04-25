@@ -25,7 +25,8 @@ package io.nuls.block.utils;
 import io.nuls.block.manager.ContextManager;
 import io.nuls.block.model.ChainParameters;
 import io.nuls.block.storage.ParametersStorageService;
-import io.nuls.tools.core.ioc.SpringLiteContext;
+import io.nuls.tools.core.annotation.Autowired;
+import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.io.IoUtils;
 import io.nuls.tools.protocol.ProtocolLoader;
 
@@ -41,9 +42,11 @@ import static io.nuls.tools.constant.BaseConstant.PROTOCOL_CONFIG_FILE;
  * @version 1.0
  * @date 18-11-8 下午1:37
  */
+@Component
 public class ConfigLoader {
 
-    private static ParametersStorageService service = SpringLiteContext.getBean(ParametersStorageService.class);
+    @Autowired
+    private static ParametersStorageService service;
 
     /**
      * 加载配置文件
@@ -56,6 +59,7 @@ public class ConfigLoader {
             loadDefault();
         } else {
             for (ChainParameters chainParameters : list) {
+                ContextManager.init(chainParameters);
                 int chainId = chainParameters.getChainId();
                 String protocolConfigJson = service.getProtocolConfigJson(chainId);
                 ProtocolLoader.load(chainId, protocolConfigJson);

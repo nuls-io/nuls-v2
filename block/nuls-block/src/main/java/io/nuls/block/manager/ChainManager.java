@@ -28,8 +28,9 @@ import io.nuls.block.rpc.call.TransactionUtil;
 import io.nuls.block.service.BlockService;
 import io.nuls.block.utils.ConfigLoader;
 import io.nuls.db.service.RocksDBService;
+import io.nuls.tools.constant.TxType;
+import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
-import io.nuls.tools.core.ioc.SpringLiteContext;
 import io.nuls.tools.log.logback.NulsLogger;
 import io.nuls.tools.protocol.ProtocolLoader;
 
@@ -47,7 +48,10 @@ import static io.nuls.block.constant.Constant.*;
 @Component
 public class ChainManager {
 
-    /**
+    @Autowired
+    private BlockService service;
+
+    /**BlockSynchronizer
      * 初始化并启动链
      * Initialize and start the chain
      */
@@ -55,10 +59,9 @@ public class ChainManager {
         //加载配置
         ConfigLoader.load();
         List<Integer> chainIds = ContextManager.chainIds;
-        BlockService service = SpringLiteContext.getBean(BlockService.class);
         for (Integer chainId : chainIds) {
             List<Integer> systemTypes = TransactionUtil.getSystemTypes(chainId);
-            while (systemTypes == null || systemTypes.size() == 0 || !systemTypes.contains(1)) {
+            while (systemTypes == null || systemTypes.size() == 0 || !systemTypes.contains(TxType.COIN_BASE)) {
                 Thread.sleep(1000);
                 systemTypes = TransactionUtil.getSystemTypes(chainId);
             }
