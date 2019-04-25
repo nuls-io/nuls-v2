@@ -62,8 +62,7 @@ public class VerifyLedgerResult {
     public static VerifyLedgerResult fail(ErrorCode errorCode){
         return new VerifyLedgerResult(false, false, errorCode);
     }
-
-
+    
     /**
      * 账本业务验证成功
      * 1.账本返回成功，并且不为孤儿交易
@@ -72,23 +71,7 @@ public class VerifyLedgerResult {
     public boolean businessSuccess() {
         return success && !orphan;
     }
-//
-//    /**
-//     * 账本业务验证失败
-//     * 1.账本返回失败，含有错误码的情况
-//     * 2.账本返回成功，但是交易为孤儿交易
-//     * @return
-//     */
-//    public boolean businessFail() {
-//        return !success || orphan;
-//    }
-/*
-    public static void main(String[] args) {
-        boolean success1 = true;
 
-        boolean orphan2 = false;
-        System.out.println(success1 && orphan2);
-    }*/
 
     public boolean getSuccess() {
         return success;
@@ -114,81 +97,4 @@ public class VerifyLedgerResult {
         this.errorCode = errorCode;
     }
 
-    //
-//    /** 1校验通过，2孤儿交易 3双花 4 其他异常 5重复交易(已确认过)*/
-//    private int code;
-//    /** 校验返回描述*/
-//    private String desc;
-//
-//    private ErrorCode errorCode;
-//
-//    public static final int SUCCESS = 1;
-//    public static final int ORPHAN = 2;
-//    public static final int DOUBLE_SPENDING = 3;
-//    public static final int OTHER_EXCEPTION = 4;
-//    public static final int CONFIRMED = 5;
-//
-//    public VerifyLedgerResult(int code, String desc) {
-//        this.code = code;
-//        this.desc = desc;
-//        switch (code){
-//            case 1:
-//                errorCode = TxErrorCode.SUCCESS;
-//                break;
-//            case 2:
-//                errorCode = TxErrorCode.ORPHAN_TX;
-//                break;
-//            case 3:
-//                errorCode = TxErrorCode.TX_REPEATED;
-//                break;
-//            case 5:
-//                errorCode = TxErrorCode.TX_ALREADY_EXISTS;
-//                break;
-//            default:
-//                errorCode = TxErrorCode.TX_LEDGER_VERIFY_FAIL;
-//        }
-//    }
-//    public VerifyLedgerResult(int code) {
-//        this.code = code;
-//    }
-//
-//    public boolean success(){
-//        return this.code == SUCCESS;
-//    }
-//
-//    public int getCode() {
-//        return code;
-//    }
-//
-//    public void setCode(int code) {
-//        this.code = code;
-//    }
-//
-//    public ErrorCode getErrorCode() {
-//        return errorCode;
-//    }
-//
-//    public void setErrorCode(ErrorCode errorCode) {
-//        this.errorCode = errorCode;
-//    }
-//
-//    public String getDesc() {
-//      /*  if(StringUtils.isBlank(this.desc)){
-//            switch (this.code){
-//                case SUCCESS:
-//                    return "验证通过";
-//                case ORPHAN:
-//                    return "孤儿交易";
-//                case DOUBLE_SPENDING:
-//                    return "双花交易";
-//                case OTHER_EXCEPTION:
-//                    return "其他验证不通过情况";
-//            }
-//        }*/
-//        return desc;
-//    }
-//
-//    public void setDesc(String desc) {
-//        this.desc = desc;
-//    }
 }

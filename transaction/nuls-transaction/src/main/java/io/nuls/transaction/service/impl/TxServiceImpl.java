@@ -864,8 +864,17 @@ public class TxServiceImpl implements TxService {
         LOG.debug("[验区块交易] -开始-------------高度:{} ----------区块交易数:{} -------------", blockHeight, txStrList.size());
         LOG.debug("[验区块交易] -开始时间:{}", s1);
         LOG.debug("");
-        //VerifyLedgerResult verifyLedgerResult = new VerifyLedgerResult(VerifyLedgerResult.OTHER_EXCEPTION);
-        List<Transaction> txList = new ArrayList<>();
+        //交易数据类型包装器
+        class TxDataWrapper {
+            private Transaction tx;
+            private String txStr;
+
+            public TxDataWrapper(Transaction tx, String txStr) {
+                this.tx = tx;
+                this.txStr = txStr;
+            }
+        }
+        List<TxDataWrapper> txList = new ArrayList<>();
 
         /**
          * 智能合约通知标识
@@ -878,7 +887,7 @@ public class TxServiceImpl implements TxService {
         List<Future<Boolean>> futures = new ArrayList<>();
         for (String txStr : txStrList) {
             Transaction tx = TxUtil.getInstanceRpcStr(txStr, Transaction.class);
-            txList.add(tx);
+            txList.add(new TxDataWrapper(tx, txStr));
             //如果不是系统智能合约就继续单个验证
             if (TxManager.isSystemSmartContract(chain, tx.getType())) {
                 continue;
@@ -918,7 +927,8 @@ public class TxServiceImpl implements TxService {
         //组装统一验证参数数据,key为各模块统一验证器cmd
         Map<TxRegister, List<String>> moduleVerifyMap = new HashMap<>(TxConstant.INIT_CAPACITY_8);
 
-        for (Transaction tx : txList) {
+        for (TxDataWrapper txDataWrapper : txList) {
+            Transaction tx = txDataWrapper.tx;
             /** 智能合约*/
             if (TxManager.isUnSystemSmartContract(chain, tx.getType())) {
                 /** 出现智能合约,且通知标识为false,则先调用通知 */
@@ -936,7 +946,7 @@ public class TxServiceImpl implements TxService {
             }
 
             //根据模块的统一验证器名，对所有交易进行分组，准备进行各模块的统一验证
-            TxUtil.moduleGroups(chain, moduleVerifyMap, tx);
+            TxUtil.moduleGroups(chain, moduleVerifyMap, tx, txDataWrapper.txStr);
         }
 
         if (contractNotify) {
@@ -1019,7 +1029,8 @@ public class TxServiceImpl implements TxService {
         if (rs) {
             long save = TimeUtils.getCurrentTimeMillis();//-----
             List<Transaction> unconfirmedTxSaveList = new ArrayList<>();
-            for (Transaction tx : txList) {
+            for (TxDataWrapper txDataWrapper : txList) {
+                Transaction tx = txDataWrapper.tx;
                 //如果该交易不在交易管理待打包库中，则进行保存
                 if (!unconfirmedTxStorageService.isExists(chain.getChainId(), tx.getHash())) {
                     unconfirmedTxSaveList.add(tx);
