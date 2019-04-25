@@ -46,7 +46,7 @@ public abstract class CallRemoteTestCase<T,P> extends BaseTestCase<T,P> {
         return nodeList.subList(0,testNodeCount);
     }
 
-    public Map doRemoteTest(String node, Class<? extends TestCaseIntf> caseCls, Object param) throws TestFailException {
+    public <S> S doRemoteTest(String node, Class<? extends TestCaseIntf> caseCls, Object param) throws TestFailException {
         RemoteCaseReq req = new RemoteCaseReq();
         req.setCaseClass(caseCls);
         if(param != null){
@@ -54,7 +54,7 @@ public abstract class CallRemoteTestCase<T,P> extends BaseTestCase<T,P> {
         }
         RestFulUtils.getInstance().setServerUri("http://" + node.split(":")[0] + ":9999/api");
         Log.debug("call {} remote case:{}",node,req);
-        RemoteResult<Map> result = RestFulUtils.getInstance().post("remote/call", MapUtils.beanToMap(req));
+        RemoteResult<S> result = RestFulUtils.getInstance().post("remote/call", MapUtils.beanToMap(req));
         Log.debug("call remote case returl :{}",result);
         checkResultStatus(new Result(result.getData()));
         return result.getData();
