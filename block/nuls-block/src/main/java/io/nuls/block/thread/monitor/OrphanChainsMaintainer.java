@@ -39,8 +39,8 @@ import java.util.SortedSet;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.StampedLock;
 
-import static io.nuls.block.constant.RunningStatusEnum.RUNNING;
-import static io.nuls.block.constant.RunningStatusEnum.UPDATE_ORPHAN_CHAINS;
+import static io.nuls.block.constant.StatusEnum.RUNNING;
+import static io.nuls.block.constant.StatusEnum.UPDATE_ORPHAN_CHAINS;
 
 /**
  * 孤儿链的形成原因分析：因为网络问题,在没有收到Block(100)的情况下,已经收到了Block(101),此时Block(101)不能连接到主链上,形成孤儿链

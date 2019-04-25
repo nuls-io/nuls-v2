@@ -28,7 +28,7 @@ package io.nuls.block.constant;
  * @version 1.0
  * @date 18-11-28 下午5:58
  */
-public enum RunningStatusEnum {
+public enum StatusEnum {
 
     /**
      * 模块正在初始化
