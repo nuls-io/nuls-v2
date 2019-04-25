@@ -47,7 +47,7 @@ public class TransactionCall {
                 response = ResponseMessageProcessor.requestAndResponse(moduleCode, cmd, params, timeout);
             }
             if (!response.isSuccess()) {
-                String errorCode = (String)response.getResponseData();
+                String errorCode = response.getResponseErrorCode();
                 LOG.error("Call interface [{}] error, ErrorCode is {}, ResponseComment:{}", cmd, errorCode, response.getResponseComment());
                 throw new NulsException(ErrorCode.init(errorCode));
             }
