@@ -73,13 +73,14 @@ public class TxRegister {
      */
     private boolean verifySignature;
 
+
     /**
-     * module code
+     * Module unified validator cmd name
      */
     private String moduleValidator;
 
     /**
-     * Module unified validator cmd name
+     * module code
      */
     private String moduleCode;
 
