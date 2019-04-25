@@ -80,9 +80,12 @@ public class MultiSignTxSignature extends TransactionSignature {
     public int size() {
         int size = 0;
         size += 1;
-        size += SerializeUtils.sizeOfVarInt(pubKeyList == null ? 0 : pubKeyList.size());
-        for (int i = 0; i < pubKeyList.size(); i++) {
-            size += SerializeUtils.sizeOfBytes(pubKeyList.get(i));
+        boolean isPubKeyListNotNull = pubKeyList != null;
+        if (isPubKeyListNotNull) {
+            size += SerializeUtils.sizeOfVarInt(pubKeyList.size());
+            for (byte[] bytes : pubKeyList ) {
+                size += SerializeUtils.sizeOfBytes(bytes);
+            }
         }
         size += super.size();
         return size;

@@ -40,7 +40,7 @@ public class TimeUtil {
 
     public static long getCurrentTime() {
         long now = System.currentTimeMillis();
-        if (now - latestGetTime >= TIMEOUT_MILLIS) {
+        if ((now - latestGetTime) >= TIMEOUT_MILLIS) {
             TimeRpcService timeRpcService = SpringLiteContext.getBean(TimeRpcServiceImpl.class);
             offset = timeRpcService.getTime() - System.currentTimeMillis();
             latestGetTime = now;

@@ -43,8 +43,9 @@ public class ShareAddressTask implements Runnable {
 
     private ConnectionManager connectionManager = ConnectionManager.getInstance();
 
-    public ShareAddressTask(NodeGroup nodeGroup) {
+    public ShareAddressTask(NodeGroup nodeGroup,boolean isCross) {
         this.nodeGroup = nodeGroup;
+        this.isCross = isCross;
     }
 
     @Override

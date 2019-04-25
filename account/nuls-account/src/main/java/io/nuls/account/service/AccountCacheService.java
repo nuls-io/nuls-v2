@@ -44,7 +44,7 @@ public class AccountCacheService {
      * 本地账户集合
      * Collection of local accounts
      */
-    public Map<String, Account> localAccountMaps;
+    private Map<String, Account> localAccountMaps;
 
     private AccountCacheService() {
         this.localAccountMaps = new ConcurrentHashMap<>();
@@ -55,4 +55,11 @@ public class AccountCacheService {
         return INSTANCE;
     }
 
+    public Map<String, Account> getLocalAccountMaps() {
+        return localAccountMaps;
+    }
+
+    public void setLocalAccountMaps(Map<String, Account> localAccountMaps) {
+        this.localAccountMaps = localAccountMaps;
+    }
 }

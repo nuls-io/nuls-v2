@@ -58,7 +58,7 @@ public class AssetServiceImpl implements AssetService {
         String assetKey = CmRuntimeInfo.getAssetKey(asset.getChainId(), asset.getAssetId());
         String key = CmRuntimeInfo.getChainAssetKey(asset.getChainId(), assetKey);
         asset.addChainId(asset.getChainId());
-        assetStorage.save(key, asset);
+        assetStorage.save(assetKey, asset);
         ChainAsset chainAsset = new ChainAsset();
         chainAsset.setAddressChainId(asset.getChainId());
         chainAsset.setAssetChainId(asset.getChainId());

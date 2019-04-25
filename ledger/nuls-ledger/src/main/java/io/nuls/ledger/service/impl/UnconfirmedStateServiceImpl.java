@@ -84,7 +84,6 @@ public class UnconfirmedStateServiceImpl implements UnconfirmedStateService {
         return accountStateUnconfirmed;
     }
 
-
     /**
      * 获取账本nonce信息
      *
@@ -185,7 +184,6 @@ public class UnconfirmedStateServiceImpl implements UnconfirmedStateService {
     @Override
     public ValidateResult updateUnconfirmedTx(int addressChainId, byte[] txNonce, TxUnconfirmed txUnconfirmed) {
         //账户同步锁
-        byte[] key = LedgerUtil.getKey(txUnconfirmed.getAddress(), txUnconfirmed.getAssetChainId(), txUnconfirmed.getAssetId());
         String keyStr = LedgerUtil.getKeyStr(txUnconfirmed.getAddress(), txUnconfirmed.getAssetChainId(), txUnconfirmed.getAssetId());
         synchronized (LockerUtil.getUnconfirmedAccountLocker(txUnconfirmed.getAddress(), txUnconfirmed.getAssetChainId(), txUnconfirmed.getAssetId())) {
             AccountState accountState = accountStateService.getAccountState(txUnconfirmed.getAddress(), addressChainId, txUnconfirmed.getAssetChainId(), txUnconfirmed.getAssetId());

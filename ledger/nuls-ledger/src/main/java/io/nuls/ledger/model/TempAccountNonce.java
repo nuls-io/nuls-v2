@@ -33,15 +33,15 @@ public class TempAccountNonce {
 
     private String assetKey;
 
-    private byte[] nonce;
+    private byte[] nonce = new byte[8];
 
-    private byte[] nextNonce;
+    private byte[] nextNonce = new byte[8];
 
 
-    public TempAccountNonce(String assetKey, byte[] nonce, byte[] nextNonce){
+    public TempAccountNonce(String assetKey, byte[] pNonce, byte[] pNextNonce) {
         this.assetKey = assetKey;
-        this.nonce = nonce;
-        this.nextNonce = nextNonce;
+        System.arraycopy(pNonce,0, this.nonce, 0, 8);
+        System.arraycopy(pNextNonce,0, this.nextNonce, 0, 8);
     }
 
     public String getAssetKey() {
