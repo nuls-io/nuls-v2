@@ -55,6 +55,7 @@ public class NodesMonitor extends BaseMonitor {
         if (size < minNodeAmount && RunningStatusEnum.RUNNING.equals(context.getStatus())) {
             commonLog.info("chainId-" + chainId + ", AvailableNodes not enough!");
             ConsensusUtil.notice(chainId, CONSENSUS_WAITING);
+            context.setStatus(RunningStatusEnum.INITIALIZING);
         }
         if (size >= minNodeAmount && !RunningStatusEnum.RUNNING.equals(context.getStatus())) {
             commonLog.info("chainId-" + chainId + ", AvailableNodes enough!");
