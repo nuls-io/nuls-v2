@@ -773,8 +773,9 @@ public class ECKey {
         //   ASN1_EXP_OPT(EC_PRIVATEKEY, publicKey, ASN1_BIT_STRING, 1)
         // } ASN1_SEQUENCE_END(EC_PRIVATEKEY)
         //
+        ASN1InputStream decoder = null;
         try {
-            ASN1InputStream decoder = new ASN1InputStream(asn1privkey);
+            decoder = new ASN1InputStream(asn1privkey);
             DLSequence seq = (DLSequence) decoder.readObject();
             checkArgument(decoder.readObject() == null, "Input contains extra bytes");
             decoder.close();
@@ -804,6 +805,13 @@ public class ECKey {
             return key;
         } catch (IOException e) {
             throw new RuntimeException(e);  // Cannot happen, reading from memory stream.
+        } finally {
+            if (decoder != null) {
+                try {
+                    decoder.close();
+                } catch (IOException e) {
+                }
+            }
         }
     }
 

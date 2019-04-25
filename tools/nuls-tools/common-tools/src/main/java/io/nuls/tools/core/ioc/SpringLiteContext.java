@@ -259,11 +259,11 @@ public class SpringLiteContext {
         if (anns == null || anns.length == 0) {
             return;
         }
-        Annotation automired = getFromArray(anns, Autowired.class);
-        if (null == automired) {
+        Annotation autowired = getFromArray(anns, Autowired.class);
+        if (null == autowired) {
             return;
         }
-        String name = ((Autowired) automired).value();
+        String name = ((Autowired) autowired).value();
         if (name.trim().length() == 0) {
             Set<String> nameSet = CLASS_NAME_SET_MAP.get(field.getType());
             if (nameSet == null || nameSet.isEmpty()) {
@@ -523,13 +523,9 @@ public class SpringLiteContext {
         if (nameSet.size() > 1) {
             throw new NulsRuntimeException(new Error("find multiple implementations {} " + beanClass));
         }
-        T value = null;
-        String beanName = null;
-        for (String name : nameSet) {
-            value = (T) BEAN_OK_MAP.get(name);
-            beanName = name;
-            break;
-        }
+        T value;
+        String beanName = nameSet.iterator().next();
+        value = (T) BEAN_OK_MAP.get(beanName);
         if (null == value) {
             value = (T) BEAN_TEMP_MAP.get(beanName);
         }

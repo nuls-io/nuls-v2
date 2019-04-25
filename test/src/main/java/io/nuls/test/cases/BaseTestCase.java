@@ -7,6 +7,7 @@ package io.nuls.test.cases;
  */
 public abstract class BaseTestCase<T,P> implements TestCaseIntf<T,P> {
 
+    @Override
     public P initParam(){
         return null;
     }

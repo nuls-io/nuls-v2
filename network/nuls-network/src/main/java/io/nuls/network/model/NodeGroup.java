@@ -116,6 +116,8 @@ public class NodeGroup implements Dto {
         this.minAvailableCount = minAvailableCount;
         if (networkConfig.isMoonNode()) {
             isCrossActive = true;
+            this.maxCrossIn = maxIn;
+            this.maxCrossOut = maxOut;
         }
     }
 

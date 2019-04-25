@@ -386,7 +386,10 @@ public class TransactionServiceImpl implements TransactionService {
             tx.setCoinData(coinData.serialize());
         } catch (NulsException e) {
             LoggerUtil.logger.error("assemblyCoinData exception.", e);
-            throw new NulsException(e.getErrorCode());
+            if(e.getErrorCode() == null){
+                throw new NulsException(AccountErrorCode.SYS_UNKOWN_EXCEPTION);
+            }
+            throw e;
         } catch (IOException e) {
             LoggerUtil.logger.error("assemblyCoinData io exception.", e);
             throw new NulsException(AccountErrorCode.SERIALIZE_ERROR);

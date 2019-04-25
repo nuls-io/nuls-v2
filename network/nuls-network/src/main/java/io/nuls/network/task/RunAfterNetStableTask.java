@@ -66,7 +66,7 @@ public class RunAfterNetStableTask implements Runnable {
                 count++;
             } else if (!nodesContainer.isHadShareAddr()) {
                 //执行分享地址线程
-                TaskManager.getInstance().createShareAddressTask(nodeGroup, false);
+                TaskManager.getInstance().createShareAddressTask(nodeGroup, true);
                 nodesContainer.setHadShareAddr(true);
             }
             try {

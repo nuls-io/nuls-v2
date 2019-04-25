@@ -279,7 +279,7 @@ public class AliasServiceImpl implements AliasService, InitializingBean {
                     this.rollbackAlias(chainId, alias);
                 }
                 Account account = po.toAccount();
-                accountCacheService.localAccountMaps.put(account.getAddress().getBase58(), account);
+                accountCacheService.getLocalAccountMaps().put(account.getAddress().getBase58(), account);
             }
         } catch (Exception e) {
             LoggerUtil.logger.error("", e);
@@ -304,7 +304,7 @@ public class AliasServiceImpl implements AliasService, InitializingBean {
                         return result;
                     }
                     Account account = accountPo.toAccount();
-                    accountCacheService.localAccountMaps.put(account.getAddress().getBase58(), account);
+                    accountCacheService.getLocalAccountMaps().put(account.getAddress().getBase58(), account);
                 }
             }
         } catch (Exception e) {
