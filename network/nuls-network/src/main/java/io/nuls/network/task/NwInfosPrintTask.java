@@ -148,7 +148,8 @@ public class NwInfosPrintTask implements Runnable {
         }
         LoggerUtil.nwInfosLogger(nodeGroup.getChainId()).info("*****(canConnect)可连接信息**********");
         for (Node n : c2) {
-            LoggerUtil.nwInfosLogger(nodeGroup.getChainId()).info("**:{},info:blockHash={},blockHeight={}", n.getId(), n.getBlockHash(), n.getBlockHeight());
+            LoggerUtil.nwInfosLogger(nodeGroup.getChainId()).info("**:{},info:blockHash={},blockHeight={},nodeStatus={}",
+                    n.getId(), n.getBlockHash(), n.getBlockHeight(),n.getStatus());
         }
         LoggerUtil.nwInfosLogger(nodeGroup.getChainId()).info("*****(disConnect)断开连接信息**********");
         for (Node n : c3) {
