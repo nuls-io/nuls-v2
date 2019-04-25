@@ -41,6 +41,6 @@ public class BatchTestCase extends TestCaseChain {
 //        BatchParam param = new BatchParam();
 //        param.count = 10;
 //        param.formAddressPriKey = config.getTestSeedAccount();
-        return 100;
+        return 1000;
     }
 }

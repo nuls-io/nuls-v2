@@ -92,7 +92,7 @@ public class VerifyTxProcessTask implements Runnable {
             long s2 = System.currentTimeMillis();
             chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("交易验证阶段花费时间:{}", s2 - s1);
             chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("- - - - - -");
-            if(verifyLedgerResult.success()){
+            if(verifyLedgerResult.businessSuccess()){
                 if(chain.getPackaging().get()) {
                     //当节点是出块节点时, 才将交易放入待打包队列
                     packablePool.add(chain, tx);
@@ -106,10 +106,11 @@ public class VerifyTxProcessTask implements Runnable {
                 chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("交易保存阶段花费时间:{}", s3 - s2);
                 return true;
             }
-            chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug(
-                    "coinData not success - code: {}, - reason:{}, type:{} - txhash:{}",
-                    verifyLedgerResult.getCode(),  verifyLedgerResult.getDesc(), tx.getType(), tx.getHash().getDigestHex());
-            if(verifyLedgerResult.getCode() == VerifyLedgerResult.ORPHAN && !isOrphanTx){
+            chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("coinData verify task fail - orphan: {}, - code:{}, type:{},  - txhash:{}",verifyLedgerResult.getOrphan(),
+                    verifyLedgerResult.getErrorCode() == null ? "" : verifyLedgerResult.getErrorCode().getCode(),
+                    tx.getType(), tx.getHash().getDigestHex());
+
+            if(verifyLedgerResult.getOrphan() && !isOrphanTx){
                 processOrphanTx(txNet);
             }else if(isOrphanTx){
                 long currentTimeMillis = TimeUtils.getCurrentTimeMillis();

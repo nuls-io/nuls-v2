@@ -31,8 +31,11 @@ import io.nuls.tools.constant.ErrorCode;
 
 /**
  * @author: LanJS
-        */
+ */
 public interface LedgerErrorCode extends CommonCodeConstanst {
-
     ErrorCode TX_IS_WRONG = ErrorCode.init(ModuleE.LG.abbr + "_0001");
+    ErrorCode ORPHAN = ErrorCode.init(ModuleE.LG.abbr + "_1001");
+    ErrorCode DOUBLE_EXPENSES = ErrorCode.init(ModuleE.LG.abbr + "_1002");
+    ErrorCode TX_EXIST = ErrorCode.init(ModuleE.LG.abbr + "_1003");
+    ErrorCode VALIDATE_FAIL = ErrorCode.init(ModuleE.LG.abbr + "_1010");
 }

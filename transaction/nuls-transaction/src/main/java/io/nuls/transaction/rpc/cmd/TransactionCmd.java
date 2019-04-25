@@ -666,7 +666,10 @@ public class TransactionCmd extends BaseCmd {
             String stateRoot = (String) params.get("stateRoot");
             String preStateRoot = (String) params.get("preStateRoot");
 
-            verifyLedgerResult = txService.batchVerify(chain, txList, height, blockTime, packingAddress, stateRoot, preStateRoot);
+            boolean rs = txService.batchVerify(chain, txList, height, blockTime, packingAddress, stateRoot, preStateRoot);
+            Map<String, Object> resultMap = new HashMap<>(TxConstant.INIT_CAPACITY_2);
+            resultMap.put("value", rs);
+            return success(resultMap);
         } catch (NulsException e) {
             errorLogProcess(chain, e);
             return failed(e.getErrorCode());
@@ -674,10 +677,7 @@ public class TransactionCmd extends BaseCmd {
             errorLogProcess(chain, e);
             return failed(TxErrorCode.SYS_UNKOWN_EXCEPTION);
         }
-        Map<String, Object> resultMap = new HashMap<>(TxConstant.INIT_CAPACITY_2);
-        boolean result = verifyLedgerResult.success();
-        resultMap.put("value", result);
-        return success(resultMap);
+
     }
 
 
