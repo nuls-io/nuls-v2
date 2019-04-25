@@ -27,6 +27,7 @@ import io.nuls.tools.exception.NulsRuntimeException;
 import io.nuls.tools.parse.JSONUtils;
 
 import java.io.IOException;
+import java.math.BigInteger;
 import java.util.Map;
 
 /**
@@ -91,7 +92,7 @@ public class ChainCmd extends BaseChainCmd {
             Asset asset = new Asset();
             asset.map2pojo(params);
             asset.setChainId(blockChain.getChainId());
-            asset.setDepositNuls(Integer.valueOf(nulsChainConfig.getAssetDepositNuls()));
+            asset.setDepositNuls(new BigInteger(nulsChainConfig.getAssetDepositNuls()));
             asset.setAvailable(true);
             /* 组装交易发送 (Send transaction) */
             Transaction tx = new RegisterChainAndAssetTransaction();

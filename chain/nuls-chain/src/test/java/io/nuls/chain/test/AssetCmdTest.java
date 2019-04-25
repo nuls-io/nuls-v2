@@ -106,7 +106,7 @@ public class AssetCmdTest {
         asset.setAssetId(3);
         asset.setSymbol("HH");
         asset.setAssetName("HHHHHH");
-        asset.setDepositNuls(200000);
+        asset.setDepositNuls(new BigInteger("20000000000000"));
         asset.setInitNumber(BigInteger.valueOf(95565));
         asset.setDecimalPlaces((short) 8);
         asset.setAvailable(true);
@@ -121,7 +121,7 @@ public class AssetCmdTest {
         asset.setAssetId(23);
         asset.setSymbol("B");
         asset.setAssetName("bts");
-        asset.setDepositNuls(200000);
+        asset.setDepositNuls(new BigInteger("20000000000000"));
         asset.setInitNumber(BigInteger.valueOf(32232));
         asset.setDecimalPlaces((short) 8);
         asset.setAvailable(true);

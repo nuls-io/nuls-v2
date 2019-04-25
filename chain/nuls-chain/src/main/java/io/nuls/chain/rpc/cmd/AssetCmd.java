@@ -27,6 +27,7 @@ import io.nuls.tools.model.ByteUtils;
 import io.nuls.tools.parse.JSONUtils;
 
 import java.io.IOException;
+import java.math.BigInteger;
 import java.util.Map;
 
 /**
@@ -78,7 +79,7 @@ public class AssetCmd extends BaseChainCmd {
             /* 组装Asset (Asset object) */
             Asset asset = new Asset();
             asset.map2pojo(params);
-            asset.setDepositNuls(Integer.valueOf(nulsChainConfig.getAssetDepositNuls()));
+            asset.setDepositNuls(new BigInteger(nulsChainConfig.getAssetDepositNuls()));
             asset.setAvailable(true);
             if (assetService.assetExist(asset)) {
                 return failed(CmErrorCode.ERROR_ASSET_ID_EXIST);
