@@ -78,7 +78,13 @@ public class ValidatorCmd extends BaseLedgerCmd {
             tx.parse(RPCUtil.decode(txStr), 0);
             LoggerUtil.logger(chainId).debug("确认交易校验：chainId={},txHash={}", chainId, tx.getHash().toString());
             validateResult = coinDataValidator.bathValidatePerTx(chainId, tx);
-            response = success(validateResult);
+            Map<String, Object> rtMap = new HashMap<>(1);
+            if (validateResult.isSuccess() || validateResult.isOrphan()) {
+                rtMap.put("orphan", validateResult.isOrphan());
+                response = success(rtMap);
+            } else {
+                response = failed(validateResult.toErrorCode());
+            }
             LoggerUtil.logger(chainId).debug("validateCoinData returnCode={},returnMsg={}", validateResult.getValidateCode(), validateResult.getValidateDesc());
         } catch (NulsException e) {
             e.printStackTrace();
@@ -114,7 +120,13 @@ public class ValidatorCmd extends BaseLedgerCmd {
             tx.parse(RPCUtil.decode(txStr), 0);
             LoggerUtil.logger(chainId).debug("交易coinData校验：chainId={},txHash={}", chainId, tx.getHash().toString());
             validateResult = coinDataValidator.verifyCoinData(chainId, tx);
-            response = success(validateResult);
+            Map<String, Object> rtMap = new HashMap<>(1);
+            if (validateResult.isSuccess() || validateResult.isOrphan()) {
+                rtMap.put("orphan", validateResult.isOrphan());
+                response = success(rtMap);
+            } else {
+                response = failed(validateResult.toErrorCode());
+            }
             LoggerUtil.logger(chainId).debug("validateCoinData returnCode={},returnMsg={}", validateResult.getValidateCode(), validateResult.getValidateDesc());
         } catch (NulsException e) {
             e.printStackTrace();
@@ -141,7 +153,7 @@ public class ValidatorCmd extends BaseLedgerCmd {
     @Parameter(parameterName = "tx", parameterType = "String")
     public Response rollbackTxValidateStatus(Map params) {
         Map<String, Object> rtData = new HashMap<>(1);
-        int value = 0;
+        boolean value = false;
         Integer chainId = (Integer) params.get("chainId");
         try {
             String txStr = params.get("tx").toString();
@@ -155,9 +167,7 @@ public class ValidatorCmd extends BaseLedgerCmd {
             //清理未确认回滚
             transactionService.rollBackUnconfirmTx(chainId, tx);
             if (coinDataValidator.rollbackTxValidateStatus(chainId, tx)) {
-                value = 1;
-            } else {
-                value = 0;
+                value = true;
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -184,7 +194,7 @@ public class ValidatorCmd extends BaseLedgerCmd {
         LoggerUtil.logger(chainId).debug("chainId={} batchValidateBegin", chainId);
         coinDataValidator.beginBatchPerTxValidate(chainId);
         Map<String, Object> rtData = new HashMap<>(1);
-        rtData.put("value", 1);
+        rtData.put("value", true);
         LoggerUtil.logger(chainId).debug("return={}", success(rtData));
         return success(rtData);
     }
@@ -220,9 +230,9 @@ public class ValidatorCmd extends BaseLedgerCmd {
         }
         Map<String, Object> rtData = new HashMap<>(1);
         if (coinDataValidator.blockValidate(chainId, blockHeight, txList)) {
-            rtData.put("value", 1);
+            rtData.put("value", true);
         } else {
-            rtData.put("value", 0);
+            rtData.put("value", false);
         }
         LoggerUtil.logger(chainId).debug("chainId={} blockHeight={},return={}", chainId, blockHeight, success(rtData));
         return success(rtData);

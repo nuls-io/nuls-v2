@@ -79,7 +79,13 @@ public class TransactionCmd extends BaseLedgerCmd {
                 return failed(LedgerErrorCode.TX_IS_WRONG);
             }
             ValidateResult validateResult = transactionService.unConfirmTxProcess(chainId, tx);
-            response = success(validateResult);
+            Map<String, Object> rtMap = new HashMap<>(1);
+            if (validateResult.isSuccess() || validateResult.isOrphan()) {
+                rtMap.put("orphan", validateResult.isOrphan());
+                response = success(rtMap);
+            } else {
+                response = failed(validateResult.toErrorCode());
+            }
             LoggerUtil.logger(chainId).debug("####commitUnconfirmedTx chainId={},txHash={},value={}=={}", chainId, tx.getHash().toString(), validateResult.getValidateCode(), validateResult.getValidateDesc());
         } catch (Exception e) {
             e.printStackTrace();
@@ -120,7 +126,7 @@ public class TransactionCmd extends BaseLedgerCmd {
             return failed("txList is blank");
         }
         LoggerUtil.logger(chainId).debug("commitBlockTxs txHexList={}", txStrList.size());
-        int value = 0;
+        boolean value = false;
         List<Transaction> txList = new ArrayList<>();
         Response parseResponse = parseTxs(txStrList, txList, chainId);
         if (!parseResponse.isSuccess()) {
@@ -129,9 +135,7 @@ public class TransactionCmd extends BaseLedgerCmd {
         }
 
         if (transactionService.confirmBlockProcess(chainId, txList, blockHeight)) {
-            value = 1;
-        } else {
-            value = 0;
+            value = true;
         }
         rtData.put("value", value);
         Response response = success(rtData);
@@ -152,7 +156,7 @@ public class TransactionCmd extends BaseLedgerCmd {
     @Parameter(parameterName = "tx", parameterType = "String")
     public Response rollBackUnconfirmTx(Map params) {
         Map<String, Object> rtData = new HashMap<>(1);
-        int value = 0;
+        boolean value = false;
         Integer chainId = (Integer) params.get("chainId");
         try {
             String txStr = params.get("tx").toString();
@@ -163,9 +167,7 @@ public class TransactionCmd extends BaseLedgerCmd {
             }
             LoggerUtil.txUnconfirmedRollBackLog(chainId).debug("rollBackUnconfirmTx chainId={},txHash={}", chainId, tx.getHash().toString());
             if (transactionService.rollBackUnconfirmTx(chainId, tx)) {
-                value = 1;
-            } else {
-                value = 0;
+                value = true;
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -192,7 +194,7 @@ public class TransactionCmd extends BaseLedgerCmd {
     @Parameter(parameterName = "txList", parameterType = "List")
     public Response rollBackBlockTxs(Map params) {
         Map<String, Object> rtData = new HashMap<>(1);
-        int value = 0;
+        boolean value = false;
         Integer chainId = (Integer) params.get("chainId");
         try {
             long blockHeight = Long.valueOf(params.get("blockHeight").toString());
@@ -211,9 +213,7 @@ public class TransactionCmd extends BaseLedgerCmd {
 
             LoggerUtil.txRollBackLog(chainId).debug("rollBackBlockTxs chainId={},blockHeight={}", chainId, blockHeight);
             if (transactionService.rollBackConfirmTxs(chainId, blockHeight, txList)) {
-                value = 1;
-            } else {
-                value = 0;
+                value = true;
             }
         } catch (Exception e) {
             LoggerUtil.logger(chainId).error(e);

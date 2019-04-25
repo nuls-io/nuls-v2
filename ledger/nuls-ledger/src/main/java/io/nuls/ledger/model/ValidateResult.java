@@ -24,7 +24,9 @@
  */
 package io.nuls.ledger.model;
 
+import io.nuls.ledger.constant.LedgerErrorCode;
 import io.nuls.ledger.constant.ValidateEnum;
+import io.nuls.tools.constant.ErrorCode;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -34,7 +36,7 @@ import java.util.Map;
  * @description
  * @date 2019/01/02
  **/
-public class  ValidateResult {
+public class ValidateResult {
     public static final String VALIDATE_SUCCESS_DESC = "success";
     public static final String VALIDATE_ORPHAN_DESC = "address {%s},nonce {%s}!={%s} is orphan transaction";
     public static final String VALIDATE_DOUBLE_EXPENSES_DESC = "address {%s},nonce {%s} is double expenses";
@@ -62,7 +64,8 @@ public class  ValidateResult {
     public static ValidateResult getResult(ValidateEnum type, String[] args) {
         return new ValidateResult(type.getValue(), String.format(validateResultMap.get(type).validateDesc, args));
     }
-    public static ValidateResult getSuccess(){
+
+    public static ValidateResult getSuccess() {
         return validateResultMap.get(ValidateEnum.SUCCESS_CODE);
     }
 
@@ -91,7 +94,23 @@ public class  ValidateResult {
         this.validateDesc = validateDesc;
     }
 
-    public  boolean isSuccess(){
+    public boolean isSuccess() {
         return validateCode == ValidateEnum.SUCCESS_CODE.getValue();
+    }
+
+    public boolean isOrphan() {
+        return validateCode == ValidateEnum.ORPHAN_CODE.getValue();
+    }
+
+    public ErrorCode toErrorCode() {
+        if (validateCode == ValidateEnum.DOUBLE_EXPENSES_CODE.getValue()) {
+            return LedgerErrorCode.DOUBLE_EXPENSES;
+        } else if (validateCode == ValidateEnum.TX_EXIST_CODE.getValue()) {
+            return LedgerErrorCode.TX_EXIST;
+        } else if (validateCode == ValidateEnum.FAIL_CODE.getValue()) {
+            return LedgerErrorCode.VALIDATE_FAIL;
+        } else {
+            return LedgerErrorCode.SYS_UNKOWN_EXCEPTION;
+        }
     }
 }

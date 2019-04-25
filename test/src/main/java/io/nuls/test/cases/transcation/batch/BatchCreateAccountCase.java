@@ -49,6 +49,7 @@ public class BatchCreateAccountCase extends BaseAccountCase<Integer, BatchParam>
         toList.clear();
         String formAddress = importAccountByPriKeyCase.check(param.getFormAddressPriKey(), depth);
         int i = 0;
+        int successTotal=0;
         Long start = System.currentTimeMillis();
         while (i < param.count) {
             i++;
@@ -61,14 +62,15 @@ public class BatchCreateAccountCase extends BaseAccountCase<Integer, BatchParam>
             Result<String> result = transferService.transfer(builder.build());
             try {
                 checkResultStatus(result);
+                successTotal++;
             } catch (TestFailException e) {
-                Log.error("创建交易失败");
+                Log.error("创建交易失败:{}",e.getMessage());
                 continue;
             }
             formList.add(account.getList().get(0));
             toList.add(account.getList().get(1));
         }
-        Log.info("创建{}笔交易，消耗时间:{}", param.count, System.currentTimeMillis() - start);
+        Log.info("创建{}笔交易,成功{}笔，消耗时间:{}", param.count,successTotal, System.currentTimeMillis() - start);
         return toList.size();
     }
 

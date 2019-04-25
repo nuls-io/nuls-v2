@@ -127,7 +127,7 @@ public interface TxService {
      * @return
      * @throws NulsException
      */
-    VerifyLedgerResult batchVerify(Chain chain, List<String> list, long blockHeight, long blockTime, String packingAddress, String stateRoot, String preStateRoot) throws Exception;
+    boolean batchVerify(Chain chain, List<String> list, long blockHeight, long blockTime, String packingAddress, String stateRoot, String preStateRoot) throws Exception;
 
 
     /**

@@ -54,7 +54,7 @@ public class BatchCreateTransferCase extends BaseTranscationCase<Boolean, Intege
                     checkResultStatus(result);
                     successTotal++;
                 } catch (TestFailException e) {
-                    Log.error("创建交易失败");
+                    Log.error("创建交易失败:{}",e.getMessage());
                 }
             }
             Log.info("创建{}笔交易,成功{}笔，消耗时间:{}", count,successTotal, System.currentTimeMillis() - start);
