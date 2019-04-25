@@ -7,7 +7,9 @@ import io.nuls.chain.model.dto.Seed;
 import io.nuls.chain.model.po.Asset;
 import io.nuls.chain.model.po.BlockChain;
 import io.nuls.chain.util.LoggerUtil;
+import io.nuls.rpc.info.NoUse;
 import io.nuls.rpc.model.ModuleE;
+import io.nuls.rpc.model.message.Response;
 import io.nuls.rpc.netty.processor.ResponseMessageProcessor;
 import io.nuls.tools.parse.JSONUtils;
 import org.junit.Before;
@@ -26,7 +28,7 @@ import java.util.Map;
 public class ChainCmdTest {
     @Before
     public void init() throws Exception {
-//        NoUse.mockModule();
+        NoUse.mockModule();
     }
 
     @Test
@@ -54,27 +56,34 @@ public class ChainCmdTest {
 
     @Test
     public void chainRegCommit() throws Exception {
-        BlockChain blockChain = new BlockChain();
-        blockChain.setChainId((short) 867);
-        blockChain.setChainName("ilovess");
-        blockChain.setAddressType(CmConstants.ADDRESS_TYPE_NULS);
-        blockChain.setMagicNumber(19870921);
-        blockChain.setSupportInflowAsset(false);
-        blockChain.setSingleNodeMinConnectionNum(6);
-        blockChain.setMinAvailableNodeNum(66);
-        blockChain.setTxConfirmedBlockNum(9);
-        List<Seed> seedList = new ArrayList<>();
-        Seed seed1 = new Seed();
-        seed1.setIp("1.1.2.2");
-        seed1.setPort(1122);
-        seedList.add(seed1);
-        Seed seed2 = new Seed();
-        seed2.setIp("3.3.4.4");
-        seed2.setPort(3344);
-        seedList.add(seed2);
-        blockChain.setDelete(false);
-        blockChain.setCreateTime(System.currentTimeMillis());
-//        System.out.println(CmdDispatcher.call("chainRegCommit", new Object[]{chain}, 1.0));
+       Map<String,Object>  parameters = new HashMap<>();
+        parameters.put("chainId",100);
+        parameters.put("chainName","ilovess");
+        parameters.put("addressType","1");
+        parameters.put("magicNumber",2000);
+        parameters.put("minAvailableNodeNum",1);
+        parameters.put("singleNodeMinConnectionNum",1);
+        parameters.put("txConfirmedBlockNum",10);
+
+        parameters.put("address","tNULSeBaMoodYW7AqyJrgYdWiJ6nfwfVHHHyXm");
+        parameters.put("assetId",1);
+        parameters.put("symbol","ns");
+        parameters.put("assetName","nulson1");
+        parameters.put("initNumber",1000000000);
+        parameters.put("decimalPlaces",8);
+        parameters.put("password","nuls123456");
+        Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.CM.abbr, "cm_chainReg", parameters);
+       System.out.println(JSONUtils.obj2json(response));
+
+    }
+
+    @Test
+    public void getChain() throws Exception {
+        Map<String,Object>  parameters = new HashMap<>();
+        parameters.put("chainId",100);
+        Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.CM.abbr, "cm_chain", parameters);
+        System.out.println(JSONUtils.obj2json(response));
+
     }
 
     @Test

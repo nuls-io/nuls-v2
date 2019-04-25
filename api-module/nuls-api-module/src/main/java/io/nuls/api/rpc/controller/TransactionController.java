@@ -1,5 +1,6 @@
 package io.nuls.api.rpc.controller;
 
+import io.nuls.api.analysis.AnalysisHandler;
 import io.nuls.api.analysis.WalletRpcHandler;
 import io.nuls.api.constant.ApiConstant;
 import io.nuls.api.db.*;
@@ -10,6 +11,9 @@ import io.nuls.api.model.po.db.*;
 import io.nuls.api.model.rpc.RpcErrorCode;
 import io.nuls.api.model.rpc.RpcResult;
 import io.nuls.api.utils.VerifyUtils;
+import io.nuls.base.basic.NulsByteBuffer;
+import io.nuls.base.data.Transaction;
+import io.nuls.rpc.util.RPCUtil;
 import io.nuls.tools.basic.Result;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Controller;
@@ -54,6 +58,9 @@ public class TransactionController {
             return RpcResult.paramError("[hash] is required");
         }
         Result<TransactionInfo> result = WalletRpcHandler.getTx(chainId, hash);
+        if (result == null) {
+            return RpcResult.dataNotFound();
+        }
         if (result.isFailed()) {
             throw new JsonRpcException(result.getErrorCode());
         }
@@ -249,8 +256,12 @@ public class TransactionController {
                 return RpcResult.dataNotFound();
             }
             Result result = WalletRpcHandler.broadcastTx(chainId, txHex);
-            if (result.isSuccess()) {
 
+            if (result.isSuccess()) {
+                Transaction tx = new Transaction();
+                tx.parse(new NulsByteBuffer(RPCUtil.decode(txHex)));
+                TransactionInfo txInfo = AnalysisHandler.toTransaction(chainId, tx);
+                txService.saveUnConfirmTx(chainId, txInfo, txHex);
                 return RpcResult.success(result.getData());
             } else {
                 return RpcResult.failed(result);

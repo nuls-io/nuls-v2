@@ -38,6 +38,7 @@ import io.nuls.rpc.model.message.Response;
 import io.nuls.rpc.netty.processor.ResponseMessageProcessor;
 import io.nuls.rpc.util.RPCUtil;
 import io.nuls.rpc.util.TimeUtils;
+import io.nuls.tools.constant.TxType;
 import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.log.Log;
@@ -130,25 +131,29 @@ public class TxValid {
 
     }
 
-    private List<Transaction> createTx() throws Exception {
-        List<Transaction> list = new ArrayList<>();
+    @Test
+    public void transferLocal() throws Exception {
         NulsDigestData hash = null;
-        System.out.println("satring......");
-        for (int i = 0; i < 1; i++) {
-            Map transferMap = this.createTransferTx(address25, address21, new BigInteger("1000000000"));
+        for (int i = 0; i < 10000; i++) {
+            Map transferMap = this.createTransferTx(address23, address21, new BigInteger("1000000000"));
 
             Transaction tx = assemblyTransaction((int) transferMap.get("chainId"), (List<CoinDTO>) transferMap.get("inputs"),
                     (List<CoinDTO>) transferMap.get("outputs"), (String) transferMap.get("remark"), hash);
-            //String hash = createCtxTransfer();
+            Map<String, Object> params = new HashMap<>(TxConstant.INIT_CAPACITY_8);
+            params.put(Constants.VERSION_KEY_STR, TxConstant.RPC_VERSION);
+            params.put("chainId", chainId);
+            params.put("tx",  RPCUtil.encode(tx.serialize()));
+            HashMap result = (HashMap) TransactionCall.request(ModuleE.TX.abbr, "tx_newTx", params);
             hash = tx.getHash();
-            list.add(tx);
             System.out.println("hash:" + hash.getDigestHex());
-            System.out.println("txHex:" + RPCUtil.encode(tx.serialize()));
+            System.out.println("hash:" + hash);
+            System.out.println("count:" + (i + 1));
+            System.out.println("");
+//            Thread.sleep(500L);
         }
-
-        System.out.println(list.size());
-        return list;
     }
+
+
 
     @Test
     public void getBalance() throws Exception {
@@ -164,17 +169,6 @@ public class TxValid {
         sign(list);
         signMThread(list);
 
-        sign(list);
-        signMThread(list);
-
-        sign(list);
-        signMThread(list);
-
-        sign(list);
-        signMThread(list);
-
-        sign(list);
-        signMThread(list);
     }
 
     /**
@@ -258,12 +252,13 @@ public class TxValid {
 
     @Test
     public void transfer() throws Exception {
-        for (int i = 0; i < 500; i++) {
-            String hash = createTransfer(address27, address21, new BigInteger("1000000000"));
+        for (int i = 0; i < 20; i++) {
+            String hash = createTransfer(address23, address20, new BigInteger("1000000000"));
             //String hash = createCtxTransfer();
+            System.out.println("hash:" + hash);
             System.out.println("count:" + (i + 1));
             System.out.println("");
-            Thread.sleep(500L);
+//            Thread.sleep(500L);
         }
     }
 
@@ -364,8 +359,8 @@ public class TxValid {
 
     @Test
     public void getTx() throws Exception {
-        getTxCfmClient("0020e87c15cc8509a46cf5c802641864dc609f87b4e1d6120a3de3d3d31e6075173a");
-        getTxCfmClient("00209a152f8a93c05463c970a12b875cb23effb59b0dd177b47ec1e56fca0d3c80e8");//最后一条
+        getTxCfmClient("31f65fb2cc5e468b203f692291ea94f8559dca30878f9e1648c11601bf0cf7e1");
+        getTxCfmClient("61b27fd200ab93bbf24fee25bcca82e46dbd62c7fa406ccd74d1b594d134e397");//最后一条
     }
 
     private void getTx(String hash) throws Exception {
@@ -486,6 +481,26 @@ public class TxValid {
         HashMap result = (HashMap) ((HashMap) cmdResp.getResponseData()).get("ac_setAlias");
         String txHash = (String) result.get("txHash");
         Log.debug("alias-txHash:{}", txHash);
+    }
+
+    private List<Transaction> createTx() throws Exception {
+        List<Transaction> list = new ArrayList<>();
+        NulsDigestData hash = null;
+        System.out.println("satring......");
+        for (int i = 0; i < 1; i++) {
+            Map transferMap = this.createTransferTx(address25, address21, new BigInteger("1000000000"));
+
+            Transaction tx = assemblyTransaction((int) transferMap.get("chainId"), (List<CoinDTO>) transferMap.get("inputs"),
+                    (List<CoinDTO>) transferMap.get("outputs"), (String) transferMap.get("remark"), hash);
+            //String hash = createCtxTransfer();
+            hash = tx.getHash();
+            list.add(tx);
+            System.out.println("hash:" + hash.getDigestHex());
+            System.out.println("txHex:" + RPCUtil.encode(tx.serialize()));
+        }
+
+        System.out.println(list.size());
+        return list;
     }
 
     /**
@@ -747,7 +762,6 @@ public class TxValid {
             assemblyCoinData(tx, chainId, fromList, toList, hash);
             //计算交易数据摘要哈希
             byte[] bytes = tx.serializeForHash();
-            System.out.println("sehash:" + RPCUtil.encode(bytes));
             tx.setHash(NulsDigestData.calcDigestData(bytes));
             //创建ECKey用于签名
 //            List<ECKey> signEcKeys = new ArrayList<>();
@@ -837,10 +851,6 @@ public class TxValid {
         for (CoinDTO coinDto : listFrom) {
             String address = coinDto.getAddress();
             byte[] addressByte = AddressTool.getAddress(address);
-            //转账交易转出地址必须是本链地址
-            if (!AddressTool.validAddress(chainId, address)) {
-
-            }
             //检查该链是否有该资产
             int assetChainId = coinDto.getAssetsChainId();
             int assetId = coinDto.getAssetsId();
@@ -848,16 +858,26 @@ public class TxValid {
             //检查对应资产余额是否足够
             BigInteger amount = coinDto.getAmount();
             //查询账本获取nonce值
-            byte[] nonce = getNonceByPreHash(hash);
+            byte[] nonce = getNonceByPreHash(createChain(), address,hash);
             CoinFrom coinFrom = new CoinFrom(addressByte, assetChainId, assetId, amount, nonce, (byte) 0);
             coinFroms.add(coinFrom);
         }
         return coinFroms;
     }
 
-    public static byte[] getNonceByPreHash(NulsDigestData hash) {
+    private Chain createChain(){
+        Chain chain = new Chain();
+        ConfigBean configBean = new ConfigBean();
+        configBean.setChainId(chainId);
+        configBean.setAssetId(assetId);
+        chain.setConfig(configBean);
+        return chain;
+    }
+
+    public static byte[] getNonceByPreHash(Chain chain, String address, NulsDigestData hash) throws NulsException {
         if (hash == null) {
-            return HexUtil.decode("ffffffff");
+            return LedgerCall.getNonce(chain, address, assetChainId, assetId);
+            //return HexUtil.decode("ffffffffffffffff");
         }
         byte[] out = new byte[8];
         byte[] in = hash.getDigestBytes();
@@ -892,7 +912,7 @@ public class TxValid {
                     }
                 }
             } else if (!addressSet.contains(AddressTool.getStringAddressByBytes(coinFrom.getAddress()))
-                    && tx.getType() != TxConstant.TX_TYPE_STOP_AGENT) {
+                    && tx.getType() != TxType.STOP_AGENT) {
                 throw new NulsException(TxErrorCode.SIGN_ADDRESS_NOT_MATCH_COINFROM);
             }
         }

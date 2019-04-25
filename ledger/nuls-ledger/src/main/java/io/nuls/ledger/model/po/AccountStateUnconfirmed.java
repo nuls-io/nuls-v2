@@ -31,6 +31,7 @@ import io.nuls.base.data.BaseNulsData;
 import io.nuls.ledger.constant.LedgerConstant;
 import io.nuls.ledger.utils.TimeUtil;
 import io.nuls.tools.exception.NulsException;
+import io.nuls.tools.model.BigIntegerUtils;
 import io.nuls.tools.parse.SerializeUtils;
 
 import java.io.IOException;
@@ -55,6 +56,9 @@ public class AccountStateUnconfirmed extends BaseNulsData {
     private byte[] fromNonce = LedgerConstant.INIT_NONCE_BYTE;
     private byte[] nonce = LedgerConstant.INIT_NONCE_BYTE;
     private BigInteger amount = BigInteger.ZERO;
+    private BigInteger toConfirmedAmount = BigInteger.ZERO;
+    private BigInteger unconfirmedAmount = BigInteger.ZERO;
+
     private long createTime = 0;
     public AccountStateUnconfirmed() {
         super();
@@ -67,7 +71,7 @@ public class AccountStateUnconfirmed extends BaseNulsData {
         this.assetId = assetId;
         this.fromNonce = fromNonce;
         this.nonce = nonce;
-        this.amount = amount;
+        this.unconfirmedAmount = amount;
         this.createTime = TimeUtil.getCurrentTime();
     }
 
@@ -163,7 +167,12 @@ public class AccountStateUnconfirmed extends BaseNulsData {
     }
 
     public BigInteger getAmount() {
-        return amount;
+        BigInteger unconfirmed =  unconfirmedAmount.subtract(toConfirmedAmount);
+        if(BigIntegerUtils.isLessThan(unconfirmed,BigInteger.ZERO)){
+            return BigInteger.ZERO;
+        }else{
+            return unconfirmed;
+        }
     }
 
     public void setAmount(BigInteger amount) {
@@ -180,5 +189,21 @@ public class AccountStateUnconfirmed extends BaseNulsData {
 
     public  boolean isOverTime(){
         return (TimeUtil.getCurrentTime()-createTime)>LedgerConstant.UNCONFIRM_NONCE_EXPIRED_TIME;
+    }
+
+    public BigInteger getToConfirmedAmount() {
+        return toConfirmedAmount;
+    }
+
+    public void setToConfirmedAmount(BigInteger toConfirmedAmount) {
+        this.toConfirmedAmount = toConfirmedAmount;
+    }
+
+    public BigInteger getUnconfirmedAmount() {
+        return unconfirmedAmount;
+    }
+
+    public void setUnconfirmedAmount(BigInteger unconfirmedAmount) {
+        this.unconfirmedAmount = unconfirmedAmount;
     }
 }

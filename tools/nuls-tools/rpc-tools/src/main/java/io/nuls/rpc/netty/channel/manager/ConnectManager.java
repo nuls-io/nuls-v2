@@ -528,6 +528,7 @@ public class ConnectManager {
         realResponse.setResponseComment(response.getResponseComment());
         realResponse.setResponseMaxSize(response.getResponseMaxSize());
         realResponse.setResponseData(response.getResponseData());
+        realResponse.setResponseErrorCode(response.getResponseErrorCode());
         return realResponse;
     }
 

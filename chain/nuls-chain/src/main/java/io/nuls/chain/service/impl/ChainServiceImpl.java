@@ -8,7 +8,7 @@ import io.nuls.chain.model.po.Asset;
 import io.nuls.chain.model.po.BlockChain;
 import io.nuls.chain.service.AssetService;
 import io.nuls.chain.service.ChainService;
-import io.nuls.chain.service.RpcService;
+import io.nuls.chain.rpc.call.RpcService;
 import io.nuls.chain.storage.ChainStorage;
 import io.nuls.chain.util.TxUtil;
 import io.nuls.tools.core.annotation.Autowired;
@@ -46,13 +46,13 @@ public class ChainServiceImpl implements ChainService {
      */
     @Override
     public void initMainChain() throws Exception {
-        int chainId = Integer.valueOf(nulsChainConfig.getNulsChainId());
+        int chainId = Integer.valueOf(nulsChainConfig.getMainAssetId());
         BlockChain chain = getChain(chainId);
         if (chain != null) {
             return;
         }
         chain = new BlockChain();
-        int assetId = Integer.parseInt(nulsChainConfig.getNulsAssetId());
+        int assetId = Integer.parseInt(nulsChainConfig.getMainAssetId());
         chain.setRegAssetId(assetId);
         chain.addCreateAssetId(CmRuntimeInfo.getAssetKey(chainId, assetId));
         chain.addCirculateAssetId(CmRuntimeInfo.getAssetKey(chainId, assetId));
@@ -62,7 +62,6 @@ public class ChainServiceImpl implements ChainService {
         asset.setAssetId(assetId);
         asset.setInitNumber(new BigInteger(nulsChainConfig.getNulsAssetInitNumberMax()));
         asset.setSymbol(nulsChainConfig.getNulsAssetSymbol());
-        asset.addChainId(chainId);
         assetService.createAsset(asset);
     }
 
@@ -141,7 +140,6 @@ public class ChainServiceImpl implements ChainService {
         1. 插入资产表
         2. 插入资产流通表
          */
-        asset.addChainId(asset.getChainId());
         assetService.createAsset(asset);
 
         /*

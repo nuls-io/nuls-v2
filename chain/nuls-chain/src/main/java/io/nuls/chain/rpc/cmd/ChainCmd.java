@@ -1,17 +1,20 @@
-package io.nuls.chain.cmd;
+package io.nuls.chain.rpc.cmd;
 
 
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.CoinData;
 import io.nuls.base.data.Transaction;
 import io.nuls.chain.config.NulsChainConfig;
+import io.nuls.chain.info.CmErrorCode;
+import io.nuls.chain.info.CmRuntimeInfo;
 import io.nuls.chain.model.dto.AccountBalance;
 import io.nuls.chain.model.po.Asset;
 import io.nuls.chain.model.po.BlockChain;
 import io.nuls.chain.model.tx.RegisterChainAndAssetTransaction;
 import io.nuls.chain.service.ChainService;
-import io.nuls.chain.service.RpcService;
+import io.nuls.chain.rpc.call.RpcService;
 import io.nuls.chain.util.LoggerUtil;
+import io.nuls.chain.util.TimeUtil;
 import io.nuls.rpc.model.CmdAnnotation;
 import io.nuls.rpc.model.Parameter;
 import io.nuls.rpc.model.message.Response;
@@ -19,8 +22,12 @@ import io.nuls.rpc.util.TimeUtils;
 import io.nuls.tools.constant.ErrorCode;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
+import io.nuls.tools.exception.NulsException;
+import io.nuls.tools.exception.NulsRuntimeException;
 import io.nuls.tools.parse.JSONUtils;
 
+import java.io.IOException;
+import java.math.BigInteger;
 import java.util.Map;
 
 /**
@@ -46,7 +53,7 @@ public class ChainCmd extends BaseChainCmd {
             int chainId = Integer.parseInt(params.get("chainId").toString());
             BlockChain blockChain = chainService.getChain(chainId);
             if (blockChain == null) {
-                return failed(ErrorCode.init("C10003"));
+                return failed(CmErrorCode.ERROR_CHAIN_NOT_FOUND);
             }
             return success(blockChain);
         } catch (Exception e) {
@@ -78,36 +85,35 @@ public class ChainCmd extends BaseChainCmd {
             /*判断链与资产是否已经存在*/
 
             /* 组装BlockChain (BlockChain object) */
-            BlockChain blockChain = JSONUtils.map2pojo(params, BlockChain.class);
-            blockChain.setRegAddress(AddressTool.getAddress(String.valueOf(params.get("address"))));
-            blockChain.setCreateTime(TimeUtils.getCurrentTimeMillis());
-
+            BlockChain blockChain = new BlockChain();
+            blockChain.map2pojo(params);
             /* 组装Asset (Asset object) */
             /* 取消int assetId = seqService.createAssetId(blockChain.getChainId());*/
-            Asset asset = JSONUtils.map2pojo(params, Asset.class);
+            Asset asset = new Asset();
+            asset.map2pojo(params);
             asset.setChainId(blockChain.getChainId());
-            asset.setDepositNuls(Integer.valueOf(nulsChainConfig.getAssetDepositNuls()));
+            asset.setDepositNuls(new BigInteger(nulsChainConfig.getAssetDepositNuls()));
             asset.setAvailable(true);
-            asset.setCreateTime(TimeUtils.getCurrentTimeMillis());
-            asset.setAddress(blockChain.getRegAddress());
-
             /* 组装交易发送 (Send transaction) */
             Transaction tx = new RegisterChainAndAssetTransaction();
             tx.setTxData(blockChain.parseToTransaction(asset));
-            tx.setTime(TimeUtils.getCurrentTimeMillis());
+            tx.setTime(TimeUtil.getCurrentTime());
             AccountBalance accountBalance = rpcService.getCoinData(String.valueOf(params.get("address")));
-            CoinData coinData = super.getRegCoinData(asset.getAddress(), asset.getChainId(),
-                    asset.getAssetId(), String.valueOf(asset.getDepositNuls()), tx.size(), accountBalance,nulsChainConfig.getAssetDepositNulsLockRate());
+            CoinData coinData = super.getRegCoinData(asset.getAddress(), CmRuntimeInfo.getMainIntChainId(),
+                    CmRuntimeInfo.getMainIntAssetId(), String.valueOf(asset.getDepositNuls()), tx.size(), accountBalance,nulsChainConfig.getAssetDepositNulsLockRate());
             tx.setCoinData(coinData.serialize());
 
-            /* 判断签名是否正确 (Determine if the signature is correct) */
-            tx = signDigest(asset.getChainId(), (String) params.get("address"), (String) params.get("password"), tx);
+            /* 判断签名是否正确 (Determine if the signature is correct),取主网的chainid进行签名 */
+            rpcService.transactionSignature(CmRuntimeInfo.getMainIntChainId(), (String) params.get("address"), (String) params.get("password"), tx);
 
             /* 发送到交易模块 (Send to transaction module) */
             return rpcService.newTx(tx) ? success(blockChain) : failed("Register chain failed");
-        } catch (Exception e) {
+        } catch (NulsRuntimeException e) {
             LoggerUtil.logger().error(e);
-            return failed(e.getMessage());
+            return failed(e.getErrorCode());
+        } catch (Exception e) {
+            e.printStackTrace();
+            return failed(CmErrorCode.SYS_UNKOWN_EXCEPTION);
         }
     }
 }

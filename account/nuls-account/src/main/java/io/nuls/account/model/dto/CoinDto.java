@@ -24,10 +24,6 @@
  */
 
 package io.nuls.account.model.dto;
-
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import io.nuls.account.util.LoggerUtil;
-
 import java.math.BigInteger;
 
 /**

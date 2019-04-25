@@ -21,6 +21,7 @@
 package io.nuls.block.model;
 
 import io.nuls.base.data.NulsDigestData;
+import io.nuls.block.utils.LoggerUtil;
 
 /**
  * 节点
@@ -97,6 +98,7 @@ public class Node {
      * 根据下载是否成功、下载耗费时间调整信用值
      */
     public void adjustCredit(boolean success, long duration) {
+        int oldCredit = credit;
         if (success) {
             this.duration = duration;
             //下载成功，信用值加20，上限为初始信用值的两倍
@@ -105,5 +107,6 @@ public class Node {
             //下载失败，信用值减半，下限为0
             credit /= 2;
         }
+        LoggerUtil.commonLog.debug("id-" + id + ",oldCredit-" + oldCredit + ",newCredit-" + credit + ",success-" + success);
     }
 }

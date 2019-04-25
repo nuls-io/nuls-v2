@@ -29,6 +29,7 @@ import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.*;
 import io.nuls.ledger.constant.LedgerConstant;
 import io.nuls.ledger.model.AccountBalance;
+import io.nuls.ledger.model.Uncfd2CfdKey;
 import io.nuls.ledger.model.ValidateResult;
 import io.nuls.ledger.model.po.AccountState;
 import io.nuls.ledger.model.po.AccountStateSnapshot;
@@ -119,7 +120,7 @@ public class TransactionServiceImpl implements TransactionService {
     }
 
     private boolean confirmBlockTxProcess(int addressChainId, long blockHeight, List<Transaction> txList,
-                                          Map<String, AccountBalance> updateAccounts, List<byte[]> delUncfd2CfdKeys, Map<String, Integer> clearUncfs) throws Exception {
+                                          Map<String, AccountBalance> updateAccounts, List<Uncfd2CfdKey> delUncfd2CfdKeys, Map<String, Integer> clearUncfs) throws Exception {
         for (Transaction transaction : txList) {
             byte[] nonce8Bytes = LedgerUtil.getNonceByTx(transaction);
             String txHash = transaction.getHash().toString();
@@ -146,10 +147,10 @@ public class TransactionServiceImpl implements TransactionService {
                         return false;
                     }
                     //判断是否存在未确认过程交易，如果存在则进行确认记录，如果不存在，则进行未确认的清空记录
-                    byte[] accounNoncekey = LedgerUtil.getAccountNoncesByteKey(from, nonce8Bytes);
                     String accountkeyStr = LedgerUtil.getAccountAssetStrKey(from);
-                    if (unconfirmedStateService.existTxUnconfirmedTx(addressChainId, accounNoncekey)) {
-                        delUncfd2CfdKeys.add(accounNoncekey);
+                    String nonce8Str = LedgerUtil.getNonceEncode(nonce8Bytes);
+                    if (unconfirmedStateService.existTxUnconfirmedTx(addressChainId, accountkeyStr,nonce8Str)) {
+                        delUncfd2CfdKeys.add(new Uncfd2CfdKey(accountkeyStr,nonce8Str));
                     } else {
                         clearUncfs.put(accountkeyStr, 1);
                     }
@@ -212,7 +213,7 @@ public class TransactionServiceImpl implements TransactionService {
             //整体区块备份
             BlockSnapshotAccounts blockSnapshotAccounts = new BlockSnapshotAccounts();
             Map<byte[], byte[]> accountStatesMap = new HashMap<>(1024);
-            List<byte[]> delUncfd2CfdKeys = new ArrayList<>();
+            List<Uncfd2CfdKey> delUncfd2CfdKeys = new ArrayList<>();
             Map<String, Integer> clearUncfs = new HashMap<>(16);
             try {
                 if (!confirmBlockTxProcess(addressChainId, blockHeight, txList, updateAccounts, delUncfd2CfdKeys, clearUncfs)) {
@@ -261,7 +262,7 @@ public class TransactionServiceImpl implements TransactionService {
             //完全提交,存储当前高度。
             repository.saveOrUpdateBlockHeight(addressChainId, blockHeight);
             time7 = System.currentTimeMillis();
-            LoggerUtil.timeTest.debug("####txs={}==accountSize={}====总时间:{},结构校验解析时间={}",
+            LoggerUtil.timeTestLogger(addressChainId).debug("####txs={}==accountSize={}====总时间:{},结构校验解析时间={}",
                     txList.size(), updateAccounts.size(), time7 - time1, time2 - time1);
             return true;
         } catch (Exception e) {

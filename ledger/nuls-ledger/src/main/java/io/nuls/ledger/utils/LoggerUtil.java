@@ -37,23 +37,20 @@ import java.util.Map;
  * @date 2018/12/17
  **/
 public class LoggerUtil {
-   public static NulsLogger timeTest = LoggerBuilder.getLogger("./lg", "timeTest", Level.ALL);
     /**
      * 日志
      */
     private static Map<String, NulsLogger> loggerMap = new HashMap<>();
     public static String logLevel = "DEBUG";
     private static final String LOGGER_KEY1 = "lg";
-    private static final String LOGGER_KEY2 = "lg_tx";
-    private static final String LOGGER_KEY3 = "lg_txRb";
-    private static final String LOGGER_KEY4 = "lg_txUncfRb";
-    private static final String LOGGER_KEY5 = "lg_txAmount";
-
+    private static final String LOGGER_KEY3 = "txRb";
+    private static final String LOGGER_KEY4 = "txUncfRb";
+    private static final String LOGGER_KEY6 = "timeTest";
     private static NulsLogger defaultLogger = null;
 
     public static NulsLogger logger() {
         if (null == defaultLogger) {
-            defaultLogger = LoggerBuilder.getLogger("./lg", "lg", Level.valueOf(logLevel));
+            defaultLogger = LoggerBuilder.getLogger("lg", Level.valueOf(logLevel));
         }
         return defaultLogger;
     }
@@ -64,12 +61,11 @@ public class LoggerUtil {
         }
         return loggerMap.get(LOGGER_KEY1 + chainId);
     }
-
-    public static NulsLogger txCommitLog(int chainId) {
-        if (null == loggerMap.get(LOGGER_KEY2 + chainId)) {
+    public static NulsLogger timeTestLogger(int chainId) {
+        if (null == loggerMap.get(LOGGER_KEY6 + chainId)) {
             createLogger(chainId);
         }
-        return loggerMap.get(LOGGER_KEY2 + chainId);
+        return loggerMap.get(LOGGER_KEY6 + chainId);
     }
 
     public static NulsLogger txRollBackLog(int chainId) {
@@ -86,20 +82,12 @@ public class LoggerUtil {
         return loggerMap.get(LOGGER_KEY4 + chainId);
     }
 
-    public static NulsLogger txAmount(int chainId) {
-        if (null == loggerMap.get(LOGGER_KEY5 + chainId)) {
-            createLogger(chainId);
-        }
-        return loggerMap.get(LOGGER_KEY5 + chainId);
-    }
 
     public static void createLogger(int chainId) {
-        String folderName = "./lg/chain-" + chainId;
-        loggerMap.put(LOGGER_KEY1 + chainId, LoggerBuilder.getLogger(folderName, "lg", Level.valueOf(logLevel)));
-        loggerMap.put(LOGGER_KEY2 + chainId, LoggerBuilder.getLogger(folderName, "tx", Level.valueOf(logLevel)));
-        loggerMap.put(LOGGER_KEY3 + chainId, LoggerBuilder.getLogger(folderName, "txRb", Level.valueOf(logLevel)));
-        loggerMap.put(LOGGER_KEY4 + chainId, LoggerBuilder.getLogger(folderName, "txUncfRb", Level.valueOf(logLevel)));
-        loggerMap.put(LOGGER_KEY5 + chainId, LoggerBuilder.getLogger(folderName, "txAmount", Level.valueOf(logLevel)));
+        String folderName = "./chain-" + chainId+"/ledger";
+        loggerMap.put(LOGGER_KEY1 + chainId, LoggerBuilder.getLogger(folderName, LOGGER_KEY1, Level.valueOf(logLevel)));
+        loggerMap.put(LOGGER_KEY3 + chainId, LoggerBuilder.getLogger(folderName, LOGGER_KEY3, Level.valueOf(logLevel)));
+        loggerMap.put(LOGGER_KEY4 + chainId, LoggerBuilder.getLogger(folderName, LOGGER_KEY4, Level.valueOf(logLevel)));
+        loggerMap.put(LOGGER_KEY6 + chainId, LoggerBuilder.getLogger(folderName, LOGGER_KEY6, Level.valueOf(logLevel)));
     }
-
 }

@@ -26,10 +26,10 @@
 package io.nuls.transaction.storage.impl;
 
 
-import io.nuls.base.data.Transaction;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.transaction.model.bo.Chain;
+import io.nuls.transaction.model.po.TransactionNetPO;
 import io.nuls.transaction.storage.UnverifiedTxStorageService;
 import io.nuls.transaction.utils.TxUtil;
 
@@ -47,7 +47,7 @@ import static io.nuls.transaction.utils.LoggerUtil.LOG;
 public class UnverifiedTxStorageServiceImpl implements UnverifiedTxStorageService {
 
     @Override
-    public boolean putTx(Chain chain, Transaction tx) {
+    public boolean putTx(Chain chain, TransactionNetPO tx) {
         try {
             chain.getUnverifiedQueue().offer(tx.serialize());
             return true;
@@ -58,13 +58,13 @@ public class UnverifiedTxStorageServiceImpl implements UnverifiedTxStorageServic
     }
 
     @Override
-    public Transaction pollTx(Chain chain) {
+    public TransactionNetPO pollTx(Chain chain) {
         byte[] bytes = chain.getUnverifiedQueue().poll();
         if (null == bytes) {
             return null;
         }
         try {
-            return TxUtil.getTransaction(bytes);
+            return TxUtil.getInstance(bytes, TransactionNetPO.class);
         } catch (NulsException e) {
             LOG.error(e);
         }

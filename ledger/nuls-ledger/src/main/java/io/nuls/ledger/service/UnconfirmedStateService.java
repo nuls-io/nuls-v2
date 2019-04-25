@@ -25,6 +25,7 @@
  */
 package io.nuls.ledger.service;
 
+import io.nuls.ledger.model.Uncfd2CfdKey;
 import io.nuls.ledger.model.ValidateResult;
 import io.nuls.ledger.model.po.AccountState;
 import io.nuls.ledger.model.po.AccountStateUnconfirmed;
@@ -65,7 +66,7 @@ public interface UnconfirmedStateService {
      * @param txsUnconfirmed
      * @param accountStateUnconfirmed
      */
-    void mergeUnconfirmedNonce(AccountState accountState, String assetKey, Map<byte[], byte[]> txsUnconfirmed, AccountStateUnconfirmed accountStateUnconfirmed);
+    void mergeUnconfirmedNonce(AccountState accountState, String assetKey,  Map<String,TxUnconfirmed> txsUnconfirmed, AccountStateUnconfirmed accountStateUnconfirmed);
 
     /**
      * 回滚未确认账本交易
@@ -78,14 +79,14 @@ public interface UnconfirmedStateService {
     boolean rollUnconfirmedTx(int addressChainId, String assetKey, String txHash);
 
     /**
-     * unconfirmed tx exist
-     *
+     * unconfirmed tx existunconfirmed tx exist
      * @param addressChainId
-     * @param assetNonceKey
+     * @param assetKey
+     * @param nonce
      * @return
      * @throws Exception
      */
-    boolean existTxUnconfirmedTx(int addressChainId, byte[] assetNonceKey) throws Exception;
+    boolean   existTxUnconfirmedTx(int addressChainId,String assetKey,String nonce)  throws Exception;
 
     /**
      * delete unconfirmed state
@@ -96,14 +97,6 @@ public interface UnconfirmedStateService {
      */
     void clearAccountUnconfirmed(int addressChainId, String accountKey) throws Exception;
 
-    /**
-     * delete unconfirmed chain
-     * @param addressChainId
-     * @param assetKey
-     * @param beginTxUnconfirmed
-     * @throws Exception
-     */
-    void deleteTxUnconfirmedList(int addressChainId, String assetKey,TxUnconfirmed beginTxUnconfirmed) throws Exception;
 
     /**
      * batch delete unconfirmed tx
@@ -112,7 +105,7 @@ public interface UnconfirmedStateService {
      * @param keys
      * @throws Exception
      */
-    void batchDeleteUnconfirmedTx(int addressChainId, List<byte[]> keys) throws Exception;
+    void batchDeleteUnconfirmedTx(int addressChainId, List<Uncfd2CfdKey> keys) throws Exception;
 
     /**
      * update unconfirmed tx

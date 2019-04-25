@@ -9,9 +9,10 @@ public class DateUtils {
     public final static String EMPTY_SRING = "";
     public final static String DEFAULT_PATTERN = "yyyy-MM-dd HH:mm:ss";
     public final static String DEFAULT_TIMESTAMP_PATTERN = "yyyy-MM-dd HH:mm:ss.sss";
-    public final static long DATE_TIME = 1000L * 24 * 60 * 60;
-    public final static long HOUR_TIME = 1000L * 60 * 60;
-    public final static long MINUTE_TIME = 1000L * 60;
+    public final static long DATE_TIME = 1000 * 24 * 60 * 60;
+    public final static long HOUR_TIME = 1000 * 60 * 60;
+    public final static long MINUTE_TIME = 1000 * 60;
+    public final static long TEN_MINUTE_TIME = 1000 * 10 * 60;
     public final static long TIME_ZONE;
     public final static String TIME_ZONE_STRING;
     private static final ThreadLocal<DateFormat> DATE_FORMATTER_17 = ThreadLocal.withInitial(() -> new SimpleDateFormat(DEFAULT_TIMESTAMP_PATTERN));
@@ -24,7 +25,7 @@ public class DateUtils {
         long timeStampUTC = cal.getTimeInMillis();
         long timeStamp = System.currentTimeMillis();
         long timeZone = (timeStamp - timeStampUTC) / HOUR_TIME;
-        TIME_ZONE = timeZone+1;
+        TIME_ZONE = timeZone + 1;
         TIME_ZONE_STRING = String.valueOf(TIME_ZONE);
     }
 
@@ -569,6 +570,7 @@ public class DateUtils {
 
     /**
      * 时间加减年数
+     *
      * @param startDate 要处理的时间，Null则为当前时间
      * @param years     加减的年数
      * @return Date
@@ -601,9 +603,9 @@ public class DateUtils {
     /**
      * 获取两个时间中最小的一个时间
      *
-     * @param date         被比较时间
-     * @param compareDate  比较时间
-     * @return             结果
+     * @param date        被比较时间
+     * @param compareDate 比较时间
+     * @return 结果
      */
     public static Date dateMin(Date date, Date compareDate) {
         if (date == null) {
@@ -623,9 +625,9 @@ public class DateUtils {
     /**
      * 获取两个时间中最大的一个时间
      *
-     * @param date              被比较时间
-     * @param compareDate       比较时间
-     * @return                  结果
+     * @param date        被比较时间
+     * @param compareDate 比较时间
+     * @return 结果
      */
     public static Date dateMax(Date date, Date compareDate) {
         if (date == null) {
@@ -642,43 +644,47 @@ public class DateUtils {
         return date;
     }
 
-     /**
-      * 获取日期时间的年份，如2017-02-13，返回2017
-      * @param date
-      * @return
-      */
-            public static int getYear(Date date) {
-              Calendar cal = Calendar.getInstance();
-              cal.setTime(date);
-             return cal.get(Calendar.YEAR);
-     }
-
-            /**
-     * 获取日期时间的月份，如2017年2月13日，返回2
+    /**
+     * 获取日期时间的年份，如2017-02-13，返回2017
+     *
      * @param date
      * @return
-      */
-            public static int getMonth(Date date) {
-               Calendar cal = Calendar.getInstance();
-               cal.setTime(date);
-            return cal.get(Calendar.MONTH) + 1;
-   }
-
-      /**
-      * 获取日期时间的第几天（即返回日期的dd），如2017-02-13，返回13
-      * @param date
-      * @return
-      */
-       public static int getDate(Date date) {
+     */
+    public static int getYear(Date date) {
         Calendar cal = Calendar.getInstance();
         cal.setTime(date);
-         return cal.get(Calendar.DATE);
-     }
+        return cal.get(Calendar.YEAR);
+    }
+
+    /**
+     * 获取日期时间的月份，如2017年2月13日，返回2
+     *
+     * @param date
+     * @return
+     */
+    public static int getMonth(Date date) {
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(date);
+        return cal.get(Calendar.MONTH) + 1;
+    }
+
+    /**
+     * 获取日期时间的第几天（即返回日期的dd），如2017-02-13，返回13
+     *
+     * @param date
+     * @return
+     */
+    public static int getDate(Date date) {
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(date);
+        return cal.get(Calendar.DATE);
+    }
 
     /**
      * 时间戳转换成日期默认格式字符串
+     *
      * @param time 时间戳
-     * @return     日期格式字符串
+     * @return 日期格式字符串
      */
     public static String timeStamp2DateStr(long time) {
         return DATE_FORMATTER_17.get().format(new Date(time));
@@ -687,29 +693,30 @@ public class DateUtils {
 
     /**
      * 时间戳转换成日期格式字符串
-     * @param time    时间戳
-     * @param format  日期字符串格式
-     * @return        日期字符串
+     *
+     * @param time   时间戳
+     * @param format 日期字符串格式
+     * @return 日期字符串
      */
-     public static String timeStamp2DateStr(long time,String format) {
-         if(format == null || format.isEmpty()){
-             format = DEFAULT_TIMESTAMP_PATTERN;
-         }
-         SimpleDateFormat sdf = new SimpleDateFormat(format);
-         return sdf.format(new Date(time));
+    public static String timeStamp2DateStr(long time, String format) {
+        if (format == null || format.isEmpty()) {
+            format = DEFAULT_TIMESTAMP_PATTERN;
+        }
+        SimpleDateFormat sdf = new SimpleDateFormat(format);
+        return sdf.format(new Date(time));
     }
 
     /**
      * 获取时区信息
-     * */
-    public static long getTimeZone(){
+     */
+    public static long getTimeZone() {
         return TIME_ZONE;
     }
 
     /**
      * 获取时区信息
-     * */
-    public static String getTimeZoneString(){
+     */
+    public static String getTimeZoneString() {
         return TIME_ZONE_STRING;
     }
 }

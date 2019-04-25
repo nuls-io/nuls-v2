@@ -17,7 +17,6 @@ import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Service;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.parse.JSONUtils;
-import org.apache.tools.ant.taskdefs.email.Header;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -120,7 +119,8 @@ public class BlockServiceImpl implements BlockService {
                 blockHeader.parse(RPCUtil.decode(header),0);
                 blockHeaderList.add(blockHeader);
             }
-            chain.getBlockHeaderList().addAll(0,blockHeaderList);
+            List<BlockHeader> localBlockHeaders = chain.getBlockHeaderList();
+            localBlockHeaders.addAll(0, blockHeaderList);
             Map<String, Object> validResult = new HashMap<>(2);
             validResult.put("value", true);
             return Result.getSuccess(ConsensusErrorCode.SUCCESS).setData(validResult);

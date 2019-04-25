@@ -12,9 +12,6 @@ import io.nuls.tools.log.logback.NulsLogger;
 import io.nuls.tools.parse.I18nUtils;
 import io.nuls.tools.thread.ThreadUtils;
 
-import java.util.Map;
-import java.util.Properties;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -91,9 +88,7 @@ public class CmdClientModule extends RpcModule {
     public void init() {
         super.init();
         try {
-            String language = "zh-CHS";
-            I18nUtils.loadLanguage(this.getClass(), "languages", language);
-            I18nUtils.setLanguage(language);
+            I18nUtils.setLanguage(config.getLanguage());
         } catch (Exception e) {
             log.error("module init I18nUtils fail",e);
             System.exit(0);

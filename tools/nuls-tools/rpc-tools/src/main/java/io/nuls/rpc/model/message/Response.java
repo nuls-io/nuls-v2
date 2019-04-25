@@ -38,6 +38,13 @@ import io.nuls.rpc.info.Constants;
  */
 
 public class Response {
+
+    public static final int SUCCESS = 0;
+
+    public static final String SUCCESS_MSG = "success";
+
+    public static final int FAIL = 65536;
+
     /**
      * This is the original request ID referred by a Request message
      */
@@ -54,7 +61,7 @@ public class Response {
      * The response status, 1 if successful, 0 otherwise.
      */
     @JsonProperty
-    private String ResponseStatus;
+    private int ResponseStatus;
 
     /**
      * A string that could offer more clarification about the result of the process.
@@ -74,6 +81,9 @@ public class Response {
     @JsonProperty
     private Object ResponseData;
 
+    @JsonProperty
+    private String ResponseErrorCode;
+
     /**
      * 回复是否正确 / Whether the response is correct
      *
@@ -81,7 +91,7 @@ public class Response {
      */
     @JsonIgnore
     public boolean isSuccess() {
-        return Constants.BOOLEAN_TRUE.equals(ResponseStatus);
+        return SUCCESS == ResponseStatus;
     }
 
     @JsonIgnore
@@ -105,12 +115,12 @@ public class Response {
     }
 
     @JsonIgnore
-    public String getResponseStatus() {
+    public int getResponseStatus() {
         return ResponseStatus;
     }
 
     @JsonIgnore
-    public void setResponseStatus(String ResponseStatus) {
+    public void setResponseStatus(int ResponseStatus) {
         this.ResponseStatus = ResponseStatus;
     }
 
@@ -142,5 +152,15 @@ public class Response {
     @JsonIgnore
     public void setResponseData(Object ResponseData) {
         this.ResponseData = ResponseData;
+    }
+
+    @JsonIgnore
+    public String getResponseErrorCode() {
+        return ResponseErrorCode;
+    }
+
+    @JsonIgnore
+    public void setResponseErrorCode(String responseErrorCode) {
+        ResponseErrorCode = responseErrorCode;
     }
 }

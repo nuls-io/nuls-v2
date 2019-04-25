@@ -65,7 +65,7 @@ public class MongoDBService implements InitializingBean {
             mongoDatabase.getCollection("test").drop();
             this.client = mongoClient;
             this.db = mongoDatabase;
-        }catch (Exception e) {
+        } catch (Exception e) {
             Log.error(e);
             System.exit(-1);
         }
@@ -230,13 +230,12 @@ public class MongoDBService implements InitializingBean {
     public List<Document> pageQuery(String collName, Bson var1, Bson sort, int pageNumber, int pageSize) {
         MongoCollection<Document> collection = getCollection(collName);
         List<Document> list = new ArrayList<>();
-        Consumer<Document> listBlocker = new Consumer<Document>() {
+        Consumer<Document> listBlocker = new Consumer<>() {
             @Override
             public void accept(final Document document) {
                 list.add(document);
             }
         };
-
 
         if (var1 == null && sort == null) {
             collection.find().skip((pageNumber - 1) * pageSize).limit(pageSize).forEach(listBlocker);
@@ -253,6 +252,22 @@ public class MongoDBService implements InitializingBean {
 //        while (documentMongoCursor.hasNext()) {
 //            list.add(documentMongoCursor.next());
 //        }
+        return list;
+    }
+
+    public List<Document> limitQuery(String collName, Bson var1, Bson sort, int start, int pageSize) {
+        MongoCollection<Document> collection = getCollection(collName);
+        List<Document> list = new ArrayList<>();
+        Consumer<Document> listBlocker = new Consumer<>() {
+            @Override
+            public void accept(final Document document) {
+                list.add(document);
+            }
+        };
+        if (start < 0) {
+            start = 0;
+        }
+        collection.find(var1).sort(sort).skip(start).limit(pageSize).forEach(listBlocker);
         return list;
     }
 
@@ -279,8 +294,6 @@ public class MongoDBService implements InitializingBean {
     }
 
     public Long getMax(String collName, String field, Bson filter) {
-
-
         MongoCollection<Document> collection = getCollection(collName);
         MongoCursor<Document> documentMongoCursor = collection.find(filter).sort(Sorts.descending(field)).limit(1).iterator();
         if (documentMongoCursor.hasNext()) {

@@ -64,7 +64,7 @@ public class RocksDbDataSource implements DbSource<byte[]> {
     }
 
     public RocksDbDataSource(Chain chain) {
-        this.AREA = "contract" + chain.getChainId();
+        this.AREA = "contract_" + chain.getChainId();
         this.chain = chain;
     }
 

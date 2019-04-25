@@ -149,4 +149,7 @@ public interface ContractConstant {
     BigInteger MININUM_TRANSFER_AMOUNT = BigInteger.TEN.pow(6);
 
     byte UNLOCKED_TX = (byte) 0;
+
+    String LOG_FILE_FOLDER = "contract";
+    String LOG_FILE_NAME = "contract";
 }

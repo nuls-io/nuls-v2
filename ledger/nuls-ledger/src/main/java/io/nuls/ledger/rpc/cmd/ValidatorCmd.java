@@ -179,9 +179,9 @@ public class ValidatorCmd extends BaseLedgerCmd {
             version = 1.0,
             description = "")
     @Parameter(parameterName = "chainId", parameterType = "int")
-    public Response bathValidateBegin(Map params) {
+    public Response batchValidateBegin(Map params) {
         Integer chainId = (Integer) params.get("chainId");
-        LoggerUtil.logger(chainId).debug("chainId={} bathValidateBegin", chainId);
+        LoggerUtil.logger(chainId).debug("chainId={} batchValidateBegin", chainId);
         coinDataValidator.beginBatchPerTxValidate(chainId);
         Map<String, Object> rtData = new HashMap<>(1);
         rtData.put("value", 1);

@@ -190,7 +190,7 @@ public class MessageRpc extends BaseCmd {
                     /*end test code*/
                     nodesList.add(availableNode);
                 }else{
-                    LoggerUtil.logger(chainId).error("node = {} is not available!");
+                    LoggerUtil.logger(chainId).error("node = {} is not available!", nodeId);
                 }
             }
             NetworkEventResult networkEventResult = messageManager.broadcastToNodes(message, nodesList, true);

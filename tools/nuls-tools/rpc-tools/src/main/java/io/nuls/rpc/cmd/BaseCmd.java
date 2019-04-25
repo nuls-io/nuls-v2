@@ -30,6 +30,7 @@ import io.nuls.rpc.model.ConfigItem;
 import io.nuls.rpc.model.message.MessageUtil;
 import io.nuls.rpc.model.message.Response;
 import io.nuls.rpc.netty.channel.manager.ConnectManager;
+import io.nuls.tools.constant.CommonCodeConstanst;
 import io.nuls.tools.constant.ErrorCode;
 
 /**
@@ -73,7 +74,7 @@ public abstract class BaseCmd {
      * @return Response
      */
     protected Response success(Object responseData) {
-        Response response = MessageUtil.newResponse("", Constants.BOOLEAN_TRUE, "Congratulations! Processing completed！");
+        Response response = MessageUtil.newSuccessResponse("", "Congratulations! Processing completed！");
         response.setResponseData(responseData);
         return response;
     }
@@ -86,9 +87,7 @@ public abstract class BaseCmd {
      * @return Response
      */
     protected Response failed(ErrorCode errorCode) {
-        Response response = MessageUtil.newResponse("", Constants.BOOLEAN_FALSE, errorCode.getMsg());
-        response.setResponseData(errorCode);
-        return response;
+        return MessageUtil.newFailResponse("", errorCode);
     }
 
     /**
@@ -99,7 +98,7 @@ public abstract class BaseCmd {
      * @return Response
      */
     protected Response failed(String errMsg) {
-        return MessageUtil.newResponse("", Constants.BOOLEAN_FALSE, errMsg);
+        return failed(CommonCodeConstanst.FAILED,errMsg);
     }
 
     /**
@@ -111,8 +110,8 @@ public abstract class BaseCmd {
      * @return Response
      */
     protected Response failed(ErrorCode errorCode, String errMsg) {
-        Response response = MessageUtil.newResponse("", Constants.BOOLEAN_FALSE, errMsg);
-        response.setResponseData(errorCode);
+        Response response = MessageUtil.newFailResponse("", errMsg);
+        response.setResponseErrorCode(errorCode.getCode());
         return response;
     }
 }

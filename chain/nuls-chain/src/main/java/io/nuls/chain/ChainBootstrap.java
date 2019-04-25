@@ -1,10 +1,11 @@
 package io.nuls.chain;
 
 import io.nuls.chain.config.NulsChainConfig;
+import io.nuls.chain.info.CmRuntimeInfo;
+import io.nuls.chain.rpc.call.impl.RpcServiceImpl;
 import io.nuls.chain.service.CacheDataService;
 import io.nuls.chain.service.ChainService;
-import io.nuls.chain.service.RpcService;
-import io.nuls.chain.service.impl.RpcServiceImpl;
+import io.nuls.chain.rpc.call.RpcService;
 import io.nuls.chain.storage.InitDB;
 import io.nuls.chain.storage.impl.*;
 import io.nuls.chain.util.LoggerUtil;
@@ -19,8 +20,6 @@ import io.nuls.rpc.util.TimeUtils;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.core.ioc.SpringLiteContext;
-import io.nuls.tools.parse.I18nUtils;
-import io.nuls.tools.parse.config.ConfigManager;
 
 /**
  * 链管理模块启动类
@@ -50,8 +49,11 @@ public class ChainBootstrap extends RpcModule {
      */
     private void initCfg() throws Exception {
         /* 设置系统语言 (Set system language) */
-        I18nUtils.loadLanguage(ChainBootstrap.class, "languages", nulsChainConfig.getLanguage());
-        I18nUtils.setLanguage(nulsChainConfig.getLanguage());
+//        I18nUtils.loadLanguage(ChainBootstrap.class, "languages", nulsChainConfig.getLanguage());
+//        I18nUtils.setLanguage(nulsChainConfig.getLanguage());
+        CmRuntimeInfo.nulsAssetId = nulsChainConfig.getMainAssetId();
+        CmRuntimeInfo.nulsChainId = nulsChainConfig.getMainChainId();
+        LoggerUtil.defaultLogInit(nulsChainConfig.getLogLevel());
     }
     /**
      * 如果数据库中有相同的配置，则以数据库为准
@@ -61,7 +63,7 @@ public class ChainBootstrap extends RpcModule {
      */
     private void initWithDatabase() throws Exception {
         /* 打开数据库连接 (Open database connection) */
-        RocksDBService.init(ConfigManager.getValue(nulsChainConfig.getDataPath()));
+        RocksDBService.init(nulsChainConfig.getDataPath());
         InitDB assetStorage = SpringLiteContext.getBean(AssetStorageImpl.class);
         assetStorage.initTableName();
         InitDB blockHeightStorage = SpringLiteContext.getBean(BlockHeightStorageImpl.class);
@@ -99,7 +101,8 @@ public class ChainBootstrap extends RpcModule {
     @Override
     public Module[] declareDependent() {
         return new Module[]{new Module(ModuleE.NW.abbr, "1.0"),
-                new Module(ModuleE.TX.abbr, "1.0")};
+                new Module(ModuleE.TX.abbr, "1.0"),
+                new Module(ModuleE.LG.abbr, "1.0")};
     }
 
     @Override

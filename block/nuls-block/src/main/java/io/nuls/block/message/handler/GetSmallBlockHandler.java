@@ -35,7 +35,6 @@ import io.nuls.rpc.model.CmdAnnotation;
 import io.nuls.rpc.model.message.Response;
 import io.nuls.rpc.util.RPCUtil;
 import io.nuls.tools.core.annotation.Component;
-import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.log.logback.NulsLogger;
 
@@ -72,7 +71,7 @@ public class GetSmallBlockHandler extends BaseCmd {
 
         NulsDigestData blockHash = message.getRequestHash();
         messageLog.debug("recieve HashMessage from node-" + nodeId + ", chainId:" + chainId + ", hash:" + blockHash);
-        SmallBlock smallBlock = SmallBlockCacher.getSmallBlock(chainId, blockHash).getSmallBlock();
+        SmallBlock smallBlock = SmallBlockCacher.getSmallBlock(chainId, blockHash);
         if (smallBlock != null) {
             SmallBlockMessage smallBlockMessage = new SmallBlockMessage();
             smallBlockMessage.setSmallBlock(smallBlock);

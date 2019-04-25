@@ -31,9 +31,9 @@ public class NulsChainConfig {
     private String assetDecimalPlacesMax;
     private String assetRecoveryRate;
 
-    private String nulsChainId;
-    private String nulsChainName;
-    private String nulsAssetId;
+    private String mainChainId;
+    private String chainName;
+    private String mainAssetId;
     private String nulsAssetInitNumberMax;
     private String nulsAssetSymbol;
 
@@ -149,28 +149,28 @@ public class NulsChainConfig {
         this.assetRecoveryRate = assetRecoveryRate;
     }
 
-    public String getNulsChainId() {
-        return nulsChainId;
+    public String getMainChainId() {
+        return mainChainId;
     }
 
-    public void setNulsChainId(String nulsChainId) {
-        this.nulsChainId = nulsChainId;
+    public void setMainChainId(String mainChainId) {
+        this.mainChainId = mainChainId;
     }
 
-    public String getNulsChainName() {
-        return nulsChainName;
+    public String getChainName() {
+        return chainName;
     }
 
-    public void setNulsChainName(String nulsChainName) {
-        this.nulsChainName = nulsChainName;
+    public void setChainName(String chainName) {
+        this.chainName = chainName;
     }
 
-    public String getNulsAssetId() {
-        return nulsAssetId;
+    public String getMainAssetId() {
+        return mainAssetId;
     }
 
-    public void setNulsAssetId(String nulsAssetId) {
-        this.nulsAssetId = nulsAssetId;
+    public void setMainAssetId(String mainAssetId) {
+        this.mainAssetId = mainAssetId;
     }
 
     public String getNulsAssetInitNumberMax() {

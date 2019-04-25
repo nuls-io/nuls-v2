@@ -33,6 +33,7 @@ import io.nuls.base.signture.SignatureUtil;
 import io.nuls.rpc.util.RPCUtil;
 import io.nuls.rpc.util.TimeUtils;
 import io.nuls.tools.basic.Result;
+import io.nuls.tools.constant.TxType;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.crypto.HexUtil;
@@ -52,6 +53,7 @@ import io.nuls.transaction.model.bo.*;
 import io.nuls.transaction.model.dto.ModuleTxRegisterDTO;
 import io.nuls.transaction.model.dto.TxRegisterDTO;
 import io.nuls.transaction.model.po.TransactionConfirmedPO;
+import io.nuls.transaction.model.po.TransactionNetPO;
 import io.nuls.transaction.rpc.call.*;
 import io.nuls.transaction.service.ConfirmedTxService;
 import io.nuls.transaction.service.TxService;
@@ -140,8 +142,8 @@ public class TxServiceImpl implements TxService {
     }
 
     @Override
-    public void newBroadcastTx(Chain chain, Transaction tx) throws NulsException {
-        TransactionConfirmedPO txExist = getTransaction(chain, tx.getHash());
+    public void newBroadcastTx(Chain chain, TransactionNetPO tx) throws NulsException {
+        TransactionConfirmedPO txExist = getTransaction(chain, tx.getTx().getHash());
         if (null == txExist) {
             unverifiedTxStorageService.putTx(chain, tx);
         }
@@ -200,7 +202,7 @@ public class TxServiceImpl implements TxService {
      * @return
      */
     @Override
-    public VerifyResult verify(Chain chain, Transaction tx) {
+    public VerifyResult verify(Chain chain, Transaction tx){
         return verify(chain, tx, true);
     }
 
@@ -216,11 +218,13 @@ public class TxServiceImpl implements TxService {
             }else{
               return VerifyResult.fail(TxErrorCode.SYS_UNKOWN_EXCEPTION);
             }
+        } catch (IOException e) {
+            return VerifyResult.fail(TxErrorCode.SERIALIZE_ERROR);
         } catch (NulsException e) {
             chain.getLoggerMap().get(TxConstant.LOG_TX).error("tx type: " + tx.getType(), e);
             return VerifyResult.fail(e.getErrorCode());
-        } catch (IOException e) {
-            return VerifyResult.fail(TxErrorCode.SERIALIZE_ERROR);
+        } catch (Exception e) {
+            return VerifyResult.fail(TxErrorCode.SYS_UNKOWN_EXCEPTION);
         }
     }
 
@@ -245,7 +249,7 @@ public class TxServiceImpl implements TxService {
         validateTxSignature(tx, txRegister, chain);
         // TODO: 2019/4/19  测试是否验证系统交易,测试 没有奖励的coinbase 反序列化问题
         //如果有coinData, 则进行验证,有一些交易没有coinData数据
-        if (tx.getType() == TxConstant.TX_TYPE_YELLOW_PUNISH){
+        if (tx.getType() == TxType.YELLOW_PUNISH){
             return;
         }
         //coinData基础验证以及手续费 (from中所有的nuls资产-to中所有nuls资产)
@@ -284,7 +288,7 @@ public class TxServiceImpl implements TxService {
                         }
                     }
                 } else if (!addressSet.contains(AddressTool.getStringAddressByBytes(coinFrom.getAddress()))
-                        && tx.getType() != TxConstant.TX_TYPE_STOP_AGENT) {
+                        && tx.getType() != TxType.STOP_AGENT) {
                     throw new NulsException(TxErrorCode.SIGN_ADDRESS_NOT_MATCH_COINFROM);
                 }
             }
@@ -306,7 +310,7 @@ public class TxServiceImpl implements TxService {
     //// TODO: 2019/4/19 多签地址交易是否只允许一个多签地址(from), 手续费可能导致两个from
     private void validateCoinFromBase(Chain chain, int type, List<CoinFrom> listFrom) throws NulsException {
         //coinBase交易/智能合约退还gas交易没有from
-        if (type == TxConstant.TX_TYPE_COINBASE || type == TxConstant.TX_TYPE_CONTRACT_RETURN_GAS) {
+        if (type == TxType.COIN_BASE || type == TxType.CONTRACT_RETURN_GAS) {
             return;
         }
         if (null == listFrom || listFrom.size() == 0) {
@@ -328,20 +332,20 @@ public class TxServiceImpl implements TxService {
                 throw new NulsException(TxErrorCode.COINFROM_NOT_SAME_CHAINID);
             }
             //如果不是跨链交易，from中地址对应的链id必须发起链id，跨链交易在验证器中验证
-            if (type != TxConstant.TX_TYPE_CROSS_CHAIN_TRANSFER) {
+            if (type != TxType.CROSS_CHAIN) {
                 if (chainId != addrChainId) {
                     throw new NulsException(TxErrorCode.FROM_ADDRESS_NOT_MATCH_CHAIN);
                 }
             }
             //当交易不是转账以及跨链转账时，from的资产必须是该链主资产。(转账以及跨链交易，在验证器中验证资产)
-            if (type != TxConstant.TX_TYPE_TRANSFER && type != TxConstant.TX_TYPE_CROSS_CHAIN_TRANSFER) {
+            if (type != TxType.TRANSFER && type != TxType.CROSS_CHAIN) {
                 if (chain.getConfig().getAssetId() != assetsId) {
                     throw new NulsException(TxErrorCode.ASSET_ERROR);
                 }
             }
             //验证账户地址,资产链id,资产id的组合唯一性
             int assetsChainId = coinFrom.getAssetsChainId();
-            boolean rs = uniqueCoin.add(AddressTool.getStringAddressByBytes(coinFrom.getAddress()) + "-" + assetsChainId + "-" + assetsId);
+            boolean rs = uniqueCoin.add(AddressTool.getStringAddressByBytes(coinFrom.getAddress()) + "-" + assetsChainId + "-" + assetsId + "-" + HexUtil.encode(coinFrom.getNonce()));
             if (!rs) {
                 throw new NulsException(TxErrorCode.COINFROM_HAS_DUPLICATE_COIN);
             }
@@ -356,7 +360,7 @@ public class TxServiceImpl implements TxService {
      * @return Result
      */
     private void validateCoinToBase(Chain chain, List<CoinTo> listTo, int type) throws NulsException {
-        if (type != TxConstant.TX_TYPE_COINBASE && !TxManager.isSmartContract(chain, type)) {
+        if (type != TxType.COIN_BASE && !TxManager.isSmartContract(chain, type)) {
             if (null == listTo || listTo.size() == 0) {
                 throw new NulsException(TxErrorCode.COINTO_NOT_FOUND);
             }
@@ -373,7 +377,7 @@ public class TxServiceImpl implements TxService {
                 throw new NulsException(TxErrorCode.COINTO_NOT_SAME_CHAINID);
             }
             //如果不是跨链交易，to中地址对应的链id必须发起交易的链id
-            if (type != TxConstant.TX_TYPE_CROSS_CHAIN_TRANSFER) {
+            if (type != TxType.CROSS_CHAIN) {
                 if (chainId != txChainId) {
                     throw new NulsException(TxErrorCode.TO_ADDRESS_NOT_MATCH_CHAIN);
                 }
@@ -388,7 +392,7 @@ public class TxServiceImpl implements TxService {
             }
 
             if (TxUtil.isLegalContractAddress(coinTo.getAddress(), chain)) {
-                if (type != TxConstant.TX_TYPE_COINBASE && type != TxConstant.TX_TYPE_CALL_CONTRACT) {
+                if (type != TxType.COIN_BASE && type != TxType.CONTRACT_CALL) {
                     chain.getLoggerMap().get(TxConstant.LOG_TX).error("contract data error: The contract does not accept transfers of this type[{}] of transaction.", type);
                     throw new NulsException(TxErrorCode.TX_DATA_VALIDATION_ERROR);
                 }
@@ -418,7 +422,7 @@ public class TxServiceImpl implements TxService {
         }
         BigInteger feeTo = BigInteger.ZERO;
         for (CoinTo coinTo : coinData.getTo()) {
-            feeFrom = feeFrom.add(accrueFee(type, chain, coinTo));
+            feeTo = feeTo.add(accrueFee(type, chain, coinTo));
         }
         //交易中实际的手续费
         BigInteger fee = feeFrom.subtract(feeTo);
@@ -427,7 +431,7 @@ public class TxServiceImpl implements TxService {
         }
         //根据交易大小重新计算手续费，用来验证实际手续费
         BigInteger targetFee;
-        if (type == TxConstant.TX_TYPE_CROSS_CHAIN_TRANSFER) {
+        if (type == TxType.CROSS_CHAIN) {
             targetFee = TransactionFeeCalculator.getCrossTxFee(txSize);
         } else {
             targetFee = TransactionFeeCalculator.getNormalTxFee(txSize);
@@ -447,7 +451,7 @@ public class TxServiceImpl implements TxService {
      */
     private BigInteger accrueFee(int type, Chain chain, Coin coin) {
         BigInteger fee = BigInteger.ZERO;
-        if (type == TxConstant.TX_TYPE_CROSS_CHAIN_TRANSFER) {
+        if (type == TxType.CROSS_CHAIN) {
             //为跨链交易时，只算nuls
             if (TxUtil.isNulsAsset(coin)) {
                 fee = fee.add(coin.getAmount());
@@ -767,7 +771,7 @@ public class TxServiceImpl implements TxService {
                 continue;
             }
 
-            /**冲突检测有不通过的, 执行清除和未确认回滚 从packingTxList删除, 放弃分组?*/
+            /**冲突检测有不通过的, 执行清除和未确认回滚 从packingTxList删除*/
             for (int i = 0; i < txHashList.size(); i++) {
                 String hash = txHashList.get(i);
                 Iterator<TxWrapper> its = packingTxList.iterator();
@@ -1065,7 +1069,6 @@ public class TxServiceImpl implements TxService {
                 return false;
             }
         });
-
-
     }
+
 }

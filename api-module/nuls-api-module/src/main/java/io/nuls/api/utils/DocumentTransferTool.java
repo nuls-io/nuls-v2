@@ -114,13 +114,12 @@ public class DocumentTransferTool {
                 if (field.getName().equals("isNew")) {
                     continue;
                 }
-                if (!document.containsKey(field.getName())) {
-                    continue;
-                }
-                if (field.getType().getName().equals("java.math.BigInteger")) {
-                    field.set(instance, new BigInteger(document.get(field.getName()).toString()));
-                } else if (_id.equals(field.getName())) {
+                if (_id.equals(field.getName())) {
                     field.set(instance, document.get("_id"));
+                } else if (!document.containsKey(field.getName())) {
+                    continue;
+                } else if (field.getType().getName().equals("java.math.BigInteger")) {
+                    field.set(instance, new BigInteger(document.get(field.getName()).toString()));
                 } else {
                     field.set(instance, document.get(field.getName()));
                 }
@@ -131,7 +130,6 @@ public class DocumentTransferTool {
             throw new NulsRuntimeException(ApiErrorCode.DATA_PARSE_ERROR, "Document to Model fail");
         }
     }
-
 
     public static List<Document> toDocumentList(List list) {
         List<Document> documentList = new ArrayList<>();

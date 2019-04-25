@@ -1,4 +1,4 @@
-package io.nuls.chain.cmd;
+package io.nuls.chain.rpc.cmd;
 
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.CoinData;
@@ -14,8 +14,9 @@ import io.nuls.chain.model.tx.DestroyAssetAndChainTransaction;
 import io.nuls.chain.model.tx.RemoveAssetFromChainTransaction;
 import io.nuls.chain.service.AssetService;
 import io.nuls.chain.service.ChainService;
-import io.nuls.chain.service.RpcService;
+import io.nuls.chain.rpc.call.RpcService;
 import io.nuls.chain.util.LoggerUtil;
+import io.nuls.chain.util.TimeUtil;
 import io.nuls.rpc.model.CmdAnnotation;
 import io.nuls.rpc.model.Parameter;
 import io.nuls.rpc.model.message.Response;
@@ -26,6 +27,7 @@ import io.nuls.tools.model.ByteUtils;
 import io.nuls.tools.parse.JSONUtils;
 
 import java.io.IOException;
+import java.math.BigInteger;
 import java.util.Map;
 
 /**
@@ -67,7 +69,7 @@ public class AssetCmd extends BaseChainCmd {
     @Parameter(parameterName = "chainId", parameterType = "int", parameterValidRange = "[1,65535]")
     @Parameter(parameterName = "assetId", parameterType = "int", parameterValidRange = "[1,65535]")
     @Parameter(parameterName = "symbol", parameterType = "array")
-    @Parameter(parameterName = "name", parameterType = "String")
+    @Parameter(parameterName = "assetName", parameterType = "String")
     @Parameter(parameterName = "initNumber", parameterType = "String")
     @Parameter(parameterName = "decimalPlaces", parameterType = "short", parameterValidRange = "[1,128]")
     @Parameter(parameterName = "address", parameterType = "String")
@@ -75,26 +77,24 @@ public class AssetCmd extends BaseChainCmd {
     public Response assetReg(Map params) {
         try {
             /* 组装Asset (Asset object) */
-            Asset asset = JSONUtils.map2pojo(params, Asset.class);
-            asset.setAddress(AddressTool.getAddress(String.valueOf(params.get("address"))));
-            asset.setDepositNuls(Integer.valueOf(nulsChainConfig.getAssetDepositNuls()));
+            Asset asset = new Asset();
+            asset.map2pojo(params);
+            asset.setDepositNuls(new BigInteger(nulsChainConfig.getAssetDepositNuls()));
             asset.setAvailable(true);
-            asset.setCreateTime(TimeUtils.getCurrentTimeMillis());
             if (assetService.assetExist(asset)) {
                 return failed(CmErrorCode.ERROR_ASSET_ID_EXIST);
             }
             /* 组装交易发送 (Send transaction) */
             Transaction tx = new AddAssetToChainTransaction();
-
             tx.setTxData(asset.parseToTransaction());
+            tx.setTime(TimeUtil.getCurrentTime());
             AccountBalance accountBalance = rpcService.getCoinData(String.valueOf(params.get("address")));
-            CoinData coinData = this.getRegCoinData(asset.getAddress(), asset.getChainId(),
-                    asset.getAssetId(), String.valueOf(asset.getDepositNuls()), tx.size(), accountBalance, nulsChainConfig.getAssetDepositNulsLockRate());
+            CoinData coinData = this.getRegCoinData(asset.getAddress(), CmRuntimeInfo.getMainIntChainId(),
+                    CmRuntimeInfo.getMainIntAssetId(), String.valueOf(asset.getDepositNuls()), tx.size(), accountBalance, nulsChainConfig.getAssetDepositNulsLockRate());
             tx.setCoinData(coinData.serialize());
 
             /* 判断签名是否正确 (Determine if the signature is correct) */
-            tx = signDigest(asset.getChainId(), (String) params.get("address"), (String) params.get("password"), tx);
-
+            rpcService.transactionSignature( CmRuntimeInfo.getMainIntChainId(), (String) params.get("address"), (String) params.get("password"), tx);
             /* 发送到交易模块 (Send to transaction module) */
             return rpcService.newTx(tx) ? success("Sent asset transaction success") : failed("Sent asset transaction failed");
         } catch (Exception e) {
@@ -158,7 +158,7 @@ public class AssetCmd extends BaseChainCmd {
             tx.setCoinData(coinData.serialize());
 
             /* 判断签名是否正确 (Determine if the signature is correct) */
-            tx = signDigest(asset.getChainId(), (String) params.get("address"), (String) params.get("password"), tx);
+            rpcService.transactionSignature(asset.getChainId(), (String) params.get("address"), (String) params.get("password"), tx);
 
             /* 发送到交易模块 (Send to transaction module) */
             return rpcService.newTx(tx) ? success("assetDisable success") : failed("assetDisable failed");

@@ -1,10 +1,12 @@
 package io.nuls.chain.model.po;
 
+import io.nuls.base.basic.AddressTool;
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.basic.NulsOutputStreamBuffer;
 import io.nuls.base.data.BaseNulsData;
 import io.nuls.chain.model.tx.txdata.TxAsset;
 import io.nuls.chain.model.tx.txdata.TxChain;
+import io.nuls.chain.util.TimeUtil;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.parse.SerializeUtils;
 
@@ -12,6 +14,7 @@ import java.io.IOException;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author tangyi
@@ -28,7 +31,7 @@ public class Asset extends BaseNulsData {
     private int assetId = 0;
     private String symbol;
     private String assetName;
-    private int depositNuls = 0;
+    private BigInteger depositNuls =  BigInteger.ZERO;
     private BigInteger initNumber = BigInteger.ZERO;
     private short decimalPlaces = 8;
     private boolean available = true;
@@ -53,7 +56,7 @@ public class Asset extends BaseNulsData {
         stream.writeUint16(assetId);
         stream.writeString(symbol);
         stream.writeString(assetName);
-        stream.writeUint32(depositNuls);
+        stream.writeBigInteger(depositNuls);
         stream.writeBigInteger(initNumber);
         stream.writeShort(decimalPlaces);
         stream.writeBoolean(available);
@@ -76,7 +79,7 @@ public class Asset extends BaseNulsData {
         this.assetId = byteBuffer.readUint16();
         this.symbol = byteBuffer.readString();
         this.assetName = byteBuffer.readString();
-        this.depositNuls = byteBuffer.readInt32();
+        this.depositNuls = byteBuffer.readBigInteger();
         this.initNumber = byteBuffer.readBigInteger();
         this.decimalPlaces = byteBuffer.readShort();
         this.available = byteBuffer.readBoolean();
@@ -104,7 +107,7 @@ public class Asset extends BaseNulsData {
         size += SerializeUtils.sizeOfString(symbol);
         size += SerializeUtils.sizeOfString(assetName);
         // depositNuls
-        size += SerializeUtils.sizeOfInt32();
+        size += SerializeUtils.sizeOfBigInteger();
         // initNumber
         size += SerializeUtils.sizeOfBigInteger();
         // decimalPlaces
@@ -199,11 +202,11 @@ public class Asset extends BaseNulsData {
         this.assetName = assetName;
     }
 
-    public int getDepositNuls() {
+    public BigInteger getDepositNuls() {
         return depositNuls;
     }
 
-    public void setDepositNuls(int depositNuls) {
+    public void setDepositNuls(BigInteger depositNuls) {
         this.depositNuls = depositNuls;
     }
 
@@ -269,5 +272,16 @@ public class Asset extends BaseNulsData {
 
     public void setChainIds(List<Integer> chainIds) {
         this.chainIds = chainIds;
+    }
+
+    public void map2pojo(Map<String,Object> map){
+        this.setChainId(Integer.valueOf(map.get("chainId").toString()));
+        this.setAssetId(Integer.valueOf(map.get("assetId").toString()));
+        this.setSymbol(String.valueOf(map.get("symbol")));
+        this.setAssetName(String.valueOf(map.get("assetName")));
+        this.setInitNumber(new BigInteger(String.valueOf(map.get("initNumber"))));
+        this.setDecimalPlaces(Short.valueOf(map.get("decimalPlaces").toString()));
+        this.setCreateTime(TimeUtil.getCurrentTime());
+        this.setAddress(AddressTool.getAddress(map.get("address").toString()));
     }
 }

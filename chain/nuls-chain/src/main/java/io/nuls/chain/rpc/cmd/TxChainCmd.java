@@ -1,4 +1,4 @@
-package io.nuls.chain.cmd;
+package io.nuls.chain.rpc.cmd;
 
 
 import io.nuls.chain.info.CmErrorCode;
@@ -8,7 +8,7 @@ import io.nuls.chain.model.tx.DestroyAssetAndChainTransaction;
 import io.nuls.chain.model.tx.RegisterChainAndAssetTransaction;
 import io.nuls.chain.service.AssetService;
 import io.nuls.chain.service.ChainService;
-import io.nuls.chain.service.RpcService;
+import io.nuls.chain.rpc.call.RpcService;
 import io.nuls.chain.service.ValidateService;
 import io.nuls.chain.util.LoggerUtil;
 import io.nuls.rpc.model.CmdAnnotation;
@@ -40,10 +40,10 @@ public class TxChainCmd extends BaseChainCmd {
     private ValidateService validateService;
     @CmdAnnotation(cmd = "cm_chainRegValidator", version = 1.0, description = "chainRegValidator")
     @Parameter(parameterName = "chainId", parameterType = "int", parameterValidRange = "[1,65535]")
-    @Parameter(parameterName = "txHex", parameterType = "String")
+    @Parameter(parameterName = "tx", parameterType = "String")
     public Response chainRegValidator(Map params) {
         try {
-            String txHex = String.valueOf(params.get("txHex"));
+            String txHex = String.valueOf(params.get("tx"));
             BlockChain blockChain = buildChainWithTxData(txHex, new RegisterChainAndAssetTransaction(), false);
             ChainEventResult chainEventResult = validateService.chainAddValidator(blockChain);
             if(chainEventResult.isSuccess()){
@@ -54,16 +54,16 @@ public class TxChainCmd extends BaseChainCmd {
 
         } catch (Exception e) {
             LoggerUtil.logger().error(e);
-            return failed(CmErrorCode.UNKOWN_ERROR, e.getMessage());
+            return failed(CmErrorCode.SYS_UNKOWN_EXCEPTION, e.getMessage());
         }
     }
 
     @CmdAnnotation(cmd = "cm_chainDestroyValidator", version = 1.0, description = "chainDestroyValidator")
     @Parameter(parameterName = "chainId", parameterType = "int", parameterValidRange = "[1,65535]")
-    @Parameter(parameterName = "txHex", parameterType = "String")
+    @Parameter(parameterName = "tx", parameterType = "String")
     @Parameter(parameterName = "secondaryData", parameterType = "String")
     public Response chainDestroyValidator(Map params) {
-        String txHex = String.valueOf(params.get("txHex"));
+        String txHex = String.valueOf(params.get("tx"));
         BlockChain blockChain = buildChainWithTxData(txHex, new DestroyAssetAndChainTransaction(), true);
         try {
             ChainEventResult chainEventResult = validateService.chainDisableValidator(blockChain);
@@ -74,7 +74,7 @@ public class TxChainCmd extends BaseChainCmd {
             }
         } catch (Exception e) {
             LoggerUtil.logger().error(e);
-            return failed(CmErrorCode.UNKOWN_ERROR, e.getMessage());
+            return failed(CmErrorCode.SYS_UNKOWN_EXCEPTION, e.getMessage());
         }
     }
 }

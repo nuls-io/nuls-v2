@@ -19,8 +19,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import static io.nuls.api.constant.MongoTableConstant.ACCOUNT_TABLE;
-import static io.nuls.api.constant.MongoTableConstant.TX_RELATION_TABLE;
+import static io.nuls.api.constant.MongoTableConstant.*;
 
 @Component
 public class MongoAccountServiceImpl implements AccountService {
@@ -74,7 +73,7 @@ public class MongoAccountServiceImpl implements AccountService {
     }
 
     public PageInfo<TxRelationInfo> getAccountTxs(int chainId, String address, int pageIndex, int pageSize, int type, boolean isMark) {
-        Bson filter = null;
+        Bson filter;
         Bson addressFilter = Filters.eq("address", address);
 
         if (type == 0 && isMark) {
@@ -84,18 +83,63 @@ public class MongoAccountServiceImpl implements AccountService {
         } else {
             filter = addressFilter;
         }
-//        long start = System.currentTimeMillis();
-        long totalCount = mongoDBService.getCount(TX_RELATION_TABLE + chainId, filter);
-//        Log.info("count use:{}ms",System.currentTimeMillis()-start);
-//        start = System.currentTimeMillis();
-        List<Document> docsList = this.mongoDBService.pageQuery(TX_RELATION_TABLE + chainId, filter, Sorts.descending("height", "createTime"), pageIndex, pageSize);
-//        Log.info("query use:{}ms",System.currentTimeMillis()-start);
+        int start = (pageIndex - 1) * pageSize;
+        int end = pageIndex * pageSize;
+        long unConfirmCount = mongoDBService.getCount(TX_UNCONFIRM_RELATION_TABLE + chainId, addressFilter);
+        long confirmCount = mongoDBService.getCount(TX_RELATION_TABLE + chainId, filter);
+        List<TxRelationInfo> txRelationInfoList;
+        if (end <= unConfirmCount) {
+            txRelationInfoList = unConfirmLimitQuery(chainId, addressFilter, start, pageSize);
+        } else if (start - 1 > unConfirmCount) {
+            start = start - 1;
+            start = (int) (start - unConfirmCount);
+            txRelationInfoList = confirmLimitQuery(chainId, filter, start, pageSize);
+        } else {
+            txRelationInfoList = relationLimitQuery(chainId, addressFilter, filter, start, pageSize);
+        }
+
+        PageInfo<TxRelationInfo> pageInfo = new PageInfo<>(pageIndex, pageSize, unConfirmCount + confirmCount, txRelationInfoList);
+        return pageInfo;
+    }
+
+    private List<TxRelationInfo> unConfirmLimitQuery(int chainId, Bson filter, int start, int pageSize) {
+        List<Document> docsList = this.mongoDBService.limitQuery(TX_UNCONFIRM_RELATION_TABLE + chainId, filter, Sorts.descending("height", "createTime"), start, pageSize);
         List<TxRelationInfo> txRelationInfoList = new ArrayList<>();
         for (Document document : docsList) {
-            txRelationInfoList.add(DocumentTransferTool.toInfo(document, TxRelationInfo.class));
+            TxRelationInfo txRelationInfo = DocumentTransferTool.toInfo(document, TxRelationInfo.class);
+            txRelationInfo.setStatus(0);
+            txRelationInfoList.add(txRelationInfo);
         }
-        PageInfo<TxRelationInfo> pageInfo = new PageInfo<>(pageIndex, pageSize, totalCount, txRelationInfoList);
-        return pageInfo;
+        return txRelationInfoList;
+    }
+
+    private List<TxRelationInfo> confirmLimitQuery(int chainId, Bson filter, int start, int pageSize) {
+        List<Document> docsList = this.mongoDBService.limitQuery(TX_RELATION_TABLE + chainId, filter, Sorts.descending("height", "createTime"), start, pageSize);
+        List<TxRelationInfo> txRelationInfoList = new ArrayList<>();
+        for (Document document : docsList) {
+            TxRelationInfo txRelationInfo = DocumentTransferTool.toInfo(document, TxRelationInfo.class);
+            txRelationInfo.setStatus(1);
+            txRelationInfoList.add(txRelationInfo);
+        }
+        return txRelationInfoList;
+    }
+
+    private List<TxRelationInfo> relationLimitQuery(int chainId, Bson filter1, Bson filter2, int start, int pageSize) {
+        List<Document> docsList = this.mongoDBService.limitQuery(TX_UNCONFIRM_RELATION_TABLE + chainId, filter1, Sorts.descending("height", "createTime"), start, pageSize);
+        List<TxRelationInfo> txRelationInfoList = new ArrayList<>();
+        for (Document document : docsList) {
+            TxRelationInfo txRelationInfo = DocumentTransferTool.toInfo(document, TxRelationInfo.class);
+            txRelationInfo.setStatus(0);
+            txRelationInfoList.add(txRelationInfo);
+        }
+        pageSize = pageSize - txRelationInfoList.size();
+        docsList = this.mongoDBService.limitQuery(TX_RELATION_TABLE + chainId, filter2, Sorts.descending("height", "createTime"), 0, pageSize);
+        for (Document document : docsList) {
+            TxRelationInfo txRelationInfo = DocumentTransferTool.toInfo(document, TxRelationInfo.class);
+            txRelationInfo.setStatus(1);
+            txRelationInfoList.add(txRelationInfo);
+        }
+        return txRelationInfoList;
     }
 
     public PageInfo<AccountInfo> getCoinRanking(int pageIndex, int pageSize, int sortType, int chainId) {

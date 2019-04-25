@@ -10,6 +10,7 @@ import io.nuls.rpc.model.message.*;
 import io.nuls.rpc.netty.channel.ConnectData;
 import io.nuls.rpc.netty.channel.manager.ConnectManager;
 import io.nuls.rpc.util.TimeUtils;
+import io.nuls.tools.constant.CommonCodeConstanst;
 import io.nuls.tools.log.Log;
 import io.nuls.tools.model.StringUtils;
 import io.nuls.tools.parse.JSONUtils;
@@ -81,7 +82,7 @@ public class RequestMessageProcessor {
      * @param messageId 请求ID
      */
     public static void serviceNotStarted(Channel channel, String messageId) throws JsonProcessingException {
-        Response response = MessageUtil.newResponse(messageId, Constants.BOOLEAN_FALSE, "Service not started!");
+        Response response = MessageUtil.newFailResponse(messageId, "Service not started!");
         Message rspMsg = MessageUtil.basicMessage(MessageType.Response);
         rspMsg.setMessageData(response);
         ConnectManager.sendMessage(channel, JSONUtils.obj2json(rspMsg));
@@ -166,10 +167,9 @@ public class RequestMessageProcessor {
             构造返回的消息对象
             Construct the returned message object
              */
-            Response response = MessageUtil.newResponse(messageId, "", "");
-            response.setRequestID(messageId);
-            response.setResponseStatus(Constants.BOOLEAN_FALSE);
-
+            Response response = MessageUtil.newResponse(messageId, Response.FAIL, "");
+//            response.setRequestID(messageId);
+//            response.setResponseStatus(Constants.BOOLEAN_FALSE);
             try {
                  /*
                 从本地注册的cmd中得到对应的方法
@@ -185,6 +185,7 @@ public class RequestMessageProcessor {
                 */
                 if (cmdDetail == null) {
                     response.setResponseComment(Constants.CMD_NOT_FOUND + ":" + method + "," + (params != null ? params.get(Constants.VERSION_KEY_STR) : ""));
+                    response.setResponseErrorCode(CommonCodeConstanst.CMD_NOTFOUND.getCode());
                     Message rspMessage = MessageUtil.basicMessage(MessageType.Response);
                     rspMessage.setMessageData(response);
                     ConnectManager.sendMessage(channel, JSONUtils.obj2json(rspMessage));
@@ -198,6 +199,7 @@ public class RequestMessageProcessor {
                 String validationString = paramsValidation(cmdDetail, params);
                 if (validationString != null) {
                     response.setResponseComment(validationString);
+                    response.setResponseErrorCode(CommonCodeConstanst.PARAMETER_ERROR.getCode());
                     Message rspMessage = MessageUtil.basicMessage(MessageType.Response);
                     rspMessage.setMessageData(response);
                     ConnectManager.sendMessage(channel, JSONUtils.obj2json(rspMessage));
@@ -217,6 +219,7 @@ public class RequestMessageProcessor {
             } catch (Exception e) {
                 Log.error(e);
                 response.setResponseComment("Server-side processing failed!");
+                response.setResponseErrorCode(CommonCodeConstanst.SYS_UNKOWN_EXCEPTION.getCode());
                 Message rspMessage = MessageUtil.basicMessage(MessageType.Response);
                 rspMessage.setMessageData(response);
                 ConnectManager.sendMessage(channel, JSONUtils.obj2json(rspMessage));
@@ -465,7 +468,7 @@ public class RequestMessageProcessor {
         Method method = clz.getDeclaredMethod(invokeMethod, Map.class);
         BaseCmd cmd = (BaseCmd) handlerMap.get(invokeClass);
         if (cmd == null) {
-            return MessageUtil.newResponse("", Constants.BOOLEAN_FALSE, CMD_NOT_FOUND);
+            return MessageUtil.newFailResponse("",  CMD_NOT_FOUND);
         }
         return (Response) method.invoke(cmd, params);
     }

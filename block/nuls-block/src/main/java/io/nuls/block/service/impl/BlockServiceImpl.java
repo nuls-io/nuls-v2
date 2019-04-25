@@ -23,14 +23,11 @@ package io.nuls.block.service.impl;
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.data.*;
 import io.nuls.base.data.po.BlockHeaderPo;
-import io.nuls.block.cache.SmallBlockCacher;
 import io.nuls.block.constant.BlockErrorCode;
-import io.nuls.block.constant.BlockForwardEnum;
 import io.nuls.block.manager.BlockChainManager;
 import io.nuls.block.manager.ContextManager;
 import io.nuls.block.message.HashMessage;
 import io.nuls.block.message.SmallBlockMessage;
-import io.nuls.block.model.CachedSmallBlock;
 import io.nuls.block.model.Chain;
 import io.nuls.block.model.ChainContext;
 import io.nuls.block.model.GenesisBlock;
@@ -41,7 +38,6 @@ import io.nuls.block.rpc.call.TransactionUtil;
 import io.nuls.block.service.BlockService;
 import io.nuls.block.storage.BlockStorageService;
 import io.nuls.block.storage.ChainStorageService;
-import io.nuls.block.thread.monitor.TxGroupRequestor;
 import io.nuls.block.utils.BlockUtil;
 import io.nuls.block.utils.ChainGenerator;
 import io.nuls.db.service.RocksDBService;
@@ -59,6 +55,7 @@ import java.util.*;
 import java.util.concurrent.locks.StampedLock;
 
 import static io.nuls.block.constant.CommandConstant.*;
+import static io.nuls.block.constant.Constant.BLOCK_HEADER_COMPARATOR;
 import static io.nuls.block.constant.Constant.BLOCK_HEADER_INDEX;
 
 /**
@@ -132,6 +129,46 @@ public class BlockServiceImpl implements BlockService {
                 list.add(blockHeader);
             }
             return list;
+        } catch (Exception e) {
+            e.printStackTrace();
+            commonLog.error(e);
+            return null;
+        }
+    }
+
+    @Override
+    public List<BlockHeader> getBlockHeaderByRound(int chainId, long height, int round) {
+        ChainContext context = ContextManager.getContext(chainId);
+        NulsLogger commonLog = context.getCommonLog();
+        try {
+            int count = 0;
+            BlockHeaderPo startHeaderPo = getBlockHeaderPo(chainId, height);
+            byte[] extend = startHeaderPo.getExtend();
+            BlockExtendsData data = new BlockExtendsData(extend);
+            long roundIndex = data.getRoundIndex();
+            List<BlockHeader> blockHeaders = new ArrayList<>();
+            if (startHeaderPo.isComplete()) {
+                blockHeaders.add(BlockUtil.fromBlockHeaderPo(startHeaderPo));
+            }
+            while (true) {
+                height--;
+                if ((height < 0)) {
+                    break;
+                }
+                BlockHeader blockHeader = getBlockHeader(chainId, height);
+                BlockExtendsData newData = new BlockExtendsData(blockHeader.getExtend());
+                long newRoundIndex = newData.getRoundIndex();
+                if (newRoundIndex != roundIndex) {
+                    count++;
+                    roundIndex = newRoundIndex;
+                }
+                if (count >= round) {
+                    break;
+                }
+                blockHeaders.add(blockHeader);
+            }
+            blockHeaders.sort(BLOCK_HEADER_COMPARATOR);
+            return blockHeaders;
         } catch (Exception e) {
             e.printStackTrace();
             commonLog.error(e);
@@ -316,13 +353,6 @@ public class BlockServiceImpl implements BlockService {
             }
             //同步\链切换\孤儿链对接过程中不进行区块广播
             if (download == 1) {
-                SmallBlock smallBlock = BlockUtil.getSmallBlock(chainId, block);
-                Map<NulsDigestData, Transaction> txMap = new HashMap<>(header.getTxCount());
-                block.getTxs().forEach(e -> txMap.put(e.getHash(), e));
-                CachedSmallBlock cachedSmallBlock = new CachedSmallBlock(null, smallBlock, txMap);
-                SmallBlockCacher.cacheSmallBlock(chainId, cachedSmallBlock);
-                SmallBlockCacher.setStatus(chainId, hash, BlockForwardEnum.COMPLETE);
-                TxGroupRequestor.removeTask(chainId, hash.toString());
                 if (broadcast) {
                     broadcastBlock(chainId, block);
                 }
@@ -330,7 +360,7 @@ public class BlockServiceImpl implements BlockService {
                     forwardBlock(chainId, hash, null);
                 }
             }
-            Response response = MessageUtil.newResponse("", Constants.BOOLEAN_TRUE, "success");
+            Response response = MessageUtil.newSuccessResponse("");
             Map<String, Long> responseData = new HashMap<>(2);
             responseData.put("value", height);
             Map<String, Object> sss = new HashMap<>(2);
@@ -452,7 +482,7 @@ public class BlockServiceImpl implements BlockService {
             }
             long elapsedNanos = System.nanoTime() - startTime;
             commonLog.info("rollback block success, time-" + elapsedNanos + ", height-" + height + ", txCount-" + blockHeaderPo.getTxCount() + ", hash-" + blockHeaderPo.getHash());
-            Response response = MessageUtil.newResponse("", Constants.BOOLEAN_TRUE, "success");
+            Response response = MessageUtil.newSuccessResponse("");
             Map<String, Long> responseData = new HashMap<>(2);
             responseData.put("value", height - 1);
             Map<String, Object> sss = new HashMap<>(2);

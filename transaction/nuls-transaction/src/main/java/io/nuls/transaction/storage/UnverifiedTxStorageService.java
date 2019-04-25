@@ -24,8 +24,8 @@
  */
 package io.nuls.transaction.storage;
 
-import io.nuls.base.data.Transaction;
 import io.nuls.transaction.model.bo.Chain;
+import io.nuls.transaction.model.po.TransactionNetPO;
 
 /**
  * 本链内发起的所有未验证的交易，包括普通交易和跨链交易
@@ -41,13 +41,13 @@ public interface UnverifiedTxStorageService {
      * @param tx
      * @return
      */
-    boolean putTx(Chain chain, Transaction tx);
+    boolean putTx(Chain chain, TransactionNetPO tx);
 
     /**
      * 从FS队列中获取未验证交易数据
      * @return
      */
-    Transaction pollTx(Chain chain);
+    TransactionNetPO pollTx(Chain chain);
 
     long size(Chain chain);
 }

@@ -501,6 +501,50 @@ public class CallMethodUtils {
         Log.debug("---------------------------区块加载成功！");
     }
 
+
+    /**
+     * 初始化链区块头数据，缓存指定数量的区块头
+     * Initialize chain block header entity to cache a specified number of block headers
+     *
+     * @param chain chain info
+     */
+    @SuppressWarnings("unchecked")
+    public static void getRoundBlockHeaders(Chain chain,long roundCount,long startHeight)throws Exception{
+        Map params = new HashMap(ConsensusConstant.INIT_CAPACITY);
+        params.put("chainId", chain.getConfig().getChainId());
+        params.put("round", roundCount);
+        params.put("height", startHeight);
+        Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.BL.abbr, "getRoundBlockHeaders", params);
+        Map<String, Object> resultMap;
+        List<String> blockHeaderHexs = new ArrayList<>();
+        if (cmdResp.isSuccess()) {
+            resultMap = (Map<String, Object>) cmdResp.getResponseData();
+            blockHeaderHexs = (List<String>) resultMap.get("getRoundBlockHeaders");
+        }
+        int tryCount = 0;
+        while (!cmdResp.isSuccess() && blockHeaderHexs.size() == 0 && tryCount < ConsensusConstant.RPC_CALL_TRY_COUNT) {
+            cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.BL.abbr, "getRoundBlockHeaders", params);
+            if (cmdResp.isSuccess()) {
+                resultMap = (Map<String, Object>) cmdResp.getResponseData();
+                blockHeaderHexs = (List<String>) resultMap.get("getRoundBlockHeaders");
+                break;
+            }
+            tryCount++;
+            Log.debug("---------------------------回滚区块轮次变化从新加载区块失败！");
+            Thread.sleep(1000);
+        }
+        List<BlockHeader> blockHeaders = new ArrayList<>();
+        for (String blockHeaderHex : blockHeaderHexs) {
+            BlockHeader blockHeader = new BlockHeader();
+            blockHeader.parse(RPCUtil.decode(blockHeaderHex), 0);
+            blockHeaders.add(blockHeader);
+        }
+        Collections.sort(blockHeaders, new BlockHeaderComparator());
+        chain.getBlockHeaderList().addAll(0, blockHeaders);
+        Log.debug("---------------------------回滚区块轮次变化从新加载区块成功！");
+    }
+
+
     /**
      * 验证交易CoinData
      * Verifying transactions CoinData

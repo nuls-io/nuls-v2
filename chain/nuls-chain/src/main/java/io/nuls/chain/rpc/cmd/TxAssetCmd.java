@@ -1,4 +1,4 @@
-package io.nuls.chain.cmd;
+package io.nuls.chain.rpc.cmd;
 
 import io.nuls.chain.info.CmErrorCode;
 import io.nuls.chain.model.dto.ChainEventResult;
@@ -33,11 +33,11 @@ public class TxAssetCmd extends BaseChainCmd {
 
     @CmdAnnotation(cmd = "cm_assetRegValidator", version = 1.0, description = "assetRegValidator")
     @Parameter(parameterName = "chainId", parameterType = "int", parameterValidRange = "[1,65535]")
-    @Parameter(parameterName = "txHex", parameterType = "String")
+    @Parameter(parameterName = "tx", parameterType = "String")
     @Parameter(parameterName = "secondaryData", parameterType = "String")
     public Response assetRegValidator(Map params) {
         try {
-            String txHex = String.valueOf(params.get("txHex"));
+            String txHex = String.valueOf(params.get("tx"));
             Asset asset = buildAssetWithTxChain(txHex, new AddAssetToChainTransaction());
             ChainEventResult chainEventResult = validateService.assetAddValidator(asset);
             if(chainEventResult.isSuccess()){
@@ -47,7 +47,7 @@ public class TxAssetCmd extends BaseChainCmd {
             }
         } catch (Exception e) {
             LoggerUtil.logger().error(e);
-            return failed(CmErrorCode.UNKOWN_ERROR);
+            return failed(CmErrorCode.SYS_UNKOWN_EXCEPTION);
         }
     }
 
@@ -57,10 +57,10 @@ public class TxAssetCmd extends BaseChainCmd {
      */
     @CmdAnnotation(cmd = "cm_assetDisableValidator", version = 1.0, description = "assetDisableValidator")
     @Parameter(parameterName = "chainId", parameterType = "int", parameterValidRange = "[1,65535]")
-    @Parameter(parameterName = "txHex", parameterType = "String")
+    @Parameter(parameterName = "tx", parameterType = "String")
     @Parameter(parameterName = "secondaryData", parameterType = "String")
     public Response assetDisableValidator(Map params) {
-        String txHex = String.valueOf(params.get("txHex"));
+        String txHex = String.valueOf(params.get("tx"));
         Asset asset = buildAssetWithTxChain(txHex, new AddAssetToChainTransaction());
         try {
             ChainEventResult chainEventResult = validateService.assetDisableValidator(asset);

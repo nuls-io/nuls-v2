@@ -189,8 +189,26 @@ public class TxValidator {
         if(depositPo == null || depositPo.getDelHeight() > 0){
             throw new NulsException(ConsensusErrorCode.DATA_NOT_EXIST);
         }
+        //查看对出委托账户是否正确
         if(!validSignature(tx,depositPo.getAddress(),chain.getConfig().getChainId())){
             return false;
+        }
+        //查看from和to中地址是否一样
+        CoinData coinData = new CoinData();
+        coinData.parse(tx.getCoinData(),0);
+        if(coinData.getFrom().size() == 0 || coinData.getTo().size() == 0){
+            throw new NulsException(ConsensusErrorCode.DATA_ERROR);
+        }
+        //退出委托账户及资产ID是否正确
+        if(!Arrays.equals(coinData.getFrom().get(0).getAddress(), coinData.getTo().get(0).getAddress())
+            || coinData.getFrom().get(0).getAssetsId() != coinData.getTo().get(0).getAssetsId()){
+            throw new NulsException(ConsensusErrorCode.DATA_ERROR);
+        }
+        //退出委托金额是否正确
+        if(depositPo.getDeposit().compareTo(coinData.getFrom().get(0).getAmount()) != 0
+            || coinData.getTo().get(0).getAmount().compareTo(depositPo.getDeposit()) >= 0
+            || coinData.getTo().get(0).getAmount().compareTo(BigInteger.ZERO) <= 0){
+            throw new NulsException(ConsensusErrorCode.DATA_ERROR);
         }
         return true;
     }
@@ -217,7 +235,7 @@ public class TxValidator {
         if (tx.getTime() <= 0) {
             throw new NulsException(ConsensusErrorCode.DATA_ERROR);
         }
-        double commissionRate = agent.getCommissionRate();
+        byte commissionRate = agent.getCommissionRate();
         if (commissionRate < chain.getConfig().getCommissionRateMin() || commissionRate > chain.getConfig().getCommissionRateMax()) {
             throw new NulsException(ConsensusErrorCode.COMMISSION_RATE_OUT_OF_RANGE);
         }
@@ -352,7 +370,6 @@ public class TxValidator {
         }
         return true;
     }
-
 
     /**
      * 交易签名验证
