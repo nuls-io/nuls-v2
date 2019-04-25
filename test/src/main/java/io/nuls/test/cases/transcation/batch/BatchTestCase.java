@@ -39,7 +39,7 @@ public class BatchTestCase extends TestCaseChain {
     @Override
     public Object initParam() {
 //        BatchParam param = new BatchParam();
-//        param.count = 10;
+//        param.count = 10000;
 //        param.formAddressPriKey = config.getTestSeedAccount();
         return 1000;
     }
