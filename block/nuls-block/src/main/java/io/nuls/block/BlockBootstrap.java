@@ -1,7 +1,7 @@
 package io.nuls.block;
 
 import io.nuls.block.constant.BlockConfig;
-import io.nuls.block.constant.RunningStatusEnum;
+import io.nuls.block.constant.StatusEnum;
 import io.nuls.block.manager.ChainManager;
 import io.nuls.block.manager.ContextManager;
 import io.nuls.block.rpc.call.NetworkUtil;
@@ -133,7 +133,7 @@ public class BlockBootstrap extends RpcModule {
         if (started) {
             List<Integer> chainIds = ContextManager.chainIds;
             for (Integer chainId : chainIds) {
-                ContextManager.getContext(chainId).setStatus(RunningStatusEnum.RUNNING);
+                ContextManager.getContext(chainId).setStatus(StatusEnum.RUNNING);
             }
         } else {
             //开启区块同步线程
@@ -173,7 +173,7 @@ public class BlockBootstrap extends RpcModule {
     public RpcModuleState onDependenciesLoss(Module module) {
         List<Integer> chainIds = ContextManager.chainIds;
         for (Integer chainId : chainIds) {
-            ContextManager.getContext(chainId).setStatus(RunningStatusEnum.INITIALIZING);
+            ContextManager.getContext(chainId).setStatus(StatusEnum.INITIALIZING);
         }
         return RpcModuleState.Ready;
     }
