@@ -1,9 +1,11 @@
 package io.nuls.cmd.client;
 
 import io.nuls.api.provider.Provider;
+import io.nuls.tools.basic.InitializingBean;
 import io.nuls.tools.core.annotation.Configuration;
 import io.nuls.tools.core.annotation.Persist;
 import io.nuls.tools.core.annotation.Value;
+import io.nuls.tools.exception.NulsException;
 
 /**
  * @Author: zhoulijun
@@ -11,7 +13,7 @@ import io.nuls.tools.core.annotation.Value;
  * @Description:
  */
 @Configuration(domain = "cmd_client")
-public class Config {
+public class Config implements InitializingBean {
 
     @Persist
     @Value.NotNull
@@ -56,5 +58,9 @@ public class Config {
 
     public void setLanguage(String language) {
         this.language = language;
+    }
+
+    @Override
+    public void afterPropertiesSet() throws NulsException {
     }
 }

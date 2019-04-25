@@ -31,7 +31,7 @@ public class Asset extends BaseNulsData {
     private int assetId = 0;
     private String symbol;
     private String assetName;
-    private int depositNuls = 0;
+    private BigInteger depositNuls =  BigInteger.ZERO;
     private BigInteger initNumber = BigInteger.ZERO;
     private short decimalPlaces = 8;
     private boolean available = true;
@@ -56,7 +56,7 @@ public class Asset extends BaseNulsData {
         stream.writeUint16(assetId);
         stream.writeString(symbol);
         stream.writeString(assetName);
-        stream.writeUint32(depositNuls);
+        stream.writeBigInteger(depositNuls);
         stream.writeBigInteger(initNumber);
         stream.writeShort(decimalPlaces);
         stream.writeBoolean(available);
@@ -79,7 +79,7 @@ public class Asset extends BaseNulsData {
         this.assetId = byteBuffer.readUint16();
         this.symbol = byteBuffer.readString();
         this.assetName = byteBuffer.readString();
-        this.depositNuls = byteBuffer.readInt32();
+        this.depositNuls = byteBuffer.readBigInteger();
         this.initNumber = byteBuffer.readBigInteger();
         this.decimalPlaces = byteBuffer.readShort();
         this.available = byteBuffer.readBoolean();
@@ -107,7 +107,7 @@ public class Asset extends BaseNulsData {
         size += SerializeUtils.sizeOfString(symbol);
         size += SerializeUtils.sizeOfString(assetName);
         // depositNuls
-        size += SerializeUtils.sizeOfInt32();
+        size += SerializeUtils.sizeOfBigInteger();
         // initNumber
         size += SerializeUtils.sizeOfBigInteger();
         // decimalPlaces
@@ -202,11 +202,11 @@ public class Asset extends BaseNulsData {
         this.assetName = assetName;
     }
 
-    public int getDepositNuls() {
+    public BigInteger getDepositNuls() {
         return depositNuls;
     }
 
-    public void setDepositNuls(int depositNuls) {
+    public void setDepositNuls(BigInteger depositNuls) {
         this.depositNuls = depositNuls;
     }
 

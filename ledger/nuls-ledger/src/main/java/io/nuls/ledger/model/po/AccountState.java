@@ -29,6 +29,7 @@ import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.basic.NulsOutputStreamBuffer;
 import io.nuls.base.data.BaseNulsData;
 import io.nuls.ledger.constant.LedgerConstant;
+import io.nuls.ledger.utils.TimeUtil;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.parse.SerializeUtils;
 
@@ -160,7 +161,7 @@ public class AccountState extends BaseNulsData {
         this.latestUnFreezeTime = byteBuffer.readUint32();
         this.totalFromAmount = byteBuffer.readBigInteger();
         this.totalToAmount = byteBuffer.readBigInteger();
-        int freezeHeightCount = (int)byteBuffer.readUint32();
+        int freezeHeightCount = (int) byteBuffer.readUint32();
         this.freezeHeightStates = new ArrayList<>(freezeHeightCount);
         for (int i = 0; i < freezeHeightCount; i++) {
             try {
@@ -171,7 +172,7 @@ public class AccountState extends BaseNulsData {
                 throw new NulsException(e);
             }
         }
-        int freezeLockTimeCount =(int)byteBuffer.readUint32();
+        int freezeLockTimeCount = (int) byteBuffer.readUint32();
         this.freezeLockTimeStates = new ArrayList<>(freezeLockTimeCount);
         for (int i = 0; i < freezeLockTimeCount; i++) {
             try {
@@ -346,5 +347,13 @@ public class AccountState extends BaseNulsData {
 
     public void setFreezeLockTimeStates(List<FreezeLockTimeState> freezeLockTimeStates) {
         this.freezeLockTimeStates = freezeLockTimeStates;
+    }
+
+    public boolean timeAllow() {
+        long now = TimeUtil.getCurrentTime();
+        if ((now - latestUnFreezeTime) > LedgerConstant.TIME_RECALCULATE_FREEZE) {
+            return true;
+        }
+        return false;
     }
 }

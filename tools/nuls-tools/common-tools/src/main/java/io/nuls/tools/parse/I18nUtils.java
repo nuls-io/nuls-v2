@@ -32,10 +32,7 @@ import io.nuls.tools.log.Log;
 
 import java.io.*;
 import java.net.URL;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Properties;
+import java.util.*;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
@@ -160,7 +157,6 @@ public class I18nUtils {
 
     }
 
-
     /**
      * 设置系统语言，切换语言包
      * Set up the system language and switch the language package.
@@ -200,6 +196,7 @@ public class I18nUtils {
      * @return 判断结果/Determine the results
      */
     public static boolean hasLanguage(String lang) {
+        Objects.requireNonNull(lang,"must be enter language");
         return ALL_MAPPING.containsKey(lang);
     }
 

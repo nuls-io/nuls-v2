@@ -181,6 +181,10 @@ public class LedgerUtil {
         return null;
     }
 
+    public static String getAccountNoncesStrKey(String assetKey, byte[] nonce) {
+        return assetKey + "-" + getNonceEncode(nonce);
+    }
+
     public static byte[] getAccountNoncesByteKey(CoinFrom from, byte[] nonce) {
         String key = AddressTool.getStringAddressByBytes(from.getAddress()) + "-" + from.getAssetsChainId() + "-" + from.getAssetsId() + "-" + getNonceEncode(nonce);
         try {

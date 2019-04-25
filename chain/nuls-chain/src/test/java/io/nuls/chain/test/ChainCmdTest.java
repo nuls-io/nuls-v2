@@ -78,6 +78,15 @@ public class ChainCmdTest {
     }
 
     @Test
+    public void getChain() throws Exception {
+        Map<String,Object>  parameters = new HashMap<>();
+        parameters.put("chainId",100);
+        Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.CM.abbr, "cm_chain", parameters);
+        System.out.println(JSONUtils.obj2json(response));
+
+    }
+
+    @Test
     public void setChainAssetCurrentNumber() throws Exception {
 //        System.out.println(CmdDispatcher.call("setChainAssetCurrentNumber", new Object[]{(short) 867, 1542092573248L, 147258300}, 1.0));
 //        System.out.println(CmdDispatcher.call("chain", new Object[]{(short) 867}));

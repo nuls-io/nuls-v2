@@ -8,7 +8,7 @@ import io.nuls.tools.core.annotation.Component;
  * @Description: 功能描述
  */
 @Component
-public class ReturnNullCase implements TestCaseIntf<String,String> {
+public class ReturnNullCase extends BaseTestCase<String,String> {
 
     @Override
     public String title() {

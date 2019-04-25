@@ -173,9 +173,6 @@ public class CommandHandler implements InitializingBean {
             System.setProperty("jline.WindowsTerminal.directConsole", "false");
         }
         try {
-//            OutputStream os = socket.getOutputStream();//字节输出流
-//            PrintWriter pw = new PrintWriter(os);//将输出流包装为打印流
-//            CONSOLE_READER = new ConsoleReader(socket.getInputStream(),socket.getOutputStream());
             CONSOLE_READER = new ConsoleReader();
             List<Completer> completers = new ArrayList<Completer>();
             completers.add(new StringsCompleter(PROCESSOR_MAP.keySet()));
@@ -188,9 +185,6 @@ public class CommandHandler implements InitializingBean {
                 }
                 String[] cmdArgs = parseArgs(line);
                 System.out.print(this.processCommand(cmdArgs) + "\n");
-//                System.out.println("1111111\n");
-//                pw.println(this.processCommand(cmdArgs) + "\n");
-//                pw.flush();
             } while (line != null);
         } catch (IOException e) {
             e.printStackTrace();

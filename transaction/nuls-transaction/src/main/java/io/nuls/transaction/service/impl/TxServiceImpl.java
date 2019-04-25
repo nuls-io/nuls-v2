@@ -202,7 +202,7 @@ public class TxServiceImpl implements TxService {
      * @return
      */
     @Override
-    public VerifyResult verify(Chain chain, Transaction tx) {
+    public VerifyResult verify(Chain chain, Transaction tx){
         return verify(chain, tx, true);
     }
 
@@ -218,11 +218,13 @@ public class TxServiceImpl implements TxService {
             }else{
               return VerifyResult.fail(TxErrorCode.SYS_UNKOWN_EXCEPTION);
             }
+        } catch (IOException e) {
+            return VerifyResult.fail(TxErrorCode.SERIALIZE_ERROR);
         } catch (NulsException e) {
             chain.getLoggerMap().get(TxConstant.LOG_TX).error("tx type: " + tx.getType(), e);
             return VerifyResult.fail(e.getErrorCode());
-        } catch (IOException e) {
-            return VerifyResult.fail(TxErrorCode.SERIALIZE_ERROR);
+        } catch (Exception e) {
+            return VerifyResult.fail(TxErrorCode.SYS_UNKOWN_EXCEPTION);
         }
     }
 
@@ -343,7 +345,7 @@ public class TxServiceImpl implements TxService {
             }
             //验证账户地址,资产链id,资产id的组合唯一性
             int assetsChainId = coinFrom.getAssetsChainId();
-            boolean rs = uniqueCoin.add(AddressTool.getStringAddressByBytes(coinFrom.getAddress()) + "-" + assetsChainId + "-" + assetsId);
+            boolean rs = uniqueCoin.add(AddressTool.getStringAddressByBytes(coinFrom.getAddress()) + "-" + assetsChainId + "-" + assetsId + "-" + HexUtil.encode(coinFrom.getNonce()));
             if (!rs) {
                 throw new NulsException(TxErrorCode.COINFROM_HAS_DUPLICATE_COIN);
             }
@@ -769,7 +771,7 @@ public class TxServiceImpl implements TxService {
                 continue;
             }
 
-            /**冲突检测有不通过的, 执行清除和未确认回滚 从packingTxList删除, 放弃分组?*/
+            /**冲突检测有不通过的, 执行清除和未确认回滚 从packingTxList删除*/
             for (int i = 0; i < txHashList.size(); i++) {
                 String hash = txHashList.get(i);
                 Iterator<TxWrapper> its = packingTxList.iterator();
@@ -1067,7 +1069,6 @@ public class TxServiceImpl implements TxService {
                 return false;
             }
         });
-
-
     }
+
 }

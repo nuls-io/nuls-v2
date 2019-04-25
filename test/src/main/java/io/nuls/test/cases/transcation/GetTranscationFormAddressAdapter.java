@@ -1,6 +1,7 @@
 package io.nuls.test.cases.transcation;
 
 import io.nuls.api.provider.transaction.facade.TransactionData;
+import io.nuls.test.cases.BaseAdapter;
 import io.nuls.test.cases.CaseType;
 import io.nuls.test.cases.TestCaseIntf;
 import io.nuls.test.cases.TestFailException;
@@ -12,7 +13,7 @@ import io.nuls.tools.core.annotation.Component;
  * @Description: 功能描述
  */
 @Component
-public class GetTranscationFormAddressAdapter implements TestCaseIntf<String, TransactionData> {
+public class GetTranscationFormAddressAdapter extends BaseAdapter<String, TransactionData> {
 
     @Override
     public String title() {

@@ -36,10 +36,12 @@ import io.nuls.tools.basic.Result;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Controller;
 import io.nuls.tools.core.annotation.RpcMethod;
+import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.log.Log;
 import io.nuls.tools.model.DoubleUtils;
 import io.nuls.tools.model.StringUtils;
 
+import java.math.BigInteger;
 import java.util.*;
 
 import static io.nuls.api.constant.MongoTableConstant.CONSENSUS_LOCKED;
@@ -205,6 +207,7 @@ public class PocConsensusController {
             if (agentInfo.getTotalPackingCount() != 0) {
                 agentInfo.setLostRate(DoubleUtils.div(count, count + agentInfo.getTotalPackingCount()));
             }
+            agentInfo.setYellowCardCount((int) count);
             ApiCache apiCache = CacheManager.getCache(chainId);
             List<PocRoundItem> itemList = apiCache.getCurrentRound().getItemList();
             PocRoundItem roundItem = null;
@@ -540,6 +543,28 @@ public class PocConsensusController {
                 list = this.depositService.getDepositListByAddress(chainId, agentHash, address, pageIndex, pageSize);
             }
             return new RpcResult().setResult(list);
+        } catch (Exception e) {
+            Log.error(e);
+            return RpcResult.failed(RpcErrorCode.SYS_UNKNOWN_EXCEPTION);
+        }
+    }
+
+    @RpcMethod("getAccountDepositValue")
+    public RpcResult getAccountDepositValue(List<Object> params) {
+        VerifyUtils.verifyParams(params, 2);
+        int chainId;
+        String address, agentHash;
+        try {
+            chainId = (int) params.get(0);
+            address = (String) params.get(1);
+            agentHash = (String) params.get(2);
+        } catch (Exception e) {
+            return RpcResult.paramError();
+        }
+
+        try {
+            BigInteger value = depositService.getDepositAmount(chainId, address, agentHash);
+            return new RpcResult().setResult(value);
         } catch (Exception e) {
             Log.error(e);
             return RpcResult.failed(RpcErrorCode.SYS_UNKNOWN_EXCEPTION);

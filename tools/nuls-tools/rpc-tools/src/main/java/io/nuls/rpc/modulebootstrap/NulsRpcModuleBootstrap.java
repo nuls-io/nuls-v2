@@ -29,6 +29,7 @@ public class NulsRpcModuleBootstrap {
 
     public static void run(String scanPackage, String[] args) {
         printLogo("/logo");
+        Log.info("RUN MODULE:{}",System.getProperty("app.name"));
         SpringLiteContext.init(scanPackage, "io.nuls.rpc.modulebootstrap", "io.nuls.rpc.cmd");
         RpcModule module;
         try {

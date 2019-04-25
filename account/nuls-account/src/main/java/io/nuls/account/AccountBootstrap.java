@@ -97,12 +97,12 @@ public class AccountBootstrap extends RpcModule {
      */
     @Override
     public boolean doStart() {
-        Map<String, Properties> lan = I18nUtils.getAll();
-        lan.entrySet().forEach(entry->{
-            entry.getValue().forEach((key,value)->{
-                Log.info("{}:{}",key,value);
-            });
-        });
+//        Map<String, Properties> lan = I18nUtils.getAll();
+//        lan.entrySet().forEach(entry->{
+//            entry.getValue().forEach((key,value)->{
+//                Log.info("{}:{}",key,value);
+//            });
+//        });
         return true;
     }
 
