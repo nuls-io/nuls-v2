@@ -503,6 +503,10 @@ public class PocConsensusController {
                 return RpcResult.success(list);
             }
             List<String> hashList = depositService.getAgentHashList(chainId, address);
+            AgentInfo agentInfo = agentService.getAliveAgentByAgentAddress(chainId, address);
+            if(agentInfo != null) {
+                hashList.add(agentInfo.getTxHash());
+            }
             list = agentService.getAgentByHashList(chainId, pageIndex, pageSize, hashList);
             return RpcResult.success(list);
         } catch (Exception e) {

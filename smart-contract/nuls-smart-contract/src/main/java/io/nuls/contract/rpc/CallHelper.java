@@ -27,6 +27,7 @@ import io.nuls.contract.util.Log;
 import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.model.message.Response;
 import io.nuls.rpc.netty.processor.ResponseMessageProcessor;
+import io.nuls.tools.constant.ErrorCode;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.parse.JSONUtils;
 
@@ -44,21 +45,13 @@ public class CallHelper {
     public static Object request(String moduleCode, String cmd, Map params) throws NulsException {
         try {
             params.put(Constants.VERSION_KEY_STR, "1.0");
-            Response cmdResp = ResponseMessageProcessor.requestAndResponse(moduleCode, cmd, params);
-            Map resData = (Map) cmdResp.getResponseData();
-            if (!cmdResp.isSuccess()) {
-                Log.error("response error info is {}, cmd is {}, params is {}", cmdResp, cmd, JSONUtils.obj2json(params));
-                String errorMsg = null;
-                if (null == resData) {
-                    errorMsg = String.format("Remote call fail. ResponseComment: %s ", cmdResp.getResponseComment());
-                } else {
-                    Map map = (Map) resData.get(cmd);
-                    if (map != null) {
-                        errorMsg = String.format("Remote call fail. msg: %s - code: %s - module: %s - interface: %s \n- params: %s ",
-                                map.get("msg"), map.get("code"), moduleCode, cmd, JSONUtils.obj2PrettyJson(params));
-                    }
-                }
-                throw new Exception(errorMsg);
+            Response response = ResponseMessageProcessor.requestAndResponse(moduleCode, cmd, params);
+            Map resData = (Map) response.getResponseData();
+            if (!response.isSuccess()) {
+                Log.error("response error info is {}, cmd is {}, params is {}", response, cmd, JSONUtils.obj2json(params));
+                String errorCode = response.getResponseErrorCode();
+                Log.error("Call interface [{}] error, ErrorCode is {}, ResponseComment:{}", cmd, errorCode, response.getResponseComment());
+                throw new NulsException(ErrorCode.init(errorCode));
             }
             return resData.get(cmd);
         } catch (Exception e) {
