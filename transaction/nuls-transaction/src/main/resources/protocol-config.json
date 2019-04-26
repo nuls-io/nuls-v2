@@ -2,46 +2,25 @@
   {
     "version": "1",
     "extend": "",
+    "moduleValidator": "",
+    "moduleCommit": "",
+    "moduleRollback": "",
     "validTransactions": [],
     "validMessages": [
       {
-        "name": "io.nuls.transaction.message.BroadcastTxMessage",
-        "handlers": [
-          {
-            "name": "io.nuls.transaction.rpc.cmd.MessageCmd#newHash"
-          },
-          {
-            "name": "io.nuls.transaction.rpc.cmd.MessageCmd#newCrossHash"
-          }
-        ]
+        "name": "io.nuls.transaction.message.ForwardTxMessage",
+        "handlers": "io.nuls.transaction.rpc.cmd.MessageCmd#newHash"
       },
       {
         "name": "io.nuls.transaction.message.GetTxMessage",
-        "handlers": [
-          {
-            "name": "io.nuls.transaction.rpc.cmd.MessageCmd#askTx"
-          },
-          {
-            "name": "io.nuls.transaction.rpc.cmd.MessageCmd#askCrossTxM2Fc"
-          },
-          {
-            "name": "io.nuls.transaction.rpc.cmd.MessageCmd#askCrossTxM2M"
-          },
-          {
-            "name": "io.nuls.transaction.rpc.cmd.MessageCmd#askCrossTxFc2M"
-          }
-        ]
+        "handlers": "io.nuls.transaction.rpc.cmd.MessageCmd#askTx"
       },
       {
-        "name": "io.nuls.transaction.message.TransactionMessage",
-        "handlers": [
-          {
-            "name": "io.nuls.transaction.rpc.cmd.MessageCmd#receiveTx"
-          }
-        ]
+        "name": "io.nuls.transaction.message.BroadcastTxMessage",
+        "handlers": "io.nuls.transaction.rpc.cmd.MessageCmd#receiveTx"
       }
     ],
-    "invalidTransactions": [],
-    "invalidMessages": []
+    "invalidTransactions": "",
+    "invalidMessages": ""
   }
 ]

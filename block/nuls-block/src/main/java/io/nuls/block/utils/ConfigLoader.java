@@ -27,13 +27,10 @@ import io.nuls.block.model.ChainParameters;
 import io.nuls.block.storage.ParametersStorageService;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
-import io.nuls.tools.io.IoUtils;
-import io.nuls.tools.protocol.ProtocolLoader;
 
 import java.util.List;
 
 import static io.nuls.block.BlockBootstrap.blockConfig;
-import static io.nuls.tools.constant.BaseConstant.PROTOCOL_CONFIG_FILE;
 
 /**
  * 配置加载器
@@ -60,9 +57,9 @@ public class ConfigLoader {
         } else {
             for (ChainParameters chainParameters : list) {
                 ContextManager.init(chainParameters);
-                int chainId = chainParameters.getChainId();
-                String protocolConfigJson = service.getProtocolConfigJson(chainId);
-                ProtocolLoader.load(chainId, protocolConfigJson);
+//                int chainId = chainParameters.getChainId();
+//                String protocolConfigJson = service.getProtocolConfigJson(chainId);
+//                ProtocolLoader.load(chainId, protocolConfigJson);
             }
         }
     }
@@ -73,12 +70,12 @@ public class ConfigLoader {
      * @throws Exception
      */
     private static void loadDefault() throws Exception {
-        String json = IoUtils.read(PROTOCOL_CONFIG_FILE);
+//        String json = IoUtils.read(PROTOCOL_CONFIG_FILE);
         ChainParameters parameter = blockConfig;
         int chainId = parameter.getChainId();
         ContextManager.init(parameter);
         service.save(parameter, chainId);
-        service.saveProtocolConfigJson(json, chainId);
+//        service.saveProtocolConfigJson(json, chainId);
     }
 
 }
