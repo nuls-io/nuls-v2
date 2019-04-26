@@ -89,7 +89,7 @@ public class OrphanTxProcessTask implements Runnable {
         }
         try {
             //时间排序TransactionTimeComparator
-            chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("处理孤儿交易 orphanTxList size:{}", orphanTxList.size());
+            chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("[OrphanTxProcessTask] OrphanTxList size:{}", orphanTxList.size());
             orphanTxList.sort(txComparator);
             Iterator<TransactionNetPO> it = orphanTxList.iterator();
             while (it.hasNext()) {
@@ -97,7 +97,7 @@ public class OrphanTxProcessTask implements Runnable {
                 boolean rs = processTx(chain, txNet);
                 if (rs) {
                     it.remove();
-                    chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("[OrphanTxProcessTask - OrphanTx remove] type:{} - txhash:{}, -orphanTxList size:{}",
+                    chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("[OrphanTxProcessTask] Orphan tx remove - type:{} - txhash:{}, -orphanTxList size:{}",
                             txNet.getTx().getType(), txNet.getTx().getHash().getDigestHex(), orphanTxList.size());
                 }
             }
@@ -105,7 +105,7 @@ public class OrphanTxProcessTask implements Runnable {
             throw new NulsException(TxErrorCode.SYS_UNKOWN_EXCEPTION);
         } finally {
             if(orphanTxList.size() > 0){
-                chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("加回剩余孤儿交易 add back size:{}", orphanTxList.size());
+                chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("[OrphanTxProcessTask] Orphan tx add back size:{}", orphanTxList.size());
                 synchronized (chainOrphan){
                     chainOrphan.addAll(orphanTxList);
                 }
@@ -133,7 +133,7 @@ public class OrphanTxProcessTask implements Runnable {
                 if(chain.getPackaging().get()) {
                     //当节点是出块节点时, 才将交易放入待打包队列
                     packablePool.add(chain, tx);
-                    chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("孤儿交易[加入待打包队列]....hash:{}", tx.getHash().getDigestHex());
+                    chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("[OrphanTxProcessTask] 加入待打包队列....hash:{}", tx.getHash().getDigestHex());
                 }
                 //保存到rocksdb
                 unconfirmedTxStorageService.putTx(chainId, tx);
@@ -141,7 +141,7 @@ public class OrphanTxProcessTask implements Runnable {
                 NetworkCall.forwardTxHash(chain.getChainId(),tx.getHash(), txNet.getExcludeNode());
                 return true;
             }
-            chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("orphan tx coinData verify fail - orphan: {}, - code:{}, type:{}, - txhash:{}", verifyLedgerResult.getOrphan(),
+            chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("[OrphanTxProcessTask] tx coinData verify fail - orphan: {}, - code:{}, type:{}, - txhash:{}", verifyLedgerResult.getOrphan(),
                     verifyLedgerResult.getErrorCode() == null ? "" : verifyLedgerResult.getErrorCode().getCode(),tx.getType(), tx.getHash().getDigestHex());
 
             if(!verifyLedgerResult.getSuccess()){
