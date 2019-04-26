@@ -28,7 +28,7 @@
       }
     ],
     "validMessages": [],
-    "invalidTransactions": [],
-    "invalidMessages": []
+    "invalidTransactions": "",
+    "invalidMessages": ""
   }
 ]

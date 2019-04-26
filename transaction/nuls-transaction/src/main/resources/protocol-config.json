@@ -2,49 +2,8 @@
   {
     "version": "1",
     "extend": "",
-    "validTransactions": [
-      {
-        "type": "1",
-        "name": "io.nuls.test.TestTransaction1",
-        "handler": "io.nuls.test.TestTransactionHandler1",
-        "validate": "validate1",
-        "commit": "commit1",
-        "rollback": "rollback1"
-      },
-      {
-        "type": "2",
-        "name": "io.nuls.test.TestTransaction2",
-        "handler": "io.nuls.test.TestTransactionHandler2",
-        "validate": "validate1",
-        "commit": "commit1",
-        "rollback": "rollback1"
-      },
-      {
-        "type": "3",
-        "name": "io.nuls.test.TestTransaction3",
-        "handler": "io.nuls.test.TestTransactionHandler3",
-        "validate": "validate1",
-        "commit": "commit1",
-        "rollback": "rollback1"
-      }
-    ],
+    "validTransactions": [],
     "validMessages": [
-      {
-        "name": "io.nuls.transaction.message.BroadcastCrossNodeRsMessage",
-        "handlers": [
-          {
-            "name": "io.nuls.transaction.rpc.cmd.MessageCmd#crossNodeRs"
-          }
-        ]
-      },
-      {
-        "name": "io.nuls.transaction.message.BroadcastCrossTxHashMessage",
-        "handlers": [
-          {
-            "name": "io.nuls.transaction.rpc.cmd.MessageCmd#process"
-          }
-        ]
-      },
       {
         "name": "io.nuls.transaction.message.BroadcastTxMessage",
         "handlers": [
@@ -53,14 +12,6 @@
           },
           {
             "name": "io.nuls.transaction.rpc.cmd.MessageCmd#newCrossHash"
-          }
-        ]
-      },
-      {
-        "name": "io.nuls.transaction.message.CrossTxMessage",
-        "handlers": [
-          {
-            "name": "io.nuls.transaction.rpc.cmd.MessageCmd#newMnTx"
           }
         ]
       },
@@ -82,162 +33,15 @@
         ]
       },
       {
-        "name": "io.nuls.transaction.message.ReceiveCrossTxMessage",
-        "handlers": [
-          {
-            "name": "io.nuls.transaction.rpc.cmd.MessageCmd#newMnTx"
-          }
-        ]
-      },
-      {
         "name": "io.nuls.transaction.message.TransactionMessage",
         "handlers": [
           {
             "name": "io.nuls.transaction.rpc.cmd.MessageCmd#receiveTx"
           }
         ]
-      },
-      {
-        "name": "io.nuls.transaction.message.VerifyCrossResultMessage",
-        "handlers": [
-          {
-            "name": "io.nuls.transaction.rpc.cmd.MessageCmd#verifyResult"
-          }
-        ]
-      },
-      {
-        "name": "io.nuls.transaction.message.VerifyCrossWithFCMessage",
-        "handlers": [
-          {
-            "name": "io.nuls.transaction.rpc.cmd.MessageCmd#verifyFc"
-          },
-          {
-            "name": "io.nuls.transaction.rpc.cmd.MessageCmd#verifyMn"
-          }
-        ]
-      },
-      {
-        "name": "io.nuls.transaction.message.VerifyCrossWithMainMessage",
-        "handlers": [
-          {
-            "name": "io.nuls.transaction.rpc.cmd.MessageCmd#process"
-          }
-        ]
       }
     ],
     "invalidTransactions": [],
     "invalidMessages": []
-  },
-  {
-    "version": "2",
-    "extend": "1",
-    "validTransactions": [
-      {
-        "type": "2",
-        "name": "io.nuls.test.TestTransaction2",
-        "handler": "io.nuls.test.TestTransactionHandler2",
-        "validate": "validate2",
-        "commit": "commit2",
-        "rollback": "rollback2"
-      },
-      {
-        "type": "4",
-        "name": "io.nuls.test.TestTransaction4",
-        "handler": "io.nuls.test.TestTransactionHandler4",
-        "validate": "validate1",
-        "commit": "commit1",
-        "rollback": "rollback1"
-      }
-    ],
-    "validMessages": [
-      {
-        "name": "io.nuls.block.test.TestMessage2",
-        "handlers": [
-          {
-            "name": "io.nuls.block.test.TestMessageHandler2#processV3"
-          },
-          {
-            "name": "io.nuls.block.test.TestMessageHandler2#processV4"
-          }
-        ]
-      },
-      {
-        "name": "io.nuls.block.test.TestMessage4",
-        "handlers": [
-          {
-            "name": "io.nuls.block.test.TestMessageHandler4#processV1"
-          },
-          {
-            "name": "io.nuls.block.test.TestMessageHandler4#processV2"
-          }
-        ]
-      }
-    ],
-    "invalidTransactions": [
-      {
-        "name": "io.nuls.test.TestTransaction3"
-      }
-    ],
-    "invalidMessages": [
-      {
-        "name": "io.nuls.block.test.TestMessage3"
-      }
-    ]
-  },
-  {
-    "version": "3",
-    "extend": "2",
-    "validTransactions": [
-      {
-        "type": "4",
-        "name": "io.nuls.test.TestTransaction4",
-        "handler": "io.nuls.test.TestTransactionHandler4",
-        "validate": "validate2",
-        "commit": "commit2",
-        "rollback": "rollback2"
-      },
-      {
-        "type": "5",
-        "name": "io.nuls.test.TestTransaction5",
-        "handler": "io.nuls.test.TestTransactionHandler5",
-        "validate": "validate1",
-        "commit": "commit1",
-        "rollback": "rollback1"
-      }
-    ],
-    "validMessages": [
-      {
-        "name": "io.nuls.block.test.TestMessage4",
-        "handlers": [
-          {
-            "name": "io.nuls.block.test.TestMessageHandler4#processV5"
-          },
-          {
-            "name": "io.nuls.block.test.TestMessageHandler4#processV6"
-          }
-        ]
-      },
-      {
-        "name": "io.nuls.block.test.TestMessage5",
-        "handlers": [
-          {
-            "name": "io.nuls.block.test.TestMessageHandler5#processV1"
-          },
-          {
-            "name": "io.nuls.block.test.TestMessageHandler5#processV2"
-          }
-        ]
-      }
-    ],
-    "invalidTransactions": [
-      {
-        "name": "io.nuls.test.TestTransaction1"
-      }
-    ],
-    "invalidMessages": [
-      {
-        "name": "io.nuls.block.test.TestMessage1"
-      }
-    ]
   }
 ]

@@ -8,18 +8,16 @@
     "validTransactions": [
       {
         "type": "1",
-        "name": "coinbase",
         "systemTx": true,
         "unlockTx": false,
         "verifySignature": false,
-        "handler": "io.nuls.account.rpc.cmd.ConsensusTransactionHandler",
+        "handler": "io.nuls.poc.rpc.cmd.ConsensusTransactionHandler",
         "validate": "",
         "commit": "",
         "rollback": ""
       },
       {
         "type": "4",
-        "name": "createAgent",
         "systemTx": false,
         "unlockTx": false,
         "verifySignature": true,
@@ -30,7 +28,6 @@
       },
       {
         "type": "5",
-        "name": "deposit",
         "systemTx": false,
         "unlockTx": false,
         "verifySignature": true,
@@ -41,40 +38,36 @@
       },
       {
         "type": "6",
-        "name": "cancelDeposit",
         "systemTx": false,
         "unlockTx": true,
         "verifySignature": true,
-        "handler": "io.nuls.account.rpc.cmd.ConsensusTransactionHandler",
+        "handler": "io.nuls.poc.rpc.cmd.ConsensusTransactionHandler",
         "validate": "cs_withdrawValid",
         "commit": "",
         "rollback": ""
       },
       {
         "type": "7",
-        "name": "yellowPunish",
         "systemTx": true,
         "unlockTx": false,
         "verifySignature": false,
-        "handler": "io.nuls.account.rpc.cmd.ConsensusTransactionHandler",
+        "handler": "io.nuls.poc.rpc.cmd.ConsensusTransactionHandler",
         "validate": "cs_withdrawValid",
         "commit": "",
         "rollback": ""
       },
       {
         "type": "8",
-        "name": "redPunish",
         "systemTx": true,
         "unlockTx": false,
         "verifySignature": false,
-        "handler": "io.nuls.account.rpc.cmd.ConsensusTransactionHandler",
+        "handler": "io.nuls.poc.rpc.cmd.ConsensusTransactionHandler",
         "validate": "cs_withdrawValid",
         "commit": "",
         "rollback": ""
       },
       {
         "type": "9",
-        "name": "stopAgent",
         "systemTx": false,
         "unlockTx": true,
         "verifySignature": true,
@@ -85,7 +78,7 @@
       }
     ],
     "validMessages": [],
-    "invalidTransactions": [],
-    "invalidMessages": []
+    "invalidTransactions": "",
+    "invalidMessages": ""
   }
 ]

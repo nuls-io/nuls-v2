@@ -33,7 +33,7 @@
         "handlers": "io.nuls.block.message.handler.TxGroupHandler#process"
       }
     ],
-    "invalidTransactions": [],
-    "invalidMessages": []
+    "invalidTransactions": "",
+    "invalidMessages": ""
   }
 ]
