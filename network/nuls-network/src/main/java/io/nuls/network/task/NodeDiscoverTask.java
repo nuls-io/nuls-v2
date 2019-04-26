@@ -217,11 +217,13 @@ public class NodeDiscoverTask implements Runnable {
 
         node.setConnectedListener(() -> {
             //探测可连接后，断开连接
+            LoggerUtil.logger().debug("探测可连接:{},之后自动断开",node.getId());
             node.setConnectStatus(NodeConnectStatusEnum.CONNECTED);
             node.getChannel().close();
         });
 
         node.setDisconnectListener(() -> {
+            LoggerUtil.logger().debug("探测进入断开:{}",node.getId());
             node.setChannel(null);
             int availableNodesCount = 0;
             if (isCross) {
@@ -252,11 +254,16 @@ public class NodeDiscoverTask implements Runnable {
         }
     }
 
+    /**
+     * 探测为可用的节点后广播给别人
+     * @param node
+     * @param isCross
+     */
     private void doShare(Node node, boolean isCross) {
         IpAddress ipAddress = new IpAddress(node.getIp(), node.getRemotePort());
         List<IpAddress> list = new ArrayList<>();
         list.add(ipAddress);
         AddrMessage addrMessage = MessageFactory.getInstance().buildAddrMessage(list, node.getMagicNumber());
-        MessageManager.getInstance().broadcastToAllNode(addrMessage, null, isCross, true);
+        MessageManager.getInstance().broadcastNewAddr(addrMessage, null, isCross, true);
     }
 }

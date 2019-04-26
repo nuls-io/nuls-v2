@@ -208,6 +208,7 @@ public class NodeGroup implements Dto {
      * @return
      */
     public boolean isMoonCrossGroup() {
+        //在卫星链上，链id不等于默认id，则是用户注册的跨链
         if (networkConfig.isMoonNode() && networkConfig.getChainId() != chainId) {
             return true;
         }
@@ -315,14 +316,20 @@ public class NodeGroup implements Dto {
     public Collection<Node> getCanConnectNodes(boolean isCross) {
         List<Node> nodeList = new ArrayList<>();
         Collection<Node> allNodes = null;
+        Map<String, Node> connectedNodes = null;
         if (isCross) {
             allNodes = crossNodeContainer.getCanConnectNodes().values();
+            connectedNodes=crossNodeContainer.getConnectedNodes();
         } else {
             allNodes = localNetNodeContainer.getCanConnectNodes().values();
+            connectedNodes=localNetNodeContainer.getConnectedNodes();
         }
         for (Node node : allNodes) {
             if (node.getStatus() == NodeStatusEnum.CONNECTABLE) {
-                nodeList.add(node);
+                //排除已经连接的信息
+                if(null == connectedNodes.get(node.getId())){
+                    nodeList.add(node);
+                }
             }
         }
         return nodeList;
