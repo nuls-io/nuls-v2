@@ -59,6 +59,7 @@ public class CmdRegisterManager implements InitializingBean {
 
     @Override
     public void afterPropertiesSet() throws NulsException {
+        // 初始化合约调用外部模块注册的命令的请求器
         this.requestAndResponseInterface = new RequestAndResponseInterface() {
             @Override
             public Response requestAndResponse(String moduleCode, String cmdName, Map argsMap) throws Exception {
@@ -125,6 +126,15 @@ public class CmdRegisterManager implements InitializingBean {
         return cmdRegister;
     }
 
+    /**
+     * 合约调用外部模块注册的命令的请求器
+     *
+     * @param moduleCode 模块代码
+     * @param cmdName 命令名称
+     * @param args 参数
+     * @return response
+     * @throws Exception
+     */
     public Response requestAndResponse(String moduleCode, String cmdName, Map args) throws Exception {
         return requestAndResponseInterface.requestAndResponse(moduleCode, cmdName, args);
     }

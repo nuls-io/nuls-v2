@@ -503,11 +503,10 @@ public class NativeUtils {
                 if(cmdResult instanceof List) {
                     List resultList = (List) cmdResult;
                     int size = resultList.size();
-                    String[] resultArray = new String[size];
+                    objectRef = frame.heap.newArray(VariableType.STRING_ARRAY_TYPE, size);
                     for (int k = 0; k < size; k++) {
-                        resultArray[k] = (String) resultList.get(k);
+                        frame.heap.putArray(objectRef, k, frame.heap.newString((String) resultList.get(k)));
                     }
-                    objectRef = frame.heap.newArray(resultArray, VariableType.STRING_TYPE, size);
                 } else if(cmdResult.getClass().isArray()) {
                     String[] resultArray = (String[]) cmdResult;
                     objectRef = frame.heap.newArray(VariableType.STRING_ARRAY_TYPE, resultArray.length);

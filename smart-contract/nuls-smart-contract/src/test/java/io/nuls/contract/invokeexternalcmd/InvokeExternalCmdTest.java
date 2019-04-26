@@ -233,6 +233,51 @@ public class InvokeExternalCmdTest {
     }
 
     @Test
+    public void testCallReturnStringArrayList() throws IOException {
+        // 自定义的requestAndResponseInterface
+        BeanUtilTest.setBean(cmdRegisterManager, "requestAndResponseInterface", new RequestAndResponseInterface() {
+            @Override
+            public Response requestAndResponse(String moduleCode, String cmdName, Map args) throws Exception {
+                Log.info("moduleCode: [{}], cmdName: [{}], args: [{}]", moduleCode, cmdName, JSONUtils.obj2PrettyJson(args));
+                Response response = MessageUtil.newSuccessResponse("888888");
+                Map resultData = new HashMap(2);
+                List stringArrayList = List.of("a", "b", "c", "d", "e");
+                resultData.put("result", stringArrayList);
+                response.setResponseData(resultData);
+                return response;
+            }
+        });
+
+        ProgramCall programCall = new ProgramCall();
+        programCall.setContractAddress(NativeAddress.toBytes(ADDRESS));
+        programCall.setSender(NativeAddress.toBytes(SENDER));
+        programCall.setPrice(1);
+        programCall.setGasLimit(1000000);
+        programCall.setNumber(1);
+        programCall.setMethodName("invokeReturnStringArrayView");
+        programCall.setMethodDesc("");
+        Object[] args = new Object[2];
+        String[] arg1 = {"a", "b"};
+        args[0] = "returnStringArray";
+        args[1] = arg1;
+        programCall.setArgs(ContractUtil.twoDimensionalArray(args));
+
+        System.out.println(JSONUtils.obj2PrettyJson(programCall));
+
+        byte[] prevStateRoot = HexUtil.decode("47f3d661db7d9f98901973965f6d3ccbef433decee9ff5079b23e49c595233b0");
+
+        ProgramExecutor track = programExecutor.begin(prevStateRoot);
+        ProgramResult programResult = track.call(programCall);
+        track.commit();
+
+        System.out.println(JSONUtils.obj2PrettyJson(programResult));
+        System.out.println("pierre - stateRoot: " + HexUtil.encode(track.getRoot()));
+        System.out.println();
+
+        sleep();
+    }
+
+    @Test
     public void testReturnStringNewTx() throws IOException {
         // 自定义的requestAndResponseInterface
         BeanUtilTest.setBean(cmdRegisterManager, "requestAndResponseInterface", new RequestAndResponseInterface() {
