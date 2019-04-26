@@ -97,6 +97,24 @@ public class MongoAgentServiceImpl implements AgentService {
         return info;
     }
 
+    @Override
+    public AgentInfo getAliveAgentByAgentAddress(int chainID, String agentAddress) {
+        Collection<AgentInfo> agentInfos = CacheManager.getCache(chainID).getAgentMap().values();
+        AgentInfo info = null;
+        for (AgentInfo agent : agentInfos) {
+            if (!agentAddress.equals(agent.getAgentAddress())) {
+                continue;
+            }
+            if(agent.getStatus() == 2) {
+                continue;
+            }
+            if (null == info || agent.getCreateTime() > info.getCreateTime()) {
+                info = agent;
+            }
+        }
+        return info;
+    }
+
     public void saveAgentList(int chainID, List<AgentInfo> agentInfoList) {
         if (agentInfoList.isEmpty()) {
             return;
