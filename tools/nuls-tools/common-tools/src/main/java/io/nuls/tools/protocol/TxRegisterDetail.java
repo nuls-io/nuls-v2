@@ -47,14 +47,6 @@ public class TxRegisterDetail {
     public TxRegisterDetail() {
     }
 
-    public TxRegisterDetail(TxProperty txProperty) {
-        this.txType = txProperty.txType;
-        this.systemTx = txProperty.systemTx;
-        this.unlockTx = txProperty.unlockTx;
-        this.verifySignature = txProperty.verifySignature;
-        this.validator = "";
-    }
-
     public String getCommit() {
         return commit;
     }

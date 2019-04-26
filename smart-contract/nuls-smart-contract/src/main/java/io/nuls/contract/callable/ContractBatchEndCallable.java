@@ -45,7 +45,7 @@ import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 
-import static io.nuls.contract.constant.ContractConstant.TX_TYPE_DELETE_CONTRACT;
+import static io.nuls.tools.constant.TxType.DELETE_CONTRACT;
 
 
 /**
@@ -129,7 +129,7 @@ public class ContractBatchEndCallable implements Callable<ContractPackageDto> {
         for (ContractResult contractResult : resultList) {
             wrapperTx = contractResult.getTx();
             // 终止合约不消耗Gas，跳过
-            if (wrapperTx.getType() == TX_TYPE_DELETE_CONTRACT) {
+            if (wrapperTx.getType() == DELETE_CONTRACT) {
                 continue;
             }
             contractData = wrapperTx.getContractData();

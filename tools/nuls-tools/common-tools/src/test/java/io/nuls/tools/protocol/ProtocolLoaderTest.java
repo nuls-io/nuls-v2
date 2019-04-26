@@ -10,5 +10,7 @@ public class ProtocolLoaderTest {
     @Test
     public void load() throws Exception {
         ProtocolLoader.load(1, Files.readString(Paths.get("C:\\Users\\alvin\\Desktop\\sample.json")));
+        Protocol protocol = ProtocolGroupManager.getProtocol(1);
+        System.out.println(protocol.getAllowMsg().get(0).getProcessors());
     }
 }

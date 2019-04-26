@@ -23,8 +23,9 @@
  */
 package io.nuls.contract.model.tx;
 
-import io.nuls.contract.constant.ContractConstant;
 import io.nuls.contract.model.txdata.CreateContractData;
+
+import static io.nuls.tools.constant.TxType.CREATE_CONTRACT;
 
 /**
  * @author: PierreLuo
@@ -33,7 +34,7 @@ import io.nuls.contract.model.txdata.CreateContractData;
 public class CreateContractTransaction extends ContractBaseTransaction<CreateContractData> {
 
     public CreateContractTransaction() {
-        super(ContractConstant.TX_TYPE_CREATE_CONTRACT);
+        super(CREATE_CONTRACT);
     }
 
     @Override

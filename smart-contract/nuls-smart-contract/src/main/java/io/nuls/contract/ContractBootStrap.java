@@ -19,13 +19,14 @@ import io.nuls.rpc.modulebootstrap.NulsRpcModuleBootstrap;
 import io.nuls.rpc.modulebootstrap.RpcModule;
 import io.nuls.rpc.modulebootstrap.RpcModuleState;
 import io.nuls.rpc.util.TimeUtils;
+import io.nuls.rpc.util.TxRegisterHelper;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.core.ioc.SpringLiteContext;
-import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.io.IoUtils;
 import io.nuls.tools.log.Log;
 import io.nuls.tools.parse.JSONUtils;
+import io.nuls.tools.protocol.ProtocolGroupManager;
 
 import java.io.File;
 import java.io.IOException;
@@ -217,13 +218,9 @@ public class ContractBootStrap extends RpcModule {
              */
             Map<Integer, Chain> chainMap = chainManager.getChainMap();
             for(Chain chain : chainMap.values()) {
-                try {
-                    boolean isSuccess = ChainManager.registerTx(chain);
-                    Log.info("register tx type to tx module, chain id is {}, result is {}", chain.getChainId(), isSuccess);
-                } catch (NulsException e) {
-                    Log.error(e);
-                    throw new RuntimeException(e);
-                }
+                int chainId = chain.getChainId();
+                boolean registerTx = TxRegisterHelper.registerTx(chainId, ProtocolGroupManager.getProtocol(chainId));
+                Log.info("register tx type to tx module, chain id is {}, result is {}", chainId, registerTx);
             }
         }
     }

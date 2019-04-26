@@ -57,6 +57,7 @@ import java.util.stream.Collectors;
 
 import static io.nuls.contract.constant.ContractConstant.*;
 import static io.nuls.contract.constant.ContractErrorCode.FAILED;
+import static io.nuls.tools.constant.TxType.*;
 import static io.nuls.tools.model.StringUtils.isBlank;
 
 /**
@@ -121,9 +122,9 @@ public class ContractUtil {
             return null;
         }
         int txType = tx.getType();
-        if (txType == ContractConstant.TX_TYPE_CREATE_CONTRACT
-                || txType == ContractConstant.TX_TYPE_CALL_CONTRACT
-                || txType == ContractConstant.TX_TYPE_DELETE_CONTRACT) {
+        if (txType == CREATE_CONTRACT
+                || txType == CALL_CONTRACT
+                || txType == DELETE_CONTRACT) {
             return extractContractAddressFromTxData(tx.getTxData());
         }
         return null;
@@ -147,17 +148,17 @@ public class ContractUtil {
         ContractData contractData = null;
         boolean isContractTx = true;
         switch (tx.getType()) {
-            case TX_TYPE_CREATE_CONTRACT:
+            case CREATE_CONTRACT:
                 CreateContractData create = new CreateContractData();
                 create.parse(tx.getTxData(), 0);
                 contractData = create;
                 break;
-            case TX_TYPE_CALL_CONTRACT:
+            case CALL_CONTRACT:
                 CallContractData call = new CallContractData();
                 call.parse(tx.getTxData(), 0);
                 contractData = call;
                 break;
-            case TX_TYPE_DELETE_CONTRACT:
+            case DELETE_CONTRACT:
                 DeleteContractData delete = new DeleteContractData();
                 delete.parse(tx.getTxData(), 0);
                 contractData = delete;
@@ -230,11 +231,11 @@ public class ContractUtil {
             return false;
         }
         int txType = tx.getType();
-        if (txType == ContractConstant.TX_TYPE_CREATE_CONTRACT
-                || txType == ContractConstant.TX_TYPE_CALL_CONTRACT
-                || txType == ContractConstant.TX_TYPE_DELETE_CONTRACT
-                || txType == ContractConstant.TX_TYPE_CONTRACT_TRANSFER
-                || txType == ContractConstant.TX_TYPE_CONTRACT_RETURN_GAS) {
+        if (txType == CREATE_CONTRACT
+                || txType == CALL_CONTRACT
+                || txType == DELETE_CONTRACT
+                || txType == CONTRACT_TRANSFER
+                || txType == CONTRACT_RETURN_GAS) {
             return true;
         }
         return false;
@@ -245,8 +246,8 @@ public class ContractUtil {
             return false;
         }
         int txType = tx.getType();
-        if (txType == ContractConstant.TX_TYPE_CREATE_CONTRACT
-                || txType == ContractConstant.TX_TYPE_CALL_CONTRACT) {
+        if (txType == CREATE_CONTRACT
+                || txType == CALL_CONTRACT) {
             return true;
         }
         return false;
@@ -489,19 +490,19 @@ public class ContractUtil {
     public static ContractBaseTransaction convertContractTx(Transaction tx) {
         ContractBaseTransaction resultTx = null;
         switch (tx.getType()) {
-            case TX_TYPE_CREATE_CONTRACT:
+            case CREATE_CONTRACT:
                 resultTx = new CreateContractTransaction();
                 break;
-            case TX_TYPE_CALL_CONTRACT:
+            case CALL_CONTRACT:
                 resultTx = new CallContractTransaction();
                 break;
-            case TX_TYPE_DELETE_CONTRACT:
+            case DELETE_CONTRACT:
                 resultTx = new DeleteContractTransaction();
                 break;
-            case TX_TYPE_CONTRACT_TRANSFER:
+            case CONTRACT_TRANSFER:
                 resultTx = new ContractTransferTransaction();
                 break;
-            case TX_TYPE_CONTRACT_RETURN_GAS:
+            case CONTRACT_RETURN_GAS:
                 resultTx = new ContractReturnGasTransaction();
                 break;
             default:

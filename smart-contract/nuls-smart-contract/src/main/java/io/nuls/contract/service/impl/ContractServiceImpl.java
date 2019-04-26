@@ -58,10 +58,10 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
-import static io.nuls.contract.constant.ContractConstant.*;
 import static io.nuls.contract.constant.ContractErrorCode.FAILED;
 import static io.nuls.contract.util.ContractUtil.getFailed;
 import static io.nuls.contract.util.ContractUtil.getSuccess;
+import static io.nuls.tools.constant.TxType.*;
 
 /**
  * @author: PierreLuo
@@ -122,17 +122,17 @@ public class ContractServiceImpl implements ContractService {
         try {
             Result result;
             switch (tx.getType()) {
-                case TX_TYPE_CREATE_CONTRACT:
+                case CREATE_CONTRACT:
                     CreateContractTransaction create = new CreateContractTransaction();
                     create.copyTx(tx);
                     result = contractTxValidatorManager.createValidator(chainId, create);
                     break;
-                case TX_TYPE_CALL_CONTRACT:
+                case CALL_CONTRACT:
                     CallContractTransaction call = new CallContractTransaction();
                     call.copyTx(tx);
                     result = contractTxValidatorManager.callValidator(chainId, call);
                     break;
-                case TX_TYPE_DELETE_CONTRACT:
+                case DELETE_CONTRACT:
                     DeleteContractTransaction delete = new DeleteContractTransaction();
                     delete.copyTx(tx);
                     result = contractTxValidatorManager.deleteValidator(chainId, delete);
@@ -253,13 +253,13 @@ public class ContractServiceImpl implements ContractService {
                     wrapperTx = contractResult.getTx();
                     wrapperTx.setContractResult(contractResult);
                     switch (wrapperTx.getType()) {
-                        case TX_TYPE_CREATE_CONTRACT:
+                        case CREATE_CONTRACT:
                             contractTxProcessorManager.createCommit(chainId, wrapperTx);
                             break;
-                        case TX_TYPE_CALL_CONTRACT:
+                        case CALL_CONTRACT:
                             contractTxProcessorManager.callCommit(chainId, wrapperTx);
                             break;
-                        case TX_TYPE_DELETE_CONTRACT:
+                        case DELETE_CONTRACT:
                             contractTxProcessorManager.deleteCommit(chainId, wrapperTx);
                             break;
                         default:
@@ -287,17 +287,17 @@ public class ContractServiceImpl implements ContractService {
                 tx = new Transaction();
                 tx.parse(RPCUtil.decode(txData), 0);
                 switch (tx.getType()) {
-                    case TX_TYPE_CREATE_CONTRACT:
+                    case CREATE_CONTRACT:
                         CreateContractData create = new CreateContractData();
                         create.parse(tx.getTxData(), 0);
                         contractTxProcessorManager.createRollback(chainId, new ContractWrapperTransaction(tx, null, create));
                         break;
-                    case TX_TYPE_CALL_CONTRACT:
+                    case CALL_CONTRACT:
                         CallContractData call = new CallContractData();
                         call.parse(tx.getTxData(), 0);
                         contractTxProcessorManager.callRollback(chainId, new ContractWrapperTransaction(tx, null, call));
                         break;
-                    case TX_TYPE_DELETE_CONTRACT:
+                    case DELETE_CONTRACT:
                         DeleteContractData delete = new DeleteContractData();
                         delete.parse(tx.getTxData(), 0);
                         contractTxProcessorManager.deleteRollback(chainId, new ContractWrapperTransaction(tx, null, delete));

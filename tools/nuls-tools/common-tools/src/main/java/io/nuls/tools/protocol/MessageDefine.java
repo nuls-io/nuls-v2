@@ -1,5 +1,6 @@
 package io.nuls.tools.protocol;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class MessageDefine {
@@ -8,6 +9,17 @@ public class MessageDefine {
     private List<MessageProcessor> processors;
 
     public List<MessageProcessor> getProcessors() {
+        if (processors == null) {
+            processors = new ArrayList<>();
+            String[] strings = handlers.split(",");
+            for (String string : strings) {
+                String[] split = string.split("#");
+                MessageProcessor processor = new MessageProcessor();
+                processor.setHandler(split[0]);
+                processor.setMethod(split[1]);
+                processors.add(processor);
+            }
+        }
         return processors;
     }
 
@@ -21,6 +33,25 @@ public class MessageDefine {
 
     public void setProcessors(List<MessageProcessor> processors) {
         this.processors = processors;
+    }
+
+    @Override
+    public String toString() {
+        return "MessageDefine{" +
+                "name='" + name + '\'' +
+                ", processors=" + processors +
+                '}';
+    }
+
+    public MessageDefine() {
+    }
+
+    public String getHandlers() {
+        return handlers;
+    }
+
+    public void setHandlers(String handlers) {
+        this.handlers = handlers;
     }
 
     class MessageProcessor {
@@ -42,16 +73,13 @@ public class MessageDefine {
         public void setMethod(String method) {
             this.method = method;
         }
-    }
 
-    public MessageDefine() {
-    }
-
-    public String getHandlers() {
-        return handlers;
-    }
-
-    public void setHandlers(String handlers) {
-        this.handlers = handlers;
+        @Override
+        public String toString() {
+            return "MessageProcessor{" +
+                    "handler='" + handler + '\'' +
+                    ", method='" + method + '\'' +
+                    '}';
+        }
     }
 }

@@ -2,77 +2,57 @@
   {
     "version": "1",
     "extend": "",
-    "moduleValidator": "cs_batchValid",
-    "moduleCommit": "cs_commit",
-    "moduleRollback": "cs_rollback",
+    "moduleValidator": "integrateValidator",
+    "moduleCommit": "commit",
+    "moduleRollback": "rollback",
     "validTransactions": [
       {
-        "type": "1",
+        "type": "15",
+        "systemTx": false,
+        "unlockTx": false,
+        "verifySignature": true,
+        "handler": "io.nuls.contract.rpc.cmd.ContractTransactionHandler",
+        "validate": "sc_create_validator",
+        "commit": "",
+        "rollback": ""
+      },
+      {
+        "type": "16",
+        "systemTx": false,
+        "unlockTx": false,
+        "verifySignature": true,
+        "handler": "io.nuls.contract.rpc.cmd.ContractTransactionHandler",
+        "validate": "sc_call_validator",
+        "commit": "",
+        "rollback": ""
+      },
+      {
+        "type": "17",
+        "systemTx": false,
+        "unlockTx": false,
+        "verifySignature": true,
+        "handler": "io.nuls.contract.rpc.cmd.ContractTransactionHandler",
+        "validate": "sc_delete_validator",
+        "commit": "",
+        "rollback": ""
+      },
+      {
+        "type": "18",
         "systemTx": true,
         "unlockTx": false,
         "verifySignature": false,
-        "handler": "io.nuls.poc.rpc.cmd.ConsensusTransactionHandler",
+        "handler": "io.nuls.contract.rpc.cmd.ContractTransactionHandler",
         "validate": "",
         "commit": "",
         "rollback": ""
       },
       {
-        "type": "4",
-        "systemTx": false,
-        "unlockTx": false,
-        "verifySignature": true,
-        "handler": "io.nuls.poc.rpc.cmd.ConsensusTransactionHandler",
-        "validate": "cs_createAgentValid",
-        "commit": "",
-        "rollback": ""
-      },
-      {
-        "type": "5",
-        "systemTx": false,
-        "unlockTx": false,
-        "verifySignature": true,
-        "handler": "io.nuls.poc.rpc.cmd.ConsensusTransactionHandler",
-        "validate": "cs_depositValid",
-        "commit": "",
-        "rollback": ""
-      },
-      {
-        "type": "6",
-        "systemTx": false,
-        "unlockTx": true,
-        "verifySignature": true,
-        "handler": "io.nuls.poc.rpc.cmd.ConsensusTransactionHandler",
-        "validate": "cs_withdrawValid",
-        "commit": "",
-        "rollback": ""
-      },
-      {
-        "type": "7",
+        "type": "19",
         "systemTx": true,
         "unlockTx": false,
         "verifySignature": false,
-        "handler": "io.nuls.poc.rpc.cmd.ConsensusTransactionHandler",
-        "validate": "cs_withdrawValid",
-        "commit": "",
-        "rollback": ""
-      },
-      {
-        "type": "8",
-        "systemTx": true,
-        "unlockTx": false,
-        "verifySignature": false,
-        "handler": "io.nuls.poc.rpc.cmd.ConsensusTransactionHandler",
-        "validate": "cs_withdrawValid",
-        "commit": "",
-        "rollback": ""
-      },
-      {
-        "type": "9",
-        "systemTx": false,
-        "unlockTx": true,
-        "verifySignature": true,
-        "handler": "io.nuls.poc.rpc.cmd.ConsensusTransactionHandler",
-        "validate": "cs_stopAgentValid",
+        "handler": "io.nuls.contract.rpc.cmd.ContractTransactionHandler",
+        "validate": "",
         "commit": "",
         "rollback": ""
       }

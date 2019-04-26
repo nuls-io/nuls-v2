@@ -28,7 +28,6 @@ package io.nuls.contract.model.dto;
 import io.nuls.base.data.CoinData;
 import io.nuls.base.data.CoinFrom;
 import io.nuls.base.data.CoinTo;
-import io.nuls.contract.constant.ContractConstant;
 import io.nuls.contract.model.tx.ContractBaseTransaction;
 import io.nuls.contract.model.txdata.ContractData;
 import io.nuls.contract.model.txdata.ContractTransferData;
@@ -44,8 +43,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static io.nuls.contract.constant.ContractConstant.TX_TYPE_COINBASE;
 import static io.nuls.contract.util.ContractUtil.bigInteger2String;
+import static io.nuls.tools.constant.TxType.*;
 import static org.apache.commons.lang3.StringUtils.EMPTY;
 
 /**
@@ -143,15 +142,15 @@ public class ContractTransactionDto {
     private Map<String, Object> makeTxData(ContractBaseTransaction tx) throws NulsException {
         Map<String, Object> result = new HashMap<>();
         ContractData txData = (ContractData) tx.getTxDataObj();
-        if (type == ContractConstant.TX_TYPE_CREATE_CONTRACT) {
+        if (type == CREATE_CONTRACT) {
             result.put("data", new CreateContractDataDto(txData));
-        } else if (type == ContractConstant.TX_TYPE_CALL_CONTRACT) {
+        } else if (type == CALL_CONTRACT) {
             result.put("data", new CallContractDataDto(txData));
-        } else if (type == ContractConstant.TX_TYPE_DELETE_CONTRACT) {
+        } else if (type == DELETE_CONTRACT) {
             result.put("data", new DeleteContractDataDto(txData));
-        } else if (type == ContractConstant.TX_TYPE_CONTRACT_TRANSFER) {
+        } else if (type == CONTRACT_TRANSFER) {
             result.put("data", new ContractTransferDataDto((ContractTransferData) txData));
-        } else if (type == TX_TYPE_COINBASE) {
+        } else if (type == COIN_BASE) {
             Map<String, String> map = MapUtil.createLinkedHashMap(1);
             map.put("sender", EMPTY);
             result.put("data", map);

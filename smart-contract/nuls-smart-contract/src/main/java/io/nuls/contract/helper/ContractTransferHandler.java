@@ -25,7 +25,6 @@ package io.nuls.contract.helper;
 
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.*;
-import io.nuls.contract.constant.ContractConstant;
 import io.nuls.contract.manager.ContractTempBalanceManager;
 import io.nuls.contract.model.bo.*;
 import io.nuls.contract.model.tx.ContractTransferTransaction;
@@ -50,6 +49,7 @@ import java.util.*;
 import static io.nuls.contract.constant.ContractConstant.MININUM_TRANSFER_AMOUNT;
 import static io.nuls.contract.constant.ContractErrorCode.TOO_SMALL_AMOUNT;
 import static io.nuls.contract.util.ContractUtil.*;
+import static io.nuls.tools.constant.TxType.CALL_CONTRACT;
 
 /**
  * @author: PierreLuo
@@ -102,7 +102,7 @@ public class ContractTransferHandler {
     }
 
     private void rollbackContractTempBalance(int chainId, ContractWrapperTransaction tx, ContractResult contractResult, ContractTempBalanceManager tempBalanceManager) {
-        if (tx != null && tx.getType() == ContractConstant.TX_TYPE_CALL_CONTRACT) {
+        if (tx != null && tx.getType() == CALL_CONTRACT) {
             ContractData contractData = tx.getContractData();
             byte[] contractAddress = contractData.getContractAddress();
             // 增加转出, 扣除转入

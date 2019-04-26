@@ -77,6 +77,8 @@ import static io.nuls.contract.constant.ContractCmdConstant.*;
 import static io.nuls.contract.constant.ContractConstant.*;
 import static io.nuls.contract.constant.ContractErrorCode.*;
 import static io.nuls.contract.util.ContractUtil.*;
+import static io.nuls.tools.constant.TxType.CONTRACT_RETURN_GAS;
+import static io.nuls.tools.constant.TxType.CONTRACT_TRANSFER;
 import static org.apache.commons.lang3.StringUtils.EMPTY;
 
 /**
@@ -1055,7 +1057,7 @@ public class ContractResource extends BaseCmd {
 
     private ContractResultDto makeContractResultDto(int chainId, ContractBaseTransaction tx1, NulsDigestData txHash) throws NulsException, IOException {
         ContractResultDto contractResultDto = null;
-        if (tx1.getType() == TX_TYPE_CONTRACT_TRANSFER || tx1.getType() == TX_TYPE_CONTRACT_RETURN_GAS) {
+        if (tx1.getType() == CONTRACT_TRANSFER || tx1.getType() == CONTRACT_RETURN_GAS) {
             return null;
         }
         ContractResult contractExecuteResult = contractService.getContractExecuteResult(chainId, txHash);
