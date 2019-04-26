@@ -69,7 +69,7 @@ public class NulsProtocolServiceImpl implements ProtocolService {
         Chain chain = chainManager.getChainMap().get(handleChainId);
         String originalHex = messageBody.getOriginalCtxHash().getDigestHex();
         String nativeHex = messageBody.getRequestHash().getDigestHex();
-        chain.getMessageLog().info("\n收到节点{}发送过来的验证跨链交易信息,originalHash:{};Hash：{}",nodeId,originalHex,nativeHex);
+        chain.getMessageLog().info("收到节点{}发送过来的验证跨链交易信息,originalHash:{};Hash：{}",nodeId,originalHex,nativeHex);
         //如果是友链向主网验证，则只需查看本地是否存在该跨链交易
         Transaction mainCtx = completedCtxService.get(ctxHash, handleChainId);
         if (mainCtx == null) {
@@ -102,7 +102,7 @@ public class NulsProtocolServiceImpl implements ProtocolService {
         }
         //将验证结果返回给请求节点
         NetWorkCall.sendToNode(chainId, responseMessage, nodeId, CommandConstant.CTX_VERIFY_RESULT_MESSAGE);
-        chain.getMessageLog().info("将跨链交易验证结果返回给节点{},originalHash:{};Hash：{}",nodeId,originalHex,nativeHex);
+        chain.getMessageLog().info("将跨链交易验证结果返回给节点{},originalHash:{};Hash：{}\n\n",nodeId,originalHex,nativeHex);
     }
 
     @Override
@@ -116,7 +116,7 @@ public class NulsProtocolServiceImpl implements ProtocolService {
             handleChainId = config.getMainChainId();
         }
         Chain chain = chainManager.getChainMap().get(handleChainId);
-        chain.getMessageLog().info("\n收到节点{}发送过来的交易验证结果,交易Hash:{},验证结果:{}\n\n",nodeId,messageBody.getRequestHash().getDigestHex(),messageBody.isVerifyResult());
+        chain.getMessageLog().info("收到节点{}发送过来的交易验证结果,交易Hash:{},验证结果:{}\n\n",nodeId,messageBody.getRequestHash().getDigestHex(),messageBody.isVerifyResult());
         NulsDigestData requestHash = messageBody.getRequestHash();
         if(!chain.getVerifyCtxResultMap().keySet().contains(requestHash)){
             chain.getVerifyCtxResultMap().put(requestHash, new ArrayList<>());
@@ -137,7 +137,7 @@ public class NulsProtocolServiceImpl implements ProtocolService {
         }
         Chain chain = chainManager.getChainMap().get(handleChainId);
         String hashHex = messageBody.getRequestHash().getDigestHex();
-        chain.getMessageLog().info("\n收到节点{}发送过来的查询跨链交易处理结果信息,交易Hash:{}",nodeId,hashHex);
+        chain.getMessageLog().info("收到节点{}发送过来的查询跨链交易处理结果信息,交易Hash:{}",nodeId,hashHex);
         NulsDigestData realCtxHash = convertToCtxService.get(messageBody.getRequestHash(), handleChainId);
         Transaction ctx = completedCtxService.get(realCtxHash, handleChainId);
         if(ctx == null){
@@ -152,7 +152,7 @@ public class NulsProtocolServiceImpl implements ProtocolService {
         }
         //将验证结果返回给请求节点
         NetWorkCall.sendToNode(chainId, responseMessage, nodeId, CommandConstant.CTX_STATE_MESSAGE);
-        chain.getMessageLog().info("将跨链交易在本节点的处理结果返回给节点{}，Hash:{}",nodeId,hashHex);
+        chain.getMessageLog().info("将跨链交易在本节点的处理结果返回给节点{}，Hash:{}\n\n",nodeId,hashHex);
     }
 
     @Override
@@ -166,7 +166,7 @@ public class NulsProtocolServiceImpl implements ProtocolService {
             handleChainId = config.getMainChainId();
         }
         Chain chain = chainManager.getChainMap().get(handleChainId);
-        chain.getMessageLog().info("\n收到节点{}发送过来的交易处理结果消息，交易hash:{},处理结果:{}",nodeId,messageBody.getRequestHash().getDigestHex(),messageBody.isHandleResult());
+        chain.getMessageLog().info("收到节点{}发送过来的交易处理结果消息，交易hash:{},处理结果:{}\n\n",nodeId,messageBody.getRequestHash().getDigestHex(),messageBody.isHandleResult());
         NulsDigestData requestHash = messageBody.getRequestHash();
         if(!chain.getCtxStateMap().keySet().contains(requestHash)){
             chain.getCtxStateMap().put(requestHash, new ArrayList<>());
@@ -187,7 +187,7 @@ public class NulsProtocolServiceImpl implements ProtocolService {
         String originalHex = messageBody.getOriginalHash().getDigestHex();
         String nativeHex = messageBody.getRequestHash().getDigestHex();
         String signHex = HexUtil.encode(messageBody.getSignature());
-        chain.getMessageLog().info("\n接收到链内节点{}广播过来的跨链交易Hash和签名，originalHash:{},Hash:{},签名:{}",nodeId,originalHex,nativeHex,signHex);
+        chain.getMessageLog().info("接收到链内节点{}广播过来的跨链交易Hash和签名，originalHash:{},Hash:{},签名:{}",nodeId,originalHex,nativeHex,signHex);
         //如果为第一次收到该交易，则向广播过来的节点获取完整跨链交易
         NulsDigestData ctxHash = convertToCtxService.get(messageBody.getOriginalHash(), handleChainId);
         if(ctxHash == null){
@@ -226,9 +226,9 @@ public class NulsProtocolServiceImpl implements ProtocolService {
             ctx.setTransactionSignature(signature.serialize());
             newCtxService.save(ctxHash, ctx, handleChainId);
             NetWorkCall.broadcast(chainId, messageBody , CommandConstant.BROAD_CTX_SIGN_MESSAGE, false);
-            chain.getMessageLog().info("将收到的跨链交易签名广播给链接到的其他节点，originalHash:{},Hash:{},签名:{}",originalHex,nativeHex,signHex);
+            chain.getMessageLog().info("将收到的跨链交易签名广播给链接到的其他节点，originalHash:{},Hash:{},签名:{}\n\n",originalHex,nativeHex,signHex);
         }catch (Exception e){
-            chain.getMessageLog().error("链内节点广播过来的跨链交易签名消息处理失败，originalHash:{},Hash:{},签名:{}",originalHex,nativeHex,signHex);
+            chain.getMessageLog().error("链内节点广播过来的跨链交易签名消息处理失败，originalHash:{},Hash:{},签名:{}\n\n",originalHex,nativeHex,signHex);
             chain.getMessageLog().error(e);
         }
     }
@@ -245,7 +245,7 @@ public class NulsProtocolServiceImpl implements ProtocolService {
         }
         Chain chain = chainManager.getChainMap().get(handleChainId);
         String nativeHex = messageBody.getRequestHash().getDigestHex();
-        chain.getMessageLog().info("\n链内节点{},向本节点获取完整的跨链交易，Hash:{}",nodeId,nativeHex);
+        chain.getMessageLog().info("链内节点{},向本节点获取完整的跨链交易，Hash:{}",nodeId,nativeHex);
         //查到对应的跨链交易
         Transaction ctx = newCtxService.get(messageBody.getRequestHash(), handleChainId);
         if(ctx == null){
@@ -259,7 +259,7 @@ public class NulsProtocolServiceImpl implements ProtocolService {
         responseMessage.setCtx(ctx);
         //把完整跨链交易发送给请求节点
         NetWorkCall.sendToNode(chainId, responseMessage, nodeId, CommandConstant.NEW_CTX_MESSAGE);
-        chain.getMessageLog().info("将完整的跨链交易发送给链内节点{},Hash:{}",nodeId,nativeHex);
+        chain.getMessageLog().info("将完整的跨链交易发送给链内节点{},Hash:{}\n\n",nodeId,nativeHex);
     }
 
     @Override
@@ -308,7 +308,7 @@ public class NulsProtocolServiceImpl implements ProtocolService {
             }
             //广播缓存中的签名
             broadcastCtx(chain, nativeHash, chainId);
-            chain.getMessageLog().info("新交易处理完成,originalHash:{},Hash:{}",originalHex,nativeHex);
+            chain.getMessageLog().info("新交易处理完成,originalHash:{},Hash:{}\n\n",originalHex,nativeHex);
         }catch (Exception e){
             chain.getMessageLog().error(e);
         }finally {
@@ -328,7 +328,7 @@ public class NulsProtocolServiceImpl implements ProtocolService {
         }
         Chain chain = chainManager.getChainMap().get(handleChainId);
         String nativeHex = messageBody.getRequestHash().getDigestHex();
-        chain.getMessageLog().info("\n收到其他链节点{}广播过来的跨链交易,Hash：{}" ,nodeId, nativeHex);
+        chain.getMessageLog().info("收到其他链节点{}广播过来的跨链交易,Hash：{}" ,nodeId, nativeHex);
         //判断是否接收过该交易,如果收到过则直接返回，如果没有收到过则向广播过来的节点发送获取完整跨链交易消息
         if(convertToCtxService.get(messageBody.getRequestHash(), handleChainId) != null){
             chain.getMessageLog().info("本节点已经收到过该跨链交易，Hash：{}" , nativeHex);
@@ -337,7 +337,7 @@ public class NulsProtocolServiceImpl implements ProtocolService {
         GetOtherCtxMessage responseMessage = new GetOtherCtxMessage();
         responseMessage.setRequestHash(messageBody.getRequestHash());
         NetWorkCall.sendToNode(chainId, responseMessage, nodeId, CommandConstant.GET_OTHER_CTX_MESSAGE);
-        chain.getMessageLog().info("向发送链节点{}获取完整跨链交易，Hash:{}",nodeId,nativeHex);
+        chain.getMessageLog().info("向发送链节点{}获取完整跨链交易，Hash:{}\n\n",nodeId,nativeHex);
     }
 
     @Override
@@ -354,7 +354,7 @@ public class NulsProtocolServiceImpl implements ProtocolService {
         }
         Chain chain = chainManager.getChainMap().get(handleChainId);
         String nativeHex = messageBody.getRequestHash().getDigestHex();
-        chain.getMessageLog().info("\n接收到请求链节点{}发送的获取完整跨链交易信息,Hash:{}",nodeId,nativeHex);
+        chain.getMessageLog().info("接收到请求链节点{}发送的获取完整跨链交易信息,Hash:{}",nodeId,nativeHex);
         /*
          * 如果为主网向接收链获取跨链交易，需要首先通过原始交易Hash找到对应的主网协议Hash
          * */
@@ -366,7 +366,7 @@ public class NulsProtocolServiceImpl implements ProtocolService {
         responseMessage.setCtx(mainCtx);
         //把完整跨链交易发送给请求节点
         NetWorkCall.sendToNode(chainId, responseMessage, nodeId, CommandConstant.NEW_OTHER_CTX_MESSAGE);
-        chain.getMessageLog().info("将完整跨链交易发送给请求连节点{},Hash:{}",nodeId,nativeHex);
+        chain.getMessageLog().info("将完整跨链交易发送给请求连节点{},Hash:{}\n\n",nodeId,nativeHex);
     }
 
     @Override
@@ -412,7 +412,7 @@ public class NulsProtocolServiceImpl implements ProtocolService {
             }
             //广播缓存中的签名
             broadcastCtx(chain, nativeHash, chainId);
-            chain.getMessageLog().info("新交易处理完成,originalHash:{},Hash:{}",originalHash,nativeHash);
+            chain.getMessageLog().info("新交易处理完成,originalHash:{},Hash:{}\n\n",originalHash,nativeHash);
         }catch (Exception e){
             chain.getMessageLog().error(e);
         }finally {
