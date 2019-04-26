@@ -90,14 +90,13 @@ public class BlockServiceImpl implements BlockService {
                         }
                         if(NetWorkCall.broadcast(toId, message, CommandConstant.BROAD_CTX_HASH_MESSAGE,true)){
                             if(!completedCtxService.save(ctxHash, ctx, chainId) || !commitedCtxService.delete(ctxHash, chainId)){
-                                chain.getRpcLogger().error("跨链交易{}状态修改保存失败",ctxHash);
                                 continue;
                             }
                             broadSuccessCtxHash.add(ctxHash);
-                            chain.getMessageLog().info("高度为{}的跨链交易Hash广播成功，Hash:{}",cacheHeight,ctxHash );
+                            chain.getMessageLog().info("跨链交易Hash广播成功，Hash:{}",cacheHeight,ctxHash );
                         }else{
                             broadFailCtxHash.add(ctxHash);
-                            chain.getMessageLog().info("高度为{}的跨链交易Hash广播失败，Hash:{}",cacheHeight,ctxHash );
+                            chain.getMessageLog().info("跨链交易Hash广播失败，Hash:{}",cacheHeight,ctxHash );
                         }
                     }
                     if(broadSuccessCtxHash.size() > 0){
@@ -108,7 +107,6 @@ public class BlockServiceImpl implements BlockService {
                             sendedPo = new SendCtxHashPo(broadSuccessCtxHash);
                         }
                         if(sendedHeightService.save(cacheHeight, sendedPo, chainId)){
-                            chain.getRpcLogger().error("高度为{}的跨链加一保存为已发送状态失败",cacheHeight);
                             continue;
                         }
                     }
@@ -118,13 +116,12 @@ public class BlockServiceImpl implements BlockService {
                     }else{
                         sendHeightService.delete(height, chainId);
                     }
-                    chain.getMessageLog().info("区块高度为{}的跨链交易Hash广播完成",cacheHeight );
                 }else{
                     break;
                 }
             }
         }
-        chain.getMessageLog().info("区块高度为{}的跨链交易广播完成！\n\n",height);
+        chain.getMessageLog().info("区块高度更新消息处理完成,Height:{}\n\n",height);
         return Result.getSuccess(SUCCESS);
     }
 }
