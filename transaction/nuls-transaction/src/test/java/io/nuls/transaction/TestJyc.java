@@ -106,7 +106,9 @@ public class TestJyc {
     @Test
     public void name() throws Exception {
         {
-            queryTx("002090b123ab10078da5f4c4cbf428491181a66ceda58b26a7d7673f3771fcd6dc2b", false);
+            balance("tNULSeBaMnrs6JKrCy6TQdzYJZkMZJDng7QAsD");
+            balance("tNULSeBaMjejH5QaSmC7yLWsbmzTgma6vrVuRg");
+            balance("tNULSeBaMtmvNYsX7NUWtJzc7cBXaW5YbYrEp5");
         }
     }
 
@@ -203,7 +205,7 @@ public class TestJyc {
                 LOG.debug("transfer from {} to {}", address23, packingAddress);
             }
 
-            Thread.sleep(15000);
+            Thread.sleep(30000);
             {
                 LOG.debug("3.##########创建节点##########");
                 BigInteger agentBalance = LedgerCall.getBalance(chain, AddressTool.getAddress(agentAddress), chainId, assetId);
@@ -221,7 +223,7 @@ public class TestJyc {
                 LOG.debug("createAgent-txHash:{}", agentHash);
             }
 
-            Thread.sleep(12000);
+            Thread.sleep(30000);
             {
                 LOG.debug("4.##########进行委托##########");
                 Map<String, Object> dpParams = new HashMap<>();
@@ -723,7 +725,7 @@ public class TestJyc {
             LOG.debug(address23 + "-----balance:{}", balance);
         }
         int total = 100_000_000;
-        int count = 10;
+        int count = 100;
         List<String> accountList = new ArrayList<>();
         LOG.debug("##################################################");
         {
