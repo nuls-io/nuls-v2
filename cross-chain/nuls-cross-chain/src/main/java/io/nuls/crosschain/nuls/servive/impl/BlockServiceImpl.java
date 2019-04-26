@@ -74,6 +74,8 @@ public class BlockServiceImpl implements BlockService {
                 if(height >= cacheHeight){
                     chain.getMessageLog().info("广播区块高度为{}的跨链交易给其他链",cacheHeight );
                     SendCtxHashPo po = sendHeightMap.get(cacheHeight);
+                    List<NulsDigestData> broadSuccessCtxHash = new ArrayList<>();
+                    List<NulsDigestData> broadFailCtxHash = new ArrayList<>();
                     for (NulsDigestData ctxHash:po.getHashList()) {
                         BroadCtxHashMessage message = new BroadCtxHashMessage();
                         message.setRequestHash(ctxHash);
@@ -87,14 +89,37 @@ public class BlockServiceImpl implements BlockService {
                             }
                         }
                         if(NetWorkCall.broadcast(toId, message, CommandConstant.BROAD_CTX_HASH_MESSAGE,true)){
+                            if(!completedCtxService.save(ctxHash, ctx, chainId) || !commitedCtxService.delete(ctxHash, chainId)){
+                                chain.getRpcLogger().error("跨链交易{}状态修改保存失败",ctxHash);
+                                continue;
+                            }
+                            broadSuccessCtxHash.add(ctxHash);
                             chain.getMessageLog().info("高度为{}的跨链交易Hash广播成功，Hash:{}",cacheHeight,ctxHash );
-                            completedCtxService.save(ctxHash, ctx, chainId);
-                            completedCtxService.delete(ctxHash, chainId);
+                        }else{
+                            broadFailCtxHash.add(ctxHash);
+                            chain.getMessageLog().info("高度为{}的跨链交易Hash广播失败，Hash:{}",cacheHeight,ctxHash );
                         }
                     }
                     chain.getMessageLog().info("区块高度为{}的跨链交易Hash广播完成\n",cacheHeight );
-                    sendedHeightService.save(height, po, chainId);
-                    sendHeightService.delete(height, chainId);
+
+                    if(broadSuccessCtxHash.size() > 0){
+                        SendCtxHashPo sendedPo = sendedHeightService.get(cacheHeight,chainId);
+                        if(sendedPo != null){
+                            sendedPo.getHashList().addAll(broadSuccessCtxHash);
+                        }else{
+                            sendedPo = new SendCtxHashPo(broadSuccessCtxHash);
+                        }
+                        if(sendedHeightService.save(cacheHeight, sendedPo, chainId)){
+                            chain.getRpcLogger().error("高度为{}的跨链加一保存为已发送状态失败",cacheHeight);
+                            continue;
+                        }
+                    }
+                    if(broadFailCtxHash.size() > 0){
+                        po.setHashList(broadFailCtxHash);
+                        sendHeightService.save(cacheHeight, po, chainId);
+                    }else{
+                        sendHeightService.delete(height, chainId);
+                    }
                 }else{
                     break;
                 }
