@@ -13,7 +13,6 @@ import io.nuls.transaction.rpc.call.LedgerCall;
 import io.nuls.transaction.rpc.call.NetworkCall;
 import io.nuls.transaction.service.TxService;
 import io.nuls.transaction.storage.UnconfirmedTxStorageService;
-import io.nuls.transaction.utils.TransactionTimeComparator;
 
 import java.util.List;
 
@@ -25,19 +24,14 @@ import java.util.List;
 public class VerifyTxProcessTask implements Runnable {
 
     private PackablePool packablePool = SpringLiteContext.getBean(PackablePool.class);
-
     private TxService txService = SpringLiteContext.getBean(TxService.class);
     private UnconfirmedTxStorageService unconfirmedTxStorageService = SpringLiteContext.getBean(UnconfirmedTxStorageService.class);
-
-    private TransactionTimeComparator txComparator = SpringLiteContext.getBean(TransactionTimeComparator.class);
-//    private List<TransactionNetPO> orphanTxList = new ArrayList<>();
 
     private Chain chain;
 
     public VerifyTxProcessTask(Chain chain){
         this.chain = chain;
     }
-
 
     @Override
     public void run() {
