@@ -29,6 +29,7 @@ import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.model.message.Response;
 import io.nuls.rpc.netty.processor.ResponseMessageProcessor;
 import io.nuls.tools.log.Log;
+import io.nuls.tools.parse.JSONUtils;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -58,6 +59,22 @@ public class CrossRpcTest {
             map.put("isMoonNode","1");
             Response response =  ResponseMessageProcessor.requestAndResponse(ModuleE.NW.abbr, "nw_createNodeGroup",map );
             Log.info("response={}",response);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    @Test
+    public void activeCrossChain(){
+        try {
+            Map<String,Object> map = new HashMap<>();
+            map.put("chainId",100);
+            map.put("maxOut","100");
+            map.put("maxIn","50");
+            map.put("seedIps","192.168.1.122:28112");
+            Response response =  ResponseMessageProcessor.requestAndResponse(ModuleE.NW.abbr, "nw_activeCross",map );
+            Log.info("response={}",JSONUtils.obj2json(response));
         } catch (Exception e) {
             e.printStackTrace();
         }

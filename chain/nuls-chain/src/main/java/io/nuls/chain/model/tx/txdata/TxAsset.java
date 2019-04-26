@@ -21,7 +21,7 @@ public class TxAsset extends TransactionLogicData {
     private int assetId;
     private String symbol;
     private String name;
-    private int depositNuls;
+    private BigInteger depositNuls;
     private BigInteger initNumber;
     private short decimalPlaces;
     private byte[] address;
@@ -32,7 +32,7 @@ public class TxAsset extends TransactionLogicData {
         stream.writeUint32(assetId);
         stream.writeString(symbol);
         stream.writeString(name);
-        stream.writeUint32(depositNuls);
+        stream.writeBigInteger(depositNuls);
         stream.writeBigInteger(initNumber);
         stream.writeShort(decimalPlaces);
         stream.writeBytesWithLength(address);
@@ -44,7 +44,7 @@ public class TxAsset extends TransactionLogicData {
         this.assetId = byteBuffer.readUint16();
         this.symbol = byteBuffer.readString();
         this.name = byteBuffer.readString();
-        this.depositNuls = byteBuffer.readInt32();
+        this.depositNuls = byteBuffer.readBigInteger();
         this.initNumber = byteBuffer.readBigInteger();
         this.decimalPlaces = byteBuffer.readShort();
         this.address = byteBuffer.readByLengthByte();
@@ -60,7 +60,7 @@ public class TxAsset extends TransactionLogicData {
         size += SerializeUtils.sizeOfString(symbol);
         size += SerializeUtils.sizeOfString(name);
         // depositNuls
-        size += SerializeUtils.sizeOfInt32();
+        size += SerializeUtils.sizeOfBigInteger();
         // initNumber
         size += SerializeUtils.sizeOfBigInteger();
         // decimalPlaces
@@ -107,11 +107,11 @@ public class TxAsset extends TransactionLogicData {
         this.name = name;
     }
 
-    public int getDepositNuls() {
+    public BigInteger getDepositNuls() {
         return depositNuls;
     }
 
-    public void setDepositNuls(int depositNuls) {
+    public void setDepositNuls(BigInteger depositNuls) {
         this.depositNuls = depositNuls;
     }
 

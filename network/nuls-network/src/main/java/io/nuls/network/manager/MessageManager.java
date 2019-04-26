@@ -167,13 +167,11 @@ public class MessageManager extends BaseManager {
 
     public NetworkEventResult broadcastSelfAddrToAllNode(Collection<Node> connectNodes, IpAddress ipAddress, boolean asyn) {
         for (Node connectNode : connectNodes) {
-            if (NodeConnectStatusEnum.AVAILABLE == connectNode.getConnectStatus()) {
                 List<IpAddress> addressesList = new ArrayList<>();
                 addressesList.add(ipAddress);
                 AddrMessage addrMessage = MessageFactory.getInstance().buildAddrMessage(addressesList, connectNode.getMagicNumber());
                 LoggerUtil.logger(connectNode.getNodeGroup().getChainId()).debug("broadcastSelfAddrToAllNode================" + addrMessage.getMsgBody().size() + "==getIpAddressList()==" + addrMessage.getMsgBody().getIpAddressList().size());
                 this.sendToNode(addrMessage, connectNode, asyn);
-            }
         }
         return new NetworkEventResult(true, NetworkErrorCode.SUCCESS);
     }
@@ -186,7 +184,7 @@ public class MessageManager extends BaseManager {
      * @param asyn      boolean
      */
     public boolean sendGetAddrMessage(NodeGroup nodeGroup, boolean isCross, boolean asyn) {
-
+        LoggerUtil.logger().debug("sendGetAddrMessage isCross=",isCross);
         if (isCross) {
             //get Cross nodes
             Collection<Node> nodes = nodeGroup.getCrossNodeContainer().getConnectedNodes().values();
@@ -214,16 +212,18 @@ public class MessageManager extends BaseManager {
     /**
      * 广播消息到所有节点，排除特定节点
      *
-     * @param addrMessage
+     * @param message
      * @param excludeNode
      * @param asyn
      * @return
      */
-    public NetworkEventResult broadcastToAllNode(BaseMessage addrMessage, Node excludeNode, boolean isCross, boolean asyn) {
-        NodeGroup nodeGroup = NodeGroupManager.getInstance().getNodeGroupByMagic(addrMessage.getHeader().getMagicNumber());
+    public NetworkEventResult broadcastToAllNode(BaseMessage message, Node excludeNode, boolean isCross, boolean asyn) {
+        NodeGroup nodeGroup = NodeGroupManager.getInstance().getNodeGroupByMagic(message.getHeader().getMagicNumber());
         Collection<Node> connectNodes = null;
         if (isCross) {
-            connectNodes = nodeGroup.getCrossNodeContainer().getConnectedNodes().values();
+            //跨链节点，不做广播分享
+            return new NetworkEventResult(true, NetworkErrorCode.SUCCESS);
+//            connectNodes = nodeGroup.getCrossNodeContainer().getConnectedNodes().values();
         } else {
             connectNodes = nodeGroup.getLocalNetNodeContainer().getConnectedNodes().values();
         }
@@ -232,12 +232,29 @@ public class MessageManager extends BaseManager {
                 if (null != excludeNode && connectNode.getId().equals(excludeNode.getId())) {
                     continue;
                 }
-                this.sendToNode(addrMessage, connectNode, asyn);
+                this.sendToNode(message, connectNode, asyn);
             }
         }
         return new NetworkEventResult(true, NetworkErrorCode.SUCCESS);
     }
-
+    public NetworkEventResult broadcastNewAddr(BaseMessage message, Node excludeNode, boolean isCross, boolean asyn) {
+        NodeGroup nodeGroup = NodeGroupManager.getInstance().getNodeGroupByMagic(message.getHeader().getMagicNumber());
+        if (isCross) {
+            //跨链节点，不做广播分享
+            return new NetworkEventResult(true, NetworkErrorCode.SUCCESS);
+        } else {
+            Collection<Node> connectNodes  = nodeGroup.getLocalNetNodeContainer().getConnectedNodes().values();
+            if (null != connectNodes && connectNodes.size() > 0) {
+                for (Node connectNode : connectNodes) {
+                    if (null != excludeNode && connectNode.getId().equals(excludeNode.getId())) {
+                        continue;
+                    }
+                    this.sendToNode(message, connectNode, asyn);
+                }
+            }
+        }
+        return new NetworkEventResult(true, NetworkErrorCode.SUCCESS);
+    }
     /**
      * 判断是否是握手消息
      * isHandShakeMessage?

@@ -41,6 +41,6 @@ import io.nuls.tools.model.StringUtils;
  **/
 public class LoggerUtil {
 
-   public static NulsLogger logger = LoggerBuilder.getLogger("account");
+   public static final NulsLogger logger = LoggerBuilder.getLogger("account");
 
 }

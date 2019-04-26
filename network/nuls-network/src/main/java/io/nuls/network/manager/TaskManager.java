@@ -116,6 +116,6 @@ public class TaskManager extends BaseManager {
 
     public void createShareAddressTask(NodeGroup nodeGroup, boolean isCross) {
         LoggerUtil.logger().debug("----------- createShareAddressTask start -------------");
-        ThreadUtils.createAndRunThread("share-mine-node", new ShareAddressTask(nodeGroup));
+        ThreadUtils.createAndRunThread("share-mine-node", new ShareAddressTask(nodeGroup,isCross));
     }
 }

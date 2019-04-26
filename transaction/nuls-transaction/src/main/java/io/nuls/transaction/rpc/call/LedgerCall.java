@@ -7,6 +7,7 @@ import io.nuls.rpc.util.RPCUtil;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.model.BigIntegerUtils;
 import io.nuls.transaction.constant.TxConstant;
+import io.nuls.transaction.constant.TxErrorCode;
 import io.nuls.transaction.model.bo.Chain;
 import io.nuls.transaction.model.bo.VerifyLedgerResult;
 
@@ -25,14 +26,13 @@ public class LedgerCall {
 
 
     /**
-     * 验证单个交易的CoinData
+     * 验证单个交易的CoinData(外部使用)
+     * 有异常直接抛出
      *
      * @param chain
      * @param tx
      * @return
      */
-    
-    // TODO 需要调整返回值
     public static VerifyLedgerResult verifyCoinData(Chain chain, String tx) {
         try {
             Map<String, Object> params = new HashMap<>(TxConstant.INIT_CAPACITY_8);
@@ -40,13 +40,39 @@ public class LedgerCall {
             params.put("chainId", chain.getChainId());
             params.put("tx", tx);
             HashMap result = (HashMap) TransactionCall.request(ModuleE.LG.abbr,"verifyCoinData", params);
-            return new VerifyLedgerResult((int)result.get("validateCode"), (String)result.get("validateDesc"));
+            return VerifyLedgerResult.success((boolean)result.get("orphan"));
+        } catch (NulsException e) {
+            chain.getLoggerMap().get(TxConstant.LOG_TX).error(e);
+            return VerifyLedgerResult.fail(e.getErrorCode());
         } catch (Exception e) {
             chain.getLoggerMap().get(TxConstant.LOG_TX).error(e);
-            return new VerifyLedgerResult(VerifyLedgerResult.OTHER_EXCEPTION, "Call verifyCoinData failed!");
+            return VerifyLedgerResult.fail(TxErrorCode.SYS_UNKOWN_EXCEPTION);
         }
     }
 
+
+
+    /**
+     * 验证单个交易与未确认交易提交
+     * @param chain
+     * @param txStr
+     */
+    public static VerifyLedgerResult commitUnconfirmedTx(Chain chain, String txStr) {
+        try {
+            Map<String, Object> params = new HashMap<>(TxConstant.INIT_CAPACITY_8);
+            params.put(Constants.VERSION_KEY_STR, TxConstant.RPC_VERSION);
+            params.put("chainId", chain.getChainId());
+            params.put("tx", txStr);
+            HashMap result = (HashMap)TransactionCall.request(ModuleE.LG.abbr, "commitUnconfirmedTx", params);
+            return VerifyLedgerResult.success((boolean)result.get("orphan"));
+        } catch (NulsException e) {
+            chain.getLoggerMap().get(TxConstant.LOG_TX).error(e);
+            return VerifyLedgerResult.fail(e.getErrorCode());
+        } catch (Exception e) {
+            chain.getLoggerMap().get(TxConstant.LOG_TX).error(e);
+            return VerifyLedgerResult.fail(TxErrorCode.SYS_UNKOWN_EXCEPTION);
+        }
+    }
 
 
     /**
@@ -62,10 +88,13 @@ public class LedgerCall {
             params.put("chainId", chain.getChainId());
             params.put("tx", tx);
             HashMap result = (HashMap) TransactionCall.request(ModuleE.LG.abbr,"verifyCoinDataPackaged", params);
-            return new VerifyLedgerResult((int)result.get("validateCode"), (String)result.get("validateDesc"));
+            return VerifyLedgerResult.success((boolean)result.get("orphan"));
+        } catch (NulsException e) {
+            chain.getLoggerMap().get(TxConstant.LOG_TX).error(e);
+            return VerifyLedgerResult.fail(e.getErrorCode());
         } catch (Exception e) {
             chain.getLoggerMap().get(TxConstant.LOG_TX).error(e);
-            return new VerifyLedgerResult(VerifyLedgerResult.OTHER_EXCEPTION, "Call verifyCoinDataPackaged failed!");
+            return VerifyLedgerResult.fail(TxErrorCode.SYS_UNKOWN_EXCEPTION);
         }
     }
 
@@ -85,9 +114,10 @@ public class LedgerCall {
             params.put("txList", txList);
             params.put("blockHeight", blockHeight);
             HashMap result = (HashMap)TransactionCall.request(ModuleE.LG.abbr, "blockValidate", params);
-            return (int) result.get("value") == 1;
-        } catch (Exception e) {
-            throw new NulsException(e);
+            return (boolean) result.get("value");
+        } catch (RuntimeException e) {
+            chain.getLoggerMap().get(TxConstant.LOG_TX).error(e);
+            throw new NulsException(TxErrorCode.SYS_UNKOWN_EXCEPTION);
         }
     }
 
@@ -112,30 +142,9 @@ public class LedgerCall {
             HashMap result = (HashMap) TransactionCall.request(ModuleE.LG.abbr, "getNonce", params);
             String nonce = (String) result.get("nonce");
             return RPCUtil.decode(nonce);
-        } catch (Exception e) {
-            throw new NulsException(e);
-        }
-    }
-
-
-    /**
-     * 查询账户特定资产的余额(包含未确认的余额)
-     * Check the balance of an account-specific asset
-     */
-    public static BigInteger getBalanceNonce(Chain chain, byte[] address, int assetChainId, int assetId) throws NulsException {
-        try {
-            String addressString = AddressTool.getStringAddressByBytes(address);
-            Map<String, Object> params = new HashMap<>(TxConstant.INIT_CAPACITY_8);
-            params.put(Constants.VERSION_KEY_STR, TxConstant.RPC_VERSION);
-            params.put("chainId", chain.getChainId());
-            params.put("assetChainId", assetChainId);
-            params.put("assetId", assetId);
-            params.put("address", addressString);
-            Map result = (Map)TransactionCall.request(ModuleE.LG.abbr, "getBalanceNonce", params);
-            Object available = result.get("available");
-            return BigIntegerUtils.stringToBigInteger(String.valueOf(available));
-        } catch (Exception e) {
-            throw new NulsException(e);
+        } catch (RuntimeException e) {
+            chain.getLoggerMap().get(TxConstant.LOG_TX).error(e);
+            throw new NulsException(TxErrorCode.SYS_UNKOWN_EXCEPTION);
         }
     }
 
@@ -155,8 +164,9 @@ public class LedgerCall {
             Map result = (Map)TransactionCall.request(ModuleE.LG.abbr, "getBalance", params);
             Object available = result.get("available");
             return BigIntegerUtils.stringToBigInteger(String.valueOf(available));
-        } catch (Exception e) {
-            throw new NulsException(e);
+        } catch (RuntimeException e) {
+            chain.getLoggerMap().get(TxConstant.LOG_TX).error(e);
+            throw new NulsException(TxErrorCode.SYS_UNKOWN_EXCEPTION);
         }
     }
 
@@ -172,31 +182,13 @@ public class LedgerCall {
             params.put(Constants.VERSION_KEY_STR, TxConstant.RPC_VERSION);
             params.put("chainId", chain.getChainId());
             HashMap result = (HashMap)TransactionCall.request(ModuleE.LG.abbr, "batchValidateBegin", params);
-            return (int) result.get("value") == 1;
-        } catch (Exception e) {
+            return (boolean) result.get("value");
+        } catch (RuntimeException e) {
             chain.getLoggerMap().get(TxConstant.LOG_TX).error(e);
-            throw new NulsException(e);
+            throw new NulsException(TxErrorCode.SYS_UNKOWN_EXCEPTION);
         }
     }
 
-    /**
-     * 验证单个交易与未确认交易提交
-     * @param chain
-     * @param txStr
-     */
-    public static VerifyLedgerResult commitUnconfirmedTx(Chain chain, String txStr) throws NulsException {
-        try {
-            Map<String, Object> params = new HashMap<>(TxConstant.INIT_CAPACITY_8);
-            params.put(Constants.VERSION_KEY_STR, TxConstant.RPC_VERSION);
-            params.put("chainId", chain.getChainId());
-            params.put("tx", txStr);
-            HashMap result = (HashMap)TransactionCall.request(ModuleE.LG.abbr, "commitUnconfirmedTx", params);
-            return new VerifyLedgerResult((int)result.get("validateCode"), (String)result.get("validateDesc"));
-        } catch (Exception e) {
-            chain.getLoggerMap().get(TxConstant.LOG_TX).error(e);
-            return new VerifyLedgerResult(VerifyLedgerResult.OTHER_EXCEPTION, "Call validateCoinData failed!");
-        }
-    }
 
     /**
      * 提交已确认交易给账本
@@ -211,9 +203,10 @@ public class LedgerCall {
             params.put("txList", txList);
             params.put("blockHeight", blockHeight);
             HashMap result = (HashMap)TransactionCall.request(ModuleE.LG.abbr, "commitBlockTxs", params);
-            return (int) result.get("value") == 1;
-        } catch (Exception e) {
-            throw new NulsException(e);
+            return (boolean) result.get("value");
+        } catch (RuntimeException e) {
+            chain.getLoggerMap().get(TxConstant.LOG_TX).error(e);
+            throw new NulsException(TxErrorCode.SYS_UNKOWN_EXCEPTION);
         }
     }
 
@@ -230,9 +223,10 @@ public class LedgerCall {
             params.put("chainId", chain.getChainId());
             params.put("tx", txStr);
             HashMap result = (HashMap)TransactionCall.request(ModuleE.LG.abbr, "rollbackTxValidateStatus", params);
-            return (int) result.get("value") == 1;
-        } catch (Exception e) {
-            throw new NulsException(e);
+            return (boolean) result.get("value");
+        } catch (RuntimeException e) {
+            chain.getLoggerMap().get(TxConstant.LOG_TX).error(e);
+            throw new NulsException(TxErrorCode.SYS_UNKOWN_EXCEPTION);
         }
     }
 
@@ -248,9 +242,10 @@ public class LedgerCall {
             params.put("chainId", chain.getChainId());
             params.put("tx", txStr);
             HashMap result = (HashMap)TransactionCall.request(ModuleE.LG.abbr, "rollBackUnconfirmTx", params);
-            return (int) result.get("value") == 1;
-        } catch (Exception e) {
-            throw new NulsException(e);
+            return (boolean) result.get("value");
+        } catch (RuntimeException e) {
+            chain.getLoggerMap().get(TxConstant.LOG_TX).error(e);
+            throw new NulsException(TxErrorCode.SYS_UNKOWN_EXCEPTION);
         }
     }
 
@@ -267,9 +262,10 @@ public class LedgerCall {
             params.put("txList", txList);
             params.put("blockHeight", blockHeight);
             HashMap result = (HashMap)TransactionCall.request(ModuleE.LG.abbr, "rollBackBlockTxs", params);
-            return (int) result.get("value") == 1;
-        } catch (Exception e) {
-            throw new NulsException(e);
+            return (boolean) result.get("value");
+        } catch (RuntimeException e) {
+            chain.getLoggerMap().get(TxConstant.LOG_TX).error(e);
+            throw new NulsException(TxErrorCode.SYS_UNKOWN_EXCEPTION);
         }
     }
 

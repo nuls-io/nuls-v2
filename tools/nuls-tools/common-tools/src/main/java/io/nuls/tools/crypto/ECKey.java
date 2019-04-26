@@ -97,10 +97,11 @@ public class ECKey {
 
         @Override
         public int compare(ECKey k1, ECKey k2) {
-            if (k1.creationTimeSeconds == k2.creationTimeSeconds)
+            if (k1.creationTimeSeconds == k2.creationTimeSeconds) {
                 return 0;
-            else
+            } else {
                 return k1.creationTimeSeconds > k2.creationTimeSeconds ? 1 : -1;
+            }
         }
     };
 
@@ -753,8 +754,9 @@ public class ECKey {
         //   ASN1_EXP_OPT(EC_PRIVATEKEY, publicKey, ASN1_BIT_STRING, 1)
         // } ASN1_SEQUENCE_END(EC_PRIVATEKEY)
         //
+        ASN1InputStream decoder = null;
         try {
-            ASN1InputStream decoder = new ASN1InputStream(asn1privkey);
+            decoder = new ASN1InputStream(asn1privkey);
             DLSequence seq = (DLSequence) decoder.readObject();
             checkArgument(decoder.readObject() == null, "Input contains extra bytes");
             decoder.close();
@@ -778,11 +780,19 @@ public class ECKey {
             // Now sanity check to ensure the pubkey bytes match the privkey.
             boolean compressed = (pubbits.length == 33);
             ECKey key = new ECKey(privkey, null, compressed);
-            if (!Arrays.equals(key.getPubKey(), pubbits))
+            if (!Arrays.equals(key.getPubKey(), pubbits)) {
                 throw new IllegalArgumentException("Public key in ASN.1 structure does not match private key.");
+            }
             return key;
         } catch (IOException e) {
             throw new RuntimeException(e);  // Cannot happen, reading from memory stream.
+        } finally {
+            if (decoder != null) {
+                try {
+                    decoder.close();
+                } catch (IOException e) {
+                }
+            }
         }
     }
 

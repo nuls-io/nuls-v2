@@ -24,6 +24,7 @@
 
 package io.nuls.account.rpc.call;
 
+import io.nuls.account.util.LoggerUtil;
 import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.model.message.Response;
@@ -60,8 +61,8 @@ public class ContractCall {
             }
             return false;
         } catch (Exception e) {
-            Log.error("Calling remote interface failed. module:{} - interface:{}", ModuleE.SC.abbr, "sc_initial_account_token");
-            e.printStackTrace();
+            LoggerUtil.logger.error("Calling remote interface failed. module:{} - interface:{}", ModuleE.SC.abbr, "sc_initial_account_token");
+            LoggerUtil.logger.error("Account Bootstrap initCfg failed", e);
             return false;
         }
     }

@@ -106,6 +106,7 @@ public class GetAddrMessageHandler extends BaseMessageHandler {
         if (null == nodeGroup) {
             return addressList;
         } else {
+            //取本地网络地址取支持跨链连接
             Collection<Node> nodes = nodeGroup.getLocalNetNodeContainer().getConnectedNodes().values();
             List nodesList = new ArrayList();
             nodesList.addAll(nodes);

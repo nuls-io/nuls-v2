@@ -2,9 +2,11 @@ package io.nuls.test.cases.account;
 
 import io.nuls.api.provider.ServiceManager;
 import io.nuls.api.provider.account.AccountService;
+import io.nuls.test.Config;
 import io.nuls.test.cases.BaseTestCase;
 import io.nuls.test.cases.Constants;
 import io.nuls.test.cases.TestCaseIntf;
+import io.nuls.tools.core.annotation.Autowired;
 
 /**
  * @Author: zhoulijun
@@ -13,9 +15,11 @@ import io.nuls.test.cases.TestCaseIntf;
  */
 public abstract class BaseAccountCase<T,P> extends BaseTestCase<T,P> {
 
-    AccountService accountService = ServiceManager.get(AccountService.class);
+    protected AccountService accountService = ServiceManager.get(AccountService.class);
 
     public static final String PASSWORD = Constants.PASSWORD;
 
+    @Autowired
+    protected Config config;
 
 }
