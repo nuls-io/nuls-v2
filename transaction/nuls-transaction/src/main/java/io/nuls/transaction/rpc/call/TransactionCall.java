@@ -40,11 +40,16 @@ public class TransactionCall {
     public static Object request(String moduleCode, String cmd, Map params, Long timeout) throws NulsException {
         try {
             params.put(Constants.VERSION_KEY_STR, TxConstant.RPC_VERSION);
-            Response response;
-            if(null == timeout) {
-                response = ResponseMessageProcessor.requestAndResponse(moduleCode, cmd, params);
-            }else{
-                response = ResponseMessageProcessor.requestAndResponse(moduleCode, cmd, params, timeout);
+            Response response = null;
+            try {
+                if(null == timeout) {
+                    response = ResponseMessageProcessor.requestAndResponse(moduleCode, cmd, params);
+                }else{
+                    response = ResponseMessageProcessor.requestAndResponse(moduleCode, cmd, params, timeout);
+                }
+            } catch (Exception e) {
+                LOG.error(e);
+                throw new NulsException(TxErrorCode.SYS_UNKOWN_EXCEPTION);
             }
             if (!response.isSuccess()) {
                 String errorCode = response.getResponseErrorCode();
@@ -53,7 +58,7 @@ public class TransactionCall {
             }
             Map data = (Map)response.getResponseData();
             return data.get(cmd);
-        } catch (Exception e) {
+        } catch (RuntimeException e) {
             LOG.error(e);
             throw new NulsException(TxErrorCode.SYS_UNKOWN_EXCEPTION);
         }
