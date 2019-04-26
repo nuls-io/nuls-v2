@@ -65,7 +65,7 @@ public class BlockServiceImpl implements BlockService {
             return Result.getFailed(CHAIN_NOT_EXIST);
         }
         long height = Long.valueOf(params.get(NEW_BLOCK_HEIGHT).toString());
-        chain.getMessageLog().info("收到最新的区块高度消息，最新高度为：{}", height);
+        chain.getMessageLog().info("收到区块高度更新信息，最新区块高度为：{}", height);
         //查询是否有待广播的跨链交易
         Map<Long , SendCtxHashPo> sendHeightMap = sendHeightService.getList(chainId);
         if(sendHeightMap != null && sendHeightMap.size() >0){
@@ -118,12 +118,13 @@ public class BlockServiceImpl implements BlockService {
                     }else{
                         sendHeightService.delete(height, chainId);
                     }
-                    chain.getMessageLog().info("区块高度为{}的跨链交易Hash广播完成\n\n",cacheHeight );
+                    chain.getMessageLog().info("区块高度为{}的跨链交易Hash广播完成",cacheHeight );
                 }else{
                     break;
                 }
             }
         }
+        chain.getMessageLog().info("区块高度为{}的跨链交易广播完成！\n\n",height);
         return Result.getSuccess(SUCCESS);
     }
 }
