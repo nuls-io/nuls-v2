@@ -26,10 +26,7 @@ package io.nuls.contract.rpc.cmd;
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.Transaction;
 import io.nuls.contract.helper.ContractHelper;
-import io.nuls.contract.manager.ChainManager;
-import io.nuls.contract.manager.ContractTokenBalanceManager;
-import io.nuls.contract.manager.ContractTxProcessorManager;
-import io.nuls.contract.manager.ContractTxValidatorManager;
+import io.nuls.contract.manager.*;
 import io.nuls.contract.model.bo.ContractTempTransaction;
 import io.nuls.contract.model.dto.ContractPackageDto;
 import io.nuls.contract.model.tx.CallContractTransaction;
@@ -73,6 +70,8 @@ public class ContractCmd extends BaseCmd {
     private ContractTxProcessorManager contractTxProcessorManager;
     @Autowired
     private ContractTxValidatorManager contractTxValidatorManager;
+    @Autowired
+    private CmdRegisterManager cmdRegisterManager;
 
     @CmdAnnotation(cmd = BATCH_BEGIN, version = 1.0, description = "batch begin")
     @Parameter(parameterName = "chainId", parameterType = "int")
@@ -342,6 +341,34 @@ public class ContractCmd extends BaseCmd {
                 return wrapperFailed(result);
             }
 
+            return success();
+        } catch (Exception e) {
+            Log.error(e);
+            return failed(e.getMessage());
+        }
+    }
+
+    @CmdAnnotation(cmd = REGISTER_CMD_FOR_CONTRACT, version = 1.0, description = "register cmd for contract")
+    @Parameter(parameterName = "chainId", parameterType = "int")
+    @Parameter(parameterName = "moduleCode", parameterType = "String")
+    @Parameter(parameterName = "cmdName", parameterType = "String")
+    @Parameter(parameterName = "cmdType", parameterType = "int")
+    @Parameter(parameterName = "argNames", parameterType = "List<String>")
+    @Parameter(parameterName = "returnType", parameterType = "int")
+    public Response registerCmdForContract(Map<String, Object> params) {
+        try {
+            Integer chainId = (Integer) params.get("chainId");
+            ChainManager.chainHandle(chainId);
+            String moduleCode = (String) params.get("moduleCode");
+            String cmdName = (String) params.get("cmdName");
+            Integer cmdType = (Integer) params.get("cmdType");
+            List<String> argNames = (List<String>) params.get("argNames");
+            Integer returnType = (Integer) params.get("returnType");
+
+            Result result = cmdRegisterManager.registerCmd(chainId, moduleCode, cmdName, cmdType, argNames, returnType);
+            if(result.isFailed()) {
+                return failed(result.getErrorCode());
+            }
             return success();
         } catch (Exception e) {
             Log.error(e);
