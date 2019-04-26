@@ -303,25 +303,44 @@ public class TxValid {
         int count = 10000;
         List<String> list = createAddress();
         //给新生成账户转账
+        NulsDigestData hash = null;
         for (int i = 0; i < count; i++) {
             String address = list.get(i);
-            createTransfer(address28, address, new BigInteger("10000000000"));
+            Map transferMap = this.createTransferTx(address26, address, new BigInteger("1000000000"));
+            Transaction tx = assemblyTransaction((int) transferMap.get("chainId"), (List<CoinDTO>) transferMap.get("inputs"),
+                    (List<CoinDTO>) transferMap.get("outputs"), (String) transferMap.get("remark"), hash);
+            Map<String, Object> params = new HashMap<>(TxConstant.INIT_CAPACITY_8);
+            params.put(Constants.VERSION_KEY_STR, TxConstant.RPC_VERSION);
+            params.put("chainId", chainId);
+            params.put("tx",  RPCUtil.encode(tx.serialize()));
+            HashMap result = (HashMap) TransactionCall.request(ModuleE.TX.abbr, "tx_newTx_test", params);
+            hash = tx.getHash();
+            System.out.println("hash:" + hash.getDigestHex());
             System.out.println("count:" + (i + 1));
+            Thread.sleep(1L);
         }
         //睡30秒
-        Thread.sleep(30000L);
+        Thread.sleep(6000L);
         List<String> listTo = createAddress();
         //新生成账户各执行一笔转账
-        for (int x = 0; x < 10; x++) {
-            for (int i = 0; i < count; i++) {
-                String address = list.get(i);
-                String addressTo = listTo.get(i);
-                createTransfer(address, addressTo, new BigInteger("100000000"));
-                System.out.println("count:" + (i + 1));
-            }
+        for (int i = 0; i < count; i++) {
+            String address = list.get(i);
+            String addressTo = listTo.get(i);
+            Map transferMap = this.createTransferTx(address, addressTo, new BigInteger("100000000"));
+            Transaction tx = assemblyTransaction((int) transferMap.get("chainId"), (List<CoinDTO>) transferMap.get("inputs"),
+                    (List<CoinDTO>) transferMap.get("outputs"), (String) transferMap.get("remark"), null);
+            Map<String, Object> params = new HashMap<>(TxConstant.INIT_CAPACITY_8);
+            params.put(Constants.VERSION_KEY_STR, TxConstant.RPC_VERSION);
+            params.put("chainId", chainId);
+            params.put("tx",  RPCUtil.encode(tx.serialize()));
+            HashMap result = (HashMap) TransactionCall.request(ModuleE.TX.abbr, "tx_newTx_test", params);
+            System.out.println("hash:" + hash.getDigestHex());
+            System.out.println("count:" + (i + 1));
         }
 
     }
+
+
 
     @Test
     public void mixedTransfer() throws Exception {
