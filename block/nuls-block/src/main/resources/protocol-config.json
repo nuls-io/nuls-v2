@@ -6,165 +6,34 @@
     "validMessages": [
       {
         "name": "io.nuls.block.message.BlockMessage",
-        "handlers": [
-          {
-            "name": "io.nuls.block.message.handler.BlockHandler#process"
-          }
-        ]
+        "handlers": "io.nuls.block.message.handler.BlockHandler#process"
       },
       {
         "name": "io.nuls.block.message.CompleteMessage",
-        "handlers": [
-          {
-            "name": "io.nuls.block.message.handler.CompleteHandler#process"
-          }
-        ]
+        "handlers": "io.nuls.block.message.handler.CompleteHandler#process"
       },
       {
         "name": "io.nuls.block.message.HashListMessage",
-        "handlers": [
-          {
-            "name": "io.nuls.block.message.handler.GetTxGroupHandler#process"
-          }
-        ]
+        "handlers": "io.nuls.block.message.handler.GetTxGroupHandler#process"
       },
       {
         "name": "io.nuls.block.message.HashMessage",
-        "handlers": [
-          {
-            "name": "io.nuls.block.message.handler.ForwardSmallBlockHandler#process"
-          },
-          {
-            "name": "io.nuls.block.message.handler.GetBlockHandler#process"
-          },
-          {
-            "name": "io.nuls.block.message.handler.GetSmallBlockHandler#process"
-          }
-        ]
+        "handlers": "io.nuls.block.message.handler.ForwardSmallBlockHandler#process,io.nuls.block.message.handler.GetBlockHandler#process,io.nuls.block.message.handler.GetSmallBlockHandler#process"
       },
       {
         "name": "io.nuls.block.message.HeightRangeMessage",
-        "handlers": [
-          {
-            "name": "io.nuls.block.message.handler.GetBlocksHandler#process"
-          }
-        ]
+        "handlers": "io.nuls.block.message.handler.GetBlocksHandler#process"
       },
       {
         "name": "io.nuls.block.message.SmallBlockMessage",
-        "handlers": [
-          {
-            "name": "io.nuls.block.message.handler.SmallBlockHandler#process"
-          }
-        ]
+        "handlers": "io.nuls.block.message.handler.SmallBlockHandler#process"
       },
       {
         "name": "io.nuls.block.message.TxGroupMessage",
-        "handlers": [
-          {
-            "name": "io.nuls.block.message.handler.TxGroupHandler#process"
-          }
-        ]
-      },
-      {
-        "name": "io.nuls.block.test.TestMessage1",
-        "handlers": [
-          {
-            "name": "io.nuls.block.test.TestMessageHandler1#processV1"
-          }
-        ]
-      },
-      {
-        "name": "io.nuls.block.test.TestMessage2",
-        "handlers": [
-          {
-            "name": "io.nuls.block.test.TestMessageHandler2#processV1"
-          },
-          {
-            "name": "io.nuls.block.test.TestMessageHandler2#processV2"
-          }
-        ]
-      },
-      {
-        "name": "io.nuls.block.test.TestMessage3",
-        "handlers": [
-          {
-            "name": "io.nuls.block.test.TestMessageHandler3#processV1"
-          }
-        ]
+        "handlers": "io.nuls.block.message.handler.TxGroupHandler#process"
       }
     ],
     "invalidTransactions": [],
     "invalidMessages": []
-  },
-  {
-    "version": "2",
-    "extend": "1",
-    "validTransactions": [],
-    "validMessages": [
-      {
-        "name": "io.nuls.block.test.TestMessage2",
-        "handlers": [
-          {
-            "name": "io.nuls.block.test.TestMessageHandler2#processV3"
-          },
-          {
-            "name": "io.nuls.block.test.TestMessageHandler2#processV4"
-          }
-        ]
-      },
-      {
-        "name": "io.nuls.block.test.TestMessage4",
-        "handlers": [
-          {
-            "name": "io.nuls.block.test.TestMessageHandler4#processV1"
-          },
-          {
-            "name": "io.nuls.block.test.TestMessageHandler4#processV2"
-          }
-        ]
-      }
-    ],
-    "invalidTransactions": [],
-    "invalidMessages": [
-      {
-        "name": "io.nuls.block.test.TestMessage3"
-      }
-    ]
-  },
-  {
-    "version": "3",
-    "extend": "2",
-    "validTransactions": [],
-    "validMessages": [
-      {
-        "name": "io.nuls.block.test.TestMessage4",
-        "handlers": [
-          {
-            "name": "io.nuls.block.test.TestMessageHandler4#processV5"
-          },
-          {
-            "name": "io.nuls.block.test.TestMessageHandler4#processV6"
-          }
-        ]
-      },
-      {
-        "name": "io.nuls.block.test.TestMessage5",
-        "handlers": [
-          {
-            "name": "io.nuls.block.test.TestMessageHandler5#processV1"
-          },
-          {
-            "name": "io.nuls.block.test.TestMessageHandler5#processV2"
-          }
-        ]
-      }
-    ],
-    "invalidTransactions": [],
-    "invalidMessages": [
-      {
-        "name": "io.nuls.block.test.TestMessage1"
-      }
-    ]
   }
 ]

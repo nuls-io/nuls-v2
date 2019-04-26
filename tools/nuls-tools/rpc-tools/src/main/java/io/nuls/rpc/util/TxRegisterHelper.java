@@ -7,7 +7,7 @@ import io.nuls.rpc.netty.channel.manager.ConnectManager;
 import io.nuls.rpc.netty.processor.ResponseMessageProcessor;
 import io.nuls.tools.log.Log;
 import io.nuls.tools.protocol.Protocol;
-import io.nuls.tools.protocol.TransactionConfig;
+import io.nuls.tools.protocol.TxDefine;
 import io.nuls.tools.protocol.TxRegisterDetail;
 
 import java.util.ArrayList;
@@ -24,8 +24,8 @@ public class TxRegisterHelper {
     public static boolean registerTx(int chainId, Protocol protocol) {
         try {
             List<TxRegisterDetail> txRegisterDetailList = new ArrayList<>();
-            List<TransactionConfig> allowTxs = protocol.getAllowTx();
-            for (TransactionConfig config : allowTxs) {
+            List<TxDefine> allowTxs = protocol.getAllowTx();
+            for (TxDefine config : allowTxs) {
                 TxRegisterDetail detail = new TxRegisterDetail();
                 detail.setValidator(config.getValidate());
                 detail.setCommit(config.getCommit());

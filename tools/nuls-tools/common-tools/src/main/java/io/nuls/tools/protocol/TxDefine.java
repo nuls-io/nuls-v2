@@ -1,8 +1,7 @@
 package io.nuls.tools.protocol;
 
-public class TransactionConfig {
+public class TxDefine {
     private short type;
-    private String name;
     private boolean systemTx;
     private boolean unlockTx;
     private boolean verifySignature;
@@ -25,14 +24,6 @@ public class TransactionConfig {
 
     public void setType(short type) {
         this.type = type;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
     }
 
     public String getValidate() {
@@ -83,6 +74,6 @@ public class TransactionConfig {
         this.verifySignature = verifySignature;
     }
 
-    public TransactionConfig() {
+    public TxDefine() {
     }
 }

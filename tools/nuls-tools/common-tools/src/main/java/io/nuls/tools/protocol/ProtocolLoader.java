@@ -22,18 +22,18 @@ public class ProtocolLoader {
             Protocol protocol = new Protocol();
             protocol.setVersion(configJson.getVersion());
             short extend = configJson.getExtend();
-            List<MessageConfig> msgList = new ArrayList<>();
-            List<TransactionConfig> txList = new ArrayList<>();
-            List<MessageConfig> validMessages = configJson.getValidMessages();
-            List<TransactionConfig> validTransactions = configJson.getValidTransactions();
+            List<MessageDefine> msgList = new ArrayList<>();
+            List<TxDefine> txList = new ArrayList<>();
+            List<MessageDefine> validMessages = configJson.getValidMessages();
+            List<TxDefine> validTransactions = configJson.getValidTransactions();
             if (extend > 0) {
                 Protocol parent = protocolsMap.get(extend);
-                List<MessageConfig> parentAllowMsg = parent.getAllowMsg();
-                List<TransactionConfig> parentAllowTx = parent.getAllowTx();
-                List<String> msg = validMessages.stream().map(MessageConfig::getName).collect(Collectors.toList());
+                List<MessageDefine> parentAllowMsg = parent.getAllowMsg();
+                List<TxDefine> parentAllowTx = parent.getAllowTx();
+                List<String> msg = validMessages.stream().map(MessageDefine::getName).collect(Collectors.toList());
                 msgList.addAll(parentAllowMsg);
                 msgList.removeIf(e -> msg.contains(e.getName()));
-                List<String> tx = validTransactions.stream().map(TransactionConfig::getName).collect(Collectors.toList());
+                List<String> tx = validTransactions.stream().map(TxDefine::getName).collect(Collectors.toList());
                 txList.addAll(parentAllowTx);
                 txList.removeIf(e -> tx.contains(e.getName()));
             }

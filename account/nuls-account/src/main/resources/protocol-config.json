@@ -8,56 +8,20 @@
     "validTransactions": [
       {
         "type": "2",
-        "name": "tranfer",
         "systemTx": false,
         "unlockTx": false,
         "verifySignature": true,
-        "handler": "io.nuls.account.rpc.cmd.TransferTransactionHandler",
+        "handler": "io.nuls.account.rpc.cmd.AccountTransactionHandler",
         "validate": "transferTxValidate",
         "commit": "",
         "rollback": ""
       },
       {
         "type": "3",
-        "name": "alias",
         "systemTx": false,
         "unlockTx": false,
         "verifySignature": true,
-        "handler": "io.nuls.account.rpc.cmd.AliasTransactionHandler",
-        "validate": "ac_aliasTxValidate",
-        "commit": "ac_aliasTxCommit",
-        "rollback": "ac_aliasTxRollback"
-      }
-    ],
-    "validMessages": [],
-    "invalidTransactions": [],
-    "invalidMessages": []
-  },
-  {
-    "version": "2",
-    "extend": "1",
-    "moduleValidator": "ac_accountTxValidate2",
-    "moduleCommit": "ac_commitTx2",
-    "moduleRollback": "ac_rollbackTx2",
-    "validTransactions": [
-      {
-        "type": "2",
-        "name": "tranfer",
-        "systemTx": false,
-        "unlockTx": false,
-        "verifySignature": true,
-        "handler": "io.nuls.account.rpc.cmd.TransferTransactionHandler",
-        "validate": "transferTxValidate",
-        "commit": "",
-        "rollback": ""
-      },
-      {
-        "type": "3",
-        "name": "alias",
-        "systemTx": false,
-        "unlockTx": false,
-        "verifySignature": true,
-        "handler": "io.nuls.account.rpc.cmd.AliasTransactionHandler",
+        "handler": "io.nuls.account.rpc.cmd.AccountTransactionHandler",
         "validate": "aliasTxValidate",
         "commit": "aliasTxCommit",
         "rollback": "aliasTxRollback"

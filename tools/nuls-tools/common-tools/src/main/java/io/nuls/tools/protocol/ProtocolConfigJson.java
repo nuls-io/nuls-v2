@@ -9,10 +9,10 @@ public class ProtocolConfigJson {
     private String moduleValidator;
     private String moduleCommit;
     private String moduleRollback;
-    private List<TransactionConfig> validTransactions;
-    private List<MessageConfig> validMessages;
-    private List<ListItem> invalidTransactions;
-    private List<ListItem> invalidMessages;
+    private List<TxDefine> validTransactions;
+    private List<MessageDefine> validMessages;
+    private String invalidTransactions;
+    private String invalidMessages;
 
     public short getVersion() {
         return version;
@@ -30,35 +30,35 @@ public class ProtocolConfigJson {
         this.extend = extend;
     }
 
-    public List<TransactionConfig> getValidTransactions() {
+    public List<TxDefine> getValidTransactions() {
         return validTransactions;
     }
 
-    public void setValidTransactions(List<TransactionConfig> validTransactions) {
+    public void setValidTransactions(List<TxDefine> validTransactions) {
         this.validTransactions = validTransactions;
     }
 
-    public List<MessageConfig> getValidMessages() {
+    public List<MessageDefine> getValidMessages() {
         return validMessages;
     }
 
-    public void setValidMessages(List<MessageConfig> validMessages) {
+    public void setValidMessages(List<MessageDefine> validMessages) {
         this.validMessages = validMessages;
     }
 
-    public List<ListItem> getInvalidTransactions() {
+    public String getInvalidTransactions() {
         return invalidTransactions;
     }
 
-    public void setInvalidTransactions(List<ListItem> invalidTransactions) {
+    public void setInvalidTransactions(String invalidTransactions) {
         this.invalidTransactions = invalidTransactions;
     }
 
-    public List<ListItem> getInvalidMessages() {
+    public String getInvalidMessages() {
         return invalidMessages;
     }
 
-    public void setInvalidMessages(List<ListItem> invalidMessages) {
+    public void setInvalidMessages(String invalidMessages) {
         this.invalidMessages = invalidMessages;
     }
 

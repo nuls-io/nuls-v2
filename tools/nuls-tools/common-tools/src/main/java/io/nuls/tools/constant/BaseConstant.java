@@ -45,23 +45,11 @@ public class BaseConstant {
     public static volatile Integer MAIN_NET_VERSION = 1;
 
     /**
-     * 切换序列化交易HASH方法的高度
-     */
-    public static Long CHANGE_HASH_SERIALIZE_HEIGHT;
-
-    /**
      * utxo锁定时间分界值
      * 小于该值表示按照高度锁定
      * 大于该值表示按照时间锁定
      */
     public static long BlOCKHEIGHT_TIME_DIVIDE = 1000000000000L;
-
-    /**
-     * 默认链id（nuls主链）,链id会影响地址的生成，当前地址以“Ns”开头
-     * The default chain id (nuls main chain), the chain id affects the generation of the address,
-     * and the current address begins with "Ns".8964.
-     */
-//    public static short DEFAULT_CHAIN_ID = 261;
 
     /**
      * 出块间隔时间（秒）

@@ -8,8 +8,8 @@ public class Protocol {
     private String moduleValidator;
     private String moduleCommit;
     private String moduleRollback;
-    private List<TransactionConfig> allowTx;
-    private List<MessageConfig> allowMsg;
+    private List<TxDefine> allowTx;
+    private List<MessageDefine> allowMsg;
 
     public short getVersion() {
         return version;
@@ -19,19 +19,19 @@ public class Protocol {
         this.version = version;
     }
 
-    public List<TransactionConfig> getAllowTx() {
+    public List<TxDefine> getAllowTx() {
         return allowTx;
     }
 
-    public void setAllowTx(List<TransactionConfig> allowTx) {
+    public void setAllowTx(List<TxDefine> allowTx) {
         this.allowTx = allowTx;
     }
 
-    public List<MessageConfig> getAllowMsg() {
+    public List<MessageDefine> getAllowMsg() {
         return allowMsg;
     }
 
-    public void setAllowMsg(List<MessageConfig> allowMsg) {
+    public void setAllowMsg(List<MessageDefine> allowMsg) {
         this.allowMsg = allowMsg;
     }
 

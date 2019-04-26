@@ -5,10 +5,10 @@ import java.util.List;
 public class ProtocolValidator {
 
     public static boolean meaasgeValidate(Class messageClass, Class handlerClass, Protocol protocol, String methodName) {
-        List<MessageConfig> allowMsg = protocol.getAllowMsg();
+        List<MessageDefine> allowMsg = protocol.getAllowMsg();
         String messageClassName = messageClass.getName();
         String handlerClassName = handlerClass.getName();
-        for (MessageConfig config : allowMsg) {
+        for (MessageDefine config : allowMsg) {
             if (config.getName().equals(messageClassName)) {
                 List<ListItem> handlers = config.getHandlers();
                 for (ListItem handler : handlers) {
@@ -24,9 +24,9 @@ public class ProtocolValidator {
     }
 
     public static boolean transactionValidate(int txType, Class handlerClass, Protocol protocol, String methodName, TxMethodType type) {
-        List<TransactionConfig> allowTx = protocol.getAllowTx();
+        List<TxDefine> allowTx = protocol.getAllowTx();
         String handlerClassName = handlerClass.getName();
-        for (TransactionConfig config : allowTx) {
+        for (TxDefine config : allowTx) {
             if (config.getType() == txType && config.getHandler().equals(handlerClassName)) {
                 switch (type) {
                     case VALID:
