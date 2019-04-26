@@ -504,7 +504,8 @@ public class PocConsensusController {
             }
             List<String> hashList = depositService.getAgentHashList(chainId, address);
             AgentInfo agentInfo = agentService.getAliveAgentByAgentAddress(chainId, address);
-            if(agentInfo != null) {
+            if(agentInfo != null && !hashList.contains(agentInfo.getTxHash())) {
+
                 hashList.add(agentInfo.getTxHash());
             }
             list = agentService.getAgentByHashList(chainId, pageIndex, pageSize, hashList);
