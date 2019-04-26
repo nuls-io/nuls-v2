@@ -64,7 +64,7 @@ public class BlockServiceImpl implements BlockService {
         if (chain == null) {
             return Result.getFailed(CHAIN_NOT_EXIST);
         }
-        long height = (long)params.get(NEW_BLOCK_HEIGHT);
+        long height = Long.valueOf(params.get(NEW_BLOCK_HEIGHT).toString());
         chain.getMessageLog().info("\n收到最新的区块高度消息，最新高度为：{}", height);
         //查询是否有待广播的跨链交易
         Map<Long , SendCtxHashPo> sendHeightMap = sendHeightService.getList(chainId);
