@@ -63,7 +63,7 @@ public class AddrMessageBody extends BaseNulsData {
     public int size() {
         int s = 0;
         if (ipAddressList.size() > 0) {
-            s += ipAddressList.size() * (new IpAddress().size());
+            s += ipAddressList.size() * (new IpAddressShare().size());
         } else {
             s = 4;
         }

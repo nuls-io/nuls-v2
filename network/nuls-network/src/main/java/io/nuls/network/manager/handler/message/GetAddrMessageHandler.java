@@ -81,7 +81,7 @@ public class GetAddrMessageHandler extends BaseMessageHandler {
         if (0 == addressMessage.getMsgBody().getIpAddressList().size()) {
             LoggerUtil.logger(chainId).info("No Address");
         } else {
-            LoggerUtil.logger(chainId).info("send addressMessage node = {} ", node.getId());
+            LoggerUtil.logger(chainId).debug("send addressMessage node = {} ", node.getId());
             MessageManager.getInstance().sendToNode(addressMessage, node, true);
         }
         return NetworkEventResult.getResultSuccess();
@@ -104,14 +104,13 @@ public class GetAddrMessageHandler extends BaseMessageHandler {
         } else {
             nodeGroup = node.getNodeGroup();
         }
-        LoggerUtil.logger().debug("getAvailableNodes chainId={}", nodeGroup.getChainId());
         //取本地网络地址去支持跨链连接,跨链的请求地址取的都是对方的本地网络IP
         Collection<Node> nodes = nodeGroup.getLocalNetNodeContainer().getConnectedNodes().values();
         List nodesList = new ArrayList();
         nodesList.addAll(nodes);
         nodesList.addAll(nodeGroup.getLocalNetNodeContainer().getCanConnectNodes().values());
         addAddress(nodesList, addressList, node.getIp());
-        LoggerUtil.logger().debug("getAvailableNodes addressList={}", addressList.size());
+        LoggerUtil.logger().debug("getAvailableNodes chainId={}, addressList={}", addressList.size());
         return addressList;
 
     }
