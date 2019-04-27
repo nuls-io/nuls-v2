@@ -122,7 +122,6 @@ public class MessageFactory {
             }
             IpAddress addrMe = new IpAddress(networkConfig.getExternalIp(), localPort);
             versionMessageBody.setAddrMe(addrMe);
-            versionMessageBody.setPortMeCross(networkConfig.getCrossPort());
             return new VersionMessage(nodeGroup.getMagicNumber(), NetworkConstant.CMD_MESSAGE_VERSION, versionMessageBody);
         } catch (UnknownHostException e) {
             e.printStackTrace();

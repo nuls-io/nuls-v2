@@ -72,7 +72,6 @@ public class MessageRpcTest {
             versionMessageBody.setAddrYou(addrYou);
             IpAddress addrMe= new IpAddress("",8008);
             versionMessageBody.setAddrMe(addrMe);
-            versionMessageBody.setPortMeCross(9005);
             VersionMessage versionMessage = new VersionMessage(0, NetworkConstant.CMD_MESSAGE_VERSION, versionMessageBody);
             versionMessage.getHeader().setPayloadLength(versionMessageBody.size());
 //            versionMessage.getHeader().setChecksum(  versionMessage.getHeader().);
