@@ -27,15 +27,7 @@ package io.nuls.transaction.storage.impl;
 
 
 import io.nuls.tools.core.annotation.Component;
-import io.nuls.tools.exception.NulsException;
-import io.nuls.transaction.model.bo.Chain;
-import io.nuls.transaction.model.po.TransactionNetPO;
 import io.nuls.transaction.storage.UnverifiedTxStorageService;
-import io.nuls.transaction.utils.TxUtil;
-
-import java.io.IOException;
-
-import static io.nuls.transaction.utils.LoggerUtil.LOG;
 
 /**
  * 未验证交易存储
@@ -46,33 +38,33 @@ import static io.nuls.transaction.utils.LoggerUtil.LOG;
 @Component
 public class UnverifiedTxStorageServiceImpl implements UnverifiedTxStorageService {
 
-    @Override
-    public boolean putTx(Chain chain, TransactionNetPO tx) {
-        try {
-            chain.getUnverifiedQueue().offer(tx.serialize());
-            return true;
-        } catch (IOException e) {
-            LOG.error(e);
-        }
-        return false;
-    }
-
-    @Override
-    public TransactionNetPO pollTx(Chain chain) {
-        byte[] bytes = chain.getUnverifiedQueue().poll();
-        if (null == bytes) {
-            return null;
-        }
-        try {
-            return TxUtil.getInstance(bytes, TransactionNetPO.class);
-        } catch (NulsException e) {
-            LOG.error(e);
-        }
-        return null;
-    }
-
-    @Override
-    public long size(Chain chain) {
-        return chain.getUnverifiedQueue().size();
-    }
+//    @Override
+//    public boolean putTx(Chain chain, TransactionNetPO tx) {
+//        try {
+//            chain.getUnverifiedQueue().offer(tx.serialize());
+//            return true;
+//        } catch (IOException e) {
+//            LOG.error(e);
+//        }
+//        return false;
+//    }
+//
+//    @Override
+//    public TransactionNetPO pollTx(Chain chain) {
+//        byte[] bytes = chain.getUnverifiedQueue().poll();
+//        if (null == bytes) {
+//            return null;
+//        }
+//        try {
+//            return TxUtil.getInstance(bytes, TransactionNetPO.class);
+//        } catch (NulsException e) {
+//            LOG.error(e);
+//        }
+//        return null;
+//    }
+//
+//    @Override
+//    public long size(Chain chain) {
+//        return chain.getUnverifiedQueue().size();
+//    }
 }

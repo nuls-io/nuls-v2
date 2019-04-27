@@ -59,7 +59,6 @@ import io.nuls.transaction.service.ConfirmedTxService;
 import io.nuls.transaction.service.TxService;
 import io.nuls.transaction.storage.ConfirmedTxStorageService;
 import io.nuls.transaction.storage.UnconfirmedTxStorageService;
-import io.nuls.transaction.storage.UnverifiedTxStorageService;
 import io.nuls.transaction.utils.TxUtil;
 
 import java.io.IOException;
@@ -80,9 +79,6 @@ public class TxServiceImpl implements TxService {
 
     @Autowired
     private PackablePool packablePool;
-
-    @Autowired
-    private UnverifiedTxStorageService unverifiedTxStorageService;
 
     @Autowired
     private UnconfirmedTxStorageService unconfirmedTxStorageService;
@@ -145,7 +141,11 @@ public class TxServiceImpl implements TxService {
     public void newBroadcastTx(Chain chain, TransactionNetPO tx) {
         TransactionConfirmedPO txExist = getTransaction(chain, tx.getTx().getHash());
         if (null == txExist) {
-            unverifiedTxStorageService.putTx(chain, tx);
+            try {
+                chain.getUnverifiedQueue().addLast(tx);
+            } catch (IllegalStateException e) {
+                chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).error("UnverifiedQueue full!");
+            }
         }
     }
 
@@ -169,11 +169,9 @@ public class TxServiceImpl implements TxService {
                             tx.getType(), tx.getHash().getDigestHex());
                     return false;
                 }
-               /** if (chain.getPackaging().get()) {
+                if (chain.getPackaging().get()) {
                     packablePool.add(chain, tx);
-                }*/
-                packablePool.add(chain, tx);/**临时注释 测试*/
-
+                }
                 unconfirmedTxStorageService.putTx(chain.getChainId(), tx);
                 //广播完整交易
                 NetworkCall.broadcastTx(chain.getChainId(),tx);

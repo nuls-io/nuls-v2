@@ -32,7 +32,6 @@ import io.nuls.tools.thread.ThreadUtils;
 import java.util.List;
 
 import static io.nuls.block.constant.Constant.CONSENSUS_WAITING;
-import static io.nuls.block.constant.Constant.CONSENSUS_WORKING;
 import static io.nuls.block.constant.StatusEnum.INITIALIZING;
 
 /**
@@ -64,7 +63,7 @@ public class NodesMonitor extends BaseMonitor {
             ConsensusUtil.notice(chainId, CONSENSUS_WAITING);
             context.setStatus(INITIALIZING);
         }
-        if (size >= minNodeAmount && !StatusEnum.RUNNING.equals(context.getStatus())) {
+        if (size >= minNodeAmount && StatusEnum.INITIALIZING.equals(context.getStatus())) {
             commonLog.info("chainId-" + chainId + ", AvailableNodes enough!");
             //重新开启区块同步线程
             ThreadUtils.createAndRunThread("block-synchronizer", BlockSynchronizer.getInstance());
