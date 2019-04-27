@@ -45,7 +45,7 @@ public class IpAddressShare extends BaseNulsData {
 
     private static final int IPSIZE = 16;
     private InetAddress ip;
-    private int port;
+    private int port = 0;
     private int crossPort = 0;
 
     public IpAddressShare() {

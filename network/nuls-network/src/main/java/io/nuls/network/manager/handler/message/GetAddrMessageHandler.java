@@ -33,16 +33,15 @@ import io.nuls.network.manager.handler.base.BaseMessageHandler;
 import io.nuls.network.model.NetworkEventResult;
 import io.nuls.network.model.Node;
 import io.nuls.network.model.NodeGroup;
-import io.nuls.network.model.dto.IpAddress;
 import io.nuls.network.model.dto.IpAddressShare;
 import io.nuls.network.model.message.AddrMessage;
 import io.nuls.network.model.message.base.BaseMessage;
 import io.nuls.network.utils.LoggerUtil;
 import io.nuls.tools.core.ioc.SpringLiteContext;
 
-import java.net.InetAddress;
-import java.net.UnknownHostException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 
 /**
  * 发送与接收 连接地址 协议消息处理类
@@ -82,6 +81,7 @@ public class GetAddrMessageHandler extends BaseMessageHandler {
         if (0 == addressMessage.getMsgBody().getIpAddressList().size()) {
             LoggerUtil.logger(chainId).info("No Address");
         } else {
+            LoggerUtil.logger(chainId).info("send addressMessage node = {} ", node.getId());
             MessageManager.getInstance().sendToNode(addressMessage, node, true);
         }
         return NetworkEventResult.getResultSuccess();
@@ -104,16 +104,14 @@ public class GetAddrMessageHandler extends BaseMessageHandler {
         } else {
             nodeGroup = node.getNodeGroup();
         }
-        if (null == nodeGroup) {
-            return addressList;
-        } else {
-            //取本地网络地址去支持跨链连接,跨链的请求地址取的都是对方的本地网络IP
-            Collection<Node> nodes = nodeGroup.getLocalNetNodeContainer().getConnectedNodes().values();
-            List nodesList = new ArrayList();
-            nodesList.addAll(nodes);
-            nodesList.addAll(nodeGroup.getLocalNetNodeContainer().getCanConnectNodes().values());
-            addAddress(nodesList, addressList, node.getIp());
-        }
+        LoggerUtil.logger().debug("getAvailableNodes chainId={}", nodeGroup.getChainId());
+        //取本地网络地址去支持跨链连接,跨链的请求地址取的都是对方的本地网络IP
+        Collection<Node> nodes = nodeGroup.getLocalNetNodeContainer().getConnectedNodes().values();
+        List nodesList = new ArrayList();
+        nodesList.addAll(nodes);
+        nodesList.addAll(nodeGroup.getLocalNetNodeContainer().getCanConnectNodes().values());
+        addAddress(nodesList, addressList, node.getIp());
+        LoggerUtil.logger().debug("getAvailableNodes addressList={}", addressList.size());
         return addressList;
 
     }
@@ -136,10 +134,9 @@ public class GetAddrMessageHandler extends BaseMessageHandler {
                 try {
                     int port = peer.getRemotePort();
                     int crossPort = peer.getRemoteCrossPort();
-                    InetAddress inetAddress = InetAddress.getByName(peer.getIp());
-                    IpAddressShare ipAddress = new IpAddressShare(peer.getIp(),port,crossPort);
+                    IpAddressShare ipAddress = new IpAddressShare(peer.getIp(), port, crossPort);
                     list.add(ipAddress);
-                } catch (UnknownHostException e) {
+                } catch (Exception e) {
                     e.printStackTrace();
                 }
             }
