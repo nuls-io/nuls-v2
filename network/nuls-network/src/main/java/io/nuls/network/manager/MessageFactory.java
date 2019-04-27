@@ -33,6 +33,7 @@ import io.nuls.network.model.Node;
 import io.nuls.network.model.NodeGroup;
 import io.nuls.network.model.dto.BestBlockInfo;
 import io.nuls.network.model.dto.IpAddress;
+import io.nuls.network.model.dto.IpAddressShare;
 import io.nuls.network.model.message.*;
 import io.nuls.network.model.message.base.BaseMessage;
 import io.nuls.network.model.message.body.*;
@@ -113,7 +114,6 @@ public class MessageFactory {
             InetAddress inetAddrYou = InetAddress.getByName(node.getIp());
             IpAddress addrYou = new IpAddress(inetAddrYou, node.getRemotePort());
             versionMessageBody.setAddrYou(addrYou);
-            versionMessageBody.setPortYouCross(node.getRemoteCrossPort());
             int localPort = 0;
             if (node.isCrossConnect()) {
                 localPort = networkConfig.getCrossPort();
@@ -165,7 +165,7 @@ public class MessageFactory {
      * @param magicNumber   net id
      * @return AddrMessage
      */
-    public AddrMessage buildAddrMessage(List<IpAddress> ipAddressList, long magicNumber) {
+    public AddrMessage buildAddrMessage(List<IpAddressShare> ipAddressList, long magicNumber) {
         AddrMessageBody addrMessageBody = new AddrMessageBody();
         addrMessageBody.setIpAddressList(ipAddressList);
         return new AddrMessage(magicNumber, NetworkConstant.CMD_MESSAGE_ADDR, addrMessageBody);

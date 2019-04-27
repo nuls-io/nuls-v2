@@ -54,7 +54,7 @@ public class Node implements Dto {
 
     private int remotePort = 0;
     /**
-     * 跨链节点才有这个port，存跨链port 普通链无
+     * 跨链节点才有这个port，存跨链port ,type为OUT情况下此端口有值
      */
     private int remoteCrossPort = 0;
 
@@ -100,12 +100,12 @@ public class Node implements Dto {
     private EventListener disconnectListener;
 
 
-    public Node(long magicNumber, String ip, int remotePort, int type, boolean isCrossConnect) {
-        this(ip + NetworkConstant.COLON + remotePort, magicNumber, ip, remotePort, type, isCrossConnect);
+    public Node(long magicNumber, String ip, int remotePort, int remoteCrossPort,int type, boolean isCrossConnect) {
+        this(ip + NetworkConstant.COLON + remotePort, magicNumber, ip, remotePort,remoteCrossPort, type, isCrossConnect);
     }
 
 
-    public Node(String id, long magicNumber, String ip, int remotePort, int type, boolean isCrossConnect) {
+    public Node(String id, long magicNumber, String ip, int remotePort,int remoteCrossPort, int type, boolean isCrossConnect) {
         this.ip = ip;
         this.magicNumber = magicNumber;
         this.remotePort = remotePort;

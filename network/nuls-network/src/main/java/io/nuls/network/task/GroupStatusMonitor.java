@@ -61,7 +61,6 @@ public class GroupStatusMonitor implements Runnable {
             //最近10s没有新的网络连接产生
             if (time < System.currentTimeMillis() && nodesContainer.getConnectPeerNum() > 0) {
                 //通知链管理模块
-                //TODO:
                 //发布网络状态事件
                 nodesContainer.setStatus(NodeGroup.WAIT2);
                 LoggerUtil.logger().info("ChainId={} NET STATUS UPDATE TO OK", nodeGroup.getChainId());

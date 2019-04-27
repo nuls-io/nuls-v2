@@ -155,8 +155,7 @@ public class NodePo extends  BasePo{
 
     @Override
     public Dto parseDto() {
-        Node   node = new Node(magicNumber,ip, port, Node.OUT, isCrossConnect);
-        node.setRemoteCrossPort(crossPort);
+        Node   node = new Node(magicNumber,ip, port, crossPort,Node.OUT, isCrossConnect);
         node.setStatus(status);
         node.setSeedNode(false);
         return node;

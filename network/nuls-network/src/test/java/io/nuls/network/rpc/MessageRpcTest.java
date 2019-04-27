@@ -70,7 +70,6 @@ public class MessageRpcTest {
             InetAddress inetAddrYou = InetAddress.getByName("192.168.2.3");
             IpAddress addrYou = new IpAddress(inetAddrYou, 8282);
             versionMessageBody.setAddrYou(addrYou);
-            versionMessageBody.setPortYouCross(8686);
             IpAddress addrMe= new IpAddress("",8008);
             versionMessageBody.setAddrMe(addrMe);
             versionMessageBody.setPortMeCross(9005);

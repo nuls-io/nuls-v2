@@ -38,7 +38,7 @@ import io.nuls.network.manager.handler.message.OtherModuleMessageHandler;
 import io.nuls.network.model.NetworkEventResult;
 import io.nuls.network.model.Node;
 import io.nuls.network.model.NodeGroup;
-import io.nuls.network.model.dto.IpAddress;
+import io.nuls.network.model.dto.IpAddressShare;
 import io.nuls.network.model.message.AddrMessage;
 import io.nuls.network.model.message.GetAddrMessage;
 import io.nuls.network.model.message.base.BaseMessage;
@@ -134,7 +134,7 @@ public class MessageManager extends BaseManager {
             int chainId = NodeGroupManager.getInstance().getChainIdByMagicNum(header.getMagicNumber());
             header.parse(headerByte, 0);
             if (!validate(payLoadBody, header.getChecksum())) {
-                LoggerUtil.logger(chainId).error("validate  false ======================cmd:{}",header.getCommandStr());
+                LoggerUtil.logger(chainId).error("validate  false ======================cmd:{}", header.getCommandStr());
                 return;
             }
             BaseMessage message = MessageManager.getInstance().getMessageInstance(header.getCommandStr());
@@ -159,19 +159,19 @@ public class MessageManager extends BaseManager {
             }
         } catch (Exception e) {
             e.printStackTrace();
-            LoggerUtil.logger().error("{}",e);
+            LoggerUtil.logger().error("{}", e);
 //            throw new NulsException(NetworkErrorCode.DATA_ERROR, e);
         }
     }
 
 
-    public NetworkEventResult broadcastSelfAddrToAllNode(Collection<Node> connectNodes, IpAddress ipAddress, boolean asyn) {
+    public NetworkEventResult broadcastSelfAddrToAllNode(Collection<Node> connectNodes, IpAddressShare ipAddress, boolean asyn) {
         for (Node connectNode : connectNodes) {
-                List<IpAddress> addressesList = new ArrayList<>();
-                addressesList.add(ipAddress);
-                AddrMessage addrMessage = MessageFactory.getInstance().buildAddrMessage(addressesList, connectNode.getMagicNumber());
-                LoggerUtil.logger(connectNode.getNodeGroup().getChainId()).debug("broadcastSelfAddrToAllNode================" + addrMessage.getMsgBody().size() + "==getIpAddressList()==" + addrMessage.getMsgBody().getIpAddressList().size());
-                this.sendToNode(addrMessage, connectNode, asyn);
+            List<IpAddressShare> addressesList = new ArrayList<>();
+            addressesList.add(ipAddress);
+            AddrMessage addrMessage = MessageFactory.getInstance().buildAddrMessage(addressesList, connectNode.getMagicNumber());
+            LoggerUtil.logger(connectNode.getNodeGroup().getChainId()).debug("broadcastSelfAddrToAllNode================" + addrMessage.getMsgBody().size() + "==getIpAddressList()==" + addrMessage.getMsgBody().getIpAddressList().size());
+            this.sendToNode(addrMessage, connectNode, asyn);
         }
         return new NetworkEventResult(true, NetworkErrorCode.SUCCESS);
     }
@@ -184,7 +184,7 @@ public class MessageManager extends BaseManager {
      * @param asyn      boolean
      */
     public boolean sendGetAddrMessage(NodeGroup nodeGroup, boolean isCross, boolean asyn) {
-        LoggerUtil.logger().debug("sendGetAddrMessage isCross=",isCross);
+        LoggerUtil.logger().debug("sendGetAddrMessage isCross=", isCross);
         if (isCross) {
             //get Cross nodes
             Collection<Node> nodes = nodeGroup.getCrossNodeContainer().getConnectedNodes().values();
@@ -237,24 +237,26 @@ public class MessageManager extends BaseManager {
         }
         return new NetworkEventResult(true, NetworkErrorCode.SUCCESS);
     }
+
     public NetworkEventResult broadcastNewAddr(BaseMessage message, Node excludeNode, boolean isCross, boolean asyn) {
         NodeGroup nodeGroup = NodeGroupManager.getInstance().getNodeGroupByMagic(message.getHeader().getMagicNumber());
-        if (isCross) {
-            //跨链节点，不做广播分享
-            return new NetworkEventResult(true, NetworkErrorCode.SUCCESS);
-        } else {
-            Collection<Node> connectNodes  = nodeGroup.getLocalNetNodeContainer().getConnectedNodes().values();
-            if (null != connectNodes && connectNodes.size() > 0) {
-                for (Node connectNode : connectNodes) {
-                    if (null != excludeNode && connectNode.getId().equals(excludeNode.getId())) {
-                        continue;
-                    }
-                    this.sendToNode(message, connectNode, asyn);
+        List<Node> connectNodes = null;
+        if(isCross){
+            connectNodes = new ArrayList<>(nodeGroup.getCrossNodeContainer().getConnectedNodes().values());
+        }else{
+            connectNodes = new ArrayList<>(nodeGroup.getLocalNetNodeContainer().getConnectedNodes().values());
+        }
+        if (null != connectNodes && connectNodes.size() > 0) {
+            for (Node connectNode : connectNodes) {
+                if (null != excludeNode && connectNode.getId().equals(excludeNode.getId())) {
+                    continue;
                 }
+                this.sendToNode(message, connectNode, asyn);
             }
         }
         return new NetworkEventResult(true, NetworkErrorCode.SUCCESS);
     }
+
     /**
      * 判断是否是握手消息
      * isHandShakeMessage?

@@ -42,7 +42,6 @@ public class VersionMessageBody extends BaseNulsData {
 
     private long protocolVersion;
     private IpAddress addrYou = new IpAddress();
-    private int portYouCross;
     private IpAddress addrMe = new IpAddress();
     private int portMeCross;
     private long blockHeight;
@@ -75,7 +74,6 @@ public class VersionMessageBody extends BaseNulsData {
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
         stream.writeUint32(protocolVersion);
         addrYou.serializeToStream(stream);
-        stream.writeUint16(portYouCross);
         addrMe.serializeToStream(stream);
         stream.writeUint16(portMeCross);
         stream.writeUint32(blockHeight);
@@ -88,7 +86,6 @@ public class VersionMessageBody extends BaseNulsData {
         try {
             protocolVersion = buffer.readUint32();
             addrYou.parse(buffer);
-            portYouCross = buffer.readUint16();
             addrMe.parse(buffer);
             portMeCross = buffer.readUint16();
             blockHeight = buffer.readUint32();
@@ -115,16 +112,6 @@ public class VersionMessageBody extends BaseNulsData {
     public void setExtend(String extend) {
         this.extend = extend;
     }
-
-
-    public int getPortYouCross() {
-        return portYouCross;
-    }
-
-    public void setPortYouCross(int portYouCross) {
-        this.portYouCross = portYouCross;
-    }
-
 
     public int getPortMeCross() {
         return portMeCross;

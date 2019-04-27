@@ -41,30 +41,27 @@ import java.net.UnknownHostException;
  * @author lan
  * @date 2018/11/01
  */
-public class IpAddress extends BaseNulsData {
+public class IpAddressShare extends BaseNulsData {
 
     private static final int IPSIZE = 16;
     private InetAddress ip;
     private int port;
+    private int crossPort = 0;
 
-    public IpAddress() {
+    public IpAddressShare() {
         super();
     }
-    public IpAddress(String ipStr, int port) {
+
+
+    public IpAddressShare(String ipStr, int port, int crossPort) {
         try {
             this.ip = InetAddress.getByName(ipStr);
         } catch (UnknownHostException e) {
             e.printStackTrace();
         }
         this.port = port;
+        this.crossPort = crossPort;
     }
-
-
-    public IpAddress(InetAddress ip, int port) {
-        this.ip = ip;
-        this.port = port;
-    }
-
     public void setIpStr(String ipStr) {
         try {
             this.ip = InetAddress.getByName(ipStr);
@@ -76,7 +73,9 @@ public class IpAddress extends BaseNulsData {
     public InetAddress getIp() {
         return ip;
     }
-
+    public String getIpStr() {
+        return ip.getHostAddress();
+    }
     public void setIp(InetAddress ip) {
         this.ip = ip;
     }
@@ -89,12 +88,21 @@ public class IpAddress extends BaseNulsData {
         this.port = port;
     }
 
+    public int getCrossPort() {
+        return crossPort;
+    }
+
+    public void setCrossPort(int crossPort) {
+        this.crossPort = crossPort;
+    }
+
     @Override
     public int size() {
         int s = 0;
         // ip 16byte
         s += IPSIZE;
         // port 2byte
+        s += SerializeUtils.sizeOfUint16();
         s += SerializeUtils.sizeOfUint16();
         return s;
     }
@@ -112,6 +120,7 @@ public class IpAddress extends BaseNulsData {
         }
         stream.write(ipBytes);
         stream.writeUint16(port);
+        stream.writeUint16(crossPort);
     }
 
     @Override
@@ -120,6 +129,7 @@ public class IpAddress extends BaseNulsData {
             byte[] ipAddrBytes = byteBuffer.readBytes(IPSIZE);
             ip = InetAddress.getByAddress(ipAddrBytes);
             port = byteBuffer.readUint16();
+            crossPort = byteBuffer.readUint16();
         } catch (UnknownHostException e) {
             // Cannot happen.
             throw new RuntimeException(e);
