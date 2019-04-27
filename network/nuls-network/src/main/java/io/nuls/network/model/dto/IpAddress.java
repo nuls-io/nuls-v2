@@ -46,7 +46,6 @@ public class IpAddress extends BaseNulsData {
     private static final int IPSIZE = 16;
     private InetAddress ip;
     private int port;
-
     public IpAddress() {
         super();
     }
@@ -123,7 +122,8 @@ public class IpAddress extends BaseNulsData {
             ip = InetAddress.getByAddress(ipAddrBytes);
             port = byteBuffer.readUint16();
         } catch (UnknownHostException e) {
-            throw new RuntimeException(e);  // Cannot happen.
+            // Cannot happen.
+            throw new RuntimeException(e);
         } catch (Exception e) {
             e.printStackTrace();
         }

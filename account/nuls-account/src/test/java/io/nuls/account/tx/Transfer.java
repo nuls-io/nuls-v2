@@ -27,6 +27,7 @@ package io.nuls.account.tx;
 import io.nuls.account.constant.AccountConstant;
 import io.nuls.account.constant.RpcConstant;
 import io.nuls.account.model.dto.CoinDto;
+import io.nuls.account.util.LoggerUtil;
 import io.nuls.base.data.NulsDigestData;
 import io.nuls.base.data.Transaction;
 import io.nuls.rpc.info.Constants;
@@ -86,7 +87,7 @@ public class Transfer implements Runnable {
     public void run() {
         try {
             NulsDigestData hash = null;
-            for (int i = 0; i < 120000; i++) {
+            for (int i = 0; i < 30000; i++) {
                 hash = transfer(hash);
                 System.out.println("count:" + (i + 1));
             }
@@ -100,7 +101,7 @@ public class Transfer implements Runnable {
         Transaction tx = CreateTx.assemblyTransaction((List<CoinDto>) transferMap.get("inputs"),
                 (List<CoinDto>) transferMap.get("outputs"), (String) transferMap.get("remark"), hash);
         newTx(tx);
-//        LoggerUtil.logger.info("hash:" + hash.getDigestHex());
+        LoggerUtil.logger.info("hash:" + tx.getHash().getDigestHex());
 //        LoggerUtil.logger.info("count:" + (i + 1));
 //        LoggerUtil.logger.info("");
 //        System.out.println("hash:" + hash.getDigestHex());

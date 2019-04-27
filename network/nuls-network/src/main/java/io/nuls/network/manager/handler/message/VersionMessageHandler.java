@@ -25,6 +25,7 @@
 
 package io.nuls.network.manager.handler.message;
 
+import io.nuls.network.cfg.NetworkConfig;
 import io.nuls.network.constant.NodeConnectStatusEnum;
 import io.nuls.network.constant.NodeStatusEnum;
 import io.nuls.network.manager.MessageFactory;
@@ -80,10 +81,11 @@ public class VersionMessageHandler extends BaseMessageHandler {
      * @param port
      * @return boolean
      */
-    private boolean canConnectIn(NodesContainer nodesContainer, int maxInCount, int sameIpMaxCount, String ip, int port) {
+    private boolean canConnectIn(int chainId,NodesContainer nodesContainer, int maxInCount, int sameIpMaxCount, String ip, int port) {
 
         int size = nodesContainer.getConnectedCount(Node.IN);
         if (size >= maxInCount) {
+            LoggerUtil.logger(chainId).debug("11111===size={},maxInCount={}",size,maxInCount);
             return false;
         }
 
@@ -94,13 +96,16 @@ public class VersionMessageHandler extends BaseMessageHandler {
             //不会存在两次被动连接都是同一个端口的，即使是同一台服务器
             //if(ip.equals(node.getIp()) && (node.getPort().intValue() == port || node.getType() == Node.OUT)) {
             if (ip.equals(node.getIp()) && node.getType() == Node.OUT) {
+                //也可能存在自己连接自己进入这个逻辑
                 //这里需要一个机制来判定相互连接时候保留哪个?
+                LoggerUtil.logger(chainId).debug("22222===ip={},node.getIp()={}, node.getType={}",ip,node.getIp(),node.getType());
                 return false;
             }
             if (ip.equals(node.getIp())) {
                 sameIpCount++;
             }
             if (sameIpCount >= sameIpMaxCount) {
+                LoggerUtil.logger(chainId).debug("333333===sameIpCount={},sameIpMaxCount={}, node.getType={}",ip,node.getIp(),node.getType());
                 return false;
             }
         }
@@ -134,7 +139,8 @@ public class VersionMessageHandler extends BaseMessageHandler {
             nodesContainer = nodeGroup.getLocalNetNodeContainer();
         }
 
-        if (!canConnectIn(nodesContainer, maxIn, sameIpMaxCount, node.getIp(), node.getRemotePort())) {
+        if (!canConnectIn(nodeGroup.getChainId(),nodesContainer, maxIn, sameIpMaxCount, node.getIp(), node.getRemotePort())) {
+            LoggerUtil.logger(nodeGroup.getChainId()).error("node={} version canConnectIn fail...cross={}",node.getId(),node.isCrossConnect());
             node.getChannel().close();
             return;
         }
@@ -157,6 +163,7 @@ public class VersionMessageHandler extends BaseMessageHandler {
         node.setRemoteCrossPort(versionBody.getPortMeCross());
         //回复version
         VersionMessage versionMessage = MessageFactory.getInstance().buildVersionMessage(node, message.getHeader().getMagicNumber());
+        LoggerUtil.logger(nodeGroup.getChainId()).debug("node={} version success.go response versionMessage..cross={}",node.getId(),node.isCrossConnect());
         send(versionMessage, node, true);
     }
 
@@ -200,7 +207,8 @@ public class VersionMessageHandler extends BaseMessageHandler {
      */
     @Override
     public NetworkEventResult recieve(BaseMessage message, Node node) {
-        LoggerUtil.logger().debug("VersionMessageHandler recieve:" + (node.isServer() ? "Server" : "Client") + ":" + node.getIp() + ":" + node.getRemotePort() + "==CMD=" + message.getHeader().getCommandStr());
+        int chainId = NodeGroupManager.getInstance().getChainIdByMagicNum(message.getHeader().getMagicNumber());
+        LoggerUtil.logger(chainId).debug("VersionMessageHandler recieve:" + (node.isServer() ? "Server" : "Client") + ":" + node.getIp() + ":" + node.getRemotePort() + "==CMD=" + message.getHeader().getCommandStr());
         if (Node.IN == node.getType()) {
             serverRecieveHandler(message, node);
         } else {
@@ -211,9 +219,9 @@ public class VersionMessageHandler extends BaseMessageHandler {
 
     @Override
     public NetworkEventResult send(BaseMessage message, Node node, boolean asyn) {
-        LoggerUtil.logger().debug("VersionMessageHandler send:" + (node.isServer() ? "Server" : "Client") + ":" + node.getIp() + ":" + node.getRemotePort() + "==CMD=" + message.getHeader().getCommandStr());
-        BlockRpcService blockRpcService = SpringLiteContext.getBean(BlockRpcServiceImpl.class);
         int chainId = NodeGroupManager.getInstance().getChainIdByMagicNum(message.getHeader().getMagicNumber());
+        LoggerUtil.logger(chainId).debug("VersionMessageHandler send:" + (node.isServer() ? "Server" : "Client") + ":" + node.getIp() + ":" + node.getRemotePort() + "==CMD=" + message.getHeader().getCommandStr());
+        BlockRpcService blockRpcService = SpringLiteContext.getBean(BlockRpcServiceImpl.class);
         BestBlockInfo bestBlockInfo = blockRpcService.getBestBlockHeader(chainId);
         VersionMessage versionMessage = (VersionMessage) message;
         versionMessage.getMsgBody().setBlockHash(bestBlockInfo.getHash());

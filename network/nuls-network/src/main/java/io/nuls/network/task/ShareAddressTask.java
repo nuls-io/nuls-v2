@@ -43,8 +43,9 @@ public class ShareAddressTask implements Runnable {
 
     private ConnectionManager connectionManager = ConnectionManager.getInstance();
 
-    public ShareAddressTask(NodeGroup nodeGroup) {
+    public ShareAddressTask(NodeGroup nodeGroup,boolean isCross) {
         this.nodeGroup = nodeGroup;
+        this.isCross = isCross;
     }
 
     @Override
@@ -68,10 +69,11 @@ public class ShareAddressTask implements Runnable {
         networkConfig.getLocalIps().add(externalIp);
         /*自有网络的连接分享*/
         if (!nodeGroup.isMoonCrossGroup()) {
-            LoggerUtil.logger().info("share self ip  is {}", externalIp);
+            LoggerUtil.logger(nodeGroup.getChainId()).debug("网络Ip分享share self ip  is {}", externalIp);
             Node myNode = new Node(nodeGroup.getMagicNumber(), externalIp, networkConfig.getPort(), Node.OUT, false);
             myNode.setConnectedListener(() -> {
                 myNode.getChannel().close();
+                //TODO:如果是主网卫星链,自有网络发现需要广播给所有跨链分支,如果是友链，自有网络发现也需要广播给到主网
                 doShare(externalIp, nodeGroup.getLocalNetNodeContainer().getConnectedNodes().values(), networkConfig.getPort());
             });
             myNode.setDisconnectListener(() -> myNode.setChannel(null));
@@ -90,6 +92,7 @@ public class ShareAddressTask implements Runnable {
         networkConfig.getLocalIps().add(externalIp);
         if (nodeGroup.isCrossActive()) {
             //开启了跨链业务
+            LoggerUtil.logger(nodeGroup.getChainId()).debug("跨链网络Ip分享share self ip  is {}", externalIp);
             Node crossNode = new Node(nodeGroup.getMagicNumber(), externalIp, networkConfig.getCrossPort(), Node.OUT, true);
             crossNode.setConnectedListener(() -> {
                 crossNode.getChannel().close();

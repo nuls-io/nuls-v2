@@ -20,7 +20,7 @@
 
 package io.nuls.block.thread.monitor;
 
-import io.nuls.block.constant.RunningStatusEnum;
+import io.nuls.block.constant.StatusEnum;
 import io.nuls.block.manager.BlockChainManager;
 import io.nuls.block.model.Chain;
 import io.nuls.block.model.ChainContext;
@@ -95,7 +95,7 @@ public class ForkChainsMonitor extends BaseMonitor {
                 }
                 // exclusive access
                 //进行切换,切换前变更模块运行状态
-                context.setStatus(RunningStatusEnum.SWITCHING);
+                context.setStatus(StatusEnum.SWITCHING);
                 ConsensusUtil.notice(chainId, CONSENSUS_WAITING);
                 if (BlockChainManager.switchChain(chainId, masterChain, switchChain)) {
                     commonLog.info("chainId-" + chainId + ", switchChain success");
@@ -106,7 +106,7 @@ public class ForkChainsMonitor extends BaseMonitor {
                 break;
             }
         } finally {
-            context.setStatus(RunningStatusEnum.RUNNING);
+            context.setStatus(StatusEnum.RUNNING);
             if (StampedLock.isWriteLockStamp(stamp)) {
                 lock.unlockWrite(stamp);
             }

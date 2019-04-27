@@ -20,7 +20,7 @@
 
 package io.nuls.block.thread.monitor;
 
-import io.nuls.block.constant.RunningStatusEnum;
+import io.nuls.block.constant.StatusEnum;
 import io.nuls.block.manager.BlockChainManager;
 import io.nuls.block.manager.ContextManager;
 import io.nuls.block.model.Chain;
@@ -55,12 +55,12 @@ public class StorageSizeMonitor extends BaseMonitor {
         ChainParameters parameters = ContextManager.getContext(chainId).getParameters();
         int heightRange = parameters.getHeightRange();
         int orphanChainMaxAge = parameters.getOrphanChainMaxAge();
-        context.setStatus(RunningStatusEnum.DATABASE_CLEANING);
+        context.setStatus(StatusEnum.STORAGE_CLEANING);
         forkChainsCleaner(chainId, heightRange, context);
         orphanChainsCleaner(chainId, heightRange, context, orphanChainMaxAge);
         int cacheSize = parameters.getCacheSize();
         dbSizeCleaner(chainId, context, cacheSize);
-        context.setStatus(RunningStatusEnum.RUNNING);
+        context.setStatus(StatusEnum.RUNNING);
     }
 
     private void dbSizeCleaner(Integer chainId, ChainContext context, int cacheSize) {

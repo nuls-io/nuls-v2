@@ -24,7 +24,7 @@ package io.nuls.block.service.impl;
 
 import io.nuls.base.data.Block;
 import io.nuls.base.data.NulsDigestData;
-import io.nuls.block.constant.RunningStatusEnum;
+import io.nuls.block.constant.StatusEnum;
 import io.nuls.block.manager.ContextManager;
 import io.nuls.block.storage.ChainStorageService;
 import io.nuls.block.test.BlockGenerator;
@@ -53,7 +53,7 @@ public class ChainStorageServiceImplTest {
         SpringLiteContext.init("io.nuls.block", "io.nuls.rpc.modulebootstrap", "io.nuls.rpc.cmd");
         RocksDBService.init("../../../../data/block");
         ConfigLoader.load();
-        ContextManager.getContext(chainId).setStatus(RunningStatusEnum.RUNNING);
+        ContextManager.getContext(chainId).setStatus(StatusEnum.RUNNING);
         service = SpringLiteContext.getBean(ChainStorageService.class);
         block = BlockGenerator.generate(null);
     }

@@ -24,7 +24,9 @@
  */
 package io.nuls.network.utils;
 
+import io.nuls.network.cfg.NetworkConfig;
 import io.nuls.network.constant.NetworkConstant;
+import io.nuls.tools.core.ioc.SpringLiteContext;
 
 import java.net.*;
 import java.util.*;
@@ -45,7 +47,10 @@ public class IpUtil {
             ips.add(ip);
         }
     }
-
+    public static boolean isSelf(String ip){
+        NetworkConfig networkConfig = SpringLiteContext.getBean(NetworkConfig.class);
+        return (ips.contains(ip) || networkConfig.getLocalIps().contains(ip));
+    }
     public static Set<String> getIps() {
         return ips;
     }
@@ -157,27 +162,4 @@ public class IpUtil {
         return matcher.matches();
     }
 
-    public static void main(String[] args) {
-        List<String> list = new ArrayList<>();
-        list.add("119.23.248.143");
-        list.add("119.23.212.239");
-        list.add("39.108.181.47");
-        list.add("185.7�\u000B��<\u0011��");
-        list.add("39.104.136.6");
-        list.add("47.107.45.135");
-        list.add("51.15.63.174");
-        list.add("39.108.167.178");
-        list.add("47.106.149.140");
-        list.add("139.159.147.21");
-        list.add("122.114.0.96");
-        list.add("127.0.0.1");
-        list.add("192.168.1.1");
-        list.add("256.2.3.4");
-        list.add("0.0.0.0");
-        list.add("0.0.0");
-
-        for (String str : list) {
-            System.out.println(isboolIp(str));
-        }
-    }
 }

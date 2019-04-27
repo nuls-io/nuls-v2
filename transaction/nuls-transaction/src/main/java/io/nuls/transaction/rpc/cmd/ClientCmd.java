@@ -34,7 +34,6 @@ import io.nuls.rpc.util.RPCUtil;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.exception.NulsException;
-import static io.nuls.transaction.utils.LoggerUtil.LOG;
 import io.nuls.tools.model.ObjectUtils;
 import io.nuls.transaction.cache.PackablePool;
 import io.nuls.transaction.constant.TxCmd;
@@ -54,6 +53,8 @@ import io.nuls.transaction.utils.TxUtil;
 
 import java.util.HashMap;
 import java.util.Map;
+
+import static io.nuls.transaction.utils.LoggerUtil.LOG;
 
 /**
  * @author: Charlie
@@ -193,8 +194,7 @@ public class ClientCmd extends BaseCmd {
                 return failed(verifyResult.getErrorCode());
             }
             VerifyLedgerResult verifyLedgerResult = LedgerCall.verifyCoinData(chain, RPCUtil.encode(tx.serialize()));
-            if(verifyLedgerResult.getCode() != VerifyLedgerResult.SUCCESS
-                    && verifyLedgerResult.getCode() != VerifyLedgerResult.ORPHAN ){
+            if(!verifyLedgerResult.getSuccess()){
                 return failed(verifyLedgerResult.getErrorCode());
             }
             Map<String, Object> resultMap = new HashMap<>(TxConstant.INIT_CAPACITY_2);

@@ -16,6 +16,7 @@ mainChainId=2
 mainAssetId=1
 [network]
 port=18001
+crossPort=28001
 #魔法参数
 packetMagic=20190002
 #种子节点

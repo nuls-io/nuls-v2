@@ -167,7 +167,7 @@ public class ConnectionManager extends BaseManager {
         if (channel.localAddress().getPort() == networkConfig.getCrossPort()) {
             isCross = true;
         }
-        LoggerUtil.logger().debug("peer = {}:{} connectIn", ip, port);
+        LoggerUtil.logger().debug("peer = {}:{} connectIn isCross={}", ip, port,isCross);
         //此时无法判定业务所属的网络id，所以无法归属哪个group,只有在version消息处理时才能知道
         Node node = new Node(0L, ip, port, Node.IN, isCross);
         node.setConnectStatus(NodeConnectStatusEnum.CONNECTED);

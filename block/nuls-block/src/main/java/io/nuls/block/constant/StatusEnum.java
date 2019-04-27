@@ -28,10 +28,10 @@ package io.nuls.block.constant;
  * @version 1.0
  * @date 18-11-28 下午5:58
  */
-public enum RunningStatusEnum {
+public enum StatusEnum {
 
     /**
-     * 正在初始化
+     * 模块正在初始化
      * initializing
      */
     INITIALIZING,
@@ -43,13 +43,13 @@ public enum RunningStatusEnum {
     SYNCHRONIZING,
 
     /**
-     * 切换主链中
+     * 分叉链切换中
      * switching
      */
     SWITCHING,
 
     /**
-     * 运行中
+     * 模块正常运行中
      * running
      */
     RUNNING,
@@ -70,7 +70,7 @@ public enum RunningStatusEnum {
      * 清理数据库中
      * Clean up the database
      */
-    DATABASE_CLEANING,
+    STORAGE_CLEANING,
     ;
 
     @Override

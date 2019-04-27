@@ -31,6 +31,7 @@ import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.model.message.Response;
 import io.nuls.rpc.netty.processor.ResponseMessageProcessor;
 import io.nuls.tools.log.Log;
+import io.nuls.tools.parse.JSONUtils;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -72,7 +73,7 @@ public class TxTest {
         Transfer transfer1 = new Transfer(address21, address20);
         Thread thread1 = new Thread(transfer1);
         thread1.start();
-        Transfer transfer2 = new Transfer(address22, address20);
+        Transfer transfer2 = new Transfer(address25, address20);
         Thread thread2 = new Thread(transfer2);
         thread2.start();
         thread1.join();
@@ -82,7 +83,7 @@ public class TxTest {
 
     @Test
     public void importPriKeyTest() {
-        importPriKey("b54db432bba7e13a6c4a28f65b925b18e63bcb79143f7b894fa735d5d3d09db5", password);//种子出块地址 tNULSeBaMkrt4z9FYEkkR9D6choPVvQr94oYZp
+//        importPriKey("b54db432bba7e13a6c4a28f65b925b18e63bcb79143f7b894fa735d5d3d09db5", password);//种子出块地址 tNULSeBaMkrt4z9FYEkkR9D6choPVvQr94oYZp
 //        importPriKey("188b255c5a6d58d1eed6f57272a22420447c3d922d5765ebb547bc6624787d9f", password);//种子出块地址 tNULSeBaMoGr2RkLZPfJeS5dFzZeNj1oXmaYNe
         importPriKey("9ce21dad67e0f0af2599b41b515a7f7018059418bab892a7b68f283d489abc4b", password);//20 tNULSeBaMvEtDfvZuukDf2mVyfGo3DdiN8KLRG
         importPriKey("477059f40708313626cccd26f276646e4466032cabceccbf571a7c46f954eb75", password);//21 tNULSeBaMnrs6JKrCy6TQdzYJZkMZJDng7QAsD
@@ -95,6 +96,15 @@ public class TxTest {
         importPriKey("27dbdcd1f2d6166001e5a722afbbb86a845ef590433ab4fcd13b9a433af6e66e", password);//28 tNULSeBaMoNnKitV28JeuUdBaPSR6n1xHfKLj2
         importPriKey("76b7beaa98db863fb680def099af872978209ed9422b7acab8ab57ad95ab218b", password);//29 tNULSeBaMqywZjfSrKNQKBfuQtVxAHBQ8rB2Zn
 //        importPriKey("00a6eef7b91c645525bb8410f2a79e1299a69d0d7ef980068434b6aca90ab6d9", password);
+    }
+
+    /**
+     * 删除账户
+     */
+    @Test
+    public void removeAccountTest() throws Exception {
+        removeAccount("tNULSeBaMkrt4z9FYEkkR9D6choPVvQr94oYZp", password);
+//        removeAccount(address20, password);
     }
 
     public void importPriKey(String priKey, String pwd) {
@@ -114,5 +124,15 @@ public class TxTest {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    public void removeAccount(String address, String password) throws Exception {
+        Map<String, Object> params = new HashMap<>();
+        params.put(Constants.VERSION_KEY_STR, "1.0");
+        params.put("chainId", chainId);
+        params.put("address", address);
+        params.put("password", password);
+        Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_removeAccount", params);
+        Log.debug("{}", JSONUtils.obj2json(cmdResp.getResponseData()));
     }
 }

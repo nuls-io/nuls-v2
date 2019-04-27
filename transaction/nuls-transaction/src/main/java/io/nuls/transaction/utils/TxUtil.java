@@ -297,6 +297,20 @@ public class TxUtil {
         } catch (Exception e) {
             throw new NulsException(e);
         }
+        moduleGroups(chain, moduleVerifyMap, tx, txStr);
+    }
+
+    /**
+     * 对交易进行模块分组
+     *
+     * @param chain
+     * @param moduleVerifyMap
+     * @param tx
+     * @throws NulsException
+     */
+    public static void moduleGroups(Chain chain, Map<TxRegister, List<String>> moduleVerifyMap, Transaction tx, String txStr) {
+        //根据模块的统一验证器名，对所有交易进行分组，准备进行各模块的统一验证
+        TxRegister txRegister = TxManager.getTxRegister(chain, tx.getType());
         if (moduleVerifyMap.containsKey(txRegister)) {
             moduleVerifyMap.get(txRegister).add(txStr);
         } else {
