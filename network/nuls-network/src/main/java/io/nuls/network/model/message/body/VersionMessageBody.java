@@ -43,7 +43,6 @@ public class VersionMessageBody extends BaseNulsData {
     private long protocolVersion;
     private IpAddress addrYou = new IpAddress();
     private IpAddress addrMe = new IpAddress();
-    private int portMeCross;
     private long blockHeight;
     private String blockHash = "";
     private String extend = "";
@@ -57,10 +56,8 @@ public class VersionMessageBody extends BaseNulsData {
     public int size() {
         int s = 0;
         s += SerializeUtils.sizeOfUint32(); // protocolVersion
-        s += addrYou.size(); // addrYou 18byte
-        s += SerializeUtils.sizeOfUint16(); // addrYou  cross port 2byte
+        s += addrYou.size(); // addrYou 16byte
         s += addrMe.size(); // addrMe  16byte
-        s += SerializeUtils.sizeOfUint16(); // addrMe cross port 2byte
         s += SerializeUtils.sizeOfUint32(); // blockHeight
         s += SerializeUtils.sizeOfString(blockHash); // blockHash
         s += SerializeUtils.sizeOfString(extend); // extend
@@ -75,7 +72,6 @@ public class VersionMessageBody extends BaseNulsData {
         stream.writeUint32(protocolVersion);
         addrYou.serializeToStream(stream);
         addrMe.serializeToStream(stream);
-        stream.writeUint16(portMeCross);
         stream.writeUint32(blockHeight);
         stream.writeString(blockHash);
         stream.writeString(extend);
@@ -87,7 +83,6 @@ public class VersionMessageBody extends BaseNulsData {
             protocolVersion = buffer.readUint32();
             addrYou.parse(buffer);
             addrMe.parse(buffer);
-            portMeCross = buffer.readUint16();
             blockHeight = buffer.readUint32();
             blockHash = buffer.readString();
             extend = buffer.readString();
@@ -111,14 +106,6 @@ public class VersionMessageBody extends BaseNulsData {
 
     public void setExtend(String extend) {
         this.extend = extend;
-    }
-
-    public int getPortMeCross() {
-        return portMeCross;
-    }
-
-    public void setPortMeCross(int portMeCross) {
-        this.portMeCross = portMeCross;
     }
 
     public IpAddress getAddrYou() {
