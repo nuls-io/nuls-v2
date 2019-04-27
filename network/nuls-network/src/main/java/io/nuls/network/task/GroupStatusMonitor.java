@@ -45,17 +45,17 @@ public class GroupStatusMonitor implements Runnable {
         List<NodeGroup> nodeGroupList = nodeGroupManager.getNodeGroups();
         for (NodeGroup nodeGroup : nodeGroupList) {
             if (nodeGroup.isMoonCrossGroup()) {
-                updateStatus(nodeGroup.getCrossNodeContainer(), nodeGroup);
+                updateStatus(nodeGroup.getCrossNodeContainer(), nodeGroup,true);
             } else if (nodeGroup.isMoonGroup()) {
-                updateStatus(nodeGroup.getLocalNetNodeContainer(), nodeGroup);
+                updateStatus(nodeGroup.getLocalNetNodeContainer(), nodeGroup,false);
             } else {
-                updateStatus(nodeGroup.getLocalNetNodeContainer(), nodeGroup);
-                updateStatus(nodeGroup.getCrossNodeContainer(), nodeGroup);
+                updateStatus(nodeGroup.getLocalNetNodeContainer(), nodeGroup,false);
+                updateStatus(nodeGroup.getCrossNodeContainer(), nodeGroup,true);
             }
         }
     }
 
-    private void updateStatus(NodesContainer nodesContainer, NodeGroup nodeGroup) {
+    private void updateStatus(NodesContainer nodesContainer, NodeGroup nodeGroup,boolean isCross) {
         if (NodeGroup.WAIT1 == nodesContainer.getStatus()) {
             long time = nodesContainer.getLatestHandshakeSuccTime() + NetworkConstant.NODEGROUP_NET_STABLE_TIME_MILLIONS;
             //最近10s没有新的网络连接产生
@@ -68,11 +68,11 @@ public class GroupStatusMonitor implements Runnable {
                 LoggerUtil.logger().info("ChainId={} NET IS IN INIT", nodeGroup.getChainId());
             }
         } else if (NodeGroup.WAIT2 == nodesContainer.getStatus()) {
-            if (nodeGroup.isActive(false)) {
+            if (nodeGroup.isActive(isCross)) {
                 nodesContainer.setStatus(NodeGroup.OK);
             }
         } else if (NodeGroup.OK == nodesContainer.getStatus()) {
-            if (!nodeGroup.isActive(false)) {
+            if (!nodeGroup.isActive(isCross)) {
                 //发布网络状态事件
                 nodesContainer.setStatus(NodeGroup.WAIT2);
                 LoggerUtil.logger().info("ChainId={} NET STATUS UPDATE TO WAITING", nodeGroup.getChainId());
