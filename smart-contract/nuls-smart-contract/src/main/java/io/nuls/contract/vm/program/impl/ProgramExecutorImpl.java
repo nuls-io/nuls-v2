@@ -385,9 +385,7 @@ public class ProgramExecutorImpl implements ProgramExecutor {
             programResult.setTransfers(vm.getTransfers());
             programResult.setInternalCalls(vm.getInternalCalls());
             programResult.setEvents(vm.getEvents());
-            /** pierre test code + */
-            //programResult.setBalance(getAccount(contractAddressBytes).getBalance());
-            /** pierre test code - */
+            programResult.setInvokeRegisterCmds(vm.getInvokeRegisterCmds());
 
             if (resultValue != null) {
                 if (resultValue instanceof ObjectRef) {
@@ -417,28 +415,21 @@ public class ProgramExecutorImpl implements ProgramExecutor {
             }
             logTime("add contract state");
 
-            /** pierre test code + */
-            //repository.increaseNonce(contractAddressBytes);
-            //programResult.setNonce(repository.getNonce(contractAddressBytes));
             if(programInvoke.isCreate()) {
                 repository.setNonce(contractAddressBytes, BigInteger.ONE);
             }
-            /** pierre test code - */
             programResult.setGasUsed(vm.getGasUsed());
 
             return programResult;
         } catch (ErrorException e) {
             this.revert = true;
-            //log.error("", e);
             ProgramResult programResult = new ProgramResult();
             programResult.setGasUsed(e.getGasUsed());
-            //programResult.setStackTrace(e.getStackTraceMessage());
             logTime("error");
             return programResult.error(e.getMessage());
         } catch (Exception e) {
             log.error("", e);
             ProgramResult programResult = revert(e.getMessage());
-            //programResult.setStackTrace(ExceptionUtils.getStackTrace(e));
             return programResult;
         }
     }
