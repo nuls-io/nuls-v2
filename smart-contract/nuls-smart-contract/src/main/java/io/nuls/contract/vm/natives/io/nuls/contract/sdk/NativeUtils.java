@@ -24,6 +24,12 @@
  */
 package io.nuls.contract.vm.natives.io.nuls.contract.sdk;
 
+import io.nuls.base.basic.AddressTool;
+import io.nuls.contract.enums.CmdRegisterMode;
+import io.nuls.contract.enums.CmdRegisterReturnType;
+import io.nuls.contract.manager.CmdRegisterManager;
+import io.nuls.contract.manager.interfaces.RequestAndResponseInterface;
+import io.nuls.contract.model.bo.CmdRegister;
 import io.nuls.contract.sdk.Event;
 import io.nuls.contract.vm.*;
 import io.nuls.contract.vm.code.ClassCode;
@@ -32,12 +38,18 @@ import io.nuls.contract.vm.code.MethodCode;
 import io.nuls.contract.vm.code.VariableType;
 import io.nuls.contract.vm.exception.ErrorException;
 import io.nuls.contract.vm.natives.NativeMethod;
+import io.nuls.contract.vm.program.ProgramInvokeRegisterCmd;
+import io.nuls.contract.vm.program.impl.ProgramInvoke;
 import io.nuls.contract.vm.util.Constants;
 import io.nuls.contract.vm.util.JsonUtils;
 import io.nuls.contract.vm.util.Utils;
+import io.nuls.rpc.model.message.Response;
+import io.nuls.rpc.netty.processor.ResponseMessageProcessor;
+import io.nuls.tools.core.ioc.SpringLiteContext;
 import io.nuls.tools.crypto.Sha3Hash;
 import org.apache.commons.lang3.StringUtils;
 
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -105,6 +117,12 @@ public class NativeUtils {
                     return SUPPORT_NATIVE;
                 } else {
                     return getRandomSeedListByHeight(methodCode, methodArgs, frame);
+                }
+            case invokeExternalCmd:
+                if (check) {
+                    return SUPPORT_NATIVE;
+                } else {
+                    return invokeExternalCmd(methodCode, methodArgs, frame);
                 }
             default:
                 if (check) {
@@ -407,4 +425,122 @@ public class NativeUtils {
         frame.setAddGas(true);
         return result;
     }
+
+    public static final String invokeExternalCmd = TYPE + "." + "invokeExternalCmd" + "(Ljava/lang/String;[Ljava/lang/String;)Ljava/lang/Object;";
+
+    private static Result invokeExternalCmd(MethodCode methodCode, MethodArgs methodArgs, Frame frame) {
+        frame.setAddGas(false);
+        ProgramInvoke programInvoke = frame.vm.getProgramInvoke();
+        if(programInvoke.isCreate()) {
+            throw new ErrorException("Invoke external cmd failed. This method cannot be called when creating a contract.", frame.vm.getGasUsed(), null);
+        }
+        frame.vm.addGasUsed(GasCost.INVOKE_EXTERNAL_METHOD);
+        ObjectRef cmdNameRef = (ObjectRef) methodArgs.invokeArgs[0];
+        ObjectRef argsRef = (ObjectRef) methodArgs.invokeArgs[1];
+        String cmdName = frame.heap.runToString(cmdNameRef);
+        String[] args = (String[]) frame.heap.getObject(argsRef);
+
+        // 检查是否注册
+        CmdRegisterManager cmdRegisterManager = SpringLiteContext.getBean(CmdRegisterManager.class);
+        int currentChainId = frame.vm.getProgramExecutor().getCurrentChainId();
+        CmdRegister cmdRegister = cmdRegisterManager.getCmdRegisterByCmdName(currentChainId, cmdName);
+        if(cmdRegister == null) {
+            throw new ErrorException(
+                    String.format("Invoke external cmd failed. There is no registration information. chainId: [%s] cmdName: [%s]",
+                            currentChainId, cmdName), frame.vm.getGasUsed(), null);
+        }
+        // 检查参数个数
+        String moduleCode = cmdRegister.getModuleCode();
+        List<String> argNames = cmdRegister.getArgNames();
+        int argsSize = args.length;
+        int argNamesSize = argNames.size();
+        if(argsSize != argNamesSize) {
+            throw new ErrorException(
+                    String.format("Invoke external cmd failed. Inconsistent number of arguments. register size: [%s] your size: [%s]",
+                            argNamesSize, argsSize), frame.vm.getGasUsed(), null);
+        }
+        Map argsMap = new HashMap(8);
+        for(int i=0;i<argsSize;i++) {
+            argsMap.put(argNames.get(i), args[i]);
+        }
+        String contractAddress = programInvoke.getAddress();
+        String contractSender = AddressTool.getStringAddressByBytes(programInvoke.getSender());
+        // 固定参数 - 合约地址、合约调用者地址
+        argsMap.put("contractAddress", contractAddress);
+        argsMap.put("contractSender", contractSender);
+
+
+        CmdRegisterMode cmdRegisterMode = cmdRegister.getCmdRegisterMode();
+        // 调用外部接口
+        Object cmdResult = requestAndResponse(cmdRegisterManager, moduleCode, cmdName, argsMap, frame);
+
+        // 处理返回值
+        ProgramInvokeRegisterCmd invokeRegisterCmd = new ProgramInvokeRegisterCmd(cmdName, argsMap, cmdRegisterMode);
+        ObjectRef objectRef = handleResult(cmdResult, invokeRegisterCmd, cmdRegister, frame);
+        frame.vm.getInvokeRegisterCmds().add(invokeRegisterCmd);
+
+        Result result = NativeMethod.result(methodCode, objectRef, frame);
+        frame.setAddGas(true);
+        return result;
+    }
+
+    private static Object requestAndResponse(CmdRegisterManager cmdRegisterManager, String moduleCode, String cmdName, Map argsMap, Frame frame) {
+        Response cmdResp;
+        try {
+            cmdResp = cmdRegisterManager.requestAndResponse(moduleCode, cmdName, argsMap);
+        } catch (Exception e) {
+            throw new ErrorException(
+                    String.format("Invoke external cmd failed. error: %s",
+                            e.getMessage()), frame.vm.getGasUsed(), null);
+        }
+        if(!cmdResp.isSuccess()) {
+            String errorCode = cmdResp.getResponseErrorCode();
+            String errorMsg = cmdResp.getResponseComment();
+            throw new ErrorException(
+                    String.format("Invoke external cmd failed. error code: %s, error message: ",
+                            errorCode, errorMsg), frame.vm.getGasUsed(), null);
+        }
+        Map resData = (Map) cmdResp.getResponseData();
+        return resData.get("result");
+    }
+
+    /**
+     * Gas消耗：//TODO pierre
+     * 返回值string -> 1000, 每超过100个长度，叠加1000
+     * 返回值string[] -> string gas cost * length
+     *
+     */
+    private static ObjectRef handleResult(Object cmdResult, ProgramInvokeRegisterCmd invokeRegisterCmd, CmdRegister cmdRegister, Frame frame) {
+        ObjectRef objectRef = null;
+        if (invokeRegisterCmd.getCmdRegisterMode().equals(CmdRegisterMode.NEW_TX)) {
+            invokeRegisterCmd.setNewTx((String) cmdResult);
+        } else {
+            if(cmdRegister.getCmdRegisterReturnType().equals(CmdRegisterReturnType.STRING)) {
+                objectRef = frame.heap.newString((String) cmdResult);
+            } else {
+                if(cmdResult instanceof List) {
+                    List resultList = (List) cmdResult;
+                    int size = resultList.size();
+                    objectRef = frame.heap.newArray(VariableType.STRING_ARRAY_TYPE, size);
+                    for (int k = 0; k < size; k++) {
+                        frame.heap.putArray(objectRef, k, frame.heap.newString((String) resultList.get(k)));
+                    }
+                } else if(cmdResult.getClass().isArray()) {
+                    String[] resultArray = (String[]) cmdResult;
+                    objectRef = frame.heap.newArray(VariableType.STRING_ARRAY_TYPE, resultArray.length);
+                    int i = 0;
+                    for(String value : resultArray) {
+                        frame.heap.putArray(objectRef, i++, frame.heap.newString(value));
+                    }
+                } else {
+                    throw new ErrorException(
+                            String.format("Invoke external cmd failed. Unkown return type: %s ",
+                                    cmdResult.getClass().getName()), frame.vm.getGasUsed(), null);
+                }
+            }
+        }
+        return objectRef;
+    }
+
+
 }

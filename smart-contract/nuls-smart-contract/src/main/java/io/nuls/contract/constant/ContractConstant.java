@@ -34,8 +34,6 @@ public interface ContractConstant {
 
     String INITIAL_STATE_ROOT = "56e81f171bcc55a6ff8345e692c0f86e5b48e01b996cadc001622fb5e363b421";
 
-    short MODULE_ID_CONTRACT = 10;
-
     /**
      * CONTRACT create, call, delete tx
      */
@@ -86,8 +84,6 @@ public interface ContractConstant {
 
     long CONTRACT_MINIMUM_PRICE = 25;
 
-    int MAX_PACKAGE_GAS = 5000000;
-
     /**
      *
      */
@@ -122,25 +118,9 @@ public interface ContractConstant {
      */
     String SYS_FILE_ENCODING = "file.encoding";
 
-    /**
-     * context path
-     */
-    String CONTEXT_PATH = "io.nuls.contract";
-
-    /**
-     * rpc file path
-     */
-    String RPC_PATH = "io.nuls.contract.rpc";
-
     String NRC20_STANDARD_FILE = "nrc20.json";
 
     String MODULE_CONFIG_FILE = "module.json";
-    /**
-     * DB config
-     */
-    String DB_CONFIG_NAME = "db_config.properties";
-    String DB_DATA_PATH = "rocksdb.datapath";
-    String DB_DATA_DEFAULT_PATH = "rocksdb.datapath";
 
     /**
      * 最小转账金额
@@ -152,4 +132,15 @@ public interface ContractConstant {
 
     String LOG_FILE_FOLDER = "contract";
     String LOG_FILE_NAME = "contract";
+
+    String BOOLEAN    = "Boolean";
+    String BYTE       = "Byte";
+    String SHORT      = "Short";
+    String CHARACTER  = "Character";
+    String INTEGER    = "Integer";
+    String LONG       = "Long";
+    String FLOAT      = "Float";
+    String DOUBLE     = "Double";
+    String STRING     = "String";
+    String BIGINTEGER = "BigInteger";
 }

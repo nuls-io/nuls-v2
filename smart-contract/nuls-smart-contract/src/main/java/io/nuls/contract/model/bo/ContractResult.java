@@ -29,6 +29,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.nuls.base.basic.AddressTool;
 import io.nuls.contract.model.tx.ContractTransferTransaction;
 import io.nuls.contract.model.txdata.ContractData;
+import io.nuls.contract.vm.program.ProgramInvokeRegisterCmd;
 import io.nuls.contract.vm.program.ProgramTransfer;
 import io.nuls.tools.crypto.HexUtil;
 
@@ -103,6 +104,8 @@ public class ContractResult {
      */
     private List<String> events = new ArrayList<>();
 
+    private List<ProgramInvokeRegisterCmd> invokeRegisterCmds = new ArrayList<>();
+
     private String remark;
 
 
@@ -122,12 +125,12 @@ public class ContractResult {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof ContractResult)) return false;
+        if (this == o) { return true;}
+        if (!(o instanceof ContractResult)) { return false;}
 
         ContractResult result = (ContractResult) o;
 
-        if (getHash() != null ? !getHash().equals(result.getHash()) : result.getHash() != null) return false;
+        if (getHash() != null ? !getHash().equals(result.getHash()) : result.getHash() != null) { return false;}
 
         return true;
     }
@@ -423,5 +426,13 @@ public class ContractResult {
 
     public void setTxTrack(Object txTrack) {
         this.txTrack = txTrack;
+    }
+
+    public List<ProgramInvokeRegisterCmd> getInvokeRegisterCmds() {
+        return invokeRegisterCmds;
+    }
+
+    public void setInvokeRegisterCmds(List<ProgramInvokeRegisterCmd> invokeRegisterCmds) {
+        this.invokeRegisterCmds = invokeRegisterCmds;
     }
 }

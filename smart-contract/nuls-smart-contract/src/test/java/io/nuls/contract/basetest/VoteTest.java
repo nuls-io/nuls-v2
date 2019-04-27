@@ -55,9 +55,9 @@ public class VoteTest {
     private VMContext vmContext;
     private ProgramExecutor programExecutor;
 
-    private static final String ADDRESS = "tNULSeBaMvEtDfvZuukDf2mVyfGo3DdiN8KLRG";
-    private static final String SENDER = "5MR_2CbdqKcZktcxntG14VuQDy8YHhc6ZqW";
-    private static final String BUYER = "5MR_2Cj9tfgQpdeF7nDy5wyaGG6MZ35H3rA";
+    private static final String ADDRESS = "tNULSeBaN7vAqBANTtVxsiFsam4NcRUbqrCpzK";
+    private static final String SENDER = "tNULSeBaMvEtDfvZuukDf2mVyfGo3DdiN8KLRG";
+    private static final String BUYER = "tNULSeBaMnrs6JKrCy6TQdzYJZkMZJDng7QAsD";
 
     @BeforeClass
     public static void initClass() {

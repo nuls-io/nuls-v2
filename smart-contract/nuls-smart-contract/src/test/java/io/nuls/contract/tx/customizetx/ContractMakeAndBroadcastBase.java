@@ -148,7 +148,6 @@ public class ContractMakeAndBroadcastBase extends BaseQuery {
         Log.info("bean init.");
     }
 
-
     protected Result<CreateContractTransaction> makeCreateTx(int chainId, String sender, Long gasLimit, Long price,
                                                            byte[] contractCode, String[][] args,
                                                            String password, String remark) {

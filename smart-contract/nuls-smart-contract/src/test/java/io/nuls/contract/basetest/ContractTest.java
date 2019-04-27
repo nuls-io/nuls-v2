@@ -53,21 +53,12 @@ public class ContractTest {
     private VMContext vmContext;
     private ProgramExecutor programExecutor;
 
-    private static final String ADDRESS = "tNULSeBaMvEtDfvZuukDf2mVyfGo3DdiN8KLRG";
-    private static final String SENDER = "5MR_2CbdqKcZktcxntG14VuQDy8YHhc6ZqW";
-    private static final String BUYER = "5MR_2Cj9tfgQpdeF7nDy5wyaGG6MZ35H3rA";
+    private static final String ADDRESS = "tNULSeBaN7vAqBANTtVxsiFsam4NcRUbqrCpzK";
+    private static final String SENDER = "tNULSeBaMvEtDfvZuukDf2mVyfGo3DdiN8KLRG";
+    private static final String BUYER = "tNULSeBaMnrs6JKrCy6TQdzYJZkMZJDng7QAsD";
 
     static String[] senderSeeds = {
-            "tNULSeBaMvEtDfvZuukDf2mVyfGo3DdiN8KLRG",
-            "5MR_2CbdqKcZktcxntG14VuQDy8YHhc6ZqW",
-            "5MR_2Cj9tfgQpdeF7nDy5wyaGG6MZ35H3rA",
-            "5MR_2CWKhFuoGVraaxL5FYY3RsQLjLDN7jw",
-            "5MR_2CgwCFRoJ8KX37xNqjjR7ttYuJsg8rk",
-            "5MR_2CjZkQsN7EnEPcaLgNrMrp6wpPGN6xo",
-            "tNULSeBaMvEtDfvZuukDf2mVyfGo3DdiN8KLRG",
-            "5MR_2CVCFWH7o8AmrTBPLkdg2dYH1UCUJiM",
-            "5MR_2CfUsasd33vQV3HqGw6M3JwVsuVxJ7r",
-            "5MR_2CVuGjQ3CYVkhFszxfSt6sodg1gDHYF"};
+            "tNULSeBaMvEtDfvZuukDf2mVyfGo3DdiN8KLRG"};
 
     @BeforeClass
     public static void initClass() {
@@ -135,7 +126,7 @@ public class ContractTest {
         programCall.args(BUYER, "1000");
         System.out.println(programCall);
 
-        byte[] prevStateRoot = HexUtil.decode("4bf7c234e14628f029875a6e172c74df7d6b87875ecc845918cb41dfd521f5a5");
+        byte[] prevStateRoot = HexUtil.decode("740bfe8f98ca7bbf67b852304956b999364dc2882e92910144ce6e18d389db07");
 
         ProgramExecutor track = programExecutor.begin(prevStateRoot);
         ProgramResult programResult = track.call(programCall);
