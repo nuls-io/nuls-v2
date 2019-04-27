@@ -24,6 +24,7 @@
  */
 package io.nuls.contract.vm.natives.io.nuls.contract.sdk;
 
+import io.nuls.base.basic.AddressTool;
 import io.nuls.contract.enums.CmdRegisterMode;
 import io.nuls.contract.enums.CmdRegisterReturnType;
 import io.nuls.contract.manager.CmdRegisterManager;
@@ -38,6 +39,7 @@ import io.nuls.contract.vm.code.VariableType;
 import io.nuls.contract.vm.exception.ErrorException;
 import io.nuls.contract.vm.natives.NativeMethod;
 import io.nuls.contract.vm.program.ProgramInvokeRegisterCmd;
+import io.nuls.contract.vm.program.impl.ProgramInvoke;
 import io.nuls.contract.vm.util.Constants;
 import io.nuls.contract.vm.util.JsonUtils;
 import io.nuls.contract.vm.util.Utils;
@@ -428,6 +430,10 @@ public class NativeUtils {
 
     private static Result invokeExternalCmd(MethodCode methodCode, MethodArgs methodArgs, Frame frame) {
         frame.setAddGas(false);
+        ProgramInvoke programInvoke = frame.vm.getProgramInvoke();
+        if(programInvoke.isCreate()) {
+            throw new ErrorException("Invoke external cmd failed. This method cannot be called when creating a contract.", frame.vm.getGasUsed(), null);
+        }
         frame.vm.addGasUsed(GasCost.INVOKE_EXTERNAL_METHOD);
         ObjectRef cmdNameRef = (ObjectRef) methodArgs.invokeArgs[0];
         ObjectRef argsRef = (ObjectRef) methodArgs.invokeArgs[1];
@@ -457,6 +463,12 @@ public class NativeUtils {
         for(int i=0;i<argsSize;i++) {
             argsMap.put(argNames.get(i), args[i]);
         }
+        String contractAddress = programInvoke.getAddress();
+        String contractSender = AddressTool.getStringAddressByBytes(programInvoke.getSender());
+        // 固定参数 - 合约地址、合约调用者地址
+        argsMap.put("contractAddress", contractAddress);
+        argsMap.put("contractSender", contractSender);
+
 
         CmdRegisterMode cmdRegisterMode = cmdRegister.getCmdRegisterMode();
         // 调用外部接口
@@ -479,7 +491,7 @@ public class NativeUtils {
         } catch (Exception e) {
             throw new ErrorException(
                     String.format("Invoke external cmd failed. error: %s",
-                            e.getMessage()), frame.vm.getGasUsed(), e.toString());
+                            e.getMessage()), frame.vm.getGasUsed(), null);
         }
         if(!cmdResp.isSuccess()) {
             String errorCode = cmdResp.getResponseErrorCode();
@@ -492,6 +504,12 @@ public class NativeUtils {
         return resData.get("result");
     }
 
+    /**
+     * Gas消耗：//TODO pierre
+     * 返回值string -> 1000, 每超过100个长度，叠加1000
+     * 返回值string[] -> string gas cost * length
+     *
+     */
     private static ObjectRef handleResult(Object cmdResult, ProgramInvokeRegisterCmd invokeRegisterCmd, CmdRegister cmdRegister, Frame frame) {
         ObjectRef objectRef = null;
         if (invokeRegisterCmd.getCmdRegisterMode().equals(CmdRegisterMode.NEW_TX)) {

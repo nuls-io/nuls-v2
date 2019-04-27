@@ -23,7 +23,6 @@
  */
 package io.nuls.contract.model.dto;
 
-import io.nuls.base.data.Transaction;
 import io.nuls.contract.model.bo.ContractResult;
 
 import java.util.LinkedHashMap;
@@ -38,10 +37,10 @@ import java.util.stream.Collectors;
  */
 public class ContractPackageDto {
     private byte[] stateRoot;
-    private List<Transaction> resultTxList;
+    private List resultTxList;
     private Map<String, ContractResult> contractResultMap;
 
-    public ContractPackageDto(byte[] stateRoot, List<Transaction> resultTxList) {
+    public ContractPackageDto(byte[] stateRoot, List resultTxList) {
         this.stateRoot = stateRoot;
         this.resultTxList = resultTxList;
     }
@@ -54,15 +53,15 @@ public class ContractPackageDto {
         this.stateRoot = stateRoot;
     }
 
-    public void setResultTxList(List<Transaction> resultTxList) {
-        this.resultTxList = resultTxList;
-    }
-
     public byte[] getStateRoot() {
         return stateRoot;
     }
 
-    public List<Transaction> getResultTxList() {
+    public void setResultTxList(List resultTxList) {
+        this.resultTxList = resultTxList;
+    }
+
+    public List getResultTxList() {
         return resultTxList;
     }
 

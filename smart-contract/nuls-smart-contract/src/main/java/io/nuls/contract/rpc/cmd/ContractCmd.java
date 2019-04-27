@@ -153,10 +153,21 @@ public class ContractCmd extends BaseCmd {
             }
             ContractPackageDto dto = (ContractPackageDto) result.getData();
             List<String> resultTxDataList = new ArrayList<>();
-            List<Transaction> resultTxList = dto.getResultTxList();
-            for (Transaction resultTx : resultTxList) {
-                Log.info("Batch txType is [{}], hash is [{}]", resultTx.getType(), resultTx.getHash().toString());
-                resultTxDataList.add(RPCUtil.encode(resultTx.serialize()));
+            List resultTxList = dto.getResultTxList();
+            Transaction tx;
+            for (Object resultTx : resultTxList) {
+                // 合约调用其他模块生成的交易
+                if (resultTx instanceof String) {
+                    resultTxDataList.add((String) resultTx);
+                } else {
+                    // 合约内部生成的交易
+                    tx = (Transaction) resultTx;
+                    if (Log.isDebugEnabled()) {
+                        Log.debug("Batch new txHash is [{}]", tx.getHash().toString());
+                    }
+                    resultTxDataList.add(RPCUtil.encode(tx.serialize()));
+                }
+
             }
 
             Map<String, Object> resultMap = MapUtil.createHashMap(2);
@@ -348,11 +359,16 @@ public class ContractCmd extends BaseCmd {
         }
     }
 
+    /**
+     * @return
+     * @see io.nuls.contract.enums.CmdRegisterMode cmdMode
+     * @see io.nuls.contract.enums.CmdRegisterReturnType returnType
+     */
     @CmdAnnotation(cmd = REGISTER_CMD_FOR_CONTRACT, version = 1.0, description = "register cmd for contract")
     @Parameter(parameterName = "chainId", parameterType = "int")
     @Parameter(parameterName = "moduleCode", parameterType = "String")
     @Parameter(parameterName = "cmdName", parameterType = "String")
-    @Parameter(parameterName = "cmdType", parameterType = "int")
+    @Parameter(parameterName = "cmdMode", parameterType = "int")
     @Parameter(parameterName = "argNames", parameterType = "List<String>")
     @Parameter(parameterName = "returnType", parameterType = "int")
     public Response registerCmdForContract(Map<String, Object> params) {
@@ -361,12 +377,12 @@ public class ContractCmd extends BaseCmd {
             ChainManager.chainHandle(chainId);
             String moduleCode = (String) params.get("moduleCode");
             String cmdName = (String) params.get("cmdName");
-            Integer cmdType = (Integer) params.get("cmdType");
+            Integer cmdMode = (Integer) params.get("cmdMode");
             List<String> argNames = (List<String>) params.get("argNames");
             Integer returnType = (Integer) params.get("returnType");
 
-            Result result = cmdRegisterManager.registerCmd(chainId, moduleCode, cmdName, cmdType, argNames, returnType);
-            if(result.isFailed()) {
+            Result result = cmdRegisterManager.registerCmd(chainId, moduleCode, cmdName, cmdMode, argNames, returnType);
+            if (result.isFailed()) {
                 return failed(result.getErrorCode());
             }
             return success();

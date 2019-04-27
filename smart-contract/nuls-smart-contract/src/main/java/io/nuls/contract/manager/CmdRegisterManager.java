@@ -24,8 +24,8 @@
 package io.nuls.contract.manager;
 
 import io.nuls.contract.constant.ContractErrorCode;
-import io.nuls.contract.enums.CmdRegisterReturnType;
 import io.nuls.contract.enums.CmdRegisterMode;
+import io.nuls.contract.enums.CmdRegisterReturnType;
 import io.nuls.contract.manager.interfaces.RequestAndResponseInterface;
 import io.nuls.contract.model.bo.Chain;
 import io.nuls.contract.model.bo.CmdRegister;
@@ -74,28 +74,30 @@ public class CmdRegisterManager implements InitializingBean {
      * 注册的命令参数类型, 需定义为String或String Array
      * 调用该命令后的返回值类型, 需定义为String或String Array
      *
-     * @param chainId 链ID
+     * @param chainId    链ID
      * @param moduleCode 模块代码
-     * @param cmdName 模块提供的命令名称
-     * @param cmdMode 创建交易 or 查询数据
-     * @param argNames 命令的参数名, 注册的命令参数类型, 需定义为String或String Array
+     * @param cmdName    模块提供的命令名称
+     * @param cmdMode    创建交易 or 查询数据
+     * @param argNames   命令的参数名, 注册的命令参数类型, 需定义为String或String Array
      * @param returnType 调用该命令后的返回值类型, 需定义为String或String Array
      * @return 执行成功与否
+     * @see CmdRegisterMode
+     * @see CmdRegisterReturnType
      */
     public Result registerCmd(int chainId, String moduleCode, String cmdName, Integer cmdMode, List<String> argNames, Integer returnType) {
         Chain chain = chainManager.getChainMap().get(chainId);
-        if(chain == null) {
+        if (chain == null) {
             Log.error("chain not found, chainId is {}", chainId);
             return Result.getFailed(DATA_NOT_FOUND);
         }
-        if(cmdMode == CmdRegisterMode.NEW_TX.mode() && !STRING.equals(returnType)) {
+        if (cmdMode == CmdRegisterMode.NEW_TX.mode() && !STRING.equals(returnType)) {
             Log.error("The type of new tx does not support non-string return values, this return type is [{}]", returnType);
             return Result.getFailed(ContractErrorCode.CMD_REGISTER_NEW_TX_RETURN_TYPE_ERROR);
         }
         Map<String, CmdRegister> cmdRegisterMap = chain.getCmdRegisterMap();
         CmdRegister cmdRegister;
-        if((cmdRegister = cmdRegisterMap.get(cmdName)) != null) {
-            if(!cmdRegister.getModuleCode().equals(moduleCode)) {
+        if ((cmdRegister = cmdRegisterMap.get(cmdName)) != null) {
+            if (!cmdRegister.getModuleCode().equals(moduleCode)) {
                 // 不同模块注册了重复的cmd
                 Log.error("Different modules registered duplicate cmd, cmdName is {}, registerd module is {}, registering module is {}", cmdName, cmdRegister.getModuleCode(), moduleCode);
                 return Result.getFailed(ContractErrorCode.DUPLICATE_REGISTER_CMD);
@@ -103,7 +105,9 @@ public class CmdRegisterManager implements InitializingBean {
         }
         // 没有则注册，存在则覆盖
         cmdRegister = new CmdRegister(moduleCode, cmdName, CmdRegisterMode.getMode(cmdMode), argNames, CmdRegisterReturnType.getType(returnType));
-        Log.debug("registered cmd info: {}", cmdRegister);
+        if (Log.isDebugEnabled()) {
+            Log.debug("registered cmd info: {}", cmdRegister);
+        }
         cmdRegisterMap.put(cmdName, cmdRegister);
         return getSuccess();
     }
@@ -117,7 +121,7 @@ public class CmdRegisterManager implements InitializingBean {
      */
     public CmdRegister getCmdRegisterByCmdName(int chainId, String cmdName) {
         Chain chain = chainManager.getChainMap().get(chainId);
-        if(chain == null) {
+        if (chain == null) {
             Log.error("chain not found, chainId is {}", chainId);
             return null;
         }
@@ -130,8 +134,8 @@ public class CmdRegisterManager implements InitializingBean {
      * 合约调用外部模块注册的命令的请求器
      *
      * @param moduleCode 模块代码
-     * @param cmdName 命令名称
-     * @param args 参数
+     * @param cmdName    命令名称
+     * @param args       参数
      * @return response
      * @throws Exception
      */

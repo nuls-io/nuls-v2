@@ -215,7 +215,9 @@ public class ContractTxCallable implements Callable<ContractResult> {
         if (txTrackObj != null && txTrackObj instanceof ProgramExecutor) {
             ProgramExecutor txTrack = (ProgramExecutor) txTrackObj;
             txTrack.commit();
-            Log.debug("One of Batch contract[{}] commit", AddressTool.getStringAddressByBytes(contractResult.getContractAddress()));
+            if (Log.isDebugEnabled()) {
+                Log.debug("One of Batch contract[{}] commit", AddressTool.getStringAddressByBytes(contractResult.getContractAddress()));
+            }
         }
     }
 
