@@ -96,8 +96,6 @@ public class ServerChannelHandler extends BaseChannelHandler {
         SocketChannel channel = (SocketChannel) ctx.channel();
         ByteBuf buf = (ByteBuf) msg;
         String remoteIP = channel.remoteAddress().getHostString();
-        int port = channel.remoteAddress().getPort();
-        LoggerUtil.logger().info("{}-----------------server channelRead-----------------{}:{}", TimeManager.currentTimeMillis(), remoteIP, port);
         NulsByteBuffer byteBuffer = null;
         Node node = null;
         try {

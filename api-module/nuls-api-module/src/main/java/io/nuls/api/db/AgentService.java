@@ -18,6 +18,8 @@ public interface AgentService {
 
     AgentInfo getAgentByAgentAddress(int chainID, String agentAddress);
 
+    AgentInfo getAliveAgentByAgentAddress(int chainID, String agentAddress);
+
     void saveAgentList(int chainID, List<AgentInfo> agentInfoList);
 
     void rollbackAgentList(int chainId, List<AgentInfo> agentInfoList);

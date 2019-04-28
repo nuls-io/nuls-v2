@@ -25,6 +25,7 @@
 
 package io.nuls.network.manager.handler.message;
 
+import io.nuls.network.cfg.NetworkConfig;
 import io.nuls.network.constant.NodeConnectStatusEnum;
 import io.nuls.network.constant.NodeStatusEnum;
 import io.nuls.network.manager.MessageFactory;
@@ -95,6 +96,7 @@ public class VersionMessageHandler extends BaseMessageHandler {
             //不会存在两次被动连接都是同一个端口的，即使是同一台服务器
             //if(ip.equals(node.getIp()) && (node.getPort().intValue() == port || node.getType() == Node.OUT)) {
             if (ip.equals(node.getIp()) && node.getType() == Node.OUT) {
+                //也可能存在自己连接自己进入这个逻辑
                 //这里需要一个机制来判定相互连接时候保留哪个?
                 LoggerUtil.logger(chainId).debug("22222===ip={},node.getIp()={}, node.getType={}",ip,node.getIp(),node.getType());
                 return false;
@@ -158,7 +160,6 @@ public class VersionMessageHandler extends BaseMessageHandler {
         });
         //存储需要的信息,协议版本信息，远程跨链端口信息
         node.setVersionProtocolInfos(versionBody.getProtocolVersion(), versionBody.getBlockHeight(), versionBody.getBlockHash());
-        node.setRemoteCrossPort(versionBody.getPortMeCross());
         //回复version
         VersionMessage versionMessage = MessageFactory.getInstance().buildVersionMessage(node, message.getHeader().getMagicNumber());
         LoggerUtil.logger(nodeGroup.getChainId()).debug("node={} version success.go response versionMessage..cross={}",node.getId(),node.isCrossConnect());
@@ -181,7 +182,6 @@ public class VersionMessageHandler extends BaseMessageHandler {
 //       Log.debug("VersionMessageHandler Recieve:Client"+":"+node.getIp()+":"+node.getRemotePort()+"==CMD=" +message.getHeader().getCommandStr());
         //存储需要的信息
         node.setVersionProtocolInfos(versionBody.getProtocolVersion(), versionBody.getBlockHeight(), versionBody.getBlockHash());
-        node.setRemoteCrossPort(versionBody.getPortMeCross());
         node.setConnectStatus(NodeConnectStatusEnum.AVAILABLE);
         node.setConnectTime(TimeManager.currentTimeMillis());
         if (node.isCrossConnect()) {

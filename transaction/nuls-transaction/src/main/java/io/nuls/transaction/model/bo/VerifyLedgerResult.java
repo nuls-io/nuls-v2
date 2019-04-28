@@ -72,6 +72,13 @@ public class VerifyLedgerResult {
         return success && !orphan;
     }
 
+    /**
+     * 孤儿交易
+     * @return
+     */
+    public boolean isOrphan() {
+        return success && orphan;
+    }
 
     public boolean getSuccess() {
         return success;

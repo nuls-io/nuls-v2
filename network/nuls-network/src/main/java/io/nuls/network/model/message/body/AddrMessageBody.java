@@ -30,6 +30,7 @@ import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.basic.NulsOutputStreamBuffer;
 import io.nuls.base.data.BaseNulsData;
 import io.nuls.network.model.dto.IpAddress;
+import io.nuls.network.model.dto.IpAddressShare;
 import io.nuls.tools.constant.ToolsConstant;
 import io.nuls.tools.exception.NulsException;
 
@@ -47,14 +48,14 @@ import java.util.List;
  */
 public class AddrMessageBody extends BaseNulsData {
 
-    private List<IpAddress> ipAddressList = new ArrayList<>();
+    private List<IpAddressShare> ipAddressList = new ArrayList<>();
 
 
     public AddrMessageBody() {
 
     }
 
-    public void addAddr(IpAddress addr) {
+    public void addAddr(IpAddressShare addr) {
         ipAddressList.add(addr);
     }
 
@@ -62,7 +63,7 @@ public class AddrMessageBody extends BaseNulsData {
     public int size() {
         int s = 0;
         if (ipAddressList.size() > 0) {
-            s += ipAddressList.size() * (new IpAddress().size());
+            s += ipAddressList.size() * (new IpAddressShare().size());
         } else {
             s = 4;
         }
@@ -77,7 +78,7 @@ public class AddrMessageBody extends BaseNulsData {
         if (0 == ipAddressList.size()) {
             stream.write(ToolsConstant.PLACE_HOLDER);
         } else {
-            for (IpAddress address : ipAddressList) {
+            for (IpAddressShare address : ipAddressList) {
                 address.serializeToStream(stream);
             }
         }
@@ -87,7 +88,7 @@ public class AddrMessageBody extends BaseNulsData {
     public void parse(NulsByteBuffer buffer) throws NulsException {
         try {
             while (!buffer.isFinished()) {
-                IpAddress address = new IpAddress();
+                IpAddressShare address = new IpAddressShare();
                 address.parse(buffer);
                 ipAddressList.add(address);
             }
@@ -97,11 +98,11 @@ public class AddrMessageBody extends BaseNulsData {
         }
     }
 
-    public List<IpAddress> getIpAddressList() {
+    public List<IpAddressShare> getIpAddressList() {
         return ipAddressList;
     }
 
-    public void setIpAddressList(List<IpAddress> ipAddressList) {
+    public void setIpAddressList(List<IpAddressShare> ipAddressList) {
         this.ipAddressList = ipAddressList;
     }
 }

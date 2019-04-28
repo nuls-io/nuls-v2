@@ -50,7 +50,6 @@ public class LoggerUtil {
     private static final String LOGGER_KEY5 = "nwInfos";
     private static Map<String, NulsLogger> logMap = new HashMap<>();
     private static NulsLogger logger = null;
-
     public static void defaultLogInit(String logLevel) {
         logger = LoggerBuilder.getLogger( "nw", Level.valueOf(logLevel));
     }

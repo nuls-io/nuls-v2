@@ -48,14 +48,14 @@ public class ConfigBean implements Serializable {
     /** 打包获取交易给RPC传输到共识的预留时间,超时则需要处理交易还原待打包队列*/
     private long packageRpcReserveTime;
     /** 接收新交易的文件队列最大容量**/
-    private long txUnverifiedQueueSize;
+    private int txUnverifiedQueueSize;
     /** 孤儿交易生命时间,超过会被清理**/
     private long orphanTtl;
 
     public ConfigBean() {
     }
 
-    public ConfigBean(int chainId, int assetId, int txMaxSize, float moduleVerifyPercent, long packageRpcReserveTime, long txUnverifiedQueueSize, long orphanTtl) {
+    public ConfigBean(int chainId, int assetId, int txMaxSize, float moduleVerifyPercent, long packageRpcReserveTime, int txUnverifiedQueueSize, long orphanTtl) {
         this.chainId = chainId;
         this.assetId = assetId;
         this.txMaxSize = txMaxSize;
@@ -105,11 +105,11 @@ public class ConfigBean implements Serializable {
         this.packageRpcReserveTime = packageRpcReserveTime;
     }
 
-    public long getTxUnverifiedQueueSize() {
+    public int getTxUnverifiedQueueSize() {
         return txUnverifiedQueueSize;
     }
 
-    public void setTxUnverifiedQueueSize(long txUnverifiedQueueSize) {
+    public void setTxUnverifiedQueueSize(int txUnverifiedQueueSize) {
         this.txUnverifiedQueueSize = txUnverifiedQueueSize;
     }
 

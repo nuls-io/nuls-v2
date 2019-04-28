@@ -50,8 +50,6 @@ public class IpAddress extends BaseNulsData {
     public IpAddress() {
         super();
     }
-
-
     public IpAddress(String ipStr, int port) {
         try {
             this.ip = InetAddress.getByName(ipStr);
@@ -123,7 +121,8 @@ public class IpAddress extends BaseNulsData {
             ip = InetAddress.getByAddress(ipAddrBytes);
             port = byteBuffer.readUint16();
         } catch (UnknownHostException e) {
-            throw new RuntimeException(e);  // Cannot happen.
+            // Cannot happen.
+            throw new RuntimeException(e);
         } catch (Exception e) {
             e.printStackTrace();
         }

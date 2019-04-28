@@ -8,6 +8,7 @@ import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
 import com.mongodb.client.model.*;
 import io.nuls.api.db.DepositService;
+import io.nuls.api.model.po.db.AgentInfo;
 import io.nuls.api.model.po.db.DepositInfo;
 import io.nuls.api.model.po.db.PageInfo;
 import io.nuls.api.utils.DocumentTransferTool;
@@ -178,14 +179,13 @@ public class MongoDepositServiceImpl implements DepositService {
     }
 
     public List<String> getAgentHashList(int chainId, String address) {
-        Bson bson = Filters.eq("address", address);
+        Bson bson = Filters.and(Filters.eq("address", address), Filters.eq("type", 0), Filters.eq("deleteHeight", 0));
         DistinctIterable<String> iterable = mongoDBService.getCollection(DEPOSIT_TABLE + chainId).distinct("agentHash", bson, String.class);
         List<String> list = new ArrayList<>();
         MongoCursor<String> mongoCursor = iterable.iterator();
         while (mongoCursor.hasNext()) {
             list.add(mongoCursor.next());
         }
-
         return list;
     }
 
