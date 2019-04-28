@@ -68,11 +68,11 @@ public class BatchCreateTransferCase extends BaseTranscationCase<Boolean, Intege
                     latch.countDown();
                 });
             }
-//            try {
-//                latch.await();
-//            } catch (InterruptedException e) {
-//                e.printStackTrace();
-//            }
+            try {
+                latch.await();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
             Log.info("创建{}笔交易,成功{}笔，消耗时间:{}", count,successTotal, System.currentTimeMillis() - start);
         });
         return true;
