@@ -74,7 +74,7 @@ public abstract class BaseCmd {
      * @return Response
      */
     protected Response success(Object responseData) {
-        Response response = MessageUtil.newSuccessResponse("", "Congratulations! Processing completed！");
+        Response response = MessageUtil.newSuccessResponse("", Response.SUCCESS_MSG);
         response.setResponseData(responseData);
         return response;
     }
