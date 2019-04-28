@@ -16,11 +16,16 @@ import io.nuls.test.cases.transcation.TransferToAddressCase;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.log.Log;
+import io.nuls.tools.thread.ThreadUtils;
+import io.nuls.tools.thread.commom.NulsThreadFactory;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 import static io.nuls.test.cases.Constants.REMARK;
 import static io.nuls.test.cases.transcation.batch.BatchCreateAccountCase.TRANSFER_AMOUNT;
@@ -36,6 +41,8 @@ public class BatchReadyNodeAccountCase extends CallRemoteTestCase<Void,Integer> 
     AccountService accountService = ServiceManager.get(AccountService.class);
 
     TransferService transferService = ServiceManager.get(TransferService.class);
+
+    private ThreadPoolExecutor threadPoolExecutor = ThreadUtils.createThreadPool(5,5,new NulsThreadFactory("create-account"));
 
     @Autowired
     Config config;
@@ -77,11 +84,26 @@ public class BatchReadyNodeAccountCase extends CallRemoteTestCase<Void,Integer> 
             params.add(bp);
         }
         sleep30.check(null,depth);
+//        CountDownLatch latch = new CountDownLatch(nodes.size());
         for (int i = 0;i<nodes.size();i++){
             String node = nodes.get(i);
-            Integer res = doRemoteTest(node,BatchCreateAccountCase.class,params.get(i));
+            BatchParam bp = params.get(i);
+            Integer res = doRemoteTest(node, BatchCreateAccountCase.class,bp);
+//            threadPoolExecutor.execute(()->{
+//                Integer res = null;
+//                try {
+//                } catch (TestFailException e) {
+//                    e.printStackTrace();
+//                }
+//                latch.countDown();
+//            });
             Log.info("成功创建测试账户{}个",res);
         }
+//        try {
+//            latch.await(60L, TimeUnit.SECONDS);
+//        } catch (InterruptedException e) {
+//            e.printStackTrace();
+//        }
         sleep15.check(null,depth);
         for (int i = 0;i<accounts.getList().size();i++) {
             String node = nodes.get(i);

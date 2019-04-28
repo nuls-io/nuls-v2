@@ -26,7 +26,7 @@ import static io.nuls.test.cases.Constants.REMARK;
 @Component
 public class BatchCreateTransferCase extends BaseTranscationCase<Boolean, Integer> {
 
-    int THEADH_COUNT = 5;
+    int THEADH_COUNT = 2;
 
     public static final BigInteger TRANSFER_AMOUNT = BigInteger.valueOf(10000000L);
 
@@ -44,6 +44,7 @@ public class BatchCreateTransferCase extends BaseTranscationCase<Boolean, Intege
             AtomicInteger successTotal = new AtomicInteger(0);
             CountDownLatch latch = new CountDownLatch(THEADH_COUNT);
             Long start = System.currentTimeMillis();
+            Log.info("开始创建交易");
             for(int s=0;s < THEADH_COUNT;s++){
                 ThreadUtils.createAndRunThread("batch-transfer", () -> {
                     int i = doneTotal.getAndIncrement();
