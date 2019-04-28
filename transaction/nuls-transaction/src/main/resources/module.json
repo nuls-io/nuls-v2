@@ -1,7 +1,7 @@
 
 {
   "chainConfig":{
-    "chainId":100,
+    "chainId":2,
     "assetId":1,
     "txMaxSize":1048576,
     "moduleVerifyPercent":0.1,
