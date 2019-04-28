@@ -40,14 +40,31 @@ public class BeanUtilTest {
                 beanName = bean.getClass().getSimpleName();
             }
             beanName = beanName.substring(0, 1).toLowerCase() + beanName.substring(1);
-            Field field = src.getClass().getDeclaredField(beanName);
+            Field field = getField(src, beanName);
             field.setAccessible(true);
             field.set(src, bean);
-        } catch (NoSuchFieldException e) {
-            e.printStackTrace();
         } catch (IllegalAccessException e) {
             e.printStackTrace();
         }
+    }
+
+    private static Field getField(Object src, String beanName) {
+        Field field = null;
+        Class<?> srcClass = src.getClass();
+        try {
+            field = src.getClass().getDeclaredField(beanName);
+            return field;
+        } catch (NoSuchFieldException e) {
+            Class<?> superclass;
+            while((superclass = srcClass.getSuperclass()) != null) {
+                try {
+                    field = superclass.getDeclaredField(beanName);
+                    return field;
+                } catch (NoSuchFieldException e1) {}
+                srcClass = superclass;
+            }
+        }
+        return field;
     }
 
     public static void setBean(Object src, String beanName, Object bean) {

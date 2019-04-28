@@ -125,4 +125,28 @@ public class ContractTempBalanceManager {
         }
     }
 
+    public void addLockedTempBalance(byte[] address, BigInteger amount) {
+        lock.lock();
+        try {
+            ContractBalance contractBalance = tempBalanceMap.get(balanceKey(address));
+            if (contractBalance != null) {
+                contractBalance.addLockedTemp(amount);
+            }
+        } finally {
+            lock.unlock();
+        }
+    }
+
+    public void minusLockedTempBalance(byte[] address, BigInteger amount) {
+        lock.lock();
+        try {
+            ContractBalance contractBalance = tempBalanceMap.get(balanceKey(address));
+            if (contractBalance != null) {
+                contractBalance.minusLockedTemp(amount);
+            }
+        } finally {
+            lock.unlock();
+        }
+    }
+
 }

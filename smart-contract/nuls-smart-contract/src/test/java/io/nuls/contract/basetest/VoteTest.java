@@ -29,7 +29,7 @@ import io.nuls.contract.model.bo.Chain;
 import io.nuls.contract.model.bo.config.ConfigBean;
 import io.nuls.contract.util.Log;
 import io.nuls.contract.util.VMContext;
-import io.nuls.contract.util.VMContextTest;
+import io.nuls.contract.util.VMContextMock;
 import io.nuls.contract.vm.natives.io.nuls.contract.sdk.NativeAddress;
 import io.nuls.contract.vm.program.ProgramCall;
 import io.nuls.contract.vm.program.ProgramCreate;
@@ -75,7 +75,7 @@ public class VoteTest {
         chain.setConfig(configBean);
         //ContractTokenBalanceManager tokenBalanceManager = ContractTokenBalanceManager.newInstance(chain.getChainId());
         //chain.setContractTokenBalanceManager(tokenBalanceManager);
-        vmContext = new VMContextTest();
+        vmContext = new VMContextMock();
         programExecutor = new ProgramExecutorImpl(vmContext, chain);
         chain.setProgramExecutor(programExecutor);
     }
