@@ -49,4 +49,12 @@ public interface CommandConstant {
      * 回滚区块通知
      */
     String ROLLBACK_BLOCK = "rollbackBlock";
+    /**
+     * 回滚区块通知
+     */
+    String REGISTER_TX = "registerTx";
+    /**
+     * 回滚区块通知
+     */
+    String REGISTER_MSG = "registerMsg";
 }

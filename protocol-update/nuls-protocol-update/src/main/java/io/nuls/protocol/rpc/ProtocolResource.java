@@ -128,4 +128,52 @@ public class ProtocolResource extends BaseCmd {
         }
     }
 
+    /**
+     * 注册多版本交易
+     *
+     * @param map
+     * @return
+     */
+    @CmdAnnotation(cmd = REGISTER_TX, version = 1.0, scope = Constants.PUBLIC, description = "")
+    @Parameter(parameterName = "chainId", parameterType = "int")
+    @Parameter(parameterName = "blockHeader", parameterType = "string")
+    public Response registerTx(Map map) {
+        int chainId = Integer.parseInt(map.get("chainId").toString());
+        String hex = map.get("blockHeader").toString();
+        BlockHeader blockHeader = new BlockHeader();
+        try {
+            blockHeader.parse(new NulsByteBuffer(HexUtil.decode(hex)));
+            short i = service.rollback(chainId, blockHeader);
+            Map<String, Short> responseData = new HashMap<>(1);
+            responseData.put("version", i);
+            return success(responseData);
+        } catch (NulsException e) {
+            return failed(e.getMessage());
+        }
+    }
+
+    /**
+     * 注册多版本消息
+     *
+     * @param map
+     * @return
+     */
+    @CmdAnnotation(cmd = REGISTER_MSG, version = 1.0, scope = Constants.PUBLIC, description = "")
+    @Parameter(parameterName = "chainId", parameterType = "int")
+    @Parameter(parameterName = "blockHeader", parameterType = "string")
+    public Response registerMsg(Map map) {
+        int chainId = Integer.parseInt(map.get("chainId").toString());
+        String hex = map.get("blockHeader").toString();
+        BlockHeader blockHeader = new BlockHeader();
+        try {
+            blockHeader.parse(new NulsByteBuffer(HexUtil.decode(hex)));
+            short i = service.rollback(chainId, blockHeader);
+            Map<String, Short> responseData = new HashMap<>(1);
+            responseData.put("version", i);
+            return success(responseData);
+        } catch (NulsException e) {
+            return failed(e.getMessage());
+        }
+    }
+
 }

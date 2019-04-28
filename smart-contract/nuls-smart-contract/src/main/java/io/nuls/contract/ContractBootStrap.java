@@ -18,8 +18,8 @@ import io.nuls.rpc.modulebootstrap.Module;
 import io.nuls.rpc.modulebootstrap.NulsRpcModuleBootstrap;
 import io.nuls.rpc.modulebootstrap.RpcModule;
 import io.nuls.rpc.modulebootstrap.RpcModuleState;
+import io.nuls.rpc.util.RegisterHelper;
 import io.nuls.rpc.util.TimeUtils;
-import io.nuls.rpc.util.TxRegisterHelper;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.core.ioc.SpringLiteContext;
@@ -219,7 +219,7 @@ public class ContractBootStrap extends RpcModule {
             Map<Integer, Chain> chainMap = chainManager.getChainMap();
             for(Chain chain : chainMap.values()) {
                 int chainId = chain.getChainId();
-                boolean registerTx = TxRegisterHelper.registerTx(chainId, ProtocolGroupManager.getProtocol(chainId));
+                boolean registerTx = RegisterHelper.registerTx(chainId, ProtocolGroupManager.getProtocol(chainId));
                 Log.info("register tx type to tx module, chain id is {}, result is {}", chainId, registerTx);
             }
         }

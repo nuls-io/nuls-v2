@@ -15,7 +15,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class TxRegisterHelper {
+public class RegisterHelper {
 
     /**
      * 向交易模块注册交易
@@ -55,6 +55,31 @@ public class TxRegisterHelper {
             Log.error("", e);
         }
         return true;
+    }
+
+    /**
+     * 注册消息处理器
+     *
+     * @return
+     */
+    public static void registerMsg(Protocol protocol) {
+        try {
+            Map<String, Object> map = new HashMap<>(2);
+            List<Map<String, String>> cmds = new ArrayList<>();
+            map.put("role", ConnectManager.LOCAL.getAbbreviation());
+            List<String> list = List.of();
+            for (String s : list) {
+                Map<String, String> cmd = new HashMap<>(2);
+                cmd.put("protocolCmd", s);
+                cmd.put("handler", s);
+                cmds.add(cmd);
+            }
+            map.put("protocolCmds", cmds);
+            ResponseMessageProcessor.requestAndResponse(ModuleE.NW.abbr, "nw_protocolRegister", map);
+        } catch (Exception e) {
+            e.printStackTrace();
+            Log.error("registerMsg fail");
+        }
     }
 
 }

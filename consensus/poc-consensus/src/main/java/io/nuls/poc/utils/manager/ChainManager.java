@@ -9,7 +9,7 @@ import io.nuls.poc.model.bo.Chain;
 import io.nuls.poc.model.bo.config.ConfigBean;
 import io.nuls.poc.rpc.call.CallMethodUtils;
 import io.nuls.poc.storage.ConfigService;
-import io.nuls.rpc.util.TxRegisterHelper;
+import io.nuls.rpc.util.RegisterHelper;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.log.Log;
@@ -88,7 +88,7 @@ public class ChainManager {
              * Chain Trading Registration
              * */
             int chainId = chain.getConfig().getChainId();
-            TxRegisterHelper.registerTx(chainId, ProtocolGroupManager.getProtocol(chainId));
+            RegisterHelper.registerTx(chainId, ProtocolGroupManager.getProtocol(chainId));
         }
     }
 
