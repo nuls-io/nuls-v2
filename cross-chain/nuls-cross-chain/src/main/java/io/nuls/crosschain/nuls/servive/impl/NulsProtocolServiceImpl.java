@@ -278,7 +278,7 @@ public class NulsProtocolServiceImpl implements ProtocolService {
         String nativeHex = nativeHash.getDigestHex();
         try {
             originalHash.parse(messageBody.getCtx().getTxData(),0);
-            chain.getMessageLog().info("\n收到链内节点:{}发送过来的完整跨链交易信息,originalHash:{},Hash:{}",nodeId,originalHex,nativeHex);
+            chain.getMessageLog().info("收到链内节点:{}发送过来的完整跨链交易信息,originalHash:{},Hash:{}",nodeId,originalHex,nativeHex);
             //判断本节点是否已经收到过该跨链交易，如果已收到过直接忽略
             if(convertToCtxService.get(originalHash, handleChainId) == null){
                 chain.getMessageLog().info("本节点已收到并处理过该跨链交易，originalHash:{},Hash:{}",originalHex,nativeHex);
@@ -381,7 +381,7 @@ public class NulsProtocolServiceImpl implements ProtocolService {
         Chain chain = chainManager.getChainMap().get(handleChainId);
         NulsDigestData originalHash = messageBody.getRequestHash();
         NulsDigestData nativeHash = messageBody.getCtx().getHash();
-        chain.getMessageLog().info("收到发送链节点{}发送过来的完整跨链交易,originalHash:{},Hash:{}",originalHash,nativeHash);
+        chain.getMessageLog().info("收到发送链节点{}发送过来的完整跨链交易,originalHash:{},Hash:{}",nodeId,originalHash,nativeHash);
         //判断本节点是否已经收到过该跨链交易，如果已收到过直接忽略
         if(convertToCtxService.get(originalHash, handleChainId) == null){
             chain.getMessageLog().info("本节点已收到并处理过该跨链交易，originalHash:{},Hash:{}",originalHash,nativeHash);
