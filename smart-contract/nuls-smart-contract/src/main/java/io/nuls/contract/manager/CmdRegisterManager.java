@@ -90,8 +90,9 @@ public class CmdRegisterManager implements InitializingBean {
             Log.error("chain not found, chainId is {}", chainId);
             return Result.getFailed(DATA_NOT_FOUND);
         }
-        if (cmdMode == CmdRegisterMode.NEW_TX.mode() && !STRING.equals(returnType)) {
-            Log.error("The type of new tx does not support non-string return values, this return type is [{}]", returnType);
+        CmdRegisterReturnType cmdRegisterReturnType = CmdRegisterReturnType.getType(returnType);
+        if (cmdMode == CmdRegisterMode.NEW_TX.mode() && !CmdRegisterReturnType.STRING_ARRAY.equals(cmdRegisterReturnType)) {
+            Log.error("The type of NEW_TX does not support non-string array return values, this return type is [{}]", cmdRegisterReturnType);
             return Result.getFailed(ContractErrorCode.CMD_REGISTER_NEW_TX_RETURN_TYPE_ERROR);
         }
         Map<String, CmdRegister> cmdRegisterMap = chain.getCmdRegisterMap();
@@ -104,7 +105,7 @@ public class CmdRegisterManager implements InitializingBean {
             }
         }
         // 没有则注册，存在则覆盖
-        cmdRegister = new CmdRegister(moduleCode, cmdName, CmdRegisterMode.getMode(cmdMode), argNames, CmdRegisterReturnType.getType(returnType));
+        cmdRegister = new CmdRegister(moduleCode, cmdName, CmdRegisterMode.getMode(cmdMode), argNames, cmdRegisterReturnType);
         if (Log.isDebugEnabled()) {
             Log.debug("registered cmd info: {}", cmdRegister);
         }

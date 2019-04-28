@@ -515,7 +515,7 @@ public class NativeUtils {
      *
      */
     private static ObjectRef handleResult(int chainId, Object cmdResult, ProgramInvokeRegisterCmd invokeRegisterCmd, CmdRegister cmdRegister, Frame frame) {
-        ObjectRef objectRef = null;
+        ObjectRef objectRef;
         if (invokeRegisterCmd.getCmdRegisterMode().equals(CmdRegisterMode.NEW_TX)) {
             String[] newTxArray = (String[]) cmdResult;
             String txHash = newTxArray[0];
@@ -525,6 +525,7 @@ public class NativeUtils {
             // 在此处理交易的作用是让NVM知道合约余额的变化，如果不在此刷新，这个交易花费的金额NVM不知道，若又产生一个合约内部转账，合约判断不了余额是否足够
             // 处理此交易 - 刷新临时余额和nonce
             handler.handleContractNewTxFromOtherModule(chainId, txHash, txString);
+            objectRef = frame.heap.newString(txHash);
         } else {
             // 根据返回值类型解析数据
             CmdRegisterReturnType returnType = cmdRegister.getCmdRegisterReturnType();
