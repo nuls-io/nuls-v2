@@ -1,5 +1,7 @@
 package io.nuls.crosschain.nuls.servive.impl;
 
+import io.nuls.base.data.Coin;
+import io.nuls.base.data.CoinData;
 import io.nuls.base.data.NulsDigestData;
 import io.nuls.base.data.Transaction;
 import io.nuls.base.signture.P2PHKSignature;
@@ -587,6 +589,10 @@ public class NulsProtocolServiceImpl implements ProtocolService {
         Map packerInfo = ConsensusCall.getPackerInfo(chain);
         int agentCount = (int)packerInfo.get("agentCount");
         int signCount = transactionSignature.getP2PHKSignatures().size();
+        //如果为主网则需要减去发起链账户对跨链交易的签名数量然后再做拜占庭
+        if(chain.isMainChain()){
+            signCount -= ctx.getCoinDataInstance().getFromAddressCount();
+        }
         if(signCount >= agentCount*chain.getConfig().getByzantineRatio()/NulsCrossChainConstant.MAGIC_NUM_100){
             TransactionCall.sendTx(chain, RPCUtil.encode(ctx.serialize()));
             chain.getMessageLog().info("跨链交易签名数量达到拜占庭比例，将该跨链交易发送给交易模块处理,originalHash:{},Hash:{}",originalHash,nativeHash);
