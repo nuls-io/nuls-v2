@@ -72,8 +72,10 @@ public class GroupStatusMonitor implements Runnable {
             if (nodeGroup.isActive(isCross)) {
                 nodesContainer.setStatus(NodeGroup.OK);
                 //执行分享地址线程
-                TaskManager.getInstance().createShareAddressTask(nodeGroup, isCross);
-                nodesContainer.setHadShareAddr(true);
+                if(!nodesContainer.isHadShareAddr()) {
+                    TaskManager.getInstance().createShareAddressTask(nodeGroup, isCross);
+                    nodesContainer.setHadShareAddr(true);
+                }
             }
         } else if (NodeGroup.OK == nodesContainer.getStatus()) {
             if (!nodeGroup.isActive(isCross)) {
