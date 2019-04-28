@@ -18,10 +18,7 @@ import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.exception.NulsRuntimeException;
 
 import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * CoinData操作工具类
@@ -179,6 +176,7 @@ public class CoinDataManager {
             Obtain the delegation information of the node and return the amount of the delegation to the principal
             */
             List<Deposit> deposits = chain.getDepositList();
+            Map<String, CoinTo> toMap = new HashMap<>(ConsensusConstant.INIT_CAPACITY);
             long blockHeight = null == height ? -1 : height;
             for (Deposit deposit : deposits) {
                 if (deposit.getDelHeight() > 0 && (blockHeight <= 0 || deposit.getDelHeight() < blockHeight)) {
@@ -200,9 +198,16 @@ public class CoinDataManager {
                     fromList.add(from);
                     break;
                 }
-                CoinTo coinTo = new CoinTo(deposit.getAddress(),chainId,assetsId,deposit.getDeposit(),0);
-                toList.add(coinTo);
+                String address = AddressTool.getStringAddressByBytes(deposit.getAddress());
+                CoinTo coinTo = toMap.get(address);
+                if(coinTo == null){
+                    coinTo = new CoinTo(deposit.getAddress(),chainId,assetsId,deposit.getDeposit(),0);
+                    toMap.put(address,coinTo);
+                }else{
+                    coinTo.setAmount(coinTo.getAmount().add(deposit.getDeposit()));
+                }
             }
+            toList.addAll(toMap.values());
             coinData.setTo(toList);
             return coinData;
         } catch (NulsException e) {

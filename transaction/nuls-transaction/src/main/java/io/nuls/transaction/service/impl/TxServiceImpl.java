@@ -350,6 +350,7 @@ public class TxServiceImpl implements TxService {
             //验证账户地址,资产链id,资产id的组合唯一性
             int assetsChainId = coinFrom.getAssetsChainId();
             boolean rs = uniqueCoin.add(AddressTool.getStringAddressByBytes(coinFrom.getAddress()) + "-" + assetsChainId + "-" + assetsId + "-" + HexUtil.encode(coinFrom.getNonce()));
+            System.out.println(AddressTool.getStringAddressByBytes(coinFrom.getAddress()) + "-" + assetsChainId + "-" + assetsId + "-" + HexUtil.encode(coinFrom.getNonce()));
             if (!rs) {
                 throw new NulsException(TxErrorCode.COINFROM_HAS_DUPLICATE_COIN);
             }
@@ -1028,8 +1029,11 @@ public class TxServiceImpl implements TxService {
             chain.getLoggerMap().get(TxConstant.LOG_TX).error(e);
             return false;
         }
+        LOG.debug("[验区块交易] 通过 ---------------总计执行时间:{}", TimeUtils.getCurrentTimeMillis() - s1);//----
+        chain.getLoggerMap().get(TxConstant.LOG_TX).debug("batchVerify success.");
+        return rs;
 
-        if (rs) {
+       /* if (rs) {
             long save = TimeUtils.getCurrentTimeMillis();//-----
             List<Transaction> unconfirmedTxSaveList = new ArrayList<>();
             for (TxDataWrapper txDataWrapper : txList) {
@@ -1050,9 +1054,8 @@ public class TxServiceImpl implements TxService {
         }else{
             LOG.debug("[验区块交易] 失败 ---------------总计执行时间:{}", TimeUtils.getCurrentTimeMillis() - s1);//----
             chain.getLoggerMap().get(TxConstant.LOG_TX).debug("batchVerify fail.");
-        }
-        LOG.debug("");//----
-        return rs;
+        }*/
+
     }
 
     @Override
