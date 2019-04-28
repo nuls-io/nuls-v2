@@ -115,7 +115,7 @@ public class BlockServiceImpl implements BlockService {
                         po.setHashList(broadFailCtxHash);
                         sendHeightService.save(cacheHeight, po, chainId);
                     }else{
-                        sendHeightService.delete(height, chainId);
+                        sendHeightService.delete(cacheHeight, chainId);
                     }
                 }else{
                     break;
