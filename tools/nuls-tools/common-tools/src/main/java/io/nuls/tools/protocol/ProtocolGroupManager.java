@@ -1,5 +1,6 @@
 package io.nuls.tools.protocol;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -21,8 +22,12 @@ public class ProtocolGroupManager {
         protocolGroup.setVersion(version);
     }
 
-    public static Protocol getProtocol(int chainId) {
+    public static Protocol getCurrentProtocol(int chainId) {
         return protocolGroupMap.get(chainId).getProtocol();
+    }
+
+    public static Collection<Protocol> getProtocols(int chainId) {
+        return protocolGroupMap.get(chainId).getProtocolsMap().values();
     }
 
     public static short getVersion(int chainId) {

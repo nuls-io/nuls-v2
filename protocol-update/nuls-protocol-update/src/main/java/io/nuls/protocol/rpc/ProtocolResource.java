@@ -136,20 +136,18 @@ public class ProtocolResource extends BaseCmd {
      */
     @CmdAnnotation(cmd = REGISTER_TX, version = 1.0, scope = Constants.PUBLIC, description = "")
     @Parameter(parameterName = "chainId", parameterType = "int")
-    @Parameter(parameterName = "blockHeader", parameterType = "string")
+    @Parameter(parameterName = "list", parameterType = "List")
     public Response registerTx(Map map) {
         int chainId = Integer.parseInt(map.get("chainId").toString());
-        String hex = map.get("blockHeader").toString();
-        BlockHeader blockHeader = new BlockHeader();
-        try {
-            blockHeader.parse(new NulsByteBuffer(HexUtil.decode(hex)));
-            short i = service.rollback(chainId, blockHeader);
-            Map<String, Short> responseData = new HashMap<>(1);
-            responseData.put("version", i);
-            return success(responseData);
-        } catch (NulsException e) {
-            return failed(e.getMessage());
-        }
+        List list = (List) map.get("list");
+
+
+//        for (Map.Entry<Short, ModuleTxRegisterDTO> entry : map.entrySet()) {
+//            Short version = entry.getKey();
+//        }
+//        ModuleTxRegisterDTO moduleTxRegisterDto = JSONUtils.map2pojo(map, ModuleTxRegisterDTO.class);
+        return success();
+
     }
 
     /**

@@ -88,7 +88,7 @@ public class ChainManager {
              * Chain Trading Registration
              * */
             int chainId = chain.getConfig().getChainId();
-            RegisterHelper.registerTx(chainId, ProtocolGroupManager.getProtocol(chainId));
+            RegisterHelper.registerTx(chainId, ProtocolGroupManager.getCurrentProtocol(chainId));
         }
     }
 

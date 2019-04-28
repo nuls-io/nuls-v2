@@ -174,7 +174,8 @@ public class ChainManager {
             for (Chain chain : chainMap.values()) {
                 //注册账户相关交易
                 int chainId = chain.getConfig().getChainId();
-                RegisterHelper.registerTx(chainId, ProtocolGroupManager.getProtocol(chainId));
+                RegisterHelper.registerTx(chainId, ProtocolGroupManager.getCurrentProtocol(chainId));
+                RegisterHelper.registerTxs(chainId);
             }
         } catch (Exception e) {
             LoggerUtil.logger.error("Transaction registerTx error!");
