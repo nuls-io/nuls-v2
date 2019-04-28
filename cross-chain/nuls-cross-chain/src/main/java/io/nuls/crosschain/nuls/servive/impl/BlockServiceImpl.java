@@ -65,7 +65,7 @@ public class BlockServiceImpl implements BlockService {
             return Result.getFailed(CHAIN_NOT_EXIST);
         }
         long height = Long.valueOf(params.get(NEW_BLOCK_HEIGHT).toString());
-        chain.getMessageLog().info("收到区块高度更新信息，最新区块高度为：{}", height);
+        chain.getRpcLogger().info("收到区块高度更新信息，最新区块高度为：{}", height);
         //查询是否有待广播的跨链交易
         Map<Long , SendCtxHashPo> sendHeightMap = sendHeightService.getList(chainId);
         if(sendHeightMap != null && sendHeightMap.size() >0){
@@ -90,13 +90,14 @@ public class BlockServiceImpl implements BlockService {
                         }
                         if(NetWorkCall.broadcast(toId, message, CommandConstant.BROAD_CTX_HASH_MESSAGE,true)){
                             if(!completedCtxService.save(ctxHash, ctx, chainId) || !commitedCtxService.delete(ctxHash, chainId)){
+                                chain.getRpcLogger().error("跨链交易从已提交表转存到已处理完成表失败,Hash:{}",ctxHash);
                                 continue;
                             }
                             broadSuccessCtxHash.add(ctxHash);
-                            chain.getMessageLog().info("跨链交易Hash广播成功，Hash:{}",cacheHeight,ctxHash );
+                            chain.getRpcLogger().info("跨链交易广播成功，Hash:{}",cacheHeight,ctxHash );
                         }else{
                             broadFailCtxHash.add(ctxHash);
-                            chain.getMessageLog().info("跨链交易Hash广播失败，Hash:{}",cacheHeight,ctxHash );
+                            chain.getRpcLogger().info("跨链交易广播失败，Hash:{}",cacheHeight,ctxHash );
                         }
                     }
                     if(broadSuccessCtxHash.size() > 0){
@@ -121,7 +122,7 @@ public class BlockServiceImpl implements BlockService {
                 }
             }
         }
-        chain.getMessageLog().info("区块高度更新消息处理完成,Height:{}\n\n",height);
+        chain.getRpcLogger().info("区块高度更新消息处理完成,Height:{}\n\n",height);
         return Result.getSuccess(SUCCESS);
     }
 }

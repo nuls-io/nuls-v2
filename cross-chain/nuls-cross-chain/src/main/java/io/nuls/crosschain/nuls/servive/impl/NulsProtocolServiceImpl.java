@@ -77,7 +77,7 @@ public class NulsProtocolServiceImpl implements ProtocolService {
         }
         if (mainCtx == null) {
             responseMessage.setVerifyResult(false);
-            chain.getMessageLog().info("本节点不存在该笔交易，originalHash:{};Hash：{}",originalHex,nativeHex);
+            chain.getMessageLog().info("本节点不存在该跨链交易，originalHash:{};Hash：{}",originalHex,nativeHex);
         } else {
             //如果为主网向友链发起验证，则需验证主网协议跨链交易中存的原始跨链交易Hash与友链中存储的是否匹配
             if(!config.isMainNet()){
