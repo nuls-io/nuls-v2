@@ -11,83 +11,43 @@
   {
     "version": "1",
     "extend": "",
+	"moduleValidator": "xxx",
+    "moduleCommit": "xxx",
+    "moduleRollback": "xxx",
     "validTransactions": [
-      {
-        "type": "1",
-        "name": "coinbase",
-        "handler": "io.nuls.test.TestTransactionHandler1",
-        "validate": "validate1",
-        "commit": "commit1",
-        "rollback": "rollback1"
-      },
-      {
+	  {
         "type": "2",
-        "name": "transfer",
-        "handler": "io.nuls.test.TestTransactionHandler2",
-        "validate": "validate1",
-        "commit": "commit1",
-        "rollback": "rollback1"
-      }
-    ],
-    "validMessages": [
-      {
-        "name": "io.nuls.block.message.BlockMessage",
-        "handlers": [
-          {
-            "name": "io.nuls.block.message.handler.BlockHandler#processV1"
-          }
-        ]
+        "systemTx": false,
+        "unlockTx": false,
+        "verifySignature": true,
+        "handler": "io.nuls.account.rpc.cmd.AccountTransactionHandler",
+        "validate": "transferTxValidate",
+        "commit": "",
+        "rollback": ""
       },
       {
-        "name": "io.nuls.block.test.TestMessage2",
-        "handlers": [
-          {
-            "name": "io.nuls.block.test.TestMessageHandler2#processV1"
-          },
-          {
-            "name": "io.nuls.block.test.TestMessageHandler2#processV2"
-          }
-        ]
+        "type": "3",
+        "systemTx": false,
+        "unlockTx": false,
+        "verifySignature": true,
+        "handler": "io.nuls.account.rpc.cmd.AccountTransactionHandler",
+        "validate": "aliasTxValidate",
+        "commit": "aliasTxCommit",
+        "rollback": "aliasTxRollback"
       }
-    ],
-    "invalidTransactions": [],
-    "invalidMessages": []
-  },
-  {
-    "version": "2",
-    "extend": "1",
-    "validTransactions": [],
-    "validMessages": [],
-    "invalidTransactions": [
-      {
-        "name": "transfer"
-      }
-    ],
-    "invalidMessages": [
-      {
-        "name": "io.nuls.block.test.TestMessage3"
-      }
-    ]
-  },
-  {
-    "version": "3",
-    "extend": "2",
-    "validTransactions": [],
+	],
     "validMessages": [
       {
-        "name": "io.nuls.block.test.TestMessage3",
-        "handlers": [
-          {
-            "name": "io.nuls.block.test.TestMessageHandler3#processV5"
-          },
-          {
-            "name": "io.nuls.block.test.TestMessageHandler3#processV6"
-          }
-        ]
+        "name": "io.nuls.block.message.HashListMessage",
+        "handlers": "io.nuls.block.message.handler.GetTxGroupHandler#process"
+      },
+      {
+        "name": "io.nuls.block.message.HashMessage",
+        "handlers": "io.nuls.block.message.handler.ForwardSmallBlockHandler#process,io.nuls.block.message.handler.GetBlockHandler#process,io.nuls.block.message.handler.GetSmallBlockHandler#process"
       }
     ],
-    "invalidTransactions": [],
-    "invalidMessages": []
+    "invalidTransactions": "2,3",
+    "invalidMessages": "io.nuls.block.message.HashListMessage,io.nuls.block.message.HashListMessage"
   }
 ]
 ```
@@ -215,8 +175,7 @@ public class MessageHandlerInterceptor implements BeanMethodInterceptor<MessageH
 
 ## 协议升级的一些问题
 
-- 关心当前协议版本的模块采用什么方式来获取协议版本号?
-- 多链的协议版本配置加载
+- 是否在系统启动时注册多个版本的交易到交易模块?
 
 [^1]:可配置,同一条链内保持一致
 
