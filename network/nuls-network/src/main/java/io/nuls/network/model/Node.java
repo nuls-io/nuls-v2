@@ -109,6 +109,7 @@ public class Node implements Dto {
         this.ip = ip;
         this.magicNumber = magicNumber;
         this.remotePort = remotePort;
+        this.remoteCrossPort = remoteCrossPort;
         this.type = type;
         this.id = id;
         this.isCrossConnect = isCrossConnect;

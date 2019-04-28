@@ -262,7 +262,6 @@ public class PocConsensusController {
         if (!AddressTool.validAddress(chainId, address)) {
             return RpcResult.paramError("[address] is invalid");
         }
-
         try {
             if (!CacheManager.isChainExist(chainId)) {
                 return RpcResult.dataNotFound();
@@ -352,7 +351,6 @@ public class PocConsensusController {
             return RpcResult.failed(RpcErrorCode.SYS_UNKNOWN_EXCEPTION);
         }
     }
-
 
     @RpcMethod("getPunishList")
     public RpcResult getPunishList(List<Object> params) {
@@ -497,18 +495,33 @@ public class PocConsensusController {
         }
 
         try {
-            PageInfo<AgentInfo> list;
+            PageInfo<AgentInfo> pageInfo;
             if (!CacheManager.isChainExist(chainId)) {
-                list = new PageInfo(pageIndex, pageSize);
-                return RpcResult.success(list);
+                pageInfo = new PageInfo(pageIndex, pageSize);
+                return RpcResult.success(pageInfo);
             }
             List<String> hashList = depositService.getAgentHashList(chainId, address);
             AgentInfo agentInfo = agentService.getAliveAgentByAgentAddress(chainId, address);
-            if(agentInfo != null) {
+            if (agentInfo != null && !hashList.contains(agentInfo.getTxHash())) {
                 hashList.add(agentInfo.getTxHash());
             }
-            list = agentService.getAgentByHashList(chainId, pageIndex, pageSize, hashList);
-            return RpcResult.success(list);
+
+            pageInfo = agentService.getAgentByHashList(chainId, pageIndex, pageSize, hashList);
+            for (AgentInfo info : pageInfo.getList()) {
+                Result<AgentInfo> clientResult = WalletRpcHandler.getAgentInfo(chainId, agentInfo.getTxHash());
+                if (clientResult.isSuccess()) {
+                    agentInfo.setCreditValue(clientResult.getData().getCreditValue());
+                    agentInfo.setDepositCount(clientResult.getData().getDepositCount());
+                    agentInfo.setStatus(clientResult.getData().getStatus());
+                    if (agentInfo.getAgentAlias() == null) {
+                        AliasInfo aliasInfo = aliasService.getAliasByAddress(chainId, agentInfo.getAgentAddress());
+                        if (null != info) {
+                            agentInfo.setAgentAlias(aliasInfo.getAlias());
+                        }
+                    }
+                }
+            }
+            return RpcResult.success(pageInfo);
         } catch (Exception e) {
             Log.error(e);
             return RpcResult.failed(RpcErrorCode.SYS_UNKNOWN_EXCEPTION);

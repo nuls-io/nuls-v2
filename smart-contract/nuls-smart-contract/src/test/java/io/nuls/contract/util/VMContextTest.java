@@ -19,7 +19,7 @@ public class VMContextTest extends VMContext {
         dto.setPreHash("002079d03c0ae201f3d56714f3df6d27e7015c143dfea019f02830d9e651c8de460e");
         dto.setHeight(chainId);
         dto.setTime(1552988615800L);
-        dto.setPackingAddress(AddressTool.getAddress("5MR_2Cj9tfgQpdeF7nDy5wyaGG6MZ35H3rA"));
+        dto.setPackingAddress(AddressTool.getAddress("tNULSeBaMshNPEnuqiDhMdSA4iNs6LMgjY6tcL"));
         return dto;
     }
 

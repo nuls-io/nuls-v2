@@ -297,7 +297,7 @@ public class MessageManager extends BaseManager {
             }
         } catch (Exception e) {
             e.printStackTrace();
-            LoggerUtil.logger().error(e.getMessage());
+            LoggerUtil.logger().error(e);
             return new NetworkEventResult(false, NetworkErrorCode.NET_MESSAGE_ERROR);
         }
         return new NetworkEventResult(true, NetworkErrorCode.SUCCESS);
