@@ -42,7 +42,6 @@ import io.nuls.rpc.modulebootstrap.RpcModuleState;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.core.ioc.SpringLiteContext;
-import io.nuls.tools.parse.I18nUtils;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -167,7 +166,6 @@ public class NetworkBootstrap extends RpcModule {
         LoggerUtil.logger().debug("doStart begin=========");
         try {
             NodeGroupManager.getInstance().start();
-//            RpcManager.getInstance().start();
         } catch (Exception e) {
             e.printStackTrace();
             System.exit(-1);

@@ -71,11 +71,8 @@ public class ContractExecutorImpl implements ContractExecutor {
 
         ContractResult contractResult = new ContractResult();
 
-        //contractResult.setNonce(programResult.getNonce());
         contractResult.setGasUsed(programResult.getGasUsed());
         contractResult.setPrice(price);
-        //contractResult.setStateRoot(HexUtil.decode(preStateRoot));
-        //contractResult.setBalance(programResult.getBalance());
         contractResult.setContractAddress(contractAddress);
         contractResult.setSender(sender);
         contractResult.setRemark(ContractConstant.CREATE_REMARK);
@@ -120,11 +117,8 @@ public class ContractExecutorImpl implements ContractExecutor {
 
         ContractResult contractResult = new ContractResult();
 
-        //contractResult.setNonce(programResult.getNonce());
         contractResult.setGasUsed(programResult.getGasUsed());
         contractResult.setPrice(price);
-        //contractResult.setStateRoot(HexUtil.decode(preStateRoot));
-        //contractResult.setBalance(programResult.getBalance());
         contractResult.setContractAddress(contractAddress);
         contractResult.setSender(sender);
         contractResult.setValue(programCall.getValue().longValue());
@@ -146,6 +140,7 @@ public class ContractExecutorImpl implements ContractExecutor {
         contractResult.setResult(programResult.getResult());
         contractResult.setEvents(programResult.getEvents());
         contractResult.setTransfers(programResult.getTransfers());
+        contractResult.setInvokeRegisterCmds(programResult.getInvokeRegisterCmds());
         contractResult.setContractAddressInnerCallSet(generateInnerCallSet(programResult.getInternalCalls()));
 
         return contractResult;
@@ -166,10 +161,7 @@ public class ContractExecutorImpl implements ContractExecutor {
 
         ContractResult contractResult = new ContractResult();
 
-        //contractResult.setNonce(programResult.getNonce());
         contractResult.setGasUsed(programResult.getGasUsed());
-        //contractResult.setStateRoot(HexUtil.decode(preStateRoot));
-        //contractResult.setBalance(programResult.getBalance());
         contractResult.setContractAddress(contractAddress);
         contractResult.setSender(sender);
         contractResult.setRemark(ContractConstant.DELETE_REMARK);

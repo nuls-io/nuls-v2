@@ -24,20 +24,27 @@
 package io.nuls.contract.callable;
 
 import io.nuls.base.basic.AddressTool;
-import io.nuls.base.data.*;
+import io.nuls.base.data.BlockHeader;
+import io.nuls.base.data.CoinData;
+import io.nuls.base.data.CoinTo;
+import io.nuls.base.data.NulsDigestData;
+import io.nuls.contract.enums.CmdRegisterMode;
 import io.nuls.contract.helper.ContractHelper;
 import io.nuls.contract.manager.ChainManager;
 import io.nuls.contract.model.bo.*;
 import io.nuls.contract.model.dto.ContractPackageDto;
 import io.nuls.contract.model.tx.ContractReturnGasTransaction;
+import io.nuls.contract.model.tx.ContractTransferTransaction;
 import io.nuls.contract.model.txdata.ContractData;
 import io.nuls.contract.service.ResultAnalyzer;
 import io.nuls.contract.service.ResultHanlder;
 import io.nuls.contract.util.Log;
 import io.nuls.contract.vm.program.ProgramExecutor;
+import io.nuls.contract.vm.program.ProgramInvokeRegisterCmd;
 import io.nuls.tools.core.ioc.SpringLiteContext;
 import io.nuls.tools.model.ByteArrayWrapper;
 import io.nuls.tools.model.LongUtils;
+import io.nuls.tools.model.StringUtils;
 
 import java.io.IOException;
 import java.math.BigInteger;
@@ -91,11 +98,29 @@ public class ContractBatchEndCallable implements Callable<ContractPackageDto> {
             AnalyzerResult analyzerResult = resultAnalyzer.analysis(callerResult.getCallableResultList());
             // 重新执行冲突合约，处理失败合约的金额退还
             List<ContractResult> contractResultList = resultHanlder.handleAnalyzerResult(chainId, batchExecutor, analyzerResult, preStateRoot);
-            // 归集合约内部转账交易
-            List<Transaction> resultTxList = new ArrayList<>();
+            // 归集合约内部转账交易和外部模块调用生成的交易
+            List resultTxList = new ArrayList<>();
+            List<ContractTransferTransaction> contractTransferList;
+            List<ProgramInvokeRegisterCmd> invokeRegisterCmds;
+            String newTx;
             for (ContractResult contractResult : contractResultList) {
-                Log.debug("ContractResult Address is {}, Order is {}", AddressTool.getStringAddressByBytes(contractResult.getContractAddress()), contractResult.getTxOrder());
-                resultTxList.addAll(contractResult.getContractTransferList());
+                if (Log.isDebugEnabled()) {
+                    Log.debug("ContractResult Address is {}, Order is {}", AddressTool.getStringAddressByBytes(contractResult.getContractAddress()), contractResult.getTxOrder());
+                }
+                contractTransferList = contractResult.getContractTransferList();
+                resultTxList.addAll(contractTransferList);
+                // 避免nonce冲突，当出现合约内部转账时，其他交易模块生成的交易则丢弃
+                if (contractTransferList.size() == 0) {
+                    invokeRegisterCmds = contractResult.getInvokeRegisterCmds();
+                    for (ProgramInvokeRegisterCmd invokeRegisterCmd : invokeRegisterCmds) {
+                        if (!invokeRegisterCmd.getCmdRegisterMode().equals(CmdRegisterMode.NEW_TX)) {
+                            continue;
+                        }
+                        if (StringUtils.isNotBlank(newTx = invokeRegisterCmd.getNewTx())) {
+                            resultTxList.add(newTx);
+                        }
+                    }
+                }
             }
             // 生成退还剩余Gas的交易
             ContractReturnGasTransaction contractReturnGasTx = makeReturnGasTx(chainId, contractResultList, blockTime, contractHelper);

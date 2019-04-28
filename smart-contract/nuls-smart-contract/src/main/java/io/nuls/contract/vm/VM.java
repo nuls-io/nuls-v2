@@ -48,6 +48,7 @@ import io.nuls.contract.vm.instructions.stack.Swap;
 import io.nuls.contract.vm.instructions.stores.*;
 import io.nuls.contract.vm.natives.io.nuls.contract.sdk.NativeAddress;
 import io.nuls.contract.vm.program.ProgramInternalCall;
+import io.nuls.contract.vm.program.ProgramInvokeRegisterCmd;
 import io.nuls.contract.vm.program.ProgramMethodArg;
 import io.nuls.contract.vm.program.ProgramTransfer;
 import io.nuls.contract.vm.program.impl.ProgramContext;
@@ -111,6 +112,8 @@ public class VM {
     private List<ProgramInternalCall> internalCalls = new ArrayList<>();
 
     private List<String> events = new ArrayList<>();
+
+    private List<ProgramInvokeRegisterCmd> invokeRegisterCmds = new ArrayList<>();
 
     public VM() {
         this.vmStack = new VMStack(VM_STACK_MAX_SIZE);
@@ -1163,16 +1166,6 @@ public class VM {
         }
     }
 
-//    public BlockHeaderDto getBlockHeader(long number) {
-//        BlockHeaderDto blockHeaderDto = new BlockHeaderDto();
-//        blockHeaderDto.setHash("hash" + number);
-//        blockHeaderDto.setHeight(number);
-//        blockHeaderDto.setTxCount(100);
-//        blockHeaderDto.setPackingAddress(AddressTool.getAddress("NsduCQ8hywspGwAXjPu7iBeuQUKWDsU2"));
-//        blockHeaderDto.setTime(1535012808001L);
-//        return blockHeaderDto;
-//    }
-
     public Result getResult() {
         return result;
     }
@@ -1251,6 +1244,14 @@ public class VM {
 
     public void setResult(Result result) {
         this.result = result;
+    }
+
+    public List<ProgramInvokeRegisterCmd> getInvokeRegisterCmds() {
+        return invokeRegisterCmds;
+    }
+
+    public void setInvokeRegisterCmds(List<ProgramInvokeRegisterCmd> invokeRegisterCmds) {
+        this.invokeRegisterCmds = invokeRegisterCmds;
     }
 
     public void setProgramExecutor(ProgramExecutorImpl programExecutor) {

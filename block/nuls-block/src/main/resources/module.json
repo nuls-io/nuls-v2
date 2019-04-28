@@ -13,7 +13,7 @@
   "chainName": "nuls2.0",
   "chainId": 100,
   "assetId": 1,
-  "blockMaxSize": 3145728,
+  "blockMaxSize": 5242880,
   "resetTime": 180000,
   "chainSwtichThreshold": 3,
   "cacheSize": 1000,

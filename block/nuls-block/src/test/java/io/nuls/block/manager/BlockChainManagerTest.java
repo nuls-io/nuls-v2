@@ -20,14 +20,12 @@
 
 package io.nuls.block.manager;
 
-import com.google.common.collect.Lists;
 import io.nuls.block.constant.ChainTypeEnum;
-import io.nuls.block.constant.RunningStatusEnum;
+import io.nuls.block.constant.StatusEnum;
 import io.nuls.block.model.Chain;
 import io.nuls.block.thread.monitor.OrphanChainsMonitor;
 import io.nuls.block.utils.ChainGenerator;
 import io.nuls.block.utils.ConfigLoader;
-import io.nuls.db.service.RocksDBService;
 import io.nuls.tools.core.ioc.SpringLiteContext;
 import org.junit.*;
 
@@ -55,7 +53,7 @@ public class BlockChainManagerTest {
     @Test
     public void testForkOrphanChains() throws Exception {
         ConfigLoader.load();
-        ContextManager.getContext(CHAIN_ID).setStatus(RunningStatusEnum.RUNNING);
+        ContextManager.getContext(CHAIN_ID).setStatus(StatusEnum.RUNNING);
         Chain masterChain = ChainGenerator.newMasterChain(999L, "M", CHAIN_ID);
         BlockChainManager.setMasterChain(CHAIN_ID, masterChain);
 
@@ -86,7 +84,7 @@ public class BlockChainManagerTest {
     @Test
     public void testMergeOrphanChains() throws Exception {
         ConfigLoader.load();
-        ContextManager.getContext(CHAIN_ID).setStatus(RunningStatusEnum.RUNNING);
+        ContextManager.getContext(CHAIN_ID).setStatus(StatusEnum.RUNNING);
         Chain masterChain = ChainGenerator.newMasterChain(999L, "M", CHAIN_ID);
         BlockChainManager.setMasterChain(CHAIN_ID, masterChain);
 
@@ -127,7 +125,7 @@ public class BlockChainManagerTest {
     @Test
     public void testOrphanChains() throws Exception {
         ConfigLoader.load();
-        ContextManager.getContext(CHAIN_ID).setStatus(RunningStatusEnum.RUNNING);
+        ContextManager.getContext(CHAIN_ID).setStatus(StatusEnum.RUNNING);
         Chain masterChain = ChainGenerator.newMasterChain(999L, "A", CHAIN_ID);
 //        masterChain.setEndHash(NulsDigestData.calcDigestData(("A" + (999)).getBytes()));
         BlockChainManager.setMasterChain(CHAIN_ID, masterChain);

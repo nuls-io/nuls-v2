@@ -2,9 +2,7 @@ package io.nuls.transaction.task;
 
 import io.nuls.base.data.Transaction;
 import io.nuls.rpc.util.RPCUtil;
-import io.nuls.rpc.util.TimeUtils;
 import io.nuls.tools.core.ioc.SpringLiteContext;
-import io.nuls.tools.exception.NulsException;
 import io.nuls.transaction.cache.PackablePool;
 import io.nuls.transaction.constant.TxConstant;
 import io.nuls.transaction.model.bo.Chain;
@@ -15,11 +13,7 @@ import io.nuls.transaction.rpc.call.LedgerCall;
 import io.nuls.transaction.rpc.call.NetworkCall;
 import io.nuls.transaction.service.TxService;
 import io.nuls.transaction.storage.UnconfirmedTxStorageService;
-import io.nuls.transaction.storage.UnverifiedTxStorageService;
-import io.nuls.transaction.utils.TransactionTimeComparator;
 
-import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -30,20 +24,14 @@ import java.util.List;
 public class VerifyTxProcessTask implements Runnable {
 
     private PackablePool packablePool = SpringLiteContext.getBean(PackablePool.class);
-
-    private UnverifiedTxStorageService unverifiedTxStorageService = SpringLiteContext.getBean(UnverifiedTxStorageService.class);
     private TxService txService = SpringLiteContext.getBean(TxService.class);
     private UnconfirmedTxStorageService unconfirmedTxStorageService = SpringLiteContext.getBean(UnconfirmedTxStorageService.class);
-
-    private TransactionTimeComparator txComparator = SpringLiteContext.getBean(TransactionTimeComparator.class);
-    private List<TransactionNetPO> orphanTxList = new ArrayList<>();
 
     private Chain chain;
 
     public VerifyTxProcessTask(Chain chain){
         this.chain = chain;
     }
-
 
     @Override
     public void run() {
@@ -52,38 +40,29 @@ public class VerifyTxProcessTask implements Runnable {
         } catch (Exception e) {
             chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).error(e);
         }
-        try {
-            //处理孤儿交易
-          doOrphanTxTask(chain);
-        } catch (Exception e) {
-            chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).error(e);
-        }
     }
 
     private void doTask(Chain chain){
-        if (packablePool.getPoolSize(chain) >= chain.getConfig().getTxUnverifiedQueueSize()) {
-            return;
-        }
         TransactionNetPO tx = null;
-        while ((tx = unverifiedTxStorageService.pollTx(chain)) != null) {
-            processTx(chain, tx, false);
+        while ((tx = chain.getUnverifiedQueue().poll()) != null) {
+            processTx(chain, tx);
         }
     }
 
-    private boolean processTx(Chain chain, TransactionNetPO txNet, boolean isOrphanTx){
+    private void processTx(Chain chain, TransactionNetPO txNet){
         try {
             Transaction tx = txNet.getTx();
-            chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("新交易处理.....hash:{}", tx.getHash().getDigestHex());
             long s1 = System.currentTimeMillis();
             int chainId = chain.getChainId();
             if (!txService.verify(chain, tx).getResult()) {
-                return false;
+                chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).error("Net new tx verify fail.....hash:{}", tx.getHash().getDigestHex());
+                return;
             }
             chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("验证器花费时间:{}", System.currentTimeMillis() - s1);
             long get = System.currentTimeMillis();
             TransactionConfirmedPO existTx = txService.getTransaction(chain, tx.getHash());
             if(null != existTx){
-                return isOrphanTx;
+                return;
             }
             chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("交易获取花费时间:{}", System.currentTimeMillis() - get);
             long timeCoinData = System.currentTimeMillis();
@@ -104,49 +83,23 @@ public class VerifyTxProcessTask implements Runnable {
                 NetworkCall.forwardTxHash(chain.getChainId(),tx.getHash(), txNet.getExcludeNode());
                 long s3 = System.currentTimeMillis();
                 chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("交易保存阶段花费时间:{}", s3 - s2);
-                return true;
+                return;
+            }else if(verifyLedgerResult.isOrphan()){
+                //孤儿交易
+                List<TransactionNetPO> chainOrphan = chain.getOrphanList();
+                synchronized (chainOrphan){
+                    chainOrphan.add(txNet);
+                }
+                chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("Net new tx coinData orphan, - type:{}, - txhash:{}",
+                        tx.getType(), tx.getHash().getDigestHex());
+                return;
             }
-            chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("coinData verify task fail - orphan: {}, - code:{}, type:{},  - txhash:{}",verifyLedgerResult.getOrphan(),
-                    verifyLedgerResult.getErrorCode() == null ? "" : verifyLedgerResult.getErrorCode().getCode(),
-                    tx.getType(), tx.getHash().getDigestHex());
-
-            if(verifyLedgerResult.getOrphan() && !isOrphanTx){
-                processOrphanTx(txNet);
-            }else if(isOrphanTx){
-                long currentTimeMillis = TimeUtils.getCurrentTimeMillis();
-                return tx.getTime() < (currentTimeMillis - chain.getConfig().getOrphanTtl());
-            }
+            chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("Net new tx coinData fail - code:{}, type:{},  - txhash:{}",
+                    verifyLedgerResult.getErrorCode() == null ? "" : verifyLedgerResult.getErrorCode().getCode(), tx.getType(), tx.getHash().getDigestHex());
         } catch (Exception e) {
             chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).error(e);
         }
-        return false;
     }
 
-    private void doOrphanTxTask(Chain chain) throws NulsException{
-        if(orphanTxList.size() == 0){
-            return;
-        }
-        try {
-            //时间排序TransactionTimeComparator
-            chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("处理孤儿交易 orphanTxList size:{}", orphanTxList.size());
-            orphanTxList.sort(txComparator);
-            Iterator<TransactionNetPO> it = orphanTxList.iterator();
-            while (it.hasNext()) {
-                TransactionNetPO txNet = it.next();
-                boolean success = processTx(chain, txNet, true);
-                if (success) {
-                    it.remove();
-                    chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("*** Debug *** [VerifyTxProcessTask - OrphanTx] " +
-                            "OrphanTx remove - type:{} - txhash:{}, -orphanTxList size:{}", txNet.getTx().getType(), txNet.getTx().getHash().getDigestHex(), orphanTxList.size());
-                }
-            }
-        } catch (Exception e) {
-            throw new NulsException(e);
-        }
-    }
-
-    private void processOrphanTx(TransactionNetPO txNet) throws NulsException {
-        orphanTxList.add(txNet);
-    }
 
 }

@@ -29,7 +29,7 @@ import io.nuls.network.constant.NodeStatusEnum;
 import io.nuls.network.manager.*;
 import io.nuls.network.model.Node;
 import io.nuls.network.model.NodeGroup;
-import io.nuls.network.model.dto.IpAddress;
+import io.nuls.network.model.dto.IpAddressShare;
 import io.nuls.network.model.message.AddrMessage;
 import io.nuls.network.netty.container.NodesContainer;
 import io.nuls.network.utils.LoggerUtil;
@@ -217,11 +217,13 @@ public class NodeDiscoverTask implements Runnable {
 
         node.setConnectedListener(() -> {
             //探测可连接后，断开连接
+            LoggerUtil.logger().debug("探测可连接:{},之后自动断开", node.getId());
             node.setConnectStatus(NodeConnectStatusEnum.CONNECTED);
             node.getChannel().close();
         });
 
         node.setDisconnectListener(() -> {
+            LoggerUtil.logger().debug("探测进入断开:{}", node.getId());
             node.setChannel(null);
             int availableNodesCount = 0;
             if (isCross) {
@@ -252,11 +254,41 @@ public class NodeDiscoverTask implements Runnable {
         }
     }
 
+    /**
+     * 探测为可用的节点后广播给其他节点（可以是跨链节点）
+     *
+     * @param node
+     * @param isCross
+     */
     private void doShare(Node node, boolean isCross) {
-        IpAddress ipAddress = new IpAddress(node.getIp(), node.getRemotePort());
-        List<IpAddress> list = new ArrayList<>();
+        if (isCross) {
+            //网络组内跨链节点不传播
+            return;
+        }
+        //自有网络广播
+        broadcastNewAddr(node.getIp(),node.getRemotePort(),node.getRemoteCrossPort(),node.getMagicNumber(),false);
+        NodeGroup nodeGroup = node.getNodeGroup();
+        if (nodeGroup.isMoonGroup()) {
+            //分享给所有外链连接点(卫星链)
+            List<NodeGroup> nodeGroupList1 = NodeGroupManager.getInstance().getNodeGroups();
+            for (NodeGroup nodeGroup1 : nodeGroupList1) {
+                if (nodeGroup1.getChainId() == nodeGroup.getChainId()) {
+                    continue;
+                }
+                //分享给跨链节点,跨链节点的port为0
+                broadcastNewAddr(node.getIp(),0,node.getRemoteCrossPort(),nodeGroup1.getMagicNumber(),true);
+            }
+        } else {
+            //分享给跨链节点,跨链节点的port为0
+            broadcastNewAddr(node.getIp(),0,node.getRemoteCrossPort(),node.getMagicNumber(),true);
+        }
+    }
+
+    private void broadcastNewAddr(String ip, int port, int crossPort, long magicNumber,boolean isCross) {
+        IpAddressShare ipAddress = new IpAddressShare(ip, port, crossPort);
+        List<IpAddressShare> list = new ArrayList<>();
         list.add(ipAddress);
-        AddrMessage addrMessage = MessageFactory.getInstance().buildAddrMessage(list, node.getMagicNumber());
-        MessageManager.getInstance().broadcastToAllNode(addrMessage, null, isCross, true);
+        AddrMessage addrMessage = MessageFactory.getInstance().buildAddrMessage(list, magicNumber);
+        MessageManager.getInstance().broadcastNewAddr(addrMessage, null, isCross, true);
     }
 }
