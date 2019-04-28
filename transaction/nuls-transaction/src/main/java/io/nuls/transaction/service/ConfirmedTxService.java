@@ -1,7 +1,6 @@
 package io.nuls.transaction.service;
 
 import io.nuls.base.data.NulsDigestData;
-import io.nuls.base.data.Transaction;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.transaction.model.bo.Chain;
 import io.nuls.transaction.model.po.TransactionConfirmedPO;
@@ -28,21 +27,21 @@ public interface ConfirmedTxService {
     /**
      * 保存创世块的交易
      * @param chain
-     * @param txList
+     * @param txStrList
      * @param blockHeader
      * @return
      * @throws NulsException
      */
-    boolean saveGengsisTxList(Chain chain, List<Transaction> txList, String blockHeader) throws NulsException;
+    boolean saveGengsisTxList(Chain chain, List<String> txStrList, String blockHeader) throws NulsException;
 
     /**
      * 保存区块中已确认交易
      * @param chain
-     * @param txHashList
+     * @param txList
      * @param blockHeader
      * @return
      */
-    boolean saveTxList(Chain chain, List<NulsDigestData> txHashList, String blockHeader) throws NulsException;
+    boolean saveTxList(Chain chain, List<String> txStrList, String blockHeader) throws NulsException;
 
 
 

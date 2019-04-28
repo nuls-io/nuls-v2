@@ -41,7 +41,6 @@ import io.nuls.block.storage.ChainStorageService;
 import io.nuls.block.utils.BlockUtil;
 import io.nuls.block.utils.ChainGenerator;
 import io.nuls.db.service.RocksDBService;
-import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.model.message.MessageUtil;
 import io.nuls.rpc.model.message.Response;
 import io.nuls.rpc.netty.channel.manager.ConnectManager;
@@ -437,7 +436,7 @@ public class BlockServiceImpl implements BlockService {
                 if (!blockStorageService.save(chainId, blockHeaderPo)) {
                     throw new NulsRuntimeException(BlockErrorCode.CHAIN_MERGE_ERROR);
                 }
-                if (!TransactionUtil.saveNormal(chainId, blockHeaderPo)) {
+                if (!TransactionUtil.saveNormal(chainId, blockHeaderPo, TransactionUtil.getTransactions(chainId, blockHeaderPo.getTxHashList(), true))) {
                     throw new NulsRuntimeException(BlockErrorCode.CHAIN_MERGE_ERROR);
                 }
                 if (!ConsensusUtil.saveNotice(chainId, blockHeader, false)) {
@@ -457,7 +456,7 @@ public class BlockServiceImpl implements BlockService {
                 if (!blockStorageService.save(chainId, blockHeaderPo)) {
                     throw new NulsRuntimeException(BlockErrorCode.CHAIN_MERGE_ERROR);
                 }
-                if (!TransactionUtil.saveNormal(chainId, blockHeaderPo)) {
+                if (!TransactionUtil.saveNormal(chainId, blockHeaderPo, TransactionUtil.getTransactions(chainId, blockHeaderPo.getTxHashList(), true))) {
                     throw new NulsRuntimeException(BlockErrorCode.CHAIN_MERGE_ERROR);
                 }
                 if (!ConsensusUtil.saveNotice(chainId, blockHeader, false)) {
