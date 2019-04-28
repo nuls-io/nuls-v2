@@ -257,7 +257,7 @@ public class NulsCrossChainServiceImpl implements CrossChainService {
             }
             //如果本链为主网通知跨链管理模块发起链与接收链资产变更
             if(config.isMainNet()){
-                ChainManagerCall.ctxAssetCirculateCommit(txStrList, headerStr);
+                ChainManagerCall.ctxAssetCirculateCommit(chainId,txStrList, headerStr);
             }
             result.put(VALUE ,true);
             return Result.getSuccess(SUCCESS).setData(result);
@@ -322,7 +322,7 @@ public class NulsCrossChainServiceImpl implements CrossChainService {
             }
             //如果为主网通知跨链管理模块发起链与接收链资产变更
             if (config.isMainNet()){
-                ChainManagerCall.ctxAssetCirculateRollback(txStrList, headerStr);
+                ChainManagerCall.ctxAssetCirculateRollback(chainId,txStrList, headerStr);
             }
             result.put(VALUE ,true);
             return Result.getSuccess(SUCCESS).setData(result);

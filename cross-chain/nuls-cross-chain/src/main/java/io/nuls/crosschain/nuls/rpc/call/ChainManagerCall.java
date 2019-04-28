@@ -46,10 +46,11 @@ public class ChainManagerCall {
      * @throws NulsException
      */
     @SuppressWarnings("unchecked")
-    public static boolean ctxAssetCirculateCommit(List<String> txList, String blockHeader) throws NulsException {
+    public static boolean ctxAssetCirculateCommit(int chainId,List<String> txList, String blockHeader) throws NulsException {
         try {
             Map<String, Object> params = new HashMap<>(INIT_CAPACITY_8);
             params.put(Constants.VERSION_KEY_STR, RPC_VERSION);
+            params.put("chainId", chainId);
             params.put("txList", txList);
             params.put("blockHeaderDigest", blockHeader);
             HashMap result = (HashMap) CommonCall.request(ModuleE.CM.abbr,"cm_assetCirculateCommit", params);
@@ -68,10 +69,11 @@ public class ChainManagerCall {
      * @throws NulsException
      */
     @SuppressWarnings("unchecked")
-    public static boolean ctxAssetCirculateRollback(List<String> txList, String blockHeader) throws NulsException {
+    public static boolean ctxAssetCirculateRollback(int chainId,List<String> txList, String blockHeader) throws NulsException {
         try {
             Map<String, Object> params = new HashMap<>(INIT_CAPACITY_8);
             params.put(Constants.VERSION_KEY_STR, RPC_VERSION);
+            params.put("chainId", chainId);
             params.put("txList", txList);
             params.put("blockHeaderDigest", blockHeader);
             HashMap result = (HashMap) CommonCall.request(ModuleE.CM.abbr,"cm_assetCirculateRollBack", params);
