@@ -21,45 +21,44 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package io.nuls.contract.enums;
+package io.nuls.contract.twodimensionaltest;
 
-import java.util.HashMap;
-import java.util.Map;
+import org.junit.Test;
+
+import java.lang.reflect.Array;
 
 /**
  * @author: PierreLuo
- * @date: 2019-04-26
+ * @date: 2019-04-28
  */
-public enum CmdRegisterReturnType {
-    // 0 - 字符串, 1 - 字符串数组, 2 - 字符串二维数组
-    STRING(0),
-    STRING_ARRAY(1),
-    STRING_TWO_DIMENSIONAL_ARRAY(2);
+public class TwoDimensionalTest {
 
-    private int type;
-    private static Map<Integer, CmdRegisterReturnType> map;
-
-    private CmdRegisterReturnType(int type) {
-        this.type = type;
-        putType(type, this);
-    }
-
-    public int type() {
-        return type;
-    }
-
-    private static CmdRegisterReturnType putType(int type, CmdRegisterReturnType typeEnum) {
-        if(map == null) {
-            map = new HashMap<>(8);
+    @Test
+    public void test() {
+        String[][] qwe = {new String[]{"1","2","3"}, new String[]{"4","5","6"}};
+        Object qweObject = qwe;
+        System.out.println(qweObject instanceof String[][]);
+        System.out.println(qweObject.getClass().getName());
+        String[][] result2Array = (String[][]) qweObject;
+        String result = "";
+        for(String[] ss : result2Array) {
+            result += ss + " - [";
+            for(String s1 : ss) {
+                result += s1 + "\n";
+            }
+            result += "]";
         }
-        return map.put(type, typeEnum);
+        System.out.println(result);
     }
 
-    public static CmdRegisterReturnType getType(int type) {
-        CmdRegisterReturnType cmdRegisterReturnType = map.get(type);
-        if(cmdRegisterReturnType == null) {
-            throw new RuntimeException(String.format("not support cmd register return type - [%s] ", type));
+    @Test
+    public void new2ArrayTest() {
+        String[][] resultArray = {new String[]{"1","2","3"}, new String[]{"4","5","6"}};
+        Object o = Array.newInstance(String[].class, 2);
+        int i = 0;
+        for(String[] valueArray : resultArray) {
+            Array.set(o, i++, valueArray);
         }
-        return cmdRegisterReturnType;
+        System.out.println(o.toString());
     }
 }

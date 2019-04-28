@@ -63,9 +63,9 @@ public class ContractTransferHandler {
     @Autowired
     private VMContext vmContext;
 
-    public void handleContractTransfer(int chainId, long blockTime, ContractWrapperTransaction tx, ContractResult contractResult, ContractTempBalanceManager tempBalanceManager) {
+    public boolean handleContractTransfer(int chainId, long blockTime, ContractWrapperTransaction tx, ContractResult contractResult, ContractTempBalanceManager tempBalanceManager) {
         this.refreshTempBalance(chainId, tx, contractResult, tempBalanceManager);
-        this.handleContractTransferTxs(contractResult, tempBalanceManager, chainId, blockTime);
+        return this.handleContractTransferTxs(contractResult, tempBalanceManager, chainId, blockTime);
     }
 
     private void refreshTempBalance(int chainId, ContractWrapperTransaction tx, ContractResult contractResult, ContractTempBalanceManager tempBalanceManager) {
@@ -168,7 +168,7 @@ public class ContractTransferHandler {
         return contracts;
     }
 
-    private void handleContractTransferTxs(ContractResult contractResult, ContractTempBalanceManager tempBalanceManager, int chainId, long blockTime) {
+    private boolean handleContractTransferTxs(ContractResult contractResult, ContractTempBalanceManager tempBalanceManager, int chainId, long blockTime) {
         boolean isCorrectContractTransfer = true;
         List<ProgramTransfer> transfers = contractResult.getTransfers();
         // 创建合约转账(从合约转出)交易
@@ -196,14 +196,13 @@ public class ContractTransferHandler {
                 Log.warn("contract transfer execution failed, reason: {}", contractResult.getErrorMessage());
                 contractResult.setError(true);
                 contractResult.setErrorMessage(result.getErrorCode().getMsg());
-                // 余额还原到上一次的余额
-                //contractResult.setBalance(contractResult.getPreBalance());
                 // 回滚临时余额
                 this.rollbackContractTempBalance(chainId, contractResult.getTx(), contractResult, tempBalanceManager);
                 // 清空内部转账列表
                 transfers.clear();
             }
         }
+        return isCorrectContractTransfer;
     }
 
     private Result verifyTransfer(List<ProgramTransfer> transfers) {
@@ -239,7 +238,7 @@ public class ContractTransferHandler {
         ContractBalance contractBalance = null;
         // 合约内部转账交易的时间的偏移量，用于排序
         long timeOffset;
-        int i = 0;
+        //int i = 0;
         for (ProgramTransfer transfer : transfers) {
             byte[] from = transfer.getFrom();
             byte[] to = transfer.getTo();
