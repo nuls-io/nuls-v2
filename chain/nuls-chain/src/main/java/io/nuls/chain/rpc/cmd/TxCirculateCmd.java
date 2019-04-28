@@ -24,8 +24,10 @@
  */
 package io.nuls.chain.rpc.cmd;
 
+import io.nuls.base.data.BlockHeader;
 import io.nuls.base.data.BlockHeaderDigest;
 import io.nuls.base.data.Transaction;
+import io.nuls.base.data.po.BlockHeaderPo;
 import io.nuls.chain.info.CmErrorCode;
 import io.nuls.chain.model.dto.ChainEventResult;
 import io.nuls.chain.model.dto.CoinDataAssets;
@@ -37,6 +39,7 @@ import io.nuls.chain.util.TxUtil;
 import io.nuls.rpc.model.CmdAnnotation;
 import io.nuls.rpc.model.Parameter;
 import io.nuls.rpc.model.message.Response;
+import io.nuls.rpc.util.RPCUtil;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.model.ObjectUtils;
 import io.nuls.tools.log.Log;
@@ -109,16 +112,18 @@ public class TxCirculateCmd extends BaseChainCmd {
     @CmdAnnotation(cmd = "cm_assetCirculateCommit", version = 1.0, description = "assetCirculateCommit")
     @Parameter(parameterName = "chainId", parameterType = "int", parameterValidRange = "[1,65535]")
     @Parameter(parameterName = "txList", parameterType = "array")
-    @Parameter(parameterName = "blockHeaderDigest", parameterType = "array")
+    @Parameter(parameterName = "blockHeader", parameterType = "String")
     public Response assetCirculateCommit(Map params) {
         //A链转B链资产X，数量N ;A链X资产减少N, B链 X资产 增加N。
         try {
             ObjectUtils.canNotEmpty(params.get("chainId"));
-            ObjectUtils.canNotEmpty(params.get("blockHeaderDigest"));
+            ObjectUtils.canNotEmpty(params.get("blockHeader"));
             Integer chainId = (Integer) params.get("chainId");
             List<String> txHexList = (List) params.get("txList");
-            BlockHeaderDigest blockHeaderDigest = (BlockHeaderDigest) params.get("blockHeaderDigest");
-            long commitHeight = blockHeaderDigest.getHeight();
+            String blockHeaderStr = (String) params.get("blockHeader");
+            BlockHeader blockHeader = new BlockHeader();
+            blockHeader.parse(RPCUtil.decode(blockHeaderStr),0);
+            long commitHeight = blockHeader.getHeight();
             List<Transaction> txList = new ArrayList<>();
             Response parseResponse = parseTxs(txHexList, txList);
             if (!parseResponse.isSuccess()) {
@@ -159,15 +164,17 @@ public class TxCirculateCmd extends BaseChainCmd {
     @CmdAnnotation(cmd = "cm_assetCirculateRollBack", version = 1.0, description = "assetCirculateRollBack")
     @Parameter(parameterName = "chainId", parameterType = "int", parameterValidRange = "[1,65535]")
     @Parameter(parameterName = "txList", parameterType = "array")
-    @Parameter(parameterName = "blockHeaderDigest", parameterType = "array")
+    @Parameter(parameterName = "blockHeader", parameterType = "array")
     public Response assetCirculateRollBack(Map params) {
         try {
             ObjectUtils.canNotEmpty(params.get("chainId"));
-            ObjectUtils.canNotEmpty(params.get("blockHeaderDigest"));
+            ObjectUtils.canNotEmpty(params.get("blockHeader"));
             Integer chainId = (Integer) params.get("chainId");
             List<String> txHexList = (List) params.get("txList");
-            BlockHeaderDigest blockHeaderDigest = (BlockHeaderDigest) params.get("blockHeaderDigest");
-            long commitHeight = blockHeaderDigest.getHeight();
+            String blockHeaderStr = (String) params.get("blockHeader");
+            BlockHeader blockHeader = new BlockHeader();
+            blockHeader.parse(RPCUtil.decode(blockHeaderStr),0);
+            long commitHeight = blockHeader.getHeight();
             List<Transaction> txList = new ArrayList<>();
             Response parseResponse = parseTxs(txHexList, txList);
             if (!parseResponse.isSuccess()) {
