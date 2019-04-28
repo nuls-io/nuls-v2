@@ -337,7 +337,7 @@ public class TransactionCmd extends BaseCmd {
      */
     @CmdAnnotation(cmd = TxCmd.TX_SAVE, version = 1.0, description = "transaction save")
     @Parameter(parameterName = "chainId", parameterType = "int")
-    @Parameter(parameterName = "txHashList", parameterType = "List")
+    @Parameter(parameterName = "txList", parameterType = "List")
     @Parameter(parameterName = "blockHeader", parameterType = "String")
     public Response txSave(Map params) {
         Map<String, Boolean> map = new HashMap<>(TxConstant.INIT_CAPACITY_16);
@@ -345,20 +345,15 @@ public class TransactionCmd extends BaseCmd {
         Chain chain = null;
         try {
             ObjectUtils.canNotEmpty(params.get("chainId"), TxErrorCode.PARAMETER_ERROR.getMsg());
-            ObjectUtils.canNotEmpty(params.get("txHashList"), TxErrorCode.PARAMETER_ERROR.getMsg());
+            ObjectUtils.canNotEmpty(params.get("txList"), TxErrorCode.PARAMETER_ERROR.getMsg());
             ObjectUtils.canNotEmpty(params.get("blockHeader"), TxErrorCode.PARAMETER_ERROR.getMsg());
 
             chain = chainManager.getChain((int) params.get("chainId"));
             if (null == chain) {
                 throw new NulsException(TxErrorCode.CHAIN_NOT_FOUND);
             }
-            List<String> txHashStrList = (List<String>) params.get("txHashList");
-            List<NulsDigestData> txHashList = new ArrayList<>();
-            //将交易hashHex解码为交易hash字节数组
-            for (String hashStr : txHashStrList) {
-                txHashList.add(NulsDigestData.fromDigestHex(hashStr));
-            }
-            result = confirmedTxService.saveTxList(chain, txHashList, (String) params.get("blockHeader"));
+            List<String> txStrList = (List<String>) params.get("txList");
+            result = confirmedTxService.saveTxList(chain, txStrList, (String) params.get("blockHeader"));
         } catch (NulsException e) {
             errorLogProcess(chain, e);
             return failed(e.getErrorCode());
@@ -396,11 +391,7 @@ public class TransactionCmd extends BaseCmd {
                 throw new NulsException(TxErrorCode.CHAIN_NOT_FOUND);
             }
             List<String> txStrList = (List<String>) params.get("txList");
-            List<Transaction> txList = new ArrayList<>();
-            for (String tx : txStrList) {
-                txList.add(TxUtil.getInstanceRpcStr(tx, Transaction.class));
-            }
-            result = confirmedTxService.saveGengsisTxList(chain, txList, (String) params.get("blockHeader"));
+            result = confirmedTxService.saveGengsisTxList(chain, txStrList, (String) params.get("blockHeader"));
         } catch (NulsException e) {
             errorLogProcess(chain, e);
             return failed(e.getErrorCode());

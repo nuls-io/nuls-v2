@@ -434,7 +434,7 @@ public class BlockServiceImpl implements BlockService {
                 if (!blockStorageService.save(chainId, blockHeaderPo)) {
                     throw new NulsRuntimeException(BlockErrorCode.CHAIN_MERGE_ERROR);
                 }
-                if (!TransactionUtil.saveNormal(chainId, blockHeaderPo)) {
+                if (!TransactionUtil.saveNormal(chainId, blockHeaderPo, TransactionUtil.getTransactions(chainId, blockHeaderPo.getTxHashList(), true))) {
                     throw new NulsRuntimeException(BlockErrorCode.CHAIN_MERGE_ERROR);
                 }
                 if (!ConsensusUtil.saveNotice(chainId, blockHeader, false)) {
@@ -454,7 +454,7 @@ public class BlockServiceImpl implements BlockService {
                 if (!blockStorageService.save(chainId, blockHeaderPo)) {
                     throw new NulsRuntimeException(BlockErrorCode.CHAIN_MERGE_ERROR);
                 }
-                if (!TransactionUtil.saveNormal(chainId, blockHeaderPo)) {
+                if (!TransactionUtil.saveNormal(chainId, blockHeaderPo, TransactionUtil.getTransactions(chainId, blockHeaderPo.getTxHashList(), true))) {
                     throw new NulsRuntimeException(BlockErrorCode.CHAIN_MERGE_ERROR);
                 }
                 if (!ConsensusUtil.saveNotice(chainId, blockHeader, false)) {

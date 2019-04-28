@@ -18,6 +18,7 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 
 import static io.nuls.api.constant.MongoTableConstant.AGENT_TABLE;
 
@@ -49,6 +50,7 @@ public class MongoAgentServiceImpl implements AgentService {
         return agentInfo;
     }
 
+    @Override
     public PageInfo<AgentInfo> getAgentByHashList(int chainID, int pageNumber, int pageSize, List<String> hashList) {
         PageInfo<AgentInfo> page = new PageInfo<>(pageNumber, pageSize);
         page.setTotalCount(hashList.size());
