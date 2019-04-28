@@ -128,7 +128,6 @@ public class AccountController {
             Log.error(e);
             return RpcResult.failed(RpcErrorCode.SYS_UNKNOWN_EXCEPTION);
         }
-
     }
 
     @RpcMethod("getAccount")
@@ -274,5 +273,4 @@ public class AccountController {
             return RpcResult.failed(RpcErrorCode.SYS_UNKNOWN_EXCEPTION);
         }
     }
-
 }
