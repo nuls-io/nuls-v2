@@ -280,8 +280,12 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
         try {
             for (int i = 0; i < txHashList.size(); i++) {
                 NulsDigestData hash = txHashList.get(i);
-                txHashs.add(hash.serialize());
                 TransactionConfirmedPO txPO = confirmedTxStorageService.getTx(chainId, hash);
+                if(null == txPO){
+                    //回滚的交易没有查出来就跳过，保存时该块可能中途中断，导致保存不全
+                    continue;
+                }
+                txHashs.add(hash.serialize());
                 Transaction tx = txPO.getTx();
                 txList.add(tx);
                 String txStr = RPCUtil.encode(tx.serialize());
