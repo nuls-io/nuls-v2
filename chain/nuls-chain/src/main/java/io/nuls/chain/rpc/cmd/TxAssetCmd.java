@@ -34,7 +34,6 @@ public class TxAssetCmd extends BaseChainCmd {
     @CmdAnnotation(cmd = "cm_assetRegValidator", version = 1.0, description = "assetRegValidator")
     @Parameter(parameterName = "chainId", parameterType = "int", parameterValidRange = "[1,65535]")
     @Parameter(parameterName = "tx", parameterType = "String")
-    @Parameter(parameterName = "secondaryData", parameterType = "String")
     public Response assetRegValidator(Map params) {
         try {
             String txHex = String.valueOf(params.get("tx"));
@@ -58,7 +57,6 @@ public class TxAssetCmd extends BaseChainCmd {
     @CmdAnnotation(cmd = "cm_assetDisableValidator", version = 1.0, description = "assetDisableValidator")
     @Parameter(parameterName = "chainId", parameterType = "int", parameterValidRange = "[1,65535]")
     @Parameter(parameterName = "tx", parameterType = "String")
-    @Parameter(parameterName = "secondaryData", parameterType = "String")
     public Response assetDisableValidator(Map params) {
         String txHex = String.valueOf(params.get("tx"));
         Asset asset = buildAssetWithTxChain(txHex, new AddAssetToChainTransaction());
