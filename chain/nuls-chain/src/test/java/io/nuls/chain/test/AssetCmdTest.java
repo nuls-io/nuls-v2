@@ -36,7 +36,7 @@ public class AssetCmdTest {
     public void getAsset() throws Exception {
         Map<String,Object> parameters = new HashMap<>();
         parameters.put("chainId",100);
-        parameters.put("assetId",2);
+        parameters.put("assetId",1);
         Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.CM.abbr, "cm_asset", parameters);
         System.out.println(JSONUtils.obj2json(response));
     }

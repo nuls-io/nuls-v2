@@ -57,19 +57,19 @@ public class ChainCmdTest {
     @Test
     public void chainRegCommit() throws Exception {
        Map<String,Object>  parameters = new HashMap<>();
-        parameters.put("chainId",100);
+        parameters.put("chainId",200);
         parameters.put("chainName","ilovess");
         parameters.put("addressType","1");
-        parameters.put("magicNumber",2000);
+        parameters.put("magicNumber",3000);
         parameters.put("minAvailableNodeNum",1);
         parameters.put("singleNodeMinConnectionNum",1);
         parameters.put("txConfirmedBlockNum",10);
 
         parameters.put("address","tNULSeBaMoodYW7AqyJrgYdWiJ6nfwfVHHHyXm");
         parameters.put("assetId",1);
-        parameters.put("symbol","ns");
-        parameters.put("assetName","nulson1");
-        parameters.put("initNumber",1000000000);
+        parameters.put("symbol","ns2");
+        parameters.put("assetName","nulson2");
+        parameters.put("initNumber","10000000000000");
         parameters.put("decimalPlaces",8);
         parameters.put("password","nuls123456");
         Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.CM.abbr, "cm_chainReg", parameters);

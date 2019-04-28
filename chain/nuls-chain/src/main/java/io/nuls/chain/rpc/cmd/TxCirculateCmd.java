@@ -33,6 +33,7 @@ import io.nuls.chain.model.dto.ChainEventResult;
 import io.nuls.chain.model.dto.CoinDataAssets;
 import io.nuls.chain.model.po.BlockHeight;
 import io.nuls.chain.model.po.CacheDatas;
+import io.nuls.chain.model.po.ChainAsset;
 import io.nuls.chain.service.*;
 import io.nuls.chain.util.LoggerUtil;
 import io.nuls.chain.util.TxUtil;
@@ -69,6 +70,37 @@ public class TxCirculateCmd extends BaseChainCmd {
     private CacheDataService cacheDataService;
     @Autowired
     private TxCirculateService txCirculateService;
+
+    /**
+     * 查询链上资产
+     */
+    @CmdAnnotation(cmd = "cm_getCirculateChainAsset", version = 1.0, description = "getCirculateChainAsset")
+    @Parameter(parameterName = "circulateChainId", parameterType = "int", parameterValidRange = "[1,65535]")
+    @Parameter(parameterName = "assetChainId", parameterType = "int", parameterValidRange = "[1,65535]")
+    @Parameter(parameterName = "assetId", parameterType = "int", parameterValidRange = "[1,65535]")
+    public Response getCirculateChainAsset(Map params) {
+        try {
+            int circulateChainId = Integer.valueOf(params.get("circulateChainId").toString());
+            int assetChainId = Integer.valueOf(params.get("assetChainId").toString());
+            int assetId = Integer.valueOf(params.get("assetId").toString());
+            ChainAsset chainAsset = txCirculateService.getCirculateChainAsset(circulateChainId,assetChainId,assetId);
+            if (null != chainAsset) {
+                Map<String, Object> resultMap = new HashMap<>();
+                resultMap.put("circulateChainId", circulateChainId);
+                resultMap.put("assetChainId", assetChainId);
+                resultMap.put("assetId", assetId);
+                resultMap.put("initNumber", chainAsset.getInitNumber());
+                resultMap.put("chainAssetAmount", chainAsset.getInNumber().subtract(chainAsset.getOutNumber()));
+                return success(resultMap);
+            } else {
+                return failed(CmErrorCode.ERROR_ASSET_NOT_EXIST);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return failed(CmErrorCode.SYS_UNKOWN_EXCEPTION);
+    }
+
 
 
     /**
@@ -112,7 +144,7 @@ public class TxCirculateCmd extends BaseChainCmd {
     @CmdAnnotation(cmd = "cm_assetCirculateCommit", version = 1.0, description = "assetCirculateCommit")
     @Parameter(parameterName = "chainId", parameterType = "int", parameterValidRange = "[1,65535]")
     @Parameter(parameterName = "txList", parameterType = "array")
-    @Parameter(parameterName = "blockHeader", parameterType = "array")
+    @Parameter(parameterName = "blockHeader", parameterType = "String")
     public Response assetCirculateCommit(Map params) {
         //A链转B链资产X，数量N ;A链X资产减少N, B链 X资产 增加N。
         try {
