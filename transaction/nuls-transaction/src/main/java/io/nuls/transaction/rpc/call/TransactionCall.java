@@ -154,17 +154,12 @@ public class TransactionCall {
         } catch (Exception e) {
             chain.getLoggerMap().get(TxConstant.LOG_TX).error("txModuleValidator Exception..");
             chain.getLoggerMap().get(TxConstant.LOG_TX).error(e);
-            try {
-                List<String> hashList = new ArrayList<>(txList.size());
-                for(String txStr : txList){
-                    Transaction tx = TxUtil.getInstanceRpcStr(txStr, Transaction.class);
-                    hashList.add(tx.getHash().getDigestHex());
-                }
-                return hashList;
-            } catch (NulsException ne) {
-                chain.getLoggerMap().get(TxConstant.LOG_TX).error(ne);
-                throw new NulsException(ne);
+            List<String> hashList = new ArrayList<>(txList.size());
+            for(String txStr : txList){
+                Transaction tx = TxUtil.getInstanceRpcStr(txStr, Transaction.class);
+                hashList.add(tx.getHash().getDigestHex());
             }
+            return hashList;
         }
     }
 

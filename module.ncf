@@ -5,7 +5,7 @@ logPath=../../../../Logs
 logLevel=DEBUG
 dataPath=../../../../data
 #默认链ID
-chainId=2
+chainId=100
 #默认资产ID
 assetId=1
 #默认链名称
@@ -16,7 +16,7 @@ mainAssetId=1
 port=18001
 crossPort=28001
 #魔法参数
-packetMagic=20190002
+packetMagic=2000
 #种子节点
 selfSeedIps=39.98.226.51:18001,47.244.186.65:18001,47.252.86.42:18001,122.114.0.96:18001
 
