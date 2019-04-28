@@ -42,6 +42,7 @@ import io.nuls.rpc.model.Parameter;
 import io.nuls.rpc.model.message.Response;
 import io.nuls.rpc.util.RPCUtil;
 import io.nuls.tools.core.annotation.Autowired;
+import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.model.ObjectUtils;
 import io.nuls.tools.log.Log;
 
@@ -57,6 +58,7 @@ import java.util.Map;
  * @author lan
  * @date 2019/02/21
  **/
+@Component
 public class TxCirculateCmd extends BaseChainCmd {
 
 
@@ -84,15 +86,17 @@ public class TxCirculateCmd extends BaseChainCmd {
             int assetChainId = Integer.valueOf(params.get("assetChainId").toString());
             int assetId = Integer.valueOf(params.get("assetId").toString());
             ChainAsset chainAsset = txCirculateService.getCirculateChainAsset(circulateChainId,assetChainId,assetId);
+            Map<String, Object> resultMap = new HashMap<>();
+            resultMap.put("circulateChainId", circulateChainId);
+            resultMap.put("assetChainId", assetChainId);
+            resultMap.put("assetId", assetId);
             if (null != chainAsset) {
-                Map<String, Object> resultMap = new HashMap<>();
-                resultMap.put("circulateChainId", circulateChainId);
-                resultMap.put("assetChainId", assetChainId);
-                resultMap.put("assetId", assetId);
                 resultMap.put("initNumber", chainAsset.getInitNumber());
                 resultMap.put("chainAssetAmount", chainAsset.getInNumber().subtract(chainAsset.getOutNumber()));
                 return success(resultMap);
             } else {
+                resultMap.put("initNumber","0");
+                resultMap.put("chainAssetAmount", chainAsset.getInNumber().subtract(chainAsset.getOutNumber()));
                 return failed(CmErrorCode.ERROR_ASSET_NOT_EXIST);
             }
         } catch (Exception e) {

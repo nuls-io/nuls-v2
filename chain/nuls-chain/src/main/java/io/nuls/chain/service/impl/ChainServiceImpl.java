@@ -6,6 +6,7 @@ import io.nuls.chain.info.ChainTxConstants;
 import io.nuls.chain.info.CmRuntimeInfo;
 import io.nuls.chain.model.po.Asset;
 import io.nuls.chain.model.po.BlockChain;
+import io.nuls.chain.model.po.ChainAsset;
 import io.nuls.chain.service.AssetService;
 import io.nuls.chain.service.ChainService;
 import io.nuls.chain.rpc.call.RpcService;
@@ -46,7 +47,7 @@ public class ChainServiceImpl implements ChainService {
      */
     @Override
     public void initMainChain() throws Exception {
-        int chainId = Integer.valueOf(nulsChainConfig.getMainAssetId());
+        int chainId = Integer.valueOf(nulsChainConfig.getMainChainId());
         BlockChain chain = getChain(chainId);
         if (chain != null) {
             return;
@@ -148,6 +149,7 @@ public class ChainServiceImpl implements ChainService {
         blockChain.addCreateAssetId(CmRuntimeInfo.getAssetKey(blockChain.getChainId(), asset.getAssetId()));
         blockChain.addCirculateAssetId(CmRuntimeInfo.getAssetKey(blockChain.getChainId(), asset.getAssetId()));
         saveChain(blockChain);
+
         /*
             通知网络模块创建链
         */
