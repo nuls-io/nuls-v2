@@ -39,7 +39,6 @@ public class VerifyCtxMessage extends BaseMessage {
     @Override
     public int size() {
         int size = 0;
-        size += SerializeUtils.sizeOfUint16();
         size += SerializeUtils.sizeOfNulsData(originalCtxHash);
         size += SerializeUtils.sizeOfNulsData(requestHash);
         return size;
