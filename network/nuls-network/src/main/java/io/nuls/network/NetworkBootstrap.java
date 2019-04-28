@@ -95,6 +95,12 @@ public class NetworkBootstrap extends RpcModule {
             List<String> ipList = new ArrayList<>();
             Collections.addAll(ipList, seedIp.split(NetworkConstant.COMMA));
             networkConfig.setSeedIpList(ipList);
+            if (networkConfig.getMainChainId() == networkConfig.getChainId()){
+                networkConfig.setMoonNode(true);
+            }else{
+                networkConfig.setMoonNode(false);
+            }
+
             networkConfig.setMaxInSameIp((networkConfig.getMaxInCount() / networkConfig.getMaxOutCount()));
             networkConfig.setCorssMaxInSameIp((networkConfig.getCrossMaxInCount() / networkConfig.getCrossMaxOutCount()));
             String seedMoonIp = networkConfig.getMoonSeedIps();
@@ -138,7 +144,7 @@ public class NetworkBootstrap extends RpcModule {
             super.init();
             System.setProperty("io.netty.tryReflectionSetAccessible", "true");
             LoggerUtil.defaultLogInit(networkConfig.getLogLevel());
-            if(!validatCfg()){
+            if (!validatCfg()) {
                 System.exit(-1);
             }
             jsonCfgInit();

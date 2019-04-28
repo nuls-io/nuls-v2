@@ -15,7 +15,7 @@ import java.util.List;
 public class NetworkConfig {
     private String logLevel = "DEBUG";
     private int chainId;
-
+    private int mainChainId;
     private int port;
 
     private long packetMagic;
@@ -224,5 +224,13 @@ public class NetworkConfig {
 
     public void setDataPath(String dataPath) {
         this.dataPath = dataPath;
+    }
+
+    public int getMainChainId() {
+        return mainChainId;
+    }
+
+    public void setMainChainId(int mainChainId) {
+        this.mainChainId = mainChainId;
     }
 }
