@@ -81,8 +81,6 @@ public class TaskManager extends BaseManager {
         executorService.scheduleAtFixedRate(new NodeMaintenanceTask(), 1000L, 5000L, TimeUnit.MILLISECONDS);
         executorService.scheduleAtFixedRate(new SaveNodeInfoTask(), 1, 1, TimeUnit.MINUTES);
         executorService.scheduleAtFixedRate(new NodeDiscoverTask(), 3000L, 10000L, TimeUnit.MILLISECONDS);
-        RunOnceAfterNetStableThreadStart();
-
     }
     private void localInfosSendTask() {
         //进行本地信息广播线程
@@ -104,14 +102,6 @@ public class TaskManager extends BaseManager {
         LoggerUtil.logger().debug("----------- TimeService start -------------");
         TimeManager.getInstance().initWebTimeServer();
         ThreadUtils.createAndRunThread("TimeTask", new TimeTask(), true);
-    }
-
-    /**
-     * 地址请求分享线程
-     */
-    private void RunOnceAfterNetStableThreadStart() {
-        LoggerUtil.logger().debug("----------- RunOnceAfterNetStableThread start -------------");
-        ThreadUtils.createAndRunThread("share-mine-node", new RunAfterNetStableTask());
     }
 
     public void createShareAddressTask(NodeGroup nodeGroup, boolean isCross) {

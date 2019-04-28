@@ -26,6 +26,7 @@ package io.nuls.network.task;
 
 import io.nuls.network.constant.NetworkConstant;
 import io.nuls.network.manager.NodeGroupManager;
+import io.nuls.network.manager.TaskManager;
 import io.nuls.network.model.NodeGroup;
 import io.nuls.network.netty.container.NodesContainer;
 import io.nuls.network.utils.LoggerUtil;
@@ -59,7 +60,7 @@ public class GroupStatusMonitor implements Runnable {
         if (NodeGroup.WAIT1 == nodesContainer.getStatus()) {
             long time = nodesContainer.getLatestHandshakeSuccTime() + NetworkConstant.NODEGROUP_NET_STABLE_TIME_MILLIONS;
             //最近10s没有新的网络连接产生
-            if (time < System.currentTimeMillis() && nodesContainer.getConnectPeerNum() > 0) {
+            if (time < System.currentTimeMillis() && nodesContainer.getAvailableNodes().size() > 0) {
                 //通知链管理模块
                 //发布网络状态事件
                 nodesContainer.setStatus(NodeGroup.WAIT2);
@@ -70,6 +71,9 @@ public class GroupStatusMonitor implements Runnable {
         } else if (NodeGroup.WAIT2 == nodesContainer.getStatus()) {
             if (nodeGroup.isActive(isCross)) {
                 nodesContainer.setStatus(NodeGroup.OK);
+                //执行分享地址线程
+                TaskManager.getInstance().createShareAddressTask(nodeGroup, isCross);
+                nodesContainer.setHadShareAddr(true);
             }
         } else if (NodeGroup.OK == nodesContainer.getStatus()) {
             if (!nodeGroup.isActive(isCross)) {
