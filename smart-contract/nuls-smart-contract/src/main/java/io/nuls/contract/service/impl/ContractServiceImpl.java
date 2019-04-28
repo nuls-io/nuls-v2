@@ -100,10 +100,6 @@ public class ContractServiceImpl implements ContractService {
         BatchInfo batchInfo = chain.getBatchInfo();
         // 清空上次批量的所有数据
         batchInfo.clear();
-        //boolean canInit = true;
-        //if (batchInfo.hasBegan() && !batchInfo.isTimeOut()) {
-        //    canInit = false;
-        //}
         batchInfo.init(blockHeight);
         // 准备临时余额和当前区块头
         contractHelper.createTempBalanceManagerAndCurrentBlockHeader(chainId, blockHeight, blockTime, AddressTool.getAddress(packingAddress));
@@ -150,7 +146,9 @@ public class ContractServiceImpl implements ContractService {
     @Override
     public Result invokeContractOneByOne(int chainId, ContractTempTransaction tx) {
         try {
-            Log.debug("[Invoke Contract] TxType is [{}], hash is [{}]", tx.getType(), tx.getHash().toString());
+            if (Log.isDebugEnabled()) {
+                Log.debug("[Invoke Contract] TxType is [{}], hash is [{}]", tx.getType(), tx.getHash().toString());
+            }
             Chain chain = contractHelper.getChain(chainId);
             BatchInfo batchInfo = chain.getBatchInfo();
             if (!batchInfo.hasBegan()) {
@@ -215,7 +213,7 @@ public class ContractServiceImpl implements ContractService {
             // 等待before_end执行完成
             future.get();
             ContractPackageDto dto = batchInfo.getContractPackageDto();
-            if(dto == null) {
+            if (dto == null) {
                 return getFailed();
             }
             BlockHeader currentBlockHeader = batchInfo.getCurrentBlockHeader();

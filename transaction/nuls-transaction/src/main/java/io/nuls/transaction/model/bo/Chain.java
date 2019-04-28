@@ -6,10 +6,9 @@ import io.nuls.base.data.Transaction;
 import io.nuls.tools.log.logback.NulsLogger;
 import io.nuls.transaction.constant.TxConstant;
 import io.nuls.transaction.model.bo.config.ConfigBean;
-import io.nuls.transaction.utils.queue.entity.PersistentQueue;
+import io.nuls.transaction.model.po.TransactionNetPO;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.BlockingDeque;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedBlockingDeque;
@@ -60,8 +59,16 @@ public class Chain {
     /**
      * 未进行验证的交易队列
      */
-    @JsonIgnore
-    private PersistentQueue unverifiedQueue;
+   /* @JsonIgnore
+    private PersistentQueue unverifiedQueue;*/
+
+    /**
+     * 未进行验证的交易队列
+     */
+    private BlockingDeque<TransactionNetPO> unverifiedQueue;
+
+
+    private List<TransactionNetPO> orphanList;
 
     /**
      * 当前最新高度
@@ -96,8 +103,10 @@ public class Chain {
         this.txRegisterMap = new ConcurrentHashMap<>(TxConstant.INIT_CAPACITY_32);
         this.txQueue = new LinkedBlockingDeque<>();
         this.loggerMap = new HashMap<>();
-        contractTxFail = false;
-        txPackageOrphanMap = new HashMap<>();
+        this.contractTxFail = false;
+        this.txPackageOrphanMap = new HashMap<>();
+        this.orphanList = new LinkedList<>();
+//        this.unverifiedQueue = new LinkedBlockingDeque<>();
     }
 
     public int getChainId(){
@@ -144,6 +153,7 @@ public class Chain {
         this.txQueue = txQueue;
     }
 
+/*
     public PersistentQueue getUnverifiedQueue() {
         return unverifiedQueue;
     }
@@ -151,6 +161,7 @@ public class Chain {
     public void setUnverifiedQueue(PersistentQueue unverifiedQueue) {
         this.unverifiedQueue = unverifiedQueue;
     }
+*/
 
     public long getBestBlockHeight() {
         return bestBlockHeight;
@@ -194,7 +205,21 @@ public class Chain {
 
     public void setTxPackageOrphanMap(Map<NulsDigestData, Integer> txPackageOrphanMap) {
         this.txPackageOrphanMap = txPackageOrphanMap;
+    }
 
+    public BlockingDeque<TransactionNetPO> getUnverifiedQueue() {
+        return unverifiedQueue;
+    }
 
+    public void setUnverifiedQueue(BlockingDeque<TransactionNetPO> unverifiedQueue) {
+        this.unverifiedQueue = unverifiedQueue;
+    }
+
+    public List<TransactionNetPO> getOrphanList() {
+        return orphanList;
+    }
+
+    public void setOrphanList(List<TransactionNetPO> orphanList) {
+        this.orphanList = orphanList;
     }
 }

@@ -32,6 +32,7 @@ import io.nuls.network.model.NetworkEventResult;
 import io.nuls.network.model.Node;
 import io.nuls.network.model.NodeGroup;
 import io.nuls.network.model.dto.IpAddress;
+import io.nuls.network.model.dto.IpAddressShare;
 import io.nuls.network.model.message.AddrMessage;
 import io.nuls.network.model.message.base.BaseMessage;
 import io.nuls.network.utils.IpUtil;
@@ -79,20 +80,20 @@ public class AddrMessageHandler extends BaseMessageHandler {
             LoggerUtil.logger(chainId).error("rec error addr message.");
             return NetworkEventResult.getResultFail(NetworkErrorCode.NET_MESSAGE_ERROR);
         }
-        List<IpAddress> ipAddressList = addrMessage.getMsgBody().getIpAddressList();
+        List<IpAddressShare> ipAddressList = addrMessage.getMsgBody().getIpAddressList();
         /*
          * 判断地址是否本地已经拥有，如果拥有不转发，PEER是跨链网络也不转发
          * Determine whether the address is already owned locally. If it does not forward, PEER is not a cross-chain network.
          */
-        for (IpAddress ipAddress : ipAddressList) {
-            if (!IpUtil.isboolIp(ipAddress.getIp().getHostAddress())) {
+        for (IpAddressShare ipAddress : ipAddressList) {
+            if (!IpUtil.isboolIp(ipAddress.getIpStr())) {
                 continue;
             }
-            if (IpUtil.isSelf(ipAddress.getIp().getHostAddress())) {
+            if (IpUtil.isSelf(ipAddress.getIpStr())) {
                 continue;
             }
-            LoggerUtil.logger(chainId).info("add check node addr ={}:{}", ipAddress.getIp().getHostAddress(), ipAddress.getPort());
-            nodeGroup.addNeedCheckNode(ipAddress, node.isCrossConnect());
+            LoggerUtil.logger(chainId).info("add check node addr ={}:{} crossPort={}", ipAddress.getIp().getHostAddress(), ipAddress.getPort(),ipAddress.getCrossPort());
+            nodeGroup.addNeedCheckNode(ipAddress.getIp().getHostAddress(),ipAddress.getPort(),ipAddress.getCrossPort(), node.isCrossConnect());
         }
         return NetworkEventResult.getResultSuccess();
     }

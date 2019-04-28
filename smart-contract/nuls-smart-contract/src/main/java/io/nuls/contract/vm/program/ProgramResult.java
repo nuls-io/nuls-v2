@@ -24,6 +24,9 @@
  */
 package io.nuls.contract.vm.program;
 
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
+
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
@@ -51,6 +54,8 @@ public class ProgramResult {
     private List<ProgramInternalCall> internalCalls = new ArrayList<>();
 
     private List<String> events = new ArrayList<>();
+
+    private List<ProgramInvokeRegisterCmd> invokeRegisterCmds = new ArrayList<>();
 
     public ProgramResult revert(String errorMessage) {
         this.revert = true;
@@ -170,81 +175,72 @@ public class ProgramResult {
         this.events = events;
     }
 
+    public List<ProgramInvokeRegisterCmd> getInvokeRegisterCmds() {
+        return invokeRegisterCmds;
+    }
+
+    public void setInvokeRegisterCmds(List<ProgramInvokeRegisterCmd> invokeRegisterCmds) {
+        this.invokeRegisterCmds = invokeRegisterCmds;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {
             return true;
         }
-        if (o == null || getClass() != o.getClass()) {
+
+        if (!(o instanceof ProgramResult)) {
             return false;
         }
 
         ProgramResult that = (ProgramResult) o;
 
-        if (gasUsed != that.gasUsed) {
-            return false;
-        }
-        if (revert != that.revert) {
-            return false;
-        }
-        if (error != that.error) {
-            return false;
-        }
-        if (result != null ? !result.equals(that.result) : that.result != null) {
-            return false;
-        }
-        if (errorMessage != null ? !errorMessage.equals(that.errorMessage) : that.errorMessage != null) {
-            return false;
-        }
-        if (stackTrace != null ? !stackTrace.equals(that.stackTrace) : that.stackTrace != null) {
-            return false;
-        }
-        //if (balance != null ? !balance.equals(that.balance) : that.balance != null) {
-        //    return false;
-        //}
-        if (nonce != null ? !nonce.equals(that.nonce) : that.nonce != null) {
-            return false;
-        }
-        if (transfers != null ? !transfers.equals(that.transfers) : that.transfers != null) {
-            return false;
-        }
-        if (internalCalls != null ? !internalCalls.equals(that.internalCalls) : that.internalCalls != null) {
-            return false;
-        }
-        return events != null ? events.equals(that.events) : that.events == null;
+        return new EqualsBuilder()
+                .append(getGasUsed(), that.getGasUsed())
+                .append(isRevert(), that.isRevert())
+                .append(isError(), that.isError())
+                .append(getResult(), that.getResult())
+                .append(getErrorMessage(), that.getErrorMessage())
+                .append(getStackTrace(), that.getStackTrace())
+                .append(getNonce(), that.getNonce())
+                .append(getTransfers(), that.getTransfers())
+                .append(getInternalCalls(), that.getInternalCalls())
+                .append(getEvents(), that.getEvents())
+                .append(getInvokeRegisterCmds(), that.getInvokeRegisterCmds())
+                .isEquals();
     }
 
     @Override
     public int hashCode() {
-        int result1 = (int) (gasUsed ^ (gasUsed >>> 32));
-        result1 = 31 * result1 + (result != null ? result.hashCode() : 0);
-        result1 = 31 * result1 + (revert ? 1 : 0);
-        result1 = 31 * result1 + (error ? 1 : 0);
-        result1 = 31 * result1 + (errorMessage != null ? errorMessage.hashCode() : 0);
-        result1 = 31 * result1 + (stackTrace != null ? stackTrace.hashCode() : 0);
-        //result1 = 31 * result1 + (balance != null ? balance.hashCode() : 0);
-        result1 = 31 * result1 + (nonce != null ? nonce.hashCode() : 0);
-        result1 = 31 * result1 + (transfers != null ? transfers.hashCode() : 0);
-        result1 = 31 * result1 + (internalCalls != null ? internalCalls.hashCode() : 0);
-        result1 = 31 * result1 + (events != null ? events.hashCode() : 0);
-        return result1;
+        return new HashCodeBuilder(17, 37)
+                .append(getGasUsed())
+                .append(getResult())
+                .append(isRevert())
+                .append(isError())
+                .append(getErrorMessage())
+                .append(getStackTrace())
+                .append(getNonce())
+                .append(getTransfers())
+                .append(getInternalCalls())
+                .append(getEvents())
+                .append(getInvokeRegisterCmds())
+                .toHashCode();
     }
 
     @Override
     public String toString() {
         return "ProgramResult{" +
                 "gasUsed=" + gasUsed +
-                ", result=" + result +
+                ", result='" + result + '\'' +
                 ", revert=" + revert +
                 ", error=" + error +
-                ", errorMessage=" + errorMessage +
-                ", stackTrace=" + stackTrace +
-                //", balance=" + balance +
+                ", errorMessage='" + errorMessage + '\'' +
+                ", stackTrace='" + stackTrace + '\'' +
                 ", nonce=" + nonce +
                 ", transfers=" + transfers +
                 ", internalCalls=" + internalCalls +
                 ", events=" + events +
+                ", invokeRegisterCmds=" + invokeRegisterCmds +
                 '}';
     }
-
 }

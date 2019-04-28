@@ -31,7 +31,6 @@ import io.nuls.network.constant.NodeConnectStatusEnum;
 import io.nuls.network.manager.NodeGroupManager;
 import io.nuls.network.model.Node;
 import io.nuls.network.model.NodeGroup;
-import io.nuls.network.model.dto.IpAddress;
 import io.nuls.network.model.po.NodePo;
 import io.nuls.network.model.vo.NodeVo;
 import io.nuls.network.netty.container.NodesContainer;
@@ -88,8 +87,11 @@ public class NodeRpc extends BaseCmd {
             List<NodePo> nodePos = new ArrayList<>();
             for (String peer : peers) {
                 String[] ipPort = peer.split(":");
-                IpAddress address = new IpAddress(ipPort[0], Integer.valueOf(ipPort[1]));
-                nodeGroup.addNeedCheckNode(address, blCross);
+                if (blCross) {
+                    nodeGroup.addNeedCheckNode(ipPort[0], Integer.valueOf(ipPort[1]), Integer.valueOf(ipPort[1]), blCross);
+                } else {
+                    nodeGroup.addNeedCheckNode(ipPort[0], Integer.valueOf(ipPort[1]), 0, blCross);
+                }
             }
         } catch (Exception e) {
             e.printStackTrace();

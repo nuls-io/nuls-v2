@@ -30,7 +30,6 @@ import io.nuls.network.constant.NodeConnectStatusEnum;
 import io.nuls.network.constant.NodeStatusEnum;
 import io.nuls.network.manager.NodeGroupManager;
 import io.nuls.network.model.dto.Dto;
-import io.nuls.network.model.dto.IpAddress;
 import io.nuls.network.model.po.*;
 import io.nuls.network.netty.container.NodesContainer;
 import io.nuls.tools.core.ioc.SpringLiteContext;
@@ -91,23 +90,24 @@ public class NodeGroup implements Dto {
     public final static int OK = 3;
     private final static int DESTROY = -1;
     private final static int RECONNECT = -2;
-    public static Map<String,String> statusMap = new HashMap<>();
+    public static Map<String, String> statusMap = new HashMap<>();
 
-    static{
-        statusMap.put(String.valueOf(WAIT1),"netInit(初始化)");
-        statusMap.put(String.valueOf(WAIT2),"waitConnected(待组网)");
-        statusMap.put(String.valueOf(OK),"running(运行中)");
-        statusMap.put(String.valueOf(DESTROY),"destroy(注销中)");
-        statusMap.put(String.valueOf(RECONNECT),"reconnect(重连中)");
+    static {
+        statusMap.put(String.valueOf(WAIT1), "netInit(初始化)");
+        statusMap.put(String.valueOf(WAIT2), "waitConnected(待组网)");
+        statusMap.put(String.valueOf(OK), "running(运行中)");
+        statusMap.put(String.valueOf(DESTROY), "destroy(注销中)");
+        statusMap.put(String.valueOf(RECONNECT), "reconnect(重连中)");
     }
 
-    public String getLocalStatus(){
-       return statusMap.get(String.valueOf(localNetNodeContainer.getStatus()));
+    public String getLocalStatus() {
+        return statusMap.get(String.valueOf(localNetNodeContainer.getStatus()));
     }
 
-    public String getCrossStatus(){
+    public String getCrossStatus() {
         return statusMap.get(String.valueOf(crossNodeContainer.getStatus()));
     }
+
     public NodeGroup(long magicNumber, int chainId, int maxIn, int maxOut, int minAvailableCount) {
         this.magicNumber = magicNumber;
         this.chainId = chainId;
@@ -299,13 +299,14 @@ public class NodeGroup implements Dto {
         loadNodes(crossNodeContainer, groupNodesPo.getCrossNodeContainer());
     }
 
-    public boolean addNeedCheckNode(IpAddress ipAddress, boolean isCross) {
+    public boolean addNeedCheckNode(String ip, int port, int crossPort, boolean isCross) {
         locker.lock();
         try {
-            Node newNode = new Node(magicNumber, ipAddress.getIp().getHostAddress(), ipAddress.getPort(), Node.OUT, isCross);
             if (isCross) {
+                Node newNode = new Node(magicNumber, ip, crossPort, crossPort, Node.OUT, isCross);
                 return crossNodeContainer.addNeedCheckNode(newNode);
             } else {
+                Node newNode = new Node(magicNumber, ip, port, crossPort, Node.OUT, isCross);
                 return localNetNodeContainer.addNeedCheckNode(newNode);
             }
         } finally {
@@ -319,15 +320,15 @@ public class NodeGroup implements Dto {
         Map<String, Node> connectedNodes = null;
         if (isCross) {
             allNodes = crossNodeContainer.getCanConnectNodes().values();
-            connectedNodes=crossNodeContainer.getConnectedNodes();
+            connectedNodes = crossNodeContainer.getConnectedNodes();
         } else {
             allNodes = localNetNodeContainer.getCanConnectNodes().values();
-            connectedNodes=localNetNodeContainer.getConnectedNodes();
+            connectedNodes = localNetNodeContainer.getConnectedNodes();
         }
         for (Node node : allNodes) {
             if (node.getStatus() == NodeStatusEnum.CONNECTABLE) {
                 //排除已经连接的信息
-                if(null == connectedNodes.get(node.getId())){
+                if (null == connectedNodes.get(node.getId())) {
                     nodeList.add(node);
                 }
             }

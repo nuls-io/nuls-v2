@@ -168,13 +168,50 @@ public class ClassCodeLoader {
     }
 
     private static Map<String, ClassCode> loadFromResource() {
-        InputStream inputStream = ClassCodeLoader.class.getResourceAsStream("/used_classes");
-        if (inputStream == null) {
-            return new HashMap<>();
-        } else {
-            return loadJar(inputStream);
+        InputStream baseInputStream = null;
+        InputStream sdkInputStream = null;
+        try {
+            baseInputStream = ClassCodeLoader.class.getResourceAsStream("/used_classes_base");
+            if (baseInputStream == null) {
+                return new HashMap<>(0);
+            } else {
+                Map<String, ClassCode> usedClasses = loadJar(baseInputStream);
+                sdkInputStream = ClassCodeLoader.class.getResourceAsStream("/used_classes_sdk");
+                if (sdkInputStream == null) {
+                    return usedClasses;
+                } else {
+                    Map<String, ClassCode> sdkClasses = loadJar(sdkInputStream);
+                    if(sdkClasses != null && usedClasses != null) {
+                        usedClasses.putAll(sdkClasses);
+                    }
+                    return usedClasses;
+                }
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        } finally {
+            IOUtils.closeQuietly(baseInputStream);
+            IOUtils.closeQuietly(sdkInputStream);
         }
     }
+
+    //private static Map<String, ClassCode> loadFromResource() {
+    //    InputStream baseInputStream = null;
+    //    InputStream sdkInputStream = null;
+    //    try {
+    //        baseInputStream = ClassCodeLoader.class.getResourceAsStream("/used_classes");
+    //        if (baseInputStream == null) {
+    //            return new HashMap<>(0);
+    //        } else {
+    //            return loadJar(baseInputStream);
+    //        }
+    //    } catch (Exception e) {
+    //        throw new RuntimeException(e);
+    //    } finally {
+    //        IOUtils.closeQuietly(baseInputStream);
+    //        IOUtils.closeQuietly(sdkInputStream);
+    //    }
+    //}
 
     private static Map<String, ClassCode> loadJar(byte[] bytes) {
         InputStream inputStream = new ByteArrayInputStream(bytes);
@@ -203,6 +240,8 @@ public class ClassCodeLoader {
             }
         } catch (IOException e) {
             throw new RuntimeException(e);
+        } finally {
+            IOUtils.closeQuietly(jarInputStream);
         }
         return map;
     }

@@ -193,7 +193,7 @@ public class ContractTransferHandler {
 
             // 如果合约转账(从合约转出)出现错误，整笔合约交易视作合约执行失败
             if (!isCorrectContractTransfer) {
-                Log.debug("contract transfer execution failed, reason: {}", contractResult.getErrorMessage());
+                Log.warn("contract transfer execution failed, reason: {}", contractResult.getErrorMessage());
                 contractResult.setError(true);
                 contractResult.setErrorMessage(result.getErrorCode().getMsg());
                 // 余额还原到上一次的余额

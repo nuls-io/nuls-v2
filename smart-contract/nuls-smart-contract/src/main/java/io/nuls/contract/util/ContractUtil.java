@@ -71,8 +71,6 @@ public class ContractUtil {
      */
     private static final int BLOCK_EXTENDS_DATA_FIX_LENGTH = 21;
 
-    private static final String STRING = "String";
-
     public static String[][] twoDimensionalArray(Object[] args, String[] types) {
         if (args == null) {
             return null;

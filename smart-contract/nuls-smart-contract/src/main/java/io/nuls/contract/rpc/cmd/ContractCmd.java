@@ -26,9 +26,7 @@ package io.nuls.contract.rpc.cmd;
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.Transaction;
 import io.nuls.contract.helper.ContractHelper;
-import io.nuls.contract.manager.ChainManager;
-import io.nuls.contract.manager.ContractTokenBalanceManager;
-import io.nuls.contract.manager.ContractTxProcessorManager;
+import io.nuls.contract.manager.*;
 import io.nuls.contract.model.bo.ContractTempTransaction;
 import io.nuls.contract.model.dto.ContractPackageDto;
 import io.nuls.contract.service.ContractService;
@@ -66,6 +64,10 @@ public class ContractCmd extends BaseCmd {
     private ContractHelper contractHelper;
     @Autowired
     private ContractTxProcessorManager contractTxProcessorManager;
+    @Autowired
+    private ContractTxValidatorManager contractTxValidatorManager;
+    @Autowired
+    private CmdRegisterManager cmdRegisterManager;
 
     @CmdAnnotation(cmd = BATCH_BEGIN, version = 1.0, description = "batch begin")
     @Parameter(parameterName = "chainId", parameterType = "int")
@@ -147,10 +149,21 @@ public class ContractCmd extends BaseCmd {
             }
             ContractPackageDto dto = (ContractPackageDto) result.getData();
             List<String> resultTxDataList = new ArrayList<>();
-            List<Transaction> resultTxList = dto.getResultTxList();
-            for (Transaction resultTx : resultTxList) {
-                Log.info("Batch txType is [{}], hash is [{}]", resultTx.getType(), resultTx.getHash().toString());
-                resultTxDataList.add(RPCUtil.encode(resultTx.serialize()));
+            List resultTxList = dto.getResultTxList();
+            Transaction tx;
+            for (Object resultTx : resultTxList) {
+                // 合约调用其他模块生成的交易
+                if (resultTx instanceof String) {
+                    resultTxDataList.add((String) resultTx);
+                } else {
+                    // 合约内部生成的交易
+                    tx = (Transaction) resultTx;
+                    if (Log.isDebugEnabled()) {
+                        Log.debug("Batch new txHash is [{}]", tx.getHash().toString());
+                    }
+                    resultTxDataList.add(RPCUtil.encode(tx.serialize()));
+                }
+
             }
 
             Map<String, Object> resultMap = MapUtil.createHashMap(2);
@@ -256,6 +269,39 @@ public class ContractCmd extends BaseCmd {
                 return wrapperFailed(result);
             }
 
+            return success();
+        } catch (Exception e) {
+            Log.error(e);
+            return failed(e.getMessage());
+        }
+    }
+
+    /**
+     * @return
+     * @see io.nuls.contract.enums.CmdRegisterMode cmdMode
+     * @see io.nuls.contract.enums.CmdRegisterReturnType returnType
+     */
+    @CmdAnnotation(cmd = REGISTER_CMD_FOR_CONTRACT, version = 1.0, description = "register cmd for contract")
+    @Parameter(parameterName = "chainId", parameterType = "int")
+    @Parameter(parameterName = "moduleCode", parameterType = "String")
+    @Parameter(parameterName = "cmdName", parameterType = "String")
+    @Parameter(parameterName = "cmdMode", parameterType = "int")
+    @Parameter(parameterName = "argNames", parameterType = "List<String>")
+    @Parameter(parameterName = "returnType", parameterType = "int")
+    public Response registerCmdForContract(Map<String, Object> params) {
+        try {
+            Integer chainId = (Integer) params.get("chainId");
+            ChainManager.chainHandle(chainId);
+            String moduleCode = (String) params.get("moduleCode");
+            String cmdName = (String) params.get("cmdName");
+            Integer cmdMode = (Integer) params.get("cmdMode");
+            List<String> argNames = (List<String>) params.get("argNames");
+            Integer returnType = (Integer) params.get("returnType");
+
+            Result result = cmdRegisterManager.registerCmd(chainId, moduleCode, cmdName, cmdMode, argNames, returnType);
+            if (result.isFailed()) {
+                return failed(result.getErrorCode());
+            }
             return success();
         } catch (Exception e) {
             Log.error(e);

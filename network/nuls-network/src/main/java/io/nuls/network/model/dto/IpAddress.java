@@ -46,11 +46,10 @@ public class IpAddress extends BaseNulsData {
     private static final int IPSIZE = 16;
     private InetAddress ip;
     private int port;
+
     public IpAddress() {
         super();
     }
-
-
     public IpAddress(String ipStr, int port) {
         try {
             this.ip = InetAddress.getByName(ipStr);

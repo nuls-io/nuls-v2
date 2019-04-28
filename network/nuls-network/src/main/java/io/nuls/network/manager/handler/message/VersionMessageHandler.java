@@ -160,7 +160,6 @@ public class VersionMessageHandler extends BaseMessageHandler {
         });
         //存储需要的信息,协议版本信息，远程跨链端口信息
         node.setVersionProtocolInfos(versionBody.getProtocolVersion(), versionBody.getBlockHeight(), versionBody.getBlockHash());
-        node.setRemoteCrossPort(versionBody.getPortMeCross());
         //回复version
         VersionMessage versionMessage = MessageFactory.getInstance().buildVersionMessage(node, message.getHeader().getMagicNumber());
         LoggerUtil.logger(nodeGroup.getChainId()).debug("node={} version success.go response versionMessage..cross={}",node.getId(),node.isCrossConnect());
@@ -183,7 +182,6 @@ public class VersionMessageHandler extends BaseMessageHandler {
 //       Log.debug("VersionMessageHandler Recieve:Client"+":"+node.getIp()+":"+node.getRemotePort()+"==CMD=" +message.getHeader().getCommandStr());
         //存储需要的信息
         node.setVersionProtocolInfos(versionBody.getProtocolVersion(), versionBody.getBlockHeight(), versionBody.getBlockHash());
-        node.setRemoteCrossPort(versionBody.getPortMeCross());
         node.setConnectStatus(NodeConnectStatusEnum.AVAILABLE);
         node.setConnectTime(TimeManager.currentTimeMillis());
         if (node.isCrossConnect()) {
