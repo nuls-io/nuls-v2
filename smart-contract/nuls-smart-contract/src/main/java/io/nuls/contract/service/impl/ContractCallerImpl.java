@@ -95,8 +95,10 @@ public class ContractCallerImpl implements ContractCaller {
             long blockTime = currentBlockHeader.getTime();
             long lastestHeight = currentBlockHeader.getHeight() - 1;
             BlockHeader latestBlockHeader = BlockCall.getLatestBlockHeader(chainId);
-            Log.debug("Current block header height is {}", currentBlockHeader.getHeight());
-            Log.debug("Latest block header height is {}", latestBlockHeader.getHeight());
+            if (Log.isDebugEnabled()) {
+                Log.debug("Current block header height is {}", currentBlockHeader.getHeight());
+                Log.debug("Latest block header height is {}", latestBlockHeader.getHeight());
+            }
             ContractTxCallable txCallable = new ContractTxCallable(chainId, blockTime, batchExecutor, contract, tx, lastestHeight, preStateRoot, checker, container);
 
             Future<ContractResult> contractResultFuture = TX_EXECUTOR_SERVICE.submit(txCallable);

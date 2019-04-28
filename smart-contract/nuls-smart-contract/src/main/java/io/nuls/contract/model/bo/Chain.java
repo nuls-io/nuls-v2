@@ -7,6 +7,9 @@ import io.nuls.contract.vm.program.ProgramExecutor;
 import org.ethereum.config.CommonConfig;
 import org.ethereum.config.DefaultConfig;
 
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
 /**
  * 链信息类
  * Chain information class
@@ -47,6 +50,11 @@ public class Chain {
      * 批量执行信息
      */
     private BatchInfo batchInfo = new BatchInfo();
+
+    /**
+     * 向合约模块注册接口提供给合约来调用
+     */
+    private Map<String, CmdRegister> cmdRegisterMap = new ConcurrentHashMap<>();
 
     public int getChainId() {
         return config.getChainId();
@@ -106,5 +114,13 @@ public class Chain {
 
     public void setBatchInfo(BatchInfo batchInfo) {
         this.batchInfo = batchInfo;
+    }
+
+    public Map<String, CmdRegister> getCmdRegisterMap() {
+        return cmdRegisterMap;
+    }
+
+    public void setCmdRegisterMap(Map<String, CmdRegister> cmdRegisterMap) {
+        this.cmdRegisterMap = cmdRegisterMap;
     }
 }

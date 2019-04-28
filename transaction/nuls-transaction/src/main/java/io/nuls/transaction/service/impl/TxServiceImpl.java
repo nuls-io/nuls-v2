@@ -169,11 +169,9 @@ public class TxServiceImpl implements TxService {
                             tx.getType(), tx.getHash().getDigestHex());
                     return false;
                 }
-               /** if (chain.getPackaging().get()) {
+                if (chain.getPackaging().get()) {
                     packablePool.add(chain, tx);
-                }*/
-                packablePool.add(chain, tx);/**临时注释 测试*/
-
+                }
                 unconfirmedTxStorageService.putTx(chain.getChainId(), tx);
                 //广播完整交易
                 NetworkCall.broadcastTx(chain.getChainId(),tx);

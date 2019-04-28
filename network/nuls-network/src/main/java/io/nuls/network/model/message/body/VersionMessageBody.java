@@ -42,9 +42,7 @@ public class VersionMessageBody extends BaseNulsData {
 
     private long protocolVersion;
     private IpAddress addrYou = new IpAddress();
-    private int portYouCross;
     private IpAddress addrMe = new IpAddress();
-    private int portMeCross;
     private long blockHeight;
     private String blockHash = "";
     private String extend = "";
@@ -58,10 +56,8 @@ public class VersionMessageBody extends BaseNulsData {
     public int size() {
         int s = 0;
         s += SerializeUtils.sizeOfUint32(); // protocolVersion
-        s += addrYou.size(); // addrYou 18byte
-        s += SerializeUtils.sizeOfUint16(); // addrYou  cross port 2byte
+        s += addrYou.size(); // addrYou 16byte
         s += addrMe.size(); // addrMe  16byte
-        s += SerializeUtils.sizeOfUint16(); // addrMe cross port 2byte
         s += SerializeUtils.sizeOfUint32(); // blockHeight
         s += SerializeUtils.sizeOfString(blockHash); // blockHash
         s += SerializeUtils.sizeOfString(extend); // extend
@@ -75,9 +71,7 @@ public class VersionMessageBody extends BaseNulsData {
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
         stream.writeUint32(protocolVersion);
         addrYou.serializeToStream(stream);
-        stream.writeUint16(portYouCross);
         addrMe.serializeToStream(stream);
-        stream.writeUint16(portMeCross);
         stream.writeUint32(blockHeight);
         stream.writeString(blockHash);
         stream.writeString(extend);
@@ -88,9 +82,7 @@ public class VersionMessageBody extends BaseNulsData {
         try {
             protocolVersion = buffer.readUint32();
             addrYou.parse(buffer);
-            portYouCross = buffer.readUint16();
             addrMe.parse(buffer);
-            portMeCross = buffer.readUint16();
             blockHeight = buffer.readUint32();
             blockHash = buffer.readString();
             extend = buffer.readString();
@@ -114,24 +106,6 @@ public class VersionMessageBody extends BaseNulsData {
 
     public void setExtend(String extend) {
         this.extend = extend;
-    }
-
-
-    public int getPortYouCross() {
-        return portYouCross;
-    }
-
-    public void setPortYouCross(int portYouCross) {
-        this.portYouCross = portYouCross;
-    }
-
-
-    public int getPortMeCross() {
-        return portMeCross;
-    }
-
-    public void setPortMeCross(int portMeCross) {
-        this.portMeCross = portMeCross;
     }
 
     public IpAddress getAddrYou() {

@@ -171,34 +171,27 @@ public class NodesContainer implements Serializable {
     }
 
     public boolean addNeedCheckNode(Node newNode) {
-
         String nodeId = newNode.getId();
-
-        Node node = uncheckNodes.get(nodeId);
-        if (node != null) {
+        Node node = connectedNodes.get(nodeId);
+        if (null != node) {
             return false;
         }
-
-        node = canConnectNodes.get(nodeId);
-        if (node != null) {
-            return false;
+        node = uncheckNodes.get(nodeId);
+        if (null == node) {
+            node = canConnectNodes.get(nodeId);
+        }
+        if (null == node) {
+            node = disconnectNodes.get(nodeId);
+        }
+        if (null == node) {
+            node = failNodes.get(nodeId);
         }
 
-        node = connectedNodes.get(nodeId);
-        if (node != null) {
+        if (null != node) {
+            //更新信息
+            node.setRemoteCrossPort(newNode.getRemoteCrossPort());
             return false;
         }
-
-        node = disconnectNodes.get(nodeId);
-        if (node != null) {
-            return false;
-        }
-
-        node = failNodes.get(nodeId);
-        if (node != null) {
-            return false;
-        }
-
         newNode.setLastProbeTime(0L);
         uncheckNodes.put(nodeId, newNode);
         newNode.setStatus(NodeStatusEnum.UNCHECK);
