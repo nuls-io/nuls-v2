@@ -15,7 +15,7 @@
     "blockReward":0,
     "blockMaxSize":30000000,
     "assetsId":1,
-    "chainId":100
+    "chainId":2
   },
   "moduleCode":"cs",
   "mainChainId": 2,
