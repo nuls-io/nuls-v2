@@ -107,7 +107,7 @@ public class BlockServiceImpl implements BlockService {
                         }else{
                             sendedPo = new SendCtxHashPo(broadSuccessCtxHash);
                         }
-                        if(sendedHeightService.save(cacheHeight, sendedPo, chainId)){
+                        if(!sendedHeightService.save(cacheHeight, sendedPo, chainId)){
                             continue;
                         }
                     }

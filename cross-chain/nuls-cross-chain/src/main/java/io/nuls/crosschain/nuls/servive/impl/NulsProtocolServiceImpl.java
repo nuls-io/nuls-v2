@@ -462,6 +462,9 @@ public class NulsProtocolServiceImpl implements ProtocolService {
         verifyCtxMessage.setRequestHash(nativeHash);
         NetWorkCall.broadcast(fromChainId, verifyCtxMessage, CommandConstant.VERIFY_CTX_MESSAGE,true);
         chain.getMessageLog().info("本节点第一次收到该跨链交易，需向连接到的发送链节点验证该跨链交易,originalHash:{},Hash:{}",originalHash,nativeHash);
+        if(!chain.getVerifyCtxResultMap().containsKey(nativeHash)){
+            chain.getVerifyCtxResultMap().put(nativeHash, new ArrayList<>());
+        }
         //接收验证结果，统计结果并做拜占庭得到最终验证结果，如果验证结果为验证不通过则删除该消息
         boolean validResult = verifyResult(chain, chain.getChainId(), nativeHash);
         //如果验证不通过，结束

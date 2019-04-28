@@ -411,6 +411,9 @@ public class NulsCrossChainServiceImpl implements CrossChainService {
                 linkedChainId = AddressTool.getChainIdByAddress(coinData.getTo().get(0).getAddress());
             }
             NetWorkCall.broadcast(linkedChainId, message, CommandConstant.GET_CTX_STATE_MESSAGE,true);
+            if(!chain.getCtxStateMap().containsKey(requestHash)){
+                chain.getCtxStateMap().put(requestHash, new ArrayList<>());
+            }
             result.put(VALUE, statisticsCtxState(chain,linkedChainId,requestHash));
             return Result.getSuccess(SUCCESS).setData(result);
         }catch (NulsException e){
