@@ -79,7 +79,6 @@ public class TxCirculateCmd extends BaseChainCmd {
     @Parameter(parameterName = "assetChainId", parameterType = "int", parameterValidRange = "[1,65535]")
     @Parameter(parameterName = "assetId", parameterType = "int", parameterValidRange = "[1,65535]")
     public Response getCirculateChainAsset(Map params) {
-        //提取 从哪条链 转 哪条链，是否是跨链，链 手续费共多少？
         try {
             int circulateChainId = Integer.valueOf(params.get("circulateChainId").toString());
             int assetChainId = Integer.valueOf(params.get("assetChainId").toString());
