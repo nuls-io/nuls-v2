@@ -27,17 +27,36 @@ package io.nuls.chain.service;
 import io.nuls.base.data.Transaction;
 import io.nuls.chain.model.dto.ChainEventResult;
 import io.nuls.chain.model.dto.CoinDataAssets;
+import io.nuls.chain.model.po.ChainAsset;
 import io.nuls.tools.exception.NulsException;
 
 import java.util.List;
 
 /**
- *
  * 资产流通接口
+ *
  * @author lan
  * @date 2019/02/21
  **/
 public interface TxCirculateService {
     ChainEventResult circulateCommit(List<Transaction> txs) throws Exception;
+
+    /**
+     * 获取资产列表
+     * @param coinDataByte
+     * @return
+     * @throws NulsException
+     */
     List<CoinDataAssets> getChainAssetList(byte[] coinDataByte) throws NulsException;
+
+    /**
+     * 查询链上资产流通量
+     * @param circulateChainId
+     * @param assetChainId
+     * @param assetId
+     * @return
+     * @throws NulsException
+     */
+    ChainAsset getCirculateChainAsset(int circulateChainId,int assetChainId,int assetId) throws Exception;
+
 }

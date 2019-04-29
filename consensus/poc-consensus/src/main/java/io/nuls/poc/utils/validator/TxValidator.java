@@ -21,6 +21,8 @@ import io.nuls.poc.model.po.DepositPo;
 import io.nuls.poc.model.po.PunishLogPo;
 import io.nuls.poc.storage.AgentStorageService;
 import io.nuls.poc.storage.DepositStorageService;
+import io.nuls.poc.utils.compare.CoinFromComparator;
+import io.nuls.poc.utils.compare.CoinToComparator;
 import io.nuls.poc.utils.manager.AgentManager;
 import io.nuls.poc.utils.manager.ChainManager;
 import io.nuls.poc.utils.manager.CoinDataManager;
@@ -333,6 +335,13 @@ public class TxValidator {
         CoinData localCoinData = coinDataManager.getStopAgentCoinData(chain, agent, coinData.getTo().get(0).getLockTime());
         int size = tx.size() - tx.getTransactionSignature().length + P2PHKSignature.SERIALIZE_LENGTH;
         BigInteger fee = TransactionFeeCalculator.getNormalTxFee(size);
+        //coinData和localCoinData排序
+        CoinFromComparator fromComparator = new CoinFromComparator();
+        CoinToComparator toComparator = new CoinToComparator();
+        coinData.getFrom().sort(fromComparator);
+        coinData.getTo().sort(toComparator);
+        localCoinData.getFrom().sort(fromComparator);
+        localCoinData.getTo().sort(toComparator);
         localCoinData.getTo().get(0).setAmount(localCoinData.getTo().get(0).getAmount().subtract(fee));
         if(!Arrays.equals(coinData.serialize(),localCoinData.serialize())){
             return false;

@@ -27,6 +27,7 @@
 package io.nuls.base.data;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import io.nuls.base.basic.AddressTool;
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.basic.NulsOutputStreamBuffer;
 import io.nuls.base.constant.BaseConstant;
@@ -184,5 +185,13 @@ public class CoinData extends BaseNulsData {
             addressSet.add(it.next().getBytes());
         }
         return addressSet;
+    }
+
+    public int getFromAddressCount(){
+        Set<String> addressSet = new HashSet<>();
+        for (CoinFrom coinFrom:from) {
+            addressSet.add(AddressTool.getStringAddressByBytes(coinFrom.getAddress()));
+        }
+        return addressSet.size();
     }
 }

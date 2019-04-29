@@ -1,8 +1,9 @@
 package io.nuls.transaction.service.impl;
 
-import io.nuls.base.basic.AddressTool;
 import io.nuls.base.constant.TxStatusEnum;
-import io.nuls.base.data.*;
+import io.nuls.base.data.BlockHeader;
+import io.nuls.base.data.NulsDigestData;
+import io.nuls.base.data.Transaction;
 import io.nuls.rpc.util.RPCUtil;
 import io.nuls.rpc.util.TimeUtils;
 import io.nuls.tools.core.annotation.Autowired;
@@ -66,19 +67,14 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
     }
 
     @Override
-    public boolean saveGengsisTxList(Chain chain, List<Transaction> txList, String blockHeader) throws NulsException {
-        if (null == chain || txList == null || txList.size() == 0) {
+    public boolean saveGengsisTxList(Chain chain, List<String> txStrList, String blockHeader) throws NulsException {
+        if (null == chain || txStrList == null || txStrList.size() == 0) {
             throw new NulsException(TxErrorCode.PARAMETER_ERROR);
         }
-        if (!saveBlockTxList(chain, txList, blockHeader, true)) {
+        if (!saveBlockTxList(chain, txStrList, blockHeader, true)) {
             chain.getLoggerMap().get(TxConstant.LOG_TX).debug("保存创世块交易失败");
             return false;
         }
-        CoinData coinData = TxUtil.getCoinData(txList.get(0));
-        for (Coin coin : coinData.getTo()) {
-            chain.getLoggerMap().get(TxConstant.LOG_TX).debug("address:{}, to:{}", AddressTool.getStringAddressByBytes(coin.getAddress()), coin.getAmount());
-        }
-
         chain.getLoggerMap().get(TxConstant.LOG_TX).debug("保存创世块交易成功");
         return true;
     }
@@ -90,28 +86,22 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
      * 4.从未打包交易库中删除交易
      */
     @Override
-    public boolean saveTxList(Chain chain, List<NulsDigestData> txHashList, String blockHeader) throws NulsException {
+    public boolean saveTxList(Chain chain, List<String> txStrList, String blockHeader) throws NulsException {
         chain.getLoggerMap().get(TxConstant.LOG_TX).debug("start save block txs.......");
-        if (null == chain || txHashList == null || txHashList.size() == 0) {
+        if (null == chain || txStrList == null || txStrList.size() == 0) {
             throw new NulsException(TxErrorCode.PARAMETER_ERROR);
         }
         try {
-            List<Transaction> txList = new ArrayList<>();
-            for (int i = 0; i < txHashList.size(); i++) {
-                NulsDigestData hash = txHashList.get(i);
-                Transaction tx = unconfirmedTxStorageService.getTx(chain.getChainId(), hash);
-                txList.add(tx);
-            }
-            return saveBlockTxList(chain, txList, blockHeader, false);
+            return saveBlockTxList(chain, txStrList, blockHeader, false);
         } catch (Exception e) {
             chain.getLoggerMap().get(TxConstant.LOG_TX).error(e);
             return false;
         }
     }
 
-    private boolean saveBlockTxList(Chain chain, List<Transaction> txList, String blockHeaderStr, boolean gengsis) throws NulsException {
+    private boolean saveBlockTxList(Chain chain, List<String> txStrList, String blockHeaderStr, boolean gengsis) throws NulsException {
         long start = TimeUtils.getCurrentTimeMillis();//-----
-        List<String> txStrList = new ArrayList<>();
+        List<Transaction> txList = new ArrayList<>();
         int chainId = chain.getChainId();
         List<byte[]> txHashs = new ArrayList<>();
         //组装统一验证参数数据,key为各模块统一验证器cmd
@@ -121,10 +111,10 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
             blockHeader = TxUtil.getInstanceRpcStr(blockHeaderStr, BlockHeader.class);
             LOG.debug("[保存区块] ==========开始==========高度:{}==========数量:{}", blockHeader.getHeight(), txList.size());//----
             chain.getLoggerMap().get(TxConstant.LOG_TX).debug("saveBlockTxList block height:{}", blockHeader.getHeight());
-            for (Transaction tx : txList) {
+            for (String txStr : txStrList) {
+                Transaction tx =TxUtil.getInstanceRpcStr(txStr, Transaction.class);
+                txList.add(tx);
                 tx.setBlockHeight(blockHeader.getHeight());
-                String txStr = RPCUtil.encode(tx.serialize());
-                txStrList.add(txStr);
                 txHashs.add(tx.getHash().serialize());
                 if(TxManager.isSystemSmartContract(chain, tx.getType())) {
                     continue;
@@ -290,8 +280,12 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
         try {
             for (int i = 0; i < txHashList.size(); i++) {
                 NulsDigestData hash = txHashList.get(i);
-                txHashs.add(hash.serialize());
                 TransactionConfirmedPO txPO = confirmedTxStorageService.getTx(chainId, hash);
+                if(null == txPO){
+                    //回滚的交易没有查出来就跳过，保存时该块可能中途中断，导致保存不全
+                    continue;
+                }
+                txHashs.add(hash.serialize());
                 Transaction tx = txPO.getTx();
                 txList.add(tx);
                 String txStr = RPCUtil.encode(tx.serialize());

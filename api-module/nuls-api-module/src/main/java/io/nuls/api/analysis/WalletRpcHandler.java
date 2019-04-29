@@ -28,6 +28,7 @@ import static io.nuls.api.constant.ApiConstant.*;
 
 public class WalletRpcHandler {
 
+
     public static Result<BlockInfo> getBlockInfo(int chainID, long height) {
         Map<String, Object> params = new HashMap<>(ApiConstant.INIT_CAPACITY_8);
         params.put(Constants.VERSION_KEY_STR, ApiContext.VERSION);
@@ -334,7 +335,6 @@ public class WalletRpcHandler {
             return Result.getFailed(e.getErrorCode());
         }
     }
-
 
     public static Result broadcastTx(int chainId, String txHex) {
         Map<String, Object> params = new HashMap<>();

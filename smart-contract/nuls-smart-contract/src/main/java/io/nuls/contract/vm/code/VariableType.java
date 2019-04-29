@@ -106,6 +106,7 @@ public class VariableType {
     public static final VariableType CHAR_ARRAY_TYPE = valueOf("[C");
     public static final VariableType SHORT_ARRAY_TYPE = valueOf("[S");
     public static final VariableType STRING_ARRAY_TYPE = valueOf("[Ljava/lang/String;");
+    public static final VariableType STRING_TWO_DIMENSIONAL_ARRAY_TYPE = valueOf("[[Ljava/lang/String;");
     public static final VariableType STACK_TRACE_ELEMENT_TYPE = valueOf("Ljava/lang/StackTraceElement;");
     public static final VariableType STACK_TRACE_ELEMENT_ARRAY_TYPE = valueOf("[Ljava/lang/StackTraceElement;");
 

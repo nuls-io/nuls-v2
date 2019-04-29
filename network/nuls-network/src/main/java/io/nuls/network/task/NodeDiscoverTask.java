@@ -64,7 +64,7 @@ public class NodeDiscoverTask implements Runnable {
     private final ConnectionManager connectionManager = ConnectionManager.getInstance();
 
     public NodeDiscoverTask() {
-        new Thread(() -> processFailNodes()).start();
+        new Thread().start();
     }
 
     @Override
@@ -75,8 +75,9 @@ public class NodeDiscoverTask implements Runnable {
             for (NodeGroup nodeGroup : list) {
                 processNodes(nodeGroup.getLocalNetNodeContainer(), false);
                 processNodes(nodeGroup.getCrossNodeContainer(), true);
+                processFailNodes(nodeGroup.getLocalNetNodeContainer(), false);
+                processFailNodes(nodeGroup.getCrossNodeContainer(), true);
             }
-
         } catch (Exception e) {
             LoggerUtil.logger().error(e);
         }
@@ -115,20 +116,12 @@ public class NodeDiscoverTask implements Runnable {
     private void processFailNodes(NodesContainer nodesContainer, boolean isCross) {
         try {
             Map<String, Node> canConnectNodes = nodesContainer.getCanConnectNodes();
-            while (true) {
-                Map<String, Node> failNodes = nodesContainer.getFailNodes();
-                if (failNodes.size() > 0) {
-                    probeNodes(failNodes, canConnectNodes, nodesContainer, isCross);
-                }
-                Thread.sleep(3000L);
+            Map<String, Node> failNodes = nodesContainer.getFailNodes();
+            if (failNodes.size() > 0) {
+                probeNodes(failNodes, canConnectNodes, nodesContainer, isCross);
             }
         } catch (Exception e) {
             LoggerUtil.logger().error(e);
-            try {
-                Thread.sleep(3000L);
-            } catch (InterruptedException e1) {
-                LoggerUtil.logger().error(e1);
-            }
         }
     }
 
@@ -266,7 +259,7 @@ public class NodeDiscoverTask implements Runnable {
             return;
         }
         //自有网络广播
-        broadcastNewAddr(node.getIp(),node.getRemotePort(),node.getRemoteCrossPort(),node.getMagicNumber(),false);
+        broadcastNewAddr(node.getIp(), node.getRemotePort(), node.getRemoteCrossPort(), node.getMagicNumber(), false);
         NodeGroup nodeGroup = node.getNodeGroup();
         if (nodeGroup.isMoonGroup()) {
             //分享给所有外链连接点(卫星链)
@@ -276,15 +269,15 @@ public class NodeDiscoverTask implements Runnable {
                     continue;
                 }
                 //分享给跨链节点,跨链节点的port为0
-                broadcastNewAddr(node.getIp(),0,node.getRemoteCrossPort(),nodeGroup1.getMagicNumber(),true);
+                broadcastNewAddr(node.getIp(), 0, node.getRemoteCrossPort(), nodeGroup1.getMagicNumber(), true);
             }
         } else {
             //分享给跨链节点,跨链节点的port为0
-            broadcastNewAddr(node.getIp(),0,node.getRemoteCrossPort(),node.getMagicNumber(),true);
+            broadcastNewAddr(node.getIp(), 0, node.getRemoteCrossPort(), node.getMagicNumber(), true);
         }
     }
 
-    private void broadcastNewAddr(String ip, int port, int crossPort, long magicNumber,boolean isCross) {
+    private void broadcastNewAddr(String ip, int port, int crossPort, long magicNumber, boolean isCross) {
         IpAddressShare ipAddress = new IpAddressShare(ip, port, crossPort);
         List<IpAddressShare> list = new ArrayList<>();
         list.add(ipAddress);

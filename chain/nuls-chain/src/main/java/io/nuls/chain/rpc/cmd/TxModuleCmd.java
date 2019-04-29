@@ -24,8 +24,10 @@
  */
 package io.nuls.chain.rpc.cmd;
 
+import io.nuls.base.data.BlockHeader;
 import io.nuls.base.data.BlockHeaderDigest;
 import io.nuls.base.data.Transaction;
+import io.nuls.base.data.po.BlockHeaderPo;
 import io.nuls.chain.info.ChainTxConstants;
 import io.nuls.chain.info.CmRuntimeInfo;
 import io.nuls.chain.info.RpcConstants;
@@ -43,6 +45,7 @@ import io.nuls.chain.util.TxUtil;
 import io.nuls.rpc.model.CmdAnnotation;
 import io.nuls.rpc.model.Parameter;
 import io.nuls.rpc.model.message.Response;
+import io.nuls.rpc.util.RPCUtil;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.crypto.HexUtil;
@@ -170,15 +173,17 @@ public class TxModuleCmd extends BaseChainCmd {
             description = "moduleTxsRollBack")
     @Parameter(parameterName = "chainId", parameterType = "int", parameterValidRange = "[1,65535]")
     @Parameter(parameterName = "txList", parameterType = "array")
-    @Parameter(parameterName = "blockHeaderDigest", parameterType = "array")
+    @Parameter(parameterName = "blockHeader", parameterType = "array")
     public Response moduleTxsRollBack(Map params) {
         try {
             ObjectUtils.canNotEmpty(params.get("chainId"));
-            ObjectUtils.canNotEmpty(params.get("blockHeaderDigest"));
+            ObjectUtils.canNotEmpty(params.get("blockHeader"));
             Integer chainId = (Integer) params.get("chainId");
             List<String> txHexList = (List) params.get("txList");
-            BlockHeaderDigest blockHeaderDigest = (BlockHeaderDigest) params.get("blockHeaderDigest");
-            long commitHeight = blockHeaderDigest.getHeight();
+            String blockHeaderStr = (String) params.get("blockHeader");
+            BlockHeader blockHeader = new BlockHeader();
+            blockHeader.parse(RPCUtil.decode(blockHeaderStr),0);
+            long commitHeight = blockHeader.getHeight();
             List<Transaction> txList = new ArrayList<>();
             Response parseResponse = parseTxs(txHexList, txList);
             if (!parseResponse.isSuccess()) {
@@ -227,10 +232,10 @@ public class TxModuleCmd extends BaseChainCmd {
             ObjectUtils.canNotEmpty(params.get("blockHeader"));
             Integer chainId = (Integer) params.get("chainId");
             List<String> txHexList = (List) params.get("txList");
-            String blockHeaderDigestStr = (String) params.get("blockHeader");
-            BlockHeaderDigest blockHeaderDigest = new BlockHeaderDigest();
-            blockHeaderDigest.parse(HexUtil.decode(blockHeaderDigestStr),0);
-            long commitHeight = blockHeaderDigest.getHeight();
+            String blockHeaderStr = (String) params.get("blockHeader");
+            BlockHeader blockHeader = new BlockHeader();
+            blockHeader.parse(RPCUtil.decode(blockHeaderStr),0);
+            long commitHeight = blockHeader.getHeight();
             List<Transaction> txList = new ArrayList<>();
             Response parseResponse = parseTxs(txHexList, txList);
             if (!parseResponse.isSuccess()) {

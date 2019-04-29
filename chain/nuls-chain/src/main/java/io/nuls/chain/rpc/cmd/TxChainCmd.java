@@ -61,7 +61,6 @@ public class TxChainCmd extends BaseChainCmd {
     @CmdAnnotation(cmd = "cm_chainDestroyValidator", version = 1.0, description = "chainDestroyValidator")
     @Parameter(parameterName = "chainId", parameterType = "int", parameterValidRange = "[1,65535]")
     @Parameter(parameterName = "tx", parameterType = "String")
-    @Parameter(parameterName = "secondaryData", parameterType = "String")
     public Response chainDestroyValidator(Map params) {
         String txHex = String.valueOf(params.get("tx"));
         BlockChain blockChain = buildChainWithTxData(txHex, new DestroyAssetAndChainTransaction(), true);

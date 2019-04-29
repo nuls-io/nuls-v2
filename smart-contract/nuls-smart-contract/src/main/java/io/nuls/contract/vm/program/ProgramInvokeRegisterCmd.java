@@ -37,7 +37,7 @@ public class ProgramInvokeRegisterCmd {
     private String cmdName;
     private Map<String, String> args;
     private CmdRegisterMode cmdRegisterMode;
-    private String newTx;
+    private ProgramNewTx programNewTx;
 
     public ProgramInvokeRegisterCmd(String cmdName, Map<String, String> args, CmdRegisterMode cmdRegisterMode) {
         this.cmdName = cmdName;
@@ -69,11 +69,11 @@ public class ProgramInvokeRegisterCmd {
         this.cmdRegisterMode = cmdRegisterMode;
     }
 
-    public String getNewTx() {
-        return newTx;
+    public ProgramNewTx getProgramNewTx() {
+        return programNewTx;
     }
 
-    public void setNewTx(String newTx) {
-        this.newTx = newTx;
+    public void setProgramNewTx(ProgramNewTx programNewTx) {
+        this.programNewTx = programNewTx;
     }
 }

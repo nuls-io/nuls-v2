@@ -107,20 +107,17 @@ public class ContractBatchEndCallable implements Callable<ContractPackageDto> {
                 if (Log.isDebugEnabled()) {
                     Log.debug("ContractResult Address is {}, Order is {}", AddressTool.getStringAddressByBytes(contractResult.getContractAddress()), contractResult.getTxOrder());
                 }
-                contractTransferList = contractResult.getContractTransferList();
-                resultTxList.addAll(contractTransferList);
-                // 避免nonce冲突，当出现合约内部转账时，其他交易模块生成的交易则丢弃
-                if (contractTransferList.size() == 0) {
-                    invokeRegisterCmds = contractResult.getInvokeRegisterCmds();
-                    for (ProgramInvokeRegisterCmd invokeRegisterCmd : invokeRegisterCmds) {
-                        if (!invokeRegisterCmd.getCmdRegisterMode().equals(CmdRegisterMode.NEW_TX)) {
-                            continue;
-                        }
-                        if (StringUtils.isNotBlank(newTx = invokeRegisterCmd.getNewTx())) {
-                            resultTxList.add(newTx);
-                        }
+                invokeRegisterCmds = contractResult.getInvokeRegisterCmds();
+                for (ProgramInvokeRegisterCmd invokeRegisterCmd : invokeRegisterCmds) {
+                    if (!invokeRegisterCmd.getCmdRegisterMode().equals(CmdRegisterMode.NEW_TX)) {
+                        continue;
+                    }
+                    if (StringUtils.isNotBlank(newTx = invokeRegisterCmd.getProgramNewTx().getTxString())) {
+                        resultTxList.add(newTx);
                     }
                 }
+                contractTransferList = contractResult.getContractTransferList();
+                resultTxList.addAll(contractTransferList);
             }
             // 生成退还剩余Gas的交易
             ContractReturnGasTransaction contractReturnGasTx = makeReturnGasTx(chainId, contractResultList, blockTime, contractHelper);

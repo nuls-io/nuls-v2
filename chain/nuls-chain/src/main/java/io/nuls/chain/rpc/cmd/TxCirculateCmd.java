@@ -24,20 +24,25 @@
  */
 package io.nuls.chain.rpc.cmd;
 
+import io.nuls.base.data.BlockHeader;
 import io.nuls.base.data.BlockHeaderDigest;
 import io.nuls.base.data.Transaction;
+import io.nuls.base.data.po.BlockHeaderPo;
 import io.nuls.chain.info.CmErrorCode;
 import io.nuls.chain.model.dto.ChainEventResult;
 import io.nuls.chain.model.dto.CoinDataAssets;
 import io.nuls.chain.model.po.BlockHeight;
 import io.nuls.chain.model.po.CacheDatas;
+import io.nuls.chain.model.po.ChainAsset;
 import io.nuls.chain.service.*;
 import io.nuls.chain.util.LoggerUtil;
 import io.nuls.chain.util.TxUtil;
 import io.nuls.rpc.model.CmdAnnotation;
 import io.nuls.rpc.model.Parameter;
 import io.nuls.rpc.model.message.Response;
+import io.nuls.rpc.util.RPCUtil;
 import io.nuls.tools.core.annotation.Autowired;
+import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.model.ObjectUtils;
 import io.nuls.tools.log.Log;
 
@@ -53,6 +58,7 @@ import java.util.Map;
  * @author lan
  * @date 2019/02/21
  **/
+@Component
 public class TxCirculateCmd extends BaseChainCmd {
 
 
@@ -66,6 +72,39 @@ public class TxCirculateCmd extends BaseChainCmd {
     private CacheDataService cacheDataService;
     @Autowired
     private TxCirculateService txCirculateService;
+
+    /**
+     * 查询链上资产
+     */
+    @CmdAnnotation(cmd = "cm_getCirculateChainAsset", version = 1.0, description = "getCirculateChainAsset")
+    @Parameter(parameterName = "circulateChainId", parameterType = "int", parameterValidRange = "[1,65535]")
+    @Parameter(parameterName = "assetChainId", parameterType = "int", parameterValidRange = "[1,65535]")
+    @Parameter(parameterName = "assetId", parameterType = "int", parameterValidRange = "[1,65535]")
+    public Response getCirculateChainAsset(Map params) {
+        try {
+            int circulateChainId = Integer.valueOf(params.get("circulateChainId").toString());
+            int assetChainId = Integer.valueOf(params.get("assetChainId").toString());
+            int assetId = Integer.valueOf(params.get("assetId").toString());
+            ChainAsset chainAsset = txCirculateService.getCirculateChainAsset(circulateChainId,assetChainId,assetId);
+            Map<String, Object> resultMap = new HashMap<>();
+            resultMap.put("circulateChainId", circulateChainId);
+            resultMap.put("assetChainId", assetChainId);
+            resultMap.put("assetId", assetId);
+            if (null != chainAsset) {
+                resultMap.put("initNumber", chainAsset.getInitNumber());
+                resultMap.put("chainAssetAmount", chainAsset.getInNumber().subtract(chainAsset.getOutNumber()));
+                return success(resultMap);
+            } else {
+                resultMap.put("initNumber","0");
+                resultMap.put("chainAssetAmount", chainAsset.getInNumber().subtract(chainAsset.getOutNumber()));
+                return failed(CmErrorCode.ERROR_ASSET_NOT_EXIST);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return failed(CmErrorCode.SYS_UNKOWN_EXCEPTION);
+    }
+
 
 
     /**
@@ -109,16 +148,18 @@ public class TxCirculateCmd extends BaseChainCmd {
     @CmdAnnotation(cmd = "cm_assetCirculateCommit", version = 1.0, description = "assetCirculateCommit")
     @Parameter(parameterName = "chainId", parameterType = "int", parameterValidRange = "[1,65535]")
     @Parameter(parameterName = "txList", parameterType = "array")
-    @Parameter(parameterName = "blockHeaderDigest", parameterType = "array")
+    @Parameter(parameterName = "blockHeader", parameterType = "String")
     public Response assetCirculateCommit(Map params) {
         //A链转B链资产X，数量N ;A链X资产减少N, B链 X资产 增加N。
         try {
             ObjectUtils.canNotEmpty(params.get("chainId"));
-            ObjectUtils.canNotEmpty(params.get("blockHeaderDigest"));
+            ObjectUtils.canNotEmpty(params.get("blockHeader"));
             Integer chainId = (Integer) params.get("chainId");
             List<String> txHexList = (List) params.get("txList");
-            BlockHeaderDigest blockHeaderDigest = (BlockHeaderDigest) params.get("blockHeaderDigest");
-            long commitHeight = blockHeaderDigest.getHeight();
+            String blockHeaderStr = (String) params.get("blockHeader");
+            BlockHeader blockHeader = new BlockHeader();
+            blockHeader.parse(RPCUtil.decode(blockHeaderStr),0);
+            long commitHeight = blockHeader.getHeight();
             List<Transaction> txList = new ArrayList<>();
             Response parseResponse = parseTxs(txHexList, txList);
             if (!parseResponse.isSuccess()) {
@@ -159,15 +200,17 @@ public class TxCirculateCmd extends BaseChainCmd {
     @CmdAnnotation(cmd = "cm_assetCirculateRollBack", version = 1.0, description = "assetCirculateRollBack")
     @Parameter(parameterName = "chainId", parameterType = "int", parameterValidRange = "[1,65535]")
     @Parameter(parameterName = "txList", parameterType = "array")
-    @Parameter(parameterName = "blockHeaderDigest", parameterType = "array")
+    @Parameter(parameterName = "blockHeader", parameterType = "array")
     public Response assetCirculateRollBack(Map params) {
         try {
             ObjectUtils.canNotEmpty(params.get("chainId"));
-            ObjectUtils.canNotEmpty(params.get("blockHeaderDigest"));
+            ObjectUtils.canNotEmpty(params.get("blockHeader"));
             Integer chainId = (Integer) params.get("chainId");
             List<String> txHexList = (List) params.get("txList");
-            BlockHeaderDigest blockHeaderDigest = (BlockHeaderDigest) params.get("blockHeaderDigest");
-            long commitHeight = blockHeaderDigest.getHeight();
+            String blockHeaderStr = (String) params.get("blockHeader");
+            BlockHeader blockHeader = new BlockHeader();
+            blockHeader.parse(RPCUtil.decode(blockHeaderStr),0);
+            long commitHeight = blockHeader.getHeight();
             List<Transaction> txList = new ArrayList<>();
             Response parseResponse = parseTxs(txHexList, txList);
             if (!parseResponse.isSuccess()) {

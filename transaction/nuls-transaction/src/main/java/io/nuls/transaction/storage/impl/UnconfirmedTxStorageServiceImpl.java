@@ -169,7 +169,7 @@ public class UnconfirmedTxStorageServiceImpl implements UnconfirmedTxStorageServ
     public boolean removeTxList(int chainId, List<byte[]> hashList) {
         //check params
         if (hashList == null || hashList.size() == 0) {
-            return false;
+            return true;
         }
 
         try {

@@ -30,6 +30,7 @@ import io.nuls.base.basic.TransactionFeeCalculator;
 import io.nuls.base.constant.TxStatusEnum;
 import io.nuls.base.data.*;
 import io.nuls.base.signture.SignatureUtil;
+import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.util.RPCUtil;
 import io.nuls.rpc.util.TimeUtils;
 import io.nuls.tools.basic.Result;
@@ -275,22 +276,24 @@ public class TxServiceImpl implements TxService {
             if (null == coinData || null == coinData.getFrom() || coinData.getFrom().size() <= 0) {
                 throw new NulsException(TxErrorCode.COINDATA_NOT_FOUND);
             }
-            //判断from中地址和签名的地址是否匹配
-            for (CoinFrom coinFrom : coinData.getFrom()) {
-                if (tx.isMultiSignTx()) {
-                    MultiSigAccount multiSigAccount = AccountCall.getMultiSigAccount(coinFrom.getAddress());
-                    if (null == multiSigAccount) {
-                        throw new NulsException(TxErrorCode.ACCOUNT_NOT_EXIST);
-                    }
-                    for (byte[] bytes : multiSigAccount.getPubKeyList()) {
-                        String addr = AddressTool.getStringAddressByBytes(AddressTool.getAddress(bytes, chain.getChainId()));
-                        if (!addressSet.contains(addr)) {
-                            throw new NulsException(TxErrorCode.SIGN_ADDRESS_NOT_MATCH_COINFROM);
+            if(!txRegister.getModuleCode().equals(ModuleE.CC.abbr)){
+                //判断from中地址和签名的地址是否匹配
+                for (CoinFrom coinFrom : coinData.getFrom()) {
+                    if (tx.isMultiSignTx()) {
+                        MultiSigAccount multiSigAccount = AccountCall.getMultiSigAccount(coinFrom.getAddress());
+                        if (null == multiSigAccount) {
+                            throw new NulsException(TxErrorCode.ACCOUNT_NOT_EXIST);
                         }
+                        for (byte[] bytes : multiSigAccount.getPubKeyList()) {
+                            String addr = AddressTool.getStringAddressByBytes(AddressTool.getAddress(bytes, chain.getChainId()));
+                            if (!addressSet.contains(addr)) {
+                                throw new NulsException(TxErrorCode.SIGN_ADDRESS_NOT_MATCH_COINFROM);
+                            }
+                        }
+                    } else if (!addressSet.contains(AddressTool.getStringAddressByBytes(coinFrom.getAddress()))
+                            && tx.getType() != TxType.STOP_AGENT) {
+                        throw new NulsException(TxErrorCode.SIGN_ADDRESS_NOT_MATCH_COINFROM);
                     }
-                } else if (!addressSet.contains(AddressTool.getStringAddressByBytes(coinFrom.getAddress()))
-                        && tx.getType() != TxType.STOP_AGENT) {
-                    throw new NulsException(TxErrorCode.SIGN_ADDRESS_NOT_MATCH_COINFROM);
                 }
             }
             if (!SignatureUtil.validateTransactionSignture(tx)) {
@@ -347,6 +350,7 @@ public class TxServiceImpl implements TxService {
             //验证账户地址,资产链id,资产id的组合唯一性
             int assetsChainId = coinFrom.getAssetsChainId();
             boolean rs = uniqueCoin.add(AddressTool.getStringAddressByBytes(coinFrom.getAddress()) + "-" + assetsChainId + "-" + assetsId + "-" + HexUtil.encode(coinFrom.getNonce()));
+            System.out.println(AddressTool.getStringAddressByBytes(coinFrom.getAddress()) + "-" + assetsChainId + "-" + assetsId + "-" + HexUtil.encode(coinFrom.getNonce()));
             if (!rs) {
                 throw new NulsException(TxErrorCode.COINFROM_HAS_DUPLICATE_COIN);
             }
@@ -1025,8 +1029,11 @@ public class TxServiceImpl implements TxService {
             chain.getLoggerMap().get(TxConstant.LOG_TX).error(e);
             return false;
         }
+        LOG.debug("[验区块交易] 通过 ---------------总计执行时间:{}", TimeUtils.getCurrentTimeMillis() - s1);//----
+        chain.getLoggerMap().get(TxConstant.LOG_TX).debug("batchVerify success.");
+        return rs;
 
-        if (rs) {
+       /* if (rs) {
             long save = TimeUtils.getCurrentTimeMillis();//-----
             List<Transaction> unconfirmedTxSaveList = new ArrayList<>();
             for (TxDataWrapper txDataWrapper : txList) {
@@ -1047,9 +1054,8 @@ public class TxServiceImpl implements TxService {
         }else{
             LOG.debug("[验区块交易] 失败 ---------------总计执行时间:{}", TimeUtils.getCurrentTimeMillis() - s1);//----
             chain.getLoggerMap().get(TxConstant.LOG_TX).debug("batchVerify fail.");
-        }
-        LOG.debug("");//----
-        return rs;
+        }*/
+
     }
 
     @Override
