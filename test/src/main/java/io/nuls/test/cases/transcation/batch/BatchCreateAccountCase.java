@@ -5,10 +5,12 @@ import io.nuls.api.provider.ServiceManager;
 import io.nuls.api.provider.account.facade.CreateAccountReq;
 import io.nuls.api.provider.transaction.TransferService;
 import io.nuls.api.provider.transaction.facade.TransferReq;
+import io.nuls.base.data.NulsDigestData;
 import io.nuls.test.cases.Constants;
 import io.nuls.test.cases.TestFailException;
 import io.nuls.test.cases.account.BaseAccountCase;
 import io.nuls.test.cases.account.ImportAccountByPriKeyCase;
+import io.nuls.test.cases.transcation.batch.fasttx.FastTransfer;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.log.Log;
@@ -40,6 +42,9 @@ public class BatchCreateAccountCase extends BaseAccountCase<Integer, BatchParam>
     @Autowired
     ImportAccountByPriKeyCase importAccountByPriKeyCase;
 
+    @Autowired
+    FastTransfer fastTransfer;
+
     protected TransferService transferService = ServiceManager.get(TransferService.class);
 
     @Override
@@ -55,17 +60,20 @@ public class BatchCreateAccountCase extends BaseAccountCase<Integer, BatchParam>
         int i = 0;
         int successTotal=0;
         Long start = System.currentTimeMillis();
+        NulsDigestData perHash = null;
         while (i < param.count) {
             i++;
             Result<String> account = accountService.createAccount(new CreateAccountReq(2, Constants.PASSWORD));
-            TransferReq.TransferReqBuilder builder =
-                    new TransferReq.TransferReqBuilder(config.getChainId(), config.getAssetsId())
-                            .addForm(formAddress, Constants.PASSWORD, TRANSFER_AMOUNT);
-            builder.addTo(account.getList().get(0), TRANSFER_AMOUNT);
-            builder.setRemark(REMARK);
-            Result<String> result = transferService.transfer(builder.build());
+//            TransferReq.TransferReqBuilder builder =
+//                    new TransferReq.TransferReqBuilder(config.getChainId(), config.getAssetsId())
+//                            .addForm(formAddress, Constants.PASSWORD, TRANSFER_AMOUNT);
+//            builder.addTo(account.getList().get(0), TRANSFER_AMOUNT);
+//            builder.setRemark(REMARK);
+//            Result<String> result = transferService.transfer(builder.build());
+            Result<NulsDigestData> result = fastTransfer.transfer(formAddress,account.getList().get(0),TRANSFER_AMOUNT,param.formAddressPriKey,perHash);
             try {
                 checkResultStatus(result);
+                perHash = result.getData();
                 successTotal++;
             } catch (TestFailException e) {
                 Log.error("创建交易失败:{}",e.getMessage());
