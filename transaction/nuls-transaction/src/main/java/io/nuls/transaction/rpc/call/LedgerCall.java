@@ -42,7 +42,7 @@ public class LedgerCall {
             HashMap result = (HashMap) TransactionCall.request(ModuleE.LG.abbr,"verifyCoinData", params);
             return VerifyLedgerResult.success((boolean)result.get("orphan"));
         } catch (NulsException e) {
-            chain.getLoggerMap().get(TxConstant.LOG_TX).error(e);
+            chain.getLoggerMap().get(TxConstant.LOG_TX).error(e.getErrorCode().getCode());
             return VerifyLedgerResult.fail(e.getErrorCode());
         } catch (Exception e) {
             chain.getLoggerMap().get(TxConstant.LOG_TX).error(e);
@@ -66,7 +66,7 @@ public class LedgerCall {
             HashMap result = (HashMap)TransactionCall.request(ModuleE.LG.abbr, "commitUnconfirmedTx", params);
             return VerifyLedgerResult.success((boolean)result.get("orphan"));
         } catch (NulsException e) {
-            chain.getLoggerMap().get(TxConstant.LOG_TX).error(e);
+            chain.getLoggerMap().get(TxConstant.LOG_TX).error(e.getErrorCode().getCode());
             return VerifyLedgerResult.fail(e.getErrorCode());
         } catch (Exception e) {
             chain.getLoggerMap().get(TxConstant.LOG_TX).error(e);
@@ -90,7 +90,7 @@ public class LedgerCall {
             HashMap result = (HashMap) TransactionCall.request(ModuleE.LG.abbr,"verifyCoinDataPackaged", params);
             return VerifyLedgerResult.success((boolean)result.get("orphan"));
         } catch (NulsException e) {
-            chain.getLoggerMap().get(TxConstant.LOG_TX).error(e);
+            chain.getLoggerMap().get(TxConstant.LOG_TX).error(e.getErrorCode().getCode());
             return VerifyLedgerResult.fail(e.getErrorCode());
         } catch (Exception e) {
             chain.getLoggerMap().get(TxConstant.LOG_TX).error(e);

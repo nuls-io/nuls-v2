@@ -38,6 +38,7 @@ import io.nuls.chain.model.po.ChainAsset;
 import io.nuls.chain.service.AssetService;
 import io.nuls.chain.service.ChainService;
 import io.nuls.chain.service.TxCirculateService;
+import io.nuls.chain.storage.ChainAssetStorage;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Service;
 import io.nuls.tools.exception.NulsException;
@@ -59,7 +60,8 @@ public class TxCirculateServiceImpl implements TxCirculateService {
     AssetService assetService;
     @Autowired
     ChainService chainService;
-
+    @Autowired
+    ChainAssetStorage chainAssetStorage;
     @Override
     public List<CoinDataAssets> getChainAssetList(byte[] coinDataByte) throws NulsException {
         List<CoinDataAssets> list = new ArrayList<>();
@@ -110,6 +112,14 @@ public class TxCirculateServiceImpl implements TxCirculateService {
         list.add(toCoinDataAssets);
         return list;
 
+    }
+
+    @Override
+    public ChainAsset getCirculateChainAsset(int circulateChainId, int assetChainId, int assetId) throws Exception {
+        String assetKey = CmRuntimeInfo.getAssetKey(assetChainId,assetId);
+        String chainAssetKey = CmRuntimeInfo.getChainAssetKey(circulateChainId,assetKey);
+        ChainAsset chainAsset = chainAssetStorage.load(chainAssetKey);
+        return chainAsset;
     }
 
     boolean isMainChain(int chainId) {

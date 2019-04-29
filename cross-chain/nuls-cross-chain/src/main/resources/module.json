@@ -1,0 +1,20 @@
+{
+  "dataFolder": "crossChain",
+  "crossChainConfig":{
+    "assetsId":1,
+    "chainId":100,
+    "minNodeAmount":8,
+    "maxNodeAmount":10,
+    "maxInNode":10,
+    "sendHeight":30,
+    "crossSeedIps": "192.168.1.122:28112",
+    "byzantineRatio":80
+  },
+  "moduleCode":"cc",
+  "mainChainId": 2,
+  "mainAssetId": 1,
+  "language": "en",
+  "encoding": "UTF-8",
+  "crossCtxType":10,
+  "mainNet":false
+}

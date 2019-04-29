@@ -27,8 +27,9 @@ package io.nuls.contract.vm.natives.io.nuls.contract.sdk;
 import io.nuls.base.basic.AddressTool;
 import io.nuls.contract.enums.CmdRegisterMode;
 import io.nuls.contract.enums.CmdRegisterReturnType;
+import io.nuls.contract.helper.ContractHelper;
+import io.nuls.contract.helper.ContractNewTxFromOtherModuleHandler;
 import io.nuls.contract.manager.CmdRegisterManager;
-import io.nuls.contract.manager.interfaces.RequestAndResponseInterface;
 import io.nuls.contract.model.bo.CmdRegister;
 import io.nuls.contract.sdk.Event;
 import io.nuls.contract.vm.*;
@@ -39,12 +40,12 @@ import io.nuls.contract.vm.code.VariableType;
 import io.nuls.contract.vm.exception.ErrorException;
 import io.nuls.contract.vm.natives.NativeMethod;
 import io.nuls.contract.vm.program.ProgramInvokeRegisterCmd;
+import io.nuls.contract.vm.program.ProgramNewTx;
 import io.nuls.contract.vm.program.impl.ProgramInvoke;
 import io.nuls.contract.vm.util.Constants;
 import io.nuls.contract.vm.util.JsonUtils;
 import io.nuls.contract.vm.util.Utils;
 import io.nuls.rpc.model.message.Response;
-import io.nuls.rpc.netty.processor.ResponseMessageProcessor;
 import io.nuls.tools.core.ioc.SpringLiteContext;
 import io.nuls.tools.crypto.Sha3Hash;
 import org.apache.commons.lang3.StringUtils;
@@ -465,18 +466,22 @@ public class NativeUtils {
         }
         String contractAddress = programInvoke.getAddress();
         String contractSender = AddressTool.getStringAddressByBytes(programInvoke.getSender());
-        // 固定参数 - 合约地址、合约调用者地址
+        // 固定参数 - 合约地址、合约调用者地址、合约地址nonce(Mode: NEW_TX)
         argsMap.put("contractAddress", contractAddress);
         argsMap.put("contractSender", contractSender);
-
-
+        // 合约地址的nonce
         CmdRegisterMode cmdRegisterMode = cmdRegister.getCmdRegisterMode();
+        if(CmdRegisterMode.NEW_TX.equals(cmdRegisterMode)) {
+            ContractHelper contractHelper = SpringLiteContext.getBean(ContractHelper.class);
+            argsMap.put("contractNonce", contractHelper.getBalance(currentChainId, programInvoke.getContractAddress()).getNonce());
+        }
+
         // 调用外部接口
         Object cmdResult = requestAndResponse(cmdRegisterManager, moduleCode, cmdName, argsMap, frame);
 
         // 处理返回值
         ProgramInvokeRegisterCmd invokeRegisterCmd = new ProgramInvokeRegisterCmd(cmdName, argsMap, cmdRegisterMode);
-        ObjectRef objectRef = handleResult(cmdResult, invokeRegisterCmd, cmdRegister, frame);
+        ObjectRef objectRef = handleResult(currentChainId, cmdResult, invokeRegisterCmd, cmdRegister, frame);
         frame.vm.getInvokeRegisterCmds().add(invokeRegisterCmd);
 
         Result result = NativeMethod.result(methodCode, objectRef, frame);
@@ -500,8 +505,7 @@ public class NativeUtils {
                     String.format("Invoke external cmd failed. error code: %s, error message: ",
                             errorCode, errorMsg), frame.vm.getGasUsed(), null);
         }
-        Map resData = (Map) cmdResp.getResponseData();
-        return resData.get("result");
+        return cmdResp.getResponseData();
     }
 
     /**
@@ -510,34 +514,85 @@ public class NativeUtils {
      * 返回值string[] -> string gas cost * length
      *
      */
-    private static ObjectRef handleResult(Object cmdResult, ProgramInvokeRegisterCmd invokeRegisterCmd, CmdRegister cmdRegister, Frame frame) {
-        ObjectRef objectRef = null;
+    private static ObjectRef handleResult(int chainId, Object cmdResult, ProgramInvokeRegisterCmd invokeRegisterCmd, CmdRegister cmdRegister, Frame frame) {
+        ObjectRef objectRef;
         if (invokeRegisterCmd.getCmdRegisterMode().equals(CmdRegisterMode.NEW_TX)) {
-            invokeRegisterCmd.setNewTx((String) cmdResult);
+            String[] newTxArray = (String[]) cmdResult;
+            String txHash = newTxArray[0];
+            String txString = newTxArray[1];
+            invokeRegisterCmd.setProgramNewTx(new ProgramNewTx(txHash, txString));
+            ContractNewTxFromOtherModuleHandler handler = SpringLiteContext.getBean(ContractNewTxFromOtherModuleHandler.class);
+            // 在此处理交易的作用是让NVM知道合约余额的变化，如果不在此刷新，这个交易花费的金额NVM不知道，若又产生一个合约内部转账，合约判断不了余额是否足够
+            // 处理此交易 - 刷新临时余额和nonce
+            handler.handleContractNewTxFromOtherModule(chainId, txHash, txString);
+            objectRef = frame.heap.newString(txHash);
         } else {
-            if(cmdRegister.getCmdRegisterReturnType().equals(CmdRegisterReturnType.STRING)) {
+            // 根据返回值类型解析数据
+            CmdRegisterReturnType returnType = cmdRegister.getCmdRegisterReturnType();
+            if(returnType.equals(CmdRegisterReturnType.STRING)) {
+                // 字符串类型
                 objectRef = frame.heap.newString((String) cmdResult);
-            } else {
+            } else if(returnType.equals(CmdRegisterReturnType.STRING_ARRAY)) {
+                // 字符串数组类型
+                if(cmdResult instanceof List) {
+                    objectRef = listToStringArrayObjectRef((List) cmdResult, frame);
+                } else if(cmdResult.getClass().isArray()) {
+                    objectRef = stringArrayToStringArrayObjectRef((String[]) cmdResult, frame);
+                } else {
+                    throw new ErrorException(
+                            String.format("Invoke external cmd failed. Unkown return object: %s ",
+                                    cmdResult.getClass().getName()), frame.vm.getGasUsed(), null);
+                }
+            } else if(returnType.equals(CmdRegisterReturnType.STRING_TWO_DIMENSIONAL_ARRAY)) {
+                // 字符串二维数组类型
                 if(cmdResult instanceof List) {
                     List resultList = (List) cmdResult;
                     int size = resultList.size();
-                    objectRef = frame.heap.newArray(VariableType.STRING_ARRAY_TYPE, size);
+                    objectRef = frame.heap.newArray(VariableType.STRING_TWO_DIMENSIONAL_ARRAY_TYPE, size, 0);
+                    Object o;
                     for (int k = 0; k < size; k++) {
-                        frame.heap.putArray(objectRef, k, frame.heap.newString((String) resultList.get(k)));
+                        o = resultList.get(k);
+                        if(o instanceof List) {
+                            frame.heap.putArray(objectRef, k, listToStringArrayObjectRef((List) o, frame));
+                        } else if(o instanceof String[]) {
+                            frame.heap.putArray(objectRef, k, stringArrayToStringArrayObjectRef((String[]) o, frame));
+                        }
                     }
                 } else if(cmdResult.getClass().isArray()) {
-                    String[] resultArray = (String[]) cmdResult;
-                    objectRef = frame.heap.newArray(VariableType.STRING_ARRAY_TYPE, resultArray.length);
+                    String[][] resultArray = (String[][]) cmdResult;
+                    objectRef = frame.heap.newArray(VariableType.STRING_TWO_DIMENSIONAL_ARRAY_TYPE, resultArray.length, 0);
                     int i = 0;
-                    for(String value : resultArray) {
-                        frame.heap.putArray(objectRef, i++, frame.heap.newString(value));
+                    for(String[] valueArray : resultArray) {
+                        frame.heap.putArray(objectRef, i++, stringArrayToStringArrayObjectRef(valueArray, frame));
                     }
                 } else {
                     throw new ErrorException(
-                            String.format("Invoke external cmd failed. Unkown return type: %s ",
+                            String.format("Invoke external cmd failed. Unkown return object: %s ",
                                     cmdResult.getClass().getName()), frame.vm.getGasUsed(), null);
                 }
+            } else {
+                throw new ErrorException(
+                        String.format("Invoke external cmd failed. Unkown return type: %s ",
+                                    returnType), frame.vm.getGasUsed(), null);
             }
+        }
+        return objectRef;
+    }
+
+    private static ObjectRef listToStringArrayObjectRef(List resultList, Frame frame) {
+        int size = resultList.size();
+        ObjectRef objectRef = frame.heap.newArray(VariableType.STRING_ARRAY_TYPE, size);
+        for (int k = 0; k < size; k++) {
+            frame.heap.putArray(objectRef, k, frame.heap.newString((String) resultList.get(k)));
+        }
+        return objectRef;
+    }
+
+    private static ObjectRef stringArrayToStringArrayObjectRef(String[] resultArray, Frame frame) {
+        ObjectRef objectRef = frame.heap.newArray(VariableType.STRING_ARRAY_TYPE, resultArray.length);
+        int i = 0;
+        for(String value : resultArray) {
+            frame.heap.putArray(objectRef, i++, frame.heap.newString(value));
         }
         return objectRef;
     }

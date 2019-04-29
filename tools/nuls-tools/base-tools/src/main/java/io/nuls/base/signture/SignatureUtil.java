@@ -68,9 +68,12 @@ public class SignatureUtil {
                 if ((transactionSignature.getP2PHKSignatures() == null || transactionSignature.getP2PHKSignatures().size() == 0)) {
                     throw new NulsException(new Exception("Transaction unsigned ！"));
                 }
+                Set<String> publicKeySet = new HashSet<>();
                 for (P2PHKSignature signature : transactionSignature.getP2PHKSignatures()) {
-                    if (!ECKey.verify(tx.getHash().getDigestBytes(), signature.getSignData().getSignBytes(), signature.getPublicKey())) {
-                        throw new NulsException(new Exception("Transaction signature error !"));
+                    if(publicKeySet.add(HexUtil.encode(signature.getPublicKey()))){
+                        if (!ECKey.verify(tx.getHash().getDigestBytes(), signature.getSignData().getSignBytes(), signature.getPublicKey())) {
+                            throw new NulsException(new Exception("Transaction signature error !"));
+                        }
                     }
                 }
             } else {

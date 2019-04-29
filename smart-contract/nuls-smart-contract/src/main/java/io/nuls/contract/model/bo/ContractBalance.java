@@ -38,11 +38,13 @@ public class ContractBalance implements Serializable {
     private BigInteger balance;
     private BigInteger freeze;
     private String nonce;
+    /**
+     * 存储合约内部连续转账的第一个交易的nonce，用于回滚连续转账(当连续转账发生错误，那么这一次连续转账全部回滚)
+     */
     private String preNonce;
 
     public static ContractBalance newInstance() {
-        ContractBalance c = new ContractBalance();
-        return c;
+        return new ContractBalance();
     }
 
     private ContractBalance() {
@@ -60,6 +62,14 @@ public class ContractBalance implements Serializable {
 
     public void addTemp(BigInteger amount) {
         this.balance = balance.add(amount);
+    }
+
+    public void minusLockedTemp(BigInteger amount) {
+        this.freeze = minus(freeze, amount);
+    }
+
+    public void addLockedTemp(BigInteger amount) {
+        this.freeze = freeze.add(amount);
     }
 
     public BigInteger getBalance() {
