@@ -85,7 +85,7 @@ public class VersionMessageHandler extends BaseMessageHandler {
 
         int size = nodesContainer.getConnectedCount(Node.IN);
         if (size >= maxInCount) {
-            LoggerUtil.logger(chainId).debug("11111===size={},maxInCount={}",size,maxInCount);
+            LoggerUtil.logger(chainId).debug("refuse canConnectIn size={},maxInCount={}",size,maxInCount);
             return false;
         }
 
@@ -98,14 +98,14 @@ public class VersionMessageHandler extends BaseMessageHandler {
             if (ip.equals(node.getIp()) && node.getType() == Node.OUT) {
                 //也可能存在自己连接自己进入这个逻辑
                 //这里需要一个机制来判定相互连接时候保留哪个?
-                LoggerUtil.logger(chainId).debug("22222===ip={},node.getIp()={}, node.getType={}",ip,node.getIp(),node.getType());
+                LoggerUtil.logger(chainId).debug("refuse canConnectIn ip={},node.getIp()={}, node.getType={}",ip,node.getIp(),node.getType());
                 return false;
             }
             if (ip.equals(node.getIp())) {
                 sameIpCount++;
             }
             if (sameIpCount >= sameIpMaxCount) {
-                LoggerUtil.logger(chainId).debug("333333===sameIpCount={},sameIpMaxCount={}, node.getType={}",ip,node.getIp(),node.getType());
+                LoggerUtil.logger(chainId).debug("refuse canConnectIn sameIpCount={},sameIpMaxCount={}, node.getType={}",ip,node.getIp(),node.getType());
                 return false;
             }
         }
@@ -183,6 +183,7 @@ public class VersionMessageHandler extends BaseMessageHandler {
         //存储需要的信息
         node.setVersionProtocolInfos(versionBody.getProtocolVersion(), versionBody.getBlockHeight(), versionBody.getBlockHash());
         node.setConnectStatus(NodeConnectStatusEnum.AVAILABLE);
+        node.setFailCount(0);
         node.setConnectTime(TimeManager.currentTimeMillis());
         if (node.isCrossConnect()) {
             node.getNodeGroup().getCrossNodeContainer().setLatestHandshakeSuccTime(TimeManager.currentTimeMillis());
