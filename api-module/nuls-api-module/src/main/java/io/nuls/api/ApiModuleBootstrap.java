@@ -50,7 +50,7 @@ import java.util.List;
  * @version 1.0
  * @date 19-2-25 上午10:48
  */
-@Component
+//@Component
 public class ApiModuleBootstrap extends RpcModule {
 
     @Autowired
