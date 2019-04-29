@@ -622,12 +622,13 @@ public class NulsProtocolServiceImpl implements ProtocolService {
         if(minPassCount == 0){
             minPassCount = 1;
         }
-
+        boolean isDuplicate = false;
         //判断交易签名与当前共识节点出块账户是否匹配
         List<P2PHKSignature>misMatchSignList = null;
         if(signCount >= minPassCount){
             misMatchSignList = getMisMatchSigns(chain, transactionSignature, packAddressList);
             signCount -= misMatchSignList.size();
+            isDuplicate = true;
             if(signCount >= minPassCount){
                 ctx.setTransactionSignature(transactionSignature.serialize());
                 TransactionCall.sendTx(chain, RPCUtil.encode(ctx.serialize()));
@@ -644,13 +645,18 @@ public class NulsProtocolServiceImpl implements ProtocolService {
             signCount++;
             transactionSignature.getP2PHKSignatures().add(p2PHKSignature);
             if(signCount >= minPassCount){
-                ctx.setTransactionSignature(transactionSignature.serialize());
-                TransactionCall.sendTx(chain, RPCUtil.encode(ctx.serialize()));
-                chain.getMessageLog().info("跨链交易签名数量达到拜占庭比例，将该跨链交易发送给交易模块处理,originalHash:{},Hash:{}",originalHex,nativeHex);
-            }else{
-                if(misMatchSignList != null && misMatchSignList.size() > 0){
-                    transactionSignature.getP2PHKSignatures().addAll(misMatchSignList);
+                if(!isDuplicate){
+                    misMatchSignList = getMisMatchSigns(chain, transactionSignature, packAddressList);
+                    signCount -= misMatchSignList.size();
                 }
+                if(signCount >= minPassCount){
+                    ctx.setTransactionSignature(transactionSignature.serialize());
+                    TransactionCall.sendTx(chain, RPCUtil.encode(ctx.serialize()));
+                    chain.getMessageLog().info("跨链交易签名数量达到拜占庭比例，将该跨链交易发送给交易模块处理,originalHash:{},Hash:{}",originalHex,nativeHex);
+                }
+            }
+            if(misMatchSignList != null && misMatchSignList.size() > 0 && signCount < minPassCount){
+                transactionSignature.getP2PHKSignatures().addAll(misMatchSignList);
                 ctx.setTransactionSignature(transactionSignature.serialize());
             }
             //将收到的消息放入缓存中，等到收到交易后再广播该签名给其他节点
@@ -667,7 +673,7 @@ public class NulsProtocolServiceImpl implements ProtocolService {
      * */
     private void broadcastCtx(Chain chain,NulsDigestData hash,int chainId,String originalHex,String nativeHex){
         for (BroadCtxSignMessage message:chain.getWaitBroadSignMap().get(hash)) {
-            NetWorkCall.broadcast(chainId, message, CommandConstant.BROAD_CTX_SIGN_MESSAGE,true);
+            NetWorkCall.broadcast(chainId, message, CommandConstant.BROAD_CTX_SIGN_MESSAGE,false);
             chain.getMessageLog().info("将跨链交易签名广播给链内其他节点,originalHash:{},Hash:{},sign:{}",originalHex,nativeHex, HexUtil.encode(message.getSignature()));
         }
     }
