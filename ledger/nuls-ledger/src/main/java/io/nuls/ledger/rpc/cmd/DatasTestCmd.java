@@ -29,6 +29,7 @@ import io.nuls.base.data.CoinData;
 import io.nuls.base.data.CoinFrom;
 import io.nuls.base.data.CoinTo;
 import io.nuls.ledger.model.po.BlockSnapshotAccounts;
+import io.nuls.ledger.service.ChainAssetsService;
 import io.nuls.ledger.service.TransactionService;
 import io.nuls.ledger.storage.Repository;
 import io.nuls.rpc.cmd.BaseCmd;
@@ -55,6 +56,8 @@ public class DatasTestCmd extends BaseCmd {
     Repository repository;
     @Autowired
     TransactionService transactionService;
+    @Autowired
+    ChainAssetsService chainAssetsService;
 
     @CmdAnnotation(cmd = "getBlockHeight",
             version = 1.0, minEvent = 0, minPeriod = 0,
@@ -64,6 +67,16 @@ public class DatasTestCmd extends BaseCmd {
         Integer chainId = (Integer) params.get("chainId");
         long height = repository.getBlockHeight(chainId);
         return success(height);
+    }
+
+    @CmdAnnotation(cmd = "getAssetsByChainId",
+            version = 1.0,
+            description = "")
+    @Parameter(parameterName = "chainId", parameterType = "int")
+    public Response getAssetsByChainId(Map params) {
+        Integer chainId = (Integer) params.get("chainId");
+        List<Map<String, Object>> list= chainAssetsService.getAssetsByChainId(chainId);
+        return success(list);
     }
 
     @CmdAnnotation(cmd = "getSnapshot",

@@ -21,7 +21,6 @@ import io.nuls.rpc.util.TimeUtils;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.log.Log;
 import io.nuls.tools.model.StringUtils;
-import io.nuls.tools.protocol.TxRegisterDetail;
 
 import java.util.*;
 
@@ -230,50 +229,6 @@ public class CallMethodUtils {
             return (HashMap) ((HashMap) callResp.getResponseData()).get("getBalance");
         } catch (Exception e) {
             throw new NulsException(e);
-        }
-    }
-
-    /**
-     * 获取当前网络时间
-     * Get the current network time
-     */
-    public static long currentTime() {
-        try {
-            Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.NW.abbr, "nw_currentTimeMillis", null);
-            Map responseData = (Map) response.getResponseData();
-            Map result = (Map) responseData.get("nw_currentTimeMillis");
-            return (Long) result.get("currentTimeMillis");
-        } catch (Exception e) {
-            Log.error("get nw_currentTimeMillis fail");
-        }
-        return System.currentTimeMillis();
-    }
-
-    /**
-     * 交易注册
-     *
-     * @param chain                chain
-     * @param txRegisterDetailList 注冊是交易信息/Registration is transaction information
-     */
-    @SuppressWarnings("unchecked")
-    public static boolean registerTx(Chain chain, List<TxRegisterDetail> txRegisterDetailList) {
-        try {
-            Map<String, Object> params = new HashMap(4);
-            params.put("chainId", chain.getConfig().getChainId());
-            params.put("list", txRegisterDetailList);
-            params.put("moduleCode", ModuleE.CS.abbr);
-            params.put("moduleValidator", "cs_batchValid");
-            params.put("commit", "cs_commit");
-            params.put("rollback", "cs_rollback");
-            Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.TX.abbr, "tx_register", params);
-            if (!cmdResp.isSuccess()) {
-                chain.getLoggerMap().get(ConsensusConstant.CONSENSUS_LOGGER_NAME).error("chain ：" + chain.getConfig().getChainId() + " Failure of transaction registration");
-                return false;
-            }
-            return true;
-        } catch (Exception e) {
-            chain.getLoggerMap().get(ConsensusConstant.CONSENSUS_LOGGER_NAME).error(e);
-            return false;
         }
     }
 
@@ -495,7 +450,7 @@ public class CallMethodUtils {
             blockHeader.parse(RPCUtil.decode(blockHeaderHex), 0);
             blockHeaders.add(blockHeader);
         }
-        Collections.sort(blockHeaders, new BlockHeaderComparator());
+        blockHeaders.sort(new BlockHeaderComparator());
         chain.setBlockHeaderList(blockHeaders);
         chain.setNewestHeader(blockHeaders.get(blockHeaders.size() - 1));
         Log.debug("---------------------------区块加载成功！");

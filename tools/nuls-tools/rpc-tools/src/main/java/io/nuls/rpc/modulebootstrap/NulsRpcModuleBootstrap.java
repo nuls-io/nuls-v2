@@ -5,7 +5,9 @@ import io.nuls.tools.exception.NulsRuntimeException;
 import io.nuls.tools.log.Log;
 import io.nuls.tools.thread.ThreadUtils;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.Arrays;
 
 /**
@@ -50,7 +52,9 @@ public class NulsRpcModuleBootstrap {
                 while (true) {
                     try {
                         String cmd = is_reader.readLine();
-                        if (cmd == null) break;
+                        if (cmd == null) {
+                            break;
+                        }
                         switch (cmd) {
                             case "f":
                                 System.out.println("模块的追随者：");
@@ -58,7 +62,7 @@ public class NulsRpcModuleBootstrap {
                                 break;
                             case "d":
                                 System.out.println("依赖的模块列表");
-                                module.getDependentces().forEach(d -> {
+                                module.getDependencies().forEach(d -> {
                                     System.out.println(d.name + " is ready : " + module.isDependencieReady(d));
                                 });
                                 break;
@@ -84,7 +88,9 @@ public class NulsRpcModuleBootstrap {
     }
 
     public static void printLogo(String logoFile) {
-        if(printLogoed)return ;
+        if(printLogoed) {
+            return ;
+        }
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(Class.forName(NulsRpcModuleBootstrap.class.getName()).getResourceAsStream(logoFile)))){
             String line = reader.readLine();
             while(line != null){

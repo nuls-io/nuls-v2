@@ -22,8 +22,8 @@ package io.nuls.block.message;
 
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.basic.NulsOutputStreamBuffer;
+import io.nuls.base.data.BaseBusinessMessage;
 import io.nuls.base.data.NulsDigestData;
-import io.nuls.block.message.base.BaseMessage;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.parse.SerializeUtils;
 
@@ -36,7 +36,7 @@ import java.io.IOException;
  * @version 1.0
  * @date 18-11-9 下午2:37
  */
-public class CompleteMessage extends BaseMessage {
+public class CompleteMessage extends BaseBusinessMessage {
 
     private NulsDigestData requestHash;
     private boolean success;

@@ -32,8 +32,10 @@ import io.nuls.rpc.model.CmdAnnotation;
 import io.nuls.rpc.model.message.Response;
 import io.nuls.rpc.util.RPCUtil;
 import io.nuls.tools.core.annotation.Component;
+import io.nuls.tools.core.annotation.Service;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.log.logback.NulsLogger;
+import io.nuls.tools.protocol.MessageHandler;
 
 import java.util.Map;
 
@@ -47,10 +49,11 @@ import static io.nuls.block.constant.CommandConstant.BLOCK_MESSAGE;
  * @version 1.0
  * @date 18-11-14 下午4:23
  */
-@Component
+@Service
 public class BlockHandler extends BaseCmd {
 
     @CmdAnnotation(cmd = BLOCK_MESSAGE, version = 1.0, scope = Constants.PUBLIC, description = "")
+    @MessageHandler(message = BlockMessage.class)
     public Response process(Map map) {
         int chainId = Integer.parseInt(map.get("chainId").toString());
         NulsLogger messageLog = ContextManager.getContext(chainId).getMessageLog();

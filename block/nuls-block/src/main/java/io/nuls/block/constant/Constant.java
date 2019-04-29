@@ -23,7 +23,6 @@ package io.nuls.block.constant;
 import io.nuls.base.data.Block;
 import io.nuls.base.data.BlockHeader;
 import io.nuls.block.model.Node;
-import io.nuls.tools.protocol.ProtocolConfigJson;
 
 import java.util.Comparator;
 
@@ -35,12 +34,6 @@ import java.util.Comparator;
  * @date 19-1-22 下午3:34
  */
 public interface Constant {
-
-    /**
-     * 协议配置文件名称
-     * Protocol configuration file name.
-     */
-    String PROTOCOL_CONFIG_FILE = "protocol-config.json";
 
     /**
      * 存储每条链的配置信息
@@ -89,11 +82,6 @@ public interface Constant {
      * 区块头排序器
      */
     Comparator<BlockHeader> BLOCK_HEADER_COMPARATOR = Comparator.comparingLong(BlockHeader::getHeight);
-
-    /**
-     * 协议配置信息排序器
-     */
-    Comparator<ProtocolConfigJson> PROTOCOL_CONFIG_COMPARATOR = Comparator.comparingInt(ProtocolConfigJson::getVersion);
 
     /**
      * 节点比较器,默认按信用值排序

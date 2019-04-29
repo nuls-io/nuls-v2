@@ -63,14 +63,18 @@ public interface ProtocolService {
      *
      * @param chainId
      * @param blockHeader
+     * @return
+     * @throws NulsException
      */
     short save(int chainId, BlockHeader blockHeader) throws NulsException;
 
     /**
-     * 回滚区块头
      *
+     * 回滚区块头
      * @param chainId
      * @param blockHeader
+     * @return
+     * @throws NulsException
      */
     short rollback(int chainId, BlockHeader blockHeader) throws NulsException;
 

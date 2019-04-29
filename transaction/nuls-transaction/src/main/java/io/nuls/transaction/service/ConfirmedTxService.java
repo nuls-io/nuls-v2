@@ -37,7 +37,7 @@ public interface ConfirmedTxService {
     /**
      * 保存区块中已确认交易
      * @param chain
-     * @param txList
+     * @param txStrList
      * @param blockHeader
      * @return
      */

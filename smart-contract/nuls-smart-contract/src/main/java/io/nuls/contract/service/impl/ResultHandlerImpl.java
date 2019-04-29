@@ -27,7 +27,10 @@ import io.nuls.base.data.*;
 import io.nuls.contract.helper.ContractHelper;
 import io.nuls.contract.helper.ContractTransferHandler;
 import io.nuls.contract.manager.ContractTempBalanceManager;
-import io.nuls.contract.model.bo.*;
+import io.nuls.contract.model.bo.AnalyzerResult;
+import io.nuls.contract.model.bo.ContractBalance;
+import io.nuls.contract.model.bo.ContractResult;
+import io.nuls.contract.model.bo.ContractWrapperTransaction;
 import io.nuls.contract.model.tx.ContractTransferTransaction;
 import io.nuls.contract.model.txdata.ContractData;
 import io.nuls.contract.model.txdata.ContractTransferData;
@@ -46,7 +49,7 @@ import java.math.BigInteger;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static io.nuls.contract.constant.ContractConstant.TX_TYPE_CALL_CONTRACT;
+import static io.nuls.tools.constant.TxType.CALL_CONTRACT;
 
 /**
  * @author: PierreLuo
@@ -94,7 +97,7 @@ public class ResultHandlerImpl implements ResultHanlder {
         Set<ContractResult> failedSet = analyzerResult.getFailedSet();
         for (ContractResult contractResult : failedSet) {
             ContractWrapperTransaction orginTx = contractResult.getTx();
-            if (orginTx.getType() != TX_TYPE_CALL_CONTRACT) {
+            if (orginTx.getType() != CALL_CONTRACT) {
                 continue;
             }
             ContractData contractData = orginTx.getContractData();

@@ -30,14 +30,24 @@ public class AccountInfo {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof AccountInfo)) return false;
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof AccountInfo)) {
+            return false;
+        }
 
         AccountInfo that = (AccountInfo) o;
 
-        if (address != null ? !address.equals(that.address) : that.address != null) return false;
-        if (alias != null ? !alias.equals(that.alias) : that.alias != null) return false;
-        if (pubkeyHex != null ? !pubkeyHex.equals(that.pubkeyHex) : that.pubkeyHex != null) return false;
+        if (address != null ? !address.equals(that.address) : that.address != null) {
+            return false;
+        }
+        if (alias != null ? !alias.equals(that.alias) : that.alias != null) {
+            return false;
+        }
+        if (pubkeyHex != null ? !pubkeyHex.equals(that.pubkeyHex) : that.pubkeyHex != null) {
+            return false;
+        }
         return encryptedPrikeyHex != null ? encryptedPrikeyHex.equals(that.encryptedPrikeyHex) : that.encryptedPrikeyHex == null;
     }
 

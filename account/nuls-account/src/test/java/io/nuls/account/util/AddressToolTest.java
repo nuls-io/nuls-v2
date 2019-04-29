@@ -1,8 +1,8 @@
 package io.nuls.account.util;
 
 import io.nuls.base.basic.AddressTool;
-import io.nuls.base.constant.BaseConstant;
 import io.nuls.base.data.Address;
+import io.nuls.tools.constant.BaseConstant;
 import io.nuls.tools.crypto.ECKey;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.parse.SerializeUtils;

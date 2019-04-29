@@ -65,8 +65,8 @@ public class TransactionCmd extends BaseCmd {
     @Parameter(parameterName = "chainId", parameterType = "int")
     @Parameter(parameterName = "moduleCode", parameterType = "String")
     @Parameter(parameterName = "moduleValidator", parameterType = "String")
-    @Parameter(parameterName = "commit", parameterType = "String")
-    @Parameter(parameterName = "rollback", parameterType = "String")
+    @Parameter(parameterName = "moduleCommit", parameterType = "String")
+    @Parameter(parameterName = "moduleRollback", parameterType = "String")
     @Parameter(parameterName = "list", parameterType = "List")
     public Response register(Map params) {
         Map<String, Boolean> map = new HashMap<>(TxConstant.INIT_CAPACITY_2);
@@ -76,8 +76,8 @@ public class TransactionCmd extends BaseCmd {
             ObjectUtils.canNotEmpty(params.get("chainId"), TxErrorCode.PARAMETER_ERROR.getMsg());
             ObjectUtils.canNotEmpty(params.get("moduleCode"), TxErrorCode.PARAMETER_ERROR.getMsg());
             ObjectUtils.canNotEmpty(params.get("moduleValidator"), TxErrorCode.PARAMETER_ERROR.getMsg());
-            ObjectUtils.canNotEmpty(params.get("commit"), TxErrorCode.PARAMETER_ERROR.getMsg());
-            ObjectUtils.canNotEmpty(params.get("rollback"), TxErrorCode.PARAMETER_ERROR.getMsg());
+            ObjectUtils.canNotEmpty(params.get("moduleCommit"), TxErrorCode.PARAMETER_ERROR.getMsg());
+            ObjectUtils.canNotEmpty(params.get("moduleRollback"), TxErrorCode.PARAMETER_ERROR.getMsg());
             ObjectUtils.canNotEmpty(params.get("list"), TxErrorCode.PARAMETER_ERROR.getMsg());
 
             JSONUtils.getInstance().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);

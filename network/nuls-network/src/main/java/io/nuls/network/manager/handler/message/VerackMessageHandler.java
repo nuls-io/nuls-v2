@@ -78,6 +78,7 @@ public class VerackMessageHandler extends BaseMessageHandler {
 
         } else {
             node.setConnectStatus(NodeConnectStatusEnum.AVAILABLE);
+            node.setFailCount(0);
             node.setConnectTime(TimeManager.currentTimeMillis());
             if (node.isCrossConnect()) {
                 node.getNodeGroup().getCrossNodeContainer().setLatestHandshakeSuccTime(TimeManager.currentTimeMillis());

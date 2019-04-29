@@ -19,10 +19,10 @@
  */
 package io.nuls.block.rpc.call;
 
+import io.nuls.base.data.BaseBusinessMessage;
 import io.nuls.base.data.NulsDigestData;
 import io.nuls.block.manager.ContextManager;
 import io.nuls.block.message.CompleteMessage;
-import io.nuls.block.message.base.BaseMessage;
 import io.nuls.block.model.Node;
 import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.model.ModuleE;
@@ -36,8 +36,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static io.nuls.block.constant.CommandConstant.*;
-import static io.nuls.block.utils.LoggerUtil.commonLog;
+import static io.nuls.block.constant.CommandConstant.COMPLETE_MESSAGE;
 
 
 /**
@@ -116,7 +115,7 @@ public class NetworkUtil {
      * @param excludeNodes 排除的节点
      * @return
      */
-    public static boolean broadcast(int chainId, BaseMessage message, String excludeNodes, String command) {
+    public static boolean broadcast(int chainId, BaseBusinessMessage message, String excludeNodes, String command) {
         NulsLogger messageLog = ContextManager.getContext(chainId).getMessageLog();
         try {
             Map<String, Object> params = new HashMap<>(5);
@@ -143,7 +142,7 @@ public class NetworkUtil {
      * @param nodeId
      * @return
      */
-    public static boolean sendToNode(int chainId, BaseMessage message, String nodeId, String command) {
+    public static boolean sendToNode(int chainId, BaseBusinessMessage message, String nodeId, String command) {
         NulsLogger messageLog = ContextManager.getContext(chainId).getMessageLog();
         try {
             Map<String, Object> params = new HashMap<>(5);
@@ -169,7 +168,7 @@ public class NetworkUtil {
      * @param message
      * @return
      */
-    public static boolean broadcast(int chainId, BaseMessage message, String command) {
+    public static boolean broadcast(int chainId, BaseBusinessMessage message, String command) {
         return broadcast(chainId, message, null, command);
     }
 
@@ -224,31 +223,6 @@ public class NetworkUtil {
         } catch (Exception e) {
             e.printStackTrace();
             commonLog.error(e);
-        }
-    }
-
-    /**
-     * 注册消息处理器
-     *
-     * @return
-     */
-    public static void register() {
-        try {
-            Map<String, Object> map = new HashMap<>(2);
-            List<Map<String, String>> cmds = new ArrayList<>();
-            map.put("role", ModuleE.BL.abbr);
-            List<String> list = List.of(COMPLETE_MESSAGE, BLOCK_MESSAGE, GET_BLOCK_MESSAGE, FORWARD_SMALL_BLOCK_MESSAGE, GET_BLOCKS_BY_HEIGHT_MESSAGE, GET_TXGROUP_MESSAGE, SMALL_BLOCK_MESSAGE, GET_SMALL_BLOCK_MESSAGE, TXGROUP_MESSAGE);
-            for (String s : list) {
-                Map<String, String> cmd = new HashMap<>(2);
-                cmd.put("protocolCmd", s);
-                cmd.put("handler", s);
-                cmds.add(cmd);
-            }
-            map.put("protocolCmds", cmds);
-            ResponseMessageProcessor.requestAndResponse(ModuleE.NW.abbr, "nw_protocolRegister", map);
-        } catch (Exception e) {
-            e.printStackTrace();
-            commonLog.error("get nw_protocolRegister fail");
         }
     }
 

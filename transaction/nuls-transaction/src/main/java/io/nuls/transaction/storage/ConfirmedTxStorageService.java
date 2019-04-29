@@ -70,31 +70,20 @@ public interface ConfirmedTxStorageService {
      */
     boolean removeTxListByHashBytes(int chainId, List<byte[]> hashList);
 
+    /**
+     *
+     * @param chainId
+     * @param txList
+     * @return
+     */
     boolean removeTxList(int chainId, List<Transaction> txList);
 
     /**
-     * 保存跨链交易的生效高度和交易hash
+     * 交易是否存在
      * @param chainId
-     * @param height 跨链交易生效高度
-     * @param hashList 跨链交易的hash
-     * @return boolean 如果hashList为空 直接返回true
+     * @param hash
+     * @return
      */
-    boolean saveCrossTxEffectList(int chainId, long height, List<NulsDigestData> hashList);
-
-    /**
-     * 获取跨链交易的生效高度和交易hash
-     * @param chainId
-     * @param height 跨链交易生效高度
-     * @return List<NulsDigestData>
-     */
-    List<NulsDigestData> getCrossTxEffectList(int chainId, long height);
-
-    /**
-     * 删除跨链交易的生效高度和交易hash
-     * @param chainId
-     * @param height 跨链交易生效高度
-     * @return boolean
-     */
-    boolean removeCrossTxEffectList(int chainId, long height);
+    boolean isExists(int chainId, NulsDigestData hash);
 
 }

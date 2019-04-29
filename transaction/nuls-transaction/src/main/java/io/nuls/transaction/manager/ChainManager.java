@@ -29,6 +29,7 @@ import io.nuls.db.service.RocksDBService;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.log.logback.NulsLogger;
+import io.nuls.tools.protocol.ProtocolLoader;
 import io.nuls.transaction.constant.TxConfig;
 import io.nuls.transaction.constant.TxConstant;
 import io.nuls.transaction.constant.TxDBConstant;
@@ -86,6 +87,7 @@ public class ChainManager {
             initTable(chain);
             chainMap.put(chainId, chain);
             chain.getLoggerMap().get(TxConstant.LOG_TX).debug("Chain:{} init success..", chainId);
+            ProtocolLoader.load(chainId);
         }
     }
 

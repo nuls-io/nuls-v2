@@ -29,7 +29,6 @@ package io.nuls.cmd.client.processor.contract;
 import io.nuls.api.provider.Result;
 import io.nuls.api.provider.contract.facade.ViewContractReq;
 import io.nuls.cmd.client.CommandBuilder;
-import io.nuls.cmd.client.CommandHelper;
 import io.nuls.cmd.client.CommandResult;
 import io.nuls.tools.core.annotation.Component;
 
@@ -88,7 +87,7 @@ public class ViewContractProcessor extends ContractBaseProcessor {
 
             if(args.length == 5) {
                 String argType = args[3].trim();
-                if(argType.equals("-d")) {
+                if ("-d".equals(argType)) {
                     call.setMethodDesc(args[4].trim());
                 } else {
                     return null;

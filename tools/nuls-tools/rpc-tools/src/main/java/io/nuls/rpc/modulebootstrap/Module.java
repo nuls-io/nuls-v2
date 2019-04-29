@@ -32,12 +32,18 @@ public class Module {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof Module)) return false;
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof Module)) {
+            return false;
+        }
 
         Module module = (Module) o;
 
-        if (name != null ? !name.equals(module.name) : module.name != null) return false;
+        if (name != null ? !name.equals(module.name) : module.name != null) {
+            return false;
+        }
         return version != null ? version.equals(module.version) : module.version == null;
     }
 

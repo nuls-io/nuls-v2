@@ -25,19 +25,12 @@ package io.nuls.block.utils;
 import io.nuls.block.manager.ContextManager;
 import io.nuls.block.model.ChainParameters;
 import io.nuls.block.storage.ParametersStorageService;
-import io.nuls.tools.core.ioc.SpringLiteContext;
-import io.nuls.tools.io.IoUtils;
-import io.nuls.tools.parse.JSONUtils;
-import io.nuls.tools.protocol.Protocol;
-import io.nuls.tools.protocol.ProtocolConfigJson;
-import io.nuls.tools.protocol.ProtocolLoader;
+import io.nuls.tools.core.annotation.Autowired;
+import io.nuls.tools.core.annotation.Component;
 
 import java.util.List;
-import java.util.Map;
 
 import static io.nuls.block.BlockBootstrap.blockConfig;
-import static io.nuls.block.constant.Constant.PROTOCOL_CONFIG_COMPARATOR;
-import static io.nuls.block.constant.Constant.PROTOCOL_CONFIG_FILE;
 
 /**
  * 配置加载器
@@ -46,9 +39,11 @@ import static io.nuls.block.constant.Constant.PROTOCOL_CONFIG_FILE;
  * @version 1.0
  * @date 18-11-8 下午1:37
  */
+@Component
 public class ConfigLoader {
 
-    private static ParametersStorageService service = SpringLiteContext.getBean(ParametersStorageService.class);
+    @Autowired
+    private static ParametersStorageService service;
 
     /**
      * 加载配置文件
@@ -61,12 +56,10 @@ public class ConfigLoader {
             loadDefault();
         } else {
             for (ChainParameters chainParameters : list) {
-                int chainId = chainParameters.getChainId();
-                String protocolConfigJson = service.getProtocolConfigJson(chainId);
-                List<ProtocolConfigJson> protocolConfigs = JSONUtils.json2list(protocolConfigJson, ProtocolConfigJson.class);
-                protocolConfigs.sort(PROTOCOL_CONFIG_COMPARATOR);
-                Map<Short, Protocol> protocolMap = ProtocolLoader.load(protocolConfigs);
-                ContextManager.init(chainParameters, protocolMap);
+                ContextManager.init(chainParameters);
+//                int chainId = chainParameters.getChainId();
+//                String protocolConfigJson = service.getProtocolConfigJson(chainId);
+//                ProtocolLoader.load(chainId, protocolConfigJson);
             }
         }
     }
@@ -77,15 +70,12 @@ public class ConfigLoader {
      * @throws Exception
      */
     private static void loadDefault() throws Exception {
-        String json = IoUtils.read(PROTOCOL_CONFIG_FILE);
-        List<ProtocolConfigJson> protocolConfigs = JSONUtils.json2list(json, ProtocolConfigJson.class);
-        protocolConfigs.sort(PROTOCOL_CONFIG_COMPARATOR);
-        Map<Short, Protocol> protocolMap = ProtocolLoader.load(protocolConfigs);
+//        String json = IoUtils.read(PROTOCOL_CONFIG_FILE);
         ChainParameters parameter = blockConfig;
         int chainId = parameter.getChainId();
-        ContextManager.init(parameter, protocolMap);
+        ContextManager.init(parameter);
         service.save(parameter, chainId);
-        service.saveProtocolConfigJson(json, chainId);
+//        service.saveProtocolConfigJson(json, chainId);
     }
 
 }

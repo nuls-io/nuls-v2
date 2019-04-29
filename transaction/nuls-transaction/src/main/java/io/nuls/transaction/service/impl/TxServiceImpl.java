@@ -27,13 +27,13 @@ package io.nuls.transaction.service.impl;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.basic.TransactionFeeCalculator;
-import io.nuls.base.constant.TxStatusEnum;
 import io.nuls.base.data.*;
 import io.nuls.base.signture.SignatureUtil;
 import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.util.RPCUtil;
 import io.nuls.rpc.util.TimeUtils;
 import io.nuls.tools.basic.Result;
+import io.nuls.tools.constant.TxStatusEnum;
 import io.nuls.tools.constant.TxType;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
@@ -106,8 +106,8 @@ public class TxServiceImpl implements TxService {
                 txRegister.setModuleValidator(moduleTxRegisterDto.getModuleValidator());
                 txRegister.setTxType(txRegisterDto.getTxType());
                 txRegister.setValidator(txRegisterDto.getValidator());
-                txRegister.setCommit(moduleTxRegisterDto.getCommit());
-                txRegister.setRollback(moduleTxRegisterDto.getRollback());
+                txRegister.setCommit(moduleTxRegisterDto.getModuleCommit());
+                txRegister.setRollback(moduleTxRegisterDto.getModuleRollback());
                 txRegister.setSystemTx(txRegisterDto.getSystemTx());
                 txRegister.setUnlockTx(txRegisterDto.getUnlockTx());
                 txRegister.setVerifySignature(txRegisterDto.getVerifySignature());
@@ -138,12 +138,14 @@ public class TxServiceImpl implements TxService {
         }
     }
 
+    static int countNewNet = 0;
     @Override
     public void newBroadcastTx(Chain chain, TransactionNetPO tx) {
         TransactionConfirmedPO txExist = getTransaction(chain, tx.getTx().getHash());
         if (null == txExist) {
             try {
                 chain.getUnverifiedQueue().addLast(tx);
+                LOG.debug("{}", ++countNewNet);
             } catch (IllegalStateException e) {
                 chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).error("UnverifiedQueue full!");
             }
@@ -195,6 +197,14 @@ public class TxServiceImpl implements TxService {
         }
     }
 
+    @Override
+    public boolean isTxExists(Chain chain, NulsDigestData hash) {
+        boolean rs = unconfirmedTxStorageService.isExists(chain.getChainId(), hash);
+        if(!rs){
+            rs = confirmedTxStorageService.isExists(chain.getChainId(), hash);
+        }
+        return rs;
+    }
 
     /**
      * 验证交易
@@ -397,7 +407,7 @@ public class TxServiceImpl implements TxService {
             }
 
             if (TxUtil.isLegalContractAddress(coinTo.getAddress(), chain)) {
-                if (type != TxType.COIN_BASE && type != TxType.CONTRACT_CALL) {
+                if (type != TxType.COIN_BASE && type != TxType.CALL_CONTRACT) {
                     chain.getLoggerMap().get(TxConstant.LOG_TX).error("contract data error: The contract does not accept transfers of this type[{}] of transaction.", type);
                     throw new NulsException(TxErrorCode.TX_DATA_VALIDATION_ERROR);
                 }

@@ -1,5 +1,6 @@
 package io.nuls.protocol.model;
 
+import com.google.common.base.Objects;
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.basic.NulsOutputStreamBuffer;
 import io.nuls.base.data.BaseNulsData;
@@ -63,6 +64,25 @@ public class ProtocolVersion extends BaseNulsData {
     }
 
     @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        ProtocolVersion that = (ProtocolVersion) o;
+        return version == that.version &&
+                effectiveRatio == that.effectiveRatio &&
+                continuousIntervalCount == that.continuousIntervalCount;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(version, effectiveRatio, continuousIntervalCount);
+    }
+
+    @Override
     public int size() {
         return 5;
     }
@@ -81,4 +101,12 @@ public class ProtocolVersion extends BaseNulsData {
         this.continuousIntervalCount = byteBuffer.readShort();
     }
 
+    @Override
+    public String toString() {
+        return "ProtocolVersion{" +
+                "version=" + version +
+                ", effectiveRatio=" + effectiveRatio +
+                ", continuousIntervalCount=" + continuousIntervalCount +
+                '}';
+    }
 }

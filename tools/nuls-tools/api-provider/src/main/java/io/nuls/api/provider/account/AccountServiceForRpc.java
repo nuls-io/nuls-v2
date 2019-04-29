@@ -70,10 +70,7 @@ public class AccountServiceForRpc extends BaseRpcService implements AccountServi
             try {
                 List<AccountInfo> list = MapUtils.mapsToObjects((List<Map<String, Object>>) res.get("list"),AccountInfo.class);
                 return success(list);
-            } catch (InstantiationException e) {
-                Log.error("getAccountList fail",e);
-                return fail(CommonCodeConstanst.FAILED);
-            } catch (IllegalAccessException e) {
+            } catch (Exception e) {
                 Log.error("getAccountList fail",e);
                 return fail(CommonCodeConstanst.FAILED);
             }

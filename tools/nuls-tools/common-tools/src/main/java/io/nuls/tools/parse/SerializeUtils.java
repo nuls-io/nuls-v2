@@ -302,7 +302,7 @@ public class SerializeUtils {
     public static byte[] int16ToBytes(int x) {
         byte[] bb = new byte[2];
         bb[1] = (byte) (0xFF & x >> 8);
-        bb[0] = (byte) (0xFF & x >> 0);
+        bb[0] = (byte) (0xFF & x);
         return bb;
     }
 
@@ -317,7 +317,7 @@ public class SerializeUtils {
         bb[3] = (byte) (0xFF & x >> 24);
         bb[2] = (byte) (0xFF & x >> 16);
         bb[1] = (byte) (0xFF & x >> 8);
-        bb[0] = (byte) (0xFF & x >> 0);
+        bb[0] = (byte) (0xFF & x);
         return bb;
     }
 

@@ -33,12 +33,28 @@ public interface CommandConstant {
 
 
     //普通服务对应的RPC命令
-
     /**
-     * 获取当前协议版本号
+     * 获取主网协议版本号
      */
     String GET_MAIN_VERSION = "getMainVersion";
+    /**
+     * 获取本地协议版本号
+     */
     String GET_BLOCK_VERSION = "getBlockVersion";
+    /**
+     * 保存区块通知
+     */
     String SAVE_BLOCK = "saveBlock";
+    /**
+     * 回滚区块通知
+     */
     String ROLLBACK_BLOCK = "rollbackBlock";
+    /**
+     * 回滚区块通知
+     */
+    String REGISTER_TX = "registerTx";
+    /**
+     * 回滚区块通知
+     */
+    String REGISTER_MSG = "registerMsg";
 }

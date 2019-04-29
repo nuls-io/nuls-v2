@@ -60,4 +60,14 @@ public interface DataBaseArea {
      *   存区块所有交易的hash值
      */
     String TB_LEDGER_HASH = "ledger_tx_hashs";
+
+    /**
+     *   链资产索引
+     */
+    String TB_LEDGER_ASSET_INDEX = "ledger_asset_index";
+
+    /**
+     *   链资产地址索引
+     */
+    String TB_LEDGER_ASSET_ADDR_INDEX = "ledger_asset_addr_index";
 }

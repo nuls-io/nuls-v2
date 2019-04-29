@@ -47,12 +47,12 @@ public class ModuleTxRegisterDTO {
     /**
      * Transaction commit cmd name
      */
-    private String commit;
+    private String moduleCommit;
 
     /**
      * Transaction validator cmd name
      */
-    private String rollback;
+    private String moduleRollback;
 
     /**
      * 交易验证器
@@ -95,20 +95,20 @@ public class ModuleTxRegisterDTO {
         this.list = list;
     }
 
-    public String getRollback() {
-        return rollback;
+    public String getModuleCommit() {
+        return moduleCommit;
     }
 
-    public void setRollback(String rollback) {
-        this.rollback = rollback;
+    public void setModuleCommit(String moduleCommit) {
+        this.moduleCommit = moduleCommit;
     }
 
-    public String getCommit() {
-        return commit;
+    public String getModuleRollback() {
+        return moduleRollback;
     }
 
-    public void setCommit(String commit) {
-        this.commit = commit;
+    public void setModuleRollback(String moduleRollback) {
+        this.moduleRollback = moduleRollback;
     }
 
     @Override
@@ -117,8 +117,8 @@ public class ModuleTxRegisterDTO {
                 "chainId=" + chainId +
                 ", moduleCode='" + moduleCode + '\'' +
                 ", moduleValidator='" + moduleValidator + '\'' +
-                ", commit='" + commit + '\'' +
-                ", rollback='" + rollback + '\'' +
+                ", moduleCommit='" + moduleCommit + '\'' +
+                ", moduleRollback='" + moduleRollback + '\'' +
                 ", list=" + list +
                 '}';
     }

@@ -6,7 +6,6 @@ import io.nuls.base.data.BaseNulsData;
 import io.nuls.base.data.NulsDigestData;
 import io.nuls.base.data.Transaction;
 import io.nuls.db.service.RocksDBService;
-import io.nuls.tools.basic.VarInt;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.exception.NulsException;
@@ -201,56 +200,17 @@ public class ConfirmedTxStorageServiceImpl implements ConfirmedTxStorageService 
     }
 
     @Override
-    public boolean saveCrossTxEffectList(int chainId, long height, List<NulsDigestData> hashList) {
-        if (hashList == null || hashList.size() == 0 || height < 0) {
-            return true;
-        }
-        CrossTxEffectList crossTxEffectList = new CrossTxEffectList();
-        crossTxEffectList.hashList = hashList;
-        boolean result = false;
+    public boolean isExists(int chainId, NulsDigestData hash) {
         try {
-            result = RocksDBService.put(TxDBConstant.DB_TRANSACTION_CONFIRMED_PREFIX + chainId,
-                    new VarInt(height).encode(), crossTxEffectList.serialize());
-        } catch (Exception e) {
-            LOG.error(e);
-        }
-       return result;
-
-    }
-
-    @Override
-    public List<NulsDigestData> getCrossTxEffectList(int chainId, long height) {
-        List<NulsDigestData> hashList = new ArrayList<>();
-        if ( height < 0) {
-            return hashList;
-        }
-        try {
-            byte[] bytes = RocksDBService.get(TxDBConstant.DB_TRANSACTION_CONFIRMED_PREFIX + chainId, new VarInt(height).encode());
-            if(null == bytes){
-                return hashList;
+            byte[] txBytes = RocksDBService.get(TxDBConstant.DB_TRANSACTION_CONFIRMED_PREFIX + chainId, hash.serialize());
+            if (null != txBytes && txBytes.length > 0) {
+                return true;
             }
-            CrossTxEffectList crossTxEffectList = new CrossTxEffectList();
-            crossTxEffectList.parse(new NulsByteBuffer(bytes));
-            hashList = crossTxEffectList.hashList;
-        } catch (Exception e) {
-            LOG.error(e);
-        }
-        return hashList;
-
-    }
-
-    @Override
-    public boolean removeCrossTxEffectList(int chainId, long height) {
-        if ( height < 0) {
             return false;
-        }
-        try {
-            //delete transaction
-            return RocksDBService.delete(TxDBConstant.DB_TRANSACTION_CONFIRMED_PREFIX + chainId, new VarInt(height).encode());
-        } catch (Exception e) {
+        } catch (IOException e) {
             LOG.error(e);
+            throw new NulsRuntimeException(e);
         }
-        return false;
     }
 
 }

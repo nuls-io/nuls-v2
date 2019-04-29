@@ -45,6 +45,7 @@ import org.junit.Test;
 
 import java.math.BigInteger;
 import java.util.*;
+import java.util.concurrent.CountDownLatch;
 
 import static io.nuls.transaction.utils.LoggerUtil.LOG;
 import static org.junit.Assert.assertEquals;
@@ -105,7 +106,9 @@ public class TestJyc {
     @Test
     public void name() throws Exception {
         {
-            queryTx("002090b123ab10078da5f4c4cbf428491181a66ceda58b26a7d7673f3771fcd6dc2b", false);
+            balance("tNULSeBaMnrs6JKrCy6TQdzYJZkMZJDng7QAsD");
+            balance("tNULSeBaMjejH5QaSmC7yLWsbmzTgma6vrVuRg");
+            balance("tNULSeBaMtmvNYsX7NUWtJzc7cBXaW5YbYrEp5");
         }
     }
 
@@ -140,102 +143,100 @@ public class TestJyc {
         LOG.debug(address23 + "-----balance:{}", balance);
         List<String> accountList;
         try {
-            while (true) {
-                LOG.debug("##################################################");
-                String agentAddress = "";
-                String packingAddress = "";
-                String agentHash = "";
-                String depositHash = "";
-                {
-                    LOG.debug("1.##########新建两个地址，一个作为节点地址，一个作为打包地址##########");
-                    //新建两个地址
-                    Map<String, Object> params = new HashMap<>();
-                    params.put(Constants.VERSION_KEY_STR, version);
-                    params.put("chainId", chainId);
-                    params.put("count", 2);
-                    params.put("password", password);
-                    Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_createAccount", params);
-                    assertTrue(response.isSuccess());
-                    accountList = (List<String>) ((HashMap) ((HashMap) response.getResponseData()).get("ac_createAccount")).get("list");
-                    agentAddress = accountList.get(0);
-                    packingAddress = accountList.get(1);
-                    LOG.debug("agentAddress-{{}}", agentAddress);
-                    LOG.debug("packingAddress-{{}}", packingAddress);
-                }
-                {
-                    LOG.debug("2.##########从创世块地址转账给新创建的地址##########");
-                    Map transferMap = new HashMap();
-                    transferMap.put("chainId", chainId);
-                    transferMap.put("remark", "transfer test");
-                    List<CoinDTO> inputs = new ArrayList<>();
-                    List<CoinDTO> outputs = new ArrayList<>();
-                    CoinDTO inputCoin1 = new CoinDTO();
-                    inputCoin1.setAddress(address23);
-                    inputCoin1.setPassword(password);
-                    inputCoin1.setAssetsChainId(chainId);
-                    inputCoin1.setAssetsId(assetId);
-                    inputCoin1.setAmount(new BigInteger("25000700000000"));
-                    inputs.add(inputCoin1);
+            LOG.debug("##################################################");
+            String agentAddress = "";
+            String packingAddress = "";
+            String agentHash = "";
+            String depositHash = "";
+            {
+                LOG.debug("1.##########新建两个地址，一个作为节点地址，一个作为打包地址##########");
+                //新建两个地址
+                Map<String, Object> params = new HashMap<>();
+                params.put(Constants.VERSION_KEY_STR, version);
+                params.put("chainId", chainId);
+                params.put("count", 2);
+                params.put("password", password);
+                Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_createAccount", params);
+                assertTrue(response.isSuccess());
+                accountList = (List<String>) ((HashMap) ((HashMap) response.getResponseData()).get("ac_createAccount")).get("list");
+                agentAddress = accountList.get(0);
+                packingAddress = accountList.get(1);
+                LOG.debug("agentAddress-{{}}", agentAddress);
+                LOG.debug("packingAddress-{{}}", packingAddress);
+            }
+            {
+                LOG.debug("2.##########从创世块地址转账给新创建的地址##########");
+                Map transferMap = new HashMap();
+                transferMap.put("chainId", chainId);
+                transferMap.put("remark", "transfer test");
+                List<CoinDTO> inputs = new ArrayList<>();
+                List<CoinDTO> outputs = new ArrayList<>();
+                CoinDTO inputCoin1 = new CoinDTO();
+                inputCoin1.setAddress(address23);
+                inputCoin1.setPassword(password);
+                inputCoin1.setAssetsChainId(chainId);
+                inputCoin1.setAssetsId(assetId);
+                inputCoin1.setAmount(new BigInteger("25000700000000"));
+                inputs.add(inputCoin1);
 
-                    CoinDTO outputCoin1 = new CoinDTO();
-                    outputCoin1.setAddress(agentAddress);
-                    outputCoin1.setPassword(password);
-                    outputCoin1.setAssetsChainId(chainId);
-                    outputCoin1.setAssetsId(assetId);
-                    outputCoin1.setAmount(new BigInteger("25000100000000"));
-                    outputs.add(outputCoin1);
+                CoinDTO outputCoin1 = new CoinDTO();
+                outputCoin1.setAddress(agentAddress);
+                outputCoin1.setPassword(password);
+                outputCoin1.setAssetsChainId(chainId);
+                outputCoin1.setAssetsId(assetId);
+                outputCoin1.setAmount(new BigInteger("25000100000000"));
+                outputs.add(outputCoin1);
 
-                    CoinDTO outputCoin2 = new CoinDTO();
-                    outputCoin2.setAddress(packingAddress);
-                    outputCoin2.setPassword(password);
-                    outputCoin2.setAssetsChainId(chainId);
-                    outputCoin2.setAssetsId(assetId);
-                    outputCoin2.setAmount(new BigInteger("500000000"));
-                    outputs.add(outputCoin2);
-                    transferMap.put("inputs", inputs);
-                    transferMap.put("outputs", outputs);
+                CoinDTO outputCoin2 = new CoinDTO();
+                outputCoin2.setAddress(packingAddress);
+                outputCoin2.setPassword(password);
+                outputCoin2.setAssetsChainId(chainId);
+                outputCoin2.setAssetsId(assetId);
+                outputCoin2.setAmount(new BigInteger("500000000"));
+                outputs.add(outputCoin2);
+                transferMap.put("inputs", inputs);
+                transferMap.put("outputs", outputs);
 
-                    Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_transfer", transferMap);
-                    assertTrue(response.isSuccess());
-                    HashMap result = (HashMap) (((HashMap) response.getResponseData()).get("ac_transfer"));
-                    LOG.debug("transfer hash:{}", result.get("value"));
-                    LOG.debug("transfer from {} to {}", address23, agentAddress);
-                    LOG.debug("transfer from {} to {}", address23, packingAddress);
-                }
+                Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_transfer", transferMap);
+                assertTrue(response.isSuccess());
+                HashMap result = (HashMap) (((HashMap) response.getResponseData()).get("ac_transfer"));
+                LOG.debug("transfer hash:{}", result.get("value"));
+                LOG.debug("transfer from {} to {}", address23, agentAddress);
+                LOG.debug("transfer from {} to {}", address23, packingAddress);
+            }
 
-                Thread.sleep(15000);
-                {
-                    LOG.debug("3.##########创建节点##########");
-                    BigInteger agentBalance = LedgerCall.getBalance(chain, AddressTool.getAddress(agentAddress), chainId, assetId);
-                    LOG.debug(agentAddress + "-----balance:{}", agentBalance);
-                    assertEquals(new BigInteger("25000100000000"), agentBalance);
-                    BigInteger packingBalance = LedgerCall.getBalance(chain, AddressTool.getAddress(packingAddress), chainId, assetId);
-                    LOG.debug(packingAddress + "-----balance:{}", packingBalance);
-                    assertEquals(new BigInteger("500000000"), packingBalance);
-                    //创建节点
-                    Map agentTxMap = this.createAgentTx(agentAddress, packingAddress);
-                    Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.CS.abbr, "cs_createAgent", agentTxMap);
-                    assertTrue(response.isSuccess());
-                    Map map = (HashMap) (((HashMap) response.getResponseData()).get("cs_createAgent"));
-                    agentHash = (String) map.get("txHash");
-                    LOG.debug("createAgent-txHash:{}", agentHash);
-                }
+            Thread.sleep(30000);
+            {
+                LOG.debug("3.##########创建节点##########");
+                BigInteger agentBalance = LedgerCall.getBalance(chain, AddressTool.getAddress(agentAddress), chainId, assetId);
+                LOG.debug(agentAddress + "-----balance:{}", agentBalance);
+                assertEquals(new BigInteger("25000100000000"), agentBalance);
+                BigInteger packingBalance = LedgerCall.getBalance(chain, AddressTool.getAddress(packingAddress), chainId, assetId);
+                LOG.debug(packingAddress + "-----balance:{}", packingBalance);
+                assertEquals(new BigInteger("500000000"), packingBalance);
+                //创建节点
+                Map agentTxMap = this.createAgentTx(agentAddress, packingAddress);
+                Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.CS.abbr, "cs_createAgent", agentTxMap);
+                assertTrue(response.isSuccess());
+                Map map = (HashMap) (((HashMap) response.getResponseData()).get("cs_createAgent"));
+                agentHash = (String) map.get("txHash");
+                LOG.debug("createAgent-txHash:{}", agentHash);
+            }
 
-                Thread.sleep(12000);
-                {
-                    LOG.debug("4.##########进行委托##########");
-                    Map<String, Object> dpParams = new HashMap<>();
-                    dpParams.put("chainId", chainId);
-                    dpParams.put("address", agentAddress);
-                    dpParams.put("password", password);
-                    dpParams.put("agentHash", agentHash);
-                    dpParams.put("deposit", 200000 * 100000000L);
-                    Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.CS.abbr, "cs_depositToAgent", dpParams);
-                    assertTrue(response.isSuccess());
-                    HashMap dpResult = (HashMap) ((HashMap) response.getResponseData()).get("cs_depositToAgent");
-                    depositHash = (String) dpResult.get("txHash");
-                    LOG.debug("deposit-txHash:{}", depositHash);
-                }
+            Thread.sleep(30000);
+            {
+                LOG.debug("4.##########进行委托##########");
+                Map<String, Object> dpParams = new HashMap<>();
+                dpParams.put("chainId", chainId);
+                dpParams.put("address", agentAddress);
+                dpParams.put("password", password);
+                dpParams.put("agentHash", agentHash);
+                dpParams.put("deposit", 200000 * 100000000L);
+                Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.CS.abbr, "cs_depositToAgent", dpParams);
+                assertTrue(response.isSuccess());
+                HashMap dpResult = (HashMap) ((HashMap) response.getResponseData()).get("cs_depositToAgent");
+                depositHash = (String) dpResult.get("txHash");
+                LOG.debug("deposit-txHash:{}", depositHash);
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -433,10 +434,10 @@ public class TestJyc {
                     HashMap result = (HashMap) ((HashMap) cmdResp.getResponseData()).get("ac_getPriKeyByAddress");
                     String priKey = (String) result.get("priKey");
                     removeAccount(packingAddress, password);
-                    Thread.sleep(600000);
+                    Thread.sleep(60000);
                     LOG.debug("9.##########导入节点账户，重新加入共识##########");
                     importPriKey(priKey, password);
-                    Thread.sleep(600000);
+                    Thread.sleep(60000);
                 }
 
                 {
@@ -527,12 +528,62 @@ public class TestJyc {
             LOG.debug(address23 + "-----balance:{}", balance);
         }
         int total = 1000_000;
-        int count = 1000;
+        int count = 2000;
+        testRunning(total, count);
+    }
+
+    /**
+     * 压力测试，发起大量普通转账
+     *
+     * @throws Exception
+     */
+    @Test
+    public void pressureTestMultiThread() throws Exception {
+        {
+            Map<String, Object> params = new HashMap<>();
+            params.put(Constants.VERSION_KEY_STR, version);
+            params.put("chainId", chainId);
+            params.put("address", address23);
+            Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_getAccountByAddress", params);
+
+            String address = JSONUtils.obj2json(((HashMap) cmdResp.getResponseData()).get("ac_getAccountByAddress"));
+            LOG.debug("address-{}" + address);
+            BigInteger balance = LedgerCall.getBalance(chain, AddressTool.getAddress(address23), chainId, assetId);
+            LOG.debug(address23 + "-----balance:{}", balance);
+        }
+        int total = 1000_000;
+        int count = 500;
+        int threadCount = 10;
+        CountDownLatch latch = new CountDownLatch(threadCount);
+        class worker implements Runnable {
+            private CountDownLatch latch;
+
+            public worker(CountDownLatch latch) {
+                this.latch = latch;
+            }
+
+            @Override
+            public void run() {
+                try {
+                    testRunning(total, count);
+                    latch.countDown();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        for (int i = 0; i < threadCount; i++) {
+            new Thread(new worker(latch)).start();
+        }
+        latch.await();
+    }
+
+    private void testRunning(int total, int count) throws Exception {
         List<String> accountList = new ArrayList<>();
         LOG.debug("##################################################");
         {
             LOG.debug("1.##########create " + count + " accounts##########");
-            for (int i = 0; i < count/100; i++) {
+            for (int i = 0; i < count / 100; i++) {
                 Map<String, Object> params = new HashMap<>();
                 params.put(Constants.VERSION_KEY_STR, version);
                 params.put("chainId", chainId);
@@ -544,18 +595,11 @@ public class TestJyc {
                 assertEquals(100 * (i + 1), accountList.size());
             }
         }
-        {
-            for (String account : accountList) {
-                Map<String, Object> params = new HashMap<>();
-                params.put(Constants.VERSION_KEY_STR, version);
-                params.put("chainId", chainId);
-                params.put("address", account);
-                Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_getAccountByAddress", params);
-
-                String address = JSONUtils.obj2json(((HashMap) cmdResp.getResponseData()).get("ac_getAccountByAddress"));
-                LOG.debug("address-{}" + address);
-            }
-        }
+//        {
+//            for (String account : accountList) {
+//                LOG.debug("address-{}", account);
+//            }
+//        }
         List<String> hashList = new ArrayList<>();
         {
             LOG.debug("2.##########transfer from seed address to " + count + " accounts##########");
@@ -571,7 +615,7 @@ public class TestJyc {
                 inputCoin1.setPassword(password);
                 inputCoin1.setAssetsChainId(chainId);
                 inputCoin1.setAssetsId(assetId);
-                inputCoin1.setAmount(new BigInteger("100000000000"));
+                inputCoin1.setAmount(new BigInteger("50000000000"));
                 inputs.add(inputCoin1);
 
                 CoinDTO outputCoin1 = new CoinDTO();
@@ -579,7 +623,7 @@ public class TestJyc {
                 outputCoin1.setPassword(password);
                 outputCoin1.setAssetsChainId(chainId);
                 outputCoin1.setAssetsId(assetId);
-                outputCoin1.setAmount(new BigInteger("100000000000"));
+                outputCoin1.setAmount(new BigInteger("50000000000"));
                 outputs.add(outputCoin1);
                 transferMap.put("inputs", inputs);
                 transferMap.put("outputs", outputs);
@@ -589,8 +633,8 @@ public class TestJyc {
                 HashMap result = (HashMap) (((HashMap) response.getResponseData()).get("ac_transfer"));
                 String hash = result.get("value").toString();
                 hashList.add(hash);
-                LOG.debug(i + "---transfer from {} to {}, hash:{}", address23, account, hash);
-                Thread.sleep(100);
+//                LOG.debug(i + "---transfer from {} to {}, hash:{}", address23, account, hash);
+                Thread.sleep(1);
             }
         }
         Thread.sleep(60000);
@@ -604,7 +648,7 @@ public class TestJyc {
         {
             LOG.debug("3.##########" + count + " accounts Transfer to each other##########");
             //100个地址之间互相转账
-            for (int j = 0; j < total/count; j++) {
+            for (int j = 0; j < total / count; j++) {
                 for (int i = 0; i < count; i++) {
                     String from = accountList.get(i % count);
                     String to = accountList.get((i + 1) % count);
@@ -662,6 +706,7 @@ public class TestJyc {
         }
     }
 
+
     /**
      * 稳定性测试
      */
@@ -680,7 +725,7 @@ public class TestJyc {
             LOG.debug(address23 + "-----balance:{}", balance);
         }
         int total = 100_000_000;
-        int count = 50;
+        int count = 100;
         List<String> accountList = new ArrayList<>();
         LOG.debug("##################################################");
         {

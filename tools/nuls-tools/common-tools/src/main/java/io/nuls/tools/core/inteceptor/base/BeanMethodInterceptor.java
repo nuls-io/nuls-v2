@@ -34,7 +34,7 @@ import java.lang.reflect.Method;
  *
  * @author: Niels Wang
  */
-public interface BeanMethodInterceptor {
+public interface BeanMethodInterceptor<T> {
     /**
      * 拦截器拦截某个方法时，使用该方法，在方法中通过逻辑决定是否继续调用拦截的方法，可以在调用之前和之后做一些业务上的操作
      * When an interceptor intercepts a method, the method is used to logically determine whether the intercepting method is called in the method,
@@ -48,5 +48,5 @@ public interface BeanMethodInterceptor {
      * @return 返回拦截的方法的返回值，可以对该值进行处理和替换/Returns the return value of the intercepting method, which can be processed and replaced.
      * @throws Throwable 该方法可能抛出异常，请谨慎处理/This method may throw an exception, handle with care.
      */
-    Object intercept(Annotation annotation, Object object, Method method, Object[] params, BeanMethodInterceptorChain interceptorChain) throws Throwable;
+    Object intercept(T annotation, Object object, Method method, Object[] params, BeanMethodInterceptorChain interceptorChain) throws Throwable;
 }

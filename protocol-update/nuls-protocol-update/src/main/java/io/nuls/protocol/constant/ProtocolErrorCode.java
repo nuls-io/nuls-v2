@@ -32,54 +32,20 @@ import io.nuls.tools.constant.ErrorCode;
  * @date 18-11-20 上午11:01
  */
 public interface ProtocolErrorCode {
-    ErrorCode SUCCESS = ErrorCode.init("0");
+    /**
+     * RPC请求成功
+     */
+    ErrorCode SUCCESS = ErrorCode.init("10000");
     /**
      * RPC请求参数错误
      */
     ErrorCode PARAMETER_ERROR = ErrorCode.init("10001");
-    ErrorCode SERIALIZE_ERROR = ErrorCode.init("10002");
+    /**
+     * 未知错误
+     */
+    ErrorCode UNKOWN_ERROR = ErrorCode.init("10002");
+    /**
+     * 数据序列化错误
+     */
     ErrorCode DATA_ERROR = ErrorCode.init("10003");
-    /**
-     * 链合并失败
-     */
-    ErrorCode CHAIN_MERGE_ERROR = ErrorCode.init("20001");
-    ErrorCode DATA_PARSE_ERROR = ErrorCode.init("20002");
-    /**
-     * 未定义错误
-     */
-    ErrorCode UNDEFINED_ERROR = ErrorCode.init("20003");
-
-
-    /**
-     * 收到的区块超出范围
-     */
-    ErrorCode OUT_OF_RANGE = ErrorCode.init("30001");
-    /**
-     * 收到主链上重复的区块
-     */
-    ErrorCode DUPLICATE_MAIN_BLOCK = ErrorCode.init("30002");
-    /**
-     * 收到分叉链上重复的区块
-     */
-    ErrorCode DUPLICATE_FORK_BLOCK = ErrorCode.init("30003");
-    /**
-     * 收到孤儿链上重复的区块
-     */
-    ErrorCode DUPLICATE_ORPHAN_BLOCK = ErrorCode.init("30004");
-    /**
-     * 收到孤儿区块
-     */
-    ErrorCode ORPHAN_BLOCK = ErrorCode.init("30005");
-    /**
-     * 收到分叉区块
-     */
-    ErrorCode FORK_BLOCK = ErrorCode.init("30006");
-    /**
-     * 区块与链没有关系(不重复　不分叉　不相连)
-     */
-    ErrorCode IRRELEVANT_BLOCK = ErrorCode.init("30007");
-    /**
-     * 链回滚失败
-     */
-    ErrorCode ROLLBACK_CHAIN_ERROR = ErrorCode.init("30008");
 }

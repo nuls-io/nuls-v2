@@ -141,7 +141,8 @@ public class NodeDiscoverTask implements Runnable {
             verifyNodes.remove(node.getId());
             if (status == PROBE_STATUS_SUCCESS) {
                 node.setConnectStatus(NodeConnectStatusEnum.UNCONNECT);
-                node.setFailCount(0);
+                //代表断链次数，也可能是多次连接在握手时候断开。只有真正握手成功的才能重置为0
+                node.setFailCount(node.getFailCount() + 1);
                 if (nodesContainer.hadInConnection(node.getIp())) {
                     node.setStatus(NodeStatusEnum.AVAILABLE);
                 } else {

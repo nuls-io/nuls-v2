@@ -411,13 +411,13 @@ public class CoinDataValidator {
 
         try {
             //数据库已经不为初始值了，则这笔交易可以认为双花
-            if(LedgerUtil.equalsNonces(fromNonce,LedgerConstant.INIT_NONCE_BYTE)){
-                logger(accountState.getAddressChainId()).info("DOUBLE_EXPENSES_CODE address={},fromNonceStr={}", address, fromNonceStr);
+            if (LedgerUtil.equalsNonces(fromNonce, LedgerConstant.INIT_NONCE_BYTE)) {
+                logger(accountState.getAddressChainId()).info("DOUBLE_EXPENSES_CODE address={},fromNonceStr={},dbNonce={}", address, fromNonceStr, LedgerUtil.getNonceEncode(preNonce));
                 return ValidateResult.getResult(ValidateEnum.DOUBLE_EXPENSES_CODE, new String[]{address, fromNonceStr});
             }
             //上面没连接上，但是fromNonce又存储过，则双花了
             if (transactionService.hadCommit(accountState.getAddressChainId(), LedgerUtil.getAccountNoncesStrKey(address, accountState.getAssetChainId(), accountState.getAssetId(), fromNonceStr))) {
-                logger(accountState.getAddressChainId()).info("DOUBLE_EXPENSES_CODE address={},fromNonceStr={}", address, fromNonceStr);
+                logger(accountState.getAddressChainId()).info("DOUBLE_EXPENSES_CODE address={},fromNonceStr={},dbNonce={}", address, fromNonceStr, fromNonceStr, LedgerUtil.getNonceEncode(preNonce));
                 return ValidateResult.getResult(ValidateEnum.DOUBLE_EXPENSES_CODE, new String[]{address, fromNonceStr});
             }
         } catch (Exception e) {
@@ -459,7 +459,7 @@ public class CoinDataValidator {
                     if (transactionService.hadCommit(chainId, LedgerUtil.getAccountNoncesStringKey(coinFrom, coinFrom.getNonce()))) {
                         return ValidateResult.getResult(ValidateEnum.DOUBLE_EXPENSES_CODE, new String[]{address, LedgerUtil.getNonceEncode(coinFrom.getNonce())});
                     } else {
-                        if(LedgerUtil.equalsNonces(coinFrom.getNonce(),LedgerConstant.INIT_NONCE_BYTE)){
+                        if (LedgerUtil.equalsNonces(coinFrom.getNonce(), LedgerConstant.INIT_NONCE_BYTE)) {
                             return ValidateResult.getResult(ValidateEnum.DOUBLE_EXPENSES_CODE, new String[]{address, LedgerUtil.getNonceEncode(coinFrom.getNonce())});
                         }
                         return ValidateResult.getResult(ValidateEnum.ORPHAN_CODE, new String[]{address, fromCoinNonceStr, LedgerUtil.getNonceEncode(accountState.getNonce())});
@@ -653,7 +653,7 @@ public class CoinDataValidator {
             AccountState accountState = accountStateService.getAccountStateReCal(address, addressChainId, coinFrom.getAssetsChainId(), coinFrom.getAssetsId());
             //普通交易
             if (coinFrom.getLocked() == 0) {
-                return validateCommonCoinData(accountState, address, coinFrom.getAmount(), coinFrom.getNonce(),true);
+                return validateCommonCoinData(accountState, address, coinFrom.getAmount(), coinFrom.getNonce(), true);
             } else {
                 if (!isValidateFreezeTx(coinFrom.getLocked(), accountState, coinFrom.getAmount(), coinFrom.getNonce())) {
                     //确认交易未找到冻结的交易
@@ -690,7 +690,7 @@ public class CoinDataValidator {
             AccountState accountState = accountStateService.getAccountStateReCal(address, addressChainId, coinFrom.getAssetsChainId(), coinFrom.getAssetsId());
             //普通交易
             if (coinFrom.getLocked() == 0) {
-                ValidateResult validateResult = validateCommonCoinData(accountState, address, coinFrom.getAmount(), coinFrom.getNonce(),false);
+                ValidateResult validateResult = validateCommonCoinData(accountState, address, coinFrom.getAmount(), coinFrom.getNonce(), false);
                 if (validateResult.isSuccess()) {
                     CoinDataUtil.calTxFromAmount(addressChainId, accountsMap, coinFrom, txNonce, accountKey);
                 } else {

@@ -23,8 +23,9 @@
  */
 package io.nuls.contract.model.tx;
 
-import io.nuls.contract.constant.ContractConstant;
 import io.nuls.contract.model.txdata.CallContractData;
+
+import static io.nuls.tools.constant.TxType.CALL_CONTRACT;
 
 /**
  * @author: PierreLuo
@@ -34,7 +35,7 @@ public class CallContractTransaction extends ContractBaseTransaction<CallContrac
 
 
     public CallContractTransaction() {
-        super(ContractConstant.TX_TYPE_CALL_CONTRACT);
+        super(CALL_CONTRACT);
     }
 
     @Override

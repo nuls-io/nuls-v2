@@ -1,7 +1,8 @@
 package io.nuls.protocol;
 
 import io.nuls.db.service.RocksDBService;
-import io.nuls.protocol.thread.monitor.ProtocolMonitor;
+import io.nuls.protocol.manager.ChainManager;
+import io.nuls.protocol.model.ProtocolConfig;
 import io.nuls.protocol.utils.ConfigLoader;
 import io.nuls.rpc.info.HostInfo;
 import io.nuls.rpc.model.ModuleE;
@@ -9,20 +10,17 @@ import io.nuls.rpc.modulebootstrap.Module;
 import io.nuls.rpc.modulebootstrap.NulsRpcModuleBootstrap;
 import io.nuls.rpc.modulebootstrap.RpcModule;
 import io.nuls.rpc.modulebootstrap.RpcModuleState;
-import io.nuls.rpc.util.TimeUtils;
+import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
+import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.log.Log;
-import io.nuls.tools.thread.ThreadUtils;
-import io.nuls.tools.thread.commom.NulsThreadFactory;
+import io.nuls.tools.parse.I18nUtils;
 
-import java.util.concurrent.ScheduledThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
-
-import static io.nuls.protocol.constant.Constant.DATA_PATH;
 import static io.nuls.protocol.constant.Constant.PROTOCOL_CONFIG;
+import static io.nuls.protocol.constant.Constant.VERSION;
 
 /**
- * 区块模块启动类
+ * 协议升级模块启动类
  *
  * @author captain
  * @version 1.0
@@ -30,6 +28,12 @@ import static io.nuls.protocol.constant.Constant.PROTOCOL_CONFIG;
  */
 @Component
 public class ProtocolBootstrap extends RpcModule {
+
+    @Autowired
+    public static ProtocolConfig protocolConfig;
+
+    @Autowired
+    private ChainManager chainManager;
 
     public static void main(String[] args) {
         if (args == null || args.length == 0) {
@@ -63,10 +67,30 @@ public class ProtocolBootstrap extends RpcModule {
      */
     @Override
     public void init() {
-        super.init();
-        initCfg();
+        try {
+            super.init();
+            initDB();
+            initLanguage();
+        } catch (Exception e) {
+            Log.error("ProtocolBootstrap init error!");
+            throw new RuntimeException(e);
+        }
+    }
+
+    /**
+     * 初始化数据库
+     * Initialization database
+     */
+    private void initDB() throws Exception {
         //读取配置文件，数据存储根目录，初始化打开该目录下所有表连接并放入缓存
-        RocksDBService.init(DATA_PATH);
+        RocksDBService.init(protocolConfig.getDataFolder());
+        RocksDBService.createTable(PROTOCOL_CONFIG);
+        RocksDBService.createTable(VERSION);
+    }
+
+    private void initLanguage() throws NulsException {
+        I18nUtils.loadLanguage(ProtocolBootstrap.class, "languages", protocolConfig.getLanguage());
+        I18nUtils.setLanguage(protocolConfig.getLanguage());
     }
 
     /**
@@ -76,9 +100,11 @@ public class ProtocolBootstrap extends RpcModule {
     @Override
     public boolean doStart() {
         try {
-            RocksDBService.createTable(PROTOCOL_CONFIG);
+            //启动链
+            chainManager.runChain();
         } catch (Exception e) {
-            e.printStackTrace();
+            Log.error("protocol module doStart error!");
+            return false;
         }
         Log.info("protocol module ready");
         return true;
@@ -97,10 +123,6 @@ public class ProtocolBootstrap extends RpcModule {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        //开启一些监控线程
-        ScheduledThreadPoolExecutor executor = ThreadUtils.createScheduledThreadPool(1, new NulsThreadFactory("protocol-monitor"));
-        executor.scheduleWithFixedDelay(ProtocolMonitor.getInstance(), 0, 5, TimeUnit.SECONDS);
-        TimeUtils.getInstance().start();
         return RpcModuleState.Running;
     }
 
@@ -111,11 +133,7 @@ public class ProtocolBootstrap extends RpcModule {
      */
     @Override
     public RpcModuleState onDependenciesLoss(Module module) {
-        return RpcModuleState.Ready;
-    }
-
-    public static void initCfg() {
-
+        return RpcModuleState.Running;
     }
 
 }
