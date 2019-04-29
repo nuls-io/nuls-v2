@@ -47,7 +47,7 @@ public class ChainAssetCmd extends BaseCmd {
     ChainAssetsService chainAssetsService;
 
 
-    @CmdAnnotation(cmd = "getAssetsByChainId",
+    @CmdAnnotation(cmd = "getAssetsById",
             version = 1.0,
             description = "")
     @Parameter(parameterName = "addressChainId", parameterType = "int")
