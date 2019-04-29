@@ -298,7 +298,7 @@ public class NulsProtocolServiceImpl implements ProtocolService {
                 chain.getMessageLog().info("本节点收到过该跨链交易，并正在处理，originalHash:{},Hash:{}",originalHex,nativeHex);
                 return;
             }
-            boolean handleResult = handleNewCtx(messageBody.getCtx(), originalHash, nativeHash, chain, chainId,nativeHex,originalHex);
+            boolean handleResult = handleNewCtx(messageBody.getCtx(), originalHash, nativeHash, chain, chainId,nativeHex,originalHex,true);
 
             while (!handleResult){
                 if(chain.getTodoCtxMap().keySet().contains(nativeHash) && chain.getTodoCtxMap().get(nativeHash).size() > 0){
@@ -306,7 +306,7 @@ public class NulsProtocolServiceImpl implements ProtocolService {
                     Transaction cacheCtx = chain.getTodoCtxMap().get(nativeHash).remove(0);
                     NulsDigestData cacheOriginalHash = new NulsDigestData();
                     cacheOriginalHash.parse(cacheCtx.getTxData(),0);
-                    handleResult = handleNewCtx(cacheCtx, cacheOriginalHash, nativeHash, chain, chainId,nativeHex,originalHex);
+                    handleResult = handleNewCtx(cacheCtx, cacheOriginalHash, nativeHash, chain, chainId,nativeHex,originalHex,true);
                 }else{
                     break;
                 }
@@ -404,7 +404,7 @@ public class NulsProtocolServiceImpl implements ProtocolService {
                 chain.getMessageLog().info("本节点收到过该跨链交易，并正在处理，originalHash:{},Hash:{}",originalHex,nativeHex);
                 return;
             }
-            boolean handleResult = handleNewCtx(messageBody.getCtx(), originalHash, nativeHash, chain, chainId,nativeHex,originalHex);
+            boolean handleResult = handleNewCtx(messageBody.getCtx(), originalHash, nativeHash, chain, chainId,nativeHex,originalHex,false);
 
             while (!handleResult){
                 if(chain.getTodoCtxMap().keySet().contains(nativeHash) && chain.getTodoCtxMap().get(nativeHash).size() > 0){
@@ -412,7 +412,7 @@ public class NulsProtocolServiceImpl implements ProtocolService {
                     Transaction cacheCtx = chain.getTodoCtxMap().get(nativeHash).remove(0);
                     NulsDigestData cacheOriginalHash = new NulsDigestData();
                     cacheOriginalHash.parse(cacheCtx.getTxData(),0);
-                    handleResult = handleNewCtx(cacheCtx, cacheOriginalHash, nativeHash, chain, chainId,nativeHex,originalHex);
+                    handleResult = handleNewCtx(cacheCtx, cacheOriginalHash, nativeHash, chain, chainId,nativeHex,originalHex,false);
                 }else{
                     break;
                 }
@@ -463,11 +463,25 @@ public class NulsProtocolServiceImpl implements ProtocolService {
      * @param fromChainId      跨链链接标志
      * @return                 处理是否成功
      * */
-    private boolean handleNewCtx(Transaction ctx, NulsDigestData originalHash, NulsDigestData nativeHash, Chain chain, int fromChainId,String nativeHex,String originalHex){
+    private boolean handleNewCtx(Transaction ctx, NulsDigestData originalHash, NulsDigestData nativeHash, Chain chain, int fromChainId,String nativeHex,String originalHex,boolean isLocalCtx){
+        TransactionSignature transactionSignature = new TransactionSignature();
         try {
-            if(!SignatureUtil.validateTransactionSignture(ctx)){
-                chain.getMessageLog().error("Signature verification error");
-                return false;
+            //如果是其他链发送过来的跨链交易一定需要验证签名，如果为本链节点发送的跨链交易，如果有签名则需验证签名，如果没有不用验证
+            transactionSignature.parse(ctx.getTransactionSignature(),0);
+            if(!isLocalCtx){
+                if(!SignatureUtil.validateTransactionSignture(ctx)){
+                    chain.getMessageLog().error("Signature verification error");
+                    return false;
+                }
+                ctx.setTransactionSignature(null);
+                transactionSignature.setP2PHKSignatures(null);
+            }else{
+                if(transactionSignature.getP2PHKSignatures() != null && transactionSignature.getP2PHKSignatures().size() > 0){
+                    if(!SignatureUtil.validateTransactionSignture(ctx)){
+                        chain.getMessageLog().error("Signature verification error");
+                        return false;
+                    }
+                }
             }
         }catch (NulsException e){
             chain.getMessageLog().error(e);
@@ -502,7 +516,7 @@ public class NulsProtocolServiceImpl implements ProtocolService {
 
         //处理交易签名
         try {
-            if(!signCtx(chain, localCtx, nativeHash,nativeHex,originalHex)){
+            if(!signCtx(chain, localCtx,originalHash, nativeHash,nativeHex,originalHex,transactionSignature)){
                 return false;
             }
         }catch (Exception e){
@@ -576,12 +590,14 @@ public class NulsProtocolServiceImpl implements ProtocolService {
     /**
      * 验证完成的跨链交易签名并广播给链内其他节点
      * */
-    private boolean signCtx(Chain chain, Transaction ctx, NulsDigestData nativeHash,String nativeHex,String originalHex)throws NulsException,IOException{
-        TransactionSignature transactionSignature = new TransactionSignature();
-        transactionSignature.parse(ctx.getTransactionSignature(),0);
+    @SuppressWarnings("unchecked")
+    private boolean signCtx(Chain chain, Transaction ctx,NulsDigestData originalHash, NulsDigestData nativeHash,String nativeHex,String originalHex,TransactionSignature transactionSignature)throws NulsException,IOException{
         /*
         * 如果本地缓存有该跨链交易为广播的签名，需要把签名加入到交易的签名列表中
         * */
+        if(transactionSignature.getP2PHKSignatures() == null){
+            transactionSignature.setP2PHKSignatures(new ArrayList<>());
+        }
         if(chain.getWaitBroadSignMap().keySet().contains(nativeHash)){
             for (BroadCtxSignMessage message:chain.getWaitBroadSignMap().get(nativeHash)) {
                 for (P2PHKSignature sign:transactionSignature.getP2PHKSignatures()) {
@@ -594,37 +610,45 @@ public class NulsProtocolServiceImpl implements ProtocolService {
                 transactionSignature.getP2PHKSignatures().add(p2PHKSignature);
             }
         }
-        ctx.setTransactionSignature(transactionSignature.serialize());
         BroadCtxSignMessage message = new BroadCtxSignMessage();
-        message.setRequestHash(ctx.getHash());
-        NulsDigestData originalHash = new NulsDigestData();
-        originalHash.parse(ctx.getTxData(),0);
+        message.setRequestHash(nativeHash);
         message.setOriginalHash(originalHash);
         //判断本节点是否为共识节点，如果为共识节点则对该交易签名
         Map packerInfo = ConsensusCall.getPackerInfo(chain);
-        int agentCount = (int)packerInfo.get("agentCount");
+        List<String> packAddressList = (List<String>) packerInfo.get("packAddressList");
+        int agentCount = packAddressList.size();
         int signCount = transactionSignature.getP2PHKSignatures().size();
-        //如果为主网则需要减去发起链账户对跨链交易的签名数量然后再做拜占庭
-        if(chain.isMainChain()){
-            signCount -= ctx.getCoinDataInstance().getFromAddressCount();
-        }
-        if(signCount >= agentCount*chain.getConfig().getByzantineRatio()/NulsCrossChainConstant.MAGIC_NUM_100){
-            TransactionCall.sendTx(chain, RPCUtil.encode(ctx.serialize()));
-            chain.getMessageLog().info("跨链交易签名数量达到拜占庭比例，将该跨链交易发送给交易模块处理,originalHash:{},Hash:{}",originalHex,nativeHex);
-            return true;
+        int minPassCount = agentCount*chain.getConfig().getByzantineRatio()/NulsCrossChainConstant.MAGIC_NUM_100;
+
+        //判断交易签名与当前共识节点出块账户是否匹配
+        List<P2PHKSignature>misMatchSignList = null;
+        if(signCount >= minPassCount){
+            misMatchSignList = getMisMatchSigns(chain, transactionSignature, packAddressList);
+            signCount -= misMatchSignList.size();
+            if(signCount >= minPassCount){
+                ctx.setTransactionSignature(transactionSignature.serialize());
+                TransactionCall.sendTx(chain, RPCUtil.encode(ctx.serialize()));
+                chain.getMessageLog().info("跨链交易签名数量达到拜占庭比例，将该跨链交易发送给交易模块处理,originalHash:{},Hash:{}",originalHex,nativeHex);
+                return true;
+            }
         }
         String password = (String)packerInfo.get("password");
         String address = (String)packerInfo.get("address");
-        if(!StringUtils.isBlank(password)){
+        if(!StringUtils.isBlank(address)){
             chain.getMessageLog().info("本节点为共识节点，对跨链交易签名,originalHash:{},Hash:{}",originalHex,nativeHex);
             P2PHKSignature p2PHKSignature = AccountCall.signDigest(address, password, ctx.getHash().getDigestBytes());
             message.setSignature(p2PHKSignature.serialize());
             signCount++;
             transactionSignature.getP2PHKSignatures().add(p2PHKSignature);
-            ctx.setTransactionSignature(transactionSignature.serialize());
-            if(signCount >= agentCount*chain.getConfig().getByzantineRatio()/NulsCrossChainConstant.MAGIC_NUM_100){
+            if(signCount >= minPassCount){
+                ctx.setTransactionSignature(transactionSignature.serialize());
                 TransactionCall.sendTx(chain, RPCUtil.encode(ctx.serialize()));
                 chain.getMessageLog().info("跨链交易签名数量达到拜占庭比例，将该跨链交易发送给交易模块处理,originalHash:{},Hash:{}",originalHex,nativeHex);
+            }else{
+                if(misMatchSignList != null && misMatchSignList.size() > 0){
+                    transactionSignature.getP2PHKSignatures().addAll(misMatchSignList);
+                }
+                ctx.setTransactionSignature(transactionSignature.serialize());
             }
             //将收到的消息放入缓存中，等到收到交易后再广播该签名给其他节点
             if(!chain.getWaitBroadSignMap().keySet().contains(nativeHash)){
@@ -643,5 +667,25 @@ public class NulsProtocolServiceImpl implements ProtocolService {
             NetWorkCall.broadcast(chainId, message, CommandConstant.BROAD_CTX_SIGN_MESSAGE,true);
             chain.getMessageLog().info("将跨链交易签名广播给链内其他节点,originalHash:{},Hash:{},sign:{}",originalHex,nativeHex, HexUtil.encode(message.getSignature()));
         }
+    }
+
+    private List<P2PHKSignature> getMisMatchSigns(Chain chain,TransactionSignature transactionSignature,List<String> addressList){
+        List<P2PHKSignature>misMatchSignList = new ArrayList<>();
+        Iterator<P2PHKSignature> iterator = transactionSignature.getP2PHKSignatures().iterator();
+        while (iterator.hasNext()){
+            P2PHKSignature signature = iterator.next();
+            boolean isMatchSign = false;
+            for (String address:addressList) {
+                if(Arrays.equals(AddressTool.getAddress(signature.getPublicKey(), chain.getChainId()), AddressTool.getAddress(address))){
+                    isMatchSign = true;
+                    break;
+                }
+            }
+            if(!isMatchSign){
+                misMatchSignList.add(signature);
+                iterator.remove();
+            }
+        }
+        return misMatchSignList;
     }
 }
