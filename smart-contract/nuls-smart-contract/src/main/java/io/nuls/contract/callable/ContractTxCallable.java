@@ -26,7 +26,7 @@ package io.nuls.contract.callable;
 import io.nuls.base.basic.AddressTool;
 import io.nuls.contract.helper.ContractConflictChecker;
 import io.nuls.contract.helper.ContractHelper;
-import io.nuls.contract.helper.ContractTransferHandler;
+import io.nuls.contract.helper.ContractNewTxHandler;
 import io.nuls.contract.manager.ChainManager;
 import io.nuls.contract.manager.ContractTempBalanceManager;
 import io.nuls.contract.model.bo.CallableResult;
@@ -60,7 +60,7 @@ public class ContractTxCallable implements Callable<ContractResult> {
 
     private ContractExecutor contractExecutor;
     private ContractHelper contractHelper;
-    private ContractTransferHandler contractTransferHandler;
+    private ContractNewTxHandler contractNewTxHandler;
     private ContractTempBalanceManager tempBalanceManager;
     private ProgramExecutor executor;
     private String contract;
@@ -78,7 +78,7 @@ public class ContractTxCallable implements Callable<ContractResult> {
         this.blockTime = blockTime;
         this.contractExecutor = SpringLiteContext.getBean(ContractExecutor.class);
         this.contractHelper = SpringLiteContext.getBean(ContractHelper.class);
-        this.contractTransferHandler = SpringLiteContext.getBean(ContractTransferHandler.class);
+        this.contractNewTxHandler = SpringLiteContext.getBean(ContractNewTxHandler.class);
         this.tempBalanceManager = contractHelper.getBatchInfoTempBalanceManager(chainId);
         this.executor = executor;
         this.contract = contract;
@@ -189,13 +189,8 @@ public class ContractTxCallable implements Callable<ContractResult> {
             // 执行成功，检查与执行失败的交易是否有冲突，把执行失败的交易添加到重新执行的集合中
             checkConflictWithFailedMap(callableResult, contractResult);
             // 本合约与成功执行的其他合约没有冲突，处理业务逻辑，提交本合约
-            /*byte[] contractAddress = contractResult.getContractAddress();
-            // 获取合约当前余额
-            BigInteger balance = vmContext.getBalance(chainId, contractAddress);
-            Log.info("[{}] current balance is {}", AddressTool.getStringAddressByBytes(contractAddress), balance.toString());
-            contractResult.setPreBalance(balance);*/
-            // 处理临时余额和合约内部转账
-            contractTransferHandler.handleContractTransfer(chainId, blockTime, tx, contractResult, tempBalanceManager);
+            // 处理合约生成的其他交易、临时余额、合约内部转账
+            contractNewTxHandler.handleContractNewTx(chainId, blockTime, tx, contractResult, tempBalanceManager);
         }
         // 处理合约内部转账成功后，提交合约
         if (contractResult.isSuccess()) {

@@ -18,17 +18,17 @@ public class CrossChainUtil {
      * @return
      */
     public static void heightNotice(int chainId, long height) {
-        NulsLogger commonLog = ContextManager.getContext(chainId).getCommonLog();
-        try {
-            Map<String, Object> params = new HashMap<>(2);
-//            params.put(Constants.VERSION_KEY_STR, "1.0");
-            params.put("chainId", chainId);
-            params.put("height", height);
-            ResponseMessageProcessor.requestAndResponse(ModuleE.CC.abbr, "newBlockHeight", params);
-        } catch (Exception e) {
-            e.printStackTrace();
-            commonLog.error(e);
-        }
+//        NulsLogger commonLog = ContextManager.getContext(chainId).getCommonLog();
+//        try {
+//            Map<String, Object> params = new HashMap<>(2);
+////            params.put(Constants.VERSION_KEY_STR, "1.0");
+//            params.put("chainId", chainId);
+//            params.put("height", height);
+//            ResponseMessageProcessor.requestAndResponse(ModuleE.CC.abbr, "newBlockHeight", params);
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//            commonLog.error(e);
+//        }
     }
 
 }

@@ -6,7 +6,7 @@ import io.nuls.contract.model.dto.BlockHeaderDto;
 import java.math.BigInteger;
 import java.util.List;
 
-public class VMContextTest extends VMContext {
+public class VMContextMock extends VMContext {
 
     @Override
     public BlockHeaderDto getBlockHeader(int chainId, String hash) {

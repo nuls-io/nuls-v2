@@ -11,7 +11,7 @@
   "txGroupTaskDelay": 3000,
   "testAutoRollbackAmount": 0,
   "chainName": "nuls2.0",
-  "chainId": 100,
+  "chainId": 2,
   "assetId": 1,
   "blockMaxSize": 5242880,
   "resetTime": 180000,

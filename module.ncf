@@ -5,7 +5,7 @@ logPath=../../../../Logs
 logLevel=DEBUG
 dataPath=../../../../data
 #默认链ID
-chainId=100
+chainId=2
 #默认资产ID
 assetId=1
 #默认链名称
@@ -18,7 +18,7 @@ crossPort=28001
 #魔法参数
 packetMagic=2000
 #种子节点
-selfSeedIps=39.98.226.51:18001,47.244.186.65:18001,47.252.86.42:18001,122.114.0.96:18001
+selfSeedIps=192.168.1.155:8080
 
 [account]
 keystoreFolder=/keystore/backup
@@ -42,7 +42,7 @@ txGroupRequestorInterval=1000
 #分叉链监视线程运行间隔
 txGroupTaskDelay=3000
 #区块最大字节数
-blockMaxSize=3145728
+blockMaxSize=5242880
 #区块扩展字段最大字节数
 extendMaxSize=1024
 #本地区块高度不更新时,引发重置网络动作的时间间隔
@@ -60,7 +60,7 @@ maxRollback=1000
 #统计网络上的节点最新区块高度、hash一致的百分比阈值
 consistencyNodePercent=60
 #最小链接节点数,当链接到的网络节点低于此参数时,会持续等待
-minNodeAmount=1
+minNodeAmount=0
 #区块同步过程中,每次从网络上节点下载的区块数量
 downloadNumber=20
 #为阻止恶意节点提前出块,设置此参数,区块时间戳大于当前时间多少就丢弃该区块
@@ -85,7 +85,7 @@ waitNetworkInterval=5000
 cleanParam=2
 
 [consensus]
-seedNodes=tNULSeBaMkrt4z9FYEkkR9D6choPVvQr94oYZp,tNULSeBaMoGr2RkLZPfJeS5dFzZeNj1oXmaYNe,tNULSeBaMnG8hGcyeygVeyaL5cXV38bQm1rw9M
+seedNodes=tNULSeBaMkrt4z9FYEkkR9D6choPVvQr94oYZp
 password=nuls123456
 
 [smart_contract]

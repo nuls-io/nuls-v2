@@ -21,45 +21,34 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package io.nuls.contract.enums;
-
-import java.util.HashMap;
-import java.util.Map;
+package io.nuls.contract.vm.program;
 
 /**
  * @author: PierreLuo
- * @date: 2019-04-26
+ * @date: 2019-04-28
  */
-public enum CmdRegisterReturnType {
-    // 0 - 字符串, 1 - 字符串数组, 2 - 字符串二维数组
-    STRING(0),
-    STRING_ARRAY(1),
-    STRING_TWO_DIMENSIONAL_ARRAY(2);
+public class ProgramNewTx {
+    private String txHash;
+    private String txString;
 
-    private int type;
-    private static Map<Integer, CmdRegisterReturnType> map;
-
-    private CmdRegisterReturnType(int type) {
-        this.type = type;
-        putType(type, this);
+    public ProgramNewTx(String txHash, String txString) {
+        this.txHash = txHash;
+        this.txString = txString;
     }
 
-    public int type() {
-        return type;
+    public String getTxHash() {
+        return txHash;
     }
 
-    private static CmdRegisterReturnType putType(int type, CmdRegisterReturnType typeEnum) {
-        if(map == null) {
-            map = new HashMap<>(8);
-        }
-        return map.put(type, typeEnum);
+    public void setTxHash(String txHash) {
+        this.txHash = txHash;
     }
 
-    public static CmdRegisterReturnType getType(int type) {
-        CmdRegisterReturnType cmdRegisterReturnType = map.get(type);
-        if(cmdRegisterReturnType == null) {
-            throw new RuntimeException(String.format("not support cmd register return type - [%s] ", type));
-        }
-        return cmdRegisterReturnType;
+    public String getTxString() {
+        return txString;
+    }
+
+    public void setTxString(String txString) {
+        this.txString = txString;
     }
 }
