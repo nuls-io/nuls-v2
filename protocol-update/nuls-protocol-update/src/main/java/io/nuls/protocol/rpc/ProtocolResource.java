@@ -34,6 +34,8 @@ import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.exception.NulsException;
+import io.nuls.tools.parse.JSONUtils;
+import io.nuls.tools.protocol.Protocol;
 
 import java.util.HashMap;
 import java.util.List;
@@ -139,13 +141,12 @@ public class ProtocolResource extends BaseCmd {
     @Parameter(parameterName = "list", parameterType = "List")
     public Response registerTx(Map map) {
         int chainId = Integer.parseInt(map.get("chainId").toString());
+        String moduleCode = map.get("moduleCode").toString();
         List list = (List) map.get("list");
-
-
-//        for (Map.Entry<Short, ModuleTxRegisterDTO> entry : map.entrySet()) {
-//            Short version = entry.getKey();
-//        }
-//        ModuleTxRegisterDTO moduleTxRegisterDto = JSONUtils.map2pojo(map, ModuleTxRegisterDTO.class);
+        for (Object o : list) {
+            Map m = (Map) o;
+            Protocol protocol = JSONUtils.map2pojo(m, Protocol.class);
+        }
         return success();
 
     }

@@ -59,38 +59,16 @@ public class RegisterHelper {
      * 向交易模块注册交易
      * Register transactions with the transaction module
      */
-    public static boolean registerTxs(int chainId) {
+    public static boolean registerProtocol(int chainId) {
         try {
             Collection<Protocol> protocols = ProtocolGroupManager.getProtocols(chainId);
             Map<String, Object> params = new HashMap<>();
             params.put(Constants.VERSION_KEY_STR, "1.0");
             params.put("chainId", chainId);
-            List<Map> list = new ArrayList<>();
+            List<Protocol> list = new ArrayList<>(protocols);
             params.put("list", list);
-            for (Protocol protocol : protocols) {
-                List<TxRegisterDetail> txRegisterDetailList = new ArrayList<>();
-                List<TxDefine> allowTxs = protocol.getAllowTx();
-                for (TxDefine config : allowTxs) {
-                    TxRegisterDetail detail = new TxRegisterDetail();
-                    detail.setValidator(config.getValidate());
-                    detail.setCommit(config.getCommit());
-                    detail.setRollback(config.getRollback());
-                    detail.setSystemTx(config.isSystemTx());
-                    detail.setTxType(config.getType());
-                    detail.setUnlockTx(config.isUnlockTx());
-                    detail.setVerifySignature(config.isVerifySignature());
-                    txRegisterDetailList.add(detail);
-                }
+            params.put("moduleCode", ConnectManager.LOCAL.getAbbreviation());
 
-                //向交易管理模块注册交易
-                Map<String, Object> map = new HashMap<>();
-                map.put("moduleCode", ConnectManager.LOCAL.getAbbreviation());
-                map.put("moduleValidator", protocol.getModuleValidator());
-                map.put("moduleCommit", protocol.getModuleCommit());
-                map.put("moduleRollback", protocol.getModuleRollback());
-                map.put("list", txRegisterDetailList);
-                list.add(map);
-            }
             Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.PU.abbr, "registerTx", params);
             if (!cmdResp.isSuccess()) {
                 Log.error("chain ：" + chainId + " Failure of transaction registration,errorMsg: " + cmdResp.getResponseComment());

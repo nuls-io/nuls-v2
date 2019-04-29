@@ -25,6 +25,8 @@
 
 package io.nuls.protocol.model;
 
+import io.nuls.tools.protocol.TxDefine;
+
 import java.util.List;
 
 /**
@@ -34,8 +36,10 @@ import java.util.List;
  * @date: 2018/11/30
  */
 public class ModuleTxRegisterDTO {
-
-    private int chainId;
+    /**
+     * 协议版本
+     */
+    private short version;
     /**
      * 模块编码
      */
@@ -58,18 +62,10 @@ public class ModuleTxRegisterDTO {
     /**
      * 交易验证器
      */
-    private List<TxRegisterDTO> list;
+    private List<TxDefine> list;
 
     public ModuleTxRegisterDTO() {
 
-    }
-
-    public int getChainId() {
-        return chainId;
-    }
-
-    public void setChainId(int chainId) {
-        this.chainId = chainId;
     }
 
     public String getModuleCode() {
@@ -88,11 +84,11 @@ public class ModuleTxRegisterDTO {
         this.moduleValidator = moduleValidator;
     }
 
-    public List<TxRegisterDTO> getList() {
+    public List<TxDefine> getList() {
         return list;
     }
 
-    public void setList(List<TxRegisterDTO> list) {
+    public void setList(List<TxDefine> list) {
         this.list = list;
     }
 
@@ -115,8 +111,7 @@ public class ModuleTxRegisterDTO {
     @Override
     public String toString() {
         return "ModuleTxRegisterDTO{" +
-                "chainId=" + chainId +
-                ", moduleCode='" + moduleCode + '\'' +
+                "moduleCode='" + moduleCode + '\'' +
                 ", moduleValidator='" + moduleValidator + '\'' +
                 ", moduleCommit='" + moduleCommit + '\'' +
                 ", moduleRollback='" + moduleRollback + '\'' +
