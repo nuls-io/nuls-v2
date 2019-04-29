@@ -73,9 +73,9 @@ public class NettyClient {
             ResponseMessageProcessor.handshake(ch);
             return ch;
         } catch (Exception e) {
-            if(tryCount < 6){
+            if(tryCount < 5){
                 try {
-                    TimeUnit.SECONDS.sleep(5);
+                    TimeUnit.SECONDS.sleep(1);
                 } catch (InterruptedException e1) {
                     Log.error("重试ws连接时，休眠进程发生异常");
                 }
