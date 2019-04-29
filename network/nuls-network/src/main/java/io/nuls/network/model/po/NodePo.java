@@ -39,7 +39,7 @@ import java.io.IOException;
  * @author: lan
  * @create: 2018/11/08
  **/
-public class NodePo extends  BasePo{
+public class NodePo extends BasePo {
     private long magicNumber;
     private String id;
 
@@ -54,22 +54,27 @@ public class NodePo extends  BasePo{
     /**
      * 是否跨链连接
      */
-    private boolean isCrossConnect=false;
+    private boolean isCrossConnect = false;
 
     private int status;
 
-    public NodePo(){
+    private int failTimes = 0;
+
+    public NodePo() {
         super();
     }
-    public NodePo(long magicNumber,String id,String ip,int port,int crossPort,boolean isCrossConnect,int status){
+
+    public NodePo(long magicNumber, String id, String ip, int port, int crossPort, boolean isCrossConnect, int status, int failTimes) {
         this.magicNumber = magicNumber;
-        this.ip=ip;
-        this.id=id;
-        this.port=port;
-        this.crossPort=crossPort;
-        this.isCrossConnect=isCrossConnect;
+        this.ip = ip;
+        this.id = id;
+        this.port = port;
+        this.crossPort = crossPort;
+        this.isCrossConnect = isCrossConnect;
         this.status = status;
+        this.failTimes = failTimes;
     }
+
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
         stream.writeUint32(magicNumber);
@@ -79,28 +84,31 @@ public class NodePo extends  BasePo{
         stream.writeUint16(crossPort);
         stream.writeBoolean(isCrossConnect);
         stream.writeUint16(status);
+        stream.writeUint16(failTimes);
     }
 
     @Override
     public void parse(NulsByteBuffer byteBuffer) throws NulsException {
-        this.magicNumber =byteBuffer.readUint32();
+        this.magicNumber = byteBuffer.readUint32();
         this.id = byteBuffer.readString();
         this.ip = byteBuffer.readString();
         this.port = byteBuffer.readUint16();
         this.crossPort = byteBuffer.readUint16();
         this.isCrossConnect = byteBuffer.readBoolean();
         this.status = byteBuffer.readUint16();
+        this.failTimes = byteBuffer.readUint16();
     }
 
     @Override
     public int size() {
-        int size=0;
+        int size = 0;
         size += SerializeUtils.sizeOfUint32();
         size += SerializeUtils.sizeOfString(id);
         size += SerializeUtils.sizeOfString(ip);
         size += SerializeUtils.sizeOfUint16();
         size += SerializeUtils.sizeOfUint16();
         size += SerializeUtils.sizeOfBoolean();
+        size += SerializeUtils.sizeOfUint16();
         size += SerializeUtils.sizeOfUint16();
         return size;
     }
@@ -153,11 +161,28 @@ public class NodePo extends  BasePo{
         this.status = status;
     }
 
+    public int getFailTimes() {
+        return failTimes;
+    }
+
+    public void setFailTimes(int failTimes) {
+        this.failTimes = failTimes;
+    }
+
+    public long getMagicNumber() {
+        return magicNumber;
+    }
+
+    public void setMagicNumber(long magicNumber) {
+        this.magicNumber = magicNumber;
+    }
+
     @Override
     public Dto parseDto() {
-        Node   node = new Node(magicNumber,ip, port, crossPort,Node.OUT, isCrossConnect);
+        Node node = new Node(magicNumber, ip, port, crossPort, Node.OUT, isCrossConnect);
         node.setStatus(status);
         node.setSeedNode(false);
+        node.setFailCount(failTimes);
         return node;
     }
 
