@@ -28,7 +28,7 @@ public class RpcCall {
      */
     public static Object request(String moduleCode, String cmd, Map params, Long timeout) throws NulsException {
         try {
-            params.put(Constants.VERSION_KEY_STR, "1.0");
+//            params.put(Constants.VERSION_KEY_STR, "1.0");
             Response response = null;
             try {
                 if(null == timeout) {
