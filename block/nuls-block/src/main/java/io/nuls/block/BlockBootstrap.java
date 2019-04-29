@@ -4,6 +4,7 @@ import io.nuls.block.constant.BlockConfig;
 import io.nuls.block.constant.StatusEnum;
 import io.nuls.block.manager.ChainManager;
 import io.nuls.block.manager.ContextManager;
+import io.nuls.block.rpc.call.NetworkUtil;
 import io.nuls.block.thread.BlockSynchronizer;
 import io.nuls.block.thread.monitor.*;
 import io.nuls.db.service.RocksDBService;
@@ -174,6 +175,7 @@ public class BlockBootstrap extends RpcModule {
         super.onDependenciesReady(module);
         if (ModuleE.NW.abbr.equals(module.getName())) {
 //            RegisterHelper.registerMsg(chainId, ProtocolGroupManager.getCurrentProtocol(chainId));
+            NetworkUtil.register();
         }
         TimeUtils.getInstance().start();
     }

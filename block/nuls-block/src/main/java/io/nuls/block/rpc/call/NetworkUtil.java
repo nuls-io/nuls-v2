@@ -36,7 +36,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static io.nuls.block.constant.CommandConstant.COMPLETE_MESSAGE;
+import static io.nuls.block.constant.CommandConstant.*;
 
 
 /**
@@ -225,5 +225,30 @@ public class NetworkUtil {
             commonLog.error(e);
         }
     }
+
+    /**
+     * 注册消息处理器
+     *
+     * @return
+     */
+    public static void register() {
+        try {
+            Map<String, Object> map = new HashMap<>(2);
+            List<Map<String, String>> cmds = new ArrayList<>();
+            map.put("role", ModuleE.BL.abbr);
+            List<String> list = List.of(COMPLETE_MESSAGE, BLOCK_MESSAGE, GET_BLOCK_MESSAGE, FORWARD_SMALL_BLOCK_MESSAGE, GET_BLOCKS_BY_HEIGHT_MESSAGE, GET_TXGROUP_MESSAGE, SMALL_BLOCK_MESSAGE, GET_SMALL_BLOCK_MESSAGE, TXGROUP_MESSAGE);
+            for (String s : list) {
+                Map<String, String> cmd = new HashMap<>(2);
+                cmd.put("protocolCmd", s);
+                cmd.put("handler", s);
+                cmds.add(cmd);
+            }
+            map.put("protocolCmds", cmds);
+            ResponseMessageProcessor.requestAndResponse(ModuleE.NW.abbr, "nw_protocolRegister", map);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
 
 }

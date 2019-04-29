@@ -7,7 +7,6 @@ import io.nuls.transaction.cache.PackablePool;
 import io.nuls.transaction.constant.TxConstant;
 import io.nuls.transaction.model.bo.Chain;
 import io.nuls.transaction.model.bo.VerifyLedgerResult;
-import io.nuls.transaction.model.po.TransactionConfirmedPO;
 import io.nuls.transaction.model.po.TransactionNetPO;
 import io.nuls.transaction.rpc.call.LedgerCall;
 import io.nuls.transaction.rpc.call.NetworkCall;
@@ -45,6 +44,7 @@ public class VerifyTxProcessTask implements Runnable {
     private void doTask(Chain chain){
         TransactionNetPO tx = null;
         while ((tx = chain.getUnverifiedQueue().poll()) != null) {
+            chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).error("待处理队列交易数：{}", chain.getUnverifiedQueue().size());
             processTx(chain, tx);
         }
     }
@@ -52,25 +52,24 @@ public class VerifyTxProcessTask implements Runnable {
     private void processTx(Chain chain, TransactionNetPO txNet){
         try {
             Transaction tx = txNet.getTx();
-            long s1 = System.currentTimeMillis();
+//            long s1 = System.currentTimeMillis();
             int chainId = chain.getChainId();
             if (!txService.verify(chain, tx).getResult()) {
                 chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).error("Net new tx verify fail.....hash:{}", tx.getHash().getDigestHex());
                 return;
             }
-            chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("验证器花费时间:{}", System.currentTimeMillis() - s1);
-            long get = System.currentTimeMillis();
-            TransactionConfirmedPO existTx = txService.getTransaction(chain, tx.getHash());
-            if(null != existTx){
+//            chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("验证器花费时间:{}", System.currentTimeMillis() - s1);
+//            long get = System.currentTimeMillis();
+            if(txService.isTxExists(chain, tx.getHash())){
                 return;
             }
-            chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("交易获取花费时间:{}", System.currentTimeMillis() - get);
-            long timeCoinData = System.currentTimeMillis();
+//            chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("交易获取花费时间:{}", System.currentTimeMillis() - get);
+//            long timeCoinData = System.currentTimeMillis();
             VerifyLedgerResult verifyLedgerResult = LedgerCall.commitUnconfirmedTx(chain, RPCUtil.encode(tx.serialize()));
-            chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("验证CoinData花费时间:{}", System.currentTimeMillis() - timeCoinData);
-            long s2 = System.currentTimeMillis();
-            chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("交易验证阶段花费时间:{}", s2 - s1);
-            chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("- - - - - -");
+//            chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("验证CoinData花费时间:{}", System.currentTimeMillis() - timeCoinData);
+//            long s2 = System.currentTimeMillis();
+//            chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("交易验证阶段花费时间:{}", s2 - s1);
+//            chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("- - - - - -");
             if(verifyLedgerResult.businessSuccess()){
                 if(chain.getPackaging().get()) {
                     //当节点是出块节点时, 才将交易放入待打包队列
@@ -81,8 +80,8 @@ public class VerifyTxProcessTask implements Runnable {
                 unconfirmedTxStorageService.putTx(chainId, tx);
                 //转发交易hash
                 NetworkCall.forwardTxHash(chain.getChainId(),tx.getHash(), txNet.getExcludeNode());
-                long s3 = System.currentTimeMillis();
-                chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("交易保存阶段花费时间:{}", s3 - s2);
+//                long s3 = System.currentTimeMillis();
+//                chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("交易保存阶段花费时间:{}", s3 - s2);
                 return;
             }else if(verifyLedgerResult.isOrphan()){
                 //孤儿交易

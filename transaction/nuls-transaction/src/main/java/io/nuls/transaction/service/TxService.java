@@ -102,6 +102,14 @@ public interface TxService {
     TransactionConfirmedPO getTransaction(Chain chain, NulsDigestData hash);
 
     /**
+     * 查询交易是否存在，先从未确认库中查，再从已确认中查
+     * @param chain
+     * @param hash
+     * @return
+     */
+    boolean isTxExists(Chain chain, NulsDigestData hash);
+
+    /**
      *  共识打包获取打包所需交易
      * @param chain
      * @param endtimestamp 获取交易截止时间

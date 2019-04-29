@@ -339,6 +339,6 @@ public class Node implements Dto {
 
     @Override
     public BasePo parseToPo() {
-        return new NodePo(magicNumber, id, ip, remotePort, remoteCrossPort, isCrossConnect,status);
+        return new NodePo(magicNumber, id, ip, remotePort, remoteCrossPort, isCrossConnect,status,failCount);
     }
 }

@@ -1,9 +1,6 @@
 package io.nuls.test.cases.transcation;
 
-import io.nuls.api.provider.block.facade.BlockHeaderData;
 import io.nuls.api.provider.transaction.facade.TransactionData;
-import io.nuls.base.constant.TxStatusEnum;
-import io.nuls.base.data.Transaction;
 import io.nuls.test.cases.RemoteTestParam;
 import io.nuls.test.cases.SyncRemoteTestCase;
 import io.nuls.test.cases.TestFailException;
