@@ -71,9 +71,6 @@ public class TxUtil {
      * */
     public static Transaction mainConvertToFriend(Transaction mainCtx,int ctxType)throws IOException {
         Transaction friendCtx = new Transaction(ctxType);
-        TransactionSignature transactionSignature = new TransactionSignature();
-        transactionSignature.setP2PHKSignatures(new ArrayList<>());
-        friendCtx.setTransactionSignature(transactionSignature.serialize());
         friendCtx.setRemark(mainCtx.getRemark());
         friendCtx.setTime(mainCtx.getTime());
         friendCtx.setTxData(mainCtx.getHash().serialize());
