@@ -8,9 +8,6 @@ import io.nuls.rpc.model.message.Response;
 import io.nuls.tools.basic.Result;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
-import io.nuls.tools.protocol.ResisterTx;
-import io.nuls.tools.protocol.TxMethodType;
-import io.nuls.tools.protocol.TxProperty;
 
 import java.util.Map;
 
@@ -42,21 +39,6 @@ public class DepositCmd extends BaseCmd {
     }
 
     /**
-     * 委托共识交易验证
-     * */
-    @CmdAnnotation(cmd = "cs_depositValid", version = 1.0, description = "deposit agent transaction validate 1.0")
-    @ResisterTx(txType = TxProperty.DEPOSIT, methodType = TxMethodType.VALID, methodName = "cs_depositValid")
-    @Parameter(parameterName = "chainId", parameterType = "int")
-    @Parameter(parameterName = "tx", parameterType = "String")
-    public Response depositValid(Map<String,Object> params){
-        Result result = service.depositValid(params);
-        if(result.isFailed()){
-            return failed(result.getErrorCode());
-        }
-        return success(result.getData());
-    }
-
-    /**
      * 退出共识
      * */
     @CmdAnnotation(cmd = "cs_withdraw", version = 1.0, description = "withdraw deposit agent transaction 1.0")
@@ -66,21 +48,6 @@ public class DepositCmd extends BaseCmd {
     @Parameter(parameterName = "password", parameterType = "String")
     public Response withdraw(Map<String,Object> params){
         Result result = service.withdraw(params);
-        if(result.isFailed()){
-            return failed(result.getErrorCode());
-        }
-        return success(result.getData());
-    }
-
-    /**
-     * 退出共识交易验证
-     * */
-    @CmdAnnotation(cmd = "cs_withdrawValid", version = 1.0, description = "withdraw deposit agent transaction validate 1.0")
-    @ResisterTx(txType = TxProperty.CANCEL_DEPOSIT,methodType = TxMethodType.VALID,methodName = "cs_withdrawValid")
-    @Parameter(parameterName = "chainId", parameterType = "int")
-    @Parameter(parameterName = "tx", parameterType = "String")
-    public Response withdrawValid(Map<String,Object> params){
-        Result result = service.withdrawValid(params);
         if(result.isFailed()){
             return failed(result.getErrorCode());
         }

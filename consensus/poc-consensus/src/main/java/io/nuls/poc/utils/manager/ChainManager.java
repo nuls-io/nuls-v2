@@ -9,24 +9,16 @@ import io.nuls.poc.model.bo.Chain;
 import io.nuls.poc.model.bo.config.ConfigBean;
 import io.nuls.poc.rpc.call.CallMethodUtils;
 import io.nuls.poc.storage.ConfigService;
-import io.nuls.tools.constant.TxType;
+import io.nuls.rpc.util.RegisterHelper;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
-import io.nuls.tools.core.ioc.ScanUtil;
 import io.nuls.tools.log.Log;
 import io.nuls.tools.log.logback.LoggerBuilder;
 import io.nuls.tools.log.logback.NulsLogger;
-import io.nuls.tools.protocol.ResisterTx;
-import io.nuls.tools.protocol.TxMethodType;
-import io.nuls.tools.protocol.TxProperty;
-import io.nuls.tools.protocol.TxRegisterDetail;
+import io.nuls.tools.protocol.ProtocolGroupManager;
+import io.nuls.tools.protocol.ProtocolLoader;
 
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Method;
 import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -59,7 +51,7 @@ public class ChainManager {
      * 初始化
      * Initialization chain
      * */
-    public void initChain(){
+    public void initChain() throws Exception {
         Map<Integer, ConfigBean> configMap = configChain();
         if (configMap == null || configMap.size() == 0) {
             Log.info("链初始化失败！");
@@ -80,6 +72,7 @@ public class ChainManager {
             */
             initTable(chain);
             chainMap.put(chainId, chain);
+            ProtocolLoader.load(chainId);
         }
 
     }
@@ -89,25 +82,13 @@ public class ChainManager {
      * Registration Chain Transaction
      * */
     public void registerTx(){
-        List<TxRegisterDetail> txRegisterDetailList = getRegisterTxList();
         for (Chain chain:chainMap.values()) {
             /*
              * 链交易注册
              * Chain Trading Registration
              * */
-            while (true) {
-                if (CallMethodUtils.registerTx(chain, txRegisterDetailList)) {
-                    if(chain.isPacker()){
-                        CallMethodUtils.sendState(chain,true);
-                    }
-                    break;
-                }
-                try {
-                    Thread.sleep(1000);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }
+            int chainId = chain.getConfig().getChainId();
+            RegisterHelper.registerTx(chainId, ProtocolGroupManager.getCurrentProtocol(chainId));
         }
     }
 
@@ -130,68 +111,6 @@ public class ChainManager {
             schedulerManager.createChainScheduler(chain);
         }
     }
-
-    /**
-     * 初始化并启动链
-     * Initialize and start the chain
-     */
-    /*public void runChain() {
-        Map<Integer, ConfigBean> configMap = configChain();
-        if (configMap == null || configMap.size() == 0) {
-            return;
-        }
-        List<TxRegisterDetail> txRegisterDetailList = getRegisterTxList();
-        *//*
-        根据配置信息创建初始化链
-        Initialize chains based on configuration information
-        *//*
-        for (Map.Entry<Integer, ConfigBean> entry : configMap.entrySet()) {
-            Chain chain = new Chain();
-            int chainId = entry.getKey();
-            chain.setConfig(entry.getValue());
-
-            *//*
-             * 初始化链日志对象
-             * Initialization Chain Log Objects
-             * *//*
-            initLogger(chain);
-
-            *//*
-             * 链交易注册
-             * Chain Trading Registration
-             * *//*
-            while (true) {
-                if (CallMethodUtils.registerTx(chain, txRegisterDetailList)) {
-                    break;
-                }
-                try {
-                    Thread.sleep(1000);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }
-
-            *//*
-            初始化链数据库表
-            Initialize linked database tables
-            *//*
-            initTable(chain);
-
-            *//*
-            加载链缓存数据
-            Load chain caching entity
-            *//*
-            initCache(chain);
-
-            *//*
-            创建并启动链内任务
-            Create and start in-chain tasks
-            *//*
-            schedulerManager.createChainScheduler(chain);
-
-            chainMap.put(chainId, chain);
-        }
-    }*/
 
     /**
      * 停止一条链
@@ -323,43 +242,4 @@ public class ChainManager {
         this.chainMap = chainMap;
     }
 
-    /**
-     * 向交易模块注册交易
-     * Register transactions with the transaction module
-     */
-    private static List<TxRegisterDetail> getRegisterTxList() {
-        List<Class> classList = ScanUtil.scan(ConsensusConstant.RPC_PATH);
-        if (classList == null || classList.size() == 0) {
-            return null;
-        }
-        Map<Integer, TxRegisterDetail> registerDetailMap = new HashMap<>(ConsensusConstant.INIT_CAPACITY);
-        for (Class clz : classList) {
-            Method[] methods = clz.getMethods();
-            for (Method method : methods) {
-                ResisterTx annotation = getRegisterAnnotation(method);
-                if (annotation != null) {
-                    if (!registerDetailMap.containsKey(annotation.txType().txType)) {
-                        registerDetailMap.put(annotation.txType().txType, new TxRegisterDetail(annotation.txType()));
-                    }
-                    if (annotation.methodType().equals(TxMethodType.VALID)) {
-                        registerDetailMap.get(annotation.txType().txType).setValidator(annotation.methodName());
-                    }
-                }
-            }
-        }
-        registerDetailMap.put(TxType.COIN_BASE, new TxRegisterDetail(TxProperty.COIN_BASE));
-        registerDetailMap.put(TxType.RED_PUNISH, new TxRegisterDetail(TxProperty.RED_PUNISH));
-        registerDetailMap.put(TxType.YELLOW_PUNISH, new TxRegisterDetail(TxProperty.YELLOW_PUNISH));
-        return new ArrayList<>(registerDetailMap.values());
-    }
-
-    private static ResisterTx getRegisterAnnotation(Method method) {
-        Annotation[] annotations = method.getDeclaredAnnotations();
-        for (Annotation annotation : annotations) {
-            if (ResisterTx.class.equals(annotation.annotationType())) {
-                return (ResisterTx) annotation;
-            }
-        }
-        return null;
-    }
 }

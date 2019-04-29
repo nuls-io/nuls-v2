@@ -19,7 +19,6 @@ package org.ethereum.trie;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import io.nuls.tools.crypto.HexUtil;
-import org.apache.commons.lang3.text.StrBuilder;
 import org.ethereum.crypto.HashUtil;
 import org.ethereum.datasource.Source;
 import org.ethereum.datasource.inmem.HashMapDB;
@@ -738,7 +737,7 @@ public class TrieImpl implements Trie<byte[]> {
             return "<empty>";
         }
         encode();
-        StrBuilder ret = new StrBuilder();
+        StringBuilder ret = new StringBuilder();
         List<String> strings = root.dumpTrieNode(compact);
         ret.append("Root: " + hash2str(getRootHash(), compact) + "\n");
         for (String s : strings) {

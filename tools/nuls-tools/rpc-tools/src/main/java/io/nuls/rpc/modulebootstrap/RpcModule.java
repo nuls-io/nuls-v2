@@ -8,16 +8,16 @@ import io.nuls.rpc.netty.processor.ResponseMessageProcessor;
 import io.nuls.tools.basic.InitializingBean;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Order;
-
 import io.nuls.tools.core.annotation.Value;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.log.Log;
-
 import io.nuls.tools.parse.I18nUtils;
 import io.nuls.tools.parse.MapUtils;
 
-
-import java.util.*;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
@@ -40,7 +40,7 @@ public abstract class RpcModule implements InitializingBean {
     @Value("dependent")
     private String dependentList;
 
-    private Set<Module> dependentces;
+    private Set<Module> dependencies;
 
     /**
      * 启动参数
@@ -70,10 +70,10 @@ public abstract class RpcModule implements InitializingBean {
     @Override
     public final void afterPropertiesSet() throws NulsException {
         try {
-            dependentces = new HashSet<>();
+            dependencies = new HashSet<>();
             Module[] depend = declareDependent();
             if(depend != null){
-                dependentces.addAll(Arrays.asList(depend));
+                dependencies.addAll(Arrays.asList(depend));
             }
             if(dependentList != null){
                 String[] temp = dependentList.split(",");
@@ -83,7 +83,7 @@ public abstract class RpcModule implements InitializingBean {
                         Log.error("config item dependent error, e.g. moduleName1:verson,moduleName2:version....");
                         System.exit(0);
                     }
-                    dependentces.add(new Module(t2[0],t2[1]));
+                    dependencies.add(new Module(t2[0], t2[1]));
                 });
             }
             I18nUtils.loadLanguage(this.getClass(), getLanguagePath(),LANGUAGE);
@@ -185,7 +185,7 @@ public abstract class RpcModule implements InitializingBean {
      * 通知所有follower当前模块已经进入ready状态
      */
     private void notifyFollowerReady() {
-        followerList.keySet().stream().forEach((module) -> this.notifyFollowerReady(module));
+        followerList.keySet().forEach(this::notifyFollowerReady);
     }
 
     /**
@@ -195,7 +195,7 @@ public abstract class RpcModule implements InitializingBean {
      */
     void run(String modulePackage, String serviceManagerUrl) {
         //初始化依赖模块的ready状态
-        this.getDependentces().forEach(d -> dependentReadyState.put(d, Boolean.FALSE));
+        this.getDependencies().forEach(d -> dependentReadyState.put(d, Boolean.FALSE));
         try {
             // Start server instance
             NettyServer server = NettyServer.getInstance(moduleInfo().getName(), moduleInfo().getName(), moduleInfo().getVersion())
@@ -204,7 +204,7 @@ public abstract class RpcModule implements InitializingBean {
                     .scanPackage((getRpcCmdPackage()==null) ? Set.of(modulePackage):getRpcCmdPackage())
                     //注册管理模块状态的RPC接口
                     .addCmdDetail(ModuleStatusCmd.class);
-            dependentReadyState.keySet().stream().forEach(d -> server.dependencies(d.getName(), d.getVersion()));
+            dependentReadyState.keySet().forEach(d -> server.dependencies(d.getName(), d.getVersion()));
             // Get information from kernel
             ConnectManager.getConnectByUrl(serviceManagerUrl);
             Log.info("RMB:开始连接service manager");
@@ -231,14 +231,14 @@ public abstract class RpcModule implements InitializingBean {
         if (!isReady()) {
             return;
         }
-        Boolean dependencieReady = dependentReadyState.isEmpty();
+        boolean dependencieReady = dependentReadyState.isEmpty();
         if (!dependencieReady) {
-            dependencieReady = dependentReadyState.entrySet().stream().allMatch(d -> d.getValue());
+            dependencieReady = dependentReadyState.entrySet().stream().allMatch(Map.Entry::getValue);
         }
         if (dependencieReady) {
             if (!isRunning()) {
                 Log.info("RMB:dependencie state");
-                dependentReadyState.entrySet().forEach(entry -> Log.debug("{}:{}", entry.getKey().getName(), entry.getValue()));
+                dependentReadyState.forEach((key, value) -> Log.debug("{}:{}", key.getName(), value));
                 Log.info("RMB:module try running");
                 state = onDependenciesReady();
                 if (state == null) {
@@ -250,7 +250,7 @@ public abstract class RpcModule implements InitializingBean {
         } else {
             Log.info("RMB:dependencie is not all ready");
             Log.info("RMB:dependencie state");
-            dependentReadyState.entrySet().forEach(entry -> Log.debug("{}:{}", entry.getKey().getName(), entry.getValue()));
+            dependentReadyState.forEach((key, value) -> Log.debug("{}:{}", key.getName(), value));
         }
     }
 
@@ -302,8 +302,8 @@ public abstract class RpcModule implements InitializingBean {
         return dependentReadyState.entrySet().stream().allMatch(d -> d.getValue());
     }
 
-    public Set<Module> getDependentces(){
-        return dependentces;
+    public Set<Module> getDependencies() {
+        return dependencies;
     }
 
     /**

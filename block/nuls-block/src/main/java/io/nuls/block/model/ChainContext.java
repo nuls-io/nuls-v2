@@ -30,7 +30,6 @@ import io.nuls.block.manager.BlockChainManager;
 import io.nuls.block.thread.monitor.TxGroupRequestor;
 import io.nuls.block.utils.LoggerUtil;
 import io.nuls.tools.log.logback.NulsLogger;
-import io.nuls.tools.protocol.Protocol;
 
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -59,16 +58,6 @@ public class ChainContext {
      * 链ID
      */
     private int chainId;
-
-    /**
-     * 当前协议版本
-     */
-    private short version;
-
-    /**
-     * 所有协议版本(包括消息、交易映射)
-     */
-    private Map<Short, Protocol> protocolsMap;
 
     /**
      * 该链的系统交易类型
@@ -139,22 +128,6 @@ public class ChainContext {
 
     public void setChainId(int chainId) {
         this.chainId = chainId;
-    }
-
-    public short getVersion() {
-        return version;
-    }
-
-    public void setVersion(short version) {
-        this.version = version;
-    }
-
-    public Map<Short, Protocol> getProtocolsMap() {
-        return protocolsMap;
-    }
-
-    public void setProtocolsMap(Map<Short, Protocol> protocolsMap) {
-        this.protocolsMap = protocolsMap;
     }
 
     public List<Integer> getSystemTransactionType() {
@@ -257,7 +230,6 @@ public class ChainContext {
         packingAddressList = new CopyOnWriteArrayList<>();
         duplicateBlockMap = new HashMap<>();
         systemTransactionType = new ArrayList<>();
-        version = 1;
         doSyn = true;
         lock = new StampedLock();
         //各类缓存初始化

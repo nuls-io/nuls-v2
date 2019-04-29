@@ -135,8 +135,9 @@ public class ECKey {
 
     static {
         // Init proper random number generator, as some old Android installations have bugs that make it unsecure.
-        if (HexUtil.isAndroidRuntime())
+        if (HexUtil.isAndroidRuntime()) {
             new LinuxSecureRandom();
+        }
 
         // Tell Bouncy Castle to precompute data that's needed during secp256k1 calculations.
         FixedPointUtil.precompute(CURVE_PARAMS.getG(), 12);
@@ -225,8 +226,9 @@ public class ECKey {
     }
 
     private static ECPoint getPointWithCompression(ECPoint point, boolean compressed) {
-        if (point.isCompressed() == compressed)
+        if (point.isCompressed() == compressed) {
             return point;
+        }
         point = point.normalize();
         BigInteger x = point.getAffineXCoord().toBigInteger();
         BigInteger y = point.getAffineYCoord().toBigInteger();
@@ -329,10 +331,11 @@ public class ECKey {
      * never need this: it's for specialised scenarios or when backwards compatibility in encoded form is necessary.
      */
     public ECKey decompress() {
-        if (!pub.isCompressed())
+        if (!pub.isCompressed()) {
             return this;
-        else
+        } else {
             return new ECKey(priv, decompressPoint(pub.get()));
+        }
     }
 
     /**
@@ -356,8 +359,9 @@ public class ECKey {
      */
     @Deprecated
     public ECKey(@Nullable BigInteger privKey, @Nullable byte[] pubKey, boolean compressed) {
-        if (privKey == null && pubKey == null)
+        if (privKey == null && pubKey == null) {
             throw new IllegalArgumentException("ECKey requires at least private or public key");
+        }
         this.priv = privKey;
         if (pubKey == null) {
             // Derive public from private.
@@ -427,8 +431,9 @@ public class ECKey {
      * Gets the hash160 form of the public key (as seen in addresses).
      */
     public byte[] getPubKeyHash() {
-        if (pubKeyHash == null)
+        if (pubKeyHash == null) {
             pubKeyHash = SerializeUtils.sha256hash160(this.pub.getEncoded());
+        }
         return pubKeyHash;
     }
 
@@ -454,8 +459,9 @@ public class ECKey {
      * @throws java.lang.IllegalStateException if the private key bytes are not available.
      */
     public BigInteger getPrivKey() {
-        if (priv == null)
+        if (priv == null) {
             throw new MissingPrivateKeyException();
+        }
         return priv;
     }
 
@@ -541,10 +547,12 @@ public class ECKey {
                 Properties.setThreadOverride("org.bouncycastle.asn1.allow_unsafe_integer", true);
                 decoder = new ASN1InputStream(bytes);
                 final ASN1Primitive seqObj = decoder.readObject();
-                if (seqObj == null)
+                if (seqObj == null) {
                     throw new RuntimeException("Reached past end of ASN.1 stream.");
-                if (!(seqObj instanceof DLSequence))
+                }
+                if (!(seqObj instanceof DLSequence)) {
                     throw new RuntimeException("Read unexpected class: " + seqObj.getClass().getName());
+                }
                 final DLSequence seq = (DLSequence) seqObj;
                 ASN1Integer r, s;
                 try {
@@ -559,11 +567,12 @@ public class ECKey {
             } catch (IOException e) {
                 throw new RuntimeException(e);
             } finally {
-                if (decoder != null)
+                if (decoder != null) {
                     try {
                         decoder.close();
                     } catch (IOException x) {
                     }
+                }
                 Properties.removeThreadOverride("org.bouncycastle.asn1.allow_unsafe_integer");
             }
         }
@@ -580,8 +589,12 @@ public class ECKey {
 
         @Override
         public boolean equals(Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
+            if (this == o) {
+                return true;
+            }
+            if (o == null || getClass() != o.getClass()) {
+                return false;
+            }
             ECDSASignature other = (ECDSASignature) o;
             return r.equals(other.r) && s.equals(other.s);
         }
@@ -709,8 +722,9 @@ public class ECKey {
      * @throws java.security.SignatureException if the signature does not match.
      */
     public void verifyOrThrow(byte[] hash, byte[] signature) throws Exception, SignatureException {
-        if (!verify(hash, signature))
+        if (!verify(hash, signature)) {
             throw new SignatureException();
+        }
     }
 
     /**
@@ -720,26 +734,31 @@ public class ECKey {
      * @throws java.security.SignatureException if the signature does not match.
      */
     public void verifyOrThrow(Sha256Hash sigHash, ECDSASignature signature) throws SignatureException {
-        if (!ECKey.verify(sigHash.getBytes(), signature, getPubKey()))
+        if (!ECKey.verify(sigHash.getBytes(), signature, getPubKey())) {
             throw new SignatureException();
+        }
     }
 
     /**
      * Returns true if the given pubkey is canonical, i.e. the correct length taking into account compression.
      */
     public static boolean isPubKeyCanonical(byte[] pubkey) {
-        if (pubkey.length < 33)
+        if (pubkey.length < 33) {
             return false;
+        }
         if (pubkey[0] == 0x04) {
             // Uncompressed pubkey
-            if (pubkey.length != 65)
+            if (pubkey.length != 65) {
                 return false;
+            }
         } else if (pubkey[0] == 0x02 || pubkey[0] == 0x03) {
             // Compressed pubkey
-            if (pubkey.length != 33)
+            if (pubkey.length != 33) {
                 return false;
-        } else
+            }
+        } else {
             return false;
+        }
         return true;
     }
 
@@ -812,8 +831,9 @@ public class ECKey {
                 break;
             }
         }
-        if (recId == -1)
+        if (recId == -1) {
             throw new RuntimeException("Could not construct a recoverable key. This should never happen.");
+        }
         return recId;
     }
 
@@ -864,8 +884,9 @@ public class ECKey {
         // So it's encoded in the recId.
         ECPoint R = decompressKey(x, (recId & 1) == 1);
         //   1.4. If nR != point at infinity, then do another iteration of Step 1 (callers responsibility).
-        if (!R.multiply(n).isInfinity())
+        if (!R.multiply(n).isInfinity()) {
             return null;
+        }
         //   1.5. Compute e from M using Steps 2 and 3 of ECDSA signature verification.
         BigInteger e = message.toBigInteger();
         //   1.6. For k from 1 to 2 do the following.   (loop is outside this function via iterating recId)
@@ -918,8 +939,9 @@ public class ECKey {
      * you have a raw key you are importing from somewhere else.
      */
     public void setCreationTimeSeconds(long newCreationTimeSeconds) {
-        if (newCreationTimeSeconds < 0)
+        if (newCreationTimeSeconds < 0) {
             throw new IllegalArgumentException("Cannot set creation time to negative value: " + newCreationTimeSeconds);
+        }
         creationTimeSeconds = newCreationTimeSeconds;
     }
 
@@ -930,10 +952,11 @@ public class ECKey {
      */
     @Nullable
     public byte[] getSecretBytes() {
-        if (hasPrivKey())
+        if (hasPrivKey()) {
             return getPrivKeyBytes();
-        else
+        } else {
             return null;
+        }
     }
 
     /**

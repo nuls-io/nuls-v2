@@ -34,25 +34,7 @@ public interface ContractConstant {
 
     String INITIAL_STATE_ROOT = "56e81f171bcc55a6ff8345e692c0f86e5b48e01b996cadc001622fb5e363b421";
 
-    /**
-     * CONTRACT create, call, delete tx
-     */
-    int TX_TYPE_CREATE_CONTRACT = 15;
-    int TX_TYPE_CALL_CONTRACT = 16;
-    int TX_TYPE_DELETE_CONTRACT = 17;
-    /**
-     * contract transfer tx
-     */
-    int TX_TYPE_CONTRACT_TRANSFER = 18;
-    /**
-     * contract return gas tx
-     */
-    int TX_TYPE_CONTRACT_RETURN_GAS = 19;
-
-    /**
-     * coin base tx
-     */
-    int TX_TYPE_COINBASE = 1;
+    short MODULE_ID_CONTRACT = 10;
     /**
      * CONTRACT STATUS
      */

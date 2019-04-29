@@ -335,6 +335,7 @@ public class BlockServiceImpl implements BlockService {
                 return false;
             }
             CrossChainUtil.heightNotice(chainId, height);
+
             //6.如果不是第一次启动,则更新主链属性
             if (!localInit) {
                 context.setLatestBlock(block);

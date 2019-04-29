@@ -37,7 +37,6 @@ import io.nuls.cmd.client.processor.network.GetNetworkProcessor;
 import io.nuls.cmd.client.processor.system.ExitProcessor;
 import io.nuls.cmd.client.processor.system.HelpProcessor;
 import io.nuls.cmd.client.processor.transaction.GetTxProcessor;
-import io.nuls.cmd.client.processor.transaction.TransferByAliasProcessor;
 import io.nuls.cmd.client.processor.transaction.TransferProcessor;
 import io.nuls.tools.basic.InitializingBean;
 import io.nuls.tools.core.annotation.Component;

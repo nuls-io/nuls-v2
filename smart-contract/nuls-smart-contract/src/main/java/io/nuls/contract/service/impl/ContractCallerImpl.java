@@ -51,8 +51,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.*;
 
-import static io.nuls.contract.constant.ContractConstant.TX_TYPE_CALL_CONTRACT;
 import static io.nuls.contract.util.ContractUtil.*;
+import static io.nuls.tools.constant.TxType.CALL_CONTRACT;
 
 
 /**
@@ -139,7 +139,7 @@ public class ContractCallerImpl implements ContractCaller {
             Log.info("[ReCall] Tx hash is {}", tx.getHash());
             contractData = tx.getContractData();
             switch (tx.getType()) {
-                case TX_TYPE_CALL_CONTRACT:
+                case CALL_CONTRACT:
                     contractResult = contractExecutor.call(batchExecutor, contractData, lastestHeight, preStateRoot);
                     makeContractResult(tx, contractResult);
                     // 处理重新执行的合约的结果

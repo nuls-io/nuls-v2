@@ -29,14 +29,16 @@ import io.nuls.account.constant.AccountErrorCode;
 import io.nuls.account.constant.AccountStorageConstant;
 import io.nuls.account.model.bo.Chain;
 import io.nuls.account.model.bo.config.ConfigBean;
-import io.nuls.account.rpc.call.TransactionCmdCall;
 import io.nuls.account.storage.ConfigService;
 import io.nuls.account.util.LoggerUtil;
 import io.nuls.db.constant.DBErrorCode;
 import io.nuls.db.service.RocksDBService;
+import io.nuls.rpc.util.RegisterHelper;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.exception.NulsRuntimeException;
+import io.nuls.tools.protocol.ProtocolGroupManager;
+import io.nuls.tools.protocol.ProtocolLoader;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -64,7 +66,7 @@ public class ChainManager {
      * 初始化链
      * Initialize and start the chain
      */
-    public void initChain() {
+    public void initChain() throws Exception {
         Map<Integer, ConfigBean> configMap = configChain();
         if (configMap == null || configMap.size() == 0) {
             return;
@@ -82,6 +84,7 @@ public class ChainManager {
             */
             initTable(chainId);
             chainMap.put(chainId, chain);
+            ProtocolLoader.load(chainId);
         }
     }
 
@@ -170,12 +173,9 @@ public class ChainManager {
         try {
             for (Chain chain : chainMap.values()) {
                 //注册账户相关交易
-                while (true) {
-                    if (TransactionCmdCall.registerTx(chain.getConfig().getChainId())) {
-                        break;
-                    }
-                    Thread.sleep(3000L);
-                }
+                int chainId = chain.getConfig().getChainId();
+                RegisterHelper.registerTx(chainId, ProtocolGroupManager.getCurrentProtocol(chainId));
+                RegisterHelper.registerProtocol(chainId);
             }
         } catch (Exception e) {
             LoggerUtil.logger.error("Transaction registerTx error!");

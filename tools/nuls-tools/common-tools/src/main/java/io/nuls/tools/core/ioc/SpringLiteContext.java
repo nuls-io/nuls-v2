@@ -168,11 +168,7 @@ public class SpringLiteContext {
         int maxKeyLength = values.keySet().stream().max((d1, d2) -> d1.length() > d2.length() ? 1 : -1).get().length();
         Log.info("Configuration information:");
         values.forEach((key, value) -> {
-            StringBuilder space = new StringBuilder();
-            for (var i = 0; i < maxKeyLength - key.length(); i++) {
-                space.append(" ");
-            }
-            Log.info("{} : {} ==> {}", key + space, value.getValue(), value.getConfigFile());
+            Log.info("{} : {} ==> {}", key + " ".repeat(Math.max(0, maxKeyLength - key.length())), value.getValue(), value.getConfigFile());
         });
     }
 
@@ -230,10 +226,7 @@ public class SpringLiteContext {
         Set<Field> fieldSet = getFieldSet(objType);
         boolean result = true;
         for (Field field : fieldSet) {
-            boolean b = injectionBeanField(obj, field);
-            if (!b) {
-                result = true;
-            }
+            injectionBeanField(obj, field);
         }
         return result;
     }
@@ -258,18 +251,17 @@ public class SpringLiteContext {
      * 检查某个对象的某个属性，如果对象被标记了Autowired注解，则去相应的依赖，并将依赖赋值给对象的该属性
      * Check an attribute of an object, and if the object is marked with Autowired annotations,
      * it is dependent and will depend on the attribute that is assigned to the object.
-     *
-     * @param obj   bean对象
+     *  @param obj   bean对象
      * @param field 对象的一个属性
      */
-    private static boolean injectionBeanField(Object obj, Field field) throws Exception {
+    private static void injectionBeanField(Object obj, Field field) throws Exception {
         Annotation[] anns = field.getDeclaredAnnotations();
         if (anns == null || anns.length == 0) {
-            return true;
+            return;
         }
         Annotation autowired = getFromArray(anns, Autowired.class);
         if (null == autowired) {
-            return true;
+            return;
         }
         String name = ((Autowired) autowired).value();
         if (name.trim().length() == 0) {
@@ -289,7 +281,6 @@ public class SpringLiteContext {
         field.setAccessible(true);
         field.set(obj, value);
         field.setAccessible(false);
-        return true;
     }
 
     /**
@@ -501,7 +492,7 @@ public class SpringLiteContext {
      */
     private static int getOrderByClass(Class clazz) {
         List<Annotation> anns = getAnnotationForBean(clazz);
-        if (anns == null || anns.isEmpty()) {
+        if (anns.isEmpty()) {
             return Order.DEFALUT_ORDER;
         }
         Optional<Annotation> ann = anns.stream().filter(a -> a.annotationType().equals(Order.class)).findFirst();
@@ -512,17 +503,8 @@ public class SpringLiteContext {
     }
 
     private static List<Annotation> getAnnotationForBean(Class clazz) {
-        Annotation[] anns = clazz.getDeclaredAnnotations();
-        List<Annotation> res = Arrays.asList(anns);
-        if (!(clazz.getSuperclass() instanceof Object) && clazz.getSuperclass() != null) {
-            List<Annotation> supperAnno = getAnnotationForBean(clazz.getSuperclass());
-            supperAnno.forEach(sa -> {
-                if (res.stream().noneMatch(a -> a.annotationType().equals(sa.annotationType()))) {
-                    res.add(sa);
-                }
-            });
-        }
-        return res;
+        Annotation[] anns = clazz.getAnnotations();
+        return Arrays.asList(anns);
     }
 
     /**
@@ -608,7 +590,7 @@ public class SpringLiteContext {
      * @param <T>       泛型
      * @return 该类型的所有实例，all instances of the type;
      */
-    public static <T> List<T> getBeanList(Class<T> beanClass) throws Exception {
+    public static <T> List<T> getBeanList(Class<T> beanClass) {
         Set<String> nameSet = CLASS_NAME_SET_MAP.get(beanClass);
         if (null == nameSet || nameSet.isEmpty()) {
             return new ArrayList<>();

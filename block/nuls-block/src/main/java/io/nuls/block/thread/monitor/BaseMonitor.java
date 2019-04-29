@@ -5,6 +5,13 @@ import io.nuls.block.manager.ContextManager;
 import io.nuls.block.model.ChainContext;
 import io.nuls.tools.log.logback.NulsLogger;
 
+/**
+ * 定时调度任务基类
+ *
+ * @author captain
+ * @version 1.0
+ * @date 2019/4/23 10:58
+ */
 import java.util.ArrayList;
 import java.util.List;
 
@@ -20,7 +27,7 @@ public abstract class BaseMonitor implements Runnable {
      */
     protected String symbol;
 
-    public BaseMonitor() {
+    BaseMonitor() {
         this.symbol = this.getClass().getName();
         this.runningStatusEnumList.add(StatusEnum.RUNNING);
     }
@@ -51,5 +58,12 @@ public abstract class BaseMonitor implements Runnable {
         }
     }
 
+    /**
+     * 具体业务处理方法
+     *
+     * @param chainId
+     * @param context
+     * @param commonLog
+     */
     protected abstract void process(int chainId, ChainContext context, NulsLogger commonLog);
 }

@@ -48,8 +48,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Callable;
 
-import static io.nuls.contract.constant.ContractConstant.*;
 import static io.nuls.contract.util.ContractUtil.*;
+import static io.nuls.tools.constant.TxType.*;
 
 
 /**
@@ -113,22 +113,22 @@ public class ContractTxCallable implements Callable<ContractResult> {
                 break;
             }
 
-            if (type != TX_TYPE_DELETE_CONTRACT && !ContractUtil.checkPrice(contractData.getPrice())) {
+            if (type != DELETE_CONTRACT && !ContractUtil.checkPrice(contractData.getPrice())) {
                 contractResult = contractHelper.makeFailedContractResult(chainId, tx, callableResult, "The minimum value of price is 25.");
                 break;
             }
 
             switch (type) {
-                case TX_TYPE_CREATE_CONTRACT:
+                case CREATE_CONTRACT:
                     container.setHasCreate(true);
                     contractResult = contractExecutor.create(executor, contractData, number, preStateRoot);
                     checkCreateResult(tx, callableResult, contractResult);
                     break;
-                case TX_TYPE_CALL_CONTRACT:
+                case CALL_CONTRACT:
                     contractResult = contractExecutor.call(executor, contractData, number, preStateRoot);
                     checkCallResult(tx, callableResult, contractResult);
                     break;
-                case TX_TYPE_DELETE_CONTRACT:
+                case DELETE_CONTRACT:
                     contractResult = contractExecutor.delete(executor, contractData, number, preStateRoot);
                     boolean isDelete = checkDeleteResult(tx, callableResult, contractResult);
                     container.setDelete(isDelete);

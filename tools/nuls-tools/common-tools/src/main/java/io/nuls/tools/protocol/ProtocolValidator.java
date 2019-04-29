@@ -4,27 +4,49 @@ import java.util.List;
 
 public class ProtocolValidator {
 
-    public static String meaasgeValidateV1(Class messageClass, Class handlerClass, Protocol protocol) {
-        List<MessageConfig> allowMsg = protocol.getAllowMsg();
+    public static boolean meaasgeValidate(Class messageClass, Class handlerClass, Protocol protocol, String methodName) {
+        List<MessageDefine> allowMsg = protocol.getAllowMsg();
         String messageClassName = messageClass.getName();
         String handlerClassName = handlerClass.getName();
-        for (MessageConfig config : allowMsg) {
+        for (MessageDefine config : allowMsg) {
             if (config.getName().equals(messageClassName)) {
-                List<ListItem> handlers = config.getHandlers();
-                for (ListItem handler : handlers) {
-                    String name = handler.getName();
-                    String[] strings = name.split("#");
-                    String ss = strings[0];
-                    if (ss.equals(handlerClassName)) {
-                        return strings[1];
+                List<MessageDefine.MessageProcessor> processors = config.getProcessors();
+                for (MessageDefine.MessageProcessor processor : processors) {
+                    if (handlerClassName.equals(processor.getHandler()) && methodName.equals(processor.getMethod())) {
+                        return true;
                     }
                 }
             }
         }
-        return "";
+        return false;
     }
 
-    public static boolean transactionValidate(int chainId, Class messageClass, Class handlerClass) {
+    public static boolean transactionValidate(int txType, Class handlerClass, Protocol protocol, String methodName, TxMethodType type) {
+        List<TxDefine> allowTx = protocol.getAllowTx();
+        String handlerClassName = handlerClass.getName();
+        for (TxDefine config : allowTx) {
+            if (config.getType() == txType && config.getHandler().equals(handlerClassName)) {
+                switch (type) {
+                    case VALID:
+                        if (methodName.equals(config.getValidate())) {
+                            return true;
+                        }
+                        break;
+                    case COMMIT:
+                        if (methodName.equals(config.getCommit())) {
+                            return true;
+                        }
+                        break;
+                    case ROLLBACK:
+                        if (methodName.equals(config.getRollback())) {
+                            return true;
+                        }
+                        break;
+                    default:
+                        return false;
+                }
+            }
+        }
         return false;
     }
 

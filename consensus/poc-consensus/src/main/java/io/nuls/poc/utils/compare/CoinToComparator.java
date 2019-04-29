@@ -16,16 +16,24 @@ public class CoinToComparator implements Comparator<CoinTo> {
 
     @Override
     public int compare(CoinTo o1, CoinTo o2) {
-        if(!Arrays.equals(o1.getAddress(), o2.getAddress())){
-            return AddressTool.getStringAddressByBytes(o1.getAddress()).compareTo(AddressTool.getStringAddressByBytes(o2.getAddress()));
+        if(o1.getLockTime() != o2.getLockTime()){
+            if(o1.getLockTime()>o2.getLockTime()){
+                return 1;
+            }else {
+                return -1;
+            }
         }else{
-            if(o1.getAssetsChainId() != o2.getAssetsChainId()){
-                return o1.getAssetsChainId() - o2.getAssetsChainId();
+            if(!Arrays.equals(o1.getAddress(), o2.getAddress())){
+                return AddressTool.getStringAddressByBytes(o1.getAddress()).compareTo(AddressTool.getStringAddressByBytes(o2.getAddress()));
             }else{
-                if(o1.getAssetsId() != o2.getAssetsId()){
-                    return o1.getAssetsId() - o2.getAssetsId();
+                if(o1.getAssetsChainId() != o2.getAssetsChainId()){
+                    return o1.getAssetsChainId() - o2.getAssetsChainId();
                 }else{
-                    return o1.getAmount().compareTo(o2.getAmount());
+                    if(o1.getAssetsId() != o2.getAssetsId()){
+                        return o1.getAssetsId() - o2.getAssetsId();
+                    }else{
+                        return o1.getAmount().compareTo(o2.getAmount());
+                    }
                 }
             }
         }

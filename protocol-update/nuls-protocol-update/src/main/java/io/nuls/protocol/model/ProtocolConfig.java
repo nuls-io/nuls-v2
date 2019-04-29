@@ -22,141 +22,68 @@
 
 package io.nuls.protocol.model;
 
-import io.nuls.base.basic.NulsByteBuffer;
-import io.nuls.base.basic.NulsOutputStreamBuffer;
-import io.nuls.base.data.BaseNulsData;
-import io.nuls.protocol.constant.ConfigConstant;
-import io.nuls.tools.exception.NulsException;
-import io.nuls.tools.parse.SerializeUtils;
-import io.nuls.tools.parse.config.ConfigItem;
+import io.nuls.tools.core.annotation.Configuration;
+import io.nuls.tools.core.annotation.Value;
 
-import java.io.IOException;
-import java.util.Map;
+import java.io.File;
 
-public class ProtocolConfig extends BaseNulsData {
-
-    /**
-     * 链ID
-     */
-    private int chainId;
-    /**
-     * 日志级别
-     */
-    private String logLevel;
+/**
+ * 协议升级文件配置类
+ *
+ * @author captain
+ * @version 1.0
+ * @date 2019/4/23 11:01
+ */
+@Configuration(domain = "protocol")
+public class ProtocolConfig {
 
     /**
-     * 统计区间
+     * db文件存放目录
      */
-    private short interval;
+    private String dataFolder;
+
     /**
-     * 每个统计区间内的最小生效比例
+     * 国际化
      */
-    private byte effectiveRatioMinimum;
+    private String language;
+
     /**
-     * 每个统计区间内的最大生效比例
+     * 默认链配置
      */
-    private byte effectiveRatioMaximum;
-    /**
-     * 协议生效要满足的连续区间数
-     */
-    private short continuousIntervalCountMaximum;
-    /**
-     * 协议生效要满足的连续区间数
-     */
-    private short continuousIntervalCountMinimum;
+    private ChainParameters defaultChainParameter;
 
-    public int getChainId() {
-        return chainId;
+    @Value("DataPath")
+    private String dataPath;
+
+    public String getDataPath() {
+        return dataPath;
     }
 
-    public void setChainId(int chainId) {
-        this.chainId = chainId;
+    public void setDataPath(String dataPath) {
+        this.dataPath = dataPath;
     }
 
-    public String getLogLevel() {
-        return logLevel;
+    public void setDataFolder(String dataFolder) {
+        this.dataFolder = dataFolder;
     }
 
-    public void setLogLevel(String logLevel) {
-        this.logLevel = logLevel;
+    public String getLanguage() {
+        return language;
     }
 
-    public short getInterval() {
-        return interval;
+    public void setLanguage(String language) {
+        this.language = language;
     }
 
-    public void setInterval(short interval) {
-        this.interval = interval;
+    public ChainParameters getDefaultChainParameter() {
+        return defaultChainParameter;
     }
 
-    public byte getEffectiveRatioMinimum() {
-        return effectiveRatioMinimum;
+    public void setDefaultChainParameter(ChainParameters defaultChainParameter) {
+        this.defaultChainParameter = defaultChainParameter;
     }
 
-    public void setEffectiveRatioMinimum(byte effectiveRatioMinimum) {
-        this.effectiveRatioMinimum = effectiveRatioMinimum;
-    }
-
-    public byte getEffectiveRatioMaximum() {
-        return effectiveRatioMaximum;
-    }
-
-    public void setEffectiveRatioMaximum(byte effectiveRatioMaximum) {
-        this.effectiveRatioMaximum = effectiveRatioMaximum;
-    }
-
-    public short getContinuousIntervalCountMaximum() {
-        return continuousIntervalCountMaximum;
-    }
-
-    public void setContinuousIntervalCountMaximum(short continuousIntervalCountMaximum) {
-        this.continuousIntervalCountMaximum = continuousIntervalCountMaximum;
-    }
-
-    public short getContinuousIntervalCountMinimum() {
-        return continuousIntervalCountMinimum;
-    }
-
-    public void setContinuousIntervalCountMinimum(short continuousIntervalCountMinimum) {
-        this.continuousIntervalCountMinimum = continuousIntervalCountMinimum;
-    }
-
-    @Override
-    protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
-        stream.writeUint16(chainId);
-        stream.writeString(logLevel);
-        stream.writeShort(interval);
-        stream.writeByte(effectiveRatioMinimum);
-        stream.writeByte(effectiveRatioMaximum);
-        stream.writeShort(continuousIntervalCountMaximum);
-        stream.writeShort(continuousIntervalCountMinimum);
-    }
-
-    @Override
-    public void parse(NulsByteBuffer byteBuffer) throws NulsException {
-        this.chainId = byteBuffer.readUint16();
-        this.logLevel = byteBuffer.readString();
-        this.interval = byteBuffer.readShort();
-        this.effectiveRatioMinimum = byteBuffer.readByte();
-        this.effectiveRatioMaximum = byteBuffer.readByte();
-        this.continuousIntervalCountMaximum = byteBuffer.readShort();
-        this.continuousIntervalCountMinimum = byteBuffer.readShort();
-    }
-
-    @Override
-    public int size() {
-        int size = 10;
-        size += SerializeUtils.sizeOfString(logLevel);
-        return size;
-    }
-
-    public void init(Map<String, ConfigItem> map) {
-        this.chainId = Integer.parseInt(map.get(ConfigConstant.CHAIN_ID).getValue());
-        this.logLevel = map.get(ConfigConstant.LOG_LEVEL).getValue();
-        this.interval = Short.parseShort(map.get(ConfigConstant.INTERVAL).getValue());
-        this.effectiveRatioMinimum = Byte.parseByte(map.get(ConfigConstant.EFFECTIVE_RATIO_MINIMUM).getValue());
-        this.effectiveRatioMaximum = Byte.parseByte(map.get(ConfigConstant.EFFECTIVE_RATIO_MAXIMUM).getValue());
-        this.continuousIntervalCountMaximum = Short.parseShort(map.get(ConfigConstant.CONTINUOUS_INTERVAL_COUNT_MAXIMUM).getValue());
-        this.continuousIntervalCountMinimum = Short.parseShort(map.get(ConfigConstant.CONTINUOUS_INTERVAL_COUNT_MINIMUM).getValue());
+    public String getDataFolder() {
+        return dataPath + File.separator + dataFolder;
     }
 }

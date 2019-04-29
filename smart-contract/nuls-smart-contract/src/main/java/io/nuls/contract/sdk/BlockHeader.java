@@ -35,17 +35,30 @@ public class BlockHeader {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
 
         BlockHeader that = (BlockHeader) o;
 
-        if (time != that.time) return false;
-        if (height != that.height) return false;
-        if (txCount != that.txCount) return false;
-        if (hash != null ? !hash.equals(that.hash) : that.hash != null) return false;
-        if (packingAddress != null ? !packingAddress.equals(that.packingAddress) : that.packingAddress != null)
+        if (time != that.time) {
             return false;
+        }
+        if (height != that.height) {
+            return false;
+        }
+        if (txCount != that.txCount) {
+            return false;
+        }
+        if (hash != null ? !hash.equals(that.hash) : that.hash != null) {
+            return false;
+        }
+        if (packingAddress != null ? !packingAddress.equals(that.packingAddress) : that.packingAddress != null) {
+            return false;
+        }
         return stateRoot != null ? stateRoot.equals(that.stateRoot) : that.stateRoot == null;
     }
 

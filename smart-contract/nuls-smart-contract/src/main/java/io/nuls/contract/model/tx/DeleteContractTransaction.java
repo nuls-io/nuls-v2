@@ -23,8 +23,9 @@
  */
 package io.nuls.contract.model.tx;
 
-import io.nuls.contract.constant.ContractConstant;
 import io.nuls.contract.model.txdata.DeleteContractData;
+
+import static io.nuls.tools.constant.TxType.DELETE_CONTRACT;
 
 /**
  * @author: PierreLuo
@@ -33,7 +34,7 @@ import io.nuls.contract.model.txdata.DeleteContractData;
 public class DeleteContractTransaction extends ContractBaseTransaction<DeleteContractData> {
 
     public DeleteContractTransaction() {
-        super(ContractConstant.TX_TYPE_DELETE_CONTRACT);
+        super(DELETE_CONTRACT);
     }
 
     @Override

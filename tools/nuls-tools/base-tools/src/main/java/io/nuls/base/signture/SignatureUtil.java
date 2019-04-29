@@ -26,13 +26,13 @@ package io.nuls.base.signture;
 
 
 import io.nuls.base.basic.AddressTool;
-import io.nuls.base.constant.BaseConstant;
 import io.nuls.base.data.NulsSignData;
 import io.nuls.base.data.Transaction;
 import io.nuls.base.script.Script;
 import io.nuls.base.script.ScriptBuilder;
 import io.nuls.base.script.ScriptChunk;
 import io.nuls.base.script.ScriptOpCodes;
+import io.nuls.tools.constant.BaseConstant;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.crypto.ECKey;
 import io.nuls.tools.crypto.HexUtil;

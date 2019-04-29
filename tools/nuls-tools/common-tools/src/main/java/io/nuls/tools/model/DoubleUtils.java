@@ -30,7 +30,7 @@ public class DoubleUtils {
      * @param roundingMode 小数的保留模式
      * @return 处理后的double数据
      */
-    public static double round(double value, int scale, int roundingMode) {
+    public static double round(double value, int scale, RoundingMode roundingMode) {
         BigDecimal bd = createBigDecimal(value);
         bd = bd.setScale(scale, roundingMode);
         return bd.doubleValue();
@@ -45,7 +45,7 @@ public class DoubleUtils {
      * @return 处理后的double数据
      */
     public static double round(double value, int scale) {
-        return round(value, scale, BigDecimal.ROUND_HALF_UP);
+        return round(value, scale, RoundingMode.HALF_UP);
     }
 
     /**

@@ -64,10 +64,7 @@ public class ConsensusProviderForRpc extends BaseRpcService implements Consensus
             try {
                 List<AgentInfo> list = MapUtils.mapsToObjects((List<Map<String, Object>>) res.get("list"),AgentInfo.class);
                 return success(list);
-            } catch (InstantiationException e) {
-                Log.error("cs_getAgentList fail",e);
-                return fail(CommonCodeConstanst.FAILED);
-            } catch (IllegalAccessException e) {
+            } catch (Exception e) {
                 Log.error("cs_getAgentList fail",e);
                 return fail(CommonCodeConstanst.FAILED);
             }

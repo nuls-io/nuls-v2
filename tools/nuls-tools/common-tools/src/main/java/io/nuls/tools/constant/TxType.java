@@ -69,16 +69,18 @@ public class TxType {
     /**
      * 调用智能合约交易
      */
-    public final static int CONTRACT_CALL = 16;
+    public final static int CALL_CONTRACT = 16;
     /**
      * 删除智能合约交易
      */
-    public final static int CONTRACT_DELETE = 17;
+    public final static int DELETE_CONTRACT = 17;
     /**
+     * 合约内部转账
      * contract transfer tx
      */
     public final static int CONTRACT_TRANSFER = 18;
     /**
+     * 合约执行手续费返还
      * contract return gas tx
      */
     public final static int CONTRACT_RETURN_GAS = 19;

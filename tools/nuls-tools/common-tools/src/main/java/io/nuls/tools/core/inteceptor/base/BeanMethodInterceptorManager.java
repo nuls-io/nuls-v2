@@ -58,9 +58,9 @@ public class BeanMethodInterceptorManager {
         BeanMethodInterceptorChain interceptorChain = INTERCEPTOR_MAP.get(annotationType);
         if (null == interceptorChain) {
             interceptorChain = new BeanMethodInterceptorChain();
+            INTERCEPTOR_MAP.put(annotationType, interceptorChain);
         }
         interceptorChain.add(interceptor);
-        INTERCEPTOR_MAP.put(annotationType, interceptorChain);
     }
 
     /**

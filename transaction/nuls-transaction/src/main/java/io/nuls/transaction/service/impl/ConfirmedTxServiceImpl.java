@@ -1,11 +1,11 @@
 package io.nuls.transaction.service.impl;
 
-import io.nuls.base.constant.TxStatusEnum;
 import io.nuls.base.data.BlockHeader;
 import io.nuls.base.data.NulsDigestData;
 import io.nuls.base.data.Transaction;
 import io.nuls.rpc.util.RPCUtil;
 import io.nuls.rpc.util.TimeUtils;
+import io.nuls.tools.constant.TxStatusEnum;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.exception.NulsException;

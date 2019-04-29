@@ -9,8 +9,9 @@ import io.nuls.rpc.model.Parameter;
 import io.nuls.rpc.model.message.Response;
 import io.nuls.rpc.util.RPCUtil;
 import io.nuls.tools.core.annotation.Autowired;
-import io.nuls.tools.core.annotation.Component;
+import io.nuls.tools.core.annotation.Service;
 import io.nuls.tools.exception.NulsException;
+import io.nuls.tools.protocol.MessageHandler;
 import io.nuls.transaction.cache.TxDuplicateRemoval;
 import io.nuls.transaction.constant.TxCmd;
 import io.nuls.transaction.constant.TxConfig;
@@ -38,7 +39,7 @@ import static io.nuls.transaction.utils.LoggerUtil.LOG;
  * @author: Charlie
  * @date: 2019/04/16
  */
-@Component
+@Service
 public class MessageCmd extends BaseCmd {
     @Autowired
     private TxService txService;
@@ -59,6 +60,7 @@ public class MessageCmd extends BaseCmd {
     @CmdAnnotation(cmd = TxCmd.NW_NEW_HASH, version = 1.0, description = "receive new transaction hash")
     @Parameter(parameterName = KEY_CHAIN_ID, parameterType = "int")
     @Parameter(parameterName = KEY_NODE_ID, parameterType = "String")
+    @MessageHandler(message = ForwardTxMessage.class)
     public Response newHash(Map params) {
         Map<String, Boolean> map = new HashMap<>();
         boolean result;
@@ -107,6 +109,7 @@ public class MessageCmd extends BaseCmd {
     @CmdAnnotation(cmd = TxCmd.NW_ASK_TX, version = 1.0, description = "get complete transaction entity")
     @Parameter(parameterName = KEY_CHAIN_ID, parameterType = "int")
     @Parameter(parameterName = KEY_NODE_ID, parameterType = "String")
+    @MessageHandler(message = GetTxMessage.class)
     public Response askTx(Map params) {
         Map<String, Boolean> map = new HashMap<>();
         boolean result;
@@ -151,6 +154,7 @@ public class MessageCmd extends BaseCmd {
     @CmdAnnotation(cmd = TxCmd.NW_RECEIVE_TX, version = 1.0, description = "receive new transactions from other nodes")
     @Parameter(parameterName = KEY_CHAIN_ID, parameterType = "int")
     @Parameter(parameterName = KEY_NODE_ID, parameterType = "String")
+    @MessageHandler(message = BroadcastTxMessage.class)
     public Response receiveTx(Map params) {
         Map<String, Boolean> map = new HashMap<>();
         boolean result;

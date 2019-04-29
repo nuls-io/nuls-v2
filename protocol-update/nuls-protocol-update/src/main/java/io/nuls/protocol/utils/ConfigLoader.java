@@ -22,22 +22,18 @@
 
 package io.nuls.protocol.utils;
 
-import io.nuls.protocol.constant.ConfigConstant;
-import io.nuls.protocol.manager.ConfigManager;
 import io.nuls.protocol.manager.ContextManager;
-import io.nuls.protocol.model.ProtocolConfig;
+import io.nuls.protocol.model.ChainParameters;
 import io.nuls.protocol.model.ProtocolVersion;
-import io.nuls.protocol.service.ConfigStorageService;
-import io.nuls.tools.core.ioc.SpringLiteContext;
+import io.nuls.protocol.storage.ParametersStorageService;
+import io.nuls.tools.core.annotation.Autowired;
+import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.io.IoUtils;
 import io.nuls.tools.parse.JSONUtils;
-import io.nuls.tools.parse.config.ConfigItem;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
-import static io.nuls.protocol.constant.Constant.MODULES_CONFIG_FILE;
+import static io.nuls.protocol.ProtocolBootstrap.protocolConfig;
 import static io.nuls.protocol.constant.Constant.PROTOCOL_CONFIG_FILE;
 
 /**
@@ -47,9 +43,11 @@ import static io.nuls.protocol.constant.Constant.PROTOCOL_CONFIG_FILE;
  * @version 1.0
  * @date 18-11-8 下午1:37
  */
+@Component
 public class ConfigLoader {
 
-    private static ConfigStorageService service = SpringLiteContext.getBean(ConfigStorageService.class);
+    @Autowired
+    private static ParametersStorageService service;
 
     /**
      * 加载配置文件
@@ -57,13 +55,17 @@ public class ConfigLoader {
      * @throws Exception
      */
     public static void load() throws Exception {
-        List<ProtocolConfig> list = service.getList();
+        List<ChainParameters> list = service.getList();
         if (list == null || list.size() == 0) {
             loadDefault();
         } else {
-            String versionJson = IoUtils.read(PROTOCOL_CONFIG_FILE);
-            List<ProtocolVersion> versions = JSONUtils.json2list(versionJson, ProtocolVersion.class);
-            list.forEach(e -> ContextManager.init(e, versions));
+            for (ChainParameters chainParameters : list) {
+                int chainId = chainParameters.getChainId();
+                String versionJson = service.getVersionJson(chainId);
+                List<ProtocolVersion> versions = JSONUtils.json2list(versionJson, ProtocolVersion.class);
+                ContextManager.init(chainParameters, versions);
+            }
+
         }
     }
 
@@ -73,18 +75,13 @@ public class ConfigLoader {
      * @throws Exception
      */
     private static void loadDefault() throws Exception {
-        String configJson = IoUtils.read(MODULES_CONFIG_FILE);
-        List<ConfigItem> configItems = JSONUtils.json2list(configJson, ConfigItem.class);
         String versionJson = IoUtils.read(PROTOCOL_CONFIG_FILE);
         List<ProtocolVersion> versions = JSONUtils.json2list(versionJson, ProtocolVersion.class);
-        Map<String, ConfigItem> map = new HashMap<>(configItems.size());
-        configItems.forEach(e -> map.put(e.getName(), e));
-        int chainId = Integer.parseInt(map.get(ConfigConstant.CHAIN_ID).getValue());
-        ConfigManager.add(chainId, map);
-        ProtocolConfig po = new ProtocolConfig();
-        po.init(map);
-        ContextManager.init(po, versions);
-        service.save(po, chainId);
+        ChainParameters parameter = protocolConfig.getDefaultChainParameter();
+        int chainId = parameter.getChainId();
+        ContextManager.init(parameter, versions);
+        service.save(parameter, chainId);
+        service.saveVersionJson(versionJson, chainId);
     }
 
 }

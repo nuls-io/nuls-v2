@@ -25,17 +25,16 @@
 
 package io.nuls.base.basic;
 
-import io.nuls.base.constant.BaseConstant;
 import io.nuls.base.data.Address;
+import io.nuls.tools.constant.BaseConstant;
 import io.nuls.tools.crypto.Base58;
-import io.nuls.tools.model.ByteUtils;
-import io.nuls.tools.model.StringUtils;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.exception.NulsRuntimeException;
 import io.nuls.tools.log.Log;
+import io.nuls.tools.model.ByteUtils;
+import io.nuls.tools.model.StringUtils;
 import io.nuls.tools.parse.SerializeUtils;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 

@@ -1036,6 +1036,7 @@ public class Script {
                         }
                         ifStack.pollLast();
                         continue;
+                    default:
                 }
 
                 if (!shouldExecute) {

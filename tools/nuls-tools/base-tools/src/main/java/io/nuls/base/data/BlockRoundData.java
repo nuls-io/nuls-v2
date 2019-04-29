@@ -28,7 +28,7 @@ package io.nuls.base.data;
 
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.basic.NulsOutputStreamBuffer;
-import io.nuls.base.constant.BaseConstant;
+import io.nuls.tools.constant.BaseConstant;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.log.Log;
 import io.nuls.tools.parse.SerializeUtils;

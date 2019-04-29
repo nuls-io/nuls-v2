@@ -178,14 +178,14 @@ if [ -n  "${BUILD_NULSTAR}" ]; then
 fi
 
 #1.install nuls-tools
-cd ./tools/nuls-tools
-if [ ! -n `ls |grep pom.xml` ]; then
-	echoRed "not found pom.xml"
-	exit 0
-fi
-doMvn "install" "nuls-tools"
-
-cd ../../
+#cd ./tools/nuls-tools
+#if [ ! -n `ls |grep pom.xml` ]; then
+#	echoRed "not found pom.xml"
+#	exit 0
+#fi
+#
+#
+#cd ../../
 
 
 #检查module.ncf指定配置项是否存在
@@ -372,6 +372,40 @@ copyModuleNcfToModules(){
 	echo "copy ${moduleBuildPath}/module.temp.ncf to ${MODULES_PATH}/${moduleName}/${version}/Module.ncf"
 }
 
+installModule() {
+    if [ ! -d "./$1" ]; then
+		return 0
+	fi
+	if [ "$1" == "tmp" ]; then
+	    return 0
+	fi
+	cd ./$1
+	if [ `pwd` == "${RELEASE_PATH}" ]; then
+	    cd ..
+		return 0;
+	fi
+	nowPath=`pwd`
+	if [ -f "./module.ncf" ]; then
+		echoYellow "find module.ncf in ${nowPath}"
+		if [ ! -f "./pom.xml" ]; then
+			echoRed "模块配置文件必须与pom.xml在同一个目录 : ${nowPath}"
+			exit 0;
+		fi
+		mvnInstall=`getModuleItem "mvnInstall"`;
+		if [ "${mvnInstall}" == "1" ];
+		then
+            doMvn "install" "$1"
+		fi
+		cd ..
+		return 0
+	fi
+    for f in `ls`
+    do
+        installModule $f
+    done
+    cd ..
+}
+
 #2.遍历文件夹，检查第一个pom 发现pom文件后通过mvn进行打包，完成后把文件jar文件和module.ncf文件复制到Modules文件夹下
 packageModule() {
 	if [ ! -d "./$1" ]; then
@@ -421,11 +455,15 @@ packageModule() {
     cd ..
 }
 
+log "INSTALL REQUIRE MODULE"
 for fi in `ls`
 do
-    if [ "$fi"x != "tools"x ]; then
-    	packageModule $fi
-    fi
+    installModule $fi
+done
+log "PACKAGE MODULE"
+for fi in `ls`
+do
+    packageModule $fi
 done
 log "============ PACKAGE MODULES DONE ==============="
 cd $PROJECT_PATH

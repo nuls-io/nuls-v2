@@ -23,17 +23,14 @@
 package io.nuls.protocol.model;
 
 import io.nuls.protocol.constant.RunningStatusEnum;
-import io.nuls.protocol.model.po.Statistics;
-import io.nuls.protocol.service.ProtocolService;
+import io.nuls.protocol.model.po.StatisticsInfo;
 import io.nuls.protocol.utils.LoggerUtil;
-import io.nuls.tools.core.ioc.SpringLiteContext;
 import io.nuls.tools.log.logback.NulsLogger;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Stack;
-import java.util.concurrent.locks.StampedLock;
 
 /**
  * 每个链ID对应一个{@link ProtocolContext},维护一些链运行期间的信息,并负责链的初始化、启动、停止、销毁操作
@@ -91,17 +88,12 @@ public class ProtocolContext {
     /**
      * 上一条缓存的统计信息
      */
-    private Statistics lastValidStatistics;
+    private StatisticsInfo lastValidStatisticsInfo;
 
     /**
      * 链的运行时参数
      */
-    private ProtocolConfig config;
-
-    /**
-     * 锁对象
-     */
-    private StampedLock lock;
+    private ChainParameters parameters;
 
     /**
      * 记录通用日志
@@ -176,28 +168,20 @@ public class ProtocolContext {
         this.count = count;
     }
 
-    public Statistics getLastValidStatistics() {
-        return lastValidStatistics;
+    public StatisticsInfo getLastValidStatisticsInfo() {
+        return lastValidStatisticsInfo;
     }
 
-    public void setLastValidStatistics(Statistics lastValidStatistics) {
-        this.lastValidStatistics = lastValidStatistics;
+    public void setLastValidStatisticsInfo(StatisticsInfo lastValidStatisticsInfo) {
+        this.lastValidStatisticsInfo = lastValidStatisticsInfo;
     }
 
-    public ProtocolConfig getConfig() {
-        return config;
+    public ChainParameters getParameters() {
+        return parameters;
     }
 
-    public void setConfig(ProtocolConfig config) {
-        this.config = config;
-    }
-
-    public StampedLock getLock() {
-        return lock;
-    }
-
-    public void setLock(StampedLock lock) {
-        this.lock = lock;
+    public void setParameters(ChainParameters parameters) {
+        this.parameters = parameters;
     }
 
     public NulsLogger getCommonLog() {
@@ -213,22 +197,15 @@ public class ProtocolContext {
     }
 
     public void init() {
-        lock = new StampedLock();
         proportionMap = new HashMap<>();
-        lastValidStatistics = new Statistics();
-        lastValidStatistics.setCount((short) 0);
-        lastValidStatistics.setHeight(0);
-        lastValidStatistics.setProtocolVersion(currentProtocolVersion);
+        lastValidStatisticsInfo = new StatisticsInfo();
+        lastValidStatisticsInfo.setCount((short) 0);
+        lastValidStatisticsInfo.setHeight(0);
+        lastValidStatisticsInfo.setProtocolVersion(currentProtocolVersion);
         protocolVersionHistory = new Stack<>();
         protocolVersionHistory.push(currentProtocolVersion);
-        LoggerUtil.init(chainId, config.getLogLevel());
+        LoggerUtil.init(chainId, parameters.getLogLevel());
         this.setStatus(RunningStatusEnum.READY);
-        //服务初始化
-        ProtocolService service = SpringLiteContext.getBean(ProtocolService.class);
-        service.init(chainId);
-        //各类缓存初始化
-
-        //定时调度接口初始化
     }
 
     public void start() {

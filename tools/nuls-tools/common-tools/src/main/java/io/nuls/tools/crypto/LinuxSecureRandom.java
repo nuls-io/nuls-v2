@@ -47,7 +47,7 @@ public class LinuxSecureRandom extends SecureRandomSpi {
         private static final long serialVersionUID = 2559382307871869793L;
 
         public LinuxSecureRandomProvider() {
-            super("LinuxSecureRandom", 1.0, "A Linux specific random number provider that uses /dev/U_RANDOM");
+            super("LinuxSecureRandom", "1.0", "A Linux specific random number provider that uses /dev/U_RANDOM");
             put("SecureRandom.LinuxSecureRandom", LinuxSecureRandom.class.getName());
         }
     }
