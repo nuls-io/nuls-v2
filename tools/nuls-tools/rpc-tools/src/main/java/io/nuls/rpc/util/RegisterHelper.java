@@ -93,6 +93,7 @@ public class RegisterHelper {
             Map<String, Object> map = new HashMap<>(2);
             List<Map<String, String>> cmds = new ArrayList<>();
             map.put("role", ConnectManager.LOCAL.getAbbreviation());
+            protocol.getAllowMsg().stream().map(e -> e.getName());
             List<String> list = List.of();
             for (String s : list) {
                 Map<String, String> cmd = new HashMap<>(2);
