@@ -619,6 +619,9 @@ public class NulsProtocolServiceImpl implements ProtocolService {
         int agentCount = packAddressList.size();
         int signCount = transactionSignature.getP2PHKSignatures().size();
         int minPassCount = agentCount*chain.getConfig().getByzantineRatio()/NulsCrossChainConstant.MAGIC_NUM_100;
+        if(minPassCount == 0){
+            minPassCount = 1;
+        }
 
         //判断交易签名与当前共识节点出块账户是否匹配
         List<P2PHKSignature>misMatchSignList = null;
