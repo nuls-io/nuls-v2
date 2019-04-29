@@ -3,8 +3,8 @@ package io.nuls.test.cases.transcation;
 import io.nuls.api.provider.Result;
 import io.nuls.api.provider.transaction.facade.GetConfirmedTxByHashReq;
 import io.nuls.api.provider.transaction.facade.TransactionData;
-import io.nuls.base.constant.TxStatusEnum;
 import io.nuls.test.cases.TestFailException;
+import io.nuls.tools.constant.TxStatusEnum;
 import io.nuls.tools.core.annotation.Component;
 
 /**
