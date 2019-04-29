@@ -31,6 +31,7 @@ import io.nuls.contract.helper.ContractHelper;
 import io.nuls.contract.helper.ContractNewTxFromOtherModuleHandler;
 import io.nuls.contract.manager.CmdRegisterManager;
 import io.nuls.contract.model.bo.CmdRegister;
+import io.nuls.contract.model.bo.ContractBalance;
 import io.nuls.contract.sdk.Event;
 import io.nuls.contract.vm.*;
 import io.nuls.contract.vm.code.ClassCode;
@@ -469,11 +470,13 @@ public class NativeUtils {
         // 固定参数 - 合约地址、合约调用者地址、合约地址nonce(Mode: NEW_TX)
         argsMap.put("contractAddress", contractAddress);
         argsMap.put("contractSender", contractSender);
-        // 合约地址的nonce
+        // 合约地址的当前余额和nonce
         CmdRegisterMode cmdRegisterMode = cmdRegister.getCmdRegisterMode();
         if(CmdRegisterMode.NEW_TX.equals(cmdRegisterMode)) {
             ContractHelper contractHelper = SpringLiteContext.getBean(ContractHelper.class);
-            argsMap.put("contractNonce", contractHelper.getBalance(currentChainId, programInvoke.getContractAddress()).getNonce());
+            ContractBalance balance = contractHelper.getBalance(currentChainId, programInvoke.getContractAddress());
+            argsMap.put("contractBalance", balance.getBalance().toString());
+            argsMap.put("contractNonce", balance.getNonce());
         }
 
         // 调用外部接口
