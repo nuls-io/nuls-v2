@@ -60,6 +60,9 @@ public class RegisterHelper {
      * Register transactions with the transaction module
      */
     public static boolean registerProtocol(int chainId) {
+        if (!ModuleHelper.isSupportProtocolUpdate()) {
+            return true;
+        }
         try {
             Collection<Protocol> protocols = ProtocolGroupManager.getProtocols(chainId);
             Map<String, Object> params = new HashMap<>();
