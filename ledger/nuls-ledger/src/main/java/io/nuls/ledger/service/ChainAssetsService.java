@@ -10,10 +10,10 @@
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- * 
+ *
  * The above copyright notice and this permission notice shall be included in
  * all copies or substantial portions of the Software.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -23,51 +23,21 @@
  * THE SOFTWARE.
  * ⁣⁣
  */
-package io.nuls.ledger.storage;
+package io.nuls.ledger.service;
+
+import java.util.List;
+import java.util.Map;
 
 /**
- * database table name constant
- * Created by wangkun23 on 2018/11/19.
+ * Created by lan on 2019/04/29
+ *
  * @author lanjinsheng
  */
-public interface DataBaseArea {
-    String TB_LEDGER_ACCOUNT = "account";
+public interface ChainAssetsService {
 
-    String TB_LEDGER_LOCK_TX = "locked_ledger";
-    /**
-     *   存未确认交易数据及状态
-     */
-    String TB_LEDGER_ACCOUNT_UNCONFIRMED = "account_unconfirmed";
-    String TB_LEDGER_TX_UNCONFIRMED = "tx_unconfirmed";
-    String TB_LEDGER_ACCOUNT_UNCFMD2CFMD = "account_uncfmd2cfmd";
-    /**
-     *   按区块高度来进行上一个账号状态的
-     */
+    void updateChainAssets(int addressChainid, Map<String, List<String>> assetAddressIndex);
 
-    String TB_LEDGER_ACCOUNT_BLOCK_SNAPSHOT = "account_block_snapshot";
+    List<Map<String, Object>> getAssetsByChainId(int addressChainId);
 
-    /**
-     *   存区块当前确认的高度
-     */
-    String TB_LEDGER_BLOCK_HEIGHT = "chain_block_height";
-
-    /**
-     *   存打包的区块交易nonce值
-     */
-    String TB_LEDGER_NONCES = "ledger_nonces";
-
-    /**
-     *   存区块所有交易的hash值
-     */
-    String TB_LEDGER_HASH = "ledger_tx_hashs";
-
-    /**
-     *   链资产索引
-     */
-    String TB_LEDGER_ASSET_INDEX = "ledger_asset_index";
-
-    /**
-     *   链资产地址索引
-     */
-    String TB_LEDGER_ASSET_ADDR_INDEX = "ledger_asset_addr_index";
+    Map<String, Object> getAssetByChainAssetId(int addressChainid, int chainAssetId, int assetId);
 }

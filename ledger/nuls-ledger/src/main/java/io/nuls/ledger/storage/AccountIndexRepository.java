@@ -10,10 +10,10 @@
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- * 
+ *
  * The above copyright notice and this permission notice shall be included in
  * all copies or substantial portions of the Software.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -25,49 +25,21 @@
  */
 package io.nuls.ledger.storage;
 
+import java.util.List;
+
 /**
- * database table name constant
- * Created by wangkun23 on 2018/11/19.
+ * 账户资产索引存储接口
+ *
  * @author lanjinsheng
  */
-public interface DataBaseArea {
-    String TB_LEDGER_ACCOUNT = "account";
+public interface AccountIndexRepository {
 
-    String TB_LEDGER_LOCK_TX = "locked_ledger";
-    /**
-     *   存未确认交易数据及状态
-     */
-    String TB_LEDGER_ACCOUNT_UNCONFIRMED = "account_unconfirmed";
-    String TB_LEDGER_TX_UNCONFIRMED = "tx_unconfirmed";
-    String TB_LEDGER_ACCOUNT_UNCFMD2CFMD = "account_uncfmd2cfmd";
-    /**
-     *   按区块高度来进行上一个账号状态的
-     */
+    void updateAssetsIndex(int chainId, byte[] key, byte[] value);
 
-    String TB_LEDGER_ACCOUNT_BLOCK_SNAPSHOT = "account_block_snapshot";
+    void updateAssetsAddressIndex(int addressChainId, int assetChainId, int assetId, byte[] addressKey, byte[] value);
 
-    /**
-     *   存区块当前确认的高度
-     */
-    String TB_LEDGER_BLOCK_HEIGHT = "chain_block_height";
+    List<String> assetsKeyList(int chainId);
 
-    /**
-     *   存打包的区块交易nonce值
-     */
-    String TB_LEDGER_NONCES = "ledger_nonces";
+    List<String> assetsAddressKeyList(int addressChainId, int assetChainId, int assetId);
 
-    /**
-     *   存区块所有交易的hash值
-     */
-    String TB_LEDGER_HASH = "ledger_tx_hashs";
-
-    /**
-     *   链资产索引
-     */
-    String TB_LEDGER_ASSET_INDEX = "ledger_asset_index";
-
-    /**
-     *   链资产地址索引
-     */
-    String TB_LEDGER_ASSET_ADDR_INDEX = "ledger_asset_addr_index";
 }
