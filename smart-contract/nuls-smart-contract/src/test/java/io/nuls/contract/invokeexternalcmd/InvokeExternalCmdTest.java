@@ -95,7 +95,7 @@ public class InvokeExternalCmdTest {
         ChainManager chainManager = new ChainManager();
         chainManager.getChainMap().put(chain.getChainId(), chain);
         Map<String, CmdRegister> cmdRegisterMap = chain.getCmdRegisterMap();
-        cmdRegisterMap.put("returnStringNewTx", new CmdRegister("sc", "returnStringNewTx", CmdRegisterMode.NEW_TX, List.of("name", "age"), CmdRegisterReturnType.STRING));
+        cmdRegisterMap.put("returnStringNewTx", new CmdRegister("sc", "returnStringNewTx", CmdRegisterMode.NEW_TX, List.of("name", "age"), CmdRegisterReturnType.STRING_ARRAY));
         cmdRegisterMap.put("returnString", new CmdRegister("sc", "returnString", CmdRegisterMode.QUERY_DATA, List.of("name", "age"), CmdRegisterReturnType.STRING));
         cmdRegisterMap.put("returnStringArray", new CmdRegister("sc", "returnStringArray", CmdRegisterMode.QUERY_DATA, List.of("name", "age"), CmdRegisterReturnType.STRING_ARRAY));
         cmdRegisterMap.put("returnString2Array", new CmdRegister("sc", "returnString2Array", CmdRegisterMode.QUERY_DATA, List.of("name", "age"), CmdRegisterReturnType.STRING_TWO_DIMENSIONAL_ARRAY));
