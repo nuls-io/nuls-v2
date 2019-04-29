@@ -21,15 +21,12 @@ import io.nuls.test.utils.Utils;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.core.ioc.SpringLiteContext;
-import io.nuls.tools.log.Log;
 import io.nuls.tools.log.logback.NulsLogger;
 import io.nuls.tools.model.DateUtils;
 import io.nuls.tools.model.StringUtils;
 import io.nuls.tools.parse.I18nUtils;
 
 import java.util.List;
-import java.util.Map;
-import java.util.Properties;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 
@@ -54,7 +51,7 @@ public class TestModule extends RpcModule {
     public Module[] declareDependent() {
         return new Module[]{
                 new Module(ModuleE.BL.abbr,"1.0"),
-                new Module(ModuleE.SC.abbr,"1.0"),
+//                new Module(ModuleE.SC.abbr,"1.0"),
                 new Module(ModuleE.TX.abbr,"1.0"),
                 new Module(ModuleE.LG.abbr,"1.0"),
                 new Module(ModuleE.CS.abbr,"1.0")
