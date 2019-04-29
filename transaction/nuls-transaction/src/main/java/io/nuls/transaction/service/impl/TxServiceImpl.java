@@ -138,12 +138,14 @@ public class TxServiceImpl implements TxService {
         }
     }
 
+    static int countNewNet = 0;
     @Override
     public void newBroadcastTx(Chain chain, TransactionNetPO tx) {
         TransactionConfirmedPO txExist = getTransaction(chain, tx.getTx().getHash());
         if (null == txExist) {
             try {
                 chain.getUnverifiedQueue().addLast(tx);
+                LOG.debug("{}", ++countNewNet);
             } catch (IllegalStateException e) {
                 chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).error("UnverifiedQueue full!");
             }
@@ -195,6 +197,14 @@ public class TxServiceImpl implements TxService {
         }
     }
 
+    @Override
+    public boolean isTxExists(Chain chain, NulsDigestData hash) {
+        boolean rs = unconfirmedTxStorageService.isExists(chain.getChainId(), hash);
+        if(!rs){
+            rs = confirmedTxStorageService.isExists(chain.getChainId(), hash);
+        }
+        return rs;
+    }
 
     /**
      * 验证交易
