@@ -1,6 +1,7 @@
 package io.nuls.transaction.rpc.call;
 
 import io.nuls.base.basic.AddressTool;
+import io.nuls.base.data.Transaction;
 import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.util.RPCUtil;
@@ -11,7 +12,9 @@ import io.nuls.transaction.constant.TxErrorCode;
 import io.nuls.transaction.model.bo.Chain;
 import io.nuls.transaction.model.bo.VerifyLedgerResult;
 
+import java.io.IOException;
 import java.math.BigInteger;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -69,6 +72,33 @@ public class LedgerCall {
         } catch (Exception e) {
             chain.getLoggerMap().get(TxConstant.LOG_TX).error(e);
             return VerifyLedgerResult.fail(TxErrorCode.SYS_UNKOWN_EXCEPTION);
+        }
+    }
+
+    /**
+     * 新交易验证账本(批量)
+     * @param chain
+     * @param txList
+     */
+    public static Map commitBatchUnconfirmedTxs(Chain chain, List<Transaction> txList) throws NulsException {
+
+        try {
+            List<String> txStrList = new ArrayList<>();
+            for(Transaction tx : txList){
+                txStrList.add(RPCUtil.encode(tx.serialize()));
+            }
+            Map<String, Object> params = new HashMap<>(TxConstant.INIT_CAPACITY_8);
+            params.put(Constants.VERSION_KEY_STR, TxConstant.RPC_VERSION);
+            params.put("chainId", chain.getChainId());
+            params.put("txList", txStrList);
+            HashMap result = (HashMap)TransactionCall.request(ModuleE.LG.abbr, "commitBatchUnconfirmedTxs", params);
+            return result;
+        }catch (IOException e) {
+            chain.getLoggerMap().get(TxConstant.LOG_TX).error(e);
+            throw new NulsException(TxErrorCode.SERIALIZE_ERROR);
+        }catch (RuntimeException e) {
+            chain.getLoggerMap().get(TxConstant.LOG_TX).error(e);
+            throw new NulsException(TxErrorCode.SYS_UNKOWN_EXCEPTION);
         }
     }
 
