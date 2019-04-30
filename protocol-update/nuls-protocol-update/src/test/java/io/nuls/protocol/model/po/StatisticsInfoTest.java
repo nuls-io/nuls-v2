@@ -1,7 +1,7 @@
 package io.nuls.protocol.model.po;
 
 import io.nuls.base.basic.NulsByteBuffer;
-import io.nuls.protocol.model.ProtocolVersion;
+import io.nuls.base.basic.ProtocolVersion;
 import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.exception.NulsException;
 import org.junit.Test;

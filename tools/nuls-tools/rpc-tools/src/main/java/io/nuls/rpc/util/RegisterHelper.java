@@ -5,8 +5,8 @@ import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.model.message.Response;
 import io.nuls.rpc.netty.channel.manager.ConnectManager;
 import io.nuls.rpc.netty.processor.ResponseMessageProcessor;
+import io.nuls.rpc.protocol.*;
 import io.nuls.tools.log.Log;
-import io.nuls.tools.protocol.*;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -54,34 +54,6 @@ public class RegisterHelper {
     }
 
     /**
-     * 向协议升级模块注册多版本协议配置
-     * Register transactions with the transaction module
-     */
-    public static boolean registerProtocol(int chainId) {
-        if (!ModuleHelper.isSupportProtocolUpdate()) {
-            return true;
-        }
-        try {
-            Collection<Protocol> protocols = ProtocolGroupManager.getProtocols(chainId);
-            Map<String, Object> params = new HashMap<>();
-            params.put(Constants.VERSION_KEY_STR, "1.0");
-            params.put("chainId", chainId);
-            List<Protocol> list = new ArrayList<>(protocols);
-            params.put("list", list);
-            params.put("moduleCode", ConnectManager.LOCAL.getAbbreviation());
-
-            Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.PU.abbr, "registerTx", params);
-            if (!cmdResp.isSuccess()) {
-                Log.error("chain ：" + chainId + " Failure of transaction registration,errorMsg: " + cmdResp.getResponseComment());
-                return false;
-            }
-        } catch (Exception e) {
-            Log.error("", e);
-        }
-        return true;
-    }
-
-    /**
      * 向网络模块注册消息
      *
      * @return
@@ -107,6 +79,34 @@ public class RegisterHelper {
             e.printStackTrace();
             Log.error("registerMsg fail");
         }
+    }
+
+    /**
+     * 向协议升级模块注册多版本协议配置
+     * Register transactions with the transaction module
+     */
+    public static boolean registerProtocol(int chainId) {
+        if (!ModuleHelper.isSupportProtocolUpdate()) {
+            return true;
+        }
+        try {
+            Collection<Protocol> protocols = ProtocolGroupManager.getProtocols(chainId);
+            Map<String, Object> params = new HashMap<>();
+            params.put(Constants.VERSION_KEY_STR, "1.0");
+            params.put("chainId", chainId);
+            List<Protocol> list = new ArrayList<>(protocols);
+            params.put("list", list);
+            params.put("moduleCode", ConnectManager.LOCAL.getAbbreviation());
+
+            Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.PU.abbr, "registerProtocol", params);
+            if (!cmdResp.isSuccess()) {
+                Log.error("chain ：" + chainId + " Failure of transaction registration,errorMsg: " + cmdResp.getResponseComment());
+                return false;
+            }
+        } catch (Exception e) {
+            Log.error("", e);
+        }
+        return true;
     }
 
 }

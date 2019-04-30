@@ -18,6 +18,7 @@ import io.nuls.rpc.modulebootstrap.Module;
 import io.nuls.rpc.modulebootstrap.NulsRpcModuleBootstrap;
 import io.nuls.rpc.modulebootstrap.RpcModule;
 import io.nuls.rpc.modulebootstrap.RpcModuleState;
+import io.nuls.rpc.protocol.ProtocolGroupManager;
 import io.nuls.rpc.util.RegisterHelper;
 import io.nuls.rpc.util.TimeUtils;
 import io.nuls.tools.core.annotation.Autowired;
@@ -26,7 +27,6 @@ import io.nuls.tools.core.ioc.SpringLiteContext;
 import io.nuls.tools.io.IoUtils;
 import io.nuls.tools.log.Log;
 import io.nuls.tools.parse.JSONUtils;
-import io.nuls.tools.protocol.ProtocolGroupManager;
 
 import java.io.File;
 import java.io.IOException;

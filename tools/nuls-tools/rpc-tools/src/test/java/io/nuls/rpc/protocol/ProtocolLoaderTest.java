@@ -1,4 +1,4 @@
-package io.nuls.tools.protocol;
+package io.nuls.rpc.protocol;
 
 import org.junit.Test;
 
@@ -13,4 +13,5 @@ public class ProtocolLoaderTest {
         Protocol protocol = ProtocolGroupManager.getCurrentProtocol(1);
         System.out.println(protocol.getAllowMsg().get(0).getProcessors());
     }
+
 }

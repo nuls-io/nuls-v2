@@ -12,10 +12,12 @@ import io.nuls.rpc.modulebootstrap.Module;
 import io.nuls.rpc.modulebootstrap.NulsRpcModuleBootstrap;
 import io.nuls.rpc.modulebootstrap.RpcModule;
 import io.nuls.rpc.modulebootstrap.RpcModuleState;
+import io.nuls.rpc.util.ModuleHelper;
 import io.nuls.rpc.util.TimeUtils;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.log.Log;
+
 import java.lang.reflect.Field;
 import java.nio.charset.Charset;
 import java.util.Set;
@@ -58,6 +60,11 @@ public class ConsensusBootStrap extends RpcModule {
         }
     }
 
+    @Override
+    public Module[] declareDependent() {
+        return new Module[0];
+    }
+
     /**
      * 指定RpcCmd的包名
      * 可以不实现此方法，若不实现将使用spring init扫描的包
@@ -66,16 +73,6 @@ public class ConsensusBootStrap extends RpcModule {
     @Override
     public Set<String> getRpcCmdPackage(){
         return Set.of(ConsensusConstant.RPC_PATH);
-    }
-
-    @Override
-    public Module[] declareDependent() {
-        return new Module[]{
-                new Module(ModuleE.BL.abbr, "1.0"),
-                new Module(ModuleE.AC.abbr, "1.0"),
-                new Module(ModuleE.NW.abbr, "1.0"),
-                new Module(ModuleE.LG.abbr, "1.0"),
-                new Module(ModuleE.TX.abbr, "1.0")};
     }
 
     @Override
@@ -116,6 +113,7 @@ public class ConsensusBootStrap extends RpcModule {
         }
         Log.debug("cs onDependenciesReady");
         TimeUtils.getInstance().start();
+        ModuleHelper.init(this);
         return RpcModuleState.Running;
     }
 

@@ -1,4 +1,4 @@
-package io.nuls.tools.protocol;
+package io.nuls.rpc.protocol;
 
 import java.util.List;
 

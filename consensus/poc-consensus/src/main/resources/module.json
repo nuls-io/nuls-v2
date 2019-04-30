@@ -25,5 +25,6 @@
   "encoding": "UTF-8",
   "mainChainCommissionRatio":60,
   "seedNodes": "tNULSeBaMoGr2RkLZPfJeS5dFzZeNj1oXmaYNe",
-  "password":"nuls123456"
+  "password": "nuls123456",
+  "dependent": "bl:1.0,ac:1.0,nw:1.0,lg:1.0,tx:1.0,pu:1.0"
 }

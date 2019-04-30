@@ -28,11 +28,11 @@ import io.nuls.block.rpc.call.TransactionUtil;
 import io.nuls.block.service.BlockService;
 import io.nuls.block.utils.ConfigLoader;
 import io.nuls.db.service.RocksDBService;
+import io.nuls.rpc.protocol.ProtocolLoader;
 import io.nuls.tools.constant.TxType;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.log.logback.NulsLogger;
-import io.nuls.tools.protocol.ProtocolLoader;
 
 import java.util.List;
 
