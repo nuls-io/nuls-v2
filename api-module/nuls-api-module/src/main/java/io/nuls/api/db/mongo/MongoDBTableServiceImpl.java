@@ -81,23 +81,35 @@ public class MongoDBTableServiceImpl implements DBTableService {
         mongoDBService.createCollection(MongoTableConstant.AGENT_TABLE + chainId);
         mongoDBService.createCollection(MongoTableConstant.ALIAS_TABLE + chainId);
         mongoDBService.createCollection(MongoTableConstant.DEPOSIT_TABLE + chainId);
-        mongoDBService.createCollection(MongoTableConstant.TX_RELATION_TABLE + chainId);
         mongoDBService.createCollection(MongoTableConstant.TX_TABLE + chainId);
+        mongoDBService.createCollection(MongoTableConstant.COINDATA_TABLE + chainId);
         mongoDBService.createCollection(MongoTableConstant.PUNISH_TABLE + chainId);
         mongoDBService.createCollection(MongoTableConstant.ROUND_TABLE + chainId);
         mongoDBService.createCollection(MongoTableConstant.ROUND_ITEM_TABLE + chainId);
+        mongoDBService.createCollection(MongoTableConstant.ACCOUNT_TOKEN_TABLE + chainId);
+        mongoDBService.createCollection(MongoTableConstant.CONTRACT_TABLE + chainId);
+        mongoDBService.createCollection(MongoTableConstant.CONTRACT_TX_TABLE + chainId);
+        mongoDBService.createCollection(MongoTableConstant.TOKEN_TRANSFER_TABLE + chainId);
+        mongoDBService.createCollection(MongoTableConstant.CONTRACT_RESULT_TABLE + chainId);
+        mongoDBService.createCollection(MongoTableConstant.STATISTICAL_TABLE + chainId);
+
+        for (int i = 0; i < 32; i++) {
+            mongoDBService.createCollection(MongoTableConstant.TX_RELATION_TABLE + chainId + "_" + i);
+        }
     }
 
     private void initTablesIndex(int chainId) {
         //交易关系表
-        mongoDBService.createIndex(MongoTableConstant.TX_RELATION_TABLE + chainId, Indexes.ascending("address"));
-        mongoDBService.createIndex(MongoTableConstant.TX_RELATION_TABLE + chainId, Indexes.ascending("address", "type"));
-        mongoDBService.createIndex(MongoTableConstant.TX_RELATION_TABLE + chainId, Indexes.ascending("txHash"));
-        mongoDBService.createIndex(MongoTableConstant.TX_RELATION_TABLE + chainId, Indexes.descending("height", "createTime"));
+        for (int i = 0; i < 32; i++) {
+            mongoDBService.createIndex(MongoTableConstant.TX_RELATION_TABLE + chainId + "_" + i, Indexes.ascending("address"));
+            mongoDBService.createIndex(MongoTableConstant.TX_RELATION_TABLE + chainId + "_" + i, Indexes.ascending("address", "type"));
+            mongoDBService.createIndex(MongoTableConstant.TX_RELATION_TABLE + chainId + "_" + i, Indexes.ascending("txHash"));
+            mongoDBService.createIndex(MongoTableConstant.TX_RELATION_TABLE + chainId + "_" + i, Indexes.descending("createTime"));
+        }
         //账户信息表
         mongoDBService.createIndex(MongoTableConstant.ACCOUNT_TABLE + chainId, Indexes.descending("totalBalance"));
         //交易表
-        mongoDBService.createIndex(MongoTableConstant.TX_TABLE + chainId, Indexes.descending("height", "createTime"));
+        mongoDBService.createIndex(MongoTableConstant.TX_TABLE + chainId, Indexes.descending("createTime"));
         //block 表
         mongoDBService.createIndex(MongoTableConstant.BLOCK_HEADER_TABLE + chainId, Indexes.ascending("hash"));
     }

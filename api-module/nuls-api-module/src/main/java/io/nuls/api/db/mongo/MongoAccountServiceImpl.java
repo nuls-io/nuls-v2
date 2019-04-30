@@ -85,25 +85,26 @@ public class MongoAccountServiceImpl implements AccountService {
         }
         int start = (pageIndex - 1) * pageSize;
         int end = pageIndex * pageSize;
-        long unConfirmCount = mongoDBService.getCount(TX_UNCONFIRM_RELATION_TABLE + chainId, addressFilter);
-        long confirmCount = mongoDBService.getCount(TX_RELATION_TABLE + chainId, filter);
+        int index = address.hashCode() & Integer.MAX_VALUE % 32;
+        long unConfirmCount = mongoDBService.getCount(TX_UNCONFIRM_RELATION_TABLE + chainId + "_" + index, addressFilter);
+        long confirmCount = mongoDBService.getCount(TX_RELATION_TABLE + chainId + "_" + index, filter);
         List<TxRelationInfo> txRelationInfoList;
         if (end <= unConfirmCount) {
-            txRelationInfoList = unConfirmLimitQuery(chainId, addressFilter, start, pageSize);
+            txRelationInfoList = unConfirmLimitQuery(chainId, index, addressFilter, start, pageSize);
         } else if (start - 1 > unConfirmCount) {
             start = start - 1;
             start = (int) (start - unConfirmCount);
-            txRelationInfoList = confirmLimitQuery(chainId, filter, start, pageSize);
+            txRelationInfoList = confirmLimitQuery(chainId, index, filter, start, pageSize);
         } else {
-            txRelationInfoList = relationLimitQuery(chainId, addressFilter, filter, start, pageSize);
+            txRelationInfoList = relationLimitQuery(chainId, index, addressFilter, filter, start, pageSize);
         }
 
         PageInfo<TxRelationInfo> pageInfo = new PageInfo<>(pageIndex, pageSize, unConfirmCount + confirmCount, txRelationInfoList);
         return pageInfo;
     }
 
-    private List<TxRelationInfo> unConfirmLimitQuery(int chainId, Bson filter, int start, int pageSize) {
-        List<Document> docsList = this.mongoDBService.limitQuery(TX_UNCONFIRM_RELATION_TABLE + chainId, filter, Sorts.descending("height", "createTime"), start, pageSize);
+    private List<TxRelationInfo> unConfirmLimitQuery(int chainId, int index, Bson filter, int start, int pageSize) {
+        List<Document> docsList = this.mongoDBService.limitQuery(TX_UNCONFIRM_RELATION_TABLE + chainId + "_" + index, filter, Sorts.descending("createTime"), start, pageSize);
         List<TxRelationInfo> txRelationInfoList = new ArrayList<>();
         for (Document document : docsList) {
             TxRelationInfo txRelationInfo = DocumentTransferTool.toInfo(document, TxRelationInfo.class);
@@ -113,8 +114,8 @@ public class MongoAccountServiceImpl implements AccountService {
         return txRelationInfoList;
     }
 
-    private List<TxRelationInfo> confirmLimitQuery(int chainId, Bson filter, int start, int pageSize) {
-        List<Document> docsList = this.mongoDBService.limitQuery(TX_RELATION_TABLE + chainId, filter, Sorts.descending("height", "createTime"), start, pageSize);
+    private List<TxRelationInfo> confirmLimitQuery(int chainId, int index, Bson filter, int start, int pageSize) {
+        List<Document> docsList = this.mongoDBService.limitQuery(TX_RELATION_TABLE + chainId + "_" + index, filter, Sorts.descending("createTime"), start, pageSize);
         List<TxRelationInfo> txRelationInfoList = new ArrayList<>();
         for (Document document : docsList) {
             TxRelationInfo txRelationInfo = DocumentTransferTool.toInfo(document, TxRelationInfo.class);
@@ -124,8 +125,8 @@ public class MongoAccountServiceImpl implements AccountService {
         return txRelationInfoList;
     }
 
-    private List<TxRelationInfo> relationLimitQuery(int chainId, Bson filter1, Bson filter2, int start, int pageSize) {
-        List<Document> docsList = this.mongoDBService.limitQuery(TX_UNCONFIRM_RELATION_TABLE + chainId, filter1, Sorts.descending("height", "createTime"), start, pageSize);
+    private List<TxRelationInfo> relationLimitQuery(int chainId, int index, Bson filter1, Bson filter2, int start, int pageSize) {
+        List<Document> docsList = this.mongoDBService.limitQuery(TX_UNCONFIRM_RELATION_TABLE + chainId + "_" + index, filter1, Sorts.descending("createTime"), start, pageSize);
         List<TxRelationInfo> txRelationInfoList = new ArrayList<>();
         for (Document document : docsList) {
             TxRelationInfo txRelationInfo = DocumentTransferTool.toInfo(document, TxRelationInfo.class);
@@ -133,7 +134,7 @@ public class MongoAccountServiceImpl implements AccountService {
             txRelationInfoList.add(txRelationInfo);
         }
         pageSize = pageSize - txRelationInfoList.size();
-        docsList = this.mongoDBService.limitQuery(TX_RELATION_TABLE + chainId, filter2, Sorts.descending("height", "createTime"), 0, pageSize);
+        docsList = this.mongoDBService.limitQuery(TX_RELATION_TABLE + chainId + "_" + index, filter2, Sorts.descending("createTime"), 0, pageSize);
         for (Document document : docsList) {
             TxRelationInfo txRelationInfo = DocumentTransferTool.toInfo(document, TxRelationInfo.class);
             txRelationInfo.setStatus(1);

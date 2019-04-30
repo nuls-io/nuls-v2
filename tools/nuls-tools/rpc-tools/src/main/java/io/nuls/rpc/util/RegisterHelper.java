@@ -5,13 +5,11 @@ import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.model.message.Response;
 import io.nuls.rpc.netty.channel.manager.ConnectManager;
 import io.nuls.rpc.netty.processor.ResponseMessageProcessor;
+import io.nuls.rpc.protocol.*;
 import io.nuls.tools.log.Log;
-import io.nuls.tools.protocol.Protocol;
-import io.nuls.tools.protocol.ProtocolGroupManager;
-import io.nuls.tools.protocol.TxDefine;
-import io.nuls.tools.protocol.TxRegisterDetail;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class RegisterHelper {
 
@@ -56,7 +54,35 @@ public class RegisterHelper {
     }
 
     /**
-     * 向交易模块注册交易
+     * 向网络模块注册消息
+     *
+     * @return
+     */
+    public static void registerMsg(Protocol protocol) {
+        try {
+            Map<String, Object> map = new HashMap<>(2);
+            List<Map<String, String>> cmds = new ArrayList<>();
+            map.put("role", ConnectManager.LOCAL.getAbbreviation());
+            List<String> collect = protocol.getAllowMsg().stream().map(MessageDefine::getProtocolCmd).collect(Collectors.toList());
+            for (String s : collect) {
+                String[] split = s.split(",");
+                for (String s1 : split) {
+                    Map<String, String> cmd = new HashMap<>(2);
+                    cmd.put("protocolCmd", s1);
+                    cmd.put("handler", s1);
+                    cmds.add(cmd);
+                }
+            }
+            map.put("protocolCmds", cmds);
+            ResponseMessageProcessor.requestAndResponse(ModuleE.NW.abbr, "nw_protocolRegister", map);
+        } catch (Exception e) {
+            e.printStackTrace();
+            Log.error("registerMsg fail");
+        }
+    }
+
+    /**
+     * 向协议升级模块注册多版本协议配置
      * Register transactions with the transaction module
      */
     public static boolean registerProtocol(int chainId) {
@@ -72,7 +98,7 @@ public class RegisterHelper {
             params.put("list", list);
             params.put("moduleCode", ConnectManager.LOCAL.getAbbreviation());
 
-            Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.PU.abbr, "registerTx", params);
+            Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.PU.abbr, "registerProtocol", params);
             if (!cmdResp.isSuccess()) {
                 Log.error("chain ：" + chainId + " Failure of transaction registration,errorMsg: " + cmdResp.getResponseComment());
                 return false;
@@ -81,31 +107,6 @@ public class RegisterHelper {
             Log.error("", e);
         }
         return true;
-    }
-
-    /**
-     * 注册消息处理器
-     *
-     * @return
-     */
-    public static void registerMsg(Protocol protocol) {
-        try {
-            Map<String, Object> map = new HashMap<>(2);
-            List<Map<String, String>> cmds = new ArrayList<>();
-            map.put("role", ConnectManager.LOCAL.getAbbreviation());
-            List<String> list = List.of();
-            for (String s : list) {
-                Map<String, String> cmd = new HashMap<>(2);
-                cmd.put("protocolCmd", s);
-                cmd.put("handler", s);
-                cmds.add(cmd);
-            }
-            map.put("protocolCmds", cmds);
-            ResponseMessageProcessor.requestAndResponse(ModuleE.NW.abbr, "nw_protocolRegister", map);
-        } catch (Exception e) {
-            e.printStackTrace();
-            Log.error("registerMsg fail");
-        }
     }
 
 }

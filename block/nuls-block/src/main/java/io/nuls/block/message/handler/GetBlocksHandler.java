@@ -26,7 +26,6 @@ import io.nuls.base.data.NulsDigestData;
 import io.nuls.block.constant.BlockErrorCode;
 import io.nuls.block.manager.ContextManager;
 import io.nuls.block.message.BlockMessage;
-import io.nuls.block.message.HashMessage;
 import io.nuls.block.message.HeightRangeMessage;
 import io.nuls.block.rpc.call.NetworkUtil;
 import io.nuls.block.service.BlockService;
@@ -34,11 +33,11 @@ import io.nuls.rpc.cmd.BaseCmd;
 import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.model.CmdAnnotation;
 import io.nuls.rpc.model.message.Response;
+import io.nuls.rpc.protocol.MessageHandler;
 import io.nuls.rpc.util.RPCUtil;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Service;
 import io.nuls.tools.log.logback.NulsLogger;
-import io.nuls.tools.protocol.MessageHandler;
 
 import java.util.Map;
 

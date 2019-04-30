@@ -1,7 +1,6 @@
 package io.nuls.test.cases.transcation.batch;
 
 import io.nuls.test.Config;
-import io.nuls.test.cases.SleepAdapter;
 import io.nuls.test.cases.TestCase;
 import io.nuls.test.cases.TestCaseChain;
 import io.nuls.test.cases.TestCaseIntf;
@@ -23,10 +22,10 @@ public class BatchTestCase extends TestCaseChain {
     @Override
     public Class<? extends TestCaseIntf>[] testChain() {
         return new Class[]{
-//                BatchReadyNodeAccountCase.class,
-                BatchCreateAccountCase.class,
-                SleepAdapter.$15SEC.class,
-                BatchCreateTransferCase.class
+                BatchReadyNodeAccountCase.class
+//                BatchCreateAccountCase.class,
+//                SleepAdapter.$15SEC.class,
+//                BatchCreateTransferCase.class
         };
     }
 
@@ -37,9 +36,9 @@ public class BatchTestCase extends TestCaseChain {
 
     @Override
     public Object initParam() {
-        BatchParam param = new BatchParam();
-        param.count = 1000;
-        param.formAddressPriKey = config.getTestSeedAccount();
-        return param;
+//        BatchParam param = new BatchParam();
+//        param.count = 1000;
+//        param.formAddressPriKey = config.getTestSeedAccount();
+        return 10000;
     }
 }

@@ -26,10 +26,10 @@ package io.nuls.transaction.manager;
 
 import io.nuls.db.constant.DBErrorCode;
 import io.nuls.db.service.RocksDBService;
+import io.nuls.rpc.protocol.ProtocolLoader;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.log.logback.NulsLogger;
-import io.nuls.tools.protocol.ProtocolLoader;
 import io.nuls.transaction.constant.TxConfig;
 import io.nuls.transaction.constant.TxConstant;
 import io.nuls.transaction.constant.TxDBConstant;

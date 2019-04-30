@@ -17,12 +17,12 @@ public interface MongoTableConstant {
     String ALIAS_TABLE = "alias_table_";
     //委托记录表
     String DEPOSIT_TABLE = "deposit_table_";
+    //交易表
+    String TX_TABLE = "tx_table_";
     //交易关系记录表
     String TX_RELATION_TABLE = "tx_relation_table_";
     //交易关系记录表
     String TX_UNCONFIRM_RELATION_TABLE = "tx_unconfirm_relation_table_";
-    //交易表
-    String TX_TABLE = "tx_table_";
     //交易表
     String TX_UNCONFIRM_TABLE = "tx_UNCONFIRM_table_";
     //coinData记录

@@ -31,17 +31,16 @@ import io.nuls.rpc.modulebootstrap.Module;
 import io.nuls.rpc.modulebootstrap.NulsRpcModuleBootstrap;
 import io.nuls.rpc.modulebootstrap.RpcModule;
 import io.nuls.rpc.modulebootstrap.RpcModuleState;
+import io.nuls.rpc.protocol.ProtocolGroupManager;
+import io.nuls.rpc.util.RegisterHelper;
 import io.nuls.rpc.util.TimeUtils;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
-import io.nuls.tools.exception.NulsException;
 import io.nuls.transaction.constant.TxConfig;
 import io.nuls.transaction.constant.TxConstant;
 import io.nuls.transaction.constant.TxDBConstant;
 import io.nuls.transaction.manager.ChainManager;
-import io.nuls.transaction.rpc.call.NetworkCall;
 import io.nuls.transaction.utils.DBUtil;
-import io.nuls.transaction.utils.LoggerUtil;
 
 import java.util.Set;
 
@@ -102,12 +101,8 @@ public class TransactionBootstrap extends RpcModule {
 
     @Override
     public void onDependenciesReady(Module module) {
-        try {
-            if (ModuleE.NW.abbr.equals(module.getName())) {
-                NetworkCall.registerProtocol();
-            }
-        } catch (NulsException e) {
-            LoggerUtil.LOG.error(e);
+        if (ModuleE.NW.abbr.equals(module.getName())) {
+            RegisterHelper.registerMsg(ProtocolGroupManager.getOneProtocol());
         }
     }
 

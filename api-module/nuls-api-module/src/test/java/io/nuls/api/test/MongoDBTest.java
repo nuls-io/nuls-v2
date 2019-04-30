@@ -1,11 +1,8 @@
 package io.nuls.api.test;
 
-import com.mongodb.MongoClient;
-import com.mongodb.client.MongoDatabase;
 import io.nuls.api.ApiContext;
 import io.nuls.api.db.mongo.MongoBlockServiceImpl;
 import io.nuls.api.db.mongo.MongoContractServiceImpl;
-import io.nuls.api.db.mongo.MongoDBService;
 import io.nuls.api.model.po.db.BlockHeaderInfo;
 import io.nuls.api.model.po.db.ContractInfo;
 import io.nuls.api.utils.DocumentTransferTool;
@@ -15,9 +12,8 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.math.BigInteger;
+import java.util.ArrayList;
 import java.util.List;
-
-import static io.nuls.api.constant.ApiConstant.DEFAULT_SCAN_PACKAGE;
 
 public class MongoDBTest {
 
@@ -36,18 +32,12 @@ public class MongoDBTest {
     }
 
     @Test
-    public void testDBSave() {
-//        BlockHeaderInfo headerInfo = new BlockHeaderInfo();
-//        headerInfo.setHeight(0L);
-//        headerInfo.setTotalFee(new BigInteger("1000000000000000000000000000000000000001"));
-//
-//        MongoBlockServiceImpl mongoBlockServiceImpl = SpringLiteContext.getBean(MongoBlockServiceImpl.class);
-//        mongoBlockServiceImpl.saveBLockHeaderInfo(2, headerInfo);
+    public void testDBSaveBlock() {
         MongoBlockServiceImpl mongoBlockServiceImpl = SpringLiteContext.getBean(MongoBlockServiceImpl.class);
         long time1, time2;
         time1 = System.currentTimeMillis();
 
-        for (int i = 1; i < 10000000; i++) {
+        for (int i = 1; i < 2; i++) {
             BlockHeaderInfo headerInfo = new BlockHeaderInfo();
             headerInfo.setHeight(i);
             mongoBlockServiceImpl.saveBLockHeaderInfo(2, headerInfo);
@@ -62,7 +52,40 @@ public class MongoDBTest {
 
         BlockHeaderInfo headerInfo = mongoBlockServiceImpl.getBlockHeader(2, 0);
         System.out.println(headerInfo.getHeight());
+    }
 
+    @Test
+    public void testSaveBlocks() {
+        MongoBlockServiceImpl mongoBlockServiceImpl = SpringLiteContext.getBean(MongoBlockServiceImpl.class);
+        BlockHeaderInfo a = mongoBlockServiceImpl.getBlockHeader(2, 0);
+
+        List<BlockHeaderInfo> blockHeaderInfos = new ArrayList<>();
+        for (int i = 1; i < 1000000; i++) {
+            BlockHeaderInfo headerInfo = new BlockHeaderInfo();
+            headerInfo.setHeight(i);
+//            headerInfo.setSize(100);
+//            headerInfo.setTotalFee(new BigInteger("100"));
+//            headerInfo.setAgentVersion(1);
+//            headerInfo.setScriptSign("abcdkeagaadsf");
+//            headerInfo.setPackingAddress("dfadsfadsf");
+//            headerInfo.setAgentHash("fasdfsdafasd");
+//            headerInfo.setMerkleHash("fdsafsdfsdf");
+//            headerInfo.setPreHash("fdsafadsfsd");
+//            headerInfo.setHash("fdsafasdfd");
+//            headerInfo.setTxHashList(List.of("abd","fsdf","Fdsf"));
+//            headerInfo.setAgentAlias("dsfsd");
+//            headerInfo.setAgentId("dfsdf");
+//            headerInfo.setCreateTime(System.nanoTime());
+//            headerInfo.setPackingIndexOfRound(3);
+//            headerInfo.setReward(new BigInteger("2990"));
+//            headerInfo.setTxCount(6);
+//            headerInfo.setRoundIndex(4);
+//            headerInfo.setRoundStartTime(10100);
+//            headerInfo.setSeedPacked(false);
+            blockHeaderInfos.add(headerInfo);
+        }
+//           mongoBlockServiceImpl.saveBulkList(2, blockHeaderInfos);
+        mongoBlockServiceImpl.saveList(2, blockHeaderInfos);
     }
 
     @Test

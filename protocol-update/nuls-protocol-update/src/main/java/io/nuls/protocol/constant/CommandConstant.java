@@ -29,9 +29,6 @@ package io.nuls.protocol.constant;
  */
 public interface CommandConstant {
 
-    //网络消息对应的RPC命令
-
-
     //普通服务对应的RPC命令
     /**
      * 获取主网协议版本号
@@ -50,11 +47,7 @@ public interface CommandConstant {
      */
     String ROLLBACK_BLOCK = "rollbackBlock";
     /**
-     * 回滚区块通知
+     * 注册多版本协议
      */
-    String REGISTER_TX = "registerTx";
-    /**
-     * 回滚区块通知
-     */
-    String REGISTER_MSG = "registerMsg";
+    String REGISTER_PROTOCOL = "registerProtocol";
 }

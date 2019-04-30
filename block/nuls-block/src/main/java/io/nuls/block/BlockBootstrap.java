@@ -13,7 +13,9 @@ import io.nuls.rpc.modulebootstrap.Module;
 import io.nuls.rpc.modulebootstrap.NulsRpcModuleBootstrap;
 import io.nuls.rpc.modulebootstrap.RpcModule;
 import io.nuls.rpc.modulebootstrap.RpcModuleState;
+import io.nuls.rpc.protocol.ProtocolGroupManager;
 import io.nuls.rpc.util.ModuleHelper;
+import io.nuls.rpc.util.RegisterHelper;
 import io.nuls.rpc.util.TimeUtils;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
@@ -75,6 +77,7 @@ public class BlockBootstrap extends RpcModule {
         try {
             super.init();
             initDB();
+            chainManager.initChain();
         } catch (Exception e) {
             Log.error("BlockBootstrap init error!");
             throw new RuntimeException(e);
@@ -106,7 +109,7 @@ public class BlockBootstrap extends RpcModule {
             //启动链
             chainManager.runChain();
         } catch (Exception e) {
-            Log.error("block module doStart error!");
+            Log.error("block module doStart error!" + e);
             return false;
         }
         Log.info("block module ready");
@@ -171,9 +174,8 @@ public class BlockBootstrap extends RpcModule {
 
     @Override
     public void onDependenciesReady(Module module) {
-        super.onDependenciesReady(module);
         if (ModuleE.NW.abbr.equals(module.getName())) {
-//            RegisterHelper.registerMsg(chainId, ProtocolGroupManager.getCurrentProtocol(chainId));
+            RegisterHelper.registerMsg(ProtocolGroupManager.getOneProtocol());
         }
         TimeUtils.getInstance().start();
     }

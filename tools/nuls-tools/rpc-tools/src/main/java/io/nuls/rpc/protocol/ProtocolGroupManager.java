@@ -1,4 +1,4 @@
-package io.nuls.tools.protocol;
+package io.nuls.rpc.protocol;
 
 import java.util.Collection;
 import java.util.List;
@@ -24,6 +24,11 @@ public class ProtocolGroupManager {
 
     public static Protocol getCurrentProtocol(int chainId) {
         return protocolGroupMap.get(chainId).getProtocol();
+    }
+
+    public static Protocol getOneProtocol() {
+        ProtocolGroup o = (ProtocolGroup) protocolGroupMap.values().toArray()[0];
+        return o.getProtocol();
     }
 
     public static Collection<Protocol> getProtocols(int chainId) {

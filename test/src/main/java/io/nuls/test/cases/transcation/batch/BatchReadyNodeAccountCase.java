@@ -22,10 +22,7 @@ import io.nuls.tools.thread.commom.NulsThreadFactory;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
 
 import static io.nuls.test.cases.Constants.REMARK;
 import static io.nuls.test.cases.transcation.batch.BatchCreateAccountCase.TRANSFER_AMOUNT;
@@ -54,6 +51,9 @@ public class BatchReadyNodeAccountCase extends CallRemoteTestCase<Void,Integer> 
     SleepAdapter.$30SEC sleep30;
     @Autowired
     SleepAdapter.$15SEC sleep15;
+
+    @Autowired
+    SleepAdapter.$60SEC sleep60;
 
     @Override
     public String title() {
@@ -104,7 +104,7 @@ public class BatchReadyNodeAccountCase extends CallRemoteTestCase<Void,Integer> 
 //        } catch (InterruptedException e) {
 //            e.printStackTrace();
 //        }
-        sleep15.check(null,depth);
+        sleep60.check(null,depth);
         for (int i = 0;i<accounts.getList().size();i++) {
             String node = nodes.get(i);
             Boolean res = doRemoteTest(node, BatchCreateTransferCase.class, itemCount);

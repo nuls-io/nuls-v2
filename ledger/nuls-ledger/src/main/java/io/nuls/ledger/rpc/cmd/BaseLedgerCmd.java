@@ -26,6 +26,7 @@ package io.nuls.ledger.rpc.cmd;
 
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.data.Transaction;
+import io.nuls.ledger.constant.LedgerErrorCode;
 import io.nuls.rpc.cmd.BaseCmd;
 import io.nuls.rpc.model.message.Response;
 import io.nuls.rpc.util.RPCUtil;
@@ -54,7 +55,7 @@ public class BaseLedgerCmd extends BaseCmd {
                 txList.add(tx);
             } catch (NulsException e) {
                 logger(chainId).error("transaction parse error", e);
-                return failed("transaction parse error");
+                return failed(LedgerErrorCode.TX_IS_WRONG);
             }
         }
         return success();
