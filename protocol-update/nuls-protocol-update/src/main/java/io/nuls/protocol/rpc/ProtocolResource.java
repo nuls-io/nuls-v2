@@ -21,21 +21,21 @@
 package io.nuls.protocol.rpc;
 
 import io.nuls.base.basic.NulsByteBuffer;
+import io.nuls.base.basic.ProtocolVersion;
 import io.nuls.base.data.BlockHeader;
 import io.nuls.protocol.manager.ContextManager;
-import io.nuls.protocol.model.ProtocolVersion;
 import io.nuls.protocol.service.ProtocolService;
 import io.nuls.rpc.cmd.BaseCmd;
 import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.model.CmdAnnotation;
 import io.nuls.rpc.model.Parameter;
 import io.nuls.rpc.model.message.Response;
+import io.nuls.rpc.protocol.Protocol;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.parse.JSONUtils;
-import io.nuls.tools.protocol.Protocol;
 
 import java.util.HashMap;
 import java.util.List;
@@ -65,7 +65,7 @@ public class ProtocolResource extends BaseCmd {
     @Parameter(parameterName = "chainId", parameterType = "int")
     public Response getMainVersion(Map map) {
         int chainId = Integer.parseInt(map.get("chainId").toString());
-        return success(ContextManager.getContext(chainId).getCurrentProtocolVersion().getVersion());
+        return success(ContextManager.getContext(chainId).getCurrentProtocolVersion());
     }
 
     /**
@@ -136,10 +136,10 @@ public class ProtocolResource extends BaseCmd {
      * @param map
      * @return
      */
-    @CmdAnnotation(cmd = REGISTER_TX, version = 1.0, scope = Constants.PUBLIC, description = "")
+    @CmdAnnotation(cmd = REGISTER_PROTOCOL, version = 1.0, scope = Constants.PUBLIC, description = "")
     @Parameter(parameterName = "chainId", parameterType = "int")
     @Parameter(parameterName = "list", parameterType = "List")
-    public Response registerTx(Map map) {
+    public Response registerProtocol(Map map) {
         int chainId = Integer.parseInt(map.get("chainId").toString());
         String moduleCode = map.get("moduleCode").toString();
         List list = (List) map.get("list");
@@ -149,30 +149,6 @@ public class ProtocolResource extends BaseCmd {
         }
         return success();
 
-    }
-
-    /**
-     * 注册多版本消息
-     *
-     * @param map
-     * @return
-     */
-    @CmdAnnotation(cmd = REGISTER_MSG, version = 1.0, scope = Constants.PUBLIC, description = "")
-    @Parameter(parameterName = "chainId", parameterType = "int")
-    @Parameter(parameterName = "blockHeader", parameterType = "string")
-    public Response registerMsg(Map map) {
-        int chainId = Integer.parseInt(map.get("chainId").toString());
-        String hex = map.get("blockHeader").toString();
-        BlockHeader blockHeader = new BlockHeader();
-        try {
-            blockHeader.parse(new NulsByteBuffer(HexUtil.decode(hex)));
-            short i = service.rollback(chainId, blockHeader);
-            Map<String, Short> responseData = new HashMap<>(1);
-            responseData.put("version", i);
-            return success(responseData);
-        } catch (NulsException e) {
-            return failed(e.getMessage());
-        }
     }
 
 }

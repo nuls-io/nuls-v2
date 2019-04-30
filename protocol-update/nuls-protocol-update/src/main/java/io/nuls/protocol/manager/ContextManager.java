@@ -20,10 +20,9 @@
 
 package io.nuls.protocol.manager;
 
+import io.nuls.base.basic.ProtocolVersion;
 import io.nuls.protocol.model.ChainParameters;
-import io.nuls.protocol.model.ProtocolConfig;
 import io.nuls.protocol.model.ProtocolContext;
-import io.nuls.protocol.model.ProtocolVersion;
 
 import java.util.List;
 import java.util.Map;

@@ -50,18 +50,16 @@ public class SchedulerManager {
 
     public boolean createTransactionScheduler(Chain chain) {
         //处理网络新交易Task
-        ScheduledThreadPoolExecutor netTxExecutor = ThreadUtils.createScheduledThreadPool(1,
-                new NulsThreadFactory(txConfig.getModuleCode()));
-        netTxExecutor.scheduleAtFixedRate(new VerifyTxProcessTask(chain),
-                TxConstant.TX_TASK_INITIALDELAY, TxConstant.TX_TASK_PERIOD, TimeUnit.SECONDS);
-        chain.setScheduledThreadPoolExecutor(netTxExecutor);
+        ScheduledThreadPoolExecutor netTxExecutor = ThreadUtils.createScheduledThreadPool(1, new NulsThreadFactory(txConfig.getModuleCode()));
+        netTxExecutor.scheduleAtFixedRate(new VerifyTxProcessTask(chain), TxConstant.TX_TASK_INITIALDELAY, TxConstant.TX_TASK_PERIOD, TimeUnit.SECONDS);
+//        chain.setScheduledThreadPoolExecutor(netTxExecutor);
 
         //孤儿交易
         ScheduledThreadPoolExecutor orphanTxExecutor = ThreadUtils.createScheduledThreadPool(1,
                 new NulsThreadFactory(txConfig.getModuleCode()));
         orphanTxExecutor.scheduleAtFixedRate(new OrphanTxProcessTask(chain),
                 TxConstant.TX_TASK_INITIALDELAY, TxConstant.TX_ORPHAN_TASK_PERIOD, TimeUnit.SECONDS);
-        chain.setScheduledThreadPoolExecutor(orphanTxExecutor);
+//        chain.setScheduledThreadPoolExecutor(orphanTxExecutor);
 
         //未确认交易清理机制Task
         ScheduledThreadPoolExecutor unconfirmedTxExecutor = ThreadUtils.createScheduledThreadPool(1,
@@ -69,7 +67,7 @@ public class SchedulerManager {
         //固定延迟时间
         unconfirmedTxExecutor.scheduleWithFixedDelay(new UnconfirmedTxProcessTask(chain),
                 TxConstant.CLEAN_TASK_INITIALDELAY, TxConstant.CLEAN_TASK_PERIOD, TimeUnit.MINUTES);
-        chain.setScheduledThreadPoolExecutor(unconfirmedTxExecutor);
+//        chain.setScheduledThreadPoolExecutor(unconfirmedTxExecutor);
 
 
         return true;

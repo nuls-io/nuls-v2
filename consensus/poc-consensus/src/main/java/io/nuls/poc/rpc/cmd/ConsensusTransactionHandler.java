@@ -6,12 +6,12 @@ import io.nuls.rpc.cmd.BaseCmd;
 import io.nuls.rpc.model.CmdAnnotation;
 import io.nuls.rpc.model.Parameter;
 import io.nuls.rpc.model.message.Response;
+import io.nuls.rpc.protocol.TransactionProcessor;
+import io.nuls.rpc.protocol.TxMethodType;
 import io.nuls.tools.basic.Result;
 import io.nuls.tools.constant.TxType;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Service;
-import io.nuls.tools.protocol.TransactionProcessor;
-import io.nuls.tools.protocol.TxMethodType;
 
 import java.util.Map;
 

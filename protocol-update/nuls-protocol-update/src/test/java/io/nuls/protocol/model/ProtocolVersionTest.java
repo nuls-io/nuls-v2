@@ -1,13 +1,15 @@
 package io.nuls.protocol.model;
 
 import io.nuls.base.basic.NulsByteBuffer;
+import io.nuls.base.basic.ProtocolVersion;
 import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.exception.NulsException;
 import org.junit.Test;
 
 import java.io.IOException;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
 
 public class ProtocolVersionTest {
 

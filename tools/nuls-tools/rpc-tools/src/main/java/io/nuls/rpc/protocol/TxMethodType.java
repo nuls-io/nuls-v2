@@ -1,4 +1,4 @@
-package io.nuls.tools.protocol;
+package io.nuls.rpc.protocol;
 
 /**
  * 该枚举类标识的是注册到交易模块的交易方法类型
