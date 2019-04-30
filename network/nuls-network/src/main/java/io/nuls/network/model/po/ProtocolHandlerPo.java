@@ -90,4 +90,12 @@ public class ProtocolHandlerPo extends BasePo {
         size += SerializeUtils.sizeOfString(handler);
         return size;
     }
+
+    @Override
+    public String toString() {
+        return "ProtocolHandlerPo{" +
+                "protocolCmd='" + protocolCmd + '\'' +
+                ", handler='" + handler + '\'' +
+                '}';
+    }
 }

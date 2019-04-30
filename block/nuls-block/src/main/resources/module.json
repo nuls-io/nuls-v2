@@ -22,7 +22,7 @@
   "waitInterval": 50,
   "maxRollback": 1000,
   "consistencyNodePercent": 60,
-  "minNodeAmount": 0,
+  "minNodeAmount": 1,
   "downloadNumber": 10,
   "extendMaxSize": 1024,
   "validBlockInterval": 60000,
