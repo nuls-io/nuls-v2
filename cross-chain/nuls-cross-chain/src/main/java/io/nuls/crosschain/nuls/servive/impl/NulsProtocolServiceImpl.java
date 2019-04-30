@@ -357,12 +357,6 @@ public class NulsProtocolServiceImpl implements ProtocolService {
         Chain chain = chainManager.getChainMap().get(handleChainId);
         String nativeHex = messageBody.getRequestHash().getDigestHex();
         chain.getMessageLog().info("接收到请求链节点{}发送的获取完整跨链交易信息,Hash:{}",nodeId,nativeHex);
-        /*
-         * 如果为主网向接收链获取跨链交易，需要首先通过原始交易Hash找到对应的主网协议Hash
-         * */
-        if(!config.isMainNet()){
-            realCtxHash = convertFromCtxService.get(realCtxHash, handleChainId);
-        }
         //查到对应的跨链交易
         Transaction mainCtx = completedCtxService.get(realCtxHash, handleChainId);
         responseMessage.setCtx(mainCtx);
