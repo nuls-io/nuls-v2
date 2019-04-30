@@ -67,7 +67,7 @@ public class MongoBlockServiceImpl implements BlockService {
     public void saveList(int chainId, List<BlockHeaderInfo> blockHeaderInfos) {
         List<Document> documentList = new ArrayList<>();
         for (BlockHeaderInfo headerInfo : blockHeaderInfos) {
-            Document document = DocumentTransferTool.toDocument(headerInfo, "height");
+            Document document = DocumentTransferTool.toDocument(headerInfo);
             documentList.add(document);
         }
         long time1 = System.currentTimeMillis();

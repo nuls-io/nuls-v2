@@ -13,6 +13,7 @@ import io.nuls.api.model.po.db.*;
 import io.nuls.api.model.rpc.BalanceInfo;
 import io.nuls.api.utils.DocumentTransferTool;
 import io.nuls.rpc.util.TimeUtils;
+import io.nuls.tools.basic.InitializingBean;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
 import org.bson.Document;
@@ -25,15 +26,25 @@ import static com.mongodb.client.model.Filters.*;
 import static io.nuls.api.constant.ApiConstant.*;
 import static io.nuls.api.constant.MongoTableConstant.*;
 
-
 @Component
-public class MongoTransactionServiceImpl implements TransactionService {
+public class MongoTransactionServiceImpl implements TransactionService, InitializingBean {
 
     @Autowired
     private MongoDBService mongoDBService;
 
     @Autowired
     private MongoBlockServiceImpl mongoBlockServiceImpl;
+
+    Map<String, List<Document>> relationMap;
+
+    @Override
+    public void afterPropertiesSet() {
+        relationMap = new HashMap<>();
+        for (int i = 0; i < 32; i++) {
+            List<Document> documentList = new ArrayList<>();
+            relationMap.put("relation_" + i, documentList);
+        }
+    }
 
     public void saveTxList(int chainId, List<TransactionInfo> txList) {
         if (txList.isEmpty()) {
@@ -63,14 +74,18 @@ public class MongoTransactionServiceImpl implements TransactionService {
         if (relationInfos.isEmpty()) {
             return;
         }
+       clear();
 
-        List<Document> documentList = new ArrayList<>();
         for (TxRelationInfo relationInfo : relationInfos) {
             Document document = DocumentTransferTool.toDocument(relationInfo);
+            int i = relationInfo.getAddress().hashCode() % 32;
+            List<Document> documentList = relationMap.get("relation_" + i);
             documentList.add(document);
         }
-
-        mongoDBService.insertMany(TX_RELATION_TABLE + chainId, documentList);
+        for (int i = 0; i < 32; i++) {
+            List<Document> documentList = relationMap.get("relation_" + i);
+            mongoDBService.insertMany(TX_RELATION_TABLE + chainId + "_" + i, documentList);
+        }
     }
 
     public PageInfo<TransactionInfo> getTxList(int chainId, int pageIndex, int pageSize, int type, boolean isHidden) {
@@ -305,5 +320,10 @@ public class MongoTransactionServiceImpl implements TransactionService {
         txRelationInfoSet.add(new TxRelationInfo(input.getAddress(), tx, input.getChainId(), input.getAssetsId(), BigInteger.ZERO, TRANSFER_NO_TYPE, balanceInfo.getTotalBalance()));
     }
 
-
+    private void clear(){
+        for (int i = 0; i < 32; i++) {
+            List list = relationMap.get("relation_" + i);
+            list.clear();
+        }
+    }
 }

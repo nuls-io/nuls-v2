@@ -69,7 +69,6 @@ public class MongoDBService implements InitializingBean {
             Log.error(e);
             System.exit(-1);
         }
-
     }
 
     public void createCollection(String collName) {
