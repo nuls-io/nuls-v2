@@ -42,12 +42,11 @@ public class VerifyTxProcessTask implements Runnable {
         long s1 = System.currentTimeMillis();
         int count = 0;
         while ((tx = chain.getUnverifiedQueue().poll()) != null) {
-            chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("待处理队列交易数：{}", chain.getUnverifiedQueue().size());
+            //chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("待处理队列交易数：{}", chain.getUnverifiedQueue().size());
             processTx(chain, tx);
             count++;
         }
-        chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("&&&&&&&&& time:{},&&&&&&&&&&&&& count:{}" ,
-                (System.currentTimeMillis() - s1),count);
+        //chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("&&&&&&&&& time:{},&&&&&&&&&&&&& count:{}" ,(System.currentTimeMillis() - s1),count);
     }
 
     private void processTx(Chain chain, TransactionNetPO txNet){
@@ -61,9 +60,9 @@ public class VerifyTxProcessTask implements Runnable {
             }
 //            chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("验证器花费时间:{}", System.currentTimeMillis() - s1);
 //            long get = System.nanoTime();
-            if(txService.isTxExists(chain, tx.getHash())){
-                return;
-            }
+//            if(txService.isTxExists(chain, tx.getHash())){
+//                return;
+//            }
             chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("交易验证花费时间:{}", System.nanoTime() - s1);
             long timeCoinData = System.nanoTime();
             VerifyLedgerResult verifyLedgerResult = LedgerCall.commitUnconfirmedTx(chain, RPCUtil.encode(tx.serialize()));
