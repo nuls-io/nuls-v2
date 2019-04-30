@@ -1,7 +1,9 @@
 package io.nuls.api.db.mongo;
 
 import com.mongodb.client.model.Filters;
+import com.mongodb.client.model.InsertOneModel;
 import com.mongodb.client.model.Sorts;
+import com.mongodb.client.model.WriteModel;
 import io.nuls.api.cache.ApiCache;
 import io.nuls.api.db.BlockService;
 import io.nuls.api.manager.CacheManager;
@@ -9,6 +11,7 @@ import io.nuls.api.model.po.db.BlockHeaderInfo;
 import io.nuls.api.model.po.db.PageInfo;
 import io.nuls.api.model.po.db.SyncInfo;
 import io.nuls.api.utils.DocumentTransferTool;
+import io.nuls.base.data.BlockHeader;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.model.StringUtils;
@@ -59,6 +62,31 @@ public class MongoBlockServiceImpl implements BlockService {
     public void saveBLockHeaderInfo(int chainId, BlockHeaderInfo blockHeaderInfo) {
         Document document = DocumentTransferTool.toDocument(blockHeaderInfo, "height");
         mongoDBService.insertOne(BLOCK_HEADER_TABLE + chainId, document);
+    }
+
+    public void saveList(int chainId, List<BlockHeaderInfo> blockHeaderInfos) {
+        List<Document> documentList = new ArrayList<>();
+        for (BlockHeaderInfo headerInfo : blockHeaderInfos) {
+            Document document = DocumentTransferTool.toDocument(headerInfo, "height");
+            documentList.add(document);
+        }
+        long time1 = System.currentTimeMillis();
+        mongoDBService.insertMany(BLOCK_HEADER_TABLE + chainId, documentList);
+        long time2 = System.currentTimeMillis();
+        System.out.println("---------------------use:" + (time2 - time1));
+    }
+
+    public void saveBulkList(int chainId, List<BlockHeaderInfo> blockHeaderInfos) {
+        List<WriteModel<Document>> modelList = new ArrayList<>();
+        for (BlockHeaderInfo headerInfo : blockHeaderInfos) {
+            Document document = DocumentTransferTool.toDocument(headerInfo, "height");
+            modelList.add(new InsertOneModel(document));
+        }
+        long time1 = System.currentTimeMillis();
+        mongoDBService.bulkWrite(BLOCK_HEADER_TABLE + chainId, modelList);
+        long time2 = System.currentTimeMillis();
+        System.out.println("---------------------use:" + (time2 - time1));
+
     }
 
     public PageInfo<BlockHeaderInfo> pageQuery(int chainId, int pageIndex, int pageSize, String packingAddress, boolean filterEmptyBlocks) {
