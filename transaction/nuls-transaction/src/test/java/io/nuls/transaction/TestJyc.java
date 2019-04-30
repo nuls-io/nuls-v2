@@ -325,7 +325,7 @@ public class TestJyc {
                     LOG.debug("transfer from {} to {}", address23, packingAddress);
                 }
 
-                Thread.sleep(15000);
+                Thread.sleep(60000);
                 {
                     LOG.debug("3.##########给新创建的地址设置别名##########");
                     BigInteger agentBalance = LedgerCall.getBalance(chain, AddressTool.getAddress(agentAddress), chainId, assetId);
@@ -362,7 +362,7 @@ public class TestJyc {
                         String txHash = (String) result.get("txHash");
                         LOG.debug("packingAddress alias-txHash:{}", txHash);
                     }
-                    Thread.sleep(12000);
+                    Thread.sleep(60000);
                     LOG.debug("4.##########创建节点##########");
                     //创建节点
                     Map agentTxMap = this.createAgentTx(agentAddress, packingAddress);
@@ -373,7 +373,7 @@ public class TestJyc {
                     LOG.debug("createAgent-txHash:{}", agentHash);
                 }
 
-                Thread.sleep(12000);
+                Thread.sleep(60000);
                 {
                     LOG.debug("5.##########进行委托##########");
                     Map<String, Object> dpParams = new HashMap<>();
@@ -454,7 +454,7 @@ public class TestJyc {
                     LOG.debug("stopAgent-txHash:{}", txHash);
                 }
 
-                Thread.sleep(12000);
+                Thread.sleep(60000);
                 {
                     LOG.debug("11.##########查询刚才创建的地址余额并返还给创世块地址##########");
                     BigInteger agentBalance = LedgerCall.getBalance(chain, AddressTool.getAddress(agentAddress), chainId, assetId);
@@ -496,7 +496,7 @@ public class TestJyc {
                     LOG.debug("ac_transfer hash:{}", result.get("value"));
                     assertTrue(response.isSuccess());
                 }
-                Thread.sleep(12000);
+                Thread.sleep(60000);
                 BigInteger agentBalance = LedgerCall.getBalance(chain, AddressTool.getAddress(agentAddress), chainId, assetId);
                 LOG.debug(agentAddress + "---balance:{}", agentBalance);
                 BigInteger packingBalance = LedgerCall.getBalance(chain, AddressTool.getAddress(packingAddress), chainId, assetId);

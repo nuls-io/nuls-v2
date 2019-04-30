@@ -26,6 +26,11 @@ public class ProtocolGroupManager {
         return protocolGroupMap.get(chainId).getProtocol();
     }
 
+    public static Protocol getOneProtocol() {
+        ProtocolGroup o = (ProtocolGroup) protocolGroupMap.values().toArray()[0];
+        return o.getProtocol();
+    }
+
     public static Collection<Protocol> getProtocols(int chainId) {
         return protocolGroupMap.get(chainId).getProtocolsMap().values();
     }
