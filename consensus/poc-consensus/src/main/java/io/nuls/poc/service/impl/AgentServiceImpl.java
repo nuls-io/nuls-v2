@@ -609,7 +609,11 @@ public class AgentServiceImpl implements AgentService {
                 resultMap.put("address", AddressTool.getStringAddressByBytes(member.getAgent().getPackingAddress()));
                 resultMap.put("password", chain.getConfig().getPassword());
             }
-            resultMap.put("agentCount", round.getMemberCount());
+            List<String> packAddressList = new ArrayList<>();
+            for (MeetingMember meetingMember:round.getMemberList()) {
+                packAddressList.add(AddressTool.getStringAddressByBytes(meetingMember.getAgent().getPackingAddress()));
+            }
+            resultMap.put("packAddressList", packAddressList);
             return Result.getSuccess(ConsensusErrorCode.SUCCESS).setData(resultMap);
         }catch (Exception e){
             chain.getLoggerMap().get(ConsensusConstant.BASIC_LOGGER_NAME).error(e);

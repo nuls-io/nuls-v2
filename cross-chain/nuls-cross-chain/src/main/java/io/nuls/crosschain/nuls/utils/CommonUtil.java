@@ -56,7 +56,6 @@ public class CommonUtil {
     }
 
     public static boolean isNulsAsset(int chainId, int assetId) {
-
         if (chainId == config.getMainChainId()
                 && assetId == config.getMainAssetId()) {
             return true;
@@ -65,7 +64,7 @@ public class CommonUtil {
     }
 
     public static boolean isLocalAsset(Coin coin) {
-        return isNulsAsset(coin.getAssetsChainId(), coin.getAssetsId());
+        return isLocalAsset(coin.getAssetsChainId(), coin.getAssetsId());
     }
 
     public static boolean isLocalAsset(int chainId, int assetId) {

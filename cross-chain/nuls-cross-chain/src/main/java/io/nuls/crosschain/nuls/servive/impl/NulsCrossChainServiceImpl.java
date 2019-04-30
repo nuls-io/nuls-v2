@@ -125,6 +125,7 @@ public class NulsCrossChainServiceImpl implements CrossChainService {
                 }
             }
             if(!txValidator.coinDataValid(chain, coinData, tx.size())){
+                chain.getRpcLogger().error("跨链交易CoinData验证失败！");
                 return Result.getFailed(COINDATA_VERIFY_FAIL);
             }
             //判断本链是友链还是主网，如果是友链则需要生成对应的主网协议跨链交易，如果为主网则直接将跨链交易发送给交易模块处理
@@ -134,6 +135,7 @@ public class NulsCrossChainServiceImpl implements CrossChainService {
                 mTransactionSignature.parse(mainCtx.getTransactionSignature(),0);
                 p2PHKSignatures.addAll(mTransactionSignature.getP2PHKSignatures());
                 if(!txValidator.coinDataValid(chain, mainCtx.getCoinDataInstance(), mainCtx.size(),false)){
+                    chain.getRpcLogger().error("生成的主网协议跨链交易CoinData验证失败！");
                     return Result.getFailed(COINDATA_VERIFY_FAIL);
                 }
                 //保存mtx
@@ -147,7 +149,8 @@ public class NulsCrossChainServiceImpl implements CrossChainService {
                 newCtxService.save(tx.getHash(), tx, chainId);
             }
             if(!TransactionCall.sendTx(chain, RPCUtil.encode(tx.serialize()))){
-                throw new NulsException(TX_VERIFY_FAIL);
+                chain.getRpcLogger().error("跨链交易发送交易模块失败");
+                throw new NulsException(INTERFACE_CALL_FAILED);
             }
             Map<String, Object> result = new HashMap<>(2);
             result.put(TX_HASH, tx.getHash().getDigestHex());
@@ -180,6 +183,7 @@ public class NulsCrossChainServiceImpl implements CrossChainService {
             Transaction transaction = new Transaction();
             transaction.parse(RPCUtil.decode(txStr), 0);
             if(!txValidator.validateTx(chain, transaction)){
+                chain.getRpcLogger().error("跨链交易验证失败");
                 return Result.getFailed(TX_DATA_VALIDATION_ERROR);
             }
             Map<String, Object> validResult = new HashMap<>(2);
