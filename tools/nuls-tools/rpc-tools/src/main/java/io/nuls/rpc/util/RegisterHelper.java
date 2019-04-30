@@ -6,12 +6,10 @@ import io.nuls.rpc.model.message.Response;
 import io.nuls.rpc.netty.channel.manager.ConnectManager;
 import io.nuls.rpc.netty.processor.ResponseMessageProcessor;
 import io.nuls.tools.log.Log;
-import io.nuls.tools.protocol.Protocol;
-import io.nuls.tools.protocol.ProtocolGroupManager;
-import io.nuls.tools.protocol.TxDefine;
-import io.nuls.tools.protocol.TxRegisterDetail;
+import io.nuls.tools.protocol.*;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class RegisterHelper {
 
@@ -56,7 +54,7 @@ public class RegisterHelper {
     }
 
     /**
-     * 向交易模块注册交易
+     * 向协议升级模块注册多版本协议配置
      * Register transactions with the transaction module
      */
     public static boolean registerProtocol(int chainId) {
@@ -84,7 +82,7 @@ public class RegisterHelper {
     }
 
     /**
-     * 注册消息处理器
+     * 向网络模块注册消息
      *
      * @return
      */
@@ -93,13 +91,15 @@ public class RegisterHelper {
             Map<String, Object> map = new HashMap<>(2);
             List<Map<String, String>> cmds = new ArrayList<>();
             map.put("role", ConnectManager.LOCAL.getAbbreviation());
-            protocol.getAllowMsg().stream().map(e -> e.getName());
-            List<String> list = List.of();
-            for (String s : list) {
-                Map<String, String> cmd = new HashMap<>(2);
-                cmd.put("protocolCmd", s);
-                cmd.put("handler", s);
-                cmds.add(cmd);
+            List<String> collect = protocol.getAllowMsg().stream().map(MessageDefine::getProtocolCmd).collect(Collectors.toList());
+            for (String s : collect) {
+                String[] split = s.split(",");
+                for (String s1 : split) {
+                    Map<String, String> cmd = new HashMap<>(2);
+                    cmd.put("protocolCmd", s1);
+                    cmd.put("handler", s1);
+                    cmds.add(cmd);
+                }
             }
             map.put("protocolCmds", cmds);
             ResponseMessageProcessor.requestAndResponse(ModuleE.NW.abbr, "nw_protocolRegister", map);

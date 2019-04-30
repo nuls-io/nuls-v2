@@ -92,7 +92,8 @@ public class MessageRpc extends BaseCmd {
             roleProtocolPo.setRole(role);
             roleProtocolPo.setProtocolHandlerPos(protocolHandlerPos);
             StorageManager.getInstance().getDbService().saveOrUpdateProtocolRegisterInfo(roleProtocolPo);
-
+            LoggerUtil.logger().info("----------------------------new message register---------------------------");
+            LoggerUtil.logger().info(roleProtocolPo.toString());
         } catch (Exception e) {
             e.printStackTrace();
             return failed(NetworkErrorCode.PARAMETER_ERROR);

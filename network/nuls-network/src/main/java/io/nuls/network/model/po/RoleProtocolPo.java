@@ -101,4 +101,12 @@ public class RoleProtocolPo extends BasePo {
         }
         return size;
     }
+
+    @Override
+    public String toString() {
+        return "RoleProtocolPo{" +
+                "role='" + role + '\'' +
+                ", protocolHandlerPos=" + protocolHandlerPos +
+                '}';
+    }
 }

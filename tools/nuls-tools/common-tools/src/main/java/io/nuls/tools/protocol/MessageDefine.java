@@ -6,6 +6,7 @@ import java.util.List;
 public class MessageDefine {
     private String name;
     private String handlers;
+    private String protocolCmd;
     private List<MessageProcessor> processors;
 
     public List<MessageProcessor> getProcessors() {
@@ -27,6 +28,14 @@ public class MessageDefine {
         return name;
     }
 
+    public String getProtocolCmd() {
+        return protocolCmd;
+    }
+
+    public void setProtocolCmd(String protocolCmd) {
+        this.protocolCmd = protocolCmd;
+    }
+
     public void setName(String name) {
         this.name = name;
     }
@@ -39,6 +48,8 @@ public class MessageDefine {
     public String toString() {
         return "MessageDefine{" +
                 "name='" + name + '\'' +
+                ", handlers='" + handlers + '\'' +
+                ", protocolCmd='" + protocolCmd + '\'' +
                 ", processors=" + processors +
                 '}';
     }

@@ -51,13 +51,21 @@ public class ChainManager {
     @Autowired
     private BlockService service;
 
+    public void initChain() throws Exception {
+        //加载配置
+        ConfigLoader.load();
+        List<Integer> chainIds = ContextManager.chainIds;
+        for (Integer chainId : chainIds) {
+            initTable(chainId);
+            ProtocolLoader.load(chainId);
+        }
+    }
+
     /**BlockSynchronizer
      * 初始化并启动链
      * Initialize and start the chain
      */
     public void runChain() throws Exception {
-        //加载配置
-        ConfigLoader.load();
         List<Integer> chainIds = ContextManager.chainIds;
         for (Integer chainId : chainIds) {
             List<Integer> systemTypes = TransactionUtil.getSystemTypes(chainId);
@@ -65,10 +73,8 @@ public class ChainManager {
                 Thread.sleep(1000);
                 systemTypes = TransactionUtil.getSystemTypes(chainId);
             }
-            initTable(chainId);
             //服务初始化
             service.init(chainId);
-            ProtocolLoader.load(chainId);
         }
     }
 
