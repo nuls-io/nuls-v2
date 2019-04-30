@@ -290,7 +290,6 @@ public class NulsProtocolServiceImpl implements ProtocolService {
         try {
             originalHash.parse(messageBody.getCtx().getTxData(),0);
             originalHex = originalHash.getDigestHex();
-            String hashMessage = "originalHash:" + originalHex + ",Hash:" + nativeHex;
             chain.getMessageLog().info("收到链内节点:{}发送过来的完整跨链交易信息,originalHash:{},Hash:{}",nodeId,originalHex,nativeHex);
             //判断本节点是否已经收到过该跨链交易，如果已收到过直接忽略
             if(convertToCtxService.get(originalHash, handleChainId) != null){
@@ -510,7 +509,7 @@ public class NulsProtocolServiceImpl implements ProtocolService {
             chain.getVerifyCtxResultMap().put(nativeHash, new ArrayList<>());
         }
         //接收验证结果，统计结果并做拜占庭得到最终验证结果，如果验证结果为验证不通过则删除该消息
-        boolean validResult = verifyResult(chain, chain.getChainId(), nativeHash);
+        boolean validResult = verifyResult(chain, fromChainId, nativeHash);
         //如果验证不通过，结束
         if(!validResult){
             chain.getMessageLog().info("该跨链交易拜占庭验证失败，originalHash:{},Hash:{}\n",originalHex,nativeHex);
@@ -576,6 +575,7 @@ public class NulsProtocolServiceImpl implements ProtocolService {
                 Thread.sleep(2000);
                 tryCount++;
             }
+            chain.getMessageLog().info("跨链交易拜占庭验证完成，验证结果为：{}",validResult );
             return validResult;
         }catch (Exception e){
             chain.getMessageLog().error(e);
