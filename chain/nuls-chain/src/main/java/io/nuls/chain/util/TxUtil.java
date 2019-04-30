@@ -81,12 +81,11 @@ public class TxUtil {
             byte[] txStream = RPCUtil.decode(txHex);
             Transaction tx = new Transaction();
             tx.parse(new NulsByteBuffer(txStream));
-
+            return tx;
         } catch (Exception e) {
             e.printStackTrace();
             LoggerUtil.logger().error("transaction parse error", e);
             return null;
         }
-        return null;
     }
 }
