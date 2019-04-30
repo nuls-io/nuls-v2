@@ -32,6 +32,7 @@ import io.nuls.network.manager.NodeGroupManager;
 import io.nuls.network.model.dto.Dto;
 import io.nuls.network.model.po.*;
 import io.nuls.network.netty.container.NodesContainer;
+import io.nuls.network.utils.LoggerUtil;
 import io.nuls.tools.core.ioc.SpringLiteContext;
 
 import java.math.BigDecimal;
@@ -392,10 +393,12 @@ public class NodeGroup implements Dto {
         this.crossNodeContainer.setStatus(RECONNECT);
         Collection<Node> nodes = this.localNetNodeContainer.getConnectedNodes().values();
         for (Node node : nodes) {
+            LoggerUtil.logger(chainId).info("local chainId={} node={} reconnect",chainId,node.getId());
             node.close();
         }
         Collection<Node> crossNodes = this.crossNodeContainer.getConnectedNodes().values();
         for (Node node : crossNodes) {
+            LoggerUtil.logger(chainId).info("cross chainId={} node={} reconnect",chainId,node.getId());
             node.close();
         }
         this.localNetNodeContainer.setStatus(WAIT2);
