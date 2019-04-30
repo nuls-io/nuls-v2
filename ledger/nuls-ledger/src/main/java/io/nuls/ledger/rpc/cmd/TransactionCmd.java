@@ -116,17 +116,15 @@ public class TransactionCmd extends BaseLedgerCmd {
                 LoggerUtil.logger(chainId).debug("commitBlockTxs response={}", parseResponse);
                 return parseResponse;
             }
-            List<Integer> orphanList = new ArrayList<>();
-            List<Integer> failList = new ArrayList<>();
-            int i = 0;
+            List<String> orphanList = new ArrayList<>();
+            List<String> failList = new ArrayList<>();
             for (Transaction tx : txList) {
                 ValidateResult validateResult = transactionService.unConfirmTxProcess(chainId, tx);
                 if (validateResult.isSuccess() || validateResult.isOrphan()) {
-                    orphanList.add(i);
+                    orphanList.add(tx.getHash().toString());
                 } else {
-                    failList.add(i);
+                    failList.add(tx.getHash().toString());
                 }
-                i++;
             }
 
             Map<String, Object> rtMap = new HashMap<>(2);
