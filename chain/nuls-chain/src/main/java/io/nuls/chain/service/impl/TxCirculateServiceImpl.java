@@ -140,8 +140,9 @@ public class TxCirculateServiceImpl implements TxCirculateService {
             Set<String> assetKeys = fromAssetMap.keySet();
             for (String assetKey : assetKeys) {
                 ChainAsset fromChainAsset = assetService.getChainAsset(fromChainId, assetKey);
-                BigDecimal currentAsset = new BigDecimal(fromChainAsset.getOutNumber()).add(new BigDecimal(fromAssetMap.get(assetKey)));
-                fromChainAsset.setOutNumber(BigIntegerUtils.stringToBigInteger(currentAsset.toString()));
+                BigInteger tempAmount = fromAssetMap.get(assetKey)==null?BigInteger.ZERO: fromAssetMap.get(assetKey);
+                BigInteger currentAsset = fromChainAsset.getOutNumber().add(tempAmount);
+                fromChainAsset.setOutNumber(currentAsset);
                 assetService.saveOrUpdateChainAsset(fromChainId, fromChainAsset);
             }
             if (!isMainChain(toChainId)) {
@@ -178,9 +179,10 @@ public class TxCirculateServiceImpl implements TxCirculateService {
                     toChainAsset.setAssetId(asset.getAssetId());
                     toChainAsset.setInNumber(toAssetMap.get(toAssetKey));
                 } else {
-                    BigDecimal inAsset = new BigDecimal(toChainAsset.getInNumber());
-                    BigDecimal inNumberBigDec = new BigDecimal(toAssetMap.get(toAssetKey)).add(inAsset);
-                    toChainAsset.setInNumber(BigIntegerUtils.stringToBigInteger(inNumberBigDec.toString()));
+                    BigInteger inAsset = toChainAsset.getInNumber();
+                    BigInteger tempAmount = toAssetMap.get(toAssetKey)==null?BigInteger.ZERO:toAssetMap.get(toAssetKey);
+                    BigInteger inNumberBigInt = tempAmount.add(inAsset);
+                    toChainAsset.setInNumber(inNumberBigInt);
                 }
                 assetService.saveOrUpdateChainAsset(toChainId, toChainAsset);
             }
