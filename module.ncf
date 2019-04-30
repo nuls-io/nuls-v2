@@ -13,12 +13,12 @@ chainName=nuls
 mainChainId=2
 mainAssetId=1
 [network]
-port=18001
+port=8888
 crossPort=28001
 #魔法参数
-packetMagic=2000
+packetMagic=19900725
 #种子节点
-selfSeedIps=192.168.1.155:8080
+selfSeedIps=192.168.1.32:8888,192.168.1.191:8888,192.168.1.190:8888
 
 [account]
 keystoreFolder=/keystore/backup
@@ -60,7 +60,7 @@ maxRollback=1000
 #统计网络上的节点最新区块高度、hash一致的百分比阈值
 consistencyNodePercent=60
 #最小链接节点数,当链接到的网络节点低于此参数时,会持续等待
-minNodeAmount=2
+minNodeAmount=0
 #区块同步过程中,每次从网络上节点下载的区块数量
 downloadNumber=10
 #为阻止恶意节点提前出块,设置此参数,区块时间戳大于当前时间多少就丢弃该区块

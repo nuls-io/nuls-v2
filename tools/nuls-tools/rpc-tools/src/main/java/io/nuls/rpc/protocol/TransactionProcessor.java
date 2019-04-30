@@ -21,19 +21,30 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package io.nuls.tools.protocol;
+package io.nuls.rpc.protocol;
 
-import java.lang.annotation.*;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
 /**
  * Created by zhouwei on 2017/10/26.
  */
 @Retention(RetentionPolicy.RUNTIME)
-@Target({ElementType.METHOD, ElementType.TYPE})
-public @interface MessageHandler {
+@Target({ElementType.METHOD})
+public @interface TransactionProcessor {
     /**
-     * 消息处理类要处理的消息类型
+     * 交易类型
+     *
      * @return
      */
-    Class message();
+    int txType();
+
+    /**
+     * 交易处理类型
+     *
+     * @return
+     */
+    TxMethodType methodType();
 }
