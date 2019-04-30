@@ -1,8 +1,6 @@
-package io.nuls.protocol.model;
+package io.nuls.base.basic;
 
 import com.google.common.base.Objects;
-import io.nuls.base.basic.NulsByteBuffer;
-import io.nuls.base.basic.NulsOutputStreamBuffer;
 import io.nuls.base.data.BaseNulsData;
 import io.nuls.tools.exception.NulsException;
 

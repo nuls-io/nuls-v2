@@ -1,6 +1,7 @@
 package io.nuls.poc.rpc.call;
 
 import io.nuls.base.basic.AddressTool;
+import io.nuls.base.basic.ProtocolVersion;
 import io.nuls.base.data.BlockExtendsData;
 import io.nuls.base.data.BlockHeader;
 import io.nuls.base.data.Transaction;
@@ -21,6 +22,7 @@ import io.nuls.rpc.util.TimeUtils;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.log.Log;
 import io.nuls.tools.model.StringUtils;
+import io.nuls.tools.parse.JSONUtils;
 
 import java.util.*;
 
@@ -585,6 +587,50 @@ public class CallMethodUtils {
         }catch (Exception e){
             chain.getLoggerMap().get(ConsensusConstant.CONSENSUS_LOGGER_NAME).error(e);
             return false;
+        }
+    }
+
+    /**
+     * 获取账户锁定金额和可用余额
+     * Acquire account lock-in amount and available balance
+     *
+     * @param chainId
+     */
+    @SuppressWarnings("unchecked")
+    public static ProtocolVersion getMainVersion(int chainId) throws NulsException {
+        Map<String, Object> params = new HashMap(4);
+        params.put("chainId", chainId);
+        try {
+            Response callResp = ResponseMessageProcessor.requestAndResponse(ModuleE.PU.abbr, "getMainVersion", params);
+            if (!callResp.isSuccess()) {
+                return null;
+            }
+            Map map = (Map) ((Map) callResp.getResponseData()).get("getMainVersion");
+            return JSONUtils.map2pojo(map, ProtocolVersion.class);
+        } catch (Exception e) {
+            throw new NulsException(e);
+        }
+    }
+
+    /**
+     * 获取账户锁定金额和可用余额
+     * Acquire account lock-in amount and available balance
+     *
+     * @param chainId
+     */
+    @SuppressWarnings("unchecked")
+    public static ProtocolVersion getLocalVersion(int chainId) throws NulsException {
+        Map<String, Object> params = new HashMap(4);
+        params.put("chainId", chainId);
+        try {
+            Response callResp = ResponseMessageProcessor.requestAndResponse(ModuleE.PU.abbr, "getBlockVersion", params);
+            if (!callResp.isSuccess()) {
+                return null;
+            }
+            Map map = (Map) ((Map) callResp.getResponseData()).get("getBlockVersion");
+            return JSONUtils.map2pojo(map, ProtocolVersion.class);
+        } catch (Exception e) {
+            throw new NulsException(e);
         }
     }
 }

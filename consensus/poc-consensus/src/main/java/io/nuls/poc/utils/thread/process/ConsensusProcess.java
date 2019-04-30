@@ -1,6 +1,7 @@
 package io.nuls.poc.utils.thread.process;
 
 import io.nuls.base.basic.AddressTool;
+import io.nuls.base.basic.ProtocolVersion;
 import io.nuls.base.data.Block;
 import io.nuls.base.data.BlockExtendsData;
 import io.nuls.base.data.BlockHeader;
@@ -15,10 +16,10 @@ import io.nuls.poc.rpc.call.CallMethodUtils;
 import io.nuls.poc.utils.enumeration.ConsensusStatus;
 import io.nuls.poc.utils.manager.ConsensusManager;
 import io.nuls.poc.utils.manager.RoundManager;
+import io.nuls.rpc.util.ModuleHelper;
 import io.nuls.rpc.util.RPCUtil;
 import io.nuls.rpc.util.TimeUtils;
 import io.nuls.tools.core.ioc.SpringLiteContext;
-import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.log.logback.NulsLogger;
 import io.nuls.tools.model.DateUtils;
@@ -242,6 +243,22 @@ public class ConsensusProcess {
         }
     }
 
+    public void fillProtocol(BlockExtendsData extendsData, int chainId) throws NulsException {
+        if (ModuleHelper.isSupportProtocolUpdate()) {
+            ProtocolVersion mainVersion = CallMethodUtils.getMainVersion(chainId);
+            ProtocolVersion localVersion = CallMethodUtils.getLocalVersion(chainId);
+            extendsData.setMainVersion(mainVersion.getVersion());
+            extendsData.setBlockVersion(localVersion.getVersion());
+            extendsData.setEffectiveRatio(localVersion.getEffectiveRatio());
+            extendsData.setContinuousIntervalCount(localVersion.getContinuousIntervalCount());
+        } else {
+            extendsData.setMainVersion((short) 1);
+            extendsData.setBlockVersion((short) 1);
+            extendsData.setEffectiveRatio((byte) 80);
+            extendsData.setContinuousIntervalCount((short) 100);
+        }
+    }
+
     @SuppressWarnings("unchecked")
     private Block doPacking(Chain chain, MeetingMember self, MeetingRound round) throws Exception{
         BlockHeader bestBlock = chain.getNewestHeader();
@@ -255,10 +272,7 @@ public class ConsensusProcess {
         extendsData.setConsensusMemberCount(round.getMemberCount());
         extendsData.setPackingIndexOfRound(self.getPackingIndexOfRound());
         extendsData.setRoundStartTime(round.getStartTime());
-        extendsData.setMainVersion((short) 1);
-        extendsData.setBlockVersion((short) 1);
-        extendsData.setEffectiveRatio((byte) 80);
-        extendsData.setContinuousIntervalCount((short) 100);
+        fillProtocol(extendsData, chain.getConfig().getChainId());
 
         Map<String,Object> resultMap = CallMethodUtils.getPackingTxList(chain,bd.getTime(),AddressTool.getStringAddressByBytes(self.getAgent().getPackingAddress()));
         List<Transaction> packingTxList = new ArrayList<>();
