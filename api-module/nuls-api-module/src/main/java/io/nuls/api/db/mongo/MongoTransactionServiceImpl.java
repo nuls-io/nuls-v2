@@ -74,11 +74,11 @@ public class MongoTransactionServiceImpl implements TransactionService, Initiali
         if (relationInfos.isEmpty()) {
             return;
         }
-       clear();
+        clear();
 
         for (TxRelationInfo relationInfo : relationInfos) {
             Document document = DocumentTransferTool.toDocument(relationInfo);
-            int i = relationInfo.getAddress().hashCode() % 32;
+            int i = Math.abs(relationInfo.getAddress().hashCode()) % 32;
             List<Document> documentList = relationMap.get("relation_" + i);
             documentList.add(document);
         }
@@ -96,7 +96,7 @@ public class MongoTransactionServiceImpl implements TransactionService, Initiali
             filter = ne("type", 1);
         }
         long totalCount = mongoDBService.getCount(TX_TABLE + chainId, filter);
-        List<Document> docList = this.mongoDBService.pageQuery(TX_TABLE + chainId, filter, Sorts.descending("height", "createTime"), pageIndex, pageSize);
+        List<Document> docList = this.mongoDBService.pageQuery(TX_TABLE + chainId, filter, Sorts.descending("createTime"), pageIndex, pageSize);
         List<TransactionInfo> txList = new ArrayList<>();
         for (Document document : docList) {
             txList.add(TransactionInfo.fromDocument(document));
@@ -130,7 +130,7 @@ public class MongoTransactionServiceImpl implements TransactionService, Initiali
         }
         long count = mongoDBService.getCount(TX_TABLE + chainId, filter);
         List<TransactionInfo> txList = new ArrayList<>();
-        List<Document> docList = this.mongoDBService.pageQuery(TX_TABLE + chainId, filter, Sorts.descending("height", "time"), pageIndex, pageSize);
+        List<Document> docList = this.mongoDBService.pageQuery(TX_TABLE + chainId, filter, Sorts.descending("createTime"), pageIndex, pageSize);
         for (Document document : docList) {
             txList.add(TransactionInfo.fromDocument(document));
         }
@@ -155,12 +155,15 @@ public class MongoTransactionServiceImpl implements TransactionService, Initiali
         if (txHashList.isEmpty()) {
             return;
         }
+
         List<DeleteManyModel<Document>> list = new ArrayList<>();
         for (String hash : txHashList) {
             DeleteManyModel model = new DeleteManyModel(Filters.eq("txHash", hash));
             list.add(model);
         }
-        mongoDBService.bulkWrite(TX_RELATION_TABLE + chainId, list);
+        for (int i = 0; i < 32; i++) {
+            mongoDBService.bulkWrite(TX_RELATION_TABLE + chainId + "_" + i, list);
+        }
     }
 
     public void rollbackTx(int chainId, List<String> txHashList) {
@@ -320,7 +323,7 @@ public class MongoTransactionServiceImpl implements TransactionService, Initiali
         txRelationInfoSet.add(new TxRelationInfo(input.getAddress(), tx, input.getChainId(), input.getAssetsId(), BigInteger.ZERO, TRANSFER_NO_TYPE, balanceInfo.getTotalBalance()));
     }
 
-    private void clear(){
+    private void clear() {
         for (int i = 0; i < 32; i++) {
             List list = relationMap.get("relation_" + i);
             list.clear();

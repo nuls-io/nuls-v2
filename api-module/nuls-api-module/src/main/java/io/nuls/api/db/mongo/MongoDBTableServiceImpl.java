@@ -104,13 +104,12 @@ public class MongoDBTableServiceImpl implements DBTableService {
             mongoDBService.createIndex(MongoTableConstant.TX_RELATION_TABLE + chainId + "_" + i, Indexes.ascending("address"));
             mongoDBService.createIndex(MongoTableConstant.TX_RELATION_TABLE + chainId + "_" + i, Indexes.ascending("address", "type"));
             mongoDBService.createIndex(MongoTableConstant.TX_RELATION_TABLE + chainId + "_" + i, Indexes.ascending("txHash"));
-            mongoDBService.createIndex(MongoTableConstant.TX_RELATION_TABLE + chainId + "_" + i, Indexes.descending("height", "createTime"));
+            mongoDBService.createIndex(MongoTableConstant.TX_RELATION_TABLE + chainId + "_" + i, Indexes.descending("createTime"));
         }
-
         //账户信息表
         mongoDBService.createIndex(MongoTableConstant.ACCOUNT_TABLE + chainId, Indexes.descending("totalBalance"));
         //交易表
-        mongoDBService.createIndex(MongoTableConstant.TX_TABLE + chainId, Indexes.descending("height", "createTime"));
+        mongoDBService.createIndex(MongoTableConstant.TX_TABLE + chainId, Indexes.descending("createTime"));
         //block 表
         mongoDBService.createIndex(MongoTableConstant.BLOCK_HEADER_TABLE + chainId, Indexes.ascending("hash"));
     }
