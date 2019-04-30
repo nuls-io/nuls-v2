@@ -56,6 +56,10 @@ public interface CmdConstant {
      */
     String CMD_COMMIT_UNCONFIRMED_TX = "commitUnconfirmedTx";
     /**
+     * 批量提交未确认交易
+     */
+    String CMD_COMMIT_UNCONFIRMED_TXS = "commitBatchUnconfirmedTxs";
+    /**
      * 回滚未确认交易
      */
     String CMD_ROLLBACK_UNCONFIRMED_TX = "rollBackUnconfirmTx";
