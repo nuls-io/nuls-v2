@@ -1,15 +1,11 @@
 package io.nuls.api.test;
 
-import com.mongodb.MongoClient;
-import com.mongodb.client.MongoDatabase;
 import io.nuls.api.ApiContext;
 import io.nuls.api.db.mongo.MongoBlockServiceImpl;
 import io.nuls.api.db.mongo.MongoContractServiceImpl;
-import io.nuls.api.db.mongo.MongoDBService;
 import io.nuls.api.model.po.db.BlockHeaderInfo;
 import io.nuls.api.model.po.db.ContractInfo;
 import io.nuls.api.utils.DocumentTransferTool;
-import io.nuls.base.data.BlockHeader;
 import io.nuls.tools.core.ioc.SpringLiteContext;
 import org.bson.Document;
 import org.junit.Before;
@@ -18,8 +14,6 @@ import org.junit.Test;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
-
-import static io.nuls.api.constant.ApiConstant.DEFAULT_SCAN_PACKAGE;
 
 public class MongoDBTest {
 
@@ -90,8 +84,8 @@ public class MongoDBTest {
 //            headerInfo.setSeedPacked(false);
             blockHeaderInfos.add(headerInfo);
         }
-        mongoBlockServiceImpl.saveBulkList(2, blockHeaderInfos);
-
+//           mongoBlockServiceImpl.saveBulkList(2, blockHeaderInfos);
+        mongoBlockServiceImpl.saveList(2, blockHeaderInfos);
     }
 
     @Test

@@ -191,17 +191,17 @@ public class CoinDataManager {
         //交易中已收取的手续费
         BigInteger actualFee = feeTotalFrom.subtract(feeTotalTo);
         if (BigIntegerUtils.isLessThan(actualFee, BigInteger.ZERO)) {
-            chain.getRpcLogger().error("转出金额小于转出金额");
-            //所有from中账户的nuls余额总和小于to的总和，不够支付手续费
+            chain.getRpcLogger().error("转出金额小于转入金额");
+            //所有from中账户的余额总和小于to的总和，不够支付手续费
             throw new NulsException(INSUFFICIENT_FEE);
         } else if (BigIntegerUtils.isLessThan(actualFee, targetFee)) {
-            //只从资产为nuls的coinfrom中收取手续费
+            //先从有手续费资产的账户收取
             actualFee = getFeeDirect(chain, listFrom, targetFee, actualFee, isLocalCtx);
             if (BigIntegerUtils.isLessThan(actualFee, targetFee)) {
-                //如果没收到足够的手续费，则从CoinFrom中资产不是nuls的coin账户中查找nuls余额，并组装新的coinfrom来收取手续费
+                //如果没收到足够的手续费，则从CoinFrom中资产不是手续费资产的coin账户中查找资产余额，并组装新的coinfrom来收取手续费
                 if (!getFeeIndirect(chain, listFrom, txSize, targetFee, actualFee, isLocalCtx)) {
                     chain.getRpcLogger().error("余额不足");
-                    //所有from中账户的nuls余额总和都不够支付手续费
+                    //所有from中账户的余额总和都不够支付手续费
                     throw new NulsException(INSUFFICIENT_FEE);
                 }
             }

@@ -9,6 +9,7 @@ import io.nuls.crosschain.nuls.constant.NulsCrossChainConstant;
 import io.nuls.crosschain.nuls.constant.NulsCrossChainErrorCode;
 import io.nuls.crosschain.nuls.model.bo.Chain;
 import io.nuls.crosschain.nuls.rpc.call.ChainManagerCall;
+import io.nuls.crosschain.nuls.srorage.ConvertFromCtxService;
 import io.nuls.crosschain.nuls.srorage.ConvertToCtxService;
 import io.nuls.crosschain.nuls.srorage.NewCtxService;
 import io.nuls.crosschain.nuls.utils.CommonUtil;
@@ -40,7 +41,7 @@ public class CrossTxValidator {
     private NewCtxService newCtxService;
 
     @Autowired
-    private ConvertToCtxService convertCtxHashService;
+    private ConvertFromCtxService convertFromCtxService;
 
     /**
      * 验证交易
@@ -59,12 +60,12 @@ public class CrossTxValidator {
         //如果本链为发起链且本链不为主链,则需要生成主网协议的跨链交易验证并验证签名
         int fromChainId = AddressTool.getChainIdByAddress(coinData.getFrom().get(0).getAddress());
         if (!config.isMainNet() && chain.getChainId() == fromChainId) {
-            NulsDigestData mainTxHash = convertCtxHashService.get(tx.getHash(), chain.getChainId());
+            NulsDigestData mainTxHash = convertFromCtxService.get(tx.getHash(), chain.getChainId());
             Transaction mainTx;
             if (mainTxHash == null) {
                 mainTx = TxUtil.friendConvertToMain(chain, tx, null, NulsCrossChainConstant.TX_TYPE_CROSS_CHAIN);
                 if (SignatureUtil.validateTransactionSignture(mainTx)) {
-                    convertCtxHashService.save(tx.getHash(), mainTx.getHash(), chain.getChainId());
+                    convertFromCtxService.save(tx.getHash(), mainTx.getHash(), chain.getChainId());
                     newCtxService.save(mainTx.getHash(), mainTx, chain.getChainId());
                 }
             } else {

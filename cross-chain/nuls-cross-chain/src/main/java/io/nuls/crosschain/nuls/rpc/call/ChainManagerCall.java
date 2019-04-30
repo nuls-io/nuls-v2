@@ -52,7 +52,7 @@ public class ChainManagerCall {
             params.put(Constants.VERSION_KEY_STR, RPC_VERSION);
             params.put("chainId", chainId);
             params.put("txList", txList);
-            params.put("blockHeaderDigest", blockHeader);
+            params.put("blockHeader", blockHeader);
             HashMap result = (HashMap) CommonCall.request(ModuleE.CM.abbr,"cm_assetCirculateCommit", params);
             return (boolean) result.get("value");
         } catch (Exception e) {
@@ -75,7 +75,7 @@ public class ChainManagerCall {
             params.put(Constants.VERSION_KEY_STR, RPC_VERSION);
             params.put("chainId", chainId);
             params.put("txList", txList);
-            params.put("blockHeaderDigest", blockHeader);
+            params.put("blockHeader", blockHeader);
             HashMap result = (HashMap) CommonCall.request(ModuleE.CM.abbr,"cm_assetCirculateRollBack", params);
             return (boolean) result.get("value");
         } catch (Exception e) {

@@ -96,6 +96,50 @@ public class TransactionCmd extends BaseLedgerCmd {
     }
 
     /**
+     * 未确认交易提交
+     *
+     * @param params
+     * @return
+     */
+    @CmdAnnotation(cmd = CmdConstant.CMD_COMMIT_UNCONFIRMED_TXS,
+            version = 1.0,
+            description = "")
+    @Parameter(parameterName = "chainId", parameterType = "int")
+    @Parameter(parameterName = "txList", parameterType = "List")
+    public Response commitBatchUnconfirmedTxs(Map params) {
+        Integer chainId = (Integer) params.get("chainId");
+        try {
+            List<String> txStrList = (List) params.get("txList");
+            List<Transaction> txList = new ArrayList<>();
+            Response parseResponse = parseTxs(txStrList, txList, chainId);
+            if (!parseResponse.isSuccess()) {
+                LoggerUtil.logger(chainId).debug("commitBlockTxs response={}", parseResponse);
+                return parseResponse;
+            }
+            List<String> orphanList = new ArrayList<>();
+            List<String> failList = new ArrayList<>();
+            for (Transaction tx : txList) {
+                ValidateResult validateResult = transactionService.unConfirmTxProcess(chainId, tx);
+                if (validateResult.isSuccess() || validateResult.isOrphan()) {
+                    orphanList.add(tx.getHash().toString());
+                } else {
+                    failList.add(tx.getHash().toString());
+                }
+            }
+
+            Map<String, Object> rtMap = new HashMap<>(2);
+            rtMap.put("fail",failList);
+            rtMap.put("orphan",orphanList);
+            return success(rtMap);
+        } catch (Exception e) {
+            e.printStackTrace();
+            LoggerUtil.logger(chainId).error("commitBatchUnconfirmedTxs exception ={}", e.getMessage());
+            return failed(e.getMessage());
+        }
+
+    }
+
+    /**
      * 区块交易提交
      *
      * @param params
