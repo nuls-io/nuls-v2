@@ -95,7 +95,7 @@ public class TxServiceImpl implements TxService {
 
 
     private ExecutorService verifySignExecutor = ThreadUtils.createThreadPool(Runtime.getRuntime().availableProcessors(), Integer.MAX_VALUE, new NulsThreadFactory(TxConstant.THREAD_VERIFIY_BLOCK_TXS));
-    private ExecutorService clearTxExecutor = ThreadUtils.createThreadPool(1, Integer.MAX_VALUE, new NulsThreadFactory(TxConstant.THREAD_VERIFIY_BLOCK_TXS));
+    private ExecutorService clearTxExecutor = ThreadUtils.createThreadPool(1, Integer.MAX_VALUE, new NulsThreadFactory(TxConstant.THREAD_CLEAR_TXS));
 
     @Override
     public boolean register(Chain chain, ModuleTxRegisterDTO moduleTxRegisterDto) {

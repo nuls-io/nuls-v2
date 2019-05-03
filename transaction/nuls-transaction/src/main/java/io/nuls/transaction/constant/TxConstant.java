@@ -87,4 +87,5 @@ public interface TxConstant {
 
     String THREAD_VERIFIY_BLOCK_TXS = "verifiyBlockTxs";
     String THREAD_CLEAR_TXS = "clearTxs";
+    String THREAD_VERIFIY_NEW_TX = "verifiyNewTxs";
 }
