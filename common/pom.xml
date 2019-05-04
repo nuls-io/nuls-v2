@@ -8,43 +8,20 @@
         <artifactId>nuls-project</artifactId>
         <version>1.0.0-SNAPSHOT</version>
     </parent>
-    <artifactId>test</artifactId>
+    <artifactId>common</artifactId>
     <packaging>pom</packaging>
 
     <properties>
         <java.version>11</java.version>
     </properties>
     <modules>
-        <module>nuls-test</module>
-        <module>mykernel</module>
+        <module>nuls-core</module>
+        <module>nuls-core-h2</module>
+        <module>nuls-core-rpc</module>
+        <module>nuls-core-rockdb</module>
+        <module>nuls-base</module>
+        <module>nuls-base-api-provider</module>
     </modules>
-
-    <dependencies>
-        <!-- common-tools -->
-        <dependency>
-            <groupId>io.nuls2</groupId>
-            <artifactId>nuls-core</artifactId>
-            <version>${core.version}</version>
-        </dependency>
-        <!-- rpc-tools -->
-        <dependency>
-            <groupId>io.nuls2</groupId>
-            <artifactId>nuls-core-rpc</artifactId>
-            <version>${core.version}</version>
-        </dependency>
-        <!-- storage-tools -->
-        <dependency>
-            <groupId>io.nuls2</groupId>
-            <artifactId>nuls-core-rockdb</artifactId>
-            <version>${core.version}</version>
-        </dependency>
-        <!-- base-tools -->
-        <dependency>
-            <groupId>io.nuls2</groupId>
-            <artifactId>nuls-base</artifactId>
-            <version>${base.version}</version>
-        </dependency>
-    </dependencies>
 
     <build>
         <plugins>
@@ -57,6 +34,8 @@
                     <target>11</target>
                 </configuration>
             </plugin>
+
+
             <!-- source attach plugin 打包源码,开发测试环境勿删 Charlie-->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
