@@ -16,13 +16,15 @@
         <dependency>
             <groupId>io.nuls2</groupId>
             <artifactId>nuls-core-rpc</artifactId>
-            <version>1.0.0-SNAPSHOT</version>
+            <version>${core.version}</version>
         </dependency>
         <dependency>
             <groupId>io.nuls2</groupId>
             <artifactId>nuls-base</artifactId>
-            <version>1.0.0-SNAPSHOT</version>
+            <version>${base.version}</version>
         </dependency>
     </dependencies>
-
+    <build>
+        <finalName>nuls-base-api-provider</finalName>
+    </build>
 </project>

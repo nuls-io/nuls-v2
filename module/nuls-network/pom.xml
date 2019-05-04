@@ -10,12 +10,6 @@
     </parent>
     <artifactId>nuls-network</artifactId>
 
-    <properties>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <java.version>11</java.version>
-        <maven.compiler.source>11</maven.compiler.source>
-        <maven.compiler.target>11</maven.compiler.target>
-    </properties>
     <dependencies>
 
         <dependency>
@@ -39,89 +33,10 @@
             <artifactId>jackson-annotations</artifactId>
             <version>2.9.5</version>
         </dependency>
-        <!--<dependency>-->
-            <!--<groupId>io.nuls.nuls-tools</groupId>-->
-            <!--<artifactId>storage-tools</artifactId>-->
-            <!--<version>1.0.0-SNAPSHOT</version>-->
-        <!--</dependency>-->
-        <!--<dependency>-->
-            <!--<groupId>io.nuls.nuls-tools</groupId>-->
-            <!--<artifactId>rpc-tools</artifactId>-->
-            <!--<version>1.0.0-SNAPSHOT</version>-->
-        <!--</dependency>-->
-        <!--<dependency>-->
-            <!--<groupId>io.nuls.nuls-tools</groupId>-->
-            <!--<artifactId>common-tools</artifactId>-->
-            <!--<version>1.0.0-SNAPSHOT</version>-->
-        <!--</dependency>-->
-        <!--<dependency>-->
-            <!--<groupId>io.nuls.nuls-tools</groupId>-->
-            <!--<artifactId>base-tools</artifactId>-->
-            <!--<version>1.0.0-SNAPSHOT</version>-->
-        <!--</dependency>-->
-        <!--<dependency>-->
-            <!--<groupId>org.projectlombok</groupId>-->
-            <!--<artifactId>lombok</artifactId>-->
-            <!--<version>1.18.4</version>-->
-        <!--</dependency>-->
     </dependencies>
 
         <build>
             <finalName>nuls-network</finalName>
-            <!--<plugins>-->
-                <!--<plugin>-->
-                    <!--<groupId>org.apache.maven.plugins</groupId>-->
-                    <!--<artifactId>maven-jar-plugin</artifactId>-->
-                    <!--<version>2.4</version>-->
-                <!--</plugin>-->
-                <!--<plugin>-->
-                    <!--<groupId>org.apache.maven.plugins</groupId>-->
-                    <!--<artifactId>maven-resources-plugin</artifactId>-->
-                    <!--<version>3.1.0</version>-->
-                    <!--<configuration>-->
-                        <!--<encoding>UTF-8</encoding>-->
-                    <!--</configuration>-->
-                    <!--<executions>-->
-                        <!--<execution>-->
-                            <!--<id>copy-resources</id>-->
-                            <!--&lt;!&ndash; here the phase you need &ndash;&gt;-->
-                            <!--<phase>package</phase>-->
-                            <!--<goals>-->
-                                <!--<goal>copy-resources</goal>-->
-                            <!--</goals>-->
-                            <!--<configuration>-->
-                                <!--<outputDirectory>${project.build.directory}/resources</outputDirectory>-->
-                                <!--<resources>-->
-                                    <!--<resource>-->
-                                        <!--<directory>src/main/resources</directory>-->
-                                        <!--<filtering>true</filtering>-->
-                                    <!--</resource>-->
-                                <!--</resources>-->
-                            <!--</configuration>-->
-                        <!--</execution>-->
-                    <!--</executions>-->
-                <!--</plugin>-->
-                <!--<plugin>-->
-                    <!--<artifactId>maven-assembly-plugin</artifactId>-->
-                    <!--<version>2.6</version>-->
-                    <!--<configuration>-->
-                        <!--<appendAssemblyId>false</appendAssemblyId>-->
-                        <!--<finalName>${project.artifactId}-${project.version}</finalName>-->
-                        <!--<descriptors>-->
-                            <!--<descriptor>src/main/assembly/default.xml</descriptor>-->
-                        <!--</descriptors>-->
-                    <!--</configuration>-->
-                    <!--<executions>-->
-                        <!--<execution>-->
-                            <!--<id>make-assembly</id>-->
-                            <!--<phase>deploy</phase>-->
-                            <!--<goals>-->
-                                <!--<goal>single</goal>-->
-                            <!--</goals>-->
-                        <!--</execution>-->
-                    <!--</executions>-->
-                <!--</plugin>-->
-            <!--</plugins>-->
         </build>
 
 

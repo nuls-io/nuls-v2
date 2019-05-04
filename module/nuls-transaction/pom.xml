@@ -10,39 +10,7 @@
     </parent>
     <artifactId>nuls-transaction</artifactId>
 
-    <properties>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-        <maven.compiler.encoding>UTF-8</maven.compiler.encoding>
-        <java.version>11</java.version>
-        <tool.version>1.0.0-SNAPSHOT</tool.version>
-    </properties>
-
     <dependencies>
-
-        <!--<dependency>-->
-            <!--<groupId>io.nuls.nuls-tools</groupId>-->
-            <!--<artifactId>common-tools</artifactId>-->
-            <!--<version>${tool.version}</version>-->
-        <!--</dependency>-->
-
-        <!--<dependency>-->
-            <!--<groupId>io.nuls.nuls-tools</groupId>-->
-            <!--<artifactId>base-tools</artifactId>-->
-            <!--<version>${tool.version}</version>-->
-        <!--</dependency>-->
-
-        <!--<dependency>-->
-            <!--<groupId>io.nuls.nuls-tools</groupId>-->
-            <!--<artifactId>rpc-tools</artifactId>-->
-            <!--<version>${tool.version}</version>-->
-        <!--</dependency>-->
-
-        <!--<dependency>-->
-            <!--<groupId>io.nuls.nuls-tools</groupId>-->
-            <!--<artifactId>storage-tools</artifactId>-->
-            <!--<version>${tool.version}</version>-->
-        <!--</dependency>-->
 
         <dependency>
             <groupId>io.nuls2</groupId>
@@ -54,70 +22,6 @@
 
     <build>
         <finalName>nuls-transaction</finalName>
-        <plugins>
-            <!--<plugin>-->
-                <!--<groupId>org.apache.maven.plugins</groupId>-->
-                <!--<artifactId>maven-compiler-plugin</artifactId>-->
-                <!--<version>3.8.0</version>-->
-                <!--<configuration>-->
-                    <!--<source>11</source>-->
-                    <!--<target>11</target>-->
-                    <!--<compilerArgs>-->
-                        <!--<arg>&#45;&#45;add-exports=java.base/sun.nio.ch=ALL-UNNAMED</arg>-->
-                    <!--</compilerArgs>-->
-                <!--</configuration>-->
-            <!--</plugin>-->
-            <!--<plugin>-->
-                <!--<groupId>org.apache.maven.plugins</groupId>-->
-                <!--<artifactId>maven-resources-plugin</artifactId>-->
-                <!--<version>3.1.0</version>-->
-                <!--<configuration>-->
-                    <!--<encoding>UTF-8</encoding>-->
-                <!--</configuration>-->
-                <!--<executions>-->
-                    <!--<execution>-->
-                        <!--<id>copy-resources</id>-->
-                        <!--&lt;!&ndash; here the phase you need &ndash;&gt;-->
-                        <!--<phase>package</phase>-->
-                        <!--<goals>-->
-                            <!--<goal>copy-resources</goal>-->
-                        <!--</goals>-->
-                        <!--<configuration>-->
-                            <!--<outputDirectory>${project.build.directory}/resources</outputDirectory>-->
-                            <!--<resources>-->
-                                <!--<resource>-->
-                                    <!--<directory>src/main/resources</directory>-->
-                                    <!--<filtering>true</filtering>-->
-                                <!--</resource>-->
-                            <!--</resources>-->
-                        <!--</configuration>-->
-                    <!--</execution>-->
-                <!--</executions>-->
-            <!--</plugin>-->
-            <!--<plugin>-->
-                <!--<groupId>org.apache.maven.plugins</groupId>-->
-                <!--<artifactId>maven-dependency-plugin</artifactId>-->
-                <!--<version>3.1.1</version>-->
-                <!--<executions>-->
-                    <!--<execution>-->
-                        <!--<id>copy-dependencies</id>-->
-                        <!--<phase>package</phase>-->
-                        <!--<goals>-->
-                            <!--<goal>copy-dependencies</goal>-->
-                        <!--</goals>-->
-                        <!--<configuration>-->
-                            <!--<outputDirectory>${project.build.directory}/libs</outputDirectory>-->
-                        <!--</configuration>-->
-                    <!--</execution>-->
-                <!--</executions>-->
-            <!--</plugin>-->
-            <!--<plugin>-->
-                <!--<groupId>org.apache.maven.plugins</groupId>-->
-                <!--<artifactId>maven-jar-plugin</artifactId>-->
-                <!--<version>3.1.1</version>-->
-            <!--</plugin>-->
-        </plugins>
-
         <resources>
             <resource>
                 <directory>src/main/java</directory>

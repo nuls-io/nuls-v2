@@ -10,4 +10,7 @@
     </parent>
     <artifactId>nuls-account</artifactId>
 
+    <build>
+        <finalName>nuls-module-account</finalName>
+    </build>
 </project>
