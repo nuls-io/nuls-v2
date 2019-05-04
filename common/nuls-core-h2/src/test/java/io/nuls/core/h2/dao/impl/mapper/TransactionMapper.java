@@ -1,6 +1,6 @@
-package io.nuls.h2.dao.impl.mapper;
+package io.nuls.core.h2.dao.impl.mapper;
 
-import io.nuls.h2.common.BaseMapper;
+import io.nuls.core.h2.common.BaseMapper;
 import io.nuls.h2.entity.TransactionPO;
 import io.nuls.h2.entity.TxTable;
 import org.apache.ibatis.annotations.Param;

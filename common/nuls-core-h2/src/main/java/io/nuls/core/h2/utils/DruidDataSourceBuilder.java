@@ -1,4 +1,4 @@
-package io.nuls.h2.utils;
+package io.nuls.core.h2.utils;
 
 import com.alibaba.druid.pool.DruidDataSource;
 import org.apache.ibatis.datasource.unpooled.UnpooledDataSourceFactory;

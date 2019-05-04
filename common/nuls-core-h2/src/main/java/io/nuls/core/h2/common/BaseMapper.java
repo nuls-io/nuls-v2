@@ -21,10 +21,10 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package io.nuls.h2.common;
+package io.nuls.core.h2.common;
 
 
-import io.nuls.h2.utils.Searchable;
+import io.nuls.core.h2.utils.Searchable;
 
 import java.util.List;
 

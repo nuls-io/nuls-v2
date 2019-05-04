@@ -21,18 +21,22 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package io.nuls.h2.transactional.annotation;
-
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+package io.nuls.core.h2.transactional.annotation;
 
 /**
- * Created by zhouwei on 2017/10/26.
+ *
+ * @author zhouwei
+ * @date 2017/10/26
  */
-@Retention(RetentionPolicy.RUNTIME)
-@Target({ElementType.METHOD, ElementType.TYPE})
-public @interface Transaction {
-    PROPAGATION transactional() default PROPAGATION.REQUIRED;
+public enum  PROPAGATION {
+    NONE("none"),
+    REQUIRED("required"),
+    INDEPENDENT("independent");
+
+
+    PROPAGATION(String value) {
+        this.value = value;
+    }
+
+    private String value;
 }

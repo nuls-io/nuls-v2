@@ -1,4 +1,4 @@
-package io.nuls.h2.utils;
+package io.nuls.core.h2.utils;
 
 import org.apache.ibatis.session.SqlSession;
 import org.apache.ibatis.session.SqlSessionFactory;

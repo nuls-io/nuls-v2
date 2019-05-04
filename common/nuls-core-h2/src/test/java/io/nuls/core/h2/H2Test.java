@@ -1,8 +1,8 @@
-package io.nuls.h2;
+package io.nuls.core.h2;
 
+import io.nuls.core.h2.dao.impl.BaseService;
+import io.nuls.core.h2.dao.impl.TransactionServiceImpl;
 import io.nuls.h2.dao.TransactionService;
-import io.nuls.h2.dao.impl.BaseService;
-import io.nuls.h2.dao.impl.TransactionServiceImpl;
 import org.apache.ibatis.io.Resources;
 import org.apache.ibatis.session.SqlSessionFactoryBuilder;
 import org.junit.Before;

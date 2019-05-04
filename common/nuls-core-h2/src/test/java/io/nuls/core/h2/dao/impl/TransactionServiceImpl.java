@@ -1,13 +1,13 @@
-package io.nuls.h2.dao.impl;
+package io.nuls.core.h2.dao.impl;
 
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
+import io.nuls.core.h2.dao.impl.mapper.TransactionMapper;
+import io.nuls.core.h2.utils.SearchOperator;
+import io.nuls.core.h2.utils.Searchable;
 import io.nuls.h2.dao.TransactionService;
-import io.nuls.h2.dao.impl.mapper.TransactionMapper;
 import io.nuls.h2.entity.TransactionPO;
 import io.nuls.h2.entity.TxTable;
-import io.nuls.h2.utils.SearchOperator;
-import io.nuls.h2.utils.Searchable;
 import io.nuls.core.core.annotation.Service;
 import org.apache.ibatis.session.SqlSession;
 
@@ -19,7 +19,7 @@ import java.util.List;
  * @date: 2018/11/14
  */
 @Service
-public class TransactionServiceImpl extends BaseService<TransactionMapper> implements TransactionService {
+public class TransactionServiceImpl extends io.nuls.core.h2.dao.impl.BaseService<TransactionMapper> implements TransactionService {
 
     @Override
     public Page<TransactionPO> getTxs(String address, Integer type, Integer state, Long startTime, Long endTime, int pageNumber, int pageSize, String orderBy) {

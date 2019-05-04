@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package io.nuls.h2.utils;
+package io.nuls.core.h2.utils;
 
 /**
  * 封装sql查询条件赋值,
