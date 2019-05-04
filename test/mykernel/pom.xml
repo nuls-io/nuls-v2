@@ -48,15 +48,9 @@
 
         <!-- rpc-tools -->
         <dependency>
-            <groupId>io.nuls.nuls-tools</groupId>
-            <artifactId>rpc-tools</artifactId>
-            <version>${tool.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.projectlombok</groupId>
-            <artifactId>lombok</artifactId>
-            <version>1.18.4</version>
-            <scope>provided</scope>
+            <groupId>io.nuls2</groupId>
+            <artifactId>nuls-core-rpc</artifactId>
+            <version>${core.version}</version>
         </dependency>
     </dependencies>
 
