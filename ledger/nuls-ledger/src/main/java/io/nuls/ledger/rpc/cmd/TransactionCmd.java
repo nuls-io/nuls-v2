@@ -120,7 +120,9 @@ public class TransactionCmd extends BaseLedgerCmd {
             List<String> failList = new ArrayList<>();
             for (Transaction tx : txList) {
                 ValidateResult validateResult = transactionService.unConfirmTxProcess(chainId, tx);
-                if (validateResult.isSuccess() || validateResult.isOrphan()) {
+                if (validateResult.isSuccess()) {
+                    //success
+                } else if (validateResult.isOrphan()) {
                     orphanList.add(tx.getHash().toString());
                 } else {
                     failList.add(tx.getHash().toString());
@@ -128,8 +130,8 @@ public class TransactionCmd extends BaseLedgerCmd {
             }
 
             Map<String, Object> rtMap = new HashMap<>(2);
-            rtMap.put("fail",failList);
-            rtMap.put("orphan",orphanList);
+            rtMap.put("fail", failList);
+            rtMap.put("orphan", orphanList);
             return success(rtMap);
         } catch (Exception e) {
             e.printStackTrace();
